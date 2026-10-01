@@ -44,7 +44,7 @@ export function acceptProfile(p:Adventurer,profile:NativeProfile) {
 }
 function event(w:World,now:number,n:number):WorldEvent {
  const kind = (['BATTLES','ANSWERS','SEALS'] as const)[(w.seed+n)%3];
- const count=Math.max(1,Object.keys(w.players).length);
+ const count=Math.max(1,Object.values(w.players).filter(p=>!p.spectator).length);
  return {kind,title:kind==='BATTLES'?'図書館を取り戻せ':kind==='ANSWERS'?'知識の灯をともせ':'校長の力を封じろ',target:kind==='SEALS'?3:count*(kind==='ANSWERS'?8:2),progress:0,expires:Math.min(w.deadlineAt,now+180000),completed:false,finished:false,contributors:{},baseline:Object.fromEntries(Object.values(w.players).map(p=>[p.id,kind==='BATTLES'?p.completedBattles:p.correctAnswers]))};
 }
 export function createActivities():Activities {
@@ -98,7 +98,7 @@ export function applyActivity(w:World,p:Adventurer,action:ActivityAction,now:num
  const tell=(text:string)=>{p.message=text;w.revision++;return true;};
  if(action.type==='trade-request') {
    const q=w.players[action.target];
-   if(!q||q===p||!available(w,p)||!available(w,q)||distance(p,q)>3||!p.profile?.deck||!q.profile?.deck) return tell('近くの探索中ではない仲間と交換できます。');
+   if(!q||q.spectator||q===p||!available(w,p)||!available(w,q)||distance(p,q)>3||!p.profile?.deck||!q.profile?.deck) return tell('近くの探索中ではない仲間と交換できます。');
    a.trades.push({id:`trade-${w.revision}-${p.id}`,from:p.id,to:q.id,accepted:false,offers:{[p.id]:[],[q.id]:[]},confirmed:[],expires:now+120000});
    return tell('トレードを申し込みました。');
  }

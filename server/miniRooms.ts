@@ -13,7 +13,7 @@ import {MAP_WIDTH,MAP_HEIGHT} from '../src/mini-games/gakuro-craft/map';
 import {homeAt,publicHome,roomTile} from '../src/mini-games/gakuro-craft/homeSocial';
 import {loadIsland,type Saved} from '../src/mini-games/gakuro-craft/save';
 
-type Member={id:string;socket:WebSocket;revision:number;alive:boolean;at:number;count:number};
+type Member={observedId?:string;id:string;socket:WebSocket;revision:number;alive:boolean;at:number;count:number};
 type Base={host:string;members:Map<string,Member>;emptyAt:number;broadcast:number;simulation:number};
 type KartRoom=Base & {game:'kart';world:kart.Race;sequence:number};
 type CraftRoom=Base & {game:'craft';world:craft.World;bank:craft.QuizBank;title:string;savedAt:number};
@@ -32,8 +32,8 @@ function checkpoint(r:CraftRoom){
   send(host,{type:'checkpoint',saved:{version:1,world:{...r.world,tiles:[],players:{},games:{},homeViews:{}},owner:r.host,player:p} satisfies Saved});
 }
 function craftState(r:CraftRoom,m:Member,shared:unknown[]){
-  const w=r.world,p=w.players[m.id],tile=p?roomTile(p):-1,home=p?.indoors?homeAt(w,tile):undefined;
-  return {type:'state',players:shared,time:w.time,paused:false,revision:w.revision,donated:w.donated,harvested:w.harvested,built:w.built,villageLevel:w.villageLevel,builtSites:w.builtSites,progress:p?.progress,coins:p?.coins,bag:p?.bag,games:Object.fromEntries(Object.entries(w.games).filter(([,g])=>g.homeTile===tile&&p?.indoors)),roomHome:home?publicHome(home):null};
+  const w=r.world,viewer=w.players[m.id],p=viewer?.spectator&&r.host===m.id&&m.observedId&&!w.players[m.observedId]?.spectator?w.players[m.observedId]:viewer,tile=p?roomTile(p):-1,home=p?.indoors?homeAt(w,tile):undefined;
+  return {type:'state',players:shared,time:w.time,paused:false,revision:w.revision,donated:w.donated,harvested:w.harvested,built:w.built,villageLevel:w.villageLevel,builtSites:w.builtSites,progress:viewer?.progress,coins:viewer?.coins,bag:viewer?.bag,games:Object.fromEntries(Object.entries(w.games).filter(([,g])=>g.homeTile===tile&&p?.indoors)),roomHome:home?publicHome(home):null};
 }
 function publish(r:Room){
   if(r.game==='kart'){
@@ -44,7 +44,7 @@ function publish(r:Room){
       m.socket.send(packet,{binary:true});
     }
   }else{
-    const shared=Object.values(r.world.players).map(p=>[p.id,p.name,p.color,+p.x.toFixed(3),+p.z.toFixed(3),+p.energy.toFixed(2),p.correct,p.actions,p.avatar,p.lastAction,p.buffUntil,p.fishing,p.indoors,p.homeTile]);
+    const shared=Object.values(r.world.players).map(p=>[p.id,p.name,p.color,+p.x.toFixed(3),+p.z.toFixed(3),+p.energy.toFixed(2),p.correct,p.actions,p.avatar,p.lastAction,p.buffUntil,p.fishing,p.indoors,p.homeTile,p.spectator]);
     const patches=new Map<number,string[]>();
     for(const m of r.members.values()){
       if(m.socket.readyState!==WebSocket.OPEN||m.socket.bufferedAmount>65536)continue;
@@ -102,6 +102,14 @@ sockets.on('connection',(socket,request)=>{
         if(room.game==='craft')send(m,{type:'init',version:8,seed:room.world.seed,width:MAP_WIDTH,height:MAP_HEIGHT,title:room.title});
         publish(room);if(room.game==='craft'&&room.host===m.id)checkpoint(room);return;
       }
+      if(d.type==='spectator' && room.host===m.id && typeof d.enabled==='boolean'){
+        if(room.game==='kart')kart.setSpectator(room.world,m.id,d.enabled);
+        else {craft.setSpectator(room.world,m.id,d.enabled);room.bank.forget(m.id);}
+        m.observedId=undefined;publish(room);return;
+      }
+      if(d.type==='observe' && room.game==='craft' && room.host===m.id && room.world.players[m.id]?.spectator){
+        m.observedId=typeof d.id==='string'&&room.world.players[d.id]&&!room.world.players[d.id].spectator?d.id:undefined;publish(room);return;
+      }
       if(room.game==='kart'){
         const w=room.world;
         if(d.type==='command'){kart.command(w,m.id,d.command);return;}
@@ -112,7 +120,7 @@ sockets.on('connection',(socket,request)=>{
         if(d.type==='start')kart.startRace(w,!!d.fill);
         if(d.type==='rematch'&&w.phase==='result'&&Number.isInteger(d.course)&&d.course>=0&&d.course<COURSES.length&&Number.isInteger(d.laps)&&d.laps>=1&&d.laps<=5){
           const next=kart.createRace(d.course,w.seed+1,d.laps);next.lesson=validLesson(d.lesson)?structuredClone(d.lesson):w.lesson;next.revision=w.revision+1;
-          for(const p of Object.values(w.players)){kart.addRacer(next,p.id,p.name,p.hero,p.cpu);next.players[p.id].avatar={...p.avatar};}kart.startRace(next);room.world=next;
+          for(const p of Object.values(w.players)){kart.addRacer(next,p.id,p.name,p.hero,p.cpu);next.players[p.id].avatar={...p.avatar};next.players[p.id].spectator=p.spectator;}kart.startRace(next);room.world=next;
         }
         publish(room);
       }else if(d.type==='command'&&d.command&&typeof d.command==='object'){

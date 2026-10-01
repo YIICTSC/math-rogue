@@ -1,3 +1,6 @@
+import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
+import HomeView from './HomeView';
+import { homeAt, roomTile } from './homeSocial';
 import {VirtualStick,MovementSettings} from './TouchControls';
 import {loadTouchControl,saveTouchControl,type TouchControl} from './touchInput';
 import {CENTER_X,CENTER_Z,MAP_WIDTH,MAP_HEIGHT} from './map';
@@ -61,6 +64,12 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
   const [touchControl,setTouchControl]=useState<TouchControl>(loadTouchControl),analog=useRef<{dx:number;dz:number}|null>(null);
   const [saved]=useState(()=>!!loadIsland());
   const self=room.current?.selfId||'preview',me=world?.players[self];
+  const spectating=!!me?.spectator;
+  const candidates=Object.values((world?.players||{}) as World['players']).filter(p=>p.id!==self&&!p.spectator);
+  const spectators=useSpectatorTarget(spectating,candidates.map(p=>p.id));
+  const watched=world?.players[spectators.target||''];
+  const watchedHome=world&&watched?.indoors?homeAt(world,roomTile(watched)):undefined;
+  useEffect(()=>{room.current?.observe(spectating?spectators.target:null);},[spectating,spectators.target]);
   const activeGame=world?gameOf(world,self):undefined;
   const craftBgm:Exclude<Parameters<typeof audioService.playBGM>[0],'random'>=
     !world?(picking?'relic_select':'menu')
@@ -73,7 +82,7 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
     :panel==='goals'?'event'
     :'map';
   const craftBgmLoops=craftBgm!=='reward';
-  worldOpen.current=!!world;quizOpen.current=!!quiz||!!panel||waiting;
+  worldOpen.current=!!world&&!spectating;quizOpen.current=!!quiz||!!panel||waiting;
   const clearInput=()=>{if(workTimer.current){clearInterval(workTimer.current);workTimer.current=null;}input.current.clear();analog.current=null;room.current?.sendCommand({type:'move',dx:0,dz:0});};
   const record=(r:Answer)=>{
     if(recorded.current.has(r.token))return;recorded.current.add(r.token);
@@ -108,7 +117,7 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
   useEffect(()=>{clearInput();},[quiz?.token,panel]);
   useEffect(()=>{if(world?.paused||me?.indoors)clearInput();},[world?.paused,me?.indoors]);
   useEffect(()=>{const f=me?.fishing;if(f&&world&&world.time>=f.biteAt&&biteSound.current!==f.biteAt){biteSound.current=f.biteAt;sound.current?.play('bite');}},[me?.fishing,world?.time]);
-  useEffect(()=>{if(me?.indoors)setPanel('home');},[me?.indoors]);
+  useEffect(()=>{if(me?.indoors&&!spectating)setPanel('home');},[me?.indoors]);
   const enter=async(sel:LessonSelection)=>{
     if(!allowHost||!picking)return;setBusy(true);setError('');selection.current=sel;
     try {const first=buildLesson(sel),unique=new Map<string,KartQuestion>();for(let i=0;i<12;i++)for(const q of (i?buildLesson(sel):first).questions)unique.set(`${q.mode}:${q.question}`,q);
@@ -129,10 +138,13 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
   const startWork=(e:React.PointerEvent<HTMLButtonElement>)=>{e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);stopWork();work();if(['gather','build','remove'].includes(tool))workTimer.current=setInterval(work,420);};
   const stopWork=()=>{if(workTimer.current)clearInterval(workTimer.current);workTimer.current=null;};
   const closePanel=()=>{if(me?.indoors)room.current?.sendCommand({type:'home_leave'});setPanel(null);};
+  const changeSpectator=(value:boolean)=>{clearInput();setQuiz(null);setAnswer(null);setWaiting(false);setPanel(null);setSelected(-1);room.current?.setSpectator(value);};
   const settlement=world?village(world):null;
   const invite=world&&room.current?.host&&room.current?.code?craftInviteUrl(window.location.href,room.current.code):'';
   return <TranslatedUiTree mode={languageMode}><main className={`gc-root ${world?'gc-playing':''}`}>
-    <CraftCanvas world={world||preview} selfId={world?self:'preview'} selected={selected} zoom={zoom} onSelect={i=>{if(world&&!quiz&&!panel)setSelected(i);}}/>
+    <CraftCanvas world={world||preview} selfId={world?(spectating?spectators.target||self:self):'preview'} selected={selected} zoom={zoom} onSelect={i=>{if(world&&!spectating&&!quiz&&!panel)setSelected(i);}}/>
+    {world&&spectating&&room.current?.host&&room.current.code&&<HostSpectator enabled={spectating} onChange={changeSpectator} name={watched?.name} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{watched&&<><span>⚡ {Math.floor(watched.energy)}/100</span><span>{t('正解')} {watched.correct}</span><span>{t(watched.indoors?'家の中':'島を探索中')}</span></>}{spectating&&<><button onClick={()=>{if(invite)void copyInviteUrl(invite);}}>{t('招待URLをコピー')}</button><button onClick={leave}>{t('退出')}</button></>}</HostSpectator>}
+    {spectating&&watchedHome&&watched&&world&&<div className="gc-spectator-home"><HomeView home={watchedHome} slot={-1} onSelect={()=>{}} t={t} avatar={watched.avatar} time={world.time}/></div>}
     {!world&&!picking?<div className="gc-welcome"><section className="gc-panel gc-lobby"><div className="gc-eyebrow">LEARNING ROGUE · ISLAND LIFE</div><h1>{t('学ロクラフト')}</h1><p>{t('学んで、つくって、みんなで暮らす。')}</p><div className="gc-tags"><span>{t('最大40人')}</span><span>{t('共有の島')}</span><span>{t('開発中')}</span></div>
       <label>{t('名前')}<input maxLength={16} value={name} disabled={busy} onChange={e=>setName(e.target.value)} /></label><details className="gc-character"><summary>{t('キャラクタークリエイト')}</summary><AvatarCreator value={avatar} onChange={changeAvatar} t={t}/></details>
       {allowHost&&<><div className="gc-row"><button className="gc-primary" disabled={busy||!name.trim()} onClick={()=>setPicking('create')}>{t('みんなの島を開く')}</button><button disabled={busy||!name.trim()} onClick={()=>setPicking('practice')}>{t('ひとりで遊ぶ')}</button></div>{saved&&<label className="gc-checkbox"><input type="checkbox" checked={resume} onChange={e=>setResume(e.target.checked)}/>{t('保存した島を続ける')}</label>}</>}
@@ -140,10 +152,10 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
       {busy&&<p role="status">{t('島と問題を準備中…')}</p>}{error&&<p className="gc-error" role="alert">{t(error)}</p>}<button className="gc-quiet" onClick={leave}>{t('タイトルへ戻る')}</button>
     </section></div>:null}
     {picking&&<LessonPicker languageMode={languageMode} busy={busy} error={error} onSelect={enter} onBack={()=>{if(!busy){setPicking(null);setError('');}}}/>}
-    {world&&me&&<>
+    {world&&me&&!spectating&&<>
       <header className="gc-hud gc-panel"><div><b>{t('学ロクラフト')}</b><small>DAY {1+Math.floor(world.time/240)} · {Object.keys(world.players).length}/40 · {MAP_WIDTH}×{MAP_HEIGHT}</small></div><div className="gc-energy"><span>⚡ {t('エネルギー')} <b>{Math.floor(me.energy)}/100</b></span><progress value={me.energy} max={100}/></div><button onClick={()=>setPanel(panel==='help'?null:'help')} aria-label={t('遊び方')}>?</button><button onClick={leave}>{t('退出')}</button></header>
       <aside className="gc-goal gc-panel"><small>{t(settlement!.stage.name)}</small><b>🌿 {settlement!.score} / {settlement!.next?.need??settlement!.score}</b><progress max={settlement!.next?.need||Math.max(1,settlement!.score)} value={settlement!.score}/><button onClick={()=>setPanel('goals')}>{t('島の発展と依頼')}</button><button onClick={()=>room.current?.sendCommand({type:'donate'})}>{t('広場で納品')}</button></aside>
-      <div className="gc-top-actions"><button onClick={()=>setPanel('controls')}>{t('移動操作')}</button><button onClick={()=>setPanel('home')}>🏡 {t('自分の家')}</button><button onClick={()=>{sound.current?.unlock();setSoundOn(sound.current?.toggle()??true);}} aria-pressed={soundOn}>{soundOn?'🔊':'🔇'} SE</button><button onClick={()=>setPanel('avatar')}>☺ {t('見た目')}</button><button onClick={()=>setPanel(panel==='bag'?null:'bag')}>🎒 {t('持ち物とクラフト')}</button>{invite&&<button onClick={()=>setPanel(panel==='invite'?null:'invite')}>↗ {t('招待')}</button>}<div className="gc-row"><button aria-label={t('縮小')} onClick={()=>setZoom(z=>Math.max(.55,z-.15))}>−</button><button aria-label={t('拡大')} onClick={()=>setZoom(z=>Math.min(1.5,z+.15))}>＋</button></div></div>
+      <div className="gc-top-actions">{room.current?.host&&room.current.code&&<button onClick={()=>changeSpectator(true)}>{t('観戦モードにする')}</button>}<button onClick={()=>setPanel('controls')}>{t('移動操作')}</button><button onClick={()=>setPanel('home')}>🏡 {t('自分の家')}</button><button onClick={()=>{sound.current?.unlock();setSoundOn(sound.current?.toggle()??true);}} aria-pressed={soundOn}>{soundOn?'🔊':'🔇'} SE</button><button onClick={()=>setPanel('avatar')}>☺ {t('見た目')}</button><button onClick={()=>setPanel(panel==='bag'?null:'bag')}>🎒 {t('持ち物とクラフト')}</button>{invite&&<button onClick={()=>setPanel(panel==='invite'?null:'invite')}>↗ {t('招待')}</button>}<div className="gc-row"><button aria-label={t('縮小')} onClick={()=>setZoom(z=>Math.max(.55,z-.15))}>−</button><button aria-label={t('拡大')} onClick={()=>setZoom(z=>Math.min(1.5,z+.15))}>＋</button></div></div>
       {(world.paused||error)&&<div className="gc-status" role="status">{t(world.paused?'ホストが戻るまで一時停止中です。':error)}</div>}
       {me.fishing&&<div className={`gc-fishing ${world.time>=me.fishing.biteAt?'bite':''}`} role="status">🎣 {t(world.time>=me.fishing.biteAt?'今！引き上げよう！':'魚を待っています…')}<progress max={1.5} value={Math.max(0,me.fishing.expires-world.time)}/></div>}{notice&&<div className="gc-toast" role="status">{t(notice)}</div>}
       {touchControl==='stick'?<div className="gc-pad gc-stick-pad" aria-label={t('移動')}><VirtualStick disabled={movementBlocked} t={t} onMove={stickMove}/></div>:<div className="gc-pad" aria-label={t('移動')}><button disabled={movementBlocked} {...pad('arrowup')} aria-label={t('上')}>↑</button><button disabled={movementBlocked} {...pad('arrowleft')} aria-label={t('左')}>←</button><div>✥</div><button disabled={movementBlocked} {...pad('arrowright')} aria-label={t('右')}>→</button><button disabled={movementBlocked} {...pad('arrowdown')} aria-label={t('下')}>↓</button></div>}

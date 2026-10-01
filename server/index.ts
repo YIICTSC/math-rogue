@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { randomInt, randomUUID } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
-import { addPlayer, applyAction, advanceWorld, createWorld, removePlayer, validProfile, type World } from '../src/rpg/engine';
+import { addPlayer, applyAction, advanceWorld, createWorld, removePlayer, setSpectator, validProfile, type World } from '../src/rpg/engine';
 import { normalizeRpgAdventureSetup } from '../src/rpg/setup';
 import {miniUpgrade,closeMiniRooms} from './miniRooms';
 import {golfUpgrade,closeGolfRooms} from './golfRooms';
@@ -67,6 +67,7 @@ sockets.on('connection',(socket,request)=>{
       if(m.admitted){const p=room.world.players[m.id];p.profile=d.profile;p.hp=d.profile.hp;p.maxHp=d.profile.maxHp;p.gold=d.profile.gold;init(room,m);}return;
     }
     if(!m.admitted)return;
+    if(d.type==='spectator' && room.host===m.id)setSpectator(room.world,m.id,d.enabled);
     if(d.type==='action' && d.action){try{applyAction(room.world,m.id,d.action);}catch{fail(m,'操作を処理できませんでした。');}}
     if(d.type==='dungeon-event' && d.event && typeof d.event.type==='string'){
       const dungeon=room.world.activities.dungeons.find(x=>x.status==='active'&&x.members.includes(m.id));

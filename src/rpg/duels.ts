@@ -81,6 +81,7 @@ export function applyDuel(w: World, p: Adventurer, action: DuelAction, now: numb
   const tell=(message:string)=>{p.message=message;w.revision++;return true;};
   if(action.type==='duel-request') {
     const q=w.players[action.target];
+    if (q?.spectator) return false;
     if(!q || q.id===p.id || [p,q].some(q=>q.nativeScene || activityBusy(w,q) || !q.profile?.deck || q.hp<=0) || distance(p,q)>3)return false;
     const first=random(w.seed+w.revision+now)()<.5?p.id:q.id;
     const d:Duel={id:`duel-${w.revision}-${p.id}`,members:[p.id,q.id],status:'request',first,actor:first,turn:1,revision:0,players:{},started:[],returned:[],expires:now+60000};

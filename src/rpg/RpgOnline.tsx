@@ -1,3 +1,4 @@
+import HostSpectator, { useSpectatorTarget } from '../mini-games/shared/HostSpectator';
 import { findWalkingRoute } from "./walking";
 import ActivitiesPanel from "./ActivitiesPanel";
 import React, {
@@ -132,7 +133,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active };
+  latest.current = { world, active: active && !world?.players[room.current?.selfId || ""]?.spectator };
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
       visualTheme: previewTheme,
@@ -154,6 +155,11 @@ export default function RpgOnline({
     [roomCode],
   );
   const members: Adventurer[] = world ? Object.values(world.players) : [];
+  const spectating = !!me?.spectator;
+  const candidates = members.filter(p => p.id !== selfId && !p.spectator);
+  const spectators = useSpectatorTarget(spectating, candidates.map(p => p.id));
+  const watched = spectating ? world?.players[spectators.target || ''] : me;
+  const rankedMembers = members.filter(p => !p.spectator);
   const remainingSeconds = world
     ? Math.max(0, Math.ceil((world.deadlineAt - clockNow) / 1000))
     : null;
@@ -327,6 +333,7 @@ export default function RpgOnline({
             学習ローグへ
           </button>
         </header>
+        {world && room.current?.host && roomCode && <HostSpectator enabled={spectating} canChangeMode={!world.started} onChange={value => { destination.current = null; walkingRoute.current = []; room.current?.setSpectator(value); }} name={spectators.target ? watched?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{watched && spectators.target && <><span>HP {watched.hp} / {watched.maxHp}</span><span>{watched.gold} G</span><span>{watched.completedBattles} WIN</span><span>{watched.correctAnswers} CORRECT</span><span>{watched.nativeScene ? world.sites.find(s => s.id === watched.nativeScene?.siteId)?.name || '探索中' : watched.dungeonId ? 'ダンジョン' : '探索中'}</span></>}</HostSpectator>}
         {!world || !me ? (
           <div className="rpg-lobby">
             <div className="rpg-lobby-art">
@@ -467,7 +474,7 @@ export default function RpgOnline({
                       <span className="rpg-waiting-dot" style={{ background: `hsl(${member.color * 60}, 58%, 63%)` }} />
                       <span>{member.name}</span>
                       {member.id === Object.keys(world.players)[0] && <small>ホスト</small>}
-                      {member.id === selfId && <small>あなた</small>}
+                      {member.id === selfId && <small>あなた</small>}{member.spectator && <small>観戦モード</small>}
                     </li>
                   ))}
                   {members.length < 2 && <li className="rpg-waiting-empty">仲間が参加するのを待っています…</li>}
@@ -528,7 +535,7 @@ export default function RpgOnline({
                 <div className="rpg-map-title">
                   <h1>木漏れ日のフロンティア</h1><span>{world.gameMode === "BATTLE_ROYALE" ? "バトルロイヤル" : "協力"}</span>
                   <span>
-                    戦闘勝利 {me.completedBattles || 0}
+                    戦闘勝利 {watched?.completedBattles || 0}
                     {remainingSeconds !== null && (
                       <strong className="rpg-time-limit" aria-label="制限時間">
                         {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, "0")}
@@ -540,12 +547,13 @@ export default function RpgOnline({
                   {active && (
                     <WorldCanvas
                       world={world}
-                      selfId={selfId}
+                      selfId={spectating ? spectators.target || selfId : selfId}
                       overview={overview}
                       languageMode={languageMode}
                       visualTheme={previewTheme}
-                      onPlayer={setSelectedPeer}
+                      onPlayer={spectating ? undefined : setSelectedPeer}
                       onTile={(x, y) => {
+                        if (spectating) return;
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
                         walkingRoute.current=route;
                         destination.current=route.at(-1)||null;
@@ -559,7 +567,7 @@ export default function RpgOnline({
                     </button>
                     <span>SEED {world.seed.toString(16).toUpperCase()}</span>
                   </div>
-                  <div className="rpg-map-bottom">
+                  {!spectating && <div className="rpg-map-bottom">
                     <div className="rpg-dpad">
                       <button
                         aria-label="上へ移動"
@@ -606,14 +614,14 @@ export default function RpgOnline({
                         </span>
                       </button>
                     )}
-                  </div>
+                  </div>}
                 </div>
                 <div className="rpg-map-caption">
-                  WASD / 矢印キーで移動 · E 調べる · マップをタップして移動
+                  {spectating ? '8秒ごとにランダム切替' : 'WASD / 矢印キーで移動 · E 調べる · マップをタップして移動'}
                 </div>
               </section>
               <aside className="rpg-sidebar">
-                <ActivitiesPanel languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />
+                {!spectating && <ActivitiesPanel languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />}
                 <section className="rpg-objective">
                   <h2>
                     <Crown />
@@ -633,7 +641,7 @@ export default function RpgOnline({
                       </p>
                     ))}
                 </section>
-                <section className="rpg-player-panel">
+                {!spectating && <><section className="rpg-player-panel">
                   <h2>{me.name}</h2>
                   <p>
                     HP {player.currentHp} / {player.maxHp}
@@ -690,10 +698,11 @@ export default function RpgOnline({
                       ))}
                   </div>
                 </section>
+                </>}
               </aside>
             </div>
             <footer className="rpg-footer">
-              <p role="status">{me.message}</p>
+              <p role="status">{watched?.message}</p>
               {roomCode ? (
                 <div className="rpg-room-invite">
                   <span>ROOM {roomCode}</span>
@@ -720,7 +729,7 @@ export default function RpgOnline({
                       <section className="rpg-ranking-card" key={ranking.title}>
                         <h2>{ranking.title}</h2>
                         <ol>
-                          {rankingRows(members, ranking.score).map(
+                          {rankingRows(rankedMembers, ranking.score).map(
                             ({ player: rankedPlayer, score }, index) => (
                               <li key={rankedPlayer.id}>
                                 <span className="rpg-ranking-rank">{index + 1}</span>

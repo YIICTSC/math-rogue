@@ -4,6 +4,7 @@ import {
   validProfile,
   addPlayer,
   applyAction,
+  setSpectator,
   createWorld,
   advanceWorld,
   removePlayer,
@@ -501,6 +502,11 @@ export class RpgRoom {
     if (this.closed) return;
     if(this.serverSocket){this.serverSend({type:'enter',profile});return;}
     this.connections.get("host")?.send({ type: "enter", profile });
+  }
+  setSpectator(enabled: boolean) {
+    if (this.closed || !this.host || !this.world || this.world.started) return;
+    if (this.serverSocket) { this.serverSend({ type: 'spectator', enabled }); return; }
+    if (setSpectator(this.world, this.selfId, enabled)) this.emit();
   }
   send(action: Action) {
     if (this.closed) return;

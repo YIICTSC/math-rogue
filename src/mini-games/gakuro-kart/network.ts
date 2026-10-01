@@ -2,7 +2,7 @@ import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConne
 import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addRacer, command, createRace, MAX_RACERS, setRaceLaps, startRace, tick, type Command, type Race } from './engine';
+import { addRacer, command, createRace, MAX_RACERS, setRaceLaps, setSpectator, startRace, tick, type Command, type Race } from './engine';
 import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Roster } from './protocol';
 
 /** Host-authoritative 60 Hz simulation, 20 Hz controls, 10 Hz compact snapshots. */
@@ -182,6 +182,11 @@ export class KartRoom {
     if(!setRaceLaps(this.world,laps))return;
     this.emit();
   }
+  setSpectator(enabled: boolean) {
+    if (!this.host || !this.world || !['lobby', 'result'].includes(this.world.phase)) return;
+    if (this.dedicated) { this.dedicated.send({ type: 'spectator', enabled }); return; }
+    if (setSpectator(this.world, this.selfId, enabled)) this.emit();
+  }
   start(fill = true) { if(this.dedicated){if(this.host)this.dedicated.send({type:'start',fill});return;} if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
   rematch(lesson?: KartLesson, course = this.world?.course ?? 0, laps = this.world?.laps ?? 3) {
     if (!this.host || this.world?.phase !== 'result') return;
@@ -189,7 +194,7 @@ export class KartRoom {
     const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1, laps);
     this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
-    for (const p of Object.values(old.players)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; }
+    for (const p of Object.values(old.players)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; this.world.players[p.id].spectator = p.spectator; }
     startRace(this.world); this.emit();
   }
   send(c: Command) {

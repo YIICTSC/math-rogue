@@ -4,7 +4,7 @@ import type { Duplex } from 'node:stream';
 import { WebSocket, WebSocketServer } from 'ws';
 import { GameMode } from '../src/types';
 import { buildLesson, type LessonSelection } from '../src/mini-games/gakuro-kart/questions';
-import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
+import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
 
 export const GOLF_SERVER_PROTOCOL = 1;
 export const GOLF_ENDPOINT = '/golf';
@@ -23,7 +23,7 @@ export function validGolfSelection(raw: unknown): raw is LessonSelection {
   }
   return JSON.stringify(raw).length <= MAX_SETUP_BYTES;
 }
-interface Member { socket: WebSocket; id: string; alive: boolean; at: number; count: number }
+interface Member { observedId?: string; socket: WebSocket; id: string; alive: boolean; at: number; count: number }
 interface Room { code: string; world: GolfWorld; host: string; members: Map<string, Member>; selection: LessonSelection | null; sequence: number; lastActive: number }
 export interface GolfServerOptions { allowedOrigins?: ReadonlySet<string>; maxRooms?: number; maxClients?: number; idleMs?: number }
 /** Router-neutral adapter. The shared server routes /golf upgrades to `sockets`. */
@@ -37,12 +37,12 @@ export function createGolfServer(options: GolfServerOptions = {}) {
   }
   function emit(room: Room, init?: Member) {
     const sequence = ++room.sequence;
-    for (const m of room.members.values()) send(m, { type: m === init ? 'init' : 'state', version: GOLF_SERVER_PROTOCOL, sequence, state: viewFor(room.world, m.id) });
+    for (const m of room.members.values()) send(m, { type: m === init ? 'init' : 'state', version: GOLF_SERVER_PROTOCOL, sequence, state: viewFor(room.world, m.id, m.id === room.host ? m.observedId : undefined) });
   }
   function acknowledge(room: Room, m: Member) {
     // Answer/shot feedback goes to the actor immediately. Other players receive
     // the next shared tick instead of 40 full broadcasts for 40 simultaneous inputs.
-    send(m, {type:'state', version:GOLF_SERVER_PROTOCOL, sequence:++room.sequence, state:viewFor(room.world,m.id)});
+    send(m, {type:'state', version:GOLF_SERVER_PROTOCOL, sequence:++room.sequence, state:viewFor(room.world,m.id,m.id === room.host ? m.observedId : undefined)});
   }
   function fail(m: Member, message: string, fatal = false) {
     send(m, { type: 'error', message });
@@ -85,6 +85,15 @@ export function createGolfServer(options: GolfServerOptions = {}) {
       }
       room.lastActive = now;
       try {
+        if (d.type === 'spectator') {
+          if (m.id === room.host && setSpectator(room.world, m.id, d.enabled)) { m.observedId = undefined; emit(room); }
+          return;
+        }
+        if (d.type === 'observe') {
+          if (m.id !== room.host || !room.world.players[m.id]?.spectator) return;
+          m.observedId = typeof d.id === 'string' && room.world.players[d.id]?.connected && !room.world.players[d.id]?.spectator ? d.id : undefined;
+          acknowledge(room, m); return;
+        }
         if (d.type === 'lesson') {
           if (m.id !== room.host || room.world.phase !== 'lobby') { fail(m, 'ホストだけが問題を設定できます。'); return; }
           if (!validGolfSelection(d.selection)) { fail(m, '問題の設定が不正です。'); return; }

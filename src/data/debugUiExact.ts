@@ -4,6 +4,16 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  'ホスト観戦': 'Host spectator',
+  '観戦モード': 'Spectator mode',
+  '観戦モードにする': 'Switch to spectator mode',
+  'プレイに戻る': 'Return to play',
+  '参加プレイヤーを待っています。': 'Waiting for players to join.',
+  '8秒ごとにランダム切替': 'Switch players randomly every 8 seconds',
+  '次のプレイヤー': 'Next player',
+  '問題に挑戦中': 'Answering questions',
+  '島を探索中': 'Exploring the island',
+
   ...RPG_ACTIVITY_ENGLISH,
   ...KART_ENGLISH,
   ...CRAFT_ENGLISH,
@@ -215,6 +225,16 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  'ホスト観戦': 'ホストかんせん',
+  '観戦モード': 'かんせんモード',
+  '観戦モードにする': 'かんせんモードにする',
+  'プレイに戻る': 'プレイにもどる',
+  '参加プレイヤーを待っています。': 'さんかプレイヤーをまっています。',
+  '8秒ごとにランダム切替': '8びょうごとにランダムきりかえ',
+  '次のプレイヤー': 'つぎのプレイヤー',
+  '問題に挑戦中': 'もんだいにちょうせんちゅう',
+  '島を探索中': 'しまをたんさくちゅう',
+
   ...RPG_ACTIVITY_HIRAGANA,
   ...KART_HIRAGANA,
   ...CRAFT_HIRAGANA,

@@ -7,8 +7,8 @@ import { BallMotion, predictShot } from './motion';
 import { createGolferAssets, type GolferRig } from './golferModels';
 const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'];
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, penalty: false, capped: false };
-export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, avatar = defaultAvatar(), portrait = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; avatar?: KartAvatar; portrait?: boolean }) {
-  const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, avatar }); state.current = { view, selfId, aim, overview, club, power, avatar };
+export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
+  const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, avatar, spectator };
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -64,12 +64,12 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         const dt = Math.min(.1, (now - previous) / 1000); previous = now;
         const { view: current, selfId: id, aim: direction, overview: full, club: selectedClub, power: selectedPower, avatar: localAvatar } = state.current;
         const me = current?.players.find(p => p.id === id);
-        const active = (current?.players || [previewPlayer]).filter(p => p.hole === holeIndex && p.connected);
+        const active = (current?.players || [previewPlayer]).filter(p => p.hole === holeIndex && p.connected && !p.spectator);
         const received = lastView !== current; lastView = current;
         const nearest = new Set([...active].sort((a,b) => Math.hypot(a.x-(me?.x||0),a.z-(me?.z||0))-Math.hypot(b.x-(me?.x||0),b.z-(me?.z||0))).slice(0, 12).map(p=>p.id));
         if (me) nearest.add(me.id);
         for (const p of active) {
-          const look = p.id === id || !current ? localAvatar : p.avatar || defaultAvatar(p.slot);
+          const look = (p.id === id && !state.current.spectator) || !current ? localAvatar : p.avatar || defaultAvatar(p.slot);
           let marker = markers.get(p.id);
           if (!marker) {
             const ownBall = p.id === id || !current;
@@ -125,7 +125,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         }
         else { cameraGoal.set(ball.x - Math.sin(base) * 26, Math.max(17, ball.y + 14), ball.z - Math.cos(base) * 26); target.set(ball.x + Math.sin(base) * 13, Math.max(1, ball.y * .7), ball.z + Math.cos(base) * 13); }
         camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.lookAt(lookAt);
-        aimLine.visible = !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
+        aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
           const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower].join('/');
           if (key !== previewKey) {

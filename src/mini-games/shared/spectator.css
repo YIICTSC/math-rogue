@@ -1,0 +1,15 @@
+.host-spectator{position:relative;z-index:12;padding:10px 14px;border:1px solid #81b9bc66;border-radius:12px;background:#102d35ed;color:#f1f8f7;font:500 13px/1.5 system-ui,sans-serif;box-shadow:0 4px 20px #0002}
+.host-spectator-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.host-spectator-controls strong{overflow-wrap:anywhere}
+.host-spectator button{padding:7px 10px;border:1px solid #98d9d866;border-radius:8px;background:#22515b;color:#fff;cursor:pointer;font:inherit}
+.host-spectator button[aria-pressed=true]{background:#416e47}
+.host-spectator button:disabled{opacity:.65;cursor:default}
+.host-spectator button:focus-visible{outline:2px solid #d9ff6a;outline-offset:2px}
+.host-spectator-details{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px}
+.gk-playing>.host-spectator{flex-shrink:0;margin:8px 16px 0}
+.gg-root>.host-spectator{margin:8px 12px}
+.gc-root>.host-spectator{position:absolute;left:12px;right:12px;top:76px;z-index:30}
+.gc-spectator-home{position:absolute;inset:155px 12px 18px;z-index:20;overflow:auto;max-width:760px;margin:auto;background:#edf0dfef;border-radius:18px}
+.gc-spectator-home .gc-home-view{width:100%;max-height:100%}
+.rpg-root>.host-spectator{margin:8px 16px}
+@media(max-width:600px){.host-spectator{font-size:12px;padding:8px}.gc-root>.host-spectator{top:90px}.gc-spectator-home{top:205px}}

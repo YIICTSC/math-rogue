@@ -18,7 +18,7 @@ export type Craftable = typeof CRAFTABLES[number];
 export const RECIPES: Record<Craftable, Partial<Record<Material, number>>> = { plank: { wood: 2 }, brick: { stone: 2 }, flower: { crop: 1 }, lamp: { wood: 2, stone: 1 }, bench: { plank: 2 }, roof: { plank: 2, stone: 1 }, fence: { wood: 2 }, window: { stone: 3 }, campfire: { wood: 3, stone: 2 }, meal: { crop: 2, fish: 1, fruit: 1 } };
 export type Inventory = Record<Material, number>;
 export type Tile = { ground: 'grass' | 'sand' | 'water'; nature: 'tree' | 'rock' | null; blocks: Building[]; owner: string; crop: number | null; watered: boolean; regrow: number; regrowKind?: 'tree' | 'rock'; revision: number; fruitAt?: number;homeOwner?:string;homeName?:string;homeLevel?:number };
-export type Player = { id: string; profileId:string;progress:Progress;indoors:boolean;homeTile?:number; name: string; color: number; x: number; z: number; energy: number; bag: Inventory; correct: number; actions: number; dx: number; dz: number; inputAt: number; actionAt: number; avatar: Avatar; coins: number; buffUntil: number; fishing?:{tile:number;biteAt:number;expires:number}; lastAction?: {seq:number;kind:string;tile:number;at:number} };
+export type Player = { spectator?: boolean; id: string; profileId:string;progress:Progress;indoors:boolean;homeTile?:number; name: string; color: number; x: number; z: number; energy: number; bag: Inventory; correct: number; actions: number; dx: number; dz: number; inputAt: number; actionAt: number; avatar: Avatar; coins: number; buffUntil: number; fishing?:{tile:number;biteAt:number;expires:number}; lastAction?: {seq:number;kind:string;tile:number;at:number} };
 export type World = {width:number;height:number;games:Record<string,HomeGame>;homeViews:Record<number,Home>; seed: number; time: number; revision: number; tiles: Tile[]; players: Record<string, Player>; donated: number; harvested: number; built: number; paused: boolean;villageLevel:number;builtSites:number[];residents:Record<string,{id:string;bag:Inventory;coins:number;energy:number;correct:number;progress:Progress}> };
 export type Tool = 'gather' | 'plant' | 'water' | 'harvest' | 'fish' | 'remove' | 'build' | 'pick';
 export type Command = GameCommand | {type:'pet_care'} | {type:'pet_name';name:string} | { type: 'move'; dx: number; dz: number } | { type: 'act'; tool: Tool; tile: number; building?: Building } | { type: 'craft'; material: Craftable } | { type: 'appearance'; avatar: Avatar } | { type: 'eat' } | { type: 'buy'; material: Material } | {type:'quest_accept'|'quest_claim';id:string} | {type:'home_claim';tile:number;petKind?:PetKind;petName?:string} | {type:'home_enter'|'home_leave'|'home_upgrade';tile?:number} | {type:'home_place';slot:number;item:HomeItem;rotation?:number} | {type:'home_make';item:HomeItem} | {type:'home_rotate'|'home_use';slot:number} | {type:'home_move';slot:number;target:number} | {type:'home_remove';slot:number} | { type: 'donate' } | { type: 'quiz' } | { type: 'answer'; token: string; option: number };
@@ -58,8 +58,18 @@ export const raining = (w: World) => (Math.floor(w.time/240)+w.seed)%3===1 && w.
 const notice = (text: string, cue?:string): Reply => ({ type: 'notice', text, cue });
 function feedback(w:World,p:Player,kind:string,tile:number){p.lastAction={seq:(p.lastAction?.seq||0)+1,kind,tile,at:w.time};}
 function touch(w: World, t: Tile) { t.revision = ++w.revision; }
+export function setSpectator(w: World, id: string, enabled: boolean) {
+  const p = w.players[id];
+  if (!p || typeof enabled !== 'boolean') return false;
+  if (enabled) {
+    for (const game of Object.values(w.games)) if (game.players.includes(id)) gameCommand(w, p, { type: 'game_leave', key: game.key });
+    if (p.indoors) leaveHome(w, p);
+    p.dx = p.dz = 0; p.fishing = undefined;
+  }
+  p.spectator = enabled; w.revision++; return true;
+}
 export function applyCommand(w: World, id: string, raw: unknown): Reply | undefined {
-  const p = w.players[id]; if (!p || !raw || typeof raw !== 'object') return;
+  const p = w.players[id]; if (!p || p.spectator || !raw || typeof raw !== 'object') return;
   const c = raw as Command;
   if(typeof c.type!=='string')return;
   if (c.type === 'move') {
@@ -128,12 +138,12 @@ export function applyCommand(w: World, id: string, raw: unknown): Reply | undefi
     if (Math.hypot(x - CENTER_X, z - CENTER_Z) < 3) return notice('中央の広場は空けておきましょう。');
     if (t.ground === 'water' && !t.blocks.length && c.building !== 'plank') return notice('水の上には木の床で橋を架けられます。');
     if (t.blocks.length && ['flower', 'lamp', 'bench', 'roof', 'fence', 'window', 'campfire'].includes(t.blocks[t.blocks.length - 1])) return notice('飾りの上には積めません。');
-    if (Object.values(w.players).some(q => indexOf(q.x, q.z) === c.tile)) return notice('人がいる場所には置けません。');
+    if (Object.values(w.players).some(q => !q.spectator && indexOf(q.x, q.z) === c.tile)) return notice('人がいる場所には置けません。');
     if (!p.bag[c.building]) return notice('材料が足りません。');
     p.bag[c.building]--; t.blocks.push(c.building); t.owner = id; t.regrow = 0; w.built++; message = '建築しました！';
   } else if (c.tool === 'remove' && t.blocks.length) {
     if (t.owner !== id) return notice('ほかの人の建築は変更できません。');
-    if (Object.values(w.players).some(q => indexOf(q.x, q.z) === c.tile)) return notice('人がいる場所は片づけられません。');
+    if (Object.values(w.players).some(q => !q.spectator && indexOf(q.x, q.z) === c.tile)) return notice('人がいる場所は片づけられません。');
     p.bag[t.blocks.pop()!]++; if (!t.blocks.length) t.owner = ''; message = '片づけました。素材が戻りました。';
   } else return notice('この場所ではその作業はできません。');
   p.energy -= cost; p.actionAt = w.time; p.actions++; touch(w, t);if(cue!=='cast')recordWork(w,p,c.tool,c.tile,amount);feedback(w,p,c.tool,c.tile);return notice(message,cue);
@@ -142,6 +152,7 @@ export function tick(w: World, seconds: number) {
   if (w.paused || !Number.isFinite(seconds) || seconds <= 0) return;
   const dt = Math.min(.1, seconds); w.time += dt;tickGames(w,dt);
   for (const p of Object.values(w.players)) {
+    if (p.spectator) continue;
     refreshDay(w,p);if(!p.indoors&&w.tiles[indexOf(p.x,p.z)]?.homeOwner)enterHome(w,p,indexOf(p.x,p.z));if(p.indoors){p.dx=p.dz=0;continue;}if(p.fishing&&(w.time>p.fishing.expires||Math.hypot(p.dx,p.dz)>.1))p.fishing=undefined;
     if (w.time - p.inputAt > .5 || p.energy <= 0) { p.dx = p.dz = 0; continue; }
     const speed = w.time < (p.buffUntil||0) ? 4.2 : 3.2, oldX = p.x, oldZ = p.z;
@@ -151,7 +162,7 @@ export function tick(w: World, seconds: number) {
     p.energy = Math.max(0, p.energy - Math.hypot(p.x - oldX, p.z - oldZ) * .7);if(w.tiles[indexOf(p.x,p.z)]?.homeOwner)enterHome(w,p,indexOf(p.x,p.z));
   }
   const rain=raining(w);for (let i = 0; i < w.tiles.length; i++) { const t = w.tiles[i]; if(rain&&t.crop!==null&&!t.watered){t.watered=true;touch(w,t);}if (t.regrow && w.time >= t.regrow && !t.blocks.length && t.crop === null) {
-    if (!Object.values(w.players).some(p => indexOf(p.x, p.z) === i)) { t.nature = t.regrowKind || 'tree'; t.regrow = 0; touch(w, t); }
+    if (!Object.values(w.players).some(p => !p.spectator && indexOf(p.x, p.z) === i)) { t.nature = t.regrowKind || 'tree'; t.regrow = 0; touch(w, t); }
   }
   }
 }
@@ -161,7 +172,7 @@ export class QuizBank {
   constructor(private questions: KartQuestion[]) { if (!questions.length) throw new Error('No questions'); }
   forget(id: string) { this.pending.delete(id); this.cursors.delete(id); }
   ask(w: World, id: string): Reply | undefined {
-    const p = w.players[id]; if (!p) return;
+    const p = w.players[id]; if (!p || p.spectator) return;
     p.dx = p.dz = 0;p.fishing=undefined;
     let pending = this.pending.get(id);
     if (!pending) { const index = this.cursors.get(id) || 0; pending = { token: `${w.seed}:${++this.serial}`, q: this.questions[index % this.questions.length], at: w.time }; this.cursors.set(id, index + 1); this.pending.set(id, pending); }
@@ -170,7 +181,7 @@ export class QuizBank {
   }
   answer(w: World, id: string, token: unknown, option: unknown): Reply | undefined {
     const p = w.players[id], pending = this.pending.get(id);
-    if (!p || !pending || token !== pending.token || !Number.isInteger(option) || (option as number) < 0 || (option as number) > 3 || w.paused) return;
+    if (!p || p.spectator || !pending || token !== pending.token || !Number.isInteger(option) || (option as number) < 0 || (option as number) > 3 || w.paused) return;
     this.pending.delete(id); const { correct: answerIndex, ...question } = pending.q, correct = option === answerIndex;
     if (correct) { p.energy = Math.min(MAX_ENERGY, p.energy + QUIZ_ENERGY); p.correct++; }
     return { type: 'answer', token: pending.token, correct, answer: pending.q.options[answerIndex], question, selected: pending.q.options[option as number], energy: p.energy, elapsedMs: Math.max(0, (w.time - pending.at) * 1000) };

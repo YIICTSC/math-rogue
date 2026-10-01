@@ -2,7 +2,7 @@ import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConne
 import {MAP_WIDTH,MAP_HEIGHT,MAP_TILES} from './map';
 import {roomTile,homeAt,publicHome} from './homeSocial';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, applyCommand, CAPACITY, createWorld, MATERIALS, QuizBank, tick, type Command, type Player, type Reply, type Tile, type World } from './engine';
+import { addPlayer, applyCommand, CAPACITY, createWorld, MATERIALS, QuizBank, setSpectator, tick, type Command, type Player, type Reply, type Tile, type World } from './engine';
 import type { KartQuestion } from '../gakuro-kart/learning';
 import { normalizeCraftCode } from './invite';
 import { avatarOf, type Avatar } from './avatar';
@@ -26,7 +26,7 @@ export class CraftRoom {
     const w = this.world!;
     const player=w.players[id],tile=player?roomTile(player):-1,home=player?.indoors?homeAt(w,tile):undefined;
     return { games:Object.fromEntries(Object.entries(w.games||{}).filter(([,g])=>g.homeTile===tile&&player?.indoors)),roomHome:home?publicHome(home):null, type: 'state', time: w.time, paused: w.paused, revision: w.revision, donated: w.donated, harvested: w.harvested, built: w.built,villageLevel:w.villageLevel,builtSites:w.builtSites,progress:w.players[id]?.progress,
-      players: Object.values(w.players).map(p => [p.id, p.name, p.color, +p.x.toFixed(3), +p.z.toFixed(3), +p.energy.toFixed(2), p.correct, p.actions, p.avatar, p.lastAction, p.buffUntil, p.fishing,p.indoors,p.homeTile]), coins: w.players[id]?.coins, bag: w.players[id]?.bag };
+      players: Object.values(w.players).map(p => [p.id, p.name, p.color, +p.x.toFixed(3), +p.z.toFixed(3), +p.energy.toFixed(2), p.correct, p.actions, p.avatar, p.lastAction, p.buffUntil, p.fishing,p.indoors,p.homeTile,p.spectator]), coins: w.players[id]?.coins, bag: w.players[id]?.bag };
   }
   private publish(world:World){
     if(this.renderedWorld!==world){this.renderedWorld=world;this.renderedTiles=world.tiles.map(t=>structuredClone(t));}
@@ -127,8 +127,8 @@ export class CraftRoom {
           const world = this.loading || this.world; if (!world || !Number.isFinite(d.time) || !d.players.some((p: any) => p[0] === this.selfId)) return;
           world.time = d.time; world.paused = !!d.paused; world.revision = d.revision; world.donated = d.donated; world.harvested = d.harvested; world.built = d.built;world.villageLevel=d.villageLevel||0;world.builtSites=Array.isArray(d.builtSites)?d.builtSites:[];
           const players: Record<string, Player> = {};
-          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions, avatar, lastAction, buffUntil, fishing,indoors,homeTile] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
-            players[id] = { id,profileId:id===this.selfId?this.profileId:'',progress:id===this.selfId?migrateProgress(d.progress):migrateProgress(null),indoors:!!indoors,homeTile:Number.isInteger(homeTile)?homeTile:undefined, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, avatar:avatarOf(avatar,color),lastAction,fishing,buffUntil:buffUntil||0,coins:id===this.selfId?d.coins||0:0, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
+          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions, avatar, lastAction, buffUntil, fishing,indoors,homeTile,spectator] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
+            players[id] = { id,spectator:!!spectator,profileId:id===this.selfId?this.profileId:'',progress:id===this.selfId?migrateProgress(d.progress):migrateProgress(null),indoors:!!indoors,homeTile:Number.isInteger(homeTile)?homeTile:undefined, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, avatar:avatarOf(avatar,color),lastAction,fishing,buffUntil:buffUntil||0,coins:id===this.selfId?d.coins||0:0, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
           }
           world.games=d.games&&typeof d.games==='object'?d.games:{};world.homeViews={};if(d.roomHome&&Number.isInteger(d.roomHome.tile))world.homeViews[d.roomHome.tile]=d.roomHome;world.players = players; this.world = world; this.loading = null; this.lastPacket = performance.now(); this.publish(world); this.cancel(deadline); joined = true; resolve();
         }
@@ -153,8 +153,8 @@ export class CraftRoom {
           const world = this.loading || this.world; if (!world || !Number.isFinite(d.time) || !d.players.some((p: any) => p[0] === this.selfId)) return;
           world.time = d.time; world.paused = !!d.paused; world.revision = d.revision; world.donated = d.donated; world.harvested = d.harvested; world.built = d.built;world.villageLevel=d.villageLevel||0;world.builtSites=Array.isArray(d.builtSites)?d.builtSites:[];
           const players: Record<string, Player> = {};
-          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions, avatar, lastAction, buffUntil, fishing,indoors,homeTile] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
-            players[id] = { id,profileId:id===this.selfId?this.profileId:'',progress:id===this.selfId?migrateProgress(d.progress):migrateProgress(null),indoors:!!indoors,homeTile:Number.isInteger(homeTile)?homeTile:undefined, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, avatar:avatarOf(avatar,color),lastAction,fishing,buffUntil:buffUntil||0,coins:id===this.selfId?d.coins||0:0, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
+          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions, avatar, lastAction, buffUntil, fishing,indoors,homeTile,spectator] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
+            players[id] = { id,spectator:!!spectator,profileId:id===this.selfId?this.profileId:'',progress:id===this.selfId?migrateProgress(d.progress):migrateProgress(null),indoors:!!indoors,homeTile:Number.isInteger(homeTile)?homeTile:undefined, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, avatar:avatarOf(avatar,color),lastAction,fishing,buffUntil:buffUntil||0,coins:id===this.selfId?d.coins||0:0, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
           }
           world.games=d.games&&typeof d.games==='object'?d.games:{};world.homeViews={};if(d.roomHome&&Number.isInteger(d.roomHome.tile))world.homeViews[d.roomHome.tile]=d.roomHome;world.players = players; this.world = world; this.loading = null; this.lastPacket = performance.now(); this.publish(world); joined = true;
         }
@@ -172,6 +172,14 @@ export class CraftRoom {
     if (raw.type === 'quiz') return this.bank?.ask(this.world, id);
     if (raw.type === 'answer') return this.bank?.answer(this.world, id, raw.token, raw.option);
     return applyCommand(this.world, id, raw);
+  }
+  setSpectator(enabled: boolean) {
+    if (this.closed || !this.host || !this.world) return;
+    if (this.dedicated) { this.dedicated.send({ type: 'spectator', enabled }); return; }
+    if (setSpectator(this.world, this.selfId, enabled)) { this.bank?.forget(this.selfId); this.emit(); }
+  }
+  observe(id: string | null) {
+    if (!this.closed && this.host && this.dedicated) this.dedicated.send({ type: 'observe', id });
   }
   sendCommand(command: Command) {
     if (this.closed) return;

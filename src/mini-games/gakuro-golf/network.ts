@@ -1,5 +1,5 @@
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
+import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
 import { HOLES } from './course';
 import { GOLF_PROTOCOL, validView } from './protocol';
@@ -9,7 +9,7 @@ export { GOLF_PROTOCOL, validView } from './protocol';
 const prefix = `gakuro-golf-v${GOLF_PROTOCOL}-`;
 /** Star topology: one authoritative host + 39 guests. 30 Hz physics, 5 Hz private snapshots. */
 export class GolfRoom {
-  selfId = 'local'; code = ''; host = false;
+  selfId = 'local'; code = ''; host = false; private observedId: string | null = null;
   private world: GolfWorld | null = null;
   private dedicated: DedicatedConnection | null = null;
   get serverHosted() { return !!this.dedicated; }
@@ -30,7 +30,7 @@ export class GolfRoom {
   }
   private emit() {
     if (this.closed || !this.world) return;
-    this.update(viewFor(this.world, this.selfId)); const sequence = ++this.sequence;
+    this.update(viewFor(this.world, this.selfId, this.observedId || undefined)); const sequence = ++this.sequence;
     for (const c of this.channels.values()) if (this.world.players[c.peer]?.connected) this.sendTo(c, { type: 'state', version: GOLF_PROTOCOL, sequence, view: viewFor(this.world, c.peer) });
   }
   private visibility = () => { if (this.world) { this.world.paused = document.hidden; this.emit(); } };
@@ -130,6 +130,17 @@ export class GolfRoom {
     if (!this.host || this.world?.phase !== 'lobby') return;
     const sample = factory(); if (!validLesson(sample)) throw new Error('問題を準備できませんでした。');
     this.factory = factory; this.world.title = sample.title; this.emit();
+  }
+  setSpectator(enabled: boolean) {
+    if (this.closed || !this.host) return;
+    if (this.dedicated) { this.dedicated.send({ type: 'spectator', enabled }); return; }
+    if (this.world && setSpectator(this.world, this.selfId, enabled)) this.emit();
+  }
+  observe(id: string | null) {
+    if (this.closed || !this.host) return;
+    this.observedId = id;
+    if (this.dedicated) this.dedicated.send({ type: 'observe', id });
+    else this.emit();
   }
   start() { if (this.dedicated) { if (this.host) this.dedicated.send({ type: 'start' }); return; } if (this.host && this.world && this.factory && startGolf(this.world, this.world.title)) this.emit(); }
   private apply(id: string, c: unknown) {

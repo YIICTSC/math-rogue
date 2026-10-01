@@ -9,7 +9,7 @@ export const ITEMS = { nitro: 'NITRO', shield: 'AEGIS', pulse: 'PULSE', rocket: 
 export const ITEM_EFFECTS = { nitro: '約3秒スピードアップ', shield: '6秒間防御＋減速を解除', pulse: '前方の最大3台を減速', rocket: '約5秒加速＋攻撃を防ぐ' };
 export type Item = keyof typeof ITEMS;
 export interface Racer {
-  id: string; slot: number; name: string; hero: number; cpu: boolean; avatar: KartAvatar;
+  id: string; slot: number; name: string; hero: number; cpu: boolean; avatar: KartAvatar; spectator?: boolean;
   distance: number; x: number; speed: number; steer: number; brake: boolean; drift: boolean;
   inputAt: number; slide: number; charge: number; boost: number; shield: number; slow: number;
   quizAnswers: number[]; quizTimes: number[]; quizCorrect: number; quizCorrectTotal: number; quizLap: number; quizFeedbackAt: number; quizApplied: boolean; crash: number;
@@ -41,14 +41,20 @@ export function addRacer(w: Race, id: string, name: string, hero = 0, cpu = fals
     inputAt: 0, slide: 0, charge: 0, boost: 0, shield: 0, slow: 0, item: null, jump: 0, draft: 0, finish: 0, drifts: 0, overtakes: 0 };
   w.revision++; return true;
 }
+export function setSpectator(w: Race, id: string, enabled: boolean) {
+  const p = w.players[id];
+  if (!p || p.cpu || typeof enabled !== 'boolean' || !['lobby', 'result'].includes(w.phase)) return false;
+  p.spectator = enabled; p.speed = p.steer = p.slide = 0; p.brake = p.drift = false; w.revision++; return true;
+}
 export function startRace(w: Race, fill = false) {
   if (w.phase !== 'lobby' || !Object.keys(w.players).length) return;
   if (fill) for (let i = 0; Object.keys(w.players).length < MAX_RACERS; i++) addRacer(w, `cpu-${i}`, `BOT ${String(i + 1).padStart(2, '0')}`, i % 3, true);
+  if (!Object.values(w.players).some(p => !p.spectator)) return;
   w.phase = 'countdown'; w.remaining = 3; w.revision++;
 }
 export function command(w: Race, id: string, raw: unknown) {
   if (!raw || typeof raw !== 'object' || w.phase !== 'race') return;
-  const c = raw as Command, p = w.players[id]; if (!p) return;
+  const c = raw as Command, p = w.players[id]; if (!p || p.spectator) return;
   if (c.type === 'input' && Number.isFinite(c.steer) && typeof c.brake === 'boolean' && typeof c.drift === 'boolean') {
     p.steer = clamp(c.steer, -1, 1); p.brake = c.brake; p.drift = c.drift; p.inputAt = w.time;
   }
@@ -56,12 +62,12 @@ export function command(w: Race, id: string, raw: unknown) {
     if (p.item === 'nitro') p.boost = Math.max(p.boost, 2.8);
     if (p.item === 'rocket') { p.boost = Math.max(p.boost, 4.5); p.shield = Math.max(p.shield, 4.5); }
     if (p.item === 'shield') { p.shield = 6; p.slow = 0; }
-    if (p.item === 'pulse') Object.values(w.players).filter(q => q.id !== id && !!q.finish === !!p.finish && q.distance > p.distance && q.distance - p.distance < 85).sort((a, b) => a.distance - b.distance).slice(0, 3).forEach(q => { if (q.shield <= 0) q.slow = 1.3; });
+    if (p.item === 'pulse') Object.values(w.players).filter(q => !q.spectator && q.id !== id && !!q.finish === !!p.finish && q.distance > p.distance && q.distance - p.distance < 85).sort((a, b) => a.distance - b.distance).slice(0, 3).forEach(q => { if (q.shield <= 0) q.slow = 1.3; });
     p.item = null;
   }
 }
 export function ranking(w: Race) {
-  return Object.values(w.players).sort((a, b) => a.finish && b.finish ? a.finish - b.finish || a.slot - b.slot : a.finish ? -1 : b.finish ? 1 : b.distance - a.distance || a.slot - b.slot);
+  return Object.values(w.players).filter(p => !p.spectator).sort((a, b) => a.finish && b.finish ? a.finish - b.finish || a.slot - b.slot : a.finish ? -1 : b.finish ? 1 : b.distance - a.distance || a.slot - b.slot);
 }
 export function tick(w: Race, dt: number) {
   if (!Number.isFinite(dt) || dt <= 0 || w.paused || w.phase === 'lobby' || w.phase === 'result') return;

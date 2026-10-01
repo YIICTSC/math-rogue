@@ -225,7 +225,7 @@ export class KartScene {
     this.quizRoad.visible = !!w.lesson && !me.finish && quizDistance(me.distance, getTrack(w.course).length) < QUIZ_END && !this.preview;
     this.crashObstacle.visible = me.crash > 0;
     if (me.crash > 0) { const impact = sampleTrack(me.distance + 2, w.course, me.x); this.crashObstacle.position.set(impact.x, impact.y, impact.z); this.crashObstacle.rotation.y = Math.atan2(impact.tx, impact.tz); }
-    const racers = Object.values(w.players), age = w.phase === 'race' && !w.paused ? Math.min(.15, (now - this.received) / 1000) : 0;
+    const racers = Object.values(w.players).filter(p => !p.spectator), age = w.phase === 'race' && !w.paused ? Math.min(.15, (now - this.received) / 1000) : 0;
     let ownPoint = sampleTrack(me.distance, w.course, me.x), ownDistance = me.distance;
     for (const part of this.parts) part.mesh.count = 0;
     racers.forEach((p, index) => {

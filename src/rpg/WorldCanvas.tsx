@@ -294,7 +294,7 @@ export default function WorldCanvas({
         }
       const visibleSites = w.sites.filter(s => s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4);
       visibleSites.forEach((s) => landmark(c, s, time));
-      Object.values(w.players)
+      Object.values(w.players).filter(p => !p.spectator)
         .sort((a, b) => a.y - b.y)
         .forEach((q) => person(c, q, time));
       c.restore();
@@ -316,7 +316,7 @@ export default function WorldCanvas({
               : "#eee6c5";
           c.fillText(label, x, y + 2);
         });
-        Object.values(w.players).forEach((q) => {
+        Object.values(w.players).filter(q => !q.spectator).forEach((q) => {
           const x = (q.x * T + 8 - cx) * scale,
             y = (q.y * T + 25 - cy) * scale;
           c.fillStyle = "#112526d9";

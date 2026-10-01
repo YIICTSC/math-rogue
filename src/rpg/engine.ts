@@ -72,6 +72,7 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  spectator?: boolean;
   id: string;
   name: string;
   x: number;
@@ -266,7 +267,7 @@ function applyNativeAction(
     if (["town", "rest", "event", "treasure"].includes(site.kind))
       p.interactionCount = (p.interactionCount || 0) + 1;
     if (site.kind === "boss" && !site.raidSize)
-      site.raidSize = Object.keys(w.players).length;
+      site.raidSize = Object.values(w.players).filter(p => !p.spectator).length;
     const teamPower = p.team
       ? 2 *
         Object.values(w.players).filter(
@@ -559,6 +560,11 @@ export function removePlayer(w: World, id: string) {
 function log(w: World, message: string) {
   w.logs = [message, ...w.logs].slice(0, 8);
 }
+export function setSpectator(w: World, id: string, enabled: boolean) {
+  const p = w.players[id];
+  if (!p || w.started || typeof enabled !== 'boolean') return false;
+  p.spectator = enabled; w.revision++; return true;
+}
 export function applyAction(
   w: World,
   id: string,
@@ -589,6 +595,7 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if (p.spectator && action.type !== "native-profile") return false;
   if (!w.started && action.type !== "native-profile") return false;
   if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
@@ -643,6 +650,7 @@ export function applyAction(
       );
     }
     const target = w.players[action.target];
+    if (target?.spectator) return false;
     if (!target?.team) return false;
     if (
       Object.values(w.players).filter((q) => q.team === target.team).length >= 4
@@ -665,7 +673,7 @@ function rankingScore(player: Adventurer, category: RpgRankingCategory, bonus: B
 }
 
 function finalizeRankingAwards(w: World) {
-  const players = Object.values(w.players);
+  const players = Object.values(w.players).filter(p => !p.spectator);
   const categories: RpgRankingCategory[] = [w.gameMode === "BATTLE_ROYALE" ? "KILLS" : "DAMAGE", "CORRECT", "BONUS"];
   const awards: Record<string, RpgRankingAward> = {};
   for (const player of players) {

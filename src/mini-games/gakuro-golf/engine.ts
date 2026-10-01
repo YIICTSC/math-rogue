@@ -13,7 +13,7 @@ export type Club = keyof typeof CLUBS;
 export const benefits = (correct: number) => ({ power: [.55, .7, .85, 1][correct] ?? .55, spread: [9, 6, 3, .7][correct] ?? 9 });
 export type PlayerPhase = 'ready' | 'quiz' | 'aim' | 'moving' | 'holed' | 'finished';
 export interface Golfer {
-  id: string; name: string; slot: number; connected: boolean; hole: number; strokes: number; scores: number[];
+  id: string; name: string; slot: number; connected: boolean; spectator?: boolean; hole: number; strokes: number; scores: number[];
   x: number; y: number; z: number; vx: number; vy: number; vz: number;
   phase: PlayerPhase; correct: number; totalCorrect: number; shotId: number;
   lesson: KartLesson | null; answers: number[]; feedback: number | null;
@@ -28,9 +28,9 @@ export type GolfCommand =
   | { type: 'continue'; shotId: number; index: number }
   | { type: 'shot'; shotId: number; club: Club; angle: number; power: number }
   | { type: 'next' };
-export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'penalty' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle'>>;
+export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'spectator' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'penalty' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle'>>;
 export interface GolfView {
-  phase: GolfWorld['phase']; title: string; paused: boolean; players: PublicGolfer[];
+  observedId?: string | null; phase: GolfWorld['phase']; title: string; paused: boolean; players: PublicGolfer[];
   quiz: null | { shotId: number; index: number; question: Omit<KartQuestion, 'correct'>; selected: number | null; answer: number | null };
 }
 export const createGolf = (seed = 1): GolfWorld => ({ phase: 'lobby', players: Object.create(null), seed: seed >>> 0 || 1, title: '', paused: false });
@@ -39,12 +39,17 @@ export function addPlayer(w: GolfWorld, id: string, name: string) {
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
   w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0 }; return true;
 }
+export function setSpectator(w: GolfWorld, id: string, enabled: boolean) {
+  const p = w.players[id];
+  if (w.phase !== 'lobby' || !p || typeof enabled !== 'boolean') return false;
+  p.spectator = enabled; return true;
+}
 export function startGolf(w: GolfWorld, title: string) {
-  if (w.phase !== 'lobby' || !title || !Object.keys(w.players).length) return false;
+  if (w.phase !== 'lobby' || !title || !Object.values(w.players).some(p => p.connected && !p.spectator)) return false;
   w.title = title.slice(0, 160); w.phase = 'playing'; return true;
 }
 function finishCheck(w: GolfWorld) {
-  if (w.phase === 'playing' && Object.values(w.players).every(p => !p.connected || p.phase === 'finished')) w.phase = 'result';
+  if (w.phase === 'playing' && Object.values(w.players).every(p => p.spectator || !p.connected || p.phase === 'finished')) w.phase = 'result';
 }
 export function disconnectPlayer(w: GolfWorld, id: string) {
   if (!w.players[id]) return;
@@ -64,7 +69,7 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () 
     if (w.phase !== 'lobby' || !validAvatar(c.avatar)) return false;
     p.avatar = { ...c.avatar }; return true;
   }
-  if (w.phase !== 'playing' || w.paused) return false;
+  if (p.spectator || w.phase !== 'playing' || w.paused) return false;
   if (c.type === 'quiz' && p.phase === 'ready' && makeLesson) {
     const lesson = makeLesson(); if (!validLesson(lesson)) return false;
     p.lesson = lesson; p.answers = []; p.feedback = null; p.correct = 0; p.shotId++; p.phase = 'quiz'; return true;
@@ -101,7 +106,7 @@ export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'correct
 export function tick(w: GolfWorld, dt: number) {
   if (w.phase !== 'playing' || w.paused || !Number.isFinite(dt) || dt <= 0 || dt > .1) return;
   for (const p of Object.values(w.players)) {
-    if (p.phase !== 'moving' || !p.connected) continue;
+    if (p.spectator || p.phase !== 'moving' || !p.connected) continue;
     const hole = HOLES[p.hole], previous = { x: p.x, z: p.z };
     p.flightTime += dt;
     if (p.y > 0 || p.vy > 0) { p.vy -= 9.8 * dt; p.vx += hole.wind.x * dt; p.vz += hole.wind.z * dt; }
@@ -123,12 +128,13 @@ export function tick(w: GolfWorld, dt: number) {
     if (p.flightTime > 30) settle(p);
   }
 }
-export function viewFor(w: GolfWorld, id: string): GolfView {
-  const p = w.players[id]; let quiz: GolfView['quiz'] = null;
+export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
+  const watched = w.players[id]?.spectator && target && w.players[target]?.connected && !w.players[target]?.spectator ? target : id;
+  const p = w.players[watched]; let quiz: GolfView['quiz'] = null;
   if (p?.phase === 'quiz' && p.lesson) {
     const index = p.feedback === null ? p.answers.length : p.answers.length - 1;
     const { correct: _secret, ...question } = p.lesson.questions[index];
     quiz = { shotId: p.shotId, index, question, selected: p.feedback === null ? null : p.answers[index], answer: p.feedback };
   }
-  return { phase: w.phase, title: w.title, paused: w.paused, quiz, players: Object.values(w.players).map(({ id, name, slot, connected, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, phase, correct, totalCorrect, shotId, penalty, capped }) => ({ id, name, slot, connected, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, phase, correct, totalCorrect, shotId, penalty, capped })) };
+  return { phase: w.phase, title: w.title, paused: w.paused, quiz, observedId: watched === id ? null : watched, players: Object.values(w.players).map(({ id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, phase, correct, totalCorrect, shotId, penalty, capped }) => ({ id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, phase, correct, totalCorrect, shotId, penalty, capped })) };
 }
