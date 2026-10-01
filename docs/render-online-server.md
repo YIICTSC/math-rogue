@@ -1,7 +1,7 @@
 # Render無料版・専用サーバー導入
 
-RPG・カート・クラフトを専用サーバーで処理する。ゴルフは統合作業中。
-専用ブランチrender-online-serverを使用し、Render無料版への公開は完了。mainは未変更。
+RPG・カート・クラフト・ゴルフを専用サーバーで処理する。
+Renderは専用ブランチrender-online-serverから公開する。mainのGitHub Pages・Androidビルドにも同じ接続先を設定する。
 
 ## Render Web Service
 
@@ -55,7 +55,7 @@ pnpm run server:start
 URL: https://learning-rogue-online.onrender.com
 Dashboard: https://dashboard.render.com/web/srv-dauu1v41nsns73fnjdk0
 Free / Singapore / Auto Deploy Off。ヘルスチェック200、ブラウザ作成・参加・移動、40接続の状態配信を確認。
-ローカル.env.localを設定済み。GitHub Pages版は接続先を含む再ビルド・公開が必要。カートとクラフトの移行はローカル検証済み。
+ローカル.env.localを設定済み。GitHub Pages・Androidのワークフローに接続先を設定済み。カート・クラフト・ゴルフの40人接続とホスト引き継ぎを検証する。
 
 ## カートとクラフトの通信
 
@@ -64,3 +64,11 @@ Free / Singapore / Auto Deploy Off。ヘルスチェック200、ブラウザ作�
 - 各部屋最大40人。退出時はホスト操作権を残る参加者へ引き継ぐ。
 - 通信切断後は入り直す。ひとりで練習は従来どおり端末内で実行。
 - scripts/test-mini-dedicated.mjsで40人ずつの接続、満員拒否、学習判定、島再開、ホスト引き継ぎ、非表示でも進行することを確認。
+
+## ゴルフの通信
+
+- /golf: サーバーで問題生成・採点・30Hz物理演算、5Hz状態配信。回答やショットの結果は操作した本人へ即時通知する。
+- 他の参加者の未回答問題や正答は配信しない。40人同時入力時の全員への重複配信を抑える。
+- ホスト退出時は操作権を引き継ぎ、物理演算を続ける。最大40人・4部屋。
+- pnpm run test:golf:dedicated は TEST_ONLINE_SERVER_URL を指定すると公開Renderへ40人接続して検証する。
+- AndroidのOrigin https://localhost、http://localhost、capacitor://localhost も許可する。

@@ -33,11 +33,16 @@ export function createGolfServer(options: GolfServerOptions = {}) {
   const maxRooms = options.maxRooms ?? 4, maxClients = options.maxClients ?? 160, idleMs = options.idleMs ?? 30 * 60 * 1000;
   let closed = false;
   function send(m: Member, packet: object) {
-    if (m.socket.readyState === WebSocket.OPEN && m.socket.bufferedAmount < 256 * 1024) m.socket.send(JSON.stringify(packet));
+    if (m.socket.readyState === WebSocket.OPEN && m.socket.bufferedAmount < 65536) m.socket.send(JSON.stringify(packet));
   }
   function emit(room: Room, init?: Member) {
     const sequence = ++room.sequence;
     for (const m of room.members.values()) send(m, { type: m === init ? 'init' : 'state', version: GOLF_SERVER_PROTOCOL, sequence, state: viewFor(room.world, m.id) });
+  }
+  function acknowledge(room: Room, m: Member) {
+    // Answer/shot feedback goes to the actor immediately. Other players receive
+    // the next shared tick instead of 40 full broadcasts for 40 simultaneous inputs.
+    send(m, {type:'state', version:GOLF_SERVER_PROTOCOL, sequence:++room.sequence, state:viewFor(room.world,m.id)});
   }
   function fail(m: Member, message: string, fatal = false) {
     send(m, { type: 'error', message });
@@ -92,7 +97,7 @@ export function createGolfServer(options: GolfServerOptions = {}) {
         }
         if (d.type === 'command') {
           // Clients send only their input. Results, answer keys and ball positions stay authoritative.
-          if (command(room.world, m.id, d.command, room.selection ? () => buildLesson(room!.selection!) : undefined)) emit(room);
+          if (command(room.world, m.id, d.command, room.selection ? () => buildLesson(room!.selection!) : undefined)) acknowledge(room,m);
         }
       } catch { fail(m, '問題を準備できませんでした。'); }
     });

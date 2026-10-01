@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { createServer as createHttpServer } from 'node:http';
 import { mkdir } from 'node:fs/promises';
 import { build } from 'esbuild';
-import { createServer } from 'vite';
 import { chromium } from 'playwright';
 await mkdir('tmp/golf-server', { recursive: true });
 await build({ entryPoints: ['server/golfRooms.ts'], outfile: 'tmp/golf-server/browser-adapter.mjs', bundle: true, platform: 'node', format: 'esm', target: 'node22', packages: 'external', define: { 'import.meta.env': '{}' } });
@@ -11,15 +10,15 @@ const adapter = createGolfServer();
 const http = createHttpServer((_req, res) => res.end('ok'));
 http.on('upgrade', (req, socket, head) => { if (req.url !== '/golf') { socket.destroy(); return; } adapter.sockets.handleUpgrade(req, socket, head, ws => adapter.sockets.emit('connection', ws, req)); });
 await new Promise(resolve => http.listen(0, '127.0.0.1', resolve));
-const server = await createServer({
-  define: { 'import.meta.env.VITE_ONLINE_SERVER_URL': JSON.stringify(`http://127.0.0.1:${http.address().port}`) },
-  server: { host: '127.0.0.1', port: 5204, strictPort: true, watch: null, hmr: false },
-  plugins: [{ name: 'golf-render-fixture', configureServer(s) { s.middlewares.use('/__golf', (_req, res) => { res.setHeader('Content-Type', 'text/html'); res.end('<html><script type="module">import{GolfRoom}from"/src/mini-games/gakuro-golf/network.ts";window.GolfRoom=GolfRoom;</script></html>'); }); } }],
-});
-await server.listen();
+const remote=process.env.TEST_ONLINE_SERVER_URL;
+const serverUrl=remote||`http://127.0.0.1:${http.address().port}`;
+const client=await build({stdin:{contents:'import{GolfRoom}from"./src/mini-games/gakuro-golf/network.ts";window.GolfRoom=GolfRoom;',resolveDir:process.cwd()},bundle:true,write:false,format:'esm',define:{'import.meta.env':JSON.stringify({VITE_ONLINE_SERVER_URL:serverUrl})}});
+const fixture=createHttpServer((req,res)=>{res.setHeader('Content-Type',req.url==='/bundle.js'?'text/javascript':'text/html');res.end(req.url==='/bundle.js'?client.outputFiles[0].text:'<script type="module" src="/bundle.js"></script>');});
+await new Promise(r=>fixture.listen(5204,'127.0.0.1',r));
 const browser = await chromium.launch(); const page = await browser.newPage(); page.setDefaultTimeout(15000);
 try {
-  await page.goto('http://127.0.0.1:5204/__golf'); await page.waitForFunction(() => window.GolfRoom);
+  if(remote){await page.route('**/__golf',r=>r.fulfill({contentType:'text/html',body:'<script type="module" src="/__golf_bundle.js"></script>'}));await page.route('**/__golf_bundle.js',r=>r.fulfill({contentType:'text/javascript',body:client.outputFiles[0].text}));}
+  await page.goto(remote?'http://127.0.0.1:5173/__golf':'http://127.0.0.1:5204/__golf'); await page.waitForFunction(() => window.GolfRoom);
   await page.evaluate(async () => {
     window.views = {}; window.rooms = []; window.statuses = [];
     window.host = new window.GolfRoom(v => window.hostView = v, m => window.statuses.push(m));
@@ -48,4 +47,4 @@ try {
   await page.evaluate(() => window.rooms.forEach(r => r.close()));
   const end = Date.now() + 5000; while (adapter.roomCount && Date.now() < end) await new Promise(r => setTimeout(r, 20)); assert.equal(adapter.roomCount, 0);
   console.log('GolfRoom Render client: VITE_ONLINE_SERVER_URL routing, 40 browser WebSockets, server-generated arithmetic, private feedback, concurrent shots, host handoff and cleanup passed.');
-} finally { await browser.close(); await server.close(); adapter.close(); await new Promise(resolve => http.close(resolve)); }
+} finally { await browser.close(); await new Promise(resolve=>fixture.close(resolve)); adapter.close(); await new Promise(resolve => http.close(resolve)); }

@@ -8,7 +8,7 @@ const signaling = spawn(process.execPath, ['--input-type=module', '-e', `import 
 await new Promise((resolve, reject) => { const timeout = setTimeout(() => { signaling.kill(); reject(new Error('Signaling server did not start')); }, 10000); signaling.once('message', () => { clearTimeout(timeout); resolve(); }); signaling.once('error', error => { clearTimeout(timeout); reject(error); }); });
 const server = await createServer({
   cacheDir: 'node_modules/.vite-golf-test', optimizeDeps: { entries: ['index.html'] },
-  define: { 'import.meta.env.VITE_ENABLE_DEBUG_FEATURES': '"true"', 'import.meta.env.VITE_RPG_PEER_HOST': '"127.0.0.1"', 'import.meta.env.VITE_RPG_PEER_PORT': '"9014"', 'import.meta.env.VITE_RPG_PEER_PATH': '"/golf"', 'import.meta.env.VITE_RPG_PEER_SECURE': '"false"', 'import.meta.env.VITE_GOLF_ICE_SERVERS': '"[]"' },
+  define: { 'import.meta.env.VITE_ONLINE_SERVER_URL': '""', 'import.meta.env.VITE_ENABLE_DEBUG_FEATURES': '"true"', 'import.meta.env.VITE_RPG_PEER_HOST': '"127.0.0.1"', 'import.meta.env.VITE_RPG_PEER_PORT': '"9014"', 'import.meta.env.VITE_RPG_PEER_PATH': '"/golf"', 'import.meta.env.VITE_RPG_PEER_SECURE': '"false"', 'import.meta.env.VITE_GOLF_ICE_SERVERS': '"[]"' },
   server: { host: '127.0.0.1', port: 5194, strictPort: true, watch: null, hmr: false },
   plugins: [{ name: 'golf-test-only', enforce: 'pre', async load(id) {
     if (id.endsWith('/src/App.tsx')) { const code = await readFile(id, 'utf8'); const at = code.lastIndexOf('\n    return ('); return code.slice(0, at) + '\n window.__golfApp = { debug: (v) => setIsDebugMode(v), screen: gameState.screen, setScreen: (screen) => setGameState(s => ({...s, screen})), language: setLanguageMode };\n' + code.slice(at); }
@@ -39,8 +39,7 @@ try {
   await page.getByRole('heading', { name: 'モード選択', exact: true }).waitFor();
   await page.screenshot({ path: 'tmp/golf-qa/lesson-picker.png' });
   // Exercise the existing unit buttons and their real onSelectMode callback.
-  await page.getByRole('button', { name: 'Math', exact: true }).click();
-  await page.getByRole('button', { name: /Math G1:/ }).first().click();
+  await page.getByRole('button', { name: /^1ケタのたし算/ }).first().click();
   await page.getByRole('button', { name: 'この条件で開始', exact: true }).click();
   await page.getByRole('button', { name: 'ラウンド開始', exact: true }).click();
   await page.getByRole('button', { name: '3問に挑戦', exact: true }).click();

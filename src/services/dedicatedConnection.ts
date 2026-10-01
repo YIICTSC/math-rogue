@@ -27,7 +27,7 @@ export class DedicatedConnection {
         let packet: any;
         try { packet = event.data instanceof ArrayBuffer ? event.data : JSON.parse(event.data); }
         catch { return; }
-        if(packet.type === 'error') {finish(new Error(packet.message || packet.text || '接続できませんでした。'));return;}
+        if(packet.type === 'error') {this.receive(packet);finish(new Error(packet.message || packet.text || '接続できませんでした。'));return;}
         if(this.receive(packet))finish();
       };
       socket.onerror = () => finish(new Error('専用サーバーへの接続に失敗しました。'));
