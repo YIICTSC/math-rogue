@@ -310,6 +310,7 @@ import {
 } from './data/vacationNarrativeCopy';
 
 const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
+const GakuroGolf = React.lazy(() => import('./mini-games/gakuro-golf/GakuroGolf'));
 const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));
 const GakuroCraft = React.lazy(() => import('./mini-games/gakuro-craft/GakuroCraft'));
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
@@ -2626,6 +2627,11 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
         }
     }, [isDebugModeActive, kartInviteOpen, gameState.screen]);
+    useEffect(() => {
+        if ((!isDebugModeActive || OFFLINE_DISTRIBUTABLE) && gameState.screen === GameScreen.GAKURO_GOLF) {
+            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+        }
+    }, [isDebugModeActive, gameState.screen]);
     const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
         && Boolean(rpgInviteCode)
         && rpgInviteParticipantRef.current
@@ -19847,7 +19853,7 @@ const App: React.FC = () => {
                                 </div>
 
                                 {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
-                                    <div className="start-menu-online-games grid w-full grid-cols-3 gap-2">
+                                    <div className="start-menu-online-games grid w-full grid-cols-2 gap-2">
                                         <button
                                             disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
                                             onClick={() => {
@@ -19891,6 +19897,21 @@ const App: React.FC = () => {
                                         >
                                             <span className="flex items-center gap-1"><Users size={15} /> {trans("学ロクラフト", languageMode)}</span>
                                             <span className="text-[10px] opacity-70">{trans("40人で島づくり", languageMode)}</span>
+                                        </button>
+                                        <button
+                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
+                                            onClick={() => {
+                                                if (!isDebugModeActive || redirectToAssignmentChallengeIfLocked()) return;
+                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                                setPendingAssignmentStartScreen(GameScreen.GAKURO_GOLF);
+                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                                setPendingAssignmentStartScreen(null);
+                                                setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_GOLF }));
+                                            }}
+                                            className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
+                                        >
+                                            <span className="flex items-center gap-1"><Flag size={15} /> GAKURO GOLF</span>
+                                            <span className="text-[10px] opacity-70">{trans("40人オンラインゴルフ", languageMode)}</span>
                                         </button>
                                     </div>
                                 )}
@@ -21519,6 +21540,12 @@ const App: React.FC = () => {
                         onComplete={handleRpgDefeatChallengeComplete}
                         languageMode={languageMode}
                     />
+                )}
+
+                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.GAKURO_GOLF && (
+                    <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-emerald-950 text-amber-100">{trans("コースと問題を準備中…", languageMode)}</div>}>
+                        <GakuroGolf languageMode={languageMode} onClose={returnToTitle} />
+                    </React.Suspense>
                 )}
 
                 {!OFFLINE_DISTRIBUTABLE && (isDebugModeActive || (kartInviteOpen && Boolean(kartCode))) && (gameState.screen === GameScreen.GAKURO_KART || kartInviteOpen) && (
