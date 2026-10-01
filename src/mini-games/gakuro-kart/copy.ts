@@ -1,4 +1,5 @@
 const copy: [string, string, string][] = [
+  ["招待リンク", "Invitation link", "しょうたいリンク"],
   ["約3秒スピードアップ", "Speed boost for ~3s", "やく3びょう スピードアップ"],
   ["6秒間防御＋減速を解除", "6s shield + clear slowdown", "6びょうかん ぼうぎょ＋げんそくを かいじょ"],
   ["前方の最大3台を減速", "Slow up to 3 racers ahead", "ぜんぽうの さいだい3だいを げんそく"],

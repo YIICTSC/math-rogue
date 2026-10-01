@@ -317,6 +317,7 @@ import { getRpgSiteDisplayName } from './rpg/enemyNames';
 import { isSharedSite } from './rpg/engine';
 import type { RpgRoom } from './rpg/network';
 import { getRpgRoomCodeFromUrl } from './rpg/invite';
+import { kartInviteCode } from './mini-games/gakuro-kart/invite';
 import { craftInviteCode } from './mini-games/gakuro-craft/invite';
 import { isRpgAdventureSetup, type RpgAdventureSetup } from './rpg/setup';
 const PARRY_WINDOW_MS = 650;
@@ -1670,6 +1671,8 @@ const App: React.FC = () => {
     const rpgInviteCode = useMemo(() => (
         typeof window === 'undefined' ? '' : getRpgRoomCodeFromUrl(window.location.href)
     ), []);
+    const kartCode = useMemo(() => typeof window === 'undefined' ? '' : kartInviteCode(window.location.href), []);
+    const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
     const craftCode = useMemo(() => typeof window === 'undefined' ? '' : craftInviteCode(window.location.href), []);
     const [craftInviteOpen, setCraftInviteOpen] = useState(Boolean(craftCode));
     const rpgInviteParticipantRef = useRef(false);
@@ -2613,6 +2616,16 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
         }
     }, [isDebugModeActive, craftInviteOpen, gameState.screen]);
+    useEffect(() => {
+        if (kartInviteOpen && !OFFLINE_DISTRIBUTABLE) {
+            setGameState(prev => prev.screen === GameScreen.GAKURO_KART ? prev : { ...prev, screen: GameScreen.GAKURO_KART });
+        }
+    }, [kartInviteOpen]);
+    useEffect(() => {
+        if (!isDebugModeActive && !kartInviteOpen && gameState.screen === GameScreen.GAKURO_KART) {
+            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+        }
+    }, [isDebugModeActive, kartInviteOpen, gameState.screen]);
     const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
         && Boolean(rpgInviteCode)
         && rpgInviteParticipantRef.current
@@ -18969,7 +18982,9 @@ const App: React.FC = () => {
     }, [electronApi]);
 
     const renderStudentGradeSurvey = () => {
-        if (!showStudentGradeSurvey) return null;
+        // Invited players use the host's lesson. Ask for their personal grade
+        // after they return to the title, rather than blocking room admission.
+        if (!showStudentGradeSurvey || kartInviteOpen || craftInviteOpen) return null;
         return (
             <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="student-grade" className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
                 <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
@@ -21506,9 +21521,9 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.GAKURO_KART && (
+                {!OFFLINE_DISTRIBUTABLE && (isDebugModeActive || (kartInviteOpen && Boolean(kartCode))) && (gameState.screen === GameScreen.GAKURO_KART || kartInviteOpen) && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("コースを準備しています…", languageMode)}</div>}>
-                        <GakuroKart languageMode={languageMode} onClose={returnToTitle} />
+                        <GakuroKart languageMode={languageMode} allowHost={isDebugModeActive} inviteCode={kartInviteOpen ? kartCode : ''} onClose={() => { setKartInviteOpen(false); returnToTitle(); }} />
                     </React.Suspense>
                 )}
 
