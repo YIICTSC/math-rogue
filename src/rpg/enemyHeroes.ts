@@ -2,7 +2,7 @@ import { assetUrl } from "../utils/assetPaths";
 import { CARDS_LIBRARY } from '../constants';
 import { getAllEnemyNamesByTheme, getTrueBossByTheme } from '../data/enemyCatalogs';
 import { ENDLESS_BOSSES, getEndlessBossSpritePath } from '../data/endlessMode';
-import { getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, getThemedMonsterEnemySpritePath, type VisualThemeId } from '../data/visualThemes';
+import { getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, getThemedMonsterEnemySpritePath, HIGH_SCHOOL_ENEMY_VARIANTS, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, MAGIC_ENEMY_VARIANTS, MAGIC_HUMANOID_ENEMY_VARIANTS, type VisualThemeId } from '../data/visualThemes';
 import { getEnemyIllustrationPaths } from '../utils/enemyIllustration';
 import type { Card, Character, Player, Relic } from '../types';
 export interface EnemyHero extends Character { relic:Relic; signature:Omit<Card,'id'>; role:string; }
@@ -16,6 +16,45 @@ const styles = [
 ];
 const cache=new Map<VisualThemeId,EnemyHero[]>();
 const usedRelicEffects=new Map<VisualThemeId,Set<string>>();
+const ENEMY_HERO_ILLUSTRATION_ALIASES:Record<string,string>={'バスケットボール':'体育館のバスケットボール','用務員さん':'激怒した用務員さん'};
+
+function getEnemyHeroImageData(name:string,theme:VisualThemeId,endless:typeof ENDLESS_BOSSES[number]|undefined) {
+ const catalogName=name.replace(/^ボス\s*[：:]\s*/,'');
+ if(theme==='high-school'){
+  if(name==='あずき')return assetUrl('sprites/high-school/azuki/idle.webp');
+  if(name==='ドドメデス')return assetUrl('enemy-illustrations/ドドメデス.webp');
+  if(name==='ゲンゾー')return assetUrl('enemy-illustrations/ゲンゾー.webp');
+ }
+ if(endless&&endless.floor<=50)return getEndlessBossSpritePath(endless,'idle');
+
+ // Enemy catalogs and sprite catalogs share exact names. Resolve those first:
+ // the generic battle-variant resolver can choose a humanoid by hash before it
+ // gets a chance to find a monster's exact illustration.
+ if(theme==='high-school'){
+  const humanoid=HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.find(variant=>variant.name===catalogName);
+  if(humanoid)return assetUrl(`sprites/high-school/humanoid-enemies/${humanoid.imageIndex}.webp`);
+  const monster=HIGH_SCHOOL_ENEMY_VARIANTS.find(variant=>variant.name===catalogName);
+  if(monster)return assetUrl(`sprites/high-school/enemies/${monster.imageIndex}.webp`);
+  if(catalogName==='真・校長先生')return assetUrl('sprites/high-school/humanoid-enemies/14.webp');
+ }
+ if(theme==='magic'){
+  const humanoid=MAGIC_HUMANOID_ENEMY_VARIANTS.find(variant=>variant.name===catalogName);
+  if(humanoid)return assetUrl(`sprites/magic/humanoid-enemies/${humanoid.imageIndex}.webp`);
+  const monster=MAGIC_ENEMY_VARIANTS.find(variant=>variant.name===catalogName);
+  if(monster)return assetUrl(`sprites/magic/enemies/${monster.imageIndex}.webp`);
+  if(catalogName==='真・大魔女校長')return assetUrl('sprites/magic/humanoid-enemies/21.webp');
+ }
+ if(theme==='elementary'&&catalogName==='真・校長先生')return assetUrl('enemy-illustrations/真ボス_2.webp');
+
+ const isTrueBoss=name===getTrueBossByTheme(theme).name||catalogName==='真・校長先生'||catalogName==='真・大魔女校長';
+ const enemy={name:catalogName,enemyType:isTrueBoss?'THE_HEART':'GENERIC',phase:catalogName.startsWith('真・')?2:1};
+ const alias=ENEMY_HERO_ILLUSTRATION_ALIASES[catalogName];
+ return getThemedMajorBossEnemySpritePath(enemy,theme)
+  ||getThemedHumanoidEnemySpritePath(enemy,theme,'idle')
+  ||getThemedMonsterEnemySpritePath(enemy,theme)
+  ||getEnemyIllustrationPaths(alias||catalogName)[0];
+}
+
 function uniqueInnate(theme:VisualThemeId,style:typeof styles[number],hash:number) {
  const used=usedRelicEffects.get(theme)||new Set<string>();usedRelicEffects.set(theme,used);
  const roleIndex=styles.indexOf(style);
@@ -45,11 +84,8 @@ export function getEnemyHeroes(theme:VisualThemeId):EnemyHero[] {
   const relic:Relic={id:`${id}:RELIC`,name:`${name}の${style.name}の証`,rarity:'STARTER',effectType:'START_BATTLE',rpgInnate:innate,description:`戦闘開始時、筋力${innate.strength}・ブロック${innate.block}・追加ドロー${innate.draw}・HP回復${innate.heal}。`};
   const base=CARDS_LIBRARY[style.cards[hash%style.cards.length]];
   const signature={...base,name:`${name}の秘技`,description:base.description};
-  const enemy={name,enemyType:name===boss.name||name.startsWith('真・')?'THE_HEART':'GENERIC',phase:name.startsWith('真・')?2:1};
   const endless=ENDLESS_BOSSES.find(b=>b.arc===theme&&b.name===name);
-  const aliases:Record<string,string>={'バスケットボール':'体育館のバスケットボール','用務員さん':'激怒した用務員さん','真・校長先生':'校長先生'};
-  const special:Record<string,string>={'あずき':'sprites/high-school/azuki/idle.webp','ドドメデス':'enemy-illustrations/ドドメデス.webp','ゲンゾー':'enemy-illustrations/ゲンゾー.webp'};
-  const imageData=(theme==='high-school'&&special[name]?assetUrl(special[name]):null)||(endless&&endless.floor<=50?getEndlessBossSpritePath(endless,'idle'):null)||getThemedMajorBossEnemySpritePath(enemy,theme)||getThemedHumanoidEnemySpritePath(enemy,theme,'idle')||getThemedMonsterEnemySpritePath(enemy,theme)||getEnemyIllustrationPaths(aliases[name]||name)[0];
+  const imageData=getEnemyHeroImageData(name,theme,endless);
   // Each hero has an exclusive signature plus a reproducible, balanced ten-card loadout.
   const extra=['BASH','NEUTRALIZE','IRON_WAVE','HEADBUTT','THUNDERCLAP','TWIN_STRIKE','POMMEL_STRIKE','CLEAVE','POISON_STAB','QUICK_SLASH','SLICE','BEAM_CELL'];
   return {id,name,description:`${style.name}を得意とする冒険者。固有の証と専用の秘技を携えて旅に出る。`,maxHp:68+hash%13,gold:50,startingRelicId:relic.id,deckTemplate:['STRIKE','STRIKE','DEFEND','DEFEND',...style.cards,extra[hash%extra.length],extra[(hash>>>9)%extra.length]],color:'#77c8b4',imageData,relic,signature,role:style.name};
