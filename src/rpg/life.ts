@@ -16,10 +16,11 @@ export const NATURE = [
  ['苔むした石柱','stone',4,4],['魔晶石の鉱脈','crystal',4,2],['鉄鉱脈','ore',4,3],['銅色の鉱脈','ore',3,2],['野草','herb',2,3],['果樹','wood',3,3],
 ] as const;
 const vegetation:Record<BiomeId,readonly number[]>={meadow:[0,1,16,17,14],forest:[0,1,2,3,17,14],wetland:[4,5,5,3,16,14],desert:[6,7,8,8,15],snow:[9,10,11,11,14],ruins:[7,12,12,13,14,15]};
+export function isResourceTile(w:World,tile:number){if(!Number.isInteger(tile)||tile<0||tile>=w.tiles.length)return false;const x=tile%WIDTH,y=Math.floor(tile/WIDTH);return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1;}
 type NatureNode={sprite:number;name:string;material:Material;hardness:number;amount:number;rock:boolean};
 const natureCache=new Map<string,NatureNode>();
 export function natureAt(w:World,tile:number):NatureNode|null {
- if(w.tiles[tile]!=='forest')return null;
+ if(!isResourceTile(w,tile)||w.tiles[tile]!=='forest')return null;
  const key=`${w.seed}:${tile}`,cached=natureCache.get(key);if(cached)return cached;
  const x=tile%WIDTH,y=Math.floor(tile/WIDTH);
  const hash=(Math.imul(tile+1,374761393)^w.seed)>>>0;

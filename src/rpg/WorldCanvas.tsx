@@ -16,7 +16,7 @@ import {
 
 const T = 16,
   colors = ["#e6b74d", "#7ed6dd", "#c0a0ec", "#ef8a80", "#8ee0a5", "#e7a4cb"];
-const atlas = typeof Image !== 'undefined' ? new Image() : null; if(atlas)atlas.src = assetUrl('/sprites/rpg/frontier-atlas.webp');
+const atlas = typeof Image !== 'undefined' ? new Image() : null; if(atlas)atlas.src = assetUrl('sprites/rpg/frontier-atlas.webp');
 function prop(c:CanvasRenderingContext2D,index:number,x:number,y:number,size=27){if(atlas?.complete&&atlas.naturalWidth)c.drawImage(atlas,index%6*atlas.naturalWidth/6,Math.floor(index/6)*atlas.naturalHeight/4,atlas.naturalWidth/6,atlas.naturalHeight/4,x+8-size/2,y+17-size,size,size);}
 const characterImages = new Map<string, HTMLImageElement>();
 function rect(
@@ -316,7 +316,7 @@ export default function WorldCanvas({
           }
         }
       for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){
-        const tile=y*WIDTH+x,node=natureAt(w,tile);if(!node)continue;
+        const tile=y*WIDTH+x,node=natureAt(w,tile);if(!node){if(w.tiles[tile]==='forest')tree(c,x*T,y*T);continue;}
         if(!resourceReady(w,tile)){rect(c,x*T+5,y*T+10,7,4,node.rock?'#89968b':'#8a6946');continue;}
         const effect=Object.values(w.players).find(q=>q.life?.effect?.tile===tile&&w.life.now-q.life.effect.at<350)?.life?.effect;
         const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;

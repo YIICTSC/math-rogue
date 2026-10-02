@@ -1823,6 +1823,10 @@ class AudioService {
       return this.isVoiceSfxName(name) ? this.voiceVolume : this.sfxVolume;
   }
 
+  public playRpgLifeSound(kind: 'gather'|'mine'|'cast'|'reel'|'craft') {
+      this.playSfxMp3(`rpg-life/${kind}`, () => this.playSound('select'), {maxDurationMs:kind==='reel'?1600:900,overlap:false});
+  }
+
   private playSfxMp3(name: string, fallback: () => void, options?: { maxDurationMs?: number; overlap?: boolean }) {
       this.init();
       if (!this.ctx || !this.sfxGain) {
