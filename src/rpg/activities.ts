@@ -174,6 +174,7 @@ export function applyActivity(w:World,p:Adventurer,action:ActivityAction,now:num
    const card=rewardCard(w,p),win=action.correctCount>0&&(game.game==='SLOT'?game.roll===0:game.roll%3===game.choice);
    const gold=win?(game.game==='SLOT'?50:20):0;
    grant(p,{remove:[],cards:win&&game.game==='FLIP'&&card?[card]:[],gold:gold+(action.correctCount>=3?10:0),heal:win&&game.game==='ROULETTE'?Math.ceil(p.maxHp*.2):0});
+   p.arcadeOutcome={...game,win,correctCount:action.correctCount,gold:gold+(action.correctCount>=3?10:0),heal:win&&game.game==='ROULETTE'?Math.ceil(p.maxHp*.2):0,...(win&&game.game==='FLIP'&&card?{card}:{})};
    p.arcadeResult=win?'当たり！ 景品を獲得しました。':'今回はハズレ。次の探索へ！';return tell(p.arcadeResult);
  }
  if(action.type==='secret-search') {

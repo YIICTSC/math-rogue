@@ -106,6 +106,7 @@ export interface Adventurer {
   dungeonId?: string;
   arcadeUses?: number;
   arcadeResult?: string;
+  arcadeOutcome?: {token:string;game:"FLIP"|"ROULETTE"|"SLOT";choice:number;roll:number;win:boolean;correctCount:number;gold:number;heal:number;card?:Card};
   arcadePending?: {token:string;siteId:string;game:"FLIP"|"ROULETTE"|"SLOT";choice:number;roll:number};
 }
 export interface World {

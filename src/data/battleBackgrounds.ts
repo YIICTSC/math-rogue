@@ -9,6 +9,46 @@ export interface BattleBackgroundScene {
 }
 
 const battleBackgroundUrl = (fileName: string) => assetUrl(`sprites/backgrounds/learning-rogue/${fileName}`);
+const rpgDungeonBackgroundUrl = (fileName: string) => assetUrl(`sprites/rpg/dungeons/${fileName}`);
+
+export const RPG_COOP_DUNGEON_BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
+  {
+    id: 'rpg-coop-dungeon-entry',
+    image: rpgDungeonBackgroundUrl('cooperative-entry.webp'),
+    flavorTexts: [
+      '苔むした石の広間に水音が響き、入口の奥から気配が迫る。',
+      '木の根が絡む古い回廊で、仲間と並んで身構えた。',
+      '灯火が揺れる地下の入口で、最初の魔物が姿を現した。'
+    ]
+  },
+  {
+    id: 'rpg-coop-dungeon-depth',
+    image: rpgDungeonBackgroundUrl('cooperative-depth.webp'),
+    flavorTexts: [
+      '地底湖の青い光が石床を照らし、結晶の影が動き出した。',
+      '深層の水音にまぎれて、敵の足音が近づいてくる。',
+      '淡く輝く結晶に囲まれ、仲間と次の一手を見定めた。'
+    ]
+  },
+  {
+    id: 'rpg-coop-dungeon-core',
+    image: rpgDungeonBackgroundUrl('cooperative-core.webp'),
+    flavorTexts: [
+      '最深部の封印門が開き、仲間全員の前に大ボスが立ちはだかった。',
+      '青と金の光が闘技場を満たす。ここが協力ダンジョンの最終決戦だ。',
+      '古代の紋様が輝き、最後の敵との戦いが始まった。'
+    ]
+  }
+];
+
+const rpgCoopDungeonSceneById = new Map(RPG_COOP_DUNGEON_BATTLE_BACKGROUND_SCENES.map(scene => [scene.id, scene]));
+
+export const getRpgCoopDungeonBattleBackgroundScene = (floor: number, nodeType?: NodeType): BattleBackgroundScene => {
+  const sceneId = nodeType === NodeType.BOSS
+    ? 'rpg-coop-dungeon-core'
+    : floor <= 1 ? 'rpg-coop-dungeon-entry' : 'rpg-coop-dungeon-depth';
+  return rpgCoopDungeonSceneById.get(sceneId) ?? RPG_COOP_DUNGEON_BATTLE_BACKGROUND_SCENES[0];
+};
 
 export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   {
@@ -350,6 +390,8 @@ export const getBattleBackgroundSceneById = (
   visualTheme: 'elementary' | 'high-school' | 'magic' = 'elementary',
   appearanceMode: CharacterAppearanceMode = 'STANDARD'
 ): BattleBackgroundScene => {
+  const rpgCoopDungeonScene = rpgCoopDungeonSceneById.get(id ?? '');
+  if (rpgCoopDungeonScene) return rpgCoopDungeonScene;
   const { scenes, byId } = getSceneCollection(visualTheme, appearanceMode);
   const biome = BIOMES.find(b => `rpg-${b.id}` === id);
   return biome ? biomeBattleBackground(biome) : byId.get(id ?? '') ?? scenes[0];

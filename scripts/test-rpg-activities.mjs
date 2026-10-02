@@ -40,7 +40,36 @@ try {
   send(arcade,'0',{type:'arcade-play',siteId:town.id,game:'FLIP',choice:0});assert.equal(arcade.players['0'].gold,90);
   ack(arcade,'0');send(arcade,'0',{type:'arcade-finish',token:pending.token,correctCount:3});
   assert.equal(arcade.players['0'].gold,pending.roll%3===0?120:100);
+  const result=arcade.players['0'].arcadeOutcome;
+  assert.equal(result.token,pending.token);assert.equal(result.roll,pending.roll);
+  assert.equal(result.correctCount,3);assert.equal(result.gold,pending.roll%3===0?30:10);
+  assert.equal(result.win,pending.roll%3===0);
+  // Both other games persist the owner's exact result; no correctness means no prize.
+  for(const kind of ['ROULETTE','SLOT']) {
+    ack(arcade,'0');
+    send(arcade,'0',{type:'arcade-play',siteId:town.id,game:kind,choice:2});
+    const turn=arcade.players['0'].arcadePending;assert(turn);ack(arcade,'0');
+    send(arcade,'0',{type:'arcade-finish',token:turn.token,correctCount:0});
+    const r=arcade.players['0'].arcadeOutcome;
+    assert.equal(r.game,kind);assert.equal(r.win,false);assert.equal(r.gold,0);assert.equal(r.heal,0);
+    assert.equal(r.roll,turn.roll);
+  }
+  ack(arcade,'0');const limitGold=arcade.players['0'].gold;
+  send(arcade,'0',{type:'arcade-play',siteId:town.id,game:'SLOT',choice:0});
+  assert.equal(arcade.players['0'].arcadePending,undefined);assert.equal(arcade.players['0'].gold,limitGold);
   const settled=arcade.players['0'].gold;assert.equal(send(arcade,'0',{type:'arcade-finish',token:pending.token,correctCount:3}),false);assert.equal(arcade.players['0'].gold,settled);
+
+  for(const kind of ['FLIP','ROULETTE','SLOT']) {
+    const winner=make(1),site=near(winner,'0','town');
+    send(winner,'0',{type:'arcade-play',siteId:site.id,game:kind,choice:0});
+    const p=winner.players['0'];p.arcadePending.roll=0;ack(winner,'0');
+    send(winner,'0',{type:'arcade-finish',token:p.arcadePending.token,correctCount:3});
+    assert.equal(p.gold,kind==='SLOT'?150:120);
+    assert.equal(p.hp,kind==='ROULETTE'?56:40);
+    assert.equal(p.profile.deck.length,kind==='FLIP'?7:6);
+    assert.equal(p.arcadeOutcome.win,true);assert.equal(p.arcadeOutcome.heal,kind==='ROULETTE'?16:0);
+    assert.equal(Boolean(p.arcadeOutcome.card),kind==='FLIP');
+  }
 
   const dungeon=make(5),site=dungeon.sites.find(s=>s.kind==='dungeon');
   for(let i=0;i<5;i++){near(dungeon,String(i),'dungeon');send(dungeon,String(i),{type:'dungeon-join',siteId:site.id});}

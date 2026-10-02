@@ -23,6 +23,7 @@ import RewardScreen from './components/RewardScreen';
 import FloorResultScreen from './components/FloorResultScreen';
 import MapScreen from './components/MapScreen';
 import RestScreen from './components/RestScreen';
+import ArcadeModal from './rpg/ArcadeModal';
 import ShopScreen from './components/ShopScreen';
 import EventScreen, { type EventAnswerMeta } from './components/EventScreen';
 import CompendiumScreen from './components/CompendiumScreen';
@@ -278,7 +279,7 @@ import { p2pService, type P2PEvent } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCards';
-import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
+import { chooseBattleBackgroundScene, getBattleBackgroundFlavor, getRpgCoopDungeonBattleBackgroundScene } from './data/battleBackgrounds';
 import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, DISTRIBUTION_PLATFORM, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 import { getThemedCharacterSpritePath, getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
@@ -1669,6 +1670,8 @@ const App: React.FC = () => {
     const currentRpgDuel=rpgSnapshot?.world.duels.find(d=>d.id===rpgDuelRef.current?.id);
     const rpgRivalId=currentRpgDuel?.members.find(id=>id!==rpgSnapshot?.selfId)||'';
     const rpgArcadeTokenRef = useRef<string | null>(null);
+    const [rpgArcadeSite, setRpgArcadeSite] = useState<string | null>(null);
+    const rpgArcadeEntryTokenRef = useRef<string | undefined>(undefined);
     const rpgDungeonMessagesRef = useRef<Array<{event:P2PEvent;from:string}>>([]);
     const rpgCorrectAnswersRef = useRef(0);
     const rpgLastTokenRef = useRef<string | null>(null);
@@ -9441,7 +9444,11 @@ const App: React.FC = () => {
                 const rpgWorld = rpgSnapshotRef.current?.world;
                 const dungeonSiteId = rpgWorld?.activities.dungeons.find(d => d.id === rpgDungeonRef.current?.id)?.siteId;
                 const rpgBattleSite = rpgEncounter?.site || (gameState.rpgOnline && dungeonSiteId ? rpgWorld?.sites.find(s => s.id === dungeonSiteId) : undefined);
-                const battleBackgroundScene = rpgBattleSite ? biomeBattleBackground(rpgBattleSite) : chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
+                const battleBackgroundScene = gameState.rpgOnline && rpgDungeonRef.current
+                    ? getRpgCoopDungeonBattleBackgroundScene(nextState.floor, node.type)
+                    : rpgBattleSite
+                        ? biomeBattleBackground(rpgBattleSite)
+                        : chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, actMultiplier * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
@@ -9804,6 +9811,10 @@ const App: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (!gameState.rpgOnline || gameState.screen === GameScreen.START_MENU || rpgSnapshot?.world.ended) setRpgArcadeSite(null);
+    }, [gameState.rpgOnline, gameState.screen, rpgSnapshot?.world.ended]);
+
     // Exploration stays mounted while the original main-game scenes run.
     useEffect(()=>{
         if(!gameState.rpgOnline||gameState.screen!==GameScreen.MAP||rpgArcadeTokenRef.current)return;
@@ -9963,6 +9974,11 @@ const App: React.FC = () => {
                 : prev.enemies.map((e, i) => i === 0 ? { ...e, currentHp: hp, maxHp: shared.maxHp } : e) }));
         }
     }, [gameState.enemies, gameState.screen, gameState.rpgOnline, rpgSnapshot]);
+
+    useEffect(() => {
+        if (gameState.rpgOnline && rpgArcadeSite && gameState.screen === GameScreen.MAP && !rpgSnapshot?.world.ended)
+            audioService.playBGM(rpgSnapshot?.world.players[rpgSnapshot.selfId]?.arcadeOutcome?.token !== rpgArcadeEntryTokenRef.current ? 'reward' : 'shop');
+    }, [gameState.rpgOnline, gameState.screen, rpgArcadeSite, rpgSnapshot?.world.players[rpgSnapshot?.selfId || '']?.arcadeOutcome?.token]);
 
     useEffect(() => {
         const world = rpgSnapshot?.world;
@@ -21587,6 +21603,21 @@ const App: React.FC = () => {
                         <button className="rounded bg-amber-700 px-5 py-3" onClick={()=>rpgRoomRef.current?.send({type:'dungeon-abort',dungeonId:rpgDungeonRef.current!.id})}>{trans('ダンジョンから帰還',languageMode)}</button>
                     </div>
                 )}
+                {gameState.rpgOnline && rpgArcadeSite && rpgSnapshot && !rpgSnapshot.world.ended && rpgSnapshot.world.players[rpgSnapshot.selfId] && (
+                    <div style={{ display: gameState.screen === GameScreen.MAP ? undefined : 'none' }}>
+                        <ArcadeModal
+                            me={rpgSnapshot.world.players[rpgSnapshot.selfId]}
+                            siteId={rpgArcadeSite}
+                            visible={gameState.screen === GameScreen.MAP}
+                            ready={!rpgSnapshot.world.players[rpgSnapshot.selfId].nativeScene &&
+                                (gameState.player.rpgMutationRevision || 0) === (rpgSnapshot.world.players[rpgSnapshot.selfId].mutationRevision || 0) &&
+                                (rpgSnapshot.world.players[rpgSnapshot.selfId].profile?.mutationRevision || 0) === (rpgSnapshot.world.players[rpgSnapshot.selfId].mutationRevision || 0)}
+                            languageMode={languageMode}
+                            send={action => rpgRoomRef.current?.send(action)}
+                            onClose={() => { setRpgArcadeSite(null); audioService.playBGM('map'); }}
+                        />
+                    </div>
+                )}
                 {!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
                         <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP && !rpgDungeonRef.current ? undefined : 'none' }}>
@@ -21594,6 +21625,7 @@ const App: React.FC = () => {
                                 languageMode={languageMode}
                                 player={gameState.player}
                                 active={gameState.screen === GameScreen.MAP && !rpgDungeonRef.current && !rpgDuelRef.current}
+                                interactionBlocked={Boolean(rpgArcadeSite)}
                                 sceneError={rpgSceneError}
                                 adventureSetup={{
                                     visualTheme: gameState.visualTheme || visualTheme,
@@ -21750,6 +21782,11 @@ const App: React.FC = () => {
                             appearanceMode={gameState.player.appearanceMode}
                             endlessMajorBoss={Boolean(gameState.isEndless && gameState.endlessFloor && gameState.endlessFloor % 10 === 0)}
                             showShopOption={Boolean(gameState.rpgOnline && rpgEncounterRef.current?.site.kind === 'town')}
+                            onOpenArcade={gameState.rpgOnline && rpgEncounterRef.current?.site.kind === 'town' ? () => {
+                                rpgArcadeEntryTokenRef.current = rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.arcadeOutcome?.token;
+                                setRpgArcadeSite(rpgEncounterRef.current!.site.id);
+                                handleNodeComplete();
+                            } : undefined}
                             onOpenShop={gameState.isEndless || (gameState.rpgOnline && rpgEncounterRef.current?.site.kind === 'town') ? handleOptionalShop : undefined}
                             onOrganizeDeck={gameState.isEndless ? handleEndlessOrganizeDeck : undefined}
                         />

@@ -87,6 +87,7 @@ function rankingRows(
 export default function RpgOnline({
   player,
   active,
+  interactionBlocked = false,
   languageMode,
   sceneError,
   adventureSetup,
@@ -98,6 +99,7 @@ export default function RpgOnline({
 }: {
   player: Player;
   active: boolean;
+  interactionBlocked?: boolean;
   languageMode: LanguageMode;
   sceneError?: string;
   adventureSetup?: RpgAdventureSetup;
@@ -137,7 +139,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active: active && !storySiteId && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !interactionBlocked && !storySiteId && !world?.players[room.current?.selfId || ""]?.spectator };
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
       visualTheme: previewTheme,
@@ -273,7 +275,7 @@ export default function RpgOnline({
     }
   }, []);
   useEffect(() => {
-    if (!active) destination.current = null;
+    if (!active || interactionBlocked) destination.current = null;
     const key = (e: KeyboardEvent) => {
       if (
         !latest.current.active ||
@@ -317,7 +319,7 @@ export default function RpgOnline({
       window.removeEventListener("keydown", key);
       clearInterval(timer);
     };
-  }, [active, interact]);
+  }, [active, interactionBlocked, interact]);
   const close = () => {
     room.current?.close();
     onClose();

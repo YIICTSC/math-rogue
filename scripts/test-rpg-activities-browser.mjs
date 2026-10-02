@@ -119,11 +119,45 @@ try {
   if(await state()==='RELIC_SELECTION')await call('relic');await screen('MAP');
   await page.getByRole('button',{name:'まずはひとりで練習する'}).click();
   await page.waitForFunction(()=>!!window.__rpgTest.room?.world.players.local?.profile?.deck);
-  await page.evaluate(()=>{const t=window.__rpgTest;t.room.world.activities.nextEventAt=t.room.world.deadlineAt;const town=t.room.world.sites.find(s=>s.kind==='town');Object.assign(t.room.world.players.local,{x:town.x,y:town.y});t.room.send({type:'arcade-play',siteId:town.id,game:'FLIP',choice:0});});
-  await screen('MATH_CHALLENGE');
-  assert.equal(await page.evaluate(()=>window.__rpgTest.state.player.gold),90);
-  await page.evaluate(()=>window.__rpgTest.quiz(3));await screen('MAP');
-  await page.waitForFunction(()=>!window.__rpgTest.room.world.players.local.arcadePending&&window.__rpgTest.state.player.rpgMutationRevision===2);
+  // Enter through the real town/rest card, not a direct map action.
+  await page.evaluate(()=>{const t=window.__rpgTest;t.room.world.activities.nextEventAt=t.room.world.deadlineAt;const town=t.room.world.sites.find(s=>s.kind==='town');Object.assign(t.room.world.players.local,{x:town.x,y:town.y,completedBattles:3});t.room.send({type:'native-enter',siteId:town.id});});
+  await screen('REST');
+  await page.getByRole('button',{name:/ゲームセンター/}).click();
+  await screen('MAP');
+  await page.getByRole('dialog').waitFor();
+  assert.equal(await page.locator('.rpg-activities').getByRole('button',{name:'スロットを回す'}).count(),0);
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.rpg-arcade-games img')).every(i=>i.complete&&i.naturalWidth>0));
+  await page.screenshot({path:'tmp/rpg-qa/town-arcade-desktop.png'});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'tmp/rpg-qa/town-arcade-mobile.png'});
+  assert(await page.locator('.rpg-arcade-dialog').evaluate(e=>e.scrollWidth<=e.clientWidth));
+  await page.setViewportSize({width:1440,height:1000});
+  for(const [index,game] of ['FLIP','ROULETTE','SLOT'].entries()) {
+    const before=await page.evaluate(()=>({gold:window.__rpgTest.state.player.gold,x:window.__rpgTest.room.world.players.local.x,y:window.__rpgTest.room.world.players.local.y}));
+    await page.keyboard.press('ArrowRight');
+    assert.deepEqual(await page.evaluate(()=>({x:window.__rpgTest.room.world.players.local.x,y:window.__rpgTest.room.world.players.local.y})),{x:before.x,y:before.y});
+    await page.locator('.rpg-arcade-games button').nth(index).click();
+    if(game==='FLIP')await page.locator('.rpg-arcade-cards button').nth(1).click();
+    if(game==='ROULETTE')await page.locator('.rpg-arcade-colors button').nth(2).click();
+    const play=page.getByRole('button',{name:'10コインで挑戦する',exact:true});
+    await play.waitFor({state:'visible'});
+    await page.waitForFunction(()=>!document.querySelector('.rpg-arcade-primary').disabled);
+    // Two synchronous clicks still charge exactly once.
+    await play.evaluate(b=>{b.click();b.click();});
+    await screen('MATH_CHALLENGE');
+    assert.equal(await page.evaluate(()=>window.__rpgTest.state.player.gold),before.gold-10);
+    assert.equal(await page.evaluate(()=>window.__rpgTest.room.world.players.local.arcadeUses),index+1);
+    await page.evaluate(()=>window.__rpgTest.quiz(3));await screen('MAP');
+    await page.waitForFunction(n=>window.__rpgTest.state.player.rpgMutationRevision===n,(index+1)*2);
+    if(game==='SLOT')for(let reel=0;reel<3;reel++)await page.getByRole('button',{name:'リールを止める',exact:true}).click();
+    await page.getByRole('button',{name:'もう一度遊ぶ',exact:true}).waitFor();
+    const result=await page.evaluate(()=>window.__rpgTest.room.world.players.local.arcadeOutcome);
+    assert.equal(result.game,game);assert.equal(result.correctCount,3);
+    assert.equal(await page.evaluate(()=>window.__rpgTest.state.player.gold),before.gold-10+result.gold);
+    await page.screenshot({path:`tmp/rpg-qa/town-arcade-${game.toLowerCase()}-result.png`});
+    await page.getByRole('button',{name:'もう一度遊ぶ',exact:true}).click();
+  }
+  await page.getByRole('dialog').getByRole('button',{name:'閉じる',exact:true}).click();
   await page.evaluate(()=>{const r=window.__rpgTest.room,s=r.world.sites.find(s=>s.kind==='dungeon');Object.assign(r.world.players.local,{x:s.x,y:s.y});r.send({type:'dungeon-join',siteId:s.id});});
   await page.getByRole('button',{name:'準備完了',exact:true}).click();
   await page.getByRole('button',{name:'ダンジョン開始',exact:true}).click();
@@ -142,6 +176,17 @@ try {
   await screen('MAP');await page.waitForFunction(()=>!window.__rpgTest.dungeon);
   assert.equal(await page.evaluate(()=>window.__rpgTest.room.world.activities.dungeons[0].status),'complete');
   assert.notEqual(await page.evaluate(()=>window.__rpgTest.state.challengeMode),'COOP');
+  // Time limit must interrupt the original question scene and close the arcade.
+  await enter('town');await screen('REST');
+  await page.getByRole('button',{name:/ゲームセンター/}).click();await screen('MAP');
+  await page.locator('.rpg-arcade-games button').nth(2).click();
+  await page.waitForFunction(()=>!document.querySelector('.rpg-arcade-primary').disabled);
+  await page.getByRole('button',{name:'10コインで挑戦する',exact:true}).click();
+  await screen('MATH_CHALLENGE');
+  await page.evaluate(()=>{window.__rpgTest.room.world.deadlineAt=Date.now()-1;});
+  await page.getByRole('heading',{name:'時間切れ！',exact:true}).waitFor();
+  assert.equal(await page.getByRole('dialog').count(),0);
+  assert.equal(await page.evaluate(()=>window.__rpgTest.room.world.players.local.arcadePending),undefined);
   assert.deepEqual(errors,[]);
   console.log('Actual App: arcade question/prize, REALTIME dungeon battle/question/reward/rest/treasure and world return passed.');
 } catch(e) {

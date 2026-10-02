@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { CharacterAppearanceMode, Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
+import { arcadeArt } from '../rpg/arcadeAssets';
 import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen, Eraser, ShoppingBag, Layers } from 'lucide-react';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { trans } from '../utils/textUtils';
@@ -30,10 +31,11 @@ interface RestScreenProps {
   endlessMajorBoss?: boolean;
   showShopOption?: boolean;
   onOpenShop?: () => void;
+  onOpenArcade?: () => void;
   onOrganizeDeck?: (deck: ICard[]) => void;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, showShopOption = false, onOpenShop, onOrganizeDeck }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, showShopOption = false, onOpenShop, onOpenArcade, onOrganizeDeck }) => {
   const isMagic = visualTheme === 'magic';
   const isVacationRun = !endlessMajorBoss && appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
   const restHubMessage = isVacationRun
@@ -91,6 +93,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
               else if (e.key === '3') { e.preventDefault(); handleSynthesizeChoice(); }
               else if (e.key === '4' && hasCardEraser) { e.preventDefault(); handleSelfStudyChoice(); }
               else if (e.key === '5' && onOpenShop && (endlessMajorBoss || showShopOption)) { e.preventDefault(); onOpenShop(); }
+              else if (e.key === '6' && onOpenArcade) { e.preventDefault(); onOpenArcade(); }
               else if (e.key === '0' || e.key === 'Enter') { e.preventDefault(); onLeave(); }
               return;
           }
@@ -162,7 +165,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions, deckOrder, deckSelection, onOpenShop, endlessMajorBoss, showShopOption]);
+  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions, deckOrder, deckSelection, onOpenShop, onOpenArcade, endlessMajorBoss, showShopOption]);
 
   const handleRest = () => {
       if (interactionDisabled) return;
@@ -421,6 +424,15 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             <Eraser size={40} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
                             <span className="font-bold text-lg">{trans(selfStudyOptionLabel, languageMode)}</span>
                             <span className="text-xs text-gray-400">{trans("不要効果を削除", languageMode)}</span>
+                        </button>
+                    )}
+                    {onOpenArcade && (
+                        <button type="button" disabled={interactionDisabled} onClick={onOpenArcade}
+                            className="group relative flex w-32 flex-col items-center overflow-hidden rounded-lg border-2 border-amber-500 bg-emerald-950 transition-all hover:-translate-y-1 hover:border-amber-200 md:w-40">
+                            <img src={arcadeArt('town')} alt="" className="h-24 w-full object-cover" />
+                            {typingMode && <span className="absolute right-2 top-2 rounded-full bg-black/80 px-2 text-amber-100">6</span>}
+                            <span className="p-2 text-lg font-bold text-amber-200">{trans('ゲームセンター', languageMode)}</span>
+                            <span className="px-2 pb-3 text-xs text-emerald-100">{trans('3つの遊びで景品に挑戦', languageMode)}</span>
                         </button>
                     )}
                     {(endlessMajorBoss || showShopOption) && onOpenShop && (

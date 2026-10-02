@@ -13,5 +13,5 @@ export function biomeAt(x: number, y: number) {
 }
 export function biomeBattleBackground(site: {x:number;y:number}) {
   const biome = biomeAt(site.x, site.y);
-  return {id:`rpg-${biome.id}`,image:assetUrl(`sprites/rpg/${biome.id}.svg`),flavorTexts:[biome.flavor]};
+  return {id:`rpg-${biome.id}`,image:assetUrl(`sprites/rpg/${biome.id}.webp`),flavorTexts:[biome.flavor]};
 }

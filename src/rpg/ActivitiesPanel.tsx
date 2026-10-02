@@ -13,7 +13,7 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
  const duel=world.duels.find(d=>d.id===me.duelId);
  const trade=a.trades.find(t=>t.from===selfId||t.to===selfId);
  const dungeon=a.dungeons.find(d=>d.id===me.dungeonId);
- const town=world.sites.find(s=>s.kind==='town'&&distance(s,me)<=2);
+
  const nearby=Object.values(world.players).filter(p=>p.id!==selfId&&distance(p,me)<=3);
  const target=world.players[selectedPeer || ''];
  const card=(id:string,owner:string)=>world.players[owner]?.profile?.deck?.find(c=>c.id===id);
@@ -26,11 +26,7 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
    <h3>地図の秘密</h3><p>地図の断片 {a.secretsFound.length} / 3 · 発見した断片は全員に共有されます。</p>{a.secretsFound.length>=3&&<p>秘密の遺跡が開放されました！</p>}
    <h3>協力ダンジョン</h3>{world.sites.filter(s=>s.kind==='dungeon').map(s=><div key={s.id}><p>{s.name} ({s.x}, {s.y})</p><button disabled={distance(s,me)>2||!!me.dungeonId||!!trade||world.ended} onClick={()=>send({type:'dungeon-join',siteId:s.id})}>参加者を募集・参加</button></div>)}
   </section>
-  {town&&!dungeon&&!trade&&<section className="rpg-player-panel rpg-activities"><h2>ゲームセンター</h2><p>1回10コイン · 残り {Math.max(0,3+Math.floor(me.completedBattles/3)-(me.arcadeUses||0))} 回</p><p>戦闘3勝で利用回数が1回増えます。</p>
-   <p>問題に正解すると当選景品を獲得。3問以上正解で10コインの追加報酬。</p><h3>カードめくり</h3><p>3枚のうち当たりを選ぶとカードを獲得。</p><div className="rpg-activity-buttons">{[0,1,2].map(choice=><button disabled={world.ended||me.gold<10} key={choice} onClick={()=>send({type:'arcade-play',siteId:town.id,game:'FLIP',choice})}>カード {choice+1}</button>)}</div>
-   <h3>ルーレット</h3><p>色が当たると20コインとHP20％回復。</p><div className="rpg-activity-buttons">{['赤','青','緑'].map((name,choice)=><button disabled={world.ended||me.gold<10} key={name} onClick={()=>send({type:'arcade-play',siteId:town.id,game:'ROULETTE',choice})}>{name}</button>)}</div>
-   <h3>スロット</h3><p>大当たりで50コイン。</p><button disabled={world.ended||me.gold<10} onClick={()=>send({type:'arcade-play',siteId:town.id,game:'SLOT',choice:0})}>スロットを回す</button><p role="status">{me.arcadeResult}</p>
-  </section>}
+
   {duel?.status==='request'&&<div className="rpg-overlay"><section className="rpg-dialog rpg-trade-dialog"><h2>ライバルと対戦</h2><p>{world.players[duel.members[0]]?.name} ↔ {world.players[duel.members[1]]?.name}</p><p>先攻・後攻はランダム。先攻の最初のターンはアタックカードを使えません。</p>{selfId===duel.members[1]?<button onClick={()=>send({type:'duel-accept',duelId:duel.id})}>対戦を受ける</button>:<p>相手の承諾を待っています。</p>}<button onClick={()=>send({type:'duel-cancel',duelId:duel.id})}>キャンセル</button></section></div>}
   {trade&&<div className="rpg-overlay"><section className="rpg-dialog rpg-trade-dialog"><h2>カードトレード</h2><p>{world.players[trade.from]?.name} ↔ {world.players[trade.to]?.name}</p>
    {!trade.accepted?<><p>{trade.to===selfId?'トレードの申し込みが届きました。':'相手の承諾を待っています。'}</p>{trade.to===selfId&&<button onClick={()=>send({type:'trade-accept',tradeId:trade.id})}>申し込みを承諾</button>}</>:<>

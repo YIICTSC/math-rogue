@@ -17,7 +17,8 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 11;
+// Arcade result presentation requires the authoritative outcome payload.
+const RPG_PROTOCOL_VERSION = 12;
 // Avoid BinaryPack's recursive encoding of 16,896 individual terrain cells.
 // Retain binary transport so PeerJS can still chunk large room snapshots.
 type WireWorld = Omit<World, "tiles"> & { tiles: World["tiles"] | string };
