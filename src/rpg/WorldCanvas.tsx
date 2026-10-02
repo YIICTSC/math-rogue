@@ -1,4 +1,6 @@
-import { BIOMES, biomeAt } from "./biomes";
+import {assetUrl} from '../utils/assetPaths';
+import {natureAt,resourceReady} from './life';
+import { BIOMES, biomeSurface } from "./biomes";
 import { trans } from "../utils/textUtils";
 import type { LanguageMode } from "../types";
 import type { VisualThemeId } from "../data/visualThemes";
@@ -14,6 +16,8 @@ import {
 
 const T = 16,
   colors = ["#e6b74d", "#7ed6dd", "#c0a0ec", "#ef8a80", "#8ee0a5", "#e7a4cb"];
+const atlas = typeof Image !== 'undefined' ? new Image() : null; if(atlas)atlas.src = assetUrl('/sprites/rpg/frontier-atlas.webp');
+function prop(c:CanvasRenderingContext2D,index:number,x:number,y:number,size=27){if(atlas?.complete&&atlas.naturalWidth)c.drawImage(atlas,index%6*atlas.naturalWidth/6,Math.floor(index/6)*atlas.naturalHeight/4,atlas.naturalWidth/6,atlas.naturalHeight/4,x+8-size/2,y+17-size,size,size);}
 const characterImages = new Map<string, HTMLImageElement>();
 function rect(
   c: CanvasRenderingContext2D,
@@ -255,7 +259,7 @@ export default function WorldCanvas({
       const minY = Math.max(0, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
       for (let y = minY; y < maxY; y++)
         for (let x = minX; x < maxX; x++) {
-          const biome = biomeAt(x,y);
+          const biome = biomeSurface(x,y);
           const tile = w.tiles[y * WIDTH + x],
             hash = (x * 173 + y * 31 + w.seed) % 19,
             px = x * T,
@@ -296,14 +300,23 @@ export default function WorldCanvas({
               rect(c, px + 10, py + 11, 2, 2, "#b4bfc9");
             }
           }
-          if (tile === "forest") {
-            if (biome.id === 'forest' || biome.id === 'meadow') tree(c, px, py - 2);
-            else { rect(c,px+5,py+3,7,12,biome.id==='snow'?'#edf5f6':biome.id==='desert'?'#708452':'#8b96a2'); }
-          }
         }
+      for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){
+        const tile=y*WIDTH+x,node=natureAt(w,tile);if(!node)continue;
+        if(!resourceReady(w,tile)){rect(c,x*T+5,y*T+10,7,4,node.rock?'#89968b':'#8a6946');continue;}
+        const effect=Object.values(w.players).find(q=>q.life?.effect?.tile===tile&&w.life.now-q.life.effect.at<350)?.life?.effect;
+        const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;
+        if(atlas?.complete&&atlas.naturalWidth)prop(c,node.sprite,x*T+shake,y*T,node.rock?23:28);else tree(c,x*T,y*T);
+      }
+      for(const h of w.life?.houses||[])prop(c,h.biome==='snow'?19:h.biome==='desert'?20:18,h.x*T,h.y*T,48);
+      for(const q of Object.values(w.players)){
+        const work=q.life?.work,effect=q.life?.effect;
+        if(work?.kind==='fish'){const x=work.tile%WIDTH*T+8,y=Math.floor(work.tile/WIDTH)*T+8;c.strokeStyle='#ddd3ad';c.lineWidth=.5;c.beginPath();c.moveTo(q.x*T+8,q.y*T+4);c.lineTo(x,y);c.stroke();rect(c,x-1,y+Math.sin(time/130)*1.5,3,3,w.life.now>=work.target?'#ffcf62':'#ec826f');}
+        if(effect&&w.life.now-effect.at<600){const x=effect.tile%WIDTH*T+8,y=Math.floor(effect.tile/WIDTH)*T+6,age=(w.life.now-effect.at)/600;for(let i=0;i<6;i++)rect(c,x+Math.cos(i)*age*14,y+Math.sin(i)*age*12,2,2,effect.perfect?'#ffdf7b':'#ddd7bb');}
+      }
       const visibleSites = w.sites.filter(s => s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4);
       visibleSites.forEach((s) => landmark(c, s, time));
-      Object.values(w.players).filter(p => !p.spectator)
+      Object.values(w.players).filter(p => !p.spectator && !p.life?.indoors)
         .sort((a, b) => a.y - b.y)
         .forEach((q) => person(c, q, time));
       c.restore();
@@ -318,6 +331,7 @@ export default function WorldCanvas({
       if (!overview) {
         c.textAlign = "center";
         c.font = "bold 12px sans-serif";
+        for(const h of w.life?.houses||[]){const x=(h.x*T+8-cx)*scale,y=(h.y*T-34-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;c.fillStyle='#10272bdd';c.fillRect(x-55,y-13,110,21);c.fillStyle='#ffdc94';c.fillText('⌂ '+h.ownerName,x,y+2);}
         visibleSites.forEach((s) => {
           const x = (s.x * T + 8 - cx) * scale,
             y = (s.y * T - 33 - cy) * scale;
@@ -333,7 +347,7 @@ export default function WorldCanvas({
               : "#eee6c5";
           c.fillText(label, x, y + 2);
         });
-        Object.values(w.players).filter(q => !q.spectator).forEach((q) => {
+        Object.values(w.players).filter(q => !q.spectator && !q.life?.indoors).forEach((q) => {
           const x = (q.x * T + 8 - cx) * scale,
             y = (q.y * T + 25 - cy) * scale;
           c.fillStyle = "#112526d9";

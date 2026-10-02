@@ -1,4 +1,10 @@
-import type {World,Player,Reply} from './engine';
+import type {Reply} from './engine';
+import type {Home} from './progression';
+import type {HomeDirectory} from './homeSocial';
+export interface HomeGamePlayer {id:string;name:string;indoors:boolean;homeTile?:number;progress:{home:Home}}
+export interface HomeGameWorld extends HomeDirectory {time:number;paused:boolean;games:Record<string,HomeGame>;players:Record<string,HomeGamePlayer>}
+type World=HomeGameWorld;
+type Player=HomeGamePlayer;
 import {homeAt,roomTile} from './homeSocial';
 export type GameKind='darts'|'billiards'|'arcade';
 export type GameCommand={type:'game_join';slot:number}|{type:'game_leave'|'game_start';key:string}|{type:'game_dart';key:string;x:number;y:number}|{type:'game_shot';key:string;angle:number;power:number}|{type:'game_cue';key:string;x:number;y:number}|{type:'game_paddle';key:string;x:number};

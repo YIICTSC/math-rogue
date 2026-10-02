@@ -1,8 +1,8 @@
-import type { Card } from '../types';
+import type { Card, Relic } from '../types';
 import type { World, Adventurer, NativeProfile } from './engine';
 import { CARDS_LIBRARY } from '../constants';
 
-export interface Mutation { revision: number; remove: string[]; cards: Card[]; gold: number; heal: number; }
+export interface Mutation { revision: number; relics?: Relic[]; remove: string[]; cards: Card[]; gold: number; heal: number; }
 export interface Trade { id: string; from: string; to: string; accepted: boolean; offers: Record<string, string[]>; confirmed: string[]; expires: number; }
 export interface Dungeon { id: string; siteId: string; leader: string; members: string[]; ready: string[]; arrived: string[]; damageActions?: string[]; status: 'lobby' | 'active' | 'complete' | 'aborted'; }
 export interface WorldEvent { kind: 'BATTLES' | 'ANSWERS' | 'SEALS'; title: string; target: number; progress: number; expires: number; completed: boolean; finished: boolean; contributors: Record<string, number>; baseline: Record<string, number>; }
@@ -20,7 +20,7 @@ export type ActivityAction =
 
 const distance = (a: {x:number;y:number}, b: {x:number;y:number}) => Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 export const pendingMutation = (p: Adventurer) => (p.profile?.mutationRevision || 0) < (p.mutationRevision || 0);
-export const activityBusy = (w: World, p: Adventurer) => !!p.duelId || !!p.arcadePending || !!p.dungeonId || w.activities.trades.some(t => t.from === p.id || t.to === p.id) || pendingMutation(p);
+export const activityBusy = (w: World, p: Adventurer) => !!p.life?.work || !!p.life?.indoors || !!p.duelId || !!p.arcadePending || !!p.dungeonId || w.activities.trades.some(t => t.from === p.id || t.to === p.id) || pendingMutation(p);
 const available = (w: World, p: Adventurer) => !w.ended && !p.nativeScene && !activityBusy(w,p);
 function rewardCard(w:World,p:Adventurer): Card | undefined {
  const pool = Object.values(CARDS_LIBRARY).filter(c => ['COMMON','UNCOMMON','RARE'].includes(c.rarity) && (!c.visualTheme || c.visualTheme === (p.profile?.visualTheme || w.setup?.visualTheme || 'elementary')));

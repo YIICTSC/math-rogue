@@ -1,4 +1,5 @@
-import { BIOMES, biomeAt } from "./biomes";
+import { createLife, advanceLife, applyLifeAction, lifeWalkable, type LifeWorld, type LifePlayer, type LifeAction } from './life';
+import { BIOMES, biomeAt, biomeSurface, riverAt } from "./biomes";
 import { STORIES, applyStory, type StoryAction, type StoryProgress } from "./stories";
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
@@ -77,6 +78,7 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  life?: LifePlayer;
   stories?: Record<string, StoryProgress>;
   spectator?: boolean;
   id: string;
@@ -110,6 +112,7 @@ export interface Adventurer {
   arcadePending?: {token:string;siteId:string;game:"FLIP"|"ROULETTE"|"SLOT";choice:number;roll:number};
 }
 export interface World {
+  life: LifeWorld;
   nativeMode: true;
   gameMode: "COOP" | "BATTLE_ROYALE";
   duels: Duel[];
@@ -132,7 +135,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = StoryAction | DuelAction | ActivityAction
+export type Action = LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -401,13 +404,13 @@ export function createWorld(
     tiles: Tile[] = [];
   for (let y = 0; y < HEIGHT; y++)
     for (let x = 0; x < WIDTH; x++) {
-      const river = 90 + Math.round(Math.sin(y / 12) * 12);
+
       tiles.push(
         x === 0 || y === 0 || x === WIDTH - 1 || y === HEIGHT - 1
           ? "forest"
-          : Math.abs(x - river) < 2
+          : riverAt(x,y)
             ? "water"
-            : rng() < biomeAt(x,y).trees
+            : rng() < biomeSurface(x,y).trees
               ? "forest"
               : "grass",
       );
@@ -534,6 +537,7 @@ export function createWorld(
     gameMode,
     duels: [],
     activities: createActivities(),
+    life: createLife(now),
     seed,
     ...(setup ? { setup: cloneRpgAdventureSetup(setup) } : {}),
     tiles,
@@ -574,6 +578,7 @@ export function addPlayer(w: World, id: string, name: string) {
     moveCount: 0,
     interactionCount: 0,
     siteUses: {},
+    life: {bag:{wood:4,stone:2},lastAction:0,crafted:[]},
     message: "町で準備を整え、道に沿って探索しよう。",
     lastMove: 0,
   };
@@ -635,6 +640,8 @@ export function applyAction(
   }
   if (p.spectator && action.type !== "native-profile") return false;
   if (!w.started && action.type !== "native-profile") return false;
+  if (action.type.startsWith("life-")) return applyLifeAction(w,p,action as LifeAction,now);
+  if ((p.life?.work || p.life?.indoors) && action.type !== "native-profile") return false;
   if (action.type === "story-choice") return applyStory(w,p,action);
   if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
@@ -658,8 +665,7 @@ export function applyAction(
       x >= WIDTH - 1 ||
       y < 1 ||
       y >= HEIGHT - 1 ||
-      tile === "water" ||
-      tile === "forest"
+      !lifeWalkable(w,x,y)
     )
       return false;
     p.x = x;
@@ -753,6 +759,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 
 export function advanceWorld(w: World, now = Date.now()) {
   if (w.started && !w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
+  advanceLife(w,now);
   advanceActivities(w,now);
   advanceDuels(w,now);
   if (

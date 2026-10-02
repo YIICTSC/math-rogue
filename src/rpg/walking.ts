@@ -1,3 +1,4 @@
+import { lifeWalkable } from './life';
 import { WIDTH, HEIGHT, type World } from "./engine";
 
 export function findWalkingRoute(w: World, x: number, y: number, tx: number, ty: number) {
@@ -27,7 +28,7 @@ export function findWalkingRoute(w: World, x: number, y: number, tx: number, ty:
         nx >= WIDTH - 1 ||
         ny >= HEIGHT - 1 ||
         previous.has(k) ||
-        ["forest", "water"].includes(w.tiles[k])
+        !lifeWalkable(w,nx,ny)
       )
         continue;
       previous.set(k, n);

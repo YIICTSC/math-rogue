@@ -9,14 +9,8 @@ import { avatarOf, type Avatar } from './avatar';
 import type { KartQuestion } from '../gakuro-kart/learning';
 
 export const SIZE = MAP_WIDTH, CAPACITY = 40, MAX_ENERGY = 100, QUIZ_ENERGY = 30, GROW_SECONDS = 90;
-export const MATERIALS = ['wood', 'stone', 'seed', 'crop', 'fish', 'plank', 'brick', 'flower', 'lamp', 'bench', 'roof', 'fence', 'window', 'campfire', 'fruit', 'meal'] as const;
-export type Material = typeof MATERIALS[number];
-export const BUILDINGS = ['plank', 'brick', 'flower', 'lamp', 'bench', 'roof', 'fence', 'window', 'campfire'] as const;
-export type Building = typeof BUILDINGS[number];
-export const CRAFTABLES = [...BUILDINGS, 'meal'] as const;
-export type Craftable = typeof CRAFTABLES[number];
-export const RECIPES: Record<Craftable, Partial<Record<Material, number>>> = { plank: { wood: 2 }, brick: { stone: 2 }, flower: { crop: 1 }, lamp: { wood: 2, stone: 1 }, bench: { plank: 2 }, roof: { plank: 2, stone: 1 }, fence: { wood: 2 }, window: { stone: 3 }, campfire: { wood: 3, stone: 2 }, meal: { crop: 2, fish: 1, fruit: 1 } };
-export type Inventory = Record<Material, number>;
+import { MATERIALS, BUILDINGS, CRAFTABLES, RECIPES, type Material, type Building, type Craftable, type Inventory } from './materials';
+export { MATERIALS, BUILDINGS, CRAFTABLES, RECIPES, type Material, type Building, type Craftable, type Inventory } from './materials';
 export type Tile = { ground: 'grass' | 'sand' | 'water'; nature: 'tree' | 'rock' | null; blocks: Building[]; owner: string; crop: number | null; watered: boolean; regrow: number; regrowKind?: 'tree' | 'rock'; revision: number; fruitAt?: number;homeOwner?:string;homeName?:string;homeLevel?:number };
 export type Player = { spectator?: boolean; id: string; profileId:string;progress:Progress;indoors:boolean;homeTile?:number; name: string; color: number; x: number; z: number; energy: number; bag: Inventory; correct: number; actions: number; dx: number; dz: number; inputAt: number; actionAt: number; avatar: Avatar; coins: number; buffUntil: number; fishing?:{tile:number;biteAt:number;expires:number}; lastAction?: {seq:number;kind:string;tile:number;at:number} };
 export type World = {width:number;height:number;games:Record<string,HomeGame>;homeViews:Record<number,Home>; seed: number; time: number; revision: number; tiles: Tile[]; players: Record<string, Player>; donated: number; harvested: number; built: number; paused: boolean;villageLevel:number;builtSites:number[];residents:Record<string,{id:string;bag:Inventory;coins:number;energy:number;correct:number;progress:Progress}> };

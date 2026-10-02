@@ -1,3 +1,5 @@
+import LifePanel from './LifePanel';
+import { natureAt, resourceReady } from './life';
 import { StoryDialog, StoryJournal } from "./StoryPanel";
 import { biomeAt } from "./biomes";
 import '../mini-games/shared/lobby.css';
@@ -109,6 +111,8 @@ export default function RpgOnline({
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
+  const [lifeOpen,setLifeOpen]=useState(false);
+  const [lifeTarget,setLifeTarget]=useState<number|null>(null);
   const [storySiteId, setStorySiteId] = useState<string | null>(null);
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
   const [world, setWorld] = useState<World | null>(null);
@@ -139,7 +143,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active: active && !interactionBlocked && !storySiteId && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !interactionBlocked && !storySiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
       visualTheme: previewTheme,
@@ -265,6 +269,8 @@ export default function RpgOnline({
     const w = latest.current.world,
       p = w?.players[room.current?.selfId || ""];
     if (!w || !p || !latest.current.active || p.nativeScene) return;
+    const home=w.life?.houses.find(h=>distance(h,p)<=2);
+    if(home){destination.current=null;room.current?.send({type:'life-enter',houseId:home.id});setLifeOpen(true);return;}
     const site = w.sites
       .filter((s) => distance(s, p) <= 2)
       .sort((a, b) => distance(a, p) - distance(b, p))[0];
@@ -272,7 +278,7 @@ export default function RpgOnline({
       destination.current = null;
       if (site.kind === "story") { setStorySiteId(site.id); return; }
       room.current?.send(site.kind === "dungeon" ? { type: "dungeon-join", siteId: site.id } : ["fragment", "secret", "seal"].includes(site.kind) ? { type: "secret-search", siteId: site.id } : { type: "native-enter", siteId: site.id });
-    }
+    } else {destination.current=null;setLifeTarget(null);setLifeOpen(true);}
   }, []);
   useEffect(() => {
     if (!active || interactionBlocked) destination.current = null;
@@ -560,14 +566,18 @@ export default function RpgOnline({
                       visualTheme={previewTheme}
                       onPlayer={spectating ? undefined : setSelectedPeer}
                       onTile={(x, y) => {
-                        if (spectating) return;
+                        if (spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
+                        const tile=y*WIDTH+x;
+                        if(Math.abs(me.x-x)+Math.abs(me.y-y)<=2 && (world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile))){destination.current=null;setLifeTarget(tile);setLifeOpen(true);return;}
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
                         walkingRoute.current=route;
                         destination.current=route.at(-1)||null;
                       }}
                     />
                   )}
+                  {!spectating && lifeOpen && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   <div className="rpg-map-tools">
+                    {!spectating && <button onClick={()=>{destination.current=null;setLifeTarget(null);setLifeOpen(true);}}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
                     <button onClick={() => setOverview(!overview)}>
                       <Map size={16} />
                       {overview ? "自分の近く" : "全体マップ"}

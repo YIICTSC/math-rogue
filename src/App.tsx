@@ -9835,7 +9835,7 @@ const App: React.FC = () => {
             let player={...prev.player};
             for(const change of changes){
                 if(change.revision<=(player.rpgMutationRevision||0))continue;
-                player={...player,deck:player.deck.filter(c=>!change.remove.includes(c.id)).concat(change.cards),gold:Math.max(0,player.gold+change.gold),currentHp:Math.min(player.maxHp,player.currentHp+change.heal),rpgMutationRevision:change.revision};
+                player={...player,relics:[...player.relics,...(change.relics||[]).filter(r=>!player.relics.some(existing=>existing.id===r.id))],deck:player.deck.filter(c=>!change.remove.includes(c.id)).concat(change.cards),gold:Math.max(0,player.gold+change.gold),currentHp:Math.min(player.maxHp,player.currentHp+change.heal),rpgMutationRevision:change.revision};
             }
             return {...prev,player};
         });

@@ -1,3 +1,4 @@
+import {RPG_LIFE_ENGLISH,RPG_LIFE_HIRAGANA} from '../rpg/lifeCopy';
 import { RPG_ARCADE_ENGLISH, RPG_ARCADE_HIRAGANA } from '../rpg/arcadeCopy';
 import { RPG_ADVENTURE_ENGLISH, RPG_ADVENTURE_HIRAGANA } from "../rpg/adventureCopy";
 import { GOLF_ENGLISH, GOLF_HIRAGANA } from '../mini-games/gakuro-golf/copy';
@@ -6,6 +7,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...RPG_LIFE_ENGLISH,
   ...RPG_ADVENTURE_ENGLISH,
   ...RPG_ARCADE_ENGLISH,
   '冒険は終了しています。': 'This adventure has ended.',
@@ -235,6 +237,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...RPG_LIFE_HIRAGANA,
   ...RPG_ADVENTURE_HIRAGANA,
   ...RPG_ARCADE_HIRAGANA,
   '冒険は終了しています。': 'ぼうけんは おわっています。',

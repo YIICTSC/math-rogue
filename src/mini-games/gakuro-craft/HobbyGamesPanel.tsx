@@ -1,5 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react';
-import type {World,Player,Command} from './engine';
+import type {HomeGameWorld as World,HomeGamePlayer as Player,GameCommand as Command} from './homeGames';
 import type {Home} from './progression';
 import {HOME_ITEMS} from './progression';
 import {gameOf} from './homeGames';
