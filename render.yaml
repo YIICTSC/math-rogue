@@ -4,11 +4,11 @@ services:
     runtime: node
     plan: free
     region: singapore
-    branch: render-online-server
+    branch: main
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run server:build
     startCommand: node server/dist/index.mjs
     healthCheckPath: /health
-    autoDeployTrigger: "off"
+    autoDeployTrigger: checksPass
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
