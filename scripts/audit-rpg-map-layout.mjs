@@ -68,6 +68,7 @@ try {
         assert.equal(counts[b.id].enemy, 3, `${seed}: encounters ${b.id}`);
         assert.equal(counts[b.id].event, 1, `${seed}: events ${b.id}`);
         assert.equal(counts[b.id].treasure, 2, `${seed}: treasure ${b.id}`);
+        assert.equal(counts[b.id].npc, 1, `${seed}: one roaming NPC ${b.id}`);
       }
       assert.equal(new Set(world.sites.map(s => `${s.x},${s.y}`)).size, world.sites.length, `${seed}: no overlapping sites`);
       const visited = new Set([start.y * WIDTH + start.x]), queue = [...visited];
@@ -84,7 +85,7 @@ try {
         assert(site.x >= 3 && site.y >= 3 && site.x < WIDTH - 3 && site.y < HEIGHT - 3);
         assert(visited.has(site.y * WIDTH + site.x), `${seed}: road access ${site.name}`);
         assert(reachable[site.y * WIDTH + site.x] >= 0, `${seed}: walkable access ${site.name}`);
-        if (['enemy', 'event', 'treasure'].includes(site.kind))
+        if (['enemy', 'event', 'treasure', 'npc'].includes(site.kind))
           assert(world.sites.every(other => other === site || Math.abs(other.x-site.x)+Math.abs(other.y-site.y) >= 7), `${seed}: site spacing`);
       }
       addPlayer(world, 'test', 'test');

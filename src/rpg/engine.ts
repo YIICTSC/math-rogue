@@ -7,6 +7,7 @@ import { createActivities, advanceActivities, applyActivity, activityBusy, accep
 import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 import { getEncounterEnemyNamePool } from "../services/geminiService";
 import type { VisualThemeId } from "../data/visualThemes";
+import { ROAMING_NPC_EVENTS } from './roamingNpcs';
 
 // Three times the width and twice the height: six times the explorable area.
 export const WIDTH = 192,
@@ -18,6 +19,7 @@ export type SiteKind =
   | "town"
   | "rest"
   | "event"
+  | "npc"
   | "treasure"
   | "enemy"
   | "guardian"
@@ -56,6 +58,7 @@ export interface Site {
   nativeInitialized?: boolean;
   bossPhase?: 1 | 2;
   eventNumber?: number;
+  npcEventId?: string;
   enemyNamesByTheme?: Record<VisualThemeId, string>;
 }
 export interface NativeProfile {
@@ -110,6 +113,8 @@ export interface Adventurer {
   arcadeResult?: string;
   arcadeOutcome?: {token:string;game:"FLIP"|"ROULETTE"|"SLOT";choice:number;roll:number;win:boolean;correctCount:number;gold:number;heal:number;card?:Card};
   arcadePending?: {token:string;siteId:string;game:"FLIP"|"ROULETTE"|"SLOT";choice:number;roll:number};
+  npcEventsSeen?: string[];
+  npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
   life: LifeWorld;
@@ -187,6 +192,8 @@ export function siteUnavailable(
   if (s.cleared) return "討伐済みです。";
   if (s.kind === "treasure" && p.claimed.includes(s.id))
     return "この宝箱は開封済みです。";
+  if (s.kind === "npc" && p.npcEventsSeen?.includes(s.id))
+    return "この旅人とのイベントは解決済みです。";
   if (["town", "rest", "event"].includes(s.kind)) {
     const remaining =
       3 - ((p.completedBattles || 0) - (p.siteUses?.[s.id] || 0));
@@ -503,6 +510,37 @@ export function createWorld(
       add(kind, name, x / 3, y / 2, 0, enemyNamesByTheme);
     }
   }
+  // A roaming character appears in an out-of-the-way patch of each biome.
+  // Their identity and exact location are seeded, so everyone in the room
+  // discovers the same encounters while new worlds stay unpredictable.
+  for (const biome of BIOMES) {
+    const candidatesForBiome = ROAMING_NPC_EVENTS.filter(event => event.biome === biome.id);
+    const npcEvent = candidatesForBiome[Math.floor(rng() * candidatesForBiome.length)];
+    const candidates: Array<{x:number;y:number}> = [];
+    const remoteCandidates: Array<{x:number;y:number}> = [];
+    for (let y = 4; y < HEIGHT - 4; y++) for (let x = 4; x < WIDTH - 4; x++) {
+      if (biomeAt(x, y).id !== biome.id) continue;
+      const tile = tiles[y * WIDTH + x];
+      const riverX = 90 + Math.round(Math.sin(y / 12) * 12);
+      const riverbank = tile !== 'water' && tile !== 'forest' && Math.abs(x - riverX) === 2;
+      const suitableTerrain = biome.id === 'forest'
+        ? tile === 'forest'
+        : biome.id === 'wetland'
+          ? riverbank
+          : biome.id === 'meadow'
+            ? tile === 'grass' || tile === 'forest'
+            : tile === 'grass';
+      if (!suitableTerrain) continue;
+      const position = {x,y};
+      if (sites.every(site => distance(site, position) >= 9)) candidates.push(position);
+      if (sites.every(site => distance(site, position) >= 7)) remoteCandidates.push(position);
+    }
+    const placementPool = candidates.length ? candidates : remoteCandidates;
+    if (!placementPool.length) throw new Error(`No roaming NPC location available in ${biome.id}`);
+    const {x,y} = placementPool[Math.floor(rng() * placementPool.length)];
+    add('npc', npcEvent.name.ja, x / 3, y / 2);
+    sites.at(-1)!.npcEventId = npcEvent.id;
+  }
   // Clear sites first so a later clearing cannot erase a connecting road.
   for (const s of sites) {
     for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++)
@@ -579,6 +617,7 @@ export function addPlayer(w: World, id: string, name: string) {
     interactionCount: 0,
     siteUses: {},
     life: {bag:{wood:4,stone:2},lastAction:0,crafted:[]},
+    npcEventsSeen: [],
     message: "町で準備を整え、道に沿って探索しよう。",
     lastMove: 0,
   };
@@ -646,7 +685,7 @@ export function applyAction(
   if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);
-  if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search")
+  if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search" || action.type === "npc-event-choice")
     return applyActivity(w,p,action as ActivityAction,now);
   if (w.ended || p.nativeScene || activityBusy(w,p)) return false;
   if (action.type === "move") {

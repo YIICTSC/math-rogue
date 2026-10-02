@@ -1763,6 +1763,11 @@
 .rpg-story-dialog p { line-height: 1.9; margin-bottom: 24px; }
 .rpg-story-dialog button { display: block; width: 100%; min-height: 48px; margin-top: 10px; padding: 10px 15px; background: #315754; border: 1px solid #aab888; border-radius: 8px; font-weight: 700; }
 .rpg-story-dialog button:focus-visible { outline: 3px solid #ffe297; }
+.rpg-roaming-npc-dialog h2 { color: #f2d58e; margin-bottom: 8px; }
+.rpg-roaming-npc-dialog h3 { color: #b7d6bd; font-size: 17px; margin: 0 0 12px; }
+.rpg-roaming-npc-dialog > small { color: #b5c8b5; }
+.rpg-roaming-npc-dialog .rpg-npc-event-result { padding: 13px; border: 1px solid #bdad70; border-radius: 8px; background: #263f3d; color: #ffedbb; }
+.rpg-roaming-npc-dialog .rpg-npc-event-close { margin-top: 18px; background: #263b3c; }
 @media(max-width:600px) { .rpg-story-dialog { padding: 18px; }.rpg-story-dialog-layout { grid-template-columns: 1fr; gap: 8px; }.rpg-story-dialog-portrait { height: min(28vh, 210px); }.rpg-story-dialog h2 { font-size: 21px; margin: 2px 0 12px; } }
 .rpg-hero-selection { height: 100%; display: flex; flex-direction: column; background: #101e2b; color: #f4efdd; }
 .rpg-hero-selection nav { display: flex; justify-content: center; gap: 12px; padding: 12px; flex-shrink: 0; }

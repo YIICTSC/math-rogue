@@ -1,6 +1,8 @@
 import type { Card, Relic } from '../types';
 import type { World, Adventurer, NativeProfile } from './engine';
 import { CARDS_LIBRARY } from '../constants';
+import { getUpgradedCard } from '../utils/cardUtils';
+import { getRoamingNpcEvent } from './roamingNpcs';
 
 export interface Mutation { revision: number; relics?: Relic[]; remove: string[]; cards: Card[]; gold: number; heal: number; }
 export interface Trade { id: string; from: string; to: string; accepted: boolean; offers: Record<string, string[]>; confirmed: string[]; expires: number; }
@@ -16,7 +18,8 @@ export type ActivityAction =
  | { type: 'dungeon-ready' | 'dungeon-leave' | 'dungeon-start' | 'dungeon-arrived' | 'dungeon-complete' | 'dungeon-abort'; dungeonId: string }
  | { type: 'arcade-play'; siteId: string; game: 'FLIP' | 'ROULETTE' | 'SLOT'; choice: number }
  | { type: 'arcade-finish'; token: string; correctCount: number }
- | { type: 'secret-search'; siteId: string };
+ | { type: 'secret-search'; siteId: string }
+ | { type: 'npc-event-choice'; siteId: string; choiceId: string };
 
 const distance = (a: {x:number;y:number}, b: {x:number;y:number}) => Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 export const pendingMutation = (p: Adventurer) => (p.profile?.mutationRevision || 0) < (p.mutationRevision || 0);
@@ -189,6 +192,47 @@ export function applyActivity(w:World,p:Adventurer,action:ActivityAction,now:num
    if(a.secretsFound.length<3)return tell('地図の断片を3つ集めると遺跡が開きます。');
    if(p.claimed.includes(s.id))return tell('秘密の宝箱は開封済みです。');
    p.interactionCount++;p.claimed.push(s.id);const card=rewardCard(w,p);grant(p,{remove:[],cards:card?[card]:[],gold:40,heal:0});return tell('秘密の遺跡でカードと40コインを発見！');
+ }
+ if(action.type==='npc-event-choice') {
+   if(typeof action.siteId!=='string'||action.siteId.length>80||typeof action.choiceId!=='string'||action.choiceId.length>80)return false;
+   const site=w.sites.find(s=>s.id===action.siteId&&s.kind==='npc');
+   const encounter=getRoamingNpcEvent(site?.npcEventId);
+   const choice=encounter?.choices.find(item=>item.id===action.choiceId);
+   if(!site||!encounter||!choice||distance(site,p)>2||!available(w,p)||!p.profile)return false;
+   if(p.npcEventsSeen?.includes(site.id))return tell('この旅人とのイベントは解決済みです。');
+
+   let gold=0,heal=0,cards:Card[]=[],remove:string[]=[],outcome:'normal'|'win'|'lose'|'fallback'='normal';
+   const effect=choice.effect;
+   const cost='cost' in effect ? effect.cost || 0 : 0;
+   if(p.profile.gold<cost)return tell('コインが足りません。');
+   if(effect.kind==='GOLD')gold=effect.amount;
+   else if(effect.kind==='HEAL')heal=Math.max(1,Math.ceil(p.maxHp*effect.ratio));
+   else if(effect.kind==='PAY_HEAL'){gold=-effect.cost;heal=Math.max(1,Math.ceil(p.maxHp*effect.ratio));}
+   else if(effect.kind==='CARD'){
+     gold=-cost;
+     const card=rewardCard(w,p);if(card)cards.push(card);
+   } else if(effect.kind==='UPGRADE_CARD'){
+     gold=-cost;
+     const deck=p.profile.deck||[];
+     const upgradeable=deck.filter(card=>!card.upgraded);
+     const selected=upgradeable.length?upgradeable[(w.seed+w.revision*31+site.id.length)%upgradeable.length]:undefined;
+     if(selected){remove=[selected.id];cards=[{...getUpgradedCard(selected),id:`${selected.id}-roaming-${w.revision}`}];}
+     else {const card=rewardCard(w,p);if(card)cards.push(card);outcome='fallback';}
+   } else if(effect.kind==='GAMBLE'){
+     const text=`${w.seed}:${p.id}:${site.id}:${choice.id}`;
+     let hash=2166136261;for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619)>>>0;
+     const won=hash%100<effect.chance;
+     outcome=won?'win':'lose';
+     gold=-effect.cost+(won?effect.winGold:(effect.loseGold||0));
+     if(won&&effect.winHealRatio)heal=Math.ceil(p.maxHp*effect.winHealRatio);
+     if(won&&effect.winCard){const card=rewardCard(w,p);if(card)cards.push(card);}
+   }
+   grant(p,{remove,cards,gold,heal});
+   p.npcEventsSeen=[...new Set([...(p.npcEventsSeen||[]),site.id])];
+   p.npcEventResults={...(p.npcEventResults||{}),[site.id]:{choiceId:choice.id,outcome}};
+   p.interactionCount++;
+   p.message=outcome==='win'?(choice.winResult?.ja||choice.result.ja):outcome==='lose'?(choice.loseResult?.ja||choice.result.ja):outcome==='fallback'?'カードを1枚受け取りました。':choice.result.ja;
+   w.revision++;return true;
  }
  return false;
 }

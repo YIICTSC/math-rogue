@@ -166,6 +166,20 @@ function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
     rect(c, x - 6, y - 4, 13, 10, "#88613c");
     rect(c, x - 6, y - 5, 13, 3, "#e3b967");
     rect(c, x - 1, y - 1, 3, 4, "#fae1a0");
+  } else if (s.kind === "npc") {
+    const coats = ["#ad6d46", "#547b67", "#587e9c", "#a58b4e", "#886b9d", "#6d8790"];
+    const coat = coats[(s.npcEventId?.split("").reduce((n,ch)=>n+ch.charCodeAt(0),0)||0)%coats.length];
+    rect(c,x-6,y+5,13,3,"#324c40");
+    rect(c,x-4,y-2,9,8,coat);
+    rect(c,x-3,y-9,7,7,"#eac69a");
+    rect(c,x-4,y-10,9,3,"#453b38");
+    rect(c,x-2,y+5,2,5,"#413a3b");
+    rect(c,x+2,y+5,2,5,"#413a3b");
+    rect(c,x+5,y-1,3,4,"#f1d67d");
+    c.fillStyle = "#fff0b5";
+    c.font = "bold 11px sans-serif";
+    c.textAlign = "center";
+    c.fillText("!",x,y-13);
   } else if (s.kind === "event") {
     rect(c, x - 4, y - 9, 9, 16, "#929d87");
     rect(c, x - 2, y - 6, 5, 2, "#d8dfb0");

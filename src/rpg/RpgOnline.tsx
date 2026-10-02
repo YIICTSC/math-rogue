@@ -1,6 +1,7 @@
 import LifePanel from './LifePanel';
 import { natureAt, resourceReady } from './life';
 import { StoryDialog, StoryJournal } from "./StoryPanel";
+import RoamingNpcDialog from './RoamingNpcDialog';
 import { biomeAt } from "./biomes";
 import '../mini-games/shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../mini-games/shared/HostSpectator';
@@ -114,6 +115,8 @@ export default function RpgOnline({
   const [lifeOpen,setLifeOpen]=useState(false);
   const [lifeTarget,setLifeTarget]=useState<number|null>(null);
   const [storySiteId, setStorySiteId] = useState<string | null>(null);
+  const [roamingNpcSiteId, setRoamingNpcSiteId] = useState<string | null>(null);
+  const [npcChoicePending, setNpcChoicePending] = useState(false);
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
   const [world, setWorld] = useState<World | null>(null);
   const inviteCode = useMemo(
@@ -143,7 +146,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active: active && !interactionBlocked && !storySiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !interactionBlocked && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
       visualTheme: previewTheme,
@@ -277,9 +280,13 @@ export default function RpgOnline({
     if (site) {
       destination.current = null;
       if (site.kind === "story") { setStorySiteId(site.id); return; }
+      if (site.kind === "npc") { setNpcChoicePending(false); setRoamingNpcSiteId(site.id); return; }
       room.current?.send(site.kind === "dungeon" ? { type: "dungeon-join", siteId: site.id } : ["fragment", "secret", "seal"].includes(site.kind) ? { type: "secret-search", siteId: site.id } : { type: "native-enter", siteId: site.id });
     } else {destination.current=null;setLifeTarget(null);setLifeOpen(true);}
   }, []);
+  useEffect(()=>{
+    if(roamingNpcSiteId && world?.players[selfId]?.npcEventResults?.[roamingNpcSiteId])setNpcChoicePending(false);
+  },[roamingNpcSiteId,selfId,world?.players]);
   useEffect(() => {
     if (!active || interactionBlocked) destination.current = null;
     const key = (e: KeyboardEvent) => {
@@ -638,6 +645,7 @@ export default function RpgOnline({
                 </div>
               </section>
               {!spectating && storySiteId && active && world.sites.some(s=>s.id===storySiteId && distance(s,me)<=2) && <StoryDialog languageMode={languageMode} site={world.sites.find(s=>s.id===storySiteId)!} player={me} send={action=>room.current?.send(action)} onClose={()=>setStorySiteId(null)} />}
+              {!spectating && roamingNpcSiteId && active && world.sites.some(s=>s.id===roamingNpcSiteId && s.kind==='npc' && distance(s,me)<=2) && <RoamingNpcDialog languageMode={languageMode} site={world.sites.find(s=>s.id===roamingNpcSiteId)!} player={me} pending={npcChoicePending} blockedReason={siteUnavailable(world,me,world.sites.find(s=>s.id===roamingNpcSiteId)!)} onChoose={choiceId=>{setNpcChoicePending(true);room.current?.send({type:'npc-event-choice',siteId:roamingNpcSiteId,choiceId});}} onClose={()=>{setRoamingNpcSiteId(null);setNpcChoicePending(false);}} />}
               <aside className="rpg-sidebar">
                 {!spectating && <StoryJournal languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);}} />}
                 {!spectating && <ActivitiesPanel languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />}

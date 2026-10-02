@@ -23,6 +23,8 @@ try {
     "/src/rpg/enemyNames.ts",
   );
   const { RpgRoom } = await server.ssrLoadModule("/src/rpg/network.ts");
+  const { getRoamingNpcEvent } = await server.ssrLoadModule("/src/rpg/roamingNpcs.ts");
+  const { CARDS_LIBRARY } = await server.ssrLoadModule("/src/constants.ts");
   const setup = {
     visualTheme: "high-school",
     mode: "MIXED",
@@ -155,8 +157,28 @@ try {
   assert.equal(WIDTH * HEIGHT, 64 * 44 * 6);
   assert.equal(w.tiles.length, WIDTH * HEIGHT);
   assert(w.sites.some(s=>s.x>64) && w.sites.some(s=>s.y>44));
-  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 55);
+  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 61);
   assert.equal(w.sites.filter(s=>s.kind==="story").length, 12);
+  const roamingNpcs = w.sites.filter(s=>s.kind==="npc");
+  assert.equal(roamingNpcs.length, 6, "one roaming NPC appears in each biome");
+  assert.equal(new Set(roamingNpcs.map(s=>s.npcEventId)).size, 6, "each biome gets a distinct encounter for the seed");
+  const npcWorld = createWorld(9876);
+  const upgradeNpc = npcWorld.sites.find(s=>s.kind==="npc");
+  upgradeNpc.npcEventId="forest-carver";
+  const sampleCard = Object.values(CARDS_LIBRARY).find(c=>!c.upgraded && c.damage>0);
+  assert(sampleCard, "test fixture includes an upgradeable card");
+  addPlayer(npcWorld,"npc-test","NPC Test");
+  const npcPlayer=npcWorld.players["npc-test"];
+  npcPlayer.x=upgradeNpc.x;npcPlayer.y=upgradeNpc.y;npcPlayer.hp=50;npcPlayer.maxHp=80;npcPlayer.gold=99;
+  npcPlayer.profile={...profile,hp:50,maxHp:80,gold:99,deckSize:1,deck:[{...sampleCard,id:"npc-test-card"}]};
+  const upgradeChoice=getRoamingNpcEvent(upgradeNpc.npcEventId).choices.find(c=>c.effect.kind==="UPGRADE_CARD");
+  assert.equal(applyAction(npcWorld,"npc-test",{type:"npc-event-choice",siteId:upgradeNpc.id,choiceId:upgradeChoice.id}),true,"NPC choices resolve on the authoritative world");
+  assert.equal(npcPlayer.profile.deck[0].upgraded,true,"NPC card-upgrade events update the player's deck");
+  assert(npcPlayer.npcEventsSeen.includes(upgradeNpc.id),"the NPC encounter is recorded once per player");
+  const mutationRevision=npcPlayer.mutationRevision;
+  npcPlayer.profile.mutationRevision=npcPlayer.mutationRevision;
+  assert.equal(applyAction(npcWorld,"npc-test",{type:"npc-event-choice",siteId:upgradeNpc.id,choiceId:upgradeChoice.id}),true,"a replay is handled without awarding a second reward");
+  assert.equal(npcPlayer.mutationRevision,mutationRevision,"replaying the same event does not grant a second reward");
   assert.match(siteUnavailable(w, p, site("town")), /3回/);
   enter(site("town"));
   assert.equal(p.nativeScene, undefined);

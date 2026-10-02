@@ -3,6 +3,7 @@ import { RPG_ARCADE_ENGLISH, RPG_ARCADE_HIRAGANA } from '../rpg/arcadeCopy';
 import { RPG_ADVENTURE_ENGLISH, RPG_ADVENTURE_HIRAGANA } from "../rpg/adventureCopy";
 import { GOLF_ENGLISH, GOLF_HIRAGANA } from '../mini-games/gakuro-golf/copy';
 import { RPG_ACTIVITY_ENGLISH, RPG_ACTIVITY_HIRAGANA } from '../rpg/activityCopy';
+import { RPG_ROAMING_NPC_ENGLISH, RPG_ROAMING_NPC_HIRAGANA } from '../rpg/roamingNpcs';
 import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
@@ -27,6 +28,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   '島を探索中': 'Exploring the island',
 
   ...RPG_ACTIVITY_ENGLISH,
+  ...RPG_ROAMING_NPC_ENGLISH,
   ...KART_ENGLISH,
   ...CRAFT_ENGLISH,
   ...GOLF_ENGLISH,
@@ -257,6 +259,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   '島を探索中': 'しまをたんさくちゅう',
 
   ...RPG_ACTIVITY_HIRAGANA,
+  ...RPG_ROAMING_NPC_HIRAGANA,
   ...KART_HIRAGANA,
   ...CRAFT_HIRAGANA,
   ...GOLF_HIRAGANA,
