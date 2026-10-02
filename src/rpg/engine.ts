@@ -517,7 +517,7 @@ export function createWorld(
   };
 }
 export function addPlayer(w: World, id: string, name: string) {
-  if (w.players[id] || Object.keys(w.players).length >= CAPACITY) return false;
+  if (w.ended || w.players[id] || Object.keys(w.players).length >= CAPACITY) return false;
   w.players[id] = {
     id,
     name: name.trim().slice(0, 16) || "冒険者",

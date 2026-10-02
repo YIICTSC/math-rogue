@@ -236,8 +236,8 @@ export class RpgRoom {
           !this.pendingInviteNames.has(conn.peer)
         ) {
           clearTimeout(handshake);
-          if (this.world.started) {
-            conn.send({ type: "error", message: "冒険はすでに始まっています。" });
+          if (this.world.ended) {
+            conn.send({ type: "error", message: "冒険は終了しています。" });
             setTimeout(() => conn.close(), 300);
             return;
           }
@@ -272,9 +272,9 @@ export class RpgRoom {
           isNativeProfile(data.profile)
         ) {
           clearTimeout(handshake);
-          if (this.world.started) {
+          if (this.world.ended) {
             this.pendingInviteNames.delete(conn.peer);
-            conn.send({ type: "error", message: "冒険はすでに始まっています。" });
+            conn.send({ type: "error", message: "冒険は終了しています。" });
             setTimeout(() => conn.close(), 300);
             return;
           }

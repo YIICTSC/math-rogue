@@ -95,7 +95,7 @@ export class KartRoom {
     this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0]); addRacer(this.world, this.selfId, name, hero);
     peer.on('connection', c => {
       if (this.closed) { c.close(); return; }
-      if (this.channels.size >= MAX_RACERS - 1 || this.world?.phase !== 'lobby' || this.channels.has(c.peer)) { this.reject(c, '満員、またはレース開始済みです。'); return; }
+      if (this.channels.size >= MAX_RACERS - 1 || this.world?.phase === 'result' || this.channels.has(c.peer)) { this.reject(c, '満員、またはレース終了済みです。'); return; }
       this.channels.set(c.peer, c);
       const timeout = setTimeout(() => { if (!this.world?.players[c.peer]) c.close(); this.pending.delete(timeout); }, 10000); this.pending.add(timeout);
       c.on('data', raw => {
@@ -104,7 +104,7 @@ export class KartRoom {
         const now = performance.now(), rate = this.rates.get(c.peer);
         if (!rate || now - rate.at > 1000) this.rates.set(c.peer, { at: now, count: 1 }); else if (++rate.count > 35) return;
         if (d.type === 'hello') {
-          if (d.version !== PROTOCOL || !validAvatar(d.avatar) || typeof d.name !== 'string' || !Number.isInteger(d.hero) || !addRacer(this.world, c.peer, d.name, d.hero)) { this.reject(c, '参加できません。レース開始前に入り直してください。'); return; }
+          if (d.version !== PROTOCOL || !validAvatar(d.avatar) || typeof d.name !== 'string' || !Number.isInteger(d.hero) || !addRacer(this.world, c.peer, d.name, d.hero)) { this.reject(c, '参加できません。部屋の空き人数を確認してください。'); return; }
           this.world.players[c.peer].avatar = { ...d.avatar }; clearTimeout(timeout); this.pending.delete(timeout); this.emit();
         } else if (d.type === 'avatar') this.applyAvatar(c.peer, d.avatar);
         else if (d.type === 'command') command(this.world, c.peer, d.command);

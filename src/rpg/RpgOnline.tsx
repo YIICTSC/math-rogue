@@ -1,3 +1,4 @@
+import '../mini-games/shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../mini-games/shared/HostSpectator';
 import { findWalkingRoute } from "./walking";
 import ActivitiesPanel from "./ActivitiesPanel";
@@ -472,7 +473,7 @@ export default function RpgOnline({
                   {members.map((member) => (
                     <li key={member.id}>
                       <span className="rpg-waiting-dot" style={{ background: `hsl(${member.color * 60}, 58%, 63%)` }} />
-                      <span>{member.name}</span>
+                      <span className="online-member-name">{member.name}</span>
                       {member.id === Object.keys(world.players)[0] && <small>ホスト</small>}
                       {member.id === selfId && <small>あなた</small>}{member.spectator && <small>観戦モード</small>}
                     </li>
@@ -504,14 +505,14 @@ export default function RpgOnline({
                 <p className="rpg-waiting-host-message">ホストの開始を待っています。</p>
               )}
             </section>
-            <section className="rpg-waiting-mini-game">
-              <div className="rpg-waiting-mini-heading">
+            <details className="rpg-waiting-mini-game">
+              <summary className="rpg-waiting-mini-heading">
                 <div>
                   <h2>待っている間に遊ぼう</h2>
                   <p>帰宅ダッシュ一発アウト · HP 1</p>
                 </div>
                 <span>開始前は何度でもリトライできます</span>
-              </div>
+              </summary>
               <div className="rpg-waiting-mini-frame">
                 <GoHomeDash
                   onBack={() => {}}
@@ -526,7 +527,7 @@ export default function RpgOnline({
                   exitEnabled={false}
                 />
               </div>
-            </section>
+            </details>
           </main>
         ) : (
           <>

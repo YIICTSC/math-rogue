@@ -95,7 +95,7 @@ sockets.on('connection',(socket,request)=>{
         }
         if(room.members.size>=40){room=undefined;error(m,'部屋は満員です（最大40人）。');return;}
         const admitted=room.game==='kart'?kart.addRacer(room.world,m.id,d.name,d.hero):craft.addPlayer(room.world,m.id,d.name,d.color,avatarOf(d.avatar,d.color),d.profileId);
-        if(!admitted){room=undefined;error(m,'参加できません。レース開始前かプロフィールを確認してください。');return;}
+        if(!admitted){room=undefined;error(m,'参加できません。空き人数、終了状態、プロフィールを確認してください。');return;}
         if(room.game==='kart')room.world.players[m.id].avatar={...d.avatar};
         room.members.set(m.id,m);room.emptyAt=0;clearTimeout(handshake);
         send(m,{type:'connected',id:m.id,code,host:room.host===m.id});

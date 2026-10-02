@@ -1,0 +1,123 @@
+/* Collection screens keep names and the next action in the first viewport. */
+.online-member-name{font-size:14px;font-weight:750;line-height:1.35;overflow-wrap:anywhere;min-width:0;text-align:left;letter-spacing:0}
+.online-roster{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px!important;overflow:visible!important;max-height:none!important;align-content:start}
+.online-roster>div,.online-roster>span{display:flex;align-items:center;gap:6px;min-width:0;min-height:38px;padding:5px 8px!important;border:1px solid #83918b40;border-radius:6px}
+.online-roster [data-self=true]{border-color:#609583;background:#60958320}
+.online-roster small{flex:none;font-size:11px;white-space:nowrap}
+.online-roster .online-member-name{flex:1}
+.online-collection-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
+.online-collection-heading strong{white-space:nowrap;font-size:16px}
+.online-collection-layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:20px;align-items:start}
+.online-collection-controls{display:flex;flex-direction:column;gap:10px;min-width:0}
+.online-collection-controls>button{width:100%;margin:0!important}
+.online-avatar-details{border:1px solid #83918b50;border-radius:8px;padding:10px;margin:10px 0;text-align:left}
+.online-avatar-details summary{font-size:14px;font-weight:700;cursor:pointer}
+.online-avatar-details[open]{max-height:270px;overflow:auto}
+.gk-root .gk-join,.gc-root .gc-join,.gg-root .gg-join{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:14px;border:2px solid #609583;border-radius:12px;margin:16px 0}
+.gk-root .gk-join button,.gc-root .gc-join button,.gg-root .gg-join button,.rpg-root .rpg-join-button{min-height:58px;width:100%;font-size:20px!important;font-weight:800!important;background:#17654d!important;color:#fff!important;border:2px solid #9ce7bc!important;border-radius:10px;box-shadow:0 3px 0 #123e32}
+.gk-root .gk-join input,.gc-root .gc-join input,.gg-root .gg-join input{min-height:46px;width:100%;font-size:20px;letter-spacing:.15em}
+.gc-root .gc-collection{width:min(1250px,100%);padding:20px;max-height:calc(100dvh - 40px);overflow:auto}
+.gc-root .gc-collection header,.gc-root .gc-collection footer{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.gc-root .gc-collection h2{font-size:22px;font-weight:800;margin:0}
+.gc-root .gc-collection-info{display:flex;gap:12px;align-items:center;margin:12px 0}
+.gc-root .gc-collection-info .gc-room-code{font-size:26px;margin:0;white-space:nowrap}
+.gc-root .gc-collection-info input{flex:1;min-width:0}
+.gc-root .gc-collection footer{justify-content:flex-end;margin-top:14px}
+.gc-root .gc-collection-roster>div{background:#fffdf3;color:#294744}
+@media(min-width:1000px) and (orientation:landscape){
+ .online-roster{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px!important}
+ .gk-root .gk-ready-card.online-collection{width:min(1440px,calc(100vw - 40px));max-height:calc(100dvh - 160px);padding:18px;text-align:left}
+ .gk-root .gk-ready-card h2{font-size:23px;margin:4px 0}
+ .gk-root .gk-ready-card .gk-roster{margin:0}
+ .gk-root .gk-ready-card .gk-roster>div{background:#17283b;color:#fff}
+ .gk-root .gk-ready-card .gk-code{font-size:26px;margin:0;padding:8px}
+ .gk-root .gk-ready-card .gk-invite{display:flex;flex-direction:column;margin:0;gap:5px}
+ .gk-root .gk-ready-card .gk-invite input{min-width:0;width:100%}
+ .gk-root .gk-ready-card .online-avatar-details{margin:0;padding:8px}
+ .gk-root .gk-ready-card .gk-lesson-summary{margin:0;padding:8px}
+ .gk-root .gk-ready-card .gk-lesson-summary p{margin:0 0 5px;font-size:13px;max-height:52px;overflow:auto}
+ .gk-root .gk-ready-card .gk-fill{font-size:13px;margin:0}
+ .gk-root .gk-ready-card .gk-primary{min-height:48px;font-size:17px}
+ .gk-root .gk-garage{height:calc(100dvh - 78px);padding:14px 24px;gap:20px;grid-template-columns:minmax(0,1fr) minmax(400px,1fr)}
+ .gk-root .gk-garage .gk-setup{padding:16px;overflow:auto}
+ .gk-root .gk-garage .gk-setup h2{margin:8px 0;font-size:24px}
+ .gk-root .gk-garage .gk-preview{min-height:0}
+ .gk-root .gk-garage .gk-rules{display:none}
+ .gk-root .gk-garage .gk-courses{gap:4px;margin:6px 0}
+ .gk-root .gk-garage .gk-courses button{padding:7px}
+ .gk-root .gk-garage .gk-section-label{margin:8px 0}
+ .gk-root .gk-garage .gk-join{margin:10px 0;padding:10px}
+ .gk-root .gk-garage .gk-actions{margin:8px 0}
+ .gg-root .gg-stage.gg-preview{height:calc(100dvh - 78px);min-height:0}
+ .gg-root .gg-lobby.online-collection{left:20px;top:12px;width:calc(100% - 40px);max-width:none;max-height:calc(100% - 24px);padding:18px}
+ .gg-root .gg-lobby.online-collection>p{margin:4px 0}
+ .gg-root .gg-lobby.online-collection h2{margin:4px 0;font-size:24px}
+ .gg-root .gg-lobby .gg-roster{margin:0}
+ .gg-root .gg-lobby .online-collection-controls p{font-size:13px;margin:0}
+ .gg-root .gg-lobby .online-collection-layout{margin-top:12px}
+ .gg-root .gg-welcome{top:12px;max-height:calc(100% - 24px);padding:16px;width:440px}
+ .gg-root .gg-welcome h1{font-size:36px;margin:8px 0}
+ .gg-root .gg-welcome p{margin:6px 0}
+ .gg-root .gg-welcome>button{margin-top:6px}
+ .gg-root .gg-welcome .gg-join{margin:10px 0;padding:10px}
+ .rpg-root .rpg-waiting-lobby{display:block;max-width:1440px;margin:12px auto;padding:0 20px 12px}
+ .rpg-root .rpg-waiting-panel{padding:16px}
+ .rpg-root .rpg-waiting-roster{margin-top:12px}
+ .rpg-root .rpg-waiting-roster ul{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;max-height:none;overflow:visible}
+ .rpg-root .rpg-waiting-roster li{min-width:0;min-height:38px;padding:5px 8px;border:1px solid #43534a;border-radius:6px;gap:5px}
+ .rpg-root .rpg-waiting-roster .online-member-name{flex:1}
+ .rpg-root .rpg-waiting-roster li small{margin:0;font-size:10px;flex:none}
+ .rpg-root .rpg-waiting-invite{margin-top:10px;padding:6px 10px}
+ .rpg-root .rpg-waiting-start-area{display:flex;gap:16px;align-items:center;margin-top:10px}
+ .rpg-root .rpg-waiting-mini-game{margin-top:8px}
+ .rpg-root .rpg-waiting-mini-heading{cursor:pointer;min-height:40px;padding:6px 16px}
+ .rpg-root .rpg-waiting-mini-heading p,.rpg-root .rpg-waiting-mini-heading>span{display:none}
+ .rpg-root .rpg-lobby{margin:12px auto;padding:0 20px;gap:20px}
+ .rpg-root .rpg-lobby-form{padding:16px}
+ .rpg-root .rpg-lobby-form h1{font-size:24px}
+ .rpg-root .rpg-lobby-form label{margin-top:8px}
+ .rpg-root .rpg-lobby-form input{min-height:40px}
+ .rpg-root .rpg-lobby-form>button{margin-top:8px;min-height:44px}
+ .gc-root .gc-welcome .gc-lobby{padding:20px;max-height:calc(100dvh - 32px)}
+ .gc-root .gc-collection-roster{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:999px){
+ .online-collection-layout{grid-template-columns:1fr}
+ .online-collection-heading{flex-wrap:wrap}
+ .gc-root .gc-collection-info{flex-wrap:wrap}
+ .gc-root .gc-collection-info input{flex-basis:100%}
+ .online-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .gc-root .gc-collection{padding:14px}
+}
+@media(max-width:500px){.online-roster{grid-template-columns:1fr}.gc-root .gc-collection h2{font-size:18px}.gc-root .gc-collection footer{flex-wrap:wrap}.online-member-name{font-size:15px}}
+@media(min-width:1000px) and (orientation:landscape){
+ .rpg-root .rpg-lobby{min-height:0;height:calc(100dvh - 108px);grid-template-columns:minmax(0,1fr) minmax(430px,1fr)}
+ .rpg-root .rpg-lobby-form{overflow:auto}
+ .rpg-root .rpg-lobby-form>p{margin-bottom:8px}
+ .rpg-root .rpg-lobby-form label{margin:8px 0}
+ .rpg-root .rpg-lobby-form>small{margin-top:8px}
+}
+@media(min-width:1000px) and (orientation:landscape){
+ .gg-root.gg-collecting{display:flex;flex-direction:column;overflow:hidden}
+ .gg-root.gg-collecting .gg-header{flex-shrink:0}
+ .gg-root.gg-collecting .gg-stage.gg-preview{flex:1;height:auto;min-height:0}
+ .gk-root .gk-ready-card .online-collection-controls{gap:7px}
+ .gk-root .gk-ready-card .gk-lesson-summary button{padding:6px!important}
+ .gk-root .gk-ready-card .gk-code{font-size:24px!important;padding:5px!important}
+ .gk-root .gk-ready-card .gk-primary{justify-content:center;padding:12px}
+}
+.online-roster>div,.online-roster>span{padding:3px 6px!important;overflow:visible!important}
+.online-member-name{white-space:normal;line-height:1.2}
+@media(min-width:1000px) and (orientation:landscape){
+ .rpg-root .rpg-waiting-panel{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:8px 16px;padding:14px}
+ .rpg-root .rpg-waiting-heading,.rpg-root .rpg-waiting-roster{grid-column:1/-1}
+ .rpg-root .rpg-waiting-heading p,.rpg-root .rpg-waiting-roster h2{display:none}
+ .rpg-root .rpg-waiting-roster{margin-top:0}
+ .rpg-root .rpg-waiting-roster ul{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:0}
+ .rpg-root .rpg-waiting-roster li{padding:3px 6px}
+ .rpg-root .rpg-waiting-invite{margin-top:0}
+ .rpg-root .rpg-waiting-start-area{margin-top:0}
+ .rpg-root .rpg-waiting-start-area p{display:none}
+ .rpg-root .rpg-waiting-host-message{margin:0!important;align-self:center}
+ .rpg-root .rpg-start-adventure{width:100%}
+}

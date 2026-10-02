@@ -84,7 +84,7 @@ export class GolfRoom {
     this.world = createGolf(crypto.getRandomValues(new Uint32Array(1))[0]); addPlayer(this.world, this.selfId, name);
     peer.on('connection', c => {
       if (this.closed) { c.close(); return; }
-      if (this.channels.size >= MAX_PLAYERS - 1 || this.world?.phase !== 'lobby' || this.channels.has(c.peer)) { this.reject(c, '満員、またはラウンド開始済みです。'); return; }
+      if (this.channels.size >= MAX_PLAYERS - 1 || this.world?.phase === 'result' || this.channels.has(c.peer)) { this.reject(c, '満員、またはラウンド終了済みです。'); return; }
       this.channels.set(c.peer, c);
       const timeout = setTimeout(() => { if (!this.world?.players[c.peer]) c.close(); this.pending.delete(timeout); }, 10000); this.pending.add(timeout);
       c.on('data', raw => {
@@ -93,7 +93,7 @@ export class GolfRoom {
         const now = performance.now(), rate = this.rates.get(c.peer);
         if (!rate || now - rate.at > 1000) this.rates.set(c.peer, { at: now, count: 1 }); else if (++rate.count > 15) return;
         if (d.type === 'hello') {
-          if (d.version !== GOLF_PROTOCOL || typeof d.name !== 'string' || !addPlayer(this.world, c.peer, d.name)) { this.reject(c, '参加できません。開始前に入り直してください。'); return; }
+          if (d.version !== GOLF_PROTOCOL || typeof d.name !== 'string' || !addPlayer(this.world, c.peer, d.name)) { this.reject(c, '参加できません。部屋の空き人数を確認してください。'); return; }
           clearTimeout(timeout); this.pending.delete(timeout); this.emit();
         } else if (d.type === 'command') this.apply(c.peer, d.command);
       });

@@ -79,7 +79,7 @@ export function createGolfServer(options: GolfServerOptions = {}) {
           candidate = rooms.get(code);
           if (!candidate) { fail(m, '部屋が見つかりません。', true); return; }
         }
-        if (candidate.members.size >= MAX_PLAYERS || !addPlayer(candidate.world, m.id, d.name)) { fail(m, '満員、またはラウンド開始済みです。', true); return; }
+        if (candidate.members.size >= MAX_PLAYERS || !addPlayer(candidate.world, m.id, d.name)) { fail(m, '満員、またはラウンド終了済みです。', true); return; }
         room = candidate; rooms.set(room.code, room); room.members.set(m.id, m); room.lastActive = now; clearTimeout(timeout);
         send(m, { type: 'connected', id: m.id, code: room.code, host: m.id === room.host }); emit(room, m); return;
       }

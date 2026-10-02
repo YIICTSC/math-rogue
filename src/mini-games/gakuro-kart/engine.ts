@@ -33,7 +33,13 @@ export function setRaceLaps(w: Race, laps: number) {
   return true;
 }
 export function addRacer(w: Race, id: string, name: string, hero = 0, cpu = false) {
-  if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_RACERS || w.players[id]) return false;
+  if (w.phase === 'result' || w.players[id]) return false;
+  // CPU-filled grids still leave room for late human arrivals.
+  if (Object.keys(w.players).length >= MAX_RACERS) {
+    const replacement = !cpu && Object.values(w.players).find(p => p.cpu);
+    if (!replacement) return false;
+    delete w.players[replacement.id];
+  }
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
   w.players[id] = { id, slot, name: name.trim().slice(0, 16) || 'Racer', hero: clamp(Math.floor(hero) || 0, 0, 2), cpu, avatar: cpu ? { ...defaultAvatar(slot), species: slot % 8, body: slot % 8, hair: slot % 6, accessory: slot % 4, hairStyle: slot % 12, kart: slot % 8, expression: slot % 8 } : defaultAvatar(hero),
     distance: -8 - Math.floor(slot / 4) * 7, x: (slot % 4 - 1.5) * 4, speed: 0, steer: 0, brake: false, drift: false,

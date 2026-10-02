@@ -35,7 +35,7 @@ export interface GolfView {
 }
 export const createGolf = (seed = 1): GolfWorld => ({ phase: 'lobby', players: Object.create(null), seed: seed >>> 0 || 1, title: '', paused: false });
 export function addPlayer(w: GolfWorld, id: string, name: string) {
-  if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_PLAYERS || Object.hasOwn(w.players, id) || !id || id.length > 100 || ['__proto__', 'constructor', 'prototype'].includes(id)) return false;
+  if (w.phase === 'result' || Object.keys(w.players).length >= MAX_PLAYERS || Object.hasOwn(w.players, id) || !id || id.length > 100 || ['__proto__', 'constructor', 'prototype'].includes(id)) return false;
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
   w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0 }; return true;
 }

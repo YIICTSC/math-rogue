@@ -1,3 +1,4 @@
+import '../shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
 import React, { useEffect, useRef, useState } from 'react';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
@@ -66,7 +67,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
     const completeA = a.phase === 'finished', completeB = b.phase === 'finished';
     return Number(completeB) - Number(completeA) || b.scores.length - a.scores.length || a.scores.reduce((s, n) => s + n, 0) - b.scores.reduce((s, n) => s + n, 0) || a.slot - b.slot;
   });
-  return <TranslatedUiTree mode={languageMode}><main className="gg-root" data-gamepad-initial-scope="gakuro-golf">
+  return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''}`} data-gamepad-initial-scope="gakuro-golf">
     <header className="gg-header"><button onClick={() => { leave(); onClose(); }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug">{t('開発中・デバッグ限定')}</span></header>
     {view && room.current?.host && room.current.code && <HostSpectator enabled={spectating} canChangeMode={view.phase === 'lobby'} onChange={value => room.current?.setSpectator(value)} name={spectators.target ? me?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>HOLE {me.hole + 1} / {HOLES.length}</span><span>{t('打数')} {me.strokes}</span><span>{t('残り')} {remaining.toFixed(1)} m</span><span>{t(me.phase === 'quiz' ? '問題に挑戦中' : me.phase === 'aim' ? 'ショットを準備する' : me.phase === 'moving' ? 'ボールの行方を見よう' : me.phase === 'finished' ? '完走' : me.phase === 'holed' ? 'カップイン！' : 'プレイ中')}</span></>}</HostSpectator>}
     {message && <div role="alert" className="gg-message">{t(message)}</div>}
@@ -82,9 +83,9 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
           <p className="gg-muted">{t('ホストが問題の範囲を選びます。全員が自分のペースでプレイできます。')}</p>
           {busy && <p role="status">{t('接続中…')}</p>}
         </div>}
-        {view?.phase === 'lobby' && <div className="gg-lobby gg-panel"><p className="gg-eyebrow">CLUBHOUSE</p><h2>{t('スタート前の集合')}</h2><p>{t('ルームコード')} <strong className="gg-code">{room.current?.code || 'SOLO'}</strong></p><p>{view.players.length} / {MAX_PLAYERS} {t('人')}</p><p data-allow-japanese="true">{view.title}</p><div className="gg-roster" data-allow-japanese="true">{view.players.map(p => <span key={p.id}>{p.name}{p.spectator && ' · ' + t('観戦モード')}</span>)}</div>
-          {room.current?.host ? <><button disabled={busy} onClick={() => setPicker('change')}>{t('問題の範囲を変更')}</button><button className="gg-primary" disabled={!view.title || busy || !view.players.some(p => p.connected && !p.spectator)} onClick={() => room.current?.start()}>{t('ラウンド開始')}</button><p className="gg-muted">{t(room.current?.serverHosted ? 'サーバーが試合を進行します。ホストの離席でもプレイできます。' : 'ホストは画面を開いたままにしてください。離席中は全員が一時停止します。')}</p></> : <p>{t('ホストの開始を待っています。')}</p>}
-          <button onClick={() => setShowCreator(true)}>{t('キャラクタークリエイト')}</button><button onClick={leave}>{t('部屋を退出')}</button></div>}
+        {view?.phase === 'lobby' && <div className="gg-lobby gg-panel online-collection"><header className="online-collection-heading"><h2>{t('スタート前の集合')}</h2><strong>{view.players.length} / {MAX_PLAYERS} {t('人')}</strong></header><div className="online-collection-layout"><div className="gg-roster online-roster" data-allow-japanese="true">{view.players.map(p => <span key={p.id} data-self={p.id === self}><b className="online-member-name">{p.name}</b>{p.spectator && ' · ' + t('観戦モード')}</span>)}</div>
+          <aside className="online-collection-controls"><p>{t('ルームコード')} <strong className="gg-code">{room.current?.code || 'SOLO'}</strong></p><p data-allow-japanese="true">{view.title}</p>{room.current?.host ? <><button disabled={busy} onClick={() => setPicker('change')}>{t('問題の範囲を変更')}</button><button className="gg-primary" disabled={!view.title || busy || !view.players.some(p => p.connected && !p.spectator)} onClick={() => room.current?.start()}>{t('ラウンド開始')}</button><p className="gg-muted">{t(room.current?.serverHosted ? 'サーバーが試合を進行します。ホストの離席でもプレイできます。' : 'ホストは画面を開いたままにしてください。離席中は全員が一時停止します。')}</p></> : <p>{t('ホストの開始を待っています。')}</p>}
+          <button onClick={() => setShowCreator(true)}>{t('キャラクタークリエイト')}</button><button onClick={leave}>{t('部屋を退出')}</button></aside></div></div>}
         {view && view.phase !== 'lobby' && me && <>
           <div className="gg-hud"><div><small>HOLE</small><strong>{me.hole + 1}<span> / {HOLES.length}</span></strong></div><div><small>PAR</small><strong>{hole.par}</strong></div><div><small>{t('打数')}</small><strong>{me.strokes}</strong></div><div><small>{t('残り')}</small><strong>{remaining.toFixed(1)}<span> m</span></strong></div></div>
           <div className="gg-course-tools"><button aria-pressed={overview} onClick={() => setOverview(!overview)}>{t(overview ? 'ボールを追う' : 'コース全景')}</button><button aria-expanded={showScores} onClick={() => setShowScores(!showScores)}>{t('スコアボード')}</button><button onClick={leave}>{t('部屋を退出')}</button></div>

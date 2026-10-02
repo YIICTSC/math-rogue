@@ -54,7 +54,7 @@ sockets.on('connection',(socket,request)=>{
         room=rooms.get(code);
         if(!room){fail(m,'部屋が見つかりません。');return;}
       }
-      if(room.world.started){room=undefined;fail(m,'冒険はすでに始まっています。');return;}
+      if(room.world.ended){room=undefined;fail(m,'冒険は終了しています。');return;}
       if(room.members.size>=40){room=undefined;fail(m,'部屋は満員です（最大40人）。');return;}
       clearTimeout(timeout);room.emptyAt=0;room.members.set(m.id,m);
       send(m,{type:'connected',id:m.id,code,host:room.host===m.id});
@@ -62,7 +62,7 @@ sockets.on('connection',(socket,request)=>{
       m.admitted=addPlayer(room.world,m.id,m.name);if(m.admitted)init(room,m);return;
     }
     if(d.type==='enter' && !m.admitted && validProfile(d.profile)){
-      if(room.world.started){fail(m,'冒険はすでに始まっています。');setTimeout(()=>socket.close(1008,'Adventure started'),300);return;}
+      if(room.world.ended){fail(m,'冒険は終了しています。');setTimeout(()=>socket.close(1008,'Adventure ended'),300);return;}
       m.admitted=addPlayer(room.world,m.id,m.name);
       if(m.admitted){const p=room.world.players[m.id];p.profile=d.profile;p.hp=d.profile.hp;p.maxHp=d.profile.maxHp;p.gold=d.profile.gold;init(room,m);}return;
     }
