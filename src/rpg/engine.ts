@@ -1,4 +1,4 @@
-import { biomeAt } from "./biomes";
+import { BIOMES, biomeAt } from "./biomes";
 import { STORIES, applyStory, type StoryAction, type StoryProgress } from "./stories";
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
@@ -425,8 +425,8 @@ export function createWorld(
       id: `site-${sites.length}`,
       kind,
       name,
-      x: x * 3,
-      y: y * 2,
+      x: Math.round(x * 3),
+      y: Math.round(y * 2),
       hp,
       maxHp: hp,
       cleared: false,
@@ -434,8 +434,13 @@ export function createWorld(
     });
   }
   add("town", "木漏れ日の町", 10, 32);
-  add("rest", "旅人の焚き火", 21, 27);
-  add("town", "星見の宿場", 44, 16);
+  // A recovery hub in every biome keeps the expanded world usable after
+  // three victories, without changing the per-location cooldown.
+  add("rest", "旅人の焚き火", 10, 10);
+  add("town", "星見の宿場", 158 / 3, 10);
+  add("rest", "旅人の焚き火", 94 / 3, 32);
+  add("rest", "旅人の焚き火", 94 / 3, 10);
+  add("rest", "旅人の焚き火", 158 / 3, 32);
   add("guardian", "森の試験官", 12 + Math.floor(rng() * 5), 9);
   add("guardian", "水辺の試験官", 39, 32 + Math.floor(rng() * 4));
   add("guardian", "遺跡の試験官", 51, 9 + Math.floor(rng() * 4));
@@ -457,35 +462,50 @@ export function createWorld(
   }
   const activeTheme = setup?.visualTheme || "elementary";
   const themes: VisualThemeId[] = ["elementary", "high-school", "magic"];
-  for (let i = 0; i < 23; i++) {
-    const kind = i % 5 === 0 ? "treasure" : i % 4 === 0 ? "event" : "enemy";
-    let candidates: Array<{x:number;y:number}> = [];
-    for (const spacing of [5, 3, 1]) {
-      for(let y=5;y<HEIGHT-5;y++) for(let x=4;x<WIDTH-5;x++)
-        if(sites.every(s=>distance(s,{x,y})>=spacing))candidates.push({x,y});
-      if(candidates.length)break;
+  // Stratify encounters by biome instead of drawing every site from the
+  // entire map. Jitter preserves seed variation; spacing prevents clusters.
+  for (const biome of BIOMES) {
+    const placements = [
+      { kind: "enemy", dx: -14, dy: -10 },
+      { kind: "enemy", dx: 14, dy: -6 },
+      { kind: "enemy", dx: 0, dy: 14 },
+      { kind: "event", dx: 22, dy: -12 },
+      { kind: "treasure", dx: -20, dy: 14 },
+      { kind: "treasure", dx: 22, dy: 14 },
+    ] as const;
+    for (const placement of placements) {
+      const { kind } = placement;
+      const target = { x: biome.x + placement.dx, y: biome.y + placement.dy };
+      let candidates: Array<{x:number;y:number}> = [];
+      for (const radius of [6, 12, WIDTH]) {
+        for (let y = 4; y < HEIGHT - 4; y++) for (let x = 4; x < WIDTH - 4; x++) {
+          const position = { x, y };
+          if (biomeAt(x,y).id !== biome.id || distance(position,target) > radius) continue;
+          if (kind === "enemy" && distance(position,biome) > 30) continue;
+          if (sites.every(site => distance(site,position) >= 7)) candidates.push(position);
+        }
+        if (candidates.length) break;
+      }
+      if (!candidates.length) throw new Error(`No RPG site placement available in ${biome.id}`);
+      const { x, y } = candidates[Math.floor(rng() * candidates.length)];
+      const enemyNamesByTheme = kind === "enemy"
+        ? Object.fromEntries(themes.map((theme) => {
+            const names = getEncounterEnemyNamePool(theme);
+            return [theme, names[Math.floor(rng() * names.length)]];
+          })) as Record<VisualThemeId, string>
+        : undefined;
+      const name = enemyNamesByTheme?.[activeTheme]
+        || (kind === "event" ? "？イベント" : "忘れられた宝箱");
+      // Random candidates are already in expanded world coordinates.
+      add(kind, name, x / 3, y / 2, 0, enemyNamesByTheme);
     }
-    const {x,y}=candidates[Math.floor(rng()*candidates.length)];
-    const enemyNamesByTheme = kind === "enemy"
-      ? Object.fromEntries(themes.map((theme) => {
-          const names = getEncounterEnemyNamePool(theme);
-          return [theme, names[Math.floor(rng() * names.length)]];
-        })) as Record<VisualThemeId, string>
-      : undefined;
-    const name = enemyNamesByTheme?.[activeTheme]
-      || (kind === "event" ? "？イベント" : "忘れられた宝箱");
-    // Random candidates are already in expanded world coordinates.
-    add(kind, name, x / 3, y / 2, 0, enemyNamesByTheme);
   }
-  // A connected spanning tree gives landmarks shorter, varied paths instead
-  // of parallel corridors radiating from the starting town.
-  for (const [index, s] of sites.entries()) {
-    const source =
-      index === 0
-        ? s
-        : [...sites.slice(0, index)].sort(
-            (a, b) => distance(a, s) - distance(b, s),
-          )[0];
+  // Clear sites first so a later clearing cannot erase a connecting road.
+  for (const s of sites) {
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++)
+      tiles[(s.y + dy) * WIDTH + s.x + dx] = s.kind === "boss" ? "stone" : "grass";
+  }
+  const pave = (source: {x:number;y:number}, s: {x:number;y:number}) => {
     let x = source.x,
       y = source.y;
     const horizontalFirst = rng() > 0.5;
@@ -494,12 +514,17 @@ export function createWorld(
       if (x !== s.x && (horizontalFirst || y === s.y)) x += Math.sign(s.x - x);
       else y += Math.sign(s.y - y);
     }
-    for (let dy = -2; dy <= 2; dy++)
-      for (let dx = -2; dx <= 2; dx++)
-        tiles[(s.y + dy) * WIDTH + s.x + dx] =
-          s.kind === "boss" ? "stone" : "grass";
     tiles[s.y * WIDTH + s.x] = "road";
+  };
+  // The six hubs form two east-west roads and three north-south roads.
+  // Their loops offer alternative routes rather than long dead-end branches.
+  for (const [index, hub] of BIOMES.entries()) {
+    for (const other of BIOMES.slice(index + 1)) {
+      if ((hub.y === other.y && Math.abs(hub.x-other.x) === 64)
+        || (hub.x === other.x && Math.abs(hub.y-other.y) === 44)) pave(hub,other);
+    }
   }
+  for (const site of sites) pave(biomeAt(site.x,site.y),site);
   const normalizedTimeLimit = Math.max(
     1,
     Math.min(180, Math.floor(Number.isFinite(timeLimitMinutes) ? timeLimitMinutes : 30)),

@@ -47,7 +47,7 @@ try {
   );
   practiceRoom.close();
   const enemySites = setupWorld.sites.filter((site) => site.kind === "enemy");
-  assert.equal(enemySites.length, 14, "map generates 14 ordinary encounters");
+  assert.equal(enemySites.length, 18, "map generates three ordinary encounters per biome");
   assert(
     enemySites.every((site) =>
       getEncounterEnemyNamePool("high-school").includes(site.name),
@@ -155,7 +155,7 @@ try {
   assert.equal(WIDTH * HEIGHT, 64 * 44 * 6);
   assert.equal(w.tiles.length, WIDTH * HEIGHT);
   assert(w.sites.some(s=>s.x>64) && w.sites.some(s=>s.y>44));
-  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 39);
+  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 55);
   assert.equal(w.sites.filter(s=>s.kind==="story").length, 12);
   assert.match(siteUnavailable(w, p, site("town")), /3回/);
   enter(site("town"));
