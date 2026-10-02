@@ -12,11 +12,12 @@
 - コミット前に `pnpm run audit:english:gate` と `pnpm run build` を実行し、英語UI監査が通過してから `main` へプッシュする。Actions が失敗した場合は `gh run view <run-id> --log-failed` で最初の監査エラーを確認し、ローカルで再現してから再プッシュする。
 - `git push` 後は `gh run list --limit 2` で `Build Android App Bundle` と `Deploy To GitHub Pages` の両方が成功したことを確認する。既存の未コミット変更はステージせず保持する。
 
-## GitHub mainへのアップロード時にRender反映も案内する
+## GitHub mainへのアップロード時はRenderへ自動デプロイする
 
-- GitHub `main` へのアップロードを依頼されたら、Renderのオンラインサーバーにも反映が必要な差分かを確認し、必要な場合はRenderへのアップロード・デプロイもあわせて提案する。
-- Renderの現在の設定は `render.yaml` を確認する。同ファイルではオンラインサーバーのブランチが `render-online-server`、`autoDeployTrigger` が `off` のため、`main` にプッシュしただけではRenderへ反映されない。サーバー側の変更を含む場合は、Renderが実際に参照するブランチとデプロイ方法を確認してから案内する。
-- GitHub Pagesだけに関わる画面・画像の変更では、Render側に反映するサーバー変更がなければ、その旨を伝える。ユーザーのアップロード依頼だけでRender本番環境へのデプロイまで許可されたとは解釈しない。
+- RenderオンラインサービスはGitHub `main` を参照し、`render.yaml` の `autoDeployTrigger: checksPass` に従ってGitHubのチェック成功後に自動デプロイする。
+- Render設定の正本は `render.yaml`。ブランチや自動デプロイ方式を変更するときは同ファイルを更新し、Render Blueprintにも同期する。
+- `main` へのプッシュ後はGitHub ActionsとRenderの最新デプロイ結果を確認する。Renderビルドまたはヘルスチェックが失敗したら原因を直し、成功を確認する。Deploy Hookや手動デプロイでチェックを迂回しない。
+- Renderはオンラインサーバーも配信するため、変更後は `pnpm run server:build` を確認してからアップロードする。
 
 ## 2026-08-27: iOS 1.0.6 Build 55を作成した手順
 
