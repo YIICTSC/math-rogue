@@ -17,7 +17,8 @@ import {
 const T = 16,
   colors = ["#e6b74d", "#7ed6dd", "#c0a0ec", "#ef8a80", "#8ee0a5", "#e7a4cb"];
 const atlas = typeof Image !== 'undefined' ? new Image() : null; if(atlas)atlas.src = assetUrl('sprites/rpg/frontier-atlas.webp');
-function prop(c:CanvasRenderingContext2D,index:number,x:number,y:number,size=27){if(atlas?.complete&&atlas.naturalWidth)c.drawImage(atlas,index%6*atlas.naturalWidth/6,Math.floor(index/6)*atlas.naturalHeight/4,atlas.naturalWidth/6,atlas.naturalHeight/4,x+8-size/2,y+17-size,size,size);}
+const craftAtlas = typeof Image !== 'undefined' ? new Image() : null; if(craftAtlas)craftAtlas.src=assetUrl('sprites/rpg/craft-items.webp');
+function prop(c:CanvasRenderingContext2D,index:number,x:number,y:number,size=27,source=atlas,columns=6,rows=4){if(source?.complete&&source.naturalWidth)c.drawImage(source,index%columns*source.naturalWidth/columns,Math.floor(index/columns)*source.naturalHeight/rows,source.naturalWidth/columns,source.naturalHeight/rows,x+8-size/2,y+17-size,size,size);}
 const characterImages = new Map<string, HTMLImageElement>();
 function rect(
   c: CanvasRenderingContext2D,
@@ -322,7 +323,7 @@ export default function WorldCanvas({
         const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;
         if(atlas?.complete&&atlas.naturalWidth)prop(c,node.sprite,x*T+shake,y*T,node.rock?23:28);else tree(c,x*T,y*T);
       }
-      for(const h of w.life?.houses||[])prop(c,h.biome==='snow'?19:h.biome==='desert'?20:18,h.x*T,h.y*T,48);
+      for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
       for(const q of Object.values(w.players)){
         const work=q.life?.work,effect=q.life?.effect;
         if(work?.kind==='fish'){const x=work.tile%WIDTH*T+8,y=Math.floor(work.tile/WIDTH)*T+8;c.strokeStyle='#ddd3ad';c.lineWidth=.5;c.beginPath();c.moveTo(q.x*T+8,q.y*T+4);c.lineTo(x,y);c.stroke();rect(c,x-1,y+Math.sin(time/130)*1.5,3,3,w.life.now>=work.target?'#ffcf62':'#ec826f');}

@@ -711,6 +711,8 @@ export function applyAction(
     p.y = y;
     p.moveCount = (p.moveCount || 0) + 1;
     p.lastMove = now;
+    const house=w.life.houses.find(h=>h.x===x&&h.y===y);
+    if(house)applyLifeAction(w,p,{type:'life-enter',houseId:house.id},now);
     w.revision++;
     return true;
   }

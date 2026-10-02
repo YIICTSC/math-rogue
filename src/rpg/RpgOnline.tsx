@@ -1,3 +1,4 @@
+import HomeRoom from './HomeRoom';
 import LifePanel from './LifePanel';
 import { natureAt, resourceReady } from './life';
 import { StoryDialog, StoryJournal } from "./StoryPanel";
@@ -147,6 +148,7 @@ export default function RpgOnline({
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
   latest.current = { world, active: active && !interactionBlocked && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
       visualTheme: previewTheme,
@@ -582,7 +584,8 @@ export default function RpgOnline({
                       }}
                     />
                   )}
-                  {!spectating && lifeOpen && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  {!spectating && active && me.life?.indoors && <HomeRoom world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
+                  {!spectating && lifeOpen && !me.life?.indoors && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   <div className="rpg-map-tools">
                     {!spectating && <button onClick={()=>{destination.current=null;setLifeTarget(null);setLifeOpen(true);}}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
                     <button onClick={() => setOverview(!overview)}>

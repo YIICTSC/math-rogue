@@ -1,3 +1,4 @@
+import {ROOM_DOOR,ROOM_SPAWN,newInterior,furnishing,furnitureDistance,placementFits,roomWalkable,type Interior,type PlacedFurniture} from './homeCatalog';
 import { BIOMES, biomeAt, biomeWeights, type BiomeId } from './biomes';
 import { WIDTH, HEIGHT, distance, type World, type Adventurer } from './engine';
 import { grant, pendingMutation } from './activities';
@@ -7,7 +8,7 @@ import { RECIPES as CRAFT_RECIPES } from '../mini-games/gakuro-craft/materials';
 import { gameCommand, tickGames, type GameCommand, type HomeGame, type HomeGameWorld } from '../mini-games/gakuro-craft/homeGames';
 import type { Home } from '../mini-games/gakuro-craft/progression';
 
-export const MATERIAL_NAMES = {wood:'木材',stone:'石材',ore:'鉄鉱石',crystal:'魔晶石',herb:'薬草',fish:'魚',frostwood:'霜木',reed:'葦',plank:'木の板',brick:'レンガ'} as const;
+export const MATERIAL_NAMES = {wood:'木材',stone:'石材',ore:'鉄鉱石',crystal:'魔晶石',herb:'薬草',fish:'魚',frostwood:'霜木',reed:'葦',plank:'木の板',brick:'レンガ',housekit:'家の建築キット'} as const;
 export type Material = keyof typeof MATERIAL_NAMES;
 export type Bag = Partial<Record<Material,number>>;
 export const NATURE = [
@@ -32,27 +33,28 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number}
-export interface LifePlayer {bag:Bag;homeId?:string;indoors?:string;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
-export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;invitedAt:number}
+export interface LifePlayer {bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
-export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-hit'|'life-reel'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand};
+export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-hit'|'life-reel'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
 export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&(w.tiles[tile]!=='forest'||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
- {id:'plank',name:'木の板',cost:CRAFT_RECIPES.plank as Bag,kind:'material',description:'家や家具の材料。',sprite:22},
- {id:'brick',name:'レンガ',cost:CRAFT_RECIPES.brick as Bag,kind:'material',description:'家や家具の材料。',sprite:8},
- {id:'sword',name:'鉄の剣',cost:{plank:2,ore:3} as Bag,kind:'weapon',description:'専用カード：14ダメージ、びくびく2。',sprite:14},
- {id:'frostbow',name:'霜木の弓',cost:{frostwood:4,reed:3,ore:1} as Bag,kind:'weapon',description:'専用カード：10ダメージ、ブロック8。',sprite:9},
- {id:'charm',name:'森の護符',cost:{herb:4,crystal:2,wood:2} as Bag,kind:'relic',description:'戦闘開始時、ブロック4・HP回復2。',sprite:23},
- {id:'crystal',name:'星晶のレリック',cost:{crystal:5,ore:3} as Bag,kind:'relic',description:'戦闘開始時、筋力1・追加ドロー1。',sprite:13},
- {id:'meal',name:'川魚のスープ',cost:{fish:2,herb:1} as Bag,kind:'meal',description:'HPを20回復。',sprite:21},
- {id:'darts',name:'ダーツ台',cost:{plank:3,ore:1} as Bag,kind:'furniture',description:'家で最大4人のダーツ対戦。',sprite:22},
- {id:'billiards',name:'ビリヤード台',cost:{plank:4,stone:4} as Bag,kind:'furniture',description:'家で最大4人の8ボール対戦。',sprite:22},
- {id:'arcade',name:'ゲーム機',cost:{plank:3,crystal:2} as Bag,kind:'furniture',description:'家で最大4人のブロック崩し対戦。',sprite:23},
+ {id:'plank',name:'木の板',cost:CRAFT_RECIPES.plank as Bag,kind:'material',description:'家や家具の材料。',sprite:0},
+ {id:'brick',name:'レンガ',cost:CRAFT_RECIPES.brick as Bag,kind:'material',description:'家や家具の材料。',sprite:1},
+ {id:'sword',name:'鉄の剣',cost:{plank:2,ore:3} as Bag,kind:'weapon',description:'専用カード：14ダメージ、びくびく2。',sprite:2},
+ {id:'frostbow',name:'霜木の弓',cost:{frostwood:4,reed:3,ore:1} as Bag,kind:'weapon',description:'専用カード：10ダメージ、ブロック8。',sprite:3},
+ {id:'charm',name:'森の護符',cost:{herb:4,crystal:2,wood:2} as Bag,kind:'relic',description:'戦闘開始時、ブロック4・HP回復2。',sprite:4},
+ {id:'crystal',name:'星晶のレリック',cost:{crystal:5,ore:3} as Bag,kind:'relic',description:'戦闘開始時、筋力1・追加ドロー1。',sprite:5},
+ {id:'meal',name:'川魚のスープ',cost:{fish:2,herb:1} as Bag,kind:'meal',description:'HPを20回復。',sprite:6},
+ {id:'housekit',name:'家の建築キット',cost:{plank:6,brick:2} as Bag,kind:'material',description:'草地に自分の家を建てるキット。',sprite:7},
+ {id:'darts',name:'ダーツ台',cost:{plank:3,ore:1} as Bag,kind:'furniture',description:'家で最大4人のダーツ対戦。',sprite:8},
+ {id:'billiards',name:'ビリヤード台',cost:{plank:4,stone:4} as Bag,kind:'furniture',description:'家で最大4人の8ボール対戦。',sprite:9},
+ {id:'arcade',name:'ゲーム機',cost:{plank:3,crystal:2} as Bag,kind:'furniture',description:'家で最大4人のブロック崩し対戦。',sprite:10},
 ] as const;
-export const HOUSE_COST:Bag={plank:6,brick:2};
+export const HOUSE_COST:Bag={housekit:1};
 export function canAfford(bag:Bag,cost:Bag){return Object.entries(cost).every(([key,n])=>(bag[key as Material]||0)>=n!);}
 function spend(bag:Bag,cost:Bag){for(const [key,n]of Object.entries(cost))bag[key as Material]=(bag[key as Material]||0)-n!;}
 export function homeGameWorld(w:World):HomeGameWorld {
@@ -61,23 +63,59 @@ export function homeGameWorld(w:World):HomeGameWorld {
  const players=Object.fromEntries(Object.values(w.players).filter(p=>!p.spectator).map(p=>{const house=life.houses.find(h=>h.id===p.life?.indoors);return [p.id,{id:p.id,name:p.name,indoors:!!house,homeTile:house?.home.tile,progress:{home:house?.home||{tile:-1,level:0,furniture:[]}}}];}));
  return {tiles,homeViews,players,games:life.games,time:life.time,paused:w.ended||!w.started};
 }
+export function interiorOf(h:House):Interior {
+ if(h.interior)return h.interior;
+ const room=newInterior(),positions=[{x:5,y:3},{x:10,y:7},{x:3,y:7}];
+ h.home.furniture.filter(f=>['darts','billiards','arcade'].includes(f.item)).forEach((f,i)=>room.placed.push({id:`legacy-${f.slot}`,item:f.item,...positions[i%3],rotation:0,slot:f.slot}));return room;
+}
+function enterHouse(w:World,p:Adventurer,h:House){const lp=lifePlayer(p);h.interior??=interiorOf(h);lp.indoors=h.id;lp.roomPos={...ROOM_SPAWN};lp.work=undefined;}
+function leaveHouse(w:World,p:Adventurer,now:number){const lp=lifePlayer(p),h=w.life.houses.find(h=>h.id===lp.indoors);if(h){const exit=[{x:h.x,y:h.y+1},{x:h.x+1,y:h.y},{x:h.x-1,y:h.y},{x:h.x,y:h.y-1}].find(q=>lifeWalkable(w,q.x,q.y)&&!w.life.houses.some(home=>home.x===q.x&&home.y===q.y));if(exit){p.x=exit.x;p.y=exit.y;}}lp.indoors=undefined;lp.roomPos=undefined;lp.work=undefined;tickGames(homeGameWorld(w),0);}
 export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):boolean {
  const life=w.life??=createLife(now),lp=lifePlayer(p);
  const tell=(text:string)=>{p.message=text;w.revision++;return true;};
  if(a.type==='life-cancel'){lp.work=undefined;return tell('作業を中断しました。');}
- if(a.type==='life-leave'){lp.indoors=undefined;lp.work=undefined;tickGames(homeGameWorld(w),0);return tell('家から外へ出ました。');}
+ if(a.type==='life-leave'){leaveHouse(w,p,now);return tell('家から外へ出ました。');}
+ if(a.type==='life-room-move'){
+  const h=life.houses.find(h=>h.id===lp.indoors);if(!h||!Number.isInteger(a.dx)||!Number.isInteger(a.dy)||Math.abs(a.dx)+Math.abs(a.dy)!==1||now-(lp.roomMoveAt||0)<110)return false;
+  h.interior??=interiorOf(h);const pos=lp.roomPos||ROOM_SPAWN,x=pos.x+a.dx,y=pos.y+a.dy;if(!roomWalkable(h.interior,x,y))return false;
+  lp.roomPos={x,y};lp.roomMoveAt=now;if(x===ROOM_DOOR.x&&y===ROOM_DOOR.y){leaveHouse(w,p,now);return tell('家から外へ出ました。');}w.revision++;return true;
+ }
  if(w.ended||!w.started||p.spectator||p.nativeScene||p.duelId||p.dungeonId||p.arcadePending||pendingMutation(p)||w.activities.trades.some(t=>t.from===p.id||t.to===p.id))return false;
  if(a.type==='life-game'){
   if(!lp.indoors||!a.command||typeof a.command.type!=='string'||!['game_join','game_leave','game_start','game_dart','game_shot','game_cue','game_paddle'].includes(a.command.type))return false;
+  if(a.command.type==='game_join'){const slot=a.command.slot;const h=life.houses.find(h=>h.id===lp.indoors),f=h&&interiorOf(h).placed.find(f=>f.slot===slot);if(!f||furnitureDistance(lp.roomPos||ROOM_SPAWN,f)>2)return tell('ゲーム家具の近くへ移動してください。');}
   const host=homeGameWorld(w),reply=gameCommand(host,host.players[p.id],a.command);life.games=host.games;if(reply?.type==='notice')p.message=reply.text;w.revision++;return true;
  }
  if(a.type==='life-enter'){
   const h=life.houses.find(h=>h.id===a.houseId);if(!h||distance(p,h)>2||lp.work||lp.indoors)return false;
-  lp.indoors=h.id;return tell('家へようこそ！家具からゲームに参加できます。');
+  enterHouse(w,p,h);return tell('家へようこそ！家具からゲームに参加できます。');
  }
  if(a.type==='life-invite'){
   const h=life.houses.find(h=>h.owner===p.id);if(!h||now-h.invitedAt<5000)return false;
   h.invitedAt=now;w.logs=['仲間を募集中！',...w.logs].slice(0,8);return tell('家の場所をみんなに知らせました。');
+ }
+ if(['life-furniture-craft','life-place','life-pack','life-rotate'].includes(a.type)){
+  const h=life.houses.find(h=>h.id===lp.indoors);if(!h||h.owner!==p.id||lp.work)return tell('家具の作成・配置は自分の家の中で行えます。');
+  const room=h.interior??=interiorOf(h),occupants=Object.values(w.players).filter(q=>q.life?.indoors===h.id).map(q=>q.life?.roomPos||ROOM_SPAWN);
+  if(a.type==='life-furniture-craft'){
+   const f=furnishing(a.item);if(!f||!canAfford(lp.bag,f.cost))return tell('材料が足りません。');if(Object.values(room.stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');
+   spend(lp.bag,f.cost);room.stock[f.id]=(room.stock[f.id]||0)+1;return tell('家具を作りました。持ち物から場所を選んで飾れます。');
+  }
+  if(a.type==='life-place'){
+   const f=furnishing(a.item);if(!f||!Number.isInteger(a.rotation)||![0,1].includes(a.rotation)||!(room.stock[f.id]>0)||room.placed.length>=48)return false;
+   const placed:PlacedFurniture={id:`decor-${w.revision}`,item:f.id,x:a.x,y:a.y,rotation:a.rotation};if(!placementFits(room,placed,occupants))return tell('家具や入口・通路に重ならない場所を選んでください。');
+   if(f.game){let slot=2;while(h.home.furniture.some(f=>f.slot===slot))slot++;placed.slot=slot;h.home.furniture.push({slot,item:f.game});}
+   room.stock[f.id]--;room.placed.push(placed);return tell('家具を飾りました！');
+  }
+  if(a.type==='life-pack'||a.type==='life-rotate'){
+   const placed=room.placed.find(f=>f.id===a.id);if(!placed)return false;
+   if(placed.slot!==undefined&&Object.values(life.games).some(g=>g.homeTile===h.home.tile&&g.slot===placed.slot&&g.phase==='playing'))return tell('対戦中の家具は変更できません。');
+   if(a.type==='life-rotate'){const next={...placed,rotation:(placed.rotation?0:1) as 0|1};if(!placementFits(room,next,occupants))return tell('家具や入口・通路に重ならない場所を選んでください。');placed.rotation=next.rotation;return tell('家具を回転しました。');}
+   if(Object.values(room.stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');
+   room.placed=room.placed.filter(f=>f.id!==placed.id);room.stock[placed.item]=(room.stock[placed.item]||0)+1;
+   if(placed.slot!==undefined){h.home.furniture=h.home.furniture.filter(f=>f.slot!==placed.slot);delete life.games[`${h.home.tile}:${placed.slot}`];}
+   return tell('家具を持ち物に戻しました。');
+  }
  }
  if(a.type==='life-craft'){
   if(lp.work)return false;
@@ -85,7 +123,8 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   if((r.kind==='weapon'||r.kind==='relic')&&lp.crafted.includes(r.id))return tell('この装備は作成済みです。');
   const house=life.houses.find(h=>h.owner===p.id);
   if(r.kind==='furniture'&&(!house||lp.indoors!==house.id))return tell('自分の家の中で家具を作れます。');
-  if(r.kind==='furniture'&&house!.home.furniture.some(f=>f.item===r.id))return tell('この家具は設置済みです。');
+  if(r.id==='housekit'&&(house||(lp.bag.housekit||0)>0))return tell('建築キットか家をすでに持っています。');
+  if(r.kind==='furniture'&&Object.values((house!.interior??=interiorOf(house!)).stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');
   if(r.kind==='meal'&&p.hp>=p.maxHp)return tell('HPは満タンです。');
   spend(lp.bag,r.cost);
   if(r.kind==='material')lp.bag[r.id as Material]=(lp.bag[r.id as Material]||0)+1;
@@ -98,7 +137,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
    grant(p,{remove:[],cards:[],gold:0,heal:0,relics:[relic]});lp.crafted.push(r.id);
   }
   if(r.kind==='meal')grant(p,{remove:[],cards:[],gold:0,heal:20});
-  if(r.kind==='furniture')house!.home.furniture.push({slot:house!.home.furniture.length,item:r.id as 'darts'|'billiards'|'arcade'});
+  if(r.kind==='furniture'){const room=house!.interior??=interiorOf(house!);room.stock[r.id]=(room.stock[r.id]||0)+1;}
   lp.effect={tile:p.y*WIDTH+p.x,at:now,kind:'craft',perfect:true};return tell('クラフトしました！');
  }
  if(a.type==='life-build'){
@@ -106,7 +145,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   if(!canAfford(lp.bag,HOUSE_COST))return tell('材料が足りません。');
   if(w.tiles[p.y*WIDTH+p.x]!=='grass'||[1,-1,WIDTH,-WIDTH].some(d=>w.tiles[p.y*WIDTH+p.x+d]==='water')||w.sites.some(s=>distance(s,p)<4)||life.houses.some(h=>distance(h,p)<5))return tell('道・水辺・施設から離れた草地に建てましょう。');
   spend(lp.bag,HOUSE_COST);const id=`home-${p.id}`,tile=p.y*WIDTH+p.x;
-  life.houses.push({id,owner:p.id,ownerName:p.name,x:p.x,y:p.y,biome:biomeAt(p.x,p.y).id,home:{tile,level:1,furniture:[{slot:0,item:'workbench'},{slot:1,item:'table'}]},invitedAt:0});lp.homeId=id;return tell('家を建てました！家具を作って仲間を招きましょう。');
+  life.houses.push({id,owner:p.id,ownerName:p.name,x:p.x,y:p.y,biome:biomeAt(p.x,p.y).id,home:{tile,level:1,furniture:[{slot:0,item:'workbench'},{slot:1,item:'table'}]},interior:newInterior(),invitedAt:0});lp.homeId=id;enterHouse(w,p,life.houses[life.houses.length-1]);return tell('家を建てました！家具を作って仲間を招きましょう。');
  }
  if(lp.indoors)return false;
  if(a.type==='life-work'||a.type==='life-cast'){

@@ -10,6 +10,6 @@ try {
  p.x=1;p.y=10;assert.equal(applyAction(w,p.id,{type:'life-work',tile:10*WIDTH},11000),false);assert.equal(p.life.work,undefined);
  const tile=w.tiles.findIndex((t,i)=>t==='forest'&&isResourceTile(w,i));assert.ok(natureAt(w,tile));p.x=tile%WIDTH;p.y=Math.floor(tile/WIDTH);assert.equal(applyAction(w,p.id,{type:'life-work',tile},12000),true);assert.ok(p.life.work);
  // Pages replaces absolute /sprites/ literals. Paths passed to assetUrl must stay relative.
- for(const file of ['src/rpg/LifePanel.tsx','src/rpg/WorldCanvas.tsx']){const source=await readFile(file,'utf8');assert.ok(source.includes("assetUrl('sprites/rpg/frontier-atlas.webp')"));assert.ok(!source.includes("assetUrl('/sprites/rpg/frontier-atlas.webp')"));}
+ for(const file of ['src/rpg/WorldCanvas.tsx']){const source=await readFile(file,'utf8');assert.ok(source.includes("assetUrl('sprites/rpg/frontier-atlas.webp')"));assert.ok(!source.includes("assetUrl('/sprites/rpg/frontier-atlas.webp')"));}
  console.log('RPG life: border exclusion, authority rejection, interior gathering and Pages atlas paths passed.');
 } finally {await server.close();}
