@@ -155,7 +155,8 @@ try {
   assert.equal(WIDTH * HEIGHT, 64 * 44 * 6);
   assert.equal(w.tiles.length, WIDTH * HEIGHT);
   assert(w.sites.some(s=>s.x>64) && w.sites.some(s=>s.y>44));
-  assert.equal(w.sites.length, 39);
+  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 39);
+  assert.equal(w.sites.filter(s=>s.kind==="story").length, 12);
   assert.match(siteUnavailable(w, p, site("town")), /3回/);
   enter(site("town"));
   assert.equal(p.nativeScene, undefined);

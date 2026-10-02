@@ -519,6 +519,7 @@ export const getThemedCharacterSpritePath = (
   magicProtagonistGender?: 'female' | 'male',
   appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (characterId?.startsWith('RPG_ENEMY:')) return fallbackImageData;
   if (appearanceMode === 'VACATION') {
     if (theme === 'high-school') return getHighSchoolVacationSpritePath(characterId);
     if (theme === 'magic') return getMagicVacationSpritePath(characterId, transformed, magicProtagonistId, magicProtagonistGender);
@@ -542,6 +543,7 @@ export const getThemedCharacterIdleSpriteSheetPath = (
   magicProtagonistGender?: 'female' | 'male',
   appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (characterId?.startsWith('RPG_ENEMY:')) return null;
   if (appearanceMode === 'VACATION') {
     if (theme === 'high-school') return getHighSchoolVacationIdleSpriteSheetPath(characterId);
     if (theme === 'magic') return getMagicVacationIdleSpriteSheetPath(
@@ -603,6 +605,7 @@ export const getThemedCharacterAnimationSheetPath = (
   magicProtagonistGender?: 'female' | 'male',
   appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (characterId?.startsWith('RPG_ENEMY:')) return null;
   if (appearanceMode === 'VACATION') {
     if (hasVacationAnimationSheet(theme, characterId, action, transformed, magicProtagonistId, magicProtagonistGender)) {
       if (theme === 'high-school') return getHighSchoolVacationAnimationSheetPath(characterId, action);

@@ -92,6 +92,6 @@ try {
   assert.equal(p2pService.getMyId(),'1');assert.deepEqual(p2pService.getConnectedPeerIds(),['0','2','3']);
   assert(p2pService.send(attack));assert(p2pService.sendTo('0',attack));assert.equal(messages[1].target,'0');
   p2pService.setRoomTransport(null);room.close();
-  for(let seed=0;seed<50;seed++){const map=createWorld(seed);assert.equal(new Set(map.sites.map(s=>`${s.x},${s.y}`)).size,39);}
+  for(let seed=0;seed<50;seed++){const map=createWorld(seed);assert.equal(new Set(map.sites.map(s=>`${s.x},${s.y}`)).size,map.sites.length);}
   console.log('RPG activities passed: atomic trade/replay/expiry, arcade charge/prize, dungeon party limits/damage/dropout, secrets and shared events.');
 } finally {await server.close();}

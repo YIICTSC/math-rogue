@@ -1,3 +1,4 @@
+import { BIOMES, biomeBattleBackground } from "../rpg/biomes";
 import { NodeType, type CharacterAppearanceMode } from '../types';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -350,7 +351,8 @@ export const getBattleBackgroundSceneById = (
   appearanceMode: CharacterAppearanceMode = 'STANDARD'
 ): BattleBackgroundScene => {
   const { scenes, byId } = getSceneCollection(visualTheme, appearanceMode);
-  return byId.get(id ?? '') ?? scenes[0];
+  const biome = BIOMES.find(b => `rpg-${b.id}` === id);
+  return biome ? biomeBattleBackground(biome) : byId.get(id ?? '') ?? scenes[0];
 };
 
 export const getBattleBackgroundFlavor = (scene: BattleBackgroundScene, seed: number): string => {

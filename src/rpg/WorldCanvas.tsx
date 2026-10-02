@@ -1,3 +1,4 @@
+import { BIOMES, biomeAt } from "./biomes";
 import { trans } from "../utils/textUtils";
 import type { LanguageMode } from "../types";
 import type { VisualThemeId } from "../data/visualThemes";
@@ -140,7 +141,11 @@ function person(
 function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
   const x = s.x * T + 8,
     y = s.y * T + 8;
-  if (s.kind === "dungeon" || s.kind === "secret") {
+  if (s.kind === 'story') {
+    rect(c,x-5,y-10,10,15,s.storyRole==='npc'?'#e6c47a':'#bdaddc');
+    rect(c,x-3,y-17,6,6,'#ffefbb');
+    c.font='bold 15px sans-serif';c.fillStyle='#fff4bc';c.textAlign='center';c.fillText(s.storyRole==='npc'?'!':'?',x,y-22);
+  } else if (s.kind === "dungeon" || s.kind === "secret") {
     rect(c,x-10,y-12,21,25,s.kind === "dungeon" ? "#777080" : "#b49a62");
     rect(c,x-5,y-7,11,20,"#16242b");
     rect(c,x-12,y+12,25,3,"#ccbe88");
@@ -250,6 +255,7 @@ export default function WorldCanvas({
       const minY = Math.max(0, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
       for (let y = minY; y < maxY; y++)
         for (let x = minX; x < maxX; x++) {
+          const biome = biomeAt(x,y);
           const tile = w.tiles[y * WIDTH + x],
             hash = (x * 173 + y * 31 + w.seed) % 19,
             px = x * T,
@@ -267,8 +273,8 @@ export default function WorldCanvas({
                 : tile === "stone"
                   ? "#727c79"
                   : hash < 8
-                    ? "#608455"
-                    : "#66895a",
+                    ? biome.shade
+                    : biome.color,
           );
           if (tile === "water") {
             rect(
@@ -290,7 +296,10 @@ export default function WorldCanvas({
               rect(c, px + 10, py + 11, 2, 2, "#b4bfc9");
             }
           }
-          if (tile === "forest") tree(c, px, py - 2);
+          if (tile === "forest") {
+            if (biome.id === 'forest' || biome.id === 'meadow') tree(c, px, py - 2);
+            else { rect(c,px+5,py+3,7,12,biome.id==='snow'?'#edf5f6':biome.id==='desert'?'#708452':'#8b96a2'); }
+          }
         }
       const visibleSites = w.sites.filter(s => s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4);
       visibleSites.forEach((s) => landmark(c, s, time));
@@ -298,6 +307,14 @@ export default function WorldCanvas({
         .sort((a, b) => a.y - b.y)
         .forEach((q) => person(c, q, time));
       c.restore();
+      if (overview) {
+        c.font='bold 13px sans-serif'; c.textAlign='center';
+        for(const biome of BIOMES) {
+          const bx=(biome.x*T-cx)*scale,by=((biome.y-12)*T-cy)*scale;
+          c.fillStyle='#10202bd9';c.fillRect(bx-65,by-14,130,22);
+          c.fillStyle='#fff4d6';c.fillText(trans(biome.name,languageMode),bx,by+2);
+        }
+      }
       if (!overview) {
         c.textAlign = "center";
         c.font = "bold 12px sans-serif";

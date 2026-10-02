@@ -1,3 +1,5 @@
+import { biomeAt } from "./biomes";
+import { STORIES, applyStory, type StoryAction, type StoryProgress } from "./stories";
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
 import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
@@ -11,6 +13,7 @@ export const WIDTH = 192,
   CAPACITY = 40;
 export type Tile = "grass" | "forest" | "water" | "road" | "stone";
 export type SiteKind =
+  | "story"
   | "town"
   | "rest"
   | "event"
@@ -38,6 +41,8 @@ export interface RpgRankingAward {
   score: number;
 }
 export interface Site {
+  storyId?: string;
+  storyRole?: "npc" | "goal";
   id: string;
   x: number;
   y: number;
@@ -72,6 +77,7 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  stories?: Record<string, StoryProgress>;
   spectator?: boolean;
   id: string;
   name: string;
@@ -125,7 +131,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = DuelAction | ActivityAction
+export type Action = StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -400,7 +406,7 @@ export function createWorld(
           ? "forest"
           : Math.abs(x - river) < 2
             ? "water"
-            : rng() < 0.24
+            : rng() < biomeAt(x,y).trees
               ? "forest"
               : "grass",
       );
@@ -442,6 +448,12 @@ export function createWorld(
   add("seal", "森の封印装置", 17, 7);
   add("seal", "水辺の封印装置", 35, 23);
   add("seal", "遺跡の封印装置", 48, 6);
+  for (const story of STORIES) {
+    for (const role of ['npc','goal'] as const) {
+      add('story',role==='npc'?story.npc:story.goal,(role==='npc'?story.x:story.goalX)/3,(role==='npc'?story.y:story.goalY)/2);
+      Object.assign(sites.at(-1)!,{storyId:story.id,storyRole:role});
+    }
+  }
   const activeTheme = setup?.visualTheme || "elementary";
   const themes: VisualThemeId[] = ["elementary", "high-school", "magic"];
   for (let i = 0; i < 23; i++) {
@@ -597,6 +609,7 @@ export function applyAction(
   }
   if (p.spectator && action.type !== "native-profile") return false;
   if (!w.started && action.type !== "native-profile") return false;
+  if (action.type === "story-choice") return applyStory(w,p,action);
   if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);

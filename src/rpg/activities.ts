@@ -27,7 +27,7 @@ function rewardCard(w:World,p:Adventurer): Card | undefined {
  const card = pool[(w.seed + w.revision * 37) % Math.max(1,pool.length)];
  return card ? {...structuredClone(card),id:`rpg-prize-${p.id}-${w.revision}-${p.mutationRevision || 0}`} : undefined;
 }
-function grant(p:Adventurer, change:Omit<Mutation,'revision'>) {
+export function grant(p:Adventurer, change:Omit<Mutation,'revision'>) {
  p.mutationRevision = (p.mutationRevision || 0)+1;
  const mutation = {...change,revision:p.mutationRevision};
  p.mutations = [...(p.mutations || []),mutation];

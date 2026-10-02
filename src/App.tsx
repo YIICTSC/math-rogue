@@ -1,3 +1,6 @@
+import RpgHeroSelection from "./rpg/HeroSelection";
+import { enemyHeroDeck, applyEnemyHeroRelics, type EnemyHero } from "./rpg/enemyHeroes";
+import { biomeBattleBackground } from "./rpg/biomes";
 import { duelEnemy, resolveRivalDefense } from "./rpg/duels";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
@@ -1872,6 +1875,7 @@ const App: React.FC = () => {
     const coopSyncedVisualTheme: VisualThemeId = gameState.challengeMode === 'COOP'
         ? (gameState.visualTheme || visualTheme)
         : visualTheme;
+    const AdventureCharacterSelection = gameState.rpgOnline ? RpgHeroSelection : CharacterSelectionScreen;
     const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, coopSyncedVisualTheme), [coopSyncedVisualTheme]);
     const applyRpgInviteSetup = useCallback((setup: RpgAdventureSetup) => {
         if (!rpgInviteParticipantRef.current || rpgInviteSetupAppliedRef.current || !isRpgAdventureSetup(setup)) return;
@@ -3753,7 +3757,7 @@ const App: React.FC = () => {
 
         syncRedSkullState(p);
 
-        let drawCount = HAND_SIZE;
+        let drawCount = HAND_SIZE + applyEnemyHeroRelics(p);
         if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
         if (p.relics.find(r => r.id === 'SNECKO_EYE')) drawCount += 2;
         drawCount += p.relicCounters[CRANE_BATTLE_DRAW_COUNTER] || 0;
@@ -8632,7 +8636,8 @@ const App: React.FC = () => {
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
 
-        const isMagicTheme = coopSyncedVisualTheme === 'magic';
+        const enemyHero = gameState.rpgOnline && char.id.startsWith('RPG_ENEMY:') ? char as EnemyHero : null;
+        const isMagicTheme = coopSyncedVisualTheme === 'magic' && !enemyHero;
         const selectedAppearanceMode: CharacterAppearanceMode = appearanceMode === 'VACATION' && vacationModeUnlockedForTheme
             ? 'VACATION'
             : 'STANDARD';
@@ -8654,7 +8659,9 @@ const App: React.FC = () => {
         const magicProtagonistId = char.magicProtagonistId
             ?? MAGIC_HERO_ID_BY_CHARACTER_ID[char.id]
             ?? 'AKARI';
-        if (isMagicTheme) {
+        if (enemyHero) {
+            initialDeck = enemyHeroDeck(enemyHero);
+        } else if (isMagicTheme) {
             initialDeck = createMagicStartingDeck(magicProtagonistId).map((card, index) => ({
                 ...card,
                 id: `${card.id}-${Date.now()}-${index}`,
@@ -8682,7 +8689,7 @@ const App: React.FC = () => {
         const startingCardNames = initialDeck.map(c => c.name);
         storageService.saveUnlockedCards(startingCardNames);
 
-        const starterRelic = isMagicTheme
+        const starterRelic = enemyHero ? enemyHero.relic : isMagicTheme
             ? getMagicRuleConfig(magicProtagonistId).relic
             : RELIC_LIBRARY[char.startingRelicId];
         const relics = starterRelic ? [starterRelic] : [];
@@ -9431,7 +9438,10 @@ const App: React.FC = () => {
                 }
                 if (rpgEncounter && rpgEncounterRef.current?.token !== rpgEncounter.token) return;
                 if (rpgEncounter) rpgEncounter.entered = true;
-                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
+                const rpgWorld = rpgSnapshotRef.current?.world;
+                const dungeonSiteId = rpgWorld?.activities.dungeons.find(d => d.id === rpgDungeonRef.current?.id)?.siteId;
+                const rpgBattleSite = rpgEncounter?.site || (gameState.rpgOnline && dungeonSiteId ? rpgWorld?.sites.find(s => s.id === dungeonSiteId) : undefined);
+                const battleBackgroundScene = rpgBattleSite ? biomeBattleBackground(rpgBattleSite) : chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, actMultiplier * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
@@ -18843,6 +18853,7 @@ const App: React.FC = () => {
             const enemy=duelEnemy(placeholder,other,q.name);
             rpgDuelRef.current={id:d.id,map:gameState.map,nodeId:gameState.currentMapNodeId,turn:0,revision:-1,ready:false,personalTurns:0,resolved:false,ending:false,signature:'',pending:null};
             const player=preparePlayerForBattle(gameState.player,NodeType.COMBAT);
+            const backdrop=biomeBattleBackground(me);setCurrentBattleBackgroundId(backdrop.id);
             setGameState(prev=>({...prev,player,enemies:[enemy],selectedEnemyId:enemy.id,screen:GameScreen.BATTLE,turn:1,combatLog:[],activeEffects:[],selectionState:{active:false,type:'DISCARD',amount:0}}));
             setCurrentNarrative(trans('ライバルと対戦',languageMode));audioService.playBGM('battle');return;
         }
@@ -21239,7 +21250,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.CHARACTER_SELECTION && (
                     <div className="absolute inset-0">
-                        <CharacterSelectionScreen
+                        <AdventureCharacterSelection
                             characters={themedCharacters}
                             unlockedCount={isDebugHpOne ? themedCharacters.length : Math.min(themedCharacters.length, clearCount + 2)}
                             onSelect={handleCharacterSelect}

@@ -1,9 +1,11 @@
+import { RPG_ADVENTURE_ENGLISH, RPG_ADVENTURE_HIRAGANA } from "../rpg/adventureCopy";
 import { GOLF_ENGLISH, GOLF_HIRAGANA } from '../mini-games/gakuro-golf/copy';
 import { RPG_ACTIVITY_ENGLISH, RPG_ACTIVITY_HIRAGANA } from '../rpg/activityCopy';
 import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...RPG_ADVENTURE_ENGLISH,
   '冒険は終了しています。': 'This adventure has ended.',
   '満員、またはレース終了済みです。': 'The room is full or the race has ended.',
   '満員、またはラウンド終了済みです。': 'The room is full or the round has ended.',
@@ -231,6 +233,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...RPG_ADVENTURE_HIRAGANA,
   '冒険は終了しています。': 'ぼうけんは おわっています。',
   '満員、またはレース終了済みです。': 'まんいん、または レースが おわっています。',
   '満員、またはラウンド終了済みです。': 'まんいん、または ラウンドが おわっています。',

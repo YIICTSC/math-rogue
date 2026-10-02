@@ -1,3 +1,5 @@
+import { StoryDialog, StoryJournal } from "./StoryPanel";
+import { biomeAt } from "./biomes";
 import '../mini-games/shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../mini-games/shared/HostSpectator';
 import { findWalkingRoute } from "./walking";
@@ -105,6 +107,7 @@ export default function RpgOnline({
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
+  const [storySiteId, setStorySiteId] = useState<string | null>(null);
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
   const [world, setWorld] = useState<World | null>(null);
   const inviteCode = useMemo(
@@ -134,7 +137,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active: active && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !storySiteId && !world?.players[room.current?.selfId || ""]?.spectator };
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
       visualTheme: previewTheme,
@@ -265,6 +268,7 @@ export default function RpgOnline({
       .sort((a, b) => distance(a, p) - distance(b, p))[0];
     if (site) {
       destination.current = null;
+      if (site.kind === "story") { setStorySiteId(site.id); return; }
       room.current?.send(site.kind === "dungeon" ? { type: "dungeon-join", siteId: site.id } : ["fragment", "secret", "seal"].includes(site.kind) ? { type: "secret-search", siteId: site.id } : { type: "native-enter", siteId: site.id });
     }
   }, []);
@@ -273,7 +277,7 @@ export default function RpgOnline({
     const key = (e: KeyboardEvent) => {
       if (
         !latest.current.active ||
-        (e.target as HTMLElement).closest("input,textarea,select")
+        (e.target as HTMLElement).closest("input,textarea,select,[role=dialog]")
       )
         return;
       const dirs: Record<string, number[]> = {
@@ -566,7 +570,7 @@ export default function RpgOnline({
                       <Map size={16} />
                       {overview ? "自分の近く" : "全体マップ"}
                     </button>
-                    <span>SEED {world.seed.toString(16).toUpperCase()}</span>
+                    <span>{biomeAt(me.x,me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
                     <div className="rpg-dpad">
@@ -621,7 +625,9 @@ export default function RpgOnline({
                   {spectating ? '8秒ごとにランダム切替' : 'WASD / 矢印キーで移動 · E 調べる · マップをタップして移動'}
                 </div>
               </section>
+              {!spectating && storySiteId && active && world.sites.some(s=>s.id===storySiteId && distance(s,me)<=2) && <StoryDialog languageMode={languageMode} site={world.sites.find(s=>s.id===storySiteId)!} player={me} send={action=>room.current?.send(action)} onClose={()=>setStorySiteId(null)} />}
               <aside className="rpg-sidebar">
+                {!spectating && <StoryJournal languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);}} />}
                 {!spectating && <ActivitiesPanel languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />}
                 <section className="rpg-objective">
                   <h2>

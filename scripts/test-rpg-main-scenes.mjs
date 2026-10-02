@@ -64,6 +64,7 @@ await server.listen();
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 await page.addInitScript(() => {
+  localStorage.setItem("pixel_spire_language_mode_v1", "JAPANESE");
   localStorage.setItem("pixel_spire_seen_battle_tutorial_v1", "true");
   localStorage.setItem("pixel_spire_seen_parry_tutorial_v1", "true");
 });
@@ -151,7 +152,12 @@ try {
   await screen("DIFFICULTY_SELECTION");
   await call("difficulty");
   await screen("CHARACTER_SELECTION");
-  await call("character");
+  await page.getByRole("button", { name: /敵キャラクターで冒険/ }).click();
+  await page.locator(".rpg-hero-grid button").first().click();
+  await page.screenshot({ path: "tmp/rpg-qa/enemy-hero-selection.png" });
+  const selectedEnemyName = await page.locator(".rpg-hero-browser aside h2").innerText();
+  assert(selectedEnemyName.length > 0, "enemy hero details are visible");
+  await page.getByRole("button", { name: "このキャラクターで冒険する", exact: true }).click();
   if ((await state()) === "RELIC_SELECTION") await call("relic");
   await screen("MAP");
   await page.evaluate(() => localStorage.removeItem("pixel_spire_legacy_card_v1"));
@@ -165,10 +171,13 @@ try {
   await page.waitForFunction(
     () => !!window.__rpgTest.room?.world?.players.local?.profile,
   );
-  assert.equal(
+  assert.match(
     await page.evaluate(() => window.__rpgTest.state.player.id),
-    "WARRIOR",
+    /^RPG_ENEMY:/,
+    "the selected enemy hero becomes the RPG protagonist",
   );
+  assert.equal(await page.evaluate(() => window.__rpgTest.state.player.deck.length),10);
+  assert.equal(await page.evaluate(() => window.__rpgTest.state.player.relics.length),1);
   await page.screenshot({ path: "tmp/rpg-qa/native-map.png" });
   await enter("town");
   assert.equal(
@@ -467,7 +476,8 @@ try {
   const inviteErrors = [];
   invitePage.on("pageerror", (e) => inviteErrors.push(e.message));
   await invitePage.addInitScript(() => {
-    localStorage.setItem("pixel_spire_seen_battle_tutorial_v1", "true");
+    localStorage.setItem("pixel_spire_language_mode_v1", "JAPANESE");
+  localStorage.setItem("pixel_spire_seen_battle_tutorial_v1", "true");
     localStorage.setItem("pixel_spire_seen_parry_tutorial_v1", "true");
   });
   await invitePage.goto("http://127.0.0.1:5196/?rpgRoom=AB2CDE", {
