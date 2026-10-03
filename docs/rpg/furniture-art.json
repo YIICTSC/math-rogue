@@ -1,0 +1,962 @@
+[
+  {
+    "id": "bed",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 43,
+      "top": 43,
+      "width": 314,
+      "height": 300
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "sofa",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 363,
+      "top": 8,
+      "width": 379,
+      "height": 353
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "chair",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 755,
+      "top": 48,
+      "width": 323,
+      "height": 309
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "table",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 1095,
+      "top": 21,
+      "width": 327,
+      "height": 328
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "bookshelf",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 25,
+      "top": 372,
+      "width": 333,
+      "height": 343
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "wardrobe",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 367,
+      "top": 371,
+      "width": 355,
+      "height": 344
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "fireplace",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 733,
+      "top": 370,
+      "width": 353,
+      "height": 357
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plant",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 1087,
+      "top": 355,
+      "width": 339,
+      "height": 352
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "flowers",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 9,
+      "top": 728,
+      "width": 353,
+      "height": 318
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "floorlamp",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 363,
+      "top": 716,
+      "width": 353,
+      "height": 370
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "blueRug",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 717,
+      "top": 728,
+      "width": 361,
+      "height": 326
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "redRug",
+    "source": "exec-054a31cd-f678-4194-a34c-8c1c001e1b55.png",
+    "rect": {
+      "left": 1089,
+      "top": 728,
+      "width": 328,
+      "height": 358
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushBear",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 63,
+      "top": 60,
+      "width": 244,
+      "height": 283
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushBunny",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 395,
+      "top": 37,
+      "width": 300,
+      "height": 306
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushCat",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 727,
+      "top": 50,
+      "width": 324,
+      "height": 293
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushFox",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 1153,
+      "top": 50,
+      "width": 259,
+      "height": 290
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushPenguin",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 48,
+      "top": 380,
+      "width": 300,
+      "height": 344
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushSlime",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 379,
+      "top": 398,
+      "width": 315,
+      "height": 289
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "painting",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 733,
+      "top": 378,
+      "width": 347,
+      "height": 345
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "clock",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 1153,
+      "top": 371,
+      "width": 277,
+      "height": 344
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "crystalDisplay",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 63,
+      "top": 725,
+      "width": 259,
+      "height": 314
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "armorStand",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 385,
+      "top": 715,
+      "width": 287,
+      "height": 345
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "aquarium",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 741,
+      "top": 734,
+      "width": 329,
+      "height": 303
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "musicBox",
+    "source": "exec-5027ea10-2ad5-49bc-a899-f21ceb37618a.png",
+    "rect": {
+      "left": 1127,
+      "top": 726,
+      "width": 276,
+      "height": 313
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "stove",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 0,
+      "top": 6,
+      "width": 362,
+      "height": 353
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "sink",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 363,
+      "top": 15,
+      "width": 361,
+      "height": 346
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "refrigerator",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 725,
+      "top": 13,
+      "width": 333,
+      "height": 349
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "counter",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 1087,
+      "top": 31,
+      "width": 345,
+      "height": 328
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "rockingChair",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 31,
+      "top": 374,
+      "width": 323,
+      "height": 349
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "desk",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 367,
+      "top": 362,
+      "width": 347,
+      "height": 361
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "mirror",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 715,
+      "top": 366,
+      "width": 371,
+      "height": 378
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "shoeCabinet",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 1087,
+      "top": 370,
+      "width": 347,
+      "height": 351
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "coatRack",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 0,
+      "top": 726,
+      "width": 356,
+      "height": 360
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "lantern",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 357,
+      "top": 729,
+      "width": 363,
+      "height": 357
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "wovenRug",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 721,
+      "top": 745,
+      "width": 359,
+      "height": 341
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushSheep",
+    "source": "exec-53289baf-f1e7-4377-9ecc-bfa65f2d686a.png",
+    "rect": {
+      "left": 1085,
+      "top": 722,
+      "width": 331,
+      "height": 317
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushDragon",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 27,
+      "top": 29,
+      "width": 335,
+      "height": 328
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushOwl",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 363,
+      "top": 33,
+      "width": 361,
+      "height": 314
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushPanda",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 725,
+      "top": 31,
+      "width": 315,
+      "height": 328
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushWolf",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 1107,
+      "top": 19,
+      "width": 310,
+      "height": 342
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushFrog",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 31,
+      "top": 404,
+      "width": 319,
+      "height": 303
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "plushMushroom",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 385,
+      "top": 388,
+      "width": 309,
+      "height": 333
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "treasureChest",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 741,
+      "top": 364,
+      "width": 345,
+      "height": 323
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "telescope",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 1087,
+      "top": 362,
+      "width": 331,
+      "height": 337
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "globe",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 0,
+      "top": 712,
+      "width": 360,
+      "height": 344
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "bonsai",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 361,
+      "top": 722,
+      "width": 363,
+      "height": 332
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "fountain",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 735,
+      "top": 747,
+      "width": 351,
+      "height": 307
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "snowGlobe",
+    "source": "exec-e9bc74e7-5fdb-4e02-92e5-2def8687f394.png",
+    "rect": {
+      "left": 1089,
+      "top": 726,
+      "width": 313,
+      "height": 344
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "workbench",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 40,
+      "top": 45,
+      "width": 301,
+      "height": 310
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "darts",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 369,
+      "top": 28,
+      "width": 353,
+      "height": 325
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "billiards",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 735,
+      "top": 21,
+      "width": 345,
+      "height": 326
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "arcade",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 1157,
+      "top": 19,
+      "width": 229,
+      "height": 340
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "reversi",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 17,
+      "top": 362,
+      "width": 323,
+      "height": 319
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "connectfour",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 395,
+      "top": 388,
+      "width": 297,
+      "height": 311
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "memory",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 733,
+      "top": 360,
+      "width": 334,
+      "height": 321
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "race",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 1091,
+      "top": 384,
+      "width": 341,
+      "height": 297
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "bowling",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 31,
+      "top": 699,
+      "width": 311,
+      "height": 340
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "reaction",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 375,
+      "top": 702,
+      "width": 343,
+      "height": 358
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "piano",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 723,
+      "top": 705,
+      "width": 353,
+      "height": 330
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  },
+  {
+    "id": "harp",
+    "source": "exec-03f8bc4f-9fb7-4e2a-9e95-3cbd02fecb73.png",
+    "rect": {
+      "left": 1159,
+      "top": 682,
+      "width": 241,
+      "height": 373
+    },
+    "cut": {
+      "left": false,
+      "right": false,
+      "top": false,
+      "bottom": false
+    }
+  }
+]

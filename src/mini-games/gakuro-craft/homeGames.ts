@@ -1,3 +1,4 @@
+import {isPartyKind,canStartParty,startParty,partyCommand,tickParty,type PartyCommand,type PartyState} from './partyGames';
 import type {Reply} from './engine';
 import type {Home} from './progression';
 import type {HomeDirectory} from './homeSocial';
@@ -6,19 +7,19 @@ export interface HomeGameWorld extends HomeDirectory {time:number;paused:boolean
 type World=HomeGameWorld;
 type Player=HomeGamePlayer;
 import {homeAt,roomTile} from './homeSocial';
-export type GameKind='darts'|'billiards'|'arcade';
-export type GameCommand={type:'game_join';slot:number}|{type:'game_leave'|'game_start';key:string}|{type:'game_dart';key:string;x:number;y:number}|{type:'game_shot';key:string;angle:number;power:number}|{type:'game_cue';key:string;x:number;y:number}|{type:'game_paddle';key:string;x:number};
+export type GameKind='darts'|'billiards'|'arcade'|'reversi'|'connectfour'|'memory'|'race'|'bowling'|'reaction';
+export type GameCommand=PartyCommand|{type:'game_join';slot:number}|{type:'game_leave'|'game_start';key:string}|{type:'game_dart';key:string;x:number;y:number}|{type:'game_shot';key:string;angle:number;power:number}|{type:'game_cue';key:string;x:number;y:number}|{type:'game_paddle';key:string;x:number};
 export type Ball={id:number;x:number;y:number;vx:number;vy:number;potted:boolean};
 export type BreakCourt={x:number;target:number;ball:{x:number;y:number;vx:number;vy:number};bricks:number[];lives:number;score:number;hits:number};
-export type HomeGame={key:string;homeTile:number;slot:number;kind:GameKind;phase:'lobby'|'playing'|'finished';players:string[];names:string[];scores:number[];turn:number;round:number;deadline:number;winner:number[];message:string;revision:number;lastInput:number;darts?:{left:number;start:number;throws:{x:number;y:number;score:number}[]};pool?:{balls:Ball[];moving:boolean;groups:[number,number];firstHit:number;shotTeam:number;shotPots:number[];scratch:boolean;ballInHand:boolean;lastShot:number;eightAllowed:boolean;rail:boolean};courts?:BreakCourt[]};
+export type HomeGame={key:string;homeTile:number;slot:number;kind:GameKind;phase:'lobby'|'playing'|'finished';players:string[];names:string[];scores:number[];turn:number;round:number;deadline:number;winner:number[];message:string;revision:number;lastInput:number;party?:PartyState;darts?:{left:number;start:number;throws:{x:number;y:number;score:number}[]};pool?:{balls:Ball[];moving:boolean;groups:[number,number];firstHit:number;shotTeam:number;shotPots:number[];scratch:boolean;ballInHand:boolean;lastShot:number;eightAllowed:boolean;rail:boolean};courts?:BreakCourt[]};
 const reply=(text:string,cue='ui'):Reply=>({type:'notice',text,cue});
-const gameKind=(item:string):item is GameKind=>['darts','billiards','arcade'].includes(item);
+export const gameKind=(item:string):item is GameKind=>['darts','billiards','arcade'].includes(item)||isPartyKind(item);
 const present=(w:World,g:HomeGame,id:string)=>{const p=w.players[id];return !!p&&p.indoors&&roomTile(p)===g.homeTile;};
 export const gameOf=(w:World,id:string)=>Object.values(w.games||{}).find(g=>g.players.includes(id));
 const next=(w:World,g:HomeGame)=>{g.turn=(g.turn+1)%g.players.length;g.deadline=w.time+60;g.round++;if(g.darts){g.darts.left=3;g.darts.start=g.scores[g.turn];}};
 function finish(g:HomeGame,winners:number[],message:string){g.phase='finished';g.winner=winners;g.message=message;g.revision++;}
 function rack():Ball[]{const b:Ball[]=[{id:0,x:.25,y:.5,vx:0,vy:0,potted:false}];const order=[1,9,2,10,8,3,11,4,12,5,13,6,14,7,15];let k=0;for(let row=0;row<5;row++)for(let j=0;j<=row;j++)b.push({id:order[k++],x:.69+row*.028,y:.5+(j-row/2)*.036,vx:0,vy:0,potted:false});return b;}
-function start(w:World,g:HomeGame){g.phase='playing';g.turn=0;g.round=1;g.deadline=w.time+(g.kind==='arcade'?75:60);g.winner=[];g.message='対戦開始！';g.revision++;g.scores=g.players.map(()=>g.kind==='darts'?301:0);g.names=g.players.map(id=>w.players[id]?.name||'Guest');if(g.kind==='darts')g.darts={left:3,start:301,throws:[]};if(g.kind==='billiards')g.pool={balls:rack(),moving:false,groups:[0,0],firstHit:-1,shotTeam:0,shotPots:[],scratch:false,ballInHand:false,lastShot:w.time,eightAllowed:false,rail:false};if(g.kind==='arcade')g.courts=g.players.map((_,i)=>({x:.5,target:.5,ball:{x:.5,y:.8,vx:(i%2?-.22:.22),vy:-.44},bricks:Array(32).fill(1),lives:3,score:0,hits:0}));}
+function start(w:World,g:HomeGame){g.phase='playing';g.turn=0;g.round=1;g.deadline=w.time+(g.kind==='arcade'?75:60);g.winner=[];g.message='対戦開始！';g.revision++;g.scores=g.players.map(()=>g.kind==='darts'?301:0);g.names=g.players.map(id=>w.players[id]?.name||'Guest');g.party=undefined;if(isPartyKind(g.kind))startParty(w,g);if(g.kind==='darts')g.darts={left:3,start:301,throws:[]};if(g.kind==='billiards')g.pool={balls:rack(),moving:false,groups:[0,0],firstHit:-1,shotTeam:0,shotPots:[],scratch:false,ballInHand:false,lastShot:w.time,eightAllowed:false,rail:false};if(g.kind==='arcade')g.courts=g.players.map((_,i)=>({x:.5,target:.5,ball:{x:.5,y:.8,vx:(i%2?-.22:.22),vy:-.44},bricks:Array(32).fill(1),lives:3,score:0,hits:0}));}
 export function dartScore(x:number,y:number){const r=Math.hypot(x,y);if(r>1)return {score:0,double:false};if(r<.035)return {score:50,double:true};if(r<.09)return {score:25,double:false};const order=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5],a=(Math.atan2(x,-y)+Math.PI*2+Math.PI/20)%(Math.PI*2),n=order[Math.floor(a/(Math.PI/10))],double=r>.92;return {score:n*(double?2:r>.56&&r<.64?3:1),double};}
 export function gameCommand(w:World,p:Player,c:GameCommand):Reply|undefined{
  w.games??={};if(!p.indoors)return reply('家の中で趣味家具を選びましょう。','error');
@@ -29,9 +30,10 @@ export function gameCommand(w:World,p:Player,c:GameCommand):Reply|undefined{
  }
  if(typeof c.key!=='string'||!Object.hasOwn(w.games,c.key))return;const g=w.games[c.key];if(!g||!g.players.includes(p.id)||!present(w,g,p.id))return;
  if(c.type==='game_leave'){removePlayer(w,g,p.id);return reply('対戦から退出しました。');}
- if(c.type==='game_start'){if(!homeAt(w,g.homeTile)?.furniture.some(f=>f.slot===g.slot&&f.item===g.kind))return;if(g.phase==='playing'||g.players[0]!==p.id)return;start(w,g);return reply('対戦開始！');}
+ if(c.type==='game_start'){if(!homeAt(w,g.homeTile)?.furniture.some(f=>f.slot===g.slot&&f.item===g.kind))return;if(g.phase==='playing'||g.players[0]!==p.id||w.paused)return;if(!canStartParty(g))return reply('このゲームは2人または4人で開始できます。','error');start(w,g);return reply('対戦開始！');}
  if(g.phase!=='playing'||w.paused)return;
  const seat=g.players.indexOf(p.id);
+ if(['game_board','game_roll','game_bowl','game_react'].includes(c.type)){if(partyCommand(w,g,seat,c as PartyCommand))return reply(g.message,'build');return;}
  if(c.type==='game_paddle'){if(g.kind!=='arcade'||!Number.isFinite(c.x))return;g.courts![seat].target=Math.max(.1,Math.min(.9,c.x));return;}
  if(seat!==g.turn)return;
  if(c.type==='game_dart'){
@@ -67,4 +69,4 @@ function poolStep(w:World,g:HomeGame,dt:number){const p=g.pool!;if(!p.moving)ret
 function breakStep(g:HomeGame,dt:number){g.courts!.forEach((c,index)=>{if(c.lives<=0)return;c.x+=(c.target-c.x)*Math.min(1,dt*18);const b=c.ball;for(let s=0;s<3;s++){const d=dt/3;b.x+=b.vx*d;b.y+=b.vy*d;if(b.x<.025||b.x>.975){b.x=Math.max(.025,Math.min(.975,b.x));b.vx*=-1;}if(b.y<.03){b.y=.03;b.vy=Math.abs(b.vy);}if(b.vy>0&&b.y>=.9&&b.y<=.94&&Math.abs(b.x-c.x)<.13){b.y=.9;b.vy=-Math.min(.85,.45+c.hits*.006);b.vx=(b.x-c.x)*3;c.hits++;}if(b.y>1){c.lives--;b.x=c.x;b.y=.8;b.vx=.22;b.vy=-.44;}
  for(let i=0;i<c.bricks.length;i++){if(!c.bricks[i])continue;const x=.04+(i%8)*.115,y=.12+Math.floor(i/8)*.065;if(b.x>x-.02&&b.x<x+.105&&b.y>y-.02&&b.y<y+.055){c.bricks[i]=0;c.score+=10;b.vy*=-1;break;}}
  }if(c.bricks.every(v=>!v)){c.bricks.fill(1);c.score+=100;}g.scores[index]=c.score;});}
-export function tickGames(w:World,dt:number){w.games??={};for(const g of Object.values(w.games)){if(!homeAt(w,g.homeTile)?.furniture.some(f=>f.slot===g.slot&&f.item===g.kind)){delete w.games[g.key];continue;}for(const id of [...g.players])if(!present(w,g,id))removePlayer(w,g,id);if(!w.games[g.key]||g.phase!=='playing')continue;if(g.kind==='billiards')poolStep(w,g,dt);if(g.kind==='arcade')breakStep(g,dt);if(w.time>=g.deadline){if(g.kind==='arcade'){const best=Math.max(...g.scores);finish(g,g.scores.map((v,i)=>v===best?i:-1).filter(i=>i>=0),'タイムアップ！');}else{g.message='時間切れ。次の手番です。';if(g.darts)g.scores[g.turn]=g.darts.start;if(g.pool?.moving)continue;next(w,g);g.revision++;}}if(g.kind==='arcade'&&g.courts!.every(c=>c.lives<=0)){const best=Math.max(...g.scores);finish(g,g.scores.map((v,i)=>v===best?i:-1).filter(i=>i>=0),'ゲーム終了！');}}}
+export function tickGames(w:World,dt:number){w.games??={};for(const g of Object.values(w.games)){if(!homeAt(w,g.homeTile)?.furniture.some(f=>f.slot===g.slot&&f.item===g.kind)){delete w.games[g.key];continue;}for(const id of [...g.players])if(!present(w,g,id))removePlayer(w,g,id);if(!w.games[g.key]||g.phase!=='playing'||w.paused)continue;if(g.kind==='billiards')poolStep(w,g,dt);if(g.kind==='arcade')breakStep(g,dt);if(isPartyKind(g.kind)){tickParty(w,g);continue;}if(w.time>=g.deadline){if(g.kind==='arcade'){const best=Math.max(...g.scores);finish(g,g.scores.map((v,i)=>v===best?i:-1).filter(i=>i>=0),'タイムアップ！');}else{g.message='時間切れ。次の手番です。';if(g.darts)g.scores[g.turn]=g.darts.start;if(g.pool?.moving)continue;next(w,g);g.revision++;}}if(g.kind==='arcade'&&g.courts!.every(c=>c.lives<=0)){const best=Math.max(...g.scores);finish(g,g.scores.map((v,i)=>v===best?i:-1).filter(i=>i>=0),'ゲーム終了！');}}}
