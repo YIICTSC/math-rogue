@@ -31,3 +31,11 @@
 - Reaction uses 12 rounds, an unpredictable delay, four buttons, per-player reaction times, time-based scores and false-start/wrong-button penalties. Reaction timing uses receipt time at the authority, so network latency contributes to the score.
 - All six games cap sessions at four players, reject other seats and stale turns, support rematches and return to the lobby when someone exits/disconnects. Timed turns keep play moving. Board results remain visible after the game.
 - Tests: `node scripts/test-home-party-games.mjs`, `node scripts/test-home-furniture-art.mjs`, `node scripts/test-home-party-browser.mjs`, plus the existing RPG homes/resources tests. The browser test uses four independent pages with a shared authoritative fixture to verify UI commands and synchronized state; it does not substitute for a live Render connection check.
+
+## スマホの探索画面
+
+幅900px以下、または高さ600px以下のタッチ端末では、探索画面を画面全体に表示する。上部はHP・残り時間・人数、下部は採取・全体マップ・仲間・イベント・手帳・詳細の操作に絞る。カードの内容は対応するボタンから開く詳細パネル内で確認する。縦画面は下から広いパネル、横画面は右側のパネルに表示する。PCの通常表示は従来のサイドバーを維持する。
+
+詳細表示中は移動を止め、閉じるボタン・背景タップ・Escapeでマップに戻る。矢印は押し続けると移動を繰り返し、離すと停止する。トレードやダンジョンの参加確認は詳細パネルを閉じていても表示する。画面回転時にキャンバスを追従させ、高さの低い横画面では地図の表示倍率を調整する。
+
+検証: `node scripts/test-rpg-mobile-browser.mjs`（縦390×844/360×640、横844×390/915×412、PC1440×900）。

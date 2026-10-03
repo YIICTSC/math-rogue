@@ -248,7 +248,7 @@ export default function WorldCanvas({
       canvas.height = Math.max(1, Math.round(sh));
       const scale = overview
         ? Math.min(sw / (WIDTH * T), sh / (HEIGHT * T))
-        : sw < 600
+        : sw < 600 || sh < 350
           ? 2
           : 3;
       const cx = overview

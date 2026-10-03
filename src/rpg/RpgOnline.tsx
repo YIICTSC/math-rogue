@@ -1,3 +1,5 @@
+import {useCompactRpgLayout} from './mobileLayout';
+import TouchPad from './TouchPad';
 import HomeRoom from './HomeRoom';
 import LifePanel from './LifePanel';
 import { natureAt, resourceReady } from './life';
@@ -16,16 +18,19 @@ import React, {
   useState,
 } from "react";
 import {
-  ArrowLeft,
-  ArrowUp,
-  ArrowRight,
-  ArrowDown,
   Compass,
   Users,
   Map,
   Crown,
   Copy,
   Check,
+  Heart,
+  Clock,
+  BookOpen,
+  Sparkles,
+  MoreHorizontal,
+  Axe,
+  X,
 } from "lucide-react";
 import type { LanguageMode, Player } from "../types";
 import type { GameMode } from "../types";
@@ -113,6 +118,9 @@ export default function RpgOnline({
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
+  const compact=useCompactRpgLayout();
+  const [detail,setDetail]=useState<string|null>(null);
+  const detailRef=useRef<HTMLElement>(null);
   const [lifeOpen,setLifeOpen]=useState(false);
   const [lifeTarget,setLifeTarget]=useState<number|null>(null);
   const [storySiteId, setStorySiteId] = useState<string | null>(null);
@@ -147,7 +155,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active: active && !interactionBlocked && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !interactionBlocked && !detail && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
@@ -335,13 +343,23 @@ export default function RpgOnline({
       clearInterval(timer);
     };
   }, [active, interactionBlocked, interact]);
+  const hasActivityDialog=!!world&&!!me&&(world.activities.trades.some(t=>t.from===selfId||t.to===selfId)||world.duels.some(d=>d.id===me.duelId&&d.status==='request')||world.activities.dungeons.some(d=>d.id===me.dungeonId&&d.status==='lobby'));
+  if(hasActivityDialog)latest.current.active=false;
+  const openDetail=(id:string)=>{destination.current=null;walkingRoute.current=[];setDetail(id);};
+  useEffect(()=>{if(!compact||!active||lifeOpen||storySiteId||roamingNpcSiteId||hasActivityDialog||me?.life?.indoors)setDetail(null);},[compact,active,lifeOpen,storySiteId,roamingNpcSiteId,hasActivityDialog,me?.life?.indoors]);
+  useEffect(()=>{if(!compact||!detail)return;const before=document.activeElement as HTMLElement|null;detailRef.current?.querySelector<HTMLButtonElement>('.rpg-detail-close')?.focus();return()=>{if(before?.isConnected&&before.getClientRects().length)before.focus();};},[compact,!!detail]);
+  const detailKeys=[['player','状態'],['team','仲間'],['event','イベント'],['journal','手帳'],['goal','目標'],['menu','部屋']];
+  const detailKeyDown=(e:React.KeyboardEvent)=>{if(!compact||!detail)return;if(e.key==='Escape'){e.stopPropagation();setDetail(null);}if(e.key==='Tab'){const buttons=Array.from(detailRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input,select,summary,[tabindex="0"]')||[]).filter(el=>el.getClientRects().length>0);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};
+  const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);setLifeOpen(true);};
+  const move=(dx:number,dy:number)=>{if(!latest.current.active)return;destination.current=null;walkingRoute.current=[];room.current?.send({type:'move',dx,dy});};
+  const hudHp=spectating?watched?.hp||0:player.currentHp,hudMaxHp=spectating?watched?.maxHp||1:player.maxHp;
   const close = () => {
     room.current?.close();
     onClose();
   };
   return (
     <TranslatedUiTree mode={languageMode}>
-      <main className="rpg-root" data-testid="rpg-native-map">
+      <main className={`rpg-root ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
         <header className="rpg-header">
           <button className="rpg-brand" onClick={close}>
             <Compass />
@@ -553,7 +571,14 @@ export default function RpgOnline({
         ) : (
           <>
             <div className="rpg-game-grid">
-              <section className="rpg-exploration">
+              <section className="rpg-exploration" inert={compact&&!!detail?true:undefined}>
+                {compact&&<div className="rpg-compact-hud" aria-label="冒険の重要情報">
+                  <button className="rpg-compact-menu" aria-label="部屋と操作の詳細" onClick={()=>openDetail('menu')}><Compass size={19}/></button>
+                  <button className="rpg-compact-health" aria-label="プレイヤーの状態" onClick={()=>openDetail('player')}><Heart size={15}/><span>HP <b>{hudHp}/{hudMaxHp}</b><i><em style={{width:`${Math.max(0,Math.min(100,hudHp/Math.max(1,hudMaxHp)*100))}%`}}/></i></span></button>
+                  <button className="rpg-compact-clock" aria-label="制限時間と冒険の目標" onClick={()=>openDetail('goal')}><Clock size={15}/><b>{Math.floor((remainingSeconds||0)/60)}:{String((remainingSeconds||0)%60).padStart(2,'0')}</b></button>
+                  <button className="rpg-compact-members" aria-label="参加者とチーム" onClick={()=>openDetail('team')}><Users size={16}/><span>{members.length}/40</span></button>
+                </div>}
+
                 <div className="rpg-map-title">
                   <h1>木漏れ日のフロンティア</h1><span>{world.gameMode === "BATTLE_ROYALE" ? "バトルロイヤル" : "協力"}</span>
                   <span>
@@ -573,9 +598,9 @@ export default function RpgOnline({
                       overview={overview}
                       languageMode={languageMode}
                       visualTheme={previewTheme}
-                      onPlayer={spectating ? undefined : setSelectedPeer}
+                      onPlayer={spectating ? undefined : id=>{setSelectedPeer(id);if(compact)openDetail('team');}}
                       onTile={(x, y) => {
-                        if (spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
+                        if (!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
                         const tile=y*WIDTH+x;
                         if(Math.abs(me.x-x)+Math.abs(me.y-y)<=2 && (world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile))){destination.current=null;setLifeTarget(tile);setLifeOpen(true);return;}
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
@@ -586,55 +611,21 @@ export default function RpgOnline({
                   )}
                   {!spectating && active && me.life?.indoors && <HomeRoom world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
                   {!spectating && lifeOpen && !me.life?.indoors && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
-                    {!spectating && <button onClick={()=>{destination.current=null;setLifeTarget(null);setLifeOpen(true);}}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
+                    {!spectating && <button onClick={openLife}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
                     <button onClick={() => setOverview(!overview)}>
                       <Map size={16} />
                       {overview ? "自分の近く" : "全体マップ"}
                     </button>
-                    <span>{biomeAt(me.x,me.y).name}</span>
+                    <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
-                    <div className="rpg-dpad">
-                      <button
-                        aria-label="上へ移動"
-                        onClick={() =>
-                          (destination.current = null, room.current?.send({ type: "move", dx: 0, dy: -1 }))
-                        }
-                      >
-                        <ArrowUp />
-                      </button>
-                      <div>
-                        <button
-                          aria-label="左へ移動"
-                          onClick={() =>
-                            (destination.current = null, room.current?.send({ type: "move", dx: -1, dy: 0 }))
-                          }
-                        >
-                          <ArrowLeft />
-                        </button>
-                        <button
-                          aria-label="下へ移動"
-                          onClick={() =>
-                            (destination.current = null, room.current?.send({ type: "move", dx: 0, dy: 1 }))
-                          }
-                        >
-                          <ArrowDown />
-                        </button>
-                        <button
-                          aria-label="右へ移動"
-                          onClick={() =>
-                            (destination.current = null, room.current?.send({ type: "move", dx: 1, dy: 0 }))
-                          }
-                        >
-                          <ArrowRight />
-                        </button>
-                      </div>
-                    </div>
+                    <TouchPad disabled={!active||interactionBlocked||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/>
                     {near && (
                       <button className="rpg-interact" onClick={interact}>
                         <span>
-                          {displaySiteName(near)}
+                          <strong>{displaySiteName(near)}</strong>
                           <small>
                             {siteUnavailable(world, me, near) || "E 調べる"}
                           </small>
@@ -643,16 +634,26 @@ export default function RpgOnline({
                     )}
                   </div>}
                 </div>
+                {compact&&<nav className="rpg-compact-dock" aria-label="冒険メニュー">
+                  {!spectating&&<button disabled={!active||interactionBlocked} onClick={openLife}><Axe size={19}/><span>採取</span></button>}
+                  <button aria-pressed={overview} onClick={()=>setOverview(!overview)}><Map size={19}/><span>{overview?'近く':'全体'}</span></button>
+                  <button aria-haspopup="dialog" onClick={()=>openDetail('team')}><Users size={19}/><span>仲間</span></button>
+                  <button aria-haspopup="dialog" onClick={()=>openDetail('event')}><Sparkles size={19}/><span>イベント</span><small>{world.activities.event.progress}/{world.activities.event.target}</small></button>
+                  {!spectating&&<button aria-haspopup="dialog" onClick={()=>openDetail('journal')}><BookOpen size={19}/><span>手帳</span></button>}
+                  <button aria-haspopup="dialog" onClick={()=>openDetail('menu')}><MoreHorizontal size={19}/><span>詳細</span></button>
+                </nav>}
                 <div className="rpg-map-caption">
                   {spectating ? '8秒ごとにランダム切替' : 'WASD / 矢印キーで移動 · E 調べる · マップをタップして移動'}
                 </div>
               </section>
               {!spectating && storySiteId && active && world.sites.some(s=>s.id===storySiteId && distance(s,me)<=2) && <StoryDialog languageMode={languageMode} site={world.sites.find(s=>s.id===storySiteId)!} player={me} send={action=>room.current?.send(action)} onClose={()=>setStorySiteId(null)} />}
               {!spectating && roamingNpcSiteId && active && world.sites.some(s=>s.id===roamingNpcSiteId && s.kind==='npc' && distance(s,me)<=2) && <RoamingNpcDialog languageMode={languageMode} site={world.sites.find(s=>s.id===roamingNpcSiteId)!} player={me} pending={npcChoicePending} blockedReason={siteUnavailable(world,me,world.sites.find(s=>s.id===roamingNpcSiteId)!)} onChoose={choiceId=>{setNpcChoicePending(true);room.current?.send({type:'npc-event-choice',siteId:roamingNpcSiteId,choiceId});}} onClose={()=>{setRoamingNpcSiteId(null);setNpcChoicePending(false);}} />}
-              <aside className="rpg-sidebar">
-                {!spectating && <StoryJournal languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);}} />}
-                {!spectating && <ActivitiesPanel languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />}
-                <section className="rpg-objective">
+              <aside ref={detailRef} className={`rpg-sidebar ${compact?'rpg-detail-sheet':''}`} hidden={compact&&!detail} data-detail={detail||undefined} role={compact&&detail?'dialog':undefined} aria-modal={compact&&detail?true:undefined} aria-label={compact&&detail?'冒険の詳細':undefined} onKeyDown={detailKeyDown}>
+                {compact&&detail&&<><header className="rpg-detail-heading"><h2>{detailKeys.find(([id])=>id===detail)?.[1]}</h2><button className="rpg-detail-close" aria-label="マップに戻る" onClick={()=>setDetail(null)}><X size={20}/><span>マップに戻る</span></button></header><nav className="rpg-detail-tabs" aria-label="詳細の切り替え">{detailKeys.filter(([id])=>!spectating||!['journal'].includes(id)).map(([id,label])=><button key={id} aria-pressed={detail===id} onClick={()=>setDetail(id)}>{label}</button>)}</nav></>}
+                <div className="rpg-sidebar-content">
+                {!spectating && <div data-rpg-panel="journal"><StoryJournal languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);if(compact)setDetail(null);}} /></div>}
+                <ActivitiesPanel display="cards" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />
+                <section data-rpg-panel="goal" className="rpg-objective">
                   <h2>
                     <Crown />
                     校長の時計塔へ
@@ -671,7 +672,7 @@ export default function RpgOnline({
                       </p>
                     ))}
                 </section>
-                {!spectating && <><section className="rpg-player-panel">
+                {!spectating && <><section data-rpg-panel="player" className="rpg-player-panel">
                   <h2>{me.name}</h2>
                   <p>
                     HP {player.currentHp} / {player.maxHp}
@@ -684,7 +685,7 @@ export default function RpgOnline({
                   </p>
                   <p>宝箱は各プレイヤーにつき1回です。</p>
                 </section>
-                <section className="rpg-player-panel">
+                <section data-rpg-panel="team" className="rpg-player-panel">
                   <h2>
                     <Users />
                     チーム
@@ -729,8 +730,14 @@ export default function RpgOnline({
                   </div>
                 </section>
                 </>}
+                {compact&&spectating&&<section data-rpg-panel="player" className="rpg-player-panel"><h2>{watched?.name||'ホスト観戦'}</h2><p>HP {hudHp} / {hudMaxHp}</p><p>コイン {watched?.gold||0} · 戦闘勝利 {watched?.completedBattles||0}</p></section>}
+                {compact&&spectating&&<section data-rpg-panel="team" className="rpg-player-panel"><h2>参加者とチーム</h2>{members.map(p=><p key={p.id}>{p.name} · HP {p.hp}/{p.maxHp}</p>)}</section>}
+                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり練習 · 通信なし</p>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
+                </div>
               </aside>
             </div>
+            {compact&&detail&&<div className="rpg-detail-backdrop" aria-hidden="true" onClick={()=>setDetail(null)}/>}
+            {!spectating&&<ActivitiesPanel display="dialogs" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action=>{destination.current=null;room.current?.send(action);}}/>}
             <footer className="rpg-footer">
               <p role="status">{watched?.message}</p>
               {roomCode ? (
