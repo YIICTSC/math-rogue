@@ -20,7 +20,7 @@ export default function LifePanel({world,selfId,target,languageMode,send,onClose
  const nearby=nearbyResources(world,me);
  if(target!==null&&nearby.includes(target))nearby.sort((a,b)=>a===target?-1:b===target?1:0);
  const work=life.work,progress=work?Math.min(100,Math.max(0,(clock-work.started)/(work.expires-work.started)*100)):0;
- const act=(a:Action)=>{if(a.type==='life-cast')audioService.playRpgLifeSound('cast');if(a.type==='life-hit'&&work)audioService.playRpgLifeSound(natureAt(world,work.tile)?.rock?'mine':'gather');if(a.type==='life-reel')audioService.playRpgLifeSound('reel');if(a.type==='life-craft'||a.type==='life-build')audioService.playRpgLifeSound('craft');send(a);};
+ const act=(a:Action)=>{if(a.type==='life-cast')void audioService.preloadRpgFishingSounds();if(a.type==='life-hit'&&work)audioService.playRpgLifeSound(natureAt(world,work.tile)?.rock?'mine':'gather');if(a.type==='life-reel')audioService.playRpgFishingSound(work?.fishing?.phase==='bite'?'hook':'reel');if(a.type==='life-craft'||a.type==='life-build')audioService.playRpgLifeSound('craft');send(a);};
  const adapter=house?homeGameWorld(world):null;
  return <div className="rpg-life-backdrop"><section className="rpg-life" role="dialog" aria-modal="true" aria-label={t('採取・クラフト')}>
  <header><div><small>FRONTIER LIFE</small><h2>{t(tab==='fishbook'?'釣り図鑑':house?'仲間の集まる家':'採取・クラフト')}</h2></div><button onClick={()=>{if(work)send({type:'life-cancel'});onClose();}} aria-label={t('閉じる')}>✕</button></header>

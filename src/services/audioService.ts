@@ -1,3 +1,4 @@
+import {FISHING_SOUNDS,type FishingSound} from '../rpg/fishingAudio';
 
 import type { AttackEffectKey, CharacterAppearanceMode, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
@@ -1465,6 +1466,7 @@ class AudioService {
 
   public toggleMute() {
       this.isMuted = !this.isMuted;
+      if (this.isMuted) this.stopRpgFishingSounds();
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1823,6 +1825,23 @@ class AudioService {
       return this.isVoiceSfxName(name) ? this.voiceVolume : this.sfxVolume;
   }
 
+  public async preloadRpgFishingSounds() {
+      await this.preloadSfx(Object.keys(FISHING_SOUNDS).map(kind => `rpg-fishing/${kind}`));
+  }
+
+  public playRpgFishingSound(kind: FishingSound) {
+      if (!this.appIsActive || this.isMuted || (typeof document !== 'undefined' && document.hidden)) return;
+      this.playSfxMp3(`rpg-fishing/${kind}`, () => this.playSound(kind === 'miss' || kind === 'escape' ? 'wrong' : 'select'), {maxDurationMs:FISHING_SOUNDS[kind],overlap:false});
+  }
+
+  public stopRpgFishingSounds() {
+      for (const kind of Object.keys(FISHING_SOUNDS)) {
+          const name = `rpg-fishing/${kind}`;
+          this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
+          this.stopActiveSfx(name);
+      }
+  }
+
   public playRpgLifeSound(kind: 'gather'|'mine'|'cast'|'reel'|'craft') {
       this.playSfxMp3(`rpg-life/${kind}`, () => this.playSound('select'), {maxDurationMs:kind==='reel'?1600:900,overlap:false});
   }
@@ -1840,6 +1859,7 @@ class AudioService {
       this.sfxPlaybackGenerations.set(name, generation);
 
       const startPlayback = () => {
+          if (this.sfxPlaybackGenerations.get(name) !== generation) return;
           const cached = this.sfxBuffers[name];
           if (cached) {
               if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
@@ -1856,7 +1876,7 @@ class AudioService {
               overlap,
               generation,
           ).then(played => {
-              if (!played) fallback();
+              if (!played && this.sfxPlaybackGenerations.get(name) === generation) fallback();
           });
           void this.loadSfxBuffer(name);
       };

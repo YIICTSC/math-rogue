@@ -12,15 +12,16 @@ import LifeSprite from './LifeSprite';
 import './life.css';
 
 export default function GatherMiniModal({world,work,languageMode,send}:{world:World;work:Work;languageMode:LanguageMode;send:(a:Action)=>void}){
- const [clock,setClock]=useState(world.life.now),[pending,setPending]=useState(false),submitted=useRef(false),panel=useRef<HTMLElement>(null);
+ const [clock,setClock]=useState(world.life.now),[pending,setPending]=useState(false),submitted=useRef(false),bitePlayed=useRef(false),panel=useRef<HTMLElement>(null);
  const t=(s:string)=>trans(s,languageMode),fish=work.kind==='fish',node=natureAt(world,work.tile),duration=work.expires-work.started;
  useEffect(()=>{const before=document.activeElement as HTMLElement|null;panel.current?.focus();return()=>{if(before?.isConnected)before.focus();};},[]);
  useEffect(()=>{const base=world.life.now,start=performance.now(),timer=setInterval(()=>setClock(base+performance.now()-start),20);return()=>clearInterval(timer);},[world.life.now]);
- const confirm=()=>{if(submitted.current)return;submitted.current=true;setPending(true);audioService.playRpgLifeSound(fish?'reel':node?.rock?'mine':'gather');send(fish?{type:'life-reel',phaseTarget:work.target}:{type:'life-hit'});};
- const cancel=()=>{if(submitted.current)return;submitted.current=true;setPending(true);send({type:'life-cancel'});};
+ const confirm=()=>{if(submitted.current)return;submitted.current=true;setPending(true);if(fish)audioService.playRpgFishingSound(work.fishing?.phase==='bite'?'hook':'reel');else audioService.playRpgLifeSound(node?.rock?'mine':'gather');send(fish?{type:'life-reel',phaseTarget:work.target}:{type:'life-hit'});};
+ const cancel=()=>{if(submitted.current)return;submitted.current=true;setPending(true);if(fish)audioService.stopRpgFishingSounds();send({type:'life-cancel'});};
  const progress=Math.min(100,Math.max(0,(clock-work.started)/duration*100)),target=(work.target-work.started)/duration*100;
  const reeling=work.fishing?.phase==='reel',window=work.fishing?reelWindow(work.fishing.id):450;
  const ready=fish?(reeling?Math.abs(clock-work.target)<=window:clock>=work.target&&clock<=work.expires):Math.abs(clock-work.target)<450;
+ useEffect(()=>{if(!fish||reeling||pending||bitePlayed.current||world.life.now>work.expires)return;const timer=setTimeout(()=>{if(bitePlayed.current)return;bitePlayed.current=true;audioService.playRpgFishingSound('bite');},Math.max(0,work.target-world.life.now));return()=>clearTimeout(timer);},[fish,reeling,pending,work.target,work.expires,world.life.now]);
  const zoneStart=(fish&&!reeling?work.target:work.target-(fish?window:450))-work.started,zoneEnd=(fish&&!reeling?work.expires:work.target+(fish?window:450))-work.started;
  return <div className="rpg-gather-screen" onPointerDown={e=>{if(!e.isPrimary||e.button!==0)return;e.preventDefault();e.stopPropagation();confirm();}} onClick={e=>{e.stopPropagation();if(e.detail===0)confirm();}}>
   <section ref={panel} className={`rpg-gather-mini ${ready?'is-ready':''} ${fish?'rpg-fishing-mini':''}`} role="dialog" aria-modal="true" aria-label={t('採取アクション')} tabIndex={-1} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel();}else if((e.key===' '||e.key==='Enter')&&!(e.target as HTMLElement).closest('button')){e.preventDefault();e.stopPropagation();confirm();}else if(e.key==='Tab'){e.preventDefault();const close=panel.current?.querySelector<HTMLButtonElement>('button');if(document.activeElement===close)panel.current?.focus();else close?.focus();}}}>
