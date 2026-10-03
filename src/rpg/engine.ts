@@ -1,6 +1,6 @@
 import {recoverGatherEnergy,GATHER_ENERGY_MAX} from './energy';
 import { createLife, advanceLife, applyLifeAction, lifeWalkable, type LifeWorld, type LifePlayer, type LifeAction } from './life';
-import { BIOMES, biomeAt, biomeSurface, riverAt } from "./biomes";
+import { BIOMES, biomeAt, biomeSurface, riverAt, fishingPondAt } from "./biomes";
 import { STORIES, applyStory, type StoryAction, type StoryProgress } from "./stories";
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
@@ -411,7 +411,7 @@ export function createWorld(
       tiles.push(
         x === 0 || y === 0 || x === WIDTH - 1 || y === HEIGHT - 1
           ? "forest"
-          : riverAt(x,y)
+          : riverAt(x,y)||fishingPondAt(x,y)
             ? "water"
             : rng() < biomeSurface(x,y).trees
               ? "forest"

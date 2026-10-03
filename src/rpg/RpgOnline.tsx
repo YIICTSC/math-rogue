@@ -1,3 +1,6 @@
+import {FishingFrame} from './FishSprite';
+import FishingCatch from './FishingCatch';
+import useFishingCollection from './useFishingCollection';
 import {energyOf,GATHER_ENERGY_MAX} from './energy';
 import GatherMiniModal from './GatherMiniModal';
 import LifeSprite from './LifeSprite';
@@ -131,6 +134,7 @@ export default function RpgOnline({
   const detailRef=useRef<HTMLElement>(null);
   const [quickReady,setQuickReady]=useState(true);
   const [lifeOpen,setLifeOpen]=useState(false);
+  const [lifeInitialTab,setLifeInitialTab]=useState<string>();
   const [lifeTarget,setLifeTarget]=useState<number|null>(null);
   const [storySiteId, setStorySiteId] = useState<string | null>(null);
   const [roamingNpcSiteId, setRoamingNpcSiteId] = useState<string | null>(null);
@@ -164,7 +168,8 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  latest.current = { world, active: active && !interactionBlocked && !detail && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch);
+  latest.current = { world, active: active && !fishing.result && !interactionBlocked && !detail && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
@@ -624,7 +629,7 @@ export default function RpgOnline({
                     />
                   )}
                   {!spectating && active && me.life?.indoors && <HomeRoom world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
-                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
                     {!spectating && <button onClick={openLife}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
@@ -635,9 +640,9 @@ export default function RpgOnline({
                     <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
-                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!active||interactionBlocked||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
+                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
-                    {compact&&quickTiles.length>0&&<div className="rpg-quick-resources" role="group" aria-label="近くの採取"><button className="rpg-energy-button" disabled={!onEnergyRequest||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onClick={requestEnergy}><Zap size={14}/><b>{energyOf(me.life)}/{GATHER_ENERGY_MAX}</b><span>問題で回復</span></button><div>{quickTiles.map(tile=>{const fish=world.tiles[tile]==='water',node=natureAt(world,tile),label=fish?'川釣り':node!.name;return <button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} aria-label={label} title={label} onClick={()=>quickGather(tile)}><LifeSprite index={fish?21:node!.sprite}/><span>{fish?'釣り':node!.rock?'採掘':'採取'}</span><small>−1</small></button>;})}</div></div>}
+                    {compact&&quickTiles.length>0&&<div className="rpg-quick-resources" role="group" aria-label="近くの採取"><button className="rpg-energy-button" disabled={!onEnergyRequest||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onClick={requestEnergy}><Zap size={14}/><b>{energyOf(me.life)}/{GATHER_ENERGY_MAX}</b><span>問題で回復</span></button><div>{quickTiles.map(tile=>{const fish=world.tiles[tile]==='water',node=natureAt(world,tile),label=fish?'川釣り':node!.name;return <button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} aria-label={label} title={label} onClick={()=>quickGather(tile)}>{fish?<FishingFrame index={0}/>:<LifeSprite index={node!.sprite}/>}<span>{fish?'釣り':node!.rock?'採掘':'採取'}</span><small>−1</small></button>;})}</div></div>}
                     {near && (
                       <button className="rpg-interact" onClick={interact}>
                         <span>
@@ -666,7 +671,8 @@ export default function RpgOnline({
               {!spectating && storySiteId && active && world.sites.some(s=>s.id===storySiteId && distance(s,me)<=2) && <StoryDialog languageMode={languageMode} site={world.sites.find(s=>s.id===storySiteId)!} player={me} send={action=>room.current?.send(action)} onClose={()=>setStorySiteId(null)} />}
               {!spectating && roamingNpcSiteId && active && world.sites.some(s=>s.id===roamingNpcSiteId && s.kind==='npc' && distance(s,me)<=2) && <RoamingNpcDialog languageMode={languageMode} site={world.sites.find(s=>s.id===roamingNpcSiteId)!} player={me} pending={npcChoicePending} blockedReason={siteUnavailable(world,me,world.sites.find(s=>s.id===roamingNpcSiteId)!)} onChoose={choiceId=>{setNpcChoicePending(true);room.current?.send({type:'npc-event-choice',siteId:roamingNpcSiteId,choiceId});}} onClose={()=>{setRoamingNpcSiteId(null);setNpcChoicePending(false);}} />}
               <aside ref={detailRef} className={`rpg-sidebar ${compact?'rpg-detail-sheet':''}`} hidden={compact&&!detail} data-detail={detail||undefined} role={compact&&detail?'dialog':undefined} aria-modal={compact&&detail?true:undefined} aria-label={compact&&detail?'冒険の詳細':undefined} onKeyDown={detailKeyDown}>
-                {compact&&detail&&<><header className="rpg-detail-heading"><h2>{detailKeys.find(([id])=>id===detail)?.[1]}</h2><button className="rpg-detail-close" aria-label="マップに戻る" onClick={()=>setDetail(null)}><X size={20}/><span>マップに戻る</span></button></header><nav className="rpg-detail-tabs" aria-label="詳細の切り替え">{detailKeys.filter(([id])=>!spectating||!['journal'].includes(id)).map(([id,label])=><button key={id} aria-pressed={detail===id} onClick={()=>setDetail(id)}>{label}</button>)}</nav></>}
+                {!spectating&&active&&fishing.result&&!me.life?.work&&<FishingCatch catching={fishing.result} languageMode={languageMode} onClose={fishing.close} onBook={()=>{fishing.close();setLifeInitialTab('fishbook');setLifeOpen(true);}}/>}
+            {compact&&detail&&<><header className="rpg-detail-heading"><h2>{detailKeys.find(([id])=>id===detail)?.[1]}</h2><button className="rpg-detail-close" aria-label="マップに戻る" onClick={()=>setDetail(null)}><X size={20}/><span>マップに戻る</span></button></header><nav className="rpg-detail-tabs" aria-label="詳細の切り替え">{detailKeys.filter(([id])=>!spectating||!['journal'].includes(id)).map(([id,label])=><button key={id} aria-pressed={detail===id} onClick={()=>setDetail(id)}>{label}</button>)}</nav></>}
                 <div className="rpg-sidebar-content">
                 {!spectating && <div data-rpg-panel="journal"><StoryJournal languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);if(compact)setDetail(null);}} /></div>}
                 <ActivitiesPanel display="cards" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />
@@ -753,7 +759,8 @@ export default function RpgOnline({
                 </div>
               </aside>
             </div>
-            {compact&&!spectating&&active&&me.life?.work&&<GatherMiniModal key={`${me.life.work.started}:${me.life.work.tile}`} world={world} work={me.life.work} languageMode={languageMode} send={a=>room.current?.send(a)}/>}
+            {compact&&!spectating&&active&&me.life?.work&&<GatherMiniModal key={`${me.life.work.target}:${me.life.work.tile}`} world={world} work={me.life.work} languageMode={languageMode} send={a=>room.current?.send(a)}/>}
+            {!spectating&&active&&fishing.result&&!me.life?.work&&<FishingCatch catching={fishing.result} languageMode={languageMode} onClose={fishing.close} onBook={()=>{fishing.close();setLifeInitialTab('fishbook');setLifeOpen(true);}}/>}
             {compact&&detail&&<div className="rpg-detail-backdrop" aria-hidden="true" onClick={()=>setDetail(null)}/>}
             {!spectating&&<ActivitiesPanel display="dialogs" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action=>{destination.current=null;room.current?.send(action);}}/>}
             <footer className="rpg-footer">

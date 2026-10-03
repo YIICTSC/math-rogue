@@ -39,3 +39,6 @@ export function biomeBattleBackground(site: {x:number;y:number}) {
   const biome = biomeAt(site.x, site.y);
   return {id:`rpg-${biome.id}`,image:assetUrl(`sprites/rpg/${biome.id}.webp`),flavorTexts:[biome.flavor]};
 }
+
+// Small warped ponds make every habitat fishable without straight rectangular shores.
+export function fishingPondAt(x:number,y:number){return BIOMES.some((b,i)=>{const px=b.x+8,py=b.y+5,dx=x-px+Math.sin(y*.7+i)*.8,dy=y-py+Math.sin(x*.6+i)*.6;return (dx/5.2)**2+(dy/3.8)**2<1;});}

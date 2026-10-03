@@ -1,3 +1,4 @@
+import {chooseFish,reelWindow,fishSize,recordFish,type FishingRun,type FishRecords,type FishCatch} from './fishing';
 import {energyOf,GATHER_ENERGY_COST,GATHER_ENERGY_MAX} from './energy';
 import {ROOM_DOOR,ROOM_SPAWN,newInterior,furnishing,furnitureDistance,placementFits,roomWalkable,type Interior,type PlacedFurniture} from './homeCatalog';
 import { BIOMES, biomeAt, biomeWeights, type BiomeId } from './biomes';
@@ -33,11 +34,11 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  const result: NatureNode = {sprite,name:NATURE[sprite][0],material:NATURE[sprite][1],hardness:NATURE[sprite][2],amount:NATURE[sprite][3],rock:[8,11,12,13,14,15].includes(sprite)};
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
-export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number}
-export interface LifePlayer {energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
+export interface LifePlayer {fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
-export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-hit'|'life-reel'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
+export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
@@ -156,11 +157,31 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   if(a.type==='life-cast'&&w.tiles[a.tile]!=='water')return false;
   if(energyOf(lp)<GATHER_ENERGY_COST)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
   lp.energy=energyOf(lp)-GATHER_ENERGY_COST;
-  const fish=a.type==='life-cast',target=now+(fish?1700+((w.seed+a.tile+w.revision)%1300):900);
-  lp.work={tile:a.tile,kind:fish?'fish':'gather',started:now,target,expires:target+(fish?1800:1400)};lp.lastAction=now;return tell(fish?'浮きが沈んだら引き上げよう！':'光るタイミングで道具を振ろう！');
+  life.now=now;const fish=a.type==='life-cast',target=now+(fish?1700+((w.seed+a.tile+w.revision)%1300):900);
+  const nonce=lp.fishCastCount||0;if(fish)lp.fishCastCount=nonce+1;const species=fish?chooseFish(w.seed,a.tile,nonce):undefined;
+  lp.work={tile:a.tile,kind:fish?'fish':'gather',started:now,target,expires:target+(fish?Math.max(900,reelWindow(species!.id)*2):1400),...(fish?{fishing:{id:species!.id,phase:'bite' as const,beat:0,hits:0,perfect:0,nonce}}:{})};lp.lastAction=now;return tell(fish?'浮きが沈んだら引き上げよう！':'光るタイミングで道具を振ろう！');
  }
  if(a.type==='life-hit'||a.type==='life-reel'){
   const work=lp.work;if(!work||(a.type==='life-hit')!==(work.kind==='gather'))return false;
+  if(work.kind==='fish'&&work.fishing){
+   const run=work.fishing,window=reelWindow(run.id);if(a.type==='life-reel'&&a.phaseTarget!==work.target)return false;lp.lastAction=now;
+   if(distance(p,{x:work.tile%WIDTH,y:Math.floor(work.tile/WIDTH)})>2){lp.work=undefined;return false;}
+   if(run.phase==='bite'){
+    if(now<work.target||now>work.expires){lp.work=undefined;return tell('魚が逃げました。浮きが沈んでから引き上げましょう。');}
+    run.phase='reel';run.perfect=now-work.target<window/2?1:0;
+   }else{
+    if(Math.abs(now-work.target)<=window){run.hits++;if(Math.abs(now-work.target)<window/2)run.perfect++;}
+    run.beat++;
+    if(run.beat>=3){
+     lp.work=undefined;if(run.hits<2)return tell('糸が切れました。光る範囲で巻きましょう。');
+     const size=fishSize(run.id,w.seed,work.tile,run.nonce,run.perfect),perfect=run.perfect>=3,records=lp.fishRecords??={};
+     lp.lastCatch={id:run.id,size,perfect,record:recordFish(records,{id:run.id,size,perfect}),at:now};lp.bag.fish=(lp.bag.fish||0)+(perfect?2:1);p.interactionCount++;lp.effect={tile:work.tile,at:now,kind:'fish',perfect};
+     return tell(lp.lastCatch.record?'釣れました！サイズ記録を更新！':'釣れました！図鑑に記録しました。');
+    }
+    if(run.beat-run.hits>=2){lp.work=undefined;return tell('糸が切れました。光る範囲で巻きましょう。');}
+   }
+   life.now=now;work.started=now;work.target=now+1050+((w.seed+run.beat*271+work.tile)%450);work.expires=work.target+window+450;return tell('光る範囲で巻いて、魚を引き寄せよう！');
+  }
   lp.work=undefined;lp.lastAction=now;
   if(distance(p,{x:work.tile%WIDTH,y:Math.floor(work.tile/WIDTH)})>2)return false;
   const perfect=Math.abs(now-work.target)<450;
@@ -184,7 +205,7 @@ export function advanceLife(w:World,now:number){
  let changed=false;
  for(const [tile,node]of Object.entries(life.nodes))if(node.regrowAt&&now>=node.regrowAt&&!Object.values(w.players).some(p=>p.x===Number(tile)%WIDTH&&p.y===Math.floor(Number(tile)/WIDTH))){delete life.nodes[Number(tile)];changed=true;}
  for(const p of Object.values(w.players))if(p.life?.effect){changed=true;if(now-p.life.effect.at>700)p.life.effect=undefined;}
- for(const p of Object.values(w.players))if(p.life?.work){changed=true;if(now>p.life.work.expires){p.life.work=undefined;p.message='タイミングを合わせてもう一度！';}}
+ for(const p of Object.values(w.players))if(p.life?.work){changed=true;if(now>p.life.work.expires){const fish=p.life.work.kind==='fish';p.life.work=undefined;p.message=fish?'魚が逃げました。浮きが沈んでから引き上げましょう。':'タイミングを合わせてもう一度！';}}
  if(Object.keys(life.games).length){const host=homeGameWorld(w);for(let remaining=elapsed;remaining>0;remaining-=.05)tickGames(host,Math.min(.05,remaining));life.games=host.games;changed=true;}
  if(changed)w.revision++;
 }

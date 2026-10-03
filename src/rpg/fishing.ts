@@ -1,0 +1,28 @@
+import {biomeAt,type BiomeId} from './biomes';
+export type FishRarity='common'|'uncommon'|'rare'|'legendary';
+export interface FishSpecies {id:string;name:string;english:string;kana:string;biome:BiomeId;index:number;rarity:FishRarity;min:number;max:number}
+export interface FishRecord {count:number;best:number;perfect:number}
+export type FishRecords=Record<string,FishRecord>;
+export interface FishCatch {id:string;size:number;perfect:boolean;record:boolean;at:number}
+export interface FishingRun {id:string;phase:'bite'|'reel';beat:number;hits:number;perfect:number;nonce:number}
+const lists:Record<BiomeId,readonly (readonly [string,string,string])[]>={
+ meadow:[['銀の小魚','Silver minnow','ぎんのこざかな'],['ひだまり金魚','Sunlit goldfish','ひだまりきんぎょ'],['縞パーチ','Striped perch','しまぱーち'],['草原ゴイ','Meadow carp','そうげんごい'],['斑点マス','Spotted trout','はんてんます'],['青ほおギル','Blue-cheek gill','あおほおぎる'],['赤尾ウグイ','Red-tail dace','あかおうぐい'],['黄金ニシキ','Golden koi','おうごんにしき'],['白羽ニシキ','White-wing koi','しろはにしき'],['虹鱗の竜ゴイ','Rainbow dragon carp','にじうろこのりゅうごい']],
+ forest:[['若葉マス','Leaf trout','わかばます'],['森の斑マス','Forest trout','もりのまだらます'],['紅ヒレイワナ','Red-fin char','べにひれいわな'],['苔色バス','Moss bass','こけいろばす'],['木の葉魚','Leaf-tail fish','このはうお'],['栗色ナマズ','Chestnut catfish','くりいろなまず'],['白星サケ','White-star salmon','しろぼしさけ'],['翡翠ニシキ','Jade koi','ひすいにしき'],['蛍灯魚','Firefly fish','ほたるびうお'],['角ヒレの森神','Antler forest spirit','つのひれのもりがみ']],
+ wetland:[['鏡ブナ','Mirror bream','かがみぶな'],['黄土ドジョウ','Yellow loach','おうどどじょう'],['紅蓮ベタ','Crimson betta','ぐれんべた'],['泥ヒゲナマズ','Muddy catfish','どろひげなまず'],['紫ウナギ','Violet eel','むらさきうなぎ'],['水玉フグ','Spotted puffer','みずたまふぐ'],['蓮桃魚','Lotus fish','はすももうお'],['青緑ハイギョ','Turquoise lungfish','あおみどりはいぎょ'],['黒沼ライギョ','Black snakehead','くろぬまらいぎょ'],['蓮冠の女王魚','Lotus queen','はすかんむりのじょおううお']],
+ desert:[['砂色メダカ','Sand minnow','すないろめだか'],['橙パプフィッシュ','Orange pupfish','だいだいぱぷふぃっしゅ'],['金ヒゲバーベル','Golden barbel','きんひげばーべる'],['砂縞ティラピア','Sand tilapia','すなしまてぃらぴあ'],['赤錆シクリッド','Rust cichlid','あかさびしくりっど'],['泉の天使魚','Oasis angelfish','いずみのてんしうお'],['琥珀ゴイ','Amber carp','こはくごい'],['洞窟の透明魚','Blind cave fish','どうくつのとうめいうお'],['黄金アロワナ','Golden arowana','おうごんあろわな'],['太陽冠の紅魚','Sun-crown ruby fish','たいようかんのべにうお']],
+ snow:[['氷青メダカ','Ice minnow','ひょうせいめだか'],['銀雪イワナ','Snow char','ぎんせついわな'],['北極マス','Arctic trout','ほっきょくます'],['霜白ホワイトフィッシュ','Frost whitefish','しもしろほわいとふぃっしゅ'],['寒縞パーチ','Cold perch','かんじまぱーち'],['紫氷サケ','Ice salmon','しひょうさけ'],['雪白ニシキ','Snow koi','ゆきしろにしき'],['結晶ヒレ魚','Crystal-fin fish','けっしょうひれうお'],['極光チョウザメ','Aurora sturgeon','きょっこうちょうざめ'],['霜冠の星魚','Frost-crown starfish','しもかんむりのほしうお']],
+ ruins:[['石鱗メダカ','Stone-scale minnow','せきりんめだか'],['青銅パーチ','Bronze perch','せいどうぱーち'],['古代紫ウナギ','Ancient eel','こだいむらさきうなぎ'],['紋章マス','Rune trout','もんしょうます'],['鎧ナマズ','Armored catfish','よろいなまず'],['銀化石シーラカンス','Fossil coelacanth','ぎんかせきしーらかんす'],['時計ヒレ魚','Clockwork fish','とけいひれうお'],['紫晶魚','Amethyst fish','ししょううお'],['星闇アンコウ','Midnight angler','ほしやみあんこう'],['暁の古代竜魚','Dawn dragon fish','あかつきのこだいりゅうぎょ']]
+};
+const ranges=[[6,18],[8,25],[14,40],[20,65],[15,45],[20,55],[25,80],[30,95],[45,130],[65,180]];
+export const FISH:FishSpecies[]=Object.entries(lists).flatMap(([biome,rows])=>rows.map(([name,english,kana],index)=>({id:`${biome}-${index}`,name,english,kana,biome:biome as BiomeId,index,rarity:(index<4?'common':index<7?'uncommon':index<9?'rare':'legendary') as FishRarity,min:ranges[index][0],max:ranges[index][1]})));
+export const fishById=(id:string)=>FISH.find(f=>f.id===id)!;
+export const FISH_WEIGHTS=[17,16,14,13,10,9,8,6,5,2];
+export function fishingHash(seed:number,tile:number,nonce:number){let n=(seed^Math.imul(tile+1,374761393)^Math.imul(nonce+1,668265263))>>>0;n=Math.imul(n^(n>>>13),1274126177);return (n^(n>>>16))>>>0;}
+export function chooseFish(seed:number,tile:number,nonce:number){const biome=biomeAt(tile%192,Math.floor(tile/192)).id;let roll=fishingHash(seed,tile,nonce)%100;let index=0;for(;index<9;index++){if(roll<FISH_WEIGHTS[index])break;roll-=FISH_WEIGHTS[index];}return fishById(`${biome}-${index}`);}
+export const reelWindow=(id:string)=>({common:420,uncommon:360,rare:300,legendary:260}[fishById(id).rarity]);
+export function fishSize(id:string,seed:number,tile:number,nonce:number,perfect:number){const f=fishById(id),roll=(fishingHash(seed^0x517cc1b7,tile,nonce)%10000)/9999;return Math.round((f.min+(f.max-f.min)*Math.min(1,roll*.83+perfect*.055))*10)/10;}
+export function recordFish(records:FishRecords,catching:Omit<FishCatch,'record'|'at'>){const previous=records[catching.id];const record=!previous||catching.size>previous.best;records[catching.id]={count:(previous?.count||0)+1,best:Math.max(previous?.best||0,catching.size),perfect:(previous?.perfect||0)+(catching.perfect?1:0)};return record;}
+export function mergeFishRecords(a:FishRecords,b:FishRecords):FishRecords{const merged={...a};for(const f of FISH){const x=a[f.id],y=b[f.id];if(y)merged[f.id]={count:Math.max(x?.count||0,y.count),best:Math.max(x?.best||0,y.best),perfect:Math.max(x?.perfect||0,y.perfect)};}return merged;}
+export const FISH_BOOK_KEY='rpg-fishing-book-v1';
+export function readFishBook():FishRecords{try{const raw=JSON.parse(localStorage.getItem(FISH_BOOK_KEY)||'{}'),safe:FishRecords={};for(const f of FISH){const r=raw[f.id];if(r&&Number.isFinite(r.best)&&r.best>=f.min&&r.best<=f.max&&Number.isSafeInteger(r.count)&&r.count>0)safe[f.id]={best:r.best,count:r.count,perfect:Number.isSafeInteger(r.perfect)?Math.max(0,r.perfect):0};}return safe;}catch{return {};}}
+export function saveFishBook(records:FishRecords){try{localStorage.setItem(FISH_BOOK_KEY,JSON.stringify(mergeFishRecords(readFishBook(),records)));}catch{/* Collection remains available for the room when storage is unavailable. */}}
