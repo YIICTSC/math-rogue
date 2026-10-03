@@ -1,9 +1,10 @@
+import {nearbyResources} from './nearbyResources';
 import {audioService} from '../services/audioService';
 import LifeSprite from './LifeSprite';
 import FurnitureSprite from './FurnitureSprite';
 import React,{useEffect,useState} from 'react';
-import {WIDTH,distance,type World,type Action} from './engine';
-import {MATERIAL_NAMES,RECIPES,HOUSE_COST,canAfford,isResourceTile,natureAt,resourceReady,homeGameWorld,type Bag,type Material} from './life';
+import {distance,type World,type Action} from './engine';
+import {MATERIAL_NAMES,RECIPES,HOUSE_COST,canAfford,natureAt,resourceReady,homeGameWorld,type Bag,type Material} from './life';
 import HobbyGamesPanel from '../mini-games/gakuro-craft/HobbyGamesPanel';
 import {trans} from '../utils/textUtils';
 import type {LanguageMode} from '../types';
@@ -12,7 +13,7 @@ export default function LifePanel({world,selfId,target,languageMode,send,onClose
  const me=world.players[selfId],life=me.life!,house=world.life.houses.find(h=>h.id===life.indoors),[tab,setTab]=useState(house?'homes':'gather'),[clock,setClock]=useState(world.life.now);
  useEffect(()=>{const start=performance.now(),base=world.life.now;const timer=setInterval(()=>setClock(base+performance.now()-start),40);return()=>clearInterval(timer);},[world.life.now]);
  const t=(s:string)=>trans(s,languageMode),cost=(bag:Bag)=>Object.entries(bag).map(([k,n])=>`${t(MATERIAL_NAMES[k as Material])} ${life.bag[k as Material]||0}/${n}`).join(' · ');
- const nearby:number[]=[];for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const x=me.x+dx,y=me.y+dy,tile=y*WIDTH+x;if(isResourceTile(world,tile)&&Math.abs(dx)+Math.abs(dy)<=2&&(world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile)))nearby.push(tile);}
+ const nearby=nearbyResources(world,me);
  if(target!==null&&nearby.includes(target))nearby.sort((a,b)=>a===target?-1:b===target?1:0);
  const work=life.work,progress=work?Math.min(100,Math.max(0,(clock-work.started)/(work.expires-work.started)*100)):0;
  const act=(a:Action)=>{if(a.type==='life-cast')audioService.playRpgLifeSound('cast');if(a.type==='life-hit'&&work)audioService.playRpgLifeSound(natureAt(world,work.tile)?.rock?'mine':'gather');if(a.type==='life-reel')audioService.playRpgLifeSound('reel');if(a.type==='life-craft'||a.type==='life-build')audioService.playRpgLifeSound('craft');send(a);};
