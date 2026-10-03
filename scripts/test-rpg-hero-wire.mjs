@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+const vite=await createServer({optimizeDeps:{noDiscovery:true,entries:[]},server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'});
+try{
+ const {RpgRoom}=await vite.ssrLoadModule('/src/rpg/network.ts');const {createWorld,addPlayer}=await vite.ssrLoadModule('/src/rpg/engine.ts');
+ const room=new RpgRoom(()=>{},()=>{});room.world=createWorld(3);addPlayer(room.world,'a','A');const hero={name:'Hero',portrait:'data:image/webp;base64,UklGRg=='};room.world.players.a.hero=hero;
+ let state={...room.world,players:{a:{...room.world.players.a}}};delete state.players.a.hero;room.restoreHeroAssets(state);assert.equal(state.players.a.hero,hero,'Initial full snapshot assets persist across slim state');
+ room.receiveHeroAssets({type:'heroes',heroes:{a:null,b:hero}});state={...state,players:{a:{...state.players.a},b:{...state.players.a,id:'b'}}};delete state.players.a.hero;delete state.players.b.hero;room.restoreHeroAssets(state);assert.equal(state.players.a.hero,undefined,'Removing a custom hero must not revive cached art');assert.equal(state.players.b.hero,hero,'Late join art arrives before the player state');room.world={...state,tiles:room.world.tiles};room.restoreHeroAssets({...state,players:{a:state.players.a}});assert.equal(room.heroAssets.has('b'),false,'Departed image cache cleared');
+ console.log('Hero wire passed: full initialization, slim state reuse, hero removal, late join ordering and cache cleanup.');
+}finally{await vite.close();}

@@ -18,7 +18,7 @@ import {
 } from "./setup";
 
 // Arcade result presentation requires the authoritative outcome payload.
-const RPG_PROTOCOL_VERSION = 15;
+const RPG_PROTOCOL_VERSION = 16;
 // Avoid BinaryPack's recursive encoding of 16,896 individual terrain cells.
 // Retain binary transport so PeerJS can still chunk large room snapshots.
 type WireWorld = Omit<World, "tiles"> & { tiles: World["tiles"] | string };
@@ -97,13 +97,17 @@ export class RpgRoom {
         if(this.receiveDungeon(d))return;
         if(d.type==='lobby'){const setup=normalizeRpgAdventureSetup(d.setup);if(!setup){finish(new Error('冒険設定を受け取れませんでした。'));return;}onSetup?.(setup);finish();}
         if(d.type==='init' && d.world){this.world=unpackWorld(d.world);this.emit();finish();}
-        if(d.type==='state' && d.state && this.world){this.world={...d.state,tiles:this.world.tiles};this.emit();}
+        if(this.receiveHeroAssets(d))return;
+        if(d.type==='state' && d.state && this.world){this.restoreHeroAssets(d.state);this.world={...d.state,tiles:this.world.tiles};this.emit();}
       };
       socket.onerror=()=>finish(new Error('専用サーバーへの接続に失敗しました。'));
       socket.onclose=()=>{finish(new Error('専用サーバーとの接続が終了しました。'));if(!this.closed){this.world=null;this.status('通信が切断されました。部屋に入り直してください。');}if(this.timer)clearInterval(this.timer);};
     });
     this.timer=setInterval(()=>this.serverSend({type:'ping',at:Date.now()}),20000);
   }
+  private heroAssets = new Map<string,World['players'][string]['hero']>();
+  private receiveHeroAssets(packet: {type?:string;heroes?:Record<string,World['players'][string]['hero']|null>}){if(packet.type!=='heroes'||!packet.heroes)return false;for(const [id,hero]of Object.entries(packet.heroes)){this.heroAssets.set(id,hero||undefined);if(this.world?.players[id])this.world.players[id].hero=hero||undefined;}this.emit();return true;}
+  private restoreHeroAssets(state:Omit<World,'tiles'>){for(const [id,p]of Object.entries(state.players)){if('hero' in p)this.heroAssets.set(id,p.hero);else p.hero=this.heroAssets.has(id)?this.heroAssets.get(id):this.world?.players[id]?.hero;}for(const id of this.heroAssets.keys())if(!state.players[id])this.heroAssets.delete(id);}
   private commands = new Map<string, { time: number; count: number }>();
   constructor(
     private update: (world: World) => void,
@@ -318,16 +322,21 @@ export class RpgRoom {
       conn.on("close", drop);
       conn.on("error", drop);
     });
+    const heroCache=new Map<string,World['players'][string]['hero']>();
     this.timer = setInterval(() => {
       if (!this.world) return;
       advanceWorld(this.world);
       if (this.world.revision === this.lastRevision) return;
       this.lastRevision = this.world.revision;
       this.emit();
-      const { tiles, ...state } = this.world;
+      const { tiles, ...rest } = this.world;
+      const heroes:Record<string,World['players'][string]['hero']|null>={};
+      for(const p of Object.values(this.world.players))if(heroCache.get(p.id)!==p.hero){heroes[p.id]=p.hero||null;heroCache.set(p.id,p.hero);}
+      for(const id of heroCache.keys())if(!this.world.players[id])heroCache.delete(id);
+      const state={...rest,players:Object.fromEntries(Object.entries(rest.players).map(([id,p])=>{const {hero,...player}=p;return [id,player];}))};
       for (const conn of this.connections.values())
         if (conn.open && this.world.players[conn.peer])
-          conn.send({ type: "state", state });
+          {if(Object.keys(heroes).length)conn.send({type:"heroes",heroes});conn.send({ type: "state", state });}
     }, 250);
     this.emit();
   }
@@ -366,6 +375,7 @@ export class RpgRoom {
           type: string;
           world?: WireWorld;
           state?: Omit<World, "tiles">;
+          heroes?:Record<string,World["players"][string]["hero"]|null>;
           message?: string;
         };
         if (data.type === "error") {
@@ -387,7 +397,9 @@ export class RpgRoom {
           this.emit();
           resolve();
         }
+        if(this.receiveHeroAssets(data))return;
         if (data.type === "state" && data.state && this.world) {
+          this.restoreHeroAssets(data.state);
           this.world = { ...data.state, tiles: this.world.tiles };
           this.emit();
         }
@@ -455,6 +467,7 @@ export class RpgRoom {
           type: string;
           world?: WireWorld;
           state?: Omit<World, "tiles">;
+          heroes?:Record<string,World["players"][string]["hero"]|null>;
           setup?: unknown;
           message?: string;
         };
@@ -482,7 +495,9 @@ export class RpgRoom {
           this.emit();
           finish();
         }
+        if(this.receiveHeroAssets(data))return;
         if (data.type === "state" && data.state && this.world) {
+          this.restoreHeroAssets(data.state);
           this.world = { ...data.state, tiles: this.world.tiles };
           this.emit();
         }
@@ -527,5 +542,6 @@ export class RpgRoom {
     this.pendingInviteNames.clear();
     this.peer?.destroy();
     this.world = null;
+    this.heroAssets.clear();
   }
 }

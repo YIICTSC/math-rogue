@@ -1,3 +1,4 @@
+import {RPG_SOCIAL_ENGLISH,RPG_SOCIAL_HIRAGANA} from '../rpg/socialCopy';
 import {RPG_FISH_ENGLISH,RPG_FISH_HIRAGANA} from '../rpg/fishingCopy';
 import {RPG_MOBILE_ENGLISH,RPG_MOBILE_HIRAGANA} from '../rpg/mobileCopy';
 import {PARTY_ENGLISH,PARTY_HIRAGANA} from '../mini-games/gakuro-craft/partyCopy';
@@ -12,6 +13,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...RPG_SOCIAL_ENGLISH,
   ...RPG_FISH_ENGLISH,
   ...RPG_HOME_ENGLISH,
   ...RPG_MOBILE_ENGLISH,
@@ -247,6 +249,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...RPG_SOCIAL_HIRAGANA,
   ...RPG_FISH_HIRAGANA,
   ...RPG_HOME_HIRAGANA,
   ...RPG_MOBILE_HIRAGANA,

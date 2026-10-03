@@ -379,6 +379,7 @@ export interface MagicRuleState {
 }
 
 export interface Player {
+  customHero?:import('./rpg/customHero').CustomHero;
   rpgMutationRevision?: number;
   id?: string;
   appearanceMode?: CharacterAppearanceMode;

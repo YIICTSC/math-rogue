@@ -1,3 +1,8 @@
+import HeroBuilder from './HeroBuilder';
+import SocialPanel,{loadMemory} from './SocialPanel';
+import {loadHero,saveHero,type CustomHero} from './customHero';
+import {socialLineText,type SocialMemory} from './social';
+import './social.css';
 import useFishingAudio from './useFishingAudio';
 import {FishingFrame} from './FishSprite';
 import FishingCatch from './FishingCatch';
@@ -130,6 +135,7 @@ export default function RpgOnline({
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
+  const [hero,setHero]=useState(loadHero),[heroOpen,setHeroOpen]=useState(false),[memory,setMemory]=useState(loadMemory),[socialError,setSocialError]=useState('');
   const compact=useCompactRpgLayout();
   const [detail,setDetail]=useState<string|null>(null);
   const detailRef=useRef<HTMLElement>(null);
@@ -171,7 +177,7 @@ export default function RpgOnline({
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
   const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch);
   useFishingAudio(world?.players[room.current?.selfId||'']?.life,world?.players[room.current?.selfId||'']?.message||'',active&&!interactionBlocked&&!world?.ended,fishing.result);
-  latest.current = { world, active: active && !fishing.result && !interactionBlocked && !detail && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
@@ -215,6 +221,9 @@ export default function RpgOnline({
     },
     bonusRanking,
   ];
+  const incomingRequest=world?.social?.requests.find(r=>r.to===selfId);
+  const currentTalk=world?.social?.talks.filter(t=>t.people.includes(selfId)).at(-1);
+  const talkLine=currentTalk&&clockNow-currentTalk.at>=0&&clockNow-currentTalk.at<currentTalk.lines.length*2600?currentTalk.lines[Math.floor((clockNow-currentTalk.at)/2600)]:undefined;
   const near =
     world && me
       ? world.sites
@@ -226,6 +235,12 @@ export default function RpgOnline({
     const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+  const heroJson=JSON.stringify(hero),memoryJson=JSON.stringify(memory);
+  useEffect(()=>{if(me&&!me.spectator&&!me.nativeScene&&JSON.stringify(me.hero||null)!==heroJson)room.current?.send({type:'hero-set',hero});},[selfId,!!me,!!me?.spectator,!!me?.nativeScene,heroJson]);
+  useEffect(()=>{if(me&&!me.spectator&&JSON.stringify(me.memory)!==memoryJson)room.current?.send({type:'social-memory',memory});},[selfId,!!me,!!me?.spectator,memoryJson]);
+  useEffect(()=>{audioService.setRpgHeroVoice(hero?.voice||null);return()=>audioService.setRpgHeroVoice(null);},[heroJson]);
+  const updateMemory=(m:SocialMemory)=>{try{localStorage.setItem('rpg-social-memory-v1',JSON.stringify(m));setMemory(m);room.current?.send({type:'social-memory',memory:m});setSocialError('');}catch{setSocialError('保存できませんでした。端末の空き容量を確認してください。');}};
+  const updateHero=(h:CustomHero|null)=>{saveHero(h);setHero(h);room.current?.send({type:'hero-set',hero:h});};
   const profileJson = JSON.stringify({...nativeProfile(player),visualTheme:previewTheme});
   useEffect(() => {
     if (
@@ -364,7 +379,7 @@ export default function RpgOnline({
   const openDetail=(id:string)=>{destination.current=null;walkingRoute.current=[];setDetail(id);};
   useEffect(()=>{if(!compact||!active||lifeOpen||storySiteId||roamingNpcSiteId||hasActivityDialog||me?.life?.indoors)setDetail(null);},[compact,active,lifeOpen,storySiteId,roamingNpcSiteId,hasActivityDialog,me?.life?.indoors]);
   useEffect(()=>{if(!compact||!detail)return;const before=document.activeElement as HTMLElement|null;detailRef.current?.querySelector<HTMLButtonElement>('.rpg-detail-close')?.focus();return()=>{if(before?.isConnected&&before.getClientRects().length)before.focus();};},[compact,!!detail]);
-  const detailKeys=[['player','状態'],['team','仲間'],['event','イベント'],['journal','手帳'],['goal','目標'],['menu','部屋']];
+  const detailKeys=[['social','交流'],['player','状態'],['team','仲間'],['event','イベント'],['journal','手帳'],['goal','目標'],['menu','部屋']];
   const detailKeyDown=(e:React.KeyboardEvent)=>{if(!compact||!detail)return;if(e.key==='Escape'){e.stopPropagation();setDetail(null);}if(e.key==='Tab'){const buttons=Array.from(detailRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input,select,summary,[tabindex="0"]')||[]).filter(el=>el.getClientRects().length>0);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};
   useEffect(()=>{if(!me?.life?.lastAction){setQuickReady(true);return;}setQuickReady(false);const timer=setTimeout(()=>setQuickReady(true),350);return()=>clearTimeout(timer);},[me?.life?.lastAction]);
   const requestEnergy=()=>{if(!active||interactionBlocked||me?.life?.work||hasActivityDialog)return;destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);onEnergyRequest?.();};
@@ -380,6 +395,7 @@ export default function RpgOnline({
   };
   return (
     <TranslatedUiTree mode={languageMode}>
+      {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
       <main className={`rpg-root ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
         <header className="rpg-header">
           <button className="rpg-brand" onClick={close}>
@@ -407,7 +423,7 @@ export default function RpgOnline({
                 visualTheme={previewTheme}
               />
             </div>
-            <section className="rpg-lobby-form">
+            <section className="rpg-lobby-form"><button onClick={()=>setHeroOpen(true)}>オリジナル主人公を作る</button>
               <h1>{autoJoinInvite ? "招待に参加する" : "冒険をはじめる"}</h1>
               <p>
                 {autoJoinInvite
@@ -519,7 +535,7 @@ export default function RpgOnline({
           </div>
         ) : !world.started ? (
           <main className="rpg-waiting-lobby">
-            <section className="rpg-waiting-panel">
+            <section className="rpg-waiting-panel"><button onClick={()=>setHeroOpen(true)}>オリジナル主人公を作る</button>
               <div className="rpg-waiting-heading">
                 <div>
                   <h1>冒険者集合中</h1>
@@ -611,7 +627,7 @@ export default function RpgOnline({
                     )}
                   </span>
                 </div>
-                <div className="rpg-map-container">
+                <div className="rpg-map-container">{incomingRequest&&!me.life?.indoors&&<button className="rpg-social-invite" onClick={()=>openDetail('social')}>{incomingRequest.kind==='cohabit'?'同居のお誘い':'結婚のお申し込み'}</button>}{talkLine&&<div className="rpg-social-bubble" aria-live="polite"><b>{talkLine.speaker==='player'?'あなた':world.players[talkLine.speaker]?.hero?.name||world.players[talkLine.speaker]?.name}</b>{socialLineText(talkLine,languageMode)}</div>}
                   {active && (
                     <WorldCanvas
                       world={world}
@@ -630,7 +646,7 @@ export default function RpgOnline({
                       }}
                     />
                   )}
-                  {!spectating && active && me.life?.indoors && <HomeRoom world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
+                  {!spectating && active && !heroOpen && me.life?.indoors && <HomeRoom onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory} world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
                   {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
@@ -674,7 +690,7 @@ export default function RpgOnline({
               {!spectating && roamingNpcSiteId && active && world.sites.some(s=>s.id===roamingNpcSiteId && s.kind==='npc' && distance(s,me)<=2) && <RoamingNpcDialog languageMode={languageMode} site={world.sites.find(s=>s.id===roamingNpcSiteId)!} player={me} pending={npcChoicePending} blockedReason={siteUnavailable(world,me,world.sites.find(s=>s.id===roamingNpcSiteId)!)} onChoose={choiceId=>{setNpcChoicePending(true);room.current?.send({type:'npc-event-choice',siteId:roamingNpcSiteId,choiceId});}} onClose={()=>{setRoamingNpcSiteId(null);setNpcChoicePending(false);}} />}
               <aside ref={detailRef} className={`rpg-sidebar ${compact?'rpg-detail-sheet':''}`} hidden={compact&&!detail} data-detail={detail||undefined} role={compact&&detail?'dialog':undefined} aria-modal={compact&&detail?true:undefined} aria-label={compact&&detail?'冒険の詳細':undefined} onKeyDown={detailKeyDown}>
             {compact&&detail&&<><header className="rpg-detail-heading"><h2>{detailKeys.find(([id])=>id===detail)?.[1]}</h2><button className="rpg-detail-close" aria-label="マップに戻る" onClick={()=>setDetail(null)}><X size={20}/><span>マップに戻る</span></button></header><nav className="rpg-detail-tabs" aria-label="詳細の切り替え">{detailKeys.filter(([id])=>!spectating||!['journal'].includes(id)).map(([id,label])=><button key={id} aria-pressed={detail===id} onClick={()=>setDetail(id)}>{label}</button>)}</nav></>}
-                <div className="rpg-sidebar-content">
+                <div className="rpg-sidebar-content">{!spectating&&<SocialPanel languageMode={languageMode} world={world} selfId={selfId} send={a=>room.current?.send(a)} onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory}/>}<p role="alert">{socialError}</p>
                 {!spectating && <div data-rpg-panel="journal"><StoryJournal languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);if(compact)setDetail(null);}} /></div>}
                 <ActivitiesPanel display="cards" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />
                 <section data-rpg-panel="goal" className="rpg-objective">
@@ -709,7 +725,7 @@ export default function RpgOnline({
                   </p>
                   <p>宝箱は各プレイヤーにつき1回です。</p>
                 </section>
-                <section data-rpg-panel="team" className="rpg-player-panel">
+                <section data-rpg-panel="team" className="rpg-player-panel"><button onClick={()=>openDetail('social')}>主人公と交流</button>
                   <h2>
                     <Users />
                     チーム
@@ -755,7 +771,7 @@ export default function RpgOnline({
                 </section>
                 </>}
                 {compact&&spectating&&<section data-rpg-panel="player" className="rpg-player-panel"><h2>{watched?.name||'ホスト観戦'}</h2><p>HP {hudHp} / {hudMaxHp}</p><p>コイン {watched?.gold||0} · 戦闘勝利 {watched?.completedBattles||0}</p></section>}
-                {compact&&spectating&&<section data-rpg-panel="team" className="rpg-player-panel"><h2>参加者とチーム</h2>{members.map(p=><p key={p.id}>{p.name} · HP {p.hp}/{p.maxHp}</p>)}</section>}
+                {compact&&spectating&&<section data-rpg-panel="team" className="rpg-player-panel"><button onClick={()=>openDetail('social')}>主人公と交流</button><h2>参加者とチーム</h2>{members.map(p=><p key={p.id}>{p.name} · HP {p.hp}/{p.maxHp}</p>)}</section>}
                 {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>採取エネルギー</h3><p>{energyOf(watched?.life)} / {GATHER_ENERGY_MAX}</p>{!spectating&&<><p>採取1回で1消費、1問正解で2回復。時間では回復しません。</p><button className="rpg-outline" disabled={!onEnergyRequest} onClick={requestEnergy}>問題を解いて回復</button></>}<h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり練習 · 通信なし</p>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
                 </div>
               </aside>

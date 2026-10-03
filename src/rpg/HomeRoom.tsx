@@ -1,3 +1,5 @@
+import SocialPanel from './SocialPanel';
+import {resident,type SocialMemory} from './social';
 import React,{useEffect,useRef,useState} from 'react';
 import {audioService} from '../services/audioService';
 import {trans} from '../utils/textUtils';
@@ -10,8 +12,8 @@ import HobbyGamesPanel from '../mini-games/gakuro-craft/HobbyGamesPanel';
 import FurnitureSprite from './FurnitureSprite';
 import HomeCanvas from './HomeCanvas';
 import './life.css';
-export default function HomeRoom({world,selfId,languageMode,send}:{world:World;selfId:string;languageMode:LanguageMode;send:(a:Action)=>void}){
- const me=world.players[selfId],house=world.life.houses.find(h=>h.id===me.life?.indoors)!,room=interiorOf(house),owner=house.owner===selfId,people=Object.values(world.players).filter(p=>p.life?.indoors===house.id),pos=me.life?.roomPos||ROOM_SPAWN;
+export default function HomeRoom({world,selfId,languageMode,send,onBuilder,onMemory}:{world:World;selfId:string;languageMode:LanguageMode;send:(a:Action)=>void;onBuilder:()=>void;onMemory:(m:SocialMemory)=>void}){
+ const me=world.players[selfId],house=world.life.houses.find(h=>h.id===me.life?.indoors)!,room=interiorOf(house),owner=resident(world,house.id,selfId),people=Object.values(world.players).filter(p=>p.life?.indoors===house.id),pos=me.life?.roomPos||ROOM_SPAWN;
  const t=(s:string)=>trans(s,languageMode),[tab,setTab]=useState('room'),[filter,setFilter]=useState('all'),[selected,setSelected]=useState<string>(),[placing,setPlacing]=useState<string>(),[rotation,setRotation]=useState<0|1>(0),[hover,setHover]=useState({x:4,y:4});
  const exitRequested=useRef(false);
  const route=useRef<Array<{x:number;y:number}>>([]),held=useRef<{dx:number;dy:number}|null>(null),pending=useRef<{x:number;y:number;at:number}|null>(null),latest=useRef({world,tab,send});latest.current={world,tab,send};
@@ -29,8 +31,8 @@ export default function HomeRoom({world,selfId,languageMode,send}:{world:World;s
  const craft=(item:string)=>{audioService.playRpgLifeSound('craft');send({type:'life-furniture-craft',item});};
  return <div className="rpg-life-backdrop"><section className="rpg-life rpg-home-room" role="dialog" aria-modal="true" aria-label={t('家の中のマップ')}>
  <header><div><small>HOME · {people.length}</small><h2>{house.ownerName} · {t('仲間の集まる家')}</h2></div><button onClick={exit}>{t('入口へ向かう')} ↓</button></header>
- <nav>{[['room','室内を歩く'],['craft','家具を作る'],['stock','持ち物と配置'],['games','ミニゲーム']].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{setPlacing(undefined);setTab(id);}}>{t(label)}</button>)}</nav>
- <div className="rpg-room-guests">{people.map(p=><span key={p.id}>{p.name}</span>)}{owner&&<button onClick={()=>send({type:'life-invite'})}>{t('みんなを招待')}</button>}</div>
+ <nav>{[['room','室内を歩く'],['craft','家具を作る'],['stock','持ち物と配置'],['games','ミニゲーム'],['social','交流']].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{setPlacing(undefined);setTab(id);}}>{t(label)}</button>)}</nav>
+ <div className="rpg-room-guests">{world.social?.requests.some(r=>r.to===selfId)&&<button onClick={()=>setTab('social')}>{t('主人公と交流')} !</button>}{people.map(p=><span key={p.id}>{p.name}</span>)}{owner&&<button onClick={()=>send({type:'life-invite'})}>{t('みんなを招待')}</button>}</div>
  <div className="rpg-life-content">
  {tab==='room'&&<><HomeCanvas room={room} players={people} selfId={selfId} selected={selected} preview={preview} label={t('家の中のマップ')} onHover={(x,y)=>{if(placing)setHover(p=>p.x===x&&p.y===y?p:{x,y});}} onTile={(x,y)=>{if(placing){const p:PlacedFurniture={id:'preview',item:placing,x,y,rotation};send({type:'life-place',item:placing,x,y,rotation});if(placementFits(room,p,occupants)){audioService.playRpgLifeSound('craft');setPlacing(undefined);}return;}const f=room.placed.find(p=>covers(p,x,y)&&!furnishing(p.item)?.floor)||room.placed.find(p=>covers(p,x,y));setSelected(f?.id);walk(x,y);}}/>
  <div className="rpg-room-controls"><div className="rpg-room-pad">{[[0,-1,'↑'],[-1,0,'←'],[0,1,'↓'],[1,0,'→']].map(([dx,dy,label])=><button key={String(label)} aria-label={t('室内の移動')+' '+label} onPointerDown={e=>{e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);move(Number(dx),Number(dy));held.current={dx:Number(dx),dy:Number(dy)};}} onPointerUp={()=>{held.current=null;}} onPointerCancel={()=>{held.current=null;}} onLostPointerCapture={()=>{held.current=null;}} onClick={e=>{if(e.detail===0)move(Number(dx),Number(dy));}}>{label}</button>)}</div><p>{t(placing?'飾る場所をマップで選んでください。':'マップをタップ、または矢印キー・WASDで移動。下の入口に重なると外へ出ます。')}</p></div>
@@ -39,6 +41,7 @@ export default function HomeRoom({world,selfId,languageMode,send}:{world:World;s
  </>}
  {tab==='craft'&&<><p>{t(owner?'家具を作ると持ち物に入ります。場所を選んで飾りましょう。':'家具の作成・配置は家の持ち主が行います。')}</p><div className="rpg-life-bag">{Object.entries(me.life!.bag).map(([k,n])=><span key={k}>{t(MATERIAL_NAMES[k as Material])} <b>{n}</b></span>)}</div><div className="rpg-room-filters">{[['all','すべて'],['decor','家具とインテリア'],['plush','ぬいぐるみ'],['game','ゲーム家具']].map(([id,label])=><button key={id} aria-pressed={filter===id} onClick={()=>setFilter(id)}>{t(label)}</button>)}</div><div className="rpg-life-grid">{FURNISHINGS.filter(f=>filter==='all'||filter==='game'&&f.game||filter==='plush'&&f.id.startsWith('plush')||filter==='decor'&&!f.game&&!f.id.startsWith('plush')).map(f=><article key={f.id}><FurnitureSprite item={f.id}/><h3>{t(f.name)}</h3><small>{cost(f)}</small><small>{f.width}×{f.height}</small><button disabled={!owner||!canAfford(me.life!.bag,f.cost)||world.ended} onClick={()=>craft(f.id)}>{t('作る')}</button></article>)}</div></>}
  {tab==='stock'&&<><p>{t('作った家具を選び、室内マップの好きな場所に配置できます。')}</p><div className="rpg-life-grid">{stock.map(([item,n])=>{const f=furnishing(item);return f&&<article key={item}><FurnitureSprite item={f.id}/><h3>{t(f.name)} ×{n}</h3><button disabled={!owner||world.ended} onClick={()=>{setTab('room');setPlacing(item);setRotation(0);setSelected(undefined);}}>{t('飾る')}</button></article>;})}</div>{!stock.length&&<p>{t('持ち物に家具がありません。家具を作るか、配置済みの家具を持ち物に戻しましょう。')}</p>}</>}
+ {tab==='social'&&<SocialPanel languageMode={languageMode} world={world} selfId={selfId} send={send} onBuilder={onBuilder} onMemory={onMemory}/>}
  {tab==='games'&&<>{!active&&<p>{t('ゲーム家具の近くで参加できます。家具は室内マップで選べます。')}</p>}{nearGames.length||active?<HobbyGamesPanel world={adapter} me={adapter.players[selfId]} home={{...house.home,furniture:active?house.home.furniture.filter(f=>f.slot===active.slot):nearGames}} t={t} send={command=>send({type:'life-game',command})}/>:<button onClick={()=>setTab('room')}>{t('室内へ戻る')}</button>}</>}
  </div><footer aria-live="polite">{t(me.message)}</footer>
  </section></div>;

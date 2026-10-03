@@ -1,3 +1,4 @@
+import {heroFrame} from './customHero';
 import {assetUrl} from '../utils/assetPaths';
 import {natureAt,resourceReady} from './life';
 import { BIOMES, biomeSurface } from "./biomes";
@@ -111,7 +112,8 @@ function person(
     coat = colors[p.color],
     bob = Math.sin(time / 350 + p.color) > 0.8 ? 1 : 0;
   rect(c, x + 3, y + 13, 11, 3, "#203b35");
-  const source = p.profile?.image;
+  const action=p.life?.work?(p.life.work.kind==='fish'?'skill':'attack'):p.hp/p.maxHp<=.25?'low-hp':p.memory?.autoTalk&&time%10000<2200?'idle-special':'idle';
+  const source = p.hero?heroFrame(p.hero,action,time):p.profile?.image;
   if (source && !characterImages.has(source)) {
     const image = new Image();
     image.src = source;

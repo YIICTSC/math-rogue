@@ -79,3 +79,13 @@
 - アタリ音は浮きが沈んだとき一度だけ。合わせ・巻き上げの手応えは入力直後、成功・失敗はサーバーの受理した段階変化で判定する。レア釣果の音が通常釣果音より優先され、最大サイズ更新は少し遅れて重ねる。重複スナップショットで同じ合図を繰り返さない。
 - 事前読み込みでタイミング合図の遅れを抑える。端末の音量・ミュート設定に従い、中断時・問題画面への切り替え・終了時に釣り音を停止する。閉じた釣果画面の記録更新音を後から鳴らさない。
 - 検証: `node scripts/test-rpg-fishing-audio-browser.mjs` で実際の釣り操作、通常・レア・記録更新・早すぎる合わせ・中断、22個のMP3/Opusのデコード・音量ピーク・ミュートを確認する。
+
+### Original heroes and social life
+
+The RPG lobby and the **Friends → Hero and friendships** drawer open an original hero builder. Upload a photo or image file, crop a region, remove a connected corner-colored background, erase or restore pixels with a touch brush, and undo edits. Each of the high-school actions (`idle`, `idle-special`, `attack`, `skill`, `hit`, `low-hp`) accepts one to four ordered frames; missing actions fall back to the idle portrait. Registered images are transparent WebP with 12-pixel padding at 160×192, compressed to fit a 320 KB validated hero packet. Browsers without WebP canvas encoding use transparent PNG with adaptive downscaling instead of losing the cutout or rejecting detailed photos. The selected high-school/magic protagonist voice is used for RPG actions. Appearance does not change the original archetype's deck, relics, or stats.
+
+The hero and up to 12 favorite phrases are saved on the device and shared on joining a room. Nearby heroes chat automatically every 16 seconds when enabled, or on request (12-second pair cooldown). The three personality choices affect responses; remembered phrases appear in coherent and occasional quirky exchanges. Players can also talk directly to their own hero. Conversations appear on the map and in a bounded history. Friendship rises by 3–5 per exchange, capped at 100.
+
+Friendship 20 allows cohabitation invitations to an existing house owned by either player; 50 allows marriage proposals. Only the recipient can accept or decline an invitation, which expires after 60 seconds. Both players must still be nearby and available at acceptance. A player has at most one marriage and one shared home. Cohabitants can craft, place, rotate, and pack furniture in their shared house; ending cohabitation removes these rights. Either player can end a relationship. Relationships and conversation history belong to the current room; the hero and favorite phrases persist on the device. Leaving a room clears that player's relationships and pending invitations.
+
+Hero images are sent separately on changes and in initialization snapshots. Regular WebSocket/PeerJS state updates omit the image payload and reuse local assets, including for late joining players. Original image files stay on the user's device; only registered cutouts are shared.

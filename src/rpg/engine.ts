@@ -1,3 +1,5 @@
+import {applySocial,advanceSocial,newSocial,type SocialWorld,type SocialMemory,type SocialAction} from './social';
+import type {CustomHero} from './customHero';
 import {recoverGatherEnergy,GATHER_ENERGY_MAX} from './energy';
 import { createLife, advanceLife, applyLifeAction, lifeWalkable, type LifeWorld, type LifePlayer, type LifeAction } from './life';
 import { BIOMES, biomeAt, biomeSurface, riverAt, fishingPondAt } from "./biomes";
@@ -82,6 +84,9 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  hero?:CustomHero;
+  memory?:SocialMemory;
+  lastPlayerTalk?:number;
   life?: LifePlayer;
   stories?: Record<string, StoryProgress>;
   spectator?: boolean;
@@ -118,6 +123,7 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+  social?:SocialWorld;
   life: LifeWorld;
   nativeMode: true;
   gameMode: "COOP" | "BATTLE_ROYALE";
@@ -141,7 +147,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = LifeAction | StoryAction | DuelAction | ActivityAction
+export type Action = SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -626,7 +632,10 @@ export function removePlayer(w: World, id: string) {
   leaveDuels(w,id);
   leaveActivities(w,id);
   log(w, `${w.players[id].name}が退出。`);
+  for(const r of w.social?.relations||[])if(r.people.includes(id)&&r.houseId)for(const qid of r.people){const q=w.players[qid];if(q?.life)q.life.homeId=w.life.houses.find(h=>h.owner===qid)?.id;}
   delete w.players[id];
+  if(w.social){w.social.requests=w.social.requests.filter(r=>r.from!==id&&r.to!==id);w.social.relations=w.social.relations.filter(r=>!r.people.includes(id));}
+
   for (const p of Object.values(w.players))
     if (
       p.team &&
@@ -673,6 +682,7 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if ((action.type==='hero-set'||action.type.startsWith('social-'))&&!p.spectator)return applySocial(w,p,action as SocialAction,now);
   if (p.spectator && action.type !== "native-profile") return false;
   if (!w.started && action.type !== "native-profile") return false;
   if (action.type.startsWith("life-")) return applyLifeAction(w,p,action as LifeAction,now);
@@ -797,6 +807,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 export function advanceWorld(w: World, now = Date.now()) {
   if (w.started && !w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
   advanceLife(w,now);
+  advanceSocial(w,now);
   advanceActivities(w,now);
   advanceDuels(w,now);
   if (

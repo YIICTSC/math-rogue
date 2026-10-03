@@ -1,3 +1,4 @@
+import CustomHeroSprite from '../rpg/CustomHeroSprite';
 
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, RaceTrickCard, AttackEffectKey, ActiveFamiliar, CharacterAppearanceMode } from '../types';
 import Card from './Card';
@@ -949,7 +950,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         player.magicProtagonistGender,
         player.appearanceMode,
     );
-    const canUseSpecialIdle = !!specialIdleSheetSource
+    const canUseSpecialIdle = (!!player.customHero || !!specialIdleSheetSource)
         && !mobileActiveFamiliar
         && !isActing
         && !isPlayerHit
@@ -1018,8 +1019,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const displayedPlayerSpriteKey = mobileActiveFamiliar
         ? `${mobileActiveFamiliar.instanceId}-${mobileFamiliarPresentation?.phase}`
         : `hero-${player.id}-${heroAnimationAction}-${lastActionTime}-${player.currentHp}`;
-    const shouldRenderHeroAnimationSheet = !!heroAnimationSheetSource && !mobileActiveFamiliar;
-    const shouldRenderIdleSpriteSheet = !!idleSpriteSheetSource
+    const shouldRenderHeroAnimationSheet = !player.customHero && !!heroAnimationSheetSource && !mobileActiveFamiliar;
+    const shouldRenderIdleSpriteSheet = !player.customHero && !!idleSpriteSheetSource
         && !shouldRenderHeroAnimationSheet
         && !mobileActiveFamiliar
         && highSchoolHeroAction === 'idle';
@@ -2381,7 +2382,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         />
                                     </div>
                                 )}
-                                {shouldRenderHeroAnimationSheet ? (
+                                {player.customHero && !mobileActiveFamiliar ? <CustomHeroSprite hero={player.customHero} action={shouldUseHeroAnimationSheet?heroAnimationAction:'idle'} className="relative z-10"/> : shouldRenderHeroAnimationSheet ? (
                                     <div
                                         key={`${displayedPlayerSpriteKey}-${heroAnimationSheetSource}`}
                                         role="img"

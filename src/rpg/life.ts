@@ -1,3 +1,4 @@
+import {resident} from './social';
 import {chooseFish,reelWindow,fishSize,recordFish,type FishingRun,type FishRecords,type FishCatch} from './fishing';
 import {energyOf,GATHER_ENERGY_COST,GATHER_ENERGY_MAX} from './energy';
 import {ROOM_DOOR,ROOM_SPAWN,newInterior,furnishing,furnitureDistance,placementFits,roomWalkable,type Interior,type PlacedFurniture} from './homeCatalog';
@@ -93,11 +94,11 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   enterHouse(w,p,h);return tell('家へようこそ！家具からゲームに参加できます。');
  }
  if(a.type==='life-invite'){
-  const h=life.houses.find(h=>h.owner===p.id);if(!h||now-h.invitedAt<5000)return false;
+  const h=life.houses.find(h=>h.id===(lp.indoors||lp.homeId)&&resident(w,h.id,p.id))||life.houses.find(h=>h.owner===p.id);if(!h||now-h.invitedAt<5000)return false;
   h.invitedAt=now;w.logs=['仲間を募集中！',...w.logs].slice(0,8);return tell('家の場所をみんなに知らせました。');
  }
  if(['life-furniture-craft','life-place','life-pack','life-rotate'].includes(a.type)){
-  const h=life.houses.find(h=>h.id===lp.indoors);if(!h||h.owner!==p.id||lp.work)return tell('家具の作成・配置は自分の家の中で行えます。');
+  const h=life.houses.find(h=>h.id===lp.indoors);if(!h||!resident(w,h.id,p.id)||lp.work)return tell('家具の作成・配置は自分の家の中で行えます。');
   const room=h.interior??=interiorOf(h),occupants=Object.values(w.players).filter(q=>q.life?.indoors===h.id).map(q=>q.life?.roomPos||ROOM_SPAWN);
   if(a.type==='life-furniture-craft'){
    const f=furnishing(a.item);if(!f||!canAfford(lp.bag,f.cost))return tell('材料が足りません。');if(Object.values(room.stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');

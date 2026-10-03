@@ -77,6 +77,11 @@ const SHOGI_GIMMICK_SOUND_PROFILES: Readonly<Record<string, ShogiGimmickSoundPro
 };
 
 class AudioService {
+  private rpgHeroVoice: {theme:'high-school'|'magic';heroId:string}|null=null;
+  public setRpgHeroVoice(voice:{theme:'high-school'|'magic';heroId:string}|null){this.rpgHeroVoice=voice;}
+  public playRpgHeroVoice(action:'attack'|'damage'|'skill'|'finish'|'defeat'='attack'){const voice=this.rpgHeroVoice;if(!voice)return Promise.resolve(false);if(voice.theme==='high-school')return this.playHighSchoolVoiceFile(voice.heroId,`${action==='skill'?'power':action}-${Math.floor(Math.random()*5)+1}`);return this.redirectMagicHeroVoice(voice.heroId,action==='damage'?'damage':action==='skill'?'spell':'attack');}
+  private redirectMagicHeroVoice(heroId:string,action:'attack'|'damage'|'spell'){const voice=this.rpgHeroVoice;this.rpgHeroVoice=null;const result=this.playMagicVoice(heroId,action);this.rpgHeroVoice=voice;return result;}
+
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private bgmGain: GainNode | null = null;
@@ -1985,6 +1990,7 @@ class AudioService {
   }
 
   public playMagicVoice(heroId: string | undefined, action: 'attack' | 'damage' | 'spell' = 'attack', variantCount = 3, spellIndex?: number, transformed = false): Promise<boolean> {
+      if(this.rpgHeroVoice)return this.playRpgHeroVoice(action==='spell'?'skill':action);
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       const voiceName = safeAction === 'spell'
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
@@ -2024,6 +2030,7 @@ class AudioService {
       action: 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat' = 'attack',
       variantCount = 5,
   ): Promise<boolean> {
+      if(this.rpgHeroVoice)return this.playRpgHeroVoice(action==='damage'?'damage':action==='finish'?'finish':action==='defeat'?'defeat':action==='attack'?'attack':'skill');
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       const voiceName = `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
       return this.playHighSchoolVoiceFile(heroId, voiceName, 2600);

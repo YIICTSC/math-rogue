@@ -6,8 +6,8 @@ import { normalizeRpgAdventureSetup } from '../src/rpg/setup';
 import {miniUpgrade,closeMiniRooms} from './miniRooms';
 import {golfUpgrade,closeGolfRooms} from './golfRooms';
 
-type Member = { socket: WebSocket; id: string; admitted: boolean; name: string; alive: boolean; at: number; count: number };
-type Room = { world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number };
+type Member = { socket: WebSocket; id: string; admitted: boolean; name: string; alive: boolean; at: number; count: number; stateRevision?:number };
+type Room = { world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number; heroCache?: Map<string,World["players"][string]["hero"]> };
 const rooms = new Map<string, Room>();
 const allowed = new Set((process.env.ALLOWED_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean));
 const server = createServer((req,res)=>{
@@ -21,7 +21,7 @@ function send(m: Member, packet: unknown) {
   if(m.socket.readyState !== WebSocket.OPEN) return;
   m.socket.send(JSON.stringify(packet));
 }
-function init(room: Room,m: Member) {send(m,{type:'init',world:{...room.world,tiles:room.world.tiles.join(',')}});}
+function init(room: Room,m: Member) {send(m,{type:'init',world:{...room.world,tiles:room.world.tiles.join(',')}});m.stateRevision=room.world.revision;}
 function fail(m: Member,message: string) {send(m,{type:'error',message});}
 sockets.on('connection',(socket,request)=>{
   if(allowed.size && (!request.headers.origin || !allowed.has(request.headers.origin))) {socket.close(1008,'Origin denied');return;}
@@ -84,11 +84,17 @@ const tick=setInterval(()=>{
     if(room.emptyAt && Date.now()-room.emptyAt>60000){rooms.delete(code);continue;}
     if(!room.members.size)continue;
     advanceWorld(room.world);
-    if(room.revision===room.world.revision)continue;
-    const {tiles,...state}=room.world;
+    if(room.revision===room.world.revision&&[...room.members.values()].every(m=>!m.admitted||m.stateRevision===room.world.revision))continue;
+    const {tiles,...rest}=room.world;
+    const changed:Record<string,World['players'][string]['hero']|null>={};
+    room.heroCache??=new Map();
+    for(const p of Object.values(room.world.players))if(room.heroCache.get(p.id)!==p.hero){changed[p.id]=p.hero||null;room.heroCache.set(p.id,p.hero);}
+    if(Object.keys(changed).length)for(const m of room.members.values())if(m.admitted)send(m,{type:'heroes',heroes:changed});
+    for(const id of room.heroCache.keys())if(!room.world.players[id])room.heroCache.delete(id);
+    const state={...rest,players:Object.fromEntries(Object.entries(rest.players).map(([id,p])=>{const {hero,...player}=p;return [id,player];}))};
     // Encode shared state once for all 40 players. Slow receivers get the next state.
     const packet=JSON.stringify({type:'state',state});
-    for(const m of room.members.values())if(m.admitted && m.socket.readyState===WebSocket.OPEN && m.socket.bufferedAmount<65536)m.socket.send(packet);
+    for(const m of room.members.values())if(m.admitted && m.socket.readyState===WebSocket.OPEN && m.socket.bufferedAmount<65536){m.socket.send(packet);m.stateRevision=room.world.revision;}
     room.revision=room.world.revision;
   }
 },100);

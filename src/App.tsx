@@ -10824,6 +10824,7 @@ const App: React.FC = () => {
         const highSchoolVoiceHeroId = gameState.visualTheme === 'high-school' ? actionPlayer.id : undefined;
         const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
         let didPlayCardVoice = false;
+        if(!isCoopHostRemoteAction&&gameState.rpgOnline&&gameState.visualTheme==='elementary'&&rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.hero){void audioService.playRpgHeroVoice(card.type===CardType.ATTACK?'attack':'skill');didPlayCardVoice=true;}
         if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
             const playMagicRuleVoice = () => {
                 audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1, actionPlayer.magicTransformed);
@@ -13436,6 +13437,7 @@ const App: React.FC = () => {
                     applyRelicDamageTakenEffects(p, newEnemies, damage, didHpDamage);
                     if (didHpDamage) {
                         audioService.playBattleSound('damage');
+                        if(prev.rpgOnline&&prev.visualTheme==='elementary'&&rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.hero)playDelayedBattleVoice(()=>audioService.playRpgHeroVoice('damage'),BATTLE_VOICE_REPLY_DELAY_MS);
                         if (prev.visualTheme === 'magic' && lastMagicDamageVoiceActionRef.current !== enemyActionKey) {
                             lastMagicDamageVoiceActionRef.current = enemyActionKey;
                             playDelayedBattleVoice(() => {
@@ -14790,6 +14792,7 @@ const App: React.FC = () => {
             audioService.stopBGM();
         }
         audioService.playSound('win');
+        if(stateRef.current.rpgOnline&&stateRef.current.visualTheme!=='high-school'&&rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.hero)void audioService.playRpgHeroVoice('finish');
         if (stateRef.current.visualTheme === 'high-school') {
             audioService.playHighSchoolVoice(stateRef.current.player.id, 'finish');
         }
@@ -14949,6 +14952,7 @@ const App: React.FC = () => {
         setNewlyUnlockedCard(null);
         setLegacyCardSelected(false);
         audioService.playSound('lose');
+        if(currentState.rpgOnline&&currentState.visualTheme!=='high-school'&&rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.hero)void audioService.playRpgHeroVoice('defeat');
         if (currentState.visualTheme === 'high-school') {
             audioService.playHighSchoolVoice(currentState.player.id, 'defeat');
         }
@@ -21462,7 +21466,7 @@ const App: React.FC = () => {
                             />
                         ) : (
                             <BattleScene
-                                rivalVisualTheme={rpgSnapshot?.world.players[rpgRivalId]?.profile?.visualTheme} rivalPlayer={currentRpgDuel?.players[rpgRivalId]} player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} blockAttackCards={!!rpgDuelRef.current && currentRpgDuel?.turn===1} coopCanAct={rpgDuelRef.current ? canActInDuel() : gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={rpgDuelRef.current ? (canActInDuel()?trans('あなたのターン',languageMode):trans('相手のターン',languageMode)) : gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} raceTrickCards={gameState.challengeMode === 'RACE' ? raceTrickCards : undefined} raceTargets={gameState.challengeMode === 'RACE' ? getRaceTargetEntries().slice(0, 3) : undefined} onUseRaceTrickCard={gameState.challengeMode === 'RACE' ? handleUseRaceTrickCard : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={battleSelectionState} onHandSelection={handleHandSelection}
+                                rivalVisualTheme={rpgSnapshot?.world.players[rpgRivalId]?.profile?.visualTheme} rivalPlayer={currentRpgDuel?.players[rpgRivalId]} player={gameState.rpgOnline?{...gameState.player,customHero:rpgSnapshot?.world.players[rpgSnapshot.selfId]?.hero}:gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} blockAttackCards={!!rpgDuelRef.current && currentRpgDuel?.turn===1} coopCanAct={rpgDuelRef.current ? canActInDuel() : gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={rpgDuelRef.current ? (canActInDuel()?trans('あなたのターン',languageMode):trans('相手のターン',languageMode)) : gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} raceTrickCards={gameState.challengeMode === 'RACE' ? raceTrickCards : undefined} raceTargets={gameState.challengeMode === 'RACE' ? getRaceTargetEntries().slice(0, 3) : undefined} onUseRaceTrickCard={gameState.challengeMode === 'RACE' ? handleUseRaceTrickCard : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={battleSelectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                                 parryState={gameState.parryState} onParry={handleParryClick} showParryTutorial={showParryTutorial} onCloseParryTutorial={handleCloseParryTutorial} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
