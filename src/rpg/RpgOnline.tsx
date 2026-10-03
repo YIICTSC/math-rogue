@@ -582,7 +582,7 @@ export default function RpgOnline({
             <div className="rpg-game-grid">
               <section className="rpg-exploration" inert={compact&&!!detail?true:undefined}>
                 {compact&&<div className="rpg-compact-hud" aria-label="冒険の重要情報">
-                  <button className="rpg-compact-menu" aria-label="部屋と操作の詳細" onClick={()=>openDetail('menu')}><Compass size={19}/></button>
+                  <button className="rpg-compact-menu" aria-label="部屋と操作の詳細" onClick={()=>openDetail('menu')}><Compass size={19}/><span className="rpg-desktop-title">木漏れ日のフロンティア</span></button>
                   <button className="rpg-compact-health" aria-label="プレイヤーの状態" onClick={()=>openDetail('player')}><Heart size={15}/><span>HP <b>{hudHp}/{hudMaxHp}</b><i><em style={{width:`${Math.max(0,Math.min(100,hudHp/Math.max(1,hudMaxHp)*100))}%`}}/></i></span></button>
                   <button className="rpg-compact-clock" aria-label="制限時間と冒険の目標" onClick={()=>openDetail('goal')}><Clock size={15}/><b>{Math.floor((remainingSeconds||0)/60)}:{String((remainingSeconds||0)%60).padStart(2,'0')}</b></button>
                   <button className="rpg-compact-members" aria-label="参加者とチーム" onClick={()=>openDetail('team')}><Users size={16}/><span>{members.length}/40</span></button>
@@ -630,7 +630,7 @@ export default function RpgOnline({
                     <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
-                    <TouchPad disabled={!active||interactionBlocked||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/>
+                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!active||interactionBlocked||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
                     {compact&&quickTiles.length>0&&<div className="rpg-quick-resources" role="group" aria-label="近くの採取"><div>{quickTiles.map(tile=>{const fish=world.tiles[tile]==='water',node=natureAt(world,tile),label=fish?'川釣り':node!.name;return <button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} aria-label={label} title={label} onClick={()=>quickGather(tile)}><LifeSprite index={fish?21:node!.sprite}/><span>{fish?'釣り':node!.rock?'採掘':'採取'}</span></button>;})}</div></div>}
                     {near && (

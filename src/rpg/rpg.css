@@ -1828,3 +1828,32 @@
 .rpg-quick-resources button{display:flex;flex-direction:column;align-items:center;gap:1px;flex:0 0 52px;min-height:58px;padding:2px;border:1px solid #6c9478;border-radius:7px;background:#244e3d;color:#f6edc9;font-size:10px}
 .rpg-quick-resources .rpg-life-sprite{width:36px;height:36px}
 @media(orientation:landscape){.rpg-root--compact .rpg-map-actions{max-width:48%}.rpg-quick-resources button{flex-direction:row;flex-basis:66px;min-height:44px;font-size:10px}.rpg-quick-resources .rpg-life-sprite{width:32px;height:32px}.rpg-quick-resources>div{max-width:300px}}
+
+/* Large displays share the map-first layout, with readable controls and a right drawer. */
+.rpg-desktop-title,.rpg-desktop-hint{display:none}.rpg-movement-controls{flex-shrink:0}
+@media(min-width:901px) and (min-height:601px){
+ .rpg-root--compact .rpg-compact-hud{min-height:58px;padding:5px 18px;gap:12px}
+ .rpg-compact-hud button{min-height:46px;font-size:14px;padding:8px 14px}
+ .rpg-compact-hud .rpg-compact-menu{flex:1;justify-content:flex-start;gap:12px}
+ .rpg-desktop-title{display:inline;font-size:18px;letter-spacing:.04em}
+ .rpg-compact-hud .rpg-compact-health{flex:0 1 210px}
+ .rpg-root--compact .rpg-compact-dock{min-height:64px;justify-content:center;gap:10px;padding:5px 18px}
+ .rpg-compact-dock button{flex:0 1 140px;min-height:52px;flex-direction:row;gap:9px;font-size:14px;border:1px solid #57736666;background:#213c3a}
+ .rpg-compact-dock small{top:2px;right:6px;font-size:10px;padding:1px 4px}
+ .rpg-root--compact .rpg-compact-message{left:18px;top:14px;max-width:min(650px,60%);min-height:36px;font-size:13px!important;padding:8px 12px}
+ .rpg-root--compact .rpg-map-bottom{left:18px;right:18px;bottom:16px}
+ .rpg-desktop-hint{display:block;margin-bottom:8px;padding:5px 9px;border-radius:6px;background:#15302bd9;color:#dbe5d0;font-size:12px}
+ .rpg-root--compact .rpg-map-actions{max-width:380px;gap:12px}
+ .rpg-root--compact .rpg-interact{font-size:15px;padding:12px 16px;min-height:58px}
+ .rpg-root--compact .rpg-interact small{font-size:12px}
+ .rpg-quick-resources>div{max-width:360px}
+ .rpg-quick-resources button{flex-basis:78px;min-height:52px;font-size:12px;gap:4px}
+ .rpg-quick-resources .rpg-life-sprite{width:40px;height:40px}
+ .rpg-root--compact .rpg-detail-sheet{inset:12px 12px 12px auto;width:480px;max-width:calc(100vw - 24px);margin:0;border-radius:14px}
+ .rpg-root--compact .rpg-detail-heading{padding:12px 16px}.rpg-detail-heading h2{font-size:19px}
+ .rpg-root--compact .rpg-sidebar-content{padding:16px;font-size:15px;line-height:1.7}
+ .rpg-detail-tabs button{font-size:14px}.rpg-detail-close{font-size:14px}
+ .rpg-root--compact .rpg-sidebar-content>section{padding:18px}
+ .rpg-root--compact .rpg-sidebar-content h2{font-size:17px}.rpg-root--compact .rpg-sidebar-content p{font-size:14px}.rpg-root--compact .rpg-sidebar-content small,.rpg-root--compact .rpg-seals span{font-size:12px}
+ .rpg-gather-mini{width:420px;padding:18px 22px}.rpg-gather-mini h2{font-size:20px}.rpg-gather-mini p{font-size:15px}.rpg-gather-hint{font-size:14px}
+}

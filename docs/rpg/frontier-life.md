@@ -32,9 +32,9 @@
 - All six games cap sessions at four players, reject other seats and stale turns, support rematches and return to the lobby when someone exits/disconnects. Timed turns keep play moving. Board results remain visible after the game.
 - Tests: `node scripts/test-home-party-games.mjs`, `node scripts/test-home-furniture-art.mjs`, `node scripts/test-home-party-browser.mjs`, plus the existing RPG homes/resources tests. The browser test uses four independent pages with a shared authoritative fixture to verify UI commands and synchronized state; it does not substitute for a live Render connection check.
 
-## スマホの探索画面
+## マップ中心の探索画面
 
-幅900px以下、または高さ600px以下のタッチ端末では、探索画面を画面全体に表示する。上部はHP・残り時間・人数、下部は採取・全体マップ・仲間・イベント・手帳・詳細の操作に絞る。カードの内容は対応するボタンから開く詳細パネル内で確認する。縦画面は下から広いパネル、横画面は右側のパネルに表示する。PCの通常表示は従来のサイドバーを維持する。
+スマホ・タブレット・デスクトップで探索画面を画面全体に表示する。上部はHP・残り時間・人数、下部は採取・全体マップ・仲間・イベント・手帳・詳細の操作に絞る。カードの内容は対応するボタンから開く詳細パネル内で確認する。縦画面は下から広いパネル、横画面は右側のパネルに表示する。デスクトップではゲーム名、読みやすいサイズのHP・時間・人数を上部に表示し、下部メニューを中央に集める。詳細は幅480pxの右側パネルへ表示し、移動操作のキーボード案内を左下に表示する。
 
 詳細表示中は移動を止め、閉じるボタン・背景タップ・Escapeでマップに戻る。矢印は押し続けると移動を繰り返し、離すと停止する。トレードやダンジョンの参加確認は詳細パネルを閉じていても表示する。画面回転時にキャンバスを追従させ、高さの低い横画面では地図の表示倍率を調整する。
 
@@ -42,6 +42,8 @@
 
 ### 素材のクイック採取
 
-スマホのマップ右下には、採取範囲内にある木・岩・草・川のアイコンボタンを表示する。施設やイベントの「調べる」が表示されているときは、その上に配置する。川釣りのボタンは近くの水面を1つにまとめ、外周と再生待ちの素材は表示しない。素材が多い場合はアイコン列を横にスクロールできる。
+マップ右下には、採取範囲内にある木・岩・草・川のアイコンボタンを表示する。施設やイベントの「調べる」が表示されているときは、その上に配置する。川釣りのボタンは近くの水面を1つにまとめ、外周と再生待ちの素材は表示しない。素材が多い場合はアイコン列を横にスクロールできる。
 
 ボタンを押すと、そのまま採取・採掘・釣りを開始する。マップ上の隣接素材をタップしても開始できる。採取アクションは小さなメーターを重ね、画面のどこでもタップして確定する。緑／金色の範囲で確定すると大成功になる。中断ボタンとEscapeは確定せず中止し、確定後は自動でマップに戻る。作業中の移動と連打による二重確定は防ぐ。素材の種類に応じた採取・採掘・釣りの音を維持する。
+
+デスクトップ検証には1366×768、1920×1080、1024×768、1024×1280のマップ占有率・右側パネル・スクロールの有無、キーボード移動・Spaceでの採取確定、端末サイズ変更時の詳細表示保持、英語HUDを含む。
