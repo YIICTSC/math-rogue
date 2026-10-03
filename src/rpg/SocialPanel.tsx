@@ -1,3 +1,5 @@
+import ConversationVoiceSettings from "./ConversationVoiceSettings";
+import { validConversationVoice } from "./conversationVoice";
 import TranslatedUiTree from "../components/TranslatedUiTree";
 import type { LanguageMode } from "../types";
 import React, { useState } from "react";
@@ -25,7 +27,8 @@ export function loadMemory(): SocialMemory {
         (p: unknown) => typeof p === "string" && p.length <= 48,
       ) &&
       ["kind", "logical", "quirky"].includes(m.personality) &&
-      typeof m.autoTalk === "boolean"
+      typeof m.autoTalk === "boolean" &&
+      (m.conversationVoice === undefined || validConversationVoice(m.conversationVoice))
       ? m
       : DEFAULT_MEMORY;
   } catch {
@@ -66,6 +69,7 @@ export default function SocialPanel({
         <h2>主人公と交流</h2>
         <button onClick={onBuilder}>オリジナル主人公を作る</button>
         <p>{me.hero?.name || me.name}</p>
+        <ConversationVoiceSettings languageMode={languageMode} voice={memory.conversationVoice} onChange={conversationVoice => onMemory({ ...memory, conversationVoice })}/>
         <label>
           会話の性格
           <select

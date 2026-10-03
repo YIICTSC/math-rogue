@@ -170,3 +170,8 @@
   background: #264744;
   color: #fff1bd;
 }
+
+.rpg-conversation-voice { border: 1px solid #6c8986; border-radius: 12px; padding: 12px; margin: 12px 0; min-width: 0; }
+.rpg-conversation-voice label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.rpg-conversation-voice input[type="range"] { width: 100%; min-height: 44px; accent-color: #d4af66; }
+.rpg-conversation-voice select, .rpg-conversation-voice button { min-height: 44px; }

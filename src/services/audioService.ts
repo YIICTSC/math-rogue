@@ -498,6 +498,10 @@ class AudioService {
       return this.sfxVolume;
   }
 
+  public canPlayConversationVoice() {
+      return this.appIsActive && !this.isMuted && this.voiceVolume > 0 && (typeof document === 'undefined' || !document.hidden);
+  }
+
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
       const voiceGain = Math.min(1, this.voiceVolume);

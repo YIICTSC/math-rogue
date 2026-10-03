@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import { createServer } from 'vite';
+import { chromium } from 'playwright';
+const file = `.rpg-voice-fixture-${process.pid}.tsx`;
+let vite, browser;
+try {
+  await fs.writeFile(file, `import React,{useState} from 'react';import {createRoot} from 'react-dom/client';import useConversationVoice from './src/rpg/useConversationVoice';import VoiceSettings from './src/rpg/ConversationVoiceSettings';import './src/rpg/social.css';import RpgOnline from './src/rpg/RpgOnline';
+const initial={players:{a:{id:'a',memory:{conversationVoice:{enabled:true,pitch:.7,rate:.8,style:'robot',timbre:0}}},b:{id:'b',memory:{conversationVoice:{enabled:true,pitch:1.8,rate:1.4,style:'bouncy',timbre:1}}}},social:{talks:[{id:'old',at:Date.now(),people:['a','b'],lines:[{speaker:'a',text:'過去の会話。'}]}]}};
+function App(){const [w,sw]=useState(initial),[active,sa]=useState(true),[v,sv]=useState(initial.players.a.memory.conversationVoice);window.setWorld=sw;window.setActive=sa;window.w=w;window.voice=v;const line=useConversationVoice(w,'a',active,'JAPANESE');return <><button id="unlock">Start</button><div id="caption">{line?.text}</div><VoiceSettings voice={v} onChange={sv} languageMode={new URLSearchParams(location.search).get('lang')||'JAPANESE'}/></>;}function Full(){const [id,setId]=useState('WARRIOR');return <><button style={{position:"fixed",zIndex:1000,top:0,right:0}} id="switchHero" onClick={()=>setId(i=>i==='WARRIOR'?'CARETAKER':'WARRIOR')}>Switch</button><RpgOnline active={true} languageMode="JAPANESE" player={{id,currentHp:72,maxHp:72,gold:100,deck:[],relics:[],imageData:''}} onRoom={r=>window.fullRoom=r} onSnapshot={s=>window.fullSnapshot=s} onSetup={()=>{}} onClose={()=>{}}/></>;}createRoot(document.getElementById('root')).render(location.search.includes('integration')?<Full/>:<App/>);`);
+  vite = await createServer({cacheDir:'node_modules/.vite-rpg-conversation-test',optimizeDeps:{noDiscovery:true,entries:[],include:['react','react-dom/client','react/jsx-runtime','peerjs','lucide-react']},server:{host:'127.0.0.1',port:5221,strictPort:true,hmr:false},plugins:[{name:'voice-test',configureServer(s){s.middlewares.use('/__voice',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml(req.url,`<html><meta name="viewport" content="width=device-width,initial-scale=1"><body><div id="root"></div><script type="module" src="/${file}"></script></body></html>`));});}}],logLevel:'error'});
+  const {validConversationVoice,DEFAULT_CONVERSATION_VOICE,speechParts}=await vite.ssrLoadModule('/src/rpg/conversationVoice.ts');
+  assert.ok(validConversationVoice(DEFAULT_CONVERSATION_VOICE));
+  for(const bad of [{pitch:NaN},{pitch:2.1},{rate:.5},{style:'external'},{timbre:4},{enabled:'yes'}]) assert.equal(validConversationVoice({...DEFAULT_CONVERSATION_VOICE,...bad}),false);
+  assert.deepEqual(speechParts('こんにちは、釣りに行こう！','robot'),['こんにちは、','釣りに行こう！']);
+  const {createWorld,addPlayer,applyAction}=await vite.ssrLoadModule('/src/rpg/engine.ts');
+  const world=createWorld(7);addPlayer(world,'a','A');
+  const memory={phrases:[],personality:'kind',autoTalk:false,conversationVoice:{...DEFAULT_CONVERSATION_VOICE,pitch:.75}};
+  assert.ok(applyAction(world,'a',{type:'social-memory',memory},Date.now()));
+  assert.equal(world.players.a.memory.conversationVoice.pitch,.75);
+  assert.equal(applyAction(world,'a',{type:'social-memory',memory:{...memory,conversationVoice:{...memory.conversationVoice,rate:99}}},Date.now()),false);
+  await vite.listen();browser=await chromium.launch({headless:true});const p=await browser.newPage({viewport:{width:390,height:844}});p.setDefaultNavigationTimeout(120000);const errors=[];p.on('pageerror',e=>errors.push(e.message));
+  await p.addInitScript(()=>{
+    window.calls=[];window.cancelCount=0;window.utterances=[];
+    window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
+    const timers=new Set();Object.defineProperty(window,'speechSynthesis',{value:{getVoices:()=>[{name:'J1',lang:'ja-JP',localService:true},{name:'J2',lang:'ja-JP',localService:true},{name:'E1',lang:'en-US',localService:true}],speak(u){window.calls.push({text:u.text,pitch:u.pitch,rate:u.rate,volume:u.volume,voice:u.voice?.name,lang:u.lang});window.utterances.push(u);const t=setTimeout(()=>{timers.delete(t);u.onend?.();},window.longSpeech?2000:30);timers.add(t);},cancel(){window.cancelCount++;for(const t of timers)clearTimeout(t);timers.clear();}},configurable:true});
+  });
+  await p.goto('http://127.0.0.1:5221/__voice');await p.locator('#unlock').click();await p.waitForTimeout(100);assert.equal(await p.evaluate(()=>window.calls.filter(c=>c.text.trim()).length),0,'Joining must not replay recent history');
+  await p.evaluate(()=>window.setWorld({...window.w,social:{talks:[...window.w.social.talks,{id:'new',at:Date.now(),people:['a','b'],lines:[{speaker:'a',text:'こんにちは、元気？'},{speaker:'b',text:'釣りに行こう！'}]}]}}));
+  await p.waitForFunction(()=>window.calls.filter(c=>c.text.trim()).length===3);await p.waitForTimeout(250);
+  const calls=await p.evaluate(()=>window.calls.filter(c=>c.text.trim()));assert.equal(calls[0].pitch,.7);assert.equal(calls[0].rate,.8);assert.equal(calls[2].pitch,1.92);assert.equal(calls[2].rate,1.4);assert.equal(calls[2].voice,'J2');
+  await p.evaluate(()=>window.setWorld(structuredClone(window.w)));await p.waitForTimeout(300);assert.equal(await p.evaluate(()=>window.calls.filter(c=>c.text.trim()).length),3,'Repeated snapshots must not replay dialogue');
+  await p.evaluate(async()=>{const {audioService}=await import('/src/services/audioService.ts');audioService.setVoiceVolume(.3);window.longSpeech=true;window.setWorld({...window.w,social:{talks:[...window.w.social.talks,{id:'interrupt',at:Date.now(),people:['a','b'],lines:[{speaker:'a',text:'長い会話です。'},{speaker:'b',text:'これは再生しない。'}]}]}});});
+  await p.waitForFunction(()=>window.calls.filter(c=>c.text.trim()).length===4);assert.equal(await p.evaluate(()=>window.calls.at(-1).volume),.3);
+  await p.evaluate(async()=>{const {audioService}=await import('/src/services/audioService.ts');audioService.toggleMute();});await p.waitForTimeout(250);assert.equal(await p.evaluate(()=>window.calls.filter(c=>c.text.trim()).length),4);assert.equal(await p.locator('#caption').innerText(),'');
+  await p.evaluate(async()=>{const {audioService}=await import('/src/services/audioService.ts');audioService.toggleMute();window.longSpeech=false;});
+  await p.getByRole('button',{name:'声を試聴する',exact:true}).click();await p.waitForTimeout(700);assert.ok(await p.evaluate(()=>window.calls.some(c=>c.text.includes('いっしょに釣り'))));
+  await p.locator('input[type=range]').first().fill('1.5');assert.equal(await p.evaluate(()=>window.voice.pitch),1.5);
+  const saved=await p.evaluate(async()=>{const {saveConversationVoice,loadConversationVoice}=await import('/src/rpg/conversationVoice.ts');saveConversationVoice('hero-a',window.voice);saveConversationVoice('hero-b',{...window.voice,pitch:.6});return [loadConversationVoice('hero-a').pitch,loadConversationVoice('hero-b').pitch,loadConversationVoice('unknown').pitch];});assert.deepEqual(saved,[1.5,.6,1.1]);
+  await p.evaluate(()=>{window.longSpeech=true;window.setWorld({...window.w,social:{talks:[...window.w.social.talks,{id:'blocked',at:Date.now(),people:['a','b'],lines:[{speaker:'b',text:'停止を確認。'},{speaker:'a',text:'停止後は読まない。'}]}]}});});await p.waitForFunction(()=>window.calls.some(c=>c.text==='停止を確認。'));await p.evaluate(()=>window.setActive(false));await p.waitForTimeout(150);const n=await p.evaluate(()=>window.calls.length);await p.evaluate(()=>window.setActive(true));await p.waitForTimeout(300);assert.equal(await p.evaluate(()=>window.calls.length),n);
+  await p.goto('http://127.0.0.1:5221/__voice?lang=ENGLISH');await p.getByRole('button',{name:'Preview voice',exact:true}).waitFor();await p.getByRole('button',{name:'Preview voice',exact:true}).click();await p.waitForFunction(()=>window.calls.some(c=>c.lang==='en-US'));await p.evaluate(async()=>{const {saveConversationVoice,DEFAULT_CONVERSATION_VOICE}=await import('/src/rpg/conversationVoice.ts');saveConversationVoice('elementary:WARRIOR',{...DEFAULT_CONVERSATION_VOICE,pitch:1.5});saveConversationVoice('elementary:CARETAKER',{...DEFAULT_CONVERSATION_VOICE,pitch:.6});});
+  await p.goto('http://127.0.0.1:5221/__voice?integration');await p.getByRole('button',{name:'まずはひとりで練習する',exact:true}).click();await p.waitForFunction(()=>window.fullSnapshot?.world.players.local.memory?.conversationVoice?.pitch===1.5);
+  await p.locator('#switchHero').click();await p.waitForFunction(()=>window.fullSnapshot?.world.players.local.memory?.conversationVoice?.pitch===.6);await p.locator('#switchHero').click();await p.waitForFunction(()=>window.fullSnapshot?.world.players.local.memory?.conversationVoice?.pitch===1.5);
+  assert.equal(errors.length,0,errors.join('\n'));
+  console.log('Conversation voices passed: server bounds, per-hero storage, phrase rhythm, per-speaker pitch/rate/timbre, translated controls, preview, gesture unlock, history deduplication, volume/mute cancellation and no replay after blocking. Speech engine mocked; acoustic quality remains device-specific.');
+} finally {await browser?.close();await vite?.close();await fs.rm(file,{force:true});}

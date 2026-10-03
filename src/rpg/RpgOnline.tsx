@@ -1,3 +1,5 @@
+import useConversationVoice from './useConversationVoice';
+import { loadConversationVoice, saveConversationVoice } from './conversationVoice';
 import HeroBuilder from './HeroBuilder';
 import SocialPanel,{loadMemory} from './SocialPanel';
 import {loadHero,loadHeroDraft,saveHero,type CustomHero} from './customHero';
@@ -222,8 +224,9 @@ export default function RpgOnline({
     bonusRanking,
   ];
   const incomingRequest=world?.social?.requests.find(r=>r.to===selfId);
+  const spokenLine = useConversationVoice(world, selfId, active && !interactionBlocked && !world?.ended && !me?.spectator && !me?.nativeScene && !me?.life?.work && !heroOpen, languageMode);
   const currentTalk=world?.social?.talks.filter(t=>t.people.includes(selfId)).at(-1);
-  const talkLine=currentTalk&&clockNow-currentTalk.at>=0&&clockNow-currentTalk.at<currentTalk.lines.length*2600?currentTalk.lines[Math.floor((clockNow-currentTalk.at)/2600)]:undefined;
+  const talkLine=spokenLine || (currentTalk&&clockNow-currentTalk.at>=0&&clockNow-currentTalk.at<currentTalk.lines.length*2600?currentTalk.lines[Math.floor((clockNow-currentTalk.at)/2600)]:undefined);
   const near =
     world && me
       ? world.sites
@@ -235,11 +238,13 @@ export default function RpgOnline({
     const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+  const voiceKey = hero ? 'original-hero' : `${previewTheme}:${previewTheme === 'magic' ? player.magicProtagonistId || player.id : player.id}`;
+  useEffect(() => { setMemory(m => ({ ...m, conversationVoice: loadConversationVoice(voiceKey) })); }, [voiceKey]);
   const heroJson=JSON.stringify(hero),memoryJson=JSON.stringify(memory);
   useEffect(()=>{if(me&&!me.spectator&&!me.nativeScene&&JSON.stringify(me.hero||null)!==heroJson)room.current?.send({type:'hero-set',hero});},[selfId,!!me,!!me?.spectator,!!me?.nativeScene,heroJson]);
   useEffect(()=>{if(me&&!me.spectator&&JSON.stringify(me.memory)!==memoryJson)room.current?.send({type:'social-memory',memory});},[selfId,!!me,!!me?.spectator,memoryJson]);
   useEffect(()=>{audioService.setRpgHeroVoice(hero?.voice||null);return()=>audioService.setRpgHeroVoice(null);},[heroJson]);
-  const updateMemory=(m:SocialMemory)=>{try{localStorage.setItem('rpg-social-memory-v1',JSON.stringify(m));setMemory(m);room.current?.send({type:'social-memory',memory:m});setSocialError('');}catch{setSocialError('保存できませんでした。端末の空き容量を確認してください。');}};
+  const updateMemory=(m:SocialMemory)=>{try{if(m.conversationVoice)saveConversationVoice(voiceKey,m.conversationVoice);localStorage.setItem('rpg-social-memory-v1',JSON.stringify(m));setMemory(m);room.current?.send({type:'social-memory',memory:m});setSocialError('');}catch{setSocialError('保存できませんでした。端末の空き容量を確認してください。');}};
   const updateHero=(h:CustomHero|null)=>{saveHero(h);setHero(h);room.current?.send({type:'hero-set',hero:h});};
   const profileJson = JSON.stringify({...nativeProfile(player),visualTheme:previewTheme});
   useEffect(() => {

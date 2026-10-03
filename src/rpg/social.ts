@@ -1,9 +1,11 @@
+import { validConversationVoice, type ConversationVoice } from "./conversationVoice";
 import type { World, Adventurer } from "./engine";
 import { validHero, type CustomHero } from "./customHero";
 export interface SocialMemory {
   phrases: string[];
   personality: "kind" | "logical" | "quirky";
   autoTalk: boolean;
+  conversationVoice?: ConversationVoice;
 }
 export interface SocialLine {
   speaker: string;
@@ -206,10 +208,17 @@ export function applySocial(
       m.phrases.length > 12 ||
       !m.phrases.every((v) => text(v, 48)) ||
       !["kind", "logical", "quirky"].includes(m.personality) ||
-      typeof m.autoTalk !== "boolean"
+      typeof m.autoTalk !== "boolean" ||
+      (m.conversationVoice !== undefined && !validConversationVoice(m.conversationVoice))
     )
       return false;
-    p.memory = { ...m, phrases: [...new Set(m.phrases.map((v) => v.trim()))] };
+    p.memory = {
+      phrases: [...new Set(m.phrases.map((v) => v.trim()))], personality: m.personality, autoTalk: m.autoTalk,
+      ...(m.conversationVoice ? { conversationVoice: {
+        enabled: m.conversationVoice.enabled, pitch: m.conversationVoice.pitch, rate: m.conversationVoice.rate,
+        style: m.conversationVoice.style, timbre: m.conversationVoice.timbre,
+      } } : {}),
+    };
     w.revision++;
     return true;
   }
