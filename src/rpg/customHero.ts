@@ -74,7 +74,7 @@ export function heroFrame(hero: CustomHero, action: HeroAction, time: number) {
   const frames = hero.frames[action];
   return frames[Math.floor(time / 155) % frames.length] || hero.portrait;
 }
-export function loadHero(): CustomHero | null {
+export function loadHeroDraft(): CustomHero | null {
   try {
     const h = JSON.parse(
       localStorage.getItem("rpg-original-hero-v1") || "null",
@@ -84,7 +84,16 @@ export function loadHero(): CustomHero | null {
     return null;
   }
 }
+export function loadHero(): CustomHero | null {
+  try {
+    return localStorage.getItem("rpg-original-hero-active-v1") === "false"
+      ? null
+      : loadHeroDraft();
+  } catch {
+    return null;
+  }
+}
 export function saveHero(hero: CustomHero | null) {
   if (hero) localStorage.setItem("rpg-original-hero-v1", JSON.stringify(hero));
-  else localStorage.removeItem("rpg-original-hero-v1");
+  localStorage.setItem("rpg-original-hero-active-v1", hero ? "true" : "false");
 }

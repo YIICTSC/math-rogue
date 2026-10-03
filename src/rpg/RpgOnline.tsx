@@ -1,6 +1,6 @@
 import HeroBuilder from './HeroBuilder';
 import SocialPanel,{loadMemory} from './SocialPanel';
-import {loadHero,saveHero,type CustomHero} from './customHero';
+import {loadHero,loadHeroDraft,saveHero,type CustomHero} from './customHero';
 import {socialLineText,type SocialMemory} from './social';
 import './social.css';
 import useFishingAudio from './useFishingAudio';
@@ -395,7 +395,7 @@ export default function RpgOnline({
   };
   return (
     <TranslatedUiTree mode={languageMode}>
-      {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
+      {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
       <main className={`rpg-root ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
         <header className="rpg-header">
           <button className="rpg-brand" onClick={close}>
