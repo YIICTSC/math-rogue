@@ -1,3 +1,4 @@
+import {energyOf,GATHER_ENERGY_COST,GATHER_ENERGY_MAX} from './energy';
 import {ROOM_DOOR,ROOM_SPAWN,newInterior,furnishing,furnitureDistance,placementFits,roomWalkable,type Interior,type PlacedFurniture} from './homeCatalog';
 import { BIOMES, biomeAt, biomeWeights, type BiomeId } from './biomes';
 import { WIDTH, HEIGHT, distance, type World, type Adventurer } from './engine';
@@ -33,12 +34,12 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number}
-export interface LifePlayer {bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface LifePlayer {energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-hit'|'life-reel'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
-export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={bag:{wood:4,stone:2},lastAction:0,crafted:[]};
+export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
 export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&(w.tiles[tile]!=='forest'||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
@@ -153,6 +154,8 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   const x=a.tile%WIDTH,y=Math.floor(a.tile/WIDTH);if(x<1||y<1||x>=WIDTH-1||y>=HEIGHT-1||distance(p,{x,y})>2)return false;
   if(a.type==='life-work'&&(!natureAt(w,a.tile)||!resourceReady(w,a.tile)))return tell('この資源は再生を待っています。');
   if(a.type==='life-cast'&&w.tiles[a.tile]!=='water')return false;
+  if(energyOf(lp)<GATHER_ENERGY_COST)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
+  lp.energy=energyOf(lp)-GATHER_ENERGY_COST;
   const fish=a.type==='life-cast',target=now+(fish?1700+((w.seed+a.tile+w.revision)%1300):900);
   lp.work={tile:a.tile,kind:fish?'fish':'gather',started:now,target,expires:target+(fish?1800:1400)};lp.lastAction=now;return tell(fish?'浮きが沈んだら引き上げよう！':'光るタイミングで道具を振ろう！');
  }

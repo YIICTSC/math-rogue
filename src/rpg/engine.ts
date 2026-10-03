@@ -1,3 +1,4 @@
+import {recoverGatherEnergy,GATHER_ENERGY_MAX} from './energy';
 import { createLife, advanceLife, applyLifeAction, lifeWalkable, type LifeWorld, type LifePlayer, type LifeAction } from './life';
 import { BIOMES, biomeAt, biomeSurface, riverAt } from "./biomes";
 import { STORIES, applyStory, type StoryAction, type StoryProgress } from "./stories";
@@ -248,6 +249,7 @@ function rotateEnemyName(w: World, site: Site) {
   site.enemyNamesByTheme = nextNames as Record<VisualThemeId, string>;
   site.name = site.enemyNamesByTheme[w.setup?.visualTheme || "elementary"] || site.name;
 }
+function recordLearning(p:Adventurer,count:number){const next=Math.max(p.correctAnswers||0,Math.floor(count));if(p.life)recoverGatherEnergy(p.life,next-(p.correctAnswers||0));p.correctAnswers=next;}
 function applyNativeAction(
   w: World,
   p: Adventurer,
@@ -257,7 +259,7 @@ function applyNativeAction(
   if (w.ended && action.type !== "native-finish") return false;
   if(action.type === "native-learning") {
     if(!Number.isSafeInteger(action.correctAnswers)||action.correctAnswers<p.correctAnswers)return false;
-    p.correctAnswers=action.correctAnswers;w.revision++;return true;
+    recordLearning(p,action.correctAnswers);w.revision++;return true;
   }
   if (action.type === "native-profile") {
     if (p.nativeScene || p.duelId || !validProfile(action.profile) || !acceptProfile(p,action.profile)) return false;
@@ -266,10 +268,7 @@ function applyNativeAction(
     p.maxHp = action.profile.maxHp;
     p.gold = action.profile.gold;
     if (action.profile.correctAnswers !== undefined)
-      p.correctAnswers = Math.max(
-        p.correctAnswers || 0,
-        Math.floor(action.profile.correctAnswers),
-      );
+      recordLearning(p,action.profile.correctAnswers);
     w.revision++;
     return true;
   }
@@ -389,10 +388,7 @@ function applyNativeAction(
     p.maxHp = action.profile.maxHp;
     p.gold = action.profile.gold;
     if (action.profile.correctAnswers !== undefined)
-      p.correctAnswers = Math.max(
-        p.correctAnswers || 0,
-        Math.floor(action.profile.correctAnswers),
-      );
+      recordLearning(p,action.profile.correctAnswers);
     delete p.nativeScene;
     return tell(
       action.outcome === "defeat" ? "町に戻りました。" : "探索を続けよう。",
@@ -616,7 +612,7 @@ export function addPlayer(w: World, id: string, name: string) {
     moveCount: 0,
     interactionCount: 0,
     siteUses: {},
-    life: {bag:{wood:4,stone:2},lastAction:0,crafted:[]},
+    life: {energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]},
     npcEventsSeen: [],
     message: "町で準備を整え、道に沿って探索しよう。",
     lastMove: 0,
@@ -680,7 +676,7 @@ export function applyAction(
   if (p.spectator && action.type !== "native-profile") return false;
   if (!w.started && action.type !== "native-profile") return false;
   if (action.type.startsWith("life-")) return applyLifeAction(w,p,action as LifeAction,now);
-  if ((p.life?.work || p.life?.indoors) && action.type !== "native-profile") return false;
+  if ((p.life?.work || p.life?.indoors) && action.type !== "native-profile" && action.type !== "native-learning") return false;
   if (action.type === "story-choice") return applyStory(w,p,action);
   if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))

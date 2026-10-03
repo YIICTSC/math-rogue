@@ -1,3 +1,4 @@
+import {energyOf,GATHER_ENERGY_MAX} from './energy';
 import GatherMiniModal from './GatherMiniModal';
 import LifeSprite from './LifeSprite';
 import {nearbyResources} from './nearbyResources';
@@ -34,6 +35,7 @@ import {
   Sparkles,
   MoreHorizontal,
   Axe,
+  Zap,
   X,
 } from "lucide-react";
 import type { LanguageMode, Player } from "../types";
@@ -107,6 +109,7 @@ export default function RpgOnline({
   autoJoinInvite = false,
   onRoom,
   onSnapshot,
+  onEnergyRequest,
   onSetup,
   onClose,
 }: {
@@ -119,6 +122,7 @@ export default function RpgOnline({
   autoJoinInvite?: boolean;
   onRoom: (room: RpgRoom) => void;
   onSnapshot: (snapshot: RpgSnapshot) => void;
+  onEnergyRequest?:()=>void;
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
@@ -356,7 +360,8 @@ export default function RpgOnline({
   const detailKeys=[['player','状態'],['team','仲間'],['event','イベント'],['journal','手帳'],['goal','目標'],['menu','部屋']];
   const detailKeyDown=(e:React.KeyboardEvent)=>{if(!compact||!detail)return;if(e.key==='Escape'){e.stopPropagation();setDetail(null);}if(e.key==='Tab'){const buttons=Array.from(detailRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input,select,summary,[tabindex="0"]')||[]).filter(el=>el.getClientRects().length>0);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};
   useEffect(()=>{if(!me?.life?.lastAction){setQuickReady(true);return;}setQuickReady(false);const timer=setTimeout(()=>setQuickReady(true),350);return()=>clearTimeout(timer);},[me?.life?.lastAction]);
-  const quickGather=(tile:number)=>{if(!latest.current.active||!world||!quickReady)return;destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);const fish=world.tiles[tile]==='water';if(fish)audioService.playRpgLifeSound('cast');room.current?.send({type:fish?'life-cast':'life-work',tile});};
+  const requestEnergy=()=>{if(!active||interactionBlocked||me?.life?.work||hasActivityDialog)return;destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);onEnergyRequest?.();};
+  const quickGather=(tile:number)=>{if(!latest.current.active||!world||!quickReady)return;if(energyOf(me?.life)<1){requestEnergy();return;}destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);const fish=world.tiles[tile]==='water';if(fish)audioService.playRpgLifeSound('cast');room.current?.send({type:fish?'life-cast':'life-work',tile});};
   const quickTiles=compact&&world&&me&&!spectating&&!me.life?.indoors?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
   useEffect(()=>{if(compact&&me?.life?.work){destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);}},[compact,me?.life?.work?.started]);
   const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);setLifeOpen(true);};
@@ -619,7 +624,7 @@ export default function RpgOnline({
                     />
                   )}
                   {!spectating && active && me.life?.indoors && <HomeRoom world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
-                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>setLifeOpen(false)} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
                     {!spectating && <button onClick={openLife}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
@@ -632,7 +637,7 @@ export default function RpgOnline({
                   {!spectating && <div className="rpg-map-bottom">
                     <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!active||interactionBlocked||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
-                    {compact&&quickTiles.length>0&&<div className="rpg-quick-resources" role="group" aria-label="近くの採取"><div>{quickTiles.map(tile=>{const fish=world.tiles[tile]==='water',node=natureAt(world,tile),label=fish?'川釣り':node!.name;return <button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} aria-label={label} title={label} onClick={()=>quickGather(tile)}><LifeSprite index={fish?21:node!.sprite}/><span>{fish?'釣り':node!.rock?'採掘':'採取'}</span></button>;})}</div></div>}
+                    {compact&&quickTiles.length>0&&<div className="rpg-quick-resources" role="group" aria-label="近くの採取"><button className="rpg-energy-button" disabled={!onEnergyRequest||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onClick={requestEnergy}><Zap size={14}/><b>{energyOf(me.life)}/{GATHER_ENERGY_MAX}</b><span>問題で回復</span></button><div>{quickTiles.map(tile=>{const fish=world.tiles[tile]==='water',node=natureAt(world,tile),label=fish?'川釣り':node!.name;return <button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} aria-label={label} title={label} onClick={()=>quickGather(tile)}><LifeSprite index={fish?21:node!.sprite}/><span>{fish?'釣り':node!.rock?'採掘':'採取'}</span><small>−1</small></button>;})}</div></div>}
                     {near && (
                       <button className="rpg-interact" onClick={interact}>
                         <span>
@@ -744,7 +749,7 @@ export default function RpgOnline({
                 </>}
                 {compact&&spectating&&<section data-rpg-panel="player" className="rpg-player-panel"><h2>{watched?.name||'ホスト観戦'}</h2><p>HP {hudHp} / {hudMaxHp}</p><p>コイン {watched?.gold||0} · 戦闘勝利 {watched?.completedBattles||0}</p></section>}
                 {compact&&spectating&&<section data-rpg-panel="team" className="rpg-player-panel"><h2>参加者とチーム</h2>{members.map(p=><p key={p.id}>{p.name} · HP {p.hp}/{p.maxHp}</p>)}</section>}
-                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり練習 · 通信なし</p>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
+                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>採取エネルギー</h3><p>{energyOf(watched?.life)} / {GATHER_ENERGY_MAX}</p>{!spectating&&<><p>採取1回で1消費、1問正解で2回復。時間では回復しません。</p><button className="rpg-outline" disabled={!onEnergyRequest} onClick={requestEnergy}>問題を解いて回復</button></>}<h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり練習 · 通信なし</p>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
                 </div>
               </aside>
             </div>

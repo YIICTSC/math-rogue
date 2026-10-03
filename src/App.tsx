@@ -1669,6 +1669,7 @@ const App: React.FC = () => {
     };
     const currentRpgDuel=rpgSnapshot?.world.duels.find(d=>d.id===rpgDuelRef.current?.id);
     const rpgRivalId=currentRpgDuel?.members.find(id=>id!==rpgSnapshot?.selfId)||'';
+    const [rpgEnergyLearning,setRpgEnergyLearning]=useState(false);
     const rpgArcadeTokenRef = useRef<string | null>(null);
     const [rpgArcadeSite, setRpgArcadeSite] = useState<string | null>(null);
     const rpgArcadeEntryTokenRef = useRef<string | undefined>(undefined);
@@ -9815,6 +9816,8 @@ const App: React.FC = () => {
         if (!gameState.rpgOnline || gameState.screen === GameScreen.START_MENU || rpgSnapshot?.world.ended) setRpgArcadeSite(null);
     }, [gameState.rpgOnline, gameState.screen, rpgSnapshot?.world.ended]);
 
+    useEffect(()=>{if(!gameState.rpgOnline||gameState.screen===GameScreen.START_MENU)setRpgEnergyLearning(false);},[gameState.rpgOnline,gameState.screen]);
+
     // Exploration stays mounted while the original main-game scenes run.
     useEffect(()=>{
         if(!gameState.rpgOnline||gameState.screen!==GameScreen.MAP||rpgArcadeTokenRef.current)return;
@@ -15631,6 +15634,7 @@ const App: React.FC = () => {
     }, [gameState.challengeMode, gameState.screen, gameState.rewards.length, gameState.enemies.length]);
 
     const handleMathChallengeComplete = (correctCount: number) => {
+        if(rpgEnergyLearning){setRpgEnergyLearning(false);setGameState(prev=>({...prev,screen:GameScreen.MAP}));audioService.playBGM('map');return;}
         if(rpgArcadeTokenRef.current) {
             rpgRoomRef.current?.send({type:'arcade-finish',token:rpgArcadeTokenRef.current,correctCount});
             rpgArcadeTokenRef.current=null;setGameState(prev=>({...prev,screen:GameScreen.MAP}));audioService.playBGM('map');return;
@@ -16147,7 +16151,8 @@ const App: React.FC = () => {
 
     const handleAssignmentAnswerResult = useCallback((result: AssignmentAnswerResult) => {
         if (gameState.rpgOnline && result.correct) {
-            rpgCorrectAnswersRef.current += 1;
+            const snapshot=rpgSnapshotRef.current;
+            rpgCorrectAnswersRef.current=Math.max(rpgCorrectAnswersRef.current,snapshot?.world.players[snapshot.selfId]?.correctAnswers||0)+1;
             rpgRoomRef.current?.send({type:'native-learning',correctAnswers:rpgCorrectAnswersRef.current});
         }
         const isRpgInviteAssignment = rpgInviteParticipantRef.current && gameState.rpgOnline;
@@ -21502,9 +21507,9 @@ const App: React.FC = () => {
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            debugSkip={isMathDebugSkipped}
+                            debugSkip={isMathDebugSkipped && !rpgEnergyLearning}
                             isChallenge={Boolean(gameState.eventLearningPending)}
-                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
+                            rewardHint={trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}
                         />
@@ -21519,9 +21524,9 @@ const App: React.FC = () => {
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            debugSkip={isMathDebugSkipped}
+                            debugSkip={isMathDebugSkipped && !rpgEnergyLearning}
                             isChallenge={Boolean(gameState.eventLearningPending)}
-                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
+                            rewardHint={trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}
                         />
@@ -21534,9 +21539,9 @@ const App: React.FC = () => {
                             mode={localAssignmentProblemConfig?.mode || gameState.mode}
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            debugSkip={isMathDebugSkipped}
+                            debugSkip={isMathDebugSkipped && !rpgEnergyLearning}
                             isChallenge={Boolean(gameState.eventLearningPending)}
-                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
+                            rewardHint={trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}
                         />
@@ -21555,9 +21560,9 @@ const App: React.FC = () => {
                             customProblems={debugIllustratedProblemPreview ? undefined : localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
                             debugProblems={debugIllustratedProblemPreview ? [debugIllustratedProblemPreview.problem] : undefined}
                             previewOnly={Boolean(debugIllustratedProblemPreview)}
-                            debugSkip={debugIllustratedProblemPreview ? false : isMathDebugSkipped}
+                            debugSkip={debugIllustratedProblemPreview ? false : isMathDebugSkipped && !rpgEnergyLearning}
                             isChallenge={debugIllustratedProblemPreview ? false : Boolean(gameState.eventLearningPending)}
-                            rewardHint={debugIllustratedProblemPreview ? undefined : trans("正解するとゴールド獲得", languageMode)}
+                            rewardHint={debugIllustratedProblemPreview ? undefined : trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={debugIllustratedProblemPreview ? undefined : assignmentProblemSource?.units}
                         />
@@ -21638,6 +21643,7 @@ const App: React.FC = () => {
                                         : undefined,
                                 }}
                                 autoJoinInvite={rpgInviteParticipantRef.current && Boolean(rpgInviteCode)}
+                                onEnergyRequest={()=>{const snapshot=rpgSnapshotRef.current,me=snapshot?.world.players[snapshot.selfId];if(!me||snapshot?.world.ended||me.spectator||me.life?.work||me.nativeScene||me.duelId||me.dungeonId||me.arcadePending)return;setRpgEnergyLearning(true);setGameState(prev=>({...prev,eventLearningPending:undefined,screen:getChallengeScreenForMode(localAssignmentProblemConfig?.mode||prev.mode)}));audioService.playBGM('math');}}
                                 onRoom={attachRpgRoom}
                                 onSnapshot={receiveRpgSnapshot}
                                 onSetup={applyRpgInviteSetup}
