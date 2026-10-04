@@ -6,6 +6,7 @@ import type { Building, Material, Player, Reply, World } from './engine';
 export type WorkStat = 'gather'|'plant'|'water'|'harvest'|'fish'|'craft'|'donate';
 export const WORK_STATS:WorkStat[]=['gather','plant','water','harvest','fish','craft','donate'];
 export const HOME_ITEMS = {
+ rhythm:['音ゲー筐体','🎵',14,'game'],
  reversi:['リバーシ台','⚫',8,'game'],connectfour:['四目並べ台','🔴',8,'game'],memory:['神経衰弱テーブル','🃏',6,'game'],race:['すごろくテーブル','🎲',8,'game'],bowling:['ボウリングレーン','🎳',12,'game'],reaction:['反応ゲーム機','💡',10,'game'],
  plushBear:['くまのぬいぐるみ','🧸',4,'decor'],plushBunny:['うさぎのぬいぐるみ','🐰',4,'decor'],darts:['ダーツ台','🎯',8,'game'],billiards:['ビリヤード台','🎱',12,'game'],arcade:['ゲーム機','🕹',10,'game'],
  bed:['ベッド','🛏',6,'rest'],sofa:['ソファ','🛋',5,'rest'],desk:['学習机','📚',5,'study'],bookshelf:['本棚','📖',4,'study'],stove:['キッチン','🍳',6,'cook'],workbench:['作業台','🔨',5,'work'],wardrobe:['クローゼット','👕',4,'dress'],chair:['チェア','🪑',2,'rest'],table:['テーブル','☕',3,'rest'],rug:['ラグ','🟨',2,'decor'],clock:['置き時計','🕰',3,'decor'],aquarium:['水槽','🐠',5,'decor'],piano:['ピアノ','🎹',8,'music'],cushion:['クッション','🟣',2,'rest'],plant:['観葉植物','🪴',3,'decor'],painting:['絵画スタンド','🖼',4,'decor'],cabinet:['キャビネット','🗄',4,'work'],bath:['バスタブ','🛁',7,'rest'],bench:['ベンチ','🪑',3,'rest'],lamp:['ランタン','🏮',3,'decor'],flower:['花壇','🌷',2,'decor'],campfire:['たき火','🔥',4,'cook']

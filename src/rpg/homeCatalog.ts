@@ -62,6 +62,7 @@ export const FURNISHINGS: Furnishing[] = [
  {id:'memory',name:'神経衰弱テーブル',cost:{plank:2,reed:3},width:2,height:2,game:'memory'},
  {id:'race',name:'すごろくテーブル',cost:{plank:3,crystal:1},width:2,height:2,game:'race'},
  {id:'bowling',name:'ボウリングレーン',cost:{plank:5,ore:3},width:2,height:3,game:'bowling'},
+ {id:'rhythm',name:'音ゲー筐体',cost:{plank:5,ore:3,crystal:4},width:2,height:1,game:'rhythm'},
  {id:'reaction',name:'反応ゲーム機',cost:{plank:3,ore:2,crystal:2},width:1,height:1,game:'reaction'},
  {id:'piano',name:'アップライトピアノ',cost:{plank:4,ore:2},width:2,height:1},
  {id:'harp',name:'ハープ',cost:{plank:3,ore:2,reed:2},width:1,height:1},

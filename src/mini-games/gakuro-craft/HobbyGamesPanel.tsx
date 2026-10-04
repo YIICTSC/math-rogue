@@ -1,3 +1,4 @@
+import RhythmPanel from '../../rpg/rhythm/RhythmPanel';
 import React,{useEffect,useRef,useState} from 'react';
 import type {HomeGameWorld as World,HomeGamePlayer as Player,GameCommand as Command} from './homeGames';
 import type {Home} from './progression';
@@ -17,11 +18,12 @@ export default function HobbyGamesPanel({world,me,home,t,send}:{world:World;me:P
  useEffect(()=>{cancelPull();setPlacing(false);},[g?.key,g?.turn,g?.phase,g?.pool?.moving,world.paused]);
  useEffect(()=>{const cancel=()=>cancelPull();window.addEventListener('blur',cancel);return()=>window.removeEventListener('blur',cancel);},[]);
  useEffect(()=>{let frame=0;const move=(now:number)=>{const a=aimRef.current;setReticle({x:a.x+Math.sin(now*.0031)*.11,y:a.y+Math.cos(now*.0037)*.11});frame=requestAnimationFrame(move);};if(g?.kind==='darts'&&g.phase==='playing')frame=requestAnimationFrame(move);return()=>cancelAnimationFrame(frame);},[g?.key,g?.kind,g?.phase]);
- useEffect(()=>{if(!g)return;const marker=g.key+':'+g.revision+':'+g.scores.join();if(previous.current&&previous.current!==marker){window.dispatchEvent(new CustomEvent('craft-hobby-sound',{detail:g.phase==='finished'?'donate':'ui'}));}previous.current=marker;},[g?.key,g?.revision,g?.scores.join(),g?.phase]);
+ useEffect(()=>{if(!g||g.kind==='rhythm')return;const marker=g.key+':'+g.revision+':'+g.scores.join();if(previous.current&&previous.current!==marker){window.dispatchEvent(new CustomEvent('craft-hobby-sound',{detail:g.phase==='finished'?'donate':'ui'}));}previous.current=marker;},[g?.key,g?.revision,g?.scores.join(),g?.phase]);
  useEffect(()=>{const key=(e:KeyboardEvent)=>{const game=activeRef.current;if(!game||game.kind!=='arcade'||game.phase!=='playing'||['INPUT','TEXTAREA','SELECT'].includes((e.target as HTMLElement)?.tagName))return;const seat=game.players.indexOf(me.id),court=game.courts?.[seat];if(!court||!['ArrowLeft','ArrowRight','a','d'].includes(e.key))return;e.preventDefault();send({type:'game_paddle',key:game.key,x:court.target+(['ArrowLeft','a'].includes(e.key)?-.08:.08)});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[send,me.id]);
  const hobbies=home.furniture.filter(f=>gameKind(f.item));
  if(!hobbies.length)return <p>{t('趣味家具を飾ると、友達と4人までで遊べます。')}</p>;
  const seat=g?.players.indexOf(me.id)??-1,myTurn=g?.phase==='playing'&&g.turn===seat&&!world.paused,deadline=Math.max(0,Math.ceil((g?.deadline||0)-world.time));
+ if(g?.kind==='rhythm')return <RhythmPanel world={world} g={g} selfId={me.id} t={t} send={send}/>;
  return <section className="gc-hobby">{!g&&<><h3>{t('みんなのゲームルーム')}</h3><p>{t('同じ家の家具から参加。最大4人で対戦できます。リバーシと四目並べは2人か4人、その他は1人でも練習できます。')}</p></>}
  {!g?<div className="gc-party-lobby">{hobbies.map(f=>{if(!gameKind(f.item))return null;const lobby=Object.values(world.games||{}).find(g=>g.homeTile===home.tile&&g.slot===f.slot);return <button key={f.slot} disabled={world.paused||lobby?.phase==='playing'||(lobby?.players.length||0)>=4} onClick={()=>send({type:'game_join',slot:f.slot})}><b>{GAME_ICONS[f.item]} {t(GAME_LABELS[f.item])}</b><small>{lobby?.players.length||0}/4 · {t(lobby?.phase==='playing'?'対戦中':'参加する')}</small></button>;})}</div>:<>
  <h4>{t(labels[g.kind])} · {g.players.length}/4</h4><div className="gc-game-seats">{g.players.map((id,i)=><div key={id} className={g.turn===i&&g.phase==='playing'?'current':''} style={{borderColor:colors[i]}}><b>{g.names[i]}{id===me.id?' ★':''}</b><span>{g.scores[i]??0}{(g.kind==='billiards'||teamGame(g.kind))&&<small> · {t(i%2===0?'チームA':'チームB')}</small>}</span></div>)}</div>

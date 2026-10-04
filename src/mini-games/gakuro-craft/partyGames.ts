@@ -3,8 +3,8 @@ import type {HomeGame,HomeGameWorld,GameKind} from './homeGames';
 export const PARTY_KINDS=['reversi','connectfour','memory','race','bowling','reaction'] as const;
 export type PartyKind=typeof PARTY_KINDS[number];
 export const isPartyKind=(kind:string):kind is PartyKind=>(PARTY_KINDS as readonly string[]).includes(kind);
-export const GAME_LABELS:Record<GameKind,string>={darts:'ダーツ301',billiards:'8ボール',arcade:'コズミックブレイク',reversi:'チームリバーシ',connectfour:'チーム四目並べ',memory:'宝物の神経衰弱',race:'星のすごろく',bowling:'テンピンボウリング',reaction:'ライトリアクション'};
-export const GAME_ICONS:Record<GameKind,string>={darts:'🎯',billiards:'🎱',arcade:'🕹',reversi:'⚫',connectfour:'🔴',memory:'🃏',race:'🎲',bowling:'🎳',reaction:'💡'};
+export const GAME_LABELS:Record<GameKind,string>={rhythm:'学ロリズム',darts:'ダーツ301',billiards:'8ボール',arcade:'コズミックブレイク',reversi:'チームリバーシ',connectfour:'チーム四目並べ',memory:'宝物の神経衰弱',race:'星のすごろく',bowling:'テンピンボウリング',reaction:'ライトリアクション'};
+export const GAME_ICONS:Record<GameKind,string>={rhythm:'🎵',darts:'🎯',billiards:'🎱',arcade:'🕹',reversi:'⚫',connectfour:'🔴',memory:'🃏',race:'🎲',bowling:'🎳',reaction:'💡'};
 export const GAME_RULES:Record<PartyKind,string>={
  reversi:'2人または4人。黒と白の2チームで交互に置き、挟んだ石を裏返します。置ける場所は光ります。置けない手番は自動パス。最後に石が多いチームの勝ち。',
  connectfour:'2人または4人。2チームで交互に列を選び、下から駒を積みます。縦・横・斜めに4個つながったチームの勝ち。',

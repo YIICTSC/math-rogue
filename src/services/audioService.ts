@@ -498,6 +498,24 @@ class AudioService {
       return this.sfxVolume;
   }
 
+  public getRhythmAudioState() {
+      return { active: this.appIsActive && (typeof document === 'undefined' || !document.hidden),
+          volume: this.isMuted ? 0 : Math.min(1, this.bgmVolume),
+          sfxVolume: this.isMuted ? 0 : Math.min(1, this.sfxVolume) };
+  }
+
+  public playRpgRhythmHit(lane: number, perfect: boolean) {
+      if (!this.getRhythmAudioState().active || this.isMuted) return;
+      this.init();
+      if (!this.ctx || !this.sfxGain) return;
+      const osc = this.ctx.createOscillator(), gain = this.ctx.createGain(), now = this.ctx.currentTime;
+      osc.type = 'sine'; osc.frequency.value = [660, 785, 880, 1047][lane] || 880;
+      gain.gain.setValueAtTime(perfect ? 0.12 : 0.07, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+      osc.connect(gain); gain.connect(this.sfxGain); osc.start(now); osc.stop(now + 0.05);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+  }
+
   public canPlayConversationVoice() {
       return this.appIsActive && !this.isMuted && this.voiceVolume > 0 && (typeof document === 'undefined' || !document.hidden);
   }

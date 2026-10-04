@@ -224,7 +224,7 @@ export default function RpgOnline({
     bonusRanking,
   ];
   const incomingRequest=world?.social?.requests.find(r=>r.to===selfId);
-  const spokenLine = useConversationVoice(world, selfId, active && !interactionBlocked && !world?.ended && !me?.spectator && !me?.nativeScene && !me?.life?.work && !heroOpen, languageMode);
+  const spokenLine = useConversationVoice(world, selfId, active && !interactionBlocked && !world?.ended && !me?.spectator && !me?.nativeScene && !me?.life?.work && !heroOpen && !Object.values(world?.life.games || {}).some(g => g.kind === 'rhythm' && g.phase === 'playing' && g.players.includes(selfId)), languageMode);
   const currentTalk=world?.social?.talks.filter(t=>t.people.includes(selfId)).at(-1);
   const talkLine=spokenLine || (currentTalk&&clockNow-currentTalk.at>=0&&clockNow-currentTalk.at<currentTalk.lines.length*2600?currentTalk.lines[Math.floor((clockNow-currentTalk.at)/2600)]:undefined);
   const near =
@@ -651,7 +651,7 @@ export default function RpgOnline({
                       }}
                     />
                   )}
-                  {!spectating && active && !heroOpen && me.life?.indoors && <HomeRoom onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory} world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
+                  {!spectating && active && !world.ended && !heroOpen && me.life?.indoors && <HomeRoom onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory} world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
                   {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">

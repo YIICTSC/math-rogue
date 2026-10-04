@@ -16,5 +16,5 @@ try{
  }
  for(const text of [...Object.values(GAME_RULES),...Object.values(GAME_LABELS)])assert.ok(!/[ぁ-んァ-ヶ一-龠]/.test(trans(text,'ENGLISH')),'Game rules must translate: '+text);
  const canvas=await fs.readFile('src/rpg/HomeCanvas.tsx','utf8');assert.ok(canvas.includes('sprite(furnitureImage(f.id))'));assert.ok(!canvas.includes('f.sprite%'),'Furniture rendering must use the entire isolated image');
- console.log('Furniture art passed: 60 isolated WebP files, fully transparent margins, symmetric left/right padding, complete-image rendering and translated names/rules.');
+ console.log('Furniture art passed: 61 isolated WebP files, fully transparent margins, symmetric left/right padding, complete-image rendering and translated names/rules.');
 }finally{await server.close();}

@@ -1,0 +1,360 @@
+.rpg-rhythm-lobby {
+  color: #eff9ef;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  min-width: 0;
+  background: #132d32;
+  border-radius: 16px;
+}
+.rpg-rhythm-lobby h3,
+.rpg-rhythm-lobby h4 {
+  margin: 0;
+}
+.rpg-rhythm-lobby p {
+  margin: 4px 0;
+  line-height: 1.5;
+}
+.rpg-rhythm-selected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #668688;
+  border-radius: 12px;
+  padding: 10px;
+}
+.rpg-rhythm-selected img {
+  width: 100px;
+  height: 110px;
+  object-fit: contain;
+}
+.rpg-rhythm-options,
+.rpg-rhythm-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.rpg-rhythm-options label,
+.rpg-rhythm-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rpg-rhythm-lobby input,
+.rpg-rhythm-lobby select,
+.rpg-rhythm-lobby button,
+.rpg-rhythm-live button {
+  min-height: 44px;
+  font: inherit;
+  color: inherit;
+  background: #28494f;
+  border: 1px solid #6b939a;
+  border-radius: 9px;
+  padding: 9px;
+  max-width: 100%;
+}
+.rpg-rhythm-lobby input[type="range"] {
+  padding: 0;
+  accent-color: #48dbd5;
+}
+.rpg-rhythm-lobby button:disabled {
+  opacity: 0.4;
+}
+.rpg-rhythm-lobby .primary {
+  background: #caa259;
+  color: #102d32;
+  font-weight: 800;
+}
+.rpg-rhythm-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rpg-rhythm-songs {
+  max-height: 330px;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 0;
+}
+.rpg-rhythm-songs button {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 6px;
+  min-width: 0;
+}
+.rpg-rhythm-songs button[aria-pressed="true"] {
+  border: 2px solid #f4d783;
+  background: #35565e;
+}
+.rpg-rhythm-lobby details summary {
+  cursor: pointer;
+  padding: 12px;
+  font-weight: 700;
+}
+.rpg-rhythm-board {
+  background: #11262e;
+  padding: 12px;
+  border-radius: 12px;
+  overflow: auto;
+}
+.rpg-rhythm-board article {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-bottom: 1px solid #496575;
+  overflow-wrap: anywhere;
+}
+.rpg-rhythm-board b {
+  font-size: 1.3rem;
+  color: #f2d074;
+  font-variant-numeric: tabular-nums;
+}
+.rpg-rhythm-lobby .rpg-rhythm-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.rpg-rhythm-lobby .rpg-rhythm-board h4 {
+  grid-column: 1/-1;
+}
+.rpg-rhythm-board > button {
+  display: none;
+}
+.rpg-rhythm-result {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #43375e, #193c48);
+  border: 2px solid #f2d074;
+  border-radius: 16px;
+}
+.rpg-rhythm-result > strong {
+  display: block;
+  font-size: 4rem;
+  color: #ffd463;
+  text-shadow: 0 0 18px #f4d783;
+}
+.rpg-rhythm-live {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: #081825;
+  color: #f6fbff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overscroll-behavior: none;
+}
+.rpg-rhythm-live > header {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #132c39;
+}
+.rpg-rhythm-live h3 {
+  margin: 0;
+  font-size: 1rem;
+  max-width: 70vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rpg-rhythm-live header > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+.rpg-rhythm-live header > div:last-child {
+  display: flex;
+  gap: 6px;
+}
+.rpg-rhythm-live progress {
+  display: block;
+  width: min(100%, 380px);
+  height: 7px;
+  accent-color: #60efce;
+}
+.rpg-rhythm-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.rpg-rhythm-stage canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+  touch-action: none;
+}
+.rpg-rhythm-live > .rpg-rhythm-board {
+  grid-column: 2;
+  grid-row: 2/4;
+  border-radius: 0;
+}
+.rpg-rhythm-judgement {
+  position: absolute;
+  top: 40%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+  font-weight: 900;
+  text-shadow: 0 0 12px #f8ffff;
+}
+.rpg-rhythm-judgement strong {
+  color: #6febff;
+  font-size: clamp(1.3rem, 4vw, 2.4rem);
+}
+.rpg-rhythm-judgement strong[data-grade="GREAT"] {
+  color: #83fab7;
+}
+.rpg-rhythm-judgement strong[data-grade="GOOD"] {
+  color: #ffd463;
+}
+.rpg-rhythm-judgement strong[data-grade="MISS"] {
+  color: #ff8192;
+}
+.rpg-rhythm-judgement b {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+.rpg-rhythm-judgement small {
+  color: #ffdda3;
+}
+.rpg-rhythm-pads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px;
+  background: #102936;
+  touch-action: none;
+}
+.rpg-rhythm-pads button {
+  min-height: 76px;
+  border: 2px solid var(--lane);
+  box-shadow: inset 0 -8px 14px color-mix(in srgb, var(--lane) 18%, transparent);
+  font-size: 1.5rem;
+  font-weight: 900;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.rpg-rhythm-pads button:active {
+  background: var(--lane);
+  color: #061d2a;
+}
+.rpg-rhythm-pads small {
+  font-size: 0.9rem;
+  display: block;
+}
+.rpg-rhythm-paused {
+  position: absolute;
+  inset: 0;
+  background: #081825e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  text-align: center;
+  gap: 12px;
+}
+.rpg-rhythm-paused h3 {
+  white-space: normal;
+  max-width: 100%;
+}
+@media (max-width: 700px) {
+  .rpg-rhythm-live {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rpg-rhythm-live > .rpg-rhythm-board {
+    display: none;
+  }
+  .rpg-rhythm-live > .rpg-rhythm-board.is-open {
+    display: block;
+    position: absolute;
+    inset: 75px 8px 95px;
+    z-index: 3;
+    border: 1px solid #89b6c9;
+  }
+  .rpg-rhythm-live .rpg-rhythm-board > button {
+    display: block;
+  }
+  .rpg-rhythm-options,
+  .rpg-rhythm-songs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rpg-rhythm-lobby .rpg-rhythm-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rpg-rhythm-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rpg-rhythm-live header {
+    padding: 6px;
+  }
+  .rpg-rhythm-live header button {
+    padding: 6px;
+    font-size: 0.8rem;
+  }
+  .rpg-rhythm-live h3 {
+    max-width: 48vw;
+  }
+  .rpg-rhythm-pads button {
+    min-height: 68px;
+  }
+}
+@media (max-height: 480px) {
+  .rpg-rhythm-live {
+    grid-template-columns: minmax(0, 1fr) 150px;
+  }
+  .rpg-rhythm-live > header {
+    padding: 4px 8px;
+  }
+  .rpg-rhythm-live h3 {
+    font-size: 0.85rem;
+  }
+  .rpg-rhythm-pads {
+    padding: 4px;
+    gap: 4px;
+  }
+  .rpg-rhythm-pads button {
+    min-height: 44px;
+    font-size: 1.1rem;
+    padding: 2px;
+  }
+  .rpg-rhythm-pads small {
+    display: none;
+  }
+  .rpg-rhythm-judgement {
+    top: 20%;
+    gap: 0;
+  }
+  .rpg-rhythm-judgement b {
+    font-size: 1.6rem;
+  }
+  .rpg-rhythm-live .rpg-rhythm-board article {
+    padding: 8px;
+  }
+  .rpg-rhythm-live > .rpg-rhythm-board {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rpg-rhythm-judgement {
+    text-shadow: none;
+  }
+  .rpg-rhythm-result > strong {
+    text-shadow: none;
+  }
+}
