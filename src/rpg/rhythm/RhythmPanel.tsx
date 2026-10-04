@@ -364,10 +364,9 @@ export default function RhythmPanel({
     let raf = 0,
       last = performance.now(),
       paintAt = 0;
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const frame = (now: number) => {
+      const reduceMotion = motionQuery.matches;
       const v = latest.current,
         rr = v.g.rhythm!,
         a = audio.current,
@@ -547,7 +546,7 @@ export default function RhythmPanel({
             }
             ctx.globalAlpha = 1;
           }
-          particles.current = particles.current.filter((p) => p.age < 0.5);
+          particles.current = reduceMotion ? [] : particles.current.filter((p) => p.age < 0.5);
           for (const p of reduceMotion ? [] : particles.current) {
             p.age += dt;
             p.x += p.vx * dt;
@@ -811,7 +810,7 @@ export default function RhythmPanel({
       </p>
       {g.phase === "finished" && result && (
         <article className="rpg-rhythm-result" role="status">
-          <div className="rpg-rhythm-award" aria-hidden="true"><span>✦</span><strong>{rhythmRank(g.scores[seat])}</strong><span>✦</span></div>
+          <div className="rpg-rhythm-award"><span aria-hidden="true">✦</span><strong>{rhythmRank(g.scores[seat])}</strong><span aria-hidden="true">✦</span></div>
           <h4>
             {t(
               result.gauge > 0 && g.scores[seat] >= 500000
