@@ -148,9 +148,9 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.evaluate(async () => {
     window.audio.toggleMute();
   });
-  await p.waitForFunction(() => window.music.volume === 0);
+  await p.waitForFunction(() => window.music.volume === 0 && window.music.muted);
   await p.evaluate(() => window.audio.toggleMute());
-  await p.waitForFunction(() => window.music.volume > 0);
+  await p.waitForFunction(() => window.music.volume > 0 && !window.music.muted);
   await p.getByRole("button", { name: "退出", exact: true }).click();
   await p.getByText("LEFT", { exact: true }).waitFor();
   assert.equal(

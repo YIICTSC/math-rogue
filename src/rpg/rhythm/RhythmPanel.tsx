@@ -366,7 +366,11 @@ export default function RhythmPanel({
         dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const state = audioService.getRhythmAudioState();
-      if (a) a.volume = state.volume;
+      if (a) {
+        a.volume = state.volume;
+        // iOS can ignore HTMLAudioElement.volume; muted remains reliable.
+        a.muted = state.volume === 0;
+      }
       if (v.g.phase === "playing") {
         // Resuming shifts the server start time; it must preserve the existing score model.
         if (session.current !== g.key + ":" + rr.run) {
