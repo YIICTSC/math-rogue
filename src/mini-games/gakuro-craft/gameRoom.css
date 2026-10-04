@@ -1,0 +1,58 @@
+.gc-hobby {--room-art:none;background:linear-gradient(#0d1823e8,#0d1823f5),var(--room-art) center/cover;color:#f2f3ee;border:1px solid #d9bd7450;border-radius:16px;padding:clamp(12px,2vw,24px);}
+.gc-game-hero {display:flex;align-items:center;gap:14px;min-height:120px;padding:16px;border-radius:14px;background:linear-gradient(90deg,#0b1727b0,#0b172740),var(--room-art) center/cover;border:1px solid #dbc18460;overflow:hidden;}
+.gc-game-hero img {width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 3px 12px #0008);}
+.gc-game-hero h4{font-size:clamp(1.2rem,3vw,1.7rem);margin:4px 0;color:#ffe2a0;}
+.gc-game-hero small{letter-spacing:.13em;color:#b7d5de;}
+.gc-hobby .gc-party-lobby button{position:relative;isolation:isolate;padding:14px;min-height:150px;border:1px solid #d4bc7760;background:linear-gradient(#0a17267a,#0a1726ed),var(--card-art) center/cover;color:#f8efd9;border-radius:14px;}
+.gc-party-lobby img{width:86px;height:86px;object-fit:contain;position:absolute;right:8px;top:8px;z-index:-1;opacity:.8;}
+.gc-party-lobby b{padding-top:70px;font-size:1rem;text-shadow:0 2px 5px #000;}
+.gc-hobby button,.gc-expedition button{min-height:44px;touch-action:manipulation;}
+.gc-hobby button:focus-visible,.gc-expedition button:focus-visible {outline:3px solid #ffe7a1;outline-offset:2px;}
+.gc-hobby .gc-game-seats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0;}
+.gc-hobby .gc-game-seats>div{min-width:0;background:#142738d9;border-radius:10px;padding:10px;}
+.gc-game-seats b{font-size:1rem;}
+.gc-game-status{background:#17283de8;border-radius:10px;padding:10px;border-left:3px solid #dfbc78;}
+.gc-expedition{color:#eeeef6;border:1px solid #9b80bf66;background:linear-gradient(130deg,#282140dd,#122a35ee);border-radius:14px;padding:12px;display:grid;gap:10px;margin:12px 0;}
+.gc-game-modes{display:flex;flex-wrap:wrap;gap:8px;}
+.gc-expedition button{font:inherit;color:inherit;border:1px solid #a9a1bd70;border-radius:10px;background:#192d40;padding:10px;}
+.gc-expedition button[aria-pressed=true]{background:linear-gradient(130deg,#b6924d,#f3d594);color:#162331;font-weight:800;border-color:#ffe9b7;}
+.gc-expedition button:disabled{opacity:.55;}
+.gc-expedition-hud{display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+.gc-expedition-hud b:nth-child(2){color:#ff9daf;letter-spacing:3px;}
+.gc-expedition details{font-size:.85rem;line-height:1.65;}
+.gc-expedition summary{cursor:pointer;min-height:36px;display:flex;align-items:center;}
+.gc-expedition-path{display:flex;justify-content:space-around;position:relative;}
+.gc-expedition-path:before{content:"";position:absolute;height:1px;background:#b9986550;inset:50% 10%;}
+.gc-expedition-path span{z-index:1;display:grid;place-items:center;width:30px;height:30px;border:1px solid #b9adcc;background:#142334;border-radius:50%;color:#b8bdcd;}
+.gc-expedition-path .active{border-color:#f7d37e;box-shadow:0 0 14px #e9b95550;color:#ffe1a2;}
+.gc-expedition-path .done{background:#325e63;color:#c6fce5;}
+.gc-relic-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.gc-relic-choices button{display:flex;flex-direction:column;gap:10px;text-align:left;background:radial-gradient(ellipse at top,#68578a55,transparent),#142638;border-color:#dbc18b80;}
+.gc-relic-choices button>span{font-size:2rem;color:#ffe09c;align-self:center;}
+.gc-relic-choices small{line-height:1.55;}
+.gc-hobby .gc-party-board{box-shadow:0 8px 25px #0005;border:2px solid #c1a86a80;}
+.gc-party-board .piece-3{background:radial-gradient(circle at 30% 25%,#dbc7ff,#8760bc 75%);}
+.gc-party-board .piece-4{background:radial-gradient(circle at 30% 25%,#ffd2d9,#bc5575 75%);}
+.gc-hobby .gc-memory-board button{background:linear-gradient(145deg,#3c3155,#182e3e);border:1px solid #e6c88466;box-shadow:0 3px 9px #0005;}
+.gc-hobby .gc-memory-board .open{background:radial-gradient(ellipse,#e3c693,#927951);}
+.gc-hobby .gc-race-board>div{background:#183447e8;border-color:#b8a17255;border-radius:8px;}
+.gc-hobby .gc-race-board .boost{background:#256653;}.gc-hobby .gc-race-board .back{background:#633747;}.gc-hobby .gc-race-board .extra{background:#735d37;}
+.gc-hobby .gc-reaction-buttons button{border-radius:18px;box-shadow:inset 0 -10px 24px #0004;}
+@media(max-width:600px){.gc-hobby .gc-game-seats{grid-template-columns:repeat(2,minmax(0,1fr));}.gc-game-hero{min-height:95px;padding:10px;}.gc-game-hero img{width:76px;height:76px;}.gc-relic-choices{gap:6px;}.gc-relic-choices button{padding:8px;font-size:.8rem;}.gc-party-lobby b{padding-top:56px;}}
+@media(max-height:480px){.gc-game-hero{min-height:70px;padding:8px;}.gc-game-hero img{width:64px;height:64px;}}
+@media(min-width:900px){.gc-game-hero{min-height:64px;padding:8px 12px;}.gc-game-hero img{width:64px;height:64px;}.gc-game-hero h4{font-size:1.25rem;}.gc-hobby .gc-game-seats>div{padding:7px;}.gc-hobby .gc-expedition{margin:8px 0;padding:8px;}}
+.gc-relic-choices img {width:80px;height:80px;object-fit:contain;align-self:center;filter:drop-shadow(0 3px 8px #0006);}
+@media(max-width:600px){.gc-relic-choices img{width:64px;height:64px;}}
+.gc-hobby.is-live{position:fixed;inset:0;z-index:2900;overflow:auto;overscroll-behavior:contain;border-radius:0;padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));outline:none;}
+.gc-hobby.is-live>.gc-game-hero,.gc-hobby.is-live>.gc-expedition,.gc-hobby.is-live>.gc-game-seats,.gc-hobby.is-live>.gc-game-status,.gc-hobby.is-live>.gc-party,.gc-hobby.is-live>.gc-row{max-width:960px;margin-left:auto;margin-right:auto;}
+.gc-hobby.is-live>.gc-game-seats{grid-template-columns:repeat(4,minmax(0,1fr));}
+@media(max-width:600px){.gc-hobby.is-live{padding-inline:8px;}.gc-hobby.is-live>.gc-game-seats{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-height:480px){.gc-hobby.is-live .gc-game-hero{display:none;}.gc-hobby.is-live .gc-game-seats{grid-template-columns:repeat(4,minmax(0,1fr));}.gc-hobby.is-live .gc-expedition{margin:4px auto;padding:6px;}.gc-hobby.is-live .gc-party-rules{padding:6px;}.gc-hobby.is-live .gc-party{margin-block:6px;}.gc-hobby.is-live .gc-game-status{margin-block:4px;}}
+.gc-hobby[data-arranged=true] .gc-party-board .piece-1{background:radial-gradient(circle at 30% 25%,#ffdf9e,#c1903d 75%);}
+.gc-hobby[data-arranged=true] .gc-party-board .piece-2{background:radial-gradient(circle at 30% 25%,#c3ffff,#359da4 75%);}
+/* Keep the game club theme above the surrounding home's generic header/buttons. */
+.gc-hobby .gc-game-hero{justify-content:flex-start;background:linear-gradient(90deg,#0b1727b0,#0b172740),var(--room-art) center/cover;}
+.gc-hobby .gc-expedition button,.rpg-rhythm-lobby .gc-expedition button{background:#192d40;border-color:#a9a1bd70;color:#eeeef6;}
+.gc-hobby .gc-expedition button[aria-pressed=true],.rpg-rhythm-lobby .gc-expedition button[aria-pressed=true]{background:linear-gradient(130deg,#b6924d,#f3d594);color:#162331;border-color:#ffe9b7;}
+.gc-hobby .gc-relic-choices button,.rpg-rhythm-lobby .gc-relic-choices button{background:radial-gradient(ellipse at top,#68578a55,transparent),#142638;border-color:#dbc18b80;}
+.gc-hobby .gc-game-seats>div{background:#142738d9;}

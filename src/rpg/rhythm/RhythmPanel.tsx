@@ -1,3 +1,5 @@
+import ExpeditionPanel from '../../mini-games/gakuro-craft/ExpeditionPanel';
+import {canStartExpedition} from '../../mini-games/gakuro-craft/gameExpedition';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type {
   HomeGame,
@@ -840,7 +842,7 @@ export default function RhythmPanel({
           </p>
         </article>
       )}
-      <div className="rpg-rhythm-selected">
+      <ExpeditionPanel g={g} world={world} selfId={selfId} t={t} send={send}/><div className="rpg-rhythm-selected">
         <img src={assetUrl("sprites/rpg/furniture/rhythm.webp")} alt="" />
         <div>
           <h4>{songTitle(song, t)}</h4>
@@ -964,11 +966,11 @@ export default function RhythmPanel({
         <button
           className="primary"
           disabled={
-            !leader || world.paused || !g.players.every((_, i) => r.ready[i])
+            !leader || !canStartExpedition(g) || world.paused || !g.players.every((_, i) => r.ready[i])
           }
           onClick={() => send({ type: "game_start", key: g.key })}
         >
-          {t(g.phase === "finished" ? "もう一度遊ぶ" : "演奏を開始")}
+          {t(g.expedition?.settled&&!g.expedition.complete?"次の階層へ":g.phase === "finished" ? "もう一度遊ぶ" : "演奏を開始")}
         </button>
         {error && (
           <button onClick={() => setRetry((n) => n + 1)}>

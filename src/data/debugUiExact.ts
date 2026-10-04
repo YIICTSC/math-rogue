@@ -1,3 +1,4 @@
+import {GAME_ROOM_ENGLISH,GAME_ROOM_HIRAGANA} from '../mini-games/gakuro-craft/gameRoomCopy';
 import {RPG_RHYTHM_ENGLISH,RPG_RHYTHM_HIRAGANA} from '../rpg/rhythm/copy';
 import {RPG_SOCIAL_ENGLISH,RPG_SOCIAL_HIRAGANA} from '../rpg/socialCopy';
 import {RPG_FISH_ENGLISH,RPG_FISH_HIRAGANA} from '../rpg/fishingCopy';
@@ -18,6 +19,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...RPG_FISH_ENGLISH,
   ...RPG_HOME_ENGLISH,
   ...RPG_RHYTHM_ENGLISH,
+  ...GAME_ROOM_ENGLISH,
   ...RPG_MOBILE_ENGLISH,
   ...PARTY_ENGLISH,
   ...RPG_LIFE_ENGLISH,
@@ -255,6 +257,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...RPG_FISH_HIRAGANA,
   ...RPG_HOME_HIRAGANA,
   ...RPG_RHYTHM_HIRAGANA,
+  ...GAME_ROOM_HIRAGANA,
   ...RPG_MOBILE_HIRAGANA,
   ...PARTY_HIRAGANA,
   ...RPG_LIFE_HIRAGANA,

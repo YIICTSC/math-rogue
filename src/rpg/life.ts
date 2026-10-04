@@ -85,7 +85,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
  }
  if(w.ended||!w.started||p.spectator||p.nativeScene||p.duelId||p.dungeonId||p.arcadePending||pendingMutation(p)||w.activities.trades.some(t=>t.from===p.id||t.to===p.id))return false;
  if(a.type==='life-game'){
-  if(!lp.indoors||!a.command||typeof a.command.type!=='string'||!['game_join','game_leave','game_start','game_dart','game_shot','game_cue','game_paddle','game_board','game_roll','game_bowl','game_react','game_rhythm_select','game_rhythm_ready','game_rhythm_pause','game_rhythm_hit'].includes(a.command.type))return false;
+  if(!lp.indoors||!a.command||typeof a.command.type!=='string'||!['game_rules','game_expedition','game_relic','game_join','game_leave','game_start','game_dart','game_shot','game_cue','game_paddle','game_board','game_roll','game_bowl','game_react','game_rhythm_select','game_rhythm_ready','game_rhythm_pause','game_rhythm_hit'].includes(a.command.type))return false;
   if(a.command.type==='game_join'){const slot=a.command.slot;const h=life.houses.find(h=>h.id===lp.indoors),f=h&&interiorOf(h).placed.find(f=>f.slot===slot);if(!f||furnitureDistance(lp.roomPos||ROOM_SPAWN,f)>2)return tell('ゲーム家具の近くへ移動してください。');}
   const host=homeGameWorld(w),reply=gameCommand(host,host.players[p.id],a.command);life.games=host.games;if(reply?.type==='notice')p.message=reply.text;w.revision++;return true;
  }
