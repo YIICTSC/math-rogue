@@ -86,7 +86,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.setViewportSize({ width: 844, height: 390 });
   await p.screenshot({ path: "/tmp/rpg-rhythm-landscape.png" });
   await p.setViewportSize({ width: 1440, height: 900 });
-  assert.ok(await p.locator('canvas').evaluate(c => Math.abs(c.width/c.height-c.clientWidth/c.clientHeight)<.02), 'canvas adapts to viewport without stretching');
+  await p.waitForFunction(() => { const c=document.querySelector('canvas'); return c && Math.abs(c.width/c.height-c.clientWidth/c.clientHeight)<.02; });
   await p.screenshot({ path: "/tmp/rpg-rhythm-desktop.png" });
   await p.evaluate(() => {
     window.autoEvents = window.notes
