@@ -76,10 +76,17 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.waitForFunction(() => window.game.rhythm.ready[0]);
   await p.getByRole("button", { name: "演奏を開始", exact: true }).click();
   await p.getByRole("dialog", { name: "学ロリズム" }).waitFor();
+  assert.ok(await p.locator('.rpg-rhythm-live').evaluate(el => getComputedStyle(el).backgroundImage.includes('astral-stage.webp')));
+  const padAlignment = await p.evaluate(() => {
+    const c=document.querySelector('canvas').getBoundingClientRect(), buttons=[...document.querySelectorAll('.rpg-rhythm-pads button')];
+    return buttons.every((b,i)=>Math.abs(b.getBoundingClientRect().x+b.getBoundingClientRect().width/2-(c.x+c.width*(i+.5)/4))<6);
+  });
+  assert.ok(padAlignment, 'touch pads align with the play lanes');
   await p.screenshot({ path: "/tmp/rpg-rhythm-portrait.png" });
   await p.setViewportSize({ width: 844, height: 390 });
   await p.screenshot({ path: "/tmp/rpg-rhythm-landscape.png" });
   await p.setViewportSize({ width: 1440, height: 900 });
+  assert.ok(await p.locator('canvas').evaluate(c => Math.abs(c.width/c.height-c.clientWidth/c.clientHeight)<.02), 'canvas adapts to viewport without stretching');
   await p.screenshot({ path: "/tmp/rpg-rhythm-desktop.png" });
   await p.evaluate(() => {
     window.autoEvents = window.notes
@@ -111,6 +118,8 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
     }
     tick();
   });
+  await p.locator('.rpg-rhythm-live.is-fever').waitFor();
+  await p.screenshot({path:'/tmp/rpg-rhythm-fever.png'});
   await p.getByRole("status").waitFor();
   const final = await p.evaluate(() => ({
     score: window.game.scores[0],
@@ -122,6 +131,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   assert.equal(final.r.miss, 0);
   assert.ok(final.r.perfect >= final.count);
   assert.equal(Object.values(final.record)[0].score, final.score);
+  assert.ok(await p.locator('.rpg-rhythm-award').evaluate(el=>getComputedStyle(el).backgroundImage.includes('astral-award.webp')));
   await p.screenshot({ path: "/tmp/rpg-rhythm-result.png" });
   await p.evaluate(() => cancelAnimationFrame(window.autoFrame));
   await p.getByRole("button", { name: "もう一度遊ぶ", exact: true }).click();
@@ -145,6 +155,9 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.waitForFunction(() => window.game.rhythm.results[0].heads[0] > 0);
   assert.notEqual(await p.evaluate(() => window.game.rhythm.results[0].heads[0]), 4, "Pointer input scores a note");
   await p.screenshot({path:"/tmp/rpg-rhythm-playing.png"});
+  await p.emulateMedia({reducedMotion:'reduce'});
+  assert.equal(await p.locator('.rpg-rhythm-judgement b').evaluate(el=>getComputedStyle(el).animationName),'none');
+  await p.emulateMedia({reducedMotion:'no-preference'});
   await p.evaluate(async () => {
     window.audio.toggleMute();
   });

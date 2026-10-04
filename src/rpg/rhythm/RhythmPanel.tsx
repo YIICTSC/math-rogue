@@ -83,6 +83,14 @@ export default function RhythmPanel({
       delta: 0,
     }),
     [record, setRecord] = useState<RhythmRecord>();
+  const stageArt = useRef<HTMLImageElement>();
+  useEffect(() => {
+    const image = new Image();
+    image.src = assetUrl("sprites/rpg/rhythm/astral-stage.webp");
+    image.onload = () => { stageArt.current = image; };
+    return () => { image.onload = null; stageArt.current = undefined; };
+  }, []);
+  const artStyle = { "--rhythm-award": `url("${assetUrl("sprites/rpg/rhythm/astral-award.webp")}")`, "--rhythm-art": `url("${assetUrl("sprites/rpg/rhythm/astral-stage.webp")}")` } as React.CSSProperties;
   const live = useRef<HTMLElement>(null);
   const audio = useRef<HTMLAudioElement>(),
     canvas = useRef<HTMLCanvasElement>(null),
@@ -208,7 +216,7 @@ export default function RhythmPanel({
       for (let i = 0; i < 8; i++)
         particles.current.push({
           x: n.lane * 100 + 50,
-          y: 448,
+          y: (canvas.current?.height ?? 560) * 0.8,
           vx: (Math.random() - 0.5) * 180,
           vy: -50 - Math.random() * 130,
           age: 0,
@@ -443,20 +451,31 @@ export default function RhythmPanel({
         const ctx = canvas.current?.getContext("2d");
         if (ctx) {
           const width = 400,
-            height = 560,
-            hit = 448,
+            height = Math.max(140, Math.min(1000, Math.round(width * canvas.current!.clientHeight / Math.max(1, canvas.current!.clientWidth)))),
+            hit = height * 0.8,
             travel = 3.1 - v.speed * 0.35,
             beat = 60 / song.bpm,
             pulse = reduceMotion
               ? 0
               : (1 + Math.cos((time / beat) * Math.PI * 2)) / 2,
             result = model.current;
+          if (canvas.current!.height !== height) canvas.current!.height = height;
           ctx.clearRect(0, 0, width, height);
           const bg = ctx.createLinearGradient(0, 0, 0, height);
           bg.addColorStop(0, result.combo >= 30 ? "#26183f" : "#0b182d");
           bg.addColorStop(1, "#122d3c");
           ctx.fillStyle = bg;
           ctx.fillRect(0, 0, width, height);
+          if (stageArt.current) {
+            const image = stageArt.current;
+            const scale = Math.max(width / image.width, height / image.height);
+            ctx.globalAlpha = 0.38;
+            ctx.drawImage(image, (width-image.width*scale)/2, (height-image.height*scale)/2, image.width*scale, image.height*scale);
+            ctx.globalAlpha = 1;
+          }
+          const veil = ctx.createLinearGradient(0,0,0,height);
+          veil.addColorStop(0,"#080e2280"); veil.addColorStop(0.8,"#080e22c0"); veil.addColorStop(1,"#080e22");
+          ctx.fillStyle = veil; ctx.fillRect(0,0,width,height);
           for (let lane = 0; lane < 4; lane++) {
             ctx.fillStyle = colors[lane];
             ctx.globalAlpha = pressed.current.has(lane)
@@ -504,7 +523,8 @@ export default function RhythmPanel({
             ctx.shadowColor = colors[n.lane];
             ctx.shadowBlur = 12;
             ctx.fillStyle = colors[n.lane];
-            ctx.fillRect(x, y - 7, 70, 14);
+            ctx.beginPath(); ctx.roundRect(x, y - 7, 70, 14, 5); ctx.fill();
+            ctx.strokeStyle = "#ffffffb0"; ctx.lineWidth = 1; ctx.stroke();
             ctx.shadowBlur = 0;
             ctx.fillStyle = "#fff9";
             ctx.fillRect(x + 3, y - 5, 64, 3);
@@ -516,6 +536,15 @@ export default function RhythmPanel({
               1 - (now - flashes.current[lane]) / 220,
             );
             ctx.fillRect(lane * 100 + 10, hit - 2, 80, 5);
+            const age = (now - flashes.current[lane]) / 420;
+            if (!reduceMotion && age >= 0 && age < 1) {
+              ctx.globalAlpha = (1-age)*0.8;
+              ctx.strokeStyle = colors[lane]; ctx.lineWidth = 2*(1-age)+1;
+              ctx.beginPath(); ctx.ellipse(lane*100+50,hit,15+age*36,6+age*18,0,0,Math.PI*2); ctx.stroke();
+              const glow=ctx.createRadialGradient(lane*100+50,hit,0,lane*100+50,hit,65);
+              glow.addColorStop(0, colors[lane]+"90");glow.addColorStop(1,colors[lane]+"00");
+              ctx.fillStyle=glow;ctx.fillRect(lane*100,hit-65,100,130);
+            }
             ctx.globalAlpha = 1;
           }
           particles.current = particles.current.filter((p) => p.age < 0.5);
@@ -526,21 +555,18 @@ export default function RhythmPanel({
             p.vy += 220 * dt;
             ctx.globalAlpha = 1 - p.age / 0.5;
             ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, 4, 4);
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.age*3);
+            ctx.beginPath();ctx.moveTo(0,-5);ctx.lineTo(2,0);ctx.lineTo(0,5);ctx.lineTo(-2,0);ctx.closePath();ctx.fill();ctx.restore();
           }
           ctx.globalAlpha = 1;
           if (serverTime < 0) {
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 68px sans-serif";
+            ctx.font = `bold ${Math.min(68,height*0.16)}px sans-serif`;
             ctx.textAlign = "center";
-            ctx.fillText(String(Math.ceil(-serverTime)), 200, 250);
+            ctx.fillText(String(Math.ceil(-serverTime)), 200, height*0.45);
+            ctx.font="600 12px sans-serif";ctx.fillStyle="#ffd463";ctx.fillText("GET READY",200,height*0.45+Math.min(32,height*0.12));
           }
-          if (result.combo >= 30) {
-            ctx.fillStyle = "#ffd463";
-            ctx.font = "bold 16px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("FEVER", 200, 55);
-          }
+
         }
         if (now - paintAt > 50) {
           paintAt = now;
@@ -654,7 +680,8 @@ export default function RhythmPanel({
     return (
       <section
         ref={live}
-        className="rpg-rhythm-live"
+        className={`rpg-rhythm-live ${hud.combo >= 30 ? "is-fever" : ""}`}
+        style={artStyle}
         role="dialog"
         aria-modal="true"
         aria-label={t("学ロリズム")}
@@ -700,6 +727,8 @@ export default function RhythmPanel({
           </div>
         </header>
         <div className="rpg-rhythm-stage">
+          <div className="rpg-rhythm-stage-aura" aria-hidden="true" />
+          <div className="rpg-rhythm-fever" aria-hidden="true">{hud.combo >= 30 ? "✦ FEVER ✦" : "ASTRAL SYMPHONY"}</div>
           <canvas
             ref={canvas}
             width={400}
@@ -714,7 +743,7 @@ export default function RhythmPanel({
               Math.abs(hud.delta) > 0.045 && (
                 <small>{hud.delta < 0 ? "FAST" : "LATE"}</small>
               )}
-            <b>{hud.combo > 0 ? hud.combo : ""}</b>
+            <b key={Math.floor(hud.combo / 10)}>{hud.combo > 0 ? hud.combo : ""}</b>
             <span>{hud.combo > 0 ? "COMBO" : ""}</span>
           </div>
           {(r.pausedAt !== undefined || error) && (
@@ -773,8 +802,8 @@ export default function RhythmPanel({
       </section>
     );
   return (
-    <section className="rpg-rhythm-lobby">
-      <h3>🎵 {t("学ロリズム")}</h3>
+    <section className="rpg-rhythm-lobby" style={artStyle}>
+      <div className="rpg-rhythm-marquee"><span aria-hidden="true">✦ ASTRAL SYMPHONY ✦</span><h3>♫ {t("学ロリズム")}</h3><small>143 TRACKS · 4 LANES · 1–4 PLAYERS</small></div>
       <p>
         {t(
           "全曲で遊べる4レーン音ゲー。D・F・J・K、矢印キー、または画面下のボタンで演奏。長いノーツは終わりまで押して離します。",
@@ -782,7 +811,7 @@ export default function RhythmPanel({
       </p>
       {g.phase === "finished" && result && (
         <article className="rpg-rhythm-result" role="status">
-          <strong>{rhythmRank(g.scores[seat])}</strong>
+          <div className="rpg-rhythm-award" aria-hidden="true"><span>✦</span><strong>{rhythmRank(g.scores[seat])}</strong><span>✦</span></div>
           <h4>
             {t(
               result.gauge > 0 && g.scores[seat] >= 500000
