@@ -1,3 +1,4 @@
+import WordTeacher from './WordTeacher';
 import ConversationVoiceSettings from "./ConversationVoiceSettings";
 import { validConversationVoice } from "./conversationVoice";
 import TranslatedUiTree from "../components/TranslatedUiTree";
@@ -51,7 +52,6 @@ export default function SocialPanel({
   onMemory: (m: SocialMemory) => void;
 }) {
   const me = world.players[selfId],
-    [phrase, setPhrase] = useState(""),
     [message, setMessage] = useState("");
   const memory = me.memory || loadMemory(),
     others = Object.values(world.players).filter(
@@ -97,32 +97,9 @@ export default function SocialPanel({
           近くの主人公と自動で会話
         </label>
         <p>
-          好きな言葉を12個まで覚えます。友好度20で同居、50で結婚を申し込めます。
+          友好度20で同居、50で結婚を申し込めます。
         </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (phrase.trim() && memory.phrases.length < 12) {
-              onMemory({
-                ...memory,
-                phrases: [...memory.phrases, phrase.trim()],
-              });
-              setPhrase("");
-            }
-          }}
-        >
-          <label>
-            覚えさせる言葉
-            <input
-              maxLength={48}
-              value={phrase}
-              onChange={(e) => setPhrase(e.target.value)}
-            />
-          </label>
-          <button disabled={!phrase.trim() || memory.phrases.length >= 12}>
-            言葉を覚える
-          </button>
-        </form>
+        <WordTeacher world={world} target={selfId} send={send} languageMode={languageMode} disabled={!world.started||world.ended||!!me.spectator}/>
         <div className="rpg-memory-phrases">
           {memory.phrases.map((p, i) => (
             <button

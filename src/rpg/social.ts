@@ -1,3 +1,4 @@
+import {conversationFromWords} from './learnedWords';
 import { validConversationVoice, type ConversationVoice } from "./conversationVoice";
 import type { World, Adventurer } from "./engine";
 import { validHero, type CustomHero } from "./customHero";
@@ -12,6 +13,7 @@ export interface SocialLine {
   text: string;
   english?: string;
   hiragana?: string;
+  speech?: string;
 }
 export const socialLineText = (line: SocialLine, mode: string) =>
   mode === "ENGLISH"
@@ -180,6 +182,8 @@ function talk(w: World, a: Adventurer, b: Adventurer, now: number) {
   lines[2].hiragana = quirky
     ? "まくらではないきがするけど……そのはっそう、おもしろいね。"
     : `「${pb}」もおぼえたよ。またはなそう！`;
+  const taught=conversationFromWords(a.id,b.id,w.town?.people[a.id]?.words||[],w.town?.people[b.id]?.words||[],r.talks,b.memory?.personality==='logical'?1:0,quirky);
+  if(taught)lines.splice(0,lines.length,...taught);
   r.talks++;
   r.friendship = Math.min(100, r.friendship + (quirky ? 3 : 5));
   r.lastTalk = now;
@@ -238,6 +242,8 @@ export function applySocial(
           : /こんにちは|hello|おはよう/i.test(a.text)
             ? `こんにちは！ 今日も「${phrase}」で楽しく過ごそう。`
             : `うん、聞いているよ。「${phrase}」を思い出した。また話してね。`;
+    const taught=conversationFromWords(p.id,p.id,w.town?.people[p.id]?.words||[],[],s.sequence,0,false);
+    if(taught){append(w,[p.id],[{speaker:'player',text:a.text.trim()},taught[0],taught[1]],now);return true;}
     append(
       w,
       [p.id],

@@ -1,4 +1,5 @@
 export const RPG_SOCIAL_ENGLISH: Record<string, string> = {
+  "友好度20で同居、50で結婚を申し込めます。": "At friendship 20 you can invite someone to live together; at 50 you can propose marriage.",
   "主人公の会話音声": "Hero conversation voice",
   "会話を読み上げる": "Read conversations aloud",
   "話し方": "Speaking style",
@@ -97,6 +98,7 @@ export const RPG_SOCIAL_ENGLISH: Record<string, string> = {
     "Friendship, cohabitation, marriage and conversation history are shared during this room's adventure.",
 };
 export const RPG_SOCIAL_HIRAGANA: Record<string, string> = {
+  "友好度20で同居、50で結婚を申し込めます。": "ゆうこうど20でどうきょ、50でけっこんをもうしこめます。",
   "主人公の会話音声": "しゅじんこうの かいわおんせい",
   "会話を読み上げる": "かいわを よみあげる",
   "話し方": "はなしかた",

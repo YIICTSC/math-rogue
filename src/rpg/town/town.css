@@ -4,3 +4,4 @@
 @media(max-width:360px){.town-grid{grid-template-columns:1fr}.town-card{padding:10px}.town-neighbor-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.town-stat-grid>div{padding:8px}.town-calendar h2{font-size:18px}.town-calendar .town-sprite{width:60px;height:60px}}
 .rpg-root--compact .rpg-detail-sheet[data-detail=town] .rpg-sidebar-content>[data-rpg-panel=town]{display:block}.town-card .town-sprite{max-width:100%;aspect-ratio:1;height:auto}
 .rpg-map-actions .rpg-flower-quick{position:static;max-width:100%;flex-shrink:0}.rpg-map-actions .rpg-flower-quick button{flex:none}
+.rpg-word-teacher form{display:grid;gap:10px}.rpg-word-teacher label{display:grid;gap:5px}.rpg-word-teacher input,.rpg-word-teacher select{box-sizing:border-box;width:100%;min-width:0}.rpg-word-teacher .rpg-memory-phrases>div{padding:8px;overflow-wrap:anywhere}.rpg-word-teacher small{display:block}
