@@ -20,8 +20,9 @@
 .game-launch-copy{text-shadow:0 2px 12px #06161df0;}
 
 @media(max-width:600px) and (orientation:portrait), (max-height:480px){
- .game-launch-title.rpg[data-actions="5"] .game-launch-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
- .game-launch-title.rpg[data-actions="5"] .game-launch-menu>button:first-child,.game-launch-title.rpg[data-actions="5"] .game-launch-status{grid-column:1/-1}
- .game-launch-title.rpg[data-actions="5"] .game-launch-menu>button{font-size:13px;padding:8px 10px}
- .game-launch-title.rpg[data-actions="5"] .game-launch-status{max-height:90px;overflow:auto}
+ .game-launch-title.rpg:is([data-actions="4"],[data-actions="5"]) .game-launch-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .game-launch-title.rpg:is([data-actions="4"],[data-actions="5"]) .game-launch-menu>button:first-child,.game-launch-title.rpg:is([data-actions="4"],[data-actions="5"]) .game-launch-status{grid-column:1/-1}
+ .game-launch-title.rpg:is([data-actions="4"],[data-actions="5"]) .game-launch-menu>button{font-size:13px;padding:8px 10px}
+ .game-launch-title.rpg:is([data-actions="4"],[data-actions="5"]) .game-launch-status{max-height:90px;overflow:auto}
+ .game-launch-title.rpg[data-actions="4"] .game-launch-menu>button:nth-child(4){grid-column:1/-1}
 }

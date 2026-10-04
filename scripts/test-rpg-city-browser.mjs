@@ -230,6 +230,7 @@ try {
       .count(),
     0,
   );
+  for(const [width,height]of [[320,568],[390,844],[568,320],[844,390],[1024,768],[1440,900]]){await p.setViewportSize({width,height});const boxes=await p.locator('.game-launch-menu>button').evaluateAll(elements=>elements.map(el=>({x:el.getBoundingClientRect().x,y:el.getBoundingClientRect().y,right:el.getBoundingClientRect().right,bottom:el.getBoundingClientRect().bottom})));assert.ok(boxes.every(r=>r.x>=0&&r.y>=0&&r.right<=width&&r.bottom<=height),`${width}x${height} normal title buttons fit ${JSON.stringify(boxes)}`);}await p.setViewportSize({width:390,height:844});
   await p.goto("http://127.0.0.1:4199/__city?title=1&debug=1");
   await p.getByRole("button", { name: "RPG設定", exact: true }).click();
   await p.locator(".rpg-settings").waitFor();

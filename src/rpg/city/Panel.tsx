@@ -277,7 +277,7 @@ export default function CityPanel({
                       </p>
                       <div className="city-buttons">
                         <button
-                          disabled={!own || lot.level >= 3}
+                          disabled={!own || lot.level >= 3 || s.level < lot.level || s.treasury < cityBuilding(lot.kind)!.cost * lot.level}
                           onClick={() =>
                             send({ type: "city-upgrade", id: lot.id })
                           }
@@ -286,7 +286,7 @@ export default function CityPanel({
                           {cityBuilding(lot.kind)!.cost * lot.level}◈
                         </button>
                         <button
-                          disabled={!own || !lot.damage}
+                          disabled={!own || !lot.damage || s.treasury < Math.floor(cityBuilding(lot.kind)!.cost * .3)}
                           onClick={() =>
                             send({ type: "city-repair", id: lot.id })
                           }
