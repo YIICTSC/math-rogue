@@ -1,3 +1,7 @@
+import RpgSettings from './RpgSettings';
+import {useRpgPreferences} from './preferences';
+import CityPanel from './city/Panel';
+import {residentsOf} from './town/residents';
 import {trans} from '../utils/textUtils';
 import TownPanel from './town/Panel';
 import {calendar,nearbyFlowers} from './town/model';
@@ -145,6 +149,8 @@ export default function RpgOnline({
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
+  const prefs=useRpgPreferences(),[settingsOpen,setSettingsOpen]=useState(false);
+  const [cityOpen,setCityOpen]=useState(false);
   const [hero,setHero]=useState(loadHero),[heroOpen,setHeroOpen]=useState(false),[memory,setMemory]=useState(loadMemory),[socialError,setSocialError]=useState('');
   const compact=useCompactRpgLayout();
   const [detail,setDetail]=useState<string|null>(null);
@@ -190,6 +196,7 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
+  useEffect(()=>{if(settingsOpen||cityOpen){destination.current=null;walkingRoute.current=[];}},[settingsOpen,cityOpen]);
   const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch);
   useFishingAudio(world?.players[room.current?.selfId||'']?.life,world?.players[room.current?.selfId||'']?.message||'',active&&!interactionBlocked&&!world?.ended,fishing.result);
   latest.current = { world, active: active && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
@@ -227,7 +234,7 @@ export default function RpgOnline({
     bonusRanking,
   ];
   const incomingRequest=world?.social?.requests.find(r=>r.to===selfId);
-  const spokenLine = useConversationVoice(world, selfId, active && !interactionBlocked && !world?.ended && !me?.spectator && !me?.nativeScene && !me?.life?.work && !heroOpen && !Object.values(world?.life.games || {}).some(g => g.kind === 'rhythm' && g.phase === 'playing' && g.players.includes(selfId)), languageMode);
+  const spokenLine = useConversationVoice(world, selfId, active && prefs.speech && !settingsOpen && !interactionBlocked && !world?.ended && !me?.spectator && !me?.nativeScene && !me?.life?.work && !heroOpen && !Object.values(world?.life.games || {}).some(g => g.kind === 'rhythm' && g.phase === 'playing' && g.players.includes(selfId)), languageMode);
   const currentTalk=world?.social?.talks.filter(t=>t.people.includes(selfId)).at(-1);
   const talkLine=spokenLine || (currentTalk&&clockNow-currentTalk.at>=0&&clockNow-currentTalk.at<currentTalk.lines.length*2600?currentTalk.lines[Math.floor((clockNow-currentTalk.at)/2600)]:undefined);
   const near =
@@ -411,8 +418,10 @@ export default function RpgOnline({
   return (
     <TranslatedUiTree mode={languageMode}>
       {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="木漏れ日のフロンティア" subtitle="招待されたワールドで、仲間と冒険しよう。" languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
+      {settingsOpen&&<RpgSettings languageMode={languageMode} onClose={()=>setSettingsOpen(false)}/>}
+      {cityOpen&&world?.city&&<CityPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onClose={()=>setCityOpen(false)}/>}
       {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
-      <main className={`rpg-root ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
+      <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
         <header className="rpg-header">
           <button className="rpg-brand" onClick={close}>
             <Compass />
@@ -535,7 +544,7 @@ export default function RpgOnline({
                     )}
                   </span>
                 </div>
-                <div className="rpg-map-container">{!spectating&&<button className="rpg-season-badge" onClick={()=>setDetail('town')}>{copy(SEASONS[calendar(world).season],languageMode)} {calendar(world).date} · {trans('暮らし',languageMode)}</button>}{incomingRequest&&!me.life?.indoors&&<button className="rpg-social-invite" onClick={()=>openDetail('social')}>{incomingRequest.kind==='cohabit'?'同居のお誘い':'結婚のお申し込み'}</button>}{talkLine&&<div className="rpg-social-bubble" aria-live="polite"><b>{talkLine.speaker==='player'?'あなた':world.players[talkLine.speaker]?.hero?.name||world.players[talkLine.speaker]?.name||(RESIDENTS.find(r=>r.id===talkLine.speaker)?copy(RESIDENTS.find(r=>r.id===talkLine.speaker)!.name,languageMode):world.town?.people[talkLine.speaker]?.name)}</b>{socialLineText(talkLine,languageMode)}</div>}
+                <div className="rpg-map-container">{!spectating&&<button className="rpg-season-badge" onClick={()=>setDetail('town')}>{copy(SEASONS[calendar(world).season],languageMode)} {calendar(world).date} · {trans('暮らし',languageMode)}</button>}{incomingRequest&&!me.life?.indoors&&<button className="rpg-social-invite" onClick={()=>openDetail('social')}>{incomingRequest.kind==='cohabit'?'同居のお誘い':'結婚のお申し込み'}</button>}{talkLine&&<div className="rpg-social-bubble" aria-live="polite"><b>{talkLine.speaker==='player'?'あなた':world.players[talkLine.speaker]?.hero?.name||world.players[talkLine.speaker]?.name||(residentsOf(world).find(r=>r.id===talkLine.speaker)?copy(residentsOf(world).find(r=>r.id===talkLine.speaker)!.name,languageMode):world.town?.people[talkLine.speaker]?.name)}</b>{socialLineText(talkLine,languageMode)}</div>}
                   {active && (
                     <WorldCanvas
                       world={world}
@@ -545,7 +554,7 @@ export default function RpgOnline({
                       visualTheme={previewTheme}
                       onPlayer={spectating ? undefined : id=>{setSelectedPeer(id);if(compact)openDetail('team');}}
                       onTile={(x, y) => {
-                        if (!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
+                        if (!prefs.tapMove||settingsOpen||cityOpen||!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
                         const tile=y*WIDTH+x;
                         if(Math.abs(me.x-x)+Math.abs(me.y-y)<=2 && (world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile))){destination.current=null;if(compact)quickGather(tile);else{setLifeTarget(tile);setLifeOpen(true);}return;}
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
@@ -555,9 +564,11 @@ export default function RpgOnline({
                     />
                   )}
                   {!spectating && active && !world.ended && !heroOpen && me.life?.indoors && <HomeRoom onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory} world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
-                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onCity={()=>{setLifeOpen(false);setCityOpen(true);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  <button className="rpg-settings-map-button" aria-label={trans("RPG設定",languageMode)} onClick={()=>setSettingsOpen(true)}>⚙</button>
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
+                    {world.city&&!spectating&&<button onClick={()=>setCityOpen(true)}>🏙 {trans('都市運営',languageMode)}</button>}
                     {!spectating && <button onClick={openLife}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
                     <button onClick={() => setOverview(!overview)}>
                       <Map size={16} />
@@ -566,7 +577,7 @@ export default function RpgOnline({
                     <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
-                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
+                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={settingsOpen||cityOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
 
                     {!spectating&&!me.life?.indoors&&nearbyFlowers(world,me).length>0&&<div className="rpg-flower-quick" aria-label={trans('近くの花',languageMode)}>{nearbyFlowers(world,me).slice(0,3).map(({tile,flower})=><button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog||energyOf(me.life)<1} onClick={()=>room.current?.send({type:'town-flower-pick',tile})} aria-label={copy(flower.name,languageMode)+' '+trans('花を摘む',languageMode)}><FlowerSprite id={flower.id}/><span>{trans('花を摘む',languageMode)}<small> −1</small></span></button>)}</div>}
@@ -733,6 +744,7 @@ export default function RpgOnline({
                       </section>
                     ))}
                   </div>
+                  {world.endReason==='clear'&&<button disabled={clockNow<(world.rewardAt||0)||!Object.keys(world.rankingAwards).length||!!me.nativeScene} onClick={()=>{room.current?.send({type:'city-continue'});}}>{trans('街づくりを始める',languageMode)}</button>}
                   <button onClick={close}>学習ローグへ</button>
                 </section>
               </div>

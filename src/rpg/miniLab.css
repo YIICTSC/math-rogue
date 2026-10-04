@@ -1,0 +1,32 @@
+.rpg-mini-lab {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: #11282c;
+  color: #f3e6bd;
+  overflow: auto;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+.rpg-mini-lab > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rpg-mini-lab h1 {
+  font-size: clamp(18px, 3vw, 30px);
+}
+.rpg-mini-lab > header button {
+  min-height: 44px;
+  border: 1px solid #9cb4a0;
+  padding: 10px;
+  border-radius: 10px;
+}
+.rpg-mini-lab .gc-party-lobby {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.rpg-mini-lab .gc-games:not(.playing) {
+  max-width: 1200px;
+  margin: auto;
+}

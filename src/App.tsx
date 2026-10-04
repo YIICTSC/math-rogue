@@ -15012,7 +15012,7 @@ const App: React.FC = () => {
     useEffect(() => {
         const snapshot = rpgSnapshot;
         const world = snapshot?.world;
-        if (!gameState.rpgOnline || !world?.ended || world.rewardAt === null) return;
+        if (!gameState.rpgOnline || (!world?.ended&&!world?.city) || world.rewardAt === null) return;
         const rewardKey = `${world.seed}:${world.rewardAt}:${snapshot.selfId}`;
         if (rpgAwardHandledRef.current === rewardKey) return;
         const wait = world.rewardAt - Date.now();
@@ -21635,7 +21635,7 @@ const App: React.FC = () => {
                         />
                     </div>
                 )}
-                {rpgTitleOpen && <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-slate-950"/>}><RpgTitle languageMode={languageMode} onClose={()=>setRpgTitleOpen(false)} onNew={mode=>{setRpgResumeSave(null);setRpgStartIntent(mode);setRpgTitleOpen(false);launchNewAdventure(visualTheme,true);}} onContinue={save=>{rpgInviteParticipantRef.current=false;rpgInviteAssignmentRef.current=save.world.setup?.assignment||null;rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;setRpgResumeSave(save);setRpgStartIntent('solo');setRpgTitleOpen(false);const setup=save.world.setup;if(setup)setVisualTheme(setup.visualTheme);setGameState(prev=>({...prev,rpgOnline:true,screen:GameScreen.MAP,player:structuredClone(save.player),visualTheme:setup?.visualTheme||prev.visualTheme,mode:(setup?.mode||prev.mode) as GameMode,modePool:setup?.modePool,answerMode:(setup?.answerMode||'CHOICE') as AnswerMode,difficultyLevel:setup?.difficultyLevel||1}));}}/></React.Suspense>}
+                {rpgTitleOpen && <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-slate-950"/>}><RpgTitle debugEnabled={isDebugModeActive} languageMode={languageMode} onClose={()=>setRpgTitleOpen(false)} onNew={mode=>{setRpgResumeSave(null);setRpgStartIntent(mode);setRpgTitleOpen(false);launchNewAdventure(visualTheme,true);}} onContinue={save=>{rpgInviteParticipantRef.current=false;rpgInviteAssignmentRef.current=save.world.setup?.assignment||null;rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;setRpgResumeSave(save);setRpgStartIntent('solo');setRpgTitleOpen(false);const setup=save.world.setup;if(setup)setVisualTheme(setup.visualTheme);setGameState(prev=>({...prev,rpgOnline:true,screen:GameScreen.MAP,player:structuredClone(save.player),visualTheme:setup?.visualTheme||prev.visualTheme,mode:(setup?.mode||prev.mode) as GameMode,modePool:setup?.modePool,answerMode:(setup?.answerMode||'CHOICE') as AnswerMode,difficultyLevel:setup?.difficultyLevel||1}));}}/></React.Suspense>}
                 {!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
                         <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP && !rpgDungeonRef.current ? undefined : 'none' }}>

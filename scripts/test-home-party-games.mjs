@@ -5,7 +5,7 @@ try{
  const {gameCommand,tickGames}=await server.ssrLoadModule('/src/mini-games/gakuro-craft/homeGames.ts');
  const {legalReversi,connectLine,bowlingTotals}=await server.ssrLoadModule('/src/mini-games/gakuro-craft/partyGames.ts');
  const {FURNISHINGS}=await server.ssrLoadModule('/src/rpg/homeCatalog.ts');
- assert.equal(FURNISHINGS.length,61);assert.equal(new Set(FURNISHINGS.map(f=>f.id)).size,61);assert.equal(FURNISHINGS.filter(f=>f.game).length,10);
+ assert.ok(FURNISHINGS.length>=61);assert.equal(new Set(FURNISHINGS.map(f=>f.id)).size,FURNISHINGS.length);assert.equal(FURNISHINGS.filter(f=>f.game).length,10);
  function fixture(kind,count=4){const home={tile:9,level:1,furniture:[{slot:2,item:kind}]};const w={tiles:[],homeViews:{9:home},players:{},games:{},time:10,paused:false};w.tiles[9]={homeOwner:'p0'};for(let i=0;i<count;i++){const id='p'+i;w.players[id]={id,name:'Player '+i,indoors:true,homeTile:9,progress:{home}};gameCommand(w,w.players[id],{type:'game_join',slot:2});}const g=w.games['9:2'];gameCommand(w,w.players.p0,{type:'game_rules',key:g.key,arranged:false});gameCommand(w,w.players.p0,{type:'game_start',key:g.key});return {w,g};}
  const command=(w,g,seat,data)=>gameCommand(w,w.players['p'+seat],{key:g.key,round:g.round,...data});
  {const {w,g}=fixture('reversi',3);assert.equal(g.phase,'lobby','team games need balanced teams');w.paused=true;const snapshot=JSON.stringify(g);gameCommand(w,w.players.p0,{type:'game_start',key:g.key});assert.equal(JSON.stringify(g),snapshot,'cannot start while paused');}

@@ -1,3 +1,5 @@
+import {changedResidentAssets,stripResidentAssets} from '../src/rpg/town/residentTransport';
+import type {CreatedResident} from '../src/rpg/town/residents';
 import { createServer } from 'node:http';
 import { randomInt, randomUUID } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -7,7 +9,7 @@ import {miniUpgrade,closeMiniRooms} from './miniRooms';
 import {golfUpgrade,closeGolfRooms} from './golfRooms';
 
 type Member = { socket: WebSocket; id: string; admitted: boolean; name: string; alive: boolean; at: number; count: number; stateRevision?:number };
-type Room = { world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number; heroCache?: Map<string,World["players"][string]["hero"]> };
+type Room = { world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number; residentCache?:Map<string,CreatedResident>; heroCache?: Map<string,World["players"][string]["hero"]> };
 const rooms = new Map<string, Room>();
 const allowed = new Set((process.env.ALLOWED_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean));
 const server = createServer((req,res)=>{
@@ -91,7 +93,8 @@ const tick=setInterval(()=>{
     for(const p of Object.values(room.world.players))if(room.heroCache.get(p.id)!==p.hero){changed[p.id]=p.hero||null;room.heroCache.set(p.id,p.hero);}
     if(Object.keys(changed).length)for(const m of room.members.values())if(m.admitted)send(m,{type:'heroes',heroes:changed});
     for(const id of room.heroCache.keys())if(!room.world.players[id])room.heroCache.delete(id);
-    const state={...rest,players:Object.fromEntries(Object.entries(rest.players).map(([id,p])=>{const {hero,...player}=p;return [id,player];}))};
+    room.residentCache??=new Map();const residentAssets=changedResidentAssets(room.world,room.residentCache);if(residentAssets.length)for(const m of room.members.values())if(m.admitted)send(m,{type:'resident-assets',residents:residentAssets});
+    const state=stripResidentAssets({...rest,players:Object.fromEntries(Object.entries(rest.players).map(([id,p])=>{const {hero,...player}=p;return [id,player];}))});
     // Encode shared state once for all 40 players. Slow receivers get the next state.
     const packet=JSON.stringify({type:'state',state});
     for(const m of room.members.values())if(m.admitted && m.socket.readyState===WebSocket.OPEN && m.socket.bufferedAmount<65536){m.socket.send(packet);m.stateRevision=room.world.revision;}

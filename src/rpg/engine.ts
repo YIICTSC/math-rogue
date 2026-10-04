@@ -1,3 +1,4 @@
+import {applyCity,advanceCity,type CityState,type CityAction} from './city/model';
 import {applyTown,advanceTown,newTown,type TownState,type TownAction} from './town/model';
 import {applySocial,advanceSocial,newSocial,type SocialWorld,type SocialMemory,type SocialAction} from './social';
 import type {CustomHero} from './customHero';
@@ -124,6 +125,7 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+ city?:CityState;
   social?:SocialWorld;
   town?:TownState;
   life: LifeWorld;
@@ -149,7 +151,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
+export type Action = CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -197,7 +199,7 @@ export function siteUnavailable(
   if (p.nativeScene || activityBusy(w,p)) return "現在のシーンを完了してください。";
   if (w.ended)
     return w.endReason === "timeout" ? "時間切れ！" : "校長を倒しました！";
-  if (w.won) return "校長を倒しました！";
+  if (w.won&&!w.city) return "校長を倒しました！";
   if (s.cleared) return "討伐済みです。";
   if (s.kind === "treasure" && p.claimed.includes(s.id))
     return "この宝箱は開封済みです。";
@@ -685,6 +687,7 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if(action.type.startsWith('city-'))return applyCity(w,p,action as CityAction,now);
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if ((w.town?.cooking[id]||w.town?.dreams[id]&&!w.town.dreams[id].finished)&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if ((action.type==='hero-set'||action.type.startsWith('social-'))&&!p.spectator)return applySocial(w,p,action as SocialAction,now);
@@ -814,6 +817,7 @@ export function advanceWorld(w: World, now = Date.now()) {
   advanceLife(w,now);
   advanceSocial(w,now);
   advanceTown(w,now);
+  advanceCity(w);
   advanceActivities(w,now);
   advanceDuels(w,now);
   if (

@@ -3,15 +3,15 @@ import TranslatedUiTree from '../components/TranslatedUiTree';
 import type { LanguageMode } from '../types';
 import { DEFAULT_CONVERSATION_VOICE, type ConversationVoice } from './conversationVoice';
 import { conversationSpeechSupported, speakConversation, stopConversationSpeech } from './conversationSpeech';
-export default function ConversationVoiceSettings({ voice = DEFAULT_CONVERSATION_VOICE, onChange, languageMode }: {
-  voice?: ConversationVoice; onChange: (voice: ConversationVoice) => void; languageMode: LanguageMode;
+export default function ConversationVoiceSettings({ voice = DEFAULT_CONVERSATION_VOICE, onChange, languageMode, subject = '主人公の会話音声' }: {
+  subject?: string; voice?: ConversationVoice; onChange: (voice: ConversationVoice) => void; languageMode: LanguageMode;
 }) {
   const id = useId();
   const [preview, setPreview] = useState(false);
   useEffect(() => () => { stopConversationSpeech(); }, []);
   const update = (patch: Partial<ConversationVoice>) => { stopConversationSpeech(); onChange({ ...voice, ...patch }); };
   return <TranslatedUiTree mode={languageMode}><fieldset className="rpg-conversation-voice">
-    <legend>主人公の会話音声</legend>
+    <legend>{subject}</legend>
     <label><input type="checkbox" checked={voice.enabled} onChange={e => update({ enabled: e.target.checked })}/>会話を読み上げる</label>
     <label>話し方<select value={voice.style} onChange={e => update({ style: e.target.value as ConversationVoice['style'] })}>
       <option value="robot">ロボット</option><option value="smooth">なめらか</option><option value="bouncy">はずむ</option>
