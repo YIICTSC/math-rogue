@@ -1,3 +1,4 @@
+import {applyTown,advanceTown,newTown,type TownState,type TownAction} from './town/model';
 import {applySocial,advanceSocial,newSocial,type SocialWorld,type SocialMemory,type SocialAction} from './social';
 import type {CustomHero} from './customHero';
 import {recoverGatherEnergy,GATHER_ENERGY_MAX} from './energy';
@@ -124,6 +125,7 @@ export interface Adventurer {
 }
 export interface World {
   social?:SocialWorld;
+  town?:TownState;
   life: LifeWorld;
   nativeMode: true;
   gameMode: "COOP" | "BATTLE_ROYALE";
@@ -147,7 +149,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
+export type Action = TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -578,6 +580,7 @@ export function createWorld(
     duels: [],
     activities: createActivities(),
     life: createLife(now),
+    town:newTown(),
     seed,
     ...(setup ? { setup: cloneRpgAdventureSetup(setup) } : {}),
     tiles,
@@ -682,6 +685,8 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
+  if ((w.town?.cooking[id]||w.town?.dreams[id]&&!w.town.dreams[id].finished)&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if ((action.type==='hero-set'||action.type.startsWith('social-'))&&!p.spectator)return applySocial(w,p,action as SocialAction,now);
   if (p.spectator && action.type !== "native-profile") return false;
   if (!w.started && action.type !== "native-profile") return false;
@@ -808,6 +813,7 @@ export function advanceWorld(w: World, now = Date.now()) {
   if (w.started && !w.ended && w.timeLimitMinutes > 0 && now >= w.deadlineAt) endWorld(w, "timeout", now);
   advanceLife(w,now);
   advanceSocial(w,now);
+  advanceTown(w,now);
   advanceActivities(w,now);
   advanceDuels(w,now);
   if (

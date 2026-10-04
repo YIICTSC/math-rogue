@@ -66,8 +66,22 @@ export const FURNISHINGS: Furnishing[] = [
  {id:'reaction',name:'反応ゲーム機',cost:{plank:3,ore:2,crystal:2},width:1,height:1,game:'reaction'},
  {id:'piano',name:'アップライトピアノ',cost:{plank:4,ore:2},width:2,height:1},
  {id:'harp',name:'ハープ',cost:{plank:3,ore:2,reed:2},width:1,height:1},
+ {id:'seasonVaseSpring',name:'春の花の花瓶',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonVaseSummer',name:'夏の花の花瓶',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonVaseAutumn',name:'秋の花の花瓶',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonVaseWinter',name:'冬の花の花瓶',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonPhotoFrame',name:'友情の写真立て',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonDreamGlobe',name:'夢のスノードーム',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonCradle',name:'家族のゆりかご',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonTravelChest',name:'旅のおみやげ箱',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonFlowerJournal',name:'押し花の手帳',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonFamilyTea',name:'家族のお茶セット',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonLantern',name:'四季の灯り',cost:{plank:1,herb:2},width:1,height:1},
+ {id:'seasonWreath',name:'花のリース',cost:{plank:1,herb:2},width:1,height:1},
 ];
-export const furnitureImage=(id:string)=>`sprites/rpg/furniture/${id}.webp`;
+export const seasonalFurniture=['seasonVaseSpring','seasonVaseSummer','seasonVaseAutumn','seasonVaseWinter','seasonPhotoFrame','seasonDreamGlobe','seasonCradle','seasonTravelChest','seasonFlowerJournal','seasonFamilyTea','seasonLantern','seasonWreath'];
+export const furnitureImage=(id:string)=>seasonalFurniture.includes(id)?'sprites/rpg/town/keepsakes.webp':`sprites/rpg/furniture/${id}.webp`;
+export function furnitureSource(id:string,image:{naturalWidth:number;naturalHeight:number}){const i=seasonalFurniture.indexOf(id);return i<0?[0,0,image.naturalWidth,image.naturalHeight]:[i%4*image.naturalWidth/4,Math.floor(i/4)*image.naturalHeight/3,image.naturalWidth/4,image.naturalHeight/3];}
 export const furnishing=(id:string)=>FURNISHINGS.find(f=>f.id===id);
 export interface PlacedFurniture {id:string;item:string;x:number;y:number;rotation:0|1;slot?:number}
 export interface Interior {stock:Record<string,number>;placed:PlacedFurniture[]}

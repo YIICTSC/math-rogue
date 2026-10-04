@@ -1,3 +1,5 @@
+import {calendar,flowerAt} from './town/model';
+import {FLOWERS as FLOWERS_FOR_GARDEN,flowerAtlas} from './town/catalog';
 import {heroFrame} from './customHero';
 import {assetUrl} from '../utils/assetPaths';
 import {natureAt,resourceReady} from './life';
@@ -20,6 +22,7 @@ const T = 16,
 const atlas = typeof Image !== 'undefined' ? new Image() : null; if(atlas)atlas.src = assetUrl('sprites/rpg/frontier-atlas.webp');
 const craftAtlas = typeof Image !== 'undefined' ? new Image() : null; if(craftAtlas)craftAtlas.src=assetUrl('sprites/rpg/craft-items.webp');
 function prop(c:CanvasRenderingContext2D,index:number,x:number,y:number,size=27,source=atlas,columns=6,rows=4){if(source?.complete&&source.naturalWidth)c.drawImage(source,index%columns*source.naturalWidth/columns,Math.floor(index/columns)*source.naturalHeight/rows,source.naturalWidth/columns,source.naturalHeight/rows,x+8-size/2,y+17-size,size,size);}
+const flowerAtlases=Array.from({length:4},(_,i)=>{if(typeof Image==='undefined')return null;const image=new Image();image.src=assetUrl(flowerAtlas(i));return image;});
 const characterImages = new Map<string, HTMLImageElement>();
 function rect(
   c: CanvasRenderingContext2D,
@@ -274,6 +277,7 @@ export default function WorldCanvas({
       c.translate(-cx, -cy);
       const minX = Math.max(0, Math.floor(cx / T) - 2), maxX = Math.min(WIDTH, Math.ceil((cx + sw / scale) / T) + 2);
       const minY = Math.max(0, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
+      const season=calendar(w);
       for (let y = minY; y < maxY; y++)
         for (let x = minX; x < maxX; x++) {
           const biome = biomeSurface(x,y);
@@ -297,6 +301,7 @@ export default function WorldCanvas({
                     ? biome.shade
                     : biome.color,
           );
+          if((tile==='grass'||tile==='forest')){c.fillStyle=['#adc89922','#72b77b16','#dcab5744','#d5e5e755'][season.season];c.fillRect(px,py,T,T);}
           if (tile === "water") {
             rect(
               c,
@@ -325,6 +330,8 @@ export default function WorldCanvas({
         const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;
         if(atlas?.complete&&atlas.naturalWidth)prop(c,node.sprite,x*T+shake,y*T,node.rock?23:28);else tree(c,x*T,y*T);
       }
+      for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
+      for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
       for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
       for(const q of Object.values(w.players)){
         const work=q.life?.work,effect=q.life?.effect;
@@ -337,6 +344,7 @@ export default function WorldCanvas({
         .sort((a, b) => a.y - b.y)
         .forEach((q) => person(c, q, time));
       c.restore();
+      if(!overview){c.save();const weather=season.weather;c.globalAlpha=.55;for(let i=0;i<20;i++){const x=(i*89+time/(season.season===3?55:30))%sw,y=(i*61+time/(weather===2?8:75))%sh;if(weather===2){c.strokeStyle='#afd5e3';c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+10);c.stroke();}else if(season.season===3&&weather===4){c.fillStyle='#f3f8ed';c.beginPath();c.arc(x,y,2,0,Math.PI*2);c.fill();}else if(season.season===0&&weather===1){c.fillStyle='#edb9c5';c.fillRect(x,y,3,2);}else if(season.season===2&&weather===1){c.fillStyle='#d4aa59';c.fillRect(x,y,3,2);}}if(season.phase===3){c.globalAlpha=.1;c.fillStyle='#152140';c.fillRect(0,0,sw,sh);}c.restore();}
       if (overview) {
         c.font='bold 13px sans-serif'; c.textAlign='center';
         for(const biome of BIOMES) {
@@ -348,7 +356,9 @@ export default function WorldCanvas({
       if (!overview) {
         c.textAlign = "center";
         c.font = "bold 12px sans-serif";
-        for(const h of w.life?.houses||[]){const x=(h.x*T+8-cx)*scale,y=(h.y*T-34-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;c.fillStyle='#10272bdd';c.fillRect(x-55,y-13,110,21);c.fillStyle='#ffdc94';c.fillText('⌂ '+h.ownerName,x,y+2);}
+        for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
+      for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
+      for(const h of w.life?.houses||[]){const x=(h.x*T+8-cx)*scale,y=(h.y*T-34-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;c.fillStyle='#10272bdd';c.fillRect(x-55,y-13,110,21);c.fillStyle='#ffdc94';c.fillText('⌂ '+h.ownerName,x,y+2);}
         visibleSites.forEach((s) => {
           const x = (s.x * T + 8 - cx) * scale,
             y = (s.y * T - 33 - cy) * scale;

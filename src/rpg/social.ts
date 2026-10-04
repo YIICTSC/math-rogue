@@ -300,6 +300,7 @@ export function applySocial(
         )
       )
         return false;
+      if(w.town?.bonds.some(b=>b.marriedDay!==undefined&&(b.people.includes(p.id)||b.people.includes(from.id))))return false;
       r.married = true;
     }
     append(
@@ -372,6 +373,7 @@ export function applySocial(
       )
         return false;
     } else if (a.kind === "marry") {
+      if(w.town?.bonds.some(b=>b.marriedDay!==undefined&&(b.people.includes(p.id)||b.people.includes(target.id))))return false;
       if (
         r.friendship < 50 ||
         r.married ||

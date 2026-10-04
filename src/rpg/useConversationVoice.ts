@@ -37,8 +37,9 @@ export default function useConversationVoice(world: World | null, selfId: string
         if (token !== generation.current) return;
         setLine(item);
         const speaker = latest.current?.players[item.speaker];
-        const config = speaker?.memory?.conversationVoice || DEFAULT_CONVERSATION_VOICE;
-        if (speaker && config.enabled) {
+        const resident=latest.current?.town?.people[item.speaker];
+        const config = speaker?.memory?.conversationVoice || (resident?{...DEFAULT_CONVERSATION_VOICE,pitch:.85+resident.personality*.07,rate:.9+(resident.personality%3)*.08,timbre:resident.personality%4}:DEFAULT_CONVERSATION_VOICE);
+        if ((speaker || latest.current?.town?.people[item.speaker]) && config.enabled) {
           const completed = await speakConversation(socialLineText(item, language), config, language);
           if (!completed) { if (token === generation.current) setLine(undefined); return; }
         } else await new Promise(resolve => setTimeout(resolve, 1600));

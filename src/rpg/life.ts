@@ -25,14 +25,14 @@ type NatureNode={sprite:number;name:string;material:Material;hardness:number;amo
 const natureCache=new Map<string,NatureNode>();
 export function natureAt(w:World,tile:number):NatureNode|null {
  if(!isResourceTile(w,tile)||w.tiles[tile]!=='forest')return null;
- const key=`${w.seed}:${tile}`,cached=natureCache.get(key);if(cached)return cached;
+ const season=Math.floor((w.town?.day||0)/7)%4;const key=`${w.seed}:${tile}:${season}`,cached=natureCache.get(key);if(cached)return cached;
  const x=tile%WIDTH,y=Math.floor(tile/WIDTH);
  const hash=(Math.imul(tile+1,374761393)^w.seed)>>>0;
  let roll=((hash>>>8)%10000)/10000,region=biomeAt(x,y).id;
  for(const [i,weight] of biomeWeights(x,y).entries()){roll-=weight;if(roll<=0){region=BIOMES[i].id;break;}}
  const choices=vegetation[region];
- const sprite=choices[hash%choices.length];
- const result: NatureNode = {sprite,name:NATURE[sprite][0],material:NATURE[sprite][1],hardness:NATURE[sprite][2],amount:NATURE[sprite][3],rock:[8,11,12,13,14,15].includes(sprite)};
+ const baseSprite=choices[hash%choices.length],snowy=season===3&&[0,1,2,4,17].includes(baseSprite);const sprite=snowy?(baseSprite===1?10:9):baseSprite;
+ const result: NatureNode = {sprite,name:snowy?'雪化粧の木':NATURE[sprite][0],material:NATURE[baseSprite][1],hardness:NATURE[baseSprite][2],amount:NATURE[baseSprite][3],rock:[8,11,12,13,14,15].includes(sprite)};
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
@@ -101,6 +101,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   const h=life.houses.find(h=>h.id===lp.indoors);if(!h||!resident(w,h.id,p.id)||lp.work)return tell('家具の作成・配置は自分の家の中で行えます。');
   const room=h.interior??=interiorOf(h),occupants=Object.values(w.players).filter(q=>q.life?.indoors===h.id).map(q=>q.life?.roomPos||ROOM_SPAWN);
   if(a.type==='life-furniture-craft'){
+   if(a.item?.startsWith('season'))return tell('花と記念品の家具は暮らしの画面で作れます。');
    const f=furnishing(a.item);if(!f||!canAfford(lp.bag,f.cost))return tell('材料が足りません。');if(Object.values(room.stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');
    spend(lp.bag,f.cost);room.stock[f.id]=(room.stock[f.id]||0)+1;return tell('家具を作りました。持ち物から場所を選んで飾れます。');
   }
