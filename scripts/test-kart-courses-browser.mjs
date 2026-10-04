@@ -18,15 +18,15 @@ await server.listen();
 const browser = await chromium.launch({ headless: true, args: ['--enable-webgl', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-background-timer-throttling', '--disable-renderer-backgrounding'] });
 const url = 'http://127.0.0.1:5198/tmp/kart-apex-qa/index.html', errors = [];
 try {
-  const page=await browser.newPage({viewport:{width:1280,height:900}});page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
+  const page=await browser.newPage({locale:'ja-JP',viewport:{width:1280,height:900}});page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
-  await page.locator('.gk-courses button').first().waitFor();assert.equal(await page.locator('.gk-courses button').count(),8);
+  await page.getByRole('button',{name:'ひとりでレース',exact:true}).click();assert.equal(await page.locator('.gk-setup select option').count(),8);
   for(let i=0;i<8;i++) {
-    await page.locator('.gk-courses button').nth(i).click();await page.waitForTimeout(400);
+    await page.locator('.gk-setup select').selectOption(String(i));await page.waitForTimeout(400);
     assert.equal(await page.locator('.gk-render-error').count(),0);
     if(i>=3)await page.locator('.gk-preview').screenshot({path:path.join(root,`course-${i}.png`)});
   }
-  await page.locator('.gk-actions .gk-primary').click();
+  await page.getByRole('button',{name:'問題を選んでレースへ',exact:true}).click();
   await page.getByRole('button',{name:'この条件で開始',exact:true}).click();
   await page.locator('.gk-ready-card .gk-primary').click();await page.waitForFunction(()=>window.room.world.phase==='race');
   for(const item of ['nitro','shield','pulse','rocket']) {

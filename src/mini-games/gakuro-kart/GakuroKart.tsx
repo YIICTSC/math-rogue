@@ -1,3 +1,5 @@
+import {trans} from '../../utils/textUtils';
+import GameTitleScreen from '../shared/GameTitleScreen';
 import '../shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
 import NextCoursePicker from './NextCoursePicker';
@@ -47,6 +49,8 @@ function MiniMap({ world, self }: { world: Race; self: string }) {
 }
 export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteCode = '', allowHost = true }: { onClose: () => void; languageMode?: LanguageMode; inviteCode?: string; allowHost?: boolean }) {
   const [world, setWorld] = useState<Race | null>(null), [name, setName] = useState('Racer'), [hero] = useState(0), [course, setCourse] = useState(0), [code, setCode] = useState(inviteCode);
+  const [entry,setEntry]=useState<'title'|'practice'|'create'|'join'|'avatar'>('title');
+  const [avatarBack,setAvatarBack]=useState<'practice'|'create'|'join'>('practice');
   const [inviteCopied, setInviteCopied] = useState(false);
   const [error, setError] = useState(''), [busy, setBusy] = useState(false), [copied, setCopied] = useState(false), [fill, setFill] = useState(true), [sound, setSound] = useState(true);
   const [avatar, setAvatar] = useState(loadAvatar);
@@ -155,7 +159,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     catch (e) { setError(e instanceof Error ? e.message : 'Problem preparation failed'); }
     finally { if (generation.current === token) setBusy(false); }
   };
-  const leave = () => { generation.current++; clearInput(); room.current?.close(); room.current = null; setWorld(null); setError(''); setCopied(false); setBusy(false); setPicking(null); recorded.current.clear(); };
+  const leave = () => { generation.current++; clearInput(); room.current?.close(); room.current = null; setWorld(null); setError(''); setCopied(false); setBusy(false); setPicking(null); setEntry('title'); recorded.current.clear(); };
   const touch = (key: keyof typeof input.current) => ({
     onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); input.current[key] = true; },
     onPointerUp: () => { input.current[key] = false; }, onPointerCancel: () => { input.current[key] = false; }, onLostPointerCapture: () => { input.current[key] = false; },
@@ -199,22 +203,22 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
   const active = world?.phase === 'race' && !world.paused && !spectating;
   const front = order.slice(0, 5); if (me && place > 5) front.push(me);
   if (picking) return <LessonPicker languageMode={languageMode} busy={busy} error={error} onSelect={chooseLesson} onBack={() => { generation.current++; setPicking(null); setError(''); }} />;
-  return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing' : ''}`} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
-    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : onClose}>← <span>{world ? 'ガレージ' : '学習ローグ'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span><button aria-label="Sound toggle" className="gk-sound" onClick={() => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); setSound(audio.current.toggle()); }}>{sound ? 'SOUND ON' : 'SOUND OFF'}</button></div></header>
+  if(!world&&entry==='title')return <GameTitleScreen kind="kart" title={trans('スーパー学ロカート',languageMode)} subtitle="学んで加速。40台のグランプリへ。" languageMode={languageMode} onClose={onClose} backdrop={<KartCanvas world={preview} selfId="preview" preview/>} actions={[...(allowHost?[{label:'ひとりでレース',onClick:()=>setEntry('practice')},{label:'オンラインの部屋を作る',onClick:()=>setEntry('create')}] : []),{label:'招待に参加する',onClick:()=>setEntry('join')}]}/>;
+  return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing'+(world.phase==='lobby'?' gk-preparing':'') : 'gk-intro-root'}`} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
+    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span><button aria-label="Sound toggle" className="gk-sound" onClick={() => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); setSound(audio.current.toggle()); }}>{sound ? 'SOUND ON' : 'SOUND OFF'}</button></div></header>
     {world && room.current?.host && room.current.code && <HostSpectator enabled={spectating} canChangeMode={['lobby', 'result'].includes(world.phase)} onChange={value => { clearInput(); room.current?.setSpectator(value); }} name={spectators.target ? me?.name : undefined} count={racers.filter(p => p.id !== self && !p.cpu && !p.spectator).length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>#{place} / {order.length}</span><span>LAP {Math.min(world.laps, Math.max(1, Math.floor(me.distance / length) + 1))} / {world.laps}</span><span>{Math.round(me.speed * 3.6)} KM/H</span></>}</HostSpectator>}
     {error && <div className="gk-error" role="alert">{error}</div>}
     {!world ? <div className="gk-garage">
       <section className="gk-preview"><KartCanvas world={preview} selfId="preview" preview /><div className="gk-preview-shade" /><div className="gk-preview-copy"><span className="gk-eyebrow">THE AFTER-SCHOOL GRAND PRIX</span><h1>BREAK<br />THE <em>LIMIT.</em></h1><p>放課後を、ぶっちぎれ。</p><div className="gk-pills"><span>FULL 3D</span><span>40 PLAYER GRID</span><span>DRIFT & BOOST</span></div></div><div className="gk-course-caption"><span>0{course + 1} / CIRCUIT</span><strong>{COURSES[course].name}</strong><span>{COURSES[course].subtitle}</span></div></section>
-      <section className="gk-setup"><span className="gk-eyebrow">YOUR NEXT STARTING LINE</span><h2>走る準備は、いい？</h2><label>レーサー名<input maxLength={16} value={name} onChange={e => setName(e.target.value)} /></label>
-        {inviteCode && <p className="gk-note">招待URLからルームコードを読み込みました。</p>}
-        <div className="gk-join"><input aria-label="ルームコード" placeholder="6文字のルームコード" maxLength={6} value={code} onChange={e => setCode(e.target.value.toUpperCase())} /><button disabled={busy || !normalizeKartCode(code) || !name.trim()} onClick={() => start('join')}>参加 →</button></div>
-        <details className="online-avatar-details"><summary>キャラクタークリエイト</summary><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /></details>
-        {allowHost && <><details className="online-avatar-details"><summary>02 / CHOOSE YOUR WORLD</summary><div className="gk-courses">{COURSES.map((c, i) => <button key={c.name} aria-pressed={course === i} onClick={() => setCourse(i)}><span>0{i + 1}</span><div><b>{c.name}</b><small>{c.subtitle}</small></div><span className="gk-course-dot" style={{ background: c.accent }} /></button>)}</div></details>
-        <div className="gk-actions"><button className="gk-primary" disabled={busy} onClick={() => setPicking('practice')}>40台でレース <span>↗</span></button><button className="gk-online" disabled={busy} onClick={() => setPicking('create')}>オンラインの部屋を作る <span>＋</span></button></div></>}
-
-        <p className="gk-note">{busy ? '接続中…' : 'ひとりでも39台のライバル。オンラインは最大40人。'}</p>
+      <section className="gk-setup gk-entry-setup">
+      {entry==='avatar'?<><div className="gk-entry-heading"><h2>キャラクタークリエイト</h2><button onClick={()=>setEntry(avatarBack)}>戻る</button></div><div className="gk-entry-avatar"><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode}/></div></>:<>
+        <div className="gk-entry-heading"><h2>{entry==='practice'?'ひとりでレース':entry==='create'?'オンラインの部屋を作る':'招待に参加する'}</h2><button onClick={()=>{setAvatarBack(entry as 'practice'|'create'|'join');setEntry('avatar');}}>キャラクタークリエイト</button></div>
+        <label>レーサー名<input maxLength={16} value={name} onChange={e=>setName(e.target.value)}/></label>
+        {entry==='join'?<><label>ルームコード<input aria-label="ルームコード" maxLength={6} value={code} onChange={e=>setCode(e.target.value.toUpperCase())}/></label><button className="gk-primary" disabled={busy||!normalizeKartCode(code)||!name.trim()} onClick={()=>start('join')}>参加 →</button></>:<><label>コースを選ぶ<select value={course} onChange={e=>setCourse(Number(e.target.value))}>{COURSES.map((c,i)=><option key={c.name} value={i}>{c.name}</option>)}</select></label><button className="gk-primary" disabled={busy||!name.trim()} onClick={()=>setPicking(entry as 'practice'|'create')}>問題を選んでレースへ</button></>}
+        <small>{busy?'接続中…':entry==='join'?'招待コードを入力すると参加できます。':'ひとりでも39台のライバル。オンラインは最大40人。'}</small>
+        <details className="gk-entry-guide"><summary>操作ガイド</summary><p>左右でハンドル。ドリフトをためてターボ。アイテムで逆転を狙おう。</p></details>
+      </>}
       </section>
-      <section className="gk-rules"><div><span>01 / CARVE</span><h3>曲がって、ためる。</h3><p>左右でハンドル。カーブでドリフトを押し続け、離してターボ。長くためるほど強く加速。</p></div><div><span>02 / CHASE</span><h3>背中を追って、抜く。</h3><p>前の車の真後ろでスリップストリーム。加速パネルとジャンプ台をつなぎ、ライバルを抜き去ろう。</p></div><div><span>03 / OVERTAKE</span><h3>最後まで、逆転。</h3><p>光るクリスタルでアイテム獲得。ニトロ、防御、前方へのパルス、追い上げロケット。周回数はホストが決める。</p></div></section>
     </div> : <>
       <section className={`gk-race-view ${me?.boost ? 'is-boosting' : ''} ${world.lesson && me && !me.finish && quizProgress < QUIZ_END + 230 ? 'has-quiz' : ''} ${me?.crash ? 'is-crashing' : ''}`}><KartCanvas world={world} selfId={viewId} />
         <div className="gk-vignette" />{me && me.boost > 0 && active && <div className="gk-speed-streaks" />}

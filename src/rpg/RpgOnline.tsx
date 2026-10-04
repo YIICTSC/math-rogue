@@ -1,3 +1,6 @@
+import {assetUrl} from '../utils/assetPaths';
+import GameTitleScreen from '../mini-games/shared/GameTitleScreen';
+import {makeWorldSave,writeWorldSave,restoreWorldSave,canSaveWorld,type RpgWorldSave} from './worldSave';
 import useConversationVoice from './useConversationVoice';
 import { loadConversationVoice, saveConversationVoice } from './conversationVoice';
 import HeroBuilder from './HeroBuilder';
@@ -55,8 +58,6 @@ import TranslatedUiTree from "../components/TranslatedUiTree";
 import GoHomeDash from "../components/GoHomeDash";
 import WorldCanvas from "./WorldCanvas";
 import {
-  addPlayer,
-  createWorld,
   distance,
   HEIGHT,
   WIDTH,
@@ -118,6 +119,7 @@ export default function RpgOnline({
   sceneError,
   adventureSetup,
   autoJoinInvite = false,
+  initialIntent = 'solo',resumeSave,onTitle,
   onRoom,
   onSnapshot,
   onEnergyRequest,
@@ -131,6 +133,7 @@ export default function RpgOnline({
   sceneError?: string;
   adventureSetup?: RpgAdventureSetup;
   autoJoinInvite?: boolean;
+  initialIntent?:'solo'|'online';resumeSave?:RpgWorldSave|null;onTitle?:()=>void;
   onRoom: (room: RpgRoom) => void;
   onSnapshot: (snapshot: RpgSnapshot) => void;
   onEnergyRequest?:()=>void;
@@ -161,7 +164,12 @@ export default function RpgOnline({
     [code, setCode] = useState(inviteCode),
     [inviteCopied, setInviteCopied] = useState(false);
   const [gameMode,setGameMode]=useState<World["gameMode"]>("COOP");
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(initialIntent==='solo'?0:30);
+  const [intent,setIntent]=useState<'practice'|'create'|'join'>(initialIntent==='solo'?'practice':'create');
+  const [inviteEntered,setInviteEntered]=useState(false);
+  const [saveStatus,setSaveStatus]=useState(''),[saving,setSaving]=useState(false);
+  const playerLatest=useRef(player);playerLatest.current=player;
+  const resumed=useRef(false),saveInProgress=useRef(false);
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [inviteTheme, setInviteTheme] = useState<RpgAdventureSetup["visualTheme"]>(
     adventureSetup?.visualTheme || "elementary",
@@ -181,16 +189,6 @@ export default function RpgOnline({
   useFishingAudio(world?.players[room.current?.selfId||'']?.life,world?.players[room.current?.selfId||'']?.message||'',active&&!interactionBlocked&&!world?.ended,fishing.result);
   latest.current = { world, active: active && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
-  const preview = useMemo(() => {
-    const w = createWorld(9252026, {
-      visualTheme: previewTheme,
-      mode: "MULTIPLICATION",
-      answerMode: "CHOICE",
-      difficultyLevel: 1,
-    });
-    addPlayer(w, "preview", "あなた");
-    return w;
-  }, [previewTheme]);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
   const roomCode = room.current?.code || "";
@@ -207,7 +205,7 @@ export default function RpgOnline({
   const spectators = useSpectatorTarget(spectating, candidates.map(p => p.id));
   const watched = spectating ? world?.players[spectators.target || ''] : me;
   const rankedMembers = members.filter(p => !p.spectator);
-  const remainingSeconds = world
+  const remainingSeconds = world&&world.timeLimitMinutes>0
     ? Math.max(0, Math.ceil((world.deadlineAt - clockNow) / 1000))
     : null;
   const bonusRanking =
@@ -287,6 +285,12 @@ export default function RpgOnline({
       setBusy(false);
     }
   };
+  useEffect(()=>{if(!resumeSave||resumed.current)return;resumed.current=true;const r=new RpgRoom(w=>{setWorld(w);onSnapshot({world:w,selfId:r.selfId});},setError);room.current=r;onRoom(r);try{const savedHero=resumeSave.player.customHero||resumeSave.world.players[resumeSave.selfId].hero||null;setHero(savedHero);setMemory(resumeSave.world.players[resumeSave.selfId].memory||loadMemory());r.resume(restoreWorldSave(resumeSave),resumeSave.selfId);setSaveStatus('保存したワールドを再開しました。');}catch{r.close();setError('保存データを読み込めませんでした。');}return()=>{r.close();resumed.current=false;};},[resumeSave]);
+  const persist=async(quiet=false)=>{const r=room.current,w=r?.world;if(!r||!w||!r.host||r.code||saveInProgress.current)return false;if(!w.ended&&!canSaveWorld(w,r.selfId,playerLatest.current)){if(!quiet)setSaveStatus('戦闘・採取・ミニゲームが終わってから保存してください。');return false;}saveInProgress.current=true;setSaving(true);try{await writeWorldSave(w.ended?structuredClone({version:1 as const,savedAt:Date.now(),selfId:r.selfId,world:w,player:playerLatest.current}):makeWorldSave(w,r.selfId,playerLatest.current));setSaveStatus('ワールドを保存しました。');return true;}catch{setSaveStatus('保存できませんでした。端末の空き容量を確認してください。');return false;}finally{saveInProgress.current=false;setSaving(false);}};
+  const persistLatest=useRef(persist);persistLatest.current=persist;
+  useEffect(()=>{if(!world?.started||!selfId||room.current?.code)return;const initial=setTimeout(()=>void persistLatest.current(true),1000),timer=setInterval(()=>void persistLatest.current(true),30000);const hidden=()=>{if(document.hidden)void persistLatest.current(true);};document.addEventListener('visibilitychange',hidden);return()=>{clearTimeout(initial);clearInterval(timer);document.removeEventListener('visibilitychange',hidden);};},[selfId,world?.started]);
+  useEffect(()=>{if(!world?.ended||room.current?.code)return;const timer=setTimeout(()=>void persistLatest.current(true),1000);return()=>clearTimeout(timer);},[world?.ended]);
+  const saveToTitle=async()=>{if(await persist()) {room.current?.close();onTitle?.();}};
   const copyInviteUrl = useCallback(async () => {
     if (!inviteUrl) return;
     try {
@@ -395,13 +399,15 @@ export default function RpgOnline({
   const move=(dx:number,dy:number)=>{if(!latest.current.active)return;destination.current=null;walkingRoute.current=[];room.current?.send({type:'move',dx,dy});};
   const hudHp=spectating?watched?.hp||0:player.currentHp,hudMaxHp=spectating?watched?.maxHp||1:player.maxHp;
   const close = () => {
+    void persist(true);
     room.current?.close();
     onClose();
   };
   return (
     <TranslatedUiTree mode={languageMode}>
+      {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="木漏れ日のフロンティア" subtitle="招待されたワールドで、仲間と冒険しよう。" languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
       {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
-      <main className={`rpg-root ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
+      <main className={`rpg-root ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
         <header className="rpg-header">
           <button className="rpg-brand" onClick={close}>
             <Compass />
@@ -419,123 +425,15 @@ export default function RpgOnline({
         {!world || !me ? (
           <div className="rpg-lobby">
             <div className="rpg-lobby-art">
-              <WorldCanvas
-                world={preview}
-                selfId="preview"
-                onTile={() => {}}
-                overview
-                languageMode={languageMode}
-                visualTheme={previewTheme}
-              />
+              <img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>
             </div>
-            <section className="rpg-lobby-form"><button onClick={()=>setHeroOpen(true)}>オリジナル主人公を作る</button>
-              <h1>{autoJoinInvite ? "招待に参加する" : "冒険をはじめる"}</h1>
-              <p>
-                {autoJoinInvite
-                  ? "参加名を入力してから、主人公を選んで冒険に加わります。"
-                  : "選択した主人公・問題・難易度で探索します。"}
-              </p>
-              <label>
-                {autoJoinInvite ? "参加名" : "冒険者の名前"}
-                <input
-                  value={name}
-                  maxLength={16}
-                  autoComplete="nickname"
-                  placeholder={autoJoinInvite ? "参加者名を入力" : undefined}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </label>
-              {autoJoinInvite ? (
-                <>
-                  <label>
-                    開始する編
-                    <select
-                      value={inviteTheme}
-                      onChange={(e) =>
-                        setInviteTheme(e.target.value as RpgAdventureSetup["visualTheme"])
-                      }
-                    >
-                      <option value="elementary">小学生編</option>
-                      <option value="high-school">高校編</option>
-                      <option value="magic">マジック編</option>
-                    </select>
-                  </label>
-                  <p className="rpg-invite-hint" role="status">
-                    {busy
-                      ? "招待された部屋へ接続しています…"
-                      : "参加名を決めて主人公選択へ進んでください。"}
-                  </p>
-                  <button
-                    className="rpg-join-button"
-                    disabled={busy || !name.trim() || code.length !== 6}
-                    onClick={() => start("invite")}
-                  >
-                    名前を決めて主人公選択へ
-                  </button>
-                </>
-              ) : (
-                <>
-                  <label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World["gameMode"])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>
-                  <label>
-                    制限時間
-                    <input
-                      type="number"
-                      min={1}
-                      max={180}
-                      step={1}
-                      value={timeLimitMinutes}
-                      onChange={(e) => {
-                        const next = Number(e.target.value);
-                        setTimeLimitMinutes(Number.isFinite(next) ? Math.max(1, Math.min(180, Math.floor(next))) : 30);
-                      }}
-                    />
-                  </label>
-                  <button
-                    className="rpg-primary"
-                    disabled={busy || !name.trim()}
-                    onClick={() => start("create")}
-                  >
-                    部屋を作る
-                  </button>
-                  <label>
-                    招待コード（6文字）
-                    <input
-                      value={code}
-                      maxLength={6}
-                      placeholder="ABC123"
-                      autoComplete="off"
-                      onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    />
-                  </label>
-                  {inviteCode && (
-                    <p className="rpg-invite-hint" role="status">
-                      招待URLからルームコードを読み込みました。
-                    </p>
-                  )}
-                  {!code && (
-                    <p className="rpg-join-hint">
-                      6文字のコードを入力すると入室できます。
-                    </p>
-                  )}
-                  <button
-                    className="rpg-join-button"
-                    disabled={busy || !name.trim() || code.length !== 6}
-                    onClick={() => start("join")}
-                  >
-                    招待コードを入力して入室する
-                  </button>
-                  <button
-                    className="rpg-practice"
-                    disabled={busy || !name.trim()}
-                    onClick={() => start("practice")}
-                  >
-                    まずはひとりで練習する
-                  </button>
-                </>
-              )}
-              <small>
-                最大40人・チームは最大4人。オンラインでは部屋を作った人の画面を開いたままにしてください。
-              </small>
+            <section className="rpg-lobby-form rpg-entry-form">
+              <div className="rpg-entry-heading"><h1>{autoJoinInvite?'招待に参加する':intent==='practice'?'ひとり用の冒険':intent==='create'?'オンラインの部屋を作る':'招待に参加する'}</h1><button onClick={()=>setHeroOpen(true)}>主人公ビルダー</button></div>
+              {!autoJoinInvite&&<nav className="rpg-entry-tabs" aria-label="冒険の遊び方">{([['practice','ひとりで遊ぶ'],['create','部屋を作る'],['join','招待に参加する']] as const).map(([value,label])=><button key={value} aria-pressed={intent===value} disabled={busy} onClick={()=>{setIntent(value);if(value==='practice'){setTimeLimitMinutes(0);setGameMode('COOP');}else if(timeLimitMinutes===0)setTimeLimitMinutes(30);}}>{label}</button>)}</nav>}
+              <label>{autoJoinInvite?'参加名':'冒険者の名前'}<input value={name} maxLength={16} autoComplete="nickname" onChange={e=>setName(e.target.value)}/></label>
+              {autoJoinInvite?<label>開始する編<select value={inviteTheme} onChange={e=>setInviteTheme(e.target.value as RpgAdventureSetup['visualTheme'])}><option value="elementary">小学生編</option><option value="high-school">高校編</option><option value="magic">マジック編</option></select></label>:intent==='join'?<label>ルームコード<input value={code} maxLength={6} autoCapitalize="characters" onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}/></label>:<div className="rpg-entry-options">{intent==='create'&&<label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World['gameMode'])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>}<label>制限時間<select value={timeLimitMinutes} onChange={e=>setTimeLimitMinutes(Number(e.target.value))}><option value={0}>制限時間なし</option>{[5,15,30,60,90,120,180].map(n=><option key={n} value={n}>{n} min</option>)}</select></label></div>}
+              <button className="rpg-join-button" disabled={busy||!name.trim()||((autoJoinInvite||intent==='join')&&code.length!==6)} onClick={()=>start(autoJoinInvite?'invite':intent)}>{busy?'接続中…':autoJoinInvite?'名前を決めて主人公選択へ':intent==='practice'?'冒険をはじめる':intent==='create'?'オンラインの部屋を作る':'招待コードを入力して入室する'}</button>
+              <small>{intent==='practice'&&!autoJoinInvite?'ワールドと主人公をこの端末へ自動保存します。':'最大40人・チームは最大4人。ホストの画面を開いたままにしてください。'}</small>
             </section>
           </div>
         ) : !world.started ? (
@@ -617,7 +515,7 @@ export default function RpgOnline({
                 {compact&&<div className="rpg-compact-hud" aria-label="冒険の重要情報">
                   <button className="rpg-compact-menu" aria-label="部屋と操作の詳細" onClick={()=>openDetail('menu')}><Compass size={19}/><span className="rpg-desktop-title">木漏れ日のフロンティア</span></button>
                   <button className="rpg-compact-health" aria-label="プレイヤーの状態" onClick={()=>openDetail('player')}><Heart size={15}/><span>HP <b>{hudHp}/{hudMaxHp}</b><i><em style={{width:`${Math.max(0,Math.min(100,hudHp/Math.max(1,hudMaxHp)*100))}%`}}/></i></span></button>
-                  <button className="rpg-compact-clock" aria-label="制限時間と冒険の目標" onClick={()=>openDetail('goal')}><Clock size={15}/><b>{Math.floor((remainingSeconds||0)/60)}:{String((remainingSeconds||0)%60).padStart(2,'0')}</b></button>
+                  <button className="rpg-compact-clock" aria-label="制限時間と冒険の目標" onClick={()=>openDetail('goal')}><Clock size={15}/><b>{world.timeLimitMinutes===0?'∞':`${Math.floor((remainingSeconds||0)/60)}:${String((remainingSeconds||0)%60).padStart(2,'0')}`}</b></button>
                   <button className="rpg-compact-members" aria-label="参加者とチーム" onClick={()=>openDetail('team')}><Users size={16}/><span>{members.length}/40</span></button>
                 </div>}
 
@@ -777,7 +675,7 @@ export default function RpgOnline({
                 </>}
                 {compact&&spectating&&<section data-rpg-panel="player" className="rpg-player-panel"><h2>{watched?.name||'ホスト観戦'}</h2><p>HP {hudHp} / {hudMaxHp}</p><p>コイン {watched?.gold||0} · 戦闘勝利 {watched?.completedBattles||0}</p></section>}
                 {compact&&spectating&&<section data-rpg-panel="team" className="rpg-player-panel"><button onClick={()=>openDetail('social')}>主人公と交流</button><h2>参加者とチーム</h2>{members.map(p=><p key={p.id}>{p.name} · HP {p.hp}/{p.maxHp}</p>)}</section>}
-                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>採取エネルギー</h3><p>{energyOf(watched?.life)} / {GATHER_ENERGY_MAX}</p>{!spectating&&<><p>採取1回で1消費、1問正解で2回復。時間では回復しません。</p><button className="rpg-outline" disabled={!onEnergyRequest} onClick={requestEnergy}>問題を解いて回復</button></>}<h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり練習 · 通信なし</p>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
+                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>採取エネルギー</h3><p>{energyOf(watched?.life)} / {GATHER_ENERGY_MAX}</p>{!spectating&&<><p>採取1回で1消費、1問正解で2回復。時間では回復しません。</p><button className="rpg-outline" disabled={!onEnergyRequest} onClick={requestEnergy}>問題を解いて回復</button></>}<h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり用 · 通信なし</p>}{!roomCode&&<div className="rpg-save-controls"><h3>ワールドの保存</h3><p role="status">{saveStatus||'探索中は30秒ごとに自動保存します。'}</p><button className="rpg-outline" disabled={saving} onClick={()=>void persist()}>ワールドを保存する</button>{onTitle&&<button className="rpg-outline" disabled={saving} onClick={()=>void saveToTitle()}>保存してRPGタイトルへ</button>}</div>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
                 </div>
               </aside>
             </div>
@@ -800,7 +698,7 @@ export default function RpgOnline({
                   </button>
                 </div>
               ) : (
-                <span>ひとり練習 · 通信なし</span>
+                <span>ひとり用 · 通信なし</span>
               )}
             </footer>
             {world.ended && !me.nativeScene && (

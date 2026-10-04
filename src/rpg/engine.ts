@@ -568,7 +568,7 @@ export function createWorld(
     }
   }
   for (const site of sites) pave(biomeAt(site.x,site.y),site);
-  const normalizedTimeLimit = Math.max(
+  const normalizedTimeLimit = timeLimitMinutes === 0 ? 0 : Math.max(
     1,
     Math.min(180, Math.floor(Number.isFinite(timeLimitMinutes) ? timeLimitMinutes : 30)),
   );
@@ -586,7 +586,7 @@ export function createWorld(
     logs: ["冒険のはじまり。3体の試験官を倒し、校長の結界を解こう。"],
     won: false,
     timeLimitMinutes: normalizedTimeLimit,
-    deadlineAt: now + normalizedTimeLimit * 60 * 1000,
+    deadlineAt: normalizedTimeLimit ? now + normalizedTimeLimit * 60 * 1000 : 0,
     started: true,
     ended: false,
     endReason: null,
@@ -677,7 +677,7 @@ export function applyAction(
     if (Object.keys(w.players).length < 2)
       return tell("参加者が2人以上集まると開始できます。");
     w.started = true;
-    w.deadlineAt = now + w.timeLimitMinutes * 60 * 1000;
+    w.deadlineAt = w.timeLimitMinutes ? now + w.timeLimitMinutes * 60 * 1000 : 0;
     log(w, "参加者が集合し、冒険が始まりました！");
     w.revision++;
     return true;
@@ -805,7 +805,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 }
 
 export function advanceWorld(w: World, now = Date.now()) {
-  if (w.started && !w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
+  if (w.started && !w.ended && w.timeLimitMinutes > 0 && now >= w.deadlineAt) endWorld(w, "timeout", now);
   advanceLife(w,now);
   advanceSocial(w,now);
   advanceActivities(w,now);

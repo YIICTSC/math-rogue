@@ -18,8 +18,8 @@ await server.listen();
 const browser = await chromium.launch({ headless: true, args: ['--enable-webgl', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-background-timer-throttling', '--disable-renderer-backgrounding'] });
 const url = 'http://127.0.0.1:5198/tmp/kart-apex-qa/index.html', errors = [];
 try {
-  const page = await browser.newPage({viewport:{width:1440,height:960}}); page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
-  await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
+  const page = await browser.newPage({locale:'ja-JP',viewport:{width:1440,height:960}}); page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
+  await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});await page.getByRole('button',{name:'ひとりでレース',exact:true}).click();await page.getByRole('button',{name:'キャラクタークリエイト',exact:true}).click();
   for (let i=0;i<8;i++) {
     await page.locator('.gk-avatar-species button').nth(i).click();
     await page.waitForTimeout(150);
@@ -48,7 +48,7 @@ try {
     if ([1,2,5,6,7].includes(i)) await page.locator('.gk-preview').screenshot({path:path.join(root,`kart-shape-${i}.png`)});
   }
   await page.locator('.gk-avatar-accessories button').nth(3).click();
-  await page.reload(); await page.locator('.gk-avatar-editor').waitFor();
+  await page.reload(); await page.getByRole('button',{name:'ひとりでレース',exact:true}).click();await page.getByRole('button',{name:'キャラクタークリエイト',exact:true}).click();await page.locator('.gk-avatar-editor').waitFor();
   assert.equal(await page.locator('.gk-avatar-species button').nth(0).getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.gk-avatar-accessories button').nth(3).getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.gk-expressions button').nth(6).getAttribute('aria-pressed'),'true');
@@ -61,9 +61,9 @@ try {
   const previewBox=await page.locator('.gk-preview').boundingBox();
   assert(previewBox && previewBox.y>=-1 && previewBox.y+previewBox.height<=844,'Mobile editor preview should stay visible while choosing a kart.');
   await page.locator('.gk-avatar-editor').screenshot({path:path.join(root,'avatar-phone.png')});
-  await page.getByRole('button',{name:/40台でレース/}).click();
+  await page.getByRole('button',{name:'戻る',exact:true}).click();await page.getByRole('button',{name:'問題を選んでレースへ',exact:true}).click();
   await page.getByRole('button',{name:'この条件で開始',exact:true}).click();
-  await page.locator('.gk-ready-card .gk-avatar-species button').nth(3).click();
+  await page.locator('.gk-ready-card summary').filter({hasText:'キャラクタークリエイト'}).click();await page.locator('.gk-ready-card .gk-avatar-species button').nth(3).click();await page.locator('.gk-ready-card summary').filter({hasText:'キャラクタークリエイト'}).click();
   assert.equal(await page.evaluate(()=>window.room.world.players.local.avatar.species),3);
   assert.equal(await page.evaluate(()=>window.room.world.players.local.avatar.expression),6);
   await page.screenshot({path:path.join(root,'avatar-lobby-phone.png')});

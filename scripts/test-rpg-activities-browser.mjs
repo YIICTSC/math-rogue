@@ -117,7 +117,7 @@ try {
   await screen('MODE_SELECTION');await call('mode');await screen('DIFFICULTY_SELECTION');await call('difficulty');
   await screen('CHARACTER_SELECTION');await call('character');
   if(await state()==='RELIC_SELECTION')await call('relic');await screen('MAP');
-  await page.getByRole('button',{name:'まずはひとりで練習する'}).click();
+  await page.getByRole('button',{name:'冒険をはじめる'}).click();
   await page.waitForFunction(()=>!!window.__rpgTest.room?.world.players.local?.profile?.deck);
   // Enter through the real town/rest card, not a direct map action.
   await page.evaluate(()=>{const t=window.__rpgTest;t.room.world.activities.nextEventAt=t.room.world.deadlineAt;const town=t.room.world.sites.find(s=>s.kind==='town');Object.assign(t.room.world.players.local,{x:town.x,y:town.y,completedBattles:3});t.room.send({type:'native-enter',siteId:town.id});});

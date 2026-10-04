@@ -45,7 +45,7 @@ sockets.on('connection',(socket,request)=>{
         if(!setup){fail(m,'冒険設定が不正です。');return;}
         const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         do{code=Array.from({length:6},()=>alphabet[randomInt(alphabet.length)]).join('');}while(rooms.has(code));
-        const minutes=Number.isFinite(d.minutes)?Math.min(120,Math.max(1,d.minutes)):30;
+        const minutes=d.minutes===0?0:Number.isFinite(d.minutes)?Math.min(180,Math.max(1,d.minutes)):30;
         const world=createWorld(randomInt(0x100000000),setup,minutes,now,d.gameMode==='BATTLE_ROYALE'?'BATTLE_ROYALE':'COOP');world.started=false;
         room={world,host:m.id,members:new Map(),revision:-1,emptyAt:0};
         rooms.set(code,room);

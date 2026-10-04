@@ -18,8 +18,8 @@ await server.listen();
 const browser = await chromium.launch({ headless: true, args: ['--enable-webgl', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-background-timer-throttling', '--disable-renderer-backgrounding'] });
 const url = 'http://127.0.0.1:5198/tmp/kart-apex-qa/index.html', errors = [];
 try {
-  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }); mobile.on('pageerror', e => errors.push(e.message));
-  mobile.setDefaultTimeout(60000); await mobile.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await mobile.getByRole('button', { name: /40台でレース/ }).tap();
+  const mobile = await browser.newPage({locale:'ja-JP', viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }); mobile.on('pageerror', e => errors.push(e.message));
+  mobile.setDefaultTimeout(60000); await mobile.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await mobile.getByRole('button',{name:'ひとりでレース',exact:true}).tap();await mobile.getByRole('button',{name:'問題を選んでレースへ',exact:true}).tap();
   const mathCategory = mobile.getByRole('button', { name: '算数・数学' });
   const categoryBefore = await mathCategory.evaluate(button => getComputedStyle(button).backgroundColor);
   await mathCategory.tap();
@@ -50,17 +50,17 @@ try {
   await mobile.waitForFunction(() => window.kartCueLog?.includes(70));
   await mobile.close();
 
-  const page = await browser.newPage({ viewport: { width: 1440, height: 960 } }); page.on('pageerror', e => errors.push(e.message));
-  page.setDefaultTimeout(60000); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await page.getByRole('button', { name: /40台でレース/ }).waitFor();
+  const page = await browser.newPage({locale:'ja-JP', viewport: { width: 1440, height: 960 } }); page.on('pageerror', e => errors.push(e.message));
+  page.setDefaultTimeout(60000); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await page.getByRole('button',{name:'ひとりでレース',exact:true}).click();
   await page.waitForFunction(() => document.querySelector('canvas')?.width > 10);
   assert.equal(await page.locator('.gk-render-error').count(), 0);
   await page.screenshot({ path: path.join(root, 'garage-desktop.png') });
   for (const [label, course] of [['cloud', 'CLOUD GARDEN'], ['solar', 'SOLAR WORKS'], ['neon', 'NEON CAMPUS']]) {
-    await page.locator('.gk-courses').getByRole('button', { name: new RegExp(course) }).click();
+    await page.locator('.gk-setup select').selectOption({label:course});
     await page.waitForTimeout(250); assert.equal(await page.locator('.gk-render-error').count(), 0);
     await page.screenshot({ path: path.join(root, `garage-${label}.png`) });
   }
-  await page.getByRole('button', { name: /40台でレース/ }).click(); await page.screenshot({path:path.join(root,'lesson-picker.png')}); assert.equal(await page.getByRole('button',{name:'入力',exact:true}).count(),0); await page.getByRole('button', { name: 'この条件で開始', exact: true }).click(); await page.getByRole('button', { name: /レースを開始/ }).click();
+  await page.getByRole('button',{name:'問題を選んでレースへ',exact:true}).click(); await page.screenshot({path:path.join(root,'lesson-picker.png')}); assert.equal(await page.getByRole('button',{name:'入力',exact:true}).count(),0); await page.getByRole('button', { name: 'この条件で開始', exact: true }).click(); await page.getByRole('button', { name: /レースを開始/ }).click();
   await page.waitForFunction(() => window.room?.world?.phase === 'race');
   assert.equal(await page.evaluate(() => Object.keys(window.room.world.players).length), 40);
   await page.evaluate(() => { window.room.world.players.local.x = 0; });

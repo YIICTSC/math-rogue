@@ -133,6 +133,12 @@ export class RpgRoom {
     }, 250);
     this.emit();
   }
+  resume(world:World,selfId:string) {
+    if(!world.players[selfId]||world.ended)throw new Error('保存データを読み込めませんでした。');
+    this.host=true;this.selfId=selfId;this.world=structuredClone(world);
+    this.timer=setInterval(()=>{if(!this.world)return;advanceWorld(this.world);if(this.world.revision!==this.lastRevision){this.lastRevision=this.world.revision;this.emit();}},250);
+    this.emit();
+  }
   private emit() {
     if (this.world && !this.closed) this.update(structuredClone(this.world));
   }
