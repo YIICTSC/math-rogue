@@ -1,0 +1,1050 @@
+{
+  "generator": "ImageGen",
+  "extraction": "Disconnected sprite silhouettes; original pixels with 12-pixel transparent padding; no uniform row crops",
+  "assets": {
+    "crops": {
+      "source": "exec-c51c47b2-11a2-434a-894a-fb2ad8b23598.png",
+      "size": [
+        1774,
+        887
+      ],
+      "exports": [
+        {
+          "file": "crops/turnip.webp",
+          "sourceRect": [
+            44,
+            37,
+            157,
+            173
+          ]
+        },
+        {
+          "file": "crops/carrot.webp",
+          "sourceRect": [
+            266,
+            37,
+            158,
+            175
+          ]
+        },
+        {
+          "file": "crops/cabbage.webp",
+          "sourceRect": [
+            480,
+            62,
+            169,
+            148
+          ]
+        },
+        {
+          "file": "crops/potato.webp",
+          "sourceRect": [
+            711,
+            39,
+            147,
+            172
+          ]
+        },
+        {
+          "file": "crops/strawberry.webp",
+          "sourceRect": [
+            922,
+            51,
+            158,
+            159
+          ]
+        },
+        {
+          "file": "crops/pea.webp",
+          "sourceRect": [
+            1136,
+            34,
+            176,
+            180
+          ]
+        },
+        {
+          "file": "crops/asparagus.webp",
+          "sourceRect": [
+            1374,
+            36,
+            147,
+            178
+          ]
+        },
+        {
+          "file": "crops/radish.webp",
+          "sourceRect": [
+            1584,
+            44,
+            155,
+            170
+          ]
+        },
+        {
+          "file": "crops/tomato.webp",
+          "sourceRect": [
+            44,
+            258,
+            161,
+            173
+          ]
+        },
+        {
+          "file": "crops/corn.webp",
+          "sourceRect": [
+            257,
+            260,
+            168,
+            175
+          ]
+        },
+        {
+          "file": "crops/cucumber.webp",
+          "sourceRect": [
+            483,
+            258,
+            158,
+            179
+          ]
+        },
+        {
+          "file": "crops/eggplant.webp",
+          "sourceRect": [
+            704,
+            263,
+            159,
+            169
+          ]
+        },
+        {
+          "file": "crops/watermelon.webp",
+          "sourceRect": [
+            912,
+            281,
+            177,
+            151
+          ]
+        },
+        {
+          "file": "crops/pineapple.webp",
+          "sourceRect": [
+            1133,
+            251,
+            178,
+            184
+          ]
+        },
+        {
+          "file": "crops/pepper.webp",
+          "sourceRect": [
+            1363,
+            262,
+            163,
+            173
+          ]
+        },
+        {
+          "file": "crops/chili.webp",
+          "sourceRect": [
+            1580,
+            263,
+            158,
+            171
+          ]
+        },
+        {
+          "file": "crops/pumpkin.webp",
+          "sourceRect": [
+            39,
+            476,
+            171,
+            165
+          ]
+        },
+        {
+          "file": "crops/sweetpotato.webp",
+          "sourceRect": [
+            257,
+            476,
+            172,
+            166
+          ]
+        },
+        {
+          "file": "crops/grape.webp",
+          "sourceRect": [
+            477,
+            469,
+            171,
+            172
+          ]
+        },
+        {
+          "file": "crops/apple.webp",
+          "sourceRect": [
+            699,
+            469,
+            165,
+            176
+          ]
+        },
+        {
+          "file": "crops/mushroom.webp",
+          "sourceRect": [
+            915,
+            486,
+            159,
+            154
+          ]
+        },
+        {
+          "file": "crops/rice.webp",
+          "sourceRect": [
+            1134,
+            468,
+            172,
+            175
+          ]
+        },
+        {
+          "file": "crops/wheat.webp",
+          "sourceRect": [
+            1357,
+            469,
+            172,
+            174
+          ]
+        },
+        {
+          "file": "crops/soy.webp",
+          "sourceRect": [
+            1577,
+            483,
+            159,
+            162
+          ]
+        },
+        {
+          "file": "crops/broccoli.webp",
+          "sourceRect": [
+            41,
+            679,
+            163,
+            171
+          ]
+        },
+        {
+          "file": "crops/spinach.webp",
+          "sourceRect": [
+            257,
+            679,
+            176,
+            171
+          ]
+        },
+        {
+          "file": "crops/leek.webp",
+          "sourceRect": [
+            488,
+            675,
+            147,
+            178
+          ]
+        },
+        {
+          "file": "crops/beet.webp",
+          "sourceRect": [
+            699,
+            675,
+            167,
+            178
+          ]
+        },
+        {
+          "file": "crops/snowberry.webp",
+          "sourceRect": [
+            920,
+            682,
+            168,
+            169
+          ]
+        },
+        {
+          "file": "crops/onion.webp",
+          "sourceRect": [
+            1156,
+            674,
+            141,
+            177
+          ]
+        },
+        {
+          "file": "crops/garlic.webp",
+          "sourceRect": [
+            1374,
+            674,
+            143,
+            182
+          ]
+        },
+        {
+          "file": "crops/tea.webp",
+          "sourceRect": [
+            1575,
+            681,
+            162,
+            170
+          ]
+        }
+      ]
+    },
+    "creatures": {
+      "source": "exec-bc90e053-ade3-4c0b-b8d9-1005cebc3cec.png",
+      "size": [
+        1774,
+        887
+      ],
+      "exports": [
+        {
+          "file": "animals/chicken.webp",
+          "sourceRect": [
+            57,
+            93,
+            122,
+            152
+          ]
+        },
+        {
+          "file": "animals/cow.webp",
+          "sourceRect": [
+            246,
+            81,
+            189,
+            164
+          ]
+        },
+        {
+          "file": "animals/sheep.webp",
+          "sourceRect": [
+            490,
+            96,
+            146,
+            149
+          ]
+        },
+        {
+          "file": "animals/goat.webp",
+          "sourceRect": [
+            707,
+            78,
+            131,
+            168
+          ]
+        },
+        {
+          "file": "animals/duck.webp",
+          "sourceRect": [
+            919,
+            113,
+            132,
+            136
+          ]
+        },
+        {
+          "file": "animals/alpaca.webp",
+          "sourceRect": [
+            1178,
+            61,
+            123,
+            187
+          ]
+        },
+        {
+          "file": "animals/pig.webp",
+          "sourceRect": [
+            1378,
+            129,
+            149,
+            118
+          ]
+        },
+        {
+          "file": "animals/bees.webp",
+          "sourceRect": [
+            1578,
+            94,
+            159,
+            151
+          ]
+        },
+        {
+          "file": "products/egg.webp",
+          "sourceRect": [
+            45,
+            318,
+            152,
+            114
+          ]
+        },
+        {
+          "file": "products/milk.webp",
+          "sourceRect": [
+            305,
+            301,
+            75,
+            134
+          ]
+        },
+        {
+          "file": "products/wool.webp",
+          "sourceRect": [
+            484,
+            313,
+            155,
+            122
+          ]
+        },
+        {
+          "file": "products/cheese.webp",
+          "sourceRect": [
+            698,
+            321,
+            165,
+            111
+          ]
+        },
+        {
+          "file": "products/duckegg.webp",
+          "sourceRect": [
+            919,
+            325,
+            151,
+            110
+          ]
+        },
+        {
+          "file": "products/yarn.webp",
+          "sourceRect": [
+            1150,
+            322,
+            141,
+            110
+          ]
+        },
+        {
+          "file": "products/truffle.webp",
+          "sourceRect": [
+            1372,
+            325,
+            156,
+            112
+          ]
+        },
+        {
+          "file": "products/honey.webp",
+          "sourceRect": [
+            1580,
+            303,
+            147,
+            130
+          ]
+        },
+        {
+          "file": "pets/shiba.webp",
+          "sourceRect": [
+            49,
+            472,
+            151,
+            158
+          ]
+        },
+        {
+          "file": "pets/corgi.webp",
+          "sourceRect": [
+            282,
+            476,
+            143,
+            154
+          ]
+        },
+        {
+          "file": "pets/poodle.webp",
+          "sourceRect": [
+            493,
+            488,
+            148,
+            141
+          ]
+        },
+        {
+          "file": "pets/husky.webp",
+          "sourceRect": [
+            701,
+            472,
+            157,
+            158
+          ]
+        },
+        {
+          "file": "pets/calico.webp",
+          "sourceRect": [
+            925,
+            494,
+            157,
+            139
+          ]
+        },
+        {
+          "file": "pets/tabby.webp",
+          "sourceRect": [
+            1143,
+            482,
+            140,
+            152
+          ]
+        },
+        {
+          "file": "pets/blackcat.webp",
+          "sourceRect": [
+            1355,
+            488,
+            151,
+            144
+          ]
+        },
+        {
+          "file": "pets/whitecat.webp",
+          "sourceRect": [
+            1573,
+            492,
+            155,
+            138
+          ]
+        },
+        {
+          "file": "pets/rabbit.webp",
+          "sourceRect": [
+            47,
+            671,
+            119,
+            153
+          ]
+        },
+        {
+          "file": "pets/hamster.webp",
+          "sourceRect": [
+            273,
+            713,
+            114,
+            111
+          ]
+        },
+        {
+          "file": "pets/hedgehog.webp",
+          "sourceRect": [
+            477,
+            707,
+            142,
+            117
+          ]
+        },
+        {
+          "file": "pets/fox.webp",
+          "sourceRect": [
+            687,
+            667,
+            180,
+            156
+          ]
+        },
+        {
+          "file": "pets/parrot.webp",
+          "sourceRect": [
+            929,
+            693,
+            140,
+            134
+          ]
+        },
+        {
+          "file": "pets/tit.webp",
+          "sourceRect": [
+            1137,
+            691,
+            144,
+            134
+          ]
+        },
+        {
+          "file": "pets/otter.webp",
+          "sourceRect": [
+            1338,
+            696,
+            181,
+            130
+          ]
+        },
+        {
+          "file": "pets/dragon.webp",
+          "sourceRect": [
+            1570,
+            681,
+            165,
+            146
+          ]
+        }
+      ]
+    },
+    "food": {
+      "source": "exec-cdf322c7-655e-4774-be78-111fb4325bf0.png",
+      "size": [
+        1774,
+        887
+      ],
+      "exports": [
+        {
+          "file": "food/0.webp",
+          "sourceRect": [
+            31,
+            84,
+            180,
+            152
+          ]
+        },
+        {
+          "file": "food/1.webp",
+          "sourceRect": [
+            236,
+            87,
+            207,
+            148
+          ]
+        },
+        {
+          "file": "food/2.webp",
+          "sourceRect": [
+            469,
+            84,
+            191,
+            151
+          ]
+        },
+        {
+          "file": "food/3.webp",
+          "sourceRect": [
+            684,
+            89,
+            194,
+            140
+          ]
+        },
+        {
+          "file": "food/4.webp",
+          "sourceRect": [
+            900,
+            80,
+            197,
+            154
+          ]
+        },
+        {
+          "file": "food/5.webp",
+          "sourceRect": [
+            1119,
+            96,
+            196,
+            139
+          ]
+        },
+        {
+          "file": "food/6.webp",
+          "sourceRect": [
+            1348,
+            81,
+            194,
+            153
+          ]
+        },
+        {
+          "file": "food/7.webp",
+          "sourceRect": [
+            1576,
+            93,
+            170,
+            145
+          ]
+        },
+        {
+          "file": "food/8.webp",
+          "sourceRect": [
+            25,
+            283,
+            196,
+            147
+          ]
+        },
+        {
+          "file": "food/9.webp",
+          "sourceRect": [
+            250,
+            286,
+            178,
+            152
+          ]
+        },
+        {
+          "file": "food/10.webp",
+          "sourceRect": [
+            461,
+            272,
+            204,
+            164
+          ]
+        },
+        {
+          "file": "food/11.webp",
+          "sourceRect": [
+            680,
+            282,
+            218,
+            154
+          ]
+        },
+        {
+          "file": "food/12.webp",
+          "sourceRect": [
+            922,
+            258,
+            133,
+            179
+          ]
+        },
+        {
+          "file": "food/13.webp",
+          "sourceRect": [
+            1112,
+            281,
+            211,
+            156
+          ]
+        },
+        {
+          "file": "food/14.webp",
+          "sourceRect": [
+            1344,
+            284,
+            206,
+            151
+          ]
+        },
+        {
+          "file": "food/15.webp",
+          "sourceRect": [
+            1569,
+            283,
+            182,
+            156
+          ]
+        },
+        {
+          "file": "food/16.webp",
+          "sourceRect": [
+            21,
+            482,
+            211,
+            148
+          ]
+        },
+        {
+          "file": "food/17.webp",
+          "sourceRect": [
+            240,
+            481,
+            199,
+            155
+          ]
+        },
+        {
+          "file": "food/18.webp",
+          "sourceRect": [
+            461,
+            475,
+            206,
+            161
+          ]
+        },
+        {
+          "file": "food/19.webp",
+          "sourceRect": [
+            686,
+            478,
+            206,
+            155
+          ]
+        },
+        {
+          "file": "food/20.webp",
+          "sourceRect": [
+            905,
+            480,
+            199,
+            153
+          ]
+        },
+        {
+          "file": "food/21.webp",
+          "sourceRect": [
+            1115,
+            480,
+            205,
+            153
+          ]
+        },
+        {
+          "file": "food/22.webp",
+          "sourceRect": [
+            1338,
+            481,
+            216,
+            153
+          ]
+        },
+        {
+          "file": "food/23.webp",
+          "sourceRect": [
+            1567,
+            474,
+            184,
+            162
+          ]
+        },
+        {
+          "file": "food/24.webp",
+          "sourceRect": [
+            18,
+            661,
+            209,
+            166
+          ]
+        },
+        {
+          "file": "food/25.webp",
+          "sourceRect": [
+            242,
+            671,
+            200,
+            158
+          ]
+        },
+        {
+          "file": "food/26.webp",
+          "sourceRect": [
+            458,
+            673,
+            207,
+            150
+          ]
+        },
+        {
+          "file": "food/27.webp",
+          "sourceRect": [
+            684,
+            669,
+            198,
+            159
+          ]
+        },
+        {
+          "file": "food/28.webp",
+          "sourceRect": [
+            918,
+            647,
+            151,
+            186
+          ]
+        },
+        {
+          "file": "food/29.webp",
+          "sourceRect": [
+            1108,
+            672,
+            215,
+            155
+          ]
+        },
+        {
+          "file": "food/30.webp",
+          "sourceRect": [
+            1346,
+            669,
+            199,
+            159
+          ]
+        },
+        {
+          "file": "food/31.webp",
+          "sourceRect": [
+            1567,
+            661,
+            190,
+            163
+          ]
+        }
+      ]
+    },
+    "extraFood": {
+      "source": "exec-f15998de-d250-462c-801c-33c9e0a46cc7.png",
+      "size": [
+        1377,
+        1142
+      ],
+      "exports": [
+        {
+          "file": "food/32.webp",
+          "sourceRect": [
+            80,
+            115,
+            240,
+            181
+          ]
+        },
+        {
+          "file": "food/33.webp",
+          "sourceRect": [
+            416,
+            138,
+            232,
+            151
+          ]
+        },
+        {
+          "file": "food/34.webp",
+          "sourceRect": [
+            732,
+            124,
+            223,
+            166
+          ]
+        },
+        {
+          "file": "food/35.webp",
+          "sourceRect": [
+            1059,
+            128,
+            237,
+            165
+          ]
+        },
+        {
+          "file": "food/36.webp",
+          "sourceRect": [
+            85,
+            389,
+            228,
+            175
+          ]
+        },
+        {
+          "file": "food/37.webp",
+          "sourceRect": [
+            415,
+            394,
+            229,
+            169
+          ]
+        },
+        {
+          "file": "food/38.webp",
+          "sourceRect": [
+            733,
+            367,
+            236,
+            202
+          ]
+        },
+        {
+          "file": "food/39.webp",
+          "sourceRect": [
+            1079,
+            390,
+            203,
+            177
+          ]
+        },
+        {
+          "file": "food/40.webp",
+          "sourceRect": [
+            86,
+            645,
+            231,
+            173
+          ]
+        },
+        {
+          "file": "food/41.webp",
+          "sourceRect": [
+            434,
+            649,
+            203,
+            171
+          ]
+        },
+        {
+          "file": "food/42.webp",
+          "sourceRect": [
+            758,
+            646,
+            195,
+            174
+          ]
+        },
+        {
+          "file": "food/43.webp",
+          "sourceRect": [
+            1076,
+            650,
+            211,
+            166
+          ]
+        },
+        {
+          "file": "food/44.webp",
+          "sourceRect": [
+            81,
+            896,
+            242,
+            161
+          ]
+        },
+        {
+          "file": "food/45.webp",
+          "sourceRect": [
+            409,
+            894,
+            247,
+            167
+          ]
+        },
+        {
+          "file": "food/46.webp",
+          "sourceRect": [
+            753,
+            896,
+            198,
+            167
+          ]
+        },
+        {
+          "file": "food/47.webp",
+          "sourceRect": [
+            1065,
+            896,
+            235,
+            164
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import {FARM_ENGLISH,FARM_HIRAGANA} from '../rpg/farm/uiCopy';
 import {RPG_IMPROVEMENT_ENGLISH,RPG_IMPROVEMENT_HIRAGANA} from '../rpg/improvementCopy';
 import {TOWN_ENGLISH,TOWN_HIRAGANA} from '../rpg/town/uiCopy';
 import {LAUNCH_ENGLISH,LAUNCH_HIRAGANA} from '../mini-games/shared/launchCopy';
@@ -25,6 +26,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...LAUNCH_ENGLISH,
   ...TOWN_ENGLISH,
   ...RPG_IMPROVEMENT_ENGLISH,
+  ...FARM_ENGLISH,
   ...GAME_ROOM_ENGLISH,
   ...RPG_MOBILE_ENGLISH,
   ...PARTY_ENGLISH,
@@ -266,6 +268,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...LAUNCH_HIRAGANA,
   ...TOWN_HIRAGANA,
   ...RPG_IMPROVEMENT_HIRAGANA,
+  ...FARM_HIRAGANA,
   ...GAME_ROOM_HIRAGANA,
   ...RPG_MOBILE_HIRAGANA,
   ...PARTY_HIRAGANA,

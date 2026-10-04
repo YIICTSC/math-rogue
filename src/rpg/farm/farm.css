@@ -1,0 +1,358 @@
+.farm-backdrop {
+  z-index: 190;
+}
+.rpg-life.farm-panel {
+  width: min(980px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  display: flex;
+  flex-direction: column;
+}
+.farm-panel > header {
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+.farm-panel > header h2 {
+  font-size: clamp(17px, 3vw, 24px);
+  margin: 4px 0;
+}
+.farm-panel > header > button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.farm-panel > footer {
+  font-size: 13px;
+  padding: 8px 14px;
+  flex-shrink: 0;
+}
+.farm-scroll {
+  overflow-y: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  padding: 12px;
+}
+.farm-content {
+  color: #edf5e9;
+  min-width: 0;
+}
+.farm-content button,
+.farm-content input,
+.farm-content select {
+  font: inherit;
+  min-height: 42px;
+  border: 1px solid #73948d;
+  border-radius: 10px;
+  background: #345654;
+  color: #f6f6e8;
+  padding: 8px 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.farm-content button:disabled {
+  opacity: 0.45;
+}
+.farm-content button[aria-pressed="true"] {
+  background: #d6b367;
+  color: #18302e;
+  border-color: #f8da95;
+}
+.farm-content button:focus-visible,
+.farm-content input:focus-visible,
+.farm-content select:focus-visible {
+  outline: 3px solid #f5d685;
+  outline-offset: 2px;
+}
+.farm-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: linear-gradient(120deg, #334e39, #294c4d);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #749573;
+}
+.farm-summary small {
+  color: #c6d5bf;
+  font-size: 12px;
+}
+.farm-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 12px 0;
+  position: sticky;
+  top: -12px;
+  background: #193b3b;
+  z-index: 2;
+}
+.farm-tabs button {
+  flex-shrink: 0;
+}
+.farm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.farm-card {
+  background: #294b49;
+  border: 1px solid #67877f;
+  border-radius: 14px;
+  padding: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.farm-card h3 {
+  font-size: 17px;
+  margin: 6px 0;
+}
+.farm-card h4 {
+  margin: 8px 0;
+}
+.farm-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+.farm-card > small {
+  display: block;
+  color: #d5ddc7;
+}
+.farm-sprite {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  vertical-align: middle;
+}
+.farm-fields {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+  padding: 10px;
+  margin: 12px 0;
+  border-radius: 14px;
+  background: #526a3c;
+  border: 2px solid #a99b6b;
+}
+.farm-fields > button {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  background: #856441;
+  padding: 4px 1px;
+  min-height: 96px;
+  min-width: 0;
+  border-color: #af9366;
+  font-size: 11px;
+  color: #fff4d7;
+}
+.farm-fields > button > small:first-child {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+}
+.farm-fields .farm-sprite {
+  width: min(100%, 60px);
+  height: 58px;
+}
+.farm-fields .farm-ripe {
+  box-shadow: inset 0 0 0 2px #e8cf80;
+}
+.farm-fields .farm-wet {
+  background: #654b32;
+}
+.farm-fields button[aria-pressed="true"] {
+  background: #b59758;
+  color: #19352c;
+}
+.farm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  margin: 8px 0;
+}
+.farm-actions button {
+  flex: 1 1 auto;
+}
+.farm-card label:not(.farm-meter) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.farm-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  margin: 8px 0;
+}
+.farm-meter progress {
+  width: 100%;
+  height: 8px;
+  accent-color: #a9cf90;
+}
+.farm-ingredient > button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.farm-ingredient .farm-sprite {
+  width: 48px;
+  height: 48px;
+}
+.farm-ingredient span {
+  margin-left: auto;
+}
+.farm-recipe-cost {
+  display: flex;
+  flex-direction: column;
+  color: #e9bf9b;
+}
+.farm-recipe-cost .farm-enough {
+  color: #b6e0aa;
+}
+.farm-name {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+.farm-rename {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+.farm-rename input {
+  width: 100%;
+  min-width: 0;
+}
+.farm-rename button {
+  flex-shrink: 0;
+}
+.farm-guide,
+.farm-notice {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #d9dfcb;
+}
+.farm-undiscovered .farm-sprite {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+.rpg-high-contrast .farm-card,
+.rpg-high-contrast .farm-summary {
+  background: #102726;
+  border-color: #d4e9dc;
+}
+.rpg-large-text .farm-content {
+  font-size: 19px;
+}
+.rpg-large-controls .farm-content button {
+  min-height: 52px;
+}
+.farm-content .town-cook-overlay {
+  z-index: 215;
+}
+.farm-content .town-cook-mini {
+  max-height: calc(100dvh - 20px);
+  overflow: auto;
+}
+.rpg-farm-shortcut {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.rpg-farm-shortcut button {
+  min-height: 42px;
+}
+.rpg-farm-shortcut .farm-sprite {
+  width: 32px;
+  height: 32px;
+}
+@media (max-width: 440px) {
+  .farm-scroll {
+    padding: 8px;
+  }
+  .farm-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .farm-card {
+    padding: 8px;
+  }
+  .farm-card h3 {
+    font-size: 15px;
+  }
+  .farm-actions button {
+    font-size: 12px;
+    padding: 7px;
+  }
+  .farm-fields {
+    gap: 3px;
+    padding: 6px;
+  }
+  .farm-fields > button {
+    min-height: 80px;
+    font-size: 10px;
+  }
+  .farm-fields .farm-sprite {
+    height: 44px;
+  }
+  .farm-tabs {
+    top: -8px;
+  }
+  .farm-panel > footer {
+    max-height: 50px;
+    overflow: auto;
+  }
+  .farm-recipe-cost {
+    font-size: 12px !important;
+  }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .farm-panel > header {
+    padding: 5px 12px;
+  }
+  .farm-panel > header small {
+    display: none;
+  }
+  .farm-panel > header h2 {
+    font-size: 17px;
+  }
+  .farm-panel > footer {
+    padding: 4px 12px;
+  }
+  .farm-summary {
+    padding: 7px;
+  }
+  .farm-summary small {
+    display: none;
+  }
+  .farm-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .farm-tabs {
+    padding: 6px 0;
+  }
+  .farm-scroll {
+    padding-top: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .rpg-root.rpg-root--compact .rpg-compact-dock {
+    gap: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .rpg-root.rpg-root--compact .rpg-compact-dock button {
+    min-width: 44px;
+  }
+}

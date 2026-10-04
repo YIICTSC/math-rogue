@@ -1,3 +1,4 @@
+import {FARM_DISHES} from '../farm/catalog';
 import type {Bag} from '../life';
 import type {BiomeId} from '../biomes';
 export type Copy={ja:string;en:string;hi:string};
@@ -18,7 +19,7 @@ export const FLOWERS:Flower[]=flowerNames.flatMap((names,season)=>names.map(([ja
 export const flowerById=(id:string)=>FLOWERS.find(f=>f.id===id);
 export const flowerAtlas=(season:number)=>`sprites/rpg/town/flowers-${['spring','summer','autumn','winter'][season]}.webp`;
 export type FoodTag='fish'|'sweet'|'herb'|'spicy'|'warm'|'fresh';
-export interface Dish {id:string;name:Copy;index:number;tags:FoodTag[];cost:Bag;nourish:number;season?:number;steps:Copy[]}
+export interface Dish {id:string;name:Copy;index:number;tags:FoodTag[];cost:Bag;nourish:number;season?:number;steps:Copy[];farmCost?:Record<string,number>;atlas?:'farm'}
 const dishes:Array<[string,string,string,FoodTag[],Bag,number,number?]>=[
 ['川魚の香草焼き','Herb-grilled fish','かわざかなのこうそうやき',['fish','herb'],{fish:1,herb:1},30],['森のキノコスープ','Forest mushroom soup','もりのきのこすーぷ',['warm','herb'],{herb:2},25],['春の花サラダ','Spring blossom salad','はるのはなさらだ',['fresh','herb'],{herb:2,reed:1},24,0],['若草のおにぎり','Meadow rice balls','わかくさのおにぎり',['fresh'],{herb:1,reed:1},20,0],['ハチミツ風クッキー','Honey-style cookies','はちみつふうくっきー',['sweet'],{herb:2,wood:1},22],['苺色のタルト','Berry tart','いちごいろのたると',['sweet','fresh'],{herb:3},28,0],
 ['夏野菜の串焼き','Summer skewers','なつやさいのくしやき',['fresh','spicy'],{herb:2,wood:1},30,1],['冷たい川魚麺','Chilled fish noodles','つめたいかわざかなめん',['fish','fresh'],{fish:1,reed:1},32,1],['草原のアイス','Meadow ice cream','そうげんのあいす',['sweet'],{herb:2,frostwood:1},24,1],['砂丘の香辛スープ','Dune spice soup','さきゅうのこうしんすーぷ',['spicy','warm'],{herb:2,crystal:1},34],['蓮葉の蒸し魚','Lotus-steamed fish','はすばのむしざかな',['fish','herb'],{fish:2,reed:1},36],['星空ゼリー','Starlight jelly','ほしぞらぜりー',['sweet','fresh'],{herb:2,crystal:1},28,1],
@@ -27,7 +28,8 @@ const dishes:Array<[string,string,string,FoodTag[],Bag,number,number?]>=[
 ];
 const steps=[c('下ごしらえ','Prepare','したごしらえ'),c('味を整える','Season','あじをととのえる'),c('仕上げる','Finish','しあげる')];
 export const DISHES:Dish[]=dishes.map(([ja,en,hi,tags,cost,nourish,season],index)=>({id:`dish-${index}`,name:c(ja,en,hi),tags,cost,nourish,season,index,steps}));
-export const dishById=(id:string)=>DISHES.find(d=>d.id===id);
+export const ALL_DISHES=[...DISHES,...FARM_DISHES];
+export const dishById=(id:string)=>ALL_DISHES.find(d=>d.id===id);
 export const PERSONALITIES=[c('おだやかな世話好き','Gentle caregiver','おだやかなせわずき'),c('好奇心いっぱいの探検家','Curious explorer','こうきしんいっぱいのたんけんか'),c('慎重な研究家','Careful researcher','しんちょうなけんきゅうか'),c('陽気なおしゃべり','Cheerful chatterbox','ようきなおしゃべり'),c('きれい好きの職人','Tidy artisan','きれいずきのしょくにん'),c('自由な夢想家','Free-spirited dreamer','じゆうなむそうか'),c('元気な挑戦者','Energetic challenger','げんきなちょうせんしゃ'),c('静かな芸術家','Quiet artist','しずかなげいじゅつか')];
 export const ROUTINES=[c('朝の散歩','Morning walk','あさのさんぽ'),c('料理の練習','Cooking practice','りょうりのれんしゅう'),c('釣りと観察','Fishing and observing','つりとかんさつ'),c('花の手入れ','Tending flowers','はなのていれ'),c('読書の時間','Reading time','どくしょのじかん'),c('友達とお茶','Tea with friends','ともだちとおちゃ'),c('部屋の片づけ','Tidying the room','へやのかたづけ'),c('静かな昼寝','Quiet nap','しずかなひるね')];
 export const RESIDENTS=[['mina','ミナ','Mina','みな'],['ao','アオ','Ao','あお'],['ren','レン','Ren','れん'],['sui','スイ','Sui','すい'],['saha','サハ','Saha','さは'],['yuki','ユキ','Yuki','ゆき'],['phil','フィル','Phil','ふぃる'],['towa','トワ','Towa','とわ'],['nono','ノノ','Nono','のの'],['kino','キノ','Kino','きの'],['nemu','ネム','Nemu','ねむ'],['mio','ミオ','Mio','みお']].map(([id,ja,en,hi],i)=>({id:`resident-${id}`,name:c(ja,en,hi),portrait:`sprites/rpg/npcs/${id}.webp`,biome:habitats[i],personality:i%8}));

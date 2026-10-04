@@ -1,3 +1,4 @@
+import {occupiedFarmTile} from './farm/model';
 import {occupiedCityTile} from './city/model';
 import {resident} from './social';
 import {chooseFish,reelWindow,fishSize,recordFish,type FishingRun,type FishRecords,type FishCatch} from './fishing';
@@ -25,7 +26,7 @@ export function isResourceTile(w:World,tile:number){if(!Number.isInteger(tile)||
 type NatureNode={sprite:number;name:string;material:Material;hardness:number;amount:number;rock:boolean};
 const natureCache=new Map<string,NatureNode>();
 export function natureAt(w:World,tile:number):NatureNode|null {
- if(occupiedCityTile(w,tile))return null;
+ if(occupiedCityTile(w,tile)||occupiedFarmTile(w,tile))return null;
  if(!isResourceTile(w,tile)||w.tiles[tile]!=='forest')return null;
  const season=Math.floor((w.town?.day||0)/7)%4;const key=`${w.seed}:${tile}:${season}`,cached=natureCache.get(key);if(cached)return cached;
  const x=tile%WIDTH,y=Math.floor(tile/WIDTH);
@@ -45,7 +46,7 @@ export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
-export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
+export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
  {id:'plank',name:'木の板',cost:CRAFT_RECIPES.plank as Bag,kind:'material',description:'家や家具の材料。',sprite:0},
  {id:'brick',name:'レンガ',cost:CRAFT_RECIPES.brick as Bag,kind:'material',description:'家や家具の材料。',sprite:1},
@@ -149,7 +150,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
  if(a.type==='life-build'){
   if(lp.indoors||lp.work||life.houses.some(h=>h.owner===p.id))return false;
   if(!canAfford(lp.bag,HOUSE_COST))return tell('材料が足りません。');
-  if(occupiedCityTile(w,p.y*WIDTH+p.x)||w.tiles[p.y*WIDTH+p.x]!=='grass'||[1,-1,WIDTH,-WIDTH].some(d=>w.tiles[p.y*WIDTH+p.x+d]==='water')||w.sites.some(s=>distance(s,p)<4)||life.houses.some(h=>distance(h,p)<5))return tell('道・水辺・施設から離れた草地に建てましょう。');
+  if(occupiedCityTile(w,p.y*WIDTH+p.x)||occupiedFarmTile(w,p.y*WIDTH+p.x)||w.tiles[p.y*WIDTH+p.x]!=='grass'||[1,-1,WIDTH,-WIDTH].some(d=>w.tiles[p.y*WIDTH+p.x+d]==='water')||w.sites.some(s=>distance(s,p)<4)||life.houses.some(h=>distance(h,p)<5))return tell('道・水辺・施設から離れた草地に建てましょう。');
   spend(lp.bag,HOUSE_COST);const id=`home-${p.id}`,tile=p.y*WIDTH+p.x;
   life.houses.push({id,owner:p.id,ownerName:p.name,x:p.x,y:p.y,biome:biomeAt(p.x,p.y).id,home:{tile,level:1,furniture:[{slot:0,item:'workbench'},{slot:1,item:'table'}]},interior:newInterior(),invitedAt:0});lp.homeId=id;enterHouse(w,p,life.houses[life.houses.length-1]);return tell('家を建てました！家具を作って仲間を招きましょう。');
  }

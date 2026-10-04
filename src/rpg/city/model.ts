@@ -1,3 +1,4 @@
+import {occupiedFarmTile} from '../farm/model';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { cityBuilding, CITY_SERVICES } from "./catalog";
@@ -68,6 +69,7 @@ export const validCityTile = (w: World, x: number, y: number) =>
   x < WIDTH - 2 &&
   y < HEIGHT - 2 &&
   w.tiles[y * WIDTH + x] !== "water" &&
+  !occupiedFarmTile(w,y*WIDTH+x) &&
   !w.sites.some((s) => Math.abs(s.x - x) + Math.abs(s.y - y) < 2) &&
   !w.life.houses.some((h) => Math.abs(h.x - x) + Math.abs(h.y - y) < 2);
 const neighbors = (tile: number) =>

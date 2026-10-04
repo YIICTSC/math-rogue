@@ -1,3 +1,4 @@
+import FarmPanel from './farm/Panel';
 import RpgSettings from './RpgSettings';
 import {useRpgPreferences} from './preferences';
 import CityPanel from './city/Panel';
@@ -150,7 +151,7 @@ export default function RpgOnline({
   onClose: () => void;
 }) {
   const prefs=useRpgPreferences(),[settingsOpen,setSettingsOpen]=useState(false);
-  const [cityOpen,setCityOpen]=useState(false);
+  const [cityOpen,setCityOpen]=useState(false),[farmOpen,setFarmOpen]=useState(false);
   const [hero,setHero]=useState(loadHero),[heroOpen,setHeroOpen]=useState(false),[memory,setMemory]=useState(loadMemory),[socialError,setSocialError]=useState('');
   const compact=useCompactRpgLayout();
   const [detail,setDetail]=useState<string|null>(null);
@@ -196,10 +197,10 @@ export default function RpgOnline({
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
-  useEffect(()=>{if(settingsOpen||cityOpen){destination.current=null;walkingRoute.current=[];}},[settingsOpen,cityOpen]);
+  useEffect(()=>{if(settingsOpen||cityOpen||farmOpen){destination.current=null;walkingRoute.current=[];}},[settingsOpen,cityOpen,farmOpen]);
   const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch);
   useFishingAudio(world?.players[room.current?.selfId||'']?.life,world?.players[room.current?.selfId||'']?.message||'',active&&!interactionBlocked&&!world?.ended,fishing.result);
-  latest.current = { world, active: active && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !farmOpen && !settingsOpen && !cityOpen && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
@@ -419,6 +420,7 @@ export default function RpgOnline({
     <TranslatedUiTree mode={languageMode}>
       {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="木漏れ日のフロンティア" subtitle="招待されたワールドで、仲間と冒険しよう。" languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
       {settingsOpen&&<RpgSettings languageMode={languageMode} onClose={()=>setSettingsOpen(false)}/>}
+      {farmOpen&&world&&<FarmPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onTrack={(x,y)=>{if(!me)return;const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setFarmOpen(false);}} onClose={()=>setFarmOpen(false)}/>}
       {cityOpen&&world?.city&&<CityPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onClose={()=>setCityOpen(false)}/>}
       {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
       <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map">
@@ -554,7 +556,7 @@ export default function RpgOnline({
                       visualTheme={previewTheme}
                       onPlayer={spectating ? undefined : id=>{setSelectedPeer(id);if(compact)openDetail('team');}}
                       onTile={(x, y) => {
-                        if (!prefs.tapMove||settingsOpen||cityOpen||!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
+                        if (!prefs.tapMove||settingsOpen||cityOpen||farmOpen||!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
                         const tile=y*WIDTH+x;
                         if(Math.abs(me.x-x)+Math.abs(me.y-y)<=2 && (world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile))){destination.current=null;if(compact)quickGather(tile);else{setLifeTarget(tile);setLifeOpen(true);}return;}
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
@@ -568,6 +570,7 @@ export default function RpgOnline({
                   <button className="rpg-settings-map-button" aria-label={trans("RPG設定",languageMode)} onClick={()=>setSettingsOpen(true)}>⚙</button>
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
+                    {!spectating&&<button onClick={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}>🌱 {trans("農園・牧場",languageMode)}</button>}
                     {world.city&&!spectating&&<button onClick={()=>setCityOpen(true)}>🏙 {trans('都市運営',languageMode)}</button>}
                     {!spectating && <button onClick={openLife}>🪓 {me.life?.indoors?'家とミニゲーム':'採取・クラフト'}</button>}
                     <button onClick={() => setOverview(!overview)}>
@@ -577,7 +580,7 @@ export default function RpgOnline({
                     <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
-                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={settingsOpen||cityOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
+                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={settingsOpen||cityOpen||farmOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
 
                     {!spectating&&!me.life?.indoors&&nearbyFlowers(world,me).length>0&&<div className="rpg-flower-quick" aria-label={trans('近くの花',languageMode)}>{nearbyFlowers(world,me).slice(0,3).map(({tile,flower})=><button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog||energyOf(me.life)<1} onClick={()=>room.current?.send({type:'town-flower-pick',tile})} aria-label={copy(flower.name,languageMode)+' '+trans('花を摘む',languageMode)}><FlowerSprite id={flower.id}/><span>{trans('花を摘む',languageMode)}<small> −1</small></span></button>)}</div>}
@@ -597,6 +600,7 @@ export default function RpgOnline({
                 </div>
                 {compact&&<nav className="rpg-compact-dock" aria-label="冒険メニュー">
                   {!spectating&&<button disabled={!active||interactionBlocked} onClick={openLife}><Axe size={19}/><span>採取</span></button>}
+                  {!spectating&&<button className="rpg-farm-dock" aria-label={trans('農園・牧場・ペット',languageMode)} aria-haspopup="dialog" disabled={!active||interactionBlocked} onClick={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}><span aria-hidden="true" style={{fontSize:19}}>🌱</span><span>{trans('農園',languageMode)}</span></button>}
                   <button aria-pressed={overview} onClick={()=>setOverview(!overview)}><Map size={19}/><span>{overview?'近く':'全体'}</span></button>
                   <button aria-haspopup="dialog" onClick={()=>openDetail('team')}><Users size={19}/><span>仲間</span></button>
                   <button aria-haspopup="dialog" onClick={()=>openDetail('event')}><Sparkles size={19}/><span>イベント</span><small>{world.activities.event.progress}/{world.activities.event.target}</small></button>

@@ -78,6 +78,50 @@ try {
     ),
     false,
   );
+  await p
+    .locator(".rpg-compact-dock")
+    .getByRole("button", { name: "農園・牧場・ペット", exact: true })
+    .click();
+  await p.locator(".farm-panel").waitFor();
+  await p.locator(".farm-summary").waitFor();
+  assert.ok(await p.evaluate(() => !!window.snapshot.world.farm?.people.local));
+  await p.locator(".farm-panel>header>button").click();
+  for (const [width, height] of [
+    [320, 568],
+    [390, 844],
+    [568, 320],
+    [844, 390],
+    [1024, 768],
+    [1440, 900],
+  ]) {
+    await p.setViewportSize({ width, height });
+    const rects = await p
+      .locator(".rpg-compact-dock button")
+      .evaluateAll((nodes) =>
+        nodes.map((n) => {
+          const r = n.getBoundingClientRect();
+          return {
+            left: r.left,
+            right: r.right,
+            width: r.width,
+            bottom: r.bottom,
+          };
+        }),
+      );
+    assert.equal(rects.length, 7);
+    assert.ok(
+      rects.every(
+        (r) =>
+          r.left >= 0 &&
+          r.right <= width + 1 &&
+          r.width >= 43.9 &&
+          r.bottom <= height + 1,
+      ),
+      JSON.stringify({ width, height, rects }),
+    );
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
+
   console.log("create resident");
   await p.locator(".rpg-season-badge").click();
   await p
@@ -230,7 +274,33 @@ try {
       .count(),
     0,
   );
-  for(const [width,height]of [[320,568],[390,844],[568,320],[844,390],[1024,768],[1440,900]]){await p.setViewportSize({width,height});const boxes=await p.locator('.game-launch-menu>button').evaluateAll(elements=>elements.map(el=>({x:el.getBoundingClientRect().x,y:el.getBoundingClientRect().y,right:el.getBoundingClientRect().right,bottom:el.getBoundingClientRect().bottom})));assert.ok(boxes.every(r=>r.x>=0&&r.y>=0&&r.right<=width&&r.bottom<=height),`${width}x${height} normal title buttons fit ${JSON.stringify(boxes)}`);}await p.setViewportSize({width:390,height:844});
+  for (const [width, height] of [
+    [320, 568],
+    [390, 844],
+    [568, 320],
+    [844, 390],
+    [1024, 768],
+    [1440, 900],
+  ]) {
+    await p.setViewportSize({ width, height });
+    const boxes = await p
+      .locator(".game-launch-menu>button")
+      .evaluateAll((elements) =>
+        elements.map((el) => ({
+          x: el.getBoundingClientRect().x,
+          y: el.getBoundingClientRect().y,
+          right: el.getBoundingClientRect().right,
+          bottom: el.getBoundingClientRect().bottom,
+        })),
+      );
+    assert.ok(
+      boxes.every(
+        (r) => r.x >= 0 && r.y >= 0 && r.right <= width && r.bottom <= height,
+      ),
+      `${width}x${height} normal title buttons fit ${JSON.stringify(boxes)}`,
+    );
+  }
+  await p.setViewportSize({ width: 390, height: 844 });
   await p.goto("http://127.0.0.1:4199/__city?title=1&debug=1");
   await p.getByRole("button", { name: "RPG設定", exact: true }).click();
   await p.locator(".rpg-settings").waitFor();

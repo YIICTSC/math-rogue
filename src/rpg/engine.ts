@@ -1,3 +1,4 @@
+import {applyFarm,advanceFarm,type FarmState,type FarmAction} from './farm/model';
 import {applyCity,advanceCity,type CityState,type CityAction} from './city/model';
 import {applyTown,advanceTown,newTown,type TownState,type TownAction} from './town/model';
 import {applySocial,advanceSocial,newSocial,type SocialWorld,type SocialMemory,type SocialAction} from './social';
@@ -128,6 +129,7 @@ export interface World {
  city?:CityState;
   social?:SocialWorld;
   town?:TownState;
+  farm?:FarmState;
   life: LifeWorld;
   nativeMode: true;
   gameMode: "COOP" | "BATTLE_ROYALE";
@@ -151,7 +153,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
+export type Action = FarmAction | CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -687,6 +689,7 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if(action.type.startsWith('farm-'))return applyFarm(w,p,action as FarmAction);
   if(action.type.startsWith('city-'))return applyCity(w,p,action as CityAction,now);
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if ((w.town?.cooking[id]||w.town?.dreams[id]&&!w.town.dreams[id].finished)&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
@@ -817,6 +820,7 @@ export function advanceWorld(w: World, now = Date.now()) {
   advanceLife(w,now);
   advanceSocial(w,now);
   advanceTown(w,now);
+  advanceFarm(w);
   advanceCity(w);
   advanceActivities(w,now);
   advanceDuels(w,now);
