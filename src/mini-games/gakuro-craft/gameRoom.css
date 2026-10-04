@@ -56,3 +56,15 @@
 .gc-hobby .gc-expedition button[aria-pressed=true],.rpg-rhythm-lobby .gc-expedition button[aria-pressed=true]{background:linear-gradient(130deg,#b6924d,#f3d594);color:#162331;border-color:#ffe9b7;}
 .gc-hobby .gc-relic-choices button,.rpg-rhythm-lobby .gc-relic-choices button{background:radial-gradient(ellipse at top,#68578a55,transparent),#142638;border-color:#dbc18b80;}
 .gc-hobby .gc-game-seats>div{background:#142738d9;}
+.gc-sports-view{max-width:840px;margin:10px auto;min-width:0;}
+.gc-sports-view-controls{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;}
+.gc-sports-canvas{display:block;width:100%;height:clamp(220px,38vw,400px);border-radius:14px;border:1px solid #c1a86a90;touch-action:none;outline:none;}
+.gc-sports-view.bowling{width:100%;margin:0;}
+.gc-sports-view.bowling .gc-sports-canvas{height:clamp(280px,45vw,460px);}
+.gc-sports-canvas:focus-visible{outline:2px solid #ffe0a0;outline-offset:2px;}
+@media(max-height:480px){.gc-sports-canvas{height:200px;}.gc-sports-view.bowling .gc-sports-canvas{height:240px;}}
+
+.gc-hobby .gc-bowling-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(140px,1fr);gap:16px;}
+.gc-hobby .gc-sports-view.bowling .gc-bowling-lane{width:100%;max-height:none;}
+.gc-hobby .gc-sports-view.bowling svg.gc-bowling-lane{height:clamp(280px,45vw,460px);}
+@media(max-width:380px){.gc-hobby .gc-bowling-layout{grid-template-columns:minmax(0,1fr) minmax(110px,.8fr);gap:8px;}}

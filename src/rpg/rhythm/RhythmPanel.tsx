@@ -1,3 +1,4 @@
+import useGameAudio from '../../mini-games/gakuro-craft/useGameAudio';
 import ExpeditionPanel from '../../mini-games/gakuro-craft/ExpeditionPanel';
 import {canStartExpedition} from '../../mini-games/gakuro-craft/gameExpedition';
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -85,6 +86,7 @@ export default function RhythmPanel({
       delta: 0,
     }),
     [record, setRecord] = useState<RhythmRecord>();
+  useGameAudio(g,selfId,!world.paused,world.time);
   const stageArt = useRef<HTMLImageElement>();
   useEffect(() => {
     const image = new Image();

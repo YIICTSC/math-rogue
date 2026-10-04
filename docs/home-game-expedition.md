@@ -37,3 +37,11 @@
 ## ImageGen素材
 
 戦略・スポーツ・アーケードの専用背景3点と、6種類のレリックをImageGenで制作し、WebPとして `public/sprites/rpg/game-room/` に導入。ゲーム選択カード・各対戦画面・レリック選択で使用します。文字、盤面、入力判定は画像に焼き込まず、操作可能なUIとして表示します。
+
+## 3D sports and game sounds
+
+Billiards and bowling lazily load a Three.js WebGL scene. Billiards offers angled and overhead views, lit numbered balls, rolling animation, rail/pocket meshes, cue and aim preview. Pointer coordinates are projected onto the physical table plane before submitting the existing authoritative shot or hand-placement commands. Bowling adds a wood lane, rotating ball and animated falling pins; authoritative scoring remains unchanged. Either game can switch to 2D. WebGL initialization failure or context loss selects the existing 2D view automatically. Static scenes render at 10 FPS, moving scenes at up to 60 FPS, resolution and shadow textures are capped, hidden tabs skip drawing and leaving disposes GPU resources.
+
+All ten games use 29 short cues adapted from Springin’ Sound Stock. Web uses Opus with MP3 fallback; native uses MP3. Sound events follow actions and state transitions, without repeating on world timer/revision updates. Local arcade impacts and reaction results do not mirror other players' private actions. Rhythm lanes use four quiet pitched click variants while song playback and judgement timing remain unchanged. Sounds respect global SFX volume, mute and application visibility; game exit stops active cues and pending delayed sounds. See [sound credits](rpg/game-furniture-sound-credits.md) for provenance.
+
+Additional validation: `node scripts/test-home-game-audio.mjs` checks authoritative sound events and all 58 encoded assets; `node scripts/test-home-sports-browser.mjs` verifies actual decoded playback, volume/cleanup, 3D projection, placement, pause cancellation and 2D fallback. The four-client party browser test exercises synchronized 3D billiards and bowling alongside the other furniture games.

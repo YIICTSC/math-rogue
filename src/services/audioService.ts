@@ -1,3 +1,4 @@
+import {HOBBY_SOUNDS,type HobbySound} from '../mini-games/gakuro-craft/gameAudio';
 import {FISHING_SOUNDS,type FishingSound} from '../rpg/fishingAudio';
 
 import type { AttackEffectKey, CharacterAppearanceMode, StatusEffectKey } from '../types';
@@ -490,6 +491,7 @@ class AudioService {
           if (this.isVoiceSfxName(name)) return;
           audios.forEach(audio => {
               audio.volume = Math.min(1, this.sfxVolume);
+              audio.muted = this.isMuted || this.sfxVolume <= 0;
           });
       });
   }
@@ -505,15 +507,25 @@ class AudioService {
   }
 
   public playRpgRhythmHit(lane: number, perfect: boolean) {
-      if (!this.getRhythmAudioState().active || this.isMuted) return;
-      this.init();
-      if (!this.ctx || !this.sfxGain) return;
-      const osc = this.ctx.createOscillator(), gain = this.ctx.createGain(), now = this.ctx.currentTime;
-      osc.type = 'sine'; osc.frequency.value = [660, 785, 880, 1047][lane] || 880;
-      gain.gain.setValueAtTime(perfect ? 0.12 : 0.07, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
-      osc.connect(gain); gain.connect(this.sfxGain); osc.start(now); osc.stop(now + 0.05);
-      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+      void perfect;
+      this.playHobbySound(`note-${Math.max(0,Math.min(3,lane))}` as HobbySound);
+  }
+
+  public async preloadHobbySounds(cues: HobbySound[]) {
+      await this.preloadSfx([...new Set<HobbySound>(['start','win','lose','relic',...cues])].map(cue=>`rpg-games/${cue}`));
+  }
+
+  public playHobbySound(cue: HobbySound) {
+      if (!this.getRhythmAudioState().active || this.isMuted || this.sfxVolume <= 0) return;
+      this.playSfxMp3(`rpg-games/${cue}`,()=>this.playSound(cue==='miss'||cue==='lose'?'wrong':'select'),{maxDurationMs:HOBBY_SOUNDS[cue],overlap:cue.startsWith('note-')||cue==='pool-hit'});
+  }
+
+  public stopHobbySounds() {
+      for (const cue of Object.keys(HOBBY_SOUNDS)) {
+          const name=`rpg-games/${cue}`;
+          this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
+          this.stopActiveSfx(name);
+      }
   }
 
   public canPlayConversationVoice() {
@@ -1493,7 +1505,7 @@ class AudioService {
 
   public toggleMute() {
       this.isMuted = !this.isMuted;
-      if (this.isMuted) this.stopRpgFishingSounds();
+      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }

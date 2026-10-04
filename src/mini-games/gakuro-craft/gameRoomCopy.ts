@@ -1,4 +1,10 @@
 export const GAME_ROOM_ENGLISH:Record<string,string>={
+  "2D表示": "2D view",
+  "3D表示": "3D view",
+  "真上から見る": "View from above",
+  "斜めから見る": "Angled view",
+  "3Dを利用できないため2Dで表示しています。": "3D is unavailable; using the 2D view.",
+
   "一戦対戦": "Single match",
   "5階層の冒険": "Five-floor expedition",
   "アレンジ個人戦": "Free-for-all rules",
@@ -48,6 +54,12 @@ export const GAME_ROOM_ENGLISH:Record<string,string>={
   "今回の冒険点": "This floor’s expedition points"
 };
 export const GAME_ROOM_HIRAGANA:Record<string,string>={
+  "2D表示": "2Dひょうじ",
+  "3D表示": "3Dひょうじ",
+  "真上から見る": "まうえからみる",
+  "斜めから見る": "ななめからみる",
+  "3Dを利用できないため2Dで表示しています。": "3Dをりようできないため2Dでひょうじしています。",
+
   "一戦対戦": "いっせんたいせん",
   "5階層の冒険": "5かいそうのぼうけん",
   "アレンジ個人戦": "あれんじこじんせん",
