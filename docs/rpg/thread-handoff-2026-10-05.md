@@ -7,8 +7,8 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`0f93f3b06fc287b431c89cec12e6bdc68a424a4b`（Add furniture game BGM and exclusive rhythm audio with percussion pads）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
-- 最後のゲーム実装依頼は家具ゲームのBGM選定・リズムの音源重なり防止・ドラム／スクラッチ入力音。実装・検証・mainへの反映・GitHub公開確認まで完了。
+- 最後にmainへ反映したコミット：`55f2c54f7c85e70df1edf2beef588dad2ae3c9ee`（Align all rhythm charts and percussion levels with soundtrack attacks）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後のゲーム実装依頼は、4種類の入力音を踏まえた全楽曲の譜面確認・修正。実装・検証・mainへの反映・GitHub公開確認まで完了。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
 
@@ -68,7 +68,7 @@ RPGの主な継続対象：
 - `WorldCanvas.tsx` / `HomeCanvas.tsx` / `HomeRoom.tsx`：屋外／屋内。
 - `src/rpg/town/catalog.ts` / `model.ts` / `Panel.tsx` / `Sprites.tsx`：全72料理、食材消費、調理。
 - `src/rpg/life.ts` / `city/model.ts`：資源・歩行・配置の競合回避。
-- `src/rpg/network.ts`：Peerプロトコル18。
+- `src/rpg/network.ts`：農園実装時点のPeerプロトコル18（現在は譜面更新によりRPG19）。
 - `public/sprites/rpg/farm/`：112 WebPと`generation.json`。
 - `src/data/debugUiExact.ts`：英語・ひらがな翻訳。短い新規ラベルも登録する。
 - `public/android-asset-pack-manifest.json`、`src/generated/androidAssetPackVersions.ts`：追加素材登録。
@@ -120,6 +120,20 @@ World.farmは任意の状態で、version=1、所有者別peopleとrevisionを�
 - `test-home-game-audio.mjs`、`test-rpg-rhythm.mjs`、Androidアセット監査、Web／サーバービルド成功。
 - GitHub Actions：Deploy To GitHub Pages run `37257184005`、Build Android App Bundle run `37257183998`、両方success。公開JSの消音制御と9家具ゲームBGM定義、MP3／Opus計8点のローカルとのバイト一致を確認。
 - 詳細と音源出典：`docs/rpg/game-furniture-sound-credits.md`。
+
+## その後の更新：全楽曲の打楽器譜面点検
+
+- main `55f2c54f7c85e70df1edf2beef588dad2ae3c9ee`。全143曲の元MP3を音域別アタック・ハーモニック集中度で解析し、3難易度×2長さの858譜面を点検／修正。
+- 旧版のIDハッシュによるレーン巡回と、音の立ち上がりから遠いグリッド配置を改善。すべての頭・長押し終点が検出音に一致。音域からキック／スネア／ハイハットを選び、スクラッチは強いノイズ成分・BPM115以上の戦闘系9曲だけ、最低8拍間隔。
+- 入力音の強さを曲・アタックに合わせて下げる。`playRpgRhythmHit`の第3引数が音量。キャッシュ音源／未準備時の合成音ともSFXバスのGainを使い、iOSのHTML音量無視を避ける。
+- 全曲で難易度別密度、140ms以上の同レーン間隔、ドラム＋ハイハットの同時押し、長押しの安全性を確認。頭ノーツ数268,151→228,507。解析音から25ms以上離れた配置137,344→0、スクラッチ対象外の曲への配置45,166→0。
+- `RhythmState.chartVersion=2`、旧状態／旧サーバーは省略時1として`legacyChart.ts`を利用。新サーバーで新しく開始すると2へ。Peer RPG19、クラフト9。
+- 保存キー`rpg-rhythm-records-v1`は保持。新譜面は記録の項目キーに`|chart-2`を付け、旧記録と比較しない。旧記録は削除しない。
+- 正本：`src/rpg/rhythm/accents.generated.ts`、`chart.ts`、`legacyChart.ts`、`game.ts`、`records.ts`。再生成は`python scripts/generate-rhythm-accents.py`（ffmpeg/numpy）。元カタログ更新時はこちらも再生成する。
+- `node scripts/audit-rhythm-accompaniment.mjs`で全曲監査。結果は`docs/rpg/rhythm-accompaniment-audit.json`、説明は`docs/rpg/rhythm-accompaniment.md`。
+- 解析は音源分離・楽器の確定識別ではなく伴奏用の推定。全曲を人の耳で聴いたとの記録ではない。
+- 全858譜面の監査、モデル満点／長押し／4人／不正入力、実ブラウザの演奏・試聴・再開・タッチ・旧記録保持、Web／サーバービルドが成功。
+- GitHub Actions：Deploy To GitHub Pages `37259530289`、Build Android App Bundle `37259530290`、両方success。公開ページの譜面バージョン・新旧記録分離・143曲分の解析データ一致を確認。
 
 ## 環境限定の補助資料
 
