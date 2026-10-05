@@ -7,8 +7,8 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`5752fb452438985ffe33ceb4965038298365fe7d`（Curate RPG scene music and pin exploration to classic elementary map）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
-- 最後のゲーム実装依頼は、RPGマップの旧小学生編BGM固定とRPG独自画面のBGM選定。実装・検証・mainへの反映・GitHub公開確認まで完了。
+- 最後にmainへ反映したコミット：`b56d5d4a6688ced421a3b3d4faa00a5d5ee4a67d`（Render native cards in RPG trades and preserve enemy art across asset packs）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後のゲーム実装依頼は、敵主人公の秘技カード画像・BGM継続調整に加え、トレードを本編と同じカード表示へ統一する改善。実装・検証・mainへの反映・GitHub公開確認まで完了。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
 
@@ -160,3 +160,18 @@ World.farmは任意の状態で、version=1、所有者別peopleとrevisionを�
 - 流用された戦闘・店・休憩・イベント・学習・ダンジョンではスコープを解除し、従来の各編BGM。RPG内の9家具ゲームは既存個別曲をNEW elementaryに固定、学ロクラフトの共有UI側は従来設定のまま。音ゲーは既存の無音スコープでBGMとの重複を防ぐ。
 - `scripts/test-rpg-scene-music.mjs`：全22曲の実ファイル／再生URL、旧マップ再適用、家具・設定の優先度、音ゲー無音、各編の戦闘への復帰、設定値保持を検証。通常WebおよびiOS設定のHTML経路をChromiumで通過。実機iOSでの試聴ではない。
 - 9家具ゲームの既存ブラウザ音楽テスト、英語UI全監査・公開用ビルド・サーバービルドを通過。GitHub Actionsと公開Webで反映を確認。Render確認はユーザー方針により省略。
+
+## 追加完了：敵主人公の秘技画像・BGM継続（bc767273）
+
+- 秘技カードの `rpgEnemyHeroId` で敵本人の画像を最優先表示。高・魔の人型は正しい番号の攻撃画像、あずきはpounce、無限ボスは本人のattack画像。それ以外は選択画面と一致する画像。攻撃画像が失敗した場合は待機画像へフォールバック。
+- 旧保存デッキは `RPG_ENEMY:<編>:<名前>:CARD:...` と秘技名から対応。通常の初期デッキカードは変更しない。`getEnemyHeroSignatureImages` と Card の最優先画像分岐。全325体のファイルと対応、旧カード、新旧描画を3編で検証。資料 `docs/rpg/enemy-signature-art.md`、テスト `scripts/test-rpg-signature-art.mjs`。
+- 前回BGM切り替えが多すぎるとのフィードバックを反映。設定、主人公編集、採取、釣り、釣果、クラフト、交流、農場・都市の管理画面、会話、手帳、仲間、目標、家具選択は周囲のBGMを継続。屋外では旧小学生マップ、室内では家の曲、タイトル設定ではタイトル曲を再生し続け、巻き戻さない。
+- `resolveRpgMusicScene` と `RPG_PASSIVE_MUSIC_SCENES` が有効な統合規則。候補22場面の定義自体は残すが、メニュー等で独立曲に切り替えない。タイトル→冒険設定、家への入室、ゲームの実プレイ開始、独自アーケード、クリア・終了など大きな転換時だけ変更。マップ基底は優先度10、終了時のみ40。家具ゲーム30は設定メニューを開いても維持。
+- 更新 `docs/rpg/scene-music.md`。マップ・家・タイトル各文脈の全15受動画面でHTML audioの同一性を検証し、通常WebとiOS設定HTML経路をChromiumで通過。英語UI監査・Web/サーバービルド通過。GitHub Actionsと公開確認済み。Render確認はユーザー指定により省略。
+
+## 追加完了：本編カードをトレードで表示（b56d5d4a）
+
+- `ActivitiesPanel` のテキストのみのCardInfoを本編 `Card` に置換。自分の選択デッキと双方の提示カードで、画像、コスト、効果、枠を共通表示。選択はチェックと縁取り、`aria-pressed`。提示カードのタップと選択カードの既存長押しで `CardInspectionModal` の詳細確認が可能。5枚上限と選択解除、キーボードのSpace/Enterにも対応。
+- `activities.ts` で旧秘技カードの敵IDを受け取りカードIDへ変更する前に保存し、交換後も正しい画像を保持。攻撃画像は画像URL文字列の置換でなく、正確な敵カタログの番号からassetUrlを呼び、Androidダウンロード素材のハッシュ化された保存先に対応。
+- `scripts/test-rpg-trade-cards-browser.mjs` が実トレードコマンドで選択・双方提示・人型攻撃画像・詳細・キーボード・旧秘技交換後の画像保持、360×800・800×360・1280×800の表示を検証。既存活動モデルテストも通過。
+- Android設定の画像ブラウザテストで、全325体のファイル／描画に加え、ダウンロード済み素材のハッシュURLが正しいattackファイルを指すことを検証。英語UI監査・最終Webビルド・サーバービルド通過。GitHub Actionsと公開反映を確認。Render確認はユーザー指定に従い省略。
