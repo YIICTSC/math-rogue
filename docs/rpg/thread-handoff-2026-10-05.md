@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`f8eb00f1c2b45bbca97c606279f7731be68528da`（Add Gakuro GP custom course editor and adopted RPG title logo）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`e670338055c4e68916fb498af600cbbe61505a4e`（Regenerate vacation librarian attack art without transparency holes）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -235,3 +235,13 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 機能説明 docs/kart/custom-courses.md。新規モデル・ブラウザ・専用サーバー3クライアントテスト、既存カートコース/学習/カメラ、Web英語監査/build、server:build成功。新規ブラウザはソフトウェアWebGLで時間がかかる。全体tscはメモリ不足のため完走しなかったので、型チェック成功とは扱わない。
 
 - 今回の公開確認：GitHub Pages Actions 37381237342、Android Actions 37381237257ともsuccess。公開ロゴと画像計53点の一致、およびカート編集・釣り修正・NPCイベントの公開コードを検証。前回待機中だったPages処理は今回のmain更新で置き換わり、前回の修正も公開済み。
+
+ 
+## 最新追記：禁書管理の書記のバカンス版アタック絵
+ 
+- main e670338055c4e68916fb498af600cbbe61505a4e。添付の高校編 hs_03「禁書管理の書記／紫帽子の浜辺司書」のアタック絵にあった四角い透過欠けを修正。
+- 立ち絵 sprites/high-school/vacation-humanoid-enemies/3.webp と元アタック絵をImageGen参照に使用。顔・帽子・服・本を維持し、人物を不透明にして水の魔法と紙のエフェクトを再生成。攻撃素材 vacation-humanoid-enemies-attack/3.webp のみ差替え。立ち絵・スキル絵はそのまま。
+- 生成元 exec-76b55aab-6cc8-42b3-aabb-40f82b3b7671.png を generated_images に保持。1024×1536の透明WebP、quality94/alphaQuality100。胴体の確認範囲でalpha240未満が約13%→0%となり、背景の角は透明。
+- Androidアセットハッシュを更新。Web英語監査/build、server:build成功。
+
+- GitHub Pages Actions 37383114895 は成功。公開URLのアタック3.webp（693344 bytes）がローカル修正版と完全一致することを確認。Android Actions 37383114886 は最終確認時点でリリースAABビルド中。Render確認はユーザーの方針により実施していない。
