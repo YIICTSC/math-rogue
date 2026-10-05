@@ -418,7 +418,7 @@ export default function RpgOnline({
     onClose();
   };
   const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':me?.life?.indoors?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
-  useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,settingsOpen||heroOpen||farmOpen||cityOpen||fishing.result||storySiteId||roamingNpcSiteId||world?.ended?40:10);
+  useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,me?.life?.indoors?'home':!world||!world.started?'setup':'map');
   return (
     <TranslatedUiTree mode={languageMode}>
       {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="木漏れ日のフロンティア" subtitle="招待されたワールドで、仲間と冒険しよう。" languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}

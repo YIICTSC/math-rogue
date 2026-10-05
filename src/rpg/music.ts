@@ -16,6 +16,12 @@ export const RPG_MUSIC = {
  ended:track('game_over','OLD','high-school'), games:track('dungeon_music','NEW'),
 } satisfies Record<string,Track>;
 export type RpgMusicScene=keyof typeof RPG_MUSIC;
-export function useRpgMusic(scene:RpgMusicScene|null,priority=10){
- useLayoutEffect(()=>{if(!scene)return;const song=RPG_MUSIC[scene];return audioService.acquireBgmScene(song.type,song.options,priority);},[scene,priority]);
+// Short interactions and information panels keep the surrounding scene's music.
+export const RPG_PASSIVE_MUSIC_SCENES = new Set<RpgMusicScene>(['settings','hero','craft','social','farm','city','fishing','catch','gather','story','journal','team','event','goal','games']);
+export function resolveRpgMusicScene(scene:RpgMusicScene|null,surrounding:RpgMusicScene='map'){
+ return scene&&RPG_PASSIVE_MUSIC_SCENES.has(scene)?surrounding:scene;
+}
+export function useRpgMusic(scene:RpgMusicScene|null,priority=10,surrounding:RpgMusicScene='map'){
+ const resolved=resolveRpgMusicScene(scene,surrounding);
+ useLayoutEffect(()=>{if(!resolved)return;const song=RPG_MUSIC[resolved];return audioService.acquireBgmScene(song.type,song.options,priority);},[resolved,priority]);
 }

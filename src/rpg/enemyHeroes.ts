@@ -83,7 +83,7 @@ export function getEnemyHeroes(theme:VisualThemeId):EnemyHero[] {
   const innate=uniqueInnate(theme,style,hash);
   const relic:Relic={id:`${id}:RELIC`,name:`${name}の${style.name}の証`,rarity:'STARTER',effectType:'START_BATTLE',rpgInnate:innate,description:`戦闘開始時、筋力${innate.strength}・ブロック${innate.block}・追加ドロー${innate.draw}・HP回復${innate.heal}。`};
   const base=CARDS_LIBRARY[style.cards[hash%style.cards.length]];
-  const signature={...base,name:`${name}の秘技`,description:base.description};
+  const signature={...base,rpgEnemyHeroId:id,name:`${name}の秘技`,description:base.description};
   const endless=ENDLESS_BOSSES.find(b=>b.arc===theme&&b.name===name);
   const imageData=getEnemyHeroImageData(name,theme,endless);
   // Each hero has an exclusive signature plus a reproducible, balanced ten-card loadout.
@@ -99,4 +99,21 @@ export function applyEnemyHeroRelics(player:Player):number {
  let draw=0;
  for(const relic of player.relics){const effect=relic.rpgInnate;if(!effect)continue;player.strength+=effect.strength;player.block+=effect.block;player.currentHp=Math.min(player.maxHp,player.currentHp+effect.heal);draw+=effect.draw;}
  return draw;
+}
+
+/** Resolve by exact hero identity, including signature cards saved before artwork metadata existed. */
+export function getEnemyHeroSignatureImages(card:Pick<Card,'id'|'name'|'rpgEnemyHeroId'>):string[] {
+ const id=card.rpgEnemyHeroId || (card.id.startsWith('RPG_ENEMY:')&&card.name.includes('秘技')?card.id.split(':CARD:')[0]:null);
+ if(!id)return [];
+ const theme=id.split(':')[1] as VisualThemeId;
+ if(!['elementary','high-school','magic'].includes(theme))return [];
+ const hero=getEnemyHeroes(theme).find(h=>h.id===id);
+ if(!hero)return [];
+ const idle=hero.imageData;
+ const endless=ENDLESS_BOSSES.find(b=>b.arc===theme&&b.name===hero.name);
+ let attack=idle;
+ if(endless&&endless.floor<=50)attack=getEndlessBossSpritePath(endless,'attack');
+ else if(idle.includes('/humanoid-enemies/'))attack=idle.replace('/humanoid-enemies/','/humanoid-enemies-attack/');
+ else if(idle.includes('/azuki/idle.webp'))attack=idle.replace('/azuki/idle.webp','/azuki/pounce.webp');
+ return [...new Set([attack,idle])];
 }

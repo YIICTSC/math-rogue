@@ -1,3 +1,4 @@
+import {getEnemyHeroSignatureImages} from '../rpg/enemyHeroes';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card as CardType, CardType as EnumCardType, CharacterAppearanceMode, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
@@ -334,6 +335,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderCardArt = () => {
+    const signatureImages=getEnemyHeroSignatureImages(card);
+    if(signatureImages.length)return <ResilientAssetImage sources={signatureImages} alt={displayCardName} className="w-full h-full object-contain opacity-95 drop-shadow-md"/>;
+
     const resolvedCardVisualTheme = card.visualTheme ?? 'elementary';
 
     if (card.customImageData) {

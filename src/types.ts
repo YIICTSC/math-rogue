@@ -16,6 +16,8 @@ export enum TargetType {
 }
 
 export interface Card {
+  /** Original enemy identity for RPG signature artwork (retained through upgrades/saves). */
+  rpgEnemyHeroId?: string;
   id: string;
   name: string;
   cost: number;

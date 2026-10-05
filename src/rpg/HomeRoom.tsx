@@ -19,7 +19,7 @@ import './life.css';
 export default function HomeRoom({world,selfId,languageMode,send,onBuilder,onMemory,musicActive=true}:{musicActive?:boolean;world:World;selfId:string;languageMode:LanguageMode;send:(a:Action)=>void;onBuilder:()=>void;onMemory:(m:SocialMemory)=>void}){
  const me=world.players[selfId],house=world.life.houses.find(h=>h.id===me.life?.indoors)!,room=interiorOf(house),owner=resident(world,house.id,selfId),people=Object.values(world.players).filter(p=>p.life?.indoors===house.id),pos=me.life?.roomPos||ROOM_SPAWN;
  const t=(s:string)=>trans(s,languageMode),[tab,setTab]=useState('room'),[filter,setFilter]=useState('all'),[selected,setSelected]=useState<string>(),[placing,setPlacing]=useState<string>(),[rotation,setRotation]=useState<0|1>(0),[hover,setHover]=useState({x:4,y:4});
- useRpgMusic(musicActive?(tab==='games'?'games':tab==='craft'?'craft':tab==='farm'?'farm':tab==='town'||tab==='social'?'social':'home'):null,20);
+ useRpgMusic(musicActive?(tab==='games'?'games':tab==='craft'?'craft':tab==='farm'?'farm':tab==='town'||tab==='social'?'social':'home'):null,20,'home');
  const exitRequested=useRef(false);
  const route=useRef<Array<{x:number;y:number}>>([]),held=useRef<{dx:number;dy:number}|null>(null),pending=useRef<{x:number;y:number;at:number}|null>(null),latest=useRef({world,tab,send});latest.current={world,tab,send};
  const move=(dx:number,dy:number)=>{route.current=[];pending.current=null;send({type:'life-room-move',dx,dy});};

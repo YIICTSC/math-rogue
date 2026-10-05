@@ -42,7 +42,7 @@ export default function MiniGameLab({
   languageMode: LanguageMode;
   onClose: () => void;
 }) {
-  useRpgMusic('games',20);
+  useRpgMusic('games',20,'games');
   const world = useRef(createMiniLabWorld()),
     [, update] = useState(0),
     [records, setRecords] = useState<Record<string, number>>(() => {

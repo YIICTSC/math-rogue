@@ -1,32 +1,24 @@
 # RPG scene music
 
-RPG outdoor exploration always uses `bgm/map.mp3` (elementary OLD). Scene scopes override playback requests only while an original RPG screen is active; they never change the user's mode or chapter preference. Reused battle, shop, rest, event and learning screens leave the scope and retain chapter music. Dungeon exploration also retains its existing chapter behavior.
+Outdoor exploration always uses `bgm/map.mp3` (elementary OLD), independently of the saved chapter or BGM mode. A short interaction must not restart, seek or change this music.
 
-Selection is curated from the complete existing OLD/NEW catalog, rather than limited to the selected protagonist chapter. `src/rpg/music.ts` is the authoritative scene table.
+After feedback that scene switching was too frequent, the following keep their surrounding screen's music: settings, hero editing, crafting, social/community menus, farm and city management, fishing and gathering actions, catch results, NPC/story dialogue, journal/encyclopedias, team/world-event/goal details, and furniture game selection. Outside these remain on the map track; indoors they remain on the house track; RPG title settings remain on the RPG title track. The selected future scene candidates remain in `RPG_MUSIC`, but `resolveRpgMusicScene` deliberately groups these interactions together.
 
-| Scene | Selection |
+Music changes on substantial scene transitions:
+
+| Scene | Active selection |
 | --- | --- |
-| Title | NEW magic menu |
-| Adventure setup / room | NEW paper plane setup |
-| Settings | OLD high school rest |
-| Original hero builder | NEW magic female relic selection |
-| House / interiors | OLD elementary rest |
-| Crafting / furniture creation | NEW high school shop |
-| Social / community | NEW magic female event |
-| Farming / animals / pets | OLD paper plane vacation |
-| City management | NEW high school map |
-| Fishing | OLD magic male rest |
-| Catch presentation | NEW magic female reward |
-| Gathering / mining | NEW science dungeon |
-| Original story / wandering NPC dialogue | OLD magic male event |
-| Journal / encyclopedia / character details | OLD library dungeon |
-| Team / multiplayer activity invitation | NEW principal setup |
-| World event details | NEW high school event |
-| Adventure goals | NEW rooftop dungeon |
-| Original arcade | NEW poker shop |
-| Adventure clear / time expired | NEW magic female reward / OLD high school game over |
-| Furniture lobby / debug practice room | NEW music dungeon |
+| Outdoor map | OLD elementary map |
+| RPG title | NEW magic menu |
+| Adventure setup / joining room | NEW paper plane setup |
+| Entering a house | OLD elementary rest |
+| Debug furniture practice room | NEW music dungeon |
+| Original arcade | NEW poker shop, maintained through its result screen |
+| Adventure clear | NEW magic female reward |
+| Time-expired results | OLD high school game over |
 
-Nine furniture games retain their individual `GAME_BGM` selections, pinned to NEW elementary assets inside RPG. The shared craft game retains its existing user-selected theme behavior. Active furniture music takes precedence over room/lobby music. The rhythm game continues to silence all background music throughout its selection, preview and play screens, playing only its selected song and percussion.
+Nine active furniture games keep their own `GAME_BGM` tracks pinned to NEW elementary assets inside RPG. Lobby browsing does not change the house music; starting an actual game does. Shared craft-game behavior stays unchanged. Rhythm selection, preview and play continue to silence background music so only the selected song/percussion is audible.
 
-Checks: `node scripts/test-rpg-scene-music.mjs` verifies all 22 selections against actual audio assets and browser playback, map reassertion after an ordinary shop request, nested furniture scopes, rhythm silence release and chapter battle restoration. `scripts/test-home-game-bgm-browser.mjs` covers the existing shared furniture playback behavior. HTML playback is tested in Chromium; this is not a physical iOS-device listening test.
+Reused battle, shop, rest, event, learning and dungeon screens retain their existing chapter-dependent music. Scene scopes never modify the user's saved BGM mode/theme.
+
+`node scripts/test-rpg-scene-music.mjs` checks asset existence, actual playback URLs, uninterrupted HTML audio identity across all passive interactions in map/house/title contexts, nested scopes, exclusive rhythm silence and chapter battle restoration. Chromium HTML playback checks are not a physical iOS-device listening test.
