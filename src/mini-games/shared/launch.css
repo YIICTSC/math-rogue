@@ -26,3 +26,7 @@
  .game-launch-title.rpg:is([data-actions="4"],[data-actions="5"]) .game-launch-status{max-height:90px;overflow:auto}
  .game-launch-title.rpg[data-actions="4"] .game-launch-menu>button:nth-child(4){grid-column:1/-1}
 }
+
+.game-launch-copy .game-launch-logo{margin:0;width:100%;line-height:0}.game-launch-logo img{display:block;width:100%;max-height:65dvh;object-fit:contain;filter:drop-shadow(0 5px 15px #051b2599)}
+@media(max-width:600px) and (orientation:portrait){.game-launch-logo img{max-height:35dvh}}
+@media(max-height:480px){.game-launch-logo img{max-height:65dvh}}

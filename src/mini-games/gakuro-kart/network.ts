@@ -1,3 +1,4 @@
+import {type CustomCourse} from './track';
 import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
 import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
@@ -55,8 +56,8 @@ export class KartRoom {
     }, 1000 / 60);
     this.emit();
   }
-  practice(name: string, hero: number, course: number) {
-    this.host = true; this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0]);
+  practice(name: string, hero: number, course: number, customCourse?:CustomCourse) {
+    this.host = true; this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0],3,customCourse);
     addRacer(this.world, this.selfId, name, hero); this.run();
   }
   private async open(id?: string) {
@@ -86,13 +87,13 @@ export class KartRoom {
     };
     if (c.open) deliver(); else c.once('open', deliver);
   }
-  async create(name: string, hero: number, course: number) {
-    if(onlineServerUrl()){await this.connectDedicated({create:true,name,hero,course,avatar:defaultAvatar(hero)});return;}
+  async create(name: string, hero: number, course: number, customCourse?:CustomCourse) {
+    if(onlineServerUrl()){await this.connectDedicated({create:true,name,hero,course,customCourse,avatar:defaultAvatar(hero)});return;}
     this.host = true;
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
     const peer = await this.open(`gakuro-apex-v${PROTOCOL}-${this.code}`);
-    this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0]); addRacer(this.world, this.selfId, name, hero);
+    this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0],3,customCourse); addRacer(this.world, this.selfId, name, hero);
     peer.on('connection', c => {
       if (this.closed) { c.close(); return; }
       if (this.channels.size >= MAX_RACERS - 1 || this.world?.phase === 'result' || this.channels.has(c.peer)) { this.reject(c, '満員、またはレース終了済みです。'); return; }
@@ -188,10 +189,10 @@ export class KartRoom {
     if (setSpectator(this.world, this.selfId, enabled)) this.emit();
   }
   start(fill = true) { if(this.dedicated){if(this.host)this.dedicated.send({type:'start',fill});return;} if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
-  rematch(lesson?: KartLesson, course = this.world?.course ?? 0, laps = this.world?.laps ?? 3) {
+  rematch(lesson?: KartLesson, course = this.world?.course ?? 0, laps = this.world?.laps ?? 3, customCourse?:CustomCourse) {
     if (!this.host || this.world?.phase !== 'result') return;
-    if(this.dedicated){this.dedicated.send({type:'rematch',lesson,course,laps});return;}
-    const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1, laps);
+    if(this.dedicated){this.dedicated.send({type:'rematch',lesson,course,laps,customCourse});return;}
+    const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1, laps,customCourse);
     this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
     for (const p of Object.values(old.players)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; this.world.players[p.id].spectator = p.spectator; }

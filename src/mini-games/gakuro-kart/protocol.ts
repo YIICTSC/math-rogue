@@ -1,17 +1,18 @@
-import { COURSES } from './track';
+import { COURSES, validCustomCourse, type CustomCourse } from './track';
 import { validAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
 import { createRace, MAX_RACERS, MIN_LAPS, MAX_LAPS, type Race, type Racer, type Item } from './engine';
-export const PROTOCOL = 9;
+export const PROTOCOL = 10;
 const phases: Race['phase'][] = ['lobby', 'countdown', 'race', 'result'];
 const items: (Item | null)[] = [null, 'nitro', 'shield', 'pulse', 'rocket'];
 const HEADER = 32, STRIDE = 56;
-export type Roster = { type: 'roster'; lesson: KartLesson | null; version: number; revision: number; course: number; laps: number; seed: number; players: Pick<Racer, 'id' | 'slot' | 'name' | 'hero' | 'cpu' | 'avatar' | 'spectator'>[] };
+export type Roster = { type: 'roster'; customCourse?:CustomCourse; lesson: KartLesson | null; version: number; revision: number; course: number; laps: number; seed: number; players: Pick<Racer, 'id' | 'slot' | 'name' | 'hero' | 'cpu' | 'avatar' | 'spectator'>[] };
 export function roster(w: Race): Roster {
-  return { type: 'roster', lesson: w.lesson, version: PROTOCOL, revision: w.revision, course: w.course, laps: w.laps, seed: w.seed, players: Object.values(w.players).map(({ id, slot, name, hero, cpu, avatar, spectator }) => ({ id, slot, name, hero, cpu, avatar, spectator })) };
+  return { type: 'roster', customCourse:w.customCourse, lesson: w.lesson, version: PROTOCOL, revision: w.revision, course: w.course, laps: w.laps, seed: w.seed, players: Object.values(w.players).map(({ id, slot, name, hero, cpu, avatar, spectator }) => ({ id, slot, name, hero, cpu, avatar, spectator })) };
 }
 export function acceptRoster(r: Roster, previous: Race | null): Race | null {
   if (r.version !== PROTOCOL || !Number.isInteger(r.revision) || r.revision < 0 || !Number.isInteger(r.course) || r.course < 0 || r.course >= COURSES.length || !Number.isInteger(r.laps) || r.laps < MIN_LAPS || r.laps > MAX_LAPS || !Array.isArray(r.players) || r.players.length > MAX_RACERS) return null;
+  if(r.customCourse!==undefined&&(!validCustomCourse(r.customCourse)||r.customCourse.theme!==r.course))return null;
   if (r.lesson !== null && !validLesson(r.lesson)) return null;
   const slots = new Set<number>(), ids = new Set<string>();
   for (const p of r.players) {
@@ -20,7 +21,7 @@ export function acceptRoster(r: Roster, previous: Race | null): Race | null {
   }
   if (previous && r.revision < previous.revision) return null;
   const w = previous ? { ...previous, players: {} } : createRace(r.course, r.seed, r.laps);
-  w.lesson = r.lesson; w.course = r.course; w.laps = r.laps; w.seed = r.seed; w.revision = r.revision;
+  w.customCourse=r.customCourse?structuredClone(r.customCourse):undefined; w.lesson = r.lesson; w.course = r.course; w.laps = r.laps; w.seed = r.seed; w.revision = r.revision;
   for (const p of r.players) w.players[p.id] = { quizAnswers: [-2, -2, -2], quizTimes: [0, 0, 0], quizCorrect: 0, quizCorrectTotal: 0, quizLap: 0, quizFeedbackAt: 0, quizApplied: false, crash: 0, distance: 0, x: 0, speed: 0, steer: 0, brake: false, drift: false, inputAt: 0, slide: 0, charge: 0, boost: 0, shield: 0, slow: 0, item: null, jump: 0, draft: 0, finish: 0, drifts: 0, overtakes: 0, ...previous?.players[p.id], ...p };
   return w;
 }

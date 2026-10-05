@@ -6,7 +6,7 @@ import * as kart from '../src/mini-games/gakuro-kart/engine';
 import {roster,encodeSnapshot} from '../src/mini-games/gakuro-kart/protocol';
 import {validAvatar} from '../src/mini-games/gakuro-kart/avatar';
 import {validLesson,type KartQuestion} from '../src/mini-games/gakuro-kart/learning';
-import {COURSES} from '../src/mini-games/gakuro-kart/track';
+import {COURSES,validCustomCourse} from '../src/mini-games/gakuro-kart/track';
 import * as craft from '../src/mini-games/gakuro-craft/engine';
 import {avatarOf} from '../src/mini-games/gakuro-craft/avatar';
 import {MAP_WIDTH,MAP_HEIGHT} from '../src/mini-games/gakuro-craft/map';
@@ -79,7 +79,8 @@ sockets.on('connection',(socket,request)=>{
           const base:Base={host:m.id,members:new Map(),emptyAt:0,broadcast:0,simulation:0};
           if(game==='kart'){
             if(!Number.isInteger(d.course)||d.course<0||d.course>=COURSES.length){error(m,'コースが不正です。');return;}
-            room={...base,game,world:kart.createRace(d.course,randomInt(0x100000000)),sequence:0};
+            if(d.customCourse!==undefined&&(!validCustomCourse(d.customCourse)||d.customCourse.theme!==d.course)){error(m,'コースが不正です。');return;}
+            room={...base,game,world:kart.createRace(d.course,randomInt(0x100000000),3,d.customCourse),sequence:0};
           }else{
             if(!Array.isArray(d.questions)||!d.questions.length||d.questions.length>2000||!d.questions.every(questionValid)){error(m,'問題設定が不正です。');return;}
             const saved=d.saved?loadIsland(JSON.stringify(d.saved)):null;
@@ -119,7 +120,8 @@ sockets.on('connection',(socket,request)=>{
         if(d.type==='laps')kart.setRaceLaps(w,d.laps);
         if(d.type==='start')kart.startRace(w,!!d.fill);
         if(d.type==='rematch'&&w.phase==='result'&&Number.isInteger(d.course)&&d.course>=0&&d.course<COURSES.length&&Number.isInteger(d.laps)&&d.laps>=1&&d.laps<=5){
-          const next=kart.createRace(d.course,w.seed+1,d.laps);next.lesson=validLesson(d.lesson)?structuredClone(d.lesson):w.lesson;next.revision=w.revision+1;
+          if(d.customCourse!==undefined&&(!validCustomCourse(d.customCourse)||d.customCourse.theme!==d.course)){error(m,'コースが不正です。');return;}
+          const next=kart.createRace(d.course,w.seed+1,d.laps,d.customCourse);next.lesson=validLesson(d.lesson)?structuredClone(d.lesson):w.lesson;next.revision=w.revision+1;
           for(const p of Object.values(w.players)){kart.addRacer(next,p.id,p.name,p.hero,p.cpu);next.players[p.id].avatar={...p.avatar};next.players[p.id].spectator=p.spectator;}kart.startRace(next);room.world=next;
         }
         publish(room);

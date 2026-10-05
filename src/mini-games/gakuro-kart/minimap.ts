@@ -1,7 +1,7 @@
-import { getTrack, ROAD_WIDTH, type Point } from './track';
+import { getTrack, ROAD_WIDTH, type CustomCourse, type Point } from './track';
 
-export function minimapGeometry(course: number) {
-  const points = getTrack(course).points;
+export function minimapGeometry(course: number,custom?:CustomCourse) {
+  const points = getTrack(course,custom).points;
   const minX = Math.min(...points.map(p => p.x)), maxX = Math.max(...points.map(p => p.x));
   const minZ = Math.min(...points.map(p => p.z)), maxZ = Math.max(...points.map(p => p.z));
   const scale = Math.min(106 / (maxX - minX + ROAD_WIDTH + 4), 124 / (maxZ - minZ + ROAD_WIDTH + 4));

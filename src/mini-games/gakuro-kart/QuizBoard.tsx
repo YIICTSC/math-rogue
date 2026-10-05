@@ -11,7 +11,7 @@ export default function QuizBoard({ world, racer, languageMode, sound }: { world
   const done = racer.quizAnswers.filter(a => a !== -2).length;
   const feedback = done > 0 && world.time - racer.quizFeedbackAt < QUIZ_FEEDBACK_SECONDS;
   const index = feedback ? done - 1 : Math.min(done, 2), q = world.lesson?.questions[index];
-  const trackLength = getTrack(world.course).length, lapDistance = quizDistance(racer.distance, trackLength);
+  const trackLength = getTrack(world.course,world.customCourse).length, lapDistance = quizDistance(racer.distance, trackLength);
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = (s: string) => trans(s, languageMode);
   const speaking = useRef<SpeechSynthesisUtterance | null>(null);

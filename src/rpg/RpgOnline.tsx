@@ -444,7 +444,7 @@ export default function RpgOnline({
   useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,me?.life?.indoors?'home':!world||!world.started?'setup':'map');
   return (
     <TranslatedUiTree mode={languageMode}>
-      {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="木漏れ日のフロンティア" subtitle="招待されたワールドで、仲間と冒険しよう。" languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
+      {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="異世界転生したら学力で無双した件" subtitle="学習ローグRPG" logo={<img src={assetUrl('sprites/rpg/title/logo.webp')} alt="学習ローグRPG"/>} languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
       {settingsOpen&&<RpgSettings languageMode={languageMode} onClose={()=>setSettingsOpen(false)}/>}
       {farmOpen&&world&&<FarmPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onTrack={(x,y)=>{if(!me)return;const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setFarmOpen(false);}} onClose={()=>setFarmOpen(false)}/>}
       {cityOpen&&world?.city&&<CityPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onClose={()=>setCityOpen(false)}/>}

@@ -1,6 +1,6 @@
 import { defaultAvatar, type KartAvatar } from './avatar';
 import { QUIZ_APPROACH_SPEED, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, QUIZ_END, answerLane, laneCenter, quizDistance, type KartLesson } from './learning';
-import { COURSES, FEATURES, getTrack, ROAD_WIDTH, sampleTrack } from './track';
+import { COURSES, trackFeatures, validCustomCourse, type CustomCourse, getTrack, ROAD_WIDTH, sampleTrack } from './track';
 export { COURSES } from './track';
 export const MAX_RACERS = 40, MIN_LAPS = 1, MAX_LAPS = 5, DEFAULT_LAPS = 3, LAPS = DEFAULT_LAPS, RACE_LIMIT = 360;
 export const HEROES = ['SPARK', 'COMET', 'NOVA'];
@@ -18,13 +18,13 @@ export interface Racer {
 export interface Race {
   lesson: KartLesson | null;
   phase: 'lobby' | 'countdown' | 'race' | 'result'; remaining: number; time: number;
-  course: number; laps: number; seed: number; finishAt: number; revision: number; paused: boolean; players: Record<string, Racer>;
+  customCourse?:CustomCourse; course: number; laps: number; seed: number; finishAt: number; revision: number; paused: boolean; players: Record<string, Racer>;
 }
 export type Command = { type: 'input'; steer: number; brake: boolean; drift: boolean } | { type: 'item' };
 export const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
-export function createRace(course = 0, seed = 1, laps = DEFAULT_LAPS): Race {
+export function createRace(course = 0, seed = 1, laps = DEFAULT_LAPS, customCourse?:CustomCourse): Race {
   const selectedLaps = Number.isFinite(laps) ? clamp(Math.floor(laps), MIN_LAPS, MAX_LAPS) : DEFAULT_LAPS;
-  return { lesson: null, phase: 'lobby', remaining: 3, time: 0, course: clamp(Math.floor(course) || 0, 0, COURSES.length - 1), laps: selectedLaps, seed, finishAt: 0, revision: 0, paused: false, players: {} };
+  return { ...(validCustomCourse(customCourse)?{customCourse:structuredClone(customCourse)}:{}), lesson: null, phase: 'lobby', remaining: 3, time: 0, course: clamp(Math.floor(course) || 0, 0, COURSES.length - 1), laps: selectedLaps, seed, finishAt: 0, revision: 0, paused: false, players: {} };
 }
 export function setRaceLaps(w: Race, laps: number) {
   if (w.phase !== 'lobby' || !Number.isInteger(laps) || laps < MIN_LAPS || laps > MAX_LAPS || w.laps === laps) return false;
@@ -64,7 +64,7 @@ export function command(w: Race, id: string, raw: unknown) {
   if (c.type === 'input' && Number.isFinite(c.steer) && typeof c.brake === 'boolean' && typeof c.drift === 'boolean') {
     p.steer = clamp(c.steer, -1, 1); p.brake = c.brake; p.drift = c.drift; p.inputAt = w.time;
   }
-  if (c.type === 'item' && p.item && !(w.lesson && !p.finish && quizDistance(p.distance, getTrack(w.course).length) < QUIZ_END) && !p.crash) {
+  if (c.type === 'item' && p.item && !(w.lesson && !p.finish && quizDistance(p.distance, getTrack(w.course,w.customCourse).length) < QUIZ_END) && !p.crash) {
     if (p.item === 'nitro') p.boost = Math.max(p.boost, 2.8);
     if (p.item === 'rocket') { p.boost = Math.max(p.boost, 4.5); p.shield = Math.max(p.shield, 4.5); }
     if (p.item === 'shield') { p.shield = 6; p.slow = 0; }
@@ -80,7 +80,7 @@ export function tick(w: Race, dt: number) {
   dt = Math.min(dt, .05);
   if (w.phase === 'countdown') { w.remaining = Math.max(0, w.remaining - dt); if (!w.remaining) { w.phase = 'race'; w.revision++; } return; }
   w.time += dt;
-  const racers = ranking(w), length = getTrack(w.course).length;
+  const racers = ranking(w), length = getTrack(w.course,w.customCourse).length;
   const oldDistances = new Map(racers.map(p => [p.id, p.distance]));
   for (let place = 0; place < racers.length; place++) {
     const p = racers[place];
@@ -89,7 +89,7 @@ export function tick(w: Race, dt: number) {
       p.quizLap = lap; p.quizAnswers = [-2, -2, -2]; p.quizTimes = [0, 0, 0];
       p.quizCorrect = 0; p.quizFeedbackAt = w.time; p.quizApplied = false;
     }
-    const turn = sampleTrack(p.distance, w.course).curve;
+    const turn = sampleTrack(p.distance, w.course,0,w.customCourse).curve;
     const lapDistance = quizDistance(p.distance, length);
     const learning = !!w.lesson && !p.finish && lapDistance < QUIZ_END;
     const questionIndex = p.quizAnswers.findIndex(a => a === -2);
@@ -140,7 +140,7 @@ export function tick(w: Race, dt: number) {
       else if (p.quizCorrect === 1) { p.slow = 7; p.speed *= .65; }
       else if (p.quizCorrect === 0) { p.crash = 2.4; p.slow = 5; p.speed = 0; p.slide = 0; }
     }
-    for (const f of FEATURES) {
+    for (const f of trackFeatures(w.customCourse)) {
       if (learning) continue;
       const next = (Math.floor((old - f.at * length) / length) + 1 + f.at) * length;
       if (next < 0 || next > p.distance || Math.abs(p.x - f.lane) > (f.type === 'jump' ? 5 : 2.8)) continue;

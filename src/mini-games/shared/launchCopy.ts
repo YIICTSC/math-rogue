@@ -1,6 +1,8 @@
 export const LAUNCH_ENGLISH:Record<string,string>={
  "この冒険は終了しました。新しい冒険を始めましょう。":"This adventure has ended. Start a new adventure.",
  "木漏れ日のフロンティア":"Sunlit Frontier",
+ "異世界転生したら学力で無双した件":"Reborn in Another World: Unstoppable with Knowledge",
+ "学習ローグRPG":"Learning Rogue RPG",
  "スーパー学ロカート":"Super Gakuro Kart",
   "学び、冒険し、自分だけの暮らしをつくろう。": "Learn, explore, and build a life of your own.",
   "ひとりで遊ぶ": "Play solo",
@@ -35,6 +37,8 @@ export const LAUNCH_ENGLISH:Record<string,string>={
 export const LAUNCH_HIRAGANA:Record<string,string>={
  "この冒険は終了しました。新しい冒険を始めましょう。":"このぼうけんはしゅうりょうしました。あたらしいぼうけんをはじめましょう。",
  "木漏れ日のフロンティア":"こもれびのふろんてぃあ",
+ "異世界転生したら学力で無双した件":"いせかいてんせいしたら がくりょくでむそうしたけん",
+ "学習ローグRPG":"がくしゅうローグRPG",
  "スーパー学ロカート":"すーぱーがくろかーと",
   "学び、冒険し、自分だけの暮らしをつくろう。": "まなび、ぼうけんし、じぶんだけのくらしをつくろう。",
   "ひとりで遊ぶ": "ひとりであそぶ",
