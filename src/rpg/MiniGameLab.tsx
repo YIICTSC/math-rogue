@@ -1,3 +1,4 @@
+import {useRpgMusic} from './music';
 import React, { useEffect, useRef, useState } from "react";
 import HobbyGamesPanel from "../mini-games/gakuro-craft/HobbyGamesPanel";
 import {
@@ -41,6 +42,7 @@ export default function MiniGameLab({
   languageMode: LanguageMode;
   onClose: () => void;
 }) {
+  useRpgMusic('games',20);
   const world = useRef(createMiniLabWorld()),
     [, update] = useState(0),
     [records, setRecords] = useState<Record<string, number>>(() => {
@@ -138,7 +140,7 @@ export default function MiniGameLab({
           </p>
         ))}
       </details>
-      <HobbyGamesPanel
+      <HobbyGamesPanel rpgMusic
         world={world.current}
         me={world.current.players.practice}
         home={world.current.players.practice.progress.home}

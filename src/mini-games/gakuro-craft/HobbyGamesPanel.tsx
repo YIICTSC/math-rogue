@@ -18,7 +18,7 @@ const artFamily=(kind:string)=>['darts','billiards','bowling'].includes(kind)?'s
 const roomArt=(kind:string)=>assetUrl(`sprites/rpg/game-room/${artFamily(kind)}.webp`);
 const labels=GAME_LABELS;
 const colors=['#f7bd68','#70d8db','#caa0f4','#f28d9b'];
-export default function HobbyGamesPanel({world,me,home,t,send}:{world:World;me:Player;home:Home;t:(s:string)=>string;send:(c:Command)=>void}){
+export default function HobbyGamesPanel({world,me,home,t,send,rpgMusic}:{rpgMusic?:boolean;world:World;me:Player;home:Home;t:(s:string)=>string;send:(c:Command)=>void}){
  const preferences=useRpgPreferences(),[cueSpin,setCueSpin]=useState({x:0,y:0});
  const panelRef=useRef<HTMLElement>(null),latestSend=useRef(send);latestSend.current=send;
  const g=gameOf(world,me.id),[angle,setAngle]=useState(0),[power,setPower]=useState(0),[placing,setPlacing]=useState(false),[aim,setAim]=useState({x:0,y:0}),[reticle,setReticle]=useState({x:0,y:0});const aimRef=useRef(aim),activeRef=useRef(g),paddleAt=useRef(0);aimRef.current=aim;activeRef.current=g;
@@ -31,7 +31,7 @@ export default function HobbyGamesPanel({world,me,home,t,send}:{world:World;me:P
  useEffect(()=>{const cancel=()=>cancelPull();window.addEventListener('blur',cancel);return()=>window.removeEventListener('blur',cancel);},[]);
  useEffect(()=>{let frame=0;const move=(now:number)=>{const a=aimRef.current;setReticle({x:a.x+(preferences.reducedMotion?0:Math.sin(now*.0031)*.11),y:a.y+(preferences.reducedMotion?0:Math.cos(now*.0037)*.11)});frame=requestAnimationFrame(move);};if(g?.kind==='darts'&&g.phase==='playing')frame=requestAnimationFrame(move);return()=>cancelAnimationFrame(frame);},[g?.key,g?.kind,g?.phase,preferences.reducedMotion]);
  useGameAudio(g?.kind==='rhythm'?undefined:g,me.id,!world.paused,world.time);
- useGameBgm(g);
+ useGameBgm(g,rpgMusic);
  useEffect(()=>{const key=(e:KeyboardEvent)=>{const game=activeRef.current;if(!game||game.kind!=='arcade'||game.phase!=='playing'||['INPUT','TEXTAREA','SELECT'].includes((e.target as HTMLElement)?.tagName))return;const seat=game.players.indexOf(me.id),court=game.courts?.[seat];if(!court||!['ArrowLeft','ArrowRight','a','d'].includes(e.key))return;e.preventDefault();send({type:'game_paddle',key:game.key,x:court.target+(['ArrowLeft','a'].includes(e.key)?-.08:.08)});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[send,me.id]);
  useEffect(()=>{
   if(g?.phase!=='playing'||g.kind==='rhythm')return;

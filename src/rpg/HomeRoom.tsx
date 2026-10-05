@@ -1,3 +1,4 @@
+import {useRpgMusic} from './music';
 import {FarmContent} from './farm/Panel';
 import {houseGuests} from './town/HouseGuests';
 import TownPanel from './town/Panel';
@@ -15,9 +16,10 @@ import HobbyGamesPanel from '../mini-games/gakuro-craft/HobbyGamesPanel';
 import FurnitureSprite from './FurnitureSprite';
 import HomeCanvas from './HomeCanvas';
 import './life.css';
-export default function HomeRoom({world,selfId,languageMode,send,onBuilder,onMemory}:{world:World;selfId:string;languageMode:LanguageMode;send:(a:Action)=>void;onBuilder:()=>void;onMemory:(m:SocialMemory)=>void}){
+export default function HomeRoom({world,selfId,languageMode,send,onBuilder,onMemory,musicActive=true}:{musicActive?:boolean;world:World;selfId:string;languageMode:LanguageMode;send:(a:Action)=>void;onBuilder:()=>void;onMemory:(m:SocialMemory)=>void}){
  const me=world.players[selfId],house=world.life.houses.find(h=>h.id===me.life?.indoors)!,room=interiorOf(house),owner=resident(world,house.id,selfId),people=Object.values(world.players).filter(p=>p.life?.indoors===house.id),pos=me.life?.roomPos||ROOM_SPAWN;
  const t=(s:string)=>trans(s,languageMode),[tab,setTab]=useState('room'),[filter,setFilter]=useState('all'),[selected,setSelected]=useState<string>(),[placing,setPlacing]=useState<string>(),[rotation,setRotation]=useState<0|1>(0),[hover,setHover]=useState({x:4,y:4});
+ useRpgMusic(musicActive?(tab==='games'?'games':tab==='craft'?'craft':tab==='farm'?'farm':tab==='town'||tab==='social'?'social':'home'):null,20);
  const exitRequested=useRef(false);
  const route=useRef<Array<{x:number;y:number}>>([]),held=useRef<{dx:number;dy:number}|null>(null),pending=useRef<{x:number;y:number;at:number}|null>(null),latest=useRef({world,tab,send});latest.current={world,tab,send};
  const move=(dx:number,dy:number)=>{route.current=[];pending.current=null;send({type:'life-room-move',dx,dy});};
@@ -47,7 +49,7 @@ export default function HomeRoom({world,selfId,languageMode,send,onBuilder,onMem
  {tab==='farm'&&<FarmContent world={world} selfId={selfId} languageMode={languageMode} send={send}/>}
  {tab==='town'&&<TownPanel world={world} selfId={selfId} languageMode={languageMode} send={send}/>}
  {tab==='social'&&<SocialPanel languageMode={languageMode} world={world} selfId={selfId} send={send} onBuilder={onBuilder} onMemory={onMemory}/>}
- {tab==='games'&&<>{!active&&<p>{t('ゲーム家具の近くで参加できます。家具は室内マップで選べます。')}</p>}{nearGames.length||active?<HobbyGamesPanel world={adapter} me={adapter.players[selfId]} home={{...house.home,furniture:active?house.home.furniture.filter(f=>f.slot===active.slot):nearGames}} t={t} send={command=>send({type:'life-game',command})}/>:<button onClick={()=>setTab('room')}>{t('室内へ戻る')}</button>}</>}
+ {tab==='games'&&<>{!active&&<p>{t('ゲーム家具の近くで参加できます。家具は室内マップで選べます。')}</p>}{nearGames.length||active?<HobbyGamesPanel rpgMusic={musicActive} world={adapter} me={adapter.players[selfId]} home={{...house.home,furniture:active?house.home.furniture.filter(f=>f.slot===active.slot):nearGames}} t={t} send={command=>send({type:'life-game',command})}/>:<button onClick={()=>setTab('room')}>{t('室内へ戻る')}</button>}</>}
  </div><footer aria-live="polite">{t(me.message)}</footer>
  </section></div>;
 }

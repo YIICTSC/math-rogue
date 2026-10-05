@@ -1,12 +1,13 @@
-import {useEffect} from 'react';
+import {useLayoutEffect} from 'react';
 import {audioService} from '../../services/audioService';
 import type {HomeGame} from './homeGames';
 import {GAME_BGM} from './gameBgm';
 
-export default function useGameBgm(game: HomeGame | undefined) {
+export default function useGameBgm(game: HomeGame | undefined, rpgMusic?:boolean) {
   const track = game?.phase === 'playing' ? GAME_BGM[game.kind] : null;
-  useEffect(() => {
-    if (!track) return;
+  useLayoutEffect(() => {
+    if (!track || rpgMusic===false) return;
+    if (rpgMusic) return audioService.acquireBgmScene(track,{mode:'NEW',theme:'elementary'},30);
     const previous = audioService.getCurrentBgmPlayback();
     void audioService.playBGM(track);
     return () => {
@@ -16,5 +17,5 @@ export default function useGameBgm(game: HomeGame | undefined) {
       void audioService.playBGM(previous.type as Parameters<typeof audioService.playBGM>[0], previous.loop, previous.options)
         .then(() => { if (previous.paused && audioService.getCurrentBgmType() === previous.type) void audioService.pauseBGM(); });
     };
-  }, [track, game?.key]);
+  }, [track, game?.key,rpgMusic]);
 }

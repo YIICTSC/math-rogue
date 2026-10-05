@@ -1,3 +1,4 @@
+import {useRpgMusic} from './music';
 import React, { useEffect, useRef, useState } from 'react';
 import TranslatedUiTree from '../components/TranslatedUiTree';
 import type { LanguageMode } from '../types';
@@ -28,6 +29,7 @@ export default function ArcadeModal({ me, siteId, ready, visible, languageMode, 
   const submitted = useRef(false);
   const dialog = useRef<HTMLDivElement>(null);
   const outcome = me.arcadeOutcome?.token !== baseline.current ? me.arcadeOutcome : undefined;
+  useRpgMusic(visible?(outcome&&revealed?'catch':'arcade'):null,20);
   const busy = waiting || !!me.arcadePending;
   const remaining = Math.max(0, 3 + Math.floor(me.completedBattles / 3) - (me.arcadeUses || 0));
   const canPlay = ready && !busy && !outcome && remaining > 0 && me.gold >= 10;

@@ -1162,8 +1162,30 @@ class AudioService {
       src.stop(time + duration);
   }
 
+  // Scene scopes pin assets without modifying the user's saved BGM preferences.
+  private bgmScenes = new Map<symbol, {type: Parameters<AudioService['playBGM']>[0]; options: BgmPlaybackOptions; priority: number}>();
+  public acquireBgmScene(type: Parameters<AudioService['playBGM']>[0], options: BgmPlaybackOptions, priority = 10) {
+      const token = Symbol('bgm-scene');
+      const previous = this.getCurrentBgmPlayback();
+      this.bgmScenes.set(token, {type, options, priority});
+      void this.playBGM(type, true, options);
+      return () => {
+          if (!this.bgmScenes.delete(token)) return;
+          const scene = this.currentBgmScene();
+          if (scene) { void this.playBGM(scene.type, true, scene.options); return; }
+          if (previous) void this.playBGM(previous.type as Parameters<AudioService['playBGM']>[0], previous.loop, previous.options)
+              .then(() => { if (previous.paused && this.getCurrentBgmType() === previous.type) void this.pauseBGM(); });
+          else this.stopBGM();
+      };
+  }
+  private currentBgmScene() {
+      return [...this.bgmScenes.values()].sort((a,b) => b.priority-a.priority)[0];
+  }
+
   // --- Public API ---
   public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true, options?: BgmPlaybackOptions) {
+      const scene = this.currentBgmScene();
+      if (scene) { type = scene.type; loop = true; options = scene.options; }
       if (type === 'random') {
           await this.playRandomBGM();
           return;

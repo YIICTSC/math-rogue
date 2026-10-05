@@ -1,3 +1,4 @@
+import {useRpgMusic,type RpgMusicScene} from './music';
 import FarmPanel from './farm/Panel';
 import RpgSettings from './RpgSettings';
 import {useRpgPreferences} from './preferences';
@@ -416,6 +417,8 @@ export default function RpgOnline({
     room.current?.close();
     onClose();
   };
+  const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':me?.life?.indoors?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
+  useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,settingsOpen||heroOpen||farmOpen||cityOpen||fishing.result||storySiteId||roamingNpcSiteId||world?.ended?40:10);
   return (
     <TranslatedUiTree mode={languageMode}>
       {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="木漏れ日のフロンティア" subtitle="招待されたワールドで、仲間と冒険しよう。" languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
@@ -565,8 +568,8 @@ export default function RpgOnline({
                       }}
                     />
                   )}
-                  {!spectating && active && !world.ended && !heroOpen && me.life?.indoors && <HomeRoom onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory} world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
-                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onCity={()=>{setLifeOpen(false);setCityOpen(true);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
+                  {!spectating && active && !world.ended && !heroOpen && me.life?.indoors && <HomeRoom musicActive={active&&!interactionBlocked&&!me.nativeScene} onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory} world={world} selfId={selfId} languageMode={languageMode} send={a=>{destination.current=null;room.current?.send(a);}}/>}
+                  {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel musicActive={active&&!interactionBlocked&&!me.nativeScene} initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onCity={()=>{setLifeOpen(false);setCityOpen(true);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   <button className="rpg-settings-map-button" aria-label={trans("RPG設定",languageMode)} onClick={()=>setSettingsOpen(true)}>⚙</button>
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
                   <div className="rpg-map-tools">
