@@ -7,8 +7,8 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`55f2c54f7c85e70df1edf2beef588dad2ae3c9ee`（Align all rhythm charts and percussion levels with soundtrack attacks）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
-- 最後のゲーム実装依頼は、4種類の入力音を踏まえた全楽曲の譜面確認・修正。実装・検証・mainへの反映・GitHub公開確認まで完了。
+- 最後にmainへ反映したコミット：`5752fb452438985ffe33ceb4965038298365fe7d`（Curate RPG scene music and pin exploration to classic elementary map）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後のゲーム実装依頼は、RPGマップの旧小学生編BGM固定とRPG独自画面のBGM選定。実装・検証・mainへの反映・GitHub公開確認まで完了。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
 
@@ -151,3 +151,12 @@ World.farmは任意の状態で、version=1、所有者別peopleとrevisionを�
 3. 基準コミット以降の変更があれば差分を確認し、古い状態へ戻さずに統合する。
 4. 関連実装とテストを読み、新しい依頼を実装する。画像と配信マニフェスト、翻訳も更新する。
 5. 変更に合う検証とWeb／サーバービルドを行う。アップロード時はmainのGitHub Actionsと公開を確認し、具体的な変更と確認範囲を日本語で報告する。
+
+## 追加完了：RPGの場面別BGM（5752fb45）
+
+- RPGの屋外マップは常に `bgm/map.mp3`（旧小学生編）。全143曲の既存音源から、独自要素22場面に旧・新／各編を横断して曲を割り当てた。選定表 `src/rpg/music.ts`、説明 `docs/rpg/scene-music.md`。
+- タイトル、設定、主人公ビルダー、家、家具作成、農場、都市、交流、釣り、釣果、採取、独自シナリオ、図鑑、家具練習室などを対応。家・採取パネルのタブ切り替えにも追従。
+- `audioService.acquireBgmScene` に優先度付きシーンスコープを追加。設定・上位モーダル40、プレイ中家具30、室内・採取・ゲームロビー20、RPG基底10。通常のマップ復帰処理による曲の上書きを防ぎ、終了時に前の音楽へ戻す。ユーザーのBGMモード・編の保存値は変更しない。
+- 流用された戦闘・店・休憩・イベント・学習・ダンジョンではスコープを解除し、従来の各編BGM。RPG内の9家具ゲームは既存個別曲をNEW elementaryに固定、学ロクラフトの共有UI側は従来設定のまま。音ゲーは既存の無音スコープでBGMとの重複を防ぐ。
+- `scripts/test-rpg-scene-music.mjs`：全22曲の実ファイル／再生URL、旧マップ再適用、家具・設定の優先度、音ゲー無音、各編の戦闘への復帰、設定値保持を検証。通常WebおよびiOS設定のHTML経路をChromiumで通過。実機iOSでの試聴ではない。
+- 9家具ゲームの既存ブラウザ音楽テスト、英語UI全監査・公開用ビルド・サーバービルドを通過。GitHub Actionsと公開Webで反映を確認。Render確認はユーザー方針により省略。
