@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`ce93200014410b1387fb80cda1d9422e47a8cfe0`（Fix portrait NPC layouts and resumed fishing result controls）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`f8eb00f1c2b45bbca97c606279f7731be68528da`（Add Gakuro GP custom course editor and adopted RPG title logo）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -224,3 +224,14 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - useFishingCollectionは最初のワールドスナップショットを保存履歴として扱い、再開時に釣果を表示しない。図鑑への保存は維持し、以後の新しい釣果だけ表示。
 - 釣りを続けるは近くの水辺へlife-castを送信する。釣果中の移動ロックに依存しない。エネルギー不足時は回復問題へ。釣りを止めるを追加し、Escapeも終了。3ボタンのフォーカス循環と縦横配置に対応。
 - 釣りモデル、釣果ブラウザ（再開/新規/続行/停止/セッション切替/3画面）、NPCブラウザ（5画面+縦の対象物/旅人）、英語監査、Web/serverビルド成功。
+
+ 
+## 最新追記：採用ロゴとGAKURO GPコースエディター
+ 
+- main f8eb00f1c2b45bbca97c606279f7731be68528da。RPGタイトルは「異世界転生したら学力で無双した件」、サブタイトル「学習ローグRPG」。採用したA案（学力が青緑）のImageGen素材を透明WebPへ変換し、通常・招待タイトル背景上に配置。素材は sprites/rpg/title/logo.webp。画面サイズ別にロゴ・メニューが収まることを確認。
+- GAKURO GPタイトルとガレージにオリジナルコース作成を追加。問題ストレートと周回接続を保護し、残り12制御点の平面位置・高さを編集。ブースト板/ジャンプ台/アイテム箱を最大48個配置でき、位置・左右レーン調整、削除、Undo/Redo、拡大、8背景テーマがある。
+- 端末保存12コース、選択、削除、JSON書出し/読込。作ったコースをひとり用・オンラインで利用でき、結果画面から次の編集コースを設定できる。
+- ネットワークはカートprotocol 10。専用サーバー/PeerホストのロスターにcustomCourseを含め、途中参加も同じコース。サーバー/クライアントで形状・固定区間・配置物を検証。レンダラー/カメラ/ミニマップ/CPU/配置物効果/周回距離/問題表示が同じコースを参照。
+- 機能説明 docs/kart/custom-courses.md。新規モデル・ブラウザ・専用サーバー3クライアントテスト、既存カートコース/学習/カメラ、Web英語監査/build、server:build成功。新規ブラウザはソフトウェアWebGLで時間がかかる。全体tscはメモリ不足のため完走しなかったので、型チェック成功とは扱わない。
+
+- 今回の公開確認：GitHub Pages Actions 37381237342、Android Actions 37381237257ともsuccess。公開ロゴと画像計53点の一致、およびカート編集・釣り修正・NPCイベントの公開コードを検証。前回待機中だったPages処理は今回のmain更新で置き換わり、前回の修正も公開済み。
