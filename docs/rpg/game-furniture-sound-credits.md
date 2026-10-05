@@ -3,7 +3,7 @@
 Source: [Springin’ Sound Stock](https://www.springin.org/sound-stock/). Terms: https://www.springin.org/sound-stock/guideline/
 Checked: 2026-10-04. Game use, including commercial use and edits, is permitted. Copyright remains with the original owners. Credits retained here; sounds are used within the game, not offered as a standalone sound library.
 
-Leading silence removed, levels matched, short fades and four pitch variants applied. MP3 for native/Safari and Opus for Web.
+Leading silence removed, levels matched, short fades applied. MP3 for native/Safari and Opus for Web.
 
 | Game cue | Original title | Source URL |
 | --- | --- | --- |
@@ -32,7 +32,15 @@ Leading silence removed, levels matched, short fades and four pitch variants app
 | signal | メトロノームのチーン | https://www.springin.org/wp-content/uploads/2022/11/メトロノームのチーン.mp3 |
 | react-good | 決定7 | https://www.springin.org/wp-content/uploads/2022/06/決定7.mp3 |
 | miss | 8bitキャンセル1 | https://www.springin.org/wp-content/uploads/2022/06/8bitキャンセル1.mp3 |
-| note-0 | 選択1 | https://www.springin.org/wp-content/uploads/2022/06/選択1.mp3 |
-| note-1 | 選択1 | https://www.springin.org/wp-content/uploads/2022/06/選択1.mp3 |
-| note-2 | 選択1 | https://www.springin.org/wp-content/uploads/2022/06/選択1.mp3 |
-| note-3 | 選択1 | https://www.springin.org/wp-content/uploads/2022/06/選択1.mp3 |
+
+## Rhythm pads (2026-10-05)
+
+The four former selection-tone variants were replaced with original synthesized rhythm samples: note-0 kick, note-1 snare, note-2 hi-hat, note-3 scratch. These four sounds do not use Springin’ recordings. Reproduce the deterministic mono PCM and MP3/Opus exports with `node scripts/generate-rhythm-pad-sounds.mjs`. Short attack/release fades and a 0.55 PCM peak leave room for the song. Each accepted button/key press plays once, including empty hits; key repeat and hold releases do not double the sample. The existing effect volume and mute apply.
+
+## Furniture BGM
+
+Existing Learning Rogue tracks are looped during play: billiards → poker_play, darts → poker_shop, bowling → dungeon_gym, reversi → dungeon_library, connectfour → math, memory → dungeon_music, race → paper_plane_vacation, arcade → paper_plane_battle, reaction → kocho_battle. RPG homes, the debug practice room and Gakuro Craft share this selection. Leaving restores the preceding BGM unless another scene has already taken over.
+
+Rhythm uses only the selected song. Its screen holds a scoped background-music silence during selection, preview, countdown, play, pause and results. This silences both Web Audio and HTML media using `muted`, which is reliable on iOS even when `volume` is ignored. Closing stops the song before releasing the scope. Other ducking or BGM changes cannot make background music audible while this screen is open.
+
+Verification: `node scripts/test-home-game-bgm-browser.mjs` (nine game tracks, loop restoration, background silence), `VITE_APP_PLATFORM=ios node scripts/test-home-game-bgm-browser.mjs` (native media path in Chromium), `node scripts/test-rpg-rhythm-browser.mjs` (preview/play/pause/mute/exit and four actual pad samples), `node scripts/test-home-game-audio.mjs` (assets and authoritative cues).

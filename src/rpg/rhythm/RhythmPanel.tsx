@@ -1,7 +1,7 @@
 import useGameAudio from '../../mini-games/gakuro-craft/useGameAudio';
 import ExpeditionPanel from '../../mini-games/gakuro-craft/ExpeditionPanel';
 import {canStartExpedition} from '../../mini-games/gakuro-craft/gameExpedition';
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type {
   HomeGame,
   HomeGameWorld,
@@ -87,6 +87,10 @@ export default function RhythmPanel({
     }),
     [record, setRecord] = useState<RhythmRecord>();
   useGameAudio(g,selfId,!world.paused,world.time);
+  useLayoutEffect(() => {
+    const release = audioService.acquireBgmSilence();
+    return () => { audio.current?.pause(); release(); };
+  }, [g.key]);
   const stageArt = useRef<HTMLImageElement>();
   useEffect(() => {
     const image = new Image();
@@ -117,8 +121,10 @@ export default function RhythmPanel({
       }>
     >([]),
     soundStarted = useRef(false),
+    priming = useRef(false),
     finished = useRef(""),
     previewUntil = useRef(0),
+    audioRequest = useRef(0),
     previousFocus = useRef<HTMLElement | null>(null);
   latest.current = { g, world, seat, send, speed, offset };
   useEffect(() => {
@@ -153,19 +159,18 @@ export default function RhythmPanel({
     element.addEventListener("error", failed);
     element.load();
     return () => {
+      audioRequest.current++;
       element.pause();
       element.removeEventListener("canplay", canplay);
       element.removeEventListener("error", failed);
       element.removeAttribute("src");
       element.load();
       if (audio.current === element) audio.current = undefined;
-      audioService.setBgmDuckMultiplier(1);
     };
   }, [songKey, retry]);
   useEffect(() => {
     return () => {
       latest.current.send({ type: "game_leave", key: g.key });
-      audioService.setBgmDuckMultiplier(1);
     };
   }, [g.key]);
   useEffect(() => {
@@ -179,18 +184,24 @@ export default function RhythmPanel({
     audioService.init();
     const a = audio.current;
     if (!a) return false;
+    const request = ++audioRequest.current;
+    priming.current = true;
     a.volume = 0;
+    a.muted = true;
     try {
       await a.play();
+      if (request !== audioRequest.current || audio.current !== a) { a.pause(); return false; }
       a.pause();
       a.currentTime = 0;
       setPreview(false);
       previewUntil.current = 0;
-      audioService.setBgmDuckMultiplier(1);
       return true;
     } catch {
-      setError(true);
+      if (request === audioRequest.current && audio.current === a) setError(true);
       return false;
+    } finally {
+      priming.current = false;
+      a.muted = audioService.getRhythmAudioState().volume === 0;
     }
   };
   const audioTime = () => audio.current?.currentTime || 0;
@@ -216,7 +227,6 @@ export default function RhythmPanel({
     };
     flashes.current[n.lane] = performance.now();
     if (grade !== 4) {
-      audioService.playRpgRhythmHit(n.lane, grade === 1);
       for (let i = 0; i < 8; i++)
         particles.current.push({
           x: n.lane * 100 + 50,
@@ -248,6 +258,7 @@ export default function RhythmPanel({
     )
       return;
     pressed.current.add(lane);
+    audioService.playRpgRhythmHit(lane, false);
     flashes.current[lane] = performance.now();
     const at = audioTime() + v.offset / 1000;
     let index = -1,
@@ -345,6 +356,12 @@ export default function RhythmPanel({
       }
     };
     const hidden = () => {
+      if (document.hidden) {
+        audioRequest.current++;
+        audio.current?.pause();
+        previewUntil.current = 0;
+        setPreview(false);
+      }
       if (document.hidden && latest.current.g.phase === "playing") {
         audio.current?.pause();
         latest.current.send({ type: "game_leave", key: g.key });
@@ -380,7 +397,7 @@ export default function RhythmPanel({
       if (a) {
         a.volume = state.volume;
         // iOS can ignore HTMLAudioElement.volume; muted remains reliable.
-        a.muted = state.volume === 0;
+        a.muted = priming.current || state.volume === 0;
       }
       if (v.g.phase === "playing") {
         // Resuming shifts the server start time; it must preserve the existing score model.
@@ -410,7 +427,6 @@ export default function RhythmPanel({
               Math.max(0, serverTime),
             );
             soundStarted.current = true;
-            audioService.setBgmDuckMultiplier(0);
             void a.play().catch(() => {
               soundStarted.current = false;
               setError(true);
@@ -585,11 +601,10 @@ export default function RhythmPanel({
             delta: feedback.current.delta,
           });
         }
-      } else if (a && previewUntil.current && now > previewUntil.current) {
+      } else if (a && previewUntil.current && (now > previewUntil.current || !state.active || v.world.paused)) {
         a.pause();
         previewUntil.current = 0;
         setPreview(false);
-        audioService.setBgmDuckMultiplier(1);
       }
       raf = requestAnimationFrame(frame);
     };
@@ -600,7 +615,6 @@ export default function RhythmPanel({
     if (g.phase === "finished") {
       audio.current?.pause();
       soundStarted.current = false;
-      audioService.setBgmDuckMultiplier(1);
       const result = r.results[seat],
         marker = `${g.key}:${r.run}`;
       if (result && finished.current !== marker) {
@@ -932,25 +946,25 @@ export default function RhythmPanel({
         <button
           disabled={!loaded}
           onClick={async () => {
+            const request = ++audioRequest.current;
             if (preview) {
               audio.current?.pause();
               setPreview(false);
               previewUntil.current = 0;
-              audioService.setBgmDuckMultiplier(1);
               return;
             }
             const a = audio.current;
             if (!a) return;
-            audioService.setBgmDuckMultiplier(0);
             a.volume = audioService.getRhythmAudioState().volume;
+            a.muted = a.volume === 0;
             a.currentTime = 0;
             try {
               await a.play();
+              if (request !== audioRequest.current || audio.current !== a || latest.current.g.phase === 'playing') { a.pause(); return; }
               setPreview(true);
               previewUntil.current = performance.now() + 20000;
             } catch {
-              setError(true);
-              audioService.setBgmDuckMultiplier(1);
+              if (request === audioRequest.current && audio.current === a) setError(true);
             }
           }}
         >

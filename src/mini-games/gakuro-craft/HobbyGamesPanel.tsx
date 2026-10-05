@@ -1,6 +1,7 @@
 import {useRpgPreferences} from '../../rpg/preferences';
 import SportsView from './SportsView';
 import useGameAudio from './useGameAudio';
+import useGameBgm from './useGameBgm';
 import ExpeditionPanel from './ExpeditionPanel';
 import {canStartExpedition} from './gameExpedition';
 import {assetUrl} from '../../utils/assetPaths';
@@ -30,6 +31,7 @@ export default function HobbyGamesPanel({world,me,home,t,send}:{world:World;me:P
  useEffect(()=>{const cancel=()=>cancelPull();window.addEventListener('blur',cancel);return()=>window.removeEventListener('blur',cancel);},[]);
  useEffect(()=>{let frame=0;const move=(now:number)=>{const a=aimRef.current;setReticle({x:a.x+(preferences.reducedMotion?0:Math.sin(now*.0031)*.11),y:a.y+(preferences.reducedMotion?0:Math.cos(now*.0037)*.11)});frame=requestAnimationFrame(move);};if(g?.kind==='darts'&&g.phase==='playing')frame=requestAnimationFrame(move);return()=>cancelAnimationFrame(frame);},[g?.key,g?.kind,g?.phase,preferences.reducedMotion]);
  useGameAudio(g?.kind==='rhythm'?undefined:g,me.id,!world.paused,world.time);
+ useGameBgm(g);
  useEffect(()=>{const key=(e:KeyboardEvent)=>{const game=activeRef.current;if(!game||game.kind!=='arcade'||game.phase!=='playing'||['INPUT','TEXTAREA','SELECT'].includes((e.target as HTMLElement)?.tagName))return;const seat=game.players.indexOf(me.id),court=game.courts?.[seat];if(!court||!['ArrowLeft','ArrowRight','a','d'].includes(e.key))return;e.preventDefault();send({type:'game_paddle',key:game.key,x:court.target+(['ArrowLeft','a'].includes(e.key)?-.08:.08)});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[send,me.id]);
  useEffect(()=>{
   if(g?.phase!=='playing'||g.kind==='rhythm')return;

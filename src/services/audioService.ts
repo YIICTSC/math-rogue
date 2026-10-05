@@ -104,6 +104,7 @@ class AudioService {
   private currentBgmThemeOverride: BgmThemeId | null = null;
   private bgmVolume: number = 1;
   private bgmDuckMultiplier: number = 1;
+  private bgmSilencers = new Set<symbol>();
   private sfxVolume: number = 0.6;
   private voiceVolume: number = 0.8;
   private audioBuffers: Record<string, AudioBuffer> = {};
@@ -162,20 +163,33 @@ class AudioService {
   constructor() {}
 
   private getEffectiveBgmVolume() {
-      return this.bgmVolume * this.bgmDuckMultiplier;
+      return this.bgmSilencers.size ? 0 : this.bgmVolume * this.bgmDuckMultiplier;
+  }
+
+  /** Independent scopes keep preview/gameplay silent even if another scene resets ducking. */
+  public acquireBgmSilence() {
+      const token = Symbol('exclusive-music');
+      this.bgmSilencers.add(token);
+      this.applyBgmVolume();
+      return () => { this.bgmSilencers.delete(token); this.applyBgmVolume(); };
   }
 
   private applyBgmVolume() {
       const effectiveVolume = this.getEffectiveBgmVolume();
       if (this.bgmGain && this.ctx) {
-          this.bgmGain.gain.setTargetAtTime(effectiveVolume, this.ctx.currentTime, 0.05);
+          if (effectiveVolume === 0) {
+              this.bgmGain.gain.cancelScheduledValues(this.ctx.currentTime);
+              this.bgmGain.gain.setValueAtTime(0, this.ctx.currentTime);
+          } else this.bgmGain.gain.setTargetAtTime(effectiveVolume, this.ctx.currentTime, 0.05);
       }
       if (this.currentHtmlAudio) {
+          this.currentHtmlAudio.muted = this.isMuted || effectiveVolume === 0;
           this.currentHtmlAudio.volume = this.bgmMediaSources.has(this.currentHtmlAudio)
               ? 1
               : Math.min(1, effectiveVolume);
       }
       this.activeBgmHtmlAudios.forEach(audio => {
+          audio.muted = this.isMuted || effectiveVolume === 0;
           audio.volume = this.bgmMediaSources.has(audio) ? 1 : Math.min(1, effectiveVolume);
       });
   }
@@ -461,6 +475,7 @@ class AudioService {
       audio.preload = 'auto';
       audio.loop = true;
       audio.volume = Math.min(1, this.getEffectiveBgmVolume());
+      audio.muted = this.isMuted || this.getEffectiveBgmVolume() === 0;
       (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
       audio.src = path;
       this.preparedBgmHtmlAudios.set(path, audio);
@@ -517,7 +532,16 @@ class AudioService {
 
   public playHobbySound(cue: HobbySound) {
       if (!this.getRhythmAudioState().active || this.isMuted || this.sfxVolume <= 0) return;
-      this.playSfxMp3(`rpg-games/${cue}`,()=>this.playSound(cue==='miss'||cue==='lose'?'wrong':'select'),{maxDurationMs:HOBBY_SOUNDS[cue],overlap:cue.startsWith('note-')||cue==='pool-hit'});
+      this.playSfxMp3(`rpg-games/${cue}`,()=>cue.startsWith('note-') ? this.playRhythmPadFallback(Number(cue.at(-1))) : this.playSound(cue==='miss'||cue==='lose'?'wrong':'select'),{maxDurationMs:HOBBY_SOUNDS[cue],overlap:cue.startsWith('note-')||cue==='pool-hit'});
+  }
+
+  private playRhythmPadFallback(lane: number) {
+      this.init();
+      if (!this.ctx || !this.sfxGain) return;
+      const now = this.ctx.currentTime;
+      this.playNoise(now, lane === 3 ? 0.21 : lane === 2 ? 0.08 : 0.16, 0.28, lane === 0 ? 'kick' : lane === 1 ? 'snare' : 'hat', this.sfxGain);
+      if (lane === 0) this.playOsc(65, now, 0.17, 'sine', 0.4, this.sfxGain);
+      if (lane === 3) for (let i = 0; i < 4; i++) this.playOsc(i % 2 ? 420 : 900, now + i * 0.045, 0.04, 'sawtooth', 0.1, this.sfxGain);
   }
 
   public stopHobbySounds() {
@@ -1102,8 +1126,8 @@ class AudioService {
       });
   }
 
-  private playNoise(time: number, duration: number, vol: number, type: 'kick' | 'snare' | 'hat') {
-      if (!this.ctx || !this.noiseBuffer || !this.bgmGain) return;
+  private playNoise(time: number, duration: number, vol: number, type: 'kick' | 'snare' | 'hat', destination: AudioNode | null = this.bgmGain) {
+      if (!this.ctx || !this.noiseBuffer || !destination) return;
       const src = this.ctx.createBufferSource();
       src.buffer = this.noiseBuffer;
       const gain = this.ctx.createGain();
@@ -1126,7 +1150,7 @@ class AudioService {
       }
       src.connect(filter);
       filter.connect(gain);
-      gain.connect(this.bgmGain); 
+      gain.connect(destination);
       src.start(time);
       src.stop(time + duration);
   }
@@ -1143,6 +1167,7 @@ class AudioService {
       if (
           this.isPlayingBGM
           && this.currentBgmType === type
+          && this.isLooping === loop
           && this.currentBgmModeOverride === modeOverride
           && this.currentBgmThemeOverride === themeOverride
       ) return;
@@ -1351,6 +1376,7 @@ class AudioService {
                   } catch {}
               }
               audio.loop = loop;
+              audio.muted = this.isMuted || this.getEffectiveBgmVolume() === 0;
               audio.volume = Math.min(1, this.getEffectiveBgmVolume());
               (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
               // Keep iOS BGM on the media element's native playback path. Routing
@@ -1378,6 +1404,7 @@ class AudioService {
               }
               this.currentHtmlAudio = audio;
               this.activeBgmHtmlAudios.add(audio);
+              this.applyBgmVolume();
               return true;
           } catch {
               if (audio) this.disconnectHtmlBgm(audio);
@@ -1505,6 +1532,7 @@ class AudioService {
 
   public toggleMute() {
       this.isMuted = !this.isMuted;
+      this.applyBgmVolume();
       if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);

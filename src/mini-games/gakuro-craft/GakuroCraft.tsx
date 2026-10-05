@@ -1,4 +1,5 @@
 import '../shared/lobby.css';
+import {GAME_BGM} from './gameBgm';
 import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
 import HomeView from './HomeView';
 import { homeAt, roomTile } from './homeSocial';
@@ -76,7 +77,7 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
     !world?(picking?'relic_select':'menu')
     :quiz||waiting?'math'
     :activeGame?.phase==='finished'?'reward'
-    :activeGame?.phase==='playing'?'poker_play'
+    :activeGame?.phase==='playing'?(GAME_BGM[activeGame.kind]||'rest')
     :activeGame?'kocho_setup'
     :me?.indoors||panel==='home'?'rest'
     :panel==='bag'?'shop'
