@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`16435d884060db39384597f8e7560a80bd1d3ec2`（Expand RPG life and 3D world with mobile menus, farm actions and varied voices）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`4d87c848c240d7629a1295bc0e2c3c4bf75320fa`（Show RPG NPCs and map props as camera-facing 2D sprites in 3D）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
