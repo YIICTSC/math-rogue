@@ -190,13 +190,17 @@ try {
   assert.deepEqual(g.winner, [0]);
   assert.equal(g.scores[1], 0);
   assert.equal(g.rhythm.results[1].miss, chartUnits(notes));
+  const holdSong=RHYTHM_SONGS.find(s=>rhythmChart(s,'expert','short').some(n=>n.end!==undefined));
+  command(0,{type:'game_rhythm_select',song:holdSong.id,difficulty:'expert',length:'short'});
+  for(let i=0;i<4;i++)command(i,{type:'game_rhythm_ready',song:holdSong.id,difficulty:'expert',length:'short',ready:true});
   command(0, { type: "game_start" });
   assert.equal(g.rhythm.run, 2);
   assert.equal(g.rhythm.results[0].raw, 0);
   assert.equal(g.rhythm.results[0].combo, 0);
-  const holdIndex = notes.findIndex((n) => n.end !== undefined);
+  const holdNotes=rhythmChart(holdSong,"expert","short");
+  const holdIndex = holdNotes.findIndex((n) => n.end !== undefined);
   assert.ok(holdIndex >= 0);
-  const hold = notes[holdIndex];
+  const hold = holdNotes[holdIndex];
   w.time = g.rhythm.start + hold.time;
   command(0, {
     type: "game_rhythm_hit",

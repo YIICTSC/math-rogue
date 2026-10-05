@@ -9,6 +9,7 @@ import {
   chartDuration,
   chartUnits,
   rhythmGrade,
+  RHYTHM_CHART_VERSION,
   type RhythmDifficulty,
   type RhythmLength,
   type RhythmGrade,
@@ -27,6 +28,7 @@ export interface RhythmResult {
   cursor: number;
 }
 export interface RhythmState {
+  chartVersion?: number;
   song: string;
   difficulty: RhythmDifficulty;
   length: RhythmLength;
@@ -62,6 +64,7 @@ export type RhythmCommand =
       run: number;
     };
 export const newRhythm = (): RhythmState => ({
+  chartVersion: RHYTHM_CHART_VERSION,
   song: RHYTHM_SONGS.find((s) => s.path === "bgm-new/battle.mp3")!.id,
   difficulty: "normal",
   length: "full",
@@ -103,6 +106,7 @@ export function awardRhythm(result: RhythmResult, grade: RhythmGrade) {
 }
 export function startRhythm(w: HomeGameWorld, g: HomeGame) {
   const r = g.rhythm!;
+  r.chartVersion = RHYTHM_CHART_VERSION;
   const notes = rhythmChart(rhythmSong(r.song)!, r.difficulty, r.length);
   r.run++;
   r.start = w.time + 4;
@@ -174,7 +178,7 @@ export function rhythmCommand(
   )
     return false;
   const song = rhythmSong(r.song)!,
-    notes = rhythmChart(song, r.difficulty, r.length),
+    notes = rhythmChart(song, r.difficulty, r.length, r.chartVersion ?? 1),
     n = notes[c.note],
     result = r.results[seat];
   if (
@@ -211,7 +215,7 @@ export function rhythmCommand(
 export function tickRhythm(w: HomeGameWorld, g: HomeGame) {
   const r = g.rhythm!;
   if (r.pausedAt !== undefined) return;
-  const notes = rhythmChart(rhythmSong(r.song)!, r.difficulty, r.length),
+  const notes = rhythmChart(rhythmSong(r.song)!, r.difficulty, r.length, r.chartVersion ?? 1),
     elapsed = w.time - r.start,
     units = chartUnits(notes);
   let changed = false;

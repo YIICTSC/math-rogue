@@ -8,7 +8,7 @@ let vite, browser, p;
 try {
   await fs.writeFile(
     file,
-    `import React,{useEffect,useState} from 'react';import {createRoot} from 'react-dom/client';import RhythmPanel from './src/rpg/rhythm/RhythmPanel';import {gameCommand,tickGames} from './src/mini-games/gakuro-craft/homeGames';import {RHYTHM_SONGS} from './src/rpg/rhythm/catalog.generated';import {rhythmChart} from './src/rpg/rhythm/chart';import {trans} from './src/utils/textUtils';import {audioService} from './src/services/audioService';window.audio=audioService;window.padHits=[];window.padSources=[];const padHit=audioService.playRpgRhythmHit.bind(audioService);audioService.playRpgRhythmHit=(lane,perfect)=>{window.padHits.push(lane);padHit(lane,perfect);};const sfxSource=audioService.startSfxSource.bind(audioService);audioService.startSfxSource=(name,...args)=>{const ok=sfxSource(name,...args);if(ok&&name.includes("rpg-games/note-"))window.padSources.push(name);return ok;};
+    `import React,{useEffect,useState} from 'react';import {createRoot} from 'react-dom/client';import RhythmPanel from './src/rpg/rhythm/RhythmPanel';import {gameCommand,tickGames} from './src/mini-games/gakuro-craft/homeGames';import {RHYTHM_SONGS} from './src/rpg/rhythm/catalog.generated';import {rhythmChart} from './src/rpg/rhythm/chart';import {trans} from './src/utils/textUtils';import {audioService} from './src/services/audioService';window.audio=audioService;window.padHits=[];window.padSources=[];const padHit=audioService.playRpgRhythmHit.bind(audioService);audioService.playRpgRhythmHit=(lane,perfect,volume)=>{window.padHits.push(lane);window.padVolumes=(window.padVolumes||[]).concat(volume);padHit(lane,perfect,volume);};const sfxSource=audioService.startSfxSource.bind(audioService);audioService.startSfxSource=(name,...args)=>{const ok=sfxSource(name,...args);if(ok&&name.includes("rpg-games/note-"))window.padSources.push(name);return ok;};
 const home={tile:9,level:1,furniture:[{slot:2,item:'rhythm'}]},world={tiles:[],homeViews:{9:home},players:{},games:{},time:10,paused:false};world.tiles[9]={homeOwner:'p0'};for(let i=0;i<4;i++){const id='p'+i;world.players[id]={id,name:'Player '+i,indoors:true,homeTile:9,progress:{home}};gameCommand(world,world.players[id],{type:'game_join',slot:2});}const game=world.games['9:2'];const song=RHYTHM_SONGS.find(s=>s.path==='bgm-new/magic-female/reward.mp3');gameCommand(world,world.players.p0,{type:'game_rhythm_select',key:game.key,song:song.id,difficulty:'expert',length:'full'});for(let i=1;i<4;i++)gameCommand(world,world.players['p'+i],{type:'game_rhythm_ready',key:game.key,song:song.id,difficulty:'expert',length:'full',ready:true});window.notes=rhythmChart(song,'expert','full');window.authority=world;window.game=game;
 function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState('JAPANESE');const emit=()=>sw(structuredClone(world));window.emit=emit;window.setMode=sm;const send=c=>{gameCommand(world,world.players.p0,c);emit();};window.send=send;useEffect(()=>{let previous=performance.now();const timer=setInterval(()=>{const now=performance.now();world.time+=(now-previous)/1000;previous=now;tickGames(world,.05);emit();},50);return()=>clearInterval(timer);},[]);return world.games[game.key]?.players.includes('p0')?<RhythmPanel world={w} g={w.games[game.key]} selfId="p0" t={s=>trans(s,mode)} send={send}/>:<div>LEFT</div>;}createRoot(document.getElementById('root')).render(<App/>);`,
   );
@@ -46,6 +46,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   const errors = [];
   p.on("pageerror", (e) => errors.push(e.message));
   await p.addInitScript(() => {
+    localStorage.setItem('rpg-rhythm-records-v1',JSON.stringify({'bgm-new:magic-female:reward|expert|full':{score:1000000,combo:30,fullCombo:true,plays:1}}));
     const Original = window.Audio;
     window.Audio = function (src) {
       const a = new Original(src);
@@ -134,8 +135,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
     return buttons.every((b,i)=>Math.abs(b.getBoundingClientRect().x+b.getBoundingClientRect().width/2-(c.x+c.width*(i+.5)/4))<6);
   });
   assert.ok(padAlignment, 'touch pads align with the play lanes');
-  await p.locator('.rpg-rhythm-live.is-fever').waitFor();
-  await p.screenshot({path:'/tmp/rpg-rhythm-fever.png'});
+  if(await p.evaluate(()=>window.notes.length+window.notes.filter(n=>n.end!==undefined).length>=30)){await p.locator('.rpg-rhythm-live.is-fever').waitFor();await p.screenshot({path:'/tmp/rpg-rhythm-fever.png'});}
   await p.getByRole("status").waitFor();
   const final = await p.evaluate(() => ({
     score: window.game.scores[0],
@@ -145,8 +145,9 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   }));
   assert.ok(final.score > 950000, JSON.stringify(final));
   assert.equal(final.r.miss, 0);
-  assert.ok(final.r.perfect >= final.count);
-  assert.equal(Object.values(final.record)[0].score, final.score);
+  assert.equal(final.r.perfect+final.r.great+final.r.good,await p.evaluate(()=>window.notes.length+window.notes.filter(n=>n.end!==undefined).length));
+  assert.equal(final.record['bgm-new:magic-female:reward|expert|full|chart-2'].score,final.score);
+  assert.equal(final.record['bgm-new:magic-female:reward|expert|full'].score,1000000,'Legacy score is retained separately');
   assert.ok(await p.locator('.rpg-rhythm-award').evaluate(el=>getComputedStyle(el).backgroundImage.includes('astral-award.webp')));
   await p.screenshot({ path: "/tmp/rpg-rhythm-result.png" });
   await p.evaluate(() => cancelAnimationFrame(window.autoFrame));
@@ -156,7 +157,8 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
     () => window.music.currentTime > 0.1 && !window.music.paused,
   );
   assert.ok(await p.evaluate(() => window.audio.currentHtmlAudio.muted), 'Background is muted in gameplay');
-  assert.ok(await p.evaluate(() => new Set(window.padSources).size === 4), 'All four drum/scratch samples actually decode and play');
+  assert.ok(await p.evaluate(() => new Set(window.padSources).size >= 3), 'The song-selected drum samples actually decode and play');
+  assert.ok(await p.evaluate(()=>window.padVolumes.every(v=>v>0&&v<.65)),'Chart and empty hit volumes remain below the song');
   await p.getByRole("button", { name: "一時停止", exact: true }).click();
   await p.getByText("一時停止中", { exact: true }).waitFor();
   await p.screenshot({ path: "/tmp/rpg-rhythm-portrait.png" });

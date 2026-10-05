@@ -521,9 +521,16 @@ class AudioService {
           sfxVolume: this.isMuted ? 0 : Math.min(1, this.sfxVolume) };
   }
 
-  public playRpgRhythmHit(lane: number, perfect: boolean) {
+  public playRpgRhythmHit(lane: number, perfect: boolean, volume = 1) {
       void perfect;
-      this.playHobbySound(`note-${Math.max(0,Math.min(3,lane))}` as HobbySound);
+      if (!this.getRhythmAudioState().active || this.isMuted || this.sfxVolume <= 0) return;
+      this.init();
+      const cue=`note-${Math.max(0,Math.min(3,lane))}` as HobbySound, name=`rpg-games/${cue}`,gain=Math.max(0,Math.min(1,volume));
+      const buffer=this.sfxBuffers[name];
+      if(buffer && this.ctx?.state==='running' && this.startSfxSource(name,buffer,HOBBY_SOUNDS[cue],true,gain))return;
+      // First presses stay in the SFX bus too: iOS ignores HTML media volume.
+      void this.loadSfxBuffer(name);
+      this.playRhythmPadFallback(lane,gain);
   }
 
   public async preloadHobbySounds(cues: HobbySound[]) {
@@ -535,13 +542,13 @@ class AudioService {
       this.playSfxMp3(`rpg-games/${cue}`,()=>cue.startsWith('note-') ? this.playRhythmPadFallback(Number(cue.at(-1))) : this.playSound(cue==='miss'||cue==='lose'?'wrong':'select'),{maxDurationMs:HOBBY_SOUNDS[cue],overlap:cue.startsWith('note-')||cue==='pool-hit'});
   }
 
-  private playRhythmPadFallback(lane: number) {
+  private playRhythmPadFallback(lane: number, volume = 1) {
       this.init();
       if (!this.ctx || !this.sfxGain) return;
       const now = this.ctx.currentTime;
-      this.playNoise(now, lane === 3 ? 0.21 : lane === 2 ? 0.08 : 0.16, 0.28, lane === 0 ? 'kick' : lane === 1 ? 'snare' : 'hat', this.sfxGain);
-      if (lane === 0) this.playOsc(65, now, 0.17, 'sine', 0.4, this.sfxGain);
-      if (lane === 3) for (let i = 0; i < 4; i++) this.playOsc(i % 2 ? 420 : 900, now + i * 0.045, 0.04, 'sawtooth', 0.1, this.sfxGain);
+      this.playNoise(now, lane === 3 ? 0.21 : lane === 2 ? 0.08 : 0.16, 0.28*volume, lane === 0 ? 'kick' : lane === 1 ? 'snare' : 'hat', this.sfxGain);
+      if (lane === 0) this.playOsc(65, now, 0.17, 'sine', 0.4*volume, this.sfxGain);
+      if (lane === 3) for (let i = 0; i < 4; i++) this.playOsc(i % 2 ? 420 : 900, now + i * 0.045, 0.04, 'sawtooth', 0.1*volume, this.sfxGain);
   }
 
   public stopHobbySounds() {

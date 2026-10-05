@@ -1,15 +1,16 @@
-import type { RhythmDifficulty, RhythmLength } from "./chart";
+import {RHYTHM_CHART_VERSION, type RhythmDifficulty, type RhythmLength} from "./chart";
 export interface RhythmRecord {
   score: number;
   combo: number;
   fullCombo: boolean;
   plays: number;
 }
-const recordKey = (
+export const recordKey = (
   song: string,
   difficulty: RhythmDifficulty,
   length: RhythmLength,
-) => `${song}|${difficulty}|${length}`;
+  version = RHYTHM_CHART_VERSION,
+) => `${song}|${difficulty}|${length}${version===1?'':`|chart-${version}`}`;
 export function rhythmRecords(): Record<string, RhythmRecord> {
   try {
     return (
@@ -31,9 +32,10 @@ export function saveRhythmRecord(
   score: number,
   combo: number,
   miss: number,
+  version = RHYTHM_CHART_VERSION,
 ) {
   const bank = rhythmRecords(),
-    key = recordKey(song, difficulty, length),
+    key = recordKey(song, difficulty, length, version),
     previous = bank[key];
   bank[key] = {
     score: Math.max(previous?.score || 0, score),

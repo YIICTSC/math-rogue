@@ -16,13 +16,14 @@ import {
   rhythmSong,
   rhythmGrade,
   rhythmRank,
+  rhythmPadVolume,
   chartUnits,
   chartDuration,
   type RhythmDifficulty,
   type RhythmLength,
 } from "./chart";
 import { newRhythmResult, awardRhythm, type RhythmResult } from "./game";
-import { rhythmRecords, saveRhythmRecord, type RhythmRecord } from "./records";
+import { recordKey, rhythmRecords, saveRhythmRecord, type RhythmRecord } from "./records";
 import { songTitle, songTheme, songEdition } from "./songLabels";
 import "./rhythm.css";
 const colors = ["#45e7ef", "#ff65b1", "#ffd463", "#b688ff"],
@@ -60,8 +61,8 @@ export default function RhythmPanel({
     leader = seat === 0,
     song = rhythmSong(r.song)!,
     notes = useMemo(
-      () => rhythmChart(song, r.difficulty, r.length),
-      [r.song, r.difficulty, r.length],
+      () => rhythmChart(song, r.difficulty, r.length, r.chartVersion ?? 1),
+      [r.song, r.difficulty, r.length, r.chartVersion],
     );
   const [query, setQuery] = useState(""),
     [theme, setTheme] = useState("all"),
@@ -130,7 +131,7 @@ export default function RhythmPanel({
   useEffect(() => {
     clock.current = { time: world.time, at: performance.now() };
   }, [world.time]);
-  const songKey = `${r.song}:${r.difficulty}:${r.length}`;
+  const songKey = `${r.song}:${r.difficulty}:${r.length}:${r.chartVersion??1}`;
   const ready = (value: boolean) =>
     latest.current.send({
       type: "game_rhythm_ready",
@@ -258,7 +259,6 @@ export default function RhythmPanel({
     )
       return;
     pressed.current.add(lane);
-    audioService.playRpgRhythmHit(lane, false);
     flashes.current[lane] = performance.now();
     const at = audioTime() + v.offset / 1000;
     let index = -1,
@@ -271,6 +271,7 @@ export default function RhythmPanel({
         index = i;
       }
     }
+    audioService.playRpgRhythmHit(lane, false, index>=0 ? notes[index].velocity ?? rhythmPadVolume(song) : rhythmPadVolume(song));
     if (index < 0) {
       for (let i = 0; i < notes.length; i++) {
         const n = notes[i];
@@ -627,6 +628,7 @@ export default function RhythmPanel({
             g.scores[seat],
             result.maxCombo,
             result.miss,
+            r.chartVersion ?? 1,
           ),
         );
       }
@@ -665,7 +667,7 @@ export default function RhythmPanel({
     [query, theme, edition, t],
   );
   const result = r.results[seat],
-    best = record || records[`${r.song}|${r.difficulty}|${r.length}`],
+    best = record || records[recordKey(r.song,r.difficulty,r.length,r.chartVersion??1)],
     duration = chartDuration(song, r.length);
   const board = (
     <aside className={"rpg-rhythm-board" + (scoresOpen ? " is-open" : "")}>
@@ -1033,7 +1035,7 @@ export default function RhythmPanel({
         </div>
         <div className="rpg-rhythm-songs">
           {filtered.map((s) => {
-            const rec = records[`${s.id}|${r.difficulty}|${r.length}`];
+            const rec = records[recordKey(s.id,r.difficulty,r.length,r.chartVersion??1)];
             return (
               <button
                 key={s.id}

@@ -1,32 +1,20 @@
 import { RHYTHM_SONGS, type RhythmSong } from "./catalog.generated";
-import {RHYTHM_PERFORMANCE} from './accents.generated';
-import {legacyRhythmChart} from './legacyChart';
-export const RHYTHM_CHART_VERSION = 2;
-const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-export function rhythmAccent(song:RhythmSong,index:number) {
-  const profile=RHYTHM_PERFORMANCE[song.id], code=alphabet.indexOf(profile?.accents[index]||'C');
-  return {lane:code&3,velocity:Math.round((.12+((code>>2)&7)*.07)*100)/100,layer:!!(code&32)};
-}
-export const rhythmPadVolume=(song:RhythmSong)=>.2+.12*(RHYTHM_PERFORMANCE[song.id]?.percussion||0);
 export type RhythmDifficulty = "easy" | "normal" | "expert";
 export type RhythmLength = "full" | "short";
 export interface RhythmNote {
   time: number;
   lane: number;
   end?: number;
-  velocity?: number;
 }
 export const rhythmSong = (id: string) => RHYTHM_SONGS.find((s) => s.id === id);
 export const chartDuration = (song: RhythmSong, length: RhythmLength) =>
   length === "short" ? Math.min(90, song.duration) : song.duration;
 const cache = new Map<string, RhythmNote[]>();
-export function rhythmChart(
+export function legacyRhythmChart(
   song: RhythmSong,
   difficulty: RhythmDifficulty,
   length: RhythmLength,
-  version = RHYTHM_CHART_VERSION,
 ): RhythmNote[] {
-  if(version===1)return legacyRhythmChart(song,difficulty,length);
   const key = `${song.id}:${difficulty}:${length}`;
   const existing = cache.get(key);
   if (existing) return existing;
@@ -35,7 +23,16 @@ export function rhythmChart(
     interval =
       beat * (difficulty === "easy" ? 2 : difficulty === "expert" ? 0.5 : 1),
     notes: RhythmNote[] = [],
+    patterns = [
+      [0, 1, 2, 3],
+      [0, 2, 1, 3],
+      [3, 2, 1, 0],
+      [0, 1, 0, 2],
+      [3, 1, 2, 0],
+    ],
     occupied = [0, 0, 0, 0];
+  let hash = 0;
+  for (const c of song.id) hash = (Math.imul(hash, 31) + c.charCodeAt(0)) >>> 0;
   let onset = 0,
     index = 0;
   for (
@@ -52,23 +49,30 @@ export function rhythmChart(
       onset++;
     const audible = song.onsets[onset] / 1000,
       delta = Math.abs(audible - grid);
-    if (!Number.isFinite(audible) || delta > Math.min(.18, interval*(difficulty==='expert'?.6:.42)) || audible < .6 || audible >= duration-.28) continue;
-    const time=audible, accent=rhythmAccent(song,onset),lane=accent.lane;
+    if (!Number.isFinite(audible) || delta > Math.max(0.6, beat)) continue;
+    const time =
+      Math.round(
+        (delta < Math.min(0.065, interval * 0.18) ? audible : grid) * 1000,
+      ) / 1000;
+    const phrase = Math.floor(index / 16),
+      pattern = patterns[(phrase + hash) % patterns.length],
+      lane = pattern[index % 4];
     if (time <= occupied[lane] + 0.14) continue;
     const strong = (song.power[onset] || 0) > 55;
     const hold =
       difficulty !== "easy" &&
-      lane === 2 && index % 16 == 8 &&
+      index % 16 == 8 &&
       time + beat * 2 < duration - 0.3;
-    const target=time+beat*(difficulty==='expert'?2:1.5);
-    const tail=hold?song.onsets.find(ms=>ms/1000>=target-.15&&ms/1000<=target+.15&&ms/1000<duration-.28):undefined;
-    const end=tail?tail/1000:undefined;
-    notes.push({ time, lane, velocity:accent.velocity, ...(end ? { end } : {}) });
+    const end = hold
+      ? Math.round((time + beat * (difficulty === "expert" ? 2 : 1.5)) * 1000) /
+        1000
+      : undefined;
+    notes.push({ time, lane, ...(end ? { end } : {}) });
     occupied[lane] = end || time;
-    if (difficulty === "expert" && strong && accent.layer && index % 8 === 0) {
-      const second = 2;
+    if (difficulty === "expert" && strong && index % 8 === 0) {
+      const second = (lane + 2) % 4;
       if (time > occupied[second] + 0.14) {
-        notes.push({ time, lane: second,velocity:accent.velocity*.7 });
+        notes.push({ time, lane: second });
         occupied[second] = time;
       }
     }

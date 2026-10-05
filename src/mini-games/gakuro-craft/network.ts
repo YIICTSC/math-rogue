@@ -9,7 +9,7 @@ import { avatarOf, type Avatar } from './avatar';
 import { migrateProgress } from './progression';
 import {loadIsland,SAVE_KEY,type Saved} from './save';
 export {loadIsland,SAVE_KEY} from './save';
-export const CRAFT_PROTOCOL = 8;
+export const CRAFT_PROTOCOL = 9;
 type Link = { channel: DataConnection; revision: number; admitted: boolean; rateAt: number; count: number };
 export class CraftRoom {
   profileId:string=crypto.randomUUID();selfId = 'local'; code = ''; host = false; world: World | null = null; title = '';
