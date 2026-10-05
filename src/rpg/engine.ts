@@ -6,7 +6,7 @@ import type {CustomHero} from './customHero';
 import {recoverGatherEnergy,GATHER_ENERGY_MAX} from './energy';
 import { createLife, advanceLife, applyLifeAction, lifeWalkable, type LifeWorld, type LifePlayer, type LifeAction } from './life';
 import { BIOMES, biomeAt, biomeSurface, riverAt, fishingPondAt } from "./biomes";
-import { STORIES, applyStory, type StoryAction, type StoryProgress } from "./stories";
+import { STORIES, storyForSite, applyStory, type StoryAction, type StoryProgress } from "./stories";
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
 import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
@@ -50,6 +50,7 @@ export interface RpgRankingAward {
   score: number;
 }
 export interface Site {
+  storyVariant?:number;
   storyId?: string;
   storyRole?: "npc" | "goal";
   id: string;
@@ -473,9 +474,11 @@ export function createWorld(
   add("seal", "水辺の封印装置", 35, 23);
   add("seal", "遺跡の封印装置", 48, 6);
   for (const story of STORIES) {
+    const storyVariant=Math.floor(rng()*4);
     for (const role of ['npc','goal'] as const) {
       add('story',role==='npc'?story.npc:story.goal,(role==='npc'?story.x:story.goalX)/3,(role==='npc'?story.y:story.goalY)/2);
-      Object.assign(sites.at(-1)!,{storyId:story.id,storyRole:role});
+      Object.assign(sites.at(-1)!,{storyId:story.id,storyRole:role,storyVariant});
+      sites.at(-1)!.name=role==='npc'?story.npc:storyForSite(sites.at(-1)!)!.goal;
     }
   }
   const activeTheme = setup?.visualTheme || "elementary";

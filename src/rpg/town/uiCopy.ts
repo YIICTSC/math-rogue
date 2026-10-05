@@ -1,4 +1,6 @@
 export const TOWN_ENGLISH:Record<string,string>={
+"小さな出来事":"A little event",
+"ふたりの小さな思い出が増えました。":"You made another small memory together.",
 "住人との交流":"Resident conversation",
 "近くで会うと、おしゃべりや贈り物で仲良くなれます。":"Meet nearby to build friendship through conversations and gifts.",
 "住人へのアクション":"Resident actions",
@@ -253,6 +255,8 @@ export const TOWN_ENGLISH:Record<string,string>={
   "冒険者": "Adventurer"
 };
 export const TOWN_HIRAGANA:Record<string,string>={
+"小さな出来事":"ちいさなできごと",
+"ふたりの小さな思い出が増えました。":"ふたりのちいさなおもいでがふえました。",
 "住人との交流":"じゅうにんとの こうりゅう",
 "近くで会うと、おしゃべりや贈り物で仲良くなれます。":"ちかくで あうと、おしゃべりや おくりもので なかよく なれます。",
 "住人へのアクション":"じゅうにんへの アクション",

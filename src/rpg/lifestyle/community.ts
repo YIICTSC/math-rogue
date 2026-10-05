@@ -1,3 +1,4 @@
+import {giftReaction} from '../town/conversationCatalog';
 import type { World, Adventurer } from "../engine";
 import type { TownPerson, TownNews } from "../town/model";
 import type { Copy } from "../town/catalog";
@@ -191,21 +192,7 @@ export function applyCommunity(
         "You remembered my birthday! I will treasure this meal.",
         "たんじょうびをおぼえていてくれたんだね！たいせつにいただくよ。",
       )
-    : taste === 2
-      ? c(
-          "大好きな味を覚えてくれて、ありがとう！",
-          "You remembered my favorite flavor. Thank you!",
-          "だいすきなあじをおぼえてくれて、ありがとう！",
-        )
-      : taste < 0
-        ? c(
-            "少し苦手な味だけど、その気持ちはうれしいな。",
-            "The flavor is not quite my taste, but your kindness means a lot.",
-            "すこしにがてなあじだけど、そのきもちはうれしいな。",
-          )
-        : GIFT_REPLIES[
-            (target.personality + gift.day + gift.wrap) % GIFT_REPLIES.length
-          ];
+    : giftReaction(dish.name,target.personality,taste,s.sequence+gift.wrap,'food',gift.perfect)[1];
   target.tastes[gift.dish] = taste;
   h.say(
     [gift.from, gift.to],

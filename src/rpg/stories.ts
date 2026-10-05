@@ -1,3 +1,4 @@
+import {STORY_VARIANTS,NPC_EVENT_BACKGROUNDS,storyEventArt} from './storyVariants';
 import type { Adventurer, Site, World } from './engine';
 import { activityBusy, grant } from './activities';
 export const STORIES = [
@@ -8,11 +9,12 @@ export const STORIES = [
  {id:'lantern',title:'雪原の最後の灯',npc:'灯台守ユキ',portrait:'sprites/rpg/npcs/yuki.webp',x:145,y:65,goalX:174,goalY:76,goal:'凍った観測所',intro:'吹雪で灯台の結晶が砕けてしまった。東の観測所なら、予備の結晶が残っている。無理はしないでね。',discovery:'観測所の日誌には、吹雪の中でも星を記録した人々の名前が並ぶ。最後のページに、灯台の結晶が包まれていた。',returning:'この光があれば帰り道が見える。灯台を強く照らすか、旅人に小さな灯を分けるか、選んでくれる？',endings:['大きな灯が峠を照らし、観測所への往来が戻った。忘れられた記録が町へ届く。','結晶を小さな灯に分けた。雪原を渡る人々の光が、新しい星座のようにつながる。']},
  {id:'clock',title:'止まった時計の明日',npc:'時計師トワ',portrait:'sprites/rpg/npcs/towa.webp',x:144,y:26,goalX:176,goalY:33,goal:'記憶の歯車庫',intro:'時計塔は、過去を守ろうとして時を止めた。東の歯車庫にある未完成の歯車を見つけて。未来を選ぶ鍵になる。',discovery:'歯車の欠けた部分には、まだ文字がない。完成させるのは過去の時計師ではなく、今ここにいる人の役目だ。',returning:'元通りに直すだけでは、同じことを繰り返すかもしれない。時計を町の暦にするか、一人ひとりの歩幅を刻むか。',endings:['町は新しい暦を手に入れた。過去の失敗を記した祝日に、人々は集まり語り合う。','時計は急がせる音をやめた。人々はそれぞれの歩幅で、明日へ進み始める。']},
 ] as const;
-export type StoryProgress = {stage:'accepted'|'found'|'complete';ending?:number};
+export type StoryProgress = {variant?:number;stage:'accepted'|'found'|'complete';ending?:number};
 export type StoryAction = {type:'story-choice';siteId:string;choice:'accept'|'search'|'restore'|'share'};
+export function storyForSite(site:Site,p?:Adventurer){const base=STORIES.find(s=>s.id===site.storyId);if(!base)return undefined;const index=STORIES.findIndex(s=>s.id===base.id);const n=p?.stories?.[base.id]?.variant??site.storyVariant??0;const variant=Number.isInteger(n)&&n>=0&&n<4?n:0;const extra=STORY_VARIANTS[index][variant];return {...base,...(extra?{title:extra.title.ja,goal:extra.goal.ja,intro:extra.intro.ja,discovery:extra.discovery.ja,returning:extra.returning.ja,endings:extra.endings.map(v=>v.ja)}:{}),variant,background:NPC_EVENT_BACKGROUNDS[index],illustration:storyEventArt(index,variant)};}
 export function applyStory(w:World,p:Adventurer,action:StoryAction):boolean {
  const site=w.sites.find(s=>s.id===action.siteId);
- const story=STORIES.find(s=>s.id===site?.storyId);
+ const story=site?storyForSite(site,p):undefined;
  if(!site||!story||w.ended||p.nativeScene||activityBusy(w,p)||!p.profile||Math.abs(p.x-site.x)+Math.abs(p.y-site.y)>2)return false;
  const progress=p.stories?.[story.id];
  let next:StoryProgress;
@@ -23,14 +25,14 @@ export function applyStory(w:World,p:Adventurer,action:StoryAction):boolean {
   next={stage:'complete',ending};
   grant(p,{remove:[],cards:[],gold:ending===0?45:20,heal:ending===0?0:Math.ceil(p.maxHp*.4)});
  } else return false;
- p.stories={...p.stories,[story.id]:next};
+ next.variant=story.variant;p.stories={...p.stories,[story.id]:next};
  p.interactionCount++;
  p.message=next.stage==='complete'?story.endings[next.ending!]:next.stage==='found'?story.discovery:story.intro;
  w.revision++;
  return true;
 }
 export function storyDialogue(site:Site,p:Adventurer) {
- const story=STORIES.find(s=>s.id===site.storyId)!;
+ const story=storyForSite(site,p)!;
  const progress=p.stories?.[story.id];
  const choices:Array<{id:StoryAction['choice'];label:string}>=[];
  let text:string=story.intro;

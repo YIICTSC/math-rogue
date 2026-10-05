@@ -1,3 +1,5 @@
+import {ROAMING_VARIANTS} from './roamingNpcVariants';
+import {NPC_EVENT_BACKGROUNDS} from './storyVariants';
 import type { BiomeId } from './biomes';
 
 export interface LocalizedNpcCopy {
@@ -26,6 +28,7 @@ export interface RoamingNpcChoice {
 }
 
 export interface RoamingNpcEvent {
+  background?:string;illustration?:string;
   id: string;
   biome: BiomeId;
   portrait: string;
@@ -35,7 +38,7 @@ export interface RoamingNpcEvent {
   choices: readonly RoamingNpcChoice[];
 }
 
-export const ROAMING_NPC_EVENTS: readonly RoamingNpcEvent[] = [
+const BASE_ROAMING_NPC_EVENTS: readonly RoamingNpcEvent[] = [
   { id: 'meadow-cook', biome: 'meadow', portrait: 'sprites/rpg/npcs/mina.webp', name: c('旅する料理人ミナ', 'Mina the Traveling Cook', 'たびする りょうりにん みな'), title: c('湯気の立つ鍋', 'A Steaming Pot', 'ゆげの たつ なべ'), description: c('草原の道端で、料理人が大鍋をかき回している。食べるか、配膳を手伝うか選ぼう。', 'A cook stirs a huge pot beside the meadow trail. Have a meal or help serve it.', 'そうげんの みちばたで、りょうりにんが おおなべを かきまわしている。たべるか、はいぜんを てつだうか えらぼう。'), choices: [
     { id: 'meal', label: c('煮込みを食べる（20G・HP35%回復）', 'Eat a stew (20G · restore 35% HP)', 'にこみを たべる（20G・HP35%かいふく）'), result: c('温かい煮込みで元気が戻った。', 'The warm stew restores your energy.', 'あたたかい にこみで げんきが もどった。'), effect: { kind: 'PAY_HEAL', cost: 20, ratio: .35 } },
     { id: 'serve', label: c('配膳を手伝う（25G）', 'Help serve meals (25G)', 'はいぜんを てつだう（25G）'), result: c('お礼にコインを受け取った。', 'You receive coins as thanks.', 'おれいに コインを うけとった。'), effect: { kind: 'GOLD', amount: 25 } },
@@ -86,6 +89,7 @@ export const ROAMING_NPC_EVENTS: readonly RoamingNpcEvent[] = [
   ] },
 ];
 
+export const ROAMING_NPC_EVENTS:readonly RoamingNpcEvent[]=BASE_ROAMING_NPC_EVENTS.flatMap((base,index)=>{const illustration=`sprites/rpg/events/roaming-${index}.webp`,background=NPC_EVENT_BACKGROUNDS[Math.floor(index/2)];const original={...base,illustration,background};const v=ROAMING_VARIANTS[index];const suffix=(copy:LocalizedNpcCopy)=>({ja:copy.ja.match(/（.*$/)?.[0]||'',en:copy.en.match(/\(.*$/)?.[0]||'',hira:copy.hira.match(/（.*$/)?.[0]||''});return [original,{...original,id:base.id+'-alternate',title:v.title,description:v.description,choices:base.choices.map((choice,i)=>{const tail=suffix(choice.label);return {...choice,label:c(v.labels[i].ja+tail.ja,v.labels[i].en+' '+tail.en,v.labels[i].hira+tail.hira),result:c(`「${v.labels[i].ja}」を手伝い、旅人と新しい思い出ができた。`,`You help with “${v.labels[i].en}” and share a new memory.`,`「${v.labels[i].hira}」をてつだい、たびびととあたらしいおもいでができた。`)};})}];});
 export const getRoamingNpcEvent = (id?: string) => ROAMING_NPC_EVENTS.find(event => event.id === id);
 
 const uiCopy = [

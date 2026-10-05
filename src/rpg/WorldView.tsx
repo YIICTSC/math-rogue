@@ -19,6 +19,7 @@ class Boundary extends React.Component<BoundaryProps, { failed: boolean }> {
 }
 export default function WorldView(
   props: React.ComponentProps<typeof WorldCanvas> & {
+    paused?: boolean;
     facing: number;
     onFacing: (n: number) => void;
   },
@@ -29,6 +30,7 @@ export default function WorldView(
     setFailed(true);
     updateRpgPreferences({ mapView: "2D" });
   };
+  if (props.paused) return null;
   return (
     <>
       {prefs.mapView === "3D" && !props.overview ? (

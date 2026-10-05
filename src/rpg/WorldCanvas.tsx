@@ -1,3 +1,4 @@
+import {storyForSite} from './stories';
 import {residentsOf} from './town/residents';
 import {residentPosition} from './town/worldResidents';
 import {getRoamingNpcEvent} from './roamingNpcs';
@@ -158,10 +159,12 @@ function person(
     c.strokeRect(x + 1, y + 12, 15, 5);
   }
 }
+function landmarkPortrait(c:CanvasRenderingContext2D,path:string,x:number,y:number){let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(!image.complete||!image.naturalWidth)return false;const height=28,width=Math.min(24,height*image.naturalWidth/image.naturalHeight);c.drawImage(image,x-width/2,y+10-height,width,height);return true;}
 export function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
   const x = s.x * T + 8,
     y = s.y * T + 8;
   if (s.kind === 'story') {
+    if(s.storyRole==='npc'){const path=storyForSite(s)?.portrait;if(path&&landmarkPortrait(c,path,x,y))return;}
     rect(c,x-5,y-10,10,15,s.storyRole==='npc'?'#e6c47a':'#bdaddc');
     rect(c,x-3,y-17,6,6,'#ffefbb');
     c.font='bold 15px sans-serif';c.fillStyle='#fff4bc';c.textAlign='center';c.fillText(s.storyRole==='npc'?'!':'?',x,y-22);

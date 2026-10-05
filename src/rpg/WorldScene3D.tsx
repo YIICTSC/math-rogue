@@ -1,3 +1,4 @@
+import {storyForSite} from './stories';
 import { residentsOf } from "./town/residents";
 import { residentPosition } from "./town/worldResidents";
 import React, { useEffect, useRef } from "react";
@@ -19,6 +20,8 @@ import { compassAngle, shortestTurn } from "./worldViewMath";
 import { useRpgPreferences } from "./preferences";
 import "./world3d.css";
 export interface SceneProps {
+  hiddenActors?: string[];
+  presentation?: "conversation";
   world: World;
   selfId: string;
   onTile: (x: number, y: number) => void;
@@ -215,7 +218,7 @@ export default function WorldScene3D(props: SceneProps) {
       const portrait =
         s.kind === "npc"
           ? getRoamingNpcEvent(s.npcEventId)?.portrait
-          : undefined;
+          : s.kind==="story"&&s.storyRole==="npc"?storyForSite(s)?.portrait:undefined;
       let src = portrait
         ? assetUrl(portrait)
         : siteImages.get(s.id + ":" + s.cleared);
@@ -655,18 +658,19 @@ export default function WorldScene3D(props: SceneProps) {
       }
     }
     function updateActors(w: World) {
-      const radius=options.current.mapQuality==='low'?12:19;
+      const radius = options.current.mapQuality === "low" ? 12 : 19;
       actors.clear();
       for (const site of w.sites)
         if (
           site.kind === "npc" &&
+          !latest.current.hiddenActors?.includes(site.id) &&
           Math.abs(site.x - w.players[latest.current.selfId].x) < radius &&
           Math.abs(site.y - w.players[latest.current.selfId].y) < radius
         )
           siteBillboard(site, actors);
       for (const r of residentsOf(w)) {
         const pos = residentPosition(w, r.id);
-        if (pos.siteId) continue;
+        if (pos.siteId || latest.current.hiddenActors?.includes(r.id)) continue;
         const custom = w.town?.customResidents?.find((v) => v.id === r.id);
         billboard(
           actors,
@@ -824,6 +828,13 @@ export default function WorldScene3D(props: SceneProps) {
     renderer.domElement.addEventListener("pointerup", end);
     const draw = (time: number) => {
       if (disposed) return;
+      if (
+        latest.current.presentation === "conversation" &&
+        time - last < 1000 / 15
+      ) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
       renderer.domElement.dataset.facing = String(latest.current.facing);
       const w: World = latest.current.world,
         a = w.players[latest.current.selfId];
@@ -858,6 +869,7 @@ export default function WorldScene3D(props: SceneProps) {
           rebuild(w, a.x, a.y);
         }
         const nextActors =
+          (latest.current.hiddenActors || []).join("|") +
           Object.values(w.players)
             .map(
               (a) =>

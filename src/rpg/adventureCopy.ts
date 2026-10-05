@@ -1,6 +1,7 @@
+import {STORY_VARIANT_ENGLISH,STORY_VARIANT_HIRAGANA} from './storyVariants';
 import { RPG_STORY_ENGLISH, RPG_STORY_HIRAGANA } from "./adventureGeneratedCopy";
 export const RPG_ADVENTURE_ENGLISH: Record<string,string> = {
- ...RPG_STORY_ENGLISH,
+ ...RPG_STORY_ENGLISH, ...STORY_VARIANT_ENGLISH,
  "報告":"Report back",
  '冒険手帳 ·':'Adventure journal ·','依頼は好きな順番で進められます。':'Explore these stories in any order.','会話を終える':'End conversation',
  'いつもの主人公':'Original heroes','敵キャラクターで冒険':'Adventure as an enemy','敵キャラクターを主人公に':'Choose an enemy hero','名前で検索':'Search by name','専用の初期デッキ':'Personal starting deck','このキャラクターで冒険する':'Begin with this character',
@@ -15,7 +16,7 @@ export const RPG_ADVENTURE_ENGLISH: Record<string,string> = {
  '止まった時計の明日':'Tomorrow of the Stopped Clock','時計師トワ':'Towa the Clockmaker','記憶の歯車庫':'Archive of Gears',
 };
 export const RPG_ADVENTURE_HIRAGANA: Record<string,string> = {
- ...RPG_STORY_HIRAGANA,
+ ...RPG_STORY_HIRAGANA, ...STORY_VARIANT_HIRAGANA,
  "報告":"ほうこく",
  '冒険手帳 ·':'ぼうけんてちょう ·','依頼は好きな順番で進められます。':'いらいは すきな じゅんばんで すすめられます。','会話を終える':'かいわを おえる',
  'いつもの主人公':'いつもの しゅじんこう','敵キャラクターで冒険':'てききゃらくたーで ぼうけん','敵キャラクターを主人公に':'てききゃらくたーを しゅじんこうに','名前で検索':'なまえで けんさく','専用の初期デッキ':'せんようの しょきでっき','このキャラクターで冒険する':'このきゃらくたーで ぼうけんする',

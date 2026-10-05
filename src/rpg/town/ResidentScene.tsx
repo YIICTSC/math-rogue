@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { World, Action } from "../engine";
 import type { LanguageMode } from "../../types";
 import { assetUrl } from "../../utils/assetPaths";
@@ -11,7 +11,6 @@ import {
   ROUTINES,
   OUTINGS,
   OUTING_SCENES,
-  OUTING_CHOICES,
   FLOWERS,
   ALL_DISHES,
 } from "./catalog";
@@ -20,6 +19,32 @@ import { socialLineText, type SocialLine } from "../social";
 import { FlowerSprite, FoodSprite } from "./Sprites";
 import WordTeacher from "../WordTeacher";
 import "./encounter.css";
+import {
+  OUTING_ACTIONS,
+  OUTING_BACKGROUNDS,
+  RESIDENT_STORIES,
+} from "./conversationCatalog";
+import { residentFacing } from "./sceneView";
+import { useRpgPreferences } from "../preferences";
+import WorldCanvas from "../WorldCanvas";
+const MapScene = lazy(() => import("../WorldScene3D"));
+class SceneBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { failed: boolean }
+> {
+  declare readonly props: {
+    children: React.ReactNode;
+    fallback: React.ReactNode;
+  };
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
 export default function ResidentScene({
   world,
   selfId,
@@ -39,6 +64,12 @@ export default function ResidentScene({
   onEvent?: (id: string) => void;
   talkLine?: SocialLine;
 }) {
+  const prefs = useRpgPreferences();
+  const [sceneFailed, setSceneFailed] = useState(false);
+  const originalMapView = useRef(prefs.mapView);
+  const initialCompleted = useRef(
+    new Set(world.town?.outings.filter((o) => o.done).map((o) => o.id)),
+  );
   const t = (s: string) => trans(s, languageMode),
     C = (s: Parameters<typeof copy>[0]) => copy(s, languageMode),
     ref = useRef<HTMLElement>(null);
@@ -91,6 +122,18 @@ export default function ResidentScene({
     const timer = setTimeout(() => closeRef.current(), 5000);
     return () => clearTimeout(timer);
   }, [town?.encounters?.[selfId]?.target, target]);
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  useEffect(() => {
+    const timer = setInterval(
+      () => sendRef.current({ type: "town-encounter", target }),
+      30000,
+    );
+    return () => {
+      clearInterval(timer);
+      sendRef.current({ type: "town-encounter", target: null });
+    };
+  }, [target]);
   if (!r || !person || !mine) return null;
   const ready =
     residentNear(world, me, target) &&
@@ -111,7 +154,10 @@ export default function ResidentScene({
       .filter((v) => v.people.includes(selfId) && v.people.includes(target))
       .at(-1),
     line =
-      talkLine && talk?.lines.some(l=>l.speaker===talkLine.speaker&&l.text===talkLine.text)
+      talkLine &&
+      talk?.lines.some(
+        (l) => l.speaker === talkLine.speaker && l.text === talkLine.text,
+      )
         ? talkLine
         : talk?.lines.at(-1),
     portrait = custom?.hero?.frames.idle[0] || r.portrait;
@@ -121,6 +167,19 @@ export default function ResidentScene({
     outing = town.outings.find(
       (o) => !o.done && o.people.includes(selfId) && o.people.includes(target),
     );
+  const trip = town.outings
+    .filter(
+      (o) =>
+        o.people.includes(selfId) &&
+        o.people.includes(target) &&
+        (!o.done || !initialCompleted.current.has(o.id)),
+    )
+    .at(-1);
+  const scenic = page === "outing" && trip;
+  const story = town.stories?.[selfId];
+  const outdoor = !me.life?.indoors;
+  const mapProps = { world, selfId, overview: false, onTile: () => {} };
+  const flat = <WorldCanvas {...mapProps} />;
   return (
     <section
       className={"resident-screen resident-" + page}
@@ -129,6 +188,10 @@ export default function ResidentScene({
       role="region"
       aria-label={t("住人との交流")}
       data-testid="resident-screen"
+      data-original-map-view={originalMapView.current}
+      data-background={
+        scenic ? `outing-${trip.route}` : outdoor ? "3D" : "room"
+      }
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.preventDefault();
@@ -149,12 +212,52 @@ export default function ResidentScene({
         <button onClick={onClose}>{t("マップに戻る")}</button>
       </header>
       <div className="resident-body">
-        <div className="resident-stage" aria-label={C(r.name)}>
-          <div className="resident-stage-window" />
-          <div className="resident-stage-rug" />
-          {me.profile?.image && (
+        <div
+          className={`resident-stage ${scenic ? "resident-outing-stage" : outdoor ? "resident-world-stage" : ""}`}
+          aria-label={C(r.name)}
+        >
+          {scenic ? (
             <img
-              className="resident-self"
+              className="resident-outing-background"
+              src={assetUrl(OUTING_BACKGROUNDS[trip.route])}
+              alt={C(OUTINGS[trip.route])}
+            />
+          ) : outdoor ? (
+            <div className="resident-map-scene" aria-hidden="true">
+              <SceneBoundary fallback={flat}>
+                <Suspense fallback={flat}>
+                  {sceneFailed ? (
+                    flat
+                  ) : (
+                    <MapScene
+                      presentation="conversation"
+                      hiddenActors={[
+                        target,
+                        ...(pos.siteId ? [pos.siteId] : []),
+                      ]}
+                      {...mapProps}
+                      facing={residentFacing(me, pos)}
+                      onFacing={() => {}}
+                      onUnavailable={() => setSceneFailed(true)}
+                    />
+                  )}
+                </Suspense>
+              </SceneBoundary>
+            </div>
+          ) : (
+            <>
+              <div className="resident-stage-window" />
+              <div className="resident-stage-rug" />
+            </>
+          )}
+          {scenic && (
+            <div className="resident-destination">
+              {C(OUTINGS[trip.route])} · {Math.min(trip.step + 1, 3)}/3
+            </div>
+          )}
+          {(me.hero?.frames.idle[0] || me.profile?.image) && (
+            <img
+              className={"resident-self " + (scenic ? "resident-traveler" : "")}
               src={assetUrl(me.hero?.frames.idle[0] || me.profile.image)}
               alt=""
             />
@@ -206,9 +309,35 @@ export default function ResidentScene({
             </p>
             {page === "talk" && (
               <>
+                {story?.target === target ? (
+                  <div className="resident-story">
+                    <h2>{C(RESIDENT_STORIES[story.index].title)}</h2>
+                    <p>{C(RESIDENT_STORIES[story.index].scene)}</p>
+                    {RESIDENT_STORIES[story.index].choices.map((choice, i) => (
+                      <button
+                        key={i}
+                        disabled={!ready}
+                        onClick={() =>
+                          act({ type: "town-story-choice", choice: i })
+                        }
+                      >
+                        {C(choice)}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <button
+                    disabled={!ready || now - (bond?.lastTalk || 0) < 12000}
+                    onClick={() => act({ type: "town-story-start", target })}
+                  >
+                    {t("小さな出来事")}
+                  </button>
+                )}
                 <button
                   className="resident-main-action"
-                  disabled={!ready || now - (bond?.lastTalk || 0) < 12000}
+                  disabled={
+                    !ready || !!story || now - (bond?.lastTalk || 0) < 12000
+                  }
                   onClick={() => act({ type: "town-talk", target })}
                 >
                   {t("おしゃべり")}
@@ -328,7 +457,7 @@ export default function ResidentScene({
                       {C(OUTINGS[outing.route])} {outing.step + 1}/3
                     </h2>
                     <p>{C(OUTING_SCENES[outing.route][outing.step])}</p>
-                    {OUTING_CHOICES.map((v, i) => (
+                    {OUTING_ACTIONS[outing.route][outing.step].map((v, i) => (
                       <button
                         key={i}
                         disabled={
