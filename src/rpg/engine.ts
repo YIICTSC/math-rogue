@@ -689,9 +689,10 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
+  if(w.town?.encounters?.[id]&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if(action.type.startsWith('farm-'))return applyFarm(w,p,action as FarmAction);
   if(action.type.startsWith('city-'))return applyCity(w,p,action as CityAction,now);
-  if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if ((w.town?.cooking[id]||w.town?.dreams[id]&&!w.town.dreams[id].finished)&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if ((action.type==='hero-set'||action.type.startsWith('social-'))&&!p.spectator)return applySocial(w,p,action as SocialAction,now);
   if (p.spectator && action.type !== "native-profile") return false;

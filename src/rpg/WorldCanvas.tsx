@@ -1,3 +1,6 @@
+import {residentsOf} from './town/residents';
+import {residentPosition} from './town/worldResidents';
+import {getRoamingNpcEvent} from './roamingNpcs';
 import {drawFarms} from './farm/draw';
 import {occupiedFarmTile} from './farm/model';
 import {CITY_SPRITES} from './city/spriteRects';
@@ -180,6 +183,8 @@ export function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
     rect(c, x - 6, y - 5, 13, 3, "#e3b967");
     rect(c, x - 1, y - 1, 3, 4, "#fae1a0");
   } else if (s.kind === "npc") {
+    const path=getRoamingNpcEvent(s.npcEventId)?.portrait;
+    if(path){let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(image.complete&&image.naturalWidth){const height=28,width=Math.min(24,height*image.naturalWidth/image.naturalHeight);c.drawImage(image,x-width/2,y+10-height,width,height);return;}}
     const coats = ["#ad6d46", "#547b67", "#587e9c", "#a58b4e", "#886b9d", "#6d8790"];
     const coat = coats[(s.npcEventId?.split("").reduce((n,ch)=>n+ch.charCodeAt(0),0)||0)%coats.length];
     rect(c,x-6,y+5,13,3,"#324c40");
@@ -344,7 +349,8 @@ export default function WorldCanvas({
       drawFarms(c,w,time,!prefs.reducedMotion,{minX,maxX,minY,maxY});
       for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
       for(const lot of w.city?.lots||[]){if(lot.x<minX||lot.x>=maxX||lot.y<minY||lot.y>=maxY)continue;const b=cityBuilding(lot.kind);if(b&&cityAtlas?.complete&&cityAtlas.naturalWidth){const r=CITY_SPRITES[b.index],size=24,ratio=r[2]/r[3];c.drawImage(cityAtlas,r[0],r[1],r[2],r[3],lot.x*T+8-size*ratio/2,lot.y*T+16-size,size*ratio,size);}if(lot.damage)rect(c,lot.x*T+4,lot.y*T,8,8,'#e66d43');}
-      for(const resident of w.town?.customResidents||[]){if(w.town?.bonds.some(b=>b.people.includes(resident.id)&&(b.houseId||b.visitHouse?.day===w.town?.day)))continue;if(resident.x<minX||resident.x>=maxX||resident.y<minY||resident.y>=maxY)continue;const path=resident.hero?.frames.idle[(prefs.reducedMotion?0:Math.floor(time/240))%Math.max(1,resident.hero.frames.idle.length)]||resident.portrait;let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(image.complete&&image.naturalWidth)c.drawImage(image,resident.x*T, resident.y*T-15,16,30);}
+      for(const resident of residentsOf(w)){const pos=residentPosition(w,resident.id);if(pos.siteId)continue;if(pos.x<minX||pos.x>=maxX||pos.y<minY||pos.y>=maxY)continue;const custom=w.town?.customResidents?.find(r=>r.id===resident.id),path=custom?.hero?.frames.idle[(prefs.reducedMotion?0:Math.floor(time/240))%Math.max(1,custom.hero.frames.idle.length)]||resident.portrait;let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(image.complete&&image.naturalWidth){const height=28,width=Math.min(24,height*image.naturalWidth/image.naturalHeight);c.drawImage(image,pos.x*T+8-width/2,pos.y*T+16-height,width,height);}if(prefs.labels&&Math.abs(pos.x-p.x)+Math.abs(pos.y-p.y)<=4){c.fillStyle='#fff0c1';c.font='bold 9px sans-serif';c.textAlign='center';c.fillText(resident.name[languageMode==='ENGLISH'?'en':languageMode==='HIRAGANA'?'hi':'ja'],pos.x*T+8,pos.y*T-15);}}
+
       for(const q of Object.values(w.players)){
         const work=q.life?.work,effect=q.life?.effect;
         if(work?.kind==='fish'){const x=work.tile%WIDTH*T+8,y=Math.floor(work.tile/WIDTH)*T+8;c.strokeStyle='#ddd3ad';c.lineWidth=.5;c.beginPath();c.moveTo(q.x*T+8,q.y*T+4);c.lineTo(x,y);c.stroke();rect(c,x-1,y+Math.sin(time/130)*1.5,3,3,w.life.now>=work.target?'#ffcf62':'#ec826f');}

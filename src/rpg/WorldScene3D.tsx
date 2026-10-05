@@ -1,3 +1,5 @@
+import { residentsOf } from "./town/residents";
+import { residentPosition } from "./town/worldResidents";
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { World } from "./engine";
@@ -209,7 +211,7 @@ export default function WorldScene3D(props: SceneProps) {
       terrain.add(sprite);
     }
     const siteImages = new Map<string, string>();
-    function siteBillboard(s: World["sites"][number]) {
+    function siteBillboard(s: World["sites"][number], parent = terrain) {
       const portrait =
         s.kind === "npc"
           ? getRoamingNpcEvent(s.npcEventId)?.portrait
@@ -262,7 +264,7 @@ export default function WorldScene3D(props: SceneProps) {
             ? 0.8
             : 1.1;
       const sprite = billboard(
-        terrain,
+        parent,
         src,
         s.x + 0.5,
         size / 2,
@@ -482,7 +484,7 @@ export default function WorldScene3D(props: SceneProps) {
             mesh(terrain, box, stone, s.x + 0.5, 2, s.y + 0.5, 1.9, 0.25, 0.4);
           }
         } else {
-          siteBillboard(s);
+          if (s.kind !== "npc") siteBillboard(s);
         }
       }
       for (const h of w.life.houses.filter(near))
@@ -653,16 +655,28 @@ export default function WorldScene3D(props: SceneProps) {
       }
     }
     function updateActors(w: World) {
+      const radius=options.current.mapQuality==='low'?12:19;
       actors.clear();
-      for (const r of w.town?.customResidents || [])
+      for (const site of w.sites)
+        if (
+          site.kind === "npc" &&
+          Math.abs(site.x - w.players[latest.current.selfId].x) < radius &&
+          Math.abs(site.y - w.players[latest.current.selfId].y) < radius
+        )
+          siteBillboard(site, actors);
+      for (const r of residentsOf(w)) {
+        const pos = residentPosition(w, r.id);
+        if (pos.siteId) continue;
+        const custom = w.town?.customResidents?.find((v) => v.id === r.id);
         billboard(
           actors,
-          assetUrl(r.hero?.frames.idle[0] || r.portrait),
-          r.x + 0.5,
-          0.65,
-          r.y + 0.5,
-          1.3,
+          assetUrl(custom?.hero?.frames.idle[0] || r.portrait),
+          pos.x + 0.5,
+          0.75,
+          pos.y + 0.5,
+          1.5,
         );
+      }
       for (const [id, f] of Object.entries(w.farm?.people || {})) {
         if (f.x !== undefined && f.y !== undefined) {
           for (const [i, a] of f.animals.entries()) {
@@ -856,7 +870,14 @@ export default function WorldScene3D(props: SceneProps) {
                 `${f.x}:${f.y}:${f.animals.length}:${f.activePet}:${f.pets.map((p) => p.awayUntil).join(",")}`,
             )
             .join("|") +
-          String(w.town?.customResidents?.length || 0);
+          String(w.town?.customResidents?.length || 0) +
+          Object.entries(w.town?.walkers || {})
+            .map(([id, p]) => `${id}:${p.x}:${p.y}`)
+            .join("|") +
+          w.sites
+            .filter((s) => s.kind === "npc")
+            .map((s) => `${s.id}:${s.x}:${s.y}`)
+            .join("|");
         if (nextActors !== actorKey) {
           actorKey = nextActors;
           updateActors(w);

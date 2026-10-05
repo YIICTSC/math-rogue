@@ -1,3 +1,4 @@
+import './town/encounter.css';
 import React, { useEffect, useRef } from 'react';
 import TranslatedUiTree from '../components/TranslatedUiTree';
 import type { LanguageMode } from '../types';
@@ -28,7 +29,7 @@ export default function RoamingNpcDialog({site,player,pending,blockedReason,onCh
   const resultText=getNpcResultText(chosen,result);
   const copy=(text:string)=>trans(text,languageMode);
   const key=(e:React.KeyboardEvent)=>{if(e.key==='Escape'){e.stopPropagation();onClose();}if(e.key==='Tab'){const buttons=dialog.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');if(!buttons?.length)return;const first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===dialog.current)){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}};
-  return <TranslatedUiTree mode={languageMode}><div className="rpg-dialog-backdrop" onClick={onClose}><section ref={dialog} tabIndex={-1} onKeyDown={key} className="rpg-story-dialog rpg-roaming-npc-dialog" role="dialog" aria-modal="true" aria-labelledby="rpg-roaming-npc-title" onClick={e=>e.stopPropagation()}>
+  return <TranslatedUiTree mode={languageMode}><div className="rpg-npc-screen"><section ref={dialog} tabIndex={-1} onKeyDown={key} className="rpg-story-dialog rpg-roaming-npc-dialog" role="region" aria-labelledby="rpg-roaming-npc-title" onClick={e=>e.stopPropagation()}>
     <small>{copy(biomeAt(site.x,site.y).name)} · {copy(ROAMING_NPC_UI_COPY.heading.ja)}</small>
     <div className="rpg-story-dialog-layout">
       <img className="rpg-story-dialog-portrait" src={assetUrl(event.portrait)} alt="" aria-hidden="true" />
