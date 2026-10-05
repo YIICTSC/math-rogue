@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`87c1d6fc8f5de44a452729cd8720fe3981188367`（Expand RPG resident conversations and illustrated NPC scenarios）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`ce93200014410b1387fb80cda1d9422e47a8cfe0`（Fix portrait NPC layouts and resumed fishing result controls）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -216,3 +216,11 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 全体tscには既存エラーあり。今回の追加モジュールには新たなエラーなし。Render確認はユーザー指定により実施しない。
 
 - 公開確認済み：GitHub Pages Actions `37294487102`、Android Actions `37294487112`ともsuccess。公開コードの新機能マーカーと画像52点のバイト一致を検証。
+
+
+## 最新追記：縦画面イベントと釣果の修正
+
+- main `ce93200014410b1387fb80cda1d9422e47a8cfe0`。NPC/対象物の画像は縦画面で最大30dvh/240pxに収め、会話欄との重なり・頭や足の見切れを防止。対象物イベントの重複サムネイルを削除。
+- useFishingCollectionは最初のワールドスナップショットを保存履歴として扱い、再開時に釣果を表示しない。図鑑への保存は維持し、以後の新しい釣果だけ表示。
+- 釣りを続けるは近くの水辺へlife-castを送信する。釣果中の移動ロックに依存しない。エネルギー不足時は回復問題へ。釣りを止めるを追加し、Escapeも終了。3ボタンのフォーカス循環と縦横配置に対応。
+- 釣りモデル、釣果ブラウザ（再開/新規/続行/停止/セッション切替/3画面）、NPCブラウザ（5画面+縦の対象物/旅人）、英語監査、Web/serverビルド成功。
