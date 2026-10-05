@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`2a1ba24f1a6d96c577a480128ba3a3cf1078bf3f`（Simplify RPG life menus on mobile and clarify hero personality settings）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`87c1d6fc8f5de44a452729cd8720fe3981188367`（Expand RPG resident conversations and illustrated NPC scenarios）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -203,3 +203,16 @@ main `2a1ba24f1a6d96c577a480128ba3a3cf1078bf3f`。標準・自作住人をワー
 詳細：`docs/rpg/world-residents.md`。主要ファイル：`town/worldResidents.ts`、`town/ResidentScene.tsx`、`town/encounter.css`、`town/model.ts`、`RpgOnline.tsx`、`WorldCanvas.tsx`、`WorldScene3D.tsx`。
 
 build/server:build、新規resident world/browser、既存town model/browser、city、lifestyle、real3D browserが成功。ブラウザはスマホ縦横/PCの5サイズで専用画面と各タブを確認。
+
+
+## 最新追記：住人交流・専用NPCイベントの拡張
+
+- main: `87c1d6fc8f5de44a452729cd8720fe3981188367`。会話24テーマ、選択イベント12種、贈り物36反応。旧お気に入り語句と教えた言葉を維持。
+- お出かけ6ルートの専用ImageGen背景と主人公・住人の2人表示。各ルート3段階×3選択（計54選択）。
+- 屋外会話の初期背景を実際の3Dマップにする。終了時は元の2D/3D設定に戻る。設定そのものは変更しない。室内は室内背景。
+- 郵便屋ほか6人の専用NPCを2D/3Dマップの立ち絵に変更。専用シナリオ6人×4=24、旅人イベント24種。新ワールド作成時にランダム選択し、受注済み・保存済みの内容は固定。旧保存は従来シナリオ。
+- 新規WebP48点：お出かけ背景6、NPC背景6、専用イベントイラスト24、旅人イラスト12。ImageGen生成後に余白を修正生成し、sharpで切り出し/WebP変換。素材の詳細は `docs/rpg/resident-conversations.md`。
+- 会話/住人/暮らし/冒険/NPCモデルテスト、住人ブラウザとNPCブラウザ（5画面サイズ）、Webビルド（英語ゲート含む）・サーバービルド成功。住人ブラウザはソフトウェア3Dで数分かかる。
+- 全体tscには既存エラーあり。今回の追加モジュールには新たなエラーなし。Render確認はユーザー指定により実施しない。
+
+- 公開確認済み：GitHub Pages Actions `37294487102`、Android Actions `37294487112`ともsuccess。公開コードの新機能マーカーと画像52点のバイト一致を検証。
