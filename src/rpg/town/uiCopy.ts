@@ -1,4 +1,15 @@
 export const TOWN_ENGLISH:Record<string,string>={
+"主人公のプロフィールを更新しました。":"Your hero’s profile has been updated.",
+"暮らしの指標と時間の説明":"Life indicators and time explained",
+"日課はあなたの主人公の今の気分です。達成ノルマではありません。プロフィールから性格・誕生日・自動交流を設定できます。":"The routine is your hero’s current mood, not a required task. Set personality, birthday and automatic social activity in the profile.",
+"あなたの主人公":"Your hero",
+"主人公の性格":"Hero personality",
+"主人公のプロフィールを設定":"Set your hero’s profile",
+"操作中の主人公に設定する、暮らし用のキャラクター性です。日課や交流会話の反応に使われます。戦闘能力やデッキには影響しません。":"This is the personality of the hero you control in daily life. It shapes their routine and responses in social conversations. It does not change combat abilities or the deck.",
+"この主人公の性格":"This hero’s personality",
+"この主人公の誕生日":"This hero’s birthday",
+"この主人公に言葉を教える":"Teach words to this hero",
+
 "暮らしの状態":"Life status",
 "暮らしの状態とプロフィール":"Life status and profile",
 "おなかは食事、幸福度は会話や贈り物、居心地は休憩や家の片づけで整います。戦闘のHPとは別の暮らしの指標です。":"Food restores hunger, conversations and gifts improve happiness, and rest or tidying improves comfort. These life indicators are separate from battle HP.",
@@ -219,6 +230,17 @@ export const TOWN_ENGLISH:Record<string,string>={
   "冒険者": "Adventurer"
 };
 export const TOWN_HIRAGANA:Record<string,string>={
+"主人公のプロフィールを更新しました。":"しゅじんこうの プロフィールを こうしんしました。",
+"暮らしの指標と時間の説明":"くらしの しひょうと じかんの せつめい",
+"日課はあなたの主人公の今の気分です。達成ノルマではありません。プロフィールから性格・誕生日・自動交流を設定できます。":"にっかは あなたの しゅじんこうの いまの きぶんです。たっせいノルマでは ありません。プロフィールから せいかく・たんじょうび・じどうこうりゅうを せっていできます。",
+"あなたの主人公":"あなたの しゅじんこう",
+"主人公の性格":"しゅじんこうの せいかく",
+"主人公のプロフィールを設定":"しゅじんこうの プロフィールを せってい",
+"操作中の主人公に設定する、暮らし用のキャラクター性です。日課や交流会話の反応に使われます。戦闘能力やデッキには影響しません。":"そうさちゅうの しゅじんこうに せっていする、くらしようの キャラクターせいです。にっかや こうりゅうかいわの はんのうに つかわれます。せんとうのうりょくや デッキには えいきょうしません。",
+"この主人公の性格":"この しゅじんこうの せいかく",
+"この主人公の誕生日":"この しゅじんこうの たんじょうび",
+"この主人公に言葉を教える":"この しゅじんこうに ことばを おしえる",
+
 "暮らしの状態":"くらしのじょうたい",
 "暮らしの状態とプロフィール":"くらしのじょうたいとぷろふぃーる",
 "おなかは食事、幸福度は会話や贈り物、居心地は休憩や家の片づけで整います。戦闘のHPとは別の暮らしの指標です。":"おなかはしょくじ、こうふくどはかいわやおくりもの、いごこちはきゅうけいやいえのかたづけでととのいます。せんとうのえいちぴーとはべつのくらしのしひょうです。",

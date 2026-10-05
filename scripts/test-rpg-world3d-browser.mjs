@@ -252,6 +252,7 @@ try {
       .locator(".town-tabs")
       .getByRole("button", { name: "暮らしの状態", exact: true })
       .click();
+    await p.locator(".town-today-guide summary").click();
     assert.ok(
       await p
         .locator(".town-today-guide")
