@@ -25,7 +25,7 @@ try {
         "three",
       ],
     },
-    server: { port: 4222, strictPort: true, host: "127.0.0.1", hmr: false },
+    server: { port: 4230, strictPort: true, host: "127.0.0.1", hmr: false },
     plugins: [
       {
         name: "world3d",
@@ -61,14 +61,28 @@ try {
   });
   p.setDefaultTimeout(90000);
   p.on("pageerror", (e) => errors.push(e.message));
-  await p.goto("http://127.0.0.1:4222/world3d");
+  await p.goto("http://127.0.0.1:4230/world3d");
   await p.getByRole("button", { name: "冒険をはじめる" }).click();
   await p.waitForFunction(() => window.room?.world);
   await p.evaluate(() => window.prepare());
+  await p.evaluate(() => {
+    const w = window.room.world;
+    const npc = w.sites.find((s) => s.kind === "npc");
+    const chest = w.sites.find((s) => s.kind === "treasure");
+    npc.x = 20;
+    npc.y = 17;
+    chest.x = 19;
+    chest.y = 17;
+    window.room.emit();
+  });
   console.log("RPG fixture ready");
   await p.getByRole("button", { name: "2D / 3D", exact: true }).click();
   await p.locator("[data-testid=rpg-world-3d]").waitFor();
   console.log("RPG 3D rendered");
+  await p.waitForTimeout(1500);
+  await p.screenshot({
+    path: "/workspace/scratch/lifestyle-screens/3d-billboards.png",
+  });
   await p.locator(".rpg-turn-controls button").last().click();
   await p.waitForFunction(
     () =>

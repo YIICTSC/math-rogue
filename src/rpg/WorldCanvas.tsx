@@ -155,7 +155,7 @@ function person(
     c.strokeRect(x + 1, y + 12, 15, 5);
   }
 }
-function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
+export function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
   const x = s.x * T + 8,
     y = s.y * T + 8;
   if (s.kind === 'story') {

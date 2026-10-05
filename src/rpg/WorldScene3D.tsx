@@ -7,7 +7,10 @@ import { natureAt } from "./life";
 import { occupiedCityTile } from "./city/model";
 import { occupiedFarmTile } from "./farm/model";
 import { animalPose } from "./lifestyle/animalMotion";
-import { calendar } from "./town/model";
+import { getRoamingNpcEvent } from "./roamingNpcs";
+import { landmark } from "./WorldCanvas";
+import { flowerAtlas } from "./town/catalog";
+import { calendar, flowerAt } from "./town/model";
 import { farmImage } from "./farm/Sprite";
 import { assetUrl } from "../utils/assetPaths";
 import { compassAngle, shortestTurn } from "./worldViewMath";
@@ -131,7 +134,10 @@ export default function WorldScene3D(props: SceneProps) {
     const texture = (src: string) => {
       let t = textureCache.get(src);
       if (!t) {
-        t = textureLoader.load(src);
+        t = textureLoader.load(src, (loaded) => {
+          for (const map of textures)
+            if (map.source === loaded.source) map.needsUpdate = true;
+        });
         t.colorSpace = THREE.SRGBColorSpace;
         textures.push(t);
         textureCache.set(src, t);
@@ -161,9 +167,109 @@ export default function WorldScene3D(props: SceneProps) {
       const s = new THREE.Sprite(m);
       s.position.set(x, y, z);
       s.scale.set(size, size, 1);
+      s.userData.displaySize = size;
+      s.userData.baseY = y;
       if (player) s.userData.player = player;
       parent.add(s);
       return s;
+    }
+    const atlasMaterials = new Map<string, THREE.SpriteMaterial>();
+    function atlasBillboard(
+      src: string,
+      index: number,
+      columns: number,
+      rows: number,
+      x: number,
+      z: number,
+      size: number,
+    ) {
+      const key = `${src}:${index}`;
+      let material = atlasMaterials.get(key);
+      if (!material) {
+        const map = texture(assetUrl(src)).clone();
+        map.repeat.set(1 / columns, 1 / rows);
+        map.offset.set(
+          (index % columns) / columns,
+          1 - (Math.floor(index / columns) + 1) / rows,
+        );
+        map.magFilter = THREE.NearestFilter;
+        textures.push(map);
+        material = new THREE.SpriteMaterial({
+          map,
+          transparent: true,
+          alphaTest: 0.08,
+        });
+        materials.push(material);
+        atlasMaterials.set(key, material);
+      }
+      const sprite = new THREE.Sprite(material);
+      sprite.position.set(x + 0.5, size / 2, z + 0.5);
+      sprite.scale.set(size, size, 1);
+      sprite.userData.tile = { x, y: z };
+      terrain.add(sprite);
+    }
+    const siteImages = new Map<string, string>();
+    function siteBillboard(s: World["sites"][number]) {
+      const portrait =
+        s.kind === "npc"
+          ? getRoamingNpcEvent(s.npcEventId)?.portrait
+          : undefined;
+      let src = portrait
+        ? assetUrl(portrait)
+        : siteImages.get(s.id + ":" + s.cleared);
+      if (!src) {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 64;
+        const ctx = canvas.getContext("2d")!;
+        ctx.translate(24, 30);
+        landmark(ctx, { ...s, x: 0, y: 0 }, 0);
+        const pixels = ctx.getImageData(0, 0, 64, 64).data;
+        let left = 64,
+          top = 64,
+          right = 0,
+          bottom = 0;
+        for (let y = 0; y < 64; y++)
+          for (let x = 0; x < 64; x++)
+            if (pixels[(y * 64 + x) * 4 + 3]) {
+              left = Math.min(left, x);
+              top = Math.min(top, y);
+              right = Math.max(right, x);
+              bottom = Math.max(bottom, y);
+            }
+        const cropped = document.createElement("canvas");
+        cropped.width = right - left + 3;
+        cropped.height = bottom - top + 3;
+        cropped
+          .getContext("2d")!
+          .drawImage(
+            canvas,
+            left,
+            top,
+            right - left + 1,
+            bottom - top + 1,
+            1,
+            1,
+            right - left + 1,
+            bottom - top + 1,
+          );
+        src = cropped.toDataURL();
+        siteImages.set(s.id + ":" + s.cleared, src);
+      }
+      const size =
+        s.kind === "npc" || s.kind === "story" || s.kind === "guardian"
+          ? 1.5
+          : s.kind === "treasure"
+            ? 0.8
+            : 1.1;
+      const sprite = billboard(
+        terrain,
+        src,
+        s.x + 0.5,
+        size / 2,
+        s.y + 0.5,
+        size,
+      );
+      sprite.userData.tile = { x: s.x, y: s.y };
     }
     function mesh(
       parent: THREE.Group,
@@ -327,38 +433,38 @@ export default function WorldScene3D(props: SceneProps) {
             );
           } else tree(tx + 0.5, ty + 0.5, b);
         } else if (node && !removed && tile === "grass") {
-          if (node.rock)
-            mesh(
-              terrain,
-              sphere,
-              stone,
-              tx + 0.5,
-              0.22,
-              ty + 0.5,
-              0.3,
-              0.28,
-              0.3,
-            );
-          else if ((tx + ty) % 3 === 0) {
-            for (let k = 0; k < 3; k++)
-              mesh(
-                terrain,
-                cone,
-                leaf,
-                tx + 0.3 + k * 0.2,
-                0.13,
-                ty + 0.5,
-                0.09,
-                0.26,
-                0.09,
-              );
-          }
+          atlasBillboard(
+            "sprites/rpg/frontier-atlas.webp",
+            node.sprite,
+            6,
+            4,
+            tx,
+            ty,
+            node.rock ? 0.65 : 0.8,
+          );
         }
+        const flower = flowerAt(w, ty * WIDTH + tx);
+        if (flower)
+          atlasBillboard(
+            flowerAtlas(flower.season),
+            flower.index,
+            4,
+            3,
+            tx,
+            ty,
+            0.45,
+          );
       });
       const near = (o: { x: number; y: number }) =>
         Math.abs(o.x - x) < radius && Math.abs(o.y - y) < radius;
-      for (const s of w.sites.filter(near)) {
-        if (["town", "rest", "boss", "dungeon", "guardian"].includes(s.kind)) {
+      for (const s of w.sites.filter(
+        (s) =>
+          near(s) &&
+          (s.kind !== "fragment" ||
+            w.activities.secretsFound.includes(s.id) ||
+            Math.abs(s.x - x) + Math.abs(s.y - y) <= 4),
+      )) {
+        if (["town", "boss", "dungeon"].includes(s.kind)) {
           house(terrain, s.x + 0.5, s.y - 0.4, s.kind === "boss" ? 2 : 1, s);
           if (s.kind === "dungeon" || s.kind === "guardian") {
             for (const d of [-0.8, 0.8])
@@ -376,17 +482,7 @@ export default function WorldScene3D(props: SceneProps) {
             mesh(terrain, box, stone, s.x + 0.5, 2, s.y + 0.5, 1.9, 0.25, 0.4);
           }
         } else {
-          mesh(
-            terrain,
-            cone,
-            gold,
-            s.x + 0.5,
-            0.5,
-            s.y + 0.5,
-            0.18,
-            0.65,
-            0.18,
-          );
+          siteBillboard(s);
         }
       }
       for (const h of w.life.houses.filter(near))
@@ -787,6 +883,22 @@ export default function WorldScene3D(props: SceneProps) {
         scene.background = new THREE.Color(sky);
         (scene.fog as THREE.FogExp2).color.set(sky);
       }
+      // Sprites face the camera automatically; preserve the source proportions after loading.
+      for (const group of [terrain, actors])
+        for (const object of group.children) {
+          if (!(object instanceof THREE.Sprite) || !object.userData.displaySize)
+            continue;
+          const image = object.material.map?.image as
+            | { width?: number; height?: number }
+            | undefined;
+          if (!image?.width || !image?.height) continue;
+          const size = object.userData.displaySize,
+            ratio = image.width / image.height;
+          const height = Math.min(size, (size * 1.25) / ratio);
+          object.scale.set(height * ratio, height, 1);
+          if (!object.userData.animal)
+            object.position.y = object.userData.baseY - size / 2 + height / 2;
+        }
       for (const actor of actors.children)
         if (actor.userData.animal) {
           const animal =
@@ -801,7 +913,7 @@ export default function WorldScene3D(props: SceneProps) {
             (!options.current.reducedMotion && pose === "hop"
               ? Math.max(0, Math.sin(time / 180)) * 0.13
               : 0);
-          actor.scale.set(size, size * (pose === "sleep" ? 0.88 : 1), 1);
+          actor.scale.y *= pose === "sleep" ? 0.88 : 1;
         }
       sun.position.set(camera.position.x - 8, 18, camera.position.z + 9);
       sun.target.position.set(camera.position.x, 0, camera.position.z);
