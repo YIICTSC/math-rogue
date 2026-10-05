@@ -16,3 +16,12 @@
 
 .rpg-event-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}.rpg-story-screen>.rpg-roaming-npc-dialog,.rpg-roaming-event-screen>.rpg-roaming-npc-dialog{position:relative;background:transparent}.rpg-story-screen .rpg-story-dialog-copy,.rpg-roaming-event-screen .rpg-story-dialog-copy{background:#163b3bee;border:1px solid #bda576;border-radius:14px}.rpg-event-illustration{width:150px;height:150px;object-fit:contain;float:right;max-width:40%;margin:4px 8px}.rpg-story-screen .rpg-story-dialog-portrait,.rpg-roaming-event-screen .rpg-story-dialog-portrait{align-self:end;max-height:80%;filter:drop-shadow(0 12px 8px #13292299)}.rpg-story-screen .rpg-story-clue{max-height:65%;align-self:center}.rpg-story-screen .rpg-story-dialog-layout,.rpg-roaming-event-screen .rpg-story-dialog-layout{gap:12px}.rpg-story-screen>.rpg-roaming-npc-dialog>small,.rpg-roaming-event-screen>.rpg-roaming-npc-dialog>small{background:#173b36dd;padding:5px;border-radius:6px;width:fit-content}
 @media(orientation:portrait) and (max-width:700px){.rpg-story-screen .rpg-story-dialog-portrait,.rpg-roaming-event-screen .rpg-story-dialog-portrait{max-height:100%}.rpg-event-illustration{width:100px;height:100px}.rpg-story-screen .rpg-story-dialog-layout,.rpg-roaming-event-screen .rpg-story-dialog-layout{gap:5px}.rpg-story-screen .rpg-story-dialog-copy,.rpg-roaming-event-screen .rpg-story-dialog-copy{padding:10px}}
+
+/* Explicit viewport bounds prevent intrinsic portrait sizes from overflowing grid rows. */
+.rpg-npc-screen .rpg-story-dialog-portrait{min-width:0;object-position:center bottom;animation:none;background:transparent}
+@media(orientation:portrait) and (max-width:700px){
+ .rpg-npc-screen .rpg-story-dialog-layout{grid-template-rows:min(30dvh,240px) minmax(0,1fr);align-items:stretch}
+ .rpg-npc-screen .rpg-story-dialog-portrait{height:min(30dvh,240px);max-height:min(30dvh,240px);align-self:center;object-position:center}
+ .rpg-npc-screen .rpg-story-clue{height:min(26dvh,200px);max-height:min(26dvh,200px)}
+ .rpg-npc-screen .rpg-story-dialog-copy{min-width:0;overflow-wrap:anywhere}
+}

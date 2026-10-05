@@ -160,11 +160,11 @@ export function StoryDialog({
               <h2 id="rpg-story-title">
                 {site.storyRole === "npc" ? story.npc : story.goal}
               </h2>
-              <img
+              {site.storyRole === "npc" && <img
                 className="rpg-event-illustration"
                 src={assetUrl(story.illustration)}
                 alt=""
-              />
+              />}
               <p>{text}</p>
               <div>
                 {choices.map((c) => (

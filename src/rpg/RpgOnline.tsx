@@ -204,7 +204,7 @@ export default function RpgOnline({
   const destination = useRef<{ x: number; y: number } | null>(null);
   const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
   useEffect(()=>{if(settingsOpen||cityOpen||farmOpen){destination.current=null;walkingRoute.current=[];}},[settingsOpen,cityOpen,farmOpen]);
-  const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch);
+  const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch,world?.players[room.current?.selfId||'']?`${world.seed}:${room.current?.selfId}`:undefined);
   useFishingAudio(world?.players[room.current?.selfId||'']?.life,world?.players[room.current?.selfId||'']?.message||'',active&&!interactionBlocked&&!world?.ended,fishing.result);
   latest.current = { world, active: active && !residentTarget && !farmOpen && !settingsOpen && !cityOpen && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
@@ -420,6 +420,16 @@ export default function RpgOnline({
   useEffect(()=>{if(!me?.life?.lastAction){setQuickReady(true);return;}setQuickReady(false);const timer=setTimeout(()=>setQuickReady(true),350);return()=>clearTimeout(timer);},[me?.life?.lastAction]);
   const requestEnergy=()=>{if(!active||interactionBlocked||me?.life?.work||hasActivityDialog)return;destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);onEnergyRequest?.();};
   const quickGather=(tile:number)=>{if(!latest.current.active||!world||!quickReady)return;if(energyOf(me?.life)<1){requestEnergy();return;}destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);const fish=world.tiles[tile]==='water';if(fish)void audioService.preloadRpgFishingSounds();room.current?.send({type:fish?'life-cast':'life-work',tile});};
+  const continueFishing=()=>{
+    fishing.close();
+    if(!world||!me||!active||interactionBlocked||world.ended||me.life?.work||me.life?.indoors||hasActivityDialog)return;
+    const tile=nearbyResources(world,me).find(tile=>world.tiles[tile]==='water');
+    if(tile===undefined)return;
+    if(energyOf(me.life)<1){requestEnergy();return;}
+    destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);
+    void audioService.preloadRpgFishingSounds();
+    room.current?.send({type:'life-cast',tile});
+  };
   const quickTiles=compact&&world&&me&&!spectating&&!me.life?.indoors?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
   useEffect(()=>{if(compact&&me?.life?.work){destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);}},[compact,me?.life?.work?.started]);
   const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);setLifeOpen(true);};
@@ -721,7 +731,7 @@ export default function RpgOnline({
               </aside>
             </div>
             {compact&&!spectating&&active&&me.life?.work&&<GatherMiniModal key={`${me.life.work.target}:${me.life.work.tile}`} world={world} work={me.life.work} languageMode={languageMode} send={a=>room.current?.send(a)}/>}
-            {!spectating&&active&&fishing.result&&!me.life?.work&&<FishingCatch catching={fishing.result} languageMode={languageMode} onClose={fishing.close} onBook={()=>{fishing.close();setLifeInitialTab('fishbook');setLifeOpen(true);}}/>}
+            {!spectating&&active&&fishing.result&&!me.life?.work&&<FishingCatch catching={fishing.result} languageMode={languageMode} onContinue={continueFishing} onClose={fishing.close} onBook={()=>{fishing.close();setLifeInitialTab('fishbook');setLifeOpen(true);}}/>}
             {compact&&detail&&<div className="rpg-detail-backdrop" aria-hidden="true" onClick={()=>setDetail(null)}/>}
             {!spectating&&<ActivitiesPanel display="dialogs" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action=>{destination.current=null;room.current?.send(action);}}/>}
             <footer className="rpg-footer">
