@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`4efd75f3ed7dbb64f7c627000bc6a2df89395375`（Simplify RPG life menus on mobile and clarify hero personality settings）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`2a1ba24f1a6d96c577a480128ba3a3cf1078bf3f`（Simplify RPG life menus on mobile and clarify hero personality settings）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -194,4 +194,12 @@ main `4d87c848c240d7629a1295bc0e2c3c4bf75320fa`：NPCは対応する立ち絵、
 
 ## 最新追記：スマホ暮らしUI・主人公の性格
 
-main `4efd75f3ed7dbb64f7c627000bc6a2df89395375`：外側の詳細ナビと暮らし内タブを各1段の横スクロールに統一。説明、プロフィール編集、言葉を教える欄を折りたたみ、状態メーターと主人公名・現在の性格・日課を優先。チェックボックス幅22pxを固定し文章の縦崩れを修正。性格は操作中の主人公の暮らし用キャラクター性（日課／交流会話の反応）と明記、戦闘能力／デッキへの影響なし。通知は「主人公のプロフィールを更新しました」。保存形式は変更なし。town実ブラウザで6画面サイズ、チェック寸法、プロフィール操作、EN／HI、料理・住人・夢・保存再開を確認。3D回帰・townモデル・Web build・server build確認。
+main `2a1ba24f1a6d96c577a480128ba3a3cf1078bf3f`：外側の詳細ナビと暮らし内タブを各1段の横スクロールに統一。説明、プロフィール編集、言葉を教える欄を折りたたみ、状態メーターと主人公名・現在の性格・日課を優先。チェックボックス幅22pxを固定し文章の縦崩れを修正。性格は操作中の主人公の暮らし用キャラクター性（日課／交流会話の反応）と明記、戦闘能力／デッキへの影響なし。通知は「主人公のプロフィールを更新しました」。保存形式は変更なし。town実ブラウザで6画面サイズ、チェック寸法、プロフィール操作、EN／HI、料理・住人・夢・保存再開を確認。3D回帰・townモデル・Web build・server build確認。
+
+## 最新追記：ワールド住人と全画面会話
+
+main `2a1ba24f1a6d96c577a480128ba3a3cf1078bf3f`。標準・自作住人をワールドに配置し、障害物を避けて散歩・休憩・見回し。NPCイベントの同一人物は二重配置せず共有。主人公の近くでは立ち止まり、右下の肖像ボタンまたはEから全画面会話。会話・贈り物・お出かけ・言葉・同居/結婚を専用画面に集約。NPCイベントも全画面化。サーバー側距離判定、会話中の移動制限、位置保存、旧セーブ移行、2D/3D反映。既存の宅配プレゼントは維持。
+
+詳細：`docs/rpg/world-residents.md`。主要ファイル：`town/worldResidents.ts`、`town/ResidentScene.tsx`、`town/encounter.css`、`town/model.ts`、`RpgOnline.tsx`、`WorldCanvas.tsx`、`WorldScene3D.tsx`。
+
+build/server:build、新規resident world/browser、既存town model/browser、city、lifestyle、real3D browserが成功。ブラウザはスマホ縦横/PCの5サイズで専用画面と各タブを確認。
