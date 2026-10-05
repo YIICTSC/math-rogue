@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`b56d5d4a6688ced421a3b3d4faa00a5d5ee4a67d`（Render native cards in RPG trades and preserve enemy art across asset packs）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`16435d884060db39384597f8e7560a80bd1d3ec2`（Render native cards in RPG trades and preserve enemy art across asset packs）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最後のゲーム実装依頼は、敵主人公の秘技カード画像・BGM継続調整に加え、トレードを本編と同じカード表示へ統一する改善。実装・検証・mainへの反映・GitHub公開確認まで完了。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -175,3 +175,15 @@ World.farmは任意の状態で、version=1、所有者別peopleとrevisionを�
 - `activities.ts` で旧秘技カードの敵IDを受け取りカードIDへ変更する前に保存し、交換後も正しい画像を保持。攻撃画像は画像URL文字列の置換でなく、正確な敵カタログの番号からassetUrlを呼び、Androidダウンロード素材のハッシュ化された保存先に対応。
 - `scripts/test-rpg-trade-cards-browser.mjs` が実トレードコマンドで選択・双方提示・人型攻撃画像・詳細・キーボード・旧秘技交換後の画像保持、360×800・800×360・1280×800の表示を検証。既存活動モデルテストも通過。
 - Android設定の画像ブラウザテストで、全325体のファイル／描画に加え、ダウンロード済み素材のハッシュURLが正しいattackファイルを指すことを検証。英語UI監査・最終Webビルド・サーバービルド通過。GitHub Actionsと公開反映を確認。Render確認はユーザー指定に従い省略。
+
+## 最新追記：暮らし・都市・農園・3Dとスマホ操作
+
+main `16435d884060db39384597f8e7560a80bd1d3ec2` に実装。詳細はmainの `docs/rpg/lifestyle-and-world3d.md` を参照。料理72種のNPC／プレイヤーへの贈答（承諾・返却・期限・日別上限）、ペット18種・芸16種、家畜の子ども、都市6地区計画・6共同プロジェクト・住民要望を追加。ImageGenで16アイコン／16動物姿勢を生成、余白付き透過WebP化。
+
+2D／3Dを設定またはマップ上で切替。Three.jsの一人称マップ、左右旋回、相対移動、低品質設定、WebGL非対応時の2D復帰。全体マップは2D。既存保存・移動判定・BGM継続を維持。
+
+横画面の各メニューは本文をスクロール、タブを横スクロールし末尾まで選択可能。「今日」は「暮らしの状態」に変更し説明を追加。会話音声は6おすすめ・6話し方・抑揚設定、文章単位の読み上げと短い間。SpeechSynthesisの声質は端末依存。農場・家畜・ペットに隣接すると右下に操作。farm-quickはサーバー側でも所有権・距離・既存制限を検証。
+
+モデル／実ブラウザ（スマホ縦横／デスクトップ／3D／横画面メニュー／農作業）・音声モック・英語監査・Web build・server build確認。新規モジュールの型エラーなし、依存先には既存型エラーが残る。
+
+この追記が冒頭の古い作業説明より優先。次のスレッドでは常に最新mainを取得する。公開確認はGitHubまで、Render確認は不要。
