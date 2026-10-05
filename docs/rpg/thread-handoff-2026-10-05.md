@@ -7,8 +7,8 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後に実装・公開を確認したコミット：`26f880b1c607365371df4a896c383375f0860765`（Add RPG farming, livestock, pets, and harvest cooking）。このSHAは基準点であり、次回の最新SHAとは限らない。
-- 最後のゲーム実装依頼は完了。未完了のゲーム改修はなく、次の要望を待つ状態。
+- 最後にmainへ反映したコミット：`0f93f3b06fc287b431c89cec12e6bdc68a424a4b`（Add furniture game BGM and exclusive rhythm audio with percussion pads）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後のゲーム実装依頼は家具ゲームのBGM選定・リズムの音源重なり防止・ドラム／スクラッチ入力音。実装・検証・mainへの反映・GitHub公開確認まで完了。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
 
@@ -91,9 +91,9 @@ World.farmは任意の状態で、version=1、所有者別peopleとrevisionを�
 
 `docs/release-handoff-2026-08-05.md`は以前のストア公開用の資料。今回のRPG改修の最新状態ではない。App Store／Google Play／Steamへの提出はこの依頼では行っていない。
 
-## 完了した検証・公開
+## 農園実装で完了した検証・公開
 
-最新ゲーム実装コミットで以下が成功。
+農園実装コミットで以下が成功。
 - `pnpm run build`（翻訳／英語UIなどの監査を含む）
 - `pnpm run server:build`
 - `node scripts/test-rpg-farm.mjs`：全32作物、全48料理、家畜・ペット、重複／所有権、保存・112画像。
@@ -105,6 +105,21 @@ World.farmは任意の状態で、version=1、所有者別peopleとrevisionを�
 - 公開ページのJS／CSSに新機能が含まれること、112 WebPがローカルとバイト一致することを確認。
 
 注意：リポジトリ全体のTypeScriptチェックには既存のエラーがある。今回追加・変更した農園関連のエラーは修正済みだが、全体tsc成功とは報告しない。Renderの更新結果はユーザー指定により確認していない。
+
+## 農園実装後の追加更新：家具ゲームのBGM・リズム音声
+
+- `0f93f3b06fc287b431c89cec12e6bdc68a424a4b`で追加。9家具ゲームのプレイ中は学習ローグの既存BGMを選定してループ。退出時に元のBGMへ戻すが、問題画面など別シーンが音楽を変更した場合は上書きしない。
+- 選定：ビリヤードpoker_play、ダーツpoker_shop、ボウリングdungeon_gym、リバーシdungeon_library、四目並べmath、神経衰弱dungeon_music、すごろくpaper_plane_vacation、ブロック崩しpaper_plane_battle、反応ゲームkocho_battle。新旧BGMの両方に対象ファイルあり。
+- `gameBgm.ts`と`useGameBgm.ts`を追加。RPGの家・練習室・学ロクラフトの`HobbyGamesPanel`で共通化し、クラフト側のBGM選定も合わせた。
+- リズム画面は選曲・試聴・カウントダウン・演奏・一時停止・結果まで背景BGMの消音スコープを保持。Web AudioのGainとHTMLAudioのmutedを使い、iOSでvolumeが無視されても重ならない。別のBGM変更やduck解除も消音を解除できない。
+- リズムの4レーンはキック／スネア／ハイハット／スクラッチ。空振りでも押したときに鳴り、キーリピート・長押し終了・自動判定で重複しない。効果音設定とミュートに従う。
+- 従来note-0〜3の選択音を、オリジナル合成音源のMP3／Opus各4点へ置換。Springinの録音を加工したものではない。`scripts/generate-rhythm-pad-sounds.mjs`で再生成。Android素材の版も更新。
+- 試聴中の非表示・曲切り替え・退出・非同期play競合を考慮し、準備用の短いplayもmutedにする。
+- 検証：`test-home-game-bgm-browser.mjs`で9曲の実再生、ループ復帰、別シーン音楽維持、リズム消音を確認。`VITE_APP_PLATFORM=ios`でも同テスト成功（ChromiumでiOS向けHTML音声経路を検証。iOS実機確認ではない）。
+- `test-rpg-rhythm-browser.mjs`で試聴、消音中のBGM変更、空打ち／リピート抑止、4音源の実再生、通しスコア、再開・タッチ・ミュート・退出が成功。タイミング検証中にスクリーンショット／画面サイズ変更を行うと最初のノーツを逃すため、表示確認は一時停止中に行う。
+- `test-home-game-audio.mjs`、`test-rpg-rhythm.mjs`、Androidアセット監査、Web／サーバービルド成功。
+- GitHub Actions：Deploy To GitHub Pages run `37257184005`、Build Android App Bundle run `37257183998`、両方success。公開JSの消音制御と9家具ゲームBGM定義、MP3／Opus計8点のローカルとのバイト一致を確認。
+- 詳細と音源出典：`docs/rpg/game-furniture-sound-credits.md`。
 
 ## 環境限定の補助資料
 
