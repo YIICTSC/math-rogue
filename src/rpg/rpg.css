@@ -1623,29 +1623,19 @@
   grid-template-columns:1fr 1fr;
   gap:15px;
 }
-.rpg-trade-card,.rpg-trade-deck button {
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  border:1px solid #a8b183;
-  padding:10px;
-  border-radius:6px;
-  margin:5px 0;
+.rpg-trade-card {
+  position:relative; display:flex; justify-content:center; width:140px;
+  padding:6px; margin:4px 0; border-radius:10px; border:2px solid transparent;
 }
+.rpg-trade-columns>div { min-width:0; display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px; }
+.rpg-trade-columns h3,.rpg-trade-columns p { width:100%; }
 .rpg-trade-deck {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:8px;
-  max-height:35vh;
-  overflow:auto;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  justify-items:center; gap:8px; max-height:42vh; overflow:auto; padding:8px 2px;
 }
-.rpg-trade-deck .is-selected {
-  background:#89712e;
-  outline:3px solid #f3d376;
-}
-.rpg-trade-deck span,.rpg-trade-card span {
-  font-size:12px;
-}
+.rpg-trade-deck .is-selected { background:#89712e; border-color:#f3d376; }
+.rpg-trade-selected { position:absolute; right:0; top:0; z-index:60; display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:#f3d376; color:#192c27; font-weight:bold; pointer-events:none; }
+.rpg-trade-card>[data-card-id]:hover { transform:none; }
 .rpg-trade-dialog>button {
   margin:10px 6px 0 0;
 }

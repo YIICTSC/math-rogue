@@ -126,7 +126,7 @@ export function applyActivity(w:World,p:Adventurer,action:ActivityAction,now:num
      if(participants.some((q,i)=>q.profile!.deck!.length-cards[i].length+cards[1-i].length<5)) return tell('交換後のデッキは5枚以上必要です。');
      if(!t.confirmed.includes(p.id)) t.confirmed.push(p.id);
      if(t.confirmed.length===2) {
-       participants.forEach((q,i)=>{grant(q,{remove:t.offers[q.id],cards:cards[1-i].map((c,j)=>({...c!,id:`${t.id}-received-${i}-${j}`})),gold:0,heal:0});q.message='カードの交換が成立しました！';});
+       participants.forEach((q,i)=>{grant(q,{remove:t.offers[q.id],cards:cards[1-i].map((c,j)=>({...c!,rpgEnemyHeroId:c!.rpgEnemyHeroId||(c!.id.startsWith('RPG_ENEMY:')&&c!.name.includes('秘技')?c!.id.split(':CARD:')[0]:undefined),id:`${t.id}-received-${i}-${j}`})),gold:0,heal:0});q.message='カードの交換が成立しました！';});
        a.trades=a.trades.filter(q=>q!==t);
      }
      w.revision++;return true;

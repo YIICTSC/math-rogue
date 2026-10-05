@@ -16,6 +16,7 @@ interface CardProps {
   card: CardType;
   onClick: () => void;
   disabled: boolean;
+  selected?: boolean;
   onInspect?: (card: CardType) => void;
   languageMode?: LanguageMode;
   gamepadZone?: string;
@@ -226,7 +227,7 @@ const CompositeArtPiece: React.FC<{
   return <div className="w-full h-full bg-black/20" />;
 };
 
-const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder, appearanceMode = 'STANDARD' }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder, appearanceMode = 'STANDARD' }) => {
   const longPressTimer = useRef<any>(null);
   const isLongPressActive = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
@@ -578,6 +579,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   return (
     <div
       role="button"
+      aria-pressed={selected}
       tabIndex={disabled ? -1 : 0}
       data-card-id={card.id}
       data-gamepad-zone={gamepadZone}

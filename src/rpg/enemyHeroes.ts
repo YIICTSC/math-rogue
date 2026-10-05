@@ -111,9 +111,13 @@ export function getEnemyHeroSignatureImages(card:Pick<Card,'id'|'name'|'rpgEnemy
  if(!hero)return [];
  const idle=hero.imageData;
  const endless=ENDLESS_BOSSES.find(b=>b.arc===theme&&b.name===hero.name);
+ const catalogName=hero.name.replace(/^ボス\s*[：:]\s*/,'');
+ const variants=theme==='high-school'?HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS:theme==='magic'?MAGIC_HUMANOID_ENEMY_VARIANTS:[];
+ const humanoid=variants.find(v=>v.name===catalogName);
+ const humanoidIndex=humanoid?.imageIndex ?? (theme==='high-school'&&catalogName==='真・校長先生'?14:theme==='magic'&&catalogName==='真・大魔女校長'?21:null);
  let attack=idle;
  if(endless&&endless.floor<=50)attack=getEndlessBossSpritePath(endless,'attack');
- else if(idle.includes('/humanoid-enemies/'))attack=idle.replace('/humanoid-enemies/','/humanoid-enemies-attack/');
- else if(idle.includes('/azuki/idle.webp'))attack=idle.replace('/azuki/idle.webp','/azuki/pounce.webp');
+ else if(humanoidIndex!==null)attack=assetUrl(`sprites/${theme}/humanoid-enemies-attack/${humanoidIndex}.webp`);
+ else if(theme==='high-school'&&hero.name==='あずき')attack=assetUrl('sprites/high-school/azuki/pounce.webp');
  return [...new Set([attack,idle])];
 }

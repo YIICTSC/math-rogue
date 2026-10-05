@@ -1,12 +1,14 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
+import GameCard from '../components/Card';
+import CardInspectionModal from '../components/CardInspectionModal';
 import TranslatedUiTree from '../components/TranslatedUiTree';
 import type { LanguageMode, Card } from '../types';
 import { distance, type Action, type World } from './engine';
 
-function CardInfo({card,languageMode}:{card:Card;languageMode:LanguageMode}) {
- return <TranslatedUiTree mode={languageMode}><strong>{card.name}</strong><small>コスト {card.cost} · {card.rarity}{card.damage !== undefined ? [' · ', '攻撃', ' ', card.damage] : ''}{card.block !== undefined ? [' · ', '防御', ' ', card.block] : ''}</small><span>{card.description}</span></TranslatedUiTree>;
-}
 export default function ActivitiesPanel({world,selfId,selectedPeer,send,languageMode,display='all'}:{display?:'all'|'cards'|'dialogs';languageMode:LanguageMode;world:World;selfId:string;selectedPeer:string|null;send:(action:Action)=>void}) {
+ const [inspected,setInspected]=useState<Card|null>(null);
+ const currentTradeId=world.activities.trades.find(t=>t.from===selfId||t.to===selfId)?.id;
+ useEffect(()=>setInspected(null),[currentTradeId]);
  const me=world.players[selfId];
  if(!me)return null;
  const a=world.activities,e=a.event;
@@ -32,13 +34,14 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
   {duel?.status==='request'&&<div className="rpg-overlay"><section className="rpg-dialog rpg-trade-dialog"><h2>ライバルと対戦</h2><p>{world.players[duel.members[0]]?.name} ↔ {world.players[duel.members[1]]?.name}</p><p>先攻・後攻はランダム。先攻の最初のターンはアタックカードを使えません。</p>{selfId===duel.members[1]?<button onClick={()=>send({type:'duel-accept',duelId:duel.id})}>対戦を受ける</button>:<p>相手の承諾を待っています。</p>}<button onClick={()=>send({type:'duel-cancel',duelId:duel.id})}>キャンセル</button></section></div>}
   {trade&&<div className="rpg-overlay"><section className="rpg-dialog rpg-trade-dialog"><h2>カードトレード</h2><p>{world.players[trade.from]?.name} ↔ {world.players[trade.to]?.name}</p>
    {!trade.accepted?<><p>{trade.to===selfId?'トレードの申し込みが届きました。':'相手の承諾を待っています。'}</p>{trade.to===selfId&&<button onClick={()=>send({type:'trade-accept',tradeId:trade.id})}>申し込みを承諾</button>}</>:<>
-    <div className="rpg-trade-columns">{[selfId,trade.from===selfId?trade.to:trade.from].map(owner=><div key={owner}><h3>{world.players[owner]?.name} の提示カード</h3>{trade.offers[owner].length===0&&<p>まだカードが選ばれていません。</p>}{trade.offers[owner].map(id=>{const c=card(id,owner);return c?<div className="rpg-trade-card" key={id}><CardInfo card={c} languageMode={languageMode}/></div>:null;})}</div>)}</div>
-    <h3>渡すカードを選択（最大5枚）</h3><div className="rpg-trade-deck">{me.profile?.deck?.map(c=>{const chosen=trade.offers[selfId].includes(c.id);return <button className={chosen?'is-selected':''} key={c.id} onClick={()=>send({type:'trade-offer',tradeId:trade.id,cards:chosen?trade.offers[selfId].filter(id=>id!==c.id):[...trade.offers[selfId],c.id]})}><CardInfo card={c} languageMode={languageMode}/></button>;})}</div>
+    <div className="rpg-trade-columns">{[selfId,trade.from===selfId?trade.to:trade.from].map(owner=><div key={owner}><h3>{world.players[owner]?.name} の提示カード</h3>{trade.offers[owner].length===0&&<p>まだカードが選ばれていません。</p>}{trade.offers[owner].map(id=>{const c=card(id,owner);return c?<div className="rpg-trade-card" key={id}><GameCard card={c} languageMode={languageMode} disabled={false} onClick={()=>setInspected(c)} onInspect={setInspected}/> </div>:null;})}</div>)}</div>
+    <h3>渡すカードを選択（最大5枚）</h3><div className="rpg-trade-deck">{me.profile?.deck?.map(c=>{const chosen=trade.offers[selfId].includes(c.id);return <div className={`rpg-trade-card ${chosen?'is-selected':''}`} key={c.id}><GameCard card={c} languageMode={languageMode} selected={chosen} disabled={!chosen&&trade.offers[selfId].length>=5} onInspect={setInspected} onClick={()=>send({type:'trade-offer',tradeId:trade.id,cards:chosen?trade.offers[selfId].filter(id=>id!==c.id):[...trade.offers[selfId],c.id]})}/>{chosen&&<span className="rpg-trade-selected" aria-hidden="true">✓</span>}</div>;})}</div>
     <p>提示内容が変わると双方の確定が解除されます。交換後のデッキは5枚以上必要です。</p><button disabled={trade.confirmed.includes(selfId)} onClick={()=>send({type:'trade-confirm',tradeId:trade.id})}>{trade.confirmed.includes(selfId)?'相手の確定待ち':'この内容で交換を確定'}</button>
    </>}
    <button onClick={()=>send({type:'trade-cancel',tradeId:trade.id})}>キャンセル</button><p role="status">{me.message}</p>
   </section></div>}
   {dungeon?.status==='lobby'&&<div className="rpg-overlay"><section className="rpg-dialog"><h2>協力ダンジョン</h2><p>最大4人 · リアルタイム協力戦闘 · 全5部屋</p><p>攻略中もワールドの制限時間は進みます。</p>{dungeon.members.map(id=><p key={id}>{world.players[id]?.name} {dungeon.ready.includes(id)?'準備完了':'準備中'}</p>)}<button onClick={()=>send({type:'dungeon-ready',dungeonId:dungeon.id})}>{dungeon.ready.includes(selfId)?'準備を取り消す':'準備完了'}</button>{dungeon.leader===selfId&&<button disabled={!dungeon.members.every(id=>dungeon.ready.includes(id))} onClick={()=>send({type:'dungeon-start',dungeonId:dungeon.id})}>ダンジョン開始</button>}<button onClick={()=>send({type:'dungeon-leave',dungeonId:dungeon.id})}>募集を離れる</button></section></div>}
  </>}
+ {trade&&inspected&&<CardInspectionModal card={inspected} languageMode={languageMode} onClose={()=>setInspected(null)}/>}
  </TranslatedUiTree>;
 }
