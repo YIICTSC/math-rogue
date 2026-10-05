@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 export interface RpgPreferences {
+  mapView:"2D"|"3D";
+  mapQuality:"auto"|"high"|"low";
   control: "dpad" | "stick";
   speech: boolean;
   reducedMotion: boolean;
@@ -16,6 +18,7 @@ export interface RpgPreferences {
 }
 const KEY = "rpg-preferences-v1",
   defaults: RpgPreferences = {
+    mapView:"2D",mapQuality:"auto",
     control: "dpad",
     speech: true,
     reducedMotion: false,
@@ -55,6 +58,8 @@ export function rpgPreferences() {
     "twoD",
   ] as const)
     if (typeof raw[key] === "boolean") current[key] = raw[key]!;
+  if (["2D","3D"].includes(raw.mapView!))current.mapView=raw.mapView!;
+  if (["auto","high","low"].includes(raw.mapQuality!))current.mapQuality=raw.mapQuality!;
   if (["dpad", "stick"].includes(raw.control!)) current.control = raw.control!;
   if (["left", "right"].includes(raw.hand!)) current.hand = raw.hand!;
   if ([1, 1.25, 1.5].includes(raw.zoom!)) current.zoom = raw.zoom!;

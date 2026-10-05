@@ -1,3 +1,6 @@
+import {farmMapTargets,type FarmQuickAction} from './mapTargets';
+import {PET_TRICKS} from '../lifestyle/catalog';
+import type {AnimalMoment} from '../lifestyle/animalMotion';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { lifePlayer, canAfford } from "../life";
@@ -28,6 +31,7 @@ export interface FarmPlot {
   harvests: number;
 }
 export interface FarmAnimal {
+  moment?:AnimalMoment;pat?:number;bredDay?:number;
   id: string;
   kind: string;
   name: string;
@@ -41,6 +45,7 @@ export interface FarmAnimal {
   ready: number;
 }
 export interface FarmPet {
+  moment?:AnimalMoment;tricks?:Record<string,number>;lastTrick?:number;
   id: string;
   kind: string;
   name: string;
@@ -80,7 +85,10 @@ export interface FarmState {
   version: 1;
   people: Record<string, FarmPlayer>;
 }
-export type FarmAction =
+export type FarmAction = FarmQuickAction
+
+  | {type:"farm-pet-trick";id:string;trick:string}
+  | {type:"farm-animal-breed";id:string;name:string}
   | { type: "farm-start" }
   | { type: "farm-establish"; x: number; y: number }
   | { type: "farm-seed"; crop: string; amount: number }
@@ -101,7 +109,7 @@ export type FarmAction =
   | {
       type: "farm-animal-care";
       id: string;
-      care: "feed" | "brush" | "clean" | "collect";
+      care: "feed" | "brush" | "clean" | "collect" | "pat";
     }
   | { type: "farm-pet-adopt"; kind: string; name: string }
   | {
@@ -375,6 +383,20 @@ const validName = (s: unknown) =>
   !/[\u0000-\u001f]/.test(s);
 export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
   if (!w.started || w.ended || farmBusy(w, p)) return false;
+  if(a.type==='farm-quick'){
+    if(typeof a.id!=='string'||typeof a.operation!=='string'||!farmMapTargets(w,p).some(t=>t.kind===a.kind&&t.id===a.id))return false;
+    if(a.kind==='plot'&&['plant','water','fertilize','harvest','clear'].includes(a.operation)){
+      const slot=Number(a.id);if(!Number.isInteger(slot)||slot<0||slot>23)return false;
+      if(a.operation==='plant')return typeof a.crop==='string'&&applyFarm(w,p,{type:'farm-plant',slot,crop:a.crop});
+      return applyFarm(w,p,{type:('farm-'+a.operation) as 'farm-water'|'farm-fertilize'|'farm-harvest'|'farm-clear',slot});
+    }
+    if(a.kind==='animal'&&['feed','brush','clean','collect','pat'].includes(a.operation))return applyFarm(w,p,{type:'farm-animal-care',id:a.id,care:a.operation as 'feed'|'brush'|'clean'|'collect'|'pat'});
+    if(a.kind==='pet'){
+      if(a.operation==='trick')return typeof a.trick==='string'&&applyFarm(w,p,{type:'farm-pet-trick',id:a.id,trick:a.trick});
+      if(['feed','pat','play','train'].includes(a.operation))return applyFarm(w,p,{type:'farm-pet-care',id:a.id,care:a.operation as 'feed'|'pat'|'play'|'train'});
+    }
+    return false;
+  }
   const hadFarm = !!ownFarm(w, p.id),
     f = farmOf(w, p),
     day = calendar(w).day,
@@ -402,6 +424,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     "farm-harvest-all",
     "farm-clear",
     "farm-animal-buy",
+    "farm-animal-breed",
     "farm-animal-care",
     "farm-upgrade",
   ];
@@ -465,7 +488,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     )
       return false;
     s[key] -= a.amount;
-    f.coins += i.value * a.amount * (a.quality ? 2 : 1);
+    f.coins += Math.round(i.value * a.amount * (a.quality ? 2 : 1) * (w.city?.living?.projects.some(p=>p.id==='market'&&p.complete)?1.2:1));
     return success();
   }
   if (a.type === "farm-plant") {
@@ -578,9 +601,16 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     });
     return success();
   }
+  if(a.type==='farm-animal-breed'){
+    const parent=f.animals.find(v=>v.id===a.id),kind=parent&&animalById(parent.kind);
+    if(!parent||!kind||!validName(a.name)||parent.bond<50||parent.health<80||day-parent.born<2||day-(parent.bredDay??-100)<7||f.animals.length>=animalLimit(f)||f.feed<8||f.coins<Math.ceil(kind.price/2))return false;
+    f.feed-=8;f.coins-=Math.ceil(kind.price/2);parent.bredDay=day;parent.moment={pose:'greet',until:w.life.time+10};
+    f.animals.push({id:`animal-${++f.sequence}`,kind:parent.kind,name:a.name.trim(),born:day,feed:-1,brush:-1,clean:-1,bond:10,health:90,progress:0,ready:0,moment:{pose:'hop',until:w.life.time+10}});f.xp+=12;
+    return tell('牧場に新しい家族が生まれました。');
+  }
   if (a.type === "farm-animal-care") {
     const animal = f.animals.find((x) => x.id === a.id);
-    if (!animal || !["feed", "brush", "clean", "collect"].includes(a.care))
+    if (!animal || !["feed", "brush", "clean", "collect", "pat"].includes(a.care))
       return false;
     if (a.care === "collect") {
       if (!animal.ready) return false;
@@ -602,6 +632,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       f.feed--;
       animal.health = Math.min(100, animal.health + 5);
     }
+    animal.moment={pose:a.care==="brush"?"roll":a.care==="clean"?"hop":"greet",until:w.life.time+7};
     animal[a.care] = day;
     animal.bond = Math.min(100, animal.bond + (a.care === "brush" ? 5 : 2));
     return success();
@@ -677,9 +708,18 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       pet.trained = Math.min(100, pet.trained + 5);
       f.xp += 3;
     }
+    pet.moment={pose:a.care==="pat"?"roll":a.care==="feed"?"greet":"hop",until:w.life.time+7};
     pet.cares[a.care] = day;
     pet.bond = Math.min(100, pet.bond + (a.care === "play" ? 5 : 3));
     return success();
+  }
+  if(a.type==='farm-pet-trick'){
+    const pet=f.pets.find(v=>v.id===a.id),trick=PET_TRICKS.find(v=>v[0]===a.trick);
+    if(!pet||!trick||pet.awayUntil>w.life.time||pet.hunger<15||pet.trained<trick[4]||pet.bond<10+trick[4]/2||w.life.time<(pet.lastTrick??-100)+8)return false;
+    pet.lastTrick=w.life.time;pet.hunger-=2;pet.moment={pose:trick[5],until:w.life.time+8};
+    const first=(pet.tricks??={})[trick[0]]!==day;pet.tricks[trick[0]]=day;
+    if(first){f.xp+=3;pet.bond=Math.min(100,pet.bond+1);}
+    return tell('かわいい芸を披露してくれました。');
   }
   if (a.type === "farm-reward") {
     const goal = FARM_GOALS.find((g) => g.id === a.id);

@@ -1,3 +1,4 @@
+import AnimalStage,{PetTricks} from '../lifestyle/AnimalStage';
 import { trans } from "../../utils/textUtils";
 import React, { useEffect, useRef, useState } from "react";
 import type { World, Action } from "../engine";
@@ -481,7 +482,7 @@ export function FarmContent({
               const k = animalById(a.kind)!;
               return (
                 <article className="farm-card" key={a.id}>
-                  <FarmSprite kind="animal" id={a.kind} />
+                  <AnimalStage animal={a} kind="animal" time={world.life.time}/>
                   <h3>{a.name}</h3>
                   <small>
                     {C(k.name)} ·{" "}
@@ -496,6 +497,8 @@ export function FarmContent({
                     {C(ingredientById(k.product)!.name)} ×{a.ready} ·{" "}
                     {a.progress}/{k.days}
                   </p>
+                  <button disabled={!canTend||a.bond<50||a.health<80||cal.day-a.born<2||cal.day-(a.bredDay??-100)<7||f.animals.length>=animalLimit(f)||f.feed<8||f.coins<Math.ceil(k.price/2)} onClick={()=>send({type:'farm-animal-breed',id:a.id,name:a.name.slice(0,10)+' Jr.'})}>{L('新しい家族を迎える','Welcome a baby','あたらしいかぞくをむかえる')} ({Math.ceil(k.price/2)} · {L('飼料','Feed','しりょう')} 8)</button>
+                  <button disabled={!canTend||a.pat===cal.day} onClick={()=>send({type:'farm-animal-care',id:a.id,care:'pat'})}>{L('なでて触れ合う','Pet and cuddle','なでてふれあう')}</button>
                   <div className="farm-actions">
                     {(["feed", "brush", "clean", "collect"] as const).map(
                       (care, i) => (
@@ -593,7 +596,7 @@ export function FarmContent({
           <div className="farm-grid">
             {f.pets.map((pet) => (
               <article className="farm-card" key={pet.id}>
-                <FarmSprite kind="pet" id={pet.kind} />
+                <AnimalStage animal={pet} kind="pet" time={world.life.time}/><PetTricks world={world} selfId={selfId} pet={pet} send={send} languageMode={languageMode} available={available}/>
                 <h3>{pet.name}</h3>
                 <small>
                   {C(petById(pet.kind)!.name)} ·{" "}

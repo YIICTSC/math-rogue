@@ -1,4 +1,6 @@
 const rows = [
+  ["かわいい芸を披露してくれました。", "Your companion performed a lovely trick.", "かわいいげいをひろうしてくれました。"],
+  ["牧場に新しい家族が生まれました。", "A new family member was born at the ranch.", "ぼくじょうにあたらしいかぞくがうまれました。"],
   ["農園", "Farm", "のうえん"],
   ["農園・牧場", "Farm & ranch", "のうえん・ぼくじょう"],
   ["農園・牧場・ペット", "Farm, ranch & pets", "のうえん・ぼくじょう・ぺっと"],

@@ -1,3 +1,4 @@
+import {animalPose} from '../lifestyle/animalMotion';
 import type { World } from "../engine";
 import { assetUrl } from "../../utils/assetPaths";
 import { cropById } from "./catalog";
@@ -10,7 +11,10 @@ export function drawFarmSprite(
   x: number,
   y: number,
   size: number,
+  pose?:ReturnType<typeof animalPose>,
 ) {
+  const row=['retriever','graytabby','cow','chicken'].indexOf(id);
+  if(pose&&row>=0){const path=assetUrl('sprites/rpg/lifestyle/animal-poses.webp');let sheet=images.get(path);if(!sheet){sheet=new Image();sheet.src=path;images.set(path,sheet);}if(sheet.complete&&sheet.naturalWidth){const col=['greet','roll','sleep','hop'].indexOf(pose);c.drawImage(sheet,col*sheet.naturalWidth/4,row*sheet.naturalHeight/4,sheet.naturalWidth/4,sheet.naturalHeight/4,x-size/2,y-size,size,size);return;}}
   const path = farmImage(kind, id);
   let image = images.get(path);
   if (!image) {
@@ -79,6 +83,7 @@ export function drawFarms(
         px,
         py + (motion ? Math.sin(time / 500 + i) * 0.4 : 0),
         20,
+        motion?animalPose(animal,w.life.time):undefined,
       );
       if (animal.ready) {
         c.fillStyle = "#ffe187";
@@ -103,11 +108,11 @@ export function drawFarms(
         "pet",
         following.kind,
         p.x * 16 + 20,
-        p.y * 16 + 18 + (motion ? Math.sin(time / 200) * 1 : 0),
+        p.y * 16 + 15 + (motion ? Math.sin(time / 200) * 1 : 0),
         22,
+        motion?animalPose(following,w.life.time):undefined,
       );
-    else if (
-      !following &&
+    if (
       f.x !== undefined &&
       f.y !== undefined &&
       (!bounds ||
@@ -117,9 +122,8 @@ export function drawFarms(
           f.y <= bounds.maxY))
     )
       f.pets
-        .filter((p) => !p.awayUntil)
         .slice(0, 6)
-        .forEach((pet, i) =>
+        .forEach((pet, i) => !pet.awayUntil&&pet.id!==following?.id&&
           drawFarmSprite(
             c,
             "pet",
@@ -127,6 +131,7 @@ export function drawFarms(
             (f.x! + i) * 16 + 8,
             (f.y! + 6) * 16 + 15,
             18,
+            motion?animalPose(pet,w.life.time):undefined,
           ),
         );
   }

@@ -1,8 +1,11 @@
+import {CITY_PROJECTS,DISTRICT_PLANS} from '../lifestyle/catalog';
+import {cityLiving,projectBenefits,districtPlan,advanceCityLiving,cityRequests,type CityLiving,type CityLivingAction} from '../lifestyle/cityLiving';
 import {occupiedFarmTile} from '../farm/model';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { cityBuilding, CITY_SERVICES } from "./catalog";
 export interface CityLot {
+  district?:string;
   id: string;
   owner: string;
   kind: string;
@@ -15,6 +18,7 @@ export interface CityLot {
   damage: number;
 }
 export interface CityState {
+  living?:CityLiving;
   unlocked: true;
   treasury: number;
   debt: number;
@@ -49,7 +53,7 @@ export interface CityState {
   origin: { x: number; y: number };
   revision: number;
 }
-export type CityAction =
+export type CityAction = CityLivingAction
   | { type: "city-continue" }
   | { type: "city-build"; kind: string; x: number; y: number }
   | { type: "city-road" | "city-road-remove"; tiles: number[] }
@@ -113,6 +117,7 @@ export function cityStats(w: World, grow = false) {
       (t) => connected.has(t) || w.tiles[t] === "road",
     );
   const serviceLots = live.filter((l) => l.connected);
+  const benefits=projectBenefits(s);
   let pollution = serviceLots.reduce(
     (n, l) => n + cityBuilding(l.kind)!.pollution,
     0,
@@ -122,10 +127,10 @@ export function cityStats(w: World, grow = false) {
     pollution -
       serviceLots.filter((l) => ["park", "sports"].includes(l.kind)).length *
         7 -
-      (s.policies[0] ? 15 : 0),
+      (s.policies[0] ? 15 : 0) - benefits.pollution - serviceLots.reduce((n,l)=>n+districtPlan(l).green,0),
   );
   const jobs = serviceLots.reduce(
-      (n, l) => n + cityBuilding(l.kind)!.jobs * l.level,
+      (n, l) => n + Math.max(0,cityBuilding(l.kind)!.jobs+districtPlan(l).jobs) * l.level,
       0,
     ),
     homes = s.lots.filter((l) => cityBuilding(l.kind)!.capacity),
@@ -187,7 +192,7 @@ export function cityStats(w: World, grow = false) {
         0,
         Math.min(
           100,
-          18 +
+          18 + Math.min(20,benefits.happiness) + districtPlan(lot).happiness +
             Object.values(coverage).filter(Boolean).length * 7 +
             (jobs >= population * 0.45 ? 10 : 0) +
             (s.policies[1] ? 4 : 0) +
@@ -403,6 +408,21 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
     }
     changed = true;
   }
+  if(a.type==='city-district'){
+    const lot=s.lots.find(l=>l.id===a.id),plan=DISTRICT_PLANS.find(v=>v.id===a.plan);
+    if(!lot||lot.owner!==p.id||!plan||s.treasury<30||lot.district===a.plan)return false;
+    s.treasury-=30;lot.district=a.plan;changed=true;
+  }
+  if(a.type==='city-project'){
+    const d=CITY_PROJECTS.find(v=>v.id===a.project),living=cityLiving(s);
+    if(!d||living.projects.some(v=>v.id===d.id)||s.treasury<d.cost)return false;
+    s.treasury-=d.cost;living.projects.push({id:d.id,started:s.month,complete:false});changed=true;
+  }
+  if(a.type==='city-request'){
+    const q=cityRequests(w).find(q=>q.id===a.id),living=cityLiving(s);
+    if(!q||!q.ready||living.claimed.includes(q.id))return false;
+    living.claimed.push(q.id);living.claimed=living.claimed.slice(-120);s.treasury+=q.reward;changed=true;
+  }
   if (a.type === "city-loan") {
     if (![500, 1000].includes(a.amount) || s.debt + a.amount > 5000)
       return false;
@@ -481,7 +501,7 @@ export function advanceCity(w: World) {
   s.accumulator += dt;
   if (s.accumulator < 30) return;
   s.accumulator -= 30;
-  s.month++;
+  s.month++;advanceCityLiving(s);
   cityStats(w, true);
   s.treasury += s.income - s.expenses;
   if (s.treasury < 0) {

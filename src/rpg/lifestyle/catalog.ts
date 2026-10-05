@@ -1,0 +1,171 @@
+import { c } from "../town/catalog";
+export const PET_TRICKS = [
+  ["sit", "おすわり", "Sit", "おすわり", 0, "greet"],
+  ["wave", "おて", "Paw", "おて", 5, "greet"],
+  ["spin", "くるりん", "Spin", "くるりん", 10, "hop"],
+  ["roll", "ごろん", "Roll over", "ごろん", 15, "roll"],
+  ["fetch", "ボール遊び", "Fetch", "ぼーるあそび", 20, "hop"],
+  ["bow", "おじぎ", "Bow", "おじぎ", 25, "greet"],
+  ["dance", "ダンス", "Dance", "だんす", 30, "hop"],
+  ["nap", "一緒にお昼寝", "Nap together", "いっしょにおひるね", 35, "sleep"],
+  ["jump", "ジャンプ", "Jump", "じゃんぷ", 40, "hop"],
+  ["sniff", "宝物探し", "Treasure sniff", "たからものさがし", 45, "greet"],
+  ["sing", "歌う", "Sing", "うたう", 50, "greet"],
+  ["cuddle", "ぎゅっと抱っこ", "Cuddle", "ぎゅっとだっこ", 55, "greet"],
+  ["balance", "バランス", "Balance", "ばらんす", 60, "greet"],
+  ["greet", "歓迎ダンス", "Welcome dance", "かんげいだんす", 65, "hop"],
+  ["guard", "見守る", "Keep watch", "みまもる", 70, "greet"],
+  ["star", "とびきりの芸", "Star performance", "とびきりのげい", 80, "hop"],
+] as const;
+export const trickCopy = (t: (typeof PET_TRICKS)[number]) =>
+  c(t[1], t[2], t[3]);
+export const DISTRICT_PLANS = [
+  {
+    id: "balanced",
+    name: c("暮らしの街", "Balanced living", "くらしのまち"),
+    happiness: 2,
+    jobs: 0,
+    green: 0,
+  },
+  {
+    id: "garden",
+    name: c("庭園の街", "Garden district", "ていえんのまち"),
+    happiness: 7,
+    jobs: -2,
+    green: 9,
+  },
+  {
+    id: "market",
+    name: c("商いの街", "Market district", "あきないのまち"),
+    happiness: 2,
+    jobs: 8,
+    green: 0,
+  },
+  {
+    id: "learning",
+    name: c("学びの街", "Learning district", "まなびのまち"),
+    happiness: 5,
+    jobs: 3,
+    green: 2,
+  },
+  {
+    id: "ranch",
+    name: c("農と動物の街", "Farm & animal district", "のうとどうぶつのまち"),
+    happiness: 5,
+    jobs: 4,
+    green: 5,
+  },
+  {
+    id: "festival",
+    name: c("交流の街", "Festival district", "こうりゅうのまち"),
+    happiness: 8,
+    jobs: 2,
+    green: 1,
+  },
+] as const;
+export const CITY_PROJECTS = [
+  {
+    id: "garden",
+    icon: 14,
+    name: c("みんなの庭", "Community garden", "みんなのにわ"),
+    cost: 450,
+    months: 3,
+    happiness: 5,
+    pollution: 6,
+  },
+  {
+    id: "market",
+    icon: 13,
+    name: c(
+      "地産地消マルシェ",
+      "Local harvest market",
+      "ちさんちしょうまるしぇ",
+    ),
+    cost: 650,
+    months: 4,
+    happiness: 4,
+    pollution: 3,
+  },
+  {
+    id: "fountain",
+    icon: 12,
+    name: c("憩いの噴水", "Town fountain", "いこいのふんすい"),
+    cost: 550,
+    months: 3,
+    happiness: 6,
+    pollution: 2,
+  },
+  {
+    id: "festival",
+    icon: 15,
+    name: c("四季のお祭り", "Seasonal festival", "しきのおまつり"),
+    cost: 800,
+    months: 5,
+    happiness: 8,
+    pollution: 1,
+  },
+  {
+    id: "petpark",
+    icon: 8,
+    name: c(
+      "動物ふれあい広場",
+      "Animal friendship park",
+      "どうぶつふれあいひろば",
+    ),
+    cost: 700,
+    months: 4,
+    happiness: 7,
+    pollution: 3,
+  },
+  {
+    id: "library",
+    icon: 5,
+    name: c("読み聞かせの日", "Storytime days", "よみきかせのひ"),
+    cost: 500,
+    months: 3,
+    happiness: 5,
+    pollution: 1,
+  },
+] as const;
+export const GIFT_REPLIES = [
+  c(
+    "開ける前からわくわくしていたよ！",
+    "I was excited before I even opened it!",
+    "あけるまえからわくわくしていたよ！",
+  ),
+  c(
+    "ひと口ずつ、大切に楽しむね。",
+    "I will treasure every little bite.",
+    "ひとくちずつ、たいせつにたのしむね。",
+  ),
+  c(
+    "この香りだけで元気になれそう！",
+    "The lovely smell already cheers me up!",
+    "このかおりだけでげんきになれそう！",
+  ),
+  c(
+    "お礼に、とっておきの話を用意するね。",
+    "I will find a special story to thank you.",
+    "おれいに、とっておきのはなしをよういするね。",
+  ),
+  c(
+    "次は一緒に作ってみたいな。",
+    "Next time, let us cook together.",
+    "つぎはいっしょにつくってみたいな。",
+  ),
+  c(
+    "今日はきっと、いい一日になるね。",
+    "Today is going to be a lovely day.",
+    "きょうはきっと、いいいちにちになるね。",
+  ),
+  c(
+    "みんなにも自慢したくなる贈り物だね！",
+    "What a gift! I want to tell everyone!",
+    "みんなにもじまんしたくなるおくりものだね！",
+  ),
+  c(
+    "包みも思い出にとっておこうかな。",
+    "I might keep the wrapping as a memory.",
+    "つつみもおもいでにとっておこうかな。",
+  ),
+];

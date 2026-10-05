@@ -1,3 +1,4 @@
+import CityLivingPanel from '../lifestyle/CityLivingPanel';
 import CitySprite from "./CitySprite";
 import React, { useState, useEffect, useRef } from "react";
 import type { World, Action } from "../engine";
@@ -145,6 +146,7 @@ export default function CityPanel({
             ],
             ["services", "サービス", "Services", "さーびす"],
             ["projects", "街の目標", "City goals", "まちのもくひょう"],
+            ["living", "住民と地区", "People and districts", "じゅうみんとちく"],
           ].map(([id, ja, en, hi]) => (
             <button
               key={id}
@@ -595,6 +597,7 @@ export default function CityPanel({
               </p>
             </>
           )}
+          {tab === "living" && <CityLivingPanel world={world} selfId={selfId} send={send} languageMode={languageMode}/>}
         </div>
       </section>
     </div>

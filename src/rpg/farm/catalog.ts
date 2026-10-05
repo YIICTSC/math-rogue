@@ -622,6 +622,8 @@ export const PET_SPECIES = [
     price: 110,
     talent: "seeds",
   },
+  {id:"retriever",name:c("ゴールデンレトリバー","Golden retriever","ごーるでんれとりばー"),index:16,price:60,talent:"seeds"},
+  {id:"graytabby",name:c("灰トラ猫","Gray tabby","はいとらねこ"),index:17,price:55,talent:"herbs"},
 ];
 export const petById = (id: string) => PET_SPECIES.find((x) => x.id === id);
 export const ingredientById = (id: string) =>

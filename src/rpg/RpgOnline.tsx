@@ -1,7 +1,8 @@
+import FarmQuickActions from './farm/QuickActions';
 import {useRpgMusic,type RpgMusicScene} from './music';
 import FarmPanel from './farm/Panel';
 import RpgSettings from './RpgSettings';
-import {useRpgPreferences} from './preferences';
+import {useRpgPreferences,updateRpgPreferences} from './preferences';
 import CityPanel from './city/Panel';
 import {residentsOf} from './town/residents';
 import {trans} from '../utils/textUtils';
@@ -67,7 +68,8 @@ import type { LanguageMode, Player } from "../types";
 import type { GameMode } from "../types";
 import TranslatedUiTree from "../components/TranslatedUiTree";
 import GoHomeDash from "../components/GoHomeDash";
-import WorldCanvas from "./WorldCanvas";
+import WorldCanvas from "./WorldView";
+import {relativeMove} from "./worldViewMath";
 import {
   distance,
   HEIGHT,
@@ -351,6 +353,9 @@ export default function RpgOnline({
   useEffect(()=>{
     if(roamingNpcSiteId && world?.players[selfId]?.npcEventResults?.[roamingNpcSiteId])setNpcChoicePending(false);
   },[roamingNpcSiteId,selfId,world?.players]);
+  const [facing,setFacing]=useState(0);
+  const navigation=useRef({facing,threeD:false});navigation.current={facing,threeD:prefs.mapView==='3D'&&!overview};
+  const turn=(n:number)=>setFacing(((n%4)+4)%4);
   useEffect(() => {
     if (!active || interactionBlocked) destination.current = null;
     const key = (e: KeyboardEvent) => {
@@ -369,11 +374,13 @@ export default function RpgOnline({
         ArrowRight: [1, 0],
         d: [1, 0],
       };
+      if(navigation.current.threeD&&["q","r"].includes(e.key.toLowerCase())){e.preventDefault();setFacing(n=>(n+(e.key.toLowerCase()==="q"?3:1))%4);return;}
       const dir = dirs[e.key];
       if (dir) {
         e.preventDefault();
         destination.current = null;
-        room.current?.send({ type: "move", dx: dir[0], dy: dir[1] });
+        const step=navigation.current.threeD?relativeMove(dir[0],dir[1],navigation.current.facing):{dx:dir[0],dy:dir[1]};
+        room.current?.send({type:"move",...step});
       }
       if (e.key.toLowerCase() === "e") {
         e.preventDefault();
@@ -410,7 +417,7 @@ export default function RpgOnline({
   const quickTiles=compact&&world&&me&&!spectating&&!me.life?.indoors?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
   useEffect(()=>{if(compact&&me?.life?.work){destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);}},[compact,me?.life?.work?.started]);
   const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);setLifeOpen(true);};
-  const move=(dx:number,dy:number)=>{if(!latest.current.active)return;destination.current=null;walkingRoute.current=[];room.current?.send({type:'move',dx,dy});};
+  const move=(dx:number,dy:number)=>{if(!latest.current.active)return;destination.current=null;walkingRoute.current=[];room.current?.send({type:'move',...(navigation.current.threeD?relativeMove(dx,dy,navigation.current.facing):{dx,dy})});};
   const hudHp=spectating?watched?.hp||0:player.currentHp,hudMaxHp=spectating?watched?.maxHp||1:player.maxHp;
   const close = () => {
     void persist(true);
@@ -551,7 +558,7 @@ export default function RpgOnline({
                 </div>
                 <div className="rpg-map-container">{!spectating&&<button className="rpg-season-badge" onClick={()=>setDetail('town')}>{copy(SEASONS[calendar(world).season],languageMode)} {calendar(world).date} · {trans('暮らし',languageMode)}</button>}{incomingRequest&&!me.life?.indoors&&<button className="rpg-social-invite" onClick={()=>openDetail('social')}>{incomingRequest.kind==='cohabit'?'同居のお誘い':'結婚のお申し込み'}</button>}{talkLine&&<div className="rpg-social-bubble" aria-live="polite"><b>{talkLine.speaker==='player'?'あなた':world.players[talkLine.speaker]?.hero?.name||world.players[talkLine.speaker]?.name||(residentsOf(world).find(r=>r.id===talkLine.speaker)?copy(residentsOf(world).find(r=>r.id===talkLine.speaker)!.name,languageMode):world.town?.people[talkLine.speaker]?.name)}</b>{socialLineText(talkLine,languageMode)}</div>}
                   {active && (
-                    <WorldCanvas
+                    <WorldCanvas facing={facing} onFacing={turn}
                       world={world}
                       selfId={spectating ? spectators.target || selfId : selfId}
                       overview={overview}
@@ -572,6 +579,7 @@ export default function RpgOnline({
                   {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel musicActive={active&&!interactionBlocked&&!me.nativeScene} initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onCity={()=>{setLifeOpen(false);setCityOpen(true);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   <button className="rpg-settings-map-button" aria-label={trans("RPG設定",languageMode)} onClick={()=>setSettingsOpen(true)}>⚙</button>
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
+                  <button className="rpg-view-switch" aria-label="2D / 3D" onClick={()=>updateRpgPreferences({mapView:prefs.mapView==='3D'?'2D':'3D'})}>{prefs.mapView==='3D'?'3D':'2D'}</button>
                   <div className="rpg-map-tools">
                     {!spectating&&<button onClick={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}>🌱 {trans("農園・牧場",languageMode)}</button>}
                     {world.city&&!spectating&&<button onClick={()=>setCityOpen(true)}>🏙 {trans('都市運営',languageMode)}</button>}
@@ -583,8 +591,9 @@ export default function RpgOnline({
                     <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
-                    <div className="rpg-movement-controls"><span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={settingsOpen||cityOpen||farmOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
+                    <div className="rpg-movement-controls">{prefs.mapView==='3D'&&!overview&&<div className="rpg-turn-controls"><button aria-label="↶" disabled={!latest.current.active} onClick={()=>turn(facing-1)}>↶</button><span>{["N","E","S","W"][facing]}</span><button aria-label="↷" disabled={!latest.current.active} onClick={()=>turn(facing+1)}>↷</button></div>}<span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={settingsOpen||cityOpen||farmOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
+                    {!spectating&&<FarmQuickActions world={world} selfId={selfId} languageMode={languageMode} disabled={!latest.current.active} send={a=>{destination.current=null;walkingRoute.current=[];room.current?.send(a);}} onOpen={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}/>}
 
                     {!spectating&&!me.life?.indoors&&nearbyFlowers(world,me).length>0&&<div className="rpg-flower-quick" aria-label={trans('近くの花',languageMode)}>{nearbyFlowers(world,me).slice(0,3).map(({tile,flower})=><button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog||energyOf(me.life)<1} onClick={()=>room.current?.send({type:'town-flower-pick',tile})} aria-label={copy(flower.name,languageMode)+' '+trans('花を摘む',languageMode)}><FlowerSprite id={flower.id}/><span>{trans('花を摘む',languageMode)}<small> −1</small></span></button>)}</div>}
                     {compact&&quickTiles.length>0&&<div className="rpg-quick-resources" role="group" aria-label="近くの採取"><button className="rpg-energy-button" disabled={!onEnergyRequest||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onClick={requestEnergy}><Zap size={14}/><b>{energyOf(me.life)}/{GATHER_ENERGY_MAX}</b><span>問題で回復</span></button><div>{quickTiles.map(tile=>{const fish=world.tiles[tile]==='water',node=natureAt(world,tile),label=fish?'川釣り':node!.name;return <button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} aria-label={label} title={label} onClick={()=>quickGather(tile)}>{fish?<FishingFrame index={0}/>:<LifeSprite index={node!.sprite}/>}<span>{fish?'釣り':node!.rock?'採掘':'採取'}</span><small>−1</small></button>;})}</div></div>}

@@ -1,4 +1,13 @@
 export const TOWN_ENGLISH:Record<string,string>={
+"暮らしの状態":"Life status",
+"暮らしの状態とプロフィール":"Life status and profile",
+"おなかは食事、幸福度は会話や贈り物、居心地は休憩や家の片づけで整います。戦闘のHPとは別の暮らしの指標です。":"Food restores hunger, conversations and gifts improve happiness, and rest or tidying improves comfort. These life indicators are separate from battle HP.",
+"日課は住人の今の気分を表します。達成ノルマではありません。下で性格・誕生日・自然な交流を設定できます。":"The routine describes a resident’s current mood; it is not a required task. Set personality, birthday and automatic social activity below.",
+"1日は活動時間で3分、1季節は7日です。画面を閉じている間は進みません。":"One day is three active minutes; each season lasts seven days. Time pauses while the game is closed.",
+
+ "料理の贈り物を届けました。":"Your food gift has been sent.",
+ "贈り物を返しました。":"The gift was returned.",
+ "料理の贈り物が思い出になりました。":"Your food gift became a shared memory.",
   "四季とみんなの暮らし": "Seasons and shared lives",
   "暮らし": "Daily life",
   "今日": "Today",
@@ -210,6 +219,15 @@ export const TOWN_ENGLISH:Record<string,string>={
   "冒険者": "Adventurer"
 };
 export const TOWN_HIRAGANA:Record<string,string>={
+"暮らしの状態":"くらしのじょうたい",
+"暮らしの状態とプロフィール":"くらしのじょうたいとぷろふぃーる",
+"おなかは食事、幸福度は会話や贈り物、居心地は休憩や家の片づけで整います。戦闘のHPとは別の暮らしの指標です。":"おなかはしょくじ、こうふくどはかいわやおくりもの、いごこちはきゅうけいやいえのかたづけでととのいます。せんとうのえいちぴーとはべつのくらしのしひょうです。",
+"日課は住人の今の気分を表します。達成ノルマではありません。下で性格・誕生日・自然な交流を設定できます。":"にっかはじゅうにんのいまのきぶんをあらわします。たっせいのるまではありません。したでせいかく・たんじょうび・しぜんなこうりゅうをせっていできます。",
+"1日は活動時間で3分、1季節は7日です。画面を閉じている間は進みません。":"いちにちはかつどうじかんでさんぷん、ひときせつはなのかです。がめんをとじているあいだはすすみません。",
+
+ "料理の贈り物を届けました。":"りょうりのおくりものをとどけました。",
+ "贈り物を返しました。":"おくりものをかえしました。",
+ "料理の贈り物が思い出になりました。":"りょうりのおくりものがおもいでになりました。",
   "四季とみんなの暮らし": "しきとみんなのくらし",
   "暮らし": "くらし",
   "今日": "きょう",

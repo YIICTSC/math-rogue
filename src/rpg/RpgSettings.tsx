@@ -182,6 +182,8 @@ export default function RpgSettings({
               ))}
             </select>
           </label>
+          <label>{L('マップの表示','Map view','まっぷのひょうじ')}<select value={p.mapView} onChange={e=>updateRpgPreferences({mapView:e.target.value as RpgPreferences['mapView']})}><option value="2D">2D</option><option value="3D">3D</option></select></label>
+          <label>{L('3D描画品質','3D quality','すりーでぃーびょうがひんしつ')}<select value={p.mapQuality} onChange={e=>updateRpgPreferences({mapQuality:e.target.value as RpgPreferences['mapQuality']})}><option value="auto">{L('自動','Automatic','じどう')}</option><option value="high">{L('高画質','High','こうがしつ')}</option><option value="low">{L('軽量','Low','けいりょう')}</option></select></label>
           <label>
             {L("マップ拡大率", "Map zoom", "まっぷかくだいりつ")}
             <select

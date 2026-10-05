@@ -38,7 +38,7 @@ export default function useConversationVoice(world: World | null, selfId: string
         setLine(item);
         const speaker = latest.current?.players[item.speaker];
         const resident=latest.current?.town?.people[item.speaker];
-        const config = speaker?.memory?.conversationVoice || latest.current?.town?.customResidents?.find(r=>r.id===item.speaker)?.voice || (resident?{...DEFAULT_CONVERSATION_VOICE,pitch:.85+resident.personality*.07,rate:.9+(resident.personality%3)*.08,timbre:resident.personality%4}:DEFAULT_CONVERSATION_VOICE);
+        const config = speaker?.memory?.conversationVoice || latest.current?.town?.customResidents?.find(r=>r.id===item.speaker)?.voice || (resident?{...DEFAULT_CONVERSATION_VOICE,pitch:.85+resident.personality*.07,rate:.9+(resident.personality%3)*.08,timbre:resident.personality%4,style:['warm','bouncy','calm','playful','smooth','warm','bouncy','calm'][resident.personality] as 'warm'|'bouncy'|'calm'|'playful'|'smooth',intonation:.35+(resident.personality%4)*.15}:DEFAULT_CONVERSATION_VOICE);
         if ((speaker || latest.current?.town?.people[item.speaker]) && config.enabled) {
           const completed = await speakConversation(language==='ENGLISH'?socialLineText(item,language):item.speech||socialLineText(item, language), config, language);
           if (!completed) { if (token === generation.current) setLine(undefined); return; }

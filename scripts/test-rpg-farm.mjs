@@ -52,7 +52,7 @@ try {
   w.players.b.y = 25;
   assert.equal(C.CROPS.length, 32);
   assert.equal(C.LIVESTOCK.length, 8);
-  assert.equal(C.PET_SPECIES.length, 16);
+  assert.equal(C.PET_SPECIES.length, 18);
   assert.equal(C.FARM_DISHES.length, 48);
   assert.equal(N.ALL_DISHES.length, 72);
   assert.ok(send({ type: "farm-start" }));
@@ -267,7 +267,7 @@ try {
     for (const id of Object.keys(d.farmCost)) assert.ok(C.ingredientById(id));
   }
   console.log(
-    "Farm passed: 32 crops, 8 livestock, 16 pets, 48 recipes, seasons/growth/quality/rotation, no duplicate rewards/production, ownership, irrigation/greenhouse/barn, pet care/walk/errands, ingredient cooking, busy guards, frozen save/restore and 112 generated WebP assets.",
+    "Farm passed: 32 crops, 8 livestock, 18 pets, 48 recipes, seasons/growth/quality/rotation, no duplicate rewards/production, ownership, irrigation/greenhouse/barn, pet care/walk/errands, ingredient cooking, busy guards, frozen save/restore and 114 generated WebP assets.",
   );
 } finally {
   await server.close();
