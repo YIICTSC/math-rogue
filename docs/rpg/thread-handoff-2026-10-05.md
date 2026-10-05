@@ -7,8 +7,8 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`16435d884060db39384597f8e7560a80bd1d3ec2`（Render native cards in RPG trades and preserve enemy art across asset packs）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
-- 最後のゲーム実装依頼は、敵主人公の秘技カード画像・BGM継続調整に加え、トレードを本編と同じカード表示へ統一する改善。実装・検証・mainへの反映・GitHub公開確認まで完了。
+- 最後にmainへ反映したコミット：`16435d884060db39384597f8e7560a80bd1d3ec2`（Expand RPG life and 3D world with mobile menus, farm actions and varied voices）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
 
