@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`8ae0b21e0138cf56f44efae111f414878a99098b`（Make RPG modal and furniture game actions visibly distinct buttons）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`b53c4645ba73072953c269822a1b67787a199665`（Expand golf rounds and refine resident dialogue and typing progression）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -254,3 +254,32 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 変更はRpgOnline.tsx/rpg.css/miniLab.css/HobbyGamesPanel.tsx/gameRoom.cssの5ファイル。ラベル／ゲームルール／アセット変更なし。アドホック表示テストと確認画像は/workspace/scratch/rpg-buttons-*。
 
 - GitHub Pages Actions 37409522125、Android AAB Actions 37409522122とも成功。公開index-DQ9wzNLN.css（774651 bytes）およびHobbyGamesPanel-CqUtRNjl.css（26541 bytes）がローカル検証済みファイルと完全一致。公開JS HobbyGamesPanel-DUHGWLqd.jsにgc-game-actions/start/exit指定を確認。Render確認はユーザー方針により実施していない。
+
+## 最新追記：ゴルフオンラインのゲーム画面（2026-10-06）
+
+- main `46c0ddf4578d768c34ccdc4f3a27a1091ac3c7e2`。ユーザーの「みんゴル」参考画像を基に、選手後方の低いカメラ、左上ホールリボン／打数／残り距離／累計スコア、右上風向き、開閉するコースマップ、下部クラブ／横長パワーゲージ／ショット操作を実装。単位は従来のメートル、パワーは従来のスライダー操作を維持。タイミング判定などルール追加はない。
+- GolfCanvas.tsxは選手を左に映すスタンスにし、その方向に合わせてスイングの符号を補正。ボール半径を0.55→0.16へ縮小し、描画軌道も0.39下げて一致させた（予測／物理データは従来どおり）。画面比率に応じたカメラ距離・横位置・HUD用の投影オフセット。飛行時のボール追従と全景切替を維持。
+- 新規 CourseHud.tsx：実際のコース／参加者座標によるSVGマップ、狙いに対する風向き、クラブSVG。courseScenery.ts：決定的な芝テクスチャ、InstancedMeshの広葉樹・影・丘・雲をコードで生成し、終了時にGPU素材を破棄。プレイ領域は物理と同じ平面を保つ。静的素材追加なし。
+- GakuroGolf.tsxでは実シミュレーションを使う推定飛距離をmemo化し、ホールを依存条件に含めた。通常プレイ中のホストには変更不可の観戦切替帯を出さず、観戦中は従来の8秒切替／手動切替を維持。ゲームステージを全面に固定し、観戦帯が画面を押し下げる問題を防いだ。
+- 変更6ファイル：GakuroGolf.tsx/GolfCanvas.tsx/CourseHud.tsx/courseScenery.ts/copy.ts/golf.css。copy.tsの新ラベルは既存debugUiExactのGOLF_ENGLISH/HIRAGANA展開で翻訳。
+- 確認：test-gakuro-golf.mjs成功（40人、学習報酬、池・OB、パター、3ホール等）、test-golf-dedicated-browser.mjs成功（40 WebSocket／同時ショット／ホスト交代）。実3問→ショット／全景／クラブ変更／全3ホールのブラウザ確認成功。
+- 最終表示：1440×900/390×844/844×390/360×640/568×320/1024×768で実選手の描画境界・足元・ボール・全操作を確認。ホスト／観戦を縦横PCで確認。スイングは実モデルのクラブ位置がバックスイング時Z負・フォロー時Z正になることを確認。
+- Web英語監査/full build/server:build/diff --check成功。最終Vite build成功。既存test-gakuro-golf-browser.mjsは現行単元UIに「1ケタのたし算」が出ないため停止したが、ゴルフ単独UIで実単元準備／3問回答／ラウンド開始を別途通している。テスト素材とログは/workspace/scratch/golf-*。
+
+- 前回のゴルフ画面改修の公開確認：GitHub Pages 37413697524、Android AAB 37413697393ともsuccess。公開CSS/JSとローカルの一致を確認済み。
+
+## 最新追記：ゴルフ18ホール・住人会話・タイピング（2026-10-06）
+
+- main `b53c4645ba73072953c269822a1b67787a199665`。47ファイル変更。ゴルフは18ホール・合計PAR72、ホスト／ソロは開始前に1〜18ホールを選択。途中参加・ホスト交代にも設定を保持。専用サーバー・Peerともprotocol2。
+- 最初に3問、その後は実際のショット3回ごとに3問。学習報酬は3ショット分でホールをまたいで保持。OB／池の罰打は残りショット数を消費しない。質問を省略する次ショットでもリプレイ防止トークンを更新。ホール数はロビーのみホストが変更できる。
+- タイトル／参加者集計を画面高内に収め、横画面2列、縦画面コンパクト配置、参加者一覧内部スクロール。320×568、390×844、360×640、568×320、844×390、1024×768、1440×900で確認。
+- Springin Sound Stockから8種のゴルフ効果音を選定しMP3／Opusで同梱。スイング／パット／着地／カップイン／バーディー／池／OB／開始。各ホールに既存新旧BGM18曲、タイトルと結果にも既存曲を割当。質問・スコアボードでは曲を切り替えない。音源一覧と権利・出典は docs/golf-audio-credits.md。音源直リンクは掲載せずカタログ分類と元タイトル・取得SHA256を記載。
+- audioService.acquireBgmSceneは従来の解除関数にupdateを追加。優先度を保ったまま曲を変更し、ホール間の一瞬の元曲復帰を防ぐ。既存利用側互換。音量／ミュートは既存設定を尊重。
+- ResidentSceneで主人公／住人のspeakerに合わせ吹き出しと名前・話者アニメを分ける。初回の仲良くなる案内、システム話者の効果説明は操作パネルへ表示し住人の発言にしない。スマホ縦では吹き出し幅は広く、しっぽを各話者側にする。操作タブ高さ44pxを保証。
+- タイピングの語句と生成処理を src/data/typingPrompts.ts へ移動、新規 typingVariety.ts で30段階・5帯。Act／フロア／敵撃破経験から進行し、戦闘開始時に経験を固定して入力途中の急な出題変更を防ぐ。ホームポジションは1キー→最大12キー、語句・文章は徐々に長くする。100語、136文、116英語例、20母音例、480数字記号例を既存に追加。直近24項目を避け、同名／同IDカードが連続しても完了後に次のお題へ更新。長文の敵行動間隔を1文字90ms、追加最大8秒で補正。
+- test-typing-progression.mjs：15レッスン×3言語×5帯、反復抑制・進行・ローマ字代替表記を検証。HOME_ROW平均1→11キー、WORDS約4→18文字、SENTENCES約8→69文字。説明 docs/typing-progression.md。
+- 検証成功：test-gakuro-golf.mjs／test-golf-server.mjs／test-golf-dedicated-browser.mjs（40クライアント、選択ホール・途中参加・ホスト交代）／新test-golf-peer.mjs（実Peer/WebRTC、ホール権限・途中参加・3打周期）、実ReactゴルフUI7画面サイズ／18番ホール、音源キュー／BGM優先度テスト。
+- RPGはtest-rpg-resident-conversations.mjsとtest-rpg-resident-browser.mjs成功。ブラウザは5画面サイズ、本人／住人／システム発言、言葉を教える／会話／贈り物／6お出かけ／NPCイベント／2D・3D復帰を実確認。ソフトウェア3Dにより10分以上かかる。
+- 英語UI監査、pnpm run build、最終Vite build、server:build、diff --check成功。全体tscは以前のOOMのため成功扱いにしない。既存の単元UI変更で旧test-gakuro-golf-browser.mjsは利用せず、実Reactゴルフ単独UIテストで準備・問題・ショットを確認。ログ・画像は /workspace/scratch/golf18-*、resident-dialogue-*、typing-final.log。
+
+- 今回の公開確認：GitHub Pages Actions 37416448743、Android AAB Actions 37416448746ともsuccess。公開GakuroGolf-Cqx_LhL5.css（31625 bytes）がローカルと完全一致。公開Golf JS／RpgOnline JS・CSSに18ホール設定／3打周期／話者別吹き出し・案内パネル、公開main JSに追加タイピング語句を確認。ゴルフMP3/Opus16ファイルが全てローカルと完全一致。CIとローカルではJSチャンク名が異なるため、公開indexから実際の参照をたどって検証した。Renderの追加確認はユーザー指定により実施していない。
