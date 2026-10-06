@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`a05abff97523b69006447b69e20d34bc3e7c3481`（Improve golf timing, spin and score reactions; restore full demon illustrations）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`cdb5c51dc88b213f0b817a78ca325887341bbd71`（feat(3d): unify RPG kart and golf with original Blender storybook scenery）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -312,3 +312,21 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 英語UI監査、最終pnpm run build、server:build、Android素材manifest検証（10288ファイル）、diff --check成功。最終Web buildのゴルフチャンクにもMAX表示を確認。全体tscはOOMの既知理由により成功扱いにしない。
 
 - 公開確認完了：main `a05abff97523b69006447b69e20d34bc3e7c3481`、Pages Actions `37439622249`・Android AAB Actions `37439622408`ともsuccess。公開indexから実際の `GakuroGolf-CV8wLTgV.js`／CSSをたどり、2度合わせ・スピン・グレード・スコア別リアクションを確認。公開main CSSに魔王の拡大抑制を確認。魔王のWebP6枚は全てローカルと完全一致。Renderの追加確認・手動デプロイは行っていない。ローカルmainはAPI公開後の同一treeのSHAへ同期済み。追跡変更はなく、引き継ぎ資料のみ未追跡で保持。
+
+
+## 2026-10-06 追記：RPG・レース・ゴルフの絵本調3D
+
+- ユーザーの明示目標「絵本のような温かさのある、統一されたファンタジー調の3D。Three.jsはゲーム内描画、Blenderはモデル・アニメーション制作」を実装。main `cdb5c51dc88b213f0b817a78ca325887341bbd71`、28ファイル。
+- Blender 4.3.2を使用しオリジナルモデル19種を制作。`assets/storybook/storybook.blend`に編集用ギャラリー、`scripts/blender/build-storybook.py`に再生成スクリプト。GLBは`public/models/storybook/storybook-v1.glb`（960552 bytes、約938 KiB）。風車の回転、蝶の羽ばたきに実際のBlenderアニメーションクリップを付与。各ゲームでアニメーションを再生する。
+- 共通描画`src/three/storybookModels.ts`はGLTFLoader、素材別InstancedMesh、AnimationMixer、非同期読み込み中の退出・リソース破棄、読み込み失敗時の既存景観への代替を担当。`storybookStyle.ts`は共通色調、地形の柔らかな色むら、水面の光、雲・丘・花粉、高画質の影を担当。
+- RPGは既存の3D切り替えを強化。バイオーム・季節に応じる木、家、塔、岩、花、都市の風車、蝶を導入。NPC・プレイヤーの立ち絵と農場アイテムを維持。建物・資源のタイル選択情報を維持。移動・戦闘・採取ルールには変更なし。
+- GPは既存・自作コースの実際の曲線に沿って木・花・家・灯り・風車を配置。浮遊コース脇は丸い草地の島で景観を支える。路面・判定・問題ストレートは既存のまま。色調を柔らかなファンタジー景観に調整。
+- ゴルフは18ホールで共通景観をロード。クラブハウス、風車、木々、花、蝶、柔らかな水面を追加。物理・メーター・スピン・反応カメラは維持。
+- GP／ゴルフには画質：自動／高画質／軽量のボタン（日本語・英語・ひらがな）を追加し共通localStorageへ保存。RPGは既存専用設定のmapQualityを利用。自動は狭い画面・タッチ端末で軽量にし、軽量では影無効・ピクセル比1・遠景の木を削減。装飾アニメーションは動きを減らす設定に対応。
+- Web／Androidの素材manifestにGLBを追加、assetUrlでキャッシュの版を管理。Androidの基本映像パックに含む。公開GLBは外部画像・バッファ依存なし。
+- 検証：`test-storybook-assets.mjs`（19モデル・床位置・容量・アニメーションの実際の変化）、`test-storybook-browser.mjs`（高画質シェーダーと影、風車の実動作、読み込み中破棄、失敗代替、全18ホール）、`test-rpg-world3d-browser.mjs`（モデル読み込み・アニメーション数・縦横PC・移動旋回・農場隣接アクション）、`test-kart-camera-browser.mjs`（モデル・アニメーション・坂道カメラの路面クリアランス・PC／スマホ）、`test-golf-shot-browser.mjs`（実React、7画面サイズ、問題・2度合わせ・18番・BGM・スコア別反応）成功。
+- ソフトウェアWebGLのスクリーンショットでGPU待ちタイムアウトが発生したため、レースのテストは撮影時だけ描画更新を止めて安定化。ゲームの描画頻度は変更していない。ゴルフのテストは軽量設定で7サイズを検証し、高画質描画は専用テストで確認。実機のFPS保証はしていない。既存RpgOnlineのReact key警告はこの変更の対象外。
+- 英語UI監査を含むpnpm run build、最終vite build、server:build、Android素材manifest検証、diff --check成功。手順は`docs/storybook-3d.md`。全体tscの成功とは扱わない。
+
+- 公開確認完了：Pages Actions `37532470628`・Android AAB Actions `37532470626`ともsuccess。公開index `index-B35_eZOT.js`から実際の`storybookModels-BUzVQL3j.js`、`GakuroGolf-Bb24GiKn.js`、`GakuroKart-CW344Zry.js`、`WorldScene3D-CbvpXqg5.js`を追跡し、新描画を確認。公開GLB 960552 bytesはローカルと完全一致（SHA-256 `4a134e80a66a71244f714137b405709ea6ff894657cf86f48abe4685e1a56170`）、catalogも19モデルを確認。
+- ローカルmainと公開mainは同一SHA・同一treeに同期済み。追跡差分なし、引き継ぎ資料のみ未追跡で保持。Renderの追加確認・手動デプロイは行っていない。
