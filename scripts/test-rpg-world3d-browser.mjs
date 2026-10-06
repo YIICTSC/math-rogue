@@ -83,28 +83,36 @@ try {
   await p.waitForFunction(()=>Number(document.querySelector("[data-testid=rpg-world-3d]")?.dataset.blenderModels)>0);
   assert(Number(await p.locator("[data-testid=rpg-world-3d]").getAttribute("data-blender-animations"))>0);
   console.log("RPG 3D rendered with Blender models and animation");
-  await p.evaluate(()=>{const w=window.room.world;w.voxels={revision:1,edits:{'20,0,19':'wood','20,1,19':'wood'}};window.room.emit();});
+  await p.evaluate(()=>{const w=window.room.world;const flat=[];for(let z=15;z<30;z++)for(let x=15;x<30;x++)flat.push(`${x},${z}`);w.voxels={terrainVersion:2,legacyFlat:flat,revision:1,edits:{'20,0,19':'wood','20,1,19':'wood'}};w.revision++;window.room.emit();});
+  await p.waitForTimeout(800);
   await p.waitForFunction(()=>Number(document.querySelector('[data-testid=rpg-world-3d]').dataset.voxelBlocks)>=2);
-  await p.getByRole('button',{name:'🧱 ブロック建築'}).click();
+  assert.equal(await p.locator('.rpg-voxel-slots button').count(),4);
+  await p.getByRole('button',{name:'スロット設定'}).click();
   await p.getByRole('button',{name:'⛏ 壊す'}).waitFor();
-  await p.getByLabel('建築素材').selectOption('stone');
+  await p.getByLabel('選択スロットの素材').selectOption('stone');
+  await p.getByRole('button',{name:'スロット設定'}).click();
   await p.getByRole('button',{name:'⛏ 壊す'}).click();
   await p.waitForFunction(()=>window.room.world.voxels.edits['20,1,19']===null);
-  assert.equal(await p.evaluate(()=>window.room.world.players.local.life.energy),5);
+  assert.equal(await p.evaluate(()=>window.room.world.players.local.life.energy),5.9);
   // A slight downward look targets the remaining block's top face.
   await p.locator('[data-testid=rpg-world-3d]').dispatchEvent('pointerdown',{clientX:220,clientY:400});
-  await p.locator('[data-testid=rpg-world-3d]').dispatchEvent('pointerup',{clientX:220,clientY:413});
+  await p.locator('[data-testid=rpg-world-3d]').dispatchEvent('pointerup',{clientX:220,clientY:453});
   await p.waitForTimeout(250);
   await p.getByRole('button',{name:'＋ 置く'}).click();
   await p.waitForFunction(()=>window.room.world.voxels.edits['20,1,19']==='stone');
   console.log('Actual 3D ray mining and supported placement passed');
 
 
+  await p.evaluate(()=>{const me=window.room.world.players.local;me.y=22;delete me.position3D;window.room.world.revision++;window.room.emit();});
+  await p.getByRole('button',{name:'視点スティック'}).press('ArrowUp');
+  await p.getByRole('button',{name:'視点スティック'}).press('ArrowUp');
+  await p.getByRole('button',{name:'視点スティック'}).press('ArrowUp');
+  await p.getByRole('button',{name:'視点スティック'}).press('ArrowUp');
   await p.waitForTimeout(1500);
   await p.screenshot({
     path: "/workspace/scratch/lifestyle-screens/3d-billboards.png",
   });
-  await p.locator(".rpg-turn-controls button").last().click();
+  await p.keyboard.press("r");
   await p.waitForFunction(
     () =>
       document.querySelector("[data-testid=rpg-world-3d]")?.dataset.facing ===
@@ -135,16 +143,25 @@ try {
   await p.waitForFunction(() =>
     window.sent.some((a) => a.type === "voxel-move" && a.dx === 0 && a.dy < 0),
   );
+  const look=await p.getByRole('button',{name:'視点スティック'}).boundingBox(),up=await p.locator('.rpg-dpad button').first().boundingBox();
+  const cdp=await p.context().newCDPSession(p),before=Number(await p.locator('[data-testid=rpg-world-3d]').getAttribute('data-facing'));
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x:up.x+up.width/2,y:up.y+up.height/2},{id:1,x:look.x+look.width*.85,y:look.y+look.height*.35}]});
+  await p.waitForTimeout(350);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await p.waitForFunction(n=>Number(document.querySelector('[data-testid=rpg-world-3d]').dataset.facing)!==n,before,{timeout:5000});
+  console.log('Two-finger left movement / right look passed');
   for (const [width, height] of [
     [390, 844],
+    [320, 568],
     [844, 390],
+    [568, 320],
     [1440, 900],
   ]) {
     await p.setViewportSize({ width, height });
     await p.waitForTimeout(250);
     const view = await p.locator("[data-testid=rpg-world-3d]").boundingBox(),
       switcher = await p.locator(".rpg-view-switch").boundingBox();
-    const tools=await p.locator('.rpg-voxel-tools').boundingBox();assert(tools.x>=0&&tools.x+tools.width<=width+1);assert(tools.y>=0&&tools.y+tools.height<=height);
+    const tools=await p.locator('.rpg-voxel-dock').boundingBox();assert(tools.x>=0&&tools.x+tools.width<=width+1);assert(tools.y>=0&&tools.y+tools.height<=height);
+    const stick=await p.getByRole('button',{name:'視点スティック'}).boundingBox();console.log('3D controls layout',{width,height,view,tools,stick});await p.screenshot({path:`/workspace/scratch/lifestyle-screens/voxel-controls-${width}.png`});assert(stick.x>=width/2&&stick.y>=view.y-1&&stick.y+stick.height<=view.y+view.height+1&&stick.x+stick.width<=width+1);
     assert.ok(view.width >= width - 2);
     assert.ok(
       switcher.width >= 44 &&
@@ -160,6 +177,11 @@ try {
       path: `/workspace/scratch/lifestyle-screens/rpg-3d-${width}.png`,
     });
   }
+  await p.evaluate(async()=>{const V=await import('/src/rpg/voxel.ts');const w=window.room.world,c=V.oasisCenters(w).find(c=>!V.protectedVoxel(w,c.x,c.z));const me=w.players.local;window.surface={x:me.x,y:me.y};me.x=c.x;me.y=c.z;me.position3D={x:c.x+.5,z:c.z+.5,y:c.depth-1};w.revision++;window.room.emit();});
+  await p.waitForFunction(()=>Number(document.querySelector('[data-testid=rpg-world-3d]').dataset.cameraY)<-3);
+  await p.waitForTimeout(600);
+  await p.screenshot({path:'/workspace/scratch/lifestyle-screens/rpg-underground-oasis.png'});
+  await p.evaluate(()=>{const w=window.room.world,me=w.players.local;me.x=window.surface.x;me.y=window.surface.y;delete me.position3D;w.revision++;window.room.emit();});
   await p.getByRole("button", { name: "2D / 3D", exact: true }).click();
   await p.locator("[data-testid=rpg-world-3d]").waitFor({ state: "detached" });
   await p.keyboard.press("ArrowRight");
@@ -299,7 +321,7 @@ try {
   });
   assert.deepEqual(errors, []);
   console.log(
-    "RPG 3D integration passed: real exploration, mobile turn buttons, relative keyboard and dpad, three layouts, toggle, adjacent farm/animal/pet actions and scrollable landscape menus.",
+    "RPG 3D integration passed: real mining/building and underground oasis, two-finger continuous look/movement, four customizable slots, five layouts, toggle, adjacent farm/animal/pet actions and scrollable landscape menus.",
   );
 } finally {
   await browser?.close();

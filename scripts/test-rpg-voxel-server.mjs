@@ -11,10 +11,11 @@ try{
  a.send({type:'rpg-start'});await until(()=>b.state().started);
  a.send({type:'voxel-move',dx:.13,dy:.11});await until(()=>b.state().players[a.id].position3D);assert(!Number.isInteger(b.state().players[a.id].position3D.x));
  const p=a.state().players[a.id],w=a.initial,tiles=w.tiles.split(',');let tile;
- for(let z=p.y-3;z<=p.y+3;z++)for(let x=p.x-3;x<=p.x+3;x++)if(!tile&&Math.hypot(x+.5-(p.position3D?.x??p.x+.5),z+.5-(p.position3D?.z??p.y+.5))<3&&['grass','road','stone'].includes(tiles[z*192+x])&&!w.sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)&&!Object.values(a.state().players).some(q=>q.x===x&&q.y===z))tile={x,y:0,z};
+ for(let z=p.y-3;z<=p.y+3;z++)for(let x=p.x-3;x<=p.x+3;x++)if(!tile&&Math.hypot(x+.5-(p.position3D?.x??p.x+.5),z+.5-(p.position3D?.z??p.y+.5))<3&&tiles[z*192+x]==='road'&&!w.sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)&&!Object.values(a.state().players).some(q=>q.x===x&&q.y===z))tile={x,y:0,z};
  assert(tile,'A buildable nearby tile exists');const key=`${tile.x},0,${tile.z}`;
  a.send({type:'voxel-place',...tile,block:'wood'});await until(()=>b.state().voxels?.edits[key]==='wood');assert.equal(b.state().players[a.id].life.bag.wood,3);
- b.send({type:'voxel-break',...tile});await until(()=>a.state().voxels?.edits[key]===null);assert.equal(a.state().players[b.id].life.bag.wood,5);assert.equal(a.state().players[b.id].life.energy,5);
+ b.send({type:'voxel-break',...tile});await until(()=>a.state().voxels?.edits[key]===null);assert.equal(a.state().players[b.id].life.bag.wood,5);assert(Math.abs(a.state().players[b.id].life.energy-5.9)<1e-8);assert(Math.abs(a.state().players[a.id].life.energy-5.9)<1e-8);
+ await pause(250);a.send({type:'voxel-break',...tile,y:-1});await until(()=>b.state().voxels?.edits[`${tile.x},-1,${tile.z}`]===null);assert(Math.abs(b.state().players[a.id].life.energy-5.8)<1e-8);assert.equal(['dirt','sand','snow'].reduce((n,k)=>n+(b.state().players[a.id].life.bag[k]||0),0),1);
  const revision=a.state().voxels.revision;b.send({type:'voxel-place',x:150,y:0,z:70,block:'wood'});await pause(350);assert.equal(a.state().voxels.revision,revision);
  a.send({type:'voxel-snap'});await until(()=>!b.state().players[a.id].position3D);
  console.log('PASS: two actual server clients synchronize continuous coordinates, place/mine/materials/energy, reject remote edits and synchronize the 2D snap.');

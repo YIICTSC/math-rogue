@@ -89,7 +89,8 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
-  position3D?: {x:number;z:number};
+  position3D?: {x:number;z:number;y?:number};
+  voxelDiscoveries?:string[];
   voxelAt?:number;
   hero?:CustomHero;
   memory?:SocialMemory;

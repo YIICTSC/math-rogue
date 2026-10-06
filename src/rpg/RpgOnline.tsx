@@ -581,7 +581,7 @@ export default function RpgOnline({
                 </div>
                 <div className="rpg-map-container">{!spectating&&<button className="rpg-season-badge" onClick={()=>setDetail('town')}>{copy(SEASONS[calendar(world).season],languageMode)} {calendar(world).date} · {trans('暮らし',languageMode)}</button>}{incomingRequest&&!me.life?.indoors&&<button className="rpg-social-invite" onClick={()=>openDetail('social')}>{incomingRequest.kind==='cohabit'?'同居のお誘い':'結婚のお申し込み'}</button>}{talkLine&&<div className="rpg-social-bubble" aria-live="polite"><b>{talkLine.speaker==='player'?'あなた':world.players[talkLine.speaker]?.hero?.name||world.players[talkLine.speaker]?.name||(residentsOf(world).find(r=>r.id===talkLine.speaker)?copy(residentsOf(world).find(r=>r.id===talkLine.speaker)!.name,languageMode):world.town?.people[talkLine.speaker]?.name)}</b>{socialLineText(talkLine,languageMode)}</div>}
                   {active && (
-                    <WorldCanvas onVoxelAction={action=>{if(latest.current.active&&!interactionBlocked&&!spectating)room.current?.send(action);}} paused={!!residentTarget||!!storySiteId||!!roamingNpcSiteId} facing={facing} onFacing={turn}
+                    <WorldCanvas onVoxelAction={spectating?undefined:action=>{if(latest.current.active&&!interactionBlocked)room.current?.send(action);}} paused={!!residentTarget||!!storySiteId||!!roamingNpcSiteId} facing={facing} onFacing={turn}
                       world={world}
                       selfId={spectating ? spectators.target || selfId : selfId}
                       overview={overview}

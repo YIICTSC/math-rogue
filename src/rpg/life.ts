@@ -13,7 +13,7 @@ import { RECIPES as CRAFT_RECIPES } from '../mini-games/gakuro-craft/materials';
 import { gameCommand, tickGames, type GameCommand, type HomeGame, type HomeGameWorld } from '../mini-games/gakuro-craft/homeGames';
 import type { Home } from '../mini-games/gakuro-craft/progression';
 
-export const MATERIAL_NAMES = {wood:'木材',stone:'石材',ore:'鉄鉱石',crystal:'魔晶石',herb:'薬草',fish:'魚',frostwood:'霜木',reed:'葦',plank:'木の板',brick:'レンガ',housekit:'家の建築キット'} as const;
+export const MATERIAL_NAMES = {dirt:'土',sand:'砂',snow:'雪',steel:'鋼材',wood:'木材',stone:'石材',ore:'鉄鉱石',crystal:'魔晶石',herb:'薬草',fish:'魚',frostwood:'霜木',reed:'葦',plank:'木の板',brick:'レンガ',housekit:'家の建築キット'} as const;
 export type Material = keyof typeof MATERIAL_NAMES;
 export type Bag = Partial<Record<Material,number>>;
 export const NATURE = [
@@ -39,7 +39,7 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
-export interface LifePlayer {fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface LifePlayer {pickaxe?:'stone'|'iron'|'steel';fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
@@ -48,6 +48,9 @@ export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERG
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
 export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&!([0,1].some(h=>!!w.voxels?.edits[`${x},${h},${y}`]))&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
+ {id:'pickaxe-stone',name:'石のツルハシ',cost:{wood:2,stone:3} as Bag,kind:'tool',description:'硬いブロックの採掘エネルギーを25%軽減。',sprite:2},
+ {id:'pickaxe-iron',name:'鉄のツルハシ',cost:{plank:2,ore:3} as Bag,kind:'tool',description:'硬いブロックの採掘エネルギーを50%軽減。',sprite:2},
+ {id:'pickaxe-steel',name:'鋼のツルハシ',cost:{plank:3,steel:3,crystal:1} as Bag,kind:'tool',description:'硬いブロックの採掘エネルギーを70%軽減。',sprite:2},
  {id:'plank',name:'木の板',cost:CRAFT_RECIPES.plank as Bag,kind:'material',description:'家や家具の材料。',sprite:0},
  {id:'brick',name:'レンガ',cost:CRAFT_RECIPES.brick as Bag,kind:'material',description:'家や家具の材料。',sprite:1},
  {id:'sword',name:'鉄の剣',cost:{plank:2,ore:3} as Bag,kind:'weapon',description:'専用カード：14ダメージ、びくびく2。',sprite:2},
@@ -127,13 +130,14 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
  if(a.type==='life-craft'){
   if(lp.work)return false;
   const r=RECIPES.find(r=>r.id===a.recipe);if(!r||!canAfford(lp.bag,r.cost))return tell('材料が足りません。');
-  if((r.kind==='weapon'||r.kind==='relic')&&lp.crafted.includes(r.id))return tell('この装備は作成済みです。');
+  if((r.kind==='weapon'||r.kind==='relic'||r.kind==='tool')&&lp.crafted.includes(r.id))return tell('この装備は作成済みです。');
   const house=life.houses.find(h=>h.owner===p.id);
   if(r.kind==='furniture'&&(!house||lp.indoors!==house.id))return tell('自分の家の中で家具を作れます。');
   if(r.id==='housekit'&&(house||(lp.bag.housekit||0)>0))return tell('建築キットか家をすでに持っています。');
   if(r.kind==='furniture'&&Object.values((house!.interior??=interiorOf(house!)).stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');
   if(r.kind==='meal'&&p.hp>=p.maxHp)return tell('HPは満タンです。');
   spend(lp.bag,r.cost);
+  if(r.kind==='tool'){const rank=['stone','iron','steel'] as const,tool=r.id.slice(8) as typeof rank[number];if(rank.indexOf(tool)>rank.indexOf(lp.pickaxe!))lp.pickaxe=tool;lp.crafted.push(r.id);}
   if(r.kind==='material')lp.bag[r.id as Material]=(lp.bag[r.id as Material]||0)+1;
   if(r.kind==='weapon'){
    const frost=r.id==='frostbow';const card={...CARDS_LIBRARY[frost?'IRON_WAVE':'BASH'],id:`rpg-crafted-${p.id}-${r.id}`,name:r.name,damage:frost?10:14,...(frost?{block:8}:{}),description:frost?'10ダメージ。ブロック8を得る。':'14ダメージ。対象にびくびく2を与える。'};
