@@ -912,6 +912,8 @@ export const getThemedEnemyVariant = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
 ) => {
+  if(enemy.enemyType==='RPG_EXAMINER')enemy={...enemy,enemyType:'GUARDIAN'};
+  if(enemy.enemyType==='RPG_DEMON')return {name:enemy.name,imageIndex:Math.max(0,(enemy.phase||1)-1)};
   if (theme === 'high-school') return getHighSchoolEnemyVariant(enemy);
   if (theme === 'magic') return getMagicEnemyVariant(enemy);
   return null;
@@ -921,6 +923,8 @@ export const getThemedHumanoidEnemyVariant = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
 ) => {
+  if(enemy.enemyType==='RPG_EXAMINER')enemy={...enemy,enemyType:'GUARDIAN'};
+  if(enemy.enemyType==='RPG_DEMON')return {name:enemy.name,imageIndex:Math.max(0,(enemy.phase||1)-1)};
   if (theme === 'high-school') return getHighSchoolHumanoidEnemyVariant(enemy);
   if (theme === 'magic') return getMagicHumanoidEnemyVariant(enemy);
   return null;
@@ -932,6 +936,8 @@ export const getThemedHumanoidEnemySpritePath = (
   action: HighSchoolEnemyAction,
   appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if(enemy.enemyType==='RPG_EXAMINER')enemy={...enemy,enemyType:'GUARDIAN'};
+  if(enemy.enemyType==='RPG_DEMON')return assetUrl(`sprites/rpg/demon/${Math.max(1,Math.min(3,enemy.phase||1))}-${action==='idle'?'idle':'attack'}.webp`);
   if (theme === 'high-school') return getHighSchoolHumanoidEnemySpritePath(enemy, action, appearanceMode);
   if (theme === 'magic') return getMagicHumanoidEnemySpritePath(enemy, action, appearanceMode);
   return null;
@@ -970,6 +976,8 @@ export const getThemedEnemyDisplayName = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
 ) => {
+  if(enemy.enemyType==='RPG_EXAMINER')return enemy.name;
+  if(enemy.enemyType==='RPG_DEMON')return enemy.name;
   if (theme === 'high-school') return getHighSchoolEnemyVariant(enemy).name;
   if (theme === 'magic') return getMagicEnemyVariant(enemy).name;
   return enemy.name;

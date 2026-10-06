@@ -63,7 +63,7 @@ export interface Site {
   cleared: boolean;
   raidSize?: number;
   nativeInitialized?: boolean;
-  bossPhase?: 1 | 2;
+  bossPhase?: 1 | 2 | 3;
   eventNumber?: number;
   npcEventId?: string;
   enemyNamesByTheme?: Record<VisualThemeId, string>;
@@ -127,6 +127,8 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+ campaignVersion?: 2;
+ endingProgress?: Record<string,number>;
  city?:CityState;
   social?:SocialWorld;
   town?:TownState;
@@ -164,7 +166,7 @@ export type Action = FarmAction | CityAction | TownAction | SocialAction | LifeA
       token: string;
       total: number;
       sequence: number;
-      phase?: 1 | 2;
+      phase?: 1 | 2 | 3;
     }
   | {
       type: "native-finish";
@@ -201,14 +203,14 @@ export function siteUnavailable(
 ): string | null {
   if (p.nativeScene || activityBusy(w,p)) return "現在のシーンを完了してください。";
   if (w.ended)
-    return w.endReason === "timeout" ? "時間切れ！" : "校長を倒しました！";
-  if (w.won&&!w.city) return "校長を倒しました！";
+    return w.endReason === "timeout" ? "時間切れ！" : "魔王を倒しました！";
+  if (w.won&&!w.city) return "魔王を倒しました！";
   if (s.cleared) return "討伐済みです。";
   if (s.kind === "treasure" && p.claimed.includes(s.id))
     return "この宝箱は開封済みです。";
   if (s.kind === "npc" && p.npcEventsSeen?.includes(s.id))
     return "この旅人とのイベントは解決済みです。";
-  if (["town", "rest", "event"].includes(s.kind)) {
+  if (["town", "rest", "event"].includes(s.kind) && !w.city) {
     const remaining =
       3 - ((p.completedBattles || 0) - (p.siteUses?.[s.id] || 0));
     if (remaining > 0)
@@ -218,7 +220,7 @@ export function siteUnavailable(
     s.kind === "boss" &&
     w.sites.some((q) => q.kind === "guardian" && !q.cleared)
   )
-    return "3体の試験官を倒すと校長の結界が解除されます。";
+    return "6地域の試験官を倒すと魔王城の結界が解除されます。";
   return null;
 }
 export function validProfile(profile: NativeProfile): boolean {
@@ -352,16 +354,15 @@ function applyNativeAction(
     p.totalDamage = (p.totalDamage || 0) + Math.max(0, Math.floor(delta));
     site.hp = Math.max(0, Math.min(site.maxHp, site.hp - delta));
     if (site.hp === 0) {
-      if (site.kind === "boss" && site.bossPhase === 1) {
-        site.bossPhase = 2;
+      if (site.kind === "boss" && (site.bossPhase || 1) < 3) {
+        site.bossPhase = ((site.bossPhase || 1) + 1) as 2 | 3;
         site.hp = site.maxHp;
         for (const player of Object.values(w.players)) {
           if (player.nativeScene?.siteId === site.id) {
             player.nativeScene.damage = 0;
           }
         }
-        const headmasterTitle = w.setup?.visualTheme === "magic" ? "大魔女校長" : "校長先生";
-        log(w, `${headmasterTitle}が真の姿を現した！`);
+        log(w, site.bossPhase === 2 ? "魔王が真の姿を現した！" : "魔王が最終形態に変身した！");
       } else {
         site.cleared = true;
         log(w, `${site.name}を討伐！`);
@@ -460,10 +461,8 @@ export function createWorld(
   add("rest", "旅人の焚き火", 94 / 3, 32);
   add("rest", "旅人の焚き火", 94 / 3, 10);
   add("rest", "旅人の焚き火", 158 / 3, 32);
-  add("guardian", "森の試験官", 12 + Math.floor(rng() * 5), 9);
-  add("guardian", "水辺の試験官", 39, 32 + Math.floor(rng() * 4));
-  add("guardian", "遺跡の試験官", 51, 9 + Math.floor(rng() * 4));
-  add("boss", "校長の時計塔", 55, 5);
+  for (const biome of BIOMES) add("guardian", `${biome.name}の試験官`, (biome.x-6)/3, (biome.y-5)/2);
+  add("boss", "魔王城", 55, 5);
   add("dungeon", "森の協力ダンジョン", 18, 19);
   add("dungeon", "星の協力ダンジョン", 47, 27);
   add("fragment", "地図の断片", 7, 22);
@@ -582,6 +581,8 @@ export function createWorld(
     Math.min(180, Math.floor(Number.isFinite(timeLimitMinutes) ? timeLimitMinutes : 30)),
   );
   return {
+    campaignVersion: 2,
+    endingProgress: {},
     nativeMode: true,
     gameMode,
     duels: [],
@@ -593,7 +594,7 @@ export function createWorld(
     tiles,
     sites,
     players: {},
-    logs: ["冒険のはじまり。3体の試験官を倒し、校長の結界を解こう。"],
+    logs: ["異世界の冒険が始まる。6地域の試験官を倒し、魔王城の結界を解こう。"],
     won: false,
     timeLimitMinutes: normalizedTimeLimit,
     deadlineAt: normalizedTimeLimit ? now + normalizedTimeLimit * 60 * 1000 : 0,
@@ -695,7 +696,7 @@ export function applyAction(
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if(w.town?.encounters?.[id]&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if(action.type.startsWith('farm-'))return applyFarm(w,p,action as FarmAction);
-  if(action.type.startsWith('city-'))return applyCity(w,p,action as CityAction,now);
+  if(action.type==='ending-progress'||action.type.startsWith('city-'))return applyCity(w,p,action as CityAction,now);
   if ((w.town?.cooking[id]||w.town?.dreams[id]&&!w.town.dreams[id].finished)&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if ((action.type==='hero-set'||action.type.startsWith('social-'))&&!p.spectator)return applySocial(w,p,action as SocialAction,now);
   if (p.spectator && action.type !== "native-profile") return false;

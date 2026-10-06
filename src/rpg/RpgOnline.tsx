@@ -1,3 +1,4 @@
+import CampaignEnding from './CampaignEnding';
 import ResidentScene from './town/ResidentScene';
 import {nearbyResidents,residentNear,residentPosition} from './town/worldResidents';
 import FarmQuickActions from './farm/QuickActions';
@@ -206,7 +207,7 @@ export default function RpgOnline({
   useEffect(()=>{if(settingsOpen||cityOpen||farmOpen){destination.current=null;walkingRoute.current=[];}},[settingsOpen,cityOpen,farmOpen]);
   const fishing=useFishingCollection(world?.players[room.current?.selfId||'']?.life?.fishRecords,world?.players[room.current?.selfId||'']?.life?.lastCatch,world?.players[room.current?.selfId||'']?`${world.seed}:${room.current?.selfId}`:undefined);
   useFishingAudio(world?.players[room.current?.selfId||'']?.life,world?.players[room.current?.selfId||'']?.message||'',active&&!interactionBlocked&&!world?.ended,fishing.result);
-  latest.current = { world, active: active && !residentTarget && !farmOpen && !settingsOpen && !cityOpen && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
+  latest.current = { world, active: active && !(world?.won&&world.endReason==='clear'&&(world.endingProgress?.[room.current?.selfId||'']||0)<6) && !residentTarget && !farmOpen && !settingsOpen && !cityOpen && !fishing.result && !interactionBlocked && !detail && !heroOpen && !world?.players[room.current?.selfId || ""]?.life?.work && !storySiteId && !roamingNpcSiteId && !lifeOpen && !world?.players[room.current?.selfId || ""]?.life?.indoors && !world?.players[room.current?.selfId || ""]?.spectator };
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
@@ -650,9 +651,9 @@ export default function RpgOnline({
                 <section data-rpg-panel="goal" className="rpg-objective">
                   <h2>
                     <Crown />
-                    校長の時計塔へ
+                    魔王城へ
                   </h2>
-                  <p>3つの結界を解き、みんなで校長に挑もう。</p>
+                  <p>6地域の試験官を倒し、三段階に変身する魔王に挑もう。</p>
                   {world.sites
                     .filter((s) => s.kind === "guardian" || s.kind === "boss")
                     .map((s) => (
@@ -752,10 +753,11 @@ export default function RpgOnline({
                 <span>ひとり用 · 通信なし</span>
               )}
             </footer>
+            {world.won && world.endReason==='clear' && !spectating && !me.nativeScene && (world.endingProgress?.[selfId]||0)<6 && <CampaignEnding world={world} selfId={selfId} languageMode={languageMode} send={a=>room.current?.send(a)}/>}
             {world.ended && !me.nativeScene && (
               <div className="rpg-overlay">
                 <section className="rpg-dialog rpg-clear-dialog">
-                  <h1>{world.endReason === "timeout" ? "時間切れ！" : "校長を倒しました！"}</h1>
+                  <h1>{world.endReason === "timeout" ? "時間切れ！" : "魔王を倒しました！"}</h1>
                   <p>{world.endReason === "timeout" ? "制限時間が終了しました。" : "みんなの冒険は大成功！"}</p>
                   <div className="rpg-ranking-grid">
                     {rankingDefinitions.map((ranking) => (
@@ -777,7 +779,7 @@ export default function RpgOnline({
                       </section>
                     ))}
                   </div>
-                  {world.endReason==='clear'&&<button disabled={clockNow<(world.rewardAt||0)||!Object.keys(world.rankingAwards).length||!!me.nativeScene} onClick={()=>{room.current?.send({type:'city-continue'});}}>{trans('街づくりを始める',languageMode)}</button>}
+                  {world.endReason==='clear'&&<button disabled={(world.campaignVersion===2&&(world.endingProgress?.[selfId]||0)<6)||clockNow<(world.rewardAt||0)||!Object.keys(world.rankingAwards).length||!!me.nativeScene} onClick={()=>{room.current?.send({type:'city-continue'});}}>{trans('街づくりを始める',languageMode)}</button>}
                   <button onClick={close}>学習ローグへ</button>
                 </section>
               </div>

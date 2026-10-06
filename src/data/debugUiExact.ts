@@ -1,3 +1,4 @@
+import {CAMPAIGN_ENGLISH,CAMPAIGN_HIRAGANA} from '../rpg/campaignCopy';
 import {FARM_ENGLISH,FARM_HIRAGANA} from '../rpg/farm/uiCopy';
 import {RPG_IMPROVEMENT_ENGLISH,RPG_IMPROVEMENT_HIRAGANA} from '../rpg/improvementCopy';
 import {TOWN_ENGLISH,TOWN_HIRAGANA} from '../rpg/town/uiCopy';
@@ -19,6 +20,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...CAMPAIGN_ENGLISH,
   ...RPG_SOCIAL_ENGLISH,
   ...RPG_FISH_ENGLISH,
   ...RPG_HOME_ENGLISH,
@@ -261,6 +263,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...CAMPAIGN_HIRAGANA,
   ...RPG_SOCIAL_HIRAGANA,
   ...RPG_FISH_HIRAGANA,
   ...RPG_HOME_HIRAGANA,

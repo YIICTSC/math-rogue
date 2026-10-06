@@ -157,7 +157,7 @@ try {
   assert.equal(WIDTH * HEIGHT, 64 * 44 * 6);
   assert.equal(w.tiles.length, WIDTH * HEIGHT);
   assert(w.sites.some(s=>s.x>64) && w.sites.some(s=>s.y>44));
-  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 61);
+  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 64);
   assert.equal(w.sites.filter(s=>s.kind==="story").length, 12);
   const roamingNpcs = w.sites.filter(s=>s.kind==="npc");
   assert.equal(roamingNpcs.length, 6, "one roaming NPC appears in each biome");
@@ -263,7 +263,7 @@ try {
   enter(site("treasure"), "b");
   assert(w.players.b.nativeScene);
   finish("complete", "b");
-  assert.match(siteUnavailable(w, p, site("boss")), /3体/);
+  assert.match(siteUnavailable(w, p, site("boss")), /6地域/);
   for (const guardian of w.sites.filter((s) => s.kind === "guardian")) {
     enter(guardian);
     enter(guardian, "b");
@@ -339,9 +339,12 @@ try {
   assert.equal(boss.hp,1040);
   assert.equal(w.won,false);
   applyAction(w,"a",{type:"native-damage",token:p.nativeScene.token,total:1040,sequence:2,phase:2});
+  assert.equal(boss.bossPhase,3);
+  assert.equal(w.won,false);
+  applyAction(w,"a",{type:"native-damage",token:p.nativeScene.token,total:1040,sequence:3,phase:3});
   assert(w.won);
   assert(finish("victory"), "rewards can finish after world victory");
-  assert.equal(p.completedBattles, 7);
+  assert.equal(p.completedBattles, 10);
   assert.equal(
     applyAction(w, "a", { type: "town", choice: "rest" }),
     false,

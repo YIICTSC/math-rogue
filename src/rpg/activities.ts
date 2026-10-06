@@ -48,7 +48,7 @@ export function acceptProfile(p:Adventurer,profile:NativeProfile) {
 function event(w:World,now:number,n:number):WorldEvent {
  const kind = (['BATTLES','ANSWERS','SEALS'] as const)[(w.seed+n)%3];
  const count=Math.max(1,Object.values(w.players).filter(p=>!p.spectator).length);
- return {kind,title:kind==='BATTLES'?'図書館を取り戻せ':kind==='ANSWERS'?'知識の灯をともせ':'校長の力を封じろ',target:kind==='SEALS'?3:count*(kind==='ANSWERS'?8:2),progress:0,expires:Math.min(w.timeLimitMinutes===0?Infinity:w.deadlineAt,now+180000),completed:false,finished:false,contributors:{},baseline:Object.fromEntries(Object.values(w.players).map(p=>[p.id,kind==='BATTLES'?p.completedBattles:p.correctAnswers]))};
+ return {kind,title:kind==='BATTLES'?'図書館を取り戻せ':kind==='ANSWERS'?'知識の灯をともせ':'魔王の力を封じろ',target:kind==='SEALS'?3:count*(kind==='ANSWERS'?8:2),progress:0,expires:Math.min(w.timeLimitMinutes===0?Infinity:w.deadlineAt,now+180000),completed:false,finished:false,contributors:{},baseline:Object.fromEntries(Object.values(w.players).map(p=>[p.id,kind==='BATTLES'?p.completedBattles:p.correctAnswers]))};
 }
 export function createActivities():Activities {
  return {trades:[],dungeons:[],event:{kind:'ANSWERS',title:'知識の灯をともせ',target:8,progress:0,expires:0,completed:false,finished:true,contributors:{},baseline:{}},nextEventAt:0,eventNumber:0,secretsFound:[],bossWeakened:false};

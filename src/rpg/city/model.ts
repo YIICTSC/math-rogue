@@ -54,6 +54,7 @@ export interface CityState {
   revision: number;
 }
 export type CityAction = CityLivingAction
+  | { type: "ending-progress"; step: number }
   | { type: "city-continue" }
   | { type: "city-build"; kind: string; x: number; y: number }
   | { type: "city-road" | "city-road-remove"; tiles: number[] }
@@ -273,9 +274,14 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
     w.activities.trades.some((t) => t.from === p.id || t.to === p.id)
   )
     return false;
+  if(a.type === "ending-progress"){
+    if(!w.won||w.endReason!=="clear"||!Number.isInteger(a.step)||a.step<1||a.step>6||a.step!==(w.endingProgress?.[p.id]||0)+1)return false;
+    (w.endingProgress??={})[p.id]=a.step;w.revision++;return true;
+  }
   if (a.type === "city-continue") {
     if (
       !w.ended ||
+      (w.campaignVersion===2 && (w.endingProgress?.[p.id]||0)<6) ||
       w.endReason !== "clear" ||
       now < (w.rewardAt || 0) ||
       !Object.keys(w.rankingAwards).length ||
@@ -313,6 +319,7 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
         origin: { x: p.x, y: p.y },
         revision: 0,
       };
+    w.sites=w.sites.filter(site=>site.kind!=="enemy");
     w.ended = false;
     w.deadlineAt = 0;
     w.timeLimitMinutes = 0;

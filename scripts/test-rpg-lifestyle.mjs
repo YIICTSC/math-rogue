@@ -185,6 +185,7 @@ try {
   w.won = true;
   w.endReason = "clear";
   w.rewardAt = now - 1;
+  for(let step=1;step<=6;step++)assert.ok(send({type:"ending-progress",step}));
   assert.ok(send({ type: "city-continue" }));
   w.city.treasury = 10000;
   const lot = {

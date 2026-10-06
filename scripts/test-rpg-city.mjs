@@ -49,6 +49,8 @@ try {
   w.rankingAwards = { a: {} };
   assert.equal(send({ type: "city-continue" }), false);
   now += 2000;
+  assert.equal(send({type:"city-continue"}),false);
+  for(let step=1;step<=6;step++)assert(send({type:"ending-progress",step}));
   assert.ok(send({ type: "city-continue" }));
   assert.equal(w.ended, false);
   assert.equal(w.deadlineAt, 0);

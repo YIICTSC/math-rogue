@@ -1,3 +1,4 @@
+import {migrateCampaign} from './campaign';
 import type {Player} from '../types';
 import type {World} from './engine';
 import {WIDTH,HEIGHT} from './engine';
@@ -8,7 +9,7 @@ export function makeWorldSave(world:World,selfId:string,player:Player,now=Date.n
 export function restoreWorldSave(save:RpgWorldSave,now=Date.now()){if(!validateWorldSave(save))throw new Error('保存データを読み込めませんでした。');const w=structuredClone(save.world),elapsed=Math.max(0,now-save.savedAt);
  // Freeze absolute runtime timers while the app is closed. Historical records retain their original dates.
  const timers=new Set(['deadlineAt','regrowAt','lastTick','now','lastMove','lastAction','lastTalk','lastPlayerTalk','expires','nextEventAt','nextTalk','endsAt','nextAt','target','started','nativeAt']);
- const shift=(v:unknown)=>{if(!v||typeof v!=='object')return;for(const [k,n] of Object.entries(v)){if(typeof n==='number'&&n>1e12&&timers.has(k))(v as Record<string,unknown>)[k]=n+elapsed;else if(n&&typeof n==='object')shift(n);}};shift(w);if(w.town)w.town.encounters={};w.life.now=now;w.life.lastTick=now;w.revision++;return w;}
+ const shift=(v:unknown)=>{if(!v||typeof v!=='object')return;for(const [k,n] of Object.entries(v)){if(typeof n==='number'&&n>1e12&&timers.has(k))(v as Record<string,unknown>)[k]=n+elapsed;else if(n&&typeof n==='object')shift(n);}};shift(w);if(w.town)w.town.encounters={};w.life.now=now;w.life.lastTick=now;w.revision++;return migrateCampaign(w);}
 const DB='learning-rogue-rpg-world',STORE='saves';
 function database():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.onblocked=()=>reject(new Error('保存機能を開けませんでした。'));});}
 export async function readWorldSave():Promise<RpgWorldSave|null>{const db=await database();try{return await new Promise((resolve,reject)=>{const r=db.transaction(STORE,'readonly').objectStore(STORE).get('latest');r.onsuccess=()=>{if(r.result===undefined)resolve(null);else if(validateWorldSave(r.result))resolve(r.result);else reject(new Error('保存データを読み込めませんでした。'));};r.onerror=()=>reject(r.error);});}finally{db.close();}}

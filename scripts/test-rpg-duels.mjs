@@ -26,7 +26,7 @@ try {
  const bosses=make(),boss=bosses.sites.find(s=>s.kind==='boss');for(const g of bosses.sites.filter(s=>s.kind==='guardian'))g.cleared=true;
  Object.assign(bosses.players.a,{x:boss.x,y:boss.y});assert(send(bosses,'a',{type:'native-enter',siteId:boss.id}));const token=bosses.players.a.nativeScene.token;
  assert(send(bosses,'a',{type:'native-ready',token,maxHp:100}));assert(send(bosses,'a',{type:'native-damage',token,total:boss.maxHp,sequence:1,phase:1}));assert.equal(boss.bossPhase,2);
- assert(send(bosses,'a',{type:'native-damage',token,total:boss.maxHp,sequence:2,phase:2}));assert(boss.cleared);assert.equal(bosses.ended,false,'battle royale continues after the headmaster');
+ assert(send(bosses,'a',{type:'native-damage',token,total:boss.maxHp,sequence:2,phase:2}));assert.equal(boss.bossPhase,3);assert(send(bosses,'a',{type:'native-damage',token,total:boss.maxHp,sequence:3,phase:3}));assert(boss.cleared);assert.equal(bosses.ended,false,'battle royale continues after the headmaster');
  const coop=make('COOP');assert.equal(send(coop,'a',{type:'duel-request',target:'b'}),false);
  const timeout=make(),td=begin(timeout);advanceWorld(timeout,timeout.deadlineAt+1);assert.equal(td.status,'aborted');assert.equal(timeout.players.a.rivalKills,0);
  const dropped=make(),dd=begin(dropped);removePlayer(dropped,'a');assert.equal(dd.winner,'b');assert.equal(dropped.players.b.rivalKills,1);

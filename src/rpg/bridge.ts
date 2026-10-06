@@ -15,7 +15,7 @@ export interface RpgEncounter {
   localDamage: number;
   damage: number;
   sequence: number;
-  phase?: 1 | 2;
+  phase?: 1 | 2 | 3;
 }
 export function nativeProfile(
   player: Player,

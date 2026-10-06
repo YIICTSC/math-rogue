@@ -320,6 +320,7 @@ const RpgTitle = React.lazy(() => import('./rpg/RpgTitle'));
 const GakuroGolf = React.lazy(() => import('./mini-games/gakuro-golf/GakuroGolf'));
 const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));
 const GakuroCraft = React.lazy(() => import('./mini-games/gakuro-craft/GakuroCraft'));
+import { demonName, canTransformEnemy, nextDemonPhase } from './rpg/demonKing';
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
 import { getRpgSiteDisplayName } from './rpg/enemyNames';
 import { isSharedSite } from './rpg/engine';
@@ -1430,6 +1431,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             if (turn % 3 === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 4, secondaryValue: 1, debuffType: 'POISON' };
             return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
 
+        case 'RPG_EXAMINER':
         case 'GUARDIAN':
             const bossTurn = turn % 6;
             if (bossTurn === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 10 };
@@ -1439,6 +1441,13 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             if (bossTurn === 5) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 10, secondaryValue: 2, debuffType: 'VULNERABLE' };
             return { type: EnemyIntentType.DEFEND, value: 20 };
 
+        case 'RPG_DEMON': {
+            const phase=enemy.phase||1,step=turn%4;
+            if(step===1)return {type:EnemyIntentType.ATTACK,value:14+phase*7};
+            if(step===2)return {type:EnemyIntentType.ATTACK_DEFEND,value:10+phase*4,secondaryValue:phase*6};
+            if(step===3)return {type:EnemyIntentType.BUFF,value:0,secondaryValue:phase};
+            return {type:EnemyIntentType.ATTACK_DEBUFF,value:8+phase*5,secondaryValue:phase,debuffType:'WEAK'};
+        }
         case 'THE_HEART':
             if (enemy.phase === 1) {
                 const heartTurn = turn % 4;
@@ -3363,7 +3372,7 @@ const App: React.FC = () => {
         const currentCursor = coopBattleState.turnCursor;
         const currentSlot = queue[currentCursor];
         const livingEnemyCount = gameState.enemies.filter(enemy =>
-            enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1)
+            enemy.currentHp > 0 || (canTransformEnemy(enemy))
         ).length;
         let enemyPhaseTriggered = currentSlot?.type === 'ENEMY';
         let nextCursor = currentCursor;
@@ -3631,7 +3640,7 @@ const App: React.FC = () => {
             case GameScreen.RELIC_SELECTION:
                 return 'relic_select' as const;
             case GameScreen.BATTLE: {
-                if (state.enemies.some(enemy => enemy.enemyType === 'THE_HEART')) {
+                if (state.enemies.some(enemy => enemy.enemyType === 'THE_HEART'||enemy.enemyType === 'RPG_DEMON')) {
                     return 'final_boss' as const;
                 }
                 const currentNode = state.currentMapNodeId
@@ -6191,7 +6200,7 @@ const App: React.FC = () => {
 
         player.familiars = nextFamiliars;
         player.familiarActionQueue = actionQueue;
-        nextEnemies = nextEnemies.filter(enemy => enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1));
+        nextEnemies = nextEnemies.filter(enemy => enemy.currentHp > 0 || (canTransformEnemy(enemy)));
         return nextEnemies;
     };
 
@@ -9396,8 +9405,8 @@ const App: React.FC = () => {
                         const hpAdjusted = Math.max(1, Math.floor(baseHp + hpOffsets[i] * hpStep));
 
                         const name = rpgEncounter?.site.kind === 'boss'
-                            ? '校長先生'
-                            : rpgEncounter?.site.kind === 'enemy'
+                            ? demonName(1)
+                            : (rpgEncounter?.site.kind === 'enemy'||rpgEncounter?.site.kind === 'guardian')
                                 ? getRpgSiteDisplayName(rpgEncounter.site, nextState.visualTheme || visualTheme)
                                 : await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
                         const isBoss = node.type === NodeType.BOSS;
@@ -9418,9 +9427,9 @@ const App: React.FC = () => {
 
                     enemies = enemies.map(e => {
                         const isRpgHeadmaster = rpgEncounter?.site.kind === 'boss';
-                        const type = isRpgHeadmaster ? 'THE_HEART' : determineEnemyType(e.name, node.type === NodeType.BOSS);
+                        const type = isRpgHeadmaster ? 'RPG_DEMON' : rpgEncounter?.site.kind==='guardian'?'RPG_EXAMINER':determineEnemyType(e.name, node.type === NodeType.BOSS);
                         storageService.saveDefeatedEnemy(e.name);
-                        const scaledEnemy = { ...e, enemyType: type, strength: e.strength + difficulty.enemyStrengthBonus, ...(isRpgHeadmaster ? {phase:1} : {}) };
+                        const scaledEnemy = { ...e, ...(rpgEncounter?.site.kind==='guardian'?{name:rpgEncounter.site.name}:{}), enemyType: type, strength: e.strength + difficulty.enemyStrengthBonus, ...(isRpgHeadmaster ? {phase:1} : {}) };
                         return { ...scaledEnemy, nextIntent: getNextEnemyIntent(scaledEnemy, 1) };
                     });
                 }
@@ -9436,7 +9445,7 @@ const App: React.FC = () => {
                     const shared = rpgSnapshotRef.current!.world.sites.find(s => s.id === rpgEncounter.site.id)!;
                     const bossPhase = rpgEncounter.site.kind === 'boss' ? (shared.bossPhase || 1) : undefined;
                     if (bossPhase) rpgEncounter.phase = bossPhase;
-                    const syncedEnemy = { ...enemies[0], maxHp: shared.maxHp, currentHp: shared.hp, ...(bossPhase ? {phase:bossPhase} : {}), ...(bossPhase === 2 ? {name:nextState.visualTheme === 'magic' ? '真・大魔女校長' : '真・校長先生'} : {}) };
+                    const syncedEnemy = { ...enemies[0], maxHp: shared.maxHp, currentHp: shared.hp, ...(bossPhase ? {phase:bossPhase} : {}), ...(bossPhase ? {enemyType:'RPG_DEMON',name:demonName(bossPhase)} : {}) };
                     enemies[0] = { ...syncedEnemy, nextIntent:getNextEnemyIntent(syncedEnemy,1) };
                     if(rpgEncounter.site.kind==='boss'&&rpgSnapshotRef.current?.world.activities.bossWeakened)enemies[0].strength-=5;
                     rpgEncounter.lastHp = shared.hp;
@@ -9953,25 +9962,25 @@ const App: React.FC = () => {
         const scene = snapshot?.world.players[snapshot.selfId]?.nativeScene;
         if (!shared?.nativeInitialized || scene?.token !== encounter.token) return;
         const localHp = enemy?.currentHp ?? 0;
-        if (encounter.site.kind === 'boss' && encounter.phase === 1 && shared.bossPhase === 2) {
-            encounter.phase = 2; encounter.damage = 0; encounter.lastHp = shared.hp;
+        if (encounter.site.kind === 'boss' && (encounter.phase || 1) < (shared.bossPhase || 1)) {
+            encounter.phase = shared.bossPhase; encounter.damage = 0; encounter.lastHp = shared.hp;
             if (shared.cleared || shared.hp <= 0) {
                 setGameState(prev => ({...prev,enemies:prev.enemies.slice(1)}));return;
             }
             setGameState(prev => ({...prev,enemies:prev.enemies.map((e,i)=>{
                 if(i!==0)return e;
-                const transformed = {...e,phase:2,name:prev.visualTheme==='magic'?'真・大魔女校長':'真・校長先生',maxHp:shared.maxHp,currentHp:shared.hp,poison:0,weak:0,vulnerable:0};
+                const transformed = {...e,enemyType:'RPG_DEMON',phase:shared.bossPhase,name:demonName(shared.bossPhase),maxHp:shared.maxHp,currentHp:shared.hp,poison:0,weak:0,vulnerable:0};
                 return {...transformed,nextIntent:getNextEnemyIntent(transformed,1)};
             })}));return;
         }
-        if (encounter.site.kind === 'boss' && encounter.phase === 1 && enemy?.phase === 2) {
+        if (encounter.site.kind === 'boss' && (enemy?.phase || 1) > (encounter.phase || 1)) {
             const unsentDamage = encounter.damage - scene.damage;
             encounter.damage += Math.max(0,Math.min(encounter.lastHp,shared.hp-unsentDamage));
             encounter.sequence++;
-            rpgRoomRef.current?.send({type:'native-damage',token:encounter.token,total:encounter.damage,sequence:encounter.sequence,phase:1});
-            encounter.phase=2;encounter.damage=0;encounter.lastHp=enemy.currentHp;return;
+            rpgRoomRef.current?.send({type:'native-damage',token:encounter.token,total:encounter.damage,sequence:encounter.sequence,phase:encounter.phase || 1});
+            encounter.phase=enemy.phase as 1|2|3;encounter.damage=0;encounter.lastHp=enemy.currentHp;return;
         }
-        if (encounter.site.kind === 'boss' && encounter.phase === 2 && shared.bossPhase === 1) return;
+        if (encounter.site.kind === 'boss' && (encounter.phase || 1) > (shared.bossPhase || 1)) return;
         const delta = encounter.lastHp - localHp;
         if (delta !== 0) {
             encounter.damage += delta;encounter.sequence++;encounter.lastHp = localHp;
@@ -11424,13 +11433,13 @@ const App: React.FC = () => {
                                 });
                             }
 
-                            if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
+                            if (e.currentHp <= 0 && canTransformEnemy(e)) {
                                 e.currentHp = isDebugHpOne ? 1 : e.maxHp;
-                                e.phase = 2;
-                                e.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
+                                e.phase = nextDemonPhase(e);
+                                e.name = e.enemyType==='RPG_DEMON'?demonName(e.phase):prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                                 e.poison = 0; e.weak = 0; e.vulnerable = 0;
                                 e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                                currentLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
+                                currentLogs.push(e.enemyType==='RPG_DEMON'?`${e.name}に変身した！`:prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                                 nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
                             }
                             if (damage > 0 && hpBeforeDamage > 0) {
@@ -11439,7 +11448,7 @@ const App: React.FC = () => {
                                         voicedEnemyDefeatIds.add(e.id);
                                         const hasOtherAliveEnemies = enemies.some(other =>
                                             other.id !== e.id &&
-                                            (other.currentHp > 0 || (other.enemyType === 'THE_HEART' && other.phase === 1))
+                                            (other.currentHp > 0 || (canTransformEnemy(other)))
                                         );
                                         if (hasOtherAliveEnemies) {
                                             playDelayedBattleVoice(() => {
@@ -12853,17 +12862,17 @@ const App: React.FC = () => {
                         enemy.floatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
                         nextLogs.push(`${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`);
                         nextActiveEffects.push({ id: `vfx-psn-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id, screenShake: false });
-                        if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
+                        if (enemy.currentHp <= 0 && canTransformEnemy(enemy)) {
                             enemy.currentHp = isDebugHpOne ? 1 : enemy.maxHp;
-                            enemy.phase = 2;
-                            enemy.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
+                            enemy.phase = nextDemonPhase(enemy);
+                            enemy.name = enemy.enemyType==='RPG_DEMON'?demonName(enemy.phase):prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                             enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
                             enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                            nextLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
+                            nextLogs.push(enemy.enemyType==='RPG_DEMON'?`${enemy.name}に変身した！`:prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                         }
                     }
                     return enemy;
-                }).filter(e => e.currentHp > 0 || (e.enemyType === 'THE_HEART' && e.phase === 1));
+                }).filter(e => e.currentHp > 0 || (canTransformEnemy(e)));
                 if (hasRelic(p, 'BIRD_FACED_URN')) {
                     const defeatedByPoison = prev.enemies.length - nextEnemies.length;
                     if (defeatedByPoison > 0) {
@@ -12910,7 +12919,7 @@ const App: React.FC = () => {
         setGameState(prev => ({
             ...prev,
             enemies: prev.enemies.map(enemy =>
-                (enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1))
+                (enemy.currentHp > 0 || (canTransformEnemy(enemy)))
                     ? { ...enemy, block: rpgDuelRef.current ? enemy.block : 0 }
                     : enemy
             )
@@ -13329,13 +13338,13 @@ const App: React.FC = () => {
                             newLogs.push(`${trans("トゲトゲ", languageMode)}で${p.powers['THORNS']}反撃ダメージ`);
                             nextActiveEffects.push({ id: `vfx-thn-${Date.now()}`, type: 'SLASH', targetId: e.id });
                         }
-                        if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
+                        if (e.currentHp <= 0 && canTransformEnemy(e)) {
                             e.currentHp = isDebugHpOne ? 1 : e.maxHp;
-                            e.phase = 2;
-                            e.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
+                            e.phase = nextDemonPhase(e);
+                            e.name = e.enemyType==='RPG_DEMON'?demonName(e.phase):prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                             enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
                             enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                            newLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
+                            newLogs.push(e.enemyType==='RPG_DEMON'?`${e.name}に変身した！`:prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                             nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
                         }
                         if (didHpDamage && p.currentHp <= 0) {
@@ -13418,7 +13427,7 @@ const App: React.FC = () => {
                         }
                     }
                     e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
-                    const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
+                    const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (canTransformEnemy(en)));
                     if (enemyHpBeforeAction > 0 && e.currentHp < enemyHpBeforeAction) {
                         if (e.currentHp <= 0) {
                             if (aliveEnemies.length > 0) {
@@ -13475,7 +13484,7 @@ const App: React.FC = () => {
         setGameState(prev => ({
             ...prev,
             enemies: prev.enemies.map(enemy => {
-                if (enemy.currentHp <= 0 && !(enemy.enemyType === 'THE_HEART' && enemy.phase === 1)) return enemy;
+                if (enemy.currentHp <= 0 && !(canTransformEnemy(enemy))) return enemy;
                 const nextEnemy = { ...enemy };
                 if (nextEnemy.vulnerable > 0) nextEnemy.vulnerable--;
                 if (nextEnemy.weak > 0) nextEnemy.weak--;
@@ -13570,7 +13579,7 @@ const App: React.FC = () => {
             return {
                 ...prev,
                 player: p,
-                enemies: nextEnemies.filter(enemy => enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1)),
+                enemies: nextEnemies.filter(enemy => enemy.currentHp > 0 || (canTransformEnemy(enemy))),
                 combatLog: nextLogs.slice(-100),
                 activeEffects: [...prev.activeEffects, ...nextActiveEffects]
             };
@@ -15169,7 +15178,7 @@ const App: React.FC = () => {
                 lastLethalEnemyRef.current = null;
                 return;
             }
-            const isHeartTransforming = gameState.enemies.some(e => e.enemyType === 'THE_HEART' && e.phase === 1 && e.currentHp <= 0);
+            const isHeartTransforming = gameState.enemies.some(e => canTransformEnemy(e) && e.currentHp <= 0);
             if (gameState.enemies.length === 0 && !isHeartTransforming) {
                 if (battleFinisherCutinCard) return;
 
