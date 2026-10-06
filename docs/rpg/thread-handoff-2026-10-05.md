@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`b53c4645ba73072953c269822a1b67787a199665`（Expand golf rounds and refine resident dialogue and typing progression）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`9d0533ee7d02e8d27dd1b56e78be040347a8acc5`（Keep peaceful-world events achievable after the demon king campaign）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -283,3 +283,19 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 英語UI監査、pnpm run build、最終Vite build、server:build、diff --check成功。全体tscは以前のOOMのため成功扱いにしない。既存の単元UI変更で旧test-gakuro-golf-browser.mjsは利用せず、実Reactゴルフ単独UIテストで準備・問題・ショットを確認。ログ・画像は /workspace/scratch/golf18-*、resident-dialogue-*、typing-final.log。
 
 - 今回の公開確認：GitHub Pages Actions 37416448743、Android AAB Actions 37416448746ともsuccess。公開GakuroGolf-Cqx_LhL5.css（31625 bytes）がローカルと完全一致。公開Golf JS／RpgOnline JS・CSSに18ホール設定／3打周期／話者別吹き出し・案内パネル、公開main JSに追加タイピング語句を確認。ゴルフMP3/Opus16ファイルが全てローカルと完全一致。CIとローカルではJSチャンク名が異なるため、公開indexから実際の参照をたどって検証した。Renderの追加確認はユーザー指定により実施していない。
+
+## 最新追記：異世界の6地域試練・三段階魔王・エンディング（2026-10-06）
+
+- main `9fba2f04aeacaf5da8c2d04f78c2c7e67e5ed510`、34ファイル。6バイオーム各1か所の試験官、全6体で魔王城の結界を解除。試験官は既存の各編イラストを流用し、戦闘名は各地域の試験官名を維持するRPG_EXAMINER型。
+- 新オリジナル人型魔王：魔王→真・魔王→スーパー魔王ハイグレードEXスペシャルエディションαオメガMAX。ImageGenで三形態それぞれ待機・攻撃6画像、WebP。RPG_DEMON型で各編共通の人型表示。行動は段階ごとに攻撃／防御／強化／弱体が強くなる。通常攻撃・毒・反撃に対応。共有HP・phaseを3段階に拡張し、過去段階のダメージ拒否、参加者全員の累計ダメージを変身時リセット、ローカル変身が先行した場合は共有段階を待つ。
+- 魔王消滅／六地域の平和／街の復興のImageGenエンディング背景3点。6つの手動送りの物語で「学びと仲間が勝利に結びついた→守った暮らしへの帰還→復興を託される→世界運営解放」を演出。既存新BGM魔法女性編victory。操作ボタンはスマホ縦横・PC対応、OSの動き低減設定に対応。
+- endingProgressは各プレイヤーごとにworldへ保存。ending-progress actionは1〜6の順番のみ承認。本人がエンディングを終えるまでcity-continueは拒否。既存の戦闘報酬・ランキング待ち条件も維持。最初の人が都市を開いても他の人は自分のエンディングを見られる。
+- 都市運営へ移行後は通常敵サイトを除去し、時間制限を解除。同じ保存ワールドで住民・クラフト・農園・都市運営を継続。平和時の町／休憩／イベント利用は戦闘勝利のクールダウンを免除。
+- campaignVersion2、Peer protocol20。古い未クリアセーブには不足3地域の試験官を追加し、既存試験官のID／勝利を保持。既存クリア・街運営セーブは実績を保持し、既存街運営でエンディングを突然再生しない。保存形式version1を維持。詳細 docs/rpg/demon-king-campaign.md。
+- 検証成功：test-rpg-campaign.mjs（6地域／ボス封鎖／3変身／古い段階拒否／エンディング順序／平和都市／移行／素材）、test-rpg-ending-browser.mjs（6場面を5画面サイズで完走）、test-rpg-demon-main-browser.mjs（実Appの攻撃カードで全3段階の変身と最終勝利、実画像読込）、native-engine／duels／city／world-save／adventure／lifestyle。
+- pnpm run build・英語UI監査・server:build・Android素材manifest検証・diff --check成功。Androidハッシュも9つの新WebPを含めて更新。元ImageGen出力は /workspace/generated_images に保持、詳細にファイル名を記載。作業ログ /workspace/scratch/demon-*。
+
+- 追加調整 main `9d0533ee7d02e8d27dd1b56e78be040347a8acc5`：街運営へ進む際に未完の共通戦闘イベントを終了し、以後の共通イベントはANSWERS（知識の灯をともせ）へ固定。通常敵がいない世界で戦闘回数目標が残るのを防止。campaignテストに平和後イベントの確認を追加し、server:build・full build・英語監査成功。
+- 魔王キャンペーンの初回公開確認：Pages 37420942627、Android 37420942554ともsuccess。公開JS／CSSに魔王・試験官・エンディング、WebP9点がローカルと完全一致を確認。
+
+- 最終公開確認：main `9d0533ee7d02e8d27dd1b56e78be040347a8acc5`、GitHub Pages Actions 37421439211・Android AAB Actions 37421439186ともsuccess。公開RpgOnline-BzeTZorj.js／CSSと公開mainに試験官・3段階魔王・6場面エンディング・平和後ANSWERSイベントを確認。魔王6点／エンディング3点のWebP9ファイルは全てローカルと完全一致。Renderの手動デプロイ・追加稼働確認はユーザー方針により行っていない。ローカルの追跡変更はなく、本引き継ぎ資料のみ未追跡で保持。
