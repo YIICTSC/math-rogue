@@ -46,7 +46,7 @@ export function acceptProfile(p:Adventurer,profile:NativeProfile) {
  return true;
 }
 function event(w:World,now:number,n:number):WorldEvent {
- const kind = (['BATTLES','ANSWERS','SEALS'] as const)[(w.seed+n)%3];
+ const kind = w.city ? 'ANSWERS' : (['BATTLES','ANSWERS','SEALS'] as const)[(w.seed+n)%3];
  const count=Math.max(1,Object.values(w.players).filter(p=>!p.spectator).length);
  return {kind,title:kind==='BATTLES'?'図書館を取り戻せ':kind==='ANSWERS'?'知識の灯をともせ':'魔王の力を封じろ',target:kind==='SEALS'?3:count*(kind==='ANSWERS'?8:2),progress:0,expires:Math.min(w.timeLimitMinutes===0?Infinity:w.deadlineAt,now+180000),completed:false,finished:false,contributors:{},baseline:Object.fromEntries(Object.values(w.players).map(p=>[p.id,kind==='BATTLES'?p.completedBattles:p.correctAnswers]))};
 }

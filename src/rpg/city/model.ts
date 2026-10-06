@@ -320,6 +320,8 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
         revision: 0,
       };
     w.sites=w.sites.filter(site=>site.kind!=="enemy");
+    w.activities.event.finished=true;
+    w.activities.nextEventAt=now+60000;
     w.ended = false;
     w.deadlineAt = 0;
     w.timeLimitMinutes = 0;
