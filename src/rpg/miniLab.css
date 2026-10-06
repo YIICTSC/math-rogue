@@ -1,3 +1,18 @@
+/* Practice has no rpg-root ancestor; provide the same compact button baseline. */
+:where(.rpg-mini-lab) button {
+  font: inherit;
+  font-weight: 700;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #829d94;
+  border-radius: 8px;
+  background: #29494a;
+  color: #fff3d5;
+  cursor: pointer;
+}
+:where(.rpg-mini-lab) button:focus-visible { outline: 3px solid #ffe09b; outline-offset: 3px; }
+:where(.rpg-mini-lab) button:disabled { opacity: .45; cursor: not-allowed; }
+:where(.rpg-mini-lab) button:hover:not(:disabled) { filter: brightness(1.15); }
 .rpg-mini-lab {
   position: fixed;
   inset: 0;

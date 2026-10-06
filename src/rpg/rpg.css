@@ -20,6 +20,13 @@
   font: inherit;
 }
 .rpg-root button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #829d94;
+  border-radius: 8px;
+  background: #29494a;
+  color: #fff3d5;
+  font-weight: 700;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -1868,3 +1875,16 @@
 .rpg-intro-root .rpg-waiting-mini-game:not([open]){flex:none;margin-top:0}
 .rpg-intro-root .rpg-waiting-heading,.rpg-intro-root .rpg-waiting-invite{flex-shrink:0}
 @media(max-height:480px){.rpg-intro-root .rpg-waiting-panel{padding:8px}.rpg-intro-root .rpg-waiting-heading h1{font-size:16px}.rpg-intro-root .rpg-waiting-roster{margin-top:4px}.rpg-intro-root .rpg-waiting-roster h2,.rpg-intro-root .rpg-waiting-start-area p{display:none}.rpg-intro-root .rpg-waiting-invite{margin-top:4px;padding:4px}.rpg-intro-root .rpg-waiting-start-area{margin-top:4px}.rpg-intro-root .rpg-waiting-mini-heading{min-height:30px;padding:4px 10px}}
+
+/* Compact actions remain distinct from headings and body copy. */
+.rpg-entry-heading { flex-wrap: wrap; }
+.rpg-entry-heading .rpg-entry-builder { padding: 7px 12px; border-color: #d4bd81; background: #334e49; }
+.rpg-entry-tabs button[aria-pressed=false] { border-color: #7c9690; background: #253f42; }
+.rpg-dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.rpg-dialog-actions button { white-space: normal; }
+@media (pointer: coarse) {
+  .rpg-root button { min-height: 44px; }
+}
+@media (max-height: 480px) {
+  .rpg-entry-heading { flex-wrap: nowrap; }
+}
