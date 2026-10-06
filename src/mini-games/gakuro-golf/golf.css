@@ -23,3 +23,63 @@
 .gg-character-dialog .gk-avatar-swatches{display:flex;flex-wrap:wrap;gap:7px}.gg-character-dialog .gk-avatar-swatches button{position:relative;width:44px;height:44px;min-height:44px;padding:5px;border-radius:50%}.gg-character-dialog .gk-avatar-swatches button span{display:block;width:100%;height:100%;border-radius:50%;background:var(--swatch)}.gg-character-dialog .gk-avatar-swatches button b{position:absolute;inset:0;display:grid;place-items:center;color:#fff;text-shadow:0 1px 3px #000}
 @media(max-width:600px){.gg-character-preview{height:190px}.gg-character-dialog{padding:16px}.gg-lesson-picker>header{padding:8px 12px;gap:8px}.gg-lesson-picker>header small{max-width:230px}}
 @media(max-width:800px) and (orientation:portrait){.gg-aiming .gg-canvas{height:45%;bottom:auto}.gg-aiming .gg-play-ui{top:47%;bottom:12px;left:12px;right:12px;width:auto;max-height:none}.gg-aiming .gg-shot{padding:14px}.gg-aiming .gg-shot h2{font-size:18px}.gg-aiming .gg-shot label{margin:8px 0}.gg-aiming .gg-bonus{padding:8px 0}.gg-aiming .gg-bonus b{font-size:18px}}
+
+/* Broadcast-style golf HUD: the course owns the screen, controls stay at its edge. */
+.gg-playing{overflow:hidden;background:#345e38;color:#fff9e6}
+.gg-playing>.gg-header{position:absolute;z-index:8;inset:0 0 auto;min-height:40px;height:40px;padding:4px max(12px,env(safe-area-inset-right)) 4px max(12px,env(safe-area-inset-left));background:linear-gradient(#0b2437b8,#0b243700);border:0;color:#fff;gap:12px;pointer-events:none}
+.gg-playing>.gg-header button{pointer-events:auto;min-height:30px;padding:4px 10px;font-size:11px;background:#16392bce;border-color:#d8e7c780;color:#fff4cf}
+.gg-playing .gg-brand{font-size:12px;letter-spacing:2px}.gg-playing .gg-brand small,.gg-playing .gg-debug{display:none}
+.gg-playing>.gg-stage{height:100dvh;min-height:0}
+.gg-playing>.gg-message{position:absolute;z-index:12;top:40px;left:12px;right:12px;border-radius:8px}
+.gg-playing .gg-hud{top:max(48px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:auto;padding:0;gap:14px;background:none;border-radius:0;align-items:flex-start;filter:drop-shadow(0 2px 2px #0007)}
+.gg-hud .gg-hole-ribbon{display:flex;align-items:center;flex-direction:column;min-width:86px;padding:5px 10px 15px;color:#fff7e3;background:linear-gradient(120deg,#bc3f37,#872726);clip-path:polygon(0 0,100% 0,100% 90%,50% 100%,0 90%);border-top:3px solid #ffb791}
+.gg-hole-ribbon>strong{font-size:48px;line-height:1.03;font-weight:950}.gg-hole-ribbon>span{font-size:10px;font-weight:800;white-space:nowrap}.gg-hole-ribbon>small{font-size:9px;letter-spacing:2px}
+.gg-hud .gg-player-readout{display:grid;grid-template-columns:auto auto;gap:3px 12px;align-items:center;padding-top:4px;color:#fff4b4;text-shadow:0 2px 1px #143326,1px 0 #143326;font-size:12px;font-weight:800}
+.gg-player-readout>b{font-size:16px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gg-player-readout .gg-total-score{font-size:20px}.gg-player-readout>span:not(.gg-total-score){grid-column:1/-1;display:flex;align-items:baseline;gap:10px}.gg-player-readout strong{display:inline;font-size:26px;line-height:1.2}.gg-player-readout strong small{display:inline;font-size:12px}
+.gg-wind{position:absolute;top:48px;right:max(16px,env(safe-area-inset-right));display:flex;align-items:center;gap:12px;min-width:104px;padding:8px 13px;border:2px solid #d0e4dc;border-radius:10px;background:linear-gradient(#075f89e6,#16446ce6);box-shadow:0 3px 0 #0e2e4766;color:#fff;pointer-events:none}
+.gg-wind-arrow{font-size:43px;font-weight:950;line-height:1;color:#6ceaff;text-shadow:0 2px #093653}.gg-wind small{display:block;font-size:10px}.gg-wind strong{font-size:24px;line-height:1}
+.gg-minimap{position:absolute;right:max(16px,env(safe-area-inset-right));top:130px;width:150px;border-radius:9px;background:#153b2cdd;border:1px solid #dcdfba80;color:#fff3c9;box-shadow:0 4px 15px #0002}
+.gg-minimap summary{cursor:pointer;padding:7px 9px;font-size:11px;font-weight:800;min-height:32px}.gg-minimap svg{display:block;width:100%;padding:5px;max-height:145px}
+.gg-playing .gg-course-tools{left:auto;top:auto;right:16px;bottom:190px;gap:5px;max-width:none;flex-wrap:wrap;justify-content:flex-end}
+.gg-playing .gg-course-tools button{min-height:36px;padding:6px 10px;font-size:11px;background:#17382cde;color:#fff4cc;border-color:#c4d6ba80;box-shadow:0 2px 6px #0002}
+.gg-playing .gg-course-tools button[aria-pressed=true]{background:#ddd294;color:#17382c}
+.gg-playing .gg-lie{top:164px;left:16px;gap:10px;padding:5px 9px;background:#163c2cc9;color:#fff8cf;max-width:none;flex-wrap:nowrap;font-size:11px}
+.gg-playing .gg-play-ui{left:24px;right:24px;bottom:max(16px,env(safe-area-inset-bottom));width:auto;max-width:none;max-height:calc(100% - 195px);overflow:auto}
+.gg-playing .gg-shot,.gg-playing .gg-quiz{background:linear-gradient(130deg,#f9f3dff5,#e4ead9f5);border-color:#fffc;box-shadow:0 6px 30px #0e2b3955;color:#173e34}
+.gg-playing .gg-play-ui>.gg-shot:not(.gg-shot-console){width:min(380px,100%);margin-left:auto;padding:18px}
+.gg-playing .gg-play-ui>.gg-quiz{width:min(520px,100%);margin-left:auto}
+.gg-playing .gg-shot-console{display:grid;grid-template-columns:140px minmax(220px,.85fr) minmax(220px,1.3fr) 160px;grid-template-areas:'club clubs title bonus' 'club aim power hit';align-items:center;gap:6px 16px;padding:13px 18px;min-height:145px;border-radius:14px}
+.gg-shot-console .gg-shot-title{grid-area:title}.gg-shot-console .gg-shot-title h2{font-size:14px;margin:0}.gg-shot-console .gg-shot-title>b{font-size:11px;color:#366453}
+.gg-club-readout{grid-area:club;display:flex;align-items:center;gap:8px}.gg-club-icon{width:55px;height:64px;flex-shrink:0;filter:drop-shadow(0 3px 2px #163e3325)}.gg-club-readout strong{display:block;font-size:15px}.gg-club-readout span{display:block;font-size:11px;white-space:nowrap;margin-top:5px}
+.gg-shot-console .gg-clubs{grid-area:clubs;margin:0;gap:4px}.gg-shot-console .gg-clubs button{min-height:38px;font-size:10px;padding:6px 2px}
+.gg-shot-console .gg-bonus{grid-area:bonus;padding:0;border:0;gap:8px;font-size:10px}.gg-shot-console .gg-bonus b{font-size:17px}
+.gg-shot-console label{margin:0;font-size:11px;min-width:0}.gg-aim-control{grid-area:aim}.gg-power-control{grid-area:power}.gg-shot-console label input{margin:3px 0 0;cursor:pointer}
+.gg-shot-console .gg-power-control input[type=range]{appearance:none;-webkit-appearance:none;height:22px;min-height:22px;border:2px solid #425443;border-radius:5px;background:linear-gradient(to right,#edbd42 0 var(--shot-power),#52664c var(--shot-power) 100%);box-shadow:inset 0 2px 2px #0003;width:100%;touch-action:pan-y}
+.gg-power-control input::-webkit-slider-thumb{appearance:none;width:8px;height:30px;border:2px solid #fff6c1;background:#ffeb88;border-radius:2px;box-shadow:0 0 6px #ad6927;cursor:ew-resize}.gg-power-control input::-moz-range-thumb{width:6px;height:26px;border:2px solid #fff6c1;border-radius:2px;background:#ffeb88;cursor:ew-resize}
+.gg-power-ticks{display:flex;justify-content:space-between;color:#4c5e4a;font-size:9px;font-weight:800;letter-spacing:1px;margin-top:2px}.gg-power-ticks span{position:relative}.gg-power-ticks span:before{content:'';position:absolute;bottom:18px;height:8px;width:1px;background:#fff9}
+.gg-shot-console>.gg-hit{grid-area:hit;margin:0;min-height:48px;font-size:19px;background:linear-gradient(#287858,#154c3c);border:2px solid #6a9e73;box-shadow:0 3px 0 #173e34}
+.gg-playing .gg-scores{top:100px;max-height:calc(100% - 125px);color:#173e34}.gg-playing .gg-paused{top:145px}
+@media(max-width:1100px){.gg-playing .gg-shot-console{grid-template-columns:110px minmax(190px,1fr) minmax(170px,1fr) 125px;gap:5px 10px;padding:12px}.gg-club-icon{width:38px}.gg-club-readout strong{font-size:12px}.gg-club-readout span{font-size:10px}.gg-shot-console .gg-shot-title h2{font-size:12px}.gg-shot-console .gg-shot-title>b{font-size:10px}}
+@media(max-width:700px) and (orientation:portrait){
+ .gg-playing .gg-hud{left:10px;gap:9px}.gg-hole-ribbon>strong{font-size:38px}.gg-hud .gg-hole-ribbon{min-width:68px;padding:4px 6px 12px}.gg-player-readout>b{max-width:135px;font-size:13px}.gg-player-readout strong{font-size:24px}.gg-hud .gg-player-readout{font-size:10px;gap:2px 8px}
+ .gg-wind{right:10px;min-width:75px;gap:7px;padding:7px}.gg-wind-arrow{font-size:30px}.gg-wind strong{font-size:20px}.gg-minimap{right:10px;top:118px;width:108px}.gg-playing .gg-lie{top:153px;left:10px}
+ .gg-playing .gg-play-ui{left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));top:auto;max-height:calc(100% - 180px)}
+ .gg-playing .gg-shot-console{grid-template-columns:minmax(0,1fr) minmax(100px,.65fr);grid-template-areas:'club bonus' 'clubs clubs' 'aim aim' 'power hit';gap:7px 12px;padding:10px;min-height:242px}
+ .gg-shot-console .gg-shot-title{display:none}.gg-club-readout{gap:6px}.gg-club-icon{height:38px;width:34px}.gg-club-readout strong{font-size:13px}.gg-club-readout span{margin-top:1px}.gg-shot-console .gg-clubs button{min-height:36px;font-size:11px}.gg-shot-console .gg-bonus b{font-size:16px}.gg-shot-console>.gg-hit{font-size:17px;min-height:45px}
+ .gg-playing .gg-aiming>.gg-canvas{height:calc(100% - 265px);bottom:auto}.gg-playing .gg-course-tools{left:auto;right:10px;bottom:275px;max-width:calc(100% - 20px)}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .gg-playing .gg-hud{top:40px;left:10px;gap:10px}.gg-hud .gg-hole-ribbon{min-width:62px;padding:3px 5px 10px}.gg-hole-ribbon>strong{font-size:30px}.gg-hole-ribbon>small,.gg-hole-ribbon>span{font-size:8px}.gg-player-readout>b{font-size:12px}.gg-player-readout strong{font-size:20px}.gg-hud .gg-player-readout{gap:0 8px;font-size:10px}.gg-wind{top:40px;right:10px;padding:4px 9px;min-width:80px}.gg-wind-arrow{font-size:30px}.gg-wind strong{font-size:19px}.gg-minimap{top:104px;right:10px;width:100px}.gg-minimap svg{max-height:90px}.gg-playing .gg-lie{top:129px;left:10px;font-size:10px}
+ .gg-playing .gg-play-ui{left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));max-width:none;max-height:calc(100% - 90px)}
+ .gg-playing .gg-shot-console{grid-template-columns:95px minmax(140px,1fr) minmax(160px,1.2fr) 105px;min-height:112px;gap:4px 10px;padding:8px 12px}.gg-shot-console .gg-shot-title{display:none}.gg-shot-console .gg-clubs button{min-height:32px;font-size:9px}.gg-shot-console label{margin:0}.gg-shot-console>.gg-hit{min-height:40px;font-size:16px}.gg-shot-console .gg-bonus b{font-size:14px}.gg-club-icon{width:30px;height:42px}.gg-club-readout strong{font-size:11px}.gg-club-readout span{font-size:9px}
+ .gg-playing .gg-course-tools{bottom:130px;right:10px;top:auto;left:auto;max-width:none}.gg-playing .gg-play-ui>.gg-shot:not(.gg-shot-console){padding:10px;max-width:330px}.gg-playing .gg-play-ui>.gg-quiz{padding:12px}.gg-playing .gg-scores{top:45px;max-height:calc(100% - 60px)}
+}
+@media(orientation:landscape) and (max-height:550px) and (max-width:700px){.gg-playing .gg-shot-console{grid-template-columns:70px minmax(110px,1fr) minmax(130px,1fr) 80px;gap:4px 6px;padding:8px}.gg-club-readout{gap:3px}.gg-club-icon{width:24px}.gg-club-readout strong{font-size:10px}.gg-club-readout span{font-size:8px}.gg-shot-console .gg-bonus{gap:4px;font-size:9px}.gg-shot-console .gg-clubs button{font-size:8px}.gg-playing .gg-course-tools button{min-height:30px;padding:5px 7px;font-size:10px}}
+.gg-shot-console>.gg-hit{white-space:nowrap;padding:8px 6px}
+@media(orientation:landscape) and (max-height:550px){.gg-shot-console .gg-bonus{grid-area:title;font-size:9px}.gg-shot-console .gg-bonus>span{white-space:nowrap}}
+.gg-minimap summary:focus-visible{outline:3px solid #ffda82;outline-offset:3px;border-radius:8px}
+@media(max-width:359px) and (orientation:portrait){.gg-player-readout>b{max-width:90px}.gg-hud .gg-player-readout{gap:2px 6px}}
+.gg-playing>.gg-stage{position:absolute;inset:0}
+.gg-playing>.host-spectator{position:absolute;z-index:12;top:40px;left:50%;transform:translateX(-50%);width:min(560px,calc(100% - 24px));margin:0;max-height:95px;overflow:auto;padding:7px 10px;font-size:11px}
+.gg-playing>.host-spectator button{min-height:32px;padding:5px 8px;font-size:11px}
+@media(max-width:1100px){.gg-spectating .gg-hud,.gg-spectating .gg-wind{top:145px}.gg-spectating .gg-minimap{top:225px}.gg-spectating .gg-lie{top:253px}.gg-spectating .gg-course-tools{bottom:12px}.gg-spectating .gg-play-ui{bottom:60px;max-height:calc(100% - 200px)}}

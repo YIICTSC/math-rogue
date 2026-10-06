@@ -1,4 +1,7 @@
 const copy: [string, string, string][] = [
+  ['ホール情報', 'Hole information', 'ホールじょうほう'],
+  ['コースマップ', 'Course map', 'コースマップ'],
+  ['推定飛距離', 'Estimated distance', 'すいていひきょり'],
   ['ラウンド開始前まで自由に変更できます。', 'Customize freely before the round starts.', 'ラウンドかいしまえまで じゆうに へんこうできます。'],
   ['服の色', 'Outfit color', 'ふくの いろ'],
   ['サーバーが試合を進行します。ホストの離席でもプレイできます。', 'The server runs the round. Play continues when the host steps away.', 'サーバーが しあいを しんこうします。ホストの りせきでも プレイできます。'],

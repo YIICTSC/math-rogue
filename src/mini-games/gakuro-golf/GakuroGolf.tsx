@@ -1,6 +1,6 @@
 import '../shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import { trans } from '../../utils/textUtils';
 import type { LanguageMode } from '../../types';
@@ -9,6 +9,8 @@ import { benefits, CLUBS, MAX_PLAYERS, type Club, type GolfCommand, type GolfVie
 import { HOLES, distance, surface } from './course';
 import { GolfRoom } from './network';
 import GolfCanvas from './GolfCanvas';
+import CourseHud, { ClubIcon } from './CourseHud';
+import { predictShot } from './motion';
 import LessonPicker from './LessonPicker';
 import QuizPanel from './QuizPanel';
 import AvatarCreator from '../gakuro-kart/AvatarCreator';
@@ -63,13 +65,15 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
   };
   const send = (c: GolfCommand) => { if (!spectating && !view?.paused) room.current?.send(c); };
   const bonus = benefits(me?.correct ?? 0);
+  const projected = useMemo(()=>me?.phase==='aim' ? predictShot(me,club,angle,power).at(-1) : undefined,[me?.phase,me?.hole,me?.x,me?.z,me?.correct,club,angle,power]);
+  const carry = me&&projected ? distance(me,projected) : 0;
   const scoreRows = [...(view?.players || [])].filter(p => !p.spectator).sort((a, b) => {
     const completeA = a.phase === 'finished', completeB = b.phase === 'finished';
     return Number(completeB) - Number(completeA) || b.scores.length - a.scores.length || a.scores.reduce((s, n) => s + n, 0) - b.scores.reduce((s, n) => s + n, 0) || a.slot - b.slot;
   });
-  return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''}`} data-gamepad-initial-scope="gakuro-golf">
+  return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''}`} data-gamepad-initial-scope="gakuro-golf">
     <header className="gg-header"><button onClick={() => { leave(); onClose(); }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug">{t('開発中・デバッグ限定')}</span></header>
-    {view && room.current?.host && room.current.code && <HostSpectator enabled={spectating} canChangeMode={view.phase === 'lobby'} onChange={value => room.current?.setSpectator(value)} name={spectators.target ? me?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>HOLE {me.hole + 1} / {HOLES.length}</span><span>{t('打数')} {me.strokes}</span><span>{t('残り')} {remaining.toFixed(1)} m</span><span>{t(me.phase === 'quiz' ? '問題に挑戦中' : me.phase === 'aim' ? 'ショットを準備する' : me.phase === 'moving' ? 'ボールの行方を見よう' : me.phase === 'finished' ? '完走' : me.phase === 'holed' ? 'カップイン！' : 'プレイ中')}</span></>}</HostSpectator>}
+    {view && room.current?.host && room.current.code && (view.phase==='lobby'||spectating) && <HostSpectator enabled={spectating} canChangeMode={view.phase === 'lobby'} onChange={value => room.current?.setSpectator(value)} name={spectators.target ? me?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>HOLE {me.hole + 1} / {HOLES.length}</span><span>{t('打数')} {me.strokes}</span><span>{t('残り')} {remaining.toFixed(1)} m</span><span>{t(me.phase === 'quiz' ? '問題に挑戦中' : me.phase === 'aim' ? 'ショットを準備する' : me.phase === 'moving' ? 'ボールの行方を見よう' : me.phase === 'finished' ? '完走' : me.phase === 'holed' ? 'カップイン！' : 'プレイ中')}</span></>}</HostSpectator>}
     {message && <div role="alert" className="gg-message">{t(message)}</div>}
     {picker ? <LessonPicker languageMode={languageMode} busy={busy} error={message} onSelect={selectLesson} onBack={() => { if (!busy) { setPicker(null); setMessage(''); } }} /> : <>
       <section className={`gg-stage ${!view || view.phase === 'lobby' ? 'gg-preview' : ''} ${me?.phase === 'aim' ? 'gg-aiming' : ''}`}>
@@ -87,14 +91,14 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
           <aside className="online-collection-controls"><p>{t('ルームコード')} <strong className="gg-code">{room.current?.code || 'SOLO'}</strong></p><p data-allow-japanese="true">{view.title}</p>{room.current?.host ? <><button disabled={busy} onClick={() => setPicker('change')}>{t('問題の範囲を変更')}</button><button className="gg-primary" disabled={!view.title || busy || !view.players.some(p => p.connected && !p.spectator)} onClick={() => room.current?.start()}>{t('ラウンド開始')}</button><p className="gg-muted">{t(room.current?.serverHosted ? 'サーバーが試合を進行します。ホストの離席でもプレイできます。' : 'ホストは画面を開いたままにしてください。離席中は全員が一時停止します。')}</p></> : <p>{t('ホストの開始を待っています。')}</p>}
           <button onClick={() => setShowCreator(true)}>{t('キャラクタークリエイト')}</button><button onClick={leave}>{t('部屋を退出')}</button></aside></div></div>}
         {view && view.phase !== 'lobby' && me && <>
-          <div className="gg-hud"><div><small>HOLE</small><strong>{me.hole + 1}<span> / {HOLES.length}</span></strong></div><div><small>PAR</small><strong>{hole.par}</strong></div><div><small>{t('打数')}</small><strong>{me.strokes}</strong></div><div><small>{t('残り')}</small><strong>{remaining.toFixed(1)}<span> m</span></strong></div></div>
+          <CourseHud player={me} hole={hole} remaining={remaining} aim={angle} players={view.players} t={t}/>
           <div className="gg-course-tools"><button aria-pressed={overview} onClick={() => setOverview(!overview)}>{t(overview ? 'ボールを追う' : 'コース全景')}</button><button aria-expanded={showScores} onClick={() => setShowScores(!showScores)}>{t('スコアボード')}</button><button onClick={leave}>{t('部屋を退出')}</button></div>
-          <div className="gg-lie"><span>{t(lies[surface(hole, me)])}</span><span>{t('風')} {Math.hypot(hole.wind.x, hole.wind.z).toFixed(1)} · {hole.wind.x >= 0 ? '←' : '→'}</span><span>{view.players.filter(p => p.connected).length} / {MAX_PLAYERS}</span></div>
+          <div className="gg-lie"><span>{t(lies[surface(hole, me)])}</span><span>{view.players.filter(p => p.connected).length} / {MAX_PLAYERS}</span></div>
           {view.paused && <p className="gg-paused" role="status">{t('ホストの画面が戻るまで一時停止しています。')}</p>}
           {view.phase === 'playing' && <div className="gg-play-ui">
             {!spectating && me.phase === 'ready' && <section className="gg-shot gg-panel"><h2>{t('次のショットを強くしよう')}</h2>{me.penalty && <p role="status">{t('池・OB：1打罰で元の位置へ')}</p>}<p>{t('3問の正答数で最大パワーと方向の精度が決まります。')}</p><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'quiz' })}>{t('3問に挑戦')}</button></section>}
             {view.quiz && (!spectating || view.observedId === spectators.target) && <QuizPanel quiz={view.quiz} languageMode={languageMode} disabled={view.paused || spectating} send={send} />}
-            {!spectating && me.phase === 'aim' && <section className="gg-shot gg-panel"><div className="gg-shot-title"><h2>{t('ショットを準備する')}</h2><b>{me.correct} / 3 {t('正解')}</b></div><div className="gg-bonus"><span>{t('最大パワー')} <b>{Math.round(bonus.power * 100)}%</b></span><span>{t('方向の誤差')} <b>±{bonus.spread}°</b></span></div><div className="gg-clubs">{(Object.keys(CLUBS) as Club[]).map(c => <button key={c} aria-pressed={club === c} disabled={view.paused} onClick={() => setClub(c)}>{t(CLUBS[c].name)}</button>)}</div><label>{t('狙う方向')} <b>{offset}°</b><input type="range" min={-180} max={180} step={1} value={offset} onChange={e => setOffset(Number(e.target.value))} disabled={view.paused} /></label><label>{t('ショットパワー')} <b>{Math.round(power * 100)}%</b><input type="range" min={5} max={100} step={1} value={Math.round(power * 100)} onChange={e => setPower(Number(e.target.value) / 100)} disabled={view.paused} /></label><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'shot', shotId: me.shotId, club, angle, power })}>{t('ショット！')}</button></section>}
+            {!spectating && me.phase === 'aim' && <section className="gg-shot gg-panel gg-shot-console"><div className="gg-shot-title"><h2>{t('ショットを準備する')}</h2><b>{me.correct} / 3 {t('正解')}</b></div><div className="gg-bonus"><span>{t('最大パワー')} <b>{Math.round(bonus.power * 100)}%</b></span><span>{t('方向の誤差')} <b>±{bonus.spread}°</b></span></div><div className="gg-club-readout"><ClubIcon club={club}/><div><strong>{t(CLUBS[club].name)}</strong><span>{t('推定飛距離')} {carry.toFixed(0)} m</span></div></div><div className="gg-clubs">{(Object.keys(CLUBS) as Club[]).map(c => <button key={c} aria-pressed={club === c} disabled={view.paused} onClick={() => setClub(c)}>{t(CLUBS[c].name)}</button>)}</div><label className="gg-aim-control">{t('狙う方向')} <b>{offset}°</b><input type="range" min={-180} max={180} step={1} value={offset} onChange={e => setOffset(Number(e.target.value))} disabled={view.paused} /></label><label className="gg-power-control" style={{'--shot-power':`${Math.round(power*100)}%`} as React.CSSProperties}>{t('ショットパワー')} <b>{Math.round(power * 100)}%</b><input type="range" min={5} max={100} step={1} value={Math.round(power * 100)} onChange={e => setPower(Number(e.target.value) / 100)} disabled={view.paused} /><span className="gg-power-ticks" aria-hidden="true"><span>MIN</span><span>50</span><span>MAX</span></span></label><button className="gg-primary gg-hit" disabled={view.paused} onClick={() => send({ type: 'shot', shotId: me.shotId, club, angle, power })}>{t('ショット！')}</button></section>}
             {me.phase === 'moving' && <p className="gg-flying" role="status">{t('ボールの行方を見よう')}</p>}
             {!spectating && me.phase === 'holed' && <section className="gg-shot gg-panel"><p className="gg-eyebrow">HOLE {me.hole + 1} / COMPLETE</p><h2>{t(me.capped ? '打数上限でホール終了' : 'カップイン！')}</h2><p>{me.strokes} {t('打')} · PAR {hole.par} · {me.strokes - hole.par > 0 ? '+' : ''}{me.strokes - hole.par}</p><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'next' })}>{t(me.hole === HOLES.length - 1 ? 'ラウンド結果へ' : '次のホール')}</button></section>}
             {me.phase === 'finished' && <p className="gg-flying" role="status">{t('完走！ほかのプレイヤーの終了を待っています。')}</p>}
