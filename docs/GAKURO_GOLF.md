@@ -1,10 +1,10 @@
-# GAKURO GOLF — initial playable version
+# GAKURO GOLF — 18-hole learning golf
 
 Debug-only title-screen game, using the same debug-feature and daily-assignment gates as GAKURO GP. All participants enter from their debug title screen; there is no public invite bypass. Solo practice and host-created rooms share the same simulation. The host selects a lesson through the existing `ModeSelectionScreen`, including delivered assignments and custom questions. Guests use that lesson.
 
 ## Playing
 
-Three holes (par 3 / 4 / 5), played independently and simultaneously. Before **every** shot, answer three newly sampled questions and review their correct answers. Then choose a driver, iron, wedge or putter, aim relative to the cup, and set power. Fewer strokes over all three holes wins; equal totals tie. A hole ends at 12 strokes (a final water/OB penalty can make 13). Leaving mid-round is recorded as DNF.
+Eighteen distinct holes (total par 72), played independently and simultaneously. The host chooses **1–18 holes** before the round; solo practice has the same selection. Answer three questions at the start and after every **three actual shots**. The power/accuracy reward applies to the next three shots and carries over between holes. Penalty strokes do not consume another reward shot. Then choose a driver, iron, wedge or putter, aim relative to the cup, and set power. Fewer strokes over the selected holes wins; equal totals tie. A hole ends at 12 strokes (a final water/OB penalty can make 13). Leaving mid-round is recorded as DNF.
 
 | Correct / 3 | Maximum power | Direction spread |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ Set `VITE_ONLINE_SERVER_URL=https://learning-rogue-online.onrender.com` when bui
 
 The existing single upgrade router in `server/index.ts` now calls `golfUpgrade(req,socket,head,allowed)`, and its SIGTERM handler calls `closeGolfRooms`. The `/online`, `/kart`, and `/craft` routes remain available. Golf uses the shared `src/services/dedicatedConnection.ts`; its game union now includes `golf`. This branch is based on Render integration commit `2c232beeeee3b423e1b8a284f7f7770e0772abcf`.
 
-- Client hello: `open('golf', {create:true,name})` or `{create:false,code,name}`. Transport sends `{type:'connect',protocol:1,...hello}`.
+- Client hello: `open('golf', {create:true,name,protocol:2})` or `{create:false,code,name,protocol:2}`. Transport sends `{type:'connect',protocol:2,...hello}`.
 - Welcome: `{type:'connected',id,code,host}`. Sent again when room ownership changes.
 - State: `{type:'init'|'state',version:1,sequence,state:GolfView}`. Only the player's current question and submitted-answer feedback are included.
 - Host setup: `{type:'lesson',selection:LessonSelection}`, then `{type:'start'}`.
@@ -56,3 +56,11 @@ The initial golf UI and Render adapter are integrated with the kart/craft server
 - Geometry/material assets are shared; only the nearest twelve golfers and the local golfer are drawn in detail, while all forty balls remain visible. This limits character draw calls on phones without affecting participation or authoritative physics.
 - LessonPicker uses the exact main-game ModeSelectionScreen in a portal outside the golf theme. Backgrounds, category and unit highlights, buttons and assignment modals retain their original styling.
 - Tests cover 60 Hz flight positions between 5 Hz snapshots, lofted/putter predictions, avatar validation and privacy, forty-player synchronization, desktop/mobile character editing, persistent appearance, selected-unit styling, swing animation and translated controls.
+
+## Round configuration, audio and small screens (2026-10-06)
+
+Protocol version 2 includes `holeCount`, `shotsLeft` and `penaltyKind`. Both the dedicated server and PeerJS host authorize lobby-only `holes` changes. Late joiners receive the selected round settings; dedicated host migration preserves them. Each accepted shot advances the replay token even when the next shot skips questions. The title/lobby use the viewport height with compact side-by-side layouts in landscape and bounded internal participant lists.
+
+Eight golf cues from Springin’ Sound Stock are packaged as MP3/Opus. The normal sound-effect volume applies. Every hole has a curated existing Learning Rogue track; quiz and scoreboard inspection retain the same track. The BGM scene updates without restoring the previous music between holes and restores the prior scene on exit. Credits and all hole selections: [golf-audio-credits.md](golf-audio-credits.md).
+
+Tests: `node scripts/test-gakuro-golf.mjs`, `node scripts/test-golf-server.mjs`, `node scripts/test-golf-dedicated-browser.mjs`, `node scripts/test-golf-peer.mjs`.

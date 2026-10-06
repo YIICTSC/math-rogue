@@ -7,7 +7,7 @@ import { BallMotion, predictShot } from './motion';
 import { createGolferAssets, type GolferRig } from './golferModels';
 import { createCourseScenery } from './courseScenery';
 const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'];
-const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, penalty: false, capped: false };
+const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
 export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, avatar, spectator };
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;

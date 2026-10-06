@@ -161,6 +161,9 @@ export default function ResidentScene({
         ? talkLine
         : talk?.lines.at(-1),
     portrait = custom?.hero?.frames.idle[0] || r.portrait;
+  const speakingSelf = line?.speaker === selfId || line?.speaker === "player";
+  const speakingResident = line?.speaker === target;
+  const dialogueLine = line && (speakingSelf || speakingResident) ? line : undefined;
   const act = (a: Action) => {
       if (ready) send(a);
     },
@@ -257,7 +260,7 @@ export default function ResidentScene({
           )}
           {(me.hero?.frames.idle[0] || me.profile?.image) && (
             <img
-              className={"resident-self " + (scenic ? "resident-traveler" : "")}
+              className={"resident-self " + (scenic ? "resident-traveler " : "") + (dialogueLine && speakingSelf ? "speaking" : "")}
               src={assetUrl(me.hero?.frames.idle[0] || me.profile.image)}
               alt=""
             />
@@ -270,16 +273,10 @@ export default function ResidentScene({
             src={assetUrl(portrait)}
             alt={C(r.name)}
           />
-          <div className="resident-speech" aria-live="polite">
-            <strong>
-              {line?.speaker === selfId ? me.hero?.name || me.name : C(r.name)}
-            </strong>
-            <p>
-              {line
-                ? socialLineText(line, languageMode)
-                : t("近くで会うと、おしゃべりや贈り物で仲良くなれます。")}
-            </p>
-          </div>
+          {dialogueLine && <div className={"resident-speech " + (speakingSelf ? "resident-speech-self" : "resident-speech-resident")} data-speaker={speakingSelf ? "self" : "resident"} aria-live="polite">
+            <strong>{speakingSelf ? me.hero?.name || me.name : C(r.name)}</strong>
+            <p>{socialLineText(dialogueLine, languageMode)}</p>
+          </div>}
           <div className="resident-mood">
             {C(PERSONALITIES[person.personality])} ·{" "}
             {C(ROUTINES[person.routine])}
@@ -304,6 +301,7 @@ export default function ResidentScene({
             ))}
           </nav>
           <div className="resident-action-content">
+            {!dialogueLine && <p className="resident-guidance">{line ? socialLineText(line,languageMode) : t("近くで会うと、おしゃべりや贈り物で仲良くなれます。")}</p>}
             <p className="resident-feedback" role="status">
               {ready ? t(me.message) : t("相手に声をかけています…")}
             </p>

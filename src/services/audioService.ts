@@ -1169,7 +1169,7 @@ class AudioService {
       const previous = this.getCurrentBgmPlayback();
       this.bgmScenes.set(token, {type, options, priority});
       void this.playBGM(type, true, options);
-      return () => {
+      const release = () => {
           if (!this.bgmScenes.delete(token)) return;
           const scene = this.currentBgmScene();
           if (scene) { void this.playBGM(scene.type, true, scene.options); return; }
@@ -1177,6 +1177,12 @@ class AudioService {
               .then(() => { if (previous.paused && this.getCurrentBgmType() === previous.type) void this.pauseBGM(); });
           else this.stopBGM();
       };
+      return Object.assign(release, { update: (nextType: Parameters<AudioService['playBGM']>[0], nextOptions: BgmPlaybackOptions) => {
+          const entry = this.bgmScenes.get(token);
+          if (!entry) return;
+          entry.type = nextType; entry.options = nextOptions;
+          if (this.currentBgmScene() === entry) void this.playBGM(nextType, true, nextOptions);
+      }});
   }
   private currentBgmScene() {
       return [...this.bgmScenes.values()].sort((a,b) => b.priority-a.priority)[0];
@@ -1936,6 +1942,11 @@ class AudioService {
           this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
           this.stopActiveSfx(name);
       }
+  }
+
+  public playGolfSound(kind: 'swing'|'putt'|'land'|'cup'|'birdie'|'water'|'ob'|'start') {
+      const durations = {swing:600,putt:300,land:250,cup:700,birdie:1800,water:850,ob:700,start:900};
+      this.playSfxMp3(`golf/${kind}`, () => this.playSound(kind === 'ob' ? 'wrong' : 'select'), {maxDurationMs:durations[kind],overlap:false});
   }
 
   public playRpgLifeSound(kind: 'gather'|'mine'|'cast'|'reel'|'craft') {

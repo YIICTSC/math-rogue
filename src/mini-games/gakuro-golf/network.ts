@@ -1,5 +1,5 @@
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
+import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
 import { HOLES } from './course';
 import { GOLF_PROTOCOL, validView } from './protocol';
@@ -74,7 +74,7 @@ export class GolfRoom {
       if (['init', 'state'].includes(packet.type) && packet.version === GOLF_PROTOCOL && Number.isInteger(packet.sequence) && packet.sequence > this.lastSequence && validView(packet.state) && packet.state.players.some(p => p.id === this.selfId)) { this.lastSequence = packet.sequence; this.update(packet.state); return true; }
       return false;
     }, () => { if (!this.closed) { this.close(); this.update(null); this.status('サーバーとの接続が終了しました。部屋に入り直してください。'); } });
-    this.dedicated = connection; await connection.open('golf', hello);
+    this.dedicated = connection; await connection.open('golf', { ...hello, protocol: GOLF_PROTOCOL });
   }
   async create(name: string) {
     if (onlineServerUrl()) { await this.openDedicated({ create: true, name: name.slice(0, 16) }); return; }
@@ -141,6 +141,11 @@ export class GolfRoom {
     this.observedId = id;
     if (this.dedicated) this.dedicated.send({ type: 'observe', id });
     else this.emit();
+  }
+  setHoleCount(count: number) {
+    if (this.closed || !this.host) return;
+    if (this.dedicated) { this.dedicated.send({ type: 'holes', count }); return; }
+    if (this.world && setHoleCount(this.world, count)) this.emit();
   }
   start() { if (this.dedicated) { if (this.host) this.dedicated.send({ type: 'start' }); return; } if (this.host && this.world && this.factory && startGolf(this.world, this.world.title)) this.emit(); }
   private apply(id: string, c: unknown) {

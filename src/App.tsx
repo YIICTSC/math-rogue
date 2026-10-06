@@ -21465,6 +21465,8 @@ const App: React.FC = () => {
                                 act={gameState.act}
                                 floor={gameState.floor}
                                 lessonId={gameState.typingLessonId}
+                                combatExperience={gameState.actStats.enemiesDefeated}
+                                battleKey={`${gameState.act}:${gameState.currentMapNodeId || gameState.floor}`}
                                 onAbort={returnToTitle}
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}

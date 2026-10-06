@@ -4,7 +4,7 @@ import type { Hole } from './course';
 /** Deterministic decorative scenery; playable ground stays level with golf physics. */
 export function createCourseScenery(scene:THREE.Scene,hole:Hole){
  const geometries:THREE.BufferGeometry[]=[],materials:THREE.Material[]=[],textures:THREE.Texture[]=[];
- let seed=517+hole.par;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+ let seed=517+hole.par+hole.cup.z*37+hole.cup.x*131;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const texture=(colors:string[],repeat:number)=>{const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const ctx=canvas.getContext('2d')!;ctx.fillStyle=colors[0];ctx.fillRect(0,0,128,128);for(let i=0;i<2200;i++){ctx.fillStyle=colors[1+i%2];ctx.fillRect(random()*128,random()*128,1+random()*2,1+random()*3);}const result=new THREE.CanvasTexture(canvas);result.colorSpace=THREE.SRGBColorSpace;result.wrapS=result.wrapT=THREE.RepeatWrapping;result.repeat.set(repeat,repeat);textures.push(result);return result;};
  const grass=texture(['#527d37','#608b3e','#456f30'],28),fairway=texture(['#81a94b','#89b351','#739d44'],3),green=texture(['#9abc59','#a0c260','#92b553'],4);
  const sky=document.createElement('canvas');sky.width=4;sky.height=256;const ctx=sky.getContext('2d')!,gradient=ctx.createLinearGradient(0,0,0,256);gradient.addColorStop(0,'#438fd2');gradient.addColorStop(.55,'#9bcee5');gradient.addColorStop(1,'#dae9cd');ctx.fillStyle=gradient;ctx.fillRect(0,0,4,256);const skyTexture=new THREE.CanvasTexture(sky);skyTexture.colorSpace=THREE.SRGBColorSpace;textures.push(skyTexture);scene.background=skyTexture;

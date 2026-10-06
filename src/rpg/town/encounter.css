@@ -25,3 +25,9 @@
  .rpg-npc-screen .rpg-story-clue{height:min(26dvh,200px);max-height:min(26dvh,200px)}
  .rpg-npc-screen .rpg-story-dialog-copy{min-width:0;overflow-wrap:anywhere}
 }
+/* Dialogue follows its speaker. Instruction/effect text stays in the action panel. */
+.resident-speech-resident{left:65%;right:auto;transform:translateX(-50%);width:min(460px,62%)}.resident-speech-resident:after{left:calc(50% - 12px)}
+.resident-speech-self{left:4%;right:auto;transform:none;width:min(460px,62%);background:#e5f2df;color:#203b30}.resident-speech-self:after{left:23%;border-top-color:#e5f2df}.resident-self.speaking{animation:resident-speak .9s ease-in-out infinite}.resident-guidance{padding:10px 12px;border:1px solid #749087;border-radius:10px;background:#244b45;color:#e8eedf}
+@media(orientation:portrait) and (max-width:700px){.resident-speech-resident,.resident-speech-self{left:6%;right:auto;width:88%;transform:none}.resident-speech-resident:after{left:67%}.resident-speech-self:after{left:16%}}
+.resident-screen .resident-controls>nav button{min-height:44px}
+.resident-stage:not(.resident-world-stage):not(.resident-outing-stage) .resident-speech-resident{left:50%}

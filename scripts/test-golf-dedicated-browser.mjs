@@ -29,6 +29,10 @@ try {
   assert.equal(await page.evaluate(() => window.host.serverHosted), true);
   await page.evaluate(async () => { await Promise.all(Array.from({ length: 39 }, async (_, i) => { const room = new window.GolfRoom(v => window.views[i] = v, m => window.statuses.push(m)); window.rooms[i] = room; await room.join(window.host.code, `Guest ${i}`); })); });
   await page.waitForFunction(() => Object.values(window.views).length === 39 && Object.values(window.views).every(v => v.players.length === 40));
+  await page.evaluate(() => window.host.setHoleCount(9));
+  await page.waitForFunction(() => Object.values(window.views).every(v => v.holeCount === 9));
+  await page.evaluate(() => window.rooms[0].setHoleCount(1));
+  await page.waitForTimeout(250); assert.equal(await page.evaluate(() => window.hostView.holeCount),9);
   await page.evaluate(() => window.host.start()); await page.waitForFunction(() => Object.values(window.views).every(v => v.phase === 'playing'));
   await page.evaluate(() => window.rooms.forEach(r => r.send({ type: 'quiz' })));
   await page.waitForFunction(() => Object.values(window.views).every(v => v.quiz));
@@ -42,9 +46,22 @@ try {
   await page.waitForFunction(() => window.hostView.players.filter(p => p.id !== window.host.selfId).every(p => p.strokes === 1));
   await page.evaluate(() => window.host.close());
   await page.waitForFunction(() => window.rooms[0].host);
-  await page.waitForFunction(() => window.views[0].players.filter(p => p.connected).every(p => p.phase === 'ready'));
+  await page.waitForFunction(() => window.views[0].players.filter(p => p.connected).every(p => p.phase === 'aim' && p.shotsLeft === 2));
   assert.equal(await page.evaluate(() => window.views[0].paused), false);
+  assert.equal(await page.evaluate(() => window.views[0].holeCount),9);
+  await page.evaluate(() => window.rooms[0].setHoleCount(1));
+  await page.waitForTimeout(250); assert.equal(await page.evaluate(() => window.views[0].holeCount),9);
   await page.evaluate(() => window.rooms.forEach(r => r.close()));
   const end = Date.now() + 5000; while (adapter.roomCount && Date.now() < end) await new Promise(r => setTimeout(r, 20)); assert.equal(adapter.roomCount, 0);
+  await page.evaluate(async()=>{
+    window.lateViews={}; window.lateHost=new window.GolfRoom(v=>window.lateViews.host=v,m=>window.statuses.push(m)); await window.lateHost.create('Late host');
+    window.lateHost.setLesson(()=>{}, {mode:'ADDITION'});window.lateHost.setHoleCount(6);
+  });
+  await page.waitForFunction(()=>window.lateViews.host?.holeCount===6&&window.lateViews.host.title);
+  await page.evaluate(()=>window.lateHost.start());await page.waitForFunction(()=>window.lateViews.host.phase==='playing');
+  await page.evaluate(async()=>{window.lateGuest=new window.GolfRoom(v=>window.lateViews.guest=v,m=>window.statuses.push(m));await window.lateGuest.join(window.lateHost.code,'Late guest');});
+  await page.waitForFunction(()=>window.lateViews.guest?.phase==='playing');
+  assert.equal(await page.evaluate(()=>window.lateViews.guest.holeCount),6);
+  await page.evaluate(()=>{window.lateGuest.close();window.lateHost.close();});
   console.log('GolfRoom Render client: VITE_ONLINE_SERVER_URL routing, 40 browser WebSockets, server-generated arithmetic, private feedback, concurrent shots, host handoff and cleanup passed.');
 } finally { await browser.close(); await new Promise(resolve=>fixture.close(resolve)); adapter.close(); await new Promise(resolve => http.close(resolve)); }

@@ -22,7 +22,7 @@ async function connect(hello, origin = 'https://golf.test') {
   socket.on('message', raw => { const p = JSON.parse(raw.toString()); if (p.type === 'connected') Object.assign(client, { id: p.id, code: p.code, host: p.host }); if (['init', 'state'].includes(p.type)) client.view = p.state; if (p.type === 'error') client.errors.push(p.message); });
   socket.on('close', () => { client.closed = true; }); socket.on('error', () => {});
   await new Promise(resolve => { socket.once('open', resolve); socket.once('close', resolve); });
-  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: 1, ...hello }));
+  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: 2, ...hello }));
   await wait(() => client.view || client.closed || client.errors.length, 'handshake'); return client;
 }
 const send = (c, d) => c.socket.send(JSON.stringify(d));
@@ -55,7 +55,7 @@ try {
   await wait(() => host.view.players.every(p => p.strokes === 1));
   assert(host.view.players.every(p=>Number.isFinite(p.vx)&&Number.isFinite(p.vy)&&p.shotClub==='iron'),'kinematics and club are available for smooth rendering');
   host.socket.close(); await wait(() => golfers[1].host, 'owner handoff');
-  await wait(() => golfers[1].view.players.filter(p => p.connected).every(p => p.phase === 'ready'), 'server continues after owner leaves', 15000);
+  await wait(() => golfers[1].view.players.filter(p => p.connected).every(p => p.phase === 'aim' && p.shotsLeft === 2), 'server continues after owner leaves', 15000);
   assert(golfers[1].view.players.filter(p => p.connected).every(p => p.strokes === 1 && p.z > 20));
   assert.equal(golfers[1].view.paused, false);
   for (const c of golfers.slice(1)) c.socket.close(); await wait(() => adapter.roomCount === 0, 'empty room cleanup');
