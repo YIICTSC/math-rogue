@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`cdb5c51dc88b213f0b817a78ca325887341bbd71`（feat(3d): unify RPG kart and golf with original Blender storybook scenery）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`e5147941436b1879e1859f58cef41881c1181a67`（feat(3d): add Blender storybook drivers and golfers with expressive character rigs）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -330,3 +330,20 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 
 - 公開確認完了：Pages Actions `37532470628`・Android AAB Actions `37532470626`ともsuccess。公開index `index-B35_eZOT.js`から実際の`storybookModels-BUzVQL3j.js`、`GakuroGolf-Bb24GiKn.js`、`GakuroKart-CW344Zry.js`、`WorldScene3D-CbvpXqg5.js`を追跡し、新描画を確認。公開GLB 960552 bytesはローカルと完全一致（SHA-256 `4a134e80a66a71244f714137b405709ea6ff894657cf86f48abe4685e1a56170`）、catalogも19モデルを確認。
 - ローカルmainと公開mainは同一SHA・同一treeに同期済み。追跡差分なし、引き継ぎ資料のみ未追跡で保持。Renderの追加確認・手動デプロイは行っていない。
+
+
+## 2026-10-06 追記：レース・ゴルフの絵本調キャラクター
+
+- ユーザーの「レース、ゴルフのキャラクターモデルも同様に改善して」を実装。main `e5147941436b1879e1859f58cef41881c1181a67`、16ファイル。
+- オリジナルのBlenderキャラクター部品12種（頭・セーター・袖・ミトン・髪・耳・靴・ズボン・ロボット頭・襟）を制作。`assets/storybook/characters.blend`、`scripts/blender/build-storybook-characters.py`、`public/models/storybook/characters-v1.glb`（101296 bytes、約99 KiB）、`characters-catalog.json`。既存19景観モデルとは別ファイル。
+- `src/three/storybookCharacters.ts`で一度だけGLBを読み込み、原点・規格サイズへ正規化した形状を既存の共有BufferGeometryへ差し替える。差し替え前にGPUバッファを破棄し、MeshやInstancedMeshのIDとカスタマイズを維持。破棄済み形状には後着のロード結果を適用しない。読み込み失敗時は代替形状でプレイを継続。
+- `avatarModels.ts`／`hairModels.ts`へBlender部品、襟やトリム、柔らかな肌・服の質感を追加。8種族・12髪型・4アクセサリー・8表情、肌／服／髪の色、8シャシーを維持。ロボットでは丸い人間頭を隠し、角の丸い専用頭で顔の貫通を防止。
+- GPでは40人のInstancedMesh共有を維持。首を支点にした軽い姿勢変化、ハンドル入力に応じる手の動き、瞬きを追加。動きを減らす設定では首の待機揺れと瞬きを停止。運転入力に応じる動きは残す。
+- ゴルフは同じ頭・服・髪に丸い靴／ズボンを追加し、両腕を別々の肩支点で回す。既存のスイング・クラブ位置・スコア別反応を維持。アンダーパーは大笑い、パーは笑顔、ボギー以降は落胆する表情へ一時変更し、その後に選択していた表情を復元。メーター・スピン・物理・ネットワークの規則は変更なし。
+- 専用ブラウザテスト `scripts/test-storybook-characters-browser.mjs`：Blender形状読み込み、384組み合わせ、表情変更／復元、肩支点、読み込み中破棄、代替表示、描画成功。確認画像は`/workspace/scratch/storybook-character-lineup.png`。
+- 既存 `test-kart-avatar-browser.mjs`：全種族・髪型・シャシー、PC／スマホの編集・保存・集合画面、40 Peerのアバター同期・人数上限・レース中ロック・再戦成功。`test-kart-camera-browser.mjs`：新形状の実際の走行描画、坂道の路面クリアランス、PC／スマホ成功。`test-golf-shot-browser.mjs`：7サイズ・出題・2度合わせ・18番・BGM・スコア別リアクション成功。
+- 英語UI監査を含むpnpm run build、最終vite build、server:build、Android素材manifest検証（10290ファイル）、diff --check成功。Androidの基本映像パックにGLBを追加。骨アニメーションをBlenderから読み込む方式ではなく、Blender形状を既存のThree.js関節／インスタンス制御へ組み込む方式。
+
+- Web公開確認：Pages Actions `37535941458` success。公開index `index-DwL449kc.js`、共有モデル読込部 `AvatarCreator-CrTm7QjN.js`、`GakuroGolf-DJ3K6bWv.js`、`GakuroKart-B9mY8rbC.js`を追跡し、新キャラクター描画を確認。公開GLB 101296 bytesはローカルと完全一致（SHA-256 `d8d327128fdfc30fcf1bfa33fde96bcd3406bbc1e211a07b2811a0bb8fecb6af`）、catalogも12部品を確認。
+
+- Androidも公開確認完了：Actions `37535941565` success。ローカルmainと公開mainは同一SHA `e5147941436b1879e1859f58cef41881c1181a67`・同一treeへ同期。追跡差分なし、引き継ぎ資料のみ未追跡で保持。Renderの追加確認・手動デプロイは行っていない。
