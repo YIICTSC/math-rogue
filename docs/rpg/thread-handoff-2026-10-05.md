@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`9d0533ee7d02e8d27dd1b56e78be040347a8acc5`（Keep peaceful-world events achievable after the demon king campaign）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`a05abff97523b69006447b69e20d34bc3e7c3481`（Improve golf timing, spin and score reactions; restore full demon illustrations）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -299,3 +299,16 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 魔王キャンペーンの初回公開確認：Pages 37420942627、Android 37420942554ともsuccess。公開JS／CSSに魔王・試験官・エンディング、WebP9点がローカルと完全一致を確認。
 
 - 最終公開確認：main `9d0533ee7d02e8d27dd1b56e78be040347a8acc5`、GitHub Pages Actions 37421439211・Android AAB Actions 37421439186ともsuccess。公開RpgOnline-BzeTZorj.js／CSSと公開mainに試験官・3段階魔王・6場面エンディング・平和後ANSWERSイベントを確認。魔王6点／エンディング3点のWebP9ファイルは全てローカルと完全一致。Renderの手動デプロイ・追加稼働確認はユーザー方針により行っていない。ローカルの追跡変更はなく、本引き継ぎ資料のみ未追跡で保持。
+
+
+## 最新追記：ゴルフの2度合わせ・スピン・スコア別リアクション／魔王の見切れ修正（2026-10-06）
+
+- main `a05abff97523b69006447b69e20d34bc3e7c3481`、28ファイル。ゴルフはメーター開始後、1回目でパワーを決めても右端まで進み続け、右から戻る2回目で下部インパクトバー中央を狙う。ナイス／グッド／ミス判定をサーバーでも算出。外向き時の余計な2回目タップは無視、戻りを逃すとミスショット。画面タッチ／Space／Enterに対応、中止／Escape／画面非表示／blur／一時停止は送信せず中断。タイミング中はクラブ・方向・打点を固定。問題正解数による最大パワーをMAX表示。
+- 打点はボールの上側でトップスピン、下側でバックスピン。飛距離プレビューとサーバーで同じ物理を使用。打ち出し角と初回着地の転がりに反映し、芝・ラフ・砂で減衰。パターは中央固定。shotSpin／shotImpact／shotQualityを参加者へ同期、範囲検証・shotId二重送信拒否を維持。Golf Peer／専用サーバーともprotocol3。18ホールとホスト選択、3問→3ショットの周期は維持。
+- カップインは6秒の専用近景カメラ。バーディー以上はジャンプ／両手上げ／ダンス／回転など大きく喜ぶ。パーは控えめなガッツポーズ／うなずき等、ボギー以降は肩を落とす／首振り／顔を覆う／悔しい足踏み。人・ホール・スコアでパターンを選び、打数上限では喜ばない。次ホールへは待たずに進める。説明 docs/golf-shot-meter.md。
+- 魔王6画像はアトラス切り出しを廃止。ImageGenで各形態の待機／攻撃を1枚ずつ再生成し、角・翼・剣・光輪・エフェクトまで全体が入る透過WebPへ変換。全6枚に透明余白15〜18%を確認。RPG_DEMONだけ既存人型敵の拡大CSSを無効化し、object-fit:containで表示。他の敵は既存表示を維持。新PNGの出力名は docs/rpg/demon-king-campaign.md に記載、元ファイルは /workspace/generated_images に保持。Android素材ハッシュ更新。
+- 検証成功：test-golf-shot-meter.mjs、test-golf-meter-browser.mjs（実タッチ／キーボード、2度合わせ・戻り・中止・blur・一時停止・ミス）、test-golf-shot-browser.mjs（実React、タイトル／集合／ショットの7画面サイズ、問題・2タイミング入力、18番ホール、パー／バーディー／ボギー／ダブルボギー別3Dリアクション、上限非演出、BGM維持）、既存engine／40人専用サーバー／40人ブラウザ接続／Peer。サーバーテストでスピン・インパクト・算出グレードの同期を追加確認。
+- RPGのcampaignテスト、実Appで魔王3段階の変身・勝利を再確認。実Appテストは3形態それぞれ390×844／844×390／1440×1000で拡大なし・containを検証。テストサーバーのHMRを無効化し、buildの素材manifest生成と競合しないよう調整。
+- 英語UI監査、最終pnpm run build、server:build、Android素材manifest検証（10288ファイル）、diff --check成功。最終Web buildのゴルフチャンクにもMAX表示を確認。全体tscはOOMの既知理由により成功扱いにしない。
+
+- 公開確認完了：main `a05abff97523b69006447b69e20d34bc3e7c3481`、Pages Actions `37439622249`・Android AAB Actions `37439622408`ともsuccess。公開indexから実際の `GakuroGolf-CV8wLTgV.js`／CSSをたどり、2度合わせ・スピン・グレード・スコア別リアクションを確認。公開main CSSに魔王の拡大抑制を確認。魔王のWebP6枚は全てローカルと完全一致。Renderの追加確認・手動デプロイは行っていない。ローカルmainはAPI公開後の同一treeのSHAへ同期済み。追跡変更はなく、引き継ぎ資料のみ未追跡で保持。
