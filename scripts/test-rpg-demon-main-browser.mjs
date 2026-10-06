@@ -8,7 +8,7 @@ const server = await createServer({
   cacheDir: "node_modules/.vite-demon-main-test",
   optimizeDeps: { entries: ["index.html"] },
   define: { "import.meta.env.VITE_ENABLE_DEBUG_FEATURES": '"true"' },
-  server: { host: "127.0.0.1", port: 4261, strictPort: true },
+  server: { host: "127.0.0.1", port: 4261, strictPort: true, hmr: false, watch: null },
   plugins: [
     {
       name: "rpg-main-test",
@@ -118,6 +118,12 @@ try {
  for(let phase=1;phase<=3;phase++){
   await page.waitForFunction(phase=>window.__rpgTest.state.enemies[0]?.phase===phase,phase);assert.equal(await page.evaluate(()=>window.__rpgTest.state.enemies[0].enemyType),'RPG_DEMON');
   await page.waitForFunction(phase=>[...document.querySelectorAll('.battle-humanoid-enemy-sprite img')].some(i=>i.src.includes(`/demon/${phase}-idle.webp`)&&i.naturalWidth>0),phase);
+  for (const [width,height] of [[390,844],[844,390],[1440,1000]]) {
+    await page.setViewportSize({width,height}); await page.waitForTimeout(100);
+    const art = page.locator('.battle-enemy-sprite [data-enemy-type="RPG_DEMON"]').first();
+    assert.equal(await art.evaluate(e=>getComputedStyle(e).transform),'none','demon art must not inherit humanoid zoom');
+    assert.equal(await art.locator('img').evaluate(e=>getComputedStyle(e).objectFit),'contain');
+  }
   await page.evaluate(()=>{const t=window.__rpgTest;t.setState(s=>({...s,player:{...s.player,currentEnergy:99,hand:[{...s.player.deck.find(c=>c.damage>0),id:'demon-test-strike-'+s.enemies[0].phase,type:'ATTACK',damage:100000,cost:0}]}}));});
   await page.waitForFunction(()=>window.__rpgTest.state.player.hand[0]?.damage===100000);assert(await page.evaluate(()=>window.__rpgTest.play(window.__rpgTest.state.player.hand[0])));
   if(phase<3)await page.waitForFunction(phase=>window.__rpgTest.room.world.sites.find(s=>s.kind==='boss').bossPhase===phase+1,phase);

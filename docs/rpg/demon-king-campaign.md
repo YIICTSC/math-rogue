@@ -13,7 +13,13 @@ New worlds have campaign version 2 and Peer protocol 20. Save migration adds the
 Generated source atlases are retained in `/workspace/generated_images`:
 
 - `exec-de9c61bf-5f4b-4054-b4bd-3e6c93c029b2.png`: original concept atlas.
-- `exec-ae9c1ca6-07d4-4d41-b7ef-abb4b93623be.png`: transparent production idle/attack atlas, sliced into six WebP assets under `public/sprites/rpg/demon/`.
+- `exec-ae9c1ca6-07d4-4d41-b7ef-abb4b93623be.png`: previous production atlas (superseded: atlas cells clipped wing/effect tips).
 - `exec-0f501ad6-f501-4fa3-a3b6-102068149529.png`: ending atlas, sliced into three WebP panoramas under `public/sprites/rpg/ending/`.
 
 Validation: `test-rpg-campaign.mjs`, `test-rpg-ending-browser.mjs`, `test-rpg-demon-main-browser.mjs` (actual App attack handler), updated native-engine/city/duel tests, existing save/adventure/lifestyle tests, English UI gate, web build, server build, Android asset manifest verification. New generated assets are included in the Android asset-pack hashes.
+
+The six demon sprites now use individually regenerated whole images, without atlas slicing. All horns, wings, weapons and effects fit inside each source. Transparent padding is retained when converting to WebP, and the battle renderer disables the inherited humanoid zoom specifically for `RPG_DEMON`. Sources, ordered idle/attack per phase:
+
+- `exec-c7374e01-5608-4a14-a960-1c46656c396d.png`, `exec-a165a38f-5a94-4471-91d0-ce623f061aec.png`
+- `exec-e01abd2e-f1c1-422a-b442-b66c92020173.png`, `exec-ca0e51eb-07ce-4dc6-b7f9-07c1488c5dd7.png`
+- `exec-e15a7dda-c89a-4c63-829f-0a078e6c0bfa.png`, `exec-e09a1d43-ce5a-465c-879b-5259541134df.png`

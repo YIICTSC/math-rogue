@@ -2,7 +2,7 @@ import { MAX_PLAYERS, type GolfView } from './engine';
 import { validLesson } from '../gakuro-kart/learning';
 import { HOLES } from './course';
 import { validAvatar } from '../gakuro-kart/avatar';
-export const GOLF_PROTOCOL = 2;
+export const GOLF_PROTOCOL = 3;
 const phases = ['ready', 'quiz', 'aim', 'moving', 'holed', 'finished'];
 export function validView(v: any): v is GolfView {
   if (!v || !['lobby', 'playing', 'result'].includes(v.phase) || typeof v.title !== 'string' || v.title.length > 160 || typeof v.paused !== 'boolean' || !Number.isInteger(v.holeCount) || v.holeCount < 1 || v.holeCount > HOLES.length || !Array.isArray(v.players) || v.players.length < 1 || v.players.length > MAX_PLAYERS) return false;
@@ -12,6 +12,8 @@ export function validView(v: any): v is GolfView {
     ids.add(p.id); slots.add(p.slot);
     if (p.avatar !== undefined && !validAvatar(p.avatar)) return false;
     if ([p.vx, p.vy, p.vz, p.flightTime, p.shotAngle].some(n => n !== undefined && (!Number.isFinite(n) || Math.abs(n) > 10000))) return false;
+    if ([p.shotSpin,p.shotImpact].some(n => n !== undefined && (!Number.isFinite(n) || Math.abs(n) > 1))) return false;
+    if (p.shotQuality !== undefined && !['nice','good','miss'].includes(p.shotQuality)) return false;
     if (p.shotClub !== undefined && !['driver','iron','wedge','putter'].includes(p.shotClub)) return false;
     if (p.origin !== undefined && (!p.origin || ![p.origin.x,p.origin.z].every(n=>Number.isFinite(n)&&Math.abs(n)<10000))) return false;
   }

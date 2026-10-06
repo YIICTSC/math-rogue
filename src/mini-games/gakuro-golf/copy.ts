@@ -1,4 +1,16 @@
 const copy: [string, string, string][] = [
+  ["1回目：パワーを決める", "First tap: set power", "1かいめ：パワーを きめる"],
+  ["2回目：下の中心に合わせる", "Second tap: hit the lower center", "2かいめ：したの ちゅうしんに あわせる"],
+  ["右端まで進んでから戻ります", "The meter reaches the far edge, then returns", "みぎはしまで すすんでから もどります"],
+  ["画面タッチで確定", "Tap screen to lock", "がめんタッチで かくてい"],
+  ["メーター開始", "Start meter", "メーターかいし"],
+  ["打点：上でトップスピン、下でバックスピン", "Contact: top for topspin, bottom for backspin", "だてん：うえで トップスピン、したで バックスピン"],
+  ["中央の打点", "Center contact", "ちゅうおうの だてん"],
+  ["トップスピン", "Topspin", "トップスピン"],
+  ["バックスピン", "Backspin", "バックスピン"],
+  ["打点", "Ball contact", "だてん"],
+  ["中止", "Cancel", "ちゅうし"],
+
   ["18ホール・最大40人のオンラインゴルフ", "18 holes. Up to 40 players online.", "18ホール・さいだい40にんの オンラインゴルフ"],
   ["プレイするホール数", "Holes to play", "プレイする ホールすう"],
   ["遊び方", "How to play", "あそびかた"],

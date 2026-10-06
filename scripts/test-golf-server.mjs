@@ -22,7 +22,7 @@ async function connect(hello, origin = 'https://golf.test') {
   socket.on('message', raw => { const p = JSON.parse(raw.toString()); if (p.type === 'connected') Object.assign(client, { id: p.id, code: p.code, host: p.host }); if (['init', 'state'].includes(p.type)) client.view = p.state; if (p.type === 'error') client.errors.push(p.message); });
   socket.on('close', () => { client.closed = true; }); socket.on('error', () => {});
   await new Promise(resolve => { socket.once('open', resolve); socket.once('close', resolve); });
-  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: 2, ...hello }));
+  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: 3, ...hello }));
   await wait(() => client.view || client.closed || client.errors.length, 'handshake'); return client;
 }
 const send = (c, d) => c.socket.send(JSON.stringify(d));
@@ -51,9 +51,10 @@ try {
     for (const c of golfers) send(c, { type: 'command', command: { type: 'continue', shotId: c.view.quiz.shotId, index } });
     await wait(() => golfers.every(c => index === 2 ? c.view.quiz === null : c.view.quiz?.index === index + 1 && c.view.quiz.answer === null));
   }
-  for (let n = 0; n < golfers.length; n++) { const c = golfers[n], me = c.view.players.find(p => p.id === c.id); assert.equal(me.correct, n % 4, 'server grades answers, ignoring client-supplied correct count'); send(c, { type: 'command', command: { type: 'shot', shotId: me.shotId, club: 'iron', angle: 0, power: .7 } }); send(c, { type: 'command', command: { type: 'shot', shotId: me.shotId, club: 'driver', angle: 0, power: 1 } }); }
+  for (let n = 0; n < golfers.length; n++) { const c = golfers[n], me = c.view.players.find(p => p.id === c.id); assert.equal(me.correct, n % 4, 'server grades answers, ignoring client-supplied correct count'); send(c, { type: 'command', command: { type: 'shot', shotId: me.shotId, club: 'iron', angle: 0, power: .7, spin: -.6, impact: .4 } }); send(c, { type: 'command', command: { type: 'shot', shotId: me.shotId, club: 'driver', angle: 0, power: 1 } }); }
   await wait(() => host.view.players.every(p => p.strokes === 1));
   assert(host.view.players.every(p=>Number.isFinite(p.vx)&&Number.isFinite(p.vy)&&p.shotClub==='iron'),'kinematics and club are available for smooth rendering');
+  assert(host.view.players.every(p=>p.shotSpin===-.6&&p.shotImpact===.4&&p.shotQuality==='good'),'spin and server-derived timing grade are synchronized');
   host.socket.close(); await wait(() => golfers[1].host, 'owner handoff');
   await wait(() => golfers[1].view.players.filter(p => p.connected).every(p => p.phase === 'aim' && p.shotsLeft === 2), 'server continues after owner leaves', 15000);
   assert(golfers[1].view.players.filter(p => p.connected).every(p => p.strokes === 1 && p.z > 20));

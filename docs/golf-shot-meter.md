@@ -1,0 +1,9 @@
+# Golf timing, spin and score reactions
+
+The shot console starts a 1.1-second outward sweep. The first timing tap locks power (minimum 5%) without interrupting travel. After reaching 100%, the cursor returns from the right edge. The second timing tap aims at the center of the small lower impact strip (12% of the full track). Nice / good / miss grades use the distance from that target. Early second taps on the outward journey are ignored. Missing the return produces a miss; cancel, pause, window blur and hiding the page cancel without submitting. Touch anywhere, Space and Enter work during a sweep, and Escape cancels. Club, direction and contact controls lock during timing.
+
+Ball contact above center selects topspin; below center selects backspin. The shared server/preview physics changes launch height and applies one landing impulse, attenuated on fairway, rough and sand. Backspin can pull a slow landing backward; topspin extends the roll. Putters keep neutral contact. Signed impact error also affects direction and power. Spin and impact are bounded and checked on the authoritative engine, which determines the grade. Shot IDs retain replay protection. Golf Peer and dedicated server protocol are version 3.
+
+Cup-in reactions last six seconds, with a closer reaction camera. Birdie or better uses exuberant jumps, raised arms, dance and turns; par uses restrained fist pumps, nods and small waves; bogey or worse uses slumped shoulders, shaking, a facepalm or a disappointed stomp. Variant selection depends on player, hole and score. A stroke-limit finish does not celebrate. Next-hole controls remain immediately available.
+
+Validation: `scripts/test-golf-shot-meter.mjs`, `scripts/test-golf-meter-browser.mjs`, existing engine, dedicated-server and Peer tests, responsive actual React screens, and score-specific 3D reactions. The three-question / three-shot cadence and eighteen-hole settings are retained.

@@ -36,10 +36,12 @@ export function createGolferAssets() {
       add(root, box, materials[2], [side * .29, .1, .04], [.35, .18, .55]);
     }
     arms.position.set(0, 1.55, -.1); torso.add(arms); arms.position.y -= 1;
+    const leftArm = new T.Group(), rightArm = new T.Group(); arms.add(leftArm, rightArm);
     for (const side of [-1, 1]) {
-      const upper = add(arms, cylinder, shirt, [side * .3, -.24, .19], [.13, .62, .13]); upper.rotation.z = side * -.4; upper.rotation.x = -.65;
-      const lower = add(arms, cylinder, skin, [side * .11, -.54, .48], [.11, .43, .11]); lower.rotation.z = side * -.25; lower.rotation.x = -.65;
-      add(arms, sphere, skin, [side * .06, -.7, .6], [.12, .12, .13]);
+      const limb = side === -1 ? leftArm : rightArm;
+      const upper = add(limb, cylinder, shirt, [side * .3, -.24, .19], [.13, .62, .13]); upper.rotation.z = side * -.4; upper.rotation.x = -.65;
+      const lower = add(limb, cylinder, skin, [side * .11, -.54, .48], [.11, .43, .11]); lower.rotation.z = side * -.25; lower.rotation.x = -.65;
+      add(limb, sphere, skin, [side * .06, -.7, .6], [.12, .12, .13]);
     }
     const club = new T.Group(); arms.add(club); club.position.set(0, -.72, .63);
     const shaft = add(club, cylinder, materials[1], [0, -.37, .27], [.025, .95, .025]); shaft.rotation.x = -.62;
@@ -52,7 +54,7 @@ export function createGolferAssets() {
       torso.children.forEach(m => { if (m.userData.visibleFor) m.visible = m.userData.visibleFor(value); });
     }
     update(avatar);
-    return { root, torso, arms, clubHead, update, dispose: () => owned.forEach(m => m.dispose()) };
+    return { root, torso, arms, leftArm, rightArm, club, clubHead, update, dispose: () => owned.forEach(m => m.dispose()) };
   }
   return { create, dispose: () => { geometries.forEach(g => g.dispose()); sharedMaterials.forEach(m => m.dispose()); } };
 }

@@ -9,6 +9,7 @@ import { benefits, CLUBS, MAX_PLAYERS, type Club, type GolfCommand, type GolfVie
 import { HOLES, distance, surface } from './course';
 import { GolfRoom } from './network';
 import GolfCanvas from './GolfCanvas';
+import ShotMeter from './ShotMeter';
 import CourseHud, { ClubIcon } from './CourseHud';
 import { predictShot } from './motion';
 import LessonPicker from './LessonPicker';
@@ -22,6 +23,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
   const [view, setView] = useState<GolfView | null>(null), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
   const [name, setName] = useState('Player'), [code, setCode] = useState(''), [picker, setPicker] = useState<'practice' | 'host' | 'change' | null>(null);
   const [club, setClub] = useState<Club>('driver'), [power, setPower] = useState(.7), [offset, setOffset] = useState(0), [overview, setOverview] = useState(false), [showScores, setShowScores] = useState(false);
+  const [spin, setSpin] = useState(0), [meterActive, setMeterActive] = useState(false);
   const [avatar, setAvatar] = useState<KartAvatar>(() => { try { const saved = JSON.parse(localStorage.getItem('gakuro-golf-avatar-v1') || 'null'); return validAvatar(saved) ? saved : loadAvatar(); } catch { return loadAvatar(); } });
   const [showCreator, setShowCreator] = useState(false);
   const [holeCount, setHoleCount] = useState(18), [rules, setRules] = useState(false);
@@ -69,7 +71,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
   };
   const send = (c: GolfCommand) => { if (!spectating && !view?.paused) room.current?.send(c); };
   const bonus = benefits(me?.correct ?? 0);
-  const projected = useMemo(()=>me?.phase==='aim' ? predictShot(me,club,angle,power).at(-1) : undefined,[me?.phase,me?.hole,me?.x,me?.z,me?.correct,club,angle,power]);
+  const projected = useMemo(()=>me?.phase==='aim' ? predictShot(me,club,angle,power,club === 'putter' ? 0 : spin).at(-1) : undefined,[me?.phase,me?.hole,me?.x,me?.z,me?.correct,club,angle,power,spin]);
   const carry = me&&projected ? distance(me,projected) : 0;
   const scoreRows = [...(view?.players || [])].filter(p => !p.spectator).sort((a, b) => {
     const completeA = a.phase === 'finished', completeB = b.phase === 'finished';
@@ -81,7 +83,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
     {message && <div role="alert" className="gg-message">{t(message)}</div>}
     {picker ? <LessonPicker languageMode={languageMode} busy={busy} error={message} onSelect={selectLesson} onBack={() => { if (!busy) { setPicker(null); setMessage(''); } }} /> : <>
       <section className={`gg-stage ${!view || view.phase === 'lobby' ? 'gg-preview' : ''} ${me?.phase === 'aim' ? 'gg-aiming' : ''}`}>
-        <GolfCanvas view={view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} avatar={spectating ? me?.avatar || avatar : avatar} />
+        <GolfCanvas view={view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} spin={club === 'putter' ? 0 : spin} avatar={spectating ? me?.avatar || avatar : avatar} />
         {!view && <div className="gg-welcome gg-panel">
           <div className="gg-title-copy"><p className="gg-eyebrow">THE LEARNING LINKS / 18 HOLES</p><h1>GAKURO<br /><em>GOLF</em></h1><p>{t('学んで、狙って、カップイン。')}</p><p className="gg-muted">{t('18ホール・最大40人のオンラインゴルフ')}</p><button onClick={() => setRules(!rules)} aria-expanded={rules}>{t('遊び方')}</button></div>
           <div className="gg-title-actions">
@@ -105,8 +107,8 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
           {view.phase === 'playing' && <div className="gg-play-ui">
             {!spectating && me.phase === 'ready' && <section className="gg-shot gg-panel"><h2>{t('次のショットを強くしよう')}</h2>{me.penalty && <p role="status">{t('池・OB：1打罰で元の位置へ')}</p>}<p>{t('3問の効果は次の3ショットに適用。罰打は回数に含みません。')}</p><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'quiz' })}>{t('3問に挑戦')}</button></section>}
             {view.quiz && (!spectating || view.observedId === spectators.target) && <QuizPanel quiz={view.quiz} languageMode={languageMode} disabled={view.paused || spectating} send={send} />}
-            {!spectating && me.phase === 'aim' && <section className="gg-shot gg-panel gg-shot-console"><div className="gg-shot-title"><h2>{t('ショットを準備する')}</h2><b>{me.correct} / 3 {t('正解')} · {t('効果残り')} {me.shotsLeft}</b></div><div className="gg-bonus"><span>{t('最大パワー')} <b>{Math.round(bonus.power * 100)}%</b></span><span>{t('方向の誤差')} <b>±{bonus.spread}°</b></span></div><div className="gg-club-readout"><ClubIcon club={club}/><div><strong>{t(CLUBS[club].name)}</strong><span>{t('推定飛距離')} {carry.toFixed(0)} m</span><span>{t('効果残り')} {me.shotsLeft} / 3</span></div></div><div className="gg-clubs">{(Object.keys(CLUBS) as Club[]).map(c => <button key={c} aria-pressed={club === c} disabled={view.paused} onClick={() => setClub(c)}>{t(CLUBS[c].name)}</button>)}</div><label className="gg-aim-control">{t('狙う方向')} <b>{offset}°</b><input type="range" min={-180} max={180} step={1} value={offset} onChange={e => setOffset(Number(e.target.value))} disabled={view.paused} /></label><label className="gg-power-control" style={{'--shot-power':`${Math.round(power*100)}%`} as React.CSSProperties}>{t('ショットパワー')} <b>{Math.round(power * 100)}%</b><input type="range" min={5} max={100} step={1} value={Math.round(power * 100)} onChange={e => setPower(Number(e.target.value) / 100)} disabled={view.paused} /><span className="gg-power-ticks" aria-hidden="true"><span>MIN</span><span>50</span><span>MAX</span></span></label><button className="gg-primary gg-hit" disabled={view.paused} onClick={() => send({ type: 'shot', shotId: me.shotId, club, angle, power })}>{t('ショット！')}</button></section>}
-            {me.phase === 'moving' && <p className="gg-flying" role="status">{t('ボールの行方を見よう')}</p>}
+            {!spectating && me.phase === 'aim' && <section className="gg-shot gg-panel gg-shot-console"><div className="gg-shot-title"><h2>{t('ショットを準備する')}</h2><b>{me.correct} / 3 {t('正解')} · {t('効果残り')} {me.shotsLeft}</b></div><div className="gg-bonus"><span>{t('最大パワー')} <b>{Math.round(bonus.power * 100)}%</b></span><span>{t('方向の誤差')} <b>±{bonus.spread}°</b></span></div><div className="gg-club-readout"><ClubIcon club={club}/><div><strong>{t(CLUBS[club].name)}</strong><span>{t('推定飛距離')} {carry.toFixed(0)} m</span><span>{t('効果残り')} {me.shotsLeft} / 3</span></div></div><div className="gg-clubs">{(Object.keys(CLUBS) as Club[]).map(c => <button key={c} aria-pressed={club === c} disabled={view.paused || meterActive} onClick={() => setClub(c)}>{t(CLUBS[c].name)}</button>)}</div><label className="gg-aim-control">{t('狙う方向')} <b>{offset}°</b><input type="range" min={-180} max={180} step={1} value={offset} onChange={e => setOffset(Number(e.target.value))} disabled={view.paused || meterActive} /></label><div className="gg-contact"><button className="gg-contact-ball" aria-label={t('打点：上でトップスピン、下でバックスピン')} disabled={view.paused || meterActive || club === 'putter'} onPointerDown={e => { const r = e.currentTarget.getBoundingClientRect(); setSpin(Math.max(-1,Math.min(1,1-2*(e.clientY-r.top)/r.height))); }}><i style={{top:`${50-(club === 'putter' ? 0 : spin)*35}%`}}/></button><label>{t(club === 'putter' || spin === 0 ? '中央の打点' : spin > 0 ? 'トップスピン' : 'バックスピン')}<input aria-label={t('打点')} type="range" min={-1} max={1} step={.1} value={club === 'putter' ? 0 : spin} disabled={view.paused || meterActive || club === 'putter'} onChange={e => setSpin(Number(e.target.value))}/></label></div><ShotMeter limit={bonus.power} key={me.shotId} disabled={view.paused || !me.connected} t={t} onActive={setMeterActive} onPower={setPower} onShot={(power,impact) => send({ type: 'shot', shotId: me.shotId, club, angle, power, impact, spin: club === 'putter' ? 0 : spin })}/></section>}
+            {me.phase === 'moving' && <p className="gg-flying" role="status">{me.shotQuality && <strong className={`gg-shot-quality ${me.shotQuality}`}>{me.shotQuality === 'nice' ? 'NICE SHOT!' : me.shotQuality === 'good' ? 'GOOD SHOT' : 'MISS'}</strong>}{t('ボールの行方を見よう')}</p>}
             {!spectating && me.phase === 'holed' && <section className="gg-shot gg-panel"><p className="gg-eyebrow">HOLE {me.hole + 1} / COMPLETE</p><h2>{t(me.capped ? '打数上限でホール終了' : 'カップイン！')}</h2><p>{me.strokes} {t('打')} · PAR {hole.par} · {me.strokes - hole.par > 0 ? '+' : ''}{me.strokes - hole.par}</p><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'next' })}>{t(me.hole === view.holeCount - 1 ? 'ラウンド結果へ' : '次のホール')}</button></section>}
             {me.phase === 'finished' && <p className="gg-flying" role="status">{t('完走！ほかのプレイヤーの終了を待っています。')}</p>}
           </div>}

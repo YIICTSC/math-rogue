@@ -6,7 +6,7 @@ import { GameMode } from '../src/types';
 import { buildLesson, type LessonSelection } from '../src/mini-games/gakuro-kart/questions';
 import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
 
-export const GOLF_SERVER_PROTOCOL = 2;
+export const GOLF_SERVER_PROTOCOL = 3;
 export const GOLF_ENDPOINT = '/golf';
 const MAX_SETUP_BYTES = 512 * 1024;
 const modes = new Set<string>(Object.values(GameMode));

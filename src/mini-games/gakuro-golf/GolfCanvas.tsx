@@ -8,8 +8,8 @@ import { createGolferAssets, type GolferRig } from './golferModels';
 import { createCourseScenery } from './courseScenery';
 const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'];
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
-export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
-  const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, avatar, spectator };
+export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
+  const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, avatar, spectator };
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
     const scene = new THREE.Scene(); scene.background = new THREE.Color('#9bcee5'); scene.fog = new THREE.Fog('#c6ddcc', 210, 750);
     const resources: (THREE.BufferGeometry | THREE.Material)[] = [];
     const golferAssets = createGolferAssets();
-    type Marker = { ball: THREE.Mesh; shadow: THREE.Mesh; motion: BallMotion; rig: GolferRig; player: PublicGolfer; swingStart: number; origin: THREE.Vector3; direction: number; avatarKey: string };
+    type Marker = { ball: THREE.Mesh; shadow: THREE.Mesh; motion: BallMotion; rig: GolferRig; player: PublicGolfer; swingStart: number; cheerStart: number; origin: THREE.Vector3; direction: number; avatarKey: string };
     const markers = new Map<string, Marker>();
     const geo = <T extends THREE.BufferGeometry>(g: T) => { resources.push(g); return g; };
     const mat = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) => { const m = new THREE.MeshStandardMaterial({ color, roughness: .85, ...extra }); resources.push(m); return m; };
@@ -78,7 +78,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             if (!ownBall) ball.scale.setScalar(.65); scene.add(ball);
             const shadow = mesh(geo(new THREE.CircleGeometry(.3, 16)), mat('#183e34', {transparent:true,opacity:.3,depthWrite:false}), p.x, .08, p.z); shadow.rotation.x = -Math.PI/2;
             const rig = golferAssets.create(look); scene.add(rig.root);
-            marker = { ball, shadow, rig, motion: new BallMotion(), player: p, swingStart: -Infinity, origin: new THREE.Vector3(p.x, 0, p.z), direction: 0, avatarKey: JSON.stringify(look) };
+            marker = { ball, shadow, rig, motion: new BallMotion(), player: p, swingStart: -Infinity, cheerStart: p.phase === 'holed' && !p.capped ? now : -Infinity, origin: new THREE.Vector3(p.x, 0, p.z), direction: 0, avatarKey: JSON.stringify(look) };
             marker.motion.push(p, now); markers.set(p.id, marker);
           }
           if (received) {
@@ -87,6 +87,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
               marker.origin.set(p.origin?.x ?? marker.player.x, 0, p.origin?.z ?? marker.player.z);
               marker.direction = p.shotAngle ?? Math.atan2(p.x-marker.player.x,p.z-marker.player.z);
             }
+            if (p.phase === 'holed' && marker.player.phase !== 'holed' && !p.capped) marker.cheerStart = now;
             marker.motion.push(p, now); marker.player = p;
           }
           const avatarKey = JSON.stringify(look); if (marker.avatarKey !== avatarKey) { marker.rig.update(look); marker.avatarKey = avatarKey; }
@@ -112,6 +113,42 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           marker.rig.arms.rotation.z = renderedSwing;
           marker.rig.torso.rotation.y = renderedSwing * -.3;
           marker.rig.torso.rotation.x = .13 + Math.sin(now / 1400) * .012;
+          marker.rig.arms.rotation.x = 0; marker.rig.root.rotation.z = 0;
+          marker.rig.leftArm.rotation.set(0,0,0); marker.rig.rightArm.rotation.set(0,0,0); marker.rig.club.visible = true;
+          const cheer = (now - marker.cheerStart) / 1000;
+          if (p.phase === 'holed' && !p.capped && cheer < 6) {
+            const pose = (p.hole + p.slot + p.strokes) % 8, beat = Math.sin(cheer * 8), fade = Math.max(0, Math.min(1, cheer * 4, (6-cheer)*2));
+            const score = p.strokes - hole.par, mood = score < 0 ? 'delighted' : score === 0 ? 'pleased' : 'frustrated';
+            const rig = marker.rig; rig.club.visible = pose === 4 && score < 0;
+            rig.arms.rotation.z = 0; rig.arms.rotation.x = 0;
+            if (score < 0) {
+              rig.leftArm.rotation.z = -fade * (pose === 6 ? .9+beat*.3 : 2.1);
+              rig.rightArm.rotation.z = fade * (pose === 6 ? .9-beat*.3 : 2.1);
+              rig.leftArm.rotation.x = rig.rightArm.rotation.x = pose === 3 ? fade*.7 : 0;
+              rig.torso.rotation.y = fade * (pose === 2 ? Math.sin(cheer*5)*.7 : beat*.15);
+              rig.torso.rotation.x = pose === 3 ? fade*(.15+Math.sin(cheer*2)**2*.4) : .08;
+              rig.root.position.y = fade * (pose === 0 || pose === 4 || pose === 7 ? Math.abs(beat)*.75 : .08*Math.abs(beat));
+              rig.root.rotation.y += pose === 5 ? cheer*2 : Math.sin(cheer*3)*.15;
+              rig.root.rotation.z = pose === 1 || pose === 6 ? beat*.12*fade : 0;
+            } else if (score === 0) {
+              rig.leftArm.rotation.z = fade*(pose%3 === 0 ? -.7 : -.15);
+              rig.rightArm.rotation.z = fade*(pose%3 === 1 ? 1.1 : .6);
+              rig.rightArm.rotation.x = fade*Math.sin(cheer*5)*.2;
+              rig.torso.rotation.x = .08 + fade*Math.sin(cheer*3)**2*.12;
+              rig.torso.rotation.y = fade*beat*.05;
+              rig.root.position.y = 0;
+            } else {
+              // Drooped shoulders, head shake, facepalm and a disappointed foot stomp.
+              rig.leftArm.rotation.z = pose%3 === 0 ? fade*-.8 : fade*.2;
+              rig.rightArm.rotation.z = pose%3 === 1 ? fade*1.7 : fade*-.2;
+              rig.rightArm.rotation.x = pose%3 === 1 ? fade*1.2 : 0;
+              rig.torso.rotation.x = fade*(.35+Math.sin(cheer*2)**2*.15);
+              rig.torso.rotation.y = fade*Math.sin(cheer*5)*.17;
+              rig.root.rotation.z = pose%3 === 2 ? fade*Math.sin(cheer*8)*.06 : 0;
+              rig.root.position.y = 0;
+            }
+            if (p.id === id) { el.dataset.celebration = String(pose); el.dataset.reaction = mood; }
+          } else if (p.id === id) { delete el.dataset.reaction; delete el.dataset.celebration; }
           marker.rig.clubHead.scale.set(selectedClub === 'putter' && p.id === id ? .42 : .31, .13, .17);
         }
         for (const [id, marker] of markers) if (!active.some(p => p.id === id)) marker.ball.visible = marker.shadow.visible = marker.rig.root.visible = false;
@@ -121,6 +158,9 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         if (portrait) { cameraGoal.set(1, 3.8, 8); target.set(-2, 2.6, 0); }
         else if (full) { cameraGoal.set(65, hole.cup.z * .65 + 45, hole.cup.z * .28); target.set(0, 0, hole.cup.z / 2); }
         else if (!me || current?.phase === 'lobby') { cameraGoal.set(12, 13, -18); target.set(-1, 2, 7); }
+        else if (me.phase === 'holed' && !me.capped && now - (markers.get(me.id)?.cheerStart ?? -Infinity) < 6000) {
+          const hero = markers.get(me.id)!.rig.root.position; cameraGoal.set(hero.x + 6, 4.5, hero.z + 8); target.set(hero.x, 2.4, hero.z);
+        }
         else if (me.phase !== 'moving') {
           // Address view: player in the foreground, green and flag ahead.
           const narrow = camera.aspect < 1, wide = viewportHeight < 550 && camera.aspect > 1, behind = narrow ? 12 : wide ? 16 : 10, side = narrow ? -.8 : camera.aspect < 1.5 ? 1.8 : 4.8;
@@ -139,9 +179,9 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.lookAt(lookAt);
         aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
-          const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower].join('/');
+          const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin].join('/');
           if (key !== previewKey) {
-            previewKey = key; const points = predictShot(me, selectedClub, direction, selectedPower);
+            previewKey = key; const points = predictShot(me, selectedClub, direction, selectedPower, state.current.spin);
             const positions = lineGeo.getAttribute('position') as THREE.BufferAttribute;
             points.forEach((p,i) => positions.setXYZ(i,p.x,p.y - .39,p.z)); positions.needsUpdate = true;
             lineGeo.setDrawRange(0,points.length); lineGeo.computeBoundingSphere(); aimLine.computeLineDistances();
@@ -150,7 +190,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           }
         }
         el.dataset.golferCount = String(nearest.size); el.dataset.ballHeight = String(ball.y); el.dataset.swing = String(me ? markers.get(me.id)?.rig.arms.rotation.z || 0 : 0);
-        el.dataset.cameraMode = portrait ? 'portrait' : full ? 'overview' : me?.phase==='moving' ? 'flight' : 'address';
+        el.dataset.cameraMode = portrait ? 'portrait' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
         flag.rotation.y = Math.sin(now / 700) * .12;
         renderer.render(scene, camera); frame = requestAnimationFrame(draw);
       }; frame = requestAnimationFrame(draw);

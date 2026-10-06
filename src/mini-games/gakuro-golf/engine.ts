@@ -9,6 +9,7 @@ export const CLUBS = {
   wedge: { speed: 18, loft: 58, name: 'ウェッジ' },
   putter: { speed: 10, loft: 0, name: 'パター' },
 } as const;
+export const shotQuality = (impact: number) => Math.abs(impact) <= .25 ? 'nice' : Math.abs(impact) <= .65 ? 'good' : 'miss';
 export type Club = keyof typeof CLUBS;
 export const benefits = (correct: number) => ({ power: [.55, .7, .85, 1][correct] ?? .55, spread: [9, 6, 3, .7][correct] ?? 9 });
 export type PlayerPhase = 'ready' | 'quiz' | 'aim' | 'moving' | 'holed' | 'finished';
@@ -18,7 +19,7 @@ export interface Golfer {
   phase: PlayerPhase; shotsLeft: number; correct: number; totalCorrect: number; shotId: number;
   lesson: KartLesson | null; answers: number[]; feedback: number | null;
   origin: Point; flightTime: number; penalty: boolean; penaltyKind: 'water' | 'ob' | null; capped: boolean;
-  avatar: KartAvatar; shotClub: Club; shotAngle: number;
+  avatar: KartAvatar; shotClub: Club; shotAngle: number; shotSpin: number; shotImpact: number; shotQuality: 'nice' | 'good' | 'miss'; spinApplied: boolean;
 }
 export interface GolfWorld { phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean; holeCount: number }
 export type GolfCommand =
@@ -26,9 +27,9 @@ export type GolfCommand =
   | { type: 'quiz' }
   | { type: 'answer'; shotId: number; index: number; option: number }
   | { type: 'continue'; shotId: number; index: number }
-  | { type: 'shot'; shotId: number; club: Club; angle: number; power: number }
+  | { type: 'shot'; shotId: number; club: Club; angle: number; power: number; impact?: number; spin?: number }
   | { type: 'next' };
-export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'spectator' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'shotsLeft' | 'penalty' | 'penaltyKind' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle'>>;
+export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'spectator' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'shotsLeft' | 'penalty' | 'penaltyKind' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle' | 'shotSpin' | 'shotImpact' | 'shotQuality'>>;
 export interface GolfView {
   observedId?: string | null; phase: GolfWorld['phase']; title: string; paused: boolean; holeCount: number; players: PublicGolfer[];
   quiz: null | { shotId: number; index: number; question: Omit<KartQuestion, 'correct'>; selected: number | null; answer: number | null };
@@ -37,7 +38,7 @@ export const createGolf = (seed = 1): GolfWorld => ({ phase: 'lobby', players: O
 export function addPlayer(w: GolfWorld, id: string, name: string) {
   if (w.phase === 'result' || Object.keys(w.players).length >= MAX_PLAYERS || Object.hasOwn(w.players, id) || !id || id.length > 100 || ['__proto__', 'constructor', 'prototype'].includes(id)) return false;
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
-  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', shotsLeft: 0, correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, penaltyKind: null, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0 }; return true;
+  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', shotsLeft: 0, correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, penaltyKind: null, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0, shotSpin: 0, shotImpact: 0, shotQuality: 'nice', spinApplied: false }; return true;
 }
 export function setSpectator(w: GolfWorld, id: string, enabled: boolean) {
   const p = w.players[id];
@@ -86,11 +87,11 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () 
   if (c.type === 'continue' && p.phase === 'quiz' && p.feedback !== null && c.shotId === p.shotId && c.index === p.answers.length - 1) {
     p.feedback = null; if (p.answers.length === 3) { p.phase = 'aim'; p.shotsLeft = 3; p.lesson = null; } return true;
   }
-  if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1) {
-    const bonus = benefits(p.correct);
-    const angle = c.angle + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
-    Object.assign(p, shotVelocity(p, c.club, angle, c.power));
-    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle;
+  if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1 && (c.impact === undefined || Number.isFinite(c.impact) && Math.abs(c.impact) <= 1) && (c.spin === undefined || Number.isFinite(c.spin) && Math.abs(c.spin) <= 1)) {
+    const bonus = benefits(p.correct), impact = c.impact ?? 0, spin = c.club === 'putter' ? 0 : c.spin ?? 0;
+    const angle = c.angle + impact * 12 * Math.PI / 180 + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
+    Object.assign(p, shotVelocity(p, c.club, angle, c.power, spin, impact));
+    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle; p.shotSpin = spin; p.shotImpact = impact; p.shotQuality = shotQuality(impact); p.spinApplied = false;
     p.strokes++; p.shotsLeft--; p.shotId++; p.phase = 'moving'; p.flightTime = 0; p.penalty = false; p.penaltyKind = null; return true;
   }
   if (c.type === 'next' && p.phase === 'holed') {
@@ -101,10 +102,10 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () 
   return false;
 }
 /** Shared by authoritative shots and the visual preview; the preview omits random aim spread. */
-export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'correct'>, club: Club, angle: number, power: number) {
+export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'correct'>, club: Club, angle: number, power: number, spin = 0, impact = 0) {
   const spec = CLUBS[club], lie = surface(HOLES[p.hole], p);
-  const speed = spec.speed * Math.sqrt(power * benefits(p.correct).power) * (lie === 'sand' ? .65 : lie === 'rough' ? .82 : 1);
-  const loft = spec.loft * Math.PI / 180;
+  const speed = spec.speed * Math.sqrt(power * benefits(p.correct).power * (1 - Math.abs(impact) * .2)) * (lie === 'sand' ? .65 : lie === 'rough' ? .82 : 1);
+  const loft = (spec.loft - (club === 'putter' ? 0 : spin * 9)) * Math.PI / 180;
   return { vx: Math.sin(angle) * speed * Math.cos(loft), vz: Math.cos(angle) * speed * Math.cos(loft), vy: Math.sin(loft) * speed };
 }
 export function tick(w: GolfWorld, dt: number) {
@@ -119,6 +120,12 @@ export function tick(w: GolfWorld, dt: number) {
       p.y = 0;
       const lie = surface(hole, p);
       if (lie === 'water' || lie === 'ob') { p.x = p.origin.x; p.z = p.origin.z; p.strokes++; p.penalty = true; p.penaltyKind = lie; settle(p); continue; }
+      if (!p.spinApplied && p.shotClub !== 'putter') {
+        p.spinApplied = true;
+        const grip = lie === 'green' ? 1 : lie === 'fairway' ? .6 : lie === 'rough' ? .25 : .1;
+        const impulse = p.shotSpin * (p.shotClub === 'wedge' ? 8 : 6) * grip;
+        p.vx += Math.sin(p.shotAngle) * impulse; p.vz += Math.cos(p.shotAngle) * impulse;
+      }
       const speed = Math.hypot(p.vx, p.vz), dx = p.x - previous.x, dz = p.z - previous.z;
       const t = Math.max(0, Math.min(1, ((hole.cup.x - previous.x) * dx + (hole.cup.z - previous.z) * dz) / (dx * dx + dz * dz || 1)));
       const near = distance(hole.cup, { x: previous.x + dx * t, z: previous.z + dz * t });
@@ -140,5 +147,5 @@ export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
     const { correct: _secret, ...question } = p.lesson.questions[index];
     quiz = { shotId: p.shotId, index, question, selected: p.feedback === null ? null : p.answers[index], answer: p.feedback };
   }
-  return { phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, players: Object.values(w.players).map(({ id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped }) => ({ id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped })) };
+  return { phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, players: Object.values(w.players).map(({ id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped }) => ({ id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped })) };
 }

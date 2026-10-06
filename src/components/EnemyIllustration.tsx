@@ -35,7 +35,7 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
 
   if (visualTheme === 'elementary' && isLegacySpriteModeEnabled()) {
     return (
-      <div className={`relative ${className}`}>
+      <div className={`relative ${className}`} data-enemy-type={enemyType}>
         <PixelSprite seed={seed} name={name} className="w-full h-full" size={size} />
       </div>
     );
@@ -85,7 +85,7 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
   }, [name, aliases.join('|'), visualTheme, enemyType, phase, action, appearanceMode]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} data-enemy-type={enemyType}>
       {imageStatus === 'error' && (
         <PixelSprite seed={seed} name={name} className="w-full h-full" size={size} />
       )}
