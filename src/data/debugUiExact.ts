@@ -1,3 +1,4 @@
+import { STORYBOOK_ENGLISH, STORYBOOK_HIRAGANA } from '../three/storybookCopy';
 import {CAMPAIGN_ENGLISH,CAMPAIGN_HIRAGANA} from '../rpg/campaignCopy';
 import {FARM_ENGLISH,FARM_HIRAGANA} from '../rpg/farm/uiCopy';
 import {RPG_IMPROVEMENT_ENGLISH,RPG_IMPROVEMENT_HIRAGANA} from '../rpg/improvementCopy';
@@ -56,6 +57,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...KART_ENGLISH,
   ...CRAFT_ENGLISH,
   ...GOLF_ENGLISH,
+  ...STORYBOOK_ENGLISH,
   'シーンを開始できませんでした。部屋に入り直してください。': 'The scene could not start. Please rejoin the room.',
   '部屋を作る': 'Create a room',
   '招待URLをコピー': 'Copy invite URL',
@@ -299,6 +301,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...KART_HIRAGANA,
   ...CRAFT_HIRAGANA,
   ...GOLF_HIRAGANA,
+  ...STORYBOOK_HIRAGANA,
   'シーンを開始できませんでした。部屋に入り直してください。': 'シーンを はじめられませんでした。へやに はいりなおしてください。',
   '部屋を作る': 'へやを つくる',
   '招待URLをコピー': 'しょうたいURLを コピー',

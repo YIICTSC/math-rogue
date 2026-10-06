@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "style": "storybook-fantasy",
+  "creator": "Original Blender models for Learning Rogue",
+  "models": [
+    "oak",
+    "cherry",
+    "autumn",
+    "pine",
+    "snowpine",
+    "rock",
+    "flowers",
+    "mushrooms",
+    "cottage",
+    "clubhouse",
+    "snowcottage",
+    "tower",
+    "arch",
+    "lantern",
+    "bridge",
+    "bench",
+    "cactus",
+    "windmill",
+    "butterfly"
+  ],
+  "animations": [
+    "WindmillTurn",
+    "ButterflyFlutter-1",
+    "ButterflyFlutter1"
+  ]
+}

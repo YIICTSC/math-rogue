@@ -8,7 +8,7 @@ const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'android-asset-pack-manifest.json');
 const generatedModulePath = path.resolve('src/generated/androidAssetPackVersions.ts');
 const hostedBaseUrl = 'https://yiictsc.github.io/math-rogue/';
-const runtimeExtensions = new Set(['.mp3', '.ogg', '.png', '.svg', '.ttf', '.webp']);
+const runtimeExtensions = new Set(['.mp3', '.ogg', '.png', '.svg', '.ttf', '.webp', '.glb']);
 
 const getLocalFileName = (assetPath) => {
   assetPath = assetPath.normalize('NFC');

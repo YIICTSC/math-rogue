@@ -61,6 +61,8 @@ try {
   });
   p.setDefaultTimeout(90000);
   p.on("pageerror", (e) => errors.push(e.message));
+  p.on("console",m=>{if(m.type()==="error"||m.text().includes("Storybook"))console.log(m.type(),m.text());});
+  await p.addInitScript(()=>localStorage.setItem("rpg-preferences-v1",JSON.stringify({mapQuality:"low"})));
   await p.goto("http://127.0.0.1:4230/world3d");
   await p.getByRole("button", { name: "冒険をはじめる" }).click();
   await p.waitForFunction(() => window.room?.world);
@@ -78,7 +80,9 @@ try {
   console.log("RPG fixture ready");
   await p.getByRole("button", { name: "2D / 3D", exact: true }).click();
   await p.locator("[data-testid=rpg-world-3d]").waitFor();
-  console.log("RPG 3D rendered");
+  await p.waitForFunction(()=>Number(document.querySelector("[data-testid=rpg-world-3d]")?.dataset.blenderModels)>0);
+  assert(Number(await p.locator("[data-testid=rpg-world-3d]").getAttribute("data-blender-animations"))>0);
+  console.log("RPG 3D rendered with Blender models and animation");
   await p.waitForTimeout(1500);
   await p.screenshot({
     path: "/workspace/scratch/lifestyle-screens/3d-billboards.png",

@@ -6,7 +6,7 @@ import { isSourceAsset } from './source-asset-exclusions.mjs';
 const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'web-asset-manifest.json');
 const runtimeExtensions = new Set([
-  '.png', '.svg', '.ttf', '.otf', '.woff', '.woff2', '.webp',
+  '.png', '.svg', '.ttf', '.otf', '.woff', '.woff2', '.webp', '.glb',
   '.ogg',
 ]);
 

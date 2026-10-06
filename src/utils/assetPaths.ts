@@ -74,6 +74,7 @@ export const getAssetBaseUrl = (): string => {
 };
 
 const shouldVersionAsset = (path: string): boolean =>
+  path.startsWith('models/storybook/') ||
   path.startsWith('sprites/magic/') ||
   // Vacation enemies switch between separate idle/attack/skill files. Keep
   // every state on the current build instead of reusing an older cached cutout.

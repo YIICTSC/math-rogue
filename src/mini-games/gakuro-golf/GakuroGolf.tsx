@@ -1,3 +1,4 @@
+import StorybookQuality from '../../three/StorybookQuality';
 import '../shared/lobby.css';
 import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -78,7 +79,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
     return Number(completeB) - Number(completeA) || b.scores.length - a.scores.length || a.scores.reduce((s, n) => s + n, 0) - b.scores.reduce((s, n) => s + n, 0) || a.slot - b.slot;
   });
   return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${!view?'gg-title-screen':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''}`} data-gamepad-initial-scope="gakuro-golf">
-    <header className="gg-header"><button onClick={() => { leave(); onClose(); }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug">{t('開発中・デバッグ限定')}</span></header>
+    <header className="gg-header"><button onClick={() => { leave(); onClose(); }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug"><StorybookQuality languageMode={languageMode}/></span><span className="gg-debug">{t('開発中・デバッグ限定')}</span></header>
     {view && room.current?.host && room.current.code && (view.phase==='lobby'||spectating) && <HostSpectator enabled={spectating} canChangeMode={view.phase === 'lobby'} onChange={value => room.current?.setSpectator(value)} name={spectators.target ? me?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>HOLE {me.hole + 1} / {view.holeCount}</span><span>{t('打数')} {me.strokes}</span><span>{t('残り')} {remaining.toFixed(1)} m</span><span>{t(me.phase === 'quiz' ? '問題に挑戦中' : me.phase === 'aim' ? 'ショットを準備する' : me.phase === 'moving' ? 'ボールの行方を見よう' : me.phase === 'finished' ? '完走' : me.phase === 'holed' ? 'カップイン！' : 'プレイ中')}</span></>}</HostSpectator>}
     {message && <div role="alert" className="gg-message">{t(message)}</div>}
     {picker ? <LessonPicker languageMode={languageMode} busy={busy} error={message} onSelect={selectLesson} onBack={() => { if (!busy) { setPicker(null); setMessage(''); } }} /> : <>
@@ -101,7 +102,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
           <button onClick={() => setShowCreator(true)}>{t('キャラクタークリエイト')}</button><button onClick={leave}>{t('部屋を退出')}</button></aside></div></div>}
         {view && view.phase !== 'lobby' && me && <>
           <CourseHud player={me} hole={hole} remaining={remaining} aim={angle} players={view.players} holeCount={view.holeCount} t={t}/>
-          <div className="gg-course-tools"><button aria-pressed={overview} onClick={() => setOverview(!overview)}>{t(overview ? 'ボールを追う' : 'コース全景')}</button><button aria-expanded={showScores} onClick={() => setShowScores(!showScores)}>{t('スコアボード')}</button><button onClick={leave}>{t('部屋を退出')}</button></div>
+          <div className="gg-course-tools"><StorybookQuality languageMode={languageMode}/><button aria-pressed={overview} onClick={() => setOverview(!overview)}>{t(overview ? 'ボールを追う' : 'コース全景')}</button><button aria-expanded={showScores} onClick={() => setShowScores(!showScores)}>{t('スコアボード')}</button><button onClick={leave}>{t('部屋を退出')}</button></div>
           <div className="gg-lie"><span>{t(lies[surface(hole, me)])}</span>{me.penalty&&<span role="status">{t('池・OB：1打罰で元の位置へ')}</span>}<span>{view.players.filter(p => p.connected).length} / {MAX_PLAYERS}</span></div>
           {view.paused && <p className="gg-paused" role="status">{t('ホストの画面が戻るまで一時停止しています。')}</p>}
           {view.phase === 'playing' && <div className="gg-play-ui">

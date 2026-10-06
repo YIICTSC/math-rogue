@@ -1,3 +1,5 @@
+import { StorybookModels, type Placement } from '../../three/storybookModels';
+import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater, qualityProfile, type Quality } from '../../three/storybookStyle';
 import { createKartParts } from './kartModels';
 import { cameraRoadFloor, chaseCameraPose } from './camera';
 import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from './avatar';
@@ -13,6 +15,9 @@ export class KartScene {
   private getTrack(course:number){return getTrack(course,this.state.customCourse);}
   private sampleTrack(distance:number,course:number,lane=0){return sampleTrack(distance,course,lane,this.state.customCourse);}
 
+  private storybook?:StorybookModels;
+  private atmosphere?:ReturnType<typeof storybookAtmosphere>;
+  private water?:ReturnType<typeof storybookWater>;
   private renderer: T.WebGLRenderer;
   private scene = new T.Scene();
   private camera = new T.PerspectiveCamera(68, 1, .2, 1700);
@@ -34,15 +39,15 @@ export class KartScene {
   private frames = 0; private frameTime = 0;
   private size = { width: 0, height: 0 };
   private textures: T.Texture[] = [];
-  constructor(private canvas: HTMLCanvasElement, world: Race, private selfId: string, private preview: boolean, private onFailure: () => void) {
+  constructor(private canvas: HTMLCanvasElement, world: Race, private selfId: string, private preview: boolean, private onFailure: () => void, private visualQuality:Quality='auto') {
     this.state = world;
     this.renderer = new T.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', alpha: false });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-    this.renderer.outputColorSpace = T.SRGBColorSpace; this.renderer.toneMapping = T.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.3;
-    const theme = COURSES[world.course]; this.scene.background = new T.Color(theme.sky); this.scene.fog = new T.Fog(theme.fog, 150, 950);
+    const profile=configureStorybook(this.renderer,visualQuality);
+    this.renderer.outputColorSpace = T.SRGBColorSpace; this.renderer.toneMapping = T.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.08;
+    const theme = COURSES[world.course]; this.scene.background = new T.Color(world.course===6?'#697d96':world.course===2?'#ddc7a6':'#b5d3cf'); this.scene.fog = new T.Fog(world.course===6?'#9bacbd':'#c7d8bb', 150, 950);
     this.scene.add(new T.HemisphereLight([1, 4, 5].includes(world.course) ? '#ecffff' : '#b7bfff', '#393452', 2.4));
-    const sun = new T.DirectionalLight([1, 4, 5].includes(world.course) ? '#fff4ce' : '#ffd8bf', 3.2); sun.position.set(-160, 250, 70); this.scene.add(sun);
-    this.buildWorld(); this.buildCars(); this.buildQuizRoad();
+    const sun = new T.DirectionalLight([1, 4, 5].includes(world.course) ? '#fff4ce' : '#ffd8bf', 3.2); sun.position.set(-160,250,70);sun.castShadow=profile.shadows;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-55;sun.shadow.camera.right=55;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-55;sun.shadow.camera.far=450;sun.shadow.normalBias=.15; this.scene.add(sun);
+    this.buildWorld(); this.buildStorybook(); this.buildCars(); this.buildQuizRoad();
     const pos = new Float32Array(180 * 3);
     for (let i = 0; i < 180; i++) { pos[i * 3] = Math.sin(i * 17.34) * 200 + 180; pos[i * 3 + 1] = 12 + (i % 23) * 4; pos[i * 3 + 2] = Math.cos(i * 29.41) * 330 - 70; }
     const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3));
@@ -57,7 +62,7 @@ export class KartScene {
   private texture(kind: 'road' | 'windows' | 'banner' | 'pad') {
     const c = document.createElement('canvas'); c.width = 512; c.height = kind === 'banner' ? 128 : 512; const ctx = c.getContext('2d')!;
     if (kind === 'road') {
-      ctx.fillStyle = '#283143'; ctx.fillRect(0, 0, 512, 512); let n = 143;
+      ctx.fillStyle = '#958677'; ctx.fillRect(0, 0, 512, 512); let n = 143;
       for (let i = 0; i < 14000; i++) { n = (Math.imul(n, 1664525) + 1013904223) >>> 0; ctx.fillStyle = i % 2 ? '#ffffff08' : '#0000000c'; ctx.fillRect(n % 512, (n >>> 12) % 512, 2, 2); }
       ctx.fillStyle = '#46505d'; ctx.fillRect(0, 0, 3, 512); ctx.fillRect(509, 0, 3, 512);
     } else if (kind === 'windows') {
@@ -84,19 +89,19 @@ export class KartScene {
   private staticInstances(geometry: T.BufferGeometry, material: T.Material, count: number, place: (i: number, o: T.Object3D) => void) {
     const mesh = new T.InstancedMesh(geometry, material, count), o = new T.Object3D();
     for (let i = 0; i < count; i++) { o.position.set(0, 0, 0); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); place(i, o); o.updateMatrix(); mesh.setMatrixAt(i, o.matrix); }
-    mesh.computeBoundingSphere(); this.scene.add(mesh); return mesh;
+    mesh.computeBoundingSphere(); mesh.castShadow=true;mesh.receiveShadow=true;this.scene.add(mesh); return mesh;
   }
   private buildWorld() {
     const course = this.state.course, theme = COURSES[course], track = this.getTrack(course);
-    const road = this.standard('#ffffff', .25, .78); road.map = this.texture('road'); road.side = T.DoubleSide;
+    const road = paintedSurface(this.standard('#ffffff', .02, .88),'road'); road.map = this.texture('road'); road.side = T.DoubleSide;
     this.ribbon(-ROAD_WIDTH / 2, ROAD_WIDTH / 2, 0, road, true);
-    const foundation = this.standard('#111b33', .4); foundation.side = T.DoubleSide; this.ribbon(-15, 15, -.28, foundation);
+    const foundation = this.standard('#b39d7c', .05); foundation.side = T.DoubleSide; this.ribbon(-15, 15, -.28, foundation);
     const neon = new T.MeshBasicMaterial({ color: theme.accent, side: T.DoubleSide });
     for (const s of [-1, 1]) {
       this.ribbon(s * 13 - .14, s * 13 + .14, .75, neon);
       this.ribbon(s * 11.5 - .13, s * 11.5 + .13, .018, new T.MeshBasicMaterial({ color: '#d4dfeb', side: T.DoubleSide }));
     }
-    this.staticInstances(new T.BoxGeometry(.5, .75, 8), this.standard('#425978', .65), 440, (i, o) => {
+    this.staticInstances(new T.BoxGeometry(.5, .75, 8), this.standard('#94745b', .05), 440, (i, o) => {
       const p = this.sampleTrack(Math.floor(i / 2) / 220 * track.length, course, i % 2 ? 13 : -13); o.position.set(p.x, p.y + .2, p.z); o.rotation.y = Math.atan2(p.tx, p.tz); o.rotation.x = -Math.atan(p.ty);
     });
     for (let side = 0; side < 2; side++) this.staticInstances(new T.BoxGeometry(1.2, .08, 3), new T.MeshBasicMaterial({ color: side ? theme.second : '#e5f9ff' }), 440, (i, o) => {
@@ -105,7 +110,7 @@ export class KartScene {
     this.staticInstances(new T.BoxGeometry(.14, .02, 4), new T.MeshBasicMaterial({ color: '#778497' }), 300, (i, o) => {
       const p = this.sampleTrack(Math.floor(i / 2) / 150 * track.length, course, i % 2 ? 4 : -4); o.position.set(p.x, p.y + .025, p.z); o.rotation.y = Math.atan2(p.tx, p.tz);
     });
-    const ground = new T.Mesh(new T.PlaneGeometry(4000, 4000), this.standard(theme.ground)); ground.rotation.x = -Math.PI / 2; ground.position.y = -28; this.scene.add(ground);
+    const ground = new T.Mesh(new T.PlaneGeometry(4000, 4000), paintedSurface(this.standard(course===6?'#d5ded9':course===2?'#a29970':'#78956d'),'grass')); ground.rotation.x = -Math.PI / 2; ground.position.y = -28; this.scene.add(ground);
     if (course === 3) {
       // Oversized bookshelves beside the library circuit.
       for (const [shelf, color] of ['#ce715e', '#728ccc', '#e3c378', '#79b0a4'].entries()) this.staticInstances(new T.BoxGeometry(2.4, 8, 4), this.standard(color), 32, (i, o) => {
@@ -173,6 +178,31 @@ export class KartScene {
     const moon = new T.Mesh(new T.SphereGeometry(36, 24, 16), new T.MeshBasicMaterial({ color: course === 1 ? '#fff3cb' : '#ffc4a4' })); moon.position.set(-190, 220, 410); this.scene.add(moon);
     const halo = new T.Mesh(new T.TorusGeometry(53, .7, 6, 64), new T.MeshBasicMaterial({ color: theme.second })); halo.position.copy(moon.position); halo.rotation.set(.65, -.4, .5); this.scene.add(halo);
   }
+  private buildStorybook(){
+    const course=this.state.course,track=this.getTrack(course),fallback:T.Object3D[]=[];
+    // Imported scenery replaces only decoration, never the road, gates or item pads.
+    this.scene.traverse(o=>{if(o instanceof T.InstancedMesh && [54,90,100].includes(o.count))fallback.push(o);});
+    this.storybook=new StorybookModels(this.scene,()=>fallback.forEach(o=>o.visible=false));
+    this.atmosphere=storybookAtmosphere(this.scene,18,this.visualQuality);
+    const placements:Placement[]=[],treeCount=qualityProfile(this.visualQuality).low?54:90;
+    // Rounded grassy islands ground the scenery beside elevated fantasy tracks.
+    const islandMaterial=paintedSurface(this.standard(course===6?'#d8e4da':'#8aab77'),'grass');
+    this.staticInstances(new T.SphereGeometry(1,12,8),islandMaterial,treeCount,(i,o)=>{
+      const p=this.sampleTrack(i/treeCount*track.length,course,(i%2?1:-1)*(24+i%4*3));o.position.set(p.x,p.y-2.1,p.z);o.scale.set(7.5,2.4,8.5);
+    });
+    for(let i=0;i<treeCount;i++){const side=i%2?1:-1,p=this.sampleTrack(i/treeCount*track.length,course,side*(24+i%4*3));
+      placements.push({model:course===6?'snowpine':course===0?'cherry':course===2?'autumn':i%4?'oak':'pine',x:p.x,y:p.y,z:p.z,scale:3.5+i%3,yaw:i*.8});
+      if(i%3===0){const f=this.sampleTrack(i/treeCount*track.length,course,side*17);placements.push({model:'flowers',x:f.x,y:f.y,z:f.z,scale:3});}
+      if(i%6===0){const l=this.sampleTrack(i/treeCount*track.length,course,side*16);placements.push({model:'lantern',x:l.x,y:l.y,z:l.z,scale:3});}
+      if(i%9===0){const h=this.sampleTrack(i/treeCount*track.length,course,side*42);placements.push({model:course===6?'snowcottage':course===3?'tower':'cottage',x:h.x,y:h.y,z:h.z,scale:7,yaw:Math.atan2(p.tx,p.tz)});}
+    }
+    for(let i=0;i<3;i++){const p=this.sampleTrack((i+.3)/3*track.length,course,55);placements.push({model:'windmill',x:p.x,y:p.y,z:p.z,scale:6});}
+    this.staticInstances(new T.SphereGeometry(1,12,8),islandMaterial,Math.ceil(treeCount/9),(i,o)=>{
+      const p=this.sampleTrack(i*9/treeCount*track.length,course,(i*9%2?1:-1)*42);o.position.set(p.x,p.y-2.5,p.z);o.scale.set(12,3,12);
+    });
+    this.storybook.set(placements);
+    if(course===5){this.water=storybookWater();const mesh=new T.Mesh(new T.PlaneGeometry(4000,4000),this.water.material);mesh.rotation.x=-Math.PI/2;mesh.position.y=-27.7;this.scene.add(mesh);}
+  }
   private buildQuizRoad() {
     const course = this.state.course;
     for (let lane = 0; lane < 4; lane++) {
@@ -201,7 +231,7 @@ export class KartScene {
     this.scene.add(this.quizRoad, this.crashObstacle);
   }
   private part(geometry: T.BufferGeometry, material: T.Material, offset: number[], scale = [1, 1, 1], rotation = [0, 0, 0], effect?: InstancePart['effect'], colored = false) {
-    const mesh = new T.InstancedMesh(geometry, material, MAX_RACERS); mesh.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh.frustumCulled = false; this.scene.add(mesh);
+    const mesh = new T.InstancedMesh(geometry, material, MAX_RACERS); mesh.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh.frustumCulled = false;mesh.castShadow=!effect;mesh.receiveShadow=true; this.scene.add(mesh);
     const part: InstancePart = { mesh, offset: new T.Vector3(...offset), scale: new T.Vector3(...scale), rotation: new T.Euler(...rotation), effect, colored }; this.parts.push(part); return part;
   }
   private buildCars() {
@@ -223,7 +253,7 @@ export class KartScene {
     const width = this.canvas.clientWidth, height = this.canvas.clientHeight; if (!width || !height) return;
     if (width !== this.size.width || height !== this.size.height) { this.size = { width, height }; this.renderer.setSize(width, height, false); this.camera.aspect = width / height; this.camera.updateProjectionMatrix(); }
     this.frameTime += dt; this.frames++;
-    if (this.frames === 180) { if (this.frameTime / this.frames > .027 && this.quality > .65) { this.quality -= .15; this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5) * this.quality); this.size.width = 0; } this.frames = 0; this.frameTime = 0; }
+    if (this.frames === 180) { if (this.frameTime / this.frames > .027 && this.quality > .65) { this.quality -= .15; this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, qualityProfile(this.visualQuality).pixelRatio) * this.quality); this.size.width = 0; } this.frames = 0; this.frameTime = 0; }
     const w = this.state, me = w.players[this.selfId] || Object.values(w.players)[0]; if (!me) return;
     this.quizRoad.visible = !!w.lesson && !me.finish && quizDistance(me.distance, this.getTrack(w.course).length) < QUIZ_END && !this.preview;
     this.crashObstacle.visible = me.crash > 0;
@@ -270,9 +300,13 @@ export class KartScene {
     if (!this.preview) this.camera.position.y = Math.max(this.camera.position.y, cameraRoadFloor(this.camera.position, ownDistance, w.course,w.customCourse));
     this.camera.lookAt(look);
     for (let i = 0; i < this.boxes.length; i++) { this.boxes[i].rotation.y = this.elapsed * 1.3; this.boxes[i].rotation.z = Math.sin(this.elapsed * 1.5 + i) * .16; }
+    this.storybook?.update(dt,matchMedia('(prefers-reduced-motion: reduce)').matches);this.atmosphere?.update(this.elapsed,new T.Vector3(ownPoint.x,0,ownPoint.z),matchMedia('(prefers-reduced-motion: reduce)').matches);this.water?.update(this.elapsed);
+    this.canvas.dataset.blenderModels=String(this.storybook?.ready?this.storybook.group.userData.models:0);this.canvas.dataset.blenderAnimations=String(this.storybook?.group.userData.animations||0);
+    const sun=this.scene.children.find(o=>o instanceof T.DirectionalLight) as T.DirectionalLight|undefined;if(sun){sun.position.set(ownPoint.x-100,ownPoint.y+180,ownPoint.z+70);sun.target.position.set(ownPoint.x,ownPoint.y,ownPoint.z);sun.target.updateMatrixWorld();}
     this.particles.position.y = Math.sin(this.elapsed * .3) * 3; this.renderer.render(this.scene, this.camera);
   }
   dispose() {
+    this.storybook?.dispose();this.atmosphere?.dispose();
     this.canvas.removeEventListener('webglcontextlost', this.lost);
     const geometries = new Set<T.BufferGeometry>(), materials = new Set<T.Material>();
     this.scene.traverse(o => { const m = o as T.Mesh; if (m.geometry) geometries.add(m.geometry); if (m.material) (Array.isArray(m.material) ? m.material : [m.material]).forEach(v => materials.add(v)); if (o instanceof T.InstancedMesh) o.dispose(); });

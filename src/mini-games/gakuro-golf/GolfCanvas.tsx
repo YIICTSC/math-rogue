@@ -1,3 +1,5 @@
+import { configureStorybook, paintedSurface, storybookWater } from '../../three/storybookStyle';
+import { useStorybookQuality } from '../../three/StorybookQuality';
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { HOLES } from './course';
@@ -9,6 +11,7 @@ import { createCourseScenery } from './courseScenery';
 const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'];
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
 export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
+  const quality=useStorybookQuality();
   const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, avatar, spectator };
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
   const [failed, setFailed] = useState(false);
@@ -20,18 +23,18 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
     type Marker = { ball: THREE.Mesh; shadow: THREE.Mesh; motion: BallMotion; rig: GolferRig; player: PublicGolfer; swingStart: number; cheerStart: number; origin: THREE.Vector3; direction: number; avatarKey: string };
     const markers = new Map<string, Marker>();
     const geo = <T extends THREE.BufferGeometry>(g: T) => { resources.push(g); return g; };
-    const mat = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) => { const m = new THREE.MeshStandardMaterial({ color, roughness: .85, ...extra }); resources.push(m); return m; };
+    const mat = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) => { const m = new THREE.MeshStandardMaterial({ color, roughness: .85, ...extra }); resources.push(m); if(extra.map)paintedSurface(m); return m; };
     const mesh = (g: THREE.BufferGeometry, m: THREE.Material, x: number, y: number, z: number) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); o.receiveShadow = true; scene.add(o); return o; };
     const lost = (event: Event) => { event.preventDefault(); setFailed(true); disposed = true; cancelAnimationFrame(frame); };
     let observer: ResizeObserver | undefined, scenery: ReturnType<typeof createCourseScenery> | undefined;
     try {
       setFailed(false); renderer = new THREE.WebGLRenderer({ canvas: el, antialias: true, powerPreference: 'high-performance' });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const profile=configureStorybook(renderer,quality); renderer.shadowMap.enabled = profile.shadows; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       scene.add(new THREE.HemisphereLight('#efffff', '#456744', 2.1));
-      const sun = new THREE.DirectionalLight('#fff4ce', 2.8); sun.position.set(-70, 130, -30); scene.add(sun);
+      const sun = new THREE.DirectionalLight('#fff4ce', 2.8); sun.position.set(-70, 130, -30); sun.castShadow=profile.shadows;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=90;sun.shadow.camera.bottom=-90;sun.shadow.camera.far=350;sun.shadow.normalBias=.08; scene.add(sun);
       const hole = HOLES[holeIndex];
-      scenery = createCourseScenery(scene,hole);
-      renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+      scenery = createCourseScenery(scene,hole,quality);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
       mesh(geo(new THREE.BoxGeometry(220, 3, hole.cup.z + 160)), mat('#ffffff', {map:scenery.grass}), 0, -1.6, hole.cup.z / 2);
       // Alternating mowing strips follow the line from tee to green.
       const length = Math.hypot(hole.cup.x, hole.cup.z), angle = Math.atan2(hole.cup.x, hole.cup.z);
@@ -40,7 +43,8 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         strip.rotation.set(-Math.PI / 2, 0, -angle);
       }
       const ellipse = (x: number, z: number, rx: number, rz: number, color: string, y = .03) => { const o = mesh(geo(new THREE.CircleGeometry(1, 48)), mat(color), x, y, z); o.rotation.x = -Math.PI / 2; o.scale.set(rx, rz, 1); return o; };
-      for (const h of hole.water) { ellipse(h.x, h.z, h.rx + 1.5, h.rz + 1.5, '#b0c99a'); ellipse(h.x, h.z, h.rx, h.rz, '#4fa6b7', .04); }
+      const animatedWater=storybookWater();resources.push(animatedWater.material);
+      for (const h of hole.water) { ellipse(h.x, h.z, h.rx + 1.5, h.rz + 1.5, '#b0c99a'); const pool=ellipse(h.x,h.z,h.rx,h.rz,'#4fa6b7',.04);pool.material=animatedWater.material; }
       for (const h of hole.sand) { ellipse(h.x,h.z,h.rx+1,h.rz+1,'#bcc184',.025); ellipse(h.x, h.z, h.rx, h.rz, '#ead9a5'); }
       const green = ellipse(hole.cup.x, hole.cup.z, 17, 17, '#ffffff', .05); (green.material as THREE.MeshStandardMaterial).map = scenery.green;
       ellipse(hole.cup.x, hole.cup.z, .9, .9, '#163a31', .07);
@@ -77,7 +81,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             const ball = new THREE.Mesh(ballGeo, mat(ownBall ? '#fffdf1' : colors[p.slot % colors.length], ownBall ? {} : {transparent:true,opacity:.7,depthWrite:false}));
             if (!ownBall) ball.scale.setScalar(.65); scene.add(ball);
             const shadow = mesh(geo(new THREE.CircleGeometry(.3, 16)), mat('#183e34', {transparent:true,opacity:.3,depthWrite:false}), p.x, .08, p.z); shadow.rotation.x = -Math.PI/2;
-            const rig = golferAssets.create(look); scene.add(rig.root);
+            const rig = golferAssets.create(look); rig.root.traverse(o=>{if(o instanceof THREE.Mesh){o.castShadow=true;o.receiveShadow=true;}});scene.add(rig.root);
             marker = { ball, shadow, rig, motion: new BallMotion(), player: p, swingStart: -Infinity, cheerStart: p.phase === 'holed' && !p.capped ? now : -Infinity, origin: new THREE.Vector3(p.x, 0, p.z), direction: 0, avatarKey: JSON.stringify(look) };
             marker.motion.push(p, now); markers.set(p.id, marker);
           }
@@ -192,10 +196,10 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         el.dataset.golferCount = String(nearest.size); el.dataset.ballHeight = String(ball.y); el.dataset.swing = String(me ? markers.get(me.id)?.rig.arms.rotation.z || 0 : 0);
         el.dataset.cameraMode = portrait ? 'portrait' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
         flag.rotation.y = Math.sin(now / 700) * .12;
-        renderer.render(scene, camera); frame = requestAnimationFrame(draw);
+        scenery?.update(now);animatedWater.update(now/1000);el.dataset.blenderModels=String(scenery?.library.ready?scenery.library.group.userData.models:0);el.dataset.blenderAnimations=String(scenery?.library.group.userData.animations||0);renderer.render(scene, camera); frame = requestAnimationFrame(draw);
       }; frame = requestAnimationFrame(draw);
     } catch (error) { console.error('Golf renderer initialization failed', error); setFailed(true); }
     return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
-  }, [holeIndex, selfId, portrait]);
+  }, [holeIndex, selfId, portrait, quality]);
   return <><canvas className="gg-canvas" ref={canvas} aria-label="GAKURO GOLF 3D course" />{failed && <div className="gg-render-error" role="alert">3D rendering unavailable. Enable WebGL and reload.</div>}</>;
 }

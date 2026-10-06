@@ -1,3 +1,5 @@
+import { StorybookModels, type Placement, type StorybookModel } from '../three/storybookModels';
+import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater } from '../three/storybookStyle';
 import {storyForSite} from './stories';
 import { residentsOf } from "./town/residents";
 import { residentPosition } from "./town/worldResidents";
@@ -57,10 +59,11 @@ export default function WorldScene3D(props: SceneProps) {
     renderer.setPixelRatio(
       Math.min(devicePixelRatio, prefs.mapQuality === "low" ? 1 : 1.5),
     );
+    const profile=configureStorybook(renderer,prefs.mapQuality);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    renderer.shadowMap.enabled = prefs.mapQuality === "high";
+    renderer.toneMappingExposure = 1.08;
+    renderer.shadowMap.enabled = profile.shadows;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.dataset.testid = "rpg-world-3d";
     renderer.domElement.setAttribute("aria-label", "3D");
@@ -71,7 +74,7 @@ export default function WorldScene3D(props: SceneProps) {
     const camera = new THREE.PerspectiveCamera(72, 1, 0.06, 100),
       sun = new THREE.DirectionalLight("#fff1cc", 2.1);
     sun.position.set(-8, 18, 9);
-    sun.castShadow = prefs.mapQuality === "high";
+    sun.castShadow = profile.shadows;
     sun.shadow.mapSize.set(1024, 1024);
     sun.shadow.camera.left = -18;
     sun.shadow.camera.right = 18;
@@ -82,6 +85,10 @@ export default function WorldScene3D(props: SceneProps) {
     const terrain = new THREE.Group(),
       actors = new THREE.Group();
     scene.add(terrain, actors);
+    let placements:Placement[]=[];
+    const models=new StorybookModels(scene,()=>{key='';});
+    const atmosphere=storybookAtmosphere(scene,1,prefs.mapQuality);
+    const animatedWater=storybookWater();
     const geometries: THREE.BufferGeometry[] = [],
       materials: THREE.Material[] = [],
       textures: THREE.Texture[] = [];
@@ -132,8 +139,9 @@ export default function WorldScene3D(props: SceneProps) {
       window = mat("#fbe6a0", 0.25, "#edb86b"),
       door = mat("#3a3431"),
       soil = mat("#694830"),
-      water = mat("#3b94ae", 0.2),
+      water = animatedWater.material,
       gold = mat("#d7b667", 0.3, "#816120");
+    materials.push(animatedWater.material);
     const textureLoader = new THREE.TextureLoader(),
       textureCache = new Map<string, THREE.Texture>();
     const texture = (src: string) => {
@@ -300,6 +308,7 @@ export default function WorldScene3D(props: SceneProps) {
       tall = 1,
       tile?: { x: number; y: number },
     ) {
+      if(parent===terrain){placements.push({model:biomeAt(Math.floor(x),Math.floor(z)).id==='snow'?'snowcottage':'cottage',x,y:0,z,scale:tall*.55,tile});if(models.ready)return;}
       const first = parent.children.length;
       mesh(parent, box, wall, x, 0.65 * tall, z, 0.85, 1.3 * tall, 0.85);
       const r = mesh(
@@ -323,6 +332,10 @@ export default function WorldScene3D(props: SceneProps) {
           child.userData.tile = tile;
     }
     function tree(x: number, z: number, biome: string) {
+      const season=calendar(latest.current.world).season;
+      const model:StorybookModel=biome==='snow'?'snowpine':biome==='desert'?'cactus':biome==='ruins'?'arch':season===2?'autumn':biome==='forest'?'pine':'oak';
+      placements.push({model,x,z,scale:biome==='ruins'?.7:1,yaw:(x*17+z*13)%6});
+      if(models.ready)return;
       mesh(terrain, trunk, wood, x, 0.6, z, 1, 1.2, 1);
       if (biome === "snow") {
         for (let i = 0; i < 3; i++)
@@ -365,7 +378,7 @@ export default function WorldScene3D(props: SceneProps) {
     camera.position.set((p?.x || 0) + 0.5, 1.05, (p?.y || 0) + 0.5);
     function rebuild(w: World, x: number, y: number) {
       batches.splice(0).forEach((b) => b.dispose());
-      terrain.clear();
+      terrain.clear();placements=[];
       groundMaterial?.dispose();
       const radius = options.current.mapQuality === "low" ? 12 : 19,
         cells: { x: number; y: number; tile: string }[] = [];
@@ -382,7 +395,7 @@ export default function WorldScene3D(props: SceneProps) {
           cells.push({ x: tx, y: ty, tile: w.tiles[ty * WIDTH + tx] });
       const ground = new THREE.InstancedMesh(
         box,
-        new THREE.MeshStandardMaterial({ roughness: 1 }),
+        paintedSurface(new THREE.MeshStandardMaterial({ roughness: 1 })),
         cells.length,
       );
       groundMaterial = ground.material as THREE.Material;
@@ -410,7 +423,7 @@ export default function WorldScene3D(props: SceneProps) {
                   ? "#8d8c91"
                   : biomeSurface(tx, ty).color,
         );
-        color.multiplyScalar(0.95 + ((tx * 13 + ty * 7) % 9) / 90);
+        color.multiplyScalar(1.04);
         ground.setColorAt(i, color);
         if (
           occupiedCityTile(w, ty * WIDTH + tx) ||
@@ -425,6 +438,7 @@ export default function WorldScene3D(props: SceneProps) {
           mesh(terrain, box, water, tx + 0.5, -0.015, ty + 0.5, 1, 0.025, 1);
         } else if (tile === "forest" && !removed) {
           if (node?.rock) {
+            placements.push({model:'rock',x:tx+.5,z:ty+.5,scale:.8,tile:{x:tx,y:ty}});if(models.ready)return;
             mesh(
               terrain,
               sphere,
@@ -438,7 +452,8 @@ export default function WorldScene3D(props: SceneProps) {
             );
           } else tree(tx + 0.5, ty + 0.5, b);
         } else if (node && !removed && tile === "grass") {
-          atlasBillboard(
+          if(node.material!=='reed')placements.push({model:node.rock?'rock':node.material==='frostwood'?'snowpine':node.material==='herb'?'flowers':'oak',x:tx+.5,z:ty+.5,scale:node.rock?.6:node.material==='herb'?1:.8,tile:{x:tx,y:ty}});
+          if(!models.ready||node.material==='reed')atlasBillboard(
             "sprites/rpg/frontier-atlas.webp",
             node.sprite,
             6,
@@ -462,6 +477,7 @@ export default function WorldScene3D(props: SceneProps) {
       });
       const near = (o: { x: number; y: number }) =>
         Math.abs(o.x - x) < radius && Math.abs(o.y - y) < radius;
+      for(let i=0;i<cells.length;i+=53){const c=cells[i];if(c.tile==='grass'&&!occupiedFarmTile(w,c.y*WIDTH+c.x)&&!occupiedCityTile(w,c.y*WIDTH+c.x))placements.push({model:'flowers',x:c.x+.3,z:c.y+.3,scale:.7});}
       for (const s of w.sites.filter(
         (s) =>
           near(s) &&
@@ -470,7 +486,9 @@ export default function WorldScene3D(props: SceneProps) {
             Math.abs(s.x - x) + Math.abs(s.y - y) <= 4),
       )) {
         if (["town", "boss", "dungeon"].includes(s.kind)) {
-          house(terrain, s.x + 0.5, s.y - 0.4, s.kind === "boss" ? 2 : 1, s);
+          if(s.kind==='boss'){placements.push({model:'tower',x:s.x+.5,z:s.y+.5,scale:1.2,tile:s});if(!models.ready)house(terrain,s.x+.5,s.y-.4,2,s);}
+          else house(terrain, s.x + 0.5, s.y - 0.4, 1, s);
+          placements.push({model:'lantern',x:s.x-.1,z:s.y+1.1,scale:.65});
           if (s.kind === "dungeon" || s.kind === "guardian") {
             for (const d of [-0.8, 0.8])
               mesh(
@@ -516,6 +534,8 @@ export default function WorldScene3D(props: SceneProps) {
             mesh(terrain, box, stone, tx, 0.5, tz, 0.35, 1, 0.35);
             mesh(terrain, box, water, tx, 1.1, tz, 0.95, 0.08, 0.5);
             if (lot.kind === "wind") {
+              placements.push({model:"windmill",x:tx,z:tz,scale:.65});
+              if(models.ready)continue;
               mesh(terrain, box, wall, tx, 1.4, tz, 0.06, 1.4, 0.08);
               mesh(terrain, box, wall, tx, 1.4, tz, 1.4, 0.06, 0.08);
             }
@@ -630,6 +650,8 @@ export default function WorldScene3D(props: SceneProps) {
           10 + (i % 3) * 2,
           8,
         );
+      placements.push({model:'butterfly',x:w.players[latest.current.selfId].x+.8,y:1.1,z:w.players[latest.current.selfId].y+1.5,scale:.7});
+      models.set(placements);
       const groups = new Map<string, THREE.Mesh[]>();
       for (const o of [...terrain.children])
         if (o instanceof THREE.Mesh && !(o instanceof THREE.InstancedMesh)) {
@@ -799,7 +821,7 @@ export default function WorldScene3D(props: SceneProps) {
         return;
       }
       const objectHit = ray
-        .intersectObjects(terrain.children)
+        .intersectObjects([...terrain.children,...models.group.children],true)
         .find(
           (h) =>
             h.distance < 24 &&
@@ -959,6 +981,8 @@ export default function WorldScene3D(props: SceneProps) {
       sun.intensity = phase === 3 ? 0.5 : 2.1;
       camera.fov = 72 / options.current.zoom;
       camera.updateProjectionMatrix();
+      models.update(Math.min(.1,(time-last)/1000||.016),options.current.reducedMotion);atmosphere.update(time/1000,camera.position,options.current.reducedMotion);animatedWater.update(options.current.reducedMotion?0:time/1000);
+      renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
       last = time;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(draw);
@@ -971,6 +995,7 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       renderer.domElement.removeEventListener("pointerdown", start);
       renderer.domElement.removeEventListener("pointerup", end);
+      models.dispose();atmosphere.dispose();
       batches.forEach((b) => b.dispose());
       groundMaterial?.dispose();
       geometries.forEach((g) => g.dispose());
