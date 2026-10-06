@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`e670338055c4e68916fb498af600cbbe61505a4e`（Regenerate vacation librarian attack art without transparency holes）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`8ae0b21e0138cf56f44efae111f414878a99098b`（Make RPG modal and furniture game actions visibly distinct buttons）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -245,3 +245,12 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - Androidアセットハッシュを更新。Web英語監査/build、server:build成功。
 
 - GitHub Pages Actions 37383114895 は成功。公開URLのアタック3.webp（693344 bytes）がローカル修正版と完全一致することを確認。Android Actions 37383114886 は最終確認時点でリリースAABビルド中。Render確認はユーザーの方針により実施していない。
+
+## 最新追記：RPGの操作ボタンの視認性
+
+- main `8ae0b21e0138cf56f44efae111f414878a99098b`。開始画面の主人公ビルダー・未選択タブを枠／背景のあるボタンにし、RPGの共通ボタンの装飾を補完。専用デザインのあるボタンはその指定を維持。
+- 家具ゲームはRPG練習室などgc-rootがない場所で基本装飾が欠落していたため、gameRoom.cssに低詳細度のフォールバックを追加。開始を金色、退出を紫系の独立したボタンとし、アクション行を折り返し＋間隔付きにした。MiniGameLabにも独立したボタンの基本表示を追加。
+- スマホ縦390×844／横844×390／PC1440×900で主人公ビルダー、全10種類の家具ゲームの開始・退出の枠／背景／配置と操作をブラウザ確認。既存test-rpg-mobile-browser.mjs成功（初回は並行ビルド中の採取タイミング判定で失敗、再実行成功）。Web英語監査/build、server:build、diff --check成功。
+- 変更はRpgOnline.tsx/rpg.css/miniLab.css/HobbyGamesPanel.tsx/gameRoom.cssの5ファイル。ラベル／ゲームルール／アセット変更なし。アドホック表示テストと確認画像は/workspace/scratch/rpg-buttons-*。
+
+- GitHub Pages Actions 37409522125、Android AAB Actions 37409522122とも成功。公開index-DQ9wzNLN.css（774651 bytes）およびHobbyGamesPanel-CqUtRNjl.css（26541 bytes）がローカル検証済みファイルと完全一致。公開JS HobbyGamesPanel-DUHGWLqd.jsにgc-game-actions/start/exit指定を確認。Render確認はユーザー方針により実施していない。
