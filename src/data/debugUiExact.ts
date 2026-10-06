@@ -21,6 +21,15 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "探索に戻る": "Return to exploring",
+  "ブロック建築": "Block building",
+  "建築素材": "Building material",
+  "壊す": "Break",
+  "置く": "Place",
+  "照準に合わせて操作 · 採掘はエネルギー1 · 上下スワイプで見上げる": "Aim to build · Mining costs 1 energy · Swipe vertically to look up",
+  "ブロックから素材を獲得しました。": "Materials collected from the block.",
+  "ブロックを設置しました。": "Block placed.",
+
   ...CAMPAIGN_ENGLISH,
   ...RPG_SOCIAL_ENGLISH,
   ...RPG_FISH_ENGLISH,
@@ -265,6 +274,15 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "探索に戻る": "たんさくにもどる",
+  "ブロック建築": "ぶろっくけんちく",
+  "建築素材": "けんちくそざい",
+  "壊す": "こわす",
+  "置く": "おく",
+  "照準に合わせて操作 · 採掘はエネルギー1 · 上下スワイプで見上げる": "しょうじゅんにあわせてそうさ · さいくつはえねるぎー1 · じょうげすわいぷでみあげる",
+  "ブロックから素材を獲得しました。": "ぶろっくからそざいをかくとくしました。",
+  "ブロックを設置しました。": "ぶろっくをせっちしました。",
+
   ...CAMPAIGN_HIRAGANA,
   ...RPG_SOCIAL_HIRAGANA,
   ...RPG_FISH_HIRAGANA,

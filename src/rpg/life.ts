@@ -46,7 +46,7 @@ export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
-export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
+export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&!([0,1].some(h=>!!w.voxels?.edits[`${x},${h},${y}`]))&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
  {id:'plank',name:'木の板',cost:CRAFT_RECIPES.plank as Bag,kind:'material',description:'家や家具の材料。',sprite:0},
  {id:'brick',name:'レンガ',cost:CRAFT_RECIPES.brick as Bag,kind:'material',description:'家や家具の材料。',sprite:1},
@@ -74,8 +74,8 @@ export function interiorOf(h:House):Interior {
  const room=newInterior(),positions=[{x:5,y:3},{x:10,y:7},{x:3,y:7}];
  h.home.furniture.filter(f=>['darts','billiards','arcade'].includes(f.item)).forEach((f,i)=>room.placed.push({id:`legacy-${f.slot}`,item:f.item,...positions[i%3],rotation:0,slot:f.slot}));return room;
 }
-function enterHouse(w:World,p:Adventurer,h:House){const lp=lifePlayer(p);h.interior??=interiorOf(h);lp.indoors=h.id;lp.roomPos={...ROOM_SPAWN};lp.work=undefined;}
-function leaveHouse(w:World,p:Adventurer,now:number){const lp=lifePlayer(p),h=w.life.houses.find(h=>h.id===lp.indoors);if(h){const exit=[{x:h.x,y:h.y+1},{x:h.x+1,y:h.y},{x:h.x-1,y:h.y},{x:h.x,y:h.y-1}].find(q=>lifeWalkable(w,q.x,q.y)&&!w.life.houses.some(home=>home.x===q.x&&home.y===q.y));if(exit){p.x=exit.x;p.y=exit.y;}}lp.indoors=undefined;lp.roomPos=undefined;lp.work=undefined;tickGames(homeGameWorld(w),0);}
+function enterHouse(w:World,p:Adventurer,h:House){delete p.position3D;const lp=lifePlayer(p);h.interior??=interiorOf(h);lp.indoors=h.id;lp.roomPos={...ROOM_SPAWN};lp.work=undefined;}
+function leaveHouse(w:World,p:Adventurer,now:number){delete p.position3D;const lp=lifePlayer(p),h=w.life.houses.find(h=>h.id===lp.indoors);if(h){const exit=[{x:h.x,y:h.y+1},{x:h.x+1,y:h.y},{x:h.x-1,y:h.y},{x:h.x,y:h.y-1}].find(q=>lifeWalkable(w,q.x,q.y)&&!w.life.houses.some(home=>home.x===q.x&&home.y===q.y));if(exit){p.x=exit.x;p.y=exit.y;}}lp.indoors=undefined;lp.roomPos=undefined;lp.work=undefined;tickGames(homeGameWorld(w),0);}
 export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):boolean {
  const life=w.life??=createLife(now),lp=lifePlayer(p);
  const tell=(text:string)=>{p.message=text;w.revision++;return true;};

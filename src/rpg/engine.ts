@@ -1,3 +1,4 @@
+import {applyVoxel,type VoxelAction,type VoxelWorld} from './voxel';
 import {applyFarm,advanceFarm,type FarmState,type FarmAction} from './farm/model';
 import {applyCity,advanceCity,type CityState,type CityAction} from './city/model';
 import {applyTown,advanceTown,newTown,type TownState,type TownAction} from './town/model';
@@ -88,6 +89,8 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  position3D?: {x:number;z:number};
+  voxelAt?:number;
   hero?:CustomHero;
   memory?:SocialMemory;
   lastPlayerTalk?:number;
@@ -127,6 +130,7 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+ voxels?:VoxelWorld;
  campaignVersion?: 2;
  endingProgress?: Record<string,number>;
  city?:CityState;
@@ -156,7 +160,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = FarmAction | CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
+export type Action = VoxelAction | FarmAction | CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -710,6 +714,11 @@ export function applyAction(
   if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search" || action.type === "npc-event-choice")
     return applyActivity(w,p,action as ActivityAction,now);
   if (w.ended || p.nativeScene || activityBusy(w,p)) return false;
+  if(action.type.startsWith("voxel-")){
+    const changed=applyVoxel(w,p,action as VoxelAction,now);
+    if(changed&&action.type==='voxel-move'){const house=w.life.houses.find(h=>h.x===p.x&&h.y===p.y);if(house)applyLifeAction(w,p,{type:'life-enter',houseId:house.id},now);}
+    return changed;
+  }
   if (action.type === "move") {
     if (
       !Number.isInteger(action.dx) ||
@@ -729,6 +738,7 @@ export function applyAction(
       !lifeWalkable(w,x,y)
     )
       return false;
+    delete p.position3D;
     p.x = x;
     p.y = y;
     p.moveCount = (p.moveCount || 0) + 1;

@@ -19,6 +19,7 @@ class Boundary extends React.Component<BoundaryProps, { failed: boolean }> {
 }
 export default function WorldView(
   props: React.ComponentProps<typeof WorldCanvas> & {
+    onVoxelAction?: (a:import("./voxel").VoxelAction)=>void;
     paused?: boolean;
     facing: number;
     onFacing: (n: number) => void;

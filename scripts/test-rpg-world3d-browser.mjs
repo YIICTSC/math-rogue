@@ -83,6 +83,23 @@ try {
   await p.waitForFunction(()=>Number(document.querySelector("[data-testid=rpg-world-3d]")?.dataset.blenderModels)>0);
   assert(Number(await p.locator("[data-testid=rpg-world-3d]").getAttribute("data-blender-animations"))>0);
   console.log("RPG 3D rendered with Blender models and animation");
+  await p.evaluate(()=>{const w=window.room.world;w.voxels={revision:1,edits:{'20,0,19':'wood','20,1,19':'wood'}};window.room.emit();});
+  await p.waitForFunction(()=>Number(document.querySelector('[data-testid=rpg-world-3d]').dataset.voxelBlocks)>=2);
+  await p.getByRole('button',{name:'🧱 ブロック建築'}).click();
+  await p.getByRole('button',{name:'⛏ 壊す'}).waitFor();
+  await p.getByLabel('建築素材').selectOption('stone');
+  await p.getByRole('button',{name:'⛏ 壊す'}).click();
+  await p.waitForFunction(()=>window.room.world.voxels.edits['20,1,19']===null);
+  assert.equal(await p.evaluate(()=>window.room.world.players.local.life.energy),5);
+  // A slight downward look targets the remaining block's top face.
+  await p.locator('[data-testid=rpg-world-3d]').dispatchEvent('pointerdown',{clientX:220,clientY:400});
+  await p.locator('[data-testid=rpg-world-3d]').dispatchEvent('pointerup',{clientX:220,clientY:413});
+  await p.waitForTimeout(250);
+  await p.getByRole('button',{name:'＋ 置く'}).click();
+  await p.waitForFunction(()=>window.room.world.voxels.edits['20,1,19']==='stone');
+  console.log('Actual 3D ray mining and supported placement passed');
+
+
   await p.waitForTimeout(1500);
   await p.screenshot({
     path: "/workspace/scratch/lifestyle-screens/3d-billboards.png",
@@ -95,7 +112,7 @@ try {
   );
   await p.keyboard.press("w");
   await p.waitForFunction(() =>
-    window.sent.some((a) => a.type === "move" && a.dx === 1 && a.dy === 0),
+    window.sent.some((a) => a.type === "voxel-move" && a.dx > 0 && a.dy === 0),
   );
   await p.keyboard.press("q");
   await p.waitForFunction(
@@ -116,7 +133,7 @@ try {
     button: 0,
   });
   await p.waitForFunction(() =>
-    window.sent.some((a) => a.type === "move" && a.dx === 0 && a.dy === -1),
+    window.sent.some((a) => a.type === "voxel-move" && a.dx === 0 && a.dy < 0),
   );
   for (const [width, height] of [
     [390, 844],
@@ -127,6 +144,7 @@ try {
     await p.waitForTimeout(250);
     const view = await p.locator("[data-testid=rpg-world-3d]").boundingBox(),
       switcher = await p.locator(".rpg-view-switch").boundingBox();
+    const tools=await p.locator('.rpg-voxel-tools').boundingBox();assert(tools.x>=0&&tools.x+tools.width<=width+1);assert(tools.y>=0&&tools.y+tools.height<=height);
     assert.ok(view.width >= width - 2);
     assert.ok(
       switcher.width >= 44 &&
