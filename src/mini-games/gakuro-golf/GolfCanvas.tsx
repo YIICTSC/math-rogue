@@ -123,7 +123,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           if (p.phase === 'holed' && !p.capped && cheer < 6) {
             const pose = (p.hole + p.slot + p.strokes) % 8, beat = Math.sin(cheer * 8), fade = Math.max(0, Math.min(1, cheer * 4, (6-cheer)*2));
             const score = p.strokes - hole.par, mood = score < 0 ? 'delighted' : score === 0 ? 'pleased' : 'frustrated';
-            const rig = marker.rig; rig.club.visible = pose === 4 && score < 0;
+            const rig = marker.rig;rig.setExpression(score<0?2:score===0?1:7); rig.club.visible = pose === 4 && score < 0;
             rig.arms.rotation.z = 0; rig.arms.rotation.x = 0;
             if (score < 0) {
               rig.leftArm.rotation.z = -fade * (pose === 6 ? .9+beat*.3 : 2.1);
@@ -152,7 +152,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
               rig.root.position.y = 0;
             }
             if (p.id === id) { el.dataset.celebration = String(pose); el.dataset.reaction = mood; }
-          } else if (p.id === id) { delete el.dataset.reaction; delete el.dataset.celebration; }
+          } else {marker.rig.setExpression();if (p.id === id) { delete el.dataset.reaction; delete el.dataset.celebration; }}
           marker.rig.clubHead.scale.set(selectedClub === 'putter' && p.id === id ? .42 : .31, .13, .17);
         }
         for (const [id, marker] of markers) if (!active.some(p => p.id === id)) marker.ball.visible = marker.shadow.visible = marker.rig.root.visible = false;
@@ -193,6 +193,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             el.dataset.trajectoryHeight = String(Math.max(...points.map(p=>p.y)));
           }
         }
+        el.dataset.characterStyle=[...markers.values()].some(m=>m.rig.torso.children.some(o=>o instanceof THREE.Mesh&&o.geometry.userData.storybookCharacter))?'blender-storybook':'loading';
         el.dataset.golferCount = String(nearest.size); el.dataset.ballHeight = String(ball.y); el.dataset.swing = String(me ? markers.get(me.id)?.rig.arms.rotation.z || 0 : 0);
         el.dataset.cameraMode = portrait ? 'portrait' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
         flag.rotation.y = Math.sin(now / 700) * .12;

@@ -3,14 +3,14 @@ import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater
 import { createKartParts } from './kartModels';
 import { cameraRoadFloor, chaseCameraPose } from './camera';
 import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from './avatar';
-import { createAvatarParts, type AvatarColor } from './avatarModels';
+import { createAvatarParts, type AvatarColor, type AvatarPart } from './avatarModels';
 import { LANE_COLORS, QUIZ_GATES, QUIZ_END, laneCenter, quizDistance } from './learning';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { COURSES, trackFeatures, getTrack, sampleTrack, ROAD_WIDTH } from './track';
 import { MAX_RACERS, type Race } from './engine';
 
-type InstancePart = { mesh: T.InstancedMesh; offset: T.Vector3; rotation: T.Euler; scale: T.Vector3; effect?: 'flame' | 'shield' | 'spark' | 'shadow'; colored?: boolean; avatarColor?: AvatarColor; visible?: (a: KartAvatar) => boolean };
+type InstancePart = { motion?: AvatarPart["motion"]; mesh: T.InstancedMesh; offset: T.Vector3; rotation: T.Euler; scale: T.Vector3; effect?: 'flame' | 'shield' | 'spark' | 'shadow'; colored?: boolean; avatarColor?: AvatarColor; visible?: (a: KartAvatar) => boolean };
 export class KartScene {
   private getTrack(course:number){return getTrack(course,this.state.customCourse);}
   private sampleTrack(distance:number,course:number,lane=0){return sampleTrack(distance,course,lane,this.state.customCourse);}
@@ -35,6 +35,9 @@ export class KartScene {
   private car = new T.Object3D();
   private matrix = new T.Matrix4();
   private cameraReady = false;
+  private headTurn = new T.Matrix4();
+  private neckInverse = new T.Matrix4().makeTranslation(0,-1.87,.13);
+  private headRotation = new T.Matrix4();
   private quality = 1;
   private frames = 0; private frameTime = 0;
   private size = { width: 0, height: 0 };
@@ -238,7 +241,7 @@ export class KartScene {
     const shell = new RoundedBoxGeometry(1, 1, 1, 2, .12);
     for (const asset of [...createKartParts(), ...createAvatarParts()]) {
       const part = this.part(asset.geometry, asset.material, asset.position, asset.scale, asset.rotation);
-      part.avatarColor = asset.color; part.visible = asset.visible;
+      part.motion=asset.motion;part.avatarColor = asset.color; part.visible = asset.visible;
     }
     for (const x of [-.59, .59]) {
       this.part(shell, new T.MeshBasicMaterial({ color: '#ff576b' }), [x, .78, -1.64], [.32, .12, .04]);
@@ -249,6 +252,7 @@ export class KartScene {
     this.part(new T.CircleGeometry(1, 16), new T.MeshBasicMaterial({ color: '#050c1e', transparent: true, opacity: .3, depthWrite: false }), [0, .035, 0], [1.6, 2.2, 1], [-Math.PI / 2, 0, 0], 'shadow');
   }
   draw(now: number) {
+    const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const dt = Math.min(.06, (now - this.clock) / 1000); this.clock = now; this.elapsed += dt;
     const width = this.canvas.clientWidth, height = this.canvas.clientHeight; if (!width || !height) return;
     if (width !== this.size.width || height !== this.size.height) { this.size = { width, height }; this.renderer.setSize(width, height, false); this.camera.aspect = width / height; this.camera.updateProjectionMatrix(); }
@@ -275,12 +279,16 @@ export class KartScene {
         if (part.visible && !part.visible(p.avatar)) continue;
         const partIndex = part.mesh.count++;
         this.dummy.position.copy(part.offset); this.dummy.rotation.copy(part.rotation); this.dummy.scale.copy(part.scale);
+        if(part.motion==='steer'){this.dummy.position.x+=p.steer*.055;this.dummy.rotation.z+=p.steer*.12;}
+        if(part.motion==='eye'&&!reducedMotion&&(now/1000+index*.71)%4.6>4.44)this.dummy.scale.y*=.15;
         if (part.effect === 'flame') this.dummy.scale.setScalar(p.boost > 0 ? .85 + Math.sin(now * .043 + index) * .15 : .001);
         if (part.effect === 'shield' && p.shield <= 0) this.dummy.scale.setScalar(.001);
         if (part.effect === 'spark') { this.dummy.scale.setScalar((p.charge > .25 || p.crash > 0) ? 1 + Math.sin(now * .07 + index) * .4 : .001); this.dummy.position.z -= (now / 90 + index) % 1.5; }
         if (part.effect === 'shadow') this.dummy.position.y -= jump;
         if (!this.preview && p.id !== me.id && gap < -3) this.dummy.scale.setScalar(.001);
-        this.dummy.updateMatrix(); this.matrix.multiplyMatrices(this.car.matrix, this.dummy.matrix); part.mesh.setMatrixAt(partIndex, this.matrix);
+        this.dummy.updateMatrix();
+        if(part.motion==='head'||part.motion==='eye'){this.headTurn.makeTranslation(0,1.87,-.13).multiply(this.headRotation.makeRotationY(p.steer*.13+(reducedMotion?0:Math.sin(now/2000+index)*.018))).multiply(this.neckInverse);this.dummy.matrix.premultiply(this.headTurn);}
+        this.matrix.multiplyMatrices(this.car.matrix, this.dummy.matrix); part.mesh.setMatrixAt(partIndex, this.matrix);
         if (part.colored) part.mesh.setColorAt(partIndex, new T.Color(AVATAR_COLORS[p.avatar.outfit]));
         if (part.avatarColor) { const colors = part.avatarColor === 'body' ? BODY_COLORS : part.avatarColor === 'hair' ? HAIR_COLORS : AVATAR_COLORS; part.mesh.setColorAt(partIndex, new T.Color(colors[p.avatar[part.avatarColor]])); }
       }
@@ -300,7 +308,8 @@ export class KartScene {
     if (!this.preview) this.camera.position.y = Math.max(this.camera.position.y, cameraRoadFloor(this.camera.position, ownDistance, w.course,w.customCourse));
     this.camera.lookAt(look);
     for (let i = 0; i < this.boxes.length; i++) { this.boxes[i].rotation.y = this.elapsed * 1.3; this.boxes[i].rotation.z = Math.sin(this.elapsed * 1.5 + i) * .16; }
-    this.storybook?.update(dt,matchMedia('(prefers-reduced-motion: reduce)').matches);this.atmosphere?.update(this.elapsed,new T.Vector3(ownPoint.x,0,ownPoint.z),matchMedia('(prefers-reduced-motion: reduce)').matches);this.water?.update(this.elapsed);
+    this.storybook?.update(dt,reducedMotion);this.atmosphere?.update(this.elapsed,new T.Vector3(ownPoint.x,0,ownPoint.z),reducedMotion);this.water?.update(this.elapsed);
+    this.canvas.dataset.characterStyle=this.parts.some(p=>p.mesh.geometry.userData.storybookCharacter)?'blender-storybook':'loading';
     this.canvas.dataset.blenderModels=String(this.storybook?.ready?this.storybook.group.userData.models:0);this.canvas.dataset.blenderAnimations=String(this.storybook?.group.userData.animations||0);
     const sun=this.scene.children.find(o=>o instanceof T.DirectionalLight) as T.DirectionalLight|undefined;if(sun){sun.position.set(ownPoint.x-100,ownPoint.y+180,ownPoint.z+70);sun.target.position.set(ownPoint.x,ownPoint.y,ownPoint.z);sun.target.updateMatrixWorld();}
     this.particles.position.y = Math.sin(this.elapsed * .3) * 3; this.renderer.render(this.scene, this.camera);

@@ -12,7 +12,7 @@ try {
   const page = await browser.newPage({viewport:{width:1280,height:800}}), errors=[];
   page.setDefaultTimeout(60000);
   page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('http://127.0.0.1:5199/tmp/kart-camera-qa/index.html', {waitUntil:'domcontentloaded',timeout:120000}); await page.waitForFunction(()=>window.ready);await page.waitForFunction(()=>Number(document.querySelector('canvas').dataset.blenderModels)>0);assert(Number(await page.locator('canvas').getAttribute('data-blender-animations'))>0);
+  await page.goto('http://127.0.0.1:5199/tmp/kart-camera-qa/index.html', {waitUntil:'domcontentloaded',timeout:120000}); await page.waitForFunction(()=>window.ready);await page.waitForFunction(()=>Number(document.querySelector('canvas').dataset.blenderModels)>0);assert(Number(await page.locator('canvas').getAttribute('data-blender-animations'))>0);await page.waitForFunction(()=>document.querySelector('canvas').dataset.characterStyle==='blender-storybook');
   const slopes=await page.evaluate(()=>{
     const points=track.points.map((p,i)=>({...p,distance:i/1024*track.length}));
     return [points.reduce((a,b)=>a.ty>b.ty?a:b).distance,points.reduce((a,b)=>a.ty<b.ty?a:b).distance,points.reduce((a,b)=>a.y>b.y?a:b).distance];

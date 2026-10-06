@@ -42,3 +42,13 @@ node scripts/verify-android-asset-manifest.mjs
 ```
 
 Browser tests use Chromium with software WebGL, including mobile viewport emulation. Actual device frame rate depends on the GPU; these tests do not establish a frame-rate guarantee.
+
+## Storybook characters for kart and golf
+
+`assets/storybook/characters.blend` and `scripts/blender/build-storybook-characters.py` contain twelve original character components: a sculpted head, sweater, sleeves, mittens, hair cap/locks, ears, shoes, trousers, robot head and collar. Exported geometry is embedded in `public/models/storybook/characters-v1.glb` (approximately 99 KiB). Regenerate with `blender --background --python scripts/blender/build-storybook-characters.py`.
+
+`storybookCharacters.ts` loads this small bank once and upgrades the existing shared geometry in place. Meshes and instances retain identity, avatar color/species/hair/accessory/expression settings and existing multiplayer data. A disposed geometry is never upgraded; a missing model retains its primitive fallback. GPU buffers are released before replacement. No network protocol or gameplay dimension changes are needed.
+
+GP drivers use the rounded Blender components with cloth trim, gentle neck movement, blinking and steering hand motion, while retaining instancing for forty players. Golf uses the same head, clothing and hair components plus rounded shoes and trousers. Arms rotate about separate shoulder pivots. A score reaction temporarily changes the face expression, then restores the player's selected expression. Existing meter, spin, club, swing and score camera rules remain intact.
+
+`node scripts/test-storybook-characters-browser.mjs` checks the loaded Blender geometry, 384 species/hair/accessory configurations, score expression restoration, shoulder pivots, early disposal and unavailable-model fallback. Existing kart-avatar and golf-shot browser tests cover customization, multiplayer synchronization and gameplay.

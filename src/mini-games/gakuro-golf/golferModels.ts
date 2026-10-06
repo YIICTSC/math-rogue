@@ -1,3 +1,5 @@
+import {characterGeometry} from '../../three/storybookCharacters';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import * as T from 'three';
 import { createAvatarParts } from '../gakuro-kart/avatarModels';
 import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from '../gakuro-kart/avatar';
@@ -6,14 +8,14 @@ import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from '../gak
 export function createGolferAssets() {
   const parts = createAvatarParts();
   const sphere = new T.SphereGeometry(1, 12, 8), cylinder = new T.CylinderGeometry(1, 1, 1, 8);
-  const box = new T.BoxGeometry(1, 1, 1);
-  const materials = [new T.MeshStandardMaterial({ color: '#34445e', roughness: .7 }),
+  const box = new RoundedBoxGeometry(1,1,1,2,.12),sleeve=characterGeometry('sleeve',sphere),mitten=characterGeometry('mitten',sphere),trouser=characterGeometry('trouser',cylinder),shoe=characterGeometry('shoe',box);
+  const materials = [new T.MeshStandardMaterial({ color: '#66534b', roughness: .7 }),
     new T.MeshStandardMaterial({ color: '#d9e4ec', metalness: .8, roughness: .25 }),
-    new T.MeshStandardMaterial({ color: '#152a30', roughness: .8 })];
-  const geometries = new Set<T.BufferGeometry>([sphere, cylinder, box, ...parts.map(p => p.geometry)]);
+    new T.MeshStandardMaterial({ color: '#493d3b', roughness: .8 })];
+  const geometries = new Set<T.BufferGeometry>([sphere, cylinder, box,sleeve,mitten,trouser,shoe, ...parts.map(p => p.geometry)]);
   const sharedMaterials = new Set<T.Material>([...materials, ...parts.map(p => p.material)]);
   function create(avatar: KartAvatar) {
-    const root = new T.Group(), torso = new T.Group(), arms = new T.Group();
+    const root = new T.Group(), torso = new T.Group(), arms = new T.Group();root.name="StorybookGolfer";
     const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' }[] = [];
     const skin = new T.MeshStandardMaterial({ roughness: .65 }), shirt = new T.MeshStandardMaterial({ roughness: .7 });
     owned.push(skin, shirt);
@@ -32,29 +34,32 @@ export function createGolferAssets() {
     }
     add(torso, parts[0].geometry, shirt, [0, .2, -.13], [.86, .8, .6]);
     for (const side of [-1, 1]) {
-      const leg = add(root, cylinder, materials[0], [side * .25, .5, -.13], [.16, .85, .16]); leg.rotation.z = side * -.09;
-      add(root, box, materials[2], [side * .29, .1, .04], [.35, .18, .55]);
+      const leg = add(root, trouser, materials[0], [side * .25, .5, -.13], [.16, .85, .16]); leg.rotation.z = side * -.09;
+      add(root, shoe, materials[2], [side * .29, .1, .04], [.35, .18, .55]);
     }
     arms.position.set(0, 1.55, -.1); torso.add(arms); arms.position.y -= 1;
-    const leftArm = new T.Group(), rightArm = new T.Group(); arms.add(leftArm, rightArm);
+    const leftArm = new T.Group(), rightArm = new T.Group();leftArm.position.x=-.34;rightArm.position.x=.34;arms.add(leftArm, rightArm);
     for (const side of [-1, 1]) {
       const limb = side === -1 ? leftArm : rightArm;
-      const upper = add(limb, cylinder, shirt, [side * .3, -.24, .19], [.13, .62, .13]); upper.rotation.z = side * -.4; upper.rotation.x = -.65;
-      const lower = add(limb, cylinder, skin, [side * .11, -.54, .48], [.11, .43, .11]); lower.rotation.z = side * -.25; lower.rotation.x = -.65;
-      add(limb, sphere, skin, [side * .06, -.7, .6], [.12, .12, .13]);
+      const upper = add(limb, sleeve, shirt, [side * -.04, -.24, .19], [.16, .34, .16]); upper.rotation.z = side * -.4; upper.rotation.x = -.65;
+      const lower = add(limb, sleeve, skin, [side * -.23, -.54, .48], [.12, .24, .12]); lower.rotation.z = side * -.25; lower.rotation.x = -.65;
+      add(limb, mitten, skin, [side * -.28, -.7, .6], [.12, .12, .13]);
     }
     const club = new T.Group(); arms.add(club); club.position.set(0, -.72, .63);
     const shaft = add(club, cylinder, materials[1], [0, -.37, .27], [.025, .95, .025]); shaft.rotation.x = -.62;
     const clubHead = add(club, box, materials[1], [0, -.76, .56], [.31, .13, .17]);
     root.scale.setScalar(1.8);
+    let appearance=avatar,expressionOverride:number|undefined;
     function update(value: KartAvatar) {
+      appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
       skin.color.set(BODY_COLORS[value.body]); shirt.color.set(AVATAR_COLORS[value.outfit]);
       const palette = { body: BODY_COLORS[value.body], outfit: AVATAR_COLORS[value.outfit], hair: HAIR_COLORS[value.hair] };
       for (const { mesh, key } of colored) (mesh.material as T.MeshStandardMaterial).color.set(palette[key]);
-      torso.children.forEach(m => { if (m.userData.visibleFor) m.visible = m.userData.visibleFor(value); });
+      torso.children.forEach(m => { if (m.userData.visibleFor) m.visible = m.userData.visibleFor(effective); });
     }
+    const setExpression=(expression?:number)=>{if(expressionOverride===expression)return;expressionOverride=expression;update(appearance);};
     update(avatar);
-    return { root, torso, arms, leftArm, rightArm, club, clubHead, update, dispose: () => owned.forEach(m => m.dispose()) };
+    return { root, torso, arms, leftArm, rightArm, club, clubHead, update,setExpression, dispose: () => owned.forEach(m => m.dispose()) };
   }
   return { create, dispose: () => { geometries.forEach(g => g.dispose()); sharedMaterials.forEach(m => m.dispose()); } };
 }

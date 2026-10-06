@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "style": "storybook-fantasy",
+  "models": [
+    "head",
+    "sleeve",
+    "mitten",
+    "haircap",
+    "ear",
+    "sweater",
+    "shoe",
+    "hairlock",
+    "robothead",
+    "trouser",
+    "pointedear",
+    "collar"
+  ],
+  "creator": "Original Blender character components for Learning Rogue"
+}

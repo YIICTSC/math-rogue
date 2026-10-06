@@ -1,9 +1,10 @@
+import {characterGeometry} from '../../three/storybookCharacters';
 import * as T from 'three';
 import type { AvatarPart } from './avatarModels';
 
 /** Sculpted silhouettes, shared between instances; helmets hide hair. */
 export function createHairParts(): AvatarPart[] {
-  const parts: AvatarPart[] = [], ball = new T.SphereGeometry(1, 12, 8), cone = new T.ConeGeometry(1, 1, 6), box = new T.BoxGeometry(1, 1, 1);
+  const parts: AvatarPart[] = [], ball = characterGeometry('haircap',new T.SphereGeometry(1, 12, 8)), cone = new T.ConeGeometry(1, 1, 6), box = characterGeometry('hairlock',new T.BoxGeometry(1, 1, 1));
   const paint = new T.MeshStandardMaterial({ color: '#ffffff', roughness: .8 });
   const add = (geometry: T.BufferGeometry, position: number[], scale: number[], styles: number[], rotation = [0, 0, 0]) => parts.push({ geometry, material: paint, position, scale, rotation, color: 'hair', visible: a => a.species === 0 && a.accessory !== 2 && styles.includes(a.hairStyle) });
   add(ball, [0, 2.14, -.22], [.55, .34, .47], [0, 1, 2, 3, 4, 5, 9, 10]);
