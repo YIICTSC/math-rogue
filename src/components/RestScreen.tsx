@@ -1,3 +1,4 @@
+import {assetUrl} from '../utils/assetPaths';
 
 import React, { useEffect, useState } from 'react';
 import { CharacterAppearanceMode, Player, Card as ICard, LanguageMode } from '../types';
@@ -375,7 +376,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                                 className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-green-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                             >
                                 {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">1</div>}
-                                <BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />
+                                {onOpenArcade?<img src={assetUrl('sprites/rpg/town-services/rest.webp')} alt="" className="h-24 w-full rounded object-cover"/>:<BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />}
                                 <span className="font-bold text-lg">{trans(restOptionLabel, languageMode)}</span>
                                 <span className="text-xs text-gray-400">HP {healAmount} {trans("回復", languageMode)}</span>
                             </button>
@@ -389,7 +390,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-yellow-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                     >
                         {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">2</div>}
-                        <Hammer size={40} className="text-yellow-500 group-hover:rotate-12 transition-transform" />
+                        {onOpenArcade?<img src={assetUrl('sprites/rpg/town-services/upgrade.webp')} alt="" className="h-24 w-full rounded object-cover"/>:<Hammer size={40} className="text-yellow-500 group-hover:rotate-12 transition-transform" />}
                         <span className="font-bold text-lg">{trans(upgradeOptionLabel, languageMode)}</span>
                         <span className="text-xs text-gray-400">{trans("カード強化", languageMode)}</span>
                     </button>
@@ -406,7 +407,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         `}
                     >
                         {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">3</div>}
-                        <FlaskConical size={40} className={`text-purple-500 ${scienceRoomAvailable ? 'group-hover:shake' : ''} transition-transform`} />
+                        {onOpenArcade?<img src={assetUrl('sprites/rpg/town-services/synthesis.webp')} alt="" className="h-24 w-full rounded object-cover"/>:<FlaskConical size={40} className={`text-purple-500 ${scienceRoomAvailable ? 'group-hover:shake' : ''} transition-transform`} />}
                         <span className="font-bold text-lg">{trans(synthesisOptionLabel, languageMode)}</span>
                         <span className="text-xs text-gray-400">
                             {scienceRoomAvailable 
@@ -421,7 +422,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-cyan-400 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                         >
                             {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">4</div>}
-                            <Eraser size={40} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
+                            {onOpenArcade?<img src={assetUrl('sprites/rpg/town-services/relic.webp')} alt="" className="h-24 w-full rounded object-cover"/>:<Eraser size={40} className="text-cyan-300 group-hover:rotate-12 transition-transform" />}
                             <span className="font-bold text-lg">{trans(selfStudyOptionLabel, languageMode)}</span>
                             <span className="text-xs text-gray-400">{trans("不要効果を削除", languageMode)}</span>
                         </button>
@@ -429,7 +430,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     {onOpenArcade && (
                         <button type="button" disabled={interactionDisabled} onClick={onOpenArcade}
                             className="group relative flex w-32 flex-col items-center overflow-hidden rounded-lg border-2 border-amber-500 bg-emerald-950 transition-all hover:-translate-y-1 hover:border-amber-200 md:w-40">
-                            <img src={arcadeArt('town')} alt="" className="h-24 w-full object-cover" />
+                            <img src={assetUrl('sprites/rpg/town-services/arcade.webp')} alt="" className="h-24 w-full object-cover" />
                             {typingMode && <span className="absolute right-2 top-2 rounded-full bg-black/80 px-2 text-amber-100">6</span>}
                             <span className="p-2 text-lg font-bold text-amber-200">{trans('ゲームセンター', languageMode)}</span>
                             <span className="px-2 pb-3 text-xs text-emerald-100">{trans('3つの遊びで景品に挑戦', languageMode)}</span>
@@ -442,7 +443,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             className="group relative flex flex-col items-center gap-2 rounded-lg border-2 border-gray-600 p-4 transition-all hover:border-amber-400 hover:bg-gray-800 w-32 md:w-40"
                         >
                             {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">5</div>}
-                            <ShoppingBag size={40} className="text-amber-400 transition-transform group-hover:scale-110" />
+                            {onOpenArcade?<img src={assetUrl('sprites/rpg/town-services/shop.webp')} alt="" className="h-24 w-full rounded object-cover"/>:<ShoppingBag size={40} className="text-amber-400 transition-transform group-hover:scale-110" />}
                             <span className="font-bold text-lg">{trans('ショップ', languageMode)}</span>
                             <span className="text-xs text-gray-400">{trans(endlessMajorBoss ? '大ボス後の特別営業' : '買い物', languageMode)}</span>
                         </button>

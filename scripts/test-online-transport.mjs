@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+const server=await createServer({define:{'import.meta.env.VITE_ONLINE_SERVER_URL':JSON.stringify('https://online.example')},optimizeDeps:{noDiscovery:true,entries:[]},server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'});
+const fetchOriginal=globalThis.fetch,wsOriginal=globalThis.WebSocket;let connections=0,fetches=0,sends=[],lost=0;
+try{
+ const T=await server.ssrLoadModule('/src/services/onlineTransport.ts'),R=await server.ssrLoadModule('/src/rpg/invite.ts'),K=await server.ssrLoadModule('/src/mini-games/gakuro-kart/invite.ts'),{DedicatedConnection}=await server.ssrLoadModule('/src/services/dedicatedConnection.ts');
+ for(const mode of ['host','server']){const code=T.shareRoomCode('ABC234',mode);assert.equal(T.roomAddress(code,mode==='host'?'server':'host').transport,mode);assert.equal(T.roomAddress(code).code,'ABC234');assert(T.validRoomAddress(code));assert.equal(R.getRpgRoomCodeFromUrl(R.buildRpgInviteUrl('https://game.example/',code)),code);assert.equal(K.kartInviteCode(K.kartInviteUrl('https://game.example/',code)),code);}
+ assert(!T.validRoomAddress('H-ABC2'));assert.deepEqual(T.roomAddress('ABC234','server'),{code:'ABC234',transport:'server'});
+ globalThis.fetch=async()=>{fetches++;if(fetches<2)throw new Error('Still waking');return {};};
+ class Socket {static OPEN=1;readyState=1;bufferedAmount=0;constructor(url){this.url=url;connections++;const attempt=connections;setTimeout(()=>attempt===1?this.onerror?.({}):this.onopen?.({}),0);}send(data){sends.push(JSON.parse(data));setTimeout(()=>this.onmessage?.({data:JSON.stringify({type:'init',world:{}})}),0);}close(){this.readyState=3;this.onclose?.({});}}
+ globalThis.WebSocket=Socket;const connection=new DedicatedConnection(p=>p.type==='init',()=>lost++);await connection.open('online',{create:true,name:'Host'});assert.equal(fetches,2);assert.equal(connections,2);assert.equal(sends.length,1);assert.equal(lost,0,'Startup retries must not trigger a lost-room callback');connection.close();assert.equal(lost,0);
+ connections=0;globalThis.fetch=async()=>({});class ErrorSocket {static OPEN=1;readyState=1;bufferedAmount=0;constructor(){connections++;setTimeout(()=>this.onopen?.({}),0);}send(){setTimeout(()=>this.onmessage?.({data:JSON.stringify({type:'error',message:'Invalid room'})}),0);}close(){this.readyState=3;this.onclose?.({});}}
+ globalThis.WebSocket=ErrorSocket;const invalid=new DedicatedConnection(()=>false,()=>lost++);await assert.rejects(invalid.open('golf',{code:'BAD'}),/Invalid room/);assert.equal(connections,1,'Invalid room errors do not retry');invalid.close();
+ globalThis.fetch=(_url,{signal})=>new Promise((_r,reject)=>signal.addEventListener('abort',()=>reject(new Error('Aborted')),{once:true}));const cancelled=new DedicatedConnection(()=>false,()=>lost++),pending=cancelled.open('kart',{create:true});cancelled.close();await assert.rejects(pending,/接続を終了/);
+ console.log('PASS: host/server tagged codes, legacy codes, RPG/kart invitations, readiness and websocket retries, explicit error termination, cancel and heartbeat teardown.');
+}finally{globalThis.fetch=fetchOriginal;globalThis.WebSocket=wsOriginal;await server.close();}

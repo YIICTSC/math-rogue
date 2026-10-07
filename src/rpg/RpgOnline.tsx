@@ -1,3 +1,6 @@
+import {initialTransport,shareRoomCode,validRoomAddress} from '../services/onlineTransport';
+import type {OnlineTransport} from '../services/onlineTransport';
+import TransportPicker from '../mini-games/shared/TransportPicker';
 import VoxelRoomPanel from './VoxelRoomPanel';
 import CampaignEnding from './CampaignEnding';
 import ResidentScene from './town/ResidentScene';
@@ -172,6 +175,7 @@ export default function RpgOnline({
   const [residentTarget,setResidentTarget]=useState<string|null>(null);
   const [npcChoicePending, setNpcChoicePending] = useState(false);
   const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
+  const [transport,setTransport]=useState<OnlineTransport>(initialTransport);
   const [world, setWorld] = useState<World | null>(null);
   const inviteCode = useMemo(
     () =>
@@ -212,7 +216,7 @@ export default function RpgOnline({
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
-  const roomCode = room.current?.code || "";
+  const roomCode = shareRoomCode(room.current?.code||"",room.current?.transport||transport);
   const inviteUrl = useMemo(
     () =>
       roomCode && typeof window !== "undefined"
@@ -287,6 +291,7 @@ export default function RpgOnline({
       if (w.setup) onSetup(w.setup);
       onSnapshot({ world: w, selfId: r.selfId });
     }, setError);
+    r.transport=transport;
     room.current = r;
     onRoom(r);
     try {
@@ -482,9 +487,10 @@ export default function RpgOnline({
               <div className="rpg-entry-heading"><h1>{autoJoinInvite?'招待に参加する':intent==='practice'?'ひとり用の冒険':intent==='create'?'オンラインの部屋を作る':'招待に参加する'}</h1><button className="rpg-entry-builder" onClick={()=>setHeroOpen(true)}>主人公ビルダー</button></div>
               {!autoJoinInvite&&<nav className="rpg-entry-tabs" aria-label="冒険の遊び方">{([['practice','ひとりで遊ぶ'],['create','部屋を作る'],['join','招待に参加する']] as const).map(([value,label])=><button key={value} aria-pressed={intent===value} disabled={busy} onClick={()=>{setIntent(value);if(value==='practice'){setTimeLimitMinutes(0);setGameMode('COOP');}else if(timeLimitMinutes===0)setTimeLimitMinutes(30);}}>{label}</button>)}</nav>}
               <label>{autoJoinInvite?'参加名':'冒険者の名前'}<input value={name} maxLength={16} autoComplete="nickname" onChange={e=>setName(e.target.value)}/></label>
-              {autoJoinInvite?<label>開始する編<select value={inviteTheme} onChange={e=>setInviteTheme(e.target.value as RpgAdventureSetup['visualTheme'])}><option value="elementary">小学生編</option><option value="high-school">高校編</option><option value="magic">マジック編</option></select></label>:intent==='join'?<label>ルームコード<input value={code} maxLength={6} autoCapitalize="characters" onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}/></label>:<div className="rpg-entry-options">{intent==='create'&&<label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World['gameMode'])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>}<label>制限時間<select value={timeLimitMinutes} onChange={e=>setTimeLimitMinutes(Number(e.target.value))}><option value={0}>制限時間なし</option>{[5,15,30,60,90,120,180].map(n=><option key={n} value={n}>{n} min</option>)}</select></label></div>}
-              <button className="rpg-join-button" disabled={busy||!name.trim()||((autoJoinInvite||intent==='join')&&code.length!==6)} onClick={()=>start(autoJoinInvite?'invite':intent)}>{busy?'接続中…':autoJoinInvite?'名前を決めて主人公選択へ':intent==='practice'?'冒険をはじめる':intent==='create'?'オンラインの部屋を作る':'招待コードを入力して入室する'}</button>
-              <small>{intent==='practice'&&!autoJoinInvite?'ワールドと主人公をこの端末へ自動保存します。':'最大40人・チームは最大4人。ホストの画面を開いたままにしてください。'}</small>
+              {autoJoinInvite?<label>開始する編<select value={inviteTheme} onChange={e=>setInviteTheme(e.target.value as RpgAdventureSetup['visualTheme'])}><option value="elementary">小学生編</option><option value="high-school">高校編</option><option value="magic">マジック編</option></select></label>:intent==='join'?<label>ルームコード<input value={code} maxLength={8} autoCapitalize="characters" onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g,''))}/></label>:<div className="rpg-entry-options">{intent==='create'&&<label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World['gameMode'])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>}<label>制限時間<select value={timeLimitMinutes} onChange={e=>setTimeLimitMinutes(Number(e.target.value))}><option value={0}>制限時間なし</option>{[5,15,30,60,90,120,180].map(n=><option key={n} value={n}>{n} min</option>)}</select></label></div>}
+              {(autoJoinInvite||intent!=='practice')&&<TransportPicker value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
+              <button className="rpg-join-button" disabled={busy||!name.trim()||((autoJoinInvite||intent==='join')&&!validRoomAddress(code))} onClick={()=>start(autoJoinInvite?'invite':intent)}>{busy?'接続中…':autoJoinInvite?'名前を決めて主人公選択へ':intent==='practice'?'冒険をはじめる':intent==='create'?'オンラインの部屋を作る':'招待コードを入力して入室する'}</button>
+              <small>{intent==='practice'&&!autoJoinInvite?'ワールドと主人公をこの端末へ自動保存します。':'ホスト通信は少人数向け。サーバー通信はbeta・大人数非推奨。'}</small>
             </section>
           </div>
         ) : !world.started ? (

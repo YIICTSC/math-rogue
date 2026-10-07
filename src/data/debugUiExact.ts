@@ -21,6 +21,19 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "オンライン": "Online",
+  "異世界の冒険と暮らし": "Adventure and life in another world",
+  "オンラインレース": "Online racing",
+  "オンラインゴルフ": "Online golf",
+  "サーバーを起動しています。初回は最大3分お待ちください。": "Starting the server. Please allow up to 3 minutes on first connection.",
+  "サーバー通信はこの環境では利用できません。": "Server connection is unavailable in this environment.",
+  "サーバーの起動を3分待ちました。時間をおいて再接続してください。": "The server did not start within 3 minutes. Please try again later.",
+  "ホスト通信は少人数向け。サーバー通信はbeta・大人数非推奨。": "Host connection is for small groups. Server connection is beta and not recommended for large groups.",
+  "ここでインパクトを合わせる": "Time the impact here",
+  "学んで加速。みんなでグランプリへ。": "Learn, accelerate and race together.",
+  "問題なしで遊べます。当たりは抽選です。": "Play without questions. Prizes are decided by chance.",
+  "抽選しています…": "Drawing the result…",
+
   "壁・屋根・床で囲った空間にドアを設置してください。": "Place a door in a space enclosed by walls, a roof and a floor.",
   "この空間は登録済みです。": "This room is already registered.",
   "囲われた空間を自宅として登録しました。": "Registered the enclosed room as your home.",
@@ -321,6 +334,20 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "オンライン": "おんらいん",
+  "異世界の冒険と暮らし": "いせかいのぼうけんとくらし",
+  "オンラインレース": "おんらいんれーす",
+  "オンラインゴルフ": "おんらいんごるふ",
+  "サーバーを起動しています。初回は最大3分お待ちください。": "さーばーをきどうしています。しょかいはさいだい3ぷんおまちください。",
+  "サーバー通信はこの環境では利用できません。": "さーばーつうしんはこのかんきょうではりようできません。",
+  "サーバーの起動を3分待ちました。時間をおいて再接続してください。": "さーばーのきどうを3ぷんまちました。じかんをおいてさいせつぞくしてください。",
+  "ホスト通信は少人数向け。サーバー通信はbeta・大人数非推奨。": "ほすとつうしんはしょうにんずうむけ。さーばーつうしんはべーた・おおにんずうひすいしょう。",
+  "ここでインパクトを合わせる": "ここでいんぱくとをあわせる",
+  "学んで加速。みんなでグランプリへ。": "まなんでかそく。みんなでぐらんぷりへ。",
+  "問題なしで遊べます。当たりは抽選です。": "もんだいなしであそべます。あたりはちゅうせんです。",
+  "抽選しています…": "ちゅうせんしています…",
+
+
   "壁・屋根・床で囲った空間にドアを設置してください。": "かべ・やね・ゆかでかこったくうかんにどあをせっちしてください。",
   "この空間は登録済みです。": "このくうかんはとうろくずみです。",
   "囲われた空間を自宅として登録しました。": "かこわれたくうかんをじたくとしてとうろくしました。",

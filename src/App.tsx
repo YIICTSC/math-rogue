@@ -1700,7 +1700,7 @@ const App: React.FC = () => {
     const kartCode = useMemo(() => typeof window === 'undefined' ? '' : kartInviteCode(window.location.href), []);
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
     const craftCode = useMemo(() => typeof window === 'undefined' ? '' : craftInviteCode(window.location.href), []);
-    const [craftInviteOpen, setCraftInviteOpen] = useState(Boolean(craftCode));
+    const [craftInviteOpen, setCraftInviteOpen] = useState(false);
     const rpgInviteParticipantRef = useRef(false);
     const rpgInviteAutoLaunchAttemptedRef = useRef(false);
     const rpgInviteSetupAppliedRef = useRef(false);
@@ -2633,41 +2633,20 @@ const App: React.FC = () => {
     // ?adminDebug=1. Store builds cannot use this route because the feature flag is off.
     const [isDebugMode, setIsDebugMode] = useState(isAdminDebugLaunch);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
-    useEffect(() => {
-        if (craftInviteOpen && !OFFLINE_DISTRIBUTABLE) {
-            setGameState(prev => prev.screen === GameScreen.GAKURO_CRAFT ? prev : { ...prev, screen: GameScreen.GAKURO_CRAFT });
-        }
-    }, [craftInviteOpen]);
-    useEffect(() => {
-        if (!isDebugModeActive && !craftInviteOpen && gameState.screen === GameScreen.GAKURO_CRAFT) {
-            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
-        }
-    }, [isDebugModeActive, craftInviteOpen, gameState.screen]);
-    useEffect(() => {
-        if (kartInviteOpen && !OFFLINE_DISTRIBUTABLE) {
-            setGameState(prev => prev.screen === GameScreen.GAKURO_KART ? prev : { ...prev, screen: GameScreen.GAKURO_KART });
-        }
-    }, [kartInviteOpen]);
-    useEffect(() => {
-        if (!isDebugModeActive && !kartInviteOpen && gameState.screen === GameScreen.GAKURO_KART) {
-            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
-        }
-    }, [isDebugModeActive, kartInviteOpen, gameState.screen]);
-    useEffect(() => {
-        if ((!isDebugModeActive || OFFLINE_DISTRIBUTABLE) && gameState.screen === GameScreen.GAKURO_GOLF) {
-            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
-        }
-    }, [isDebugModeActive, gameState.screen]);
+    useEffect(()=>{if(gameState.screen===GameScreen.GAKURO_CRAFT)setGameState(prev=>({...prev,screen:GameScreen.START_MENU}));},[gameState.screen]);
+    useEffect(()=>{if(kartInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.GAKURO_KART?prev:{...prev,screen:GameScreen.GAKURO_KART});},[kartInviteOpen]);
     const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
         && Boolean(rpgInviteCode)
         && rpgInviteParticipantRef.current
         && Boolean(gameState.rpgOnline);
-    const canRunRpgOnline = isDebugModeActive || isRpgInviteParticipantActive;
+    const canRunRpgOnline = !OFFLINE_DISTRIBUTABLE;
     const [debugEventSimulationTheme, setDebugEventSimulationTheme] = useState<VisualThemeId>('elementary');
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
     const [titleClickCount, setTitleCount] = useState<number>(0);
+    const [onlineGamesUnlocked, setOnlineGamesUnlocked] = useState(false);
+    const onlineTitleTapCount = useRef(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
     const crowdfundingBossDebugRef = useRef<'AZUKI' | 'DODOMEDESU' | null>(null);
@@ -5342,6 +5321,15 @@ const App: React.FC = () => {
         const next = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
         setNextThreshold(next || null);
     }, [totalMathCorrect]);
+
+    const handleTitleLogoClick = () => {
+        onlineTitleTapCount.current += 1;
+        if (onlineTitleTapCount.current === 3) {
+            setOnlineGamesUnlocked(true);
+            audioService.playSound('select');
+        }
+        if (DEBUG_FEATURES_ENABLED) handleTitleClick();
+    };
 
     const handleTitleClick = () => {
         if (!DEBUG_FEATURES_ENABLED) return;
@@ -9839,9 +9827,7 @@ const App: React.FC = () => {
         if(!gameState.rpgOnline||gameState.screen!==GameScreen.MAP||rpgArcadeTokenRef.current)return;
         const me=rpgSnapshot?.world.players[rpgSnapshot.selfId];
         if(!me?.arcadePending||(gameState.player.rpgMutationRevision||0)!==(me.mutationRevision||0)||(me.profile?.mutationRevision||0)!==(me.mutationRevision||0))return;
-        rpgArcadeTokenRef.current=me.arcadePending.token;
-        setGameState(prev=>({...prev,screen:getChallengeScreenForMode(localAssignmentProblemConfig?.mode||prev.mode)}));
-        audioService.playBGM('math');
+        rpgRoomRef.current?.send({type:'arcade-finish',token:me.arcadePending.token,correctCount:0});
     },[gameState.rpgOnline,gameState.screen,gameState.player.rpgMutationRevision,rpgSnapshot]);
 
     // Apply authoritative card/gold transactions once, after returning from a native scene.
@@ -19718,8 +19704,15 @@ const App: React.FC = () => {
 
                         <div className="start-menu-content relative z-10 text-center p-8 w-full flex flex-col items-center">
                             <h1
-                                className={`start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] select-none items-center justify-center leading-none ${DEBUG_FEATURES_ENABLED ? 'cursor-pointer' : ''}`}
-                                onClick={DEBUG_FEATURES_ENABLED ? handleTitleClick : undefined}
+                                className={`start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] select-none items-center justify-center leading-none ${'cursor-pointer'}`}
+                                onClick={handleTitleLogoClick}
+                                tabIndex={0}
+                                onKeyDown={event => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        handleTitleLogoClick();
+                                    }
+                                }}
                             >
                                 <img
                                     src={assetUrl('sprites/learning-rogue-logo-emblem.webp')}
@@ -19912,12 +19905,12 @@ const App: React.FC = () => {
                                     )}
                                 </div>
 
-                                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
-                                    <div className="start-menu-online-games grid w-full grid-cols-2 gap-2">
+                                {!OFFLINE_DISTRIBUTABLE && onlineGamesUnlocked && (
+                                    <div className="start-menu-online-games grid w-full grid-cols-3 gap-2">
                                         <button
                                             disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
                                             onClick={() => {
-                                                if (!isDebugModeActive) return;
+
                                                 if (!rpgInviteCode && redirectToAssignmentChallengeIfLocked()) return;
                                                 if (!rpgInviteCode && isDailyLimitReached) { setShowTimeLimitModal(true); return; }
                                                 setRpgTitleOpen(true);
@@ -19925,12 +19918,12 @@ const App: React.FC = () => {
                                             className={`min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 ${!rpgInviteCode && (isDailyLimitReached || isAssignmentChallengeOnlyLocked) ? 'opacity-40 cursor-not-allowed' : ''}`}
                                         >
                                             <span className="flex items-center gap-1"><Users size={15} /> {trans("RPGオンライン", languageMode)}</span>
-                                            <span className="text-[10px] opacity-70">{trans("開発中・デバッグ限定", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("異世界の冒険と暮らし", languageMode)}</span>
                                         </button>
                                         <button
                                             disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
                                             onClick={() => {
-                                                if (!isDebugModeActive) return;
+
                                                 if (redirectToAssignmentChallengeIfLocked()) return;
                                                 if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
                                                 setPendingAssignmentStartScreen(GameScreen.GAKURO_KART);
@@ -19941,27 +19934,13 @@ const App: React.FC = () => {
                                             className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
                                         >
                                             <span className="flex items-center gap-1"><Users size={15} /> {trans("スーパー学ロカート", languageMode)}</span>
-                                            <span className="text-[10px] opacity-70">{trans("40人オンラインレース", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("オンラインレース", languageMode)}</span>
                                         </button>
+
                                         <button
                                             disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
                                             onClick={() => {
-                                                if (!isDebugModeActive || redirectToAssignmentChallengeIfLocked()) return;
-                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                                setPendingAssignmentStartScreen(GameScreen.GAKURO_CRAFT);
-                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
-                                                setPendingAssignmentStartScreen(null);
-                                                setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_CRAFT }));
-                                            }}
-                                            className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
-                                        >
-                                            <span className="flex items-center gap-1"><Users size={15} /> {trans("学ロクラフト", languageMode)}</span>
-                                            <span className="text-[10px] opacity-70">{trans("40人で島づくり", languageMode)}</span>
-                                        </button>
-                                        <button
-                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
-                                            onClick={() => {
-                                                if (!isDebugModeActive || redirectToAssignmentChallengeIfLocked()) return;
+                                                if (redirectToAssignmentChallengeIfLocked()) return;
                                                 if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
                                                 setPendingAssignmentStartScreen(GameScreen.GAKURO_GOLF);
                                                 if (showDailyAssignmentNoticeForProblemSelection()) return;
@@ -19971,7 +19950,7 @@ const App: React.FC = () => {
                                             className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
                                         >
                                             <span className="flex items-center gap-1"><Flag size={15} /> GAKURO GOLF</span>
-                                            <span className="text-[10px] opacity-70">{trans("40人オンラインゴルフ", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("オンラインゴルフ", languageMode)}</span>
                                         </button>
                                     </div>
                                 )}
@@ -21604,21 +21583,15 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.GAKURO_GOLF && (
+                {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.GAKURO_GOLF && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-emerald-950 text-amber-100">{trans("コースと問題を準備中…", languageMode)}</div>}>
                         <GakuroGolf languageMode={languageMode} onClose={returnToTitle} />
                     </React.Suspense>
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && (isDebugModeActive || (kartInviteOpen && Boolean(kartCode))) && (gameState.screen === GameScreen.GAKURO_KART || kartInviteOpen) && (
+                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_KART || kartInviteOpen) && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("コースを準備しています…", languageMode)}</div>}>
-                        <GakuroKart languageMode={languageMode} allowHost={isDebugModeActive} inviteCode={kartInviteOpen ? kartCode : ''} onClose={() => { setKartInviteOpen(false); returnToTitle(); }} />
-                    </React.Suspense>
-                )}
-
-                {!OFFLINE_DISTRIBUTABLE && (isDebugModeActive || (craftInviteOpen && Boolean(craftCode))) && (gameState.screen === GameScreen.GAKURO_CRAFT || craftInviteOpen) && (
-                    <React.Suspense fallback={<div className="fixed inset-0 z-[160] grid place-items-center bg-emerald-950 text-amber-100">{trans("島と問題を準備中…", languageMode)}</div>}>
-                        <GakuroCraft languageMode={languageMode} allowHost={isDebugModeActive} inviteCode={craftInviteOpen ? craftCode : ''} onClose={() => { setCraftInviteOpen(false); returnToTitle(); }} />
+                        <GakuroKart languageMode={languageMode} allowHost={true} inviteCode={kartInviteOpen ? kartCode : ''} onClose={() => { setKartInviteOpen(false); returnToTitle(); }} />
                     </React.Suspense>
                 )}
 
@@ -22675,8 +22648,7 @@ const App: React.FC = () => {
                                             <div
                                                 key={card.id}
                                                 data-gamepad-initial-choice={index === 0 ? true : undefined}
-                                                role="button"
-                                                tabIndex={0}
+                                                                tabIndex={0}
                                                 className="scale-75 cursor-pointer hover:scale-90 transition-transform"
                                                 onClick={() => handleLegacyCardSelect(card)}
                                                 onKeyDown={(event) => {

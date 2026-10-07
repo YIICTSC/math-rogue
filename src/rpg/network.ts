@@ -1,3 +1,5 @@
+import {DedicatedConnection} from '../services/dedicatedConnection';
+import {roomAddress,type OnlineTransport} from '../services/onlineTransport';
 import {changedResidentAssets,stripResidentAssets,type ResidentAssets} from './town/residentTransport';
 import type {CreatedResident} from './town/residents';
 import type { P2PEvent } from "../services/p2pService";
@@ -35,6 +37,7 @@ function isNativeProfile(value: unknown): value is NativeProfile {
 
 /** A single room owner validates commands and broadcasts authoritative state. */
 export class RpgRoom {
+  transport:OnlineTransport='host';
   onDungeonEvent: ((event: P2PEvent, from: string) => void) | null = null;
   private receiveDungeon(raw: unknown): boolean {
     const packet = raw as { type?: string; event?: P2PEvent; from?: string };
@@ -56,7 +59,7 @@ export class RpgRoom {
   }
   sendDungeonEvent(event: P2PEvent, target?: string): boolean {
     if (this.closed) return false;
-    if(this.serverSocket)return this.serverSend({type:'dungeon-event',event,target});
+    if(this.serverConnection)return this.serverSend({type:'dungeon-event',event,target});
     if (this.host) return this.relayDungeon(this.selfId,event,target);
     const conn=this.connections.get('host');
     if (!conn?.open) return false;
@@ -72,40 +75,25 @@ export class RpgRoom {
   private lastRevision = -1;
   private closed = false;
   private serverSocket: WebSocket | null = null;
+  private serverConnection:DedicatedConnection|null=null;
   private serverSend(packet: unknown) {
+    if(this.serverConnection)return this.serverConnection.send(packet);
     if(this.serverSocket?.readyState!==WebSocket.OPEN)return false;
     this.serverSocket.send(JSON.stringify(packet));return true;
   }
   private serverUrl() {return import.meta.env.VITE_ONLINE_SERVER_URL as string | undefined;}
-  private async connectServer(packet: object, onSetup?: (setup:RpgAdventureSetup)=>void) {
-    const base=this.serverUrl()!;
-    const url=new URL(base);url.protocol=url.protocol==='http:'?'ws:':url.protocol==='https:'?'wss:':url.protocol;url.pathname='/online';url.search='';url.hash='';
-    this.status('専用サーバーに接続しています。初回は約1分かかる場合があります。');
-    const health=new URL(url);health.protocol=url.protocol==='ws:'?'http:':'https:';health.pathname='/health';
-    // An HTTP request wakes Render Free before attempting the WebSocket upgrade.
-    try {await fetch(health,{mode:'no-cors',signal:AbortSignal.timeout(90000)});}catch{throw new Error('専用サーバーを起動できませんでした。少し待って入り直してください。');}
-    if(this.closed)throw new Error('接続を終了しました。');
-    const socket=new WebSocket(url);this.serverSocket=socket;
-    await new Promise<void>((resolve,reject)=>{
-      let settled=false;
-      const timeout=setTimeout(()=>finish(new Error('専用サーバーに接続できませんでした。')),90000);
-      const finish=(error?:Error)=>{if(settled)return;settled=true;clearTimeout(timeout);if(error){socket.close();reject(error);}else{this.status('');resolve();}};
-      socket.onopen=()=>this.serverSend({type:'connect',protocol:1,...packet});
-      socket.onmessage=e=>{
-        let d:any;try{d=JSON.parse(e.data);}catch{return;}
-        if(this.closed)return;
-        if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
-        if(d.type==='error'){this.status(d.message);if(!settled)finish(new Error(d.message));return;}
-        if(this.receiveDungeon(d))return;
-        if(d.type==='lobby'){const setup=normalizeRpgAdventureSetup(d.setup);if(!setup){finish(new Error('冒険設定を受け取れませんでした。'));return;}onSetup?.(setup);finish();}
-        if(d.type==='init' && d.world){this.world=unpackWorld(d.world);this.emit();finish();}
-        if(this.receiveResidentAssets(d)||this.receiveHeroAssets(d))return;
-        if(d.type==='state' && d.state && this.world){this.restoreHeroAssets(d.state);this.world={...d.state,tiles:this.world.tiles};this.emit();}
-      };
-      socket.onerror=()=>finish(new Error('専用サーバーへの接続に失敗しました。'));
-      socket.onclose=()=>{finish(new Error('専用サーバーとの接続が終了しました。'));if(!this.closed){this.world=null;this.status('通信が切断されました。部屋に入り直してください。');}if(this.timer)clearInterval(this.timer);};
-    });
-    this.timer=setInterval(()=>this.serverSend({type:'ping',at:Date.now()}),20000);
+  private async connectServer(packet:object,onSetup?:(setup:RpgAdventureSetup)=>void){
+    this.status('サーバーを起動しています。初回は最大3分お待ちください。');
+    const connection=new DedicatedConnection(d=>{
+      if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
+      if(d.type==='error'){this.status(d.message);return false;}
+      if(this.receiveDungeon(d))return false;
+      if(d.type==='lobby'){const setup=normalizeRpgAdventureSetup(d.setup);if(!setup)throw new Error('冒険設定を受け取れませんでした。');onSetup?.(setup);this.status('');return true;}
+      if(d.type==='init'&&d.world){this.world=unpackWorld(d.world);this.emit();this.status('');return true;}
+      if(this.receiveResidentAssets(d)||this.receiveHeroAssets(d))return false;
+      if(d.type==='state'&&d.state&&this.world){this.restoreHeroAssets(d.state);this.world={...d.state,tiles:this.world.tiles};this.emit();}return false;
+    },()=>{if(!this.closed){this.world=null;this.status('通信が切断されました。部屋に入り直してください。');}});
+    this.serverConnection=connection;await connection.open('online',packet);
   }
   private residentAssets=new Map<string,ResidentAssets>();
   private receiveResidentAssets(packet:{type?:string;residents?:ResidentAssets[]}){if(packet.type!=='resident-assets'||!Array.isArray(packet.residents))return false;for(const r of packet.residents){this.residentAssets.set(r.id,r);const target=this.world?.town?.customResidents?.find(x=>x.id===r.id);if(target)Object.assign(target,r);}this.emit();return true;}
@@ -156,6 +144,7 @@ export class RpgRoom {
           secure: env.VITE_RPG_PEER_SECURE !== "false",
         }
       : {};
+    const ice=env.VITE_RPG_ICE_SERVERS||env.VITE_KART_ICE_SERVERS;if(ice){const iceServers=JSON.parse(ice);if(!Array.isArray(iceServers))throw new Error('ICE server configuration is invalid.');options.config={iceServers};}
     const peer = id ? new Peer(id, options) : new Peer(options);
     this.peer = peer;
     await new Promise<void>((resolve, reject) => {
@@ -192,7 +181,7 @@ export class RpgRoom {
     return peer;
   }
   async create(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30, gameMode: World["gameMode"] = "COOP") {
-    if(this.serverUrl()){await this.connectServer({create:true,name,setup:normalizeRpgAdventureSetup(setup)||normalizeRpgAdventureSetup({}),minutes:timeLimitMinutes,gameMode});return;}
+    if(this.transport==='server'){await this.connectServer({create:true,name,setup:normalizeRpgAdventureSetup(setup)||normalizeRpgAdventureSetup({}),minutes:timeLimitMinutes,gameMode});return;}
     this.host = true;
     this.code = Array.from(
       crypto.getRandomValues(new Uint8Array(6)),
@@ -353,10 +342,10 @@ export class RpgRoom {
     this.emit();
   }
   async join(code: string, name: string) {
-    this.code = code.trim().toUpperCase();
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;
     if (!/^[A-Z2-9]{6}$/.test(this.code))
       throw new Error("6文字のルームコードを入力してください。");
-    if(this.serverUrl()){await this.connectServer({code:this.code,name});return;}
+    if(this.transport==='server'){await this.connectServer({code:this.code,name});return;}
     const peer = await this.open();
     this.selfId = peer.id;
     const conn = peer.connect(`learning-rogue-rpg-${this.code}`, {
@@ -436,10 +425,10 @@ export class RpgRoom {
     name: string,
     onSetup: (setup: RpgAdventureSetup) => void,
   ) {
-    this.code = code.trim().toUpperCase();
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;
     if (!/^[A-Z2-9]{6}$/.test(this.code))
       throw new Error("6文字のルームコードを入力してください。");
-    if(this.serverUrl()){await this.connectServer({code:this.code,name,prepare:true},onSetup);return;}
+    if(this.transport==='server'){await this.connectServer({code:this.code,name,prepare:true},onSetup);return;}
     const peer = await this.open();
     this.selfId = peer.id;
     const conn = peer.connect(`learning-rogue-rpg-${this.code}`, {
@@ -528,17 +517,17 @@ export class RpgRoom {
   }
   enterWorld(profile: NativeProfile) {
     if (this.closed) return;
-    if(this.serverSocket){this.serverSend({type:'enter',profile});return;}
+    if(this.serverConnection){this.serverSend({type:'enter',profile});return;}
     this.connections.get("host")?.send({ type: "enter", profile });
   }
   setSpectator(enabled: boolean) {
     if (this.closed || !this.host || !this.world || this.world.started) return;
-    if (this.serverSocket) { this.serverSend({ type: 'spectator', enabled }); return; }
+    if (this.serverConnection) { this.serverSend({ type: 'spectator', enabled }); return; }
     if (setSpectator(this.world, this.selfId, enabled)) this.emit();
   }
   send(action: Action) {
     if (this.closed) return;
-    if(this.serverSocket){this.serverSend({type:'action',action});return;}
+    if(this.serverConnection){this.serverSend({type:'action',action});return;}
     if (this.host && this.world) {
       const revision=this.world.revision;
       applyAction(this.world, this.selfId, action);
@@ -547,6 +536,7 @@ export class RpgRoom {
   }
   close() {
     this.closed = true;
+    this.serverConnection?.close();
     this.serverSocket?.close();this.serverSocket=null;
     if (this.timer) clearInterval(this.timer);
     this.connections.forEach((c) => c.close());

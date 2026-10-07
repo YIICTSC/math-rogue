@@ -57,7 +57,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
       const aimLine = new THREE.Line(lineGeo, lineMat); scene.add(aimLine);
       const landing = mesh(geo(new THREE.TorusGeometry(1.4, .12, 6, 24)), mat('#fff6c9'), 0, .1, 0); landing.rotation.x = Math.PI / 2;
       const camera = new THREE.PerspectiveCamera(48, 1, .1, 800); camera.position.set(60, 100, -65);
-      if (portrait) { camera.position.set(1, 3.8, 8); camera.lookAt(-2, 2.6, 0); }
+      if (portrait) { camera.position.set(1, 3.8, 8); camera.up.set(0,1,0);camera.lookAt(-2, 2.6, 0); }
       const target = new THREE.Vector3(), cameraGoal = new THREE.Vector3(), lookAt = new THREE.Vector3(portrait ? -2 : 0, portrait ? 2.6 : 0, 0);
       let viewportWidth=1,viewportHeight=1,lastLift=-1,offsetWidth=0,offsetHeight=0;
       observer = new ResizeObserver(() => { const { width, height } = el.getBoundingClientRect(); if (width && height && renderer) { viewportWidth=width;viewportHeight=height;renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix(); } }); observer.observe(el);
@@ -165,7 +165,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           target.set(-2.05, 2.3, 0);
           cameraGoal.set(-2.05 + distance * .12, 2.3 + distance * .08, distance);
         }
-        else if (full) { cameraGoal.set(65, hole.cup.z * .65 + 45, hole.cup.z * .28); target.set(0, 0, hole.cup.z / 2); }
+        else if (full) { cameraGoal.set(hole.cup.x/2, hole.cup.z*.75+45, hole.cup.z/2); target.set(hole.cup.x/2, 0, hole.cup.z/2); }
         else if (!me || current?.phase === 'lobby') { cameraGoal.set(12, 13, -18); target.set(-1, 2, 7); }
         else if (me.phase === 'holed' && !me.capped && now - (markers.get(me.id)?.cheerStart ?? -Infinity) < 6000) {
           const hero = markers.get(me.id)!.rig.root.position; cameraGoal.set(hero.x + 6, 4.5, hero.z + 8); target.set(hero.x, 2.4, hero.z);
@@ -185,7 +185,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           if(lift) camera.setViewOffset(viewportWidth,viewportHeight,0,viewportHeight*lift,viewportWidth,viewportHeight);
           else if(camera.view?.enabled) camera.clearViewOffset();
         }
-        camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.lookAt(lookAt);
+        camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.up.set(0,full?0:1,full?1:0);camera.lookAt(lookAt);
         aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
           const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin].join('/');

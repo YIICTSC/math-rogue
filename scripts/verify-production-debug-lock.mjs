@@ -21,14 +21,17 @@ for (const scriptName of ['build', 'build:ios', 'build:android', 'build:steam', 
 const requiredGuards = [
   'const isAdminDebugLaunch = DEBUG_FEATURES_ENABLED',
   'if (!DEBUG_FEATURES_ENABLED || gamepadTestScreenOpenedRef.current',
-  'onClick={DEBUG_FEATURES_ENABLED ? handleTitleClick : undefined}',
+  'onClick={handleTitleLogoClick}',
+  'if (DEBUG_FEATURES_ENABLED) handleTitleClick();',
+  'if (onlineTitleTapCount.current === 3)',
+  '{!OFFLINE_DISTRIBUTABLE && onlineGamesUnlocked && (',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.DEBUG_MENU',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.MAGIC_EVENT_SIMULATION',
   '{!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted',
   'const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE',
-  '(isDebugModeActive || (craftInviteOpen && Boolean(craftCode)))',
-  'allowHost={isDebugModeActive}',
-  'inviteCode={craftInviteOpen ? craftCode :',
+  'const canRunRpgOnline = !OFFLINE_DISTRIBUTABLE;',
+  'allowHost={true}',
+  'inviteCode={kartInviteOpen ? kartCode :',
   'if (gameState.screen === GameScreen.RPG_ONLINE || gameState.rpgOnline)',
 ];
 for (const guard of requiredGuards) {
@@ -37,4 +40,5 @@ for (const guard of requiredGuards) {
   }
 }
 
+if(appSource.includes('<GakuroCraft '))throw new Error('Standalone online craft remains accessible.');
 process.stdout.write('Production debug-route lock verification passed.\n');

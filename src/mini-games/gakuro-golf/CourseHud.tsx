@@ -8,7 +8,7 @@ export default function CourseHud({player,hole,remaining,aim,players,holeCount,t
   const windAngle=(Math.atan2(hole.wind.x,hole.wind.z)-aim)*180/Math.PI;
   const length=Math.hypot(hole.cup.x,hole.cup.z);
   const zScale=112/(hole.cup.z+60),mapZ=(z:number)=>130-(z+25)*zScale;
-  const ballX=80+player.x*.65,ballZ=mapZ(player.z);
+  const ballX=80-player.x*.65,ballZ=mapZ(player.z);
   const bounds={x:Math.max(5,Math.min(155,ballX)),z:Math.max(5,Math.min(135,ballZ))};
   return <>
     <div className="gg-hud" role="group" aria-label={t('ホール情報')}>
@@ -18,14 +18,14 @@ export default function CourseHud({player,hole,remaining,aim,players,holeCount,t
     <aside className="gg-wind" aria-label={t('風')}><span className="gg-wind-arrow" style={{transform:`rotate(${windAngle}deg)`}} aria-hidden="true">↑</span><div><small>{t('風')}</small><strong>{Math.hypot(hole.wind.x,hole.wind.z).toFixed(1)}</strong></div></aside>
     <details className="gg-minimap"><summary>{t('コースマップ')}</summary><svg viewBox="0 0 160 140" role="img" aria-label={t('コースマップ')}>
       <rect width="160" height="140" rx="10" fill="#234d34"/>
-      <path d={`M ${80-hole.fairway*.65} ${mapZ(-6)} L ${80+hole.cup.x*.65-hole.fairway*.65} ${mapZ(hole.cup.z)} L ${80+hole.cup.x*.65+hole.fairway*.65} ${mapZ(hole.cup.z)} L ${80+hole.fairway*.65} ${mapZ(-6)} Z`} fill="#81ad55"/>
-      {hole.water.map((h,i)=><ellipse key={'w'+i} cx={80+h.x*.65} cy={mapZ(h.z)} rx={h.rx*.65} ry={h.rz*zScale} fill="#65bed2"/>)}
-      {hole.sand.map((h,i)=><ellipse key={'s'+i} cx={80+h.x*.65} cy={mapZ(h.z)} rx={h.rx*.65} ry={h.rz*zScale} fill="#edda9b"/>)}
-      <ellipse cx={80+hole.cup.x*.65} cy={mapZ(hole.cup.z)} rx="11" ry={17*zScale} fill="#b1d779"/>
-      {players.filter(p=>!p.spectator&&p.connected&&p.hole===player.hole&&p.id!==player.id).map(p=><circle key={p.id} cx={80+p.x*.65} cy={mapZ(p.z)} r="2" fill="#80dcff"/>)}
-      <path d={`M ${bounds.x} ${bounds.z} l ${Math.sin(aim)*12} ${-Math.cos(aim)*12}`} stroke="#fff5a6" strokeWidth="2"/>
+      <path d={`M ${80+hole.fairway*.65} ${mapZ(-6)} L ${80-hole.cup.x*.65+hole.fairway*.65} ${mapZ(hole.cup.z)} L ${80-hole.cup.x*.65-hole.fairway*.65} ${mapZ(hole.cup.z)} L ${80-hole.fairway*.65} ${mapZ(-6)} Z`} fill="#81ad55"/>
+      {hole.water.map((h,i)=><ellipse key={'w'+i} cx={80-h.x*.65} cy={mapZ(h.z)} rx={h.rx*.65} ry={h.rz*zScale} fill="#65bed2"/>)}
+      {hole.sand.map((h,i)=><ellipse key={'s'+i} cx={80-h.x*.65} cy={mapZ(h.z)} rx={h.rx*.65} ry={h.rz*zScale} fill="#edda9b"/>)}
+      <ellipse cx={80-hole.cup.x*.65} cy={mapZ(hole.cup.z)} rx="11" ry={17*zScale} fill="#b1d779"/>
+      {players.filter(p=>!p.spectator&&p.connected&&p.hole===player.hole&&p.id!==player.id).map(p=><circle key={p.id} cx={80-p.x*.65} cy={mapZ(p.z)} r="2" fill="#80dcff"/>)}
+      <path d={`M ${bounds.x} ${bounds.z} l ${-Math.sin(aim)*12} ${-Math.cos(aim)*12}`} stroke="#fff5a6" strokeWidth="2"/>
       <circle cx={bounds.x} cy={bounds.z} r="3.5" fill="white" stroke="#132d2a" strokeWidth="1.5"/>
-      <path d={`M ${80+hole.cup.x*.65} ${mapZ(hole.cup.z)} v -10 l 7 2 -7 2`} stroke="#fff" strokeWidth="1.5" fill="#ff6c59"/>
+      <path d={`M ${80-hole.cup.x*.65} ${mapZ(hole.cup.z)} v -10 l 7 2 -7 2`} stroke="#fff" strokeWidth="1.5" fill="#ff6c59"/>
     </svg></details>
   </>;
 }

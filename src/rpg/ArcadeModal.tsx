@@ -104,8 +104,8 @@ export default function ArcadeModal({ me, siteId, ready, visible, languageMode, 
               {game === 'FLIP' && <div className="rpg-arcade-cards">{[0, 1, 2].map(i => <button key={i} aria-pressed={choice === i} disabled={busy} onClick={() => setChoice(i)}><span>✦</span><small>カード {i + 1}</small></button>)}</div>}
               {game === 'ROULETTE' && <div className="rpg-arcade-colors">{['赤', '青', '緑'].map((label, i) => <button key={i} aria-pressed={choice === i} disabled={busy} onClick={() => setChoice(i)} style={{ borderColor: ['#ff7b77', '#79c8ff', '#84e7b1'][i] }}>{label}</button>)}</div>}
               {game === 'SLOT' && <div className="rpg-arcade-reels"><span>★</span><span>◆</span><span>♬</span></div>}
-              <p className="rpg-arcade-muted">当たりは抽選です。問題挑戦のあとに結果を発表します。</p>
-              <button className="rpg-arcade-primary" disabled={!canPlay} onClick={play}>{busy ? '問題を準備しています…' : '10コインで挑戦する'}</button>
+              <p className="rpg-arcade-muted">問題なしで遊べます。当たりは抽選です。</p>
+              <button className="rpg-arcade-primary" disabled={!canPlay} onClick={play}>{busy ? '抽選しています…' : '10コインで挑戦する'}</button>
               {!busy && <button className="rpg-arcade-secondary" onClick={() => setGame(null)}>ゲームを選び直す</button>}
             </>}
             {error && <p role="alert">開始できませんでした。接続と利用回数を確認してください。</p>}

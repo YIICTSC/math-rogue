@@ -1,5 +1,5 @@
 export const RPG_ROOM_QUERY_PARAM = "rpgRoom";
-export const RPG_ROOM_CODE_PATTERN = /^[A-Z2-9]{6}$/;
+export const RPG_ROOM_CODE_PATTERN = /^(?:[HS]-)?[A-Z2-9]{6}$/;
 
 export function normalizeRpgRoomCode(value: string | null | undefined) {
   const code = (value || "").trim().toUpperCase();

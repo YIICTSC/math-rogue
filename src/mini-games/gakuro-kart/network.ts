@@ -1,3 +1,4 @@
+import {roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import {type CustomCourse} from './track';
 import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
 import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
@@ -8,6 +9,7 @@ import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Ro
 
 /** Host-authoritative 60 Hz simulation, 20 Hz controls, 10 Hz compact snapshots. */
 export class KartRoom {
+  transport:OnlineTransport='host';
   selfId = 'local'; code = ''; host = false; world: Race | null = null;
   private dedicated: DedicatedConnection | null = null;
   private peer: Peer | null = null;
@@ -88,7 +90,7 @@ export class KartRoom {
     if (c.open) deliver(); else c.once('open', deliver);
   }
   async create(name: string, hero: number, course: number, customCourse?:CustomCourse) {
-    if(onlineServerUrl()){await this.connectDedicated({create:true,name,hero,course,customCourse,avatar:defaultAvatar(hero)});return;}
+    if(this.transport==='server'){await this.connectDedicated({create:true,name,hero,course,customCourse,avatar:defaultAvatar(hero)});return;}
     this.host = true;
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
@@ -124,9 +126,9 @@ export class KartRoom {
     }); this.run();
   }
   async join(code: string, name: string, hero: number, avatar: KartAvatar = defaultAvatar(hero)) {
-    this.code = code.trim().toUpperCase();
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;
     if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
-    if(onlineServerUrl()){await this.connectDedicated({code:this.code,name,hero,avatar});return;}
+    if(this.transport==='server'){await this.connectDedicated({code:this.code,name,hero,avatar});return;}
     const peer = await this.open();
     const c = peer.connect(`gakuro-apex-v${PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);
     await new Promise<void>((resolve, reject) => {

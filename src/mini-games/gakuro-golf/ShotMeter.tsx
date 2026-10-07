@@ -15,6 +15,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     if (s.power === null) { if (m.returning) return; s.power = Math.max(.05, m.position); setLocked(s.power); callbacks.current.onPower(s.power); }
     else if (m.returning) finish(impactAt(m.position));
   };
+  useEffect(()=>{if(active||disabled)return;const key=(e:KeyboardEvent)=>{if(e.repeat||!(e.code==='Enter'||e.code==='Space')||(e.target as Element)?.closest('input,textarea,select,[role=dialog]'))return;e.preventDefault();e.stopPropagation();tap();};document.addEventListener('keydown',key,true);return()=>document.removeEventListener('keydown',key,true);},[active,disabled]);
   useEffect(() => { if (disabled) cancel(); }, [disabled]);
   useEffect(() => {
     if (!active) return;
@@ -34,7 +35,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
   return <div className="gg-timing" data-active={active} data-returning={returning}>
     <div className="gg-meter-heading"><b>{locked === null ? t('1回目：パワーを決める') : returning ? t('2回目：下の中心に合わせる') : t('右端まで進んでから戻ります')}</b><span>{locked === null ? `MAX ${Math.round(limit * 100)}%` : `${Math.round(locked * 100)}%`}</span></div>
     <div className="gg-meter-track"><span className="gg-meter-fill" style={{ width: `${(locked ?? 0) * 100}%` }}/>{locked !== null && <i className="gg-meter-lock" style={{ left: `${locked * 100}%` }}/>}<span className="gg-meter-cursor" ref={cursor}/></div>
-    <div className="gg-impact-strip"><span/><i/></div>
-    <div className="gg-meter-actions"><button className="gg-primary" disabled={disabled} onClick={e => { if (e.detail === 0 && !state.current.active) tap(); }} onPointerDown={() => { if (!state.current.active) tap(); }} onKeyDown={e => { if (!state.current.active && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tap(); } }}>{t(active ? '画面タッチで確定' : 'メーター開始')}</button>{active && <button data-meter-ignore onClick={cancel}>{t('中止')}</button>}</div>
+    <div className="gg-impact-strip"><span/><i/>{locked!==null&&<b className="gg-impact-cue" aria-label={t('ここでインパクトを合わせる')}>↑</b>}</div>
+    <div className="gg-meter-actions"><button className="gg-primary" disabled={disabled} onClick={e => { if (e.detail === 0 && !state.current.active) tap(); }} onPointerDown={() => { if (!state.current.active) tap(); }} onKeyDown={e => { if (!state.current.active && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tap(); } }}>{t(active ? '画面タッチで確定' : 'ショット')}</button></div>
   </div>;
 }

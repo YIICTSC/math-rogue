@@ -168,16 +168,16 @@ export function applyActivity(w:World,p:Adventurer,action:ActivityAction,now:num
    // The owner chooses the result; retries cannot change a settled play.
    let n=(w.seed^Math.imul(w.revision+1,2654435761)^Math.imul(uses+1,2246822519))>>>0;n^=n>>>16;
    p.arcadePending={token:`arcade-${p.id}-${w.revision}`,siteId:s.id,game:action.game,choice:action.choice,roll:n%6};
-   grant(p,{remove:[],cards:[],gold:-10,heal:0});return tell('問題に挑戦して景品を獲得しよう！');
+   grant(p,{remove:[],cards:[],gold:-10,heal:0});return applyActivity(w,p,{type:'arcade-finish',token:p.arcadePending.token,correctCount:0},now);
  }
  if(action.type==='arcade-finish') {
    const game=p.arcadePending;
    if(!game||game.token!==action.token||!Number.isSafeInteger(action.correctCount)||action.correctCount<0||action.correctCount>100)return false;
    delete p.arcadePending;
-   const card=rewardCard(w,p),win=action.correctCount>0&&(game.game==='SLOT'?game.roll===0:game.roll%3===game.choice);
+   const card=rewardCard(w,p),win=(game.game==='SLOT'?game.roll===0:game.roll%3===game.choice);
    const gold=win?(game.game==='SLOT'?50:20):0;
-   grant(p,{remove:[],cards:win&&game.game==='FLIP'&&card?[card]:[],gold:gold+(action.correctCount>=3?10:0),heal:win&&game.game==='ROULETTE'?Math.ceil(p.maxHp*.2):0});
-   p.arcadeOutcome={...game,win,correctCount:action.correctCount,gold:gold+(action.correctCount>=3?10:0),heal:win&&game.game==='ROULETTE'?Math.ceil(p.maxHp*.2):0,...(win&&game.game==='FLIP'&&card?{card}:{})};
+   grant(p,{remove:[],cards:win&&game.game==='FLIP'&&card?[card]:[],gold,heal:win&&game.game==='ROULETTE'?Math.ceil(p.maxHp*.2):0});
+   p.arcadeOutcome={...game,win,correctCount:0,gold,heal:win&&game.game==='ROULETTE'?Math.ceil(p.maxHp*.2):0,...(win&&game.game==='FLIP'&&card?{card}:{})};
    p.arcadeResult=win?'当たり！ 景品を獲得しました。':'今回はハズレ。次の探索へ！';return tell(p.arcadeResult);
  }
  if(action.type==='secret-search') {

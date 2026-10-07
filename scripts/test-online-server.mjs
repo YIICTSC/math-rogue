@@ -26,10 +26,15 @@ try{
   assert.equal(Object.keys(state.state.players).length,40);
   const full=await connect({code:info.code});
   assert.match((await until(()=>full.packets.find(p=>p.type==='error'))).message,/満員/);
+  host.socket.send(JSON.stringify({type:'action',action:{type:'rpg-start'}}));
+  await until(()=>host.packets.findLast(p=>p.type==='state'&&p.state.started));
   const playerId=info.id;
   const before=state.state.players[playerId];
-  host.socket.send(JSON.stringify({type:'action',action:{type:'move',dx:1,dy:0}}));
-  await until(()=>host.packets.findLast(p=>p.type==='state'&&(p.state.players[playerId].x!==before.x||p.state.players[playerId].steps>before.steps)));
+  for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+    host.socket.send(JSON.stringify({type:'action',action:{type:'move',dx,dy}}));
+    await new Promise(resolve=>setTimeout(resolve,250));
+  }
+  await until(()=>host.packets.findLast(p=>p.type==='state'&&(p.state.players[playerId].x!==before.x||p.state.players[playerId].moveCount>before.moveCount)));
   host.socket.close();
   await until(()=>guests[0].packets.findLast(p=>p.type==='state'&&Object.keys(p.state.players).length===39));
   const invited=await connect({code:info.code,prepare:true});

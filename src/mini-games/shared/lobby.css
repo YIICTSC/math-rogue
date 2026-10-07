@@ -121,3 +121,5 @@
  .rpg-root .rpg-waiting-host-message{margin:0!important;align-self:center}
  .rpg-root .rpg-start-adventure{width:100%}
 }
+
+.online-transport{border:1px solid #90b1a6;border-radius:10px;padding:8px;min-width:0}.online-transport>div{display:flex;gap:6px}.online-transport button{flex:1;min-height:36px;border:1px solid #809f92;border-radius:7px;background:#153a32;color:#ecf0de}.online-transport button[aria-pressed=true]{background:#b89448;color:#14231f;border-color:#ffe1a0}.online-transport small{display:block;line-height:1.35;margin-top:6px;font-size:11px}

@@ -1,3 +1,4 @@
+import {roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
@@ -9,6 +10,7 @@ export { GOLF_PROTOCOL, validView } from './protocol';
 const prefix = `gakuro-golf-v${GOLF_PROTOCOL}-`;
 /** Star topology: one authoritative host + 39 guests. 30 Hz physics, 5 Hz private snapshots. */
 export class GolfRoom {
+  transport:OnlineTransport='host';
   selfId = 'local'; code = ''; host = false; private observedId: string | null = null;
   private world: GolfWorld | null = null;
   private dedicated: DedicatedConnection | null = null;
@@ -77,7 +79,7 @@ export class GolfRoom {
     this.dedicated = connection; await connection.open('golf', { ...hello, protocol: GOLF_PROTOCOL });
   }
   async create(name: string) {
-    if (onlineServerUrl()) { await this.openDedicated({ create: true, name: name.slice(0, 16) }); return; }
+    if (this.transport==='server') { await this.openDedicated({ create: true, name: name.slice(0, 16) }); return; }
     this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
     const peer = await this.open(prefix + this.code);
@@ -103,8 +105,8 @@ export class GolfRoom {
     }); this.run();
   }
   async join(code: string, name: string) {
-    this.code = code.trim().toUpperCase(); if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
-    if (onlineServerUrl()) { await this.openDedicated({ create: false, code: this.code, name: name.slice(0, 16) }); return; }
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code; if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
+    if (this.transport==='server') { await this.openDedicated({ create: false, code: this.code, name: name.slice(0, 16) }); return; }
     const peer = await this.open(); const c = peer.connect(prefix + this.code, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);
     await new Promise<void>((resolve, reject) => {
       const cancel = () => fail(new Error('接続を終了しました。'));
