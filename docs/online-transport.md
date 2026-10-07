@@ -15,3 +15,11 @@ RPG town arcade rewards no longer require questions. Upgrade, synthesis, rest, s
 Invitations for all three games first show only player name and Join. Golf hosts can copy an invitation URL from the lobby. Invite URLs omit unrelated query parameters and fragments. After joining, RPG participants choose their edition and protagonist (and can choose again while waiting); GP and Golf participants edit an avatar with a 3D preview. One-hit Home Dash remains available while waiting and closes when the host starts. New-player surveys are deferred until leaving the invitation flow.
 
 Kart prepares fifteen shuffled questions from the selected units and uses a different three-question segment for each of up to five laps. Golf keeps an independent question history for each player across quizzes and holes. Duplicate source entries are merged, and questions repeat only after the available pool is exhausted. Both host and server communication use these rules.
+
+## Render deployment filters
+
+`render.yaml` defines `buildFilter.paths`: online-game source folders, shared runtime dependencies actually compiled into the server, package/lock files, and the deployment configuration. `autoDeployTrigger: checksPass` remains enabled. Changes confined to unrelated app UI, public images/audio, docs, or frontend CI do not match. Shared question/card data still matches because the online server consumes it. Craft logic remains included because RPG furniture and the server still reuse it.
+
+`pnpm run server:build` verifies every nonempty bundled server input is covered by these paths. If a new dependency lives outside the listed folders, add its path to `render.yaml`; the build fails rather than allowing future changes to miss deployment.
+
+Existing Render service setup: open https://dashboard.render.com/web/srv-dauu1v41nsns73fnjdk0/settings and set **Build Filters → Included Paths** to the entries under `buildFilter.paths` in `render.yaml`. Keep automatic deploys set to **After CI Checks Pass**. Alternatively, sync this file through a Blueprint that manages the existing service. Publishing this file alone does not establish that an existing manually created service uses the filter. The current Render connector can inspect services but cannot update Build Filters, so the live setting needs this one-time Dashboard step.

@@ -9,6 +9,42 @@ services:
     startCommand: node server/dist/index.mjs
     healthCheckPath: /health
     autoDeployTrigger: checksPass
+    # Online games and the shared code/data compiled into their server.
+    buildFilter:
+      paths:
+        - server/**
+        - scripts/verify-render-build-filter.mjs
+        - src/rpg/**
+        - src/mini-games/gakuro-kart/**
+        - src/mini-games/gakuro-golf/**
+        - src/mini-games/gakuro-craft/**
+        - src/data/subjects/**
+        - src/components/mapSymbolImageMap.ts
+        - src/constants.ts
+        - src/constants1.ts
+        - src/data/enemyCatalogs.ts
+        - src/data/englishData.ts
+        - src/data/expansionCards.ts
+        - src/data/highSchoolCards.ts
+        - src/data/kanjiData.ts
+        - src/data/kanjiReadingProfiles.ts
+        - src/data/kankenLevelKanji.ts
+        - src/data/magicHeroes.ts
+        - src/data/subjectData.ts
+        - src/data/visualThemes.ts
+        - src/nativeEnglishUnitConfig.ts
+        - src/scienceUnitConfig.ts
+        - src/services/geminiService.ts
+        - src/socialUnitConfig.ts
+        - src/types.ts
+        - src/utils/assetPaths.ts
+        - src/utils/assignmentRangeFilters.ts
+        - src/utils/cardUtils.ts
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .npmrc
+        - render.yaml
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
