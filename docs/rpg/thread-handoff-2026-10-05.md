@@ -406,3 +406,10 @@ Published main: 454cb3514b7bf4b527a8966c5f1b68cf6bca20a7; uploaded tree matched 
 ## 2026-10-07: course scenery and upload verification preference
 User now explicitly says not to wait for post-commit completion checks. Do local required tests/builds, upload main, and report without waiting for GitHub Actions completion.
 Kart: eight course sky/fog/road/rail/material palettes now applied; urban courses retain buildings instead of hiding them when imported models load. Neon cyber signs/lights, solar panels/stacks, library reading arcades, stadium floodlights/banners; natural garden/forest/harbor and snowy aurora retain themed imported scenery. Configuration: src/mini-games/gakuro-kart/scenery.ts. Eight WebGL scene captures plus course/minimap checks, English gate, frontend/server builds passed. Published main: 02e0a45e6089fd4bb00d1ce7de4f6cd36cf70ab7.
+
+## 2026-10-07 オンライン招待動線
+- 最新 main 56d7ad22 の帰宅ダッシュ待機機能等を取り込んだ上で、4dc703f4035a87d4d18098bb0918bd0fec640713 を main に公開。
+- RPG・レース・ゴルフの招待URLは最初に参加名と参加ボタンのみ。ゴルフのホスト待機画面に招待URLとコピーを追加。通信方式の H-/S- 接頭辞を保持し、別ゲームやデバッグのURLパラメーターを除去。
+- 参加後、RPGは編と主人公を選択・待機中に再選択可。レースとゴルフは3Dプレビュー付きアバター編集。待機中の帰宅ダッシュ一発アウトを維持し、ホスト開始で終了。初回プロフィール等の案内は招待終了後に延期。
+- 実Appブラウザで3ゲームの名前入力・参加・キャラ編集・HP1ダッシュ・ホスト開始を確認。ゴルフのホストURLコピーとデスクトップ配置、通信/URL単体、英語監査、frontend/server build 合格。
+- コミット後の Actions や Render 完了待ちはユーザー指示により省略。前依頼の Render 再デプロイ dep-db2sclm7bikc73aqshfg は開始のみ報告済み、今回の作業では手動再デプロイせず。
