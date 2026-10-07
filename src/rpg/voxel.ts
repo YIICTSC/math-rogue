@@ -4,13 +4,15 @@ import {energyOf} from './energy';
 import {occupiedFarmTile,farmBusy} from './farm/model';
 import {occupiedCityTile} from './city/model';
 import {BIOMES,biomeWeights,biomeAt} from './biomes';
-export const BLOCKS=['wood','stone','plank','brick','frostwood','ore','crystal','dirt','sand','snow','steel','leaves','frostleaves','fruit','bush','reed','herb','cactus','door'] as const;
+import {CATALOG_BLOCKS,VOXEL_CATALOG,BLOCK_DROPS,shapeOf,TOOL_RANK,type CatalogBlock} from './voxelCatalog';
+import {applyWorkshop,activeTools,type WorkshopAction,type VoxelContainer} from './voxelWorkshop';
+export const BLOCKS=CATALOG_BLOCKS;
 export type Block=typeof BLOCKS[number];
-export const VOXEL_COLORS:Record<TerrainBlock,string>={wood:'#98704a',stone:'#829096',plank:'#c39a63',brick:'#ae6550',frostwood:'#c5dee0',ore:'#75634f',crystal:'#9e75ce',dirt:'#89734e',sand:'#d7ba79',snow:'#dbe9ef',steel:'#648c9a',leaves:'#508741',frostleaves:'#bad5c7',fruit:'#d87835',bush:'#639943',reed:'#88a85b',herb:'#72aa66',cactus:'#438754',door:'#b38958','door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf'};
+export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLOCKS.map(b=>[b,VOXEL_CATALOG[b].color])) as Record<Block,string>,'door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf'};
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'door-top';
 export const MIN_DEPTH=-18,MAX_HEIGHT=18,EYE_HEIGHT=1.62;
-export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;terrainVersion?:2;legacyFlat?:string[]}
-export type VoxelAction={type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block};
+export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
+export type VoxelAction=WorkshopAction|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 export function protectedVoxel(w:World,x:number,z:number){return x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedFarmTile(w,z*WIDTH+x)||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-z)<=1);}
 const heightCache=new Map<number,Int8Array>();
@@ -30,6 +32,7 @@ export function terrainHeight(w:World,x:number,z:number){
  return save(h);
 }
 const oasisCache=new Map<number,{id:string;x:number;z:number;depth:number}[]>();
+const trunkFor=(node:{sprite:number;material:string}):Block=>node.material==='frostwood'?'frostwood':node.sprite===1?'birchwood':node.sprite===2?'darkwood':node.sprite===7?'acaciawood':'wood';
 export function oasisCenters(w:World){let centers=oasisCache.get(w.seed);if(!centers){if(oasisCache.size>8)oasisCache.clear();centers=BIOMES.map((b,i)=>({id:`oasis-${i}`,x:b.x+9+(w.seed%5),z:b.y-7,depth:-7-(i%3)*2}));oasisCache.set(w.seed,centers);}return centers;}
 export function undergroundOasis(w:World,x:number,y:number,z:number){return oasisCenters(w).find(c=>((x+.5-c.x)/5.5)**2+((z+.5-c.z)/5.5)**2+((y+.5-c.depth)/2.8)**2<1);}
 /** Natural vegetation uses the same editable cells as player-built blocks. */
@@ -38,10 +41,10 @@ export function vegetationCells(w:World,x:number,z:number):{x:number;y:number;z:
  const h=terrainHeight(w,x,z),cell=(dx:number,dy:number,dz:number,block:Block)=>({x:x+dx,y:h+dy,z:z+dz,block});
  if(node.rock)return [cell(0,0,0,node.material as Block)];
  if(node.sprite===3)return [cell(0,0,0,'herb')];
- if(node.sprite===5)return [cell(0,0,0,'reed'),cell(0,1,0,'reed')];
+ if(node.sprite===5){const stem:Block=(x+z)%3===0?'bamboo':'reed';return [cell(0,0,0,stem),cell(0,1,0,stem)];}
  if(node.sprite===6)return [cell(0,0,0,'cactus'),cell(0,1,0,'cactus')];
  if(node.sprite===16)return [cell(0,0,0,'bush')];
- const trunk:Block=node.material==='frostwood'?'frostwood':'wood';
+ const trunk:Block=trunkFor(node);
  if(node.sprite===7)return [cell(0,0,0,trunk),cell(0,1,0,trunk)];
  const leaf:Block=[9,10].includes(node.sprite)?'frostleaves':'leaves';
  return [cell(0,0,0,trunk),cell(0,1,0,trunk),...[[0,0],[-1,0],[1,0],[0,-1],[0,1]].map(([dx,dz])=>cell(dx,2,dz,leaf)),cell(0,3,0,node.sprite===17?'fruit':leaf)].filter(c=>!protectedVoxel(w,c.x,c.z)&&w.tiles[c.z*WIDTH+c.x]!=='water');
@@ -55,10 +58,10 @@ function vegetationAt(w:World,x:number,y:number,z:number):Block|null{
   if(!own){if(tree&&level===2)return leaf;continue;}
   if(node.rock){if(level===0)return node.material as Block;continue;}
   if(node.sprite===3){if(level===0)return 'herb';continue;}
-  if(node.sprite===5){if(level<=1)return 'reed';continue;}
+  if(node.sprite===5){if(level<=1)return (tx+tz)%3===0?'bamboo':'reed';continue;}
   if(node.sprite===6){if(level<=1)return 'cactus';continue;}
   if(node.sprite===16){if(level===0)return 'bush';continue;}
-  if(level<2)return node.material==='frostwood'?'frostwood':'wood';
+  if(level<2)return trunkFor(node);
   if(tree)return level===3&&node.sprite===17?'fruit':leaf;
  }
  return null;
@@ -77,22 +80,30 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
   if(y===h-1)return biomeAt(x,z).id==='snow'?'snow':biomeAt(x,z).id==='desert'?'sand':'dirt';
   if(y>=h-3)return 'dirt';
   const hash=(Math.imul(x+1,374761393)^Math.imul(z+1,668265263)^Math.imul(y+31,1274126177)^w.seed)>>>0;
-  if(y<=-7&&hash%23<3)return 'steel';if(y<=-4&&hash%19<2)return 'crystal';if(hash%17<2)return 'ore';return 'stone';
+  if(y<=-7&&hash%23<3)return 'steel';if(y<=-4&&hash%19<2)return 'crystal';if(hash%17<2)return 'ore';
+  if(y<=-10&&hash%61<2)return 'diamond_ore';if(y<=-6&&hash%43<2)return 'gold_ore';if(y<=-5&&hash%37<2)return 'lapis_ore';if(hash%29<2)return 'copper_ore';if(hash%13<2)return 'coal_ore';if(hash%47===0)return 'quartz_ore';
+  if(hash%31===0)return 'clay';if(hash%23===0)return 'gravel';if(y<=-14)return hash%3?'deepslate':'obsidian';
+  return (['stone','stone','stone','granite','diorite','andesite','basalt'] as const)[Math.floor(x/5+z/5)%7];
  }
  if(protectedCell||w.tiles[z*WIDTH+x]==='water')return null;
  return vegetationAt(w,x,y,z);
 }
 export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='door'&&b!=='door-top';
+const blockTop=(b:TerrainBlock)=>shapeOf(b)==='slab'?.5:1;
+export function bodyClear(w:World,x:number,z:number,feet:number,top=feet+1.8){
+ for(let y=Math.floor(feet);y<Math.ceil(top);y++){const b=blockAt(w,x,y,z);if(b&&solid(b)&&y+blockTop(b)>feet+.001&&y<top-.001)return false;}return true;
+}
 export function floorAt(w:World,x:number,z:number,maxTop:number):number|null {
  if(x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||w.tiles[z*WIDTH+x]==='water')return null;
- for(let y=Math.min(MAX_HEIGHT,Math.floor(maxTop)-1);y>=MIN_DEPTH;y--)if(solid(blockAt(w,x,y,z))&&!solid(blockAt(w,x,y+1,z))&&!solid(blockAt(w,x,y+2,z)))return y+1;
+ for(let y=Math.min(MAX_HEIGHT,Math.ceil(maxTop)-1);y>=MIN_DEPTH;y--){const b=blockAt(w,x,y,z);if(b&&solid(b)){const top=y+blockTop(b);if(top<=maxTop+.001&&bodyClear(w,x,z,top))return top;}}
  return null;
 }
 export function playerHeight(w:World,p:Adventurer){return p.position3D?.y??floorAt(w,p.x,p.y,terrainHeight(w,p.x,p.y)+1)??0;}
-export function miningCost(block:TerrainBlock,p:Adventurer){const base=({stone:.3,brick:.2,ore:.6,crystal:.8,steel:1.2,bedrock:Infinity,'oasis-water':Infinity} as Partial<Record<TerrainBlock,number>>)[block]??.1;const factor=p.life?.pickaxe==='steel'?.3:p.life?.pickaxe==='iron'?.5:p.life?.pickaxe==='stone'?.75:1;return Math.max(.1,Math.round(base*factor*100)/100);}
+export function miningCost(block:TerrainBlock,p:Adventurer){const def=VOXEL_CATALOG[block as CatalogBlock],tool=['dirt','sand','snow','clay','gravel'].includes(block)?'shovel':def?.group==='wood'||['workbench','chest','composter'].includes(block)?'axe':'pickaxe';const rank=TOOL_RANK.indexOf(activeTools(p)[tool]!);const base=({stone:.3,brick:.2,ore:.6,crystal:.8,steel:1.2,obsidian:1.5,diamond_ore:1,bedrock:Infinity,'oasis-water':Infinity} as Partial<Record<TerrainBlock,number>>)[block]??(block.endsWith('_ore')?.6:def?.group==='stone'?.3:.1);return Math.max(rank>=0&&tool!=='pickaxe'?.02:.1,Math.round(base*([1,.75,.5,.3,.18][rank+1])*100)/100);}
 export function voxelWalkable(w:World,x:number,z:number,maxTop=terrainHeight(w,Math.floor(x),Math.floor(z))+1){return floorAt(w,Math.floor(x),Math.floor(z),maxTop)!==null;}
 function upgrade(w:World){const v=w.voxels??={edits:{},revision:0,terrainVersion:2};if(!v.terrainVersion){v.legacyFlat=[...new Set(Object.keys(v.edits).map(k=>{const [x,,z]=k.split(',');return `${x},${z}`;}))];v.terrainVersion=2;}return v;}
 export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
+ if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds')return applyWorkshop(w,p,a,now);
  const tell=(text:string)=>{p.message=text;w.revision++;return true;};
  if(a.type==='voxel-snap'){
   // Underground coordinates never leak into the 2D tile simulation.
@@ -106,7 +117,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   let {x,z}=p.position3D??{x:p.x+.5,z:p.y+.5},feet=playerHeight(w,p);
   const travel=Math.min(.4,Math.max(0,(now-p.lastMove)/1000)*3.2),length=Math.hypot(a.dx,a.dy);if(!length)return false;
   const dx=a.dx*Math.min(1,travel/length),dz=a.dy*Math.min(1,travel/length);
-  const step=(nx:number,nz:number)=>{const corners=[[-.18,-.18],[-.18,.18],[.18,-.18],[.18,.18]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;const next=Math.max(...heights as number[]);if(corners.some(c=>solid(blockAt(w,c.x,next,c.z))||solid(blockAt(w,c.x,next+1,c.z))))return false;if(next<feet&&corners.some(c=>{for(let y=next;y<=feet+1;y++)if(solid(blockAt(w,c.x,y,c.z)))return true;return false;}))return false;x=nx;z=nz;feet=next;return true;};
+  const step=(nx:number,nz:number)=>{const corners=[[-.18,-.18],[-.18,.18],[.18,-.18],[.18,.18]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;const next=Math.max(...heights as number[]);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+1.8)))return false;x=nx;z=nz;feet=next;return true;};
   step(x+dx,z);step(x,z+dz);p.position3D={x,z,y:feet};p.x=Math.floor(x);p.y=Math.floor(z);p.lastMove=now;p.moveCount++;w.revision++;
   const oasis=undergroundOasis(w,p.x,feet,p.y);if(oasis&&!p.voxelDiscoveries?.includes(oasis.id)){(p.voxelDiscoveries??=[]).push(oasis.id);p.message='地下のオアシスを発見しました！';}
   return true;
@@ -118,7 +129,9 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  if(a.type==='voxel-break'){
   if(!existing||existing==='bedrock'||existing==='oasis-water')return false;
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
-  lp.bag[existing as Material]=(lp.bag[existing as Material]||0)+1;state.edits[voxelKey(x,y,z)]=null;
+  if(existing==='chest'&&Object.values(state.containers?.[voxelKey(x,y,z)]?.items||{}).some(n=>n!>0))return tell('チェストの中身を取り出してから壊してください。');
+  const drop=BLOCK_DROPS[existing as Block]??existing as Material;lp.bag[drop]=(lp.bag[drop]||0)+1;state.edits[voxelKey(x,y,z)]=null;
+  if(state.rotations)delete state.rotations[voxelKey(x,y,z)];if(state.containers)delete state.containers[voxelKey(x,y,z)];
   // Do not erase an entire crown when only its trunk or one leaf was harvested.
   for(const [dx,dz] of [[0,0],[-1,0],[1,0],[0,-1],[0,1]]){const tx=x+dx,tz=z+dz,tile=tz*WIDTH+tx,cells=vegetationCells(w,tx,tz);if(cells.length&&cells.every(c=>!solid(blockAt(w,c.x,c.y,c.z))))w.life.nodes[tile]={hits:0,regrowAt:Number.MAX_SAFE_INTEGER};}
   if(existing==='steel'&&!p.voxelDiscoveries?.includes('steel'))(p.voxelDiscoveries??=[]).push('steel');
@@ -128,7 +141,8 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
   if(![[x,y-1,z],[x-1,y,z],[x+1,y,z],[x,y,z-1],[x,y,z+1]].some(([bx,by,bz])=>solid(blockAt(w,bx,by,bz))))return false;
   if(Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2))return false;
-  lp.bag[a.block]=(lp.bag[a.block]||0)-1;state.edits[voxelKey(x,y,z)]=a.block;
+  if(a.rotation!==undefined&&(!Number.isInteger(a.rotation)||a.rotation<0||a.rotation>3))return false;
+  lp.bag[a.block]=(lp.bag[a.block]||0)-1;state.edits[voxelKey(x,y,z)]=a.block;(state.rotations??={})[voxelKey(x,y,z)]=a.rotation??0;
  }
  lp.energy=Math.round((energyOf(lp)-cost)*100)/100;p.message=a.type==='voxel-break'?(existing==='steel'?'未知の鋼材ブロックを発見しました！':'ブロックから素材を獲得しました。'):'ブロックを設置しました。';p.voxelAt=now;state.revision++;w.revision++;
  // Mining under one's feet causes a fall to the next solid floor.

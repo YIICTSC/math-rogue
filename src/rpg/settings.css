@@ -2,6 +2,9 @@
   z-index: 220;
 }
 .rpg-life.rpg-settings {
+  color: #f5f2e8;
+  background: #183238;
+  color-scheme: dark;
   width: min(600px, calc(100vw - 16px));
   max-height: calc(100dvh - 16px);
   display: flex;
@@ -23,9 +26,16 @@
   gap: 8px;
 }
 .rpg-settings-content select {
+  color: #172f33;
+  background: #faf7ed;
+  border: 2px solid #9aaea6;
   min-height: 44px;
   max-width: 100%;
 }
+.rpg-settings-content option { color: #172f33; background: #faf7ed; }
+.rpg-settings header, .rpg-settings-content label { color: #f5f2e8; }
+.rpg-settings header button { color: #f5f2e8; background: #244b50; border: 1px solid #a4bab0; }
+.rpg-settings-content input[type="checkbox"] { accent-color: #e3c375; }
 .rpg-settings-content .rpg-settings-toggle {
   display: flex;
   align-items: center;

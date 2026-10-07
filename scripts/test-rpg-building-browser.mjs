@@ -10,7 +10,7 @@ try {
     "scripts/test-rpg-mobile-browser.mjs",
     "utf8",
   );
-  const fixture = source.match(/const fixture=`([\s\S]*?)`;\nlet server/)[1];
+  const fixture = source.match(/const fixture=`([\s\S]*?)`;\r?\nlet server/)[1];
   await fs.writeFile(file, fixture);
   server = await createServer({
     cacheDir: "node_modules/.vite-building-test",
@@ -80,7 +80,7 @@ try {
   await p.evaluate(()=>{const w=window.room.world,me=w.players.local;me.x=30;me.y=30;w.revision++;window.room.emit();});await p.locator('.rpg-till-quick').click();await p.waitForFunction(()=>window.room.world.farm.people.local.plots.some(v=>v.x===30&&v.y===29));await p.evaluate(()=>{const w=window.room.world,me=w.players.local;me.x=22;me.y=22;w.revision++;window.room.emit();});
   await p.getByRole('button',{name:'2D / 3D',exact:true}).click();
   await p.locator('.rpg-world-3d canvas').waitFor();
-  for(const [width,height] of [[390,844],[844,390],[1280,720]]){await p.setViewportSize({width,height});await p.waitForTimeout(200);const box=await p.locator('.rpg-voxel-room-panel').boundingBox();assert(box.x>=0&&box.x+box.width<=width+1);}
+  for(const [width,height] of [[390,844],[844,390],[1280,720]]){await p.setViewportSize({width,height});await p.waitForTimeout(200);const box=await p.locator('.rpg-voxel-room-panel').boundingBox();assert(box.x>=0&&box.x+box.width<=width+1,JSON.stringify({width,height,box}));}
   await p.setViewportSize({width:390,height:844});
   await p.evaluate(()=>{window.room.world.players.local.life.energy=0;window.room.world.revision++;window.room.emit();});
   await p.getByRole('button',{name:'⛏ 壊す'}).click();
@@ -90,4 +90,4 @@ try {
   for(let i=0;i<2;i++){await p.waitForTimeout(1200);const q=await p.locator('.basic-challenge-question h3').innerText(),ns=q.match(/(\d+)\s*[×x*]\s*(\d+)/),n=Number(ns[1])*Number(ns[2]);for(const b of await p.locator('.basic-challenge-options button').all())if(Number(await b.innerText())===n){await b.click();break;}}await p.locator('.main-challenge-screen').waitFor({state:'detached'});await p.evaluate(()=>{const w=window.room.world;w.players.local.life.energy=0;w.revision++;window.room.emit();});await p.getByRole('button',{name:'＋ 置く'}).click();await p.locator('.main-challenge-screen').waitFor();
   assert.deepEqual(errors,[]);
   console.log('PASS: room registration/shared mode/furniture placement, responsive room UI and 3D exhausted action opens real recovery question and restores energy, exhausted placement opens learning, crafted-hoe shortcut tills one cell ahead.');
-} catch(e){if(page){console.log(await page.evaluate(()=>({text:document.body.innerText,player:window.room?.world.players.local,plots:window.room?.world.farm?.people.local?.plots,sent:window.sent?.slice(-5)})));await page.screenshot({path:'/workspace/scratch/building-error.png'});}throw e;} finally {await browser?.close();await server?.close();await fs.rm(file,{force:true});}
+} catch(e){if(page){console.log(await page.evaluate(()=>({text:document.body.innerText,player:window.room?.world.players.local,plots:window.room?.world.farm?.people.local?.plots,sent:window.sent?.slice(-5)})));await page.screenshot({path:'tmp/voxel-building-error.png'});}throw e;} finally {await browser?.close();await server?.close();await fs.rm(file,{force:true});}

@@ -1,4 +1,5 @@
 import {currentVoxelRoom,roomContains,roomUsable} from '../voxelRooms';
+import {irrigatedPlot} from '../voxelWorkshop';
 import {roomWalkable,ROOM_WIDTH,ROOM_HEIGHT,furnishing,furnitureSize} from '../homeCatalog';
 import {migrateLand,plotPosition} from './land';
 import {energyOf} from '../energy';
@@ -754,7 +755,8 @@ export function advanceFarm(w: World) {
         if (
           plot.water === previous ||
           rain ||
-          f.upgrades.includes("irrigation")
+          f.upgrades.includes("irrigation") ||
+          (()=>{const pos=plotPosition(f,plot);return !!pos&&irrigatedPlot(w,pos.x,pos.y);})()
         ) {
           plot.growth++;
           plot.quality = Math.min(100, plot.quality + 5);

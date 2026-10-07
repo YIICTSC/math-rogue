@@ -1,4 +1,5 @@
 import {currentVoxelRoom} from './voxelRooms';
+import {ALL_MATERIAL_NAMES,TOOL_RANK,type ToolKind,type ToolTier} from './voxelCatalog';
 import {occupiedFarmTile} from './farm/model';
 import {occupiedCityTile} from './city/model';
 import {resident} from './social';
@@ -14,7 +15,7 @@ import { RECIPES as CRAFT_RECIPES } from '../mini-games/gakuro-craft/materials';
 import { gameCommand, tickGames, type GameCommand, type HomeGame, type HomeGameWorld } from '../mini-games/gakuro-craft/homeGames';
 import type { Home } from '../mini-games/gakuro-craft/progression';
 
-export const MATERIAL_NAMES = {door:'ドア',leaves:'木の葉',frostleaves:'雪積もる葉',fruit:'果実',bush:'茂み',cactus:'サボテン',dirt:'土',sand:'砂',snow:'雪',steel:'鋼材',wood:'木材',stone:'石材',ore:'鉄鉱石',crystal:'魔晶石',herb:'薬草',fish:'魚',frostwood:'霜木',reed:'葦',plank:'木の板',brick:'レンガ',housekit:'家の建築キット'} as const;
+export const MATERIAL_NAMES = ALL_MATERIAL_NAMES;
 export type Material = keyof typeof MATERIAL_NAMES;
 export type Bag = Partial<Record<Material,number>>;
 export const NATURE = [
@@ -40,7 +41,7 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
-export interface LifePlayer {hoe?:boolean;pickaxe?:'stone'|'iron'|'steel';fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface LifePlayer {tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
@@ -142,7 +143,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   if(r.kind==='meal'&&p.hp>=p.maxHp)return tell('HPは満タンです。');
   spend(lp.bag,r.cost);
   if(r.kind==='tool'&&r.id==='hoe'){lp.hoe=true;lp.crafted.push(r.id);}
-  if(r.kind==='tool'&&r.id.startsWith('pickaxe-')){const rank=['stone','iron','steel'] as const,tool=r.id.slice(8) as typeof rank[number];if(rank.indexOf(tool)>rank.indexOf(lp.pickaxe!))lp.pickaxe=tool;lp.crafted.push(r.id);}
+  if(r.kind==='tool'&&r.id.startsWith('pickaxe-')){const rank=TOOL_RANK,tool=r.id.slice(8) as ToolTier;if(rank.indexOf(tool)>rank.indexOf(lp.pickaxe!))lp.pickaxe=tool;lp.crafted.push(r.id);}
   if(r.kind==='material')lp.bag[r.id as Material]=(lp.bag[r.id as Material]||0)+1;
   if(r.kind==='weapon'){
    const frost=r.id==='frostbow';const card={...CARDS_LIBRARY[frost?'IRON_WAVE':'BASH'],id:`rpg-crafted-${p.id}-${r.id}`,name:r.name,damage:frost?10:14,...(frost?{block:8}:{}),description:frost?'10ダメージ。ブロック8を得る。':'14ダメージ。対象にびくびく2を与える。'};

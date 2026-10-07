@@ -19,7 +19,7 @@ export interface RpgPreferences {
 const KEY = "rpg-preferences-v1",
   defaults: RpgPreferences = {
     mapView:"2D",mapQuality:"auto",
-    control: "dpad",
+    control: "stick",
     speech: true,
     reducedMotion: false,
     contrast: false,
@@ -37,7 +37,7 @@ let current: RpgPreferences | undefined;
 const listeners = new Set<() => void>();
 export function rpgPreferences() {
   if (current) return current;
-  let raw: Partial<RpgPreferences> = {};
+  let raw: Partial<RpgPreferences> & { controlDefaultVersion?: number } = {};
   try {
     raw = JSON.parse(localStorage.getItem(KEY) || "{}") || {};
   } catch {}
@@ -60,18 +60,19 @@ export function rpgPreferences() {
     if (typeof raw[key] === "boolean") current[key] = raw[key]!;
   if (["2D","3D"].includes(raw.mapView!))current.mapView=raw.mapView!;
   if (["auto","high","low"].includes(raw.mapQuality!))current.mapQuality=raw.mapQuality!;
-  if (["dpad", "stick"].includes(raw.control!)) current.control = raw.control!;
+  if (raw.controlDefaultVersion === 2 && ["dpad", "stick"].includes(raw.control!)) current.control = raw.control!;
   if (["left", "right"].includes(raw.hand!)) current.hand = raw.hand!;
   if ([1, 1.25, 1.5].includes(raw.zoom!)) current.zoom = raw.zoom!;
   if ([120, 160, 240].includes(raw.repeat!)) current.repeat = raw.repeat!;
   if ([0.15, 0.22, 0.35].includes(raw.deadZone!))
     current.deadZone = raw.deadZone!;
+  try { localStorage.setItem(KEY, JSON.stringify({ ...current, controlDefaultVersion: 2 })); } catch {}
   return current;
 }
 export function updateRpgPreferences(patch: Partial<RpgPreferences>) {
   current = { ...rpgPreferences(), ...patch };
   try {
-    localStorage.setItem(KEY, JSON.stringify(current));
+    localStorage.setItem(KEY, JSON.stringify({ ...current, controlDefaultVersion: 2 }));
   } catch {}
   for (const notify of listeners) notify();
 }

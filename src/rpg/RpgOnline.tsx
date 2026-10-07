@@ -407,7 +407,7 @@ export default function RpgOnline({
       }
     };
     window.addEventListener("keydown", key);window.addEventListener("keyup",release);window.addEventListener("blur",stop);
-    const freeTimer=window.setInterval(()=>{if(!navigation.current.threeD||!latest.current.active){held.clear();return;}const dx=Number(held.has("d")||held.has("arrowright"))-Number(held.has("a")||held.has("arrowleft")),dy=Number(held.has("s")||held.has("arrowdown"))-Number(held.has("w")||held.has("arrowup"));const l=Math.hypot(dx,dy);if(l){const v=relativeMove(dx/l*.256,dy/l*.256,navigation.current.facing);room.current?.send({type:"voxel-move",...v});}},80);
+    const freeTimer=window.setInterval(()=>{if(!navigation.current.threeD||!latest.current.active||document.activeElement?.closest("[role=dialog]")){held.clear();return;}const dx=Number(held.has("d")||held.has("arrowright"))-Number(held.has("a")||held.has("arrowleft")),dy=Number(held.has("s")||held.has("arrowdown"))-Number(held.has("w")||held.has("arrowup"));const l=Math.hypot(dx,dy);if(l){const v=relativeMove(dx/l*.256,dy/l*.256,navigation.current.facing);room.current?.send({type:"voxel-move",...v});}},80);
     const timer = window.setInterval(() => {
       const w = latest.current.world,
         p = w?.players[room.current?.selfId || ""],

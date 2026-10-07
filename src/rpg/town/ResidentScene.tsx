@@ -125,6 +125,9 @@ export default function ResidentScene({
   const sendRef = useRef(send);
   sendRef.current = send;
   useEffect(() => {
+    // Reacquire immediately after StrictMode's cleanup/setup cycle or remount.
+    // Waiting for the heartbeat leaves the five-second admission check unregistered.
+    sendRef.current({ type: "town-encounter", target });
     const timer = setInterval(
       () => sendRef.current({ type: "town-encounter", target }),
       30000,

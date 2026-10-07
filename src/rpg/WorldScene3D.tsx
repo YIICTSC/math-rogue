@@ -1,3 +1,6 @@
+import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
+import {createConstructionGeometry,voxelMaterial} from './voxelRendering';
+import {fullCube} from './voxelCatalog';
 import {furnitureImage,furnitureSize,furnishing} from './homeCatalog';
 import {plotPosition} from './farm/land';
 import VoxelLookStick from './VoxelLookStick';
@@ -6,7 +9,6 @@ import type {LanguageMode} from '../types';
 import {energyOf} from './energy';
 import {BLOCKS,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
 import {MATERIAL_NAMES} from './life';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { StorybookModels, type Placement, type StorybookModel } from '../three/storybookModels';
 import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater } from '../three/storybookStyle';
 import {storyForSite} from './stories';
@@ -46,10 +48,10 @@ export interface SceneProps {
 }
 /** First-person presentation of the authoritative grid; never maintains a second simulation. */
 export default function WorldScene3D(props: SceneProps) {
-  const [slots,setSlots]=useState<Block[]>(()=>{try{const a=JSON.parse(localStorage.getItem('rpg-voxel-slots-v1')||'null');if(Array.isArray(a)&&a.length===4&&a.every(b=>BLOCKS.includes(b)))return a;}catch{}return ['wood','stone','dirt','plank'];}),[selectedSlot,setSelectedSlot]=useState(0),[editSlot,setEditSlot]=useState(false),[pitch,setPitch]=useState(-.18),[target,setTarget]=useState<{block:TerrainBlock;cost:number}|null>(null);
+  const [slots,setSlots]=useState<Block[]>(()=>{try{const a=JSON.parse(localStorage.getItem('rpg-voxel-slots-v1')||'null');if(Array.isArray(a)&&a.length===4&&a.every(b=>BLOCKS.includes(b)))return a;}catch{}return ['wood','stone','dirt','plank'];}),[selectedSlot,setSelectedSlot]=useState(0),[editSlot,setEditSlot]=useState(false),[rotation,setRotation]=useState(0),[pitch,setPitch]=useState(-.18),[target,setTarget]=useState<{block:TerrainBlock;cost:number}|null>(null);
   const selected=slots[selectedSlot],building=!!props.onVoxelAction&&props.presentation!=='conversation';
   useEffect(()=>{try{localStorage.setItem('rpg-voxel-slots-v1',JSON.stringify(slots));}catch{}},[slots]);
-  const buildRef=useRef({building,selected,pitch});buildRef.current={building,selected,pitch};
+  const buildRef=useRef({building,selected,pitch,rotation,panel:editSlot});buildRef.current={building,selected,pitch,rotation,panel:editSlot};
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(props),
     prefs = useRpgPreferences(),
@@ -99,14 +101,15 @@ export default function WorldScene3D(props: SceneProps) {
     sun.shadow.bias = -0.002;
     scene.add(sun, new THREE.HemisphereLight("#cdeaff", "#4d624d", 2));
     const voxelGeometry=new THREE.BoxGeometry(1,1,1);
-    new GLTFLoader().load(assetUrl("models/storybook/voxel-block.glb"),g=>{if(!disposed){g.scene.traverse(o=>{if(o instanceof THREE.Mesh){voxelGeometry.dispose();voxelGeometry.copy(o.geometry);}});}g.scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());}});},undefined,()=>{});
     const voxelGroup=new THREE.Group();scene.add(voxelGroup);
     const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top'];
-    const voxelMaterials=renderBlocks.map(b=>new THREE.MeshStandardMaterial({color:b==='fruit'?'#ffffff':VOXEL_COLORS[b],roughness:b==='crystal'||b==='oasis-water'?.25:.85,transparent:b==='oasis-water',opacity:b==='oasis-water'?.65:1,emissive:b==='crystal'?'#7955bd':b==='oasis-water'?'#149b8e':'#000000',emissiveIntensity:.3}));
+    const voxelMaterials=renderBlocks.map(voxelMaterial);
+    const construction=createConstructionGeometry(()=>{key="";});
     const lamp=new THREE.PointLight('#ffdfa5',0,12,1.5),oasisLight=new THREE.PointLight('#6cf1d7',0,14,1.5);scene.add(lamp,oasisLight);
-    voxelMaterials.forEach((material,i)=>{const c=document.createElement('canvas');c.width=c.height=16;const ctx=c.getContext('2d')!;ctx.fillStyle='#ffffff';ctx.fillRect(0,0,16,16);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const hash=(x*31+y*17+i*11)%19;ctx.fillStyle=`rgba(30,20,10,${hash*.009})`;ctx.fillRect(x,y,1,1);}ctx.fillStyle='#47332044';if(i===0||i===2||i===4){for(let x=3;x<16;x+=5)ctx.fillRect(x,0,1,16);}else if(i===3){ctx.fillRect(0,7,16,1);ctx.fillRect(0,15,16,1);ctx.fillRect(7,0,1,7);ctx.fillRect(3,8,1,7);}const block=renderBlocks[i];if(['leaves','frostleaves','bush','herb'].includes(block)){for(let k=0;k<20;k++){ctx.fillStyle=k%2?'#ffffff55':'#12341555';ctx.fillRect((k*7)%16,(k*11)%16,3,2);}}else if(block==='fruit'){ctx.fillStyle='#416b2c';ctx.fillRect(0,0,16,16);for(const [x,y] of [[3,4],[11,3],[7,11]]){ctx.fillStyle='#ef6040';ctx.fillRect(x-2,y-1,4,4);ctx.fillStyle='#ffbb7044';ctx.fillRect(x-1,y,1,2);ctx.fillStyle='#734c29';ctx.fillRect(x,y-2,1,1);}}else if(block==='door'||block==='door-top'){ctx.fillStyle='#66422288';ctx.strokeStyle='#54371c';ctx.lineWidth=1;ctx.strokeRect(2,2,12,12);ctx.fillRect(7,0,1,16);if(block==='door'){ctx.fillStyle='#ffde82';ctx.fillRect(12,3,2,2);}}else if(block==='reed'||block==='cactus'){ctx.fillStyle='#19482a77';for(let x=2;x<16;x+=4)ctx.fillRect(x,0,1,16);if(block==='cactus'){ctx.fillStyle='#e2e5b5';for(let k=0;k<9;k++)ctx.fillRect(k*7%16,k*5%16,1,2);}}const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.NearestFilter;material.map=texture;});
     const outlineMaterial=new THREE.MeshBasicMaterial({color:'#ffe292',wireframe:true,depthTest:false});
     const outline=new THREE.Mesh(voxelGeometry,outlineMaterial);outline.scale.setScalar(1.012);outline.visible=false;outline.renderOrder=10;scene.add(outline);
+    const ghostMaterial=new THREE.MeshBasicMaterial({color:'#89e0ac',transparent:true,opacity:.36,depthWrite:false});
+    const ghost=new THREE.Mesh(voxelGeometry,ghostMaterial);ghost.visible=false;ghost.renderOrder=9;scene.add(ghost);
     const terrain = new THREE.Group(),
       actors = new THREE.Group();
     scene.add(terrain, actors);
@@ -413,10 +416,10 @@ export default function WorldScene3D(props: SceneProps) {
       const get=(bx:number,by:number,bz:number)=>{const k=`${bx},${by},${bz}`;if(!cache.has(k))cache.set(k,blockAt(w,bx,by,bz));return cache.get(k)!;};
       for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=MAX_HEIGHT;vy++){
         const b=get(vx,vy,vz);if(!b)continue;
-        if(solid(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>solid(get(vx+dx,vy+dy,vz+dz))))continue;
+        if(fullCube(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>{const neighbor=get(vx+dx,vy+dy,vz+dz);return !!neighbor&&fullCube(neighbor);}))continue;
         blocks[renderBlocks.indexOf(b)].push({x:vx,y:vy,z:vz});
       }
-      blocks.forEach((positions,i)=>{if(!positions.length)return;const m=new THREE.InstancedMesh(voxelGeometry,voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>{matrix.makeTranslation(v.x+.5,v.y+.5,v.z+.5);if(renderBlocks[i]==='door'||renderBlocks[i]==='door-top'){const y=renderBlocks[i]==='door-top'?v.y-1:v.y;const alongX=solid(get(v.x-1,y,v.z))||solid(get(v.x+1,y,v.z));matrix.scale(new THREE.Vector3(alongX?1:.16,1,alongX?.16:1));}m.setMatrixAt(j,matrix);});m.userData.voxels=positions;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
+      blocks.forEach((positions,i)=>{if(!positions.length)return;const m=new THREE.InstancedMesh(construction.get(renderBlocks[i]),voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>{matrix.makeRotationY((w.voxels?.rotations?.[`${v.x},${v.y},${v.z}`]||0)*Math.PI/2);matrix.setPosition(v.x+.5,v.y+.5,v.z+.5);if(renderBlocks[i]==='door'||renderBlocks[i]==='door-top'){const y=renderBlocks[i]==='door-top'?v.y-1:v.y;const alongX=solid(get(v.x-1,y,v.z))||solid(get(v.x+1,y,v.z));matrix.scale(new THREE.Vector3(alongX?1:.16,1,alongX?.16:1));}m.setMatrixAt(j,matrix);});m.userData.voxels=positions;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
       groundMaterial?.dispose();
       const radius = options.current.mapQuality === "low" ? 12 : 19,
         cells: { x: number; y: number; tile: string }[] = [];
@@ -755,11 +758,12 @@ export default function WorldScene3D(props: SceneProps) {
       plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
       hit = new THREE.Vector3();
     function performBuild(kind:'voxel-break'|'voxel-place'='voxel-break') {
+      if(buildRef.current.panel)return;
       const current=latest.current.world.players[latest.current.selfId];
-      if(energyOf(current.life)<.1){latest.current.onEnergyRequest?.();return;}
+      if(energyOf(current.life)<(kind==='voxel-place'?.1:.02)){latest.current.onEnergyRequest?.();return;}
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
       const h=ray.intersectObjects(voxelGroup.children)[0];
-      if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!],b=blockAt(latest.current.world,v.x,v.y,v.z);if(kind==='voxel-break'&&b&&Number.isFinite(miningCost(b,current))&&energyOf(current.life)<miningCost(b,current)){latest.current.onEnergyRequest?.();return;}const n=h.face!.normal;latest.current.onVoxelAction?.({type:kind,x:v.x+(kind==='voxel-place'?Math.round(n.x):0),y:v.y+(kind==='voxel-place'?Math.round(n.y):0),z:v.z+(kind==='voxel-place'?Math.round(n.z):0),block:buildRef.current.selected});}
+      if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!],b=blockAt(latest.current.world,v.x,v.y,v.z);if(kind==='voxel-break'&&b&&Number.isFinite(miningCost(b,current))&&energyOf(current.life)<miningCost(b,current)){latest.current.onEnergyRequest?.();return;}const matrix=new THREE.Matrix4();(h.object as THREE.InstancedMesh).getMatrixAt(h.instanceId!,matrix);const n=h.face!.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(matrix));latest.current.onVoxelAction?.({type:kind,x:v.x+(kind==='voxel-place'?Math.round(n.x):0),y:v.y+(kind==='voxel-place'?Math.round(n.y):0),z:v.z+(kind==='voxel-place'?Math.round(n.z):0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
 
     }
     const command=(e:Event)=>performBuild((e as CustomEvent).detail);
@@ -958,9 +962,10 @@ export default function WorldScene3D(props: SceneProps) {
       camera.fov = 72 / options.current.zoom;
       camera.updateProjectionMatrix();
       models.update(Math.min(.1,(time-last)/1000||.016),options.current.reducedMotion);atmosphere.update(time/1000,camera.position,options.current.reducedMotion);animatedWater.update(options.current.reducedMotion?0:time/1000);
-      renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
-      outline.visible=false;
-      if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=ray.intersectObjects(voxelGroup.children)[0];let t:{block:TerrainBlock;cost:number}|null=null;if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!];outline.position.set(v.x+.5,v.y+.5,v.z+.5);outline.visible=true;const b=blockAt(w,v.x,v.y,v.z);if(b)t={block:b,cost:miningCost(b,w.players[latest.current.selfId])};}const k=t?t.block+':'+t.cost:'';if(k!==lastTarget){lastTarget=k;setTarget(t);}}
+      renderer.domElement.dataset.workshopModels=String(construction.readyShapes);renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
+      outline.visible=false;ghost.visible=false;
+      if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=ray.intersectObjects(voxelGroup.children)[0];let t:{block:TerrainBlock;cost:number}|null=null;if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!];outline.position.set(v.x+.5,v.y+.5,v.z+.5);outline.visible=true;const b=blockAt(w,v.x,v.y,v.z);if(b)t={block:b,cost:miningCost(b,w.players[latest.current.selfId])};
+        if(!buildRef.current.panel){const im=new THREE.Matrix4();(h.object as THREE.InstancedMesh).getMatrixAt(h.instanceId!,im);const n=h.face!.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(im));const x=v.x+Math.round(n.x),y=v.y+Math.round(n.y),z=v.z+Math.round(n.z),chosen=buildRef.current.selected;ghost.geometry=construction.get(chosen);ghost.position.set(x+.5,y+.5,z+.5);ghost.rotation.y=buildRef.current.rotation*Math.PI/2;ghost.visible=true;const valid=!blockAt(w,x,y,z)&&!protectedVoxel(w,x,z)&&y>MIN_DEPTH&&y<=MAX_HEIGHT&&(w.players[latest.current.selfId].life?.bag[chosen]||0)>0&&!Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2);ghostMaterial.color.set(valid?'#89e0ac':'#ed9079');}}const k=t?t.block+':'+t.cost:'';if(k!==lastTarget){lastTarget=k;setTarget(t);}}
       last = time;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(draw);
@@ -973,7 +978,7 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       renderer.domElement.removeEventListener("pointerdown", start);
       renderer.domElement.removeEventListener("pointerup", end);
-      element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();
+      element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
       models.dispose();atmosphere.dispose();
       batches.forEach((b) => b.dispose());
       groundMaterial?.dispose();
@@ -990,9 +995,9 @@ export default function WorldScene3D(props: SceneProps) {
   return <div className="rpg-world-3d" ref={host}>{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
     <VoxelLookStick languageMode={props.languageMode||'JAPANESE'} onLook={(dx,dy)=>{props.onFacing(props.facing+dx);setPitch(p=>Math.max(-1.35,Math.min(1.2,p-dy)));}}/>
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
-    {editSlot&&<select aria-label={text('選択スロットの素材')} value={selected} onChange={e=>setSlots(a=>a.map((b,i)=>i===selectedSlot?e.target.value as Block:b))}>{BLOCKS.map(b=><option key={b} value={b}>{text(MATERIAL_NAMES[b])}</option>)}</select>}
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
+    <div className="rpg-workshop-actions"><button onClick={()=>setEditSlot(true)}>{text("建築工房")}</button><button aria-label={text("建材を回転")} onClick={()=>setRotation(r=>(r+1)%4)}>↻ {rotation*90}°</button></div>
     <div className="rpg-voxel-actions"><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} onClick={()=>command('voxel-break')}>⛏ {text('壊す')}</button><button disabled={energyOf(me?.life)>=.1&&(me?.life?.bag[selected]||0)<1} onClick={()=>command('voxel-place')}>＋ {text('置く')}</button></div>
     <small className="rpg-voxel-target">{target?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':target.block==='door-top'?'ドア':MATERIAL_NAMES[target.block]):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
-  </div>}{building&&<span className="rpg-voxel-crosshair">＋</span>}</div>;
+  </div>}{building&&editSlot&&<VoxelWorkshopPanel world={props.world} selfId={props.selfId} languageMode={props.languageMode||"JAPANESE"} send={a=>props.onVoxelAction?.(a)} onChoose={block=>setSlots(slots=>slots.map((b,i)=>i===selectedSlot?block:b))} onClose={()=>setEditSlot(false)}/>}{building&&<span className="rpg-voxel-crosshair">＋</span>}</div>;
 }

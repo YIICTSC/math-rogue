@@ -21,6 +21,15 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  '建築工房':'Builder workshop', '建材を回転':'Rotate material',
+  '必要な作業設備の近くへ移動してください。':'Move closer to the required workstation.',
+  '同じ強さ以上の道具を持っています。':'You already have an equal or stronger tool.',
+  '燃料が足りません。石炭・木炭・木材を用意してください。':'You need coal, charcoal or wood for fuel.',
+  '素材を加工しました。':'Materials processed.', 'チェストがいっぱいです。':'The chest is full.',
+  '共有チェストを更新しました。':'Shared chest updated.',
+  '有機肥料を農園の堆肥に補充しました。':'Organic fertilizer added to farm compost.',
+  '収穫物から種を採りました。':'Seeds recovered from harvested crops.',
+  'チェストの中身を取り出してから壊してください。':'Empty the chest before breaking it.',
   "オンライン": "Online",
   "異世界の冒険と暮らし": "Adventure and life in another world",
   "オンラインレース": "Online racing",
@@ -334,6 +343,15 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  '建築工房':'けんちくこうぼう', '建材を回転':'けんざいをかいてん',
+  '必要な作業設備の近くへ移動してください。':'ひつようなさぎょうせつびのちかくへいどうしてください。',
+  '同じ強さ以上の道具を持っています。':'おなじつよさいじょうのどうぐをもっています。',
+  '燃料が足りません。石炭・木炭・木材を用意してください。':'ねんりょうがたりません。せきたん・もくたん・もくざいをよういしてください。',
+  '素材を加工しました。':'そざいをかこうしました。', 'チェストがいっぱいです。':'チェストがいっぱいです。',
+  '共有チェストを更新しました。':'きょうゆうチェストをこうしんしました。',
+  '有機肥料を農園の堆肥に補充しました。':'ゆうきひりょうをのうえんのたいひにほじゅうしました。',
+  '収穫物から種を採りました。':'しゅうかくぶつからたねをとりました。',
+  'チェストの中身を取り出してから壊してください。':'チェストのなかみをとりだしてからこわしてください。',
   "オンライン": "おんらいん",
   "異世界の冒険と暮らし": "いせかいのぼうけんとくらし",
   "オンラインレース": "おんらいんれーす",
