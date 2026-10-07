@@ -2180,6 +2180,9 @@ class AudioService {
       const name = `enemy-voice-${profile.voiceSet ?? 'standard'}-${profile.theme}-${profile.id}-${safeAction}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
+      const effectiveMaxDurationMs = profile.voiceSet === 'vacation'
+          ? Math.max(maxDurationMs, 7500)
+          : maxDurationMs;
       return this.playVoiceFile(
           name,
           [
@@ -2190,7 +2193,7 @@ class AudioService {
               `${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.ogg`,
               `${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.wav`,
           ],
-          maxDurationMs,
+          effectiveMaxDurationMs,
           false,
           generation,
       );
