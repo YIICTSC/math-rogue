@@ -103,7 +103,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
         <GolfCanvas view={view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} spin={club === 'putter' ? 0 : spin} avatar={spectating ? me?.avatar || avatar : avatar} />
         {!view && <div className="gg-welcome gg-panel">
           <div className="gg-title-copy"><p className="gg-eyebrow">THE LEARNING LINKS / 18 HOLES</p><h1>GAKURO<br /><em>GOLF</em></h1><p>{t('学んで、狙って、カップイン。')}</p><p className="gg-muted">{t('18ホール・最大40人のオンラインゴルフ')}</p><button onClick={() => setRules(!rules)} aria-expanded={rules}>{t('遊び方')}</button></div>
-          <div className="gg-title-actions"><button onClick={()=>setEntry('title')} disabled={busy}>{t('タイトルへ')}</button>{entry!=='practice'&&<TransportPicker value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
+          <div className="gg-title-actions"><button onClick={()=>setEntry('title')} disabled={busy}>{t('タイトルへ')}</button>{entry!=='practice'&&<TransportPicker game="golf" value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
             <label>{t('参加名')}<input value={name} maxLength={16} onChange={e => setName(e.target.value)} disabled={busy} /></label>
             {entry!=='join'&&<label>{t('プレイするホール数')}<select value={holeCount} disabled={busy} onChange={e => setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {HOLES.slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label>}
             <button disabled={busy} onClick={() => setShowCreator(true)}>{t('キャラクタークリエイト')}</button>
