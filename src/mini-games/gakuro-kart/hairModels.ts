@@ -1,33 +1,52 @@
-import {characterGeometry} from '../../three/storybookCharacters';
+import { characterGeometry } from '../../three/storybookCharacters';
 import * as T from 'three';
 import type { AvatarPart } from './avatarModels';
 
-/** Sculpted silhouettes, shared between instances; helmets hide hair. */
+/** Curved Blender locks replace box fringes; all twelve saved style IDs remain stable. */
 export function createHairParts(): AvatarPart[] {
-  const parts: AvatarPart[] = [], ball = characterGeometry('haircap',new T.SphereGeometry(1, 12, 8)), cone = new T.ConeGeometry(1, 1, 6), box = characterGeometry('hairlock',new T.BoxGeometry(1, 1, 1));
-  const paint = new T.MeshStandardMaterial({ color: '#ffffff', roughness: .8 });
-  const add = (geometry: T.BufferGeometry, position: number[], scale: number[], styles: number[], rotation = [0, 0, 0]) => parts.push({ geometry, material: paint, position, scale, rotation, color: 'hair', visible: a => a.species === 0 && a.accessory !== 2 && styles.includes(a.hairStyle) });
-  add(ball, [0, 2.14, -.22], [.55, .34, .47], [0, 1, 2, 3, 4, 5, 9, 10]);
-  add(box, [-.22, 2.12, .26], [.36, .25, .12], [0, 3, 4, 5, 10], [0, 0, -.22]);
-  add(box, [0, 2.15, .29], [.92, .16, .1], [1, 2]);
+  const parts: AvatarPart[] = [];
+  const cap = characterGeometry('haircap', new T.SphereGeometry(1, 20, 12));
+  const fallback = new T.SphereGeometry(.5, 16, 12);
+  const lock = characterGeometry('hairstrand', fallback);
+  fallback.dispose();
+  const paint = new T.MeshStandardMaterial({ color: '#ffffff', roughness: .52 });
+  const add = (geometry: T.BufferGeometry, position: number[], scale: number[], styles: number[], rotation = [0, 0, 0]) => parts.push({
+    geometry, material: paint, position, scale, rotation, color: 'hair', motion: 'head',
+    visible: a => a.species === 0 && a.accessory !== 2 && styles.includes(a.hairStyle),
+  });
+  const natural = [0, 1, 2, 3, 4, 5, 9, 10];
+  add(cap, [0, 2.19, -.24], [.515, .285, .47], natural);
+  add(cap, [0, 2.28, .025], [.46, .185, .30], natural);
+  for (let i = 0; i < 5; i++) {
+    const x = -.34 + i * .16;
+    add(lock, [x, 2.205 + Math.abs(x) * .06, .235], [.20, .39 - i * .018, .14], [0, 3, 4, 5, 10], [0, 0, -.35 + i * .07]);
+    add(lock, [x, 2.205, .24], [.19, .32 + (i % 2) * .035, .13], [1, 2], [0, 0, x * .12]);
+    add(lock, [x, 2.22 + x * .12, .23], [.24, .34, .14], [9], [0, 0, -.55]);
+  }
   for (const side of [-1, 1]) {
-    add(ball, [side * .44, 1.96, -.17], [.16, .43, .36], [1]);
-    add(ball, [side * .46, 1.66, -.35], [.16, .67, .32], [2]);
-    add(ball, [side * .64, 1.85, -.32], [.21, .6, .24], [4], [0, 0, side * .25]);
+    add(lock, [side * .44, 2.045, -.035], [.15, .40, .22], natural, [0, 0, side * -.12]);
+    for (let i = 0; i < 3; i++) {
+      add(lock, [side * (.43 - i * .035), 1.93, -.18 - i * .15], [.20, .63, .29], [1], [.1, 0, side * .09]);
+      add(lock, [side * (.44 - i * .035), 1.69, -.22 - i * .12], [.20, 1.09, .24], [2], [.1, 0, side * -.07]);
+    }
+    for (let i = 0; i < 3; i++) add(lock, [side * (.59 + i * .05), 1.88 - i * .055, -.28 - i * .09], [.22, .90, .25], [4], [.1, 0, side * .22]);
+    add(cap, [side * .55, 2.23, -.31], [.12, .12, .12], [4]);
   }
-  add(ball, [0, 1.77, -.63], [.47, .62, .15], [2]);
-  add(ball, [0, 1.88, -.79], [.22, .57, .22], [3], [-.3, 0, 0]);
-  add(ball, [0, 2.56, -.25], [.33, .32, .33], [5]);
-  add(ball, [0, 2.23, -.2], [.72, .67, .62], [6]);
-  // Separate curls and spikes prevent the styles from looking like scaled caps.
+  add(cap, [0, 1.86, -.54], [.44, .47, .17], [1]);
+  add(cap, [0, 1.65, -.57], [.43, .69, .17], [2]);
+  for (let i = 0; i < 3; i++) add(lock, [(i - 1) * .14, 1.89, -.72], [.25, 1.08, .26], [3], [-.3, 0, (i - 1) * .12]);
+  add(cap, [0, 2.49, -.33], [.26, .24, .26], [5]);
+  add(cap, [0, 2.2, -.23], [.56, .44, .49], [6]);
+  for (let i = 0; i < 10; i++) {
+    const a = i / 10 * Math.PI * 2;
+    add(cap, [Math.sin(a) * .45, 2.31 + (i % 2) * .08, -.24 + Math.cos(a) * .38], [.19, .20, .18], [6]);
+  }
+  add(cap, [0, 2.13, -.24], [.48, .27, .43], [8]);
   for (let i = 0; i < 7; i++) {
-    const angle = i / 7 * Math.PI * 2;
-    add(ball, [Math.sin(angle) * .48, 2.48, -.2 + Math.cos(angle) * .39], [.24, .24, .24], [6]);
-    add(cone, [Math.sin(angle) * .35, 2.48, -.2 + Math.cos(angle) * .3], [.27, .52, .27], [8], [Math.cos(angle) * .25, 0, -Math.sin(angle) * .25]);
+    const a = i / 7 * Math.PI * 2;
+    add(lock, [Math.sin(a) * .32, 2.43, -.24 + Math.cos(a) * .28], [.25, .54, .24], [8], [Math.cos(a) * .40, a, -Math.sin(a) * .40]);
   }
-  for (let i = 0; i < 4; i++) add(cone, [0, 2.47, .17 - i * .23], [.16, .6, .23], [7]);
-  add(ball, [-.23, 2.21, -.01], [.38, .3, .43], [9], [0, 0, -.25]);
-  add(box, [.17, 2.12, .28], [.45, .18, .12], [9], [0, 0, .32]);
-  for (let i = 0; i < 5; i++) add(ball, [Math.sin(i * Math.PI) * .07, 2.02 - i * .17, -.66], [.15, .17, .15], [10]);
+  for (let i = 0; i < 4; i++) add(lock, [0, 2.42, .12 - i * .20], [.17, .60, .28], [7], [-.15, 0, 0]);
+  for (let i = 0; i < 6; i++) add(cap, [Math.sin(i * Math.PI / 2) * .065, 2.02 - i * .14, -.68], [.12, .14, .12], [10]);
   return parts;
 }

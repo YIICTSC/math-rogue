@@ -1,8 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "style": "storybook-fantasy",
   "models": [
     "head",
+    "humanhead",
+    "hairstrand",
     "sleeve",
     "mitten",
     "haircap",

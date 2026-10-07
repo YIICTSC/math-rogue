@@ -2,7 +2,7 @@ import {characterGeometry} from '../../three/storybookCharacters';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import * as T from 'three';
 import { createAvatarParts } from '../gakuro-kart/avatarModels';
-import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from '../gakuro-kart/avatar';
+import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, EYE_COLORS, type KartAvatar } from '../gakuro-kart/avatar';
 
 /** Shared GP face/hair/species assets, with a standing golf rig and articulated club. */
 export function createGolferAssets() {
@@ -16,7 +16,7 @@ export function createGolferAssets() {
   const sharedMaterials = new Set<T.Material>([...materials, ...parts.map(p => p.material)]);
   function create(avatar: KartAvatar) {
     const root = new T.Group(), torso = new T.Group(), arms = new T.Group();root.name="StorybookGolfer";
-    const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' }[] = [];
+    const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' | 'eyeColor' }[] = [];
     const skin = new T.MeshStandardMaterial({ roughness: .65 }), shirt = new T.MeshStandardMaterial({ roughness: .7 });
     owned.push(skin, shirt);
     const add = (parent: T.Group, geometry: T.BufferGeometry, material: T.Material, pos: number[], scale: number[]) => {
@@ -53,7 +53,7 @@ export function createGolferAssets() {
     function update(value: KartAvatar) {
       appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
       skin.color.set(BODY_COLORS[value.body]); shirt.color.set(AVATAR_COLORS[value.outfit]);
-      const palette = { body: BODY_COLORS[value.body], outfit: AVATAR_COLORS[value.outfit], hair: HAIR_COLORS[value.hair] };
+      const palette = { body: BODY_COLORS[value.body], outfit: AVATAR_COLORS[value.outfit], hair: HAIR_COLORS[value.hair], eyeColor: EYE_COLORS[value.eyeColor ?? 0] };
       for (const { mesh, key } of colored) (mesh.material as T.MeshStandardMaterial).color.set(palette[key]);
       torso.children.forEach(m => { if (m.userData.visibleFor) m.visible = m.userData.visibleFor(effective); });
     }

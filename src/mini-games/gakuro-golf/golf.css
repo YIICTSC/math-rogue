@@ -13,9 +13,11 @@
 .gg-lesson-picker>header button:hover{background:#334155}.gg-lesson-picker>header button:focus-visible{outline:3px solid #facc15}
 .gg-lesson-picker>header button:disabled{opacity:.5}.gg-preparing{background:#020617dd;color:#fff}
 .gg-character-overlay{position:fixed;inset:0;z-index:30;background:#102a26c9;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));backdrop-filter:blur(5px)}
-.gg-character-dialog{width:min(640px,100%);max-height:100%;overflow:auto;overscroll-behavior:contain}
+.gg-character-dialog{width:min(640px,100%);height:min(800px,100%);max-height:100%;display:grid;grid-template-rows:auto minmax(120px,200px) minmax(0,1fr);overflow:hidden;overscroll-behavior:contain}
 .gg-character-dialog>header{display:flex;justify-content:space-between;align-items:center;gap:12px}.gg-character-dialog>header b{font-size:12px;letter-spacing:2px}
-.gg-character-preview{height:240px;position:relative;overflow:hidden;border-radius:12px;margin:14px 0;background:#a8d4cf}
+.gg-character-preview{height:100%;min-height:0;position:relative;overflow:hidden;border-radius:12px;margin:0;background:#a8d4cf}
+.gg-character-dialog .gk-avatar-editor{min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:0 6px 20px 0;scrollbar-gutter:stable}
+.gg-character-dialog .gk-avatar-editor button{background:#fffdf1;color:#173e34;border-color:#274c3840}.gg-character-dialog .gk-avatar-editor button[aria-pressed=true]{background:#d7e4bd;color:#173e34;border-color:#3c7451;box-shadow:inset 0 0 0 1px #3c7451}.gg-character-dialog .gk-avatar-editor legend{color:#173e34}
 .gg-character-dialog .gk-avatar-heading{display:none}.gg-character-dialog .gk-avatar-editor>p,.gg-character-dialog .gk-avatar-editor>small{font-size:12px;color:#557367}
 .gg-character-dialog fieldset{border:0;padding:0;margin:16px 0;min-width:0}.gg-character-dialog legend{font-size:13px;font-weight:700;margin-bottom:8px}
 .gg-character-dialog .gk-avatar-species{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.gg-character-dialog .gk-avatar-species button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px}.gg-character-dialog .gk-avatar-species button span{font-size:25px}.gg-character-dialog .gk-avatar-species button b{font-size:12px}
@@ -117,3 +119,5 @@
 @media(orientation:landscape) and (max-height:550px){.gg-contact-ball{width:32px!important;height:32px;min-height:32px!important}.gg-contact label{font-size:9px}.gg-meter-actions button{min-height:26px!important}.gg-meter-heading{font-size:9px}.gg-meter-track{height:16px}.gg-meter-cursor,.gg-meter-lock{height:20px}.gg-timing{grid-column:3 / 5}}
 .gg-meter-cursor:after{content:'';position:absolute;top:24px;left:-3px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #fff}
 @media(orientation:landscape) and (max-height:550px){.gg-meter-cursor:after{top:20px}}
+
+@media(orientation:landscape) and (max-height:650px){.gg-character-dialog{grid-template-rows:auto minmax(0,1fr)}.gg-character-dialog .gg-character-preview{min-height:0}.gg-character-dialog .gk-avatar-editor{margin:0}}

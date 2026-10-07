@@ -1,5 +1,11 @@
 /** Curated shared English copy for mini-game catalogs without structured card translation. */
 export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  '顔の輪郭': 'Face shape', '顔つき': 'Complexion', '目の形': 'Eye shape', '瞳の色': 'Eye color',
+  'やわらか卵型': 'Soft oval', '丸顔': 'Round', 'シャープ': 'Tapered', 'ハート型': 'Heart', 'スクエア': 'Square',
+  'ナチュラル': 'Natural', 'ほっぺピンク': 'Rosy cheeks', 'そばかす': 'Freckles', '泣きぼくろ': 'Beauty mark',
+  'ぱっちり': 'Bright', 'アーモンド': 'Almond', '切れ長': 'Slender', 'たれ目': 'Downturned', 'つり目': 'Upturned', 'まんまる': 'Round eyes',
+  '丸メガネ': 'Round glasses', 'スクエアメガネ': 'Square glasses', 'サングラス': 'Sunglasses', 'リボン': 'Ribbon', '花かざり': 'Flower',
+  'ヘッドホン': 'Headphones', '猫耳カチューシャ': 'Cat ear headband', 'ベレー帽': 'Beret', '星のイヤリング': 'Star earrings', 'スポーツバイザー': 'Sports visor',
   'スーパー学ロカート': 'Super Gakuro Kart',
   '学習カートレース': 'Learning Kart Racing',
   'コースを準備しています…': 'Preparing the course…',

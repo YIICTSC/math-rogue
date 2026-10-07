@@ -9,7 +9,7 @@ def finish(o,name):
  for p in o.data.polygons:p.use_smooth=True
  models.append(o)
 def ball(name,deform=None):
- bpy.ops.mesh.primitive_uv_sphere_add(segments=20,ring_count=12,radius=1);o=bpy.context.object
+ bpy.ops.mesh.primitive_uv_sphere_add(segments=32 if name=='humanhead' else 20,ring_count=20 if name=='humanhead' else 12,radius=1);o=bpy.context.object
  if deform:
   for v in o.data.vertices:deform(v.co)
  finish(o,name)
@@ -26,6 +26,19 @@ def head(v):
  if v.y<-.35:v.y=-.35+(v.y+.35)*.8
  if t<-.5:v.z=-.5+(t+.5)*.82
 ball('head',head)
+# Blender Z is height; -Y becomes the forward +Z face in glTF.
+def human_head(v):
+ height=v.z
+ v.x*=.88+.12*max(0,min(1,(height+.9)/.75))
+ if v.y<-.35:v.y=-.35+(v.y+.35)*.66
+ if height<-.45:v.z=-.45+(height+.45)*.84
+ball('humanhead',human_head)
+def strand(v):
+ height=v.z
+ v.x*=.28*(.2+.8*max(0,1-((height-.15)/1.25)**2))
+ v.y*=.18*(.35+.65*max(0,1-height*height))
+ v.x+=.16*(1-height*height)
+ball('hairstrand',strand)
 ball('sleeve',lambda v:setattr(v,'z',v.z*(.94 if v.z<0 else 1)))
 ball('mitten',lambda v:setattr(v,'y',v.y*.85))
 ball('haircap',lambda v:setattr(v,'z',v.z*(.82 if v.z<0 else 1)))
@@ -41,9 +54,9 @@ m=o.modifiers.new('Soft ear tips','BEVEL');m.width=.06;m.segments=2;bpy.ops.obje
 roundbox('collar',width=1,height=1,depth=.3,bevel=.08)
 # Named origin-centred components are recolored and articulated by the existing game rigs.
 out=ROOT/'public/models/storybook';out.mkdir(parents=True,exist_ok=True)
-bpy.ops.export_scene.gltf(filepath=str(out/'characters-v1.glb'),export_format='GLB',export_yup=True,export_animations=False)
+bpy.ops.export_scene.gltf(filepath=str(out/'characters-v2.glb'),export_format='GLB',export_yup=True,export_animations=False)
 for i,o in enumerate(models):o.location=((i%4)*3,(i//4)*3,0)
 source=ROOT/'assets/storybook';source.mkdir(parents=True,exist_ok=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(source/'characters.blend'))
-(out/'characters-catalog.json').write_text(json.dumps({'version':1,'style':'storybook-fantasy','models':[o.name for o in models],'creator':'Original Blender character components for Learning Rogue'},indent=2)+'\n')
+(out/'characters-catalog.json').write_text(json.dumps({'version':2,'style':'storybook-fantasy','models':[o.name for o in models],'creator':'Original Blender character components for Learning Rogue'},indent=2)+'\n')
 print('STORYBOOK_CHARACTER_COMPONENTS_READY',len(models))

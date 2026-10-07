@@ -1,10 +1,12 @@
 import {characterGeometry} from '../../three/storybookCharacters';
 import { createExpressionParts } from './expressionModels';
+import { createHumanFaceParts } from './humanFaceModels';
+import { createHumanAccessories } from './humanAccessories';
 import { createHairParts } from './hairModels';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { KartAvatar } from './avatar';
-export type AvatarColor = 'body' | 'outfit' | 'hair';
+export type AvatarColor = 'body' | 'outfit' | 'hair' | 'eyeColor';
 export interface AvatarPart { geometry: T.BufferGeometry; material: T.Material; position: number[]; scale: number[]; rotation: number[]; color?: AvatarColor; visible?: (a: KartAvatar) => boolean; motion?: 'head'|'eye'|'steer' }
 /** Original reusable 3D driver assets. Geometry is shared by all 40 racers. */
 export function createAvatarParts(): AvatarPart[] {
@@ -21,9 +23,23 @@ export function createAvatarParts(): AvatarPart[] {
     add(sleeve, paint, [side * .46, 1.16, .18], [.19, .24, .38], 'outfit');
     add(mitten, paint, [side * .42, 1.13, .48], [.15, .13, .16], 'body');
   }
-  add(head, paint, [0, 1.87, -.13], [.54, .57, .56], 'body',a=>a.species!==7);
-  parts.push(...createHairParts(), ...createExpressionParts());
-  for (const side of [-1, 1]) add(ear, paint, [side * .52, 1.86, -.1], [.13, .19, .1], 'body', species(0));
+  add(head, paint, [0, 1.87, -.13], [.54, .57, .56], 'body',a=>a.species!==7&&a.species!==0);
+  for(let shape=0;shape<5;shape++) {
+    const geometry=characterGeometry('humanhead',ball,g=>{
+      const p=g.getAttribute('position');
+      for(let i=0;i<p.count;i++){
+        const y=p.getY(i),lower=Math.max(0,Math.min(1,-y));
+        const factor=shape===1?1+.19*lower:shape===2?1-.23*lower:shape===3?1-.34*lower:shape===4?1+.30*lower:1;
+        p.setX(i,p.getX(i)*factor);
+      }
+      p.needsUpdate=true;g.computeVertexNormals();g.computeBoundingBox();g.computeBoundingSphere();
+    });
+    add(geometry,paint,[0,1.87,-.13],[.49,.57,.51],'body',a=>a.species===0&&(a.faceShape??0)===shape);
+  }
+  const animalExpressions=createExpressionParts();
+  for(const part of animalExpressions){const visible=part.visible;part.visible=a=>a.species!==0&&(!visible||visible(a));}
+  parts.push(...createHairParts(), ...animalExpressions, ...createHumanFaceParts(), ...createHumanAccessories());
+  for (const side of [-1, 1]) add(ear, paint, [side * .52, 1.86, -.1], [.095, .145, .09], 'body', species(0));
   // Cats and foxes: upright triangular ears, contrasting muzzle and tail.
   for (const n of [1, 4]) {
     for (const side of [-1, 1]) {
@@ -76,8 +92,8 @@ export function createAvatarParts(): AvatarPart[] {
   add(new T.CylinderGeometry(.43, .43, .17, 12), gold, [0, 2.48, -.14], [1, 1, 1], undefined, accessory(3));
   for (const side of [-1, 0, 1]) add(cone, gold, [side * .28, 2.65, -.04], [.2, .3, .2], undefined, accessory(3));
   // Headwear, animal silhouettes and facial expressions move together around the neck.
-  parts.forEach((part,i)=>{if(i>=5)part.motion=part.position[1]>=1.9&&part.position[2]>=.4&&part.geometry.type==='SphereGeometry'?'eye':'head';else if(i>0)part.motion='steer';});
-  add(ball,paint,[0,1.84,.45],[.065,.075,.08],'body',species(0));parts.at(-1)!.motion='head';
+  parts.forEach((part,i)=>{if(i>=5){if(!part.motion)part.motion=part.position[1]>=1.9&&part.position[2]>=.4&&part.geometry.type==='SphereGeometry'?'eye':'head';}else if(i>0)part.motion='steer';});
+  add(ball,paint,[0,1.84,.385],[.034,.047,.047],'body',species(0));parts.at(-1)!.motion='head';
   for(const side of [-1,1])add(collar,white,[side*.18,1.52,.08],[.28,.17,.1],undefined,undefined,[0,0,side*.3]);
   add(ball,gold,[0,1.38,.045],[.07,.075,.035]);
   for(const side of [-1,1])add(box,white,[side*.37,1.04,.17],[.17,.07,.12]);

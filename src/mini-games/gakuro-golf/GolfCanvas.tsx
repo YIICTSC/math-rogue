@@ -159,7 +159,12 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         const ball = me ? markers.get(me.id)?.ball.position || new THREE.Vector3(me.x, me.y, me.z) : new THREE.Vector3(0, 0, 0);
         // Keep the flight camera behind the shot even when the ball passes the cup.
         const base = me?.phase === 'moving' ? markers.get(me.id)?.direction ?? direction : me?.phase === 'aim' ? direction : Math.atan2(hole.cup.x - ball.x, hole.cup.z - ball.z);
-        if (portrait) { cameraGoal.set(1, 3.8, 8); target.set(-2, 2.6, 0); }
+        if (portrait) {
+          // Fit the standing golfer even in the editor's narrow preview column.
+          const distance = Math.max(7, 1.7 / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect));
+          target.set(-2.05, 2.3, 0);
+          cameraGoal.set(-2.05 + distance * .12, 2.3 + distance * .08, distance);
+        }
         else if (full) { cameraGoal.set(65, hole.cup.z * .65 + 45, hole.cup.z * .28); target.set(0, 0, hole.cup.z / 2); }
         else if (!me || current?.phase === 'lobby') { cameraGoal.set(12, 13, -18); target.set(-1, 2, 7); }
         else if (me.phase === 'holed' && !me.capped && now - (markers.get(me.id)?.cheerStart ?? -Infinity) < 6000) {

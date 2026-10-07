@@ -2,7 +2,7 @@ import { StorybookModels, type Placement } from '../../three/storybookModels';
 import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater, qualityProfile, type Quality } from '../../three/storybookStyle';
 import { createKartParts } from './kartModels';
 import { cameraRoadFloor, chaseCameraPose } from './camera';
-import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from './avatar';
+import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, EYE_COLORS, type KartAvatar } from './avatar';
 import { createAvatarParts, type AvatarColor, type AvatarPart } from './avatarModels';
 import { LANE_COLORS, QUIZ_GATES, QUIZ_END, laneCenter, quizDistance } from './learning';
 import * as T from 'three';
@@ -290,7 +290,7 @@ export class KartScene {
         if(part.motion==='head'||part.motion==='eye'){this.headTurn.makeTranslation(0,1.87,-.13).multiply(this.headRotation.makeRotationY(p.steer*.13+(reducedMotion?0:Math.sin(now/2000+index)*.018))).multiply(this.neckInverse);this.dummy.matrix.premultiply(this.headTurn);}
         this.matrix.multiplyMatrices(this.car.matrix, this.dummy.matrix); part.mesh.setMatrixAt(partIndex, this.matrix);
         if (part.colored) part.mesh.setColorAt(partIndex, new T.Color(AVATAR_COLORS[p.avatar.outfit]));
-        if (part.avatarColor) { const colors = part.avatarColor === 'body' ? BODY_COLORS : part.avatarColor === 'hair' ? HAIR_COLORS : AVATAR_COLORS; part.mesh.setColorAt(partIndex, new T.Color(colors[p.avatar[part.avatarColor]])); }
+        if (part.avatarColor) { const colors = part.avatarColor === 'body' ? BODY_COLORS : part.avatarColor === 'hair' ? HAIR_COLORS : part.avatarColor === 'eyeColor' ? EYE_COLORS : AVATAR_COLORS; part.mesh.setColorAt(partIndex, new T.Color(colors[p.avatar[part.avatarColor] ?? 0])); }
       }
     });
     for (const part of this.parts) { part.mesh.instanceMatrix.needsUpdate = true; if (part.mesh.instanceColor) part.mesh.instanceColor.needsUpdate = true; }
