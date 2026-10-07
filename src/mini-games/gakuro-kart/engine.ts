@@ -1,3 +1,4 @@
+import { lapQuestion } from './learning';
 import { defaultAvatar, type KartAvatar } from './avatar';
 import { QUIZ_APPROACH_SPEED, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, QUIZ_END, answerLane, laneCenter, quizDistance, type KartLesson } from './learning';
 import { COURSES, trackFeatures, validCustomCourse, type CustomCourse, getTrack, ROAD_WIDTH, sampleTrack } from './track';
@@ -93,7 +94,7 @@ export function tick(w: Race, dt: number) {
     const lapDistance = quizDistance(p.distance, length);
     const learning = !!w.lesson && !p.finish && lapDistance < QUIZ_END;
     const questionIndex = p.quizAnswers.findIndex(a => a === -2);
-    const question = !p.finish && questionIndex >= 0 ? w.lesson?.questions[questionIndex] : undefined;
+    const question = !p.finish && questionIndex >= 0 ? lapQuestion(w.lesson, p.quizLap, questionIndex) : undefined;
     if (p.cpu) {
       const cpuLane = question ? ((p.slot * 7 + questionIndex * 3 + w.seed) % 10 < 7 ? question.correct : (question.correct + 1 + p.slot % 3) % 4) : 0;
       const target = learning ? laneCenter(cpuLane) : Math.sin(p.distance / 100 + p.slot * 2.4) * 5;

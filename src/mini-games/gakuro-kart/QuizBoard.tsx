@@ -1,3 +1,4 @@
+import { lapQuestion } from './learning';
 import React, { useEffect, useRef } from 'react';
 import type { Race, Racer } from './engine';
 import { answerLane, LANE_COLORS, QUIZ_END, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, quizDistance } from './learning';
@@ -10,7 +11,7 @@ import type { LanguageMode } from '../../types';
 export default function QuizBoard({ world, racer, languageMode, sound }: { world: Race; racer: Racer; languageMode: LanguageMode; sound: boolean }) {
   const done = racer.quizAnswers.filter(a => a !== -2).length;
   const feedback = done > 0 && world.time - racer.quizFeedbackAt < QUIZ_FEEDBACK_SECONDS;
-  const index = feedback ? done - 1 : Math.min(done, 2), q = world.lesson?.questions[index];
+  const index = feedback ? done - 1 : Math.min(done, 2), q = lapQuestion(world.lesson, racer.quizLap, index);
   const trackLength = getTrack(world.course,world.customCourse).length, lapDistance = quizDistance(racer.distance, trackLength);
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = (s: string) => trans(s, languageMode);

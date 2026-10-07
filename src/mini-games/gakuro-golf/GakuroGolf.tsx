@@ -72,7 +72,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
       buildLesson(selection);
       if (intent !== 'change') { current = createRoom(); if (intent === 'host') await current.create(name); else current.practice(name); }
       if (!current || room.current !== current || !mounted.current) return;
-      current.setLesson(() => buildLesson(selection), selection);
+      current.setLesson(history => buildLesson(selection, 3, history), selection);
       if (intent !== 'change') current.setHoleCount(holeCount); setPicker(null);
     } catch (e) { if (mounted.current) { if (intent !== 'change' && current && room.current === current) { room.current = null; current.close(); setView(null); } setMessage(e instanceof Error ? e.message : '問題を準備できませんでした。'); } }
     finally { if (mounted.current) setBusy(false); }

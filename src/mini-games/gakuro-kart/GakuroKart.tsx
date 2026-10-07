@@ -156,7 +156,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     try {
       const { buildLesson } = await import('./questions');
       if (generation.current !== token) return;
-      const lesson = buildLesson(choice); selection.current = choice;
+      const lesson = buildLesson(choice, 15); selection.current = choice;
       if (target === 'edit') room.current?.setLesson(lesson);
       else await start(target, lesson);
       if (room.current?.world) setPicking(null);
@@ -167,7 +167,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     if (busy) return;
     wakeAudio(); setBusy(true); setError('');
     const token = generation.current;
-    try { const { buildLesson } = await import('./questions'); if (generation.current === token) room.current?.rematch(selection.current ? buildLesson(selection.current) : undefined, nextCourse, nextLaps,nextCustom); }
+    try { const { buildLesson } = await import('./questions'); if (generation.current === token) room.current?.rematch(selection.current ? buildLesson(selection.current, 15) : undefined, nextCourse, nextLaps,nextCustom); }
     catch (e) { setError(e instanceof Error ? e.message : 'Problem preparation failed'); }
     finally { if (generation.current === token) setBusy(false); }
   };

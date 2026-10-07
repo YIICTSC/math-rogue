@@ -22,7 +22,7 @@ export const answerLane = (x: number) => Math.abs(x) <= 12 ? Math.min(3, Math.ma
 export function validLesson(value: unknown): value is KartLesson {
   if (!value || typeof value !== 'object') return false;
   const lesson = value as KartLesson;
-  return typeof lesson.title === 'string' && lesson.title.length <= 160 && Array.isArray(lesson.questions) && lesson.questions.length === 3 && lesson.questions.every(q =>
+  return typeof lesson.title === 'string' && lesson.title.length <= 160 && Array.isArray(lesson.questions) && lesson.questions.length >= 3 && lesson.questions.length <= 15 && lesson.questions.length % 3 === 0 && lesson.questions.every(q =>
     q && typeof q.id === 'string' && q.id.length <= 300 && typeof q.mode === 'string' && q.mode.length <= 120 &&
     typeof q.question === 'string' && q.question.length > 0 && q.question.length <= 12000 &&
     Array.isArray(q.options) && q.options.length === 4 && q.options.every(o => typeof o === 'string' && o.trim().length > 0 && o.length <= 3000) && new Set(q.options).size === 4 &&
@@ -31,3 +31,5 @@ export function validLesson(value: unknown): value is KartLesson {
     (q.visual === undefined || (!!q.visual && typeof q.visual === 'object' && typeof q.visual.kind === 'string')) &&
     (q.audioPrompt === undefined || (!!q.audioPrompt && typeof q.audioPrompt.text === 'string' && q.audioPrompt.text.length <= 12000 && (q.audioPrompt.lang === undefined || typeof q.audioPrompt.lang === 'string'))));
 }
+
+export const lapQuestion = (lesson: KartLesson | null, lap: number, index: number) => lesson?.questions[(lap * 3 + index) % lesson.questions.length];

@@ -13,3 +13,5 @@ Golf has a responsive title/preparation screen. Left/right arrows aim, up/down a
 RPG town arcade rewards no longer require questions. Upgrade, synthesis, rest, shop, relic and arcade entry cards use dedicated generated illustrations.
 
 Invitations for all three games first show only player name and Join. Golf hosts can copy an invitation URL from the lobby. Invite URLs omit unrelated query parameters and fragments. After joining, RPG participants choose their edition and protagonist (and can choose again while waiting); GP and Golf participants edit an avatar with a 3D preview. One-hit Home Dash remains available while waiting and closes when the host starts. New-player surveys are deferred until leaving the invitation flow.
+
+Kart prepares fifteen shuffled questions from the selected units and uses a different three-question segment for each of up to five laps. Golf keeps an independent question history for each player across quizzes and holes. Duplicate source entries are merged, and questions repeat only after the available pool is exhausted. Both host and server communication use these rules.

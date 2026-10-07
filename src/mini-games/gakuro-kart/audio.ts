@@ -1,3 +1,4 @@
+import { lapQuestion } from './learning';
 import type { Race } from './engine';
 /** Original synthesized engine, soundtrack and race cues. */
 export class KartAudio {
@@ -85,7 +86,7 @@ export class KartAudio {
       if (p.quizLap !== this.lastQuizLap) { this.lastQuizLap = p.quizLap; this.lastAnswers = 0; }
       const answers = p.quizAnswers.filter(a => a !== -2).length;
       if (answers > this.lastAnswers && w?.lesson) {
-        const i = answers - 1, correct = p.quizAnswers[i] === w.lesson.questions[i].correct;
+        const i = answers - 1, correct = p.quizAnswers[i] === lapQuestion(w.lesson, p.quizLap, i)!.correct;
         this.note(correct ? 1047 : 165, correct ? .4 : .5, .22, correct ? 'sine' : 'triangle');
         if (correct) this.note(1319, .6, .1);
       }

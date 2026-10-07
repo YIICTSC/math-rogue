@@ -22,7 +22,7 @@ export class GolfRoom {
   private sequence = 0;
   private lastSequence = -1;
   private lastPacket = 0;
-  private factory: (() => KartLesson) | undefined;
+  private factory: ((history: string[]) => KartLesson) | undefined;
   private pending = new Set<ReturnType<typeof setTimeout>>();
   private cancellations = new Set<() => void>();
   private rates = new Map<string, { at: number; count: number }>();
@@ -127,10 +127,10 @@ export class GolfRoom {
     });
     this.timer = setInterval(() => { if (performance.now() - this.lastPacket > 15000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
-  setLesson(factory: () => KartLesson, selection?: LessonSelection) {
+  setLesson(factory: (history: string[]) => KartLesson, selection?: LessonSelection) {
     if (this.dedicated) { if (!this.host || !selection) return; this.dedicated.send({ type: 'lesson', selection }); return; }
     if (!this.host || this.world?.phase !== 'lobby') return;
-    const sample = factory(); if (!validLesson(sample)) throw new Error('問題を準備できませんでした。');
+    const sample = factory([]); if (!validLesson(sample)) throw new Error('問題を準備できませんでした。');
     this.factory = factory; this.world.title = sample.title; this.emit();
   }
   setSpectator(enabled: boolean) {

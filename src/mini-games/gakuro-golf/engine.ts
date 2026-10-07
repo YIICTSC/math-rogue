@@ -17,7 +17,7 @@ export interface Golfer {
   id: string; name: string; slot: number; connected: boolean; spectator?: boolean; hole: number; strokes: number; scores: number[];
   x: number; y: number; z: number; vx: number; vy: number; vz: number;
   phase: PlayerPhase; shotsLeft: number; correct: number; totalCorrect: number; shotId: number;
-  lesson: KartLesson | null; answers: number[]; feedback: number | null;
+  questionHistory?: string[]; lesson: KartLesson | null; answers: number[]; feedback: number | null;
   origin: Point; flightTime: number; penalty: boolean; penaltyKind: 'water' | 'ob' | null; capped: boolean;
   avatar: KartAvatar; shotClub: Club; shotAngle: number; shotSpin: number; shotImpact: number; shotQuality: 'nice' | 'good' | 'miss'; spinApplied: boolean;
 }
@@ -67,7 +67,7 @@ function settle(p: Golfer) {
   if (p.strokes >= MAX_STROKES) { p.capped = true; completeHole(p); } else p.phase = p.shotsLeft > 0 ? 'aim' : 'ready';
 }
 function random(w: GolfWorld) { w.seed ^= w.seed << 13; w.seed ^= w.seed >>> 17; w.seed ^= w.seed << 5; return (w.seed >>> 0) / 4294967296; }
-export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () => KartLesson): boolean {
+export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (history: string[]) => KartLesson): boolean {
   if (!raw || typeof raw !== 'object') return false;
   const c = raw as GolfCommand, p = w.players[id]; if (!p?.connected) return false;
   if (c.type === 'avatar') {
@@ -76,7 +76,7 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () 
   }
   if (p.spectator || w.phase !== 'playing' || w.paused) return false;
   if (c.type === 'quiz' && p.phase === 'ready' && makeLesson) {
-    const lesson = makeLesson(); if (!validLesson(lesson)) return false;
+    const lesson = makeLesson(p.questionHistory ||= []); if (!validLesson(lesson) || lesson.questions.length !== 3) return false;
     p.lesson = lesson; p.answers = []; p.feedback = null; p.correct = 0; p.shotId++; p.phase = 'quiz'; return true;
   }
   if (c.type === 'answer' && p.phase === 'quiz' && p.lesson && p.feedback === null && c.shotId === p.shotId && c.index === p.answers.length && Number.isInteger(c.option) && c.option >= 0 && c.option < 4) {

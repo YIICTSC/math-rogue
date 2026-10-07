@@ -110,7 +110,7 @@ export function createGolfServer(options: GolfServerOptions = {}) {
         }
         if (d.type === 'command') {
           // Clients send only their input. Results, answer keys and ball positions stay authoritative.
-          if (command(room.world, m.id, d.command, room.selection ? () => buildLesson(room!.selection!) : undefined)) acknowledge(room,m);
+          if (command(room.world, m.id, d.command, room.selection ? history => buildLesson(room!.selection!, 3, history) : undefined)) acknowledge(room,m);
         }
       } catch { fail(m, '問題を準備できませんでした。'); }
     });

@@ -47,7 +47,7 @@ try {
     if (score === 0) { assert.equal(p.speed, 0); for (let i = 0; i < 180; i++) e.tick(w, 1 / 60); assert(p.speed > 0); assert.equal(p.crash, 0); }
   }
 
-  // The same three selected questions are asked again on lap two; current-lap
+  // Legacy three-question room data remains playable on lap two; current-lap
   // answers clear while the nine-question race total persists and syncs.
   const perLap = e.createRace(); perLap.lesson = lesson; e.addRacer(perLap, 'p', 'Player'); perLap.phase = 'race'; const p = perLap.players.p;
   p.quizAnswers = [0, 1, 2]; p.quizTimes = [5, 5, 5]; p.quizCorrect = 2; p.quizCorrectTotal = 2; p.quizApplied = true;
@@ -74,5 +74,5 @@ try {
   assert.equal(w.phase, 'result'); assert(Object.values(w.players).every(p => p.quizLap === 2 && p.quizApplied && p.quizAnswers.every(a => a >= 0) && p.quizCorrectTotal >= 0 && p.quizCorrectTotal <= 9));
   const roster = n.acceptRoster(n.roster(w), null); const pack = n.encodeSnapshot(w, 12); assert.equal(pack.byteLength, 2272); assert(n.decodeSnapshot(pack, roster, 11));
   const invalid = n.roster(w); invalid.lesson.questions[0].options = ['same', 'same', 'same', 'same']; assert.equal(n.acceptRoster(invalid, null), null);
-  console.log('Four-choice sources/assignments, 3 five-second approaches per lap, all score effects, repeated questions on lap two, configurable 1–5 lap finishes/protocol sync and 40-racer three-lap quiz race passed.');
+  console.log('Four-choice sources/assignments, 3 five-second approaches per lap, all score effects, legacy three-question lap compatibility, configurable 1–5 lap finishes/protocol sync and 40-racer three-lap quiz race passed.');
 } finally { await server.close(); }

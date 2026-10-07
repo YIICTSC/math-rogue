@@ -21,7 +21,7 @@ export function fourOptions(correct: string, supplied: string[], peers: string[]
   for (let n = 1; values.size < 4; n++) values.add(`${correct} (${n})`);
   return shuffle([...values].slice(0, 4)) as [string, string, string, string];
 }
-export function buildLesson(selection: LessonSelection): KartLesson {
+export function buildLesson(selection: LessonSelection, count = 3, history: string[] = []): KartLesson {
   const assignment = selection.assignment;
   const modes = assignment ? [...new Set(assignment.units.flatMap(u => u.modes))] : selection.modes?.length ? selection.modes : [selection.mode];
   const pool: Candidate[] = [];
@@ -43,14 +43,18 @@ export function buildLesson(selection: LessonSelection): KartLesson {
     pool.push(...source.map(p => ({ ...p, mode })));
   }
   for (const p of assignment?.customProblems || []) pool.push({ question: p.question, answer: p.answer, options: [p.answer, ...p.options], mode: 'ASSIGNMENT_CUSTOM', problemId: p.id });
-  const usable = shuffle(pool.filter(p => p.question?.trim() && p.options?.[0]?.trim()));
+  const key = (p: Candidate) => JSON.stringify([p.question.trim(),p.passage||'',p.options[0].trim()]);
+  const usable = shuffle([...new Map(pool.filter(p => p.question?.trim() && p.options?.[0]?.trim()).map(p => [key(p),p])).values()]);
   if (!usable.length) throw new Error('この範囲には出題できる問題がありません。');
-  const questions: KartQuestion[] = Array.from({ length: 3 }, (_, i) => {
-    const p = usable[i % usable.length], correct = p.options[0].trim();
+  const questions: KartQuestion[] = Array.from({ length: count }, (_, i) => {
+    let remaining = usable.filter(p => !history.includes(key(p)));
+    if (!remaining.length) { history.length = 0; remaining = usable; }
+    const p = remaining[0]; history.push(key(p));
+    const correct = p.options[0].trim();
     const options = fourOptions(correct, p.options, usable.filter(q => q.mode === p.mode).map(q => q.options[0]));
     return { id: `${i}:${p.mode}:${p.problemId || p.question}`.slice(0, 300), mode: p.mode, question: p.question, options, correct: options.indexOf(correct), passage: p.passage, visual: p.visual, audioPrompt: p.audioPrompt, problemId: p.problemId, unitName: assignment?.units.find(u => u.modes.includes(p.mode))?.name };
   });
   const lesson = { title: (assignment?.title || selection.title || modes.join(' / ')).slice(0, 160), questions };
-  if (!validLesson(lesson) || JSON.stringify(lesson).length > 100000) throw new Error('問題データが大きすぎます。別の範囲を選んでください。');
+  if (!validLesson(lesson) || JSON.stringify(lesson).length > 100000 * (count / 3)) throw new Error('問題データが大きすぎます。別の範囲を選んでください。');
   return lesson;
 }

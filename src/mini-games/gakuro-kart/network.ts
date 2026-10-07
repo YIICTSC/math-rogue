@@ -143,7 +143,7 @@ export class KartRoom {
             this.world = decoded.world; this.lastSequence = decoded.sequence; this.lastPacketAt = performance.now(); this.update(this.world); done(); resolve();
           } return;
         }
-        if (typeof raw !== 'string' || raw.length > 120000) return;
+        if (typeof raw !== 'string' || raw.length > 600000) return;
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
         if (d.type === 'error') { done(); reject(new Error(typeof d.message === 'string' ? d.message : 'Connection rejected')); }
         if (d.type === 'roster') { const next = acceptRoster(d as Roster, this.world); if (next) this.world = next; }
