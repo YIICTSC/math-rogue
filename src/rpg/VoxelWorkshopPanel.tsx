@@ -11,7 +11,7 @@ import {plotPosition} from './farm/land';
 import {copy} from './town/catalog';
 import {assetUrl} from '../utils/assetPaths';
 
-export function VoxelIcon({block}:{block:string}){if(['shovel','axe','pickaxe','hoe'].includes(block))return <img className="voxel-item-icon" src={assetUrl(`images/rpg/workshop/${block}-v1.png`)} alt=""/>;const color=VOXEL_CATALOG[block as CatalogBlock]?.color??'#c3b898';return <svg viewBox="0 0 32 32" aria-hidden="true"><path fill={color} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff55" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg>;}
+export function VoxelIcon({block}:{block:string}){if(['shovel','axe','pickaxe','hoe'].includes(block))return <img className="voxel-item-icon" src={assetUrl(`images/rpg/workshop/${block}-v1.webp`)} alt=""/>;const color=VOXEL_CATALOG[block as CatalogBlock]?.color??'#c3b898';return <svg viewBox="0 0 32 32" aria-hidden="true"><path fill={color} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff55" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg>;}
 export function VoxelWorkshopPanel({world,selfId,languageMode,send,onChoose,onClose,initial='materials'}:{world:World;selfId:string;languageMode:LanguageMode;send:(a:WorkshopAction)=>void;onChoose:(b:CatalogBlock)=>void;onClose:()=>void;initial?:string}){
  const me=world.players[selfId],bag=me.life?.bag??{},farm=world.farm?.people[selfId],root=useRef<HTMLDivElement>(null);
  const [tab,setTab]=useState(initial),[query,setQuery]=useState(''),[group,setGroup]=useState('all'),[owned,setOwned]=useState(false),[batch,setBatch]=useState(1);
