@@ -402,3 +402,7 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - Verification: production three-tap browser plus real PeerJS two-player join, shared cold-start retry/cancel, 40 server connections/movement/disconnect, arcade, meter, English gate, Android asset manifest, frontend/server builds. Main publication commit recorded below once completed.
 
 Published main: 454cb3514b7bf4b527a8966c5f1b68cf6bca20a7; uploaded tree matched tested tree. Frontend and server builds passed.
+
+## 2026-10-07: course scenery and upload verification preference
+User now explicitly says not to wait for post-commit completion checks. Do local required tests/builds, upload main, and report without waiting for GitHub Actions completion.
+Kart: eight course sky/fog/road/rail/material palettes now applied; urban courses retain buildings instead of hiding them when imported models load. Neon cyber signs/lights, solar panels/stacks, library reading arcades, stadium floodlights/banners; natural garden/forest/harbor and snowy aurora retain themed imported scenery. Configuration: src/mini-games/gakuro-kart/scenery.ts. Eight WebGL scene captures plus course/minimap checks, English gate, frontend/server builds passed. Published main: 02e0a45e6089fd4bb00d1ce7de4f6cd36cf70ab7.
