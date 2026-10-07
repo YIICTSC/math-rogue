@@ -81,8 +81,9 @@ try {
   await p.getByRole("button", { name: "2D / 3D", exact: true }).click();
   await p.locator("[data-testid=rpg-world-3d]").waitFor();
   await p.waitForFunction(()=>Number(document.querySelector("[data-testid=rpg-world-3d]")?.dataset.blenderModels)>0);
-  assert(Number(await p.locator("[data-testid=rpg-world-3d]").getAttribute("data-blender-animations"))>0);
-  console.log("RPG 3D rendered with Blender models and animation");
+  // Decorative animated butterflies were removed; static Blender scenery remains.
+  assert(!/model:\s*['"]butterfly['"]/.test(await fs.readFile("src/rpg/WorldScene3D.tsx","utf8")));
+  console.log("RPG 3D rendered with Blender models and no decorative butterflies");
   await p.evaluate(()=>{const w=window.room.world;const flat=[];for(let z=15;z<30;z++)for(let x=15;x<30;x++)flat.push(`${x},${z}`);w.voxels={terrainVersion:2,legacyFlat:flat,revision:1,edits:{'20,0,19':'wood','20,1,19':'wood'}};w.revision++;window.room.emit();});
   await p.waitForTimeout(800);
   await p.waitForFunction(()=>Number(document.querySelector('[data-testid=rpg-world-3d]').dataset.voxelBlocks)>=2);
@@ -194,6 +195,7 @@ try {
     const f = farmOf(w, me);
     f.x = 20;
     f.y = 20;
+    f.plots[0].x=20;f.plots[0].y=21;
     f.feed = 30;
     f.animals = [
       {
@@ -252,17 +254,7 @@ try {
       () => window.room.world.farm.people.local.animals[0].moment,
     ),
   );
-  await p
-    .locator(".rpg-farm-targets")
-    .getByRole("button", { name: "Sunny", exact: true })
-    .click();
-  await p
-    .locator(".rpg-farm-buttons")
-    .getByRole("button", { name: "遊ぶ", exact: true })
-    .click();
-  assert.ok(
-    await p.evaluate(() => window.room.world.farm.people.local.pets[0].moment),
-  );
+  assert.equal(await p.locator('.rpg-farm-targets').getByRole('button',{name:'Sunny',exact:true}).count(),0,'Pets no longer appear outdoors');
   for (const [width, height] of [
     [844, 390],
     [568, 320],
@@ -321,7 +313,7 @@ try {
   });
   assert.deepEqual(errors, []);
   console.log(
-    "RPG 3D integration passed: real mining/building and underground oasis, two-finger continuous look/movement, four customizable slots, five layouts, toggle, adjacent farm/animal/pet actions and scrollable landscape menus.",
+    "RPG 3D integration passed: real mining/building and underground oasis, two-finger continuous look/movement, four customizable slots, five layouts, toggle, adjacent farm/animal actions, pets absent outdoors and scrollable landscape menus.",
   );
 } finally {
   await browser?.close();

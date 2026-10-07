@@ -1,3 +1,4 @@
+import {applyRoomAction,type RoomAction,type VoxelRoom} from './voxelRooms';
 import {applyVoxel,type VoxelAction,type VoxelWorld} from './voxel';
 import {applyFarm,advanceFarm,type FarmState,type FarmAction} from './farm/model';
 import {applyCity,advanceCity,type CityState,type CityAction} from './city/model';
@@ -131,6 +132,7 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+ voxelRooms?:VoxelRoom[];
  voxels?:VoxelWorld;
  campaignVersion?: 2;
  endingProgress?: Record<string,number>;
@@ -161,7 +163,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = VoxelAction | FarmAction | CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
+export type Action = RoomAction | VoxelAction | FarmAction | CityAction | TownAction | SocialAction | LifeAction | StoryAction | DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -700,6 +702,7 @@ export function applyAction(
   }
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if(w.town?.encounters?.[id]&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
+  if(action.type.startsWith('voxel-room-'))return applyRoomAction(w,p,action as RoomAction);
   if(action.type.startsWith('farm-'))return applyFarm(w,p,action as FarmAction);
   if(action.type==='ending-progress'||action.type.startsWith('city-'))return applyCity(w,p,action as CityAction,now);
   if ((w.town?.cooking[id]||w.town?.dreams[id]&&!w.town.dreams[id].finished)&&action.type!=='native-profile'&&action.type!=='native-learning')return false;

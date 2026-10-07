@@ -1,3 +1,4 @@
+import {plotPosition} from './land';
 import type { World, Adventurer } from "../engine";
 export type FarmQuickAction = {
   type: "farm-quick";
@@ -20,13 +21,7 @@ export function farmMapTargets(w: World, p: Adventurer): FarmMapTarget[] {
   if (!f || p.life?.indoors || p.spectator) return [];
   const targets: Omit<FarmMapTarget, "distance">[] = [];
   if (f.x !== undefined && f.y !== undefined) {
-    for (const plot of f.plots)
-      targets.push({
-        kind: "plot",
-        id: String(plot.slot),
-        x: f.x + (plot.slot % 6),
-        y: f.y + 1 + Math.floor(plot.slot / 6),
-      });
+    for (const plot of f.plots){const xy=plotPosition(f,plot);if(xy)targets.push({kind:'plot',id:String(plot.slot),...xy});}
     f.animals.forEach((a, i) =>
       targets.push({
         kind: "animal",
@@ -36,13 +31,6 @@ export function farmMapTargets(w: World, p: Adventurer): FarmMapTarget[] {
       }),
     );
   }
-  f.pets.forEach((pet, i) => {
-    if (pet.awayUntil) return;
-    if (f.activePet === pet.id)
-      targets.push({ kind: "pet", id: pet.id, x: p.x + 1, y: p.y });
-    else if (f.x !== undefined && f.y !== undefined)
-      targets.push({ kind: "pet", id: pet.id, x: f.x + i, y: f.y + 6 });
-  });
   return targets
     .map((t) => ({ ...t, distance: Math.abs(t.x - p.x) + Math.abs(t.y - p.y) }))
     .filter((t) => t.distance <= 1)

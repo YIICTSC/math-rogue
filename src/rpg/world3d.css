@@ -12,3 +12,12 @@
 @media(max-height:350px) and (orientation:landscape){.rpg-voxel-dock>header{height:24px;min-height:24px}.rpg-voxel-dock header button{min-height:24px;height:24px}.rpg-voxel-dock .rpg-voxel-slots button{padding:1px;min-height:42px}.rpg-voxel-dock .rpg-voxel-slots small{font-size:8px;line-height:10px}.rpg-voxel-dock .rpg-voxel-slots b{font-size:10px;line-height:11px}.rpg-voxel-dock .rpg-voxel-actions button{min-height:38px}.rpg-voxel-dock .rpg-voxel-target{font-size:9px;line-height:11px;min-height:11px}}
 
 @media(max-height:500px) and (orientation:landscape){.rpg-root--compact:has(.rpg-voxel-dock) .rpg-view-switch{top:9px}}
+
+.rpg-till-quick{position:absolute;left:10px;bottom:155px;z-index:6;background:#284c35!important;color:#fff2be!important;border:1px solid #b6c591!important;border-radius:9px!important;min-height:40px}
+@media(max-height:500px){.rpg-till-quick{bottom:125px}}
+
+.rpg-voxel-room-panel{position:absolute;top:105px;right:9px;z-index:7;max-width:min(330px,85%);font-size:12px}.rpg-voxel-room-panel button{border:1px solid #aec3ad!important;background:#294b3deF!important;border-radius:8px!important;min-height:36px;color:#fff4d4!important;padding:6px!important}.rpg-voxel-room-content{background:#183a32f5;border:1px solid #bbccae;border-radius:10px;padding:9px;max-height:50dvh;overflow:auto;display:flex;flex-wrap:wrap;gap:5px}.rpg-voxel-room-content p,.rpg-voxel-room-content select,.rpg-voxel-room-content>small{width:100%}.rpg-voxel-room-content .rpg-furniture-sprite{width:55px;height:55px}.rpg-voxel-room-content .farm-content{width:100%}@media(max-height:500px){.rpg-voxel-room-panel{top:9px;right:65px;max-width:300px}.rpg-voxel-room-content{max-height:65dvh}}
+
+.rpg-voxel-room-game{position:fixed;inset:5px;z-index:100;background:#13302f;overflow:auto;padding:10px;border:1px solid #b7c9a6;border-radius:12px}
+
+.rpg-voxel-room-panel{display:flex;flex-direction:column;max-height:calc(100% - 115px)}.rpg-voxel-room-panel>button{flex-shrink:0}.rpg-voxel-room-content{min-height:0;flex-shrink:1}@media(max-height:500px){.rpg-voxel-room-panel{max-height:calc(100% - 18px)}}

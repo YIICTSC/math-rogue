@@ -62,6 +62,8 @@ try {
   assert.equal(send({ type: "farm-establish", x: 0, y: 0 }), false);
   assert.ok(send({ type: "farm-establish", x: 22, y: 23 }));
   assert.equal(p.life.bag.wood, 0);
+  // Legacy farms retain planted cells during the per-cell migration.
+  f.spatialVersion=undefined;F.farmOf(w,p);p.x=22;p.y=24;
   assert.ok(F.occupiedFarmTile(w, 24 * E.WIDTH + 24));
   assert.equal(Y.validCityTile(w, 24, 24), false);
   assert.equal(F.validFarmSpot(w, 23, 23), false);
@@ -155,29 +157,13 @@ try {
     assert.ok(f.book[crop.id]);
     delete f.plots[slot].crop;
   }
-  assert.ok(send({ type: "farm-pet-adopt", kind: "shiba", name: "ポチ" }));
-  const pet = f.pets[0];
-  for (const care of ["feed", "pat", "play", "train"])
-    assert.ok(send({ type: "farm-pet-care", id: pet.id, care }));
-  assert.equal(
-    send({ type: "farm-pet-care", id: pet.id, care: "play" }),
-    false,
-  );
-  pet.hunger = 80;
-  pet.bond = 50;
-  p.moveCount += 20;
-  F.advanceFarm(w);
-  assert.equal(pet.bond, 54);
-  F.advanceFarm(w);
-  assert.equal(pet.bond, 54, "walk bond reward only once a day");
-  assert.ok(send({ type: "farm-pet-care", id: pet.id, care: "trip" }));
-  assert.equal(send({ type: "farm-pet-care", id: pet.id, care: "pat" }), false);
-  w.life.time += 181;
-  F.advanceFarm(w);
-  assert.equal(pet.awayUntil, 0);
-  assert.equal(pet.trips, 1);
-  assert.ok(send({ type: "farm-name", id: pet.id, name: "コムギ" }));
-  assert.equal(pet.name, "コムギ");
+  const petHome={id:'pet-home',owner:'a',ownerName:'Farmer',x:60,y:60,biome:'meadow',home:{tile:60*E.WIDTH+60,furniture:[],stock:{}},invitedAt:0};w.life.houses.push(petHome);p.life.indoors=petHome.id;
+  assert.ok(send({type:'farm-pet-adopt',kind:'shiba',name:'ポチ'}));const pet=f.pets[0];assert.equal(pet.homeId,petHome.id);
+  for(const care of ['feed','pat','play','train'])assert.ok(send({type:'farm-pet-care',id:pet.id,care}));
+  assert.equal(send({type:'farm-pet-care',id:pet.id,care:'play'}),false);
+  pet.hunger=80;pet.bond=50;p.moveCount+=20;F.advanceFarm(w);assert.equal(pet.bond,50,'Outdoor walking no longer rewards home pets');
+  send({type:'farm-pet-care',id:pet.id,care:'trip'});assert.equal(pet.awayUntil,0);
+  assert.ok(send({type:'farm-name',id:pet.id,name:'コムギ'}));assert.equal(pet.name,'コムギ');delete p.life.indoors;
   // Cooking consumes actual crop and animal products once, then shares the existing authoritative timing action.
   const home = {
     id: "home-a",
@@ -267,7 +253,7 @@ try {
     for (const id of Object.keys(d.farmCost)) assert.ok(C.ingredientById(id));
   }
   console.log(
-    "Farm passed: 32 crops, 8 livestock, 18 pets, 48 recipes, seasons/growth/quality/rotation, no duplicate rewards/production, ownership, irrigation/greenhouse/barn, pet care/walk/errands, ingredient cooking, busy guards, frozen save/restore and 114 generated WebP assets.",
+    "Farm passed: 32 crops, 8 livestock, 18 pets, 48 recipes, seasons/growth/quality/rotation, no duplicate rewards/production, ownership, irrigation/greenhouse/barn, home-only pet care, ingredient cooking, busy guards, frozen save/restore and 114 generated WebP assets.",
   );
 } finally {
   await server.close();

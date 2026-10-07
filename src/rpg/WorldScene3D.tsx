@@ -1,6 +1,9 @@
+import {furnitureImage,furnitureSize,furnishing} from './homeCatalog';
+import {plotPosition} from './farm/land';
 import VoxelLookStick from './VoxelLookStick';
 import {trans} from '../utils/textUtils';
 import type {LanguageMode} from '../types';
+import {energyOf} from './energy';
 import {BLOCKS,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
 import {MATERIAL_NAMES} from './life';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -30,6 +33,7 @@ import "./world3d.css";
 export interface SceneProps {
   languageMode?:LanguageMode;
   onVoxelAction?:(a:VoxelAction)=>void;
+  onEnergyRequest?:()=>void;
   hiddenActors?: string[];
   presentation?: "conversation";
   world: World;
@@ -97,10 +101,10 @@ export default function WorldScene3D(props: SceneProps) {
     const voxelGeometry=new THREE.BoxGeometry(1,1,1);
     new GLTFLoader().load(assetUrl("models/storybook/voxel-block.glb"),g=>{if(!disposed){g.scene.traverse(o=>{if(o instanceof THREE.Mesh){voxelGeometry.dispose();voxelGeometry.copy(o.geometry);}});}g.scene.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());}});},undefined,()=>{});
     const voxelGroup=new THREE.Group();scene.add(voxelGroup);
-    const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water'];
-    const voxelMaterials=renderBlocks.map(b=>new THREE.MeshStandardMaterial({color:VOXEL_COLORS[b],roughness:b==='crystal'||b==='oasis-water'?.25:.85,transparent:b==='oasis-water',opacity:b==='oasis-water'?.65:1,emissive:b==='crystal'?'#7955bd':b==='oasis-water'?'#149b8e':'#000000',emissiveIntensity:.3}));
+    const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top'];
+    const voxelMaterials=renderBlocks.map(b=>new THREE.MeshStandardMaterial({color:b==='fruit'?'#ffffff':VOXEL_COLORS[b],roughness:b==='crystal'||b==='oasis-water'?.25:.85,transparent:b==='oasis-water',opacity:b==='oasis-water'?.65:1,emissive:b==='crystal'?'#7955bd':b==='oasis-water'?'#149b8e':'#000000',emissiveIntensity:.3}));
     const lamp=new THREE.PointLight('#ffdfa5',0,12,1.5),oasisLight=new THREE.PointLight('#6cf1d7',0,14,1.5);scene.add(lamp,oasisLight);
-    voxelMaterials.forEach((material,i)=>{const c=document.createElement('canvas');c.width=c.height=16;const ctx=c.getContext('2d')!;ctx.fillStyle='#ffffff';ctx.fillRect(0,0,16,16);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const hash=(x*31+y*17+i*11)%19;ctx.fillStyle=`rgba(30,20,10,${hash*.009})`;ctx.fillRect(x,y,1,1);}ctx.fillStyle='#47332044';if(i===0||i===2||i===4){for(let x=3;x<16;x+=5)ctx.fillRect(x,0,1,16);}else if(i===3){ctx.fillRect(0,7,16,1);ctx.fillRect(0,15,16,1);ctx.fillRect(7,0,1,7);ctx.fillRect(3,8,1,7);}const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.NearestFilter;material.map=texture;});
+    voxelMaterials.forEach((material,i)=>{const c=document.createElement('canvas');c.width=c.height=16;const ctx=c.getContext('2d')!;ctx.fillStyle='#ffffff';ctx.fillRect(0,0,16,16);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const hash=(x*31+y*17+i*11)%19;ctx.fillStyle=`rgba(30,20,10,${hash*.009})`;ctx.fillRect(x,y,1,1);}ctx.fillStyle='#47332044';if(i===0||i===2||i===4){for(let x=3;x<16;x+=5)ctx.fillRect(x,0,1,16);}else if(i===3){ctx.fillRect(0,7,16,1);ctx.fillRect(0,15,16,1);ctx.fillRect(7,0,1,7);ctx.fillRect(3,8,1,7);}const block=renderBlocks[i];if(['leaves','frostleaves','bush','herb'].includes(block)){for(let k=0;k<20;k++){ctx.fillStyle=k%2?'#ffffff55':'#12341555';ctx.fillRect((k*7)%16,(k*11)%16,3,2);}}else if(block==='fruit'){ctx.fillStyle='#416b2c';ctx.fillRect(0,0,16,16);for(const [x,y] of [[3,4],[11,3],[7,11]]){ctx.fillStyle='#ef6040';ctx.fillRect(x-2,y-1,4,4);ctx.fillStyle='#ffbb7044';ctx.fillRect(x-1,y,1,2);ctx.fillStyle='#734c29';ctx.fillRect(x,y-2,1,1);}}else if(block==='door'||block==='door-top'){ctx.fillStyle='#66422288';ctx.strokeStyle='#54371c';ctx.lineWidth=1;ctx.strokeRect(2,2,12,12);ctx.fillRect(7,0,1,16);if(block==='door'){ctx.fillStyle='#ffde82';ctx.fillRect(12,3,2,2);}}else if(block==='reed'||block==='cactus'){ctx.fillStyle='#19482a77';for(let x=2;x<16;x+=4)ctx.fillRect(x,0,1,16);if(block==='cactus'){ctx.fillStyle='#e2e5b5';for(let k=0;k<9;k++)ctx.fillRect(k*7%16,k*5%16,1,2);}}const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.NearestFilter;material.map=texture;});
     const outlineMaterial=new THREE.MeshBasicMaterial({color:'#ffe292',wireframe:true,depthTest:false});
     const outline=new THREE.Mesh(voxelGeometry,outlineMaterial);outline.scale.setScalar(1.012);outline.visible=false;outline.renderOrder=10;scene.add(outline);
     const terrain = new THREE.Group(),
@@ -178,6 +182,7 @@ export default function WorldScene3D(props: SceneProps) {
       }
       return t;
     };
+    const floorFurnitureGeometry=geo(new THREE.PlaneGeometry(1,1)),floorFurnitureMaterials=new Map<string,THREE.MeshBasicMaterial>();
     const spriteMaterials = new Map<string, THREE.SpriteMaterial>();
     function billboard(
       parent: THREE.Group,
@@ -187,6 +192,7 @@ export default function WorldScene3D(props: SceneProps) {
       z: number,
       size = 1.2,
       player?: string,
+      absolute=false,
     ) {
       let m = spriteMaterials.get(src);
       if (!m) {
@@ -199,7 +205,7 @@ export default function WorldScene3D(props: SceneProps) {
         spriteMaterials.set(src, m);
       }
       const s = new THREE.Sprite(m);
-      y+=player?playerHeight(latest.current.world,latest.current.world.players[player]):terrainHeight(latest.current.world,Math.floor(x),Math.floor(z));
+      if(!absolute)y+=player?playerHeight(latest.current.world,latest.current.world.players[player]):terrainHeight(latest.current.world,Math.floor(x),Math.floor(z));
       s.position.set(x, y, z);
       s.scale.set(size, size, 1);
       s.userData.displaySize = size;
@@ -410,7 +416,7 @@ export default function WorldScene3D(props: SceneProps) {
         if(solid(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>solid(get(vx+dx,vy+dy,vz+dz))))continue;
         blocks[renderBlocks.indexOf(b)].push({x:vx,y:vy,z:vz});
       }
-      blocks.forEach((positions,i)=>{if(!positions.length)return;const m=new THREE.InstancedMesh(voxelGeometry,voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>m.setMatrixAt(j,matrix.makeTranslation(v.x+.5,v.y+.5,v.z+.5)));m.userData.voxels=positions;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
+      blocks.forEach((positions,i)=>{if(!positions.length)return;const m=new THREE.InstancedMesh(voxelGeometry,voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>{matrix.makeTranslation(v.x+.5,v.y+.5,v.z+.5);if(renderBlocks[i]==='door'||renderBlocks[i]==='door-top'){const y=renderBlocks[i]==='door-top'?v.y-1:v.y;const alongX=solid(get(v.x-1,y,v.z))||solid(get(v.x+1,y,v.z));matrix.scale(new THREE.Vector3(alongX?1:.16,1,alongX?.16:1));}m.setMatrixAt(j,matrix);});m.userData.voxels=positions;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
       groundMaterial?.dispose();
       const radius = options.current.mapQuality === "low" ? 12 : 19,
         cells: { x: number; y: number; tile: string }[] = [];
@@ -599,59 +605,15 @@ export default function WorldScene3D(props: SceneProps) {
             } else mesh(terrain, cone, gold, tx, 0.5, tz, 0.25, 0.8, 0.25);
           }
         }
-      for (const farm of Object.values(w.farm?.people || {}))
-        if (
-          farm.x !== undefined &&
-          farm.y !== undefined &&
-          near(farm as { x: number; y: number })
-        ) {
-          mesh(
-            terrain,
-            box,
-            soil,
-            farm.x + 3.5,
-            -0.005,
-            farm.y + 3.5,
-            7,
-            0.04,
-            7,
-          );
-          for (let a = 0; a < 7; a++) {
-            mesh(
-              terrain,
-              box,
-              wood,
-              farm.x + a + 0.5,
-              0.22,
-              farm.y,
-              0.06,
-              0.45,
-              0.06,
-            );
-            mesh(
-              terrain,
-              box,
-              wood,
-              farm.x + a + 0.5,
-              0.22,
-              farm.y + 7,
-              0.06,
-              0.45,
-              0.06,
-            );
-          }
-          for (const plot of farm.plots) {
-            if (plot.crop)
-              billboard(
-                terrain,
-                assetUrl(farmImage("crop", plot.crop)),
-                farm.x + (plot.slot % 6) + 0.5,
-                0.3,
-                farm.y + Math.floor(plot.slot / 6) + 1.5,
-                plot.growth > 1 ? 0.65 : 0.38,
-              );
-          }
-        }
+      for(const farm of Object.values(w.farm?.people||{}))for(const plot of farm.plots){
+        const xy=plotPosition(farm,plot);if(!xy||!near(xy))continue;const h=terrainHeight(w,xy.x,xy.y);
+        mesh(terrain,box,soil,xy.x+.5,h+.01,xy.y+.5,1,.04,1);
+        if(plot.crop)billboard(terrain,assetUrl(farmImage('crop',plot.crop)),xy.x+.5,.35,xy.y+.5,plot.growth>1?.7:.4);
+      }
+      for(const room of w.voxelRooms||[]){
+        for(const f of room.furniture){const size=furnitureSize(f);if(!near({x:f.x,y:f.y}))continue;if(furnishing(f.item)?.floor){let material=floorFurnitureMaterials.get(f.item);if(!material){material=new THREE.MeshBasicMaterial({map:texture(assetUrl(furnitureImage(f.item))),transparent:true,alphaTest:.08,side:THREE.DoubleSide});floorFurnitureMaterials.set(f.item,material);materials.push(material);}const rug=new THREE.Mesh(floorFurnitureGeometry,material);rug.rotation.x=-Math.PI/2;rug.position.set(f.x+size.width/2,room.floor+.03,f.y+size.height/2);rug.scale.set(size.width,size.height,1);terrain.add(rug);}else billboard(terrain,assetUrl(furnitureImage(f.item)),f.x+size.width/2,room.floor+.55,f.y+size.height/2,Math.max(size.width,size.height)*.85,undefined,true);}
+        for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id){const pos=pet.roomPos||room.cells[0];billboard(terrain,assetUrl(farmImage('pet',pet.kind)),pos.x+.5,room.floor+.35,('y' in pos?pos.y:pos.z)+.5,.7,undefined,true);}
+      }
       for (let i = 0; i < 5; i++) {
         const cx = x + Math.sin(i * 1.7) * 23,
           cz = y + Math.cos(i * 1.7) * 23;
@@ -668,7 +630,7 @@ export default function WorldScene3D(props: SceneProps) {
             1.5,
           );
       }
-      mesh(terrain, box, leaf, WIDTH / 2, -0.2, HEIGHT / 2, WIDTH, 0.1, HEIGHT);
+      // The actual voxel soil is the floor; a world-sized plane would cover excavations.
       // Silhouettes at the fog line establish scale without disconnected collision geometry.
       for (let i = 0; i < 12; i++)
         mesh(
@@ -682,7 +644,7 @@ export default function WorldScene3D(props: SceneProps) {
           10 + (i % 3) * 2,
           8,
         );
-      placements.push({model:'butterfly',x:w.players[latest.current.selfId].x+.8,y:1.1,z:w.players[latest.current.selfId].y+1.5,scale:.7});
+
       for(const c of oasisCenters(w))if(Math.abs(c.x-x)<radius&&Math.abs(c.z-y)<radius){for(const [dx,dz] of [[4,0],[-4,0],[0,4],[0,-4]])if(!protectedVoxel(w,c.x+dx,c.z+dz))placements.push({model:'mushrooms',x:c.x+dx+.5,z:c.z+dz+.5,y:c.depth-1,scale:.55});}
       models.set(placements.map(v=>({...v,y:v.y!==undefined&&v.y<0?v.y:(v.y||0)+terrainHeight(w,Math.floor(v.x),Math.floor(v.z))})));
       const groups = new Map<string, THREE.Mesh[]>();
@@ -754,40 +716,6 @@ export default function WorldScene3D(props: SceneProps) {
             sprite.userData.size = 0.7;
           }
         }
-        if (f.x !== undefined && f.y !== undefined)
-          f.pets.forEach((pet, i) => {
-            if (pet.awayUntil || pet.id === f.activePet) return;
-            const sprite = billboard(
-              actors,
-              assetUrl(farmImage("pet", pet.kind)),
-              f.x! + i + 0.5,
-              0.3,
-              f.y! + 6.5,
-              0.6,
-            );
-            sprite.userData.animal = pet;
-            sprite.userData.owner = id;
-            sprite.userData.collection = "pets";
-            sprite.userData.base = 0.3;
-            sprite.userData.size = 0.6;
-          });
-        const pet = f.pets.find((p) => p.id === f.activePet && !p.awayUntil),
-          owner = w.players[id];
-        if (pet && owner && !owner.life?.indoors) {
-          const sprite = billboard(
-            actors,
-            assetUrl(farmImage("pet", pet.kind)),
-            owner.x + 1.5,
-            0.3,
-            owner.y + 0.5,
-            0.6,
-          );
-          sprite.userData.animal = pet;
-          sprite.userData.owner = id;
-          sprite.userData.collection = "pets";
-          sprite.userData.base = 0.3;
-          sprite.userData.size = 0.6;
-        }
       }
       for (const a of Object.values(w.players))
         if (
@@ -827,9 +755,11 @@ export default function WorldScene3D(props: SceneProps) {
       plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
       hit = new THREE.Vector3();
     function performBuild(kind:'voxel-break'|'voxel-place'='voxel-break') {
+      const current=latest.current.world.players[latest.current.selfId];
+      if(energyOf(current.life)<.1){latest.current.onEnergyRequest?.();return;}
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
       const h=ray.intersectObjects(voxelGroup.children)[0];
-      if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!];const n=h.face!.normal;latest.current.onVoxelAction?.({type:kind,x:v.x+(kind==='voxel-place'?Math.round(n.x):0),y:v.y+(kind==='voxel-place'?Math.round(n.y):0),z:v.z+(kind==='voxel-place'?Math.round(n.z):0),block:buildRef.current.selected});}
+      if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!],b=blockAt(latest.current.world,v.x,v.y,v.z);if(kind==='voxel-break'&&b&&Number.isFinite(miningCost(b,current))&&energyOf(current.life)<miningCost(b,current)){latest.current.onEnergyRequest?.();return;}const n=h.face!.normal;latest.current.onVoxelAction?.({type:kind,x:v.x+(kind==='voxel-place'?Math.round(n.x):0),y:v.y+(kind==='voxel-place'?Math.round(n.y):0),z:v.z+(kind==='voxel-place'?Math.round(n.z):0),block:buildRef.current.selected});}
 
     }
     const command=(e:Event)=>performBuild((e as CustomEvent).detail);
@@ -928,7 +858,7 @@ export default function WorldScene3D(props: SceneProps) {
             )
             .join("|");
         }
-        const nextKey = `${w.voxels?.revision||0}:${Math.floor(a.x / 4)}:${Math.floor(a.y / 4)}:${w.city?.revision || 0}:${w.life.houses.length}:${resourceStamp}:${farmStamp}:${Math.floor(w.life.time / 8)}`;
+        const nextKey = `${w.voxelRooms?.map(r=>r.revision).join(',')||''}:${w.voxels?.revision||0}:${Math.floor(a.x / 4)}:${Math.floor(a.y / 4)}:${w.city?.revision || 0}:${w.life.houses.length}:${resourceStamp}:${farmStamp}:${Math.floor(w.life.time / (Object.values(w.farm?.people||{}).some(f=>f.pets.some(p=>w.voxelRooms?.some(r=>r.id===p.homeId)))?2:8))}`;
         if (nextKey !== key) {
           key = nextKey;
           rebuild(w, a.x, a.y);
@@ -1062,7 +992,7 @@ export default function WorldScene3D(props: SceneProps) {
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
     {editSlot&&<select aria-label={text('選択スロットの素材')} value={selected} onChange={e=>setSlots(a=>a.map((b,i)=>i===selectedSlot?e.target.value as Block:b))}>{BLOCKS.map(b=><option key={b} value={b}>{text(MATERIAL_NAMES[b])}</option>)}</select>}
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
-    <div className="rpg-voxel-actions"><button disabled={!!target&&!Number.isFinite(target.cost)} onClick={()=>command('voxel-break')}>⛏ {text('壊す')}</button><button disabled={(me?.life?.bag[selected]||0)<1} onClick={()=>command('voxel-place')}>＋ {text('置く')}</button></div>
-    <small className="rpg-voxel-target">{target?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':MATERIAL_NAMES[target.block]):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
+    <div className="rpg-voxel-actions"><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} onClick={()=>command('voxel-break')}>⛏ {text('壊す')}</button><button disabled={energyOf(me?.life)>=.1&&(me?.life?.bag[selected]||0)<1} onClick={()=>command('voxel-place')}>＋ {text('置く')}</button></div>
+    <small className="rpg-voxel-target">{target?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':target.block==='door-top'?'ドア':MATERIAL_NAMES[target.block]):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
   </div>}{building&&<span className="rpg-voxel-crosshair">＋</span>}</div>;
 }

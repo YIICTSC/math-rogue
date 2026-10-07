@@ -1,3 +1,7 @@
+import {currentVoxelRoom,roomContains,roomUsable} from '../voxelRooms';
+import {roomWalkable,ROOM_WIDTH,ROOM_HEIGHT,furnishing,furnitureSize} from '../homeCatalog';
+import {migrateLand,plotPosition} from './land';
+import {energyOf} from '../energy';
 import {farmMapTargets,type FarmQuickAction} from './mapTargets';
 import {PET_TRICKS} from '../lifestyle/catalog';
 import type {AnimalMoment} from '../lifestyle/animalMotion';
@@ -21,6 +25,7 @@ export interface PantryStack {
   quality: number;
 }
 export interface FarmPlot {
+  x?:number;y?:number;
   slot: number;
   crop?: string;
   growth: number;
@@ -45,6 +50,7 @@ export interface FarmAnimal {
   ready: number;
 }
 export interface FarmPet {
+  homeDays?:number;homeId?:string;roomPos?:{x:number;y:number};wanderAt?:number;
   moment?:AnimalMoment;tricks?:Record<string,number>;lastTrick?:number;
   id: string;
   kind: string;
@@ -59,6 +65,7 @@ export interface FarmPet {
   trips: number;
 }
 export interface FarmPlayer {
+  spatialVersion?:2;
   x?: number;
   y?: number;
   coins: number;
@@ -85,7 +92,7 @@ export interface FarmState {
   version: 1;
   people: Record<string, FarmPlayer>;
 }
-export type FarmAction = FarmQuickAction
+export type FarmAction = {type:"farm-till";dx:number;dy:number} | FarmQuickAction
 
   | {type:"farm-pet-trick";id:string;trick:string}
   | {type:"farm-animal-breed";id:string;name:string}
@@ -129,9 +136,10 @@ export const animalLimit = (f: FarmPlayer) =>
 export const ownFarm = (w: World, id: string) => w.farm?.people[id];
 export function farmOf(w: World, p: Adventurer): FarmPlayer {
   const s = (w.farm ??= { version: 1, people: {} });
-  if (s.people[p.id]) return s.people[p.id];
+  if (s.people[p.id]) {migrateLand(s.people[p.id]);return s.people[p.id];}
   const season = calendar(w).season;
   return (s.people[p.id] = {
+    spatialVersion:2,
     coins: 100,
     xp: 0,
     seeds: Object.fromEntries(
@@ -174,11 +182,10 @@ export function occupiedFarmTile(w: World, tile: number) {
     cache.revision !== (w.farm.revision || 0)
   ) {
     const tiles = new Set<number>();
-    for (const f of Object.values(w.farm.people))
-      if (f.x !== undefined && f.y !== undefined)
-        for (let dy = 0; dy < 7; dy++)
-          for (let dx = 0; dx < 7; dx++)
-            tiles.add((f.y + dy) * WIDTH + f.x + dx);
+    for (const f of Object.values(w.farm.people)){
+      for(const plot of f.plots){const xy=plotPosition(f,plot);if(xy)tiles.add(xy.y*WIDTH+xy.x);}
+      if(f.x!==undefined&&f.y!==undefined)f.animals.forEach((_,i)=>tiles.add((f.y!+(i<6?0:5))*WIDTH+f.x!+i%6));
+    }
     cache = { state: w.farm, revision: w.farm.revision || 0, tiles };
     occupiedCache.set(w, cache);
   }
@@ -232,13 +239,7 @@ export function farmSpots(w: World, p: Adventurer) {
       }
   return spots;
 }
-export const nearFarm = (p: Adventurer, f: FarmPlayer) =>
-  f.x !== undefined &&
-  f.y !== undefined &&
-  p.x >= f.x - 4 &&
-  p.x <= f.x + 10 &&
-  p.y >= f.y - 4 &&
-  p.y <= f.y + 10;
+export const nearFarm = (p:Adventurer,f:FarmPlayer)=>f.plots.some(plot=>{const xy=plotPosition(f,plot);return xy&&Math.abs(xy.x-p.x)+Math.abs(xy.y-p.y)<=4;})||(f.x!==undefined&&f.y!==undefined&&Math.abs(f.x-p.x)+Math.abs(f.y-p.y)<=4);
 export function farmBusy(w: World, p: Adventurer) {
   return !!(
     p.spectator ||
@@ -330,12 +331,14 @@ export const FARM_GOALS = [
   },
   {
     id: "ranch",
+    spatialVersion:2,
     coins: 100,
     xp: 30,
     done: (f: FarmPlayer) => f.products >= 10,
   },
   {
     id: "friend",
+    spatialVersion:2,
     coins: 100,
     xp: 30,
     done: (f: FarmPlayer) => f.pets.some((p) => p.bond >= 60),
@@ -373,7 +376,7 @@ export const FARM_GOALS = [
     id: "journey",
     coins: 180,
     xp: 50,
-    done: (f: FarmPlayer) => f.pets.reduce((n, p) => n + p.trips, 0) >= 10,
+    done: (f: FarmPlayer) => f.pets.reduce((n, p) => n + (p.homeDays??p.trips), 0) >= 10,
   },
 ];
 const validName = (s: unknown) =>
@@ -430,6 +433,14 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
   ];
   if (tending.includes(a.type) && (!nearFarm(p, f) || lp.indoors))
     return tell("農園の近くで作業してください。");
+  if(a.type==='farm-till'){
+    if(!lp.hoe||lp.indoors||!Number.isInteger(a.dx)||!Number.isInteger(a.dy)||Math.abs(a.dx)+Math.abs(a.dy)!==1)return false;
+    const x=p.x+a.dx,y=p.y+a.dy,tile=y*WIDTH+x,plot=f.plots.find(v=>v.slot<plotLimit(f)&&!plotPosition(f,v));
+    if(!plot||x<2||y<2||x>=WIDTH-2||y>=HEIGHT-2||!(w.tiles[tile]==='grass'||w.tiles[tile]==='forest'&&!!w.life.nodes[tile]?.regrowAt)||occupiedFarmTile(w,tile)||w.sites.some(v=>Math.abs(v.x-x)+Math.abs(v.y-y)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-y)<=1)||w.city?.lots.some(v=>v.x===x&&v.y===y)||w.city?.roads.includes(tile)||w.voxels?.edits[`${x},0,${y}`])return tell('耕せる草地でクワを使ってください。');
+    if(energyOf(lp)<1)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
+    if(p.position3D&&p.position3D.y!==undefined&&p.position3D.y<0)return tell('農地は地上の草地で耕せます。');
+    Object.assign(plot,{x,y});lp.energy=energyOf(lp)-1;f.x??=x;f.y??=y-1;w.farm!.revision=(w.farm!.revision||0)+1;return tell('前の1マスを耕しました。種を植えられます。');
+  }
   if (a.type === "farm-establish") {
     if (
       f.x !== undefined ||
@@ -497,6 +508,8 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     if (
       !c ||
       !plot ||
+      !plotPosition(f,plot)||
+      Math.abs(plotPosition(f,plot)!.x-p.x)+Math.abs(plotPosition(f,plot)!.y-p.y)>2||
       a.slot >= plotLimit(f) ||
       plot.crop ||
       !(f.seeds[c.id] > 0) ||
@@ -522,7 +535,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     )
   ) {
     const plot = f.plots.find((s) => s.slot === ("slot" in a ? a.slot : -1));
-    if (!plot?.crop) return false;
+    if (!plot?.crop||!plotPosition(f,plot)||Math.abs(plotPosition(f,plot)!.x-p.x)+Math.abs(plotPosition(f,plot)!.y-p.y)>2) return false;
     if (a.type === "farm-water") {
       if (plot.water === day) return false;
       plot.water = day;
@@ -638,6 +651,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     return success();
   }
   if (a.type === "farm-pet-adopt") {
+    const voxelHome=currentVoxelRoom(w,p);const home=w.life.houses.find(h=>h.id===lp.indoors&&(h.owner===p.id||lp.homeId===h.id))||(voxelHome?.owner===p.id&&!voxelHome.shared&&roomUsable(w,voxelHome)?voxelHome:undefined);if(!home)return tell("ペットは自宅の中で迎えられます。");
     const k = petById(a.kind);
     if (
       !k ||
@@ -649,6 +663,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       return false;
     f.coins -= k.price;
     const pet: FarmPet = {
+      homeId:home.id,roomPos:voxelHome?{x:voxelHome.cells[0].x,y:voxelHome.cells[0].z}:{x:3,y:4},
       id: `pet-${++f.sequence}`,
       kind: k.id,
       name: a.name.trim(),
@@ -662,7 +677,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       trips: 0,
     };
     f.pets.push(pet);
-    if (!f.activePet) f.activePet = pet.id;
+
     return success();
   }
   if (a.type === "farm-name") {
@@ -674,6 +689,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
   }
   if (a.type === "farm-pet-care") {
     const pet = f.pets.find((x) => x.id === a.id);
+    if(!pet?.homeId||(lp.indoors!==pet.homeId&&currentVoxelRoom(w,p)?.id!==pet.homeId))return tell("ペットのお世話は自宅の中で行えます。");
     if (
       !pet ||
       pet.awayUntil > w.life.time ||
@@ -682,22 +698,8 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       )
     )
       return false;
-    if (a.care === "follow") {
-      f.activePet = pet.id;
-      pet.walkBase = p.moveCount;
-      return success();
-    }
-    if (a.care === "stay") {
-      if (f.activePet === pet.id) delete f.activePet;
-      return success();
-    }
-    if (a.care === "trip") {
-      if (pet.bond < 20 || pet.hunger < 40) return false;
-      pet.awayUntil = w.life.time + 180;
-      pet.hunger -= 15;
-      if (f.activePet === pet.id) delete f.activePet;
-      return success();
-    }
+    if(a.care==='follow'||a.care==='trip')return false;
+    if(a.care==='stay'){pet.moment={pose:'sleep',until:w.life.time+12};return success();}
     if (pet.cares[a.care] === day) return false;
     if (a.care === "feed") {
       if (!f.feed) return false;
@@ -715,7 +717,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
   }
   if(a.type==='farm-pet-trick'){
     const pet=f.pets.find(v=>v.id===a.id),trick=PET_TRICKS.find(v=>v[0]===a.trick);
-    if(!pet||!trick||pet.awayUntil>w.life.time||pet.hunger<15||pet.trained<trick[4]||pet.bond<10+trick[4]/2||w.life.time<(pet.lastTrick??-100)+8)return false;
+    if(!pet||(lp.indoors!==pet.homeId&&currentVoxelRoom(w,p)?.id!==pet.homeId)||!trick||pet.awayUntil>w.life.time||pet.hunger<15||pet.trained<trick[4]||pet.bond<10+trick[4]/2||w.life.time<(pet.lastTrick??-100)+8)return false;
     pet.lastTrick=w.life.time;pet.hunger-=2;pet.moment={pose:trick[5],until:w.life.time+8};
     const first=(pet.tricks??={})[trick[0]]!==day;pet.tricks[trick[0]]=day;
     if(first){f.xp+=3;pet.bond=Math.min(100,pet.bond+1);}
@@ -736,6 +738,7 @@ export function advanceFarm(w: World) {
   if (!w.started || w.ended || !w.farm) return;
   const today = calendar(w).day;
   for (const [id, f] of Object.entries(w.farm.people)) {
+    migrateLand(f);
     for (let day = f.lastDay + 1; day <= today; day++) {
       const previous = day - 1,
         season = Math.floor(previous / 7) % 4,
@@ -778,13 +781,21 @@ export function advanceFarm(w: World) {
         if (animal.clean !== previous)
           animal.health = Math.max(10, animal.health - 3);
       }
-      for (const pet of f.pets) pet.hunger = Math.max(0, pet.hunger - 15);
+      for (const pet of f.pets){pet.hunger=Math.max(0,pet.hunger-15);if(pet.homeId)pet.homeDays=(pet.homeDays??pet.trips)+1;}
     }
     if (today > f.lastDay) {
       f.lastDay = today;
       w.revision++;
     }
+    delete f.activePet;
     for (const pet of f.pets) {
+      pet.homeId??=w.life.houses.find(h=>h.owner===id)?.id;pet.awayUntil=0;
+      const voxelHome=w.voxelRooms?.find(r=>r.id===pet.homeId);if(voxelHome&&w.life.time>=(pet.wanderAt||0)){const pos=pet.roomPos||{x:voxelHome.cells[0].x,y:voxelHome.cells[0].z},step=[[0,-1],[1,0],[0,1],[-1,0]][hash(pet.id+Math.floor(w.life.time/2),w.seed)%4],next={x:pos.x+step[0],y:pos.y+step[1]};pet.roomPos=voxelHome.cells.some(c=>c.x===next.x&&c.z===next.y)&&!voxelHome.furniture.some(f=>{const s=furnitureSize(f);return !furnishing(f.item)?.floor&&next.x>=f.x&&next.x<f.x+s.width&&next.y>=f.y&&next.y<f.y+s.height;})?next:pos;pet.wanderAt=w.life.time+2;w.revision++;}
+      const home=w.life.houses.find(h=>h.id===pet.homeId);if(home?.interior&&w.life.time>=(pet.wanderAt||0)){
+        const pos=pet.roomPos||{x:3,y:4},step=[[0,-1],[1,0],[0,1],[-1,0]][hash(pet.id+Math.floor(w.life.time/2),w.seed)%4],next={x:pos.x+step[0],y:pos.y+step[1]};
+        pet.roomPos=roomWalkable(home.interior,next.x,next.y)&&next.y<ROOM_HEIGHT-2?next:pos;pet.wanderAt=w.life.time+1.8+(hash(pet.id,w.seed)%8)/10;w.revision++;
+      }
+
       if (pet.awayUntil > 0 && pet.awayUntil <= w.life.time) {
         pet.awayUntil = 0;
         pet.trips++;

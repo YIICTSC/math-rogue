@@ -114,6 +114,7 @@ try {
   f.feed = 100;
   f.x = 21;
   f.y = 22;
+  f.plots[0].x=21;f.plots[0].y=23;
   f.upgrades = ["barn"];
   const quick = {
     type: "farm-quick",
@@ -138,6 +139,7 @@ try {
   assert.equal(send({ ...quick, id: "__proto__" }), false);
   assert.equal(send({ ...quick, operation: "farm-quick" }), false);
   assert.equal(send(quick, "b"), false);
+  w.life.houses.push({id:'pet-home',owner:'a',ownerName:'Owner',x:60,y:60,biome:'meadow',home:{tile:60*E.WIDTH+60,furniture:[],stock:{}},invitedAt:0});w.players.a.life.indoors='pet-home';
   assert.ok(send({ type: "farm-pet-adopt", kind: "retriever", name: "Sunny" }));
   const pet = f.pets[0];
   assert.ok(send({ type: "farm-pet-trick", id: pet.id, trick: "sit" }));
@@ -161,6 +163,7 @@ try {
     assert.ok(send({ type: "farm-pet-trick", id: pet.id, trick: trick[0] }));
   }
   assert.equal(Object.keys(pet.tricks).length, 16);
+  delete w.players.a.life.indoors;
   assert.ok(send({ type: "farm-animal-buy", kind: "cow", name: "Daisy" }));
   const cow = f.animals[0];
   cow.bond = 80;

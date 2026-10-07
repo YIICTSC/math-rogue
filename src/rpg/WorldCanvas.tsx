@@ -1,3 +1,6 @@
+import {furnitureImage} from './homeCatalog';
+import {drawFarmSprite} from './farm/draw';
+import {VOXEL_COLORS,type TerrainBlock} from './voxel';
 import {storyForSite} from './stories';
 import {residentsOf} from './town/residents';
 import {residentPosition} from './town/worldResidents';
@@ -351,7 +354,8 @@ export default function WorldCanvas({
       for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
       const built=new Map<string,{x:number;z:number;height:number;block:string}>();
       for(const [key,block] of Object.entries(w.voxels?.edits||{})){if(!block)continue;const [x,y,z]=key.split(',').map(Number);const k=`${x},${z}`,old=built.get(k);if(!old||old.height<y)built.set(k,{x,z,height:y,block});}
-      for(const b of built.values()){if(b.x<minX||b.x>=maxX||b.z<minY||b.z>=maxY)continue;rect(c,b.x*T+1,b.z*T-3,14,18,({wood:'#98704a',stone:'#829096',plank:'#c39a63',brick:'#ae6550',frostwood:'#c5dee0',ore:'#75634f',crystal:'#9e75ce'} as Record<string,string>)[b.block]);rect(c,b.x*T+2,b.z*T-2,12,4,'#ffffff44');rect(c,b.x*T+2,b.z*T+12,12,2,'#00000044');}
+      for(const b of built.values()){if(b.x<minX||b.x>=maxX||b.z<minY||b.z>=maxY)continue;rect(c,b.x*T+1,b.z*T-3,14,18,VOXEL_COLORS[b.block as TerrainBlock]);rect(c,b.x*T+2,b.z*T-2,12,4,'#ffffff44');rect(c,b.x*T+2,b.z*T+12,12,2,'#00000044');}
+      for(const room of w.voxelRooms||[]){for(const f of room.furniture){const path=assetUrl(furnitureImage(f.item));let img=characterImages.get(path);if(!img){img=new Image();img.src=path;characterImages.set(path,img);}if(img?.complete&&img.naturalWidth)c.drawImage(img,f.x*T,f.y*T-12,24,24);}for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id&&pet.roomPos)drawFarmSprite(c,'pet',pet.kind,pet.roomPos.x*T+8,pet.roomPos.y*T+15,22);}
       drawFarms(c,w,time,!prefs.reducedMotion,{minX,maxX,minY,maxY});
       for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
       for(const lot of w.city?.lots||[]){if(lot.x<minX||lot.x>=maxX||lot.y<minY||lot.y>=maxY)continue;const b=cityBuilding(lot.kind);if(b&&cityAtlas?.complete&&cityAtlas.naturalWidth){const r=CITY_SPRITES[b.index],size=24,ratio=r[2]/r[3];c.drawImage(cityAtlas,r[0],r[1],r[2],r[3],lot.x*T+8-size*ratio/2,lot.y*T+16-size,size*ratio,size);}if(lot.damage)rect(c,lot.x*T+4,lot.y*T,8,8,'#e66d43');}

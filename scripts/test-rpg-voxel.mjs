@@ -17,7 +17,7 @@ try{
  w.voxels.edits['21,1,20']='wood';w.revision++;p.position3D={x:20.5,z:20.5,y:0};assert(send({type:'voxel-move',dx:.32,dy:0}));near(p.position3D.x,20.5);assert.equal(p.position3D.y,0,'No teleport through a two-block wall to a buried cavern');delete p.position3D;w.voxels.edits['21,1,20']=null;w.revision++;
  assert(send({type:'voxel-place',x:21,y:1,z:20,block:'wood'}));assert(send({type:'voxel-break',x:21,y:1,z:20}));assert(send({type:'voxel-break',x:21,y:0,z:20}));near(lp.energy,5.6);assert.equal(lp.bag.wood,20);
  w.tiles[20*E.WIDTH+21]='forest';delete w.voxels.edits['21,0,20'];delete w.voxels.edits['21,1,20'];w.revision++;
- for(let h=0;h<3;h++){if(V.blockAt(w,21,h,20))assert(send({type:'voxel-break',x:21,y:h,z:20}));}assert(L.lifeWalkable(w,21,20));assert.equal(V.blockAt(w,21,0,20),null);
+ for(const cell of V.vegetationCells(w,21,20)){if(V.blockAt(w,cell.x,cell.y,cell.z))assert(send({type:'voxel-break',x:cell.x,y:cell.y,z:cell.z}));}assert(L.lifeWalkable(w,21,20));assert.equal(V.blockAt(w,21,0,20),null);
  lp.energy=1;lp.bag.stone=3;assert(send({type:'voxel-place',x:22,y:0,z:20,block:'stone'}));near(lp.energy,.9);lp.energy=0;const rev=w.voxels.revision;assert(send({type:'voxel-break',x:22,y:0,z:20}));assert.equal(w.voxels.revision,rev);
  // Mine straight down: exposed ground disappears and feet fall to the next floor.
  lp.energy=6;p.position3D={x:20.5,z:20.5,y:0};assert(send({type:'voxel-break',x:20,y:-1,z:20}));assert.equal(p.position3D.y,-1);near(lp.energy,5.9);
@@ -29,6 +29,16 @@ try{
  lp.bag={wood:10,stone:10,plank:10,ore:10,steel:10,crystal:10};assert(send({type:'life-craft',recipe:'pickaxe-stone'}));assert.equal(lp.pickaxe,'stone');near(V.miningCost('steel',p),.9);assert(send({type:'life-craft',recipe:'pickaxe-iron'}));near(V.miningCost('steel',p),.6);assert(send({type:'life-craft',recipe:'pickaxe-steel'}));near(V.miningCost('steel',p),.36);
  p.position3D={x:steel.x+.5,z:steel.z+.5,y:steel.y+1};p.x=steel.x;p.y=steel.z;lp.energy=6;assert(send({type:'voxel-break',...steel}));near(lp.energy,5.64);assert(p.voxelDiscoveries.includes('steel'));
  p.profile={hp:72,maxHp:72,gold:100,deck:[],deckSize:0,character:'WARRIOR',image:''};const player={currentHp:72,maxHp:72,gold:100,deck:[],relics:[],rpgMutationRevision:0};const save=S.makeWorldSave(w,'a',player,now),restored=S.restoreWorldSave(JSON.parse(JSON.stringify(save)),now+10000);assert.deepEqual(restored.voxels,w.voxels);assert.equal(restored.players.a.life.pickaxe,'steel');assert.equal(restored.players.a.position3D.y,p.position3D.y);
+ // Natural leaves, fruit and bushes are individually harvested, placed and saved.
+ const vw=E.createWorld(42,undefined,0,now);vw.started=true;E.addPlayer(vw,'v','Gardener');vw.sites=[];const vp=vw.players.v,vl=L.lifePlayer(vp);const found=new Map();
+ for(let z=2;z<E.HEIGHT-2;z++)for(let x=2;x<E.WIDTH-2;x++)for(const c of V.vegetationCells(vw,x,z))if(c.x===x&&c.z===z&&!found.has(c.block))found.set(c.block,c);
+ for(const block of ['leaves','frostleaves','fruit','bush','reed','herb','cactus']){
+  const c=found.get(block);assert(c,block+' exists naturally');vp.x=c.x-1;vp.y=c.z;vp.position3D={x:c.x-.5,z:c.z+.5,y:V.terrainHeight(vw,c.x,c.z)};vl.energy=6;const before=vl.bag[block]||0;
+  assert(E.applyAction(vw,'v',{type:'voxel-break',x:c.x,y:c.y,z:c.z},now+=300));assert.equal(V.blockAt(vw,c.x,c.y,c.z),null);assert.equal(vl.bag[block],before+1);near(vl.energy,5.9);
+  assert(E.applyAction(vw,'v',{type:'voxel-place',x:c.x,y:c.y,z:c.z,block},now+=300));assert.equal(V.blockAt(vw,c.x,c.y,c.z),block);assert.equal(vl.bag[block],before);near(vl.energy,5.8);
+ }
+ const tree=found.get('leaves');vp.x=tree.x-1;vp.y=tree.z;vp.position3D={x:tree.x-.5,z:tree.z+.5,y:V.terrainHeight(vw,tree.x,tree.z)};vl.energy=6;const base=V.terrainHeight(vw,tree.x,tree.z);assert(E.applyAction(vw,'v',{type:'voxel-break',x:tree.x,y:base,z:tree.z},now+=300));assert.equal(V.blockAt(vw,tree.x,tree.y,tree.z),'leaves','Cutting trunk preserves canopy');assert.equal(V.blockAt(vw,tree.x+1,base+2,tree.z),'leaves','Spread canopy is editable');
+ vp.profile=p.profile;const vegetationSave=S.makeWorldSave(vw,'v',player,now),vegetationRestore=S.restoreWorldSave(JSON.parse(JSON.stringify(vegetationSave)),now+10000);assert.deepEqual(vegetationRestore.voxels,vw.voxels);assert.deepEqual(vegetationRestore.players.v.life.bag,vl.bag);
  const q=w.players.b;q.spectator=true;assert(!send({type:'voxel-break',x:22,y:0,z:20},'b'));w.sites.push({x:22,y:20,kind:'npc'});assert(!send({type:'voxel-break',x:22,y:0,z:20}));
  p.x=20;p.y=20;p.position3D={x:20.5,z:20.86,y:0};w.life.houses.push({id:'home',owner:'a',ownerName:'Builder',x:20,y:21,biome:'meadow',home:{tile:21*E.WIDTH+20,level:1,furniture:[]},invitedAt:0});w.revision++;assert(send({type:'voxel-move',dx:0,dy:.32}));assert.equal(lp.indoors,'home');assert(!p.position3D);assert(send({type:'life-leave'}));assert(!p.position3D);
  console.log('PASS: fractional energy, continuous movement, 1-block climbing, 2D snap, ground excavation/falling, six biome hills/oases, steel, crafted tool discounts, authority and saved elevations/edits/tools.');

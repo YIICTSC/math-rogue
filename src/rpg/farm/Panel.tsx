@@ -1,3 +1,5 @@
+import {currentVoxelRoom} from '../voxelRooms';
+import {plotPosition} from './land';
 import AnimalStage,{PetTricks} from '../lifestyle/AnimalStage';
 import { trans } from "../../utils/textUtils";
 import React, { useEffect, useRef, useState } from "react";
@@ -42,6 +44,7 @@ export function FarmContent({
   send,
   languageMode,
   showCooking = true,
+  petsOnly=false,
   onTrack,
 }: {
   world: World;
@@ -49,6 +52,7 @@ export function FarmContent({
   send: (a: Action) => void;
   languageMode: LanguageMode;
   showCooking?: boolean;
+  petsOnly?:boolean;
   onTrack?: (x: number, y: number) => void;
 }) {
   const p = world.players[selfId],
@@ -58,7 +62,7 @@ export function FarmContent({
   const L = (ja: string, en: string, hi: string) =>
       label(ja, en, hi, languageMode),
     C = (v: Parameters<typeof copy>[0]) => copy(v, languageMode);
-  const [tab, setTab] = useState("field"),
+  const [tab, setTab] = useState(petsOnly?"pets":"field"),
     [slot, setSlot] = useState(0),
     [crop, setCrop] = useState(CROPS[cal.season * 8].id),
     [season, setSeason] = useState(cal.season),
@@ -122,7 +126,7 @@ export function FarmContent({
     selected = cropById(crop)!,
     level = farmLevel(f),
     limit = plotLimit(f),
-    slots = f.plots.filter((s) => s.slot < limit),
+    slots = f.plots.filter((s) => s.slot < limit&&!!plotPosition(f,s)),
     spots = f.x === undefined ? farmSpots(world, p) : [],
     pantry = [...CROPS, ...PRODUCTS].filter((i) => {
       const s = f.pantry[i.id];
@@ -133,9 +137,9 @@ export function FarmContent({
     farmAfford(world, selfId, d.farmCost) &&
     canAfford(p.life?.bag || {}, d.cost);
   const farmName = L(
-    "農園・牧場・ペット",
-    "Farm, ranch & pets",
-    "のうえん・ぼくじょう・ぺっと",
+    "農園・牧場",
+    "Farm & ranch",
+    "のうえん・ぼくじょう",
   );
   const upgradeNames = [
     c("自動水やり", "Irrigation", "じどうみずやり"),
@@ -173,9 +177,9 @@ export function FarmContent({
       "かちく8しゅるいをしいく",
     ),
     c(
-      "ペットのおつかい10回",
-      "Complete 10 pet errands",
-      "ぺっとのおつかい10かい",
+      "自宅で10日暮らす",
+      "Spend 10 pet days at home",
+      "じたくで10にちくらす",
     ),
   ];
   const meter = (n: number, text: string) => (
@@ -209,14 +213,14 @@ export function FarmContent({
         {[
           ["field", c("畑", "Fields", "はたけ")],
           ["ranch", c("家畜", "Livestock", "かちく")],
-          ["pets", c("ペット", "Pets", "ぺっと")],
+          ...(petsOnly ? [["pets",c("ペット","Pets","ぺっと")]] : []),
           [
             "pantry",
             c("食材と料理", "Pantry & cooking", "しょくざいとりょうり"),
           ],
           ["shop", c("種と設備", "Seeds & upgrades", "たねとせつび")],
           ["book", c("図鑑と目標", "Collection & goals", "ずかんともくひょう")],
-        ].map(([id, text]) => (
+        ].filter(([id])=>!petsOnly||id==="pets").map(([id, text]) => (
           <button
             key={id as string}
             aria-pressed={tab === id}
@@ -228,48 +232,8 @@ export function FarmContent({
       </nav>
       {tab === "field" && (
         <>
-          {f.x === undefined ? (
-            <article className="farm-card">
-              <h3>
-                {L(
-                  "自分の農園を開こう",
-                  "Start your farm",
-                  "じぶんののうえんをひらこう",
-                )}
-              </h3>
-              <p>
-                {L(
-                  "木材4・石材2で農園を作れます。最初は12区画、成長すると24区画。今の季節の種を各3袋プレゼント。",
-                  "Build with 4 wood and 2 stone. Start with 12 plots, expanding to 24. Receive 3 seed packets for each crop of the current season.",
-                  "もくざい4・せきざい2でのうえんをつくれます。さいしょは12くかく、せいちょうすると24くかく。いまのきせつのたねをかく3ふくろぷれぜんと。",
-                )}
-              </p>
-              <p>{L("場所を選ぶ", "Choose a location", "ばしょをえらぶ")}</p>
-              <div className="farm-actions">
-                {spots.map((s) => (
-                  <button
-                    key={`${s.x}:${s.y}`}
-                    disabled={
-                      !available ||
-                      !canAfford(p.life?.bag || {}, { wood: 4, stone: 2 })
-                    }
-                    onClick={() => send({ type: "farm-establish", ...s })}
-                  >
-                    {L("ここに開く", "Build here", "ここにひらく")} ({s.x},{" "}
-                    {s.y})
-                  </button>
-                ))}
-              </div>
-              {!spots.length && (
-                <p>
-                  {L(
-                    "道・水辺・建物から離れた広い場所へ移動してください。",
-                    "Move to open land away from roads, water and buildings.",
-                    "みち・みずべ・たてものからはなれたひろいばしょへいどうしてください。",
-                  )}
-                </p>
-              )}
-            </article>
+          {!f.plots.some(plot=>plotPosition(f,plot)) ? (
+            <article className="farm-card"><h3>{L('クワで畑を耕そう','Till land with a hoe','くわではたけをたがやそう')}</h3><p>{L('クラフトでクワを作り、マップの「耕す」で前の草地1マスを農地にできます。耕した場所に種を植えましょう。','Craft a hoe, then use Till on the map to turn the grass cell ahead into a plot. Plant seeds on tilled land.','くらふとでくわをつくり、まっぷの「たがやす」でまえのくさち1ますをのうちにできます。たがやしたばしょにたねをうえましょう。')}</p></article>
           ) : (
             <>
               <div className="farm-actions">
@@ -280,7 +244,7 @@ export function FarmContent({
                 {onTrack && !near && (
                   <button
                     disabled={!available || !!p.life?.indoors}
-                    onClick={() => onTrack(f.x! + 3, f.y! + 3)}
+                    onClick={() => onTrack(f.plots.find(s=>plotPosition(f,s))?.x??f.x!, f.plots.find(s=>plotPosition(f,s))?.y??f.y!)}
                   >
                     {L("農園へ向かう", "Walk to the farm", "のうえんへむかう")}
                   </button>
@@ -322,7 +286,7 @@ export function FarmContent({
               >
                 {f.plots.map((s) => {
                   const c = cropById(s.crop || ""),
-                    locked = s.slot >= limit;
+                    locked = s.slot >= limit||!plotPosition(f,s);
                   return (
                     <button
                       key={s.slot}
@@ -578,9 +542,9 @@ export function FarmContent({
         <>
           <p>
             {L(
-              "6匹まで暮らせます。なでる・遊ぶ・しつけは毎日1回。連れ歩いて20歩で絆アップ。絆20・満腹40以上なら3分のおつかいへ。得意分野の種・薬草・コインを持ち帰ります。",
-              "Live with up to 6 pets. Pat, play and train once daily. Walk 20 steps together for a bond boost. Bond 20 and hunger 40 unlock 3-minute errands for seeds, herbs or coins.",
-              "6ひきまでくらせます。なでる・あそぶ・しつけはまいにち1かい。つれあるいて20ぽできずなあっぷ。きずな20・まんぷく40いじょうなら3ぷんのおつかいへ。とくいぶんやのたね・やくそう・こいんをもちかえります。",
+              "ペットは自宅で6匹まで暮らせます。家の中を自由に歩きます。なでる・遊ぶ・しつけは毎日1回。",
+              "Live with up to 6 pets. Pat, play and train once daily. Pets live and roam inside their home.",
+              "ぺっとはじたくで6ひきまでくらせます。いえのなかをじゆうにあるきます。なでる・あそぶ・しつけはまいにち1かい。",
             )}
           </p>
           <button
@@ -594,21 +558,13 @@ export function FarmContent({
             )}
           </button>
           <div className="farm-grid">
-            {f.pets.map((pet) => (
+            {f.pets.filter(pet=>pet.homeId===(p.life?.indoors||currentVoxelRoom(world,p)?.id)).map((pet) => (
               <article className="farm-card" key={pet.id}>
                 <AnimalStage animal={pet} kind="pet" time={world.life.time}/><PetTricks world={world} selfId={selfId} pet={pet} send={send} languageMode={languageMode} available={available}/>
                 <h3>{pet.name}</h3>
                 <small>
                   {C(petById(pet.kind)!.name)} ·{" "}
-                  {f.activePet === pet.id
-                    ? L("一緒にお散歩", "Following you", "いっしょにおさんぽ")
-                    : pet.awayUntil
-                      ? `${L("おつかい中", "On an errand", "おつかいちゅう")} ${Math.max(0, Math.ceil(pet.awayUntil - world.life.time))}s`
-                      : L(
-                          "おうちで休憩",
-                          "Resting at home",
-                          "おうちできゅうけい",
-                        )}
+                  {L('おうちで自由に暮らす','Roaming at home','おうちでじゆうにくらす')}
                 </small>
                 {meter(pet.bond, L("絆", "Bond", "きずな"))}
                 {meter(pet.hunger, L("満腹", "Hunger", "まんぷく"))}
@@ -639,37 +595,7 @@ export function FarmContent({
                       </button>
                     ),
                   )}
-                  <button
-                    disabled={!available || !!pet.awayUntil}
-                    onClick={() =>
-                      send({
-                        type: "farm-pet-care",
-                        id: pet.id,
-                        care: f.activePet === pet.id ? "stay" : "follow",
-                      })
-                    }
-                  >
-                    {f.activePet === pet.id
-                      ? L("休憩させる", "Let rest", "きゅうけいさせる")
-                      : L("連れて歩く", "Walk together", "つれてあるく")}
-                  </button>
-                  <button
-                    disabled={
-                      !available ||
-                      !!pet.awayUntil ||
-                      pet.bond < 20 ||
-                      pet.hunger < 40
-                    }
-                    onClick={() =>
-                      send({ type: "farm-pet-care", id: pet.id, care: "trip" })
-                    }
-                  >
-                    {L(
-                      "おつかいを頼む",
-                      "Send on an errand",
-                      "おつかいをたのむ",
-                    )}
-                  </button>
+                  <button disabled={!available} onClick={()=>send({type:'farm-pet-care',id:pet.id,care:'stay'})}>{L('おうちでくつろぐ','Relax at home','おうちでくつろぐ')}</button>
                 </div>
                 <Rename
                   id={pet.id}
@@ -684,9 +610,9 @@ export function FarmContent({
           {f.log.length > 0 && (
             <p aria-live="polite">
               {L(
-                "おつかいから帰ってきたよ：",
-                "Back from an errand: ",
-                "おつかいからかえってきたよ：",
+                "ペットとの思い出：",
+                "Pet memories: ",
+                "ぺっととのおもいで：",
               )}
               {f.log.slice(-3).join(" · ")}
             </p>
@@ -710,9 +636,9 @@ export function FarmContent({
                 <h3>{C(k.name)}</h3>
                 <p>
                   {L(
-                    "おつかいの得意分野",
-                    "Errand specialty",
-                    "おつかいのとくいぶんや",
+                    "好きなこと",
+                    "Favorite activity",
+                    "すきなこと",
                   )}
                   ：
                   {k.talent === "herbs"
@@ -1265,9 +1191,9 @@ export default function FarmPanel({
         role="dialog"
         aria-modal="true"
         aria-label={label(
-          "農園・牧場・ペット",
-          "Farm, ranch & pets",
-          "のうえん・ぼくじょう・ぺっと",
+          "農園・牧場",
+          "Farm & ranch",
+          "のうえん・ぼくじょう",
           languageMode,
         )}
       >
@@ -1276,9 +1202,9 @@ export default function FarmPanel({
             <small>FRONTIER FARM</small>
             <h2>
               {label(
-                "農園・牧場・ペット",
-                "Farm, ranch & pets",
-                "のうえん・ぼくじょう・ぺっと",
+                "農園・牧場",
+                "Farm & ranch",
+                "のうえん・ぼくじょう",
                 languageMode,
               )}
             </h2>

@@ -1,3 +1,4 @@
+import {plotPosition} from './land';
 import {animalPose} from '../lifestyle/animalMotion';
 import type { World } from "../engine";
 import { assetUrl } from "../../utils/assetPaths";
@@ -35,29 +36,13 @@ export function drawFarms(
   for (const f of Object.values(w.farm?.people || {})) {
     if (
       f.x === undefined ||
-      f.y === undefined ||
-      (bounds &&
-        (f.x + 7 < bounds.minX ||
-          f.x > bounds.maxX ||
-          f.y + 7 < bounds.minY ||
-          f.y > bounds.maxY))
+      f.y === undefined
     )
       continue;
     const x = f.x * 16,
       y = f.y * 16;
-    c.fillStyle = "#789453";
-    c.fillRect(x, y, 112, 112);
-    c.strokeStyle = "#ccba86";
-    c.lineWidth = 1;
-    c.strokeRect(x + 1, y + 1, 110, 110);
-    for (let dx = 0; dx < 7; dx++) {
-      c.fillStyle = "#b69d67";
-      c.fillRect(x + dx * 16, y, 2, 5);
-      c.fillRect(x + dx * 16, y + 107, 2, 5);
-    }
     for (const plot of f.plots) {
-      const px = x + (plot.slot % 6) * 16,
-        py = y + (Math.floor(plot.slot / 6) + 1) * 16;
+      const xy=plotPosition(f,plot);if(!xy)continue;const px=xy.x*16,py=xy.y*16;
       c.fillStyle = plot.water === (w.town?.day || 0) ? "#61472f" : "#89633e";
       c.fillRect(px + 1, py + 3, 14, 12);
       c.fillStyle = "#a37a49";
@@ -90,49 +75,5 @@ export function drawFarms(
         c.fillRect(px + 5, py - 16, 2, 2);
       }
     });
-  }
-  for (const [id, f] of Object.entries(w.farm?.people || {})) {
-    const p = w.players[id];
-    if (!p || p.spectator || p.life?.indoors) continue;
-    const following = f.pets.find((p) => p.id === f.activePet && !p.awayUntil);
-    if (
-      following &&
-      (!bounds ||
-        (p.x >= bounds.minX &&
-          p.x <= bounds.maxX &&
-          p.y >= bounds.minY &&
-          p.y <= bounds.maxY))
-    )
-      drawFarmSprite(
-        c,
-        "pet",
-        following.kind,
-        p.x * 16 + 20,
-        p.y * 16 + 15 + (motion ? Math.sin(time / 200) * 1 : 0),
-        22,
-        motion?animalPose(following,w.life.time):undefined,
-      );
-    if (
-      f.x !== undefined &&
-      f.y !== undefined &&
-      (!bounds ||
-        (f.x + 7 >= bounds.minX &&
-          f.x <= bounds.maxX &&
-          f.y + 7 >= bounds.minY &&
-          f.y <= bounds.maxY))
-    )
-      f.pets
-        .slice(0, 6)
-        .forEach((pet, i) => !pet.awayUntil&&pet.id!==following?.id&&
-          drawFarmSprite(
-            c,
-            "pet",
-            pet.kind,
-            (f.x! + i) * 16 + 8,
-            (f.y! + 6) * 16 + 15,
-            18,
-            motion?animalPose(pet,w.life.time):undefined,
-          ),
-        );
   }
 }
