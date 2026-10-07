@@ -423,3 +423,8 @@ Kart: eight course sky/fog/road/rail/material palettes now applied; urban course
 - main 517db88346b9571dfe0542ab26d0e822e6db0b8f。render.yaml に buildFilter.paths を追加。オンライン3ゲーム・再利用クラフト・実際にサーバーへコンパイルされる共通データ/ロジック・依存パッケージのみ対象。一般UI/画像/音楽/文書は対象外。checksPass 維持。
 - server/build.mjs と Pages CI に依存ファイル包含検査。新しい対象外依存をサーバーに追加すると検査失敗。公式Blueprint JSONSchema、実サーバー依存包含、除外例、未包含依存の失敗検査、英語ゲート/frontend/server build 合格。
 - 重要: Render MCP に既存サービス Build Filters 更新ツールなし、Render CLI/API認証も未設定。既存 learning-rogue-online のライブフィルターにはまだ適用していない。ユーザーへDashboard settings の Build Filters / Included Paths に render.yaml paths を一度登録する手順を提示。Blueprint管理サービスへの同期でも可。ファイル公開だけで現サービスに適用済みと主張しない。サービス srv-dauu1v41nsns73fnjdk0、承認済み My Workspace tea-d75h6r6a2pns73cualng。
+
+## 2026-10-08 サーバー通信の可否判定
+- ユーザーはRender Build FiltersのIncluded Paths保存を完了したと報告。前項の「未適用」はユーザー作業で解消（追加の実サービス設定検査は未実施）。最新main 42440fbd の音声変更等を統合した上で main 28ae9854ced46ba134b2bd00690427123493fea7 を公開。
+- 3ゲーム共通TransportPicker: ブラウザから各endpointへWebSocket ping/pong（既存サーバー機能）で到達性を確認。確認中/接続不可はサーバー選択無効＋灰色。不可時はホストへ戻し、再確認ボタン・自動復旧を用意。接続不可5秒/成功30秒再確認、focus/online/offlineで再確認。health fetchは起動促進のみで、成功判定に使わない。unmountで通信とtimer解除。
+- 実サーバーを使うブラウザテストでRPG/kart/golf到達、Origin拒否、停止/ネットワーク切断、ホスト維持/フォールバック、復旧、部屋作成なしを検証。英語ゲート、frontend/server build合格。サーバーソース変更なし。Actions/Render完了待ちなし。
