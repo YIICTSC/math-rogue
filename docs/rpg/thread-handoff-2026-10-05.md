@@ -374,3 +374,21 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - 実サーバーの2 WebSocket参加者：小数位置・地面の掘削・設置・素材・小数エネルギー・遠隔拒否・2D復帰の同期成功。ブラウザ：実照準で採掘と設置、実2本指の左右同時入力、390x844/320x568/844x390/568x320/1440x900、地下描画、既存農場アクションと横画面メニューが成功。既存React key警告のみ残る。
 - pnpm run build（英語gate含む）、server:build、Android manifest生成／検証10294ファイル、diff --check成功。公開用CSSにも最終横画面配置の変更が含まれることを確認。
 - 公開確認完了：Pages `37547078114`、Android `37547078092` はともにsuccess。ユーザーの希望に従いRenderの手動デプロイ／追加確認は行わない。
+
+
+## 2026-10-07: latest main integration, vegetation and home/farm building
+
+- User supplied additional local commits; fetched and fast-forwarded main to `c031447b` before continuing. Preserve the updated human avatar GLBs, kart/golf editor scrolling, and BowlingSwipeControl filename fix.
+- Implemented leaves, snowy leaves, fruit, shrubs, reeds, herbs and cactus as independent natural harvested/placeable voxels. Nineteen hotbar materials now include a crafted two-cell door. Protocol 24.
+- Exhausted break/place or insufficient mining cost opens learning recovery questions. Removed decorative butterflies and the false ground plane covering excavations.
+- Roof/floor/wall enclosed door rooms (4–256 cells) register as private homes or shared facilities. Furniture and existing game furniture crafting/placement/packing and games work via authoritative room actions; ownership, damaged enclosures, overlaps and coordinates are checked.
+- Pets are home-only, care/adoption in home menu, freely roam inside normal and built homes; legacy pet records are retained. A room with pets cannot switch to shared mode.
+- Crafted hoe unlocks a gathering shortcut to till the single cell ahead for one energy. Only actual tilled cells are farmland; legacy planted cells migrate with crops intact. Camera facing in 3D and last travel direction in 2D select the cell.
+- Validated building-life authority/save tests (including actual furniture game join/start/leave), farm/lifestyle regressions, vegetation voxel tests, two real WebSocket clients, responsive room and tilling UI, exhausted break/place and real learning recovery, English gate, frontend/server build and Android asset manifests. Final publication/Actions details follow.
+- User only requires GitHub publication verification; do not manually deploy or check Render. This handoff stays on its dedicated documentation branch and is excluded from main.
+
+### Publication and latest user steering
+
+- Main published as `72850abbfc4c637d7511864cf53feb103ca1c476`; fetched and verified exact tested local tree equality. GitHub Actions: Pages `37562749251`, Android `37562749285`. User explicitly confirmed build verification complete; do not keep waiting or recheck deployment on their behalf.
+- 3D browser integration passed on five sizes including continuous dual-stick movement, actual mining/placing, underground oasis, outdoor farm/animal actions and no outdoor pet buttons. Local frontend and server builds, English gate and Android manifest verification passed.
+- User asked whether games can use host-driven networking for about ten players instead of Render. No implementation change was requested yet. All four network classes already retain PeerJS/WebRTC host code, while the deployed builds choose dedicated servers because `VITE_ONLINE_SERVER_URL` is configured in Pages/Android workflows. Explain signaling/STUN and possible TURN relay, host upload/CPU/battery and background throttling; recommend a room-level host/server choice, compact updates and host handover if asked to implement. Do not simply remove the URL globally without a room transport/join design.
