@@ -1,3 +1,6 @@
+import InviteJoin from '../shared/InviteJoin';
+import {golfInviteUrl} from './invite';
+import {copyInviteUrl} from '../shared/copyInviteUrl';
 import WaitingHomeDash from '../shared/WaitingHomeDash';
 import GameTitleScreen from '../shared/GameTitleScreen';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/onlineTransport';
@@ -25,17 +28,20 @@ import { loadAvatar, validAvatar, type KartAvatar } from '../gakuro-kart/avatar'
 import './golf.css';
 import { useGolfAudio } from './useGolfAudio';
 const lies = { green: 'グリーン', fairway: 'フェアウェイ', rough: 'ラフ', sand: 'バンカー', water: '池', ob: 'OB' };
-export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onClose: () => void; languageMode?: LanguageMode }) {
+export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteCode='' }: { onClose: () => void; languageMode?: LanguageMode; inviteCode?:string }) {
   const [transport,setTransport]=useState<OnlineTransport>(initialTransport);
   const [view, setView] = useState<GolfView | null>(null), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
-  const [name, setName] = useState('Player'), [code, setCode] = useState(''), [picker, setPicker] = useState<'practice' | 'host' | 'change' | null>(null);
+  const [name, setName] = useState(inviteCode?'':'Player'), [code, setCode] = useState(inviteCode), [picker, setPicker] = useState<'practice' | 'host' | 'change' | null>(null);
   const [club, setClub] = useState<Club>('driver'), [power, setPower] = useState(.7), [offset, setOffset] = useState(0), [overview, setOverview] = useState(false), [showScores, setShowScores] = useState(false);
   const [spin, setSpin] = useState(0), [meterActive, setMeterActive] = useState(false);
   const [avatar, setAvatar] = useState<KartAvatar>(() => { try { const saved = JSON.parse(localStorage.getItem('gakuro-golf-avatar-v1') || 'null'); return validAvatar(saved) ? saved : loadAvatar(); } catch { return loadAvatar(); } });
   const [showCreator, setShowCreator] = useState(false);
+  const [inviteCopied,setInviteCopied]=useState(false);
   const [entry,setEntry]=useState<'title'|'practice'|'host'|'join'>('title');
   const [holeCount, setHoleCount] = useState(18), [rules, setRules] = useState(false);
   const room = useRef<GolfRoom | null>(null), mounted = useRef(true);
+  const invite=view&&room.current?.host&&room.current.code?golfInviteUrl(window.location.href,shareRoomCode(room.current.code,room.current.transport)):'';
+
   useEffect(() => { if (view?.phase === 'lobby') room.current?.send({ type: 'avatar', avatar }); else if (view) setShowCreator(false); }, [avatar, view?.phase]);
   const changeAvatar = (value: KartAvatar) => { setAvatar(value); try { localStorage.setItem('gakuro-golf-avatar-v1', JSON.stringify(value)); } catch { /* Session editing still works. */ } };
   const t = (s: string) => trans(s, languageMode);
@@ -73,7 +79,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
   };
   const join = async () => {
     if (busy) return; setBusy(true); setMessage(''); const current = createRoom();
-    try { await current.join(code, name); }
+    try { await current.join(code, name.trim()); if(mounted.current&&room.current===current&&inviteCode)setShowCreator(true); }
     catch (e) { if (mounted.current && room.current === current) { room.current = null; current.close(); setView(null); setMessage(e instanceof Error ? e.message : '接続できませんでした。'); } }
     finally { if (mounted.current) setBusy(false); }
   };
@@ -86,6 +92,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
     const completeA = a.phase === 'finished', completeB = b.phase === 'finished';
     return Number(completeB) - Number(completeA) || b.scores.length - a.scores.length || a.scores.reduce((s, n) => s + n, 0) - b.scores.reduce((s, n) => s + n, 0) || a.slot - b.slot;
   });
+  if(!view&&inviteCode)return <InviteJoin title="GAKURO GOLF" name={name} onName={setName} onJoin={join} onClose={()=>{leave();onClose();}} busy={busy} error={t(message)} languageMode={languageMode}/>;
   if(!view&&entry==='title'&&!picker)return <GameTitleScreen kind="golf" title="GAKURO GOLF" subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
   return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${!view?'gg-title-screen':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''}`} data-gamepad-initial-scope="gakuro-golf">
     <header className="gg-header"><button onClick={() => { leave(); onClose(); }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug"><StorybookQuality languageMode={languageMode}/></span><span className="gg-debug">{t('オンライン')}</span></header>
@@ -107,7 +114,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE' }: { onC
           </div>
         </div>}
         {view?.phase === 'lobby' && <div className="gg-lobby gg-panel online-collection"><header className="online-collection-heading"><h2>{t('スタート前の集合')}</h2><strong>{view.players.length} / {MAX_PLAYERS} {t('人')}</strong></header><div className="online-collection-layout"><div className="gg-roster online-roster" data-allow-japanese="true">{view.players.map(p => <span key={p.id} data-self={p.id === self}><b className="online-member-name">{p.name}</b>{p.spectator && ' · ' + t('観戦モード')}</span>)}</div>
-          <aside className="online-collection-controls"><p>{t('ルームコード')} <strong className="gg-code">{shareRoomCode(room.current?.code||'',room.current?.transport||transport) || 'SOLO'}</strong></p><p data-allow-japanese="true">{view.title}</p><label>{t('プレイするホール数')}<select value={view.holeCount} disabled={!room.current?.host || busy} onChange={e => room.current?.setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {HOLES.slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label>{room.current?.host ? <><button disabled={busy} onClick={() => setPicker('change')}>{t('問題の範囲を変更')}</button><button className="gg-primary" disabled={!view.title || busy || !view.players.some(p => p.connected && !p.spectator)} onClick={() => room.current?.start()}>{t('ラウンド開始')}</button><p className="gg-muted">{t(room.current?.serverHosted ? 'サーバーが試合を進行します。ホストの離席でもプレイできます。' : 'ホストは画面を開いたままにしてください。離席中は全員が一時停止します。')}</p></> : <p>{t('ホストの開始を待っています。')}</p>}
+          <aside className="online-collection-controls"><p>{t('ルームコード')} <strong className="gg-code">{shareRoomCode(room.current?.code||'',room.current?.transport||transport) || 'SOLO'}</strong></p>{invite&&<div className="gg-invite"><input readOnly aria-label={t('招待リンク')} value={invite} onFocus={e=>e.target.select()}/><button onClick={async()=>{if(await copyInviteUrl(invite))setInviteCopied(true);else setMessage('リンクを選択してコピーしてください。');}}>{t(inviteCopied?'コピーしました':'招待URLをコピー')}</button></div>}<p data-allow-japanese="true">{view.title}</p><label>{t('プレイするホール数')}<select value={view.holeCount} disabled={!room.current?.host || busy} onChange={e => room.current?.setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {HOLES.slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label>{room.current?.host ? <><button disabled={busy} onClick={() => setPicker('change')}>{t('問題の範囲を変更')}</button><button className="gg-primary" disabled={!view.title || busy || !view.players.some(p => p.connected && !p.spectator)} onClick={() => room.current?.start()}>{t('ラウンド開始')}</button><p className="gg-muted">{t(room.current?.serverHosted ? 'サーバーが試合を進行します。ホストの離席でもプレイできます。' : 'ホストは画面を開いたままにしてください。離席中は全員が一時停止します。')}</p></> : <p>{t('ホストの開始を待っています。')}</p>}
           <button onClick={() => setShowCreator(true)}>{t('キャラクタークリエイト')}</button><button onClick={leave}>{t('部屋を退出')}</button></aside></div><WaitingHomeDash languageMode={languageMode}/></div>}
         {view && view.phase !== 'lobby' && me && <>
           <CourseHud player={me} hole={hole} remaining={remaining} aim={angle} players={view.players} holeCount={view.holeCount} t={t}/>

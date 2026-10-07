@@ -22,7 +22,6 @@ const requiredGuards = [
   'const isAdminDebugLaunch = DEBUG_FEATURES_ENABLED',
   'if (!DEBUG_FEATURES_ENABLED || gamepadTestScreenOpenedRef.current',
   'onClick={handleTitleLogoClick}',
-  'if (DEBUG_FEATURES_ENABLED) handleTitleClick();',
   'if (onlineTitleTapCount.current === 3)',
   '{!OFFLINE_DISTRIBUTABLE && onlineGamesUnlocked && (',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.DEBUG_MENU',

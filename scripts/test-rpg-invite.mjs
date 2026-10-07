@@ -19,7 +19,7 @@ try {
   const invite = buildRpgInviteUrl(source, "ab2cde");
   assert.equal(
     invite,
-    "https://example.test/learning-rogue?debug=1&rpgRoom=AB2CDE#rpg",
+    "https://example.test/learning-rogue?rpgRoom=AB2CDE",
   );
   assert.equal(getRpgRoomCodeFromUrl(invite), "AB2CDE");
   assert.equal(

@@ -1,3 +1,4 @@
+import InviteJoin from '../mini-games/shared/InviteJoin';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../services/onlineTransport';
 import type {OnlineTransport} from '../services/onlineTransport';
 import TransportPicker from '../mini-games/shared/TransportPicker';
@@ -143,6 +144,7 @@ export default function RpgOnline({
   onRoom,
   onSnapshot,
   onEnergyRequest,
+  onChooseCharacter,
   onSetup,
   onClose,
 }: {
@@ -157,6 +159,7 @@ export default function RpgOnline({
   onRoom: (room: RpgRoom) => void;
   onSnapshot: (snapshot: RpgSnapshot) => void;
   onEnergyRequest?:()=>void;
+  onChooseCharacter?:()=>void;
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
@@ -198,9 +201,7 @@ export default function RpgOnline({
   const [inviteTheme, setInviteTheme] = useState<RpgAdventureSetup["visualTheme"]>(
     adventureSetup?.visualTheme || "elementary",
   );
-  const previewTheme = autoJoinInvite
-    ? inviteTheme
-    : adventureSetup?.visualTheme || "elementary";
+  const previewTheme = adventureSetup?.visualTheme || "elementary";
   const displaySiteName = (site: Site) => getRpgSiteDisplayName(site, previewTheme);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -297,10 +298,11 @@ export default function RpgOnline({
     try {
       if (mode === "practice") r.practice(name, adventureSetup, timeLimitMinutes,gameMode);
       else if (mode === "create") await r.create(name, adventureSetup, timeLimitMinutes,gameMode);
-      else if (mode === "invite")
-        await r.prepareInviteJoin(code, name, (setup) =>
-          onSetup({ ...setup, visualTheme: inviteTheme }),
-        );
+      else if (mode === "invite") {
+        await r.prepareInviteJoin(code, name.trim(), setup => onSetup(setup));
+        // Register the entered name immediately; character selection then updates the profile.
+        if(room.current===r)r.enterWorld({...nativeProfile(player),visualTheme:previewTheme});
+      }
       else await r.join(code, name);
     } catch (e) {
       r.close();
@@ -456,9 +458,10 @@ export default function RpgOnline({
   };
   const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':me?.life?.indoors?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
   useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,me?.life?.indoors?'home':!world||!world.started?'setup':'map');
+  if(autoJoinInvite&&!world)return <InviteJoin title={trans("学習ローグRPG",languageMode)} name={name} onName={setName} onJoin={()=>start("invite")} onClose={close} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
   return (
     <TranslatedUiTree mode={languageMode}>
-      {autoJoinInvite&&!inviteEntered&&!world&&<GameTitleScreen kind="rpg" title="異世界転生したら学力で無双した件" subtitle="学習ローグRPG" logo={<img src={assetUrl('sprites/rpg/title/logo.webp')} alt="学習ローグRPG"/>} languageMode={languageMode} onClose={close} backdrop={<img src={assetUrl('sprites/rpg/title/frontier.webp')} alt=""/>} actions={[{label:'招待に参加する',onClick:()=>setInviteEntered(true)}]}/>}
+
       {settingsOpen&&<RpgSettings languageMode={languageMode} onClose={()=>setSettingsOpen(false)}/>}
       {farmOpen&&world&&<FarmPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onTrack={(x,y)=>{if(!me)return;const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setFarmOpen(false);}} onClose={()=>setFarmOpen(false)}/>}
       {cityOpen&&world?.city&&<CityPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onClose={()=>setCityOpen(false)}/>}
@@ -495,7 +498,7 @@ export default function RpgOnline({
           </div>
         ) : !world.started ? (
           <main className="rpg-waiting-lobby">
-            <section className="rpg-waiting-panel"><button onClick={()=>setHeroOpen(true)}>オリジナル主人公を作る</button>
+            <section className="rpg-waiting-panel">{autoJoinInvite&&onChooseCharacter&&<button onClick={onChooseCharacter}>編と主人公を選び直す</button>}<button onClick={()=>setHeroOpen(true)}>オリジナル主人公を作る</button>
               <div className="rpg-waiting-heading">
                 <div>
                   <h1>冒険者集合中</h1>

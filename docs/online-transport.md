@@ -6,8 +6,10 @@ Room creation defaults to Host connection (PeerJS/WebRTC). The host runs the gam
 
 Server connection (beta) is not recommended for large groups. Health checks and WebSocket setup retry for up to three minutes on cold starts. Invalid room/protocol errors terminate immediately; leaving aborts the wait.
 
-Shared codes use H-ABC234 for host or S-ABC234 for server communication. Prefixes override the joining transport. RPG/GP invite URLs retain prefixes. Legacy unprefixed invite URLs use server communication.
+Shared codes use H-ABC234 for host or S-ABC234 for server communication. Prefixes override the joining transport. RPG/GP/Golf invite URLs retain prefixes. Legacy unprefixed invite URLs use server communication.
 
 Golf has a responsive title/preparation screen. Left/right arrows aim, up/down adjust spin, and Enter starts/confirms the shot meter. The right-side Shot button starts the meter without a cancel button. After setting power, an arrow marks the impact center. Course overview forward points up.
 
 RPG town arcade rewards no longer require questions. Upgrade, synthesis, rest, shop, relic and arcade entry cards use dedicated generated illustrations.
+
+Invitations for all three games first show only player name and Join. Golf hosts can copy an invitation URL from the lobby. Invite URLs omit unrelated query parameters and fragments. After joining, RPG participants choose their edition and protagonist (and can choose again while waiting); GP and Golf participants edit an avatar with a 3D preview. One-hit Home Dash remains available while waiting and closes when the host starts. New-player surveys are deferred until leaving the invitation flow.

@@ -23,6 +23,8 @@ export function buildRpgInviteUrl(href: string, roomCode: string) {
   if (!code) return href;
   try {
     const url = new URL(href, "http://learning-rogue.local");
+    url.search = "";
+    url.hash = "";
     url.searchParams.set(RPG_ROOM_QUERY_PARAM, code);
     return /^https?:/i.test(href)
       ? url.toString()

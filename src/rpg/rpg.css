@@ -1888,3 +1888,5 @@
 @media (max-height: 480px) {
   .rpg-entry-heading { flex-wrap: nowrap; }
 }
+
+.rpg-invite-theme{flex-shrink:0;padding:8px 16px;background:#1d3b42;color:#fff3ce}.rpg-invite-theme label{display:flex;align-items:center;justify-content:center;gap:12px}.rpg-invite-theme select{padding:8px 12px;border:1px solid #b9ba8b;border-radius:8px;background:#294d55;color:#fff3ce}

@@ -1,3 +1,5 @@
+import WaitingHomeDash from './mini-games/shared/WaitingHomeDash';
+import {golfInviteCode} from './mini-games/gakuro-golf/invite';
 import type {RpgWorldSave} from './rpg/worldSave';
 import RpgHeroSelection from "./rpg/HeroSelection";
 import { enemyHeroDeck, applyEnemyHeroRelics, type EnemyHero } from "./rpg/enemyHeroes";
@@ -1699,6 +1701,8 @@ const App: React.FC = () => {
     ), []);
     const kartCode = useMemo(() => typeof window === 'undefined' ? '' : kartInviteCode(window.location.href), []);
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
+    const golfCode = useMemo(() => typeof window === 'undefined' ? '' : golfInviteCode(window.location.href), []);
+    const [golfInviteOpen,setGolfInviteOpen] = useState(Boolean(golfCode));
     const craftCode = useMemo(() => typeof window === 'undefined' ? '' : craftInviteCode(window.location.href), []);
     const [craftInviteOpen, setCraftInviteOpen] = useState(false);
     const rpgInviteParticipantRef = useRef(false);
@@ -1740,6 +1744,7 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
+    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     // 「続きから」で読み込んだ本編の状態を、課題レターを確認してから
@@ -21237,8 +21242,9 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.CHARACTER_SELECTION && (
-                    <div className="absolute inset-0">
-                        <AdventureCharacterSelection
+                    <div className="absolute inset-0 flex flex-col">
+                        {gameState.rpgOnline&&rpgInviteParticipantRef.current&&<div className="rpg-invite-theme"><label>{trans('開始する編',languageMode)}<select aria-label={trans('開始する編',languageMode)} value={visualTheme} onChange={event=>{const theme=event.target.value as VisualThemeId;setVisualTheme(theme);setGameState(prev=>({...prev,visualTheme:theme}));}}>{(['elementary','high-school','magic'] as const).map((theme,i)=><option key={theme} value={theme}>{trans(['小学生編','高校編','マジック編'][i],languageMode)}</option>)}</select></label>{!rpgSnapshot?.world.started&&<WaitingHomeDash languageMode={languageMode}/>}</div>}
+                        <div className="min-h-0 flex-1"><AdventureCharacterSelection
                             characters={themedCharacters}
                             unlockedCount={isDebugHpOne ? themedCharacters.length : Math.min(themedCharacters.length, clearCount + 2)}
                             onSelect={handleCharacterSelect}
@@ -21249,7 +21255,7 @@ const App: React.FC = () => {
                             coopDecisionOwnerPeerId={gameState.challengeMode === 'COOP' ? coopDecisionOwner?.peerId : undefined}
                             visualTheme={visualTheme}
                             vacationModeUnlocked={vacationModeUnlockedForTheme}
-                        />
+                        /></div>
                     </div>
                 )}
 
@@ -21550,9 +21556,9 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.GAKURO_GOLF && (
+                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen) && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-emerald-950 text-amber-100">{trans("コースと問題を準備中…", languageMode)}</div>}>
-                        <GakuroGolf languageMode={languageMode} onClose={returnToTitle} />
+                        <GakuroGolf languageMode={languageMode} inviteCode={golfInviteOpen?golfCode:''} onClose={()=>{setGolfInviteOpen(false);returnToTitle();}} />
                     </React.Suspense>
                 )}
 
@@ -21613,6 +21619,7 @@ const App: React.FC = () => {
                                 onEnergyRequest={()=>{const snapshot=rpgSnapshotRef.current,me=snapshot?.world.players[snapshot.selfId];if(!me||snapshot?.world.ended||me.spectator||me.life?.work||me.nativeScene||me.duelId||me.dungeonId||me.arcadePending)return;setRpgEnergyLearning(true);setGameState(prev=>({...prev,eventLearningPending:undefined,screen:getChallengeScreenForMode(localAssignmentProblemConfig?.mode||prev.mode)}));audioService.playBGM('math');}}
                                 onRoom={attachRpgRoom}
                                 onSnapshot={receiveRpgSnapshot}
+                                onChooseCharacter={()=>setGameState(prev=>({...prev,screen:GameScreen.CHARACTER_SELECTION}))}
                                 onSetup={applyRpgInviteSetup}
                                 onClose={()=>{setRpgResumeSave(null);returnToTitle();}}
                             />
@@ -22665,7 +22672,7 @@ const App: React.FC = () => {
                     onOnlineProfileChange={setOnlineRankingProfile}
                     onManagementProfileChange={setManagementProfile}
                 />
-                {!showAgePrivacySetup && renderStudentGradeSurvey()}
+                {!onlineInviteActive && !showAgePrivacySetup && renderStudentGradeSurvey()}
                 <AssignmentInboxModal
                     open={showAssignmentInbox && !showAgePrivacySetup && !showStudentGradeSurvey}
                     onClose={() => setShowAssignmentInbox(false)}
@@ -22685,7 +22692,7 @@ const App: React.FC = () => {
                     onCancel={() => setLearnerInvitationToken('')}
                 />
                 <OnlineNameSetupModal
-                    open={showOnlineNameSetup
+                    open={!onlineInviteActive && showOnlineNameSetup
                         && !showAgePrivacySetup
                         && !showStudentGradeSurvey
                         && childSafetyService.canSubmitRanking()}

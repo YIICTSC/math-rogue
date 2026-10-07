@@ -1,3 +1,4 @@
+import InviteJoin from '../shared/InviteJoin';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/onlineTransport';
 import type {OnlineTransport} from '../../services/onlineTransport';
 import TransportPicker from '../shared/TransportPicker';
@@ -57,11 +58,12 @@ function MiniMap({ world, self }: { world: Race; self: string }) {
 }
 export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteCode = '', allowHost = true }: { onClose: () => void; languageMode?: LanguageMode; inviteCode?: string; allowHost?: boolean }) {
   const [transport,setTransport]=useState<OnlineTransport>(initialTransport);
-  const [world, setWorld] = useState<Race | null>(null), [name, setName] = useState('Racer'), [hero] = useState(0), [course, setCourse] = useState(0), [code, setCode] = useState(inviteCode);
+  const [world, setWorld] = useState<Race | null>(null), [name, setName] = useState(inviteCode?'':'Racer'), [hero] = useState(0), [course, setCourse] = useState(0), [code, setCode] = useState(inviteCode);
   const [customCourse,setCustomCourse]=useState<CustomCourse>(),[nextCustom,setNextCustom]=useState<CustomCourse>(),[editingCourse,setEditingCourse]=useState(false);
   const [entry,setEntry]=useState<'title'|'practice'|'create'|'join'|'avatar'>('title');
   const [avatarBack,setAvatarBack]=useState<'practice'|'create'|'join'>('practice');
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [lobbyAvatarOpen,setLobbyAvatarOpen]=useState(Boolean(inviteCode));
   const [error, setError] = useState(''), [busy, setBusy] = useState(false), [copied, setCopied] = useState(false), [fill, setFill] = useState(true), [sound, setSound] = useState(true);
   const [avatar, setAvatar] = useState(loadAvatar);
   const [nextCourse, setNextCourse] = useState(0);
@@ -214,6 +216,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
   const front = order.slice(0, 5); if (me && place > 5) front.push(me);
   if(editingCourse)return <CourseEditor languageMode={languageMode} initial={world?nextCustom:customCourse} onClose={()=>setEditingCourse(false)} onUse={c=>{if(world){setNextCustom(c);setNextCourse(c.theme);}else{setCustomCourse(c);setCourse(c.theme);setEntry('practice');}setEditingCourse(false);}}/>;
   if (picking) return <LessonPicker languageMode={languageMode} busy={busy} error={error} onSelect={chooseLesson} onBack={() => { generation.current++; setPicking(null); setError(''); }} />;
+  if(!world&&inviteCode)return <InviteJoin title="GAKURO GP" name={name} onName={setName} onJoin={()=>start('join')} onClose={onClose} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
   if(!world&&entry==='title')return <GameTitleScreen kind="kart" title={trans('スーパー学ロカート',languageMode)} subtitle="学んで加速。みんなでグランプリへ。" languageMode={languageMode} onClose={onClose} backdrop={<KartCanvas world={preview} selfId="preview" preview/>} actions={[...(allowHost?[{label:'ひとりでレース',onClick:()=>setEntry('practice')},{label:'オンラインの部屋を作る',onClick:()=>setEntry('create')},{label:'オリジナルコース作成',onClick:()=>setEditingCourse(true)}] : []),{label:'招待に参加する',onClick:()=>setEntry('join')}]}/>;
   return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing'+(world.phase==='lobby'?' gk-preparing':'') : 'gk-intro-root'}`} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
     <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><StorybookQuality languageMode={languageMode}/><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span><button aria-label="Sound toggle" className="gk-sound" onClick={() => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); setSound(audio.current.toggle()); }}>{sound ? 'SOUND ON' : 'SOUND OFF'}</button></div></header>
@@ -246,7 +249,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
           <div className="online-collection-layout"><div className="gk-roster online-roster" data-allow-japanese="true">{racers.filter(p=>!p.cpu).map(p => <div key={p.id} data-self={p.id===self}><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span className="online-member-name">{p.name}</span>{p.spectator ? <small>WATCH</small> : p.id === self && <small>YOU</small>}</div>)}</div>
           <aside className="online-collection-controls">{room.current?.code && <button className="gk-code" onClick={async () => { try { await navigator.clipboard.writeText(shareRoomCode(room.current!.code,room.current!.transport)); setCopied(true); } catch { setError('コードを選択してコピーしてください。'); } }}>{shareRoomCode(room.current.code,room.current.transport)}<small>{copied ? 'コピー済み' : 'コピー'}</small></button>}
           {invite && <div className="gk-invite"><input readOnly aria-label="招待リンク" value={invite} onFocus={e => e.target.select()} /><button onClick={copyInvitation}>{inviteCopied ? 'コピーしました' : '招待URLをコピー'}</button></div>}
-          <details className="online-avatar-details"><summary>キャラクタークリエイト</summary><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /></details>
+          <details className="online-avatar-details" open={lobbyAvatarOpen} onToggle={e=>setLobbyAvatarOpen(e.currentTarget.open)}><summary>キャラクタークリエイト</summary>{lobbyAvatarOpen&&<div className="online-avatar-preview"><KartCanvas world={preview} selfId="preview" preview /></div>}<AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /></details>
           <details className="online-avatar-details"><summary>周回数 · {world.laps}</summary><LapCountPicker value={world.laps} onChange={laps => room.current?.setLaps(laps)} disabled={!room.current?.host} languageMode={languageMode} /></details>
           {room.current?.host ? <><div className="gk-lesson-summary"><p>{world.lesson?.title}</p><button onClick={() => setPicking('edit')}>問題を選び直す</button></div><label className="gk-fill"><input type="checkbox" checked={fill} onChange={e => setFill(e.target.checked)} />空き枠をCPUで埋める</label><button className="gk-primary" disabled={!world.lesson || (!fill && !order.length)} onClick={e => { wakeAudio(); e.currentTarget.blur(); room.current?.start(fill); }}>レースを開始 →</button></> : <p>ホストのスタートを待っています。</p>}</aside></div>
           <WaitingHomeDash languageMode={languageMode}/>
