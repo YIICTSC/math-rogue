@@ -1,0 +1,11 @@
+.online-waiting-dash{margin-top:12px;border:1px solid #839ba7;border-radius:12px;background:#102831;color:#f4f5e9;overflow:hidden;text-align:left}
+.online-waiting-dash summary{cursor:pointer;padding:12px;min-height:44px;touch-action:manipulation}
+.online-waiting-dash summary strong{margin-right:12px;font-size:15px}.online-waiting-dash summary span{font-size:12px}
+.online-waiting-dash>p{padding:0 12px;font-size:12px;margin:0 0 8px;color:#e1eadc}
+.online-waiting-dash-frame{height:clamp(250px,40dvh,380px);min-height:0;overflow:hidden;isolation:isolate;position:relative;contain:layout paint}
+.online-waiting-dash-frame .mini-game-go-home-screen button{background:#274b55!important;color:#fff!important;border:1px solid #a5bdc4}
+@media(max-width:600px){.online-waiting-dash summary strong,.online-waiting-dash summary span{display:block}.online-waiting-dash-frame{height:300px}}
+
+.online-waiting-dash-frame>.mini-game-go-home-screen{position:relative!important;width:100%!important;height:100%!important}
+.online-waiting-dash{flex-shrink:0}.gk-ready-card.online-collection>.online-collection-layout,.gk-ready-card.online-collection>.online-collection-heading{flex-shrink:0}
+.gk-root.gk-preparing .gk-ready-card.online-collection,.gg-root.gg-collecting .gg-lobby.online-collection{display:block;overflow:auto}.gk-root.gk-preparing .online-collection-layout,.gg-root.gg-collecting .online-collection-layout{height:auto;min-height:min-content;max-height:none;flex:none;overflow:visible}

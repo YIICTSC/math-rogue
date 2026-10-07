@@ -1,6 +1,7 @@
 import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/onlineTransport';
 import type {OnlineTransport} from '../../services/onlineTransport';
 import TransportPicker from '../shared/TransportPicker';
+import WaitingHomeDash from '../shared/WaitingHomeDash';
 import StorybookQuality from '../../three/StorybookQuality';
 import CourseEditor from './CourseEditor';
 import {loadCourses} from './courseStorage';
@@ -248,6 +249,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
           <details className="online-avatar-details"><summary>キャラクタークリエイト</summary><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /></details>
           <details className="online-avatar-details"><summary>周回数 · {world.laps}</summary><LapCountPicker value={world.laps} onChange={laps => room.current?.setLaps(laps)} disabled={!room.current?.host} languageMode={languageMode} /></details>
           {room.current?.host ? <><div className="gk-lesson-summary"><p>{world.lesson?.title}</p><button onClick={() => setPicking('edit')}>問題を選び直す</button></div><label className="gk-fill"><input type="checkbox" checked={fill} onChange={e => setFill(e.target.checked)} />空き枠をCPUで埋める</label><button className="gk-primary" disabled={!world.lesson || (!fill && !order.length)} onClick={e => { wakeAudio(); e.currentTarget.blur(); room.current?.start(fill); }}>レースを開始 →</button></> : <p>ホストのスタートを待っています。</p>}</aside></div>
+          <WaitingHomeDash languageMode={languageMode}/>
         </section></div>}
         {world.phase === 'countdown' && <div className="gk-countdown"><span>{Math.ceil(world.remaining)}</span><p>GET READY TO BREAK AWAY</p></div>}
         {!spectating && world.phase === 'race' && !!me?.finish && <div className="gk-finished"><b>FREE RUN</b><span>#{place} · {time(me.finish)}</span><p>順位・タイム確定！結果がそろうまで自由に走れます。</p></div>}

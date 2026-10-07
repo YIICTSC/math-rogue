@@ -1232,7 +1232,7 @@ const GoHomeDash: React.FC<{
 
             {gameState === 'START' && (
                 <div data-gamepad-modal data-gamepad-initial-scope="go-home-start" className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 animate-in fade-in backdrop-blur-md">
-                    <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">{t('帰宅ダッシュ！')}</h2>
+                    <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">{initialHp===1&&initialMaxHp===1?(languageMode==='ENGLISH'?'One-hit Home Dash!':languageMode==='HIRAGANA'?'きたくダッシュいっぱつアウト!':'帰宅ダッシュ一発アウト!'):t('帰宅ダッシュ！')}</h2>
                     <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
                     <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">{t('障害物をよけて帰宅せよ！')}<br/>{t('ミサイルやスキルを駆使してゴールを目指せ。')}</p>
                     <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> {t('START DASH')}</button>

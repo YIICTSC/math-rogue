@@ -2641,10 +2641,8 @@ const App: React.FC = () => {
         && Boolean(gameState.rpgOnline);
     const canRunRpgOnline = !OFFLINE_DISTRIBUTABLE;
     const [debugEventSimulationTheme, setDebugEventSimulationTheme] = useState<VisualThemeId>('elementary');
-    const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
-    const [titleClickCount, setTitleCount] = useState<number>(0);
     const [onlineGamesUnlocked, setOnlineGamesUnlocked] = useState(false);
     const onlineTitleTapCount = useRef(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
@@ -5187,7 +5185,6 @@ const App: React.FC = () => {
         // session. Store builds also clear these keys as before.
         storageService.clearDebugSettings();
         setIsDebugMode(isAdminDebugLaunch);
-        setIsMathDebugSkipped(false);
         setIsDebugHpOne(isAdminDebugLaunch);
         setIsMiniGameDebugUnlocked(isAdminDebugLaunch);
         if (isAdminDebugLaunch) {
@@ -5328,20 +5325,6 @@ const App: React.FC = () => {
             setOnlineGamesUnlocked(true);
             audioService.playSound('select');
         }
-        if (DEBUG_FEATURES_ENABLED) handleTitleClick();
-    };
-
-    const handleTitleClick = () => {
-        if (!DEBUG_FEATURES_ENABLED) return;
-        const next = titleClickCount + 1;
-        setTitleCount(next);
-        if (next >= 10) {
-            const newState = !isMathDebugSkipped;
-            setIsMathDebugSkipped(newState);
-            storageService.saveDebugMathSkip(newState);
-            setTitleCount(0);
-            audioService.playSound('select');
-        }
     };
 
     const handleLogClick = (e: React.SyntheticEvent) => {
@@ -5362,13 +5345,6 @@ const App: React.FC = () => {
         }
     };
 
-    const disableMathDebugSkip = () => {
-        if (!isMathDebugSkipped) return;
-        setIsMathDebugSkipped(false);
-        storageService.saveDebugMathSkip(false);
-        setTitleCount(0);
-        audioService.playSound('select');
-    };
 
     const disableDebugHpOne = () => {
         if (!isDebugHpOne) return;
@@ -19745,15 +19721,6 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
-                            {DEBUG_FEATURES_ENABLED && isMathDebugSkipped && (
-                                <button
-                                    type="button"
-                                    onClick={disableMathDebugSkip}
-                                    className={`start-menu-debug-toggle text-red-500 font-bold ${isMiniGameDebugUnlocked ? 'mb-1' : 'mb-6'} text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer`}
-                                >
-                                    {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
-                                </button>
-                            )}
                             {isDebugModeActive && isDebugHpOne && (
                                 <button
                                     type="button"
@@ -19772,7 +19739,7 @@ const App: React.FC = () => {
                                     {trans("(デバッグ: ミニゲームぜんかいほう ON)", languageMode)}
                                 </button>
                             )}
-                            {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="start-menu-debug-spacer mb-2 h-2"></div>}
+                            {(!isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="start-menu-debug-spacer mb-2 h-2"></div>}
 
                             <div className="start-menu-button-panel flex w-full flex-col items-center">
                                 <div className="mb-4 flex flex-wrap items-stretch justify-center gap-2">
@@ -21509,7 +21476,7 @@ const App: React.FC = () => {
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            debugSkip={isMathDebugSkipped && !rpgEnergyLearning}
+                            debugSkip={false}
                             isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
@@ -21526,7 +21493,7 @@ const App: React.FC = () => {
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            debugSkip={isMathDebugSkipped && !rpgEnergyLearning}
+                            debugSkip={false}
                             isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
@@ -21541,7 +21508,7 @@ const App: React.FC = () => {
                             mode={localAssignmentProblemConfig?.mode || gameState.mode}
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            debugSkip={isMathDebugSkipped && !rpgEnergyLearning}
+                            debugSkip={false}
                             isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
@@ -21562,7 +21529,7 @@ const App: React.FC = () => {
                             customProblems={debugIllustratedProblemPreview ? undefined : localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
                             debugProblems={debugIllustratedProblemPreview ? [debugIllustratedProblemPreview.problem] : undefined}
                             previewOnly={Boolean(debugIllustratedProblemPreview)}
-                            debugSkip={debugIllustratedProblemPreview ? false : isMathDebugSkipped && !rpgEnergyLearning}
+                            debugSkip={false}
                             isChallenge={debugIllustratedProblemPreview ? false : Boolean(gameState.eventLearningPending)}
                             rewardHint={debugIllustratedProblemPreview ? undefined : trans(rpgEnergyLearning ? "正解するとエネルギーが2回復" : "正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}

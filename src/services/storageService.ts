@@ -1706,20 +1706,7 @@ export const storageService = {
   },
 
   // --- Debug Settings ---
-  saveDebugMathSkip: (enabled: boolean) => {
-      if (!DEBUG_FEATURES_ENABLED) {
-          localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
-          return;
-      }
-      localStorage.setItem(STORAGE_KEY_DEBUG_MATH_SKIP, JSON.stringify(enabled));
-  },
 
-  getDebugMathSkip: (): boolean => {
-      if (!DEBUG_FEATURES_ENABLED) return false;
-      try {
-          return JSON.parse(localStorage.getItem(STORAGE_KEY_DEBUG_MATH_SKIP) || 'false');
-      } catch { return false; }
-  },
 
   saveDebugHpOne: (enabled: boolean) => {
       if (!DEBUG_FEATURES_ENABLED) {
