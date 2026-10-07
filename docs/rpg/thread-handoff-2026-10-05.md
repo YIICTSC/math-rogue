@@ -392,3 +392,13 @@ build/server:build、新規resident world/browser、既存town model/browser、c
 - Main published as `72850abbfc4c637d7511864cf53feb103ca1c476`; fetched and verified exact tested local tree equality. GitHub Actions: Pages `37562749251`, Android `37562749285`. User explicitly confirmed build verification complete; do not keep waiting or recheck deployment on their behalf.
 - 3D browser integration passed on five sizes including continuous dual-stick movement, actual mining/placing, underground oasis, outdoor farm/animal actions and no outdoor pet buttons. Local frontend and server builds, English gate and Android manifest verification passed.
 - User asked whether games can use host-driven networking for about ten players instead of Render. No implementation change was requested yet. All four network classes already retain PeerJS/WebRTC host code, while the deployed builds choose dedicated servers because `VITE_ONLINE_SERVER_URL` is configured in Pages/Android workflows. Explain signaling/STUN and possible TURN relay, host upload/CPU/battery and background throttling; recommend a room-level host/server choice, compact updates and host handover if asked to implement. Do not simply remove the URL globally without a room transport/join design.
+
+
+## 2026-10-07: online transport and release entry
+- RPG / kart / golf room creation chooses host WebRTC (default) or server beta; server cold start retries for 3 minutes. Tagged H-/S- codes preserve transport.
+- Latest release instruction supersedes public visible entries: exactly three title-logo taps reveal the three games, independent of debug. Invitations remain direct. Standalone Craft removed; RPG reused mini-games retained.
+- Golf dedicated responsive title, keyboard aim/spin/Enter, right Shot start, no cancel button, impact arrow, corrected overview orientation. Seven title/lobby/shot viewport checks passed.
+- Town arcade no questions; six ImageGen town-service WebP images added.
+- Verification: production three-tap browser plus real PeerJS two-player join, shared cold-start retry/cancel, 40 server connections/movement/disconnect, arcade, meter, English gate, Android asset manifest, frontend/server builds. Main publication commit recorded below once completed.
+
+Published main: 454cb3514b7bf4b527a8966c5f1b68cf6bca20a7; uploaded tree matched tested tree. Frontend and server builds passed.
