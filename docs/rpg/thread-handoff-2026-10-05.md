@@ -418,3 +418,8 @@ Kart: eight course sky/fog/road/rail/material palettes now applied; urban course
 - main b9cf06e317ef44f9f4434f795cfd95aa899f7677。レースは選択単元から15問を用意し各周3問ずつ。表示・CPU判断・採点・効果音を周回に対応。旧3問データも互換維持。
 - ゴルフは参加者別の出題履歴をホールをまたいで維持。ホスト・サーバー双方対応。問題ソースの重複を統合し、使用可能問題を使い切った時のみ再出題。
 - 新出題テスト（5周15問、ゴルフ12回36問、2周目採点、個別履歴、独自問題の重複排除・枯渇時循環）、既存レース学習・ゴルフサーバーテスト、英語ゲート、frontend/server build 合格。アップロード後のActions/Render完了待ちなし。
+
+## 2026-10-07 Render 自動デプロイ対象の絞り込み（実サービス未適用）
+- main 517db88346b9571dfe0542ab26d0e822e6db0b8f。render.yaml に buildFilter.paths を追加。オンライン3ゲーム・再利用クラフト・実際にサーバーへコンパイルされる共通データ/ロジック・依存パッケージのみ対象。一般UI/画像/音楽/文書は対象外。checksPass 維持。
+- server/build.mjs と Pages CI に依存ファイル包含検査。新しい対象外依存をサーバーに追加すると検査失敗。公式Blueprint JSONSchema、実サーバー依存包含、除外例、未包含依存の失敗検査、英語ゲート/frontend/server build 合格。
+- 重要: Render MCP に既存サービス Build Filters 更新ツールなし、Render CLI/API認証も未設定。既存 learning-rogue-online のライブフィルターにはまだ適用していない。ユーザーへDashboard settings の Build Filters / Included Paths に render.yaml paths を一度登録する手順を提示。Blueprint管理サービスへの同期でも可。ファイル公開だけで現サービスに適用済みと主張しない。サービス srv-dauu1v41nsns73fnjdk0、承認済み My Workspace tea-d75h6r6a2pns73cualng。
