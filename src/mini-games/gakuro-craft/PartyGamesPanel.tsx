@@ -1,4 +1,4 @@
-import BowlingSwipe from './BowlingSwipe';
+import BowlingSwipe from './BowlingSwipeControl';
 import SportsView from './SportsView';
 import React,{useEffect,useState} from 'react';
 import type {HomeGame,HomeGameWorld,GameCommand} from './homeGames';
