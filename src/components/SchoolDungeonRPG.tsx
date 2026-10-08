@@ -8,7 +8,7 @@ import { storageService } from '../services/storageService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import SchoolAdventurePanel from './school-dungeon/SchoolAdventurePanel';
 import { useSchoolAdventure } from './school-dungeon/useSchoolAdventure';
-import { ADVENTURE_ITEMS, equipmentHas, type SchoolItem } from './school-dungeon/adventure';
+import { ADVENTURE_ITEMS, equipmentHas, equipmentResonance, type SchoolItem } from './school-dungeon/adventure';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
@@ -493,10 +493,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
   const adventure = useSchoolAdventure({
-    game: 1, debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, gameOver, gameClear,
+    game: 1, debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
     setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
     log: message => addLog(message), restart: () => startNewGame(),
-    descend: next => { setFloor(next); generateFloor(next); }, turn: () => processTurn(player.x, player.y),
+    descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
     clearSave: () => storageService.clearDungeonState(), itemName: item => getItemName(item), catalog: ITEM_DB,
   });
   const allPossessions = useMemo(() => {
@@ -637,8 +637,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           const next = prev.map(row => [...row]);
           let changed = false;
           
-          const startX = player.x - Math.floor(VIEW_W/2);
-          const startY = player.y - Math.floor(VIEW_H/2);
+          const startX = adventure.state.scene !== undefined ? 0 : player.x - Math.floor(VIEW_W/2);
+          const startY = adventure.state.scene !== undefined ? 1 : player.y - Math.floor(VIEW_H/2);
           
           for (let y = 0; y < VIEW_H; y++) {
               for (let x = 0; x < VIEW_W; x++) {
@@ -690,8 +690,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           
           return {
               ...p,
-              attack: p.baseAttack + wPow + accPow,
-              defense: p.baseDefense + aPow + accDef
+              attack: equipmentResonance(p.equipment||{}).attack + p.baseAttack + wPow + accPow,
+              defense: equipmentResonance(p.equipment||{}).defense + p.baseDefense + aPow + accDef
           };
       });
   }, [player.equipment]);
@@ -1319,6 +1319,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     const adventureStart = adventure.prepareFloor(newMap, newEnemies, newItems, newTraps, px, py, f);
     px = adventureStart.px; py = adventureStart.py;
     if (adventure.state.mode === 'PUZZLE') roomsRef.current = [{x:1,y:1,w:7,h:7}];
+    else if (adventure.state.scene !== undefined) roomsRef.current = [{x:1,y:1,w:10,h:9}];
     setMap(newMap);
     setVisitedMap(Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false)));
     setFloorMapRevealed(false);
@@ -1363,6 +1364,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
       adventure.tick(px, py);
+      if (adventure.safeTurn()) return;
       turnCounter.current += 1;
       
       const aType = player.equipment?.armor?.type;
@@ -2777,8 +2779,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           shake.current.duration--;
       }
 
-      const startX = player.x - Math.floor(VIEW_W/2);
-      const startY = player.y - Math.floor(VIEW_H/2);
+      adventure.drawBackdrop(ctx, w, h);
+      const startX = adventure.state.scene !== undefined ? 0 : player.x - Math.floor(VIEW_W/2);
+      const startY = adventure.state.scene !== undefined ? 1 : player.y - Math.floor(VIEW_H/2);
 
       const hasSight = equipmentHas(player.equipment?.accessory, 'RING_SIGHT');
       const hasTrapSight = (equipmentHas(player.equipment?.accessory, 'RING_TRAP')) || (player.status.trapSight && player.status.trapSight > 0);
@@ -2796,10 +2799,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   continue;
               }
 
-              const isRevealed = floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]);
+              const isRevealed = adventure.state.scene !== undefined || (adventure.visibleTile(mx, my) && (floorMapRevealed || (visitedMap[my] && visitedMap[my][mx])));
               const tile = map[my][mx];
               
               if (isRevealed) {
+                  if (!adventure.drawTile(ctx, tile, sx, sy, ts)) {
                   if (tile === 'WALL') {
                       ctx.fillStyle = C1;
                       ctx.fillRect(sx, sy, ts, ts);
@@ -2814,6 +2818,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                       }
                   }
                   
+                  }
                   adventure.drawTerrain(ctx, mx, my, sx, sy, ts);
                   const trap = traps.find(t => t.x === mx && t.y === my);
                   if (trap && (trap.visible || hasTrapSight)) {
@@ -3226,7 +3231,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-full relative overflow-hidden flex flex-col">
                     <div className="dungeon-top-bar absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                        <span className="font-bold tracking-widest">{tr(currentTheme.name)}</span>
+                        <span className="font-bold tracking-widest">{adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
                             <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                             <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>

@@ -24,3 +24,17 @@ for(let seed=0;seed<40;seed++){
 }
 for(let i=0;i<8;i++){const p=puzzleLayout(26,26,i);assert.equal(p.map[p.goal.y][p.goal.x],'STAIRS');assert.equal(p.map[p.start.y][p.start.x],'FLOOR');assert(p.limit>=5);}
 console.log('PASS: emblem inheritance, seals, container capacity/ownership, challenge goals, enemy evolution and 40 safe maps');
+const {companionDirection,companionStep}=await import('../tmp/school-test/rules.mjs');
+for(const [n,[dx,dy]] of [[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1],[1,0],[1,1]].entries())assert.equal(companionDirection(dx,dy),n);
+const routeMap=Array.from({length:9},(_,y)=>Array.from({length:9},(_,x)=>x>0&&y>0&&x<8&&y<8?'FLOOR':'WALL'));
+routeMap[3][3]='WALL';routeMap[4][3]='WALL';routeMap[5][3]='WALL';
+const follower={x:2,y:4};let moves=0;
+while(Math.max(Math.abs(follower.x-6),Math.abs(follower.y-4))>1&&moves++<15){const step=companionStep(follower,6,4,routeMap,{},[]);assert(step);assert(routeMap[step.y][step.x]!=='WALL');if(step.x!==follower.x&&step.y!==follower.y){assert(routeMap[follower.y][step.x]!=='WALL');assert(routeMap[step.y][follower.x]!=='WALL');}Object.assign(follower,step);}
+assert(moves<15);assert.equal(companionStep({x:5,y:4},6,4,routeMap,{},[]),null);
+const narrow=[['WALL','WALL','WALL','WALL','WALL'],['WALL','FLOOR','FLOOR','FLOOR','WALL'],['WALL','WALL','WALL','WALL','WALL']];
+assert.equal(companionStep({x:1,y:1},3,1,narrow,{'2,1':'HOLE'},[]),null);
+assert.equal(companionStep({x:1,y:1},3,1,narrow,{},[{x:2,y:1}]),null);
+console.log('PASS: eight companion directions, safe detours, corner collision, hazards and occupied corridors');
+const {equipmentResonance}=await import('../tmp/school-test/rules.mjs');
+assert.deepEqual(equipmentResonance({}),{attack:0,defense:0,names:[]});assert.equal(equipmentResonance({weapon:item('NURSE_PENCIL',{marks:['HEAL_SWORD']}),accessory:item('RING_HEAL')}).attack,2);assert.equal(equipmentResonance({weapon:item('DRAGON_RULER',{marks:['DRAGON_KILLER']}),armor:item('FIREFIGHTER')}).defense,3);
+console.log('PASS: school equipment resonance and inherited emblems');

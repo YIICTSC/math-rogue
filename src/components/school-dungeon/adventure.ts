@@ -1,17 +1,18 @@
+import {EXTRA_ITEMS} from './expansion';
 /** Shared, serializable rules for both offline School Wanderer adventures. */
 export type AdventureMode = 'STORY'|'BARE'|'MYSTERY'|'TRAPS'|'NO_GEAR'|'CARDS'|'RESCUE'|'PUZZLE';
 export type Terrain = 'WATER'|'ICE'|'HOLE'|'CRACK'|'SECRET';
 export interface SchoolItem {
  id: string; type: string; category: string; name: string; desc: string; value?:number; power?:number; plus?:number; charges?:number;
- marks?:string[]; markSlots?:number; cursed?:boolean; blessed?:boolean; capacity?:number; contents?:SchoolItem[]; shopOwner?:number; price?:number;
+ marks?:string[]; markSlots?:number; cursed?:boolean; blessed?:boolean; capacity?:number; contents?:SchoolItem[]; shopOwner?:number; price?:number;wet?:boolean;
 }
-export interface Companion {name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';}
+export interface Companion {name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;}
 export interface AdventureState {
  version:1; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
  companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean}>; swallowed:Record<string,SchoolItem[]>;
- rescueTarget:number; puzzle:number; puzzleTurns:number; rescued:boolean; sealedTurns:number; returned:boolean;
+ rescueTarget:number; puzzle:number; puzzleTurns:number; rescued:boolean; sealedTurns:number; returned:boolean;scene?:number;town?:boolean;weather?:string;night?:boolean;townUsed?:string[];festivalSeed?:number;
 }
-export interface SchoolBase {version:1;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;}
+export interface SchoolBase {version:1;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;dojo?:Record<number,number>;codex?:string[];diary?:string[];claimed?:string[];}
 export const MODES: {id:AdventureMode;ja:string;en:string;desc:string;english:string;floors:number}[] = [
  {id:'STORY',ja:'放課後の大冒険',en:'After-school adventure',desc:'道具持ち込み可。20階の校長先生へ。',english:'Bring equipment and challenge the principal on floor 20.',floors:20},
  {id:'BARE',ja:'手ぶらの99階',en:'Empty-handed 99 floors',desc:'倉庫の道具なし。拾った道具と知恵で99階へ。',english:'No warehouse items. Survive 99 floors with what you find.',floors:99},
@@ -28,6 +29,7 @@ export const MARKS:Record<string,{ja:string;en:string}>={
 };
 const supply=(type:string,name:string,desc:string,value:number,extra:Partial<SchoolItem>={}):Omit<SchoolItem,'id'>=>({type,name,desc,value,category:'CONSUMABLE',...extra});
 export const ADVENTURE_ITEMS:Record<string,Omit<SchoolItem,'id'>>={
+ ...EXTRA_ITEMS,
  BAG_SAVE:supply('BAG_SAVE','保存のランドセル','道具を6個収納。中身は出し入れできる。',600,{capacity:6,contents:[]}),
  BAG_HEAL:supply('BAG_HEAL','保健の箱','道具を入れるとHP30回復。中身は取り出せず、割ると戻る。',700,{capacity:4,contents:[]}),
  BAG_IDENTIFY:supply('BAG_IDENTIFY','調べる筆箱','入れた道具を識別。4個収納、自由に取り出せる。',650,{capacity:4,contents:[]}),
@@ -79,7 +81,7 @@ export function decorateFloor(state:AdventureState,map:string[][],px:number,py:n
  cells.filter(c=>!state.terrain[positionKey(c.x,c.y)]).slice(0,4).forEach((c,i)=>state.events[positionKey(c.x,c.y)]={kind:eventKinds[(i+floor)%4],done:false});
  // A wall beside a reachable cell can conceal a cache without altering the connected floor.
  for(const c of cells){const wall=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:c.x+dx*2,y:c.y+dy*2})).find(p=>map[p.y]?.[p.x]==='WALL');if(wall){state.terrain[positionKey(wall.x,wall.y)]='SECRET';break;}}
- if(state.companion){state.companion.x=px;state.companion.y=py;}
+ if(state.companion){const start=[[0,1],[0,-1],[-1,0],[1,0]].map(([dx,dy])=>({x:px+dx,y:py+dy})).find(p=>map[p.y]?.[p.x]==='FLOOR'&&!occupied.has(positionKey(p.x,p.y)));Object.assign(state.companion,start||{x:px,y:py});state.companion.direction=0;state.companion.moving=false;}
  return cells;
 }
 export function puzzleLayout(width:number,height:number,index:number){
@@ -101,3 +103,35 @@ export function puzzleLayout(width:number,height:number,index:number){
  return {map,start:{x:2,y:2},goal:{x:sx,y:sy},limit:path.length+4+Math.floor(index/3),enemy:path[Math.min(2,path.length-2)]};
 }
 export function evolveEnemy(enemy:any){const rank=(enemy.schoolRank||1)+1;return {...enemy,schoolRank:rank,name:enemy.name.replace(/ ★\d+$/,'')+' ★'+rank,hp:enemy.maxHp+12,maxHp:enemy.maxHp+12,attack:enemy.attack+3,defense:enemy.defense+1,xp:enemy.xp+8};}
+
+/** Eight-way direction order matches the companion atlas columns. */
+export function companionDirection(dx:number,dy:number):number {
+ const x=Math.sign(dx),y=Math.sign(dy);
+ return y>0?(x<0?1:x>0?7:0):y<0?(x<0?3:x>0?5:4):x<0?2:6;
+}
+/** Shortest safe route to an adjacent cell, without cutting wall corners. */
+export function companionStep(friend:Companion,px:number,py:number,map:string[][],terrain:Record<string,Terrain>,enemies:{x:number;y:number}[]):{x:number;y:number}|null {
+ const near=(x:number,y:number)=>Math.max(Math.abs(x-px),Math.abs(y-py))<=1;
+ if(near(friend.x,friend.y))return null;
+ const pass=(x:number,y:number)=>Boolean(map[y]?.[x]&&map[y][x]!=='WALL'&&!['WATER','HOLE'].includes(terrain[positionKey(x,y)])&&!enemies.some(e=>e.x===x&&e.y===y));
+ const queue=[{x:friend.x,y:friend.y,first:null as {x:number;y:number}|null}],seen=new Set([positionKey(friend.x,friend.y)]);
+ for(let i=0;i<queue.length;i++){
+  const p=queue[i];
+  if(p.first&&near(p.x,p.y))return p.first;
+  for(const [dx,dy] of [[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1],[1,0],[1,1]]){
+   const x=p.x+dx,y=p.y+dy,key=positionKey(x,y);
+   if(seen.has(key)||!pass(x,y)||(dx&&dy&&(!pass(p.x+dx,p.y)||!pass(p.x,p.y+dy))))continue;
+   seen.add(key);queue.push({x,y,first:p.first||{x,y}});
+  }
+ }
+ return null;
+}
+
+/** Recognizable school equipment pairings add permanent bonuses while both are worn. */
+export function equipmentResonance(equipment:{weapon?:SchoolItem|null;armor?:SchoolItem|null;accessory?:SchoolItem|null}){
+ const {weapon,armor,accessory}=equipment;const bonuses={attack:0,defense:0,names:[] as string[]};
+ if(equipmentHas(weapon,'HEAL_SWORD')&&equipmentHas(accessory,'RING_HEAL')){bonuses.attack+=2;bonuses.defense+=2;bonuses.names.push('保健係セット');}
+ if(equipmentHas(weapon,'DRAGON_KILLER')&&(equipmentHas(armor,'FIREFIGHTER')||equipmentHas(armor,'DISASTER_HOOD'))){bonuses.attack+=4;bonuses.defense+=3;bonuses.names.push('防災探検セット');}
+ if(equipmentHas(weapon,'STAINLESS_PEN')&&equipmentHas(armor,'NAME_TAG')){bonuses.attack+=2;bonuses.defense+=2;bonuses.names.push('ものを大切にセット');}
+ return bonuses;
+}

@@ -8,7 +8,7 @@ import { storageService } from '../services/storageService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import SchoolAdventurePanel from './school-dungeon/SchoolAdventurePanel';
 import { useSchoolAdventure } from './school-dungeon/useSchoolAdventure';
-import { ADVENTURE_ITEMS, equipmentHas, type SchoolItem } from './school-dungeon/adventure';
+import { ADVENTURE_ITEMS, equipmentHas, equipmentResonance, type SchoolItem } from './school-dungeon/adventure';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
@@ -565,9 +565,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
   const adventure = useSchoolAdventure({
-    game: 2, debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, gameOver, gameClear,
+    game: 2, debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
     setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
-    log: message => addLog(message), restart: () => startNewGame(), descend: next => { setFloor(next); generateFloor(next); }, turn: () => processTurn(player.x, player.y),
+    log: message => addLog(message), restart: () => startNewGame(), descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
     clearSave: () => storageService.clearDungeonState2(), itemName: item => getItemName(item), catalog: ITEM_DB, cardSupplies: DUNGEON_CARD_DB.map(card => ({category:'DECK_CARD',type:card.templateId,name:card.name,desc:card.description,value:0})),
   });
   const allPossessions = useMemo(() => {
@@ -897,8 +897,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       setVisitedMap(prev => {
           const next = prev.map(row => [...row]);
           let changed = false;
-          const startX = player.x - Math.floor(VIEW_W/2);
-          const startY = player.y - Math.floor(VIEW_H/2);
+          const startX = adventure.state.scene !== undefined ? 0 : player.x - Math.floor(VIEW_W/2);
+          const startY = adventure.state.scene !== undefined ? 1 : player.y - Math.floor(VIEW_H/2);
           for (let y = 0; y < VIEW_H; y++) {
               for (let x = 0; x < VIEW_W; x++) {
                   const mx = startX + x; const my = startY + y;
@@ -933,7 +933,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           const accDef = (accItem?.type === 'RING_GUARD' ? (accItem.power || 0) : 0);
           const buffDef = p.status.defenseBuff || 0;
           const buffAtk = p.status.attackBuff || 0;
-          return { ...p, attack: p.baseAttack + wPow + accPow + buffAtk, defense: p.baseDefense + aPow + accDef + buffDef };
+          return { ...p, attack: equipmentResonance(p.equipment||{}).attack + p.baseAttack + wPow + accPow + buffAtk, defense: equipmentResonance(p.equipment||{}).defense + p.baseDefense + aPow + accDef + buffDef };
       });
   }, [player.equipment, player.status.defenseBuff, player.status.attackBuff]);
 
@@ -1369,6 +1369,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     const adventureStart = adventure.prepareFloor(newMap, newEnemies, newItems, newTraps, px, py, f);
     px = adventureStart.px; py = adventureStart.py;
     if (adventure.state.mode === 'PUZZLE') roomsRef.current = [{x:1,y:1,w:7,h:7}];
+    else if (adventure.state.scene !== undefined) roomsRef.current = [{x:1,y:1,w:10,h:9}];
     setMap(newMap); setVisitedMap(Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false))); setFloorMapRevealed(false);
     setVisitedMap(prev => { const next = prev.map(row => [...row]); const startX = px - Math.floor(VIEW_W/2); const startY = py - Math.floor(VIEW_H/2); for(let y=0; y<VIEW_H; y++){ for(let x=0; x<VIEW_W; x++){ const mx = startX + x; const my = startY + y; if(mx>=0 && mx<MAP_W && my>=0 && my<MAP_H) next[my][mx] = true; } } return next; });
     setEnemies(newEnemies); setFloorItems(newItems); setTraps(newTraps); setShowMap(false); addVisualEffect('FLASH', 0, 0, {duration: 10, maxDuration: 10});
@@ -1382,6 +1383,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
       adventure.tick(px, py);
+      if (adventure.safeTurn()) return;
       turnCounter.current += 1;
       const aType = player.equipment?.armor?.type; const heavy = equipmentHas(player.equipment?.armor, 'RANDO_SERU'); const accType = player.equipment?.accessory?.type; const isHungerResist = equipmentHas(player.equipment?.accessory, 'RING_HUNGER'); const isHealRing = equipmentHas(player.equipment?.accessory, 'RING_HEAL');
       let hungerRate = heavy ? 0.5 : 1; if (isHungerResist) hungerRate *= 0.5; if (isHealRing) hungerRate *= 2; 
@@ -1849,17 +1851,20 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const w = canvas.width; const h = canvas.height; const ts = TILE_SIZE * SCALE; const { C0, C1, C2, C3 } = currentTheme.colors;
       ctx.fillStyle = C0; ctx.fillRect(0, 0, w, h); ctx.save();
       if (shake.current.duration > 0) { const mag = 4; ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag); shake.current.duration--; }
-      const startX = player.x - Math.floor(VIEW_W/2); const startY = player.y - Math.floor(VIEW_H/2);
+      adventure.drawBackdrop(ctx, w, h);
+      const startX = adventure.state.scene !== undefined ? 0 : player.x - Math.floor(VIEW_W/2); const startY = adventure.state.scene !== undefined ? 1 : player.y - Math.floor(VIEW_H/2);
       const hasSight = equipmentHas(player.equipment?.accessory, 'RING_SIGHT');
       const hasTrapSight = (equipmentHas(player.equipment?.accessory, 'RING_TRAP')) || (player.status.trapSight && player.status.trapSight > 0);
       for (let y = 0; y < VIEW_H; y++) {
           for (let x = 0; x < VIEW_W; x++) {
               const mx = startX + x; const my = startY + y; const sx = x * ts; const sy = y * ts;
               if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) { ctx.fillStyle = C0; ctx.fillRect(sx, sy, ts, ts); continue; }
-              const isRevealed = floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]); const tile = map[my][mx];
+              const isRevealed = adventure.state.scene !== undefined || (adventure.visibleTile(mx, my) && (floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]))); const tile = map[my][mx];
               if (isRevealed) {
+                  if (!adventure.drawTile(ctx, tile, sx, sy, ts)) {
                   if (tile === 'WALL') { ctx.fillStyle = C1; ctx.fillRect(sx, sy, ts, ts); ctx.fillStyle = C0; ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2); }
                   else { ctx.fillStyle = C3; ctx.fillRect(sx, sy, ts, ts); if (tile === 'STAIRS') { ctx.fillStyle = C1; for(let i=0; i<3; i++) ctx.fillRect(sx, sy + i*(ts/3), ts, 2); } }
+                  }
                   adventure.drawTerrain(ctx, mx, my, sx, sy, ts);
                   const trap = traps.find(t => t.x === mx && t.y === my); if (trap && (trap.visible || hasTrapSight)) { const sprite = spriteCache.current['TRAP']; if (!adventure.drawTrap(ctx, trap, sx, sy, ts) && sprite) ctx.drawImage(sprite, sx, sy, ts, ts); }
               } else { ctx.fillStyle = C0; ctx.fillRect(sx, sy, ts, ts); }
@@ -2182,7 +2187,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="dungeon-top-bar w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                    <span className="font-bold tracking-widest">{tr(currentTheme.name)}</span>
+                    <span className="font-bold tracking-widest">{adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                     <div className="flex gap-2">
                         <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                         <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
