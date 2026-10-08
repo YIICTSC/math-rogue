@@ -14,7 +14,7 @@
 
 ## GitHub mainへのアップロード時はRenderへ自動デプロイする
 
-- RenderオンラインサービスはGitHub `main` を参照し、`render.yaml` の `autoDeployTrigger: checksPass` に従ってGitHubのチェック成功後に自動デプロイする。
+- RenderオンラインサービスはGitHub `main` を参照し、`render.yaml` の `autoDeployTrigger: commit` に従ってmain更新ごとに自動デプロイする。Build Filtersは設けず、変更ファイルの種類で除外しない。
 - Render設定の正本は `render.yaml`。ブランチや自動デプロイ方式を変更するときは同ファイルを更新し、Render Blueprintにも同期する。
 - `main` へのプッシュ後はGitHub ActionsとRenderの最新デプロイ結果を確認する。Renderビルドまたはヘルスチェックが失敗したら原因を直し、成功を確認する。Deploy Hookや手動デプロイでチェックを迂回しない。
 - Renderはオンラインサーバーも配信するため、変更後は `pnpm run server:build` を確認してからアップロードする。

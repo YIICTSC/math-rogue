@@ -16,13 +16,11 @@ Invitations for all three games first show only player name and Join. Golf hosts
 
 Kart prepares fifteen shuffled questions from the selected units and uses a different three-question segment for each of up to five laps. Golf keeps an independent question history for each player across quizzes and holes. Duplicate source entries are merged, and questions repeat only after the available pool is exhausted. Both host and server communication use these rules.
 
-## Render deployment filters
+## Render automatic deployment
 
-`render.yaml` defines `buildFilter.paths`: online-game source folders, shared runtime dependencies actually compiled into the server, package/lock files, and the deployment configuration. `autoDeployTrigger: checksPass` remains enabled. Changes confined to unrelated app UI, public images/audio, docs, or frontend CI do not match. Shared question/card data still matches because the online server consumes it. Craft logic remains included because RPG furniture and the server still reuse it.
+`render.yaml` uses `autoDeployTrigger: commit` on `main`, without build filters. Every main update triggers a deploy, including frontend, media and documentation changes. `pnpm run server:build` checks that this policy remains configured.
 
-`pnpm run server:build` verifies every nonempty bundled server input is covered by these paths. If a new dependency lives outside the listed folders, add its path to `render.yaml`; the build fails rather than allowing future changes to miss deployment.
-
-Existing Render service setup: open https://dashboard.render.com/web/srv-dauu1v41nsns73fnjdk0/settings and set **Build Filters → Included Paths** to the entries under `buildFilter.paths` in `render.yaml`. Keep automatic deploys set to **After CI Checks Pass**. Alternatively, sync this file through a Blueprint that manages the existing service. Publishing this file alone does not establish that an existing manually created service uses the filter. The current Render connector can inspect services but cannot update Build Filters, so the live setting needs this one-time Dashboard step.
+For the existing manually configured service, open https://dashboard.render.com/web/srv-dauu1v41nsns73fnjdk0/settings, clear both **Build Filters → Included Paths** and **Ignored Paths**, and set **Auto-Deploy → On Commit**. Alternatively, sync the Blueprint if it manages this service. Publishing render.yaml alone does not update a manually configured service. The current Render connector cannot edit these settings.
 
 The connection picker probes the selected game endpoint using a browser WebSocket ping/pong without creating rooms. Server communication stays disabled while checking or unreachable (including Origin denial), and falls back to Host when it becomes unavailable. A no-CORS health request wakes a sleeping server but never counts as proof of connectivity. Failed checks retry every five seconds, successful checks refresh every thirty seconds; browser focus/network changes and the Check again button trigger a fresh check. Leaving the picker aborts the probe and health request.
 
