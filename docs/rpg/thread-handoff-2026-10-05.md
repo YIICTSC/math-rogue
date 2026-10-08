@@ -433,3 +433,9 @@ Kart: eight course sky/fog/road/rail/material palettes now applied; urban course
 - main df60762d1929b789db10c0d5f8a5364d2ca24d2b。レース/ゴルフの参加者一覧左に常時自キャラプレビュー、編集結果を即反映。帰宅ダッシュHP1はportalによる全画面flex表示、閉じる操作付き。
 - 両ゲームのリザルトを2カラム化、ランキング/設定を内部スクロール、次の開始・退出を固定表示。ゴルフは同じ部屋で次ラウンドへ、参加者/アバター/問題履歴を保持しスコアをリセット。ホストが次のホール数を選択可能。
 - 390x844/844x390/1366x768でプレビュー編集反映、ダッシュとリザルト/次のボタン配置をブラウザ検証（WebGL表示のみモック）。ゴルフ再戦エンジン/既存サーバーテスト、英語ゲート、frontend/server build合格。今回server/golfRooms.ts変更あり、Render自動デプロイ対象。Actions/Render完了待ちは不要。
+
+## 2026-10-08: Offline School Wanderer expansion
+
+Main: 9d1bf1706755065991bb34245e78a2109414c30b. Both SchoolDungeonRPG variants now share school-dungeon adventure rules: equipment emblems, sealed/blessed supplies, containers, 6 special enemy behaviors, terrain/excavation, recoverable traps, shop bills/monitors, floor bells, persistent warehouse/bank, three classmates, facilities/story progress, rescue requests and eight challenge rules (including 99 floors and eight puzzles). ImageGen generated two transparent 16-sprite sheets, converted to lossless WebP and integrated for Web/Android with measured bounds to avoid clipping. See docs/school-wanderer-adventure.md.
+
+Validation: pure rules tests, browser integration on both real components at portrait/landscape/desktop sizes, atlas alpha checks, old-save migration, reload/escrow recovery, frontend English gates/build and server build passed. Published main without waiting for deployments, as requested. Handoff file remains exclusive to its documentation branch. Render repository config requests every main commit; live dashboard settings were previously left for user adjustment.
