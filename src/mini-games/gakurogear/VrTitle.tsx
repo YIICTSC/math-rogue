@@ -11,14 +11,15 @@ import type {KartLesson} from '../gakuro-kart/learning';
 import type {KartAvatar} from '../gakuro-kart/avatar';
 import {loadVrAvatar,saveVrAvatar} from './character';
 import {createScene} from './scene';
-import {MISSIONS,createRun} from './engine';
+import {MISSIONS} from './engine';
+import StagePreview from './StagePreview';
 import GakuroGear from './GakuroGear';
 import OnlineGame from './OnlineGame';
 import {VrRoom} from './network';
 import type {OnlineMode,OnlineWorld} from './onlineEngine';
 import '../gakuro-kart/kart.css';
 import './gakurogear.css';
-function AvatarPreview({avatar}:{avatar:KartAvatar}){const host=useRef<HTMLDivElement>(null);useEffect(()=>{if(!host.current)return;const mission={...MISSIONS[0],routes:[],cameras:[],targets:[],obstacles:[]};const s=createRun(mission);s.player={x:0,z:0,angle:0};const view=createScene(host.current,mission,avatar);view.draw(s,{mode:'third',yaw:Math.PI});return()=>view.dispose();},[avatar]);return <div ref={host} style={{height:250,width:'100%'}}/>;}
+function AvatarPreview({avatar}:{avatar:KartAvatar}){const host=useRef<HTMLDivElement>(null),scene=useRef<ReturnType<typeof createScene>|null>(null);useEffect(()=>{if(!host.current)return;const mission={...MISSIONS[0],routes:[],cameras:[],targets:[],obstacles:[]};let view:ReturnType<typeof createScene>;try{view=createScene(host.current,mission,avatar);}catch{return;}scene.current=view;let frame=0;const draw=()=>{if(!document.hidden)view.portrait();frame=requestAnimationFrame(draw);};frame=requestAnimationFrame(draw);return()=>{cancelAnimationFrame(frame);scene.current=null;view.dispose();};},[]);useEffect(()=>{scene.current?.setAvatar(avatar);},[avatar]);return <div ref={host} className="gear-avatar-preview" aria-hidden="true"/>;}
 export default function VrTitle(props:MiniGameComponentProps){const language=props.languageMode??'JAPANESE',en=language==='ENGLISH',t=(ja:string,eng:string)=>en?eng:ja;
  const [entry,setEntry]=useState<'title'|'lesson'|'solo'|'online'|'setup'|'join'>('title'),[intent,setIntent]=useState<'solo'|'create'|'join'>('solo');
  const [mode,setMode]=useState<OnlineMode>('coop'),[mission,setMission]=useState(1),[limit,setLimit]=useState(300),[name,setName]=useState('Player'),[code,setCode]=useState(''),[lesson,setLesson]=useState<KartLesson|null>(null),[world,setWorld]=useState<OnlineWorld|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[avatar,setAvatar]=useState(loadVrAvatar),[editing,setEditing]=useState(false);
@@ -34,7 +35,7 @@ export default function VrTitle(props:MiniGameComponentProps){const language=pro
  const openLessons=()=>{setIntent('solo');void audioService.unlockAudio();cue('select');setEntry('lesson');};
  const setup=entry==='setup',joining=entry==='join';
  const actions=setup?[{label:t('問題を選んで部屋を作る','Choose lesson and create room'),onClick:()=>{setIntent('create');setEntry('lesson');},disabled:busy}]:joining?[{label:t('参加する','Join'),onClick:()=>void join(),disabled:busy||!code.trim()}]:[{label:t('ソロトレーニング','Solo training'),onClick:openLessons},{label:t('オンラインルーム作成','Create online room'),onClick:()=>setEntry('setup')},{label:t('ルームに参加','Join room'),onClick:()=>setEntry('join')}];
- return <GameTitleScreen kind="vr" title={setup?t('オンラインルーム作成','Create online room'):joining?t('ルームに参加','Join room'):t('GAKURO VRトレーニング','GAKURO VR Training')} subtitle={t('学校を舞台にしたステルス訓練','TACTICAL SCHOOL TRAINING')} languageMode={language} backLabel={entry==='title'?'学習ローグへ':t('戻る','Back')} onClose={entry==='title'?props.onBack:()=>setEntry('title')} backdrop={<div style={{width:'100%',height:'100%',background:'radial-gradient(ellipse at 35% 30%,#55765b,#071b1b 75%)'}}/>} actions={actions}>
+ return <GameTitleScreen kind="vr" title={setup?t('オンラインルーム作成','Create online room'):joining?t('ルームに参加','Join room'):t('GAKURO VRトレーニング','GAKURO VR Training')} subtitle={t('学校を舞台にしたステルス訓練','TACTICAL SCHOOL TRAINING')} languageMode={language} backLabel={entry==='title'?'学習ローグへ':t('戻る','Back')} onClose={entry==='title'?props.onBack:()=>setEntry('title')} backdrop={<StagePreview mission={MISSIONS[mission-1]}/>} actions={actions}>
  {(setup||joining)&&<div className="gear-title-options"><label>{t('参加名','Name')}<input disabled={busy} value={name} maxLength={24} onChange={e=>setName(e.target.value)}/></label>{joining?<label>{t('部屋コード','Room code')}<input disabled={busy} value={code} maxLength={8} onChange={e=>setCode(e.target.value.toUpperCase())}/></label>:<><label>{t('モード','Mode')}<select value={mode} onChange={e=>setMode(e.target.value as OnlineMode)}><option value="coop">{t('協力','Co-op')}</option><option value="royale">{t('バトルロイヤル','Battle royale')}</option></select></label>{mode==='coop'&&<label>{t('協力ミッション','Co-op mission')}<select value={mission} onChange={e=>setMission(Number(e.target.value))}>{MISSIONS.map(m=><option key={m.id} value={m.id}>{m.id}: {en?m.en:m.name}</option>)}</select></label>}<label>{t('制限時間（秒）','Time limit (seconds)')}<input type="number" min={60} max={900} step={30} value={limit} onChange={e=>setLimit(Math.max(60,Math.min(900,Number(e.target.value)||60)))}/></label></>}{busy&&<p role="status">{t('接続中…','Connecting…')}</p>}</div>}{error&&<p role="alert">{error}</p>}
  </GameTitleScreen>;
 }
