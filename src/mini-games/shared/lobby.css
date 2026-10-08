@@ -127,3 +127,5 @@
 .online-avatar-preview{height:180px;position:relative;overflow:hidden;border-radius:12px;background:#102a35}.online-avatar-preview canvas{width:100%;height:100%;display:block}
 
 .online-transport button:disabled{opacity:.4;filter:grayscale(1);cursor:not-allowed}.online-transport .online-server-recheck{min-height:32px;margin-top:5px;padding:4px 10px;font-size:12px}
+
+.online-collection-left{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}.online-self-preview{position:relative;height:clamp(140px,30dvh,280px);min-height:100px;overflow:hidden;border-radius:12px;background:#153742;flex-shrink:0}.online-self-preview canvas{width:100%;height:100%;display:block}.online-collection-left .online-roster{flex:1;min-height:60px;overflow:auto!important}.online-avatar-details .gk-avatar-editor{margin-top:8px}@media(orientation:landscape) and (max-height:500px){.online-self-preview{height:120px;min-height:80px}}

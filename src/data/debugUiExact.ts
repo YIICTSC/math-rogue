@@ -21,6 +21,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  '次のラウンドへ': 'Next round',
   "編と主人公を選び直す": "Choose chapter and hero again",
   '建築工房':'Builder workshop', '建材を回転':'Rotate material',
   '必要な作業設備の近くへ移動してください。':'Move closer to the required workstation.',
@@ -344,6 +345,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  '次のラウンドへ': 'つぎのらうんどへ',
   "編と主人公を選び直す": "へんとしゅじんこうをえらびなおす",
   '建築工房':'けんちくこうぼう', '建材を回転':'けんざいをかいてん',
   '必要な作業設備の近くへ移動してください。':'ひつようなさぎょうせつびのちかくへいどうしてください。',

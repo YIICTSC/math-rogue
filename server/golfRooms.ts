@@ -4,7 +4,7 @@ import type { Duplex } from 'node:stream';
 import { WebSocket, WebSocketServer } from 'ws';
 import { GameMode } from '../src/types';
 import { buildLesson, type LessonSelection } from '../src/mini-games/gakuro-kart/questions';
-import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
+import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
 
 export const GOLF_SERVER_PROTOCOL = 3;
 export const GOLF_ENDPOINT = '/golf';
@@ -104,6 +104,7 @@ export function createGolfServer(options: GolfServerOptions = {}) {
           if (m.id === room.host && setHoleCount(room.world, d.count)) emit(room);
           return;
         }
+        if(d.type==='rematch'){if(m.id!==room.host){fail(m,'ホストだけがラウンドを開始できます。');return;}if(rematchGolf(room.world,d.holeCount))emit(room);return;}
         if (d.type === 'start') {
           if (m.id !== room.host || !room.selection) { fail(m, 'ホストだけがラウンドを開始できます。'); return; }
           if (startGolf(room.world, room.world.title)) emit(room); return;

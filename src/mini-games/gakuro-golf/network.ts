@@ -1,6 +1,6 @@
 import {roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, command, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
+import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
 import { HOLES } from './course';
 import { GOLF_PROTOCOL, validView } from './protocol';
@@ -149,6 +149,7 @@ export class GolfRoom {
     if (this.dedicated) { this.dedicated.send({ type: 'holes', count }); return; }
     if (this.world && setHoleCount(this.world, count)) this.emit();
   }
+  rematch(count:number){if(!this.host||this.closed)return;if(this.dedicated){this.dedicated.send({type:'rematch',holeCount:count});return;}if(this.world&&rematchGolf(this.world,count))this.emit();}
   start() { if (this.dedicated) { if (this.host) this.dedicated.send({ type: 'start' }); return; } if (this.host && this.world && this.factory && startGolf(this.world, this.world.title)) this.emit(); }
   private apply(id: string, c: unknown) {
     if (!this.world || this.closed) return;

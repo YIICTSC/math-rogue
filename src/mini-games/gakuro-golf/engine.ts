@@ -149,3 +149,10 @@ export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
   }
   return { phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, players: Object.values(w.players).map(({ id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped }) => ({ id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped })) };
 }
+
+export function rematchGolf(w:GolfWorld,count=w.holeCount){
+ if(w.phase!=='result'||!Number.isInteger(count)||count<1||count>HOLES.length)return false;
+ const next=createGolf(w.seed+1);next.title=w.title;next.holeCount=count;
+ for(const p of Object.values(w.players)){if(!p.connected)continue;addPlayer(next,p.id,p.name);Object.assign(next.players[p.id],{avatar:{...p.avatar},spectator:p.spectator,questionHistory:p.questionHistory,shotId:p.shotId+1});}
+ Object.assign(w,next);return true;
+}
