@@ -1,3 +1,4 @@
+import { SCHOOL_WANDERER_ENGLISH, SCHOOL_WANDERER_HIRAGANA } from '../components/school-dungeon/copy';
 import { STORYBOOK_ENGLISH, STORYBOOK_HIRAGANA } from '../three/storybookCopy';
 import {CAMPAIGN_ENGLISH,CAMPAIGN_HIRAGANA} from '../rpg/campaignCopy';
 import {FARM_ENGLISH,FARM_HIRAGANA} from '../rpg/farm/uiCopy';
@@ -21,6 +22,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...SCHOOL_WANDERER_ENGLISH,
   '次のラウンドへ': 'Next round',
   "編と主人公を選び直す": "Choose chapter and hero again",
   '建築工房':'Builder workshop', '建材を回転':'Rotate material',
@@ -345,6 +347,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...SCHOOL_WANDERER_HIRAGANA,
   '次のラウンドへ': 'つぎのらうんどへ',
   "編と主人公を選び直す": "へんとしゅじんこうをえらびなおす",
   '建築工房':'けんちくこうぼう', '建材を回転':'けんざいをかいてん',

@@ -1,3 +1,4 @@
+import {SchoolSupplyIcon} from './school-dungeon/sprites';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, Circle, Menu, X, Check, Search, LogOut, Shield, Sword, Target, Trash2, Hammer, FlaskConical, Info, Zap, Skull, Ghost, Award, RotateCcw, Send, Edit3, HelpCircle, Umbrella, Crosshair, FastForward, Coins, ShoppingBag, DollarSign, Map as MapIcon, User, Watch } from 'lucide-react';
@@ -5,6 +6,9 @@ import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
+import SchoolAdventurePanel from './school-dungeon/SchoolAdventurePanel';
+import { useSchoolAdventure } from './school-dungeon/useSchoolAdventure';
+import { ADVENTURE_ITEMS, equipmentHas, type SchoolItem } from './school-dungeon/adventure';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
@@ -152,6 +156,7 @@ interface VisualEffect {
 }
 
 interface Item {
+  marks?: string[]; markSlots?: number; cursed?: boolean; blessed?: boolean; capacity?: number; contents?: SchoolItem[]; shopOwner?: number;
   id: string;
   category: ItemCategory;
   type: string; 
@@ -318,6 +323,7 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     'POT_CHANGE': { category: 'CONSUMABLE', type: 'POT_CHANGE', name: 'びっくり箱', desc: '中身を別のアイテムに変化させる。', value: 400 },
     'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
     ...EXTRA_SCHOOL_DUNGEON_ITEMS,
+    ...ADVENTURE_ITEMS as Record<string, Omit<Item, 'id'>>,
 };
 
 /** The complete item pool is also consumed by the in-game compendium. */
@@ -436,7 +442,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
   
-  const currentTheme = getTheme(floor);
+  const currentTheme = getTheme(floor > 20 ? (floor - 1) % 19 + 1 : floor);
 
   // Shop State
   const [shopState, setShopState] = useState<{ active: boolean, merchantId: number | null, mode: 'BUY' | 'SELL' }>({ active: false, merchantId: null, mode: 'BUY' });
@@ -486,6 +492,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const [inheritItemIdx, setInheritItemIdx] = useState<number | null>(null);
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
+  const adventure = useSchoolAdventure({
+    game: 1, debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, gameOver, gameClear,
+    setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
+    log: message => addLog(message), restart: () => startNewGame(),
+    descend: next => { setFloor(next); generateFloor(next); }, turn: () => processTurn(player.x, player.y),
+    clearSave: () => storageService.clearDungeonState(), itemName: item => getItemName(item), catalog: ITEM_DB,
+  });
   const allPossessions = useMemo(() => {
     if (!gameOver) return [];
     const items = [...inventory];
@@ -565,6 +578,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   }, [currentTheme.bgm]);
 
   const restoreState = (save: any) => {
+      adventure.restore(save.adventure, save.floor);
       setMap(save.map);
       setVisitedMap(save.visitedMap || Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false))); // Fallback for old saves
       setFloorMapRevealed(save.floorMapRevealed || false);
@@ -588,18 +602,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const saveData = useCallback((immediate = false) => {
-      if (debugPreview || gameOver || gameClear) return;
+      if (debugPreview || gameOver || gameClear || adventure.state.returned) { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
       const persist = () => {
+          if (adventure.state.returned) return;
           const state = {
               map, visitedMap, floorMapRevealed,
               rooms: roomsRef.current, // Save rooms
               player, enemies, floorItems, traps, inventory,
               floor, level, belly, maxBelly,
               idMap, identifiedTypes: Array.from(identifiedTypes),
-              isEndless, turnCounter: turnCounter.current,
+              isEndless, adventure: adventure.snapshot(), turnCounter: turnCounter.current,
               shopState, synthState
           };
           storageService.saveDungeonState(state);
+          if (storageService.loadDungeonState()?.adventure?.runId === adventure.state.runId) adventure.saveCommitted();
       };
       if (immediate) {
           persist();
@@ -607,7 +623,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       }
       if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
       saveDebounceRef.current = setTimeout(persist, 500);
-  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, shopState, synthState, debugPreview, gameOver, gameClear]);
+  }, [adventure.revision, map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, shopState, synthState, debugPreview, gameOver, gameClear]);
 
   useEffect(() => {
       const handlePageHide = () => saveData(true);
@@ -643,7 +659,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   // Auto-save effect on key state changes
   useEffect(() => {
       if (!gameOver && !gameClear) {
-          saveData();
+          saveData(true);
       }
   }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
 
@@ -765,6 +781,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const drawEnemyFromSheets = (ctx: CanvasRenderingContext2D, enemy: Entity, sx: number, sy: number, ts: number) => {
+      if (adventure.drawEnemy(ctx, enemy, sx, sy, ts)) return true;
       const enemyBase = ENEMY_SPRITE_ORDER.indexOf(enemy.enemyType || 'SLIME');
       const enemyIndex = (enemyBase >= 0 ? enemyBase : stableSpriteIndex(enemy.enemyType || enemy.name, 16)) * 4 + Math.max(0, getEnemyDirectionIndex(enemy.dir));
       const enemySlot = getPagedSheet('enemy', enemyIndex);
@@ -774,6 +791,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const drawFloorItemFromSheets = (ctx: CanvasRenderingContext2D, item: Entity, sx: number, sy: number, ts: number) => {
       const data = item.itemData;
       markDungeonItemDiscovered(data);
+      if (adventure.drawItem(ctx, data, sx, sy, ts)) return true;
       if (data?.category === 'WEAPON') {
           const slot = getPagedSheet('weapons', getWeaponSpriteIndex(data.type));
           return drawSheetSprite(ctx, slot.sheet, slot.cell, sx, sy, ts, ts);
@@ -981,6 +999,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const startNewGame = () => {
+    adventure.begin();
     setFloor(1);
     setLevel(1);
     setBelly(100);
@@ -996,10 +1015,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     roomsRef.current = []; // Reset rooms
     
     const shuffledNames = [...UNIDENTIFIED_NAMES].sort(() => Math.random() - 0.5);
-    const staffTypes = Object.keys(ITEM_DB).filter(k => ITEM_DB[k].category === 'STAFF');
+    const staffTypes = Object.keys(ITEM_DB).filter(k => adventure.state.mode === 'MYSTERY' || ITEM_DB[k].category === 'STAFF');
     const newIdMap: Record<string, string> = {};
     staffTypes.forEach((t, i) => {
-        newIdMap[t] = shuffledNames[i] || "謎の傘";
+        newIdMap[t] = adventure.state.mode === 'MYSTERY' ? (languageMode === 'ENGLISH' ? `Supply ${i + 1}` : `なぞのどうぐ${i + 1}`) : shuffledNames[i] || "謎の傘";
     });
     setIdMap(newIdMap);
     setIdentifiedTypes(new Set());
@@ -1015,7 +1034,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     initInventory.push({ ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` });
     initInventory.push({ ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` });
     initInventory.forEach(item => markDungeonItemDiscovered(item));
-    setInventory(initInventory);
+    setInventory(adventure.setupInventory(initInventory) as Item[]);
     
     setPlayer({
         id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生',
@@ -1037,10 +1056,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleRestart = () => {
+    if (adventure.state.mode !== 'STORY') { adventure.start(adventure.state.mode, [], 0, null); return; }
     if (gameOver && inheritItemIdx !== null) {
         // 引き継ぎアイテムを全所持品（装備含む）から取得
         const selected = allPossessions[inheritItemIdx];
         if (selected) {
+            adventure.takeLegacyItem(selected);
             inheritedItemTemplate = { ...selected };
             // IDを新調して装備状態などはリセットされるようにする
             inheritedItemTemplate.id = `inherited-template-${Date.now()}`;
@@ -1154,8 +1175,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     }
 
     const startRoom = rooms[0];
-    const px = Math.floor(startRoom.x + startRoom.w/2);
-    const py = Math.floor(startRoom.y + startRoom.h/2);
+    let px = Math.floor(startRoom.x + startRoom.w/2);
+    let py = Math.floor(startRoom.y + startRoom.h/2);
     setPlayer(prev => ({ ...prev, x: px, y: py }));
 
     const newEnemies: Entity[] = [];
@@ -1295,6 +1316,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         }
     }
 
+    const adventureStart = adventure.prepareFloor(newMap, newEnemies, newItems, newTraps, px, py, f);
+    px = adventureStart.px; py = adventureStart.py;
+    if (adventure.state.mode === 'PUZZLE') roomsRef.current = [{x:1,y:1,w:7,h:7}];
     setMap(newMap);
     setVisitedMap(Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false)));
     setFloorMapRevealed(false);
@@ -1338,13 +1362,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
+      adventure.tick(px, py);
       turnCounter.current += 1;
       
       const aType = player.equipment?.armor?.type;
-      const heavy = aType === 'RANDO_SERU';
+      const heavy = equipmentHas(player.equipment?.armor, 'RANDO_SERU');
       const accType = player.equipment?.accessory?.type;
-      const isHungerResist = accType === 'RING_HUNGER';
-      const isHealRing = accType === 'RING_HEAL';
+      const isHungerResist = equipmentHas(player.equipment?.accessory, 'RING_HUNGER');
+      const isHealRing = equipmentHas(player.equipment?.accessory, 'RING_HEAL');
 
       let hungerRate = heavy ? 0.5 : 1; 
       if (isHungerResist) hungerRate *= 0.5; 
@@ -1449,7 +1474,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               if (hasNoticedPlayer && e.enemyType === 'DRAGON' && dist <= 2 && dist > 0 && Math.random() < 0.3) {
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
-                  if (player.equipment?.armor?.type === 'FIREFIGHTER') dmg = Math.floor(dmg / 2);
+                  if (equipmentHas(player.equipment?.armor, 'FIREFIGHTER')) dmg = Math.floor(dmg / 2);
                   setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return {...p, hp:nhp}; });
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
@@ -1521,8 +1546,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
               if (tx === px && ty === py) {
                   let dmg = Math.max(1, e.attack - player.defense);
-                  if (player.equipment?.armor?.type === 'GYM_CLOTHES' && Math.random() < 0.3) { addLog("ひらりと身をかわした！", currentTheme.colors.C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: currentTheme.colors.C3 }); }
-                  if (player.equipment?.armor?.type === 'NAME_TAG' && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
+                  if (equipmentHas(player.equipment?.armor, 'GYM_CLOTHES') && Math.random() < 0.3) { addLog("ひらりと身をかわした！", currentTheme.colors.C2); dmg = 0; addVisualEffect('TEXT', px, py, { value: 'MISS', color: currentTheme.colors.C3 }); }
+                  if (equipmentHas(player.equipment?.armor, 'NAME_TAG') && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
                   else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
 
                   if (dmg > 0) {
@@ -1535,7 +1560,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   } else { nextEnemies.push(e); }
                   occupied.add(`${e.x},${e.y}`);
               } else if (moved) {
-                  if (!map[ty]?.[tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
+                  if (!adventure.enemyCanMove(e, tx, ty) || !map[ty]?.[tx] || map[ty][tx] === 'WALL' || occupied.has(`${tx},${ty}`) || prevEnemies.some(o => o.id !== e.id && o.x === tx && o.y === ty)) {
                       occupied.add(`${e.x},${e.y}`); nextEnemies.push(e); 
                   } else {
                       occupied.add(`${tx},${ty}`); nextEnemies.push({ ...e, x: tx, y: ty, dir: { x: Math.sign(tx - e.x) as 0|1|-1, y: Math.sign(ty - e.y) as 0|1|-1 } });
@@ -1596,6 +1621,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if (adventure.blocksInput()) return;
       if(gameOver || gameClear) return;
 
       if (shopState.active) {
@@ -1674,6 +1700,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
       }
 
+      if (!adventure.beforeMove(rdx, rdy)) return;
+      const slid = adventure.slide(tx, ty, rdx, rdy); tx = slid.x; ty = slid.y;
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) {
           if (target.enemyType === 'SHOPKEEPER') {
@@ -1736,7 +1764,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               const item = itemEntity.itemData;
               markDungeonItemDiscovered(item);
               if (inventory.length < MAX_INVENTORY) {
-                  setInventory(prev => [...prev, item]);
+                  adventure.onPickup(item); setInventory(prev => [...prev, item]);
                   addLog(`${getItemName(item)}を拾った！`);
                   setFloorItems(prev => prev.filter((_, i) => i !== itemIdx));
                   audioService.playSound('select');
@@ -1751,6 +1779,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleActionBtn = () => {
+      if (adventure.blocksInput()) return;
       if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
       if (shopState.active) { handleShopAction(); return; }
@@ -1770,6 +1799,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       
       // 階段処理
       if (map[player.y][player.x] === 'STAIRS') {
+           if (!adventure.canDescend()) return;
            addLog("階段を降りる...");
            audioService.playSound('select');
            setShowMathChallenge(true); // 計算モードへ
@@ -1807,7 +1837,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           addLog("爆発した！", "red");
           addVisualEffect('EXPLOSION', player.x, player.y);
           let dmg = 20;
-          if (player.equipment?.armor?.type === 'DISASTER_HOOD') dmg = Math.floor(dmg / 2);
+          if (equipmentHas(player.equipment?.armor, 'DISASTER_HOOD')) dmg = Math.floor(dmg / 2);
           setPlayer(p => ({ ...p, hp: Math.max(0, p.hp - dmg) }));
           if (player.hp - dmg <= 0) { setGameOver(true); saveDungeonScore("Killed by Bomb Trap"); }
       } else if (t === 'SLEEP') {
@@ -1869,6 +1899,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const getItemName = (item: Item) => {
+      if (adventure.state.mode === 'MYSTERY' && !identifiedTypes.has(item.type)) return idMap[item.type] || '???';
       const displayName = (() => {
           if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY') return item.name;
           if (item.type.includes('MEAT')) return item.name;
@@ -1924,7 +1955,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
           if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
           else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
-          setEnemies(newEnemies.filter(e => e.hp > 0));
+          adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
+      setEnemies(newEnemies.filter(e => e.hp > 0));
           audioService.playSound('attack');
       } else {
           addLog("外した！");
@@ -1972,7 +2004,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
       } else {
           if (inventory.length === 0) return;
-          const item = inventory[idx];
+          const item = inventory[idx]; if (item?.shopOwner || item?.cursed) return;
           if (!item) return;
           
           if (player.equipment?.weapon === item || player.equipment?.armor === item || player.equipment?.ranged === item || player.equipment?.accessory === item) {
@@ -1997,11 +2029,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const attackEnemy = (target: Entity) => {
+      if (equipmentHas(player.equipment?.weapon, 'HEAL_SWORD')) setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 3)}));
       triggerPlayerAttackAnim(player.dir);
       const targets = [target];
       addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
 
-      if (player.equipment?.weapon?.type === 'PROTRACTOR_EDGE') {
+      if (equipmentHas(player.equipment?.weapon, 'PROTRACTOR_EDGE')) {
           const {x: dx, y: dy} = player.dir;
           const others = [];
           if (dx === 0 && dy === -1) { others.push({x: -1, y: -1}, {x: 1, y: -1}); } 
@@ -2025,13 +2058,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
       let newEnemies = [...enemies];
       targets.forEach(t => {
-          let dmg = Math.max(1, player.attack - t.defense);
+          let dmg = Math.max(1, player.attack - t.defense); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2;
           
           const wType = player.equipment?.weapon?.type;
-          if (wType === 'OFUDA_RULER' && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); }
-          if (wType === 'VITAMIN_INJECT' && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); }
-          if (wType === 'STAINLESS_PEN' && t.enemyType === 'METAL') { dmg = 1; }
-          if (wType === 'RICH_WATCH' && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); } 
+          if (equipmentHas(player.equipment?.weapon, 'OFUDA_RULER') && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); }
+          if (equipmentHas(player.equipment?.weapon, 'VITAMIN_INJECT') && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); }
+          if (equipmentHas(player.equipment?.weapon, 'STAINLESS_PEN') && t.enemyType === 'METAL') { dmg = 1; }
+          if (equipmentHas(player.equipment?.weapon, 'RICH_WATCH') && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); }
           
           if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
 
@@ -2040,7 +2073,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   const nhp = e.hp - dmg;
                   addLog(`${e.name}に${dmg}ダメージ！`);
                   addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' });
-                  if (nhp <= 0 && wType === 'LADLE' && Math.random() < 0.3) {
+                  if (nhp <= 0 && equipmentHas(player.equipment?.weapon, 'LADLE') && Math.random() < 0.3) {
                       const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` };
                       setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]);
                       addLog(`${e.name}を肉に変えた！`, currentTheme.colors.C2);
@@ -2064,13 +2097,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               gainXp(d.xp);
           }
       });
+      adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
       setEnemies(newEnemies.filter(e => e.hp > 0));
       audioService.playSound('attack');
   };
 
   // ... LONG PRESS LOGIC ...
   const handlePressStart = () => {
-      if (menuOpen || shopState.active || gameOver || gameClear) return;
+      if (adventure.blocksInput() || menuOpen || shopState.active || gameOver || gameClear) return;
       fastForwardInterval.current = setTimeout(() => {
           setIsFastForwarding(true);
       }, 400); 
@@ -2140,7 +2174,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       audioService.playSound('select');
   };
 
-  const startEndlessMode = () => { setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
+  const startEndlessMode = () => { if (adventure.state.mode !== 'STORY') { adventure.returnHome(); return; } setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
 
   const handleSynthesisStep = () => {
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
@@ -2185,7 +2219,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               if (baseItem.category !== matItem.category) { addLog("種類が違うと合成できません", "red"); audioService.playSound('wrong'); return; }
               
               const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1;
-              const newItem: Item = { ...baseItem, plus: newPlus, name: `${baseItem.name.split('+')[0]}+${newPlus}` };
+              const newItem = adventure.combine(baseItem, matItem) as Item | null; if (!newItem) return;
               
               const glueIdx = inventory.findIndex(i => i.type === 'POT_GLUE');
               if (glueIdx === -1) { setSynthState({ ...synthState, active: false }); return; }
@@ -2310,6 +2344,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleThrowItem = (index: number) => {
+      if (adventure.blocksInput() || inventory[index]?.cursed || inventory[index]?.shopOwner) return;
       const item = inventory[index];
       if (!item) return;
       
@@ -2356,7 +2391,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
               if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
               else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
-              setEnemies(newEnemies.filter(e => e.hp > 0));
+              adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
+      setEnemies(newEnemies.filter(e => e.hp > 0));
           }
           
           audioService.playSound('attack');
@@ -2381,6 +2417,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       const item = inventory[index];
       if (!item) return;
 
+      if (adventure.beforeUse(item)) return;
+      if (['WEAPON','ARMOR','ACCESSORY','RANGED'].includes(item.category) && !adventure.canEquip(item)) return;
       if (item.category === 'STAFF') {
           const { x: dx, y: dy } = player.dir;
           let target: Entity | null = null;
@@ -2595,6 +2633,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleDropItem = (index: number) => {
+      if (adventure.blocksInput() || inventory[index]?.cursed || inventory[index]?.shopOwner) return;
       const item = inventory[index];
       if (!item || synthState.active) return;
       let newEquip = player.equipment;
@@ -2620,6 +2659,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleUnequip = (slot: 'weapon'|'armor'|'ranged'|'accessory') => {
+      if (!adventure.canUnequip(player.equipment?.[slot])) return;
       const item = player.equipment?.[slot];
       if (item) {
           if (inventory.length < MAX_INVENTORY) {
@@ -2641,6 +2681,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+        if (adventure.blocksInput()) return;
         lastInputType.current = 'KEY';
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
         if (gameOver) { 
@@ -2739,8 +2780,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       const startX = player.x - Math.floor(VIEW_W/2);
       const startY = player.y - Math.floor(VIEW_H/2);
 
-      const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-      const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
+      const hasSight = equipmentHas(player.equipment?.accessory, 'RING_SIGHT');
+      const hasTrapSight = (equipmentHas(player.equipment?.accessory, 'RING_TRAP')) || (player.status.trapSight && player.status.trapSight > 0);
 
       for (let y = 0; y < VIEW_H; y++) {
           for (let x = 0; x < VIEW_W; x++) {
@@ -2773,10 +2814,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                       }
                   }
                   
+                  adventure.drawTerrain(ctx, mx, my, sx, sy, ts);
                   const trap = traps.find(t => t.x === mx && t.y === my);
                   if (trap && (trap.visible || hasTrapSight)) {
                       const sprite = spriteCache.current['TRAP'];
-                      if (sprite) ctx.drawImage(sprite, sx, sy, ts, ts);
+                      if (!adventure.drawTrap(ctx, trap, sx, sy, ts) && sprite) ctx.drawImage(sprite, sx, sy, ts, ts);
                   }
               } else {
                   ctx.fillStyle = C0;
@@ -2862,6 +2904,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
       }
 
+      adventure.drawCompanion(ctx, startX, startY, ts, spriteCache.current['PLAYER']);
       visualEffects.current.forEach((fx, i) => {
           fx.duration--;
           
@@ -2994,7 +3037,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const getInspectedDescription = (item: Item) => {
-      if (item.category === 'STAFF' && !identifiedTypes.has(item.type)) {
+      if ((adventure.state.mode === 'MYSTERY' || item.category === 'STAFF') && !identifiedTypes.has(item.type)) {
           return "振ってみるまで分からない。";
       }
       return item.desc;
@@ -3005,6 +3048,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   return (
     <div data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-play" className="mini-game-dungeon-screen w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
+        <SchoolAdventurePanel adventure={adventure} inventory={inventory} player={player} itemName={getItemName} gameOver={gameOver} gameClear={gameClear} />
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -3215,8 +3259,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                 {map.map((row, y) => row.map((tile, x) => {
                                     const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
                                     const isPlayer = x === player.x && y === player.y;
-                                    const hasSight = player.equipment?.accessory?.type === 'RING_SIGHT';
-                                    const hasTrapSight = (player.equipment?.accessory?.type === 'RING_TRAP') || (player.status.trapSight && player.status.trapSight > 0);
+                                    const hasSight = equipmentHas(player.equipment?.accessory, 'RING_SIGHT');
+                                    const hasTrapSight = (equipmentHas(player.equipment?.accessory, 'RING_TRAP')) || (player.status.trapSight && player.status.trapSight > 0);
                                     const hasItem = floorItems.some(i => i.x===x && i.y===y);
                                     const hasEnemy = enemies.some(e => e.x===x && e.y===y);
                                     
@@ -3306,7 +3350,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
                                                 onClick={() => handleShopAction(i)}
                                             >
-                                                <span>{getItemName(item)}</span>
+                                                <span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={item.type} size={24}/>{getItemName(item)}</span>
                                                 <span className="flex items-center gap-1">
                                                     {item.price} G
                                                 </span>
@@ -3336,7 +3380,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
                                                 onClick={() => handleShopAction(i)}
                                             >
-                                                <span>{getItemName(item)}</span>
+                                                <span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={item.type} size={24}/>{getItemName(item)}</span>
                                                 <span className="flex items-center gap-1">
                                                     {Math.floor((item.price || (item.value || 100)) / 2)} G
                                                 </span>
@@ -3503,7 +3547,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             <p className="mb-8">{tr('君は伝説の小学生となった。')}</p>
                             <div className="flex flex-col gap-4 w-full">
                                 <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>
-                                    {tr('中学生編へ (エンドレス)')}
+                                    {adventure.state.mode === 'STORY' ? tr('中学生編へ (エンドレス)') : adventure.text('学校前へ帰る', 'Return to school base')}
                                 </button>
                                 <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>
                                     {tr('タイトルへ戻る')}
@@ -3518,7 +3562,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             <h2 className="text-xl font-bold mb-1">GAME OVER</h2>
                             <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
                             
-                            <div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
+                            {adventure.state.mode === 'STORY' && (<div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
                                 <h3 className="text-red-400 font-bold text-xs mb-2">{tr('引き継ぐアイテムを選択')}</h3>
                                 <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
                                     {allPossessions.map((item, idx) => (
@@ -3547,10 +3591,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                     ))}
                                     {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">{tr('所持品なし')}</div>}
                                 </div>
-                            </div>
+                            </div>)}
+
 
                             <button data-gamepad-initial-choice={allPossessions.length === 0 ? true : undefined} data-gamepad-zone="dungeon-actions" data-gamepad-order={0} data-gamepad-up-zone={allPossessions.length > 0 ? 'dungeon-inherit' : undefined} onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
-                                <RotateCcw size={16}/> {inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
+                                <RotateCcw size={16}/> {adventure.state.mode === 'STORY' && inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
                             </button>
                             <button data-gamepad-zone="dungeon-actions" data-gamepad-order={1} onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">
                                 EXIT
