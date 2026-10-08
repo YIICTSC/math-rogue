@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`fd149027d3b13a988d87fbb4b42b657973803874`（feat(vr): expand to 300 missions with elevation and equipment）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`d1937620674d53792aa0473232064ebf6bc9def0`（feat(vr): position equipment in field corners and unlock by stage）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -492,3 +492,10 @@ Testing tips: scripts/test-online-screen-layouts.mjs supports LAYOUT_KINDS=life,
 - 全300到達性・全武器・アイテム・複合目標、協力地形/防衛/在庫、5画面サイズ、実PeerJS 2人、24効果音デコード、英語gate、build、server:buildが通過。最終vite成果物に最新地形式が含まれることも確認済み。Actions/Renderの完了待ちはしない。
 - 型確認では既存のreadRecords推論、Input.reload、shared.statusの絞り込み、kankenLevelKanji等の問題が残る。実装・実行テストとビルドは通過。全体tscはdistまで対象にしてしまう設定でメモリ不足・dist再生成との競合が出るため、次回はsrc対象の設定を使う。
 - 詳細はmainの `docs/online/vr-300-stage-expansion.md`。新検証は `scripts/test-vr-expansion.mjs`。ユーザーの次の指示があれば最新mainから続行する。
+
+
+## 2026-10-08：VR装備の左右下配置・ステージ解禁
+
+- main `d1937620674d53792aa0473232064ebf6bc9def0`。武器スロット/攻撃はプレイフィールド右下、アイテムスロット/使用は左下。説明は装備の上、モーダルは装備より前。ソロの重複デコイボタンを撤去し、キーQは維持。
+- ミッション番号で解禁：シャボン銃/デコイ1、バトン31、弾薬41、ライフル61、散弾銃111、マント121、連射171、靴201、ハンマー231。未解禁項目に🔒ST番号、未解禁アイテム初期在庫0。equip関数をソロ・協力・ロイヤル共通で適用し、通信入力の装備制限も強制。
+- 5画面サイズの左右/重なり/範囲チェック、全300の到達性と解禁境界、協力・ロイヤルの権限制限、実2人通信、英語gate、build、server:buildが通過。Actions/Render完了の待機は行わない。
