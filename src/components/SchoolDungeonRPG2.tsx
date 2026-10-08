@@ -1374,7 +1374,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     else if (adventure.state.scene !== undefined) roomsRef.current = [{x:1,y:1,w:10,h:9}];
     setMap(newMap); setVisitedMap(Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false))); setFloorMapRevealed(false);
     setVisitedMap(prev => { const next = prev.map(row => [...row]); const startX = px - Math.floor(VIEW_W/2); const startY = py - Math.floor(VIEW_H/2); for(let y=0; y<VIEW_H; y++){ for(let x=0; x<VIEW_W; x++){ const mx = startX + x; const my = startY + y; if(mx>=0 && mx<MAP_W && my>=0 && my<MAP_H) next[my][mx] = true; } } return next; });
-    setEnemies(newEnemies); setFloorItems(newItems); setTraps(newTraps); setShowMap(false); addVisualEffect('FLASH', 0, 0, {duration: 10, maxDuration: 10});
+    setEnemies(newEnemies); setFloorItems(newItems); setTraps(newTraps); setShowMap(false); visualEffects.current = []; shake.current.duration = 0;
+    addVisualEffect('FLASH', 0, 0, {duration: 6, maxDuration: 20});
   };
 
   const gainXp = (amount: number) => {
@@ -1872,7 +1873,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) { ctx.fillStyle = C0; ctx.fillRect(sx, sy, ts, ts); continue; }
               const isRevealed = adventure.state.scene !== undefined || (adventure.visibleTile(mx, my) && (floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]))); const tile = map[my][mx];
               if (isRevealed) {
-                  if (!adventure.drawTile(ctx, tile, sx, sy, ts)) {
+                  if (!adventure.drawTile(ctx, tile, sx, sy, ts, mx, my)) {
                   if (tile === 'WALL') { ctx.fillStyle = C1; ctx.fillRect(sx, sy, ts, ts); ctx.fillStyle = C0; ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2); }
                   else { ctx.fillStyle = C3; ctx.fillRect(sx, sy, ts, ts); if (tile === 'STAIRS') { ctx.fillStyle = C1; for(let i=0; i<3; i++) ctx.fillRect(sx, sy + i*(ts/3), ts, 2); } }
                   }

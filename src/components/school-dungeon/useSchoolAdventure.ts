@@ -107,7 +107,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
    const stock=(shop.shopItems||[]).slice(0,3);
    for(let i=0;i<stock.length;i++){const c=cells.find(c=>Math.max(Math.abs(c.x-shop.x),Math.abs(c.y-shop.y))<=2&&!occupied.has(positionKey(c.x,c.y)));if(!c)break;occupied.add(positionKey(c.x,c.y));delete s.terrain[positionKey(c.x,c.y)];delete s.events[positionKey(c.x,c.y)];const item={...cloneItem(stock[i]),id:id(),shopOwner:shop.id,price:stock[i].price||stock[i].value||100};items.push({...emptyEntity(c.x,c.y),name:item.name,itemData:item});}
   }
-  normalizePlacements(map,[enemies,items,traps],px,py);lastEnemies.current=cloneItem(enemies);persist();return {px,py};
+  b.current.setPlayer((p:any)=>({...p,x:px,y:py,offset:{x:0,y:0}}));normalizePlacements(map,[enemies,items,traps],px,py);lastEnemies.current=cloneItem(enemies);persist();return {px,py};
  };
  const normalizePlacements=(map:string[][],groups:any[][],px:number,py:number)=>{
   const reachable=new Set<string>(),queue=[[px,py]];
@@ -118,8 +118,13 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  };
  useEffect(()=>{
   const ctx=b.current;if(!ctx.map.length||dojoRef.current)return;
+  let {x:px,y:py}=ctx.player;
+  if(!ctx.map[py]?.[px]||ctx.map[py][px]==='WALL'){
+   const floors:{x:number;y:number}[]=[];ctx.map.forEach((row,y)=>row.forEach((tile,x)=>{if(tile==='FLOOR')floors.push({x,y});}));floors.sort((a,b)=>Math.abs(a.x-px)+Math.abs(a.y-py)-Math.abs(b.x-px)-Math.abs(b.y-py));if(!floors.length)return;
+   const start=floors[0];px=start.x;py=start.y;ctx.setPlayer((p:any)=>({...p,x:px,y:py,offset:{x:0,y:0}}));
+  }
   const groups=[ctx.enemies,ctx.floorItems,ctx.traps],next=cloneItem(groups),before=JSON.stringify(groups);
-  normalizePlacements(ctx.map,next,ctx.player.x,ctx.player.y);
+  normalizePlacements(ctx.map,next,px,py);
   if(JSON.stringify(next)!==before){ctx.setEnemies(next[0]);ctx.setFloorItems(next[1]);ctx.setTraps(next[2]);refresh();}
  },[bridge.map]);
  const interactNearby=()=>{const p=b.current.player,keys=[positionKey(p.x,p.y),positionKey(p.x+p.dir.x,p.y+p.dir.y)];if(state.current.terrain[keys[1]]==='SECRET'){if(b.current.inventory.some(i=>i.type==='SUPPLY_PICK'&&i.charges>0))dig();else say('模様の違う壁です。つるはしで掘ると隠しロッカーを探せます。','A marked wall. Use a pickaxe to uncover a hidden locker.');return true;}if(!keys.some(k=>state.current.events[k]&&!state.current.events[k].done))return false;interact();return true;};
@@ -228,7 +233,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   lastEnemies.current=cloneItem(enemies);
  };
  const tick=(px:number,py:number)=>{
-  const ctx=b.current,s=state.current;s.floorTurns++;s.puzzleTurns++;if(s.sealedTurns>0)s.sealedTurns--;
+  const ctx=b.current,s=state.current;if(s.scene===undefined){s.floorTurns++;s.puzzleTurns++;if(s.sealedTurns>0)s.sealedTurns--;}
   recoverLoot(ctx.enemies);
   const eventKey=positionKey(px,py),event=s.events[eventKey];let recovery:{belly:number}|undefined;if(event&&!event.done){if(event.kind==='REST')recovery={belly:Math.min(100,ctx.belly+25)};else if(event.kind==='PICNIC')recovery={belly:100};else if(event.kind==='TRADER'&&ctx.player.gold>=100)recovery={belly:Math.min(100,ctx.belly+50)};interact(eventKey,false);}
   const billShop=ctx.enemies.find(e=>e.id===(s as any).shopPosition?.id)||(s as any).shopPosition;
@@ -239,7 +244,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(s.mode==='PUZZLE'&&s.puzzleTurns>(s as any).puzzleLimit){say('手数を使い切った。もう一度作戦を考えよう。','Turn limit reached. Try another strategy.');ctx.setGameOver(true);return;}
   if(s.scene===undefined&&s.mode!=='PUZZLE'){
    const night=Math.floor(s.floorTurns/80)%2===1;if(night!==Boolean(s.night)){s.night=night;say(night?'夜になった。傘おばけに注意！':'朝になった。見通しが戻った。',night?'Night has fallen. Watch for umbrella ghosts!':'Morning has arrived.');}
-   if(s.weather==='WIND'&&s.floorTurns%12===0){const dx=Math.floor(s.floorTurns/12)%2?1:-1;ctx.setFloorItems((a:any[])=>a.map(i=>i.itemData&&!i.itemData.shopOwner&&ctx.map[i.y]?.[i.x+dx]==='FLOOR'&&!s.terrain[positionKey(i.x+dx,i.y)]&&!a.some(other=>other!==i&&other.x===i.x+dx&&other.y===i.y)?{...i,x:i.x+dx}:i));say('風で床の道具が少し動いた。','Wind moved loose supplies on the floor.');}
+   if(s.weather==='WIND'&&s.floorTurns%12===0){const dx=Math.floor(s.floorTurns/12)%2?1:-1;ctx.setFloorItems((a:any[])=>a.map(i=>i.itemData&&!i.itemData.shopOwner&&ctx.map[i.y]?.[i.x+dx]==='FLOOR'&&!s.terrain[positionKey(i.x+dx,i.y)]&&!s.events[positionKey(i.x+dx,i.y)]&&!(i.x+dx===px&&i.y===py)&&!ctx.enemies.some(e=>e.x===i.x+dx&&e.y===i.y)&&!ctx.traps.some(t=>t.x===i.x+dx&&t.y===i.y)&&!a.some(other=>other!==i&&other.x===i.x+dx&&other.y===i.y)?{...i,x:i.x+dx}:i));say('風で床の道具が少し動いた。','Wind moved loose supplies on the floor.');}
    if(s.weather==='RAIN'&&s.floorTurns%25===0&&!equipmentHas(ctx.player.equipment?.accessory,'SUPPLY_RAINCOAT')){const paper=ctx.inventory.find(i=>!i.wet&&(i.type.startsWith('SCROLL')||i.type==='SUPPLY_MAT'));if(paper){updateInventory((a:any[])=>a.map(i=>i.id===paper.id?{...i,wet:true}:i));say('雨で紙の道具が濡れた。宿で乾かせます。','Rain soaked a paper supply. Dry it at an inn.');}}
   }
   const friend=s.companion;
@@ -338,8 +343,16 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const safelyDrawService=(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number)=>{const service=TOWN_SERVICES.find(s=>s.kind===kind);return service?drawExpansionSprite(ctx,service.sprite,x,y,size):false;};
  const safeTurn=()=>state.current.scene!==undefined;
  const drawBackdrop=(ctx:CanvasRenderingContext2D,w:number,h:number)=>{if(state.current.scene!==undefined)drawScenery(ctx,state.current.scene,w,h);};
- const drawTile=(ctx:CanvasRenderingContext2D,tile:string,x:number,y:number,size:number)=>{
-  if(state.current.scene===undefined)return false;ctx.save();ctx.fillStyle=tile==='WALL'?'#103c3566':'#e6d1a540';ctx.fillRect(x,y,size,size);if(tile!=='WALL'){ctx.strokeStyle='#fff3';ctx.strokeRect(x,y,size,size);}if(tile==='STAIRS'){ctx.fillStyle='#f3d887';ctx.font=`bold ${size*.5}px monospace`;ctx.fillText('↓',x+size*.3,y+size*.7);}ctx.restore();return true;
+ const drawTile=(ctx:CanvasRenderingContext2D,tile:string,x:number,y:number,size:number,mx=0,my=0)=>{
+  const s=state.current;if(s.scene===undefined)return false;ctx.save();ctx.imageSmoothingEnabled=false;
+  const river=!s.town&&mx===5&&my>=1&&my<=9,bridge=river&&tile!=='WALL';
+  const palettes=[['#568044','#314e36','#c6ae70'],['#658155','#304f3b','#c6ba87'],['#ad7644','#573e30','#d6ba80'],['#bacdd0','#445e68','#e0dcc0']];
+  const palette=palettes[Math.max(0,Math.min(3,s.scene-2))];
+  if(river&&!bridge){ctx.fillStyle=s.scene===5?'#406d88':'#356c86';ctx.fillRect(x,y,size,size);ctx.strokeStyle='#a8ced1';ctx.lineWidth=1;for(let i=0;i<3;i++){const yy=y+size*(.2+i*.3);ctx.beginPath();ctx.moveTo(x+size*.12,yy);ctx.lineTo(x+size*.55,yy);ctx.stroke();}}
+  else if(tile==='WALL'){ctx.fillStyle=s.town?'#203b2b':palette[1];ctx.globalAlpha=.88;ctx.fillRect(x,y,size,size);ctx.globalAlpha=1;ctx.strokeStyle=s.town?'#8bac0f':palette[0];ctx.strokeRect(x+2,y+2,size-4,size-4);}
+  else{ctx.fillStyle=bridge?'#98734a':s.town?'#b3ab70':palette[0];ctx.globalAlpha=bridge ? .95 : .72;ctx.fillRect(x,y,size,size);ctx.globalAlpha=1;ctx.strokeStyle=bridge?'#e2c68e':s.town?'#8f915c':palette[2];if(bridge){for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(x,y+i*size/5);ctx.lineTo(x+size,y+i*size/5);ctx.stroke();}}else{ctx.globalAlpha=.25;ctx.strokeRect(x,y,size,size);ctx.globalAlpha=1;}}
+  if(tile==='STAIRS'){ctx.fillStyle='#173426';ctx.fillRect(x+size*.15,y+size*.12,size*.7,size*.76);ctx.fillStyle='#f3d887';for(let i=0;i<4;i++)ctx.fillRect(x+size*.25,y+size*(.24+i*.14),size*(.48-i*.08),2);}
+  ctx.restore();return true;
  };
  const townAction=(kind:string,type?:string)=>{
   if(!enterMutation()||!state.current.town)return;const ctx=b.current,s=state.current;const service=TOWN_SERVICES.find(v=>v.kind===kind);
@@ -359,6 +372,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const drawTerrain=(ctx:CanvasRenderingContext2D,x:number,y:number,sx:number,sy:number,ts:number)=>{const k=positionKey(x,y),t=state.current.terrain[k],event=state.current.events[k];ctx.save();
   if(t==='SECRET'){ctx.strokeStyle=ctx.fillStyle='#9bbc0f';ctx.strokeRect(sx+ts*.3,sy+ts*.3,ts*.4,ts*.4);ctx.font=`${ts*.3}px monospace`;ctx.fillText('?',sx+ts*.4,sy+ts*.6);ctx.restore();return;}
   if(t){ctx.fillStyle=t==='WATER'?'#3b97c9':t==='ICE'?'#b2e2f1':t==='HOLE'?'#302830':'#997745';ctx.fillRect(sx+2,sy+2,ts-4,ts-4);ctx.fillStyle='#fff';ctx.font=`${Math.floor(ts*.35)}px monospace`;ctx.fillText(t==='WATER'?'≈':t==='ICE'?'◇':t==='HOLE'?'↓':'?',sx+ts*.3,sy+ts*.6);}
+  if(event&&!event.done&&event.kind==='PICNIC'&&drawExpansionSprite(ctx,5,sx,sy,ts)){ctx.restore();return;}
   if(event&&safelyDrawService(ctx,event.kind,sx,sy,ts)){ctx.restore();return;}
   if(event&&!event.done&&drawSchoolSprite(ctx,event.kind==='FRIEND'?'actors':'items',event.kind==='FRIEND'?14:event.kind==='REST'?13:event.kind==='TRADER'?14:6,sx,sy,ts)){ctx.restore();return;}
   if(event&&!event.done){ctx.fillStyle='#f9e7a5';ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.6,ts*.6);ctx.fillStyle='#304a37';ctx.font=`bold ${Math.floor(ts*.4)}px monospace`;ctx.fillText(({REST:'+',TRADER:'$',FRIEND:'☺',STORY:'!'} as any)[event.kind],sx+ts*.32,sy+ts*.65);}ctx.restore();};

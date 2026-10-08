@@ -1342,7 +1342,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     setFloorItems(newItems);
     setTraps(newTraps);
     setShowMap(false);
-    addVisualEffect('FLASH', 0, 0, {duration: 10, maxDuration: 10});
+    visualEffects.current = []; shake.current.duration = 0;
+    addVisualEffect('FLASH', 0, 0, {duration: 6, maxDuration: 20});
 };
 
   const gainXp = (amount: number) => {
@@ -2813,7 +2814,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               const tile = map[my][mx];
               
               if (isRevealed) {
-                  if (!adventure.drawTile(ctx, tile, sx, sy, ts)) {
+                  if (!adventure.drawTile(ctx, tile, sx, sy, ts, mx, my)) {
                   if (tile === 'WALL') {
                       ctx.fillStyle = C1;
                       ctx.fillRect(sx, sy, ts, ts);
