@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`dd8e33e4595eca2cfa54469bd371b475c55e2b35`（fix(online): improve responsive screen layouts across four games）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`fd149027d3b13a988d87fbb4b42b657973803874`（feat(vr): expand to 300 missions with elevation and equipment）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -481,3 +481,14 @@ VR lobby extracted to VrLobby with scrollable 8-player roster and fixed Start; l
 RPG hero builder has a single-row action tab bar and shrinkable frame buttons (2 columns at <=360px). City and lifestyle tabs use one horizontal row; season/status cards wrap within narrow content. Arcade close/header and practice-room return remain available while content scrolls. Full-screen furniture-game Exit is fixed above the board; reaction-button columns now fit 320px. LifePanel only animates its clock during active gathering, avoiding unnecessary 25Hz redraws while browsing crafting/fish catalogs.
 Validation: 15 representative screen families at 5 sizes, all farm/city/craft/fish/lifestyle/home tabs, nine furniture games’ start/exit plus rhythm selection at five sizes, active gathering meter/tool action; RPG/kart launch, common questions/difficulty, IndexedDB save/continue, 40-player RPG lobby and kart results at six sizes; actual VR 3D title/stage/avatar setup; kart custom editor; golf ready/quiz/aim/open-map, 40-player results and landscape spectators. English UI gate, final frontend build, server build and diff check passed. Publication used GitHub Git Data API with the tested tree unchanged. No Actions/Render deployment-completion checks or waiting, per user preference. Handoff remains on its own documentation branch.
 Testing tips: scripts/test-online-screen-layouts.mjs supports LAYOUT_KINDS=life,lab for focused checks; LAYOUT_SCREENSHOTS=0 skips expensive screenshots. Fixtures must advance world.life.now together with work.started, matching real action snapshots. Avoid running multiple animated WebGL screenshot suites alongside the English runtime gate.
+
+
+## 2026-10-08：VR 300ステージ・高低差・装備
+
+- main: `fd149027d3b13a988d87fbb4b42b657973803874`。既存50 IDを保ち、新250を追加。各難易度60ステージ。広さ16/22/30/38/48m、高さ2/3/4/6mの坂・高台、10環境の配色。
+- シャボン銃、訓練ライフル、フォーム散弾銃、連射ブラスター、スポンジバトン、訓練ハンマー。武器/アイテムスロット、R攻撃、X使用。デコイ、弾薬+8、透明6秒、速度8秒。ソロ・協力・ロイヤルで動作。
+- 資料・救助・端末は色/形/操作時間が異なる。扉起動、防衛地点、ホールド・命中、脱出を複合。参加者のエリアは広さに応じて離し、地形・防衛地点を移動。共有デコイ消費を1回に統一。
+- Three.js床はInstancedMeshで広域協力の描画負荷を抑制。floorHeightでマップ端を高さ0に戻し、隣接エリアへ滑らかに接続。
+- 全300到達性・全武器・アイテム・複合目標、協力地形/防衛/在庫、5画面サイズ、実PeerJS 2人、24効果音デコード、英語gate、build、server:buildが通過。最終vite成果物に最新地形式が含まれることも確認済み。Actions/Renderの完了待ちはしない。
+- 型確認では既存のreadRecords推論、Input.reload、shared.statusの絞り込み、kankenLevelKanji等の問題が残る。実装・実行テストとビルドは通過。全体tscはdistまで対象にしてしまう設定でメモリ不足・dist再生成との競合が出るため、次回はsrc対象の設定を使う。
+- 詳細はmainの `docs/online/vr-300-stage-expansion.md`。新検証は `scripts/test-vr-expansion.mjs`。ユーザーの次の指示があれば最新mainから続行する。
