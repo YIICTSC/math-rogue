@@ -21,3 +21,7 @@
 .town-panel .town-toggle span{flex:1;min-width:0;line-height:1.6;overflow-wrap:anywhere}
 .town-panel .town-hero-profile h3{overflow-wrap:anywhere}
 @media(max-width:600px){.town-calendar{padding:8px;gap:6px}.town-calendar small{display:none}.town-calendar h2{font-size:16px;margin:0 0 4px}.town-calendar .town-sprite{width:38px;height:38px}.town-card{padding:10px}.town-stat-grid>div{padding:8px}.town-section{gap:10px}}
+/* Nested home/lifestyle panels also need to fit narrow modal content widths. */
+.town-calendar>div{min-width:0}.town-calendar h2,.town-calendar p,.town-card h3,.town-card p{overflow-wrap:anywhere}.town-stat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.town-stat-grid>div{min-width:0;padding:8px}.town-stat-grid span{overflow-wrap:anywhere}.town-tabs{max-width:100%;min-width:0}.town-neighbor-detail{min-width:0;flex-wrap:wrap}.town-card-actions button{min-width:0;overflow-wrap:anywhere}
+@media(max-width:360px){.town-calendar{gap:8px;padding:10px}.town-calendar .town-sprite{width:48px;height:48px}.town-calendar h2{font-size:18px}.town-stat-grid{gap:5px}.town-stat-grid span{font-size:11px}}
+.town-panel>.town-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}.town-panel>.town-tabs button{flex:0 0 auto;white-space:nowrap}

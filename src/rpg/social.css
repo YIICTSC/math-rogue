@@ -176,3 +176,6 @@
 .rpg-conversation-voice input[type="range"] { width: 100%; min-height: 44px; accent-color: #d4af66; }
 .rpg-conversation-voice select, .rpg-conversation-voice button { min-height: 44px; }
 .rpg-voice-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.rpg-voice-presets button{min-height:44px;padding:6px;font-size:12px}@media(orientation:landscape) and (max-height:550px){.rpg-voice-presets{grid-template-columns:repeat(6,minmax(0,1fr))}.rpg-conversation-voice{padding:10px}.rpg-conversation-voice label{margin:6px 0}}
+/* Six animation tabs stay on one row; frames and editor fields may shrink. */
+.rpg-hero-builder>nav{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain}.rpg-hero-builder>nav button{flex-shrink:0;white-space:nowrap}.rpg-hero-frames{grid-template-columns:repeat(4,minmax(0,1fr))}.rpg-hero-frames button{height:auto;min-height:110px;min-width:0;padding:6px;margin:0;overflow-wrap:anywhere}.rpg-hero-preview{min-width:0;gap:12px}.rpg-hero-preview>div{min-width:0}.rpg-social-panel article{min-width:0;overflow-wrap:anywhere}.rpg-hero-builder input,.rpg-social-panel input{box-sizing:border-box;max-width:100%}
+@media(max-width:360px){.rpg-hero-frames{grid-template-columns:repeat(2,minmax(0,1fr))}}

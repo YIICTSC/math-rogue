@@ -165,3 +165,5 @@
 .city-catalog svg.city-sprite {
   max-height: none;
 }
+/* A single scrollable tab row preserves space for the city tools on phones. */
+.city-panel>nav{display:flex;flex-wrap:nowrap;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;flex-shrink:0}.city-panel>nav button{flex:0 0 auto;white-space:nowrap;min-height:44px}.city-summary{flex-shrink:0;min-width:0;flex-wrap:wrap}.city-panel>header>div{min-width:0}.city-panel>header h2{overflow-wrap:anywhere}

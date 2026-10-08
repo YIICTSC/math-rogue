@@ -91,3 +91,6 @@
 .gc-hobby .gc-game-exit { background: #443244; border: 1px solid #c5a5b3; color: #fff0f0; padding: 7px 12px; margin-top: 10px; }
 .gc-hobby .gc-game-actions .gc-game-exit { margin-top: 0; }
 @media (pointer: coarse) { :where(.gc-hobby) button { min-height: 44px; } }
+/* Every full-screen furniture game keeps an exit above the scrollable board. */
+.gc-hobby.is-live{padding-top:calc(60px + env(safe-area-inset-top))}.gc-hobby.is-live>.gc-game-exit{position:fixed;top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));z-index:3000;min-height:44px;max-width:calc(100vw - 16px);margin:0;padding:8px 14px;border:1px solid #e7ce91;border-radius:9px;background:#193b43;color:#fff3d5;box-shadow:0 3px 12px #0005}
+.gc-hobby .gc-reaction-buttons{width:min(360px,100%);max-width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}.gc-hobby .gc-reaction-buttons button{min-width:0;width:100%;box-sizing:border-box}.gc-hobby .gc-reaction-status{min-width:0;overflow-wrap:anywhere}

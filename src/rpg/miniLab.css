@@ -45,3 +45,6 @@
   max-width: 1200px;
   margin: auto;
 }
+/* Practice room keeps its return action available while games scroll below. */
+.rpg-mini-lab{box-sizing:border-box;overscroll-behavior:contain;scroll-padding-top:72px}.rpg-mini-lab>header{position:sticky;top:0;z-index:15;background:#11282cf5;padding:8px 0;min-width:0}.rpg-mini-lab>header>div{min-width:0}.rpg-mini-lab>header button{flex-shrink:0}.rpg-mini-lab .gc-games{min-width:0;overflow-wrap:anywhere}
+@media(orientation:landscape) and (max-height:550px){.rpg-mini-lab{padding:6px 10px}.rpg-mini-lab>header{padding:2px 0}.rpg-mini-lab>header h1{font-size:18px;margin:4px 0}.rpg-mini-lab>header p{font-size:11px;margin:4px 0}}

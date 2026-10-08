@@ -159,3 +159,5 @@
  .gg-playing:not(.gg-spectating) .gg-play-ui>.gg-shot:not(.gg-shot-console),.gg-playing:not(.gg-spectating) .gg-play-ui>.gg-quiz{width:100%;max-width:none;margin:0}
  .gg-playing:not(.gg-spectating) .gg-paused{top:84px;left:max(8px,env(safe-area-inset-left));right:calc(var(--gg-dock) + 16px);max-width:none;width:auto;transform:none;font-size:10px}
 }
+/* Spectator chrome uses its own column rather than covering the course HUD. */
+@media(orientation:landscape) and (max-height:550px){.gg-spectating>.host-spectator{top:40px;left:auto;right:max(8px,env(safe-area-inset-right));transform:none;width:min(310px,46vw);max-height:90px}.gg-spectating .gg-hud{top:40px;left:8px;right:auto;width:48vw}.gg-spectating .gg-wind{top:115px;left:8px;right:auto}.gg-spectating .gg-minimap{top:115px;left:110px;right:auto;max-width:100px;max-height:100px}.gg-spectating .gg-lie{top:85px;left:8px;right:auto}.gg-spectating .gg-course-tools{right:8px;left:auto;bottom:8px;width:min(310px,46vw);flex-wrap:wrap}.gg-spectating .gg-play-ui{top:140px;bottom:70px;left:auto;right:8px;width:min(310px,46vw);max-height:none;overflow:auto}.gg-spectating .gg-play-ui>.gg-quiz{width:100%;margin:0}}

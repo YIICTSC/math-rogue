@@ -1646,7 +1646,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           )}
         </div>
 
-        <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
+        <div className="mode-selection-layout flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
           <div className="mode-category-list lg:col-span-2 grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-col gap-1 lg:gap-1.5 pb-1 lg:pb-0 overflow-y-auto lg:overflow-x-visible custom-scrollbar shrink-0">
             {displayedCategories.map((cat, categoryIndex) => (
               <button
@@ -1665,7 +1665,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             ))}
           </div>
 
-          <div className="lg:col-span-7 flex flex-col min-h-0">
+          <div className="mode-selection-units lg:col-span-7 flex flex-col min-h-0">
             <h3 className="text-[10px] md:text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-tight shrink-0">
               {trans('単元', languageMode)} / {trans('種目', languageMode)}
             </h3>
@@ -1674,7 +1674,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             </div>
           </div>
 
-          <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
+          <div className="mode-selection-summary lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
             <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{trans('選択中', languageMode)}</div>
               <div className="text-sm font-bold text-yellow-300" data-allow-japanese="true">{selectionPreview.label}</div>
