@@ -428,3 +428,8 @@ Kart: eight course sky/fog/road/rail/material palettes now applied; urban course
 - ユーザーはRender Build FiltersのIncluded Paths保存を完了したと報告。前項の「未適用」はユーザー作業で解消（追加の実サービス設定検査は未実施）。最新main 42440fbd の音声変更等を統合した上で main 28ae9854ced46ba134b2bd00690427123493fea7 を公開。
 - 3ゲーム共通TransportPicker: ブラウザから各endpointへWebSocket ping/pong（既存サーバー機能）で到達性を確認。確認中/接続不可はサーバー選択無効＋灰色。不可時はホストへ戻し、再確認ボタン・自動復旧を用意。接続不可5秒/成功30秒再確認、focus/online/offlineで再確認。health fetchは起動促進のみで、成功判定に使わない。unmountで通信とtimer解除。
 - 実サーバーを使うブラウザテストでRPG/kart/golf到達、Origin拒否、停止/ネットワーク切断、ホスト維持/フォールバック、復旧、部屋作成なしを検証。英語ゲート、frontend/server build合格。サーバーソース変更なし。Actions/Render完了待ちなし。
+
+## 2026-10-08 参加画面とリザルトの整理
+- main df60762d1929b789db10c0d5f8a5364d2ca24d2b。レース/ゴルフの参加者一覧左に常時自キャラプレビュー、編集結果を即反映。帰宅ダッシュHP1はportalによる全画面flex表示、閉じる操作付き。
+- 両ゲームのリザルトを2カラム化、ランキング/設定を内部スクロール、次の開始・退出を固定表示。ゴルフは同じ部屋で次ラウンドへ、参加者/アバター/問題履歴を保持しスコアをリセット。ホストが次のホール数を選択可能。
+- 390x844/844x390/1366x768でプレビュー編集反映、ダッシュとリザルト/次のボタン配置をブラウザ検証（WebGL表示のみモック）。ゴルフ再戦エンジン/既存サーバーテスト、英語ゲート、frontend/server build合格。今回server/golfRooms.ts変更あり、Render自動デプロイ対象。Actions/Render完了待ちは不要。
