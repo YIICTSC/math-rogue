@@ -69,3 +69,10 @@ Eight new supplies offer a limited-use directional rain umbrella, nearby sleep w
 The starting base has a dedicated entrance to fifty independently selectable, deterministic lessons, across ten subjects with five spatial variants each: turns/routes, diagonal corners, corridor combat, sleep, directional magic, water, traps, hunger, key detours and digging. Each lesson has its own map, limited turns, HP/food and tool budget. Enemies retaliate while adjacent; sleep suppresses retaliation; ray tools stop at walls; floats enable water; traps deal damage; lunch prevents starvation; keys open adjacent doors; picks cannot break borders. Diagonal movement respects blocked corners. Hints, restart, stage selection, next-stage progression and best clear turns are available. Lesson equipment and failures are isolated from the expedition, warehouse and rescue. Both games store their own dojo completion records.
 
 `test-school-dojo.mjs` verifies that all fifty unique scenarios have legal winning action sequences, and checks immutable reducer state and finished-state handling. Browser integration exercises the real dojo entrance and a clear, both games' town services, four scenery routes, rain/repair/wind/night effects and all sprite frames. Mobile portrait/landscape and desktop dialog bounds are checked. All six generated sheets (original and expansion) are available to Web and Android asset manifests.
+
+## 道場の画面と操作
+50ステージの練習は通常のゲームキャンバス、ステータス欄、十字キーとA・B・Rボタンの配置をそのまま使用する。Bから道具・ヒント・やり直しを開き、Rで練習用道具を使用する。選択と結果のみダイアログに表示し、冒険の持ち物・座標・空腹を変更しない。
+
+## 解禁と配置
+最初は放課後の大冒険と50問道場。道場5問で放課後の一手、15問で工作室を解禁。大冒険クリアでなぞなぞ校舎・作戦ノート・工作室・一手を解禁し、なぞなぞか作戦ノートのクリアで体操服、そのクリアで99階を解禁。既存のクリア記録があるモードは維持する。救助は依頼がある間のみ。
+特殊敵は4階から少数、7・11・16階で能力の種類を追加。追加敵は8階から登場。イベントは足元への移動と正面へのAで反応する。生成時とロード時に壁・到達不能地点・重なりを補正する。隠しロッカーは床アイテムではなく壁の模様として表示し、Aでつるはし採掘または説明を表示する。開始拠点・手帳は4色GB風の角型ボタンと枠、等幅文字で統一。

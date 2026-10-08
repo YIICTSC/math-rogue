@@ -973,6 +973,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const handleCardUse = (index: number) => {
+      if (adventure.dojoMenu()) return;
       if (adventure.blocksInput() || !adventure.cardsAllowed()) return;
       if (gameOver || gameClear || menuOpen || shopState.active) return;
       if (index >= dungeonHand.length) return;
@@ -1257,7 +1258,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     setInheritItemIdx(null);
   };
 
-  const handleQuit = () => { saveData(true); onBack(); };
+  const handleQuit = () => {
+      if (adventure.isDojoActive()) { adventure.exitDojo(); return; } saveData(true); onBack(); };
   const isPointInRoom = (x: number, y: number) => (roomsRef.current || []).some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   const createShopkeeper = (x: number, y: number): Entity => {
       const shopItems: Item[] = [];
@@ -1382,7 +1384,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
-      adventure.tick(px, py);
+      const recovered = adventure.tick(px, py);
+      overrides = overrides || recovered;
       if (adventure.safeTurn()) return;
       turnCounter.current += 1;
       const aType = player.equipment?.armor?.type; const heavy = equipmentHas(player.equipment?.armor, 'RANDO_SERU'); const accType = player.equipment?.accessory?.type; const isHungerResist = equipmentHas(player.equipment?.accessory, 'RING_HUNGER'); const isHealRing = equipmentHas(player.equipment?.accessory, 'RING_HEAL');
@@ -1488,6 +1491,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if (adventure.dojoStep({type:'MOVE',dx,dy})) return;
       if (adventure.blocksInput()) return;
       if(gameOver || gameClear) return;
       if (shopState.active) {
@@ -1554,6 +1558,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const handleActionBtn = () => {
+      if (adventure.dojoAction()) return;
+      if (!adventure.blocksInput() && !menuOpen && !gameOver && !gameClear && adventure.interactNearby()) return;
       if (adventure.blocksInput()) return;
       if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
@@ -1608,6 +1614,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       return tr(displayName);
   };
   const fireRangedWeapon = () => {
+      if (adventure.dojoStep({type:'TOOL'})) return;
       if (menuOpen || shopState.active) return; const rangedItem = player.equipment?.ranged;
       if (!rangedItem) { addLog("飛び道具を装備していない！"); return; }
       if ((rangedItem.count || 0) <= 0) { addLog(`${rangedItem.name}が無くなった！`); setPlayer(p => ({ ...p, equipment: { ...p.equipment!, ranged: null } })); return; }
@@ -1668,12 +1675,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack');
   };
 
-  const handlePressStart = () => { if (adventure.blocksInput() || menuOpen || shopState.active || gameOver || gameClear) return; fastForwardInterval.current = setTimeout(() => setIsFastForwarding(true), 400); };
+  const handlePressStart = () => {
+      if (adventure.isDojoActive()) return; if (adventure.blocksInput() || menuOpen || shopState.active || gameOver || gameClear) return; fastForwardInterval.current = setTimeout(() => setIsFastForwarding(true), 400); };
   const handlePressEnd = (e?: React.TouchEvent | React.MouseEvent) => { if (e) e.preventDefault(); if (fastForwardInterval.current) { clearTimeout(fastForwardInterval.current); fastForwardInterval.current = null; } if (!isFastForwarding) handleActionBtn(); else setIsFastForwarding(false); };
 
   useEffect(() => {
       let interval: any = null;
-      if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
+      if (!adventure.isDojoActive() && isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
           interval = setInterval(() => {
               const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
               if (nearby) { setIsFastForwarding(false); addLog("敵が近くにいる！", "red"); return; }
@@ -1685,7 +1693,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       return () => { if (interval) clearInterval(interval); };
   }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear]);
 
-  const toggleMenu = () => { if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); setSelectedItemActionIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
+  const toggleMenu = () => {
+      if (adventure.dojoMenu()) return; if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); setSelectedItemActionIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
   const startEndlessMode = () => { if (adventure.state.mode !== 'STORY') { adventure.returnHome(); return; } setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
   const handleSynthesisStep = () => {
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex; const item = inventory[idx];
@@ -1808,6 +1817,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (adventure.dojoKey(e)) return;
         if (adventure.blocksInput()) return;
         lastInputType.current = 'KEY'; if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
         if (gameOver) return; 
@@ -1849,6 +1859,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const renderGame = () => {
       const canvas = canvasRef.current; if (!canvas) return; const ctx = canvas.getContext('2d'); if (!ctx) return; if (!map || map.length === 0) return;
       const w = canvas.width; const h = canvas.height; const ts = TILE_SIZE * SCALE; const { C0, C1, C2, C3 } = currentTheme.colors;
+      if (adventure.drawDojo(ctx,w,h,ts,currentTheme.colors,(entity,x,y,size)=>{drawPlayerFromSheets(ctx,entity,x,y,size);})) return;
       ctx.fillStyle = C0; ctx.fillRect(0, 0, w, h); ctx.save();
       if (shake.current.duration > 0) { const mag = 4; ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag); shake.current.duration--; }
       adventure.drawBackdrop(ctx, w, h);
@@ -2080,7 +2091,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         
         {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={languageMode === 'ENGLISH' ? 'Perfect score: Fullness +10' : '全問正解で満腹度+10'} languageMode={languageMode} /></div>)}
 
-        {showDeck && (
+        {showDeck && !adventure.dojoRun && (
             <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-deck" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
@@ -2105,7 +2116,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             </div>
         )}
 
-        {showStatus && (
+        {showStatus && !adventure.dojoRun && (
             <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-status" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}><h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> {tr('ステータス')}</h2><button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowStatus(false)} aria-label={tr('閉じる')}><X size={24}/></button></div>
@@ -2151,7 +2162,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             </div>
         )}
 
-        {showHelp && (
+        {showHelp && !adventure.dojoRun && (
             <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-help" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}><h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> {tr('遊び方')}</h2><button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowHelp(false)} aria-label={tr('閉じる')}><X size={24}/></button></div>
@@ -2187,21 +2198,21 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="dungeon-top-bar w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                    <span className="font-bold tracking-widest">{adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
+                    <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の小学生道場','School Wanderer dojo') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                     <div className="flex gap-2">
-                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
-                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={2} data-gamepad-shortcut="LT" aria-keyshortcuts="LT" onClick={() => { setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
-                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={3} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
+                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => { if (!adventure.dojoMenu()) setShowMap(!showMap); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => { if (!adventure.dojoMenu()) setShowStatus(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={2} data-gamepad-shortcut="LT" aria-keyshortcuts="LT" onClick={() => { if (adventure.dojoMenu()) return; setDeckViewMode('VIEW'); setShowDeck(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><Layers size={10}/> Deck</button>
+                        <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={3} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={() => { if (!adventure.dojoMenu()) setShowHelp(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                     </div>
                 </div>
                 <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
-                    <span>{floor}F</span><span>Lv{level}</span><span>HP{player.hp}/{player.maxHp}</span><span>A{player.attack}D{player.defense}</span><span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span><span>🍙{belly}%</span>
+                    <span>{adventure.dojoRun?.stage ?? floor}F</span><span>Lv{adventure.dojoRun ? 1 : level}</span><span>HP{adventure.dojoRun?.hp ?? player.hp}/{adventure.dojoRun ? 7 : player.maxHp}</span><span>A{adventure.dojoRun ? 2 : player.attack}D{adventure.dojoRun ? 0 : player.defense}</span><span className="flex items-center"><Coins size={10} className="mr-0.5"/>{adventure.dojoRun ? 0 : player.gold}</span><span>🍙{adventure.dojoRun?.food ?? belly}%</span>
                 </div>
                 <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
                     {isFastForwarding && (<div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}><FastForward size={16} className="mr-1"/> {tr('早送り中')}</div>)}
-                    {showMap && map.length > 0 && (
+                    {showMap && !adventure.dojoRun && map.length > 0 && (
                         <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-map" className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
                             <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                                 {map.map((row, y) => row.map((tile, x) => {
@@ -2237,7 +2248,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         </div>
                     </div>
                 )}
-                {menuOpen && (
+                {menuOpen && !adventure.dojoRun && (
                     <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
                         <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold">{synthState.active ? tr(synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))) : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`}</h3><button onClick={toggleMenu}><X size={12}/></button></div>
                         {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
@@ -2284,8 +2295,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         )}
                     </div>
                 )}
-                {gameClear && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">{tr('ついに校長を説得した！')}</p><p className="mb-8">{tr('君は伝説の小学生となった。')}</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>{adventure.state.mode === 'STORY' ? tr('中学生編へ (エンドレス)') : adventure.text('学校前へ帰る', 'Return to school base')}</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>{tr('タイトルへ戻る')}</button></div></div>)}
-                {gameOver && (
+                {gameClear && !adventure.dojoRun && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">{tr('ついに校長を説得した！')}</p><p className="mb-8">{tr('君は伝説の小学生となった。')}</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>{adventure.state.mode === 'STORY' ? tr('中学生編へ (エンドレス)') : adventure.text('学校前へ帰る', 'Return to school base')}</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>{tr('タイトルへ戻る')}</button></div></div>)}
+                {gameOver && !adventure.dojoRun && (
                     <div data-gamepad-modal data-gamepad-initial-scope="dungeon-2-game-over" data-gamepad-navigation-root className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
                         <Skull size={48} className="mb-2" style={{ color: C1 }}/>
                         <h2 className="text-xl font-bold mb-1">GAME OVER</h2>

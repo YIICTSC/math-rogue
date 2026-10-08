@@ -1,9 +1,10 @@
+import {DOJO_STAGES,dojoStart,dojoAct,type DojoAction,type DojoRun} from './dojo';
 import {SCHOOL_WANDERER_ENGLISH} from './copy';
 import {EXTRA_ITEM_SPRITES,EXTRA_ITEMS,EXTRA_ENEMIES,TOWN_SERVICES,journeyLayout} from './expansion';
 import {drawExpansionSprite,drawScenery,drawCompanionSprite,drawSchoolSprite,loadSchoolSprites,SCHOOL_ITEM_SPRITES,SCHOOL_ACTOR_SPRITES} from './sprites';
 import {trans} from '../../utils/textUtils';
 import {useEffect,useRef,useState} from 'react';
-import {ADVENTURE_ITEMS,companionDirection,companionStep,cloneItem,decorateFloor,equipmentHas,evolveEnemy,goalFloor,mergeEquipment,MODES,newAdventure,newBase,positionKey,puzzleLayout,putInContainer, type AdventureMode,type AdventureState,type SchoolBase,type SchoolItem} from './adventure';
+import {ADVENTURE_ITEMS,companionDirection,companionStep,cloneItem,decorateFloor,equipmentHas,evolveEnemy,goalFloor,mergeEquipment,MODES,modeUnlocked,modeRequirement,newAdventure,newBase,positionKey,puzzleLayout,putInContainer, type AdventureMode,type AdventureState,type SchoolBase,type SchoolItem} from './adventure';
 export interface AdventureBridge {
  game:1|2; debug?:boolean; language:string; map:string[][]; player:any; inventory:any[]; enemies:any[]; traps:any[]; floorItems:any[];floor:number;belly:number;gameOver:boolean;gameClear:boolean;
  setPlayer:(fn:any)=>void;setInventory:(fn:any)=>void;setEnemies:(fn:any)=>void;setTraps:(fn:any)=>void;setFloorItems:(fn:any)=>void;setMap:(fn:any)=>void;setGameOver:(v:boolean)=>void;setGameClear:(v:boolean)=>void;setMenuOpen:(v:boolean)=>void;setBelly:(fn:any)=>void;setIdentifiedTypes:(fn:any)=>void;
@@ -18,6 +19,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const key=`learning-rogue:school-base:${bridge.game}`;
  const baseRef=useRef<SchoolBase|null>(null);if(!baseRef.current)baseRef.current=bridge.debug?newBase():loadBase(key);const base=baseRef as {current:SchoolBase};const state=useRef(newAdventure());
  const [revision,redraw]=useState(0);const [panel,setPanel]=useState<string|null>(bridge.debug?null:'BASE');
+ const [dojoRun,setDojoRun]=useState<DojoRun|null>(null);const dojoRef=useRef<DojoRun|null>(null);
  const [container,setContainer]=useState<string|null>(null);const [message,setMessage]=useState('');
  const panelRef=useRef(panel);panelRef.current=panel;
  const pending=useRef<{mode:AdventureMode;items:SchoolItem[];gold:number;friend:AdventureState['companion']}|null>(null);
@@ -40,6 +42,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  };
  const start=(mode:AdventureMode,selected:string[],gold:number,role:'HEAL'|'GUARD'|'FETCH'|null)=>{
   if(!enterMutation())return;
+  if(!b.current.debug&&!modeUnlocked(base.current,mode)){const requirement=modeRequirement(mode);say(...requirement);return;}
   if(mode==='RESCUE'&&(!base.current.rescue||base.current.rescue.attempts>=3)){say('救助できる忘れ物がありません。','No supplies are available for rescue.');return;}
   const previous=cloneItem(base.current),runId=id();
   const carry=mode==='STORY';const items=carry?base.current.warehouse.filter(i=>selected.includes(i.id)).slice(0,16):[];
@@ -83,8 +86,8 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(s.town)for(const service of TOWN_SERVICES)s.events[positionKey(service.x,service.y)]={kind:service.kind,done:false};
   else if(s.scene!==undefined)s.events['7,7']={kind:'PICNIC',done:false};
   if(floor===1)b.current.setPlayer((p:any)=>({...p,gold:(s as any).startingGold||0}));
-  const kinds=['SPLIT','SEAL','SWALLOW','ERASE','RICE','EVOLVE'];
-  enemies.forEach((e,i)=>{if(e.enemyType!=='BOSS'&&e.enemyType!=='SHOPKEEPER'&&(s.mode==='PUZZLE'||i%3===0)){e.schoolKind=s.mode==='PUZZLE'?'DETENTION':kinds[(i+floor)%kinds.length];e.schoolRank=1;if(s.mode!=='PUZZLE')e.enemyType=({SPLIT:'SLIME',SEAL:'MAGE',SWALLOW:'THIEF',ERASE:'DRAIN',RICE:'MANDRAKE',EVOLVE:'GOLEM'} as any)[e.schoolKind];e.name=({'DETENTION':'居残りおばけ','SPLIT':'ちぎれ紙おばけ','SEAL':'封印シール小僧','SWALLOW':'ぱくぱく筆箱','ERASE':'消しゴム怪人','RICE':'おにぎり係','EVOLVE':'ガキ大将'} as any)[e.schoolKind];}});
+  const kinds=floor>=16?['SPLIT','SEAL','SWALLOW','ERASE','RICE','EVOLVE']:floor>=11?['SPLIT','SEAL','SWALLOW','ERASE']:floor>=7?['SPLIT','SEAL','SWALLOW']:['SPLIT'];
+  enemies.forEach((e,i)=>{if(e.enemyType!=='BOSS'&&e.enemyType!=='SHOPKEEPER'&&(s.mode==='PUZZLE'||floor>=4&&i%(floor>=12?4:6)===0)){e.schoolKind=s.mode==='PUZZLE'?'DETENTION':kinds[(i+floor)%kinds.length];e.schoolRank=1;if(s.mode!=='PUZZLE')e.enemyType=({SPLIT:'SLIME',SEAL:'MAGE',SWALLOW:'THIEF',ERASE:'DRAIN',RICE:'MANDRAKE',EVOLVE:'GOLEM'} as any)[e.schoolKind];e.name=({'DETENTION':'居残りおばけ','SPLIT':'ちぎれ紙おばけ','SEAL':'封印シール小僧','SWALLOW':'ぱくぱく筆箱','ERASE':'消しゴム怪人','RICE':'おにぎり係','EVOLVE':'ガキ大将'} as any)[e.schoolKind];}});
   if(s.mode==='TRAPS')traps.forEach(t=>t.visible=true);
   for(const e of items){if(e.itemData){e.itemData=cloneItem(e.itemData);if(['WEAPON','ARMOR'].includes(e.itemData.category)){e.itemData.markSlots=4;e.itemData.cursed=Math.random()<.09;}else if(!e.itemData.shopOwner)e.itemData.blessed=Math.random()<.06;}}
   if(s.mode==='CARDS'){
@@ -95,17 +98,31 @@ export function useSchoolAdventure(bridge:AdventureBridge){
    const cell=cells.find(c=>!occupied.has(positionKey(c.x,c.y))&&!s.terrain[positionKey(c.x,c.y)]&&!s.events[positionKey(c.x,c.y)]);
    if(cell){occupied.add(positionKey(cell.x,cell.y));const type=Object.keys(ADVENTURE_ITEMS)[(floor-1)%Object.keys(ADVENTURE_ITEMS).length];items.push({...emptyEntity(cell.x,cell.y),name:ADVENTURE_ITEMS[type].name,itemData:{...cloneItem(ADVENTURE_ITEMS[type]),id:id()}});}
   }
-  if(s.scene===undefined&&s.mode!=='PUZZLE'){
+  if(floor>=8&&s.scene===undefined&&s.mode!=='PUZZLE'){
    const extra=enemies.find(e=>!e.schoolKind&&e.enemyType!=='BOSS'&&e.enemyType!=='SHOPKEEPER');
-   if(extra){const kind=Object.keys(EXTRA_ENEMIES)[floor%4],def=EXTRA_ENEMIES[kind];extra.schoolKind=kind;extra.enemyType=def.type;extra.name=def.name;}
+   if(extra){const kind=Object.keys(EXTRA_ENEMIES)[Math.floor(floor/4)%Math.min(4,Math.floor(floor/4))],def=EXTRA_ENEMIES[kind];extra.schoolKind=kind;extra.enemyType=def.type;extra.name=def.name;}
   }
   base.current.codex=[...new Set([...(base.current.codex||[]),...enemies.map(e=>'ENEMY:'+e.name)])];
   for(const shop of enemies.filter(e=>e.enemyType==='SHOPKEEPER')){
    const stock=(shop.shopItems||[]).slice(0,3);
    for(let i=0;i<stock.length;i++){const c=cells.find(c=>Math.max(Math.abs(c.x-shop.x),Math.abs(c.y-shop.y))<=2&&!occupied.has(positionKey(c.x,c.y)));if(!c)break;occupied.add(positionKey(c.x,c.y));delete s.terrain[positionKey(c.x,c.y)];delete s.events[positionKey(c.x,c.y)];const item={...cloneItem(stock[i]),id:id(),shopOwner:shop.id,price:stock[i].price||stock[i].value||100};items.push({...emptyEntity(c.x,c.y),name:item.name,itemData:item});}
   }
-  lastEnemies.current=cloneItem(enemies);persist();return {px,py};
+  normalizePlacements(map,[enemies,items,traps],px,py);lastEnemies.current=cloneItem(enemies);persist();return {px,py};
  };
+ const normalizePlacements=(map:string[][],groups:any[][],px:number,py:number)=>{
+  const reachable=new Set<string>(),queue=[[px,py]];
+  for(const [x,y] of queue){const k=positionKey(x,y);if(reachable.has(k)||!map[y]?.[x]||map[y][x]==='WALL')continue;reachable.add(k);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])queue.push([x+dx,y+dy]);}
+  const occupied=new Set([positionKey(px,py)]),free=[...reachable].map(k=>k.split(',').map(Number)).filter(([x,y])=>map[y][x]==='FLOOR');
+  for(const group of groups)for(let i=group.length-1;i>=0;i--){const e=group[i],k=positionKey(e.x,e.y);if(!reachable.has(k)||map[e.y]?.[e.x]!=='FLOOR'||occupied.has(k)){const cell=free.find(([x,y])=>!occupied.has(positionKey(x,y))&&!state.current.events[positionKey(x,y)]&&!state.current.terrain[positionKey(x,y)]);if(!cell){group.splice(i,1);continue;}[e.x,e.y]=cell;}occupied.add(positionKey(e.x,e.y));}
+  for(const [k,event] of Object.entries(state.current.events)){const [x,y]=k.split(',').map(Number);if(!reachable.has(k)||map[y]?.[x]!=='FLOOR'||occupied.has(k)){const cell=free.find(([x,y])=>!occupied.has(positionKey(x,y))&&!state.current.events[positionKey(x,y)]&&!state.current.terrain[positionKey(x,y)]);delete state.current.events[k];if(cell){const key=positionKey(cell[0],cell[1]);state.current.events[key]=event;occupied.add(key);}}else occupied.add(k);}
+ };
+ useEffect(()=>{
+  const ctx=b.current;if(!ctx.map.length||dojoRef.current)return;
+  const groups=[ctx.enemies,ctx.floorItems,ctx.traps],next=cloneItem(groups),before=JSON.stringify(groups);
+  normalizePlacements(ctx.map,next,ctx.player.x,ctx.player.y);
+  if(JSON.stringify(next)!==before){ctx.setEnemies(next[0]);ctx.setFloorItems(next[1]);ctx.setTraps(next[2]);refresh();}
+ },[bridge.map]);
+ const interactNearby=()=>{const p=b.current.player,keys=[positionKey(p.x,p.y),positionKey(p.x+p.dir.x,p.y+p.dir.y)];if(state.current.terrain[keys[1]]==='SECRET'){if(b.current.inventory.some(i=>i.type==='SUPPLY_PICK'&&i.charges>0))dig();else say('模様の違う壁です。つるはしで掘ると隠しロッカーを探せます。','A marked wall. Use a pickaxe to uncover a hidden locker.');return true;}if(!keys.some(k=>state.current.events[k]&&!state.current.events[k].done))return false;interact();return true;};
  const saveCommitted=()=>{if(base.current.departure&&base.current.departure.runId===state.current.runId){delete base.current.departure;persist();}};
  const restore=(saved?:AdventureState,floor=1)=>{state.current=saved?.version===1?cloneItem(saved):newAdventure();state.current.floor=floor;state.current.runId ||= id();(state.current as any).departed=true;if(base.current.departure){if(base.current.departure.runId===state.current.runId)saveCommitted();else{const lost=base.current.departure,existing=new Set(base.current.warehouse.map(i=>i.id));base.current.warehouse.push(...lost.items.filter(i=>!existing.has(i.id)));base.current.bank+=lost.gold;delete base.current.departure;persist();}}setPanel(state.current.returned?'BASE':null);refresh();};
  const snapshot=()=>cloneItem(state.current);
@@ -193,8 +210,8 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(place){if(!s.pouch.length||ctx.traps.some(t=>t.x===x&&t.y===y)){say('置ける罠がありません。','No trap can be placed here.');return;}const type=s.pouch.shift()!;ctx.setTraps((a:any[])=>[...a,{...emptyEntity(x,y),type:'TRAP',trapType:type,name:'工作わな',visible:true,schoolPlaced:true}]);}
   else {const trap=ctx.traps.find(t=>t.x===x&&t.y===y&&t.visible);if(!trap){say('正面に見えている罠がありません。','No visible trap ahead.');return;}if(s.pouch.length>=8){say('罠袋は8個までです。','The trap pouch holds eight traps.');return;}s.pouch.push(trap.trapType);ctx.setTraps((a:any[])=>a.filter(t=>t.id!==trap.id));}ctx.turn();refresh();
  };
- const interact=()=>{
-  const ctx=b.current,s=state.current;const keys=[positionKey(ctx.player.x,ctx.player.y),positionKey(ctx.player.x+ctx.player.dir.x,ctx.player.y+ctx.player.dir.y)];const k=keys.find(key=>s.events[key]&&!s.events[key].done);
+ const interact=(selectedKey?:string,spendTurn=true)=>{
+  const ctx=b.current,s=state.current;const keys=[positionKey(ctx.player.x,ctx.player.y),positionKey(ctx.player.x+ctx.player.dir.x,ctx.player.y+ctx.player.dir.y)];const k=selectedKey&&s.events[selectedKey]&&!s.events[selectedKey].done?selectedKey:keys.find(key=>s.events[key]&&!s.events[key].done);
   if(!k){say('足元か正面の施設に近づこう。','Approach a facility on your tile or ahead.');return;}
   const event=s.events[k];
   if(TOWN_SERVICES.some(v=>v.kind===event.kind)){event.done=false;setPanel('TOWN');refresh();return;}
@@ -203,7 +220,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(event.kind==='TRADER'){if((ctx.player.gold||0)<100){say('行商のおやつは100円です。','A trader snack costs 100 coins.');return;}ctx.setPlayer((p:any)=>({...p,gold:p.gold-100}));ctx.setBelly((v:number)=>Math.min(100,v+50));say('行商のおやつを食べた！','Enjoyed a trader snack!');}
   if(event.kind==='FRIEND'){if(!s.companion)s.companion={name:'迷子の同級生',role:'FETCH',x:ctx.player.x,y:ctx.player.y,hp:40,level:1,xp:0,order:'FOLLOW'};else{s.companion.hp=40+s.companion.level*5;s.companion.xp+=5;}say('迷子の同級生と助け合う約束をした。','A lost classmate agreed to help you.');}
   if(event.kind==='STORY'){base.current.story++;const stories=[['図書委員「消しゴム怪人には、大事な装備をしまって対策しよう！」','The librarian recommends storing precious equipment before facing eraser monsters.'],['用務員「壁の模様が違うところには、隠しロッカーがあるぞ。」','The caretaker says marked walls conceal hidden lockers.'],['先生「冒険は競争だけじゃない。迷子の友達も助けてね。」','The teacher asks you to help lost classmates along the way.'],['同級生「校長先生の試練を越えたら、みんなで遠足に行こう！」','A classmate promises a field trip after the principal trial.']];const story=stories[(base.current.story-1)%stories.length];say(story[0],story[1]);persist();}
-  event.done=true;ctx.turn(event.kind==='REST'?{belly:Math.min(100,ctx.belly+25)}:event.kind==='TRADER'?{belly:Math.min(100,ctx.belly+50)}:event.kind==='PICNIC'?{belly:100}:undefined);refresh();
+  event.done=true;if(spendTurn)ctx.turn(event.kind==='REST'?{belly:Math.min(100,ctx.belly+25)}:event.kind==='TRADER'?{belly:Math.min(100,ctx.belly+50)}:event.kind==='PICNIC'?{belly:100}:undefined);refresh();
  };
  const recoverLoot=(enemies:any[])=>{
   const live=new Set(enemies.map(e=>String(e.id))),s=state.current,ctx=b.current;
@@ -213,6 +230,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const tick=(px:number,py:number)=>{
   const ctx=b.current,s=state.current;s.floorTurns++;s.puzzleTurns++;if(s.sealedTurns>0)s.sealedTurns--;
   recoverLoot(ctx.enemies);
+  const eventKey=positionKey(px,py),event=s.events[eventKey];let recovery:{belly:number}|undefined;if(event&&!event.done){if(event.kind==='REST')recovery={belly:Math.min(100,ctx.belly+25)};else if(event.kind==='PICNIC')recovery={belly:100};else if(event.kind==='TRADER'&&ctx.player.gold>=100)recovery={belly:Math.min(100,ctx.belly+50)};interact(eventKey,false);}
   const billShop=ctx.enemies.find(e=>e.id===(s as any).shopPosition?.id)||(s as any).shopPosition;
   if(s.debt&&!s.alarm&&billShop&&Math.max(Math.abs(px-billShop.x),Math.abs(py-billShop.y))>3){s.alarm=true;say('購買部の未払い！見回り先生が追ってくる！','Unpaid supplies! Hall monitors are chasing you!');ctx.setEnemies((a:any[])=>[...a,...[[1,0],[-1,0],[0,1],[0,-1]].filter(([dx,dy])=>ctx.map[py+dy]?.[px+dx]&&ctx.map[py+dy]?.[px+dx]!=='WALL'&&!a.some(e=>e.x===px+dx&&e.y===py+dy)).map(([dx,dy])=>({...emptyEntity(px+dx,py+dy),type:'ENEMY',enemyType:'GOLEM',name:'見回り先生',schoolKind:'MONITOR',hp:100,maxHp:100,attack:25,defense:10,xp:0}))]);}
   if(s.scene===undefined&&[150,220,280].includes(s.floorTurns))say('下校チャイム！長居すると見回りが来ます。','School bell! Leave before the monitors arrive.');
@@ -240,6 +258,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
    if(friend.hp<=0)say('同級生は安全な場所へ避難した。保健室で再合流できます。','Your classmate retreated. Reunite at a facility.');
   }
   refresh();
+  return recovery;
  };
  const enemySkills=()=>{
   const ctx=b.current,s=state.current,px=ctx.player.x,py=ctx.player.y;if(s.scene!==undefined)return;
@@ -281,6 +300,41 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const claimMilestone=(key:string)=>{const goals:Record<string,boolean>={DOJO10:Object.keys(base.current.dojo||{}).length>=10,DOJO50:Object.keys(base.current.dojo||{}).length>=50,DISCOVER20:(base.current.codex||[]).length>=20};if(!goals[key]||base.current.claimed?.includes(key)){say('達成すると一度だけ報酬を受け取れます。','Complete this milestone to claim its reward once.');return;}base.current.claimed=[...(base.current.claimed||[]),key];base.current.bank+=key==='DOJO50'?1000:300;persist();say('修了証の報酬を貯金箱に届けた！','Certificate reward delivered to your savings!');};
  const visibleTile=(x:number,y:number)=>state.current.scene!==undefined||(!state.current.night&&state.current.weather!=='FOG')||Math.max(Math.abs(x-b.current.player.x),Math.abs(y-b.current.player.y))<=(state.current.night?4:5);
  const dojoComplete=(stage:number,turns:number)=>{base.current.dojo={...base.current.dojo,[stage]:Math.min(base.current.dojo?.[stage]||Infinity,turns)};persist();};
+ const beginDojo=(stage:number)=>{if(!DOJO_STAGES[stage-1])return;const run=dojoStart(DOJO_STAGES[stage-1]);dojoRef.current=run;setDojoRun(run);b.current.setMenuOpen(false);setPanel(null);b.current.log(text(DOJO_STAGES[stage-1].lesson,DOJO_STAGES[stage-1].english));refresh();};
+ const exitDojo=()=>{dojoRef.current=null;setDojoRun(null);setPanel('DOJO');refresh();};
+ const dojoStep=(action:DojoAction,fromMenu=false)=>{
+  const run=dojoRef.current;if(!run)return false;if(panelRef.current&&!fromMenu)return true;if(run.won||run.failed){setPanel('DOJO_PLAY');return true;}
+  if(fromMenu)setPanel(null);const next=dojoAct(run,action);dojoRef.current=next;setDojoRun(next);
+  if(next.won&&!run.won){dojoComplete(next.stage,next.turns);b.current.log(text('練習クリア！学んだ作戦を冒険でも使おう。','Lesson cleared! Use this strategy in your adventure.'));setPanel('DOJO_PLAY');}
+  else if(next.failed){b.current.log(text('もう一度考えてみよう。道具・位置・手数を見直そう。','Try again. Review your tools, position and turn budget.'));setPanel('DOJO_PLAY');}
+  refresh();return true;
+ };
+ const dojoAction=()=>{const run=dojoRef.current;if(!run)return false;const target=run.enemies.some(e=>e.x===run.x+run.dir.x&&e.y===run.y+run.dir.y);return dojoStep(target?{type:'MOVE',dx:run.dir.x,dy:run.dir.y}:{type:'WAIT'});};
+ const dojoMenu=()=>{if(!dojoRef.current)return false;setPanel('DOJO_PLAY');return true;};
+ const dojoKey=(event:KeyboardEvent)=>{
+  if(!dojoRef.current)return false;if(panelRef.current)return true;
+  const moves:Record<string,[number,number]>={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],Home:[-1,-1],PageUp:[1,-1],End:[-1,1],PageDown:[1,1],'7':[-1,-1],'9':[1,-1],'1':[-1,1],'3':[1,1],w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]};
+  if(moves[event.key]){event.preventDefault();dojoStep({type:'MOVE',dx:moves[event.key][0],dy:moves[event.key][1]});}
+  else if(['z',' ','Enter'].includes(event.key)){event.preventDefault();dojoAction();}
+  else if(event.key==='r'){event.preventDefault();dojoStep({type:'TOOL'});}
+  else if(['x','c','Escape'].includes(event.key)){event.preventDefault();dojoMenu();}
+  return true;
+ };
+ const drawDojo=(ctx:CanvasRenderingContext2D,w:number,h:number,ts:number,colors:{C0:string;C1:string;C3:string},drawHero:(player:any,x:number,y:number,size:number)=>void)=>{
+  const run=dojoRef.current;if(!run)return false;const startX=run.x-Math.floor(w/ts/2),startY=run.y-Math.floor(h/ts/2);
+  ctx.save();ctx.imageSmoothingEnabled=false;ctx.fillStyle=colors.C0;ctx.fillRect(0,0,w,h);
+  for(let y=0;y<Math.ceil(h/ts);y++)for(let x=0;x<Math.ceil(w/ts);x++){
+   const mx=startX+x,my=startY+y,tile=run.map[my]?.[mx]||'WALL',sx=x*ts,sy=y*ts;
+   if(tile==='WALL'||tile==='DOOR'){ctx.fillStyle=colors.C1;ctx.fillRect(sx,sy,ts,ts);ctx.fillStyle=colors.C0;ctx.fillRect(sx+ts/4,sy+ts/4,ts/2,ts/2);}
+   else{ctx.fillStyle=tile==='WATER'?'#3b97c9':colors.C3;ctx.fillRect(sx,sy,ts,ts);if(tile==='STAIRS'){ctx.fillStyle=colors.C1;for(let i=0;i<3;i++)ctx.fillRect(sx,sy+i*ts/3,ts,2);}}
+   if(tile==='DOOR'){ctx.fillStyle='#dabc76';ctx.fillRect(sx+ts*.3,sy+ts*.15,ts*.4,ts*.7);}
+   if(run.revealed&&run.traps.some(t=>t.x===mx&&t.y===my))drawSchoolSprite(ctx,'items',12,sx,sy,ts);
+   if(DOJO_STAGES[run.stage-1].key?.x===mx&&DOJO_STAGES[run.stage-1].key?.y===my&&!run.key){ctx.fillStyle='#dbaa36';ctx.font=`bold ${ts*.6}px monospace`;ctx.fillText('⚿',sx+ts*.2,sy+ts*.7);}
+   const enemy=run.enemies.find(e=>e.x===mx&&e.y===my);if(enemy){if(!drawExpansionSprite(ctx,9,sx,sy,ts)){ctx.fillStyle=colors.C0;ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.6,ts*.6);}if(enemy.sleep>0){ctx.fillStyle='#fff';ctx.font=`${ts*.25}px monospace`;ctx.fillText('Zzz',sx,sy+ts*.25);}}
+   if(mx===run.x&&my===run.y)drawHero({...b.current.player,x:run.x,y:run.y,dir:run.dir},sx,sy,ts);
+  }
+  ctx.restore();return true;
+ };
  const safelyDrawService=(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number)=>{const service=TOWN_SERVICES.find(s=>s.kind===kind);return service?drawExpansionSprite(ctx,service.sprite,x,y,size):false;};
  const safeTurn=()=>state.current.scene!==undefined;
  const drawBackdrop=(ctx:CanvasRenderingContext2D,w:number,h:number)=>{if(state.current.scene!==undefined)drawScenery(ctx,state.current.scene,w,h);};
@@ -303,18 +357,18 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   s.townUsed=[...(s.townUsed||[]),kind];say('町で旅の準備を整えた。','Prepared for the journey in town.');refresh();
  };
  const drawTerrain=(ctx:CanvasRenderingContext2D,x:number,y:number,sx:number,sy:number,ts:number)=>{const k=positionKey(x,y),t=state.current.terrain[k],event=state.current.events[k];ctx.save();
-  if(t==='SECRET'&&drawSchoolSprite(ctx,'items',15,sx,sy,ts)){ctx.restore();return;}
+  if(t==='SECRET'){ctx.strokeStyle=ctx.fillStyle='#9bbc0f';ctx.strokeRect(sx+ts*.3,sy+ts*.3,ts*.4,ts*.4);ctx.font=`${ts*.3}px monospace`;ctx.fillText('?',sx+ts*.4,sy+ts*.6);ctx.restore();return;}
   if(t){ctx.fillStyle=t==='WATER'?'#3b97c9':t==='ICE'?'#b2e2f1':t==='HOLE'?'#302830':'#997745';ctx.fillRect(sx+2,sy+2,ts-4,ts-4);ctx.fillStyle='#fff';ctx.font=`${Math.floor(ts*.35)}px monospace`;ctx.fillText(t==='WATER'?'≈':t==='ICE'?'◇':t==='HOLE'?'↓':'?',sx+ts*.3,sy+ts*.6);}
   if(event&&safelyDrawService(ctx,event.kind,sx,sy,ts)){ctx.restore();return;}
   if(event&&!event.done&&drawSchoolSprite(ctx,event.kind==='FRIEND'?'actors':'items',event.kind==='FRIEND'?14:event.kind==='REST'?13:event.kind==='TRADER'?14:6,sx,sy,ts)){ctx.restore();return;}
   if(event&&!event.done){ctx.fillStyle='#f9e7a5';ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.6,ts*.6);ctx.fillStyle='#304a37';ctx.font=`bold ${Math.floor(ts*.4)}px monospace`;ctx.fillText(({REST:'+',TRADER:'$',FRIEND:'☺',STORY:'!'} as any)[event.kind],sx+ts*.32,sy+ts*.65);}ctx.restore();};
  const drawCompanion=(ctx:CanvasRenderingContext2D,startX:number,startY:number,ts:number,sprite?:HTMLCanvasElement)=>{const f=state.current.companion;if(!f||f.hp<=0)return;const x=(f.x-startX)*ts,y=(f.y-startY)*ts;ctx.save();if(drawCompanionSprite(ctx,f,x,y,ts)||drawSchoolSprite(ctx,'actors',(f.name==='迷子の同級生'?14:SCHOOL_ACTOR_SPRITES[f.role])+(f.order==='FOLLOW'?Math.floor(state.current.floorTurns/2)%2:0),x,y,ts)){}else if(sprite){ctx.globalAlpha=.8;ctx.drawImage(sprite,x,y,ts,ts);}else{ctx.fillStyle='#69becd';ctx.fillRect(x+ts*.3,y+ts*.25,ts*.4,ts*.65);}ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(ts*.23)}px monospace`;ctx.fillText('Lv'+f.level,x,y+ts*.18);ctx.fillStyle='#24322b';ctx.fillRect(x+3,y+ts-3,ts-6,3);ctx.fillStyle=f.hp<(40+f.level*5)/3?'#ef7468':'#8edf91';ctx.fillRect(x+3,y+ts-3,(ts-6)*Math.min(1,f.hp/(40+f.level*5)),3);ctx.restore();};
- return {state:state.current,base:base.current,revision,panel,setPanel,container,message,text,start,begin,setupInventory,prepareFloor,restore,snapshot,saveCommitted,canDescend,beforeMove,onPickup,pay,returnGoods,canEquip,canUnequip,beforeUse,combine,dig,containerPut,containerTake,breakContainer,trapAction,interact,tick,recoverLoot,returnHome,drawTerrain,drawCompanion,drawBackdrop,drawTile,safeTurn,dojoComplete,townAction,visibleTile,claimMilestone,sceneTitle,catalog:bridge.catalog,
+ return {state:state.current,dojoRun,beginDojo,exitDojo,dojoStep,dojoAction,dojoMenu,dojoKey,drawDojo,isDojoActive:()=>Boolean(dojoRef.current),base:base.current,revision,panel,setPanel,container,message,text,start,begin,setupInventory,prepareFloor,restore,snapshot,saveCommitted,canDescend,beforeMove,onPickup,pay,returnGoods,canEquip,canUnequip,beforeUse,combine,dig,containerPut,containerTake,breakContainer,trapAction,interact,interactNearby,modeUnlocked:(mode:AdventureMode)=>b.current.debug||modeUnlocked(base.current,mode),modeRequirement,tick,recoverLoot,returnHome,drawTerrain,drawCompanion,drawBackdrop,drawTile,safeTurn,dojoComplete,townAction,visibleTile,claimMilestone,sceneTitle,catalog:bridge.catalog,
   drawTrap:(ctx:CanvasRenderingContext2D,trap:any,x:number,y:number,size:number)=>(trap.schoolPlaced||state.current.mode==='TRAPS')&&drawSchoolSprite(ctx,'items',12,x,y,size),
   drawItem:(ctx:CanvasRenderingContext2D,item:any,x:number,y:number,size:number)=>EXTRA_ITEM_SPRITES[item?.type]!==undefined?drawExpansionSprite(ctx,EXTRA_ITEM_SPRITES[item.type],x,y,size):SCHOOL_ITEM_SPRITES[item?.type]!==undefined&&drawSchoolSprite(ctx,'items',SCHOOL_ITEM_SPRITES[item.type],x,y,size),
   drawEnemy:(ctx:CanvasRenderingContext2D,enemy:any,x:number,y:number,size:number)=>EXTRA_ENEMIES[enemy?.schoolKind]?drawExpansionSprite(ctx,EXTRA_ENEMIES[enemy.schoolKind].sprite,x,y,size):SCHOOL_ACTOR_SPRITES[enemy?.schoolKind]!==undefined&&drawSchoolSprite(ctx,'actors',SCHOOL_ACTOR_SPRITES[enemy.schoolKind],x,y,size),
   openContainer:(item:SchoolItem)=>{if(item.capacity&&!item.cursed&&!item.shopOwner){identify(item);setContainer(item.id);setPanel('BAG');}},
-  resume:()=>{(state.current as any).departed=true;setPanel(null);refresh();},
+  resume:()=>{if(!dojoRef.current)(state.current as any).departed=true;setPanel(null);refresh();},
   slide:(x:number,y:number,dx:number,dy:number)=>{
    const ctx=b.current,s=state.current,nx=x+dx,ny=y+dy;
    if(s.terrain[positionKey(x,y)]==='ICE'&&ctx.map[ny]?.[nx]&&ctx.map[ny][nx]!=='WALL'&&!ctx.enemies.some(e=>e.x===nx&&e.y===ny)&&!['HOLE','WATER'].includes(s.terrain[positionKey(nx,ny)])&&(dx===0||dy===0||(ctx.map[y]?.[nx]!=='WALL'&&ctx.map[ny]?.[x]!=='WALL')))return {x:nx,y:ny};

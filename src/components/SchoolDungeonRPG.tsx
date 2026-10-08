@@ -1074,6 +1074,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleQuit = () => {
+      if (adventure.isDojoActive()) { adventure.exitDojo(); return; }
       saveData(true);
       onBack();
   };
@@ -1363,7 +1364,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
-      adventure.tick(px, py);
+      const recovered = adventure.tick(px, py);
+      overrides = overrides || recovered;
       if (adventure.safeTurn()) return;
       turnCounter.current += 1;
       
@@ -1623,6 +1625,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if (adventure.dojoStep({type:'MOVE',dx,dy})) return;
       if (adventure.blocksInput()) return;
       if(gameOver || gameClear) return;
 
@@ -1781,6 +1784,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleActionBtn = () => {
+      if (adventure.dojoAction()) return;
+      if (!adventure.blocksInput() && !menuOpen && !gameOver && !gameClear && adventure.interactNearby()) return;
       if (adventure.blocksInput()) return;
       if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
@@ -1912,6 +1917,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const fireRangedWeapon = () => {
+      if (adventure.dojoStep({type:'TOOL'})) return;
       if (menuOpen || shopState.active) return;
       const rangedItem = player.equipment?.ranged;
       if (!rangedItem) {
@@ -2106,6 +2112,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   // ... LONG PRESS LOGIC ...
   const handlePressStart = () => {
+      if (adventure.isDojoActive()) return;
       if (adventure.blocksInput() || menuOpen || shopState.active || gameOver || gameClear) return;
       fastForwardInterval.current = setTimeout(() => {
           setIsFastForwarding(true);
@@ -2129,7 +2136,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   // Fast Forward Loop
   useEffect(() => {
       let interval: any = null;
-      if (isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
+      if (!adventure.isDojoActive() && isFastForwarding && !gameOver && !gameClear && !menuOpen && !shopState.active) {
           interval = setInterval(() => {
               const nearby = enemies.some(e => Math.abs(e.x - player.x) <= 2 && Math.abs(e.y - player.y) <= 2);
               if (nearby) {
@@ -2159,6 +2166,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
 
   const toggleMenu = () => {
+      if (adventure.dojoMenu()) return;
       if (shopState.active) {
           setShopState(prev => ({ ...prev, active: false }));
           return;
@@ -2683,6 +2691,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   // --- KEYBOARD ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (adventure.dojoKey(e)) return;
         if (adventure.blocksInput()) return;
         lastInputType.current = 'KEY';
         if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) { e.preventDefault(); }
@@ -2765,6 +2774,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
       // Use Theme Colors
       const { C0, C1, C2, C3 } = currentTheme.colors;
+      if (adventure.drawDojo(ctx,w,h,ts,currentTheme.colors,(entity,x,y,size)=>{const sprite=getPlayerSpriteCanvas(entity); if(sprite) ctx.drawImage(sprite,x,y,size,size);})) return;
 
       ctx.fillStyle = C0;
       ctx.fillRect(0, 0, w, h);
@@ -3095,7 +3105,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         )}
 
         {/* Status Screen */}
-        {showStatus && (
+        {showStatus && !adventure.dojoRun && (
             <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-status" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
@@ -3163,7 +3173,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         )}
 
         {/* Help Screen */}
-        {showHelp && (
+        {showHelp && !adventure.dojoRun && (
             <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-help" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
@@ -3231,21 +3241,21 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-full relative overflow-hidden flex flex-col">
                     <div className="dungeon-top-bar absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                        <span className="font-bold tracking-widest">{adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
+                        <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の小学生道場','School Wanderer dojo') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
-                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
-                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={2} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
+                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => { if (!adventure.dojoMenu()) setShowMap(!showMap); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => { if (!adventure.dojoMenu()) setShowStatus(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={2} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={() => { if (!adventure.dojoMenu()) setShowHelp(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                         </div>
                     </div>
 
                     <div className="absolute top-8 left-0 w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10" style={{ backgroundColor: C1, color: C3 }}>
-                        <span>{floor}F</span>
-                        <span>Lv{level}</span>
-                        <span>HP{player.hp}/{player.maxHp}</span>
-                        <span>A{player.attack}D{player.defense}</span>
-                        <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{player.gold}</span>
-                        <span>🍙{belly}%</span>
+                        <span>{adventure.dojoRun?.stage ?? floor}F</span>
+                        <span>Lv{adventure.dojoRun ? 1 : level}</span>
+                        <span>HP{adventure.dojoRun?.hp ?? player.hp}/{adventure.dojoRun ? 7 : player.maxHp}</span>
+                        <span>A{adventure.dojoRun ? 2 : player.attack}D{adventure.dojoRun ? 0 : player.defense}</span>
+                        <span className="flex items-center"><Coins size={10} className="mr-0.5"/>{adventure.dojoRun ? 0 : player.gold}</span>
+                        <span>🍙{adventure.dojoRun?.food ?? belly}%</span>
                     </div>
 
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
@@ -3258,7 +3268,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                     )}
 
                     {/* Map Overlay */}
-                    {showMap && map.length > 0 && (
+                    {showMap && !adventure.dojoRun && map.length > 0 && (
                         <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-map" className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
                             <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                                 {map.map((row, y) => row.map((tile, x) => {
@@ -3405,7 +3415,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         </div>
                     )}
 
-                    {menuOpen && (
+                    {menuOpen && !adventure.dojoRun && (
                         <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
                             <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
                                 <h3 className="font-bold">
@@ -3544,7 +3554,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         </div>
                     )}
 
-                    {gameClear && (
+                    {gameClear && !adventure.dojoRun && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
                             <Award size={48} className="mb-4" style={{ color: C2 }}/>
                             <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
@@ -3561,7 +3571,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         </div>
                     )}
 
-                    {gameOver && (
+                    {gameOver && !adventure.dojoRun && (
                         <div data-gamepad-modal data-gamepad-initial-scope="dungeon-game-over" data-gamepad-navigation-root className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
                             <Skull size={48} className="mb-2" style={{ color: C1 }}/>
                             <h2 className="text-xl font-bold mb-1">GAME OVER</h2>
