@@ -71,7 +71,7 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (hi
   if (!raw || typeof raw !== 'object') return false;
   const c = raw as GolfCommand, p = w.players[id]; if (!p?.connected) return false;
   if (c.type === 'avatar') {
-    if (w.phase !== 'lobby' || !validAvatar(c.avatar)) return false;
+    if (!validAvatar(c.avatar)) return false;
     p.avatar = { ...c.avatar }; return true;
   }
   if (p.spectator || w.phase !== 'playing' || w.paused) return false;

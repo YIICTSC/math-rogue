@@ -132,3 +132,9 @@
 .gg-root:has(.gg-round-result){height:100dvh;display:flex;flex-direction:column;overflow:hidden}.gg-root:has(.gg-round-result) .gg-stage{flex:1;min-height:0;height:auto;overflow:hidden}.gg-root:has(.gg-round-result) .gg-header{flex:none;min-height:44px;padding:6px 12px}
 
 @media(max-height:500px){.gg-root .gg-round-result{padding:10px}.gg-round-result header h2{font-size:18px;margin:0}.gg-round-result .gg-muted{margin:3px 0;font-size:10px}.gg-result-actions{gap:6px}.gg-result-actions label{gap:3px;font-size:11px}.gg-result-actions button,.gg-result-actions select{min-height:34px;padding:4px 8px;font-size:12px}}
+
+.gg-title-screen .gg-title-copy h2{font-size:clamp(22px,3vw,34px);margin:6px 0}.gg-title-screen .gg-title-copy .gg-eyebrow{margin:0}.gg-title-screen .gg-title-copy>p:not(.gg-eyebrow){font-size:12px}@media(max-height:480px){.gg-title-screen .gg-title-copy h2{font-size:22px}}
+
+.gg-title-screen .gg-title-actions{align-content:center;align-items:start}.gg-title-screen .gg-title-actions>button{min-height:44px;max-height:52px}@media(max-width:600px) and (orientation:portrait){.gg-title-screen .gg-welcome{grid-template-rows:auto auto;align-content:center;gap:18px}}
+
+.gg-title-screen .gg-welcome{top:50%;bottom:auto;transform:translateY(-50%);max-height:calc(100% - 24px);height:auto;grid-template-rows:auto}

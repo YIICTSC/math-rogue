@@ -9,7 +9,8 @@ import { MISSIONS, DIFFICULTIES, nearbySwitch, underPassage, sensorActive, holdC
 import { createScene, type ViewMode } from './scene';
 import './gakurogear.css';
 
-export default function GakuroGear({ onBack, languageMode, lesson, avatar }: MiniGameComponentProps & {lesson?:KartLesson;avatar?:KartAvatar}) {
+export default function GakuroGear({ onBack, languageMode, lesson, avatar, onConfigure, editing=false }: MiniGameComponentProps & {lesson?:KartLesson;avatar?:KartAvatar;onConfigure?:()=>void;editing?:boolean}) {
+  const editingRef=useRef(editing);editingRef.current=editing;
   const en = languageMode === 'ENGLISH';
   const t = (ja: string, english: string) => en ? english : ja;
   const [selected, setSelected] = useState(0), [playing, setPlaying] = useState(false), [attempt, setAttempt] = useState(0);
@@ -24,6 +25,8 @@ export default function GakuroGear({ onBack, languageMode, lesson, avatar }: Min
   const mission = MISSIONS[selected];
   const [hud, setHud] = useState<Run>(() => createRun(mission));
   useVrBgm(!playing?'lobby':hud.status==='playing'?'training':lesson&&!quizDone?'quiz':hud.status==='clear'?'clear':'fail',mission.id);
+  const sceneRef=useRef<ReturnType<typeof createScene>|null>(null);
+  useEffect(()=>{if(avatar)sceneRef.current?.setAvatar(avatar);},[avatar]);
   const host = useRef<HTMLDivElement>(null), live = useRef<Run | null>(null), pauseRef = useRef(false);
   const input = useRef<Input>({ x: 0, z: 0, crouch: false, interact: false, decoy: false });
   const stick = useRef<{ id: number; x: number; y: number } | null>(null);
@@ -37,8 +40,10 @@ export default function GakuroGear({ onBack, languageMode, lesson, avatar }: Min
     const s = createRun(mission); live.current = s; view.current.yaw = s.player.angle;
     let sceneView: ReturnType<typeof createScene>;
     try { sceneView = createScene(host.current, mission, avatar); } catch { setError(t('3Dの初期化に失敗しました。ブラウザのハードウェアアクセラレーションを確認してください。', '3D could not start. Check hardware acceleration in your browser.')); return; }
+    sceneRef.current=sceneView;
     const keys = new Set<string>(); let frame = 0, previous = performance.now(), lastHud = 0, saved = false;
     function keydown(e: KeyboardEvent) {
+      if(editingRef.current)return;
       if (!['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyE', 'KeyC', 'KeyQ', 'KeyF', 'KeyR', 'KeyV', 'KeyJ', 'KeyL', 'Escape', 'Space'].includes(e.code)) return;
       e.preventDefault(); e.stopPropagation();
       if (e.code === 'Escape' && !e.repeat) { togglePause(); keys.clear(); return; }
@@ -83,7 +88,7 @@ export default function GakuroGear({ onBack, languageMode, lesson, avatar }: Min
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(frame); sceneView.dispose(); window.removeEventListener('keydown', keydown, true); window.removeEventListener('keyup', keyup, true); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', visibility); live.current = null; };
+    return () => { cancelAnimationFrame(frame); sceneView.dispose(); sceneRef.current=null; window.removeEventListener('keydown', keydown, true); window.removeEventListener('keyup', keyup, true); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', visibility); live.current = null; };
   }, [playing, selected, attempt]);
   const count = hud.collected.filter(Boolean).length;
   const canHold = holdCandidate(mission, hud) >= 0;
@@ -93,7 +98,7 @@ export default function GakuroGear({ onBack, languageMode, lesson, avatar }: Min
   const leave = () => { clearInput(); setPlaying(false); };
   const hold = (field: 'interact' | 'hold', value: boolean) => { input.current[field] = value; };
   return <div className="gear-shell" data-testid="gakurogear">
-    <header className="gear-header"><button onClick={playing ? leave : onBack}>{t('← 戻る', '← Back')}</button><div><strong>GAKURO</strong><span>VR TRAINING / SCHOOL OPERATIONS</span></div><span className="gear-tag">SOLO / 3D</span></header>
+    <header className="gear-header"><button onClick={playing ? leave : onBack}>{t('← 戻る', '← Back')}</button><div><strong>GAKURO</strong><span>VR TRAINING / SCHOOL OPERATIONS</span></div>{onConfigure&&<button onClick={()=>{clearInput();if(playing&&!paused)togglePause();onConfigure();}}>{t('キャラクタークリエイト','Character creator')}</button>}<span className="gear-tag">SOLO / 3D</span></header>
     {!playing ? <main className="gear-select">
       <section className="gear-intro"><div className="gear-eyebrow">TACTICAL SCHOOL / TRAINING PROGRAM</div><h1>GAKURO<br /><em>VR {t('トレーニング', 'TRAINING')}</em></h1><p>{t('見つからずに、任務を果たせ。', 'Complete the mission. Stay unseen.')}</p><div className="gear-brief">{t('放課後の学校を再現した仮想訓練。見回りとカメラをかわし、資料を回収して脱出しよう。', 'A virtual after-school training program. Evade patrols and cameras, retrieve files, and extract.')}</div><div className="gear-stats"><span>50<br /><small>MISSIONS</small></span><span>{Object.keys(records).length.toString().padStart(2, '0')}<br /><small>CLEARED</small></span><span>PS-ERA<br /><small>LOW POLYGON</small></span></div><div className="gear-help">{t('移動: WASD / 矢印 / スティック　しゃがむ: C　回収: E長押し　音のデコイ: Q　ホールド: F長押し　シャボン銃: R　視点: V　旋回: J/L・画面ドラッグ　一時停止: Esc', 'Move: WASD / arrows / stick · C: crouch · Hold E: collect · Q: sound decoy · Hold F: sleep hold · R: bubble gun · V: view · J/L or drag: turn · Esc: pause')}</div></section>
       <section className="gear-missions"><h2>{t('ミッション選択', 'SELECT MISSION')}</h2><div className="gear-difficulties">{DIFFICULTIES.map((d, i) => <button key={d.en} aria-pressed={difficulty === i} onClick={() => { setDifficulty(i); setSelected(i * 10); }}>{en ? d.en : d.ja}<small>{i * 10 + 1}–{i * 10 + 10}</small></button>)}</div>{MISSIONS.filter(m => m.difficulty === difficulty).map(m => <button key={m.id} className={`gear-mission ${selected === m.id - 1 ? 'selected' : ''}`} onClick={() => setSelected(m.id - 1)} aria-pressed={selected === m.id - 1}><span className="gear-number">{String(m.id).padStart(2, '0')}</span><span><strong>{en ? m.en : m.name}</strong><small>{m.targets.length} FILES / {m.routes.length} PATROLS / {m.cameras.length} CAMERAS</small></span><b>{records[m.id]?.rank ?? '—'}</b></button>)}<div className="gear-brief"><strong>BRIEFING / {String(mission.id).padStart(2, '0')}</strong><p>{en ? mission.hintEn : mission.hint}</p><p>{mission.obstacles.some(b => b.kind === 'crawl') && t('黄色い低いシャッターはしゃがんで通過。', 'Crouch under yellow shutters. ')}{!!mission.switches?.length && t('オレンジのスイッチでE長押し→青い扉が開く。', 'Hold E at orange switches to open blue doors. ')}{!!mission.sensors?.length && t('赤い光センサーは消灯中か、しゃがんで通過。', 'Pass red light sensors while off or crouched.')}</p><p>{t('シャボン弾', 'Bubbles')}: {mission.ammo} / {t('おやすみ時間', 'Sleep duration')}: {mission.sleepDuration}s<br />{t('追加課題：ホールド', 'Objectives: holds')} {mission.requiredHolds} / {t('シャボン命中', 'Bubble hits')} {mission.requiredShots}</p><small>{t('目標時間', 'Target time')}: {mission.par}s · {t('制限', 'Limit')}: {mission.limit}s {records[mission.id] && `· BEST ${records[mission.id].time.toFixed(1)}s`}</small></div><button className="gear-primary" onClick={start}>{t('訓練開始', 'START TRAINING')} →</button></section>

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import {writeFile} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
+await mkdir('tmp/gakurogear',{recursive:true});
 await writeFile('tmp/vr-network-entry.tsx',"import React from'react';import{createRoot}from'react-dom/client';import{VrRoom}from'/src/mini-games/gakurogear/network.ts';import Title from'/src/mini-games/gakurogear/VrTitle.tsx';import Game from'/src/mini-games/gakurogear/OnlineGame.tsx';window.VrRoom=VrRoom;window.root=createRoot(document.getElementById('root'));window.showTitle=()=>root.render(React.createElement(Title,{onBack:()=>{},problemMode:'ADDITION',languageMode:'JAPANESE'}));window.showGame=()=>root.render(React.createElement(Game,{room:window.room,world:window.world,onBack:()=>{},en:false}));");
 const signal=spawn(process.execPath,['--input-type=module','-e',`import{PeerServer}from'peer';PeerServer({host:'127.0.0.1',port:9026,path:'/vr'},()=>process.send('ready'));`],{stdio:['ignore','ignore','inherit','ipc']});
 await new Promise((resolve,reject)=>{signal.once('message',resolve);signal.once('error',reject);});
@@ -15,7 +16,7 @@ try{const ctx=await browser.newContext({viewport:{width:1280,height:800}}),host=
  await host.bringToFront();await host.evaluate(()=>room.start());await guest.waitForFunction(()=>world.phase==='playing');
  const before=await guest.evaluate(()=>world.players[room.selfId].run.player.x);await guest.evaluate(()=>{window.move=setInterval(()=>room.input({x:1,z:0,crouch:true,interact:false,decoy:false}),50);});await guest.waitForTimeout(500);await guest.evaluate(()=>clearInterval(move));assert.notEqual(await guest.evaluate(()=>world.players[room.selfId].run.player.x),before);
  await host.evaluate(()=>{const p=room.world.players[Object.keys(room.world.players).find(id=>id!==room.selfId)];p.energy=25;p.run.ammo=0;});await guest.evaluate(()=>room.input({x:0,z:0,crouch:true,interact:false,decoy:false,reload:true}));await guest.waitForFunction(()=>world.players[room.selfId].quiz);await guest.evaluate(()=>{room.answer(0);room.answer(0);room.answer(0);});await guest.waitForFunction(()=>world.players[room.selfId].energy===100&&!world.players[room.selfId].quiz);
- await host.evaluate(()=>room.close());await guest.evaluate(()=>room.close());
+ await guest.evaluate(()=>{room.input({x:0,z:0,crouch:true,interact:false,decoy:false});room.setAvatar({...world.players[room.selfId].avatar,hairStyle:3});});await host.waitForFunction(()=>Object.values(world.players).find(p=>p.name==='Guest').avatar.hairStyle===3);await guest.waitForFunction(()=>world.players[room.selfId].avatar.hairStyle===3);assert.equal(await guest.evaluate(()=>world.phase),'playing');assert.equal(await guest.evaluate(()=>world.players[room.selfId].energy),100);await host.evaluate(()=>room.close());await guest.evaluate(()=>room.close());
  const coopCode=await host.evaluate(async()=>{window.gameShown=false;window.room=new VrRoom(w=>{window.world=w;if(window.gameShown)showGame();},s=>{window.error=s;});const lesson={title:'Coop test',questions:Array.from({length:3},(_,i)=>({id:String(i),mode:'ADDITION',question:'1+1',options:['2','3','4','5'],correct:0}))};await room.create('Host','coop',1,lesson,120);return room.code;});
  await guest.evaluate(async code=>{window.gameShown=false;window.room=new VrRoom(w=>{window.world=w;if(window.gameShown)showGame();},s=>{window.error=s;});await room.join('Guest',code);},coopCode);
  await host.bringToFront();await host.waitForFunction(()=>Object.keys(world.players).length===2);await host.evaluate(()=>{room.start();});await guest.waitForFunction(()=>world.phase==='playing');
@@ -23,6 +24,6 @@ try{const ctx=await browser.newContext({viewport:{width:1280,height:800}}),host=
  await host.waitForSelector('.gear-canvas canvas');await guest.waitForSelector('.gear-canvas canvas');await host.screenshot({path:'tmp/gakurogear/coop-host.png'});await guest.screenshot({path:'tmp/gakurogear/coop-guest.png'});
  await guest.setViewportSize({width:390,height:844});await guest.waitForTimeout(150);await guest.screenshot({path:'tmp/gakurogear/coop-mobile.png'});
  await host.evaluate(()=>{window.gameShown=false;room.close();});await guest.evaluate(()=>{window.gameShown=false;room.close();});
- await host.evaluate(()=>showTitle());await host.getByRole('button',{name:'キャラクター作成',exact:true}).click();await host.getByRole('button',{name:'ポニーテール',exact:true}).click();assert.equal(await host.evaluate(()=>JSON.parse(localStorage.getItem('gakuro-vr-avatar-v1')).hairStyle),3);await host.screenshot({path:'tmp/gakurogear/vr-avatar.png'});await host.getByRole('button',{name:'完了',exact:true}).click();await host.getByRole('button',{name:'ソロトレーニング',exact:true}).click();assert(await host.getByText('単元問題選択・3問',{exact:true}).isVisible());
- assert.deepEqual(errors,[]);console.log('PASS two real peers: create/join/start, avatar replication, movement, reload-energy quiz/refill; character editor and lesson entry.');
+ await host.evaluate(()=>{showTitle();});assert.equal(await host.getByRole('button',{name:'キャラクター作成',exact:true}).count(),0);await host.getByRole('button',{name:'ソロトレーニング',exact:true}).click();await host.locator('[data-online-lesson=vr]').waitFor();
+ assert.deepEqual(errors,[]);console.log('PASS two real peers: create/join/start, avatar replication, movement, reload-energy quiz/refill; post-start avatar updates and shared lesson entry.');
 }finally{await browser.close();await server.close();signal.kill();}

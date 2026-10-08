@@ -47,7 +47,7 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     return beam;
   });
   function actor(color: number) { const g = new THREE.Group(); cube(.48, .65, .3, color, 0, .82, 0, g); cube(.34, .35, .32, 0xd7ad82, 0, 1.32, 0, g); cube(.37, .12, .34, 0x1a2526, 0, 1.52, 0, g); for (const x of [-.16, .16]) cube(.16, .5, .2, 0x172a30, x, .25, 0, g); scene.add(g); return g; }
-  const player = avatar ? createVrCharacter(avatar) : actor(0x2d8d9c); if (avatar) scene.add(player); const guards = mission.routes.map(() => actor(0xb78748));
+  let player = avatar ? createVrCharacter(avatar) : actor(0x2d8d9c); if (avatar) scene.add(player); const guards = mission.routes.map(() => actor(0xb78748));
   const ring = (color: number, radius: number, p: Point) => { const m = new THREE.Mesh(new THREE.RingGeometry(radius * .78, radius, 24), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.position.set(p.x, .025, p.z); scene.add(m); return m; };
   const playerRing = ring(0x8affee, .5, mission.spawn);
   const exit = ring(0x405958, .85, mission.exit);
@@ -91,7 +91,7 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   function draw(s: Run, view: ViewSettings = { mode: 'overhead', yaw: s.player.angle }) {
     frameState = s;
     remoteActors.forEach((g,id)=>{g.visible=!!view.others?.some(p=>p.id===id);});
-    for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g){g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);scene.add(g);remoteActors.set(other.id,g);}g.visible=true;g.position.set(other.player.x,0,other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
+    for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g||g.userData.avatarKey!==JSON.stringify(other.avatar)){if(g){scene.remove(g);disposeObject(g);}g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);g.userData.avatarKey=JSON.stringify(other.avatar);scene.add(g);remoteActors.set(other.id,g);}g.visible=true;g.position.set(other.player.x,0,other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
 
     host.dataset.view = view.mode;
     frontWall.visible = view.mode !== 'overhead';
@@ -133,5 +133,5 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     renderer.render(scene, view.mode === 'overhead' ? camera : perspective);
   }
   function disposeObject(object: THREE.Object3D) { object.traverse(o => { if (o instanceof THREE.Mesh) { o.geometry.dispose(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose()); } }); }
-  return { draw, dispose() { disposed = true; observer.disconnect(); sleepMarkers.forEach(s => { s.material.map?.dispose(); s.material.dispose(); }); aim.geometry.dispose(); (aim.material as THREE.Material).dispose(); disposeObject(scene); assets.forEach(disposeObject); mats.forEach(m => m.dispose()); renderer.dispose(); renderer.domElement.remove(); } };
+  return { draw, setAvatar(next:KartAvatar){const replacement=createVrCharacter(next);replacement.position.copy(player.position);replacement.rotation.copy(player.rotation);replacement.visible=player.visible;scene.remove(player);disposeObject(player);player=replacement;scene.add(player);}, dispose() { disposed = true; observer.disconnect(); sleepMarkers.forEach(s => { s.material.map?.dispose(); s.material.dispose(); }); aim.geometry.dispose(); (aim.material as THREE.Material).dispose(); disposeObject(scene); assets.forEach(disposeObject); mats.forEach(m => m.dispose()); renderer.dispose(); renderer.domElement.remove(); } };
 }

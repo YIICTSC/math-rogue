@@ -15,7 +15,7 @@ try {
   styled.players[0].avatar.species = 0; assert.equal(lobby.players.styled.avatar.species, 3, 'public avatar is a copy');
   const oldView = viewFor(lobby, 'styled'); for (const k of ['avatar','vx','vy','vz','origin','flightTime','shotClub','shotAngle']) delete oldView.players[0][k];
   assert(validView(oldView), 'optional motion/appearance fields remain compatible');
-  startGolf(lobby, 'Test'); assert.equal(command(lobby, 'styled', { type: 'avatar', avatar }), false);
+  startGolf(lobby, 'Test'); const beforeAppearance = structuredClone(lobby); const newAvatar = { ...avatar, hairStyle: 2 }; assert(command(lobby, 'styled', { type: 'avatar', avatar: newAvatar })); beforeAppearance.players.styled.avatar = newAvatar; assert.deepEqual(JSON.parse(JSON.stringify(lobby)), beforeAppearance, 'appearance can change after start without resetting play');
   const player = { ...viewFor(lobby,'styled').players[0], correct: 3 };
   const flight = predictShot(player,'driver',0,1), putt = predictShot(player,'putter',0,.7);
   assert(Math.max(...flight.map(p=>p.y)) > 20, 'driver preview has a high arc');
