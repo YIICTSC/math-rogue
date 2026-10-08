@@ -961,6 +961,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MINI_GAME_CHESS,
     GameScreen.MINI_GAME_MAHJONG,
     GameScreen.MINI_GAME_CRANE,
+    GameScreen.MINI_GAME_GAKUROGEAR,
     GameScreen.COOP_SETUP,
     GameScreen.RACE_SETUP,
 ]);
@@ -7258,6 +7259,11 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         setPendingMiniGameScreen(screen);
+        if (screen === GameScreen.MINI_GAME_GAKUROGEAR) {
+            setPendingMiniGameScreen(null);
+            setGameState(prev => ({ ...prev, screen }));
+            return;
+        }
         if (screen === GameScreen.MINI_GAME_CRANE) {
             if (showDailyAssignmentNoticeForProblemSelection()) {
                 return;
@@ -19086,6 +19092,7 @@ const App: React.FC = () => {
         // and the portrait back/reset controls remain inside the viewport.
         GameScreen.MINI_GAME_SCHOOL_TRPG,
         GameScreen.MINI_GAME_CRANE,
+        GameScreen.MINI_GAME_GAKUROGEAR,
     ].includes(gameState.screen);
 
     return (
@@ -19878,7 +19885,7 @@ const App: React.FC = () => {
                                 </div>
 
                                 {!OFFLINE_DISTRIBUTABLE && onlineGamesUnlocked && (
-                                    <div className="start-menu-online-games grid w-full grid-cols-3 gap-2">
+                                    <div className="start-menu-online-games grid w-full grid-cols-2 sm:grid-cols-4 gap-2">
                                         <button
                                             disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
                                             onClick={() => {
@@ -19891,6 +19898,16 @@ const App: React.FC = () => {
                                         >
                                             <span className="flex items-center gap-1"><Users size={15} /> {trans("RPGオンライン", languageMode)}</span>
                                             <span className="text-[10px] opacity-70">{trans("異世界の冒険と暮らし", languageMode)}</span>
+                                        </button>
+                                        <button disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached} onClick={() => {
+                                            if (redirectToAssignmentChallengeIfLocked()) return;
+                                            if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                            setPendingAssignmentStartScreen(GameScreen.MINI_GAME_GAKUROGEAR);
+                                            if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                            setPendingAssignmentStartScreen(null);
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_GAKUROGEAR }));
+                                        }} className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40">
+                                            <span>{trans('GAKURO VRトレーニング', languageMode)}</span><span className="text-[10px] opacity-70">{languageMode === 'ENGLISH' ? 'STEALTH · CO-OP · BATTLE ROYALE' : 'ステルス・協力・バトルロイヤル'}</span>
                                         </button>
                                         <button
                                             disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}

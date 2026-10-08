@@ -42,6 +42,19 @@ export const isMiniGameUnlocked = (
 
 export const MINI_GAMES: MiniGameConfig[] = [
   {
+    id: 'GAKURO',
+    name: 'GAKURO VRトレーニング',
+    titleLines: ['GAKURO', 'VRトレーニング'],
+    description: '学校を舞台にした3Dステルス訓練。見回りをかわして資料を回収し、脱出せよ。',
+    screen: GameScreen.MINI_GAME_GAKUROGEAR,
+    threshold: 0,
+    typeLabel: 'STEALTH',
+    typeColor: 'bg-emerald-900',
+    glowColor: 'rgba(150,200,160,0.4)',
+    icon: Compass,
+    clearAction: () => { localStorage.removeItem('gakurogear-vr-v1'); }
+  },
+  {
     id: 'GO_HOME',
     name: '帰宅ダッシュ',
     titleLines: ['帰宅', 'ダッシュ'],

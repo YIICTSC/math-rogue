@@ -1,0 +1,98 @@
+[
+  {
+    "cue": "select",
+    "title": "選択3",
+    "file": "select.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "alert",
+    "title": "8bitアラート1",
+    "file": "alert.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "bubble",
+    "title": "パフッ1",
+    "file": "bubble.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "hold",
+    "title": "にぎりしめ単発",
+    "file": "hold.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "reload",
+    "title": "8bitメカノイズ",
+    "file": "reload.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "collect",
+    "title": "短い音-プイッ",
+    "file": "collect.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "door",
+    "title": "扉が開く1",
+    "file": "door.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "correct",
+    "title": "正解1",
+    "file": "correct.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "wrong",
+    "title": "8bitキャンセル2",
+    "file": "wrong.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "clear",
+    "title": "ジャジャーン1",
+    "file": "clear.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "fail",
+    "title": "短い音-ズッコケ",
+    "file": "fail.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  },
+  {
+    "cue": "countdown",
+    "title": "制限時間1",
+    "file": "countdown.mp3",
+    "source": "https://www.springin.org/sound-stock/",
+    "copyright": "Springin’ Sound Stock / 株式会社しくみデザイン",
+    "license": "https://www.springin.org/sound-stock/guideline/"
+  }
+]

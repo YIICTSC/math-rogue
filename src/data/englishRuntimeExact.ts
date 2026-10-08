@@ -1,5 +1,8 @@
 import { RPG_ENGLISH } from './rpgEnglish';
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
+  'GAKURO VRトレーニング': 'GAKURO VR Training',
+  'VRトレーニング': 'VR Training',
+  '学校を舞台にした3Dステルス訓練。見回りをかわして資料を回収し、脱出せよ。': '3D school stealth training. Evade patrols, retrieve files, and extract.',
   ...RPG_ENGLISH,
   'エンドレス第1章へ進んだ。': 'You entered Endless Chapter 1.',
   '真のエンドレスモード第51章へ進んだ。': 'You entered True Endless Mode, Chapter 51.',

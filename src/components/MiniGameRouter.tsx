@@ -1,5 +1,6 @@
 
 import React from 'react';
+const GakuroGear = React.lazy(() => import('../mini-games/gakurogear/VrTitle'));
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode, MiniGameDebugPreview } from '../types';
 import PokerGameScreen from './PokerGameScreen';
 import SchoolyardSurvivorScreen from './SchoolyardSurvivorScreen';
@@ -55,6 +56,7 @@ export interface MiniGameComponentProps {
  * 今後ミニゲームが増えた場合は、ここに追加するだけでApp.tsxを触らずに済みます
  */
 const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComponentProps>>> = {
+    [GameScreen.MINI_GAME_GAKUROGEAR]: GakuroGear,
     [GameScreen.MINI_GAME_POKER]: PokerGameScreen,
     [GameScreen.MINI_GAME_SURVIVOR]: SchoolyardSurvivorScreen,
     [GameScreen.MINI_GAME_DUNGEON]: SchoolDungeonRPG,
@@ -86,7 +88,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
     }
 
     return (
-        <Component
+        <React.Suspense fallback={<div className="h-full bg-slate-950 text-white grid place-items-center">LOADING…</div>}><Component
             onBack={onBack}
             onFinish={onFinish}
             problemMode={problemMode}
@@ -102,7 +104,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             onCraneReplay={onCraneReplay}
             craneGold={craneGold}
             eventMode={craneEventMode}
-        />
+        /></React.Suspense>
     );
 };
 

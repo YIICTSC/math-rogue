@@ -1944,6 +1944,11 @@ class AudioService {
       }
   }
 
+  public playVrSound(kind: 'select'|'alert'|'bubble'|'hold'|'reload'|'collect'|'door'|'correct'|'wrong'|'clear'|'fail'|'countdown') {
+      if(this.isMuted || this.sfxVolume <= 0) return;
+      this.playSfxMp3(`gakuro-vr/${kind}`,()=>this.playSound(kind==='wrong'||kind==='fail'?'wrong':'select'),{maxDurationMs:kind==='clear'?2500:kind==='countdown'?2000:1600,overlap:false});
+  }
+
   public playGolfSound(kind: 'swing'|'putt'|'land'|'cup'|'birdie'|'water'|'ob'|'start') {
       const durations = {swing:600,putt:300,land:250,cup:700,birdie:1800,water:850,ob:700,start:900};
       this.playSfxMp3(`golf/${kind}`, () => this.playSound(kind === 'ob' ? 'wrong' : 'select'), {maxDurationMs:durations[kind],overlap:false});
