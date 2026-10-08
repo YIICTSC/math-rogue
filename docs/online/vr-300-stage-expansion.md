@@ -12,3 +12,10 @@ The original 50 mission IDs and `gakurogear-vr-v1` records remain compatible. ID
 - Floor tiles use one instanced mesh to limit draw calls in expanded cooperative maps.
 
 Validation: `test-vr-expansion.mjs` flood-fills all 300 stages and checks every mandatory location, six weapon types, item consumption/effects, terrain height and compound extraction conditions. `test-vr-online.mjs` covers expanded cooperative terrain/inventories/decoys and existing cooperative and royale behavior. Browser suites cover five screen sizes, equipment selectors, stage selection and real PeerJS peers. English gate, production build and server build are required before publication.
+
+
+## Equipment positioning and stage unlocks
+
+Weapon selector/Attack are inside the bottom-right corner of the field; item selector/Use are bottom-left. The objective prompt sits above them and modal overlays remain above all equipment controls.
+
+Unlocks by mission ID (not accumulated clear records): pistol + decoy 1, baton 31, ammo pack 41, rifle 61, shotgun 111, cloak 121, rapid blaster 171, boots 201, hammer 231. Disabled options display the unlock stage. Locked items receive no initial charges. Solo/co-op/royale simulation enforces the same unlock rules, including host-authoritative incoming equipment changes.

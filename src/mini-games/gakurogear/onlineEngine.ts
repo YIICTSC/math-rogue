@@ -1,5 +1,5 @@
 import type {KartAvatar} from '../gakuro-kart/avatar';
-import { WEAPONS, floorHeight, MISSIONS, activeObstacles, blocked, clearSight, createRun, distance, step, type Input, type Mission, type Point, type Run } from './engine';
+import { equip, WEAPONS, floorHeight, MISSIONS, activeObstacles, blocked, clearSight, createRun, distance, step, type Input, type Mission, type Point, type Run } from './engine';
 import type { KartLesson } from '../gakuro-kart/learning';
 export type OnlineMode = 'coop' | 'royale';
 export type Participant = { avatar?: KartAvatar; id: string; name: string; run: Run; hits: number; out: boolean; invulnerable: number; energy: number; reloading: number; quiz: boolean; answers: number[]; quizCorrect: number; quizRound: number; connected: boolean; helped: string[] };
@@ -58,7 +58,7 @@ export function tickWorld(w: OnlineWorld, controls: Record<string, Input & { rel
       let struck: Participant | undefined;
       const holdTarget = connected.find(q => q !== p && !q.out && !q.quiz && q.invulnerable === 0 && distance(q.run.player, p.run.player) < 1.15 && ((p.run.player.x - q.run.player.x) * Math.sin(q.run.player.angle) + (p.run.player.z - q.run.player.z) * Math.cos(q.run.player.angle)) < -.3 && clearSight(w.mission, p.run.player, q.run.player, true));
       if (input.hold && holdTarget && p.energy >= 20 && Math.hypot(input.x, input.z) < .1) { if(p.run.holdTarget!==players.indexOf(holdTarget)){p.run.holdProgress=0;p.run.holdTarget=players.indexOf(holdTarget);} p.run.holdProgress += dt; if (p.run.holdProgress >= .9) { struck = holdTarget; p.energy -= 20; p.run.holdProgress = 0; } } else {p.run.holdProgress = 0;p.run.holdTarget=-1;}
-      if(input.weapon!==undefined&&Number.isInteger(input.weapon)&&WEAPONS[input.weapon])p.run.weapon=input.weapon;
+      equip(w.mission,p.run,input);
       const weapon=WEAPONS[p.run.weapon];
       const firing = input.shoot && p.run.ammo >= weapon.cost && p.run.shotCooldown === 0 && p.reloading === 0;
       if (firing) { const from = p.run.player, a = input.facing ?? from.angle; const candidates = connected.filter(q => q !== p && !q.out && !q.quiz && q.invulnerable === 0).map(q => { const dx = q.run.player.x - from.x, dz = q.run.player.z - from.z; return { q, along: dx * Math.sin(a) + dz * Math.cos(a), side: Math.abs(dx * Math.cos(a) - dz * Math.sin(a)) }; }).filter(q => q.along > 0 && q.along < weapon.range && q.side < weapon.spread && clearSight(w.mission, from, q.q.run.player, true)).sort((a, b) => a.along - b.along); struck = candidates[0]?.q; }

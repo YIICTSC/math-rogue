@@ -31,3 +31,12 @@
 @media(max-height:500px) and (orientation:landscape){.gear-loadout{padding:2px 8px}.gear-loadout select{padding:3px}.gear-loadout button{min-height:28px}.gear-loadout small{display:inline;margin-left:4px}}
 
 .gear-loadout label{white-space:nowrap}.gear-loadout select{flex:1}
+
+/* Equipment overlays are anchored to the playfield, away from movement controls. */
+.gear-loadout{position:absolute;inset:0;z-index:3;display:block;padding:0;background:none;pointer-events:none}
+.gear-loadout>div{position:absolute;bottom:8px;width:min(260px,43%);display:grid;gap:4px;background:#10272be8;border:1px solid #6e9590;border-radius:9px;padding:6px;pointer-events:auto}
+.gear-weapon-slot{right:8px}.gear-item-slot{left:8px}
+.gear-loadout label{display:block;font-size:10px}.gear-loadout select{display:block;font-size:11px;padding:6px 3px}
+.gear-loadout button{min-height:36px;font-size:12px;padding:5px}.gear-loadout small{display:inline;margin-left:5px}
+.gear-field:has(.gear-loadout) .gear-objective{bottom:100px}
+@media(max-height:500px) and (orientation:landscape){.gear-loadout>div{width:min(260px,35%);grid-template-columns:minmax(0,1fr) auto;align-items:end;padding:4px;bottom:4px}.gear-loadout label{font-size:0}.gear-loadout select{font-size:10px;padding:5px 2px}.gear-loadout button{min-height:29px;font-size:10px}.gear-field:has(.gear-loadout) .gear-objective{bottom:55px}}

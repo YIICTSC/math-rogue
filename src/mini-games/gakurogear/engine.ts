@@ -99,10 +99,18 @@ export const ITEMS = [
  { ja: '音のデコイ', en: 'Sound decoy', icon: '♪' }, { ja: '弾薬パック', en: 'Ammo pack', icon: '▣' },
  { ja: '光学マント', en: 'Stealth cloak', icon: '◌' }, { ja: 'スピード靴', en: 'Speed boots', icon: '↗' },
 ];
+export const WEAPON_UNLOCKS = [1, 61, 111, 171, 31, 231];
+export const ITEM_UNLOCKS = [1, 41, 121, 201];
+export function equip(m: Mission, s: Run, input: Input) {
+ if (Number.isInteger(input.weapon) && WEAPON_UNLOCKS[input.weapon!] <= m.id) s.weapon=input.weapon!;
+ if (Number.isInteger(input.item) && ITEM_UNLOCKS[input.item!] <= m.id) s.item=input.item!;
+ if (!(WEAPON_UNLOCKS[s.weapon] <= m.id)) s.weapon=0;
+ if (!(ITEM_UNLOCKS[s.item] <= m.id)) s.item=0;
+}
 export type Guard = Point & { angle: number; waypoint: number; investigate: Point | null; search: number; sleep: number; heldOnce: boolean; shotOnce: boolean; detour?: Point[] };
 export type Run = { weapon: number; item: number; items: number[]; stealth: number; boost: number; meleeHits: number; defended: number; switches: boolean[]; switchProgress: number; ammo: number; shotCooldown: number; holdTarget: number; holdProgress: number; holds: number; shots: number; bubble: (Point & { end: Point; life: number; hit: boolean }) | null; player: Point & { angle: number }; guards: Guard[]; collected: boolean[]; time: number; detection: number; peak: number; crouch: boolean; interact: number; status: 'playing' | 'clear' | 'caught' | 'timeout'; decoys: number; cooldown: number; noise: (Point & { life: number }) | null };
 export type Input = { x: number; z: number; interact: boolean; crouch: boolean; decoy: boolean; weapon?: number; item?: number; useItem?: boolean; hold?: boolean; shoot?: boolean; facing?: number };
-export function createRun(m: Mission): Run { return { weapon: 0, item: 0, items: [3, 2, 2, 2], stealth: 0, boost: 0, meleeHits: 0, defended: 0, switches: (m.switches ?? []).map(() => false), switchProgress: 0, ammo: m.ammo, shotCooldown: 0, holdTarget: -1, holdProgress: 0, holds: 0, shots: 0, bubble: null, player: { ...m.spawn, angle: Math.PI }, guards: m.routes.map(r => ({ ...r[0], angle: Math.atan2(r[1].x - r[0].x, r[1].z - r[0].z), waypoint: 1, investigate: null, search: 0, sleep: 0, heldOnce: false, shotOnce: false })), collected: m.targets.map(() => false), time: 0, detection: 0, peak: 0, crouch: false, interact: 0, status: 'playing', decoys: 3, cooldown: 0, noise: null }; }
+export function createRun(m: Mission): Run { return { weapon: 0, item: 0, items: ITEM_UNLOCKS.map((level,i)=>m.id>=level?(i===0?3:2):0), stealth: 0, boost: 0, meleeHits: 0, defended: 0, switches: (m.switches ?? []).map(() => false), switchProgress: 0, ammo: m.ammo, shotCooldown: 0, holdTarget: -1, holdProgress: 0, holds: 0, shots: 0, bubble: null, player: { ...m.spawn, angle: Math.PI }, guards: m.routes.map(r => ({ ...r[0], angle: Math.atan2(r[1].x - r[0].x, r[1].z - r[0].z), waypoint: 1, investigate: null, search: 0, sleep: 0, heldOnce: false, shotOnce: false })), collected: m.targets.map(() => false), time: 0, detection: 0, peak: 0, crouch: false, interact: 0, status: 'playing', decoys: 3, cooldown: 0, noise: null }; }
 export const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.z - b.z, (a.y ?? 0) - (b.y ?? 0));
 export function activeObstacles(m: Mission, s?: Pick<Run, 'switches'>): Obstacle[] { return m.obstacles.filter(b => b.kind !== 'door' || !s?.switches[b.switchId ?? 0]); }
 export function blocked(m: Mission, p: Point, radius = .27, crouch = false, s?: Pick<Run, 'switches'>): boolean {
@@ -162,8 +170,7 @@ function sleepGuard(m: Mission, s: Run, index: number, method: 'hold' | 'shot' |
 export function step(m: Mission, s: Run, input: Input, dt: number) {
   if (s.status !== 'playing') return;
   dt = Math.min(Math.max(dt, 0), .05);
-  if (Number.isInteger(input.weapon) && input.weapon! >= 0 && input.weapon! < WEAPONS.length) s.weapon = input.weapon!;
-  if (Number.isInteger(input.item) && input.item! >= 0 && input.item! < ITEMS.length) s.item = input.item!;
+  equip(m,s,input);
   s.stealth = Math.max(0, s.stealth - dt); s.boost = Math.max(0, s.boost - dt);
   if (input.useItem && s.cooldown === 0 && s.items[s.item] > 0) {
    s.items[s.item]--; s.cooldown = 1;

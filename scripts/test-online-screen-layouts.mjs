@@ -105,6 +105,11 @@ try {
       }
       if (kind === "game") {
         await fit(page.locator(".gear-controls"));
+        const field=await page.locator('.gear-field').boundingBox(),weapon=await page.locator('.gear-weapon-slot').boundingBox(),item=await page.locator('.gear-item-slot').boundingBox();
+        assert(weapon.x>field.x+field.width/2&&item.x<field.x+field.width/2,'Equipment corners');
+        assert(weapon.y+weapon.height<=field.y+field.height+1&&item.y+item.height<=field.y+field.height+1,'Equipment remains inside field');
+        assert(item.x+item.width<weapon.x,'Equipment slots do not overlap');
+        for(const control of await page.locator('.gear-loadout select,.gear-loadout button').all())await fit(control);
         await fit(page.locator(".gear-objective"));
         await page.locator(".gear-online-roster summary").click();
         const a = await page.locator(".gear-online-roster").boundingBox(), b = await page.locator(".gear-radar").boundingBox();
