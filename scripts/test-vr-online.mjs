@@ -30,3 +30,14 @@ failed.time=60;tickWorld(failed,{},.05);assert.equal(failed.phase,'result');asse
 const doors=createWorld('coop',2,lesson,300);addPlayer(doors,'a','A');addPlayer(doors,'b','B');startWorld(doors,5);assert.equal(doors.mission.switches.length,2);assert.equal(doors.mission.obstacles.filter(b=>b.kind==='door').length,2);
 doors.players.a.run.player={...doors.mission.switches[0],angle:0};for(let i=0;i<15;i++)tickWorld(doors,{a:{...neutral,interact:true},b:neutral},.05);assert(doors.players.b.run.switches[0]);
 console.log('PASS cooperative hold progress, shared sleep and doors, 3-question failure retry and timeout quiz.');
+
+const expanded=createWorld('coop',100,lesson,600);addPlayer(expanded,'a','A');addPlayer(expanded,'b','B');startWorld(expanded,7);
+assert.equal(expanded.mission.terrain.length,2);assert(expanded.mission.size>16);
+const equip={...neutral,weapon:4,item:1,useItem:true};tickWorld(expanded,{a:equip},.05);
+assert.equal(expanded.players.a.run.weapon,4);assert.equal(expanded.players.a.run.items[1],1);
+assert.equal(expanded.players.b.run.items[1],2);assert(expanded.players.a.run.ammo>expanded.mission.ammo);
+console.log('PASS enlarged elevated cooperative zones and independent equipment/item inventories.');
+
+const decoyWorld=createWorld('coop',1,lesson,300);addPlayer(decoyWorld,'a','A');startWorld(decoyWorld,1);tickWorld(decoyWorld,{a:{...neutral,item:0,useItem:true}},.05);assert.equal(decoyWorld.players.a.run.decoys,2);assert.equal(decoyWorld.players.a.run.items[0],2);assert(decoyWorld.guards.noise);console.log('PASS cooperative decoy consumed once and attracts shared patrols.');
+
+const defense=createWorld('coop',100,lesson,600);addPlayer(defense,'a','A');addPlayer(defense,'b','B');startWorld(defense,1);const dm=defense.mission;assert.equal(dm.targetKinds.length,dm.targets.length);defense.guards.guards=[];defense.mission.cameras=[];defense.mission.sensors=[];for(const p of Object.values(defense.players)){const index=Object.keys(defense.players).indexOf(p.id),offset=(index-.5)*((dm.size/2-.5)*2+1);p.run.player={x:dm.defend.x+offset,z:dm.defend.z,angle:0};}for(let i=0;i<65;i++)tickWorld(defense,{a:neutral,b:neutral},.05);assert.equal(defense.players.a.run.defended,3);assert.equal(defense.players.b.run.defended,3);console.log('PASS defense objectives progress independently in shifted cooperative zones.');

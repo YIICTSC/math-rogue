@@ -31,7 +31,7 @@ export class VrRoom {
       c.on('close', () => { this.connections.delete(c.peer); delete this.controls[c.peer]; if (this.world?.players[c.peer]) { if (this.world.phase === 'lobby') delete this.world.players[c.peer]; else this.world.players[c.peer].connected = false; this.emit(); } });
     });
     let pulses = 0; document.addEventListener('visibilitychange', this.visibility);
-    this.timer = setInterval(() => { if (!this.world) return; for (const id of Object.keys(this.controls)) if (Date.now() - (this.lastInput[id] ?? 0) > 600) delete this.controls[id]; tickWorld(this.world, this.controls, .05); Object.values(this.controls).forEach(i => { i.shoot = false; i.decoy = false; i.reload = false; }); if (++pulses % 2 === 0) this.emit(); }, 50); this.emit();
+    this.timer = setInterval(() => { if (!this.world) return; for (const id of Object.keys(this.controls)) if (Date.now() - (this.lastInput[id] ?? 0) > 600) delete this.controls[id]; tickWorld(this.world, this.controls, .05); Object.values(this.controls).forEach(i => { i.shoot = false; i.decoy = false; i.reload = false; i.useItem = false; }); if (++pulses % 2 === 0) this.emit(); }, 50); this.emit();
   }
   async join(name: string, code: string, avatar: KartAvatar = defaultAvatar()) {
     this.code = code.trim().toUpperCase().replace(/^H-/, ''); if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('Invalid room code');

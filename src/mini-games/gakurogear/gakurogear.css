@@ -20,3 +20,14 @@
 @media(orientation:landscape) and (max-height:550px){.gear-online-lobby>section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;position:relative;padding-bottom:50px;align-content:start}.gear-lobby-roster{grid-column:2;grid-row:1/7;max-height:calc(100dvh - 120px);min-height:0;grid-template-columns:1fr}.gear-online-lobby .gear-primary{position:absolute;bottom:0;left:0;width:100%;height:44px}.gear-online-lobby h1{font-size:18px}.gear-online-lobby>section>p{font-size:11px}.gear-header>span{font-size:10px}.gear-controls{gap:4px;padding:4px}.gear-controls button{flex:1;min-width:0;padding:4px;font-size:10px}.gear-controls small{display:none}}
 .gear-overlay section>button{margin:5px 0}.gear-overlay canvas{height:auto}
 @media(max-width:700px),(orientation:landscape) and (max-height:550px){.gear-field>.gear-overlay{position:fixed;inset:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);z-index:80}}
+
+/* Equipment stays outside the field; compact touch targets and bounded columns. */
+.gear-loadout{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:6px;padding:5px 10px;background:#10272b;flex-shrink:0}
+.gear-loadout label{min-width:0;display:flex;align-items:center;gap:5px;font-size:11px}
+.gear-loadout select{min-width:0;width:100%;background:#213e42;color:#fff;border:1px solid #6e9590;border-radius:7px;padding:7px 4px}
+.gear-loadout button{border:1px solid #d7ba74;border-radius:7px;background:#365957;color:#fff;padding:5px 9px;min-height:36px}
+.gear-loadout small{display:block;font-size:10px}.gear-loadout button:disabled{opacity:.4}
+@media(max-width:600px){.gear-loadout{padding:3px 5px;gap:4px}.gear-loadout label{font-size:0}.gear-loadout select{font-size:11px;padding:8px 2px}.gear-loadout button{font-size:11px;padding:3px 5px}}
+@media(max-height:500px) and (orientation:landscape){.gear-loadout{padding:2px 8px}.gear-loadout select{padding:3px}.gear-loadout button{min-height:28px}.gear-loadout small{display:inline;margin-left:4px}}
+
+.gear-loadout label{white-space:nowrap}.gear-loadout select{flex:1}

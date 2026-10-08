@@ -3,7 +3,7 @@ import type {KartAvatar} from '../gakuro-kart/avatar';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assetUrl } from '../../utils/assetPaths';
-import { cameraAngle, cameraBlocked, sensorActive, clearSight, holdCandidate, objectivesComplete, type Mission, type Point, type Run } from './engine';
+import { floorHeight, WEAPONS, cameraAngle, cameraBlocked, sensorActive, clearSight, holdCandidate, objectivesComplete, type Mission, type Point, type Run } from './engine';
 
 export type ViewMode = 'overhead' | 'first' | 'third';
 export type ViewSettings = { mode: ViewMode; yaw: number; exitReady?: boolean; others?: { id: string; name: string; player: Point & { angle: number }; out: boolean; avatar?: KartAvatar }[] };
@@ -22,7 +22,17 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   const mat = (color: number) => { const m = new THREE.MeshLambertMaterial({ color, flatShading: true }); mats.push(m); return m; };
   function cube(w: number, h: number, d: number, color: number, x: number, y: number, z: number, parent: THREE.Object3D = scene) { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color)); mesh.position.set(x, y, z); parent.add(mesh); return mesh; }
   const size = mission.size ?? 8;
-  for (let x = -size + 1; x < size; x += 2) for (let z = -size + 1; z < size; z += 2) cube(2, .12, 2, (x + z) % 4 === 0 ? 0x344b48 : 0x293f3e, x, -.1, z);
+ const palettes=[0x355b53,0x31546a,0x56596d,0x414253,0x495578,0x396542,0x547485,0x8aabb5,0x947857,0x544e7e];
+ const floorColor=palettes[mission.theme??0];
+  const tileCount=Math.ceil(size)*Math.ceil(size), tiles=new THREE.InstancedMesh(new THREE.BoxGeometry(2,.12,2),mat(floorColor),tileCount), dummy=new THREE.Object3D();
+  let tileIndex=0;
+  for(let x=-size+1;x<size;x+=2)for(let z=-size+1;z<size;z+=2){
+    dummy.position.set(x,floorHeight(mission,{x,z})-.1,z);
+    dummy.rotation.x=-Math.atan2(floorHeight(mission,{x,z:z+1})-floorHeight(mission,{x,z:z-1}),2);
+    dummy.rotation.z=Math.atan2(floorHeight(mission,{x:x+1,z})-floorHeight(mission,{x:x-1,z}),2);
+    dummy.updateMatrix();tiles.setMatrixAt(tileIndex,dummy.matrix);tiles.setColorAt(tileIndex,new THREE.Color((Math.round(x+z))%4===0?floorColor:floorColor-0x080808));tileIndex++;
+  }
+  tiles.count=tileIndex;scene.add(tiles);
   const grid = new THREE.GridHelper(size * 2, Math.round(size * 2), 0x638276, 0x496359); grid.position.y = .001; scene.add(grid);
   cube(size * 2 + .4, 2.5, .3, 0x456260, 0, 1.2, -size-.1); cube(.3, 2.5, size*2, 0x456260, -size-.1, 1.2, 0); cube(.3, 2.5, size*2, 0x456260, size+.1, 1.2, 0);
   for (const x of [-6, -2, 2, 6]) { cube(2.2, 1.1, .1, 0x88b5ab, x, 1.6, -7.9); cube(2.4, .1, .2, 0xc1bea0, x, 1, -7.85); }
@@ -31,27 +41,28 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   const doors: { group: THREE.Group; index: number }[] = [];
   const decorations: { holder: THREE.Group; kind: string; w: number; h: number; d: number }[] = [];
   for (const b of mission.obstacles) {
-    const holder = new THREE.Group(); holder.position.set(b.x, 0, b.z); scene.add(holder);
+    const holder = new THREE.Group(); holder.position.set(b.x, floorHeight(mission,b), b.z); scene.add(holder);
     cube(b.w, b.h - (b.clearance ?? 0), b.d, b.kind === 'crawl' ? 0xc5a254 : b.kind === 'door' ? 0x538ea5 : b.kind === 'wall' ? 0x607775 : b.kind === 'planter' ? 0x426244 : 0x746049, 0, (b.h + (b.clearance ?? 0)) / 2, 0, holder);
     if (b.kind === 'door') doors.push({ group: holder, index: b.switchId ?? 0 });
     if (b.kind === 'crawl') cube(b.w, .07, b.d + .03, 0xf6e3a0, 0, b.clearance!, 0, holder);
     if (['desk', 'shelf', 'planter'].includes(b.kind)) decorations.push({ holder, kind: b.kind, w: b.w, h: b.h, d: b.d });
   }
   const switches = (mission.switches ?? []).map(p => {
-    cube(.12, .8, .12, 0x94a6a1, p.x, .4, p.z);
-    return cube(.4, .25, .3, 0xffbb5e, p.x, .9, p.z);
+    cube(.12, .8, .12, 0x94a6a1, p.x, floorHeight(mission,p)+.4, p.z);
+    return cube(.4, .25, .3, 0xffbb5e, p.x, floorHeight(mission,p)+.9, p.z);
   });
   const sensors = (mission.sensors ?? []).map(b => {
-    const beam = cube(b.w, .045, b.d, 0xff6579, b.x, 1.1, b.z);
+    const beam = cube(b.w, .045, b.d, 0xff6579, b.x, floorHeight(mission,b)+1.1, b.z);
     for (const side of [-1, 1]) cube(.12, 1.25, .12, 0x557681, b.x + (b.w > b.d ? b.w / 2 * side : 0), .625, b.z + (b.d > b.w ? b.d / 2 * side : 0));
     return beam;
   });
   function actor(color: number) { const g = new THREE.Group(); cube(.48, .65, .3, color, 0, .82, 0, g); cube(.34, .35, .32, 0xd7ad82, 0, 1.32, 0, g); cube(.37, .12, .34, 0x1a2526, 0, 1.52, 0, g); for (const x of [-.16, .16]) cube(.16, .5, .2, 0x172a30, x, .25, 0, g); scene.add(g); return g; }
   let player = avatar ? createVrCharacter(avatar) : actor(0x2d8d9c); if (avatar) scene.add(player); const guards = mission.routes.map(() => actor(0xb78748));
-  const ring = (color: number, radius: number, p: Point) => { const m = new THREE.Mesh(new THREE.RingGeometry(radius * .78, radius, 24), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.position.set(p.x, .025, p.z); scene.add(m); return m; };
+  const ring = (color: number, radius: number, p: Point) => { const m = new THREE.Mesh(new THREE.RingGeometry(radius * .78, radius, 24), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.position.set(p.x, floorHeight(mission,p)+.025, p.z); scene.add(m); return m; };
   const playerRing = ring(0x8affee, .5, mission.spawn);
   const exit = ring(0x405958, .85, mission.exit);
-  const targets = mission.targets.map(p => { const g = new THREE.Group(); cube(.48, .08, .6, 0x79e9ff, 0, .45, 0, g); cube(.35, .02, .08, 0xf0ffff, 0, .5, .12, g); g.position.set(p.x, 0, p.z); scene.add(g); ring(0x3e838e, .52, p); return g; });
+  if(mission.defend) ring(0xffd36e,1.4,mission.defend);
+  const targets = mission.targets.map((p,i) => { const g = new THREE.Group(); cube(.48, .08, .6, mission.targetKinds?.[i]==='rescue'?0xff9ccf:mission.targetKinds?.[i]==='relay'?0xffd36e:0x79e9ff, 0, .45, 0, g); if(mission.targetKinds?.[i]==='rescue'){cube(.35,.6,.25,0xff9ccf,0,.7,0,g);cube(.3,.3,.3,0xe9c7a0,0,1.15,0,g);}else if(mission.targetKinds?.[i]==='relay'){cube(.5,1,.35,0x365868,0,.5,0,g);cube(.4,.3,.04,0xffd36e,0,.8,.2,g);}else cube(.35,.02,.08,0xf0ffff,0,.5,.12,g); g.position.set(p.x, floorHeight(mission,p), p.z); scene.add(g); ring(0x3e838e, .52, p); return g; });
   const cones = [...guards, ...mission.cameras].map(() => {
     const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(32 * 9), 3));
     const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0xedc55c, transparent: true, opacity: .23, side: THREE.DoubleSide, depthWrite: false })); scene.add(mesh); return mesh;
@@ -67,7 +78,12 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   const holdRing = ring(0xf8ec8c, .6, mission.spawn);
   const aim = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: 0x99dbe5, dashSize: .2, gapSize: .2, transparent: true, opacity: .45 })); scene.add(aim);
   // Bright toy proportions distinguish the bubble tool from a real weapon.
-  const toy = new THREE.Group(); cube(.15, .18, .38, 0x5acdd5, .36, .85, .25, toy); cube(.2, .2, .08, 0xf2cf64, .36, .85, .46, toy); scene.add(toy);
+  const toy=new THREE.Group(), weaponModels=WEAPONS.map((w,i)=>{
+   const model=new THREE.Group();
+   if(w.melee){cube(.1,.7,.1,0xedd594,.36,.85,.25,model);if(i===5)cube(.45,.25,.25,0x87b9c7,.36,1.25,.25,model);}
+   else{cube(.15,.18,i===1?.8:i===2?.5:.38,[0x5acdd5,0x7296dc,0xecac69,0xa58bdf][i],.36,.85,.25,model);cube(.2,.2,.08,0xf2cf64,.36,.85,i===1?.7:.46,model);}
+   toy.add(model);return model;
+  });scene.add(toy);
   let disposed = false;
   const assets: THREE.Object3D[] = [];
   new GLTFLoader().load(assetUrl('models/gakurogear/school-kit.glb'), gltf => {
@@ -84,14 +100,14 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   function drawCone(index: number, p: Point, angle: number, crouch: boolean, range: number) {
     const attr = cones[index].geometry.getAttribute('position') as THREE.BufferAttribute;
     for (let i = 0; i < 32; i++) {
-      attr.setXYZ(i * 3, p.x, .035, p.z);
-      for (let edge = 0; edge < 2; edge++) { const a = angle - .6 + (i + edge) / 32 * 1.2; let r = .1; for (; r < range; r += .15) { const to = { x: p.x + Math.sin(a) * r, z: p.z + Math.cos(a) * r }; if (Math.abs(to.x) > size || Math.abs(to.z) > size || !clearSight(mission, p, to, crouch, frameState)) break; } attr.setXYZ(i * 3 + edge + 1, p.x + Math.sin(a) * r, .035, p.z + Math.cos(a) * r); }
+      attr.setXYZ(i * 3, p.x, floorHeight(mission,p)+.035, p.z);
+      for (let edge = 0; edge < 2; edge++) { const a = angle - .6 + (i + edge) / 32 * 1.2; let r = .1; for (; r < range; r += .15) { const to = { x: p.x + Math.sin(a) * r, z: p.z + Math.cos(a) * r }; if (Math.abs(to.x) > size || Math.abs(to.z) > size || !clearSight(mission, p, to, crouch, frameState)) break; } attr.setXYZ(i * 3 + edge + 1, p.x + Math.sin(a) * r, floorHeight(mission,p)+.035, p.z + Math.cos(a) * r); }
     } attr.needsUpdate = true; cones[index].geometry.computeBoundingSphere();
   }
   function draw(s: Run, view: ViewSettings = { mode: 'overhead', yaw: s.player.angle }) {
     frameState = s;
     remoteActors.forEach((g,id)=>{g.visible=!!view.others?.some(p=>p.id===id);});
-    for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g||g.userData.avatarKey!==JSON.stringify(other.avatar)){if(g){scene.remove(g);disposeObject(g);}g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);g.userData.avatarKey=JSON.stringify(other.avatar);scene.add(g);remoteActors.set(other.id,g);}g.visible=true;g.position.set(other.player.x,0,other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
+    for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g||g.userData.avatarKey!==JSON.stringify(other.avatar)){if(g){scene.remove(g);disposeObject(g);}g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);g.userData.avatarKey=JSON.stringify(other.avatar);scene.add(g);remoteActors.set(other.id,g);}g.visible=true;g.position.set(other.player.x,floorHeight(mission,other.player),other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
 
     host.dataset.view = view.mode;
     frontWall.visible = view.mode !== 'overhead';
@@ -100,7 +116,7 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     sensors.forEach((mesh, i) => { mesh.visible = sensorActive(mission.sensors![i].period, s.time); });
     const eye = s.crouch ? .62 : 1.38;
     const forward = new THREE.Vector3(Math.sin(view.yaw), 0, Math.cos(view.yaw));
-    const focus = new THREE.Vector3(s.player.x, eye, s.player.z);
+    const focus = new THREE.Vector3(s.player.x, floorHeight(mission,s.player)+eye, s.player.z);
     if (view.mode === 'first') { perspective.position.copy(focus); perspective.lookAt(focus.clone().add(forward)); }
     if (view.mode === 'third') {
       const desired = focus.clone().addScaledVector(forward, -3.8); desired.y += s.crouch ? 1 : 1.5;
@@ -109,25 +125,25 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
       perspective.position.copy(safe); perspective.lookAt(focus.clone().addScaledVector(forward, 2));
     }
     player.visible = view.mode !== 'first'; playerRing.visible = view.mode === 'overhead';
-    player.position.set(s.player.x, 0, s.player.z); player.rotation.y = s.player.angle; player.scale.y = s.crouch ? .55 : 1;
-    playerRing.position.set(s.player.x, .025, s.player.z);
+    player.position.set(s.player.x, floorHeight(mission,s.player), s.player.z); player.rotation.y = s.player.angle; player.scale.y = s.crouch ? .55 : 1;
+    playerRing.position.set(s.player.x, floorHeight(mission,s.player)+.025, s.player.z);
     s.guards.forEach((g, i) => {
-      guards[i].position.set(g.x, g.sleep > 0 ? .23 : 0, g.z); guards[i].rotation.set(g.sleep > 0 ? Math.PI / 2 : 0, g.angle, 0);
+      guards[i].position.set(g.x, floorHeight(mission,g)+(g.sleep > 0 ? .23 : 0), g.z); guards[i].rotation.set(g.sleep > 0 ? Math.PI / 2 : 0, g.angle, 0);
       cones[i].visible = g.sleep <= 0 && s.holdTarget !== i;
       if (cones[i].visible) drawCone(i, g, g.angle, s.crouch, mission.sightRange);
-      sleepMarkers[i].visible = g.sleep > 0; sleepMarkers[i].position.set(g.x, 1.4 + Math.sin(s.time * 2) * .12, g.z);
+      sleepMarkers[i].visible = g.sleep > 0; sleepMarkers[i].position.set(g.x, floorHeight(mission,g)+1.4 + Math.sin(s.time * 2) * .12, g.z);
     });
-    toy.visible = view.mode !== 'first'; toy.position.copy(player.position); toy.rotation.y = s.player.angle; toy.scale.y = s.crouch ? .55 : 1;
+    weaponModels.forEach((model,i)=>{model.visible=i===s.weapon;}); toy.visible = view.mode !== 'first'; toy.position.copy(player.position); toy.rotation.y = s.player.angle; toy.scale.y = s.crouch ? .55 : 1;
     const candidate = holdCandidate(mission, s); holdRing.visible = candidate >= 0;
     if (candidate >= 0) holdRing.position.set(s.guards[candidate].x, .04, s.guards[candidate].z);
     bubble.visible = !!s.bubble;
-    if (s.bubble) { const t = Math.min(1, ( .4 - s.bubble.life) / .2); bubble.position.set(s.bubble.x + (s.bubble.end.x - s.bubble.x) * t, .7, s.bubble.z + (s.bubble.end.z - s.bubble.z) * t); bubble.scale.setScalar(t === 1 ? 1 + ( .2 - s.bubble.life) * 8 : 1); }
+    if (s.bubble) { const t = Math.min(1, ( .4 - s.bubble.life) / .2); bubble.position.set(s.bubble.x + (s.bubble.end.x - s.bubble.x) * t, floorHeight(mission,s.player)+.7, s.bubble.z + (s.bubble.end.z - s.bubble.z) * t); bubble.scale.setScalar(t === 1 ? 1 + ( .2 - s.bubble.life) * 8 : 1); }
     const ray = aim.geometry.getAttribute('position') as THREE.BufferAttribute;
     let aimDistance = .2;
-    for (; aimDistance < 6; aimDistance += .1) { const q = { x: s.player.x + Math.sin(s.player.angle) * aimDistance, z: s.player.z + Math.cos(s.player.angle) * aimDistance }; if (Math.abs(q.x) > size || Math.abs(q.z) > size || !clearSight(mission, s.player, q, true, s)) break; }
-    ray.setXYZ(0, s.player.x, .12, s.player.z); ray.setXYZ(1, s.player.x + Math.sin(s.player.angle) * aimDistance, .12, s.player.z + Math.cos(s.player.angle) * aimDistance); ray.needsUpdate = true; aim.geometry.computeBoundingSphere(); aim.computeLineDistances(); aim.visible = s.ammo > 0;
+    for (; aimDistance < WEAPONS[s.weapon].range; aimDistance += .1) { const q = { x: s.player.x + Math.sin(s.player.angle) * aimDistance, z: s.player.z + Math.cos(s.player.angle) * aimDistance }; if (Math.abs(q.x) > size || Math.abs(q.z) > size || !clearSight(mission, s.player, q, true, s)) break; }
+    ray.setXYZ(0, s.player.x, floorHeight(mission,s.player)+.12, s.player.z); ray.setXYZ(1, s.player.x + Math.sin(s.player.angle) * aimDistance, floorHeight(mission,s.player)+.12, s.player.z + Math.cos(s.player.angle) * aimDistance); ray.needsUpdate = true; aim.geometry.computeBoundingSphere(); aim.computeLineDistances(); aim.visible = s.ammo >= WEAPONS[s.weapon].cost;
     mission.cameras.forEach((c, i) => drawCone(guards.length + i, c, cameraAngle(mission, i, s.time), s.crouch, 6.3));
-    targets.forEach((t, i) => { t.visible = !s.collected[i]; t.rotation.y = s.time; t.position.y = Math.sin(s.time * 3) * .1; });
+    targets.forEach((t, i) => { t.visible = !s.collected[i]; t.rotation.y = s.time; t.position.y = floorHeight(mission,mission.targets[i])+Math.sin(s.time * 3) * .1; });
     (exit.material as THREE.MeshBasicMaterial).color.setHex((view.exitReady ?? objectivesComplete(mission, s)) ? 0x6cffab : 0x405958);
     noise.visible = !!s.noise; if (s.noise) { noise.position.set(s.noise.x, .04, s.noise.z); noise.scale.setScalar(1 + (3 - s.noise.life) % 1); }
     renderer.render(scene, view.mode === 'overhead' ? camera : perspective);
