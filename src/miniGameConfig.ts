@@ -43,6 +43,7 @@ export const isMiniGameUnlocked = (
 export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'GAKURO',
+    categoryOnly: true, // Launched from the main title, not the mini-game list.
     name: 'GAKURO VRトレーニング',
     titleLines: ['GAKURO', 'VRトレーニング'],
     description: '学校を舞台にした3Dステルス訓練。見回りをかわして資料を回収し、脱出せよ。',
