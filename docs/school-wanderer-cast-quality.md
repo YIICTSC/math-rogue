@@ -6,11 +6,8 @@
 
 - `public/models/school-wanderer/cast-quality.glb`：86モデル、5,705,128 bytes。
 - `assets/school-wanderer/cast-quality/cast-quality.blend`：編集可能な素材一覧。
-- `assets/school-wanderer/cast-quality/characters.png`：9キャラクターの確認画像。
-- `assets/school-wanderer/cast-quality/enemies.png`：25敵モデルの確認画像。
-- `assets/school-wanderer/cast-quality/items.png`：52アイテム・マップ用モデルの確認画像。
 - `assets/school-wanderer/cast-quality/manifest.json`：全モデル名・配色・アニメーション一覧。
-- `assets/school-wanderer/cast-quality/animation-walk.png`、`animation-attack.png`：動作中の確認画像。
+- 確認用PNGはゲームで使用しないため削除した。再生成時の出力先はGit管理外の `tmp/school-wanderer-review/cast/`。
 - `scripts/blender/build-school-cast.py`：再現可能な生成・レンダリング・GLB出力スクリプト。
 
 ## キャラクター

@@ -288,9 +288,10 @@ def light(name,pos,power,size):
 light('Key',(-3,4,4),350,4);light('Fill',(3,2,2),180,3);light('Rim',(1,3,-3),320,3)
 data=bpy.data.cameras.new('Quality turntable');camera=bpy.data.objects.new('Quality turntable',data);bpy.context.collection.objects.link(camera);scene.camera=camera;data.type='ORTHO';data.ortho_scale=1.92
 renderdir=os.path.join(OUT,('compact-' if TOY else 'cycle-')+str(CYCLE));os.makedirs(renderdir,exist_ok=True)
+render_output=os.path.join(ROOT,'tmp/school-wanderer-review/hero',os.path.basename(renderdir));os.makedirs(render_output,exist_ok=True)
 def render(name,pos,target=(0,.73,0)):
     camera.location=xyz(pos);camera.rotation_euler=(Vector(xyz(target))-camera.location).to_track_quat('-Z','Y').to_euler()
-    scene.render.filepath=os.path.join(renderdir,name+'.png');bpy.ops.render.render(write_still=True)
+    scene.render.filepath=os.path.join(render_output,name+'.png');bpy.ops.render.render(write_still=True)
 for name,pos in [('front',(0,1.25,4)),('angle',(3,1.6,3)),('side',(4,1.3,0)),('back',(0,1.4,-4)),('game',(0,5,3))]:render(name,pos)
 for expr in ['smile','surprise','anger','sad','hit','victory']:
     expression_visible(expr)

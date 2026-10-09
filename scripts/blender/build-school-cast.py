@@ -324,11 +324,12 @@ def light(name,pos,power,size):
 light('Gallery key',(-4,6,5),700,5);light('Gallery fill',(4,3,3),350,4);light('Gallery rim',(2,5,-4),500,4)
 data=bpy.data.cameras.new('Gallery');camera=bpy.data.objects.new('Gallery',data);bpy.context.collection.objects.link(camera);scene.camera=camera;data.type='ORTHO'
 review=os.path.join(ROOT,'assets/school-wanderer/cast-quality');os.makedirs(review,exist_ok=True)
+render_output=os.path.join(ROOT,'tmp/school-wanderer-review/cast');os.makedirs(render_output,exist_ok=True)
 def gallery(name,names,cols=5):
     for i,r in enumerate(old_roots.values()):r.location=(100+i*3,0,0)
     rows=math.ceil(len(names)/cols)
     for i,n in enumerate(names):old_roots[n].location=scope['xyz'](((i%cols-(cols-1)/2)*1.7,0,(i//cols-(rows-1)/2)*2))
-    data.ortho_scale=max(cols*1.7,rows*2.35);camera.location=scope['xyz']((0,7,8));camera.rotation_euler=(Vector(scope['xyz']((0,.45,0)))-camera.location).to_track_quat('-Z','Y').to_euler();scene.render.filepath=os.path.join(review,name+'.png');bpy.ops.render.render(write_still=True)
+    data.ortho_scale=max(cols*1.7,rows*2.35);camera.location=scope['xyz']((0,7,8));camera.rotation_euler=(Vector(scope['xyz']((0,.45,0)))-camera.location).to_track_quat('-Z','Y').to_euler();scene.render.filepath=os.path.join(render_output,name+'.png');bpy.ops.render.render(write_still=True)
 gallery('characters',['friend_heal','friend_guard','friend_fetch','merchant','teacher','principal','ninja','mage','school_bully'],5)
 enemies=['slime','bat','ghost','thief','drain','dragon','plant','golem','book_enemy','mimic','eraser_enemy','rice_enemy','fire','dust','clock','paper_enemy','seal_enemy','pencil_case_enemy','detention_ghost','mud_boot','umbrella_enemy','sprout','metal_slime','test_enemy','ball_enemy']
 gallery('enemies',enemies,6)

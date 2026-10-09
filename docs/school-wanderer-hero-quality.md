@@ -26,7 +26,7 @@
 2. `compact-2`：腕・脚の曲面と法線を修正。反射を調整し、鉛筆ソードと盾を新規造形。装備ありの画像を追加。通常の前髪はかわいさに寄っていた。
 3. `compact-3`：追加の髪型指定を反映。斜め上への大きなスパイクと尖った側面・背面の束へ変更。正面・45度・側面・背面・ゲーム視点・装備あり画像を実際に確認した。
 
-最終画像は `assets/school-wanderer/hero-quality/compact-3/`。各サイクルの元画像も保存して比較できる。
+確認済みのレンダリングPNGはゲームで使用しないため削除した。再生成すると `tmp/school-wanderer-review/hero/compact-3/` に出力される。モデルと構造検査データは保持する。
 
 ## 自己評価（10点満点）
 
@@ -50,9 +50,7 @@
 - 編集用：`assets/school-wanderer/hero-quality/hero-quality.blend`
 - ゲーム用：`public/models/school-wanderer/hero-quality.glb`（668,668 bytes）
 - スクリプト：`scripts/blender/build-school-hero.py`
-- 正面等のPNG：`compact-3/front.png`、`angle.png`、`side.png`、`back.png`、`game.png`
-- 装備ありPNG：`compact-3/equipped-angle.png`、`equipped-front.png`
-- 表情PNG：`compact-3/expression-*.png`
+- 確認PNGはGit管理外の `tmp/school-wanderer-review/hero/compact-3/` へ出力する。ゲームでは使用しない。
 - GLBは主人公、鉛筆ソード、校長の盾の3ルートを含む。主人公の通常表情は19,820 triangles、27 meshes。表情差分は同時に描画しない。テクスチャは使わない。
 - 7表情：通常、笑顔、驚き、怒り、悲しみ、ダメージ、勝利。
 - 7動作：Idle、Walk、Run、Attack、Hit、Victory、Defeat。腕・脚・頭・胴の剛体パーツアニメーションで、武器は手のsocketに追従する。布・髪の物理シミュレーションやスキニングは未導入。Runは素材として出力し、通常のターン移動はWalkを使用。

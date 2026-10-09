@@ -3,6 +3,7 @@ import bpy, os, math
 from mathutils import Vector
 root=os.path.abspath(os.path.join(os.path.dirname(__file__),'../..'))
 review=os.path.join(root,'assets/school-wanderer/cast-quality')
+render_output=os.path.join(root,'tmp/school-wanderer-review/cast');os.makedirs(render_output,exist_ok=True)
 bpy.ops.wm.open_mainfile(filepath=os.path.join(review,'cast-quality.blend'))
 scene=bpy.context.scene
 names=['friend_heal','friend_guard','friend_fetch','slime','bat','dragon','thief','golem','mage']
@@ -17,5 +18,5 @@ for action,frame in [('Walk',6),('Attack',9)]:
         if ob.animation_data:
             for track in ob.animation_data.nla_tracks:track.mute=not track.name.endswith('_'+action)
     scene.frame_set(frame)
-    scene.render.filepath=os.path.join(review,'animation-'+action.lower()+'.png')
+    scene.render.filepath=os.path.join(render_output,'animation-'+action.lower()+'.png')
     bpy.ops.render.render(write_still=True)

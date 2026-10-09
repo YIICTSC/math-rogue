@@ -1,5 +1,6 @@
 # Keep Blender recovery files and superseded experiments on the local machine.
 *.blend1
+*.png
 school-wanderer.blend
 hero-quality/hero-before-redesign.*
 hero-quality/hero-prototype.*
