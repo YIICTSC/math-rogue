@@ -1,13 +1,12 @@
 import LandscapeCompass from './LandscapeCompass';
 import {audioService} from '../services/audioService';
 import {LandscapeScene} from './landscapeScene';
-import {WORLD_SCALE,legacyRegion,landscapeEnvironment,waterProfile} from './worldLandscape';
+import {WORLD_SCALE,legacyRegion,landscapeEnvironment,waterProfile,landmarkBlock} from './worldLandscape';
 import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
 import {createConstructionGeometry,voxelMaterial} from './voxelRendering';
 import {fullCube} from './voxelCatalog';
 import {furnitureImage,furnitureSize,furnishing} from './homeCatalog';
 import {plotPosition} from './farm/land';
-import VoxelLookStick from './VoxelLookStick';
 import {trans} from '../utils/textUtils';
 import type {LanguageMode} from '../types';
 import {energyOf} from './energy';
@@ -411,6 +410,7 @@ export default function WorldScene3D(props: SceneProps) {
       const get=(bx:number,by:number,bz:number)=>{const k=`${bx},${by},${bz}`;if(!cache.has(k))cache.set(k,blockAt(w,bx,by,bz));return cache.get(k)!;};
       for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=Math.max(terrainHeight(w,vx,vz)+4,editedTops.get(vx+','+vz)||0);vy++){
         const b=get(vx,vy,vz);if(!b)continue;
+        if(landmarkBlock(vx,vy,vz)&&!Object.hasOwn(w.voxels?.edits||{},`${vx},${vy},${vz}`))continue;
         if(fullCube(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>{const neighbor=get(vx+dx,vy+dy,vz+dz);return !!neighbor&&fullCube(neighbor);}))continue;
         blocks[renderBlocks.indexOf(b)].push({x:vx,y:vy,z:vz});
       }
@@ -442,7 +442,7 @@ export default function WorldScene3D(props: SceneProps) {
       cells.forEach(({ x: tx, y: ty, tile }, i) => {
         dummy.position.set(
           tx + 0.5,
-          tile === "water" ? -(voxelWater(w,tx,ty)?.depth||1)+.025 : solid(blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty))?terrainHeight(w,tx,ty)-.06:-100,
+          tile === "water" ? (voxelWater(w,tx,ty)?.surface||0)-(voxelWater(w,tx,ty)?.depth||1)+.025 : solid(blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty))?terrainHeight(w,tx,ty)-.06:-100,
           ty + 0.5,
         );
         dummy.scale.set(1, 0.1, 1);
@@ -470,8 +470,8 @@ export default function WorldScene3D(props: SceneProps) {
           node = natureAt(w, ty * WIDTH + tx),
           removed =
             (w.life.nodes[ty * WIDTH + tx]?.regrowAt || 0) > w.life.time;
-        if (tile === "water") {
-          mesh(terrain, box, water, tx + 0.5, -0.015, ty + 0.5, 1, 0.025, 1);
+        if (tile === "water" || voxelWater(w,tx,ty)) {
+          mesh(terrain, box, water, tx + 0.5, (voxelWater(w,tx,ty)?.surface||0)-0.015, ty + 0.5, 1, 0.025, 1);
         } else if (tile === "forest" && !removed && (!natureAt(w,ty*WIDTH+tx) || protectedVoxel(w,tx,ty))) {
           if (node?.rock) {
             placements.push({model:'rock',x:tx+.5,z:ty+.5,scale:.8,tile:{x:tx,y:ty}});if(models.ready)return;
@@ -740,53 +740,17 @@ export default function WorldScene3D(props: SceneProps) {
     const enableAmbience=()=>{ambience??=audioService.createRpgAmbience();};
     element.addEventListener('pointerdown',enableAmbience);
     const start = (e: PointerEvent) => {
+      renderer.domElement.setPointerCapture(e.pointerId);
       down = { x: e.clientX, y: e.clientY };
     };
-    const end = (e: PointerEvent) => {
+    const moveLook = (e: PointerEvent) => {
       if (!down) return;
-      const dx = e.clientX - down.x,
-        dy = e.clientY - down.y;
-      down = null;
-      if(buildRef.current.building&&Math.hypot(dx,dy)>12){setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy*.006)));if(Math.abs(dx)>35)latest.current.onFacing(latest.current.facing-dx/180);return;}
-      if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
-        latest.current.onFacing(latest.current.facing-dx/180);
-        return;
-      }
-      if (Math.hypot(dx, dy) > 12) return;
-      const r = renderer.domElement.getBoundingClientRect();
-      pointer.set(
-        ((e.clientX - r.left) / r.width) * 2 - 1,
-        (-(e.clientY - r.top) / r.height) * 2 + 1,
-      );
-      ray.setFromCamera(pointer, camera);
-      const person = ray
-        .intersectObjects(actors.children)
-        .find((v) => v.object.userData.player);
-      if (person) {
-        latest.current.onPlayer?.(person.object.userData.player);
-        return;
-      }
-      const objectHit = ray
-        .intersectObjects([...terrain.children,...models.group.children],true)
-        .find(
-          (h) =>
-            h.distance < 24 &&
-            (h.object.userData.tile ||
-              h.object.userData.tiles?.[h.instanceId ?? -1]),
-        );
-      if (objectHit) {
-        const tile =
-          objectHit.object.userData.tile ||
-          objectHit.object.userData.tiles[objectHit.instanceId!];
-        latest.current.onTile(tile.x, tile.y);
-        return;
-      }
-      if (
-        ray.ray.intersectPlane(plane, hit) &&
-        hit.distanceTo(camera.position) < 24
-      )
-        latest.current.onTile(Math.floor(hit.x), Math.floor(hit.z));
+      const dx=e.clientX-down.x, dy=e.clientY-down.y;
+      down={x:e.clientX,y:e.clientY};
+      latest.current.onFacing(latest.current.facing-dx*.004);
+      setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy*.006)));
     };
+    const end = () => { down=null; };
     const lost = (e: Event) => {
       e.preventDefault();
       latest.current.onUnavailable();
@@ -794,6 +758,8 @@ export default function WorldScene3D(props: SceneProps) {
     renderer.domElement.addEventListener("webglcontextlost", lost);
     renderer.domElement.addEventListener("pointerdown", start);
     renderer.domElement.addEventListener("pointerup", end);
+    renderer.domElement.addEventListener("pointermove", moveLook);
+    renderer.domElement.addEventListener("pointercancel", end);
     let lastTarget="";
     const draw = (time: number) => {
       if (disposed) return;
@@ -958,6 +924,8 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       renderer.domElement.removeEventListener("pointerdown", start);
       renderer.domElement.removeEventListener("pointerup", end);
+      renderer.domElement.removeEventListener("pointermove", moveLook);
+      renderer.domElement.removeEventListener("pointercancel", end);
       element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
       landscape.dispose();models.dispose();
       batches.forEach((b) => b.dispose());
@@ -973,7 +941,7 @@ export default function WorldScene3D(props: SceneProps) {
   const command=(type:string)=>host.current?.dispatchEvent(new CustomEvent('voxel-command',{detail:type}));
   const me=props.world.players[props.selfId];
   return <div className="rpg-world-3d" ref={host}>{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
-    <VoxelLookStick languageMode={props.languageMode||'JAPANESE'} onLook={(dx,dy)=>{props.onFacing(props.facing+dx);setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy)));}}/>
+
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
     <div className="rpg-workshop-actions"><button onClick={()=>setEditSlot(true)}>{text("建築工房")}</button><button aria-label={text("建材を回転")} onClick={()=>setRotation(r=>(r+1)%4)}>↻ {rotation*90}°</button></div>

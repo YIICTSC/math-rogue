@@ -11,8 +11,10 @@ import { createCourseScenery } from './courseScenery';
 const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'];
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
 export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
+  const orbit=useRef({yaw:0,pitch:.6,active:false,drag:null as null|{id:number;x:number;y:number}});
   const quality=useStorybookQuality();
   const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, avatar, spectator };
+  useEffect(()=>{orbit.current.active=false;},[overview]);
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -156,6 +158,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           marker.rig.clubHead.scale.set(selectedClub === 'putter' && p.id === id ? .42 : .31, .13, .17);
         }
         for (const [id, marker] of markers) if (!active.some(p => p.id === id)) marker.ball.visible = marker.shadow.visible = marker.rig.root.visible = false;
+        if(me?.phase==='moving'||me?.phase==='holed')orbit.current.active=false;
         const ball = me ? markers.get(me.id)?.ball.position || new THREE.Vector3(me.x, me.y, me.z) : new THREE.Vector3(0, 0, 0);
         // Keep the flight camera behind the shot even when the ball passes the cup.
         const base = me?.phase === 'moving' ? markers.get(me.id)?.direction ?? direction : me?.phase === 'aim' ? direction : Math.atan2(hole.cup.x - ball.x, hole.cup.z - ball.z);
@@ -177,6 +180,11 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           target.set(ball.x + Math.sin(base) * (narrow?24:35), 2.7, ball.z + Math.cos(base) * (narrow?24:35));
         }
         else { cameraGoal.set(ball.x - Math.sin(base) * 26, Math.max(17, ball.y + 14), ball.z - Math.cos(base) * 26); target.set(ball.x + Math.sin(base) * 13, Math.max(1, ball.y * .7), ball.z + Math.cos(base) * 13); }
+        if (!portrait && orbit.current.active && me && me.phase !== 'moving') {
+          const o=orbit.current, radius=45;
+          target.set(ball.x,1,ball.z);
+          cameraGoal.set(ball.x+Math.sin(o.yaw)*Math.cos(o.pitch)*radius,Math.sin(o.pitch)*radius+2,ball.z+Math.cos(o.yaw)*Math.cos(o.pitch)*radius);
+        }
         // Reserve the bottom HUD area without shrinking the course horizontally.
         const lift = !portrait && !full && me && me.phase !== 'moving' ? me.phase === 'aim'
           ? (viewportHeight < 550 && camera.aspect > 1 ? Math.max(.22,130 / viewportHeight - .11) : camera.aspect < 1 ? .2 : camera.aspect < 1.5 ? .3 : .26) : .14 : 0;
@@ -185,7 +193,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           if(lift) camera.setViewOffset(viewportWidth,viewportHeight,0,viewportHeight*lift,viewportWidth,viewportHeight);
           else if(camera.view?.enabled) camera.clearViewOffset();
         }
-        camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.up.set(0,full?0:1,full?1:0);camera.lookAt(lookAt);
+        camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.up.set(0,full&&!orbit.current.active?0:1,full&&!orbit.current.active?1:0);camera.lookAt(lookAt);
         aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
           const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin].join('/');
@@ -200,12 +208,12 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         }
         el.dataset.characterStyle=[...markers.values()].some(m=>m.rig.torso.children.some(o=>o instanceof THREE.Mesh&&o.geometry.userData.storybookCharacter))?'blender-storybook':'loading';
         el.dataset.golferCount = String(nearest.size); el.dataset.ballHeight = String(ball.y); el.dataset.swing = String(me ? markers.get(me.id)?.rig.arms.rotation.z || 0 : 0);
-        el.dataset.cameraMode = portrait ? 'portrait' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
+        el.dataset.cameraMode = portrait ? 'portrait' : orbit.current.active && me?.phase!=='moving' ? 'orbit' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
         flag.rotation.y = Math.sin(now / 700) * .12;
         scenery?.update(now);animatedWater.update(now/1000);el.dataset.blenderModels=String(scenery?.library.ready?scenery.library.group.userData.models:0);el.dataset.blenderAnimations=String(scenery?.library.group.userData.animations||0);renderer.render(scene, camera); frame = requestAnimationFrame(draw);
       }; frame = requestAnimationFrame(draw);
     } catch (error) { console.error('Golf renderer initialization failed', error); setFailed(true); }
     return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
   }, [holeIndex, selfId, portrait, quality]);
-  return <><canvas className="gg-canvas" ref={canvas} aria-label="GAKURO GOLF 3D course" />{failed && <div className="gg-render-error" role="alert">3D rendering unavailable. Enable WebGL and reload.</div>}</>;
+  return <><canvas className="gg-canvas" ref={canvas} onPointerDown={e=>{if(portrait)return;if(e.nativeEvent.isTrusted)e.currentTarget.setPointerCapture(e.pointerId);orbit.current.drag={id:e.pointerId,x:e.clientX,y:e.clientY};}} onPointerMove={e=>{const o=orbit.current,d=o.drag;if(!d||d.id!==e.pointerId)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.hypot(dx,dy)<2)return;o.active=true;o.yaw-=dx*.008;o.pitch=Math.max(.15,Math.min(1.45,o.pitch+dy*.008));d.x=e.clientX;d.y=e.clientY;}} onPointerUp={()=>{orbit.current.drag=null;}} onPointerCancel={()=>{orbit.current.drag=null;}} aria-label="GAKURO GOLF 3D course" />{failed && <div className="gg-render-error" role="alert">3D rendering unavailable. Enable WebGL and reload.</div>}</>;
 }

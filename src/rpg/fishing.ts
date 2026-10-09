@@ -1,3 +1,4 @@
+import {WIDTH} from './engine';
 import {biomeAt,type BiomeId} from './biomes';
 export type FishRarity='common'|'uncommon'|'rare'|'legendary';
 export interface FishSpecies {id:string;name:string;english:string;kana:string;biome:BiomeId;index:number;rarity:FishRarity;min:number;max:number}
@@ -18,7 +19,7 @@ export const FISH:FishSpecies[]=Object.entries(lists).flatMap(([biome,rows])=>ro
 export const fishById=(id:string)=>FISH.find(f=>f.id===id)!;
 export const FISH_WEIGHTS=[17,16,14,13,10,9,8,6,5,2];
 export function fishingHash(seed:number,tile:number,nonce:number){let n=(seed^Math.imul(tile+1,374761393)^Math.imul(nonce+1,668265263))>>>0;n=Math.imul(n^(n>>>13),1274126177);return (n^(n>>>16))>>>0;}
-export function chooseFish(seed:number,tile:number,nonce:number){const biome=biomeAt(tile%192,Math.floor(tile/192)).id;let roll=fishingHash(seed,tile,nonce)%100;let index=0;for(;index<9;index++){if(roll<FISH_WEIGHTS[index])break;roll-=FISH_WEIGHTS[index];}return fishById(`${biome}-${index}`);}
+export function chooseFish(seed:number,tile:number,nonce:number){const biome=biomeAt(tile%WIDTH,Math.floor(tile/WIDTH)).id;let roll=fishingHash(seed,tile,nonce)%100;let index=0;for(;index<9;index++){if(roll<FISH_WEIGHTS[index])break;roll-=FISH_WEIGHTS[index];}return fishById(`${biome}-${index}`);}
 export const reelWindow=(id:string)=>({common:420,uncommon:360,rare:300,legendary:260}[fishById(id).rarity]);
 export function fishSize(id:string,seed:number,tile:number,nonce:number,perfect:number){const f=fishById(id),roll=(fishingHash(seed^0x517cc1b7,tile,nonce)%10000)/9999;return Math.round((f.min+(f.max-f.min)*Math.min(1,roll*.83+perfect*.055))*10)/10;}
 export function recordFish(records:FishRecords,catching:Omit<FishCatch,'record'|'at'>){const previous=records[catching.id];const record=!previous||catching.size>previous.best;records[catching.id]={count:(previous?.count||0)+1,best:Math.max(previous?.best||0,catching.size),perfect:(previous?.perfect||0)+(catching.perfect?1:0)};return record;}

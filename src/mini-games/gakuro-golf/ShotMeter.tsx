@@ -34,7 +34,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
   useEffect(() => () => { state.current.active = false; callbacks.current.onActive(false); }, []);
   return <div className="gg-timing" data-active={active} data-returning={returning}>
     <div className="gg-meter-heading"><b>{locked === null ? t('1回目：パワーを決める') : returning ? t('2回目：下の中心に合わせる') : t('右端まで進んでから戻ります')}</b><span>{locked === null ? `MAX ${Math.round(limit * 100)}%` : `${Math.round(locked * 100)}%`}</span></div>
-    <div className="gg-meter-track"><span className="gg-meter-fill" style={{ width: `${(locked ?? 0) * 100}%` }}/>{locked !== null && <i className="gg-meter-lock" style={{ left: `${locked * 100}%` }}/>}<span className="gg-meter-cursor" ref={cursor}/></div>
+    <div className={`gg-meter-track ${locked !== null ? 'is-impact' : ''}`}><span className="gg-meter-fill" style={{ width: `${(locked ?? 0) * 100}%` }}/>{locked !== null && <i className="gg-meter-lock" style={{ left: `${locked * 100}%` }}/>}<span className="gg-meter-cursor" ref={cursor}/></div>
     <div className="gg-impact-strip"><span/><i/>{locked!==null&&<b className="gg-impact-cue" aria-label={t('ここでインパクトを合わせる')}>↑</b>}</div>
     <div className="gg-meter-actions"><button className="gg-primary" disabled={disabled} onClick={e => { if (e.detail === 0 && !state.current.active) tap(); }} onPointerDown={() => { if (!state.current.active) tap(); }} onKeyDown={e => { if (!state.current.active && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tap(); } }}>{t(active ? '画面タッチで確定' : 'ショット')}</button></div>
   </div>;

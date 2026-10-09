@@ -5,4 +5,4 @@ export function meterPosition(elapsed: number) {
   const travel = Math.max(0, elapsed) / SWEEP_MS;
   return { position: Math.max(0, travel <= 1 ? travel : 2 - travel), returning: travel >= 1, expired: travel >= 2 };
 }
-export const impactAt = (position: number) => Math.max(-1, Math.min(1, (position - IMPACT_CENTER) / .08));
+export const impactAt = (position: number) => Math.max(-1, Math.min(1, (position - IMPACT_CENTER) / .1));

@@ -17,7 +17,7 @@ export function findEnclosure(w:World,door:{x:number;y:number;z:number}){
  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
   const start={x:door.x+dx,z:door.z+dz};if(!clear(start.x,start.z))continue;const seen=new Set<string>(),queue=[start],cells:{x:number;z:number}[]=[];let valid=true;
   while(queue.length&&valid){const c=queue.shift()!,key=`${c.x},${c.z}`;if(seen.has(key))continue;seen.add(key);if(!clear(c.x,c.z))continue;
-   if(c.x<WORLD_SCALE.min||c.z<WORLD_SCALE.min||c.x>=WORLD_SCALE.max||c.z>=WORLD_SCALE.max||Math.abs(c.x-door.x)>16||Math.abs(c.z-door.z)>16||cells.length>=256||!solid(blockAt(w,c.x,door.y-1,c.z))||!solid(blockAt(w,c.x,door.y+2,c.z))){valid=false;break;}cells.push(c);
+   if(c.x<WORLD_SCALE.min||c.z<WORLD_SCALE.min||c.x>=WORLD_SCALE.max||c.z>=HEIGHT||Math.abs(c.x-door.x)>16||Math.abs(c.z-door.z)>16||cells.length>=256||!solid(blockAt(w,c.x,door.y-1,c.z))||!solid(blockAt(w,c.x,door.y+2,c.z))){valid=false;break;}cells.push(c);
    for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])queue.push({x:c.x+a,z:c.z+b});
   }
   if(valid&&cells.length>=4)return cells;

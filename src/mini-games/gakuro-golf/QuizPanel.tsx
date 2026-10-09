@@ -10,6 +10,12 @@ export default function QuizPanel({ quiz, languageMode, disabled, send }: { quiz
   const symbol = q.visual?.kind === 'map_symbol' ? MAP_SYMBOL_ASSET_MAP[q.visual.symbol] : null;
   useEffect(() => { if (canvas.current && q.visual && !symbol) drawProblemVisual(canvas.current, q.visual); }, [q.id, quiz.shotId, symbol]);
   useEffect(() => () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }, [q.id, quiz.shotId]);
+  const sender=useRef(send);sender.current=send;
+  useEffect(() => {
+    if (quiz.answer === null || disabled) return;
+    const timer = window.setTimeout(() => sender.current({ type: 'continue', shotId: quiz.shotId, index: quiz.index }), 850);
+    return () => window.clearTimeout(timer);
+  }, [quiz.answer, quiz.shotId, quiz.index, disabled]);
   const speak = () => { if (!q.audioPrompt || !('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(q.audioPrompt.text); u.lang = q.audioPrompt.lang || 'ja-JP'; u.rate = .85; window.speechSynthesis.speak(u); };
   return <section className="gg-quiz gg-panel" aria-label={t('ショット前の3問')}>
     <header><span>{t('ショット前の3問')}</span><b>{quiz.index + 1} / 3</b></header>
@@ -20,6 +26,6 @@ export default function QuizPanel({ quiz, languageMode, disabled, send }: { quiz
     </div>
     {q.audioPrompt && <button disabled={disabled || !('speechSynthesis' in window)} onClick={speak}>{t('聞く')}</button>}
     <div className="gg-options" data-allow-japanese="true">{q.options.map((option, i) => <button key={i} disabled={disabled || quiz.answer !== null} className={quiz.answer === i ? 'is-correct' : quiz.selected === i ? 'is-wrong' : ''} onClick={() => send({ type: 'answer', shotId: quiz.shotId, index: quiz.index, option: i })}><b>{i + 1}</b><MathText text={option} /></button>)}</div>
-    {quiz.answer !== null && <div className="gg-feedback" role="status"><b>{t(quiz.answer === quiz.selected ? '正解！' : '正答を確認しましょう')}</b><span data-allow-japanese="true"><MathText text={q.options[quiz.answer]} /></span><button className="gg-primary" disabled={disabled} onClick={() => send({ type: 'continue', shotId: quiz.shotId, index: quiz.index })}>{t(quiz.index === 2 ? 'ショットを準備する' : '次の問題')}</button></div>}
+
   </section>;
 }

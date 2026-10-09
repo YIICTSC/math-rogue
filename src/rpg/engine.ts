@@ -1,4 +1,5 @@
-import {legacyRegion} from './worldLandscape';
+import {legacyRegion,landscapeEnvironment,STRUCTURES} from './worldLandscape';
+import {MAP_WIDTH,MAP_HEIGHT,originalRegion} from './worldDimensions';
 import {landscapeGate} from './landscapeMap';
 import {applyRoomAction,currentVoxelRoom,type RoomAction,type VoxelRoom} from './voxelRooms';
 import {applyVoxel,moveLandscape2D,advanceVoxelWater,type VoxelAction,type VoxelWorld} from './voxel';
@@ -19,9 +20,9 @@ import { getEncounterEnemyNamePool } from "../services/geminiService";
 import type { VisualThemeId } from "../data/visualThemes";
 import { ROAMING_NPC_EVENTS } from './roamingNpcs';
 
-// Three times the width and twice the height: six times the explorable area.
-export const WIDTH = 192,
-  HEIGHT = 88,
+// Story, life and building share a single surface map.
+export const WIDTH = MAP_WIDTH,
+  HEIGHT = MAP_HEIGHT,
   CAPACITY = 40;
 export type Tile = "grass" | "forest" | "water" | "road" | "stone";
 export type SiteKind =
@@ -431,10 +432,14 @@ export function createWorld(
   for (let y = 0; y < HEIGHT; y++)
     for (let x = 0; x < WIDTH; x++) {
 
+      const scenery=landscapeEnvironment(seed,x,y);
+      const facility=STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+3&&Math.abs(y-l.z)<l.depth/2+5);
       tiles.push(
         x === 0 || y === 0 || x === WIDTH - 1 || y === HEIGHT - 1
           ? "forest"
-          : riverAt(x,y)||fishingPondAt(x,y)
+          : !originalRegion(x,y)&&(scenery.road||facility)
+            ? 'road'
+            : (!originalRegion(x,y)&&scenery.water)||riverAt(x,y)||fishingPondAt(x,y)
             ? "water"
             : rng() < biomeSurface(x,y).trees
               ? "forest"
@@ -735,7 +740,7 @@ export function applyAction(
       now - p.lastMove < 100
     )
       return false;
-    if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z))return moveLandscape2D(w,p,action.dx,action.dy,now);
+    if(p.position3D&&(p.position3D.surface2D||!legacyRegion(p.position3D.x,p.position3D.z)))return moveLandscape2D(w,p,action.dx,action.dy,now);
     const x = p.x + action.dx,
       y = p.y + action.dy,
       tile = w.tiles[y * WIDTH + x];

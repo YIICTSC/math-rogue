@@ -1,5 +1,5 @@
 import {findLandscapeRoute} from './voxel';
-import {legacyRegion,landscapeEnvironment,LANDSCAPE_BIOME_NAMES} from './worldLandscape';
+import {legacyRegion,landscapeEnvironment,LANDSCAPE_BIOME_NAMES,LANDMARKS} from './worldLandscape';
 import InviteJoin from '../mini-games/shared/InviteJoin';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../services/onlineTransport';
 import type {OnlineTransport} from '../services/onlineTransport';
@@ -355,7 +355,7 @@ export default function RpgOnline({
     const w = latest.current.world,
       p = w?.players[room.current?.selfId || ""];
     if (!w || !p || !latest.current.active || p.nativeScene) return;
-    if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z)){room.current?.send({type:'voxel-landmark'});return;}
+    if(LANDMARKS.some(l=>Math.hypot(l.x-(p.position3D?.x??p.x),l.z-(p.position3D?.z??p.y))<Math.max(l.width,l.depth)/2+6)){room.current?.send({type:'voxel-landmark'});return;}
     const resident=nearbyResidents(w,p)[0];if(resident){destination.current=null;walkingRoute.current=[];room.current?.send({type:'town-encounter',target:resident.id});setResidentTarget(resident.id);setDetail(null);return;}
     const home=w.life?.houses.find(h=>distance(h,p)<=2);
     if(home){destination.current=null;room.current?.send({type:'life-enter',houseId:home.id});setLifeOpen(true);return;}
@@ -420,7 +420,7 @@ export default function RpgOnline({
         target = destination.current;
       if (!latest.current.active || !w || !p || p.nativeScene || !target)
         return;
-      if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z)){const x=Math.floor(p.position3D.x),y=Math.floor(p.position3D.z);while(walkingRoute.current[0]?.x===x&&walkingRoute.current[0]?.y===y)walkingRoute.current.shift();const next=walkingRoute.current[0];if(!next||Math.abs(next.x-x)+Math.abs(next.y-y)!==1){destination.current=null;return;}room.current?.send({type:'move',dx:next.x-x,dy:next.y-y});return;}
+      if(p.position3D&&(p.position3D.surface2D||!legacyRegion(p.position3D.x,p.position3D.z))){const x=Math.floor(p.position3D.x),y=Math.floor(p.position3D.z);while(walkingRoute.current[0]?.x===x&&walkingRoute.current[0]?.y===y)walkingRoute.current.shift();const next=walkingRoute.current[0];if(!next||Math.abs(next.x-x)+Math.abs(next.y-y)!==1){destination.current=null;return;}room.current?.send({type:'move',dx:next.x-x,dy:next.y-y});return;}
       while(walkingRoute.current[0]?.x===p.x && walkingRoute.current[0]?.y===p.y)walkingRoute.current.shift();
       const step=walkingRoute.current[0];
       if(step && distance(p,step)===1){lastDirection.current={dx:step.x-p.x,dy:step.y-p.y};room.current?.send({type:"move",...lastDirection.current});}
@@ -605,8 +605,9 @@ export default function RpgOnline({
                       visualTheme={previewTheme}
                       onPlayer={spectating ? undefined : id=>{setSelectedPeer(id);if(compact)openDetail('team');}}
                       onTile={(x, y) => {
+                        if(prefs.mapView==='3D')return;
                         if (!prefs.tapMove||settingsOpen||cityOpen||farmOpen||!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
-                        if(me.position3D&&!legacyRegion(me.position3D.x,me.position3D.z)){const route=findLandscapeRoute(world,me,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;return;}
+                        if(me.position3D&&(me.position3D.surface2D||!legacyRegion(me.position3D.x,me.position3D.z))){const route=findLandscapeRoute(world,me,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;return;}
                         const tile=y*WIDTH+x;
                         if(Math.abs(me.x-x)+Math.abs(me.y-y)<=2 && (world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile))){destination.current=null;if(compact)quickGather(tile);else{setLifeTarget(tile);setLifeOpen(true);}return;}
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
@@ -633,7 +634,7 @@ export default function RpgOnline({
                   {!spectating && <div className="rpg-map-bottom">
                     <div className="rpg-movement-controls">{prefs.mapView==='3D'&&!overview&&<div className="rpg-turn-controls"><button aria-label="↶" disabled={!latest.current.active} onClick={()=>turn(facing-1)}>↶</button><span>{["N","E","S","W"][Math.round(facing)%4]}</span><button aria-label="↷" disabled={!latest.current.active} onClick={()=>turn(facing+1)}>↷</button></div>}<span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!!residentTarget||settingsOpen||cityOpen||farmOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
-                    {me.position3D&&!legacyRegion(me.position3D.x,me.position3D.z)&&<button className="rpg-landmark-action" onClick={()=>room.current?.send({type:'voxel-landmark'})}>🧭 {trans('調べる',languageMode)}</button>}
+                    {LANDMARKS.some(l=>Math.hypot(l.x-(me.position3D?.x??me.x),l.z-(me.position3D?.z??me.y))<Math.max(l.width,l.depth)/2+6)&&<button className="rpg-landmark-action" onClick={()=>room.current?.send({type:'voxel-landmark'})}>🧭 {trans('調べる',languageMode)}</button>}
 
                     {!spectating&&!me.life?.indoors&&(!me.position3D||legacyRegion(me.position3D.x,me.position3D.z))&&nearbyResidents(world,me).length>0&&<div className="rpg-resident-quick" aria-label={trans('近くの住人',languageMode)}>{nearbyResidents(world,me).map(r=><button key={r.id} disabled={!latest.current.active} onClick={()=>openResident(r.id)}><img src={assetUrl(r.portrait)} alt=""/><span>{copy(r.name,languageMode)}<small>{trans('話しかける',languageMode)}</small></span></button>)}</div>}
                     {!spectating&&<FarmQuickActions world={world} selfId={selfId} languageMode={languageMode} disabled={!latest.current.active} send={a=>{destination.current=null;walkingRoute.current=[];room.current?.send(a);}} onOpen={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}/>}

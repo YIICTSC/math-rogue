@@ -77,7 +77,7 @@ export class KartScene {
       ctx.fillStyle = '#f3fffe'; ctx.font = '900 55px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('GAKURO GP', 256, 83);
     } else {
       ctx.fillStyle = '#164345'; ctx.fillRect(0, 0, 512, 512); ctx.strokeStyle = '#67ffe4'; ctx.lineWidth = 34;
-      for (let y = -40; y < 560; y += 150) { ctx.beginPath(); ctx.moveTo(60, y + 90); ctx.lineTo(256, y); ctx.lineTo(452, y + 90); ctx.stroke(); }
+      for (let y = -40; y < 560; y += 150) { ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(256, y + 90); ctx.lineTo(452, y); ctx.stroke(); }
     }
     const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); this.textures.push(t); return t;
   }

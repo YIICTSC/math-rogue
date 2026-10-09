@@ -71,7 +71,7 @@ try {
   for (let i = 0; i < 3; i++) {
     const correct = await page.evaluate(() => { const r = window.__golf.room; return r.world.players[r.selfId].lesson.questions[window.__golf.view.quiz.index].correct; });
     await page.locator('.gg-options button').nth(correct).click();
-    await page.getByRole('button', { name: i === 2 ? 'ショットを準備する' : '次の問題', exact: true }).click();
+    await page.waitForFunction(i=>!window.__golf.view.quiz||window.__golf.view.quiz.index>i,i);
   }
   await page.getByRole('button', { name: 'ショット！', exact: true }).waitFor();
   assert.match(await page.locator('.gg-bonus').innerText(), /100%/);

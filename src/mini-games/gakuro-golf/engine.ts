@@ -9,7 +9,7 @@ export const CLUBS = {
   wedge: { speed: 18, loft: 58, name: 'ウェッジ' },
   putter: { speed: 10, loft: 0, name: 'パター' },
 } as const;
-export const shotQuality = (impact: number) => Math.abs(impact) <= .25 ? 'nice' : Math.abs(impact) <= .65 ? 'good' : 'miss';
+export const shotQuality = (impact: number) => Math.abs(impact) <= .200001 ? 'nice' : Math.abs(impact) <= .800001 ? 'good' : 'miss';
 export type Club = keyof typeof CLUBS;
 export const benefits = (correct: number) => ({ power: [.55, .7, .85, 1][correct] ?? .55, spread: [9, 6, 3, .7][correct] ?? 9 });
 export type PlayerPhase = 'ready' | 'quiz' | 'aim' | 'moving' | 'holed' | 'finished';

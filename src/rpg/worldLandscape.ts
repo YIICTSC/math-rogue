@@ -1,23 +1,21 @@
-import {biomeSurface} from './biomes';
-/** Metres and deterministic world geometry shared by rendering and authority.
- * The original 192 x 88 map and its saved edits keep their coordinates.
- * Exploration continues beyond its edge without resizing any legacy tile array.
- */
-export const WORLD_SCALE = {block:1, playerHeight:1.78, eyeHeight:1.62, radius:.28, walkSpeed:3.2, swimSpeed:2.2, stepHeight:1, gravity:18, jumpSpeed:6, chunk:16, min:-512, max:768, ceiling:352} as const;
-export const legacyRegion=(x:number,z:number)=>x>=0&&z>=0&&x<192&&z<88;
-export const landscapeRegion=(x:number,z:number)=>!legacyRegion(x,z)&&x>=WORLD_SCALE.min&&z>=WORLD_SCALE.min&&x<WORLD_SCALE.max&&z<WORLD_SCALE.max;
-export const MOUNTAINS=[{x:330,z:-165,radius:158,height:268},{x:-220,z:-175,radius:145,height:224},{x:395,z:355,radius:170,height:302}] as const;
+import {MAP_WIDTH,MAP_HEIGHT} from './worldDimensions';
+import {biomeAt,biomeSurface} from './biomes';
+/** Shared geometry for the single surface map; original save coordinates remain intact. */
+export const WORLD_SCALE = {block:1, playerHeight:1.78, eyeHeight:1.62, radius:.28, walkSpeed:3.2, swimSpeed:2.2, stepHeight:1, gravity:18, jumpSpeed:6, chunk:16, min:0, max:MAP_WIDTH, ceiling:352} as const;
+export const legacyRegion=(x:number,z:number)=>x>=0&&z>=0&&x<MAP_WIDTH&&z<MAP_HEIGHT;
+export const landscapeRegion=(x:number,z:number)=>!legacyRegion(x,z)&&x>=WORLD_SCALE.min&&z>=WORLD_SCALE.min&&x<WORLD_SCALE.max&&z<MAP_HEIGHT;
+export const MOUNTAINS=[{x:222,z:24,radius:18,height:36},{x:224,z:98,radius:22,height:46},{x:160,z:108,radius:17,height:18}] as const;
 export const LANDMARKS=[
- {id:'academy',x:92,z:-58,width:30,depth:22,height:24,kind:'school',label:'冒険学園'},
- {id:'castle',x:242,z:115,width:40,depth:32,height:42,kind:'castle',label:'白雲の城'},
- {id:'village',x:-63,z:46,width:12,depth:12,height:9,kind:'village',label:'川辺の村'},
- {id:'temple',x:180,z:210,width:24,depth:26,height:21,kind:'temple',label:'湖畔の神殿'},
- {id:'tower',x:330,z:-165,width:10,depth:10,height:30,kind:'tower',label:'山頂の観測塔'},
+ {id:'academy',x:30,z:108,width:18,depth:12,height:16,kind:'school',label:'冒険学園'},
+ {id:'castle',x:224,z:54,width:24,depth:20,height:28,kind:'castle',label:'白雲の城'},
+ {id:'village',x:64,z:104,width:10,depth:10,height:8,kind:'village',label:'川辺の村'},
+ {id:'temple',x:106,z:108,width:18,depth:14,height:16,kind:'temple',label:'湖畔の神殿'},
+ {id:'tower',x:160,z:108,width:8,depth:8,height:18,kind:'tower',label:'山頂の観測塔'},
 ] as const;
 /** Residential courtyards share the same collision/terrain model as major facilities. */
-export const STRUCTURES=[...LANDMARKS,...Array.from({length:8},(_,i)=>({id:'home-'+i,x:-63+(i%4-1.5)*18,z:46+(i<4?-24:24),width:10,depth:10,height:7,kind:'village',label:'川辺の住居'}))];
-export const LANDSCAPE_BIOME_NAMES={forest:'ささやきの森',meadow:'木漏れ日の草原',wetland:'鏡水の湿原',alpine:'高山の草原',rock:'岩山',snow:'雪山'};
-export type LandscapeBiome='forest'|'meadow'|'wetland'|'rock'|'snow'|'alpine';
+export const STRUCTURES=[...LANDMARKS,...Array.from({length:8},(_,i)=>({id:'home-'+i,x:64+(i%4-1.5)*10,z:104+(i<4?-10:10),width:6,depth:6,height:6,kind:'village',label:'川辺の住居'}))];
+export const LANDSCAPE_BIOME_NAMES={forest:'ささやきの森',meadow:'木漏れ日の草原',wetland:'鏡水の湿原',alpine:'高山の草原',rock:'岩山',snow:'雪山',desert:'琥珀の砂丘',ruins:'暁の古代遺跡'};
+export type LandscapeBiome='forest'|'meadow'|'wetland'|'rock'|'snow'|'alpine'|'desert'|'ruins';
 export function landscapeHash(x:number,z:number,seed:number){let n=Math.imul(x|0,374761393)^Math.imul(z|0,668265263)^seed;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;}
 const smooth=(n:number)=>{n=Math.max(0,Math.min(1,n));return n*n*(3-2*n);};
 function coreDistance(x:number,z:number){return Math.hypot(Math.max(0,-x,x-191),Math.max(0,-z,z-87));}
@@ -29,15 +27,15 @@ export function trailAt(x:number,z:number){
   const delta=Math.atan2(Math.sin(angle-target),Math.cos(angle-target));if(Math.abs(delta)*r<2.3)return true;
  }return false;
 }
-function roadDistance(x:number,z:number){return Math.min(Math.hypot(x-92,Math.max(-92-z,0,z-235)),Math.hypot(z-46,Math.max(-100-x,0,x-280)),Math.hypot(x-242,Math.max(42-z,0,z-155)),Math.hypot(z-210,Math.max(90-x,0,x-200)));}
+function roadDistance(x:number,z:number){return Math.min(Math.hypot(x-96,Math.max(44-z,0,z-108)),Math.hypot(z-108,Math.max(30-x,0,x-224)),Math.hypot(x-224,Math.max(54-z,0,z-108)));}
 export function roadAt(x:number,z:number){return roadDistance(x,z)<2.8;}
 export function waterProfile(x:number,z:number){
- const river= -100+Math.sin(z/64)*19+Math.sin(z/23)*4;
- const riverDistance=Math.abs(x-river),lake=Math.hypot((x-150)/1.4,z-180);
- if(lake<36)return {surface:1,depth:Math.max(1,Math.floor((1-lake/36)*12)),flowX:.2,flowZ:.05,kind:'lake' as const};
- if(riverDistance<9)return {surface:2,depth:Math.max(1,Math.floor((1-riverDistance/9)*5)),flowX:Math.cos(z/64)*.2,flowZ:1,kind:'river' as const};
+ const river=246+Math.sin(z/24)*2;
+ const riverDistance=Math.abs(x-river),lake=Math.hypot((x-124)/1.2,z-103);
+ if(lake<10)return {surface:1,depth:Math.max(1,Math.floor((1-lake/10)*12)),flowX:.2,flowZ:.05,kind:'lake' as const};
+ if(riverDistance<3)return {surface:2,depth:Math.max(1,Math.floor((1-riverDistance/3)*5)),flowX:Math.cos(z/64)*.2,flowZ:1,kind:'river' as const};
  // A high spring feeds a stepped cascade on the south face of the eastern mountain.
- if(Math.abs(x-393)<3&&z>407&&z<466){const surface=Math.max(3,Math.floor(mountainHeight(393,z)/6)*6);return {surface,depth:2,flowX:0,flowZ:1,kind:'waterfall' as const};}
+ if(Math.abs(x-226)<3&&z>105&&z<123){const surface=Math.max(3,Math.floor(mountainHeight(226,z)/6)*6);return {surface,depth:2,flowX:0,flowZ:1,kind:'waterfall' as const};}
  return null;
 }
 export function landscapeHeight(seed:number,x:number,z:number){
@@ -56,7 +54,7 @@ export function landscapeHeight(seed:number,x:number,z:number){
 }
 export function landscapeEnvironment(seed:number,x:number,z:number){
  const height=landscapeHeight(seed,x,z),water=waterProfile(x,z),moisture=(Math.sin(x/61)+Math.cos(z/37)+2)/4;
- const biome:LandscapeBiome=height>190?'snow':height>130?'rock':height>90?'alpine':water||moisture>.8?'wetland':moisture>.42?'forest':'meadow';
+ const biome:LandscapeBiome=biomeAt(x,z).id;
  return {height,water,moisture,biome,trail:trailAt(x,z),road:roadAt(x,z)};
 }
 /** Walls have actual thickness and a 4m wide, 3m high opening. */
@@ -106,11 +104,9 @@ export function landscapeBlock(seed:number,x:number,y:number,z:number):'stone'|'
 export function landscapeColor(seed:number,x:number,z:number){
  const e=landscapeEnvironment(seed,x,z);
  const mix=(a:string,b:string,t:number)=>{t=smooth(t);const channels=[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0'));return '#'+channels.join('');};
- let color=mix('#82a55d','#49734d',(e.moisture-.35)/.3);
- color=mix(color,'#628b73',(e.moisture-.72)/.18);
- color=mix(color,'#83906a',(e.height-78)/30);
- color=mix(color,'#89888b',(e.height-120)/30);
- color=mix(color,'#e5edf1',(e.height-178)/32);
- if(coreDistance(x,z)<24)color=mix(biomeSurface(Math.max(0,Math.min(191,x)),Math.max(0,Math.min(87,z))).color,color,coreDistance(x,z)/24);
+ let color=biomeSurface(x,z).color;
+ if(e.water)color=mix(color,'#628b73',.2);
+ color=mix(color,'#89888b',(e.height-24)/36);
+ if(e.biome==='snow')color=mix(color,'#e5edf1',.45);
  return color;
 }

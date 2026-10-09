@@ -1,3 +1,4 @@
+import {landmarkBlock,landscapeHeight} from './worldLandscape';
 import {currentVoxelRoom} from './voxelRooms';
 import {ALL_MATERIAL_NAMES,TOOL_RANK,type ToolKind,type ToolTier} from './voxelCatalog';
 import {occupiedFarmTile} from './farm/model';
@@ -48,7 +49,7 @@ export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
-export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&w.tiles[tile]!=='water'&&!([0,1].some(h=>!!w.voxels?.edits[`${x},${h},${y}`]&&w.voxels?.edits[`${x},${h},${y}`]!=='door'))&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
+export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&!landmarkBlock(x,landscapeHeight(w.seed,x,y)+1,y)&&w.tiles[tile]!=='water'&&!([0,1].some(h=>!!w.voxels?.edits[`${x},${h},${y}`]&&w.voxels?.edits[`${x},${h},${y}`]!=='door'))&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
  {id:'door',name:'ドア',cost:{plank:3,ore:1} as Bag,kind:'material',description:'囲った空間を自宅や共用施設にする入口。',sprite:0},
  {id:'hoe',name:'クワ',cost:{wood:2,ore:2} as Bag,kind:'tool',description:'前の1マスを耕して農地にする道具。',sprite:2},

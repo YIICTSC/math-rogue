@@ -290,7 +290,7 @@ export default function WorldCanvas({
       c.scale(scale, scale);
       c.translate(-cx, -cy);
       const minX = Math.max(WORLD_SCALE.min, Math.floor(cx / T) - 2), maxX = Math.min(WORLD_SCALE.max, Math.ceil((cx + sw / scale) / T) + 2);
-      const minY = Math.max(WORLD_SCALE.min, Math.floor(cy / T) - 3), maxY = Math.min(WORLD_SCALE.max, Math.ceil((cy + sh / scale) / T) + 2);
+      const minY = Math.max(WORLD_SCALE.min, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
       const season=calendar(w);
       const stride=overview&&expanded?16:1;
       for (let y = minY; y < maxY; y+=stride)
@@ -342,14 +342,14 @@ export default function WorldCanvas({
       if(!overview)for(let z=minY;z<maxY;z++)for(let x=minX;x<maxX;x++)drawLandscapeVegetation(c,w,x,z,T);
       drawLandscapeBuildings(c,w,p,T,{minX,maxX,minY,maxY},s=>trans(s,languageMode));
       if(w.city){const roads=new Set(w.city.roads);for(const tile of w.city.roads){const x=tile%WIDTH,y=Math.floor(tile/WIDTH);if(x<minX||x>=maxX||y<minY||y>=maxY)continue;rect(c,x*T,y*T,T,T,'#bbbaa1');rect(c,x*T+3,y*T+3,10,10,'#596166');for(const [dx,dy]of [[0,-1],[1,0],[0,1],[-1,0]])if(roads.has((y+dy)*WIDTH+x+dx)||w.tiles[(y+dy)*WIDTH+x+dx]==='road')rect(c,x*T+(dx<0?0:dx>0?8:3),y*T+(dy<0?0:dy>0?8:3),dx?8:10,dy?8:10,'#596166');rect(c,x*T+7,y*T+7,2,2,'#decfa0');}}
-      for(let y=Math.max(0,minY);!(overview&&expanded)&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){
+      for(let y=Math.max(0,minY);!overview&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){
         if(!legacyRegion(x,y))continue;const tile=y*WIDTH+x;if(occupiedCityTile(w,tile)||occupiedFarmTile(w,tile))continue;const node=natureAt(w,tile);if(!node){if(w.tiles[tile]==='forest'&&!landscapeGate(x,y))tree(c,x*T,y*T);continue;}
         if(!resourceReady(w,tile)){rect(c,x*T+5,y*T+10,7,4,node.rock?'#89968b':'#8a6946');continue;}
         const effect=Object.values(w.players).find(q=>q.life?.effect?.tile===tile&&w.life.now-q.life.effect.at<350)?.life?.effect;
         const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;
         if(atlas?.complete&&atlas.naturalWidth)prop(c,node.sprite,x*T+shake,y*T,node.rock?23:28);else tree(c,x*T,y*T);
       }
-      for(let y=Math.max(0,minY);!(overview&&expanded)&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){if(!legacyRegion(x,y))continue;const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
+      for(let y=Math.max(0,minY);!overview&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){if(!legacyRegion(x,y))continue;const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
       for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
       const built=new Map<string,{x:number;z:number;height:number;block:string}>();
       for(const [key,block] of Object.entries(w.voxels?.edits||{})){if(!block)continue;const [x,y,z]=key.split(',').map(Number);const k=`${x},${z}`,old=built.get(k);if(!old||old.height<y)built.set(k,{x,z,height:y,block});}

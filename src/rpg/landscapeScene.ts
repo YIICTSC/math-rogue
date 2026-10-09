@@ -1,5 +1,5 @@
 import * as T from 'three';
-import type {World} from './engine';
+import {WIDTH,HEIGHT,type World} from './engine';
 import {WORLD_SCALE,STRUCTURES,landscapeRegion,legacyRegion,landscapeHeight,landscapeEnvironment,landscapeTree,landmarkBlock,landscapeHash,landscapeColor,waterProfile,mountainHeight} from './worldLandscape';
 import {blockAt,solid,terrainHeight,VOXEL_COLORS,type TerrainBlock} from './voxel';
 import {fullCube} from './voxelCatalog';
@@ -10,7 +10,7 @@ export class LandscapeScene {
  private chunks=new Map<string,T.Group>();private queue:{x:number;z:number}[]=[];private center='';private revision=-1;private edits=new Map<string,string>();private pending=new Set<string>();
  private box=new T.BoxGeometry(1,1,1);private sphere=new T.SphereGeometry(1,8,6);private materials=new Map<string,T.MeshStandardMaterial>();private far?:T.Mesh;
  private sky=new T.Group();private clouds?:T.InstancedMesh;private cloudMaterial=new T.MeshBasicMaterial({color:'#edf1ec',transparent:true,opacity:.68,depthWrite:false});private precipitation?:T.Points;private animals:{object:T.Group;home:T.Vector3;phase:number;species:string;last:number;legs:T.Object3D[];wings:T.Object3D[];state:string}[]=[];
- private geometries:T.BufferGeometry[]=[];private animalCell='';private farTiles=new Map<string,number[]>();
+ private geometries:T.BufferGeometry[]=[];private animalCell='';private farTiles=new Map<string,number[]>();private coreView={x:0,z:0};
  constructor(parent:T.Scene,private quality:string,private construction?:{get:(block:string)=>T.BufferGeometry},private blockMaterial?:(block:TerrainBlock)=>T.Material){parent.add(this.group);this.group.name='ExplorationLandscape';this.group.add(this.buildings,this.sky);
   this.clouds=new T.InstancedMesh(this.sphere,this.cloudMaterial,36);const d=new T.Object3D();for(let i=0;i<36;i++){d.position.set(Math.sin(i*3.7)*570,155+(i%5)*18,Math.cos(i*2.3)*570);d.scale.set(28+i%3*7,4,13);d.updateMatrix();this.clouds.setMatrixAt(i,d.matrix);}this.clouds.computeBoundingSphere();this.sky.add(this.clouds);
   const p=new Float32Array((quality==='low'?90:220)*3);for(let i=0;i<p.length;i++)p[i]=Math.sin(i*3.123)*18;const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));this.precipitation=new T.Points(g,new T.PointsMaterial({color:'#d8e8f1',size:.065,transparent:true,opacity:.6,depthWrite:false}));this.precipitation.frustumCulled=false;this.sky.add(this.precipitation);
@@ -30,7 +30,7 @@ export class LandscapeScene {
   const get=(x:number,y:number,z:number)=>{const key=[x,y,z].join(',');if(!cache.has(key))cache.set(key,blockAt(w,x,y,z));return cache.get(key)!;};
   const candidates=new Map<string,{x:number;y:number;z:number}>();
   const add=(x:number,y:number,z:number)=>{if(x>=x0&&x<x0+size&&z>=z0&&z<z0+size&&landscapeRegion(x,z)&&y<height(x,z)&&y>=-18)candidates.set([x,y,z].join(','),{x,y,z});};
-  for(let z=z0;z<z0+size;z+=step)for(let x=x0;x<x0+size;x+=step){if(!landscapeRegion(x,z))continue;
+  for(let z=z0;z<z0+size;z+=step)for(let x=x0;x<x0+size;x+=step){if(!(step>1?legacyRegion(x,z):landscapeRegion(x,z)))continue;
    const env=landscapeEnvironment(w.seed,x,z),h=height(x,z),color=env.road||env.trail?'#b8a77e':env.water?'#9c977e':landscapeColor(w.seed,x,z);
    if(step>1){
     // Coarse terrain stays under resident chunks until they have actually loaded.
@@ -58,7 +58,7 @@ export class LandscapeScene {
  }
  private refreshFar(){
   const index=this.far?.geometry.index;if(!index)return;
-  for(const [key,indices]of this.farTiles){const loaded=this.chunks.has(key);for(const i of indices)index.setX(i,loaded?indices[0]:i);}index.needsUpdate=true;
+  for(const [key,indices]of this.farTiles){const [cx,cz]=key.split(':').map(Number),radius=this.quality==='low'?12:19;const loaded=this.chunks.has(key)||(Math.abs(cx*16+8-this.coreView.x)+8<=radius&&Math.abs(cz*16+8-this.coreView.z)+8<=radius);for(const i of indices)index.setX(i,loaded?indices[0]:i);}index.needsUpdate=true;
  }
  private surface=new T.MeshStandardMaterial({vertexColors:true,roughness:.95});
  private water=new T.MeshStandardMaterial({color:'#4da3b3',transparent:true,opacity:.42,roughness:.18,metalness:.15,depthWrite:false,side:T.DoubleSide});
@@ -104,7 +104,7 @@ export class LandscapeScene {
  private spawnAnimals(w:World,x:number,z:number){
   for(const a of this.animals)a.object.removeFromParent();this.animals=[];
   // Shared simple rounded anatomy with species-specific ears, horns, wings and proportions.
-  for(let i=0;i<(this.quality==='low'?12:30);i++){const ax=Math.floor(x)+(landscapeHash(Math.floor(i/3),5,w.seed)-.5)*100+(i%3)*2,az=Math.floor(z)+(landscapeHash(Math.floor(i/3),9,w.seed)-.5)*100;if(!landscapeRegion(ax,az))continue;
+  for(let i=0;i<(this.quality==='low'?12:30);i++){const ax=Math.floor(x)+(landscapeHash(Math.floor(i/3),5,w.seed)-.5)*100+(i%3)*2,az=Math.floor(z)+(landscapeHash(Math.floor(i/3),9,w.seed)-.5)*100;if(!legacyRegion(ax,az))continue;
    const e=landscapeEnvironment(w.seed,ax,az);if(e.road)continue;const species=e.water?(i%3?'fish':'duck'):e.height>130?'eagle':e.height>85?'goat':e.biome==='forest'?(i%3?'deer':'rabbit'):i%4===0?'owl':['sheep','cow','horse'][i%3];
    const group=new T.Group(),color=species==='fish'?'#deaf78':species==='sheep'?'#e8ddc7':species==='cow'?'#815647':species==='owl'?'#8b819c':'#ad8057';
    const small=['fish','duck','rabbit','owl','eagle'].includes(species),scale=small?.45:1;
@@ -114,14 +114,16 @@ export class LandscapeScene {
    if(['owl','eagle','fish'].includes(species))for(const side of [-1,1])wings.push(this.part(group,color,side*.55,.85,0,.8,.06,.4));
    if(['deer','goat','rabbit','horse'].includes(species))for(const side of [-1,1])this.part(group,color,side*.17,1.62,.5,.08,species==='rabbit'?.7:.35,.09);
    for(const side of [-1,1])this.part(group,'#20272a',side*.17,1.30,.75,.045,.05,.035,true);
-   group.scale.setScalar(scale);const y=e.water?e.water.surface-(species==='duck'?.35:e.water.depth*.6):e.height;group.position.set(ax,y,az);this.group.add(group);this.animals.push({object:group,home:new T.Vector3(ax,y,az),phase:i*.7,species,last:0,legs,wings,state:'graze'});
+   group.scale.setScalar(scale);const y=e.water?e.water.surface-(species==='duck'?.35:e.water.depth*.6):terrainHeight(w,ax,az);group.position.set(ax,y,az);this.group.add(group);this.animals.push({object:group,home:new T.Vector3(ax,y,az),phase:i*.7,species,last:0,legs,wings,state:'graze'});
   }
  }
  update(w:World,position:T.Vector3,time:number,night:boolean,reduced:boolean){
+  this.coreView={x:position.x,z:position.z};
   const weather=Math.floor(w.life.time/90+w.seed)%5===0;this.precipitation!.visible=!reduced&&(weather||position.y>190);this.precipitation!.position.copy(position);if(this.precipitation!.visible){const p=this.precipitation!.geometry.getAttribute('position') as T.BufferAttribute;for(let i=0;i<p.count;i++){p.setY(i,18-((time*(position.y>190?1:8)+i*1.71)%36));p.setX(i,Math.sin(i*3.123+time*.1)*18);}p.needsUpdate=true;}
   this.cloudMaterial.color.set(night?'#65758a':weather?'#adb8bc':'#edf1ec');
   const cx=Math.floor(position.x/16),cz=Math.floor(position.z/16),radius=this.quality==='low'?2:3,center=cx+':'+cz,revision=w.voxels?.revision||0;
-  if(!this.far){this.far=this.terrainMesh(w,-512,-512,1280,16);this.far.position.y=-1.1;this.group.add(this.far);this.landmarks(w);}
+  if(!this.far){this.far=this.terrainMesh(w,0,0,WIDTH,16);this.far.position.y=-1.1;this.group.add(this.far);this.landmarks(w);}
+  this.refreshFar();
   const dirty=new Set<string>();
   if(revision!==this.revision){
    const next=new Map(Object.entries(w.voxels?.edits||{}).map(([k,b])=>[k,String(b)+':'+(w.voxels?.rotations?.[k]||0)]));
@@ -145,7 +147,7 @@ export class LandscapeScene {
    let dx=nx-a.object.position.x,dz=nz-a.object.position.z;if(scared){dx=a.object.position.x-position.x;dz=a.object.position.z-position.z;}
    const len=Math.hypot(dx,dz)||1,speed=a.state==='flee'?3:1.1,tx=a.object.position.x+dx/len*dt*speed,tz=a.object.position.z+dz/len*dt*speed;
    const env=landscapeEnvironment(w.seed,tx,tz),flying=['owl','eagle'].includes(a.species);
-   if(moving&&landscapeRegion(tx,tz)&&(['fish','duck'].includes(a.species)?!!env.water:flying||!env.water&&Math.abs(env.height-a.object.position.y)<1.5)&&!landmarkBlock(Math.floor(tx),env.height+1,Math.floor(tz))){a.object.position.x=tx;a.object.position.z=tz;a.object.rotation.y=Math.atan2(dx,dz);a.object.position.y=['fish','duck'].includes(a.species)?env.water!.surface-(a.species==='duck'?.35:Math.max(.5,env.water!.depth*.6)):env.height+(flying?9+Math.sin(time+a.phase):0);}
+   if(moving&&legacyRegion(tx,tz)&&(['fish','duck'].includes(a.species)?!!env.water:flying||!env.water&&Math.abs(env.height-a.object.position.y)<1.5)&&!landmarkBlock(Math.floor(tx),env.height+1,Math.floor(tz))){a.object.position.x=tx;a.object.position.z=tz;a.object.rotation.y=Math.atan2(dx,dz);a.object.position.y=['fish','duck'].includes(a.species)?env.water!.surface-(a.species==='duck'?.35:Math.max(.5,env.water!.depth*.6)):env.height+(flying?9+Math.sin(time+a.phase):0);}
    a.legs.forEach((leg,i)=>leg.rotation.x=moving?Math.sin(time*(scared?12:6)+i%2*Math.PI)*.45:0);a.wings.forEach((wing,i)=>wing.rotation.z=Math.sin(time*5+a.phase)*(i?1:-1)*.45);
    a.object.userData.behavior=a.state;
   }

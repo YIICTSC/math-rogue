@@ -12,7 +12,7 @@ try {
   assert(Math.abs(meterPosition(SWEEP_MS*1.88).position-.12)<1e-10);
   assert(Math.abs(impactAt(meterPosition(SWEEP_MS*1.88).position))<1e-10);
   assert.equal(meterPosition(SWEEP_MS*2).expired,true);
-  assert.equal(shotQuality(0),'nice'); assert.equal(shotQuality(.4),'good'); assert.equal(shotQuality(.9),'miss');
+  assert.equal(shotQuality(impactAt(.12)),'nice');for(const position of [.04,.06,.18,.20])assert.equal(shotQuality(impactAt(position)),'good','red strip is an ordinary shot');assert.equal(shotQuality(impactAt(.22)),'miss');assert.equal(shotQuality(0),'nice'); assert.equal(shotQuality(.4),'good'); assert.equal(shotQuality(.9),'miss');
   const setup = () => {const w=createGolf(23);addPlayer(w,'p','P');startGolf(w,'Lesson');Object.assign(w.players.p,{phase:'aim',correct:3,shotsLeft:3});return w;};
   const w=setup(),p=w.players.p,shot={type:'shot',shotId:p.shotId,club:'wedge',angle:0,power:.7,spin:-1,impact:.1};
   for (const bad of [{spin:2},{impact:NaN},{spin:'1'},{impact:-1.01}]) assert.equal(command(w,'p',{...shot,...bad}),false);

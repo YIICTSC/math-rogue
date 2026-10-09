@@ -3,7 +3,7 @@ import {landscapeEnvironment,landscapeColor,landscapeTree,landscapeRegion,legacy
 import {blockAt,solid,VOXEL_COLORS} from './voxel';
 export const mapPosition=(p:Adventurer)=>({x:p.position3D?.x??p.x+.5,z:p.position3D?.z??p.y+.5});
 /** Gateways join the old tile map without changing its save-array dimensions. */
-export const landscapeGate=(x:number,z:number)=>Math.abs(x-92)<=2&&(z<=1||z>=86)||Math.abs(z-46)<=2&&(x<=1||x>=190);
+export const landscapeGate=(_x:number,_z:number)=>false;
 export const landscapePalette={forest:'#49734d',meadow:'#82a55d',wetland:'#628b73',alpine:'#83906a',rock:'#89888b',snow:'#e5edf1'};
 export function drawLandscapeTile(c:CanvasRenderingContext2D,w:World,x:number,z:number,t:number,time:number){
  if(!landscapeRegion(x,z))return;

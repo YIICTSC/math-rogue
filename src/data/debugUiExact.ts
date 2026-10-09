@@ -22,6 +22,8 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  'ミッション範囲（60ステージずつ）': 'Mission range (60 stages each)',
+  '旧建築を安全に移す空間が不足しています。保存データは保持されています。': 'There is not enough space to safely move the old buildings. Your save has been retained.',
   ...SCHOOL_WANDERER_ENGLISH,
   '次のラウンドへ': 'Next round',
   "編と主人公を選び直す": "Choose chapter and hero again",
@@ -347,6 +349,8 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  'ミッション範囲（60ステージずつ）': 'ミッションのはんい（60ステージずつ）',
+  '旧建築を安全に移す空間が不足しています。保存データは保持されています。': 'まえのたてものをあんぜんにうつすばしょがたりません。ほぞんデータはのこっています。',
   ...SCHOOL_WANDERER_HIRAGANA,
   '次のラウンドへ': 'つぎのらうんどへ',
   "編と主人公を選び直す": "へんとしゅじんこうをえらびなおす",

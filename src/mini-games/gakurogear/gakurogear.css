@@ -68,3 +68,11 @@
  .gear-preparing .gear-avatar-preview{min-height:0}
  .gear-preparing .gear-lobby-roster p{padding:6px;font-size:12px}
 }
+/* Landscape phones reserve almost all vertical space for the mission. */
+@media(orientation:landscape) and (max-height:550px){
+.gear-shell:has(.gear-field) .gear-header{position:absolute;top:0;left:0;right:0;z-index:8;height:36px;padding:3px 8px;gap:8px;background:#08211de0;pointer-events:none}
+.gear-shell:has(.gear-field) .gear-header>*{pointer-events:auto}.gear-shell:has(.gear-field) .gear-header strong{font-size:12px}.gear-shell:has(.gear-field) .gear-header button{padding:3px 8px;font-size:11px;min-height:28px}.gear-shell:has(.gear-field) .gear-header button:nth-of-type(2){display:none}.gear-shell:has(.gear-field) .gear-tag,.gear-shell:has(.gear-field) .gear-header>span:last-child{margin-left:auto}
+.gear-shell:has(.gear-field) .gear-hud{position:absolute;top:36px;left:8px;right:8px;z-index:7;padding:3px;gap:10px;pointer-events:none;background:transparent;font-size:11px}.gear-shell:has(.gear-field) .gear-hud button{pointer-events:auto;min-height:28px;padding:3px 8px}.gear-shell:has(.gear-field) .gear-equipment{position:absolute;top:39px;right:8px;z-index:7;padding:2px 5px;font-size:10px;max-width:45%;background:#09251bd9}.gear-shell:has(.gear-field) .gear-viewbar{position:absolute;left:8px;top:70px;z-index:7;padding:2px;gap:3px;background:#09251bc9}.gear-shell:has(.gear-field) .gear-viewbar button{padding:3px 6px;min-height:28px;font-size:10px}.gear-shell:has(.gear-field) .gear-viewbar small{display:none}
+.gear-shell:has(.gear-field) .gear-field{flex:1;min-height:0}.gear-shell:has(.gear-field) .gear-controls{padding:3px 8px;gap:5px;min-height:44px}.gear-shell:has(.gear-field) .gear-controls button{padding:4px 8px;min-height:36px;font-size:11px}.gear-shell:has(.gear-field) .gear-controls small{display:none}.gear-shell:has(.gear-field) .gear-alert{top:110px;font-size:10px}
+}
+@media(orientation:landscape) and (max-height:550px){.gear-shell:has(.gear-field)>.gear-equipment{display:none}.gear-shell:has(.gear-field) .gear-hud{justify-content:space-between}.gear-shell:has(.gear-field) .gear-hud>div:first-child{max-width:36%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.gear-shell:has(.gear-field) .gear-hud strong{font-size:13px}.gear-shell:has(.gear-field) .gear-hud small{font-size:9px}}
