@@ -122,13 +122,11 @@ try{
   await page.getByRole('button',{name:'2D / 3D',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('[data-school-dungeon3d]'));
   await page.getByRole('button',{name:'2D / 3D',exact:true}).click();await page.locator('[data-school-dungeon3d="ready"]').waitFor();
   assert.equal(await page.evaluate(()=>JSON.stringify([window.__bridge.player,window.__bridge.inventory,window.__adventure.state.floorTurns])),before);
-  await page.evaluate(()=>localStorage.setItem('school-wanderer-3d','on')); // Old saved preferences must not override the 2D default.
+  assert.equal(await page.evaluate(()=>localStorage.getItem('school-wanderer-3d')),'on');
   await page.reload({waitUntil:'domcontentloaded'});
   const depart=page.getByRole('button',{name:'このルールで出発',exact:true});if(await depart.isVisible())await depart.click();
-  assert.equal(await page.getByRole('button',{name:'2D / 3D',exact:true}).innerText(),'2D');
-  assert.equal(await page.locator('[data-school-dungeon3d]').count(),0);
-  await page.getByRole('button',{name:'2D / 3D',exact:true}).click();
   await page.locator('[data-school-dungeon3d="ready"]').waitFor();
+  assert.equal(await page.getByRole('button',{name:'2D / 3D',exact:true}).innerText(),'3D');
   await page.evaluate(()=>window.__adventure.beginDojo(1));
   await page.waitForFunction(()=>document.querySelector('[data-school-dungeon3d]')?.getAttribute('data-scene')==='dojo');
   const turns=await page.evaluate(()=>window.__adventure.dojoRun.turns);await page.keyboard.press('ArrowRight');
@@ -137,7 +135,7 @@ try{
   await page.evaluate(()=>window.__scene.renderer.forceContextLoss());
   await page.waitForFunction(()=>!document.querySelector('[data-school-dungeon3d]'));
   assert.equal(await page.getByRole('button',{name:'2D / 3D',exact:true}).innerText(),'2D');
-
+  assert.equal(await page.evaluate(()=>localStorage.getItem('school-wanderer-3d')),'off');
   assert.deepEqual(errors,[]);
   console.log(`PASS series ${game}: Blender scene, seven equipment operations, journey, three viewport sizes, 2D/3D, dojo movement and context fallback`);
   await page.close();
