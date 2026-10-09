@@ -12,7 +12,7 @@ export type WorkshopAction={type:'voxel-craft';recipe:string;amount:number}|{typ
 export interface VoxelContainer{items:Bag}
 export function nearbyWorkshop(w:World,p:Adventurer,block:string){
  const feet=playerHeight(w,p),px=p.position3D?.x??p.x+.5,pz=p.position3D?.z??p.y+.5;
- for(let y=Math.floor(feet)-1;y<=Math.floor(feet)+2;y++)for(let z=p.y-3;z<=p.y+3;z++)for(let x=p.x-3;x<=p.x+3;x++)
+ for(let y=Math.floor(feet)-1;y<=Math.floor(feet)+2;y++)for(let z=Math.floor(pz)-3;z<=Math.floor(pz)+3;z++)for(let x=Math.floor(px)-3;x<=Math.floor(px)+3;x++)
   if(Math.hypot(x+.5-px,y+.5-(feet+1),z+.5-pz)<=3.5&&blockAt(w,x,y,z)===block)return {x,y,z};
 }
 export const activeTools=(p:Adventurer):Partial<Record<ToolKind,ToolTier>>=>({...p.life?.tools,...(p.life?.pickaxe?{pickaxe:p.life.pickaxe}:{})});

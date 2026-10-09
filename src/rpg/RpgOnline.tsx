@@ -1,3 +1,5 @@
+import {findLandscapeRoute} from './voxel';
+import {legacyRegion,landscapeEnvironment,LANDSCAPE_BIOME_NAMES} from './worldLandscape';
 import InviteJoin from '../mini-games/shared/InviteJoin';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../services/onlineTransport';
 import type {OnlineTransport} from '../services/onlineTransport';
@@ -217,6 +219,7 @@ export default function RpgOnline({
   useEffect(()=>{if(world?.players[room.current?.selfId||'']?.life?.indoors){destination.current=null;walkingRoute.current=[];setLifeOpen(false);}},[world?.players[room.current?.selfId||'']?.life?.indoors]);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
+  const exterior=!!me?.position3D&&!legacyRegion(me.position3D.x,me.position3D.z);
   const roomCode = shareRoomCode(room.current?.code||"",room.current?.transport||transport);
   const inviteUrl = useMemo(
     () =>
@@ -352,6 +355,7 @@ export default function RpgOnline({
     const w = latest.current.world,
       p = w?.players[room.current?.selfId || ""];
     if (!w || !p || !latest.current.active || p.nativeScene) return;
+    if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z)){room.current?.send({type:'voxel-landmark'});return;}
     const resident=nearbyResidents(w,p)[0];if(resident){destination.current=null;walkingRoute.current=[];room.current?.send({type:'town-encounter',target:resident.id});setResidentTarget(resident.id);setDetail(null);return;}
     const home=w.life?.houses.find(h=>distance(h,p)<=2);
     if(home){destination.current=null;room.current?.send({type:'life-enter',houseId:home.id});setLifeOpen(true);return;}
@@ -368,7 +372,7 @@ export default function RpgOnline({
   useEffect(()=>{
     if(roamingNpcSiteId && world?.players[selfId]?.npcEventResults?.[roamingNpcSiteId])setNpcChoicePending(false);
   },[roamingNpcSiteId,selfId,world?.players]);
-  useEffect(()=>{if(prefs.mapView==='2D'&&me?.position3D)room.current?.send({type:'voxel-snap'});},[prefs.mapView,!!me?.position3D]);
+  useEffect(()=>{if(prefs.mapView==='2D'&&me?.position3D&&!me.position3D.surface2D)room.current?.send({type:'voxel-snap'});},[prefs.mapView,!!me?.position3D]);
   const [facing,setFacing]=useState(0);
   const lastDirection=useRef({dx:0,dy:-1});
   const navigation=useRef({facing,threeD:false});navigation.current={facing,threeD:prefs.mapView==='3D'&&!overview};
@@ -416,6 +420,7 @@ export default function RpgOnline({
         target = destination.current;
       if (!latest.current.active || !w || !p || p.nativeScene || !target)
         return;
+      if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z)){const x=Math.floor(p.position3D.x),y=Math.floor(p.position3D.z);while(walkingRoute.current[0]?.x===x&&walkingRoute.current[0]?.y===y)walkingRoute.current.shift();const next=walkingRoute.current[0];if(!next||Math.abs(next.x-x)+Math.abs(next.y-y)!==1){destination.current=null;return;}room.current?.send({type:'move',dx:next.x-x,dy:next.y-y});return;}
       while(walkingRoute.current[0]?.x===p.x && walkingRoute.current[0]?.y===p.y)walkingRoute.current.shift();
       const step=walkingRoute.current[0];
       if(step && distance(p,step)===1){lastDirection.current={dx:step.x-p.x,dy:step.y-p.y};room.current?.send({type:"move",...lastDirection.current});}
@@ -446,9 +451,9 @@ export default function RpgOnline({
     void audioService.preloadRpgFishingSounds();
     room.current?.send({type:'life-cast',tile});
   };
-  const quickTiles=compact&&world&&me&&!spectating&&!me.life?.indoors?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
+  const quickTiles=compact&&world&&me&&!exterior&&!spectating&&!me.life?.indoors?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
   useEffect(()=>{if(compact&&me?.life?.work){destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);}},[compact,me?.life?.work?.started]);
-  const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);setLifeOpen(true);};
+  const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);if(exterior)setLifeInitialTab('craft');setLifeOpen(true);};
   const move=(dx:number,dy:number)=>{if(!latest.current.active)return;destination.current=null;walkingRoute.current=[];const step=navigation.current.threeD?relativeMove(dx,dy,navigation.current.facing):{dx,dy};if(!navigation.current.threeD)lastDirection.current={dx,dy};room.current?.send(navigation.current.threeD?{type:'voxel-move',dx:step.dx*.32,dy:step.dy*.32}:{type:'move',...step});};
   const hudHp=spectating?watched?.hp||0:player.currentHp,hudMaxHp=spectating?watched?.maxHp||1:player.maxHp;
   const close = () => {
@@ -601,6 +606,7 @@ export default function RpgOnline({
                       onPlayer={spectating ? undefined : id=>{setSelectedPeer(id);if(compact)openDetail('team');}}
                       onTile={(x, y) => {
                         if (!prefs.tapMove||settingsOpen||cityOpen||farmOpen||!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
+                        if(me.position3D&&!legacyRegion(me.position3D.x,me.position3D.z)){const route=findLandscapeRoute(world,me,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;return;}
                         const tile=y*WIDTH+x;
                         if(Math.abs(me.x-x)+Math.abs(me.y-y)<=2 && (world.tiles[tile]==='water'||natureAt(world,tile)&&resourceReady(world,tile))){destination.current=null;if(compact)quickGather(tile);else{setLifeTarget(tile);setLifeOpen(true);}return;}
                         const route=findWalkingRoute(world,me.x,me.y,x,y);
@@ -613,7 +619,7 @@ export default function RpgOnline({
                   {!spectating && (lifeOpen||!compact&&!!me.life?.work) && !(compact&&me.life?.work) && !me.life?.indoors && <LifePanel musicActive={active&&!interactionBlocked&&!me.nativeScene} initialTab={lifeInitialTab} world={world} selfId={selfId} target={lifeTarget} languageMode={languageMode} onEnergyRequest={requestEnergy} send={a=>{destination.current=null;room.current?.send(a);}} onCity={()=>{setLifeOpen(false);setCityOpen(true);}} onClose={()=>{setLifeOpen(false);setLifeInitialTab(undefined);}} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setLifeOpen(false);}}/>}
                   <button className="rpg-settings-map-button" aria-label={trans("RPG設定",languageMode)} onClick={()=>setSettingsOpen(true)}>⚙</button>
                   {compact&&<button className="rpg-compact-message" onClick={()=>openDetail('menu')} aria-label="メッセージの詳細"><span>{watched?.message}</span><MoreHorizontal size={15}/></button>}
-                  <button className="rpg-view-switch" aria-label="2D / 3D" onClick={()=>{room.current?.send({type:'voxel-snap'});updateRpgPreferences({mapView:prefs.mapView==='3D'?'2D':'3D'});}}>{prefs.mapView==='3D'?'3D':'2D'}</button>
+                  <button className="rpg-view-switch" aria-label="2D / 3D" onClick={()=>{if(prefs.mapView==='3D')room.current?.send({type:'voxel-snap'});updateRpgPreferences({mapView:prefs.mapView==='3D'?'2D':'3D'});}}>{prefs.mapView==='3D'?'3D':'2D'}</button>
                   <div className="rpg-map-tools">
                     {!spectating&&<button onClick={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}>🌱 {trans("農園・牧場",languageMode)}</button>}
                     {world.city&&!spectating&&<button onClick={()=>setCityOpen(true)}>🏙 {trans('都市運営',languageMode)}</button>}
@@ -622,12 +628,14 @@ export default function RpgOnline({
                       <Map size={16} />
                       {overview ? "自分の近く" : "全体マップ"}
                     </button>
-                    <span>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</span>
+                    <span>{trans(watched?.position3D&&!legacyRegion(watched.position3D.x,watched.position3D.z)?LANDSCAPE_BIOME_NAMES[landscapeEnvironment(world.seed,watched.position3D.x,watched.position3D.z).biome]:biomeAt(watched?.x??me.x,watched?.y??me.y).name,languageMode)}</span>
                   </div>
                   {!spectating && <div className="rpg-map-bottom">
                     <div className="rpg-movement-controls">{prefs.mapView==='3D'&&!overview&&<div className="rpg-turn-controls"><button aria-label="↶" disabled={!latest.current.active} onClick={()=>turn(facing-1)}>↶</button><span>{["N","E","S","W"][Math.round(facing)%4]}</span><button aria-label="↷" disabled={!latest.current.active} onClick={()=>turn(facing+1)}>↷</button></div>}<span className="rpg-desktop-hint">WASD / 矢印キーで移動 · E 調べる</span><TouchPad disabled={!!residentTarget||settingsOpen||cityOpen||farmOpen||!active||interactionBlocked||!!fishing.result||!!detail||lifeOpen||!!me.life?.indoors||!!me.life?.work||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog} onMove={move} languageMode={languageMode}/></div>
                     <div className="rpg-map-actions">
-                    {!spectating&&!me.life?.indoors&&nearbyResidents(world,me).length>0&&<div className="rpg-resident-quick" aria-label={trans('近くの住人',languageMode)}>{nearbyResidents(world,me).map(r=><button key={r.id} disabled={!latest.current.active} onClick={()=>openResident(r.id)}><img src={assetUrl(r.portrait)} alt=""/><span>{copy(r.name,languageMode)}<small>{trans('話しかける',languageMode)}</small></span></button>)}</div>}
+                    {me.position3D&&!legacyRegion(me.position3D.x,me.position3D.z)&&<button className="rpg-landmark-action" onClick={()=>room.current?.send({type:'voxel-landmark'})}>🧭 {trans('調べる',languageMode)}</button>}
+
+                    {!spectating&&!me.life?.indoors&&(!me.position3D||legacyRegion(me.position3D.x,me.position3D.z))&&nearbyResidents(world,me).length>0&&<div className="rpg-resident-quick" aria-label={trans('近くの住人',languageMode)}>{nearbyResidents(world,me).map(r=><button key={r.id} disabled={!latest.current.active} onClick={()=>openResident(r.id)}><img src={assetUrl(r.portrait)} alt=""/><span>{copy(r.name,languageMode)}<small>{trans('話しかける',languageMode)}</small></span></button>)}</div>}
                     {!spectating&&<FarmQuickActions world={world} selfId={selfId} languageMode={languageMode} disabled={!latest.current.active} send={a=>{destination.current=null;walkingRoute.current=[];room.current?.send(a);}} onOpen={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}/>}
 
                     {!spectating&&!me.life?.indoors&&nearbyFlowers(world,me).length>0&&<div className="rpg-flower-quick" aria-label={trans('近くの花',languageMode)}>{nearbyFlowers(world,me).slice(0,3).map(({tile,flower})=><button key={tile} disabled={!quickReady||!active||interactionBlocked||!!me.life?.work||lifeOpen||!!detail||!!storySiteId||!!roamingNpcSiteId||hasActivityDialog||energyOf(me.life)<1} onClick={()=>room.current?.send({type:'town-flower-pick',tile})} aria-label={copy(flower.name,languageMode)+' '+trans('花を摘む',languageMode)}><FlowerSprite id={flower.id}/><span>{trans('花を摘む',languageMode)}<small> −1</small></span></button>)}</div>}

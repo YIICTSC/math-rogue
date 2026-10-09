@@ -16,8 +16,8 @@ try{
  const pool=L.waterProfile(150,180);assert(pool.depth>=10);const bed=V.terrainHeight(w,150,180);assert.equal(V.blockAt(w,150,bed-1,180),'gravel');assert.equal(V.blockAt(w,150,bed+1,180),null);
  p.position3D={x:150.5,z:180.5,y:pool.surface-1.3};for(let i=0;i<4;i++)assert(E.applyAction(w,'a',{type:'voxel-dive'},now+=100));assert(p.position3D.y+V.EYE_HEIGHT<pool.surface);assert(E.applyAction(w,'a',{type:'voxel-jump'},now+=100));
  p.profile={hp:72,maxHp:72,gold:100,deck:[],deckSize:0,character:'WARRIOR',image:''};const player={currentHp:72,maxHp:72,gold:100,deck:[],relics:[],rpgMutationRevision:0};
- const restored=S.restoreWorldSave(JSON.parse(JSON.stringify(S.makeWorldSave(w,'a',player,now))),now+1000);assert.deepEqual(restored.players.a.position3D,p.position3D);assert.equal(restored.tiles.length,E.WIDTH*E.HEIGHT);
- assert(E.applyAction(w,'a',{type:'voxel-snap'},now+=100));assert(!p.position3D);assert.deepEqual({x:p.x,y:p.y},anchor);
+ const restored=S.restoreWorldSave(JSON.parse(JSON.stringify(S.makeWorldSave(w,'a',player,now))),now+1000);assert.deepEqual(restored.players.a.position3D,{...p.position3D,waterAt:p.position3D.waterAt+1000});assert.equal(restored.tiles.length,E.WIDTH*E.HEIGHT);
+ p.position3D={x:92.5,z:-22.5,y:0};assert(E.applyAction(w,'a',{type:'voxel-snap'},now+=100));assert(p.position3D?.surface2D);assert.equal(Math.floor(p.position3D.x),92);assert.equal(Math.floor(p.position3D.z),-23);assert.deepEqual({x:p.x,y:p.y},anchor);
  const trace=V.traceVoxel(w,{x:92.5,y:2,z:-10.5},{x:0,y:-1,z:0});assert(trace&&trace.y===-1&&trace.normal.y===1);
- console.log('PASS metre scale, mountain ascent grades, extended travel, collidable entry, jump/landing, lake bed/diving, save/load and legacy return, voxel ray');
+ console.log('PASS metre scale, mountain ascent grades, extended travel, collidable entry, jump/landing, lake bed/diving, save/load and exterior 2D preservation, voxel ray');
 }finally{await server.close();}

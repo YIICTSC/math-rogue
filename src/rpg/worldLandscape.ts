@@ -1,3 +1,4 @@
+import {biomeSurface} from './biomes';
 /** Metres and deterministic world geometry shared by rendering and authority.
  * The original 192 x 88 map and its saved edits keep their coordinates.
  * Exploration continues beyond its edge without resizing any legacy tile array.
@@ -15,6 +16,7 @@ export const LANDMARKS=[
 ] as const;
 /** Residential courtyards share the same collision/terrain model as major facilities. */
 export const STRUCTURES=[...LANDMARKS,...Array.from({length:8},(_,i)=>({id:'home-'+i,x:-63+(i%4-1.5)*18,z:46+(i<4?-24:24),width:10,depth:10,height:7,kind:'village',label:'川辺の住居'}))];
+export const LANDSCAPE_BIOME_NAMES={forest:'ささやきの森',meadow:'木漏れ日の草原',wetland:'鏡水の湿原',alpine:'高山の草原',rock:'岩山',snow:'雪山'};
 export type LandscapeBiome='forest'|'meadow'|'wetland'|'rock'|'snow'|'alpine';
 export function landscapeHash(x:number,z:number,seed:number){let n=Math.imul(x|0,374761393)^Math.imul(z|0,668265263)^seed;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;}
 const smooth=(n:number)=>{n=Math.max(0,Math.min(1,n));return n*n*(3-2*n);};
@@ -84,6 +86,9 @@ export function landscapeTree(seed:number,x:number,z:number){
 export function landscapeBlock(seed:number,x:number,y:number,z:number):'stone'|'snow'|'dirt'|'gravel'|'sand'|'wood'|'leaves'|'brick'|'plank'|'glass'|null{
  const h=landscapeHeight(seed,x,z);
  if(y<h){
+  const water=waterProfile(x,z);
+  // A bridge is a deck over real water/air, never a solid dam to the lake bed.
+  if(water&&roadAt(x,z)&&y>=water.surface-water.depth)return y===h-1?'plank':null;
   // Traversable cave cuts horizontally into mountain slopes; floor and roof remain solid.
   const caveY=32+Math.floor(Math.sin(z/40)*3);if(h>caveY&&Math.abs(x-(326+Math.sin(z/30)*7))<3&&y>=caveY&&y<caveY+4)return null;
   if(y===h-1)return h>190?'snow':waterProfile(x,z)?'gravel':trailAt(x,z)||roadAt(x,z)?'sand':h>130?'stone':'dirt';
@@ -93,6 +98,19 @@ export function landscapeBlock(seed:number,x:number,y:number,z:number):'stone'|'
  for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++){
   const t=landscapeTree(seed,x+dx,z+dz);if(!t)continue;const level=y-t.base;
   if(!dx&&!dz&&level>=0&&level<t.height)return 'wood';
-  if(level>=t.height-3&&level<=t.height&&Math.abs(dx)+Math.abs(dz)<= (level===t.height?1:3))return 'leaves';
+  if(level>=t.height-3&&level<=t.height&&Math.abs(dx)+Math.abs(dz)<= (t.pine?Math.min(3,t.height-level):level===t.height?1:3))return 'leaves';
  }return null;
+}
+
+/** Continuous climate tint; also grades the old six biomes into the exploration border. */
+export function landscapeColor(seed:number,x:number,z:number){
+ const e=landscapeEnvironment(seed,x,z);
+ const mix=(a:string,b:string,t:number)=>{t=smooth(t);const channels=[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,'0'));return '#'+channels.join('');};
+ let color=mix('#82a55d','#49734d',(e.moisture-.35)/.3);
+ color=mix(color,'#628b73',(e.moisture-.72)/.18);
+ color=mix(color,'#83906a',(e.height-78)/30);
+ color=mix(color,'#89888b',(e.height-120)/30);
+ color=mix(color,'#e5edf1',(e.height-178)/32);
+ if(coreDistance(x,z)<24)color=mix(biomeSurface(Math.max(0,Math.min(191,x)),Math.max(0,Math.min(87,z))).color,color,coreDistance(x,z)/24);
+ return color;
 }

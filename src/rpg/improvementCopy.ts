@@ -1,4 +1,16 @@
 export const RPG_IMPROVEMENT_ENGLISH: Record<string, string> = {
+  "高山の草原": "Alpine meadow", "岩山": "Rocky mountains", "雪山": "Snowy mountains",
+  "道をたどって施設を探しましょう。コンパスで目的地を選べます。": "Follow the roads to discover facilities. Choose a destination using the compass.",
+  "この施設は探索済みです。建物の中や上階も歩いて調べられます。": "You have explored this facility. Walk inside and explore its upper floor.",
+  "5つの施設の探索を達成！ 魔晶石と鋼材5個を獲得しました。": "All five facilities explored! You received a crystal and five steel blocks.",
+  "新しい施設を発見！ 魔晶石を1個獲得しました。": "New facility discovered! You received one crystal.",
+  "冒険学園": "Adventure Academy",
+  "白雲の城": "Cloud Castle",
+  "川辺の村": "Riverside Village",
+  "湖畔の神殿": "Lake Temple",
+  "山頂の観測塔": "Summit Observatory",
+  "川辺の住居": "Riverside home",
+
   "同じ家の家具から参加。全10種類をひとりから最大4人で遊べます。盤面ゲームはひとりならCPU対戦。アレンジ個人戦と5階層の冒険も選べます。":
     "Join through furniture in the same house. All 10 games support 1–4 players; solo board games include a CPU. Choose arranged rules or a five-floor expedition.",
   "1〜4人。上へスワイプして10フレーム対戦。速さと曲がりで投球が変わります。ストライクは次の2投、スペアは次の1投が加点。10フレーム目はボーナス投球あり。":
@@ -32,6 +44,18 @@ export const RPG_IMPROVEMENT_ENGLISH: Record<string, string> = {
     "Use left/right arrows to aim and Enter or Space to throw.",
 };
 export const RPG_IMPROVEMENT_HIRAGANA: Record<string, string> = {
+  "高山の草原": "こうざんのそうげん", "岩山": "いわやま", "雪山": "ゆきやま",
+  "道をたどって施設を探しましょう。コンパスで目的地を選べます。": "みちをたどってしせつをさがしましょう。コンパスでもくてきちをえらべます。",
+  "この施設は探索済みです。建物の中や上階も歩いて調べられます。": "このしせつはたんさくずみです。たてもののなかやじょうかいもあるいてしらべられます。",
+  "5つの施設の探索を達成！ 魔晶石と鋼材5個を獲得しました。": "5つのしせつのたんさくをたっせい！ ましょうせきとこうざい5こをかくとくしました。",
+  "新しい施設を発見！ 魔晶石を1個獲得しました。": "あたらしいしせつをはっけん！ ましょうせきを1こかくとくしました。",
+  "冒険学園": "ぼうけんがくえん",
+  "白雲の城": "はくうんのしろ",
+  "川辺の村": "かわべのむら",
+  "湖畔の神殿": "こはんのしんでん",
+  "山頂の観測塔": "さんちょうのかんそくとう",
+  "川辺の住居": "かわべのじゅうきょ",
+
   "同じ家の家具から参加。全10種類をひとりから最大4人で遊べます。盤面ゲームはひとりならCPU対戦。アレンジ個人戦と5階層の冒険も選べます。":
     "おなじいえのかぐからさんか。ぜん10しゅるいをひとりからさいだい4にんであそべます。ばんめんげーむはひとりならCPUたいせん。あれんじこじんせんと5かいそうのぼうけんもえらべます。",
   "1〜4人。上へスワイプして10フレーム対戦。速さと曲がりで投球が変わります。ストライクは次の2投、スペアは次の1投が加点。10フレーム目はボーナス投球あり。":

@@ -1,3 +1,5 @@
+import {mapPosition,drawLandscapeTile,drawLandscapeVegetation,drawLandscapeBuildings,landscapeGate} from './landscapeMap';
+import {legacyRegion,WORLD_SCALE,landscapeEnvironment,landscapeColor,LANDMARKS} from './worldLandscape';
 import {furnitureImage} from './homeCatalog';
 import {drawFarmSprite} from './farm/draw';
 import {VOXEL_COLORS,type TerrainBlock} from './voxel';
@@ -124,8 +126,9 @@ function person(
   p: Adventurer,
   time: number,
 ) {
-  const x = p.x * T,
-    y = p.y * T,
+  const pos=mapPosition(p);
+  const x = (pos.x-.5) * T,
+    y = (pos.z-.5) * T,
     coat = colors[p.color],
     bob = Math.sin(time / 350 + p.color) > 0.8 ? 1 : 0;
   rect(c, x + 3, y + 13, 11, 3, "#203b35");
@@ -270,23 +273,15 @@ export default function WorldCanvas({
         sh = canvas.clientHeight;
       canvas.width = Math.max(1, Math.round(sw));
       canvas.height = Math.max(1, Math.round(sh));
+      const pos=mapPosition(p),expanded=!!p.position3D&&!legacyRegion(pos.x,pos.z);
+      const width=expanded?1280:WIDTH,height=expanded?1280:HEIGHT,origin=expanded?-512:0;
       const scale = overview
-        ? Math.min(sw / (WIDTH * T), sh / (HEIGHT * T))
+        ? Math.min(sw / (width * T), sh / (height * T))
         : sw < 600 || sh < 350
           ? 2*prefs.zoom
           : 3*prefs.zoom;
-      const cx = overview
-        ? (WIDTH * T - sw / scale) / 2
-        : Math.max(
-            0,
-            Math.min(WIDTH * T - sw / scale, p.x * T - sw / scale / 2),
-          );
-      const cy = overview
-        ? (HEIGHT * T - sh / scale) / 2
-        : Math.max(
-            0,
-            Math.min(HEIGHT * T - sh / scale, p.y * T - sh / scale / 2),
-          );
+      const cx=overview?origin*T+(width*T-sw/scale)/2:pos.x*T-sw/scale/2;
+      const cy=overview?origin*T+(height*T-sh/scale)/2:pos.z*T-sh/scale/2;
       camera.current = { x: cx, y: cy, scale };
       c.imageSmoothingEnabled = false;
       c.fillStyle = "#101f24";
@@ -294,11 +289,13 @@ export default function WorldCanvas({
       c.save();
       c.scale(scale, scale);
       c.translate(-cx, -cy);
-      const minX = Math.max(0, Math.floor(cx / T) - 2), maxX = Math.min(WIDTH, Math.ceil((cx + sw / scale) / T) + 2);
-      const minY = Math.max(0, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
+      const minX = Math.max(WORLD_SCALE.min, Math.floor(cx / T) - 2), maxX = Math.min(WORLD_SCALE.max, Math.ceil((cx + sw / scale) / T) + 2);
+      const minY = Math.max(WORLD_SCALE.min, Math.floor(cy / T) - 3), maxY = Math.min(WORLD_SCALE.max, Math.ceil((cy + sh / scale) / T) + 2);
       const season=calendar(w);
-      for (let y = minY; y < maxY; y++)
-        for (let x = minX; x < maxX; x++) {
+      const stride=overview&&expanded?16:1;
+      for (let y = minY; y < maxY; y+=stride)
+        for (let x = minX; x < maxX; x+=stride) {
+          if(!legacyRegion(x,y)){if(stride>1){const e=landscapeEnvironment(w.seed,x,y);c.fillStyle=e.water?'#377f95':landscapeColor(w.seed,x,y);c.fillRect(x*T,y*T,T*stride,T*stride);}else drawLandscapeTile(c,w,x,y,T,time);continue;}
           const biome = biomeSurface(x,y);
           const tile = w.tiles[y * WIDTH + x],
             hash = (x * 173 + y * 31 + w.seed) % 19,
@@ -342,19 +339,21 @@ export default function WorldCanvas({
             }
           }
         }
+      if(!overview)for(let z=minY;z<maxY;z++)for(let x=minX;x<maxX;x++)drawLandscapeVegetation(c,w,x,z,T);
+      drawLandscapeBuildings(c,w,p,T,{minX,maxX,minY,maxY},s=>trans(s,languageMode));
       if(w.city){const roads=new Set(w.city.roads);for(const tile of w.city.roads){const x=tile%WIDTH,y=Math.floor(tile/WIDTH);if(x<minX||x>=maxX||y<minY||y>=maxY)continue;rect(c,x*T,y*T,T,T,'#bbbaa1');rect(c,x*T+3,y*T+3,10,10,'#596166');for(const [dx,dy]of [[0,-1],[1,0],[0,1],[-1,0]])if(roads.has((y+dy)*WIDTH+x+dx)||w.tiles[(y+dy)*WIDTH+x+dx]==='road')rect(c,x*T+(dx<0?0:dx>0?8:3),y*T+(dy<0?0:dy>0?8:3),dx?8:10,dy?8:10,'#596166');rect(c,x*T+7,y*T+7,2,2,'#decfa0');}}
-      for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){
-        const tile=y*WIDTH+x;if(occupiedCityTile(w,tile)||occupiedFarmTile(w,tile))continue;const node=natureAt(w,tile);if(!node){if(w.tiles[tile]==='forest')tree(c,x*T,y*T);continue;}
+      for(let y=Math.max(0,minY);!(overview&&expanded)&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){
+        if(!legacyRegion(x,y))continue;const tile=y*WIDTH+x;if(occupiedCityTile(w,tile)||occupiedFarmTile(w,tile))continue;const node=natureAt(w,tile);if(!node){if(w.tiles[tile]==='forest'&&!landscapeGate(x,y))tree(c,x*T,y*T);continue;}
         if(!resourceReady(w,tile)){rect(c,x*T+5,y*T+10,7,4,node.rock?'#89968b':'#8a6946');continue;}
         const effect=Object.values(w.players).find(q=>q.life?.effect?.tile===tile&&w.life.now-q.life.effect.at<350)?.life?.effect;
         const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;
         if(atlas?.complete&&atlas.naturalWidth)prop(c,node.sprite,x*T+shake,y*T,node.rock?23:28);else tree(c,x*T,y*T);
       }
-      for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
+      for(let y=Math.max(0,minY);!(overview&&expanded)&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){if(!legacyRegion(x,y))continue;const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
       for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
       const built=new Map<string,{x:number;z:number;height:number;block:string}>();
       for(const [key,block] of Object.entries(w.voxels?.edits||{})){if(!block)continue;const [x,y,z]=key.split(',').map(Number);const k=`${x},${z}`,old=built.get(k);if(!old||old.height<y)built.set(k,{x,z,height:y,block});}
-      for(const b of built.values()){if(b.x<minX||b.x>=maxX||b.z<minY||b.z>=maxY)continue;rect(c,b.x*T+1,b.z*T-3,14,18,VOXEL_COLORS[b.block as TerrainBlock]);rect(c,b.x*T+2,b.z*T-2,12,4,'#ffffff44');rect(c,b.x*T+2,b.z*T+12,12,2,'#00000044');}
+      for(const b of built.values()){if(!legacyRegion(b.x,b.z)||b.x<minX||b.x>=maxX||b.z<minY||b.z>=maxY)continue;rect(c,b.x*T+1,b.z*T-3,14,18,VOXEL_COLORS[b.block as TerrainBlock]);rect(c,b.x*T+2,b.z*T-2,12,4,'#ffffff44');rect(c,b.x*T+2,b.z*T+12,12,2,'#00000044');}
       for(const room of w.voxelRooms||[]){for(const f of room.furniture){const path=assetUrl(furnitureImage(f.item));let img=characterImages.get(path);if(!img){img=new Image();img.src=path;characterImages.set(path,img);}if(img?.complete&&img.naturalWidth)c.drawImage(img,f.x*T,f.y*T-12,24,24);}for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id&&pet.roomPos)drawFarmSprite(c,'pet',pet.kind,pet.roomPos.x*T+8,pet.roomPos.y*T+15,22);}
       drawFarms(c,w,time,!prefs.reducedMotion,{minX,maxX,minY,maxY});
       for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
@@ -369,11 +368,12 @@ export default function WorldCanvas({
       const visibleSites = w.sites.filter(s => s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4);
       visibleSites.forEach((s) => landmark(c, s, time));
       Object.values(w.players).filter(p => !p.spectator && !p.life?.indoors)
-        .sort((a, b) => a.y - b.y)
+        .sort((a, b) => mapPosition(a).z - mapPosition(b).z)
         .forEach((q) => person(c, q, prefs.reducedMotion?0:time));
       c.restore();
       if(!overview&&!prefs.reducedMotion){c.save();const weather=season.weather;c.globalAlpha=.55;for(let i=0;i<20;i++){const x=(i*89+time/(season.season===3?55:30))%sw,y=(i*61+time/(weather===2?8:75))%sh;if(weather===2){c.strokeStyle='#afd5e3';c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+10);c.stroke();}else if(season.season===3&&weather===4){c.fillStyle='#f3f8ed';c.beginPath();c.arc(x,y,2,0,Math.PI*2);c.fill();}else if(season.season===0&&weather===1){c.fillStyle='#edb9c5';c.fillRect(x,y,3,2);}else if(season.season===2&&weather===1){c.fillStyle='#d4aa59';c.fillRect(x,y,3,2);}}if(season.phase===3){c.globalAlpha=.1;c.fillStyle='#152140';c.fillRect(0,0,sw,sh);}c.restore();}
-      if (overview&&prefs.labels) {
+      if(overview&&expanded){c.font='bold 12px sans-serif';c.textAlign='center';for(const l of LANDMARKS){const x=(l.x*T-cx)*scale,y=(l.z*T-cy)*scale;const text=trans(l.label,languageMode),width=c.measureText(text).width+12;c.fillStyle='#142b35';c.fillRect(x-width/2,y-14,width,20);c.fillStyle='#ffdf8c';c.fillText(text,x,y);}}
+      if (overview&&!expanded&&prefs.labels) {
         c.font='bold 13px sans-serif'; c.textAlign='center';
         for(const biome of BIOMES) {
           const bx=(biome.x*T-cx)*scale,by=((biome.y-12)*T-cy)*scale;
@@ -384,8 +384,6 @@ export default function WorldCanvas({
       if (!overview && prefs.labels) {
         c.textAlign = "center";
         c.font = "bold 12px sans-serif";
-        for(let y=minY;y<maxY;y++)for(let x=minX;x<maxX;x++){const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
-      for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
       for(const h of (prefs.labels?w.life?.houses:[])||[]){const x=(h.x*T+8-cx)*scale,y=(h.y*T-34-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;c.fillStyle='#10272bdd';c.fillRect(x-55,y-13,110,21);c.fillStyle='#ffdc94';c.fillText('⌂ '+h.ownerName,x,y+2);}
         for(const r of w.town?.customResidents||[]){if(w.town?.bonds.some(b=>b.people.includes(r.id)&&(b.houseId||b.visitHouse?.day===w.town?.day)))continue;const x=(r.x*T+8-cx)*scale,y=(r.y*T+25-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;const width=c.measureText(r.name).width+12;c.fillStyle='#112526d9';c.fillRect(x-width/2,y-12,width,18);c.fillStyle='#e5dcba';c.fillText(r.name,x,y);}
         visibleSites.forEach((s) => {
@@ -404,8 +402,9 @@ export default function WorldCanvas({
           c.fillText(label, x, y + 2);
         });
         Object.values(w.players).filter(q => !q.spectator && !q.life?.indoors).forEach((q) => {
-          const x = (q.x * T + 8 - cx) * scale,
-            y = (q.y * T + 25 - cy) * scale;
+          const qp=mapPosition(q);
+          const x = (qp.x * T - cx) * scale,
+            y = (qp.z * T + 17 - cy) * scale;
           c.fillStyle = "#112526d9";
           c.fillRect(x - 35, y - 12, 70, 18);
           c.fillStyle = q.id === selfId ? "#ffe3a5" : "#fff";

@@ -1,17 +1,17 @@
 import * as T from 'three';
 import type {World} from './engine';
-import {WORLD_SCALE,STRUCTURES,landscapeRegion,legacyRegion,landscapeHeight,landscapeEnvironment,landscapeTree,landmarkBlock,landscapeHash,waterProfile,mountainHeight} from './worldLandscape';
-import {blockAt} from './voxel';
+import {WORLD_SCALE,STRUCTURES,landscapeRegion,legacyRegion,landscapeHeight,landscapeEnvironment,landscapeTree,landmarkBlock,landscapeHash,landscapeColor,waterProfile,mountainHeight} from './worldLandscape';
+import {blockAt,solid,terrainHeight,VOXEL_COLORS,type TerrainBlock} from './voxel';
+import {fullCube} from './voxelCatalog';
 
-const colors={forest:'#49734d',meadow:'#82a55d',wetland:'#628b73',alpine:'#83906a',rock:'#89888b',snow:'#e5edf1'};
 /** Bounded chunk cache, one construction job per frame, coarse distant terrain. */
 export class LandscapeScene {
  readonly group=new T.Group();readonly buildings=new T.Group();
- private chunks=new Map<string,T.Group>();private queue:{x:number;z:number}[]=[];private center='';private revision=-1;
+ private chunks=new Map<string,T.Group>();private queue:{x:number;z:number}[]=[];private center='';private revision=-1;private edits=new Map<string,string>();private pending=new Set<string>();
  private box=new T.BoxGeometry(1,1,1);private sphere=new T.SphereGeometry(1,8,6);private materials=new Map<string,T.MeshStandardMaterial>();private far?:T.Mesh;
  private sky=new T.Group();private clouds?:T.InstancedMesh;private cloudMaterial=new T.MeshBasicMaterial({color:'#edf1ec',transparent:true,opacity:.68,depthWrite:false});private precipitation?:T.Points;private animals:{object:T.Group;home:T.Vector3;phase:number;species:string;last:number;legs:T.Object3D[];wings:T.Object3D[];state:string}[]=[];
- private geometries:T.BufferGeometry[]=[];private animalCell='';private nearBounds?:{x:number;z:number;r:number};
- constructor(parent:T.Scene,private quality:string){parent.add(this.group);this.group.name='ExplorationLandscape';this.group.add(this.buildings,this.sky);
+ private geometries:T.BufferGeometry[]=[];private animalCell='';private farTiles=new Map<string,number[]>();
+ constructor(parent:T.Scene,private quality:string,private construction?:{get:(block:string)=>T.BufferGeometry},private blockMaterial?:(block:TerrainBlock)=>T.Material){parent.add(this.group);this.group.name='ExplorationLandscape';this.group.add(this.buildings,this.sky);
   this.clouds=new T.InstancedMesh(this.sphere,this.cloudMaterial,36);const d=new T.Object3D();for(let i=0;i<36;i++){d.position.set(Math.sin(i*3.7)*570,155+(i%5)*18,Math.cos(i*2.3)*570);d.scale.set(28+i%3*7,4,13);d.updateMatrix();this.clouds.setMatrixAt(i,d.matrix);}this.clouds.computeBoundingSphere();this.sky.add(this.clouds);
   const p=new Float32Array((quality==='low'?90:220)*3);for(let i=0;i<p.length;i++)p[i]=Math.sin(i*3.123)*18;const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));this.precipitation=new T.Points(g,new T.PointsMaterial({color:'#d8e8f1',size:.065,transparent:true,opacity:.6,depthWrite:false}));this.precipitation.frustumCulled=false;this.sky.add(this.precipitation);
  }
@@ -21,53 +21,68 @@ export class LandscapeScene {
   const o=new T.Mesh(geometry,this.material(color));o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;
  }
  private instances(parent:T.Group,points:number[][],color:string){if(!points.length)return;const mesh=new T.InstancedMesh(this.box,this.material(color),points.length),d=new T.Object3D();points.forEach(([x,y,z,sx,sy,sz],i)=>{d.position.set(x,y,z);d.scale.set(sx,sy,sz);d.updateMatrix();mesh.setMatrixAt(i,d.matrix);});mesh.computeBoundingSphere();mesh.receiveShadow=true;mesh.castShadow=this.quality==='high';parent.add(mesh);}
- private releaseChunk(group:T.Group){group.traverse(o=>{if(o instanceof T.InstancedMesh)o.dispose();if(o instanceof T.Mesh&&o.geometry!==this.box)o.geometry.dispose();});group.removeFromParent();}
+ private releaseChunk(group:T.Group){group.traverse(o=>{if(o instanceof T.InstancedMesh)o.dispose();if(o instanceof T.Mesh&&!o.userData.sharedGeometry&&o.geometry!==this.box)o.geometry.dispose();});group.removeFromParent();}
  private terrainMesh(w:World,x0:number,z0:number,size:number,step:number){
-  const positions:number[]=[],normals:number[]=[],tints:number[]=[],c=new T.Color();
+  const positions:number[]=[],tints:number[]=[],c=new T.Color();
   const face=(v:number[][],color:string)=>{c.set(color);for(const i of [0,1,2,0,2,3]){positions.push(...v[i]);tints.push(c.r,c.g,c.b);}};
-  for(let z=z0;z<z0+size;z+=step)for(let x=x0;x<x0+size;x+=step){if(!landscapeRegion(x,z))continue;if(step>1&&this.nearBounds){const n=this.nearBounds;if(x>=n.x-n.r&&x<n.x+n.r+16&&z>=n.z-n.r&&z<n.z+n.r+16)continue;}const env=landscapeEnvironment(w.seed,x,z),h=env.height;
-   const color=env.road||env.trail?'#b8a77e':env.water?'#9c977e':colors[env.biome];
-   // Near surface honours player mining and placed blocks; distant geometry is simplified.
-   let top=h;if(step===1){for(let y=h-1;y>=-18;y--){if(blockAt(w,x,y,z)){top=y+1;break;}}}
-   face([[x,top,z],[x,top,z+step],[x+step,top,z+step],[x+step,top,z]],color);
-   for(const [dx,dz] of [[step,0],[-step,0],[0,step],[0,-step]]){const nh=landscapeHeight(w.seed,x+dx,z+dz);if(nh>=top)continue;
-    const side=(bottom:number,upper:number)=>{
-     if(dx>0)face([[x+step,bottom,z],[x+step,upper,z],[x+step,upper,z+step],[x+step,bottom,z+step]],'#847e6d');
-     if(dx<0)face([[x,bottom,z+step],[x,upper,z+step],[x,upper,z],[x,bottom,z]],'#847e6d');
-     if(dz>0)face([[x+step,bottom,z+step],[x+step,upper,z+step],[x,upper,z+step],[x,bottom,z+step]],'#847e6d');
-     if(dz<0)face([[x,bottom,z],[x,upper,z],[x+step,upper,z],[x+step,bottom,z]],'#847e6d');
-    };
-    const cave=32+Math.floor(Math.sin(z/40)*3);
-    if(step===1&&h>cave&&Math.abs(x-(326+Math.sin(z/30)*7))<3){if(nh<cave)side(nh,Math.min(cave,top));if(top>cave+4)side(Math.max(nh,cave+4),top);}else side(nh,top);
+  const ground=new Map<string,number>(),cache=new Map<string,TerrainBlock|null>();
+  const height=(x:number,z:number)=>{const key=x+','+z;if(!ground.has(key))ground.set(key,terrainHeight(w,x,z));return ground.get(key)!;};
+  const get=(x:number,y:number,z:number)=>{const key=[x,y,z].join(',');if(!cache.has(key))cache.set(key,blockAt(w,x,y,z));return cache.get(key)!;};
+  const candidates=new Map<string,{x:number;y:number;z:number}>();
+  const add=(x:number,y:number,z:number)=>{if(x>=x0&&x<x0+size&&z>=z0&&z<z0+size&&landscapeRegion(x,z)&&y<height(x,z)&&y>=-18)candidates.set([x,y,z].join(','),{x,y,z});};
+  for(let z=z0;z<z0+size;z+=step)for(let x=x0;x<x0+size;x+=step){if(!landscapeRegion(x,z))continue;
+   const env=landscapeEnvironment(w.seed,x,z),h=height(x,z),color=env.road||env.trail?'#b8a77e':env.water?'#9c977e':landscapeColor(w.seed,x,z);
+   if(step>1){
+    // Coarse terrain stays under resident chunks until they have actually loaded.
+    const start=positions.length/3;this.farTiles.set(Math.floor(x/16)+':'+Math.floor(z/16),[start,start+1,start+2,start+3,start+4,start+5]);
+    face([[x,h,z],[x,height(x,z+step),z+step],[x+step,height(x+step,z+step),z+step],[x+step,height(x+step,z),z]],color);continue;
    }
-   // Interior cave faces come from the same solid/air cells used by collision.
+   add(x,h-1,z);
+   for(const [dx,dz]of [[1,0],[-1,0],[0,1],[0,-1]])for(let y=height(x+dx,z+dz);y<h;y++)add(x,y,z);
    const cave=32+Math.floor(Math.sin(z/40)*3);
-   if(step===1&&Math.abs(x-(326+Math.sin(z/30)*7))<5&&h>cave){for(let y=cave-2;y<=cave+5;y++){
-    if(!blockAt(w,x,y,z))continue;
-    if(!blockAt(w,x,y+1,z))face([[x,y+1,z],[x,y+1,z+1],[x+1,y+1,z+1],[x+1,y+1,z]],'#8f897d');
-    if(!blockAt(w,x,y-1,z))face([[x,y,z+1],[x,y,z],[x+1,y,z],[x+1,y,z+1]],'#6e716b');
-    if(!blockAt(w,x+1,y,z))face([[x+1,y,z],[x+1,y+1,z],[x+1,y+1,z+1],[x+1,y,z+1]],'#7b8178');
-    if(!blockAt(w,x-1,y,z))face([[x,y,z+1],[x,y+1,z+1],[x,y+1,z],[x,y,z]],'#7b8178');
-    if(!blockAt(w,x,y,z+1))face([[x+1,y,z+1],[x+1,y+1,z+1],[x,y+1,z+1],[x,y,z+1]],'#7b8178');
-    if(!blockAt(w,x,y,z-1))face([[x,y,z],[x,y+1,z],[x+1,y+1,z],[x+1,y,z]],'#7b8178');
-   }}
+   if(Math.abs(x-(326+Math.sin(z/30)*7))<5&&h>cave)for(let y=cave-2;y<=cave+5;y++)add(x,y,z);
+   if(env.water&&env.road){add(x,env.water.surface-env.water.depth-1,z);add(x,h-1,z);}
   }
-  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new T.Float32BufferAttribute(tints,3));geometry.computeVertexNormals();geometry.computeBoundingSphere();
+  if(step===1)for(const key of Object.keys(w.voxels?.edits||{})){const [x,y,z]=key.split(',').map(Number);add(x,y,z);for(const [dx,dy,dz]of [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]])add(x+dx,y+dy,z+dz);}
+  for(const {x,y,z}of candidates.values()){
+   const b=get(x,y,z);if(!solid(b)||Object.hasOwn(w.voxels?.edits||{},[x,y,z].join(',')))continue;const env=landscapeEnvironment(w.seed,x,z),top=env.road||env.trail?'#b8a77e':env.water?'#9c977e':landscapeColor(w.seed,x,z),color=y===height(x,z)-1?top:VOXEL_COLORS[b!]||'#847e6d';
+   if(!solid(get(x,y+1,z)))face([[x,y+1,z],[x,y+1,z+1],[x+1,y+1,z+1],[x+1,y+1,z]],color);
+   if(!solid(get(x,y-1,z)))face([[x,y,z+1],[x,y,z],[x+1,y,z],[x+1,y,z+1]],'#6e716b');
+   if(!solid(get(x+1,y,z)))face([[x+1,y,z],[x+1,y+1,z],[x+1,y+1,z+1],[x+1,y,z+1]],color);
+   if(!solid(get(x-1,y,z)))face([[x,y,z+1],[x,y+1,z+1],[x,y+1,z],[x,y,z]],color);
+   if(!solid(get(x,y,z+1)))face([[x+1,y,z+1],[x+1,y+1,z+1],[x,y+1,z+1],[x,y,z+1]],color);
+   if(!solid(get(x,y,z-1)))face([[x,y,z],[x,y+1,z],[x+1,y+1,z],[x+1,y,z]],color);
+  }
+  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new T.Float32BufferAttribute(tints,3));geometry.computeVertexNormals();geometry.computeBoundingSphere();if(step>1)geometry.setIndex(Array.from({length:positions.length/3},(_,i)=>i));
   const mesh=new T.Mesh(geometry,this.surface);mesh.receiveShadow=true;return mesh;
+ }
+ private refreshFar(){
+  const index=this.far?.geometry.index;if(!index)return;
+  for(const [key,indices]of this.farTiles){const loaded=this.chunks.has(key);for(const i of indices)index.setX(i,loaded?indices[0]:i);}index.needsUpdate=true;
  }
  private surface=new T.MeshStandardMaterial({vertexColors:true,roughness:.95});
  private water=new T.MeshStandardMaterial({color:'#4da3b3',transparent:true,opacity:.42,roughness:.18,metalness:.15,depthWrite:false,side:T.DoubleSide});
  private chunk(w:World,cx:number,cz:number){const g=new T.Group(),x0=cx*16,z0=cz*16;g.add(this.terrainMesh(w,x0,z0,16,1));const wood:number[][]=[],leaves:number[][]=[],plants:number[][]=[],flowers:number[][]=[],shrubs:number[][]=[],water:number[][]=[];
   for(let z=z0;z<z0+16;z++)for(let x=x0;x<x0+16;x++){if(!landscapeRegion(x,z))continue;const e=landscapeEnvironment(w.seed,x,z),t=landscapeTree(w.seed,x,z);
    if(t){for(let y=t.base;y<t.base+t.height;y++)if(blockAt(w,x,y,z)==='wood')wood.push([x+.5,y+.5,z+.5,1,1,1]);for(let dy=-3;dy<=0;dy++)for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++){const y=t.base+t.height+dy;if(blockAt(w,x+dx,y,z+dz)==='leaves')leaves.push([x+dx+.5,y+.5,z+dz+.5,1,1,1]);}}
-   if(e.water&&!e.road){water.push([x+.5,e.water.surface,z+.5,1,.035,1]);if(e.water.kind==='waterfall'){const next=waterProfile(x,z+1);if(next&&next.surface<e.water.surface)water.push([x+.5,(next.surface+e.water.surface)/2,z+1,1,e.water.surface-next.surface,.06]);}}
-   if(!e.road&&!e.trail&&!t&&e.height<130&&landscapeHash(x,z,w.seed+17)<.10){const h=landscapeHash(x,z,w.seed+23);plants.push([x+.5,e.height+(e.biome==='wetland'?.55:.18),z+.5,.13,e.biome==='wetland'?1.1:.36,.13]);if(e.biome==='meadow'&&h<.3)flowers.push([x+.5,e.height+.4,z+.5,.27,.12,.27]);if(e.biome==='forest'&&h<.2)shrubs.push([x+.5,e.height+.35,z+.5,.8,.7,.8]);}
+   if(e.water){water.push([x+.5,e.water.surface,z+.5,1,.035,1]);if(e.water.kind==='waterfall'){const next=waterProfile(x,z+1);if(next&&next.surface<e.water.surface)water.push([x+.5,(next.surface+e.water.surface)/2,z+1,1,e.water.surface-next.surface,.06]);}}
+   if(!e.road&&!e.trail&&!t&&!e.water&&solid(blockAt(w,x,e.height-1,z))&&e.height<130&&landscapeHash(x,z,w.seed+17)<.10){const h=landscapeHash(x,z,w.seed+23);plants.push([x+.5,e.height+(e.biome==='wetland'?.55:.18),z+.5,.13,e.biome==='wetland'?1.1:.36,.13]);if(e.biome==='meadow'&&h<.3)flowers.push([x+.5,e.height+.4,z+.5,.27,.12,.27]);if(e.biome==='forest'&&h<.2)shrubs.push([x+.5,e.height+.35,z+.5,.8,.7,.8]);}
   }
   this.instances(g,wood,'#72513b');this.instances(g,leaves,'#396a4e');this.instances(g,plants,'#90a75a');this.instances(g,flowers,'#ebc482');this.instances(g,shrubs,'#567349');
   if(water.length){this.instances(g,water,'#4da3b3');const m=g.children[g.children.length-1] as T.Mesh;m.material=this.water;m.castShadow=false;}
-  // Edits above the surface use the same coordinates as the authoritative voxel map.
-  const edits=new Map<string,number[][]>();for(const [key,b]of Object.entries(w.voxels?.edits||{})){if(!b)continue;const [x,y,z]=key.split(',').map(Number);if(x>=x0&&x<x0+16&&z>=z0&&z<z0+16&&landscapeRegion(x,z)){const list=edits.get(b)||[];list.push([x+.5,y+.5,z+.5,1,1,1]);edits.set(b,list);}}
-  for(const [b,points]of edits)this.instances(g,points,b.includes('wood')||b==='plank'?'#9c754e':'#8a9299');
+  // Every placed material uses the same Blender shape, rotation and texture as the old map.
+  const edits=new Map<TerrainBlock,{x:number;y:number;z:number}[]>();
+  for(const [key,b]of Object.entries(w.voxels?.edits||{})){if(!b)continue;const [x,y,z]=key.split(',').map(Number);
+   if(x<x0||x>=x0+16||z<z0||z>=z0+16||!landscapeRegion(x,z))continue;
+   if(fullCube(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>!!blockAt(w,x+dx,y+dy,z+dz)&&fullCube(blockAt(w,x+dx,y+dy,z+dz)!)))continue;
+   const list=edits.get(b)||[];list.push({x,y,z});edits.set(b,list);
+   if(b==='door'&&blockAt(w,x,y+1,z)==='door-top'){const tops=edits.get('door-top')||[];tops.push({x,y:y+1,z});edits.set('door-top',tops);}
+  }
+  for(const [b,points]of edits){const mesh=new T.InstancedMesh(this.construction?.get(b)||this.box,this.blockMaterial?.(b)||this.material(VOXEL_COLORS[b]),points.length),matrix=new T.Matrix4();
+   points.forEach(({x,y,z},i)=>{matrix.makeRotationY((w.voxels?.rotations?.[[x,b==='door-top'?y-1:y,z].join(',')]||0)*Math.PI/2);matrix.setPosition(x+.5,y+.5,z+.5);
+    if(b==='door'||b==='door-top'){const base=b==='door-top'?y-1:y,alongX=solid(blockAt(w,x-1,base,z))||solid(blockAt(w,x+1,base,z));matrix.scale(new T.Vector3(alongX?1:.16,1,alongX?.16:1));}mesh.setMatrixAt(i,matrix);});
+   mesh.userData.sharedGeometry=true;mesh.computeBoundingSphere();mesh.castShadow=this.quality==='high';mesh.receiveShadow=true;g.add(mesh);
+  }
   return g;
  }
  private landmarks(w:World){
@@ -105,15 +120,24 @@ export class LandscapeScene {
  update(w:World,position:T.Vector3,time:number,night:boolean,reduced:boolean){
   const weather=Math.floor(w.life.time/90+w.seed)%5===0;this.precipitation!.visible=!reduced&&(weather||position.y>190);this.precipitation!.position.copy(position);if(this.precipitation!.visible){const p=this.precipitation!.geometry.getAttribute('position') as T.BufferAttribute;for(let i=0;i<p.count;i++){p.setY(i,18-((time*(position.y>190?1:8)+i*1.71)%36));p.setX(i,Math.sin(i*3.123+time*.1)*18);}p.needsUpdate=true;}
   this.cloudMaterial.color.set(night?'#65758a':weather?'#adb8bc':'#edf1ec');
-  const cx=Math.floor(position.x/16),cz=Math.floor(position.z/16),radius=this.quality==='low'?2:3,key=cx+':'+cz+':'+(w.voxels?.revision||0);
-  if(!this.far){this.far=this.terrainMesh(w,-512,-512,1280,16);this.far.position.y=-.25;this.group.add(this.far);this.landmarks(w);}
-  if(key!==this.center){const edited=this.revision!==(w.voxels?.revision||0);this.revision=w.voxels?.revision||0;this.center=key;const wanted=new Set<string>();this.queue=[];
-   for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){const x=cx+dx,z=cz+dz,k=x+':'+z;if(legacyRegion(x*16,z*16)&&legacyRegion(x*16+15,z*16+15))continue;wanted.add(k);if(edited&&this.chunks.has(k)){this.releaseChunk(this.chunks.get(k)!);this.chunks.delete(k);}if(!this.chunks.has(k))this.queue.push({x,z});}
-   for(const [k,g]of this.chunks)if(!wanted.has(k)){this.releaseChunk(g);this.chunks.delete(k);}
-   this.queue.sort((a,b)=>Math.hypot(a.x-cx,a.z-cz)-Math.hypot(b.x-cx,b.z-cz));
-   this.nearBounds={x:cx*16,z:cz*16,r:radius*16};this.far.geometry.dispose();this.far.removeFromParent();this.far=this.terrainMesh(w,-512,-512,1280,16);this.far.position.y=-.25;this.group.add(this.far);
+  const cx=Math.floor(position.x/16),cz=Math.floor(position.z/16),radius=this.quality==='low'?2:3,center=cx+':'+cz,revision=w.voxels?.revision||0;
+  if(!this.far){this.far=this.terrainMesh(w,-512,-512,1280,16);this.far.position.y=-1.1;this.group.add(this.far);this.landmarks(w);}
+  const dirty=new Set<string>();
+  if(revision!==this.revision){
+   const next=new Map(Object.entries(w.voxels?.edits||{}).map(([k,b])=>[k,String(b)+':'+(w.voxels?.rotations?.[k]||0)]));
+   for(const key of new Set([...next.keys(),...this.edits.keys()]))if(next.get(key)!==this.edits.get(key)){const [x,,z]=key.split(',').map(Number);for(const [dx,dz]of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])dirty.add(Math.floor((x+dx)/16)+':'+Math.floor((z+dz)/16));}
+   this.edits=next;this.revision=revision;
   }
-  const job=this.queue.shift();if(job){const g=this.chunk(w,job.x,job.z);this.chunks.set(job.x+':'+job.z,g);this.group.add(g);}
+  if(center!==this.center||dirty.size){this.center=center;const wanted=new Set<string>();
+   for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){const x=cx+dx,z=cz+dz,k=x+':'+z;if(legacyRegion(x*16,z*16)&&legacyRegion(x*16+15,z*16+15))continue;if(x*16<-512||z*16<-512||x*16>=768||z*16>=768)continue;wanted.add(k);if(!this.chunks.has(k)||dirty.has(k))this.pending.add(k);}
+   for(const [k,g]of this.chunks)if(!wanted.has(k)){this.releaseChunk(g);this.chunks.delete(k);}
+   this.refreshFar();
+   for(const k of this.pending)if(!wanted.has(k))this.pending.delete(k);
+   this.queue=[...this.pending].map(k=>{const [x,z]=k.split(':').map(Number);return {x,z};}).sort((a,b)=>Math.hypot(a.x-cx,a.z-cz)-Math.hypot(b.x-cx,b.z-cz));
+   // Keep old geometry while its replacement is queued; block edits never clear every chunk.
+
+  }
+  const job=this.queue.shift();if(job){const k=job.x+':'+job.z,g=this.chunk(w,job.x,job.z),old=this.chunks.get(k);if(old)this.releaseChunk(old);this.chunks.set(k,g);this.pending.delete(k);this.group.add(g);this.refreshFar();}
   const animalCell=Math.floor(position.x/64)+':'+Math.floor(position.z/64);if(animalCell!==this.animalCell){this.animalCell=animalCell;this.spawnAnimals(w,position.x,position.z);}
   for(const a of this.animals){if(time-a.last<.15||reduced)continue;const dt=Math.min(.3,time-a.last);a.last=time;const nocturnal=a.species==='owl';a.state=night!==nocturnal?'rest':Math.sin(time*.18+a.phase)>.1?'walk':'graze';
    if(['fish','duck','eagle'].includes(a.species))a.state='walk';const scared=a.object.position.distanceTo(position)<8;if(scared)a.state='flee';

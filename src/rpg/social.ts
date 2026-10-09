@@ -98,7 +98,8 @@ export function socialNear(a: Adventurer, b: Adventurer) {
         Math.abs((a.life.roomPos?.y || 0) - (b.life?.roomPos?.y || 0)) <=
         5
     );
-  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 4;
+  const ax=a.position3D?.x??a.x+.5,az=a.position3D?.z??a.y+.5,bx=b.position3D?.x??b.x+.5,bz=b.position3D?.z??b.y+.5;
+  return Math.abs(ax-bx)+Math.abs(az-bz)<=4&&(!(a.position3D&&b.position3D)||Math.abs((a.position3D.y??0)-(b.position3D.y??0))<=3);
 }
 function available(p: Adventurer) {
   return (

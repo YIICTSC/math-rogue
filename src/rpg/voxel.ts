@@ -1,4 +1,5 @@
-import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES} from './worldLandscape';
+import {landscapeGate} from './landscapeMap';
+import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES,LANDMARKS,mountainHeight} from './worldLandscape';
 import {WIDTH,HEIGHT,type World,type Adventurer} from './engine';
 import {natureAt,lifePlayer,lifeWalkable,type Material} from './life';
 import {energyOf} from './energy';
@@ -13,7 +14,7 @@ export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLO
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'door-top';
 export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
 export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
-export type VoxelAction=WorkshopAction|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export type VoxelAction=WorkshopAction|{type:'voxel-landmark'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 export function voxelWater(w:World,x:number,z:number){
  if(!legacyRegion(x,z))return waterProfile(x,z);
@@ -103,7 +104,7 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
   if(hash%31===0)return 'clay';if(hash%23===0)return 'gravel';if(y<=-14)return hash%3?'deepslate':'obsidian';
   return (['stone','stone','stone','granite','diorite','andesite','basalt'] as const)[Math.floor(x/5+z/5)%7];
  }
- if(protectedCell||w.tiles[z*WIDTH+x]==='water')return null;
+ if(protectedCell||landscapeGate(x,z)||w.tiles[z*WIDTH+x]==='water')return null;
  return vegetationAt(w,x,y,z);
 }
 export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='door'&&b!=='door-top';
@@ -124,11 +125,30 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds')return applyWorkshop(w,p,a,now);
  const tell=(text:string)=>{p.message=text;w.revision++;return true;};
  if(a.type==='voxel-snap'){
+  if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z)){
+   const pos=p.position3D,x=Math.floor(pos.x),z=Math.floor(pos.z);
+   const water=voxelWater(w,x,z);if(water&&bodyClear(w,x,z,water.surface-1.3)){pos.y=water.surface-1.3;pos.surface2D=true;pos.swimming=false;delete pos.vy;w.revision++;return true;}
+   const floor=floorAt(w,x,z,(pos.y??0)+.01);
+   if(floor!==null&&Math.abs(floor-(pos.y??0))<.1){pos.surface2D=true;delete pos.vy;w.revision++;return true;}
+   // Surface projection is safe and does not discard the exterior X/Z coordinates.
+   for(let r=0;r<=12;r++)for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++){if(Math.max(Math.abs(dx),Math.abs(dz))!==r)continue;const nx=x+dx,nz=z+dz,top=floorAt(w,nx,nz,terrainHeight(w,nx,nz)+1);if(top!==null&&!voxelWater(w,nx,nz)){p.position3D={x:nx+.5,z:nz+.5,y:top,surface2D:true};w.revision++;return true;}}
+   pos.surface2D=true;delete pos.vy;w.revision++;return true;
+  }
   // Underground coordinates never leak into the 2D tile simulation.
   if(!lifeWalkable(w,p.x,p.y)){let target:{x:number;y:number}|undefined;for(let r=1;r<=WIDTH+HEIGHT&&!target;r++)for(let dx=-r;dx<=r&&!target;dx++){const dz=r-Math.abs(dx);for(const sign of [-1,1])if(lifeWalkable(w,p.x+dx,p.y+dz*sign)){target={x:p.x+dx,y:p.y+dz*sign};break;}}if(target){p.x=target.x;p.y=target.y;}}
   delete p.position3D;w.revision++;return true;
  }
  upgrade(w);
+ if(a.type==='voxel-landmark'){
+  const pos=p.position3D;if(!pos)return false;
+  const l=LANDMARKS.find(l=>Math.abs(pos.x-l.x)<l.width/2+4&&Math.abs(pos.z-l.z)<l.depth/2+6&&Math.abs((pos.y??0)-(l.kind==='tower'?Math.floor(mountainHeight(l.x,l.z)):0))<8);
+  if(!l)return tell('道をたどって施設を探しましょう。コンパスで目的地を選べます。');
+  const id='landmark-'+l.id,discoveries=p.voxelDiscoveries??=[];
+  if(discoveries.includes(id))return tell('この施設は探索済みです。建物の中や上階も歩いて調べられます。');
+  discoveries.push(id);const lp=lifePlayer(p);lp.bag.crystal=(lp.bag.crystal||0)+1;
+  if(LANDMARKS.every(l=>discoveries.includes('landmark-'+l.id))){lp.bag.steel=(lp.bag.steel||0)+5;return tell('5つの施設の探索を達成！ 魔晶石と鋼材5個を獲得しました。');}
+  return tell('新しい施設を発見！ 魔晶石を1個獲得しました。');
+ }
  if(a.type==='voxel-jump'||a.type==='voxel-dive'){
   const pos=p.position3D;if(!pos)return false;
   const water=voxelWater(w,pos.x,pos.z);
@@ -152,7 +172,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   }
   const dx=a.dx*Math.min(1,travel/(length||1)),dz=a.dy*Math.min(1,travel/(length||1));
   const step=(nx:number,nz:number)=>{if(!legacyRegion(nx,nz)&&!landscapeRegion(nx,nz))return false;const r=WORLD_SCALE.radius;const corners=[[-r,-r],[-r,r],[r,-r],[r,r]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;let next=Math.max(...heights as number[]);const pool=voxelWater(w,nx,nz);if(pool&&next<pool.surface){next=Math.max(next,p.position3D?.swimming?Math.min(feet,pool.surface-.25):pool.surface-1.3);}else if(vy)next=Math.max(next,feet);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+WORLD_SCALE.playerHeight)))return false;x=nx;z=nz;feet=next;return true;};
-  if(dx)step(x+dx,z);if(dz)step(x,z+dz);p.position3D={x,z,y:feet,...(vy?{vy}:{}),...(water?{swimming:!!p.position3D?.swimming}:{})};if(legacyRegion(x,z)){p.x=Math.max(1,Math.min(WIDTH-2,Math.floor(x)));p.y=Math.max(1,Math.min(HEIGHT-2,Math.floor(z)));}p.lastMove=now;p.moveCount++;w.revision++;
+  if(dx)step(x+dx,z);if(dz)step(x,z+dz);p.position3D={x,z,y:feet,oxygen:p.position3D?.oxygen,waterAt:p.position3D?.waterAt,...(vy?{vy}:{}),...(water?{swimming:!!p.position3D?.swimming}:{})};if(legacyRegion(x,z)){p.x=Math.max(1,Math.min(WIDTH-2,Math.floor(x)));p.y=Math.max(1,Math.min(HEIGHT-2,Math.floor(z)));}p.lastMove=now;p.moveCount++;w.revision++;
   const oasis=legacyRegion(x,z)?undergroundOasis(w,p.x,feet,p.y):undefined;if(oasis&&!p.voxelDiscoveries?.includes(oasis.id)){(p.voxelDiscoveries??=[]).push(oasis.id);p.message='地下のオアシスを発見しました！';}
   return true;
  }
@@ -182,4 +202,55 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  // Mining under one's feet causes a fall to the next solid floor.
  for(const q of Object.values(w.players))if(q.position3D){const next=floorAt(w,Math.floor(q.position3D.x),Math.floor(q.position3D.z),playerHeight(w,q));if(next!==null&&!q.position3D.vy&&!voxelWater(w,q.position3D.x,q.position3D.z))q.position3D.y=next;}
  return true;
+}
+
+/** Exterior tile movement shares the exact solid/air map with 3D walking. */
+export function landscapeStep(w:World,pos:{x:number;z:number;y?:number},dx:number,dz:number){
+ const x=Math.floor(pos.x)+dx,z=Math.floor(pos.z)+dz;
+ if(!legacyRegion(x,z)&&!landscapeRegion(x,z))return null;
+ let top=floorAt(w,x,z,(pos.y??0)+1);const water=voxelWater(w,x,z);
+ if(water&&(top===null||top<water.surface)){top=water.surface-1.3;if(!bodyClear(w,x,z,top))return null;}if(top===null)return null;
+ if(legacyRegion(x,z)&&!lifeWalkable(w,x,z)&&!landscapeGate(x,z))return null;
+ return {x:x+.5,z:z+.5,y:top};
+}
+export function moveLandscape2D(w:World,p:Adventurer,dx:number,dz:number,now:number){
+ const pos=p.position3D;if(!pos)return false;const next=landscapeStep(w,pos,dx,dz);if(!next)return false;
+ p.position3D={...next,surface2D:true,oxygen:pos.oxygen,waterAt:pos.waterAt};p.lastMove=now;p.moveCount++;w.revision++;
+ if(legacyRegion(next.x,next.z)){p.x=Math.floor(next.x);p.y=Math.floor(next.z);delete p.position3D;}
+ return true;
+}
+/** Bounded A* uses the same height/body test as authoritative movement. */
+export function findLandscapeRoute(w:World,p:Adventurer,x:number,z:number){
+ if(!p.position3D||!Number.isInteger(x)||!Number.isInteger(z)||!landscapeRegion(x,z)&&!legacyRegion(x,z))return [];
+ const start=p.position3D,heuristic=(pos:{x:number;z:number})=>Math.abs(Math.floor(pos.x)-x)+Math.abs(Math.floor(pos.z)-z),key=(pos:{x:number;z:number})=>Math.floor(pos.x)+','+Math.floor(pos.z);
+ type Node={pos:{x:number;z:number;y?:number};path:{x:number;y:number}[];cost:number};
+ const open:Node[]=[{pos:start,path:[],cost:0}],seen=new Map<string,number>([[key(start),0]]);let best=open[0];
+ for(let count=0;open.length&&count<512;count++){
+  open.sort((a,b)=>a.cost+heuristic(a.pos)-b.cost-heuristic(b.pos));const current=open.shift()!;
+  if(heuristic(current.pos)<heuristic(best.pos))best=current;if(!heuristic(current.pos))return current.path;
+  for(const [dx,dz]of [[1,0],[-1,0],[0,1],[0,-1]]){const pos=landscapeStep(w,current.pos,dx,dz);if(!pos)continue;const id=key(pos),cost=current.cost+1;if((seen.get(id)??Infinity)<=cost)continue;seen.set(id,cost);open.push({pos,cost,path:[...current.path,{x:Math.floor(pos.x),y:Math.floor(pos.z)}]});}
+ }
+ return best.path;
+}
+/** Authority-owned breath and currents continue even while the player stands still. */
+export function advanceVoxelWater(w:World,now:number){
+ if(!w.started||w.ended)return;
+ for(const p of Object.values(w.players)){
+  const pos=p.position3D;if(!pos||p.spectator||p.nativeScene||p.life?.indoors)continue;
+  const dt=Math.min(1,Math.max(0,(now-(pos.waterAt??now))/1000));pos.waterAt=now;
+  const pool=voxelWater(w,pos.x,pos.z),submerged=!!pool&&(pos.y??0)+EYE_HEIGHT<pool.surface;
+  const oxygen=Math.min(20,Math.max(0,(pos.oxygen??20)+(submerged?-dt:dt*4)));
+  if(pos.oxygen!==oxygen){pos.oxygen=oxygen;w.revision++;}
+  if(oxygen===0&&pool){
+   // Find a clear surface, including beside a bridge; never push into a solid deck.
+   let rescued=false;for(let r=0;r<=12&&!rescued;r++)for(let dx=-r;dx<=r&&!rescued;dx++)for(let dz=-r;dz<=r;dz++){
+    if(Math.max(Math.abs(dx),Math.abs(dz))!==r)continue;const x=Math.floor(pos.x)+dx,z=Math.floor(pos.z)+dz,water=voxelWater(w,x,z);if(!water)continue;
+    const feet=water.surface-1.3;if(bodyClear(w,x,z,feet)){pos.x=x+.5;pos.z=z+.5;pos.y=feet;pos.oxygen=5;pos.swimming=false;rescued=true;w.revision++;break;}
+   }
+   if(!rescued){const safe=w.sites.find(s=>s.kind==='town');if(safe){p.x=safe.x;p.y=safe.y;delete p.position3D;w.revision++;continue;}}
+  }
+  if(pool&&!pos.surface2D&&(pos.y??0)<pool.surface&&dt){const nx=pos.x+pool.flowX*dt*.3,nz=pos.z+pool.flowZ*dt*.3;
+   if(voxelWater(w,nx,nz)&&bodyClear(w,Math.floor(nx),Math.floor(nz),pos.y??0)){pos.x=nx;pos.z=nz;w.revision++;if(legacyRegion(nx,nz)){p.x=Math.floor(nx);p.y=Math.floor(nz);}}
+  }
+ }
 }

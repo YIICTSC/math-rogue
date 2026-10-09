@@ -1,7 +1,7 @@
 import LandscapeCompass from './LandscapeCompass';
 import {audioService} from '../services/audioService';
 import {LandscapeScene} from './landscapeScene';
-import {WORLD_SCALE,legacyRegion,waterProfile} from './worldLandscape';
+import {WORLD_SCALE,legacyRegion,landscapeEnvironment,waterProfile} from './worldLandscape';
 import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
 import {createConstructionGeometry,voxelMaterial} from './voxelRendering';
 import {fullCube} from './voxelCatalog';
@@ -119,7 +119,7 @@ export default function WorldScene3D(props: SceneProps) {
     scene.add(terrain, actors);
     let placements:Placement[]=[];
     const models=new StorybookModels(scene,()=>{key='';});
-    const landscape=new LandscapeScene(scene,prefs.mapQuality);
+    const landscape=new LandscapeScene(scene,prefs.mapQuality,construction,b=>voxelMaterials[renderBlocks.indexOf(b)]);
     const animatedWater=storybookWater();
     const geometries: THREE.BufferGeometry[] = [],
       materials: THREE.Material[] = [],
@@ -690,8 +690,8 @@ export default function WorldScene3D(props: SceneProps) {
           !a.spectator &&
           !a.life?.indoors &&
           Math.hypot(
-            a.x - w.players[latest.current.selfId].x,
-            a.y - w.players[latest.current.selfId].y,
+            (a.position3D?.x??a.x)-(w.players[latest.current.selfId].position3D?.x??w.players[latest.current.selfId].x),
+            (a.position3D?.z??a.y)-(w.players[latest.current.selfId].position3D?.z??w.players[latest.current.selfId].y),
           ) > 0.5
         ) {
           const image = a.hero?.frames.idle[0] || a.profile?.image;
@@ -705,7 +705,7 @@ export default function WorldScene3D(props: SceneProps) {
               WORLD_SCALE.playerHeight,
               a.id,
             );
-          else mesh(actors, cone, gold, a.x + 0.5, 0.5, a.y + 0.5, 0.2, 1, 0.2);
+          else mesh(actors, cone, gold, a.position3D?.x??a.x + 0.5, playerHeight(w,a)+.5, a.position3D?.z??a.y + 0.5, 0.2, 1, 0.2);
         }
     }
     const resize = () => {
@@ -875,7 +875,7 @@ export default function WorldScene3D(props: SceneProps) {
           camera.position.y+Math.tan(viewPitch),
           camera.position.z - Math.cos(yaw),
         );
-        const b = biomeAt(a.x, a.y).id;
+        const b = a.position3D&&!legacyRegion(a.position3D.x,a.position3D.z)?landscapeEnvironment(w.seed,a.position3D.x,a.position3D.z).biome:biomeAt(a.x,a.y).id;
         const sky =
           b === "ruins"
             ? "#a4a3bd"
@@ -930,7 +930,7 @@ export default function WorldScene3D(props: SceneProps) {
       landscape.update(w,camera.position,time/1000,phase===3,options.current.reducedMotion);
       ambience?.update(camera.position.y,underwater||!!pool,landscape.group.userData.stats.weather==='rain');
       renderer.domElement.dataset.landscape=JSON.stringify(landscape.group.userData.stats);renderer.domElement.dataset.underwater=String(underwater);
-      const underground=!underwater&&!exterior&&camera.position.y<-.5;lamp.position.copy(camera.position);lamp.intensity=underground?3:0;const nearest=oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);oasisLight.position.set(nearest.x,nearest.depth+1,nearest.z);oasisLight.intensity=underground?2.5:0;
+      const underground=!underwater&&camera.position.y<terrainHeight(w,Math.floor(camera.position.x),Math.floor(camera.position.z))-.5;lamp.position.copy(camera.position);lamp.intensity=underground?3:0;const nearest=oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);oasisLight.position.set(nearest.x,nearest.depth+1,nearest.z);oasisLight.intensity=underground?2.5:0;
       const brightness = underground?.1:phase === 3 ? 0.48 : phase === 2 ? 0.8 : 1;
       skyMaterial.uniforms.dark.value = brightness;
       skyMaterial.uniforms.tone.value.copy((scene.fog as THREE.FogExp2).color);
@@ -972,7 +972,7 @@ export default function WorldScene3D(props: SceneProps) {
   const text=(s:string)=>trans(s,props.languageMode||"JAPANESE");
   const command=(type:string)=>host.current?.dispatchEvent(new CustomEvent('voxel-command',{detail:type}));
   const me=props.world.players[props.selfId];
-  return <div className="rpg-world-3d" ref={host}>{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
+  return <div className="rpg-world-3d" ref={host}>{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
     <VoxelLookStick languageMode={props.languageMode||'JAPANESE'} onLook={(dx,dy)=>{props.onFacing(props.facing+dx);setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy)));}}/>
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>

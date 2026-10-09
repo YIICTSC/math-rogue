@@ -1,5 +1,7 @@
-import {applyRoomAction,type RoomAction,type VoxelRoom} from './voxelRooms';
-import {applyVoxel,type VoxelAction,type VoxelWorld} from './voxel';
+import {legacyRegion} from './worldLandscape';
+import {landscapeGate} from './landscapeMap';
+import {applyRoomAction,currentVoxelRoom,type RoomAction,type VoxelRoom} from './voxelRooms';
+import {applyVoxel,moveLandscape2D,advanceVoxelWater,type VoxelAction,type VoxelWorld} from './voxel';
 import {applyFarm,advanceFarm,type FarmState,type FarmAction} from './farm/model';
 import {applyCity,advanceCity,type CityState,type CityAction} from './city/model';
 import {applyTown,advanceTown,newTown,type TownState,type TownAction} from './town/model';
@@ -90,7 +92,7 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
-  position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean};
+  position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean;surface2D?:boolean;oxygen?:number;waterAt?:number};
   voxelDiscoveries?:string[];
   voxelAt?:number;
   hero?:CustomHero;
@@ -701,7 +703,7 @@ export function applyAction(
     return true;
   }
   const beyondLegacy=p.position3D&&(p.position3D.x<0||p.position3D.z<0||p.position3D.x>=WIDTH||p.position3D.z>=HEIGHT);
-  if(beyondLegacy&&!action.type.startsWith('voxel-')&&!action.type.startsWith('native-')&&action.type!=='life-craft')return false;
+  if(beyondLegacy&&!action.type.startsWith('voxel-')&&action.type!=='native-profile'&&action.type!=='native-learning'&&action.type!=='life-craft'&&action.type!=='move'&&!(action.type.startsWith('farm-pet-')&&currentVoxelRoom(w,p)))return false;
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if(w.town?.encounters?.[id]&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if(action.type.startsWith('voxel-room-'))return applyRoomAction(w,p,action as RoomAction);
@@ -733,15 +735,17 @@ export function applyAction(
       now - p.lastMove < 100
     )
       return false;
+    if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z))return moveLandscape2D(w,p,action.dx,action.dy,now);
     const x = p.x + action.dx,
       y = p.y + action.dy,
       tile = w.tiles[y * WIDTH + x];
+    if(landscapeGate(x,y)&&(x<=0||y<=0||x>=WIDTH-1||y>=HEIGHT-1)){p.position3D={x:p.x+.5,z:p.y+.5,y:0,surface2D:true};return moveLandscape2D(w,p,action.dx,action.dy,now);}
     if (
       x < 1 ||
       x >= WIDTH - 1 ||
       y < 1 ||
       y >= HEIGHT - 1 ||
-      !lifeWalkable(w,x,y)
+      (!lifeWalkable(w,x,y)&&!landscapeGate(x,y))
     )
       return false;
     delete p.position3D;
@@ -838,6 +842,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 
 export function advanceWorld(w: World, now = Date.now()) {
   if (w.started && !w.ended && w.timeLimitMinutes > 0 && now >= w.deadlineAt) endWorld(w, "timeout", now);
+  advanceVoxelWater(w,now);
   advanceLife(w,now);
   advanceSocial(w,now);
   advanceTown(w,now);

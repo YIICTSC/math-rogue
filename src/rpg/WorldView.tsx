@@ -1,3 +1,5 @@
+import LandscapeCompass from './LandscapeCompass';
+import {legacyRegion} from './worldLandscape';
 import React, { lazy, Suspense, useState } from "react";
 import WorldCanvas from "./WorldCanvas";
 import { useRpgPreferences, updateRpgPreferences } from "./preferences";
@@ -44,6 +46,7 @@ export default function WorldView(
       ) : (
         <WorldCanvas {...props} />
       )}{" "}
+      {prefs.mapView==='2D'&&props.world.players[props.selfId]?.position3D&&(()=>{const pos=props.world.players[props.selfId].position3D!;return !legacyRegion(pos.x,pos.z)?<LandscapeCompass x={pos.x} z={pos.z} languageMode={props.languageMode}/>:null;})()}
       {failed && (
         <button className="rpg-3d-fallback" onClick={() => setFailed(false)}>
           WebGL · 2D ✓

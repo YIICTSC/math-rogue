@@ -1,3 +1,4 @@
+import {legacyRegion} from '../worldLandscape';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { BIOMES, biomeAt } from "../biomes";
@@ -93,6 +94,7 @@ export function residentNear(w: World, p: Adventurer, id: string) {
           (b.visitHouse?.id === p.life?.indoors &&
             b.visitHouse.day === w.town?.day)),
     );
+  if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z))return false;
   const r = residentPosition(w, id);
   return Math.abs(r.x - p.x) + Math.abs(r.y - p.y) <= 2;
 }
@@ -179,6 +181,7 @@ export function advanceResidents(w: World) {
         (p) =>
           !p.spectator &&
           !p.life?.indoors &&
+          (!p.position3D||legacyRegion(p.position3D.x,p.position3D.z))&&
           Math.abs(p.x - r.x) + Math.abs(p.y - r.y) <= 2,
       );
     if (held) {
