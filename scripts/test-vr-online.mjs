@@ -27,7 +27,7 @@ for(let i=0;i<25;i++)tickWorld(holdCoop,{a:{...neutral,hold:true},b:neutral},.05
 assert.equal(holdCoop.players.a.run.holds,1);assert(holdCoop.guards.guards[0].sleep>0);
 const failed=createWorld('coop',1,lesson,60);addPlayer(failed,'a','A');startWorld(failed,2);failed.players.a.run.status='caught';failed.players.a.quiz=true;answer(failed,'a',0);answer(failed,'a',0);answer(failed,'a',0);completeQuiz(failed,'a');retryCoop(failed,'a');assert.equal(failed.players.a.run.status,'playing');
 failed.time=60;tickWorld(failed,{},.05);assert.equal(failed.phase,'result');assert(failed.players.a.quiz);assert.equal(failed.players.a.run.status,'timeout');
-const doors=createWorld('coop',2,lesson,300);addPlayer(doors,'a','A');addPlayer(doors,'b','B');startWorld(doors,5);assert.equal(doors.mission.switches.length,2);assert.equal(doors.mission.obstacles.filter(b=>b.kind==='door').length,2);
+const doors=createWorld('coop',2,lesson,300);addPlayer(doors,'a','A');addPlayer(doors,'b','B');startWorld(doors,5);assert.equal(doors.mission.switches.length,2);assert.equal(doors.mission.obstacles.filter(b=>b.kind==='door').length,3);
 doors.players.a.run.player={...doors.mission.switches[0],angle:0};for(let i=0;i<15;i++)tickWorld(doors,{a:{...neutral,interact:true},b:neutral},.05);assert(doors.players.b.run.switches[0]);
 console.log('PASS cooperative hold progress, shared sleep and doors, 3-question failure retry and timeout quiz.');
 

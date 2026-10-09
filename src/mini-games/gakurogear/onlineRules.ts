@@ -77,7 +77,7 @@ export function tickArena(w:OnlineWorld,dt:number) {
 }
 export function assistTeam(w:OnlineWorld,p:Participant,input:Input,dt:number) {
  const others=Object.values(w.players).filter(q=>q!==p&&q.connected),base=MISSIONS[w.missionId-1];
- if(!input.interact||Math.hypot(input.x,input.z)>.1||p.quiz){p.helpTarget='';p.helpProgress=0;return;}
+ if(!input.interact||Math.hypot(input.x,input.z)>.1||p.quiz||p.run.status!=='clear'){p.helpTarget='';p.helpProgress=0;return;}
  let target='',needed=1.2,complete:(()=>void)|undefined;
  for(const other of others){
   if(other.run.status==='caught'&&!other.quiz&&distance(p.run.player,other.run.player)<1.5&&clearSight(w.mission,p.run.player,other.run.player,true,p.run)){
