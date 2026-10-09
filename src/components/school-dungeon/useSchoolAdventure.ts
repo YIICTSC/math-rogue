@@ -257,7 +257,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
    }
 
    const near=ctx.enemies.find(e=>e.enemyType!=='SHOPKEEPER'&&Math.max(Math.abs(e.x-friend.x),Math.abs(e.y-friend.y))<=1);
-   if(near){friend.direction=companionDirection(near.x-friend.x,near.y-friend.y);const damage=friend.role==='GUARD'?5+friend.level*2:2+friend.level;ctx.setEnemies((a:any[])=>a.map(e=>e.id===near.id?{...e,hp:Math.max(1,e.hp-damage)}:e));friend.hp-=Math.max(1,Math.floor(near.attack/3));friend.xp++;if(friend.xp>=friend.level*12){friend.xp=0;friend.level++;friend.hp=40+friend.level*5;say('同級生が成長した！','Your classmate leveled up!');}}
+   if(near){friend.attackVisualAt=Date.now();friend.direction=companionDirection(near.x-friend.x,near.y-friend.y);const damage=friend.role==='GUARD'?5+friend.level*2:2+friend.level;ctx.setEnemies((a:any[])=>a.map(e=>e.id===near.id?{...e,hp:Math.max(1,e.hp-damage)}:e));friend.hp-=Math.max(1,Math.floor(near.attack/3));friend.xp++;if(friend.xp>=friend.level*12){friend.xp=0;friend.level++;friend.hp=40+friend.level*5;say('同級生が成長した！','Your classmate leveled up!');}}
    if(friend.role==='HEAL'&&s.floorTurns%8===0&&Math.max(Math.abs(friend.x-px),Math.abs(friend.y-py))<=2)ctx.setPlayer((p:any)=>({...p,hp:Math.min(p.maxHp,p.hp+5+friend.level)}));
    if(friend.role==='FETCH'&&s.floorTurns%3===0&&ctx.inventory.length<20){const loot=ctx.floorItems.find(e=>e.itemData&&!e.itemData.shopOwner&&Math.max(Math.abs(e.x-friend.x),Math.abs(e.y-friend.y))<=1);if(loot){updateInventory((a:any[])=>[...a,loot.itemData]);ctx.setFloorItems((a:any[])=>a.filter(e=>e.id!==loot.id));say('同級生が道具を届けてくれた。','Your classmate delivered a supply.');}}
    if(friend.hp<=0)say('同級生は安全な場所へ避難した。保健室で再合流できます。','Your classmate retreated. Reunite at a facility.');

@@ -1,3 +1,5 @@
+import EquipmentPreview from './school-dungeon/three/EquipmentPreview';
+import {useDungeon3D} from './school-dungeon/three/useDungeon3D';
 import {SchoolSupplyIcon} from './school-dungeon/sprites';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -233,6 +235,8 @@ interface Entity {
   itemData?: Item; 
   equipment?: EquipmentSlots;
   enemyType?: EnemyType;
+  visualTier?: number;
+  schoolRank?: number;
   shopItems?: Item[]; // For Shopkeeper
   
   // Trap specific
@@ -381,6 +385,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
 const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
   const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const threeView = useDungeon3D();
   const diagonalLockRef = useRef(false);
 
   useEffect(() => {
@@ -393,7 +398,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   
   // --- STATE ---
   const [map, setMap] = useState<TileType[][]>([]);
-  const [visitedMap, setVisitedMap] = useState<boolean[][]>([]); // Fog of War state
+  const [visitedMap, setVisitedMap] = useState<boolean[][]>(() => Array.from({length: MAP_H}, () => Array(MAP_W).fill(false))); // Fog of War state
   const [floorMapRevealed, setFloorMapRevealed] = useState(false); // Map Scroll effect
   const roomsRef = useRef<RoomRect[]>([]); // Keep track of rooms for logic
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
@@ -560,7 +565,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         setGameClear(debugPreview === 'ENDING');
     } else {
         const savedState = storageService.loadDungeonState();
-        if (savedState) {
+        if (savedState?.map?.length) {
             restoreState(savedState);
         } else {
             startNewGame();
@@ -602,7 +607,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const saveData = useCallback((immediate = false) => {
-      if (debugPreview || gameOver || gameClear || adventure.state.returned) { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
+      if (!map.length || debugPreview || gameOver || gameClear || adventure.state.returned) { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
       const persist = () => {
           if (adventure.state.returned) return;
           const state = {
@@ -1116,7 +1121,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
       return {
           id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], 
-          name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t,
+          name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t, visualTier: Math.min(4, 1 + Math.floor((floorLevel - 1) / 5)),
           status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0 },
           offset: { x: 0, y: 0 }
       };
@@ -2760,9 +2765,22 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           renderGame();
       }, 50); 
       return () => clearInterval(loop);
-  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme, spriteSheetRevision]);
+  }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme, spriteSheetRevision, adventure.revision, adventure.dojoRun, identifiedTypes]);
 
   const renderGame = () => {
+      if (threeView.draw({
+          map, player, enemies, floorItems, traps, floor, effects: visualEffects.current,
+          adventure: adventure.state, dojo: adventure.dojoRun,
+          visible: (x, y) => adventure.state.scene !== undefined || (adventure.visibleTile(x, y) && Boolean(floorMapRevealed || visitedMap[y]?.[x])),
+          sight: equipmentHas(player.equipment?.accessory, 'RING_SIGHT'),
+          trapSight: Boolean(equipmentHas(player.equipment?.accessory, 'RING_TRAP') || player.status.trapSight),
+          knownItem: item => !(adventure.state.mode === 'MYSTERY' || item.category === 'STAFF') || identifiedTypes.has(item.type),
+      })) {
+          visualEffects.current = visualEffects.current.filter(fx => --fx.duration > 0);
+          if (shake.current.duration > 0) shake.current.duration--;
+          return;
+      }
+
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -3127,6 +3145,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">{tr('装備')}</h3>
+                            {threeView.enabled && <EquipmentPreview gear={player.equipment || {}}/>}
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div>
                                     <span className="font-bold mr-2">[{tr('武')}]</span>
@@ -3260,6 +3279,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                     </div>
 
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
+                    <div ref={threeView.host} aria-hidden="true" style={{position:'absolute',inset:'53px 0 0',visibility:threeView.ready?'visible':'hidden',pointerEvents:'none'}} />
+                    <button type="button" aria-label="2D / 3D" onClick={threeView.toggle} style={{position:'absolute',bottom:6,right:6,zIndex:12,padding:'4px 10px',borderRadius:6,border:'1px solid #b9d4cc',background:'#172b35',color:'#fff3d5',fontWeight:700,fontSize:12}}>{threeView.enabled?'3D':'2D'}</button>
 
                     {/* Fast Forward Indicator */}
                     {isFastForwarding && (

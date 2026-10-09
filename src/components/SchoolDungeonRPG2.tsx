@@ -1,3 +1,5 @@
+import EquipmentPreview from './school-dungeon/three/EquipmentPreview';
+import {useDungeon3D} from './school-dungeon/three/useDungeon3D';
 import {SchoolSupplyIcon} from './school-dungeon/sprites';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -304,6 +306,8 @@ interface Entity {
   itemData?: Item; 
   equipment?: EquipmentSlots;
   enemyType?: EnemyType;
+  visualTier?: number;
+  schoolRank?: number;
   shopItems?: Item[]; 
   
   trapType?: TrapType;
@@ -465,6 +469,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
 const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
   const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const threeView = useDungeon3D();
   const diagonalLockRef = useRef(false);
 
   useEffect(() => {
@@ -475,7 +480,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     return () => window.removeEventListener('learning-rogue:dungeon-diagonal-lock', handleDiagonalLock);
   }, []);
   const [map, setMap] = useState<TileType[][]>([]);
-  const [visitedMap, setVisitedMap] = useState<boolean[][]>([]);
+  const [visitedMap, setVisitedMap] = useState<boolean[][]>(() => Array.from({length: MAP_H}, () => Array(MAP_W).fill(false)));
   const [floorMapRevealed, setFloorMapRevealed] = useState(false);
   const roomsRef = useRef<RoomRect[]>([]);
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
@@ -666,7 +671,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const saveData = useCallback((immediate = false) => {
-      if (debugPreview || gameOver || gameClear || adventure.state.returned) { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
+      if (!map.length || debugPreview || gameOver || gameClear || adventure.state.returned) { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
       const persist = () => {
           if (adventure.state.returned) return;
           const state = {
@@ -1288,7 +1293,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           else if (r < 0.98 && floorLevel > 4) { t = 'DRAGON'; name="ドラゴン"; hp=50+hpScale*2; atk=10+scaling*1.5; xp=50+xpScale*2; }
           else if (floorLevel > 6) { t = 'METAL'; name="メタル生徒"; hp=4+Math.floor(floorLevel/5); atk=1+scaling; xp=100+xpScale*3; def=999; }
       }
-      return { id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } };
+      return { id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t, visualTier: Math.min(4, 1 + Math.floor((floorLevel - 1) / 5)), status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } };
   };
 
   const generateFloor = (f: number) => {
@@ -1855,9 +1860,22 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, selectedItemActionIndex, selectedEquipmentSlot, synthState, shopState]);
 
   const frameCountRef = useRef(0);
-  useEffect(() => { const loop = setInterval(() => { frameCountRef.current++; renderGame(); }, 50); return () => clearInterval(loop); }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme]);
+  useEffect(() => { const loop = setInterval(() => { frameCountRef.current++; renderGame(); }, 50); return () => clearInterval(loop); }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme, adventure.revision, adventure.dojoRun, identifiedTypes]);
 
   const renderGame = () => {
+      if (threeView.draw({
+          map, player, enemies, floorItems, traps, floor, effects: visualEffects.current,
+          adventure: adventure.state, dojo: adventure.dojoRun,
+          visible: (x, y) => adventure.state.scene !== undefined || (adventure.visibleTile(x, y) && Boolean(floorMapRevealed || visitedMap[y]?.[x])),
+          sight: equipmentHas(player.equipment?.accessory, 'RING_SIGHT'),
+          trapSight: Boolean(equipmentHas(player.equipment?.accessory, 'RING_TRAP') || player.status.trapSight),
+          knownItem: item => !(adventure.state.mode === 'MYSTERY' || item.category === 'STAFF') || identifiedTypes.has(item.type),
+      })) {
+          visualEffects.current = visualEffects.current.filter(fx => --fx.duration > 0);
+          if (shake.current.duration > 0) shake.current.duration--;
+          return;
+      }
+
       const canvas = canvasRef.current; if (!canvas) return; const ctx = canvas.getContext('2d'); if (!ctx) return; if (!map || map.length === 0) return;
       const w = canvas.width; const h = canvas.height; const ts = TILE_SIZE * SCALE; const { C0, C1, C2, C3 } = currentTheme.colors;
       if (adventure.drawDojo(ctx,w,h,ts,currentTheme.colors,(entity,x,y,size)=>{drawPlayerFromSheets(ctx,entity,x,y,size);})) return;
@@ -2135,6 +2153,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">{tr('装備')}</h3>
+                            {threeView.enabled && <EquipmentPreview gear={player.equipment || {}}/>}
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div><span className="font-bold mr-2">[{tr('武')}]</span> {player.equipment?.weapon ? (<span>{getItemName(player.equipment.weapon)} {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})</span></span>) : tr('なし')}</div>
                                 <div><span className="font-bold mr-2">[{tr('防')}]</span> {player.equipment?.armor ? (<span>{getItemName(player.equipment.armor)} {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})</span></span>) : tr('なし')}</div>
@@ -2212,6 +2231,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 </div>
                 <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
+                    <div ref={threeView.host} aria-hidden="true" style={{position:'absolute',inset:'0 0 0',visibility:threeView.ready?'visible':'hidden',pointerEvents:'none'}} />
+                    <button type="button" aria-label="2D / 3D" onClick={threeView.toggle} style={{position:'absolute',bottom:6,right:6,zIndex:12,padding:'4px 10px',borderRadius:6,border:'1px solid #b9d4cc',background:'#172b35',color:'#fff3d5',fontWeight:700,fontSize:12}}>{threeView.enabled?'3D':'2D'}</button>
                     {isFastForwarding && (<div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}><FastForward size={16} className="mr-1"/> {tr('早送り中')}</div>)}
                     {showMap && !adventure.dojoRun && map.length > 0 && (
                         <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-map" className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>

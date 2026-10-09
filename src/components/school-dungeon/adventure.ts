@@ -6,7 +6,7 @@ export interface SchoolItem {
  id: string; type: string; category: string; name: string; desc: string; value?:number; power?:number; plus?:number; charges?:number;
  marks?:string[]; markSlots?:number; cursed?:boolean; blessed?:boolean; capacity?:number; contents?:SchoolItem[]; shopOwner?:number; price?:number;wet?:boolean;
 }
-export interface Companion {name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;}
+export interface Companion {name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;attackVisualAt?:number;}
 export interface AdventureState {
  version:1; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
  companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean}>; swallowed:Record<string,SchoolItem[]>;

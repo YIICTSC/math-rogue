@@ -1,0 +1,27 @@
+{
+  "cycle": 3,
+  "style": "compact school adventurer with original swept spikes",
+  "triangles_all_expressions": 28232,
+  "meshes": 55,
+  "materials": 16,
+  "animation_tracks": [
+    "Attack",
+    "Defeat",
+    "Hit",
+    "Idle",
+    "Run",
+    "Victory",
+    "Walk"
+  ],
+  "expressions": [
+    "neutral",
+    "smile",
+    "surprise",
+    "anger",
+    "sad",
+    "hit",
+    "victory"
+  ],
+  "head_ratio": 2.68,
+  "glb_bytes": 668668
+}

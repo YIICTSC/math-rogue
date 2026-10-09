@@ -1,0 +1,341 @@
+{
+  "models": [
+    "apron",
+    "backpack",
+    "badge",
+    "bag",
+    "ball_enemy",
+    "bamboo",
+    "bat",
+    "bat_item",
+    "blade",
+    "bomb",
+    "book_enemy",
+    "bottle",
+    "bridge",
+    "broom",
+    "cape",
+    "card",
+    "chalk",
+    "chest",
+    "clock",
+    "coat",
+    "coin",
+    "compass",
+    "desk",
+    "detention_ghost",
+    "dragon",
+    "drain",
+    "dust",
+    "eraser_enemy",
+    "extinguisher",
+    "fire",
+    "float",
+    "friend_fetch",
+    "friend_guard",
+    "friend_heal",
+    "ghost",
+    "golem",
+    "grass",
+    "hammer",
+    "helmet",
+    "hood",
+    "key",
+    "ladle",
+    "locker",
+    "mage",
+    "magnifier",
+    "meat",
+    "merchant",
+    "metal_slime",
+    "mimic",
+    "mud_boot",
+    "ninja",
+    "paper_enemy",
+    "paper_plane",
+    "pencil",
+    "pencil_case_enemy",
+    "pickaxe",
+    "plant",
+    "pot",
+    "principal",
+    "protractor",
+    "rice",
+    "rice_enemy",
+    "ring",
+    "ruler",
+    "school_bully",
+    "scroll",
+    "seal_enemy",
+    "shears",
+    "shelf",
+    "shield",
+    "slime",
+    "sprout",
+    "stairs",
+    "stall",
+    "stone",
+    "teacher",
+    "test_enemy",
+    "thief",
+    "toolbox",
+    "trap",
+    "tree",
+    "triangle",
+    "umbrella",
+    "umbrella_enemy",
+    "watch",
+    "whistle"
+  ],
+  "count": 86,
+  "glb_bytes": 5705128,
+  "enemy_models": [
+    "slime",
+    "bat",
+    "ghost",
+    "thief",
+    "drain",
+    "dragon",
+    "plant",
+    "golem",
+    "book_enemy",
+    "mimic",
+    "eraser_enemy",
+    "rice_enemy",
+    "fire",
+    "dust",
+    "clock",
+    "paper_enemy",
+    "seal_enemy",
+    "pencil_case_enemy",
+    "detention_ghost",
+    "mud_boot",
+    "umbrella_enemy",
+    "sprout",
+    "metal_slime",
+    "test_enemy",
+    "ball_enemy"
+  ],
+  "item_and_map_models": [
+    "chest",
+    "pencil",
+    "ruler",
+    "bat_item",
+    "broom",
+    "hammer",
+    "shears",
+    "ladle",
+    "umbrella",
+    "shield",
+    "coat",
+    "apron",
+    "cape",
+    "helmet",
+    "hood",
+    "backpack",
+    "badge",
+    "ring",
+    "scroll",
+    "card",
+    "bag",
+    "coin",
+    "key",
+    "trap",
+    "stairs",
+    "desk",
+    "shelf",
+    "locker",
+    "tree",
+    "bamboo",
+    "stall",
+    "bridge",
+    "triangle",
+    "rice",
+    "bottle",
+    "compass",
+    "protractor",
+    "extinguisher",
+    "pickaxe",
+    "blade",
+    "watch",
+    "grass",
+    "meat",
+    "bomb",
+    "chalk",
+    "stone",
+    "paper_plane",
+    "pot",
+    "magnifier",
+    "whistle",
+    "float",
+    "toolbox"
+  ],
+  "animated_models": [
+    "ball_enemy",
+    "bat",
+    "book_enemy",
+    "clock",
+    "detention_ghost",
+    "dragon",
+    "drain",
+    "dust",
+    "eraser_enemy",
+    "fire",
+    "friend_fetch",
+    "friend_guard",
+    "friend_heal",
+    "ghost",
+    "golem",
+    "mage",
+    "merchant",
+    "metal_slime",
+    "mimic",
+    "mud_boot",
+    "ninja",
+    "paper_enemy",
+    "pencil_case_enemy",
+    "plant",
+    "principal",
+    "rice_enemy",
+    "school_bully",
+    "seal_enemy",
+    "slime",
+    "sprout",
+    "teacher",
+    "test_enemy",
+    "thief",
+    "umbrella_enemy"
+  ],
+  "clips_per_actor": [
+    "Idle",
+    "Walk",
+    "Attack",
+    "Hit"
+  ],
+  "palettes": {
+    "slime": [
+      "#438fd9",
+      "#a6e9ff"
+    ],
+    "metal_slime": [
+      "#a6becb",
+      "#eef8ff"
+    ],
+    "bat": [
+      "#8861bd",
+      "#d5a5ed"
+    ],
+    "ghost": [
+      "#9adbd2",
+      "#e3fff6"
+    ],
+    "detention_ghost": [
+      "#6978a7",
+      "#bbc9f0"
+    ],
+    "thief": [
+      "#a86f45",
+      "#efd0a1"
+    ],
+    "drain": [
+      "#87944d",
+      "#d3d7a2"
+    ],
+    "dragon": [
+      "#d94e45",
+      "#ffd37f"
+    ],
+    "plant": [
+      "#3e9d62",
+      "#f19dbf"
+    ],
+    "sprout": [
+      "#b5c94c",
+      "#39875a"
+    ],
+    "golem": [
+      "#967963",
+      "#d8bea0"
+    ],
+    "book_enemy": [
+      "#397baf",
+      "#f5dfac"
+    ],
+    "test_enemy": [
+      "#f0e2c5",
+      "#c94e59"
+    ],
+    "paper_enemy": [
+      "#d3e6f2",
+      "#6ab8d4"
+    ],
+    "seal_enemy": [
+      "#c34266",
+      "#ffd09e"
+    ],
+    "mimic": [
+      "#785339",
+      "#e9b751"
+    ],
+    "pencil_case_enemy": [
+      "#39b4aa",
+      "#f8d485"
+    ],
+    "eraser_enemy": [
+      "#f2adbf",
+      "#576ab7"
+    ],
+    "rice_enemy": [
+      "#fff2d9",
+      "#304d3e"
+    ],
+    "ball_enemy": [
+      "#e28a36",
+      "#ffe5ab"
+    ],
+    "clock": [
+      "#d1ab42",
+      "#f6eab2"
+    ],
+    "dust": [
+      "#a4a0a8",
+      "#e1dbe7"
+    ],
+    "fire": [
+      "#f66d2c",
+      "#ffe976"
+    ],
+    "umbrella_enemy": [
+      "#5b70b5",
+      "#e1a2df"
+    ],
+    "mud_boot": [
+      "#775842",
+      "#b99365"
+    ],
+    "ninja": [
+      "#344458",
+      "#bb677e"
+    ],
+    "mage": [
+      "#a260c2",
+      "#f3c278"
+    ],
+    "school_bully": [
+      "#d48e39",
+      "#ffe2a0"
+    ],
+    "teacher": [
+      "#386d75",
+      "#e4ca92"
+    ],
+    "merchant": [
+      "#56a783",
+      "#f7dba3"
+    ],
+    "principal": [
+      "#9d70ce",
+      "#e9bd60"
+    ]
+  }
+}

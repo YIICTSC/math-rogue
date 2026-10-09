@@ -1,0 +1,10 @@
+# Keep Blender recovery files and superseded experiments on the local machine.
+*.blend1
+school-wanderer.blend
+hero-quality/hero-before-redesign.*
+hero-quality/hero-prototype.*
+hero-quality/generator-before-redesign.py
+hero-quality/cycle-*/
+hero-quality/reference-*/
+hero-quality/compact-1/
+hero-quality/compact-2/

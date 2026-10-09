@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+import {mkdir} from 'node:fs/promises';
+await mkdir('tmp/school-test',{recursive:true});
+await build({entryPoints:['src/components/school-dungeon/three/appearance.ts'],outfile:'tmp/school-test/appearance.mjs',bundle:true,platform:'node',format:'esm'});
+const {enemyVisualRank,enemyPalette,ENEMY_RANK_COLORS,enemyModel,itemModel}=await import('../tmp/school-test/appearance.mjs');
+assert.equal(new Set(['slime','bat','dragon','plant','thief','rice_enemy'].map(n=>enemyPalette(n)[0])).size,6);
+assert.equal(new Set(ENEMY_RANK_COLORS).size,6);
+for(const [hp,rank]of [[10,1],[25,1],[28,2],[43,3],[58,4]])assert.equal(enemyVisualRank({enemyType:'SLIME',maxHp:hp}),rank);
+assert.equal(enemyVisualRank({enemyType:'SLIME',maxHp:40,schoolRank:2}),3,'old evolved enemies infer original floor strength before adding their evolution');
+assert.equal(enemyVisualRank({enemyType:'SLIME',maxHp:1,visualTier:4}),4,'current saves use persistent tier, not current damage');
+assert.equal(enemyVisualRank({enemyType:'SLIME',maxHp:22,visualTier:1,schoolRank:2}),2);
+assert.equal(enemyVisualRank({enemyType:'SLIME',maxHp:82,visualTier:4,schoolRank:3}),6);
+assert.equal(enemyVisualRank({enemyType:'BOSS',maxHp:500}),1);assert.equal(enemyVisualRank({enemyType:'SHOPKEEPER',maxHp:1000}),1);
+assert.notEqual(enemyModel('THIEF'),enemyModel('NINJA'));assert.notEqual(enemyModel('BOSS'),enemyModel('MONITOR'));
+assert.notEqual(enemyModel('SWALLOW'),enemyModel('ERASE'));
+for(const [type,model]of [['FIRE_EXTINGUISHER_LANCE','extinguisher'],['MATH_COMPASS_SABER','compass'],['SUPPLY_PICK','pickaxe'],['GRASS_HEAL','grass'],['PAPER_PLANE_BUNDLE','paper_plane']])assert.equal(itemModel({type,category:'CONSUMABLE'}),model);
+console.log('PASS persistent strength tiers, legacy inference, evolution, unique rank palettes, distinct enemy families and semantic supply models');
