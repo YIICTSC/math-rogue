@@ -55,6 +55,6 @@ export function buildLesson(selection: LessonSelection, count = 3, history: stri
     return { id: `${i}:${p.mode}:${p.problemId || p.question}`.slice(0, 300), mode: p.mode, question: p.question, options, correct: options.indexOf(correct), passage: p.passage, visual: p.visual, audioPrompt: p.audioPrompt, problemId: p.problemId, unitName: assignment?.units.find(u => u.modes.includes(p.mode))?.name };
   });
   const lesson = { title: (assignment?.title || selection.title || modes.join(' / ')).slice(0, 160), questions };
-  if (!validLesson(lesson) || JSON.stringify(lesson).length > 100000 * (count / 3)) throw new Error('問題データが大きすぎます。別の範囲を選んでください。');
+  if (!validLesson(lesson,Math.max(15,count)) || JSON.stringify(lesson).length > 100000 * (count / 3)) throw new Error('問題データが大きすぎます。別の範囲を選んでください。');
   return lesson;
 }

@@ -42,3 +42,8 @@
 @media(max-height:500px) and (orientation:landscape){.gear-loadout>div{width:min(260px,35%);grid-template-columns:minmax(0,1fr) auto;align-items:end;padding:4px;bottom:4px}.gear-loadout label{font-size:0}.gear-loadout select{font-size:10px;padding:5px 2px}.gear-loadout button{min-height:29px;font-size:10px}.gear-field:has(.gear-loadout) .gear-objective{bottom:55px}}
 
 @media(max-height:500px) and (orientation:landscape){.gear-loadout>.gear-item-slot{grid-template-columns:auto minmax(0,1fr)}.gear-item-slot>button{grid-column:1;grid-row:1}.gear-item-slot>label{grid-column:2;grid-row:1}}
+
+.gear-watch{display:flex;align-items:center;gap:4px;font-size:11px;min-width:0}.gear-watch select{min-width:0;max-width:140px;background:#173831;color:white;border:1px solid #799b91;padding:4px;border-radius:5px}
+.gear-report{overflow:auto;max-height:35dvh;margin:8px 0}.gear-report table{border-collapse:collapse;width:100%;font-size:12px}.gear-report th,.gear-report td{padding:6px;border-bottom:1px solid #55756b;text-align:left;overflow-wrap:anywhere}.gear-report th{font-size:10px}.gear-report td:first-child{max-width:150px}
+.gear-equipment{flex-wrap:wrap}.gear-controls button{overflow-wrap:anywhere}
+@media(max-height:500px) and (orientation:landscape){.gear-report{max-height:25dvh}.gear-report th,.gear-report td{padding:3px}.gear-watch{font-size:10px}.gear-watch select{max-width:100px}}

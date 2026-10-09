@@ -1,3 +1,4 @@
+import type {Supply} from './onlineRules';
 import {createVrCharacter} from './character';
 import type {KartAvatar} from '../gakuro-kart/avatar';
 import * as THREE from 'three';
@@ -6,7 +7,7 @@ import { assetUrl } from '../../utils/assetPaths';
 import { floorHeight, WEAPONS, cameraAngle, cameraBlocked, sensorActive, clearSight, holdCandidate, objectivesComplete, type Mission, type Point, type Run } from './engine';
 
 export type ViewMode = 'overhead' | 'first' | 'third';
-export type ViewSettings = { mode: ViewMode; yaw: number; exitReady?: boolean; others?: { id: string; name: string; player: Point & { angle: number }; out: boolean; avatar?: KartAvatar }[] };
+export type ViewSettings = { mode: ViewMode; yaw: number; safeZone?:number; supplies?:Supply[]; spectating?:boolean; exitReady?: boolean; others?: { id: string; name: string; player: Point & { angle: number }; out: boolean; stealth?:number; avatar?: KartAvatar }[] };
 
 export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAvatar) {
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
@@ -95,6 +96,8 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   }, undefined, () => { host.dataset.models = 'fallback'; });
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; renderer.setSize(Math.min(w, 960), Math.min(w, 960) * h / w, false); const aspect = w / h, half = Math.max(size * 1.28, size * 1.2 / aspect); camera.left = -half * aspect; camera.right = half * aspect; camera.top = half; camera.bottom = -half; camera.updateProjectionMatrix(); perspective.aspect = aspect; perspective.updateProjectionMatrix(); };
   const observer = new ResizeObserver(resize); observer.observe(host); resize();
+  const safeZone=new THREE.Mesh(new THREE.RingGeometry(.985,1,96),new THREE.MeshBasicMaterial({color:0x72f7bd,side:THREE.DoubleSide,transparent:true,opacity:.8}));safeZone.rotation.x=-Math.PI/2;safeZone.position.y=.045;safeZone.visible=false;scene.add(safeZone);
+  const supplyModels=new Map<number,THREE.Group>();
   const remoteActors = new Map<string, THREE.Group>();
   let frameState: Run | undefined;
   function drawCone(index: number, p: Point, angle: number, crouch: boolean, range: number) {
@@ -107,9 +110,13 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   function draw(s: Run, view: ViewSettings = { mode: 'overhead', yaw: s.player.angle }) {
     frameState = s;
     remoteActors.forEach((g,id)=>{g.visible=!!view.others?.some(p=>p.id===id);});
-    for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g||g.userData.avatarKey!==JSON.stringify(other.avatar)){if(g){scene.remove(g);disposeObject(g);}g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);g.userData.avatarKey=JSON.stringify(other.avatar);scene.add(g);remoteActors.set(other.id,g);}g.visible=true;g.position.set(other.player.x,floorHeight(mission,other.player),other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
+    for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g||g.userData.avatarKey!==JSON.stringify(other.avatar)){if(g){scene.remove(g);disposeObject(g);}g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);g.userData.avatarKey=JSON.stringify(other.avatar);scene.add(g);remoteActors.set(other.id,g);}g.visible=view.spectating||!other.stealth||Math.hypot(other.player.x-s.player.x,other.player.z-s.player.z)<2;g.position.set(other.player.x,floorHeight(mission,other.player),other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
 
     host.dataset.view = view.mode;
+    safeZone.visible=view.safeZone!==undefined;if(view.safeZone!==undefined){safeZone.scale.setScalar(view.safeZone);(safeZone.material as THREE.MeshBasicMaterial).color.setHex(Math.hypot(s.player.x,s.player.z)>view.safeZone?0xff7777:0x72f7bd);}
+    supplyModels.forEach(g=>{g.visible=false;});
+    for(const supply of view.supplies??[]){let g=supplyModels.get(supply.id);if(!g){g=new THREE.Group();const color=supply.kind==='ammo'?0xffd36e:supply.kind==='energy'?0x70dfff:0xff92bb;cube(.55,.45,.55,color,0,.3,0,g);cube(.6,.08,.6,0xe8fff5,0,.56,0,g);if(supply.kind==='repair'){cube(.1,.3,.05,0xffffff,0,.34,.3,g);cube(.3,.1,.05,0xffffff,0,.34,.3,g);}else if(supply.kind==='ammo'){for(const x of [-.15,0,.15])cube(.06,.25,.05,0x4e4d2f,x,.34,.3,g);}else cube(.25,.12,.05,0xffffff,0,.34,.3,g);scene.add(g);supplyModels.set(supply.id,g);}g.visible=true;g.position.set(supply.x,.08+Math.sin(s.time*2)*.04,supply.z);g.rotation.y=s.time*.3;}
+
     frontWall.visible = view.mode !== 'overhead';
     doors.forEach(d => { d.group.visible = !s.switches[d.index]; });
     switches.forEach((mesh, i) => (mesh.material as THREE.MeshLambertMaterial).color.setHex(s.switches[i] ? 0x73ffb0 : 0xffbb5e));
@@ -124,7 +131,7 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
       for (let t = .025; t <= 1; t += .025) { const q = focus.clone().lerp(desired, t); if (cameraBlocked(mission, s, { x: q.x, z: q.z }, q.y)) break; safe = q; }
       perspective.position.copy(safe); perspective.lookAt(focus.clone().addScaledVector(forward, 2));
     }
-    player.visible = view.mode !== 'first'; playerRing.visible = view.mode === 'overhead';
+    player.visible = !view.spectating&&view.mode !== 'first'; playerRing.visible = !view.spectating&&view.mode === 'overhead';
     player.position.set(s.player.x, floorHeight(mission,s.player), s.player.z); player.rotation.y = s.player.angle; player.scale.y = s.crouch ? .55 : 1;
     playerRing.position.set(s.player.x, floorHeight(mission,s.player)+.025, s.player.z);
     s.guards.forEach((g, i) => {
@@ -133,7 +140,7 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
       if (cones[i].visible) drawCone(i, g, g.angle, s.crouch, mission.sightRange);
       sleepMarkers[i].visible = g.sleep > 0; sleepMarkers[i].position.set(g.x, floorHeight(mission,g)+1.4 + Math.sin(s.time * 2) * .12, g.z);
     });
-    weaponModels.forEach((model,i)=>{model.visible=i===s.weapon;}); toy.visible = view.mode !== 'first'; toy.position.copy(player.position); toy.rotation.y = s.player.angle; toy.scale.y = s.crouch ? .55 : 1;
+    weaponModels.forEach((model,i)=>{model.visible=i===s.weapon;}); toy.visible = !view.spectating&&view.mode !== 'first'; toy.position.copy(player.position); toy.rotation.y = s.player.angle; toy.scale.y = s.crouch ? .55 : 1;
     const candidate = holdCandidate(mission, s); holdRing.visible = candidate >= 0;
     if (candidate >= 0) holdRing.position.set(s.guards[candidate].x, .04, s.guards[candidate].z);
     bubble.visible = !!s.bubble;
@@ -141,7 +148,7 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     const ray = aim.geometry.getAttribute('position') as THREE.BufferAttribute;
     let aimDistance = .2;
     for (; aimDistance < WEAPONS[s.weapon].range; aimDistance += .1) { const q = { x: s.player.x + Math.sin(s.player.angle) * aimDistance, z: s.player.z + Math.cos(s.player.angle) * aimDistance }; if (Math.abs(q.x) > size || Math.abs(q.z) > size || !clearSight(mission, s.player, q, true, s)) break; }
-    ray.setXYZ(0, s.player.x, floorHeight(mission,s.player)+.12, s.player.z); ray.setXYZ(1, s.player.x + Math.sin(s.player.angle) * aimDistance, floorHeight(mission,s.player)+.12, s.player.z + Math.cos(s.player.angle) * aimDistance); ray.needsUpdate = true; aim.geometry.computeBoundingSphere(); aim.computeLineDistances(); aim.visible = s.ammo >= WEAPONS[s.weapon].cost;
+    ray.setXYZ(0, s.player.x, floorHeight(mission,s.player)+.12, s.player.z); ray.setXYZ(1, s.player.x + Math.sin(s.player.angle) * aimDistance, floorHeight(mission,s.player)+.12, s.player.z + Math.cos(s.player.angle) * aimDistance); ray.needsUpdate = true; aim.geometry.computeBoundingSphere(); aim.computeLineDistances(); aim.visible = !view.spectating&&s.ammo >= WEAPONS[s.weapon].cost;
     mission.cameras.forEach((c, i) => drawCone(guards.length + i, c, cameraAngle(mission, i, s.time), s.crouch, 6.3));
     targets.forEach((t, i) => { t.visible = !s.collected[i]; t.rotation.y = s.time; t.position.y = floorHeight(mission,mission.targets[i])+Math.sin(s.time * 3) * .1; });
     (exit.material as THREE.MeshBasicMaterial).color.setHex((view.exitReady ?? objectivesComplete(mission, s)) ? 0x6cffab : 0x405958);
