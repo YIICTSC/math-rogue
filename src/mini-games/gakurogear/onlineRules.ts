@@ -32,7 +32,7 @@ export function quizLesson(w:OnlineWorld,p:Participant):KartLesson {
  return {...w.lesson,questions:(p.quizQuestions.length===3?p.quizQuestions:[0,1,2]).map(i=>w.lesson.questions[i])};
 }
 export function requestSupply(w:OnlineWorld,id:string) {
- const p=w.players[id];if(w.phase!=='playing'||!p?.connected||p.out||p.quiz||w.paused||w.time<p.nextSupplyAt)return false;
+ const p=w.players[id];if(w.phase!=='playing'||!p?.connected||p.quiz||w.paused||w.time<p.nextSupplyAt)return false;
  beginQuiz(w,p,'supply');return true;
 }
 export function completeQuiz(w:OnlineWorld,id:string) {
@@ -44,6 +44,12 @@ export function completeQuiz(w:OnlineWorld,id:string) {
  } else {p.run.ammo=Math.min(w.mission.ammo+12,p.run.ammo+2+p.quizCorrect*2);p.run.detection=Math.max(0,p.run.detection-p.quizCorrect*15);if(p.quizCorrect===3&&p.run.items[0]<3){p.run.items[0]++;p.run.decoys=p.run.items[0];}}
  return true;
 }
+export function respawnRoyale(w:OnlineWorld,p:Participant) {
+ p.out=true;p.respawnHits=0;p.run.status='playing';
+ p.run.player={...openPoint(w,safeRadius(w)-1,p.id.length+Math.floor(w.time)*31),angle:p.run.player.angle};
+ p.run.ammo=magazineSize(p.run.weapon);p.energy=100;p.reloading=0;p.zoneExposure=0;p.invulnerable=3;
+ p.run.holdProgress=0;p.run.holdTarget=-1;p.run.stealth=0;
+}
 function openPoint(w:OnlineWorld,radius:number,seed:number):Point {
  const rand=random(w.seed+seed);for(let n=0;n<300;n++){const a=rand()*Math.PI*2,r=Math.sqrt(rand())*Math.max(1,radius),q={x:Math.sin(a)*r,z:Math.cos(a)*r};if(!blocked(w.mission,q,.4))return q;}
  return {x:0,z:0};
@@ -52,10 +58,10 @@ export function spawnSupplies(w:OnlineWorld) {
  w.supplies=Array.from({length:Math.min(12,Object.keys(w.players).length+4)},(_,id)=>({...openPoint(w,(w.mission.size??18)*.7,id*97),id,kind:['ammo','energy','repair'][id%3] as Supply['kind'],readyAt:8+id*2}));
 }
 export function tickArena(w:OnlineWorld,dt:number) {
- const active=Object.values(w.players).filter(p=>p.connected&&!p.out&&!p.quiz);
+ const active=Object.values(w.players).filter(p=>p.connected&&!p.quiz);
  for(const p of active){
   p.zoneExposure=Math.hypot(p.run.player.x,p.run.player.z)>safeRadius(w)?p.zoneExposure+dt:0;
-  if(p.zoneExposure>=6){p.zoneExposure=0;p.hits++;p.invulnerable=2;if(p.hits>=3){p.out=true;p.run.status='caught';}}
+  if(p.zoneExposure>=6){p.zoneExposure=0;if(p.out)p.respawnHits++;else p.hits++;p.invulnerable=2;if((p.out?p.respawnHits:p.hits)>=3)respawnRoyale(w,p);}
  }
  for(const s of w.supplies){
   if(s.readyAt>w.time)continue;

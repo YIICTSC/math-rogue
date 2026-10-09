@@ -22,3 +22,16 @@ arena.players.b.run.player.z=1;arena.players.a.run.shotCooldown=0;tickWorld(aren
 console.log('PASS cooperative help/revive/progress retry, nonrepeating question deck, protected feedback/rewards, same-room next stage, shrinking zone, supply crates, quiz return and cloak counterplay.');
 
 const mags=createWorld('royale',300,lesson,300);addPlayer(mags,'a','A');addPlayer(mags,'b','B');startWorld(mags,5);mags.players.a.run.weapon=3;mags.players.a.run.ammo=0;tickWorld(mags,{a:{...neutral,reload:true}},.05);for(let i=0;i<24;i++)tickWorld(mags,{},.05);assert.equal(mags.players.a.run.ammo,12);assert.equal(mags.players.a.energy,75);console.log('PASS weapon-specific magazine capacities and deliberate reload costs.');
+
+// Eliminated players respawn, keep moving and cannot alter contenders' results.
+const replay=createWorld('royale',300,lesson,300);for(const id of ['a','b','c','d'])addPlayer(replay,id,id);startWorld(replay,87);replay.mission.obstacles=[];replay.supplies=[];
+const a=replay.players.a,b=replay.players.b,c=replay.players.c,d=replay.players.d;
+a.run.player={x:0,z:0,angle:0};b.run.player={x:0,z:2,angle:0};c.run.player={x:8,z:8,angle:0};d.run.player={x:-8,z:-8,angle:0};a.invulnerable=b.invulnerable=0;b.hits=2;
+tickWorld(replay,{a:{...neutral,shoot:true}},.05);assert(b.out);assert.equal(b.run.status,'playing');assert.equal(b.hits,3);assert.equal(b.respawnHits,0);assert.equal(replay.phase,'playing');assert(b.invulnerable>0);
+const bx=b.run.player.x;tickWorld(replay,{b:{...neutral,x:1}},.05);assert.notEqual(b.run.player.x,bx);
+b.run.player={x:0,z:0,angle:0};a.run.player={x:0,z:2,angle:0};a.invulnerable=b.invulnerable=0;b.run.shotCooldown=0;const ah=a.hits;tickWorld(replay,{b:{...neutral,shoot:true}},.05);assert.equal(a.hits,ah,'Respawned cannot damage contender');
+a.run.player={x:0,z:0,angle:0};b.run.player={x:0,z:2,angle:0};a.run.shotCooldown=0;tickWorld(replay,{a:{...neutral,shoot:true}},.05);assert.equal(b.respawnHits,0,'Contender cannot damage respawned player');
+d.out=true;d.run.player={x:0,z:0,angle:0};b.run.player={x:0,z:2,angle:0};d.run.shotCooldown=0;b.invulnerable=0;b.respawnHits=2;tickWorld(replay,{d:{...neutral,shoot:true}},.05);assert.equal(b.respawnHits,0);assert.equal(b.hits,3);assert(b.invulnerable>0);
+assert(requestSupply(replay,'b'));for(let i=0;i<3;i++)answer(replay,'b',0);assert(completeQuiz(replay,'b'));assert(b.out,'Learning cannot restore victory eligibility');
+assert.equal(replay.phase,'playing');c.out=true;tickWorld(replay,{},.05);assert.equal(replay.phase,'result');assert.deepEqual(replay.winner,['a']);assert(returnToLobby(replay));assert(startWorld(replay,88));assert(Object.values(replay.players).every(p=>!p.out&&p.respawnHits===0));
+console.log('PASS eliminated respawn/movement/repeated respawn, separate combat, permanent result lock, learning resupply, winner and rematch reset.');
