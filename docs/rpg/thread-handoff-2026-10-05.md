@@ -7,7 +7,7 @@
 - リポジトリ：https://github.com/YIICTSC/math-rogue
 - 公開Web：https://yiictsc.github.io/math-rogue/
 - このスレッドでユーザーが動作確認に利用したURL：https://learning-rogue.yishigeict.chatgpt.site/
-- 最後にmainへ反映したコミット：`5f640b428b99ce601c023bf5e267ec3db6207790`（fix(vr): place item use before selector in mobile landscape）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
+- 最後にmainへ反映したコミット：`426cae04a235aab0a5440b5a6cb99231a7a499aa`（feat(vr): polish cooperative support and royale survival）。農園実装の基準コミットは`26f880b1c607365371df4a896c383375f0860765`。このSHAは基準点であり、次回の最新SHAとは限らない。
 - 最新の実装は暮らし・都市・農園の拡張、3D表示、横画面メニュー、音声、隣接農作業。末尾の最新追記を参照。
 - 今回の作業環境：`/workspace/math-rogue`、main。引き継ぎ資料を作る直前は未コミット変更なし。
 - 本資料は資料専用ブランチ `docs/rpg-handoff-2026-10-05` に公開。ゲーム本体のmainは変更していない。ローカルmain上ではこの資料だけが未追跡ファイルになっている可能性がある。
@@ -505,3 +505,10 @@ Testing tips: scripts/test-online-screen-layouts.mjs supports LAYOUT_KINDS=life,
 
 - main `5f640b428b99ce601c023bf5e267ec3db6207790`。横画面・高さ500px以下のみアイテムボタンを左列、選択欄を右列へ。縦画面や武器欄は維持。
 - 実ブラウザ568×320、844×390で左配置、390×844で従来の縦並びを確認。既存5画面レイアウト、英語gate、build、server:buildも通過。デプロイ完了の待機なし。
+
+
+## 2026-10-09 VR協力・対戦のブラッシュアップ
+
+ユーザーは協力・対戦をバランスよく改善する方針を選択。mainへ426cae04a235aab0a5440b5a6cb99231a7a499aaを反映。協力は任務完了前の他プレイヤーの回収支援・問題回答後の仲間救助・失敗時の進捗保持。対戦は縮小安全地帯、弾薬・エネルギー・修理箱、迷彩の近距離対策、武器別装填数とリロード調整。最大120問を重複排除した順番で出題し、最終回答解説を確認後に復帰。30秒間隔で問題補給。同じ部屋で再戦・協力の次ステージ、結果統計、敗退後の観戦者選択。プロトコルv2で問題プールは初期接続時のみ共有。仕様はdocs/online/vr-gameplay-polish-2026-10-09.md参照。
+
+エンジン試験・300ステージ試験・実2端末で120問共有/問題補給/再戦・5画面サイズのゲーム/問題/結果/対戦/観戦表示・レース/ゴルフ出題試験・必須監査と本体/サーバービルドを通過。最大8人、途中参加・ホスト移行なしという既存制約は維持。ActionsやRenderの完了確認はユーザー指定に従い省略。
