@@ -8,8 +8,8 @@ services:
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run server:build
     startCommand: node server/dist/index.mjs
     healthCheckPath: /health
-    # Deploy every main commit, regardless of changed paths.
-    autoDeployTrigger: commit
+    # Start deployments manually to conserve free pipeline minutes.
+    autoDeployTrigger: 'off'
     envVars:
       - key: NODE_VERSION
         value: 22.16.0

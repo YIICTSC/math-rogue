@@ -12,11 +12,12 @@
 - コミット前に `pnpm run audit:english:gate` と `pnpm run build` を実行し、英語UI監査が通過してから `main` へプッシュする。Actions が失敗した場合は `gh run view <run-id> --log-failed` で最初の監査エラーを確認し、ローカルで再現してから再プッシュする。
 - `git push` 後は `gh run list --limit 2` で `Build Android App Bundle` と `Deploy To GitHub Pages` の両方が成功したことを確認する。既存の未コミット変更はステージせず保持する。
 
-## GitHub mainへのアップロード時はRenderへ自動デプロイする
+## Renderは手動デプロイで運用する
 
-- RenderオンラインサービスはGitHub `main` を参照し、`render.yaml` の `autoDeployTrigger: commit` に従ってmain更新ごとに自動デプロイする。Build Filtersは設けず、変更ファイルの種類で除外しない。
+- RenderオンラインサービスはGitHub `main` を参照し、`render.yaml` の `autoDeployTrigger: 'off'` に従って手動デプロイする。ユーザーからRenderへのデプロイ指示があるときだけ開始し、mainへのアップロードだけでは開始しない。
 - Render設定の正本は `render.yaml`。ブランチや自動デプロイ方式を変更するときは同ファイルを更新し、Render Blueprintにも同期する。
-- `main` へのプッシュ後はGitHub ActionsとRenderの最新デプロイ結果を確認する。Renderビルドまたはヘルスチェックが失敗したら原因を直し、成功を確認する。Deploy Hookや手動デプロイでチェックを迂回しない。
+- Renderの月間パイプライン追加支出上限は `$0` を維持する。明示的な指示なく上限の引き上げや有料プランへの変更を行わない。
+- Renderへの手動デプロイを指示された場合は、ビルドとヘルスチェックの成功を確認する。失敗したら原因を直し、成功を確認する。
 - Renderはオンラインサーバーも配信するため、変更後は `pnpm run server:build` を確認してからアップロードする。
 
 ## 2026-08-27: iOS 1.0.6 Build 55を作成した手順
