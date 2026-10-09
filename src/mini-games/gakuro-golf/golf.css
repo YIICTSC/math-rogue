@@ -161,3 +161,16 @@
 }
 /* Spectator chrome uses its own column rather than covering the course HUD. */
 @media(orientation:landscape) and (max-height:550px){.gg-spectating>.host-spectator{top:40px;left:auto;right:max(8px,env(safe-area-inset-right));transform:none;width:min(310px,46vw);max-height:90px}.gg-spectating .gg-hud{top:40px;left:8px;right:auto;width:48vw}.gg-spectating .gg-wind{top:115px;left:8px;right:auto}.gg-spectating .gg-minimap{top:115px;left:110px;right:auto;max-width:100px;max-height:100px}.gg-spectating .gg-lie{top:85px;left:8px;right:auto}.gg-spectating .gg-course-tools{right:8px;left:auto;bottom:8px;width:min(310px,46vw);flex-wrap:wrap}.gg-spectating .gg-play-ui{top:140px;bottom:70px;left:auto;right:8px;width:min(310px,46vw);max-height:none;overflow:auto}.gg-spectating .gg-play-ui>.gg-quiz{width:100%;margin:0}}
+/* Race-style collection: preview and roster on the left, launch controls right. */
+.gg-collecting .gg-lobby.online-collection{border-radius:14px;background:#121824;color:#f1f6fd;border-color:#ffffff20}
+.gg-collecting .gg-lobby.online-collection :is(input,select){background:#152c3e;color:#fff;border-color:#77959b}
+.gg-collecting .gg-lobby.online-collection button{border-radius:8px;background:#1a2e40;color:#f1f6fd;border-color:#7f9aa966}
+.gg-collecting .gg-lobby.online-collection .gg-primary{background:#d9ff6a;color:#10171a;border-color:#d9ff6a}
+.gg-collecting .gg-lobby .online-collection-controls{align-content:end}
+.gg-collecting .gg-lobby .online-roster>span{background:#152c3e;color:#fff;border-color:#ffffff30}
+.gg-character-overlay{padding:14px;background:#0c101a}
+.gg-character-dialog.gg-panel{width:100%;height:100%;max-width:none;padding:18px;background:#121824;color:#f1f6fd;border-color:#ffffff20;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+.gg-character-dialog .gk-avatar-editor{min-height:0;overflow:auto;color:#f1f6fd;padding:6px}
+.gg-character-dialog :is(input:not([type=range]),select,button){background:#152c3e;color:#f1f6fd;border-color:#77959b}
+@media(max-width:600px) and (orientation:portrait){.gg-character-overlay{padding:10px}.gg-character-dialog.gg-panel{padding:12px;grid-template-columns:1fr;grid-template-rows:auto minmax(90px,23dvh) minmax(0,1fr)}}
+@media(max-height:480px){.gg-character-overlay{padding:8px}.gg-character-dialog.gg-panel{padding:10px;gap:8px}}

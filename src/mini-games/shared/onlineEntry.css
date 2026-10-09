@@ -1,0 +1,48 @@
+/* Shared race-style preparation layout; each activity keeps its own scenery. */
+.online-entry-shell{position:fixed;inset:0;z-index:60;height:100dvh;display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box;background:#0c101a;color:#f1f6fd;font-family:system-ui,sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.online-entry-shell *{box-sizing:border-box;min-width:0}
+.online-entry-header{display:flex;align-items:center;gap:16px;flex:none;min-height:56px;padding:8px 14px;border-bottom:1px solid #ffffff20}
+.online-entry-header strong{letter-spacing:.12em;font-size:18px}
+.online-entry-shell button{border:1px solid #7f9aa966;border-radius:8px;background:#1a2e40;color:#f1f6fd;padding:10px 14px;min-height:44px;font:700 13px system-ui;cursor:pointer}
+.online-entry-shell button:disabled{opacity:.45;cursor:default}
+.online-entry-shell :is(button,input,select):focus-visible{outline:3px solid #d9ff6a;outline-offset:2px}
+.online-entry-layout{display:flex;flex:1;min-height:0;gap:16px;padding:14px;width:100%;max-width:none;margin:0;overflow:hidden}
+.online-entry-preview{position:relative;flex:1.1;min-height:0;overflow:hidden;border:1px solid #ffffff20;border-radius:14px;background:#192342}
+.online-entry-preview>.gear-stage-preview{position:absolute;inset:0;width:100%;height:100%}
+.online-entry-caption{position:absolute;left:18px;right:18px;bottom:18px;padding:12px;border-radius:10px;background:#0b172ad9;color:#e5f2ff;font-size:13px;pointer-events:none}
+.online-entry-panel{flex:.9;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden;border:1px solid #ffffff20;border-radius:14px;background:#121824;padding:18px}
+.online-entry-heading{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.online-entry-heading h2{margin:0;font-size:clamp(18px,2vw,25px);font-weight:800}
+.online-entry-fields{display:flex;flex:1;min-height:0;flex-direction:column;justify-content:safe center;gap:12px;overflow:auto;overscroll-behavior:contain;padding:3px}
+.online-entry-fields label{display:grid;gap:5px;font-size:12px;color:#bdc9d9}
+.online-entry-fields :is(input:not([type=checkbox]),select){width:100%;height:44px;background:#152c3e;color:#fff;border:1px solid #77959b;border-radius:8px;padding:8px;font:inherit}
+.online-entry-footer{flex:none;display:grid;gap:8px}
+.online-entry-shell .online-entry-primary{width:100%;min-height:48px;background:#d9ff6a;border-color:#d9ff6a;color:#10171a;font-size:15px}
+.online-entry-shell p{margin:0;font-size:12px;line-height:1.5}
+/* Kart already renders this structure; make its garage fill the viewport too. */
+.gk-intro-root .gk-garage{display:flex;width:100%;max-width:none;margin:0}
+.gk-intro-root .gk-preview{flex:1.1;min-width:0}
+.gk-intro-root .gk-entry-setup{flex:.9;min-width:0;justify-content:safe center;overflow-y:auto;overscroll-behavior:contain}
+.gk-intro-root .gk-entry-setup>*{flex-shrink:0}
+.gk-intro-root .gk-entry-avatar{flex-shrink:1}
+@media(max-width:600px) and (orientation:portrait){
+ .online-entry-layout,.gk-intro-root .gk-garage{flex-direction:column;gap:10px;padding:10px}
+ .online-entry-preview{flex:0 0 clamp(90px,23dvh,200px);min-height:0}
+ .gk-intro-root .gk-preview{flex:.7;min-height:90px}
+ .online-entry-panel,.gk-intro-root .gk-entry-setup{flex:1;padding:12px;gap:8px}
+ .online-entry-caption{left:10px;right:10px;bottom:10px;padding:8px;font-size:11px}
+ .online-entry-fields{gap:8px}
+}
+@media(max-height:480px){
+ .online-entry-header{min-height:40px;padding:4px 10px}
+ .online-entry-header button{min-height:32px;padding:5px 10px;font-size:11px}
+ .online-entry-layout{padding:8px;gap:10px}
+ .online-entry-preview{flex:.8}
+ .online-entry-panel{flex:1.2;padding:10px;gap:6px}
+ .online-entry-fields{gap:6px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:safe center;align-items:start}
+ .online-entry-fields :is(label,input,select){font-size:11px}
+ .online-entry-fields :is(input:not([type=checkbox]),select){height:36px}
+ .online-entry-fields>.online-transport,.online-entry-fields>[role=alert],.online-entry-fields>.gear-title-options{grid-column:1/-1}
+ .online-entry-shell .online-entry-primary{min-height:40px;padding:6px}
+ .online-entry-caption{font-size:11px;padding:8px}
+}
