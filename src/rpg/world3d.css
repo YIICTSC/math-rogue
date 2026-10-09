@@ -21,3 +21,7 @@
 .rpg-voxel-room-game{position:fixed;inset:5px;z-index:100;background:#13302f;overflow:auto;padding:10px;border:1px solid #b7c9a6;border-radius:12px}
 
 .rpg-voxel-room-panel{display:flex;flex-direction:column;max-height:calc(100% - 115px)}.rpg-voxel-room-panel>button{flex-shrink:0}.rpg-voxel-room-content{min-height:0;flex-shrink:1}@media(max-height:500px){.rpg-voxel-room-panel{max-height:calc(100% - 18px)}}
+
+.rpg-landscape-compass{position:absolute;top:8px;left:8px;z-index:6;max-width:180px;padding:6px;border:1px solid #9aaf95;border-radius:8px;background:#163a32e8;color:#fff4d5;font-size:12px}.rpg-landscape-compass summary{cursor:pointer;min-height:28px}.rpg-landscape-compass select{width:100%;background:#203f34;color:#fff4d5}.rpg-landscape-compass svg{display:block;width:160px;height:130px}.rpg-landscape-compass small{display:block;font-size:10px}
+
+.rpg-voxel-actions{display:grid;grid-template-columns:34px 34px minmax(0,1fr) minmax(0,1fr);gap:3px}.rpg-voxel-dock .rpg-voxel-actions button{padding:2px;font-size:11px;white-space:nowrap}

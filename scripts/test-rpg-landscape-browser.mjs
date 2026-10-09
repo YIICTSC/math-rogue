@@ -1,0 +1,16 @@
+import {createServer} from 'vite';import {chromium} from 'playwright';import assert from 'node:assert/strict';import fs from 'node:fs/promises';
+const dir='tmp/rpg-landscape-review';await fs.mkdir(dir,{recursive:true});await fs.writeFile(dir+'/index.html','<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><div id="root"></div><script type="module" src="/scripts/fixtures/rpg-landscape.tsx"></script>');
+let server,browser;try{
+ server=await createServer({server:{port:4247,host:'127.0.0.1',strictPort:true,hmr:false},logLevel:'error',plugins:[{name:'landscape-observer',enforce:'pre',transform(code,id){if(id.endsWith('/WorldScene3D.tsx'))return code.replace('renderer.render(scene, camera);','renderer.render(scene, camera);(window as any).__landscape={renderer,scene,camera,landscape};');}}]});await server.listen();browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ const page=await browser.newPage({viewport:{width:1280,height:800}});page.setDefaultTimeout(120000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('ERROR',e.message);});page.on('console',m=>{if(m.type()==='error')console.log(m.text());});
+ await page.addInitScript(()=>localStorage.setItem('rpg-preferences-v1',JSON.stringify({mapQuality:'low'})));
+ await page.goto('http://127.0.0.1:4247/'+dir+'/index.html',{waitUntil:'domcontentloaded'});console.log('DOM ready');await page.waitForFunction(()=>window.__landscape?.landscape.group.userData.stats?.queued===0);
+ console.log('chunks ready');await page.screenshot({path:dir+'/academy.png'});
+ const results=[];
+ for(const [name,x,z,y,heading]of [['castle',242,155,0,0],['mountain',380,20,undefined,0],['summit',330,-159,268,2],['underwater',150,180,-4,0]]){
+  await page.evaluate(([x,z,y,h])=>window.visit(x,z,y,h),[x,z,y,heading]);if(name==='mountain'||name==='underwater'){await page.mouse.move(600,350);await page.mouse.down();await page.mouse.move(600,name==='mountain'?260:450);await page.mouse.up();}await page.waitForTimeout(800);await page.waitForFunction(()=>window.__landscape.landscape.group.userData.stats.queued===0);await page.screenshot({path:dir+'/'+name+'.png'});
+  const info=await page.evaluate(()=>{const s=window.__landscape;return {...s.landscape.group.userData.stats,drawCalls:s.renderer.info.render.calls,triangles:s.renderer.info.render.triangles,geometries:s.renderer.info.memory.geometries,underwater:s.renderer.domElement.dataset.underwater,cameraY:s.camera.position.y};});results.push({name,...info});assert(info.chunks<=25);assert(info.animals<=12);assert(info.drawCalls<350);if(name==='underwater')assert.equal(info.underwater,'true');
+ }
+ for(const [width,height]of [[390,844],[844,390]]){await page.setViewportSize({width,height});await page.screenshot({path:dir+`/mobile-${width}.png`});for(const label of ['Jump / Swim up','Dive']){const box=await page.getByRole('button',{name:label,exact:true}).boundingBox();assert(box.x>=0&&box.y>=0&&box.x+box.width<=width&&box.y+box.height<=height);}}
+ assert.deepEqual(errors,[]);await fs.writeFile(dir+'/metrics.json',JSON.stringify(results,null,2));console.log('PASS landscape browser, underwater camera, mobile vertical controls and bounded chunks',results);
+}finally{await browser?.close();await server?.close();}

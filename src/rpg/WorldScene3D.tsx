@@ -1,3 +1,7 @@
+import LandscapeCompass from './LandscapeCompass';
+import {audioService} from '../services/audioService';
+import {LandscapeScene} from './landscapeScene';
+import {WORLD_SCALE,legacyRegion,waterProfile} from './worldLandscape';
 import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
 import {createConstructionGeometry,voxelMaterial} from './voxelRendering';
 import {fullCube} from './voxelCatalog';
@@ -7,10 +11,10 @@ import VoxelLookStick from './VoxelLookStick';
 import {trans} from '../utils/textUtils';
 import type {LanguageMode} from '../types';
 import {energyOf} from './energy';
-import {BLOCKS,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
+import {BLOCKS,voxelWater,traceVoxel,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
 import {MATERIAL_NAMES} from './life';
 import { StorybookModels, type Placement, type StorybookModel } from '../three/storybookModels';
-import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater } from '../three/storybookStyle';
+import { configureStorybook, paintedSurface, storybookWater } from '../three/storybookStyle';
 import {storyForSite} from './stories';
 import { residentsOf } from "./town/residents";
 import { residentPosition } from "./town/worldResidents";
@@ -89,7 +93,7 @@ export default function WorldScene3D(props: SceneProps) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#9acbd6");
     scene.fog = new THREE.FogExp2("#9acbd6", 0.038);
-    const camera = new THREE.PerspectiveCamera(72, 1, 0.06, 100),
+    const camera = new THREE.PerspectiveCamera(72, 1, 0.06, prefs.mapQuality==="low"?650:1200),
       sun = new THREE.DirectionalLight("#fff1cc", 2.1);
     sun.position.set(-8, 18, 9);
     sun.castShadow = profile.shadows;
@@ -109,13 +113,13 @@ export default function WorldScene3D(props: SceneProps) {
     const outlineMaterial=new THREE.MeshBasicMaterial({color:'#ffe292',wireframe:true,depthTest:false});
     const outline=new THREE.Mesh(voxelGeometry,outlineMaterial);outline.scale.setScalar(1.012);outline.visible=false;outline.renderOrder=10;scene.add(outline);
     const ghostMaterial=new THREE.MeshBasicMaterial({color:'#89e0ac',transparent:true,opacity:.36,depthWrite:false});
-    const ghost=new THREE.Mesh(voxelGeometry,ghostMaterial);ghost.visible=false;ghost.renderOrder=9;scene.add(ghost);
+    const ghost=new THREE.Mesh<THREE.BufferGeometry>(voxelGeometry,ghostMaterial);ghost.visible=false;ghost.renderOrder=9;scene.add(ghost);
     const terrain = new THREE.Group(),
       actors = new THREE.Group();
     scene.add(terrain, actors);
     let placements:Placement[]=[];
     const models=new StorybookModels(scene,()=>{key='';});
-    const atmosphere=storybookAtmosphere(scene,1,prefs.mapQuality);
+    const landscape=new LandscapeScene(scene,prefs.mapQuality);
     const animatedWater=storybookWater();
     const geometries: THREE.BufferGeometry[] = [],
       materials: THREE.Material[] = [],
@@ -148,7 +152,7 @@ export default function WorldScene3D(props: SceneProps) {
     });
     materials.push(skyMaterial);
     const skyDome = new THREE.Mesh(
-      geo(new THREE.SphereGeometry(70, 24, 12)),
+      geo(new THREE.SphereGeometry(1150, 24, 12)),
       skyMaterial,
     );
     scene.add(skyDome);
@@ -164,7 +168,7 @@ export default function WorldScene3D(props: SceneProps) {
       snow = mat("#d5e9ed"),
       roof = mat("#8e5145"),
       wall = mat("#dbcea8"),
-      window = mat("#fbe6a0", 0.25, "#edb86b"),
+      windowMaterial = mat("#fbe6a0", 0.25, "#edb86b"),
       door = mat("#3a3431"),
       soil = mat("#694830"),
       water = animatedWater.material,
@@ -339,29 +343,19 @@ export default function WorldScene3D(props: SceneProps) {
       tall = 1,
       tile?: { x: number; y: number },
     ) {
-      if(parent===terrain){placements.push({model:biomeAt(Math.floor(x),Math.floor(z)).id==='snow'?'snowcottage':'cottage',x,y:0,z,scale:tall*.55,tile});if(models.ready)return;}
-      const first = parent.children.length;
-      mesh(parent, box, wall, x, 0.65 * tall, z, 0.85, 1.3 * tall, 0.85);
-      const r = mesh(
-        parent,
-        cone,
-        roof,
-        x,
-        1.3 * tall + 0.22,
-        z,
-        0.72,
-        0.5,
-        0.72,
-      );
-      r.rotation.y = Math.PI / 4;
-      mesh(parent, box, door, x, 0.3, z + 0.431, 0.22, 0.6, 0.02);
-      for (const d of [-0.26, 0.26])
-        mesh(parent, box, window, x + d, 0.85, z + 0.44, 0.16, 0.22, 0.025);
-      mesh(parent, box, wood, x, 0.02, z, 1.02, 0.06, 1.02);
-      if (tile)
-        for (const child of parent.children.slice(first))
-          child.userData.tile = tile;
+      const first=parent.children.length;
+      const height=3.2*tall,depth=3,width=3;
+      mesh(parent,box,wall,x-width/2+.15,height/2,z,.3,height,depth);
+      mesh(parent,box,wall,x+width/2-.15,height/2,z,.3,height,depth);
+      mesh(parent,box,wall,x,height/2,z-depth/2,width,height,.3);
+      // The entry tile lies in a 1.4m opening beneath a 2.4m lintel.
+      for(const side of [-1,1])mesh(parent,box,wall,x+side*1.1,height/2,z+.35,.8,height,.3);
+      mesh(parent,box,wall,x,(height+2.4)/2,z+.35,1.4,height-2.4,.3);
+      const cap=mesh(parent,cone,roof,x,height+.55,z,2.25,1.25,2.25);cap.rotation.y=Math.PI/4;
+      for(const side of [-1,1])mesh(parent,box,windowMaterial,x+side*1.51,1.8,z-.4,.03,.9,.8);
+      if(tile)for(const child of parent.children.slice(first))child.userData.tile=tile;
     }
+
     function tree(x: number, z: number, biome: string) {
       const season=calendar(latest.current.world).season;
       const model:StorybookModel=biome==='snow'?'snowpine':biome==='desert'?'cactus':biome==='ruins'?'arch':season===2?'autumn':biome==='forest'?'pine':'oak';
@@ -413,8 +407,9 @@ export default function WorldScene3D(props: SceneProps) {
       terrain.clear();placements=[];voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGroup.clear();
       const blocks=renderBlocks.map(()=>[] as {x:number;y:number;z:number}[]),cache=new Map<string,TerrainBlock|null>();
       const vr=options.current.mapQuality==='low'?12:19;
+      const editedTops=new Map<string,number>();for(const [k,b]of Object.entries(w.voxels?.edits||{})){if(!b)continue;const [ex,ey,ez]=k.split(',').map(Number),col=ex+','+ez;editedTops.set(col,Math.max(editedTops.get(col)||0,ey));}
       const get=(bx:number,by:number,bz:number)=>{const k=`${bx},${by},${bz}`;if(!cache.has(k))cache.set(k,blockAt(w,bx,by,bz));return cache.get(k)!;};
-      for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=MAX_HEIGHT;vy++){
+      for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=Math.max(terrainHeight(w,vx,vz)+4,editedTops.get(vx+','+vz)||0);vy++){
         const b=get(vx,vy,vz);if(!b)continue;
         if(fullCube(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>{const neighbor=get(vx+dx,vy+dy,vz+dz);return !!neighbor&&fullCube(neighbor);}))continue;
         blocks[renderBlocks.indexOf(b)].push({x:vx,y:vy,z:vz});
@@ -447,7 +442,7 @@ export default function WorldScene3D(props: SceneProps) {
       cells.forEach(({ x: tx, y: ty, tile }, i) => {
         dummy.position.set(
           tx + 0.5,
-          tile === "water" ? -0.11 : solid(blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty))?terrainHeight(w,tx,ty)-.06:-100,
+          tile === "water" ? -(voxelWater(w,tx,ty)?.depth||1)+.025 : solid(blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty))?terrainHeight(w,tx,ty)-.06:-100,
           ty + 0.5,
         );
         dummy.scale.set(1, 0.1, 1);
@@ -617,37 +612,6 @@ export default function WorldScene3D(props: SceneProps) {
         for(const f of room.furniture){const size=furnitureSize(f);if(!near({x:f.x,y:f.y}))continue;if(furnishing(f.item)?.floor){let material=floorFurnitureMaterials.get(f.item);if(!material){material=new THREE.MeshBasicMaterial({map:texture(assetUrl(furnitureImage(f.item))),transparent:true,alphaTest:.08,side:THREE.DoubleSide});floorFurnitureMaterials.set(f.item,material);materials.push(material);}const rug=new THREE.Mesh(floorFurnitureGeometry,material);rug.rotation.x=-Math.PI/2;rug.position.set(f.x+size.width/2,room.floor+.03,f.y+size.height/2);rug.scale.set(size.width,size.height,1);terrain.add(rug);}else billboard(terrain,assetUrl(furnitureImage(f.item)),f.x+size.width/2,room.floor+.55,f.y+size.height/2,Math.max(size.width,size.height)*.85,undefined,true);}
         for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id){const pos=pet.roomPos||room.cells[0];billboard(terrain,assetUrl(farmImage('pet',pet.kind)),pos.x+.5,room.floor+.35,('y' in pos?pos.y:pos.z)+.5,.7,undefined,true);}
       }
-      for (let i = 0; i < 5; i++) {
-        const cx = x + Math.sin(i * 1.7) * 23,
-          cz = y + Math.cos(i * 1.7) * 23;
-        for (let k = 0; k < 3; k++)
-          mesh(
-            terrain,
-            foliage,
-            cloud,
-            cx + k * 1.9,
-            9 + (i % 2),
-            cz,
-            2.6,
-            1.1,
-            1.5,
-          );
-      }
-      // The actual voxel soil is the floor; a world-sized plane would cover excavations.
-      // Silhouettes at the fog line establish scale without disconnected collision geometry.
-      for (let i = 0; i < 12; i++)
-        mesh(
-          terrain,
-          cone,
-          stone,
-          x + Math.sin((i / 12) * Math.PI * 2) * 35,
-          -2,
-          y + Math.cos((i / 12) * Math.PI * 2) * 35,
-          8,
-          10 + (i % 3) * 2,
-          8,
-        );
-
       for(const c of oasisCenters(w))if(Math.abs(c.x-x)<radius&&Math.abs(c.z-y)<radius){for(const [dx,dz] of [[4,0],[-4,0],[0,4],[0,-4]])if(!protectedVoxel(w,c.x+dx,c.z+dz))placements.push({model:'mushrooms',x:c.x+dx+.5,z:c.z+dz+.5,y:c.depth-1,scale:.55});}
       models.set(placements.map(v=>({...v,y:v.y!==undefined&&v.y<0?v.y:(v.y||0)+terrainHeight(w,Math.floor(v.x),Math.floor(v.z))})));
       const groups = new Map<string, THREE.Mesh[]>();
@@ -736,9 +700,9 @@ export default function WorldScene3D(props: SceneProps) {
               actors,
               assetUrl(image),
               a.position3D?.x??a.x + 0.5,
-              .9,
+              playerHeight(w,a)+WORLD_SCALE.playerHeight/2,
               a.position3D?.z??a.y + 0.5,
-              1.8,
+              WORLD_SCALE.playerHeight,
               a.id,
             );
           else mesh(actors, cone, gold, a.x + 0.5, 0.5, a.y + 0.5, 0.2, 1, 0.2);
@@ -762,13 +726,19 @@ export default function WorldScene3D(props: SceneProps) {
       const current=latest.current.world.players[latest.current.selfId];
       if(energyOf(current.life)<(kind==='voxel-place'?.1:.02)){latest.current.onEnergyRequest?.();return;}
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
-      const h=ray.intersectObjects(voxelGroup.children)[0];
-      if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!],b=blockAt(latest.current.world,v.x,v.y,v.z);if(kind==='voxel-break'&&b&&Number.isFinite(miningCost(b,current))&&energyOf(current.life)<miningCost(b,current)){latest.current.onEnergyRequest?.();return;}const matrix=new THREE.Matrix4();(h.object as THREE.InstancedMesh).getMatrixAt(h.instanceId!,matrix);const n=h.face!.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(matrix));latest.current.onVoxelAction?.({type:kind,x:v.x+(kind==='voxel-place'?Math.round(n.x):0),y:v.y+(kind==='voxel-place'?Math.round(n.y):0),z:v.z+(kind==='voxel-place'?Math.round(n.z):0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
+      const h=traceVoxel(latest.current.world,ray.ray.origin,ray.ray.direction);
+      if(h){if(kind==='voxel-break'&&Number.isFinite(miningCost(h.block,current))&&energyOf(current.life)<miningCost(h.block,current)){latest.current.onEnergyRequest?.();return;}latest.current.onVoxelAction?.({type:kind,x:h.x+(kind==='voxel-place'?h.normal.x:0),y:h.y+(kind==='voxel-place'?h.normal.y:0),z:h.z+(kind==='voxel-place'?h.normal.z:0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
 
     }
+    const vertical=(e:KeyboardEvent)=>{if(e.code==='Space'&&!e.repeat&&!buildRef.current.panel&&!document.activeElement?.closest('input,textarea,[role=dialog]')){e.preventDefault();latest.current.onVoxelAction?.({type:'voxel-jump'});}if(e.code==='KeyC'&&!e.repeat&&!buildRef.current.panel&&!document.activeElement?.closest('input,textarea,[role=dialog]'))latest.current.onVoxelAction?.({type:'voxel-dive'});};
+    window.addEventListener('keydown',vertical);
+    const physicsTimer=window.setInterval(()=>{const a=latest.current.world.players[latest.current.selfId];if(buildRef.current.building&&a?.position3D?.vy)latest.current.onVoxelAction?.({type:'voxel-move',dx:0,dy:0});},80);
     const command=(e:Event)=>performBuild((e as CustomEvent).detail);
     element.addEventListener('voxel-command',command);
     let down: { x: number; y: number } | null = null;
+    let ambience:ReturnType<typeof audioService.createRpgAmbience>=null;
+    const enableAmbience=()=>{ambience??=audioService.createRpgAmbience();};
+    element.addEventListener('pointerdown',enableAmbience);
     const start = (e: PointerEvent) => {
       down = { x: e.clientX, y: e.clientY };
     };
@@ -777,7 +747,7 @@ export default function WorldScene3D(props: SceneProps) {
       const dx = e.clientX - down.x,
         dy = e.clientY - down.y;
       down = null;
-      if(buildRef.current.building&&Math.hypot(dx,dy)>12){setPitch(p=>Math.max(-1.1,Math.min(.7,p-dy*.006)));if(Math.abs(dx)>35)latest.current.onFacing(latest.current.facing-dx/180);return;}
+      if(buildRef.current.building&&Math.hypot(dx,dy)>12){setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy*.006)));if(Math.abs(dx)>35)latest.current.onFacing(latest.current.facing-dx/180);return;}
       if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
         latest.current.onFacing(latest.current.facing-dx/180);
         return;
@@ -862,10 +832,10 @@ export default function WorldScene3D(props: SceneProps) {
             )
             .join("|");
         }
-        const nextKey = `${w.voxelRooms?.map(r=>r.revision).join(',')||''}:${w.voxels?.revision||0}:${Math.floor(a.x / 4)}:${Math.floor(a.y / 4)}:${w.city?.revision || 0}:${w.life.houses.length}:${resourceStamp}:${farmStamp}:${Math.floor(w.life.time / (Object.values(w.farm?.people||{}).some(f=>f.pets.some(p=>w.voxelRooms?.some(r=>r.id===p.homeId)))?2:8))}`;
+        const nextKey = `${w.voxelRooms?.map(r=>r.revision).join(',')||''}:${w.voxels?.revision||0}:${Math.floor((a.position3D?.x??a.x) / 4)}:${Math.floor((a.position3D?.z??a.y) / 4)}:${w.city?.revision || 0}:${w.life.houses.length}:${resourceStamp}:${farmStamp}:${Math.floor(w.life.time / (Object.values(w.farm?.people||{}).some(f=>f.pets.some(p=>w.voxelRooms?.some(r=>r.id===p.homeId)))?2:8))}`;
         if (nextKey !== key) {
           key = nextKey;
-          rebuild(w, a.x, a.y);
+          rebuild(w, Math.floor(a.position3D?.x??a.x), Math.floor(a.position3D?.z??a.y));
         }
         const nextActors =
           (latest.current.hiddenActors || []).join("|") +
@@ -949,37 +919,47 @@ export default function WorldScene3D(props: SceneProps) {
               : 0);
           actor.scale.y *= pose === "sleep" ? 0.88 : 1;
         }
-      sun.position.set(camera.position.x - 8, 18, camera.position.z + 9);
-      sun.target.position.set(camera.position.x, 0, camera.position.z);
+      sun.position.set(camera.position.x - 8, camera.position.y+18, camera.position.z + 9);
+      sun.target.position.set(camera.position.x, camera.position.y-1.62, camera.position.z);
       sun.target.updateMatrixWorld();
       skyDome.position.copy(camera.position);
       const phase = calendar(w).phase;
-      const underground=camera.position.y<-.5;lamp.position.copy(camera.position);lamp.intensity=underground?3:0;const nearest=oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);oasisLight.position.set(nearest.x,nearest.depth+1,nearest.z);oasisLight.intensity=underground?2.5:0;
+      const exterior=!legacyRegion(camera.position.x,camera.position.z),pool=voxelWater(w,camera.position.x,camera.position.z),underwater=!!pool&&camera.position.y<pool.surface;
+      (scene.fog as THREE.FogExp2).density=underwater?.11:camera.position.y>170?.0035:options.current.mapQuality==='low'?.003:.0018;
+      if(underwater){scene.background=new THREE.Color('#28748b');(scene.fog as THREE.FogExp2).color.set('#28748b');}
+      landscape.update(w,camera.position,time/1000,phase===3,options.current.reducedMotion);
+      ambience?.update(camera.position.y,underwater||!!pool,landscape.group.userData.stats.weather==='rain');
+      renderer.domElement.dataset.landscape=JSON.stringify(landscape.group.userData.stats);renderer.domElement.dataset.underwater=String(underwater);
+      const underground=!underwater&&!exterior&&camera.position.y<-.5;lamp.position.copy(camera.position);lamp.intensity=underground?3:0;const nearest=oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);oasisLight.position.set(nearest.x,nearest.depth+1,nearest.z);oasisLight.intensity=underground?2.5:0;
       const brightness = underground?.1:phase === 3 ? 0.48 : phase === 2 ? 0.8 : 1;
       skyMaterial.uniforms.dark.value = brightness;
       skyMaterial.uniforms.tone.value.copy((scene.fog as THREE.FogExp2).color);
       sun.intensity = underground?.08:phase === 3 ? 0.5 : 2.1;
       camera.fov = 72 / options.current.zoom;
       camera.updateProjectionMatrix();
-      models.update(Math.min(.1,(time-last)/1000||.016),options.current.reducedMotion);atmosphere.update(time/1000,camera.position,options.current.reducedMotion);animatedWater.update(options.current.reducedMotion?0:time/1000);
+      models.update(Math.min(.1,(time-last)/1000||.016),options.current.reducedMotion);animatedWater.update(options.current.reducedMotion?0:time/1000);
       renderer.domElement.dataset.workshopModels=String(construction.readyShapes);renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
       outline.visible=false;ghost.visible=false;
-      if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=ray.intersectObjects(voxelGroup.children)[0];let t:{block:TerrainBlock;cost:number}|null=null;if(h&&h.distance<4.5){const v=h.object.userData.voxels[h.instanceId!];outline.position.set(v.x+.5,v.y+.5,v.z+.5);outline.visible=true;const b=blockAt(w,v.x,v.y,v.z);if(b)t={block:b,cost:miningCost(b,w.players[latest.current.selfId])};
-        if(!buildRef.current.panel){const im=new THREE.Matrix4();(h.object as THREE.InstancedMesh).getMatrixAt(h.instanceId!,im);const n=h.face!.normal.clone().applyNormalMatrix(new THREE.Matrix3().getNormalMatrix(im));const x=v.x+Math.round(n.x),y=v.y+Math.round(n.y),z=v.z+Math.round(n.z),chosen=buildRef.current.selected;ghost.geometry=construction.get(chosen);ghost.position.set(x+.5,y+.5,z+.5);ghost.rotation.y=buildRef.current.rotation*Math.PI/2;ghost.visible=true;const valid=!blockAt(w,x,y,z)&&!protectedVoxel(w,x,z)&&y>MIN_DEPTH&&y<=MAX_HEIGHT&&(w.players[latest.current.selfId].life?.bag[chosen]||0)>0&&!Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2);ghostMaterial.color.set(valid?'#89e0ac':'#ed9079');}}const k=t?t.block+':'+t.cost:'';if(k!==lastTarget){lastTarget=k;setTarget(t);}}
+      if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=traceVoxel(w,ray.ray.origin,ray.ray.direction);let t:{block:TerrainBlock;cost:number}|null=null;
+        if(h){outline.position.set(h.x+.5,h.y+.5,h.z+.5);outline.visible=true;t={block:h.block,cost:miningCost(h.block,w.players[latest.current.selfId])};
+          if(!buildRef.current.panel){const x=h.x+h.normal.x,y=h.y+h.normal.y,z=h.z+h.normal.z,chosen=buildRef.current.selected;ghost.geometry=construction.get(chosen);ghost.position.set(x+.5,y+.5,z+.5);ghost.rotation.y=buildRef.current.rotation*Math.PI/2;ghost.visible=true;const valid=!blockAt(w,x,y,z)&&!protectedVoxel(w,x,z)&&y>MIN_DEPTH&&y<=MAX_HEIGHT&&(w.players[latest.current.selfId].life?.bag[chosen]||0)>0&&!Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2);ghostMaterial.color.set(valid?'#89e0ac':'#ed9079');}}
+        const k=t?t.block+':'+t.cost:'';if(k!==lastTarget){lastTarget=k;setTarget(t);}}
+
       last = time;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
     return () => {
-      disposed = true;
+      disposed = true;window.removeEventListener('keydown',vertical);clearInterval(physicsTimer);
+      element.removeEventListener('pointerdown',enableAmbience);ambience?.dispose();
       cancelAnimationFrame(raf);
       observer.disconnect();
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       renderer.domElement.removeEventListener("pointerdown", start);
       renderer.domElement.removeEventListener("pointerup", end);
       element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
-      models.dispose();atmosphere.dispose();
+      landscape.dispose();models.dispose();
       batches.forEach((b) => b.dispose());
       groundMaterial?.dispose();
       geometries.forEach((g) => g.dispose());
@@ -992,12 +972,12 @@ export default function WorldScene3D(props: SceneProps) {
   const text=(s:string)=>trans(s,props.languageMode||"JAPANESE");
   const command=(type:string)=>host.current?.dispatchEvent(new CustomEvent('voxel-command',{detail:type}));
   const me=props.world.players[props.selfId];
-  return <div className="rpg-world-3d" ref={host}>{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
-    <VoxelLookStick languageMode={props.languageMode||'JAPANESE'} onLook={(dx,dy)=>{props.onFacing(props.facing+dx);setPitch(p=>Math.max(-1.35,Math.min(1.2,p-dy)));}}/>
-    <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
+  return <div className="rpg-world-3d" ref={host}>{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
+    <VoxelLookStick languageMode={props.languageMode||'JAPANESE'} onLook={(dx,dy)=>{props.onFacing(props.facing+dx);setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy)));}}/>
+    <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
     <div className="rpg-workshop-actions"><button onClick={()=>setEditSlot(true)}>{text("建築工房")}</button><button aria-label={text("建材を回転")} onClick={()=>setRotation(r=>(r+1)%4)}>↻ {rotation*90}°</button></div>
-    <div className="rpg-voxel-actions"><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} onClick={()=>command('voxel-break')}>⛏ {text('壊す')}</button><button disabled={energyOf(me?.life)>=.1&&(me?.life?.bag[selected]||0)<1} onClick={()=>command('voxel-place')}>＋ {text('置く')}</button></div>
+    <div className="rpg-voxel-actions"><button aria-label="Jump / Swim up" onClick={()=>props.onVoxelAction?.({type:'voxel-jump'})}>↑</button><button aria-label="Dive" onClick={()=>props.onVoxelAction?.({type:'voxel-dive'})}>↓</button><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} onClick={()=>command('voxel-break')}>⛏ {text('壊す')}</button><button disabled={energyOf(me?.life)>=.1&&(me?.life?.bag[selected]||0)<1} onClick={()=>command('voxel-place')}>＋ {text('置く')}</button></div>
     <small className="rpg-voxel-target">{target?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':target.block==='door-top'?'ドア':MATERIAL_NAMES[target.block]):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
   </div>}{building&&editSlot&&<VoxelWorkshopPanel world={props.world} selfId={props.selfId} languageMode={props.languageMode||"JAPANESE"} send={a=>props.onVoxelAction?.(a)} onChoose={block=>setSlots(slots=>slots.map((b,i)=>i===selectedSlot?block:b))} onClose={()=>setEditSlot(false)}/>}{building&&<span className="rpg-voxel-crosshair">＋</span>}</div>;
 }

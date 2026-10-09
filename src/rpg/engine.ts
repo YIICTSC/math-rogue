@@ -90,7 +90,7 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
-  position3D?: {x:number;z:number;y?:number};
+  position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean};
   voxelDiscoveries?:string[];
   voxelAt?:number;
   hero?:CustomHero;
@@ -700,6 +700,8 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  const beyondLegacy=p.position3D&&(p.position3D.x<0||p.position3D.z<0||p.position3D.x>=WIDTH||p.position3D.z>=HEIGHT);
+  if(beyondLegacy&&!action.type.startsWith('voxel-')&&!action.type.startsWith('native-')&&action.type!=='life-craft')return false;
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
   if(w.town?.encounters?.[id]&&action.type!=='native-profile'&&action.type!=='native-learning')return false;
   if(action.type.startsWith('voxel-room-'))return applyRoomAction(w,p,action as RoomAction);
@@ -720,7 +722,7 @@ export function applyAction(
   if (w.ended || p.nativeScene || activityBusy(w,p)) return false;
   if(action.type.startsWith("voxel-")){
     const changed=applyVoxel(w,p,action as VoxelAction,now);
-    if(changed&&action.type==='voxel-move'){const house=w.life.houses.find(h=>h.x===p.x&&h.y===p.y);if(house)applyLifeAction(w,p,{type:'life-enter',houseId:house.id},now);}
+    if(changed&&action.type==='voxel-move'&&(!p.position3D||(p.position3D.x>=0&&p.position3D.x<WIDTH&&p.position3D.z>=0&&p.position3D.z<HEIGHT))){const house=w.life.houses.find(h=>h.x===p.x&&h.y===p.y);if(house)applyLifeAction(w,p,{type:'life-enter',houseId:house.id},now);}
     return changed;
   }
   if (action.type === "move") {

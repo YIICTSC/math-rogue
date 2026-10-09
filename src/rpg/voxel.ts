@@ -1,3 +1,4 @@
+import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES} from './worldLandscape';
 import {WIDTH,HEIGHT,type World,type Adventurer} from './engine';
 import {natureAt,lifePlayer,lifeWalkable,type Material} from './life';
 import {energyOf} from './energy';
@@ -10,15 +11,30 @@ export const BLOCKS=CATALOG_BLOCKS;
 export type Block=typeof BLOCKS[number];
 export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLOCKS.map(b=>[b,VOXEL_CATALOG[b].color])) as Record<Block,string>,'door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf'};
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'door-top';
-export const MIN_DEPTH=-18,MAX_HEIGHT=18,EYE_HEIGHT=1.62;
+export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
 export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
-export type VoxelAction=WorkshopAction|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export type VoxelAction=WorkshopAction|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
-export function protectedVoxel(w:World,x:number,z:number){return x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedFarmTile(w,z*WIDTH+x)||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-z)<=1);}
+export function voxelWater(w:World,x:number,z:number){
+ if(!legacyRegion(x,z))return waterProfile(x,z);
+ x=Math.floor(x);z=Math.floor(z);if(w.tiles[z*WIDTH+x]!=='water')return null;
+ let depth=6;for(let r=1;r<=6;r++)if([[x-r,z],[x+r,z],[x,z-r],[x,z+r]].some(([tx,tz])=>!legacyRegion(tx,tz)||w.tiles[tz*WIDTH+tx]!=='water')){depth=r;break;}
+ return {surface:0,depth,flowX:.15,flowZ:.3,kind:'river' as const};
+}
+/** Grid traversal ray uses the authoritative blocks, including unloaded chunks. */
+export function traceVoxel(w:World,origin:{x:number;y:number;z:number},direction:{x:number;y:number;z:number},reach=4.5){
+ let x=Math.floor(origin.x),y=Math.floor(origin.y),z=Math.floor(origin.z);const axes=['x','y','z'] as const;
+ const step={x:Math.sign(direction.x),y:Math.sign(direction.y),z:Math.sign(direction.z)};
+ const delta={x:Math.abs(1/direction.x),y:Math.abs(1/direction.y),z:Math.abs(1/direction.z)};
+ const next={x:direction.x?((direction.x>0?x+1:x)-origin.x)/direction.x:Infinity,y:direction.y?((direction.y>0?y+1:y)-origin.y)/direction.y:Infinity,z:direction.z?((direction.z>0?z+1:z)-origin.z)/direction.z:Infinity};
+ for(let i=0;i<64;i++){const axis=axes.reduce((a,b)=>next[a]<next[b]?a:b);const distance=next[axis];if(distance>reach)return null;next[axis]+=delta[axis];if(axis==='x')x+=step.x;if(axis==='y')y+=step.y;if(axis==='z')z+=step.z;const block=blockAt(w,x,y,z);if(block){const normal={x:0,y:0,z:0};normal[axis]=-step[axis];return {x,y,z,block,normal,distance};}}
+ return null;
+}
+export function protectedVoxel(w:World,x:number,z:number){if(!legacyRegion(x,z))return !landscapeRegion(x,z)||STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1);return x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedFarmTile(w,z*WIDTH+x)||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-z)<=1);}
 const heightCache=new Map<number,Int8Array>();
 const finalHeightCache=new WeakMap<World,{revision:number;heights:Int8Array}>();
 export function terrainHeight(w:World,x:number,z:number){
- if(x<0||z<0||x>=WIDTH||z>=HEIGHT)return 0;
+ if(!legacyRegion(x,z))return landscapeRegion(x,z)?landscapeHeight(w.seed,x,z):0;
  let cache=finalHeightCache.get(w);if(!cache||cache.revision!==w.revision){cache={revision:w.revision,heights:new Int8Array(WIDTH*HEIGHT).fill(-128)};finalHeightCache.set(w,cache);}const cell=z*WIDTH+x;if(cache.heights[cell]!==-128)return cache.heights[cell];
  const save=(h:number)=>(cache!.heights[cell]=h);
  if((protectedVoxel(w,x,z)&&!occupiedFarmTile(w,z*WIDTH+x))||w.tiles[z*WIDTH+x]==='road'||w.tiles[z*WIDTH+x]==='water'||w.voxels?.legacyFlat?.includes(`${x},${z}`))return save(0);
@@ -37,6 +53,7 @@ export function oasisCenters(w:World){let centers=oasisCache.get(w.seed);if(!cen
 export function undergroundOasis(w:World,x:number,y:number,z:number){return oasisCenters(w).find(c=>((x+.5-c.x)/5.5)**2+((z+.5-c.z)/5.5)**2+((y+.5-c.depth)/2.8)**2<1);}
 /** Natural vegetation uses the same editable cells as player-built blocks. */
 export function vegetationCells(w:World,x:number,z:number):{x:number;y:number;z:number;block:Block}[]{
+ if(!legacyRegion(x,z))return [];
  const node=natureAt(w,z*WIDTH+x);if(!node||w.life.nodes[z*WIDTH+x]?.regrowAt||protectedVoxel(w,x,z))return [];
  const h=terrainHeight(w,x,z),cell=(dx:number,dy:number,dz:number,block:Block)=>({x:x+dx,y:h+dy,z:z+dz,block});
  if(node.rock)return [cell(0,0,0,node.material as Block)];
@@ -67,12 +84,13 @@ function vegetationAt(w:World,x:number,y:number,z:number):Block|null{
  return null;
 }
 export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
- if(x<0||z<0||x>=WIDTH||z>=HEIGHT||y>MAX_HEIGHT)return null;
+ if(y>MAX_HEIGHT)return null;
+ if(!legacyRegion(x,z)){if(!landscapeRegion(x,z))return null;const key=voxelKey(x,y,z);if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];if(w.voxels?.edits[voxelKey(x,y-1,z)]==='door')return 'door-top';return y<=MIN_DEPTH?'bedrock':landscapeBlock(w.seed,x,y,z);}
  const key=voxelKey(x,y,z);if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];
  if(w.voxels?.edits[voxelKey(x,y-1,z)]==='door')return 'door-top';
  if(y<=MIN_DEPTH)return 'bedrock';const h=terrainHeight(w,x,z),protectedCell=protectedVoxel(w,x,z);
  if(y<h){
-  if(w.tiles[z*WIDTH+x]==='water')return y< -1?'stone':null;
+  if(w.tiles[z*WIDTH+x]==='water'){const bed=-(voxelWater(w,x,z)?.depth||1);return y<bed?(y===bed-1?'gravel':'stone'):null;}
   if(!protectedCell){const oasis=undergroundOasis(w,x,y,z);if(oasis){const radius=Math.hypot(x-oasis.x,z-oasis.z);if(y<=oasis.depth-2)return radius<4?'sand':'stone';return y===oasis.depth-1&&radius<3?'oasis-water':null;}
    // Winding caverns join the six oases without a second terrain simulation.
    if(y<=-4&&y>=-13&&Math.abs(Math.sin(x*.23+w.seed)+Math.cos(z*.21))<.24&&Math.abs(y-(-8+Math.round(Math.sin((x+z)*.09)*2)))<=1)return null;
@@ -90,11 +108,11 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
 }
 export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='door'&&b!=='door-top';
 const blockTop=(b:TerrainBlock)=>shapeOf(b)==='slab'?.5:1;
-export function bodyClear(w:World,x:number,z:number,feet:number,top=feet+1.8){
+export function bodyClear(w:World,x:number,z:number,feet:number,top=feet+WORLD_SCALE.playerHeight){
  for(let y=Math.floor(feet);y<Math.ceil(top);y++){const b=blockAt(w,x,y,z);if(b&&solid(b)&&y+blockTop(b)>feet+.001&&y<top-.001)return false;}return true;
 }
 export function floorAt(w:World,x:number,z:number,maxTop:number):number|null {
- if(x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||w.tiles[z*WIDTH+x]==='water')return null;
+ if(!legacyRegion(x,z)&&!landscapeRegion(x,z))return null;
  for(let y=Math.min(MAX_HEIGHT,Math.ceil(maxTop)-1);y>=MIN_DEPTH;y--){const b=blockAt(w,x,y,z);if(b&&solid(b)){const top=y+blockTop(b);if(top<=maxTop+.001&&bodyClear(w,x,z,top))return top;}}
  return null;
 }
@@ -111,15 +129,31 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   delete p.position3D;w.revision++;return true;
  }
  upgrade(w);
+ if(a.type==='voxel-jump'||a.type==='voxel-dive'){
+  const pos=p.position3D;if(!pos)return false;
+  const water=voxelWater(w,pos.x,pos.z);
+  if(water&&(pos.y??0)<water.surface){const y=Math.max(water.surface-water.depth,Math.min(water.surface-.25,(pos.y??0)+(a.type==='voxel-dive'?-.5:.5)));if(bodyClear(w,Math.floor(pos.x),Math.floor(pos.z),y)){pos.y=y;pos.swimming=true;w.revision++;return true;}return false;}
+  if(a.type==='voxel-dive'||pos.vy||now-(p.voxelAt||0)<400)return false;
+  const floor=floorAt(w,Math.floor(pos.x),Math.floor(pos.z),(pos.y??0)+.05);if(floor===null||Math.abs(floor-(pos.y??0))>.1)return false;
+  pos.vy=WORLD_SCALE.jumpSpeed;p.voxelAt=now;w.revision++;return true;
+ }
  if(a.type==='voxel-move'){
   if(farmBusy(w,p))return false;
   if(!Number.isFinite(a.dx)||!Number.isFinite(a.dy)||Math.hypot(a.dx,a.dy)>.45||now-p.lastMove<45)return false;
   let {x,z}=p.position3D??{x:p.x+.5,z:p.y+.5},feet=playerHeight(w,p);
-  const travel=Math.min(.4,Math.max(0,(now-p.lastMove)/1000)*3.2),length=Math.hypot(a.dx,a.dy);if(!length)return false;
-  const dx=a.dx*Math.min(1,travel/length),dz=a.dy*Math.min(1,travel/length);
-  const step=(nx:number,nz:number)=>{const corners=[[-.18,-.18],[-.18,.18],[.18,-.18],[.18,.18]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;const next=Math.max(...heights as number[]);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+1.8)))return false;x=nx;z=nz;feet=next;return true;};
-  step(x+dx,z);step(x,z+dz);p.position3D={x,z,y:feet};p.x=Math.floor(x);p.y=Math.floor(z);p.lastMove=now;p.moveCount++;w.revision++;
-  const oasis=undergroundOasis(w,p.x,feet,p.y);if(oasis&&!p.voxelDiscoveries?.includes(oasis.id)){(p.voxelDiscoveries??=[]).push(oasis.id);p.message='地下のオアシスを発見しました！';}
+  const water=voxelWater(w,x,z);
+  const dt=Math.min(.1,Math.max(0,(now-p.lastMove)/1000)),speed=water?WORLD_SCALE.swimSpeed:WORLD_SCALE.walkSpeed;
+  const travel=Math.min(.4,dt*speed),length=Math.hypot(a.dx,a.dy);
+  let vy=p.position3D?.vy||0;
+  if(!length&&!vy)return false;
+  if(vy){const next=feet+vy*dt;vy-=WORLD_SCALE.gravity*dt;
+   if(next>feet){if(bodyClear(w,Math.floor(x),Math.floor(z),feet,next+WORLD_SCALE.playerHeight))feet=next;else vy=-.1;}
+   else {const ground=floorAt(w,Math.floor(x),Math.floor(z),feet+.01);if(ground!==null&&next<=ground){feet=ground;vy=0;}else feet=next;}
+  }
+  const dx=a.dx*Math.min(1,travel/(length||1)),dz=a.dy*Math.min(1,travel/(length||1));
+  const step=(nx:number,nz:number)=>{if(!legacyRegion(nx,nz)&&!landscapeRegion(nx,nz))return false;const r=WORLD_SCALE.radius;const corners=[[-r,-r],[-r,r],[r,-r],[r,r]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;let next=Math.max(...heights as number[]);const pool=voxelWater(w,nx,nz);if(pool&&next<pool.surface){next=Math.max(next,p.position3D?.swimming?Math.min(feet,pool.surface-.25):pool.surface-1.3);}else if(vy)next=Math.max(next,feet);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+WORLD_SCALE.playerHeight)))return false;x=nx;z=nz;feet=next;return true;};
+  if(dx)step(x+dx,z);if(dz)step(x,z+dz);p.position3D={x,z,y:feet,...(vy?{vy}:{}),...(water?{swimming:!!p.position3D?.swimming}:{})};if(legacyRegion(x,z)){p.x=Math.max(1,Math.min(WIDTH-2,Math.floor(x)));p.y=Math.max(1,Math.min(HEIGHT-2,Math.floor(z)));}p.lastMove=now;p.moveCount++;w.revision++;
+  const oasis=legacyRegion(x,z)?undergroundOasis(w,p.x,feet,p.y):undefined;if(oasis&&!p.voxelDiscoveries?.includes(oasis.id)){(p.voxelDiscoveries??=[]).push(oasis.id);p.message='地下のオアシスを発見しました！';}
   return true;
  }
  let {x,y,z}=a;if(a.type==='voxel-break'&&blockAt(w,x,y,z)==='door-top')y--;if(![x,y,z].every(Number.isInteger)||y<=MIN_DEPTH||y>MAX_HEIGHT||protectedVoxel(w,x,z)||now-(p.voxelAt||0)<220)return false;
@@ -137,7 +171,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(existing==='steel'&&!p.voxelDiscoveries?.includes('steel'))(p.voxelDiscoveries??=[]).push('steel');
  }else{
   if(a.block==='door'&&(y>=MAX_HEIGHT||blockAt(w,x,y+1,z)||!solid(blockAt(w,x,y-1,z))))return false;
-  if(existing||!a.block||!BLOCKS.includes(a.block)||(lp.bag[a.block]||0)<1||w.tiles[z*WIDTH+x]==='water')return false;
+  if(existing||!a.block||!BLOCKS.includes(a.block)||(lp.bag[a.block]||0)<1||(legacyRegion(x,z)&&w.tiles[z*WIDTH+x]==='water'))return false;
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
   if(![[x,y-1,z],[x-1,y,z],[x+1,y,z],[x,y,z-1],[x,y,z+1]].some(([bx,by,bz])=>solid(blockAt(w,bx,by,bz))))return false;
   if(Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2))return false;
@@ -146,6 +180,6 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  }
  lp.energy=Math.round((energyOf(lp)-cost)*100)/100;p.message=a.type==='voxel-break'?(existing==='steel'?'未知の鋼材ブロックを発見しました！':'ブロックから素材を獲得しました。'):'ブロックを設置しました。';p.voxelAt=now;state.revision++;w.revision++;
  // Mining under one's feet causes a fall to the next solid floor.
- for(const q of Object.values(w.players))if(q.position3D){const next=floorAt(w,Math.floor(q.position3D.x),Math.floor(q.position3D.z),playerHeight(w,q));if(next!==null)q.position3D.y=next;}
+ for(const q of Object.values(w.players))if(q.position3D){const next=floorAt(w,Math.floor(q.position3D.x),Math.floor(q.position3D.z),playerHeight(w,q));if(next!==null&&!q.position3D.vy&&!voxelWater(w,q.position3D.x,q.position3D.z))q.position3D.y=next;}
  return true;
 }

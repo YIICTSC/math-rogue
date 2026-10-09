@@ -202,6 +202,16 @@ class AudioService {
       return { theme, type };
   }
 
+  /** One scoped environmental loop; routed through the existing mute/SFX bus. */
+  public createRpgAmbience() {
+    this.init();
+    if(!this.ctx||!this.sfxGain||!this.noiseBuffer)return null;
+    const ctx=this.ctx,source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+    source.buffer=this.noiseBuffer;source.loop=true;filter.type='lowpass';filter.frequency.value=400;gain.gain.value=0;
+    source.connect(filter);filter.connect(gain);gain.connect(this.sfxGain);source.start();
+    return {update:(height:number,water:boolean,rain:boolean)=>{filter.frequency.setTargetAtTime(water?800:rain?2200:350,ctx.currentTime,.4);gain.gain.setTargetAtTime(water?.055:rain?.035:Math.max(0,height-80)/5000,ctx.currentTime,.5);},dispose:()=>{source.stop();source.disconnect();filter.disconnect();gain.disconnect();}};
+  }
+
   public init() {
     if (this.ctx?.state === 'closed') {
         this.ctx = null;
