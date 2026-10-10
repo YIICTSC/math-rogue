@@ -22,6 +22,9 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+ "所持素材": "Owned materials",
+ "近くのペット": "Nearby pets",
+ "左に回転": "Rotate left", "右に回転": "Rotate right", "左右反転": "Flip horizontally",
   'ミッション範囲（60ステージずつ）': 'Mission range (60 stages each)',
   '旧建築を安全に移す空間が不足しています。保存データは保持されています。': 'There is not enough space to safely move the old buildings. Your save has been retained.',
   ...SCHOOL_WANDERER_ENGLISH,
@@ -349,6 +352,9 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+ "所持素材": "しょじそざい",
+ "近くのペット": "ちかくのペット",
+ "左に回転": "ひだりにかいてん", "右に回転": "みぎにかいてん", "左右反転": "さゆうはんてん",
   'ミッション範囲（60ステージずつ）': 'ミッションのはんい（60ステージずつ）',
   '旧建築を安全に移す空間が不足しています。保存データは保持されています。': 'まえのたてものをあんぜんにうつすばしょがたりません。ほぞんデータはのこっています。',
   ...SCHOOL_WANDERER_HIRAGANA,

@@ -5,7 +5,7 @@ const server=await createServer({optimizeDeps:{noDiscovery:true,entries:[]},serv
 try{
  const {createWorld,addPlayer,applyAction,WIDTH}=await server.ssrLoadModule('/src/rpg/engine.ts');
  const {lifeWalkable,interiorOf}=await server.ssrLoadModule('/src/rpg/life.ts');
- const {roomRoute,ROOM_DOOR,placementFits}=await server.ssrLoadModule('/src/rpg/homeCatalog.ts');
+ const {roomRoute,ROOM_DOOR,placementFits,furnitureSize}=await server.ssrLoadModule('/src/rpg/homeCatalog.ts');
  const w=createWorld(77,undefined,180,10000);addPlayer(w,'owner','Owner');addPlayer(w,'guest','Guest');const owner=w.players.owner,guest=w.players.guest;
  const site=w.tiles.findIndex((t,i)=>t==='grass'&&i%WIDTH>2&&i%WIDTH<WIDTH-3&&Math.floor(i/WIDTH)>2&&w.sites.every(s=>Math.abs(s.x-i%WIDTH)+Math.abs(s.y-Math.floor(i/WIDTH))>=4)&&lifeWalkable(w,i%WIDTH-1,Math.floor(i/WIDTH))&&[1,-1,WIDTH,-WIDTH].every(d=>w.tiles[i+d]!=='water'));
  assert.ok(site>=0);owner.x=site%WIDTH;owner.y=Math.floor(site/WIDTH);owner.life.bag={plank:6,brick:2};
@@ -22,6 +22,14 @@ try{
  applyAction(w,'owner',{type:'life-place',item:'plushBear',x:5,y:5,rotation:0},16300);assert.equal(h.interior.stock.plushBear,0);const plush=h.interior.placed.find(p=>p.item==='plushBear');assert.ok(plush);
  const before=h.interior.placed.length;applyAction(w,'guest',{type:'life-pack',id:plush.id},16400);assert.equal(h.interior.placed.length,before,'guest cannot edit owner furniture');
  applyAction(w,'owner',{type:'life-rotate',id:plush.id},16500);assert.equal(plush.rotation,1);
+ for(const angle of [2,3,0]){applyAction(w,'owner',{type:'life-rotate',id:plush.id},16500);assert.equal(plush.rotation,angle);}
+ applyAction(w,'owner',{type:'life-rotate',id:plush.id,direction:-1},16500);assert.equal(plush.rotation,3);
+ applyAction(w,'owner',{type:'life-rotate',id:plush.id,flip:true},16500);assert.equal(plush.flipped,true);assert.equal(plush.rotation,3);
+ applyAction(w,'guest',{type:'life-rotate',id:plush.id,flip:true},16500);assert.equal(plush.flipped,true,'guest cannot flip owner furniture');
+ applyAction(w,'owner',{type:'life-rotate',id:plush.id,direction:9},16500);assert.equal(plush.rotation,3,'invalid rotation command rejected');
+ for(const rotation of [0,1,2,3]){const size=furnitureSize({id:'size',item:'bed',x:0,y:0,rotation});const base=furnitureSize({id:'size',item:'bed',x:0,y:0,rotation:0});assert.deepEqual(size,rotation%2?{width:base.height,height:base.width}:base);}
+ const {makeWorldSave,restoreWorldSave}=await server.ssrLoadModule('/src/rpg/worldSave.ts');w.started=true;owner.profile={hp:72,maxHp:72,gold:100,deck:[],deckSize:0,character:'WARRIOR',image:''};const save=makeWorldSave(w,'owner',{id:'WARRIOR',currentHp:72,maxHp:72,gold:100,deck:[],relics:[],potions:[],rpgMutationRevision:0},16500);const loaded=restoreWorldSave(save,16500).life.houses.find(v=>v.id===h.id).interior.placed.find(v=>v.id===plush.id);assert.equal(loaded.rotation,3);assert.equal(loaded.flipped,true,'save retains all orientation states');
+
  applyAction(w,'owner',{type:'life-furniture-craft',item:'blueRug'},16600);applyAction(w,'owner',{type:'life-place',item:'blueRug',x:4,y:4,rotation:0},16700);assert.ok(h.interior.placed.some(p=>p.item==='blueRug'),'rug can go underneath objects');
  applyAction(w,'owner',{type:'life-furniture-craft',item:'darts'},17000);applyAction(w,'owner',{type:'life-place',item:'darts',x:7,y:5,rotation:0},17100);const dart=h.interior.placed.find(p=>p.item==='darts');assert.ok(dart);assert.ok(h.home.furniture.some(f=>f.slot===dart.slot&&f.item==='darts'));
  applyAction(w,'guest',{type:'life-game',command:{type:'game_join',slot:dart.slot}},17200);assert.equal(Object.values(w.life.games).length,0,'far players cannot join a furniture game');

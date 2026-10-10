@@ -24,3 +24,5 @@
 
 .rpg-fish-result>div{flex-wrap:wrap}.rpg-fish-result button{min-height:44px;flex:1 1 120px}.rpg-fish-result button:last-child{background:#294e50;color:#fff0ce;border-color:#81aaa0}
 .rpg-pickaxe-image{width:112px;height:112px;object-fit:contain;align-self:center}.rpg-voxel-energy-help{font-size:12px;color:#e9d6a5;margin:4px 0 8px}
+/* Pet care stays below the room canvas, leaving the home visible. */
+.rpg-home-pet-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px;margin-top:6px;border:1px solid #688e86;border-radius:12px;background:#193c3e}.rpg-home-pet-targets,.rpg-home-pet-buttons{display:flex;flex-wrap:wrap;gap:5px}.rpg-home-pet-targets button{display:flex;align-items:center;gap:4px}.rpg-home-pet-targets img{width:28px;height:28px;object-fit:contain}.rpg-home-pet-actions button{min-height:36px;padding:6px 10px;font-size:12px}

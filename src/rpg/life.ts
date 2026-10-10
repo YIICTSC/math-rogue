@@ -45,7 +45,7 @@ export interface Work {tile:number;kind:'gather'|'fish';started:number;target:nu
 export interface LifePlayer {tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
-export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1}|{type:'life-pack'|'life-rotate';id:string};
+export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean}|{type:'life-pack';id:string}|{type:'life-rotate';id:string;direction?:1|-1;flip?:boolean};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
@@ -118,15 +118,15 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
    spend(lp.bag,f.cost);room.stock[f.id]=(room.stock[f.id]||0)+1;return tell('家具を作りました。持ち物から場所を選んで飾れます。');
   }
   if(a.type==='life-place'){
-   const f=furnishing(a.item);if(!f||!Number.isInteger(a.rotation)||![0,1].includes(a.rotation)||!(room.stock[f.id]>0)||room.placed.length>=48)return false;
-   const placed:PlacedFurniture={id:`decor-${w.revision}`,item:f.id,x:a.x,y:a.y,rotation:a.rotation};if(!placementFits(room,placed,occupants))return tell('家具や入口・通路に重ならない場所を選んでください。');
+   const f=furnishing(a.item);if(!f||!Number.isInteger(a.rotation)||![0,1,2,3].includes(a.rotation)||(a.flipped!==undefined&&typeof a.flipped!=='boolean')||!(room.stock[f.id]>0)||room.placed.length>=48)return false;
+   const placed:PlacedFurniture={id:`decor-${w.revision}`,item:f.id,x:a.x,y:a.y,rotation:a.rotation,flipped:a.flipped??false};if(!placementFits(room,placed,occupants))return tell('家具や入口・通路に重ならない場所を選んでください。');
    if(f.game){let slot=2;while(h.home.furniture.some(f=>f.slot===slot))slot++;placed.slot=slot;h.home.furniture.push({slot,item:f.game});}
    room.stock[f.id]--;room.placed.push(placed);return tell('家具を飾りました！');
   }
   if(a.type==='life-pack'||a.type==='life-rotate'){
    const placed=room.placed.find(f=>f.id===a.id);if(!placed)return false;
    if(placed.slot!==undefined&&Object.values(life.games).some(g=>g.homeTile===h.home.tile&&g.slot===placed.slot&&g.phase==='playing'))return tell('対戦中の家具は変更できません。');
-   if(a.type==='life-rotate'){const next={...placed,rotation:(placed.rotation?0:1) as 0|1};if(!placementFits(room,next,occupants))return tell('家具や入口・通路に重ならない場所を選んでください。');placed.rotation=next.rotation;return tell('家具を回転しました。');}
+   if(a.type==='life-rotate'){if((a.direction!==undefined&&a.direction!==1&&a.direction!==-1)||(a.flip!==undefined&&typeof a.flip!=='boolean'))return false;const next={...placed,rotation:(a.flip?placed.rotation:(placed.rotation+(a.direction??1)+4)%4) as 0|1|2|3,flipped:a.flip?!placed.flipped:placed.flipped};if(!placementFits(room,next,occupants))return tell('家具や入口・通路に重ならない場所を選んでください。');placed.rotation=next.rotation;placed.flipped=next.flipped;return tell('家具を回転しました。');}
    if(Object.values(room.stock).reduce((a,b)=>a+b,0)>=40)return tell('家具の持ち物がいっぱいです。');
    room.placed=room.placed.filter(f=>f.id!==placed.id);room.stock[placed.item]=(room.stock[placed.item]||0)+1;
    if(placed.slot!==undefined){h.home.furniture=h.home.furniture.filter(f=>f.slot!==placed.slot);delete life.games[`${h.home.tile}:${placed.slot}`];}

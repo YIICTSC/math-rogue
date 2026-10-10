@@ -83,10 +83,10 @@ export const seasonalFurniture=['seasonVaseSpring','seasonVaseSummer','seasonVas
 export const furnitureImage=(id:string)=>seasonalFurniture.includes(id)?'sprites/rpg/town/keepsakes.webp':`sprites/rpg/furniture/${id}.webp`;
 export function furnitureSource(id:string,image:{naturalWidth:number;naturalHeight:number}){const i=seasonalFurniture.indexOf(id);return i<0?[0,0,image.naturalWidth,image.naturalHeight]:[i%4*image.naturalWidth/4,Math.floor(i/4)*image.naturalHeight/3,image.naturalWidth/4,image.naturalHeight/3];}
 export const furnishing=(id:string)=>FURNISHINGS.find(f=>f.id===id);
-export interface PlacedFurniture {id:string;item:string;x:number;y:number;rotation:0|1;slot?:number}
+export interface PlacedFurniture {id:string;item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean;slot?:number}
 export interface Interior {stock:Record<string,number>;placed:PlacedFurniture[]}
 export const newInterior=():Interior=>({stock:{},placed:[{id:'starter-workbench',item:'workbench',x:2,y:2,rotation:0,slot:0},{id:'starter-table',item:'table',x:13,y:3,rotation:0,slot:1}]});
-export function furnitureSize(p:PlacedFurniture){const f=furnishing(p.item);return {width:p.rotation?f?.height||1:f?.width||1,height:p.rotation?f?.width||1:f?.height||1};}
+export function furnitureSize(p:PlacedFurniture){const f=furnishing(p.item);return {width:p.rotation%2?f?.height||1:f?.width||1,height:p.rotation%2?f?.width||1:f?.height||1};}
 export function furnitureDistance(pos:{x:number;y:number},p:PlacedFurniture){const size=furnitureSize(p);return Math.max(p.x-pos.x,0,pos.x-(p.x+size.width-1))+Math.max(p.y-pos.y,0,pos.y-(p.y+size.height-1));}
 export function covers(p:PlacedFurniture,x:number,y:number){const s=furnitureSize(p);return x>=p.x&&x<p.x+s.width&&y>=p.y&&y<p.y+s.height;}
 export function roomWalkable(room:Interior,x:number,y:number){return x===ROOM_DOOR.x&&y===ROOM_DOOR.y||x>=1&&x<ROOM_WIDTH-1&&y>=1&&y<ROOM_HEIGHT-1&&!room.placed.some(p=>!furnishing(p.item)?.floor&&covers(p,x,y));}
