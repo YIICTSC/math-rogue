@@ -68,7 +68,7 @@ export default function WorldScene3D(props: SceneProps) {
       renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: prefs.mapQuality !== "low",
+        antialias: true,
         alpha: false,
         powerPreference:
           prefs.mapQuality === "high" ? "high-performance" : "default",
@@ -77,10 +77,11 @@ export default function WorldScene3D(props: SceneProps) {
       props.onUnavailable();
       return;
     }
-    renderer.setPixelRatio(
-      Math.min(devicePixelRatio, prefs.mapQuality === "low" ? 1 : 1.5),
-    );
     const profile=configureStorybook(renderer,prefs.mapQuality);
+    // Keep mobile auto detail inexpensive without lowering edge resolution to 1x.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,prefs.mapQuality==='low'?1:prefs.mapQuality==='high'?2.5:2));
+    renderer.domElement.dataset.antialias='true';
+    renderer.domElement.dataset.pixelRatio=String(renderer.getPixelRatio());
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
@@ -92,7 +93,7 @@ export default function WorldScene3D(props: SceneProps) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#9acbd6");
     scene.fog = new THREE.FogExp2("#9acbd6", 0.038);
-    const camera = new THREE.PerspectiveCamera(72, 1, 0.06, prefs.mapQuality==="low"?650:1200),
+    const camera = new THREE.PerspectiveCamera(72, 1, 0.06, prefs.mapQuality==="low"?360:600),
       sun = new THREE.DirectionalLight("#fff1cc", 2.1);
     sun.position.set(-8, 18, 9);
     sun.castShadow = profile.shadows;
@@ -107,6 +108,7 @@ export default function WorldScene3D(props: SceneProps) {
     const voxelGroup=new THREE.Group();scene.add(voxelGroup);
     const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top'];
     const voxelMaterials=renderBlocks.map(voxelMaterial);
+    for(const material of voxelMaterials)if(material.map){material.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());material.map.needsUpdate=true;}
     const construction=createConstructionGeometry(()=>{key="";});
     const lamp=new THREE.PointLight('#ffdfa5',0,12,1.5),oasisLight=new THREE.PointLight('#6cf1d7',0,14,1.5);scene.add(lamp,oasisLight);
     const outlineMaterial=new THREE.MeshBasicMaterial({color:'#ffe292',wireframe:true,depthTest:false});
@@ -402,6 +404,7 @@ export default function WorldScene3D(props: SceneProps) {
     const p = props.world.players[props.selfId];
     camera.position.set(p?.position3D?.x??(p?.x || 0) + 0.5, (p?playerHeight(props.world,p):0)+EYE_HEIGHT, p?.position3D?.z??(p?.y || 0) + 0.5);
     function rebuild(w: World, x: number, y: number) {
+      landscape.setDetailRegion(x,y,options.current.mapQuality === "low" ? 12 : 19);
       batches.splice(0).forEach((b) => b.dispose());
       terrain.clear();placements=[];voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGroup.clear();
       const blocks=renderBlocks.map(()=>[] as {x:number;y:number;z:number}[]),cache=new Map<string,TerrainBlock|null>();
