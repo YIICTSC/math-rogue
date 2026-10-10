@@ -4,6 +4,7 @@ import {LANDMARKS,MOUNTAINS} from './worldLandscape';
 import type {LanguageMode} from '../types';
 export default function LandscapeCompass({x,z,languageMode}:{x:number;z:number;languageMode?:LanguageMode}){
  const [target,setTarget]=useState(0),l=LANDMARKS[target];
+ if(!l)return null;
  const direction=Math.atan2(l.x-x,-(l.z-z))*180/Math.PI;
  return <details className="rpg-landscape-compass" onPointerDown={e=>e.stopPropagation()}>
   <summary>🧭 {Math.round(Math.hypot(l.x-x,l.z-z))} m <span style={{display:'inline-block',transform:`rotate(${direction}deg)`}}>↑</span></summary>

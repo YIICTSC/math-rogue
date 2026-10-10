@@ -135,6 +135,8 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+ compactMapVersion?:1;
+ expandedMapArchive?:{width:number;height:number;world:unknown};
  voxelRooms?:VoxelRoom[];
  voxels?:VoxelWorld;
  campaignVersion?: 2;

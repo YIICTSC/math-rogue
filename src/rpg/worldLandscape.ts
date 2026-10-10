@@ -11,9 +11,9 @@ export const LANDMARKS=[
  {id:'village',x:64,z:104,width:10,depth:10,height:8,kind:'village',label:'川辺の村'},
  {id:'temple',x:106,z:108,width:18,depth:14,height:16,kind:'temple',label:'湖畔の神殿'},
  {id:'tower',x:160,z:108,width:8,depth:8,height:18,kind:'tower',label:'山頂の観測塔'},
-] as const;
+].filter(l=>legacyRegion(l.x-l.width/2,l.z-l.depth/2)&&legacyRegion(l.x+l.width/2,l.z+l.depth/2));
 /** Residential courtyards share the same collision/terrain model as major facilities. */
-export const STRUCTURES=[...LANDMARKS,...Array.from({length:8},(_,i)=>({id:'home-'+i,x:64+(i%4-1.5)*10,z:104+(i<4?-10:10),width:6,depth:6,height:6,kind:'village',label:'川辺の住居'}))];
+export const STRUCTURES=[...LANDMARKS,...Array.from({length:8},(_,i)=>({id:'home-'+i,x:64+(i%4-1.5)*10,z:104+(i<4?-10:10),width:6,depth:6,height:6,kind:'village',label:'川辺の住居'}))].filter(l=>legacyRegion(l.x-l.width/2,l.z-l.depth/2)&&legacyRegion(l.x+l.width/2,l.z+l.depth/2));
 export const LANDSCAPE_BIOME_NAMES={forest:'ささやきの森',meadow:'木漏れ日の草原',wetland:'鏡水の湿原',alpine:'高山の草原',rock:'岩山',snow:'雪山',desert:'琥珀の砂丘',ruins:'暁の古代遺跡'};
 export type LandscapeBiome='forest'|'meadow'|'wetland'|'rock'|'snow'|'alpine'|'desert'|'ruins';
 export function landscapeHash(x:number,z:number,seed:number){let n=Math.imul(x|0,374761393)^Math.imul(z|0,668265263)^seed;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;}

@@ -356,3 +356,4 @@
     min-width: 44px;
   }
 }
+.rpg-life-backdrop>.rpg-life.farm-panel{width:min(980px,100%);max-width:100%;box-sizing:border-box}.farm-content,.farm-summary,.farm-grid>*{min-width:0;box-sizing:border-box;max-width:100%;overflow-wrap:anywhere}.farm-tabs{max-width:100%;overflow-x:auto}.farm-tabs button{flex-shrink:0}.farm-scroll{flex:1;min-height:0;overflow:auto}

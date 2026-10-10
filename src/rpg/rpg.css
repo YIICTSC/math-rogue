@@ -1893,3 +1893,12 @@
 /* Map shortcuts have fixed, separate lanes in both rendering modes. */
 .rpg-root .rpg-map-container .rpg-compact-message{height:32px;min-height:32px!important;max-height:32px;padding:4px 8px}.rpg-root .rpg-map-container .rpg-settings-map-button{top:46px;left:8px;width:44px;padding:4px;min-height:40px!important}.rpg-root .rpg-map-container .rpg-season-badge{top:46px;left:60px;max-width:calc(100% - 140px);min-height:40px;padding:6px 10px}.rpg-root .rpg-map-container .rpg-view-switch{top:46px;right:8px;min-height:40px}
 @media(orientation:landscape) and (max-height:550px){.rpg-root .rpg-map-container .rpg-settings-map-button,.rpg-root .rpg-map-container .rpg-season-badge{top:42px}.rpg-root .rpg-map-container .rpg-view-switch{top:6px}}
+@media(orientation:landscape) and (max-height:550px){
+ .rpg-root--compact:not(:has(.rpg-voxel-dock)) .rpg-map-actions{position:absolute;right:0;bottom:0;width:min(330px,45%);max-width:45%;max-height:calc(100dvh - 180px);overflow-y:auto;overflow-x:hidden;box-sizing:border-box;pointer-events:auto;gap:5px;align-items:stretch;padding:2px}
+ .rpg-root--compact .rpg-map-actions>*{flex-shrink:0;min-width:0;max-width:100%;box-sizing:border-box}
+ .rpg-root--compact .rpg-map-actions .rpg-interact{order:-1;width:100%;max-width:100%;min-height:44px;padding:6px 9px}
+ .rpg-root--compact .rpg-map-actions .rpg-interact small{display:block}
+ .rpg-root--compact .rpg-resident-quick{width:100%;max-width:100%;flex-wrap:wrap}
+ .rpg-root--compact .rpg-resident-quick button{min-width:90px;flex:1;min-height:44px}
+}
+.rpg-root .rpg-overlay{box-sizing:border-box;min-width:0}.rpg-root .rpg-dialog{box-sizing:border-box;min-width:0;max-width:100%;overflow-x:hidden;overflow-wrap:anywhere}.rpg-root .rpg-sidebar-content{min-width:0;box-sizing:border-box;max-width:100%}

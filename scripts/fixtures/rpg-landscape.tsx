@@ -8,7 +8,7 @@ import {createWorld,addPlayer,applyAction} from '../../src/rpg/engine';
 import {landscapeHeight} from '../../src/rpg/worldLandscape';
 const world=createWorld(42);addPlayer(world,'local','Explorer');world.started=true;
 const player=world.players.local;player.life!.energy=6;
-player.position3D={x:224.5,z:68,y:0};
+player.position3D={x:120.5,z:68,y:0};
 (window as any).world=world;
 function App(){const [w,setWorld]=useState(world),[facing,setFacing]=useState(0),[mode,setMode]=useState(true),[overview,setOverview]=useState(false);
  (window as any).mapMode=(three:boolean,all=false)=>{if(!three)applyAction(world,'local',{type:'voxel-snap'},Date.now());setMode(three);setOverview(all);setWorld({...world});};
