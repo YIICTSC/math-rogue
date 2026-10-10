@@ -1,3 +1,4 @@
+import {residentAppearance,npcAppearance} from './town/wardrobe';
 import LandscapeCompass from './LandscapeCompass';
 import {audioService} from '../services/audioService';
 import {LandscapeScene} from './landscapeScene';
@@ -264,7 +265,7 @@ export default function WorldScene3D(props: SceneProps) {
           ? getRoamingNpcEvent(s.npcEventId)?.portrait
           : s.kind==="story"&&s.storyRole==="npc"?storyForSite(s)?.portrait:undefined;
       let src = portrait
-        ? assetUrl(portrait)
+        ? assetUrl(npcAppearance(latest.current.world,portrait))
         : siteImages.get(s.id + ":" + s.cleared);
       if (!src) {
         const canvas = document.createElement("canvas");
@@ -661,7 +662,7 @@ export default function WorldScene3D(props: SceneProps) {
         const custom = w.town?.customResidents?.find((v) => v.id === r.id);
         billboard(
           actors,
-          assetUrl(custom?.hero?.frames.idle[0] || r.portrait),
+          assetUrl(custom?.hero?.frames.idle[0] || residentAppearance(w,r.id,r.portrait)),
           pos.x + 0.5,
           0.75,
           pos.y + 0.5,
@@ -820,7 +821,7 @@ export default function WorldScene3D(props: SceneProps) {
                 `${f.x}:${f.y}:${f.animals.length}:${f.activePet}:${f.pets.map((p) => p.awayUntil).join(",")}`,
             )
             .join("|") +
-          String(w.town?.customResidents?.length || 0) +
+          String(w.town?.customResidents?.length || 0) + Object.values(w.town?.people||{}).map(p=>`${p.id}:${p.wearing||""}`).join("|") +
           Object.entries(w.town?.walkers || {})
             .map(([id, p]) => `${id}:${p.x}:${p.y}`)
             .join("|") +

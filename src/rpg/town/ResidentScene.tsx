@@ -3,6 +3,7 @@ import type { World, Action } from "../engine";
 import type { LanguageMode } from "../../types";
 import { assetUrl } from "../../utils/assetPaths";
 import { trans } from "../../utils/textUtils";
+import {OUTFITS,outfitImage,reactionImage,residentAppearance,outfitRequirement,outfitPreference,supportsWardrobe,EMOTION_NAMES} from "./wardrobe";
 import { residentsOf } from "./residents";
 import { residentNear, residentPosition } from "./worldResidents";
 import {
@@ -163,7 +164,10 @@ export default function ResidentScene({
       )
         ? talkLine
         : talk?.lines.at(-1),
-    portrait = custom?.hero?.frames.idle[0] || r.portrait;
+    portrait = residentAppearance(world,target,custom?.hero?.frames.idle[0] || r.portrait);
+  const emotion=person.reaction&&person.reaction.until>now?person.reaction.emotion:undefined;
+  const emotionArt=emotion&&reactionImage(target,emotion);
+  const displayPortrait=emotionArt&&!person.wearing?emotionArt:portrait;
   const speakingSelf = line?.speaker === selfId || line?.speaker === "player";
   const speakingResident = line?.speaker === target;
   const dialogueLine = line && (speakingSelf || speakingResident) ? line : undefined;
@@ -273,9 +277,10 @@ export default function ResidentScene({
               "resident-portrait " +
               (line?.speaker === target ? "speaking" : "")
             }
-            src={assetUrl(portrait)}
+            src={assetUrl(displayPortrait)}
             alt={C(r.name)}
           />
+          {emotion && <div className="resident-emotion" aria-live="polite">{emotionArt&&person.wearing&&<span className="resident-reaction-face"><img src={assetUrl(emotionArt)} alt=""/></span>}{C(EMOTION_NAMES[emotion])}</div>}
           {dialogueLine && <div className={"resident-speech " + (speakingSelf ? "resident-speech-self" : "resident-speech-resident")} data-speaker={speakingSelf ? "self" : "resident"} aria-live="polite">
             <strong>{speakingSelf ? me.hero?.name || me.name : C(r.name)}</strong>
             <p>{socialLineText(dialogueLine, languageMode)}</p>
@@ -291,6 +296,7 @@ export default function ResidentScene({
               ["talk", "おしゃべり"],
               ["gift", "贈り物"],
               ["outing", "お出かけ"],
+              ["wardrobe", "衣装"],
               ["words", "言葉を教える"],
               ["home", "住人と暮らす"],
             ].map(([id, label]) => (
@@ -304,8 +310,8 @@ export default function ResidentScene({
             ))}
           </nav>
           <div className="resident-action-content">
-            {!dialogueLine && <p className="resident-guidance">{line ? socialLineText(line,languageMode) : t("近くで会うと、おしゃべりや贈り物で仲良くなれます。")}</p>}
-            <p className="resident-feedback" role="status">
+            {!dialogueLine && page!=="wardrobe" && <p className="resident-guidance">{line ? socialLineText(line,languageMode) : t("近くで会うと、おしゃべりや贈り物で仲良くなれます。")}</p>}
+            <p className={"resident-feedback " + (page==="wardrobe"&&!/衣装|着替え|クローゼット/.test(me.message)?"resident-feedback-hidden":"")} role="status">
               {ready ? t(me.message) : t("相手に声をかけています…")}
             </p>
             {page === "talk" && (
@@ -379,6 +385,7 @@ export default function ResidentScene({
             )}
             {page === "gift" && (
               <>
+                {supportsWardrobe(target)&&<button onClick={()=>setPage("wardrobe")}>{C({ja:"衣装をプレゼント",en:"Give an outfit",hi:"いしょうをぷれぜんと"})}</button>}
                 <h2>{t("花を贈る")}</h2>
                 {flower ? (
                   <>
@@ -441,6 +448,24 @@ export default function ResidentScene({
                 )}
               </>
             )}
+            {page === "wardrobe" && <section className="resident-wardrobe">
+              <h2>{C({ja:'衣装を贈る・着替えをお願いする',en:'Gift outfits and request a change',hi:'いしょうをおくる・きがえをおねがいする'})}</h2>
+              {supportsWardrobe(target)?<>
+                <details><summary>{C({ja:"衣装の贈り方",en:"How to give outfits",hi:"いしょうのおくりかた"})}</summary><p>{C({ja:'衣装はGで購入して贈れます。友好度が足りない時もクローゼットに保管され、仲良くなってから着替えをお願いできます。',en:'Buy outfits with gold and gift them. Gifts stay in the closet even if friendship is too low; request a change when you become closer.',hi:'いしょうはGでこうにゅうしておくれます。ゆうこうどがたりないときもくろーぜっとにほかんされ、なかよくなってからきがえをおねがいできます。'})}</p></details>
+                <p>{C({ja:'手持ちのゴールド',en:'Your gold',hi:'てもちのごーるど'})}: {me.gold} G · {C({ja:'住人の好きなスタイル',en:'Resident’s favorite style',hi:'じゅうにんのすきなすたいる'})}: {C(OUTFITS.find(o=>o.id===outfitPreference(world,target))!.name)}</p>
+                <div className="resident-outfit-grid">{OUTFITS.map(o=>{
+                  const owned=person.wardrobe?.includes(o.id),count=mine.clothes?.[o.id]||0,needed=outfitRequirement(world,target,o);
+                  return <article key={o.id} data-outfit={o.id}>
+                    <img loading="lazy" src={assetUrl(outfitImage(target,o.id)!)} alt=""/>
+                    <h3>{C(o.name)}</h3><small>{o.price} G · {C({ja:'着替えの友好度',en:'Friendship to wear',hi:'きがえのゆうこうど'})} {needed} · {count}</small>
+                    <button disabled={!ready||me.gold<o.price||owned} onClick={()=>act({type:'town-outfit-buy',outfit:o.id})}>{C({ja:'購入',en:'Buy',hi:'こうにゅう'})}</button>
+                    <button disabled={!ready||!count||owned} onClick={()=>act({type:'town-outfit-gift',target,outfit:o.id})}>{C({ja:owned?'贈り済み':'プレゼント',en:owned?'Gifted':'Gift',hi:owned?'おくりずみ':'ぷれぜんと'})}</button>
+                    {owned&&<button aria-pressed={person.wearing===o.id} disabled={!ready||friendship<needed||person.wearing===o.id} onClick={()=>act({type:'town-outfit-wear',target,outfit:o.id})}>{C({ja:person.wearing===o.id?'着用中':'着替えをお願い',en:person.wearing===o.id?'Wearing':'Request change',hi:person.wearing===o.id?'ちゃくようちゅう':'きがえをおねがい'})}</button>}
+                  </article>;
+                })}</div>
+                <button disabled={!ready||!person.wearing} onClick={()=>act({type:'town-outfit-wear',target,outfit:'default'})}>{C({ja:'いつもの衣装に戻す',en:'Return to usual outfit',hi:'いつものいしょうにもどす'})}</button>
+              </>:<p>{C({ja:'この住人は主人公ビルダーで設定した衣装を使います。',en:'This resident uses the outfit set in the hero builder.',hi:'このじゅうにんはしゅじんこうびるだーでせっていしたいしょうをつかいます。'})}</p>}
+            </section>}
             {page === "words" && (
               <WordTeacher
                 world={world}

@@ -22,6 +22,13 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "衣装はクローゼットに保管されました。友好度を深めてから着替えをお願いしましょう。": "The outfit is in the closet. Become closer before requesting a change.",
+  "衣装": "Outfits",
+  "衣装を買うためのゴールドが足りません。": "You do not have enough gold to buy this outfit.",
+  "衣装の持ち物がいっぱいです。": "Your outfit inventory is full.",
+  "衣装を購入しました。贈り物から住人に渡せます。": "Outfit purchased. You can give it to a resident.",
+  "いつもの衣装に着替えました。": "Changed back to the usual outfit.",
+  "贈った衣装に着替えてくれました。": "The resident changed into your gift.",
  "所持素材": "Owned materials",
  "近くのペット": "Nearby pets",
  "左に回転": "Rotate left", "右に回転": "Rotate right", "左右反転": "Flip horizontally",
@@ -352,6 +359,13 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "衣装はクローゼットに保管されました。友好度を深めてから着替えをお願いしましょう。": "いしょうはくろーぜっとにほかんされました。ゆうこうどをふかめてからきがえをおねがいしましょう。",
+  "衣装": "いしょう",
+  "衣装を買うためのゴールドが足りません。": "いしょうをかうためのごーるどがたりません。",
+  "衣装の持ち物がいっぱいです。": "いしょうのもちものがいっぱいです。",
+  "衣装を購入しました。贈り物から住人に渡せます。": "いしょうをこうにゅうしました。おくりものからじゅうにんにわたせます。",
+  "いつもの衣装に着替えました。": "いつものいしょうにきがえました。",
+  "贈った衣装に着替えてくれました。": "おくったいしょうにきがえてくれました。",
  "所持素材": "しょじそざい",
  "近くのペット": "ちかくのペット",
  "左に回転": "ひだりにかいてん", "右に回転": "みぎにかいてん", "左右反転": "さゆうはんてん",

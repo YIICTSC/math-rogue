@@ -1,10 +1,11 @@
+import {npcAppearance} from './town/wardrobe';
 import "./town/encounter.css";
 import React, { useEffect, useRef } from "react";
 import TranslatedUiTree from "../components/TranslatedUiTree";
 import type { LanguageMode } from "../types";
 import { trans } from "../utils/textUtils";
 import { assetUrl } from "../utils/assetPaths";
-import type { Site, Adventurer } from "./engine";
+import type { Site, Adventurer, World } from "./engine";
 import { biomeAt } from "./biomes";
 import {
   getRoamingNpcEvent,
@@ -15,6 +16,7 @@ import {
 type NpcResult = NonNullable<Adventurer["npcEventResults"]>[string];
 
 export default function RoamingNpcDialog({
+  world,
   site,
   player,
   pending,
@@ -23,6 +25,7 @@ export default function RoamingNpcDialog({
   onClose,
   languageMode,
 }: {
+  world: World;
   site: Site;
   player: Adventurer;
   pending: boolean;
@@ -95,7 +98,7 @@ export default function RoamingNpcDialog({
           <div className="rpg-story-dialog-layout">
             <img
               className="rpg-story-dialog-portrait"
-              src={assetUrl(event.portrait)}
+              src={assetUrl(npcAppearance(world,event.portrait))}
               alt=""
               aria-hidden="true"
             />
