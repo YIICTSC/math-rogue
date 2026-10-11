@@ -15,7 +15,7 @@ import type {World,Adventurer} from '../engine';
 import {WIDTH,HEIGHT} from '../engine';
 import {biomeAt} from '../biomes';
 import {lifePlayer,isResourceTile,canAfford,interiorOf,lifeWalkable} from '../life';
-import {energyOf,GATHER_ENERGY_MAX} from '../energy';
+import {energyOf,GATHER_ENERGY_COST,GATHER_ENERGY_MAX} from '../energy';
 import {socialNear,newSocial,relation} from '../social';
 import {pendingMutation,grant} from '../activities';
 import {furnishing} from '../homeCatalog';
@@ -79,7 +79,29 @@ function married(w:World,a:string,b:string){return !!relation(w,a,b)?.married||t
 function family(w:World,a:string,b:string){const s=townOf(w);if(!married(w,a,b)||s.families.some(f=>f.parents.includes(a)||f.parents.includes(b))||s.families.length>=40)return false;const f:TownFamily={id:`family-${++s.sequence}`,parents:[a,b],name:'ルミ',bornDay:s.day,care:0,careDays:[],claimedStages:[]};s.families.push(f);increaseBond(w,a,f.id,30);increaseBond(w,b,f.id,30);event(w,'family',f.parents,c('新しい家族がやってきた','A new family member arrives','あたらしいかぞくがやってきた'),c('ふたりの家に小さな笑顔。名前を決めて、いっしょに育てよう。','A little smile joins your home. Choose a name and raise the child together.','ふたりのいえにちいさなえがお。なまえをきめて、いっしょにそだてよう。'));return true;}
 function completeOuting(w:World,a:string,b:string,route:number){const s=townOf(w);s.outings??=[];if(s.outings.some(o=>!o.done&&(o.people.includes(a)||o.people.includes(b))))return;s.outings.push({id:`outing-${++s.sequence}`,people:[a,b],route,step:0,answers:{},choices:[],done:false,dialogueVariant:s.sequence});s.outings=s.outings.slice(-60);say(w,[a,b],outingIntroduction(route,personOf(w,b)!.personality,s.sequence),w.life.now);w.revision++;}
 function finishOuting(w:World,a:string,b:string,route:number,ending=0){const s=townOf(w);increaseBond(w,a,b,8);for(const id of [a,b]){const p=personOf(w,id)!;p.happiness=Math.min(100,p.happiness+8);}event(w,'outing',[a,b],c('ふたりのお出かけ','An outing together','ふたりのおでかけ'),OUTING_ENDINGS[ending],{kind:'resident',id:residentsOf(w).find(r=>r.id===b)?.id||a});s.giftDays[`outing:${a}:${b}`]=s.day;for(const q of s.quests)if(q.owner===a&&q.kind==='outing'&&q.day===s.day)q.baseline=1;}
+const residentEnergyActionTypes=new Set([
+ 'town-outfit-gift','town-outfit-wear','town-story-start','town-talk','town-apologize','town-mediate',
+ 'town-invite','town-resident-home','town-resident-marry','town-resident-end','town-word-teach','town-word-forget',
+ 'town-meal','town-gift','town-food-gift',
+]);
+export function residentActionEnergyCost(w:World,playerId:string,a:{type:string;target?:unknown;id?:unknown}){
+ const residentIds=new Set(residentsOf(w).map(r=>r.id));
+ if(residentEnergyActionTypes.has(a.type)&&typeof a.target==='string'&&residentIds.has(a.target))return GATHER_ENERGY_COST;
+ if(a.type==='town-story-choice'&&residentIds.has(w.town?.stories?.[playerId]?.target||''))return GATHER_ENERGY_COST;
+ if(a.type==='town-outing-choice'&&typeof a.id==='string'){
+  const outing=w.town?.outings.find(o=>o.id===a.id&&!o.done&&o.people.includes(playerId));
+  if(outing?.people.some(id=>id!==playerId&&residentIds.has(id)))return GATHER_ENERGY_COST;
+ }
+ return 0;
+}
 export function applyTown(w:World,p:Adventurer,a:TownAction,now:number):boolean {
+ const cost=residentActionEnergyCost(w,p.id,a);
+ if(cost>0&&w.started&&!w.ended&&!busy(w,p)&&energyOf(p.life)+1e-8<cost){p.message='エネルギーが足りません。問題に正解して回復しましょう。';w.revision++;return true;}
+ const applied=applyTownCore(w,p,a,now);
+ if(applied&&cost>0){const lp=lifePlayer(p);lp.energy=Math.max(0,Math.round((energyOf(lp)-cost)*100)/100);w.revision++;}
+ return applied;
+}
+function applyTownCore(w:World,p:Adventurer,a:TownAction,now:number):boolean {
  if(a.type==='town-encounter'&&a.target===null){if(w.town?.encounters)delete w.town.encounters[p.id];w.revision++;return true;}
  if(!w.started||w.ended||busy(w,p))return false;const s=townOf(w),me=personOf(w,p.id)!;for(const npc of residentsOf(w))personOf(w,npc.id);questsFor(w,p.id);const tell=(ja:string)=>{p.message=ja;w.revision++;return true;};
  if(a.type==='town-encounter'){if(typeof a.target!=='string'||!residentNear(w,p,a.target)||s.cooking[p.id]||s.dreams[p.id]&&!s.dreams[p.id].finished)return false;(s.encounters??={})[p.id]={target:a.target,until:w.life.time+180};w.revision++;return true;}
@@ -104,10 +126,10 @@ export function applyTown(w:World,p:Adventurer,a:TownAction,now:number):boolean 
    const key=`outfit:${p.id}:${a.target}`;if(s.giftDays[key]!==s.day){increaseBond(w,p.id,a.target,outfitPreference(w,a.target)===o.id?7:4);s.giftDays[key]=s.day;}
    target.happiness=Math.min(100,target.happiness+6);
   }else if(!target.wardrobe?.includes(o.id))return false;
-  const accept=visibleFriendship(w,p.id,a.target)>=required;
+  const favoriteStyle=outfitPreference(w,a.target)===o.id,accept=visibleFriendship(w,p.id,a.target)>=required;
   if(accept)target.wearing=o.id;
-  target.reaction={emotion:accept?(outfitPreference(w,a.target)===o.id?'joy':'shy'):'surprise',until:now+14000};
-  const response=accept?c('選んでくれた服、着てみたよ！どうかな？','I tried the outfit you chose! How do I look?','えらんでくれたふく、きてみたよ！どうかな？'):c('ありがとう。大切にしまっておくね。もう少し仲良くなったら着てみたいな。','Thank you. I will keep it safe. I would like to try it when we know each other better.','ありがとう。たいせつにしまっておくね。もうすこしなかよくなったらきてみたいな。');
+  target.reaction={emotion:accept?(favoriteStyle?'joy':'shy'):'surprise',until:now+14000};
+  const response=accept?(favoriteStyle?c('この服、私の好みにぴったり！選んでくれてうれしい。','This outfit is exactly my style! I am so glad you picked it.','このふく、わたしのこのみにぴったり！えらんでくれてうれしい。'):c('ありがとう。いつも選ぶ雰囲気とは少し違うけど、新鮮でいいね。','Thank you. It is a little different from my usual style, but it feels fresh.','ありがとう。いつもえらぶふんいきとはすこしちがうけど、しんせんでいいね。')):(favoriteStyle?c('この服、私の好きな雰囲気だよ。仲良くなったら着てみるね。','This is just the kind of style I like. I will try it when we get closer.','このふく、わたしのすきなふんいきだよ。なかよくなったらきてみるね。'):c('ありがとう。大切にしまっておくね。これは好みとは少し違うけど、気持ちがうれしいな。','Thank you. I will keep it safe. It is not quite my style, but I am happy you thought of me.','ありがとう。たいせつにしまっておくね。これはこのみとはすこしちがうけど、きもちがうれしいな。'));
   say(w,[p.id,a.target],[c(`${o.name.ja}を着てみない？`,`Would you try this ${o.name.en}?`,`${o.name.hi}をきてみない？`),response,c('あなたに似合いそうだと思って選んだんだ。','I chose it because I thought it would suit you.','あなたににあいそうだとおもってえらんだんだ。'),accept?c('次のお出かけも、この服で行こうかな。','Maybe I will wear this on our next outing.','つぎのおでかけも、このふくでいこうかな。'):c('また一緒にお話ししようね。','Let us chat together again soon.','またいっしょにおはなししようね。')],now);
   event(w,'outfit',[p.id,a.target],c('衣装の贈り物と着替え','Outfit gifts and dressing up','いしょうのおくりものときがえ'),response,{kind:'resident',id:a.target});
   return tell(accept?'贈った衣装に着替えてくれました。':'衣装はクローゼットに保管されました。友好度を深めてから着替えをお願いしましょう。');

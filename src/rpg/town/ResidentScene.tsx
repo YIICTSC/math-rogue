@@ -4,6 +4,7 @@ import type { LanguageMode } from "../../types";
 import { assetUrl } from "../../utils/assetPaths";
 import { trans } from "../../utils/textUtils";
 import {OUTFITS,outfitImage,reactionImage,residentAppearance,outfitRequirement,outfitPreference,supportsWardrobe,EMOTION_NAMES} from "./wardrobe";
+import {energyOf,GATHER_ENERGY_MAX} from "../energy";
 import { residentsOf } from "./residents";
 import { residentNear, residentPosition } from "./worldResidents";
 import {
@@ -52,6 +53,7 @@ export default function ResidentScene({
   target,
   languageMode,
   send,
+  onEnergyRequest,
   onClose,
   onEvent,
   talkLine,
@@ -61,6 +63,7 @@ export default function ResidentScene({
   target: string;
   languageMode: LanguageMode;
   send: (a: Action) => void;
+  onEnergyRequest?: () => void;
   onClose: () => void;
   onEvent?: (id: string) => void;
   talkLine?: SocialLine;
@@ -311,9 +314,14 @@ export default function ResidentScene({
           </nav>
           <div className="resident-action-content">
             {!dialogueLine && page!=="wardrobe" && <p className="resident-guidance">{line ? socialLineText(line,languageMode) : t("近くで会うと、おしゃべりや贈り物で仲良くなれます。")}</p>}
-            <p className={"resident-feedback " + (page==="wardrobe"&&!/衣装|着替え|クローゼット/.test(me.message)?"resident-feedback-hidden":"")} role="status">
+            <p className={"resident-feedback " + (page==="wardrobe"&&!/衣装|着替え|クローゼット|エネルギー/.test(me.message)?"resident-feedback-hidden":"")} role="status">
               {ready ? t(me.message) : t("相手に声をかけています…")}
             </p>
+            <div className="resident-energy" aria-label={C({ja:"住人交流エネルギー",en:"Resident interaction energy",hi:"じゅうにんこうりゅうえねるぎー"})}>
+              <strong>⚡ {C({ja:"住人交流エネルギー",en:"Resident interaction energy",hi:"じゅうにんこうりゅうえねるぎー"})} {energyOf(me.life)}/{GATHER_ENERGY_MAX}</strong>
+              <button disabled={!ready||!onEnergyRequest} onClick={onEnergyRequest}>{C({ja:"問題で回復",en:"Recover with a question",hi:"もんだいでかいふく"})}</button>
+              <small>{C({ja:"住人とのアクションで1消費。問題に正解すると2回復します。",en:"Resident actions cost 1. A correct answer restores 2.",hi:"じゅうにんとのあくしょんで1しょうひ。もんだいにせいかいすると2かいふくします。"})}</small>
+            </div>
             {page === "talk" && (
               <>
                 {story?.target === target ? (
@@ -452,12 +460,12 @@ export default function ResidentScene({
               <h2>{C({ja:'衣装を贈る・着替えをお願いする',en:'Gift outfits and request a change',hi:'いしょうをおくる・きがえをおねがいする'})}</h2>
               {supportsWardrobe(target)?<>
                 <details><summary>{C({ja:"衣装の贈り方",en:"How to give outfits",hi:"いしょうのおくりかた"})}</summary><p>{C({ja:'衣装はGで購入して贈れます。友好度が足りない時もクローゼットに保管され、仲良くなってから着替えをお願いできます。',en:'Buy outfits with gold and gift them. Gifts stay in the closet even if friendship is too low; request a change when you become closer.',hi:'いしょうはGでこうにゅうしておくれます。ゆうこうどがたりないときもくろーぜっとにほかんされ、なかよくなってからきがえをおねがいできます。'})}</p></details>
-                <p>{C({ja:'手持ちのゴールド',en:'Your gold',hi:'てもちのごーるど'})}: {me.gold} G · {C({ja:'住人の好きなスタイル',en:'Resident’s favorite style',hi:'じゅうにんのすきなすたいる'})}: {C(OUTFITS.find(o=>o.id===outfitPreference(world,target))!.name)}</p>
+                <p>{C({ja:'手持ちのゴールド',en:'Your gold',hi:'てもちのごーるど'})}: {me.gold} G · {person.wardrobe?.length ? <>{C({ja:'好きなスタイル',en:'Favorite style',hi:'すきなすたいる'})}: {C(OUTFITS.find(o=>o.id===outfitPreference(world,target))!.name)}</> : C({ja:'衣装の好みは、プレゼントするまで秘密です。',en:'Their outfit preference stays secret until you give a gift.',hi:'いしょうのこのみは、ぷれぜんとするまでひみつです。'})}</p>
                 <div className="resident-outfit-grid">{OUTFITS.map(o=>{
                   const owned=person.wardrobe?.includes(o.id),count=mine.clothes?.[o.id]||0,needed=outfitRequirement(world,target,o);
                   return <article key={o.id} data-outfit={o.id}>
-                    <img loading="lazy" src={assetUrl(outfitImage(target,o.id)!)} alt=""/>
-                    <h3>{C(o.name)}</h3><small>{o.price} G · {C({ja:'着替えの友好度',en:'Friendship to wear',hi:'きがえのゆうこうど'})} {needed} · {count}</small>
+                    {owned ? <img loading="lazy" src={assetUrl(outfitImage(target,o.id)!)} alt=""/> : <div className="resident-outfit-mystery" role="img" aria-label={C({ja:'プレゼントするまで衣装イラストは秘密',en:'Outfit art is hidden until gifted',hi:'ぷれぜんとするまでいしょういらすとはひみつ'})}><span aria-hidden="true">?</span></div>}
+                    <h3>{C(o.name)}</h3><small>{o.price} G · {count}{owned&&<> · {C({ja:'着替えの友好度',en:'Friendship to wear',hi:'きがえのゆうこうど'})} {needed}</>}</small>
                     <button disabled={!ready||me.gold<o.price||owned} onClick={()=>act({type:'town-outfit-buy',outfit:o.id})}>{C({ja:'購入',en:'Buy',hi:'こうにゅう'})}</button>
                     <button disabled={!ready||!count||owned} onClick={()=>act({type:'town-outfit-gift',target,outfit:o.id})}>{C({ja:owned?'贈り済み':'プレゼント',en:owned?'Gifted':'Gift',hi:owned?'おくりずみ':'ぷれぜんと'})}</button>
                     {owned&&<button aria-pressed={person.wearing===o.id} disabled={!ready||friendship<needed||person.wearing===o.id} onClick={()=>act({type:'town-outfit-wear',target,outfit:o.id})}>{C({ja:person.wearing===o.id?'着用中':'着替えをお願い',en:person.wearing===o.id?'Wearing':'Request change',hi:person.wearing===o.id?'ちゃくようちゅう':'きがえをおねがい'})}</button>}

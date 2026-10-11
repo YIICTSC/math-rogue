@@ -18,7 +18,7 @@ import CityPanel from './city/Panel';
 import {residentsOf} from './town/residents';
 import {trans} from '../utils/textUtils';
 import TownPanel from './town/Panel';
-import {calendar,nearbyFlowers} from './town/model';
+import {calendar,nearbyFlowers,residentActionEnergyCost} from './town/model';
 import {copy,SEASONS,RESIDENTS} from './town/catalog';
 import {FlowerSprite} from './town/Sprites';
 import {assetUrl} from '../utils/assetPaths';
@@ -86,6 +86,7 @@ import {
   HEIGHT,
   WIDTH,
   siteUnavailable,
+  type Action,
   type World,
   type Adventurer,
   type Site,
@@ -444,6 +445,7 @@ export default function RpgOnline({
   const detailKeyDown=(e:React.KeyboardEvent)=>{if(!compact||!detail)return;if(e.key==='Escape'){e.stopPropagation();setDetail(null);}if(e.key==='Tab'){const buttons=Array.from(detailRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input,select,summary,[tabindex="0"]')||[]).filter(el=>el.getClientRects().length>0);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}};
   useEffect(()=>{if(!me?.life?.lastAction){setQuickReady(true);return;}setQuickReady(false);const timer=setTimeout(()=>setQuickReady(true),350);return()=>clearTimeout(timer);},[me?.life?.lastAction]);
   const requestEnergy=()=>{if(!active||interactionBlocked||me?.life?.work||hasActivityDialog)return;destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);onEnergyRequest?.();};
+  const sendTownAction=(action:Action)=>{const w=latest.current.world,p=w?.players[room.current?.selfId||''];if(!w||!p)return;if(residentActionEnergyCost(w,p.id,action)>energyOf(p.life)){requestEnergy();return;}room.current?.send(action);};
   const quickGather=(tile:number)=>{if(!latest.current.active||!world||!quickReady)return;if(energyOf(me?.life)<1){requestEnergy();return;}destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);const fish=world.tiles[tile]==='water';if(fish)void audioService.preloadRpgFishingSounds();room.current?.send({type:fish?'life-cast':'life-work',tile});};
   const continueFishing=()=>{
     fishing.close();
@@ -677,7 +679,7 @@ export default function RpgOnline({
               {!spectating && roamingNpcSiteId && active && world.sites.some(s=>s.id===roamingNpcSiteId && s.kind==='npc' && distance(s,me)<=2) && <RoamingNpcDialog world={world} languageMode={languageMode} site={world.sites.find(s=>s.id===roamingNpcSiteId)!} player={me} pending={npcChoicePending} blockedReason={siteUnavailable(world,me,world.sites.find(s=>s.id===roamingNpcSiteId)!)} onChoose={choiceId=>{setNpcChoicePending(true);room.current?.send({type:'npc-event-choice',siteId:roamingNpcSiteId,choiceId});}} onClose={()=>{setRoamingNpcSiteId(null);setNpcChoicePending(false);}} />}
               <aside ref={detailRef} className={`rpg-sidebar ${compact?'rpg-detail-sheet':''}`} hidden={compact&&!detail} data-detail={detail||undefined} role={compact&&detail?'dialog':undefined} aria-modal={compact&&detail?true:undefined} aria-label={compact&&detail?'冒険の詳細':undefined} onKeyDown={detailKeyDown}>
             {compact&&detail&&<><header className="rpg-detail-heading"><h2>{detailKeys.find(([id])=>id===detail)?.[1]}</h2><button className="rpg-detail-close" aria-label="マップに戻る" onClick={()=>setDetail(null)}><X size={20}/><span>マップに戻る</span></button></header><nav className="rpg-detail-tabs" aria-label="詳細の切り替え">{detailKeys.filter(([id])=>!spectating||!['journal'].includes(id)).map(([id,label])=><button key={id} aria-pressed={detail===id} onClick={()=>setDetail(id)}>{label}</button>)}</nav></>}
-                <div className="rpg-sidebar-content">{!spectating&&(!compact||detail==='town')&&<TownPanel onEncounter={openResident} onTrack={id=>{const pos=residentPosition(world,id);setDetail(null);walkingRoute.current=findWalkingRoute(world,me.x,me.y,pos.x,pos.y);destination.current=walkingRoute.current.at(-1)||null;}} world={world} selfId={selfId} languageMode={languageMode} send={a=>room.current?.send(a)}/>}{!spectating&&<SocialPanel languageMode={languageMode} world={world} selfId={selfId} send={a=>room.current?.send(a)} onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory}/>}<p role="alert">{socialError}</p>
+                <div className="rpg-sidebar-content">{!spectating&&(!compact||detail==='town')&&<TownPanel onEncounter={openResident} onTrack={id=>{const pos=residentPosition(world,id);setDetail(null);walkingRoute.current=findWalkingRoute(world,me.x,me.y,pos.x,pos.y);destination.current=walkingRoute.current.at(-1)||null;}} onEnergyRequest={requestEnergy} world={world} selfId={selfId} languageMode={languageMode} send={sendTownAction}/>}{!spectating&&<SocialPanel languageMode={languageMode} world={world} selfId={selfId} send={a=>room.current?.send(a)} onBuilder={()=>setHeroOpen(true)} onMemory={updateMemory}/>}<p role="alert">{socialError}</p>
                 {!spectating && <div data-rpg-panel="journal"><StoryJournal world={world} languageMode={languageMode} player={me} onTrack={(x,y)=>{const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setStorySiteId(null);if(compact)setDetail(null);}} /></div>}
                 <ActivitiesPanel display="cards" languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />
                 <section data-rpg-panel="goal" className="rpg-objective">
@@ -824,7 +826,7 @@ export default function RpgOnline({
             <button onClick={close}>学習ローグへ</button>
           </div>
         )}
-      {residentTarget&&world&&active&&!spectating&&<ResidentScene world={world} selfId={selfId} target={residentTarget} languageMode={languageMode} send={a=>room.current?.send(a)} talkLine={talkLine} onClose={closeResident} onEvent={id=>{closeResident();setNpcChoicePending(false);setRoamingNpcSiteId(id);}}/>}
+      {residentTarget&&world&&active&&!spectating&&<ResidentScene world={world} selfId={selfId} target={residentTarget} languageMode={languageMode} send={sendTownAction} onEnergyRequest={requestEnergy} talkLine={talkLine} onClose={closeResident} onEvent={id=>{closeResident();setNpcChoicePending(false);setRoamingNpcSiteId(id);}}/>}
       </main>
     </TranslatedUiTree>
   );
