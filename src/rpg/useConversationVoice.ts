@@ -2,7 +2,7 @@ import { residentVoiceMoras, unlockResidentVoice } from './residentVoiceSynth';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { World } from './engine';
 import { socialLineText, type SocialLine } from './social';
-import { DEFAULT_CONVERSATION_VOICE } from './conversationVoice';
+import { DEFAULT_CONVERSATION_VOICE, defaultResidentVoice } from './conversationVoice';
 import { speakConversation, stopConversationSpeech } from './conversationSpeech';
 export default function useConversationVoice(world: World | null, selfId: string, enabled: boolean, language: string) {
   const latest = useRef(world); latest.current = world;
@@ -40,7 +40,7 @@ export default function useConversationVoice(world: World | null, selfId: string
         setLine(item);
         const speaker = latest.current?.players[item.speaker];
         const resident=latest.current?.town?.people[item.speaker];
-        const config = speaker?.memory?.conversationVoice || latest.current?.town?.customResidents?.find(r=>r.id===item.speaker)?.voice || (resident?{...DEFAULT_CONVERSATION_VOICE,pitch:.85+resident.personality*.07,rate:.9+(resident.personality%3)*.08,timbre:resident.personality%4,style:['warm','bouncy','calm','playful','smooth','warm','bouncy','calm'][resident.personality] as 'warm'|'bouncy'|'calm'|'playful'|'smooth',intonation:.35+(resident.personality%4)*.15}:DEFAULT_CONVERSATION_VOICE);
+        const config = speaker?.memory?.conversationVoice || latest.current?.town?.customResidents?.find(r=>r.id===item.speaker)?.voice || (resident ? defaultResidentVoice(item.speaker, resident.personality) : DEFAULT_CONVERSATION_VOICE);
         if ((speaker || latest.current?.town?.people[item.speaker]) && config.enabled) {
           const readable = item.speech || item.hiragana || socialLineText(item, language);
           const kana = config.engine !== 'device' ? [item.speech, item.hiragana].find(text => text && residentVoiceMoras(text)) : undefined;

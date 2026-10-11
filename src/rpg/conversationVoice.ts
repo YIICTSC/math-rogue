@@ -16,6 +16,26 @@ export const DEFAULT_CONVERSATION_VOICE: ConversationVoice = {
   timbre: 0,
   intonation: 0.65,
 };
+/** Built-in residents use explicit voice profiles so personality never assigns girls a deep timbre. */
+const GIRL_RESIDENT_PITCH: Readonly<Record<string, number>> = {
+  "resident-mina": 1.75,
+  "resident-sui": 1.65,
+  "resident-yuki": 1.8,
+  "resident-nono": 1.85,
+  "resident-nemu": 1.7,
+};
+export function defaultResidentVoice(id: string, personality: number): ConversationVoice {
+  const styles: ConversationVoice["style"][] = ["warm", "bouncy", "calm", "playful", "smooth", "warm", "bouncy", "calm"];
+  const girlPitch = GIRL_RESIDENT_PITCH[id];
+  return {
+    ...DEFAULT_CONVERSATION_VOICE,
+    pitch: girlPitch ?? (0.85 + personality * 0.07),
+    rate: 0.9 + (personality % 3) * 0.08,
+    timbre: girlPitch === undefined ? personality % 4 : 1,
+    style: styles[personality] ?? "smooth",
+    intonation: girlPitch === undefined ? 0.35 + (personality % 4) * 0.15 : 0.65,
+  };
+}
 export function validConversationVoice(v: unknown): v is ConversationVoice {
   if (!v || typeof v !== "object") return false;
   const c = v as ConversationVoice;
@@ -117,10 +137,10 @@ export const CONVERSATION_PRESETS = [
     en: "Tiny & cute",
     hi: "ちいさくかわいい",
     voice: {
-      pitch: 1.45,
+      pitch: 1.8,
       rate: 1.05,
       style: "playful",
-      timbre: 0,
+      timbre: 1,
       intonation: 0.7,
     },
   },
