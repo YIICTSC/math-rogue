@@ -34,6 +34,8 @@ const getRelicSpritePosition = (id: string) => {
 };
 
 export const RelicIcon: React.FC<ItemIconProps> = ({ id, className, alt = '' }) => {
+  const craftIndex:Record<string,number>={sword:2,frostbow:3,charm:4,crystal:5};
+  if(id.startsWith('RPG_CRAFT:')&&craftIndex[id.slice(10)]!==undefined)return <span role="img" aria-label={alt||undefined} className={`${iconClass(className,false)} bg-no-repeat`} style={{backgroundImage:`url(${assetUrl('sprites/rpg/craft-items.webp')})`,backgroundSize:'400% 300%',backgroundPosition:`${craftIndex[id.slice(10)]%4*100/3}% ${Math.floor(craftIndex[id.slice(10)]/4)*50}%`}}/>;
   const sprite = id.startsWith('MAGIC_RELIC_') ? null : getRelicSpritePosition(id);
 
   if (!sprite) {

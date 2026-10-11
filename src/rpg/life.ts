@@ -10,7 +10,7 @@ import {ROOM_DOOR,ROOM_SPAWN,newInterior,furnishing,furnitureDistance,placementF
 import { BIOMES, biomeAt, biomeWeights, type BiomeId } from './biomes';
 import { WIDTH, HEIGHT, distance, type World, type Adventurer } from './engine';
 import { grant, pendingMutation } from './activities';
-import { CARDS_LIBRARY } from '../constants';
+import {craftedRelic,CRAFTED_SWORD_DESCRIPTION,CRAFTED_BOW_DESCRIPTION} from './craftedRelics';
 import type { Relic } from '../types';
 import { RECIPES as CRAFT_RECIPES } from '../mini-games/gakuro-craft/materials';
 import { gameCommand, tickGames, type GameCommand, type HomeGame, type HomeGameWorld } from '../mini-games/gakuro-craft/homeGames';
@@ -42,7 +42,7 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
-export interface LifePlayer {tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface LifePlayer {relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean}|{type:'life-pack';id:string}|{type:'life-rotate';id:string;direction?:1|-1;flip?:boolean};
@@ -58,8 +58,8 @@ export const RECIPES = [
  {id:'pickaxe-steel',name:'鋼のツルハシ',cost:{plank:3,steel:3,crystal:1} as Bag,kind:'tool',description:'硬いブロックの採掘エネルギーを70%軽減。',sprite:2},
  {id:'plank',name:'木の板',cost:CRAFT_RECIPES.plank as Bag,kind:'material',description:'家や家具の材料。',sprite:0},
  {id:'brick',name:'レンガ',cost:CRAFT_RECIPES.brick as Bag,kind:'material',description:'家や家具の材料。',sprite:1},
- {id:'sword',name:'鉄の剣',cost:{plank:2,ore:3} as Bag,kind:'weapon',description:'専用カード：14ダメージ、びくびく2。',sprite:2},
- {id:'frostbow',name:'霜木の弓',cost:{frostwood:4,reed:3,ore:1} as Bag,kind:'weapon',description:'専用カード：10ダメージ、ブロック8。',sprite:3},
+ {id:'sword',name:'鉄の剣',cost:{plank:2,ore:3} as Bag,kind:'relic',description:CRAFTED_SWORD_DESCRIPTION,sprite:2},
+ {id:'frostbow',name:'霜木の弓',cost:{frostwood:4,reed:3,ore:1} as Bag,kind:'relic',description:CRAFTED_BOW_DESCRIPTION,sprite:3},
  {id:'charm',name:'森の護符',cost:{herb:4,crystal:2,wood:2} as Bag,kind:'relic',description:'戦闘開始時、ブロック4・HP回復2。',sprite:4},
  {id:'crystal',name:'星晶のレリック',cost:{crystal:5,ore:3} as Bag,kind:'relic',description:'戦闘開始時、筋力1・追加ドロー1。',sprite:5},
  {id:'meal',name:'川魚のスープ',cost:{fish:2,herb:1} as Bag,kind:'meal',description:'HPを20回復。',sprite:6},
@@ -136,7 +136,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
  if(a.type==='life-craft'){
   if(lp.work)return false;
   const r=RECIPES.find(r=>r.id===a.recipe);if(!r||!canAfford(lp.bag,r.cost))return tell('材料が足りません。');
-  if((r.kind==='weapon'||r.kind==='relic'||r.kind==='tool')&&lp.crafted.includes(r.id))return tell('この装備は作成済みです。');
+  if((r.kind==='relic'||r.kind==='tool')&&lp.crafted.includes(r.id))return tell('この装備は作成済みです。');
   const house=life.houses.find(h=>h.owner===p.id);
   if(r.kind==='furniture'&&(!house||lp.indoors!==house.id))return tell('自分の家の中で家具を作れます。');
   if(r.id==='housekit'&&(house||(lp.bag.housekit||0)>0))return tell('建築キットか家をすでに持っています。');
@@ -146,13 +146,10 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   if(r.kind==='tool'&&r.id==='hoe'){lp.hoe=true;lp.crafted.push(r.id);}
   if(r.kind==='tool'&&r.id.startsWith('pickaxe-')){const rank=TOOL_RANK,tool=r.id.slice(8) as ToolTier;if(rank.indexOf(tool)>rank.indexOf(lp.pickaxe!))lp.pickaxe=tool;lp.crafted.push(r.id);}
   if(r.kind==='material')lp.bag[r.id as Material]=(lp.bag[r.id as Material]||0)+1;
-  if(r.kind==='weapon'){
-   const frost=r.id==='frostbow';const card={...CARDS_LIBRARY[frost?'IRON_WAVE':'BASH'],id:`rpg-crafted-${p.id}-${r.id}`,name:r.name,damage:frost?10:14,...(frost?{block:8}:{}),description:frost?'10ダメージ。ブロック8を得る。':'14ダメージ。対象にびくびく2を与える。'};
-   grant(p,{remove:[],cards:[card],gold:0,heal:0});lp.crafted.push(r.id);
-  }
   if(r.kind==='relic'){
-   const relic:Relic={id:`RPG_CRAFT:${r.id}`,name:r.name,description:r.description,rarity:'UNCOMMON',effectType:'START_BATTLE',rpgInnate:r.id==='charm'?{strength:0,block:4,draw:0,heal:2}:{strength:1,block:0,draw:1,heal:0}};
+   const relic:Relic=craftedRelic(r.id)??{id:`RPG_CRAFT:${r.id}`,name:r.name,description:r.description,rarity:'UNCOMMON',effectType:'START_BATTLE',rpgInnate:r.id==='charm'?{strength:0,block:4,draw:0,heal:2}:{strength:1,block:0,draw:1,heal:0}};
    grant(p,{remove:[],cards:[],gold:0,heal:0,relics:[relic]});lp.crafted.push(r.id);
+   if(craftedRelic(r.id))(lp.relicEquipment??=[]).push(r.id);
   }
   if(r.kind==='meal')grant(p,{remove:[],cards:[],gold:0,heal:20});
   if(r.kind==='furniture'){const room=house!.interior??=interiorOf(house!);room.stock[r.id]=(room.stock[r.id]||0)+1;}
@@ -219,6 +216,16 @@ export function advanceLife(w:World,now:number){
  const elapsed=Math.max(0,Math.min(1,(now-life.lastTick)/1000));life.lastTick=now;life.now=now;life.time+=elapsed;
  if(w.ended){for(const p of Object.values(w.players))if(p.life)p.life.work=undefined;return;}
  let changed=false;
+ // Convert old crafted weapon cards through the same acknowledged mutation channel.
+ for(const p of Object.values(w.players)){
+  const lp=p.life;if(!lp||!p.profile||p.nativeScene||p.spectator||pendingMutation(p))continue;
+  const ids=['sword','frostbow'].filter(id=>lp.crafted.includes(id)&&!lp.relicEquipment?.includes(id));
+  if(!ids.length)continue;
+  const remove=(p.profile.deck||[]).filter(card=>ids.some(id=>card.id===`rpg-crafted-${p.id}-${id}`)).map(card=>card.id);
+  grant(p,{remove,cards:[],gold:0,heal:0,relics:ids.map(id=>craftedRelic(id)!)});
+  (lp.relicEquipment??=[]).push(...ids);changed=true;
+ }
+
  for(const [tile,node]of Object.entries(life.nodes))if(node.regrowAt&&now>=node.regrowAt&&!Object.values(w.players).some(p=>p.x===Number(tile)%WIDTH&&p.y===Math.floor(Number(tile)/WIDTH))){delete life.nodes[Number(tile)];changed=true;}
  for(const p of Object.values(w.players))if(p.life?.effect){changed=true;if(now-p.life.effect.at>700)p.life.effect=undefined;}
  for(const p of Object.values(w.players))if(p.life?.work){changed=true;if(now>p.life.work.expires){const fish=p.life.work.kind==='fish';p.life.work=undefined;p.message=fish?'魚が逃げました。浮きが沈んでから引き上げましょう。':'タイミングを合わせてもう一度！';}}

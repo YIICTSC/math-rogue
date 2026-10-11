@@ -72,6 +72,7 @@ import {
   Sparkles,
   MoreHorizontal,
   Axe,
+  Sprout,
   Zap,
   X,
 } from "lucide-react";
@@ -664,7 +665,7 @@ export default function RpgOnline({
                 </div>
                 {compact&&<nav className="rpg-compact-dock" aria-label="冒険メニュー">
                   {!spectating&&<button disabled={!active||interactionBlocked} onClick={openLife}><Axe size={19}/><span>採取</span></button>}
-                  {!spectating&&<button className="rpg-farm-dock" aria-label={trans('農園・牧場・ペット',languageMode)} aria-haspopup="dialog" disabled={!active||interactionBlocked} onClick={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}><span aria-hidden="true" style={{fontSize:19}}>🌱</span><span>{trans('農園',languageMode)}</span></button>}
+                  {!spectating&&<button className="rpg-farm-dock" aria-label={trans('農園・牧場・ペット',languageMode)} aria-haspopup="dialog" disabled={!active||interactionBlocked} onClick={()=>{setDetail(null);setLifeOpen(false);setFarmOpen(true);}}><Sprout size={19} aria-hidden="true"/><span>{trans('農園',languageMode)}</span></button>}
                   <button aria-pressed={overview} onClick={()=>setOverview(!overview)}><Map size={19}/><span>{overview?'近く':'全体'}</span></button>
                   <button aria-haspopup="dialog" onClick={()=>openDetail('team')}><Users size={19}/><span>仲間</span></button>
                   <button aria-haspopup="dialog" onClick={()=>openDetail('event')}><Sparkles size={19}/><span>イベント</span><small>{world.activities.event.progress}/{world.activities.event.target}</small></button>
@@ -687,7 +688,7 @@ export default function RpgOnline({
                     <Crown />
                     魔王城へ
                   </h2>
-                  <p>6地域の試験官を倒し、三段階に変身する魔王に挑もう。</p>
+                  <p>6地域の試験官を倒し、魔王城へ挑もう。</p>
                   {world.sites
                     .filter((s) => s.kind === "guardian" || s.kind === "boss")
                     .map((s) => (

@@ -1,4 +1,12 @@
 export const RPG_ACTIVITY_ENGLISH: Record<string,string> = {
+  "あなたが獲得した報酬": "Rewards you earned",
+  "イベント達成時の報酬": "Rewards for completing this event",
+  "全員に20 G · 貢献した参加者に追加15 G": "20 G for everyone · Contributors earn 15 extra G",
+  "カードを1枚獲得": "Gain 1 card",
+  "最大HPの25％を回復": "Recover 25% of maximum HP",
+  "町・休憩・イベントを再利用可能": "Town, rest and event services become available again",
+  "魔王の攻撃力を弱める": "Weaken the Demon King's attacks",
+
   "冒険者集合中": "Waiting for adventurers",
   "ホストが開始すると、全員でワールドへ移動します。": "The host will send everyone into the world when the adventure starts.",
   "参加者": "Players",
@@ -43,7 +51,7 @@ export const RPG_ACTIVITY_ENGLISH: Record<string,string> = {
   "秒": "seconds",
   "みんなで戦闘に勝利して図書館を取り戻そう。": "Win battles together to recover the library.",
   "問題に正解して知識の灯をともそう。": "Answer questions correctly to light the lamps of knowledge.",
-  "各地の封印装置を調べ、校長の攻撃力を弱めよう。": "Activate the seals to weaken the principal's attacks.",
+  "各地の封印装置を調べ、魔王の攻撃力を弱めよう。": "Activate the seals to weaken the Demon King's attacks.",
   "地図の秘密": "Map secrets",
   "地図の断片": "Map fragment",
   "/ 3 · 発見した断片は全員に共有されます。": "/ 3 · Discoveries are shared with everyone.",
@@ -127,6 +135,14 @@ export const RPG_ACTIVITY_ENGLISH: Record<string,string> = {
 };
 
 export const RPG_ACTIVITY_HIRAGANA: Record<string,string> = {
+  "あなたが獲得した報酬": "あなたがかくとくしたほうしゅう",
+  "イベント達成時の報酬": "いべんとたっせいじのほうしゅう",
+  "全員に20 G · 貢献した参加者に追加15 G": "ぜんいんに20 G · こうけんしたさんかしゃについか15 G",
+  "カードを1枚獲得": "かーどをいちまいかくとく",
+  "最大HPの25％を回復": "さいだいHPの25％をかいふく",
+  "町・休憩・イベントを再利用可能": "まち・きゅうけい・いべんとをさいりようかのう",
+  "魔王の攻撃力を弱める": "まおうのこうげきりょくをよわめる",
+
   "冒険者集合中": "ぼうけんしゃしゅうごうちゅう",
   "ホストが開始すると、全員でワールドへ移動します。": "ホストがかいしすると、ぜんいんでワールドへいどうします。",
   "参加者": "さんかしゃ",
@@ -171,7 +187,7 @@ export const RPG_ACTIVITY_HIRAGANA: Record<string,string> = {
   "秒": "びょう",
   "みんなで戦闘に勝利して図書館を取り戻そう。": "みんなでせんとうにしょうりしてとしょかんをとりもどそう。",
   "問題に正解して知識の灯をともそう。": "もんだいにせいかいしてちしきのひをともそう。",
-  "各地の封印装置を調べ、校長の攻撃力を弱めよう。": "かくちのふういんそうちをしらべ、こうちょうのこうげきりょくをよわめよう。",
+  "各地の封印装置を調べ、魔王の攻撃力を弱めよう。": "かくちのふういんそうちをしらべ、まおうのこうげきりょくをよわめよう。",
   "地図の秘密": "ちずのひみつ",
   "地図の断片": "ちずのだんぺん",
   "/ 3 · 発見した断片は全員に共有されます。": "/ 3 · はっけんしただんぺんはぜんいんにきょうゆうされます。",

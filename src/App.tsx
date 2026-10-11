@@ -1,3 +1,4 @@
+import {prepareCraftedFirstStrike,craftedFirstStrikeActive,consumeCraftedFirstStrike} from './rpg/craftedRelics';
 import WaitingHomeDash from './mini-games/shared/WaitingHomeDash';
 import {golfInviteCode} from './mini-games/gakuro-golf/invite';
 import type {RpgWorldSave} from './rpg/worldSave';
@@ -3759,6 +3760,7 @@ const App: React.FC = () => {
 
         syncRedSkullState(p);
 
+        prepareCraftedFirstStrike(p);
         let drawCount = HAND_SIZE + applyEnemyHeroRelics(p);
         if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
         if (p.relics.find(r => r.id === 'SNECKO_EYE')) drawCount += 2;
@@ -12897,6 +12899,26 @@ const App: React.FC = () => {
                     : enemy
             )
         }));
+        const firstStrike = !rpgDuelRef.current && (
+            craftedFirstStrikeActive(stateRef.current.player)
+            || (stateRef.current.challengeMode === 'COOP' && !!coopSession?.isHost
+                && (stateRef.current.coopBattleState?.players || []).some(entry => entry.player.currentHp > 0 && craftedFirstStrikeActive(entry.player)))
+        );
+        if (firstStrike) {
+            setGameState(prev => {
+                const player = { ...prev.player, relicCounters: { ...prev.player.relicCounters } };
+                consumeCraftedFirstStrike(player);
+                const coopBattleState = prev.coopBattleState ? {
+                    ...prev.coopBattleState,
+                    players: prev.coopBattleState.players.map(entry => {
+                        const partner = { ...entry.player, relicCounters: { ...entry.player.relicCounters } };
+                        consumeCraftedFirstStrike(partner);
+                        return { ...entry, player: partner };
+                    })
+                } : null;
+                return { ...prev, player, coopBattleState };
+            });
+        }
         for (const enemyTemplate of enemiesToAct) {
             const hasLivingCoopTarget =
                 stateRef.current.challengeMode === 'COOP' &&
@@ -12905,6 +12927,19 @@ const App: React.FC = () => {
             if (stateRef.current.player.currentHp <= 0 && !hasLivingCoopTarget) break;
             const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
             if (!enemy || enemy.currentHp <= 0) continue;
+            if (firstStrike) {
+                setGameState(prev => ({
+                    ...prev,
+                    enemies: prev.enemies.map(e => e.id === enemy.id ? {
+                        ...e,
+                        nextIntent: getNextEnemyIntent(e, prev.turn + 1),
+                        floatingText: { id: `first-strike-${prev.turn}-${e.id}`, text: trans('先制攻撃', languageMode), color: 'text-cyan-300' }
+                    } : e),
+                    combatLog: [...prev.combatLog, trans('先制攻撃！敵はこのターン行動できない。', languageMode)].slice(-100)
+                }));
+                await wait(100);
+                continue;
+            }
             setActingEnemyId(enemy.id);
             const enemyActionKey = `${stateRef.current.turn}:${enemy.id}`;
             lastActingEnemyRef.current = { ...enemy };

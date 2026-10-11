@@ -1,4 +1,9 @@
 export const RPG_LIFE_ENGLISH:Record<string,string> = {
+  "所持中、すべての戦闘でムキムキ＋2。": "While owned, gain +2 Strength in every battle.",
+  "戦闘開始時、15％の確率で先制攻撃。最初の敵ターンは敵が行動しない。": "At battle start, a 15% chance of a first strike. Enemies skip their first turn.",
+  "先制攻撃": "First strike",
+  "先制攻撃！敵はこのターン行動できない。": "First strike! Enemies cannot act this turn.",
+
   "10ダメージ。ブロック8を得る。":"Deal 10 damage. Gain 8 Block.",
   "14ダメージ。対象にびくびく2を与える。":"Deal 14 damage. Apply 2 Vulnerable.",
   "木材": "Wood",
@@ -98,6 +103,11 @@ export const RPG_LIFE_ENGLISH:Record<string,string> = {
   "素材と家は、この部屋の冒険中に共有・保存されます。": "Materials and houses last for this room's adventure."
 };
 export const RPG_LIFE_HIRAGANA:Record<string,string> = {
+  "所持中、すべての戦闘でムキムキ＋2。": "しょじちゅう、すべてのせんとうでむきむき＋2。",
+  "戦闘開始時、15％の確率で先制攻撃。最初の敵ターンは敵が行動しない。": "せんとうかいしじ、15％のかくりつでせんせいこうげき。さいしょのてきたーんはてきがこうどうしない。",
+  "先制攻撃": "せんせいこうげき",
+  "先制攻撃！敵はこのターン行動できない。": "せんせいこうげき！てきはこのたーんこうどうできない。",
+
   "10ダメージ。ブロック8を得る。":"10だめーじ。ぶろっく8をえる。",
   "14ダメージ。対象にびくびく2を与える。":"14だめーじ。たいしょうにびくびく2をあたえる。",
   "木材": "もくざい",

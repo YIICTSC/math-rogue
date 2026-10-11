@@ -7,7 +7,8 @@ import { getRoamingNpcEvent } from './roamingNpcs';
 export interface Mutation { revision: number; relics?: Relic[]; remove: string[]; cards: Card[]; gold: number; heal: number; }
 export interface Trade { id: string; from: string; to: string; accepted: boolean; offers: Record<string, string[]>; confirmed: string[]; expires: number; }
 export interface Dungeon { id: string; siteId: string; leader: string; members: string[]; ready: string[]; arrived: string[]; damageActions?: string[]; status: 'lobby' | 'active' | 'complete' | 'aborted'; }
-export interface WorldEvent { kind: 'BATTLES' | 'ANSWERS' | 'SEALS'; title: string; target: number; progress: number; expires: number; completed: boolean; finished: boolean; contributors: Record<string, number>; baseline: Record<string, number>; }
+export interface WorldEventReward { gold: number; heal: number; card?: Card }
+export interface WorldEvent { rewards?: Record<string,WorldEventReward>; kind: 'BATTLES' | 'ANSWERS' | 'SEALS'; title: string; target: number; progress: number; expires: number; completed: boolean; finished: boolean; contributors: Record<string, number>; baseline: Record<string, number>; }
 export interface Activities { trades: Trade[]; dungeons: Dungeon[]; event: WorldEvent; nextEventAt: number; eventNumber: number; secretsFound: string[]; bossWeakened: boolean; }
 export type ActivityAction =
  | { type: 'trade-request'; target: string }
@@ -53,6 +54,10 @@ function event(w:World,now:number,n:number):WorldEvent {
 export function createActivities():Activities {
  return {trades:[],dungeons:[],event:{kind:'ANSWERS',title:'知識の灯をともせ',target:8,progress:0,expires:0,completed:false,finished:true,contributors:{},baseline:{}},nextEventAt:0,eventNumber:0,secretsFound:[],bossWeakened:false};
 }
+/** Use the same reward calculation for the grant and its visible receipt. */
+export function worldEventReward(e:WorldEvent,p:Adventurer):WorldEventReward {
+ return e.rewards?.[p.id] ?? {gold:20+((e.contributors[p.id]||0)>0?15:0),heal:e.kind==='ANSWERS'?Math.max(0,Math.min(p.maxHp-p.hp,Math.ceil(p.maxHp*.25))):0};
+}
 export function advanceActivities(w:World,now:number) {
  const a=w.activities;
  const before=a.trades.length;
@@ -80,7 +85,9 @@ export function advanceActivities(w:World,now:number) {
      if(e.kind==='SEALS') a.bossWeakened=true;
      for(const p of Object.values(w.players)) {
        const card=rewardCard(w,p);
-       grant(p,{remove:[],cards:e.kind==='BATTLES'&&card?[card]:[],gold:20+(e.contributors[p.id]>0?15:0),heal:e.kind==='ANSWERS'?Math.ceil(p.maxHp*.25):0});
+       const reward=worldEventReward(e,p);if(e.kind==='BATTLES'&&card)reward.card=card;
+       (e.rewards??={})[p.id]=reward;
+       grant(p,{remove:[],cards:reward.card?[reward.card]:[],gold:reward.gold,heal:reward.heal});
        if(e.kind==='ANSWERS') p.siteUses=Object.fromEntries(w.sites.filter(s=>['town','rest','event'].includes(s.kind)).map(s=>[s.id,p.completedBattles-3]));
        p.message=`${e.title}達成！ 共通報酬を獲得。`;
      }

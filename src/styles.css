@@ -19521,3 +19521,24 @@ textarea {
 .battle-scene-root.battle-ui-custom .battle-enemy-sprite.battle-humanoid-enemy-sprite > div.relative[data-enemy-type="RPG_DEMON"]:first-child { transform: none !important; width: 100% !important; height: 100% !important; }
 
 .storybook-quality{white-space:nowrap;font-size:10px!important;min-height:28px!important;padding:4px 8px!important;border:1px solid #d6bf86!important;border-radius:8px!important;color:#fff0ce!important;background:#34584d!important}.gg-header>.gg-debug:has(.storybook-quality){margin-left:auto}.gk-header-right .storybook-quality{flex:none}
+
+/* Fit every exploration destination into the available app viewport. */
+.main-rest-screen[data-rest-mode="CHOICE"] { min-height:0; overflow:hidden; padding:clamp(6px,1.5dvh,20px); }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-panel { min-height:0; height:min(90dvh,100%); max-height:100%; padding:clamp(8px,2dvh,24px); }
+.main-rest-screen[data-rest-mode="CHOICE"] h2 { font-size:clamp(18px,3.6vw,32px); margin-bottom:clamp(4px,1dvh,12px); }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-panel>p { min-height:0; margin-bottom:clamp(6px,1.5dvh,16px); font-size:clamp(12px,2.8vw,18px); }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:minmax(0,1fr); flex:1; min-height:0; width:100%; gap:clamp(6px,1.5dvh,16px); }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid>button { width:auto!important; min-width:0; min-height:0; overflow:hidden; justify-content:center; gap:clamp(3px,.7dvh,8px); padding:clamp(6px,1.2dvh,14px); }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid>button>img { flex:1; width:100%; height:0; min-height:0; max-height:96px; object-fit:cover; border-radius:4px; }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid>button>span { flex-shrink:0; padding:0; overflow-wrap:anywhere; }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid .text-lg { font-size:clamp(13px,2.8vw,18px); line-height:1.2; }
+.main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid .text-xs { font-size:clamp(10px,2.3vw,12px); line-height:1.25; }
+@media(min-width:640px),(orientation:landscape) { .main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid {grid-template-columns:repeat(3,minmax(0,1fr));} }
+@media(orientation:landscape) and (max-height:450px) {
+ .main-rest-screen[data-rest-mode="CHOICE"] h2 {font-size:18px; margin-bottom:3px;}
+ .main-rest-screen[data-rest-mode="CHOICE"] .rest-panel>p {font-size:12px;margin-bottom:5px;}
+ .main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid>button {padding:4px;gap:2px;}
+ .main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid>button>svg {width:20px;height:20px;}
+ .main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid .text-lg {font-size:12px;}
+ .main-rest-screen[data-rest-mode="CHOICE"] .rest-choice-grid .text-xs {font-size:10px;}
+}

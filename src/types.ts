@@ -313,7 +313,7 @@ export interface EndlessGimmickProgress {
 }
 
 export interface Relic {
-  rpgInnate?: { strength: number; block: number; draw: number; heal: number };
+  rpgInnate?: { strength: number; block: number; draw: number; heal: number; firstStrikeChance?: number };
   id: string;
   name: string;
   description: string;

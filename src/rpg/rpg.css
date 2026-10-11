@@ -1902,3 +1902,5 @@
  .rpg-root--compact .rpg-resident-quick button{min-width:90px;flex:1;min-height:44px}
 }
 .rpg-root .rpg-overlay{box-sizing:border-box;min-width:0}.rpg-root .rpg-dialog{box-sizing:border-box;min-width:0;max-width:100%;overflow-x:hidden;overflow-wrap:anywhere}.rpg-root .rpg-sidebar-content{min-width:0;box-sizing:border-box;max-width:100%}
+
+.rpg-event-rewards{margin:12px 0;padding:12px;border:1px solid #b8a475;border-radius:10px;background:#394a36;color:#f5e3b4}.rpg-event-rewards h3{margin-top:0}.rpg-event-rewards p{margin:5px 0}

@@ -18,11 +18,11 @@ export const DEFAULT_CONVERSATION_VOICE: ConversationVoice = {
 };
 /** Built-in residents use explicit voice profiles so personality never assigns girls a deep timbre. */
 const GIRL_RESIDENT_PITCH: Readonly<Record<string, number>> = {
-  "resident-mina": 1.75,
-  "resident-sui": 1.65,
-  "resident-yuki": 1.8,
-  "resident-nono": 1.85,
-  "resident-nemu": 1.7,
+  "resident-mina": 1.93,
+  "resident-sui": 1.9,
+  "resident-yuki": 1.98,
+  "resident-nono": 2,
+  "resident-nemu": 1.92,
 };
 function voiceProfile(pitch: number, timbre: number, rate: number, style: ConversationVoice["style"], intonation: number): ConversationVoice {
   return { ...DEFAULT_CONVERSATION_VOICE, pitch, timbre, rate, style, intonation };

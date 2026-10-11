@@ -4,6 +4,7 @@ import CardInspectionModal from '../components/CardInspectionModal';
 import TranslatedUiTree from '../components/TranslatedUiTree';
 import type { LanguageMode, Card } from '../types';
 import { distance, type Action, type World } from './engine';
+import {worldEventReward} from './activities';
 
 export default function ActivitiesPanel({world,selfId,selectedPeer,send,languageMode,display='all'}:{display?:'all'|'cards'|'dialogs';languageMode:LanguageMode;world:World;selfId:string;selectedPeer:string|null;send:(action:Action)=>void}) {
  const [inspected,setInspected]=useState<Card|null>(null);
@@ -11,7 +12,7 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
  useEffect(()=>setInspected(null),[currentTradeId]);
  const me=world.players[selfId];
  if(!me)return null;
- const a=world.activities,e=a.event;
+ const a=world.activities,e=a.event,reward=worldEventReward(e,me),received=e.completed&&!!e.rewards?.[selfId];
  const duel=world.duels.find(d=>d.id===me.duelId);
  const trade=a.trades.find(t=>t.from===selfId||t.to===selfId);
  const dungeon=a.dungeons.find(d=>d.id===me.dungeonId);
@@ -24,7 +25,14 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
    {target && <p>選択中：{target.name}</p>}
    {nearby.length===0?<p>近くに仲間がいません。</p>:nearby.map(p=><div className="rpg-team-member-row" key={p.id}><span>{p.name}</span><button disabled={!!trade||!!me.duelId||!!p.duelId||!!me.dungeonId||!!me.nativeScene||!!p.nativeScene||!!p.dungeonId||world.ended} onClick={()=>send({type:'trade-request',target:p.id})}>トレード</button>{world.gameMode==='BATTLE_ROYALE'&&<button disabled={!!me.duelId||!!me.dungeonId||!!me.nativeScene||!!p.duelId||!!p.dungeonId||!!p.nativeScene||world.ended} onClick={()=>send({type:'duel-request',target:p.id})}>バトル</button>}</div>)}
   </section>}
-  <section data-rpg-panel="event" className="rpg-player-panel rpg-activities"><h2>ワールド共通イベント</h2><strong>{e.title}</strong><p>{e.finished?(e.completed?'達成！ 共通報酬を獲得':'次のイベントを待っています'): <>{e.progress} / {e.target} · 残り {Math.max(0,Math.ceil((e.expires-Date.now())/1000))} 秒</>}</p><progress max={e.target} value={e.progress}/><p>{e.kind==='BATTLES'?'みんなで戦闘に勝利して図書館を取り戻そう。':e.kind==='ANSWERS'?'問題に正解して知識の灯をともそう。':'各地の封印装置を調べ、校長の攻撃力を弱めよう。'}</p>
+  <section data-rpg-panel="event" className="rpg-player-panel rpg-activities"><h2>ワールド共通イベント</h2><strong>{e.title}</strong><p>{e.finished?(e.completed?'達成！ 共通報酬を獲得':'次のイベントを待っています'): <>{e.progress} / {e.target} · 残り {Math.max(0,Math.ceil((e.expires-Date.now())/1000))} 秒</>}</p><progress max={e.target} value={e.progress}/><p>{e.kind==='BATTLES'?'みんなで戦闘に勝利して図書館を取り戻そう。':e.kind==='ANSWERS'?'問題に正解して知識の灯をともそう。':'各地の封印装置を調べ、魔王の攻撃力を弱めよう。'}</p>
+   <div className="rpg-event-rewards" role={received?'status':undefined}>
+    <h3>{received?'あなたが獲得した報酬':'イベント達成時の報酬'}</h3>
+    {received?<p>{reward.gold} G{reward.heal>0&&<> · HP +{reward.heal}</>}{reward.card&&<> · {reward.card.name}</>}</p>:<p>全員に20 G · 貢献した参加者に追加15 G</p>}
+    {e.kind==='BATTLES'&&!received&&<p>カードを1枚獲得</p>}
+    {e.kind==='ANSWERS'&&<><p>最大HPの25％を回復</p><p>町・休憩・イベントを再利用可能</p></>}
+    {e.kind==='SEALS'&&<p>魔王の攻撃力を弱める</p>}
+   </div>
    <h3>地図の秘密</h3><p>地図の断片 {a.secretsFound.length} / 3 · 発見した断片は全員に共有されます。</p>{a.secretsFound.length>=3&&<p>秘密の遺跡が開放されました！</p>}
    <h3>協力ダンジョン</h3>{world.sites.filter(s=>s.kind==='dungeon').map(s=><div key={s.id}><p>{s.name} ({s.x}, {s.y})</p><button disabled={distance(s,me)>2||!!me.dungeonId||!!trade||world.ended} onClick={()=>send({type:'dungeon-join',siteId:s.id})}>参加者を募集・参加</button></div>)}
   </section>

@@ -14,6 +14,8 @@ for (const [letters, consonant] of rows) [...letters].forEach((letter, index) =>
   if (!kana.has(letter)) kana.set(letter, [index, consonant]);
 });
 kana.set('ゔ', [2, 'v']);
+// Japanese affricates and palatal fricatives have distinct consonant spectra.
+for(const [letter,vowel,consonant] of [['し',1,'sh'],['じ',1,'j'],['ち',1,'ch'],['ぢ',1,'j'],['つ',2,'ts'],['づ',2,'z'],['ふ',2,'f'],['ひ',1,'hy']] as const)kana.set(letter,[vowel,consonant]);
 const small = 'ぁぃぅぇぉ';
 const formants = [[800,1200,2500],[300,2300,3000],[350,1300,2400],[500,1900,2600],[500,850,2400]];
 
@@ -45,49 +47,85 @@ export function residentVoiceMoras(text: string): VoiceMora[] | null {
   return result.some(m => m.vowel >= 0) ? result : null;
 }
 
-/** Render a bounded mono PCM buffer; stable noise makes a resident sound consistent. */
+type Resonator = {b0:number;b2:number;a1:number;a2:number;x1:number;x2:number;y1:number;y2:number};
+function resonator():Resonator{return {b0:0,b2:0,a1:0,a2:0,x1:0,x2:0,y1:0,y2:0};}
+function tune(r:Resonator,frequency:number,bandwidth:number,sampleRate:number){
+ const f=Math.max(80,Math.min(sampleRate*.45,frequency)),omega=2*Math.PI*f/sampleRate;
+ const alpha=Math.sin(omega)/(2*Math.max(.5,f/bandwidth)),a0=1+alpha;
+ r.b0=alpha/a0;r.b2=-alpha/a0;r.a1=-2*Math.cos(omega)/a0;r.a2=(1-alpha)/a0;
+}
+function filter(r:Resonator,input:number){
+ const value=r.b0*input+r.b2*r.x2-r.a1*r.y1-r.a2*r.y2;
+ r.x2=r.x1;r.x1=input;r.y2=r.y1;r.y1=value;return value;
+}
+const unvoiced=(consonant:string)=>/^(k|p|t|s|h|f)/.test(consonant);
+/** Source/filter synthesis: closures, bursts, frication, nasals and connected vowels. */
 export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice, sampleRate = 22050): Float32Array {
-  const rate = Math.max(.6, Math.min(1.6, voice.rate)) * (voice.style === "calm" ? .9 : voice.style === "warm" ? .96 : 1);
-  const units = moras.slice(0,240);
-  const sizes = units.map(m => Math.round(sampleRate * m.duration / rate));
-  const pcm = new Float32Array(sizes.reduce((a,b) => a+b,0));
-  const color = ([1,1.18,.87,.72][voice.timbre] ?? 1) * (voice.style === "warm" ? .94 : 1);
-  const expression = voice.intonation ?? .65;
-  let offset = 0, phase = 0, seed = 1471;
-  units.forEach((m,index) => {
-    const length = sizes[index];
-    if (m.vowel < 0) { offset += length; return; }
-    const bright = voice.style === 'bouncy' || voice.style === 'playful';
-    const contour = voice.style === 'robot' ? 0 : expression * (Math.sin(index * (bright ? 1.8 : .65)) * (bright ? .15 : .065));
-    const fundamental = 165 * voice.pitch * (1 + contour);
-    const frequencies = formants[m.vowel];
-    const harmonics = Array.from({length:Math.min(40, Math.floor(sampleRate / 2 / (fundamental * 1.2)))},(_,h) => {
-      const frequency = (h+1)*fundamental;
-      return frequencies.reduce((sum,f,j) => sum + Math.exp(-.5*((frequency-f*color)/(90+j*55))**2)/(1+j*.45), .015)/(h+1)**.65;
-    });
-    const normalizer = harmonics.reduce((a,b)=>a+b,0) || 1;
-    for (let i=0;i<length;i++) {
-      const time = i/sampleRate, position = i/length;
-      phase += 2*Math.PI*fundamental*(1 + (m.question ? position*.18*expression : 0))/sampleRate;
-      const onset = m.consonant ? .027 : .008;
-      let voiced = 0;
-      for(let h=0;h<harmonics.length;h++) voiced += Math.sin(phase*(h+1))*harmonics[h];
-      voiced /= normalizer;
-      seed = (Math.imul(seed,1664525)+1013904223) | 0;
-      const noise = seed/2147483648;
-      const fricative = /^[szhfv]/.test(m.consonant);
-      const nasal = /^[mn]/.test(m.consonant);
-      const attack = Math.min(1,time/onset);
-      const envelope = Math.min(1,time/.006,(length-i)/(sampleRate*.015));
-      let value = voiced * attack;
-      if (time < onset && fricative) value += noise * .32 * (1-attack);
-      else if(time < .008 && /^[ktpgdb]/.test(m.consonant)) value += noise*.22*(1-time/.008);
-      if(nasal) value = value*.5 + Math.sin(phase)*.25;
-      if(m.consonant.includes('y') && time < .035) value *= .75;
-      pcm[offset+i] = Math.max(-.85,Math.min(.85,value*envelope*.6));
+  const rate=Math.max(.6,Math.min(1.6,voice.rate))*(voice.style==='calm'?.9:voice.style==='warm'?.96:1);
+  const units=moras.slice(0,240),sizes=units.map(m=>Math.round(sampleRate*m.duration/rate));
+  const pcm=new Float32Array(sizes.reduce((a,b)=>a+b,0));
+  const color=([1,1.19,.89,.76][voice.timbre]??1)*(voice.style==='warm'?.97:1);
+  const expression=voice.intonation??.65,bright=voice.style==='bouncy'||voice.style==='playful';
+  const vowels=[resonator(),resonator(),resonator()],friction=resonator(),nasal=resonator();
+  tune(nasal,280,180,sampleRate);
+  let offset=0,phase=0,seed=1471,lastPulse=0,phraseIndex=0;
+  for(let index=0;index<units.length;index++){
+    const m=units[index],length=sizes[index];
+    if(m.vowel<0){offset+=length;phraseIndex=0;continue;}
+    const previous=units[index-1],next=units[index+1],c=m.consonant;
+    const stop=/^[kgtdbp]/.test(c)&&!/^ts|^ch/.test(c),affricate=/^ch|^ts|^j/.test(c);
+    const fricative=/^s|^sh|^z|^h|^f|^v/.test(c),isNasal=/^[mn]/.test(c),syllabic=c==='nasal';
+    const voicedConsonant=/^[gdbzjvmnrwy]/.test(c);
+    const palatal=c.includes('y')||/^sh|^ch|^j/.test(c),labial=/^[pbmfvw]/.test(c);
+    const closure=(stop||affricate?(voicedConsonant?.012:.018):c==='r'?.012:0)/rate;
+    const onset=(affricate?.060:fricative?.060:isNasal?.047:c==='r'?.030:c?.040:.008)/rate;
+    const burstEnd=closure+.012/rate,transition=onset+.035/rate;
+    const devoiced=(m.vowel===1||m.vowel===2)&&unvoiced(c)&&(!next||next.vowel<0||unvoiced(next.consonant));
+    const noiseFrequency=/^sh|^ch|^j|^hy/.test(c)?3600:/^s|^ts|^z/.test(c)?6500:/^k|^g/.test(c)?2600:labial?1200:1900;
+    tune(friction,noiseFrequency,/^s|^sh|^ts|^ch/.test(c)?2200:1600,sampleRate);
+    const target=formants[m.vowel],prev=previous&&previous.vowel>=0?formants[previous.vowel]:target;
+    const contour=voice.style==='robot'?0:expression*(Math.min(phraseIndex,16)*-.006+Math.sin(phraseIndex*(bright?1.2:.55))*(bright?.055:.025));
+    const fundamental=165*voice.pitch*(1+contour);
+    for(let i=0;i<length;i++){
+      const time=i/sampleRate,position=i/length;
+      if(i%48===0){
+        const blend=Math.min(1,time/transition),connected=Math.min(1,time/(.02/rate));
+        const start=[180,palatal?2300:labial?800:/^[kg]/.test(c)?1700:1800,2800];
+        for(let j=0;j<3;j++)tune(vowels[j],(c?start[j]*(1-blend)+target[j]*blend:prev[j]*(1-connected)+target[j]*connected)*color,110+j*95,sampleRate);
+      }
+      seed=(Math.imul(seed,1664525)+1013904223)|0;const noise=seed/2147483648;
+      const f0=fundamental*(1+(m.question?Math.max(0,position-.45)*.32*expression:0)+(voice.style==='robot'?0:.003*Math.sin(time*107)));
+      phase+=f0/sampleRate;const cycle=phase%1;
+      const pulse=cycle<.62?.5*(1-Math.cos(Math.PI*cycle/.62)):.5*(1+Math.cos(Math.PI*(cycle-.62)/.38));
+      const excitation=(pulse-lastPulse)*sampleRate/f0*.32+Math.sin(phase*2*Math.PI)*.13;
+      lastPulse=pulse;
+      const vowel=filter(vowels[0],excitation+noise*.014)+filter(vowels[1],excitation)*.62+filter(vowels[2],excitation)*.32;
+      const nasalVoice=filter(nasal,excitation)*1.5+Math.sin(phase*2*Math.PI)*.10;
+      const frictionVoice=filter(friction,noise);
+      let voicedGain=c?Math.max(0,Math.min(1,(time-closure)/(onset-closure||.001))):1;
+      let value=vowel*voicedGain*(devoiced?.26:1);
+      if(syllabic)value=nasalVoice*.8;
+      else if(isNasal){const mix=Math.max(0,1-time/onset);value=vowel*(1-mix)+nasalVoice*mix;}
+      else if(stop||affricate){
+        if(time<closure)value=voicedConsonant?nasalVoice*.2:0;
+        else if(time<burstEnd)value+=frictionVoice*(voicedConsonant?.22:.55)*(1-(time-closure)/(burstEnd-closure));
+        if(affricate&&time>=closure&&time<onset)value+=frictionVoice*.45*(1-voicedGain);
+        else if(stop&&time>=burstEnd&&time<onset)value+=frictionVoice*.16*(1-voicedGain);
+      }else if(fricative){
+        const mix=Math.max(0,1-time/onset);
+        value+=frictionVoice*(/^h/.test(c)?.22:.45)*mix;
+        if(voicedConsonant)value+=nasalVoice*.16*mix;
+      }else if(c==='r'&&time<closure)value*=.12;
+      if(devoiced)value+=frictionVoice*.045*voicedGain;
+      const attack=previous&&previous.vowel>=0?1:Math.min(1,time/.006);
+      const release=next&&next.vowel>=0?1:Math.min(1,(length-i)/(sampleRate*.018));
+      pcm[offset+i]=value*attack*release;
     }
-    offset += length;
-  });
+    offset+=length;phraseIndex++;
+  }
+  let peak=0;for(const value of pcm)peak=Math.max(peak,Math.abs(value));
+  const gain=peak>0?Math.min(6,.70/peak):1;
+  for(let i=0;i<pcm.length;i++)pcm[i]=Math.max(-.85,Math.min(.85,pcm[i]*gain));
   return pcm;
 }
 

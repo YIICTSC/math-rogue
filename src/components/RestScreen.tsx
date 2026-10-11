@@ -346,6 +346,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   return (
     <div
       data-gamepad-initial-scope={`rest-${mode}`}
+      data-rest-mode={mode}
       className="main-rest-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
       style={{
         backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'rest', appearanceMode)
@@ -353,7 +354,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
     >
         <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
         
-        <div className="z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="rest-panel z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
             {interactionDisabled && (
                 <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
                     {interactionDisabledMessage ? trans(interactionDisabledMessage, languageMode) : trans('他のプレイヤーの選択を待っています', languageMode)}
@@ -365,7 +366,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
             {mode === 'CHOICE' && (
-                <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+                <div className="rest-choice-grid flex flex-wrap justify-center gap-4 md:gap-8">
                     {/* The major-boss intermission already starts at full HP. */}
                     {!endlessMajorBoss && (
                         <>
