@@ -169,7 +169,7 @@ export default function ResidentScene({
         : talk?.lines.at(-1),
     portrait = residentAppearance(world,target,custom?.hero?.frames.idle[0] || r.portrait);
   const emotion=person.reaction&&person.reaction.until>now?person.reaction.emotion:undefined;
-  const emotionArt=emotion&&reactionImage(target,emotion);
+  const emotionArt=emotion&&reactionImage(target,emotion,person.wearing);
   const displayPortrait=emotionArt&&!person.wearing?emotionArt:portrait;
   const speakingSelf = line?.speaker === selfId || line?.speaker === "player";
   const speakingResident = line?.speaker === target;
@@ -283,7 +283,7 @@ export default function ResidentScene({
             src={assetUrl(displayPortrait)}
             alt={C(r.name)}
           />
-          {emotion && <div className="resident-emotion" aria-live="polite">{emotionArt&&person.wearing&&<span className="resident-reaction-face"><img src={assetUrl(emotionArt)} alt=""/></span>}{C(EMOTION_NAMES[emotion])}</div>}
+          {emotion && <div className="resident-emotion" aria-live="polite">{emotionArt&&person.wearing&&<span className="resident-reaction-face resident-reaction-face-outfit"><img src={assetUrl(emotionArt)} alt=""/></span>}{C(EMOTION_NAMES[emotion])}</div>}
           {dialogueLine && <div className={"resident-speech " + (speakingSelf ? "resident-speech-self" : "resident-speech-resident")} data-speaker={speakingSelf ? "self" : "resident"} aria-live="polite">
             <strong>{speakingSelf ? me.hero?.name || me.name : C(r.name)}</strong>
             <p>{socialLineText(dialogueLine, languageMode)}</p>

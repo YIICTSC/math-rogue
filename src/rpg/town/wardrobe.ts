@@ -18,7 +18,7 @@ export const supportsWardrobe=(id:string)=>RESIDENTS.some(r=>r.id===id);
 export function outfitPreference(w:World,id:string){return OUTFITS[(w.town?.people[id]?.personality??RESIDENTS.find(r=>r.id===id)?.personality??0)%OUTFITS.length].id;}
 export function outfitRequirement(w:World,id:string,outfit:typeof OUTFITS[number]){return Math.max(0,outfit.bond-(outfitPreference(w,id)===outfit.id?5:0));}
 export function outfitImage(id:string,outfit:string){if(!supportsWardrobe(id)||!outfitById(outfit))return undefined;return `sprites/rpg/wardrobe/${id.slice(9)}/${outfit}.webp`;}
-export function reactionImage(id:string,emotion:ResidentEmotion){return supportsWardrobe(id)?`sprites/rpg/wardrobe/${id.slice(9)}/${emotion}.webp`:undefined;}
+export function reactionImage(id:string,emotion:ResidentEmotion,outfit?:string){if(!supportsWardrobe(id))return undefined;const image=outfit&&outfitById(outfit)?`${outfit}-${emotion}`:emotion;return `sprites/rpg/wardrobe/${id.slice(9)}/${image}.webp`;}
 export function residentAppearance(w:World,id:string,fallback:string){return outfitImage(id,w.town?.people[id]?.wearing||'')||fallback;}
 export const EMOTION_NAMES:Record<ResidentEmotion,Copy>={joy:c('うれしい！','Delighted!','うれしい！'),shy:c('ありがとう…','Thank you…','ありがとう…'),surprise:c('びっくり！','Surprised!','びっくり！'),sad:c('しょんぼり','Disappointed','しょんぼり')};
 
