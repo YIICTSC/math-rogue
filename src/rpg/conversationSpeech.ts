@@ -1,3 +1,4 @@
+import { residentVoiceMoras, renderResidentVoice, residentVoiceSupported, unlockResidentVoice } from "./residentVoiceSynth";
 import { audioService } from "../services/audioService";
 import { speechPlan, type ConversationVoice } from "./conversationVoice";
 /** Owns only RPG utterances; an idle cleanup must never cancel another game's speech. */
@@ -5,13 +6,62 @@ let stopCurrent: (() => void) | undefined;
 export function stopConversationSpeech() {
   stopCurrent?.();
 }
-export function conversationSpeechSupported() {
+function deviceSpeechSupported() {
   return (
     typeof window !== "undefined" &&
     "speechSynthesis" in window &&
     typeof SpeechSynthesisUtterance !== "undefined"
   );
 }
+export function conversationSpeechSupported() {
+  return residentVoiceSupported() || deviceSpeechSupported();
+}
+
+function speakOriginal(moras: NonNullable<ReturnType<typeof residentVoiceMoras>>, config: ConversationVoice): Promise<boolean> {
+  return new Promise(resolve => {
+    let source: AudioBufferSourceNode | undefined;
+    let gain: GainNode | undefined;
+    let ended = false;
+    let guard: ReturnType<typeof setInterval> | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const finish = (completed = false) => {
+      if (ended) return;
+      ended = true;
+      clearInterval(guard); clearTimeout(timeout);
+      if (source) { source.onended = null; try { source.stop(); } catch {} source.disconnect(); }
+      gain?.disconnect();
+      if (stopCurrent === cancel) stopCurrent = undefined;
+      resolve(completed);
+    };
+    const cancel = () => finish(false);
+    stopCurrent = cancel;
+    try {
+      const ctx = unlockResidentVoice();
+      if (!ctx) { cancel(); return; }
+      timeout = setTimeout(cancel, 3000);
+      void (async () => {
+        if (ctx.state !== 'running') await ctx.resume();
+        if (ended) return;
+        if (!audioService.canPlayConversationVoice()) { cancel(); return; }
+        const samples = renderResidentVoice(moras, config);
+        const buffer = ctx.createBuffer(1, samples.length, 22050);
+        buffer.getChannelData(0).set(samples);
+        source = ctx.createBufferSource(); source.buffer = buffer;
+        gain = ctx.createGain(); gain.gain.value = Math.min(1, audioService.getVoiceVolume());
+        source.connect(gain); gain.connect(ctx.destination);
+        source.onended = () => finish(true);
+        guard = setInterval(() => {
+          if (!audioService.canPlayConversationVoice() || ctx.state !== 'running') cancel();
+          else gain?.gain.setTargetAtTime(Math.min(1, audioService.getVoiceVolume()), ctx.currentTime, .02);
+        }, 60);
+        clearTimeout(timeout);
+        timeout = setTimeout(cancel, buffer.duration * 1000 + 2000);
+        source.start();
+      })().catch(cancel);
+    } catch { cancel(); }
+  });
+}
+
 export function speakConversation(
   text: string,
   config: ConversationVoice,
@@ -24,6 +74,9 @@ export function speakConversation(
     !audioService.canPlayConversationVoice()
   )
     return Promise.resolve(false);
+  const moras = config.engine !== "device" && language !== "ENGLISH" ? residentVoiceMoras(text) : null;
+  if (moras && residentVoiceSupported()) return speakOriginal(moras, config);
+  if (!deviceSpeechSupported()) return Promise.resolve(false);
   return new Promise((resolve) => {
     const synth = window.speechSynthesis;
     let ended = false,

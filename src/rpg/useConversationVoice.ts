@@ -1,3 +1,4 @@
+import { residentVoiceMoras, unlockResidentVoice } from './residentVoiceSynth';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { World } from './engine';
 import { socialLineText, type SocialLine } from './social';
@@ -12,6 +13,7 @@ export default function useConversationVoice(world: World | null, selfId: string
     const unlock = () => {
       if (unlocked.current || !allowed.current || document.hidden) return;
       unlocked.current = true;
+      unlockResidentVoice();
       // iOS requires the first speech request to originate from a user gesture.
       if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
         const prime = new SpeechSynthesisUtterance(' '); prime.volume = 0; window.speechSynthesis.speak(prime);
@@ -40,7 +42,9 @@ export default function useConversationVoice(world: World | null, selfId: string
         const resident=latest.current?.town?.people[item.speaker];
         const config = speaker?.memory?.conversationVoice || latest.current?.town?.customResidents?.find(r=>r.id===item.speaker)?.voice || (resident?{...DEFAULT_CONVERSATION_VOICE,pitch:.85+resident.personality*.07,rate:.9+(resident.personality%3)*.08,timbre:resident.personality%4,style:['warm','bouncy','calm','playful','smooth','warm','bouncy','calm'][resident.personality] as 'warm'|'bouncy'|'calm'|'playful'|'smooth',intonation:.35+(resident.personality%4)*.15}:DEFAULT_CONVERSATION_VOICE);
         if ((speaker || latest.current?.town?.people[item.speaker]) && config.enabled) {
-          const completed = await speakConversation(language==='ENGLISH'?socialLineText(item,language):item.speech||socialLineText(item, language), config, language);
+          const readable = item.speech || item.hiragana || socialLineText(item, language);
+          const kana = config.engine !== 'device' ? [item.speech, item.hiragana].find(text => text && residentVoiceMoras(text)) : undefined;
+          const completed = await speakConversation(language === 'ENGLISH' ? socialLineText(item, language) : kana || readable, config, language);
           if (!completed) { if (token === generation.current) setLine(undefined); return; }
         } else await new Promise(resolve => setTimeout(resolve, 1600));
         if (token !== generation.current) return;

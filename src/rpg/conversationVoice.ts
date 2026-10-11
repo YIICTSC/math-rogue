@@ -1,5 +1,6 @@
 export interface ConversationVoice {
   enabled: boolean;
+  engine?: "original" | "device";
   pitch: number;
   rate: number;
   style: "robot" | "smooth" | "bouncy" | "warm" | "calm" | "playful";
@@ -8,6 +9,7 @@ export interface ConversationVoice {
 }
 export const DEFAULT_CONVERSATION_VOICE: ConversationVoice = {
   enabled: true,
+  engine: "original",
   pitch: 1.1,
   rate: 1,
   style: "smooth",
@@ -19,6 +21,7 @@ export function validConversationVoice(v: unknown): v is ConversationVoice {
   const c = v as ConversationVoice;
   return (
     typeof c.enabled === "boolean" &&
+    (c.engine === undefined || c.engine === "original" || c.engine === "device") &&
     Number.isFinite(c.pitch) &&
     c.pitch >= 0.5 &&
     c.pitch <= 2 &&

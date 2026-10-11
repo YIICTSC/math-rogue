@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { c, copy } from "./town/catalog";
 import TranslatedUiTree from "../components/TranslatedUiTree";
 import type { LanguageMode } from "../types";
@@ -27,6 +27,7 @@ export default function ConversationVoiceSettings({
     L = (ja: string, en: string, hi: string) =>
       copy(c(ja, en, hi), languageMode);
   const [preview, setPreview] = useState(false);
+  const previewGeneration = useRef(0);
   useEffect(
     () => () => {
       stopConversationSpeech();
@@ -34,7 +35,9 @@ export default function ConversationVoiceSettings({
     [],
   );
   const update = (patch: Partial<ConversationVoice>) => {
+    previewGeneration.current++;
     stopConversationSpeech();
+    setPreview(false);
     onChange({ ...voice, ...patch });
   };
   return (
@@ -61,11 +64,18 @@ export default function ConversationVoiceSettings({
         </div>
         <p>
           {L(
-            "おすすめの声から選び、高さ・速さ・抑揚で自分らしく調整できます。短い音に分断せず、言葉をまとまりで読み上げます。",
-            "Start with a preset, then adjust pitch, speed and expression. Words are spoken in phrases with natural pauses.",
-            "おすすめのこえからえらび、たかさ・はやさ・よくようでじぶんらしくちょうせいできます。みじかいおとにぶんだんせず、ことばをまとまりでよみあげます。",
+            "おすすめの声から選び、高さ・速さ・抑揚で自分らしく調整できます。オリジナル音声は、かなから個性的な声を作ります。",
+            "Choose a preset and adjust pitch, speed and expression. Original voices turn Japanese kana into a distinctive synthesized voice.",
+            "おすすめのこえからえらび、たかさ・はやさ・よくようでじぶんらしくちょうせいできます。おりじなるおんせいは、かなからこせいてきなこえをつくります。",
           )}
         </p>
+        <label>
+          {L("音声の種類", "Voice engine", "おんせいのしゅるい")}
+          <select value={voice.engine ?? "original"} onChange={e => update({engine: e.target.value as "original" | "device"})}>
+            <option value="original">{L("オリジナル音声", "Original voice", "おりじなるおんせい")}</option>
+            <option value="device">{L("端末の読み上げ", "Device speech", "たんまつのよみあげ")}</option>
+          </select>
+        </label>
         <label>
           話し方
           <select
@@ -94,7 +104,7 @@ export default function ConversationVoiceSettings({
           >
             {[0, 1, 2, 3].map((n) => (
               <option key={n} value={n}>
-                {L("端末の声", "Device voice", "たんまつのこえ")} {n + 1}
+                {voice.engine === "device" ? `${L("端末の声", "Device voice", "たんまつのこえ")} ${n + 1}` : [L("まろやか", "Mellow", "まろやか"), L("明るい", "Bright", "あかるい"), L("やわらかい", "Soft", "やわらかい"), L("深い", "Deep", "ふかい")][n]}
               </option>
             ))}
           </select>
@@ -139,6 +149,7 @@ export default function ConversationVoiceSettings({
         <button
           disabled={!conversationSpeechSupported()}
           onClick={() => {
+            const token = ++previewGeneration.current;
             if (preview) {
               stopConversationSpeech();
               setPreview(false);
@@ -148,17 +159,17 @@ export default function ConversationVoiceSettings({
             void speakConversation(
               languageMode === "ENGLISH"
                 ? "Hello! Let us go fishing together."
-                : "こんにちは！ いっしょに釣りに行こう。",
+                : "こんにちは！ いっしょにつりにいこう。",
               { ...voice, enabled: true },
               languageMode,
-            ).finally(() => setPreview(false));
+            ).finally(() => { if (token === previewGeneration.current) setPreview(false); });
           }}
         >
           {preview ? "試聴を止める" : "声を試聴する"}
         </button>
         <p>
           {conversationSpeechSupported()
-            ? "主人公ごとに端末へ保存し、相手にも声設定を共有します。声質は端末の音声に応じて変わります。"
+            ? L("声設定は保存・共有されます。読みがなのない漢字や英語は端末の音声で読み上げます。", "Voice settings are saved and shared. English and kanji without readings use device speech.", "こえせっていはほぞん・きょうゆうされます。よみがなのないかんじやえいごはたんまつのおんせいでよみあげます。")
             : "この端末は音声読み上げに対応していません。会話は文字で表示します。"}
         </p>
       </fieldset>
