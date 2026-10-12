@@ -1,3 +1,4 @@
+import {BUILDING_GOALS,buildingMeetsGoal,surveyBuildings} from './buildingGoals';
 import {originalRegion,ORIGINAL_WIDTH,ORIGINAL_HEIGHT} from './worldDimensions';
 import {landscapeGate} from './landscapeMap';
 import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES,LANDMARKS,mountainHeight,landmarkBlock,roadAt} from './worldLandscape';
@@ -14,8 +15,8 @@ export type Block=typeof BLOCKS[number];
 export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLOCKS.map(b=>[b,VOXEL_CATALOG[b].color])) as Record<Block,string>,'door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf'};
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'door-top';
 export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
-export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
-export type VoxelAction=WorkshopAction|{type:'voxel-landmark'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
+export type VoxelAction=WorkshopAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 export function voxelWater(w:World,x:number,z:number){
  if(!originalRegion(x,z)&&legacyRegion(x,z)&&waterProfile(x,z))return waterProfile(x,z);
@@ -148,6 +149,14 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   delete p.position3D;w.revision++;return true;
  }
  upgrade(w);
+ if(a.type==='voxel-building-survey'){
+  if(!w.started||w.ended||p.spectator||p.life?.indoors||farmBusy(w,p))return false;
+  const lp=lifePlayer(p);if(now-(lp.buildingSurvey?.checkedAt||0)<1000)return false;
+  const survey=surveyBuildings(w,p,now);lp.buildingSurvey=survey;
+  const completed=lp.buildingGoals??=[],newGoals=BUILDING_GOALS.filter(goal=>!completed.includes(goal.id)&&survey.buildings.some(m=>buildingMeetsGoal(m,goal)));
+  lp.buildingGoals=[...completed,...newGoals.map(goal=>goal.id)];
+  return tell(newGoals.length?'3D建築の任意目標を達成しました！':'3D建築の寸法と完成状況を更新しました。');
+ }
  if(a.type==='voxel-landmark'){
   const pos=p.position3D??{x:p.x+.5,z:p.y+.5,y:terrainHeight(w,p.x,p.y)};
   const l=LANDMARKS.find(l=>Math.abs(pos.x-l.x)<l.width/2+4&&Math.abs(pos.z-l.z)<l.depth/2+6&&Math.abs((pos.y??0)-(l.kind==='tower'?Math.floor(mountainHeight(l.x,l.z)):0))<8);
@@ -193,7 +202,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(!existing||existing==='bedrock'||existing==='oasis-water')return false;
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
   if(existing==='chest'&&Object.values(state.containers?.[voxelKey(x,y,z)]?.items||{}).some(n=>n!>0))return tell('チェストの中身を取り出してから壊してください。');
-  const drop=BLOCK_DROPS[existing as Block]??existing as Material;lp.bag[drop]=(lp.bag[drop]||0)+1;state.edits[voxelKey(x,y,z)]=null;
+  const drop=BLOCK_DROPS[existing as Block]??existing as Material;lp.bag[drop]=(lp.bag[drop]||0)+1;state.edits[voxelKey(x,y,z)]=null;if(state.placedBy)delete state.placedBy[voxelKey(x,y,z)];
   if(state.rotations)delete state.rotations[voxelKey(x,y,z)];if(state.containers)delete state.containers[voxelKey(x,y,z)];
   // Do not erase an entire crown when only its trunk or one leaf was harvested.
   for(const [dx,dz] of [[0,0],[-1,0],[1,0],[0,-1],[0,1]]){const tx=x+dx,tz=z+dz,tile=tz*WIDTH+tx,cells=vegetationCells(w,tx,tz);if(cells.length&&cells.every(c=>!solid(blockAt(w,c.x,c.y,c.z))))w.life.nodes[tile]={hits:0,regrowAt:Number.MAX_SAFE_INTEGER};}
@@ -205,7 +214,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(![[x,y-1,z],[x-1,y,z],[x+1,y,z],[x,y,z-1],[x,y,z+1]].some(([bx,by,bz])=>solid(blockAt(w,bx,by,bz))))return false;
   if(Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2))return false;
   if(a.rotation!==undefined&&(!Number.isInteger(a.rotation)||a.rotation<0||a.rotation>3))return false;
-  lp.bag[a.block]=(lp.bag[a.block]||0)-1;state.edits[voxelKey(x,y,z)]=a.block;(state.rotations??={})[voxelKey(x,y,z)]=a.rotation??0;
+  lp.bag[a.block]=(lp.bag[a.block]||0)-1;state.edits[voxelKey(x,y,z)]=a.block;(state.placedBy??={})[voxelKey(x,y,z)]=p.id;(state.rotations??={})[voxelKey(x,y,z)]=a.rotation??0;
  }
  lp.energy=Math.round((energyOf(lp)-cost)*100)/100;p.message=a.type==='voxel-break'?(existing==='steel'?'未知の鋼材ブロックを発見しました！':'ブロックから素材を獲得しました。'):'ブロックを設置しました。';p.voxelAt=now;state.revision++;w.revision++;
  // Mining under one's feet causes a fall to the next solid floor.

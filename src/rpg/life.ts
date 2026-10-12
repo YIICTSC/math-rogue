@@ -1,3 +1,4 @@
+import type {BuildingSurvey} from './buildingGoals';
 import {landmarkBlock,landscapeHeight} from './worldLandscape';
 import {currentVoxelRoom} from './voxelRooms';
 import {ALL_MATERIAL_NAMES,TOOL_RANK,type ToolKind,type ToolTier} from './voxelCatalog';
@@ -42,7 +43,7 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
-export interface LifePlayer {relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface LifePlayer {buildingGoals?:string[];buildingSurvey?:BuildingSurvey;relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean}|{type:'life-pack';id:string}|{type:'life-rotate';id:string;direction?:1|-1;flip?:boolean};

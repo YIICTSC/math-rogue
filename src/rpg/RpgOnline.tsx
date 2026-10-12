@@ -1,3 +1,4 @@
+import BuildingGoalsPanel from './BuildingGoalsPanel';
 import {residentAppearance} from './town/wardrobe';
 import {findLandscapeRoute} from './voxel';
 import {legacyRegion,landscapeEnvironment,LANDSCAPE_BIOME_NAMES,LANDMARKS} from './worldLandscape';
@@ -702,6 +703,7 @@ export default function RpgOnline({
                       </p>
                     ))}
                 </section>
+                <BuildingGoalsPanel world={world} selfId={selfId} languageMode={languageMode} disabled={spectating||world.ended||!!me.life?.indoors} onSurvey={()=>room.current?.send({type:'voxel-building-survey'})}/>
                 {!spectating && <><section data-rpg-panel="player" className="rpg-player-panel">
                   <h2>{me.name}</h2>
                   <p>
