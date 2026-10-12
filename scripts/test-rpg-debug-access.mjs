@@ -35,7 +35,7 @@ try {
       const entry=page.getByRole('button',{name:'RPGオンライン 開発中・デバッグ限定'});
       assert.equal(await entry.count(),0,`hidden before entering debug mode (flag ${debug})`);
       await page.locator('.start-menu-version').click();
-      const unlock=page.getByRole('button',{name:'System Release Notes v1.0.7',exact:true});
+      const unlock=page.getByRole('button',{name:'System Release Notes v1.0.8',exact:true});
       if(!debug){assert.equal(await unlock.count(),0,'normal build cannot unlock debug');continue;}
       for(let i=0;i<10;i++)await unlock.click();
       await page.getByRole('button',{name:'戻る',exact:true}).first().click();

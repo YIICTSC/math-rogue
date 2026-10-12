@@ -20054,7 +20054,7 @@ const App: React.FC = () => {
                                 </div>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-white text-[10px] hover:text-white flex items-center justify-center gap-1 transition-opacity">
-                                        <Terminal size={10} /> v1.0.7 YUSUKE ISHIGE
+                                        <Terminal size={10} /> v1.0.8 YUSUKE ISHIGE
                                     </button>
                                 </div>
 
@@ -20666,14 +20666,28 @@ const App: React.FC = () => {
                                     className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
                                     onClick={handleLogClick}
                                 >
-                                    System Release Notes v1.0.7
+                                    System Release Notes v1.0.8
                                 </button>
                             ) : (
                                 <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
-                                    System Release Notes v1.0.7
+                                    System Release Notes v1.0.8
                                 </h2>
                             )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <section>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.8 学びと冒険の世界を拡張', languageMode)}</h3>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>{trans('RPGワールドを拡張し、地域探索、住民との会話、採集、釣り、農業、料理、家具、ペット、街の発展を追加', languageMode)}</li>
+                                        <li>{trans('3D探索、採掘、建築、家づくりとストーリーブック風3Dキャラクターを追加', languageMode)}</li>
+                                        <li>{trans('オンライン協力、招待、途中参加、観戦、ランキング、専用ロビーと結果画面を改善', languageMode)}</li>
+                                        <li>{trans('VRを300ミッションまで拡張し、協力ルーム、再出撃、装備、高低差、サバイバルルールを追加', languageMode)}</li>
+                                        <li>{trans('GAKURO GP、カート、ゴルフ、リズム、釣り、家具スポーツなどのゲーム進行とミニゲームを拡張', languageMode)}</li>
+                                        <li>{trans('学校ダンジョンに2D・3D表示切替、50ステージの道場、旅の村と新しい演出を追加', languageMode)}</li>
+                                        <li>{trans('主人公・住民・敵の音声、BGM、効果音、イベント演出を追加・改善', languageMode)}</li>
+                                        <li>{trans('縦画面・横画面のスマートフォンUI、オンライン準備画面、操作、画像表示を改善', languageMode)}</li>
+                                        <li>{trans('画像・WebP資産の読み込みと初期表示を最適化し、各モードの安定性を向上', languageMode)}</li>
+                                    </ul>
+                                </section>
                                 <section>
                                     <h3 className="text-white font-bold mb-1">■ {trans('v1.0.7 エンドレスモードと学習連携の強化', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">

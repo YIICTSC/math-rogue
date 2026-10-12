@@ -8,6 +8,15 @@ const outputDir = path.join(rootDir, 'release', 'steam', 'store-assets', 'genera
 const landscapePath = path.join(sourceDir, 'keyart-landscape.png');
 const portraitPath = path.join(sourceDir, 'keyart-portrait.png');
 const emblemPath = path.join(sourceDir, 'emblem-clean.png');
+const iosAppIconPath = path.join(
+    rootDir,
+    'ios',
+    'App',
+    'App',
+    'Assets.xcassets',
+    'AppIcon.appiconset',
+    'AppIcon-512@2x.png',
+);
 
 await mkdir(outputDir, { recursive: true });
 
@@ -198,8 +207,9 @@ await sharp(await createLogo(1280, 720))
     .png({ compressionLevel: 9 })
     .toFile(path.join(outputDir, 'library_logo.png'));
 
-await sharp(emblemPath)
-    .resize(256, 256, { fit: 'contain', background: { r: 6, g: 15, b: 38, alpha: 1 } })
+await sharp(iosAppIconPath)
+    .resize(256, 256, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+    .removeAlpha()
     .png({ compressionLevel: 9 })
     .toFile(path.join(outputDir, 'shortcut_icon.png'));
 
