@@ -24,6 +24,10 @@ export const CREDIT_SECTIONS = [
     entries: ['YUSUKE ISHIGE'],
   },
   {
+    title: 'Sound Effects',
+    entries: ['魔王魂（森田交一）', 'https://maou.audio/'],
+  },
+  {
     title: 'Special Supporters',
     entries: CROWDFUNDING_SPECIAL_STAFF_ROLL_NAMES,
     special: true,
