@@ -1,4 +1,5 @@
 export const RPG_LIFE_ENGLISH:Record<string,string> = {
+  "3D建築の達成報酬を参加者全員に配布しました。": "Distributed the 3D building completion reward to all participants.",
   "3D建築の任意目標を達成しました！": "Optional 3D building goal completed!",
   "3D建築の寸法と完成状況を更新しました。": "Updated 3D building dimensions and completion status.",
   "所持中、すべての戦闘でムキムキ＋2。": "While owned, gain +2 Strength in every battle.",
@@ -105,6 +106,7 @@ export const RPG_LIFE_ENGLISH:Record<string,string> = {
   "素材と家は、この部屋の冒険中に共有・保存されます。": "Materials and houses last for this room's adventure."
 };
 export const RPG_LIFE_HIRAGANA:Record<string,string> = {
+  "3D建築の達成報酬を参加者全員に配布しました。": "3Dけんちくのたっせいほうしゅうをさんかしゃぜんいんにはいふしました。",
   "3D建築の任意目標を達成しました！": "3Dけんちくのにんいもくひょうをたっせいしました！",
   "3D建築の寸法と完成状況を更新しました。": "3Dけんちくのすんぽうとかんせいじょうきょうをこうしんしました。",
   "所持中、すべての戦闘でムキムキ＋2。": "しょじちゅう、すべてのせんとうでむきむき＋2。",

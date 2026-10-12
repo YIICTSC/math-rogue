@@ -1,3 +1,4 @@
+import type {BuildingGoalReward} from './buildingGoals';
 import {legacyRegion,landscapeEnvironment,STRUCTURES} from './worldLandscape';
 import {MAP_WIDTH,MAP_HEIGHT,originalRegion} from './worldDimensions';
 import {landscapeGate} from './landscapeMap';
@@ -135,6 +136,7 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+ buildingGoalRewards?:Record<string,BuildingGoalReward>;
  compactMapVersion?:1;
  expandedMapArchive?:{width:number;height:number;world:unknown};
  voxelRooms?:VoxelRoom[];

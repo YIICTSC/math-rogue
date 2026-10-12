@@ -1,13 +1,30 @@
+import {grant} from './activities';
 import type {World, Adventurer} from './engine';
 import {blockAt,solid} from './voxel';
 import {VOXEL_CATALOG} from './voxelCatalog';
 
 export const BUILDING_GOALS = [
- {id:'starter-home', dimensions:[6,6,4], ja:'はじめての立体住宅', hira:'はじめてのりったいじゅうたく', en:'First three-dimensional home'},
- {id:'watchtower', dimensions:[6,6,12], ja:'見晴らしの塔', hira:'みはらしのとう', en:'Lookout tower'},
- {id:'grand-house', dimensions:[12,12,12], ja:'立体建築の大邸宅', hira:'りったいけんちくのだいていたく', en:'Grand three-dimensional residence'},
- {id:'landmark-builder', dimensions:[20,20,20], ja:'20×20×20のランドマーク', hira:'20×20×20のランドマーク', en:'20×20×20 landmark'},
+ {id:'starter-home', gold:100, dimensions:[6,6,4], ja:'はじめての立体住宅', hira:'はじめてのりったいじゅうたく', en:'First three-dimensional home'},
+ {id:'watchtower', gold:200, dimensions:[6,6,12], ja:'見晴らしの塔', hira:'みはらしのとう', en:'Lookout tower'},
+ {id:'grand-house', gold:400, dimensions:[12,12,12], ja:'立体建築の大邸宅', hira:'りったいけんちくのだいていたく', en:'Grand three-dimensional residence'},
+ {id:'landmark-builder', gold:1000, dimensions:[20,20,20], ja:'20×20×20のランドマーク', hira:'20×20×20のランドマーク', en:'20×20×20 landmark'},
 ] as const;
+export interface BuildingGoalReward {completedAt:number;completedBy:string;gold:number;recipients:string[]}
+/** The world ledger prevents payouts from repeated surveys or another builder's claim. */
+export function distributeBuildingGoalRewards(world:World, achiever:Adventurer, now:number) {
+ const achieved=new Set(Object.values(world.players).flatMap(p=>p.life?.buildingGoals||[]));
+ const ledger=world.buildingGoalRewards??={};
+ const fresh=BUILDING_GOALS.filter(goal=>achieved.has(goal.id)&&!ledger[goal.id]);
+ const recipients=Object.values(world.players).filter(p=>!p.spectator&&!!p.profile);
+ if(!fresh.length||!recipients.length)return 0;
+ for(const goal of fresh)ledger[goal.id]={completedAt:now,completedBy:Object.values(world.players).find(p=>p.life?.buildingGoals?.includes(goal.id))?.id??achiever.id,gold:goal.gold,recipients:recipients.map(p=>p.id)};
+ const gold=fresh.reduce((total,goal)=>total+goal.gold,0);
+ for(const p of recipients){
+  grant(p,{remove:[],cards:[],gold,heal:0});
+  p.message='3D建築の達成報酬を参加者全員に配布しました。';
+ }
+ return gold;
+}
 export interface BuildingMeasurement {
  width:number; depth:number; height:number; blocks:number;
  floor:boolean; roof:boolean; walls:boolean; entrance:boolean; usable:boolean;

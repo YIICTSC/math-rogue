@@ -1,4 +1,4 @@
-import {BUILDING_GOALS,buildingMeetsGoal,surveyBuildings} from './buildingGoals';
+import {BUILDING_GOALS,buildingMeetsGoal,surveyBuildings,distributeBuildingGoalRewards} from './buildingGoals';
 import {originalRegion,ORIGINAL_WIDTH,ORIGINAL_HEIGHT} from './worldDimensions';
 import {landscapeGate} from './landscapeMap';
 import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES,LANDMARKS,mountainHeight,landmarkBlock,roadAt} from './worldLandscape';
@@ -155,7 +155,8 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   const survey=surveyBuildings(w,p,now);lp.buildingSurvey=survey;
   const completed=lp.buildingGoals??=[],newGoals=BUILDING_GOALS.filter(goal=>!completed.includes(goal.id)&&survey.buildings.some(m=>buildingMeetsGoal(m,goal)));
   lp.buildingGoals=[...completed,...newGoals.map(goal=>goal.id)];
-  return tell(newGoals.length?'3D建築の任意目標を達成しました！':'3D建築の寸法と完成状況を更新しました。');
+  const rewardGold=distributeBuildingGoalRewards(w,p,now);
+  return tell(rewardGold?'3D建築の達成報酬を参加者全員に配布しました。':newGoals.length?'3D建築の任意目標を達成しました！':'3D建築の寸法と完成状況を更新しました。');
  }
  if(a.type==='voxel-landmark'){
   const pos=p.position3D??{x:p.x+.5,z:p.y+.5,y:terrainHeight(w,p.x,p.y)};
