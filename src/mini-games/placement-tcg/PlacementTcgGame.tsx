@@ -726,6 +726,9 @@ const RewardOverlay: React.FC<{
   const [workingDeck, setWorkingDeck] = useState<string[]>(() => [...runDeck]);
   const [deckNotice, setDeckNotice] = useState('');
   const claimedRef = useRef(false);
+  const soundedRevealRef = useRef(0);
+  const onClaimRef = useRef(onClaim);
+  onClaimRef.current = onClaim;
   const cards = choices.map(getCard).filter((card): card is PlacementCardDefinition => Boolean(card));
   const latestCard = revealedCount > 0 ? cards[Math.min(revealedCount, cards.length) - 1] || null : null;
   const revealComplete = phase === 'REVEAL' && cards.length > 0 && revealedCount >= cards.length;
@@ -753,17 +756,20 @@ const RewardOverlay: React.FC<{
 
   useEffect(() => {
     if (phase !== 'REVEAL' || revealedCount <= 0) return;
-    playRewardRevealSound(latestCard);
+    if (soundedRevealRef.current < revealedCount) {
+      soundedRevealRef.current = revealedCount;
+      playRewardRevealSound(latestCard);
+    }
     if (revealedCount >= cards.length) {
       if (!claimedRef.current) {
         claimedRef.current = true;
-        onClaim();
+        onClaimRef.current();
       }
       return;
     }
     const timer = window.setTimeout(() => setRevealedCount(count => Math.min(cards.length, count + 1)), 560);
     return () => window.clearTimeout(timer);
-  }, [phase, revealedCount, cards.length, latestCard?.id, onClaim]);
+  }, [phase, revealedCount, cards.length, latestCard?.id]);
 
   const openPack = () => {
     if (phase !== 'SEALED') return;

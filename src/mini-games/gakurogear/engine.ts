@@ -26,7 +26,7 @@ const extra = [
 extra.forEach((e, i) => BASE.push({ ...BASE[0], ...e, id: i + 7, spawn: p(-6, 6), targets: [p(-6, -5), p(6, 5)], exit: p(7, -6), par: 100, limit: 260, hint: '背後でFを長押ししてホールド。向きを合わせてRでシャボン発射。課題を達成して脱出しよう。', hintEn: 'Hold F behind a patrol for a sleep hold. Face a target and press R to fire a bubble. Complete the objectives and extract.' }));
 // Ten school layouts, each with five authored difficulty configurations. Rotation,
 // additional patrols/cameras, recovery times and equipment change the route strategy.
-export const MISSIONS: Mission[] = Array.from({ length: 50 }, (_, index) => {
+const SCHOOL_MISSIONS: Mission[] = Array.from({ length: 50 }, (_, index) => {
   const tier = Math.floor(index / 10), slot = index % 10, base = BASE[slot];
   const rotation = tier % 4;
   const rotate = (q: Point): Point => { let r = { ...q }; for (let i = 0; i < rotation; i++) r = { x: -r.z, z: r.x }; return r; };
@@ -54,35 +54,47 @@ export const MISSIONS: Mission[] = Array.from({ length: 50 }, (_, index) => {
     cameras: cameras.map(c => ({ ...rotate(c), angle: c.angle - rotation * Math.PI / 2 })),
   };
 });
-// Keep IDs 1–50 stable so existing records and invitations remain valid.
+// Five chapters of twenty: ten school exercises followed by ten field missions.
+export const MISSIONS_PER_CHAPTER = 20;
 const AREAS = [
  ['屋上庭園','Rooftop garden'], ['港の倉庫','Harbor depot'], ['山岳研究所','Mountain lab'],
  ['地下基地','Underground base'], ['都市の広場','City plaza'], ['森林キャンプ','Forest camp'],
  ['空中回廊','Sky corridor'], ['雪の観測所','Snow observatory'], ['砂漠の遺跡','Desert ruins'], ['宇宙訓練基地','Space academy'],
 ];
-for (let n = 0; n < 250; n++) {
- const tier = Math.floor(n / 50), variant = n % 50, area = variant % 10, layout = Math.floor(variant / 10);
- const size = [8, 11, 15, 19, 24][(area + layout) % 5];
- const sx = (size - 1) / 7, sz = sx * [1, .75, .9, 1, .65][layout];
- const source = MISSIONS[tier * 10 + (area + layout * 3) % 10];
+const OPERATIONS = [
+ ['安全経路の確認','Safe-route survey'], ['資料搬出作戦','File extraction'],
+ ['救助と端末復旧','Rescue and relay'], ['警戒網の突破','Security breach'], ['最終防衛作戦','Final defense'],
+];
+export const MISSIONS: Mission[] = Array.from({ length: 100 }, (_, index) => {
+ const tier = Math.floor(index / MISSIONS_PER_CHAPTER), slot = index % MISSIONS_PER_CHAPTER;
+ const field = slot >= 10, area = slot % 10;
+ const source = SCHOOL_MISSIONS[tier * 10 + area];
+ if (!field) return { ...source, id: index + 1,
+   name: `${DIFFICULTIES[tier].ja}・${source.name.replace(`${DIFFICULTIES[tier].ja}・`, '')}`,
+   en: `${DIFFICULTIES[tier].en}: ${source.en.replace(`${DIFFICULTIES[tier].en}: `, '')}` };
+ const size = [9, 10, 12, 14, 16][tier];
+ const sx = (size - 1) / 7, sz = sx * (area % 2 ? .85 : 1);
  const scale = (q: Point): Point => ({ x: q.x * sx, z: q.z * sz });
- const terrain: Terrain[] = layout === 0 ? [] : [{ x: 0, z: 0, w: size * 2, d: size * 2, height: [0, 2, 4, 6, 3][layout] }];
+ const elevated = tier >= 1 && [2, 3, 6, 7, 8, 9].includes(area);
+ const terrain: Terrain[] = elevated ? [{ x: 0, z: 0, w: size * 2, d: size * 2, height: tier }] : [];
  const targets = source.targets.map(scale);
  const switches = (source.switches ?? []).map(scale);
- const defend = layout >= 3 ? { ...scale(p(0, 6)), seconds: 3 + tier } : undefined;
- MISSIONS.push({ ...source, id: n + 51, size, terrain, theme: area,
- name: `${DIFFICULTIES[tier].ja}・${AREAS[area][0]} ${layout + 1}`, en: `${DIFFICULTIES[tier].en}: ${AREAS[area][1]} ${layout + 1}`,
- spawn: scale(source.spawn), exit: scale(source.exit), targets,
- targetKinds: targets.map((_, i) => ['file', 'rescue', 'relay'][(i + layout) % 3] as 'file' | 'rescue' | 'relay'),
- switches, requireSwitches: switches.length > 0, defend,
- obstacles: source.obstacles.map(b => ({ ...b, ...scale(b), w: b.w * sx, d: b.d * sz })),
- routes: source.routes.map(r => r.map(scale)), cameras: source.cameras.map(c => ({ ...c, ...scale(c) })),
- sensors: (source.sensors ?? []).map(b => ({ ...b, ...scale(b), w: b.w * sx, d: b.d * sz })),
- ammo: 12 + tier * 2, par: Math.round(source.par * sx + (defend?.seconds ?? 0)), limit: Math.round(source.limit * sx + 60),
- hint: '資料回収・救助・端末操作は近くで回収を長押し。坂を登り、扉のスイッチと黄色い防衛地点も確認。武器スロットで射程を選び、アイテムを使って全目標達成後に出口へ。',
- hintEn: 'Hold Collect near files, rescues and relays. Climb slopes, activate door switches and hold the yellow defense zone. Select weapon range and use items; finish every objective before extraction.',
- });
-}
+ const defend = tier >= 3 && area >= 5 ? { ...scale(p(0, 6)), seconds: tier === 3 ? 5 : 8 } : undefined;
+ const targetKinds = targets.map((_, i) => tier < 2 ? 'file' : (['file', 'rescue', 'relay'] as const)[(i + area) % 3]);
+ return { ...source, id: index + 1, size, terrain, theme: area,
+   name: `${AREAS[area][0]}・${tier === 4 && !defend ? '最終潜入作戦' : OPERATIONS[tier][0]}`,
+   en: `${AREAS[area][1]}: ${tier === 4 && !defend ? 'Final infiltration' : OPERATIONS[tier][1]}`,
+   spawn: scale(source.spawn), exit: scale(source.exit), targets, targetKinds,
+   switches, requireSwitches: tier >= 2 && switches.length > 0, defend,
+   obstacles: source.obstacles.map(b => ({ ...b, ...scale(b), w: b.w * sx, d: b.d * sz })),
+   routes: source.routes.map(r => r.map(scale)), cameras: source.cameras.map(c => ({ ...c, ...scale(c) })),
+   sensors: (source.sensors ?? []).map(b => ({ ...b, ...scale(b), w: b.w * sx, d: b.d * sz })),
+   ammo: [10, 10, 12, 12, 14][tier], par: Math.round(source.par * sx + (defend?.seconds ?? 0)),
+   limit: Math.round(source.limit * sx + 45),
+   hint: `${tier < 2 ? '青い資料を回収し、巡回の背後を通って出口へ。' : '資料回収・救助・端末操作を完了し、スイッチで扉を開けて出口へ。'}${elevated ? '坂道で高所へ移動できる。' : ''}${defend ? `黄色い地点を${defend.seconds}秒防衛しよう。` : ''}`,
+   hintEn: `${tier < 2 ? 'Collect blue files and pass behind patrols to extract.' : 'Collect files, rescue allies and restore relays. Activate door switches before extracting.'}${elevated ? ' Use slopes to reach higher ground.' : ''}${defend ? ` Defend the yellow zone for ${defend.seconds} seconds.` : ''}`,
+ };
+});
 // Continuous terraced terrain: every elevation is accessible from either side.
 export function floorHeight(m: Mission, q: Point): number {
  return Math.max(0, ...(m.terrain ?? []).map(t => Math.abs(q.x - t.x) <= t.w / 2 && Math.abs(q.z - t.z) <= t.d / 2 ? t.height * Math.max(0, Math.min(1, (q.x-t.x+t.w/2)/t.w*3, (t.x+t.w/2-q.x)/t.w*3)) * Math.max(0,Math.min(1,(t.d/2-Math.abs(q.z-t.z))/3)) : 0));
@@ -99,8 +111,8 @@ export const ITEMS = [
  { ja: '音のデコイ', en: 'Sound decoy', icon: '♪' }, { ja: '弾薬パック', en: 'Ammo pack', icon: '▣' },
  { ja: '光学マント', en: 'Stealth cloak', icon: '◌' }, { ja: 'スピード靴', en: 'Speed boots', icon: '↗' },
 ];
-export const WEAPON_UNLOCKS = [1, 61, 111, 171, 31, 231];
-export const ITEM_UNLOCKS = [1, 41, 121, 201];
+export const WEAPON_UNLOCKS = [1, 21, 41, 61, 11, 81];
+export const ITEM_UNLOCKS = [1, 21, 41, 61];
 export function equip(m: Mission, s: Run, input: Input) {
  if (Number.isInteger(input.weapon) && WEAPON_UNLOCKS[input.weapon!] <= m.id) s.weapon=input.weapon!;
  if (Number.isInteger(input.item) && ITEM_UNLOCKS[input.item!] <= m.id) s.item=input.item!;
@@ -258,6 +270,17 @@ export function step(m: Mission, s: Run, input: Input, dt: number) {
   if (objectivesComplete(m, s) && distance(s.player, { ...m.exit, y: floorHeight(m, m.exit) }) < .9) s.status = 'clear';
 }
 export function rank(m: Mission, s: Run) { return s.time <= m.par && s.peak < 1 ? 'S' : s.time <= m.par * 1.5 && s.peak < 50 ? 'A' : 'B'; }
-export const SAVE_KEY = 'gakurogear-vr-v1';
+export const SAVE_KEY = 'gakurogear-vr-curriculum-100-v2';
 export type Records = Record<number, { time: number; rank: string }>;
-export function readRecords(): Records { try { const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return Object.fromEntries(Object.entries(raw).filter(([key, v]: [string, any]) => MISSIONS.some(m => m.id === Number(key)) && v && Number.isFinite(v.time) && v.time > 0 && ['S', 'A', 'B'].includes(v.rank))); } catch { return {}; } }
+export function readRecords(): Records {
+ try {
+  const current = localStorage.getItem(SAVE_KEY);
+  const raw = JSON.parse(current ?? localStorage.getItem('gakurogear-vr-v1') ?? '{}');
+  const entries = Object.entries(raw).filter(([key, v]: [string, any]) =>
+   Number.isInteger(Number(key)) && Number(key) >= 1 && Number(key) <= (current ? 100 : 50) &&
+   v && Number.isFinite(v.time) && v.time > 0 && ['S', 'A', 'B'].includes(v.rank));
+  // The ten school layouts in each tier are unchanged; transfer their records.
+  // Retired field missions stay in the old save without assigning their ranks to new missions.
+  return Object.fromEntries(entries.map(([key, v]) => [current ? Number(key) : Math.floor((Number(key)-1)/10)*20+(Number(key)-1)%10+1, v]));
+ } catch { return {}; }
+}
