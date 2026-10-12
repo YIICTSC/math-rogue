@@ -12,10 +12,11 @@ const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
 export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
   const orbit=useRef({yaw:0,pitch:.6,active:false,drag:null as null|{id:number;x:number;y:number}});
+  const overviewPan=useRef({x:0,z:0,unitsPerPixel:1});
   const quality=useStorybookQuality();
   const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, avatar, spectator };
-  useEffect(()=>{orbit.current.active=false;},[overview]);
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
+  useEffect(()=>{orbit.current.active=false;orbit.current.drag=null;overviewPan.current.x=overviewPan.current.z=0;},[overview,holeIndex,selfId]);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     const el = canvas.current!; let renderer: THREE.WebGLRenderer | undefined, frame = 0, disposed = false;
@@ -168,7 +169,13 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           target.set(-2.05, 2.3, 0);
           cameraGoal.set(-2.05 + distance * .12, 2.3 + distance * .08, distance);
         }
-        else if (full) { cameraGoal.set(hole.cup.x/2, hole.cup.z*.75+45, hole.cup.z/2); target.set(hole.cup.x/2, 0, hole.cup.z/2); }
+        else if (full) {
+          const pan=overviewPan.current;
+          const height=Math.max(hole.cup.z*.75+45,(hole.cup.z+40)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))));
+          pan.unitsPerPixel=2*height*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/Math.max(1,viewportHeight);
+          cameraGoal.set(hole.cup.x/2+pan.x,height,hole.cup.z/2+pan.z);
+          target.set(hole.cup.x/2+pan.x,0,hole.cup.z/2+pan.z);
+        }
         else if (!me || current?.phase === 'lobby') { cameraGoal.set(12, 13, -18); target.set(-1, 2, 7); }
         else if (me.phase === 'holed' && !me.capped && now - (markers.get(me.id)?.cheerStart ?? -Infinity) < 6000) {
           const hero = markers.get(me.id)!.rig.root.position; cameraGoal.set(hero.x + 6, 4.5, hero.z + 8); target.set(hero.x, 2.4, hero.z);
@@ -180,7 +187,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           target.set(ball.x + Math.sin(base) * (narrow?24:35), 2.7, ball.z + Math.cos(base) * (narrow?24:35));
         }
         else { cameraGoal.set(ball.x - Math.sin(base) * 26, Math.max(17, ball.y + 14), ball.z - Math.cos(base) * 26); target.set(ball.x + Math.sin(base) * 13, Math.max(1, ball.y * .7), ball.z + Math.cos(base) * 13); }
-        if (!portrait && orbit.current.active && me && me.phase !== 'moving') {
+        if (!portrait && !full && orbit.current.active && me && me.phase !== 'moving') {
           const o=orbit.current, radius=45;
           target.set(ball.x,1,ball.z);
           cameraGoal.set(ball.x+Math.sin(o.yaw)*Math.cos(o.pitch)*radius,Math.sin(o.pitch)*radius+2,ball.z+Math.cos(o.yaw)*Math.cos(o.pitch)*radius);
@@ -193,7 +200,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           if(lift) camera.setViewOffset(viewportWidth,viewportHeight,0,viewportHeight*lift,viewportWidth,viewportHeight);
           else if(camera.view?.enabled) camera.clearViewOffset();
         }
-        camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * 3)); lookAt.lerp(target, 1 - Math.exp(-dt * 5)); camera.up.set(0,full&&!orbit.current.active?0:1,full&&!orbit.current.active?1:0);camera.lookAt(lookAt);
+        camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * (full ? 12 : 3))); lookAt.lerp(target, 1 - Math.exp(-dt * (full ? 12 : 5))); camera.up.set(0,full&&!orbit.current.active?0:1,full&&!orbit.current.active?1:0);camera.lookAt(lookAt);
         aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
           const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin].join('/');
@@ -215,5 +222,18 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
     } catch (error) { console.error('Golf renderer initialization failed', error); setFailed(true); }
     return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
   }, [holeIndex, selfId, portrait, quality]);
-  return <><canvas className="gg-canvas" ref={canvas} onPointerDown={e=>{if(portrait)return;if(e.nativeEvent.isTrusted)e.currentTarget.setPointerCapture(e.pointerId);orbit.current.drag={id:e.pointerId,x:e.clientX,y:e.clientY};}} onPointerMove={e=>{const o=orbit.current,d=o.drag;if(!d||d.id!==e.pointerId)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.hypot(dx,dy)<2)return;o.active=true;o.yaw-=dx*.008;o.pitch=Math.max(.15,Math.min(1.45,o.pitch+dy*.008));d.x=e.clientX;d.y=e.clientY;}} onPointerUp={()=>{orbit.current.drag=null;}} onPointerCancel={()=>{orbit.current.drag=null;}} aria-label="GAKURO GOLF 3D course" />{failed && <div className="gg-render-error" role="alert">3D rendering unavailable. Enable WebGL and reload.</div>}</>;
+  const endDrag=(event:React.PointerEvent<HTMLCanvasElement>)=>{if(orbit.current.drag?.id===event.pointerId)orbit.current.drag=null;};
+  return <><canvas className="gg-canvas" ref={canvas}
+    onPointerDown={e=>{if(portrait||e.button!==0||orbit.current.drag)return;if(e.nativeEvent.isTrusted)e.currentTarget.setPointerCapture(e.pointerId);orbit.current.drag={id:e.pointerId,x:e.clientX,y:e.clientY};}}
+    onPointerMove={e=>{
+      const o=orbit.current,d=o.drag;if(!d||d.id!==e.pointerId)return;
+      const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.hypot(dx,dy)<2)return;
+      if(state.current.overview){
+        const pan=overviewPan.current,hole=HOLES[holeIndex];
+        pan.x=THREE.MathUtils.clamp(pan.x+dx*pan.unitsPerPixel,-100-hole.cup.x/2,100-hole.cup.x/2);
+        pan.z=THREE.MathUtils.clamp(pan.z+dy*pan.unitsPerPixel,-40-hole.cup.z/2,hole.cup.z/2+60);
+      }else{o.active=true;o.yaw-=dx*.008;o.pitch=Math.max(.15,Math.min(1.45,o.pitch+dy*.008));}
+      d.x=e.clientX;d.y=e.clientY;
+    }}
+    onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={endDrag} aria-label="GAKURO GOLF 3D course" />{failed && <div className="gg-render-error" role="alert">3D rendering unavailable. Enable WebGL and reload.</div>}</>;
 }

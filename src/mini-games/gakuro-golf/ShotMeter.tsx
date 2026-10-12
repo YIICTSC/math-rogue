@@ -15,7 +15,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     if (s.power === null) { if (m.returning) return; s.power = Math.max(.05, m.position); setLocked(s.power); callbacks.current.onPower(s.power); }
     else if (m.returning) finish(impactAt(m.position));
   };
-  useEffect(()=>{if(active||disabled)return;const key=(e:KeyboardEvent)=>{if(e.repeat||!(e.code==='Enter'||e.code==='Space')||(e.target as Element)?.closest('input,textarea,select,[role=dialog]'))return;e.preventDefault();e.stopPropagation();tap();};document.addEventListener('keydown',key,true);return()=>document.removeEventListener('keydown',key,true);},[active,disabled]);
+  useEffect(()=>{if(active||disabled)return;const key=(e:KeyboardEvent)=>{if(e.repeat||!(e.code==='Enter'||e.code==='Space')||(e.target as Element)?.closest('input,textarea,select,[role=dialog],[data-meter-ignore]'))return;e.preventDefault();e.stopPropagation();tap();};document.addEventListener('keydown',key,true);return()=>document.removeEventListener('keydown',key,true);},[active,disabled]);
   useEffect(() => { if (disabled) cancel(); }, [disabled]);
   useEffect(() => {
     if (!active) return;
@@ -26,7 +26,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
       if (m.expired) { finish(1); return; } frame = requestAnimationFrame(draw);
     };
     const pointer = (e: PointerEvent) => { if ((e.target as Element).closest('[data-meter-ignore]')) return; e.preventDefault(); e.stopPropagation(); tap(); };
-    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') cancel(); else if (!e.repeat && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); e.stopPropagation(); tap(); } };
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') cancel(); else if ((e.target as Element)?.closest('[data-meter-ignore]')) return; else if (!e.repeat && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); e.stopPropagation(); tap(); } };
     const visibility = () => { if (document.hidden) cancel(); };
     frame = requestAnimationFrame(draw); document.addEventListener('pointerdown', pointer, true); document.addEventListener('keydown', key, true); document.addEventListener('visibilitychange', visibility); window.addEventListener('blur', cancel);
     return () => { cancelAnimationFrame(frame); document.removeEventListener('pointerdown', pointer, true); document.removeEventListener('keydown', key, true); document.removeEventListener('visibilitychange', visibility); window.removeEventListener('blur', cancel); };

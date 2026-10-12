@@ -181,3 +181,41 @@
 @media(orientation:landscape) and (max-height:350px){.gg-root.gg-collecting .gg-lobby.online-collection{padding:6px 8px}.gg-root.gg-collecting .online-collection-controls{gap:3px}.gg-root.gg-collecting .online-collection-controls>button{min-height:32px!important;padding:3px 5px}.gg-root.gg-collecting .online-waiting-dash summary{min-height:24px;padding:2px 6px}.gg-root.gg-collecting .online-collection-controls select{min-height:28px;margin-top:2px}}
 @media(orientation:portrait) and (max-width:650px){.gg-root.gg-collecting .online-collection-layout{display:grid;grid-template-columns:1fr;grid-template-rows:minmax(70px,.65fr) minmax(180px,1fr);gap:8px}.gg-root.gg-collecting .online-collection-left{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,.7fr);gap:8px;min-height:0}.gg-root.gg-collecting .online-self-preview{height:100%;min-height:0;max-height:160px}.gg-root.gg-collecting .online-collection-left .online-roster{min-height:0}.gg-root.gg-collecting .online-collection-controls{display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start}.gg-root.gg-collecting .online-collection-controls p,.gg-root.gg-collecting .online-collection-controls label{font-size:11px;margin:0}.gg-root.gg-collecting .online-collection-controls>p,.gg-root.gg-collecting .gg-invite,.gg-root.gg-collecting .online-collection-controls>.gg-primary{grid-column:1/-1}.gg-root.gg-collecting .online-collection-controls>button{font-size:12px;min-height:40px;padding:5px 7px}.gg-root.gg-collecting .online-waiting-dash{margin-top:6px}.gg-root.gg-collecting .online-waiting-dash summary{min-height:32px;padding:5px 8px}.gg-root.gg-collecting .online-waiting-dash summary strong{font-size:12px}.gg-root.gg-collecting .online-waiting-dash summary span{display:none}.gg-root.gg-collecting .online-collection-heading h2{font-size:17px}}
 @media(orientation:portrait) and (max-width:650px){.gg-root.gg-collecting .gg-lobby.online-collection{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:6px;padding:10px;overflow:hidden}.gg-root.gg-collecting .gg-lobby .online-collection-layout{margin-top:0;grid-template-rows:minmax(60px,.6fr) minmax(150px,1fr);min-height:0}.gg-root.gg-collecting .gg-lobby .online-collection-controls{min-height:0;overflow:auto;align-content:start}.gg-root.gg-collecting .gg-lobby .online-collection-controls label{grid-column:auto;font-size:11px}.gg-root.gg-collecting .gg-lobby .online-collection-controls>button{font-size:11px;line-height:1.2;min-height:40px;padding:5px}.gg-root.gg-collecting .gg-lobby .online-collection-heading{margin:0}.gg-root.gg-collecting .gg-lobby .online-waiting-dash{margin:0}}
+
+/* Keep course tools and shot controls in a single bounded dock in either orientation. */
+.gg-playing .gg-control-dock{position:absolute;z-index:8;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:min(410px,calc(100% - 24px));max-height:calc(100% - 190px);display:flex;flex-direction:column;gap:6px;pointer-events:none;min-height:0}
+.gg-playing .gg-control-dock .gg-course-tools{position:relative;inset:auto;width:100%;height:auto;max-width:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:auto;gap:4px;flex:none;pointer-events:auto;align-content:start}
+.gg-playing .gg-control-dock .gg-course-tools button,.gg-playing .gg-control-dock .gg-minimap summary{width:100%;min-width:0;min-height:44px;padding:5px 4px;font-size:11px;line-height:1.3;white-space:normal;overflow-wrap:anywhere;text-align:center;display:flex;align-items:center;justify-content:center}
+.gg-playing .gg-control-dock .gg-minimap{position:relative;inset:auto;width:100%;max-width:none;max-height:none;margin:0;align-self:stretch;overflow:visible;border-radius:9px}
+.gg-playing .gg-control-dock .gg-minimap svg{position:absolute;right:0;bottom:calc(100% + 6px);width:min(200px,calc(100vw - 24px));height:auto;max-height:175px;z-index:16;background:#153b2cf5;border:1px solid #dcdfba80;border-radius:10px;box-shadow:0 6px 24px #0005}
+.gg-playing .gg-control-dock .gg-play-ui{position:relative;inset:auto;width:100%;max-width:none;max-height:none;min-height:0;flex:0 1 auto;overflow:auto;pointer-events:auto;overscroll-behavior:contain}
+.gg-playing .gg-control-dock .gg-play-ui>.gg-shot,.gg-playing .gg-control-dock .gg-play-ui>.gg-quiz{width:100%;max-width:none;margin:0}
+.gg-playing .gg-stage>.gg-canvas{height:100%;bottom:0}
+.gg-overview-hint{margin:0;padding:7px 10px;border-radius:7px;background:#17382cdb;color:#fff4cc;font-size:12px;text-align:center;pointer-events:none}
+.gg-playing.gg-overview .gg-control-dock .gg-play-ui{display:none}
+@media(orientation:portrait){
+ .gg-playing .gg-control-dock{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:auto;max-height:min(460px,calc(100% - 190px))}
+ .gg-playing .gg-control-dock .gg-shot-console{grid-template-columns:minmax(0,1fr) minmax(90px,.65fr);grid-template-areas:'club bonus' 'clubs clubs' 'aim aim' 'power power';gap:6px 10px;padding:10px;min-height:0}
+ .gg-playing .gg-control-dock .gg-timing{grid-column:1/-1}
+ .gg-playing .gg-control-dock .gg-shot-title{display:none}
+}
+@media(orientation:landscape){
+ .gg-playing .gg-control-dock{left:auto;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));width:min(390px,46vw);max-height:calc(100% - 56px);gap:5px}
+ .gg-playing .gg-control-dock .gg-course-tools button,.gg-playing .gg-control-dock .gg-minimap summary{min-height:38px;font-size:10px;padding:4px}
+ .gg-playing .gg-control-dock .gg-shot-console{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:'club bonus' 'clubs aim' 'power power';padding:8px 10px;gap:5px 8px;min-height:0}
+ .gg-playing .gg-control-dock .gg-shot-title{display:none}
+ .gg-playing .gg-control-dock .gg-timing{grid-column:1/-1}
+ .gg-playing .gg-control-dock .gg-club-readout{min-width:0;gap:4px}
+ .gg-playing .gg-control-dock .gg-club-icon{width:26px;height:32px}
+ .gg-playing .gg-control-dock .gg-club-readout strong{font-size:11px}
+ .gg-playing .gg-control-dock .gg-club-readout span{font-size:9px;white-space:normal;line-height:1.2;margin-top:1px}
+ .gg-playing .gg-control-dock .gg-clubs button{min-height:36px;font-size:9px;padding:3px 1px;white-space:normal}
+ .gg-playing .gg-control-dock .gg-contact{gap:4px;min-width:0}
+ .gg-playing .gg-control-dock .gg-contact label,.gg-playing .gg-control-dock .gg-aim-control{font-size:10px;min-width:0}
+ .gg-playing .gg-control-dock .gg-contact input,.gg-playing .gg-control-dock .gg-aim-control input{width:100%;min-width:0}
+ .gg-playing .gg-scores:not(.gg-round-result){top:48px;right:max(10px,env(safe-area-inset-right));width:min(620px,calc(100% - 20px));max-height:calc(100% - 60px)}
+}
+.gg-playing.gg-overview .gg-hud,.gg-playing.gg-overview .gg-wind,.gg-playing.gg-overview .gg-lie{pointer-events:none}
+@media(orientation:portrait){.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 280px)}}
+@media(orientation:landscape){.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 150px)}}
+.gg-playing .gg-scores{z-index:12}

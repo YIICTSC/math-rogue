@@ -1,4 +1,5 @@
 const copy: [string, string, string][] = [
+  ["スワイプでコースを動かして確認", "Swipe to move around the course", "スワイプで コースをうごかして かくにん"],
   ["1回目：パワーを決める", "First tap: set power", "1かいめ：パワーを きめる"],
   ["2回目：下の中心に合わせる", "Second tap: hit the lower center", "2かいめ：したの ちゅうしんに あわせる"],
   ["右端まで進んでから戻ります", "The meter reaches the far edge, then returns", "みぎはしまで すすんでから もどります"],
