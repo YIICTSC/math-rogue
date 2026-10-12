@@ -1,4 +1,8 @@
+import {NEW_FURNITURE} from './newFurniture';
 export const RPG_HOME_ENGLISH:Record<string,string> = {
+ ...Object.fromEntries(NEW_FURNITURE.map(f=>[f.name,f.nameEn!])),
+ "自宅のBGMを変更しました。":"Home BGM changed.",
+ "音楽家具":"Music furniture",
   "家の建築キット": "House building kit",
   "草地に自分の家を建てるキット。": "A kit to build your home on grass.",
   "建築キットか家をすでに持っています。": "You already have a house or building kit.",
@@ -64,6 +68,9 @@ export const RPG_HOME_ENGLISH:Record<string,string> = {
   "作業台": "Workbench"
 };
 export const RPG_HOME_HIRAGANA:Record<string,string> = {
+ ...Object.fromEntries(NEW_FURNITURE.map(f=>[f.name,f.nameHiragana!])),
+ "自宅のBGMを変更しました。":"じたくのBGMをへんこうしました。",
+ "音楽家具":"おんがくかぐ",
   "家の建築キット": "いえのけんちくきっと",
   "草地に自分の家を建てるキット。": "くさちにじぶんのいえをたてるきっと。",
   "建築キットか家をすでに持っています。": "けんちくきっとかいえをすでにもっています。",

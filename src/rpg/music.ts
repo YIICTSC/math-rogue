@@ -1,3 +1,4 @@
+import type {HomeTrackId} from './homeTracks';
 import {useLayoutEffect} from 'react';
 import {audioService,type BgmPlaybackOptions} from '../services/audioService';
 type Track = {type:Parameters<typeof audioService.playBGM>[0];options:BgmPlaybackOptions};
@@ -21,7 +22,7 @@ export const RPG_PASSIVE_MUSIC_SCENES = new Set<RpgMusicScene>(['settings','hero
 export function resolveRpgMusicScene(scene:RpgMusicScene|null,surrounding:RpgMusicScene='map'){
  return scene&&RPG_PASSIVE_MUSIC_SCENES.has(scene)?surrounding:scene;
 }
-export function useRpgMusic(scene:RpgMusicScene|null,priority=10,surrounding:RpgMusicScene='map'){
+export function useRpgMusic(scene:RpgMusicScene|null,priority=10,surrounding:RpgMusicScene='map',homeTrack:HomeTrackId='home'){
  const resolved=resolveRpgMusicScene(scene,surrounding);
- useLayoutEffect(()=>{if(!resolved)return;const song=RPG_MUSIC[resolved];return audioService.acquireBgmScene(song.type,song.options,priority);},[resolved,priority]);
+ useLayoutEffect(()=>{if(!resolved)return;const song=RPG_MUSIC[resolved==='home'?homeTrack:resolved];return audioService.acquireBgmScene(song.type,song.options,priority);},[resolved,priority,homeTrack]);
 }

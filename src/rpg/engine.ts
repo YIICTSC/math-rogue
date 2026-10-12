@@ -1,3 +1,4 @@
+import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
 import type {BuildingGoalReward} from './buildingGoals';
 import {legacyRegion,landscapeEnvironment,STRUCTURES} from './worldLandscape';
 import {MAP_WIDTH,MAP_HEIGHT,originalRegion} from './worldDimensions';
@@ -87,6 +88,7 @@ export interface NativeProfile {
   visualTheme?: VisualThemeId;
 }
 export interface NativeScene {
+  homeBonus?:HomeBattleBonus;
   token: string;
   siteId: string;
   damage: number;
@@ -325,6 +327,7 @@ function applyNativeAction(
       damage: 0,
       sequence: 0,
       teamPower,
+      homeBonus:homeBattleBonus(w,p.id),
     };
     return tell("本編のシーンをプレイ中です。");
   }

@@ -2,6 +2,7 @@ import {prepareCraftedFirstStrike,craftedFirstStrikeActive,consumeCraftedFirstSt
 import WaitingHomeDash from './mini-games/shared/WaitingHomeDash';
 import {golfInviteCode} from './mini-games/gakuro-golf/invite';
 import type {RpgWorldSave} from './rpg/worldSave';
+import {homeBattleBonus,applyHomeBattleBonus} from './rpg/furnitureBenefits';
 import RpgHeroSelection from "./rpg/HeroSelection";
 import { enemyHeroDeck, applyEnemyHeroRelics, isEnemyHeroUnlocked, type EnemyHero } from "./rpg/enemyHeroes";
 import { biomeBattleBackground } from "./rpg/biomes";
@@ -3774,7 +3775,11 @@ const App: React.FC = () => {
         syncRedSkullState(p);
 
         prepareCraftedFirstStrike(p);
-        let drawCount = HAND_SIZE + applyEnemyHeroRelics(p);
+        const furnitureSnapshot=rpgSnapshotRef.current;
+        const furnitureBonus=furnitureSnapshot&&(rpgEncounterRef.current||rpgDuelRef.current||rpgDungeonRef.current)
+            ? furnitureSnapshot.world.players[furnitureSnapshot.selfId]?.nativeScene?.homeBonus||homeBattleBonus(furnitureSnapshot.world,furnitureSnapshot.selfId)
+            : undefined;
+        let drawCount = HAND_SIZE + applyEnemyHeroRelics(p) + (furnitureBonus?applyHomeBattleBonus(p,furnitureBonus):0);
         if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
         if (p.relics.find(r => r.id === 'SNECKO_EYE')) drawCount += 2;
         drawCount += p.relicCounters[CRANE_BATTLE_DRAW_COUNTER] || 0;

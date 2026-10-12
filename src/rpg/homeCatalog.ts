@@ -1,10 +1,14 @@
+import {NEW_FURNITURE} from './newFurniture';
+import type {HomeTrackId} from './homeTracks';
 import type {GameKind} from '../mini-games/gakuro-craft/homeGames';
 import type {Bag} from './life';
 export const ROOM_WIDTH=18,ROOM_HEIGHT=14;
+export const MAX_FURNITURE_STOCK=160;
 export const ROOM_DOOR={x:9,y:13};
 export const ROOM_SPAWN={x:9,y:11};
-export interface Furnishing {id:string;name:string;cost:Bag;width:number;height:number;floor?:boolean;game?:GameKind}
+export interface Furnishing {id:string;name:string;cost:Bag;width:number;height:number;floor?:boolean;game?:GameKind;benefit?:'might'|'guard'|'focus'|'comfort';nameEn?:string;nameHiragana?:string}
 export const FURNISHINGS: Furnishing[] = [
+ ...NEW_FURNITURE,
  {id:'bed',name:'木のベッド',cost:{plank:4,reed:3},width:2,height:2},
  {id:'sofa',name:'森色のソファ',cost:{plank:3,herb:2,reed:2},width:2,height:1},
  {id:'chair',name:'木のチェア',cost:{plank:1},width:1,height:1},
@@ -61,7 +65,7 @@ export const FURNISHINGS: Furnishing[] = [
  {id:'connectfour',name:'四目並べ台',cost:{plank:3,ore:1},width:2,height:1,game:'connectfour'},
  {id:'memory',name:'神経衰弱テーブル',cost:{plank:2,reed:3},width:2,height:2,game:'memory'},
  {id:'race',name:'すごろくテーブル',cost:{plank:3,crystal:1},width:2,height:2,game:'race'},
- {id:'bowling',name:'ボウリングレーン',cost:{plank:5,ore:3},width:2,height:3,game:'bowling'},
+ {id:'coindozer',name:'コインドーザー',cost:{plank:5,ore:3,crystal:2},width:2,height:3,game:'coindozer'},
  {id:'rhythm',name:'音ゲー筐体',cost:{plank:5,ore:3,crystal:4},width:2,height:1,game:'rhythm'},
  {id:'reaction',name:'反応ゲーム機',cost:{plank:3,ore:2,crystal:2},width:1,height:1,game:'reaction'},
  {id:'piano',name:'アップライトピアノ',cost:{plank:4,ore:2},width:2,height:1},
@@ -84,7 +88,7 @@ export const furnitureImage=(id:string)=>seasonalFurniture.includes(id)?'sprites
 export function furnitureSource(id:string,image:{naturalWidth:number;naturalHeight:number}){const i=seasonalFurniture.indexOf(id);return i<0?[0,0,image.naturalWidth,image.naturalHeight]:[i%4*image.naturalWidth/4,Math.floor(i/4)*image.naturalHeight/3,image.naturalWidth/4,image.naturalHeight/3];}
 export const furnishing=(id:string)=>FURNISHINGS.find(f=>f.id===id);
 export interface PlacedFurniture {id:string;item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean;slot?:number}
-export interface Interior {stock:Record<string,number>;placed:PlacedFurniture[]}
+export interface Interior {music?:HomeTrackId;stock:Record<string,number>;placed:PlacedFurniture[]}
 export const newInterior=():Interior=>({stock:{},placed:[{id:'starter-workbench',item:'workbench',x:2,y:2,rotation:0,slot:0},{id:'starter-table',item:'table',x:13,y:3,rotation:0,slot:1}]});
 export function furnitureSize(p:PlacedFurniture){const f=furnishing(p.item);return {width:p.rotation%2?f?.height||1:f?.width||1,height:p.rotation%2?f?.width||1:f?.height||1};}
 export function furnitureDistance(pos:{x:number;y:number},p:PlacedFurniture){const size=furnitureSize(p);return Math.max(p.x-pos.x,0,pos.x-(p.x+size.width-1))+Math.max(p.y-pos.y,0,pos.y-(p.y+size.height-1));}

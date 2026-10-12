@@ -1,3 +1,5 @@
+import {homeMusic} from './homeTracks';
+import {currentVoxelRoom} from './voxelRooms';
 import BuildingGoalsPanel from './BuildingGoalsPanel';
 import {residentAppearance} from './town/wardrobe';
 import {findLandscapeRoute} from './voxel';
@@ -469,8 +471,9 @@ export default function RpgOnline({
     room.current?.close();
     onClose();
   };
-  const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':me?.life?.indoors?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
-  useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,me?.life?.indoors?'home':!world||!world.started?'setup':'map');
+  const homeRoom=world&&me?(world.life.houses.find(h=>h.id===me.life?.indoors)?.interior||currentVoxelRoom(world,me)):undefined;
+  const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':homeRoom?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
+  useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,homeRoom?'home':!world||!world.started?'setup':'map',homeMusic(homeRoom));
   if(autoJoinInvite&&!world)return <InviteJoin title={trans("学習ローグRPG",languageMode)} name={name} onName={setName} onJoin={()=>start("invite")} onClose={close} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
   return (
     <TranslatedUiTree mode={languageMode}>

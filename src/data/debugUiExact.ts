@@ -1,3 +1,4 @@
+import {COIN_ENGLISH,COIN_HIRAGANA} from '../mini-games/gakuro-craft/coin-dozer/copy';
 import { SCHOOL_WANDERER_ENGLISH, SCHOOL_WANDERER_HIRAGANA } from '../components/school-dungeon/copy';
 import { STORYBOOK_ENGLISH, STORYBOOK_HIRAGANA } from '../three/storybookCopy';
 import {CAMPAIGN_ENGLISH,CAMPAIGN_HIRAGANA} from '../rpg/campaignCopy';
@@ -120,6 +121,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...RPG_SOCIAL_ENGLISH,
   ...RPG_FISH_ENGLISH,
   ...RPG_HOME_ENGLISH,
+  ...COIN_ENGLISH,
   ...RPG_RHYTHM_ENGLISH,
   ...LAUNCH_ENGLISH,
   ...TOWN_ENGLISH,
@@ -459,6 +461,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...RPG_SOCIAL_HIRAGANA,
   ...RPG_FISH_HIRAGANA,
   ...RPG_HOME_HIRAGANA,
+  ...COIN_HIRAGANA,
   ...RPG_RHYTHM_HIRAGANA,
   ...LAUNCH_HIRAGANA,
   ...TOWN_HIRAGANA,

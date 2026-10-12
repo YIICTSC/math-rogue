@@ -1,4 +1,5 @@
 import {useRpgPreferences} from '../../rpg/preferences';
+import CoinDozerPanel from './coin-dozer/Panel';
 import SportsView from './SportsView';
 import useGameAudio from './useGameAudio';
 import useGameBgm from './useGameBgm';
@@ -14,7 +15,7 @@ import PartyGamesPanel from './PartyGamesPanel';
 import {GAME_LABELS,GAME_ICONS,GAME_RULES,isPartyKind,canStartParty,teamGame} from './partyGames';
 import {gameOf,gameKind} from './homeGames';
 type Pull={pointerId:number;key:string;turn:number;x:number;y:number;endX:number;endY:number;screenX:number;screenY:number};
-const artFamily=(kind:string)=>['darts','billiards','bowling'].includes(kind)?'sports':['arcade','reaction','rhythm'].includes(kind)?'arcade':'strategy';
+const artFamily=(kind:string)=>['darts','billiards','bowling'].includes(kind)?'sports':['arcade','reaction','rhythm','coindozer'].includes(kind)?'arcade':'strategy';
 const roomArt=(kind:string)=>assetUrl(`sprites/rpg/game-room/${artFamily(kind)}.webp`);
 const labels=GAME_LABELS;
 const colors=['#f7bd68','#70d8db','#caa0f4','#f28d9b'];
@@ -43,6 +44,7 @@ export default function HobbyGamesPanel({world,me,home,t,send,rpgMusic}:{rpgMusi
  const completion=g?.kind==='memory'?(g.party?.matched?.filter(Boolean).length||0)/24:g?.kind==='race'?Math.max(0,...g.party?.positions||[])/40:g?.kind==='reaction'?(g.round-1)/(g.arranged?16:12):g?.kind==='billiards'?(g.pool?.balls.filter(b=>b.id&&b.potted).length||0)/15:g?.kind==='arcade'?(32-(g.courts?.[g.players.indexOf(me.id)]?.bricks.filter(Boolean).length||32))/32:g?.kind==='darts'&&g.arranged?(g.round-1)/(g.players.length*5):undefined;
  if(!hobbies.length)return <p>{t('趣味家具を飾ると、友達と4人までで遊べます。')}</p>;
  const seat=g?.players.indexOf(me.id)??-1,myTurn=g?.phase==='playing'&&g.turn===seat&&!world.paused,deadline=Math.max(0,Math.ceil((g?.deadline||0)-world.time));
+ if(g?.kind==='coindozer')return <CoinDozerPanel world={world} g={g} selfId={me.id} t={t} send={send}/>;
  if(g?.kind==='rhythm')return <RhythmPanel world={world} g={g} selfId={me.id} t={t} send={send}/>;
  return <section ref={panelRef} className={`gc-hobby ${g?.phase==='playing'?'is-live':''}`} data-arranged={!!g?.arranged} role={g?.phase==='playing'?'dialog':undefined} aria-modal={g?.phase==='playing'?true:undefined} aria-label={g?t(labels[g.kind]):undefined} tabIndex={-1} style={{"--room-art":`url("${roomArt(g?.kind||"strategy")}")`} as React.CSSProperties}>{!g&&<><h3>{t('みんなのゲームルーム')}</h3><p>{t('同じ家の家具から参加。全10種類をひとりから最大4人で遊べます。盤面ゲームはひとりならCPU対戦。アレンジ個人戦と5階層の冒険も選べます。')}</p></>}
  {!g?<div className="gc-party-lobby">{hobbies.map(f=>{if(!gameKind(f.item))return null;const lobby=Object.values(world.games||{}).find(g=>g.homeTile===home.tile&&g.slot===f.slot);return <button key={f.slot} style={{"--card-art":`url("${roomArt(f.item)}")`} as React.CSSProperties} disabled={world.paused||lobby?.phase==='playing'||(lobby?.players.length||0)>=4} onClick={()=>send({type:'game_join',slot:f.slot})}><img src={assetUrl(`sprites/rpg/furniture/${f.item}.webp`)} alt=""/><b>{GAME_ICONS[f.item]} {t(GAME_LABELS[f.item])}</b><small>{lobby?.players.length||0}/4 · {t(lobby?.phase==='playing'?'対戦中':'参加する')}</small></button>;})}</div>:<>
