@@ -1,3 +1,4 @@
+import { storageService } from '../services/storageService';
 import { assetUrl } from "../utils/assetPaths";
 import { CARDS_LIBRARY } from '../constants';
 import { getAllEnemyNamesByTheme, getTrueBossByTheme } from '../data/enemyCatalogs';
@@ -107,8 +108,9 @@ export function getEnemyHeroSignatureImages(card:Pick<Card,'id'|'name'|'rpgEnemy
  if(!id)return [];
  const theme=id.split(':')[1] as VisualThemeId;
  if(!['elementary','high-school','magic'].includes(theme))return [];
- const hero=getEnemyHeroes(theme).find(h=>h.id===id);
+ const hero=getSelectableEnemyHeroes(theme).find(h=>h.id===id);
  if(!hero)return [];
+ if(id.endsWith(':VACATION'))return [hero.imageData];
  const idle=hero.imageData;
  const endless=ENDLESS_BOSSES.find(b=>b.arc===theme&&b.name===hero.name);
  const catalogName=hero.name.replace(/^ボス\s*[：:]\s*/,'');
@@ -120,4 +122,27 @@ export function getEnemyHeroSignatureImages(card:Pick<Card,'id'|'name'|'rpgEnemy
  else if(humanoidIndex!==null)attack=assetUrl(`sprites/${theme}/humanoid-enemies-attack/${humanoidIndex}.webp`);
  else if(theme==='high-school'&&hero.name==='あずき')attack=assetUrl('sprites/high-school/azuki/pounce.webp');
  return [...new Set([attack,idle])];
+}
+
+/** Main-game collection only: RPG and other mini-games cannot unlock heroes. */
+export function isEnemyHeroUnlocked(hero:EnemyHero):boolean {
+ const theme=hero.id.split(':')[1] as VisualThemeId;
+ if(hero.id.endsWith(':VACATION'))return theme!=='elementary'&&storageService.getVacationModeUnlocks()[theme]&&storageService.getMiniGameDiscoveries(`main-vacation-enemies:${theme}`).includes(hero.name);
+ const names=storageService.getDefeatedEnemies();
+ return names.includes(hero.name)||names.includes(`ボス: ${hero.name}`);
+}
+export function getSelectableEnemyHeroes(theme:VisualThemeId):EnemyHero[] {
+ const standard=getEnemyHeroes(theme);
+ if(theme==='elementary')return standard;
+ const vacation=standard.flatMap(hero=>{
+  const name=hero.name.replace(/^ボス\s*[：:]\s*/,'');
+  const variants=theme==='high-school'?[...HIGH_SCHOOL_ENEMY_VARIANTS,...HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS]:[...MAGIC_ENEMY_VARIANTS,...MAGIC_HUMANOID_ENEMY_VARIANTS];
+  if(!variants.some(v=>v.name===name)&&name!==getTrueBossByTheme(theme).name&&name!==(theme==='magic'?'真・大魔女校長':'真・校長先生'))return [];
+  const enemy={name,enemyType:name===getTrueBossByTheme(theme).name||name.startsWith('真・')?'THE_HEART':'GENERIC',phase:name.startsWith('真・')?2:1};
+  const image=getThemedMajorBossEnemySpritePath(enemy,theme,'idle','VACATION')||getThemedHumanoidEnemySpritePath(enemy,theme,'idle','VACATION')||getThemedMonsterEnemySpritePath(enemy,theme,'VACATION');
+  if(!image?.includes('vacation-'))return [];
+  const id=`${hero.id}:VACATION`;
+  return [{...hero,id,imageData:image,startingRelicId:`${id}:RELIC`,relic:{...hero.relic,id:`${id}:RELIC`},signature:{...hero.signature,rpgEnemyHeroId:id}}];
+ });
+ return [...standard,...vacation];
 }

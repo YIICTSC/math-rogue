@@ -3,7 +3,7 @@ import WaitingHomeDash from './mini-games/shared/WaitingHomeDash';
 import {golfInviteCode} from './mini-games/gakuro-golf/invite';
 import type {RpgWorldSave} from './rpg/worldSave';
 import RpgHeroSelection from "./rpg/HeroSelection";
-import { enemyHeroDeck, applyEnemyHeroRelics, type EnemyHero } from "./rpg/enemyHeroes";
+import { enemyHeroDeck, applyEnemyHeroRelics, isEnemyHeroUnlocked, type EnemyHero } from "./rpg/enemyHeroes";
 import { biomeBattleBackground } from "./rpg/biomes";
 import { duelEnemy, resolveRivalDefense } from "./rpg/duels";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -1902,6 +1902,21 @@ const App: React.FC = () => {
         ? (gameState.visualTheme || visualTheme)
         : visualTheme;
     const AdventureCharacterSelection = gameState.rpgOnline ? RpgHeroSelection : CharacterSelectionScreen;
+    useEffect(() => {
+        if (gameState.rpgOnline || gameState.screen !== GameScreen.BATTLE) return;
+        const theme = gameState.visualTheme || visualTheme;
+        for (const enemy of gameState.enemies) {
+            const names = new Set([enemy.name, enemy.name.replace(/^ボス\s*[：:]\s*/, '')]);
+            if (enemy.enemyType === 'THE_HEART' && enemy.phase === 2) names.add(theme === 'magic' ? '真・大魔女校長' : '真・校長先生');
+            for (const name of names) storageService.saveDefeatedEnemy(name);
+            if (gameState.player.appearanceMode === 'VACATION') {
+                const scope = `main-vacation-enemies:${theme}`;
+                const encountered = storageService.getMiniGameDiscoveries(scope);
+                const added = [...names].filter(name => !encountered.includes(name));
+                if (added.length) storageService.markMiniGameDiscovered(scope, added);
+            }
+        }
+    }, [gameState.screen, gameState.rpgOnline, gameState.enemies, gameState.visualTheme, gameState.player.appearanceMode, visualTheme]);
     const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, coopSyncedVisualTheme), [coopSyncedVisualTheme]);
     const applyRpgInviteSetup = useCallback((setup: RpgAdventureSetup) => {
         if (!rpgInviteParticipantRef.current || rpgInviteSetupAppliedRef.current || !isRpgAdventureSetup(setup)) return;
@@ -8619,6 +8634,7 @@ const App: React.FC = () => {
     }, [coopSession, coopSyncedVisualTheme, gameState.challengeMode, languageMode, startGameAssetPreload]);
 
     const handleCharacterSelect = async (char: Character, appearanceMode: CharacterAppearanceMode = 'STANDARD') => {
+        if (gameState.rpgOnline && char.id.startsWith('RPG_ENEMY:') && !isEnemyHeroUnlocked(char as EnemyHero)) return;
         audioService.playSound('select');
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
@@ -9395,7 +9411,7 @@ const App: React.FC = () => {
                     enemies = enemies.map(e => {
                         const isRpgHeadmaster = rpgEncounter?.site.kind === 'boss';
                         const type = isRpgHeadmaster ? 'RPG_DEMON' : rpgEncounter?.site.kind==='guardian'?'RPG_EXAMINER':determineEnemyType(e.name, node.type === NodeType.BOSS);
-                        storageService.saveDefeatedEnemy(e.name);
+                        if (!nextState.rpgOnline) storageService.saveDefeatedEnemy(e.name);
                         const scaledEnemy = { ...e, ...(rpgEncounter?.site.kind==='guardian'?{name:rpgEncounter.site.name}:{}), enemyType: type, strength: e.strength + difficulty.enemyStrengthBonus, ...(isRpgHeadmaster ? {phase:1} : {}) };
                         return { ...scaledEnemy, nextIntent: getNextEnemyIntent(scaledEnemy, 1) };
                     });

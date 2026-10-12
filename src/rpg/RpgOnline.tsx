@@ -481,11 +481,11 @@ export default function RpgOnline({
       {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
       <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map" data-resident-scene={!!residentTarget}>
         <header className="rpg-header">
-          <button className="rpg-brand" onClick={close}>
+          <div className="rpg-brand">
             <Compass />
             学習ローグ <em className="rpg-dev-badge">開発中</em>
             <b>RPG ONLINE</b>
-          </button>
+          </div>
           <span>
             {world ? `${Object.keys(world.players).length} / 40` : ""}
           </span>
