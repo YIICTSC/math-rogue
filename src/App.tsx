@@ -20679,10 +20679,10 @@ const App: React.FC = () => {
                                     <ul className="list-disc pl-5 space-y-1">
                                         <li>{trans('RPGワールドを拡張し、地域探索、住民との会話、採集、釣り、農業、料理、家具、ペット、街の発展を追加', languageMode)}</li>
                                         <li>{trans('3D探索、採掘、建築、家づくりとストーリーブック風3Dキャラクターを追加', languageMode)}</li>
-                                        <li>{trans('オンライン協力、招待、途中参加、観戦、ランキング、専用ロビーと結果画面を改善', languageMode)}</li>
-                                        <li>{trans('VRを300ミッションまで拡張し、協力ルーム、再出撃、装備、高低差、サバイバルルールを追加', languageMode)}</li>
+                                        <li>{trans('RPG、GAKURO VR、GAKURO GP、GAKURO GOLFの4つのオンライン対応ゲームを追加し、招待、途中参加、観戦、ランキング、専用ロビーと結果画面を改善', languageMode)}</li>
+                                        <li>{trans('GAKURO VRを全100ミッションに対応し、協力ルーム、再出撃、装備、高低差、サバイバルルールを追加', languageMode)}</li>
                                         <li>{trans('GAKURO GP、カート、ゴルフ、リズム、釣り、家具スポーツなどのゲーム進行とミニゲームを拡張', languageMode)}</li>
-                                        <li>{trans('学校ダンジョンに2D・3D表示切替、50ステージの道場、旅の村と新しい演出を追加', languageMode)}</li>
+                                        <li>{trans('風来の小学生シリーズに2D・3D表示切替、50ステージの道場、旅の村と新しい演出を追加', languageMode)}</li>
                                         <li>{trans('主人公・住民・敵の音声、BGM、効果音、イベント演出を追加・改善', languageMode)}</li>
                                         <li>{trans('縦画面・横画面のスマートフォンUI、オンライン準備画面、操作、画像表示を改善', languageMode)}</li>
                                         <li>{trans('画像・WebP資産の読み込みと初期表示を最適化し、各モードの安定性を向上', languageMode)}</li>
