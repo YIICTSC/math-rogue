@@ -12,7 +12,7 @@ Bowling is no longer craftable or joinable. Existing RPG furniture and stored bo
 
 The generated cabinet source is preserved at `/workspace/generated_models/coin-dozer.blend`; the rendered PNG stays there too. Run Blender in background with the included script to reproduce the models. Cycles denoising is disabled for builds without OpenImageDenoise.
 
-The game loads these GLB assets through Three.js. One instanced coin mesh renders the active coins and falling reward animations. The pusher follows the host's simulation clock. The renderer releases resources on leaving; WebGL failure has a playable board fallback. Controls work with touch and keyboard and remain outside the canvas.
+The game loads these GLB assets through Three.js. Separate instanced meshes for each Blender coin primitive render the active coins and falling reward animations. The pusher follows the host's simulation clock. The renderer releases resources on leaving; WebGL failure has a playable board fallback. Controls work with touch and keyboard and remain outside the canvas.
 
 ## Run structure
 
@@ -33,3 +33,10 @@ The game loads these GLB assets through Three.js. One instanced coin mesh render
 Commands verify membership, presence, phase, stage, resources, coordinates and cooldown on the authority. Pausing freezes simulation and commands. Repeated audio comes only from new input/collection/relic changes, not from rendering the same state. Furniture games continue to use the existing game audio priority.
 
 The server implementation is included in main. Server transport requires the updated Render service to be manually deployed when authorized. Peer-to-peer clients require RPG protocol 25; shared craft rooms use protocol 10.
+
+## コイン表示と筐体の見せ方
+
+- 筐体は正面中央から見下ろし、左右対称の構図で押し出し台と手前の回収口を表示する。
+- Blenderコインの本体・縁・刻印の各GLTFプリミティブを個別にインスタンス描画する。グループを持たないジオメトリに材質配列を渡さない。
+- 通常コインは銀色、特別コインは金色などで区別する。開始前にもコインを敷き詰めたプレビューを表示する。
+- 実際に盤面から落ちたコインは時間差で回転しながら回収口へ落下し、跳ねて積もる。横から失ったコインは回収口に積まない。描画上のコインの山は最大65枚に制限し、得点や手持ち枚数は変更しない。
