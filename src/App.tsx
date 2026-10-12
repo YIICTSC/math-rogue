@@ -2650,8 +2650,6 @@ const App: React.FC = () => {
     const [debugEventSimulationTheme, setDebugEventSimulationTheme] = useState<VisualThemeId>('elementary');
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
-    const [onlineGamesUnlocked, setOnlineGamesUnlocked] = useState(false);
-    const onlineTitleTapCount = useRef(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
     const crowdfundingBossDebugRef = useRef<'AZUKI' | 'DODOMEDESU' | null>(null);
@@ -5326,14 +5324,6 @@ const App: React.FC = () => {
         const next = UNLOCK_THRESHOLDS.find(t => t > totalMathCorrect);
         setNextThreshold(next || null);
     }, [totalMathCorrect]);
-
-    const handleTitleLogoClick = () => {
-        onlineTitleTapCount.current += 1;
-        if (onlineTitleTapCount.current === 3) {
-            setOnlineGamesUnlocked(true);
-            audioService.playSound('select');
-        }
-    };
 
     const handleLogClick = (e: React.SyntheticEvent) => {
         e.stopPropagation();
@@ -19727,15 +19717,7 @@ const App: React.FC = () => {
 
                         <div className="start-menu-content relative z-10 text-center p-8 w-full flex flex-col items-center">
                             <h1
-                                className={`start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] select-none items-center justify-center leading-none ${'cursor-pointer'}`}
-                                onClick={handleTitleLogoClick}
-                                tabIndex={0}
-                                onKeyDown={event => {
-                                    if (event.key === 'Enter' || event.key === ' ') {
-                                        event.preventDefault();
-                                        handleTitleLogoClick();
-                                    }
-                                }}
+                                className={`start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] select-none items-center justify-center leading-none`}
                             >
                                 <img
                                     src={assetUrl('sprites/learning-rogue-logo-emblem.webp')}
@@ -19919,66 +19901,6 @@ const App: React.FC = () => {
                                     )}
                                 </div>
 
-                                {!OFFLINE_DISTRIBUTABLE && onlineGamesUnlocked && (
-                                    <div className="start-menu-online-games grid w-full grid-cols-2 sm:grid-cols-4 gap-2">
-                                        <button
-                                            disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
-                                            onClick={() => {
-
-                                                if (!rpgInviteCode && redirectToAssignmentChallengeIfLocked()) return;
-                                                if (!rpgInviteCode && isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                                setRpgTitleOpen(true);
-                                            }}
-                                            className={`min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 ${!rpgInviteCode && (isDailyLimitReached || isAssignmentChallengeOnlyLocked) ? 'opacity-40 cursor-not-allowed' : ''}`}
-                                        >
-                                            <span className="flex items-center gap-1"><Users size={15} /> {trans("RPGオンライン", languageMode)}</span>
-                                            <span className="text-[10px] opacity-70">{trans("異世界の冒険と暮らし", languageMode)}</span>
-                                        </button>
-                                        <button disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached} onClick={() => {
-                                            if (redirectToAssignmentChallengeIfLocked()) return;
-                                            if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                            setPendingAssignmentStartScreen(GameScreen.MINI_GAME_GAKUROGEAR);
-                                            if (showDailyAssignmentNoticeForProblemSelection()) return;
-                                            setPendingAssignmentStartScreen(null);
-                                            setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_GAKUROGEAR }));
-                                        }} className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40">
-                                            <span>{trans('GAKURO VRトレーニング', languageMode)}</span><span className="text-[10px] opacity-70">{languageMode === 'ENGLISH' ? 'STEALTH · CO-OP · BATTLE ROYALE' : 'ステルス・協力・バトルロイヤル'}</span>
-                                        </button>
-                                        <button
-                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
-                                            onClick={() => {
-
-                                                if (redirectToAssignmentChallengeIfLocked()) return;
-                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                                setPendingAssignmentStartScreen(GameScreen.GAKURO_KART);
-                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
-                                                setPendingAssignmentStartScreen(null);
-                                                setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_KART }));
-                                            }}
-                                            className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
-                                        >
-                                            <span className="flex items-center gap-1"><Users size={15} /> {trans("スーパー学ロカート", languageMode)}</span>
-                                            <span className="text-[10px] opacity-70">{trans("オンラインレース", languageMode)}</span>
-                                        </button>
-
-                                        <button
-                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
-                                            onClick={() => {
-                                                if (redirectToAssignmentChallengeIfLocked()) return;
-                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                                setPendingAssignmentStartScreen(GameScreen.GAKURO_GOLF);
-                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
-                                                setPendingAssignmentStartScreen(null);
-                                                setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_GOLF }));
-                                            }}
-                                            className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
-                                        >
-                                            <span className="flex items-center gap-1"><Flag size={15} /> GAKURO GOLF</span>
-                                            <span className="text-[10px] opacity-70">{trans("オンラインゴルフ", languageMode)}</span>
-                                        </button>
-                                    </div>
-                                )}
-
                                 {!isMobilePortrait && (
                                     <button
                                         disabled={isAssignmentChallengeOnlyLocked}
@@ -19988,6 +19910,62 @@ const App: React.FC = () => {
                                         <Keyboard className="mr-2" size={18} /> {trans("タイピングモード", languageMode)}
                                     </button>
                                 )}
+
+                                <div className="start-menu-online-games grid w-full grid-cols-4 gap-2">
+                                    <button
+                                        disabled={OFFLINE_DISTRIBUTABLE || (!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached))}
+                                        title={OFFLINE_DISTRIBUTABLE ? trans(OFFLINE_NETWORK_FEATURE_MESSAGE, languageMode) : undefined}
+                                        onClick={() => {
+
+                                            if (!rpgInviteCode && redirectToAssignmentChallengeIfLocked()) return;
+                                            if (!rpgInviteCode && isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                            setRpgTitleOpen(true);
+                                        }}
+                                        className={`min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 ${OFFLINE_DISTRIBUTABLE || (!rpgInviteCode && (isDailyLimitReached || isAssignmentChallengeOnlyLocked)) ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span className="flex items-center gap-1"><Users size={15} /> RPG</span>
+                                    </button>
+                                    <button disabled={OFFLINE_DISTRIBUTABLE || isAssignmentChallengeOnlyLocked || isDailyLimitReached} title={OFFLINE_DISTRIBUTABLE ? trans(OFFLINE_NETWORK_FEATURE_MESSAGE, languageMode) : undefined} onClick={() => {
+                                        if (redirectToAssignmentChallengeIfLocked()) return;
+                                        if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                        setPendingAssignmentStartScreen(GameScreen.MINI_GAME_GAKUROGEAR);
+                                        if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                        setPendingAssignmentStartScreen(null);
+                                        setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_GAKUROGEAR }));
+                                    }} className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40">
+                                        <span className="flex items-center gap-1"><Gamepad2 size={15} /> VR</span>
+                                    </button>
+                                    <button
+                                        disabled={OFFLINE_DISTRIBUTABLE || isAssignmentChallengeOnlyLocked || isDailyLimitReached} title={OFFLINE_DISTRIBUTABLE ? trans(OFFLINE_NETWORK_FEATURE_MESSAGE, languageMode) : undefined}
+                                        onClick={() => {
+
+                                            if (redirectToAssignmentChallengeIfLocked()) return;
+                                            if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                            setPendingAssignmentStartScreen(GameScreen.GAKURO_KART);
+                                            if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                            setPendingAssignmentStartScreen(null);
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_KART }));
+                                        }}
+                                        className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
+                                    >
+                                        <span className="flex items-center gap-1"><Users size={15} /><span className="start-menu-kart-label">GAKURO <span>GP</span></span></span>
+                                    </button>
+
+                                    <button
+                                        disabled={OFFLINE_DISTRIBUTABLE || isAssignmentChallengeOnlyLocked || isDailyLimitReached} title={OFFLINE_DISTRIBUTABLE ? trans(OFFLINE_NETWORK_FEATURE_MESSAGE, languageMode) : undefined}
+                                        onClick={() => {
+                                            if (redirectToAssignmentChallengeIfLocked()) return;
+                                            if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                            setPendingAssignmentStartScreen(GameScreen.GAKURO_GOLF);
+                                            if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                            setPendingAssignmentStartScreen(null);
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_GOLF }));
+                                        }}
+                                        className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
+                                    >
+                                        <span className="flex items-center gap-1"><Flag size={15} /> {trans("ゴルフ", languageMode)}</span>
+                                    </button>
+                                </div>
 
                                 <div className="flex gap-2 w-full">
                                     <button onClick={startProblemChallenge} className="flex-1 py-2 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none bg-emerald-900/80 text-emerald-100 border-emerald-500 hover:bg-emerald-800 cursor-pointer flex items-center justify-center shadow-md hover:shadow-emerald-900/50">

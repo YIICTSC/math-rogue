@@ -19600,3 +19600,11 @@ textarea {
 .school-trpg-resource-changes b { color: #f5dd9e; margin-left: 5px; }
 @keyframes trpg-die-settle { from { transform: rotate(-22deg) scale(.65); opacity: .2; } to { transform: rotate(0) scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .school-trpg-table-die b { animation: none; } }
+
+/* Four concise online launchers remain visible beneath the optional typing mode. */
+.start-menu-actions .start-menu-online-games{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.start-menu-actions .start-menu-online-games button:not(.start-menu-version).flex-col{min-height:44px;height:auto;padding:8px 4px;gap:0}
+.start-menu-actions .start-menu-online-games button>span:only-child{font-size:clamp(12px,2.4vw,15px);line-height:1.4;white-space:nowrap}
+
+.start-menu-kart-label{display:inline-block;font-size:10px;white-space:normal;line-height:1.15}
+.start-menu-kart-label>span{display:block}
