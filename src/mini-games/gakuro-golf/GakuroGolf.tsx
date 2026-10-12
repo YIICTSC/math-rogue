@@ -3,6 +3,7 @@ import {golfInviteUrl} from './invite';
 import {copyInviteUrl} from '../shared/copyInviteUrl';
 import WaitingHomeDash from '../shared/WaitingHomeDash';
 import GameTitleScreen from '../shared/GameTitleScreen';
+import GameTitleLogo from '../shared/GameTitleLogo';
 import OnlineEntryScreen from '../shared/OnlineEntryScreen';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/onlineTransport';
 import type {OnlineTransport} from '../../services/onlineTransport';
@@ -95,7 +96,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     return Number(completeB) - Number(completeA) || b.scores.length - a.scores.length || a.scores.reduce((s, n) => s + n, 0) - b.scores.reduce((s, n) => s + n, 0) || a.slot - b.slot;
   });
   if(!view&&inviteCode)return <InviteJoin title="GAKURO GOLF" name={name} onName={setName} onJoin={join} onClose={()=>{leave();onClose();}} busy={busy} error={t(message)} languageMode={languageMode}/>;
-  if(!view&&entry==='title'&&!picker)return <GameTitleScreen kind="golf" title="GAKURO GOLF" subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
+  if(!view&&entry==='title'&&!picker)return <GameTitleScreen kind="golf" title="GAKURO GOLF" logo={<GameTitleLogo kind="golf" languageMode={languageMode}/>} subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
   if(!view&&!picker)return <OnlineEntryScreen brand="GAKURO GOLF" title={t(entry==='practice'?'ひとりで練習':entry==='host'?'オンラインの部屋を作る':'招待に参加する')} languageMode={languageMode} onBack={()=>setEntry('title')} preview={<GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar}/>} caption={t('学んで、狙って、カップイン。')} footer={<><button aria-label={t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} className="online-entry-primary" disabled={busy||!name.trim()||(entry==='join'&&!validRoomAddress(code))} onClick={()=>entry==='join'?void join():setPicker(entry==='host'?'host':'practice')}>{t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} →</button>{busy&&<p role="status">{t(transport==='server'?'サーバーを起動しています。初回は最大3分お待ちください。':'接続中…')}</p>}</>}>
     {entry==='host'&&<TransportPicker game="golf" value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
     <label>{t('参加名')}<input value={name} maxLength={16} onChange={e=>setName(e.target.value)} disabled={busy}/></label>

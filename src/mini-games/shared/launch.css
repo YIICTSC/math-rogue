@@ -30,3 +30,8 @@
 .game-launch-copy .game-launch-logo{margin:0;width:100%;line-height:0}.game-launch-logo img{display:block;width:100%;max-height:65dvh;object-fit:contain;filter:drop-shadow(0 5px 15px #051b2599)}
 @media(max-width:600px) and (orientation:portrait){.game-launch-logo img{max-height:35dvh}}
 @media(max-height:480px){.game-launch-logo img{max-height:65dvh}}
+
+/* Illustrated online logos keep their complete subtitle visible at every aspect ratio. */
+.game-launch-title:is(.kart,.vr,.golf) .game-launch-copy{min-width:0}
+.game-launch-title:is(.kart,.vr,.golf) .game-launch-logo{max-width:760px;margin-inline:auto}
+@media(max-width:600px) and (orientation:portrait){.game-launch-title:is(.kart,.vr,.golf) .game-launch-copy{text-align:center}.game-launch-title:is(.kart,.vr,.golf) .game-launch-copy>small{font-size:10px;letter-spacing:.15em}}
