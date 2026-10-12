@@ -1,4 +1,4 @@
-import {HOBBY_SOUNDS,type HobbySound} from '../mini-games/gakuro-craft/gameAudio';
+import {HOBBY_SOUNDS,RHYTHM_PAD_SOUNDS,type HobbySound} from '../mini-games/gakuro-craft/gameAudio';
 import {FISHING_SOUNDS,type FishingSound} from '../rpg/fishingAudio';
 
 import type { AttackEffectKey, CharacterAppearanceMode, StatusEffectKey } from '../types';
@@ -535,7 +535,7 @@ class AudioService {
       void perfect;
       if (!this.getRhythmAudioState().active || this.isMuted || this.sfxVolume <= 0) return;
       this.init();
-      const cue=`note-${Math.max(0,Math.min(3,lane))}` as HobbySound, name=`rpg-games/${cue}`,gain=Math.max(0,Math.min(1,volume));
+      const cue=RHYTHM_PAD_SOUNDS[Math.max(0,Math.min(3,Math.trunc(lane)||0))], name=`rpg-games/${cue}`,gain=Math.max(0,Math.min(1,volume));
       const buffer=this.sfxBuffers[name];
       if(buffer && this.ctx?.state==='running' && this.startSfxSource(name,buffer,HOBBY_SOUNDS[cue],true,gain))return;
       // First presses stay in the SFX bus too: iOS ignores HTML media volume.
@@ -548,17 +548,27 @@ class AudioService {
   }
 
   public playHobbySound(cue: HobbySound) {
+      const padLane=RHYTHM_PAD_SOUNDS.indexOf(cue as typeof RHYTHM_PAD_SOUNDS[number]);
+      if(padLane>=0 || cue.startsWith('note-')){this.playRpgRhythmHit(padLane>=0?padLane:Number(cue.at(-1)),false);return;}
       if (!this.getRhythmAudioState().active || this.isMuted || this.sfxVolume <= 0) return;
-      this.playSfxMp3(`rpg-games/${cue}`,()=>cue.startsWith('note-') ? this.playRhythmPadFallback(Number(cue.at(-1))) : this.playSound(cue==='miss'||cue==='lose'?'wrong':'select'),{maxDurationMs:HOBBY_SOUNDS[cue],overlap:cue.startsWith('note-')||cue==='pool-hit'});
+      this.playSfxMp3(`rpg-games/${cue}`,()=>this.playSound(cue==='miss'||cue==='lose'?'wrong':'select'),{maxDurationMs:HOBBY_SOUNDS[cue],overlap:cue==='pool-hit'});
   }
 
   private playRhythmPadFallback(lane: number, volume = 1) {
       this.init();
       if (!this.ctx || !this.sfxGain) return;
-      const now = this.ctx.currentTime;
-      this.playNoise(now, lane === 3 ? 0.21 : lane === 2 ? 0.08 : 0.16, 0.28*volume, lane === 0 ? 'kick' : lane === 1 ? 'snare' : 'hat', this.sfxGain);
-      if (lane === 0) this.playOsc(65, now, 0.17, 'sine', 0.4*volume, this.sfxGain);
-      if (lane === 3) for (let i = 0; i < 4; i++) this.playOsc(i % 2 ? 420 : 900, now + i * 0.045, 0.04, 'sawtooth', 0.1*volume, this.sfxGain);
+      const ctx=this.ctx,now=ctx.currentTime,pad=Math.max(0,Math.min(3,Math.trunc(lane)||0)),duration=[.24,.2,.5,.28][pad];
+      const gain=ctx.createGain();gain.connect(this.sfxGain);gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.42*volume,now+.002);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+      const nodes:AudioNode[]=[gain];
+      if(pad===0){
+          const kick=ctx.createOscillator();kick.frequency.setValueAtTime(155,now);kick.frequency.exponentialRampToValueAtTime(44,now+.12);kick.connect(gain);nodes.push(kick);kick.start(now);kick.stop(now+duration);kick.onended=()=>nodes.forEach(n=>n.disconnect());
+      }else{
+          if(!this.noiseBuffer){gain.disconnect();return;}
+          const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter();noise.buffer=this.noiseBuffer;noise.connect(filter);filter.connect(gain);nodes.push(noise,filter);
+          filter.type=pad===3?'bandpass':'highpass';filter.frequency.setValueAtTime(pad===1?1200:pad===2?4500:700,now);
+          if(pad===3){filter.Q.value=1.4;for(let i=1;i<=6;i++)filter.frequency.exponentialRampToValueAtTime(i%2?3800:500,now+i*.04);gain.gain.setValueAtTime(.5*volume,now+.002);for(let i=1;i<=6;i++)gain.gain.linearRampToValueAtTime((i%2?.1:.4)*volume,now+i*.04);gain.gain.linearRampToValueAtTime(0,now+duration);}
+          noise.start(now);noise.stop(now+duration);noise.onended=()=>nodes.forEach(n=>n.disconnect());
+      }
   }
 
   public stopHobbySounds() {

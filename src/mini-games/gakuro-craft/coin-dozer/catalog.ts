@@ -13,7 +13,7 @@ export const COIN_RELICS = [
  ['combo','踊る金貨','Dancing gold','おどるきんか','コンボの得点倍率が増加。','Combos grant a larger score multiplier.','こんぼのとくてんばいりつがぞうか。'],
  ['fortune','黄金のクローバー','Golden clover','おうごんのくろーばー','得点＋15%。','Score +15%.','とくてん＋15%。'],
  ['alchemist','錬金の指輪','Alchemy ring','れんきんのゆびわ','通常コインを20%の確率で金貨へ。','20% chance to upgrade regular coins to gold.','つうじょうこいんを20%のかくりつできんかへ。'],
- ['supply','補給の鳥','Supply bird','ほきゅうのとり','10枚投入するたびに手持ち＋3。','Gain 3 coins for every 10 drops.','10まいとうにゅうするたびにてもち＋3。'],
+ ['supply','補給の鳥','Supply bird','ほきゅうのとり','6枚投入するたびに追加で手持ち＋3。','Gain 3 extra coins for every 6 drops.','6まいとうにゅうするたびについかでてもち＋3。'],
  ['coupon','商人の会員証','Merchant pass','しょうにんのかいいんしょう','ショップ価格を2下げる。','Shop prices are 2 lower.','しょっぷかかくを2さげる。'],
  ['ward','浄化のお守り','Cleansing charm','じょうかのおまもり','呪いコインも通常コインとして獲得。','Cursed coins become regular rewards.','のろいこいんもつうじょうこいんとしてかくとく。'],
  ['risk','欲張りの冠','Greedy crown','よくばりのかんむり','得点＋35%。呪いコインの出現率＋8%。','Score +35%, but curse chance +8%.','とくてん＋35%。のろいこいんのしゅつげんりつ＋8%。'],

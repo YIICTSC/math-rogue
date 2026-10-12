@@ -16,7 +16,7 @@ The game loads these GLB assets through Three.js. Separate instanced meshes for 
 
 ## Run structure
 
-1–4 players each own a separate run, sharing the leaderboard and game clock. Runs have five stages, starting with 28 spendable coins. The host advances disk contacts, insertion gravity, pusher motion, friction, crosswinds and collection. The playfield caps at 110 coins per player, with snapshots rounded to four decimals. A 15-minute limit bounds inactive multiplayer games.
+1–4 players each own a separate run, sharing the leaderboard and game clock. Runs have five stages, starting with 40 spendable coins. The host advances disk contacts, insertion gravity, pusher motion, friction, crosswinds and collection. The playfield caps at 150 coins per player, with snapshots rounded to four decimals. A 15-minute limit bounds inactive multiplayer games.
 
 - Stage goals: 8, 12, 17, 22, 32 value, with the vault route adding 4.
 - Coin types: ordinary, gold, gem, supply, curse and final-stage crown.
@@ -40,3 +40,11 @@ The server implementation is included in main. Server transport requires the upd
 - Blenderコインの本体・縁・刻印の各GLTFプリミティブを個別にインスタンス描画する。グループを持たないジオメトリに材質配列を渡さない。
 - 通常コインは銀色、特別コインは金色などで区別する。開始前にもコインを敷き詰めたプレビューを表示する。
 - 実際に盤面から落ちたコインは時間差で回転しながら回収口へ落下し、跳ねて積もる。横から失ったコインは回収口に積まない。描画上のコインの山は最大65枚に制限し、得点や手持ち枚数は変更しない。
+
+## 爽快感とタッチ操作の調整
+
+- 盤面タッチは位置指定と同時に1枚投入する。他プレイヤーを観戦中・停止中・選択画面では投入しない。押し続ける投入ボタンは190ms間隔。
+- 初期盤面は110枚を出口近くまで密に配置し、コインの半径・押し板のストローク・接触解決回数を増加。落下の着地で周囲のコインに押し出し力が伝わる。
+- 初期手持ちは40枚。通常回収の65%で手持ち1枚を補給（還元レリックで最大95%）。6枚投入ごとに金貨3枚のシャワーと手持ち1枚の補給。
+- 一度に3枚以上回収すると盤面へ追加5枚が降り、次の連鎖につながる。8コンボ以上でフィーバー表示。
+- 階層目標は28／42／56／72／100。初回は最低3回投入後に階層が完了する。押し出しスキルも強化。

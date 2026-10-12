@@ -1,5 +1,6 @@
 import {COIN_RELICS} from './catalog';
 export const COIN_ENGLISH:Record<string,string>={
+ "コインフィーバー！":"Coin fever!",
  ...Object.fromEntries(COIN_RELICS.flatMap(r=>[[r[1],r[2]],[r[4],r[5]]])),
  "コインドーザー":"Coin Dozer",
  "コインドーザーの盤面":"Coin Dozer playfield",
@@ -13,7 +14,7 @@ export const COIN_ENGLISH:Record<string,string>={
  "投入位置":"Drop position",
  "コインを投入":"Drop coin",
  "押し出しスキル":"Pusher pulse",
- "盤面をタップして位置を選べます。押し板が引くタイミングを狙いましょう。":"Tap the playfield to aim. Time your drops as the pusher retreats.",
+ "盤面をタップすると、その位置の上からコインを投入！6枚ごとに金貨シャワー。連鎖回収でボーナスコインが降ります。":"Tap to drop a coin from above that position! Every six drops brings a gold shower; multi-coin payouts rain bonus coins.",
  "コイン切れ：盤面からの回収を待っています。":"Out of coins: waiting for rewards from the playfield.",
  "レリックを1つ選ぶ":"Choose one relic",
  "次のルートを選ぶ":"Choose the next route",
@@ -48,6 +49,7 @@ export const COIN_ENGLISH:Record<string,string>={
  "不思議な鏡":"Mysterious mirror",
 };
 export const COIN_HIRAGANA:Record<string,string>={
+ "コインフィーバー！":"こいんふぃーばー！",
  ...Object.fromEntries(COIN_RELICS.flatMap(r=>[[r[1],r[3]],[r[4],r[6]]])),
  "コインドーザー":"こいんどーざー",
  "コインドーザーの盤面":"こいんどーざーのばんめん",
@@ -61,7 +63,7 @@ export const COIN_HIRAGANA:Record<string,string>={
  "投入位置":"とうにゅういち",
  "コインを投入":"こいんをとうにゅう",
  "押し出しスキル":"おしだしすきる",
- "盤面をタップして位置を選べます。押し板が引くタイミングを狙いましょう。":"ばんめんをたっぷしていちをえらべます。おしいたがひくたいみんぐをねらいましょう。",
+ "盤面をタップすると、その位置の上からコインを投入！6枚ごとに金貨シャワー。連鎖回収でボーナスコインが降ります。":"ばんめんをたっぷすると、そのいちのうえからこいんをとうにゅう！ろくまいごとにきんかしゃわー。れんさかいしゅうでぼーなすこいんがふります。",
  "コイン切れ：盤面からの回収を待っています。":"こいんぎれ：ばんめんからのかいしゅうをまっています。",
  "レリックを1つ選ぶ":"れりっくを1つえらぶ",
  "次のルートを選ぶ":"つぎのるーとをえらぶ",
