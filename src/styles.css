@@ -19578,3 +19578,25 @@ textarea {
   .placement-tcg-pack-deck-header, .placement-tcg-pack-deck-header > *, .placement-tcg-manager > * { min-width: 0; }
   .placement-tcg-start-overlay { margin-inline: auto; text-align: center; }
 }
+
+.school-trpg-table-talk { padding: 10px 12px; border-left: 2px solid #ac8edc; background: rgba(115,78,168,.12); }
+.school-trpg-table-talk summary { color: #dccaf7; cursor: pointer; font-size: 11px; letter-spacing: .05em; }
+.school-trpg-table-talk p { margin: 8px 0; line-height: 1.8; font-size: 12px; }
+.school-trpg-approaches { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin: 14px 0; padding: 10px; border: 1px solid rgba(138,206,221,.25); min-width: 0; }
+.school-trpg-approaches legend { padding-inline: 6px; color: #e5d094; font-size: 12px; }
+.school-trpg-approaches button { padding: 9px; text-align: left; color: #d5e6ee; background: #142430; border: 1px solid #3a5264; cursor: pointer; min-width: 0; }
+.school-trpg-approaches button[aria-pressed="true"] { border-color: #e5d094; background: #343329; }
+.school-trpg-approaches button:disabled { opacity: .4; cursor: default; }
+.school-trpg-approaches b, .school-trpg-approaches small { display: block; }
+.school-trpg-approaches b { font-size: 12px; }
+.school-trpg-approaches small { margin-top: 5px; font-size: 10px; line-height: 1.6; }
+.school-trpg-table-consequence { padding: 10px; color: #f5dd9e; border: 1px solid rgba(229,208,148,.35); background: rgba(229,208,148,.08); line-height: 1.7; }
+@media (orientation:portrait) and (max-width:700px) { .school-trpg-choice-list > button { grid-template-columns: 26px minmax(0,1fr); } .school-trpg-choice-list > button > em { grid-column: 2; text-align: left; white-space: normal; } }
+.school-trpg-table-die { display: flex; align-items: center; gap: 10px; margin-block: 12px; }
+.school-trpg-table-die b { display: grid; place-items: center; width: 58px; height: 58px; border: 2px solid #e5d094; border-radius: 12px; background: #1d2538; color: #fff1c7; font-size: 28px; box-shadow: 0 0 22px #e5d09422; animation: trpg-die-settle .55s ease-out both; }
+.school-trpg-table-die small { color: #9bb4c3; letter-spacing: .15em; }
+.school-trpg-resource-changes { display: flex; flex-wrap: wrap; gap: 6px; margin-block: 12px; }
+.school-trpg-resource-changes span { padding: 6px 9px; border: 1px solid #42586b; border-radius: 5px; font-size: 11px; }
+.school-trpg-resource-changes b { color: #f5dd9e; margin-left: 5px; }
+@keyframes trpg-die-settle { from { transform: rotate(-22deg) scale(.65); opacity: .2; } to { transform: rotate(0) scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .school-trpg-table-die b { animation: none; } }

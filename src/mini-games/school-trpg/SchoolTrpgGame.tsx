@@ -1,3 +1,4 @@
+import { TRPG_APPROACHES, canUseTrpgApproach, getTrpgTableTalk } from './schoolTrpgTabletop';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -48,7 +49,8 @@ import {
   createSchoolTrpgCampaign,
   getQuestionGateCopy,
   getQuestionGateTitleCopy,
-  getSchoolTrpgChoiceTarget,
+  getSchoolTrpgCheckPreview,
+  getSchoolTrpgCombatOpportunity,
   getSchoolTrpgCombatResolutionCopy,
   getSchoolTrpgDataErrors,
   getSchoolTrpgEventForState,
@@ -64,6 +66,7 @@ import {
   localizeTrpgCopy,
   trpgCopy,
   type TrpgCampaignState,
+  type TrpgApproach,
   type TrpgCombatActionId,
   type TrpgCombatState,
   type TrpgCopy,
@@ -404,9 +407,11 @@ const EventScreen: React.FC<{
   languageMode?: LanguageMode;
   useFate: boolean;
   onUseFate: () => void;
-  onChoice: (choiceId: string) => void;
+  onChoice: (choiceId: string, approach: TrpgApproach) => void;
 }> = ({ state, languageMode, useFate, onUseFate, onChoice }) => {
+  const [approach, setApproach] = useState<TrpgApproach>('STANDARD');
   const event = getSchoolTrpgEventForState(state) || SCHOOL_TRPG_EVENTS[0];
+  const selectedApproach = canUseTrpgApproach(state, approach) ? approach : 'STANDARD';
   const sceneArt = event.illustrationAsset || getSchoolTrpgSceneArt(event.locationId, event.backgroundAsset);
   const archetypeCopy = event.archetype ? EVENT_ARCHETYPE_COPY[event.archetype] : null;
   return (
@@ -428,6 +433,16 @@ const EventScreen: React.FC<{
         <div className="school-trpg-panel-eyebrow">STORY EVENT // {event.id}{archetypeCopy ? ` · ${text(archetypeCopy, languageMode)}` : ''}</div>
         <h2>{text(event.title, languageMode)}</h2>
         <p>{text(event.body, languageMode)}</p>
+        <details className="school-trpg-table-talk" open>
+          <summary>{text(trpgCopy('この場の空気と仲間の声', 'このばのくうきとなかまのこえ', 'AT THE TABLE'), languageMode)}</summary>
+          {getTrpgTableTalk(state, event.archetype).map((line, index) => <p key={index}>{text(line, languageMode)}</p>)}
+        </details>
+        <fieldset className="school-trpg-approaches">
+          <legend>{text(trpgCopy('どう挑む？', 'どういどむ？', 'HOW WILL YOU APPROACH THIS?'), languageMode)}</legend>
+          {(Object.keys(TRPG_APPROACHES) as TrpgApproach[]).map(id => <button key={id} type="button" aria-pressed={selectedApproach === id} disabled={!canUseTrpgApproach(state, id)} onClick={() => setApproach(id)}>
+            <b>{text(TRPG_APPROACHES[id].label, languageMode)}</b><small>{text(TRPG_APPROACHES[id].detail, languageMode)}</small>
+          </button>)}
+        </fieldset>
         <button
           type="button"
           className={`school-trpg-fate-button ${useFate ? 'is-active' : ''}`}
@@ -441,11 +456,12 @@ const EventScreen: React.FC<{
         <div className="school-trpg-choice-list">
           {event.choices.map((choice, index) => {
             const locked = Boolean(choice.requiresFlag && !state.flags[choice.requiresFlag]);
+            const preview = getSchoolTrpgCheckPreview(state, choice, useFate, selectedApproach);
             return (
-            <button key={choice.id} type="button" disabled={locked} onClick={() => onChoice(choice.id)}>
+            <button key={choice.id} type="button" disabled={locked} onClick={() => onChoice(choice.id, selectedApproach)}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <div><b>{text(choice.label, languageMode)}</b><small>{text(choice.detail, languageMode)}</small></div>
-              <em>{locked ? text(UI_COPY.routeLocked, languageMode) : `${text(TRPG_STAT_COPY[choice.stat], languageMode)} ${getSchoolTrpgChoiceTarget(state, choice)}`}</em>
+              <em>{locked ? text(UI_COPY.routeLocked, languageMode) : `${text(TRPG_STAT_COPY[choice.stat], languageMode)} ${preview.target} · ${preview.successes}/6 (${preview.chance}%)`}</em>
             </button>
             );
           })}
@@ -463,6 +479,7 @@ const ResultScreen: React.FC<{
   const event = getSchoolTrpgEventForState(state) || SCHOOL_TRPG_EVENTS[0];
   const result = state.result!;
   const isGreat = result.grade === 'GREAT';
+  const gradeCopy = result.grade === 'MIXED' ? trpgCopy('代償つきの手がかり', 'だいしょうつきのてがかり', 'A CLUE AT A COST') : isGreat ? UI_COPY.great : result.success ? UI_COPY.success : UI_COPY.failure;
   return (
     <div className="school-trpg-campaign-layout result-mode">
       <section className="school-trpg-scene-panel">
@@ -474,22 +491,33 @@ const ResultScreen: React.FC<{
         />
         <div className="school-trpg-scene-vignette" />
         <div className={`school-trpg-result-signal ${result.success ? 'is-success' : 'is-alternate'}`}>
-          <span>{text(isGreat ? UI_COPY.great : result.success ? UI_COPY.success : UI_COPY.failure, languageMode)}</span>
+          <span>{text(gradeCopy, languageMode)}</span>
           <b>{result.total}</b>
           <small>{text(UI_COPY.target, languageMode)} {result.difficulty}</small>
         </div>
       </section>
       <aside className="school-trpg-command-panel result-copy">
         <div className="school-trpg-panel-eyebrow">CHECK RESOLUTION</div>
-        <h2>{text(isGreat ? UI_COPY.great : result.success ? UI_COPY.success : UI_COPY.failure, languageMode)}</h2>
+        <h2>{text(gradeCopy, languageMode)}</h2>
         <p>{text(result.copy, languageMode)}</p>
+        {result.consequence && <p className="school-trpg-table-consequence">{text(result.consequence, languageMode)}</p>}
+        <div className="school-trpg-table-die" aria-label={`${text(UI_COPY.roll, languageMode)} ${result.roll}`}><b>{result.roll}</b><small>D6</small></div>
         <div className="school-trpg-roll-formula">
           <span>{text(UI_COPY.roll, languageMode)} <b>{result.roll}</b></span>
           <span>{text(TRPG_STAT_COPY[result.stat], languageMode)} <b>+{result.statValue}</b></span>
           {result.fateBonus > 0 && <span>{text(UI_COPY.fate, languageMode)} <b>+{result.fateBonus}</b></span>}
           {(result.itemBonus || 0) > 0 && <span>{result.itemName ? text(result.itemName, languageMode) : 'DISCOVERY'} <b>+{result.itemBonus}</b></span>}
+          {(result.approachBonus || 0) > 0 && <span>{text(TRPG_APPROACHES[result.approach || 'STANDARD'].label, languageMode)} <b>+{result.approachBonus}</b></span>}
           <strong>= {result.total}</strong>
         </div>
+        {result.resourceChanges && <div className="school-trpg-resource-changes">
+          {([
+            [trpgCopy('手がかり', 'てがかり', 'CLUES'), result.resourceChanges.clues],
+            [trpgCopy('疲労', 'ひろう', 'STRESS'), result.resourceChanges.stress],
+            [trpgCopy('運命点', 'うんめいてん', 'FATE'), result.resourceChanges.fate],
+            [trpgCopy('時間', 'じかん', 'TIME'), result.resourceChanges.time],
+          ] as [TrpgCopy, number][]).filter(([, delta]) => delta !== 0).map(([label, delta]) => <span key={label.en}>{text(label, languageMode)} <b>{delta > 0 ? '+' : ''}{delta}</b></span>)}
+        </div>}
         {(result.statGain || isGreat) && <div className="school-trpg-check-grade">
           {text(result.statGain
             ? isGreat
@@ -512,6 +540,7 @@ const CombatScreen: React.FC<{
   onAction: (action: TrpgCombatActionId) => void;
 }> = ({ state, languageMode, cue, onAction }) => {
   const combat = state.combat!;
+  const opportunity = getSchoolTrpgCombatOpportunity(state);
   const canPersuade = combat.insight >= 3 || Boolean(state.flags.knowsPassphrase);
   const canInteract = Boolean(combat.mode && combat.mode !== 'DUEL');
   const canUseItem = state.inventory.some(itemId => !state.flags[`usedCombatItem.${itemId}`]);
@@ -558,6 +587,7 @@ const CombatScreen: React.FC<{
           {combat.hazard && <span>{text(UI_COPY.hazard, languageMode)} <b>{text(combat.hazard.label, languageMode)} {combat.hazard.progress}/{combat.hazard.target}</b></span>}
           {combat.allyStates && <span>{text(UI_COPY.allies, languageMode)} <b>{combat.allyStates.filter(ally => ally.status === 'SAFE').length}/{combat.allyStates.length}</b></span>}
         </div>
+        {opportunity && <p className="school-trpg-table-consequence">{text(opportunity.copy, languageMode)}</p>}
         <div className="school-trpg-combat-actions">
           {COMBAT_ACTIONS.map(action => {
             const Icon = action.icon;
@@ -849,8 +879,8 @@ const SchoolTrpgGame = ({
             }}
           />
         )}
-        {state.phase === 'EVENT' && <EventScreen state={state} languageMode={languageMode} useFate={useFate} onUseFate={() => setUseFate(current => !current)} onChoice={choiceId => {
-          const nextState = resolveSchoolTrpgChoice(state, choiceId, useFate);
+        {state.phase === 'EVENT' && <EventScreen key={`${state.currentEventId}-${state.currentEventVariant}`} state={state} languageMode={languageMode} useFate={useFate} onUseFate={() => setUseFate(current => !current)} onChoice={(choiceId, approach) => {
+          const nextState = resolveSchoolTrpgChoice(state, choiceId, useFate, approach);
           audioService.playSound(nextState.result?.success ? 'correct' : 'wrong');
           setUseFate(false);
           setState(nextState);

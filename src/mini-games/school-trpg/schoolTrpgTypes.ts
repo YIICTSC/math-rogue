@@ -11,6 +11,7 @@ export const trpgCopy = (ja: string, hira: string, en: string): TrpgCopy => ({ j
 export const localizeTrpgCopy = (copy: TrpgCopy, languageMode: LanguageMode = 'JAPANESE') =>
   languageMode === 'ENGLISH' ? copy.en : languageMode === 'HIRAGANA' ? copy.hira : copy.ja;
 
+export type TrpgApproach = 'STANDARD' | 'CAREFUL' | 'BOLD' | 'TEAM';
 export type TrpgStat = 'study' | 'energy' | 'friendship' | 'courage';
 export type TrpgPhase = 'MAP' | 'EVENT' | 'RESULT' | 'QUESTION' | 'COMBAT' | 'REWARD' | 'ENDING';
 export type TrpgQuestionGateId =
@@ -29,7 +30,7 @@ export type TrpgQuestionGateId =
   | 'HIDDEN_RESEARCH'
   | 'HIDDEN_CLEAR';
 export type TrpgCombatResolution = 'DEFEAT' | 'PERSUADE' | 'ESCAPE' | 'OVERWHELMED';
-export type TrpgCheckGrade = 'GREAT' | 'SUCCESS' | 'SETBACK';
+export type TrpgCheckGrade = 'GREAT' | 'SUCCESS' | 'MIXED' | 'SETBACK';
 
 export type TrpgLocation = {
   id: string;
@@ -151,6 +152,10 @@ export type TrpgCheckResult = {
   roll: number;
   statValue: number;
   fateBonus: number;
+  approach?: TrpgApproach;
+  approachBonus?: number;
+  consequence?: TrpgCopy;
+  resourceChanges?: { clues: number; stress: number; fate: number; time: number };
   itemBonus?: number;
   itemName?: TrpgCopy;
   total: number;

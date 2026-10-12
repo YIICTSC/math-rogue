@@ -1,3 +1,4 @@
+import { canUseTrpgApproach, trpgApproachBonus, trpgSupportCopy } from './schoolTrpgTabletop';
 import {
   SCHOOL_TRPG_EVENTS,
   SCHOOL_TRPG_REWARDS,
@@ -13,6 +14,7 @@ import {
 import {
   trpgCopy,
   type TrpgCampaignState,
+  type TrpgApproach,
   type TrpgCheckGrade,
   type TrpgCombatActionId,
   type TrpgCombatResolution,
@@ -76,6 +78,13 @@ export const getSchoolTrpgChoiceTarget = (state: TrpgCampaignState, choice: Trpg
   const masteryPressure = Math.min(2, Math.max(0, state.stats[choice.stat] - 4));
   const chapterPressure = Math.min(1, Math.max(0, state.chapter - 1));
   return choice.difficulty + masteryPressure + chapterPressure;
+};
+
+export const getSchoolTrpgCheckPreview = (state: TrpgCampaignState, choice: TrpgChoice, useFate = false, approach: TrpgApproach = 'STANDARD') => {
+ const bonus = trpgApproachBonus(approach) + (useFate && state.fate > 0 ? 2 : 0) + claimRewardEffect(state, 'CHECK_BONUS').amount;
+ const target = getSchoolTrpgChoiceTarget(state, choice);
+ const successes = Array.from({length: 6}, (_, i) => i + 1 + state.stats[choice.stat] + bonus).filter(total => total >= target).length;
+ return { successes, chance: Math.round(successes / 6 * 100), bonus, target };
 };
 
 const getActiveSchoolTrpgEvent = (state: TrpgCampaignState) => {
@@ -287,6 +296,7 @@ const createGuardianCombat = (state: TrpgCampaignState, insightBonus = 0, resolv
       + (researchQuality === 'CLEAR' ? 1 : 0)
       + (shortcutCrossing ? 1 : 0)
       + (signatureScore >= 4 ? 1 : 0)
+      + (state.flags[`fieldPlan.${state.chapter}`] ? 1 : 0)
       + insightBonus, 0, 6),
     resolve: clamp((state.flags.knowsPassphrase ? 2 : 0)
       + (momentum === 'DIALOGUE' || momentum === 'DEFENSE' ? 1 : 0)
@@ -312,6 +322,7 @@ export const resolveSchoolTrpgChoice = (
   state: TrpgCampaignState,
   choiceId: string,
   useFate: boolean,
+  approach: TrpgApproach = 'STANDARD',
 ): TrpgCampaignState => {
   const event = getActiveSchoolTrpgEvent(state);
   const choice = event?.choices.find(candidate => candidate.id === choiceId);
@@ -320,15 +331,17 @@ export const resolveSchoolTrpgChoice = (
   // condition in the engine (rather than only disabling the button) so old
   // saves, keyboard input, and scripted callers cannot bypass the branch.
   if (choice.requiresFlag && !state.flags[choice.requiresFlag]) return state;
+  if (!canUseTrpgApproach(state, approach) || !['STANDARD', 'CAREFUL', 'BOLD', 'TEAM'].includes(approach)) return state;
 
   const rolled = rollD6(state);
   const fateBonus = useFate && state.fate > 0 ? 2 : 0;
   const checkEffect = claimRewardEffect(state, 'CHECK_BONUS');
   const statValue = state.stats[choice.stat];
   const difficulty = getSchoolTrpgChoiceTarget(state, choice);
-  const total = rolled.roll + statValue + fateBonus + checkEffect.amount;
+  const approachBonus = trpgApproachBonus(approach);
+  const total = rolled.roll + statValue + fateBonus + checkEffect.amount + approachBonus;
   const success = total >= difficulty;
-  const grade: TrpgCheckGrade = total >= difficulty + 3 ? 'GREAT' : success ? 'SUCCESS' : 'SETBACK';
+  const grade: TrpgCheckGrade = total >= difficulty + 3 ? 'GREAT' : success ? 'SUCCESS' : total === difficulty - 1 ? 'MIXED' : 'SETBACK';
   // Early routine wins teach the route and can raise a weak stat to the stable
   // band. Past that band, growth requires a GREAT result; at 6 the stat is
   // deliberately stable while adaptive targets keep checks contestable.
@@ -342,11 +355,20 @@ export const resolveSchoolTrpgChoice = (
     ...state.stats,
     [choice.stat]: clamp(statValue + statGain, 1, 6),
   };
+  const consequence = approach === 'TEAM' ? trpgSupportCopy(choice.stat)
+    : grade === 'MIXED' ? trpgCopy('あと一歩だった。目的は果たせなかったが、失敗の跡から手がかりを1つ拾った。', 'あといっぽだった。もくてきははたせなかったが、しっぱいのあとからてがかりを1つひろった。', 'A near miss. You do not achieve the objective, but recover one clue from what went wrong.')
+    : approach === 'BOLD' ? success
+      ? trpgCopy('大胆な一手で、相手が隠していた手がかりまで引き出した。', 'だいたんないってで、あいてがかくしていたてがかりまでひきだした。', 'Your bold move exposes an additional hidden clue.')
+      : trpgCopy('賭けは外れた。無理をした分、追加の疲労が2残った。', 'かけははずれた。むりをしたぶん、ついかのひろうが2のこった。', 'The gamble fails. Pushing yourself adds 2 extra stress.')
+    : approach === 'CAREFUL' ? trpgCopy('準備に時間を使った。集中の疲労は残るが、判定を2支えた。', 'じゅんびにじかんをつかった。しゅうちゅうのひろうはのこるが、はんていを2ささえた。', 'Preparation costs time and concentration, adding 2 to your check and 1 stress.') : undefined;
   const outcomeFlags = success ? choice.successFlags : choice.failureFlags;
   const nextFlags = {
     ...state.flags,
     ...choice.flags,
     ...(outcomeFlags || {}),
+    ...(success && (choice.stat === 'study' || choice.stat === 'friendship') ? { sharedEvidence: true } : {}),
+    ...(approach === 'TEAM' ? { [`teamSupport.${state.chapter}`]: true } : {}),
+    [`approach.${event.id}`]: approach,
     [`choice.${event.id}`]: choice.id,
     [`check.grade.${event.id}`]: grade,
   };
@@ -356,6 +378,9 @@ export const resolveSchoolTrpgChoice = (
     roll: rolled.roll,
     statValue,
     fateBonus,
+    approach,
+    approachBonus,
+    consequence,
     itemBonus: checkEffect.amount,
     itemName: checkEffect.reward?.name,
     total,
@@ -367,7 +392,7 @@ export const resolveSchoolTrpgChoice = (
     nextPhase: event.nextPhase,
   } as const;
   const pendingQuestionGate = event.nextPhase === 'QUESTION' ? event.questionGate || null : state.pendingQuestionGate;
-  const effectBase = { ...state, flags: { ...checkEffect.flags, ...nextFlags } };
+  const effectBase = { ...state, flags: { ...nextFlags, ...(checkEffect.reward ? { [rewardUsedFlag(checkEffect.reward.id)]: true } : {}) } };
   const insightEffect = event.nextPhase === 'COMBAT' ? claimRewardEffect(effectBase, 'COMBAT_INSIGHT') : { amount: 0, reward: null, flags: effectBase.flags, log: [] as TrpgCopy[] };
   const resolveEffect = event.nextPhase === 'COMBAT' ? claimRewardEffect({ ...effectBase, flags: insightEffect.flags }, 'COMBAT_RESOLVE') : { amount: 0, reward: null, flags: insightEffect.flags, log: [] as TrpgCopy[] };
   const combat = event.nextPhase === 'COMBAT'
@@ -377,9 +402,10 @@ export const resolveSchoolTrpgChoice = (
     ...state,
     rngStep: rolled.rngStep,
     phase: 'RESULT',
+    time: state.time + (approach === 'CAREFUL' ? 1 : 0),
     stats: nextStats,
-    clues: clamp(state.clues + (success ? choice.clueOnSuccess + (grade === 'GREAT' ? 1 : 0) : 0), 0, 8),
-    stress: clamp(state.stress + (success ? 0 : choice.stressOnFailure + (grade === 'SETBACK' ? 1 : 0)), 0, 6),
+    clues: clamp(state.clues + (success ? choice.clueOnSuccess + (grade === 'GREAT' ? 1 : 0) + (approach === 'BOLD' ? 1 : 0) : grade === 'MIXED' ? 1 : 0), 0, 8),
+    stress: clamp(state.stress + (approach === 'CAREFUL' ? 1 : approach === 'TEAM' ? -1 : 0) + (success ? 0 : choice.stressOnFailure + (grade === 'SETBACK' ? 1 : 0) + (approach === 'BOLD' ? 2 : 0)), 0, 6),
     fate: clamp(state.fate - (fateBonus ? 1 : 0) + (success ? 0 : 1), 0, 3),
     flags: resolveEffect.flags,
     completedEventIds,
@@ -393,8 +419,9 @@ export const resolveSchoolTrpgChoice = (
     pendingQuestionGate,
     result,
     combat,
-    discoveryLog: [...state.discoveryLog, ...checkEffect.log, success ? choice.success : choice.failure, ...insightEffect.log, ...resolveEffect.log].slice(-18),
+    discoveryLog: [...state.discoveryLog, ...checkEffect.log, success ? choice.success : choice.failure, ...(consequence ? [consequence] : []), ...insightEffect.log, ...resolveEffect.log].slice(-18),
   };
+  updated.result = { ...result, resourceChanges: { clues: updated.clues - state.clues, stress: updated.stress - state.stress, fate: updated.fate - state.fate, time: updated.time - state.time } };
   return reconcileSchoolTrpgUnlocks(updated);
 };
 
@@ -563,11 +590,21 @@ const finishCombat = (
   };
 };
 
+export const getSchoolTrpgCombatOpportunity = (state: TrpgCampaignState) => {
+ const previous = state.combat?.actionHistory?.at(-1);
+ if (previous === 'GUARD') return { action: 'STRIKE', copy: trpgCopy('反撃の好機：次の攻撃ダメージ+2', 'はんげきのこうき：つぎのこうげきダメージ+2', 'COUNTER OPENING: your next strike deals +2 damage') };
+ if (previous === 'INVESTIGATE' && (state.combat!.insight >= 3 || state.flags.knowsPassphrase)) return { action: 'PERSUADE', copy: trpgCopy('証拠を提示：次の説得+1、反撃を1軽減', 'しょうこをていじ：つぎのせっとく+1、はんげきを1けいげん', 'PRESENT EVIDENCE: next persuasion +1, counterattack reduced by 1') };
+ if (previous === 'INTERACT') return { action: 'INVESTIGATE', copy: trpgCopy('変化を観察：次の調査+1', 'へんかをかんさつ：つぎのちょうさ+1', 'OBSERVE THE CHANGE: next investigation +1') };
+ return null;
+};
+
 export const performSchoolTrpgCombatAction = (
   state: TrpgCampaignState,
   action: TrpgCombatActionId,
 ): TrpgCampaignState => {
   if (state.phase !== 'COMBAT' || !state.combat || state.combat.result) return state;
+  const opportunity = getSchoolTrpgCombatOpportunity(state);
+  const combo = opportunity?.action === action;
   const rolled = rollD6(state);
   const combat = {
     ...state.combat,
@@ -583,7 +620,7 @@ export const performSchoolTrpgCombatAction = (
 
   if (action === 'STRIKE') {
     const modeBonus = mode === 'RITUAL' && rolled.roll >= 4 ? 1 : mode === 'PARADOX' && combat.insight >= 3 ? 1 : 0;
-    const amount = Math.max(1, state.stats.courage + Math.ceil(rolled.roll / 2) - 1 + modeBonus);
+    const amount = Math.max(1, state.stats.courage + Math.ceil(rolled.roll / 2) - 1 + modeBonus + (combo ? 2 : 0));
     combat.enemyHp = Math.max(0, combat.enemyHp - amount);
     combat.logs.push({ turn: combat.turn, copy: modeBonus > 0
       ? trpgCopy(`${combatCopy(action, amount).ja}（${mode}の共鳴）`, `${combatCopy(action, amount).hira}（${mode}のきょうめい）`, `${combatCopy(action, amount).en} (${mode} resonance).`)
@@ -591,7 +628,7 @@ export const performSchoolTrpgCombatAction = (
     if (combat.enemyHp <= 0) resolution = 'DEFEAT';
   } else if (action === 'INVESTIGATE') {
     const modeBonus = mode === 'CHASE' && rolled.roll >= 4 ? 1 : mode === 'ECHO' ? 1 : 0;
-    combat.insight = clamp(combat.insight + 1 + (rolled.roll >= 4 ? 1 : 0) + (state.stats.study >= 3 ? 1 : 0) + modeBonus, 0, 6);
+    combat.insight = clamp(combat.insight + 1 + (rolled.roll >= 4 ? 1 : 0) + (state.stats.study >= 3 ? 1 : 0) + modeBonus + (combo ? 1 : 0), 0, 6);
     const ritualBreak = mode === 'RITUAL' && rolled.roll >= 5;
     if (ritualBreak) combat.enemyHp = Math.max(0, combat.enemyHp - 1);
     combat.logs.push({ turn: combat.turn, copy: ritualBreak
@@ -602,8 +639,9 @@ export const performSchoolTrpgCombatAction = (
     if (combat.insight < 3 && !state.flags.knowsPassphrase) {
       combat.logs.push({ turn: combat.turn, copy: trpgCopy('情報が足りず、言葉は番人へ届かなかった。', 'じょうほうがたりず、ことばはばんにんへとどかなかった。', 'Without enough insight, your words cannot reach the guardian.') });
     } else {
-      const amount = Math.max(1, state.stats.friendship + Math.floor(rolled.roll / 2) + (state.flags.knowsPassphrase ? 1 : 0) + (mode === 'PARADOX' ? 1 : 0));
+      const amount = Math.max(1, state.stats.friendship + Math.floor(rolled.roll / 2) + (state.flags.knowsPassphrase ? 1 : 0) + (mode === 'PARADOX' ? 1 : 0) + (combo ? 1 : 0));
       combat.resolve = clamp(combat.resolve + amount, 0, 8);
+      if (combo) guard = 1;
       combat.logs.push({ turn: combat.turn, copy: combatCopy(action, combat.resolve) });
       if (combat.resolve >= 8) resolution = 'PERSUADE';
     }
@@ -685,6 +723,7 @@ export const performSchoolTrpgCombatAction = (
     }
   }
 
+  if (combo && opportunity) combat.logs.push({ turn: combat.turn, copy: opportunity.copy });
   combat.phase = combat.enemyHp <= combat.enemyMaxHp / 2 ? 2 : combat.hazard && combat.hazard.progress >= combat.hazard.target ? 3 : 1;
   const withRoll: TrpgCampaignState = { ...state, rngStep: rolled.rngStep, flags: nextFlags };
   if (resolution) return finishCombat(withRoll, combat, resolution);
