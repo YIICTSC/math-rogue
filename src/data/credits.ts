@@ -25,7 +25,7 @@ export const CREDIT_SECTIONS = [
   },
   {
     title: 'Sound Effects',
-    entries: ['魔王魂（森田交一）', 'https://maou.audio/'],
+    entries: ['魔王魂（森田交一）', 'https://maou.audio/', 'Springin’ Sound Stock'],
   },
   {
     title: 'Special Supporters',

@@ -1,4 +1,8 @@
 export const COIN_RELICS = [
+ ['magnet','磁石の羅針盤','Magnetic compass','じしゃくのらしんばん','盤面のコインを中央へ少し引き寄せる。','Coins gently drift toward the center.','ばんめんのこいんをちゅうおうへすこしひきよせる。'],
+ ['shower','星降りの鈴','Star shower bell','ほしふりのすず','10枚投入するたび宝石が2枚降る。','Two gems fall after every 10 drops.','10まいとうにゅうするたびほうせきが2まいふる。'],
+ ['recycler','再生の歯車','Recycling gear','さいせいのはぐるま','落下損失が5枚に達するたび3枚補給。','Recover 3 coins for every 5 side losses.','らっかそんしつが5まいにたっするたび3まいほきゅう。'],
+ ['resonance','共鳴の宝冠','Resonant crown','きょうめいのほうかん','磁石＋中央獲得、双子＋宝石の組合せで得点強化。','Magnet + center and twin + gems grant score synergies.','じしゃく＋ちゅうおうかくとく、ふたご＋ほうせきのくみあわせでとくてんきょうか。'],
  ['mint','豊穣の鋳型','Abundant mold','ほうじょうのいがた','各層の開始コイン＋5。','Start each stage with 5 extra coins.','かくそうのかいしこいん＋5。'],
  ['twin','双子のコイン','Twin coin','ふたごのこいん','投入時に25%の確率で追加コイン。','25% chance to drop an extra coin.','とうにゅうじに25%のかくりつでついかこいん。'],
  ['rebate','還元の財布','Refund purse','かんげんのさいふ','獲得時のコイン返却率＋15%。','Coin recovery chance +15%.','かくとくじのこいんへんきゃくりつ＋15%。'],
@@ -25,5 +29,6 @@ export const COIN_RELICS = [
  ['treasury','金庫の鍵','Vault key','きんこのかぎ','層クリア時に金庫コイン＋4。','Gain 4 vault coins after each stage.','そうくりあじにきんここいん＋4。'],
 ] as const;
 export type CoinRelicId=typeof COIN_RELICS[number][0];
-export const COIN_STAGES=['木漏れ日の広場','銅の採掘場','星の商店街','嵐の造幣所','黄金竜の宝庫'] as const;
+export const COIN_STAGES=['木漏れ日の広場','銅の採掘場','星の商店街','嵐の造幣所','黄金竜の宝庫','水晶の地下工房','流星の回廊','天空竜の金庫'] as const;
+export const COIN_MODIFIERS=['静かな台','宝石の潮流','黄金の祝福','横風の台'] as const;
 export const COIN_EVENTS=['古い泉','旅の商人','光る卵','眠る金庫','迷子の妖精','不思議な鏡'] as const;

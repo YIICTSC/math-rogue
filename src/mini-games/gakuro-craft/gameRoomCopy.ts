@@ -1,4 +1,5 @@
-export const GAME_ROOM_ENGLISH:Record<string,string>={
+import {ADVENTURE_ENGLISH,ADVENTURE_HIRAGANA} from './adventureCopy';
+export const GAME_ROOM_ENGLISH:Record<string,string>={...ADVENTURE_ENGLISH,
   "2D表示": "2D view",
   "3D表示": "3D view",
   "真上から見る": "View from above",
@@ -53,7 +54,7 @@ export const GAME_ROOM_ENGLISH:Record<string,string>={
   "1〜4人のブロック崩し。装甲ブロックは2回当てて破壊。指か左右キーで操作し、75秒の得点で勝負。": "One to four breakout players. Armored blocks take two hits. Move with touch or left/right keys and compete for points over seventy-five seconds.",
   "今回の冒険点": "This floor’s expedition points"
 };
-export const GAME_ROOM_HIRAGANA:Record<string,string>={
+export const GAME_ROOM_HIRAGANA:Record<string,string>={...ADVENTURE_HIRAGANA,
   "2D表示": "2Dひょうじ",
   "3D表示": "3Dひょうじ",
   "真上から見る": "まうえからみる",

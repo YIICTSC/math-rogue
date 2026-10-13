@@ -1,0 +1,8 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import ffmpeg from 'ffmpeg-static';
+const pages=['https://www.springin.org/sound-stock/subcategory/money/','https://www.springin.org/sound-stock/'];
+const urls=[];for(const page of pages){const html=await (await fetch(page)).text();urls.push(...html.matchAll(/https[^"<> ]+\.mp3/g));}
+const selections=[['dozer-drop','お金を落とす',.3,.6],['dozer-collect','お金ジャラジャラ1',.65,.5],['dozer-shower','小銭をばらまいた音1',1.1,.45],['dozer-gem','キュピーン1',.85,.4],['dozer-pulse','ビヨン1',.5,.4],['dozer-clear','ジャジャーン1',2,.5]];
+await mkdir('tmp/coin-sounds',{recursive:true});await mkdir('public/sfx/rpg-games',{recursive:true});await mkdir('public/web-audio/sfx/rpg-games',{recursive:true});
+for(const[cue,title,duration,volume]of selections){const url=urls.map(m=>m[0]).find(url=>decodeURI(url).normalize('NFC').endsWith('/'+title+'.mp3'));if(!url)throw Error('Missing source '+title);const response=await fetch(encodeURI(url));if(!response.ok)throw Error(title+' '+response.status);const source='tmp/coin-sounds/'+cue+'.mp3';await writeFile(source,Buffer.from(await response.arrayBuffer()));const filter=`silenceremove=start_periods=1:start_threshold=-50dB,volume=${volume},afade=t=out:st=${duration-.08}:d=0.08`;for(const[type,args,out]of [['mp3',['-codec:a','libmp3lame','-b:a','96k'],'public/sfx/rpg-games/'],['ogg',['-codec:a','libopus','-b:a','64k'],'public/web-audio/sfx/rpg-games/']])execFileSync(ffmpeg,['-y','-v','error','-i',source,'-ac','1','-ar','48000','-t',String(duration),'-af',filter,...args,out+cue+'.'+type]);console.log(cue+' ← '+title);}
