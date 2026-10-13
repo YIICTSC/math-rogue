@@ -90,7 +90,8 @@ class AndroidAssetPackService {
   private error: string | null = null;
 
   isAvailable() {
-    return Capacitor.getPlatform() === 'android'
+    return import.meta.env.VITE_ANDROID_BUNDLED_ASSETS !== 'true'
+      && Capacitor.getPlatform() === 'android'
       && Capacitor.isPluginAvailable('Filesystem')
       && Capacitor.isPluginAvailable('FileTransfer');
   }

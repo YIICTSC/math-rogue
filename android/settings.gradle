@@ -1,4 +1,5 @@
 include ':app'
+include ':bundled_media_1', ':bundled_media_2', ':bundled_media_3'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 

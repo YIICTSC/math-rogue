@@ -58,7 +58,7 @@ export const readAndroidAssetPackInstallState = (): AndroidAssetPackInstallState
 };
 
 export const resolveDownloadedAndroidAssetUrl = (path: string): string | null => {
-  if (!isAndroidBuild || typeof window === 'undefined') return null;
+  if (!isAndroidBuild || import.meta.env.VITE_ANDROID_BUNDLED_ASSETS === 'true' || typeof window === 'undefined') return null;
   const normalizedPath = path.normalize('NFC').replace(/^\/+/, '');
   if (!normalizedPath.includes('/')) return null;
   const packId = getAndroidAssetPackId(normalizedPath);

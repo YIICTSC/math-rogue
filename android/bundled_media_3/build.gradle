@@ -1,0 +1,5 @@
+plugins { id 'com.android.asset-pack' }
+assetPack {
+    packName = 'bundled_media_3'
+    dynamicDelivery { deliveryType = 'install-time' }
+}
