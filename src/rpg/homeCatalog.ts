@@ -65,6 +65,7 @@ export const FURNISHINGS: Furnishing[] = [
  {id:'connectfour',name:'四目並べ台',cost:{plank:3,ore:1},width:2,height:1,game:'connectfour'},
  {id:'memory',name:'神経衰弱テーブル',cost:{plank:2,reed:3},width:2,height:2,game:'memory'},
  {id:'race',name:'すごろくテーブル',cost:{plank:3,crystal:1},width:2,height:2,game:'race'},
+ {id:'skyadventure',name:'空島アドベンチャー筐体',nameEn:'Sky Adventure cabinet',nameHiragana:'そらじまあどべんちゃーきょうたい',cost:{plank:5,ore:3,crystal:4},width:2,height:1,game:'skyadventure'},
  {id:'coindozer',name:'コインドーザー',cost:{plank:5,ore:3,crystal:2},width:2,height:3,game:'coindozer'},
  {id:'rhythm',name:'音ゲー筐体',cost:{plank:5,ore:3,crystal:4},width:2,height:1,game:'rhythm'},
  {id:'reaction',name:'反応ゲーム機',cost:{plank:3,ore:2,crystal:2},width:1,height:1,game:'reaction'},

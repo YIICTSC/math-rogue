@@ -1,0 +1,4 @@
+import assert from 'node:assert/strict';
+export const testLesson={title:'Multiplication',questions:[0,1,2].map(i=>({id:'q'+i,mode:'MULTIPLICATION',question:'2 × 4 = ?',options:['8','6','7','9'],correct:0}))};
+export function completeFurnitureQuiz(gameCommand,w,g,id){const l=w.learning?.[id];if(!l?.due)return false;const p=w.players[id];gameCommand(w,p,{type:'game_learn_finish',key:g.key,batch:l.batch});assert(l.due);gameCommand(w,p,{type:'game_learn_set',key:g.key,batch:l.batch-1,lesson:testLesson});assert(!l.lesson);gameCommand(w,p,{type:'game_learn_set',key:g.key,batch:l.batch,lesson:testLesson});assert(l.lesson);
+ for(let i=0;i<3;i++){gameCommand(w,p,{type:'game_learn_answer',key:g.key,batch:l.batch,index:i,option:i%2});gameCommand(w,p,{type:'game_learn_answer',key:g.key,batch:l.batch,index:i,option:0});assert.equal(l.answers.length,i+1);}gameCommand(w,p,{type:'game_learn_finish',key:g.key,batch:l.batch});assert(!l.due);return true;}

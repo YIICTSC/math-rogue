@@ -822,7 +822,7 @@ export default function RhythmPanel({
       </section>
     );
   return (
-    <section className="rpg-rhythm-lobby" style={artStyle}><FurnitureTitle kind="rhythm" t={t}/>
+    <section inert={!!world.learning?.[selfId]?.due} className="rpg-rhythm-lobby" style={artStyle}><FurnitureTitle kind="rhythm" t={t}/>
       <div className="rpg-rhythm-marquee"><span aria-hidden="true">✦ ASTRAL SYMPHONY ✦</span><h3>♫ {t("学ロリズム")}</h3><small>143 TRACKS · 4 LANES · 1–4 PLAYERS</small></div>
       <p>
         {t(

@@ -1,3 +1,5 @@
+import type {FurnitureLearner} from '../mini-games/gakuro-craft/furnitureLearning';
+import {GameMode} from '../types';
 import {isHomeTrack,MUSIC_FURNITURE} from './homeTracks';
 import type {BuildingSurvey} from './buildingGoals';
 import {landmarkBlock,landscapeHeight} from './worldLandscape';
@@ -46,7 +48,7 @@ export function natureAt(w:World,tile:number):NatureNode|null {
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
 export interface LifePlayer {buildingGoals?:string[];buildingSurvey?:BuildingSurvey;relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
-export interface LifeWorld {nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
+export interface LifeWorld {furnitureLearning?:Record<string,FurnitureLearner>;nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-home-music';id:string;track:string}|{type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean}|{type:'life-pack';id:string}|{type:'life-rotate';id:string;direction?:1|-1;flip?:boolean};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
@@ -79,12 +81,12 @@ export function homeGameWorld(w:World):HomeGameWorld {
  for(const h of life.houses){tiles[h.home.tile]={homeOwner:h.owner};homeViews[h.home.tile]=h.home;}
  for(const [i,r] of (w.voxelRooms||[]).entries()){const tile=WIDTH*HEIGHT+i+1;tiles[tile]={homeOwner:r.owner};homeViews[tile]={tile,level:1,furniture:r.furniture.filter(f=>furnishing(f.item)?.game).map((f,index)=>({slot:f.slot??index,item:f.item}))};}
  const players=Object.fromEntries(Object.values(w.players).filter(p=>!p.spectator).map(p=>{const house=life.houses.find(h=>h.id===p.life?.indoors),room=currentVoxelRoom(w,p),voxelHome=room&&(room.owner===p.id||room.shared)?homeViews[WIDTH*HEIGHT+(w.voxelRooms?.indexOf(room)||0)+1]:undefined;return [p.id,{id:p.id,name:p.name,indoors:!!house||!!voxelHome,homeTile:house?.home.tile??voxelHome?.tile,progress:{home:house?.home||voxelHome||{tile:-1,level:0,furniture:[]}}}];}));
- return {tiles,homeViews,players,games:life.games,time:life.time,paused:w.ended||!w.started};
+ return {learning:life.furnitureLearning??={},learningSelection:{mode:(w.setup?.mode||GameMode.MULTIPLICATION) as GameMode,modes:w.setup?.modePool,assignment:w.setup?.assignment},tiles,homeViews,players,games:life.games,time:life.time,paused:w.ended||!w.started};
 }
 export function interiorOf(h:House):Interior {
  if(h.interior)return h.interior;
  const room=newInterior(),positions=[{x:5,y:3},{x:10,y:7},{x:3,y:7}];
- h.home.furniture.filter(f=>['darts','billiards','arcade','bowling','coindozer'].includes(f.item)).forEach((f,i)=>room.placed.push({id:`legacy-${f.slot}`,item:f.item,...positions[i%3],rotation:0,slot:f.slot}));return room;
+ h.home.furniture.filter(f=>['skyadventure','darts','billiards','arcade','bowling','coindozer'].includes(f.item)).forEach((f,i)=>room.placed.push({id:`legacy-${f.slot}`,item:f.item,...positions[i%3],rotation:0,slot:f.slot}));return room;
 }
 function enterHouse(w:World,p:Adventurer,h:House){delete p.position3D;const lp=lifePlayer(p);h.interior??=interiorOf(h);lp.indoors=h.id;lp.roomPos={...ROOM_SPAWN};lp.work=undefined;}
 function leaveHouse(w:World,p:Adventurer,now:number){delete p.position3D;const lp=lifePlayer(p),h=w.life.houses.find(h=>h.id===lp.indoors);if(h){const exit=[{x:h.x,y:h.y+1},{x:h.x+1,y:h.y},{x:h.x-1,y:h.y},{x:h.x,y:h.y-1}].find(q=>lifeWalkable(w,q.x,q.y)&&!w.life.houses.some(home=>home.x===q.x&&home.y===q.y));if(exit){p.x=exit.x;p.y=exit.y;}}lp.indoors=undefined;lp.roomPos=undefined;lp.work=undefined;tickGames(homeGameWorld(w),0);}
@@ -105,7 +107,7 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   room.music=a.track;return tell('自宅のBGMを変更しました。');
  }
  if(a.type==='life-game'){
-  if(!lp.indoors||!a.command||typeof a.command.type!=='string'||!['game_rules','game_expedition','game_relic','game_route','game_camp','game_join','game_leave','game_start','game_dart','game_shot','game_cue','game_paddle','game_board','game_roll','game_coin_drop','game_coin_pulse','game_coin_choice','game_coin_route','game_coin_buy','game_coin_event','game_react','game_rhythm_select','game_rhythm_ready','game_rhythm_pause','game_rhythm_hit'].includes(a.command.type))return false;
+  if(!lp.indoors||!a.command||typeof a.command.type!=='string'||!['game_rules','game_expedition','game_relic','game_route','game_camp','game_learn_set','game_learn_answer','game_learn_finish','game_sky_input','game_sky_relic','game_join','game_leave','game_start','game_dart','game_shot','game_cue','game_paddle','game_board','game_roll','game_coin_drop','game_coin_pulse','game_coin_choice','game_coin_route','game_coin_buy','game_coin_event','game_react','game_rhythm_select','game_rhythm_ready','game_rhythm_pause','game_rhythm_hit'].includes(a.command.type))return false;
   if(a.command.type==='game_join'){const slot=a.command.slot;const h=life.houses.find(h=>h.id===lp.indoors),f=h&&interiorOf(h).placed.find(f=>f.slot===slot);if(!f||furnitureDistance(lp.roomPos||ROOM_SPAWN,f)>2)return tell('ゲーム家具の近くへ移動してください。');}
   const host=homeGameWorld(w),reply=gameCommand(host,host.players[p.id],a.command);life.games=host.games;if(reply?.type==='notice')p.message=reply.text;w.revision++;return true;
  }

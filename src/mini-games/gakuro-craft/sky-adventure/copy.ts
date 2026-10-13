@@ -1,0 +1,27 @@
+const rows=[
+ ['空島ランドセルアドベンチャー','Sky Backpack Adventure','そらじまらんどせるあどべんちゃー'],
+ ['空島アドベンチャー筐体','Sky Adventure cabinet','そらじまあどべんちゃーきょうたい'],
+ ['風の草原島','Windy Meadow Island','かぜのそうげんじま'],['夕焼けの時計塔','Sunset Clock Tower','ゆうやけのとけいとう'],['星空の水晶島','Starlit Crystal Island','ほしぞらのすいしょうじま'],
+ ['走って、跳んで、3つの空島の星を集めよう。','Run, jump and collect stars across three sky islands.','はしって、とんで、3つのそらじまのほしをあつめよう。'],
+ ['ひとりから4人まで。それぞれの冒険点で競おう。','1–4 adventurers. Compete with your own adventure score.','ひとりから4にんまで。それぞれのぼうけんてんできそおう。'],
+ ['星を3つ集めて頂上の門へ！','Collect three stars and reach the summit gate!','ほしを3つあつめてちょうじょうのもんへ！'],
+ ['次の空島を探索しよう！','Explore the next sky island!','つぎのそらじまをたんさくしよう！'],
+ ['もう一度挑戦！星はこの島で集め直そう。','Try again! Collect this island’s stars once more.','もういちどちょうせん！ほしはこのしまであつめなおそう。'],
+ ['旗から再開！','Back to the checkpoint flag!','はたからさいかい！'],['おばけに注意！踏むかアタックしよう。','Watch out for ghosts! Stomp or attack them.','おばけにちゅうい！ふむかあたっくしよう。'],
+ ['ジャンプ台で高く飛ぼう！','Bounce pads launch you high!','じゃんぷだいでたかくとぼう！'],['チェックポイント！','Checkpoint!','ちぇっくぽいんと！'],
+ ['コインの星を獲得！','Coin star collected!','こいんのほしをかくとく！'],['スイッチの星を獲得！','Switch star collected!','すいっちのほしをかくとく！'],['頂上の星を獲得！','Summit star collected!','ちょうじょうのほしをかくとく！'],
+ ['おばけを追い払った！','Ghost chased away!','おばけをおいはらった！'],['3つの空島を踏破！','All three sky islands cleared!','3つのそらじまをとうは！'],
+ ['島をクリア！次の島への強化を選ぼう。','Island cleared! Choose an upgrade for the next island.','しまをくりあ！つぎのしまへのきょうかをえらぼう。'],
+ ['空島の冒険が終了しました！','The sky adventure is over!','そらじまのぼうけんがしゅうりょうしました！'],
+ ['風のブーツ','Wind boots · faster movement','かぜのぶーつ'],['雲の羽','Cloud wings · higher jumps','くものはね'],['星の磁石','Star magnet · wider coin collection','ほしのじしゃく'],['おまもり','Charm · reduced enemy damage','おまもり'],['宝探しの袋','Treasure bag · double coin points','たからさがしのふくろ'],
+ ['急降下','Ground pound','きゅうこうか'],
+ ['3Dステージを準備中','Preparing the 3D stage','3Dすてーじをじゅんびちゅう'],['カメラを戻す','Reset camera','かめらをもどす'],['アタック','Attack','あたっく'],
+ ['WASD・方向キーで移動 / Spaceで2段ジャンプ / Shiftでダッシュ / Jでアタック / Cで急降下','WASD/arrows: move · Space: double jump · Shift: dash · J: attack · C: ground pound','WASD・ほうこうきーでいどう / Spaceで2だんじゃんぷ / Shiftでだっしゅ / Jであたっく / Cできゅうこうか'],
+ ['画面をドラッグ、またはQ・Eでカメラ回転。コイン8枚・スイッチ・頂上で星を集め、門へ進もう。','Drag the scene or use Q/E to rotate the camera. Get stars from 8 coins, the switch and the summit, then reach the gate.','がめんをどらっぐ、またはQ・Eでかめらかいてん。こいん8まい・すいっち・ちょうじょうでほしをあつめ、もんへすすもう。'],
+ ['旗で落下後の再開地点を更新。金の丸はジャンプ台。敵は上から踏むかアタックで追い払おう。','Flags set your respawn point. Golden circles are bounce pads. Stomp or attack ghosts.','はたでらっかごのさいかいてんをこうしん。きんのまるはじゃんぷだい。てきはうえからふむかあたっくでおいはらおう。'],
+ ['3Dを開始できませんでした。ブラウザの3D表示を確認し、もう一度お試しください。','Could not start 3D. Check browser graphics support and retry.','3Dをかいしできませんでした。ぶらうざの3Dひょうじをかくにんし、もういちどおためしください。'],
+ ['仲間のゴールを待っています。','Waiting for the other adventurers to finish.','なかまのごーるをまっています。'],
+ ['同じ家の家具から参加。全11種類をひとりから最大4人で遊べます。盤面ゲームはひとりならCPU対戦。分岐とレリックの冒険も選べます。','Join from furniture in the same home. Play all 11 games with 1–4 players. Board games include solo CPU opponents and relic expeditions.','おなじいえのかぐからさんか。ぜん11しゅるいをひとりからさいだい4にんであそべます。ばんめんげーむはひとりならCPUたいせん。ぶんきとれりっくのぼうけんもえらべます。'],
+] as const;
+export const SKY_ENGLISH=Object.fromEntries(rows.map(([jp,en])=>[jp,en]));
+export const SKY_HIRAGANA=Object.fromEntries(rows.map(([jp,,hi])=>[jp,hi]));

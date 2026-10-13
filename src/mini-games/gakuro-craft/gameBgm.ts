@@ -2,7 +2,7 @@ import type {GameKind} from './homeGames';
 
 // Existing Learning Rogue tracks, selected for each game's pace and atmosphere.
 export const GAME_BGM = {
-  coindozer:'poker_play', billiards: 'poker_play', darts: 'poker_shop', bowling: 'dungeon_gym',
+  skyadventure:'paper_plane_vacation', coindozer:'poker_play', billiards: 'poker_play', darts: 'poker_shop', bowling: 'dungeon_gym',
   reversi: 'dungeon_library', connectfour: 'math', memory: 'dungeon_music',
   race: 'paper_plane_vacation', arcade: 'paper_plane_battle', reaction: 'kocho_battle',
   rhythm: null,
