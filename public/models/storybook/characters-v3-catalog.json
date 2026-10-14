@@ -1,0 +1,123 @@
+{
+  "version": 3,
+  "models": [
+    "humanhead",
+    "head",
+    "sweater",
+    "trouser",
+    "sleeve",
+    "mitten",
+    "shoe",
+    "ear",
+    "pointedear",
+    "robothead",
+    "collar",
+    "haircap",
+    "muzzle",
+    "floppyear",
+    "tail",
+    "hairlock",
+    "hairstrand",
+    "hairdo_0",
+    "hairdo_1",
+    "hairdo_2",
+    "hairdo_3",
+    "hairdo_4",
+    "hairdo_5",
+    "hairdo_6",
+    "hairdo_7",
+    "hairdo_8",
+    "hairdo_9",
+    "hairdo_10",
+    "acc_1_ink",
+    "acc_1_gold",
+    "acc_1_lens",
+    "acc_2_outfit",
+    "acc_2_gold",
+    "acc_2_white",
+    "acc_2_lens",
+    "acc_3_gold",
+    "acc_3_green",
+    "acc_4_ink",
+    "acc_4_gold",
+    "acc_5_ink",
+    "acc_5_gold",
+    "acc_6_ink",
+    "acc_6_gold",
+    "acc_6_lens",
+    "acc_7_gold",
+    "acc_7_pink",
+    "acc_8_gold",
+    "acc_8_pink",
+    "acc_8_green",
+    "acc_9_ink",
+    "acc_9_gold",
+    "acc_10_ink",
+    "acc_10_pink",
+    "acc_11_outfit",
+    "acc_11_ink",
+    "acc_11_gold",
+    "acc_12_gold",
+    "acc_13_outfit",
+    "acc_13_white"
+  ],
+  "accessories": {
+    "1": [
+      "ink",
+      "gold",
+      "lens"
+    ],
+    "2": [
+      "outfit",
+      "gold",
+      "white",
+      "lens"
+    ],
+    "3": [
+      "gold",
+      "green"
+    ],
+    "4": [
+      "ink",
+      "gold"
+    ],
+    "5": [
+      "ink",
+      "gold"
+    ],
+    "6": [
+      "ink",
+      "gold",
+      "lens"
+    ],
+    "7": [
+      "gold",
+      "pink"
+    ],
+    "8": [
+      "gold",
+      "pink",
+      "green"
+    ],
+    "9": [
+      "ink",
+      "gold"
+    ],
+    "10": [
+      "ink",
+      "pink"
+    ],
+    "11": [
+      "outfit",
+      "ink",
+      "gold"
+    ],
+    "12": [
+      "gold"
+    ],
+    "13": [
+      "outfit",
+      "white"
+    ]
+  }
+}

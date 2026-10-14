@@ -12,8 +12,9 @@ export interface AvatarPart { geometry: T.BufferGeometry; material: T.Material; 
 export function createAvatarParts(): AvatarPart[] {
   const parts: AvatarPart[] = [];
   const ball = new T.SphereGeometry(1, 16, 12), box = new RoundedBoxGeometry(1, 1, 1, 2, .14), cone = new T.ConeGeometry(1, 1, 4);
-  const material = (color: string, metalness = 0) => new T.MeshStandardMaterial({ color, metalness, roughness: .78 });
+  const material = (color: string, metalness = 0) => new T.MeshStandardMaterial({ color, metalness, roughness: .43 });
   const head=characterGeometry('head',ball),sweater=characterGeometry('sweater',box),sleeve=characterGeometry('sleeve',ball),mitten=characterGeometry('mitten',ball),ear=characterGeometry('ear',ball),pointed=characterGeometry('pointedear',cone),robot=characterGeometry('robothead',box),collar=characterGeometry('collar',box);
+  const muzzle=characterGeometry('muzzle',ball),floppy=characterGeometry('floppyear',ball),tail=characterGeometry('tail',ball);
   const paint = material('#ffffff'), white = material('#faf4e8'), dark = material('#17243a'), pink = material('#ffadbe'), gold = material('#ffc94b', .65);
   const add = (geometry: T.BufferGeometry, mat: T.Material, position: number[], scale: number[], color?: AvatarColor, visible?: AvatarPart['visible'], rotation = [0, 0, 0]) => parts.push({ geometry, material: mat, position, scale, rotation, color, visible });
   const species = (n: number) => (a: KartAvatar) => a.species === n;
@@ -45,14 +46,14 @@ export function createAvatarParts(): AvatarPart[] {
     for (const side of [-1, 1]) {
       add(pointed, paint, [side * .38, 2.39, -.15], [.38, .5, .28], 'body', species(n), [0, 0, -side * .18]);
       add(cone, pink, [side * .38, 2.39, .005], [.21, .3, .03], undefined, species(n), [0, 0, -side * .18]);
-      add(ball, white, [side * .14, 1.76, .32], [.2, .15, .15], undefined, species(n));
+      add(muzzle, white, [side * .14, 1.76, .32], [.2, .15, .15], undefined, species(n));
     }
     add(ball, dark, [0, 1.83, .48], [.085, .06, .055], undefined, species(n));
-    add(ball, paint, [.63, 1.07, -.92], [.19, n === 4 ? .46 : .3, .22], 'body', species(n), [0, 0, -.65]);
+    add(tail, paint, [.63, 1.07, -.92], [.19, n === 4 ? .46 : .3, .22], 'body', species(n), [0, 0, -.65]);
   }
   // Dog: floppy ears and a projecting muzzle.
-  for (const side of [-1, 1]) add(ball, paint, [side * .55, 1.92, -.15], [.21, .48, .21], 'hair', species(2), [0, 0, side * .25]);
-  add(ball, white, [0, 1.75, .34], [.32, .2, .27], undefined, species(2));
+  for (const side of [-1, 1]) add(floppy, paint, [side * .55, 1.92, -.15], [.21, .48, .21], 'hair', species(2), [0, 0, side * .25]);
+  add(muzzle, white, [0, 1.75, .34], [.32, .2, .27], undefined, species(2));
   add(ball, dark, [0, 1.85, .58], [.12, .08, .07], undefined, species(2));
   // Rabbit: tall ears, pink inner ears and cotton tail.
   for (const side of [-1, 1]) {
@@ -66,7 +67,7 @@ export function createAvatarParts(): AvatarPart[] {
     add(ball, dark, [side * .42, 2.27, -.17], [.23, .24, .18], undefined, species(5));
     add(ball, dark, [side * .2, 1.95, .31], [.15, .18, .075], undefined, species(5), [0, 0, side * .25]);
   }
-  add(ball, white, [0, 1.73, .3], [.27, .18, .15], undefined, species(5));
+  add(muzzle, white, [0, 1.73, .3], [.27, .18, .15], undefined, species(5));
   add(ball, dark, [0, 1.8, .44], [.09, .06, .04], undefined, species(5));
   // Penguin: belly bib, beak, side flippers and orange feet.
   add(ball, white, [0, 1.36, .02], [.37, .44, .17], undefined, species(6));
@@ -83,20 +84,12 @@ export function createAvatarParts(): AvatarPart[] {
   }
   add(box, dark, [0, 2.49, -.1], [.07, .26, .07], undefined, species(7));
   add(ball, gold, [0, 2.64, -.1], [.11, .11, .11], undefined, species(7));
-  // Accessories retain species silhouettes; ears remain visible above headwear.
-  const accessory = (n: number) => (a: KartAvatar) => a.accessory === n;
-  for (const side of [-1, 1]) add(new T.TorusGeometry(.16, .035, 6, 12), gold, [side * .21, 1.96, .42], [1, 1, 1], undefined, accessory(1));
-  add(box, gold, [0, 1.96, .43], [.15, .035, .035], undefined, accessory(1));
-  add(ball, paint, [0, 2.17, -.2], [.61, .39, .52], 'outfit', accessory(2));
-  add(box, dark, [0, 2.1, .35], [.86, .2, .1], undefined, accessory(2));
-  add(new T.CylinderGeometry(.43, .43, .17, 12), gold, [0, 2.48, -.14], [1, 1, 1], undefined, accessory(3));
-  for (const side of [-1, 0, 1]) add(cone, gold, [side * .28, 2.65, -.04], [.2, .3, .2], undefined, accessory(3));
   // Headwear, animal silhouettes and facial expressions move together around the neck.
   parts.forEach((part,i)=>{if(i>=5){if(!part.motion)part.motion=part.position[1]>=1.9&&part.position[2]>=.4&&part.geometry.type==='SphereGeometry'?'eye':'head';}else if(i>0)part.motion='steer';});
   add(ball,paint,[0,1.84,.385],[.034,.047,.047],'body',species(0));parts.at(-1)!.motion='head';
   for(const side of [-1,1])add(collar,white,[side*.18,1.52,.08],[.28,.17,.1],undefined,undefined,[0,0,side*.3]);
   add(ball,gold,[0,1.38,.045],[.07,.075,.035]);
-  for(const side of [-1,1])add(box,white,[side*.37,1.04,.17],[.17,.07,.12]);
+  add(box,white,[0,1.18,.035],[.025,.27,.025]);
   // Temporary primitive sources are not used after the Blender-ready components take ownership.
   return parts;
 }

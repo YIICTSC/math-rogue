@@ -219,3 +219,7 @@
 @media(orientation:portrait){.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 280px)}}
 @media(orientation:landscape){.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 150px)}}
 .gg-playing .gg-scores{z-index:12}
+
+/* Entry screens share the same character dialog as the in-room editor. */
+.gg-character-overlay{z-index:360;color:#173e34;font-family:system-ui,sans-serif}
+.gg-character-overlay button{min-height:44px;cursor:pointer}

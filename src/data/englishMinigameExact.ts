@@ -1,5 +1,6 @@
 /** Curated shared English copy for mini-game catalogs without structured card translation. */
 export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  'つぶらな瞳': 'Cute oval eyes',
   '顔の輪郭': 'Face shape', '顔つき': 'Complexion', '目の形': 'Eye shape', '瞳の色': 'Eye color',
   'やわらか卵型': 'Soft oval', '丸顔': 'Round', 'シャープ': 'Tapered', 'ハート型': 'Heart', 'スクエア': 'Square',
   'ナチュラル': 'Natural', 'ほっぺピンク': 'Rosy cheeks', 'そばかす': 'Freckles', '泣きぼくろ': 'Beauty mark',

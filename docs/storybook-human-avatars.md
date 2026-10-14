@@ -1,3 +1,5 @@
+> Superseded by [Avatar studio v3](avatar-studio-2026-10-15.md), shared by GP, golf and VR. The v2 notes below document the previous library.
+
 # Human avatars shared by kart and golf
 
 The human head uses a softer cheek-to-chin silhouette and a flattened forward face.

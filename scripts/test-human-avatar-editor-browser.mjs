@@ -9,14 +9,14 @@ await fs.writeFile(`${dir}/index.html`,'<meta name="viewport" content="width=dev
 await fs.writeFile(`${dir}/fixture.tsx`, `import React from 'react';import{createRoot}from'react-dom/client';import '/src/styles.css';import GakuroGolf from '/src/mini-games/gakuro-golf/GakuroGolf';import GakuroKart from '/src/mini-games/gakuro-kart/GakuroKart';createRoot(document.getElementById('root')).render(location.search.includes('golf')?<GakuroGolf onClose={()=>{}}/>:<GakuroKart onClose={()=>{}}/>);`);
 let server,browser;
 try{
-  server=await createServer({configFile:false,plugins:[react()],cacheDir:'node_modules/.vite-human-editor',logLevel:'error',server:{host:'127.0.0.1',port:5248,strictPort:true}});await server.listen();
+  server=await createServer({configFile:false,plugins:[react()],cacheDir:'node_modules/.vite-human-editor',optimizeDeps:{entries:['tmp/human-editor-qa/index.html']},logLevel:'error',server:{host:'127.0.0.1',port:5248,strictPort:true}});await server.listen();
   browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   for(const game of ['golf','kart']){
     const page=await browser.newPage({viewport:{width:1280,height:720}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
-    const open=async()=>{await page.goto(`http://127.0.0.1:5248/${dir}/index.html?${game}`);if(game==='kart')await page.getByRole('button',{name:'ひとりでレース',exact:true}).click();await page.getByRole('button',{name:'キャラクタークリエイト',exact:true}).click();};
+    const open=async()=>{await page.goto(`http://127.0.0.1:5248/${dir}/index.html?${game}`);await page.getByRole('button',{name:game==='kart'?'ひとりでレース':'ひとりで練習',exact:true}).click();await page.getByRole('button',{name:'キャラクタークリエイト',exact:true}).click();};
     await open();
     await page.locator('.gk-avatar-species button').nth(0).click();
-    for(const [selector,count] of [['faceShape',5],['faceStyle',4],['eyeStyle',6]]){
+    for(const [selector,count] of [['faceShape',5],['faceStyle',4],['eyeStyle',7]]){
       assert.equal(await page.locator(`.gk-${selector} button`).count(),count);
       for(let i=0;i<count;i++){await page.locator(`.gk-${selector} button`).nth(i).click();assert.equal(await page.locator(`.gk-${selector} button`).nth(i).getAttribute('aria-pressed'),'true');}
     }
@@ -24,7 +24,7 @@ try{
     for(let i=0;i<14;i++)await page.locator('.gk-avatar-accessories button').nth(i).click();
     await page.getByRole('button',{name:'瞳の色 2',exact:true}).click();
     await open();
-    for(const [selector,i] of [['faceShape',4],['faceStyle',3],['eyeStyle',5]])assert.equal(await page.locator(`.gk-${selector} button`).nth(i).getAttribute('aria-pressed'),'true');
+    for(const [selector,i] of [['faceShape',4],['faceStyle',3],['eyeStyle',6]])assert.equal(await page.locator(`.gk-${selector} button`).nth(i).getAttribute('aria-pressed'),'true');
     assert.equal(await page.getByRole('button',{name:'瞳の色 2',exact:true}).getAttribute('aria-pressed'),'true');
     for(const size of [{width:1280,height:720},{width:390,height:844},{width:844,height:390}]){
       await page.setViewportSize(size);

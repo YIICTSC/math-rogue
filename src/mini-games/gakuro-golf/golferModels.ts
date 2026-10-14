@@ -9,15 +9,15 @@ export function createGolferAssets() {
   const parts = createAvatarParts();
   const sphere = new T.SphereGeometry(1, 12, 8), cylinder = new T.CylinderGeometry(1, 1, 1, 8);
   const box = new RoundedBoxGeometry(1,1,1,2,.12),sleeve=characterGeometry('sleeve',sphere),mitten=characterGeometry('mitten',sphere),trouser=characterGeometry('trouser',cylinder),shoe=characterGeometry('shoe',box);
-  const materials = [new T.MeshStandardMaterial({ color: '#66534b', roughness: .7 }),
+  const materials = [new T.MeshStandardMaterial({ color: '#344357', roughness: .7 }),
     new T.MeshStandardMaterial({ color: '#d9e4ec', metalness: .8, roughness: .25 }),
-    new T.MeshStandardMaterial({ color: '#493d3b', roughness: .8 })];
+    new T.MeshStandardMaterial({ color: '#263148', roughness: .34 })];
   const geometries = new Set<T.BufferGeometry>([sphere, cylinder, box,sleeve,mitten,trouser,shoe, ...parts.map(p => p.geometry)]);
   const sharedMaterials = new Set<T.Material>([...materials, ...parts.map(p => p.material)]);
   function create(avatar: KartAvatar) {
     const root = new T.Group(), torso = new T.Group(), arms = new T.Group();root.name="StorybookGolfer";
     const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' | 'eyeColor' }[] = [];
-    const skin = new T.MeshStandardMaterial({ roughness: .65 }), shirt = new T.MeshStandardMaterial({ roughness: .7 });
+    const skin = new T.MeshStandardMaterial({ roughness: .43 }), shirt = new T.MeshStandardMaterial({ roughness: .48 });
     owned.push(skin, shirt);
     const add = (parent: T.Group, geometry: T.BufferGeometry, material: T.Material, pos: number[], scale: number[]) => {
       const m = new T.Mesh(geometry, material); m.position.fromArray(pos); m.scale.fromArray(scale); parent.add(m); return m;
@@ -32,7 +32,7 @@ export function createGolferAssets() {
       m.userData.visibleFor = part.visible;
       if (part.color) colored.push({ mesh: m, key: part.color });
     }
-    add(torso, parts[0].geometry, shirt, [0, .2, -.13], [.86, .8, .6]);
+    add(torso, parts[0].geometry, shirt, [0, .2, -.3], [.86, .8, .6]);
     for (const side of [-1, 1]) {
       const leg = add(root, trouser, materials[0], [side * .25, .5, -.13], [.16, .85, .16]); leg.rotation.z = side * -.09;
       add(root, shoe, materials[2], [side * .29, .1, .04], [.35, .18, .55]);

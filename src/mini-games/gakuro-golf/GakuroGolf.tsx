@@ -95,15 +95,25 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     const completeA = a.phase === 'finished', completeB = b.phase === 'finished';
     return Number(completeB) - Number(completeA) || b.scores.length - a.scores.length || a.scores.reduce((s, n) => s + n, 0) - b.scores.reduce((s, n) => s + n, 0) || a.slot - b.slot;
   });
+  const creator = showCreator && <div className="gg-character-overlay" onKeyDown={e => {
+      if (e.key === 'Escape') setShowCreator(false);
+      if (e.key === 'Tab') {
+        const buttons = e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
+        const first = buttons[0], last = buttons[buttons.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    }}><section className="gg-character-dialog gg-panel" role="dialog" aria-modal="true" aria-label={t('キャラクタークリエイト')}><header><b>YOUR GOLFER</b><button autoFocus onClick={() => setShowCreator(false)}>{t('確定')}</button></header><div className="gg-character-preview"><GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar} portrait /></div><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} activity="golf" /></section></div>;
   if(!view&&inviteCode)return <InviteJoin title="GAKURO GOLF" name={name} onName={setName} onJoin={join} onClose={()=>{leave();onClose();}} busy={busy} error={t(message)} languageMode={languageMode}/>;
   if(!view&&entry==='title'&&!picker)return <GameTitleScreen kind="golf" title="GAKURO GOLF" logo={<GameTitleLogo kind="golf" languageMode={languageMode}/>} subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
-  if(!view&&!picker)return <OnlineEntryScreen brand="GAKURO GOLF" title={t(entry==='practice'?'ひとりで練習':entry==='host'?'オンラインの部屋を作る':'招待に参加する')} languageMode={languageMode} onBack={()=>setEntry('title')} preview={<GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar}/>} caption={t('学んで、狙って、カップイン。')} footer={<><button aria-label={t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} className="online-entry-primary" disabled={busy||!name.trim()||(entry==='join'&&!validRoomAddress(code))} onClick={()=>entry==='join'?void join():setPicker(entry==='host'?'host':'practice')}>{t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} →</button>{busy&&<p role="status">{t(transport==='server'?'サーバーを起動しています。初回は最大3分お待ちください。':'接続中…')}</p>}</>}>
+  if(!view&&!picker)return <><OnlineEntryScreen brand="GAKURO GOLF" title={t(entry==='practice'?'ひとりで練習':entry==='host'?'オンラインの部屋を作る':'招待に参加する')} languageMode={languageMode} onBack={()=>setEntry('title')} preview={<GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar}/>} caption={t('学んで、狙って、カップイン。')} footer={<><button aria-label={t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} className="online-entry-primary" disabled={busy||!name.trim()||(entry==='join'&&!validRoomAddress(code))} onClick={()=>entry==='join'?void join():setPicker(entry==='host'?'host':'practice')}>{t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} →</button>{busy&&<p role="status">{t(transport==='server'?'サーバーを起動しています。初回は最大3分お待ちください。':'接続中…')}</p>}</>}>
     {entry==='host'&&<TransportPicker game="golf" value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
     <label>{t('参加名')}<input value={name} maxLength={16} onChange={e=>setName(e.target.value)} disabled={busy}/></label>
     {entry==='join'?<label>{t('ルームコード')}<input aria-label={t('ルームコード')} placeholder="H-ABC234" maxLength={8} value={code} onChange={e=>setCode(e.target.value.toUpperCase())} disabled={busy}/></label>:<label>{t('プレイするホール数')}<select value={holeCount} disabled={busy} onChange={e=>setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {HOLES.slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label>}
+    <button disabled={busy} onClick={()=>setShowCreator(true)}>{t('キャラクタークリエイト')}</button>
     {message&&<p role="alert">{t(message)}</p>}
     <details><summary>{t('遊び方')}</summary><p>{t('開始時と3ショットごとに、選んだ範囲から3問。')}</p><p>{t('0・1・2・3問正解で最大パワー55・70・85・100%。')}</p><p>{t('クラブと方向を選んでカップを狙おう。池とOBは1打罰。')}</p></details>
-  </OnlineEntryScreen>;
+  </OnlineEntryScreen>{creator}</>;
   return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${!view?'gg-title-screen':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''} ${overview?'gg-overview':''}`} data-gamepad-initial-scope="gakuro-golf">
     <header className="gg-header"><button onClick={() => { if (!view) setEntry('title'); else { leave(); onClose(); } }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug"><StorybookQuality languageMode={languageMode}/></span><span className="gg-debug">{t('オンライン')}</span></header>
     {view && room.current?.host && room.current.code && (view.phase==='lobby'||spectating) && <HostSpectator enabled={spectating} canChangeMode={view.phase === 'lobby'} onChange={value => room.current?.setSpectator(value)} name={spectators.target ? me?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>HOLE {me.hole + 1} / {view.holeCount}</span><span>{t('打数')} {me.strokes}</span><span>{t('残り')} {remaining.toFixed(1)} m</span><span>{t(me.phase === 'quiz' ? '問題に挑戦中' : me.phase === 'aim' ? 'ショットを準備する' : me.phase === 'moving' ? 'ボールの行方を見よう' : me.phase === 'finished' ? '完走' : me.phase === 'holed' ? 'カップイン！' : 'プレイ中')}</span></>}</HostSpectator>}
@@ -135,14 +145,6 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
         </>}
       </section>
     </>}
-    {showCreator && <div className="gg-character-overlay" onKeyDown={e => {
-      if (e.key === 'Escape') setShowCreator(false);
-      if (e.key === 'Tab') {
-        const buttons = e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
-        const first = buttons[0], last = buttons[buttons.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-      }
-    }}><section className="gg-character-dialog gg-panel" role="dialog" aria-modal="true" aria-label={t('キャラクタークリエイト')}><header><b>YOUR GOLFER</b><button autoFocus onClick={() => setShowCreator(false)}>{t('確定')}</button></header><div className="gg-character-preview"><GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar} portrait /></div><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} activity="golf" /></section></div>}
+    {creator}
   </main></TranslatedUiTree>;
 }

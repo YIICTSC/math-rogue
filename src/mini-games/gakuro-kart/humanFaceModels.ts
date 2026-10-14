@@ -5,8 +5,8 @@ import type { AvatarPart } from './avatarModels';
 export function createHumanFaceParts(): AvatarPart[] {
   const parts: AvatarPart[] = [];
   const sphere = new T.SphereGeometry(1, 16, 12);
-  const paint = (color: string) => new T.MeshStandardMaterial({ color, roughness: .72 });
-  const ink = paint('#302939'), sclera = paint('#fff8ef'), iris = paint('#ffffff'), freckle=paint('#a07457');
+  const paint = (color: string) => new T.MeshStandardMaterial({ color, roughness: .37 });
+  const ink = paint('#202333'), sclera = paint('#fff8ef'), iris = paint('#ffffff'), freckle=paint('#a07457');
   const sparkle = new T.MeshBasicMaterial({ color: '#ffffff' }), blush = paint('#eaa38f');
   const stroke = (points: number[][], radius = .012) => new T.TubeGeometry(
     new T.CatmullRomCurve3(points.map(p => new T.Vector3(...p))), 12, radius, 5, false);
@@ -20,10 +20,10 @@ export function createHumanFaceParts(): AvatarPart[] {
     const start=parts.length;
     const open = side === 1 ? [0, 1, 3, 4, 5, 7] : [0, 1, 3, 4, 5, 6, 7];
     const x = side * .19;
-    add(sphere, sclera, [x, 1.965, .335], [.111, .095, .035], open);
-    add(sphere, iris, [x, 1.966, .368], [.067, .084, .022], open);parts.at(-1)!.color='eyeColor';
-    add(sphere, ink, [x, 1.969, .389], [.034, .063, .013], open);
-    add(sphere, sparkle, [x - .023, 2.005, .402], [.022, .025, .008], open);
+    add(sphere, sclera, [x, 1.965, .335], [.096, .105, .028], open);
+    add(sphere, iris, [x, 1.966, .368], [.070, .091, .021], open);parts.at(-1)!.color='eyeColor';
+    add(sphere, ink, [x, 1.969, .389], [.044, .073, .013], open);
+    add(sphere, sparkle, [x - .023, 2.005, .402], [.025, .028, .008], open);
     add(sphere, sparkle, [x + .022, 1.944, .395], [.01, .012, .006], open);
     add(arch, ink, [x, 2.036, .37], [1.18, .8, 1], open);
     add(arch, ink, [x, 1.964, .367], [1.06, 1, 1], side === 1 ? [2, 6] : [2]);
@@ -40,6 +40,24 @@ export function createHumanFaceParts(): AvatarPart[] {
         part.position[1]=1.965+dx*width*Math.sin(tilt)+dy*height*Math.cos(tilt);
         part.scale[0]*=width;part.scale[1]*=height;part.rotation[2]+=tilt;
       }
+    }
+  }
+  // Saved IDs 0–5 retain their layered irises. ID 6 has a simple, readable
+  // black oval silhouette, a large glint and a small tint along its lower edge.
+  const bead = new T.SphereGeometry(1,20,14);bead.name='AvatarBeadEye';
+  const beadInk = new T.MeshStandardMaterial({color:'#090e19',roughness:.28});
+  for(const side of [-1,1]){
+    const start=parts.length,x=side*.19;
+    const open=side===1?[0,1,3,4,5,7]:[0,1,3,4,5,6,7];
+    add(bead,beadInk,[x,1.96,.365],[.076,.127,.032],open);
+    add(sphere,sparkle,[x-.019,2.015,.396],[.025,.038,.008],open);
+    add(sphere,iris,[x+.008,1.898,.393],[.037,.019,.006],open);parts.at(-1)!.color='eyeColor';
+    add(arch,ink,[x,1.964,.384],[.85,1.05,1],side===1?[2,6]:[2]);
+    add(arch,ink,[x,2.135,.30],[.72,.32,1],[0,1,2,6]);
+    add(arch,ink,[x,2.13,.30],[.78,.35,1],[3,4],[0,0,side*.24]);
+    add(arch,ink,[x,2.14,.30],[.7,.55,1],[5,7],[0,0,-side*.18]);
+    for(const part of parts.slice(start)){
+      const visible=part.visible!;part.visible=a=>visible(a)&&a.eyeStyle===6;
     }
   }
   for(const side of [-1,1]){
