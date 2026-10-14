@@ -276,11 +276,16 @@ export function readRecords(): Records {
  try {
   const current = localStorage.getItem(SAVE_KEY);
   const raw = JSON.parse(current ?? localStorage.getItem('gakurogear-vr-v1') ?? '{}');
-  const entries = Object.entries(raw).filter(([key, v]: [string, any]) =>
-   Number.isInteger(Number(key)) && Number(key) >= 1 && Number(key) <= (current ? 100 : 50) &&
-   v && Number.isFinite(v.time) && v.time > 0 && ['S', 'A', 'B'].includes(v.rank));
-  // The ten school layouts in each tier are unchanged; transfer their records.
-  // Retired field missions stay in the old save without assigning their ranks to new missions.
-  return Object.fromEntries(entries.map(([key, v]) => [current ? Number(key) : Math.floor((Number(key)-1)/10)*20+(Number(key)-1)%10+1, v]));
+  const records: Records = {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return records;
+  for (const [key, value] of Object.entries(raw)) {
+   const id = Number(key);
+   if (!Number.isInteger(id) || id < 1 || id > (current ? 100 : 50) || !value || typeof value !== 'object') continue;
+   if (!('time' in value) || typeof value.time !== 'number' || !Number.isFinite(value.time) || value.time <= 0) continue;
+   if (!('rank' in value) || typeof value.rank !== 'string' || !['S', 'A', 'B'].includes(value.rank)) continue;
+   // Legacy school missions retain their records at their new positions.
+   records[current ? id : Math.floor((id-1)/10)*20+(id-1)%10+1] = { time: value.time, rank: value.rank };
+  }
+  return records;
  } catch { return {}; }
 }

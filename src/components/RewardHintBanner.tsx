@@ -8,7 +8,7 @@ interface RewardHintBannerProps {
   languageMode?: LanguageMode;
 }
 
-const RewardHintBanner: React.FC<RewardHintBannerProps> = ({ text, languageMode = 'NORMAL' }) => {
+const RewardHintBanner: React.FC<RewardHintBannerProps> = ({ text, languageMode = 'JAPANESE' }) => {
   if (!text) return null;
   const translatedText = trans(text, languageMode);
 

@@ -13,6 +13,7 @@ interface GardenScreenProps {
   onHarvest: (slotIndex: number) => void;
   onLeave: () => void;
   languageMode: LanguageMode;
+  visualTheme?: import('../data/visualThemes').VisualThemeId;
 }
 
 const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest, onLeave, languageMode }) => {

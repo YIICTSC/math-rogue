@@ -683,13 +683,13 @@ export const getDebugProblemUnitGroups = (): DebugProblemUnitGroup[] => {
       .map(category => ({
         id: category.id,
         name: category.name,
-        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode, level: 'LOWER', gradeLabel: '小中' })),
+        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode, level: 'LOWER' as const, gradeLabel: '小中' })),
       })),
     ...UPPER_PROBLEM_CATEGORIES
       .map(category => ({
         id: category.id,
         name: category.name,
-        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode, level: 'UPPER', gradeLabel: '高校以上' })),
+        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode, level: 'UPPER' as const, gradeLabel: '高校以上' })),
       })),
   ].filter(group => group.units.length > 0);
 };

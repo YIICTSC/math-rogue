@@ -7,6 +7,7 @@ export type WorkStat = 'gather'|'plant'|'water'|'harvest'|'fish'|'craft'|'donate
 export const WORK_STATS:WorkStat[]=['gather','plant','water','harvest','fish','craft','donate'];
 export const HOME_ITEMS = {
  skyadventure:['空島アドベンチャー筐体','🎒',14,'game'],
+ bowling:['ボウリングレーン','🎳',12,'game'],
  rhythm:['音ゲー筐体','🎵',14,'game'],
  reversi:['リバーシ台','⚫',8,'game'],connectfour:['四目並べ台','🔴',8,'game'],memory:['神経衰弱テーブル','🃏',6,'game'],race:['すごろくテーブル','🎲',8,'game'],coindozer:['コインドーザー','🪙',12,'game'],reaction:['反応ゲーム機','💡',10,'game'],
  plushBear:['くまのぬいぐるみ','🧸',4,'decor'],plushBunny:['うさぎのぬいぐるみ','🐰',4,'decor'],darts:['ダーツ台','🎯',8,'game'],billiards:['ビリヤード台','🎱',12,'game'],arcade:['ゲーム機','🕹',10,'game'],

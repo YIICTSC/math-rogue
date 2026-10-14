@@ -410,12 +410,13 @@ export interface Player {
   nextTurnEnergy: number;
   nextTurnDraw: number;
   relicCounters: Record<string, number>;
-  turnFlags: Record<string, boolean>;
+  turnFlags: Record<string, boolean | number>;
   floatingText: FloatingText | null;
   hpLostThisTurn?: number;
   partner?: Partner;
   garden?: GardenSlot[];
   codexBuffer?: Card[]; // 秘密の攻略本用
+  familiars?: ActiveFamiliar[];
   familiarActionQueue?: ActiveFamiliar[];
   magicTransformed?: boolean;
   magicTransformedThisBattle?: boolean;

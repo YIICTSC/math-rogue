@@ -909,7 +909,7 @@ const createMahjongTiles = () => {
   return tiles;
 };
 const MAHJONG_TILE_POOL = createMahjongTiles();
-const shuffleMahjong = (tiles: MahjongTile[]) => {
+const shuffleMahjong = <T,>(tiles: T[]): T[] => {
   const shuffled = [...tiles];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
@@ -1324,7 +1324,7 @@ const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JA
       const melds = [...previous.melds, { kind: 'CHI' as const, tiles: [pending.tile, ...chiIndexes.map(index => previous.hand[index])] }];
       return { ...previous, hand: nextHand, melds, quality: analyzeMahjongHand(nextHand, melds.length, 4), pendingCall: null, drawnForDiscard: true, mustDiscard: true, lastDraw: null };
     });
-    setSelected(null); audioService.playSound(option === 'RON' ? 'success' : 'buff');
+    setSelected(null); audioService.playSound(option === 'RON' ? 'win' : 'buff');
   };
   const discard = () => {
     if (game.result || selected === null || game.pendingEvent) return;
@@ -1346,7 +1346,7 @@ const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JA
         const limitReached = nextTurn > previous.turnLimit;
         const finalPlayerScore = mahjongShapeScore(quality, previous.relics, true);
         const finalCpuScore = mahjongShapeScore(cpuQuality, []);
-        const result = quality.complete ? 'WIN' : (cpuQuality.complete && !callOptions.includes('RON')) ? 'LOSE' : (!callOptions.length && limitReached ? (finalPlayerScore >= finalCpuScore ? 'WIN' : 'LOSE') : null);
+        const result: MahjongState['result'] = quality.complete ? 'WIN' : (cpuQuality.complete && !callOptions.includes('RON')) ? 'LOSE' : (!callOptions.length && limitReached ? (finalPlayerScore >= finalCpuScore ? 'WIN' : 'LOSE') : null);
         return { ...previous, hand: nextHand, cpuHand: nextCpuHand, deck: previous.deck, cpuDeck: previous.cpuDeck.length > 0 ? previous.cpuDeck.slice(1) : previous.cpuDeck, discardPile: [...previous.discardPile, discarded], cpuDiscardPile: [...previous.cpuDiscardPile, cpuDiscard], turn: nextTurn, quality, cpuQuality, lastDraw: previous.lastDraw, lastDiscard: discarded, lastCpuDiscard: cpuDiscard, pendingCall: result ? null : callOptions.length > 0 ? { tile: cpuDiscard, options: callOptions } : null, drawnForDiscard: false, mustDiscard: false, result };
       }
       const stageDefinition = previous.mode === 'ADVANCE' ? getMahjongAdvanceStage(previous.stage) : null;
@@ -1361,6 +1361,7 @@ const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JA
       const cpuChoice = previous.mode === 'ADVANCE'
         ? chooseMahjongCpuCandidate(cpuCandidates, previous.cpuProfile || stageDefinition?.cpuProfile || 'COLLECTOR', previous.stage)
         : cpuCandidates.sort((a, b) => mahjongShapeScore(b.quality, []) - mahjongShapeScore(a.quality, []))[0];
+      const cpuDiscard = cpuWithDraw[cpuChoice.index];
       const nextCpuHand = cpuWithDraw.filter((_, index) => index !== cpuChoice.index); const cpuQuality = analyzeMahjongHand(nextCpuHand, 0, mahjongTargetGroups(previous.mode)); const nextTurn = previous.turn + 1;
       const lastCpuRisk = previous.mode === 'ADVANCE' ? mahjongDiscardRisk(nextHand, cpuDiscard) : previous.lastCpuRisk;
       const drawHint = previous.mode === 'ADVANCE' && (previous.stage === 1 && nextTurn <= 4 || previous.eventEffect === 'OBSERVE' || previous.eventEffect === 'SHAPE_HINT')
@@ -1371,7 +1372,7 @@ const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JA
       const limitReached = nextTurn > previous.turnLimit;
       const finalPlayerScore = previous.mode === 'ADVANCE' ? mahjongAdvanceScore(quality, nextHand, previous.stage, previous.relics, previous.eventEffect, true) : mahjongShapeScore(quality, previous.relics, true);
       const finalCpuScore = mahjongShapeScore(cpuQuality, []) + (previous.mode === 'ADVANCE' ? Math.max(0, previous.stage - 2) : 0);
-      const result = quality.complete ? 'WIN' : cpuFinishes ? 'LOSE' : limitReached ? (finalPlayerScore >= finalCpuScore ? 'WIN' : 'LOSE') : null;
+      const result: MahjongState['result'] = quality.complete ? 'WIN' : cpuFinishes ? 'LOSE' : limitReached ? (finalPlayerScore >= finalCpuScore ? 'WIN' : 'LOSE') : null;
       const rewardOptions = result === 'WIN' && previous.mode === 'ADVANCE' && previous.stage < MAHJONG_ADVANCE_ROUNDS ? chooseMahjongRewards(previous.relics) : null;
       const eventDue = previous.mode === 'ADVANCE' && !!stageDefinition && !previous.eventUsed && !result && nextTurn === stageDefinition.eventTurn;
       const lastAdvice = previous.mode === 'ADVANCE' && result ? mahjongAdvanceAdvice(nextHand, quality, previous.stage) : previous.lastAdvice;

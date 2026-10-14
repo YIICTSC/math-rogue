@@ -281,9 +281,10 @@ export const KANKEN_OFFICIAL_LEVEL_KANJI: Record<OfficialKankenLevel, string> = 
 };
 
 export const KANKEN_OFFICIAL_LEVEL_KANJI_SETS: Record<OfficialKankenLevel, ReadonlySet<string>> =
-    Object.fromEntries(
-        KANKEN_OFFICIAL_LEVEL_ORDER.map((level) => [level, new Set(KANKEN_OFFICIAL_LEVEL_KANJI[level])]),
-    ) as Record<OfficialKankenLevel, ReadonlySet<string>>;
+    KANKEN_OFFICIAL_LEVEL_ORDER.reduce((sets, level) => {
+        sets[level] = new Set(KANKEN_OFFICIAL_LEVEL_KANJI[level]);
+        return sets;
+    }, {} as Record<OfficialKankenLevel, ReadonlySet<string>>);
 
 export const KANKEN_OFFICIAL_LEVEL_KANJI_COUNTS: Record<OfficialKankenLevel, number> = {
     KANKEN_10: 80,

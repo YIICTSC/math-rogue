@@ -263,7 +263,7 @@ const addCardWithEventRelics = (player: Player, card: Card): Player => {
 };
 
 // Helper to check if a card is available based on unlock status
-const isCardAvailable = (card: Card, unlockedNames: string[]) => {
+const isCardAvailable = (card: Omit<Card, 'id'>, unlockedNames: string[]) => {
     const additionalCardNames = Object.values(ADDITIONAL_CARDS).map(ac => ac.name);
     if (additionalCardNames.includes(card.name)) {
         return unlockedNames.includes(card.name);
@@ -1017,7 +1017,7 @@ export const generateEvent = (
                 setEventResultLog(supporterText(`${resultPrefix}\n栄養チャージ！ 最大HPが2上がり、HPが10回復した。`, `${resultPrefix}\nNutrition charge! Max HP +2 and restore 10 HP.`));
                 return;
             case 'ramenBoost':
-                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, TOSHI_RAMEN_BATTLE_BOOSTS: (prev.player.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0) + 3 } } }));
+                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, TOSHI_RAMEN_BATTLE_BOOSTS: Number(prev.player.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0) + 3 } } }));
                 setEventResultLog(supporterText(`${resultPrefix}\nラーメンの気合で、次の3戦の開始時エナジーが1増える。`, `${resultPrefix}\nRamen spirit! Start your next 3 battles with 1 extra Energy.`));
                 return;
             case 'fanFavorite':
@@ -1642,12 +1642,14 @@ export const generateEvent = (
                 { label: "先生に相談する", text: "学習効率調整（カード2枚強化 / HP+8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("配慮してもらい、集中できる席に。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -1791,12 +1793,14 @@ export const generateEvent = (
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("水の抵抗で筋力が伸びた。\n恒久ムキムキ+1。", languageMode));
                     } else if (roll < 0.67) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("泳法を研究し、技術が洗練された。\nカードを2枚強化した。", languageMode));
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
@@ -2215,12 +2219,14 @@ export const generateEvent = (
                 { label: "解剖図で論破する", text: "知識勝負（カード2枚強化 / HP+8 / 呪い）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("見事な説明で納得させた。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -2406,12 +2412,14 @@ export const generateEvent = (
                 { label: "メモを取り続ける", text: "集中（カード2枚強化 / HP+8 / 呪い「不安」）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("話の要点を掴み切った。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -2705,12 +2713,14 @@ export const generateEvent = (
                 { label: "暗号を解読する", text: "知性（カード2枚強化 / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("暗号理論が冴えた。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 6) } }));
@@ -3438,12 +3448,14 @@ export const generateEvent = (
                 { label: "調律する", text: "技術（カード2枚強化 / HP+8 / 呪い）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("音の粒が揃った。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -3789,12 +3801,14 @@ export const generateEvent = (
                 { label: "読書を教わる", text: "学び（カード2枚強化 / HP+8 / 呪い「不安」）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("読書の芯を掴んだ。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -3974,12 +3988,14 @@ export const generateEvent = (
                 { label: "新しいメモを書き足す", text: "前進（カード2枚強化 / 80G / 呪い「不安」）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("目標を書き出して頭が冴えた。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
@@ -4284,12 +4300,14 @@ export const generateEvent = (
                 { label: "続きの考察ノートを書く", text: "考察（カード2枚強化 / 呪い「不安」 / 最大HP+3）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("考察が冴え渡る。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...CURSE_CARDS.DOUBT, id: `manga-doubt-${Date.now()}` } as Card) }));
@@ -4439,12 +4457,14 @@ export const generateEvent = (
                 { label: "楽譜を読む", text: "分析（カード2枚強化 / カード削除）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("旋律の構造を理解した。\nカードを2枚強化した。", languageMode));
                     } else if (roll < 0.67) {
                         let removedName = "";
@@ -4994,12 +5014,14 @@ export const generateEvent = (
                 { label: "段数を数え直す", text: "検証（カード2枚強化 / 70G / HP-5）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("冷静な観察で技が研がれた。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 70 } }));
@@ -5085,12 +5107,14 @@ export const generateEvent = (
                 { label: "司書さんに質問攻め", text: "探求（カード2枚強化 / 80G / 呪い「不安」）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("知識の扉が開いた。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 80 } }));
@@ -5245,12 +5269,14 @@ export const generateEvent = (
                         if (success) setEventResultLog(trans("動きを完璧に読んだ！「先読み」が強化された。", languageMode));
                         else resolveMomentum("先読みカードは無かった。", "先読みカードは無かった。");
                     } else if (roll < 0.67) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("観察眼が冴えた。\nカードを2枚強化。", languageMode));
                     } else {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 70 } }));
@@ -5350,12 +5376,14 @@ export const generateEvent = (
                 { label: "分別マスターになる", text: "研究（カード2枚強化 / 恒久ムキムキ+1 / HP-5）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("最適化が冴えた。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
@@ -5535,12 +5563,14 @@ export const generateEvent = (
                 { label: "自分の答案を貼る", text: "挑戦（カード2枚強化 / 最大HP+3 / 呪い「不安」）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("覚悟が決まった。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 3, currentHp: prev.player.currentHp + 3 } }));
@@ -5892,12 +5922,14 @@ export const generateEvent = (
                 { label: "解毒薬を調合する", text: "研究（カード2枚強化 / HP+8 / 70G）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("理論がつながった。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + 8) } }));
@@ -5977,12 +6009,14 @@ export const generateEvent = (
                 { label: "言葉で和解する", text: "交渉（カード2枚強化 / HP-6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("対話が通じた。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.max(1, prev.player.currentHp - 6) } }));
@@ -6399,12 +6433,14 @@ export const generateEvent = (
                 { label: "原因を解析する", text: "分析（カード2枚強化 / 恒久ムキムキ+1 / HP-8）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const deck = [...prev.player.deck];
-                        for (let i = 0; i < Math.min(2, deck.length); i++) {
-                            const idx = Math.floor(Math.random() * deck.length);
-                            deck[idx] = getUpgradedCard(deck[idx]);
-                        }
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, deck } }));
+                        setGameState(prev => {
+                            const deck = [...prev.player.deck];
+                            for (let i = 0; i < Math.min(2, deck.length); i++) {
+                                const idx = Math.floor(Math.random() * deck.length);
+                                deck[idx] = getUpgradedCard(deck[idx]);
+                            }
+                            return { ...prev, player: { ...prev.player, deck } };
+                        });
                         setEventResultLog(trans("分析ノートが完成した。\nカードを2枚強化。", languageMode));
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));

@@ -14,7 +14,7 @@ export interface MagicRuleConfig {
   relic: Relic;
 }
 
-const CONFIG_ROWS: Array<Omit<MagicRuleConfig, 'relic' | 'completionCondition'> & {
+const CONFIG_ROWS: Array<Omit<MagicRuleConfig, 'relic' | 'completionCondition' | 'selectionSummary' | 'completionEffect'> & {
   completionCondition?: string;
   relicName: string;
   relicDescription: string;

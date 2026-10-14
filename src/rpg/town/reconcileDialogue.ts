@@ -1,6 +1,6 @@
 import { c, type Copy } from './catalog';
 
-export const RECONCILE_DIALOGUES: Copy[][][] = [
+export const RECONCILE_DIALOGUES: Copy[][] = [
   [
     c('さっきの言い方、ごめん。決めつけて話してしまった。', 'I am sorry for how I spoke. I jumped to conclusions.', 'さっきのいいかた、ごめん。きめつけてはなしてしまった。'),
     c('そう聞こえていたんだね。理由を話してくれてありがとう。', 'I see how it sounded that way. Thank you for explaining.', 'そうきこえていたんだね。りゆうをはなしてくれてありがとう。'),

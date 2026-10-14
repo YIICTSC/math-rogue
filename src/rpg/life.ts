@@ -79,7 +79,7 @@ export function homeGameWorld(w:World):HomeGameWorld {
  migrateDozerFurniture(w);
  const life=w.life!,tiles:Array<{homeOwner?:string}>=Array(WIDTH*HEIGHT),homeViews:Record<number,Home>={};
  for(const h of life.houses){tiles[h.home.tile]={homeOwner:h.owner};homeViews[h.home.tile]=h.home;}
- for(const [i,r] of (w.voxelRooms||[]).entries()){const tile=WIDTH*HEIGHT+i+1;tiles[tile]={homeOwner:r.owner};homeViews[tile]={tile,level:1,furniture:r.furniture.filter(f=>furnishing(f.item)?.game).map((f,index)=>({slot:f.slot??index,item:f.item}))};}
+ for(const [i,r] of (w.voxelRooms||[]).entries()){const tile=WIDTH*HEIGHT+i+1;tiles[tile]={homeOwner:r.owner};homeViews[tile]={tile,level:1,furniture:r.furniture.filter(f=>furnishing(f.item)?.game).map((f,index)=>({slot:f.slot??index,item:furnishing(f.item)!.game!}))};}
  const players=Object.fromEntries(Object.values(w.players).filter(p=>!p.spectator).map(p=>{const house=life.houses.find(h=>h.id===p.life?.indoors),room=currentVoxelRoom(w,p),voxelHome=room&&(room.owner===p.id||room.shared)?homeViews[WIDTH*HEIGHT+(w.voxelRooms?.indexOf(room)||0)+1]:undefined;return [p.id,{id:p.id,name:p.name,indoors:!!house||!!voxelHome,homeTile:house?.home.tile??voxelHome?.tile,progress:{home:house?.home||voxelHome||{tile:-1,level:0,furniture:[]}}}];}));
  return {learning:life.furnitureLearning??={},learningSelection:{mode:(w.setup?.mode||GameMode.MULTIPLICATION) as GameMode,modes:w.setup?.modePool,assignment:w.setup?.assignment},tiles,homeViews,players,games:life.games,time:life.time,paused:w.ended||!w.started};
 }

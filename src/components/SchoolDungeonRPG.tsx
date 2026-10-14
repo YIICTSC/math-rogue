@@ -3099,9 +3099,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             : inspectedItem.category === 'RANGED' ? '飛び道具'
                             : inspectedItem.category === 'ACCESSORY' ? '装飾品'
                             : inspectedItem.category === 'STAFF' ? '杖'
-                            : inspectedItem.category === 'FOOD' ? '食料'
-                            : inspectedItem.category === 'SCROLL' ? '巻物'
-                            : inspectedItem.category === 'POTION' ? '薬'
+                            : inspectedItem.type.startsWith('FOOD_') ? '食料'
+                            : inspectedItem.type.startsWith('SCROLL_') ? '巻物'
+                            : inspectedItem.type.startsWith('GRASS_') ? '薬'
                             : inspectedItem.category
                         )}</div>
                         {inspectedItem.power && (

@@ -58,7 +58,7 @@ export default function SchoolAdventurePanel({adventure:a,inventory,player,itemN
        <button disabled={!s.companion} onClick={a.toggleFriend}>{l('同級生：','Classmate: ')}{s.companion?.order==='WAIT'?l('待機→集合','Wait → follow'):l('集合→待機','Follow → wait')}</button>
        {!a.dojoRun&&s.town&&<button onClick={()=>a.setPanel('TOWN')}>{l('町の施設を利用','Town facilities')}</button>}<button onClick={()=>a.setPanel('RECORDS')}>{l('探検の記録','Adventure records')}</button>
        <button onClick={()=>a.setPanel('BASE')}>{l('倉庫・貯金・挑戦一覧','Warehouse and challenges')}</button>
-       <button disabled={!gameClear} onClick={a.returnHome}>{l('達成して学校前へ帰る','Return after completion')}</button>
+       <button disabled={!gameClear} onClick={() => a.returnHome()}>{l('達成して学校前へ帰る','Return after completion')}</button>
       </div>
       {s.companion&&<p className="school-adventure-friend"><SchoolActorIcon role={s.companion.role}/>{l(s.companion.name,s.companion.role==='HEAL'?'Aoi':s.companion.role==='GUARD'?'Takeru':'Hinata')} · Lv{s.companion.level} · HP {Math.max(0,s.companion.hp)} · {s.companion.order==='WAIT'?l('待機中','Waiting'):l('同行中','Following')}</p>}
       {!a.dojoRun&&gameClear&&<button onClick={()=>a.returnHome()}>{l('学校前へ帰る','Return to school base')}</button>}

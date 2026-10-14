@@ -2017,7 +2017,7 @@ const App: React.FC = () => {
     const dailyAssignmentProfile = useMemo<StudentProfile>(() => (
         studentProfile.grade ? studentProfile : getDefaultDailyAssignmentProfile(studentGradeMode)
     ), [studentGradeMode, studentProfile]);
-    const studentGradeOptions = useMemo(() => getStudentGradeOptions(studentGradeMode), [studentGradeMode]);
+    const studentGradeOptions: readonly string[] = useMemo(() => getStudentGradeOptions(studentGradeMode), [studentGradeMode]);
     const isStudentGradeUnset = !studentProfile.grade?.trim();
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
     // 年齢そのものは収集しない。学習集計は管理者発行コードによる明示的な連携で制御する。
@@ -2608,7 +2608,7 @@ const App: React.FC = () => {
 
     const saveStudentGrade = useCallback((grade: string) => {
         const dailyAssignmentLanguageMode = studentGradeMode === 'ENGLISH' ? 'ENGLISH' : 'JAPANESE';
-        const nextProfile = {
+        const nextProfile: StudentProfile = {
             ...studentProfile,
             grade,
             schoolYear: getCurrentSchoolYear(),
@@ -3019,7 +3019,7 @@ const App: React.FC = () => {
             const hostPeerId = coopSession.roomCode ? `lr-battle-${coopSession.roomCode}` : null;
             const hostParticipant = hostPeerId
                 ? coopSession.participants.find(participant => participant.peerId === hostPeerId)
-                : gameState.player.turnFlags['EVENT_NPC_DUPLICATE_PENDING_MODAL'] ? 'DUPLICATE' : null;
+                : null;
             return hostParticipant?.peerId ||
                 getActiveCoopParticipants(coopSession.participants)[0]?.peerId ||
                 coopSession.participants[0]?.peerId ||
@@ -3071,7 +3071,7 @@ const App: React.FC = () => {
         }
         const activeTurn = gameState.coopBattleState.turnQueue[gameState.coopBattleState.turnCursor];
         if (!activeTurn) return null;
-        if ((activeTurn.type === 'PLAYER' || activeTurn.type === 'ALLY') && activeTurn.peerId) return activeTurn.peerId;
+        if ((activeTurn.type === 'SELF' || activeTurn.type === 'ALLY') && activeTurn.peerId) return activeTurn.peerId;
         return null;
     }, [coopSelfPeerId, gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
     const attachCoopEffectOwner = useCallback((effects: VisualEffectInstance[], ownerPeerId?: string | null) => {
@@ -3748,7 +3748,7 @@ const App: React.FC = () => {
             p.nextTurnEnergy += 3;
             delete p.turnFlags['STREET_DOG_NEXT_BATTLE'];
         }
-        const toshiBattleBoosts = p.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0;
+        const toshiBattleBoosts = Number(p.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0);
         if (toshiBattleBoosts > 0) {
             p.nextTurnEnergy += 1;
             if (toshiBattleBoosts === 1) {
@@ -5432,9 +5432,6 @@ const App: React.FC = () => {
                 const localResult = applyRaceTrickEffectLocal(card.effectId, raceSession.name, gameState.player.gold);
                 if (card.effectId === 'WALLET_SWAP' && localResult !== undefined) {
                     setGameState(prev => ({ ...prev, player: { ...prev.player, gold: Number(localResult) } }));
-                }
-                if (card.effectId === 'GOLD_SIPHON' && localResult !== undefined) {
-                    applyRaceGoldDelta(Number(localResult), 'おつりミスでゴールド獲得');
                 }
             } else {
                 p2pService.sendTo(targetPeerId, { type: 'RACE_TRICK_APPLY', cardId: card.id, effectId: card.effectId, sourcePeerId: 'host', sourceName: raceSession.name, sourceGold: gameState.player.gold });
@@ -7458,7 +7455,7 @@ const App: React.FC = () => {
             nextIntent: index === 0
                 ? { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' }
                 : index === 1
-                    ? { type: EnemyIntentType.BLOCK, value: 14 }
+                    ? { type: EnemyIntentType.DEFEND, value: 14 }
                     : { type: EnemyIntentType.ATTACK, value: 18 },
             vulnerable: index === 0 ? 1 : 0,
             weak: index === 1 ? 1 : 0,
@@ -7659,7 +7656,8 @@ const App: React.FC = () => {
             roomCode: 'UI0000',
             participants,
             battleMode: 'REALTIME',
-            visualTheme,
+            startedAt: Date.now(),
+            decisionOwnerIndex: 0,
         });
         setCoopSupportCards(COOP_SUPPORT_LIBRARY.slice(0, 4).map(card => ({ ...card })));
         setCoopPlayerSnapshots(playerSnapshots);
@@ -7747,13 +7745,10 @@ const App: React.FC = () => {
             );
         }
         setGameState(prev => {
-            const previewMap = (screen === GameScreen.MAP || screen === GameScreen.BATTLE) && prev.map.length === 0
+            const previewMap = screen === GameScreen.MAP && prev.map.length === 0
                 ? generateDungeonMap(prev.difficultyLevel || 1)
                 : prev.map;
 
-            if (screen === GameScreen.BATTLE) {
-                return prev;
-            }
 
             if (screen === GameScreen.REWARD) {
                 const previewRelic = Object.values(RELIC_LIBRARY)[0];
@@ -14106,7 +14101,7 @@ const App: React.FC = () => {
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         if (!gameState.player.turnFlags['GOLD_FISH_PENDING_MODAL']) return;
 
-        const cards = [...gameState.player.hand].filter(c => c.type === CardType.ATTACK && c.type !== CardType.STATUS && c.type !== CardType.CURSE);
+        const cards = [...gameState.player.hand].filter(c => c.type === CardType.ATTACK);
         if (cards.length > 0) {
             setGoldFishModal({
                 title: '金魚すくい',
@@ -15940,7 +15935,7 @@ const App: React.FC = () => {
         const isLibrarian = stateRef.current.visualTheme !== 'magic' && player.id === 'LIBRARIAN';
         const isGardener = stateRef.current.visualTheme !== 'magic' && player.id === 'GARDENER';
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;
+        const getRewardCardTemplateKey = (card: Omit<ICard, 'id'> & { id?: string }) => card.originalNames?.[0] || card.name || card.id || '';
         const pickedCardTemplateIds = new Set<string>();
         const unlockedCardNames = new Set(storageService.getUnlockedCards().map(name => name.trim()));
         // 追加カードのうち、通常プールでは除外される特殊カードにも、
@@ -22109,7 +22104,7 @@ const App: React.FC = () => {
                                 data-gamepad-initial-choice={weatherScryModal.cards.length === 0 ? true : undefined}
                                 data-gamepad-zone="weather-scry-confirm"
                                 data-gamepad-order={0}
-                                onClick={applyWeatherScrySelection}
+                                onClick={() => applyWeatherScrySelection()}
                                 className="mt-4 w-full rounded bg-cyan-700 hover:bg-cyan-600 py-2 font-bold"
                             >
                                 {trans('決定', languageMode)}

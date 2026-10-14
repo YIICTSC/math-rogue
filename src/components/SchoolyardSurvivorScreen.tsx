@@ -350,7 +350,7 @@ const getSpriteSheetIconStyle = (fileName: string, keys: readonly string[], key:
         width: '100%',
         height: '100%',
         backgroundImage: `url("${assetUrl(`sprites/${fileName}`)}?v=${SPRITE_ASSET_VERSION}")`,
-        backgroundPosition: `${SPRITE_SHEET_COLUMNS === 1 ? 0 : (col / (SPRITE_SHEET_COLUMNS - 1)) * 100}% ${rows === 1 ? 0 : (row / (rows - 1)) * 100}%`,
+        backgroundPosition: `${(col / (SPRITE_SHEET_COLUMNS - 1)) * 100}% ${rows === 1 ? 0 : (row / (rows - 1)) * 100}%`,
         backgroundSize: `${SPRITE_SHEET_COLUMNS * 100}% ${rows * 100}%`,
         backgroundRepeat: 'no-repeat',
         imageRendering: 'pixelated',
@@ -777,7 +777,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             storageService.saveSurvivorScore({
                 id: `survivor-${Date.now()}`,
                 date: Date.now(),
-                score: Math.floor(scoreRef.current),
+                score: Math.floor(score.current),
                 timeSurvived: time.current,
                 levelReached: level.current,
                 weapons: ownedWeapons

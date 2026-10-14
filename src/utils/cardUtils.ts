@@ -507,7 +507,7 @@ const describeSynthPower = (id: string | undefined, amount: number): string => {
 };
 
 const getTripleBoostedCard = (card: Card): Card => {
-    let boosted = { ...card, upgraded: false, holographic: false };
+    let boosted: Card = { ...card, upgraded: false, holographic: false };
     for (let i = 0; i < 3; i += 1) {
         boosted = getUpgradedCard({ ...boosted, upgraded: false });
     }

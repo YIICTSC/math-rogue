@@ -58,11 +58,11 @@ export default function HeroBuilder({
     [tick, setTick] = useState(0),
     [busy, setBusy] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null),
-    original = useRef<ImageData>(),
+    original = useRef<ImageData>(undefined),
     history = useRef<ImageData[]>([]),
-    start = useRef<{ x: number; y: number }>(),
+    start = useRef<{ x: number; y: number }>(undefined),
     drag = useRef(false),
-    target = useRef<{ action: HeroAction; slot: number; portrait: boolean }>(),
+    target = useRef<{ action: HeroAction; slot: number; portrait: boolean }>(undefined),
     ref = useRef<HTMLElement>(null),
     reader = useRef(0);
   useEffect(() => {

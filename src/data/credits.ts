@@ -18,7 +18,7 @@ export const CROWDFUNDING_SPECIAL_STAFF_ROLL_NAMES = [
   '長野和子',
 ] as const;
 
-export const CREDIT_SECTIONS = [
+export const CREDIT_SECTIONS: readonly { title: string; entries: readonly string[]; special?: boolean }[] = [
   {
     title: '制作',
     entries: ['YUSUKE ISHIGE'],

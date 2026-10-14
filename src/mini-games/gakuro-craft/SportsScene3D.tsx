@@ -7,7 +7,7 @@ export type SportsSceneProps={kind:'pool'|'bowling';spinX?:number;spinY?:number;
 type Pull={id:number;x:number;z:number;endX:number;endZ:number;screenX:number;screenY:number;turn:number|undefined};
 const BALL_COLORS=['#f7f2df','#e8bf37','#2969ba','#d94945','#8950b0','#e48136','#2c916e','#8b332e','#15191b'];
 export default function SportsScene3D(props:SportsSceneProps){
- const surface=useRef<HTMLCanvasElement>(null),latest=useRef(props),project=useRef<(x:number,y:number)=>THREE.Vector3|null>(),pull=useRef<Pull|null>(null);
+ const surface=useRef<HTMLCanvasElement>(null),latest=useRef(props),project=useRef<(x:number,y:number)=>THREE.Vector3|null>(undefined),pull=useRef<Pull|null>(null);
  latest.current=props;
  useEffect(()=>{pull.current=null;props.onPower?.(0);},[props.gameKey,props.turn,props.myTurn,props.paused,props.top]);
  useEffect(()=>{const cancel=()=>{pull.current=null;latest.current.onPower?.(0);};window.addEventListener('blur',cancel);return()=>window.removeEventListener('blur',cancel);},[]);

@@ -1211,7 +1211,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                     <div className="flex-grow overflow-y-auto p-2 md:p-4 custom-scrollbar min-h-0">
                         {activeTab === 'CAPTURE_SIM' && (
                             <CaptureCardSimulator
-                                cards={allCards}
+                                cards={allCards.map((card, index) => ({ ...card, id: `capture-template-${index}` }))}
                                 languageMode={initialLanguageMode}
                                 onAddToDeck={addCapturedSimulatorCard}
                                 onSetTestDeck={setCaptureSimulatorTestDeck}

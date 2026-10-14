@@ -519,7 +519,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 ...p,
                 actualCorrectAnswer: correctAnswer,
                 options: [...p.options].sort(() => Math.random() - 0.5),
-                assignmentProblemKey: ('assignmentProblemId' in p ? p.assignmentProblemId : undefined) || `${p.sourceMode}:${p.question}`,
+                assignmentProblemKey: ('assignmentProblemId' in p && typeof p.assignmentProblemId === 'string' ? p.assignmentProblemId : undefined) || `${p.sourceMode}:${p.question}`,
             };
         });
         

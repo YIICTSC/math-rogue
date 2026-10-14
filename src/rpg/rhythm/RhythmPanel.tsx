@@ -93,7 +93,7 @@ export default function RhythmPanel({
     const release = audioService.acquireBgmSilence();
     return () => { audio.current?.pause(); release(); };
   }, [g.key]);
-  const stageArt = useRef<HTMLImageElement>();
+  const stageArt = useRef<HTMLImageElement>(undefined);
   useEffect(() => {
     const image = new Image();
     image.src = assetUrl("sprites/rpg/rhythm/astral-stage.webp");
@@ -102,7 +102,7 @@ export default function RhythmPanel({
   }, []);
   const artStyle = { "--rhythm-award": `url("${assetUrl("sprites/rpg/rhythm/astral-award.webp")}")`, "--rhythm-art": `url("${assetUrl("sprites/rpg/rhythm/astral-stage.webp")}")` } as React.CSSProperties;
   const live = useRef<HTMLElement>(null);
-  const audio = useRef<HTMLAudioElement>(),
+  const audio = useRef<HTMLAudioElement>(undefined),
     canvas = useRef<HTMLCanvasElement>(null),
     clock = useRef({ time: world.time, at: performance.now() }),
     latest = useRef({ g, world, seat, send, speed, offset }),

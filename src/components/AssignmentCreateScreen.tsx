@@ -405,7 +405,7 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
             <div className="mb-4">
               <div className="mb-1 text-xs font-bold text-slate-400">{trans('答え方', languageMode)}</div>
               <div className={`grid ${hasKanjiUnit ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
-                {(hasKanjiUnit ? ['CHOICE', 'INPUT', 'WRITING'] : ['CHOICE', 'INPUT']).map((mode) => (
+                {(hasKanjiUnit ? (['CHOICE', 'INPUT', 'WRITING'] as const) : (['CHOICE', 'INPUT'] as const)).map((mode) => (
                   <button key={mode} onClick={() => setAnswerMode(mode)} className={`rounded-lg border px-2 py-2 text-xs font-black ${answerMode === mode ? 'border-yellow-300 bg-yellow-400 text-slate-950' : 'border-slate-600 bg-slate-800 text-slate-200'}`}>
                     {trans(mode === 'CHOICE' ? '4択' : mode === 'WRITING' ? '書き' : '入力', languageMode)}
                   </button>
