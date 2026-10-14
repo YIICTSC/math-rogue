@@ -1,4 +1,7 @@
 export const RPG_RHYTHM_ENGLISH: Record<string, string> = {
+  楽曲スクラッチ: "Song scratch",
+  スクラッチ: "Scratch",
+  "押している間、楽曲をスクラッチ": "Hold to scratch the song",
   音ゲー筐体: "Rhythm arcade cabinet",
   学ロリズム: "Gakuro Rhythm",
   "全曲で遊べる4レーン音ゲー。D・F・J・K、矢印キー、または画面下のボタンで演奏。長いノーツは終わりまで押して離します。":
@@ -85,6 +88,9 @@ export const RPG_RHYTHM_ENGLISH: Record<string, string> = {
   紙飛行機の休暇: "Paper plane vacation",
 };
 export const RPG_RHYTHM_HIRAGANA: Record<string, string> = {
+  楽曲スクラッチ: "がっきょく すくらっち",
+  スクラッチ: "すくらっち",
+  "押している間、楽曲をスクラッチ": "おしている あいだ、がっきょくを すくらっち",
   音ゲー筐体: "おとげー きょうたい",
   学ロリズム: "がくろりずむ",
   "全曲で遊べる4レーン音ゲー。D・F・J・K、矢印キー、または画面下のボタンで演奏。長いノーツは終わりまで押して離します。":

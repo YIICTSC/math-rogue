@@ -27,6 +27,7 @@ import { newRhythmResult, awardRhythm, type RhythmResult } from "./game";
 import { recordKey, rhythmRecords, saveRhythmRecord, type RhythmRecord } from "./records";
 import { songTitle, songTheme, songEdition } from "./songLabels";
 import "./rhythm.css";
+import { createSongScratch, rhythmHitVolume } from "./songScratch";
 const colors = ["#45e7ef", "#ff65b1", "#ffd463", "#b688ff"],
   keys = ["D", "F", "J", "K"];
 const readNumber = (
@@ -102,6 +103,7 @@ export default function RhythmPanel({
   }, []);
   const artStyle = { "--rhythm-award": `url("${assetUrl("sprites/rpg/rhythm/astral-award.webp")}")`, "--rhythm-art": `url("${assetUrl("sprites/rpg/rhythm/astral-stage.webp")}")` } as React.CSSProperties;
   const live = useRef<HTMLElement>(null);
+  const scratch = useRef<ReturnType<typeof createSongScratch>>(undefined);
   const audio = useRef<HTMLAudioElement>(undefined),
     canvas = useRef<HTMLCanvasElement>(null),
     clock = useRef({ time: world.time, at: performance.now() }),
@@ -152,6 +154,8 @@ export default function RhythmPanel({
     const element = new Audio(assetUrl(song.path));
     element.preload = "auto";
     audio.current = element;
+    const effect = createSongScratch(element);
+    scratch.current = effect;
     const canplay = () => setLoaded(true),
       failed = () => {
         setError(true);
@@ -163,6 +167,8 @@ export default function RhythmPanel({
     return () => {
       audioRequest.current++;
       element.pause();
+      effect.dispose();
+      if (scratch.current === effect) scratch.current = undefined;
       element.removeEventListener("canplay", canplay);
       element.removeEventListener("error", failed);
       element.removeAttribute("src");
@@ -184,6 +190,7 @@ export default function RhythmPanel({
   }, [g.phase]);
   const prime = async () => {
     audioService.init();
+    scratch.current?.prepare();
     const a = audio.current;
     if (!a) return false;
     const request = ++audioRequest.current;
@@ -272,7 +279,8 @@ export default function RhythmPanel({
         index = i;
       }
     }
-    audioService.playRpgRhythmHit(lane, false, index>=0 ? notes[index].velocity ?? rhythmPadVolume(song) : rhythmPadVolume(song));
+    if (lane === 3) scratch.current?.setActive(true);
+    else audioService.playRpgRhythmHit(lane, false, rhythmHitVolume(index >= 0 ? notes[index].velocity ?? rhythmPadVolume(song) : rhythmPadVolume(song)));
     if (index < 0) {
       for (let i = 0; i < notes.length; i++) {
         const n = notes[i];
@@ -296,6 +304,7 @@ export default function RhythmPanel({
   };
   const up = (lane: number) => {
     pressed.current.delete(lane);
+    if (lane === 3) scratch.current?.setActive(false);
     const index = held.current.get(lane);
     held.current.delete(lane);
     if (index === undefined) return;
@@ -359,6 +368,7 @@ export default function RhythmPanel({
     };
     const hidden = () => {
       if (document.hidden) {
+        scratch.current?.setActive(false);
         audioRequest.current++;
         audio.current?.pause();
         previewUntil.current = 0;
@@ -397,7 +407,7 @@ export default function RhythmPanel({
       last = now;
       const state = audioService.getRhythmAudioState();
       if (a) {
-        a.volume = state.volume;
+        scratch.current?.setVolume(state.volume);
         // iOS can ignore HTMLAudioElement.volume; muted remains reliable.
         a.muted = priming.current || state.volume === 0;
       }
@@ -408,6 +418,7 @@ export default function RhythmPanel({
           model.current = newRhythmResult(notes.length);
           held.current.clear();
           pressed.current.clear();
+          scratch.current?.setActive(false);
           particles.current = [];
           soundStarted.current = false;
         }
@@ -422,6 +433,7 @@ export default function RhythmPanel({
           soundStarted.current = false;
           held.current.clear();
           pressed.current.clear();
+          scratch.current?.setActive(false);
         } else if (serverTime >= 0 && a && a.readyState >= 2) {
           if (!soundStarted.current) {
             a.currentTime = Math.min(
@@ -614,6 +626,7 @@ export default function RhythmPanel({
     return () => cancelAnimationFrame(raf);
   }, [songKey, g.key, song.duration]);
   useEffect(() => {
+    if (g.phase !== "playing") scratch.current?.setActive(false);
     if (g.phase === "finished") {
       audio.current?.pause();
       soundStarted.current = false;
@@ -798,7 +811,8 @@ export default function RhythmPanel({
             <button
               key={key}
               style={{ "--lane": colors[lane] } as React.CSSProperties}
-              aria-label={t("レーン") + " " + (lane + 1)}
+              aria-label={lane === 3 ? t("楽曲スクラッチ") : t("レーン") + " " + (lane + 1)}
+              title={lane === 3 ? t("押している間、楽曲をスクラッチ") : undefined}
               onPointerDown={(e) => {
                 e.preventDefault();
                 e.currentTarget.setPointerCapture(e.pointerId);
@@ -815,7 +829,7 @@ export default function RhythmPanel({
               }}
             >
               {key}
-              <small>{["←", "↓", "↑", "→"][lane]}</small>
+              <small>{lane === 3 ? t("スクラッチ") : ["←", "↓", "↑"][lane]}</small>
             </button>
           ))}
         </div>
@@ -958,8 +972,10 @@ export default function RhythmPanel({
             }
             const a = audio.current;
             if (!a) return;
-            a.volume = audioService.getRhythmAudioState().volume;
-            a.muted = a.volume === 0;
+            scratch.current?.prepare();
+            const volume = audioService.getRhythmAudioState().volume;
+            scratch.current?.setVolume(volume);
+            a.muted = volume === 0;
             a.currentTime = 0;
             try {
               await a.play();

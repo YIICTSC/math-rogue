@@ -8,7 +8,7 @@ let vite, browser, p;
 try {
   await fs.writeFile(
     file,
-    `import React,{useEffect,useState} from 'react';import {createRoot} from 'react-dom/client';import RhythmPanel from './src/rpg/rhythm/RhythmPanel';import {gameCommand,tickGames} from './src/mini-games/gakuro-craft/homeGames';import {RHYTHM_SONGS} from './src/rpg/rhythm/catalog.generated';import {rhythmChart} from './src/rpg/rhythm/chart';import {trans} from './src/utils/textUtils';import {audioService} from './src/services/audioService';window.audio=audioService;window.padHits=[];window.padSources=[];const padHit=audioService.playRpgRhythmHit.bind(audioService);audioService.playRpgRhythmHit=(lane,perfect,volume)=>{window.padHits.push(lane);window.padVolumes=(window.padVolumes||[]).concat(volume);padHit(lane,perfect,volume);};const sfxSource=audioService.startSfxSource.bind(audioService);audioService.startSfxSource=(name,...args)=>{const ok=sfxSource(name,...args);if(ok&&name.includes("rpg-games/note-"))window.padSources.push(name);return ok;};
+    `import React,{useEffect,useState} from 'react';import {createRoot} from 'react-dom/client';import RhythmPanel from './src/rpg/rhythm/RhythmPanel';import {gameCommand,tickGames} from './src/mini-games/gakuro-craft/homeGames';import {RHYTHM_SONGS} from './src/rpg/rhythm/catalog.generated';import {rhythmChart} from './src/rpg/rhythm/chart';import {trans} from './src/utils/textUtils';import {audioService} from './src/services/audioService';window.audio=audioService;window.padHits=[];window.padSources=[];const padHit=audioService.playRpgRhythmHit.bind(audioService);audioService.playRpgRhythmHit=(lane,perfect,volume)=>{window.padHits.push(lane);window.padVolumes=(window.padVolumes||[]).concat(volume);padHit(lane,perfect,volume);};const sfxSource=audioService.startSfxSource.bind(audioService);audioService.startSfxSource=(name,...args)=>{const ok=sfxSource(name,...args);if(ok&&name.includes("rpg-games/maou-rhythm-"))window.padSources.push(name);return ok;};
 const home={tile:9,level:1,furniture:[{slot:2,item:'rhythm'}]},world={tiles:[],homeViews:{9:home},players:{},games:{},time:10,paused:false};world.tiles[9]={homeOwner:'p0'};for(let i=0;i<4;i++){const id='p'+i;world.players[id]={id,name:'Player '+i,indoors:true,homeTile:9,progress:{home}};gameCommand(world,world.players[id],{type:'game_join',slot:2});}const game=world.games['9:2'];const song=RHYTHM_SONGS.find(s=>s.path==='bgm-new/magic-female/reward.mp3');gameCommand(world,world.players.p0,{type:'game_rhythm_select',key:game.key,song:song.id,difficulty:'expert',length:'full'});for(let i=1;i<4;i++)gameCommand(world,world.players['p'+i],{type:'game_rhythm_ready',key:game.key,song:song.id,difficulty:'expert',length:'full',ready:true});window.notes=rhythmChart(song,'expert','full');window.authority=world;window.game=game;
 function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState('JAPANESE');const emit=()=>sw(structuredClone(world));window.emit=emit;window.setMode=sm;const send=c=>{gameCommand(world,world.players.p0,c);emit();};window.send=send;useEffect(()=>{let previous=performance.now();const timer=setInterval(()=>{const now=performance.now();world.time+=(now-previous)/1000;previous=now;tickGames(world,.05);emit();},50);return()=>clearInterval(timer);},[]);return world.games[game.key]?.players.includes('p0')?<RhythmPanel world={w} g={w.games[game.key]} selfId="p0" t={s=>trans(s,mode)} send={send}/>:<div>LEFT</div>;}createRoot(document.getElementById('root')).render(<App/>);`,
   );
@@ -47,6 +47,17 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   p.on("pageerror", (e) => errors.push(e.message));
   await p.addInitScript(() => {
     localStorage.setItem('rpg-rhythm-records-v1',JSON.stringify({'bgm-new:magic-female:reward|expert|full':{score:1000000,combo:30,fullCombo:true,plays:1}}));
+    const originalSource = AudioContext.prototype.createMediaElementSource;
+    const originalGain = AudioContext.prototype.createGain;
+    AudioContext.prototype.createMediaElementSource = function(element) {
+      if (element === window.music) { window.songContext = this; window.songGains = []; }
+      return originalSource.call(this, element);
+    };
+    AudioContext.prototype.createGain = function() {
+      const gain = originalGain.call(this);
+      if (this === window.songContext) window.songGains.push(gain);
+      return gain;
+    };
     const Original = window.Audio;
     window.Audio = function (src) {
       const a = new Original(src);
@@ -120,7 +131,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.getByRole("dialog", { name: "学ロリズム" }).waitFor();
   await p.waitForFunction(() => window.music.currentTime > .02 && !window.music.paused);
   const emptyHit=await p.evaluate(()=>{
-    const lane=[0,1,2,3].find(l=>!window.notes.some(n=>n.lane===l&&Math.abs(n.time-window.music.currentTime)<.2));
+    const lane=[0,1,2].find(l=>!window.notes.some(n=>n.lane===l&&Math.abs(n.time-window.music.currentTime)<.2));
     if(lane===undefined)throw Error('No empty test lane');
     const c=document.querySelector('canvas'),key=['d','f','j','k'][lane],before=window.padHits.length;
     c.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true}));
@@ -158,8 +169,32 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   );
   assert.ok(await p.evaluate(() => window.audio.currentHtmlAudio.muted), 'Background is muted in gameplay');
   assert.ok(await p.evaluate(() => new Set(window.padSources).size >= 3), 'The song-selected drum samples actually decode and play');
-  assert.ok(await p.evaluate(()=>window.padVolumes.every(v=>v>0&&v<.65)),'Chart and empty hit volumes remain below the song');
+  await p.keyboard.down('k');
+  await p.waitForFunction(() => window.songGains[1].gain.value > .98);
+  const scratchStart = await p.evaluate(() => window.music.currentTime);
+  await p.waitForTimeout(700);
+  assert.ok(await p.evaluate(t => window.music.currentTime > t + .5 && window.music.playbackRate === 1, scratchStart), 'Scratch does not move or slow the song transport');
+  assert.equal(await p.evaluate(() => window.padHits.includes(3)), false, 'Scratch modifies the song instead of playing a pad sample');
+  await p.keyboard.up('k');
+  await p.waitForFunction(() => window.songGains[1].gain.value < .01);
+  assert.ok(await p.evaluate(()=>window.padVolumes.every(v=>v>=.5&&v<=1)),'Quiet accents and empty hits are boosted without exceeding unity gain');
+  const scratchButton = p.getByRole('button', {name:'楽曲スクラッチ',exact:true});
+  await scratchButton.hover();
+  await p.mouse.down();
+  await p.waitForFunction(() => window.songGains[1].gain.value > .98);
+  await scratchButton.dispatchEvent('pointercancel');
+  await p.waitForFunction(() => window.songGains[1].gain.value < .01);
+  await p.mouse.up();
+  await p.keyboard.down('k');
+  await p.waitForFunction(() => window.songGains[1].gain.value > .98);
+  await p.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await p.waitForFunction(() => window.songGains[1].gain.value < .01);
+  await p.keyboard.up('k');
+  await p.keyboard.down('k');
+  await p.waitForFunction(() => window.songGains[1].gain.value > .98);
   await p.getByRole("button", { name: "一時停止", exact: true }).click();
+  await p.waitForFunction(() => window.songGains[1].gain.value < .01);
+  await p.keyboard.up('k');
   await p.getByText("一時停止中", { exact: true }).waitFor();
   await p.screenshot({ path: "/tmp/rpg-rhythm-portrait.png" });
   await p.setViewportSize({ width: 844, height: 390 });
@@ -193,7 +228,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.evaluate(async () => {
     window.audio.toggleMute();
   });
-  await p.waitForFunction(() => window.music.volume === 0 && window.music.muted);
+  await p.waitForFunction(() => window.music.muted && window.songGains[2].gain.value < .01);
   await p.evaluate(() => window.audio.toggleMute());
   await p.waitForFunction(() => window.music.volume > 0 && !window.music.muted);
   await p.getByRole("button", { name: "退出", exact: true }).click();
@@ -212,7 +247,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.waitForFunction(() => !window.audio.currentHtmlAudio.muted);
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    "Rhythm browser passed: real MP3 loading/preview/playback, all 143 song choices and filters, 4 seats, keyboard taps/holds with live score, responsive portrait/landscape/desktop, records, rematch reset, synchronized pause/resume, mute and cleanup while other players continue.",
+    "Rhythm browser passed: real MP3 loading/preview/playback, all 143 song choices and filters, 4 seats, keyboard taps/holds with live score, responsive portrait/landscape/desktop, records, rematch reset, synchronized pause/resume, mute, louder accents, live-song scratch with uninterrupted transport, pointer cancellation/blur/pause release, and cleanup while other players continue.",
   );
 } catch (error) {
   if (p) console.error(await p.evaluate(()=>({phase:window.game?.phase,result:window.game?.rhythm?.results?.[0],music:window.music?{time:window.music.currentTime,paused:window.music.paused,muted:window.music.muted}:null,padHits:window.padHits?.length,padSources:window.padSources?.length,body:document.body.innerText.slice(0,700)})));
