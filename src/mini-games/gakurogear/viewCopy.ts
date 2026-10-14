@@ -1,4 +1,8 @@
 export const VR_VIEW_ENGLISH:Record<string,string>={
+  'ソロ対戦':'Solo battle',
+  '問題を選んでソロ対戦':'Choose lesson and play solo',
+  'CPUの人数':'CPU opponents',
+  '通信なしでCPUと対戦できます。':'Play against CPU opponents without a connection.',
   '観戦対象を固定中':'Spectator target locked',
   '対象を固定':'Lock target',
   '自動切替を再開':'Resume automatic switching',
@@ -22,6 +26,10 @@ export const VR_VIEW_ENGLISH:Record<string,string>={
   'WASDまたはスティックで移動。Spaceで爆弾を設置。Fでリモート起爆。Bで補充問題。炎・速さ・同時設置数などを強化できます。3回被弾で脱落。':'WASD or stick to move. Space to place bombs, F to detonate, B to refill by answering. Upgrade flame, speed and capacity. Three hits eliminate you.'
 };
 export const VR_VIEW_HIRAGANA:Record<string,string>={
+  'ソロ対戦':'ソロたいせん',
+  '問題を選んでソロ対戦':'もんだいをえらんで ソロたいせん',
+  'CPUの人数':'CPUのにんずう',
+  '通信なしでCPUと対戦できます。':'つうしんなしで CPUとたいせんできます。',
   '観戦対象を固定中':'かんせんするひとを こていちゅう',
   '対象を固定':'みるひとを こてい',
   '自動切替を再開':'じどうきりかえを さいかい',

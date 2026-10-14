@@ -1,3 +1,4 @@
+import {SoloBots} from './soloBots';
 import {DedicatedConnection,vrServerUrl} from '../../services/dedicatedConnection';
 import {updateVrSettings,type VrSettings} from './roomSettings';
 import {roomAddress,shareRoomCode,type OnlineTransport} from '../../services/onlineTransport';
@@ -11,6 +12,7 @@ import { addPlayer, answer, createWorld, startWorld, retryCoop, tickWorld, valid
 import type { Input } from './engine';
 export {vrServerUrl} from '../../services/dedicatedConnection';
 export class VrRoom {
+  solo=false;private bots:SoloBots|null=null;private soloPaused=false;private soloEditing=false;
   transport:OnlineTransport=vrServerUrl()?'server':'host';
   private dedicated:DedicatedConnection|null=null;
   get shareCode(){return shareRoomCode(this.code,this.transport);}
@@ -20,7 +22,7 @@ export class VrRoom {
   constructor(private update: (w: OnlineWorld) => void, private status: (s: string) => void) {}
   private send(c: DataConnection, data: unknown) { if (c.open && (c.dataChannel?.bufferedAmount ?? 0) < 200000) c.send(JSON.stringify(data)); }
   private emit() { if (!this.world || this.closed) return; this.update(structuredClone(this.world)); this.connections.forEach(c=>this.send(c,vrPacket(this.world!))); }
-  private visibility = () => { if (this.host && this.world) { this.world.paused = document.hidden; this.emit(); } };
+  private visibility = () => { if (this.host && this.world) { this.world.paused = document.hidden||this.soloPaused||this.soloEditing; this.emit(); } };
   private async open(id?: string) {
     const env = import.meta.env;
     const options: PeerOptions = env.VITE_RPG_PEER_HOST ? { host: env.VITE_RPG_PEER_HOST, port: Number(env.VITE_RPG_PEER_PORT || 443), path: env.VITE_RPG_PEER_PATH || '/', secure: env.VITE_RPG_PEER_SECURE !== 'false' } : {};
@@ -29,6 +31,20 @@ export class VrRoom {
     if (this.closed) { peer.destroy(); throw new Error('Closed'); } this.selfId = peer.id;
     peer.on('error', e => this.status(`Network: ${e.type}`)); return peer;
   }
+  createSolo(name:string,mode:'royale'|'bomb',lesson:KartLesson,limit:number,avatar:KartAvatar=defaultAvatar(),bombMap=0,botCount=3){
+    if(this.closed||this.world)throw new Error('Room already created');
+    if(!validLesson(lesson,120)||!['royale','bomb'].includes(mode)||!Number.isFinite(limit)||!Number.isInteger(bombMap)||bombMap<0||bombMap>2)throw new Error('Invalid solo battle settings');
+    this.solo=this.host=true;this.selfId='solo-player';this.world=createWorld(mode,1,lesson,limit);this.world.bombMap=bombMap;
+    addPlayer(this.world,this.selfId,name);this.world.players[this.selfId].avatar=avatar;
+    const count=Math.max(1,Math.min(39,Math.floor(Number.isFinite(botCount)?botCount:3))),ids=Array.from({length:count},(_,i)=>`solo-cpu-${i+1}`);
+    ids.forEach((id,i)=>{addPlayer(this.world!,id,`CPU ${i+1}`);this.world!.players[id].avatar={...defaultAvatar(),outfit:(i+1)%8,hair:(i+2)%6};});
+    this.bots=new SoloBots(ids);startWorld(this.world,crypto.getRandomValues(new Uint32Array(1))[0]);
+    document.addEventListener('visibilitychange',this.visibility);let pulses=0;
+    this.timer=setInterval(()=>{if(!this.world||this.closed)return;this.bots?.update(this.world,this.controls,.05);tickWorld(this.world,this.controls,.05);clearVrPulses(this.controls);if(++pulses%2===0)this.emit();},50);
+    this.emit();
+  }
+  pauseSolo(paused:boolean){if(!this.solo||!this.world)return;this.soloPaused=paused;this.world.paused=paused||this.soloEditing||document.hidden;this.emit();}
+  pauseSoloEditor(paused:boolean){if(!this.solo||!this.world)return;this.soloEditing=paused;this.world.paused=paused||this.soloPaused||document.hidden;this.emit();}
   async create(name: string, mode: OnlineMode, missionId: number, lesson: KartLesson, limit: number, avatar: KartAvatar = defaultAvatar(), bombMap=0) {
     if(this.transport==='server'){await this.connectDedicated({create:true,name,mode,missionId,lesson,limit,avatar,bombMap});return;}
     this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
@@ -58,7 +74,7 @@ export class VrRoom {
   completeQuiz(){this.action({type:'quizComplete'});}
   supply(){this.action({type:'supply'});}
   closeBombQuiz(){this.action({type:'closeBombQuiz'});}
-  rematch(next=false){if(this.dedicated){if(this.host)this.transmit({type:'rematch',next});return;}if(this.host&&this.world&&returnToLobby(this.world,next)){this.controls={};this.lastInput={};this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
+  rematch(next=false){if(this.dedicated){if(this.host)this.transmit({type:'rematch',next});return;}if(this.host&&this.world&&returnToLobby(this.world,next)){this.controls={};this.lastInput={};if(this.solo){this.soloPaused=this.soloEditing=false;this.bots=new SoloBots(Object.keys(this.world.players).filter(id=>id!==this.selfId));startWorld(this.world,crypto.getRandomValues(new Uint32Array(1))[0]);}this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
   setAvatar(avatar:KartAvatar){if(validAvatar(avatar))this.action({type:'avatar',avatar});}
   retry(){this.action({type:'retry'});}
   setSpectator(enabled:boolean){if(!this.host||this.closed)return;if(this.dedicated){this.transmit({type:'spectator',enabled});return;}if(this.world&&setVrSpectator(this.world,this.selfId,enabled)){delete this.controls[this.selfId];this.emit();}}

@@ -10,7 +10,7 @@
 
 - `TranslatedUiTree` 内に日本語のデバッグUIを追加・変更した場合は、`src/data/debugUiExact.ts` の `ENGLISH_DEBUG_UI_EXACT` と `HIRAGANA_DEBUG_UI_EXACT` に同じ文言の翻訳を追加する。短いラベル（例: 「確定」「聞く」）も省略しない。
 - コミット前に `pnpm run audit:english:gate` と `pnpm run build` を実行し、英語UI監査が通過してから `main` へプッシュする。Actions が失敗した場合は `gh run view <run-id> --log-failed` で最初の監査エラーを確認し、ローカルで再現してから再プッシュする。
-- `git push` 後は `gh run list --limit 2` で `Build Android App Bundle` と `Deploy To GitHub Pages` の両方が成功したことを確認する。既存の未コミット変更はステージせず保持する。
+- アップロードは `git push` の成功確認まで行う。ユーザーの2026-10-14の指示に従い、GitHub Actions・公開処理などアップロード後の完了確認や監視は、明示的に依頼された場合だけ行う。既存の未コミット変更はステージせず保持する。
 
 ## Renderは手動デプロイで運用する
 
