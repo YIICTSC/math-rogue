@@ -1,0 +1,5119 @@
+{
+  "ships": [
+    {
+      "id": "SHIP_DEFAULT",
+      "name": "チラシ号",
+      "unlockRank": 0,
+      "description": "バランスの良い標準機体。",
+      "baseHp": 40,
+      "color": "bg-emerald-800",
+      "layout": [
+        {
+          "id": "p0",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p1",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p2",
+          "type": "CANNON",
+          "name": "軽量砲",
+          "slots": [
+            {
+              "req": "WHITE",
+              "value": null
+            }
+          ],
+          "multiplier": 1,
+          "basePower": 1,
+          "hp": 10
+        },
+        {
+          "id": "p3",
+          "type": "ENGINE",
+          "name": "増幅炉",
+          "slots": [
+            {
+              "req": "BLUE",
+              "value": null
+            }
+          ],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 10,
+          "specialEffect": "RANK_UP"
+        },
+        {
+          "id": "p4",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p5",
+          "type": "CANNON",
+          "name": "連装砲",
+          "slots": [
+            {
+              "req": "WHITE",
+              "value": null
+            },
+            {
+              "req": "WHITE",
+              "value": null
+            }
+          ],
+          "multiplier": 1,
+          "basePower": 2,
+          "hp": 10
+        },
+        {
+          "id": "p6",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p7",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p8",
+          "type": "CANNON",
+          "name": "軽量砲",
+          "slots": [
+            {
+              "req": "WHITE",
+              "value": null
+            }
+          ],
+          "multiplier": 1,
+          "basePower": 1,
+          "hp": 10
+        }
+      ]
+    },
+    {
+      "id": "SHIP_SPEED",
+      "name": "テスト用紙号",
+      "unlockRank": 5,
+      "description": "青スロットが多い高機動型。",
+      "baseHp": 30,
+      "color": "bg-blue-800",
+      "layout": [
+        {
+          "id": "p0",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p1",
+          "type": "MISSILE",
+          "name": "誘導弾",
+          "slots": [
+            {
+              "req": "BLUE",
+              "value": null
+            }
+          ],
+          "multiplier": 1.5,
+          "basePower": 2,
+          "hp": 10
+        },
+        {
+          "id": "p2",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p3",
+          "type": "ENGINE",
+          "name": "高機動",
+          "slots": [
+            {
+              "req": "BLUE",
+              "value": null
+            }
+          ],
+          "multiplier": 1.2,
+          "basePower": 2,
+          "hp": 10
+        },
+        {
+          "id": "p4",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p5",
+          "type": "ENGINE",
+          "name": "高機動",
+          "slots": [
+            {
+              "req": "BLUE",
+              "value": null
+            }
+          ],
+          "multiplier": 1.2,
+          "basePower": 2,
+          "hp": 10
+        },
+        {
+          "id": "p6",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p7",
+          "type": "MISSILE",
+          "name": "誘導弾",
+          "slots": [
+            {
+              "req": "BLUE",
+              "value": null
+            }
+          ],
+          "multiplier": 1.5,
+          "basePower": 2,
+          "hp": 10
+        },
+        {
+          "id": "p8",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        }
+      ]
+    },
+    {
+      "id": "SHIP_POWER",
+      "name": "画用紙号",
+      "unlockRank": 10,
+      "description": "橙スロットが多い重装甲型。",
+      "baseHp": 50,
+      "color": "bg-orange-800",
+      "layout": [
+        {
+          "id": "p0",
+          "type": "CANNON",
+          "name": "重砲",
+          "slots": [
+            {
+              "req": "ORANGE",
+              "value": null
+            }
+          ],
+          "multiplier": 2,
+          "basePower": 3,
+          "hp": 15
+        },
+        {
+          "id": "p1",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p2",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p3",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p4",
+          "type": "SHIELD",
+          "name": "装甲板",
+          "slots": [
+            {
+              "req": "ANY",
+              "value": null
+            },
+            {
+              "req": "ANY",
+              "value": null
+            }
+          ],
+          "multiplier": 1.2,
+          "basePower": 5,
+          "hp": 20
+        },
+        {
+          "id": "p5",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p6",
+          "type": "CANNON",
+          "name": "重砲",
+          "slots": [
+            {
+              "req": "ORANGE",
+              "value": null
+            }
+          ],
+          "multiplier": 2,
+          "basePower": 3,
+          "hp": 15
+        },
+        {
+          "id": "p7",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        },
+        {
+          "id": "p8",
+          "type": "EMPTY",
+          "name": "空き",
+          "slots": [],
+          "multiplier": 0,
+          "basePower": 0,
+          "hp": 0
+        }
+      ]
+    }
+  ],
+  "enemies": [
+    {
+      "name": "折り紙偵察機",
+      "hp": 40,
+      "durability": 3,
+      "layout": [
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY"
+      ],
+      "energy": 2,
+      "colors": [
+        "WHITE"
+      ],
+      "moveChance": 0.3
+    },
+    {
+      "name": "ノート爆撃機",
+      "hp": 60,
+      "durability": 4,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 3,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.2
+    },
+    {
+      "name": "定規戦艦",
+      "hp": 90,
+      "durability": 8,
+      "layout": [
+        "CANNON",
+        "CANNON",
+        "EMPTY",
+        "AMPLIFIER",
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "CANNON",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "WHITE"
+      ],
+      "moveChance": 0.1
+    },
+    {
+      "name": "コンパス要塞",
+      "hp": 120,
+      "durability": 8,
+      "layout": [
+        "MISSILE",
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "MISSILE",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.1
+    },
+    {
+      "name": "修正液タンク",
+      "hp": 180,
+      "durability": 20,
+      "layout": [
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "AMPLIFIER",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 3,
+      "colors": [
+        "WHITE",
+        "ORANGE"
+      ],
+      "moveChance": 0.05
+    },
+    {
+      "name": "カッター迎撃機",
+      "hp": 70,
+      "durability": 4,
+      "layout": [
+        "MISSILE",
+        "EMPTY",
+        "MISSILE",
+        "CANNON",
+        "CANNON",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "MISSILE"
+      ],
+      "energy": 5,
+      "colors": [
+        "BLUE"
+      ],
+      "moveChance": 0.6
+    },
+    {
+      "name": "分度器マザー",
+      "hp": 150,
+      "durability": 7,
+      "layout": [
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON"
+      ],
+      "energy": 5,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.2
+    },
+    {
+      "name": "彫刻刀デストロイヤー",
+      "hp": 200,
+      "durability": 11,
+      "layout": [
+        "MISSILE",
+        "CANNON",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "AMPLIFIER",
+        "MISSILE",
+        "CANNON",
+        "CANNON"
+      ],
+      "energy": 6,
+      "colors": [
+        "ORANGE",
+        "WHITE"
+      ],
+      "moveChance": 0.1
+    },
+    {
+      "name": "暗黒文房具王",
+      "hp": 350,
+      "durability": 22,
+      "layout": [
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE",
+        "AMPLIFIER",
+        "AMPLIFIER",
+        "AMPLIFIER",
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE"
+      ],
+      "energy": 7,
+      "colors": [
+        "ORANGE",
+        "BLUE",
+        "WHITE"
+      ],
+      "moveChance": 0.3
+    },
+    {
+      "name": "プリント追試機",
+      "hp": 48,
+      "durability": 3,
+      "layout": [
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 2,
+      "colors": [
+        "WHITE"
+      ],
+      "moveChance": 0.25
+    },
+    {
+      "name": "赤ペン査定機",
+      "hp": 55,
+      "durability": 3,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "CANNON"
+      ],
+      "energy": 3,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.35
+    },
+    {
+      "name": "上履きホバー",
+      "hp": 52,
+      "durability": 2,
+      "layout": [
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY"
+      ],
+      "energy": 3,
+      "colors": [
+        "BLUE"
+      ],
+      "moveChance": 0.65
+    },
+    {
+      "name": "黒板けし艇",
+      "hp": 68,
+      "durability": 4,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 3,
+      "colors": [
+        "WHITE"
+      ],
+      "moveChance": 0.15
+    },
+    {
+      "name": "チョーク散布機",
+      "hp": 72,
+      "durability": 4,
+      "layout": [
+        "MISSILE",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.4
+    },
+    {
+      "name": "図書室しおり艇",
+      "hp": 66,
+      "durability": 3,
+      "layout": [
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "BLUE"
+      ],
+      "moveChance": 0.45
+    },
+    {
+      "name": "給食ワゴン戦車",
+      "hp": 88,
+      "durability": 6,
+      "layout": [
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "WHITE",
+        "ORANGE"
+      ],
+      "moveChance": 0.15
+    },
+    {
+      "name": "モップローラー",
+      "hp": 82,
+      "durability": 5,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "ORANGE",
+        "WHITE"
+      ],
+      "moveChance": 0.2
+    },
+    {
+      "name": "理科実験ドローン",
+      "hp": 90,
+      "durability": 5,
+      "layout": [
+        "MISSILE",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "MISSILE"
+      ],
+      "energy": 4,
+      "colors": [
+        "BLUE",
+        "ORANGE"
+      ],
+      "moveChance": 0.5
+    },
+    {
+      "name": "放送室ジャマー",
+      "hp": 96,
+      "durability": 6,
+      "layout": [
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "AMPLIFIER",
+        "AMPLIFIER",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY"
+      ],
+      "energy": 4,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.2
+    },
+    {
+      "name": "三角定規ランサー",
+      "hp": 104,
+      "durability": 5,
+      "layout": [
+        "MISSILE",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "EMPTY",
+        "MISSILE",
+        "CANNON",
+        "EMPTY"
+      ],
+      "energy": 5,
+      "colors": [
+        "BLUE",
+        "WHITE"
+      ],
+      "moveChance": 0.45
+    },
+    {
+      "name": "彫刻刀追撃機",
+      "hp": 112,
+      "durability": 6,
+      "layout": [
+        "CANNON",
+        "MISSILE",
+        "EMPTY",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "MISSILE",
+        "CANNON"
+      ],
+      "energy": 5,
+      "colors": [
+        "ORANGE",
+        "BLUE"
+      ],
+      "moveChance": 0.35
+    },
+    {
+      "name": "答案シュレッダー",
+      "hp": 118,
+      "durability": 6,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "CANNON"
+      ],
+      "energy": 5,
+      "colors": [
+        "WHITE",
+        "ORANGE"
+      ],
+      "moveChance": 0.1
+    },
+    {
+      "name": "校内放送要塞",
+      "hp": 128,
+      "durability": 7,
+      "layout": [
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "CANNON",
+        "CANNON",
+        "CANNON",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY"
+      ],
+      "energy": 5,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.12
+    },
+    {
+      "name": "美術室フレーム砲台",
+      "hp": 134,
+      "durability": 8,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "AMPLIFIER",
+        "EMPTY",
+        "AMPLIFIER",
+        "CANNON",
+        "EMPTY",
+        "CANNON"
+      ],
+      "energy": 5,
+      "colors": [
+        "WHITE",
+        "ORANGE"
+      ],
+      "moveChance": 0.18
+    },
+    {
+      "name": "焼却炉ブレイザー",
+      "hp": 144,
+      "durability": 8,
+      "layout": [
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY"
+      ],
+      "energy": 6,
+      "colors": [
+        "ORANGE",
+        "WHITE"
+      ],
+      "moveChance": 0.28
+    },
+    {
+      "name": "体育倉庫ブルドーザー",
+      "hp": 156,
+      "durability": 14,
+      "layout": [
+        "CANNON",
+        "CANNON",
+        "EMPTY",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "CANNON",
+        "CANNON",
+        "EMPTY"
+      ],
+      "energy": 6,
+      "colors": [
+        "ORANGE",
+        "WHITE"
+      ],
+      "moveChance": 0.16
+    },
+    {
+      "name": "文化祭ステージ艦",
+      "hp": 168,
+      "durability": 10,
+      "layout": [
+        "MISSILE",
+        "EMPTY",
+        "MISSILE",
+        "AMPLIFIER",
+        "CANNON",
+        "AMPLIFIER",
+        "MISSILE",
+        "EMPTY",
+        "MISSILE"
+      ],
+      "energy": 6,
+      "colors": [
+        "BLUE",
+        "WHITE",
+        "ORANGE"
+      ],
+      "moveChance": 0.34
+    },
+    {
+      "name": "校庭サーチライト艦",
+      "hp": 176,
+      "durability": 9,
+      "layout": [
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY"
+      ],
+      "energy": 6,
+      "colors": [
+        "BLUE",
+        "BLUE",
+        "WHITE"
+      ],
+      "moveChance": 0.55
+    },
+    {
+      "name": "昼休みパン争奪機",
+      "hp": 170,
+      "durability": 8,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "CANNON"
+      ],
+      "energy": 6,
+      "colors": [
+        "WHITE",
+        "ORANGE",
+        "BLUE"
+      ],
+      "moveChance": 0.42
+    },
+    {
+      "name": "理科室プラズマ塔",
+      "hp": 188,
+      "durability": 10,
+      "layout": [
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE"
+      ],
+      "energy": 6,
+      "colors": [
+        "BLUE",
+        "ORANGE"
+      ],
+      "moveChance": 0.22
+    },
+    {
+      "name": "卒業アルバム号",
+      "hp": 196,
+      "durability": 11,
+      "layout": [
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "EMPTY",
+        "AMPLIFIER",
+        "EMPTY",
+        "MISSILE",
+        "EMPTY",
+        "MISSILE"
+      ],
+      "energy": 6,
+      "colors": [
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.24
+    },
+    {
+      "name": "応援団総攻撃艇",
+      "hp": 210,
+      "durability": 12,
+      "layout": [
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "CANNON",
+        "EMPTY",
+        "CANNON",
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE"
+      ],
+      "energy": 7,
+      "colors": [
+        "ORANGE",
+        "WHITE"
+      ],
+      "moveChance": 0.22
+    },
+    {
+      "name": "裏生徒会旗艦",
+      "hp": 228,
+      "durability": 13,
+      "layout": [
+        "MISSILE",
+        "EMPTY",
+        "MISSILE",
+        "AMPLIFIER",
+        "CANNON",
+        "AMPLIFIER",
+        "MISSILE",
+        "EMPTY",
+        "MISSILE"
+      ],
+      "energy": 7,
+      "colors": [
+        "WHITE",
+        "BLUE",
+        "ORANGE"
+      ],
+      "moveChance": 0.3
+    },
+    {
+      "name": "校則執行ドレッド",
+      "hp": 244,
+      "durability": 22,
+      "layout": [
+        "CANNON",
+        "CANNON",
+        "MISSILE",
+        "AMPLIFIER",
+        "AMPLIFIER",
+        "EMPTY",
+        "CANNON",
+        "CANNON",
+        "MISSILE"
+      ],
+      "energy": 7,
+      "colors": [
+        "ORANGE",
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.2
+    },
+    {
+      "name": "終業チャイム・オメガ",
+      "hp": 268,
+      "durability": 15,
+      "layout": [
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "MISSILE",
+        "AMPLIFIER",
+        "MISSILE"
+      ],
+      "energy": 7,
+      "colors": [
+        "BLUE",
+        "WHITE",
+        "ORANGE"
+      ],
+      "moveChance": 0.38
+    },
+    {
+      "name": "職員室ペーパードラゴン",
+      "hp": 290,
+      "durability": 18,
+      "layout": [
+        "CANNON",
+        "MISSILE",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "AMPLIFIER",
+        "CANNON",
+        "MISSILE",
+        "CANNON"
+      ],
+      "energy": 8,
+      "colors": [
+        "ORANGE",
+        "WHITE",
+        "BLUE"
+      ],
+      "moveChance": 0.18
+    }
+  ],
+  "parts": [
+    {
+      "type": "CANNON",
+      "name": "バスター砲",
+      "description": "標準的な威力の大砲。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 3,
+      "hp": 10
+    },
+    {
+      "type": "MISSILE",
+      "name": "誘導ミサイル",
+      "description": "青エネルギーで高出力。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 5,
+      "hp": 10
+    },
+    {
+      "type": "SHIELD",
+      "name": "エネルギー盾",
+      "description": "高い防御力を発揮。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 5,
+      "hp": 15
+    },
+    {
+      "type": "ENGINE",
+      "name": "高機動スラスター",
+      "description": "回避率と燃料効率が高い。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 10
+    },
+    {
+      "type": "CANNON",
+      "name": "波動砲",
+      "description": "オレンジ必須。超高火力。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 10,
+      "hp": 10
+    },
+    {
+      "type": "ENGINE",
+      "name": "増幅炉",
+      "description": "ランク+1のカードを生成する。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 0,
+      "hp": 10,
+      "specialEffect": "RANK_UP"
+    },
+    {
+      "type": "CANNON",
+      "name": "バルカン砲",
+      "description": "白エネルギーで手軽に連射。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 2,
+      "hp": 10
+    },
+    {
+      "type": "CANNON",
+      "name": "レールガン",
+      "description": "青エネルギー専用。貫通力重視。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 3,
+      "basePower": 6,
+      "hp": 10
+    },
+    {
+      "type": "MISSILE",
+      "name": "ナパーム弾",
+      "description": "オレンジ専用。広範囲高火力。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.5,
+      "basePower": 5,
+      "hp": 10
+    },
+    {
+      "type": "SHIELD",
+      "name": "スパイク装甲",
+      "description": "被弾時、防御出力の半分を敵に返す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 2,
+      "hp": 20,
+      "specialEffect": "THORNS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "リペアキット",
+      "description": "白エネルギーで効率よく防御。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 4,
+      "hp": 10
+    },
+    {
+      "type": "ENGINE",
+      "name": "ソーラー帆",
+      "description": "白エネルギーを効率よく変換。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 0,
+      "hp": 5
+    },
+    {
+      "type": "ENGINE",
+      "name": "核融合炉",
+      "description": "オレンジ専用。莫大な出力(シールド・燃料)。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 4,
+      "basePower": 6,
+      "hp": 15
+    },
+    {
+      "type": "CANNON",
+      "name": "スナイパー",
+      "description": "2スロットで精密射撃。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 5,
+      "hp": 10
+    },
+    {
+      "type": "MISSILE",
+      "name": "拡散ポッド",
+      "description": "多数の白スロットを持つ。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0.8,
+      "basePower": 3,
+      "hp": 10
+    },
+    {
+      "type": "SHIELD",
+      "name": "ミラーコート",
+      "description": "青エネルギーで特殊防御。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 4,
+      "hp": 12
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "エネルギー増幅器",
+      "description": "隣接するパーツの出力を強化する(要:白エネ)。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 2,
+      "hp": 8
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "ハイパーブースター",
+      "description": "隣接するパーツを大幅強化(要:橙エネ)。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 5,
+      "hp": 8
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "デュアルアンプ",
+      "description": "2スロットで安定した強化。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8
+    },
+    {
+      "type": "CANNON",
+      "name": "ホッチキス銃",
+      "description": "4連白スロット。数で勝負。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0.8,
+      "basePower": 4,
+      "hp": 10
+    },
+    {
+      "type": "CANNON",
+      "name": "カッターナイフ",
+      "description": "近距離高火力。1スロット橙。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 4.5,
+      "basePower": 2,
+      "hp": 5
+    },
+    {
+      "type": "MISSILE",
+      "name": "コンパスドリル",
+      "description": "1スロットだが貫通力が高い。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 3.5,
+      "basePower": 4,
+      "hp": 10
+    },
+    {
+      "type": "SHIELD",
+      "name": "修正液バリア",
+      "description": "白エネルギーで堅牢な守り。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.8,
+      "basePower": 6,
+      "hp": 15
+    },
+    {
+      "type": "SHIELD",
+      "name": "鉄壁の筆箱",
+      "description": "3スロットで鉄壁の防御。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 8,
+      "hp": 20
+    },
+    {
+      "type": "CANNON",
+      "name": "黒板消しキャノン",
+      "description": "粉塵爆発。白と青を使用。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.8,
+      "basePower": 5,
+      "hp": 12
+    },
+    {
+      "type": "MISSILE",
+      "name": "三角定規ブーメラン",
+      "description": "戻ってくる衝撃波。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 6,
+      "hp": 10
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "黄金比コンパス",
+      "description": "青エネルギーで隣接パーツを強化。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 4,
+      "hp": 8
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "下敷き静電気",
+      "description": "隣接強化。白エネルギー。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 5
+    },
+    {
+      "type": "CANNON",
+      "name": "シャーペンスナイパー",
+      "description": "超遠距離精密射撃。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.5,
+      "basePower": 7,
+      "hp": 8
+    },
+    {
+      "type": "CANNON",
+      "name": "液状のりスプレー",
+      "description": "敵の動きを鈍らせる(イメージ)。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 3,
+      "hp": 12
+    },
+    {
+      "type": "CANNON",
+      "name": "彫刻刀セット",
+      "description": "5本の刃を一斉射出。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.5,
+      "basePower": 10,
+      "hp": 10
+    },
+    {
+      "type": "CANNON",
+      "name": "放送室スピーカー",
+      "description": "音波攻撃。白エネで高出力。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 5,
+      "hp": 15
+    },
+    {
+      "type": "ENGINE",
+      "name": "焼却炉エンジン",
+      "description": "橙エネルギー専用。爆発的推進力。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 5,
+      "basePower": 10,
+      "hp": 20
+    },
+    {
+      "type": "SHIELD",
+      "name": "理科室の人体模型",
+      "description": "不気味なオーラで守る。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 8,
+      "hp": 25
+    },
+    {
+      "type": "MISSILE",
+      "name": "消火栓放水",
+      "description": "青エネルギー3つで超高圧放水。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 3,
+      "basePower": 12,
+      "hp": 18
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "校長先生の銅像",
+      "description": "圧倒的威圧感で隣接パーツを強化。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 6,
+      "hp": 30
+    },
+    {
+      "type": "CANNON",
+      "name": "チャイム音波砲",
+      "description": "キーンコーンカーンコーン(破壊音)。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 6,
+      "hp": 10
+    },
+    {
+      "type": "SHIELD",
+      "name": "自己修復ナノ",
+      "description": "起動時に船体HPを5回復する。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 0,
+      "hp": 10,
+      "specialEffect": "HEAL"
+    },
+    {
+      "type": "ENGINE",
+      "name": "エネルギー吸収装置",
+      "description": "起動時、燃料を1回復する。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "RECYCLE"
+    },
+    {
+      "type": "ENGINE",
+      "name": "あしたのジョーロ",
+      "description": "水力エンジン。白のみで高効率。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.8,
+      "basePower": 1,
+      "hp": 8
+    },
+    {
+      "type": "SHIELD",
+      "name": "揚げパンアーマー",
+      "description": "砂糖のコーティングで衝撃吸収。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 5,
+      "hp": 15
+    },
+    {
+      "type": "MISSILE",
+      "name": "冷凍ミカン爆弾",
+      "description": "カチカチのミカンを投下。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 3,
+      "basePower": 3,
+      "hp": 8
+    },
+    {
+      "type": "CANNON",
+      "name": "牛乳瓶キャノン",
+      "description": "カルシウムパワーで攻撃。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 2,
+      "hp": 10
+    },
+    {
+      "type": "SHIELD",
+      "name": "0点のテスト用紙",
+      "description": "紙装甲だがHPだけは無駄に高い。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0.1,
+      "basePower": 1,
+      "hp": 50
+    },
+    {
+      "type": "CANNON",
+      "name": "プリズムレーザー",
+      "description": "青と橙の混合エネルギーが必要。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.5,
+      "basePower": 8,
+      "hp": 10
+    },
+    {
+      "type": "CANNON",
+      "name": "伝説のソード",
+      "description": "勇者が使っていた剣の切っ先。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 3,
+      "basePower": 20,
+      "hp": 30
+    },
+    {
+      "type": "MISSILE",
+      "name": "ドラゴン花火",
+      "description": "龍の形をした花火ミサイル。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.5,
+      "basePower": 15,
+      "hp": 15
+    },
+    {
+      "type": "ENGINE",
+      "name": "無限の心臓",
+      "description": "永久機関。ランクアップ効果付き。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 5,
+      "hp": 40,
+      "specialEffect": "RANK_UP"
+    },
+    {
+      "type": "CANNON",
+      "name": "白チョーク連射砲",
+      "description": "白エネルギーを使うほど黒板粉が舞い、出力が伸びる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 3,
+      "hp": 10,
+      "specialEffect": "WHITE_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "おそろいノート砲",
+      "description": "同じ数字をそろえると一斉提出の勢いで火力が増す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "MATCH_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "補習プリントランチャー",
+      "description": "低い数字ほど枚数で押し込む。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "LOW_SCORE_BOOST"
+    },
+    {
+      "type": "CANNON",
+      "name": "一発勝負えんぴつ",
+      "description": "たった1枚にすべてを賭ける小テスト特化砲。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 2,
+      "basePower": 2,
+      "hp": 6,
+      "specialEffect": "SOLO_DOUBLE"
+    },
+    {
+      "type": "CANNON",
+      "name": "虹色時間割レーザー",
+      "description": "3色の授業をそろえると時間割共鳴で威力が跳ね上がる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 8,
+      "hp": 12,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "図工パレットシールド",
+      "description": "3色がそろうとカラフルな防壁が完成する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 6,
+      "hp": 14,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "保健室の白衣",
+      "description": "白エネルギーで守りが厚くなる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 12,
+      "specialEffect": "WHITE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "連絡網コピー機",
+      "description": "増幅炉の量産型。連絡事項を次々と複製する。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 0,
+      "hp": 10,
+      "specialEffect": "RANK_UP"
+    },
+    {
+      "type": "ENGINE",
+      "name": "給食ワゴンエンジン",
+      "description": "配膳の勢いで燃料を回収する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.4,
+      "basePower": 2,
+      "hp": 12,
+      "specialEffect": "RECYCLE"
+    },
+    {
+      "type": "SHIELD",
+      "name": "画用紙トゲバリア",
+      "description": "厚紙の反発で被弾を押し返す。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 5,
+      "hp": 18,
+      "specialEffect": "THORNS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "朝礼マイク",
+      "description": "朝礼の声量で隣接パーツを底上げする。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "応援メガホン",
+      "description": "体育祭ばりの声援で隣接出力を引き上げる。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 4,
+      "hp": 8
+    },
+    {
+      "type": "MISSILE",
+      "name": "図書室しおりスナイパー",
+      "description": "静かな狙撃。青と白を丁寧にそろえる高精度型。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.2,
+      "basePower": 5,
+      "hp": 9
+    },
+    {
+      "type": "CANNON",
+      "name": "掃除当番モップブレード",
+      "description": "勢いよく振り抜く近距離切断。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.6,
+      "basePower": 5,
+      "hp": 10
+    },
+    {
+      "type": "MISSILE",
+      "name": "黒板けしストーム",
+      "description": "白エネルギーが多いほど粉塵爆発が強まる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 6,
+      "hp": 12,
+      "specialEffect": "WHITE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "理科準備室コイル",
+      "description": "理科室の配線を流用した高効率推進器。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.4,
+      "basePower": 3,
+      "hp": 10
+    },
+    {
+      "type": "CANNON",
+      "name": "学級新聞キャノン",
+      "description": "同じ数字がそろうと号外の勢いで一斉発射。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 6,
+      "hp": 12,
+      "specialEffect": "MATCH_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "居残り反省文シュレッダー",
+      "description": "低い数字の束を勢いに変える裁断砲。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 11,
+      "specialEffect": "LOW_SCORE_BOOST"
+    },
+    {
+      "type": "SHIELD",
+      "name": "放課後見回りライト",
+      "description": "単独起動時だけ強く光る防護ライト。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.4,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "SOLO_DOUBLE"
+    },
+    {
+      "type": "CANNON",
+      "name": "青インク速射砲",
+      "description": "青エネルギーの本数だけ追撃火力が伸びる。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 3,
+      "hp": 10,
+      "specialEffect": "BLUE_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "夕焼け校舎ブラスター",
+      "description": "オレンジの熱量で一気に押し切る。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.4,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "ORANGE_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "成績表ジャッジメント",
+      "description": "高得点カードほど厳しく評価して威力化する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 11,
+      "specialEffect": "HIGH_SCORE_BOOST"
+    },
+    {
+      "type": "CANNON",
+      "name": "偶数小テスト砲",
+      "description": "偶数で揃うと模範解答の火力を放つ。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 3,
+      "hp": 9,
+      "specialEffect": "EVEN_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "奇数暗記ミサイル",
+      "description": "奇数だけでそろえる変則弾幕。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "ODD_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "時間割シーケンス砲",
+      "description": "並び順の美しさで威力が跳ね上がる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 11,
+      "specialEffect": "SEQUENCE_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "単色クレヨンポッド",
+      "description": "同じ色で染めるほどまとまりが出る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "MONO_COLOR_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "追い込み補習バリア",
+      "description": "過充填した時だけ回復もこなす守り。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 6,
+      "hp": 13,
+      "specialEffect": "OVERCHARGE_HEAL"
+    },
+    {
+      "type": "ENGINE",
+      "name": "早弁エンジン",
+      "description": "大きな数字をまとめて食べると燃料を吐き出す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "OVERCHARGE_RECYCLE"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "文化祭ライトアップ",
+      "description": "3色そろうと舞台照明ばりの増幅を行う。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 4,
+      "hp": 8,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "生徒会拡声器",
+      "description": "高得点エネルギーほど校内中に響き渡る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "HIGH_SCORE_BOOST"
+    },
+    {
+      "type": "SHIELD",
+      "name": "保護者会パーテーション",
+      "description": "同色統一で場を完全に仕切る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "MONO_COLOR_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "ノート端切れシュート",
+      "description": "小さい数字を束ねるほど鋭く飛ぶ。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "LOW_SCORE_BOOST"
+    },
+    {
+      "type": "CANNON",
+      "name": "目覚まし当番砲",
+      "description": "朝イチの一発だけに全力を込める。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 2.2,
+      "basePower": 2,
+      "hp": 7,
+      "specialEffect": "SOLO_DOUBLE"
+    },
+    {
+      "type": "SHIELD",
+      "name": "理科室フラスコ盾",
+      "description": "青い試薬を注ぐほど防壁が安定する。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 11,
+      "specialEffect": "BLUE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "習字半紙ブースター",
+      "description": "白エネルギーに反応して静かに加速する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.4,
+      "basePower": 2,
+      "hp": 9,
+      "specialEffect": "WHITE_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "絵の具パレット増幅器",
+      "description": "色がそろうほど図工室の魔法が強まる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "昼休み鬼ごっこエンジン",
+      "description": "偶数の歩調で加速が安定する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "EVEN_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "机寄せプッシャー",
+      "description": "同じ数字をそろえて列全体を押し出す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 7,
+      "specialEffect": "MATCH_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "校門ダッシュジェット",
+      "description": "奇数テンポのスタートダッシュに特化。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "ODD_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "連続チャイム砲",
+      "description": "順番通りに鳴るほど破壊音が増す。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 6,
+      "hp": 12,
+      "specialEffect": "SEQUENCE_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "反省文ミサイルポッド",
+      "description": "低評価の束を容赦なく撃ち込む。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "LOW_SCORE_BOOST"
+    },
+    {
+      "type": "SHIELD",
+      "name": "午後の眠気クッション",
+      "description": "過充填で眠気が飛ぶと同時に回復する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 13,
+      "specialEffect": "OVERCHARGE_HEAL"
+    },
+    {
+      "type": "CANNON",
+      "name": "放送原稿キャノン",
+      "description": "同じ色の原稿束で火力を安定化する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "MONO_COLOR_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "掲示板ホチキスランチャー",
+      "description": "同じ数字で留めるほど発射が鋭い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "MATCH_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "修学旅行エンジン",
+      "description": "色とりどりの思い出を燃料に変える。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.5,
+      "basePower": 3,
+      "hp": 11,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "風紀チェックライト",
+      "description": "高得点カードほど強く取り締まる防壁。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "HIGH_SCORE_BOOST"
+    },
+    {
+      "type": "CANNON",
+      "name": "掃除ロッカーラム",
+      "description": "オレンジエネルギーで雑に押し切る衝角。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.4,
+      "basePower": 4,
+      "hp": 11,
+      "specialEffect": "ORANGE_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "クラス旗ブースター",
+      "description": "同色で染まるほど応援がまとまる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "MONO_COLOR_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "係決めじゃんけん砲",
+      "description": "偶数でまとまると話が早い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "EVEN_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "帰りの会スパイラル",
+      "description": "奇数で揃えると締めの一撃が強い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "ODD_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "体育館マット壁",
+      "description": "同じ数字を重ねるほど防壁が分厚くなる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 14,
+      "specialEffect": "MATCH_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "予鈴スタート装置",
+      "description": "単独入力で一気に走り出す。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.8,
+      "basePower": 2,
+      "hp": 7,
+      "specialEffect": "SOLO_DOUBLE"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "班長メモ増幅器",
+      "description": "高得点の指示ほど周囲に伝わる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "HIGH_SCORE_BOOST"
+    },
+    {
+      "type": "CANNON",
+      "name": "宿題チェックアーム",
+      "description": "高得点カードを見逃さず出力へ変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "HIGH_SCORE_BOOST"
+    },
+    {
+      "type": "MISSILE",
+      "name": "色紙メッセージ弾",
+      "description": "同じ色でまとめると気持ちが乗る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "MONO_COLOR_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "保冷剤ベスト",
+      "description": "青い冷気が多いほど守りが硬い。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 12,
+      "specialEffect": "BLUE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "夕方寄り道タービン",
+      "description": "オレンジの勢いで燃料を押し戻す。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "ORANGE_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "表彰状フラッシュ",
+      "description": "高得点時だけまぶしい一撃になる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "HIGH_SCORE_BOOST"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "時間割ボード",
+      "description": "数字の流れが整うほど強く支援する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "SEQUENCE_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "折りたたみ座布団",
+      "description": "低い数字でも枚数で守りを作る。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 13,
+      "specialEffect": "LOW_SCORE_BOOST"
+    },
+    {
+      "type": "MISSILE",
+      "name": "校外学習スタンプ弾",
+      "description": "順番通りの記録で破壊力が増す。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 6,
+      "hp": 10,
+      "specialEffect": "SEQUENCE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "購買ダッシュ装置",
+      "description": "過充填に成功すると燃料が返ってくる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "OVERCHARGE_RECYCLE"
+    },
+    {
+      "type": "CANNON",
+      "name": "教科書積み上げ砲",
+      "description": "同じ数字を積み上げるほど厚みで押し潰す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "MATCH_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "ホームルーム結界",
+      "description": "3色がそろうと一体感で防壁が完成する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "点呼ホイッスル",
+      "description": "奇数テンポの合図が味方を鼓舞する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "ODD_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "卒業式フラワーシャワー",
+      "description": "3色の祝福がそろうと華やかに炸裂する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 7,
+      "hp": 11,
+      "specialEffect": "RAINBOW_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "先生の赤チョーク弾",
+      "description": "オレンジの勢いで小テストを返却する。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "ORANGE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "放課後居残りブースト",
+      "description": "高負荷の過充填でさらに燃料が戻る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 3,
+      "hp": 11,
+      "specialEffect": "OVERCHARGE_RECYCLE"
+    },
+    {
+      "type": "SHIELD",
+      "name": "連絡板ガード",
+      "description": "単色でそろえるほど一枚岩の守りになる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 13,
+      "specialEffect": "MONO_COLOR_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "素数判定レーザー",
+      "description": "素数だけを見抜いて高火力へ変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "PRIME_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "平方数プロテクタ",
+      "description": "平方数の整った力場で守りを固める。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 12,
+      "specialEffect": "SQUARE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "最大公約エンジン",
+      "description": "数字の共通因子を効率へ変換する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 3,
+      "hp": 10,
+      "specialEffect": "GCD_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "最小公倍キャノン",
+      "description": "数字を重ねて巨大な一撃を放つ。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 11,
+      "specialEffect": "LCM_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "フィボナッチ翼",
+      "description": "成長する数列に共鳴して加速する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 3,
+      "hp": 9,
+      "specialEffect": "FIBONACCI_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "平均点ブラスター",
+      "description": "平均点が高いほど安定して強い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "MEAN_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "中央値シールド",
+      "description": "極端な値に左右されない堅実な防壁。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 13,
+      "specialEffect": "MEDIAN_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "同型共鳴器",
+      "description": "同じタイプが隣にあるほど共鳴する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "SAME_TYPE_LINK"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "整列委員アレイ",
+      "description": "同じ列が整うと一斉強化を行う。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "ROW_UNITY"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "中央司令塔",
+      "description": "中央で全体を見渡して指揮を執る。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 9,
+      "specialEffect": "CENTER_COMMAND"
+    },
+    {
+      "type": "MISSILE",
+      "name": "対角線レーザー",
+      "description": "斜めの仲間を数えて収束する。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "DIAGONAL_LINK"
+    },
+    {
+      "type": "MISSILE",
+      "name": "左右対称ノズル",
+      "description": "対称配置で照準が安定する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "MIRROR_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "学期末ブースター",
+      "description": "長期戦になるほど本気を出す。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 3,
+      "hp": 10,
+      "specialEffect": "TURN_SCALE"
+    },
+    {
+      "type": "SHIELD",
+      "name": "反省ログ装甲",
+      "description": "痛みを記録し、次の守りへ変える。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 14,
+      "specialEffect": "DAMAGE_MEMORY"
+    },
+    {
+      "type": "CANNON",
+      "name": "努力ノート砲",
+      "description": "同じパーツに装填するほど努力が実る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "EFFORT_STACK"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "自由研究アーカイブ",
+      "description": "戦闘中に見た数字の種類を研究成果に変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "UNIQUE_VALUE_RECORD"
+    },
+    {
+      "type": "MISSILE",
+      "name": "くじ引きクラッカー",
+      "description": "大当たりが出れば一気に爆ぜる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "RANDOM_SPIKE"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "天気予報アンテナ",
+      "description": "日直の予報色に合わせて増幅する。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "FORECAST_COLOR"
+    },
+    {
+      "type": "ENGINE",
+      "name": "ラッキー鉛筆",
+      "description": "運が良ければカードを使い回せる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.4,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "NO_CONSUME_CHANCE"
+    },
+    {
+      "type": "CANNON",
+      "name": "微分ドリルバースト",
+      "description": "素数と高平均の両立を目指す理系砲。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 11,
+      "specialEffect": "PRIME_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "市松模様ガード",
+      "description": "対称と整列の両方を意識した守り。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "MIRROR_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "回文読みレーザー",
+      "description": "前から読んでも後ろから読んでも強い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "PALINDROME_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "15点満点ミサイル",
+      "description": "合計点ぴったりの美しさを威力に変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "SUM_FIFTEEN_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "三の倍数ジョーク砲",
+      "description": "3の倍数だけ妙に強い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "MULTIPLE_OF_THREE_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "手札分析ボード",
+      "description": "選択肢が多いほど作戦は冴える。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "HAND_SIZE_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "居残りテンポ弾",
+      "description": "一時カードの勢いで飛び出す連続弾。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "TEMP_CARD_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "壁ぎわロッカー盾",
+      "description": "端に置くと安定する壁役。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "EDGE_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "角席スナイパー",
+      "description": "教室の角から狙うと強い。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "CORNER_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "ぼっち研究エンジン",
+      "description": "周りに誰もいない時ほど集中する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 9,
+      "specialEffect": "ISOLATION_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "交互色マーカー砲",
+      "description": "色が交互だとリズムよく発射する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "ALT_COLOR_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "連投演習キャノン",
+      "description": "同じ砲に入れ続けるほど鍛えられる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "LAST_STREAK_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "教卓の端ブースター",
+      "description": "端配置かつ手札豊富で真価を発揮。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "EDGE_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "回文座布団",
+      "description": "対称の数字で座り心地が増す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 13,
+      "specialEffect": "PALINDROME_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "予習済みノート弾",
+      "description": "手札が多いと撃ち筋も増える。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "HAND_SIZE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "補習残業タービン",
+      "description": "一時カードを燃料計画に変換する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "TEMP_CARD_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "端数切り上げ砲",
+      "description": "端に置くと成績補正が入る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "EDGE_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "角コーナーシュート",
+      "description": "角に置いた時だけ見える射線。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "CORNER_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "独習シグナル",
+      "description": "周囲が空いているほど信号がよく通る。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "ISOLATION_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "しましま防護服",
+      "description": "交互色で縫い込むと耐久が増す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "ALT_COLOR_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "居残り連続記録計",
+      "description": "連続装填の粘りを燃料効率へ変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "LAST_STREAK_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "約数しらべ砲",
+      "description": "約数の多い数字ほど丁寧に分解して火力へ変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "DIVISOR_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "素因数ノートミサイル",
+      "description": "素因数の種類が多いほど、散らばるメモのように弾が増える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "PRIME_FACTOR_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "合計12ブラスター",
+      "description": "合計12や18ぴったりで会心の一撃。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "SUM_TARGET_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "余り3シールド",
+      "description": "3で割った余りが揃うと守りが整う。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "MOD_MATCH_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "比例グラフアンプ",
+      "description": "比が揃うとグラフの線がまっすぐ伸びる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "RATIO_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "反比例ノズル",
+      "description": "積が12になる絶妙な釣り合いで燃料を生む。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "PRODUCT_SUPPORT_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "平均点レーザー",
+      "description": "平均点そのものを集束光に変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "MEAN_DOUBLE_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "最頻値バリア",
+      "description": "よく出る数字ほど防壁が厚くなる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 12,
+      "specialEffect": "MODE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "分散スタビライザー",
+      "description": "数字のばらつきが小さいほど安定した推力を出す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "LOW_SPREAD_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "平方数ポッド",
+      "description": "平方数を揃えるときれいに弾道がまとまる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "SQUARE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "約分エンジン",
+      "description": "最大公約数が高いほど、約分の気持ちよさで燃費が伸びる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "GCD_FUEL_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "回文読みキャノン",
+      "description": "前後対称の並びを一瞬で見抜いて撃ち抜く。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "PALINDROME_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "15点満点ロケット",
+      "description": "合計15に届いた瞬間、満点気分で加速する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "SUM_FIFTEEN_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "三の倍数ブースター",
+      "description": "3の倍数だけテンポよく増幅する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "MULTIPLE_OF_THREE_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "等差数列ノズル",
+      "description": "等差数列が完成すると理路整然と燃料を吐き出す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "ARITHMETIC_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "窓際スナイパー",
+      "description": "端や角に置くと視界が開けて狙撃精度が上がる。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "EDGE_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "教卓タワー",
+      "description": "中央で周囲を見渡すほど指揮力が増す。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "CENTER_ADJ_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "ロッカー横シールド",
+      "description": "壁際に寄せるほど守備が固まる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 0.9,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "EDGE_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "掲示板ライン砲",
+      "description": "同じ列の仲間が同タイプだと掲示がつながって強い。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "ROW_TYPE_LINK"
+    },
+    {
+      "type": "ENGINE",
+      "name": "出入口ダッシュエンジン",
+      "description": "角からの飛び出しで一気に加速する。",
+      "slots": [
+        {
+          "req": "ORANGE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 9,
+      "specialEffect": "CORNER_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "班行動ミサイル",
+      "description": "隣に違う役割が多いほど連携が決まる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "ADJACENT_DIVERSITY_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "黒板前フォーメーション",
+      "description": "同じ列を同タイプで埋めると教室全体を押し上げる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "ROW_UNITY"
+    },
+    {
+      "type": "ENGINE",
+      "name": "すみっこ研究ノズル",
+      "description": "孤立しているほど静かに燃料が戻る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.3,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "ISOLATION_FUEL_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "中央通路バリア",
+      "description": "中央列に置き、上下が埋まるほど守りが伸びる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "CENTER_COLUMN_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "左右確認レーザー",
+      "description": "左右対称の位置に同タイプがあると一斉照射する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "MIRROR_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "くじ当てキャノン",
+      "description": "当たりなら超火力、外れても少しは頑張る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "RANDOM_SWING"
+    },
+    {
+      "type": "SHIELD",
+      "name": "占いシールド",
+      "description": "今日のラッキーカラーに合わせると守りが伸びる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 12,
+      "specialEffect": "FORECAST_COLOR"
+    },
+    {
+      "type": "ENGINE",
+      "name": "席替えエンジン",
+      "description": "うまくハマるとエネルギーを消費しない。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 2,
+      "hp": 9,
+      "specialEffect": "NO_CONSUME_CHANCE"
+    },
+    {
+      "type": "MISSILE",
+      "name": "福引ミサイル",
+      "description": "大吉なら大爆発、外れでも最低限は飛ぶ。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "RANDOM_SWING"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "山勘アンプ",
+      "description": "その場の勘で増幅値が上下する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "RANDOM_SWING"
+    },
+    {
+      "type": "ENGINE",
+      "name": "忘れ物リサイクラ",
+      "description": "たまにカードを使わずに済ませるちゃっかり者。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "NO_CONSUME_CHANCE"
+    },
+    {
+      "type": "CANNON",
+      "name": "ラッキーカラー砲",
+      "description": "そのターンの予報色を当てるとよく伸びる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "FORECAST_COLOR"
+    },
+    {
+      "type": "SHIELD",
+      "name": "おみくじバリア",
+      "description": "守りの強さが毎回変わる博打防壁。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 11,
+      "specialEffect": "RANDOM_SWING"
+    },
+    {
+      "type": "CANNON",
+      "name": "努力記録レーザー",
+      "description": "この戦闘での装填回数がそのまま威力になる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "EFFORT_STACK"
+    },
+    {
+      "type": "SHIELD",
+      "name": "継続観察シールド",
+      "description": "ターン経過ごとに観察力が増して守りが厚くなる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 12,
+      "specialEffect": "TURN_SCALE"
+    },
+    {
+      "type": "ENGINE",
+      "name": "部活ランエンジン",
+      "description": "連続装填の勢いで推進力が伸びる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 8,
+      "specialEffect": "LAST_STREAK_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "宿題ログアンプ",
+      "description": "見た数字の種類が多いほど分析が進む。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "UNIQUE_VALUE_RECORD"
+    },
+    {
+      "type": "MISSILE",
+      "name": "学期末ミサイル",
+      "description": "終盤になるほど締切の圧で強くなる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 9,
+      "specialEffect": "TURN_SCALE"
+    },
+    {
+      "type": "CANNON",
+      "name": "研究発表キャノン",
+      "description": "手札が多いほど選択肢を火力へ変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 10,
+      "specialEffect": "HAND_SIZE_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "反省ノートバリア",
+      "description": "受けた痛みを忘れず、次の守りに変える。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "DAMAGE_MEMORY"
+    },
+    {
+      "type": "ENGINE",
+      "name": "居残りターボ",
+      "description": "一時カードの勢いで放課後に加速する。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.2,
+      "basePower": 2,
+      "hp": 9,
+      "specialEffect": "TEMP_CARD_BONUS"
+    },
+    {
+      "type": "ENGINE",
+      "name": "保健室補給ポッド",
+      "description": "過充填に成功すると回復も燃料補給もこなす。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "OVERCHARGE_SUPPORT"
+    },
+    {
+      "type": "CANNON",
+      "name": "給食当番キャノン",
+      "description": "3色が揃うと配膳の勢いで火力も体力も伸びる。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 5,
+      "hp": 11,
+      "specialEffect": "RAINBOW_HEAL_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "学級費アンプ",
+      "description": "余っている燃料をぜいたくに増幅へ回す。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "FUEL_RESERVE_BONUS"
+    },
+    {
+      "type": "SHIELD",
+      "name": "清掃時間シールド",
+      "description": "青い雑巾が多いほど守りと反撃が増す。",
+      "slots": [
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 12,
+      "specialEffect": "BLUE_THORNS_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "放送室エコー砲",
+      "description": "同じ数字が2枚でも3枚でも響き方が変わる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "ECHO_MATCH_BONUS"
+    },
+    {
+      "type": "MISSILE",
+      "name": "図書整理ミサイル",
+      "description": "数字が全部違うと整理され、3色ならさらに整う。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 4,
+      "hp": 10,
+      "specialEffect": "ALL_UNIQUE_RAINBOW_BONUS"
+    },
+    {
+      "type": "AMPLIFIER",
+      "name": "文化祭カウントダウン",
+      "description": "終盤になるほど会場の熱気で増幅が強まる。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        }
+      ],
+      "multiplier": 0,
+      "basePower": 3,
+      "hp": 8,
+      "specialEffect": "TURN_SCALE"
+    },
+    {
+      "type": "ENGINE",
+      "name": "進路相談コア",
+      "description": "中央に据えてフル装填すると安定して燃料が戻る。",
+      "slots": [
+        {
+          "req": "ANY",
+          "value": null
+        },
+        {
+          "req": "WHITE",
+          "value": null
+        }
+      ],
+      "multiplier": 1.1,
+      "basePower": 2,
+      "hp": 10,
+      "specialEffect": "CENTER_FULL_BONUS"
+    },
+    {
+      "type": "CANNON",
+      "name": "卒業アルバム砲",
+      "description": "見てきた数字の多様さと3色の思い出を火力に変える。",
+      "slots": [
+        {
+          "req": "WHITE",
+          "value": null
+        },
+        {
+          "req": "BLUE",
+          "value": null
+        },
+        {
+          "req": "ORANGE",
+          "value": null
+        }
+      ],
+      "multiplier": 1,
+      "basePower": 5,
+      "hp": 11,
+      "specialEffect": "UNIQUE_RAINBOW_BONUS"
+    }
+  ]
+}

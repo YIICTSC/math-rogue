@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
@@ -7,6 +7,8 @@ import { assetUrl } from '../utils/assetPaths';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import { trans } from '../utils/textUtils';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
+
+const PaperPlaneFleet3D = lazy(() => import('./PaperPlaneFleet3D'));
 
 // --- TYPES & CONSTANTS ---
 
@@ -68,6 +70,7 @@ interface Pilot {
 }
 
 interface ShipState {
+    airframe?: string; // Optional visual identity; old saves retain a default paper hull.
     yOffset: number; // 0 to MAX_ROWS - SHIP_HEIGHT
     hp: number;
     maxHp: number;
@@ -2068,6 +2071,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         // ... more can be added
 
         setPlayer({
+            airframe: shipTemplate.id,
             yOffset: 1,
             hp: pMaxHp, maxHp: pMaxHp,
             fuel: pMaxFuel, maxFuel: pMaxFuel,
@@ -2186,6 +2190,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         const initialFuel = 3 + Math.floor(stageNum / 2);
 
         const initialEnemy = {
+            airframe: template.name,
             yOffset: 1,
             hp: hp, maxHp: hp,
             durability: dur, maxDurability: dur,
@@ -4088,6 +4093,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                     <p className="text-sm text-gray-300">{t('船と格納庫のパーツを入れ替えます')}</p>
                 </div>
 
+                <div className="w-full max-w-xl shrink-0 h-[min(20vh,150px)] min-h-[70px] relative rounded-xl bg-slate-950/30 mb-2">
+                    <Suspense fallback={null}><PaperPlaneFleet3D player={player} preview /></Suspense>
+                </div>
+
                 <div className="paper-plane-hangar-layout flex-grow flex flex-col md:flex-row gap-4 md:gap-8 w-full max-w-5xl overflow-hidden min-h-0">
                     {/* Ship Grid */}
                     <div className="paper-plane-hangar-ship flex-shrink-0 md:flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto md:overflow-visible">
@@ -4391,30 +4400,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             {/* Battle Grid */}
             <div className="flex-1 relative bg-[#1a1a24] overflow-y-auto custom-scrollbar overflow-hidden">
                 <PaperPlaneSceneBackdrop sprite={getPaperPlaneStageBackground(stage)} alpha={0.28} />
-                <div className="absolute inset-0 flex pointer-events-none overflow-hidden mix-blend-screen z-0 opacity-40">
-                    <div 
-                        className="absolute w-1/2 left-0 h-full flex items-center justify-center transition-transform duration-500 ease-out animate-pulse"
-                        style={{ transform: `translateY(${(player.yOffset - 1) * 20}%)`, animationDuration: '3s' }}
-                    >
-                         <div className="relative w-[80%] max-w-[350px] aspect-square flex items-center justify-center -translate-x-4 md:-translate-x-8">
-                             <Send 
-                                 strokeWidth={0.2} 
-                                 className="w-full h-full text-cyan-400 rotate-45 drop-shadow-[0_0_8px_rgba(34,211,238,1)] absolute" 
-                             />
-                         </div>
-                    </div>
-                    <div 
-                        className="absolute w-1/2 right-0 h-full flex items-center justify-center transition-transform duration-500 ease-out animate-pulse"
-                        style={{ transform: `translateY(${(enemy.yOffset - 1) * 20}%)`, animationDuration: '3.5s', animationDelay: '1s' }}
-                    >
-                         <div className="relative w-[80%] max-w-[350px] aspect-square flex items-center justify-center translate-x-4 md:translate-x-8">
-                             <Send 
-                                 strokeWidth={0.2} 
-                                 className="w-full h-full text-red-500 rotate-[225deg] drop-shadow-[0_0_8px_rgba(239,68,68,1)] absolute" 
-                             />
-                         </div>
-                    </div>
-                </div>
+                <Suspense fallback={null}>
+                    <PaperPlaneFleet3D player={player} enemy={enemy} attacking={clashState.active} />
+                </Suspense>
 
                 {/* Clash Overlay */}
                 <ClashOverlay clashState={clashState} />
