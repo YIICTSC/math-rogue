@@ -1,3 +1,4 @@
+import {VR_VIEW_ENGLISH,VR_VIEW_HIRAGANA} from '../mini-games/gakurogear/viewCopy';
 import {COIN_ENGLISH,COIN_HIRAGANA} from '../mini-games/gakuro-craft/coin-dozer/copy';
 import { SCHOOL_WANDERER_ENGLISH, SCHOOL_WANDERER_HIRAGANA } from '../components/school-dungeon/copy';
 import { STORYBOOK_ENGLISH, STORYBOOK_HIRAGANA } from '../three/storybookCopy';
@@ -139,6 +140,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   '参加できません。部屋の空き人数を確認してください。': 'Unable to join. Check the available places in the room.',
   '参加者': 'Participants',
   'あなた': 'You',
+  ...VR_VIEW_ENGLISH,
   'ホスト観戦': 'Host spectator',
   '観戦モード': 'Spectator mode',
   '観戦モードにする': 'Switch to spectator mode',
@@ -501,6 +503,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   '参加できません。部屋の空き人数を確認してください。': 'さんかできません。へやの あきにんずうを かくにんしてください。',
   '参加者': 'さんかしゃ',
   'あなた': 'あなた',
+  ...VR_VIEW_HIRAGANA,
   'ホスト観戦': 'ホストかんせん',
   '観戦モード': 'かんせんモード',
   '観戦モードにする': 'かんせんモードにする',

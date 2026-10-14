@@ -1,3 +1,5 @@
+import {frameArena,followArena,collisionSafeCamera,cameraBlend} from './camera';
+import {createScreenMarkers} from './markers';
 import type {Supply} from './onlineRules';
 import {createVrCharacter} from './character';
 import type {KartAvatar} from '../gakuro-kart/avatar';
@@ -7,13 +9,15 @@ import { assetUrl } from '../../utils/assetPaths';
 import { floorHeight, WEAPONS, cameraAngle, cameraBlocked, sensorActive, clearSight, holdCandidate, objectivesComplete, type Mission, type Point, type Run } from './engine';
 
 export type ViewMode = 'overhead' | 'first' | 'third';
-export type ViewSettings = { mode: ViewMode; yaw: number; safeZone?:number; supplies?:Supply[]; spectating?:boolean; observer?:boolean;exitPoint?:Point;defendPoint?:Point; exitReady?: boolean; others?: { id: string; name: string; player: Point & { angle: number }; out: boolean; stealth?:number; avatar?: KartAvatar }[] };
+export type ViewSettings = { mode: ViewMode; yaw: number; overview?:boolean; targetId?:string; focusNumber?:number; focusName?:string; safeZone?:number; supplies?:Supply[]; spectating?:boolean; observer?:boolean;exitPoint?:Point;defendPoint?:Point; exitReady?: boolean; others?: { id: string; number?:number; name: string; player: Point & { angle: number }; out: boolean; stealth?:number; avatar?: KartAvatar }[] };
 
 export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAvatar) {
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
   renderer.setPixelRatio(1); renderer.setClearColor(0x071718); host.appendChild(renderer.domElement);
   renderer.domElement.setAttribute('aria-label', 'GAKURO 3D');
-  const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x071718, 28, 55);
+  const scene = new THREE.Scene(), perspectiveFog = new THREE.Fog(0x071718, 28, 55); scene.fog = perspectiveFog;
+  const markers=createScreenMarkers(host), reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tracked=new THREE.Vector3();let initialized=false,lastDraw=0,lastMode:ViewMode|undefined,lastTarget:string|undefined;
   const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, .1, 90);
   const perspective = new THREE.PerspectiveCamera(72, 1, .035, 60);
   camera.position.set(0, 24, 15); camera.lookAt(0, 0, 0);
@@ -60,7 +64,9 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   function actor(color: number) { const g = new THREE.Group(); cube(.48, .65, .3, color, 0, .82, 0, g); cube(.34, .35, .32, 0xd7ad82, 0, 1.32, 0, g); cube(.37, .12, .34, 0x1a2526, 0, 1.52, 0, g); for (const x of [-.16, .16]) cube(.16, .5, .2, 0x172a30, x, .25, 0, g); scene.add(g); return g; }
   let player = avatar ? createVrCharacter(avatar) : actor(0x2d8d9c); if (avatar) scene.add(player); const guards = mission.routes.map(() => actor(0xb78748));
   const ring = (color: number, radius: number, p: Point) => { const m = new THREE.Mesh(new THREE.RingGeometry(radius * .78, radius, 24), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.position.set(p.x, floorHeight(mission,p)+.025, p.z); scene.add(m); return m; };
-  const playerRing = ring(0x8affee, .5, mission.spawn);
+  const playerRing = ring(0xffffff, .7, mission.spawn);
+  (playerRing.material as THREE.MeshBasicMaterial).depthTest=false;playerRing.renderOrder=10;
+  const direction=new THREE.Mesh(new THREE.ConeGeometry(.2,.65,3),new THREE.MeshBasicMaterial({color:0xffffff,depthTest:false}));direction.rotation.x=Math.PI/2;direction.renderOrder=11;scene.add(direction);
   const exit = ring(0x405958, .85, mission.exit);
   const defendMarker=mission.defend?ring(0xffd36e,1.4,mission.defend):undefined;
   const targets = mission.targets.map((p,i) => { const g = new THREE.Group(); cube(.48, .08, .6, mission.targetKinds?.[i]==='rescue'?0xff9ccf:mission.targetKinds?.[i]==='relay'?0xffd36e:0x79e9ff, 0, .45, 0, g); if(mission.targetKinds?.[i]==='rescue'){cube(.35,.6,.25,0xff9ccf,0,.7,0,g);cube(.3,.3,.3,0xe9c7a0,0,1.15,0,g);}else if(mission.targetKinds?.[i]==='relay'){cube(.5,1,.35,0x365868,0,.5,0,g);cube(.4,.3,.04,0xffd36e,0,.8,.2,g);}else cube(.35,.02,.08,0xf0ffff,0,.5,.12,g); g.position.set(p.x, floorHeight(mission,p), p.z); scene.add(g); ring(0x3e838e, .52, p); return g; });
@@ -94,7 +100,9 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     if (student && !avatar) { disposeObject(player); player.clear(); const clone = student.clone(true); clone.position.set(0, 0, 0); player.add(clone); }
     host.dataset.models = 'blender';
   }, undefined, () => { host.dataset.models = 'fallback'; });
-  const resize = () => { const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return; renderer.setSize(Math.min(w, 960), Math.min(w, 960) * h / w, false); const aspect = w / h, half = Math.max(size * 1.28, size * 1.2 / aspect); camera.left = -half * aspect; camera.right = half * aspect; camera.top = half; camera.bottom = -half; camera.updateProjectionMatrix(); perspective.aspect = aspect; perspective.updateProjectionMatrix(); };
+  let aspect=1;
+  const sceneHeight=Math.max(3,...mission.obstacles.map(b=>b.h),...(mission.terrain??[]).map(t=>t.height+3));
+  const resize = () => { const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(Math.min(w,960),Math.min(w,960)*h/w,false);aspect=w/h;perspective.aspect=aspect;perspective.updateProjectionMatrix(); };
   const observer = new ResizeObserver(resize); observer.observe(host); resize();
   const safeZone=new THREE.Mesh(new THREE.RingGeometry(.985,1,96),new THREE.MeshBasicMaterial({color:0x72f7bd,side:THREE.DoubleSide,transparent:true,opacity:.8}));safeZone.rotation.x=-Math.PI/2;safeZone.position.y=.045;safeZone.visible=false;scene.add(safeZone);
   const supplyModels=new Map<number,THREE.Group>();
@@ -109,6 +117,16 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
   }
   function draw(s: Run, view: ViewSettings = { mode: 'overhead', yaw: s.player.angle }) {
     frameState = s;
+    const targetChanged=lastTarget!==view.targetId;
+    const now=performance.now(),dt=Math.min(.05,(now-lastDraw)/1000);lastDraw=now;
+    const desiredFocus=new THREE.Vector3(s.player.x,floorHeight(mission,s.player),s.player.z);
+    if(!initialized||lastMode!==view.mode||tracked.distanceTo(desiredFocus)>30){tracked.copy(desiredFocus);initialized=true;}else tracked.lerp(desiredFocus,cameraBlend(dt,reducedMotion));
+    if(view.mode==='overhead'){
+      scene.fog=null;
+      if(view.overview)frameArena(camera,size+.6,aspect,sceneHeight);else followArena(camera,tracked,aspect,10,.625,size);
+    }else scene.fog=perspectiveFog;
+    host.dataset.overview=String(!!view.overview);
+    host.dataset.target=view.targetId??'';
     remoteActors.forEach((g,id)=>{g.visible=!!view.others?.some(p=>p.id===id);});
     for(const other of view.others??[]) { let g=remoteActors.get(other.id);if(!g||g.userData.avatarKey!==JSON.stringify(other.avatar)){if(g){scene.remove(g);disposeObject(g);}g=other.avatar?createVrCharacter(other.avatar):actor(0xc98eeb);g.userData.avatarKey=JSON.stringify(other.avatar);scene.add(g);remoteActors.set(other.id,g);}g.visible=view.observer||view.spectating||!other.stealth||Math.hypot(other.player.x-s.player.x,other.player.z-s.player.z)<2;g.position.set(other.player.x,floorHeight(mission,other.player),other.player.z);g.rotation.y=other.player.angle;g.scale.y=other.out?.45:1; }
 
@@ -126,16 +144,24 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     const focus = new THREE.Vector3(s.player.x, floorHeight(mission,s.player)+eye, s.player.z);
     if (view.mode === 'first') { perspective.position.copy(focus); perspective.lookAt(focus.clone().add(forward)); }
     if (view.mode === 'third') {
-      const desired = focus.clone().addScaledVector(forward, -3.8); desired.y += s.crouch ? 1 : 1.5;
-      let safe = focus.clone();
-      for (let t = .025; t <= 1; t += .025) { const q = focus.clone().lerp(desired, t); if (cameraBlocked(mission, s, { x: q.x, z: q.z }, q.y)) break; safe = q; }
-      perspective.position.copy(safe); perspective.lookAt(focus.clone().addScaledVector(forward, 2));
+      const shoulder=new THREE.Vector3(Math.cos(view.yaw),0,-Math.sin(view.yaw)).multiplyScalar(.55);
+      const desired=focus.clone().addScaledVector(forward,-3.8).add(shoulder);desired.y+=s.crouch?1:1.5;
+      const blocked=(q:THREE.Vector3)=>cameraBlocked(mission,s,{x:q.x,z:q.z},q.y);
+      const safe=collisionSafeCamera(focus,desired,blocked);
+      const blended=lastMode==='third'&&!targetChanged?perspective.position.clone().lerp(safe,cameraBlend(dt,reducedMotion)):safe;
+      perspective.position.copy(collisionSafeCamera(focus,blended,blocked));
+      perspective.lookAt(focus.clone().addScaledVector(forward,2).add(shoulder));
     }
+    const opacity=view.mode==='third'?THREE.MathUtils.clamp((perspective.position.distanceTo(focus)-1.6)/2.3,.03,1):1;
+    for(const object of [player,toy])object.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material]){if(m.userData.baseOpacity===undefined){m.userData.baseOpacity=m.opacity;m.userData.baseTransparent=m.transparent;m.userData.baseDepthWrite=m.depthWrite;}m.opacity=m.userData.baseOpacity*opacity;m.transparent=opacity<1||m.userData.baseTransparent;m.depthWrite=opacity<1?false:m.userData.baseDepthWrite;}});
+    host.dataset.playerOpacity=opacity.toFixed(2);
+    lastMode=view.mode;lastTarget=view.targetId;
     if(view.exitPoint)exit.position.set(view.exitPoint.x,floorHeight(mission,view.exitPoint)+.025,view.exitPoint.z);
     if(view.defendPoint&&defendMarker)defendMarker.position.set(view.defendPoint.x,floorHeight(mission,view.defendPoint)+.025,view.defendPoint.z);
     player.visible = !view.spectating&&view.mode !== 'first'; playerRing.visible = !view.spectating&&view.mode === 'overhead';
     player.position.set(s.player.x, floorHeight(mission,s.player), s.player.z); player.rotation.y = s.player.angle; player.scale.y = s.crouch ? .55 : 1;
-    playerRing.position.set(s.player.x, floorHeight(mission,s.player)+.025, s.player.z);
+    playerRing.position.set(s.player.x, floorHeight(mission,s.player)+.04, s.player.z);
+    direction.visible=playerRing.visible;direction.position.set(s.player.x+Math.sin(s.player.angle)*.9,floorHeight(mission,s.player)+.1,s.player.z+Math.cos(s.player.angle)*.9);direction.rotation.set(Math.PI/2,0,-s.player.angle);
     s.guards.forEach((g, i) => {
       guards[i].position.set(g.x, floorHeight(mission,g)+(g.sleep > 0 ? .23 : 0), g.z); guards[i].rotation.set(g.sleep > 0 ? Math.PI / 2 : 0, g.angle, 0);
       cones[i].visible = g.sleep <= 0 && s.holdTarget !== i;
@@ -155,8 +181,12 @@ export function createScene(host: HTMLElement, mission: Mission, avatar?: KartAv
     targets.forEach((t, i) => { t.visible = !s.collected[i]; t.rotation.y = s.time; t.position.y = floorHeight(mission,mission.targets[i])+Math.sin(s.time * 3) * .1; });
     (exit.material as THREE.MeshBasicMaterial).color.setHex((view.exitReady ?? objectivesComplete(mission, s)) ? 0x6cffab : 0x405958);
     noise.visible = !!s.noise; if (s.noise) { noise.position.set(s.noise.x, .04, s.noise.z); noise.scale.setScalar(1 + (3 - s.noise.life) % 1); }
-    renderer.render(scene, view.mode === 'overhead' ? camera : perspective);
+    const activeCamera=view.mode==='overhead'?camera:perspective;
+    const nearby=(view.others??[]).filter(p=>remoteActors.get(p.id)?.visible&&(view.overview||Math.hypot(p.player.x-s.player.x,p.player.z-s.player.z)<12));
+    markers.draw(activeCamera,view.mode==='overhead'?[{id:'focus',number:view.focusNumber??1,name:view.focusName,point:new THREE.Vector3(s.player.x,floorHeight(mission,s.player)+1.7,s.player.z),self:true},...nearby.map(p=>({id:p.id,number:p.number??1,name:nearby.length<=8?p.name:undefined,point:new THREE.Vector3(p.player.x,floorHeight(mission,p.player)+1.7,p.player.z)}))]:[],!!view.overview);
+    host.dataset.focusVisible=String(new THREE.Frustum().setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(activeCamera.projectionMatrix,activeCamera.matrixWorldInverse)).containsPoint(desiredFocus.clone().add(new THREE.Vector3(0,1,0))));
+    renderer.render(scene,activeCamera);
   }
   function disposeObject(object: THREE.Object3D) { object.traverse(o => { if (o instanceof THREE.Mesh) { o.geometry.dispose(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose()); } }); }
-  return { draw, portrait(){frontWall.visible=false;player.visible=true;player.position.set(0,0,0);player.rotation.set(0,0,0);playerRing.visible=false;toy.visible=false;aim.visible=false;exit.visible=false;holdRing.visible=false;bubble.visible=false;noise.visible=false;perspective.fov=40;perspective.updateProjectionMatrix();perspective.position.set(0,1.05,Math.max(2.7,1.5/perspective.aspect));perspective.lookAt(0,.7,0);renderer.render(scene,perspective);}, preview(time:number){frontWall.visible=false;player.visible=false;playerRing.visible=false;toy.visible=false;aim.visible=false;const angle=.35+Math.sin(time*.12)*.3;perspective.position.set(Math.sin(angle)*size*2.1,size*1.6,Math.cos(angle)*size*2.1);perspective.lookAt(0,.5,0);targets.forEach((t,i)=>{t.rotation.y=time*.4;});renderer.render(scene,perspective);}, setAvatar(next:KartAvatar){const replacement=createVrCharacter(next);replacement.position.copy(player.position);replacement.rotation.copy(player.rotation);replacement.visible=player.visible;scene.remove(player);disposeObject(player);player=replacement;scene.add(player);}, dispose() { disposed = true; observer.disconnect(); sleepMarkers.forEach(s => { s.material.map?.dispose(); s.material.dispose(); }); aim.geometry.dispose(); (aim.material as THREE.Material).dispose(); disposeObject(scene); assets.forEach(disposeObject); mats.forEach(m => m.dispose()); renderer.dispose(); renderer.domElement.remove(); } };
+  return { draw, portrait(){direction.visible=false;markers.draw(perspective,[],false);frontWall.visible=false;player.visible=true;player.position.set(0,0,0);player.rotation.set(0,0,0);playerRing.visible=false;toy.visible=false;aim.visible=false;exit.visible=false;holdRing.visible=false;bubble.visible=false;noise.visible=false;perspective.fov=40;perspective.updateProjectionMatrix();perspective.position.set(0,1.05,Math.max(2.7,1.5/perspective.aspect));perspective.lookAt(0,.7,0);renderer.render(scene,perspective);}, preview(time:number){direction.visible=false;markers.draw(perspective,[],false);frontWall.visible=false;player.visible=false;playerRing.visible=false;toy.visible=false;aim.visible=false;const angle=.35+Math.sin(time*.12)*.3;perspective.position.set(Math.sin(angle)*size*2.1,size*1.6,Math.cos(angle)*size*2.1);perspective.lookAt(0,.5,0);targets.forEach((t,i)=>{t.rotation.y=time*.4;});renderer.render(scene,perspective);}, setAvatar(next:KartAvatar){const replacement=createVrCharacter(next);replacement.position.copy(player.position);replacement.rotation.copy(player.rotation);replacement.visible=player.visible;scene.remove(player);disposeObject(player);player=replacement;scene.add(player);}, dispose() { disposed = true;markers.dispose(); observer.disconnect(); sleepMarkers.forEach(s => { s.material.map?.dispose(); s.material.dispose(); }); aim.geometry.dispose(); (aim.material as THREE.Material).dispose(); disposeObject(scene); assets.forEach(disposeObject); mats.forEach(m => m.dispose()); renderer.dispose(); renderer.domElement.remove(); } };
 }

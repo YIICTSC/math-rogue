@@ -80,3 +80,31 @@
 .gear-bomb .gear-canvas{position:absolute;inset:0}.gear-bomb .gear-canvas canvas{width:100%;height:100%;display:block}.gear-bomb-quiz{z-index:40}.gear-bomb-quiz section{max-width:540px;max-height:80%;overflow:auto}.gear-bomb-quiz header{display:flex;align-items:center;justify-content:space-between}.gear-bomb-quiz canvas{max-width:100%;height:auto}.gear-bomb-answers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.gear-bomb .gear-field{min-height:300px;flex:1;position:relative}.gear-bomb .gear-controls{flex-wrap:wrap}.gear-bomb .gear-controls button{touch-action:none}
 
 .gear-bomb-controls{display:grid!important;grid-template-columns:140px minmax(0,1fr);align-items:center;gap:14px;padding:8px 16px max(8px,env(safe-area-inset-bottom));flex-shrink:0}.gear-bomb-stick-area{display:grid;justify-items:center;gap:4px}.gear-bomb-stick{position:relative;width:110px;height:110px;border-radius:50%;border:2px solid #88d4d780;background:radial-gradient(circle,#254c54,#102d35);touch-action:none;user-select:none}.gear-bomb-stick.is-disabled{opacity:.4}.gear-bomb-stick-cross{position:absolute;inset:0;display:grid;place-items:center;font-size:68px;color:#87ccd22e;pointer-events:none}.gear-bomb-stick-knob{position:absolute;left:calc(50% - 24px);top:calc(50% - 24px);width:48px;height:48px;border-radius:50%;background:linear-gradient(#a7e8dc,#5aafaf);box-shadow:0 3px 12px #0006;pointer-events:none}.gear-bomb-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:420px;justify-self:end;width:100%}.gear-bomb-actions button{min-height:48px;margin:0;display:grid;place-content:center;gap:3px;font-size:14px;touch-action:none}.gear-bomb-actions .gear-bomb-place{grid-column:1/-1;min-height:56px;background:#376354;border-color:#b3e687;font-size:17px}.gear-bomb-actions small{opacity:.8;font-size:11px}@media(max-width:600px){.gear-bomb-controls{grid-template-columns:118px minmax(0,1fr);gap:10px;padding-left:8px;padding-right:8px}.gear-bomb-actions button{font-size:12px}.gear-bomb-actions .gear-bomb-place{font-size:16px}.gear-bomb-actions small{font-size:10px}}
+
+/* Keep identifiers readable without covering the center or the chase camera. */
+.gear-map-markers{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.gear-map-marker{position:absolute;transform:translate(-50%,-125%);border:1px solid var(--seat-color,#d9a4ee);border-radius:4px;background:#06191deb;color:#f4ffff;font:600 10px/1.2 system-ui,sans-serif;padding:1px 3px;white-space:nowrap;box-shadow:0 1px 3px #0008}
+.gear-map-marker.is-self{color:#082120;background:#fff;border:2px solid #082120;font-weight:800;z-index:2}
+.gear-map-marker[hidden]{display:none}
+.gear-canvas{position:relative}
+.gear-radar-panel{position:absolute;left:8px;top:8px;width:132px;z-index:5;background:#071e20e8;border:1px solid #8ca995;border-radius:6px;overflow:hidden}
+.gear-radar-panel .gear-radar{position:static!important;display:block;width:100%;height:auto;aspect-ratio:1;border:0}
+.gear-shell .gear-radar-panel button{font-size:10px;padding:4px;width:100%;min-height:28px;border:0;border-bottom:1px solid #638276}
+.gear-radar-panel small{display:block;font-size:9px;line-height:1.35;padding:3px;overflow-wrap:anywhere}
+.gear-mission-hud{position:absolute;top:8px;left:150px;right:232px;z-index:6;max-width:360px;font-size:11px;pointer-events:none}
+.gear-mission-status{display:inline-block;background:#08231ce8;border-left:3px solid #ffe58a;padding:5px 8px;border-radius:3px;line-height:1.4;overflow-wrap:anywhere}
+.gear-mission-hud details{pointer-events:auto;max-width:320px;background:#08231ce8;border-radius:4px;margin-top:4px;max-height:min(240px,40dvh);overflow:auto}
+.gear-mission-hud summary{padding:5px 8px;cursor:pointer;font-size:10px;min-height:28px}
+.gear-mission-hud p{margin:4px 8px;line-height:1.6}.gear-shell .gear-mission-hud button{font-size:10px;padding:5px 8px;margin:4px 8px;min-height:28px}
+.gear-bomb .gear-mission-hud{left:8px}
+.gear-shell>.host-spectator{flex-shrink:0;border-radius:0;padding:4px 8px;font-size:11px}
+@media(max-width:700px){.gear-radar-panel{width:100px}.gear-mission-hud{left:118px;right:8px;top:56px;font-size:10px}.gear-bomb .gear-mission-hud{left:8px;right:8px;top:54px}.gear-map-marker{font-size:9px}.gear-shell>.host-spectator strong{max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media(orientation:landscape) and (max-height:550px){.gear-radar-panel{top:106px;width:90px}.gear-mission-hud{left:110px;right:232px;top:42px;font-size:10px}.gear-bomb .gear-mission-hud{top:8px}.gear-shell>.host-spectator{position:absolute;top:36px;right:8px;max-width:65%;z-index:9}.gear-shell>.host-spectator .host-spectator-controls{gap:4px}.gear-shell>.host-spectator .host-spectator-controls>span{display:none}}
+@media(orientation:landscape) and (max-height:550px){
+ .gear-shell.gear-bomb:has(.gear-field) .gear-header{position:relative}
+ .gear-shell.gear-bomb:has(.gear-field)>.gear-equipment{display:flex;position:relative;top:auto;right:auto;max-width:none;min-height:34px;flex-shrink:0;padding:2px 8px;background:#102c29;font-size:10px}
+ .gear-shell.gear-bomb:has(.gear-field) .gear-field{min-height:0}
+ .gear-bomb-controls{grid-template-columns:85px minmax(0,1fr);padding:4px 8px;gap:8px}
+ .gear-bomb-stick{width:72px;height:72px}.gear-bomb-stick-knob{width:36px;height:36px;left:calc(50% - 18px);top:calc(50% - 18px)}
+ .gear-bomb-actions{grid-template-columns:repeat(3,minmax(0,1fr));max-width:600px}.gear-bomb-actions .gear-bomb-place{grid-column:auto;min-height:42px;font-size:13px}.gear-bomb-actions button{min-height:42px;font-size:11px}
+}
