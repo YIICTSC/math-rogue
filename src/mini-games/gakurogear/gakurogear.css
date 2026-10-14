@@ -110,3 +110,16 @@
 }
 .gear-bomb-preview{position:relative;width:100%;height:100%;min-height:220px;overflow:hidden;background:#102638}.gear-bomb-preview .gear-canvas{width:100%;height:100%}.gear-bomb-preview .gear-map-markers{display:none}
 @media(orientation:landscape) and (max-height:550px){.gear-shell:has(.gear-field) .gear-header button[data-solo-pause]{display:inline-flex}.gear-shell:has(.gear-field) .gear-header button[data-avatar-editor]{display:none}}
+
+/* Shared touch dock: left movement, right actions at every viewport size. */
+.gear-shell:has(.gear-field) .gear-controls.gear-battle-controls{display:grid!important;grid-template-columns:112px minmax(0,1fr);align-items:end;gap:16px;padding:10px max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));}
+.gear-battle-controls .gear-bomb-stick-area{justify-self:start;align-self:end}
+.gear-battle-controls .gear-battle-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;justify-self:end;width:min(100%,360px);max-width:360px}
+.gear-shell:has(.gear-field) .gear-battle-controls .gear-battle-actions button{min-height:52px;font-size:13px;padding:8px;touch-action:none;user-select:none}
+.gear-battle-controls .gear-bomb-place{grid-column:1/-1}
+.gear-battle-controls .gear-bomb-stick{width:100px;height:100px}
+@media(max-width:600px){.gear-shell:has(.gear-field) .gear-controls.gear-battle-controls{grid-template-columns:100px minmax(0,1fr);gap:10px;padding-left:8px;padding-right:8px}.gear-shell:has(.gear-field) .gear-battle-controls .gear-battle-actions button{font-size:11px;min-height:48px}}
+@media(orientation:landscape) and (max-height:550px){.gear-shell:has(.gear-field) .gear-controls.gear-battle-controls{grid-template-columns:78px minmax(0,1fr);padding-top:4px;padding-bottom:max(4px,env(safe-area-inset-bottom));gap:12px}.gear-battle-controls .gear-bomb-stick{width:72px;height:72px}.gear-battle-controls .gear-battle-actions{width:min(100%,330px)}.gear-shell:has(.gear-field) .gear-battle-controls .gear-battle-actions button{min-height:36px;font-size:11px;padding:4px}.gear-battle-controls .gear-bomb-place{grid-column:1/-1}.gear-battle-controls .gear-bomb-stick-area>small{display:none}}
+
+.gear-online-battle .gear-loadout>div>button{display:none}
+@media(orientation:landscape) and (max-height:550px){.gear-online-battle .gear-battle-actions{grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,400px);max-width:400px}}
