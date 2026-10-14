@@ -45,7 +45,8 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   p.setDefaultNavigationTimeout(120000);
   const errors = [];
   p.on("pageerror", (e) => errors.push(e.message));
-  await p.addInitScript(() => {
+  await p.addInitScript((calibration) => {
+    localStorage.setItem("rpg-rhythm-offset-v1", String(calibration));
     localStorage.setItem('rpg-rhythm-records-v1',JSON.stringify({'bgm-new:magic-female:reward|expert|full':{score:1000000,combo:30,fullCombo:true,plays:1}}));
     const colorContext = document.createElement('canvas').getContext('2d');
     colorContext.strokeStyle = '#ffffff14';
@@ -81,7 +82,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
       return a;
     };
     window.Audio.prototype = Original.prototype;
-  });
+  }, Number(process.env.RHYTHM_TEST_OFFSET || 0));
   await p.goto("http://127.0.0.1:5224/__rhythm");
   await p.getByText("楽曲読み込み完了", { exact: true }).waitFor();
   assert.equal(await p.locator(".rpg-rhythm-songs button").count(), 143);
@@ -127,7 +128,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
       if (a && !a.paused) {
         while (
           window.autoIndex < window.autoEvents.length &&
-          window.autoEvents[window.autoIndex].time <= a.currentTime
+          window.autoEvents[window.autoIndex].time <= a.currentTime + Number(localStorage.getItem("rpg-rhythm-offset-v1")||0)/1000
         ) {
           const e = window.autoEvents[window.autoIndex++];
           document
@@ -147,7 +148,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.getByRole("dialog", { name: "学ロリズム" }).waitFor();
   await p.waitForFunction(() => window.music.currentTime > .02 && !window.music.paused);
   const emptyHit=await p.evaluate(()=>{
-    const lane=[0,1,2].find(l=>!window.notes.some(n=>n.lane===l&&Math.abs(n.time-window.music.currentTime)<.2));
+    const lane=[0,1,2].find(l=>!window.notes.some(n=>n.lane===l&&Math.abs(n.time-window.music.currentTime-Number(localStorage.getItem("rpg-rhythm-offset-v1")||0)/1000)<.2));
     if(lane===undefined)throw Error('No empty test lane');
     const c=document.querySelector('canvas'),key=['d','f','j','k'][lane],before=window.padHits.length;
     c.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true}));
@@ -168,9 +169,10 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   }), 'The judgement line joins the upper button edge');
   await p.waitForFunction(() => window.gridSamples?.length > 0);
   assert.ok(await p.evaluate(() => {
-    const {bpm,offset}=window.rhythmSong,beat=60/bpm,speed=Number(localStorage.getItem('rpg-rhythm-speed-v1')||3),travel=3.1-speed*.35;
+    const {bpm,offset}=window.rhythmSong,beat=60/bpm,speed=Number(localStorage.getItem('rpg-rhythm-speed-v1')||3),calibration=Number(localStorage.getItem('rpg-rhythm-offset-v1')||0)/1000;
     return window.gridSamples.length>0 && window.gridSamples.every(({y,height,time})=>{
-      const beatIndex=(time+(height-1-y)/(height-1)*travel-offset)/beat;
+      const travel=(3.1-speed*.35)*(height-1)/(height*.8);
+      const beatIndex=(time+calibration+(height-1-y)/(height-1)*travel-offset)/beat;
       return Math.abs(beatIndex-Math.round(beatIndex))<.04;
     });
   }), 'Drawn grid lines follow the real MP3 BPM and beat origin');
@@ -245,7 +247,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
     if(index<0)throw Error('No upcoming pointer test note');
     return {...window.notes[index],index};
   });
-  await p.waitForFunction((time) => window.music.currentTime >= time - 0.03, firstNote.time);
+  await p.waitForFunction((time) => window.music.currentTime + Number(localStorage.getItem("rpg-rhythm-offset-v1")||0)/1000 >= time - 0.03, firstNote.time);
   await p.locator(".rpg-rhythm-pads button").nth(firstNote.lane).click();
   await p.waitForFunction(i => window.game.rhythm.results[0].heads[i] > 0, firstNote.index);
   assert.notEqual(await p.evaluate(i => window.game.rhythm.results[0].heads[i], firstNote.index), 4, "Pointer input scores a note");
@@ -275,7 +277,7 @@ function App(){const [w,sw]=useState(structuredClone(world)),[mode,sm]=useState(
   await p.waitForFunction(() => !window.audio.currentHtmlAudio.muted);
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    "Rhythm browser passed: real MP3 loading/preview/playback, all 143 song choices and filters, 4 seats, keyboard taps/holds with live score, responsive portrait/landscape/desktop, records, rematch reset, synchronized pause/resume, mute, louder accents, live-song scratch with uninterrupted transport, pointer cancellation/blur/pause release, and cleanup while other players continue.",
+    "Rhythm browser passed: real MP3 loading/preview/playback, all 143 song choices and filters, 4 seats, keyboard taps/holds with live score, responsive portrait/landscape/desktop, records, rematch reset, synchronized pause/resume, mute, louder accents, shared calibrated beat/note clock and original scroll speed, live-song scratch with uninterrupted transport, pointer cancellation/blur/pause release, and cleanup while other players continue.",
   );
 } catch (error) {
   if (p) console.error(await p.evaluate(()=>({phase:window.game?.phase,result:window.game?.rhythm?.results?.[0],music:window.music?{time:window.music.currentTime,paused:window.music.paused,muted:window.music.muted}:null,padHits:window.padHits?.length,padSources:window.padSources?.length,body:document.body.innerText.slice(0,700)})));
