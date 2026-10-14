@@ -31,7 +31,8 @@ function checkpoint(r:CraftRoom){
   // The host already has authoritative terrain patches; avoid resending the island.
   send(host,{type:'checkpoint',saved:{version:1,world:{...r.world,tiles:[],players:{},games:{},homeViews:{}},owner:r.host,player:p} satisfies Saved});
 }
-function craftState(r:CraftRoom,m:Member,shared:unknown[]){
+function craftPlayers(r:CraftRoom){return Object.values(r.world.players).map(p=>[p.id,p.name,p.color,+p.x.toFixed(3),+p.z.toFixed(3),+p.energy.toFixed(2),p.correct,p.actions,p.avatar,p.lastAction,p.buffUntil,p.fishing,p.indoors,p.homeTile,p.spectator]);}
+function craftState(r:CraftRoom,m:Member,shared:unknown[]=craftPlayers(r)){
   const w=r.world,viewer=w.players[m.id],p=viewer?.spectator&&r.host===m.id&&m.observedId&&!w.players[m.observedId]?.spectator?w.players[m.observedId]:viewer,tile=p?roomTile(p):-1,home=p?.indoors?homeAt(w,tile):undefined;
   return {type:'state',players:shared,time:w.time,paused:false,revision:w.revision,donated:w.donated,harvested:w.harvested,built:w.built,villageLevel:w.villageLevel,builtSites:w.builtSites,progress:viewer?.progress,coins:viewer?.coins,bag:viewer?.bag,games:Object.fromEntries(Object.entries(w.games).filter(([,g])=>g.homeTile===tile&&p?.indoors)),roomHome:home?publicHome(home):null};
 }
@@ -44,7 +45,7 @@ function publish(r:Room){
       m.socket.send(packet,{binary:true});
     }
   }else{
-    const shared=Object.values(r.world.players).map(p=>[p.id,p.name,p.color,+p.x.toFixed(3),+p.z.toFixed(3),+p.energy.toFixed(2),p.correct,p.actions,p.avatar,p.lastAction,p.buffUntil,p.fishing,p.indoors,p.homeTile,p.spectator]);
+    const shared=craftPlayers(r);
     const patches=new Map<number,string[]>();
     for(const m of r.members.values()){
       if(m.socket.readyState!==WebSocket.OPEN||m.socket.bufferedAmount>65536)continue;
@@ -109,7 +110,9 @@ sockets.on('connection',(socket,request)=>{
         m.observedId=undefined;publish(room);return;
       }
       if(d.type==='observe' && room.game==='craft' && room.host===m.id && room.world.players[m.id]?.spectator){
-        m.observedId=typeof d.id==='string'&&room.world.players[d.id]&&!room.world.players[d.id].spectator?d.id:undefined;publish(room);return;
+        m.observedId=typeof d.id==='string'&&room.world.players[d.id]&&!room.world.players[d.id].spectator?d.id:undefined;
+        // The observed home/mini-game is private to this viewer; do not broadcast a room update.
+        send(m,craftState(room,m));return;
       }
       if(room.game==='kart'){
         const w=room.world;

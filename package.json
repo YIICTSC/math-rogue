@@ -117,7 +117,10 @@
     "test:server:minigames": "node scripts/test-mini-dedicated.mjs",
     "test:rpg:farm": "node scripts/test-rpg-farm.mjs",
     "test:rpg:farm:browser": "node scripts/test-rpg-farm-browser.mjs",
-    "test:rpg:farm:server": "node scripts/test-rpg-farm-server.mjs"
+    "test:rpg:farm:server": "node scripts/test-rpg-farm-server.mjs",
+    "test:vr-bomb": "node scripts/test-vr-bomb-battle.mjs",
+    "test:vr-server": "node scripts/test-vr-server-40.mjs",
+    "test:vr-bomb-browser": "node scripts/test-vr-bomb-browser.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

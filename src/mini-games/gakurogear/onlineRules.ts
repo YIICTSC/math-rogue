@@ -2,7 +2,7 @@ import { blocked, clearSight, distance, floorHeight, MISSIONS, type Input, type 
 import type { KartLesson } from '../gakuro-kart/learning';
 import type { OnlineWorld, Participant } from './onlineEngine';
 
-export type Supply = Point & { id: number; kind: 'ammo' | 'energy' | 'repair'; readyAt: number };
+export type Supply = Point & { id: number; kind: 'ammo' | 'energy' | 'repair' | 'weapon' | 'item'; slot?:number; readyAt: number };
 export const magazineSize=(weapon:number)=>[6,4,4,12,0,0][weapon]??6;
 export const newStats = () => ({ assists: 0, rescues: 0, hits: 0, correct: 0 });
 function random(seed: number) { let n=seed>>>0;return()=>{n+=0x6d2b79f5;let t=n;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}; }
@@ -15,10 +15,10 @@ export function zoneOffset(w:OnlineWorld,index:number):Point {
  return {x:(index%columns-(columns-1)/2)*spacing,z:(Math.floor(index/columns)-(rows-1)/2)*spacing};
 }
 export function beginQuiz(w:OnlineWorld,p:Participant,reason:Participant['quizReason']='recovery') {
- if(p.quiz)return;
+ if(p.quiz||!w.lesson.questions.length)return;
  const unique=[...new Map(w.lesson.questions.map((q,i)=>[JSON.stringify([q.mode,q.question,q.passage??'',q.options[q.correct]]),i])).values()];
  p.quizQuestions=[];
- for(let i=0;i<3;i++){
+ for(let i=0;i<(reason==='bomb'?1:3);i++){
   if(!p.quizDeck.length){
    const rand=random(w.seed+p.id.split('').reduce((n,c)=>n+c.charCodeAt(0),0)+p.quizCycle++*7919);
    p.quizDeck=[...unique];for(let j=p.quizDeck.length-1;j>0;j--){const k=Math.floor(rand()*(j+1));[p.quizDeck[j],p.quizDeck[k]]=[p.quizDeck[k],p.quizDeck[j]];}
@@ -29,16 +29,16 @@ export function beginQuiz(w:OnlineWorld,p:Participant,reason:Participant['quizRe
  p.quiz=true;p.quizRound++;p.answers=[];p.quizCorrect=0;p.quizReason=reason;p.nextSupplyAt=w.time+30;
 }
 export function quizLesson(w:OnlineWorld,p:Participant):KartLesson {
- return {...w.lesson,questions:(p.quizQuestions.length===3?p.quizQuestions:[0,1,2]).map(i=>w.lesson.questions[i])};
+ return {...w.lesson,questions:(p.quizQuestions.length?p.quizQuestions:[0,1,2]).map(i=>w.lesson.questions[i])};
 }
 export function requestSupply(w:OnlineWorld,id:string) {
- const p=w.players[id];if(w.phase!=='playing'||!p?.connected||p.quiz||w.paused||w.time<p.nextSupplyAt)return false;
- beginQuiz(w,p,'supply');return true;
+ const p=w.players[id];if(w.phase!=='playing'||!p?.connected||p.quiz||w.paused||(w.mode!=='bomb'&&w.time<p.nextSupplyAt))return false;
+ if(w.mode==='bomb'){if(p.out||p.bomb.stock>=12)return false;beginQuiz(w,p,'bomb');}else beginQuiz(w,p,'supply');return true;
 }
 export function completeQuiz(w:OnlineWorld,id:string) {
- const p=w.players[id];if(!p?.quiz||p.answers.length!==3)return false;
+ const p=w.players[id];if(w.mode==='bomb')return false;if(!p?.quiz||p.answers.length!==3)return false;
  p.quiz=false;p.stats.correct+=p.quizCorrect;
- if(w.mode==='royale') {p.energy=Math.max(p.energy,40+p.quizCorrect*20);p.run.ammo=Math.max(p.run.ammo,magazineSize(p.run.weapon));p.reloading=0;p.invulnerable=2;p.zoneExposure=0;
+ if(w.mode==='royale') {p.energy=Math.max(p.energy,40+p.quizCorrect*20);if(p.weapons[p.run.weapon])p.run.ammo=Math.max(p.run.ammo,magazineSize(p.run.weapon));p.reloading=0;p.invulnerable=2;p.zoneExposure=0;
   // Return learners safely to the active zone after their question break.
   if(Math.hypot(p.run.player.x,p.run.player.z)>safeRadius(w)-.8){const q=openPoint(w,safeRadius(w)-1,p.id.length);p.run.player={...q,angle:p.run.player.angle};}
  } else {p.run.ammo=Math.min(w.mission.ammo+12,p.run.ammo+2+p.quizCorrect*2);p.run.detection=Math.max(0,p.run.detection-p.quizCorrect*15);if(p.quizCorrect===3&&p.run.items[0]<3){p.run.items[0]++;p.run.decoys=p.run.items[0];}}
@@ -47,7 +47,7 @@ export function completeQuiz(w:OnlineWorld,id:string) {
 export function respawnRoyale(w:OnlineWorld,p:Participant) {
  p.out=true;p.respawnHits=0;p.run.status='playing';
  p.run.player={...openPoint(w,safeRadius(w)-1,p.id.length+Math.floor(w.time)*31),angle:p.run.player.angle};
- p.run.ammo=magazineSize(p.run.weapon);p.energy=100;p.reloading=0;p.zoneExposure=0;p.invulnerable=3;
+ p.run.ammo=0;p.run.items=[0,0,0,0];p.run.weapon=4;p.weapons=p.weapons.map(()=>false);p.energy=100;p.reloading=0;p.zoneExposure=0;p.invulnerable=3;
  p.run.holdProgress=0;p.run.holdTarget=-1;p.run.stealth=0;
 }
 function openPoint(w:OnlineWorld,radius:number,seed:number):Point {
@@ -55,7 +55,7 @@ function openPoint(w:OnlineWorld,radius:number,seed:number):Point {
  return {x:0,z:0};
 }
 export function spawnSupplies(w:OnlineWorld) {
- w.supplies=Array.from({length:Math.min(12,Object.keys(w.players).length+4)},(_,id)=>({...openPoint(w,(w.mission.size??18)*.7,id*97),id,kind:['ammo','energy','repair'][id%3] as Supply['kind'],readyAt:8+id*2}));
+ w.supplies=Array.from({length:Math.min(120,Object.keys(w.players).length*3+12)},(_,id)=>({...openPoint(w,(w.mission.size??18)*.7,id*97),id,kind:['weapon','item','ammo','energy','repair'][id%5] as Supply['kind'],slot:Math.floor(id/5)%((id%5===0)?6:4),readyAt:id%5<=1?0:8+(id%12)*2}));
 }
 export function tickArena(w:OnlineWorld,dt:number) {
  const active=Object.values(w.players).filter(p=>p.connected&&!p.quiz);
@@ -66,9 +66,11 @@ export function tickArena(w:OnlineWorld,dt:number) {
  for(const s of w.supplies){
   if(s.readyAt>w.time)continue;
   if(Math.hypot(s.x,s.z)>safeRadius(w)-.8)Object.assign(s,openPoint(w,safeRadius(w)-1,s.id+Math.floor(w.time)*23));
-  const collector=active.filter(p=>!p.out&&distance(p.run.player,s)<.85&&(s.kind==='ammo'?p.run.ammo<12:s.kind==='energy'?p.energy<100:p.hits>0)).sort((a,b)=>distance(a.run.player,s)-distance(b.run.player,s))[0];
+  const collector=active.filter(p=>!p.out&&distance(p.run.player,s)<.85&&(s.kind==='weapon'?true:s.kind==='item'?p.run.items[s.slot??0]<4:s.kind==='ammo'?p.weapons[p.run.weapon]&&p.run.ammo<12:s.kind==='energy'?p.energy<100:p.hits>0)).sort((a,b)=>distance(a.run.player,s)-distance(b.run.player,s))[0];
   if(!collector)continue;
-  if(s.kind==='ammo'&&collector.run.ammo<12)collector.run.ammo=Math.min(12,collector.run.ammo+3);
+  if(s.kind==='weapon'){const slot=s.slot??0;collector.weapons[slot]=true;collector.run.weapon=slot;collector.run.ammo=magazineSize(slot);}
+  else if(s.kind==='item'){const slot=s.slot??0;collector.run.items[slot]++;if(slot===0)collector.run.decoys=collector.run.items[0];}
+  else if(s.kind==='ammo'&&collector.run.ammo<12)collector.run.ammo=Math.min(12,collector.run.ammo+3);
   else if(s.kind==='energy'&&collector.energy<100)collector.energy=Math.min(100,collector.energy+25);
   else if(s.kind==='repair'&&collector.hits>0)collector.hits--;
   else continue;
@@ -94,13 +96,13 @@ export function assistTeam(w:OnlineWorld,p:Participant,input:Input,dt:number) {
  if(p.helpProgress>=needed){complete?.();p.helpProgress=0;if(!p.helped.includes(target))p.helped.push(target);}
 }
 export function finishWorld(w:OnlineWorld,winners:string[]) {
- if(w.phase==='result')return;w.phase='result';w.winner=winners;winners.forEach(id=>{w.players[id].wins++;});
+ if(w.phase==='result')return;if(w.mode==='bomb')Object.values(w.players).forEach(p=>{p.quiz=false;});w.phase='result';w.winner=winners;winners.forEach(id=>{w.players[id].wins++;});
 }
 export function returnToLobby(w:OnlineWorld,next=false) {
  if(w.phase!=='result'||Object.values(w.players).some(p=>p.connected&&p.quiz))return false;
  if(next&&w.mode==='coop')w.missionId=Math.min(MISSIONS.length,w.missionId+1);
  Object.keys(w.players).forEach(id=>{if(!w.players[id].connected)delete w.players[id];});
- w.mission=structuredClone(MISSIONS[w.missionId-1]);w.phase='lobby';w.time=0;w.winner=[];w.supplies=[];w.paused=false;return true;
+ w.mission=structuredClone(MISSIONS[w.missionId-1]);w.phase='lobby';w.time=0;w.winner=[];w.supplies=[];w.bombArena=undefined;w.paused=false;return true;
 }
 
 export function readyToExtract(w:OnlineWorld,p:Participant){

@@ -6,9 +6,9 @@ export class DedicatedConnection {
   private heartbeat: ReturnType<typeof setInterval> | null = null;
   private closed = false;
   private abort = new AbortController();
-  constructor(private receive: (packet: any) => boolean, private lost: () => void) {}
-  async open(game: 'kart' | 'craft' | 'golf' | 'online', hello: object) {
-    const base=onlineServerUrl();if(!base)throw new Error('サーバー通信はこの環境では利用できません。');
+  constructor(private receive: (packet: any) => boolean, private lost: () => void, private baseUrl?:string) {}
+  async open(game: 'kart' | 'craft' | 'golf' | 'online' | 'vr', hello: object) {
+    const base=this.baseUrl??onlineServerUrl();if(!base)throw new Error('サーバー通信はこの環境では利用できません。');
     const url=new URL(base);url.protocol=['http:','ws:'].includes(url.protocol)?'ws:':'wss:';url.pathname=`/${game}`;url.search='';url.hash='';
     const health=new URL(url);health.protocol=url.protocol==='ws:'?'http:':'https:';health.pathname='/health';
     const deadline=Date.now()+180000,signal=this.abort.signal;

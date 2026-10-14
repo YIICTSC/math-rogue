@@ -1,16 +1,24 @@
+import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
+import {roomAddress,shareRoomCode,type OnlineTransport} from '../../services/onlineTransport';
+import {vrCommand,clearVrPulses} from './roomCommands';
+import {vrPacket,readVrWorld} from './vrProtocol';
 import {completeQuiz,requestSupply,returnToLobby} from './onlineRules';
 import {validAvatar,defaultAvatar,type KartAvatar} from '../gakuro-kart/avatar';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
 import { addPlayer, answer, createWorld, startWorld, retryCoop, tickWorld, validInput, type OnlineMode, type OnlineWorld } from './onlineEngine';
 import type { Input } from './engine';
+export const vrServerUrl=()=>import.meta.env.VITE_VR_SERVER_URL||(import.meta.env.DEV&&typeof location!=='undefined'?`http://${location.hostname}:10001`:onlineServerUrl());
 export class VrRoom {
+  transport:OnlineTransport=vrServerUrl()?'server':'host';
+  private dedicated:DedicatedConnection|null=null;
+  get shareCode(){return shareRoomCode(this.code,this.transport);}
   host = false; selfId = ''; code = ''; world: OnlineWorld | null = null;
   private peer: Peer | null = null; private connections = new Map<string, DataConnection>(); private timer: ReturnType<typeof setInterval> | null = null;
   private controls: Record<string, Input & { reload?: boolean }> = {}; private lastInput: Record<string, number> = {}; private closed = false;
   constructor(private update: (w: OnlineWorld) => void, private status: (s: string) => void) {}
   private send(c: DataConnection, data: unknown) { if (c.open && (c.dataChannel?.bufferedAmount ?? 0) < 200000) c.send(JSON.stringify(data)); }
-  private emit() { if (!this.world || this.closed) return; this.update(structuredClone(this.world)); const {lesson,...state}=this.world;this.connections.forEach(c=>this.send(c,{type:'state',world:state,self:c.peer})); }
+  private emit() { if (!this.world || this.closed) return; this.update(structuredClone(this.world)); this.connections.forEach(c=>this.send(c,vrPacket(this.world!))); }
   private visibility = () => { if (this.host && this.world) { this.world.paused = document.hidden; this.emit(); } };
   private async open(id?: string) {
     const env = import.meta.env;
@@ -20,33 +28,38 @@ export class VrRoom {
     if (this.closed) { peer.destroy(); throw new Error('Closed'); } this.selfId = peer.id;
     peer.on('error', e => this.status(`Network: ${e.type}`)); return peer;
   }
-  async create(name: string, mode: OnlineMode, missionId: number, lesson: KartLesson, limit: number, avatar: KartAvatar = defaultAvatar()) {
+  async create(name: string, mode: OnlineMode, missionId: number, lesson: KartLesson, limit: number, avatar: KartAvatar = defaultAvatar(), bombMap=0) {
+    if(this.transport==='server'){await this.connectDedicated({create:true,name,mode,missionId,lesson,limit,avatar,bombMap});return;}
     this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
-    const peer = await this.open(`gakuro-vr-v5-${this.code}`); this.world = createWorld(mode, missionId, lesson, limit); addPlayer(this.world, this.selfId, name); this.world.players[this.selfId].avatar = avatar;
+    const peer = await this.open(`gakuro-vr-v6-${this.code}`); this.world = createWorld(mode, missionId, lesson, limit); this.world.bombMap=bombMap;addPlayer(this.world, this.selfId, name); this.world.players[this.selfId].avatar = avatar;
     peer.on('connection', c => {
       c.on('data', raw => { if (typeof raw !== 'string' || raw.length > 2000 || !this.world) return; let d: any; try { d = JSON.parse(raw); } catch { return; }
-        if (d.type === 'hello' && d.version === 5 && validAvatar(d.avatar) && typeof d.name === 'string' && addPlayer(this.world, c.peer, d.name)) { this.world.players[c.peer].avatar = d.avatar; this.connections.set(c.peer,c);this.send(c,{type:'world',world:this.world,self:c.peer});this.emit(); }
+        if (d.type === 'hello' && d.version === 6 && validAvatar(d.avatar) && typeof d.name === 'string' && addPlayer(this.world, c.peer, d.name)) { this.world.players[c.peer].avatar = d.avatar; this.connections.set(c.peer,c);this.send(c,vrPacket(this.world,true));this.emit(); }
         else if (this.world.players[c.peer]) this.receive(c.peer, d);
         else { this.send(c, { type: 'error', text: 'Room full or already started' }); c.close(); }
       });
       c.on('close', () => { this.connections.delete(c.peer); delete this.controls[c.peer]; if (this.world?.players[c.peer]) { if (this.world.phase === 'lobby') delete this.world.players[c.peer]; else this.world.players[c.peer].connected = false; this.emit(); } });
     });
     let pulses = 0; document.addEventListener('visibilitychange', this.visibility);
-    this.timer = setInterval(() => { if (!this.world) return; for (const id of Object.keys(this.controls)) if (Date.now() - (this.lastInput[id] ?? 0) > 600) delete this.controls[id]; tickWorld(this.world, this.controls, .05); Object.values(this.controls).forEach(i => { i.shoot = false; i.decoy = false; i.reload = false; i.useItem = false; }); if (++pulses % 2 === 0) this.emit(); }, 50); this.emit();
+    this.timer = setInterval(() => { if (!this.world) return; for (const id of Object.keys(this.controls)) if (Date.now() - (this.lastInput[id] ?? 0) > 600) delete this.controls[id]; tickWorld(this.world, this.controls, .05); clearVrPulses(this.controls); if (++pulses % 2 === 0) this.emit(); }, 50); this.emit();
   }
   async join(name: string, code: string, avatar: KartAvatar = defaultAvatar()) {
-    this.code = code.trim().toUpperCase().replace(/^H-/, ''); if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('Invalid room code');
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;if(this.transport==='server'){await this.connectDedicated({create:false,name,code:this.code,avatar});return;} if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('Invalid room code');
     const peer = await this.open(); const c = peer.connect(`gakuro-vr-v5-${this.code}`, { reliable: true }); this.connections.set('host', c);
-    await new Promise<void>((resolve, reject) => { const timeout = setTimeout(() => reject(new Error('Room connection timeout')), 20000); c.on('open', () => this.send(c, { type: 'hello', version: 5, name, avatar })); c.on('data', raw => { let d: any; try { d = JSON.parse(String(raw)); } catch { return; } if (d.type === 'error') { clearTimeout(timeout); reject(new Error(d.text)); } if((d.type==='world'||d.type==='state')&&d.world&&d.world.players?.[this.selfId]){const world={...d.world,lesson:d.world.lesson??this.world?.lesson};if(d.world.lesson?!validLesson(d.world.lesson,120):!this.world?.lesson)return;clearTimeout(timeout);this.world=world;this.update(world);resolve();} }); c.on('error', e => { clearTimeout(timeout); reject(e); }); c.on('close', () => this.status('Host disconnected. Return to title to reconnect.')); });
+    await new Promise<void>((resolve, reject) => { const timeout = setTimeout(() => reject(new Error('Room connection timeout')), 20000); c.on('open', () => this.send(c, { type: 'hello', version: 6, name, avatar })); c.on('data', raw => { let d: any; try { d = JSON.parse(String(raw)); } catch { return; } if (d.type === 'error') { clearTimeout(timeout); reject(new Error(d.text)); } if(d.type==='world'||d.type==='state'){const world=readVrWorld(d,this.world);if(!world||!world.players[this.selfId]||!validLesson(world.lesson,120))return;clearTimeout(timeout);this.world=world;this.update(world);resolve();} }); c.on('error', e => { clearTimeout(timeout); reject(e); }); c.on('close', () => this.status('Host disconnected. Return to title to reconnect.')); });
   }
-  private receive(id: string, d: any) { if (!this.world) return; if (d.type === 'input' && validInput(d.input)) { this.controls[id] = { ...d.input, reload: d.input.reload === true }; this.lastInput[id] = Date.now(); } if(d.type==='avatar'&&this.world.players[id]&&validAvatar(d.avatar)){this.world.players[id].avatar={...d.avatar};this.emit();} if(d.type==='retry')retryCoop(this.world,id); if(d.type==='answer')answer(this.world,id,d.choice);if(d.type==='quizComplete')completeQuiz(this.world,id);if(d.type==='supply')requestSupply(this.world,id); }
-  input(input: Input & { reload?: boolean }) { if (this.host) this.receive(this.selfId, { type: 'input', input }); else { const c = this.connections.get('host'); if (c) this.send(c, { type: 'input', input }); } }
-  answer(choice: number) { if (this.host && this.world) answer(this.world, this.selfId, choice); else { const c = this.connections.get('host'); if (c) this.send(c, { type: 'answer', choice }); } }
-  completeQuiz(){if(this.host&&this.world)completeQuiz(this.world,this.selfId);else{const c=this.connections.get('host');if(c)this.send(c,{type:'quizComplete'});}}
-  supply(){if(this.host&&this.world)requestSupply(this.world,this.selfId);else{const c=this.connections.get('host');if(c)this.send(c,{type:'supply'});}}
-  rematch(next=false){if(this.host&&this.world&&returnToLobby(this.world,next)){this.controls={};this.lastInput={};this.emit();}}
-  setAvatar(avatar:KartAvatar){if(!validAvatar(avatar))return;if(this.host)this.receive(this.selfId,{type:'avatar',avatar});else{const c=this.connections.get('host');if(c)this.send(c,{type:'avatar',avatar});}}
-  retry() { if(this.host&&this.world)retryCoop(this.world,this.selfId);else{const c=this.connections.get('host');if(c)this.send(c,{type:'retry'});} }
-  start() { if (this.host && this.world) { this.controls={};this.lastInput={};startWorld(this.world, crypto.getRandomValues(new Uint32Array(1))[0]); this.emit(); } }
-  close() { this.closed = true; if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility); this.connections.forEach(c => c.close()); this.peer?.destroy(); }
+  private receive(id:string,d:any){if(this.world)vrCommand(this.world,id,d,this.controls,this.lastInput);}
+  private transmit(d:object){if(this.dedicated){this.dedicated.send(d);return;}const c=this.connections.get('host');if(c)this.send(c,d);}
+  private async connectDedicated(hello:object){this.dedicated=new DedicatedConnection(packet=>{if(packet.type==='connected'){this.selfId=packet.id;this.code=packet.code;this.host=packet.host;return false;}if(packet.type==='host')this.host=!!packet.host;if(packet.type==='error')this.status(packet.message);if(packet.type==='world'||packet.type==='state'){const world=readVrWorld(packet,this.world);if(world&&world.players[this.selfId]&&validLesson(world.lesson,120)){this.world=world;this.update(world);return true;}}return false;},()=>this.status('Server disconnected. Return to title to reconnect.'),vrServerUrl());await this.dedicated.open('vr',{version:6,...hello});}
+  private action(d:object){if(this.dedicated||!this.host)this.transmit(d);else{this.receive(this.selfId,d);this.emit();}}
+  input(input:Input&{reload?:boolean;bomb?:boolean;remote?:boolean}){if(this.dedicated||!this.host)this.transmit({type:'input',input});else this.receive(this.selfId,{type:'input',input});}
+  answer(choice:number,round?:number){this.action({type:'answer',choice,round});}
+  completeQuiz(){this.action({type:'quizComplete'});}
+  supply(){this.action({type:'supply'});}
+  closeBombQuiz(){this.action({type:'closeBombQuiz'});}
+  rematch(next=false){if(this.dedicated){if(this.host)this.transmit({type:'rematch',next});return;}if(this.host&&this.world&&returnToLobby(this.world,next)){this.controls={};this.lastInput={};this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
+  setAvatar(avatar:KartAvatar){if(validAvatar(avatar))this.action({type:'avatar',avatar});}
+  retry(){this.action({type:'retry'});}
+  start(){if(this.dedicated){if(this.host)this.transmit({type:'start'});return;}if(this.host&&this.world){this.controls={};this.lastInput={};startWorld(this.world,crypto.getRandomValues(new Uint32Array(1))[0]);this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
+  close() { this.closed = true; this.dedicated?.close(); if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility); this.connections.forEach(c => c.close()); this.peer?.destroy(); }
 }

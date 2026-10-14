@@ -142,7 +142,7 @@ export class GolfRoom {
     if (this.closed || !this.host) return;
     this.observedId = id;
     if (this.dedicated) this.dedicated.send({ type: 'observe', id });
-    else this.emit();
+    else if (this.world) this.update(viewFor(this.world, this.selfId, this.observedId || undefined));
   }
   setHoleCount(count: number) {
     if (this.closed || !this.host) return;

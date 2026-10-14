@@ -60,6 +60,8 @@ export class KartScene {
   }
   private lost = (e: Event) => { e.preventDefault(); this.onFailure(); };
   setWorld(world: Race) { if (world !== this.state) { this.state = world; this.received = performance.now(); } }
+  // Watching another racer changes the camera, never the course or GPU resources.
+  setViewId(id: string) { if (id !== this.selfId) { this.selfId = id; this.cameraReady = false; } }
   private standard(color: T.ColorRepresentation, metalness = 0, roughness = .65, emissive?: T.ColorRepresentation) {
     return new T.MeshStandardMaterial({ color, metalness, roughness, ...(emissive ? { emissive, emissiveIntensity: .65 } : {}) });
   }

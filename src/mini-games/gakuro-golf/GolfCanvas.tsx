@@ -88,6 +88,14 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             marker = { ball, shadow, rig, motion: new BallMotion(), player: p, swingStart: -Infinity, cheerStart: p.phase === 'holed' && !p.capped ? now : -Infinity, origin: new THREE.Vector3(p.x, 0, p.z), direction: 0, avatarKey: JSON.stringify(look) };
             marker.motion.push(p, now); markers.set(p.id, marker);
           }
+          // A camera switch must update the highlight without rebuilding the course.
+          const watchedBall = p.id === id || !current;
+          const ballMaterial = marker.ball.material as THREE.MeshStandardMaterial;
+          ballMaterial.color.set(watchedBall ? '#fffdf1' : colors[p.slot % colors.length]);
+          ballMaterial.opacity = watchedBall ? 1 : .7;
+          ballMaterial.transparent = !watchedBall;
+          ballMaterial.depthWrite = watchedBall;
+          marker.ball.scale.setScalar(watchedBall ? 1 : .65);
           if (received) {
             if (p.phase === 'moving' && (marker.player.phase !== 'moving' || marker.player.strokes !== p.strokes)) {
               marker.swingStart = now;
@@ -221,7 +229,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
       }; frame = requestAnimationFrame(draw);
     } catch (error) { console.error('Golf renderer initialization failed', error); setFailed(true); }
     return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
-  }, [holeIndex, selfId, portrait, quality]);
+  }, [holeIndex, portrait, quality]);
   const endDrag=(event:React.PointerEvent<HTMLCanvasElement>)=>{if(orbit.current.drag?.id===event.pointerId)orbit.current.drag=null;};
   return <><canvas className="gg-canvas" ref={canvas}
     onPointerDown={e=>{if(portrait||e.button!==0||orbit.current.drag)return;if(e.nativeEvent.isTrusted)e.currentTarget.setPointerCapture(e.pointerId);orbit.current.drag={id:e.pointerId,x:e.clientX,y:e.clientY};}}
