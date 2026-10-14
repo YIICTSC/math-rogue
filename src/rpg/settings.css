@@ -113,3 +113,4 @@
   height: 100%;
   min-width: 0;
 }
+.rpg-camera-settings{display:grid;gap:12px;border:1px solid #8eaea7;border-radius:12px;padding:14px;margin:6px 0}.rpg-camera-settings legend{color:#fff3c6;font-weight:700}.rpg-camera-settings>button{min-height:44px;border:1px solid #a6bdb5;border-radius:8px;padding:8px;background:#34554f;color:#fff3c6}.rpg-camera-settings p{margin:0}

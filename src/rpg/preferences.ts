@@ -1,5 +1,10 @@
 import { useSyncExternalStore } from "react";
 export interface RpgPreferences {
+  lookControl:"drag"|"stick"|"both";
+  lookInvertX:boolean;
+  lookInvertY:boolean;
+  lookSensitivity:number;
+  lookDeadZone:number;
   mapView:"2D"|"3D";
   mapQuality:"auto"|"high"|"low";
   control: "dpad" | "stick";
@@ -18,6 +23,7 @@ export interface RpgPreferences {
 }
 const KEY = "rpg-preferences-v1",
   defaults: RpgPreferences = {
+    lookControl:"drag",lookInvertX:false,lookInvertY:false,lookSensitivity:1,lookDeadZone:.22,
     mapView:"2D",mapQuality:"auto",
     control: "stick",
     speech: true,
@@ -48,6 +54,8 @@ export function rpgPreferences() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   };
   for (const key of [
+    "lookInvertX",
+    "lookInvertY",
     "speech",
     "reducedMotion",
     "contrast",
@@ -58,6 +66,9 @@ export function rpgPreferences() {
     "twoD",
   ] as const)
     if (typeof raw[key] === "boolean") current[key] = raw[key]!;
+  if (["drag","stick","both"].includes(raw.lookControl!))current.lookControl=raw.lookControl!;
+  if ([.5,.75,1,1.5,2].includes(raw.lookSensitivity!))current.lookSensitivity=raw.lookSensitivity!;
+  if ([.15,.22,.35].includes(raw.lookDeadZone!))current.lookDeadZone=raw.lookDeadZone!;
   if (["2D","3D"].includes(raw.mapView!))current.mapView=raw.mapView!;
   if (["auto","high","low"].includes(raw.mapQuality!))current.mapQuality=raw.mapQuality!;
   if (raw.controlDefaultVersion === 2 && ["dpad", "stick"].includes(raw.control!)) current.control = raw.control!;

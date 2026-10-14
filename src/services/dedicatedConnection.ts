@@ -1,4 +1,5 @@
 export const onlineServerUrl = () => import.meta.env.VITE_ONLINE_SERVER_URL as string | undefined;
+export const vrServerUrl=()=>import.meta.env.VITE_VR_SERVER_URL||(import.meta.env.DEV&&typeof location!=='undefined'?`http://${location.hostname}:10001`:onlineServerUrl());
 
 /** Shared cold-start, heartbeat and bounded outgoing queue for dedicated rooms. */
 export class DedicatedConnection {

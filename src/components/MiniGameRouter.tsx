@@ -25,6 +25,7 @@ interface MiniGameRouterProps {
     assignment?: AssignmentPayload | null;
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
+    inviteCode?: string;
     debugPreview?: MiniGameDebugPreview;
     isUiPreview?: boolean;
     onCraneComplete?: (result: CraneGameResult) => void;
@@ -42,6 +43,7 @@ export interface MiniGameComponentProps {
     assignment?: AssignmentPayload | null;
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
+    inviteCode?: string;
     debugPreview?: MiniGameDebugPreview;
     isUiPreview?: boolean;
     gameScreen?: GameScreen;
@@ -74,7 +76,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_CRANE]: CraneGame,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview, isUiPreview, onCraneComplete, onCraneReplay, craneGold, craneEventMode }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, inviteCode, debugPreview, isUiPreview, onCraneComplete, onCraneReplay, craneGold, craneEventMode }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -97,6 +99,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             assignment={assignment}
             onAnswerResult={onAnswerResult}
             languageMode={languageMode}
+            inviteCode={inviteCode}
             debugPreview={debugPreview}
             isUiPreview={isUiPreview}
             gameScreen={screen}

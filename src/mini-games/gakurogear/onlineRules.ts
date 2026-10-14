@@ -2,6 +2,8 @@ import { blocked, clearSight, distance, floorHeight, MISSIONS, type Input, type 
 import type { KartLesson } from '../gakuro-kart/learning';
 import type { OnlineWorld, Participant } from './onlineEngine';
 
+export const playerSeats=(w:OnlineWorld)=>Object.values(w.players).filter(p=>!p.spectator);
+export function setVrSpectator(w:OnlineWorld,id:string,value:unknown){const p=w.players[id];if(typeof value!=='boolean'||!p?.connected||w.phase==='playing')return false;p.spectator=value;p.quiz=false;return true;}
 export type Supply = Point & { id: number; kind: 'ammo' | 'energy' | 'repair' | 'weapon' | 'item'; slot?:number; readyAt: number };
 export const magazineSize=(weapon:number)=>[6,4,4,12,0,0][weapon]??6;
 export const newStats = () => ({ assists: 0, rescues: 0, hits: 0, correct: 0 });
@@ -11,11 +13,11 @@ export function safeRadius(w: OnlineWorld): number {
  return initial+(3-initial)*Math.max(0,Math.min(1,(w.time-begin)/(end-begin)));
 }
 export function zoneOffset(w:OnlineWorld,index:number):Point {
- const count=Object.keys(w.players).length,columns=Math.ceil(Math.sqrt(count)),rows=Math.ceil(count/columns),base=MISSIONS[w.missionId-1],spacing=2*(base.size??8)+1;
+ const count=playerSeats(w).length,columns=Math.ceil(Math.sqrt(count)),rows=Math.ceil(count/columns),base=MISSIONS[w.missionId-1],spacing=2*(base.size??8)+1;
  return {x:(index%columns-(columns-1)/2)*spacing,z:(Math.floor(index/columns)-(rows-1)/2)*spacing};
 }
 export function beginQuiz(w:OnlineWorld,p:Participant,reason:Participant['quizReason']='recovery') {
- if(p.quiz||!w.lesson.questions.length)return;
+ if(p.spectator||p.quiz||!w.lesson.questions.length)return;
  const unique=[...new Map(w.lesson.questions.map((q,i)=>[JSON.stringify([q.mode,q.question,q.passage??'',q.options[q.correct]]),i])).values()];
  p.quizQuestions=[];
  for(let i=0;i<(reason==='bomb'?1:3);i++){
@@ -32,11 +34,11 @@ export function quizLesson(w:OnlineWorld,p:Participant):KartLesson {
  return {...w.lesson,questions:(p.quizQuestions.length?p.quizQuestions:[0,1,2]).map(i=>w.lesson.questions[i])};
 }
 export function requestSupply(w:OnlineWorld,id:string) {
- const p=w.players[id];if(w.phase!=='playing'||!p?.connected||p.quiz||w.paused||(w.mode!=='bomb'&&w.time<p.nextSupplyAt))return false;
+ const p=w.players[id];if(w.phase!=='playing'||p?.spectator||!p?.connected||p.quiz||w.paused||(w.mode!=='bomb'&&w.time<p.nextSupplyAt))return false;
  if(w.mode==='bomb'){if(p.out||p.bomb.stock>=12)return false;beginQuiz(w,p,'bomb');}else beginQuiz(w,p,'supply');return true;
 }
 export function completeQuiz(w:OnlineWorld,id:string) {
- const p=w.players[id];if(w.mode==='bomb')return false;if(!p?.quiz||p.answers.length!==3)return false;
+ const p=w.players[id];if(w.mode==='bomb')return false;if(p?.spectator||!p?.quiz||p.answers.length!==3)return false;
  p.quiz=false;p.stats.correct+=p.quizCorrect;
  if(w.mode==='royale') {p.energy=Math.max(p.energy,40+p.quizCorrect*20);if(p.weapons[p.run.weapon])p.run.ammo=Math.max(p.run.ammo,magazineSize(p.run.weapon));p.reloading=0;p.invulnerable=2;p.zoneExposure=0;
   // Return learners safely to the active zone after their question break.
@@ -55,10 +57,10 @@ function openPoint(w:OnlineWorld,radius:number,seed:number):Point {
  return {x:0,z:0};
 }
 export function spawnSupplies(w:OnlineWorld) {
- w.supplies=Array.from({length:Math.min(120,Object.keys(w.players).length*3+12)},(_,id)=>({...openPoint(w,(w.mission.size??18)*.7,id*97),id,kind:['weapon','item','ammo','energy','repair'][id%5] as Supply['kind'],slot:Math.floor(id/5)%((id%5===0)?6:4),readyAt:id%5<=1?0:8+(id%12)*2}));
+ w.supplies=Array.from({length:Math.min(120,playerSeats(w).length*3+12)},(_,id)=>({...openPoint(w,(w.mission.size??18)*.7,id*97),id,kind:['weapon','item','ammo','energy','repair'][id%5] as Supply['kind'],slot:Math.floor(id/5)%((id%5===0)?6:4),readyAt:id%5<=1?0:8+(id%12)*2}));
 }
 export function tickArena(w:OnlineWorld,dt:number) {
- const active=Object.values(w.players).filter(p=>p.connected&&!p.quiz);
+ const active=playerSeats(w).filter(p=>p.connected&&!p.quiz);
  for(const p of active){
   p.zoneExposure=Math.hypot(p.run.player.x,p.run.player.z)>safeRadius(w)?p.zoneExposure+dt:0;
   if(p.zoneExposure>=6){p.zoneExposure=0;if(p.out)p.respawnHits++;else p.hits++;p.invulnerable=2;if((p.out?p.respawnHits:p.hits)>=3)respawnRoyale(w,p);}
@@ -78,7 +80,7 @@ export function tickArena(w:OnlineWorld,dt:number) {
  }
 }
 export function assistTeam(w:OnlineWorld,p:Participant,input:Input,dt:number) {
- const others=Object.values(w.players).filter(q=>q!==p&&q.connected),base=MISSIONS[w.missionId-1];
+ const others=playerSeats(w).filter(q=>q!==p&&q.connected),base=MISSIONS[w.missionId-1];
  if(!input.interact||Math.hypot(input.x,input.z)>.1||p.quiz||p.run.status!=='clear'){p.helpTarget='';p.helpProgress=0;return;}
  let target='',needed=1.2,complete:(()=>void)|undefined;
  for(const other of others){
@@ -86,7 +88,7 @@ export function assistTeam(w:OnlineWorld,p:Participant,input:Input,dt:number) {
    target=`revive:${other.id}`;needed=1.5;complete=()=>{other.run.status='playing';other.run.detection=0;other.invulnerable=3;p.stats.rescues++;};break;
   }
   if(other.run.status!=='playing')continue;
-  const offset=zoneOffset(w,Object.keys(w.players).indexOf(other.id));
+  const offset=zoneOffset(w,playerSeats(w).findIndex(p=>p.id===other.id));
   const i=base.targets.findIndex((q,i)=>{const point={x:q.x+offset.x,z:q.z+offset.z};return !other.run.collected[i]&&distance(p.run.player,{...point,y:floorHeight(w.mission,point)})<1.2&&clearSight(w.mission,p.run.player,point,true,p.run);});
   if(i>=0){target=`file:${other.id}:${i}`;needed=base.targetKinds?.[i]==='relay'?1.5:base.targetKinds?.[i]==='rescue'?1.2:.8;complete=()=>{other.run.collected[i]=true;p.stats.assists++;};break;}
  }
@@ -106,6 +108,7 @@ export function returnToLobby(w:OnlineWorld,next=false) {
 }
 
 export function readyToExtract(w:OnlineWorld,p:Participant){
- const m=MISSIONS[w.missionId-1],index=Object.keys(w.players).indexOf(p.id),count=m.switches?.length??0;
+ if(p.spectator)return false;
+ const m=MISSIONS[w.missionId-1],index=playerSeats(w).findIndex(q=>q.id===p.id),count=m.switches?.length??0;
  return p.run.collected.every(Boolean)&&p.run.holds>=m.requiredHolds&&p.run.shots>=m.requiredShots&&p.run.defended>=(m.defend?.seconds??0)&&(!m.requireSwitches||p.run.switches.slice(index*count,(index+1)*count).every(Boolean));
 }

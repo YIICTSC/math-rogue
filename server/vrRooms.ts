@@ -1,3 +1,4 @@
+import {setVrSpectator} from '../src/mini-games/gakurogear/onlineRules';
 import { randomInt,randomUUID } from 'node:crypto';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
@@ -6,6 +7,7 @@ import { addPlayer,createWorld,startWorld,tickWorld,type OnlineWorld,type VrInpu
 import { returnToLobby } from '../src/mini-games/gakurogear/onlineRules';
 import { vrCommand,clearVrPulses } from '../src/mini-games/gakurogear/roomCommands';
 import { vrPacket,VrStateEncoder } from '../src/mini-games/gakurogear/vrProtocol';
+import {updateVrSettings} from '../src/mini-games/gakurogear/roomSettings';
 import { validLesson } from '../src/mini-games/gakuro-kart/learning';
 import { validAvatar } from '../src/mini-games/gakuro-kart/avatar';
 type Member={id:string;socket:WebSocket;alive:boolean;rate:number;at:number;metadata:string};
@@ -27,6 +29,8 @@ sockets.on('connection',socket=>{
    room.world.players[m.id].avatar=d.avatar;room.members.set(m.id,m);room.emptyAt=0;clearTimeout(handshake);send(m,{type:'connected',id:m.id,code,host:m.id===room.host});emit(room);return;
   }
   if(d.type==='start'){if(m.id===room.host){room.controls={};room.lastInput={};startWorld(room.world,randomInt(0x100000000));emit(room);}return;}
+  if(d.type==='spectator'){if(m.id===room.host&&setVrSpectator(room.world,m.id,d.enabled)){delete room.controls[m.id];emit(room);}return;}
+  if(d.type==='settings'){if(m.id===room.host&&updateVrSettings(room.world,d.settings)){for(const q of room.members.values())q.metadata='';emit(room);}return;}
   if(d.type==='rematch'){if(m.id===room.host&&returnToLobby(room.world,d.next===true)){room.controls={};room.lastInput={};emit(room);}return;}
   vrCommand(room.world,m.id,d,room.controls,room.lastInput);if(d.type!=='input')emit(room);
   }catch{send(m,{type:'error',message:'Unable to process VR command'});}

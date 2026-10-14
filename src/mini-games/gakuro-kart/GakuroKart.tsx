@@ -67,7 +67,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
   const [avatarBack,setAvatarBack]=useState<'practice'|'create'|'join'>('practice');
   const [inviteCopied, setInviteCopied] = useState(false);
   const [lobbyAvatarOpen,setLobbyAvatarOpen]=useState(Boolean(inviteCode));
-  const [error, setError] = useState(''), [busy, setBusy] = useState(false), [copied, setCopied] = useState(false), [fill, setFill] = useState(true), [sound, setSound] = useState(true);
+  const [error, setError] = useState(''), [busy, setBusy] = useState(false), [copied, setCopied] = useState(false), [fill, setFill] = useState(true);
   const [avatar, setAvatar] = useState(loadAvatar);
   const [nextCourse, setNextCourse] = useState(0);
   const [nextLaps, setNextLaps] = useState(DEFAULT_LAPS);
@@ -229,7 +229,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     {error&&<p role="alert">{trans(error,languageMode)}</p>}
   </OnlineEntryScreen>;
   return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing'+(world.phase==='lobby'?' gk-preparing':'') : 'gk-intro-root'}`} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
-    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><StorybookQuality languageMode={languageMode}/><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span><button aria-label="Sound toggle" className="gk-sound" onClick={() => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); setSound(audio.current.toggle()); }}>{sound ? 'SOUND ON' : 'SOUND OFF'}</button></div></header>
+    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><StorybookQuality languageMode={languageMode}/><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span></div></header>
     {world && room.current?.host && room.current.code && <HostSpectator enabled={spectating} canChangeMode={['lobby', 'result'].includes(world.phase)} onChange={value => { clearInput(); room.current?.setSpectator(value); }} name={spectators.target ? me?.name : undefined} count={racers.filter(p => p.id !== self && !p.cpu && !p.spectator).length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>#{place} / {order.length}</span><span>LAP {Math.min(world.laps, Math.max(1, Math.floor(me.distance / length) + 1))} / {world.laps}</span><span>{Math.round(me.speed * 3.6)} KM/H</span></>}</HostSpectator>}
     {error && <div className="gk-error" role="alert">{error}</div>}
     {!world ? <div className="gk-garage">
@@ -249,7 +249,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
         <div className="gk-vignette" />{me && me.boost > 0 && active && <div className="gk-speed-streaks" />}
         <div className="gk-hud"><div className="gk-position"><span>POSITION</span><strong>{String(place).padStart(2, '0')}<small> / {order.length}</small></strong></div><div className="gk-lap"><span>LAP</span><strong>{Math.min(world.laps, Math.max(1, Math.floor((me?.distance || 0) / length) + 1))}<small> / {world.laps}</small></strong></div><div className="gk-race-time"><span>{world.finishAt ? 'FINISH WINDOW' : 'RACE TIME'}</span><strong>{world.finishAt ? Math.ceil(world.remaining) : time(world.time)}</strong></div></div>
         <div className="gk-leaderboard">{front.map(p => <div key={p.id} className={p.id === viewId ? 'is-self' : ''}><b>{order.indexOf(p) + 1}</b><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span>{p.name}</span><small>{p.finish ? 'FIN' : p.id === viewId ? spectating ? 'WATCH' : 'YOU' : `${Math.max(0, Math.round((Math.min(length * world.laps, order[0].distance) - p.distance)))}m`}</small></div>)}</div>
-        {me && world.lesson && <QuizBoard world={world} racer={me} languageMode={languageMode} sound={sound} />}
+        {me && world.lesson && <QuizBoard world={world} racer={me} languageMode={languageMode} sound={true} />}
         <MiniMap world={world} self={viewId} />
         <div className="gk-track-label"><b>{world.customCourse?.name??COURSES[world.course].name}</b><span>{Math.round(Math.max(0, Math.min(1, (me?.distance || 0) / (length * world.laps))) * 100)}%</span><i style={{ width: `${Math.max(0, Math.min(100, (me?.distance || 0) / (length * world.laps) * 100))}%` }} /></div>
         <div className="gk-speed"><strong>{Math.round((me?.speed || 0) * 3.6)}</strong><span>KM/H</span></div>

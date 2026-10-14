@@ -1,14 +1,15 @@
-import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
+import {DedicatedConnection,vrServerUrl} from '../../services/dedicatedConnection';
+import {updateVrSettings,type VrSettings} from './roomSettings';
 import {roomAddress,shareRoomCode,type OnlineTransport} from '../../services/onlineTransport';
 import {vrCommand,clearVrPulses} from './roomCommands';
 import {vrPacket,readVrWorld} from './vrProtocol';
-import {completeQuiz,requestSupply,returnToLobby} from './onlineRules';
+import {setVrSpectator,completeQuiz,requestSupply,returnToLobby} from './onlineRules';
 import {validAvatar,defaultAvatar,type KartAvatar} from '../gakuro-kart/avatar';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
 import { addPlayer, answer, createWorld, startWorld, retryCoop, tickWorld, validInput, type OnlineMode, type OnlineWorld } from './onlineEngine';
 import type { Input } from './engine';
-export const vrServerUrl=()=>import.meta.env.VITE_VR_SERVER_URL||(import.meta.env.DEV&&typeof location!=='undefined'?`http://${location.hostname}:10001`:onlineServerUrl());
+export {vrServerUrl} from '../../services/dedicatedConnection';
 export class VrRoom {
   transport:OnlineTransport=vrServerUrl()?'server':'host';
   private dedicated:DedicatedConnection|null=null;
@@ -45,7 +46,7 @@ export class VrRoom {
   }
   async join(name: string, code: string, avatar: KartAvatar = defaultAvatar()) {
     const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;if(this.transport==='server'){await this.connectDedicated({create:false,name,code:this.code,avatar});return;} if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('Invalid room code');
-    const peer = await this.open(); const c = peer.connect(`gakuro-vr-v5-${this.code}`, { reliable: true }); this.connections.set('host', c);
+    const peer = await this.open(); const c = peer.connect(`gakuro-vr-v6-${this.code}`, { reliable: true }); this.connections.set('host', c);
     await new Promise<void>((resolve, reject) => { const timeout = setTimeout(() => reject(new Error('Room connection timeout')), 20000); c.on('open', () => this.send(c, { type: 'hello', version: 6, name, avatar })); c.on('data', raw => { let d: any; try { d = JSON.parse(String(raw)); } catch { return; } if (d.type === 'error') { clearTimeout(timeout); reject(new Error(d.text)); } if(d.type==='world'||d.type==='state'){const world=readVrWorld(d,this.world);if(!world||!world.players[this.selfId]||!validLesson(world.lesson,120))return;clearTimeout(timeout);this.world=world;this.update(world);resolve();} }); c.on('error', e => { clearTimeout(timeout); reject(e); }); c.on('close', () => this.status('Host disconnected. Return to title to reconnect.')); });
   }
   private receive(id:string,d:any){if(this.world)vrCommand(this.world,id,d,this.controls,this.lastInput);}
@@ -60,6 +61,8 @@ export class VrRoom {
   rematch(next=false){if(this.dedicated){if(this.host)this.transmit({type:'rematch',next});return;}if(this.host&&this.world&&returnToLobby(this.world,next)){this.controls={};this.lastInput={};this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
   setAvatar(avatar:KartAvatar){if(validAvatar(avatar))this.action({type:'avatar',avatar});}
   retry(){this.action({type:'retry'});}
+  setSpectator(enabled:boolean){if(!this.host||this.closed)return;if(this.dedicated){this.transmit({type:'spectator',enabled});return;}if(this.world&&setVrSpectator(this.world,this.selfId,enabled)){delete this.controls[this.selfId];this.emit();}}
+  setSettings(settings:VrSettings){if(!this.host||this.closed)return;if(this.dedicated){this.transmit({type:'settings',settings});return;}if(this.world&&updateVrSettings(this.world,settings)){this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
   start(){if(this.dedicated){if(this.host)this.transmit({type:'start'});return;}if(this.host&&this.world){this.controls={};this.lastInput={};startWorld(this.world,crypto.getRandomValues(new Uint32Array(1))[0]);this.connections.forEach(c=>this.send(c,vrPacket(this.world!,true)));this.emit();}}
   close() { this.closed = true; this.dedicated?.close(); if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility); this.connections.forEach(c => c.close()); this.peer?.destroy(); }
 }

@@ -1,8 +1,8 @@
-import {onlineServerUrl} from './dedicatedConnection';
-export type OnlineGameEndpoint='online'|'kart'|'golf';
+import {onlineServerUrl,vrServerUrl} from './dedicatedConnection';
+export type OnlineGameEndpoint='online'|'kart'|'golf'|'vr';
 /** A real browser WebSocket/pong check includes origin restrictions, without creating a room. */
 export async function probeServer(game:OnlineGameEndpoint,signal:AbortSignal,timeout=15000):Promise<boolean>{
- const base=onlineServerUrl();if(!base||signal.aborted||navigator.onLine===false)return false;
+ const base=game==='vr'?vrServerUrl():onlineServerUrl();if(!base||signal.aborted||navigator.onLine===false)return false;
  let url:URL;try{url=new URL(base);url.protocol=['http:','ws:'].includes(url.protocol)?'ws:':'wss:';url.pathname='/'+game;url.search='';url.hash='';}catch{return false;}
  return new Promise(resolve=>{
   let socket:WebSocket|undefined,settled=false;

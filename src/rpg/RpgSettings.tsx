@@ -184,6 +184,15 @@ export default function RpgSettings({
           </label>
           <label>{L('マップの表示','Map view','まっぷのひょうじ')}<select value={p.mapView} onChange={e=>updateRpgPreferences({mapView:e.target.value as RpgPreferences['mapView']})}><option value="2D">2D</option><option value="3D">3D</option></select></label>
           <label>{L('3D描画品質','3D quality','すりーでぃーびょうがひんしつ')}<select value={p.mapQuality} onChange={e=>updateRpgPreferences({mapQuality:e.target.value as RpgPreferences['mapQuality']})}><option value="auto">{L('自動','Automatic','じどう')}</option><option value="high">{L('高画質','High','こうがしつ')}</option><option value="low">{L('軽量','Low','けいりょう')}</option></select></label>
+          <fieldset className="rpg-camera-settings"><legend>{L('3D視点操作','3D camera controls','3Dしてんそうさ')}</legend>
+            <label>{L('視点の操作方法','Camera input','してんのそうさほうほう')}<select value={p.lookControl} onChange={e=>updateRpgPreferences({lookControl:e.target.value as RpgPreferences['lookControl']})}><option value="drag">{L('画面ドラッグ','Drag screen','がめんどらっぐ')}</option><option value="stick">{L('視点スティック','Camera stick','してんすてぃっく')}</option><option value="both">{L('ドラッグとスティック','Drag and stick','どらっぐとすてぃっく')}</option></select></label>
+            <label className="rpg-settings-toggle"><input type="checkbox" checked={p.lookInvertX} onChange={e=>updateRpgPreferences({lookInvertX:e.target.checked})}/>{L('視点操作の左右を反転','Invert horizontal camera','してんそうさのさゆうをはんてん')}</label>
+            <label className="rpg-settings-toggle"><input type="checkbox" checked={p.lookInvertY} onChange={e=>updateRpgPreferences({lookInvertY:e.target.checked})}/>{L('視点操作の上下を反転','Invert vertical camera','してんそうさのじょうげをはんてん')}</label>
+            <label>{L('視点の感度','Camera sensitivity','してんのかんど')}<select value={p.lookSensitivity} onChange={e=>updateRpgPreferences({lookSensitivity:Number(e.target.value)})}>{[.5,.75,1,1.5,2].map(n=><option key={n} value={n}>{n*100}%</option>)}</select></label>
+            <label>{L('視点スティックの遊び','Camera stick dead zone','してんすてぃっくのあそび')}<select value={p.lookDeadZone} onChange={e=>updateRpgPreferences({lookDeadZone:Number(e.target.value)})}>{[.15,.22,.35].map(n=><option key={n} value={n}>{Math.round(n*100)}%</option>)}</select></label>
+            <button type="button" onClick={()=>updateRpgPreferences({lookControl:'drag',lookInvertX:false,lookInvertY:false,lookSensitivity:1,lookDeadZone:.22})}>{L('視点設定を標準に戻す','Reset camera settings','してんせっていをひょうじゅんにもどす')}</button>
+            <p>{L('視点スティックは倒している間だけ旋回します。移動と視点を別の指で同時に操作できます。','Hold the camera stick to turn. Move and look simultaneously with separate fingers.','してんすてぃっくはたおしているあいだだけせんかいします。いどうとしてんをべつのゆびでどうじにそうさできます。')}</p>
+          </fieldset>
           <label>
             {L("マップ拡大率", "Map zoom", "まっぷかくだいりつ")}
             <select

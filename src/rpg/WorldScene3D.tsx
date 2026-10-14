@@ -1,3 +1,5 @@
+import CameraControls from './CameraControls';
+import {cameraDelta} from './cameraInput';
 import {residentAppearance,npcAppearance} from './town/wardrobe';
 import LandscapeCompass from './LandscapeCompass';
 import {audioService} from '../services/audioService';
@@ -739,22 +741,28 @@ export default function WorldScene3D(props: SceneProps) {
     const physicsTimer=window.setInterval(()=>{const a=latest.current.world.players[latest.current.selfId];if(buildRef.current.building&&a?.position3D?.vy)latest.current.onVoxelAction?.({type:'voxel-move',dx:0,dy:0});},80);
     const command=(e:Event)=>performBuild((e as CustomEvent).detail);
     element.addEventListener('voxel-command',command);
-    let down: { x: number; y: number } | null = null;
+    let down: { id:number; x: number; y: number } | null = null;
     let ambience:ReturnType<typeof audioService.createRpgAmbience>=null;
     const enableAmbience=()=>{ambience??=audioService.createRpgAmbience();};
     element.addEventListener('pointerdown',enableAmbience);
     const start = (e: PointerEvent) => {
+      if(down||e.button!==0||options.current.lookControl==='stick'||buildRef.current.panel||document.querySelector('[role=dialog]'))return;
       renderer.domElement.setPointerCapture(e.pointerId);
-      down = { x: e.clientX, y: e.clientY };
+      down = { id:e.pointerId,x: e.clientX, y: e.clientY };
     };
     const moveLook = (e: PointerEvent) => {
-      if (!down) return;
+      if (!down||down.id!==e.pointerId) return;
+      if(options.current.lookControl==='stick'||buildRef.current.panel||document.querySelector('[role=dialog]')){down=null;return;}
       const dx=e.clientX-down.x, dy=e.clientY-down.y;
-      down={x:e.clientX,y:e.clientY};
-      latest.current.onFacing(latest.current.facing-dx*.004);
-      setPitch(p=>Math.max(-1.45,Math.min(1.45,p-dy*.006)));
+      down={id:e.pointerId,x:e.clientX,y:e.clientY};
+      const delta=cameraDelta(dx,dy,options.current);
+      latest.current.onFacing(latest.current.facing+delta.yaw);
+      setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));
     };
-    const end = () => { down=null; };
+    const end = (e:PointerEvent) => { if(down?.id===e.pointerId)down=null; };
+    const cancelLook=()=>{down=null;};
+    window.addEventListener("blur",cancelLook);
+    document.addEventListener("visibilitychange",cancelLook);
     const lost = (e: Event) => {
       e.preventDefault();
       latest.current.onUnavailable();
@@ -764,6 +772,7 @@ export default function WorldScene3D(props: SceneProps) {
     renderer.domElement.addEventListener("pointerup", end);
     renderer.domElement.addEventListener("pointermove", moveLook);
     renderer.domElement.addEventListener("pointercancel", end);
+    renderer.domElement.addEventListener("lostpointercapture", end);
     let lastTarget="";
     const draw = (time: number) => {
       if (disposed) return;
@@ -908,7 +917,7 @@ export default function WorldScene3D(props: SceneProps) {
       camera.fov = 72 / options.current.zoom;
       camera.updateProjectionMatrix();
       models.update(Math.min(.1,(time-last)/1000||.016),options.current.reducedMotion);animatedWater.update(options.current.reducedMotion?0:time/1000);
-      renderer.domElement.dataset.workshopModels=String(construction.readyShapes);renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
+      renderer.domElement.dataset.workshopModels=String(construction.readyShapes);renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.facing=String(latest.current.facing);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
       outline.visible=false;ghost.visible=false;
       if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=traceVoxel(w,ray.ray.origin,ray.ray.direction);let t:{block:TerrainBlock;cost:number}|null=null;
         if(h){outline.position.set(h.x+.5,h.y+.5,h.z+.5);outline.visible=true;t={block:h.block,cost:miningCost(h.block,w.players[latest.current.selfId])};
@@ -930,6 +939,9 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.removeEventListener("pointerup", end);
       renderer.domElement.removeEventListener("pointermove", moveLook);
       renderer.domElement.removeEventListener("pointercancel", end);
+      renderer.domElement.removeEventListener("lostpointercapture", end);
+      window.removeEventListener("blur",cancelLook);
+      document.removeEventListener("visibilitychange",cancelLook);
       element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
       landscape.dispose();models.dispose();
       batches.forEach((b) => b.dispose());
@@ -944,7 +956,7 @@ export default function WorldScene3D(props: SceneProps) {
   const text=(s:string)=>trans(s,props.languageMode||"JAPANESE");
   const command=(type:string)=>host.current?.dispatchEvent(new CustomEvent('voxel-command',{detail:type}));
   const me=props.world.players[props.selfId];
-  return <div className="rpg-world-3d" ref={host}>{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
+  return <div className="rpg-world-3d" ref={host}>{props.presentation!=='conversation'&&<CameraControls languageMode={props.languageMode} building={building} disabled={editSlot} onReset={()=>setPitch(0)} onLook={(x,y,dt)=>{if(buildRef.current.panel||document.querySelector('[role=dialog]'))return;const delta=cameraDelta(x,y,options.current,dt);latest.current.onFacing(latest.current.facing+delta.yaw);setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));}}/>}{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
 
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>

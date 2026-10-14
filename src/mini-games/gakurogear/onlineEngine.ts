@@ -1,20 +1,20 @@
 import {makeBombArena,tickBombArena,newBombLoadout,type BombArena,type BombLoadout} from './bombEngine';
 import {buildRoomBoundaries,syncRoomDoors} from './cooperativeRooms';
-import {respawnRoyale,assistTeam,beginQuiz,finishWorld,magazineSize,newStats,spawnSupplies,tickArena,type Supply} from './onlineRules';
+import {playerSeats,respawnRoyale,assistTeam,beginQuiz,finishWorld,magazineSize,newStats,spawnSupplies,tickArena,type Supply} from './onlineRules';
 import type {KartAvatar} from '../gakuro-kart/avatar';
 import { equip, WEAPONS, floorHeight, MISSIONS, activeObstacles, blocked, clearSight, createRun, distance, step, type Input, type Mission, type Point, type Run } from './engine';
 import type { KartLesson } from '../gakuro-kart/learning';
 export type OnlineMode = 'coop' | 'royale' | 'bomb';
 export type VrInput = Input & {reload?:boolean;bomb?:boolean;remote?:boolean};
-export type Participant = { bomb:BombLoadout; weapons:boolean[]; stats:ReturnType<typeof newStats>; wins:number; respawnHits:number; helpTarget:string; helpProgress:number; zoneExposure:number; nextSupplyAt:number; quizQuestions:number[]; quizDeck:number[]; quizCycle:number; lastQuestion:number; quizReason:'recovery'|'supply'|'finish'|'bomb'; avatar?: KartAvatar; id: string; name: string; run: Run; hits: number; out: boolean; invulnerable: number; energy: number; reloading: number; quiz: boolean; answers: number[]; quizCorrect: number; quizRound: number; connected: boolean; helped: string[] };
+export type Participant = { spectator:boolean; bomb:BombLoadout; weapons:boolean[]; stats:ReturnType<typeof newStats>; wins:number; respawnHits:number; helpTarget:string; helpProgress:number; zoneExposure:number; nextSupplyAt:number; quizQuestions:number[]; quizDeck:number[]; quizCycle:number; lastQuestion:number; quizReason:'recovery'|'supply'|'finish'|'bomb'; avatar?: KartAvatar; id: string; name: string; run: Run; hits: number; out: boolean; invulnerable: number; energy: number; reloading: number; quiz: boolean; answers: number[]; quizCorrect: number; quizRound: number; connected: boolean; helped: string[] };
 export type OnlineWorld = { bombMap:number; bombArena?:BombArena; roomDoors:number[]; supplies:Supply[]; phase: 'lobby' | 'playing' | 'result'; mode: OnlineMode; missionId: number; seed: number; time: number; limit: number; players: Record<string, Participant>; mission: Mission; lesson: KartLesson; winner: string[]; paused: boolean; round: number };
 export const MAX_PLAYERS = 40;
 export function createWorld(mode: OnlineMode, missionId: number, lesson: KartLesson, limit = 300): OnlineWorld { const mission = structuredClone(MISSIONS[missionId - 1] ?? MISSIONS[0]); return { bombMap:0, roomDoors:[], supplies:[], phase: 'lobby', mode, missionId: mission.id, seed: 1, time: 0, limit: Math.max(60, Math.min(900, limit)), players: {}, mission, lesson, winner: [], paused: false, round: 0 }; }
-export function addPlayer(w: OnlineWorld, id: string, name: string) { if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_PLAYERS || w.players[id]) return false; w.players[id] = { bomb:newBombLoadout(),weapons:WEAPONS.map(()=>false),stats:newStats(),wins:0,respawnHits:0,helpTarget:'',helpProgress:0,zoneExposure:0,nextSupplyAt:0,quizQuestions:[],quizDeck:[],quizCycle:0,lastQuestion:-1,quizReason:'recovery',id, name: name.trim().slice(0, 24) || 'Player', run: createRun(w.mission), hits: 0, out: false, invulnerable: 0, energy: 100, reloading: 0, quiz: false, answers: [], quizCorrect: 0, quizRound: 0, connected: true, helped: [] }; return true; }
+export function addPlayer(w: OnlineWorld, id: string, name: string) { if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_PLAYERS || w.players[id]) return false; w.players[id] = { spectator:false,bomb:newBombLoadout(),weapons:WEAPONS.map(()=>false),stats:newStats(),wins:0,respawnHits:0,helpTarget:'',helpProgress:0,zoneExposure:0,nextSupplyAt:0,quizQuestions:[],quizDeck:[],quizCycle:0,lastQuestion:-1,quizReason:'recovery',id, name: name.trim().slice(0, 24) || 'Player', run: createRun(w.mission), hits: 0, out: false, invulnerable: 0, energy: 100, reloading: 0, quiz: false, answers: [], quizCorrect: 0, quizRound: 0, connected: true, helped: [] }; return true; }
 function random(seed: number) { let n = seed >>> 0; return () => { n += 0x6d2b79f5; let t = n; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 export function startWorld(w: OnlineWorld, seed: number) {
-  if (w.phase !== 'lobby' || (w.mode !== 'coop' && Object.values(w.players).filter(p => p.connected).length < 2)) return false;
-  const ids = Object.keys(w.players), base = structuredClone(MISSIONS[w.missionId - 1]), rand = random(seed); w.seed = seed; w.round++; w.time = 0; w.winner = [];
+  if (w.phase !== 'lobby' || playerSeats(w).filter(p=>p.connected).length < (w.mode==='coop'?1:2)) return false;
+  const ids = playerSeats(w).map(p=>p.id), base = structuredClone(MISSIONS[w.missionId - 1]), rand = random(seed); w.seed = seed; w.round++; w.time = 0; w.winner = [];
   if (w.mode === 'coop') {
     const columns = Math.ceil(Math.sqrt(ids.length)), rows = Math.ceil(ids.length / columns), size = Math.max(columns, rows) * ((base.size??8)+.5);
     const zones = ids.map((id, i) => ({ id, x: (i % columns - (columns - 1) / 2) * (2*(base.size??8)+1), z: (Math.floor(i / columns) - (rows - 1) / 2) * (2*(base.size??8)+1) }));
@@ -37,15 +37,15 @@ export function startWorld(w: OnlineWorld, seed: number) {
 }
 export function validInput(v: unknown): v is Input { if (!v || typeof v !== 'object') return false; const p = v as Input; return Number.isFinite(p.x) && Math.abs(p.x) <= 1 && Number.isFinite(p.z) && Math.abs(p.z) <= 1 && typeof p.crouch === 'boolean' && typeof p.interact === 'boolean' && typeof p.decoy === 'boolean' && (p.weapon===undefined||(Number.isInteger(p.weapon)&&p.weapon>=0&&p.weapon<WEAPONS.length)) && (p.item===undefined||(Number.isInteger(p.item)&&p.item>=0&&p.item<4)) && (p.facing === undefined || Number.isFinite(p.facing)) && ['hold', 'shoot', 'useItem', 'reload', 'bomb', 'remote'].every(k => (p as any)[k] === undefined || typeof (p as any)[k] === 'boolean'); }
 export function answer(w: OnlineWorld, id: string, choice: number, round?:number) {
- const p=w.players[id];if(w.mode==='bomb'){if(!p?.quiz||p.quizReason!=='bomb'||round!==p.quizRound||!Number.isInteger(choice)||choice<0||choice>3||p.bomb.stock>=12)return;const q=w.lesson.questions[p.quizQuestions[0]];if(!q)return;if(choice===q.correct){p.bomb.stock++;p.stats.correct++;}p.quiz=false;beginQuiz(w,p,'bomb');return;}if(!p?.quiz||!Number.isInteger(choice)||choice<0||choice>3||p.answers.length>=3)return;
+ const p=w.players[id];if(p?.spectator)return;if(w.mode==='bomb'){if(!p?.quiz||p.quizReason!=='bomb'||round!==p.quizRound||!Number.isInteger(choice)||choice<0||choice>3||p.bomb.stock>=12)return;const q=w.lesson.questions[p.quizQuestions[0]];if(!q)return;if(choice===q.correct){p.bomb.stock++;p.stats.correct++;}p.quiz=false;beginQuiz(w,p,'bomb');return;}if(!p?.quiz||!Number.isInteger(choice)||choice<0||choice>3||p.answers.length>=3)return;
  const index=p.quizQuestions[p.answers.length]??p.answers.length;
  const q=w.lesson.questions[index];if(!q)return;p.answers.push(choice);if(choice===q.correct)p.quizCorrect++;
 }
 const neutral: Input & {reload?:boolean} = { x: 0, z: 0, crouch: true, interact: false, decoy: false };
 export function tickWorld(w: OnlineWorld, controls: Record<string, VrInput>, dt: number) {
   if (w.phase !== 'playing' || w.paused) return; dt = Math.min(.05, dt); w.time += dt;
-  if(w.mode==='bomb'){tickBombArena(w,controls,dt);const alive=Object.values(w.players).filter(p=>p.connected&&!p.out);if(alive.length<=1)finishWorld(w,alive.map(p=>p.id));else if(w.time>=w.limit){const best=Math.min(...alive.map(p=>p.hits));finishWorld(w,alive.filter(p=>p.hits===best).map(p=>p.id));}return;}
-  const players = Object.values(w.players), connected = players.filter(p => p.connected);
+  if(w.mode==='bomb'){tickBombArena(w,controls,dt);const alive=playerSeats(w).filter(p=>p.connected&&!p.out);if(alive.length<=1)finishWorld(w,alive.map(p=>p.id));else if(w.time>=w.limit){const best=Math.min(...alive.map(p=>p.hits));finishWorld(w,alive.filter(p=>p.hits===best).map(p=>p.id));}return;}
+  const players = playerSeats(w), connected = players.filter(p => p.connected);
   for (const p of connected) {
     p.invulnerable = Math.max(0, p.invulnerable - dt);
     if (p.quiz) continue;
@@ -93,6 +93,6 @@ export function tickWorld(w: OnlineWorld, controls: Record<string, VrInput>, dt:
   if (w.time >= w.limit) { if(w.mode==='coop')connected.filter(p=>p.run.status!=='clear'&&!p.quiz).forEach(p=>{p.run.status='timeout';beginQuiz(w,p);}); const winners = w.mode === 'coop' ? connected.filter(p => p.run.status === 'clear').map(p => p.id) : connected.filter(p => !p.out).sort((a, b) => a.hits - b.hits).filter((p, _, all) => p.hits === all[0].hits).map(p => p.id);finishWorld(w,winners); }
 }
 
-export function retryCoop(w:OnlineWorld,id:string){const p=w.players[id];if(w.mode!=='coop'||w.phase!=='playing'||!p||p.quiz||!['caught','timeout'].includes(p.run.status))return;const ids=Object.keys(w.players),i=ids.indexOf(id),columns=Math.ceil(Math.sqrt(ids.length)),rows=Math.ceil(ids.length/columns),base=MISSIONS[w.missionId-1];const run=p.run;run.status='playing';run.detection=0;run.player={x:base.spawn.x+(i%columns-(columns-1)/2)*(2*(base.size??8)+1),z:base.spawn.z+(Math.floor(i/columns)-(rows-1)/2)*(2*(base.size??8)+1),angle:Math.PI};run.player.y=floorHeight(w.mission,run.player);run.guards=[];p.run=run;p.invulnerable=2;}
+export function retryCoop(w:OnlineWorld,id:string){const p=w.players[id];if(w.mode!=='coop'||w.phase!=='playing'||!p||p.spectator||p.quiz||!['caught','timeout'].includes(p.run.status))return;const ids=playerSeats(w).map(p=>p.id),i=ids.indexOf(id),columns=Math.ceil(Math.sqrt(ids.length)),rows=Math.ceil(ids.length/columns),base=MISSIONS[w.missionId-1];const run=p.run;run.status='playing';run.detection=0;run.player={x:base.spawn.x+(i%columns-(columns-1)/2)*(2*(base.size??8)+1),z:base.spawn.z+(Math.floor(i/columns)-(rows-1)/2)*(2*(base.size??8)+1),angle:Math.PI};run.player.y=floorHeight(w.mission,run.player);run.guards=[];p.run=run;p.invulnerable=2;}
 
 export {completeQuiz,requestSupply,returnToLobby,safeRadius,quizLesson} from './onlineRules';

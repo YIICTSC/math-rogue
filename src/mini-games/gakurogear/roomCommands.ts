@@ -2,7 +2,7 @@ import { answer,retryCoop,validInput,type OnlineWorld,type VrInput } from './onl
 import { completeQuiz,requestSupply } from './onlineRules';
 import { validAvatar } from '../gakuro-kart/avatar';
 export function vrCommand(w:OnlineWorld,id:string,d:any,controls:Record<string,VrInput>,lastInput:Record<string,number>){
- const p=w.players[id];if(!p?.connected)return;
+ const p=w.players[id];if(!p?.connected||(p.spectator&&d.type!=='avatar'))return;
  if(d.type==='input'&&validInput(d.input)){controls[id]={...d.input};lastInput[id]=Date.now();}
  if(d.type==='avatar'&&validAvatar(d.avatar))p.avatar={...d.avatar};
  if(d.type==='retry')retryCoop(w,id);
