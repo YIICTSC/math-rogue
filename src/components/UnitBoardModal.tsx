@@ -28,15 +28,17 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
   const keepJapaneseBoard = languageMode === 'ENGLISH' && !isNativeEnglishBoard;
   const translate = (text: string) => {
     if (isNativeEnglishBoard) return text;
+    // Keep the original sentence context; grade-limited copy may already contain partial readings.
+    if (languageMode === 'HIRAGANA') return repairUnitBoardHiraganaArtifacts(
+      trans(normalizeUnitBoardHiragana(repairUnitBoardHiraganaArtifacts(text)), 'HIRAGANA'),
+    );
     const boardText = limitUnitBoardKanjiByGrade(
       repairUnitBoardHiraganaArtifacts(text),
       summary.grade,
       summary.id,
     );
     if (keepJapaneseBoard) return boardText;
-    const translated = languageMode === 'HIRAGANA'
-      ? trans(normalizeUnitBoardHiragana(boardText), 'HIRAGANA')
-      : trans(boardText, languageMode);
+    const translated = trans(boardText, languageMode);
     return repairUnitBoardHiraganaArtifacts(translated);
   };
   const pages: UnitBoardSummaryPage[] = [

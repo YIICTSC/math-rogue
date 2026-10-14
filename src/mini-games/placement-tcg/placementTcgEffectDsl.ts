@@ -125,7 +125,7 @@ const actionLabel: Record<PlacementEffectAction, { jp: string; en: string }> = {
   BREAK_SUPPORT: { jp: 'サポート破壊', en: 'break Support' },
   LIFE_DRAIN: { jp: '吸収', en: 'drain Life' },
   MARK: { jp: '記録', en: 'mark' },
-  REORDER_HAND: { jp: '手札再編', en: 'reorder the hand' },
+  REORDER_HAND: { jp: '手札再編', en: 'redraw the hand' },
   DISCARD: { jp: '手札破棄', en: 'discard' },
 };
 
@@ -147,11 +147,11 @@ const conditionLabel: Record<PlacementEffectCondition, { jp: string; en: string 
   HAS_ENEMY: { jp: '敵がいる場合', en: 'if an enemy is present' },
   HAS_OWN_UNIT: { jp: '味方がいる場合', en: 'if an ally is present' },
   LIFE_BELOW_HALF: { jp: 'ライフ半分以下なら', en: 'if your Life is half or lower' },
-  SP_LEAD: { jp: 'SPが相手より多ければ', en: 'if you have more SP' },
+  SP_LEAD: { jp: 'SPが相手より多ければ', en: 'if you have more SP than your opponent' },
   CENTER_LANE: { jp: '中央レーンなら', en: 'if this is the center lane' },
   AFTER_MARK: { jp: '記録があれば', en: 'if its mark is active' },
   ODD_TURN: { jp: '奇数ターンなら', en: 'on odd turns' },
-  EMPTY_LANE: { jp: '空きレーンがあれば', en: 'if an empty lane exists' },
+  EMPTY_LANE: { jp: '空きレーンがあれば', en: 'if you have an empty lane' },
 };
 
 const targetLabel: Record<PlacementEffectTarget, { jp: string; en: string }> = {
@@ -232,20 +232,20 @@ export const PLACEMENT_EFFECT_TERM_DEFINITIONS: Record<string, PlacementEffectTe
         DISCARD: '手札からカードを捨てます。',
       }[key],
       en: {
-        DAMAGE: 'Reduces the target unit health or Life.',
+        DAMAGE: 'Reduces the target unit\'s Health or the opposing player\'s Life.',
         HEAL: 'Restores health to the target.',
         DRAW: 'Draws cards from the deck into your hand.',
         GAIN_SP: 'Adds SP used to play cards.',
-        BUFF_ATTACK: 'Temporarily raises the target unit attack.',
-        BUFF_HEALTH: 'Raises the target unit maximum and current health.',
+        BUFF_ATTACK: 'Temporarily raises the target unit\'s Attack.',
+        BUFF_HEALTH: 'Raises the target unit\'s maximum and current Health.',
         SHIELD: 'Adds a shield that absorbs the next damage.',
         STUN: 'Rests the target unit so it cannot attack this turn.',
         MOVE: 'Moves a unit into an adjacent empty lane.',
         BREAK_SUPPORT: 'Reduces the durability of the lane Support.',
-        LIFE_DRAIN: 'Steals Life from an enemy and restores your Life.',
+        LIFE_DRAIN: 'Damages an enemy unit or the opposing player\'s Life, then restores your Life if damage was dealt.',
         MARK: 'Leaves a marker that later effects can check.',
         REORDER_HAND: 'Returns hand cards to the deck and redraws them.',
-        DISCARD: 'Removes cards from your hand.',
+        DISCARD: 'Moves cards from your hand to your discard pile.',
       }[key],
     },
   )])) as Record<string, PlacementEffectTermDefinition>,
@@ -265,15 +265,15 @@ export const PLACEMENT_EFFECT_TERM_DEFINITIONS: Record<string, PlacementEffectTe
       }[key],
       en: {
         SELF: 'The card that triggered this effect.',
-        OWN_SAME_LANE: 'Your ally in this card lane.',
+        OWN_SAME_LANE: 'Your ally in this card\'s lane.',
         OWN_ANY: 'Automatically targets the first valid allied unit from the left.',
         OWN_ALL: 'All allied units on your field.',
-        ENEMY_SAME_LANE: 'The enemy in this card lane.',
+        ENEMY_SAME_LANE: 'The enemy in this card\'s lane.',
         ENEMY_ANY: 'Automatically targets the first valid enemy unit from the left.',
         ENEMY_ALL: 'All enemy units on the opposing field.',
-        ENEMY_LIFE: 'The opposing player Life total.',
+        ENEMY_LIFE: 'The opposing player\'s Life total.',
         ADJACENT_EMPTY: 'An empty lane next to the current lane.',
-        SUPPORT_SAME_LANE: 'The Support in this card lane.',
+        SUPPORT_SAME_LANE: 'The Support in this card\'s lane.',
       }[key],
     },
   )])) as Record<string, PlacementEffectTermDefinition>,
@@ -393,7 +393,6 @@ const renderStep = (step: PlacementEffectStep): { jp: string; en: string } => {
     ? ''
     : String(step.amount);
   const jpAmount = amount ? ` ${amount}` : '';
-  const enAmount = amount ? ` ${amount}` : '';
   const duration = effectiveDuration(step);
   const durationJp = duration > 0 ? `（${duration}ターン）` : '';
   const durationEn = duration > 0 ? ` for ${duration} turn${duration === 1 ? '' : 's'}` : '';
@@ -420,9 +419,31 @@ const renderStep = (step: PlacementEffectStep): { jp: string; en: string } => {
     : step.action === 'BREAK_SUPPORT' && breakSupportTargetEn[step.target]
       ? breakSupportTargetEn[step.target]!
       : ` to ${target.en}`;
+  const unit = step.target === 'SELF' || step.target === 'ADJACENT_EMPTY' ? 'this unit' : target.en;
+  const n = step.amount;
+  const cards = `${n} card${n === 1 ? '' : 's'}`;
+  let actionText: string;
+  switch (step.action) {
+    case 'DAMAGE': actionText = `Deal ${n} damage to ${unit}`; break;
+    case 'HEAL': actionText = `Restore ${n} Health to ${unit}`; break;
+    case 'DRAW': actionText = `Draw ${cards}`; break;
+    case 'GAIN_SP': actionText = `Gain ${n} SP`; break;
+    case 'BUFF_ATTACK': actionText = `Give ${unit} +${n} Attack${durationEn}`; break;
+    case 'BUFF_HEALTH': actionText = `Give ${unit} +${n} Health${durationEn}`; break;
+    case 'SHIELD': actionText = `Give ${unit} ${n} Shield`; break;
+    case 'STUN': actionText = `Stun ${unit}`; break;
+    case 'MOVE': actionText = `Move ${step.target === 'OWN_ALL' ? 'one allied unit' : unit} to an adjacent empty lane`; break;
+    case 'BREAK_SUPPORT': actionText = `Reduce the durability of ${targetTextEn.replace(/^ to /, '')} by ${n}`; break;
+    case 'LIFE_DRAIN': actionText = `Deal ${n} damage to ${unit}; if damage is dealt, restore ${n} Life`; break;
+    case 'MARK': actionText = `Add ${n} mark${n === 1 ? '' : 's'} to this card's record`; break;
+    case 'REORDER_HAND': actionText = 'Shuffle your hand into your deck, then draw the same number of cards'; break;
+    case 'DISCARD': actionText = `Discard the last ${cards} in your hand (or all cards if you have fewer)`; break;
+  }
+  const conditionalText = step.condition === 'ALWAYS' ? actionText
+    : `${condition.en[0].toUpperCase()}${condition.en.slice(1)}, ${actionText[0].toLowerCase()}${actionText.slice(1)}`;
   return {
     jp: `${condition.jp}、${targetText}${action.jp}${jpAmount}${durationJp}。`,
-    en: `${action.en}${enAmount}${targetTextEn}${durationEn} ${condition.en}.`,
+    en: `${conditionalText}.`,
   };
 };
 

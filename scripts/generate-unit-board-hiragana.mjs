@@ -149,7 +149,7 @@ for (const [surface, readings] of readingSets) {
   // Single kanji are intentionally excluded. They are highly context-dependent
   // (上 can be うえ / じょう, 日 can be ひ / にち, etc.) and were the source of
   // the broken board readings we are protecting against.
-  if (surface.length <= 1 || readings.size !== 1) continue;
+  if (surface.length <= 1 || surface === '分の' || readings.size !== 1) continue;
   const reading = [...readings][0];
   const malformed = translateHiragana?.(surface);
   if (!malformed || malformed === surface || malformed === reading) continue;

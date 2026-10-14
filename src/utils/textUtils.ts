@@ -5,6 +5,8 @@ import { HIRAGANA_UI_EXACT } from '../data/hiraganaUiExact';
 import { HIRAGANA_DYNAMIC_UI_RULES } from '../data/hiraganaDynamicUiRules';
 import { HIRAGANA_RUNTIME_EXACT, HIRAGANA_RUNTIME_PARTIAL } from '../data/hiraganaRuntimeExact';
 import { HIRAGANA_COMPENDIUM_EXACT } from '../data/hiraganaCompendiumExact';
+import { HIRAGANA_CONTEXT_EXACT } from '../data/hiraganaContextExact';
+import { HIRAGANA_CONTEXT_WORDS } from '../data/hiraganaContextWords';
 import { HIRAGANA_REVIEW_EXACT } from '../data/hiraganaReviewExact';
 import { HIRAGANA_ENDING_EXACT } from '../data/hiraganaEndingExact';
 import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
@@ -18,6 +20,7 @@ import { ENGLISH_MAGIC_CARD_RULE_EXACT } from '../data/englishMagicCardRuleExact
 import { ENGLISH_CARD_DESCRIPTION_EXACT } from '../data/englishCardDescriptionExact';
 import { ENGLISH_IDENTIFIER_EXACT } from '../data/englishIdentifierExact';
 import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
+import { ENGLISH_CONTEXT_EXACT, ENGLISH_CONTEXT_ENTITY_NAMES, translateReviewedEnglishDynamic } from '../data/englishContextExact';
 import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
 import { describeExpansionEffectEnglish, EXPANSION_CARD_ENGLISH_NAMES, translateExpansionCardEnglish } from '../data/expansionCardTranslations';
 import { translateExpansionCardHiragana } from '../data/expansionCardHiragana';
@@ -789,12 +792,12 @@ const BASE_DICTIONARY: Record<string, string> = {
     "得て": "ゲットして",
     "戻す": "もどす",
     "被": "うけた",
-    "捨て": "すてて",
+    "捨て": "すて",
     "反撃": "はんげき",
     "上": "うえ",
     "見る": "みる",
-    "加え": "くわえて",
-    "与え": "あたえて",
+    "加え": "くわえ",
+    "与え": "あたえ",
     "全員": "ぜんいん",
     "失い": "なくして",
     "軽減": "へらす",
@@ -1055,7 +1058,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "次のターン、": "つぎの ターン、",
     "次ターン": "つぎの ターン",
     "枚ドロー。": "まい ひく。",
-    "手札を全て捨て、": "てふだを ぜんぶ すてて、",
+    "手札を全て捨て、": "てふだを ぜんぶ すて、",
     "同じ枚数引く。": "おなじ かずだけ ひく。",
     "2倍にする。": "2ばいに する。",
     "3倍にする。": "3ばいに する。",
@@ -1258,7 +1261,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "カードを1ターンに6枚までしか使えない。": "カードを 1ターンに 6まいまでしか つかえない。",
     "カードを使用するために必要。ターン毎に回復する。": "カードを つかう パワー. まいターン かいふくする。",
     "使用済みカード。山札が切れるとリシャッフルされる。": "つかった カード. やまふだが なくなると もどってくる。",
-    "枚捨ててください": "まい すててね",
+    "枚捨ててください": "まい すてね",
     "コピーするカードを選択してください": "コピーする カードを えらんでね",
     "廃棄するカードを選択してください": "もうつかわない カードを えらんでね",
     "毎ターン": "まいターン",
@@ -1422,7 +1425,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "「毒舌」で相手を毒状態にしてジワジワ追い詰めるテクニカル型。": "「どくぜつ」で あ相手を どくにして ジワジワおいつめる テクニカルなタイプ。",
     "コスト0の「レーザー」とエネルギーを溜める「静電気」で手数を稼ぐ。": "コスト0の「レーザー」と パワーをためる「せいでんき」で たくさん こうげきする。",
     "カードを引いて捨てる「チョーク投げ」でデッキを回転させるスピードタイプ。": "カードをひいて すてる「チョークなげ」で どんどんこうげきする スピードタイプ。",
-    "「大声」で敵全体にダメージを与え、さらに弱体化させる。": "「おおごえ」で てきぜんたいに ダメージをあたえて、さらに よわらせる。",
+    "「大声」で敵全体にダメージを与え、さらに弱体化させる。": "「おおごえ」で てきぜんたいに ダメージをあたえ、さらに よわらせる。",
     "「予習（ブロック＆保留）」で次のターンに備える慎重派。": "「よしゅう（ブロック＆ほりゅう）」で つぎのターンに そなえる しんちょうなタイプ。",
     "「やる気」でムキムキになり、「重いバット」で超火力を叩き出す！": "「やるき」で ムキムキになり、「おもいバット」で すごいダメージを だす！",
     "ブロックを固めて「防具ごと体当たり」で反撃する鉄壁の守り。": "ブロックを かためて「ぼうぐごとたいあたり」で はんげきする てっぺきの まもり。",
@@ -3039,7 +3042,7 @@ Object.assign(BASE_DICTIONARY, {
     "他のプレイヤーの報酬完了を待っています": "ほかの プレイヤーの ごほうび かんりょうを まっています",
     "ホストが報酬を確定するまで待っています": "ホストが ごほうびを かくていするまで まっています",
     "魔晶": "ましょう",
-    "どれを捨てて入れ替えますか？": "どれを すてて いれかえますか？",
+    "どれを捨てて入れ替えますか？": "どれを すて いれかえますか？",
     "実験材料（カード）が": "じっけんざいりょう（カード）が",
     "足りない...": "たりない...",
 
@@ -3109,7 +3112,7 @@ Object.assign(BASE_DICTIONARY, {
     "接続": "せつぞく",
     "開門": "かいもん",
     "血印": "けついん",
-    "影印": "かげいん",
+    "影印": "えいいん",
     "終印": "しゅういん",
     "異なる種類のカードを3枚使うと星座が完成し、敵全体へ星光を放ってブロックを得る。": "ちがう しゅるいのカードを 3まい つかうと せいざが かんせいし、てきぜんたいへ ほしのひかりを はなって ブロックを える。",
     "専用カードを3回使うと月鏡が反射し、敵1体へ追加攻撃してブロックを得る。2枚目の専用カードは追加ブロックも得る。": "せんようカードを 3かい つかうと つきかがみが はんしゃし、てき1たいへ ついかこうげきして ブロックを える。2まいめの せんようカードは ついかブロックも える。",
@@ -6457,6 +6460,7 @@ const ENGLISH_ENEMY_NAME_DICTIONARY: Record<string, string> = {
     "校長先生": "Principal",
 };
 
+Object.assign(ENGLISH_ENEMY_NAME_DICTIONARY, ENGLISH_CONTEXT_ENTITY_NAMES);
 Object.assign(ENGLISH_ENEMY_NAME_DICTIONARY, {
     "チョーク粉の雲": "Cloud of Chalk Dust",
     "内申点の秤": "Report-Score Scales",
@@ -7407,7 +7411,7 @@ const buildEnglishMagicEventFallback = (text: string): string | null => {
     const hasMagicCharacterName = Object.keys(MAGIC_EVENT_NAME_TRANSLATIONS).some(name => trimmed.includes(name));
     if (MAGIC_EVENT_METADATA_TRANSLATIONS[trimmed]) return MAGIC_EVENT_METADATA_TRANSLATIONS[trimmed];
     const relationshipLabel = trimmed.match(/^(.+)（(.+)）$/);
-    if (relationshipLabel) {
+    if (relationshipLabel && (MAGIC_EVENT_NAME_TRANSLATIONS[relationshipLabel[1]] || /(?:友情|親友|相棒)ルート/.test(relationshipLabel[2]))) {
         const name = MAGIC_EVENT_NAME_TRANSLATIONS[relationshipLabel[1]] || relationshipLabel[1];
         return `${name} (${translateMagicEventDescriptor(relationshipLabel[2])})`;
     }
@@ -9652,7 +9656,14 @@ export const sanitizeEnglishText = (text: string): string => {
 };
 
 // 置換用キーワードのリスト（長い順にソートして置換ミスを防ぐ）
-const KEYWORDS = Object.keys(DICTIONARY).sort((a, b) => b.length - a.length);
+const KEYWORDS = Object.keys({...DICTIONARY,...HIRAGANA_RUNTIME_PARTIAL,...HIRAGANA_CONTEXT_WORDS}).sort((a, b) => b.length - a.length);
+const HIRAGANA_TOKEN_PATTERN = new RegExp(KEYWORDS.map(key=>key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+// Match against the original text once. A single kanji must never split an unknown compound.
+const replaceHiraganaTokens = (text:string):string => text.replace(HIRAGANA_TOKEN_PATTERN,(key:string,offset:number)=>{
+ const before=text[offset-1]||'',after=text[offset+key.length]||'';
+ if(key.length===1&&!/\d/.test(before)&&/[㐀-鿿々]/.test(key)&&(/[㐀-鿿々]/.test(before)||/[㐀-鿿々]/.test(after)))return key;
+ return HIRAGANA_CONTEXT_WORDS[key]||HIRAGANA_RUNTIME_PARTIAL[key]||DICTIONARY[key];
+});
 
 const PROBLEM_SUBJECT_HIRAGANA_MAP: Record<string, string> = {
     "計算": "けいさん",
@@ -10881,7 +10892,7 @@ const translateHiraganaDynamicUi = (text: string): string | null => {
     const dynamicRuleSpecificity = (rule: { pattern: RegExp }) => rule.pattern.source.replace(/\(\.\*\?\)/g, '').length;
     const dynamicRules = [...HIRAGANA_DYNAMIC_UI_RULES].sort((a, b) => dynamicRuleSpecificity(b) - dynamicRuleSpecificity(a));
     for (const rule of dynamicRules) {
-        if (rule.pattern.test(text)) return text.replace(rule.pattern, rule.replacement);
+        if (rule.pattern.test(text)) {const translated=text.replace(rule.pattern, rule.replacement);if(translated!==text)return translated;}
     }
     return null;
 };
@@ -10952,6 +10963,19 @@ const transCore = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
     if (mode === 'ENGLISH') {
+        if (ENGLISH_CONTEXT_EXACT[text]) return ENGLISH_CONTEXT_EXACT[text];
+        const reviewedDynamic=translateReviewedEnglishDynamic(text);
+        if(reviewedDynamic)return reviewedDynamic;
+        const droppedPrize=text.match(/^「(.+)」は獲得口までに落ちたが、参加賞として(\d+)Gを得た。$/);
+        if(droppedPrize)return `"${translateEnglishNameInline(droppedPrize[1])}" fell before reaching the collection slot, but you received ${droppedPrize[2]}G as a participation reward.`;
+        const comprehensive=text.match(/^総まとめ（(.+)）$/);
+        if(comprehensive){
+            const grade=comprehensive[1].match(/^(\d+)年生$/);
+            const junior=comprehensive[1].match(/^中学(\d+)年生$/);
+            const label=grade ? `Grade ${grade[1]}` : junior ? `Junior High ${junior[1]}` : transProblemSubjectName(comprehensive[1],mode);
+            return `Comprehensive Review (${label})`;
+        }
+
         if (ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
         if (ENGLISH_DEBUG_UI_EXACT[text]) return ENGLISH_DEBUG_UI_EXACT[text];
         if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
@@ -10993,18 +11017,18 @@ const transCore = (text: string, mode: LanguageMode): string => {
         const simpleHeal = text.match(/^HPを(\d+)回復する。$/);
         if (simpleHeal) return `Heal ${simpleHeal[1]} HP.`;
         const energyPoolValue = text.match(/^エネルギー生成プールに「(.+)」を追加。$/);
-        if (energyPoolValue) return `Add “${energyPoolValue[1]}” to the Energy generation pool.`;
+        if (energyPoolValue) return `Add “${translateEnglishNameInline(energyPoolValue[1])}” to the Energy generation pool.`;
         const generationPoolColor = text.match(/^生成プールに「(.+)」を追加。$/);
         if (generationPoolColor) {
             const color = ({ '白': 'White', '青': 'Blue', 'オレンジ': 'Orange' } as Record<string, string>)[generationPoolColor[1]] || generationPoolColor[1];
             return `Add ${color} to the generation pool.`;
         }
         if (text === '永続的な攻撃力ボーナスを得る。') return 'Gain a permanent Attack bonus.';
-        const maxHpReward = text.match(/^最大HPが(.+)上がった。$/);
+        const maxHpReward = text.match(/^最大HPが(\d+(?:\.\d+)?)上がった。$/);
         if (maxHpReward) return `Max HP increased by ${maxHpReward[1]}.`;
-        const goldReward = text.match(/^(.+)Gを得た。$/);
+        const goldReward = text.match(/^(\d+(?:\.\d+)?)Gを得た。$/);
         if (goldReward) return `Gained ${goldReward[1]}G.`;
-        const permanentStrengthReward = text.match(/^戦闘開始時の恒久ムキムキが(.+)増えた。$/);
+        const permanentStrengthReward = text.match(/^戦闘開始時の恒久ムキムキが(\d+)増えた。$/);
         if (permanentStrengthReward) return `Permanent starting Strength increased by ${permanentStrengthReward[1]}.`;
         const paperPlaneMissionUnlock = text.match(/^このランクをクリアすると Lv(.+) が解放されます！$/);
         if (paperPlaneMissionUnlock) return `Clear this rank to unlock Lv ${paperPlaneMissionUnlock[1]}!`;
@@ -11081,6 +11105,8 @@ const transCore = (text: string, mode: LanguageMode): string => {
     }
 
     // 辞書に完全一致がある場合はそれを返す
+    if (HIRAGANA_CONTEXT_EXACT[text]) return HIRAGANA_CONTEXT_EXACT[text];
+    if (HIRAGANA_CONTEXT_WORDS[text]) return HIRAGANA_CONTEXT_WORDS[text];
     if (HIRAGANA_DISPLAY_COPY_EXACT[text]) return HIRAGANA_DISPLAY_COPY_EXACT[text];
     if (HIRAGANA_DEBUG_UI_EXACT[text]) return HIRAGANA_DEBUG_UI_EXACT[text];
     if (HIRAGANA_ENDING_EXACT[text]) return HIRAGANA_ENDING_EXACT[text];
@@ -11091,23 +11117,11 @@ const transCore = (text: string, mode: LanguageMode): string => {
     if (DICTIONARY[text]) return DICTIONARY[text];
 
     const dynamicUiTranslation = translateHiraganaDynamicUi(text);
-    if (dynamicUiTranslation) return dynamicUiTranslation;
+    if (dynamicUiTranslation && dynamicUiTranslation!==text) return trans(dynamicUiTranslation,'HIRAGANA');
 
     // 部分置換ロジック
     let result = text;
-    Object.keys(HIRAGANA_RUNTIME_PARTIAL)
-        .sort((a, b) => b.length - a.length)
-        .forEach(key => {
-            result = result.replaceAll(key, HIRAGANA_RUNTIME_PARTIAL[key]);
-        });
-    KEYWORDS.forEach(key => {
-        if (result.includes(key)) {
-            // キーワードに含まれる正規表現の特殊文字をエスケープする
-            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(escapedKey, 'g');
-            result = result.replace(regex, DICTIONARY[key]);
-        }
-    });
+    result = replaceHiraganaTokens(result);
 
     // 共通の記号や単位の微調整
     result = result.replace(/ダメージ/g, "ダメージ");
@@ -11168,6 +11182,22 @@ const normalizeHiraganaDisplayText = (value: string): string => value
     .replace(/〈br〉/g, '\n')
     .replace(/＜br＞/g, '\n');
 
+// Read 分 from its grammatical role, rather than assigning one reading everywhere.
+const repairHiraganaNumbers = (source:string, output:string):string => {
+ for(const match of source.matchAll(/(\d+)分の(\d+)(?![\d分秒])/g))output=output.replaceAll(`${match[1]}ふんの${match[2]}`,`${match[1]}ぶんの${match[2]}`);
+ for(const match of source.matchAll(/(\d+)時/g))output=output.replaceAll(`${match[1]}とき`,`${match[1]}じ`);
+ for(const match of source.matchAll(/(\d+)分(後|前)/g)){
+  const suffix=match[2]==='後'?'ご':'まえ';
+  output=output.replaceAll(`${match[1]}ふん${match[2]}`,`${match[1]}ふん${suffix}`);
+ }
+ for(const match of source.matchAll(/(\d+)(人|枚|個|回|つ)分/g)){
+  const unit=({'人':'にん','枚':'まい','個':'こ','回':'かい','つ':'つ'} as Record<string,string>)[match[2]];
+  output=output.replaceAll(`${match[1]}${unit}ふん`,`${match[1]}${unit}ぶん`);
+  output=output.replaceAll(`${match[1]}${unit}分`,`${match[1]}${unit}ぶん`);
+ }
+ return output;
+};
+
 export const trans = (text: string, mode: LanguageMode): string => {
     if (mode === 'ENGLISH') {
         const expansionTranslation = translateExpansionCardEnglish(text);
@@ -11184,7 +11214,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
             ? normalizeHiraganaDisplayText(rawOutput)
             : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'trans');
-    return output;
+    return mode === 'HIRAGANA' ? repairHiraganaNumbers(text, output) : output;
 };
 
 export const buildHiraganaCardDescription = (card: Card): string => {

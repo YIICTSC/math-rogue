@@ -244,7 +244,6 @@ export const UNIT_BOARD_HIRAGANA_CORRECTIONS: ReadonlyArray<readonly [string, st
   ["沸点", "ふってん"],
   ["物語", "ものがたり"],
   ["分け", "わけ"],
-  ["分の", "ぶんの"],
   ["分解", "ぶんかい"],
   ["分岐", "ぶんき"],
   ["分業", "ぶんぎょう"],

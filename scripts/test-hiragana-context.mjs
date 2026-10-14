@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import {createServer} from 'vite';import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';
+const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'silent'});
+try{const {trans}=await server.ssrLoadModule('/src/utils/textUtils.ts');const {HIRAGANA_CONTEXT_WORDS}=await server.ssrLoadModule('/src/data/hiraganaContextWords.ts');const {HIRAGANA_CONTEXT_EXACT}=await server.ssrLoadModule('/src/data/hiraganaContextExact.ts');for(const [source,expected]of Object.entries({...HIRAGANA_CONTEXT_WORDS,...HIRAGANA_CONTEXT_EXACT}))assert.equal(trans(source,'HIRAGANA'),expected,source);
+const cases=[['分数を数える。分けると分かる。','ぶんすうをかぞえる。わけるとわかる。'],['今回、上がる。次回、上げる。','こんかい、あがる。じかい、あげる。'],['第123章ボスから開始','だい123しょうボスからかいし'],['テスト：長押しで人数を数える','テスト：ながおしでにんずうをかぞえる'],['3分の1と10分の1','3ぶんの1と10ぶんの1'],['9時40分の30分後は10時10分。','9じ40ふんの30ふんごは10じ10ふん。'],['2人分と3枚分','2にんぶんと3まいぶん'],['国際水生研究','国際水生研究']];for(const [source,expected]of cases)assert.equal(trans(source,'HIRAGANA'),expected,source);assert.equal(trans('手札と山札と捨て札','HIRAGANA'),'てふだとやまふだとすてふだ');assert.equal(trans('しゅさつ','JAPANESE'),'しゅさつ');
+const {default:UnitBoardModal}=await server.ssrLoadModule('/src/components/UnitBoardModal.tsx');
+const summary={id:'MATH_CLOCK_READING_FIXTURE',grade:2,title:'分数',subtitle:'時刻',goal:'9時40分の30分後は10時10分。',points:['3分の1と10分の1'],mistakes:[],example:'9時40分の30分後は10時10分。'};
+const board=renderToStaticMarkup(React.createElement(UnitBoardModal,{summary,open:true,onClose:()=>{},languageMode:'HIRAGANA'}));
+assert(board.includes('9じ40ふんの30ふんごは10じ10ふん。'),'Real board must preserve the source context of a clock sentence');
+assert(board.includes('3ぶんの1と10ぶんの1'),'Fractions on the same board must use bun');
+assert(!board.includes('40ぶんの30'),'Clock minutes must not use the fraction reading');
+console.log(`PASS: ${Object.keys(HIRAGANA_CONTEXT_WORDS).length} reviewed words, ${Object.keys(HIRAGANA_CONTEXT_EXACT).length} sentences, contextual/dynamic logs and unknown-compound safety.`);}finally{await server.close();}process.exit(0);
