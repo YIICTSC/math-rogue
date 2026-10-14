@@ -422,3 +422,6 @@
 @keyframes rhythm-combo {from{transform:scale(1.15);filter:brightness(1.4);}to{transform:scale(1);filter:brightness(1);}}
 @keyframes rhythm-award {from{opacity:0;transform:translateY(8px) scale(.9);}to{opacity:1;transform:translateY(0) scale(1);}}
 @media(prefers-reduced-motion:reduce) {.rpg-rhythm-judgement b,.rpg-rhythm-award{animation:none;}}
+
+/* Join the beat/ judgement line to the upper edge of the input pads. */
+.rpg-rhythm-pads { padding-top: 0; border-top: 0; }

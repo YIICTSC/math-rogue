@@ -27,6 +27,7 @@ import { newRhythmResult, awardRhythm, type RhythmResult } from "./game";
 import { recordKey, rhythmRecords, saveRhythmRecord, type RhythmRecord } from "./records";
 import { songTitle, songTheme, songEdition } from "./songLabels";
 import "./rhythm.css";
+import { rhythmBeatPhase, rhythmGridLines } from "./beatGrid";
 import { createSongScratch, rhythmHitVolume } from "./songScratch";
 const colors = ["#45e7ef", "#ff65b1", "#ffd463", "#b688ff"],
   keys = ["D", "F", "J", "K"];
@@ -239,7 +240,7 @@ export default function RhythmPanel({
       for (let i = 0; i < 8; i++)
         particles.current.push({
           x: n.lane * 100 + 50,
-          y: (canvas.current?.height ?? 560) * 0.8,
+          y: (canvas.current?.height ?? 560) - 1,
           vx: (Math.random() - 0.5) * 180,
           vy: -50 - Math.random() * 130,
           age: 0,
@@ -485,12 +486,12 @@ export default function RhythmPanel({
         if (ctx) {
           const width = 400,
             height = Math.max(140, Math.min(1000, Math.round(width * canvas.current!.clientHeight / Math.max(1, canvas.current!.clientWidth)))),
-            hit = height * 0.8,
+            hit = height - 1,
             travel = 3.1 - v.speed * 0.35,
-            beat = 60 / song.bpm,
+            beatTime = serverTime < 0 || rr.pausedAt !== undefined || v.world.paused ? serverTime : audioTime(),
             pulse = reduceMotion
               ? 0
-              : (1 + Math.cos((time / beat) * Math.PI * 2)) / 2,
+              : (1 + Math.cos(rhythmBeatPhase(song, beatTime) * Math.PI * 2)) / 2,
             result = model.current;
           if (canvas.current!.height !== height) canvas.current!.height = height;
           ctx.clearRect(0, 0, width, height);
@@ -523,8 +524,7 @@ export default function RhythmPanel({
             ctx.stroke();
           }
           ctx.strokeStyle = "#ffffff14";
-          for (let b = Math.ceil(time / beat); b * beat < time + travel; b++) {
-            const y = hit - ((b * beat - time) / travel) * hit;
+          for (const { y } of rhythmGridLines(song, beatTime, travel, hit)) {
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(width, y);
