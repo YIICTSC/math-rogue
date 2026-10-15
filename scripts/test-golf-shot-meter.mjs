@@ -2,16 +2,20 @@ import assert from 'node:assert/strict';
 import { createServer } from 'vite';
 const server = await createServer({ server: { middlewareMode: true, watch: null, hmr: false }, optimizeDeps: { noDiscovery: true, include: [] }, appType: 'custom' });
 try {
-  const { meterPosition, impactAt, SWEEP_MS } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/shotTiming.ts');
+  const { meterPosition, impactAt, SWEEP_MS, MAX_HOLD_MS, powerAt } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/shotTiming.ts');
   const { createGolf, addPlayer, startGolf, command, tick, viewFor, shotVelocity, shotQuality } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/engine.ts');
   const { predictShot } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/motion.ts');
   const { validView } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/protocol.ts');
   assert.equal(meterPosition(SWEEP_MS*.7).position,.7);
   assert.equal(meterPosition(SWEEP_MS).position,1);
   assert.equal(meterPosition(SWEEP_MS*1.5).returning,true);
-  assert(Math.abs(meterPosition(SWEEP_MS*1.88).position-.12)<1e-10);
-  assert(Math.abs(impactAt(meterPosition(SWEEP_MS*1.88).position))<1e-10);
-  assert.equal(meterPosition(SWEEP_MS*2).expired,true);
+  assert(Math.abs(meterPosition(SWEEP_MS*1.88 + MAX_HOLD_MS).position-.12)<1e-10);
+  assert(Math.abs(impactAt(meterPosition(SWEEP_MS*1.88 + MAX_HOLD_MS).position))<1e-10);
+  assert.equal(meterPosition(SWEEP_MS*2 + MAX_HOLD_MS).expired,true);
+  for (const time of [SWEEP_MS, SWEEP_MS + 110, SWEEP_MS + MAX_HOLD_MS - 1]) { const m=meterPosition(time); assert.equal(m.position,1); assert.equal(m.returning,false,'MAX accepts power taps throughout the hold'); }
+  assert.equal(meterPosition(SWEEP_MS + MAX_HOLD_MS).returning,true);
+  assert.equal(meterPosition(SWEEP_MS * 2 + MAX_HOLD_MS - 1).expired,false);
+  assert.equal(powerAt(.97),1); assert.equal(powerAt(.999),1);assert.equal(powerAt(.7),.7);
   assert.equal(shotQuality(impactAt(.12)),'nice');for(const position of [.04,.06,.18,.20])assert.equal(shotQuality(impactAt(position)),'good','red strip is an ordinary shot');assert.equal(shotQuality(impactAt(.22)),'miss');assert.equal(shotQuality(0),'nice'); assert.equal(shotQuality(.4),'good'); assert.equal(shotQuality(.9),'miss');
   const setup = () => {const w=createGolf(23);addPlayer(w,'p','P');startGolf(w,'Lesson');Object.assign(w.players.p,{phase:'aim',correct:3,shotsLeft:3});return w;};
   const w=setup(),p=w.players.p,shot={type:'shot',shotId:p.shotId,club:'wedge',angle:0,power:.7,spin:-1,impact:.1};

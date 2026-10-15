@@ -223,3 +223,6 @@
 /* Entry screens share the same character dialog as the in-room editor. */
 .gg-character-overlay{z-index:360;color:#173e34;font-family:system-ui,sans-serif}
 .gg-character-overlay button{min-height:44px;cursor:pointer}
+
+/* Leave a margin above desktop taskbars without reducing the course view. */
+@media(orientation:landscape){.gg-playing .gg-control-dock{bottom:max(36px,calc(env(safe-area-inset-bottom) + 24px));max-height:calc(100% - 82px)}.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 176px)}}

@@ -105,9 +105,9 @@
 </head>
   <body>
     <div id="root"></div>
-    <aside id="startup-status" role="status" style="position:fixed;inset:0;display:grid;place-content:center;gap:16px;padding:24px;background:#020617;color:#e2e8f0;text-align:center;font:16px sans-serif;z-index:2147483647">
+    <aside id="startup-status" role="status" style="position:fixed;inset:0;display:none;place-content:center;gap:16px;padding:24px;background:#020617;color:#e2e8f0;text-align:center;font:16px sans-serif;z-index:2147483647">
       <strong>学習ローグ / Learning Rogue</strong>
-      <span id="startup-message">ゲームを読み込んでいます… / Loading…</span>
+      <span id="startup-message"></span>
       <button id="startup-retry" hidden style="padding:14px;border-radius:8px;background:#67e8f9;color:#020617;border:0;font:inherit">再読み込み / Reload</button>
     </aside>
     <script>
@@ -120,7 +120,7 @@
         const ready = () => root.childElementCount > 0;
         const observer = new MutationObserver(() => { if (ready()) { panel.remove(); observer.disconnect(); clearTimeout(timer); } });
         observer.observe(root, {childList:true});
-        const showFailure = () => { if (!ready()) { message.textContent = '読み込みを完了できませんでした。セーブを保持して再読み込みできます。 / Loading failed. Reload without deleting saves.'; retry.hidden = false; } };
+        const showFailure = () => { if (!ready()) { panel.style.display = 'grid'; message.textContent = '読み込みを完了できませんでした。セーブを保持して再読み込みできます。 / Loading failed. Reload without deleting saves.'; retry.hidden = false; } };
         const reload = async () => {
           if (recovering) return;
           recovering = true; retry.disabled = true;
