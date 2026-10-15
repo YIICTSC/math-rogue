@@ -49,7 +49,7 @@ export function completeQuiz(w:OnlineWorld,id:string) {
 export function respawnRoyale(w:OnlineWorld,p:Participant) {
  p.out=true;p.respawnHits=0;p.run.status='playing';
  p.run.player={...openPoint(w,safeRadius(w)-1,p.id.length+Math.floor(w.time)*31),angle:p.run.player.angle};
- p.run.ammo=0;p.run.items=[0,0,0,0];p.run.weapon=4;p.weapons=p.weapons.map(()=>false);p.energy=100;p.reloading=0;p.zoneExposure=0;p.invulnerable=3;
+ p.run.ammo=magazineSize(0);p.run.items=[0,0,0,0];p.run.weapon=0;p.weapons=p.weapons.map((_,index)=>index===0);p.energy=100;p.reloading=0;p.zoneExposure=0;p.invulnerable=3;
  p.run.holdProgress=0;p.run.holdTarget=-1;p.run.stealth=0;
 }
 function openPoint(w:OnlineWorld,radius:number,seed:number):Point {

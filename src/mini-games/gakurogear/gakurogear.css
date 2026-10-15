@@ -123,3 +123,50 @@
 
 .gear-online-battle .gear-loadout>div>button{display:none}
 @media(orientation:landscape) and (max-height:550px){.gear-online-battle .gear-battle-actions{grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,400px);max-width:400px}}
+
+/* Immersive VR play surface: the field fills the viewport; only controls overlay it. */
+.gear-shell.gear-play-surface{overflow:hidden;padding:0}
+.gear-shell.gear-play-surface .gear-field{position:absolute;inset:0;min-height:0;width:100%;height:100%;flex:none}
+.gear-play-surface>.gear-header{position:absolute!important;top:max(6px,env(safe-area-inset-top));left:max(6px,env(safe-area-inset-left));right:auto;z-index:20;border:0;background:none;padding:0!important;gap:5px;min-height:0;pointer-events:none}
+.gear-play-surface>.gear-header>strong,.gear-play-surface>.gear-header>div,.gear-play-surface>.gear-header>span,.gear-play-surface>.gear-header>[data-avatar-editor]{display:none!important}
+.gear-play-surface>.gear-header button{pointer-events:auto;min-height:38px;padding:6px 10px;font-size:11px;background:#102b32e6;border-radius:9px}
+.gear-play-surface>.gear-hud{position:absolute;right:8px;top:6px;left:auto;max-width:55%;z-index:12;padding:5px 8px;border-radius:8px;gap:10px;background:#08232bd9;font-size:11px}
+.gear-play-surface>.gear-hud>div:first-child{display:none}.gear-play-surface>.gear-hud button{min-height:32px;padding:5px;font-size:11px}
+.gear-play-surface>.gear-equipment{position:absolute!important;top:54px!important;right:8px!important;left:auto!important;max-width:58%!important;min-height:0!important;z-index:10;background:#09252cd9!important;border-radius:8px;padding:5px 8px!important;gap:7px;font-size:10px;pointer-events:none;flex-wrap:wrap}
+.gear-play-surface>.gear-equipment button{pointer-events:auto;min-height:32px;padding:4px 7px;font-size:10px}
+.gear-play-surface>.gear-viewbar{position:absolute;left:8px;top:51px;z-index:13;padding:0;background:none;gap:4px;max-width:54%;flex-wrap:wrap}
+.gear-play-surface>.gear-viewbar small{display:none}.gear-play-surface>.gear-viewbar button{min-height:32px;padding:4px 7px;background:#102b32df;border-radius:7px;font-size:10px}
+.gear-shell.gear-play-surface .gear-controls.gear-battle-controls{position:absolute;bottom:0;left:0;right:0;z-index:15;pointer-events:none;background:none;border:0;align-items:end;grid-template-columns:96px minmax(0,1fr);padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));gap:14px}
+.gear-play-surface .gear-battle-controls .gear-bomb-stick-area,.gear-play-surface .gear-battle-actions{pointer-events:auto}
+.gear-play-surface .gear-battle-controls .gear-battle-actions{width:min(100%,300px);max-width:300px;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{min-height:44px;font-size:11px;padding:5px;border-radius:10px;background:#12353ce8;border-color:#9fd5cc88;box-shadow:0 2px 5px #0004}
+.gear-play-surface .gear-battle-actions .gear-bomb-place{background:#356c54ed!important;grid-column:1/-1}
+.gear-play-surface .gear-loadout>div{bottom:160px;width:min(210px,36%);padding:4px;background:#102b32c9}
+.gear-play-surface .gear-loadout>div>button{display:none}
+.gear-play-surface .gear-radar-panel,.gear-play-surface .gear-radar{top:114px;left:8px;right:auto;width:95px;height:95px}
+.gear-play-surface .gear-online-roster{top:114px;right:8px;max-width:160px;z-index:10}
+.gear-play-surface .gear-mission-hud{top:104px;left:112px;right:180px;pointer-events:none}
+.gear-play-surface .gear-alert{top:104px!important;left:112px;max-width:220px}
+.gear-play-surface .gear-objective{bottom:180px;max-width:min(440px,75%);white-space:normal;text-align:center;border-radius:8px;pointer-events:none}
+.gear-task-pending{color:#ffe17b!important;background:#624114ed!important;border:2px solid #ffd45a!important;border-radius:8px;padding:4px 8px;font-weight:900;box-shadow:0 0 0 2px #20150b88}
+.gear-action-tutorial{position:fixed!important;inset:0!important;z-index:100!important;background:#031318db;backdrop-filter:blur(5px)}
+.gear-action-tutorial section{border-radius:18px;max-width:480px}.gear-action-tutorial p{font-size:15px;line-height:1.8}.gear-tutorial-icon{font-size:52px;color:#a3f1ef}
+.gear-stealth:has(.gear-action-tutorial) .gear-controls{pointer-events:none}.gear-stealth:has(.gear-action-tutorial) .gear-controls *{pointer-events:none}
+.gear-map-marker::after{content:'▼';position:absolute;left:50%;top:100%;transform:translateX(-50%);font-size:17px;color:var(--seat-color);text-shadow:0 2px #071b23}.gear-map-marker.is-self::after{color:#fff}
+.gear-royale-legend{display:flex;gap:8px;flex-wrap:wrap;font-size:11px}.gear-royale-legend b{padding:4px 6px;background:#152831;border:2px solid;border-radius:6px}.gear-royale-legend b:first-child{border-color:#c48aff}.gear-royale-legend b:last-child{border-color:#6cf2ae}
+@media(max-width:600px){.gear-play-surface .gear-battle-controls .gear-battle-actions{max-width:205px}.gear-play-surface>.gear-equipment{font-size:9px;top:98px!important;max-width:64%!important}.gear-play-surface>.gear-viewbar{max-width:100%;right:8px}.gear-play-surface .gear-loadout>div{bottom:198px;width:44%}.gear-play-surface .gear-radar-panel,.gear-play-surface .gear-radar{top:145px;width:76px;height:76px}.gear-play-surface .gear-alert{top:145px!important;left:94px;max-width:150px}.gear-play-surface .gear-online-roster{top:220px;font-size:10px}.gear-play-surface .gear-mission-hud{top:145px;left:94px;right:8px}.gear-play-surface .gear-objective{bottom:208px;font-size:11px}}
+@media(orientation:landscape) and (max-height:550px){.gear-play-surface .gear-battle-controls .gear-battle-actions{grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,360px);max-width:360px}.gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{min-height:36px;font-size:10px}.gear-play-surface .gear-battle-actions .gear-bomb-place{grid-column:auto}.gear-play-surface .gear-loadout>div{bottom:108px;max-width:180px}.gear-play-surface>.gear-equipment{top:6px!important;max-width:55%!important}.gear-play-surface>.gear-viewbar{top:47px}.gear-play-surface .gear-radar-panel,.gear-play-surface .gear-radar{top:88px;width:72px;height:72px}.gear-play-surface .gear-alert{top:88px!important;left:90px}.gear-play-surface .gear-online-roster{top:52px}.gear-play-surface .gear-mission-hud{top:88px;left:90px;right:180px}.gear-play-surface .gear-objective{bottom:112px;font-size:10px;max-width:45%}}
+@media(prefers-reduced-motion:no-preference){.gear-task-pending{animation:gear-task-glow 1.4s ease-in-out infinite alternate}@keyframes gear-task-glow{to{box-shadow:0 0 12px #ffd45a99}}}
+
+.gear-royale-legend{position:absolute;top:92px;left:112px;z-index:9;pointer-events:none}@media(max-width:600px){.gear-royale-legend{top:118px;left:8px;font-size:9px}}@media(orientation:landscape) and (max-height:550px){.gear-royale-legend{top:50px;left:250px;font-size:9px}}
+
+.gear-bomb-icon-guide{position:absolute;left:8px;top:54px;z-index:14;border-radius:8px;background:#0b252edb;padding:6px;font-size:11px;max-width:220px}.gear-bomb-icon-guide>div{display:grid;gap:5px;padding-top:5px}.gear-bomb-icon-guide span{display:flex;align-items:center;gap:6px}.gear-bomb-icon-guide i{width:36px;height:36px;display:inline-block;background-size:500% 100%;flex-shrink:0;border-radius:5px}@media(max-width:600px){.gear-bomb-icon-guide{top:50px}}
+
+.gear-play-surface>.gear-equipment{display:flex!important}
+
+/* Refill is a nonmodal question dock, replacing only the right action cluster. */
+.gear-play-surface .gear-bomb-quiz{position:absolute;inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) auto;z-index:35;width:min(360px,calc(100% - 116px));max-height:64dvh;padding:0;background:none;pointer-events:none}
+.gear-play-surface .gear-bomb-quiz section{box-sizing:border-box;width:100%;max-width:none;max-height:64dvh;overflow:auto;overscroll-behavior:contain;pointer-events:auto;background:#102e37f5;border:2px solid #8bdac3;border-radius:14px;padding:12px;box-shadow:0 4px 18px #0007;text-align:left}
+.gear-play-surface .gear-bomb-quiz header{gap:8px}.gear-play-surface .gear-bomb-quiz h2{font-size:15px;margin:0}.gear-play-surface .gear-bomb-quiz p{font-size:12px;line-height:1.5;margin:6px 0}.gear-play-surface .gear-bomb-quiz button{min-height:40px;border-radius:8px;padding:6px;font-size:13px}.gear-play-surface .gear-bomb-quiz canvas{width:100%;max-height:150px;object-fit:contain;background:white}.gear-play-surface .gear-bomb-answers{gap:5px;margin:8px 0}.gear-play-surface .gear-bomb-quiz small{font-size:10px}.gear-play-surface:has(.gear-bomb-quiz) .gear-battle-actions{visibility:hidden;pointer-events:none}
+@media(orientation:landscape) and (max-height:550px){.gear-play-surface .gear-bomb-quiz{width:min(320px,40vw);max-height:76dvh}.gear-play-surface .gear-bomb-quiz section{max-height:76dvh;padding:8px}.gear-play-surface .gear-bomb-quiz canvas{max-height:90px}.gear-play-surface .gear-bomb-quiz button{min-height:36px}}
+@media(max-width:600px) and (orientation:portrait){.gear-play-surface .gear-bomb-quiz{width:calc(100% - 112px);max-height:55dvh}.gear-play-surface .gear-bomb-quiz section{max-height:55dvh;padding:8px}.gear-play-surface .gear-bomb-quiz canvas{max-height:115px}}

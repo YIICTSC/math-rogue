@@ -1,7 +1,7 @@
 import * as T from 'three';
 
 export const seatColor = (seat: number) => new T.Color().setHSL((seat * .61803398875) % 1, .62, .67);
-export type ScreenMarker = {id: string; number: number; name?: string; point: T.Vector3; self?: boolean; angle?: number};
+export type ScreenMarker = {id: string; number: number; name?: string; point: T.Vector3; self?: boolean; label?:string; angle?: number};
 
 /** DOM labels remain legible when the full map scales its 3D actors down. */
 export function createScreenMarkers(host: HTMLElement) {
@@ -23,7 +23,7 @@ export function createScreenMarkers(host: HTMLElement) {
         label.style.left = `${(point.x + 1) * 50}%`; label.style.top = `${(1 - point.y) * 50}%`;
         label.style.setProperty('--seat-color', `#${seatColor(marker.number).getHexString()}`);
         const name = !overview && marker.name ? ` ${marker.name.slice(0, 12)}` : '';
-        label.textContent = `${marker.self ? '➤ ' : ''}${marker.number}${name}`;
+        label.textContent = marker.label??`${marker.self ? '➤ ' : ''}${marker.number}${name}`;
         label.title = marker.name || String(marker.number);
         label.dataset.seat = String(marker.number);
       }
