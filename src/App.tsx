@@ -254,7 +254,7 @@ import { androidAssetPackService } from './services/androidAssetPackService';
 import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap, MAP_HEIGHT } from './services/mapGenerator';
-import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
+import { parseTransferData, serializeTransferData, storageService, isMainAdventureResumeState } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
 import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, managementPortalService, toAssignmentPayload, type ManagementProfile } from './services/managementPortalService';
 import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotificationService';
@@ -6731,7 +6731,14 @@ const App: React.FC = () => {
         }
         setShowStartOverConfirm(false);
         setPendingResumeProblemSelection(false);
-        const saved = pendingAssignmentResumeState || storageService.loadGame();
+        const saved = isMainAdventureResumeState(pendingAssignmentResumeState)
+            ? pendingAssignmentResumeState
+            : storageService.loadGame();
+        if (!saved) {
+            setPendingAssignmentResumeState(null);
+            setHasSave(false);
+            return;
+        }
         if (saved) {
             const savedVisualTheme = VISUAL_THEMES.includes(saved.visualTheme as VisualThemeId)
                 ? saved.visualTheme as VisualThemeId

@@ -18,53 +18,41 @@ const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 // The title screen's "Continue" entry belongs only to the main roguelike.
 // Every mini-game owns its own progress/state key and must never create or
 // validate the main-adventure resume slot.
-const NON_RESUMABLE_GAME_SCREENS = new Set<GameScreen>([
-  GameScreen.START_MENU,
-  GameScreen.RPG_ONLINE,
-  GameScreen.GAKURO_KART,
-  GameScreen.GAKURO_GOLF,
-  GameScreen.GAME_OVER,
-  GameScreen.ENDING,
-  GameScreen.MAGIC_ROMANCE_ENDING,
-  GameScreen.VICTORY,
-  GameScreen.COMPENDIUM,
-  GameScreen.HELP,
-  GameScreen.CHARACTER_SELECTION,
-  GameScreen.DIFFICULTY_SELECTION,
-  GameScreen.RANKING,
-  GameScreen.PROBLEM_CHALLENGE,
-  GameScreen.ASSIGNMENT_CREATE,
-  GameScreen.SUBMISSION,
-  GameScreen.REWARD_CARD_ALBUM,
-  GameScreen.ORIGINAL_CARD_BUILDER,
-  GameScreen.DEBUG_MENU,
-  GameScreen.MAGIC_EVENT_SIMULATION,
-  GameScreen.MINI_GAME_SELECT,
-  GameScreen.MINI_GAME_MODE_SELECTION,
-  GameScreen.MINI_GAME_POKER,
-  GameScreen.MINI_GAME_SURVIVOR,
-  GameScreen.MINI_GAME_DUNGEON,
-  GameScreen.MINI_GAME_DUNGEON_2,
-  GameScreen.MINI_GAME_KOCHO,
-  GameScreen.MINI_GAME_PAPER_PLANE,
-  GameScreen.MINI_GAME_GO_HOME,
-  GameScreen.MINI_GAME_STONE_GLOW,
-  GameScreen.MINI_GAME_SCHOOL_TRPG,
-  GameScreen.MINI_GAME_LEARNING_TCG,
-  GameScreen.MINI_GAME_SHOGI,
-  GameScreen.MINI_GAME_GO,
-  GameScreen.MINI_GAME_CHESS,
-  GameScreen.MINI_GAME_MAHJONG,
-  GameScreen.MINI_GAME_CRANE,
+// Allow only main-adventure screens so new online/mini-game modes cannot leak
+// into Continue when their own screen is added later.
+const MAIN_ADVENTURE_RESUME_SCREENS = new Set<GameScreen>([
+  GameScreen.MODE_SELECTION,
+  GameScreen.RELIC_SELECTION,
+  GameScreen.DECK_CONSTRUCTION,
+  GameScreen.MAP,
+  GameScreen.BATTLE,
+  GameScreen.DODGEBALL_SHOOTING,
+  GameScreen.BASKETBALL_LAYUP,
+  GameScreen.MATH_CHALLENGE,
+  GameScreen.KANJI_CHALLENGE,
+  GameScreen.ENGLISH_CHALLENGE,
+  GameScreen.GENERAL_CHALLENGE,
+  GameScreen.REWARD,
+  GameScreen.REST,
+  GameScreen.SHOP,
+  GameScreen.EVENT,
+  GameScreen.FINAL_BRIDGE,
+  GameScreen.ENDLESS_OPENING,
+  GameScreen.ENDLESS_TRUE_ENDING,
+  GameScreen.ENDLESS_CLEAR,
+  GameScreen.TREASURE,
+  GameScreen.GARDEN,
+  GameScreen.FLOOR_RESULT,
 ]);
 
-const isMainAdventureResumeState = (value: unknown): value is GameState => {
+export const isMainAdventureResumeState = (value: unknown): value is GameState => {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<GameState>;
   return typeof candidate.screen === 'string'
     && !candidate.rpgOnline
-    && !NON_RESUMABLE_GAME_SCREENS.has(candidate.screen as GameScreen)
+    && MAIN_ADVENTURE_RESUME_SCREENS.has(candidate.screen as GameScreen)
     && candidate.challengeMode !== 'COOP'
+    && candidate.challengeMode !== 'RACE'
     && Boolean(candidate.player)
     && Array.isArray(candidate.map);
 };

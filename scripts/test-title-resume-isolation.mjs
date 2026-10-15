@@ -19,6 +19,12 @@ try {
   const saveKey = 'pixel_spire_save_state_v1';
   const miniGames = [
     GameScreen.RPG_ONLINE,
+    GameScreen.GAKURO_KART,
+    GameScreen.GAKURO_GOLF,
+    GameScreen.MINI_GAME_GAKUROGEAR,
+    GameScreen.GAKURO_CRAFT,
+    GameScreen.TYPING_MODE_SELECTION,
+    'FUTURE_ONLINE_MODE',
     GameScreen.MINI_GAME_STONE_GLOW,
     GameScreen.MINI_GAME_SCHOOL_TRPG,
     GameScreen.MINI_GAME_LEARNING_TCG,
@@ -37,9 +43,11 @@ try {
     localStorage.setItem(saveKey, JSON.stringify({ screen, player: {}, map: [] }));
     assert.equal(storageService.hasSaveFile(), false, `${screen} must not enable Continue when found in a legacy save`);
     assert.equal(localStorage.getItem(saveKey), null, `${screen} legacy save should be removed`);
+    localStorage.setItem(saveKey, JSON.stringify({ screen, player: {}, map: [] }));
+    assert.equal(storageService.loadGame(),null,`${screen} must not load through Continue`);
   }
 
-  storageService.saveGame({ screen: GameScreen.MAP, player: { currentHp: 10 }, map: [] });
+  storageService.saveGame({ screen: GameScreen.MAP, player: { currentHp: 10 }, map: [], rewards: [], narrativeLog: [], combatLog: [] });
   assert.equal(storageService.hasSaveFile(), true, 'a main-adventure map state should still enable Continue');
   const mainSave = localStorage.getItem(saveKey);
   storageService.saveGame({ screen: GameScreen.RPG_ONLINE, player: {}, map: [] });
@@ -49,7 +57,10 @@ try {
     assert.equal(localStorage.getItem(saveKey), mainSave, `RPG native ${screen} must preserve the main adventure`);
   }
 
-  console.log('Title Continue isolation passed for all added mini-games, including the crane game.');
+  for(const screen of miniGames){storageService.saveGame({screen,player:{},map:[]});assert.equal(localStorage.getItem(saveKey),mainSave,`${screen} must not overwrite a main adventure`);assert.equal(storageService.loadGame().screen,GameScreen.MAP);}
+  for(const mode of ['COOP','RACE']){localStorage.setItem(saveKey,JSON.stringify({screen:GameScreen.MAP,challengeMode:mode,player:{},map:[]}));assert.equal(storageService.loadGame(),null,`${mode} legacy online session is not a main continuation`);}
+  for(const screen of [GameScreen.MODE_SELECTION,GameScreen.RELIC_SELECTION,GameScreen.DECK_CONSTRUCTION,GameScreen.MAP,GameScreen.BATTLE,GameScreen.MATH_CHALLENGE,GameScreen.KANJI_CHALLENGE,GameScreen.ENGLISH_CHALLENGE,GameScreen.GENERAL_CHALLENGE,GameScreen.REWARD,GameScreen.REST,GameScreen.SHOP,GameScreen.EVENT,GameScreen.TREASURE,GameScreen.GARDEN,GameScreen.FLOOR_RESULT,GameScreen.ENDLESS_OPENING,GameScreen.ENDLESS_TRUE_ENDING,GameScreen.ENDLESS_CLEAR]){storageService.saveGame({screen,player:{currentHp:10},map:[],rewards:[],narrativeLog:[],combatLog:[]});assert.equal(storageService.loadGame().screen,screen,`${screen} main progression remains resumable`);}
+  console.log('PASS: all four online modes and legacy/future mini-game saves excluded; existing main save preserved; main progression remains resumable.');
 } finally {
   await server.close();
 }

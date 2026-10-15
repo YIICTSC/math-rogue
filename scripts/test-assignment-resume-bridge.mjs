@@ -24,7 +24,7 @@ assert.ok(continueStart >= 0 && continueEnd > continueStart, '続きから処理
 const continueSource = source.slice(continueStart, continueEnd);
 assert.match(
   continueSource,
-  /const saved = pendingAssignmentResumeState \|\| storageService\.loadGame\(\);/,
+  /const saved = isMainAdventureResumeState\(pendingAssignmentResumeState\)\s*\? pendingAssignmentResumeState\s*:\s*storageService\.loadGame\(\);/,
   '課題レター確定前に保持した本編セーブを優先していない'
 );
 assert.match(
@@ -68,7 +68,7 @@ assert.match(source, /screen: GameScreen\.MODE_SELECTION,/,
   '課題開始後の冒険で通常のモード選択を開いていない');
 assert.match(source, /const shouldSkipAssignmentModeSelection = activeAssignment\?\.gameMode === 'FREE' && isAssignmentWithinDeadline;/,
   '選択済みFREE課題の冒険で問題選択をスキップする判定がない');
-assert.match(source, /screen: shouldSkipAssignmentModeSelection\s*\? GameScreen\.DIFFICULTY_SELECTION\s*:\s*GameScreen\.MODE_SELECTION,/,
+assert.match(source, /shouldSkipAssignmentModeSelection\s*\? GameScreen\.DIFFICULTY_SELECTION\s*:\s*GameScreen\.MODE_SELECTION,/,
   '選択済み課題の冒険開始が難易度選択へ進まない');
 assert.match(source, /nextLaunchLocked && pendingManagedAssignmentLetter\?\.id === nextLaunchLocked\.id && showAssignmentLetter/,
   '最優先課題レター表示中の自動再処理を抑止していない');
