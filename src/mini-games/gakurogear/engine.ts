@@ -167,6 +167,8 @@ export function visible(m: Mission, from: Point, angle: number, to: Point, crouc
 export const cameraAngle = (m: Mission, index: number, time: number) => m.cameras[index].angle + Math.sin(time * .65 + index) * .65;
 export const HOLD_RANGE = 2.4;
 export const HOLD_RELEASE_RANGE = 2.8;
+// Allow standing approaches to reach hold range before footsteps turn patrols.
+export const FOOTSTEP_HEARING_RANGE = 1.2;
 export function withinHoldReach(m: Mission, from: Point, to: Point, continuing = false, s?: Pick<Run, 'switches'>): boolean {
   return distance(from, to) <= (continuing ? HOLD_RELEASE_RANGE : HOLD_RANGE) && clearSight(m, from, to, true, s);
 }
@@ -254,7 +256,7 @@ export function step(m: Mission, s: Run, input: Input, dt: number) {
   s.guards.forEach((g, i) => {
     if (g.sleep > 0) { g.sleep = Math.max(0, g.sleep - dt); return; }
     if (s.holdTarget === i) return;
-    if (!s.crouch && len > .1 && distance(g, s.player) < 2.5 && clearSight(m, g, s.player, false, s)) { g.investigate = { ...s.player }; g.search = 2; g.detour = undefined; }
+    if (!s.crouch && len > .1 && distance(g, s.player) < FOOTSTEP_HEARING_RANGE && clearSight(m, g, s.player, false, s)) { g.investigate = { ...s.player }; g.search = 2; g.detour = undefined; }
     const route = m.routes[i], destination = g.investigate ?? route[g.waypoint];
     if (g.detour?.length && distance(g, g.detour[0]) < .15) g.detour.shift();
     const target = g.detour?.[0] ?? destination;
