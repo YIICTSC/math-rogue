@@ -12,7 +12,7 @@ const questions=[];for(let round=0;round<5;round++){w.time=round*31;assert(reque
 assert.equal(new Set(questions).size,15);assert.equal(w.players.a.stats.correct,15);
 w.players.b.run.status='caught';retryCoop(w,'b');assert(w.players.b.run.collected[0],'Retry keeps progress');
 w.players.a.run.status=w.players.b.run.status='clear';w.players.a.run.collected=[true];tickWorld(w,{},.05);assert.equal(w.phase,'result');assert.equal(w.players.a.wins,1);assert(returnToLobby(w,true));assert.equal(w.missionId,2);assert.equal(w.players.a.name,'A');assert.equal(w.players.a.wins,1);assert(startWorld(w,456));assert.equal(w.round,2);assert.equal(w.players.a.stats.correct,0);
-const arena=createWorld('royale',300,lesson,120);addPlayer(arena,'a','A');addPlayer(arena,'b','B');startWorld(arena,99);arena.mission.obstacles=[];arena.players.a.invulnerable=arena.players.b.invulnerable=0;const initial=safeRadius(arena);arena.time=90;assert(safeRadius(arena)<initial);arena.players.a.run.player={x:arena.mission.size-1,z:0,angle:0};arena.players.b.run.player={x:0,z:0,angle:0};for(let i=0;i<122;i++)tickWorld(arena,{},.05);assert.equal(arena.players.a.hits,1);
+const arena=createWorld('royale',1,lesson,120);addPlayer(arena,'a','A');addPlayer(arena,'b','B');startWorld(arena,99);arena.mission.obstacles=[];arena.players.a.invulnerable=arena.players.b.invulnerable=0;const initial=safeRadius(arena);arena.time=90;assert(safeRadius(arena)<initial);arena.players.a.run.player={x:arena.mission.size-1,z:0,angle:0};arena.players.b.run.player={x:0,z:0,angle:0};for(let i=0;i<122;i++)tickWorld(arena,{},.05);assert.equal(arena.players.a.hits,1);
 const crate=arena.supplies[0];crate.kind='ammo';crate.readyAt=0;crate.x=0;crate.z=0;arena.players.b.run.ammo=0;tickWorld(arena,{},.05);assert.equal(arena.players.b.run.ammo,3);assert(crate.readyAt>arena.time);
 crate.kind='repair';crate.readyAt=0;arena.players.b.hits=2;tickWorld(arena,{},.05);assert.equal(arena.players.b.hits,1);
 assert(requestSupply(arena,'a'));answer(arena,'a',0);answer(arena,'a',0);answer(arena,'a',0);assert(completeQuiz(arena,'a'));assert(Math.hypot(arena.players.a.run.player.x,arena.players.a.run.player.z)<safeRadius(arena));assert(arena.players.a.run.ammo>=3);
@@ -21,10 +21,35 @@ arena.time=0;arena.players.a.run.player={x:0,z:0,angle:0};arena.players.b.run.pl
 arena.players.b.run.player.z=1;arena.players.a.run.shotCooldown=0;tickWorld(arena,{a:{...neutral,shoot:true}},.05);assert.equal(arena.players.b.hits,hits+1);
 console.log('PASS cooperative help/revive/progress retry, nonrepeating question deck, protected feedback/rewards, same-room next stage, shrinking zone, supply crates, quiz return and cloak counterplay.');
 
-const mags=createWorld('royale',300,lesson,300);addPlayer(mags,'a','A');addPlayer(mags,'b','B');startWorld(mags,5);mags.players.a.run.weapon=3;mags.players.a.run.ammo=0;tickWorld(mags,{a:{...neutral,reload:true}},.05);for(let i=0;i<24;i++)tickWorld(mags,{},.05);assert.equal(mags.players.a.run.ammo,12);assert.equal(mags.players.a.energy,75);console.log('PASS weapon-specific magazine capacities and deliberate reload costs.');
+// Battle weapons must be picked up before they can be reloaded.
+for(const [weapon,capacity] of [6,4,4,12].entries()) {
+ const mags=createWorld('royale',1,lesson,300);addPlayer(mags,'a','A');addPlayer(mags,'b','B');assert(startWorld(mags,5));
+ mags.mission.obstacles=[];mags.supplies=[];
+ const player=mags.players.a;player.run.player={x:0,z:0,angle:0};mags.players.b.run.player={x:8,z:8,angle:0};
+ if(weapon!==0) {
+  player.run.weapon=weapon;player.run.ammo=0;
+  tickWorld(mags,{a:{...neutral,reload:true}},.05);
+  assert.equal(player.reloading,0,'Unowned weapons cannot reload');
+  assert.equal(player.energy,100,'Rejected reloads do not consume energy');
+  assert.equal(player.run.ammo,0);
+ }
+ mags.supplies=[{id:900,kind:'weapon',slot:weapon,x:0,z:0,readyAt:0}];
+ tickWorld(mags,{},.05);
+ assert(player.weapons[weapon],'Pickup grants weapon ownership');
+ assert.equal(player.run.weapon,weapon);
+ assert.equal(player.run.ammo,capacity,'Pickup fills the correct magazine');
+ player.run.ammo=0;
+ tickWorld(mags,{a:{...neutral,reload:true}},.05);
+ assert(player.reloading>0,'Owned weapon starts reloading');
+ assert.equal(player.run.ammo,0,'Ammo remains empty until reload completes');
+ assert.equal(player.energy,75);
+ for(let i=0;i<24;i++)tickWorld(mags,{},.05);
+ assert.equal(player.reloading,0);assert.equal(player.run.ammo,capacity);assert.equal(player.energy,75);
+}
+console.log('PASS real weapon pickup, unowned reload rejection, four magazine capacities and deliberate reload costs.');
 
 // Eliminated players respawn, keep moving and cannot alter contenders' results.
-const replay=createWorld('royale',300,lesson,300);for(const id of ['a','b','c','d'])addPlayer(replay,id,id);startWorld(replay,87);replay.mission.obstacles=[];replay.supplies=[];
+const replay=createWorld('royale',1,lesson,300);for(const id of ['a','b','c','d'])addPlayer(replay,id,id);startWorld(replay,87);replay.mission.obstacles=[];replay.supplies=[];
 const a=replay.players.a,b=replay.players.b,c=replay.players.c,d=replay.players.d;
 a.run.player={x:0,z:0,angle:0};b.run.player={x:0,z:2,angle:0};c.run.player={x:8,z:8,angle:0};d.run.player={x:-8,z:-8,angle:0};a.invulnerable=b.invulnerable=0;b.hits=2;
 tickWorld(replay,{a:{...neutral,shoot:true}},.05);assert(b.out);assert.equal(b.run.status,'playing');assert.equal(b.hits,3);assert.equal(b.respawnHits,0);assert.equal(replay.phase,'playing');assert(b.invulnerable>0);
