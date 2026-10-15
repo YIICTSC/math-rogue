@@ -46,8 +46,8 @@ sockets.on('connection',(socket,request)=>{
         if(rooms.size>=4){fail(m,'サーバーの部屋数上限です。');return;}
         const setup=normalizeRpgAdventureSetup(d.setup);
         if(!setup){fail(m,'冒険設定が不正です。');return;}
-        const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        do{code=Array.from({length:6},()=>alphabet[randomInt(alphabet.length)]).join('');}while(rooms.has(code));
+
+        do{code=String(randomInt(500000,1000000));}while(rooms.has(code));
         const minutes=d.minutes===0?0:Number.isFinite(d.minutes)?Math.min(180,Math.max(1,d.minutes)):30;
         const world=createWorld(randomInt(0x100000000),setup,minutes,now,d.gameMode==='BATTLE_ROYALE'?'BATTLE_ROYALE':'COOP');world.started=false;
         room={world,host:m.id,members:new Map(),revision:-1,emptyAt:0};

@@ -1,7 +1,7 @@
 import {SoloBots} from './soloBots';
 import {DedicatedConnection,vrServerUrl} from '../../services/dedicatedConnection';
 import {updateVrSettings,type VrSettings} from './roomSettings';
-import {roomAddress,shareRoomCode,type OnlineTransport} from '../../services/onlineTransport';
+import {createHostRoomCode,roomAddress,shareRoomCode,type OnlineTransport} from '../../services/onlineTransport';
 import {vrCommand,clearVrPulses} from './roomCommands';
 import {vrPacket,readVrWorld} from './vrProtocol';
 import {setVrSpectator,completeQuiz,requestSupply,returnToLobby} from './onlineRules';
@@ -47,7 +47,7 @@ export class VrRoom {
   pauseSoloEditor(paused:boolean){if(!this.solo||!this.world)return;this.soloEditing=paused;this.world.paused=paused||this.soloPaused||document.hidden;this.emit();}
   async create(name: string, mode: OnlineMode, missionId: number, lesson: KartLesson, limit: number, avatar: KartAvatar = defaultAvatar(), bombMap=0) {
     if(this.transport==='server'){await this.connectDedicated({create:true,name,mode,missionId,lesson,limit,avatar,bombMap});return;}
-    this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
+    this.host = true; this.code = createHostRoomCode();
     const peer = await this.open(`gakuro-vr-v6-${this.code}`); this.world = createWorld(mode, missionId, lesson, limit); this.world.bombMap=bombMap;addPlayer(this.world, this.selfId, name); this.world.players[this.selfId].avatar = avatar;
     peer.on('connection', c => {
       c.on('data', raw => { if (typeof raw !== 'string' || raw.length > 2000 || !this.world) return; let d: any; try { d = JSON.parse(raw); } catch { return; }
@@ -61,7 +61,7 @@ export class VrRoom {
     this.timer = setInterval(() => { if (!this.world) return; for (const id of Object.keys(this.controls)) if (Date.now() - (this.lastInput[id] ?? 0) > 600) delete this.controls[id]; tickWorld(this.world, this.controls, .05); clearVrPulses(this.controls); if (++pulses % 2 === 0) this.emit(); }, 50); this.emit();
   }
   async join(name: string, code: string, avatar: KartAvatar = defaultAvatar()) {
-    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;if(this.transport==='server'){await this.connectDedicated({create:false,name,code:this.code,avatar});return;} if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('Invalid room code');
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;if(this.transport==='server'){await this.connectDedicated({create:false,name,code:this.code,avatar});return;} if (!/^[A-Z0-9]{6}$/.test(this.code)) throw new Error('Invalid room code');
     const peer = await this.open(); const c = peer.connect(`gakuro-vr-v6-${this.code}`, { reliable: true }); this.connections.set('host', c);
     await new Promise<void>((resolve, reject) => { const timeout = setTimeout(() => reject(new Error('Room connection timeout')), 20000); c.on('open', () => this.send(c, { type: 'hello', version: 6, name, avatar })); c.on('data', raw => { let d: any; try { d = JSON.parse(String(raw)); } catch { return; } if (d.type === 'error') { clearTimeout(timeout); reject(new Error(d.text)); } if(d.type==='world'||d.type==='state'){const world=readVrWorld(d,this.world);if(!world||!world.players[this.selfId]||!validLesson(world.lesson,120))return;clearTimeout(timeout);this.world=world;this.update(world);resolve();} }); c.on('error', e => { clearTimeout(timeout); reject(e); }); c.on('close', () => this.status('Host disconnected. Return to title to reconnect.')); });
   }

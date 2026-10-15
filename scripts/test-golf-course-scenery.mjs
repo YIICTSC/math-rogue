@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import {createServer} from 'vite';
+import {chromium} from 'playwright';
+const dir='tmp/golf-course-audit';await fs.mkdir(dir,{recursive:true});
+await fs.writeFile(`${dir}/index.html`,'<body style="margin:0"><script type="module" src="./fixture.ts"></script>');
+await fs.writeFile(`${dir}/fixture.ts`, `
+import * as T from 'three';import{HOLES,surface}from'/src/mini-games/gakuro-golf/course';import{createCourseScenery}from'/src/mini-games/gakuro-golf/courseScenery';
+const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(900,700);renderer.setPixelRatio(1);document.body.append(renderer.domElement);
+let scene,scenery;const camera=new T.PerspectiveCamera(48,9/7,.1,2000);
+window.show=(i,quality='low')=>{scenery?.dispose();scene=new T.Scene();scene.add(new T.HemisphereLight(0xffffff,0x668855,2));const sun=new T.DirectionalLight(0xffffff,2);sun.position.set(100,200,100);scene.add(sun);const h=HOLES[i];scenery=createCourseScenery(scene,h,quality);const green=new T.Mesh(new T.CircleGeometry(17,40),new T.MeshStandardMaterial({color:0x9bbc65}));green.rotation.x=-Math.PI/2;green.position.set(h.cup.x,.05,h.cup.z);scene.add(green);const flag=new T.Mesh(new T.CylinderGeometry(.15,.15,6),new T.MeshStandardMaterial({color:0xffffff}));flag.position.set(h.cup.x,3,h.cup.z);scene.add(flag);const cloth=new T.Mesh(new T.PlaneGeometry(4,2),new T.MeshStandardMaterial({color:0xff6644,side:T.DoubleSide}));cloth.position.set(h.cup.x+2,5,h.cup.z);scene.add(cloth);camera.position.set(h.cup.x+30,30,h.cup.z-45);camera.lookAt(h.cup.x,0,h.cup.z);renderer.render(scene,camera);return h;};
+window.ready=()=>scenery.library.ready||scenery.library.failed;
+window.audit=()=>{const boxes=[],m=new T.Matrix4();scene.updateMatrixWorld(true);scenery.library.group.updateMatrixWorld(true);scene.traverse(o=>{if(!o.isInstancedMesh)return; o.geometry.computeBoundingBox();for(let i=0;i<o.count;i++){o.getMatrixAt(i,m);const b=o.geometry.boundingBox.clone().applyMatrix4(m).applyMatrix4(o.matrixWorld);if(b.max.y>.5)boxes.push(b);}});const cup=HOLES[window.index].cup;const blockers=boxes.filter(b=>b.min.x<cup.x+17&&b.max.x>cup.x-17&&b.min.z<cup.z+17&&b.max.z>cup.z-17&&b.min.y<6);renderer.render(scene,camera);return{blockers:blockers.map(b=>({min:b.min.toArray(),max:b.max.toArray()})),surface:surface(HOLES[window.index],{x:cup.x,z:cup.z}),library:scenery.library.ready};};
+window.dispose=()=>{scenery.dispose();renderer.dispose();};window.index=0;show(0);
+`);
+let server,browser;
+try{server=await createServer({configFile:false,cacheDir:'node_modules/.vite-golf-course-audit',optimizeDeps:{entries:[`${dir}/index.html`]},logLevel:'error',server:{host:'127.0.0.1',port:5264,strictPort:true,hmr:false}});await server.listen();browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const page=await browser.newPage({viewport:{width:900,height:700}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(90000);await page.goto(`http://127.0.0.1:5264/${dir}/index.html`);
+for(const quality of ['low','high'])for(let i=0;i<18;i++){await page.evaluate(({i,quality})=>{window.index=i;show(i,quality);},{i,quality});await page.waitForFunction(()=>ready());const r=await page.evaluate(()=>audit());assert.equal(r.library,true);assert.equal(r.surface,'green');assert.deepEqual(r.blockers,[],`Hole ${i+1}: green obstructed`);await page.screenshot({path:`${dir}/${quality}-hole-${String(i+1).padStart(2,'0')}.png`});console.log('PASS hole',i+1,'green clear with loaded Blender scenery');}assert.deepEqual(errors,[]);await page.evaluate(()=>dispose());}finally{await browser?.close();await server?.close();}

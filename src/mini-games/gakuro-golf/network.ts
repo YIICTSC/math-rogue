@@ -1,4 +1,4 @@
-import {roomAddress,type OnlineTransport} from '../../services/onlineTransport';
+import {createHostRoomCode,roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
@@ -71,7 +71,7 @@ export class GolfRoom {
   private async openDedicated(hello: object) {
     const connection = new DedicatedConnection(packet => {
       if (this.closed) return false;
-      if (packet.type === 'connected' && typeof packet.id === 'string' && packet.id.length <= 100 && typeof packet.code === 'string' && /^[A-Z2-9]{6}$/.test(packet.code) && typeof packet.host === 'boolean') { this.selfId = packet.id; this.code = packet.code; this.host = packet.host; }
+      if (packet.type === 'connected' && typeof packet.id === 'string' && packet.id.length <= 100 && typeof packet.code === 'string' && /^[A-Z0-9]{6}$/.test(packet.code) && typeof packet.host === 'boolean') { this.selfId = packet.id; this.code = packet.code; this.host = packet.host; }
       if (packet.type === 'error' && typeof packet.message === 'string') this.status(packet.message);
       if (['init', 'state'].includes(packet.type) && packet.version === GOLF_PROTOCOL && Number.isInteger(packet.sequence) && packet.sequence > this.lastSequence && validView(packet.state) && packet.state.players.some(p => p.id === this.selfId)) { this.lastSequence = packet.sequence; this.update(packet.state); return true; }
       return false;
@@ -80,8 +80,7 @@ export class GolfRoom {
   }
   async create(name: string) {
     if (this.transport==='server') { await this.openDedicated({ create: true, name: name.slice(0, 16) }); return; }
-    this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
+    this.host = true; this.code = createHostRoomCode();
     const peer = await this.open(prefix + this.code);
     this.world = createGolf(crypto.getRandomValues(new Uint32Array(1))[0]); addPlayer(this.world, this.selfId, name);
     peer.on('connection', c => {
@@ -105,7 +104,7 @@ export class GolfRoom {
     }); this.run();
   }
   async join(code: string, name: string) {
-    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code; if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
+    const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code; if (!/^[A-Z0-9]{6}$/.test(this.code)) throw new Error('6桁の数字の招待コードを入力してください。');
     if (this.transport==='server') { await this.openDedicated({ create: false, code: this.code, name: name.slice(0, 16) }); return; }
     const peer = await this.open(); const c = peer.connect(prefix + this.code, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);
     await new Promise<void>((resolve, reject) => {

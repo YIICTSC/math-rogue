@@ -22,7 +22,7 @@ sockets.on('connection',socket=>{
  socket.on('message',raw=>{let d:any;try{d=JSON.parse(raw.toString());}catch{return;}if(!d||typeof d!=='object'||Array.isArray(d))return;const now=Date.now();if(now-m.at>=1000){m.at=now;m.rate=0;}if(++m.rate>50)return;if(d.type==='ping'){send(m,{type:'pong'});return;}
   try{if(!room){if(d.type!=='connect'||d.protocol!==1||d.version!==6||typeof d.name!=='string'||!validAvatar(d.avatar)){send(m,{type:'error',message:'Invalid VR connection'});return;}
    let code='';if(d.create){if(rooms.size>=4||!['coop','royale','bomb'].includes(d.mode)||!Number.isInteger(d.missionId)||d.missionId<1||d.missionId>100||!validLesson(d.lesson,120)||!Number.isFinite(d.limit)||!Number.isInteger(d.bombMap??0)||(d.bombMap??0)<0||(d.bombMap??0)>2){send(m,{type:'error',message:'Invalid room settings or server full'});return;}
-    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';do{code=Array.from({length:6},()=>alphabet[randomInt(alphabet.length)]).join('');}while(rooms.has(code));
+    do{code=String(randomInt(500000,1000000));}while(rooms.has(code));
     room={host:m.id,world:createWorld(d.mode,d.missionId,d.lesson,d.limit),members:new Map(),controls:{},lastInput:{},emptyAt:0,encoder:new VrStateEncoder()};room.world.bombMap=d.bombMap??0;rooms.set(code,room);
    }else{code=String(d.code??'').toUpperCase();room=rooms.get(code);}
    if(!room||!addPlayer(room.world,m.id,d.name)){room=undefined;send(m,{type:'error',message:'Room full, missing, or already started'});return;}

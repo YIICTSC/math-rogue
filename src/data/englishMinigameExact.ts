@@ -1,5 +1,6 @@
 /** Curated shared English copy for mini-game catalogs without structured card translation. */
 export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  '6桁の数字の招待コードを入力してください。': 'Enter the six-digit invitation code.',
   'つぶらな瞳': 'Cute oval eyes',
   '顔の輪郭': 'Face shape', '顔つき': 'Complexion', '目の形': 'Eye shape', '瞳の色': 'Eye color',
   'やわらか卵型': 'Soft oval', '丸顔': 'Round', 'シャープ': 'Tapered', 'ハート型': 'Heart', 'スクエア': 'Square',

@@ -25,10 +25,10 @@ export function configureStorybook(renderer:T.WebGLRenderer, quality:Quality='au
   const p=qualityProfile(quality);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,p.pixelRatio));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.shadowMap.enabled=p.shadows;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.quality=p.low?'low':'high';return p;
 }
 /** Soft distant hills, drifting cloud cushions and pollen; all are decorative. */
-export function storybookAtmosphere(scene:T.Scene,scale=1,quality:Quality='auto'){
+export function storybookAtmosphere(scene:T.Scene,scale=1,quality:Quality='auto',options:{hills?:boolean}={}){
   const root=new T.Group();scene.add(root);const profile=qualityProfile(quality);
   const geo=new T.SphereGeometry(1,12,8), cloudMat=new T.MeshBasicMaterial({color:'#fff1d5',transparent:true,opacity:.7,depthWrite:false}),hillMat=new T.MeshStandardMaterial({color:'#90ab94',roughness:1});
-  const clouds=new T.InstancedMesh(geo,cloudMat,18),hills=new T.InstancedMesh(geo,hillMat,14),dummy=new T.Object3D();root.add(clouds,hills);
+  const clouds=new T.InstancedMesh(geo,cloudMat,18),hills=new T.InstancedMesh(geo,hillMat,14),dummy=new T.Object3D();root.add(clouds);if(options.hills!==false)root.add(hills);
   for(let i=0;i<14;i++){const a=i*Math.PI*2/14;dummy.position.set(Math.cos(a)*42*scale,-5*scale,Math.sin(a)*42*scale);dummy.scale.set(12*scale,(9+i%3*2)*scale,13*scale);dummy.updateMatrix();hills.setMatrixAt(i,dummy.matrix);}
   for(let i=0;i<18;i++){const a=i*2.4;dummy.position.set(Math.cos(a)*38*scale,(13+i%4*2)*scale,Math.sin(a)*38*scale);dummy.scale.set((4+i%3)*scale,1*scale,2.4*scale);dummy.updateMatrix();clouds.setMatrixAt(i,dummy.matrix);}
   const particleGeo=new T.BufferGeometry(),count=profile.low?30:70,positions=new Float32Array(count*3);

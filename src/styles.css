@@ -19608,3 +19608,8 @@ textarea {
 
 .start-menu-kart-label{display:inline-block;font-size:10px;white-space:normal;line-height:1.15}
 .start-menu-kart-label>span{display:block}
+
+/* Online invitation codes remain readable on classroom screens and phones. */
+.gk-root .gk-ready-card .online-collection-controls .gk-code,.gg-code,.rpg-root .rpg-room-code,.rpg-code,.vr-room-code input{font-family:ui-monospace,monospace!important;font-size:clamp(30px,5vw,48px)!important;font-weight:900!important;letter-spacing:.12em!important;line-height:1.25!important;font-variant-numeric:tabular-nums;color:inherit}
+.vr-room-code input{height:auto!important;min-height:64px;text-align:center}
+.gk-code small{font-size:11px;letter-spacing:normal;display:block}

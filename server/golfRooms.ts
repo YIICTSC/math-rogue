@@ -70,12 +70,12 @@ export function createGolfServer(options: GolfServerOptions = {}) {
         let candidate: Room | undefined;
         if (d.create) {
           if (rooms.size >= maxRooms) { fail(m, 'サーバーの部屋数上限です。', true); return; }
-          const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code: string;
-          do { code = Array.from({ length: 6 }, () => alphabet[randomInt(alphabet.length)]).join(''); } while (rooms.has(code));
+          let code: string;
+          do { code = String(randomInt(500000,1000000)); } while (rooms.has(code));
           candidate = { code, world: createGolf(randomInt(1, 0x100000000)), host: m.id, members: new Map(), selection: null, sequence: 0, lastActive: now };
         } else {
           const code = typeof d.code === 'string' ? d.code.trim().toUpperCase() : '';
-          if (!/^[A-Z2-9]{6}$/.test(code)) { fail(m, '6文字のルームコードを入力してください。', true); return; }
+          if (!/^[A-Z0-9]{6}$/.test(code)) { fail(m, '6桁の数字の招待コードを入力してください。', true); return; }
           candidate = rooms.get(code);
           if (!candidate) { fail(m, '部屋が見つかりません。', true); return; }
         }

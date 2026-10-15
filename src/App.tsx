@@ -1673,7 +1673,7 @@ const App: React.FC = () => {
     const [rpgSnapshot, setRpgSnapshot] = useState<RpgSnapshot | null>(null);
     const [rpgMounted, setRpgMounted] = useState(false);
     const [rpgTitleOpen,setRpgTitleOpen]=useState(false);
-    const [rpgStartIntent,setRpgStartIntent]=useState<'solo'|'online'>('solo');
+    const [rpgStartIntent,setRpgStartIntent]=useState<'solo'|'online'|'join'>('solo');
     const [rpgResumeSave,setRpgResumeSave]=useState<RpgWorldSave|null>(null);
     const [rpgSceneError, setRpgSceneError] = useState('');
     const rpgSnapshotRef = useRef<RpgSnapshot | null>(null);
@@ -6983,12 +6983,12 @@ const App: React.FC = () => {
         }));
     };
 
-    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme, rpgOnline = false) => {
+    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme, rpgOnline = false, inviteByCode = false) => {
         setRpgResumeSave(null);
         const adventureTheme = VISUAL_THEMES.includes(themeOverride as VisualThemeId)
             ? themeOverride as VisualThemeId
             : visualTheme;
-        const isRpgInviteParticipant = rpgOnline && Boolean(rpgInviteCode);
+        const isRpgInviteParticipant = rpgOnline && (inviteByCode || Boolean(rpgInviteCode));
         rpgInviteParticipantRef.current = isRpgInviteParticipant;
         rpgAwardHandledRef.current = null;
         rpgClearBgmRef.current = null;
@@ -21657,7 +21657,7 @@ const App: React.FC = () => {
                         />
                     </div>
                 )}
-                {rpgTitleOpen && <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-slate-950"/>}><RpgTitle debugEnabled={isDebugModeActive} languageMode={languageMode} onClose={()=>setRpgTitleOpen(false)} onNew={mode=>{setRpgResumeSave(null);setRpgStartIntent(mode);setRpgTitleOpen(false);launchNewAdventure(visualTheme,true);}} onContinue={save=>{rpgInviteParticipantRef.current=false;rpgInviteAssignmentRef.current=save.world.setup?.assignment||null;rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;setRpgResumeSave(save);setRpgStartIntent('solo');setRpgTitleOpen(false);const setup=save.world.setup;if(setup)setVisualTheme(setup.visualTheme);setGameState(prev=>({...prev,rpgOnline:true,screen:GameScreen.MAP,player:structuredClone(save.player),visualTheme:setup?.visualTheme||prev.visualTheme,mode:(setup?.mode||prev.mode) as GameMode,modePool:setup?.modePool,answerMode:(setup?.answerMode||'CHOICE') as AnswerMode,difficultyLevel:setup?.difficultyLevel||1}));}}/></React.Suspense>}
+                {rpgTitleOpen && <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-slate-950"/>}><RpgTitle debugEnabled={isDebugModeActive} languageMode={languageMode} onClose={()=>setRpgTitleOpen(false)} onNew={mode=>{setRpgResumeSave(null);setRpgStartIntent(mode);setRpgTitleOpen(false);launchNewAdventure(visualTheme,true,mode==='join');}} onContinue={save=>{rpgInviteParticipantRef.current=false;rpgInviteAssignmentRef.current=save.world.setup?.assignment||null;rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;setRpgResumeSave(save);setRpgStartIntent('solo');setRpgTitleOpen(false);const setup=save.world.setup;if(setup)setVisualTheme(setup.visualTheme);setGameState(prev=>({...prev,rpgOnline:true,screen:GameScreen.MAP,player:structuredClone(save.player),visualTheme:setup?.visualTheme||prev.visualTheme,mode:(setup?.mode||prev.mode) as GameMode,modePool:setup?.modePool,answerMode:(setup?.answerMode||'CHOICE') as AnswerMode,difficultyLevel:setup?.difficultyLevel||1}));}}/></React.Suspense>}
                 {!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
                         <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP && !rpgDungeonRef.current ? undefined : 'none' }}>

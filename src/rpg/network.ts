@@ -1,5 +1,5 @@
 import {DedicatedConnection} from '../services/dedicatedConnection';
-import {roomAddress,type OnlineTransport} from '../services/onlineTransport';
+import {createHostRoomCode,roomAddress,type OnlineTransport} from '../services/onlineTransport';
 import {changedResidentAssets,stripResidentAssets,type ResidentAssets} from './town/residentTransport';
 import type {CreatedResident} from './town/residents';
 import type { P2PEvent } from "../services/p2pService";
@@ -183,10 +183,7 @@ export class RpgRoom {
   async create(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30, gameMode: World["gameMode"] = "COOP") {
     if(this.transport==='server'){await this.connectServer({create:true,name,setup:normalizeRpgAdventureSetup(setup)||normalizeRpgAdventureSetup({}),minutes:timeLimitMinutes,gameMode});return;}
     this.host = true;
-    this.code = Array.from(
-      crypto.getRandomValues(new Uint8Array(6)),
-      (n) => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[n % 31],
-    ).join("");
+    this.code = createHostRoomCode();
     const peer = await this.open(`learning-rogue-rpg-${this.code}`);
     this.selfId = peer.id;
     this.world = createWorld(
@@ -343,8 +340,8 @@ export class RpgRoom {
   }
   async join(code: string, name: string) {
     const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;
-    if (!/^[A-Z2-9]{6}$/.test(this.code))
-      throw new Error("6文字のルームコードを入力してください。");
+    if (!/^[A-Z0-9]{6}$/.test(this.code))
+      throw new Error("6桁の数字の招待コードを入力してください。");
     if(this.transport==='server'){await this.connectServer({code:this.code,name});return;}
     const peer = await this.open();
     this.selfId = peer.id;
@@ -426,8 +423,8 @@ export class RpgRoom {
     onSetup: (setup: RpgAdventureSetup) => void,
   ) {
     const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;
-    if (!/^[A-Z2-9]{6}$/.test(this.code))
-      throw new Error("6文字のルームコードを入力してください。");
+    if (!/^[A-Z0-9]{6}$/.test(this.code))
+      throw new Error("6桁の数字の招待コードを入力してください。");
     if(this.transport==='server'){await this.connectServer({code:this.code,name,prepare:true},onSetup);return;}
     const peer = await this.open();
     this.selfId = peer.id;

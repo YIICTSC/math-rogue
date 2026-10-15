@@ -76,7 +76,7 @@ sockets.on('connection',(socket,request)=>{
         let code:string;
         if(d.create){
           if(rooms.size>=4){error(m,'サーバーの部屋数上限です。');return;}
-          const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';do{code=Array.from({length:6},()=>alphabet[randomInt(alphabet.length)]).join('');}while(rooms.has(code));
+          const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';do{code=game==='kart'?String(randomInt(500000,1000000)):Array.from({length:6},()=>alphabet[randomInt(alphabet.length)]).join('');}while(rooms.has(code));
           const base:Base={host:m.id,members:new Map(),emptyAt:0,broadcast:0,simulation:0};
           if(game==='kart'){
             if(!Number.isInteger(d.course)||d.course<0||d.course>=COURSES.length){error(m,'コースが不正です。');return;}

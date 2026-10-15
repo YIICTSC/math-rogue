@@ -1,4 +1,4 @@
-import {roomAddress,type OnlineTransport} from '../../services/onlineTransport';
+import {createHostRoomCode,roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import {type CustomCourse} from './track';
 import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
 import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
@@ -92,8 +92,7 @@ export class KartRoom {
   async create(name: string, hero: number, course: number, customCourse?:CustomCourse) {
     if(this.transport==='server'){await this.connectDedicated({create:true,name,hero,course,customCourse,avatar:defaultAvatar(hero)});return;}
     this.host = true;
-    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
+    this.code = createHostRoomCode();
     const peer = await this.open(`gakuro-apex-v${PROTOCOL}-${this.code}`);
     this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0],3,customCourse); addRacer(this.world, this.selfId, name, hero);
     peer.on('connection', c => {
@@ -127,7 +126,7 @@ export class KartRoom {
   }
   async join(code: string, name: string, hero: number, avatar: KartAvatar = defaultAvatar(hero)) {
     const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;
-    if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
+    if (!/^[A-Z0-9]{6}$/.test(this.code)) throw new Error('6桁の数字の招待コードを入力してください。');
     if(this.transport==='server'){await this.connectDedicated({code:this.code,name,hero,avatar});return;}
     const peer = await this.open();
     const c = peer.connect(`gakuro-apex-v${PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);

@@ -163,7 +163,7 @@ export default function RpgOnline({
   sceneError?: string;
   adventureSetup?: RpgAdventureSetup;
   autoJoinInvite?: boolean;
-  initialIntent?:'solo'|'online';resumeSave?:RpgWorldSave|null;onTitle?:()=>void;
+  initialIntent?:'solo'|'online'|'join';resumeSave?:RpgWorldSave|null;onTitle?:()=>void;
   onRoom: (room: RpgRoom) => void;
   onSnapshot: (snapshot: RpgSnapshot) => void;
   onEnergyRequest?:()=>void;
@@ -200,7 +200,7 @@ export default function RpgOnline({
     [inviteCopied, setInviteCopied] = useState(false);
   const [gameMode,setGameMode]=useState<World["gameMode"]>("COOP");
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(initialIntent==='solo'?0:30);
-  const [intent,setIntent]=useState<'practice'|'create'|'join'>(initialIntent==='solo'?'practice':'create');
+  const [intent,setIntent]=useState<'practice'|'create'|'join'>(initialIntent==='solo'?'practice':initialIntent==='join'?'join':'create');
   const [inviteEntered,setInviteEntered]=useState(false);
   const [saveStatus,setSaveStatus]=useState(''),[saving,setSaving]=useState(false);
   const playerLatest=useRef(player);playerLatest.current=player;
@@ -506,9 +506,9 @@ export default function RpgOnline({
               <div className="rpg-entry-heading"><h1>{autoJoinInvite?'招待に参加する':intent==='practice'?'ひとり用の冒険':intent==='create'?'オンラインの部屋を作る':'招待に参加する'}</h1><button className="rpg-entry-builder" onClick={()=>setHeroOpen(true)}>主人公ビルダー</button></div>
               {!autoJoinInvite&&<nav className="rpg-entry-tabs" aria-label="冒険の遊び方">{([['practice','ひとりで遊ぶ'],['create','部屋を作る'],['join','招待に参加する']] as const).map(([value,label])=><button key={value} aria-pressed={intent===value} disabled={busy} onClick={()=>{setIntent(value);if(value==='practice'){setTimeLimitMinutes(0);setGameMode('COOP');}else if(timeLimitMinutes===0)setTimeLimitMinutes(30);}}>{label}</button>)}</nav>}
               <label>{autoJoinInvite?'参加名':'冒険者の名前'}<input value={name} maxLength={16} autoComplete="nickname" onChange={e=>setName(e.target.value)}/></label>
-              {autoJoinInvite?<label>開始する編<select value={inviteTheme} onChange={e=>setInviteTheme(e.target.value as RpgAdventureSetup['visualTheme'])}><option value="elementary">小学生編</option><option value="high-school">高校編</option><option value="magic">マジック編</option></select></label>:intent==='join'?<label>ルームコード<input value={code} maxLength={8} autoCapitalize="characters" onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g,''))}/></label>:<div className="rpg-entry-options">{intent==='create'&&<label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World['gameMode'])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>}<label>制限時間<select value={timeLimitMinutes} onChange={e=>setTimeLimitMinutes(Number(e.target.value))}><option value={0}>制限時間なし</option>{[5,15,30,60,90,120,180].map(n=><option key={n} value={n}>{n} min</option>)}</select></label></div>}
+              {autoJoinInvite?<label>開始する編<select value={inviteTheme} onChange={e=>setInviteTheme(e.target.value as RpgAdventureSetup['visualTheme'])}><option value="elementary">小学生編</option><option value="high-school">高校編</option><option value="magic">マジック編</option></select></label>:intent==='join'?<label>ルームコード<input value={code} maxLength={8} inputMode="numeric" autoCapitalize="characters" onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g,''))}/></label>:<div className="rpg-entry-options">{intent==='create'&&<label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World['gameMode'])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>}<label>制限時間<select value={timeLimitMinutes} onChange={e=>setTimeLimitMinutes(Number(e.target.value))}><option value={0}>制限時間なし</option>{[5,15,30,60,90,120,180].map(n=><option key={n} value={n}>{n} min</option>)}</select></label></div>}
               {(autoJoinInvite||intent!=='practice')&&<TransportPicker game="online" value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
-              <button className="rpg-join-button" disabled={busy||!name.trim()||((autoJoinInvite||intent==='join')&&!validRoomAddress(code))} onClick={()=>start(autoJoinInvite?'invite':intent)}>{busy?'接続中…':autoJoinInvite?'名前を決めて主人公選択へ':intent==='practice'?'冒険をはじめる':intent==='create'?'オンラインの部屋を作る':'招待コードを入力して入室する'}</button>
+              <button className="rpg-join-button" disabled={busy||!name.trim()||((autoJoinInvite||intent==='join')&&!validRoomAddress(code))} onClick={()=>start(autoJoinInvite||intent==='join'?'invite':intent)}>{busy?'接続中…':autoJoinInvite?'名前を決めて主人公選択へ':intent==='practice'?'冒険をはじめる':intent==='create'?'オンラインの部屋を作る':'招待コードを入力して入室する'}</button>
               <small>{intent==='practice'&&!autoJoinInvite?'ワールドと主人公をこの端末へ自動保存します。':'ホスト通信は少人数向け。サーバー通信はbeta・大人数非推奨。'}</small>
             </section>
           </div>
@@ -538,7 +538,7 @@ export default function RpgOnline({
               </div>
               {roomCode && (
                 <div className="rpg-waiting-invite">
-                  <span>ROOM {roomCode}</span>
+                  <span>ROOM <strong className="rpg-room-code">{roomCode}</strong></span>
                   <button className="rpg-invite-button" onClick={copyInviteUrl}>
                     {inviteCopied ? <Check size={14} /> : <Copy size={14} />}
                     {inviteCopied ? "コピーしました" : "招待URLをコピー"}
@@ -767,7 +767,7 @@ export default function RpgOnline({
                 </>}
                 {compact&&spectating&&<section data-rpg-panel="player" className="rpg-player-panel"><h2>{watched?.name||'ホスト観戦'}</h2><p>HP {hudHp} / {hudMaxHp}</p><p>コイン {watched?.gold||0} · 戦闘勝利 {watched?.completedBattles||0}</p></section>}
                 {compact&&spectating&&<section data-rpg-panel="team" className="rpg-player-panel"><button onClick={()=>openDetail('social')}>主人公と交流</button><h2>参加者とチーム</h2>{members.map(p=><p key={p.id}>{p.name} · HP {p.hp}/{p.maxHp}</p>)}</section>}
-                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>採取エネルギー</h3><p>{energyOf(watched?.life)} / {GATHER_ENERGY_MAX}</p>{!spectating&&<><p>採取1回で1消費、1問正解で2回復。時間では回復しません。</p><button className="rpg-outline" disabled={!onEnergyRequest} onClick={requestEnergy}>問題を解いて回復</button></>}<h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM {roomCode}</p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり用 · 通信なし</p>}{!roomCode&&<div className="rpg-save-controls"><h3>ワールドの保存</h3><p role="status">{saveStatus||'探索中は30秒ごとに自動保存します。'}</p><button className="rpg-outline" disabled={saving} onClick={()=>void persist()}>ワールドを保存する</button>{onTitle&&<button className="rpg-outline" disabled={saving} onClick={()=>void saveToTitle()}>保存してRPGタイトルへ</button>}</div>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
+                {compact&&<section data-rpg-panel="menu" className="rpg-player-panel rpg-room-details"><h2>木漏れ日のフロンティア</h2><p>{world.gameMode==='BATTLE_ROYALE'?'バトルロイヤル':'協力'} · 戦闘勝利 {watched?.completedBattles||0}</p><p>{biomeAt(watched?.x??me.x,watched?.y??me.y).name}</p><h3>採取エネルギー</h3><p>{energyOf(watched?.life)} / {GATHER_ENERGY_MAX}</p>{!spectating&&<><p>採取1回で1消費、1問正解で2回復。時間では回復しません。</p><button className="rpg-outline" disabled={!onEnergyRequest} onClick={requestEnergy}>問題を解いて回復</button></>}<h3>メッセージ</h3><p>{watched?.message}</p><h3>操作</h3><p>マップをタップして移動。矢印ボタンは押し続けて移動できます。</p><p>施設の近くで「調べる」、素材の近くで「採取」を使いましょう。</p>{spectating&&<><p>8秒ごとにランダム切替</p><button className="rpg-outline" onClick={spectators.next}>次のプレイヤー</button></>}{roomCode?<><p>ROOM <strong className="rpg-room-code">{roomCode}</strong></p><button className="rpg-invite-button" onClick={copyInviteUrl}>{inviteCopied?'コピーしました':'招待URLをコピー'}</button></>:<p>ひとり用 · 通信なし</p>}{!roomCode&&<div className="rpg-save-controls"><h3>ワールドの保存</h3><p role="status">{saveStatus||'探索中は30秒ごとに自動保存します。'}</p><button className="rpg-outline" disabled={saving} onClick={()=>void persist()}>ワールドを保存する</button>{onTitle&&<button className="rpg-outline" disabled={saving} onClick={()=>void saveToTitle()}>保存してRPGタイトルへ</button>}</div>}<button className="rpg-outline" onClick={close}>学習ローグへ</button></section>}
                 </div>
               </aside>
             </div>
@@ -779,7 +779,7 @@ export default function RpgOnline({
               <p role="status">{watched?.message}</p>
               {roomCode ? (
                 <div className="rpg-room-invite">
-                  <span>ROOM {roomCode}</span>
+                  <span>ROOM <strong className="rpg-room-code">{roomCode}</strong></span>
                   <button
                     className="rpg-invite-button"
                     onClick={copyInviteUrl}
