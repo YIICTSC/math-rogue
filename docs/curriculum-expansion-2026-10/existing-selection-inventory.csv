@@ -1,0 +1,982 @@
+﻿カテゴリ,学年キー,表示名,参照モード,登録元
+MATH_GRADES,1,かずとすうじ（10までの かず）,MATH_G1_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,いくつといくつ,MATH_G1_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,かたちあそび,MATH_G1_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,なんばんめ,MATH_G1_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,あわせていくつ（たしざん）,MATH_G1_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,ふえるといくつ（たしざん）,MATH_G1_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,のこりはいくつ（ひきざん）,MATH_G1_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,ちがいはいくつ（ひきざん）,MATH_G1_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,20までのかず,MATH_G1_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,なんじ（とけい）,MATH_G1_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,ながさくらべ,MATH_G1_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,かさくらべ,MATH_G1_U12,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,えぐらふ,MATH_G1_U13,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,ひょう,MATH_G1_U14,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,さんかくとしかく,MATH_G1_U15,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,かたちづくり,MATH_G1_U16,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,3つのかずのけいさん,MATH_G1_U17,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,1,ぶんしょうだい,MATH_G1_U18,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,表 と グラフ,MATH_G2_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,たし算（2けた＋2けた）,MATH_G2_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,ひき算（2けた−2けた）,MATH_G2_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,長さ（ものさし）,MATH_G2_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,100までの 数,MATH_G2_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,かさ（リットル・デシリットル）,MATH_G2_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,時こく と 時かん,MATH_G2_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,3けたの 数,MATH_G2_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,かけ算（かけ算のいみ）,MATH_G2_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,かけ算（九九）,MATH_G2_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,はこの 形,MATH_G2_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,2,ぶんしょうだい,MATH_G2_U12,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,表 と グラフ,MATH_G3_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,大きい 数（1000より大きい数）,MATH_G3_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,たし算（3けた・4けた）,MATH_G3_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,ひき算（3けた・4けた）,MATH_G3_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,時こく と 時かん,MATH_G3_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,長さ（km と m）,MATH_G3_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,かけ算（2けた×1けた など）,MATH_G3_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,円 と きゅう,MATH_G3_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,わり算（わり算のいみ）,MATH_G3_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,わり算（あまりのある計算）,MATH_G3_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,重さ（g と kg）,MATH_G3_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,小数,MATH_G3_U12,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,分数,MATH_G3_U13,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,3,□をつかった 式,MATH_G3_U14,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,大きい 数（1おくまでの数）,MATH_G4_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,わり算（2けたでわる計算）,MATH_G4_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,折れ線グラフ,MATH_G4_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,角,MATH_G4_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,そろばん,MATH_G4_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,小数,MATH_G4_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,小数の たし算 と ひき算,MATH_G4_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,面せき,MATH_G4_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,がい数,MATH_G4_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,式 と 計算の じゅんじょ,MATH_G4_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,分数,MATH_G4_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,分数の たし算 と ひき算,MATH_G4_U12,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,直方体 と 立方体,MATH_G4_U13,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,変わり方,MATH_G4_U14,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,4,調べたことを 表 や グラフ にまとめる,MATH_G4_U15,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,整数 と 小数,MATH_G5_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,体積,MATH_G5_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,小数の かけ算,MATH_G5_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,小数の わり算,MATH_G5_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,合同な 図形,MATH_G5_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,分数 と 小数・整数,MATH_G5_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,分数の たし算 と ひき算,MATH_G5_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,平均,MATH_G5_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,単位量あたりの 大きさ,MATH_G5_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,速さ,MATH_G5_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,比例,MATH_G5_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,円 と 正多角形,MATH_G5_U12,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,角柱 と 円柱,MATH_G5_U13,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,割合,MATH_G5_U14,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,5,帯グラフ と 円グラフ,MATH_G5_U15,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,対称な 図形,MATH_G6_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,文字 と 式,MATH_G6_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,分数の かけ算,MATH_G6_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,分数の わり算,MATH_G6_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,比 と その 利用,MATH_G6_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,比例 と 反比例,MATH_G6_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,拡大図 と 縮図,MATH_G6_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,円の 面積,MATH_G6_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,角柱 と 円柱の 体積,MATH_G6_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,およその 面積 と 体積,MATH_G6_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,場合の 数,MATH_G6_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,資料の 調べ方,MATH_G6_U12,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,6,算数の まとめ,MATH_G6_U13,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,正の数 と 負の数,MATH_G7_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,正負の数の 加法 と 減法,MATH_G7_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,正負の数の 乗法 と 除法,MATH_G7_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,文字式,MATH_G7_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,文字式の 計算,MATH_G7_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,一次方程式,MATH_G7_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,一次方程式の 利用,MATH_G7_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,比例 と 反比例,MATH_G7_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,平面図形,MATH_G7_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,空間図形,MATH_G7_U10,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,7,資料の 整理 と 活用,MATH_G7_U11,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,式の計算,MATH_G8_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,連立方程式,MATH_G8_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,連立方程式の 利用,MATH_G8_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,一次関数,MATH_G8_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,図形の 性質,MATH_G8_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,図形の 合同,MATH_G8_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,三角形 と 四角形,MATH_G8_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,確率,MATH_G8_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,8,データの 分析,MATH_G8_U09,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,式の 展開 と 因数分解,MATH_G9_U01,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,平方根,MATH_G9_U02,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,二次方程式,MATH_G9_U03,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,二次方程式の 利用,MATH_G9_U04,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,関数 y=ax²,MATH_G9_U05,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,相似な 図形,MATH_G9_U06,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,三平方の 定理,MATH_G9_U07,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,円の 性質,MATH_G9_U08,src/components/ModeSelectionScreen.tsx
+MATH_GRADES,9,標本調査,MATH_G9_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,ひらがな,KOKUGO_G1_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,ことばあつめ,KOKUGO_G1_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,かたかな,KOKUGO_G1_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,のばすおん（ー）,KOKUGO_G1_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,ちいさい「っ」,KOKUGO_G1_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,「は・を・へ」のつかいかた,KOKUGO_G1_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,おはなしをよむ,KOKUGO_G1_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,せつめいぶんをよむ,KOKUGO_G1_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,ばめんをそうぞうしてよむ,KOKUGO_G1_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,たいせつなところをみつけてよむ,KOKUGO_G1_U10,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,ぶんをかく,KOKUGO_G1_U11,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,かんたんなにっき,KOKUGO_G1_U12,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,おはなしをつくる,KOKUGO_G1_U13,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,はなしをきく,KOKUGO_G1_U14,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,じぶんのことをはなす,KOKUGO_G1_U15,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,1,みんなのまえではなす,KOKUGO_G1_U16,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,かたかなのことば,KOKUGO_G2_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,主語 と 述語,KOKUGO_G2_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,文のきまり,KOKUGO_G2_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,日記を書く,KOKUGO_G2_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,せつめい文を読む,KOKUGO_G2_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,物語を読む,KOKUGO_G2_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,大事なことを見つける,KOKUGO_G2_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,手紙を書く,KOKUGO_G2_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,作文を書く,KOKUGO_G2_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,話を聞く,KOKUGO_G2_U10,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,2,順序よく話す,KOKUGO_G2_U11,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,漢字の読み書き,KOKUGO_G3_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,国語辞典の使い方,KOKUGO_G3_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,段落,KOKUGO_G3_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,物語文の読み取り,KOKUGO_G3_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,説明文の読み取り,KOKUGO_G3_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,要点をまとめる,KOKUGO_G3_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,日記・作文,KOKUGO_G3_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,手紙の書き方,KOKUGO_G3_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,3,話し合い,KOKUGO_G3_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,漢字の使い方,KOKUGO_G4_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,熟語,KOKUGO_G4_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,国語辞典・漢字辞典,KOKUGO_G4_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,段落と要旨,KOKUGO_G4_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,物語文の読み取り,KOKUGO_G4_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,説明文の読み取り,KOKUGO_G4_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,要約,KOKUGO_G4_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,意見文を書く,KOKUGO_G4_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,4,話し合いと発表,KOKUGO_G4_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,漢字の意味と使い分け,KOKUGO_G5_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,敬語,KOKUGO_G5_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,物語文の読み取り,KOKUGO_G5_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,説明文の読み取り,KOKUGO_G5_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,要約と要旨,KOKUGO_G5_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,意見文を書く,KOKUGO_G5_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,報告文を書く,KOKUGO_G5_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,討論,KOKUGO_G5_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,5,スピーチ,KOKUGO_G5_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,漢字のまとめ,KOKUGO_G6_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,熟語と語句,KOKUGO_G6_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,物語文の読み取り,KOKUGO_G6_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,説明文の読み取り,KOKUGO_G6_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,要旨と要約,KOKUGO_G6_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,意見文を書く,KOKUGO_G6_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,提案文を書く,KOKUGO_G6_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,討論,KOKUGO_G6_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,スピーチ,KOKUGO_G6_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,6,卒業文集,KOKUGO_G6_U10,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,物語文の読み取り,KOKUGO_G7_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,説明文の読み取り,KOKUGO_G7_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,詩の読み取り,KOKUGO_G7_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,古典（古文の基礎）,KOKUGO_G7_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,漢文の基礎,KOKUGO_G7_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,文の成分（主語・述語など）,KOKUGO_G7_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,品詞,KOKUGO_G7_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,漢字の読み書き,KOKUGO_G7_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,要約,KOKUGO_G7_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,意見文,KOKUGO_G7_U10,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,スピーチ,KOKUGO_G7_U11,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,7,話し合い,KOKUGO_G7_U12,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,物語文の読み取り,KOKUGO_G8_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,説明文の読み取り,KOKUGO_G8_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,詩・短歌・俳句,KOKUGO_G8_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,古文（物語・随筆）,KOKUGO_G8_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,漢文（訓読・故事成語）,KOKUGO_G8_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,文法（品詞・活用）,KOKUGO_G8_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,漢字の読み書き,KOKUGO_G8_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,要約,KOKUGO_G8_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,意見文,KOKUGO_G8_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,発表,KOKUGO_G8_U10,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,8,討論,KOKUGO_G8_U11,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,物語文の読み取り,KOKUGO_G9_U01,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,説明文の読み取り,KOKUGO_G9_U02,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,詩・短歌・俳句,KOKUGO_G9_U03,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,古文（古典文学）,KOKUGO_G9_U04,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,漢文（名文・思想）,KOKUGO_G9_U05,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,文法（文の構造）,KOKUGO_G9_U06,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,漢字の読み書き,KOKUGO_G9_U07,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,要約,KOKUGO_G9_U08,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,論説文を書く,KOKUGO_G9_U09,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,スピーチ,KOKUGO_G9_U10,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,討論,KOKUGO_G9_U11,src/components/ModeSelectionScreen.tsx
+KOKUGO_GRADES,9,卒業論文・発表,KOKUGO_G9_U12,src/components/ModeSelectionScreen.tsx
+SCIENCE,1,がっこうたんけん,LIFE_1_U01,src/scienceUnitConfig.ts
+SCIENCE,1,がっこうのひととなかよし,LIFE_1_U02,src/scienceUnitConfig.ts
+SCIENCE,1,きせつとなかよし,LIFE_1_U03,src/scienceUnitConfig.ts
+SCIENCE,1,いきものとなかよし,LIFE_1_U04,src/scienceUnitConfig.ts
+SCIENCE,1,はなややさいをそだてよう,LIFE_1_U05,src/scienceUnitConfig.ts
+SCIENCE,1,みぢかなものあそび,LIFE_1_U06,src/scienceUnitConfig.ts
+SCIENCE,1,じぶんのせいちょう,LIFE_1_U07,src/scienceUnitConfig.ts
+SCIENCE,2,まちたんけん,LIFE_2_U01,src/scienceUnitConfig.ts
+SCIENCE,2,まちのひととなかよし,LIFE_2_U02,src/scienceUnitConfig.ts
+SCIENCE,2,きせつのしぜん,LIFE_2_U03,src/scienceUnitConfig.ts
+SCIENCE,2,やさいをそだてよう,LIFE_2_U04,src/scienceUnitConfig.ts
+SCIENCE,2,いきもののかんさつ,LIFE_2_U05,src/scienceUnitConfig.ts
+SCIENCE,2,おもちゃづくり,LIFE_2_U06,src/scienceUnitConfig.ts
+SCIENCE,2,じぶんのせいちょう,LIFE_2_U07,src/scienceUnitConfig.ts
+SCIENCE,3,しぜんのかんさつ,SCIENCE_3_U01,src/scienceUnitConfig.ts
+SCIENCE,3,こん虫のせい長,SCIENCE_3_U02,src/scienceUnitConfig.ts
+SCIENCE,3,しょくぶつのせい長,SCIENCE_3_U03,src/scienceUnitConfig.ts
+SCIENCE,3,太陽と地面,SCIENCE_3_U04,src/scienceUnitConfig.ts
+SCIENCE,3,光,SCIENCE_3_U05,src/scienceUnitConfig.ts
+SCIENCE,3,音,SCIENCE_3_U06,src/scienceUnitConfig.ts
+SCIENCE,3,風とゴムのはたらき,SCIENCE_3_U07,src/scienceUnitConfig.ts
+SCIENCE,3,電気の通り道,SCIENCE_3_U08,src/scienceUnitConfig.ts
+SCIENCE,3,ものの重さ,SCIENCE_3_U09,src/scienceUnitConfig.ts
+SCIENCE,3,じしゃく,SCIENCE_3_U10,src/scienceUnitConfig.ts
+SCIENCE,4,天気と気温,SCIENCE_4_U01,src/scienceUnitConfig.ts
+SCIENCE,4,季節と生き物,SCIENCE_4_U02,src/scienceUnitConfig.ts
+SCIENCE,4,星と空,SCIENCE_4_U03,src/scienceUnitConfig.ts
+SCIENCE,4,月の動き,SCIENCE_4_U04,src/scienceUnitConfig.ts
+SCIENCE,4,電気のはたらき,SCIENCE_4_U05,src/scienceUnitConfig.ts
+SCIENCE,4,空気と水,SCIENCE_4_U06,src/scienceUnitConfig.ts
+SCIENCE,4,とじこめた空気,SCIENCE_4_U07,src/scienceUnitConfig.ts
+SCIENCE,4,水のすがた,SCIENCE_4_U08,src/scienceUnitConfig.ts
+SCIENCE,4,もののあたたまり方,SCIENCE_4_U09,src/scienceUnitConfig.ts
+SCIENCE,5,天気の変化,SCIENCE_5_U01,src/scienceUnitConfig.ts
+SCIENCE,5,台風と天気,SCIENCE_5_U02,src/scienceUnitConfig.ts
+SCIENCE,5,植物の発芽と成長,SCIENCE_5_U03,src/scienceUnitConfig.ts
+SCIENCE,5,花から実へ,SCIENCE_5_U04,src/scienceUnitConfig.ts
+SCIENCE,5,メダカのたんじょう,SCIENCE_5_U05,src/scienceUnitConfig.ts
+SCIENCE,5,人のたんじょう,SCIENCE_5_U06,src/scienceUnitConfig.ts
+SCIENCE,5,流れる水のはたらき,SCIENCE_5_U07,src/scienceUnitConfig.ts
+SCIENCE,5,物のとけ方,SCIENCE_5_U08,src/scienceUnitConfig.ts
+SCIENCE,5,電磁石,SCIENCE_5_U09,src/scienceUnitConfig.ts
+SCIENCE,6,物の燃え方,SCIENCE_6_U01,src/scienceUnitConfig.ts
+SCIENCE,6,植物のつくりとはたらき,SCIENCE_6_U02,src/scienceUnitConfig.ts
+SCIENCE,6,人の体のつくりとはたらき,SCIENCE_6_U03,src/scienceUnitConfig.ts
+SCIENCE,6,月と太陽,SCIENCE_6_U04,src/scienceUnitConfig.ts
+SCIENCE,6,てこ,SCIENCE_6_U05,src/scienceUnitConfig.ts
+SCIENCE,6,水よう液,SCIENCE_6_U06,src/scienceUnitConfig.ts
+SCIENCE,6,電気の利用,SCIENCE_6_U07,src/scienceUnitConfig.ts
+SCIENCE,6,土地のつくり,SCIENCE_6_U08,src/scienceUnitConfig.ts
+SCIENCE,6,生き物と環境,SCIENCE_6_U09,src/scienceUnitConfig.ts
+SCIENCE,7,生物の観察と分類,SCIENCE_7_U01,src/scienceUnitConfig.ts
+SCIENCE,7,植物の体のつくりとはたらき,SCIENCE_7_U02,src/scienceUnitConfig.ts
+SCIENCE,7,動物の体のつくりとはたらき,SCIENCE_7_U03,src/scienceUnitConfig.ts
+SCIENCE,7,身のまわりの物質,SCIENCE_7_U04,src/scienceUnitConfig.ts
+SCIENCE,7,気体の性質,SCIENCE_7_U05,src/scienceUnitConfig.ts
+SCIENCE,7,水溶液の性質,SCIENCE_7_U06,src/scienceUnitConfig.ts
+SCIENCE,7,光,SCIENCE_7_U07,src/scienceUnitConfig.ts
+SCIENCE,7,音,SCIENCE_7_U08,src/scienceUnitConfig.ts
+SCIENCE,7,力と圧力,SCIENCE_7_U09,src/scienceUnitConfig.ts
+SCIENCE,7,大地の変化,SCIENCE_7_U10,src/scienceUnitConfig.ts
+SCIENCE,7,火山,SCIENCE_7_U11,src/scienceUnitConfig.ts
+SCIENCE,7,地震,SCIENCE_7_U12,src/scienceUnitConfig.ts
+SCIENCE,7,地層,SCIENCE_7_U13,src/scienceUnitConfig.ts
+SCIENCE,8,生物と細胞,SCIENCE_8_U01,src/scienceUnitConfig.ts
+SCIENCE,8,植物の体のつくりとはたらき,SCIENCE_8_U02,src/scienceUnitConfig.ts
+SCIENCE,8,動物の体のつくりとはたらき,SCIENCE_8_U03,src/scienceUnitConfig.ts
+SCIENCE,8,化学変化,SCIENCE_8_U04,src/scienceUnitConfig.ts
+SCIENCE,8,原子と分子,SCIENCE_8_U05,src/scienceUnitConfig.ts
+SCIENCE,8,化学変化と質量,SCIENCE_8_U06,src/scienceUnitConfig.ts
+SCIENCE,8,電流,SCIENCE_8_U07,src/scienceUnitConfig.ts
+SCIENCE,8,電流と磁界,SCIENCE_8_U08,src/scienceUnitConfig.ts
+SCIENCE,8,天気と気象,SCIENCE_8_U09,src/scienceUnitConfig.ts
+SCIENCE,8,前線と天気,SCIENCE_8_U10,src/scienceUnitConfig.ts
+SCIENCE,9,生物の成長と生殖,SCIENCE_9_U01,src/scienceUnitConfig.ts
+SCIENCE,9,遺伝,SCIENCE_9_U02,src/scienceUnitConfig.ts
+SCIENCE,9,生物のつながり,SCIENCE_9_U03,src/scienceUnitConfig.ts
+SCIENCE,9,化学変化とイオン,SCIENCE_9_U04,src/scienceUnitConfig.ts
+SCIENCE,9,酸とアルカリ,SCIENCE_9_U05,src/scienceUnitConfig.ts
+SCIENCE,9,中和,SCIENCE_9_U06,src/scienceUnitConfig.ts
+SCIENCE,9,力の合成と分解,SCIENCE_9_U07,src/scienceUnitConfig.ts
+SCIENCE,9,運動,SCIENCE_9_U08,src/scienceUnitConfig.ts
+SCIENCE,9,仕事とエネルギー,SCIENCE_9_U09,src/scienceUnitConfig.ts
+SCIENCE,9,地球と宇宙,SCIENCE_9_U10,src/scienceUnitConfig.ts
+SCIENCE,9,太陽系,SCIENCE_9_U11,src/scienceUnitConfig.ts
+SCIENCE,9,星の動き,SCIENCE_9_U12,src/scienceUnitConfig.ts
+SOCIAL,3,わたしたちの町,SOCIAL_3_U01,src/socialUnitConfig.ts
+SOCIAL,3,地図の見方,SOCIAL_3_U02,src/socialUnitConfig.ts
+SOCIAL,3,土地のようす,SOCIAL_3_U03,src/socialUnitConfig.ts
+SOCIAL,3,町ではたらく人,SOCIAL_3_U04,src/socialUnitConfig.ts
+SOCIAL,3,商店のしごと,SOCIAL_3_U05,src/socialUnitConfig.ts
+SOCIAL,3,農家のしごと,SOCIAL_3_U06,src/socialUnitConfig.ts
+SOCIAL,3,工場のしごと,SOCIAL_3_U07,src/socialUnitConfig.ts
+SOCIAL,3,交通のはたらき,SOCIAL_3_U08,src/socialUnitConfig.ts
+SOCIAL,3,市のようすのうつりかわり,SOCIAL_3_U09,src/socialUnitConfig.ts
+SOCIAL,4,都道府県,SOCIAL_4_U01,src/socialUnitConfig.ts
+SOCIAL,4,日本の地形,SOCIAL_4_U02,src/socialUnitConfig.ts
+SOCIAL,4,気候,SOCIAL_4_U03,src/socialUnitConfig.ts
+SOCIAL,4,水のしごと,SOCIAL_4_U04,src/socialUnitConfig.ts
+SOCIAL,4,ごみのしょり,SOCIAL_4_U05,src/socialUnitConfig.ts
+SOCIAL,4,災害とくらし,SOCIAL_4_U06,src/socialUnitConfig.ts
+SOCIAL,4,地図帳の使い方,SOCIAL_4_U07,src/socialUnitConfig.ts
+SOCIAL,4,県のようす,SOCIAL_4_U08,src/socialUnitConfig.ts
+SOCIAL,4,伝統文化,SOCIAL_4_U09,src/socialUnitConfig.ts
+SOCIAL,5,日本の国土,SOCIAL_5_U01,src/socialUnitConfig.ts
+SOCIAL,5,日本の気候,SOCIAL_5_U02,src/socialUnitConfig.ts
+SOCIAL,5,農業,SOCIAL_5_U03,src/socialUnitConfig.ts
+SOCIAL,5,水産業,SOCIAL_5_U04,src/socialUnitConfig.ts
+SOCIAL,5,工業,SOCIAL_5_U05,src/socialUnitConfig.ts
+SOCIAL,5,貿易,SOCIAL_5_U06,src/socialUnitConfig.ts
+SOCIAL,5,情報産業,SOCIAL_5_U07,src/socialUnitConfig.ts
+SOCIAL,5,環境問題,SOCIAL_5_U08,src/socialUnitConfig.ts
+SOCIAL,5,食料問題,SOCIAL_5_U09,src/socialUnitConfig.ts
+SOCIAL,6,日本の歴史（縄文・弥生）,SOCIAL_6_U01,src/socialUnitConfig.ts
+SOCIAL,6,古墳時代,SOCIAL_6_U02,src/socialUnitConfig.ts
+SOCIAL,6,奈良時代,SOCIAL_6_U03,src/socialUnitConfig.ts
+SOCIAL,6,平安時代,SOCIAL_6_U04,src/socialUnitConfig.ts
+SOCIAL,6,鎌倉時代,SOCIAL_6_U05,src/socialUnitConfig.ts
+SOCIAL,6,室町時代,SOCIAL_6_U06,src/socialUnitConfig.ts
+SOCIAL,6,安土桃山時代,SOCIAL_6_U07,src/socialUnitConfig.ts
+SOCIAL,6,江戸時代,SOCIAL_6_U08,src/socialUnitConfig.ts
+SOCIAL,6,明治時代,SOCIAL_6_U09,src/socialUnitConfig.ts
+SOCIAL,6,大正時代,SOCIAL_6_U10,src/socialUnitConfig.ts
+SOCIAL,6,昭和時代,SOCIAL_6_U11,src/socialUnitConfig.ts
+SOCIAL,6,日本国憲法,SOCIAL_6_U12,src/socialUnitConfig.ts
+SOCIAL,6,国会,SOCIAL_6_U13,src/socialUnitConfig.ts
+SOCIAL,6,内閣,SOCIAL_6_U14,src/socialUnitConfig.ts
+SOCIAL,6,裁判所,SOCIAL_6_U15,src/socialUnitConfig.ts
+SOCIAL,6,地方自治,SOCIAL_6_U16,src/socialUnitConfig.ts
+SOCIAL,6,国際社会,SOCIAL_6_U17,src/socialUnitConfig.ts
+SOCIAL,7,世界の地域,SOCIAL_7_U01,src/socialUnitConfig.ts
+SOCIAL,7,世界の気候,SOCIAL_7_U02,src/socialUnitConfig.ts
+SOCIAL,7,世界の人口,SOCIAL_7_U03,src/socialUnitConfig.ts
+SOCIAL,7,世界の産業,SOCIAL_7_U04,src/socialUnitConfig.ts
+SOCIAL,7,アジア,SOCIAL_7_U05,src/socialUnitConfig.ts
+SOCIAL,7,ヨーロッパ,SOCIAL_7_U06,src/socialUnitConfig.ts
+SOCIAL,7,アフリカ,SOCIAL_7_U07,src/socialUnitConfig.ts
+SOCIAL,7,北アメリカ,SOCIAL_7_U08,src/socialUnitConfig.ts
+SOCIAL,7,南アメリカ,SOCIAL_7_U09,src/socialUnitConfig.ts
+SOCIAL,7,オセアニア,SOCIAL_7_U10,src/socialUnitConfig.ts
+SOCIAL,7,日本の地域,SOCIAL_7_U11,src/socialUnitConfig.ts
+SOCIAL,7,日本の自然,SOCIAL_7_U12,src/socialUnitConfig.ts
+SOCIAL,7,日本の人口,SOCIAL_7_U13,src/socialUnitConfig.ts
+SOCIAL,7,日本の産業,SOCIAL_7_U14,src/socialUnitConfig.ts
+SOCIAL,8,古代文明,SOCIAL_8_U01,src/socialUnitConfig.ts
+SOCIAL,8,ギリシャ・ローマ,SOCIAL_8_U02,src/socialUnitConfig.ts
+SOCIAL,8,日本の古代,SOCIAL_8_U03,src/socialUnitConfig.ts
+SOCIAL,8,日本の中世,SOCIAL_8_U04,src/socialUnitConfig.ts
+SOCIAL,8,日本の近世,SOCIAL_8_U05,src/socialUnitConfig.ts
+SOCIAL,8,欧米の近代化,SOCIAL_8_U06,src/socialUnitConfig.ts
+SOCIAL,8,明治維新,SOCIAL_8_U07,src/socialUnitConfig.ts
+SOCIAL,8,日本の近代化,SOCIAL_8_U08,src/socialUnitConfig.ts
+SOCIAL,8,世界大戦,SOCIAL_8_U09,src/socialUnitConfig.ts
+SOCIAL,8,現代の日本,SOCIAL_8_U10,src/socialUnitConfig.ts
+SOCIAL,9,現代社会,SOCIAL_9_U01,src/socialUnitConfig.ts
+SOCIAL,9,人権,SOCIAL_9_U02,src/socialUnitConfig.ts
+SOCIAL,9,民主主義,SOCIAL_9_U03,src/socialUnitConfig.ts
+SOCIAL,9,日本国憲法,SOCIAL_9_U04,src/socialUnitConfig.ts
+SOCIAL,9,国会,SOCIAL_9_U05,src/socialUnitConfig.ts
+SOCIAL,9,内閣,SOCIAL_9_U06,src/socialUnitConfig.ts
+SOCIAL,9,裁判所,SOCIAL_9_U07,src/socialUnitConfig.ts
+SOCIAL,9,地方自治,SOCIAL_9_U08,src/socialUnitConfig.ts
+SOCIAL,9,選挙,SOCIAL_9_U09,src/socialUnitConfig.ts
+SOCIAL,9,税金,SOCIAL_9_U10,src/socialUnitConfig.ts
+SOCIAL,9,市場経済,SOCIAL_9_U11,src/socialUnitConfig.ts
+SOCIAL,9,金融,SOCIAL_9_U12,src/socialUnitConfig.ts
+SOCIAL,9,労働,SOCIAL_9_U13,src/socialUnitConfig.ts
+SOCIAL,9,社会保障,SOCIAL_9_U14,src/socialUnitConfig.ts
+SOCIAL,9,国際社会,SOCIAL_9_U15,src/socialUnitConfig.ts
+SOCIAL,9,国際協力,SOCIAL_9_U16,src/socialUnitConfig.ts
+ENGLISH,3,あいさつ,ENGLISH_G3_U01,src/englishUnitConfig.ts
+ENGLISH,3,じこしょうかい,ENGLISH_G3_U02,src/englishUnitConfig.ts
+ENGLISH,3,すきなもの,ENGLISH_G3_U03,src/englishUnitConfig.ts
+ENGLISH,3,かぞく,ENGLISH_G3_U04,src/englishUnitConfig.ts
+ENGLISH,3,いろ,ENGLISH_G3_U05,src/englishUnitConfig.ts
+ENGLISH,3,かず（1〜20）,ENGLISH_G3_U06,src/englishUnitConfig.ts
+ENGLISH,3,どうぶつ,ENGLISH_G3_U07,src/englishUnitConfig.ts
+ENGLISH,3,くだもの・たべもの,ENGLISH_G3_U08,src/englishUnitConfig.ts
+ENGLISH,3,きぶん,ENGLISH_G3_U09,src/englishUnitConfig.ts
+ENGLISH,3,からだのぶぶん,ENGLISH_G3_U10,src/englishUnitConfig.ts
+ENGLISH,3,リスニング総仕上げ,ENGLISH_G3_U11,src/englishUnitConfig.ts
+ENGLISH,3,発声総仕上げ,ENGLISH_G3_U12,src/englishUnitConfig.ts
+ENGLISH,3,復唱問題総仕上げ,ENGLISH_G3_U13,src/englishUnitConfig.ts
+ENGLISH,3,応答問題総仕上げ,ENGLISH_G3_U14,src/englishUnitConfig.ts
+ENGLISH,3,英単語総合,ENGLISH_G3_WORDS,src/englishUnitConfig.ts
+ENGLISH,4,あいさつと会話,ENGLISH_G4_U01,src/englishUnitConfig.ts
+ENGLISH,4,すきな教科,ENGLISH_G4_U02,src/englishUnitConfig.ts
+ENGLISH,4,一日の生活,ENGLISH_G4_U03,src/englishUnitConfig.ts
+ENGLISH,4,天気,ENGLISH_G4_U04,src/englishUnitConfig.ts
+ENGLISH,4,時こく,ENGLISH_G4_U05,src/englishUnitConfig.ts
+ENGLISH,4,文ぼうぐ,ENGLISH_G4_U06,src/englishUnitConfig.ts
+ENGLISH,4,場所,ENGLISH_G4_U07,src/englishUnitConfig.ts
+ENGLISH,4,学校の中,ENGLISH_G4_U08,src/englishUnitConfig.ts
+ENGLISH,4,すきな食べ物,ENGLISH_G4_U09,src/englishUnitConfig.ts
+ENGLISH,4,日本の文化しょうかい,ENGLISH_G4_U10,src/englishUnitConfig.ts
+ENGLISH,4,リスニング総仕上げ,ENGLISH_G4_U11,src/englishUnitConfig.ts
+ENGLISH,4,発声総仕上げ,ENGLISH_G4_U12,src/englishUnitConfig.ts
+ENGLISH,4,復唱問題総仕上げ,ENGLISH_G4_U13,src/englishUnitConfig.ts
+ENGLISH,4,応答問題総仕上げ,ENGLISH_G4_U14,src/englishUnitConfig.ts
+ENGLISH,4,英単語総合,ENGLISH_G4_WORDS,src/englishUnitConfig.ts
+ENGLISH,5,アルファベット,ENGLISH_G5_U01,src/englishUnitConfig.ts
+ENGLISH,5,自己紹介,ENGLISH_G5_U02,src/englishUnitConfig.ts
+ENGLISH,5,家族,ENGLISH_G5_U03,src/englishUnitConfig.ts
+ENGLISH,5,誕生日,ENGLISH_G5_U04,src/englishUnitConfig.ts
+ENGLISH,5,好きなもの,ENGLISH_G5_U05,src/englishUnitConfig.ts
+ENGLISH,5,学校生活,ENGLISH_G5_U06,src/englishUnitConfig.ts
+ENGLISH,5,曜日,ENGLISH_G5_U07,src/englishUnitConfig.ts
+ENGLISH,5,時こく,ENGLISH_G5_U08,src/englishUnitConfig.ts
+ENGLISH,5,できること（can）,ENGLISH_G5_U09,src/englishUnitConfig.ts
+ENGLISH,5,行きたい場所,ENGLISH_G5_U10,src/englishUnitConfig.ts
+ENGLISH,5,リスニング総仕上げ,ENGLISH_G5_U11,src/englishUnitConfig.ts
+ENGLISH,5,発声総仕上げ,ENGLISH_G5_U12,src/englishUnitConfig.ts
+ENGLISH,5,復唱問題総仕上げ,ENGLISH_G5_U13,src/englishUnitConfig.ts
+ENGLISH,5,応答問題総仕上げ,ENGLISH_G5_U14,src/englishUnitConfig.ts
+ENGLISH,5,英単語総合,ENGLISH_G5_WORDS,src/englishUnitConfig.ts
+ENGLISH,6,自己紹介,ENGLISH_G6_U01,src/englishUnitConfig.ts
+ENGLISH,6,将来の夢,ENGLISH_G6_U02,src/englishUnitConfig.ts
+ENGLISH,6,日常生活,ENGLISH_G6_U03,src/englishUnitConfig.ts
+ENGLISH,6,日本文化紹介,ENGLISH_G6_U04,src/englishUnitConfig.ts
+ENGLISH,6,行きたい国,ENGLISH_G6_U05,src/englishUnitConfig.ts
+ENGLISH,6,思い出,ENGLISH_G6_U06,src/englishUnitConfig.ts
+ENGLISH,6,過去の出来事,ENGLISH_G6_U07,src/englishUnitConfig.ts
+ENGLISH,6,好きなもの,ENGLISH_G6_U08,src/englishUnitConfig.ts
+ENGLISH,6,世界の文化,ENGLISH_G6_U09,src/englishUnitConfig.ts
+ENGLISH,6,将来の計画,ENGLISH_G6_U10,src/englishUnitConfig.ts
+ENGLISH,6,リスニング総仕上げ,ENGLISH_G6_U11,src/englishUnitConfig.ts
+ENGLISH,6,発声総仕上げ,ENGLISH_G6_U12,src/englishUnitConfig.ts
+ENGLISH,6,復唱問題総仕上げ,ENGLISH_G6_U13,src/englishUnitConfig.ts
+ENGLISH,6,応答問題総仕上げ,ENGLISH_G6_U14,src/englishUnitConfig.ts
+ENGLISH,6,英単語総合,ENGLISH_G6_WORDS,src/englishUnitConfig.ts
+ENGLISH,7,アルファベット,ENGLISH_G7_U01,src/englishUnitConfig.ts
+ENGLISH,7,be動詞,ENGLISH_G7_U02,src/englishUnitConfig.ts
+ENGLISH,7,一般動詞,ENGLISH_G7_U03,src/englishUnitConfig.ts
+ENGLISH,7,疑問文,ENGLISH_G7_U04,src/englishUnitConfig.ts
+ENGLISH,7,否定文,ENGLISH_G7_U05,src/englishUnitConfig.ts
+ENGLISH,7,命令文,ENGLISH_G7_U06,src/englishUnitConfig.ts
+ENGLISH,7,can,ENGLISH_G7_U07,src/englishUnitConfig.ts
+ENGLISH,7,現在進行形,ENGLISH_G7_U08,src/englishUnitConfig.ts
+ENGLISH,7,三人称単数,ENGLISH_G7_U09,src/englishUnitConfig.ts
+ENGLISH,7,前置詞,ENGLISH_G7_U10,src/englishUnitConfig.ts
+ENGLISH,7,複数形,ENGLISH_G7_U11,src/englishUnitConfig.ts
+ENGLISH,7,代名詞,ENGLISH_G7_U12,src/englishUnitConfig.ts
+ENGLISH,7,リスニング総仕上げ,ENGLISH_G7_U13,src/englishUnitConfig.ts
+ENGLISH,7,発声総仕上げ,ENGLISH_G7_U14,src/englishUnitConfig.ts
+ENGLISH,7,復唱問題総仕上げ,ENGLISH_G7_U15,src/englishUnitConfig.ts
+ENGLISH,7,応答問題総仕上げ,ENGLISH_G7_U16,src/englishUnitConfig.ts
+ENGLISH,7,英単語総合,ENGLISH_G7_WORDS,src/englishUnitConfig.ts
+ENGLISH,8,過去形,ENGLISH_G8_U01,src/englishUnitConfig.ts
+ENGLISH,8,過去進行形,ENGLISH_G8_U02,src/englishUnitConfig.ts
+ENGLISH,8,未来表現（will / be going to）,ENGLISH_G8_U03,src/englishUnitConfig.ts
+ENGLISH,8,助動詞（must / have to / may など）,ENGLISH_G8_U04,src/englishUnitConfig.ts
+ENGLISH,8,不定詞,ENGLISH_G8_U05,src/englishUnitConfig.ts
+ENGLISH,8,動名詞,ENGLISH_G8_U06,src/englishUnitConfig.ts
+ENGLISH,8,接続詞,ENGLISH_G8_U07,src/englishUnitConfig.ts
+ENGLISH,8,比較（比較級・最上級）,ENGLISH_G8_U08,src/englishUnitConfig.ts
+ENGLISH,8,受動態,ENGLISH_G8_U09,src/englishUnitConfig.ts
+ENGLISH,8,リスニング総仕上げ,ENGLISH_G8_U10,src/englishUnitConfig.ts
+ENGLISH,8,発声総仕上げ,ENGLISH_G8_U11,src/englishUnitConfig.ts
+ENGLISH,8,復唱問題総仕上げ,ENGLISH_G8_U12,src/englishUnitConfig.ts
+ENGLISH,8,応答問題総仕上げ,ENGLISH_G8_U13,src/englishUnitConfig.ts
+ENGLISH,8,英単語総合,ENGLISH_G8_WORDS,src/englishUnitConfig.ts
+ENGLISH,9,現在完了,ENGLISH_G9_U01,src/englishUnitConfig.ts
+ENGLISH,9,現在完了進行形,ENGLISH_G9_U02,src/englishUnitConfig.ts
+ENGLISH,9,関係代名詞,ENGLISH_G9_U03,src/englishUnitConfig.ts
+ENGLISH,9,間接疑問文,ENGLISH_G9_U04,src/englishUnitConfig.ts
+ENGLISH,9,仮定法,ENGLISH_G9_U05,src/englishUnitConfig.ts
+ENGLISH,9,分詞,ENGLISH_G9_U06,src/englishUnitConfig.ts
+ENGLISH,9,比較の応用,ENGLISH_G9_U07,src/englishUnitConfig.ts
+ENGLISH,9,長文読解,ENGLISH_G9_U08,src/englishUnitConfig.ts
+ENGLISH,9,英作文,ENGLISH_G9_U09,src/englishUnitConfig.ts
+ENGLISH,9,スピーチ,ENGLISH_G9_U10,src/englishUnitConfig.ts
+ENGLISH,9,リスニング総仕上げ,ENGLISH_G9_U11,src/englishUnitConfig.ts
+ENGLISH,9,発声総仕上げ,ENGLISH_G9_U12,src/englishUnitConfig.ts
+ENGLISH,9,復唱問題総仕上げ,ENGLISH_G9_U13,src/englishUnitConfig.ts
+ENGLISH,9,応答問題総仕上げ,ENGLISH_G9_U14,src/englishUnitConfig.ts
+ENGLISH,9,英単語総合,ENGLISH_G9_WORDS,src/englishUnitConfig.ts
+NATIVE,1,ELA G1: Phonics and Sight Words,NATIVE_ELA_G1,src/nativeEnglishUnitConfig.ts
+NATIVE,1,ELA G1: Long Vowels,NATIVE_ELA_G1_LONG_VOWELS,src/nativeEnglishUnitConfig.ts
+NATIVE,1,ELA G1: Sight Words in Sentences,NATIVE_ELA_G1_SIGHT_WORDS,src/nativeEnglishUnitConfig.ts
+NATIVE,1,ELA G1: Sentences and Story Details,NATIVE_ELA_G1_SENTENCES,src/nativeEnglishUnitConfig.ts
+NATIVE,2,ELA G2: Sentences and Main Idea,NATIVE_ELA_G2,src/nativeEnglishUnitConfig.ts
+NATIVE,2,ELA G2: Prefixes and Suffixes,NATIVE_ELA_G2_PREFIX_SUFFIX,src/nativeEnglishUnitConfig.ts
+NATIVE,2,ELA G2: Reading Details and Vocabulary,NATIVE_ELA_G2_READING,src/nativeEnglishUnitConfig.ts
+NATIVE,2,ELA G2: Reading Fluency and Expression,NATIVE_ELA_G2_FLUENCY,src/nativeEnglishUnitConfig.ts
+NATIVE,3,ELA G3: Reading and Grammar,NATIVE_ELA_G3,src/nativeEnglishUnitConfig.ts
+NATIVE,3,ELA G3: Paragraphs and Word Study,NATIVE_ELA_G3_WRITING,src/nativeEnglishUnitConfig.ts
+NATIVE,3,ELA G3: Inference and Theme,NATIVE_ELA_G3_INFERENCE,src/nativeEnglishUnitConfig.ts
+NATIVE,3,ELA G3: Vocabulary and Context Clues,NATIVE_ELA_G3_VOCAB,src/nativeEnglishUnitConfig.ts
+NATIVE,4,ELA G4: Inference and Theme,NATIVE_ELA_G4_INFERENCE,src/nativeEnglishUnitConfig.ts
+NATIVE,4,ELA G4: Text Structure and Vocabulary,NATIVE_ELA_G4_STRUCTURE,src/nativeEnglishUnitConfig.ts
+NATIVE,4,ELA G4: Point of View,NATIVE_ELA_G4_POINT_OF_VIEW,src/nativeEnglishUnitConfig.ts
+NATIVE,4,ELA G4: Figurative Language,NATIVE_ELA_G4_FIGURATIVE,src/nativeEnglishUnitConfig.ts
+NATIVE,5,ELA G5: Text Analysis,NATIVE_ELA_G5_ANALYSIS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,ELA G5: Opinion and Informative Writing,NATIVE_ELA_G5_WRITING,src/nativeEnglishUnitConfig.ts
+NATIVE,5,ELA G5: Text Evidence,NATIVE_ELA_G5_TEXT_EVIDENCE,src/nativeEnglishUnitConfig.ts
+NATIVE,5,ELA G5: Compare and Contrast,NATIVE_ELA_G5_COMPARE,src/nativeEnglishUnitConfig.ts
+NATIVE,6,ELA G6: Argument and Evidence,NATIVE_ELA_G6_ARGUMENT,src/nativeEnglishUnitConfig.ts
+NATIVE,6,ELA G6: Literature and Figurative Language,NATIVE_ELA_G6_LITERATURE,src/nativeEnglishUnitConfig.ts
+NATIVE,6,ELA G6: Academic Vocabulary,NATIVE_ELA_G6_VOCAB,src/nativeEnglishUnitConfig.ts
+NATIVE,6,ELA G6: Informational Text,NATIVE_ELA_G6_INFORMATIONAL,src/nativeEnglishUnitConfig.ts
+NATIVE,7,ELA G7: Literary Analysis,NATIVE_ELA_G7_ANALYSIS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,ELA G7: Research and Media Literacy,NATIVE_ELA_G7_RESEARCH,src/nativeEnglishUnitConfig.ts
+NATIVE,7,ELA G7: Argument and Claims,NATIVE_ELA_G7_ARGUMENT,src/nativeEnglishUnitConfig.ts
+NATIVE,7,ELA G7: Word Study and Tone,NATIVE_ELA_G7_VOCAB,src/nativeEnglishUnitConfig.ts
+NATIVE,8,ELA G8: Rhetoric and Author Craft,NATIVE_ELA_G8_RHETORIC,src/nativeEnglishUnitConfig.ts
+NATIVE,8,ELA G8: Argument Writing and Source Use,NATIVE_ELA_G8_ARGUMENT,src/nativeEnglishUnitConfig.ts
+NATIVE,8,ELA G8: Media Literacy,NATIVE_ELA_G8_MEDIA,src/nativeEnglishUnitConfig.ts
+NATIVE,8,ELA G8: Literature and Theme,NATIVE_ELA_G8_LITERATURE,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Math G1: Number Sense,NATIVE_MATH_G1,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Math G1: Addition and Subtraction within 20,NATIVE_MATH_G1_ADD_SUB_20,src/nativeEnglishUnitConfig.ts
+NATIVE,1,"Math G1: Shapes, Time, and Money",NATIVE_MATH_G1_SHAPES,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Math G1: Compare Numbers and Data,NATIVE_MATH_G1_COMPARE,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Math G2: Word Problems,NATIVE_MATH_G2,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Math G2: Place Value,NATIVE_MATH_G2_PLACE_VALUE,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Math G2: Place Value and Measurement,NATIVE_MATH_G2_MEASURE,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Math G2: Addition and Subtraction within 100,NATIVE_MATH_G2_ADD_SUB_100,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Math G3: Multiplication and Fractions,NATIVE_MATH_G3,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Math G3: Fractions on Shapes and Number Lines,NATIVE_MATH_G3_FRACTIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Math G3: Geometry and Data,NATIVE_MATH_G3_GEOMETRY,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Math G3: Division and Equal Groups,NATIVE_MATH_G3_DIVISION,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Math G4: Multi-Digit Operations,NATIVE_MATH_G4_OPERATIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Math G4: Fractions and Decimals,NATIVE_MATH_G4_FRACTIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Math G4: Decimals and Measurement,NATIVE_MATH_G4_DECIMALS,src/nativeEnglishUnitConfig.ts
+NATIVE,4,"Math G4: Geometry, Lines, and Angles",NATIVE_MATH_G4_GEOMETRY,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Math G5: Decimals and Volume,NATIVE_MATH_G5_DECIMALS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Math G5: Fraction Operations,NATIVE_MATH_G5_FRACTIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Math G5: Coordinate Plane,NATIVE_MATH_G5_COORDINATE,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Math G5: Numerical Expressions,NATIVE_MATH_G5_EXPRESSIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Math G6: Ratios and Rates,NATIVE_MATH_G6_RATIOS,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Math G6: Expressions and Equations,NATIVE_MATH_G6_EXPRESSIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Math G6: Integers and Rational Numbers,NATIVE_MATH_G6_INTEGERS,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Math G6: Statistics and Data,NATIVE_MATH_G6_STATS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Math G7: Proportional Relationships,NATIVE_MATH_G7_PROPORTIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Math G7: Statistics and Probability,NATIVE_MATH_G7_STATS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Math G7: Integers and Rational Numbers,NATIVE_MATH_G7_INTEGERS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Math G7: Expressions and Equations,NATIVE_MATH_G7_EXPRESSIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Math G8: Linear Equations,NATIVE_MATH_G8_LINEAR,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Math G8: Geometry and Functions,NATIVE_MATH_G8_GEOMETRY,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Math G8: Pythagorean Theorem,NATIVE_MATH_G8_PYTHAGOREAN,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Math G8: Transformations and Congruence,NATIVE_MATH_G8_TRANSFORMATIONS,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Science G1: Weather and Living Things,NATIVE_SCIENCE_G1,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Science G1: Weather and Seasons,NATIVE_SCIENCE_G1_WEATHER,src/nativeEnglishUnitConfig.ts
+NATIVE,1,"Science G1: Light, Sound, and Materials",NATIVE_SCIENCE_G1_MATERIALS,src/nativeEnglishUnitConfig.ts
+NATIVE,2,"Science G2: Plants, Animals, and Matter",NATIVE_SCIENCE_G2,src/nativeEnglishUnitConfig.ts
+NATIVE,2,"Science G2: Solids, Liquids, and Changes",NATIVE_SCIENCE_G2_MATTER,src/nativeEnglishUnitConfig.ts
+NATIVE,2,"Science G2: Land, Water, and Weather",NATIVE_SCIENCE_G2_EARTH,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Science G3: Habitats and Forces,NATIVE_SCIENCE_G3,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Science G3: Life Cycles and Earth Systems,NATIVE_SCIENCE_G3_SYSTEMS,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Science G3: Weather and Climate,NATIVE_SCIENCE_G3_WEATHER_CLIMATE,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Science G4: Energy and Waves,NATIVE_SCIENCE_G4_ENERGY,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Science G4: Earth Changes,NATIVE_SCIENCE_G4_EARTH,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Science G4: Organisms and Environments,NATIVE_SCIENCE_G4_ORGANISMS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Science G5: Matter and Mixtures,NATIVE_SCIENCE_G5_MATTER,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Science G5: Ecosystems and Space,NATIVE_SCIENCE_G5_ECOSYSTEMS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Science G5: Engineering Design,NATIVE_SCIENCE_G5_ENGINEERING,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Science G6: Cells and Body Systems,NATIVE_SCIENCE_G6_CELLS,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Science G6: Earth Science,NATIVE_SCIENCE_G6_EARTH,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Science G6: Weather and Climate,NATIVE_SCIENCE_G6_WEATHER_CLIMATE,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Science G7: Genetics and Ecology,NATIVE_SCIENCE_G7_LIFE,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Science G7: Physical Science,NATIVE_SCIENCE_G7_PHYSICAL,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Science G7: Energy Transfer,NATIVE_SCIENCE_G7_ENERGY_TRANSFER,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Science G8: Chemistry Foundations,NATIVE_SCIENCE_G8_CHEMISTRY,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Science G8: Space and Earth History,NATIVE_SCIENCE_G8_SPACE,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Science G8: Forces and Motion,NATIVE_SCIENCE_G8_FORCES_MOTION,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Social Studies G1: Community,NATIVE_SOCIAL_G1,src/nativeEnglishUnitConfig.ts
+NATIVE,1,"Social Studies G1: Needs, Wants, and Jobs",NATIVE_SOCIAL_G1_NEEDS_WANTS,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Social Studies G1: Rules and Citizenship,NATIVE_SOCIAL_G1_CITIZENSHIP,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Social Studies G1: Digital Kindness and Safety,NATIVE_SOCIAL_G1_DIGITAL_KINDNESS,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Social Studies G2: Maps and Citizenship,NATIVE_SOCIAL_G2,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Social Studies G2: Map Skills,NATIVE_SOCIAL_G2_MAP_SKILLS,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Social Studies G2: Culture and History Sources,NATIVE_SOCIAL_G2_HISTORY,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Social Studies G2: Healthy Routines and Choices,NATIVE_SOCIAL_G2_HEALTHY_ROUTINES,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Social Studies G3: Regions and History,NATIVE_SOCIAL_G3,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Social Studies G3: Government and Economy,NATIVE_SOCIAL_G3_GOVERNMENT,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Social Studies G3: Map Skills and Regions,NATIVE_SOCIAL_G3_MAP_SKILLS,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Social Studies G3: Digital Citizenship,NATIVE_SOCIAL_G3_DIGITAL_CITIZENSHIP,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Social Studies G4: Geography and Regions,NATIVE_SOCIAL_G4_GEOGRAPHY,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Social Studies G4: State and Local History,NATIVE_SOCIAL_G4_HISTORY,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Social Studies G4: Economics and Resources,NATIVE_SOCIAL_G4_ECONOMICS,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Social Studies G4: Study Skills and Goals,NATIVE_SOCIAL_G4_STUDY_SKILLS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Social Studies G5: U.S. History Foundations,NATIVE_SOCIAL_G5_US_HISTORY,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Social Studies G5: Civics and Economics,NATIVE_SOCIAL_G5_CIVICS,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Social Studies G5: Geography of the Americas,NATIVE_SOCIAL_G5_GEOGRAPHY,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Social Studies G5: Financial Literacy Basics,NATIVE_SOCIAL_G5_FINANCIAL_LITERACY,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Social Studies G6: World Geography,NATIVE_SOCIAL_G6_WORLD_GEO,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Social Studies G6: Ancient Civilizations,NATIVE_SOCIAL_G6_ANCIENT,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Social Studies G6: World Cultures,NATIVE_SOCIAL_G6_WORLD_CULTURES,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Social Studies G6: Online Safety and Privacy,NATIVE_SOCIAL_G6_ONLINE_PRIVACY,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Social Studies G7: Medieval and Early Modern World,NATIVE_SOCIAL_G7_MEDIEVAL,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Social Studies G7: Civics and Global Issues,NATIVE_SOCIAL_G7_CIVICS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Social Studies G7: Economics and Trade,NATIVE_SOCIAL_G7_ECONOMICS,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Social Studies G7: Media Balance and Well-Being,NATIVE_SOCIAL_G7_MEDIA_BALANCE,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Social Studies G8: U.S. History and Constitution,NATIVE_SOCIAL_G8_US_HISTORY,src/nativeEnglishUnitConfig.ts
+NATIVE,8,"Social Studies G8: Government, Rights, and Media",NATIVE_SOCIAL_G8_CIVICS,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Social Studies G8: Media Literacy and Public Issues,NATIVE_SOCIAL_G8_MEDIA_LITERACY,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Social Studies G8: Career Awareness and Problem Solving,NATIVE_SOCIAL_G8_CAREER_AWARENESS,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Japanese G1: Hiragana and First Words,NATIVE_JAPANESE_G1,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Japanese G1: Greetings and Classroom Phrases,NATIVE_JAPANESE_G1_GREETINGS,src/nativeEnglishUnitConfig.ts
+NATIVE,1,Japanese G1: Numbers and Colors,NATIVE_JAPANESE_G1_NUMBERS,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Japanese G2: Katakana and Loanwords,NATIVE_JAPANESE_G2,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Japanese G2: Simple Sentences,NATIVE_JAPANESE_G2_SENTENCES,src/nativeEnglishUnitConfig.ts
+NATIVE,2,Japanese G2: Family and Daily Words,NATIVE_JAPANESE_G2_FAMILY,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Japanese G3: Particles and Questions,NATIVE_JAPANESE_G3,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Japanese G3: First Kanji and Radicals,NATIVE_JAPANESE_G3_KANJI,src/nativeEnglishUnitConfig.ts
+NATIVE,3,Japanese G3: Time and Schedules,NATIVE_JAPANESE_G3_TIME,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Japanese G4: Verbs and Polite Forms,NATIVE_JAPANESE_G4_VERBS,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Japanese G4: Short Reading Passages,NATIVE_JAPANESE_G4_READING,src/nativeEnglishUnitConfig.ts
+NATIVE,4,Japanese G4: Shopping and Menus,NATIVE_JAPANESE_G4_SHOPPING,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Japanese G5: Adjectives and Descriptions,NATIVE_JAPANESE_G5_ADJECTIVES,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Japanese G5: Daily Life Communication,NATIVE_JAPANESE_G5_DAILY_LIFE,src/nativeEnglishUnitConfig.ts
+NATIVE,5,Japanese G5: School Life,NATIVE_JAPANESE_G5_SCHOOL_LIFE,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Japanese G6: Connectors and Longer Sentences,NATIVE_JAPANESE_G6_CONNECTORS,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Japanese G6: Culture and Practical Reading,NATIVE_JAPANESE_G6_CULTURE,src/nativeEnglishUnitConfig.ts
+NATIVE,6,Japanese G6: Travel and Directions,NATIVE_JAPANESE_G6_TRAVEL,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Japanese G7: Conversation and Opinions,NATIVE_JAPANESE_G7_CONVERSATION,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Japanese G7: Reading with Kanji,NATIVE_JAPANESE_G7_READING,src/nativeEnglishUnitConfig.ts
+NATIVE,7,Japanese G7: Media and Messages,NATIVE_JAPANESE_G7_MEDIA,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Japanese G8: Grammar Review and Nuance,NATIVE_JAPANESE_G8_GRAMMAR,src/nativeEnglishUnitConfig.ts
+NATIVE,8,"Japanese G8: Media, Signs, and Everyday Texts",NATIVE_JAPANESE_G8_MEDIA,src/nativeEnglishUnitConfig.ts
+NATIVE,8,Japanese G8: Culture Project and Presentation,NATIVE_JAPANESE_G8_CULTURE_PROJECT,src/nativeEnglishUnitConfig.ts
+KANKEN,,超難読 熟字訓,HARD_KANJI_JUKUJIKUN,src/subjectConfig.ts
+KANKEN,,動植物 極,HARD_KANJI_FLORA_FAUNA,src/subjectConfig.ts
+KANKEN,,当て字・外来語 極,HARD_KANJI_ATEJI,src/subjectConfig.ts
+KANKEN,,地名・国名 難読,HARD_KANJI_PLACE_NAMES,src/subjectConfig.ts
+KANKEN,,国字・和製漢字,HARD_KANJI_KOKUJI,src/subjectConfig.ts
+KANKEN,,仏教・神道・古典語,HARD_KANJI_CLASSICS,src/subjectConfig.ts
+KANKEN,,四字熟語 極,HARD_KANJI_YOJUKUGO,src/subjectConfig.ts
+KANKEN,,古典表記・歴史語彙,HARD_KANJI_HISTORY,src/subjectConfig.ts
+KANKEN,,ミックス,HARD_KANJI_MIXED,src/subjectConfig.ts
+UPPER_MODERN,,評論語彙・読解語,UPPER_MODERN_VOCAB,src/components/ModeSelectionScreen.tsx
+UPPER_CLASSICS,,古文・漢文基礎,UPPER_CLASSICS,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,高校英語基礎,UPPER_ENGLISH,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,英単語総合,UPPER_ENGLISH_WORDS,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,学術・論説,UPPER_ENGLISH_ACADEMIC,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,生活実用,UPPER_ENGLISH_DAILY,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,ビジネス・進路,UPPER_ENGLISH_BUSINESS,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,科学,UPPER_ENGLISH_SCIENCE,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,IT・テクノロジー,UPPER_ENGLISH_TECH,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,入試・論理表現,UPPER_ENGLISH_EXAM,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,社会・国際,UPPER_ENGLISH_SOCIAL,src/components/ModeSelectionScreen.tsx
+UPPER_ENGLISH,,旅行・文化,UPPER_ENGLISH_TRAVEL,src/components/ModeSelectionScreen.tsx
+UPPER_INFORMATION,,情報I・ネット活用,UPPER_INFORMATION,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,一般常識・科学雑学,UPPER_TRIVIA,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,ボードゲーム,HOBBY_BOARD_GAMES,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,TRPG,HOBBY_TRPG,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,カードゲーム,HOBBY_CARD_GAMES,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,将棋,HOBBY_SHOGI,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,囲碁,HOBBY_GO,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,チェス,HOBBY_CHESS,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,麻雀,HOBBY_MAHJONG,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,釣り,HOBBY_FISHING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,キャンプ,HOBBY_CAMPING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,登山,HOBBY_HIKING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,写真,HOBBY_PHOTOGRAPHY,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,動画制作,HOBBY_VIDEO,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,音楽鑑賞,HOBBY_MUSIC_LISTENING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,楽器演奏,HOBBY_INSTRUMENTS,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,園芸,HOBBY_GARDENING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,料理,HOBBY_COOKING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,お菓子作り,HOBBY_BAKING,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,手芸,HOBBY_HANDICRAFT,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,プラモデル,HOBBY_PLASTIC_MODELS,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,鉄道,HOBBY_RAILWAY,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,自転車,HOBBY_BICYCLE,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,天体観測,HOBBY_ASTRONOMY,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,昆虫観察,HOBBY_INSECTS,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,水族館・魚,HOBBY_AQUARIUM_FISH,src/components/ModeSelectionScreen.tsx
+UPPER_TRIVIA,,動物園・動物,HOBBY_ZOO_ANIMALS,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,数と式,UPPER_MATH_NUM_EXPR,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,二次関数,UPPER_MATH_QUADRATIC,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,図形と計量,UPPER_MATH_GEOMETRY,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,確率・統計,UPPER_MATH_PROB_STATS,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,三角関数,UPPER_MATH_TRIGONOMETRY,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,数列,UPPER_MATH_SEQUENCE,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,ベクトル,UPPER_MATH_VECTOR,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,微分・積分基礎,UPPER_MATH_CALCULUS,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,指数・対数,UPPER_MATH_EXP_LOG,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,複素数平面,UPPER_MATH_COMPLEX,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,場合の数発展,UPPER_MATH_ADV_PROB,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,統計的推測,UPPER_MATH_STAT_INFERENCE,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,数学史・活用,UPPER_MATH_MATH_HISTORY,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,線形代数入門,UPPER_MATH_LINEAR_ALGEBRA,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,解析幾何,UPPER_MATH_ANALYTIC_GEOMETRY,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,最適化,UPPER_MATH_OPTIMIZATION,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,離散数学,UPPER_MATH_DISCRETE,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,金融数学,UPPER_MATH_FINANCE,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,微分応用,UPPER_MATH_DERIVATIVE_APP,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,積分応用,UPPER_MATH_INTEGRAL_APP,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,証明発展,UPPER_MATH_PROOF_ADV,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,関数総合,UPPER_MATH_FUNCTION_MIX,src/components/ModeSelectionScreen.tsx
+UPPER_MATH,,データサイエンス基礎,UPPER_MATH_DATA_SCIENCE,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,物理基礎,UPPER_SCIENCE_PHYSICS,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,化学基礎,UPPER_SCIENCE_CHEMISTRY,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,生物基礎,UPPER_SCIENCE_BIOLOGY,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,地学基礎,UPPER_SCIENCE_EARTH,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,力学演習,UPPER_SCIENCE_MECHANICS,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,電磁気,UPPER_SCIENCE_ELECTROMAGNETISM,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,有機化学,UPPER_SCIENCE_ORGANIC,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,遺伝・進化,UPPER_SCIENCE_GENETICS,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,環境科学,UPPER_SCIENCE_ENVIRONMENT,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,天文・宇宙,UPPER_SCIENCE_ASTRONOMY,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,実験・探究,UPPER_SCIENCE_LAB,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,医療・生命科学,UPPER_SCIENCE_MEDICAL,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,科学技術,UPPER_SCIENCE_ENGINEERING,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,熱とエネルギー,UPPER_SCIENCE_THERMODYNAMICS,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,波動・光学,UPPER_SCIENCE_WAVES_OPTICS,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,無機化学,UPPER_SCIENCE_INORGANIC,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,生態・進化発展,UPPER_SCIENCE_ECOLOGY_ADV,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,地質・気象発展,UPPER_SCIENCE_GEO_WEATHER,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,原子・量子,UPPER_SCIENCE_ATOMIC_QUANTUM,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,材料科学,UPPER_SCIENCE_MATERIALS,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,食品科学,UPPER_SCIENCE_FOOD,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,海洋科学,UPPER_SCIENCE_OCEAN,src/components/ModeSelectionScreen.tsx
+UPPER_SCIENCE,,防災科学,UPPER_SCIENCE_DISASTER,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,日本史基礎,UPPER_SOCIETY_JAPAN_HISTORY,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,世界史基礎,UPPER_SOCIETY_WORLD_HISTORY,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,地理基礎,UPPER_SOCIETY_GEOGRAPHY,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,公民・政治経済,UPPER_SOCIETY_CIVICS,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,近現代日本史,UPPER_SOCIETY_MODERN_JAPAN,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,近現代世界史,UPPER_SOCIETY_MODERN_WORLD,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,地図・GIS,UPPER_SOCIETY_GIS_MAP,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,倫理・公共,UPPER_SOCIETY_ETHICS_PUBLIC,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,法と人権,UPPER_SOCIETY_LAW_RIGHTS,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,経済発展,UPPER_SOCIETY_ECONOMICS_ADV,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,国際関係,UPPER_SOCIETY_INTL_RELATIONS,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,地域研究,UPPER_SOCIETY_REGIONAL_STUDIES,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,現代社会課題,UPPER_SOCIETY_CURRENT_AFFAIRS,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,古代文明,UPPER_SOCIETY_ANCIENT_WORLD,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,中世世界,UPPER_SOCIETY_MEDIEVAL_WORLD,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,文化史,UPPER_SOCIETY_CULTURE_HISTORY,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,政治思想,UPPER_SOCIETY_POLITICAL_THOUGHT,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,日本地理,UPPER_SOCIETY_JAPAN_GEOGRAPHY,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,世界地理発展,UPPER_SOCIETY_WORLD_GEO_ADV,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,日本政治,UPPER_SOCIETY_JAPAN_POLITICS,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,地方自治,UPPER_SOCIETY_LOCAL_GOV,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,メディア社会,UPPER_SOCIETY_MEDIA_SOCIAL,src/components/ModeSelectionScreen.tsx
+UPPER_SOCIETY,,環境政策,UPPER_SOCIETY_ENV_POLICY,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,小論文語彙,UPPER_ESSAY_VOCAB,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,論点整理,UPPER_ESSAY_LOGIC,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,資料読解,UPPER_ESSAY_DATA_READING,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,探究・研究法,UPPER_ESSAY_RESEARCH,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,課題発見,UPPER_ESSAY_ISSUE_FINDING,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,データ分析,UPPER_ESSAY_DATA_ANALYSIS,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,プレゼン・発表,UPPER_ESSAY_PRESENTATION,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,レポート作法,UPPER_ESSAY_REPORT_WRITING,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,ディベート,UPPER_ESSAY_DEBATE,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,デザイン思考,UPPER_ESSAY_DESIGN_THINKING,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,メディア読解,UPPER_ESSAY_MEDIA_LITERACY,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,学術語彙,UPPER_ESSAY_ACADEMIC_WORDS,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,聞き取り調査,UPPER_ESSAY_INTERVIEW_FIELD,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,表現技法,UPPER_ESSAY_CREATIVE_WRITING,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,政策提案,UPPER_ESSAY_POLICY_PROPOSAL,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,資料批判,UPPER_ESSAY_SOURCE_CRITIQUE,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,志望理由・面接,UPPER_ESSAY_CAREER_ADMISSION,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,文章論理,UPPER_ESSAY_STATEMENT_LOGIC,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,論理パズル,UPPER_ESSAY_LOGIC_PUZZLE,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,課題図書読解,UPPER_ESSAY_BOOK_READING,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,要約トレーニング,UPPER_ESSAY_SUMMARY,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,比較文化論,UPPER_ESSAY_COMPARATIVE_CULTURE,src/components/ModeSelectionScreen.tsx
+UPPER_ESSAY,,プロジェクト管理,UPPER_ESSAY_PROJECT_MANAGEMENT,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,お金・金融,UPPER_PRACTICAL_MONEY,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,法律・契約,UPPER_PRACTICAL_LAW,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,健康・医療リテラシー,UPPER_PRACTICAL_HEALTH,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,防災・安全,UPPER_PRACTICAL_SAFETY,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,税金・社会保険,UPPER_PRACTICAL_TAX_SOCIAL,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,労働・進路,UPPER_PRACTICAL_WORK_CAREER,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,住まい・契約,UPPER_PRACTICAL_HOUSING_CONTRACT,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,ネット生活安全,UPPER_PRACTICAL_NET_SAFETY,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,料理・栄養,UPPER_PRACTICAL_COOK_NUTRITION,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,コミュニケーション,UPPER_PRACTICAL_COMMUNICATION,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,デジタル効率化,UPPER_PRACTICAL_DIGITAL_PRODUCTIVITY,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,福祉・子育て,UPPER_PRACTICAL_CHILD_WELFARE,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,起業・企画,UPPER_PRACTICAL_ENTREPRENEURSHIP,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,時間管理,UPPER_PRACTICAL_TIME_MANAGEMENT,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,応急手当,UPPER_PRACTICAL_EMERGENCY_FIRSTAID,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,消費者トラブル,UPPER_PRACTICAL_CONSUMER_TROUBLE,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,公共サービス,UPPER_PRACTICAL_PUBLIC_SERVICES,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,人間関係・メンタル,UPPER_PRACTICAL_RELATIONSHIP,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,家計管理発展,UPPER_PRACTICAL_BUDGET_ADV,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,投資リテラシー,UPPER_PRACTICAL_INVESTMENT,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,交通・旅行,UPPER_PRACTICAL_TRAVEL_TRANSPORT,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,冠婚葬祭マナー,UPPER_PRACTICAL_CEREMONY_MANNERS,src/components/ModeSelectionScreen.tsx
+UPPER_PRACTICAL,,介護・看護入門,UPPER_PRACTICAL_CARE_NURSING,src/components/ModeSelectionScreen.tsx
+MATH,,1ケタのたし算,ADD_1DIGIT,src/subjectConfig.ts
+MATH,,たし算（くりあがり）,ADD_1DIGIT_CARRY,src/subjectConfig.ts
+MATH,,1ケタのひき算,SUB_1DIGIT,src/subjectConfig.ts
+MATH,,ひき算（くりさがり）,SUB_1DIGIT_BORROW,src/subjectConfig.ts
+MATH,,2ケタのたし算,ADDITION,src/subjectConfig.ts
+MATH,,2ケタのひき算,SUBTRACTION,src/subjectConfig.ts
+MATH,,かけ算九九,MULTIPLICATION,src/subjectConfig.ts
+MATH,,わり算,DIVISION,src/subjectConfig.ts
+MATH,,ミックス,MIXED,src/subjectConfig.ts
+SUMMARY,,学年別総まとめ,MATH_G1_1,src/subjectConfig.ts
+MATH_GRADES,,算 小1 2学期,MATH_G1_2,src/subjectConfig.ts
+MATH_GRADES,,算 小1 3学期,MATH_G1_3,src/subjectConfig.ts
+MATH_GRADES,,算 小2 1学期,MATH_G2_1,src/subjectConfig.ts
+MATH_GRADES,,算 小2 2学期,MATH_G2_2,src/subjectConfig.ts
+MATH_GRADES,,算 小2 3学期,MATH_G2_3,src/subjectConfig.ts
+MATH_GRADES,,算 小3 1学期,MATH_G3_1,src/subjectConfig.ts
+MATH_GRADES,,算 小3 2学期,MATH_G3_2,src/subjectConfig.ts
+MATH_GRADES,,算 小3 3学期,MATH_G3_3,src/subjectConfig.ts
+MATH_GRADES,,算 小4 1学期,MATH_G4_1,src/subjectConfig.ts
+MATH_GRADES,,算 小4 2学期,MATH_G4_2,src/subjectConfig.ts
+MATH_GRADES,,算 小4 3学期,MATH_G4_3,src/subjectConfig.ts
+MATH_GRADES,,算 小5 1学期,MATH_G5_1,src/subjectConfig.ts
+MATH_GRADES,,算 小5 2学期,MATH_G5_2,src/subjectConfig.ts
+MATH_GRADES,,算 小5 3学期,MATH_G5_3,src/subjectConfig.ts
+MATH_GRADES,,算 小6 1学期,MATH_G6_1,src/subjectConfig.ts
+MATH_GRADES,,算 小6 2学期,MATH_G6_2,src/subjectConfig.ts
+MATH_GRADES,,算 小6 3学期,MATH_G6_3,src/subjectConfig.ts
+MATH_GRADES,,数 中1 1学期,MATH_G7_1,src/subjectConfig.ts
+MATH_GRADES,,数 中1 2学期,MATH_G7_2,src/subjectConfig.ts
+MATH_GRADES,,数 中1 3学期,MATH_G7_3,src/subjectConfig.ts
+MATH_GRADES,,数 中2 1学期,MATH_G8_1,src/subjectConfig.ts
+MATH_GRADES,,数 中2 2学期,MATH_G8_2,src/subjectConfig.ts
+MATH_GRADES,,数 中2 3学期,MATH_G8_3,src/subjectConfig.ts
+MATH_GRADES,,数 中3 1学期,MATH_G9_1,src/subjectConfig.ts
+MATH_GRADES,,数 中3 2学期,MATH_G9_2,src/subjectConfig.ts
+MATH_GRADES,,数 中3 3学期,MATH_G9_3,src/subjectConfig.ts
+KOKUGO_GRADES,,国 小1,KOKUGO_G1_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 小2,KOKUGO_G2_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 小3,KOKUGO_G3_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 小4,KOKUGO_G4_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 小5,KOKUGO_G5_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 小6,KOKUGO_G6_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 中1,KOKUGO_G7_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 中2,KOKUGO_G8_1,src/subjectConfig.ts
+KOKUGO_GRADES,,国 中3,KOKUGO_G9_1,src/subjectConfig.ts
+KANJI,,小学1年,KANJI_1,src/subjectConfig.ts
+KANJI,,小学2年,KANJI_2,src/subjectConfig.ts
+KANJI,,小学3年,KANJI_3,src/subjectConfig.ts
+KANJI,,小学4年,KANJI_4,src/subjectConfig.ts
+KANJI,,小学5年,KANJI_5,src/subjectConfig.ts
+KANJI,,小学6年,KANJI_6,src/subjectConfig.ts
+KANJI,,中学1年,KANJI_7,src/subjectConfig.ts
+KANJI,,中学2年,KANJI_8,src/subjectConfig.ts
+KANJI,,中学3年,KANJI_9,src/subjectConfig.ts
+KANJI,,高校基礎,KANJI_10,src/subjectConfig.ts
+KANJI,,高校標準,KANJI_11,src/subjectConfig.ts
+KANJI,,高校発展,KANJI_12,src/subjectConfig.ts
+KANJI,,ミックス,KANJI_MIXED,src/subjectConfig.ts
+KANKEN,,10級,KANKEN_10,src/subjectConfig.ts
+KANKEN,,9級,KANKEN_9,src/subjectConfig.ts
+KANKEN,,8級,KANKEN_8,src/subjectConfig.ts
+KANKEN,,7級,KANKEN_7,src/subjectConfig.ts
+KANKEN,,6級,KANKEN_6,src/subjectConfig.ts
+KANKEN,,5級,KANKEN_5,src/subjectConfig.ts
+KANKEN,,4級,KANKEN_4,src/subjectConfig.ts
+KANKEN,,3級,KANKEN_3,src/subjectConfig.ts
+KANKEN,,準2級,KANKEN_PRE2,src/subjectConfig.ts
+KANKEN,,2級,KANKEN_2,src/subjectConfig.ts
+KANKEN,,準1級,KANKEN_PRE1,src/subjectConfig.ts
+KANKEN,,1級,KANKEN_1,src/subjectConfig.ts
+KANKEN,,ミックス,KANKEN_MIXED,src/subjectConfig.ts
+ENGLISH,,英 小3,ENGLISH_G3_1,src/subjectConfig.ts
+ENGLISH,,英 小4,ENGLISH_G4_1,src/subjectConfig.ts
+ENGLISH,,英 小5,ENGLISH_G5_1,src/subjectConfig.ts
+ENGLISH,,英 小6,ENGLISH_G6_1,src/subjectConfig.ts
+ENGLISH,,英 中1,ENGLISH_G7_1,src/subjectConfig.ts
+ENGLISH,,英 中2,ENGLISH_G8_1,src/subjectConfig.ts
+ENGLISH,,英 中3,ENGLISH_G9_1,src/subjectConfig.ts
+LIFE,,生 小1 1学期,LIFE_1_1,src/subjectConfig.ts
+LIFE,,生 小1 2学期,LIFE_1_2,src/subjectConfig.ts
+LIFE,,生 小1 3学期,LIFE_1_3,src/subjectConfig.ts
+LIFE,,生 小2 1学期,LIFE_2_1,src/subjectConfig.ts
+LIFE,,生 小2 2学期,LIFE_2_2,src/subjectConfig.ts
+LIFE,,生 小2 3学期,LIFE_2_3,src/subjectConfig.ts
+SCIENCE,,理 小3 1学期,SCIENCE_3_1,src/subjectConfig.ts
+SCIENCE,,理 小3 2学期,SCIENCE_3_2,src/subjectConfig.ts
+SCIENCE,,理 小3 3学期,SCIENCE_3_3,src/subjectConfig.ts
+SCIENCE,,理 小4 1学期,SCIENCE_4_1,src/subjectConfig.ts
+SCIENCE,,理 小4 2学期,SCIENCE_4_2,src/subjectConfig.ts
+SCIENCE,,理 小4 3学期,SCIENCE_4_3,src/subjectConfig.ts
+SCIENCE,,理 小5 1学期,SCIENCE_5_1,src/subjectConfig.ts
+SCIENCE,,理 小5 2学期,SCIENCE_5_2,src/subjectConfig.ts
+SCIENCE,,理 小5 3学期,SCIENCE_5_3,src/subjectConfig.ts
+SCIENCE,,理 小6 1学期,SCIENCE_6_1,src/subjectConfig.ts
+SCIENCE,,理 小6 2学期,SCIENCE_6_2,src/subjectConfig.ts
+SCIENCE,,理 小6 3学期,SCIENCE_6_3,src/subjectConfig.ts
+SCIENCE,,理 中1 1学期,SCIENCE_7_1,src/subjectConfig.ts
+SCIENCE,,理 中1 2学期,SCIENCE_7_2,src/subjectConfig.ts
+SCIENCE,,理 中1 3学期,SCIENCE_7_3,src/subjectConfig.ts
+SCIENCE,,理 中2 1学期,SCIENCE_8_1,src/subjectConfig.ts
+SCIENCE,,理 中2 2学期,SCIENCE_8_2,src/subjectConfig.ts
+SCIENCE,,理 中2 3学期,SCIENCE_8_3,src/subjectConfig.ts
+SCIENCE,,理 中3 1学期,SCIENCE_9_1,src/subjectConfig.ts
+SCIENCE,,理 中3 2学期,SCIENCE_9_2,src/subjectConfig.ts
+SCIENCE,,理 中3 3学期,SCIENCE_9_3,src/subjectConfig.ts
+SOCIAL,,社 小3 1学期,SOCIAL_3_1,src/subjectConfig.ts
+SOCIAL,,社 小3 2学期,SOCIAL_3_2,src/subjectConfig.ts
+SOCIAL,,社 小3 3学期,SOCIAL_3_3,src/subjectConfig.ts
+SOCIAL,,社 小4 1学期,SOCIAL_4_1,src/subjectConfig.ts
+SOCIAL,,社 小4 2学期,SOCIAL_4_2,src/subjectConfig.ts
+SOCIAL,,社 小4 3学期,SOCIAL_4_3,src/subjectConfig.ts
+SOCIAL,,社 小5 1学期,SOCIAL_5_1,src/subjectConfig.ts
+SOCIAL,,社 小5 2学期,SOCIAL_5_2,src/subjectConfig.ts
+SOCIAL,,社 小5 3学期,SOCIAL_5_3,src/subjectConfig.ts
+SOCIAL,,社 小6 1学期,SOCIAL_6_1,src/subjectConfig.ts
+SOCIAL,,社 小6 2学期,SOCIAL_6_2,src/subjectConfig.ts
+SOCIAL,,社 小6 3学期,SOCIAL_6_3,src/subjectConfig.ts
+SOCIAL,,社 中1 1学期,SOCIAL_7_1,src/subjectConfig.ts
+SOCIAL,,社 中1 2学期,SOCIAL_7_2,src/subjectConfig.ts
+SOCIAL,,社 中1 3学期,SOCIAL_7_3,src/subjectConfig.ts
+SOCIAL,,社 中2 1学期,SOCIAL_8_1,src/subjectConfig.ts
+SOCIAL,,社 中2 2学期,SOCIAL_8_2,src/subjectConfig.ts
+SOCIAL,,社 中2 3学期,SOCIAL_8_3,src/subjectConfig.ts
+SOCIAL,,社 中3 1学期,SOCIAL_9_1,src/subjectConfig.ts
+SOCIAL,,社 中3 2学期,SOCIAL_9_2,src/subjectConfig.ts
+SOCIAL,,社 中3 3学期,SOCIAL_9_3,src/subjectConfig.ts
+MAP_PREF,,地図記号,MAP_SYMBOLS,src/subjectConfig.ts
+MAP_PREF,,都道府県,PREFECTURES,src/subjectConfig.ts
+MAP_PREF,,県庁所在地,PREF_CAPITALS,src/subjectConfig.ts
+MAP_PREF,,北海道,PREF_HOKKAIDO,src/subjectConfig.ts
+MAP_PREF,,青森県,PREF_AOMORI,src/subjectConfig.ts
+MAP_PREF,,岩手県,PREF_IWATE,src/subjectConfig.ts
+MAP_PREF,,宮城県,PREF_MIYAGI,src/subjectConfig.ts
+MAP_PREF,,秋田県,PREF_AKITA,src/subjectConfig.ts
+MAP_PREF,,山形県,PREF_YAMAGATA,src/subjectConfig.ts
+MAP_PREF,,福島県,PREF_FUKUSHIMA,src/subjectConfig.ts
+MAP_PREF,,茨城県,PREF_IBARAKI,src/subjectConfig.ts
+MAP_PREF,,栃木県,PREF_TOCHIGI,src/subjectConfig.ts
+MAP_PREF,,群馬県,PREF_GUNMA,src/subjectConfig.ts
+MAP_PREF,,埼玉県,PREF_SAITAMA,src/subjectConfig.ts
+MAP_PREF,,千葉県,PREF_CHIBA,src/subjectConfig.ts
+MAP_PREF,,東京都,PREF_TOKYO,src/subjectConfig.ts
+MAP_PREF,,神奈川県,PREF_KANAGAWA,src/subjectConfig.ts
+MAP_PREF,,新潟県,PREF_NIIGATA,src/subjectConfig.ts
+MAP_PREF,,富山県,PREF_TOYAMA,src/subjectConfig.ts
+MAP_PREF,,石川県,PREF_ISHIKAWA,src/subjectConfig.ts
+MAP_PREF,,福井県,PREF_FUKUI,src/subjectConfig.ts
+MAP_PREF,,山梨県,PREF_YAMANASHI,src/subjectConfig.ts
+MAP_PREF,,長野県,PREF_NAGANO,src/subjectConfig.ts
+MAP_PREF,,岐阜県,PREF_GIFU,src/subjectConfig.ts
+MAP_PREF,,静岡県,PREF_SHIZUOKA,src/subjectConfig.ts
+MAP_PREF,,愛知県,PREF_AICHI,src/subjectConfig.ts
+MAP_PREF,,三重県,PREF_MIE,src/subjectConfig.ts
+MAP_PREF,,滋賀県,PREF_SHIGA,src/subjectConfig.ts
+MAP_PREF,,京都府,PREF_KYOTO,src/subjectConfig.ts
+MAP_PREF,,大阪府,PREF_OSAKA,src/subjectConfig.ts
+MAP_PREF,,兵庫県,PREF_HYOGO,src/subjectConfig.ts
+MAP_PREF,,奈良県,PREF_NARA,src/subjectConfig.ts
+MAP_PREF,,和歌山県,PREF_WAKAYAMA,src/subjectConfig.ts
+MAP_PREF,,鳥取県,PREF_TOTTORI,src/subjectConfig.ts
+MAP_PREF,,島根県,PREF_SHIMANE,src/subjectConfig.ts
+MAP_PREF,,岡山県,PREF_OKAYAMA,src/subjectConfig.ts
+MAP_PREF,,広島県,PREF_HIROSHIMA,src/subjectConfig.ts
+MAP_PREF,,山口県,PREF_YAMAGUCHI,src/subjectConfig.ts
+MAP_PREF,,徳島県,PREF_TOKUSHIMA,src/subjectConfig.ts
+MAP_PREF,,香川県,PREF_KAGAWA,src/subjectConfig.ts
+MAP_PREF,,愛媛県,PREF_EHIME,src/subjectConfig.ts
+MAP_PREF,,高知県,PREF_KOCHI,src/subjectConfig.ts
+MAP_PREF,,福岡県,PREF_FUKUOKA,src/subjectConfig.ts
+MAP_PREF,,佐賀県,PREF_SAGA,src/subjectConfig.ts
+MAP_PREF,,長崎県,PREF_NAGASAKI,src/subjectConfig.ts
+MAP_PREF,,熊本県,PREF_KUMAMOTO,src/subjectConfig.ts
+MAP_PREF,,大分県,PREF_OITA,src/subjectConfig.ts
+MAP_PREF,,宮崎県,PREF_MIYAZAKI,src/subjectConfig.ts
+MAP_PREF,,鹿児島県,PREF_KAGOSHIMA,src/subjectConfig.ts
+MAP_PREF,,沖縄県,PREF_OKINAWA,src/subjectConfig.ts
+IT_INFO,,Windows,IT_WINDOWS,src/subjectConfig.ts
+IT_INFO,,iPad,IT_IPAD,src/subjectConfig.ts
+IT_INFO,,Chromebook,IT_CHROMEBOOK,src/subjectConfig.ts
+IT_INFO,,スマホ・ネット,IT_INTERNET,src/subjectConfig.ts
+IT_INFO,,情報リテラシー,IT_LITERACY,src/subjectConfig.ts
+IT_INFO,,プログラミング,IT_PROGRAMMING,src/subjectConfig.ts
+IT_INFO,,モラル・セキュリティ,IT_SECURITY,src/subjectConfig.ts

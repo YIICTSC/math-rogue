@@ -1,0 +1,4993 @@
+{
+  "schemaVersion": 1,
+  "status": "design-only",
+  "date": "2026-10-16",
+  "sourceRevision": "87bc5f1773ddda0df6e3d8f4fbdd3cc1aef5e93d",
+  "units": [
+    {
+      "id": "EXP_M01",
+      "key": "M01",
+      "name": "あまりのあるわり算：必要な箱の数",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G3_U10",
+          "name": "わり算（あまりのある計算）"
+        }
+      ],
+      "distinction": "余りの計算から「全量を収める」という条件判断を独立させる",
+      "goal": "余りが出る場面で必要個数を切り上げる",
+      "prerequisiteText": "あまりのあるわり算",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "23個の石を1箱5個まで入れる。全部入れるには何箱必要？",
+        "answer": "5箱",
+        "distractors": [
+          {
+            "answer": "4箱",
+            "misconception": "余りを捨てる"
+          },
+          {
+            "answer": "3箱",
+            "misconception": "余りを箱数にする"
+          },
+          {
+            "answer": "6箱",
+            "misconception": "切り上げを二重に行う"
+          }
+        ],
+        "explanation": "23÷5＝4あまり3。残り3個にも箱が1つ必要なので5箱。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M02",
+      "key": "M02",
+      "name": "あまりのあるわり算：同じ数ずつ配る",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G3_U10",
+          "name": "わり算（あまりのある計算）"
+        }
+      ],
+      "distinction": "M01の切り上げと対比し、余りの扱いを場面で使い分ける",
+      "goal": "配れる数と配らない余りを区別する",
+      "prerequisiteText": "わり算の意味",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "23枚のカードを5人に同じ数ずつ配る。1人何枚で、何枚残る？",
+        "answer": "1人4枚で3枚残る",
+        "distractors": [
+          {
+            "answer": "1人5枚で余りなし",
+            "misconception": "切り上げて配る"
+          },
+          {
+            "answer": "1人3枚で4枚残る",
+            "misconception": "商と余りを逆にする"
+          },
+          {
+            "answer": "1人4枚で4枚残る",
+            "misconception": "引き算を誤る"
+          }
+        ],
+        "explanation": "5×4＝20枚を配り、23−20＝3枚が残る。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M03",
+      "key": "M03",
+      "name": "分数：同じ全体を基準にする",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G3_U13",
+          "name": "分数"
+        }
+      ],
+      "distinction": "分数の名称から、基準となる全体の確認を切り出す",
+      "goal": "分数の比較で全体の大きさを確認する",
+      "prerequisiteText": "等分と分数",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "同じ大きさのピザを使う。1/2枚と1/4枚ではどちらが多い？",
+        "answer": "1/2枚",
+        "distractors": [
+          {
+            "answer": "1/4枚",
+            "misconception": "分母が大きいほど量も大きいと考える"
+          },
+          {
+            "answer": "同じ量",
+            "misconception": "分子だけを見る"
+          },
+          {
+            "answer": "比べられない",
+            "misconception": "全体が同じという条件を見落とす"
+          }
+        ],
+        "explanation": "同じ全体を2等分した1つ分は、4等分した1つ分より大きい。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M04",
+      "key": "M04",
+      "name": "分数：通分して大小を比べる",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U07",
+          "name": "分数の たし算 と ひき算"
+        }
+      ],
+      "distinction": "加減計算の前段である比較と通分の判断に限定する",
+      "goal": "異なる分母の分数を同じ単位で比較する",
+      "prerequisiteText": "倍数・等しい分数",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "2/3と3/5ではどちらが大きい？",
+        "answer": "2/3",
+        "distractors": [
+          {
+            "answer": "3/5",
+            "misconception": "分子だけを見る"
+          },
+          {
+            "answer": "同じ",
+            "misconception": "分子と分母の差だけを見る"
+          },
+          {
+            "answer": "どちらも1より大きい",
+            "misconception": "分数の大きさの範囲を誤る"
+          }
+        ],
+        "explanation": "2/3＝10/15、3/5＝9/15なので2/3が大きい。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M05",
+      "key": "M05",
+      "name": "小数：末尾の0と位の大きさ",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G4_U06",
+          "name": "小数"
+        }
+      ],
+      "distinction": "小数全般から末尾0の意味と同値表現を独立させる",
+      "goal": "表記の桁数と数の大小を区別する",
+      "prerequisiteText": "小数の位取り",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "0.50と0.5の大きさの関係は？",
+        "answer": "等しい",
+        "distractors": [
+          {
+            "answer": "0.50の方が大きい",
+            "misconception": "桁数で比較する"
+          },
+          {
+            "answer": "0.5の方が大きい",
+            "misconception": "末尾の0で小さくなると考える"
+          },
+          {
+            "answer": "10倍違う",
+            "misconception": "小数点の位置を取り違える"
+          }
+        ],
+        "explanation": "0.50は50/100、0.5は5/10で、同じ量を表す。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M06",
+      "key": "M06",
+      "name": "概数：どの位で丸めたかを読む",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G4_U09",
+          "name": "がい数"
+        }
+      ],
+      "distinction": "概数の計算から指示語「まで」の読み取りを重点化する",
+      "goal": "四捨五入する位と残す位を区別する",
+      "prerequisiteText": "十進位取り",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "3,450を四捨五入して百の位までの概数にすると？",
+        "answer": "3,500",
+        "distractors": [
+          {
+            "answer": "3,400",
+            "misconception": "5を切り捨てる"
+          },
+          {
+            "answer": "3,000",
+            "misconception": "残す位を取り違える"
+          },
+          {
+            "answer": "3,450",
+            "misconception": "丸める操作をしない"
+          }
+        ],
+        "explanation": "百の位まで残すので十の位の5を見て切り上げる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M07",
+      "key": "M07",
+      "name": "複合図形：面積の足し引き",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小4〜5",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G4_U08",
+          "name": "面せき"
+        }
+      ],
+      "distinction": "面積公式の暗記から図形の分解・除去の判断へ分ける",
+      "goal": "重なりや欠けを式に表す",
+      "prerequisiteText": "長方形の面積",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "縦6cm・横8cmの長方形から縦2cm・横3cmの部分を切り取る。残りの面積は？",
+        "answer": "42cm²",
+        "distractors": [
+          {
+            "answer": "48cm²",
+            "misconception": "切り取る部分を引かない"
+          },
+          {
+            "answer": "54cm²",
+            "misconception": "切り取る部分を足す"
+          },
+          {
+            "answer": "6cm²",
+            "misconception": "切り取った部分だけ答える"
+          }
+        ],
+        "explanation": "全体48cm²から切り取る6cm²を引く。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M08",
+      "key": "M08",
+      "name": "周の長さと面積の区別",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G4_U08",
+          "name": "面せき"
+        }
+      ],
+      "distinction": "面積単元内の周長との取り違えを診断する",
+      "goal": "求める量と単位に合う式を選ぶ",
+      "prerequisiteText": "長方形・長さの単位",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "縦3cm・横5cmの長方形の周の長さは？",
+        "answer": "16cm",
+        "distractors": [
+          {
+            "answer": "15cm",
+            "misconception": "面積の式を使う"
+          },
+          {
+            "answer": "8cm",
+            "misconception": "隣り合う2辺しか足さない"
+          },
+          {
+            "answer": "30cm",
+            "misconception": "面積を2倍する"
+          }
+        ],
+        "explanation": "周は4辺の合計なので3＋5＋3＋5＝16cm。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M09",
+      "key": "M09",
+      "name": "平均：極端な値が加わるとどうなるか",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U08",
+          "name": "平均"
+        }
+      ],
+      "distinction": "単純平均から集団の追加・変化を扱う小単元にする",
+      "goal": "平均の変化を合計と人数で説明する",
+      "prerequisiteText": "合計÷個数",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "3人の平均点が60点。100点の人が1人加わると4人の平均は？",
+        "answer": "70点",
+        "distractors": [
+          {
+            "answer": "80点",
+            "misconception": "60と100だけを平均する"
+          },
+          {
+            "answer": "65点",
+            "misconception": "人数の増分を誤る"
+          },
+          {
+            "answer": "160点",
+            "misconception": "合計を平均とする"
+          }
+        ],
+        "explanation": "元の合計180点に100点を足し、280÷4＝70点。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M10",
+      "key": "M10",
+      "name": "割合：何を100％にするか",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U14",
+          "name": "割合"
+        }
+      ],
+      "distinction": "割合の式より前に基準量の選定を練習する",
+      "goal": "比較する量と基準量を特定する",
+      "prerequisiteText": "わり算・百分率",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "赤12個、青8個。全部のうち赤の割合は？",
+        "answer": "60％",
+        "distractors": [
+          {
+            "answer": "150％",
+            "misconception": "青を基準にする"
+          },
+          {
+            "answer": "40％",
+            "misconception": "青の割合を答える"
+          },
+          {
+            "answer": "12％",
+            "misconception": "個数を百分率とする"
+          }
+        ],
+        "explanation": "全部20個を100％として12÷20＝0.6。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M11",
+      "key": "M11",
+      "name": "割引：支払う割合を求める",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U14",
+          "name": "割合"
+        }
+      ],
+      "distinction": "割合から割引率と支払率の補数関係を切り出す",
+      "goal": "割引率と残る割合を区別する",
+      "prerequisiteText": "百分率・M10",
+      "prerequisiteProposals": [
+        "EXP_M10"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "800円の商品が25％引き。支払額は？",
+        "answer": "600円",
+        "distractors": [
+          {
+            "answer": "200円",
+            "misconception": "割引額を支払額とする"
+          },
+          {
+            "answer": "775円",
+            "misconception": "25円引きと考える"
+          },
+          {
+            "answer": "1,000円",
+            "misconception": "割引額を加える"
+          }
+        ],
+        "explanation": "支払うのは75％。800×0.75＝600円。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M12",
+      "key": "M12",
+      "name": "割合の逆算：もとの値段",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U14",
+          "name": "割合"
+        }
+      ],
+      "distinction": "順方向の割引と逆算を別の到達目標にする",
+      "goal": "割引後の金額から基準量を逆算する",
+      "prerequisiteText": "M11・小数の除法",
+      "prerequisiteProposals": [
+        "EXP_M11"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "20％引きで640円の商品。定価はいくら？",
+        "answer": "800円",
+        "distractors": [
+          {
+            "answer": "768円",
+            "misconception": "640円に20％を足す"
+          },
+          {
+            "answer": "512円",
+            "misconception": "さらに20％引く"
+          },
+          {
+            "answer": "660円",
+            "misconception": "率を金額に置き換える"
+          }
+        ],
+        "explanation": "定価の80％が640円なので640÷0.8＝800円。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M13",
+      "key": "M13",
+      "name": "連続する割合：割引率は足せない",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U14",
+          "name": "割合"
+        }
+      ],
+      "distinction": "基準量が変わる2段階の割合を独立させる",
+      "goal": "変化後の量を次の基準として扱う",
+      "prerequisiteText": "M11・小数の乗法",
+      "prerequisiteProposals": [
+        "EXP_M11"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "1,000円を10％引きにし、その金額からさらに20％引くと？",
+        "answer": "720円",
+        "distractors": [
+          {
+            "answer": "700円",
+            "misconception": "割引率を足す"
+          },
+          {
+            "answer": "800円",
+            "misconception": "最初の割引を無視する"
+          },
+          {
+            "answer": "900円",
+            "misconception": "2回目の割引を無視する"
+          }
+        ],
+        "explanation": "1,000×0.9×0.8＝720円。2回目は900円が基準。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M14",
+      "key": "M14",
+      "name": "単位量：単価で商品を比べる",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U09",
+          "name": "単位量あたりの 大きさ"
+        }
+      ],
+      "distinction": "単位量全般から価格比較に必要な基準化を切り出す",
+      "goal": "量が違う商品を同じ単位に直して比べる",
+      "prerequisiteText": "除法・単位量",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "Aは300gで240円、Bは500gで350円。1gあたり安いのは？",
+        "answer": "B",
+        "distractors": [
+          {
+            "answer": "A",
+            "misconception": "表示価格だけで比べる"
+          },
+          {
+            "answer": "同じ",
+            "misconception": "容量差を無視する"
+          },
+          {
+            "answer": "値段からは比べられない",
+            "misconception": "単位量の利用を避ける"
+          }
+        ],
+        "explanation": "Aは0.8円/g、Bは0.7円/g。単位を揃えて比べる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M15",
+      "key": "M15",
+      "name": "速さ：分と時間をそろえる",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U10",
+          "name": "速さ"
+        }
+      ],
+      "distinction": "距離・時間・速さから単位不一致を重点化する",
+      "goal": "速さの計算前に時間の単位を変換する",
+      "prerequisiteText": "時間換算・除法",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "12kmを30分で進む速さは時速何km？",
+        "answer": "時速24km",
+        "distractors": [
+          {
+            "answer": "時速0.4km",
+            "misconception": "分のまま割る"
+          },
+          {
+            "answer": "時速6km",
+            "misconception": "時間を誤って掛ける"
+          },
+          {
+            "answer": "時速12km",
+            "misconception": "30分を1時間とする"
+          }
+        ],
+        "explanation": "30分＝0.5時間。12÷0.5＝24km/h。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M16",
+      "key": "M16",
+      "name": "往復の平均の速さ",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U10",
+          "name": "速さ"
+        }
+      ],
+      "distinction": "等距離の往復という条件付き平均を独立させる",
+      "goal": "速さの単純平均と全行程の平均を区別する",
+      "prerequisiteText": "M15・分数の計算",
+      "prerequisiteProposals": [
+        "EXP_M15"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "片道6kmを往路は時速3km、復路は時速6kmで進む。全体の平均の速さは？",
+        "answer": "時速4km",
+        "distractors": [
+          {
+            "answer": "時速4.5km",
+            "misconception": "2つの速さを単純平均する"
+          },
+          {
+            "answer": "時速9km",
+            "misconception": "速さを足す"
+          },
+          {
+            "answer": "時速3km",
+            "misconception": "往路だけを見る"
+          }
+        ],
+        "explanation": "往路2時間、復路1時間。全12km÷3時間＝4km/h。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M17",
+      "key": "M17",
+      "name": "比：全体からそれぞれの量へ",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G6_U05",
+          "name": "比 と その 利用"
+        }
+      ],
+      "distinction": "比の相等から合計条件付き配分を切り出す",
+      "goal": "比の和を使って全体を分配する",
+      "prerequisiteText": "整数の比・除法",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "赤と青の個数の比が2：3で、合計25個。赤は何個？",
+        "answer": "10個",
+        "distractors": [
+          {
+            "answer": "15個",
+            "misconception": "青の個数を答える"
+          },
+          {
+            "answer": "12.5個",
+            "misconception": "等分と取り違える"
+          },
+          {
+            "answer": "50個",
+            "misconception": "全体に比の値を掛ける"
+          }
+        ],
+        "explanation": "全体を5等分して1つ分が5個。赤は2つ分の10個。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M18",
+      "key": "M18",
+      "name": "確率：戻さず2個取り出す",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中2",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G8_U08",
+          "name": "確率"
+        }
+      ],
+      "distinction": "等確率の基礎から非復元抽出の条件変化を独立させる",
+      "goal": "1回目の結果で変わる分母を扱う",
+      "prerequisiteText": "樹形図・分数の乗法",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "赤2個・青1個の玉から戻さず2個取る。両方赤の確率は？",
+        "answer": "1/3",
+        "distractors": [
+          {
+            "answer": "4/9",
+            "misconception": "取り出した玉を戻したと考える"
+          },
+          {
+            "answer": "2/3",
+            "misconception": "1回目しか計算しない"
+          },
+          {
+            "answer": "1/2",
+            "misconception": "色の種類数だけで考える"
+          }
+        ],
+        "explanation": "2/3×1/2＝1/3。2回目の全体は2個に減る。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M19",
+      "key": "M19",
+      "name": "グラフ：省略された縦軸を見抜く",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中1〜2",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G7_U11",
+          "name": "資料の 整理 と 活用"
+        }
+      ],
+      "distinction": "グラフ作成から表現による印象の違いの評価へ分ける",
+      "goal": "数値差と見た目の差を区別する",
+      "prerequisiteText": "棒グラフ・差の計算",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "A＝100、B＝110の棒グラフで縦軸が90から始まる。正しい読み取りは？",
+        "answer": "差は10で、見た目ほど大差とは限らない",
+        "distractors": [
+          {
+            "answer": "BはAの2倍",
+            "misconception": "棒の見かけの高さをそのまま比べる"
+          },
+          {
+            "answer": "差は100",
+            "misconception": "軸の始点を取り違える"
+          },
+          {
+            "answer": "数値は比較できない",
+            "misconception": "表示値まで無効と考える"
+          }
+        ],
+        "explanation": "軸の省略で印象が変わっても、表示値の差は110−100＝10。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_M20",
+      "key": "M20",
+      "name": "標本調査：回答者の偏り",
+      "area": "算数・数学",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中3",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "MATH_G9_U09",
+          "name": "標本調査"
+        }
+      ],
+      "distinction": "標本数の計算から抽出の偏りの診断へ分ける",
+      "goal": "標本の選び方が結論を制限することを理解する",
+      "prerequisiteText": "割合・母集団と標本",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "全校の朝食状況を調べるのに、朝練に来た運動部だけに質問した。問題点は？",
+        "answer": "全校を代表するとは限らない",
+        "distractors": [
+          {
+            "answer": "人数が10人以上なら必ず代表する",
+            "misconception": "数だけで判断する"
+          },
+          {
+            "answer": "質問を1つにすれば偏りがなくなる",
+            "misconception": "設問数と抽出を混同する"
+          },
+          {
+            "answer": "回答が本当なら全校にも当てはまる",
+            "misconception": "回答の正確さと代表性を混同する"
+          }
+        ],
+        "explanation": "回答者の集まり方が偏っているので、全校への一般化には注意が必要。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J01",
+      "key": "J01",
+      "name": "指示語：何を指すかを本文から探す",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G3_U05",
+          "name": "説明文の読み取り"
+        }
+      ],
+      "distinction": "説明文読解から照応関係の解決を独立させる",
+      "goal": "指示語を具体的な語句に置き換える",
+      "prerequisiteText": "短文読解",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「花子は赤い傘を買った。それを玄関に置いた。」の「それ」は何？",
+        "answer": "赤い傘",
+        "distractors": [
+          {
+            "answer": "花子",
+            "misconception": "近くの人名を選ぶ"
+          },
+          {
+            "answer": "玄関",
+            "misconception": "後ろの語を選ぶ"
+          },
+          {
+            "answer": "買うこと",
+            "misconception": "物と動作を混同する"
+          }
+        ],
+        "explanation": "置ける物を前の文から探すと「赤い傘」。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J02",
+      "key": "J02",
+      "name": "接続語：原因と結果のつながり",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G3_U05",
+          "name": "説明文の読み取り"
+        }
+      ],
+      "distinction": "説明文から接続関係の判断に絞る",
+      "goal": "因果・逆接に合う接続語を選ぶ",
+      "prerequisiteText": "2文の意味の理解",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「雨が降った。（　）、運動会は延期になった。」に合うのは？",
+        "answer": "そのため",
+        "distractors": [
+          {
+            "answer": "しかし",
+            "misconception": "逆接にする"
+          },
+          {
+            "answer": "また",
+            "misconception": "並列にする"
+          },
+          {
+            "answer": "たとえば",
+            "misconception": "例示にする"
+          }
+        ],
+        "explanation": "雨が原因で延期が結果なので因果を示す「そのため」。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J03",
+      "key": "J03",
+      "name": "説明の順序：手順を入れ替えない",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G2_U11",
+          "name": "順序よく話す"
+        }
+      ],
+      "distinction": "順序よく話す学習を手順文の読解・検証へ細分化する",
+      "goal": "条件を読み、作業順序を組み立てる",
+      "prerequisiteText": "順序を表す言葉",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "説明書に「種をまいた後に水をやる」とある。合う順序は？",
+        "answer": "種をまく→水をやる",
+        "distractors": [
+          {
+            "answer": "水をやる→種をまく",
+            "misconception": "前後を逆にする"
+          },
+          {
+            "answer": "水をやるだけ",
+            "misconception": "必要な手順を落とす"
+          },
+          {
+            "answer": "種をまく前に必ず水をやる",
+            "misconception": "書かれていない条件を足す"
+          }
+        ],
+        "explanation": "「後に」が指定する前後関係をそのまま並べる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J04",
+      "key": "J04",
+      "name": "事実と意見：確かめられる表現",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G5_U06",
+          "name": "意見文を書く"
+        }
+      ],
+      "distinction": "意見文の作成から事実・評価の識別を独立させる",
+      "goal": "観測できる事実と評価を区別する",
+      "prerequisiteText": "文の要点",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「来場者は30人だった。とても楽しい会だった。」で事実を述べた文は？",
+        "answer": "来場者は30人だった",
+        "distractors": [
+          {
+            "answer": "とても楽しい会だった",
+            "misconception": "感想を事実とする"
+          },
+          {
+            "answer": "両方とも意見",
+            "misconception": "数えられる情報を無視する"
+          },
+          {
+            "answer": "両方とも必ず事実",
+            "misconception": "評価も全員共通と考える"
+          }
+        ],
+        "explanation": "人数は記録で確認できる。「楽しい」は人による評価。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J05",
+      "key": "J05",
+      "name": "要約：条件と結論を落とさない",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G5_U05",
+          "name": "要約と要旨"
+        }
+      ],
+      "distinction": "要約全般から条件・例外の保持を重点化する",
+      "goal": "中心となる結論と条件を保って短くする",
+      "prerequisiteText": "主題・要点",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「図書館は通常17時までだが、土曜は15時に閉まる。」の要約として正しいものは？",
+        "answer": "通常17時まで、土曜は15時まで",
+        "distractors": [
+          {
+            "answer": "毎日17時まで",
+            "misconception": "例外条件を落とす"
+          },
+          {
+            "answer": "毎日15時まで",
+            "misconception": "土曜だけの条件を全体に広げる"
+          },
+          {
+            "answer": "土曜は開館しない",
+            "misconception": "本文にない内容を足す"
+          }
+        ],
+        "explanation": "通常と土曜の両方を残すと、利用に必要な情報を保てる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J06",
+      "key": "J06",
+      "name": "同訓異字：文脈で漢字を選ぶ",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小4〜5",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G4_U01",
+          "name": "漢字の使い方"
+        }
+      ],
+      "distinction": "既存の漢字使い分け問題を文脈判断の子単元として分離する",
+      "goal": "同じ読みの漢字を対象に合わせて選ぶ",
+      "prerequisiteText": "漢字の意味",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「時計をなおす」「けがをなおす」の漢字の組合せは？",
+        "answer": "時計を直す／けがを治す",
+        "distractors": [
+          {
+            "answer": "時計を治す／けがを直す",
+            "misconception": "対象を逆にする"
+          },
+          {
+            "answer": "時計を直す／けがを直す",
+            "misconception": "病気やけがにも直すを使う"
+          },
+          {
+            "answer": "時計を治す／けがを治す",
+            "misconception": "物の修理にも治すを使う"
+          }
+        ],
+        "explanation": "物の故障や誤りには「直す」、病気やけがには「治す」を使う。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J07",
+      "key": "J07",
+      "name": "熟語の構成：どちらがどちらを説明するか",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小4〜5",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G4_U02",
+          "name": "熟語"
+        }
+      ],
+      "distinction": "熟語の読み・意味から構成の分類を独立させる",
+      "goal": "漢字間の意味の関係を説明する",
+      "prerequisiteText": "漢字の意味",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「強風」の漢字の関係として正しいものは？",
+        "answer": "前の漢字が後の漢字を詳しくする",
+        "distractors": [
+          {
+            "answer": "反対の意味を重ねる",
+            "misconception": "上下型と混同する"
+          },
+          {
+            "answer": "同じ意味を重ねる",
+            "misconception": "森林型と混同する"
+          },
+          {
+            "answer": "動作とその相手",
+            "misconception": "読書型と混同する"
+          }
+        ],
+        "explanation": "「強い風」と読めるので「強」が「風」を説明する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J08",
+      "key": "J08",
+      "name": "敬語：動作の主体を見分ける",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G5_U02",
+          "name": "敬語"
+        }
+      ],
+      "distinction": "敬語一覧から動作主体の確認を独立させる",
+      "goal": "相手の動作と自分の動作で敬語を使い分ける",
+      "prerequisiteText": "主語・基本敬語",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "先生が話したことを表す文として適切なのは？",
+        "answer": "先生がおっしゃった",
+        "distractors": [
+          {
+            "answer": "先生が申した",
+            "misconception": "相手に謙譲語を使う"
+          },
+          {
+            "answer": "先生が申し上げた",
+            "misconception": "話者側の謙譲と混同する"
+          },
+          {
+            "answer": "先生が参った",
+            "misconception": "別の動作の敬語にする"
+          }
+        ],
+        "explanation": "相手である先生の「言う」には尊敬語「おっしゃる」を使う。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J09",
+      "key": "J09",
+      "name": "否定の範囲：全部と一部の違い",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G7_U06",
+          "name": "文の成分（主語・述語など）"
+        }
+      ],
+      "distinction": "文の構造から量化と否定の範囲を切り出す",
+      "goal": "部分否定と全体否定を区別する",
+      "prerequisiteText": "主語と述語・否定文",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「全員が賛成したわけではない」から必ず言えることは？",
+        "answer": "賛成しなかった人がいる",
+        "distractors": [
+          {
+            "answer": "全員が反対した",
+            "misconception": "部分否定を全体否定にする"
+          },
+          {
+            "answer": "全員が賛成した",
+            "misconception": "否定を読み落とす"
+          },
+          {
+            "answer": "ちょうど半分が反対した",
+            "misconception": "人数を補ってしまう"
+          }
+        ],
+        "explanation": "否定されているのは「全員が賛成した」ということ。反対の人数までは分からない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J10",
+      "key": "J10",
+      "name": "引用：誰の発言かを区別する",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G5_U07",
+          "name": "報告文を書く"
+        }
+      ],
+      "distinction": "報告文から情報の発信者・引用境界の特定を分離する",
+      "goal": "引用文と書き手の説明を区別する",
+      "prerequisiteText": "かぎ括弧の読み方",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「先生は『明日は休みです』と言った。私はうれしかった。」で休みと伝えたのは？",
+        "answer": "先生",
+        "distractors": [
+          {
+            "answer": "私",
+            "misconception": "書き手と引用元を混同する"
+          },
+          {
+            "answer": "友達",
+            "misconception": "本文にない人物を加える"
+          },
+          {
+            "answer": "分からない",
+            "misconception": "発言者の表示を見落とす"
+          }
+        ],
+        "explanation": "「先生は」と「と言った」が引用した発言の主を示す。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J11",
+      "key": "J11",
+      "name": "推論：本文の根拠を付ける",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G7_U01",
+          "name": "物語文の読み取り"
+        }
+      ],
+      "distinction": "物語読解から根拠のある推測と断定を区別する",
+      "goal": "明示情報から無理のない推論を選ぶ",
+      "prerequisiteText": "指示語・心情表現",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「太郎は何度も時計を見て、改札の方を見つめた。」から根拠が最もある推測は？",
+        "answer": "誰かや何かを待っている",
+        "distractors": [
+          {
+            "answer": "昨日試合に勝った",
+            "misconception": "無関係な背景を足す"
+          },
+          {
+            "answer": "必ず電車が遅れている",
+            "misconception": "原因を断定する"
+          },
+          {
+            "answer": "時計が壊れたと確定できる",
+            "misconception": "可能性を事実にする"
+          }
+        ],
+        "explanation": "時計と改札への注目は待つ行動と結び付くが、理由の断定はできない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J12",
+      "key": "J12",
+      "name": "反論：相手の主張に応答する",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "中2",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G8_U11",
+          "name": "討論"
+        }
+      ],
+      "distinction": "討論一般から論点の一致を評価する子単元にする",
+      "goal": "論点に対応した反論を選ぶ",
+      "prerequisiteText": "主張と理由",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「雨の日も本を返せるよう返却箱を屋内に置こう」への、論点に合う反論は？",
+        "answer": "閉館後に入れず返せなくなるのでは",
+        "distractors": [
+          {
+            "answer": "図書館の壁は白い",
+            "misconception": "論点を変える"
+          },
+          {
+            "answer": "提案者の字が汚い",
+            "misconception": "人への批判に替える"
+          },
+          {
+            "answer": "読書は必ず悪い",
+            "misconception": "根拠なく話題を広げる"
+          }
+        ],
+        "explanation": "返却のしやすさという提案の目的に、利用時間の観点から応答している。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J13",
+      "key": "J13",
+      "name": "根拠と主張：資料は本当に支えているか",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "中2〜3",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G8_U09",
+          "name": "意見文"
+        }
+      ],
+      "distinction": "意見文から証拠と結論の対応を独立させる",
+      "goal": "根拠が主張を支持する範囲を判断する",
+      "prerequisiteText": "J04・表の読み方",
+      "prerequisiteProposals": [
+        "EXP_J04"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「昼の利用者が増えた」という資料だけで「朝の開館を早めるべき」と言える？",
+        "answer": "朝の利用希望など追加の根拠が必要",
+        "distractors": [
+          {
+            "answer": "昼が増えれば朝も必ず増える",
+            "misconception": "時間帯を一般化する"
+          },
+          {
+            "answer": "利用者資料は一切役立たない",
+            "misconception": "資料の役割を全否定する"
+          },
+          {
+            "answer": "人数が多ければどんな提案も正しい",
+            "misconception": "根拠と結論の対応を無視する"
+          }
+        ],
+        "explanation": "昼の資料は昼の需要を示すが、朝の需要は別に確かめる必要がある。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J14",
+      "key": "J14",
+      "name": "条件文：例外を含むルールの読解",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "中1〜2",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G7_U02",
+          "name": "説明文の読み取り"
+        }
+      ],
+      "distinction": "説明文から条件・例外の適用を独立させる",
+      "goal": "ただし書きの適用範囲を判断する",
+      "prerequisiteText": "J05・否定表現",
+      "prerequisiteProposals": [
+        "EXP_J05"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「全員参加。ただし欠席届を出した人は除く。」欠席届を出した人の参加義務は？",
+        "answer": "この規則では参加義務がない",
+        "distractors": [
+          {
+            "answer": "必ず参加しなければならない",
+            "misconception": "例外を無視する"
+          },
+          {
+            "answer": "全員参加しなくてよい",
+            "misconception": "例外を全体に広げる"
+          },
+          {
+            "answer": "欠席届を出さなくてもよい",
+            "misconception": "条件を消す"
+          }
+        ],
+        "explanation": "「ただし」が、前の原則から除く条件を示す。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_J15",
+      "key": "J15",
+      "name": "言い換え：程度と範囲を変えない",
+      "area": "国語",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "中3",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "KOKUGO_G9_U08",
+          "name": "要約"
+        }
+      ],
+      "distinction": "要約から程度・範囲・確実性の保存を重点化する",
+      "goal": "要約で確実性や対象範囲を保つ",
+      "prerequisiteText": "J09・J13",
+      "prerequisiteProposals": [
+        "EXP_J09",
+        "EXP_J13"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「一部の商品は値上がりする可能性がある」の言い換えとして適切なのは？",
+        "answer": "値上がりする商品が出るかもしれない",
+        "distractors": [
+          {
+            "answer": "全商品が必ず値上がりする",
+            "misconception": "範囲と確実性を強める"
+          },
+          {
+            "answer": "値上がりする商品はない",
+            "misconception": "意味を逆にする"
+          },
+          {
+            "answer": "すべての商品が値下がりする",
+            "misconception": "対象と方向を変える"
+          }
+        ],
+        "explanation": "「一部」と「可能性」を保つ表現を選ぶ。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E01",
+      "key": "E01",
+      "name": "aとan：文字より最初の音",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U01",
+          "name": "アルファベット"
+        }
+      ],
+      "distinction": "アルファベットから音と冠詞の対応を切り出す。既存英語圏phonicsとは日本語話者の文法判断として区別する",
+      "goal": "冠詞を次に来る語の発音で選ぶ",
+      "prerequisiteText": "アルファベット・基本名詞",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "空欄に入るのは？ I waited for (　) hour.",
+        "answer": "an",
+        "distractors": [
+          {
+            "answer": "a",
+            "misconception": "文字hだけで選ぶ"
+          },
+          {
+            "answer": "two",
+            "misconception": "名詞の単数形と合わない"
+          },
+          {
+            "answer": "many",
+            "misconception": "可算単数に使う"
+          }
+        ],
+        "explanation": "hourはhを発音せず、母音で始まるためan hour。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E02",
+      "key": "E02",
+      "name": "可算名詞：数と単複を一致させる",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U11",
+          "name": "複数形"
+        }
+      ],
+      "distinction": "複数形から数量語・冠詞との一致を重点化する",
+      "goal": "数量表現に合う名詞の形を選ぶ",
+      "prerequisiteText": "基本名詞と数",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "正しい文は？",
+        "answer": "I have two books.",
+        "distractors": [
+          {
+            "answer": "I have two book.",
+            "misconception": "複数のsを落とす"
+          },
+          {
+            "answer": "I has two books.",
+            "misconception": "主語と動詞を取り違える"
+          },
+          {
+            "answer": "I have a books.",
+            "misconception": "単数冠詞と複数を混在させる"
+          }
+        ],
+        "explanation": "twoの後は複数形books、Iの動詞はhave。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E03",
+      "key": "E03",
+      "name": "位置を表す前置詞：図と文を対応させる",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U10",
+          "name": "前置詞"
+        }
+      ],
+      "distinction": "前置詞全般から物の位置関係の対応を切り出す",
+      "goal": "上下の位置関係を前置詞で表す",
+      "prerequisiteText": "身近な名詞",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「猫はテーブルの下にいる」に合うのは？ The cat is (　) the table.",
+        "answer": "under",
+        "distractors": [
+          {
+            "answer": "on",
+            "misconception": "上と下を逆にする"
+          },
+          {
+            "answer": "in",
+            "misconception": "内部と下部を混同する"
+          },
+          {
+            "answer": "above",
+            "misconception": "下を上方に替える"
+          }
+        ],
+        "explanation": "underは「〜の下に」を表す。後続問題では同じ位置関係を図でも確認する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E04",
+      "key": "E04",
+      "name": "疑問詞：答えに合う質問を選ぶ",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U04",
+          "name": "疑問文"
+        }
+      ],
+      "distinction": "疑問文の形から情報の種類と疑問詞の対応を分離する",
+      "goal": "回答の種類から必要な疑問詞を選ぶ",
+      "prerequisiteText": "基本疑問文",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "答えが「At seven.」になる質問は？",
+        "answer": "What time do you get up?",
+        "distractors": [
+          {
+            "answer": "Where do you get up?",
+            "misconception": "場所を尋ねる"
+          },
+          {
+            "answer": "Who gets up early?",
+            "misconception": "人物を尋ねる"
+          },
+          {
+            "answer": "Why do you get up?",
+            "misconception": "理由を尋ねる"
+          }
+        ],
+        "explanation": "At sevenは時刻なのでWhat timeで尋ねる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E05",
+      "key": "E05",
+      "name": "thisとthese：主語とbe動詞の一致",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U12",
+          "name": "代名詞"
+        }
+      ],
+      "distinction": "代名詞から距離・個数・動詞の一致を独立させる",
+      "goal": "単数・複数に合わせて指示語と動詞を選ぶ",
+      "prerequisiteText": "E02・be動詞",
+      "prerequisiteProposals": [
+        "EXP_E02"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "近くにある複数のペンを示す文は？",
+        "answer": "These are pens.",
+        "distractors": [
+          {
+            "answer": "This is pens.",
+            "misconception": "単数と複数を混ぜる"
+          },
+          {
+            "answer": "These is pens.",
+            "misconception": "動詞だけ単数にする"
+          },
+          {
+            "answer": "That is a pen.",
+            "misconception": "遠さと個数を取り違える"
+          }
+        ],
+        "explanation": "近くの複数にはthese、be動詞はareを使う。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E06",
+      "key": "E06",
+      "name": "doesの後：動詞を原形に戻す",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U09",
+          "name": "三人称単数"
+        }
+      ],
+      "distinction": "三単現全般から助動詞との役割分担を切り出す",
+      "goal": "疑問・否定で三単現のsを重ねない",
+      "prerequisiteText": "一般動詞・疑問文",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "正しい疑問文は？",
+        "answer": "Does she play tennis?",
+        "distractors": [
+          {
+            "answer": "Does she plays tennis?",
+            "misconception": "sを二重に付ける"
+          },
+          {
+            "answer": "Do she play tennis?",
+            "misconception": "助動詞を主語に合わせない"
+          },
+          {
+            "answer": "Does she playing tennis?",
+            "misconception": "原形と進行形を混同する"
+          }
+        ],
+        "explanation": "三単現の印はdoesが受け持つので動詞はplay。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E07",
+      "key": "E07",
+      "name": "頻度の副詞：文中の位置",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中1",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U03",
+          "name": "一般動詞"
+        }
+      ],
+      "distinction": "一般動詞から頻度表現と自然な語順を独立させる",
+      "goal": "頻度の副詞を一般動詞の前に置く",
+      "prerequisiteText": "一般動詞の肯定文",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「私はよく図書館に行く」に合う文は？",
+        "answer": "I often go to the library.",
+        "distractors": [
+          {
+            "answer": "I go often the library.",
+            "misconception": "toを落とす"
+          },
+          {
+            "answer": "I often to the library go.",
+            "misconception": "動詞の位置を誤る"
+          },
+          {
+            "answer": "I go to library often the.",
+            "misconception": "冠詞と副詞を混ぜる"
+          }
+        ],
+        "explanation": "oftenはこの文では一般動詞goの前に置く。別解となる自然な語順は誤答にしない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E08",
+      "key": "E08",
+      "name": "時を示す語：過去形を選ぶ",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中2",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G8_U01",
+          "name": "過去形"
+        }
+      ],
+      "distinction": "過去形一覧から文脈の時間判断を切り出す",
+      "goal": "時の手掛かりと時制を一致させる",
+      "prerequisiteText": "基本動詞の過去形",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "空欄に入るのは？ We (　) soccer yesterday.",
+        "answer": "played",
+        "distractors": [
+          {
+            "answer": "play",
+            "misconception": "yesterdayを読み落とす"
+          },
+          {
+            "answer": "plays",
+            "misconception": "主語と時制の両方を誤る"
+          },
+          {
+            "answer": "playing",
+            "misconception": "助動詞なしの分詞にする"
+          }
+        ],
+        "explanation": "yesterdayは過去を示すのでplayed。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E09",
+      "key": "E09",
+      "name": "進行中と習慣：nowとevery day",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中2",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G7_U08",
+          "name": "現在進行形"
+        },
+        {
+          "mode": "ENGLISH_G7_U03",
+          "name": "一般動詞"
+        }
+      ],
+      "distinction": "2つの既存文法単元を対比する診断単元にする",
+      "goal": "進行中の動作と習慣を区別する",
+      "prerequisiteText": "現在形・現在進行形",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "通常の状況で「今、彼は走っている」は？",
+        "answer": "He is running now.",
+        "distractors": [
+          {
+            "answer": "He runs every day.",
+            "misconception": "習慣を答える"
+          },
+          {
+            "answer": "He ran yesterday.",
+            "misconception": "過去を答える"
+          },
+          {
+            "answer": "He is run now.",
+            "misconception": "進行形の形を誤る"
+          }
+        ],
+        "explanation": "今進行している動作なのでis＋runningを使う。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E10",
+      "key": "E10",
+      "name": "未来表現：既にある予定を読む",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中2",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G8_U03",
+          "name": "未来表現（will / be going to）"
+        }
+      ],
+      "distinction": "willとの唯一解が曖昧な穴埋めを避け、予定の読解へ絞る",
+      "goal": "文脈から予定・意図を読み取る",
+      "prerequisiteText": "未来表現",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「I am going to visit Kyoto tomorrow.」が表す内容は？",
+        "answer": "明日京都を訪れる予定だ",
+        "distractors": [
+          {
+            "answer": "昨日京都を訪れた",
+            "misconception": "時を逆にする"
+          },
+          {
+            "answer": "毎日京都に住んでいる",
+            "misconception": "習慣と居住に変える"
+          },
+          {
+            "answer": "京都へ行く予定はない",
+            "misconception": "否定を加える"
+          }
+        ],
+        "explanation": "be going toはこの文では今ある予定・意図を示す。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E11",
+      "key": "E11",
+      "name": "比較級：thanが示す比較対象",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中2",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G8_U08",
+          "name": "比較（比較級・最上級）"
+        }
+      ],
+      "distinction": "比較表現から比較対象と範囲の読解を切り出す",
+      "goal": "比較の向きと対象を読み取る",
+      "prerequisiteText": "比較級",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「Ken is taller than Tom.」から分かることは？",
+        "answer": "ケンはトムより背が高い",
+        "distractors": [
+          {
+            "answer": "トムはケンより背が高い",
+            "misconception": "比較の向きを逆にする"
+          },
+          {
+            "answer": "2人は同じ高さ",
+            "misconception": "比較を同等とする"
+          },
+          {
+            "answer": "ケンは全員で一番高い",
+            "misconception": "2者比較を最上級にする"
+          }
+        ],
+        "explanation": "thanの後のTomが比較対象。全員の中で一番かは分からない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E12",
+      "key": "E12",
+      "name": "禁止と不要：must notとdo not have to",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中2",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G8_U04",
+          "name": "助動詞（must / have to / may など）"
+        }
+      ],
+      "distinction": "助動詞一覧から意味を取り違えやすい対を独立させる",
+      "goal": "禁止と義務がないことを区別する",
+      "prerequisiteText": "助動詞・否定文",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「You do not have to come tomorrow.」の意味は？",
+        "answer": "明日来る必要はない",
+        "distractors": [
+          {
+            "answer": "明日来てはいけない",
+            "misconception": "不要を禁止とする"
+          },
+          {
+            "answer": "明日必ず来なさい",
+            "misconception": "否定を読み落とす"
+          },
+          {
+            "answer": "昨日来る必要はなかった",
+            "misconception": "時制を変える"
+          }
+        ],
+        "explanation": "do not have toは不要、must notは禁止。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E13",
+      "key": "E13",
+      "name": "現在完了：sinceとfor",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中3",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G9_U01",
+          "name": "現在完了"
+        }
+      ],
+      "distinction": "現在完了の継続用法から時間表現を切り出す",
+      "goal": "開始時点と期間を区別する",
+      "prerequisiteText": "現在完了・時の表現",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "空欄に入るのは？ I have lived here (　) 2020.",
+        "answer": "since",
+        "distractors": [
+          {
+            "answer": "for",
+            "misconception": "時点と期間を混同する"
+          },
+          {
+            "answer": "during",
+            "misconception": "現在までの起点を示せない"
+          },
+          {
+            "answer": "at",
+            "misconception": "年の前置詞を誤る"
+          }
+        ],
+        "explanation": "2020は開始時点なのでsince。forの後には期間を置く。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E14",
+      "key": "E14",
+      "name": "関係代名詞：説明される名詞を探す",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中3",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G9_U03",
+          "name": "関係代名詞"
+        }
+      ],
+      "distinction": "関係代名詞の穴埋めから修飾の係り先の読解へ分ける",
+      "goal": "修飾節と先行詞を対応させる",
+      "prerequisiteText": "文の主語と動詞",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「The girl who plays the piano is my sister.」でピアノを弾くのは？",
+        "answer": "the girl",
+        "distractors": [
+          {
+            "answer": "the piano",
+            "misconception": "節内の目的語を選ぶ"
+          },
+          {
+            "answer": "my brother",
+            "misconception": "本文にない人物を選ぶ"
+          },
+          {
+            "answer": "the teacher",
+            "misconception": "本文にない人物を補う"
+          }
+        ],
+        "explanation": "who plays the pianoは直前のthe girlを説明する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_E15",
+      "key": "E15",
+      "name": "間接疑問：疑問文の語順にしない",
+      "area": "英語",
+      "primaryCategory": "ENGLISH",
+      "targetGrade": "中3",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G9_U04",
+          "name": "間接疑問文"
+        }
+      ],
+      "distinction": "間接疑問から節の内外の語順を独立させる",
+      "goal": "間接疑問節を平叙文の語順にする",
+      "prerequisiteText": "疑問文・接続",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「駅がどこにあるか知っていますか」に合う文は？",
+        "answer": "Do you know where the station is?",
+        "distractors": [
+          {
+            "answer": "Do you know where is the station?",
+            "misconception": "疑問文の語順を残す"
+          },
+          {
+            "answer": "Do you know where the station are?",
+            "misconception": "主語と動詞を一致させない"
+          },
+          {
+            "answer": "Do you know the station where is?",
+            "misconception": "疑問詞の位置を誤る"
+          }
+        ],
+        "explanation": "Do you knowの後の節はwhere＋主語＋動詞になる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S01",
+      "key": "S01",
+      "name": "対照実験：変える条件を1つにする",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小5",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_5_U03",
+          "name": "植物の発芽と成長"
+        }
+      ],
+      "distinction": "発芽の知識から実験計画の妥当性を独立させる",
+      "goal": "調べたい条件以外をそろえる",
+      "prerequisiteText": "植物の発芽・観察記録",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "水の有無で発芽が変わるか調べる。そろえる条件は？",
+        "answer": "種の種類と温度など、水以外の条件",
+        "distractors": [
+          {
+            "answer": "水だけ同じにする",
+            "misconception": "調べる条件を固定する"
+          },
+          {
+            "answer": "温度も種も変える",
+            "misconception": "複数条件を同時に変える"
+          },
+          {
+            "answer": "結果が出た種だけ記録する",
+            "misconception": "都合のよい結果だけ選ぶ"
+          }
+        ],
+        "explanation": "水だけを変え、他をそろえると違いの原因を考えやすい。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S02",
+      "key": "S02",
+      "name": "観測記録：同じ時刻で比べる",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小4",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_4_U01",
+          "name": "天気と気温"
+        }
+      ],
+      "distinction": "天気と気温から公平な測定条件に絞る",
+      "goal": "気温比較で観測条件をそろえる",
+      "prerequisiteText": "気温の読み取り",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "2日間の昼の気温を比べたい。適切な測り方は？",
+        "answer": "同じ場所・同じ時刻・同じ測り方で測る",
+        "distractors": [
+          {
+            "answer": "片方だけ日なたで測る",
+            "misconception": "場所の条件を変える"
+          },
+          {
+            "answer": "一方は朝、他方は昼に測る",
+            "misconception": "時刻の条件を変える"
+          },
+          {
+            "answer": "高い値だけ記録する",
+            "misconception": "記録を選別する"
+          }
+        ],
+        "explanation": "場所・時刻・測り方をそろえて比較する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S03",
+      "key": "S03",
+      "name": "実験結果：言えることと言えないこと",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小5〜6",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_5_U03",
+          "name": "植物の発芽と成長"
+        }
+      ],
+      "distinction": "発芽から結果解釈と一般化の範囲を独立させる",
+      "goal": "観測した範囲を超えて断定しない",
+      "prerequisiteText": "S01・表の読み方",
+      "prerequisiteProposals": [
+        "EXP_S01"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "同じ種類の種を水あり・なしで3個ずつ試した。水ありだけ発芽した。適切な結論は？",
+        "answer": "この実験条件では水ありの方に発芽が見られた",
+        "distractors": [
+          {
+            "answer": "全ての植物は必ず同じ結果になる",
+            "misconception": "対象範囲を広げすぎる"
+          },
+          {
+            "answer": "水以外は全く関係しない",
+            "misconception": "未検証条件を否定する"
+          },
+          {
+            "answer": "今後の実験は不要",
+            "misconception": "少数の結果だけで確定する"
+          }
+        ],
+        "explanation": "観察できた条件と個数の範囲を明示し、繰り返して確かめる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S04",
+      "key": "S04",
+      "name": "溶解：見えなくなっても質量は残る",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小5",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_5_U08",
+          "name": "物のとけ方"
+        }
+      ],
+      "distinction": "溶け方の知識から物質量の保存を切り出す",
+      "goal": "溶質が溶けた後の全体質量を求める",
+      "prerequisiteText": "質量の加法・溶解",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "水100gに食塩10gを全て溶かし、こぼれも蒸発もない。全体の質量は？",
+        "answer": "110g",
+        "distractors": [
+          {
+            "answer": "100g",
+            "misconception": "見えない食塩を消えたと考える"
+          },
+          {
+            "answer": "90g",
+            "misconception": "溶けた分を引く"
+          },
+          {
+            "answer": "10g",
+            "misconception": "溶質だけ答える"
+          }
+        ],
+        "explanation": "溶けても食塩の質量は残り、100＋10＝110g。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S05",
+      "key": "S05",
+      "name": "測定器：温度計の読み方",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小4",
+      "phase": 2,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_4_U01",
+          "name": "天気と気温"
+        }
+      ],
+      "distinction": "気温の知識から測定操作と視差を独立させる",
+      "goal": "目盛りに対する視線の位置を選ぶ",
+      "prerequisiteText": "温度の単位・目盛り",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "液体温度計の目盛りを読むとき、視線はどこに置く？",
+        "answer": "液柱の先端と同じ高さ",
+        "distractors": [
+          {
+            "answer": "真上",
+            "misconception": "斜め読みで誤差が出る"
+          },
+          {
+            "answer": "真下",
+            "misconception": "斜め読みで誤差が出る"
+          },
+          {
+            "answer": "離れるほどよい",
+            "misconception": "視差の条件を無視する"
+          }
+        ],
+        "explanation": "視線を液柱の先端と同じ高さにして目盛りを読む。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S06",
+      "key": "S06",
+      "name": "回路：直列と並列の電流の道",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小6〜中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_4_U05",
+          "name": "電気のはたらき"
+        }
+      ],
+      "distinction": "回路単元から経路の独立性を診断する。図示を必須とする",
+      "goal": "回路を切ったときの通り道を考える",
+      "prerequisiteText": "閉回路",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "電池と同じ豆電球2個を並列につないだ。一方の枝だけを切ると、もう一方は？",
+        "answer": "電流が流れる道が残るので点灯する",
+        "distractors": [
+          {
+            "answer": "必ず両方消える",
+            "misconception": "直列と混同する"
+          },
+          {
+            "answer": "電池なしでも点灯し続ける",
+            "misconception": "電源の条件を無視する"
+          },
+          {
+            "answer": "電流が逆向きになる",
+            "misconception": "切断と方向を混同する"
+          }
+        ],
+        "explanation": "並列では枝ごとに電池へ戻る通り道がある。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S07",
+      "key": "S07",
+      "name": "電磁石：巻き数だけを変えて比べる",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小5",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_5_U09",
+          "name": "電磁石"
+        }
+      ],
+      "distinction": "電磁石の性質から条件制御の転移課題へ分ける",
+      "goal": "電磁石の強さを比べる実験条件を選ぶ",
+      "prerequisiteText": "S01・電磁石",
+      "prerequisiteProposals": [
+        "EXP_S01"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "巻き数と電磁石の強さの関係を調べる。そろえるべきものは？",
+        "answer": "流れる電流と鉄心など、巻き数以外の条件",
+        "distractors": [
+          {
+            "answer": "巻き数だけ同じにする",
+            "misconception": "調べる条件を固定する"
+          },
+          {
+            "answer": "電流も鉄心も変える",
+            "misconception": "原因を分離できない"
+          },
+          {
+            "answer": "引き付けた個数を記録しない",
+            "misconception": "比較の証拠を残さない"
+          }
+        ],
+        "explanation": "巻き数だけを変え、電流など他の要因をそろえる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S08",
+      "key": "S08",
+      "name": "月の満ち欠け：太陽との位置関係",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小6",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_6_U04",
+          "name": "月と太陽"
+        }
+      ],
+      "distinction": "月相の名称から光源と観察位置の対応へ分ける",
+      "goal": "月の明るい側と太陽の方向を対応させる",
+      "prerequisiteText": "光の直進・月の形",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "月の明るく見える側は、基本的にどちらを向く？",
+        "answer": "太陽のある側",
+        "distractors": [
+          {
+            "answer": "地球の影がない側だけ",
+            "misconception": "通常の満ち欠けを月食と混同する"
+          },
+          {
+            "answer": "常に北側",
+            "misconception": "方位を固定する"
+          },
+          {
+            "answer": "月自身の電球がある側",
+            "misconception": "月が自ら光ると考える"
+          }
+        ],
+        "explanation": "太陽に照らされた半分のうち地球から見える部分が明るく見える。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S09",
+      "key": "S09",
+      "name": "食物連鎖：矢印の向きを読む",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "小6〜中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_6_U09",
+          "name": "生き物と環境"
+        }
+      ],
+      "distinction": "生態の知識から図の凡例と方向の読み取りを独立させる",
+      "goal": "食べられる側から食べる側へ矢印を描く",
+      "prerequisiteText": "生物と食べ物",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「草をバッタが食べ、バッタをカエルが食べる」。食物の移動を示す矢印は？",
+        "answer": "草→バッタ→カエル",
+        "distractors": [
+          {
+            "answer": "カエル→バッタ→草",
+            "misconception": "矢印の向きを逆にする"
+          },
+          {
+            "answer": "草→カエル→バッタ",
+            "misconception": "関係を入れ替える"
+          },
+          {
+            "answer": "バッタ→草→カエル",
+            "misconception": "食べる関係を取り違える"
+          }
+        ],
+        "explanation": "ここでは食べられるものから食べるものへ矢印を引く。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S10",
+      "key": "S10",
+      "name": "気体の同定：性質を組み合わせる",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_7_U05",
+          "name": "気体の性質"
+        }
+      ],
+      "distinction": "気体の暗記から複数証拠による識別に分ける",
+      "goal": "1つの性質だけで気体を断定しない",
+      "prerequisiteText": "代表的気体の性質",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "火を消し、石灰水を白く濁らせる気体は？",
+        "answer": "二酸化炭素",
+        "distractors": [
+          {
+            "answer": "窒素",
+            "misconception": "火を消す性質だけで選ぶ"
+          },
+          {
+            "answer": "酸素",
+            "misconception": "燃焼を助ける気体と混同する"
+          },
+          {
+            "answer": "水素",
+            "misconception": "可燃性の気体と混同する"
+          }
+        ],
+        "explanation": "石灰水を白く濁らせる性質を組み合わせて二酸化炭素と判断する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S11",
+      "key": "S11",
+      "name": "密度：体積が違う物質を比べる",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_7_U04",
+          "name": "身のまわりの物質"
+        }
+      ],
+      "distinction": "物質全般から体積をそろえた比較に特化する",
+      "goal": "質量と体積から物質の密度を求める",
+      "prerequisiteText": "除法・体積",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "質量54g、体積20cm³の物体の密度は？",
+        "answer": "2.7g/cm³",
+        "distractors": [
+          {
+            "answer": "1,080g/cm³",
+            "misconception": "質量と体積を掛ける"
+          },
+          {
+            "answer": "0.37g/cm³",
+            "misconception": "割る向きを逆にする"
+          },
+          {
+            "answer": "34g/cm³",
+            "misconception": "差を求める"
+          }
+        ],
+        "explanation": "密度＝質量÷体積なので54÷20＝2.7g/cm³。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S12",
+      "key": "S12",
+      "name": "地震：初期微動継続時間の比較",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_7_U12",
+          "name": "地震"
+        }
+      ],
+      "distinction": "地震の名称から記録比較と推定の範囲へ分ける",
+      "goal": "同条件でS−P時間から距離を比較する",
+      "prerequisiteText": "時刻差・地震波",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "同じ地震の記録でAのS−P時間は3秒、Bは6秒。一般に震源から遠いのは？",
+        "answer": "B",
+        "distractors": [
+          {
+            "answer": "A",
+            "misconception": "時間差と距離の関係を逆にする"
+          },
+          {
+            "answer": "必ず同じ",
+            "misconception": "波の速さの違いを無視する"
+          },
+          {
+            "answer": "震央がBだと断定できる",
+            "misconception": "距離比較だけで位置を確定する"
+          }
+        ],
+        "explanation": "同じ伝わり方を仮定すると、P波とS波の到着差が大きいほど遠い。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S13",
+      "key": "S13",
+      "name": "化学変化：閉じた容器の質量",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "中2",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_8_U06",
+          "name": "化学変化と質量"
+        }
+      ],
+      "distinction": "質量保存から系の境界を明示する判断へ分ける",
+      "goal": "気体を含む全体で質量保存を判断する",
+      "prerequisiteText": "S04・化学反応",
+      "prerequisiteProposals": [
+        "EXP_S04"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "密閉容器内で反応して気体が発生した。漏れがなければ容器全体の質量は？",
+        "answer": "変わらない",
+        "distractors": [
+          {
+            "answer": "気体の分だけ減る",
+            "misconception": "容器外へ出たと考える"
+          },
+          {
+            "answer": "必ず増える",
+            "misconception": "気体の体積を質量増加とする"
+          },
+          {
+            "answer": "半分になる",
+            "misconception": "保存則を使わない"
+          }
+        ],
+        "explanation": "気体も容器内に残るので、反応前後の全体質量は同じ。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S14",
+      "key": "S14",
+      "name": "電流：直列回路の抵抗の合計",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "中2",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_8_U07",
+          "name": "電流"
+        }
+      ],
+      "distinction": "電流単元から接続判断と式の選択を切り出す",
+      "goal": "回路のつなぎ方に合わせて抵抗を求める",
+      "prerequisiteText": "オームの法則・直列回路",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "2Ωと4Ωの抵抗を直列にして6Vを加える。電流は？",
+        "answer": "1A",
+        "distractors": [
+          {
+            "answer": "3A",
+            "misconception": "2Ωだけで計算する"
+          },
+          {
+            "answer": "1.5A",
+            "misconception": "4Ωだけで計算する"
+          },
+          {
+            "answer": "4.5A",
+            "misconception": "枝ごとの電流を足すつもりで計算する"
+          }
+        ],
+        "explanation": "直列の合成抵抗は6Ω。I＝6÷6＝1A。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_S15",
+      "key": "S15",
+      "name": "運動エネルギー：速さが2倍のとき",
+      "area": "理科",
+      "primaryCategory": "SCIENCE",
+      "targetGrade": "中3〜高1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_9_U09",
+          "name": "仕事とエネルギー"
+        },
+        {
+          "mode": "UPPER_SCIENCE_MECHANICS",
+          "name": "力学演習"
+        }
+      ],
+      "distinction": "エネルギー全般から条件付きの二乗関係の読解へ分ける",
+      "goal": "式を根拠に速さとエネルギーの変化を比較する",
+      "prerequisiteText": "比例・式への代入",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "同じ質量で運動エネルギーは速さの2乗に比例するとする。速さが2倍なら何倍？",
+        "answer": "4倍",
+        "distractors": [
+          {
+            "answer": "2倍",
+            "misconception": "単純比例と考える"
+          },
+          {
+            "answer": "8倍",
+            "misconception": "3乗と取り違える"
+          },
+          {
+            "answer": "変わらない",
+            "misconception": "速さの影響を無視する"
+          }
+        ],
+        "explanation": "2の2乗は4。中学向けは比例関係を問題文に明示する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C01",
+      "key": "C01",
+      "name": "地図の縮尺：実際の距離に直す",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小6",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_4_U07",
+          "name": "地図帳の使い方"
+        },
+        {
+          "mode": "MATH_G6_U07",
+          "name": "拡大図 と 縮図"
+        }
+      ],
+      "distinction": "地図帳の知識から縮尺の数量操作を独立させる",
+      "goal": "縮尺と長さの単位を使って距離を求める",
+      "prerequisiteText": "縮図・単位換算",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "縮尺1：25,000の地図で4cm。実際の距離は？",
+        "answer": "1km",
+        "distractors": [
+          {
+            "answer": "100m",
+            "misconception": "cmからmへの変換を誤る"
+          },
+          {
+            "answer": "10km",
+            "misconception": "桁を1つ増やす"
+          },
+          {
+            "answer": "25km",
+            "misconception": "地図上の長さを掛けない"
+          }
+        ],
+        "explanation": "4×25,000＝100,000cm＝1,000m＝1km。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C02",
+      "key": "C02",
+      "name": "地図の凡例：通れる道を判断する",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小4〜5",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_3_U02",
+          "name": "地図の見方"
+        }
+      ],
+      "distinction": "地図記号の暗記から凡例に基づく判断へ分ける",
+      "goal": "凡例と経路条件を対応させる",
+      "prerequisiteText": "方位・地図記号",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "地図の凡例で実線は歩道、点線は工事中で通行不可。目的地まで選ぶべき道は？",
+        "answer": "実線の歩道だけを通る経路",
+        "distractors": [
+          {
+            "answer": "短ければ点線を通る経路",
+            "misconception": "通行条件を無視する"
+          },
+          {
+            "answer": "必ず北へ進む経路",
+            "misconception": "方位を目的化する"
+          },
+          {
+            "answer": "凡例を見ず直線で進む経路",
+            "misconception": "地図の条件を使わない"
+          }
+        ],
+        "explanation": "距離だけでなく、凡例が示す通行可否を満たす必要がある。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C03",
+      "key": "C03",
+      "name": "雨温図：降水量の季節差を読む",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小5〜中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_5_U02",
+          "name": "日本の気候"
+        }
+      ],
+      "distinction": "気候名の暗記から資料で言える範囲の読解へ分ける",
+      "goal": "月別降水量から季節の特徴を説明する",
+      "prerequisiteText": "棒グラフ・月",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "ある地点の降水量は1月20mm、7月200mm。示された資料から言えるのは？",
+        "answer": "7月は1月より180mm多い",
+        "distractors": [
+          {
+            "answer": "この地点は必ず日本である",
+            "misconception": "2点の値だけで国を断定する"
+          },
+          {
+            "answer": "7月は1月の2倍",
+            "misconception": "倍率を誤る"
+          },
+          {
+            "answer": "毎年必ず同じ量が降る",
+            "misconception": "観測値を固定的法則とする"
+          }
+        ],
+        "explanation": "200−20＝180mm。2か月の値だけでは国や毎年の量を断定できない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C04",
+      "key": "C04",
+      "name": "食料自給率：分母を確かめる",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小5〜6",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_5_U09",
+          "name": "食料問題"
+        }
+      ],
+      "distinction": "食料問題から指標の基準と単位の読み取りを独立させる",
+      "goal": "指標が何を基準に計算されたか確認する",
+      "prerequisiteText": "M10・食料生産",
+      "prerequisiteProposals": [
+        "EXP_M10"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "重量で比べるとし、消費100kgのうち国内産40kgなら重量ベースの自給率は？",
+        "answer": "40％",
+        "distractors": [
+          {
+            "answer": "60％",
+            "misconception": "輸入の割合を答える"
+          },
+          {
+            "answer": "250％",
+            "misconception": "分母を逆にする"
+          },
+          {
+            "answer": "40kg",
+            "misconception": "量と割合を混同する"
+          }
+        ],
+        "explanation": "重量という基準を明示して40÷100×100＝40％。カロリーベース等とは区別する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C05",
+      "key": "C05",
+      "name": "歴史：出来事の順と因果を分ける",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小6〜中1",
+      "phase": 3,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_6_U09",
+          "name": "明治時代"
+        }
+      ],
+      "distinction": "時代別知識から年表の証拠の使い方を独立させる",
+      "goal": "年表上の前後関係と原因の断定を区別する",
+      "prerequisiteText": "年表・前後の比較",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "資料に「Aは1868年、Bは1872年」とだけある。必ず言えるのは？",
+        "answer": "AはBより先に起きた",
+        "distractors": [
+          {
+            "answer": "AがBの唯一の原因だ",
+            "misconception": "前後を因果とする"
+          },
+          {
+            "answer": "BがAを引き起こした",
+            "misconception": "時間関係を逆にする"
+          },
+          {
+            "answer": "2つは同じ年だ",
+            "misconception": "年を読み落とす"
+          }
+        ],
+        "explanation": "年表から分かるのは順序。原因の判断には内容の資料も必要。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C06",
+      "key": "C06",
+      "name": "三権：担当する機関を場面から選ぶ",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小6〜中3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_6_U13",
+          "name": "国会"
+        },
+        {
+          "mode": "SOCIAL_6_U14",
+          "name": "内閣"
+        },
+        {
+          "mode": "SOCIAL_6_U15",
+          "name": "裁判所"
+        }
+      ],
+      "distinction": "3つの既存単元を役割の対比として再編する",
+      "goal": "機関名の暗記を具体的な役割に結び付ける",
+      "prerequisiteText": "国会・内閣・裁判所",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "裁判を通して法律に基づき争いを解決するのは？",
+        "answer": "裁判所",
+        "distractors": [
+          {
+            "answer": "国会",
+            "misconception": "立法と司法を混同する"
+          },
+          {
+            "answer": "内閣",
+            "misconception": "行政と司法を混同する"
+          },
+          {
+            "answer": "選挙管理委員会",
+            "misconception": "選挙事務と司法を混同する"
+          }
+        ],
+        "explanation": "裁判所が司法を担当する。国会は立法、内閣は行政を担う。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C07",
+      "key": "C07",
+      "name": "税と公共サービス：みんなで負担する理由",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小6〜中3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_9_U10",
+          "name": "税金"
+        }
+      ],
+      "distinction": "税の名称から負担と公共性の理由に絞る",
+      "goal": "共同利用するサービスと税の関係を説明する",
+      "prerequisiteText": "公共施設・費用",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "地域の道路や消防を税で支える主な理由として適切なのは？",
+        "answer": "多くの人の暮らしを支えるサービスを共同で負担するため",
+        "distractors": [
+          {
+            "answer": "利用者以外は影響を受けないから",
+            "misconception": "公共性を見落とす"
+          },
+          {
+            "answer": "税を払えば道路を私物化できるから",
+            "misconception": "共同利用を所有と混同する"
+          },
+          {
+            "answer": "費用が一切かからないから",
+            "misconception": "必要経費を無視する"
+          }
+        ],
+        "explanation": "個人だけでは維持しにくい共同の仕組みを税で支えている。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C08",
+      "key": "C08",
+      "name": "多数決：最多票と過半数の違い",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "中3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_9_U09",
+          "name": "選挙"
+        }
+      ],
+      "distinction": "選挙制度から集計用語の意味を独立させる",
+      "goal": "最多得票と全体の半分超を区別する",
+      "prerequisiteText": "割合・選挙",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "100票の内訳がA45票、B35票、C20票。Aについて正しいものは？",
+        "answer": "最多票だが過半数ではない",
+        "distractors": [
+          {
+            "answer": "過半数である",
+            "misconception": "最多を半分超とする"
+          },
+          {
+            "answer": "ちょうど半数である",
+            "misconception": "45と50を混同する"
+          },
+          {
+            "answer": "最少得票である",
+            "misconception": "大小を逆にする"
+          }
+        ],
+        "explanation": "過半数は50票を超えること。45票は最多でも過半数でない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C09",
+      "key": "C09",
+      "name": "需要と供給：条件を固定した価格変化",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "中3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_9_U11",
+          "name": "市場経済"
+        }
+      ],
+      "distinction": "市場経済全般から条件付きの変化方向に絞る",
+      "goal": "他条件一定という前提付きで市場を考える",
+      "prerequisiteText": "価格・需要と供給",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "他の条件が同じで、人気が高まり買いたい人だけが増えた。一般に価格にはどんな圧力がかかる？",
+        "answer": "上がる方向",
+        "distractors": [
+          {
+            "answer": "下がる方向",
+            "misconception": "需要増の向きを逆にする"
+          },
+          {
+            "answer": "必ず半額になる",
+            "misconception": "具体的な値を断定する"
+          },
+          {
+            "answer": "売り手がいなくなる",
+            "misconception": "需要と供給を混同する"
+          }
+        ],
+        "explanation": "供給などが変わらなければ需要増は価格を押し上げる方向に働く。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_C10",
+      "key": "C10",
+      "name": "統計資料：年・地域・単位をそろえる",
+      "area": "社会",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "中2〜3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "細分化",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_7_U13",
+          "name": "日本の人口"
+        }
+      ],
+      "distinction": "人口の知識から資料比較の前提チェックを独立させる",
+      "goal": "異なる資料を比較する前に定義を確認する",
+      "prerequisiteText": "表の見出し・単位",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "A市の2020年人口とB市の2025年世帯数を、そのまま人口の大小として比べてよい？",
+        "answer": "年と指標が違うので、そのままでは比べられない",
+        "distractors": [
+          {
+            "answer": "数字が大きい方が人口も多い",
+            "misconception": "単位を無視する"
+          },
+          {
+            "answer": "同じ国内なら必ず比べられる",
+            "misconception": "指標の違いを無視する"
+          },
+          {
+            "answer": "年だけ合わせればよい",
+            "misconception": "人口と世帯数を混同する"
+          }
+        ],
+        "explanation": "時点・地域範囲・指標の定義を合わせて比較する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L01",
+      "key": "L01",
+      "name": "買い物：予算内に収める",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "MATH_G3_U04",
+          "name": "ひき算（3けた・4けた）"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_MONEY",
+          "name": "お金・金融"
+        }
+      ],
+      "distinction": "高校の家計知識を小学生の1回の買い物に再設計する",
+      "goal": "合計金額と残金から購入可否を判断する",
+      "prerequisiteText": "整数の加減算",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "予算500円で180円と240円の商品を買う。残金は？",
+        "answer": "80円",
+        "distractors": [
+          {
+            "answer": "420円",
+            "misconception": "支払額を残金とする"
+          },
+          {
+            "answer": "260円",
+            "misconception": "一方の商品だけ引く"
+          },
+          {
+            "answer": "920円",
+            "misconception": "合計を予算に足す"
+          }
+        ],
+        "explanation": "180＋240＝420円、500−420＝80円。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L02",
+      "key": "L02",
+      "name": "時刻表：出発と所要時間を読む",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小3〜4",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "MATH_G3_U05",
+          "name": "時こく と 時かん"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_TRAVEL_TRANSPORT",
+          "name": "交通・旅行"
+        }
+      ],
+      "distinction": "旅行の広い知識から小学生向け時刻表の数量読解にする",
+      "goal": "時刻と時間を区別して到着を求める",
+      "prerequisiteText": "時刻・時間の加算",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "9時40分発、乗車時間35分のバス。到着予定は？",
+        "answer": "10時15分",
+        "distractors": [
+          {
+            "answer": "9時75分",
+            "misconception": "60分を繰り上げない"
+          },
+          {
+            "answer": "10時35分",
+            "misconception": "分の扱いを誤る"
+          },
+          {
+            "answer": "9時5分",
+            "misconception": "所要時間を引く"
+          }
+        ],
+        "explanation": "9時40分に20分で10時、残り15分で10時15分。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L03",
+      "key": "L03",
+      "name": "料理：人数に合わせて分量を変える",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "MATH_G6_U05",
+          "name": "比 と その 利用"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_COOK_NUTRITION",
+          "name": "料理・栄養"
+        }
+      ],
+      "distinction": "栄養知識から人数比例だけを扱う生活場面単元にする",
+      "goal": "人数と分量の比例を使う",
+      "prerequisiteText": "比・分数の乗法",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "4人分で米300gの料理を6人分作る。同じ1人分の量なら米は？",
+        "answer": "450g",
+        "distractors": [
+          {
+            "answer": "200g",
+            "misconception": "人数比を逆にする"
+          },
+          {
+            "answer": "600g",
+            "misconception": "倍だと決め付ける"
+          },
+          {
+            "answer": "302g",
+            "misconception": "人数の差を足す"
+          }
+        ],
+        "explanation": "6/4＝1.5倍なので300×1.5＝450g。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L04",
+      "key": "L04",
+      "name": "防災：条件付きの避難経路を選ぶ",
+      "area": "生活場面",
+      "primaryCategory": "SOCIAL",
+      "targetGrade": "小4〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_4_U06",
+          "name": "災害とくらし"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_SAFETY",
+          "name": "防災・安全"
+        }
+      ],
+      "distinction": "一般的な防災用語から与件付きの経路選択へ再設計する",
+      "goal": "与えられた危険情報を経路判断に使う",
+      "prerequisiteText": "地図の凡例・J03",
+      "prerequisiteProposals": [
+        "EXP_J03"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "訓練資料で「川沿いは通行不可」と指示された。避難経路として適切なのは？",
+        "answer": "指示された安全な経路で、川沿いを避ける",
+        "distractors": [
+          {
+            "answer": "最短なら川沿いを通る",
+            "misconception": "危険条件を無視する"
+          },
+          {
+            "answer": "去年の経路を必ず使う",
+            "misconception": "今回の指示を無視する"
+          },
+          {
+            "answer": "資料を確認せず川へ向かう",
+            "misconception": "根拠のない判断をする"
+          }
+        ],
+        "explanation": "訓練で与えられた通行条件と指示に従う。現実の行動は最新の自治体等の情報を確認する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L05",
+      "key": "L05",
+      "name": "ネット公開：写真に含まれる個人情報",
+      "area": "生活場面",
+      "primaryCategory": "IT_INFO",
+      "targetGrade": "小4〜6",
+      "phase": 1,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "IT_SECURITY",
+          "name": "モラル・セキュリティ"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_NET_SAFETY",
+          "name": "ネット生活安全"
+        }
+      ],
+      "distinction": "高校のネット安全から小学生の写真公開場面に絞る",
+      "goal": "写真の背景にある情報にも気付く",
+      "prerequisiteText": "住所・氏名・ネット公開",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "作品写真を公開したいが、背景に自宅住所のラベルが写っている。まずどうする？",
+        "answer": "住所が見えない写真にして、公開範囲を確認する",
+        "distractors": [
+          {
+            "answer": "作品が主役ならそのまま公開する",
+            "misconception": "背景を無視する"
+          },
+          {
+            "answer": "名前だけ隠せば住所はよい",
+            "misconception": "情報を一部しか確認しない"
+          },
+          {
+            "answer": "一度公開してから考える",
+            "misconception": "公開後の拡散を軽視する"
+          }
+        ],
+        "explanation": "作品以外にも個人情報が写る。公開前に背景と範囲を確認する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L06",
+      "key": "L06",
+      "name": "買い物：単価と使い切れる量を両立する",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U09",
+          "name": "単位量あたりの 大きさ"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_BUDGET_ADV",
+          "name": "家計管理発展"
+        }
+      ],
+      "distinction": "単価比較に保存・廃棄という生活条件を追加する",
+      "goal": "最安単価と必要量を分けて判断する",
+      "prerequisiteText": "M14・残金計算",
+      "prerequisiteProposals": [
+        "EXP_M14"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "今日中に使う牛乳は200mLで、残りは保存できない。200mL120円と1L300円では支出を抑えるのは？",
+        "answer": "200mL120円",
+        "distractors": [
+          {
+            "answer": "1L300円",
+            "misconception": "単価の安さだけで選ぶ"
+          },
+          {
+            "answer": "両方買う",
+            "misconception": "必要量を無視する"
+          },
+          {
+            "answer": "どちらも0円",
+            "misconception": "費用を計算しない"
+          }
+        ],
+        "explanation": "使える量と保存条件を考えると、今回必要な200mLだけ買う方が支出は少ない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L07",
+      "key": "L07",
+      "name": "定期購入：初月だけで比較しない",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中1〜3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "UPPER_PRACTICAL_CONSUMER_TROUBLE",
+          "name": "消費者トラブル"
+        },
+        {
+          "mode": "MATH_G7_U04",
+          "name": "文字式"
+        }
+      ],
+      "distinction": "大人向け契約知識を継続費用の読み取りへ再設計する",
+      "goal": "継続期間の総額と契約条件を確認する",
+      "prerequisiteText": "整数の計算・条件読解",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "初月0円、2か月目から月500円。途中解約なしで6か月利用すると合計は？",
+        "answer": "2,500円",
+        "distractors": [
+          {
+            "answer": "0円",
+            "misconception": "広告の初月表示だけを見る"
+          },
+          {
+            "answer": "3,000円",
+            "misconception": "無料の初月を数える"
+          },
+          {
+            "answer": "500円",
+            "misconception": "1か月分しか数えない"
+          }
+        ],
+        "explanation": "有料は5か月分なので500×5＝2,500円。別途の費用がない条件を明記する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L08",
+      "key": "L08",
+      "name": "充電と利用時間：足りる残量を見積もる",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U14",
+          "name": "割合"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_DIGITAL_PRODUCTIVITY",
+          "name": "デジタル効率化"
+        }
+      ],
+      "distinction": "端末活用を、仮定を明示した数量見積もりに分ける",
+      "goal": "一定消費を仮定して残量と時間を比べる",
+      "prerequisiteText": "割合・比例",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "電池を1時間に20ポイント使うと仮定する。残量60％で2時間使うと残量は？",
+        "answer": "20％",
+        "distractors": [
+          {
+            "answer": "40％",
+            "misconception": "使った量を残量とする"
+          },
+          {
+            "answer": "30％",
+            "misconception": "時間で割る"
+          },
+          {
+            "answer": "80％",
+            "misconception": "消費分を加える"
+          }
+        ],
+        "explanation": "2時間で40ポイント使い、60−40＝20％。現実の消費は使用条件で変わる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L09",
+      "key": "L09",
+      "name": "認証：パスワードと確認コードを守る",
+      "area": "生活場面",
+      "primaryCategory": "IT_INFO",
+      "targetGrade": "中1以上",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "IT_SECURITY",
+          "name": "モラル・セキュリティ"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_NET_SAFETY",
+          "name": "ネット生活安全"
+        }
+      ],
+      "distinction": "安全一般から確認コードを狙う場面へ細分化する",
+      "goal": "本人確認情報を他人へ渡さない",
+      "prerequisiteText": "アカウントの意味",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "友人を名乗る相手から「届いたログイン確認コードを教えて」と連絡が来た。適切なのは？",
+        "answer": "教えず、別の確かな連絡手段で本人を確認する",
+        "distractors": [
+          {
+            "answer": "友人らしいので教える",
+            "misconception": "名乗りをそのまま信じる"
+          },
+          {
+            "answer": "パスワードと一緒に送る",
+            "misconception": "認証情報をまとめて渡す"
+          },
+          {
+            "answer": "SNSで公開して確認する",
+            "misconception": "秘密情報を公開する"
+          }
+        ],
+        "explanation": "確認コードも本人確認の秘密情報。相手の名乗りだけで渡さない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L10",
+      "key": "L10",
+      "name": "偽の連絡：公式窓口で確かめる",
+      "area": "生活場面",
+      "primaryCategory": "IT_INFO",
+      "targetGrade": "中1以上",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "IT_LITERACY",
+          "name": "情報リテラシー"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_NET_SAFETY",
+          "name": "ネット生活安全"
+        }
+      ],
+      "distinction": "情報リテラシーを偽通知への検証手順に落とし込む",
+      "goal": "急がせる通知を独立した経路で検証する",
+      "prerequisiteText": "URL・公式サイト",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "「今すぐ支払わないと停止」と知らない送信元から通知。まずどう確認する？",
+        "answer": "通知のリンクを使わず、公式アプリ等から確認する",
+        "distractors": [
+          {
+            "answer": "急いで通知のリンクで支払う",
+            "misconception": "緊急性を信用の根拠とする"
+          },
+          {
+            "answer": "ロゴがあれば信用する",
+            "misconception": "外見だけで判断する"
+          },
+          {
+            "answer": "要求された秘密情報を返信する",
+            "misconception": "本人確認前に渡す"
+          }
+        ],
+        "explanation": "見た目や緊急性だけで判断せず、普段の公式経路から状況を確かめる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L11",
+      "key": "L11",
+      "name": "データ保護：同期とバックアップの違い",
+      "area": "生活場面",
+      "primaryCategory": "IT_INFO",
+      "targetGrade": "中1以上",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "IT_LITERACY",
+          "name": "情報リテラシー"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_DIGITAL_PRODUCTIVITY",
+          "name": "デジタル効率化"
+        }
+      ],
+      "distinction": "端末操作から消失場面と復元可能性に絞る",
+      "goal": "同期による削除反映と復元用保存を区別する",
+      "prerequisiteText": "ファイル・保存場所",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "同期中のファイルを消すと他端末からも消える設定だった。復元に備えるには？",
+        "answer": "別の復元可能なバックアップを用意する",
+        "distractors": [
+          {
+            "answer": "同期だけなら必ず復元できる",
+            "misconception": "同期をバックアップと同一視する"
+          },
+          {
+            "answer": "全端末から同時に消す",
+            "misconception": "復元元をなくす"
+          },
+          {
+            "answer": "ファイル名だけ覚える",
+            "misconception": "内容を保存しない"
+          }
+        ],
+        "explanation": "同期は同じ状態を共有する仕組み。削除前の状態を戻せる保存を別に確認する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L12",
+      "key": "L12",
+      "name": "生活時間：日をまたぐ時間計算",
+      "area": "生活場面",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小5〜6",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "MATH_G3_U05",
+          "name": "時こく と 時かん"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_TIME_MANAGEMENT",
+          "name": "時間管理"
+        }
+      ],
+      "distinction": "時間管理から日付境界の計算を子どもの生活で扱う",
+      "goal": "日付をまたぐ経過時間を計算する",
+      "prerequisiteText": "L02・24時間",
+      "prerequisiteProposals": [
+        "EXP_L02"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "22時30分に寝て翌朝6時30分に起きた。経過時間は？",
+        "answer": "8時間",
+        "distractors": [
+          {
+            "answer": "16時間",
+            "misconception": "同じ日として引く"
+          },
+          {
+            "answer": "7時間",
+            "misconception": "深夜までの時間を誤る"
+          },
+          {
+            "answer": "9時間",
+            "misconception": "時間を1つ多く数える"
+          }
+        ],
+        "explanation": "24時まで1時間30分、その後6時間30分で計8時間。適切な睡眠量の診断は扱わない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L13",
+      "key": "L13",
+      "name": "健康情報：表示と相談先を読む",
+      "area": "生活場面",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "UPPER_PRACTICAL_HEALTH",
+          "name": "健康・医療リテラシー"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_EMERGENCY_FIRSTAID",
+          "name": "応急手当"
+        }
+      ],
+      "distinction": "健康リテラシーを条件読解と相談行動に限定する",
+      "goal": "医薬品の表示を読み、自己判断で変更しない",
+      "prerequisiteText": "年齢条件・注意書き",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "家庭にある薬の表示に「12歳未満は使用しない」とある。11歳の人はどうする？",
+        "answer": "自己判断で使わず、保護者や薬剤師等に相談する",
+        "distractors": [
+          {
+            "answer": "半分なら使ってよい",
+            "misconception": "量を勝手に調整する"
+          },
+          {
+            "answer": "効きそうなら表示を無視する",
+            "misconception": "年齢条件を無視する"
+          },
+          {
+            "answer": "友達の体験だけで決める",
+            "misconception": "個人例を根拠にする"
+          }
+        ],
+        "explanation": "表示の年齢条件を守り、必要な相談につなげる。投薬量の計算や診断は出題しない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L14",
+      "key": "L14",
+      "name": "申請と締切：必要な条件を照合する",
+      "area": "生活場面",
+      "primaryCategory": "KOKUGO_GRADES",
+      "targetGrade": "中1以上",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "UPPER_PRACTICAL_PUBLIC_SERVICES",
+          "name": "公共サービス"
+        },
+        {
+          "mode": "KOKUGO_G7_U02",
+          "name": "説明文の読み取り"
+        }
+      ],
+      "distinction": "行政知識を学校の架空要項の照合へ再設計する",
+      "goal": "要件・締切・提出先を照合する",
+      "prerequisiteText": "J14・日付",
+      "prerequisiteProposals": [
+        "EXP_J14"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "学校の申込要項に「10月20日までに申込書と同意書を提出」。19日に申込書だけ出した。条件を満たす？",
+        "answer": "同意書も必要なので、まだ満たしていない",
+        "distractors": [
+          {
+            "answer": "締切前なら書類は1枚でよい",
+            "misconception": "必要書類を落とす"
+          },
+          {
+            "answer": "21日でも必ず受理される",
+            "misconception": "締切を無視する"
+          },
+          {
+            "answer": "同意書だけあれば申込書はいらない",
+            "misconception": "要件の一方を消す"
+          }
+        ],
+        "explanation": "期限と2種類の書類の両方を満たす必要がある。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_L15",
+      "key": "L15",
+      "name": "作品利用：画像の利用条件を確かめる",
+      "area": "生活場面",
+      "primaryCategory": "IT_INFO",
+      "targetGrade": "中1以上",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "生活場面への再設計",
+      "existingUnits": [
+        {
+          "mode": "IT_SECURITY",
+          "name": "モラル・セキュリティ"
+        },
+        {
+          "mode": "UPPER_PRACTICAL_LAW",
+          "name": "法律・契約"
+        }
+      ],
+      "distinction": "法律全般から与えられたライセンス条件の実行に絞る",
+      "goal": "公開されていることと利用許可を区別する",
+      "prerequisiteText": "引用・利用条件",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "利用条件に「作者名の表示が必要」とある画像を、その条件内で使う。必要なのは？",
+        "answer": "指定された作者名表示を行う",
+        "distractors": [
+          {
+            "answer": "ネットにあるので表示不要",
+            "misconception": "公開と自由利用を混同する"
+          },
+          {
+            "answer": "自分の作品と表示する",
+            "misconception": "作者を偽る"
+          },
+          {
+            "answer": "条件を削除して配る",
+            "misconception": "許可条件を消す"
+          }
+        ],
+        "explanation": "公開されていても利用条件は確認する。ここでは示された条件の読み取りを問う。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X01",
+      "key": "X01",
+      "name": "備蓄計画：人数・日数・必要量",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "MATH_G6_U05",
+          "name": "比 と その 利用"
+        },
+        {
+          "mode": "SOCIAL_4_U06",
+          "name": "災害とくらし"
+        }
+      ],
+      "distinction": "防災の条件読解と比例による計画を合わせる",
+      "goal": "防災資料の数値から必要量を計画する",
+      "prerequisiteText": "M17・L04",
+      "prerequisiteProposals": [
+        "EXP_M17",
+        "EXP_L04"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "訓練上の目安を1人1日3Lとする。4人で3日分の水は？",
+        "answer": "36L",
+        "distractors": [
+          {
+            "answer": "12L",
+            "misconception": "人数だけ掛ける"
+          },
+          {
+            "answer": "9L",
+            "misconception": "日数だけ掛ける"
+          },
+          {
+            "answer": "10L",
+            "misconception": "数を足す"
+          }
+        ],
+        "explanation": "3×4×3＝36L。訓練条件に基づく計画で、現実の備蓄は地域の案内も確認する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X02",
+      "key": "X02",
+      "name": "避難計画：通れる道の中で所要時間を比べる",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6〜中1",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U10",
+          "name": "速さ"
+        },
+        {
+          "mode": "SOCIAL_4_U06",
+          "name": "災害とくらし"
+        }
+      ],
+      "distinction": "計算前に経路の条件を判定する2段階の融合課題にする",
+      "goal": "危険条件を満たした経路の時間を比較する",
+      "prerequisiteText": "M15・C02・L04",
+      "prerequisiteProposals": [
+        "EXP_M15",
+        "EXP_C02",
+        "EXP_L04"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "訓練で橋は通行不可。A道は橋経由600m、B道は安全な900m。分速60mなら選ぶ経路と時間は？",
+        "answer": "B道で15分",
+        "distractors": [
+          {
+            "answer": "A道で10分",
+            "misconception": "通行不可を無視する"
+          },
+          {
+            "answer": "B道で9分",
+            "misconception": "速さの計算を誤る"
+          },
+          {
+            "answer": "A道で15分",
+            "misconception": "経路と時間を混同する"
+          }
+        ],
+        "explanation": "まず安全条件でAを除き、900÷60＝15分と計算する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X03",
+      "key": "X03",
+      "name": "実験報告：平均と結論をつなぐ",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中1〜2",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "MATH_G5_U08",
+          "name": "平均"
+        },
+        {
+          "mode": "SCIENCE_5_U03",
+          "name": "植物の発芽と成長"
+        },
+        {
+          "mode": "KOKUGO_G5_U07",
+          "name": "報告文を書く"
+        }
+      ],
+      "distinction": "平均計算と科学的な限定表現を同時に評価する",
+      "goal": "繰り返し測定を要約し、結論の範囲を示す",
+      "prerequisiteText": "M09・S03・J04",
+      "prerequisiteProposals": [
+        "EXP_M09",
+        "EXP_S03",
+        "EXP_J04"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "同じ条件で伸びを3回測り4cm、5cm、6cmだった。適切な報告は？",
+        "answer": "この3回の平均は5cmだった",
+        "distractors": [
+          {
+            "answer": "毎回必ず5cm伸びる",
+            "misconception": "平均を各回の値にする"
+          },
+          {
+            "answer": "全植物が5cm伸びる",
+            "misconception": "対象を一般化する"
+          },
+          {
+            "answer": "平均は15cmだった",
+            "misconception": "合計を平均とする"
+          }
+        ],
+        "explanation": "合計15÷3＝5cm。対象と測定回数を残して報告する。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X04",
+      "key": "X04",
+      "name": "包装設計：面積から材料を見積もる",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "小6",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "MATH_G4_U08",
+          "name": "面せき"
+        },
+        {
+          "mode": "SOCIAL_5_U08",
+          "name": "環境問題"
+        }
+      ],
+      "distinction": "面積換算を材料計画へ接続し、使用量と環境負荷の同一視は避ける",
+      "goal": "同条件で包装材料の使用量を比較する",
+      "prerequisiteText": "面積・単位",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "のりしろと重なりを無視すると、箱1個に600cm²の紙を使う。10個には何m²必要？",
+        "answer": "0.6m²",
+        "distractors": [
+          {
+            "answer": "6m²",
+            "misconception": "面積の換算を10倍と考える"
+          },
+          {
+            "answer": "60m²",
+            "misconception": "cmとmの換算をそのまま使う"
+          },
+          {
+            "answer": "0.06m²",
+            "misconception": "桁を1つ余分に下げる"
+          }
+        ],
+        "explanation": "6,000cm²。1m²＝10,000cm²なので0.6m²。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X05",
+      "key": "X05",
+      "name": "旅の支払い：英語の料金表と換算",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中2〜3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "ENGLISH_G9_U08",
+          "name": "長文読解"
+        },
+        {
+          "mode": "MATH_G5_U03",
+          "name": "小数の かけ算"
+        }
+      ],
+      "distinction": "英語読解と費用の合算・単位換算を組み合わせる",
+      "goal": "英語の料金条件を読み、与えられた換算率で計算する",
+      "prerequisiteText": "英語の基本料金語・小数の乗法",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "料金表は「Ticket $8 + service fee $2」。1ドル150円で、他の費用なし。合計は？",
+        "answer": "1,500円",
+        "distractors": [
+          {
+            "answer": "1,200円",
+            "misconception": "feeを読み落とす"
+          },
+          {
+            "answer": "300円",
+            "misconception": "手数料だけ換算する"
+          },
+          {
+            "answer": "10円",
+            "misconception": "通貨の単位を無視する"
+          }
+        ],
+        "explanation": "チケットと手数料で10ドル。10×150＝1,500円。換算率は設問の架空条件。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X06",
+      "key": "X06",
+      "name": "電気代：電力・時間・単価のつながり",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中2〜3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "SCIENCE_8_U07",
+          "name": "電流"
+        },
+        {
+          "mode": "MATH_G5_U09",
+          "name": "単位量あたりの 大きさ"
+        }
+      ],
+      "distinction": "物理量の関係と単位量料金の計算を接続する",
+      "goal": "電力量を求め、与えられた料金条件で計算する",
+      "prerequisiteText": "単位量・時間換算",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "1kWの機器を2時間使う。1kWh30円で基本料等を考えない場合、料金は？",
+        "answer": "60円",
+        "distractors": [
+          {
+            "answer": "30円",
+            "misconception": "利用時間を無視する"
+          },
+          {
+            "answer": "15円",
+            "misconception": "時間で割る"
+          },
+          {
+            "answer": "600円",
+            "misconception": "単位の桁を誤る"
+          }
+        ],
+        "explanation": "電力量は1×2＝2kWh、2×30＝60円。料金は与件であり実際の契約額とは分ける。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X07",
+      "key": "X07",
+      "name": "アンケート改善：偏りを減らす提案",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中2〜3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "MATH_G9_U09",
+          "name": "標本調査"
+        },
+        {
+          "mode": "KOKUGO_G8_U09",
+          "name": "意見文"
+        }
+      ],
+      "distinction": "統計の批判を改善提案という文章判断へつなげる",
+      "goal": "抽出の問題を根拠に調査計画を改善する",
+      "prerequisiteText": "M20・J13",
+      "prerequisiteProposals": [
+        "EXP_M20",
+        "EXP_J13"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "全校の図書館への要望を調べるのに図書委員だけへ質問した。改善案は？",
+        "answer": "各学年・学級から偏りを抑えて回答者を選ぶ",
+        "distractors": [
+          {
+            "answer": "図書委員に同じ質問を10回する",
+            "misconception": "人数と代表性を混同する"
+          },
+          {
+            "answer": "結論に合う回答だけ残す",
+            "misconception": "結果を選別する"
+          },
+          {
+            "answer": "質問の文字を大きくするだけ",
+            "misconception": "抽出の問題を直さない"
+          }
+        ],
+        "explanation": "対象の偏りを説明し、全校の意見を拾える抽出に変える。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X08",
+      "key": "X08",
+      "name": "投票結果：数値で主張を検証する",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "SOCIAL_9_U09",
+          "name": "選挙"
+        },
+        {
+          "mode": "KOKUGO_G9_U09",
+          "name": "論説文を書く"
+        },
+        {
+          "mode": "MATH_G5_U14",
+          "name": "割合"
+        }
+      ],
+      "distinction": "公民用語・割合・根拠付き反論を一問で統合する",
+      "goal": "最多票の結果から言える主張を選ぶ",
+      "prerequisiteText": "C08・J13・割合",
+      "prerequisiteProposals": [
+        "EXP_C08",
+        "EXP_J13"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "100票中A45、B35、C20。「全投票者の過半数がAを支持」は正しい？",
+        "answer": "誤り。Aは最多票だが過半数ではない",
+        "distractors": [
+          {
+            "answer": "正しい。1位なら過半数である",
+            "misconception": "順位と割合を混同する"
+          },
+          {
+            "answer": "正しい。45は35より多い",
+            "misconception": "別候補との比較だけで判断する"
+          },
+          {
+            "answer": "誤り。Aは最少得票である",
+            "misconception": "否定の理由を誤る"
+          }
+        ],
+        "explanation": "45％は50％を超えない。結論とその理由の両方をそろえる。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X09",
+      "key": "X09",
+      "name": "食品表示：1食分への換算",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中1〜2",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "UPPER_PRACTICAL_COOK_NUTRITION",
+          "name": "料理・栄養"
+        },
+        {
+          "mode": "MATH_G6_U05",
+          "name": "比 と その 利用"
+        }
+      ],
+      "distinction": "食品表示の読解と比例計算を統合する",
+      "goal": "表示の基準量と実際に食べる量を区別する",
+      "prerequisiteText": "比例・小数",
+      "prerequisiteProposals": [],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "架空の食品表示は100gあたり食塩相当量2g。30g分の食塩相当量は？",
+        "answer": "0.6g",
+        "distractors": [
+          {
+            "answer": "2g",
+            "misconception": "表示基準量をそのまま使う"
+          },
+          {
+            "answer": "6g",
+            "misconception": "割合を10倍にする"
+          },
+          {
+            "answer": "60g",
+            "misconception": "単位を混同する"
+          }
+        ],
+        "explanation": "2×30/100＝0.6g。個人の適正摂取量や健康状態の判断はしない。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    },
+    {
+      "id": "EXP_X10",
+      "key": "X10",
+      "name": "企画計画：予算と締切を同時に満たす",
+      "area": "教科融合",
+      "primaryCategory": "MATH_GRADES",
+      "targetGrade": "中2〜3",
+      "phase": 4,
+      "status": "設計案・未実装",
+      "changeType": "教科融合",
+      "existingUnits": [
+        {
+          "mode": "UPPER_ESSAY_PROJECT_MANAGEMENT",
+          "name": "プロジェクト管理"
+        },
+        {
+          "mode": "KOKUGO_G7_U02",
+          "name": "説明文の読み取り"
+        },
+        {
+          "mode": "MATH_G7_U04",
+          "name": "文字式"
+        }
+      ],
+      "distinction": "文章の条件抽出と数量による案の比較を統合する",
+      "goal": "複数の条件を満たす案を選び理由を述べる",
+      "prerequisiteText": "L01・J14・条件整理",
+      "prerequisiteProposals": [
+        "EXP_L01",
+        "EXP_J14"
+      ],
+      "difficulty": [
+        "基礎",
+        "標準",
+        "応用"
+      ],
+      "format": "選択式を初期実装。図表・音声・入力の条件は設計書参照。",
+      "example": {
+        "question": "予算3,000円、準備期限2日。A案2,500円・3日、B案2,800円・2日、C案3,200円・1日。選べるのは？",
+        "answer": "B案",
+        "distractors": [
+          {
+            "answer": "A案",
+            "misconception": "費用だけを見る"
+          },
+          {
+            "answer": "C案",
+            "misconception": "日数だけを見る"
+          },
+          {
+            "answer": "全部選べる",
+            "misconception": "複数条件を同時に見ない"
+          }
+        ],
+        "explanation": "Bだけが金額3,000円以下と日数2日以下の両方を満たす。"
+      },
+      "targetQuestionCount": 50,
+      "overlapReview": "登録名・親モード・ラベル・代表問題を一次確認。問題全件の意味重複照合と教育内容レビューは実装前の受入条件。"
+    }
+  ]
+}
