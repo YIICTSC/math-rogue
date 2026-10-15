@@ -165,12 +165,28 @@ export function visible(m: Mission, from: Point, angle: number, to: Point, crouc
   return Math.abs(delta) < .6 && clearSight(m, from, to, crouch, s);
 }
 export const cameraAngle = (m: Mission, index: number, time: number) => m.cameras[index].angle + Math.sin(time * .65 + index) * .65;
+export const HOLD_RANGE = 2.4;
+export const HOLD_RELEASE_RANGE = 2.8;
+export function withinHoldReach(m: Mission, from: Point, to: Point, continuing = false, s?: Pick<Run, 'switches'>): boolean {
+  return distance(from, to) <= (continuing ? HOLD_RELEASE_RANGE : HOLD_RANGE) && clearSight(m, from, to, true, s);
+}
 export function holdCandidate(m: Mission, s: Run): number {
-  return s.guards.findIndex(g => {
+  const eligible = (index: number, continuing = false) => {
+    const g = s.guards[index];
+    if (!g || g.sleep > 0) return false;
     const d = distance(g, s.player);
     const behind = ((s.player.x - g.x) * Math.sin(g.angle) + (s.player.z - g.z) * Math.cos(g.angle)) / Math.max(.01, d);
-    return g.sleep <= 0 && d <= 1.15 && d > .1 && behind < -.55 && clearSight(m, g, s.player, true, s);
+    return d > .1 && behind < -.55 && withinHoldReach(m, g, s.player, continuing, s);
+  };
+  // Keep the current target through small distance changes, rather than resetting
+  // the gauge or switching to another guard when two patrols cross.
+  if (s.holdProgress > 0 && eligible(s.holdTarget, true)) return s.holdTarget;
+  let target = -1, nearest = Infinity;
+  s.guards.forEach((g, i) => {
+    const d = distance(g, s.player);
+    if (d < nearest && eligible(i)) { target = i; nearest = d; }
   });
+  return target;
 }
 export const objectivesComplete = (m: Mission, s: Run) => s.collected.every(Boolean) && s.holds >= m.requiredHolds && s.shots >= m.requiredShots && (!m.requireSwitches || s.switches.every(Boolean)) && s.defended >= (m.defend?.seconds ?? 0);
 function sleepGuard(m: Mission, s: Run, index: number, method: 'hold' | 'shot' | 'melee') {

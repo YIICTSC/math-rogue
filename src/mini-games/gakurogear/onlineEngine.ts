@@ -2,7 +2,7 @@ import {makeBombArena,tickBombArena,newBombLoadout,type BombArena,type BombLoado
 import {buildRoomBoundaries,syncRoomDoors} from './cooperativeRooms';
 import {playerSeats,respawnRoyale,assistTeam,beginQuiz,finishWorld,magazineSize,newStats,spawnSupplies,tickArena,type Supply} from './onlineRules';
 import type {KartAvatar} from '../gakuro-kart/avatar';
-import { equip, WEAPONS, floorHeight, MISSIONS, activeObstacles, blocked, clearSight, createRun, distance, step, type Input, type Mission, type Point, type Run } from './engine';
+import { equip, WEAPONS, floorHeight, MISSIONS, activeObstacles, blocked, clearSight, withinHoldReach, createRun, distance, step, type Input, type Mission, type Point, type Run } from './engine';
 import type { KartLesson } from '../gakuro-kart/learning';
 export type OnlineMode = 'coop' | 'royale' | 'bomb';
 export type VrInput = Input & {reload?:boolean;bomb?:boolean;remote?:boolean};
@@ -68,14 +68,19 @@ export function tickWorld(w: OnlineWorld, controls: Record<string, VrInput>, dt:
       if (p.weapons[p.run.weapon] && input.reload && p.reloading === 0 && magazineSize(p.run.weapon)>0 && p.run.ammo < magazineSize(p.run.weapon) && p.energy >= 25) { p.energy -= 25; p.reloading = 1.1; if (p.energy < 20) beginQuiz(w,p); }
       if (p.reloading > 0) { p.reloading -= dt; if (p.reloading <= 0) { p.reloading = 0; p.run.ammo = magazineSize(p.run.weapon); } }
       let struck: Participant | undefined;
-      const holdTarget = connected.find(q => q !== p && q.out===p.out && !q.quiz && q.invulnerable === 0 && distance(q.run.player, p.run.player) < 1.15 && ((p.run.player.x - q.run.player.x) * Math.sin(q.run.player.angle) + (p.run.player.z - q.run.player.z) * Math.cos(q.run.player.angle)) < -.3 && clearSight(w.mission, p.run.player, q.run.player, true));
+      const canHold = (q: Participant, continuing = false) => q !== p && q.out === p.out && !q.quiz && q.invulnerable === 0 &&
+        ((p.run.player.x - q.run.player.x) * Math.sin(q.run.player.angle) + (p.run.player.z - q.run.player.z) * Math.cos(q.run.player.angle)) < -.3 &&
+        withinHoldReach(w.mission, p.run.player, q.run.player, continuing);
+      const previousHold = players[p.run.holdTarget];
+      const holdTarget = p.run.holdProgress > 0 && previousHold && connected.includes(previousHold) && canHold(previousHold, true) ? previousHold :
+        connected.filter(q => canHold(q)).sort((a,b) => distance(a.run.player,p.run.player)-distance(b.run.player,p.run.player))[0];
       if (input.hold && holdTarget && p.energy >= 20 && Math.hypot(input.x, input.z) < .1) { if(p.run.holdTarget!==players.indexOf(holdTarget)){p.run.holdProgress=0;p.run.holdTarget=players.indexOf(holdTarget);} p.run.holdProgress += dt; if (p.run.holdProgress >= .9) { struck = holdTarget; p.energy -= 20; p.run.holdProgress = 0; } } else {p.run.holdProgress = 0;p.run.holdTarget=-1;}
       const allowed={...input,weapon:input.weapon!==undefined&&p.weapons[input.weapon]?input.weapon:p.run.weapon,shoot:!!input.shoot&&p.weapons[p.run.weapon]};equip(w.mission,p.run,allowed);
       const weapon=WEAPONS[p.run.weapon];
       const firing = input.shoot && p.weapons[p.run.weapon] && p.run.ammo >= weapon.cost && p.run.shotCooldown === 0 && p.reloading === 0;
       if (firing) {p.run.stealth=0;const from = p.run.player, a = input.facing ?? from.angle; const candidates = connected.filter(q => q !== p && q.out===p.out && !q.quiz && q.invulnerable === 0 && (q.run.stealth<=0||distance(q.run.player,p.run.player)<=2)).map(q => { const dx = q.run.player.x - from.x, dz = q.run.player.z - from.z; return { q, along: dx * Math.sin(a) + dz * Math.cos(a), side: Math.abs(dx * Math.cos(a) - dz * Math.sin(a)) }; }).filter(q => q.along > 0 && q.along < weapon.range && q.side < weapon.spread && clearSight(w.mission, from, q.q.run.player, true)).sort((a, b) => a.along - b.along); struck = candidates[0]?.q; }
-      const holdProgress = p.run.holdProgress;
-      step(w.mission, p.run, { ...input, weapon:allowed.weapon, shoot: firing, hold: false, interact: false, decoy: false }, dt); p.run.holdProgress = holdProgress;
+      const holdProgress = p.run.holdProgress, holdTargetIndex = holdProgress > 0 ? p.run.holdTarget : -1;
+      step(w.mission, p.run, { ...input, weapon:allowed.weapon, shoot: firing, hold: false, interact: false, decoy: false }, dt); p.run.holdProgress = holdProgress; p.run.holdTarget = holdTargetIndex;
       if (struck) { p.stats.hits++;p.run.stealth=0;if(struck.out)struck.respawnHits++;else struck.hits++; struck.invulnerable = .9; if ((struck.out?struck.respawnHits:struck.hits) >= 3) respawnRoyale(w,struck); }
       if (p.energy < 20 && p.run.ammo === 0 && p.reloading === 0) beginQuiz(w,p);
     }
