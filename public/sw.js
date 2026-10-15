@@ -1,7 +1,7 @@
 // Bump the shell/runtime generation when the deployed app contains UI fixes.
 // This prevents an older Pages service worker from re-serving the pre-fix bundle.
-const SHELL_CACHE = 'learning-rogue-shell-v5';
-const RUNTIME_CACHE = 'learning-rogue-runtime-v5';
+const SHELL_CACHE = 'learning-rogue-shell-v6';
+const RUNTIME_CACHE = 'learning-rogue-runtime-v6';
 const THEME_CACHE_PREFIX = 'learning-rogue-theme-';
 const THEME_CACHE_VERSION = 'v4';
 
@@ -17,35 +17,39 @@ const isCacheableAsset = (url) => {
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
-    const cache = await caches.open(SHELL_CACHE);
-    const scopeUrl = new URL(self.registration.scope);
-    const shellUrls = [
-      new URL('./', scopeUrl).href,
-      new URL('index.html', scopeUrl).href,
-      new URL('manifest.webmanifest', scopeUrl).href,
-      new URL('pwa-icon-192.png', scopeUrl).href,
-      new URL('pwa-icon-512.png', scopeUrl).href,
-    ];
-    await Promise.all(shellUrls.map((url) => cache.add(url).catch(() => undefined)));
+    try {
+      const cache = await caches.open(SHELL_CACHE);
+      const scopeUrl = new URL(self.registration.scope);
+      const shellUrls = [
+        new URL('./', scopeUrl).href,
+        new URL('index.html', scopeUrl).href,
+        new URL('manifest.webmanifest', scopeUrl).href,
+        new URL('pwa-icon-192.png', scopeUrl).href,
+        new URL('pwa-icon-512.png', scopeUrl).href,
+      ];
+      await Promise.all(shellUrls.map((url) => cache.add(url).catch(() => undefined)));
+    } catch { /* Install the recovery worker even if offline storage is unavailable. */ }
     await self.skipWaiting();
   })());
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const cacheNames = await caches.keys();
-    await Promise.all(cacheNames
-      .filter((name) => (
-        name.startsWith('learning-rogue-shell-')
-        || name.startsWith('learning-rogue-runtime-')
-        || name.startsWith(THEME_CACHE_PREFIX)
-      ))
-      .filter((name) => (
-        name !== SHELL_CACHE
-        && name !== RUNTIME_CACHE
-        && !name.endsWith(`-${THEME_CACHE_VERSION}`)
-      ))
-      .map((name) => caches.delete(name)));
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames
+        .filter((name) => (
+          name.startsWith('learning-rogue-shell-')
+          || name.startsWith('learning-rogue-runtime-')
+          || name.startsWith(THEME_CACHE_PREFIX)
+        ))
+        .filter((name) => (
+          name !== SHELL_CACHE
+          && name !== RUNTIME_CACHE
+          && !name.endsWith(`-${THEME_CACHE_VERSION}`)
+        ))
+        .map((name) => caches.delete(name)));
+    } catch { /* Cache cleanup must not prevent activation. */ }
     await self.clients.claim();
   })());
 });
@@ -64,10 +68,13 @@ self.addEventListener('fetch', (event) => {
   if (isNavigationRequest(request)) {
     event.respondWith((async () => {
       try {
-        const response = await fetch(request);
+        const response = await fetch(request, { cache: 'no-store' });
         if (response.ok) {
-          const cache = await caches.open(SHELL_CACHE);
-          await cache.put(request, response.clone());
+          // Storage quota/cache failures must never hide a successful network page.
+          try {
+            const cache = await caches.open(SHELL_CACHE);
+            await cache.put(request, response.clone());
+          } catch { /* Online navigation remains available without offline storage. */ }
         }
         return response;
       } catch {
@@ -81,14 +88,18 @@ self.addEventListener('fetch', (event) => {
 
   if (!isCacheableAsset(url)) return;
   event.respondWith((async () => {
-    const cached = await caches.match(request);
-    if (cached) return cached;
+    try {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+    } catch { /* A broken or disabled cache must fall back to the network. */ }
 
     try {
       const response = await fetch(request);
       if (response.ok) {
-        const cache = await caches.open(RUNTIME_CACHE);
-        await cache.put(request, response.clone());
+        try {
+          const cache = await caches.open(RUNTIME_CACHE);
+          await cache.put(request, response.clone());
+        } catch { /* Return the downloaded asset even when the cache is full. */ }
       }
       return response;
     } catch (error) {

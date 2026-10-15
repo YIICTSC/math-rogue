@@ -105,6 +105,53 @@
 </head>
   <body>
     <div id="root"></div>
+    <aside id="startup-status" role="status" style="position:fixed;inset:0;display:grid;place-content:center;gap:16px;padding:24px;background:#020617;color:#e2e8f0;text-align:center;font:16px sans-serif;z-index:2147483647">
+      <strong>学習ローグ / Learning Rogue</strong>
+      <span id="startup-message">ゲームを読み込んでいます… / Loading…</span>
+      <button id="startup-retry" hidden style="padding:14px;border-radius:8px;background:#67e8f9;color:#020617;border:0;font:inherit">再読み込み / Reload</button>
+    </aside>
+    <script>
+      (() => {
+        const root = document.getElementById('root');
+        const panel = document.getElementById('startup-status');
+        const message = document.getElementById('startup-message');
+        const retry = document.getElementById('startup-retry');
+        let recovering = false;
+        const ready = () => root.childElementCount > 0;
+        const observer = new MutationObserver(() => { if (ready()) { panel.remove(); observer.disconnect(); clearTimeout(timer); } });
+        observer.observe(root, {childList:true});
+        const showFailure = () => { if (!ready()) { message.textContent = '読み込みを完了できませんでした。セーブを保持して再読み込みできます。 / Loading failed. Reload without deleting saves.'; retry.hidden = false; } };
+        const reload = async () => {
+          if (recovering) return;
+          recovering = true; retry.disabled = true;
+          message.textContent = '最新版を再読み込みしています… / Reloading the latest version…';
+          const clean = async () => {
+            if ('caches' in window) {
+              const names = await caches.keys();
+              await Promise.all(names.filter(name => /^learning-rogue-(shell|runtime)-/.test(name)).map(name => caches.delete(name)));
+            }
+            if ('serviceWorker' in navigator) {
+              const registration = await navigator.serviceWorker.getRegistration();
+              if (registration) await registration.update();
+            }
+          };
+          await Promise.race([clean().catch(() => {}), new Promise(resolve => setTimeout(resolve, 1800))]);
+          const url = new URL(location.href); url.searchParams.set('_startup', Date.now().toString(36)); location.replace(url.href);
+        };
+        retry.addEventListener('click', reload);
+        window.addEventListener('error', event => {
+          if (ready()) return;
+          const module = event.target;
+          if (module instanceof HTMLScriptElement && module.type === 'module') {
+            const key = 'learning-rogue-startup-retry:' + module.src;
+            try { if (!sessionStorage.getItem(key)) { sessionStorage.setItem(key, '1'); void reload(); return; } } catch {}
+          }
+          showFailure();
+        }, true);
+        window.addEventListener('unhandledrejection', showFailure);
+        const timer = setTimeout(showFailure, 20000);
+      })();
+    </script>
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
