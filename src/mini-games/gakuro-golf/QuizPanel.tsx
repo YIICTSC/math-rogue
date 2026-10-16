@@ -17,7 +17,7 @@ export default function QuizPanel({ quiz, languageMode, disabled, send }: { quiz
     return () => window.clearTimeout(timer);
   }, [quiz.answer, quiz.shotId, quiz.index, disabled]);
   const speak = () => { if (!q.audioPrompt || !('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(q.audioPrompt.text); u.lang = q.audioPrompt.lang || 'ja-JP'; u.rate = .85; window.speechSynthesis.speak(u); };
-  return <section className="gg-quiz gg-panel" aria-label={t('ショット前の3問')}>
+  return <section data-gamepad-question-screen data-gamepad-modal className="gg-quiz gg-panel" aria-label={t('ショット前の3問')}>
     <header><span>{t('ショット前の3問')}</span><b>{quiz.index + 1} / 3</b></header>
     <div className="gg-question" data-allow-japanese="true">
       {q.passage && <p className="gg-passage">{q.passage}</p>}

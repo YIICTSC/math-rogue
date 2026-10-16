@@ -5,6 +5,8 @@ import WaitingHomeDash from '../shared/WaitingHomeDash';
 import GameTitleScreen from '../shared/GameTitleScreen';
 import GameTitleLogo from '../shared/GameTitleLogo';
 import OnlineEntryScreen from '../shared/OnlineEntryScreen';
+import {useGameplayGamepad,PAD,openControllerMenu} from '../../hooks/useGameplayGamepad';
+import GameplayGamepadHint from '../../components/GameplayGamepadHint';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/onlineTransport';
 import type {OnlineTransport} from '../../services/onlineTransport';
 import TransportPicker from '../shared/TransportPicker';
@@ -89,6 +91,26 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const send = (c: GolfCommand) => { if (!spectating && !view?.paused) room.current?.send(c); };
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(showCreator||spectating||view?.paused||me?.phase!=='aim'||meterActive||(e.target as Element)?.closest('input,textarea,select,[role=dialog]'))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setOffset(n=>Math.max(-180,Math.min(180,n+(e.key==='ArrowLeft'?2:-2))));}else if((e.key==='ArrowUp'||e.key==='ArrowDown')&&club!=='putter'){e.preventDefault();setSpin(n=>Math.max(-1,Math.min(1,Math.round((n+(e.key==='ArrowUp'?.1:-.1))*10)/10)));}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[showCreator,spectating,view?.paused,me?.phase,meterActive,club]);
   const bonus = benefits(me?.correct ?? 0);
+  const controllerAimTime=useRef(0);
+  useGameplayGamepad('golf',pad=>{
+    const meter=(action:'tap'|'cancel')=>window.dispatchEvent(new CustomEvent('learning-rogue:golf-meter',{detail:action}));
+    if(!pad.active){meter('cancel');controllerAimTime.current=0;return;}
+    if(pad.pressed[PAD.MENU]){meter('cancel');openControllerMenu();return;}
+    if(pad.pressed[PAD.B]){meter('cancel');setOverview(false);return;}
+    if(pad.pressed[PAD.X]){meter('cancel');setShowScores(v=>!v);return;}
+    if(pad.pressed[PAD.Y]){meter('cancel');setOverview(v=>!v);return;}
+    if(overview)return;
+    if(pad.pressed[PAD.A])meter('tap');
+    if(meterActive)return;
+    const clubs=Object.keys(CLUBS) as Club[];
+    if(pad.pressed[PAD.LB])setClub(clubs[(clubs.indexOf(club)+clubs.length-1)%clubs.length]);
+    if(pad.pressed[PAD.RB])setClub(clubs[(clubs.indexOf(club)+1)%clubs.length]);
+    controllerAimTime.current+=pad.dt;
+    if(controllerAimTime.current>=.05){const dt=controllerAimTime.current;controllerAimTime.current=0;
+      if(pad.x)setOffset(n=>Math.max(-180,Math.min(180,Math.round(n-pad.x*dt*80))));
+      if(pad.y&&club!=='putter')setSpin(n=>Math.max(-1,Math.min(1,Math.round((n-pad.y*dt*1.5)*10)/10)));
+    }
+  });
   const projected = useMemo(()=>me?.phase==='aim' ? predictShot(me,club,angle,power,club === 'putter' ? 0 : spin).at(-1) : undefined,[me?.phase,me?.hole,me?.x,me?.z,me?.correct,club,angle,power,spin]);
   const carry = me&&projected ? distance(me,projected) : 0;
   const scoreRows = [...(view?.players || [])].filter(p => !p.spectator).sort((a, b) => {
@@ -114,7 +136,8 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     {message&&<p role="alert">{t(message)}</p>}
     <details><summary>{t('遊び方')}</summary><p>{t('開始時と3ショットごとに、選んだ範囲から3問。')}</p><p>{t('0・1・2・3問正解で最大パワー55・70・85・100%。')}</p><p>{t('クラブと方向を選んでカップを狙おう。池とOBは1打罰。')}</p></details>
   </OnlineEntryScreen>{creator}</>;
-  return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${!view?'gg-title-screen':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''} ${overview?'gg-overview':''}`} data-gamepad-initial-scope="gakuro-golf">
+  return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${!view?'gg-title-screen':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''} ${overview?'gg-overview':''}`} data-gamepad-live={view?.phase==='playing'&&me?.phase==='aim'&&!spectating&&!view.paused&&!showScores&&!showCreator&&!picker?'golf':undefined} data-gamepad-initial-scope="gakuro-golf">
+    <GameplayGamepadHint mode="golf"/>
     <header className="gg-header"><button onClick={() => { if (!view) setEntry('title'); else { leave(); onClose(); } }}>{t('タイトルへ')}</button><div className="gg-brand">GAKURO <strong>GOLF</strong><small>LEARN · AIM · SWING</small></div><span className="gg-debug"><StorybookQuality languageMode={languageMode}/></span><span className="gg-debug">{t('オンライン')}</span></header>
     {view && room.current?.host && room.current.code && (view.phase==='lobby'||spectating) && <HostSpectator enabled={spectating} canChangeMode={view.phase === 'lobby'} onChange={value => room.current?.setSpectator(value)} name={spectators.target ? me?.name : undefined} count={candidates.length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>HOLE {me.hole + 1} / {view.holeCount}</span><span>{t('打数')} {me.strokes}</span><span>{t('残り')} {remaining.toFixed(1)} m</span><span>{t(me.phase === 'quiz' ? '問題に挑戦中' : me.phase === 'aim' ? 'ショットを準備する' : me.phase === 'moving' ? 'ボールの行方を見よう' : me.phase === 'finished' ? '完走' : me.phase === 'holed' ? 'カップイン！' : 'プレイ中')}</span></>}</HostSpectator>}
     {message && <div role="alert" className="gg-message">{t(message)}</div>}

@@ -1,4 +1,6 @@
 import FurnitureBenefit from './FurnitureBenefit';
+import {useGameplayGamepad,PAD} from '../hooks/useGameplayGamepad';
+import GameplayGamepadHint from '../components/GameplayGamepadHint';
 import HomeBenefitsPanel from './HomeBenefitsPanel';
 import {homeMusic,MUSIC_FURNITURE} from './homeTracks';
 import {useRpgMusic} from './music';
@@ -38,9 +40,20 @@ export default function HomeRoom({world,selfId,languageMode,send,onBuilder,onMem
  const occupants=people.map(p=>p.life?.roomPos||ROOM_SPAWN),stock=Object.entries(room.stock).filter(([,n])=>n>0),cost=(f:typeof FURNISHINGS[number])=>Object.entries(f.cost).map(([k,n])=>`${t(MATERIAL_NAMES[k as Material])} ${me.life?.bag[k as Material]||0}/${n}`).join(' · ');
  const nearGames=house.home.furniture.filter(f=>gameKind(f.item)&&room.placed.some(p=>p.slot===f.slot&&furnitureDistance(pos,p)<=2));
  const craft=(item:string)=>{audioService.playRpgLifeSound('craft');if(item.startsWith('season')){setTab('town');return;}send({type:'life-furniture-craft',item});};
- return <div className="rpg-life-backdrop"><section className="rpg-life rpg-home-room" role="dialog" aria-modal="true" data-time={world.life.time} aria-label={t('家の中のマップ')}>
+ const padMoveAt=useRef(0);
+ useGameplayGamepad('rpg-home',pad=>{
+  if(!pad.active){held.current=null;return;}
+  if((pad.x||pad.y)&&performance.now()-padMoveAt.current>130){padMoveAt.current=performance.now();const dx=Math.abs(pad.x)>Math.abs(pad.y)?Math.sign(pad.x):0,dy=Math.abs(pad.y)>=Math.abs(pad.x)?Math.sign(pad.y):0;
+   if(placing)setHover(h=>({x:Math.max(0,Math.min(17,h.x+dx)),y:Math.max(0,Math.min(13,h.y+dy))}));else move(dx,dy);}
+  if(pad.pressed[PAD.B]||pad.pressed[PAD.MENU]){if(placing)setPlacing(undefined);else setTab('stock');}
+  if(placing){if(pad.pressed[PAD.LB])setRotation(r=>((r+3)%4) as 0|1|2|3);if(pad.pressed[PAD.RB])setRotation(r=>((r+1)%4) as 0|1|2|3);if(pad.pressed[PAD.Y])setFlipped(v=>!v);
+   if(pad.pressed[PAD.A]&&preview&&placementFits(room,preview,occupants)){send({type:'life-place',item:placing,...hover,rotation,flipped});setPlacing(undefined);}}
+  else if(pad.pressed[PAD.A]){const nearest=[...room.placed].sort((a,b)=>furnitureDistance(pos,a)-furnitureDistance(pos,b))[0];if(nearest){setSelected(nearest.id);walk(nearest.x,nearest.y);}else setTab('craft');}
+ });
+ return <div className="rpg-life-backdrop"><section className="rpg-life rpg-home-room" data-gamepad-live={tab==='room'&&(!selected||placing)?'rpg-home':undefined} role="dialog" aria-modal="true" data-time={world.life.time} aria-label={t('家の中のマップ')}>
+ <GameplayGamepadHint mode="rpg-home"/>
  <header><div><small>HOME · {people.length}</small><h2>{house.ownerName} · {t('仲間の集まる家')}</h2></div><button onClick={exit}>{t('入口へ向かう')} ↓</button></header>
- <nav>{[['room','室内を歩く'],['craft','家具を作る'],['stock','持ち物と配置'],['inventory','所持素材'],['games','ミニゲーム'],['social','交流'],['town','暮らし'],['farm','農園・牧場'],['pets','ペット']].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{setPlacing(undefined);setTab(id);}}>{t(label)}</button>)}</nav>
+ <nav>{[['room','室内を歩く'],['craft','家具を作る'],['stock','持ち物と配置'],['inventory','所持素材'],['games','ミニゲーム'],['social','交流'],['town','暮らし'],['farm','農園・牧場'],['pets','ペット']].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{setPlacing(undefined);setSelected(undefined);setTab(id);}}>{t(label)}</button>)}</nav>
  <div className="rpg-room-guests">{world.social?.requests.some(r=>r.to===selfId)&&<button onClick={()=>setTab('social')}>{t('主人公と交流')} !</button>}{people.map(p=><span key={p.id}>{p.name}</span>)}{houseGuests(world,house.id,languageMode).map(p=><span key={p.id}>{p.name}</span>)}{owner&&<button onClick={()=>send({type:'life-invite'})}>{t('みんなを招待')}</button>}</div>
  <div className="rpg-life-content">
  <HomeBenefitsPanel world={world} selfId={selfId} languageMode={languageMode} roomId={house.id} placed={room.placed} music={room.music} canControl={owner} send={send}/>

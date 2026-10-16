@@ -17,6 +17,11 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     if (s.power === null) { if (m.returning && m.position < MAX_SNAP) return; s.power = powerAt(m.position); setLocked(s.power); callbacks.current.onPower(s.power); }
     else if (m.returning) finish(impactAt(m.position));
   };
+  useEffect(()=>{
+    const controller=(event:Event)=>{if((event as CustomEvent).detail==='cancel')cancel();else tap();};
+    window.addEventListener('learning-rogue:golf-meter',controller);
+    return()=>window.removeEventListener('learning-rogue:golf-meter',controller);
+  },[disabled,active]);
   useEffect(()=>{if(active||disabled)return;const key=(e:KeyboardEvent)=>{if(e.repeat||!(e.code==='Enter'||e.code==='Space')||(e.target as Element)?.closest('input,textarea,select,[role=dialog],[data-meter-ignore]'))return;e.preventDefault();e.stopPropagation();tap();};document.addEventListener('keydown',key,true);return()=>document.removeEventListener('keydown',key,true);},[active,disabled]);
   useEffect(() => { if (disabled) cancel(); }, [disabled]);
   useEffect(() => {

@@ -85,6 +85,8 @@ import TranslatedUiTree from "../components/TranslatedUiTree";
 import GoHomeDash from "../components/GoHomeDash";
 import WorldCanvas from "./WorldView";
 import {relativeMove} from "./worldViewMath";
+import {useGameplayGamepad, PAD} from '../hooks/useGameplayGamepad';
+import GameplayGamepadHint from '../components/GameplayGamepadHint';
 import {
   distance,
   HEIGHT,
@@ -472,6 +474,29 @@ export default function RpgOnline({
     onClose();
   };
   const homeRoom=world&&me?(world.life.houses.find(h=>h.id===me.life?.indoors)?.interior||currentVoxelRoom(world,me)):undefined;
+  const padMoveAt = useRef(0);
+  const controllerExploring = !!world?.started && latest.current.active && !world.ended && !me?.nativeScene && !homeRoom && !hasActivityDialog;
+  useGameplayGamepad('rpg', pad => {
+    if (!pad.active) { padMoveAt.current = 0; return; }
+    const now = performance.now();
+    if ((pad.x || pad.y) && now - padMoveAt.current >= (navigation.current.threeD ? 80 : 150)) {
+      padMoveAt.current = now;
+      if (navigation.current.threeD) move(pad.x * .8, pad.y * .8);
+      else move(Math.abs(pad.x) > Math.abs(pad.y) ? Math.sign(pad.x) : 0, Math.abs(pad.y) >= Math.abs(pad.x) ? Math.sign(pad.y) : 0);
+    }
+    if (pad.pressed[PAD.A]) interact();
+    if (pad.pressed[PAD.X] && navigation.current.threeD) room.current?.send({type:'voxel-jump'});
+    if (pad.pressed[PAD.Y]) setOverview(v=>!v);
+    if (pad.pressed[PAD.B] || pad.pressed[PAD.MENU]) setDetail('menu');
+    if (pad.pressed[PAD.LB]) turn(facing-1);
+    if (pad.pressed[PAD.RB]) turn(facing+1);
+    if (navigation.current.threeD) {
+      window.dispatchEvent(new CustomEvent('learning-rogue:rpg-controller-look',{detail:{x:pad.lookX,y:pad.lookY,dt:pad.dt,reset:pad.pressed[PAD.RS]}}));
+      const surface = document.querySelector('.rpg-world-3d');
+      if (pad.pressed[PAD.RT]) surface?.dispatchEvent(new CustomEvent('voxel-command',{detail:'voxel-break'}));
+      if (pad.pressed[PAD.LT]) surface?.dispatchEvent(new CustomEvent('voxel-command',{detail:'voxel-place'}));
+    }
+  });
   const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':homeRoom?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
   useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,homeRoom?'home':!world||!world.started?'setup':'map',homeMusic(homeRoom));
   if(autoJoinInvite&&!world)return <InviteJoin title={trans("学習ローグRPG",languageMode)} name={name} onName={setName} onJoin={()=>start("invite")} onClose={close} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
@@ -482,7 +507,8 @@ export default function RpgOnline({
       {farmOpen&&world&&<FarmPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onTrack={(x,y)=>{if(!me)return;const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setFarmOpen(false);}} onClose={()=>setFarmOpen(false)}/>}
       {cityOpen&&world?.city&&<CityPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onClose={()=>setCityOpen(false)}/>}
       {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
-      <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-testid="rpg-native-map" data-resident-scene={!!residentTarget}>
+      <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-gamepad-live={controllerExploring?'rpg':undefined} data-gamepad-initial-scope="rpg" data-testid="rpg-native-map" data-resident-scene={!!residentTarget}>
+        <GameplayGamepadHint mode="rpg"/>
         <header className="rpg-header">
           <div className="rpg-brand">
             <Compass />

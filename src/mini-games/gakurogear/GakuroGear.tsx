@@ -1,4 +1,6 @@
 import BombStick from './BombStick';
+import {useGameplayGamepad,PAD} from '../../hooks/useGameplayGamepad';
+import GameplayGamepadHint from '../../components/GameplayGamepadHint';
 import {unreadActions,missionActions,rememberAction,type ActionTutorial} from './actionTutorials';
 import ActionTutorialDialog from './ActionTutorialDialog';
 import EquipmentBar from './EquipmentBar';
@@ -107,7 +109,20 @@ export default function GakuroGear({ onBack, languageMode, lesson, avatar, onCon
   const near=nearIndex>=0;
   const leave = () => { clearInput(); setPlaying(false); };
   const hold = (field: 'interact' | 'hold', value: boolean) => { input.current[field] = value; };
-  return <div className={`gear-shell ${playing?'gear-play-surface gear-stealth':''}`} data-testid="gakurogear">
+  useGameplayGamepad('vr', pad => {
+    if (!pad.active) { clearInput(); return; }
+    input.current.x=pad.x; input.current.z=pad.y;
+    input.current.interact=pad.buttons[PAD.A]; input.current.hold=pad.buttons[PAD.X];
+    if(view.current.mode!=='overhead')view.current.yaw-=pad.lookX*pad.dt*1.9;
+    if(pad.pressed[PAD.B]){input.current.crouch=!input.current.crouch;setCrouch(input.current.crouch);}
+    if(pad.pressed[PAD.RT])input.current.shoot=true;
+    if(pad.pressed[PAD.LB])input.current.decoy=true;
+    if(pad.pressed[PAD.RB])input.current.useItem=true;
+    if(pad.pressed[PAD.Y]){const modes:ViewMode[]=['overhead','first','third'];changeView(modes[(modes.indexOf(view.current.mode)+1)%3]);}
+    if(pad.pressed[PAD.MENU])togglePause();
+  });
+  return <div className={`gear-shell ${playing?'gear-play-surface gear-stealth':''}`} data-gamepad-live={playing&&!paused&&!tutorials.length&&!editing&&hud.status==='playing'?'vr':undefined} data-gamepad-initial-scope="gakuro-vr" data-testid="gakurogear">
+    <GameplayGamepadHint mode="vr"/>
     <header className="gear-header"><button onClick={playing ? leave : onBack}>{t('← 戻る', '← Back')}</button><div><strong>GAKURO</strong><span>VR TRAINING / SCHOOL OPERATIONS</span></div>{onConfigure&&<button data-avatar-editor onClick={()=>{clearInput();if(playing&&!paused)togglePause();onConfigure();}}>{t('キャラクタークリエイト','Character creator')}</button>}<span className="gear-tag">SOLO / 3D</span></header>
     {!playing ? <main className="gear-select gear-stage-select">
       <section className="gear-intro"><StagePreview mission={mission}/><div className="gear-eyebrow">TACTICAL SCHOOL / TRAINING PROGRAM</div><h1>GAKURO<br /><em>VR {t('トレーニング', 'TRAINING')}</em></h1><p>{t('見つからずに、任務を果たせ。', 'Complete the mission. Stay unseen.')}</p><div className="gear-brief">{t('入門から達人まで20任務ずつ、全100任務。学校で基本を学び、都市・山岳・地下基地で救助・端末・防衛に挑もう。', '100 missions in five chapters of 20. Learn the basics at school, then tackle rescue, relay and defense missions across cities, mountains and bases.')}</div><div className="gear-stats"><span>100<br /><small>MISSIONS</small></span><span>{Object.keys(records).length.toString().padStart(2, '0')}<br /><small>CLEARED</small></span><span>PS-ERA<br /><small>LOW POLYGON</small></span></div><div className="gear-help">{t('移動: WASD / 矢印 / スティック　しゃがむ: C　回収: E長押し　音のデコイ: Q　ホールド: F長押し　装備選択: スロット　攻撃: R　アイテム: X　視点: V　旋回: J/L・画面ドラッグ　一時停止: Esc', 'Move: WASD / arrows / stick · C: crouch · Hold E: collect · Q: sound decoy · Hold F: sleep hold · Slots: equip · R: attack · X: item · V: view · J/L or drag: turn · Esc: pause')}</div></section>

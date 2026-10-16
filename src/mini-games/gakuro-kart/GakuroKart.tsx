@@ -1,4 +1,6 @@
 import OnlineEntryScreen from '../shared/OnlineEntryScreen';
+import {useGameplayGamepad, PAD, openControllerMenu} from '../../hooks/useGameplayGamepad';
+import GameplayGamepadHint from '../../components/GameplayGamepadHint';
 import InviteJoin from '../shared/InviteJoin';
 import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/onlineTransport';
 import type {OnlineTransport} from '../../services/onlineTransport';
@@ -92,6 +94,13 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
   const preview = useMemo(() => { const w = createRace(world?.course ?? course,1,3,world?world.customCourse:customCourse); addRacer(w, 'preview', name, hero); w.players.preview.x = 0; w.players.preview.distance = 0; w.players.preview.avatar = avatar; return w; }, [world?.course,world?.customCourse,customCourse, course, name, hero, avatar]);
   const changeAvatar = (value: KartAvatar) => { if (room.current?.world && room.current.world.phase !== 'lobby') return; setAvatar(value); saveAvatar(value); room.current?.setAvatar(value); };
   const clearInput = () => { stickInput.current = 0; input.current = { left: false, right: false, brake: false, drift: false }; room.current?.send({ type: 'input', steer: 0, brake: false, drift: false }); };
+  const controllerInput = useRef({steer:0,brake:false,drift:false});
+  useGameplayGamepad('race', pad => {
+    controllerInput.current = {steer:pad.x,brake:pad.buttons[PAD.LT],drift:pad.buttons[PAD.A]||pad.buttons[PAD.RT]};
+    if (!pad.active) { room.current?.send({type:'input',steer:0,brake:false,drift:false}); return; }
+    if (pad.pressed[PAD.B] || pad.pressed[PAD.X]) room.current?.send({type:'item'});
+    if (pad.pressed[PAD.MENU]) openControllerMenu();
+  });
   useEffect(() => { clearInput(); }, [world?.phase]);
   useEffect(() => () => {
     audioService.setBgmDuckMultiplier(1);
@@ -132,13 +141,11 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     const visibility = () => { blur(); if (!document.hidden) resumeAudio(); };
     window.addEventListener('keydown', down); window.addEventListener('keyup', up); window.addEventListener('blur', blur);
     window.addEventListener('focus', resumeAudio); window.addEventListener('pageshow', resumeAudio); document.addEventListener('visibilitychange', visibility);
-    let padItem = false;
     const timer = setInterval(() => {
       if (currentPhase.current !== 'race') return;
-      const pad = navigator.getGamepads?.()?.[0], axis = pad && Math.abs(pad.axes[0]) > .15 ? pad.axes[0] : 0;
+      const pad = controllerInput.current;
       // Screen-right is negative on our track-space axis, so invert stick and button inputs.
-      room.current?.send({ type: 'input', steer: -(stickInput.current || axis || Number(input.current.right) - Number(input.current.left)), brake: input.current.brake || !!pad?.buttons[6]?.pressed, drift: input.current.drift || !!pad?.buttons[0]?.pressed });
-      if (pad?.buttons[1]?.pressed && !padItem) room.current?.send({ type: 'item' }); padItem = !!pad?.buttons[1]?.pressed;
+      room.current?.send({ type: 'input', steer: -(stickInput.current || pad.steer || Number(input.current.right) - Number(input.current.left)), brake: input.current.brake || pad.brake, drift: input.current.drift || pad.drift });
     }, 50);
     return () => { generation.current++; clearInterval(timer); window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); window.removeEventListener('focus', resumeAudio); window.removeEventListener('pageshow', resumeAudio); document.removeEventListener('visibilitychange', visibility); room.current?.close(); audio.current?.close(); };
   }, []);
@@ -228,7 +235,8 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     <button disabled={busy} onClick={()=>{setAvatarBack(entry as 'practice'|'create'|'join');setEntry('avatar');}}>{trans('キャラクタークリエイト',languageMode)}</button>
     {error&&<p role="alert">{trans(error,languageMode)}</p>}
   </OnlineEntryScreen>;
-  return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing'+(world.phase==='lobby'?' gk-preparing':'') : 'gk-intro-root'}`} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
+  return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing'+(world.phase==='lobby'?' gk-preparing':'') : 'gk-intro-root'}`} data-gamepad-live={world?.phase==='race'&&!spectating&&!picking?'race':undefined} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
+    <GameplayGamepadHint mode="race"/>
     <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><StorybookQuality languageMode={languageMode}/><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span></div></header>
     {world && room.current?.host && room.current.code && <HostSpectator enabled={spectating} canChangeMode={['lobby', 'result'].includes(world.phase)} onChange={value => { clearInput(); room.current?.setSpectator(value); }} name={spectators.target ? me?.name : undefined} count={racers.filter(p => p.id !== self && !p.cpu && !p.spectator).length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>#{place} / {order.length}</span><span>LAP {Math.min(world.laps, Math.max(1, Math.floor(me.distance / length) + 1))} / {world.laps}</span><span>{Math.round(me.speed * 3.6)} KM/H</span></>}</HostSpectator>}
     {error && <div className="gk-error" role="alert">{error}</div>}

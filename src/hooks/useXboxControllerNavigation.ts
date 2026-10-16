@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { liveGamepadSurface } from './useGameplayGamepad';
 
 type GamepadButtonName =
   | 'A'
@@ -462,7 +463,7 @@ const setNativeFormControlValue = (
 const adjustFocusedFormControl = (action: NavigationAction): boolean => {
   const active = document.activeElement;
   if (active instanceof HTMLInputElement && active.type === 'range') {
-    if (!['left', 'right', 'up', 'down'].includes(action)) return false;
+    if (!['left', 'right'].includes(action)) return false;
     const parsedMin = Number(active.min);
     const parsedMax = Number(active.max);
     const min = Number.isFinite(parsedMin) ? parsedMin : 0;
@@ -481,7 +482,7 @@ const adjustFocusedFormControl = (action: NavigationAction): boolean => {
   }
 
   if (active instanceof HTMLSelectElement) {
-    if (!['left', 'right', 'up', 'down'].includes(action)) return false;
+    if (!['left', 'right'].includes(action)) return false;
     const direction = action === 'right' || action === 'down' ? 1 : -1;
     let nextIndex = active.selectedIndex;
     do {
@@ -1020,6 +1021,8 @@ export const useXboxControllerNavigation = () => {
         (getTopmostVisibleGamepadModal() || document.querySelector('[data-gamepad-question-screen]'))
         && handleZonedNavigation(action)
       ) return;
+      if (getTopmostVisibleGamepadModal() || document.querySelector('[data-gamepad-question-screen]')) { handleActionFallback(action); return; }
+      if (document.querySelector('.rpg-root, .gear-shell, .gk-root, .gg-root')) { handleActionFallback(action); return; }
       const handled = dispatchKeyboardEvent(getKeyboardActionKey(action));
       if (!handled) handleActionFallback(action);
     };
@@ -1125,6 +1128,16 @@ export const useXboxControllerNavigation = () => {
       }
 
       if (gamepad) {
+        if (liveGamepadSurface()) {
+          if (gamepad.buttons[BUTTON_INDEX.BACK]?.pressed && !pressedRef.current[`button:${BUTTON_INDEX.BACK}`]) {
+            window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_SYSTEM_MENU_EVENT));
+          }
+          for (const index of Object.values(BUTTON_INDEX)) pressedRef.current[`button:${index}`] = !!gamepad.buttons[index]?.pressed;
+          heldActionRef.current = { action: null, firstAt: 0, lastAt: 0 };
+          rightStickScrollRef.current = { direction: 0, lastAt: 0 };
+          frameId = window.requestAnimationFrame(tick);
+          return;
+        }
         const dungeonGameplayActive = Boolean(document.querySelector('.mini-game-dungeon-screen'))
           && !getTopmostVisibleGamepadModal()
           && !document.querySelector('.main-challenge-screen, [data-gamepad-question-screen]');

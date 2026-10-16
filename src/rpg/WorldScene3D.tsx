@@ -741,6 +741,14 @@ export default function WorldScene3D(props: SceneProps) {
     const physicsTimer=window.setInterval(()=>{const a=latest.current.world.players[latest.current.selfId];if(buildRef.current.building&&a?.position3D?.vy)latest.current.onVoxelAction?.({type:'voxel-move',dx:0,dy:0});},80);
     const command=(e:Event)=>performBuild((e as CustomEvent).detail);
     element.addEventListener('voxel-command',command);
+    const controllerLook=(event:Event)=>{
+      if(buildRef.current.panel)return;
+      const {x,y,dt,reset}=(event as CustomEvent<{x:number;y:number;dt:number;reset:boolean}>).detail;
+      const delta=cameraDelta(x,y,options.current,dt);
+      if(x)latest.current.onFacing(latest.current.facing+delta.yaw);
+      if(y||reset)setPitch(p=>reset?-.18:Math.max(-1.45,Math.min(1.45,p+delta.pitch)));
+    };
+    window.addEventListener('learning-rogue:rpg-controller-look',controllerLook);
     let down: { id:number; x: number; y: number } | null = null;
     let ambience:ReturnType<typeof audioService.createRpgAmbience>=null;
     const enableAmbience=()=>{ambience??=audioService.createRpgAmbience();};
@@ -930,7 +938,7 @@ export default function WorldScene3D(props: SceneProps) {
     };
     raf = requestAnimationFrame(draw);
     return () => {
-      disposed = true;window.removeEventListener('keydown',vertical);clearInterval(physicsTimer);
+      disposed = true;window.removeEventListener('learning-rogue:rpg-controller-look',controllerLook);window.removeEventListener('keydown',vertical);clearInterval(physicsTimer);
       element.removeEventListener('pointerdown',enableAmbience);ambience?.dispose();
       cancelAnimationFrame(raf);
       observer.disconnect();
