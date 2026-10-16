@@ -4,7 +4,7 @@
 
 背景の描画領域と操作UIの安全領域を分離した。
 
-- `src/rpg/landscapeViewport.css`（新規）: 横向き・高さ600px以下・幅1100px以下のRPGを対象に、ルートのSafe Area余白と上下のレイアウト占有を解除。マップを画面全体へ絶対配置し、HUD・下部メニュー・移動・カメラ・建築操作だけにSafe Areaを適用した。短い画面では配置を組み替え、建築操作は2段、移動操作は左右・スティック・十字キーに対応。ダイアログと詳細パネルは安全領域内でスクロールする。
+- `src/rpg/landscapeViewport.css`（新規）: 横向き・高さ600px以下・幅1100px以下のRPGを対象に、ルートのSafe Area余白と上下のレイアウト占有を解除。マップを画面全体へ絶対配置し、HUD・下部メニュー・移動・カメラ・建築操作だけにSafe Areaを適用した。短い画面では配置を組み替え、建築操作は縦画面と同じ順序（状態→素材→工房・回転→配置操作）を幅228pxのパネルにまとめ、短い画面ではパネル内をスクロール。下部メニューには縦画面と同じ不透明な背景色を適用。移動操作は左右・スティック・十字キーに対応。ダイアログと詳細パネルは安全領域内でスクロールする。
 - `src/mini-games/shared/onlineSafeArea.css`: カートの横画面でも、ルートの左右余白を背景から取り除き、HUD・運転操作へ安全余白を移動。
 - `src/rpg/RpgOnline.tsx`: 上記CSSの読み込み。
 - `src/rpg/WorldCanvas.tsx`: 横画面の端末判定を描画領域の高さから端末の表示領域へ補正。描画領域の拡張によってスマホのズームが2倍から3倍に変わる問題を防止し、縦横同倍率で地形の表示範囲を広げた。
@@ -61,3 +61,13 @@ pnpm run server:build
 ```
 
 今回のスクリーンショット・計測JSONは作業環境の `/workspace/artifacts/` に保存。`rpg-edge-before` が修正前2D、`rpg-edge-after` が修正後2D、`rpg-edge-3d` が修正後3D。全画面精査は `landscape-audit-final` / `landscape-audit-followup` / `landscape-audit-targeted` / `landscape-audit-start-ios` を順に適用し、`landscape-audit-merged.json` に112状態の最新結果を統合した。タイトル追加確認は `landscape-audit-start-android` / `landscape-audit-start-small`、オンライン実プレイは `online-safe-area-final` に保存。
+
+## RPG操作パネル・下部バーの追補
+
+横画面の下部用途バーは縦画面と同じ `#162c30` の不透明な背景へ変更した。マップ自体は従来どおり画面全体へ描画する。
+
+建築操作パネルは最大520pxの横長2列構成から、最大228px・縦画面と同じ行順へ変更。素材は4列、工房・回転は2列、配置操作は4列を維持する。44px以上のボタン高さを確保し、画面が短いときはSafe Area内に高さを制限してパネル内でスクロールする。パネルとボタンには `touch-action: pan-y` を指定し、タッチでも上下スクロールできるようにした。右利き設定では従来どおり左側へ反転する。
+
+ブラウザーテストに背景色、パネル幅・行順、短い画面で配置操作までスクロールできること、タッチスクロールを許可するCSSの検証を追加した。568×320ではブラウザーへ実際にtouchStart / touchMove / touchEndを送り、パネルがスクロールすることも確認。変更はスマホ横画面のRPG用CSSとその検証・説明に限定している。
+
+追補の検証: 3Dの9サイズと左右×スティック/十字キーの追加8通りが通過。最終状態は844×390・568×320の2D/3Dでも再確認し、バー背景色、縦並び・幅制限、タッチスクロール、移動入力、設定・採取・農園・詳細パネルを確認した。`pnpm run build`（型チェック・英語UI監査を含む）と `pnpm run server:build` も成功。スクリーンショットは `/workspace/artifacts/rpg-portrait-panel-final-3d` と `/workspace/artifacts/rpg-portrait-panel-final-2d` に保存。
