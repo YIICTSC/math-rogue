@@ -264,6 +264,9 @@ export default function WorldCanvas({
   useEffect(() => {
     const canvas = ref.current!;
     const c = canvas.getContext("2d")!;
+    // Full-bleed maps are taller than the old inset map. Keep the phone zoom
+    // tied to the viewport, so expanding the canvas reveals more terrain.
+    const phoneLandscape = window.matchMedia("(orientation: landscape) and (max-height: 600px) and (max-width: 1100px)");
     let frame = 0;
     const paint = (time: number) => {
       const prefs=rpgPreferences();
@@ -278,7 +281,7 @@ export default function WorldCanvas({
       const width=expanded?1280:WIDTH,height=expanded?1280:HEIGHT,origin=expanded?-512:0;
       const scale = overview
         ? Math.min(sw / (width * T), sh / (height * T))
-        : sw < 600 || sh < 350
+        : phoneLandscape.matches || sw < 600 || sh < 350
           ? 2*prefs.zoom
           : 3*prefs.zoom;
       const cx=overview?origin*T+(width*T-sw/scale)/2:pos.x*T-sw/scale/2;

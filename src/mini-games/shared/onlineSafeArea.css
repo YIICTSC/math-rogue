@@ -22,3 +22,19 @@
 .gg-root.gg-playing > .gg-stage {
   height: 100%;
 }
+
+/* Landscape race backgrounds extend under the cutout. Its HUD and driving
+   controls own the safe insets instead of shrinking the entire renderer. */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .gk-root.gk-playing { padding-left: 0; padding-right: 0; }
+  .gk-playing > .gk-header,
+  .gk-playing > .gk-controls {
+    padding-left: max(10px, env(safe-area-inset-left, 0px));
+    padding-right: max(10px, env(safe-area-inset-right, 0px));
+  }
+  .gk-playing > .gk-controls { padding-bottom: max(5px, env(safe-area-inset-bottom, 0px)); }
+  .gk-playing .gk-hud { left: calc(18px + env(safe-area-inset-left, 0px)); right: calc(18px + env(safe-area-inset-right, 0px)); }
+  .gk-playing .gk-leaderboard { left: calc(18px + env(safe-area-inset-left, 0px)); }
+  .gk-playing .gk-map { right: calc(15px + env(safe-area-inset-right, 0px)); }
+  .gk-playing .gk-speed { right: calc(20px + env(safe-area-inset-right, 0px)); }
+}

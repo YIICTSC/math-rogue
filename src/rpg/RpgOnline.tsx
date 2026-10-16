@@ -104,6 +104,7 @@ import { nativeProfile, type RpgSnapshot } from "./bridge";
 import { buildRpgInviteUrl, getRpgRoomCodeFromUrl } from "./invite";
 import type { RpgAdventureSetup } from "./setup";
 import "./rpg.css";
+import "./landscapeViewport.css";
 
 
 const BONUS_RANKING_LABELS: Record<

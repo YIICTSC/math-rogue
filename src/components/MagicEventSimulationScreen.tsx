@@ -192,7 +192,8 @@ const MagicEventSimulationScreen: React.FC<MagicEventSimulationScreenProps> = ({
   if (!protagonist || !player) {
     return (
       <TranslatedUiTree mode={languageMode}>
-      <div className="h-full w-full overflow-y-auto bg-slate-950 p-4 text-white custom-scrollbar">
+      <div className="magic-event-choice-screen h-full w-full bg-slate-950">
+      <div className="h-full w-full overflow-y-auto p-4 text-white custom-scrollbar">
         <div className="mx-auto max-w-6xl">
           <div className="mb-6 flex items-center justify-between gap-3">
             <div>
@@ -219,6 +220,7 @@ const MagicEventSimulationScreen: React.FC<MagicEventSimulationScreenProps> = ({
             ))}
           </div>
         </div>
+      </div>
       </div>
       </TranslatedUiTree>
     );

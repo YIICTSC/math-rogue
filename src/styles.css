@@ -4298,6 +4298,13 @@ body,
   background-color: #000;
 }
 
+:root {
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-right: env(safe-area-inset-right, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-left: env(safe-area-inset-left, 0px);
+}
+
 .app-shell {
   box-sizing: border-box;
   min-height: 100dvh;
@@ -19616,3 +19623,219 @@ textarea {
 /* Keep controller help in the HUD, and show it only for a connected pad. */
 .xbox-gameplay-hint { display: none; padding: 5px 10px; color: #f5f8ff; background: #081322ed; font: 11px/1.5 system-ui, sans-serif; text-align: center; flex: 0 0 auto; }
 .gamepad-connected .xbox-gameplay-hint { display: block; }
+
+/* Phone landscape: paint roots to the display edge, inset UI content only.
+   env() also works on Android cutouts; desktop/tablet rules stay untouched. */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .app-shell { padding: 0; }
+  .ios-safe-ui-x {
+    padding-left: max(12px, var(--app-safe-left)) !important;
+    padding-right: max(12px, var(--app-safe-right)) !important;
+  }
+  .ios-safe-ui-header { padding-top: max(8px, var(--app-safe-top)) !important; }
+  .ios-safe-edge-left { left: max(12px, var(--app-safe-left)) !important; }
+  .ios-safe-edge-right { right: max(12px, var(--app-safe-right)) !important; }
+  .main-mode-selection-screen,
+  .main-typing-mode-screen,
+  .assignment-create-shell,
+  .main-mini-game-select-screen .mini-game-select-panel,
+  .game-over-screen {
+    box-sizing: border-box;
+    padding-bottom: max(8px, var(--app-safe-bottom));
+  }
+  .start-menu-root .start-menu-version { margin-bottom: max(4px, var(--app-safe-bottom)); }
+  .main-mini-game-select-screen .mini-game-select-back { min-height: 44px; }
+  .school-adventure-toolbar {
+    top: max(4px, var(--app-safe-top));
+    left: max(8px, var(--app-safe-left));
+    right: max(8px, var(--app-safe-right));
+  }
+  .school-adventure-toolbar button { min-height: 44px; }
+  /* Result overlays scroll internally on short screens; backgrounds still
+     cover the viewport, with the final action above the home indicator. */
+  [data-gamepad-initial-scope="survivor-game-over"],
+  [data-gamepad-initial-scope="go-home-game-over"] {
+    box-sizing: border-box;
+    padding: max(8px, var(--app-safe-top)) max(12px, var(--app-safe-right)) max(8px, var(--app-safe-bottom)) max(12px, var(--app-safe-left));
+    overflow-y: auto;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  :is([data-gamepad-initial-scope="survivor-game-over"], [data-gamepad-initial-scope="go-home-game-over"]) > svg { width: 40px; height: 40px; flex-shrink: 0; margin: 0 auto; }
+  :is([data-gamepad-initial-scope="survivor-game-over"], [data-gamepad-initial-scope="go-home-game-over"]) > h2 { font-size: 36px; line-height: 1.1; margin: 0; }
+  :is([data-gamepad-initial-scope="survivor-game-over"], [data-gamepad-initial-scope="go-home-game-over"]) > div { margin-top: 0; margin-bottom: 0; flex-shrink: 0; }
+  :is([data-gamepad-initial-scope="survivor-game-over"], [data-gamepad-initial-scope="go-home-game-over"]) button { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+  .mini-game-paper-plane-screen:has(.paper-plane-hangar-back) { padding-bottom: max(8px, var(--app-safe-bottom)); }
+  .mini-game-paper-plane-screen [data-gamepad-zone="paper-actions"],
+  .mini-game-paper-plane-screen [data-gamepad-zone="paper-move"] { margin-bottom: max(0px, calc(var(--app-safe-bottom) - 8px)); }
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel { padding-bottom: max(8px, var(--app-safe-bottom)); }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .app-screen-stage .main-mode-selection-screen,
+  .app-screen-stage .main-typing-mode-screen,
+  .app-screen-stage .assignment-create-shell,
+  .app-screen-stage .game-over-screen {
+    padding-bottom: max(8px, var(--app-safe-bottom)) !important;
+  }
+  .app-screen-stage .main-mini-game-select-screen .mini-game-select-panel {
+    padding-bottom: calc(8px + var(--app-safe-bottom)) !important;
+  }
+  .mini-game-dungeon-screen .school-adventure-toolbar {
+    left: max(8px, var(--app-safe-left));
+    right: max(8px, var(--app-safe-right));
+    top: max(4px, var(--app-safe-top));
+  }
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel {
+    box-sizing: border-box;
+    padding-bottom: calc(8px + var(--app-safe-bottom)) !important;
+  }
+  .mini-game-paper-plane-screen:has(.paper-plane-hangar-back) {
+    padding-bottom: calc(8px + var(--app-safe-bottom)) !important;
+  }
+  .app-modal-overlay,
+  .paper-plane-result-overlay,
+  [data-gamepad-initial-scope="student-grade"],
+  [data-gamepad-initial-scope^="online-profile-"] {
+    box-sizing: border-box;
+    padding: max(8px, var(--app-safe-top)) max(12px, var(--app-safe-right)) max(8px, var(--app-safe-bottom)) max(12px, var(--app-safe-left)) !important;
+  }
+  .app-modal-overlay > .app-modal-panel,
+  .paper-plane-result-overlay > .paper-plane-result-panel,
+  [data-gamepad-initial-scope="student-grade"] > div,
+  [data-gamepad-initial-scope^="online-profile-"] > div {
+    box-sizing: border-box;
+    max-width: calc(100vw - var(--app-safe-left) - var(--app-safe-right) - 24px) !important;
+    max-height: calc(100dvh - max(8px, var(--app-safe-top)) - max(8px, var(--app-safe-bottom))) !important;
+    overflow-y: auto;
+    min-height: 0;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .main-mode-selection-screen .mode-selection-summary > button {
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .mini-game-paper-plane-screen:not([data-gamepad-initial-scope="paper-battle"]),
+  .kocho-showdown-root[data-gamepad-initial-scope^="kocho-SETUP"] {
+    padding-bottom: max(8px, var(--app-safe-bottom)) !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .app-screen-stage .paper-plane-hangar-screen {
+    padding-bottom: calc(8px + var(--app-safe-bottom)) !important;
+  }
+  .mini-game-dungeon-screen .dungeon-landscape-card {
+    max-height: 68px !important;
+    overflow: hidden;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .paper-plane-result-overlay > .paper-plane-result-panel { overflow-y: auto !important; }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  /* Android uses the same content-only safe insets as iOS. Exclude the RPG
+     shell, which owns separate world and UI layers in landscapeViewport.css. */
+  html:not(.app-platform-ios) .app-screen-stage > .absolute.inset-0 > :not(style, script, .mini-game-dungeon-screen, .rpg-root) > :not(style, script, button, .unit-board-open-button, .ios-edge-to-edge-visual, .magic-rule-panel-mobile, canvas, img, picture, video, svg),
+  html:not(.app-platform-ios) .app-screen-stage > :not(style, script, .fixed, .absolute, .mini-game-dungeon-screen, .rpg-root) > :not(style, script, button, .unit-board-open-button, .ios-edge-to-edge-visual, .magic-rule-panel-mobile, canvas, img, picture, video, svg) {
+    box-sizing: border-box;
+    padding-left: max(12px, var(--app-safe-left)) !important;
+    padding-right: max(12px, var(--app-safe-right)) !important;
+  }
+  html:not(.app-platform-ios) .mini-game-dungeon-screen {
+    padding-left: max(12px, var(--app-safe-left)) !important;
+    padding-right: max(12px, var(--app-safe-right)) !important;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .kocho-showdown-root .kocho-difficulty-overlay {
+    padding: max(8px, var(--app-safe-top)) max(12px, var(--app-safe-right)) max(8px, var(--app-safe-bottom)) max(12px, var(--app-safe-left)) !important;
+  }
+  .kocho-showdown-root .kocho-difficulty-panel {
+    max-height: calc(100dvh - max(8px, var(--app-safe-top)) - max(8px, var(--app-safe-bottom))) !important;
+  }
+  .kocho-showdown-root .kocho-difficulty-grid {
+    grid-template-rows: repeat(5, minmax(44px, auto)) !important;
+    overflow-y: auto;
+  }
+  .kocho-showdown-root .kocho-difficulty-button { min-height: 44px !important; }
+  .app-screen-stage .paper-plane-hangar-screen { justify-content: flex-start !important; overflow: hidden !important; }
+  .paper-plane-hangar-screen .paper-plane-hangar-layout { min-height: 0 !important; flex: 1 1 auto !important; }
+  .paper-plane-hangar-screen :is(.paper-plane-hangar-ship, .paper-plane-hangar-inventory) { min-height: 0; overflow-y: auto !important; }
+  .paper-plane-hangar-screen .paper-plane-hangar-back { min-height: 44px; }
+  .shogi-mini-shell .shogi-mini-start {
+    box-sizing: border-box;
+    padding-bottom: calc(16px + var(--app-safe-bottom));
+  }
+  .shogi-mini-shell .shogi-mini-start-actions button { min-height: 44px; }
+}
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .magic-event-choice-screen {
+    box-sizing: border-box;
+    padding-top: max(8px, var(--app-safe-top));
+    padding-bottom: max(8px, var(--app-safe-bottom));
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .start-menu-root .start-menu-button-panel {
+    max-height: calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom) - 16px);
+    min-height: 0;
+    overflow-y: auto;
+    transform: none;
+  }
+  .start-menu-root .start-menu-version { min-height: 44px; flex-shrink: 0; }
+}
+
+/* Match the desktop split title: artwork/promotion left, actions right. */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .start-menu-root .start-menu-content { position: absolute; inset: 0; display: block; }
+  .start-menu-root .start-menu-button-panel {
+    position: absolute;
+    inset: calc(var(--app-safe-top) + 48px) calc(var(--app-safe-right) + 8px) calc(var(--app-safe-bottom) + 8px) auto;
+    width: calc(48% - var(--app-safe-right) - 12px);
+    min-width: 0;
+    max-width: 380px;
+    margin: 0;
+    max-height: none;
+    justify-content: flex-start;
+  }
+  .start-menu-root .start-menu-title {
+    position: absolute;
+    top: calc(var(--app-safe-top) + 64px);
+    left: calc(var(--app-safe-left) + 8px);
+    width: calc(50% - var(--app-safe-left) - 20px);
+    min-height: clamp(64px, 22dvh, 90px);
+    transform: none;
+  }
+  .start-menu-root .start-menu-title img { height: clamp(64px, 22dvh, 90px); max-width: 100%; }
+  .start-menu-root .start-menu-title .start-menu-title-text { font-size: clamp(1.8rem, 4.7vw, 3rem); }
+  .start-menu-root .start-menu-title .start-menu-title-text-hiragana { font-size: clamp(1.4rem, 3.8vw, 2.4rem); }
+  .start-menu-root .start-menu-progress {
+    top: calc(var(--app-safe-top) + 64px + 24dvh);
+    left: calc(var(--app-safe-left) + 8px);
+    width: calc(50% - var(--app-safe-left) - 20px);
+    max-height: 28px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 2px 4px;
+  }
+  .start-menu-root .start-menu-ios-launch-banner {
+    position: absolute;
+    left: calc(var(--app-safe-left) + 8px);
+    bottom: calc(var(--app-safe-bottom) + 44px);
+    width: min(320px, calc(50% - var(--app-safe-left) - 20px));
+    height: min(72px, 20dvh);
+    margin: 0;
+  }
+  .start-menu-root .start-menu-ios-launch-banner img { width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  .start-menu-root .start-menu-credit-button {
+    top: calc(var(--app-safe-top) + 8px) !important;
+    left: calc(var(--app-safe-left) + 8px) !important;
+    bottom: auto !important;
+    min-height: 44px;
+  }
+}

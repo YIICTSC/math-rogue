@@ -1,0 +1,190 @@
+/* The world owns the viewport. Only interactive layers consume the safe area.
+   Keep this scoped to short phone landscapes; desktop/tablet/portrait retain
+   their existing layouts. The canvas and WebGL renderer observe this box. */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .rpg-root.rpg-root.rpg-root--compact {
+    --rpg-safe-top: var(--app-safe-top, env(safe-area-inset-top, 0px));
+    --rpg-safe-right: var(--app-safe-right, env(safe-area-inset-right, 0px));
+    --rpg-safe-bottom: var(--app-safe-bottom, env(safe-area-inset-bottom, 0px));
+    --rpg-safe-left: var(--app-safe-left, env(safe-area-inset-left, 0px));
+    --rpg-build-reserve: 156px;
+    --rpg-hud-height: calc(48px + var(--rpg-safe-top));
+    --rpg-dock-height: calc(52px + var(--rpg-safe-bottom));
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-width: none;
+    padding: 0;
+    border: 0;
+  }
+  .rpg-root--compact .rpg-game-grid,
+  .rpg-root--compact .rpg-exploration {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  .rpg-root--compact .rpg-exploration > .rpg-map-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+  }
+  .rpg-root--compact .rpg-exploration > .rpg-compact-hud {
+    position: absolute;
+    z-index: 10;
+    inset: 0 0 auto;
+    min-height: var(--rpg-hud-height);
+    padding: calc(var(--rpg-safe-top) + 2px) calc(var(--rpg-safe-right) + 8px) 2px calc(var(--rpg-safe-left) + 8px);
+    border: 0;
+    background: none;
+    pointer-events: none;
+  }
+  .rpg-root--compact .rpg-compact-hud > button { pointer-events: auto; min-height: 44px; }
+  .rpg-root--compact .rpg-exploration > .rpg-compact-dock {
+    position: absolute;
+    z-index: 10;
+    inset: auto 0 0;
+    min-height: var(--rpg-dock-height);
+    padding: 2px calc(var(--rpg-safe-right) + 8px) calc(var(--rpg-safe-bottom) + 2px) calc(var(--rpg-safe-left) + 8px);
+    border: 0;
+    background: linear-gradient(transparent, #162c30cc);
+    pointer-events: none;
+  }
+  .rpg-root--compact .rpg-compact-dock > button { pointer-events: auto; min-height: 48px; }
+  .rpg-root.rpg-root--compact .rpg-map-container > .rpg-compact-message {
+    top: calc(var(--rpg-hud-height) + 4px);
+    left: calc(var(--rpg-safe-left) + 8px);
+    right: auto;
+    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 80px));
+    max-width: none;
+    height: 44px;
+    min-height: 44px !important;
+    max-height: none;
+  }
+  .rpg-root.rpg-root--compact .rpg-map-container > .rpg-settings-map-button {
+    top: calc(var(--rpg-hud-height) + 52px);
+    left: calc(var(--rpg-safe-left) + 8px);
+    min-height: 44px !important;
+  }
+  .rpg-root.rpg-root--compact .rpg-map-container > .rpg-season-badge {
+    top: calc(var(--rpg-hud-height) + 52px);
+    left: calc(var(--rpg-safe-left) + 60px);
+    min-height: 44px;
+    max-width: min(220px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 320px));
+  }
+  .rpg-root.rpg-root--compact .rpg-map-container > .rpg-view-switch {
+    top: calc(var(--rpg-hud-height) + 4px);
+    right: calc(var(--rpg-safe-right) + 8px);
+    min-height: 44px;
+  }
+  .rpg-root.rpg-root--compact:has(.rpg-camera-controls) .rpg-map-container > .rpg-compact-message {
+    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 250px));
+  }
+  .rpg-root.rpg-root--compact:has(.rpg-camera-stick) .rpg-map-container > .rpg-compact-message {
+    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 330px));
+  }
+  .rpg-root.rpg-root--compact .rpg-stick { width: 88px; height: 88px; min-height: 88px; }
+  .rpg-root.rpg-root--compact:has(.rpg-voxel-dock) .rpg-map-actions {
+    left: 0; bottom: calc(100% + 8px); max-width: min(180px, calc(100vw - var(--rpg-safe-left) - var(--rpg-safe-right) - min(520px, calc(100vw - var(--rpg-safe-left) - var(--rpg-safe-right) - var(--rpg-build-reserve))) - 16px)); max-height: 48px;
+  }
+  .rpg-root.rpg-root--compact .rpg-map-bottom {
+    left: calc(var(--rpg-safe-left) + 8px);
+    right: calc(var(--rpg-safe-right) + 8px);
+    bottom: calc(var(--rpg-dock-height) + 8px);
+  }
+  .rpg-root.rpg-root--compact .rpg-voxel-dock {
+    right: calc(var(--rpg-safe-right) + 8px);
+    bottom: calc(var(--rpg-dock-height) + 8px);
+    --rpg-voxel-width: min(520px, calc(100vw - var(--rpg-safe-left) - var(--rpg-safe-right) - var(--rpg-build-reserve)));
+    width: var(--rpg-voxel-width);
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "status slots" "work actions" "target target";
+    gap: 4px;
+    padding: 4px;
+  }
+  .rpg-root.rpg-root--compact .rpg-voxel-dock > header { grid-area: status; min-height: 44px; height: auto; }
+  .rpg-root.rpg-root--compact .rpg-voxel-dock > header button { min-height: 44px; height: 44px; min-width: 44px; }
+  .rpg-root.rpg-root--compact .rpg-voxel-slots { grid-area: slots; margin: 0; }
+  .rpg-root.rpg-root--compact .rpg-voxel-slots button { min-height: 44px; gap: 0; padding: 1px; }
+  .rpg-root.rpg-root--compact .rpg-voxel-slots svg { width: 18px; height: 18px; }
+  .rpg-root.rpg-root--compact .rpg-voxel-slots small { font-size: 8px; line-height: 9px; }
+  .rpg-root.rpg-root--compact .rpg-voxel-slots b { font-size: 10px; line-height: 11px; }
+  .rpg-root.rpg-root--compact .rpg-workshop-actions { grid-area: work; }
+  .rpg-root.rpg-root--compact .rpg-workshop-actions button,
+  .rpg-root.rpg-root--compact .rpg-voxel-actions button { min-height: 44px; }
+  .rpg-root.rpg-root--compact .rpg-voxel-actions { grid-area: actions; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rpg-root.rpg-root--compact .rpg-voxel-target { grid-area: target; margin: 0; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) { position: static; display: flex; flex-wrap: wrap; gap: 4px; width: 100%; max-width: 100%; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button { min-width: 0; max-width: 100%; flex: 1 1 120px; min-height: 44px; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button { padding: 4px 6px; font-size: 11px; line-height: 1.2; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) :is(img, .town-sprite) { width: 28px; height: 28px; flex-shrink: 0; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button > span:not(.town-sprite) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rpg-root.rpg-root--compact .rpg-camera-controls {
+    right: calc(var(--rpg-safe-right) + 66px);
+    top: calc(var(--rpg-hud-height) + 4px);
+    bottom: auto;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .rpg-root.rpg-root--compact .rpg-camera-reset { min-height: 44px !important; }
+  .rpg-root.rpg-root--compact .rpg-camera-stick { width: 64px; height: 64px !important; }
+  .rpg-root.rpg-root--compact .rpg-map-container .rpg-landscape-compass {
+    top: calc(var(--rpg-hud-height) + 100px);
+    left: calc(var(--rpg-safe-left) + 8px);
+    max-width: 150px;
+  }
+  .rpg-root.rpg-root--compact .rpg-map-container .rpg-oxygen-meter {
+    top: calc(var(--rpg-hud-height) + 100px);
+    right: calc(var(--rpg-safe-right) + 8px);
+  }
+  .rpg-root.rpg-root--compact .rpg-map-actions .rpg-voxel-room-panel {
+    position: static; width: 100%; max-width: 100%; max-height: none;
+  }
+  .rpg-root.rpg-root--compact .rpg-map-actions .rpg-voxel-room-panel > button { min-height: 44px; }
+  .rpg-root.rpg-root--compact .rpg-map-actions:has(.rpg-voxel-room-content) button { min-height: 44px; }
+  .rpg-root.rpg-root--compact .rpg-map-actions:has(.rpg-voxel-room-content) {
+    position: fixed;
+    z-index: 120;
+    inset: calc(var(--rpg-hud-height) + 4px) calc(var(--rpg-safe-right) + 8px) calc(var(--rpg-dock-height) + 8px) auto;
+    width: min(330px, calc(100vw - var(--rpg-safe-left) - var(--rpg-safe-right) - 16px));
+    max-width: none; max-height: none;
+    padding: 8px; background: #183a32f5; border: 1px solid #bbccae; border-radius: 10px;
+  }
+  .rpg-root.rpg-root--compact .rpg-social-invite { left: calc(var(--rpg-safe-left) + 8px); top: calc(var(--rpg-hud-height) + 100px); }
+  .rpg-root.rpg-root--compact .rpg-map-actions .rpg-till-quick { position: static; min-height: 44px; }
+  .rpg-root.rpg-root--compact:has(.rpg-dpad) { --rpg-build-reserve: 168px; }
+  .rpg-root.rpg-root--compact.rpg-hand-right .rpg-voxel-dock { right: auto; left: calc(var(--rpg-safe-left) + 8px); }
+  .rpg-root.rpg-root--compact.rpg-hand-right .rpg-map-actions:not(:has(.rpg-voxel-room-content)) { left: 0; right: auto; }
+  .rpg-root.rpg-root--compact.rpg-hand-right:has(.rpg-voxel-dock) .rpg-map-actions:not(:has(.rpg-voxel-room-content)) { left: auto; right: 0; }
+  /* Dialog backdrops paint to the edge; their scrollable content stays safe. */
+  :is(.rpg-life-backdrop, .rpg-arcade-backdrop, .rpg-fish-result-backdrop, .voxel-workshop-overlay) {
+    box-sizing: border-box;
+    padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+  }
+  .rpg-life-backdrop > .rpg-life,
+  .rpg-arcade-backdrop > .rpg-arcade-dialog,
+  .voxel-workshop-overlay > .voxel-workshop {
+    max-width: 100%;
+    max-height: calc(100dvh - max(8px, env(safe-area-inset-top, 0px)) - max(8px, env(safe-area-inset-bottom, 0px)));
+  }
+  .rpg-root--compact .rpg-detail-sheet {
+    inset: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) auto;
+    max-width: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 16px);
+  }
+}
+
+/* On the shortest displays, use two toolbar rows instead of a tall stack.
+   This changes arrangement, never the camera's aspect ratio or UI scale. */
+@media (orientation: landscape) and (max-height: 375px) and (max-width: 1100px) {
+  .rpg-root.rpg-root--compact:has(.rpg-voxel-dock):has(.rpg-dpad) .rpg-map-actions:not(:has(.rpg-voxel-room-content)) { bottom: calc(100% + 2px); max-height: 44px; }
+  .rpg-root.rpg-root--compact .rpg-stick { width: 72px; height: 72px; min-height: 72px; }
+  .rpg-root.rpg-root--compact:has(.rpg-voxel-dock) .rpg-map-container > .rpg-compact-message { width: 44px; }
+  .rpg-root.rpg-root--compact:has(.rpg-voxel-dock) .rpg-map-container > .rpg-settings-map-button { top: calc(var(--rpg-hud-height) + 4px); left: calc(var(--rpg-safe-left) + 60px); }
+  .rpg-root.rpg-root--compact:has(.rpg-voxel-dock) .rpg-map-container > .rpg-season-badge { top: calc(var(--rpg-hud-height) + 4px); left: calc(var(--rpg-safe-left) + 112px); max-width: 150px; }
+}
