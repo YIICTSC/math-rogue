@@ -1,0 +1,24 @@
+/* The four online activities share one safe viewport for their in-flow and
+   absolutely positioned controls. Fixed title/picker dialogs own their inset. */
+.gk-root.gk-root,
+.gg-root.gg-root,
+.gear-shell.gear-shell,
+.rpg-root.rpg-root {
+  top: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  /* A border reserves space for absolute children too, while covering the
+     previous screen behind the status bar. Padding alone cannot do both. */
+  border-top: env(safe-area-inset-top, 0px) solid #0c101a;
+  padding-top: 0;
+  box-sizing: border-box;
+}
+/* The play surface is already below the notch: do not inset this button twice. */
+.gear-shell.gear-play-surface > .gear-header {
+  top: 6px;
+}
+/* Golf's absolute course must use the safe content height, not the full device
+   height, or its bottom question/shot controls extend below the viewport. */
+.gg-root.gg-playing > .gg-stage {
+  height: 100%;
+}

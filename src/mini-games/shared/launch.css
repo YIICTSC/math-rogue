@@ -35,3 +35,21 @@
 .game-launch-title:is(.kart,.vr,.golf) .game-launch-copy{min-width:0}
 .game-launch-title:is(.kart,.vr,.golf) .game-launch-logo{max-width:760px;margin-inline:auto}
 @media(max-width:600px) and (orientation:portrait){.game-launch-title:is(.kart,.vr,.golf) .game-launch-copy{text-align:center}.game-launch-title:is(.kart,.vr,.golf) .game-launch-copy>small{font-size:10px;letter-spacing:.15em}}
+
+/* Fixed title screens are outside the safe play viewport. Add a control-sized
+   margin after the inset, rather than letting phone overrides erase it. */
+.game-launch-back{top:calc(8px + env(safe-area-inset-top,0px));left:calc(16px + env(safe-area-inset-left,0px))}
+@media(max-width:600px) and (orientation:portrait){
+ .game-launch-title{padding:calc(75px + env(safe-area-inset-top,0px)) calc(20px + env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) calc(20px + env(safe-area-inset-left,0px))}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .game-launch-title{padding:calc(54px + env(safe-area-inset-top,0px)) calc(20px + env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) calc(20px + env(safe-area-inset-left,0px))}
+}
+/* Only the RPG setup picker: retain the main game's full-width category rows.
+   Its old 90px sidebar conflicted with the six-column landscape category grid. */
+.rpg-intro-active .main-mode-selection-screen{box-sizing:border-box;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+@media(orientation:landscape) and (max-height:550px){
+ .rpg-intro-active .main-mode-selection-screen>.relative>.mode-selection-layout.mode-selection-layout{grid-template-columns:minmax(0,1fr) minmax(168px,.45fr);grid-template-rows:auto minmax(0,1fr)}
+ .rpg-intro-active .main-mode-selection-screen>.relative>.mode-selection-layout.mode-selection-layout>.mode-category-list{grid-column:1/-1;min-height:0;max-height:88px;grid-auto-rows:minmax(36px,auto);align-content:start;overflow-y:auto!important}
+ .rpg-intro-active .mode-category-list .mode-category-button{min-height:36px!important;flex-shrink:0}
+}
