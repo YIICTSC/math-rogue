@@ -2,7 +2,8 @@
 
 更新日: 2026-10-16
 対象: GitHub `main` の `c55e0022..75e528b7`（197コミット）をローカルへ反映した差分
-iOS: Version `1.0.8` / Build `63`
+iOS: Version `1.0.8` / Build `64`
+Android: versionName `1.0.8` / versionCode `19`
 
 ## 変更点
 
@@ -15,6 +16,12 @@ iOS: Version `1.0.8` / Build `63`
 - 主人公・住民・敵の音声、BGM、効果音、イベント演出を追加・改善した。
 - 縦画面・横画面のスマートフォンUI、オンライン準備画面、操作、画像表示を改善した。
 - 画像・WebP資産の読み込みと初期表示を最適化し、各モードの安定性を向上した。
+
+## Build 64／Android 19の追加修正
+
+- GAKURO GPの全8コースで、建物・樹木・装飾が別区間を含む走行路に重なる配置を修正した。
+- 実際の3Dモデルの大きさ・回転・高低差を考慮して配置を判定し、コースのテーマと走行レイアウトを維持した。
+- 高画質・低画質およびスマートフォン縦横表示で走行路の遮蔽がないことを検証した。
 
 ## Build 63の追加修正
 
@@ -34,4 +41,5 @@ iOS: Version `1.0.8` / Build `63`
 
 - `origin/main` を取得し、ローカルへfast-forwardで反映した。
 - アプリ内のタイトル表示、System Release Notes、英語表示、ひらがな表示を1.0.8へ更新した。
-- XcodeプロジェクトのDebug／ReleaseをVersion 1.0.8、Build 63へ統一した。
+- XcodeプロジェクトのDebug／ReleaseをVersion 1.0.8、Build 64へ統一した。
+- AndroidをversionName 1.0.8、versionCode 19へ更新した。

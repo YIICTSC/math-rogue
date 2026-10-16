@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const built=await build({entryPoints:['src/mini-games/gakuro-kart/sceneryClearance.ts'],bundle:true,platform:'node',format:'esm',write:false});
+const {SceneryClearance}=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
+const track={length:400,points:[[0,0,0],[0,0,100],[100,20,100],[100,20,0]].map(([x,y,z])=>({x,y,z,tx:0,ty:0,tz:1,curve:0}))};
+const guard=new SceneryClearance(track),box=(x,y,z,w,h,d)=>({min:{x:x-w/2,y,z:z-d/2},max:{x:x+w/2,y:y+h,z:z+d/2}});
+assert.equal(guard.firstIntersection(box(30,0,50,4,20,4)),-1,'Distant buildings remain');
+assert.equal(guard.firstIntersection(box(20,0,50,20,20,4)),0,'Check full building footprint, not just its center');
+assert.equal(guard.firstIntersection(box(95,18,50,4,20,4)),2,'Other side of the course is protected');
+assert.equal(guard.firstIntersection(box(100,30,50,4,5,4)),-1,'Safe overhead separation is allowed');
+assert.equal(guard.firstIntersection(box(0,-10,50,4,5,4)),-1,'Scenery completely below the road is allowed');
+assert.equal(guard.firstIntersection(box(50,5,0,4,10,4)),3,'Closing segment is checked');
+console.log('PASS whole-circuit scenery clearance: footprint, other bends, elevation, headroom and closing segment.');

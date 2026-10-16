@@ -1,4 +1,5 @@
 import { COURSE_SCENERY } from './scenery';
+import {SceneryClearance} from './sceneryClearance';
 import { StorybookModels, type Placement } from '../../three/storybookModels';
 import { configureStorybook, paintedSurface, storybookAtmosphere, storybookWater, qualityProfile, type Quality } from '../../three/storybookStyle';
 import { createKartParts } from './kartModels';
@@ -17,6 +18,7 @@ export class KartScene {
   private sampleTrack(distance:number,course:number,lane=0){return sampleTrack(distance,course,lane,this.state.customCourse);}
 
   private storybook?:StorybookModels;
+  private sceneryClearance:SceneryClearance;
   private atmosphere?:ReturnType<typeof storybookAtmosphere>;
   private water?:ReturnType<typeof storybookWater>;
   private renderer: T.WebGLRenderer;
@@ -45,6 +47,7 @@ export class KartScene {
   private textures: T.Texture[] = [];
   constructor(private canvas: HTMLCanvasElement, world: Race, private selfId: string, private preview: boolean, private onFailure: () => void, private visualQuality:Quality='auto') {
     this.state = world;
+    this.sceneryClearance=new SceneryClearance(this.getTrack(world.course));
     this.renderer = new T.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', alpha: false });
     const profile=configureStorybook(this.renderer,visualQuality);
     this.renderer.outputColorSpace = T.SRGBColorSpace; this.renderer.toneMapping = T.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.08;
@@ -92,11 +95,18 @@ export class KartScene {
     const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(vertices, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); g.setIndex(indices); g.computeVertexNormals();
     this.scene.add(new T.Mesh(g, material));
   }
-  private staticInstances(geometry: T.BufferGeometry, material: T.Material, count: number, place: (i: number, o: T.Object3D) => void) {
+  private staticInstances(geometry: T.BufferGeometry, material: T.Material, count: number, place: (i: number, o: T.Object3D) => void, roadside=false) {
     const mesh = new T.InstancedMesh(geometry, material, count), o = new T.Object3D();
-    for (let i = 0; i < count; i++) { o.position.set(0, 0, 0); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); place(i, o); o.updateMatrix(); mesh.setMatrixAt(i, o.matrix); }
+    if(roadside)geometry.computeBoundingBox();
+    let rejected=0,written=0;
+    for (let i = 0; i < count; i++) { o.position.set(0, 0, 0); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); place(i, o); o.updateMatrix();
+      if(roadside&&this.sceneryClearance.firstIntersection(geometry.boundingBox!.clone().applyMatrix4(o.matrix).expandByScalar(.02))>=0){rejected++;continue;}
+      mesh.setMatrixAt(written++, o.matrix); }
+    mesh.count=written;mesh.visible=written>0;
+    mesh.userData.roadside=roadside;mesh.userData.filteredInstances=rejected;
     mesh.computeBoundingSphere(); mesh.castShadow=true;mesh.receiveShadow=true;this.scene.add(mesh); return mesh;
   }
+  private sceneryInstances(geometry:T.BufferGeometry,material:T.Material,count:number,place:(i:number,o:T.Object3D)=>void){return this.staticInstances(geometry,material,count,place,true);}
   private buildWorld() {
     const course = this.state.course, theme = COURSES[course], look=COURSE_SCENERY[course], track = this.getTrack(course);
     const road = paintedSurface(this.standard('#ffffff', .02, .88),'road'); road.map = this.texture('road'); road.side = T.DoubleSide;
@@ -119,16 +129,16 @@ export class KartScene {
     const ground = new T.Mesh(new T.PlaneGeometry(4000, 4000), paintedSurface(this.standard(theme.ground),'grass')); ground.rotation.x = -Math.PI / 2; ground.position.y = -28; this.scene.add(ground);
     if (course === 3) {
       // Oversized bookshelves beside the library circuit.
-      for (const [shelf, color] of ['#ce715e', '#728ccc', '#e3c378', '#79b0a4'].entries()) this.staticInstances(new T.BoxGeometry(2.4, 8, 4), this.standard(color), 32, (i, o) => {
+      for (const [shelf, color] of ['#ce715e', '#728ccc', '#e3c378', '#79b0a4'].entries()) this.sceneryInstances(new T.BoxGeometry(2.4, 8, 4), this.standard(color), 32, (i, o) => {
         const p = this.sampleTrack((i + .25 * shelf) / 32 * track.length, course, i % 2 ? 26 + shelf * 3 : -26 - shelf * 3); o.position.set(p.x, p.y + 4, p.z); o.rotation.y = Math.atan2(p.tx, p.tz); o.scale.y = .8 + i % 3 * .2;
       });
     }
     if (course === 4) {
-      this.staticInstances(new T.ConeGeometry(9, 24, 8), this.standard('#33674e'), 100, (i, o) => { const p = this.sampleTrack(i / 100 * track.length, course, i % 2 ? 33 : -33); o.position.set(p.x, p.y + 12, p.z); });
+      this.sceneryInstances(new T.ConeGeometry(9, 24, 8), this.standard('#33674e'), 100, (i, o) => { const p = this.sampleTrack(i / 100 * track.length, course, i % 2 ? 33 : -33); o.position.set(p.x, p.y + 12, p.z); });
     }
     if (course === 5) {
       const water = new T.Mesh(new T.PlaneGeometry(4000, 4000), this.standard('#267ba8', .25, .18)); water.rotation.x = -Math.PI / 2; water.position.y = -27.8; this.scene.add(water);
-      this.staticInstances(new T.ConeGeometry(9, 15, 3), this.standard('#fff6d6'), 30, (i, o) => { const p = this.sampleTrack(i / 30 * track.length, course, i % 2 ? 49 : -49); o.position.set(p.x, -12, p.z); o.rotation.y = i; });
+      this.sceneryInstances(new T.ConeGeometry(9, 15, 3), this.standard('#fff6d6'), 30, (i, o) => { const p = this.sampleTrack(i / 30 * track.length, course, i % 2 ? 49 : -49); o.position.set(p.x, -12, p.z); o.rotation.y = i; });
     }
     if (course === 6) {
       for (const [band, color] of ['#65ffc9', '#ad8aff', '#70ceff'].entries()) {
@@ -139,11 +149,11 @@ export class KartScene {
       }
     }
     if (course === 7) {
-      this.staticInstances(new T.BoxGeometry(10, 3, 14), this.standard('#657493'), 90, (i, o) => { const p = this.sampleTrack(Math.floor(i / 3) / 30 * track.length, course, (i % 2 ? 1 : -1) * (28 + i % 3 * 9)); o.position.set(p.x, p.y + 2 + i % 3 * 3, p.z); o.rotation.y = Math.atan2(p.tx, p.tz); });
+      this.sceneryInstances(new T.BoxGeometry(10, 3, 14), this.standard('#657493'), 90, (i, o) => { const p = this.sampleTrack(Math.floor(i / 3) / 30 * track.length, course, (i % 2 ? 1 : -1) * (28 + i % 3 * 9)); o.position.set(p.x, p.y + 2 + i % 3 * 3, p.z); o.rotation.y = Math.atan2(p.tx, p.tz); });
     }
     const windows = this.texture('windows');
     const buildings = this.standard('#ffffff', .35); buildings.map = windows; buildings.emissiveMap = windows; buildings.emissive = new T.Color(theme.accent); buildings.emissiveIntensity = [1, 4, 5].includes(course) ? .05 : .32;
-    if (![1,4].includes(course)) this.staticInstances(course === 2 ? new T.CylinderGeometry(.5, .5, 1, 12) : new T.BoxGeometry(1, 1, 1), buildings, 90, (i, o) => {
+    if (![1,4].includes(course)) this.sceneryInstances(course === 2 ? new T.CylinderGeometry(.5, .5, 1, 12) : new T.BoxGeometry(1, 1, 1), buildings, 90, (i, o) => {
       const p = this.sampleTrack(i / 90 * track.length, course, (i % 2 ? -1 : 1) * (40 + i % 4 * 20)), h = 18 + i * 17 % 73;
       o.position.set(p.x, h / 2 - 25, p.z); o.scale.set(13 + i % 3 * 7, h, 13 + i % 4 * 6); o.rotation.y = Math.atan2(p.tx, p.tz);
     });
@@ -178,13 +188,21 @@ export class KartScene {
   private buildStorybook(){
     const course=this.state.course,track=this.getTrack(course),look=COURSE_SCENERY[course];
     // Keep the city buildings and course landmarks when imported models load.
-    this.storybook=new StorybookModels(this.scene);
-    if([1,4,5].includes(course))this.atmosphere=storybookAtmosphere(this.scene,18,this.visualQuality);
+    this.storybook=new StorybookModels(this.scene,undefined,(placement,bounds)=>{
+      if(bounds.some(b=>this.sceneryClearance.firstIntersection(b.clone().expandByScalar(.02))>=0))return false;
+      // Keep models and their floating support islands together when a bend is close.
+      if(!['oak','cherry','autumn','pine','snowpine','cottage','snowcottage'].includes(placement.model))return true;
+      const island=placement.model==='cottage'||placement.model==='snowcottage'?{x:12,y:3,z:12}:{x:7.5,y:2.4,z:8.5};
+      const y=(placement.y??0)-(island.x===12?2.5:2.1);
+      return this.sceneryClearance.firstIntersection({min:{x:placement.x-island.x,y:y-island.y,z:placement.z-island.z},max:{x:placement.x+island.x,y:y+island.y,z:placement.z+island.z}})<0;
+    });
+    // Moving horizon hills can intersect another section of these kilometre-long circuits.
+    if([1,4,5].includes(course))this.atmosphere=storybookAtmosphere(this.scene,18,this.visualQuality,{hills:false});
     if([0,2,3,7].includes(course)){this.buildUrbanScenery();return;}
     const placements:Placement[]=[],treeCount=qualityProfile(this.visualQuality).low?54:90;
     // Rounded grassy islands ground the scenery beside elevated fantasy tracks.
     const islandMaterial=paintedSurface(this.standard(look.island),'grass');
-    this.staticInstances(new T.SphereGeometry(1,12,8),islandMaterial,treeCount,(i,o)=>{
+    this.sceneryInstances(new T.SphereGeometry(1,12,8),islandMaterial,treeCount,(i,o)=>{
       const p=this.sampleTrack(i/treeCount*track.length,course,(i%2?1:-1)*(24+i%4*3));o.position.set(p.x,p.y-2.1,p.z);o.scale.set(7.5,2.4,8.5);
     });
     for(let i=0;i<treeCount;i++){const side=i%2?1:-1,p=this.sampleTrack(i/treeCount*track.length,course,side*(24+i%4*3));
@@ -194,7 +212,7 @@ export class KartScene {
       if(i%9===0){const h=this.sampleTrack(i/treeCount*track.length,course,side*42);placements.push({model:course===6?'snowcottage':course===3?'tower':'cottage',x:h.x,y:h.y,z:h.z,scale:7,yaw:Math.atan2(p.tx,p.tz)});}
     }
     for(let i=0;i<(course===1?3:0);i++){const p=this.sampleTrack((i+.3)/3*track.length,course,55);placements.push({model:'windmill',x:p.x,y:p.y,z:p.z,scale:6});}
-    this.staticInstances(new T.SphereGeometry(1,12,8),islandMaterial,Math.ceil(treeCount/9),(i,o)=>{
+    this.sceneryInstances(new T.SphereGeometry(1,12,8),islandMaterial,Math.ceil(treeCount/9),(i,o)=>{
       const p=this.sampleTrack(i*9/treeCount*track.length,course,(i*9%2?1:-1)*42);o.position.set(p.x,p.y-2.5,p.z);o.scale.set(12,3,12);
     });
     this.storybook.set(placements);
@@ -206,22 +224,22 @@ export class KartScene {
     const place=(i:number,o:T.Object3D,height:number,lane=28)=>{const p=this.sampleTrack(i/count*track.length,course,(i%2?1:-1)*lane);o.position.set(p.x,p.y+height,p.z);o.rotation.y=Math.atan2(p.tx,p.tz);};
     if(course===0){
       // Cyan/magenta towers, luminous circuit strips and suspended city signs.
-      this.staticInstances(new T.BoxGeometry(.22,30,.22),new T.MeshBasicMaterial({color:theme.second}),count,(i,o)=>place(i,o,15,32));
-      this.staticInstances(new T.BoxGeometry(9,4,.3),this.standard('#17223d',.3,.3,theme.accent),count,(i,o)=>place(i,o,9,30));
+      this.sceneryInstances(new T.BoxGeometry(.22,30,.22),new T.MeshBasicMaterial({color:theme.second}),count,(i,o)=>place(i,o,15,32));
+      this.sceneryInstances(new T.BoxGeometry(9,4,.3),this.standard('#17223d',.3,.3,theme.accent),count,(i,o)=>place(i,o,9,30));
       for(const lane of [-18,18])this.ribbon(lane-.07,lane+.07,-.12,new T.MeshBasicMaterial({color:theme.second,side:T.DoubleSide}));
     }else if(course===2){
       // Copper works and rows of blue photovoltaic panels.
-      this.staticInstances(new T.BoxGeometry(12,.35,9),this.standard('#174574',.65,.25),count,(i,o)=>{place(i,o,6,32);o.rotation.x=-.35;});
-      this.staticInstances(new T.CylinderGeometry(1.3,1.6,16,8),this.standard(look.rail,.5),count,(i,o)=>place(i,o,8,39));
+      this.sceneryInstances(new T.BoxGeometry(12,.35,9),this.standard('#174574',.65,.25),count,(i,o)=>{place(i,o,6,32);o.rotation.x=-.35;});
+      this.sceneryInstances(new T.CylinderGeometry(1.3,1.6,16,8),this.standard(look.rail,.5),count,(i,o)=>place(i,o,8,39));
     }else if(course===3){
       // Warm stone library district with lit reading arcades.
-      this.staticInstances(new T.CylinderGeometry(.7,.85,10,8),this.standard('#d9c19b'),count,(i,o)=>place(i,o,5,19));
-      this.staticInstances(new T.BoxGeometry(6,.45,2),this.standard(look.rail),count,(i,o)=>place(i,o,10,20));
+      this.sceneryInstances(new T.CylinderGeometry(.7,.85,10,8),this.standard('#d9c19b'),count,(i,o)=>place(i,o,5,19));
+      this.sceneryInstances(new T.BoxGeometry(6,.45,2),this.standard(look.rail),count,(i,o)=>place(i,o,10,20));
     }else if(course===7){
       // Violet dusk stadium, illuminated floodlights and bright spectator banners.
-      this.staticInstances(new T.CylinderGeometry(.35,.5,22,8),this.standard('#a6abc4',.4),count,(i,o)=>place(i,o,11,38));
-      this.staticInstances(new T.BoxGeometry(8,1.3,1.3),new T.MeshBasicMaterial({color:'#fff3c7'}),count,(i,o)=>place(i,o,22,38));
-      this.staticInstances(new T.BoxGeometry(6,3,.2),this.standard(theme.second,0,.7,theme.second),count,(i,o)=>place(i,o,5,24));
+      this.sceneryInstances(new T.CylinderGeometry(.35,.5,22,8),this.standard('#a6abc4',.4),count,(i,o)=>place(i,o,11,38));
+      this.sceneryInstances(new T.BoxGeometry(8,1.3,1.3),new T.MeshBasicMaterial({color:'#fff3c7'}),count,(i,o)=>place(i,o,22,38));
+      this.sceneryInstances(new T.BoxGeometry(6,3,.2),this.standard(theme.second,0,.7,theme.second),count,(i,o)=>place(i,o,5,24));
     }
   }
   private buildQuizRoad() {
