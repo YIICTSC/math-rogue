@@ -1792,8 +1792,8 @@
 .rpg-dpad button{touch-action:none;user-select:none}
 .rpg-root--compact{height:100dvh;max-height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);overscroll-behavior:none}
 .rpg-root--compact>.rpg-header,.rpg-root--compact>.host-spectator,.rpg-root--compact .rpg-map-title,.rpg-root--compact .rpg-map-caption,.rpg-root--compact>.rpg-footer{display:none}
-.rpg-root--compact .rpg-game-grid{display:block;flex:1;min-height:0;width:100%;max-width:none;padding:0;margin:0}
-.rpg-root--compact .rpg-exploration{height:100%;min-height:0;display:flex;flex-direction:column}
+.rpg-root--compact .rpg-game-grid{display:flex;flex-direction:column;flex:1 1 auto;min-width:0;min-height:0;width:100%;max-width:none;padding:0;margin:0}
+.rpg-root--compact .rpg-exploration{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column}
 .rpg-root--compact .rpg-map-container{flex:1;min-height:0;max-height:none;height:auto;width:100%;border:0;border-radius:0;box-shadow:none}
 .rpg-root--compact .rpg-compact-hud{display:flex;align-items:center;gap:6px;min-height:46px;flex-shrink:0;padding:2px 7px;border-bottom:1px solid #53675c;background:#172d30}
 .rpg-compact-hud button{display:flex;align-items:center;justify-content:center;gap:5px;min-height:42px;min-width:44px;padding:5px 8px;border:1px solid #59736a;border-radius:8px;background:#203c3c;color:#f3e5bc;font-size:11px;white-space:nowrap}

@@ -174,3 +174,24 @@
 .gear-play-surface .gear-bomb-quiz header{gap:8px}.gear-play-surface .gear-bomb-quiz h2{font-size:15px;margin:0}.gear-play-surface .gear-bomb-quiz p{font-size:12px;line-height:1.5;margin:6px 0}.gear-play-surface .gear-bomb-quiz button{min-height:40px;border-radius:8px;padding:6px;font-size:13px}.gear-play-surface .gear-bomb-quiz canvas{width:100%;max-height:150px;object-fit:contain;background:white}.gear-play-surface .gear-bomb-answers{gap:5px;margin:8px 0}.gear-play-surface .gear-bomb-quiz small{font-size:10px}.gear-play-surface:has(.gear-bomb-quiz) .gear-battle-actions{visibility:hidden;pointer-events:none}
 @media(orientation:landscape) and (max-height:550px){.gear-play-surface .gear-bomb-quiz{width:min(320px,40vw);max-height:76dvh}.gear-play-surface .gear-bomb-quiz section{max-height:76dvh;padding:8px}.gear-play-surface .gear-bomb-quiz canvas{max-height:90px}.gear-play-surface .gear-bomb-quiz button{min-height:36px}}
 @media(max-width:600px) and (orientation:portrait){.gear-play-surface .gear-bomb-quiz{width:calc(100% - 112px);max-height:55dvh}.gear-play-surface .gear-bomb-quiz section{max-height:55dvh;padding:8px}.gear-play-surface .gear-bomb-quiz canvas{max-height:115px}}
+
+/* Equipment and actions share a flow layout: their height can change with
+   language, safe insets or seven-button solo missions without overlapping. */
+.gear-shell.gear-play-surface .gear-controls.gear-battle-controls:has(>.gear-loadout){grid-template-areas:"loadout loadout" "stick actions";row-gap:6px}
+.gear-play-surface .gear-controls>.gear-loadout{grid-area:loadout;position:static;inset:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0;width:100%;max-width:460px;justify-self:end}
+.gear-play-surface .gear-controls>.gear-loadout>div{position:static;inset:auto;width:auto;max-width:none;min-width:0;display:block;padding:3px 5px}
+.gear-play-surface .gear-controls>.gear-loadout>.gear-item-slot{order:-1}
+.gear-play-surface .gear-controls>.gear-loadout label{font-size:0}
+.gear-play-surface .gear-controls>.gear-loadout select{box-sizing:border-box;min-height:32px;font-size:12px;padding:3px}
+.gear-play-surface .gear-controls:has(>.gear-loadout)>.gear-bomb-stick-area{grid-area:stick}
+.gear-play-surface .gear-controls:has(>.gear-loadout)>.gear-battle-actions{grid-area:actions}
+@media(max-width:600px),(orientation:landscape) and (max-height:550px){
+ .gear-shell.gear-play-surface .gear-controls.gear-battle-controls{grid-template-columns:76px minmax(0,1fr);gap:6px 8px}
+ .gear-play-surface .gear-battle-controls .gear-battle-actions{grid-template-columns:repeat(3,minmax(0,1fr));width:100%;max-width:420px;gap:4px}
+ .gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{min-height:44px;padding:4px 2px;font-size:11px;line-height:1.2;border-radius:8px;overflow-wrap:anywhere}
+ .gear-play-surface .gear-battle-actions .gear-bomb-place{grid-column:auto}
+ .gear-play-surface .gear-battle-controls .gear-bomb-stick{width:72px;height:72px}
+ .gear-play-surface .gear-battle-controls .gear-bomb-stick-area>small,.gear-play-surface .gear-battle-actions small{display:none}
+ .gear-play-surface .gear-objective{bottom:230px}
+}
+@media(orientation:landscape) and (max-height:550px){.gear-play-surface .gear-objective{bottom:170px}}

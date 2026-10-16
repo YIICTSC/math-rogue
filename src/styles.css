@@ -4807,8 +4807,8 @@ html.app-platform-ios {
   /* Keep each screen root itself unpadded so its background and visual effects
      cover the whole display. Its immediate content layers keep their full
      paint box too, but place normal-flow UI inside the horizontal safe area. */
-  html.app-platform-ios .app-screen-stage > .absolute.inset-0 > :not(style, script, .mini-game-dungeon-screen) > :not(style, script, button, .unit-board-open-button, .ios-edge-to-edge-visual, .magic-rule-panel-mobile, canvas, img, picture, video, svg),
-  html.app-platform-ios .app-screen-stage > :not(style, script, .fixed, .absolute, .mini-game-dungeon-screen) > :not(style, script, button, .unit-board-open-button, .ios-edge-to-edge-visual, .magic-rule-panel-mobile, canvas, img, picture, video, svg) {
+  html.app-platform-ios .app-screen-stage > .absolute.inset-0 > :not(style, script, .mini-game-dungeon-screen, .rpg-root) > :not(style, script, button, .unit-board-open-button, .ios-edge-to-edge-visual, .magic-rule-panel-mobile, canvas, img, picture, video, svg),
+  html.app-platform-ios .app-screen-stage > :not(style, script, .fixed, .absolute, .mini-game-dungeon-screen, .rpg-root) > :not(style, script, button, .unit-board-open-button, .ios-edge-to-edge-visual, .magic-rule-panel-mobile, canvas, img, picture, video, svg) {
     box-sizing: border-box;
     padding-right: max(0.75rem, var(--ios-ui-safe-right)) !important;
     padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
