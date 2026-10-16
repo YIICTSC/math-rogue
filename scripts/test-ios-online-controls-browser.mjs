@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
+process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY='1';
+const vrOnly=process.env.IOS_CONTROLS_VR_ONLY==='1';
 const dir='tmp/ios-online-controls',shots=process.env.IOS_CONTROL_SCREENSHOTS||dir;
 await mkdir(dir,{recursive:true});await mkdir(shots,{recursive:true});
 await writeFile(`${dir}/index.html`,'<html class="app-platform-ios"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><body><div id="root"></div><script type="module" src="./entry.tsx"></script></body></html>');
@@ -20,15 +22,20 @@ try{
   const bottom=size.height-(size.width>size.height?21:34),left=size.width>size.height?44:0;
   for(const b of boxes){assert(b.x>=left-1&&b.x+b.width<=size.width-left+1&&b.y>=0&&b.y+b.height<=bottom+1,`${kind} ${size.width}: ${b.name} outside safe viewport`);for(const a of boxes){if(a===b)continue;assert(!(Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x)>1&&Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y)>1),`${kind} ${size.width}: ${a.name} overlaps ${b.name}`);}}
   for(const b of boxes.filter(b=>!b.name.includes('スロット')&&!b.name.includes('slot')))assert(b.height>=43,`${kind}: touch target too short`);
+  if(size.width>size.height){const field=await page.locator('.gear-field').boundingBox();for(const box of boxes.filter(b=>b.name.includes('スロット')||b.name.includes('slot')||b.width<100&&b.height<60))assert(box.x>=field.x+field.width-1,`${kind} ${size.width}: equipment/action overlaps playfield`);const columns=await page.locator('.gear-battle-actions').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length);assert.equal(columns,2,'Landscape actions use two vertical columns');if(kind.startsWith('solo')){const guide=await page.locator('.gear-header-guide').boundingBox();assert(guide&&guide.y<65&&guide.x<size.width/2,'Guide is in upper left');}}
+  console.log('Controls:',kind,size.width);
   await page.screenshot({path:`${shots}/${kind}-${size.width}.png`});
  }
  for(const en of [false,true]){
   await viewport(sizes[0]);await page.goto(base+'?kind=vr'+(en?'&en=1':''));await page.waitForFunction(()=>!!window.qa);await page.evaluate(()=>qa.start(0));await page.locator('.gear-stealth .gear-canvas canvas').waitFor();
   for(const size of en?[sizes[0],sizes[2]]:sizes){await viewport(size);await controls(en?'solo-en':'solo',size);}
   await page.getByRole('button',{name:en?'CROUCH':'しゃがむ',exact:false}).click();await page.waitForFunction(()=>qa.input.current.crouch);
-  for(const mode of ['royale','coop','bomb']){await page.evaluate(mode=>window.battle(mode),mode);await page.locator('.gear-field canvas').waitFor();for(const size of en?[sizes[0]]:[sizes[0],sizes[2],sizes[3]]){await viewport(size);await controls(mode+(en?'-en':''),size);}await page.evaluate(()=>room.close());}
+  await page.locator('.gear-header-guide').click();await page.locator('.gear-action-tutorial').waitFor();assert(await page.locator('.gear-controls').evaluate(el=>el.inert),'Guide blocks gameplay controls');while(await page.locator('.gear-action-tutorial').count())await page.locator('.gear-action-tutorial .gear-primary').click();
+  for(const mode of ['royale','coop','bomb']){await page.evaluate(mode=>window.battle(mode),mode);await page.locator('.gear-field canvas').waitFor();for(const size of en?[sizes[0],sizes[2]]:[sizes[0],sizes[2],sizes[3],sizes[4]]){await viewport(size);await controls(mode+(en?'-en':''),size);}await page.evaluate(()=>room.close());}
  }
+ if(!vrOnly){
  await viewport(sizes[2]);await page.goto(base+'?kind=rpg');await page.waitForFunction(()=>!!window.qa);await page.evaluate(async()=>{await qa.start('practice');qa.room.current.world.started=true;qa.room.current.world.revision++;qa.setWorld({...qa.room.current.world});});await page.locator('.rpg-root--compact').waitFor();
  for(const view of ['2D','3D']){if(view==='3D')await page.getByRole('button',{name:'2D / 3D',exact:true}).click();for(const size of sizes){await viewport(size);const geometry=await page.locator('.rpg-root--compact').evaluate(root=>{const s=getComputedStyle(root),content=root.clientWidth-parseFloat(s.paddingLeft)-parseFloat(s.paddingRight);return{content,grid:root.querySelector('.rpg-game-grid').getBoundingClientRect().width,map:root.querySelector('.rpg-map-container').getBoundingClientRect().width,hud:root.querySelector('.rpg-compact-hud').getBoundingClientRect().width,dock:root.querySelector('.rpg-compact-dock').getBoundingClientRect().width,flex:getComputedStyle(root.querySelector('.rpg-game-grid')).display};});assert.equal(geometry.flex,'flex');for(const key of ['grid','map','hud','dock'])assert(Math.abs(geometry[key]-geometry.content)<2,`RPG ${view} ${size.width}: ${key} lost horizontal space ${JSON.stringify(geometry)}`);await page.screenshot({path:`${shots}/rpg-${view}-${size.width}.png`});}}
- await page.evaluate(()=>qa.room.current.close());assert.deepEqual(errors,[]);console.log('PASS iOS shell: no equipment/action/stick overlaps, compact 44px actions, solo/coop/royale/bomb, Japanese/English; RPG 2D/3D flex width at five portrait/landscape sizes; zero page errors.');
+ await page.evaluate(()=>qa.room.current.close());}
+ assert.deepEqual(errors,[]);console.log(`PASS iOS shell: no equipment/action/stick overlaps, compact 44px actions, solo/coop/royale/bomb, Japanese/English; landscape two-column rail clear of playfield, guide upper left; ${vrOnly?'': 'RPG 2D/3D flex width at five sizes; '}zero page errors.`);
 }finally{await browser?.close();await server?.close();}

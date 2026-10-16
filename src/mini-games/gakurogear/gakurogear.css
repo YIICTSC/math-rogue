@@ -195,3 +195,21 @@
  .gear-play-surface .gear-objective{bottom:230px}
 }
 @media(orientation:landscape) and (max-height:550px){.gear-play-surface .gear-objective{bottom:170px}}
+
+/* Landscape gives the renderer and the two-column action rail separate space. */
+.gear-header-guide{display:none}
+@media(orientation:landscape) and (max-height:550px){
+ .gear-shell.gear-play-surface{--gear-action-rail:clamp(144px,21vw,180px);--gear-action-right:max(8px,env(safe-area-inset-right));--gear-action-bottom:max(8px,env(safe-area-inset-bottom))}
+ .gear-shell.gear-play-surface .gear-field{right:calc(var(--gear-action-rail) + var(--gear-action-right) + 8px);width:auto}
+ .gear-shell.gear-play-surface .gear-controls.gear-battle-controls{display:block!important;height:0;padding-top:0;padding-bottom:0;overflow:visible}
+ .gear-play-surface .gear-controls>.gear-loadout{position:absolute;inset:auto var(--gear-action-right) calc(var(--gear-action-bottom) + 148px) auto;width:var(--gear-action-rail);max-width:none;grid-template-columns:minmax(0,1fr);gap:4px}
+ .gear-play-surface .gear-controls>.gear-loadout>div{padding:2px 3px}
+ .gear-play-surface .gear-controls>.gear-loadout select{font-size:11px;min-height:30px;padding:2px}
+ .gear-play-surface .gear-battle-controls .gear-battle-actions{position:absolute;right:var(--gear-action-right);bottom:var(--gear-action-bottom);width:var(--gear-action-rail);max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+ .gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{font-size:10px}
+ .gear-play-surface .gear-battle-controls>.gear-bomb-stick-area{position:absolute;left:max(8px,env(safe-area-inset-left));bottom:var(--gear-action-bottom)}
+ .gear-play-surface .gear-battle-controls .gear-bomb-stick{width:62px;height:62px}
+ .gear-shell.gear-play-surface .gear-header>.gear-header-guide{display:inline-flex!important;align-items:center}
+ .gear-play-surface .gear-battle-actions>.gear-footer-guide{display:none}
+ .gear-play-surface .gear-objective{bottom:12px}
+}
