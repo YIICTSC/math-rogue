@@ -1,3 +1,5 @@
+import {adventureSurface,adventureWater} from './adventureStyle';
+import {voxelWater} from './voxel';
 import * as T from 'three';
 import {WIDTH,HEIGHT,type World} from './engine';
 import {WORLD_SCALE,STRUCTURES,landscapeRegion,legacyRegion,landscapeHeight,landscapeEnvironment,landscapeTree,landmarkBlock,landscapeHash,landscapeColor,waterProfile,mountainHeight} from './worldLandscape';
@@ -10,13 +12,17 @@ export class LandscapeScene {
  private chunks=new Map<string,T.Group>();private queue:{x:number;z:number}[]=[];private center='';private revision=-1;private edits=new Map<string,string>();private pending=new Set<string>();
  private box=new T.BoxGeometry(1,1,1);private sphere=new T.SphereGeometry(1,8,6);private materials=new Map<string,T.MeshStandardMaterial>();private far?:T.Mesh;
  private sky=new T.Group();private clouds?:T.InstancedMesh;private cloudMaterial=new T.MeshBasicMaterial({color:'#edf1ec',transparent:true,opacity:.68,depthWrite:false});private precipitation?:T.Points;private animals:{object:T.Group;home:T.Vector3;phase:number;species:string;last:number;legs:T.Object3D[];wings:T.Object3D[];state:string}[]=[];
- private geometries:T.BufferGeometry[]=[];private animalCell='';private farTiles=new Map<string,number[]>();private coreView={x:0,z:0};private detailRadius=0;private farMask='';
+ private geometries:T.BufferGeometry[]=[];private animalCell='';private farTiles=new Map<string,number[]>();private coreView={x:0,z:0};private detailRadius=0;private farMask='';private farWater?:T.InstancedMesh;private farWaterPoints:number[][]=[];
  setDetailRegion(x:number,z:number,radius:number){this.coreView={x,z};this.detailRadius=radius;}
- constructor(parent:T.Scene,private quality:string,private construction?:{get:(block:string)=>T.BufferGeometry},private blockMaterial?:(block:TerrainBlock)=>T.Material){parent.add(this.group);this.group.name='ExplorationLandscape';this.group.add(this.buildings,this.sky);
-  this.clouds=new T.InstancedMesh(this.sphere,this.cloudMaterial,36);const d=new T.Object3D();for(let i=0;i<36;i++){d.position.set(Math.sin(i*3.7)*570,155+(i%5)*18,Math.cos(i*2.3)*570);d.scale.set(28+i%3*7,4,13);d.updateMatrix();this.clouds.setMatrixAt(i,d.matrix);}this.clouds.computeBoundingSphere();this.sky.add(this.clouds);
+ constructor(parent:T.Scene,private quality:string,private construction?:{get:(block:string)=>T.BufferGeometry},private blockMaterial?:(block:TerrainBlock)=>T.Material){this.water.transparent=true;this.water.opacity=.78;this.water.depthWrite=false;parent.add(this.group);this.group.name='ExplorationLandscape';this.group.add(this.buildings,this.sky);
+  // Ocean surrounds the existing playable footprint; never covers interior caves or edits.
+  const ocean:number[][]=[[-160,-.12,HEIGHT/2,320,.02,HEIGHT],[WIDTH+160,-.12,HEIGHT/2,320,.02,HEIGHT],[WIDTH/2,-.12,-160,WIDTH+640,.02,320],[WIDTH/2,-.12,HEIGHT+160,WIDTH+640,.02,320]];
+  this.instances(this.group,ocean,'#4da3b3');const sea=this.group.children[this.group.children.length-1] as T.Mesh;sea.material=this.water;sea.castShadow=false;
+  this.clouds=new T.InstancedMesh(this.sphere,this.cloudMaterial,36);const d=new T.Object3D();for(let i=0;i<36;i++){d.position.set(128+Math.sin(i*3.7)*180,65+(i%5)*12,64+Math.cos(i*2.3)*160);d.scale.set(12+i%3*6,2.5,7);d.updateMatrix();this.clouds.setMatrixAt(i,d.matrix);}this.clouds.computeBoundingSphere();this.sky.add(this.clouds);
   const p=new Float32Array((quality==='low'?90:220)*3);for(let i=0;i<p.length;i++)p[i]=Math.sin(i*3.123)*18;const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));this.precipitation=new T.Points(g,new T.PointsMaterial({color:'#d8e8f1',size:.065,transparent:true,opacity:.6,depthWrite:false}));this.precipitation.frustumCulled=false;this.sky.add(this.precipitation);
  }
- private material(color:string){let m=this.materials.get(color);if(!m){m=new T.MeshStandardMaterial({color,roughness:.82});this.materials.set(color,m);}return m;}
+ private wind={value:0};
+ private material(color:string){let m=this.materials.get(color);if(!m){m=adventureSurface(new T.MeshStandardMaterial({color,roughness:.82}));this.materials.set(color,m);}return m;}
  private part(parent:T.Group,color:string,x:number,y:number,z:number,sx:number,sy:number,sz:number,round=false){
   const geometry:T.BufferGeometry=round?this.sphere:this.box;
   const o=new T.Mesh(geometry,this.material(color));o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;
@@ -27,16 +33,23 @@ export class LandscapeScene {
   const positions:number[]=[],tints:number[]=[],c=new T.Color();
   const face=(v:number[][],color:string)=>{c.set(color);for(const i of [0,1,2,0,2,3]){positions.push(...v[i]);tints.push(c.r,c.g,c.b);}};
   const ground=new Map<string,number>(),cache=new Map<string,TerrainBlock|null>();
-  const height=(x:number,z:number)=>{const key=x+','+z;if(!ground.has(key))ground.set(key,terrainHeight(w,x,z));return ground.get(key)!;};
+  const height=(x:number,z:number)=>{const key=x+','+z;if(!ground.has(key))ground.set(key,legacyRegion(x,z)?(distant&&voxelWater(w,x,z)?voxelWater(w,x,z)!.surface-voxelWater(w,x,z)!.depth:terrainHeight(w,x,z)):0);return ground.get(key)!;};
   const get=(x:number,y:number,z:number)=>{const key=[x,y,z].join(',');if(!cache.has(key))cache.set(key,blockAt(w,x,y,z));return cache.get(key)!;};
   const candidates=new Map<string,{x:number;y:number;z:number}>();
   const add=(x:number,y:number,z:number)=>{if(x>=x0&&x<x0+size&&z>=z0&&z<z0+size&&landscapeRegion(x,z)&&y<height(x,z)&&y>=-18)candidates.set([x,y,z].join(','),{x,y,z});};
   for(let z=z0;z<z0+size;z+=step)for(let x=x0;x<x0+size;x+=step){if(!(distant?legacyRegion(x,z):landscapeRegion(x,z)))continue;
-   const env=landscapeEnvironment(w.seed,x,z),h=height(x,z),color=env.road||env.trail?'#b8a77e':env.water?'#9c977e':landscapeColor(w.seed,x,z);
+   const env=landscapeEnvironment(w.seed,x,z),h=height(x,z),color=w.terrainStyle===1&&h>=34?'#e3edf0':w.terrainStyle===1&&h>=22?'#99a48f':env.road||env.trail?'#b8a77e':env.water?'#9c977e':landscapeColor(w.seed,x,z);
    if(distant){
-    // Coarse terrain stays under resident chunks until they have actually loaded.
-    const start=positions.length/3;this.farTiles.set(x+':'+z,[start,start+1,start+2,start+3,start+4,start+5]);
-    face([[x,h,z],[x,height(x,z+step),z+step],[x+step,height(x+step,z+step),z+step],[x+step,height(x+step,z),z]],color);continue;
+    // Stepped silhouettes match the authoritative height field, including distant cliffs.
+    const start=positions.length/3;
+    face([[x,h,z],[x,h,z+step],[x+step,h,z+step],[x+step,h,z]],color);
+    const east=height(x+step,z),south=height(x,z+step),west=height(x-step,z),north=height(x,z-step);
+    const side=h>=34?'#d2dde2':h>=22?'#a8ada7':'#a99b80';
+    if(h>east)face([[x+step,east,z],[x+step,h,z],[x+step,h,z+step],[x+step,east,z+step]],side);
+    if(h>south)face([[x+step,south,z+step],[x+step,h,z+step],[x,h,z+step],[x,south,z+step]],side);
+    if(h>west)face([[x,west,z+step],[x,h,z+step],[x,h,z],[x,west,z]],side);
+    if(h>north)face([[x,north,z],[x,h,z],[x+step,h,z],[x+step,north,z]],side);
+    this.farTiles.set(x+':'+z,Array.from({length:positions.length/3-start},(_,i)=>start+i));continue;
    }
    add(x,h-1,z);
    for(const [dx,dz]of [[1,0],[-1,0],[0,1],[0,-1]])for(let y=height(x+dx,z+dz);y<h;y++)add(x,y,z);
@@ -60,11 +73,13 @@ export class LandscapeScene {
  private refreshFar(){
   const index=this.far?.geometry.index;if(!index)return;
   const mask=`${this.coreView.x}:${this.coreView.z}:${this.detailRadius}`;if(mask===this.farMask)return;this.farMask=mask;
+  if(this.farWater){const d=new T.Object3D();this.farWaterPoints.forEach(([x,y,z,sx,sy,sz],i)=>{const detailed=Math.abs(Math.floor(x)-this.coreView.x)<=this.detailRadius&&Math.abs(Math.floor(z)-this.coreView.z)<=this.detailRadius;d.position.set(x,y,z);d.scale.set(detailed?0:sx,sy,sz);d.updateMatrix();this.farWater!.setMatrixAt(i,d.matrix);});this.farWater.instanceMatrix.needsUpdate=true;}
   // Cell-sized distant faces are masked exactly where the detailed voxel mesh exists.
-  for(const [key,indices]of this.farTiles){const [x,z]=key.split(':').map(Number);const loaded=Math.abs(x-this.coreView.x)<=this.detailRadius&&Math.abs(z-this.coreView.z)<=this.detailRadius;for(const i of indices)index.setX(i,loaded?indices[0]:i);}index.needsUpdate=true;
+  for(const [key,indices]of this.farTiles){const [x,z]=key.split(':').map(Number);const loaded=x>0&&z>0&&x<WIDTH-1&&z<HEIGHT-1&&Math.abs(x-this.coreView.x)<=this.detailRadius&&Math.abs(z-this.coreView.z)<=this.detailRadius;for(const i of indices)index.setX(i,loaded?indices[0]:i);}index.needsUpdate=true;
  }
- private surface=new T.MeshStandardMaterial({vertexColors:true,roughness:.95});
- private water=new T.MeshStandardMaterial({color:'#4da3b3',transparent:true,opacity:.42,roughness:.18,metalness:.15,depthWrite:false,side:T.DoubleSide});
+ private surface=adventureSurface(new T.MeshStandardMaterial({vertexColors:true,roughness:.92}));
+ private waterEffect=adventureWater();
+ private water=this.waterEffect.material;
  private chunk(w:World,cx:number,cz:number){const g=new T.Group(),x0=cx*16,z0=cz*16;g.add(this.terrainMesh(w,x0,z0,16,1));const wood:number[][]=[],leaves:number[][]=[],plants:number[][]=[],flowers:number[][]=[],shrubs:number[][]=[],water:number[][]=[];
   for(let z=z0;z<z0+16;z++)for(let x=x0;x<x0+16;x++){if(!landscapeRegion(x,z))continue;const e=landscapeEnvironment(w.seed,x,z),t=landscapeTree(w.seed,x,z);
    if(t){for(let y=t.base;y<t.base+t.height;y++)if(blockAt(w,x,y,z)==='wood')wood.push([x+.5,y+.5,z+.5,1,1,1]);for(let dy=-3;dy<=0;dy++)for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++){const y=t.base+t.height+dy;if(blockAt(w,x+dx,y,z+dz)==='leaves')leaves.push([x+dx+.5,y+.5,z+dz+.5,1,1,1]);}}
@@ -108,7 +123,7 @@ export class LandscapeScene {
   for(const a of this.animals)a.object.removeFromParent();this.animals=[];
   // Shared simple rounded anatomy with species-specific ears, horns, wings and proportions.
   for(let i=0;i<(this.quality==='low'?12:30);i++){const ax=Math.floor(x)+(landscapeHash(Math.floor(i/3),5,w.seed)-.5)*100+(i%3)*2,az=Math.floor(z)+(landscapeHash(Math.floor(i/3),9,w.seed)-.5)*100;if(!legacyRegion(ax,az))continue;
-   const e=landscapeEnvironment(w.seed,ax,az);if(e.road)continue;const species=e.water?(i%3?'fish':'duck'):e.height>130?'eagle':e.height>85?'goat':e.biome==='forest'?(i%3?'deer':'rabbit'):i%4===0?'owl':['sheep','cow','horse'][i%3];
+   const e=landscapeEnvironment(w.seed,ax,az);e.height=terrainHeight(w,Math.floor(ax),Math.floor(az));e.water=voxelWater(w,ax,az);if(e.road)continue;const species=e.water?(i%3?'fish':'duck'):e.height>30?'eagle':e.height>22?'goat':e.biome==='forest'?(i%3?'deer':'rabbit'):i%4===0?'owl':['sheep','cow','horse'][i%3];
    const group=new T.Group(),color=species==='fish'?'#deaf78':species==='sheep'?'#e8ddc7':species==='cow'?'#815647':species==='owl'?'#8b819c':'#ad8057';
    const small=['fish','duck','rabbit','owl','eagle'].includes(species),scale=small?.45:1;
    this.part(group,color,0,.8,0,.42,.45,.75,true);this.part(group,color,0,1.22,.52,.24,.3,.28,true);
@@ -117,15 +132,20 @@ export class LandscapeScene {
    if(['owl','eagle','fish'].includes(species))for(const side of [-1,1])wings.push(this.part(group,color,side*.55,.85,0,.8,.06,.4));
    if(['deer','goat','rabbit','horse'].includes(species))for(const side of [-1,1])this.part(group,color,side*.17,1.62,.5,.08,species==='rabbit'?.7:.35,.09);
    for(const side of [-1,1])this.part(group,'#20272a',side*.17,1.30,.75,.045,.05,.035,true);
-   group.scale.setScalar(scale);const y=e.water?e.water.surface-(species==='duck'?.35:e.water.depth*.6):terrainHeight(w,ax,az);group.position.set(ax,y,az);this.group.add(group);this.animals.push({object:group,home:new T.Vector3(ax,y,az),phase:i*.7,species,last:0,legs,wings,state:'graze'});
+   group.scale.setScalar(scale);const y=e.water?e.water.surface-(species==='duck'?.35:e.water.depth*.6):terrainHeight(w,Math.floor(ax),Math.floor(az))+(['owl','eagle'].includes(species)?9:0);group.position.set(ax,y,az);this.group.add(group);this.animals.push({object:group,home:new T.Vector3(ax,y,az),phase:i*.7,species,last:0,legs,wings,state:'graze'});
   }
  }
  update(w:World,position:T.Vector3,time:number,night:boolean,reduced:boolean){
 
-  const weather=Math.floor(w.life.time/90+w.seed)%5===0;this.precipitation!.visible=!reduced&&(weather||position.y>190);this.precipitation!.position.copy(position);if(this.precipitation!.visible){const p=this.precipitation!.geometry.getAttribute('position') as T.BufferAttribute;for(let i=0;i<p.count;i++){p.setY(i,18-((time*(position.y>190?1:8)+i*1.71)%36));p.setX(i,Math.sin(i*3.123+time*.1)*18);}p.needsUpdate=true;}
+  this.waterEffect.update(reduced?0:time);this.wind.value=reduced?0:time;if(this.clouds&&!reduced)this.clouds.position.x=Math.sin(time*.008)*8;
+  const snowy=w.terrainStyle===1?position.y>=34:position.y>190;
+  const weather=Math.floor(w.life.time/90+w.seed)%5===0;this.precipitation!.visible=!reduced&&(weather||snowy);this.precipitation!.position.copy(position);if(this.precipitation!.visible){const p=this.precipitation!.geometry.getAttribute('position') as T.BufferAttribute;for(let i=0;i<p.count;i++){p.setY(i,18-((time*(snowy?1:8)+i*1.71)%36));p.setX(i,Math.sin(i*3.123+time*.1)*18);}p.needsUpdate=true;}
   this.cloudMaterial.color.set(night?'#65758a':weather?'#adb8bc':'#edf1ec');
   const cx=Math.floor(position.x/16),cz=Math.floor(position.z/16),radius=this.quality==='low'?2:3,center=cx+':'+cz,revision=w.voxels?.revision||0;
-  if(!this.far){this.far=this.terrainMesh(w,0,0,WIDTH,1,true);this.far.position.y=-.03;this.group.add(this.far);this.landmarks(w);}
+  if(!this.far){this.far=this.terrainMesh(w,0,0,WIDTH,1,true);this.far.position.y=-.03;this.group.add(this.far);this.landmarks(w);
+   const pools:number[][]=[];for(let z=0;z<HEIGHT;z++)for(let x=0;x<WIDTH;x++){const p=voxelWater(w,x,z);if(p){pools.push([x+.5,p.surface-.03,z+.5,1,.025,1]);if(p.kind==='waterfall'){const dx=Math.sign(p.flowX),dz=Math.sign(p.flowZ),next=voxelWater(w,x+dx,z+dz);if(next&&next.surface<p.surface)pools.push([x+.5+dx*.5,(p.surface+next.surface)/2-.03,z+.5+dz*.5,dx?.035:1,p.surface-next.surface,dz?.035:1]);}}}
+   this.instances(this.group,pools,'#4da3b3');if(pools.length){const mesh=this.group.children[this.group.children.length-1] as T.Mesh;mesh.material=this.water;mesh.castShadow=false;this.farWater=mesh as T.InstancedMesh;this.farWaterPoints=pools;}
+  }
   this.refreshFar();
   const dirty=new Set<string>();
   if(revision!==this.revision){
@@ -149,12 +169,12 @@ export class LandscapeScene {
    const moving=a.state==='walk'||a.state==='flee',angle=time*.08+a.phase,nx=a.home.x+Math.sin(angle)*7,nz=a.home.z+Math.cos(angle)*7;
    let dx=nx-a.object.position.x,dz=nz-a.object.position.z;if(scared){dx=a.object.position.x-position.x;dz=a.object.position.z-position.z;}
    const len=Math.hypot(dx,dz)||1,speed=a.state==='flee'?3:1.1,tx=a.object.position.x+dx/len*dt*speed,tz=a.object.position.z+dz/len*dt*speed;
-   const env=landscapeEnvironment(w.seed,tx,tz),flying=['owl','eagle'].includes(a.species);
+   const env=landscapeEnvironment(w.seed,tx,tz);env.height=terrainHeight(w,Math.floor(tx),Math.floor(tz));env.water=voxelWater(w,tx,tz);const flying=['owl','eagle'].includes(a.species);
    if(moving&&legacyRegion(tx,tz)&&(['fish','duck'].includes(a.species)?!!env.water:flying||!env.water&&Math.abs(env.height-a.object.position.y)<1.5)&&!landmarkBlock(Math.floor(tx),env.height+1,Math.floor(tz))){a.object.position.x=tx;a.object.position.z=tz;a.object.rotation.y=Math.atan2(dx,dz);a.object.position.y=['fish','duck'].includes(a.species)?env.water!.surface-(a.species==='duck'?.35:Math.max(.5,env.water!.depth*.6)):env.height+(flying?9+Math.sin(time+a.phase):0);}
    a.legs.forEach((leg,i)=>leg.rotation.x=moving?Math.sin(time*(scared?12:6)+i%2*Math.PI)*.45:0);a.wings.forEach((wing,i)=>wing.rotation.z=Math.sin(time*5+a.phase)*(i?1:-1)*.45);
    a.object.userData.behavior=a.state;
   }
-  this.group.userData.stats={chunks:this.chunks.size,queued:this.queue.length,animals:this.animals.length,weather:position.y>190?'snow':weather?'rain':'clear'};
+  this.group.userData.stats={chunks:this.chunks.size,queued:this.queue.length,animals:this.animals.length,weather:snowy?'snow':weather?'rain':'clear'};
  }
- dispose(){for(const g of this.chunks.values())this.releaseChunk(g);this.buildings.traverse(o=>{if(o instanceof T.InstancedMesh)o.dispose();});this.far?.geometry.dispose();this.clouds?.dispose();this.cloudMaterial.dispose();this.precipitation?.geometry.dispose();(this.precipitation?.material as T.Material)?.dispose();this.box.dispose();this.sphere.dispose();this.surface.dispose();this.water.dispose();this.materials.forEach(m=>m.dispose());this.geometries.forEach(g=>g.dispose());this.group.removeFromParent();}
+ dispose(){for(const o of this.group.children)if(o instanceof T.InstancedMesh)o.dispose();for(const g of this.chunks.values())this.releaseChunk(g);this.buildings.traverse(o=>{if(o instanceof T.InstancedMesh)o.dispose();});this.far?.geometry.dispose();this.clouds?.dispose();this.cloudMaterial.dispose();this.precipitation?.geometry.dispose();(this.precipitation?.material as T.Material)?.dispose();this.box.dispose();this.sphere.dispose();this.surface.dispose();this.water.dispose();this.materials.forEach(m=>m.dispose());this.geometries.forEach(g=>g.dispose());this.group.removeFromParent();}
 }

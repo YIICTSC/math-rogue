@@ -1,3 +1,4 @@
+import {ProtagonistModel} from '../../three/protagonistModel';
 import * as T from 'three';
 import {characterGeometry} from '../../three/storybookCharacters';
 import {createAvatarParts} from '../gakuro-kart/avatarModels';
@@ -7,6 +8,7 @@ export function saveVrAvatar(a:KartAvatar){try{localStorage.setItem('gakuro-vr-a
 /** Keep live Blender geometries until the owning scene disposes this avatar.
  * Cloning the pre-load fallback would permanently lose asynchronous upgrades. */
 export function createVrCharacter(a:KartAvatar){
+  if(a.protagonist){const root=new T.Group(),fallback=createVrCharacter({...a,protagonist:undefined}),hero=new ProtagonistModel();hero.root.scale.setScalar(.9);root.add(fallback,hero.root);root.userData.protagonistModel=hero;root.userData.protagonistUpdate=()=>{fallback.visible=!hero.ready;hero.root.visible=hero.ready;};hero.set(a.protagonist);return root;}
   const g=new T.Group(),parts=createAvatarParts();
   const palette={body:BODY_COLORS,outfit:AVATAR_COLORS,hair:HAIR_COLORS,eyeColor:EYE_COLORS};
   const used=new Set<T.BufferGeometry>();

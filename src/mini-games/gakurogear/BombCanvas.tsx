@@ -1,3 +1,4 @@
+import {updateProtagonists,disposeProtagonists} from '../../three/protagonistModel';
 import {BOMB_ICON_PATH,BOMB_ICON_ORDER} from './bombIcons';
 import {frameArena,followArena,cameraBlend} from './camera';
 import {createScreenMarkers,seatColor} from './markers';
@@ -37,7 +38,7 @@ export default function BombCanvas({world,selfId,overview=false}:{world:OnlineWo
   const arrow=new T.Mesh(geo(new T.ConeGeometry(.18,.6,3)),new T.MeshBasicMaterial({color:0xffffff,depthTest:false}));materials.push(arrow.material);arrow.renderOrder=9;scene.add(arrow);
   const transform=new T.Object3D(),color=new T.Color(),rigs=new Map<string,{root:T.Group;key:string}>();let cells='',lastCells:number[]|undefined;
   const stamp=(m:T.InstancedMesh,index:number,x:number,z:number,y=.65,scale=1)=>{transform.position.set(x,y,z);transform.scale.setScalar(scale);transform.rotation.set(0,0,0);transform.updateMatrix();m.setMatrixAt(index,transform.matrix);};
-  const disposeRig=(root:T.Group)=>{root.traverse(o=>{if(o instanceof T.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});scene.remove(root);};
+  const disposeRig=(root:T.Group)=>{disposeProtagonists(root);root.traverse(o=>{if(o instanceof T.Mesh){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});scene.remove(root);};
   const resize=new ResizeObserver(()=>{renderer.setSize(el.clientWidth,el.clientHeight,false);});resize.observe(el);
   const draw=(now:number)=>{const{world:w,selfId:id,overview:full}=latest.current as {world:OnlineWorld;selfId:string;overview:boolean},arena=w.bombArena;if(!arena)return;const own=w.players[id],near=own?.run.player??{x:0,z:0};
    if(arena.cells!==lastCells){lastCells=arena.cells;const key=arena.cells.join('');if(key!==cells){cells=key;let h=0,s=0;arena.cells.forEach((v,i)=>{if(v){const p=cellPoint(arena,i%arena.side,Math.floor(i/arena.side));stamp(v===1?hard:soft,v===1?h++:s++,p.x,p.z);}});hard.count=h;soft.count=s;hard.instanceMatrix.needsUpdate=soft.instanceMatrix.needsUpdate=true;}}
@@ -55,7 +56,7 @@ export default function BombCanvas({world,selfId,overview=false}:{world:OnlineWo
    selfRing.visible=arrow.visible=!!own&&!own.out;selfRing.position.set(near.x,.05,near.z);arrow.position.set(near.x+Math.sin(own?.run.player.angle??0)*.85,.1,near.z+Math.cos(own?.run.player.angle??0)*.85);arrow.rotation.set(Math.PI/2,0,-(own?.run.player.angle??0));
    markers.draw(camera,players.filter(p=>full||Math.hypot(p.run.player.x-near.x,p.run.player.z-near.z)<13).map(p=>({id:p.id,number:participantNumber(w,p.id),name:p.id===id?p.name:players.length<=8?p.name:undefined,point:new T.Vector3(p.run.player.x,1.6,p.run.player.z),self:p.id===id})),full);
    el.dataset.focusVisible=String(new T.Frustum().setFromProjectionMatrix(new T.Matrix4().multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse)).containsPoint(focus));
-   el.dataset.bombs=String(arena.bombs.length);el.dataset.players=String(players.length);renderer.render(scene,camera);frame=requestAnimationFrame(draw);
+   el.dataset.bombs=String(arena.bombs.length);el.dataset.players=String(players.length);updateProtagonists(scene,1/60);renderer.render(scene,camera);frame=requestAnimationFrame(draw);
   };frame=requestAnimationFrame(draw);
   return()=>{cancelAnimationFrame(frame);iconClosed=true;iconSource.dispose();iconTextures.forEach(t=>t.dispose());iconMeshes.forEach(m=>m.dispose());markers.dispose();resize.disconnect();for(const rig of rigs.values())disposeRig(rig.root);for(const m of[hard,soft,bombs,flames,drops,distant])m.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();};
  },[world.seed,world.round]);

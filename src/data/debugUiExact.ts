@@ -24,6 +24,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+ "カメラ切替": "Switch camera",
   "衣装はクローゼットに保管されました。友好度を深めてから着替えをお願いしましょう。": "The outfit is in the closet. Become closer before requesting a change.",
   "衣装": "Outfits",
   "衣装を買うためのゴールドが足りません。": "You do not have enough gold to buy this outfit.",
@@ -364,6 +365,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+ "カメラ切替": "かめらきりかえ",
   "全解除": "ぜんかいじょ",
   "チェックを全解除": "チェックをぜんかいじょ",
 

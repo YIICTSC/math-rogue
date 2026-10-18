@@ -26,6 +26,8 @@ export function nativeProfile(
     maxHp: player.maxHp,
     gold: player.gold,
     character: player.id || "WARRIOR",
+    magicProtagonistId: player.magicProtagonistId,
+    appearanceMode: player.appearanceMode,
     image: player.imageData || "",
     deckSize: player.deck.length,
     deck: player.deck,

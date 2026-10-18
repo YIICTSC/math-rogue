@@ -3,7 +3,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {assetUrl} from '../utils/assetPaths';
 export type CharacterComponent='head'|'humanhead'|'hairstrand'|'sweater'|'sleeve'|'mitten'|'haircap'|'hairlock'|'ear'|'shoe'|'trouser'|'pointedear'|'robothead'|'collar'|'muzzle'|'floppyear'|'tail'|`hairdo_${number}`|`acc_${number}_${string}`;
 let library:Promise<Map<string,T.BufferGeometry>>|undefined;
-function load(){return library??=new Promise<Map<string,T.BufferGeometry>>(resolve=>{
+function load(){if(typeof window==='undefined')return Promise.resolve(new Map<string,T.BufferGeometry>());return library??=new Promise<Map<string,T.BufferGeometry>>(resolve=>{
  new GLTFLoader().load(assetUrl('models/storybook/characters-v3.glb'),gltf=>{
   const bank=new Map<string,T.BufferGeometry>();gltf.scene.updateMatrixWorld(true);
   gltf.scene.traverse(o=>{

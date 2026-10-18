@@ -10,7 +10,7 @@ export function voxelMaterial(block:TerrainBlock){
  const def=VOXEL_CATALOG[block as CatalogBlock],color=VOXEL_COLORS[block],pattern=def?.pattern??'stone';
  const canvas=document.createElement('canvas');canvas.width=canvas.height=32;const c=canvas.getContext('2d')!;
  c.fillStyle=color;c.fillRect(0,0,32,32);
- for(let y=0;y<32;y++)for(let x=0;x<32;x++){const hash=(x*29+y*43+x*y*7)%31;c.fillStyle=hash%2?`rgba(255,255,255,${hash*.003})`:`rgba(12,20,26,${hash*.005})`;c.fillRect(x,y,1,1);}
+ for(let y=0;y<32;y++)for(let x=0;x<32;x++){const hash=(x*29+y*43+x*y*7)%31;c.fillStyle=hash%2?`rgba(255,255,255,${hash*.0015})`:`rgba(12,20,26,${hash*.0025})`;c.fillRect(x,y,1,1);}
  c.strokeStyle='#20252e55';c.lineWidth=1;
  if(['brick','plank','cobble'].includes(pattern)){const h=pattern==='plank'?8:pattern==='brick'?8:16;for(let y=0;y<32;y+=h){c.beginPath();c.moveTo(0,y+.5);c.lineTo(32,y+.5);c.stroke();for(let x=(y/h%2)*8;x<32;x+=16){c.beginPath();c.moveTo(x+.5,y);c.lineTo(x+.5,y+h);c.stroke();}}}
  if(pattern==='log'){for(let x=2;x<32;x+=5){c.fillStyle='#24190940';c.fillRect(x,0,2,32);c.fillStyle='#ffe6b433';c.fillRect(x+2,0,1,32);}}
@@ -22,7 +22,7 @@ export function voxelMaterial(block:TerrainBlock){
  if(pattern==='chest'||pattern==='door'||pattern==='workbench'){c.strokeStyle='#432e2277';c.lineWidth=2;c.strokeRect(2,2,28,28);for(let x=8;x<32;x+=8){c.beginPath();c.moveTo(x,2);c.lineTo(x,30);c.stroke();}if(pattern==='workbench'){for(let y=8;y<32;y+=8){c.beginPath();c.moveTo(2,y);c.lineTo(30,y);c.stroke();}}else{c.fillStyle='#efd27d';c.fillRect(23,14,4,5);}}
  if(pattern==='furnace'){c.fillStyle='#424954';c.fillRect(5,5,22,5);c.fillStyle='#29313b';c.fillRect(5,16,22,12);c.fillStyle='#bc7948';c.fillRect(9,25,14,2);}
  if(pattern==='bookshelf'){for(let y=4;y<32;y+=15){for(let i=0;i<6;i++){c.fillStyle=['#687eab','#cf8a68','#87a77c','#e0c77e','#a17f9d','#658e95'][i];c.fillRect(3+i*4,y,3,11);}c.fillStyle='#543c2c';c.fillRect(0,y+11,32,2);}}
- const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.magFilter=T.NearestFilter;map.minFilter=T.LinearMipmapLinearFilter;
+ const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.magFilter=T.LinearFilter;map.minFilter=T.LinearMipmapLinearFilter;
  const transparent=def?.transparent||block==='oasis-water';
  return new T.MeshStandardMaterial({map,color:'#ffffff',roughness:transparent?.2:.86,metalness:pattern==='metal'?.35:0,transparent,opacity:block==='oasis-water'?.65:1,depthWrite:!transparent,side:transparent?T.DoubleSide:T.FrontSide,emissive:def?.light?color:block==='oasis-water'?'#17877e':'#000000',emissiveIntensity:def?.light?.65:.1});
 }

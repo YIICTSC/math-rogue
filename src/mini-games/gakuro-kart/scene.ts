@@ -1,3 +1,4 @@
+import {ProtagonistModel} from '../../three/protagonistModel';
 import { COURSE_SCENERY } from './scenery';
 import {SceneryClearance} from './sceneryClearance';
 import { StorybookModels, type Placement } from '../../three/storybookModels';
@@ -12,7 +13,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { COURSES, trackFeatures, getTrack, sampleTrack, ROAD_WIDTH } from './track';
 import { MAX_RACERS, type Race } from './engine';
 
-type InstancePart = { motion?: AvatarPart["motion"]; mesh: T.InstancedMesh; offset: T.Vector3; rotation: T.Euler; scale: T.Vector3; effect?: 'flame' | 'shield' | 'spark' | 'shadow'; colored?: boolean; avatarColor?: AvatarColor; visible?: (a: KartAvatar) => boolean };
+type InstancePart = { driver?:boolean; motion?: AvatarPart["motion"]; mesh: T.InstancedMesh; offset: T.Vector3; rotation: T.Euler; scale: T.Vector3; effect?: 'flame' | 'shield' | 'spark' | 'shadow'; colored?: boolean; avatarColor?: AvatarColor; visible?: (a: KartAvatar) => boolean };
 export class KartScene {
   private getTrack(course:number){return getTrack(course,this.state.customCourse);}
   private sampleTrack(distance:number,course:number,lane=0){return sampleTrack(distance,course,lane,this.state.customCourse);}
@@ -25,6 +26,7 @@ export class KartScene {
   private scene = new T.Scene();
   private camera = new T.PerspectiveCamera(68, 1, .2, 1700);
   private parts: InstancePart[] = [];
+  private protagonists=new Map<string,ProtagonistModel>();
   private boxes: T.Object3D[] = [];
   private quizRoad = new T.Group();
   private crashObstacle = new T.Group();
@@ -275,9 +277,9 @@ export class KartScene {
   }
   private buildCars() {
     const shell = new RoundedBoxGeometry(1, 1, 1, 2, .12);
-    for (const asset of [...createKartParts(), ...createAvatarParts()]) {
+    for (const asset of [...createKartParts(), ...createAvatarParts().map(p=>({...p,driver:true}))]) {
       const part = this.part(asset.geometry, asset.material, asset.position, asset.scale, asset.rotation);
-      part.motion=asset.motion;part.avatarColor = asset.color; part.visible = asset.visible;
+      part.driver='driver' in asset;part.motion=asset.motion;part.avatarColor = asset.color; part.visible = asset.visible;
     }
     for (const x of [-.59, .59]) {
       this.part(shell, new T.MeshBasicMaterial({ color: '#ff576b' }), [x, .78, -1.64], [.32, .12, .04]);
@@ -301,6 +303,7 @@ export class KartScene {
     const racers = Object.values(w.players).filter(p => !p.spectator), age = w.phase === 'race' && !w.paused ? Math.min(.15, (now - this.received) / 1000) : 0;
     let ownPoint = this.sampleTrack(me.distance, w.course, me.x), ownDistance = me.distance;
     for (const part of this.parts) part.mesh.count = 0;
+    const live=new Set(racers.map(p=>p.id));for(const[id,hero]of this.protagonists)if(!live.has(id)){hero.dispose();this.scene.remove(hero.root);this.protagonists.delete(id);}
     racers.forEach((p, index) => {
       const target = p.distance + p.speed * age, s = this.smoothed.get(p.id) || { distance: target, x: p.x };
       if (Math.abs(s.distance - target) > 40 || w.phase === 'lobby') { s.distance = target; s.x = p.x; }
@@ -308,10 +311,15 @@ export class KartScene {
       const pt = this.sampleTrack(s.distance, w.course, s.x), jump = p.jump > 0 ? Math.sin(Math.PI * Math.min(1, p.jump / 1.3)) * 4.5 : 0;
       if (p.id === me.id) { ownPoint = pt; ownDistance = s.distance; }
       this.car.position.set(pt.x, pt.y + jump + .07 + (p.crash > 0 ? Math.abs(Math.sin(p.crash * 8)) * .55 : 0), pt.z); this.car.rotation.set(-Math.atan(pt.ty), Math.atan2(pt.tx, pt.tz) + p.steer * (p.drift ? .38 : .09) + (p.crash > 0 ? (2.4 - p.crash) * Math.PI * 3 : 0), -p.steer * .045); this.car.updateMatrix();
+      let hero=this.protagonists.get(p.id);
+      if(p.avatar.protagonist&&!hero){hero=new ProtagonistModel(true);this.protagonists.set(p.id,hero);this.scene.add(hero.root);}
+      if(hero){hero.set(p.avatar.protagonist);hero.root.position.copy(this.car.position);hero.root.rotation.copy(this.car.rotation);hero.update(dt,'Idle',reducedMotion);hero.root.visible=!!p.avatar.protagonist;}
       // During free run, compare physical positions on the circuit across laps.
       let gap = p.distance - me.distance;
       if (me.finish) { const length = this.getTrack(w.course).length; gap = ((gap + length / 2) % length + length) % length - length / 2; }
+      if(hero)hero.root.visible=!!p.avatar.protagonist&&(this.preview||p.id===me.id||gap>=-3);
       for (const part of this.parts) {
+        if(part.driver&&hero?.ready&&p.avatar.protagonist)continue;
         if (part.visible && !part.visible(p.avatar)) continue;
         const partIndex = part.mesh.count++;
         this.dummy.position.copy(part.offset); this.dummy.rotation.copy(part.rotation); this.dummy.scale.copy(part.scale);
@@ -345,12 +353,14 @@ export class KartScene {
     this.camera.lookAt(look);
     for (let i = 0; i < this.boxes.length; i++) { this.boxes[i].rotation.y = this.elapsed * 1.3; this.boxes[i].rotation.z = Math.sin(this.elapsed * 1.5 + i) * .16; }
     this.storybook?.update(dt,reducedMotion);this.atmosphere?.update(this.elapsed,new T.Vector3(ownPoint.x,0,ownPoint.z),reducedMotion);this.water?.update(this.elapsed);
+    this.canvas.dataset.protagonist=me.avatar.protagonist||'';this.canvas.dataset.protagonistReady=String(!!this.protagonists.get(me.id)?.ready);
     this.canvas.dataset.characterStyle=this.parts.some(p=>p.mesh.geometry.userData.storybookCharacter)?'blender-storybook':'loading';
     this.canvas.dataset.blenderModels=String(this.storybook?.ready?this.storybook.group.userData.models:0);this.canvas.dataset.blenderAnimations=String(this.storybook?.group.userData.animations||0);
     const sun=this.scene.children.find(o=>o instanceof T.DirectionalLight) as T.DirectionalLight|undefined;if(sun){sun.position.set(ownPoint.x-100,ownPoint.y+180,ownPoint.z+70);sun.target.position.set(ownPoint.x,ownPoint.y,ownPoint.z);sun.target.updateMatrixWorld();}
     this.particles.position.y = Math.sin(this.elapsed * .3) * 3; this.renderer.render(this.scene, this.camera);
   }
   dispose() {
+    for(const hero of this.protagonists.values())hero.dispose();this.protagonists.clear();
     this.storybook?.dispose();this.atmosphere?.dispose();
     this.canvas.removeEventListener('webglcontextlost', this.lost);
     const geometries = new Set<T.BufferGeometry>(), materials = new Set<T.Material>();

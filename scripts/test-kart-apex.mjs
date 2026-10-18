@@ -22,7 +22,7 @@ try {
   const hairParts=hair.createHairParts(), kartParts=karts.createKartParts();
   const expressions = await server.ssrLoadModule('/src/mini-games/gakuro-kart/expressionModels.ts');
   const expressionParts = expressions.createExpressionParts();
-  const signature = (parts,avatar)=>JSON.stringify(parts.filter(p=>!p.visible||p.visible(avatar)).map(p=>[p.position,p.scale,p.geometry.type]));
+  const signature = (parts,avatar)=>JSON.stringify(parts.filter(p=>!p.visible||p.visible(avatar)).map(p=>[p.position,p.scale,p.geometry.type,p.geometry.uuid]));
   assert.equal(new Set(Array.from({length:12},(_,hairStyle)=>signature(hairParts,{...avatars.defaultAvatar(),hairStyle}))).size,12);
   assert.equal(new Set(Array.from({length:8},(_,kart)=>signature(kartParts,{...avatars.defaultAvatar(),kart}))).size,8);
   assert(hairParts.every(p=>!p.visible({...avatars.defaultAvatar(),accessory:2})));

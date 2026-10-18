@@ -83,10 +83,10 @@
     min-height: 44px;
   }
   .rpg-root.rpg-root--compact:has(.rpg-camera-controls) .rpg-map-container > .rpg-compact-message {
-    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 250px));
+    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 298px));
   }
   .rpg-root.rpg-root--compact:has(.rpg-camera-stick) .rpg-map-container > .rpg-compact-message {
-    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 330px));
+    width: min(420px, calc(100% - var(--rpg-safe-left) - var(--rpg-safe-right) - 378px));
   }
   .rpg-root.rpg-root--compact .rpg-stick { width: 88px; height: 88px; min-height: 88px; }
   .rpg-root.rpg-root--compact:has(.rpg-voxel-dock) .rpg-map-actions {

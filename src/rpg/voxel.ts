@@ -1,3 +1,5 @@
+import {traceAdventureSprings,type SpringWater} from './adventureHydrology';
+import {adventureElevation,adventureRoadGrades} from './adventureTerrain';
 import {BUILDING_GOALS,buildingMeetsGoal,surveyBuildings,distributeBuildingGoalRewards} from './buildingGoals';
 import {originalRegion,ORIGINAL_WIDTH,ORIGINAL_HEIGHT} from './worldDimensions';
 import {landscapeGate} from './landscapeMap';
@@ -18,7 +20,19 @@ export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE
 export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
 export type VoxelAction=WorkshopAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
+const springCache=new WeakMap<World,{revision:number;cells:Map<string,SpringWater>}>();
+function springWater(w:World,x:number,z:number){
+ if(w.terrainStyle!==1||!w.terrainPeaks?.length)return null;
+ let cached=springCache.get(w);
+ if(!cached||cached.revision!==w.revision){
+  const edited=new Set(Object.keys(w.voxels?.edits||{}).map(k=>{const [x,,z]=k.split(',');return x+','+z;}));
+  const allowed=(x:number,z:number)=>x>1&&z>1&&x<WIDTH-2&&z<HEIGHT-2&&w.tiles[z*WIDTH+x]!=='road'&&!edited.has(x+','+z)&&!occupiedFarmTile(w,z*WIDTH+x)&&!occupiedCityTile(w,z*WIDTH+x)&&!w.sites.some(s=>s.kind!=='npc'&&Math.abs(s.x-x)+Math.abs(s.y-z)<4)&&!w.life.houses.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<4);
+  cached={revision:w.revision,cells:traceAdventureSprings(w.terrainPeaks,(x,z)=>terrainHeight(w,x,z),allowed)};springCache.set(w,cached);
+ }
+ return cached.cells.get(Math.floor(x)+','+Math.floor(z))||null;
+}
 export function voxelWater(w:World,x:number,z:number){
+ const spring=springWater(w,x,z);if(spring)return spring;
  if(!originalRegion(x,z)&&legacyRegion(x,z)&&waterProfile(x,z))return waterProfile(x,z);
  if(!legacyRegion(x,z))return waterProfile(x,z);
  x=Math.floor(x);z=Math.floor(z);if(w.tiles[z*WIDTH+x]!=='water')return null;
@@ -36,22 +50,29 @@ export function traceVoxel(w:World,origin:{x:number;y:number;z:number},direction
 }
 export function protectedVoxel(w:World,x:number,z:number){if(STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1))return true;if(!legacyRegion(x,z))return !landscapeRegion(x,z)||STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1);return x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedFarmTile(w,z*WIDTH+x)||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-z)<=1);}
 const heightCache=new Map<number,Int8Array>();
-const finalHeightCache=new WeakMap<World,{revision:number;heights:Int8Array;editedColumns:Set<string>;flat:Set<string>}>();
+const finalHeightCache=new WeakMap<World,{revision:number;heights:Int8Array;grades?:Uint8Array;editedColumns:Set<string>;flat:Set<string>}>();
 export function terrainHeight(w:World,x:number,z:number){
  if(!legacyRegion(x,z))return 0;
- let cache=finalHeightCache.get(w);if(!cache||cache.revision!==w.revision){cache={revision:w.revision,heights:new Int8Array(WIDTH*HEIGHT).fill(-128),editedColumns:new Set(Object.keys(w.voxels?.edits||{}).map(k=>{const [x,,z]=k.split(',');return `${x},${z}`;})),flat:new Set(w.voxels?.legacyFlat||[])};finalHeightCache.set(w,cache);}const cell=z*WIDTH+x;if(cache.heights[cell]!==-128)return cache.heights[cell];
+ let cache=finalHeightCache.get(w);if(!cache||cache.revision!==w.revision){cache={revision:w.revision,heights:new Int8Array(WIDTH*HEIGHT).fill(-128),grades:w.terrainStyle===1?adventureRoadGrades(w.tiles,WIDTH,HEIGHT):undefined,editedColumns:new Set(Object.keys(w.voxels?.edits||{}).map(k=>{const [x,,z]=k.split(',');return `${x},${z}`;})),flat:new Set(w.voxels?.legacyFlat||[])};finalHeightCache.set(w,cache);}const cell=z*WIDTH+x;if(cache.heights[cell]!==-128)return cache.heights[cell];
  const save=(h:number)=>(cache!.heights[cell]=h);
  if(cache.flat.has(`${x},${z}`))return save(0);
  if(!originalRegion(x,z)){let h=landscapeHeight(w.seed,x,z);for(const site of [...w.sites,...w.life.houses])h=Math.min(h,Math.max(0,Math.abs(site.x-x)+Math.abs(site.y-z)-2));return save(Math.min(h,Math.max(x-ORIGINAL_WIDTH,z-ORIGINAL_HEIGHT)));}
- if((protectedVoxel(w,x,z)&&!occupiedFarmTile(w,z*WIDTH+x))||w.tiles[z*WIDTH+x]==='road'||w.tiles[z*WIDTH+x]==='water'||w.voxels?.legacyFlat?.includes(`${x},${z}`))return save(0);
+ const foundation=w.terrainStyle===1?(x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>s.kind!=='npc'&&Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(s=>Math.abs(s.x-x)+Math.abs(s.y-z)<=1)):(protectedVoxel(w,x,z)&&!occupiedFarmTile(w,z*WIDTH+x));
+ if(foundation||w.tiles[z*WIDTH+x]==='road'||w.tiles[z*WIDTH+x]==='water'||w.voxels?.legacyFlat?.includes(`${x},${z}`))return save(0);
  // Existing flat-world constructions remain at their original height on upgrade.
  if(w.voxels&&!w.voxels.terrainVersion&&cache.editedColumns.has(`${x},${z}`))return save(0);
  let heights=heightCache.get(w.seed);if(!heights){if(heightCache.size>8)heightCache.clear();heights=new Int8Array(WIDTH*HEIGHT).fill(-1);heightCache.set(w.seed,heights);}const tile=z*WIDTH+x;
  if(heights[tile]<0){const phase=(w.seed%997)/97,wave=(Math.sin(x*.115+phase)+Math.cos(z*.13-phase)+Math.sin((x+z)*.075+phase)) / 6+.5;const amp=biomeWeights(x,z).reduce((sum,weight,i)=>sum+weight*[4,6,3,7,9,6][i],0);heights[tile]=Math.max(0,Math.floor((wave-.18)*amp));}
  let h=heights[tile];
- if(!cache.editedColumns.has(`${x},${z}`))h=Math.min(h,Math.max(0,Math.min(ORIGINAL_WIDTH-1-x,ORIGINAL_HEIGHT-1-z)));
- for(const s of [...w.sites,...w.life.houses])h=Math.min(h,Math.max(0,Math.abs(s.x-x)+Math.abs(s.y-z)-2));
- for(let d=1;d<=5&&h>0;d++)if([[x-d,z],[x+d,z],[x,z-d],[x,z+d]].some(([tx,tz])=>w.tiles[tz*WIDTH+tx]==='road'))h=Math.min(h,d-1);
+ if(w.terrainStyle===1)h=Math.max(h,Math.floor(adventureElevation(x,z,w.terrainPeaks)));
+ if(!cache.editedColumns.has(`${x},${z}`))h=Math.min(h,Math.max(0,w.terrainStyle===1?Math.min(x,z,ORIGINAL_WIDTH-1-x,ORIGINAL_HEIGHT-1-z)*3:Math.min(ORIGINAL_WIDTH-1-x,ORIGINAL_HEIGHT-1-z)));
+ for(const s of [...w.sites,...w.life.houses]){
+  if(w.terrainStyle===1&&'kind' in s&&s.kind==='npc')continue;
+  const distance=Math.max(0,Math.abs(s.x-x)+Math.abs(s.y-z)-2);
+  h=Math.min(h,distance*(w.terrainStyle===1?3:1));
+ }
+ if(cache.grades)h=Math.min(h,Math.max(0,cache.grades[tile]-1)*3);
+ else for(let d=1;d<=5&&h>0;d++)if([[x-d,z],[x+d,z],[x,z-d],[x,z+d]].some(([tx,tz])=>w.tiles[tz*WIDTH+tx]==='road'))h=Math.min(h,d-1);
  return save(h);
 }
 const oasisCache=new Map<number,{id:string;x:number;z:number;depth:number}[]>();
@@ -100,12 +121,14 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
  const h=terrainHeight(w,x,z),protectedCell=protectedVoxel(w,x,z);
  if(!originalRegion(x,z)){const pool=waterProfile(x,z);if(pool){const bed=pool.surface-pool.depth;if(roadAt(x,z)&&y===h-1)return 'plank';return y<bed?(y===bed-1?'gravel':'stone'):null;}}
  if(y<h){
-  if(w.tiles[z*WIDTH+x]==='water'){const bed=-(voxelWater(w,x,z)?.depth||1);return y<bed?(y===bed-1?'gravel':'stone'):null;}
+  const spring=springWater(w,x,z);
+  if(spring&&y===h-1){const root=vegetationAt(w,x,h,z);if(root&&(root.endsWith('wood')||['bamboo','reed','cactus'].includes(root)))return root;}
+  if(w.tiles[z*WIDTH+x]==='water'||spring){const pool=spring||voxelWater(w,x,z),bed=(pool?.surface||0)-(pool?.depth||1);return y<bed?(y===bed-1?'gravel':'stone'):null;}
   if(!protectedCell){const oasis=undergroundOasis(w,x,y,z);if(oasis){const radius=Math.hypot(x-oasis.x,z-oasis.z);if(y<=oasis.depth-2)return radius<4?'sand':'stone';return y===oasis.depth-1&&radius<3?'oasis-water':null;}
    // Winding caverns join the six oases without a second terrain simulation.
    if(y<=-4&&y>=-13&&Math.abs(Math.sin(x*.23+w.seed)+Math.cos(z*.21))<.24&&Math.abs(y-(-8+Math.round(Math.sin((x+z)*.09)*2)))<=1)return null;
   }
-  if(y===h-1)return biomeAt(x,z).id==='snow'?'snow':biomeAt(x,z).id==='desert'?'sand':'dirt';
+  if(y===h-1)return w.terrainStyle===1&&h>=34?'snow':w.terrainStyle===1&&h>=22?'stone':biomeAt(x,z).id==='snow'?'snow':biomeAt(x,z).id==='desert'?'sand':'dirt';
   if(y>=h-3)return 'dirt';
   const hash=(Math.imul(x+1,374761393)^Math.imul(z+1,668265263)^Math.imul(y+31,1274126177)^w.seed)>>>0;
   if(y<=-7&&hash%23<3)return 'steel';if(y<=-4&&hash%19<2)return 'crystal';if(hash%17<2)return 'ore';

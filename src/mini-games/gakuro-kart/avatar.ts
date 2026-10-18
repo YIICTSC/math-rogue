@@ -1,3 +1,4 @@
+import {isProtagonistId} from '../../three/protagonistCatalog';
 export const AVATAR_SPECIES = [
   { id: 'human', name: '人間', icon: '🧑' }, { id: 'cat', name: '猫', icon: '🐱' },
   { id: 'dog', name: '犬', icon: '🐶' }, { id: 'rabbit', name: 'ウサギ', icon: '🐰' },
@@ -16,12 +17,12 @@ export const HAIR_STYLES = ['ショート', 'ボブ', 'ロング', 'ポニーテ
 export const KART_SHAPES = ['スタンダード', 'フォーミュラ', 'バギー', 'スポーツカー', 'ロケット', 'ホバー', 'スクールバス', 'ピックアップ'] as const;
 export const EXPRESSIONS = ['ふつう', 'にっこり', '大笑い', '真剣', '怒り顔', 'びっくり', 'ウインク', 'ねむそう'] as const;
 export const EXPRESSION_ICONS = ['😐', '🙂', '😆', '😎', '😠', '😮', '😉', '😴'] as const;
-export interface KartAvatar { species: number; body: number; outfit: number; hair: number; accessory: number; hairStyle: number; kart: number; expression: number; faceShape?: number; faceStyle?: number; eyeStyle?: number; eyeColor?: number }
+export interface KartAvatar { protagonist?: string; species: number; body: number; outfit: number; hair: number; accessory: number; hairStyle: number; kart: number; expression: number; faceShape?: number; faceStyle?: number; eyeStyle?: number; eyeColor?: number }
 export const defaultAvatar = (index = 0): KartAvatar => ({ species: 0, body: 0, outfit: index % AVATAR_COLORS.length, hair: 0, accessory: 0, hairStyle: 0, kart: 0, expression: 0 });
 export function validAvatar(raw: unknown): raw is KartAvatar {
   if (!raw || typeof raw !== 'object') return false;
   const a = raw as KartAvatar;
-  return [[a.species, AVATAR_SPECIES.length], [a.body, BODY_COLORS.length], [a.outfit, AVATAR_COLORS.length], [a.hair, HAIR_COLORS.length], [a.accessory, ACCESSORIES.length], [a.hairStyle, HAIR_STYLES.length], [a.kart, KART_SHAPES.length], [a.expression, EXPRESSIONS.length], [a.faceShape ?? 0, FACE_SHAPES.length], [a.faceStyle ?? 0, FACE_STYLES.length], [a.eyeStyle ?? 0, EYE_STYLES.length], [a.eyeColor ?? 0, EYE_COLORS.length]].every(([v, limit]) => Number.isInteger(v) && v >= 0 && v < limit);
+  return (a.protagonist===undefined||isProtagonistId(a.protagonist)) && [[a.species, AVATAR_SPECIES.length], [a.body, BODY_COLORS.length], [a.outfit, AVATAR_COLORS.length], [a.hair, HAIR_COLORS.length], [a.accessory, ACCESSORIES.length], [a.hairStyle, HAIR_STYLES.length], [a.kart, KART_SHAPES.length], [a.expression, EXPRESSIONS.length], [a.faceShape ?? 0, FACE_SHAPES.length], [a.faceStyle ?? 0, FACE_STYLES.length], [a.eyeStyle ?? 0, EYE_STYLES.length], [a.eyeColor ?? 0, EYE_COLORS.length]].every(([v, limit]) => Number.isInteger(v) && v >= 0 && v < limit);
 }
 export function loadAvatar(): KartAvatar {
   try { const raw = JSON.parse(localStorage.getItem('gakuro-kart-avatar-v1') || 'null'); const a = raw && typeof raw === 'object' ? { ...defaultAvatar(), ...raw } : null; return validAvatar(a) ? a : defaultAvatar(); } catch { return defaultAvatar(); }

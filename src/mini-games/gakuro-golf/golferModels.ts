@@ -1,3 +1,4 @@
+import {ProtagonistModel} from '../../three/protagonistModel';
 import {characterGeometry} from '../../three/storybookCharacters';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import * as T from 'three';
@@ -49,9 +50,14 @@ export function createGolferAssets() {
     const shaft = add(club, cylinder, materials[1], [0, -.37, .27], [.025, .95, .025]); shaft.rotation.x = -.62;
     const clubHead = add(club, box, materials[1], [0, -.76, .56], [.31, .13, .17]);
     root.scale.setScalar(1.8);
+    const hero=new ProtagonistModel();hero.root.scale.setScalar(1.3);root.add(hero.root);
     let appearance=avatar,expressionOverride:number|undefined;
+    function animateHero(dt:number,swing:number){hero.update(dt);root.userData.protagonistReady=hero.ready;const ready=hero.ready;hero.root.visible=ready;for(const child of root.children)if(child!==hero.root&&child!==torso)child.visible=!ready;
+      for(const child of torso.children)if(child!==arms)child.visible=!ready;leftArm.visible=rightArm.visible=!ready;
+      if(ready){hero.pose('upper_arm.L',-.65,.50);hero.pose('upper_arm.R',-.65,-.50);hero.pose('forearm.L',-.45,.30);hero.pose('forearm.R',-.45,-.30);hero.pose('spine',.1,swing*.45);root.updateMatrixWorld(true);hero.grip(club);}
+    }
     function update(value: KartAvatar) {
-      appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
+      hero.set(value.protagonist);appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
       skin.color.set(BODY_COLORS[value.body]); shirt.color.set(AVATAR_COLORS[value.outfit]);
       const palette = { body: BODY_COLORS[value.body], outfit: AVATAR_COLORS[value.outfit], hair: HAIR_COLORS[value.hair], eyeColor: EYE_COLORS[value.eyeColor ?? 0] };
       for (const { mesh, key } of colored) (mesh.material as T.MeshStandardMaterial).color.set(palette[key]);
@@ -59,7 +65,7 @@ export function createGolferAssets() {
     }
     const setExpression=(expression?:number)=>{if(expressionOverride===expression)return;expressionOverride=expression;update(appearance);};
     update(avatar);
-    return { root, torso, arms, leftArm, rightArm, club, clubHead, update,setExpression, dispose: () => owned.forEach(m => m.dispose()) };
+    return { root, torso, arms, leftArm, rightArm, club, clubHead, update,setExpression,animateHero, dispose: () => {hero.dispose();owned.forEach(m => m.dispose());} };
   }
   return { create, dispose: () => { geometries.forEach(g => g.dispose()); sharedMaterials.forEach(m => m.dispose()); } };
 }

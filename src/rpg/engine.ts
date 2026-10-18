@@ -1,3 +1,4 @@
+import {planAdventurePeaks,type AdventurePeak} from './adventureTerrain';
 import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
 import type {BuildingGoalReward} from './buildingGoals';
 import {legacyRegion,landscapeEnvironment,STRUCTURES} from './worldLandscape';
@@ -76,6 +77,8 @@ export interface Site {
   enemyNamesByTheme?: Record<VisualThemeId, string>;
 }
 export interface NativeProfile {
+  magicProtagonistId?: string;
+  appearanceMode?: string;
   hp: number;
   maxHp: number;
   gold: number;
@@ -138,6 +141,9 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+  /** New games only; absent on existing saves to preserve all elevations. */
+  terrainStyle?:1;
+  terrainPeaks?:AdventurePeak[];
  buildingGoalRewards?:Record<string,BuildingGoalReward>;
  compactMapVersion?:1;
  expandedMapArchive?:{width:number;height:number;world:unknown};
@@ -251,6 +257,8 @@ export function validProfile(profile: NativeProfile): boolean {
     profile.gold >= 0 &&
     Number.isInteger(profile.deckSize) && profile.deckSize >= 0 &&
     (profile.deck === undefined || (Array.isArray(profile.deck) && profile.deck.length === profile.deckSize && profile.deck.length <= 500 && new Set(profile.deck.map(c=>c?.id)).size === profile.deck.length && profile.deck.every(c=>c && typeof c.id==='string' && typeof c.name==='string' && typeof c.description==='string' && Number.isFinite(c.cost)))) &&
+    (profile.magicProtagonistId===undefined||typeof profile.magicProtagonistId==="string") &&
+    (profile.appearanceMode===undefined||typeof profile.appearanceMode==="string") &&
     typeof profile.character === "string" &&
     typeof profile.image === "string" &&
     (profile.correctAnswers === undefined ||
@@ -602,6 +610,8 @@ export function createWorld(
     Math.min(180, Math.floor(Number.isFinite(timeLimitMinutes) ? timeLimitMinutes : 30)),
   );
   return {
+    terrainStyle: 1,
+    terrainPeaks: planAdventurePeaks(tiles,sites,WIDTH,HEIGHT),
     campaignVersion: 2,
     endingProgress: {},
     nativeMode: true,

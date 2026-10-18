@@ -164,6 +164,8 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             }
             if (p.id === id) { el.dataset.celebration = String(pose); el.dataset.reaction = mood; }
           } else {marker.rig.setExpression();if (p.id === id) { delete el.dataset.reaction; delete el.dataset.celebration; }}
+          marker.rig.animateHero(1/60,renderedSwing);
+          if(p.id===id||!current){el.dataset.protagonist=look.protagonist||'';el.dataset.protagonistReady=String(!!marker.rig.root.userData.protagonistReady);}
           marker.rig.clubHead.scale.set(selectedClub === 'putter' && p.id === id ? .42 : .31, .13, .17);
         }
         for (const [id, marker] of markers) if (!active.some(p => p.id === id)) marker.ball.visible = marker.shadow.visible = marker.rig.root.visible = false;

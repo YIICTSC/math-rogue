@@ -1,3 +1,8 @@
+import {ProtagonistModel} from '../three/protagonistModel';
+import {rpgProtagonist} from '../three/protagonistCatalog';
+import {AdventureNature} from './adventureNature';
+import {adventureSurface,adventureAvatar,adventureMasonry,adventureWater} from './adventureStyle';
+import {cameraBoom,AdventureQuality} from './adventureCamera';
 import CameraControls from './CameraControls';
 import {cameraDelta} from './cameraInput';
 import {residentAppearance,npcAppearance} from './town/wardrobe';
@@ -16,7 +21,7 @@ import {energyOf} from './energy';
 import {BLOCKS,voxelWater,traceVoxel,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
 import {MATERIAL_NAMES} from './life';
 import { StorybookModels, type Placement, type StorybookModel } from '../three/storybookModels';
-import { configureStorybook, paintedSurface, storybookWater } from '../three/storybookStyle';
+import { configureStorybook } from '../three/storybookStyle';
 import {storyForSite} from './stories';
 import { residentsOf } from "./town/residents";
 import { residentPosition } from "./town/worldResidents";
@@ -52,9 +57,11 @@ export interface SceneProps {
   onFacing: (n: number) => void;
   onUnavailable: () => void;
 }
-/** First-person presentation of the authoritative grid; never maintains a second simulation. */
+/** Adventure camera presentation of the authoritative grid; never maintains a second simulation. */
 export default function WorldScene3D(props: SceneProps) {
   const [slots,setSlots]=useState<Block[]>(()=>{try{const a=JSON.parse(localStorage.getItem('rpg-voxel-slots-v1')||'null');if(Array.isArray(a)&&a.length===4&&a.every(b=>BLOCKS.includes(b)))return a;}catch{}return ['wood','stone','dirt','plank'];}),[selectedSlot,setSelectedSlot]=useState(0),[editSlot,setEditSlot]=useState(false),[rotation,setRotation]=useState(0),[pitch,setPitch]=useState(-.18),[target,setTarget]=useState<{block:TerrainBlock;cost:number}|null>(null);
+  const [thirdPerson,setThirdPerson]=useState(true);
+  const thirdRef=useRef(thirdPerson);thirdRef.current=thirdPerson;
   const selected=slots[selectedSlot],building=!!props.onVoxelAction&&props.presentation!=='conversation';
   useEffect(()=>{try{localStorage.setItem('rpg-voxel-slots-v1',JSON.stringify(slots));}catch{}},[slots]);
   const buildRef=useRef({building,selected,pitch,rotation,panel:editSlot});buildRef.current={building,selected,pitch,rotation,panel:editSlot};
@@ -82,7 +89,7 @@ export default function WorldScene3D(props: SceneProps) {
     }
     const profile=configureStorybook(renderer,prefs.mapQuality);
     // Keep mobile auto detail inexpensive without lowering edge resolution to 1x.
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,prefs.mapQuality==='low'?1:prefs.mapQuality==='high'?2.5:2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,prefs.mapQuality==='high'?2:profile.pixelRatio));
     renderer.domElement.dataset.antialias='true';
     renderer.domElement.dataset.pixelRatio=String(renderer.getPixelRatio());
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -106,11 +113,13 @@ export default function WorldScene3D(props: SceneProps) {
     sun.shadow.camera.top = 18;
     sun.shadow.camera.bottom = -18;
     sun.shadow.bias = -0.002;
-    scene.add(sun, new THREE.HemisphereLight("#cdeaff", "#4d624d", 2));
+    const hemisphere=new THREE.HemisphereLight("#d5edff", "#6b7457", 1.65);
+    scene.add(sun,hemisphere);
     const voxelGeometry=new THREE.BoxGeometry(1,1,1);
     const voxelGroup=new THREE.Group();scene.add(voxelGroup);
     const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top'];
-    const voxelMaterials=renderBlocks.map(voxelMaterial);
+    const windClock={value:0};
+    const voxelMaterials=renderBlocks.map(b=>adventureSurface(voxelMaterial(b),['leaves','frostleaves','bush','fruit'].includes(b),windClock));
     for(const material of voxelMaterials)if(material.map){material.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());material.map.needsUpdate=true;}
     const construction=createConstructionGeometry(()=>{key="";});
     const lamp=new THREE.PointLight('#ffdfa5',0,12,1.5),oasisLight=new THREE.PointLight('#6cf1d7',0,14,1.5);scene.add(lamp,oasisLight);
@@ -123,8 +132,8 @@ export default function WorldScene3D(props: SceneProps) {
     scene.add(terrain, actors);
     let placements:Placement[]=[];
     const models=new StorybookModels(scene,()=>{key='';});
-    const landscape=new LandscapeScene(scene,prefs.mapQuality,construction,b=>voxelMaterials[renderBlocks.indexOf(b)]);
-    const animatedWater=storybookWater();
+    const landscape=new LandscapeScene(scene,profile.low?'low':'high',construction,b=>voxelMaterials[renderBlocks.indexOf(b)]);
+    const animatedWater=adventureWater();
     const geometries: THREE.BufferGeometry[] = [],
       materials: THREE.Material[] = [],
       textures: THREE.Texture[] = [];
@@ -140,7 +149,7 @@ export default function WorldScene3D(props: SceneProps) {
         emissiveIntensity: 0.65,
       });
       materials.push(m);
-      return m;
+      return adventureSurface(m);
     };
     const skyMaterial = new THREE.ShaderMaterial({
       side: THREE.BackSide,
@@ -152,11 +161,11 @@ export default function WorldScene3D(props: SceneProps) {
       vertexShader:
         "varying vec3 v;void main(){v=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
       fragmentShader:
-        "varying vec3 v;uniform vec3 tone;uniform float dark;void main(){float h=clamp(normalize(v).y*.7+.3,0.,1.);vec3 c=mix(tone+vec3(.12,.10,.07),tone*vec3(.65,.85,1.05),h);gl_FragColor=vec4(c*dark,1.);}",
+        "varying vec3 v;uniform vec3 tone;uniform float dark;void main(){float h=clamp(normalize(v).y*.7+.3,0.,1.);vec3 c=mix(tone+vec3(.12,.10,.07),tone*vec3(.65,.85,1.05),h);vec3 n=normalize(v);float disk=pow(max(0.,dot(n,normalize(vec3(-.4,.65,.45)))),700.);float halo=pow(max(0.,dot(n,normalize(vec3(-.4,.65,.45)))),14.);float star=step(.9985,fract(sin(dot(floor(n*450.),vec3(127.1,311.7,74.7)))*43758.5453))*step(.08,n.y);c=c*dark+vec3(1.,.84,.54)*(disk*.7+halo*.08)*dark+vec3(.75,.85,1.)*star*(1.-smoothstep(.45,.7,dark));gl_FragColor=vec4(c,1.);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}",
     });
     materials.push(skyMaterial);
     const skyDome = new THREE.Mesh(
-      geo(new THREE.SphereGeometry(1150, 24, 12)),
+      geo(new THREE.SphereGeometry(280, 24, 12)),
       skyMaterial,
     );
     scene.add(skyDome);
@@ -171,7 +180,7 @@ export default function WorldScene3D(props: SceneProps) {
       leaf = mat("#315c44"),
       snow = mat("#d5e9ed"),
       roof = mat("#8e5145"),
-      wall = mat("#dbcea8"),
+      wall = adventureMasonry(mat("#dbcea8")),
       windowMaterial = mat("#fbe6a0", 0.25, "#edb86b"),
       door = mat("#3a3431"),
       soil = mat("#694830"),
@@ -340,6 +349,7 @@ export default function WorldScene3D(props: SceneProps) {
       parent.add(o);
       return o;
     }
+    const buildingColliders:THREE.Box3[]=[];
     function house(
       parent: THREE.Group,
       x: number,
@@ -348,16 +358,36 @@ export default function WorldScene3D(props: SceneProps) {
       tile?: { x: number; y: number },
     ) {
       const first=parent.children.length;
-      const height=3.2*tall,depth=3,width=3;
+      const height=3.2*tall,depth=tall>1?4:3,width=tall>1?5:3;
       mesh(parent,box,wall,x-width/2+.15,height/2,z,.3,height,depth);
       mesh(parent,box,wall,x+width/2-.15,height/2,z,.3,height,depth);
       mesh(parent,box,wall,x,height/2,z-depth/2,width,height,.3);
       // The entry tile lies in a 1.4m opening beneath a 2.4m lintel.
-      for(const side of [-1,1])mesh(parent,box,wall,x+side*1.1,height/2,z+.35,.8,height,.3);
+      for(const side of [-1,1])mesh(parent,box,wall,x+side*(width+1.4)/4,height/2,z+.35,(width-1.4)/2,height,.3);
       mesh(parent,box,wall,x,(height+2.4)/2,z+.35,1.4,height-2.4,.3);
-      const cap=mesh(parent,cone,roof,x,height+.55,z,2.25,1.25,2.25);cap.rotation.y=Math.PI/4;
-      for(const side of [-1,1])mesh(parent,box,windowMaterial,x+side*1.51,1.8,z-.4,.03,.9,.8);
-      if(tile)for(const child of parent.children.slice(first))child.userData.tile=tile;
+      const cap=mesh(parent,cone,roof,x,height+.55,z,width*.75,1.25,depth*.75);cap.rotation.y=Math.PI/4;
+      for(const side of [-1,1])mesh(parent,box,windowMaterial,x+side*(width/2+.01),1.8,z-.4,.03,.9,.8);
+      // Warm timber frame, projecting eaves, planters and a chimney; doorway remains open.
+      for(const side of [-1,1]){
+        mesh(parent,box,wood,x+side*(width/2-.12),height/2,z+.53,.16,height,.18);
+        mesh(parent,box,wood,x+side*1.06,1.35,z+.54,.7,.12,.18);
+        mesh(parent,box,wood,x+side*1.06,.9,z+.64,.68,.18,.45);
+        mesh(parent,foliage,leaf,x+side*1.06,1.06,z+.64,.32,.13,.2);
+      }
+      mesh(parent,box,wood,x,height-.1,z+.52,width+.2,.18,.2);
+      mesh(parent,box,stone,x-.8,height+.7,z-.6,.45,1.7,.45);
+      mesh(parent,box,wall,x-.8,height+1.58,z-.6,.57,.14,.57);
+      mesh(parent,box,wood,x+.8,2.8,z+.75,.6,.45,.08);
+      mesh(parent,box,gold,x+.8,2.8,z+.8,.32,.08,.03);
+      if(tall>1){
+        for(const y of [3.5,5.5])for(const side of [-1,1]){mesh(parent,box,wood,x+side*1.55,y,z+.53,.9,1.3,.16);mesh(parent,box,windowMaterial,x+side*1.55,y,z+.63,.62,.95,.08);}
+        for(const side of [-1,1]){
+          mesh(parent,box,stone,x+side*(width/2-.4),height*.65,z-.8,.8,height*1.3,.8);
+          mesh(parent,cone,roof,x+side*(width/2-.4),height*1.3+.55,z-.8,.75,1.3,.75);
+          for(const offset of [-.28,.28])mesh(parent,box,wall,x+side*(width/2-.4)+offset,height*1.27,z-.4,.2,.4,.25);
+        }
+      }
+      for(const child of parent.children.slice(first)){if(tile)child.userData.tile=tile;if(child instanceof THREE.Mesh){child.updateMatrixWorld(true);buildingColliders.push(new THREE.Box3().setFromObject(child));}}
     }
 
     function tree(x: number, z: number, biome: string) {
@@ -397,6 +427,12 @@ export default function WorldScene3D(props: SceneProps) {
       lastTime = -1,
       resourceStamp = "",
       farmStamp = "";
+    const avatar=adventureAvatar();scene.add(avatar.root);
+    const protagonist=new ProtagonistModel();scene.add(protagonist.root);
+    const remoteHeroes=new Map<string,{hero:ProtagonistModel;position:THREE.Vector3}>();let attackUntil=0;
+    const nature=new AdventureNature(scene,profile.low);
+    const previousActor=new THREE.Vector3();let boomLength=0,orbitZoom=1;
+    const adaptive=new AdventureQuality();const baseRatio=renderer.getPixelRatio();
     let groundMaterial: THREE.Material | undefined;
     const batches: THREE.InstancedMesh[] = [];
     let key = "",
@@ -407,11 +443,11 @@ export default function WorldScene3D(props: SceneProps) {
     const p = props.world.players[props.selfId];
     camera.position.set(p?.position3D?.x??(p?.x || 0) + 0.5, (p?playerHeight(props.world,p):0)+EYE_HEIGHT, p?.position3D?.z??(p?.y || 0) + 0.5);
     function rebuild(w: World, x: number, y: number) {
-      landscape.setDetailRegion(x,y,options.current.mapQuality === "low" ? 12 : 19);
+      landscape.setDetailRegion(x,y,profile.low ? 12 : 19);
       batches.splice(0).forEach((b) => b.dispose());
-      terrain.clear();placements=[];voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGroup.clear();
+      terrain.clear();placements=[];buildingColliders.length=0;voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGroup.clear();
       const blocks=renderBlocks.map(()=>[] as {x:number;y:number;z:number}[]),cache=new Map<string,TerrainBlock|null>();
-      const vr=options.current.mapQuality==='low'?12:19;
+      const vr=profile.low?12:19;
       const editedTops=new Map<string,number>();for(const [k,b]of Object.entries(w.voxels?.edits||{})){if(!b)continue;const [ex,ey,ez]=k.split(',').map(Number),col=ex+','+ez;editedTops.set(col,Math.max(editedTops.get(col)||0,ey));}
       const get=(bx:number,by:number,bz:number)=>{const k=`${bx},${by},${bz}`;if(!cache.has(k))cache.set(k,blockAt(w,bx,by,bz));return cache.get(k)!;};
       for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=Math.max(terrainHeight(w,vx,vz)+4,editedTops.get(vx+','+vz)||0);vy++){
@@ -422,7 +458,7 @@ export default function WorldScene3D(props: SceneProps) {
       }
       blocks.forEach((positions,i)=>{if(!positions.length)return;const m=new THREE.InstancedMesh(construction.get(renderBlocks[i]),voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>{matrix.makeRotationY((w.voxels?.rotations?.[`${v.x},${v.y},${v.z}`]||0)*Math.PI/2);matrix.setPosition(v.x+.5,v.y+.5,v.z+.5);if(renderBlocks[i]==='door'||renderBlocks[i]==='door-top'){const y=renderBlocks[i]==='door-top'?v.y-1:v.y;const alongX=solid(get(v.x-1,y,v.z))||solid(get(v.x+1,y,v.z));matrix.scale(new THREE.Vector3(alongX?1:.16,1,alongX?.16:1));}m.setMatrixAt(j,matrix);});m.userData.voxels=positions;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
       groundMaterial?.dispose();
-      const radius = options.current.mapQuality === "low" ? 12 : 19,
+      const radius = profile.low ? 12 : 19,
         cells: { x: number; y: number; tile: string }[] = [];
       for (
         let ty = Math.max(0, y - radius);
@@ -437,7 +473,7 @@ export default function WorldScene3D(props: SceneProps) {
           cells.push({ x: tx, y: ty, tile: w.tiles[ty * WIDTH + tx] });
       const ground = new THREE.InstancedMesh(
         box,
-        paintedSurface(new THREE.MeshStandardMaterial({ roughness: 1 })),
+        adventureSurface(new THREE.MeshStandardMaterial({ roughness: .92 })),
         cells.length,
       );
       groundMaterial = ground.material as THREE.Material;
@@ -448,7 +484,7 @@ export default function WorldScene3D(props: SceneProps) {
       cells.forEach(({ x: tx, y: ty, tile }, i) => {
         dummy.position.set(
           tx + 0.5,
-          tile === "water" ? (voxelWater(w,tx,ty)?.surface||0)-(voxelWater(w,tx,ty)?.depth||1)+.025 : solid(blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty))?terrainHeight(w,tx,ty)-.06:-100,
+          tile === "water" ? (voxelWater(w,tx,ty)?.surface||0)-(voxelWater(w,tx,ty)?.depth||1)+.025 : solid(blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty))?terrainHeight(w,tx,ty)-.044:-100,
           ty + 0.5,
         );
         dummy.scale.set(1, 0.1, 1);
@@ -465,6 +501,7 @@ export default function WorldScene3D(props: SceneProps) {
                   ? "#8d8c91"
                   : biomeSurface(tx, ty).color,
         );
+        if(w.terrainStyle===1){const height=terrainHeight(w,tx,ty);if(height>=34)color.set('#e3edf0');else if(height>=22)color.lerp(new THREE.Color('#99a48f'),.75);}
         color.multiplyScalar(1.04);
         ground.setColorAt(i, color);
         if (
@@ -478,6 +515,11 @@ export default function WorldScene3D(props: SceneProps) {
             (w.life.nodes[ty * WIDTH + tx]?.regrowAt || 0) > w.life.time;
         if (tile === "water" || voxelWater(w,tx,ty)) {
           mesh(terrain, box, water, tx + 0.5, (voxelWater(w,tx,ty)?.surface||0)-0.015, ty + 0.5, 1, 0.025, 1);
+          const pool=voxelWater(w,tx,ty);
+          if(pool?.kind==='waterfall'){
+            const dx=Math.sign(pool.flowX),dz=Math.sign(pool.flowZ),next=voxelWater(w,tx+dx,ty+dz);
+            if(next&&next.surface<pool.surface)mesh(terrain,box,water,tx+.5+dx*.5,(pool.surface+next.surface)/2-.015,ty+.5+dz*.5,dx?.04:1,pool.surface-next.surface,dz?.04:1);
+          }
         } else if (tile === "forest" && !removed && (!natureAt(w,ty*WIDTH+tx) || protectedVoxel(w,tx,ty))) {
           if (node?.rock) {
             placements.push({model:'rock',x:tx+.5,z:ty+.5,scale:.8,tile:{x:tx,y:ty}});if(models.ready)return;
@@ -528,7 +570,7 @@ export default function WorldScene3D(props: SceneProps) {
             Math.abs(s.x - x) + Math.abs(s.y - y) <= 4),
       )) {
         if (["town", "boss", "dungeon"].includes(s.kind)) {
-          if(s.kind==='boss'){placements.push({model:'tower',x:s.x+.5,z:s.y+.5,scale:1.2,tile:s});if(!models.ready)house(terrain,s.x+.5,s.y-.4,2,s);}
+          if(s.kind==='boss'){house(terrain,s.x+.5,s.y-.4,2.5,s);}
           else house(terrain, s.x + 0.5, s.y - 0.4, 1, s);
           placements.push({model:'lantern',x:s.x-.1,z:s.y+1.1,scale:.65});
           if (s.kind === "dungeon" || s.kind === "guardian") {
@@ -647,8 +689,15 @@ export default function WorldScene3D(props: SceneProps) {
         terrain.add(batch);
       }
     }
+    const npcRigs=new Map<string,{rig:ReturnType<typeof adventureAvatar>;target:THREE.Vector3;active:boolean}>();
+    function residentModel(id:string,x:number,z:number){
+      let npc=npcRigs.get(id);const target=new THREE.Vector3(x,terrainHeight(latest.current.world,Math.floor(x),Math.floor(z)),z);
+      if(!npc){const seed=[...id].reduce((n,c)=>n+c.charCodeAt(0),0),rig=adventureAvatar(seed);rig.root.position.copy(target);rig.root.rotation.y=(seed%8)*Math.PI/4;npc={rig,target,active:true};npcRigs.set(id,npc);}
+      npc.target.copy(target);npc.active=true;actors.add(npc.rig.root);
+    }
     function updateActors(w: World) {
-      const radius = options.current.mapQuality === "low" ? 12 : 19;
+      for(const npc of npcRigs.values())npc.active=false;
+      const radius = profile.low ? 12 : 19;
       actors.clear();
       for (const site of w.sites)
         if (
@@ -657,11 +706,17 @@ export default function WorldScene3D(props: SceneProps) {
           Math.abs(site.x - w.players[latest.current.selfId].x) < radius &&
           Math.abs(site.y - w.players[latest.current.selfId].y) < radius
         )
-          siteBillboard(site, actors);
+        {
+          const portrait=getRoamingNpcEvent(site.npcEventId)?.portrait;
+          if(portrait&&npcAppearance(w,portrait)!==portrait)siteBillboard(site,actors);
+          else residentModel(site.id,site.x+.5,site.y+.5);
+        }
       for (const r of residentsOf(w)) {
         const pos = residentPosition(w, r.id);
         if (pos.siteId || latest.current.hiddenActors?.includes(r.id)) continue;
+        if(Math.hypot(pos.x-(w.players[latest.current.selfId].position3D?.x??w.players[latest.current.selfId].x),pos.y-(w.players[latest.current.selfId].position3D?.z??w.players[latest.current.selfId].y))>radius)continue;
         const custom = w.town?.customResidents?.find((v) => v.id === r.id);
+        if(!custom&&!w.town?.people[r.id]?.wearing){residentModel(r.id,pos.x+.5,pos.y+.5);continue;}
         billboard(
           actors,
           assetUrl(custom?.hero?.frames.idle[0] || residentAppearance(w,r.id,r.portrait)),
@@ -714,12 +769,22 @@ export default function WorldScene3D(props: SceneProps) {
           else mesh(actors, cone, gold, a.position3D?.x??a.x + 0.5, playerHeight(w,a)+.5, a.position3D?.z??a.y + 0.5, 0.2, 1, 0.2);
         }
     }
+    const distantBuildings=new THREE.Group();scene.add(distantBuildings);
+    for(const site of props.world.sites.filter(s=>s.kind==='town'||s.kind==='boss')){
+      const group=new THREE.Group(),h=site.kind==='boss'?8:3.2;group.userData.site=site;
+      mesh(group,box,site.kind==='boss'?stone:wall,site.x+.5,h/2,site.y-.4,3,h,3);
+      mesh(group,cone,roof,site.x+.5,h+.6,site.y-.4,2.2,1.3,2.2);
+      if(site.kind==='boss')for(const dx of [-1.15,1.15]){mesh(group,box,stone,site.x+.5+dx,h*.65,site.y-1.2,.8,h*1.3,.8);mesh(group,cone,roof,site.x+.5+dx,h*1.3+.55,site.y-1.2,.75,1.3,.75);}
+      distantBuildings.add(group);
+    }
     const resize = () => {
       const r = element.getBoundingClientRect();
       renderer.setSize(Math.max(1, r.width), Math.max(1, r.height));
       camera.aspect = r.width / Math.max(1, r.height);
       camera.updateProjectionMatrix();
     };
+    const wheelZoom=(e:WheelEvent)=>{if(!thirdRef.current||buildRef.current.panel)return;e.preventDefault();orbitZoom=Math.max(.65,Math.min(1.6,orbitZoom*Math.exp(-e.deltaY*.001)));};
+    renderer.domElement.addEventListener('wheel',wheelZoom,{passive:false});
     const observer = new ResizeObserver(resize);
     observer.observe(element);
     resize();
@@ -727,13 +792,21 @@ export default function WorldScene3D(props: SceneProps) {
       pointer = new THREE.Vector2(),
       plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
       hit = new THREE.Vector3();
+    function buildHit(w:World){
+      ray.setFromCamera(new THREE.Vector2(0,0),camera);
+      if(!thirdRef.current)return traceVoxel(w,ray.ray.origin,ray.ray.direction);
+      const a=w.players[latest.current.selfId],eye=new THREE.Vector3(a.position3D?.x??a.x+.5,playerHeight(w,a)+EYE_HEIGHT,a.position3D?.z??a.y+.5);
+      const visible=traceVoxel(w,ray.ray.origin,ray.ray.direction,12);
+      const point=visible?ray.ray.at(visible.distance+.01,new THREE.Vector3()):ray.ray.at(12,new THREE.Vector3());
+      return traceVoxel(w,eye,point.sub(eye).normalize());
+    }
     function performBuild(kind:'voxel-break'|'voxel-place'='voxel-break') {
       if(buildRef.current.panel)return;
       const current=latest.current.world.players[latest.current.selfId];
       if(energyOf(current.life)<(kind==='voxel-place'?.1:.02)){latest.current.onEnergyRequest?.();return;}
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
-      const h=traceVoxel(latest.current.world,ray.ray.origin,ray.ray.direction);
-      if(h){if(kind==='voxel-break'&&Number.isFinite(miningCost(h.block,current))&&energyOf(current.life)<miningCost(h.block,current)){latest.current.onEnergyRequest?.();return;}latest.current.onVoxelAction?.({type:kind,x:h.x+(kind==='voxel-place'?h.normal.x:0),y:h.y+(kind==='voxel-place'?h.normal.y:0),z:h.z+(kind==='voxel-place'?h.normal.z:0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
+      const h=buildHit(latest.current.world);
+      if(h){attackUntil=performance.now()+700;if(kind==='voxel-break'&&Number.isFinite(miningCost(h.block,current))&&energyOf(current.life)<miningCost(h.block,current)){latest.current.onEnergyRequest?.();return;}latest.current.onVoxelAction?.({type:kind,x:h.x+(kind==='voxel-place'?h.normal.x:0),y:h.y+(kind==='voxel-place'?h.normal.y:0),z:h.z+(kind==='voxel-place'?h.normal.z:0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
 
     }
     const vertical=(e:KeyboardEvent)=>{if(e.code==='Space'&&!e.repeat&&!buildRef.current.panel&&!document.activeElement?.closest('input,textarea,[role=dialog]')){e.preventDefault();latest.current.onVoxelAction?.({type:'voxel-jump'});}if(e.code==='KeyC'&&!e.repeat&&!buildRef.current.panel&&!document.activeElement?.closest('input,textarea,[role=dialog]'))latest.current.onVoxelAction?.({type:'voxel-dive'});};
@@ -794,6 +867,7 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.dataset.facing = String(latest.current.facing);renderer.domElement.dataset.voxelBlocks=String(voxelGroup.children.reduce((n,o)=>n+(o instanceof THREE.InstancedMesh?o.count:0),0));
       const w: World = latest.current.world,
         a = w.players[latest.current.selfId];
+      const dt = Math.min(0.1, (time - last) / 1000 || 0.016);
       if (a) {
         if (
           w !== lastWorld ||
@@ -849,19 +923,39 @@ export default function WorldScene3D(props: SceneProps) {
         if (nextActors !== actorKey) {
           actorKey = nextActors;
           updateActors(w);
+          for(const [id,npc]of npcRigs)if(!npc.active){npc.rig.dispose();npcRigs.delete(id);}
         }
-        const dt = Math.min(0.1, (time - last) / 1000 || 0.016),
-          smooth = options.current.reducedMotion ? 1 : 1 - Math.exp(-dt * 12);
-        camera.position.x += ((a.position3D?.x??a.x + 0.5) - camera.position.x) * smooth;
-        camera.position.y += (playerHeight(w,a)+EYE_HEIGHT-camera.position.y)*smooth;
-        camera.position.z += ((a.position3D?.z??a.y + 0.5) - camera.position.z) * smooth;
+        const smooth = options.current.reducedMotion ? 1 : 1 - Math.exp(-dt * 12);
+        const third=thirdRef.current&&latest.current.presentation!=='conversation';
+        const focus=new THREE.Vector3(a.position3D?.x??a.x+.5,playerHeight(w,a)+EYE_HEIGHT+(third?.45:0),a.position3D?.z??a.y+.5);
         yaw += shortestTurn(yaw, compassAngle(latest.current.facing)) * smooth;
         viewPitch+=(buildRef.current.pitch-viewPitch)*smooth;
-        camera.lookAt(
-          camera.position.x + Math.sin(yaw),
-          camera.position.y+Math.tan(viewPitch),
-          camera.position.z - Math.cos(yaw),
-        );
+        const direction=new THREE.Vector3(Math.sin(yaw)*Math.cos(viewPitch),Math.sin(viewPitch),-Math.cos(yaw)*Math.cos(viewPitch));
+        const desired=third?5.2/(options.current.zoom*orbitZoom):0;
+        const boom=direction.clone().negate();
+        const allowed=third?cameraBoom(w,focus,boom,desired,buildingColliders):0;
+        // Retract immediately; recover gently when the obstruction clears.
+        boomLength=allowed<boomLength?allowed:boomLength+(allowed-boomLength)*smooth;
+        const destination=focus.clone().addScaledVector(boom,boomLength);
+        if(camera.position.distanceTo(destination)>12)camera.position.copy(destination);
+        else camera.position.lerp(destination,smooth);
+        // Sweep the smoothed location too: lateral orbit must not cut a wall corner.
+        const swept=camera.position.clone().sub(focus),length=swept.length();
+        if(length>.001){swept.divideScalar(length);camera.position.copy(focus).addScaledVector(swept,cameraBoom(w,focus,swept,length,buildingColliders));}
+        camera.lookAt(camera.position.clone().add(direction));
+        const speed=previousActor.distanceTo(focus)/Math.max(dt,.001);
+        avatar.root.position.set(focus.x,playerHeight(w,a),focus.z);
+        if(speed>30||previousActor.lengthSq()===0)avatar.root.rotation.y=Math.atan2(direction.x,direction.z);
+        else if(speed>.1)avatar.root.rotation.y+=shortestTurn(avatar.root.rotation.y,Math.atan2(focus.x-previousActor.x,focus.z-previousActor.z))*smooth;
+        avatar.root.visible=third&&camera.position.distanceTo(focus)>1.6&&!a.life?.indoors;
+        avatar.update(time/1000,Math.min(1,speed),!!a.position3D?.vy,options.current.reducedMotion);
+        protagonist.set(rpgProtagonist(a.profile,!!a.hero));protagonist.root.position.copy(avatar.root.position);protagonist.root.rotation.copy(avatar.root.rotation);
+        protagonist.update(dt,time<attackUntil?'Attack':a.position3D?.vy?'Jump':speed>.1?'Walk':'Idle',options.current.reducedMotion);
+        protagonist.root.visible=avatar.root.visible&&protagonist.ready;if(protagonist.ready)avatar.root.visible=false;
+        renderer.domElement.dataset.protagonist=protagonist.root.userData.protagonist||'';renderer.domElement.dataset.protagonistReady=String(protagonist.ready);
+        previousActor.copy(focus);
+        renderer.domElement.dataset.cameraMode=third?'third-person':'first-person';
+        renderer.domElement.dataset.cameraDistance=String(camera.position.distanceTo(focus));
         const b = a.position3D&&!legacyRegion(a.position3D.x,a.position3D.z)?landscapeEnvironment(w.seed,a.position3D.x,a.position3D.z).biome:biomeAt(a.x,a.y).id;
         const sky =
           b === "ruins"
@@ -873,6 +967,12 @@ export default function WorldScene3D(props: SceneProps) {
                 : "#9acbd6";
         scene.background = new THREE.Color(sky);
         (scene.fog as THREE.FogExp2).color.set(sky);
+      }
+      for(const npc of npcRigs.values()){
+        const dt=Math.min(.1,(time-last)/1000||.016),delta=npc.target.clone().sub(npc.rig.root.position),speed=delta.length();
+        if(speed>8)npc.rig.root.position.copy(npc.target);else npc.rig.root.position.lerp(npc.target,options.current.reducedMotion?1:1-Math.exp(-dt*9));
+        if(speed>.025)npc.rig.root.rotation.y+=shortestTurn(npc.rig.root.rotation.y,Math.atan2(delta.x,delta.z))*(1-Math.exp(-dt*8));
+        npc.rig.update(time/1000,Math.min(1,speed*3),false,options.current.reducedMotion);
       }
       // Sprites face the camera automatically; preserve the source proportions after loading.
       for (const group of [terrain, actors])
@@ -912,26 +1012,42 @@ export default function WorldScene3D(props: SceneProps) {
       skyDome.position.copy(camera.position);
       const phase = calendar(w).phase;
       const exterior=!legacyRegion(camera.position.x,camera.position.z),pool=voxelWater(w,camera.position.x,camera.position.z),underwater=!!pool&&camera.position.y<pool.surface;
-      (scene.fog as THREE.FogExp2).density=underwater?.11:camera.position.y>170?.0035:options.current.mapQuality==='low'?.003:.0018;
+      (scene.fog as THREE.FogExp2).density=underwater?.11:camera.position.y>170?.0035:profile.low?.003:.0018;
       if(underwater){scene.background=new THREE.Color('#28748b');(scene.fog as THREE.FogExp2).color.set('#28748b');}
-      landscape.update(w,camera.position,time/1000,phase===3,options.current.reducedMotion);
+      const nearby=new Set<string>();for(const other of Object.values(w.players)){if(other.id===latest.current.selfId||other.spectator||other.life?.indoors)continue;const id=rpgProtagonist(other.profile,!!other.hero);if(!id)continue;const x=other.position3D?.x??other.x+.5,z=other.position3D?.z??other.y+.5;if(Math.hypot(x-avatar.root.position.x,z-avatar.root.position.z)>26)continue;
+        nearby.add(other.id);let entry=remoteHeroes.get(other.id);if(!entry){const hero=new ProtagonistModel();entry={hero,position:new THREE.Vector3(x,playerHeight(w,other),z)};remoteHeroes.set(other.id,entry);scene.add(hero.root);}entry.hero.set(id);const point=new THREE.Vector3(x,playerHeight(w,other),z),movement=point.clone().sub(entry.position);if(movement.lengthSq()>.0001)entry.hero.root.rotation.y=Math.atan2(movement.x,movement.z);entry.hero.root.position.copy(point);entry.hero.update(dt,other.position3D?.vy?'Jump':movement.lengthSq()>.0001?'Walk':'Idle',options.current.reducedMotion);entry.position.copy(point);
+      }
+      for(const[id,entry]of remoteHeroes)if(!nearby.has(id)){entry.hero.dispose();scene.remove(entry.hero.root);remoteHeroes.delete(id);}
+      for(const actor of actors.children)if(actor.userData.player)actor.visible=!remoteHeroes.get(actor.userData.player)?.hero.ready;
+      landscape.update(w,avatar.root.position,time/1000,phase===3,options.current.reducedMotion);
+      nature.update(w,avatar.root.position,time/1000,options.current.reducedMotion,phase===3);
+      const detailRadius=profile.low?12:19;
+      for(const g of distantBuildings.children){const s=g.userData.site,dx=Math.abs(s.x-avatar.root.position.x),dz=Math.abs(s.y-avatar.root.position.z);g.visible=(dx>=detailRadius||dz>=detailRadius)&&Math.hypot(dx,dz)<170;}
       ambience?.update(camera.position.y,underwater||!!pool,landscape.group.userData.stats.weather==='rain');
       renderer.domElement.dataset.landscape=JSON.stringify(landscape.group.userData.stats);renderer.domElement.dataset.underwater=String(underwater);
       const underground=!underwater&&camera.position.y<terrainHeight(w,Math.floor(camera.position.x),Math.floor(camera.position.z))-.5;lamp.position.copy(camera.position);lamp.intensity=underground?3:0;const nearest=oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);oasisLight.position.set(nearest.x,nearest.depth+1,nearest.z);oasisLight.intensity=underground?2.5:0;
+      if(!underwater){const haze=(scene.fog as THREE.FogExp2).color;haze.lerp(new THREE.Color(phase===3?'#354863':phase===2?'#dca88d':skyMaterial.uniforms.tone.value),phase===3?.7:phase===2?.35:0);}
       const brightness = underground?.1:phase === 3 ? 0.48 : phase === 2 ? 0.8 : 1;
       skyMaterial.uniforms.dark.value = brightness;
       skyMaterial.uniforms.tone.value.copy((scene.fog as THREE.FogExp2).color);
-      sun.intensity = underground?.08:phase === 3 ? 0.5 : 2.1;
+      sun.intensity = underground?.08:phase === 3 ? .35 : phase===2?1.6:2.1;
+      sun.color.set(phase===3?"#a7bce8":phase===2?"#ffc58e":"#fff0cc");
+      hemisphere.intensity=underground?.18:phase===3?.55:1.65;
       camera.fov = 72 / options.current.zoom;
       camera.updateProjectionMatrix();
       models.update(Math.min(.1,(time-last)/1000||.016),options.current.reducedMotion);animatedWater.update(options.current.reducedMotion?0:time/1000);
       renderer.domElement.dataset.workshopModels=String(construction.readyShapes);renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.facing=String(latest.current.facing);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
       outline.visible=false;ghost.visible=false;
-      if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=traceVoxel(w,ray.ray.origin,ray.ray.direction);let t:{block:TerrainBlock;cost:number}|null=null;
+      if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=buildHit(w);let t:{block:TerrainBlock;cost:number}|null=null;
         if(h){outline.position.set(h.x+.5,h.y+.5,h.z+.5);outline.visible=true;t={block:h.block,cost:miningCost(h.block,w.players[latest.current.selfId])};
           if(!buildRef.current.panel){const x=h.x+h.normal.x,y=h.y+h.normal.y,z=h.z+h.normal.z,chosen=buildRef.current.selected;ghost.geometry=construction.get(chosen);ghost.position.set(x+.5,y+.5,z+.5);ghost.rotation.y=buildRef.current.rotation*Math.PI/2;ghost.visible=true;const valid=!blockAt(w,x,y,z)&&!protectedVoxel(w,x,z)&&y>MIN_DEPTH&&y<=MAX_HEIGHT&&(w.players[latest.current.selfId].life?.bag[chosen]||0)>0&&!Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2);ghostMaterial.color.set(valid?'#89e0ac':'#ed9079');}}
         const k=t?t.block+':'+t.cost:'';if(k!==lastTarget){lastTarget=k;setTarget(t);}}
 
+      windClock.value=options.current.reducedMotion?0:time/1000;
+      if(adaptive.sample((time-last)/1000,options.current.mapQuality==='auto')){
+        renderer.setPixelRatio(baseRatio*adaptive.level);renderer.shadowMap.enabled=profile.shadows&&adaptive.level>.7;resize();
+      }
+      renderer.domElement.dataset.renderStats=JSON.stringify({calls:renderer.info.render.calls,triangles:renderer.info.render.triangles,geometries:renderer.info.memory.geometries,pixelRatio:renderer.getPixelRatio(),qualityScale:adaptive.level});
       last = time;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(draw);
@@ -941,7 +1057,7 @@ export default function WorldScene3D(props: SceneProps) {
       disposed = true;window.removeEventListener('learning-rogue:rpg-controller-look',controllerLook);window.removeEventListener('keydown',vertical);clearInterval(physicsTimer);
       element.removeEventListener('pointerdown',enableAmbience);ambience?.dispose();
       cancelAnimationFrame(raf);
-      observer.disconnect();
+      observer.disconnect();renderer.domElement.removeEventListener('wheel',wheelZoom);
       renderer.domElement.removeEventListener("webglcontextlost", lost);
       renderer.domElement.removeEventListener("pointerdown", start);
       renderer.domElement.removeEventListener("pointerup", end);
@@ -951,7 +1067,7 @@ export default function WorldScene3D(props: SceneProps) {
       window.removeEventListener("blur",cancelLook);
       document.removeEventListener("visibilitychange",cancelLook);
       element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
-      landscape.dispose();models.dispose();
+      protagonist.dispose();remoteHeroes.forEach(e=>e.hero.dispose());landscape.dispose();models.dispose();avatar.dispose();nature.dispose();npcRigs.forEach(n=>n.rig.dispose());
       batches.forEach((b) => b.dispose());
       groundMaterial?.dispose();
       geometries.forEach((g) => g.dispose());
@@ -964,7 +1080,7 @@ export default function WorldScene3D(props: SceneProps) {
   const text=(s:string)=>trans(s,props.languageMode||"JAPANESE");
   const command=(type:string)=>host.current?.dispatchEvent(new CustomEvent('voxel-command',{detail:type}));
   const me=props.world.players[props.selfId];
-  return <div className="rpg-world-3d" ref={host}>{props.presentation!=='conversation'&&<CameraControls languageMode={props.languageMode} building={building} disabled={editSlot} onReset={()=>setPitch(0)} onLook={(x,y,dt)=>{if(buildRef.current.panel||document.querySelector('[role=dialog]'))return;const delta=cameraDelta(x,y,options.current,dt);latest.current.onFacing(latest.current.facing+delta.yaw);setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));}}/>}{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
+  return <div className="rpg-world-3d" ref={host}>{props.presentation!=='conversation'&&<CameraControls languageMode={props.languageMode} building={building} disabled={editSlot} thirdPerson={thirdPerson} onView={()=>setThirdPerson(v=>!v)} onReset={()=>setPitch(0)} onLook={(x,y,dt)=>{if(buildRef.current.panel||document.querySelector('[role=dialog]'))return;const delta=cameraDelta(x,y,options.current,dt);latest.current.onFacing(latest.current.facing+delta.yaw);setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));}}/>}{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
 
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} onClick={()=>setEditSlot(!editSlot)}>⚙</button></header>
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} onClick={()=>setSelectedSlot(i)}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
