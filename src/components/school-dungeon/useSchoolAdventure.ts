@@ -1,3 +1,6 @@
+import {magicForm,studentDamage} from './student/transformation';
+import {STUDENT_STORIES,STUDENT_ITEM_DB,studentHero,studentChapter,studentGear,isProtagonistId} from './student/content';
+import {drawStudentSprite,loadStudentSprite} from './student/sprites';
 import {DOJO_STAGES,dojoStart,dojoAct,type DojoAction,type DojoRun} from './dojo';
 import {SCHOOL_WANDERER_ENGLISH} from './copy';
 import {EXTRA_ITEM_SPRITES,EXTRA_ITEMS,EXTRA_ENEMIES,TOWN_SERVICES,journeyLayout} from './expansion';
@@ -18,8 +21,10 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const b=useRef(bridge);b.current=bridge;
  const key=`learning-rogue:school-base:${bridge.game}`;
  const baseRef=useRef<SchoolBase|null>(null);if(!baseRef.current)baseRef.current=bridge.debug?newBase():loadBase(key);const base=baseRef as {current:SchoolBase};const state=useRef(newAdventure());
+ if(!isProtagonistId(base.current.selectedHero))base.current.selectedHero=bridge.game===2?'high-school-warrior':'elementary-warrior';
  const [revision,redraw]=useState(0);const [panel,setPanel]=useState<string|null>(bridge.debug?null:'BASE');
  const [dojoRun,setDojoRun]=useState<DojoRun|null>(null);const dojoRef=useRef<DojoRun|null>(null);
+ const [storyIndex,setStoryIndex]=useState<number|null>(null),[storyLine,setStoryLine]=useState(0),[storyReplay,setStoryReplay]=useState(false);
  const [container,setContainer]=useState<string|null>(null);const [message,setMessage]=useState('');
  const panelRef=useRef(panel);panelRef.current=panel;
  const pending=useRef<{mode:AdventureMode;items:SchoolItem[];gold:number;friend:AdventureState['companion']}|null>(null);
@@ -30,6 +35,13 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const refresh=()=>redraw(v=>v+1);
  const persist=()=>{if(!b.current.debug)try{localStorage.setItem(key,JSON.stringify(base.current));}catch{setMessage(text('保存領域がいっぱいです。道具を減らして再保存してください。','Storage is full. Reduce stored supplies and try again.'));refresh();return false;}refresh();return true;};
  const say=(ja:string,en:string)=>{const msg=text(ja,en);base.current.diary=[...(base.current.diary||[]),msg].slice(-40);b.current.log(msg);setMessage(msg);refresh();};
+ const activeHero=()=>studentHero(dojoRef.current?base.current.selectedHero:state.current.heroId||base.current.selectedHero);
+ const setHero=(heroId:string)=>{if(!isProtagonistId(heroId))return;base.current.selectedHero=heroId;loadStudentSprite(heroId);persist();};
+ const openStory=(index:number,replay=false)=>{const s=state.current,act=STUDENT_STORIES[studentChapter(activeHero().id)][index];if(!act||(!replay&&(s.mode!=='STORY'||s.storySeen?.includes(act.floor))))return;setStoryIndex(index);setStoryLine(0);setStoryReplay(replay);setPanel('STUDENT_STORY');};
+ const advanceStory=()=>{if(storyIndex===null)return;const hero=activeHero(),chapter=studentChapter(hero.id),act=STUDENT_STORIES[chapter][storyIndex];if(storyLine<act.lines.length-1){setStoryLine(v=>v+1);return;}
+  if(!storyReplay&&!state.current.storySeen?.includes(act.floor)){state.current.storySeen=[...(state.current.storySeen||[]),act.floor];base.current.studentStory={...base.current.studentStory,[chapter]:Math.max(base.current.studentStory?.[chapter]||0,storyIndex+1)};say(act.title,act.englishTitle);
+   if(storyIndex>0){const choices=studentGear(hero.id,Math.min(20,act.floor)).filter(i=>i.category===(storyIndex%2?'ARMOR':'WEAPON'));const template=choices[choices.length-1];if(template){const item={...cloneItem(template),id:id()};if(b.current.inventory.length<20)updateInventory((a:any[])=>[...a,item]);else b.current.setFloorItems((a:any[])=>[...a,{...emptyEntity(b.current.player.x,b.current.player.y),name:item.name,itemData:item}]);}}persist();}
+  setStoryIndex(null);setPanel(storyReplay?'NOTE':null);refresh();};
  const updateInventory=(fn:any)=>{const ctx=b.current,next=typeof fn==='function'?fn(ctx.inventory):fn;ctx.inventory=next;ctx.setInventory(next);};
  const consume=(item:SchoolItem)=>updateInventory((inv:any[])=>inv.filter(i=>i.id!==item.id));
  const getPossessions=()=>[...b.current.inventory,...Object.values(b.current.player.equipment||{}).filter(Boolean)] as SchoolItem[];
@@ -38,7 +50,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(!enterMutation())return;
   if(state.current.debt||state.current.alarm){say('購買部の未払い中は帰れません。先に精算しよう。','Settle your shop bill before returning.');return false;}
   if(state.current.mode==='RESCUE'&&!state.current.rescued){say('救助の途中では帰れません。','Finish the rescue before returning.');return false;}
-  const previous=cloneItem(base.current);archive(usedItem?.id);base.current.visits++;if(!persist()){base.current=previous;return false;}state.current.returned=true;b.current.clearSave();updateInventory([]);b.current.setPlayer((p:any)=>({...p,gold:0,equipment:{weapon:null,armor:null,ranged:null,accessory:null}}));setPanel('BASE');return true;
+  const previous=cloneItem(base.current);archive(usedItem?.id);base.current.visits++;if(!persist()){base.current=previous;return false;}state.current.transformed=false;state.current.returned=true;b.current.clearSave();updateInventory([]);b.current.setPlayer((p:any)=>({...p,gold:0,equipment:{weapon:null,armor:null,ranged:null,accessory:null}}));setPanel('BASE');return true;
  };
  const start=(mode:AdventureMode,selected:string[],gold:number,role:'HEAL'|'GUARD'|'FETCH'|null)=>{
   if(!enterMutation())return;
@@ -53,18 +65,19 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   pending.current={mode,items:cloneItem(items),gold:coins,friend:role&&carry?{name:role==='HEAL'?'保健係あおい':role==='GUARD'?'体育係たける':'図書係ひなた',role,x:0,y:0,hp:40,level:1,xp:0,order:'FOLLOW'}:null};
   if(!persist()){base.current=previous;pending.current=null;return;}setPanel(null);b.current.restart();
  };
- const begin=()=>{const config=pending.current;if(!config&&base.current.departure){const lost=base.current.departure,existing=new Set(base.current.warehouse.map(i=>i.id));base.current.warehouse.push(...lost.items.filter(i=>!existing.has(i.id)));base.current.bank+=lost.gold;delete base.current.departure;persist();}state.current=newAdventure(config?.mode||state.current.mode);state.current.runId=config?base.current.departure?.runId:id();(state.current as any).departed=Boolean(config);state.current.companion=config?.friend||null;state.current.rescueTarget=base.current.rescue?.floor||1;deathHandled.current=false;lastEnemies.current=[];};
+ const begin=()=>{const config=pending.current;if(!config&&base.current.departure){const lost=base.current.departure,existing=new Set(base.current.warehouse.map(i=>i.id));base.current.warehouse.push(...lost.items.filter(i=>!existing.has(i.id)));base.current.bank+=lost.gold;delete base.current.departure;persist();}state.current=newAdventure(config?.mode||state.current.mode);state.current.heroId=studentHero(base.current.selectedHero).id;state.current.storySeen=[];loadStudentSprite(state.current.heroId);state.current.runId=config?base.current.departure?.runId:id();(state.current as any).departed=Boolean(config);state.current.companion=config?.friend||null;state.current.rescueTarget=base.current.rescue?.floor||1;deathHandled.current=false;lastEnemies.current=[];};
  const setupInventory=(items:any[])=>{
   const cfg=pending.current;pending.current=null;
   const mode=state.current.mode;
-  const allowed=mode==='STORY'?items:items.filter(i=>i.id.startsWith('start-')&&(i.type==='FOOD_ONIGIRI'||(mode!=='NO_GEAR'&&i.type==='PENCIL_SWORD')));
+  const themed=studentGear(activeHero().id,1);const starterWeapon=themed.find(i=>i.category==='WEAPON')!,starterArmor=themed.find(i=>i.category==='ARMOR')!;
+  const allowed=mode==='STORY'?[...items.map(i=>i.type==='PENCIL_SWORD'?{...starterWeapon,id:i.id}:i),{...starterArmor,id:id()}]:items.filter(i=>i.id.startsWith('start-')&&(i.type==='FOOD_ONIGIRI'||(mode!=='NO_GEAR'&&i.type==='PENCIL_SWORD')));
   const extra=mode==='TRAPS'?['SUPPLY_CLEAN']:mode==='PUZZLE'?['SUPPLY_PICK']:mode==='CARDS'?['BAG_SAVE','SUPPLY_PICK']:[];
   if(cfg?.gold)b.current.setPlayer((p:any)=>({...p,gold:cfg.gold})); // floor initialization resets player: also applied by prepareFloor below.
   (state.current as any).startingGold=cfg?.gold||0;
   return [...allowed,...(cfg?.items||[]),...extra.map(type=>({...ADVENTURE_ITEMS[type],id:id()}))].slice(0,20);
  };
  const prepareFloor=(map:any[][],enemies:any[],items:any[],traps:any[],px:number,py:number,floor:number)=>{
-  const s=state.current;s.town=false;s.scene=undefined;s.townUsed=[];s.weather=['CLEAR','RAIN','FOG','WIND'][Math.floor(Math.random()*4)];s.night=false;
+  const s=state.current;s.transformed=false;s.town=false;s.scene=undefined;s.townUsed=[];s.weather=['CLEAR','RAIN','FOG','WIND'][Math.floor(Math.random()*4)];s.night=false;
   if(s.alarm)updateInventory((a:any[])=>a.map(i=>({...i,shopOwner:undefined})));
   if(s.mode==='PUZZLE'){
    const puzzle=puzzleLayout(map[0].length,map.length,floor-1);map.splice(0,map.length,...puzzle.map);px=puzzle.start.x;py=puzzle.start.y;enemies.splice(0);items.splice(0);traps.splice(0);
@@ -85,18 +98,19 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(s.mode==='PUZZLE'||s.scene!==undefined){s.terrain={};s.events={};}
   if(s.town)for(const service of TOWN_SERVICES)s.events[positionKey(service.x,service.y)]={kind:service.kind,done:false};
   else if(s.scene!==undefined)s.events['7,7']={kind:'PICNIC',done:false};
-  if(floor===1)b.current.setPlayer((p:any)=>({...p,gold:(s as any).startingGold||0}));
+  if(floor===1)b.current.setPlayer((p:any)=>({...p,name:activeHero().name,gold:(s as any).startingGold||0}));
+  if(s.mode==='STORY'&&(s as any).departed){const index=STUDENT_STORIES[studentChapter(activeHero().id)].findIndex(a=>a.floor===floor);if(index>=0)openStory(index);}
   const kinds=floor>=16?['SPLIT','SEAL','SWALLOW','ERASE','RICE','EVOLVE']:floor>=11?['SPLIT','SEAL','SWALLOW','ERASE']:floor>=7?['SPLIT','SEAL','SWALLOW']:['SPLIT'];
   enemies.forEach((e,i)=>{if(e.enemyType!=='BOSS'&&e.enemyType!=='SHOPKEEPER'&&(s.mode==='PUZZLE'||floor>=4&&i%(floor>=12?4:6)===0)){e.schoolKind=s.mode==='PUZZLE'?'DETENTION':kinds[(i+floor)%kinds.length];e.schoolRank=1;if(s.mode!=='PUZZLE')e.enemyType=({SPLIT:'SLIME',SEAL:'MAGE',SWALLOW:'THIEF',ERASE:'DRAIN',RICE:'MANDRAKE',EVOLVE:'GOLEM'} as any)[e.schoolKind];e.name=({'DETENTION':'居残りおばけ','SPLIT':'ちぎれ紙おばけ','SEAL':'封印シール小僧','SWALLOW':'ぱくぱく筆箱','ERASE':'消しゴム怪人','RICE':'おにぎり係','EVOLVE':'ガキ大将'} as any)[e.schoolKind];}});
   if(s.mode==='TRAPS')traps.forEach(t=>t.visible=true);
-  for(const e of items){if(e.itemData){e.itemData=cloneItem(e.itemData);if(['WEAPON','ARMOR'].includes(e.itemData.category)){e.itemData.markSlots=4;e.itemData.cursed=Math.random()<.09;}else if(!e.itemData.shopOwner)e.itemData.blessed=Math.random()<.06;}}
+  for(const e of items){if(e.itemData){e.itemData=cloneItem(e.itemData);if(STUDENT_ITEM_DB[e.itemData.type]&&STUDENT_ITEM_DB[e.itemData.type].chapter!==studentChapter(activeHero().id)){const replacement=studentGear(activeHero().id,floor).filter(i=>i.category===e.itemData.category).at(-1);if(replacement){e.itemData={...replacement,id:e.itemData.id};e.name=replacement.name;}}if(['WEAPON','ARMOR'].includes(e.itemData.category)){e.itemData.markSlots=4;e.itemData.cursed=Math.random()<.09;}else if(!e.itemData.shopOwner)e.itemData.blessed=Math.random()<.06;}}
   if(s.mode==='CARDS'){
    const choices=b.current.game===2?(b.current.cardSupplies||[]):['UMB_FIRE','UMB_SLEEP','SCROLL_SLEEP','SCROLL_THUNDER'].map(type=>({...b.current.catalog[type],charges:5}));
    for(const cell of cells.filter(c=>!occupied.has(positionKey(c.x,c.y))&&!s.terrain[positionKey(c.x,c.y)]&&!s.events[positionKey(c.x,c.y)]).slice(0,3)){const supply=cloneItem(choices[Math.floor(Math.random()*choices.length)]);if(supply){occupied.add(positionKey(cell.x,cell.y));items.push({...emptyEntity(cell.x,cell.y),name:supply.name,itemData:{...supply,id:id()}});}}
   }
   if(cells.length&&s.mode!=='PUZZLE'){
    const cell=cells.find(c=>!occupied.has(positionKey(c.x,c.y))&&!s.terrain[positionKey(c.x,c.y)]&&!s.events[positionKey(c.x,c.y)]);
-   if(cell){occupied.add(positionKey(cell.x,cell.y));const type=Object.keys(ADVENTURE_ITEMS)[(floor-1)%Object.keys(ADVENTURE_ITEMS).length];items.push({...emptyEntity(cell.x,cell.y),name:ADVENTURE_ITEMS[type].name,itemData:{...cloneItem(ADVENTURE_ITEMS[type]),id:id()}});}
+   if(cell){occupied.add(positionKey(cell.x,cell.y));const keys=Object.keys(ADVENTURE_ITEMS).filter(k=>!STUDENT_ITEM_DB[k]);const type=floor%3===0?studentGear(activeHero().id,floor)[floor%studentGear(activeHero().id,floor).length].type:keys[(floor-1)%keys.length];items.push({...emptyEntity(cell.x,cell.y),name:ADVENTURE_ITEMS[type].name,itemData:{...cloneItem(ADVENTURE_ITEMS[type]),id:id()}});}
   }
   if(floor>=8&&s.scene===undefined&&s.mode!=='PUZZLE'){
    const extra=enemies.find(e=>!e.schoolKind&&e.enemyType!=='BOSS'&&e.enemyType!=='SHOPKEEPER');
@@ -129,12 +143,12 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  },[bridge.map]);
  const interactNearby=()=>{const p=b.current.player,keys=[positionKey(p.x,p.y),positionKey(p.x+p.dir.x,p.y+p.dir.y)];if(state.current.terrain[keys[1]]==='SECRET'){if(b.current.inventory.some(i=>i.type==='SUPPLY_PICK'&&i.charges>0))dig();else say('模様の違う壁です。つるはしで掘ると隠しロッカーを探せます。','A marked wall. Use a pickaxe to uncover a hidden locker.');return true;}if(!keys.some(k=>state.current.events[k]&&!state.current.events[k].done))return false;interact();return true;};
  const saveCommitted=()=>{if(base.current.departure&&base.current.departure.runId===state.current.runId){delete base.current.departure;persist();}};
- const restore=(saved?:AdventureState,floor=1)=>{state.current=saved?.version===1?cloneItem(saved):newAdventure();state.current.floor=floor;state.current.runId ||= id();(state.current as any).departed=true;if(base.current.departure){if(base.current.departure.runId===state.current.runId)saveCommitted();else{const lost=base.current.departure,existing=new Set(base.current.warehouse.map(i=>i.id));base.current.warehouse.push(...lost.items.filter(i=>!existing.has(i.id)));base.current.bank+=lost.gold;delete base.current.departure;persist();}}setPanel(state.current.returned?'BASE':null);refresh();};
+ const restore=(saved?:AdventureState,floor=1)=>{state.current=saved?.version===1?cloneItem(saved):newAdventure();state.current.floor=floor;state.current.heroId=studentHero(dojoRef.current?base.current.selectedHero:state.current.heroId||base.current.selectedHero).id;state.current.transformed=Boolean(state.current.transformed&&magicForm(state.current.heroId));loadStudentSprite(state.current.heroId,state.current.transformed);state.current.runId ||= id();(state.current as any).departed=true;if(base.current.departure){if(base.current.departure.runId===state.current.runId)saveCommitted();else{const lost=base.current.departure,existing=new Set(base.current.warehouse.map(i=>i.id));base.current.warehouse.push(...lost.items.filter(i=>!existing.has(i.id)));base.current.bank+=lost.gold;delete base.current.departure;persist();}}setPanel(state.current.returned?'BASE':null);refresh();};
  const snapshot=()=>cloneItem(state.current);
  const finish=()=>{const s=state.current;if(s.rescued)return;s.rescued=true;base.current.clears[s.mode]=(base.current.clears[s.mode]||0)+1;
   if(s.mode==='RESCUE'&&base.current.rescue){base.current.warehouse.push(...cloneItem(base.current.rescue.items));base.current.rescue=null;say('忘れ物を救出！学校前の倉庫へ届けた！','Supplies rescued and delivered to the warehouse!');}
   else say('挑戦達成！帰還すると道具を倉庫へ持ち帰れます。','Challenge complete! Return to keep your supplies.');
-  persist();b.current.setGameClear(true);
+  persist();b.current.setGameClear(true);if(s.mode==='STORY')openStory(5);
  };
  const canDescend=()=>{if(panelRef.current)return false;if(state.current.debt&&!state.current.alarm){say('購買部の品を持っています。精算してから階段へ。','Settle your shop bill before taking the stairs.');return false;}if(state.current.mode!=='STORY'&&b.current.floor>=goalFloor(state.current)){finish();return false;}return true;};
  const beforeMove=(dx:number,dy:number)=>{
@@ -142,7 +156,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(dx===0&&dy===0)return true;const x=ctx.player.x+dx,y=ctx.player.y+dy,k=positionKey(x,y),terrain=s.terrain[k];
   if(s.town&&TOWN_SERVICES.some(v=>v.x===x&&v.y===y)){ctx.setPlayer((p:any)=>({...p,dir:{x:dx,y:dy}}));setPanel('TOWN');return false;}
   if(terrain==='WATER'&&!equipmentHas(ctx.player.equipment?.accessory,'FLOAT_MARK')){say('水路です。浮き輪バッジで渡れます。','A waterway. Wear a float badge to cross.');return false;}
-  if(terrain==='HOLE'){ctx.setPlayer((p:any)=>({...p,hp:Math.max(1,p.hp-8)}));say('床の穴から次の階へ落ちた！','You fell through a hole to the next floor!');if(canDescend())ctx.descend(ctx.floor+1);return false;}
+  if(terrain==='HOLE'){const damage=studentDamage(8,Boolean(s.transformed));ctx.setPlayer((p:any)=>({...p,hp:Math.max(1,p.hp-damage)}));say('床の穴から次の階へ落ちた！','You fell through a hole to the next floor!');if(canDescend())ctx.descend(ctx.floor+1);return false;}
   if(terrain==='ICE')say('つるつる床！1マス先まで滑るので足元に注意。','Slippery floor! Watch the next tile as you slide.');
   return true;
  };
@@ -175,7 +189,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
     const dir=ctx.player.dir;if(!dir.x&&!dir.y){say('使う方向を向いてください。','Face the direction to use it.');return true;}
     let x=ctx.player.x+dir.x,y=ctx.player.y+dir.y,target:any;
     while(ctx.map[y]?.[x]&&ctx.map[y][x]!=='WALL'){target=ctx.enemies.find(e=>e.x===x&&e.y===y&&e.enemyType!=='SHOPKEEPER');if(target)break;x+=dir.x;y+=dir.y;}
-    if(target)ctx.setEnemies((a:any[])=>a.map(e=>e.id===target.id?{...e,hp:Math.max(1,e.hp-20),status:{...e.status,frozen:2}}:e));updateInventory((a:any[])=>a.map(i=>i.id===item.id?{...i,charges:(i.charges||0)-1}:i));used=false;
+    if(target)ctx.setEnemies((a:any[])=>a.map(e=>e.id===target.id?{...e,hp:Math.max(1,e.hp-studentDamage(20,Boolean(state.current.transformed))),status:{...e.status,frozen:2}}:e));updateInventory((a:any[])=>a.map(i=>i.id===item.id?{...i,charges:(i.charges||0)-1}:i));used=false;
    }else if(item.type==='SUPPLY_WHISTLE')ctx.setEnemies((a:any[])=>a.map(e=>e.enemyType!=='SHOPKEEPER'&&Math.max(Math.abs(e.x-ctx.player.x),Math.abs(e.y-ctx.player.y))<=2?{...e,status:{...e.status,sleep:8}}:e));
    else if(item.type==='SUPPLY_CRANE'){
     const cells:{x:number;y:number}[]=[];for(let y=1;y<ctx.map.length-1;y++)for(let x=1;x<ctx.map[y].length-1;x++)if(ctx.map[y][x]==='FLOOR'&&!st.terrain[positionKey(x,y)]&&!ctx.enemies.some(e=>Math.max(Math.abs(e.x-x),Math.abs(e.y-y))<=1)&&!ctx.traps.some(t=>t.x===x&&t.y===y))cells.push({x,y});
@@ -224,7 +238,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(event.kind==='REST'){if(s.companion)s.companion.hp=40+s.companion.level*5;ctx.setPlayer((p:any)=>({...p,hp:p.maxHp}));ctx.setBelly((v:number)=>Math.min(100,v+25));say('保健室で休んだ。HP全回復、お腹も少し回復！','Rested at the nurse: full HP and some food!');}
   if(event.kind==='TRADER'){if((ctx.player.gold||0)<100){say('行商のおやつは100円です。','A trader snack costs 100 coins.');return;}ctx.setPlayer((p:any)=>({...p,gold:p.gold-100}));ctx.setBelly((v:number)=>Math.min(100,v+50));say('行商のおやつを食べた！','Enjoyed a trader snack!');}
   if(event.kind==='FRIEND'){if(!s.companion)s.companion={name:'迷子の同級生',role:'FETCH',x:ctx.player.x,y:ctx.player.y,hp:40,level:1,xp:0,order:'FOLLOW'};else{s.companion.hp=40+s.companion.level*5;s.companion.xp+=5;}say('迷子の同級生と助け合う約束をした。','A lost classmate agreed to help you.');}
-  if(event.kind==='STORY'){base.current.story++;const stories=[['図書委員「消しゴム怪人には、大事な装備をしまって対策しよう！」','The librarian recommends storing precious equipment before facing eraser monsters.'],['用務員「壁の模様が違うところには、隠しロッカーがあるぞ。」','The caretaker says marked walls conceal hidden lockers.'],['先生「冒険は競争だけじゃない。迷子の友達も助けてね。」','The teacher asks you to help lost classmates along the way.'],['同級生「校長先生の試練を越えたら、みんなで遠足に行こう！」','A classmate promises a field trip after the principal trial.']];const story=stories[(base.current.story-1)%stories.length];say(story[0],story[1]);persist();}
+  if(event.kind==='STORY'){base.current.story++;const stories=[['図書委員「消しゴム怪人には、大事な装備をしまって対策しよう！」','The librarian recommends storing precious equipment before facing eraser monsters.'],['用務員「壁の模様が違うところには、隠しロッカーがあるぞ。」','The caretaker says marked walls conceal hidden lockers.'],['先生「冒険は競争だけじゃない。迷子の友達も助けてね。」','The teacher asks you to help lost classmates along the way.'],['同級生「校長先生の試練を越えたら、みんなで遠足に行こう！」','A classmate promises a field trip after the principal trial.']];const story=stories[(base.current.story-1)%stories.length];say(story[0],story[1]);if(s.mode==='STORY')openStory(Math.min(4,Math.floor(s.floor/5)),true);persist();}
   event.done=true;if(spendTurn)ctx.turn(event.kind==='REST'?{belly:Math.min(100,ctx.belly+25)}:event.kind==='TRADER'?{belly:Math.min(100,ctx.belly+50)}:event.kind==='PICNIC'?{belly:100}:undefined);refresh();
  };
  const recoverLoot=(enemies:any[])=>{
@@ -272,7 +286,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   lastSkills.current=stamp;
   for(const e of ctx.enemies.filter(e=>e.hp>0&&!e.status?.sleep&&!e.status?.frozen&&Math.max(Math.abs(e.x-px),Math.abs(e.y-py))<=1)){
    if(e.schoolKind==='MIMIC'&&s.floorTurns%5===0){const coin=Math.min(20,ctx.player.gold);ctx.setPlayer((p:any)=>({...p,gold:Math.max(0,p.gold-coin)}));say('びっくり宝箱がおこづかいをくわえた！','The surprise chest grabbed your coins!');}
-   if(e.schoolKind==='UMBRELLA'&&s.night&&s.floorTurns%3===0)ctx.setPlayer((p:any)=>({...p,hp:Math.max(1,p.hp-3)}));
+   if(e.schoolKind==='UMBRELLA'&&s.night&&s.floorTurns%3===0)ctx.setPlayer((p:any)=>({...p,hp:Math.max(1,p.hp-studentDamage(3,Boolean(s.transformed)))}));
    if(e.schoolKind==='MUD'&&s.floorTurns%4===0)ctx.setPlayer((p:any)=>({...p,status:{...p.status,poison:4}}));
    if(e.schoolKind==='SPROUT'&&s.floorTurns%4===0)ctx.setEnemies((a:any[])=>a.map(v=>v.id===e.id?{...v,hp:Math.min(v.maxHp,v.hp+5)}:v));
   }
@@ -288,7 +302,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
    if(enemy.schoolKind==='ERASE')ctx.setPlayer((p:any)=>({...p,equipment:Object.fromEntries(Object.entries(p.equipment).map(([slot,item]:any)=>[slot,item&&['weapon','armor'].includes(slot)&&!equipmentHas(item,'STAINLESS_PEN')?{...item,plus:Math.max(-5,(item.plus||0)-1)}:item]))}));
    if(enemy.schoolKind==='RICE'){const item=ctx.inventory.find(i=>!i.capacity&&!i.shopOwner&&!['FOOD_ONIGIRI','SUPPLY_REVIVE'].includes(i.type));if(item){updateInventory((a:any[])=>a.map(i=>i.id===item.id?{...ctx.catalog.FOOD_ONIGIRI,id:i.id}:i));say('道具がおにぎりになった！大事な道具はランドセルへ。','A supply became a rice ball! Store precious items in a bag.');}}
   }}
-  const placed=ctx.traps.filter(t=>t.schoolPlaced);for(const trap of placed){const enemy=ctx.enemies.find(e=>e.x===trap.x&&e.y===trap.y&&e.enemyType!=='SHOPKEEPER');if(enemy){ctx.setEnemies((a:any[])=>a.map(e=>e.id===enemy.id?{...e,hp:trap.trapType==='BOMB'?Math.max(1,e.hp-25):e.hp,status:{...e.status,...(trap.trapType==='SLEEP'?{sleep:5}:trap.trapType==='POISON'?{poison:5}:{frozen:3})}}:e));ctx.setTraps((a:any[])=>a.filter(t=>t.id!==trap.id));say('工作わなに敵がかかった！','Your crafted trap caught a foe!');}}
+  const placed=ctx.traps.filter(t=>t.schoolPlaced);for(const trap of placed){const enemy=ctx.enemies.find(e=>e.x===trap.x&&e.y===trap.y&&e.enemyType!=='SHOPKEEPER');if(enemy){ctx.setEnemies((a:any[])=>a.map(e=>e.id===enemy.id?{...e,hp:trap.trapType==='BOMB'?Math.max(1,e.hp-studentDamage(25,Boolean(s.transformed))):e.hp,status:{...e.status,...(trap.trapType==='SLEEP'?{sleep:5}:trap.trapType==='POISON'?{poison:5}:{frozen:3})}}:e));ctx.setTraps((a:any[])=>a.filter(t=>t.id!==trap.id));say('工作わなに敵がかかった！','Your crafted trap caught a foe!');}}
   refresh();
  };
  useEffect(()=>{if(!bridge.gameOver){deathHandled.current=false;return;}if(deathHandled.current||bridge.debug)return;deathHandled.current=true;
@@ -301,7 +315,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  useEffect(()=>recoverLoot(bridge.enemies),[bridge.enemies]);
  useEffect(()=>enemySkills(),[bridge.enemies,revision]);
  useEffect(()=>{if(bridge.gameClear&&!state.current.rescued)finish();},[bridge.gameClear]);
- const sceneTitle=()=>text(['川辺の宿場町','風来の小学生道場','桜の滝見坂','竹林の天空橋','紅葉の鏡湖','雪山の星灯り'][state.current.scene??0],['Riverside village','School Wanderer dojo','Cherry waterfall path','Bamboo sky bridge','Autumn mirror lake','Snowy starlight'][state.current.scene??0]);
+ const sceneTitle=()=>text(['川辺の宿場町','風来の学生道場','桜の滝見坂','竹林の天空橋','紅葉の鏡湖','雪山の星灯り'][state.current.scene??0],['Riverside village','School Wanderer dojo','Cherry waterfall path','Bamboo sky bridge','Autumn mirror lake','Snowy starlight'][state.current.scene??0]);
  const claimMilestone=(key:string)=>{const goals:Record<string,boolean>={DOJO10:Object.keys(base.current.dojo||{}).length>=10,DOJO50:Object.keys(base.current.dojo||{}).length>=50,DISCOVER20:(base.current.codex||[]).length>=20};if(!goals[key]||base.current.claimed?.includes(key)){say('達成すると一度だけ報酬を受け取れます。','Complete this milestone to claim its reward once.');return;}base.current.claimed=[...(base.current.claimed||[]),key];base.current.bank+=key==='DOJO50'?1000:300;persist();say('修了証の報酬を貯金箱に届けた！','Certificate reward delivered to your savings!');};
  const visibleTile=(x:number,y:number)=>state.current.scene!==undefined||(!state.current.night&&state.current.weather!=='FOG')||Math.max(Math.abs(x-b.current.player.x),Math.abs(y-b.current.player.y))<=(state.current.night?4:5);
  const dojoComplete=(stage:number,turns:number)=>{base.current.dojo={...base.current.dojo,[stage]:Math.min(base.current.dojo?.[stage]||Infinity,turns)};persist();};
@@ -357,15 +371,16 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const townAction=(kind:string,type?:string)=>{
   if(!enterMutation()||!state.current.town)return;const ctx=b.current,s=state.current;const service=TOWN_SERVICES.find(v=>v.kind===kind);
   if(!service||Math.max(Math.abs(service.x-ctx.player.x),Math.abs(service.y-ctx.player.y))>1){say('町の施設の隣へ移動してから利用しよう。','Move beside the town facility first.');return;}
-  const cost=kind==='INN'?80:kind==='SMITH'?150:kind==='SHOP'?(EXTRA_ITEMS[type||'']?.value||0):kind==='FESTIVAL'?50:0;
+  const shopItem=EXTRA_ITEMS[type||'']||studentGear(activeHero().id,state.current.floor).find(i=>i.type===type);
+  const cost=kind==='INN'?80:kind==='SMITH'?150:kind==='SHOP'?(shopItem?.value||0):kind==='FESTIVAL'?50:0;
   if(ctx.player.gold<cost){say('おこづかいが足りません。','Not enough coins.');return;}
-  if(kind==='SHOP'&&(!EXTRA_ITEMS[type||'']||ctx.inventory.length>=20))return;
+  if(kind==='SHOP'&&(!shopItem||ctx.inventory.length>=20))return;
   if(kind==='SMITH'&&s.townUsed?.includes('SMITH')){say('この町でのお手入れは済んでいます。','Your equipment was already serviced in this town.');return;}
   if(kind==='BANK'){base.current.bank+=ctx.player.gold;ctx.setPlayer((p:any)=>({...p,gold:0}));persist();say('おこづかいを学校前の貯金箱に送った。','Coins sent to your savings at school.');return;}
   if(kind==='FESTIVAL'&&s.townUsed?.includes('FESTIVAL')){say('お祭りの景品は受け取り済みです。','You already collected this festival prize.');return;}
   ctx.setPlayer((p:any)=>({...p,gold:p.gold-cost,hp:kind==='INN'?p.maxHp:p.hp,equipment:kind==='SMITH'?Object.fromEntries(Object.entries(p.equipment).map(([slot,e]:any)=>[slot,e?{...e,cursed:false,wet:false,plus:(e.plus||0)+(slot==='weapon'||slot==='armor'?1:0)}:null])):p.equipment}));
   if(kind==='INN'){ctx.setBelly(100);updateInventory((a:any[])=>a.map(i=>({...i,wet:false})));if(s.companion)s.companion.hp=40+s.companion.level*5;}
-  if(kind==='SHOP')updateInventory((a:any[])=>[...a,{...cloneItem(EXTRA_ITEMS[type!]),id:id()}]);
+  if(kind==='SHOP')updateInventory((a:any[])=>[...a,{...cloneItem(shopItem!),id:id()}]);
   if(kind==='FESTIVAL'){const prize=Object.keys(EXTRA_ITEMS)[Math.floor(Math.random()*8)];const item={...cloneItem(EXTRA_ITEMS[prize]),id:id()};if(ctx.inventory.length<20)updateInventory((a:any[])=>[...a,item]);else ctx.setFloorItems((a:any[])=>[...a,{...emptyEntity(ctx.player.x,ctx.player.y),name:item.name,itemData:item}]);}
   s.townUsed=[...(s.townUsed||[]),kind];say('町で旅の準備を整えた。','Prepared for the journey in town.');refresh();
  };
@@ -377,12 +392,12 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   if(event&&!event.done&&drawSchoolSprite(ctx,event.kind==='FRIEND'?'actors':'items',event.kind==='FRIEND'?14:event.kind==='REST'?13:event.kind==='TRADER'?14:6,sx,sy,ts)){ctx.restore();return;}
   if(event&&!event.done){ctx.fillStyle='#f9e7a5';ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.6,ts*.6);ctx.fillStyle='#304a37';ctx.font=`bold ${Math.floor(ts*.4)}px monospace`;ctx.fillText(({REST:'+',TRADER:'$',FRIEND:'☺',STORY:'!'} as any)[event.kind],sx+ts*.32,sy+ts*.65);}ctx.restore();};
  const drawCompanion=(ctx:CanvasRenderingContext2D,startX:number,startY:number,ts:number,sprite?:HTMLCanvasElement)=>{const f=state.current.companion;if(!f||f.hp<=0)return;const x=(f.x-startX)*ts,y=(f.y-startY)*ts;ctx.save();if(drawCompanionSprite(ctx,f,x,y,ts)||drawSchoolSprite(ctx,'actors',(f.name==='迷子の同級生'?14:SCHOOL_ACTOR_SPRITES[f.role])+(f.order==='FOLLOW'?Math.floor(state.current.floorTurns/2)%2:0),x,y,ts)){}else if(sprite){ctx.globalAlpha=.8;ctx.drawImage(sprite,x,y,ts,ts);}else{ctx.fillStyle='#69becd';ctx.fillRect(x+ts*.3,y+ts*.25,ts*.4,ts*.65);}ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(ts*.23)}px monospace`;ctx.fillText('Lv'+f.level,x,y+ts*.18);ctx.fillStyle='#24322b';ctx.fillRect(x+3,y+ts-3,ts-6,3);ctx.fillStyle=f.hp<(40+f.level*5)/3?'#ef7468':'#8edf91';ctx.fillRect(x+3,y+ts-3,(ts-6)*Math.min(1,f.hp/(40+f.level*5)),3);ctx.restore();};
- return {state:state.current,dojoRun,beginDojo,exitDojo,dojoStep,dojoAction,dojoMenu,dojoKey,drawDojo,isDojoActive:()=>Boolean(dojoRef.current),base:base.current,revision,panel,setPanel,container,message,text,start,begin,setupInventory,prepareFloor,restore,snapshot,saveCommitted,canDescend,beforeMove,onPickup,pay,returnGoods,canEquip,canUnequip,beforeUse,combine,dig,containerPut,containerTake,breakContainer,trapAction,interact,interactNearby,modeUnlocked:(mode:AdventureMode)=>b.current.debug||modeUnlocked(base.current,mode),modeRequirement,tick,recoverLoot,returnHome,drawTerrain,drawCompanion,drawBackdrop,drawTile,safeTurn,dojoComplete,townAction,visibleTile,claimMilestone,sceneTitle,catalog:bridge.catalog,
+ return {state:state.current,hero:activeHero(),magicForm:magicForm(activeHero().id),transform:()=>{if(dojoRef.current||panelRef.current||b.current.gameOver||b.current.gameClear||state.current.transformed||!magicForm(activeHero().id)||!enterMutation())return;state.current.transformed=true;loadStudentSprite(activeHero().id,true);say('変身！与えるダメージと受けるダメージが2倍。次の階で解除。','Transformed! Deal and take double damage until the next floor.');b.current.turn();refresh();},damage:(amount:number)=>studentDamage(amount,Boolean(state.current.transformed&&!dojoRef.current&&magicForm(activeHero().id))),selectedHero:studentHero(base.current.selectedHero),setHero,storyAct:storyIndex===null?null:STUDENT_STORIES[studentChapter(activeHero().id)][storyIndex],storyLine,advanceStory,openStory,studentShop:studentGear(activeHero().id,Math.max(1,state.current.floor)),drawHero:(ctx:CanvasRenderingContext2D,entity:any,x:number,y:number,size:number)=>drawStudentSprite(ctx,activeHero().id,entity.dir||{x:0,y:1},x,y,size,Boolean(state.current.transformed&&!dojoRef.current)),dojoRun,beginDojo,exitDojo,dojoStep,dojoAction,dojoMenu,dojoKey,drawDojo,isDojoActive:()=>Boolean(dojoRef.current),base:base.current,revision,panel,setPanel,container,message,text,start,begin,setupInventory,prepareFloor,restore,snapshot,saveCommitted,canDescend,beforeMove,onPickup,pay,returnGoods,canEquip,canUnequip,beforeUse,combine,dig,containerPut,containerTake,breakContainer,trapAction,interact,interactNearby,modeUnlocked:(mode:AdventureMode)=>b.current.debug||modeUnlocked(base.current,mode),modeRequirement,tick,recoverLoot,returnHome,drawTerrain,drawCompanion,drawBackdrop,drawTile,safeTurn,dojoComplete,townAction,visibleTile,claimMilestone,sceneTitle,catalog:bridge.catalog,
   drawTrap:(ctx:CanvasRenderingContext2D,trap:any,x:number,y:number,size:number)=>(trap.schoolPlaced||state.current.mode==='TRAPS')&&drawSchoolSprite(ctx,'items',12,x,y,size),
   drawItem:(ctx:CanvasRenderingContext2D,item:any,x:number,y:number,size:number)=>EXTRA_ITEM_SPRITES[item?.type]!==undefined?drawExpansionSprite(ctx,EXTRA_ITEM_SPRITES[item.type],x,y,size):SCHOOL_ITEM_SPRITES[item?.type]!==undefined&&drawSchoolSprite(ctx,'items',SCHOOL_ITEM_SPRITES[item.type],x,y,size),
   drawEnemy:(ctx:CanvasRenderingContext2D,enemy:any,x:number,y:number,size:number)=>EXTRA_ENEMIES[enemy?.schoolKind]?drawExpansionSprite(ctx,EXTRA_ENEMIES[enemy.schoolKind].sprite,x,y,size):SCHOOL_ACTOR_SPRITES[enemy?.schoolKind]!==undefined&&drawSchoolSprite(ctx,'actors',SCHOOL_ACTOR_SPRITES[enemy.schoolKind],x,y,size),
   openContainer:(item:SchoolItem)=>{if(item.capacity&&!item.cursed&&!item.shopOwner){identify(item);setContainer(item.id);setPanel('BAG');}},
-  resume:()=>{if(!dojoRef.current)(state.current as any).departed=true;setPanel(null);refresh();},
+  resume:()=>{if(!dojoRef.current)(state.current as any).departed=true;setPanel(null);if(!dojoRef.current&&state.current.mode==='STORY'&&state.current.floor===1&&!state.current.storySeen?.includes(1))openStory(0);refresh();},
   slide:(x:number,y:number,dx:number,dy:number)=>{
    const ctx=b.current,s=state.current,nx=x+dx,ny=y+dy;
    if(s.terrain[positionKey(x,y)]==='ICE'&&ctx.map[ny]?.[nx]&&ctx.map[ny][nx]!=='WALL'&&!ctx.enemies.some(e=>e.x===nx&&e.y===ny)&&!['HOLE','WATER'].includes(s.terrain[positionKey(nx,ny)])&&(dx===0||dy===0||(ctx.map[y]?.[nx]!=='WALL'&&ctx.map[ny]?.[x]!=='WALL')))return {x:nx,y:ny};

@@ -6,9 +6,9 @@ Game export: one skinned mesh and one material, four in-place clips, +Z front / 
 import bpy,bmesh,math,json,sys,argparse,os
 from pathlib import Path
 from mathutils import Vector,Matrix
-P=argparse.ArgumentParser();P.add_argument('--out',required=True);P.add_argument('--only',default='');P.add_argument('--render',action='store_true');P.add_argument('--size',type=int,default=512);P.add_argument('--samples',type=int,default=16)
+P=argparse.ArgumentParser();P.add_argument('--out',required=True);P.add_argument('--only',default='');P.add_argument('--designs',default='');P.add_argument('--render',action='store_true');P.add_argument('--size',type=int,default=512);P.add_argument('--samples',type=int,default=16)
 args=P.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
-OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True);DESIGNS=json.loads(Path(__file__).with_name('designs.json').read_text())
+OUT=Path(args.out);OUT.mkdir(parents=True,exist_ok=True);DESIGNS=json.loads((Path(args.designs) if args.designs else Path(__file__).with_name('designs.json')).read_text())
 def xyz(v):return (v[0],-v[2],v[1])
 def linear(v):return v/12.92 if v<=.04045 else ((v+.055)/1.055)**2.4
 def color(h):return tuple(linear(int(h[i:i+2],16)/255) for i in (0,2,4))+(1,)
@@ -68,7 +68,7 @@ class Model:
    if d.get('sport') and not d.get('skirt'):
     for bone,y,h in [(f'thigh.{side}',.64,.26),(f'shin.{side}',.3,.32)]:b('side_stripe',bone,(s*.189,y,0),(.018,h,.055),accent)
   # Small lapels, large color areas, limited plaid bands. No micro-noise textures.
-  is_uniform=not d['id'].startswith('elementary') or d.get('longcoat')
+  is_uniform=not d.get('transformed') and (not d['id'].startswith('elementary') or d.get('longcoat'))
   if is_uniform:
    inner=d.get('vestcolor',accent if d.get('hood') else 'e9e7df') if d.get('vest') or d.get('hood') else 'e9e7df'
    b('shirt_front','spine',(0,1.035,.151),(.17,.30,.018),inner)
@@ -77,7 +77,28 @@ class Model:
     b('lapel_trim','spine',(s*.139,1.128,.187),(.011,.152,.012),gold,rot=s*25)
    b('badge','spine',(-.172,1.092,.16),(.047,.061,.025),gold)
    b('badge','spine',(-.172,1.098,.177),(.025,.033,.011),accent)
-  else:b('front_pocket','spine',(0,1.04,.15),(.20,.11,.018),tint(coat,1.13))
+  elif not d.get('transformed'):b('front_pocket','spine',(0,1.04,.15),(.20,.11,.018),tint(coat,1.13))
+  if d.get('transformed'):
+   # Authored magical costume: mantles, metallic pauldrons, jewels and boots.
+   b('magic_belt','pelvis',(0,.838,0),(.40,.055,.29),gold)
+   b('magic_buckle','pelvis',(0,.838,.163),(.09,.08,.025),accent,rot=45)
+   b('magic_bodice','spine',(0,1.025,.158),(.16,.29,.025),d.get('inner','f0eee3'))
+   for side,sign in [('R',-1),('L',1)]:
+    b('magic_pauldrons','upper_arm.'+side,(sign*.303,1.168,0),(.21,.105,.24),gold)
+    b('magic_pauldrons','upper_arm.'+side,(sign*.303,1.193,.015),(.15,.055,.19),coat)
+    b('magic_bracers','forearm.'+side,(sign*.302,.837,0),(.174,.11,.22),gold)
+    b('magic_boots','shin.'+side,(sign*.105,.285,.102),(.16,.24,.035),accent)
+    b('magic_boot_trim','shin.'+side,(sign*.105,.40,.102),(.17,.035,.04),gold)
+    b('magic_front_trim','spine',(sign*.13,1.02,.172),(.018,.30,.019),gold)
+   b('magic_jewel','spine',(0,1.153,.193),(.075,.088,.04),accent,rot=45)
+   b('magic_jewel_glint','spine',(-.012,1.168,.218),(.022,.027,.01),'fff6db')
+   t('magic_mantle','spine',(0,.84,-.224),(.62,.045),(.36,.045),.69,coat)
+   t('magic_mantle_lining','spine',(0,.84,-.194),(.56,.015),(.30,.015),.63,accent)
+   for sign in [-1,1]:b('magic_mantle_trim','spine',(sign*.226,.84,-.255),(.022,.65,.018),gold,rot=sign*10)
+   if d.get('crown'):
+    b('magic_circlet','head',(0,1.70,.10),(.43,.035,.32),gold)
+    for xx,yy in [(-.15,1.75),(0,1.79),(.15,1.75)]:b('magic_crown','head',(xx,yy,.24),(.075,.11,.045),gold)
+    b('magic_crown_gem','head',(0,1.77,.268),(.04,.055,.022),accent)
   if d.get('tie'):
    b('tie','spine',(0,1.143,.181),(.049,.04,.025),accent)
    t('tie','spine',(0,1.036,.184),(.048,.023),(.031,.023),.17,accent)

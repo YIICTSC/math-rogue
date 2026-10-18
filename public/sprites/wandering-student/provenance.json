@@ -1,0 +1,4758 @@
+[
+  {
+    "id": "elementary-warrior",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-2def455a-4cf8-418c-b32d-a93bdc65df39.png",
+    "sourceSha256": "c4aa7f153fb237d08dd781da5422a76f3b646a59bea7a650327a5972d0c2a8cf",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27053140096618356,
+    "bounds": [
+      [
+        143,
+        25,
+        344,
+        427
+      ],
+      [
+        122,
+        16,
+        312,
+        426
+      ],
+      [
+        123,
+        15,
+        329,
+        426
+      ],
+      [
+        102,
+        16,
+        309,
+        426
+      ],
+      [
+        131,
+        11,
+        349,
+        422
+      ],
+      [
+        99,
+        9,
+        313,
+        421
+      ],
+      [
+        117,
+        5,
+        322,
+        419
+      ],
+      [
+        104,
+        5,
+        313,
+        419
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 63260
+  },
+  {
+    "id": "elementary-assassin",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-7344790b-2808-4f45-95f0-f15bd7e8c46a.png",
+    "sourceSha256": "e0e74177bd57dbad31e861609b33285bf0d1ce491ff36d51f9431f65178a8c57",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2793017456359102,
+    "bounds": [
+      [
+        143,
+        26,
+        339,
+        427
+      ],
+      [
+        127,
+        26,
+        317,
+        427
+      ],
+      [
+        125,
+        26,
+        315,
+        427
+      ],
+      [
+        122,
+        26,
+        315,
+        427
+      ],
+      [
+        138,
+        18,
+        338,
+        419
+      ],
+      [
+        120,
+        18,
+        323,
+        419
+      ],
+      [
+        125,
+        18,
+        319,
+        419
+      ],
+      [
+        119,
+        18,
+        316,
+        419
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 53686
+  },
+  {
+    "id": "elementary-caretaker",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-3e5000c2-1a8a-4fe6-b966-24019a62dd49.png",
+    "sourceSha256": "4187c827be4928810ac9a85847a083fa15dfd5f76125a26bb4dc2e391b088b9f",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27860696517412936,
+    "bounds": [
+      [
+        144,
+        24,
+        341,
+        425
+      ],
+      [
+        119,
+        24,
+        316,
+        425
+      ],
+      [
+        119,
+        23,
+        331,
+        423
+      ],
+      [
+        112,
+        23,
+        319,
+        423
+      ],
+      [
+        129,
+        10,
+        345,
+        412
+      ],
+      [
+        102,
+        10,
+        316,
+        411
+      ],
+      [
+        119,
+        9,
+        333,
+        411
+      ],
+      [
+        105,
+        9,
+        318,
+        411
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 56678
+  },
+  {
+    "id": "elementary-bard",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-37e411b6-1a66-416d-86f1-8db311a6d9c6.png",
+    "sourceSha256": "c6e9cb76acdf93c04643e40b19f17558959d6252729356846775be8578e99ef3",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2751842751842752,
+    "bounds": [
+      [
+        170,
+        37,
+        376,
+        439
+      ],
+      [
+        127,
+        38,
+        331,
+        439
+      ],
+      [
+        121,
+        33,
+        327,
+        439
+      ],
+      [
+        66,
+        32,
+        277,
+        439
+      ],
+      [
+        163,
+        13,
+        377,
+        419
+      ],
+      [
+        121,
+        13,
+        334,
+        419
+      ],
+      [
+        106,
+        13,
+        321,
+        419
+      ],
+      [
+        80,
+        12,
+        296,
+        418
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 68780
+  },
+  {
+    "id": "elementary-dodgeball",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-b75a0316-aafb-4a77-8235-8b067e1a72de.png",
+    "sourceSha256": "96b1764650f969ebc39eaa27003bedb32afb3f0d62cb3e515551246530602737",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27722772277227725,
+    "bounds": [
+      [
+        156,
+        24,
+        357,
+        428
+      ],
+      [
+        121,
+        24,
+        321,
+        428
+      ],
+      [
+        121,
+        24,
+        333,
+        428
+      ],
+      [
+        79,
+        24,
+        288,
+        428
+      ],
+      [
+        144,
+        11,
+        353,
+        413
+      ],
+      [
+        109,
+        11,
+        322,
+        413
+      ],
+      [
+        119,
+        11,
+        337,
+        413
+      ],
+      [
+        94,
+        11,
+        309,
+        413
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 68642
+  },
+  {
+    "id": "elementary-librarian",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-6c6128bc-f7a0-44c7-8e89-d34d97f15a53.png",
+    "sourceSha256": "0f19b9c10e5826c0f3b19fe4775e8f3357306fbf7e28ea36ae6f2c98bea6a009",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2685851318944844,
+    "bounds": [
+      [
+        126,
+        22,
+        358,
+        428
+      ],
+      [
+        111,
+        13,
+        331,
+        428
+      ],
+      [
+        102,
+        14,
+        323,
+        427
+      ],
+      [
+        98,
+        16,
+        315,
+        427
+      ],
+      [
+        124,
+        7,
+        358,
+        424
+      ],
+      [
+        103,
+        7,
+        342,
+        423
+      ],
+      [
+        100,
+        7,
+        323,
+        422
+      ],
+      [
+        89,
+        5,
+        316,
+        422
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 66814
+  },
+  {
+    "id": "elementary-gardener",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-34917223-640a-47f1-9228-2b64c4f303b9.png",
+    "sourceSha256": "a4376b3179277198a1f924526735c2e6193a22c8a95cd82f3252cd43d533a9c1",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2765432098765432,
+    "bounds": [
+      [
+        140,
+        29,
+        362,
+        427
+      ],
+      [
+        106,
+        25,
+        331,
+        427
+      ],
+      [
+        111,
+        25,
+        341,
+        427
+      ],
+      [
+        88,
+        25,
+        316,
+        427
+      ],
+      [
+        125,
+        11,
+        365,
+        415
+      ],
+      [
+        106,
+        11,
+        345,
+        415
+      ],
+      [
+        105,
+        11,
+        341,
+        415
+      ],
+      [
+        88,
+        10,
+        325,
+        415
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 63260
+  },
+  {
+    "id": "elementary-chef",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-e047d524-6315-4f4e-80eb-381004acd60c.png",
+    "sourceSha256": "6af90d95c3a3b89517d0c7c87be9be20e6f4ee378511614cff263ccbe895476e",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2679425837320574,
+    "bounds": [
+      [
+        134,
+        16,
+        352,
+        429
+      ],
+      [
+        118,
+        11,
+        327,
+        428
+      ],
+      [
+        123,
+        17,
+        340,
+        429
+      ],
+      [
+        87,
+        16,
+        313,
+        429
+      ],
+      [
+        118,
+        9,
+        350,
+        421
+      ],
+      [
+        94,
+        2,
+        326,
+        420
+      ],
+      [
+        117,
+        4,
+        339,
+        420
+      ],
+      [
+        105,
+        4,
+        328,
+        420
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 65010
+  },
+  {
+    "id": "elementary-mage",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-3c2d9e4c-e202-4bfd-b612-5c9a8f369d20.png",
+    "sourceSha256": "55dee9d1409d31dd24e4ff98009c731dd8db36ed8ee02956cbe8d378ebcd2ced",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2731707317073171,
+    "bounds": [
+      [
+        148,
+        29,
+        345,
+        423
+      ],
+      [
+        127,
+        28,
+        326,
+        420
+      ],
+      [
+        123,
+        28,
+        305,
+        421
+      ],
+      [
+        112,
+        28,
+        295,
+        422
+      ],
+      [
+        140,
+        0,
+        344,
+        410
+      ],
+      [
+        115,
+        7,
+        319,
+        414
+      ],
+      [
+        123,
+        8,
+        316,
+        410
+      ],
+      [
+        105,
+        8,
+        298,
+        410
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 54402
+  },
+  {
+    "id": "high-school-warrior",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-020db258-3a40-4f6c-89fc-6b353306cd43.png",
+    "sourceSha256": "867c1477b5356e7c4c60104215d1b181dfbbf03d20b47a1a272413c99bdd4598",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2641509433962264,
+    "bounds": [
+      [
+        108,
+        13,
+        350,
+        437
+      ],
+      [
+        85,
+        13,
+        342,
+        437
+      ],
+      [
+        77,
+        13,
+        313,
+        437
+      ],
+      [
+        114,
+        13,
+        358,
+        437
+      ],
+      [
+        83,
+        7,
+        330,
+        419
+      ],
+      [
+        105,
+        7,
+        358,
+        419
+      ],
+      [
+        68,
+        7,
+        316,
+        417
+      ],
+      [
+        113,
+        7,
+        358,
+        417
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          0,
+          0,
+          418,
+          429
+        ]
+      }
+    ],
+    "bytes": 62066
+  },
+  {
+    "id": "high-school-caretaker",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-b0095f0e-61c7-40ee-b5dc-28cc3dceed08.png",
+    "sourceSha256": "b08f8c7ff8001a7b33b7ee1e6bc9c8b847563b5f5260bb83d299bd4581464c5b",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2647754137115839,
+    "bounds": [
+      [
+        150,
+        33,
+        347,
+        444
+      ],
+      [
+        116,
+        33,
+        313,
+        444
+      ],
+      [
+        112,
+        33,
+        295,
+        444
+      ],
+      [
+        121,
+        33,
+        304,
+        444
+      ],
+      [
+        145,
+        0,
+        347,
+        423
+      ],
+      [
+        124,
+        0,
+        318,
+        423
+      ],
+      [
+        118,
+        0,
+        307,
+        421
+      ],
+      [
+        107,
+        0,
+        297,
+        421
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          418,
+          0,
+          836,
+          429
+        ]
+      }
+    ],
+    "bytes": 67444
+  },
+  {
+    "id": "high-school-assassin",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-ffe6ffe3-709e-4260-bb32-f743d65f404d.png",
+    "sourceSha256": "2368c1e9aecc147c51739aa27bcb7550d9106fdce269c8f39d2758db381ca09d",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26987951807228916,
+    "bounds": [
+      [
+        146,
+        25,
+        333,
+        435
+      ],
+      [
+        143,
+        20,
+        331,
+        435
+      ],
+      [
+        129,
+        20,
+        307,
+        435
+      ],
+      [
+        126,
+        20,
+        307,
+        435
+      ],
+      [
+        146,
+        10,
+        325,
+        418
+      ],
+      [
+        147,
+        10,
+        327,
+        418
+      ],
+      [
+        139,
+        10,
+        315,
+        418
+      ],
+      [
+        121,
+        10,
+        296,
+        418
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          836,
+          0,
+          1254,
+          429
+        ]
+      }
+    ],
+    "bytes": 57054
+  },
+  {
+    "id": "high-school-dodgeball",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-44031a94-d32a-4f99-ad55-cd47bef479d0.png",
+    "sourceSha256": "812fe10db61dcb0db467ca7d7ef10678fd70add438de4cd5aa4eb1d1e43d8aa4",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.25986078886310904,
+    "bounds": [
+      [
+        159,
+        8,
+        358,
+        439
+      ],
+      [
+        138,
+        12,
+        334,
+        436
+      ],
+      [
+        125,
+        12,
+        305,
+        439
+      ],
+      [
+        108,
+        12,
+        284,
+        439
+      ],
+      [
+        156,
+        6,
+        349,
+        421
+      ],
+      [
+        135,
+        5,
+        324,
+        421
+      ],
+      [
+        125,
+        5,
+        306,
+        416
+      ],
+      [
+        103,
+        5,
+        286,
+        416
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          418,
+          429,
+          836,
+          836
+        ]
+      }
+    ],
+    "bytes": 66774
+  },
+  {
+    "id": "high-school-bard",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-53c1241c-757a-4d5b-ab28-e59ff74aae04.png",
+    "sourceSha256": "bf53675c61f7d50d5680514e40871728d3381a2bfe62a4b88aaad1ea25199c5b",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27383863080684595,
+    "bounds": [
+      [
+        136,
+        27,
+        372,
+        436
+      ],
+      [
+        128,
+        27,
+        351,
+        436
+      ],
+      [
+        105,
+        28,
+        315,
+        436
+      ],
+      [
+        126,
+        28,
+        339,
+        436
+      ],
+      [
+        118,
+        13,
+        344,
+        421
+      ],
+      [
+        136,
+        13,
+        363,
+        421
+      ],
+      [
+        109,
+        18,
+        316,
+        421
+      ],
+      [
+        124,
+        18,
+        339,
+        421
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          836,
+          429,
+          1254,
+          836
+        ]
+      }
+    ],
+    "bytes": 66070
+  },
+  {
+    "id": "high-school-mage",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-8259a050-b54d-4a1a-abe8-2f2aa6910c93.png",
+    "sourceSha256": "49aac58d253d78ad00de7252c1e840684d4f8563c44fff0bb8214618afe0f6c0",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2679425837320574,
+    "bounds": [
+      [
+        178,
+        25,
+        348,
+        441
+      ],
+      [
+        137,
+        25,
+        309,
+        441
+      ],
+      [
+        128,
+        24,
+        285,
+        442
+      ],
+      [
+        102,
+        24,
+        262,
+        442
+      ],
+      [
+        160,
+        15,
+        336,
+        418
+      ],
+      [
+        118,
+        14,
+        296,
+        418
+      ],
+      [
+        123,
+        14,
+        290,
+        418
+      ],
+      [
+        98,
+        14,
+        266,
+        418
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          0,
+          429,
+          418,
+          836
+        ]
+      }
+    ],
+    "bytes": 59688
+  },
+  {
+    "id": "high-school-librarian",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-f8cf498a-a91e-4d31-97de-84ed9be44a21.png",
+    "sourceSha256": "f20642e14382f97bad1736f1a5316ecdd6d14e3d1744058c26bce8cba3027bd8",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27860696517412936,
+    "bounds": [
+      [
+        170,
+        20,
+        359,
+        422
+      ],
+      [
+        143,
+        20,
+        322,
+        422
+      ],
+      [
+        122,
+        25,
+        285,
+        422
+      ],
+      [
+        120,
+        26,
+        289,
+        422
+      ],
+      [
+        166,
+        17,
+        357,
+        414
+      ],
+      [
+        146,
+        17,
+        322,
+        414
+      ],
+      [
+        122,
+        17,
+        298,
+        410
+      ],
+      [
+        109,
+        17,
+        286,
+        410
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          0,
+          836,
+          418,
+          1254
+        ]
+      }
+    ],
+    "bytes": 55754
+  },
+  {
+    "id": "high-school-chef",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-ed7334d6-ff44-42c4-a729-933a2d92ec69.png",
+    "sourceSha256": "63d8cc55a9ccb9bc6f56068fbbf1bc32069f973832fc529dde10638914be156a",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26987951807228916,
+    "bounds": [
+      [
+        179,
+        20,
+        365,
+        434
+      ],
+      [
+        150,
+        20,
+        332,
+        429
+      ],
+      [
+        109,
+        20,
+        292,
+        435
+      ],
+      [
+        69,
+        20,
+        253,
+        435
+      ],
+      [
+        169,
+        9,
+        361,
+        417
+      ],
+      [
+        143,
+        9,
+        335,
+        417
+      ],
+      [
+        127,
+        9,
+        308,
+        411
+      ],
+      [
+        78,
+        9,
+        263,
+        411
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          418,
+          836,
+          836,
+          1254
+        ]
+      }
+    ],
+    "bytes": 61246
+  },
+  {
+    "id": "high-school-gardener",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-b2bcf745-69e4-4b12-877d-dbae9184cd73.png",
+    "sourceSha256": "f690647b426fdb2fe30966c65afda19172bc6797e707d690fb743dc0b3dd2cf9",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2641509433962264,
+    "bounds": [
+      [
+        115,
+        17,
+        318,
+        441
+      ],
+      [
+        128,
+        17,
+        332,
+        441
+      ],
+      [
+        139,
+        18,
+        293,
+        441
+      ],
+      [
+        149,
+        19,
+        305,
+        441
+      ],
+      [
+        118,
+        11,
+        304,
+        427
+      ],
+      [
+        134,
+        11,
+        320,
+        427
+      ],
+      [
+        144,
+        14,
+        310,
+        425
+      ],
+      [
+        134,
+        16,
+        300,
+        425
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-f3b54acb-a39c-4c57-9305-42c85e684b39.png",
+        "sourceSha256": "cb383c85ed7e0a86abcab98967376a2c9ac13884615eb00b7a884fc603147b3a",
+        "box": [
+          836,
+          836,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "bytes": 59082
+  },
+  {
+    "id": "magic-hiyori",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-a0ba5a00-5950-4d61-9db4-0cdd53d14c99.png",
+    "sourceSha256": "188143d32f4dc428671f21cbeca35d67adf8c80ac7bd9bd9afe573215b0de307",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2711864406779661,
+    "bounds": [
+      [
+        153,
+        28,
+        377,
+        441
+      ],
+      [
+        152,
+        28,
+        374,
+        441
+      ],
+      [
+        156,
+        28,
+        363,
+        441
+      ],
+      [
+        115,
+        28,
+        322,
+        441
+      ],
+      [
+        139,
+        13,
+        362,
+        416
+      ],
+      [
+        138,
+        14,
+        361,
+        416
+      ],
+      [
+        135,
+        13,
+        345,
+        416
+      ],
+      [
+        119,
+        13,
+        328,
+        416
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          836,
+          0,
+          1254,
+          433
+        ]
+      }
+    ],
+    "bytes": 75496
+  },
+  {
+    "id": "magic-akari",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-fff33416-6e2a-44b8-9a1b-a8dfc12a531c.png",
+    "sourceSha256": "4f267535c287b83bf83f54772bb6cf3245bcff8a0178f91cd011f37c463c37d8",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26291079812206575,
+    "bounds": [
+      [
+        129,
+        17,
+        398,
+        442
+      ],
+      [
+        131,
+        17,
+        325,
+        442
+      ],
+      [
+        54,
+        17,
+        320,
+        443
+      ],
+      [
+        89,
+        17,
+        354,
+        443
+      ],
+      [
+        125,
+        15,
+        401,
+        427
+      ],
+      [
+        97,
+        9,
+        378,
+        427
+      ],
+      [
+        69,
+        11,
+        329,
+        425
+      ],
+      [
+        82,
+        11,
+        340,
+        425
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          0,
+          0,
+          418,
+          433
+        ]
+      }
+    ],
+    "bytes": 85166
+  },
+  {
+    "id": "magic-shizuku",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-f193ebc6-b760-4bf6-89be-c73d05307046.png",
+    "sourceSha256": "62bb2b568b401fa3a4dd0aaf5b71607d74e4b5779a885395ce492ca55372b3bd",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2641509433962264,
+    "bounds": [
+      [
+        107,
+        20,
+        335,
+        444
+      ],
+      [
+        108,
+        20,
+        335,
+        444
+      ],
+      [
+        95,
+        20,
+        299,
+        439
+      ],
+      [
+        138,
+        20,
+        342,
+        439
+      ],
+      [
+        92,
+        15,
+        312,
+        421
+      ],
+      [
+        125,
+        15,
+        345,
+        421
+      ],
+      [
+        95,
+        15,
+        307,
+        417
+      ],
+      [
+        135,
+        15,
+        349,
+        417
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          418,
+          0,
+          836,
+          433
+        ]
+      }
+    ],
+    "bytes": 61270
+  },
+  {
+    "id": "magic-tsubasa",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-86680546-925e-4680-a602-4a487d7610a9.png",
+    "sourceSha256": "3c26050292fa546994b4e1560305e3d28583ec7ac7f62d1416590a47b3850b27",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26107226107226106,
+    "bounds": [
+      [
+        143,
+        15,
+        340,
+        441
+      ],
+      [
+        114,
+        15,
+        313,
+        440
+      ],
+      [
+        113,
+        15,
+        307,
+        444
+      ],
+      [
+        105,
+        15,
+        301,
+        443
+      ],
+      [
+        140,
+        7,
+        340,
+        426
+      ],
+      [
+        115,
+        7,
+        319,
+        426
+      ],
+      [
+        117,
+        6,
+        320,
+        425
+      ],
+      [
+        102,
+        6,
+        301,
+        425
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          0,
+          433,
+          418,
+          838
+        ]
+      }
+    ],
+    "bytes": 72134
+  },
+  {
+    "id": "magic-rei",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-e810efe5-9d4d-4bcb-82f3-2c0abcc211f6.png",
+    "sourceSha256": "71ca60f5e6d47531e43c82614d7afca737c94638feb38992f3f185453b8404fd",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26730310262529833,
+    "bounds": [
+      [
+        122,
+        15,
+        397,
+        434
+      ],
+      [
+        101,
+        15,
+        375,
+        434
+      ],
+      [
+        72,
+        15,
+        293,
+        434
+      ],
+      [
+        112,
+        15,
+        327,
+        434
+      ],
+      [
+        122,
+        8,
+        402,
+        422
+      ],
+      [
+        114,
+        5,
+        387,
+        422
+      ],
+      [
+        70,
+        8,
+        323,
+        419
+      ],
+      [
+        99,
+        8,
+        357,
+        418
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          418,
+          433,
+          836,
+          838
+        ]
+      }
+    ],
+    "bytes": 68926
+  },
+  {
+    "id": "magic-koharu",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-821c1534-8a80-4479-91bb-9865ac3a772a.png",
+    "sourceSha256": "777ddadf207ec5892162fa4bfc8fe306a06a06cde92023276b75d2dfd9facc5b",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26666666666666666,
+    "bounds": [
+      [
+        105,
+        25,
+        362,
+        444
+      ],
+      [
+        107,
+        28,
+        361,
+        444
+      ],
+      [
+        89,
+        34,
+        300,
+        444
+      ],
+      [
+        115,
+        29,
+        329,
+        444
+      ],
+      [
+        91,
+        0,
+        340,
+        420
+      ],
+      [
+        121,
+        0,
+        371,
+        420
+      ],
+      [
+        78,
+        0,
+        313,
+        416
+      ],
+      [
+        115,
+        0,
+        346,
+        416
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          0,
+          838,
+          418,
+          1254
+        ]
+      }
+    ],
+    "bytes": 75624
+  },
+  {
+    "id": "magic-mirai",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-fbfa70c2-f1ef-4138-8f0d-788ed1b17eb0.png",
+    "sourceSha256": "aa860eb472d6ea63f19df3252fea06812d8990d1edfac30d725eedc3e5532376",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2725060827250608,
+    "bounds": [
+      [
+        136,
+        30,
+        365,
+        441
+      ],
+      [
+        69,
+        30,
+        299,
+        438
+      ],
+      [
+        117,
+        30,
+        357,
+        441
+      ],
+      [
+        104,
+        30,
+        322,
+        441
+      ],
+      [
+        120,
+        16,
+        371,
+        415
+      ],
+      [
+        89,
+        19,
+        341,
+        415
+      ],
+      [
+        86,
+        19,
+        326,
+        415
+      ],
+      [
+        64,
+        16,
+        309,
+        415
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          418,
+          838,
+          836,
+          1254
+        ]
+      }
+    ],
+    "bytes": 86320
+  },
+  {
+    "id": "magic-madoka",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-806f2a77-ea3a-4497-93f2-5bb6648394b0.png",
+    "sourceSha256": "709fec4a79ddadad6bd22bf51f1454691c9410ca33ac2a12bdb56f3532f63db3",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2711864406779661,
+    "bounds": [
+      [
+        85,
+        28,
+        409,
+        435
+      ],
+      [
+        66,
+        28,
+        396,
+        435
+      ],
+      [
+        52,
+        22,
+        297,
+        435
+      ],
+      [
+        105,
+        22,
+        344,
+        435
+      ],
+      [
+        63,
+        8,
+        386,
+        419
+      ],
+      [
+        64,
+        8,
+        391,
+        419
+      ],
+      [
+        51,
+        17,
+        351,
+        416
+      ],
+      [
+        55,
+        21,
+        355,
+        416
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          836,
+          433,
+          1254,
+          838
+        ]
+      }
+    ],
+    "bytes": 98588
+  },
+  {
+    "id": "magic-sera",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-e998631d-6f35-486d-bd71-7a8615b1b173.png",
+    "sourceSha256": "c67813eb083d2d0a9005c00b1607d1e41ccb3351e21793838ade4d05c5764c3a",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2641509433962264,
+    "bounds": [
+      [
+        116,
+        15,
+        396,
+        437
+      ],
+      [
+        94,
+        17,
+        371,
+        437
+      ],
+      [
+        74,
+        15,
+        319,
+        438
+      ],
+      [
+        116,
+        15,
+        363,
+        439
+      ],
+      [
+        102,
+        6,
+        394,
+        417
+      ],
+      [
+        94,
+        6,
+        375,
+        417
+      ],
+      [
+        82,
+        7,
+        328,
+        417
+      ],
+      [
+        100,
+        7,
+        353,
+        417
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b1e4ce88-b9d7-4d2e-acf7-46037fb566eb.png",
+        "sourceSha256": "3b1bce9e57ab8281100d2ba3e21f8320d7e964ca31cca380228a3b1ef664fa45",
+        "box": [
+          836,
+          838,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "bytes": 85590
+  },
+  {
+    "id": "magic-ren",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-5ef7680f-3d28-4faa-b012-a372466e64cd.png",
+    "sourceSha256": "d5e75a95a6995a2a04f8256ba0980438084c4e5483edf885425dec0dde65bb0f",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27450980392156865,
+    "bounds": [
+      [
+        147,
+        15,
+        342,
+        422
+      ],
+      [
+        136,
+        15,
+        316,
+        422
+      ],
+      [
+        117,
+        15,
+        302,
+        423
+      ],
+      [
+        101,
+        15,
+        284,
+        423
+      ],
+      [
+        144,
+        7,
+        336,
+        410
+      ],
+      [
+        121,
+        7,
+        324,
+        410
+      ],
+      [
+        124,
+        7,
+        308,
+        410
+      ],
+      [
+        101,
+        7,
+        280,
+        410
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          0,
+          0,
+          418,
+          434
+        ]
+      }
+    ],
+    "bytes": 68488
+  },
+  {
+    "id": "magic-minato",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-85de1def-147e-4e47-829b-14dd369c0025.png",
+    "sourceSha256": "7feeb49c1bbd518f87d4efe99a97440a8e4943a8953c4cc054dc4e3d3dbe36f2",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26229508196721313,
+    "bounds": [
+      [
+        133,
+        8,
+        326,
+        435
+      ],
+      [
+        119,
+        9,
+        321,
+        435
+      ],
+      [
+        109,
+        9,
+        312,
+        435
+      ],
+      [
+        114,
+        8,
+        314,
+        435
+      ],
+      [
+        94,
+        6,
+        329,
+        423
+      ],
+      [
+        117,
+        6,
+        349,
+        423
+      ],
+      [
+        94,
+        6,
+        322,
+        420
+      ],
+      [
+        108,
+        6,
+        335,
+        420
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          836,
+          0,
+          1254,
+          434
+        ]
+      }
+    ],
+    "bytes": 76338
+  },
+  {
+    "id": "magic-soma",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-914e708b-6d73-4319-870f-8c8f4d476aa5.png",
+    "sourceSha256": "93437e583da4644fb2e32f3205805e58912f32f5da9a2ef9e09a08336c52f91d",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2692307692307692,
+    "bounds": [
+      [
+        117,
+        23,
+        359,
+        436
+      ],
+      [
+        93,
+        19,
+        339,
+        433
+      ],
+      [
+        97,
+        21,
+        315,
+        436
+      ],
+      [
+        115,
+        20,
+        318,
+        436
+      ],
+      [
+        97,
+        8,
+        337,
+        422
+      ],
+      [
+        105,
+        8,
+        339,
+        422
+      ],
+      [
+        82,
+        8,
+        311,
+        416
+      ],
+      [
+        112,
+        8,
+        337,
+        415
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          418,
+          0,
+          836,
+          434
+        ]
+      }
+    ],
+    "bytes": 78732
+  },
+  {
+    "id": "magic-riku",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-e37e93d4-0a58-4850-9492-254dc071c852.png",
+    "sourceSha256": "392d286717289dee07d7e846751d7a31b8361fdc22a91094a345900965cf328e",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2751842751842752,
+    "bounds": [
+      [
+        135,
+        31,
+        330,
+        438
+      ],
+      [
+        129,
+        31,
+        315,
+        438
+      ],
+      [
+        114,
+        31,
+        313,
+        438
+      ],
+      [
+        131,
+        31,
+        330,
+        438
+      ],
+      [
+        129,
+        22,
+        332,
+        419
+      ],
+      [
+        113,
+        22,
+        317,
+        418
+      ],
+      [
+        123,
+        21,
+        323,
+        417
+      ],
+      [
+        123,
+        21,
+        322,
+        417
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          0,
+          434,
+          418,
+          842
+        ]
+      }
+    ],
+    "bytes": 63112
+  },
+  {
+    "id": "magic-yamato",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-ee4c9d53-7846-4742-916b-18fa3e3224f1.png",
+    "sourceSha256": "148e1172031547e64cced7db28e039949d51ad7d8a84e6e6c5d26936783240b0",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2685851318944844,
+    "bounds": [
+      [
+        146,
+        20,
+        332,
+        432
+      ],
+      [
+        136,
+        20,
+        319,
+        430
+      ],
+      [
+        121,
+        17,
+        307,
+        434
+      ],
+      [
+        110,
+        17,
+        293,
+        434
+      ],
+      [
+        141,
+        13,
+        335,
+        421
+      ],
+      [
+        114,
+        13,
+        314,
+        421
+      ],
+      [
+        131,
+        12,
+        312,
+        415
+      ],
+      [
+        103,
+        11,
+        287,
+        414
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          418,
+          434,
+          836,
+          842
+        ]
+      }
+    ],
+    "bytes": 69046
+  },
+  {
+    "id": "magic-leon",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-83967075-e400-44c7-8418-e0b36906dcd4.png",
+    "sourceSha256": "a35aac9a35a3fd2f117e5425babc3748fd9f49275643e4ab9a934a655cda945c",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26987951807228916,
+    "bounds": [
+      [
+        153,
+        28,
+        343,
+        432
+      ],
+      [
+        132,
+        28,
+        324,
+        432
+      ],
+      [
+        122,
+        23,
+        297,
+        433
+      ],
+      [
+        107,
+        24,
+        290,
+        432
+      ],
+      [
+        146,
+        6,
+        332,
+        416
+      ],
+      [
+        119,
+        1,
+        308,
+        416
+      ],
+      [
+        122,
+        1,
+        305,
+        410
+      ],
+      [
+        116,
+        2,
+        303,
+        412
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          836,
+          434,
+          1254,
+          842
+        ]
+      }
+    ],
+    "bytes": 74228
+  },
+  {
+    "id": "magic-elliot",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-9bf35884-5c2d-422a-937d-b3a85d8b0927.png",
+    "sourceSha256": "c99cbdf223174c795c54bdee73fff7c378decb85f0d42ea8180d0c0fda5f2260",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2635294117647059,
+    "bounds": [
+      [
+        139,
+        17,
+        368,
+        435
+      ],
+      [
+        97,
+        10,
+        335,
+        435
+      ],
+      [
+        91,
+        10,
+        318,
+        435
+      ],
+      [
+        78,
+        14,
+        313,
+        435
+      ],
+      [
+        107,
+        1,
+        351,
+        413
+      ],
+      [
+        96,
+        1,
+        358,
+        413
+      ],
+      [
+        75,
+        1,
+        321,
+        413
+      ],
+      [
+        83,
+        1,
+        330,
+        413
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          0,
+          842,
+          418,
+          1254
+        ]
+      }
+    ],
+    "bytes": 84404
+  },
+  {
+    "id": "magic-sakuya",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-21709660-553f-4630-bab6-e0eeb0e0656c.png",
+    "sourceSha256": "7e63e9de0162e5e038b77f0b4dd7eb673829d4ffd781f01d07cb9821d86a5202",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.26666666666666666,
+    "bounds": [
+      [
+        130,
+        18,
+        393,
+        438
+      ],
+      [
+        115,
+        18,
+        356,
+        438
+      ],
+      [
+        73,
+        18,
+        333,
+        438
+      ],
+      [
+        88,
+        18,
+        348,
+        438
+      ],
+      [
+        97,
+        12,
+        368,
+        419
+      ],
+      [
+        115,
+        12,
+        388,
+        418
+      ],
+      [
+        82,
+        12,
+        332,
+        418
+      ],
+      [
+        88,
+        12,
+        344,
+        418
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-aa242eac-6b38-4554-ae5a-b5037e4ccdec.png",
+        "sourceSha256": "ad4c5d0a89657c8e7e2778c2d376cdb5aa64347dd44edd5e8516f82550ffaa2a",
+        "box": [
+          418,
+          842,
+          836,
+          1254
+        ]
+      }
+    ],
+    "bytes": 82586
+  },
+  {
+    "id": "magic-shizuku-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-f698e9d5-3c41-4f37-92e9-60e6822bc949.png",
+    "sourceSha256": "2e3b743b63b2c5507197daaf5339d1ab22ceb3939403afc717e05ad9d4edb196",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27860696517412936,
+    "bounds": [
+      [
+        86,
+        38,
+        373,
+        435
+      ],
+      [
+        93,
+        37,
+        381,
+        433
+      ],
+      [
+        72,
+        37,
+        321,
+        439
+      ],
+      [
+        124,
+        37,
+        371,
+        439
+      ],
+      [
+        73,
+        24,
+        361,
+        411
+      ],
+      [
+        95,
+        23,
+        375,
+        414
+      ],
+      [
+        70,
+        19,
+        331,
+        410
+      ],
+      [
+        117,
+        19,
+        375,
+        414
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          480,
+          55,
+          744,
+          430
+        ]
+      }
+    ],
+    "bytes": 105018
+  },
+  {
+    "id": "magic-akari-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-df7ee18c-6703-4963-9581-b3a12cc7046b.png",
+    "sourceSha256": "fa77ccdd3ae5f9c8cc64cc8a7b3b44b872facb26f6dc63df0e2982ec97936457",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2711864406779661,
+    "bounds": [
+      [
+        105,
+        38,
+        384,
+        443
+      ],
+      [
+        117,
+        38,
+        321,
+        443
+      ],
+      [
+        76,
+        39,
+        360,
+        444
+      ],
+      [
+        111,
+        39,
+        383,
+        444
+      ],
+      [
+        70,
+        27,
+        352,
+        409
+      ],
+      [
+        99,
+        25,
+        387,
+        411
+      ],
+      [
+        82,
+        0,
+        354,
+        413
+      ],
+      [
+        118,
+        0,
+        382,
+        411
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          102,
+          48,
+          367,
+          430
+        ]
+      }
+    ],
+    "bytes": 93688
+  },
+  {
+    "id": "magic-tsubasa-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-2d28fbeb-8386-4a0c-998c-2dd848090ddd.png",
+    "sourceSha256": "e1109fe922ee319c2c3b66d655361aaf8ca7a770de68ae9f16c43ae83db353b0",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2725060827250608,
+    "bounds": [
+      [
+        130,
+        33,
+        381,
+        439
+      ],
+      [
+        120,
+        31,
+        371,
+        439
+      ],
+      [
+        79,
+        31,
+        326,
+        442
+      ],
+      [
+        112,
+        32,
+        332,
+        442
+      ],
+      [
+        96,
+        13,
+        341,
+        412
+      ],
+      [
+        124,
+        13,
+        381,
+        412
+      ],
+      [
+        96,
+        18,
+        336,
+        407
+      ],
+      [
+        105,
+        13,
+        365,
+        407
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          102,
+          446,
+          359,
+          832
+        ]
+      }
+    ],
+    "bytes": 91008
+  },
+  {
+    "id": "magic-hiyori-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-25f17817-67c5-4d07-9e82-9be6f7b0e1f8.png",
+    "sourceSha256": "bf963b4f0b356db926ff89fb7751897d44fcc8dab157490aa85483d380dcd136",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2978723404255319,
+    "bounds": [
+      [
+        83,
+        54,
+        386,
+        430
+      ],
+      [
+        92,
+        54,
+        392,
+        430
+      ],
+      [
+        104,
+        54,
+        335,
+        430
+      ],
+      [
+        117,
+        54,
+        345,
+        430
+      ],
+      [
+        88,
+        32,
+        367,
+        407
+      ],
+      [
+        99,
+        32,
+        381,
+        407
+      ],
+      [
+        94,
+        32,
+        354,
+        406
+      ],
+      [
+        92,
+        32,
+        354,
+        407
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          878,
+          49,
+          1159,
+          436
+        ]
+      }
+    ],
+    "bytes": 115188
+  },
+  {
+    "id": "magic-rei-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-f49394d1-8385-4e14-82b8-8df166d3ab2d.png",
+    "sourceSha256": "6be142a26c238c582bd5596468dace1467712efee784202479df50651fd3fd7b",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2857142857142857,
+    "bounds": [
+      [
+        97,
+        42,
+        384,
+        431
+      ],
+      [
+        80,
+        42,
+        359,
+        428
+      ],
+      [
+        89,
+        41,
+        324,
+        432
+      ],
+      [
+        113,
+        41,
+        351,
+        433
+      ],
+      [
+        81,
+        11,
+        363,
+        403
+      ],
+      [
+        92,
+        11,
+        376,
+        403
+      ],
+      [
+        77,
+        11,
+        346,
+        398
+      ],
+      [
+        95,
+        11,
+        362,
+        398
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 104770
+  },
+  {
+    "id": "magic-koharu-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-153b61ba-14d9-47fd-ab30-09fe1e1a44d1.png",
+    "sourceSha256": "90d10c90ccc9dc66ef832eb3a6762eca5d9e1f3e030564210bc1af09f9bbbd7c",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2879177377892031,
+    "bounds": [
+      [
+        97,
+        43,
+        355,
+        430
+      ],
+      [
+        103,
+        43,
+        356,
+        430
+      ],
+      [
+        92,
+        45,
+        320,
+        434
+      ],
+      [
+        125,
+        45,
+        354,
+        434
+      ],
+      [
+        82,
+        22,
+        356,
+        406
+      ],
+      [
+        88,
+        24,
+        362,
+        408
+      ],
+      [
+        75,
+        24,
+        329,
+        410
+      ],
+      [
+        100,
+        24,
+        358,
+        410
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          78,
+          838,
+          370,
+          1234
+        ]
+      }
+    ],
+    "bytes": 101692
+  },
+  {
+    "id": "magic-madoka-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-6dc9c7d4-ec2a-4d99-9076-073e360a5686.png",
+    "sourceSha256": "8caa9befd54be24ad8b8255b0891c1b54d34daff13d039e42c85e8f155797b34",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.28426395939086296,
+    "bounds": [
+      [
+        86,
+        51,
+        366,
+        442
+      ],
+      [
+        87,
+        51,
+        367,
+        439
+      ],
+      [
+        118,
+        51,
+        312,
+        444
+      ],
+      [
+        115,
+        50,
+        314,
+        444
+      ],
+      [
+        109,
+        24,
+        356,
+        417
+      ],
+      [
+        88,
+        27,
+        338,
+        418
+      ],
+      [
+        91,
+        27,
+        336,
+        415
+      ],
+      [
+        93,
+        27,
+        337,
+        415
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          904,
+          443,
+          1154,
+          839
+        ]
+      }
+    ],
+    "bytes": 103762
+  },
+  {
+    "id": "magic-mirai-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-8735a939-1276-48c2-8e4e-3394a1aaded3.png",
+    "sourceSha256": "156d7395dc8a1eaa471a08e423924e2c7021fc8adfc994e8bad371403de02f8a",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2731707317073171,
+    "bounds": [
+      [
+        89,
+        32,
+        388,
+        439
+      ],
+      [
+        87,
+        32,
+        382,
+        434
+      ],
+      [
+        64,
+        32,
+        352,
+        436
+      ],
+      [
+        94,
+        32,
+        373,
+        436
+      ],
+      [
+        81,
+        7,
+        375,
+        412
+      ],
+      [
+        90,
+        5,
+        392,
+        415
+      ],
+      [
+        74,
+        5,
+        370,
+        415
+      ],
+      [
+        90,
+        5,
+        375,
+        415
+      ]
+    ],
+    "directionOverrides": [],
+    "bytes": 106188
+  },
+  {
+    "id": "magic-ren-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-3184b2cb-3e57-4eb9-99df-4d3513f7c93b.png",
+    "sourceSha256": "100b8ac2b340196692f542478faf3cf1aa5586e544e6c6eef12b2418981241cd",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27860696517412936,
+    "bounds": [
+      [
+        88,
+        35,
+        380,
+        432
+      ],
+      [
+        81,
+        31,
+        369,
+        431
+      ],
+      [
+        83,
+        34,
+        330,
+        432
+      ],
+      [
+        121,
+        34,
+        360,
+        431
+      ],
+      [
+        70,
+        14,
+        357,
+        416
+      ],
+      [
+        102,
+        14,
+        379,
+        416
+      ],
+      [
+        80,
+        14,
+        329,
+        416
+      ],
+      [
+        120,
+        14,
+        364,
+        416
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          65,
+          25,
+          356,
+          433
+        ]
+      }
+    ],
+    "bytes": 94892
+  },
+  {
+    "id": "magic-soma-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-effac49c-4d2c-4477-8c0b-32bdc708cca8.png",
+    "sourceSha256": "cadde101c75bf71210b434f9cc3897654456fa071a5a9f30d14ae2493361ed58",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.28498727735368956,
+    "bounds": [
+      [
+        107,
+        46,
+        355,
+        435
+      ],
+      [
+        96,
+        46,
+        348,
+        436
+      ],
+      [
+        114,
+        47,
+        323,
+        436
+      ],
+      [
+        117,
+        43,
+        329,
+        436
+      ],
+      [
+        95,
+        22,
+        342,
+        406
+      ],
+      [
+        101,
+        22,
+        351,
+        406
+      ],
+      [
+        94,
+        31,
+        332,
+        406
+      ],
+      [
+        113,
+        26,
+        346,
+        407
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          496,
+          28,
+          767,
+          433
+        ]
+      }
+    ],
+    "bytes": 88168
+  },
+  {
+    "id": "magic-sera-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-020f3261-6ac8-4d04-8441-8911a882f7e1.png",
+    "sourceSha256": "c0f0cfe17c32e1bb0bce085c65b100a7b7024b295f9809cc3b9b783fd9a3df0e",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27722772277227725,
+    "bounds": [
+      [
+        71,
+        38,
+        378,
+        442
+      ],
+      [
+        83,
+        38,
+        401,
+        439
+      ],
+      [
+        80,
+        38,
+        350,
+        442
+      ],
+      [
+        121,
+        38,
+        385,
+        442
+      ],
+      [
+        71,
+        21,
+        357,
+        410
+      ],
+      [
+        96,
+        21,
+        385,
+        410
+      ],
+      [
+        69,
+        20,
+        341,
+        410
+      ],
+      [
+        114,
+        21,
+        385,
+        410
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-4604653f-7559-409f-9264-d1da6fc89ef9.png",
+        "sourceSha256": "3472005addab4c21f93e2509cb0314abad577ab53593bd154d46aa90dbc28828",
+        "box": [
+          875,
+          841,
+          1169,
+          1226
+        ]
+      }
+    ],
+    "bytes": 104004
+  },
+  {
+    "id": "magic-minato-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-233e9179-38ba-4a9b-a61c-33e1c61f9dd4.png",
+    "sourceSha256": "685b962dd710e4201277a874cf3eefa2c36414e3ec4cb99f179fd61d5ae1a949",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.28,
+    "bounds": [
+      [
+        116,
+        39,
+        322,
+        437
+      ],
+      [
+        123,
+        42,
+        334,
+        437
+      ],
+      [
+        108,
+        43,
+        332,
+        437
+      ],
+      [
+        112,
+        37,
+        343,
+        437
+      ],
+      [
+        82,
+        27,
+        334,
+        415
+      ],
+      [
+        116,
+        25,
+        367,
+        415
+      ],
+      [
+        97,
+        25,
+        331,
+        413
+      ],
+      [
+        115,
+        24,
+        355,
+        413
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          895,
+          32,
+          1191,
+          433
+        ]
+      }
+    ],
+    "bytes": 93640
+  },
+  {
+    "id": "magic-yamato-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-b08a7ae0-f943-45bd-9497-854dd91f780b.png",
+    "sourceSha256": "6b7c3d3faee54d3c5ea2457d1a1cdc9ad024a751d2ecdccfed125a532257c9be",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.28211586901763225,
+    "bounds": [
+      [
+        111,
+        39,
+        346,
+        435
+      ],
+      [
+        102,
+        39,
+        339,
+        435
+      ],
+      [
+        121,
+        39,
+        336,
+        436
+      ],
+      [
+        112,
+        40,
+        323,
+        436
+      ],
+      [
+        98,
+        25,
+        350,
+        413
+      ],
+      [
+        105,
+        24,
+        353,
+        413
+      ],
+      [
+        105,
+        24,
+        343,
+        411
+      ],
+      [
+        95,
+        25,
+        334,
+        412
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          478,
+          435,
+          764,
+          834
+        ]
+      }
+    ],
+    "bytes": 83436
+  },
+  {
+    "id": "magic-riku-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-eaf2ef5a-8b64-4fc6-a2d7-4f9f3710768f.png",
+    "sourceSha256": "4f71bdf8a08993fd216ae6e1a6dc33680b265f0f39965df4857d98063f97b1da",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.28940568475452194,
+    "bounds": [
+      [
+        126,
+        45,
+        356,
+        432
+      ],
+      [
+        93,
+        45,
+        324,
+        432
+      ],
+      [
+        93,
+        45,
+        321,
+        432
+      ],
+      [
+        115,
+        45,
+        330,
+        432
+      ],
+      [
+        94,
+        24,
+        335,
+        405
+      ],
+      [
+        112,
+        24,
+        352,
+        405
+      ],
+      [
+        93,
+        24,
+        328,
+        406
+      ],
+      [
+        110,
+        24,
+        343,
+        405
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          71,
+          440,
+          354,
+          834
+        ]
+      }
+    ],
+    "bytes": 87746
+  },
+  {
+    "id": "magic-leon-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-79b84f2d-96d4-4c1f-b70d-620deb48ae3f.png",
+    "sourceSha256": "7dcbb6dbdd3877d88914e0615881fd13613ec8844276b6ff8664674440d92e9c",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.2814070351758794,
+    "bounds": [
+      [
+        118,
+        52,
+        320,
+        443
+      ],
+      [
+        122,
+        55,
+        324,
+        437
+      ],
+      [
+        137,
+        52,
+        339,
+        442
+      ],
+      [
+        126,
+        52,
+        328,
+        443
+      ],
+      [
+        106,
+        11,
+        333,
+        407
+      ],
+      [
+        112,
+        9,
+        344,
+        407
+      ],
+      [
+        128,
+        11,
+        330,
+        406
+      ],
+      [
+        123,
+        10,
+        333,
+        406
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          917,
+          437,
+          1195,
+          840
+        ]
+      }
+    ],
+    "bytes": 94452
+  },
+  {
+    "id": "magic-elliot-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-bc47cfe8-6f77-419f-837a-7c2bdce29bf6.png",
+    "sourceSha256": "f053e3e517d0d4b9904e5aba85e4cd5203f5055dcc8957593daa496f448dcae1",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27722772277227725,
+    "bounds": [
+      [
+        93,
+        32,
+        342,
+        434
+      ],
+      [
+        89,
+        32,
+        357,
+        434
+      ],
+      [
+        93,
+        32,
+        334,
+        434
+      ],
+      [
+        112,
+        32,
+        345,
+        434
+      ],
+      [
+        79,
+        13,
+        333,
+        417
+      ],
+      [
+        110,
+        15,
+        366,
+        417
+      ],
+      [
+        73,
+        15,
+        336,
+        413
+      ],
+      [
+        111,
+        15,
+        368,
+        413
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          66,
+          835,
+          356,
+          1241
+        ]
+      }
+    ],
+    "bytes": 97690
+  },
+  {
+    "id": "magic-sakuya-transformed",
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-b239fdef-b632-4a8b-97fd-162c08864844.png",
+    "sourceSha256": "c1c8c43e6692f563a391a5b502e3fa2118806b4841df3a919f25b7d214a3e1d3",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "grid": [
+      4,
+      2
+    ],
+    "cell": [
+      128,
+      128
+    ],
+    "directions": [
+      "S",
+      "N",
+      "E",
+      "W",
+      "SE",
+      "SW",
+      "NE",
+      "NW"
+    ],
+    "baseline": 124,
+    "scale": 0.27586206896551724,
+    "bounds": [
+      [
+        104,
+        39,
+        379,
+        435
+      ],
+      [
+        105,
+        34,
+        358,
+        434
+      ],
+      [
+        66,
+        34,
+        337,
+        434
+      ],
+      [
+        105,
+        34,
+        371,
+        434
+      ],
+      [
+        75,
+        9,
+        355,
+        412
+      ],
+      [
+        100,
+        9,
+        378,
+        415
+      ],
+      [
+        79,
+        9,
+        345,
+        405
+      ],
+      [
+        119,
+        9,
+        378,
+        407
+      ]
+    ],
+    "directionOverrides": [
+      {
+        "direction": "SE",
+        "source": "/workspace/generated_images/exec-b84d9388-d3ec-4f18-b906-709fb5f7b58c.png",
+        "sourceSha256": "f3763c6f5f87a26f0907f71ba4ee7b741f1a6a4d379f7be959cbd473fab996e8",
+        "box": [
+          466,
+          837,
+          772,
+          1241
+        ]
+      }
+    ],
+    "bytes": 87944
+  }
+]

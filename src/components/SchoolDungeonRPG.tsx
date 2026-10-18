@@ -1,3 +1,4 @@
+import {STUDENT_ITEM_DB} from './school-dungeon/student/content';
 import EquipmentPreview from './school-dungeon/three/EquipmentPreview';
 import {useDungeon3D} from './school-dungeon/three/useDungeon3D';
 import {SchoolSupplyIcon} from './school-dungeon/sprites';
@@ -781,6 +782,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const drawPlayerFromSheets = (ctx: CanvasRenderingContext2D, entity: Entity, sx: number, sy: number, ts: number) => {
+      if(adventure.drawHero(ctx,entity,sx,sy,ts))return true;
       const baseIndex = Math.max(0, getHeroDirectionIndex(entity.dir));
       return drawSheetSprite(ctx, 'hero', baseIndex, sx, sy, ts, ts);
   };
@@ -1415,7 +1417,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
 
           if (nextStatus.poison && nextStatus.poison > 0) {
-              const poisonDmg = 5;
+              const poisonDmg = adventure.damage(5);
               currentHp -= poisonDmg;
               nextStatus.poison--;
               addVisualEffect('TEXT', px, py, { value: `${poisonDmg}`, color: 'purple' });
@@ -1424,7 +1426,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
           
           if (starveDamage > 0) {
-              currentHp -= 1;
+              currentHp -= adventure.damage(1);
               if (currentHp <= 0) {
                   setGameOver(true); 
                   saveDungeonScore("Starved"); 
@@ -1485,7 +1487,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   addLog(`${e.name}の炎！`, "red");
                   let dmg = 15;
                   if (equipmentHas(player.equipment?.armor, 'FIREFIGHTER')) dmg = Math.floor(dmg / 2);
-                  setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return {...p, hp:nhp}; });
+                  dmg = adventure.damage(dmg); setPlayer(p => { const nhp = p.hp - dmg; if(nhp<=0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return {...p, hp:nhp}; });
                   occupied.add(`${e.x},${e.y}`); nextEnemies.push(e);
                   addVisualEffect('EXPLOSION', px, py); addVisualEffect('TEXT', px, py, { value: `${dmg}`, color: 'red' });
                   continue;
@@ -1560,7 +1562,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   if (equipmentHas(player.equipment?.armor, 'NAME_TAG') && e.enemyType === 'THIEF') addLog("名札が盗みを防いだ！");
                   else if (e.enemyType === 'THIEF' && dmg > 0 && Math.random() < 0.3 && inventory.length > 0) { addLog("アイテムを盗まれた！", "red"); const idx = Math.floor(Math.random() * inventory.length); setInventory(inv => inv.filter((_, i) => i !== idx)); }
 
-                  if (dmg > 0) {
+                  dmg = adventure.damage(dmg); if (dmg > 0) {
                       addLog(`${e.name}の攻撃！${dmg}ダメージ！`, "red");
                       setPlayer(p => { const newHp = p.hp - dmg; if (newHp <= 0) { setGameOver(true); saveDungeonScore(`Killed by ${e.name}`); storageService.clearDungeonState(); } return { ...p, hp: newHp }; });
                       nextEnemies.push({ ...e, dir: { x: Math.sign(tx - e.x) as 0|1|-1, y: Math.sign(ty - e.y) as 0|1|-1 }, offset: { x: (tx - e.x) * 6, y: (ty - e.y) * 6 } });
@@ -1851,7 +1853,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           addVisualEffect('EXPLOSION', player.x, player.y);
           let dmg = 20;
           if (equipmentHas(player.equipment?.armor, 'DISASTER_HOOD')) dmg = Math.floor(dmg / 2);
-          setPlayer(p => ({ ...p, hp: Math.max(0, p.hp - dmg) }));
+          dmg = adventure.damage(dmg); setPlayer(p => ({ ...p, hp: Math.max(0, p.hp - dmg) }));
           if (player.hp - dmg <= 0) { setGameOver(true); saveDungeonScore("Killed by Bomb Trap"); }
       } else if (t === 'SLEEP') {
           addLog("眠ってしまった...", "blue");
@@ -1919,7 +1921,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           if (identifiedTypes.has(item.type)) return item.name;
           return idMap[item.type] || item.name;
       })();
-      return tr(displayName);
+      return languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].en:tr(displayName);
   };
 
   const fireRangedWeapon = () => {
@@ -1956,7 +1958,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       triggerPlayerAttackAnim(player.dir);
 
       if (hitEntity) {
-          let dmg = 5 + (newRanged.power || 0);
+          let dmg = adventure.damage(5 + (newRanged.power || 0));
           if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
           
           const newEnemies = enemies.map(e => {
@@ -2082,7 +2084,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           
           if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
 
-          newEnemies = newEnemies.map(e => {
+          dmg = adventure.damage(dmg); newEnemies = newEnemies.map(e => {
               if (e.id === t.id) {
                   const nhp = e.hp - dmg;
                   addLog(`${e.name}に${dmg}ダメージ！`);
@@ -2284,7 +2286,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if (item.type === 'UMB_FIRE') {
           addVisualEffect('BEAM', x, y, { color: 'red', dir: effectDir });
           if (target) {
-              const dmg = 20;
+              const dmg = adventure.damage(20);
               const nhp = target.hp - dmg;
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
               if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; }
@@ -2294,7 +2296,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       } else if (item.type === 'UMB_THUNDER') {
           addVisualEffect('THUNDER', x, y);
           if (target) {
-              const dmg = 25;
+              const dmg = adventure.damage(25);
               const nhp = target.hp - dmg;
               setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0));
               if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; }
@@ -2389,7 +2391,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           if (item.type.includes('POISON')) { addLog(`${hitEntity.name}に毒を与えた！`); dmg += 10; }
           if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
           
-          if (item.category === 'STAFF') {
+          dmg = adventure.damage(dmg); if (item.category === 'STAFF') {
               const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y);
               if (res.msg) addLog(res.msg);
               if (!identifiedTypes.has(item.type)) {
@@ -2576,8 +2578,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               setEnemies(prev => prev.map(e => {
                   const dist = Math.abs(e.x - player.x) + Math.abs(e.y - player.y);
                   if (item.type === 'BOMB' && dist > 2) return e;
-                  const nhp = e.hp - (item.value || 20);
-                  addVisualEffect('TEXT', e.x, e.y, {value: `${item.value||20}`, color:'yellow'});
+                  const dmg = adventure.damage(item.value || 20); const nhp = e.hp - dmg;
+                  addVisualEffect('TEXT', e.x, e.y, {value: `${dmg}`, color:'yellow'});
                   if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
                   return { ...e, hp: nhp };
               }).filter(e => !e.dead));
@@ -2770,7 +2772,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const renderGame = () => {
       if (threeView.draw({
           map, player, enemies, floorItems, traps, floor, effects: visualEffects.current,
-          adventure: adventure.state, dojo: adventure.dojoRun,
+          adventure: {...adventure.state,heroId:adventure.hero.id}, dojo: adventure.dojoRun,
           visible: (x, y) => adventure.state.scene !== undefined || (adventure.visibleTile(x, y) && Boolean(floorMapRevealed || visitedMap[y]?.[x])),
           sight: equipmentHas(player.equipment?.accessory, 'RING_SIGHT'),
           trapSight: Boolean(equipmentHas(player.equipment?.accessory, 'RING_TRAP') || player.status.trapSight),
@@ -3074,7 +3076,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if ((adventure.state.mode === 'MYSTERY' || item.category === 'STAFF') && !identifiedTypes.has(item.type)) {
           return "振ってみるまで分からない。";
       }
-      return item.desc;
+      return languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].englishDesc:item.desc;
   };
 
   // --- STYLE VARIABLES FOR THEME ---
@@ -3145,7 +3147,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">{tr('装備')}</h3>
-                            {threeView.enabled && <EquipmentPreview gear={player.equipment || {}}/>}
+                            {threeView.enabled && <EquipmentPreview gear={player.equipment || {}} heroId={adventure.hero.id} transformed={Boolean(adventure.state.transformed&&!adventure.dojoRun)}/>}
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div>
                                     <span className="font-bold mr-2">[{tr('武')}]</span>
@@ -3261,7 +3263,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-full relative overflow-hidden flex flex-col">
                     <div className="dungeon-top-bar absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                        <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の小学生道場','School Wanderer dojo') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
+                        <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の学生道場','School Wanderer dojo') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
                             <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => { if (!adventure.dojoMenu()) setShowMap(!showMap); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                             <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => { if (!adventure.dojoMenu()) setShowStatus(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>

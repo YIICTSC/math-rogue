@@ -1,3 +1,5 @@
+import {ProtagonistModel} from '../../../three/protagonistModel';
+import {isProtagonistId} from '../student/content';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {assetUrl} from '../../../utils/assetPaths';
@@ -106,6 +108,19 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
     }
     return g;
   }
+  function studentHero(id:string,gear:Gear,transformed=false){
+    const wrapper=new THREE.Group(),fallback=hero(gear),student=new ProtagonistModel();student.root.scale.setScalar(.80);wrapper.add(fallback,student.root);student.set(id,transformed);wrapper.userData.studentModel=student;wrapper.userData.legacyHero=fallback;
+    const props=new THREE.Group();student.root.add(props);props.name='studentEquipment';
+    for(const [slot,data]of Object.entries(gear)){if(!data)continue;const visual=itemModel(data),prop=item(data);prop.name='equipped_'+slot+'_'+data.type;
+      if(slot==='weapon'){prop.scale.setScalar(.65);prop.position.set(-.32,.73,.13);prop.rotation.z=-.15;}
+      else if(slot==='ranged'){prop.scale.setScalar(.38);prop.position.set(.28,.87,-.22);prop.rotation.z=-.4;}
+      else if(slot==='accessory'){prop.scale.setScalar(.45);prop.position.set(.11,1.12,.23);}
+      else if(visual==='backpack'){prop.scale.setScalar(.64);prop.position.set(0,.10,-.05);}
+      else if(visual==='shield'){prop.scale.setScalar(.62);prop.position.set(.34,.72,.10);}
+      else {const clasp=item({type:'STUDENT_ARMOR_BADGE',category:'ACCESSORY'});clasp.name='equipped_armor_'+data.type;clasp.scale.setScalar(.34);clasp.position.set(-.15,1.12,.24);props.add(clasp);continue;}
+      props.add(prop);
+    }return wrapper;
+  }
   const enemyVariants=new Map<string,THREE.Object3D>();
   function enemyBody(base:string,rank:number){
     const key=base+':'+Math.min(ENEMY_RANK_COLORS.length,rank);let template=enemyVariants.get(key);
@@ -133,7 +148,7 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
     const mat=new THREE.SpriteMaterial({map:texture,depthTest:false});
     const sprite=new THREE.Sprite(mat);sprite.scale.set(1.6,.4,1);sprite.renderOrder=20;sprite.userData.textResource=true;return sprite;
   }
-  function remove(object:THREE.Object3D){world.remove(object);object.traverse(o=>{if(o.userData.animationMixer){const mixer=o.userData.animationMixer as THREE.AnimationMixer;mixer.stopAllAction();mixer.uncacheRoot(mixer.getRoot());}if(o instanceof THREE.Sprite&&o.userData.textResource){const tex=o.material.map;if(tex){tex.dispose();textTextures.delete(tex);}o.material.dispose();}});}
+  function remove(object:THREE.Object3D){object.traverse(o=>{(o.userData.studentModel as ProtagonistModel|undefined)?.dispose();});world.remove(object);object.traverse(o=>{if(o.userData.animationMixer){const mixer=o.userData.animationMixer as THREE.AnimationMixer;mixer.stopAllAction();mixer.uncacheRoot(mixer.getRoot());}if(o instanceof THREE.Sprite&&o.userData.textResource){const tex=o.material.map;if(tex){tex.dispose();textTextures.delete(tex);}o.material.dispose();}});}
   function node(key:string,signature:string,make:()=>THREE.Object3D){used.add(key);let n=nodes.get(key);if(n?.signature!==signature){if(n)remove(n.object);const object=make();world.add(object);n={signature,object};nodes.set(key,n);}return n.object;}
   function terrainNode(tile:string,terrain:string|undefined,x:number,y:number,frame:DungeonFrame){
     const g=new THREE.Group(),outdoor=frame.adventure.scene!==undefined,variant=frame.adventure.scene||0;
@@ -182,8 +197,9 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
     }
     function actor(e:Entity,key:string,base:string,gear?:Gear){
       const isEnemy=key.startsWith('enemy:'),rank=isEnemy?enemyVisualRank(e):0;
-      const signature=base+gearSignature(gear)+':'+rank+':'+Boolean(e.status?.sleep)+':'+Boolean(e.status?.frozen);
-      const o=node(key,signature,()=>{const g=new THREE.Group();shadow(g);const body=gear?hero(gear,base):isEnemy?enemyBody(base,rank):model(base);body.name='actorBody';body.scale.setScalar(base==='principal'?1.0:base==='dragon'?.90:.80);g.add(body);if(isEnemy&&!['merchant','principal'].includes(base)){const badge=label('Lv'+rank,ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)]);badge.name='enemyRank';badge.position.y=base==='dragon'?1.3:1.06;badge.scale.set(1.0,.25,1);g.add(badge);g.userData.enemyRank=rank;g.userData.rankColor=ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)];}if(e.status?.sleep){const z=label('Zzz','#b6def7');z.position.y=1.5;g.add(z);}if(e.status?.frozen){box(g,'#9fdae5',0,.1,0,.64,.2,.6);}return g;});
+      const protagonist=key==='player'&&isProtagonistId(f.adventure.heroId)?f.adventure.heroId:undefined;
+      const signature=base+(protagonist||'')+':'+Boolean(protagonist&&f.adventure.transformed)+gearSignature(gear)+':'+rank+':'+Boolean(e.status?.sleep)+':'+Boolean(e.status?.frozen);
+      const o=node(key,signature,()=>{const g=new THREE.Group();shadow(g);const body=protagonist?studentHero(protagonist,gear||{},Boolean(f.adventure.transformed&&!dojo)):gear?hero(gear,base):isEnemy?enemyBody(base,rank):model(base);body.name='actorBody';body.scale.setScalar(base==='principal'?1.0:base==='dragon'?.90:.80);g.add(body);if(isEnemy&&!['merchant','principal'].includes(base)){const badge=label('Lv'+rank,ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)]);badge.name='enemyRank';badge.position.y=base==='dragon'?1.3:1.06;badge.scale.set(1.0,.25,1);g.add(badge);g.userData.enemyRank=rank;g.userData.rankColor=ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)];}if(e.status?.sleep){const z=label('Zzz','#b6def7');z.position.y=1.5;g.add(z);}if(e.status?.frozen){box(g,'#9fdae5',0,.1,0,.64,.2,.6);}return g;});
       o.position.set(e.x+(e.offset?.x||0)/16,0,e.y+(e.offset?.y||0)/16);
       const body=o.getObjectByName('actorBody')!;
         {
@@ -203,6 +219,8 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
           const clipName=(action:string)=>base==='hero'?action:base+'_'+action;
           if(state.action!==action){const clip=clips.find(c=>c.name===clipName(action));if(clip){const oldClip=clips.find(c=>c.name===clipName(state!.action));const old=oldClip?mixer.clipAction(oldClip):undefined;const next=mixer.clipAction(clip);next.reset().play();if(['Attack','Hit','Defeat'].includes(action)){next.setLoop(THREE.LoopOnce,1);next.clampWhenFinished=true;}else next.setLoop(THREE.LoopRepeat,Infinity);if(old&&old!==next){old.fadeOut(.10);next.fadeIn(.10);}state.action=action;}}
           if(!paused)mixer.update(Math.min(.1,Math.max(0,now-state.time)));
+          const student=body.userData.studentModel as ProtagonistModel|undefined;if(student){student.update(paused?0:Math.min(.1,Math.max(0,now-state.time)),action==='Walk'?'Walk':action==='Attack'?'Attack':'Idle',paused);(body.userData.legacyHero as THREE.Group).visible=!student.ready;student.root.visible=student.ready;renderer.domElement.dataset.studentHero=protagonist||'';renderer.domElement.dataset.studentHeroReady=String(student.ready);renderer.domElement.dataset.studentTransformed=String(Boolean(f.adventure.transformed&&!dojo));const weapon=student.root.getObjectByName('studentEquipment')?.children.find(o=>o.name.startsWith('equipped_weapon_'));const hand=student.root.getObjectByName('forearmR');if(weapon&&hand&&weapon.parent){hand.updateWorldMatrix(true,false);weapon.parent.updateWorldMatrix(true,false);weapon.position.copy(weapon.parent.worldToLocal(hand.localToWorld(new THREE.Vector3(0,.24,0))));}}
+
         const expression=action==='Hit'?'hit':action==='Defeat'?'sad':action==='Victory'?'victory':action==='Attack'?'anger':'neutral';
         if(state.expression!==expression){for(const name of ['neutral','smile','surprise','anger','sad','hit','victory']){const face=body.getObjectByName('hero_expression_'+name);if(face)face.visible=name===expression;}state.expression=expression;}
         state.x=e.x;state.y=e.y;state.hp=e.hp;state.time=now;

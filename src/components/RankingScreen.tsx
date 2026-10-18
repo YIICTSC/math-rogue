@@ -345,7 +345,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
                 dungeonData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Compass size={48} className="mb-4 opacity-50" />
-                        <p>{trans('風来の小学生の記録はありません。', languageMode)}</p>
+                        <p>{trans('風来の学生の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -397,7 +397,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
                 dungeon2Data.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Mountain size={48} className="mb-4 opacity-50 text-cyan-800" />
-                        <p>{trans('風来の小学生2の記録はありません。', languageMode)}</p>
+                        <p>{trans('風来の学生2の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">

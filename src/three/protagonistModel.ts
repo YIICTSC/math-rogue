@@ -2,14 +2,14 @@ import * as T from 'three';
 import {GLTFLoader,type GLTF} from 'three/addons/loaders/GLTFLoader.js';
 import {clone} from 'three/addons/utils/SkeletonUtils.js';
 import {assetUrl} from '../utils/assetPaths';
-import {isProtagonistId,type ProtagonistId} from './protagonistCatalog';
+import {isProtagonistId} from './protagonistCatalog';
 const cache=new Map<string,Promise<GLTF>>();
-function load(id:ProtagonistId){let promise=cache.get(id);if(!promise){promise=new GLTFLoader().loadAsync(assetUrl(`models/protagonists/${id}.glb`));cache.set(id,promise);if(cache.size>8)cache.delete(cache.keys().next().value!);promise.catch(()=>cache.delete(id));}return promise;}
+function load(id:string){let promise=cache.get(id);if(!promise){promise=new GLTFLoader().loadAsync(assetUrl(`models/protagonists/${id}.glb`));cache.set(id,promise);if(cache.size>8)cache.delete(cache.keys().next().value!);promise.catch(()=>cache.delete(id));}return promise;}
 /** Each instance owns its skin, geometry and materials; scene disposal cannot invalidate another player. */
 export class ProtagonistModel {
  readonly root=new T.Group();private model?:T.Group;private rests=new Map<string,T.Quaternion>();private mixer?:T.AnimationMixer;private action?:T.AnimationAction;private clips:T.AnimationClip[]=[];private request=0;private id?:string;private disposed=false;private elapsed=0;
  constructor(readonly seated=false){this.root.name='LearningRogueProtagonist';}
- set(id:unknown){const next=isProtagonistId(id)?id:undefined;if(this.id===next)return;this.id=next;const request=++this.request;this.clear();this.root.userData.protagonist=next||'';if(!next)return;
+ set(id:unknown,transformed=false){const base=isProtagonistId(id)?id:undefined;const next=base?base+(transformed&&base.startsWith('magic-')?'-transformed':''):undefined;if(this.id===next)return;this.id=next;const request=++this.request;this.clear();this.root.userData.protagonist=next||'';if(!next)return;
   load(next).then(gltf=>{if(this.disposed||request!==this.request)return;const model=clone(gltf.scene) as T.Group;
    model.traverse(o=>{if(o instanceof T.Mesh){o.geometry=o.geometry.clone();o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();o.castShadow=true;o.receiveShadow=true;}});
    // Physics owns vertical displacement. Keep the visual jump pose, without doubling the jump height.

@@ -1,3 +1,4 @@
+import {STUDENT_ITEM_DB} from './student/content';
 import {EXTRA_ITEMS} from './expansion';
 /** Shared, serializable rules for both offline School Wanderer adventures. */
 export type AdventureMode = 'STORY'|'BARE'|'MYSTERY'|'TRAPS'|'NO_GEAR'|'CARDS'|'RESCUE'|'PUZZLE';
@@ -8,11 +9,11 @@ export interface SchoolItem {
 }
 export interface Companion {name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;attackVisualAt?:number;}
 export interface AdventureState {
- version:1; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
+ version:1; heroId?:string;transformed?:boolean;storySeen?:number[]; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
  companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean}>; swallowed:Record<string,SchoolItem[]>;
  rescueTarget:number; puzzle:number; puzzleTurns:number; rescued:boolean; sealedTurns:number; returned:boolean;scene?:number;town?:boolean;weather?:string;night?:boolean;townUsed?:string[];festivalSeed?:number;
 }
-export interface SchoolBase {version:1;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;dojo?:Record<number,number>;codex?:string[];diary?:string[];claimed?:string[];}
+export interface SchoolBase {version:1;selectedHero?:string;studentStory?:Record<string,number>;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;dojo?:Record<number,number>;codex?:string[];diary?:string[];claimed?:string[];}
 export const MODES: {id:AdventureMode;ja:string;en:string;desc:string;english:string;floors:number}[] = [
  {id:'STORY',ja:'放課後の大冒険',en:'After-school adventure',desc:'道具持ち込み可。20階の校長先生へ。',english:'Bring equipment and challenge the principal on floor 20.',floors:20},
  {id:'BARE',ja:'手ぶらの99階',en:'Empty-handed 99 floors',desc:'倉庫の道具なし。拾った道具と知恵で99階へ。',english:'No warehouse items. Survive 99 floors with what you find.',floors:99},
@@ -47,7 +48,7 @@ export const MARKS:Record<string,{ja:string;en:string}>={
 };
 const supply=(type:string,name:string,desc:string,value:number,extra:Partial<SchoolItem>={}):Omit<SchoolItem,'id'>=>({type,name,desc,value,category:'CONSUMABLE',...extra});
 export const ADVENTURE_ITEMS:Record<string,Omit<SchoolItem,'id'>>={
- ...EXTRA_ITEMS,
+ ...EXTRA_ITEMS,...STUDENT_ITEM_DB,
  BAG_SAVE:supply('BAG_SAVE','保存のランドセル','道具を6個収納。中身は出し入れできる。',600,{capacity:6,contents:[]}),
  BAG_HEAL:supply('BAG_HEAL','保健の箱','道具を入れるとHP30回復。中身は取り出せず、割ると戻る。',700,{capacity:4,contents:[]}),
  BAG_IDENTIFY:supply('BAG_IDENTIFY','調べる筆箱','入れた道具を識別。4個収納、自由に取り出せる。',650,{capacity:4,contents:[]}),

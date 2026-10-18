@@ -1,3 +1,4 @@
+import {PROTAGONISTS} from '../three/protagonistCatalog';
 export type SpriteAuditAssetKind = 'sprite' | 'sheet' | 'ui';
 
 export interface SpriteAuditAssetDefinition {
@@ -137,8 +138,8 @@ export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAudit
     assets: pokerSheets(),
   },
   DUNGEON: {
-    note: '風来の小学生で使う主人公・敵・装備・アイテム・演出のシートです。',
-    assets: furaiSheets(),
+    note: '風来の学生で使う主人公・敵・装備・アイテム・演出のシートです。',
+    assets: [...furaiSheets(),...studentSheets()],
   },
   KOCHO: {
     note: '主人公・敵・演出・消耗品・レリックをまとめて確認できます。',
@@ -149,9 +150,9 @@ export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAudit
     assets: paperPlaneSheets(),
   },
   DUNGEON_2: {
-    note: '風来の小学生2は共通の戦闘シートに加え、カードとカード演出を使います。',
+    note: '風来の学生2は共通の戦闘シートに加え、カードとカード演出を使います。',
     assets: [
-      ...furaiSheets(),
+      ...furaiSheets(),...studentSheets(),
       asset('sprites/furai-shogakusei2-card-sheet.webp', 'カードシート'),
       asset('sprites/furai-shogakusei2-card-effects.webp', 'カード演出'),
     ],
@@ -188,3 +189,5 @@ export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAudit
     assets: triviaUiAssets('learning-tcg'),
   },
 };
+
+function studentSheets(){return PROTAGONISTS.flatMap(h=>[asset(`sprites/wandering-student/${h.id}.webp`,h.name),...(h.id.startsWith('magic-')?[asset(`sprites/wandering-student/${h.id}-transformed.webp`,`${h.name}・変身`)]:[])]);}

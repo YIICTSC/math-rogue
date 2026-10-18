@@ -99,7 +99,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   },
   {
     id: 'DUNGEON',
-    name: '風来の小学生',
+    name: '風来の学生',
     titleLines: ['風来の', '小学生'],
     description: '1000回遊べるランダムダンジョン。GB風ローグライクRPG。',
     screen: GameScreen.MINI_GAME_DUNGEON,
@@ -138,7 +138,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   },
   {
     id: 'DUNGEON_2',
-    name: '風来の小学生2',
+    name: '風来の学生2',
     titleLines: ['風来の', '小学生2'],
     description: '更なる深淵へ...進化したローグライクRPG。',
     screen: GameScreen.MINI_GAME_DUNGEON_2,

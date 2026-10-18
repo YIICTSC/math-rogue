@@ -1,3 +1,4 @@
+import {STUDENT_ITEM_DB} from '../student/content';
 import palettes from './enemy-palettes.json';
 /** Model families authored in Blender; variants keep the same appearance on the floor and in hand. */
 export interface VisualItem { type: string; category: string; plus?: number; }
@@ -9,6 +10,7 @@ export function visualHash(value: string) {
 }
 export function itemModel(item: VisualItem): string {
   const t = item.type;
+  if(STUDENT_ITEM_DB[t])return STUDENT_ITEM_DB[t].model;
   if(/EXTINGUISHER/.test(t))return 'extinguisher';
   if(/WATCH/.test(t))return 'watch';
   if(/COMPASS/.test(t))return 'compass';
