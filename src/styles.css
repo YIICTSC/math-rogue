@@ -18412,7 +18412,7 @@ textarea {
     overflow-y: auto !important;
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
-    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) calc(3.5rem + max(10px, var(--app-safe-bottom, env(safe-area-inset-bottom, 0px)))) max(10px, env(safe-area-inset-left)) !important;
   }
 
   .main-mini-game-select-screen .mini-game-select-panel {
@@ -18531,10 +18531,27 @@ textarea {
   }
 
   .main-mini-game-select-screen .mini-game-select-back {
+    position: fixed !important;
+    z-index: 40;
+    left: 50%;
+    bottom: max(8px, var(--app-safe-bottom, env(safe-area-inset-bottom, 0px)));
+    display: inline-flex;
     align-self: center;
     flex: 0 0 auto;
+    width: min(75vw, 18rem);
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
     margin: 0 !important;
-    padding: 5px 4px !important;
+    padding: 0.65rem 0.9rem !important;
+    border: 1px solid rgba(103, 232, 249, 0.55);
+    border-radius: 0.65rem;
+    background: rgba(3, 20, 34, 0.94);
+    box-shadow: 0 0.35rem 1.1rem rgba(0, 0, 0, 0.45), 0 0 1rem rgba(34, 211, 238, 0.18);
+    color: #d9fbff;
+    transform: translateX(-50%);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     font-size: clamp(0.65rem, 3vw, 0.9rem) !important;
     line-height: 1.1;
   }
