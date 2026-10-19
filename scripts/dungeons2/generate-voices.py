@@ -1,4 +1,4 @@
-"""Generate original voice designs and ten battle clips per hero using the official API.
+"""Generate original voice designs and 30 battle clips per hero using the official API.
 No real-person reference audio is used. The model's watermarking stays enabled.
 """
 import argparse,json,hashlib,time,subprocess,urllib.request,wave

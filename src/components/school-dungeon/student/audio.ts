@@ -5,7 +5,7 @@ export type StudentAudioAction='ultimate'|'attack'|'projectile'|'skill'|'damage'
 type AudioPort=Pick<typeof audioService,'playDungeons2VoiceFile'|'playDungeonsAbilitySound'|'playAttackEffectSound'|'playStatusEffectSound'|'playBattleSound'|'playHighSchoolVoiceFile'|'playMagicVoiceFile'|'canPlayConversationVoice'>;
 const chances:Partial<Record<StudentAudioAction,number>>={ultimate:.65,attack:.22,projectile:.22,skill:.35,damage:.18,heal:.2,item:.2,transform:1,win:1,defeat:1};
 export function studentVoice(heroId:string,action:StudentAudioAction,finish:boolean,random:()=>number,abilityName?:string){
- const original=abyssHero(heroId);if(original){const skill=original.skills.findIndex(s=>s.en===abilityName);const file=action==='ultimate'?(abilityName===original.card.en?'card':`ultimate-${Math.max(0,skill)+1}`):action==='transform'?'transform':action==='defeat'?'defeat':finish||action==='win'?'finish':action==='damage'?'damage':action==='heal'||action==='item'?'heal':action==='skill'?'ultimate-1':'attack';return {theme:'dungeons2',id:original.id.slice(10),file}as const;}
+ const original=abyssHero(heroId);if(original){const skill=original.skills.findIndex(s=>s.en===abilityName);const file=action==='ultimate'?(abilityName===original.card.en?'card':`ultimate-${Math.max(0,skill)+1}`):action==='transform'?'transform':action==='defeat'?'defeat':finish||action==='win'?'finish':action==='damage'?'damage':action==='heal'||action==='item'?'heal':action==='skill'?'ultimate-1':'attack';const variant=Math.max(0,Math.min(2,Math.floor(random()*3)));return {theme:'dungeons2',id:original.id.slice(10),file:variant?`${file}-alt-${variant}`:file}as const;}
  const theme=heroId.startsWith('high-school-')?'high-school':heroId.startsWith('magic-')?'magic':null;
  if(!theme)return null;
  const id=heroId.slice(theme.length+1).toUpperCase();
@@ -17,6 +17,7 @@ export function studentVoice(heroId:string,action:StudentAudioAction,finish:bool
 export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),random=()=>Math.random()){
  let lastVoice=-Infinity,pending=false;
  const effects=new Map<StudentAudioAction,number>();
+ const previousD2=new Map<string,string>();
  return {play(heroId:string,action:StudentAudioAction,finish=false,element='star',abilityName?:string){
   const time=now();
   if(time-(effects.get(action)??-Infinity)<100)return;
@@ -36,7 +37,12 @@ export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),ran
   if(pending||time-lastVoice<3200||!audio.canPlayConversationVoice())return;
   const chance=finish?1:chances[action]||0;
   if(!chance||random()>=chance)return;
-  const voice=studentVoice(heroId,action,finish,random,abilityName);if(!voice)return;
+  let voice=studentVoice(heroId,action,finish,random,abilityName);if(!voice)return;
+  if(voice.theme==='dungeons2'){
+   const base=voice.file.replace(/-alt-[12]$/,''),key=voice.id+':'+base;
+   if(previousD2.get(key)===voice.file){const variant=voice.file===base?1:voice.file.endsWith('-1')?2:0;voice={...voice,file:variant?`${base}-alt-${variant}`:base};}
+   previousD2.set(key,voice.file);
+  }
   lastVoice=time;pending=true;
   try{const played=voice.theme==='dungeons2'?audio.playDungeons2VoiceFile(voice.id,voice.file):voice.theme==='high-school'?audio.playHighSchoolVoiceFile(voice.id,voice.file):audio.playMagicVoiceFile(voice.id,voice.file);
    void Promise.resolve(played).catch(()=>false).finally(()=>{pending=false;});

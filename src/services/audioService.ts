@@ -2141,7 +2141,7 @@ class AudioService {
 
   /** Offline, original Irodori v4.1 voices for the nine Dungeons 2 heroes. */
   public async playDungeons2VoiceFile(heroId: string, voiceName: string) {
-      if (!/^(lyria|celis|flora|noctia|aurene|ignis|leon|orion|leif)$/.test(heroId) || !/^(attack|damage|finish|heal|defeat|transform|ultimate-[123]|card)$/.test(voiceName)) return false;
+      if (!/^(lyria|celis|flora|noctia|aurene|ignis|leon|orion|leif)$/.test(heroId) || !/^(attack|damage|finish|heal|defeat|transform|ultimate-[123]|card)(?:-alt-[12])?$/.test(voiceName)) return false;
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return false;
       const name = `dungeons2-voice-${heroId}-${voiceName}`;
