@@ -1,3 +1,4 @@
+import {WandererTitle,WandererTown} from './school-dungeon/JourneyScreens';
 import {STUDENT_ITEM_DB} from './school-dungeon/student/content';
 import EquipmentPreview from './school-dungeon/three/EquipmentPreview';
 import {useDungeon3D} from './school-dungeon/three/useDungeon3D';
@@ -471,6 +472,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const threeView = useDungeon3D();
+  const [launch,setLaunch]=useState<'TITLE'|'NEW'|'PLAY'>(debugPreview?'PLAY':'TITLE');
+  const [hasSave,setHasSave]=useState(()=>Boolean(storageService.loadDungeonState2()?.map?.length));
   const diagonalLockRef = useRef(false);
 
   useEffect(() => {
@@ -571,11 +574,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
   const adventure = useSchoolAdventure({
-    game: 2, debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
+    game: 2, known:item=>itemKnown(item), suspended:launch!=='PLAY'||showMathChallenge, stairs:()=>setShowMathChallenge(true), debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
     setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
     log: message => addLog(message), restart: () => startNewGame(), descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
     clearSave: () => storageService.clearDungeonState2(), itemName: item => getItemName(item), catalog: ITEM_DB, cardSupplies: DUNGEON_CARD_DB.map(card => ({category:'DECK_CARD',type:card.templateId,name:card.name,desc:card.description,value:0})),
   });
+  const itemKnown=(item:any):boolean=>Boolean(item&&(identifiedTypes.has(item.type)||(adventure.state.mode!=='MYSTERY'&&item.category!=='STAFF')));
   const allPossessions = useMemo(() => {
     if (!gameOver) return [];
     const items = [...inventory];
@@ -672,9 +676,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const saveData = useCallback((immediate = false) => {
-      if (!map.length || debugPreview || gameOver || gameClear || adventure.state.returned) { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
+      if (launch!=='PLAY' || !map.length || debugPreview || gameOver || gameClear&&adventure.state.pendingStory===undefined || adventure.state.returned&&adventure.state.place!=='HOME') { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
       const persist = () => {
-          if (adventure.state.returned) return;
+          if (adventure.state.returned&&adventure.state.place!=='HOME') return;
           const state = {
               map, visitedMap, floorMapRevealed, rooms: roomsRef.current,
               player, enemies, floorItems, traps, inventory,
@@ -692,7 +696,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       }
       if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
       saveDebounceRef.current = setTimeout(persist, 500);
-  }, [adventure.revision, map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, shopState, synthState, debugPreview, gameOver, gameClear, dungeonDeck, dungeonHand, dungeonDiscard]);
+  }, [launch, adventure.revision, map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, shopState, synthState, debugPreview, gameOver, gameClear, dungeonDeck, dungeonHand, dungeonDiscard]);
 
   useEffect(() => {
       const handlePageHide = () => saveData(true);
@@ -799,7 +803,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const data = item.itemData;
       if (data?.category === 'DECK_CARD') markDungeonCardDiscovered(data.type);
       else markDungeonItemDiscovered(data);
-      if (adventure.drawItem(ctx, data, sx, sy, ts)) return true;
+      if (itemKnown(data) && adventure.drawItem(ctx, data, sx, sy, ts)) return true;
       if (data?.category === 'DECK_CARD') {
           return drawCardEffectSpriteInRect(ctx, 'dropCard', sx, sy, ts, ts);
       }
@@ -1251,7 +1255,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const handleRestart = () => {
-    if (adventure.state.mode !== 'STORY') { adventure.start(adventure.state.mode, [], 0, null); return; }
+    if (adventure.state.mode !== 'STORY') { adventure.newJourney(); return; }
     if (gameOver && inheritItemIdx !== null) {
         const selected = allPossessions[inheritItemIdx];
         if (selected) {
@@ -1261,7 +1265,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         }
     }
     storageService.clearDungeonState2(); 
-    startNewGame(); 
+    adventure.newJourney();
     setInheritItemIdx(null);
   };
 
@@ -1825,6 +1829,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (adventure.townKey(e)) return;
       if (adventure.dojoKey(e)) return;
         if (adventure.blocksInput()) return;
         lastInputType.current = 'KEY'; if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
@@ -2081,6 +2086,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   return (
     <div data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-play" className="mini-game-dungeon-screen w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
+        {launch!=='PLAY'&&<WandererTitle adventure={adventure} creating={launch==='NEW'} hasSave={hasSave} three={threeView.enabled} onToggle={threeView.toggle} onContinue={()=>{const save=storageService.loadDungeonState2();if(save?.map?.length){restoreState(save);setLaunch('PLAY');}else setHasSave(false);}} onChoose={()=>{threeView.setMode(false);setLaunch('NEW');}} onBack={()=>setLaunch('TITLE')} onExit={onBack} onCreate={()=>{if(hasSave&&!window.confirm(adventure.text('今の冒険を新しい旅で上書きしますか？','Replace the saved adventure with a new journey?')))return;adventure.newJourney();setLaunch('PLAY');setHasSave(true);}}/>}
+        {launch==='PLAY'&&!adventure.dojoRun&&['HOME','RELAY'].includes(adventure.state.place||'')&&<WandererTown adventure={adventure} three={threeView.enabled} onToggle={threeView.toggle} onTitle={()=>{saveData(true);setHasSave(true);setLaunch('TITLE');}}/>}
         <SchoolAdventurePanel adventure={adventure} inventory={inventory} player={player} itemName={getItemName} gameOver={gameOver} gameClear={gameClear} />
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2267,7 +2274,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}><span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span></div>
                         {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: selectedItemIndex === -1 ? C3 : C1, backgroundColor: selectedItemIndex === -1 ? C2 : 'transparent', color: selectedItemIndex === -1 ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(-1); }} onClick={() => handleShopAction(-1)}>{selectedItemIndex === -1 && <span className="mr-1 animate-pulse">▶</span>}<Trash2 size={12} /> {tr('カード除外')} (100 G)</button>)}
                         <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={item.type} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">{tr('売り切れ')}</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={item.type} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
+                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={itemKnown(item)?item.type:'UNKNOWN'} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">{tr('売り切れ')}</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={itemKnown(item)?item.type:'UNKNOWN'} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
                             {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">{tr('持ち物なし')}</div>}
                         </div>
                     </div>

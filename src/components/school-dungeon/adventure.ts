@@ -1,3 +1,4 @@
+import {routeOpen,ROUTE_ORDER} from './journey';
 import {STUDENT_ITEM_DB} from './student/content';
 import {EXTRA_ITEMS} from './expansion';
 /** Shared, serializable rules for both offline School Wanderer adventures. */
@@ -7,9 +8,9 @@ export interface SchoolItem {
  id: string; type: string; category: string; name: string; desc: string; value?:number; power?:number; plus?:number; charges?:number;
  marks?:string[]; markSlots?:number; cursed?:boolean; blessed?:boolean; capacity?:number; contents?:SchoolItem[]; shopOwner?:number; price?:number;wet?:boolean;
 }
-export interface Companion {name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;attackVisualAt?:number;}
+export interface Companion {heroId?:string;name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;attackVisualAt?:number;}
 export interface AdventureState {
- version:1; heroId?:string;transformed?:boolean;storySeen?:number[]; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
+ version:1;place?:'HOME'|'DUNGEON'|'RELAY';friendRecruited?:boolean;pendingStory?:number;pendingStoryLine?:number;townX?:number;leavingRelay?:boolean; heroId?:string;transformed?:boolean;storySeen?:number[]; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
  companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean}>; swallowed:Record<string,SchoolItem[]>;
  rescueTarget:number; puzzle:number; puzzleTurns:number; rescued:boolean; sealedTurns:number; returned:boolean;scene?:number;town?:boolean;weather?:string;night?:boolean;townUsed?:string[];festivalSeed?:number;
 }
@@ -24,24 +25,8 @@ export const MODES: {id:AdventureMode;ja:string;en:string;desc:string;english:st
  {id:'RESCUE',ja:'忘れ物レスキュー',en:'Lost-supply rescue',desc:'倒れた階へ別の冒険で向かい、道具を倉庫に救出。3回まで。',english:'Reach the lost floor to recover supplies. Three attempts.',floors:99},
  {id:'PUZZLE',ja:'放課後の一手',en:'One clever move',desc:'固定配置の8問。限られた手数で階段へ。',english:'Eight fixed layouts. Reach the stairs within the turn limit.',floors:8},
 ];
-export function modeUnlocked(base:SchoolBase,mode:AdventureMode){
- if(mode==='RESCUE')return Boolean(base.rescue&&base.rescue.attempts<3);
- if(mode==='STORY'||base.clears[mode])return true;
- const lessons=Object.keys(base.dojo||{}).length;
- if(mode==='PUZZLE')return lessons>=5||Boolean(base.clears.STORY);
- if(mode==='TRAPS')return lessons>=15||Boolean(base.clears.STORY);
- if(mode==='MYSTERY'||mode==='CARDS')return Boolean(base.clears.STORY);
- if(mode==='NO_GEAR')return Boolean(base.clears.MYSTERY||base.clears.CARDS);
- return Boolean(base.clears.NO_GEAR);
-}
-export function modeRequirement(mode:AdventureMode):[string,string]{
- if(mode==='PUZZLE')return ['道場5問修了 または 大冒険クリア','Clear 5 dojo lessons or the story'];
- if(mode==='TRAPS')return ['道場15問修了 または 大冒険クリア','Clear 15 dojo lessons or the story'];
- if(mode==='MYSTERY'||mode==='CARDS')return ['放課後の大冒険クリア','Clear the after-school adventure'];
- if(mode==='NO_GEAR')return ['なぞなぞ校舎 または 作戦ノートクリア','Clear Mystery school or Strategy notebook'];
- if(mode==='BARE')return ['体操服の挑戦クリア','Clear the gym-clothes challenge'];
- return ['倒れた冒険の救助依頼','A rescue request from a defeated adventure'];
-}
+export function modeUnlocked(base:SchoolBase,mode:AdventureMode){return routeOpen(base,mode);}
+export function modeRequirement(mode:AdventureMode):[string,string]{const previous=ROUTE_ORDER[ROUTE_ORDER.indexOf(mode)-1];const rule=MODES.find(m=>m.id===previous);return rule?[`${rule.ja}を踏破`, `Clear ${rule.en}`]:['倒れた冒険の救助依頼','A rescue request from a defeated adventure'];}
 export const MARKS:Record<string,{ja:string;en:string}>={
  OFUDA_RULER:{ja:'おばけ退治',en:'Ghost slayer'},VITAMIN_INJECT:{ja:'吸血対策',en:'Drain slayer'},RICH_WATCH:{ja:'おこづかい攻撃',en:'Coin attack'},LADLE:{ja:'食料づくり',en:'Food drops'},PROTRACTOR_EDGE:{ja:'広い攻撃',en:'Wide attack'},DISASTER_HOOD:{ja:'爆風対策',en:'Blast guard'},RING_SIGHT:{ja:'透視',en:'Far sight'},
  STAINLESS_PEN:{ja:'さび防止',en:'Rustproof'},NAME_TAG:{ja:'盗難防止',en:'Theft guard'},FIREFIGHTER:{ja:'防火',en:'Fire guard'},GYM_CLOTHES:{ja:'身かわし',en:'Dodge'},HEAL_SWORD:{ja:'回復',en:'Healing'},DRAGON_KILLER:{ja:'竜退治',en:'Dragon slayer'},RING_HUNGER:{ja:'腹もち',en:'Slow hunger'},RING_TRAP:{ja:'罠見え',en:'Trap sight'},RING_HEAL:{ja:'早い回復',en:'Fast recovery'},RANDO_SERU:{ja:'頑丈',en:'Sturdy'},FLOAT_MARK:{ja:'水わたり',en:'Water walking'},

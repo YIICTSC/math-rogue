@@ -1,3 +1,4 @@
+import {classmateFor} from '../journey';
 import {ProtagonistModel} from '../../../three/protagonistModel';
 import {isProtagonistId} from '../student/content';
 import * as THREE from 'three';
@@ -10,7 +11,7 @@ import {enemyModel, enemyPalette, enemyVisualRank, ENEMY_RANK_COLORS, gearSignat
 interface Entity {
   id?: number|string; x:number; y:number; type?:string; enemyType?:string; schoolKind?:string; visualTier?:number; schoolRank?:number; dead?:boolean;
   dir?:{x:number;y:number}; offset?:{x:number;y:number}; equipment?:Gear; itemData?:VisualItem;
-  hp?:number; maxHp?:number; moving?:boolean; direction?:number; attackVisualAt?:number; status?:{sleep?:number;frozen?:number;poison?:number};
+  heroId?:string;hp?:number; maxHp?:number; moving?:boolean; direction?:number; attackVisualAt?:number; status?:{sleep?:number;frozen?:number;poison?:number};
 }
 interface Effect {type:string;x:number;y:number;duration:number;maxDuration:number;value?:string;color?:string;startX?:number;startY?:number;targetX?:number;targetY?:number;dir?:{x:number;y:number};}
 export interface DungeonFrame {
@@ -194,13 +195,14 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
       const signature=[tile,terrain,shown,f.floor,f.adventure.scene,f.adventure.town].join(':');
       const o=node(`tile:${x}:${y}`,signature,()=>shown?terrainNode(tile,terrain,x,y,f):new THREE.Group());o.position.set(x,0,y);
       const event=f.adventure.events[`${x},${y}`];
-      if(shown&&event&&!event.done){const o=node(`event:${x}:${y}`,event.kind,()=>{const g=new THREE.Group();const m=model(event.kind==='FRIEND'?'friend_fetch':['SHOP','TRADER','INN','SMITH','BANK','FESTIVAL'].includes(event.kind)?'stall':event.kind==='REST'||event.kind==='PICNIC'?'desk':'chest');m.scale.setScalar(.65);g.add(m);const t=label(event.kind==='FRIEND'?'!':event.kind==='REST'?'+':'◆','#ffe5a1');t.position.y=1.1;g.add(t);return g;});o.position.set(x,0,y);}
+      if(shown&&event&&!event.done&&event.kind==='FRIEND')actor({x,y,heroId:classmateFor(f.adventure.heroId||'elementary-warrior').id,dir:{x:0,y:1}},`friend-event:${x}:${y}`,'hero',{});
+      else if(shown&&event&&!event.done){const o=node(`event:${x}:${y}`,event.kind,()=>{const g=new THREE.Group();const m=model(event.kind==='FRIEND'?'friend_fetch':['SHOP','TRADER','INN','SMITH','BANK','FESTIVAL'].includes(event.kind)?'stall':event.kind==='REST'||event.kind==='PICNIC'?'desk':'chest');m.scale.setScalar(.65);g.add(m);const t=label(event.kind==='FRIEND'?'!':event.kind==='REST'?'+':'◆','#ffe5a1');t.position.y=1.1;g.add(t);return g;});o.position.set(x,0,y);}
     }
     function actor(e:Entity,key:string,base:string,gear?:Gear){
       const isEnemy=key.startsWith('enemy:'),rank=isEnemy?enemyVisualRank(e):0;
-      const protagonist=key==='player'&&isProtagonistId(f.adventure.heroId)?f.adventure.heroId:undefined;
-      const signature=base+(protagonist||'')+':'+Boolean(protagonist&&f.adventure.transformed)+gearSignature(gear)+':'+rank+':'+Boolean(e.status?.sleep)+':'+Boolean(e.status?.frozen);
-      const o=node(key,signature,()=>{const g=new THREE.Group();shadow(g);const body=protagonist?studentHero(protagonist,gear||{},Boolean(f.adventure.transformed&&!dojo)):gear?hero(gear,base):isEnemy?enemyBody(base,rank):model(base);body.name='actorBody';body.scale.setScalar(base==='principal'?1.0:base==='dragon'?.90:.80);g.add(body);if(isEnemy&&!['merchant','principal'].includes(base)){const badge=label('Lv'+rank,ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)]);badge.name='enemyRank';badge.position.y=base==='dragon'?1.3:1.06;badge.scale.set(1.0,.25,1);g.add(badge);g.userData.enemyRank=rank;g.userData.rankColor=ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)];}if(e.status?.sleep){const z=label('Zzz','#b6def7');z.position.y=1.5;g.add(z);}if(e.status?.frozen){box(g,'#9fdae5',0,.1,0,.64,.2,.6);}return g;});
+      const protagonist=key==='player'&&isProtagonistId(f.adventure.heroId)?f.adventure.heroId:key!=='player'&&isProtagonistId(e.heroId)?e.heroId:undefined;
+      const signature=base+(protagonist||'')+':'+Boolean(key==='player'&&protagonist&&f.adventure.transformed)+gearSignature(gear)+':'+rank+':'+Boolean(e.status?.sleep)+':'+Boolean(e.status?.frozen);
+      const o=node(key,signature,()=>{const g=new THREE.Group();shadow(g);const body=protagonist?studentHero(protagonist,gear||{},Boolean(key==='player'&&f.adventure.transformed&&!dojo)):gear?hero(gear,base):isEnemy?enemyBody(base,rank):model(base);body.name='actorBody';body.scale.setScalar(base==='principal'?1.0:base==='dragon'?.90:.80);g.add(body);if(isEnemy&&!['merchant','principal'].includes(base)){const badge=label('Lv'+rank,ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)]);badge.name='enemyRank';badge.position.y=base==='dragon'?1.3:1.06;badge.scale.set(1.0,.25,1);g.add(badge);g.userData.enemyRank=rank;g.userData.rankColor=ENEMY_RANK_COLORS[Math.min(ENEMY_RANK_COLORS.length-1,rank-1)];}if(e.status?.sleep){const z=label('Zzz','#b6def7');z.position.y=1.5;g.add(z);}if(e.status?.frozen){box(g,'#9fdae5',0,.1,0,.64,.2,.6);}return g;});
       o.position.set(e.x+(e.offset?.x||0)/16,0,e.y+(e.offset?.y||0)/16);
       const body=o.getObjectByName('actorBody')!;
         {
@@ -220,7 +222,7 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
           const clipName=(action:string)=>base==='hero'?action:base+'_'+action;
           if(state.action!==action){const clip=clips.find(c=>c.name===clipName(action));if(clip){const oldClip=clips.find(c=>c.name===clipName(state!.action));const old=oldClip?mixer.clipAction(oldClip):undefined;const next=mixer.clipAction(clip);next.reset().play();if(['Attack','Hit','Defeat'].includes(action)){next.setLoop(THREE.LoopOnce,1);next.clampWhenFinished=true;}else next.setLoop(THREE.LoopRepeat,Infinity);if(old&&old!==next){old.fadeOut(.10);next.fadeIn(.10);}state.action=action;}}
           if(!paused)mixer.update(Math.min(.1,Math.max(0,now-state.time)));
-          const student=body.userData.studentModel as ProtagonistModel|undefined;if(student){student.update(paused?0:Math.min(.1,Math.max(0,now-state.time)),action==='Walk'?'Walk':action==='Attack'?'Attack':'Idle',paused);(body.userData.legacyHero as THREE.Group).visible=!student.ready;student.root.visible=student.ready;renderer.domElement.dataset.studentHero=protagonist||'';renderer.domElement.dataset.studentHeroReady=String(student.ready);renderer.domElement.dataset.studentTransformed=String(Boolean(f.adventure.transformed&&!dojo));const weapon=student.root.getObjectByName('studentEquipment')?.children.find(o=>o.name.startsWith('equipped_weapon_'));const hand=student.root.getObjectByName('forearmR');if(weapon&&hand&&weapon.parent){hand.updateWorldMatrix(true,false);weapon.parent.updateWorldMatrix(true,false);weapon.position.copy(weapon.parent.worldToLocal(hand.localToWorld(new THREE.Vector3(0,.24,0))));}}
+          const student=body.userData.studentModel as ProtagonistModel|undefined;if(student){student.update(paused?0:Math.min(.1,Math.max(0,now-state.time)),action==='Walk'?'Walk':action==='Attack'?'Attack':'Idle',paused);(body.userData.legacyHero as THREE.Group).visible=!student.ready;student.root.visible=student.ready;renderer.domElement.dataset.studentHero=protagonist||'';renderer.domElement.dataset.studentHeroReady=String(student.ready);renderer.domElement.dataset.studentTransformed=String(Boolean(key==='player'&&f.adventure.transformed&&!dojo));const weapon=student.root.getObjectByName('studentEquipment')?.children.find(o=>o.name.startsWith('equipped_weapon_'));const hand=student.root.getObjectByName('forearmR');if(weapon&&hand&&weapon.parent){hand.updateWorldMatrix(true,false);weapon.parent.updateWorldMatrix(true,false);weapon.position.copy(weapon.parent.worldToLocal(hand.localToWorld(new THREE.Vector3(0,.24,0))));}}
 
         const expression=action==='Hit'?'hit':action==='Defeat'?'sad':action==='Victory'?'victory':action==='Attack'?'anger':'neutral';
         if(state.expression!==expression){for(const name of ['neutral','smile','surprise','anger','sad','hit','victory']){const face=body.getObjectByName('hero_expression_'+name);if(face)face.visible=name===expression;}state.expression=expression;}
