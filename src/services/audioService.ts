@@ -1940,7 +1940,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2137,6 +2137,20 @@ class AudioService {
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
+  }
+
+  /** Offline, original Irodori v4.1 voices for the nine Dungeons 2 heroes. */
+  public async playDungeons2VoiceFile(heroId: string, voiceName: string) {
+      if (!/^(lyria|celis|flora|noctia|aurene|ignis|leon|orion|leif)$/.test(heroId) || !/^(attack|damage|finish|heal|defeat|transform|ultimate-[123]|card)$/.test(voiceName)) return false;
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return false;
+      const name = `dungeons2-voice-${heroId}-${voiceName}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      const played = await this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/dungeons2-voices/${heroId}/${voiceName}.mp3`))], 3400, false, generation);
+      // Keep the action controller busy for the clip's bounded playback window.
+      if (played) await new Promise<void>(resolve => window.setTimeout(resolve, 3400));
+      return played;
   }
 
   public playMagicVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2200, _transformed = false) {

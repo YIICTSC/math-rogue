@@ -7,3 +7,6 @@
 @media(prefers-reduced-motion:reduce){.abyss-element{animation:none;opacity:.45}.abyss-skill-portrait{display:none}}
 
 @media(orientation:landscape) and (max-height:520px){.abyss-profile{max-height:285px;overflow:auto;padding-right:3px}.abyss-profile .primary{position:sticky;bottom:0;z-index:1}.abyss-roster img{height:57px}.abyss-roster{gap:5px}.abyss-picker header{align-items:center}.abyss-picker header>div{display:block!important}}
+
+/* Three compact slots remain in one horizontal row in every orientation. */
+.d2-ability-loadout,.portrait-ability-slot .d2-ability-loadout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;flex-direction:row;height:44px;min-width:0}.d2-ability-loadout .student-ability-button,.portrait-ability-slot .d2-ability-loadout .student-ability-button{width:100%;height:44px;min-height:44px!important;max-width:none;padding:3px 2px!important;font-size:9px;gap:2px;overflow:hidden}.d2-ability-loadout .ability-slot-name{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%;line-height:1.15;overflow-wrap:anywhere}.d2-ability-loadout .student-ability-button small{font-size:8px;white-space:nowrap}.dungeon-landscape-action-panel:has(.d2-ability-loadout) .d2-ability-loadout{flex-shrink:0}.portrait-ability-slot:has(.d2-ability-loadout){width:calc(100% - 74px)!important}

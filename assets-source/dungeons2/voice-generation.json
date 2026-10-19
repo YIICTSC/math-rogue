@@ -1,0 +1,909 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+  "format": "mp3",
+  "sampleRate": 24000,
+  "channels": 1,
+  "clips": [
+    {
+      "hero": "lyria",
+      "action": "attack",
+      "text": "星よ、切り開け！",
+      "duration": 1.824,
+      "rms": 0.10288,
+      "peak": 0.70333,
+      "bytes": 14828,
+      "sha256": "a1859871a6f198f69ee7db14ad4b6727f7f47c5ed66ab03c989380deda9ed81a"
+    },
+    {
+      "hero": "lyria",
+      "action": "damage",
+      "text": "まだ、負けない！",
+      "duration": 1.536,
+      "rms": 0.10814,
+      "peak": 0.58969,
+      "bytes": 12524,
+      "sha256": "2138117b9e71fafb5b66ec959225cf04a68b867ffac8fe2a04b88ad8bac9ca5b"
+    },
+    {
+      "hero": "lyria",
+      "action": "finish",
+      "text": "これが、私の答え！",
+      "duration": 1.968,
+      "rms": 0.11286,
+      "peak": 0.65045,
+      "bytes": 15980,
+      "sha256": "e38899ff69a83ee28b72657109a366780901c84aee20e65a74fd1c65d4c71955"
+    },
+    {
+      "hero": "lyria",
+      "action": "heal",
+      "text": "もう大丈夫。立て直そう。",
+      "duration": 2.184,
+      "rms": 0.10249,
+      "peak": 0.55749,
+      "bytes": 17708,
+      "sha256": "120e1bb7f79b22985659ba0c3b5f9a57d0a12b8a887e9e19cc8873b2e3149574"
+    },
+    {
+      "hero": "lyria",
+      "action": "defeat",
+      "text": "みんな、ごめん……。",
+      "duration": 1.32,
+      "rms": 0.12018,
+      "peak": 0.59989,
+      "bytes": 10796,
+      "sha256": "6bdfee88913852578cae69aab88db0ada921e56dac81292045e7f9e80eb9e112"
+    },
+    {
+      "hero": "lyria",
+      "action": "transform",
+      "text": "星冠よ、私に力を！",
+      "duration": 2.52,
+      "rms": 0.10673,
+      "peak": 0.68823,
+      "bytes": 20396,
+      "sha256": "932784bfbeb63dd6c54990dffc00f2bbdb88dadb76e6f81fa295276da30d7729"
+    },
+    {
+      "hero": "lyria",
+      "action": "ultimate-1",
+      "text": "せいもんいっせん！",
+      "duration": 1.128,
+      "rms": 0.10938,
+      "peak": 0.6142,
+      "bytes": 9260,
+      "sha256": "bdb402ab04e79c80374d425bac4d4f591c79e1c913595d869a40708e62828096"
+    },
+    {
+      "hero": "lyria",
+      "action": "ultimate-2",
+      "text": "ほしまもりのわ！",
+      "duration": 1.008,
+      "rms": 0.10984,
+      "peak": 0.53715,
+      "bytes": 8300,
+      "sha256": "1ffe1fa869606fa693ab161c316740558b1a1370562c35035061d986065f2ba2"
+    },
+    {
+      "hero": "lyria",
+      "action": "ultimate-3",
+      "text": "てんきょくグランドクロス！",
+      "duration": 1.632,
+      "rms": 0.11493,
+      "peak": 0.55488,
+      "bytes": 13292,
+      "sha256": "9a465e201ebc82c3b5797a353ee6878324a18284e7a6cdf37d54ee5ece0203e5"
+    },
+    {
+      "hero": "lyria",
+      "action": "card",
+      "text": "せいかんのちかい！",
+      "duration": 1.296,
+      "rms": 0.12283,
+      "peak": 0.58799,
+      "bytes": 10604,
+      "sha256": "0e858c6b0fd1a49c20caa7a3f6a1d1f38950dc1b7a3d2e7628b42d10d95fea34"
+    },
+    {
+      "hero": "celis",
+      "action": "attack",
+      "text": "氷よ、貫いて！",
+      "duration": 1.92,
+      "rms": 0.09427,
+      "peak": 0.56614,
+      "bytes": 15596,
+      "sha256": "c7ec80468b124496e227b1e21956d291fa25adc0da2d5429c4768506f1e1610b"
+    },
+    {
+      "hero": "celis",
+      "action": "damage",
+      "text": "このくらい、平気。",
+      "duration": 1.8,
+      "rms": 0.11836,
+      "peak": 0.56187,
+      "bytes": 14636,
+      "sha256": "6848dcfd66bad30918cf6b9ff47e85a329e6abb9c60ad38e91d8b500beb0c785"
+    },
+    {
+      "hero": "celis",
+      "action": "finish",
+      "text": "静かに、眠って。",
+      "duration": 1.848,
+      "rms": 0.10922,
+      "peak": 0.55125,
+      "bytes": 15020,
+      "sha256": "043b7225aadb073b74ec6c5de88fcceaa05853da57e87aa7306a58ec7d75f7a1"
+    },
+    {
+      "hero": "celis",
+      "action": "heal",
+      "text": "心を落ち着けて。",
+      "duration": 1.392,
+      "rms": 0.11849,
+      "peak": 0.50141,
+      "bytes": 11372,
+      "sha256": "71ff861de2e8b52ec43f459a2e9fcc421bab3270d314386b7efdf16ef77299bb"
+    },
+    {
+      "hero": "celis",
+      "action": "defeat",
+      "text": "もう、届かないの……。",
+      "duration": 1.824,
+      "rms": 0.10315,
+      "peak": 0.52047,
+      "bytes": 14828,
+      "sha256": "11ed3b580ca938c5ecea72a93442bb28f6e6754369e5c2cf483537a10880a518"
+    },
+    {
+      "hero": "celis",
+      "action": "transform",
+      "text": "氷冠よ、目覚めなさい！",
+      "duration": 2.232,
+      "rms": 0.10279,
+      "peak": 0.54674,
+      "bytes": 18092,
+      "sha256": "365ee0cdb48d9fe0bbbb001c03bc432ba5f684b40fd8e1030f78bac84a295d38"
+    },
+    {
+      "hero": "celis",
+      "action": "ultimate-1",
+      "text": "ひょうしょうのや！",
+      "duration": 1.224,
+      "rms": 0.10914,
+      "peak": 0.38865,
+      "bytes": 10028,
+      "sha256": "043b7c2666652d0f59ff9800f16e62ca9ea937d0365f18832ed8c2b012ed06c2"
+    },
+    {
+      "hero": "celis",
+      "action": "ultimate-2",
+      "text": "せいひょうのいずみ！",
+      "duration": 1.392,
+      "rms": 0.11819,
+      "peak": 0.44413,
+      "bytes": 11372,
+      "sha256": "349fb0353d1bdeb0b6f781356ad7bc19f0946813b681f04fdb25dc87a97dbcc3"
+    },
+    {
+      "hero": "celis",
+      "action": "ultimate-3",
+      "text": "ぜつれいのおうかん！",
+      "duration": 1.632,
+      "rms": 0.11141,
+      "peak": 0.48644,
+      "bytes": 13292,
+      "sha256": "36feeaf4fed39027355b4afe9ecffb1b6070a8e6573d65d65632646cbb15f0f3"
+    },
+    {
+      "hero": "celis",
+      "action": "card",
+      "text": "えいひょうのけいやく！",
+      "duration": 1.632,
+      "rms": 0.12158,
+      "peak": 0.41773,
+      "bytes": 13292,
+      "sha256": "86fd54bcec1f19c0fcae47cbc53941203e575bd81ab4938b2b6223863135f1e8"
+    },
+    {
+      "hero": "flora",
+      "action": "attack",
+      "text": "狙いは、外さない！",
+      "duration": 2.016,
+      "rms": 0.10402,
+      "peak": 0.51517,
+      "bytes": 16364,
+      "sha256": "78cc9265b7628296cffa28308542e677f3ba20c4608d2699f9819ef64a7475fd"
+    },
+    {
+      "hero": "flora",
+      "action": "damage",
+      "text": "いたっ、まだまだ！",
+      "duration": 2.52,
+      "rms": 0.08196,
+      "peak": 0.54805,
+      "bytes": 20396,
+      "sha256": "e197dc38b03865d80c3589ef60341dde91f76d5276ef91fb6398ca05dd5f26d7"
+    },
+    {
+      "hero": "flora",
+      "action": "finish",
+      "text": "やったね、大成功！",
+      "duration": 2.4,
+      "rms": 0.09532,
+      "peak": 0.53178,
+      "bytes": 19436,
+      "sha256": "54ace4712ec4f31ed41a0a5917d466cbd5fd22ace5203784b47f2e8a7c1a5ae2"
+    },
+    {
+      "hero": "flora",
+      "action": "heal",
+      "text": "さあ、元気出して！",
+      "duration": 2.016,
+      "rms": 0.09941,
+      "peak": 0.68364,
+      "bytes": 16364,
+      "sha256": "642bccbc97c4a516eb1bea3929a226999e36feb07955eea36da71773a15debe0"
+    },
+    {
+      "hero": "flora",
+      "action": "defeat",
+      "text": "森のみんな、またね……。",
+      "duration": 2.16,
+      "rms": 0.0999,
+      "peak": 0.56226,
+      "bytes": 17516,
+      "sha256": "a9dac10042223a101cc80ba937722036fa1a814e1c24f6a1bb0364b715622dc8"
+    },
+    {
+      "hero": "flora",
+      "action": "transform",
+      "text": "花冠よ、一緒に咲こう！",
+      "duration": 2.52,
+      "rms": 0.10868,
+      "peak": 0.60115,
+      "bytes": 20396,
+      "sha256": "066b74f2dfebfa044af42af8687746088df624652182939a8036defa1fa687d7"
+    },
+    {
+      "hero": "flora",
+      "action": "ultimate-1",
+      "text": "すいようのしゃせん！",
+      "duration": 1.824,
+      "rms": 0.10841,
+      "peak": 0.44967,
+      "bytes": 14828,
+      "sha256": "6ad99351bb1ac21e368495f0d9e2998f55b3cceda1dc4a7b39de6c1bc62c4b7b"
+    },
+    {
+      "hero": "flora",
+      "action": "ultimate-2",
+      "text": "せいれいのこかげ！",
+      "duration": 1.512,
+      "rms": 0.11437,
+      "peak": 0.42673,
+      "bytes": 12332,
+      "sha256": "b9c4b7bb1e6c70d956584ba83bd9a95bf457582384bb426e6ef8e10984754edb"
+    },
+    {
+      "hero": "flora",
+      "action": "ultimate-3",
+      "text": "ばんかのけっかい！",
+      "duration": 1.68,
+      "rms": 0.1158,
+      "peak": 0.60065,
+      "bytes": 13676,
+      "sha256": "0264d69da67d61ffa22e121e2ff782e60cceb5d81e3cd11109e129de57a8cbae"
+    },
+    {
+      "hero": "flora",
+      "action": "card",
+      "text": "せかいじゅのめぶき！",
+      "duration": 1.104,
+      "rms": 0.10561,
+      "peak": 0.42816,
+      "bytes": 9068,
+      "sha256": "d6f6d806b3672a3ad2cb767ef38e037ebf8ff1d6363ae18b09ed98d2288a6ee8"
+    },
+    {
+      "hero": "noctia",
+      "action": "attack",
+      "text": "影に、沈みなさい。",
+      "duration": 2.064,
+      "rms": 0.11041,
+      "peak": 0.67278,
+      "bytes": 16748,
+      "sha256": "432b7ecbb45f825f9171bc5671e91a255152fca34aebdd033db3fb5159738696"
+    },
+    {
+      "hero": "noctia",
+      "action": "damage",
+      "text": "ふふ、やるわね。",
+      "duration": 2.256,
+      "rms": 0.08368,
+      "peak": 0.55561,
+      "bytes": 18284,
+      "sha256": "80b6174863947a53df5a5263d834e41fc68e499ab863d7775dbceef25dfc99dc"
+    },
+    {
+      "hero": "noctia",
+      "action": "finish",
+      "text": "これで、おしまい。",
+      "duration": 1.704,
+      "rms": 0.13236,
+      "peak": 0.69545,
+      "bytes": 13868,
+      "sha256": "350c6158e5077c4464c9695f78c7a1599f5b43457b12cf9a3fd626e6135db978"
+    },
+    {
+      "hero": "noctia",
+      "action": "heal",
+      "text": "ひと息、つきましょう。",
+      "duration": 1.92,
+      "rms": 0.11278,
+      "peak": 0.58954,
+      "bytes": 15596,
+      "sha256": "5aa52043d9299bc4c3e39cd0cb126f09d6d57b2ce6c77614ad8aea108f3c8da5"
+    },
+    {
+      "hero": "noctia",
+      "action": "defeat",
+      "text": "月が、遠いわね……。",
+      "duration": 2.208,
+      "rms": 0.10344,
+      "peak": 0.60175,
+      "bytes": 17900,
+      "sha256": "3de1b04eac76e1273c4eef2be393e0114b98789089958c45d9cd8bcc08b6000e"
+    },
+    {
+      "hero": "noctia",
+      "action": "transform",
+      "text": "夜冠よ、闇をひらいて！",
+      "duration": 2.784,
+      "rms": 0.10406,
+      "peak": 0.57542,
+      "bytes": 22508,
+      "sha256": "0c8758e518fa84b24d8a3318a3608516040dba5e3201945da6c936e4ab6a0ce1"
+    },
+    {
+      "hero": "noctia",
+      "action": "ultimate-1",
+      "text": "つきかげわたり！",
+      "duration": 1.368,
+      "rms": 0.11017,
+      "peak": 0.48178,
+      "bytes": 11180,
+      "sha256": "a8876fe7f9c60bd70e7a121793ca48d0040de1ad5e71641c99ee807e554cd613"
+    },
+    {
+      "hero": "noctia",
+      "action": "ultimate-2",
+      "text": "やそうのページ！",
+      "duration": 1.824,
+      "rms": 0.12464,
+      "peak": 0.53653,
+      "bytes": 14828,
+      "sha256": "9651b729bcf984248421c0b4f8278e93ef994196f7470d95aa8c8e8233612e5b"
+    },
+    {
+      "hero": "noctia",
+      "action": "ultimate-3",
+      "text": "かいきげっしょく！",
+      "duration": 1.584,
+      "rms": 0.12909,
+      "peak": 0.67593,
+      "bytes": 12908,
+      "sha256": "9106aec105795efac6cc5fcc4d8dff934da22bdcd31dc12d5e23da217de93270"
+    },
+    {
+      "hero": "noctia",
+      "action": "card",
+      "text": "えいげつのきんしょ！",
+      "duration": 1.632,
+      "rms": 0.12834,
+      "peak": 0.71858,
+      "bytes": 13292,
+      "sha256": "4c343710d407d28868d669df0bd8ce652aec0c397ffcf9c73baded2d2f5ee46b"
+    },
+    {
+      "hero": "aurene",
+      "action": "attack",
+      "text": "光よ、導いて！",
+      "duration": 1.92,
+      "rms": 0.10014,
+      "peak": 0.57079,
+      "bytes": 15596,
+      "sha256": "a1f9aae2342261ddfdfbe9d00f347a8cad713fb83f9a452eb4bfb984c9aead2e"
+    },
+    {
+      "hero": "aurene",
+      "action": "damage",
+      "text": "私は、立っています！",
+      "duration": 2.112,
+      "rms": 0.09172,
+      "peak": 0.65318,
+      "bytes": 17132,
+      "sha256": "92bdd5b846c47af45b7c38db88d3e874ca273a5afc469216fc98af577ce565ec"
+    },
+    {
+      "hero": "aurene",
+      "action": "finish",
+      "text": "安らかな、夜明けを。",
+      "duration": 1.92,
+      "rms": 0.10448,
+      "peak": 0.51966,
+      "bytes": 15596,
+      "sha256": "1421305d5f54978b08c0725d63285060b45b48e38ccca928160452920be2fa5e"
+    },
+    {
+      "hero": "aurene",
+      "action": "heal",
+      "text": "あなたに、癒やしの光を。",
+      "duration": 2.52,
+      "rms": 0.09839,
+      "peak": 0.55094,
+      "bytes": 20396,
+      "sha256": "5cca078860d348022ccfdefac2db8844be69c54e2d40f1fc5a785209cfd3b484"
+    },
+    {
+      "hero": "aurene",
+      "action": "defeat",
+      "text": "どうか、みんなを……。",
+      "duration": 1.8,
+      "rms": 0.11085,
+      "peak": 0.51252,
+      "bytes": 14636,
+      "sha256": "6043842ad519cad2c3985c97cd1797c35e7db09798fe8fbdec3664d55e810fd4"
+    },
+    {
+      "hero": "aurene",
+      "action": "transform",
+      "text": "聖冠よ、希望を照らして！",
+      "duration": 2.52,
+      "rms": 0.10525,
+      "peak": 0.49,
+      "bytes": 20396,
+      "sha256": "309b0fd945a872bf3af8988d8f13e292fdff54c835903c5729efc259977e4ad8"
+    },
+    {
+      "hero": "aurene",
+      "action": "ultimate-1",
+      "text": "しょこうのやり！",
+      "duration": 1.176,
+      "rms": 0.11126,
+      "peak": 0.47109,
+      "bytes": 9644,
+      "sha256": "d50458d592f1b527fd537ed76e92687e57712b56832fb553c56c8f8f7305f051"
+    },
+    {
+      "hero": "aurene",
+      "action": "ultimate-2",
+      "text": "じあいのいのり！",
+      "duration": 1.248,
+      "rms": 0.12303,
+      "peak": 0.4461,
+      "bytes": 10220,
+      "sha256": "3d2c4d049283db5fcb68cfa6936e16a30f8493b3ae7682faeb7d11933911fd89"
+    },
+    {
+      "hero": "aurene",
+      "action": "ultimate-3",
+      "text": "せいじつのしゅくさい！",
+      "duration": 1.632,
+      "rms": 0.11977,
+      "peak": 0.63921,
+      "bytes": 13292,
+      "sha256": "aceb7c15e55ebdb90518fdad307ea3b7bb7cbfe1d84900284480d4bd67368037"
+    },
+    {
+      "hero": "aurene",
+      "action": "card",
+      "text": "よあけのふくいん！",
+      "duration": 1.344,
+      "rms": 0.11851,
+      "peak": 0.51057,
+      "bytes": 10988,
+      "sha256": "420961755777a8585b5510b0f93301275a00387dfeae2ed1ca23219f04a0010a"
+    },
+    {
+      "hero": "ignis",
+      "action": "attack",
+      "text": "俺が、道を開く！",
+      "duration": 1.848,
+      "rms": 0.09768,
+      "peak": 0.71353,
+      "bytes": 15020,
+      "sha256": "7942b074a83d89b074b34a440051b0ca498e12af5e6b95a2312bb9cfa5e4b6a1"
+    },
+    {
+      "hero": "ignis",
+      "action": "damage",
+      "text": "へっ、まだいける！",
+      "duration": 1.56,
+      "rms": 0.08542,
+      "peak": 0.68121,
+      "bytes": 12716,
+      "sha256": "dc60f4d7de0d41e34e51522ac9f95700710edb0750395c6d0808125b965068e2"
+    },
+    {
+      "hero": "ignis",
+      "action": "finish",
+      "text": "よっしゃ、決まった！",
+      "duration": 1.608,
+      "rms": 0.10213,
+      "peak": 0.77513,
+      "bytes": 13100,
+      "sha256": "2cf0c509c4c617384145e0815f8bec714681e484805ef46fa8ee1627272752f6"
+    },
+    {
+      "hero": "ignis",
+      "action": "heal",
+      "text": "もう一度、いくぞ！",
+      "duration": 1.704,
+      "rms": 0.09209,
+      "peak": 0.77291,
+      "bytes": 13868,
+      "sha256": "e9dde8ea58f26dcf27c9d9c0775f790ab5a564d3e710ac62310d463c739dd1c8"
+    },
+    {
+      "hero": "ignis",
+      "action": "defeat",
+      "text": "くそっ、ここまでか……。",
+      "duration": 1.944,
+      "rms": 0.07589,
+      "peak": 0.73207,
+      "bytes": 15788,
+      "sha256": "cdc10df80a1d5cc643a0fdc1b9e4ef569c01b6f79aaac94296cd557b2b978445"
+    },
+    {
+      "hero": "ignis",
+      "action": "transform",
+      "text": "勇気よ、燃え上がれ！",
+      "duration": 1.944,
+      "rms": 0.09334,
+      "peak": 0.62175,
+      "bytes": 15788,
+      "sha256": "eeb7b8973ddbce676f7a81fdf5cf5c302629aaa28562ab3d343f16d70be89149"
+    },
+    {
+      "hero": "ignis",
+      "action": "ultimate-1",
+      "text": "ゆうきのいっせん！",
+      "duration": 1.272,
+      "rms": 0.08901,
+      "peak": 0.76637,
+      "bytes": 10412,
+      "sha256": "d6daad2fce3b74556ca3ae75e2b1c8983ca3d420fef43728b94d31147ee560aa"
+    },
+    {
+      "hero": "ignis",
+      "action": "ultimate-2",
+      "text": "ふくつのとうし！",
+      "duration": 1.368,
+      "rms": 0.0999,
+      "peak": 0.64628,
+      "bytes": 11180,
+      "sha256": "0ae185de0539ba0fa9426d4c0fdaa72788a11b8868c6342af75cebb95186a7f7"
+    },
+    {
+      "hero": "ignis",
+      "action": "ultimate-3",
+      "text": "ぐれんブレイバー！",
+      "duration": 1.248,
+      "rms": 0.09087,
+      "peak": 0.63073,
+      "bytes": 10220,
+      "sha256": "fa20439e71a508074e1ab7116968e03978505639da6d6d36b99203fc55cb30f0"
+    },
+    {
+      "hero": "ignis",
+      "action": "card",
+      "text": "ゆうしゃのちかい！",
+      "duration": 1.224,
+      "rms": 0.09239,
+      "peak": 0.83976,
+      "bytes": 10028,
+      "sha256": "70f7a4a0e562dd9f90320a632116fcaf3ebc76dd2ad35aa0d6df48b925161dde"
+    },
+    {
+      "hero": "leon",
+      "action": "attack",
+      "text": "この剣に、誓う！",
+      "duration": 2.928,
+      "rms": 0.10401,
+      "peak": 0.60635,
+      "bytes": 23660,
+      "sha256": "3879206d2c2b78e4cb9879427aeca9f38ae251962e69dc68c2fd0cc92cacb689"
+    },
+    {
+      "hero": "leon",
+      "action": "damage",
+      "text": "盾は、砕けない！",
+      "duration": 2.568,
+      "rms": 0.09531,
+      "peak": 0.59081,
+      "bytes": 20780,
+      "sha256": "e2e028bec32a54d4d0f75678dc075bcf86fd33536e8055e7bf2c8f4b01a3fa68"
+    },
+    {
+      "hero": "leon",
+      "action": "finish",
+      "text": "正しき道を、ここに。",
+      "duration": 2.928,
+      "rms": 0.1031,
+      "peak": 0.52512,
+      "bytes": 23660,
+      "sha256": "e8357580edc2781a7d1f4570bc281c033a4b9bc16859411e88d16eec22e28e2a"
+    },
+    {
+      "hero": "leon",
+      "action": "heal",
+      "text": "立ち上がれ、友よ。",
+      "duration": 2.664,
+      "rms": 0.09392,
+      "peak": 0.63711,
+      "bytes": 21548,
+      "sha256": "be68769bf00a0620831b20e0c75938e1cd1a8c7c983c10fd3b86592847296ce4"
+    },
+    {
+      "hero": "leon",
+      "action": "defeat",
+      "text": "誓いを、託す……。",
+      "duration": 2.592,
+      "rms": 0.09431,
+      "peak": 0.71,
+      "bytes": 20972,
+      "sha256": "8bbeef5fa2cdf53b09542eb0b9f8d41546cc747aefc25a181d8ff5683458dd21"
+    },
+    {
+      "hero": "leon",
+      "action": "transform",
+      "text": "日輪よ、我に守護を！",
+      "duration": 2.448,
+      "rms": 0.10563,
+      "peak": 0.47685,
+      "bytes": 19820,
+      "sha256": "11b35bdf08918d6987307e2568be63dc6116af2101d98f91b117ec7389d71288"
+    },
+    {
+      "hero": "leon",
+      "action": "ultimate-1",
+      "text": "せいたてのいちげき！",
+      "duration": 3.072,
+      "rms": 0.11303,
+      "peak": 0.70362,
+      "bytes": 24812,
+      "sha256": "46c34adfa16f151eff0ce6d77414c9e8f55ce49a8f99b260affd0511428c7917"
+    },
+    {
+      "hero": "leon",
+      "action": "ultimate-2",
+      "text": "きしのしゅごせいやく！",
+      "duration": 3.072,
+      "rms": 0.10744,
+      "peak": 0.65895,
+      "bytes": 24812,
+      "sha256": "5785f9c2304b64637d18367cd1b022a98877bfbae02ae9b931dd08c38feeab29"
+    },
+    {
+      "hero": "leon",
+      "action": "ultimate-3",
+      "text": "にちりんエクスカリバー！",
+      "duration": 2.88,
+      "rms": 0.10667,
+      "peak": 0.6036,
+      "bytes": 23276,
+      "sha256": "a071051c891975680f2aa2dd9b950e10360d5ac2a02712a89a9dcb9a91edaae5"
+    },
+    {
+      "hero": "leon",
+      "action": "card",
+      "text": "あかつきのせいけん！",
+      "duration": 3.072,
+      "rms": 0.11862,
+      "peak": 0.69956,
+      "bytes": 24812,
+      "sha256": "fcc6297b7b7f5bd3c37eb13433e19509df944bc2ab071103e2bd68223ae9927b"
+    },
+    {
+      "hero": "orion",
+      "action": "attack",
+      "text": "そこが、隙だ。",
+      "duration": 1.848,
+      "rms": 0.08941,
+      "peak": 0.75017,
+      "bytes": 15020,
+      "sha256": "7a31b60cb845aaa52fffcc0243aa4b5c2eb386432bec483e5b791dd9d7fafbde"
+    },
+    {
+      "hero": "orion",
+      "action": "damage",
+      "text": "まだ、終わらない。",
+      "duration": 1.944,
+      "rms": 0.10941,
+      "peak": 0.75083,
+      "bytes": 15788,
+      "sha256": "5bb5ab501166ee77f74d4bec811550d0d4dbd7974e98fffa2c5aa51cd91dcf42"
+    },
+    {
+      "hero": "orion",
+      "action": "finish",
+      "text": "勝負は、ついた。",
+      "duration": 2.064,
+      "rms": 0.09846,
+      "peak": 0.77249,
+      "bytes": 16748,
+      "sha256": "806407d1a096f5d62ddc6d8daee54c100bb2df0f57f9cd54b71da0030972a0dc"
+    },
+    {
+      "hero": "orion",
+      "action": "heal",
+      "text": "借りは、返す。",
+      "duration": 1.776,
+      "rms": 0.08306,
+      "peak": 0.76444,
+      "bytes": 14444,
+      "sha256": "6f480c227b84959c3880586290e41cfe5e0c3ae9e4f5ada7f3f2b8ec2efbff3c"
+    },
+    {
+      "hero": "orion",
+      "action": "defeat",
+      "text": "まだ、先が……。",
+      "duration": 1.848,
+      "rms": 0.09802,
+      "peak": 0.76123,
+      "bytes": 15020,
+      "sha256": "df3be95187ac4618ea7edb26c6d1a4414ea71950db8d92dee3342137b8138e24"
+    },
+    {
+      "hero": "orion",
+      "action": "transform",
+      "text": "黒月よ、この身に宿れ！",
+      "duration": 3.048,
+      "rms": 0.12358,
+      "peak": 0.67887,
+      "bytes": 24620,
+      "sha256": "639e8c0887604b7bd1cb7afba6e056e086018cfedcd1af4de4b8c36cf94b737b"
+    },
+    {
+      "hero": "orion",
+      "action": "ultimate-1",
+      "text": "つきかげルーンざん！",
+      "duration": 1.656,
+      "rms": 0.1108,
+      "peak": 0.57285,
+      "bytes": 13484,
+      "sha256": "161a00f2a75a3af01f263cc03d06c89cd3884071e669cc829d6578eaeb0de2cd"
+    },
+    {
+      "hero": "orion",
+      "action": "ultimate-2",
+      "text": "げんえいのふみこみ！",
+      "duration": 1.752,
+      "rms": 0.1253,
+      "peak": 0.61608,
+      "bytes": 14252,
+      "sha256": "25926a704896239c61facd122c9cfc52b3049ee6b7b283a563fe4b3f2269d9cf"
+    },
+    {
+      "hero": "orion",
+      "action": "ultimate-3",
+      "text": "こくげつエクリプス！",
+      "duration": 1.704,
+      "rms": 0.11368,
+      "peak": 0.56831,
+      "bytes": 13868,
+      "sha256": "de6123f4a607999276103e57cf454af35210fe581eca916d3eb6928507aae617"
+    },
+    {
+      "hero": "orion",
+      "action": "card",
+      "text": "まけんのかくせい！",
+      "duration": 1.608,
+      "rms": 0.12327,
+      "peak": 0.62103,
+      "bytes": 13100,
+      "sha256": "af05ef1459bc783b3fd6b34f1dbcca3b36eb3fa3d3ede1e1e78cfbdc42befe88"
+    },
+    {
+      "hero": "leif",
+      "action": "attack",
+      "text": "風よ、まっすぐに！",
+      "duration": 1.68,
+      "rms": 0.10072,
+      "peak": 0.74217,
+      "bytes": 13676,
+      "sha256": "9e781d48cd88e60cc28958b2878990558f922cb6c49f3de7c5a7470eb921b77b"
+    },
+    {
+      "hero": "leif",
+      "action": "damage",
+      "text": "っと、危ないな！",
+      "duration": 1.152,
+      "rms": 0.11717,
+      "peak": 0.67094,
+      "bytes": 9452,
+      "sha256": "f83f4b983cf954ca9a797b0a969dc97c0c26ff8614ea0953f154c44fdc19e0a9"
+    },
+    {
+      "hero": "leif",
+      "action": "finish",
+      "text": "ほらね、命中！",
+      "duration": 1.68,
+      "rms": 0.10933,
+      "peak": 0.62754,
+      "bytes": 13676,
+      "sha256": "a59256eda1ca657cc7c936849cf96c472983bd23398a66d1c220e9a0b8c560c4"
+    },
+    {
+      "hero": "leif",
+      "action": "heal",
+      "text": "よし、調子戻った！",
+      "duration": 1.848,
+      "rms": 0.11277,
+      "peak": 0.6873,
+      "bytes": 15020,
+      "sha256": "b90ef93882450ec94ed427c2567a623e3838ff361f4f047e921b7e01335b8663"
+    },
+    {
+      "hero": "leif",
+      "action": "defeat",
+      "text": "ごめん、先に行って……。",
+      "duration": 1.608,
+      "rms": 0.1099,
+      "peak": 0.74486,
+      "bytes": 13100,
+      "sha256": "b6911492afd12996dae39dbe46dd1fba5ed1f29abf86909ecd323982440e8e78"
+    },
+    {
+      "hero": "leif",
+      "action": "transform",
+      "text": "翠冠よ、風と走れ！",
+      "duration": 2.184,
+      "rms": 0.10316,
+      "peak": 0.58042,
+      "bytes": 17708,
+      "sha256": "985b2d364c1e5fcc36af04e387e09e69fa9a5c4eb3d3cf6351b0bf1472c7a2af"
+    },
+    {
+      "hero": "leif",
+      "action": "ultimate-1",
+      "text": "しっぷうのや！",
+      "duration": 1.008,
+      "rms": 0.10539,
+      "peak": 0.67276,
+      "bytes": 8300,
+      "sha256": "efde5b4ec8368d06273e30868f97404a0bad2c1b15386d7980f8c86cd34da857"
+    },
+    {
+      "hero": "leif",
+      "action": "ultimate-2",
+      "text": "もりのみちしるべ！",
+      "duration": 1.224,
+      "rms": 0.10996,
+      "peak": 0.59355,
+      "bytes": 10028,
+      "sha256": "a9d0a39e008d17276b57bb8b7b6cecdcdbafdea4617f8daa934aff90315b3860"
+    },
+    {
+      "hero": "leif",
+      "action": "ultimate-3",
+      "text": "せんようのりゅうせいう！",
+      "duration": 1.632,
+      "rms": 0.10484,
+      "peak": 0.55717,
+      "bytes": 13292,
+      "sha256": "d912a9439a8d5407158a1574e1998b35eedf3bb62e81ea00740310b0484071aa"
+    },
+    {
+      "hero": "leif",
+      "action": "card",
+      "text": "せいれいおうのいっし！",
+      "duration": 1.392,
+      "rms": 0.10252,
+      "peak": 0.49378,
+      "bytes": 11372,
+      "sha256": "8a3dbee321ae7e9055cf3b7ef5024c9f7068a813c8d85f52c522dd083af3bf2d"
+    }
+  ]
+}

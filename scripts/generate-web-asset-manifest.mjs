@@ -44,7 +44,8 @@ const filePaths = filesOnDisk
     filePath,
     path: path.relative(publicDir, filePath).split(path.sep).join('/').normalize('NFC'),
   }))
-  .filter(file => runtimeExtensions.has(path.extname(file.path).toLowerCase()))
+  .filter(file => runtimeExtensions.has(path.extname(file.path).toLowerCase())
+    || (file.path.startsWith('sfx/dungeons2-voices/') && path.extname(file.path).toLowerCase() === '.mp3'))
   .filter(file => !isSourceAsset(file.path));
 
 const filePathSet = new Set(filePaths.map(file => file.path));

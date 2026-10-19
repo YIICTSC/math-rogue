@@ -14,7 +14,7 @@ import {trans} from '../../utils/textUtils';
 import {useEffect,useRef,useState} from 'react';
 import {ADVENTURE_ITEMS,companionDirection,companionStep,cloneItem,decorateFloor,equipmentHas,evolveEnemy,goalFloor,mergeEquipment,MODES,modeUnlocked,modeRequirement,newAdventure,newBase,positionKey,puzzleLayout,putInContainer, type AdventureMode,type AdventureState,type SchoolBase,type SchoolItem} from './adventure';
 export interface AdventureBridge {
- revealMap?:()=>void;awardXp?:(amount:number)=>void;abilityEffect?:(x:number,y:number,color:string)=>void;abilityAudio?:(effect:string,finish:boolean)=>void;bossVictory?:()=>void;
+ revealMap?:()=>void;awardXp?:(amount:number)=>void;abilityEffect?:(x:number,y:number,color:string)=>void;abilityAudio?:(effect:string,finish:boolean,abilityName?:string)=>void;bossVictory?:()=>void;
  game:1|2; actionBlocked?:boolean;suspended?:boolean;known:(item:any)=>boolean;stairs:()=>void; debug?:boolean; language:string; map:string[][]; player:any; inventory:any[]; enemies:any[]; traps:any[]; floorItems:any[];floor:number;belly:number;gameOver:boolean;gameClear:boolean;
  setPlayer:(fn:any)=>void;setInventory:(fn:any)=>void;setEnemies:(fn:any)=>void;setTraps:(fn:any)=>void;setFloorItems:(fn:any)=>void;setMap:(fn:any)=>void;setGameOver:(v:boolean)=>void;setGameClear:(v:boolean)=>void;setMenuOpen:(v:boolean)=>void;setBelly:(fn:any)=>void;setIdentifiedTypes:(fn:any)=>void;
  log:(msg:string)=>void; restart:()=>void; descend:(floor:number)=>void; turn:(overrides?:{belly?:number;hp?:number})=>void;clearSave:()=>void; itemName:(item:any)=>string; catalog:Record<string,any>;cardSupplies?:any[];
@@ -427,7 +427,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   const xp=outcome.dead.filter(e=>e.enemyType!=='BOSS').reduce((sum,e)=>sum+(e.xp||0),0);if(xp)ctx.awardXp?.(xp);
   const reducedMotion=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!reducedMotion){ctx.abilityEffect?.(ctx.player.x,ctx.player.y,a.color);for(const hit of outcome.hits.slice(0,16))ctx.abilityEffect?.(hit.x,hit.y,a.color);}
-  ctx.abilityAudio?.(a.effect,outcome.dead.length>0);setAbilityBurst({id:Date.now(),ability:a});
+  ctx.abilityAudio?.(a.effect,outcome.dead.length>0,a.en);setAbilityBurst({id:Date.now(),ability:a});
   say(text(a.name,a.en)+'！',a.en+'!');
   if(outcome.dead.some(e=>e.enemyType==='BOSS')){ctx.bossVictory?.();finish();refresh();return true;}
   abilityPending.current=true;refresh();
