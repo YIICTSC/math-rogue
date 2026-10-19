@@ -8,11 +8,11 @@ export class DedicatedConnection {
   private closed = false;
   private abort = new AbortController();
   constructor(private receive: (packet: any) => boolean, private lost: () => void, private baseUrl?:string) {}
-  async open(game: 'kart' | 'craft' | 'golf' | 'online' | 'vr', hello: object) {
+  async open(game: 'kart' | 'craft' | 'golf' | 'online' | 'vr', hello: object, timeoutMs = 180000) {
     const base=this.baseUrl??onlineServerUrl();if(!base)throw new Error('サーバー通信はこの環境では利用できません。');
     const url=new URL(base);url.protocol=['http:','ws:'].includes(url.protocol)?'ws:':'wss:';url.pathname=`/${game}`;url.search='';url.hash='';
     const health=new URL(url);health.protocol=url.protocol==='ws:'?'http:':'https:';health.pathname='/health';
-    const deadline=Date.now()+180000,signal=this.abort.signal;
+    const deadline=Date.now()+timeoutMs,signal=this.abort.signal;
     const pause=()=>new Promise<void>((resolve,reject)=>{if(signal.aborted){reject(new Error('接続を終了しました。'));return;}const end=()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);resolve();},abort=()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);reject(new Error('接続を終了しました。'));},timer=setTimeout(end,2000);signal.addEventListener('abort',abort,{once:true});});
     let ready=false;
     while(!ready&&!this.closed&&Date.now()<deadline){try{await fetch(health,{mode:'no-cors',signal:AbortSignal.any([signal,AbortSignal.timeout(Math.min(15000,Math.max(1,deadline-Date.now())))])});ready=true;}catch{if(this.closed)throw new Error('接続を終了しました。');await pause();}}

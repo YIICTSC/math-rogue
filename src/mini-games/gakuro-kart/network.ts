@@ -1,3 +1,4 @@
+import { RaceStartSync } from './startSync';
 import {createHostRoomCode,roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import {type CustomCourse} from './track';
 import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
@@ -12,6 +13,26 @@ export class KartRoom {
   transport:OnlineTransport='host';
   selfId = 'local'; code = ''; host = false; world: Race | null = null;
   private dedicated: DedicatedConnection | null = null;
+  private sessionToken = crypto.randomUUID();
+  private dedicatedHello: object | null = null;
+  private reconnecting = false;
+  private startSync = new RaceStartSync();
+  private readySeed: number | null = null;
+  private readyFrame = 0;
+  private notify(world: Race) {
+    this.update(world);
+    if (world.phase !== 'countdown' || !world.paused || this.readySeed === world.seed) return;
+    this.readySeed = world.seed;
+    // Let React commit the new course and the canvas draw before acknowledging it.
+    this.readyFrame = requestAnimationFrame(() => {
+      this.readyFrame = requestAnimationFrame(() => {
+        if (this.closed || this.world?.seed !== world.seed) return;
+        if (this.dedicated) this.dedicated.send({ type: 'ready', seed: world.seed });
+        else if (this.host) this.startSync.ready(this.world, this.selfId, world.seed);
+        else { const host = this.channels.get('host'); if (host) this.sendTo(host, { type: 'ready', seed: world.seed }); }
+      });
+    });
+  }
   private peer: Peer | null = null;
   private channels = new Map<string, DataConnection>();
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -26,7 +47,7 @@ export class KartRoom {
   }
   private emit() {
     if (this.closed || !this.world) return;
-    this.update(structuredClone(this.world));
+    this.notify(structuredClone(this.world));
     const metadata = this.lastRoster !== this.world.revision ? roster(this.world) : null;
     const packet = encodeSnapshot(this.world, ++this.sequence);
     for (const c of this.channels.values()) if (c.open && this.world.players[c.peer]) {
@@ -39,7 +60,7 @@ export class KartRoom {
   private visibility = () => {
     if (!this.host || this.closed) return;
     this.paused = document.hidden;
-    if (this.world) this.world.paused = this.paused;
+    if (this.world) this.world.paused = this.paused || this.startSync.waiting;
     for (const c of this.channels.values()) this.sendTo(c, { type: 'pause', value: this.paused });
     this.status(this.paused ? 'ホストの画面が戻るまで一時停止しています。' : '');
   };
@@ -49,6 +70,7 @@ export class KartRoom {
     this.visibility();
     this.timer = setInterval(() => {
       const now = performance.now(), elapsed = Math.min(.15, (now - previous) / 1000); previous = now;
+      if (this.world && this.startSync.advance(this.world)) this.world.paused = this.paused;
       if (this.world && !this.paused) {
         accumulator += elapsed;
         while (accumulator >= 1 / 60) { tick(this.world, 1 / 60); accumulator -= 1 / 60; }
@@ -108,7 +130,8 @@ export class KartRoom {
         if (d.type === 'hello') {
           if (d.version !== PROTOCOL || !validAvatar(d.avatar) || typeof d.name !== 'string' || !Number.isInteger(d.hero) || !addRacer(this.world, c.peer, d.name, d.hero)) { this.reject(c, '参加できません。部屋の空き人数を確認してください。'); return; }
           this.world.players[c.peer].avatar = { ...d.avatar }; clearTimeout(timeout); this.pending.delete(timeout); this.emit();
-        } else if (d.type === 'avatar') this.applyAvatar(c.peer, d.avatar);
+        } else if (d.type === 'ready') this.startSync.ready(this.world, c.peer, d.seed);
+        else if (d.type === 'avatar') this.applyAvatar(c.peer, d.avatar);
         else if (d.type === 'command') command(this.world, c.peer, d.command);
       });
       let dropped = false;
@@ -116,8 +139,8 @@ export class KartRoom {
         if (dropped) return; dropped = true;
         clearTimeout(timeout); this.pending.delete(timeout); this.channels.delete(c.peer); this.rates.delete(c.peer);
         if (this.world?.players[c.peer]) {
-          if (this.world.phase === 'lobby') delete this.world.players[c.peer];
-          else { const p = this.world.players[c.peer]; p.cpu = true; p.name = `${p.name.slice(0, 10)} [BOT]`; }
+          delete this.world.players[c.peer];
+          this.startSync.remove(c.peer);
           this.world.revision++; this.emit();
         }
       };
@@ -139,7 +162,7 @@ export class KartRoom {
         if (raw instanceof ArrayBuffer && this.world) {
           const decoded = decodeSnapshot(raw, this.world, this.lastSequence);
           if (decoded && decoded.world.players[this.selfId]) {
-            this.world = decoded.world; this.lastSequence = decoded.sequence; this.lastPacketAt = performance.now(); this.update(this.world); done(); resolve();
+            this.world = decoded.world; this.lastSequence = decoded.sequence; this.lastPacketAt = performance.now(); this.notify(this.world); done(); resolve();
           } return;
         }
         if (typeof raw !== 'string' || raw.length > 600000) return;
@@ -153,15 +176,26 @@ export class KartRoom {
     });
     this.timer = setInterval(() => { if (performance.now() - this.lastPacketAt > 12000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
-  private async connectDedicated(packet: object) {
+  private async connectDedicated(packet: object, resuming = false) {
+    if (!resuming) this.dedicatedHello = { ...packet, sessionToken: this.sessionToken };
+    this.lastSequence = -1;
+    this.readySeed = null;
     this.dedicated=new DedicatedConnection(d=>{
-      if(d instanceof ArrayBuffer && this.world){const next=decodeSnapshot(d,this.world,this.lastSequence);if(next){this.world=next.world;this.lastSequence=next.sequence;this.update(this.world);return !!this.world.players[this.selfId];}}
-      if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
+      if(d instanceof ArrayBuffer && this.world){const next=decodeSnapshot(d,this.world,this.lastSequence);if(next){this.world=next.world;this.lastSequence=next.sequence;this.notify(this.world);return !!this.world.players[this.selfId];}}
+      if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;Object.assign(this.dedicatedHello!,{create:false,code:this.code});}
       if(d.type==='host')this.host=!!d.host;
       if(d.type==='roster'){const next=acceptRoster(d,this.world);if(next)this.world=next;}
       return false;
-    },()=>{this.close();this.update(null);this.status('専用サーバーとの接続が終了しました。');});
-    this.status('専用サーバーに接続しています。');await this.dedicated.open('kart',packet);this.status('');
+    },()=>{ void this.resumeDedicated(); });
+    this.status('専用サーバーに接続しています。');await this.dedicated.open('kart',this.dedicatedHello!,resuming ? 20000 : 180000);this.status('');
+  }
+  private async resumeDedicated() {
+    if (this.closed || this.reconnecting || !this.dedicatedHello) return;
+    this.reconnecting = true;
+    this.dedicated?.close();
+    try { await this.connectDedicated({}, true); }
+    catch { if (!this.closed) { this.close(); this.update(null); this.status('専用サーバーとの接続が終了しました。'); } }
+    finally { this.reconnecting = false; }
   }
   private applyAvatar(id: string, avatar: unknown) {
     if (this.world?.phase !== 'lobby' || !this.world.players[id] || !validAvatar(avatar)) return;
@@ -189,15 +223,15 @@ export class KartRoom {
     if (this.dedicated) { this.dedicated.send({ type: 'spectator', enabled }); return; }
     if (setSpectator(this.world, this.selfId, enabled)) this.emit();
   }
-  start(fill = true) { if(this.dedicated){if(this.host)this.dedicated.send({type:'start',fill});return;} if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
+  start(fill = true) { if(this.dedicated){if(this.host)this.dedicated.send({type:'start',fill});return;} if (this.host && this.world?.phase === 'lobby') { startRace(this.world, fill); this.startSync.begin(this.world, Object.values(this.world.players).filter(p => !p.cpu).map(p => p.id)); this.emit(); } }
   rematch(lesson?: KartLesson, course = this.world?.course ?? 0, laps = this.world?.laps ?? 3, customCourse?:CustomCourse) {
     if (!this.host || this.world?.phase !== 'result') return;
     if(this.dedicated){this.dedicated.send({type:'rematch',lesson,course,laps,customCourse});return;}
     const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1, laps,customCourse);
     this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
-    for (const p of Object.values(old.players)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; this.world.players[p.id].spectator = p.spectator; }
-    startRace(this.world); this.emit();
+    for (const p of Object.values(old.players).filter(p => p.cpu ? p.id.startsWith('cpu-') : p.id === this.selfId || this.channels.get(p.id)?.open)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; this.world.players[p.id].spectator = p.spectator; }
+    startRace(this.world); this.startSync.begin(this.world, Object.values(this.world.players).filter(p => !p.cpu).map(p => p.id)); this.emit();
   }
   send(c: Command) {
     if (this.closed) return;
@@ -207,7 +241,9 @@ export class KartRoom {
   }
   close() {
     if (this.closed) return; this.closed = true;
+    this.dedicated?.send({type:'leave'});
     this.dedicated?.close();
+    cancelAnimationFrame(this.readyFrame);
     if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility);
     this.pending.forEach(clearTimeout); this.pending.clear(); this.channels.forEach(c => c.close()); this.channels.clear(); this.peer?.destroy(); this.world = null;
   }
