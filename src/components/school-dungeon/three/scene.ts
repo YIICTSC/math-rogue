@@ -158,7 +158,8 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
     const river=outdoor&&!frame.adventure.town&&x===5&&y>=1&&y<=9;
     const water=terrain==='WATER'||tile==='WATER'||river&&tile==='WALL';
     const hole=terrain==='HOLE';
-    const floor=water?'#438eaa':hole?'#13232d':terrain==='ICE'?'#a5d9e1':outdoor?(variant===5?'#dce6dc':variant===4?'#ae965b':'#8da671'):floors[room];
+    const townRoad=frame.adventure.town&&(x===5||y===4||y===6||y===8);
+    const floor=water?'#438eaa':hole?'#13232d':terrain==='ICE'?'#a5d9e1':townRoad?'#b7966a':outdoor?(variant===5?'#dce6dc':variant===4?'#ae965b':'#8da671'):floors[room];
     box(g,floor,0,-.09,0,.985,.16,.985);
     if(water||terrain==='ICE'){for(let i=0;i<3;i++)box(g,water?'#90d2d6':'#e1f5f1',-.2+i*.17,.003,-.25+i*.23,.30,.012,.025);}
     if(terrain==='CRACK'){box(g,'#5c4b3c',0,.005,0,.045,.01,.8);box(g,'#5c4b3c',.14,.008,.1,.3,.01,.045);}

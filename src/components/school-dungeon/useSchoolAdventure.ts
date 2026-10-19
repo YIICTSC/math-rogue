@@ -91,12 +91,12 @@ export function useSchoolAdventure(bridge:AdventureBridge){
    if(s.mode!=='STORY'&&enemies.some(e=>e.enemyType==='BOSS')){const boss=enemies.find(e=>e.enemyType==='BOSS');map[boss.y][boss.x]='STAIRS';enemies.splice(enemies.indexOf(boss),1);}
   }
   if(s.mode==='STORY'&&floor!==20&&(floor%5===0||(floor>1&&floor%5===1)||floor===18)){
-   const layout=journeyLayout(map[0].length,map.length,floor%5===0,floor===18?3:Math.floor(floor/5)-1);map.splice(0,map.length,...layout.map);px=layout.start.x;py=layout.start.y;enemies.splice(0);items.splice(0);traps.splice(0);s.town=floor%5===0;s.scene=layout.scene;
+   const layout=journeyLayout(map[0].length,map.length,true,floor===18?3:Math.floor(floor/5)-1);map.splice(0,map.length,...layout.map);px=layout.start.x;py=layout.start.y;enemies.splice(0);items.splice(0);traps.splice(0);s.town=true;s.scene=layout.scene;
   }
   const occupied=new Set([...enemies,...items,...traps].map(e=>positionKey(e.x,e.y)));
   const cells=decorateFloor(s,map,px,py,floor,occupied);
   if(s.mode==='PUZZLE'||s.scene!==undefined){s.terrain={};s.events={};}
-  if(s.town)for(const service of TOWN_SERVICES)s.events[positionKey(service.x,service.y)]={kind:service.kind,done:false};
+  if(s.town){for(const service of TOWN_SERVICES)s.events[positionKey(service.x,service.y)]={kind:service.kind,done:false};if(floor%5!==0)s.events['5,7']={kind:'PICNIC',done:false};}
   else if(s.scene!==undefined)s.events['7,7']={kind:'PICNIC',done:false};
   if(floor===1)b.current.setPlayer((p:any)=>({...p,name:activeHero().name,gold:(s as any).startingGold||0}));
   if(s.mode==='STORY'&&(s as any).departed){const index=STUDENT_STORIES[studentChapter(activeHero().id)].findIndex(a=>a.floor===floor);if(index>=0)openStory(index);}
@@ -315,7 +315,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  useEffect(()=>recoverLoot(bridge.enemies),[bridge.enemies]);
  useEffect(()=>enemySkills(),[bridge.enemies,revision]);
  useEffect(()=>{if(bridge.gameClear&&!state.current.rescued)finish();},[bridge.gameClear]);
- const sceneTitle=()=>text(['川辺の宿場町','風来の学生道場','桜の滝見坂','竹林の天空橋','紅葉の鏡湖','雪山の星灯り'][state.current.scene??0],['Riverside village','School Wanderer dojo','Cherry waterfall path','Bamboo sky bridge','Autumn mirror lake','Snowy starlight'][state.current.scene??0]);
+ const sceneTitle=()=>state.current.town&&state.current.floor%5!==0?text('旅人の中継町','Wayfarer relay town'):text(['川辺の宿場町','風来の学生道場','桜の滝見坂','竹林の天空橋','紅葉の鏡湖','雪山の星灯り'][state.current.scene??0],['Riverside village','School Wanderer dojo','Cherry waterfall path','Bamboo sky bridge','Autumn mirror lake','Snowy starlight'][state.current.scene??0]);
  const claimMilestone=(key:string)=>{const goals:Record<string,boolean>={DOJO10:Object.keys(base.current.dojo||{}).length>=10,DOJO50:Object.keys(base.current.dojo||{}).length>=50,DISCOVER20:(base.current.codex||[]).length>=20};if(!goals[key]||base.current.claimed?.includes(key)){say('達成すると一度だけ報酬を受け取れます。','Complete this milestone to claim its reward once.');return;}base.current.claimed=[...(base.current.claimed||[]),key];base.current.bank+=key==='DOJO50'?1000:300;persist();say('修了証の報酬を貯金箱に届けた！','Certificate reward delivered to your savings!');};
  const visibleTile=(x:number,y:number)=>state.current.scene!==undefined||(!state.current.night&&state.current.weather!=='FOG')||Math.max(Math.abs(x-b.current.player.x),Math.abs(y-b.current.player.y))<=(state.current.night?4:5);
  const dojoComplete=(stage:number,turns:number)=>{base.current.dojo={...base.current.dojo,[stage]:Math.min(base.current.dojo?.[stage]||Infinity,turns)};persist();};
@@ -356,7 +356,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  };
  const safelyDrawService=(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number)=>{const service=TOWN_SERVICES.find(s=>s.kind===kind);return service?drawExpansionSprite(ctx,service.sprite,x,y,size):false;};
  const safeTurn=()=>state.current.scene!==undefined;
- const drawBackdrop=(ctx:CanvasRenderingContext2D,w:number,h:number)=>{if(state.current.scene!==undefined)drawScenery(ctx,state.current.scene,w,h);};
+ const drawBackdrop=(ctx:CanvasRenderingContext2D,w:number,h:number)=>{const s=state.current;if(s.scene!==undefined&&!(s.town&&s.floor%5!==0))drawScenery(ctx,s.scene,w,h);};
  const drawTile=(ctx:CanvasRenderingContext2D,tile:string,x:number,y:number,size:number,mx=0,my=0)=>{
   const s=state.current;if(s.scene===undefined)return false;ctx.save();ctx.imageSmoothingEnabled=false;
   const river=!s.town&&mx===5&&my>=1&&my<=9,bridge=river&&tile!=='WALL';
@@ -364,7 +364,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   const palette=palettes[Math.max(0,Math.min(3,s.scene-2))];
   if(river&&!bridge){ctx.fillStyle=s.scene===5?'#406d88':'#356c86';ctx.fillRect(x,y,size,size);ctx.strokeStyle='#a8ced1';ctx.lineWidth=1;for(let i=0;i<3;i++){const yy=y+size*(.2+i*.3);ctx.beginPath();ctx.moveTo(x+size*.12,yy);ctx.lineTo(x+size*.55,yy);ctx.stroke();}}
   else if(tile==='WALL'){ctx.fillStyle=s.town?'#203b2b':palette[1];ctx.globalAlpha=.88;ctx.fillRect(x,y,size,size);ctx.globalAlpha=1;ctx.strokeStyle=s.town?'#8bac0f':palette[0];ctx.strokeRect(x+2,y+2,size-4,size-4);}
-  else{ctx.fillStyle=bridge?'#98734a':s.town?'#b3ab70':palette[0];ctx.globalAlpha=bridge ? .95 : .72;ctx.fillRect(x,y,size,size);ctx.globalAlpha=1;ctx.strokeStyle=bridge?'#e2c68e':s.town?'#8f915c':palette[2];if(bridge){for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(x,y+i*size/5);ctx.lineTo(x+size,y+i*size/5);ctx.stroke();}}else{ctx.globalAlpha=.25;ctx.strokeRect(x,y,size,size);ctx.globalAlpha=1;}}
+  else{const road=s.town&&(my===4||my===6||my===8||mx===5);ctx.fillStyle=bridge?'#98734a':road?'#a88b63':s.town?'#9aa76b':palette[0];ctx.globalAlpha=bridge ? .95 : .82;ctx.fillRect(x,y,size,size);ctx.globalAlpha=1;ctx.strokeStyle=bridge?'#e2c68e':road?'#d6bc8b':s.town?'#778958':palette[2];if(bridge){for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(x,y+i*size/5);ctx.lineTo(x+size,y+i*size/5);ctx.stroke();}}else if(road){ctx.globalAlpha=.38;ctx.beginPath();if(mx===5){ctx.moveTo(x+size*.32,y);ctx.lineTo(x+size*.32,y+size);ctx.moveTo(x+size*.68,y);ctx.lineTo(x+size*.68,y+size);}else{ctx.moveTo(x,y+size*.32);ctx.lineTo(x+size,y+size*.32);ctx.moveTo(x,y+size*.68);ctx.lineTo(x+size,y+size*.68);}ctx.stroke();ctx.globalAlpha=1;}else{ctx.globalAlpha=.25;ctx.strokeRect(x,y,size,size);ctx.globalAlpha=1;}}
   if(tile==='STAIRS'){ctx.fillStyle='#173426';ctx.fillRect(x+size*.15,y+size*.12,size*.7,size*.76);ctx.fillStyle='#f3d887';for(let i=0;i<4;i++)ctx.fillRect(x+size*.25,y+size*(.24+i*.14),size*(.48-i*.08),2);}
   ctx.restore();return true;
  };

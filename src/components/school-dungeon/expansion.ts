@@ -14,8 +14,20 @@ export const EXTRA_ENEMIES:Record<string,{sprite:number;name:string;en:string;ty
 export const TOWN_SERVICES=[{kind:'INN',x:3,y:3,name:'川辺の宿',en:'Riverside inn',sprite:12},{kind:'SMITH',x:7,y:3,name:'工作工房',en:'Craft smith',sprite:13},{kind:'BANK',x:3,y:6,name:'郵便・預かり所',en:'Mail and savings',sprite:14},{kind:'SHOP',x:7,y:6,name:'旅のお店',en:'Travel shop',sprite:14},{kind:'FESTIVAL',x:5,y:4,name:'町のお祭り',en:'Town festival',sprite:15}];
 export function journeyLayout(width:number,height:number,town:boolean,variant:number){
  const map=Array.from({length:height},()=>Array(width).fill('WALL'));
- for(let y=1;y<=9;y++)for(let x=1;x<=10;x++)map[y][x]='FLOOR';
- // A river and an explicit bridge frame the scenery without sealing the route.
- if(!town){for(let y=1;y<=9;y++)if(y!==4&&y!==7)map[y][5]='WALL';for(let x=7;x<=9;x++)map[2][x]='WALL';}
+ const floor=(x:number,y:number)=>{if(map[y]?.[x]!==undefined)map[y][x]='FLOOR';};
+ if(town){
+  // Fixed street grid and building plots keep both towns and relay stops readable without a backdrop.
+  for(let y=1;y<=9;y++)for(let x=1;x<=10;x++)floor(x,y);
+  for(const [left,top,right,bottom] of [[1,1,2,2],[8,1,10,2],[1,5,2,5],[8,5,10,5],[1,7,2,7],[8,7,10,7]] as const)
+   for(let y=top;y<=bottom;y++)for(let x=left;x<=right;x++)if(map[y]?.[x]!==undefined)map[y][x]='WALL';
+  for(let x=1;x<=10;x++)for(const y of [4,6,8])floor(x,y);
+  for(let y=1;y<=9;y++)floor(5,y);
+  for(const service of TOWN_SERVICES)floor(service.x,service.y);
+ }else{
+  for(let y=1;y<=9;y++)for(let x=1;x<=10;x++)floor(x,y);
+  // A river and an explicit bridge frame the scenery without sealing the route.
+  for(let y=1;y<=9;y++)if(y!==4&&y!==7)map[y][5]='WALL';
+  for(let x=7;x<=9;x++)map[2][x]='WALL';
+ }
  map[8][9]='STAIRS';return {map,start:{x:2,y:8},scene:town?0:2+variant%4};
 }
