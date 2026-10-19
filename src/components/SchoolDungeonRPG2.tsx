@@ -925,15 +925,18 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   useEffect(() => { if (!gameOver && !gameClear) saveData(true); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
 
   useEffect(() => {
-      if (menuListRef.current) {
-          let activeIndex = selectedItemIndex;
-          if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') activeIndex = blankScrollSelectionIndex;
-          const items = menuListRef.current.children;
-          if (items && items[activeIndex]) {
-              (items[activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'smooth' }); 
-          }
-      }
-  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step]);
+      const list = menuListRef.current;
+      if (!list) return;
+      const revealSelection = () => {
+          const activeIndex = menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? blankScrollSelectionIndex : selectedItemIndex;
+          const row = list.querySelector<HTMLElement>(`[data-menu-item="${activeIndex}"]`) || list.children[activeIndex] as HTMLElement | undefined;
+          row?.scrollIntoView({block:'nearest',behavior:'instant'});
+      };
+      revealSelection();
+      const observer = new ResizeObserver(revealSelection);
+      observer.observe(list);
+      return () => observer.disconnect();
+  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
 
   useEffect(() => {
       setPlayer(p => {
@@ -1504,6 +1507,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if (adventure.dojoStep({type:'MOVE',dx,dy})) return;
+      if (adventure.townControl(dx,dy)) return;
       if (adventure.blocksInput()) return;
       if(gameOver || gameClear) return;
       if (shopState.active) {
@@ -1571,6 +1575,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const handleActionBtn = () => {
       if (adventure.dojoAction()) return;
+      if (adventure.townControl(0,0)) return;
       if (!adventure.blocksInput() && !menuOpen && !gameOver && !gameClear && adventure.interactNearby()) return;
       if (adventure.blocksInput()) return;
       if (gameOver) { handleRestart(); return; }
@@ -1706,6 +1711,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear]);
 
   const toggleMenu = () => {
+      if (adventure.townControl(0,0,true)) return;
       if (adventure.dojoMenu()) return; if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); setSelectedItemActionIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
   const startEndlessMode = () => { if (adventure.state.mode !== 'STORY') { adventure.returnHome(); return; } setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
   const handleSynthesisStep = () => {
@@ -2087,7 +2093,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   return (
     <div data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-play" className="mini-game-dungeon-screen w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         {launch!=='PLAY'&&<WandererTitle adventure={adventure} creating={launch==='NEW'} hasSave={hasSave} three={threeView.enabled} onToggle={threeView.toggle} onContinue={()=>{const save=storageService.loadDungeonState2();if(save?.map?.length){restoreState(save);setLaunch('PLAY');}else setHasSave(false);}} onChoose={()=>{threeView.setMode(false);setLaunch('NEW');}} onBack={()=>setLaunch('TITLE')} onExit={onBack} onCreate={()=>{if(hasSave&&!window.confirm(adventure.text('今の冒険を新しい旅で上書きしますか？','Replace the saved adventure with a new journey?')))return;adventure.newJourney();setLaunch('PLAY');setHasSave(true);}}/>}
-        {launch==='PLAY'&&!adventure.dojoRun&&['HOME','RELAY'].includes(adventure.state.place||'')&&<WandererTown adventure={adventure} three={threeView.enabled} onToggle={threeView.toggle} onTitle={()=>{saveData(true);setHasSave(true);setLaunch('TITLE');}}/>}
         <SchoolAdventurePanel adventure={adventure} inventory={inventory} player={player} itemName={getItemName} gameOver={gameOver} gameClear={gameClear} />
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2227,7 +2232,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="dungeon-top-bar w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                    <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の学生道場','School Wanderer dojo') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
+                    <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の学生道場','School Wanderer dojo') : adventure.state.place==='HOME' ? adventure.text('はじまりの町','Firstlight Town') : adventure.state.place==='RELAY' ? adventure.text('旅人の中継町','Wayfarer relay town') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                     <div className="flex gap-2">
                         <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => { if (!adventure.dojoMenu()) setShowMap(!showMap); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                         <button data-gamepad-zone="dungeon-two-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => { if (!adventure.dojoMenu()) setShowStatus(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
@@ -2241,6 +2246,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
                     <div ref={threeView.host} aria-hidden="true" style={{position:'absolute',inset:'0 0 0',visibility:threeView.ready?'visible':'hidden',pointerEvents:'none'}} />
+        {launch==='PLAY'&&!adventure.dojoRun&&['HOME','RELAY'].includes(adventure.state.place||'')&&<WandererTown adventure={adventure} three={threeView.enabled} onToggle={threeView.toggle} onTitle={()=>{saveData(true);setHasSave(true);setLaunch('TITLE');}}/>}
                     <button type="button" aria-label="2D / 3D" onClick={threeView.toggle} style={{position:'absolute',bottom:6,right:6,zIndex:12,padding:'4px 10px',borderRadius:6,border:'1px solid #b9d4cc',background:'#172b35',color:'#fff3d5',fontWeight:700,fontSize:12}}>{threeView.enabled?'3D':'2D'}</button>
                     {isFastForwarding && (<div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}><FastForward size={16} className="mr-1"/> {tr('早送り中')}</div>)}
                     {showMap && !adventure.dojoRun && map.length > 0 && (
@@ -2274,7 +2280,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}><span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span></div>
                         {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: selectedItemIndex === -1 ? C3 : C1, backgroundColor: selectedItemIndex === -1 ? C2 : 'transparent', color: selectedItemIndex === -1 ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(-1); }} onClick={() => handleShopAction(-1)}>{selectedItemIndex === -1 && <span className="mr-1 animate-pulse">▶</span>}<Trash2 size={12} /> {tr('カード除外')} (100 G)</button>)}
                         <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={itemKnown(item)?item.type:'UNKNOWN'} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">{tr('売り切れ')}</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={itemKnown(item)?item.type:'UNKNOWN'} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
+                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} data-menu-item={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={itemKnown(item)?item.type:'UNKNOWN'} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">{tr('売り切れ')}</div>) : (inventory.map((item, i) => (<div key={i} data-menu-item={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span className="inline-flex items-center gap-1"><SchoolSupplyIcon type={itemKnown(item)?item.type:'UNKNOWN'} size={24}/>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
                             {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">{tr('持ち物なし')}</div>}
                         </div>
                     </div>
@@ -2284,7 +2290,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold">{synthState.active ? tr(synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))) : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`}</h3><button onClick={toggleMenu}><X size={12}/></button></div>
                         {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
                             <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (<div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}><button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{blankScrollSelectionIndex === i && <span className="mr-1 animate-pulse">▶</span>}{tr(ITEM_DB[type as string].name)}</button></div>))}
+                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (<div key={i} data-menu-item={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}><button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{blankScrollSelectionIndex === i && <span className="mr-1 animate-pulse">▶</span>}{tr(ITEM_DB[type as string].name)}</button></div>))}
                                 {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">{tr('識別済みのノートがありません')}</div>}
                             </div>
                         ) : (
@@ -2306,7 +2312,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                                         const isSynthTarget = synthState.active && ((synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) || (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i));
                                         const switchDiffLabel = getEquipmentSwitchDiffLabel(item, player.equipment);
                                         return (
-                                            <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: !selectedEquipmentSlot && selectedItemIndex === i ? C3 : 'transparent', backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i ? C2 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
+                                            <div key={i} data-menu-item={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: !selectedEquipmentSlot && selectedItemIndex === i ? C3 : 'transparent', backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i ? C2 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
                                                 <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(0); }} style={!synthState.active && !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 0 ? { backgroundColor: C3, color: C0 } : undefined}>
                                                     <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-2">
                                                         <span className="truncate">{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>

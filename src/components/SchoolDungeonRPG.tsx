@@ -675,16 +675,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   // Auto-scroll menu
   useEffect(() => {
-      if (lastInputType.current === 'KEY' && menuListRef.current) {
-          let activeIndex = selectedItemIndex;
-          if (menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
-              activeIndex = blankScrollSelectionIndex;
-          }
-          const items = menuListRef.current.children;
-          if (items && items[activeIndex]) {
-              (items[activeIndex] as HTMLElement).scrollIntoView({ block: 'nearest', behavior: 'instant' }); 
-          }
-      }
+      const list = menuListRef.current;
+      if (!list) return;
+      const revealSelection = () => {
+          const activeIndex = menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? blankScrollSelectionIndex : selectedItemIndex;
+          const row = list.querySelector<HTMLElement>(`[data-menu-item="${activeIndex}"]`) || list.children[activeIndex] as HTMLElement | undefined;
+          row?.scrollIntoView({block:'nearest',behavior:'instant'});
+      };
+      revealSelection();
+      const observer = new ResizeObserver(revealSelection);
+      observer.observe(list);
+      return () => observer.disconnect();
   }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
 
   // Update Stats
@@ -1638,6 +1639,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if (adventure.dojoStep({type:'MOVE',dx,dy})) return;
+      if (adventure.townControl(dx,dy)) return;
       if (adventure.blocksInput()) return;
       if(gameOver || gameClear) return;
 
@@ -1797,6 +1799,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   const handleActionBtn = () => {
       if (adventure.dojoAction()) return;
+      if (adventure.townControl(0,0)) return;
       if (!adventure.blocksInput() && !menuOpen && !gameOver && !gameClear && adventure.interactNearby()) return;
       if (adventure.blocksInput()) return;
       if (gameOver) { handleRestart(); return; }
@@ -2178,6 +2181,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
 
   const toggleMenu = () => {
+      if (adventure.townControl(0,0,true)) return;
       if (adventure.dojoMenu()) return;
       if (shopState.active) {
           setShopState(prev => ({ ...prev, active: false }));
@@ -3090,7 +3094,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   return (
     <div data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-play" className="mini-game-dungeon-screen w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         {launch!=='PLAY'&&<WandererTitle adventure={adventure} creating={launch==='NEW'} hasSave={hasSave} three={threeView.enabled} onToggle={threeView.toggle} onContinue={()=>{const save=storageService.loadDungeonState();if(save?.map?.length){restoreState(save);setLaunch('PLAY');}else setHasSave(false);}} onChoose={()=>{threeView.setMode(false);setLaunch('NEW');}} onBack={()=>setLaunch('TITLE')} onExit={onBack} onCreate={()=>{if(hasSave&&!window.confirm(adventure.text('今の冒険を新しい旅で上書きしますか？','Replace the saved adventure with a new journey?')))return;adventure.newJourney();setLaunch('PLAY');setHasSave(true);}}/>}
-        {launch==='PLAY'&&!adventure.dojoRun&&['HOME','RELAY'].includes(adventure.state.place||'')&&<WandererTown adventure={adventure} three={threeView.enabled} onToggle={threeView.toggle} onTitle={()=>{saveData(true);setHasSave(true);setLaunch('TITLE');}}/>}
         <SchoolAdventurePanel adventure={adventure} inventory={inventory} player={player} itemName={getItemName} gameOver={gameOver} gameClear={gameClear} />
         
         {inspectedItem && (
@@ -3270,7 +3273,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-full relative overflow-hidden flex flex-col">
                     <div className="dungeon-top-bar absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                        <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の学生道場','School Wanderer dojo') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
+                        <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('風来の学生道場','School Wanderer dojo') : adventure.state.place==='HOME' ? adventure.text('はじまりの町','Firstlight Town') : adventure.state.place==='RELAY' ? adventure.text('旅人の中継町','Wayfarer relay town') : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
                             <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => { if (!adventure.dojoMenu()) setShowMap(!showMap); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                             <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => { if (!adventure.dojoMenu()) setShowStatus(true); }} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
@@ -3289,6 +3292,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art mt-6" style={{ imageRendering: 'pixelated' }} />
                     <div ref={threeView.host} aria-hidden="true" style={{position:'absolute',inset:'53px 0 0',visibility:threeView.ready?'visible':'hidden',pointerEvents:'none'}} />
+        {launch==='PLAY'&&!adventure.dojoRun&&['HOME','RELAY'].includes(adventure.state.place||'')&&<WandererTown adventure={adventure} three={threeView.enabled} onToggle={threeView.toggle} onTitle={()=>{saveData(true);setHasSave(true);setLaunch('TITLE');}}/>}
                     <button type="button" aria-label="2D / 3D" onClick={threeView.toggle} style={{position:'absolute',bottom:6,right:6,zIndex:12,padding:'4px 10px',borderRadius:6,border:'1px solid #b9d4cc',background:'#172b35',color:'#fff3d5',fontWeight:700,fontSize:12}}>{threeView.enabled?'3D':'2D'}</button>
 
                     {/* Fast Forward Indicator */}
@@ -3383,7 +3387,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                 {shopState.mode === 'BUY' ? (
                                     enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (
                                         <div 
-                                            key={i} 
+                                            key={i} data-menu-item={i}
                                             className="flex items-center border"
                                             style={{ 
                                                 borderColor: selectedItemIndex === i ? C3 : 'transparent',
@@ -3413,7 +3417,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                 ) : (
                                     inventory.map((item, i) => (
                                         <div 
-                                            key={i} 
+                                            key={i} data-menu-item={i}
                                             className="flex items-center border"
                                             style={{ 
                                                 borderColor: selectedItemIndex === i ? C3 : 'transparent',
@@ -3461,7 +3465,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                     {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (
-                                        <div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
+                                        <div key={i} data-menu-item={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}>
                                             <button 
                                                 className="flex-grow text-left px-2 py-1 cursor-pointer" 
                                                 onClick={() => handleSynthesisStep()} 
@@ -3509,7 +3513,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                             
                                             return (
                                                 <div 
-                                                    key={i} 
+                                                    key={i} data-menu-item={i}
                                                     className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`}
                                                     style={{ 
                                                         borderColor: !selectedEquipmentSlot && selectedItemIndex === i ? C3 : 'transparent',

@@ -21,3 +21,5 @@ const {existsSync}=await import('node:fs');
 const cells=new Set();for(const type of [...COMMON_ITEM_ART,...STUDENT_GEAR.map(i=>i.type)]){const spec=itemArtSpec(type);assert.ok(spec,type);assert.ok(spec.index<spec.columns*spec.rows,type);assert.ok(existsSync('public/'+spec.path),spec.path);cells.add(spec.path+':'+spec.index);}assert.equal(cells.size,161);console.log('PASS: 161 distinct generated item illustrations are assigned and available.');
 
 for(const hero of PROTAGONISTS){assert.ok(existsSync('public/sprites/wandering-student/'+hero.id+'.webp'),hero.id);assert.ok(existsSync('public/models/protagonists/'+hero.id+'.glb'),hero.id);}console.log('PASS: all 35 travelers have their 2D sheet and 3D model.');
+
+assert.deepEqual(journey.townBuildings(true).filter(b=>!b.npc).map(b=>b.kind).sort(),['DOJO','GATE','WAREHOUSE']);assert.ok(journey.townBuildings(false).some(b=>b.kind==='SHOP'));console.log('PASS: home has only warehouse/dojo facilities and its gate; relay shops remain available.');
