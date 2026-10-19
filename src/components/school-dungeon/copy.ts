@@ -187,7 +187,7 @@ export const SCHOOL_WANDERER_HIRAGANA:Record<string,string> = {
 };
 
 Object.assign(SCHOOL_WANDERER_ENGLISH, {
-  "風来の学生道場：冒険とは別の持ち物で練習。失敗しても倉庫や救助に影響しません。": "School Wanderer dojo: practice with separate supplies. Failure never affects your warehouse or rescue.",
+  "学習ローグダンジョンズ道場：冒険とは別の持ち物で練習。失敗しても倉庫や救助に影響しません。": "Dungeons dojo: practice with separate supplies. Failure never affects your warehouse or rescue.",
   "この練習をはじめる": "Start this lesson",
   "お腹": "Food",
   "手数": "Turns",
@@ -214,7 +214,7 @@ Object.assign(SCHOOL_WANDERER_ENGLISH, {
   "学校前へ帰る": "Return to school base",
   "未払い": "Bill",
   "学校前と冒険手帳": "School base and notebook",
-  "風来の学生道場": "School Wanderer dojo",
+  "学習ローグダンジョンズ道場": "Dungeons dojo",
   "ダンジョン途中の町": "Journey village",
   "探検の記録": "Adventure records",
   "学校前の集合場所": "School meeting point",
@@ -237,7 +237,7 @@ Object.assign(SCHOOL_WANDERER_ENGLISH, {
   "発見20種：報酬を受け取る": "20 discoveries: claim reward",
   "発見した道具と敵": "Discovered supplies and foes",
   "冒険日記": "Adventure diary",
-  "風来の学生道場：50ステージ": "School Wanderer dojo: 50 stages",
+  "学習ローグダンジョンズ道場：50ステージ": "Dungeons dojo: 50 stages",
   "探検の記録・修了証": "Records and certificates",
   "倉庫と貯金箱はこの端末に保存します。手ぶらの挑戦では持ち込めません。": "Warehouse and savings are stored on this device. Challenge modes start without stored equipment.",
   "冒険を選ぶ": "Choose adventure",
@@ -382,8 +382,8 @@ Object.assign(SCHOOL_WANDERER_ENGLISH, {
   "道具なし": "No tool"
 });
 Object.assign(SCHOOL_WANDERER_HIRAGANA, {
-  "風来の学生道場": "ふうらいのしょうがくせいどうじょう",
-  "風来の学生道場：50ステージ": "ふうらいのしょうがくせいどうじょう：50すてーじ",
+  "学習ローグダンジョンズ道場": "ふうらいのしょうがくせいどうじょう",
+  "学習ローグダンジョンズ道場：50ステージ": "ふうらいのしょうがくせいどうじょう：50すてーじ",
   "探検の記録": "たんけんのきろく",
   "探検の記録・修了証": "たんけんのきろく・しゅうりょうしょう",
   "ダンジョン途中の町": "だんじょんとちゅうのまち",

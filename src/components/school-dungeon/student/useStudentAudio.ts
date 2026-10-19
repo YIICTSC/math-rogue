@@ -7,7 +7,7 @@ export function useStudentAudio(snapshot:Snapshot){
  const current=useRef(snapshot);current.current=snapshot;
  const controller=useRef<ReturnType<typeof createStudentAudio>|null>(null);
  controller.current??=createStudentAudio(audioService);
- const play=(action:StudentAudioAction,finish=false)=>{if(current.current.active&&typeof document!=='undefined'&&!document.hidden)controller.current!.play(current.current.heroId,action,finish);};
+ const play=(action:StudentAudioAction,finish=false,element='star')=>{if(current.current.active&&typeof document!=='undefined'&&!document.hidden)controller.current!.play(current.current.heroId,action,finish,element);};
  const previous=useRef(snapshot);
  const lastPlaying=useRef({runId:snapshot.runId,floor:snapshot.floor});
  useEffect(()=>{

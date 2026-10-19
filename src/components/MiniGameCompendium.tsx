@@ -515,8 +515,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
         ];
 
         return [
-            { id: 'DUNGEON', title: '風来の学生シリーズ', caption: '小学生編の全アイテム', entries: dungeonItems },
-            { id: 'DUNGEON_2', title: '風来の学生シリーズ 2', caption: '高校編の全アイテム・カード', entries: [...dungeon2Items, ...dungeon2Cards] },
+            { id: 'DUNGEON', title: '学習ローグダンジョンズシリーズ', caption: '小学生編の全アイテム', entries: dungeonItems },
+            { id: 'DUNGEON_2', title: '学習ローグダンジョンズシリーズ 2', caption: '高校編の全アイテム・カード', entries: [...dungeon2Items, ...dungeon2Cards] },
             { id: 'SURVIVOR', title: '校庭サバイバー', caption: '武器とパッシブ', entries: [...survivorWeapons, ...survivorPassives] },
             { id: 'POKER', title: '放課後ポーカー', caption: 'サポーター・アイテム・パック・バウチャー', entries: [...pokerSupporters, ...pokerConsumables, ...pokerPacks, ...pokerVouchers] },
             { id: 'KOCHO', title: '校長対決', caption: '全アクションカード', entries: kochoCards },

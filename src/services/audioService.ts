@@ -2070,6 +2070,20 @@ class AudioService {
       }
   }
 
+  /** Original, lightweight spell accent; generated at runtime, no extra audio downloads. */
+  public playDungeonsAbilitySound(element: string) {
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted || !this.appIsActive) return;
+      const colors: Record<string, number[]> = {fire:[146.83,220,293.66],ice:[523.25,783.99,1046.5],leaf:[261.63,329.63,392],shadow:[130.81,155.56,196],thunder:[220,311.13,440],water:[293.66,440,587.33],song:[329.63,493.88,659.25],alchemy:[196,293.66,392],slash:[174.61,261.63,349.23],star:[392,587.33,783.99]};
+      const accent = () => {
+          if (!this.ctx || this.ctx.state !== 'running' || !this.appIsActive || this.isMuted) return;
+          const t = this.ctx.currentTime;
+          (colors[element] || colors.star).forEach((note,i)=>this.playOsc(note,t+i*.065,.24,'triangle',.045,this.sfxGain));
+      };
+      this.playAttackEffectSound(element==='fire'?'fire':element==='shadow'?'drain':element==='slash'?'finisher':element==='thunder'?'lightning':element==='leaf'?'plant':element==='song'?'soundwave':'flash');
+      if (this.ctx.state === 'running') accent(); else void this.resumeAudioContext().then(ready=>{if(ready)accent();});
+  }
+
   public playAttackEffectSound(effect: AttackEffectKey, hitCount: number = 1) {
       const fallbackByEffect: Record<AttackEffectKey, () => void> = {
           slash: () => this.playAttackSynth(this.ctx!.currentTime),

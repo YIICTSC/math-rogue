@@ -213,7 +213,7 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
         if(e.hp!==undefined&&state.hp!==undefined&&e.hp<state.hp)state.hitUntil=now+.40;
           // Enemy attack offsets belong to the attacker; nearby player effects do not.
           const offsetAttack=(Math.abs(e.offset?.x||0)+Math.abs(e.offset?.y||0)>0)&&now>=state.movingUntil;
-          const attacking=base==='hero'?f.effects.some(fx=>['SLASH','PROJECTILE','MAGIC_PROJ'].includes(fx.type)&&Math.max(Math.abs(fx.x-e.x),Math.abs(fx.y-e.y))<=1):offsetAttack||Boolean(e.attackVisualAt&&Date.now()-e.attackVisualAt<150);
+          const attacking=base==='hero'?f.effects.some(fx=>['SLASH','PROJECTILE','MAGIC_PROJ','ABILITY'].includes(fx.type)&&Math.max(Math.abs(fx.x-e.x),Math.abs(fx.y-e.y))<=1):offsetAttack||Boolean(e.attackVisualAt&&Date.now()-e.attackVisualAt<150);
           if(attacking)state.attackUntil=now+.35;
           const paused=Boolean(e.status?.sleep||e.status?.frozen);
           const action=e.hp!==undefined&&e.hp<=0&&base==='hero'?'Defeat':dojo?.won&&base==='hero'?'Victory':now<state.hitUntil?'Hit':now<state.attackUntil?'Attack':now<state.movingUntil||e.moving?'Walk':'Idle';

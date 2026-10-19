@@ -99,9 +99,9 @@ export const MINI_GAMES: MiniGameConfig[] = [
   },
   {
     id: 'DUNGEON',
-    name: '風来の学生',
-    titleLines: ['風来の', '小学生'],
-    description: '1000回遊べるランダムダンジョン。GB風ローグライクRPG。',
+    name: '学習ローグダンジョンズ',
+    titleLines: ['学習ローグ', 'ダンジョンズ'],
+    description: '35人の固有技で挑む、学園と魔法のローグライクRPG。',
     screen: GameScreen.MINI_GAME_DUNGEON,
     threshold: 2000,
     typeLabel: 'RETRO',
@@ -138,8 +138,8 @@ export const MINI_GAMES: MiniGameConfig[] = [
   },
   {
     id: 'DUNGEON_2',
-    name: '風来の学生2',
-    titleLines: ['風来の', '小学生2'],
+    name: '学習ローグダンジョンズ2',
+    titleLines: ['学習ローグ', 'ダンジョンズ2'],
     description: '更なる深淵へ...進化したローグライクRPG。',
     screen: GameScreen.MINI_GAME_DUNGEON_2,
     threshold: 3500,

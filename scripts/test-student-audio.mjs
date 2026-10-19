@@ -6,14 +6,14 @@ const {createStudentAudio,studentVoice}=await import('data:text/javascript;base6
 const rosterBundle=await build({entryPoints:['src/three/protagonistCatalog.ts'],bundle:true,write:false,format:'esm',platform:'node'});
 const {PROTAGONISTS}=await import('data:text/javascript;base64,'+Buffer.from(rosterBundle.outputFiles[0].text).toString('base64'));
 const files=new Set(execFileSync('git',['ls-files','public/sfx'],{encoding:'utf8'}).trim().split('\n'));
-for(const hero of PROTAGONISTS)for(const action of ['attack','projectile','skill','damage','heal','item','transform','win','defeat'])for(const finish of [false,true])for(const rng of [0,.999]){
+for(const hero of PROTAGONISTS)for(const action of ['ultimate','attack','projectile','skill','damage','heal','item','transform','win','defeat'])for(const finish of [false,true])for(const rng of [0,.999]){
  const voice=studentVoice(hero.id,action,finish,()=>rng);
  if(hero.id.startsWith('elementary-'))assert.equal(voice,null);
  else assert.ok(files.has(`public/sfx/${voice.theme}-voices/${voice.id}/${voice.file}.ogg`),JSON.stringify(voice));
 }
 for(const path of ['attack-effects/slash','attack-effects/finisher','attack-effects/projectile','attack-effects/lightning','attack-effects/drain','attack-effects/impact','attack-effects/flash','attack-effects/graduation','status-effects/heal','status-effects/debuff','status-effects/block','status-effects/buff','status-effects/weak','jump'])assert.ok(files.has(`public/sfx/${path}.mp3`),path);
 let time=0,random=.99,canSpeak=true;const calls=[];
-const port=Object.fromEntries(['playAttackEffectSound','playStatusEffectSound','playBattleSound'].map(method=>[method,(...args)=>calls.push([method,...args])]));
+const port=Object.fromEntries(['playDungeonsAbilitySound','playAttackEffectSound','playStatusEffectSound','playBattleSound'].map(method=>[method,(...args)=>calls.push([method,...args])]));
 Object.assign(port,{canPlayConversationVoice:()=>canSpeak,playHighSchoolVoiceFile:(...args)=>{calls.push(['high',...args]);return Promise.resolve(true);},playMagicVoiceFile:(...args)=>{calls.push(['magic',...args]);return Promise.resolve(true);}});
 const controller=createStudentAudio(port,()=>time,()=>random);
 const voices=()=>calls.filter(c=>c[0]==='high'||c[0]==='magic');

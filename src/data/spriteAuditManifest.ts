@@ -138,7 +138,7 @@ export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAudit
     assets: pokerSheets(),
   },
   DUNGEON: {
-    note: '風来の学生で使う主人公・敵・装備・アイテム・演出のシートです。',
+    note: '学習ローグダンジョンズで使う主人公・敵・装備・アイテム・演出のシートです。',
     assets: [...furaiSheets(),...studentSheets()],
   },
   KOCHO: {
@@ -150,7 +150,7 @@ export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAudit
     assets: paperPlaneSheets(),
   },
   DUNGEON_2: {
-    note: '風来の学生2は共通の戦闘シートに加え、カードとカード演出を使います。',
+    note: '学習ローグダンジョンズ2は共通の戦闘シートに加え、カードとカード演出を使います。',
     assets: [
       ...furaiSheets(),...studentSheets(),
       asset('sprites/furai-shogakusei2-card-sheet.webp', 'カードシート'),
