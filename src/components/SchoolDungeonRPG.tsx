@@ -1,3 +1,4 @@
+import {AbilityDetails} from './school-dungeon/student/AbilityDetails';
 import {drawStudentAbilityEffect} from './school-dungeon/student/abilityEffects';
 import {AbilityButton,AbilityBurst,DungeonBiome} from './school-dungeon/student/AbilityUI';
 import {useStudentAudio} from './school-dungeon/student/useStudentAudio';
@@ -3164,6 +3165,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             <div><span style={{ color: C1 }} className="font-bold">{tr('防御力')}:</span> {player.defense}</div>
                             <div><span style={{ color: C1 }} className="font-bold">{tr('所持金')}:</span> {player.gold} G</div>
                         </div>
+                        <AbilityDetails heroId={adventure.hero.id} text={adventure.text}/>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">{tr('装備')}</h3>
                             {threeView.enabled && <EquipmentPreview gear={player.equipment || {}} heroId={adventure.hero.id} transformed={Boolean(adventure.state.transformed&&!adventure.dojoRun)}/>}
