@@ -1,10 +1,10 @@
-"""Blender 4.3+: procedural 3D VFX, 27 editable scenes, baked transparent frames.
+"""Blender 4.3+: procedural 3D VFX, 27 D2 or 35 D1 editable scenes, baked transparent frames.
 blender -b -t 1 --python scripts/dungeons2/render-ultimate-fx.py -- --output /workspace/d2-fx-render [--preview]
 """
 import bpy,math,random,sys,argparse,json
 from mathutils import Vector
 from pathlib import Path
-p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--preview',action='store_true');args=p.parse_args(sys.argv[sys.argv.index('--')+1:])
+p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--preview',action='store_true');p.add_argument('--series1-roster');args=p.parse_args(sys.argv[sys.argv.index('--')+1:])
 OUT=Path(args.output);OUT.mkdir(parents=True,exist_ok=True)
 ROOT=Path(__file__).resolve().parents[2]
 HEROES=[('lyria','star',(0.48,.42,1)),('celis','ice',(.12,.65,1)),('flora','leaf',(.28,.9,.25)),('noctia','shadow',(.52,.12,1)),('aurene','sun',(1,.62,.12)),('ignis','fire',(1,.15,.025)),('leon','sun',(1,.76,.24)),('orion','shadow',(.52,.24,1)),('leif','leaf',(.18,.8,.4))]
@@ -81,7 +81,7 @@ def make_scene(hero,element,color,slot):
    obj=arc('Dancing crescent of the eclipse',.8+j*.16,.24,j*2,math.pi*1.6,body,z=.2*j);envelope(obj,peak=8+j);key(obj,1,rotation=(.5,j*.25,-1));key(obj,24,rotation=(.9,j*.5,math.tau+1))
  elif element in ('star','sun'):
   rays=10 if element=='star' else 16;verts=[(math.cos(i*math.tau/rays)*(1 if i%2==0 else .35),math.sin(i*math.tau/rays)*(1 if i%2==0 else .35),.4)for i in range(rays)];obj=mesh('Celestial rotating seal',verts,[tuple(range(rays))],body);envelope(obj,peak=9);key(obj,1,rotation=(.5,0,-1));key(obj,24,rotation=(.5,.6,4))
- else:
+ elif element=='leaf':
   for j in range(5):
    a=j*math.tau/5;obj=mesh('Great leaves of the spirit tree',[(0,0,0),(.3,.8,.2),(0,1.7,.4),(-.3,.8,-.1)],[(0,1,2,3)],body);envelope(obj,peak=7+j);key(obj,1,rotation=(.35,0,a));key(obj,24,rotation=(1.0,.2,a+2))
  # Three skill silhouettes: a forward lance, a protective rising helix, a radial finisher.
@@ -101,8 +101,41 @@ def make_scene(hero,element,color,slot):
      for point in curve.keyframe_points:point.interpolation='BEZIER'
    except AttributeError:pass
  return scene
-scenes=[make_scene(h,e,c,slot)for h,e,c in HEROES for slot in range(3)]
-source=ROOT/'assets-source/dungeons2/ultimate-fx.blend';source.parent.mkdir(parents=True,exist_ok=True);bpy.data.scenes.remove(bpy.data.scenes['Scene']);bpy.context.window.scene=scenes[17];scenes[17].frame_set(10);bpy.ops.wm.save_as_mainfile(filepath=str(source),compress=True)
+if args.series1_roster:
+ roster=json.loads(Path(args.series1_roster).read_text());scenes=[]
+ for entry in roster:
+  hero=entry['id'];effect=entry['effect'];color=tuple(int(entry['color'][i:i+2],16)/255 for i in (1,3,5));slot=0 if entry.get('line') else 1 if entry.get('heal') or entry.get('guard') else 2
+  scene=make_scene(hero,effect,color,slot);scene.name=hero+'_skill_1'
+  mat=material(hero+'PersonalSigil',color,1.3);core=material(hero+'SigilCore',tuple(.4+.6*c for c in color),1.7)
+  role=hero.split('-')[-1]
+  # Character-specific objects orbit, gather into the central emblem, then burst outward.
+  for n in range(4):
+   a=n*math.tau/4
+   if role in ('librarian','elliot','mirai'):
+    obj=mesh('Turning pages of insight',[(-.5,0,0),(0,-.1,.12),(.5,0,0),(.5,.6,0),(0,.5,.12),(-.5,.6,0)],[(0,1,4,5),(1,2,3,4)],core)
+   elif role in ('warrior','ren','yamato','assassin','rei','soma'):
+    obj=mesh('Heroic sword edge',[(-.1,-.7,0),(.1,-.7,0),(.15,.55,0),(0,1,0),(-.15,.55,0)],[(0,1,2,3,4)],core)
+   elif role in ('dodgeball','leon'):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=.32);obj=bpy.context.object;obj.name='Blazing comet core';obj.data.materials.append(mat)
+   elif role in ('bard','riku') or effect=='song':
+    obj=mesh('Rising musical note',[(-.08,-.3,0),(.08,-.3,0),(.08,.65,0),(.45,.5,0),(.45,.3,0),(-.08,.45,0)],[(0,1,2,3,4,5)],core)
+   elif effect=='thunder':
+    obj=mesh('Forked thunderbolt',[(-.2,.8,0),(.25,.8,0),(0,.12,0),(.24,.12,0),(-.3,-.8,0),(-.1,-.12,0),(-.35,-.12,0)],[(0,1,2,3,4,5,6)],core)
+   elif effect=='water':
+    obj=arc('Curling tide',.65,.15,0,math.pi*1.7,mat)
+   elif role=='chef':
+    obj=ring('Golden serving plate',.45,.16,mat)
+   elif effect=='alchemy':
+    obj=ring('Transmutation orbit',.5,.06,core);obj.rotation_euler=(a,.5,a)
+   else:
+    obj=mesh('Blooming guardian petal',[(0,-.5,0),(.35,0,.1),(0,.7,0),(-.35,0,-.1)],[(0,1,2,3)],mat)
+   envelope(obj,offset=n,peak=8+n);key(obj,1,loc=(math.cos(a)*.5,math.sin(a)*.5,-.4),rotation=(.3,0,a));key(obj,11,loc=(math.cos(a)*1.5,math.sin(a)*1.5,.4+n*.1),rotation=(.6,.2,a+1));key(obj,24,loc=(math.cos(a+1)*3,math.sin(a+1)*3,1),rotation=(1,.6,a+4))
+  scene['hero_id']=hero;scene['ability_name']=entry['en'];scene['element']=effect;scenes.append(scene)
+ source=ROOT/'assets-source/dungeons/ultimate-fx.blend'
+else:
+ scenes=[make_scene(h,e,c,slot)for h,e,c in HEROES for slot in range(3)]
+ source=ROOT/'assets-source/dungeons2/ultimate-fx.blend'
+source.parent.mkdir(parents=True,exist_ok=True);bpy.data.scenes.remove(bpy.data.scenes['Scene']);bpy.context.window.scene=scenes[min(17,len(scenes)-1)];bpy.context.window.scene.frame_set(10);bpy.ops.wm.save_as_mainfile(filepath=str(source),compress=True)
 manifest=[]
 for scene in scenes:
  bpy.context.window.scene=scene

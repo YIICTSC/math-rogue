@@ -11,7 +11,7 @@ blender -b -t 1 --python scripts/dungeons2/render-ultimate-fx.py -- --output /wo
 python scripts/dungeons2/pack-ultimate-fx.py /workspace/d2-fx-render
 ```
 
-Packing requires Pillow and NumPy. Raw frames stay outside the repository. Mobile runtime plays one CSS stepped atlas rather than running Blender geometry or an additional WebGL context. Dungeons 2 uses all 27 animations; Dungeons 1 reuses elemental templates. Existing procedural effects remain a loading fallback; reduced-motion mode shows a single frame.
+Packing requires Pillow and NumPy. Raw frames stay outside the repository. Mobile runtime plays one CSS stepped atlas rather than running Blender geometry or an additional WebGL context. Dungeons 2 uses all 27 animations; Dungeons 1 has 35 dedicated character animations in `../dungeons/ultimate-fx.blend`. Existing procedural effects remain a loading fallback; reduced-motion mode shows a single frame.
 
 ## IrodoriTTS cloud runtime
 
@@ -31,6 +31,6 @@ python scripts/dungeons2/generate-voices.py --url http://127.0.0.1:8088
 python scripts/dungeons2/finalize-voices.py
 ```
 
-Nine original caption-designed voice references are synthesized without real-person recordings. `voice-design.json` stores identity descriptions, Japanese scripts, and fixed seeds used by the generator. Each hero has attack, damage, finishing blow, heal, defeat, transformation, three named ultimates, and a card call: 90 clips total. Finalization trims edge silence, normalizes loudness, limits peaks, and compresses long calls to at most 3 seconds without changing pitch. Shipping MP3 is mono 24 kHz/64 kbps for Safari, Android, and desktop compatibility. Raw WAVs and intermediate audio remain outside Git. `voice-generation.json` records text, timing, levels, and hashes.
+Nine original caption-designed voice references are synthesized without real-person recordings. `voice-design.json` stores identity descriptions, Japanese scripts, and fixed seeds used by the generator. Each hero has attack, damage, finishing blow, heal, defeat, transformation, three named ultimates, and a card call: 90 clips total. Finalization trims edge silence, normalizes loudness, limits peaks, and compresses long calls to at most 3 seconds without changing pitch. Shipping OGG Vorbis is mono 24 kHz, quality 4, matching the existing voice banks. Raw WAVs and intermediate audio remain outside Git. `voice-generation.json` records text, timing, levels, and hashes.
 
 Speech retains the existing probability/cooldown/mute rules; finishing blows and transformations are prioritized. Dedicated ultimate/card names select the correct call. Existing sound effects and previous protagonists' voices are reused.

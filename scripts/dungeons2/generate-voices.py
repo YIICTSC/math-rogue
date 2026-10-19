@@ -26,8 +26,8 @@ for index,hero in enumerate(design['heroes']):
  folder=ROOT/'public/sfx/dungeons2-voices'/hero['id'];folder.mkdir(parents=True,exist_ok=True)
  for n,(action,text)in enumerate(hero['lines'].items()):
   raw=work/(hero['id']+'-'+action+'.wav');synth(text,hero,91000+index*100+n,hero['id'],raw)
-  output=folder/(action+'.mp3')
-  if not output.exists():subprocess.run(['ffmpeg','-v','error','-y','-i',str(raw),'-af','silenceremove=start_periods=1:start_duration=0.03:start_threshold=-48dB,loudnorm=I=-18:TP=-2:LRA=9','-ac','1','-ar','24000','-c:a','libmp3lame','-b:a','64k',str(output)],check=True)
+  output=folder/(action+'.ogg')
+  if not output.exists():subprocess.run(['ffmpeg','-v','error','-y','-i',str(raw),'-af','silenceremove=start_periods=1:start_duration=0.03:start_threshold=-48dB,loudnorm=I=-18:TP=-2:LRA=9','-ac','1','-ar','24000','-c:a','libvorbis','-q:a','4',str(output)],check=True)
   info=json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_format','-of','json',str(output)]));duration=float(info['format']['duration']);report.append({'hero':hero['id'],'action':action,'text':text,'duration':duration,'sha256':hashlib.sha256(output.read_bytes()).hexdigest()})
  (work/'generation-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
 print('Generated',len(report),'clips.',flush=True)

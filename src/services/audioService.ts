@@ -2147,7 +2147,7 @@ class AudioService {
       const name = `dungeons2-voice-${heroId}-${voiceName}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
-      const played = await this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/dungeons2-voices/${heroId}/${voiceName}.mp3`))], 3400, false, generation);
+      const played = await this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/dungeons2-voices/${heroId}/${voiceName}.ogg`))], 3400, false, generation);
       // Keep the action controller busy for the clip's bounded playback window.
       if (played) await new Promise<void>(resolve => window.setTimeout(resolve, 3400));
       return played;
