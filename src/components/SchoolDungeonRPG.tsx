@@ -1,3 +1,4 @@
+import {useStudentAudio} from './school-dungeon/student/useStudentAudio';
 import {WandererTitle,WandererTown} from './school-dungeon/JourneyScreens';
 import {STUDENT_ITEM_DB} from './school-dungeon/student/content';
 import EquipmentPreview from './school-dungeon/three/EquipmentPreview';
@@ -508,6 +509,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
     clearSave: () => storageService.clearDungeonState(), itemName: item => getItemName(item), catalog: ITEM_DB,
   });
+  const studentCue = useStudentAudio({heroId:adventure.hero.id,active:launch==='PLAY'&&!showMathChallenge,runId:adventure.state.runId,floor,hp:player.hp,gameOver,gameClear,transformed:Boolean(adventure.state.transformed),inventory, equipment:player.equipment, inDungeon:adventure.state.place==='DUNGEON'&&!shopState.active});
   const itemKnown=(item:any):boolean=>Boolean(item&&(identifiedTypes.has(item.type)||(adventure.state.mode!=='MYSTERY'&&item.category!=='STAFF')));
   const allPossessions = useMemo(() => {
     if (!gameOver) return [];
@@ -1852,7 +1854,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const activateTrap = (trap: Entity) => {
-      audioService.playSound('wrong');
+      studentCue('trap');
       const t = trap.trapType;
       
       if (t === 'BOMB') {
@@ -1980,9 +1982,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
           adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
       setEnemies(newEnemies.filter(e => e.hp > 0));
-          audioService.playSound('attack');
+          studentCue('projectile',Boolean(dead));
       } else {
-          addLog("外した！");
+          studentCue('projectile'); addLog("外した！");
       }
       processTurn(player.x, player.y);
   };
@@ -2122,7 +2124,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       });
       adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
       setEnemies(newEnemies.filter(e => e.hp > 0));
-      audioService.playSound('attack');
+      studentCue('attack',deads.length>0);
   };
 
   // ... LONG PRESS LOGIC ...
@@ -2277,6 +2279,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
+      studentCue('skill');
       let hit = false;
       let msg = "";
       const effectDir = directionFromDelta((target ? target.x : x) - player.x, (target ? target.y : y) - player.y);
@@ -2390,6 +2393,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       addVisualEffect('PROJECTILE', lx, ly, { dir: player.dir, duration: 10 });
       setInventory(prev => prev.filter((_, i) => i !== index));
 
+      let throwFinished=false;
       if (hitEntity) {
           let dmg = 2; 
           
@@ -2415,13 +2419,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                   return e;
               });
               const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0);
-              if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
+              if(dead) { throwFinished=true; gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
               else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
               adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
       setEnemies(newEnemies.filter(e => e.hp > 0));
           }
           
-          audioService.playSound('attack');
+
       } else {
           if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
               setFloorItems(prev => [...prev, {
@@ -2435,7 +2439,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               addLog("彼方へ消え去った。");
           }
       }
-      setMenuOpen(false);
+      studentCue('projectile',throwFinished); setMenuOpen(false);
       processTurn(player.x, player.y);
   };
 

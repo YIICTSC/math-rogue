@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+import {execFileSync} from 'node:child_process';
+const bundle=await build({entryPoints:['src/components/school-dungeon/student/audio.ts'],bundle:true,write:false,format:'esm',platform:'node'});
+const {createStudentAudio,studentVoice}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
+const rosterBundle=await build({entryPoints:['src/three/protagonistCatalog.ts'],bundle:true,write:false,format:'esm',platform:'node'});
+const {PROTAGONISTS}=await import('data:text/javascript;base64,'+Buffer.from(rosterBundle.outputFiles[0].text).toString('base64'));
+const files=new Set(execFileSync('git',['ls-files','public/sfx'],{encoding:'utf8'}).trim().split('\n'));
+for(const hero of PROTAGONISTS)for(const action of ['attack','projectile','skill','damage','heal','item','transform','win','defeat'])for(const finish of [false,true])for(const rng of [0,.999]){
+ const voice=studentVoice(hero.id,action,finish,()=>rng);
+ if(hero.id.startsWith('elementary-'))assert.equal(voice,null);
+ else assert.ok(files.has(`public/sfx/${voice.theme}-voices/${voice.id}/${voice.file}.ogg`),JSON.stringify(voice));
+}
+for(const path of ['attack-effects/slash','attack-effects/finisher','attack-effects/projectile','attack-effects/lightning','attack-effects/drain','attack-effects/impact','attack-effects/flash','attack-effects/graduation','status-effects/heal','status-effects/debuff','status-effects/block','status-effects/buff','status-effects/weak','jump'])assert.ok(files.has(`public/sfx/${path}.mp3`),path);
+let time=0,random=.99,canSpeak=true;const calls=[];
+const port=Object.fromEntries(['playAttackEffectSound','playStatusEffectSound','playBattleSound'].map(method=>[method,(...args)=>calls.push([method,...args])]));
+Object.assign(port,{canPlayConversationVoice:()=>canSpeak,playHighSchoolVoiceFile:(...args)=>{calls.push(['high',...args]);return Promise.resolve(true);},playMagicVoiceFile:(...args)=>{calls.push(['magic',...args]);return Promise.resolve(true);}});
+const controller=createStudentAudio(port,()=>time,()=>random);
+const voices=()=>calls.filter(c=>c[0]==='high'||c[0]==='magic');
+const tick=async(ms=4000)=>{time+=ms;await new Promise(resolve=>setImmediate(resolve));};
+controller.play('high-school-warrior','attack');assert.equal(voices().length,0);
+await tick();controller.play('high-school-warrior','attack',true);assert.deepEqual(voices().at(-1),['high','WARRIOR','finish-5']);
+controller.play('high-school-warrior','attack',true);assert.equal(voices().length,1);
+await tick(1000);controller.play('high-school-warrior','damage');assert.equal(voices().length,1);
+await tick();random=0;controller.play('magic-akari','skill');assert.deepEqual(voices().at(-1),['magic','AKARI','spell-1']);
+await tick();controller.play('magic-akari','damage');assert.deepEqual(voices().at(-1),['magic','AKARI','damage-1']);
+await tick();canSpeak=false;const count=voices().length;controller.play('high-school-warrior','attack',true);assert.equal(voices().length,count);
+await tick();canSpeak=true;controller.play('elementary-warrior','attack',true);assert.equal(voices().length,count);
+let release;port.playHighSchoolVoiceFile=(...args)=>{calls.push(['high',...args]);return new Promise(resolve=>{release=resolve;});};
+await tick();controller.play('high-school-warrior','attack',true);await tick(10000);controller.play('high-school-warrior','attack',true);assert.equal(voices().length,count+1);release(false);
+await tick();port.playHighSchoolVoiceFile=()=>Promise.reject(new Error('offline'));controller.play('high-school-warrior','attack',true);await tick();controller.play('magic-akari','attack',true);assert.equal(voices().at(-1)[0],'magic');
+console.log('PASS: all 26 voiced heroes reference existing files, all action SE are reused, chance/finish policy, 3.2s spacing, muted voices, no overlapping loads, elementary silence, and load failure recovery.');
