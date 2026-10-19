@@ -1,3 +1,4 @@
+import {ABYSS_HEROES,abyssHero,signatureHero,signatureId} from './school-dungeon/dungeons2/roster';
 import {drawStudentAbilityEffect} from './school-dungeon/student/abilityEffects';
 import {AbilityButton,AbilityBurst,DungeonBiome} from './school-dungeon/student/AbilityUI';
 import {useStudentAudio} from './school-dungeon/student/useStudentAudio';
@@ -438,7 +439,7 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
 ];
 
 /** The full deck-card pool is also consumed by the in-game compendium. */
-export const SCHOOL_DUNGEON_2_CARD_CATALOG = DUNGEON_CARD_DB.map(({ icon: _icon, ...card }) => card);
+export const SCHOOL_DUNGEON_2_CARD_CATALOG = [...DUNGEON_CARD_DB.map(({ icon: _icon, ...card }) => card),...ABYSS_HEROES.map(h=>({templateId:signatureId(h.id),name:h.card.name,type:'SPECIAL' as const,power:0,description:h.card.en}))];
 
 // --- DIJKSTRA PATHFINDING HELPER ---
 const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number): number[][] => {
@@ -474,7 +475,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
 const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
   const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const threeView = useDungeon3D();
+  const threeView = useDungeon3D(false);
   const [launch,setLaunch]=useState<'TITLE'|'NEW'|'PLAY'>(debugPreview?'PLAY':'TITLE');
   const [hasSave,setHasSave]=useState(()=>Boolean(storageService.loadDungeonState2()?.map?.length));
   const diagonalLockRef = useRef(false);
@@ -647,6 +648,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   useEffect(() => { audioService.playBGM(currentTheme.bgm); }, [currentTheme.bgm]);
 
+  const makeSignatureCard=(heroId:string):DungeonCard|null=>{const hero=abyssHero(heroId);return hero?{templateId:signatureId(hero.id),name:adventure.text(hero.card.name,hero.card.en),type:'SPECIAL',power:0,description:adventure.text('専用カード：広域攻撃・HP25回復・3ターン守護。','Signature: area attack, heal 25 HP and guard for 3 turns.'),icon:<Sparkles size={16}/>,id:`signature-${Date.now()}-${Math.random()}`}:null;};
   const restoreState = (save: any) => {
       adventure.restore(save.adventure, save.floor);
       setMap(save.map);
@@ -669,13 +671,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       setShopState(save.shopState || { active: false, merchantId: null, mode: 'BUY' });
       setSynthState(save.synthState || { active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
       if (save.dungeonDeck) {
-          const hydrateCards = (cards: any[]) => cards.map(c => {
-              const template = DUNGEON_CARD_DB.find(t => t.templateId === c.templateId);
-              return { ...c, icon: template ? template.icon : <HelpCircle size={16}/> };
-          });
-          setDungeonDeck(hydrateCards(save.dungeonDeck));
-          setDungeonHand(hydrateCards(save.dungeonHand));
-          setDungeonDiscard(hydrateCards(save.dungeonDiscard));
+          const heroId=adventure.snapshot().heroId!,signature=makeSignatureCard(heroId);
+          const hydrateCards=(cards:any[])=>Array.isArray(cards)?cards.filter(c=>!c.templateId?.startsWith('D2_SIG_')||signatureHero(c.templateId)?.id===heroId).map(c=>({...c,icon:DUNGEON_CARD_DB.find(t=>t.templateId===c.templateId)?.icon||<Sparkles size={16}/>})):[];
+          const deck=hydrateCards(save.dungeonDeck),hand=hydrateCards(save.dungeonHand),discard=hydrateCards(save.dungeonDiscard);
+          if(signature&&![...deck,...hand,...discard].some(c=>c.templateId===signature.templateId)){if(hand.length<3)hand.unshift(signature);else deck.push(signature);}
+          setDungeonDeck(deck);setDungeonHand(hand);setDungeonDiscard(discard);
       } else initDeck();
       addLog("冒険を再開した。", currentTheme.colors.C2);
   };
@@ -905,9 +905,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       );
   };
 
-  const DungeonCardSprite: React.FC<{ templateId?: string; className?: string }> = ({ templateId, className = '' }) => (
-      <SheetSprite sheet="cards2" index={getDungeonCardSpriteIndex(templateId)} columns={6} pageSize={30} className={className} />
-  );
+  const DungeonCardSprite: React.FC<{templateId?:string;className?:string}>=({templateId,className=''})=>{const hero=signatureHero(templateId||'');return hero?<img src={assetUrl(hero.afterPortrait)} alt="" className={`abyss-card-art ${className}`}/>:<SheetSprite sheet="cards2" index={getDungeonCardSpriteIndex(templateId)} columns={6} pageSize={30} className={className}/>;};
 
   useEffect(() => {
       setVisitedMap(prev => {
@@ -986,7 +984,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const guardTemplate = DUNGEON_CARD_DB.find(t => t.templateId === 'GUARD')!;
       newDeck.push({ ...guardTemplate, id: `card-init-guard-${Date.now()}-${Math.random()}` });
       newDeck.sort(() => Math.random() - 0.5);
-      const hand = newDeck.splice(0, 3);
+      const signature=makeSignatureCard(adventure.snapshot().heroId||adventure.selectedHero.id);
+      const hand: DungeonCard[] = newDeck.splice(0, signature?2:3);if(signature)hand.unshift(signature);
       hand.forEach(card => markDungeonCardDiscovered(card.templateId));
       setDungeonHand(hand); setDungeonDeck(newDeck); setDungeonDiscard([]);
   };
@@ -997,6 +996,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (gameOver || gameClear || menuOpen || shopState.active) return;
       if (index >= dungeonHand.length) return;
       const card = dungeonHand[index];
+      if(signatureHero(card.templateId)){
+          if(!adventure.activateSignatureCard(card.templateId))return;
+          const nextHand=dungeonHand.filter((_,i)=>i!==index),discard=[...dungeonDiscard,card];let deck=[...dungeonDeck],nextDiscard=discard;
+          if(!deck.length){deck=[...discard].sort(()=>Math.random()-.5);nextDiscard=[];}
+          const drawn=deck.pop();if(drawn)nextHand.push(drawn);setDungeonHand(nextHand);setDungeonDeck(deck);setDungeonDiscard(nextDiscard);markDungeonCardDiscovered(card.templateId);return;
+      }
       markDungeonCardDiscovered(card.templateId);
       let msg = ""; let used = false;
       const baseDmg = player.attack + card.power;
@@ -1845,7 +1850,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (adventure.townKey(e)) return;
       if (adventure.dojoKey(e)) return;
         if (adventure.blocksInput()) return;
-        if(e.key.toLowerCase()==='q'){e.preventDefault();adventure.activateAbility();return;}
+        if(['q','e','f'].includes(e.key.toLowerCase())){e.preventDefault();adventure.activateAbility(['q','e','f'].indexOf(e.key.toLowerCase()));return;}
         lastInputType.current = 'KEY'; if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
         if (gameOver) return; 
         if (gameClear) { if (['z', 'Enter', ' '].includes(e.key)) startEndlessMode(); return; }
@@ -2257,7 +2262,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                     <AbilityBurst adventure={adventure}/><DungeonBiome adventure={adventure}/>
                     <div ref={threeView.host} aria-hidden="true" style={{position:'absolute',inset:'0 0 0',visibility:threeView.ready?'visible':'hidden',pointerEvents:'none'}} />
         {launch==='PLAY'&&!adventure.dojoRun&&['HOME','RELAY'].includes(adventure.state.place||'')&&<WandererTown adventure={adventure} three={threeView.enabled} onToggle={threeView.toggle} onTitle={()=>{saveData(true);setHasSave(true);setLaunch('TITLE');}}/>}
-                    <button type="button" aria-label="2D / 3D" onClick={threeView.toggle} style={{position:'absolute',bottom:6,right:6,zIndex:12,padding:'4px 10px',borderRadius:6,border:'1px solid #b9d4cc',background:'#172b35',color:'#fff3d5',fontWeight:700,fontSize:12}}>{threeView.enabled?'3D':'2D'}</button>
                     {isFastForwarding && (<div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}><FastForward size={16} className="mr-1"/> {tr('早送り中')}</div>)}
                     {showMap && !adventure.dojoRun && map.length > 0 && (
                         <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-two-map" className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>

@@ -1,10 +1,10 @@
 import {useEffect,useRef,useState} from 'react';
 import type {DungeonFrame,createDungeonScene} from './scene';
 
-export function useDungeon3D(){
+export function useDungeon3D(allowed=true){
   const host=useRef<HTMLDivElement>(null);
   const scene=useRef<Awaited<ReturnType<typeof createDungeonScene>>|null>(null);
-  const [enabled,setEnabled]=useState(()=>{try{return localStorage.getItem('school-wanderer-3d')==='on';}catch{return false;}});
+  const [enabled,setEnabled]=useState(()=>{try{return allowed&&localStorage.getItem('school-wanderer-3d')==='on';}catch{return false;}});
   const [ready,setReady]=useState(false);
   const active=useRef(enabled);active.current=enabled;
   useEffect(()=>{
@@ -18,7 +18,7 @@ export function useDungeon3D(){
     }).catch(error=>{if(!cancelled){console.warn('School Wanderer 3D: using 2D fallback',error);failed();}});
     return()=>{cancelled=true;mount.removeEventListener('school-3d-error',failed);scene.current?.dispose();scene.current=null;setReady(false);};
   },[enabled]);
-  return {host,enabled,ready,setMode:(value:boolean)=>{active.current=value;setEnabled(value);try{localStorage.setItem('school-wanderer-3d',value?'on':'off');}catch{}},toggle:()=>{active.current=!active.current;try{localStorage.setItem('school-wanderer-3d',active.current?'on':'off');}catch{}setEnabled(active.current);},draw:(frame:DungeonFrame)=>{
+  return {host,enabled,ready,setMode:(value:boolean)=>{if(!allowed)return;active.current=value;setEnabled(value);try{localStorage.setItem('school-wanderer-3d',value?'on':'off');}catch{}},toggle:()=>{if(!allowed)return;active.current=!active.current;try{localStorage.setItem('school-wanderer-3d',active.current?'on':'off');}catch{}setEnabled(active.current);},draw:(frame:DungeonFrame)=>{
     if(!active.current||!scene.current)return false;
     scene.current.draw(frame);return true;
   }};

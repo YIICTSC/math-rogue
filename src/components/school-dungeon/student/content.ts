@@ -1,8 +1,10 @@
-import {PROTAGONISTS,isProtagonistId,type ProtagonistId} from '../../../three/protagonistCatalog';
-export {PROTAGONISTS,isProtagonistId};export type {ProtagonistId};
+import {PROTAGONISTS,isProtagonistId as isLegacyProtagonistId,type ProtagonistId} from '../../../three/protagonistCatalog';
+import {abyssHero} from '../dungeons2/roster';
+export {PROTAGONISTS};
+export const isProtagonistId=(id:unknown):id is string=>typeof id==='string'&&(isLegacyProtagonistId(id)||Boolean(abyssHero(id))); export type {ProtagonistId};
 export type StudentChapter='elementary'|'high-school'|'magic';
-export function studentChapter(id:string):StudentChapter{return id.startsWith('magic-')?'magic':id.startsWith('high-school-')?'high-school':'elementary';}
-export function studentHero(id?:string){return PROTAGONISTS.find(p=>p.id===id)||PROTAGONISTS[0];}
+export function studentChapter(id:string):StudentChapter{return (id.startsWith('magic-')||abyssHero(id))?'magic':id.startsWith('high-school-')?'high-school':'elementary';}
+export function studentHero(id?:string){return abyssHero(id)||PROTAGONISTS.find(p=>p.id===id)||PROTAGONISTS[0];}
 export const CHAPTER_LABELS={elementary:['小学生編','Elementary'], 'high-school':['高校生編','High school'],magic:['魔法学園編','Magic academy']} as const;
 export interface StudentGear {type:string;category:string;name:string;desc:string;en:string;englishDesc:string;power:number;value:number;chapter:StudentChapter;floor:number;model:string;icon:number;count?:number;marks?:string[];}
 const gear=(chapter:StudentChapter,key:string,category:string,name:string,en:string,power:number,floor:number,model:string,icon:number):StudentGear=>({type:`STUDENT_${chapter==='elementary'?'E':chapter==='high-school'?'H':'M'}_${key}`,category,name,en,power,value:100+power*80,chapter,floor,model,icon,count:category==='RANGED'?12:undefined,marks:category==='ACCESSORY'?[key==='COMPASS'?'RING_SIGHT':key==='WATCH'?'RING_HUNGER':chapter==='magic'?'RING_HEAL':chapter==='high-school'?'RING_TRAP':'RING_HUNGER']:undefined,desc:category==='ACCESSORY'?(key==='COMPASS'?'敵と道具の位置がわかる。':key==='WATCH'||chapter==='elementary'?'お腹が減りにくくなる。':chapter==='magic'?'HPの回復が早くなるが、お腹も減る。':'足元の罠が見える。'):`${name}。${category==='WEAPON'?'攻撃':category==='ARMOR'?'防御':'道具の力'}+${power}。旅の仲間が手入れした道具。`,englishDesc:category==='ACCESSORY'?(key==='COMPASS'?'Reveals foes and supplies.':key==='WATCH'||chapter==='elementary'?'Slows hunger.':chapter==='magic'?'Accelerates recovery, at the cost of food.':'Reveals traps.'):`${en}. ${category==='WEAPON'?'Attack':category==='ARMOR'?'Defense':'Tool power'} +${power}. Maintained by your traveling companions.`});

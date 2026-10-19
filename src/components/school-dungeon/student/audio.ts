@@ -1,9 +1,11 @@
+import {abyssHero} from '../dungeons2/roster';
 import type {audioService} from '../../../services/audioService';
 
 export type StudentAudioAction='ultimate'|'attack'|'projectile'|'skill'|'damage'|'heal'|'item'|'pickup'|'equip'|'stairs'|'trap'|'transform'|'talk'|'win'|'defeat';
 type AudioPort=Pick<typeof audioService,'playDungeonsAbilitySound'|'playAttackEffectSound'|'playStatusEffectSound'|'playBattleSound'|'playHighSchoolVoiceFile'|'playMagicVoiceFile'|'canPlayConversationVoice'>;
 const chances:Partial<Record<StudentAudioAction,number>>={ultimate:.65,attack:.22,projectile:.22,skill:.35,damage:.18,heal:.2,item:.2,transform:1,win:1,defeat:1};
 export function studentVoice(heroId:string,action:StudentAudioAction,finish:boolean,random:()=>number){
+ heroId=abyssHero(heroId)?.voice||heroId;
  const theme=heroId.startsWith('high-school-')?'high-school':heroId.startsWith('magic-')?'magic':null;
  if(!theme)return null;
  const id=heroId.slice(theme.length+1).toUpperCase();

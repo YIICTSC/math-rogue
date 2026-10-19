@@ -1,9 +1,10 @@
+import {ABYSS_HEROES,abyssHero} from './dungeons2/roster';
 import {expedition,expeditionUnlocked} from './expeditions';
 import {PROTAGONISTS,studentChapter,studentHero,STUDENT_STORIES} from './student/content';
 import type {AdventureMode,SchoolBase} from './adventure';
 export const ROUTE_ORDER:AdventureMode[]=['STORY','PUZZLE','TRAPS','MYSTERY','CARDS','NO_GEAR','BARE'];
 export function routeOpen(base:SchoolBase,mode:AdventureMode){if(expedition(mode))return expeditionUnlocked(base,mode);if(mode==='RESCUE')return Boolean(base.rescue&&base.rescue.attempts<3);const index=ROUTE_ORDER.indexOf(mode);return index===0||Boolean(base.clears[mode])||ROUTE_ORDER.slice(index).some(id=>Boolean(base.clears[id]))||Boolean(base.clears[ROUTE_ORDER[index-1]]);}
-export function classmateFor(id:string){const roster=PROTAGONISTS.filter(p=>studentChapter(p.id)===studentChapter(id));return roster[(roster.findIndex(p=>p.id===id)+1)%roster.length];}
+export function classmateFor(id:string){const roster=abyssHero(id)?ABYSS_HEROES:PROTAGONISTS.filter(p=>studentChapter(p.id)===studentChapter(id));return roster[(roster.findIndex(p=>p.id===id)+1)%roster.length];}
 export function personalStories(id:string){const hero=studentHero(id);return STUDENT_STORIES[studentChapter(id)].map((act,index)=>({...act,lines:[[`${hero.name}は${['町の門で、最初の一歩を踏み出した。','仲間と交わした約束を胸に、先へ進む。','自分の得意なことを生かし、失われた記録を探す。','これまで出会った人の声を思い出した。','旅で学んだ工夫を、最後の試練に向ける。','帰る場所と、新しい旅の始まりを見つけた。'][index]}`,`Your traveler ${['takes the first step beyond the town gate.','moves forward with a promise of friendship.','uses a personal talent to seek the lost record.','remembers the voices of everyone met along the road.','brings the journey’s lessons to the final trial.','finds a home to return to, and a new beginning.'][index]}`] as const,...act.lines,...(index===5?[routeEpilogue('STORY')]:[])]}));}
 export const TOWN_BUILDINGS:readonly {kind:string;x:number;name:string;en:string;npc?:boolean}[]=[
  {kind:'GUIDE',x:5,name:'旅の案内人',en:'Travel guide',npc:true},
