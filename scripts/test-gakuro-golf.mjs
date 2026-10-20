@@ -6,6 +6,29 @@ try {
   const { HOLES } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/course.ts');
   const { BallMotion, BALL_RENDER_DELAY, predictShot } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/motion.ts');
   const { defaultAvatar } = await server.ssrLoadModule('/src/mini-games/gakuro-kart/avatar.ts');
+  const { createGolferAssets } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/golferModels.ts');
+  const golferAssets = createGolferAssets(), golfer = golferAssets.create(defaultAvatar());
+  try {
+    const checkAppearance = (avatar, expression) => {
+      golfer.update(avatar);
+      golfer.setExpression(expression);
+      const effective = expression === undefined ? avatar : { ...avatar, expression };
+      const parts = golfer.torso.children.filter(part => part.userData.visibleFor);
+      assert(parts.some(part => !part.userData.visibleFor(effective)), 'the avatar has unselected parts');
+      for (const swing of [0, .7, -1.2, 0]) {
+        golfer.animateHero(1 / 60, swing);
+        for (const part of parts) assert.equal(part.visible, part.userData.visibleFor(effective),
+          `animation must preserve selected avatar parts: ${JSON.stringify(effective)}`);
+      }
+    };
+    for (let species = 0; species < 8; species++) checkAppearance({ ...defaultAvatar(), species });
+    for (const [key, count] of [['hairStyle', 12], ['accessory', 14], ['expression', 8], ['faceShape', 5], ['faceStyle', 4], ['eyeStyle', 7]]) {
+      for (let value = 0; value < count; value++) checkAppearance({ ...defaultAvatar(), [key]: value });
+    }
+    checkAppearance(defaultAvatar(), 6);
+    checkAppearance(defaultAvatar());
+    console.log('Golf avatar: species, hair, accessories, face and expression stay selected during animation.');
+  } finally { golfer.dispose(); golferAssets.dispose(); }
   const { validView } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/protocol.ts');
   const lobby = createGolf(); addPlayer(lobby, 'styled', 'Styled');
   const avatar = { ...defaultAvatar(), species: 3, expression: 6, hairStyle: 4 };
