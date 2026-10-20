@@ -31,3 +31,17 @@ assert(result.shell.gzipBytes < 300_000, 'startup shell must stay under 300 KB g
 assert(result.title.gzipBytes < 4_800_000, 'title JS must be at least 20% below the previous ~6 MB gzip entry');
 console.log(JSON.stringify(result, null, 2));
 console.log('PASS: lightweight boot shell and title do not eagerly download question banks or mini-games.');
+
+const html = await readFile(path.join(root, 'index.html'), 'utf8');
+const bootConfig = JSON.parse(html.match(/<script type="application\/json" id="startup-config">([\s\S]*?)<\/script>/)[1]);
+const planned = new Map(bootConfig.resources.map(item => [item.url.replace(/^\.\//, ''), item]));
+for (const key of title) {
+  for (const file of [manifest[key].file, ...(manifest[key].css || [])]) {
+    assert(planned.has(file), `progress plan must cover startup dependency: ${file}`);
+    assert.equal(planned.get(file).bytes, (await readFile(path.join(root, file))).length);
+  }
+}
+assert.equal(bootConfig.entry, `./${manifest[entry].file}`);
+assert(!/<script[^>]*type="module"[^>]*src=/.test(html), 'module evaluation waits for complete startup downloads');
+assert(!/startup-retry|location.reload\(/.test(html), 'startup never prompts or reloads the document');
+console.log('PASS: startup plan covers actual JS/CSS byte sizes and waits for complete downloads.');

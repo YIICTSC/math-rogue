@@ -105,42 +105,208 @@
 </head>
   <body>
     <div id="root"></div>
-    <aside id="startup-status" role="status" style="position:fixed;inset:0;display:none;place-content:center;gap:16px;padding:24px;background:#020617;color:#e2e8f0;text-align:center;font:16px sans-serif;z-index:2147483647">
-      <strong>学習ローグ / Learning Rogue</strong>
-      <span id="startup-message"></span>
-      <button id="startup-retry" hidden style="padding:14px;border-radius:8px;background:#67e8f9;color:#020617;border:0;font:inherit">再読み込み / Reload</button>
+    <aside id="startup-status" role="status" aria-live="polite" style="position:fixed;inset:0;display:grid;place-content:center;gap:16px;padding:24px;background:#020617;color:#e2e8f0;text-align:center;font:16px/1.6 system-ui,sans-serif;z-index:2147483647">
+      <strong id="startup-title">学習ローグ</strong>
+      <span id="startup-message">読み込んでいます / Loading</span>
+      <progress id="startup-progress" max="100" value="0" aria-label="ロード進捗 / Loading progress" style="width:min(320px,80vw);height:12px;accent-color:#67e8f9"></progress>
+      <span id="startup-percent" aria-hidden="true" style="font-variant-numeric:tabular-nums">0%</span>
+      <small id="startup-detail" aria-hidden="true" style="color:#94a3b8;min-height:1.6em"></small>
     </aside>
     <script>
       (() => {
-        const root = document.getElementById('root');
         const panel = document.getElementById('startup-status');
         const message = document.getElementById('startup-message');
-        const retry = document.getElementById('startup-retry');
-        let recovering = false;
-        let failed = false;
-        const ready = () => root.childElementCount > 0;
-        const observer = new MutationObserver(() => { if (ready()) { panel.remove(); observer.disconnect(); clearTimeout(timer); } });
-        observer.observe(root, {childList:true});
-        const showFailure = () => { if (!ready()) { failed = true; panel.style.display = 'grid'; message.textContent = '読み込みを完了できませんでした。セーブを保持して再読み込みできます。 / Loading failed. Reload without deleting saves.'; retry.hidden = false; } };
-        const reload = async () => {
-          if (recovering) return;
-          recovering = true; retry.disabled = true;
-          message.textContent = '保存済みデータを使って再読み込みしています… / Reloading with saved data…';
-          // A busy classroom connection is not evidence of corrupt storage.
-          // Preserve cached downloads, saves, invitation parameters and hashes.
-          location.reload();
+        const progress = document.getElementById('startup-progress');
+        const percent = document.getElementById('startup-percent');
+        const detail = document.getElementById('startup-detail');
+        let language; try { language = localStorage.getItem('pixel_spire_language_mode_v1'); } catch {}
+        const copy = language === 'ENGLISH'
+          ? { loading: 'Loading the game', waiting: 'Waiting for the connection. Loading will continue automatically.', preparing: 'Preparing the game', complete: 'Ready', files: 'files' }
+          : language === 'HIRAGANA'
+          ? { loading: 'ゲームを よみこんでいます', waiting: 'つうしんを まっています。このまま じどうで よみこみを つづけます。', preparing: 'ゲームを じゅんびしています', complete: 'じゅんびできました', files: 'ファイル' }
+          : { loading: 'ゲームを読み込んでいます', waiting: '通信を待っています。このまま自動で読み込みを続けます。', preparing: 'ゲームを準備しています', complete: '準備できました', files: 'ファイル' };
+        let shown = 0, finished = false;
+        const show = (value, text, summary = '') => {
+          if (finished) return;
+          shown = Math.max(shown, Math.min(100, value));
+          if (progress.value !== shown) progress.value = shown;
+          if (percent.textContent !== `${shown}%`) percent.textContent = `${shown}%`;
+          if (message.textContent !== text) message.textContent = text;
+          if (detail.textContent !== summary) detail.textContent = summary;
         };
-        retry.addEventListener('click', reload);
-        window.addEventListener('error', event => {
-          if (ready() || failed) return;
-          showFailure();
-        }, true);
-        window.addEventListener('unhandledrejection', showFailure);
-        const timer = setTimeout(() => {
-          if (ready() || failed) return;
-          panel.style.display = 'grid';
-          message.textContent = '読み込み中です。通信が混み合っている場合は、このままお待ちください。 / Still loading. Please wait while the connection is busy.';
-        }, 20000);
+        document.getElementById('startup-title').textContent = language === 'ENGLISH' ? 'Learning Rogue' : language === 'HIRAGANA' ? 'がくしゅうローグ' : '学習ローグ';
+        progress.setAttribute('aria-label', language === 'ENGLISH' ? 'Loading progress' : language === 'HIRAGANA' ? 'よみこみの しんちょく' : '読み込みの進捗');
+        show(0, copy.loading);
+        window.addEventListener('learning-rogue-startup-waiting', () => show(shown, copy.waiting));
+        window.addEventListener('learning-rogue-module-ready', () => show(98, copy.preparing));
+        window.addEventListener('learning-rogue-ready', () => {
+          if (finished) return;
+          show(100, copy.complete); finished = true;
+          requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => panel.remove(), 150)));
+          // Keep the current startup graph for offline launches without accumulating old builds.
+          if (activeConfig && 'caches' in window) {
+            const current = new Set(activeConfig.resources.map(item => new URL(item.url, location.href).href));
+            Promise.resolve().then(() => caches.open('learning-rogue-startup-v1')).then(async cache => {
+              for (const request of await cache.keys()) if (!current.has(request.url)) await cache.delete(request);
+            }).catch(() => {});
+          }
+        });
+        let activeConfig = null, controller, refreshing, lastRefresh = 0;
+        const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+        const storageTask = async work => {
+          let timer;
+          try { return await Promise.race([
+            Promise.resolve().then(work),
+            new Promise((_, reject) => { timer = setTimeout(() => reject(Error('Storage is busy')), 2000); }),
+          ]); } finally { clearTimeout(timer); }
+        };
+        const readConfig = doc => {
+          const node = doc.getElementById('startup-config');
+          if (!node) return null;
+          try {
+            const config = JSON.parse(node.textContent);
+            if (typeof config.entry !== 'string' || !Array.isArray(config.resources) || !config.resources.length) return null;
+            for (const item of [{url: config.entry}, ...config.resources]) {
+              const url = new URL(item.url, location.href);
+              if (location.protocol === 'file:' ? url.protocol !== 'file:' : url.origin !== location.origin) return null;
+            }
+            if (config.resources.some(item => !Number.isFinite(item.bytes) || item.bytes < 0)) return null;
+            return config;
+          } catch { return null; }
+        };
+        const refreshPlan = async () => {
+          if (refreshing) return refreshing;
+          if (Date.now() - lastRefresh < 10000) return;
+          lastRefresh = Date.now();
+          refreshing = (async () => {
+            const abort = new AbortController(), timer = setTimeout(() => abort.abort(), 15000);
+            try {
+              const response = await fetch(location.href, {cache: 'no-store', signal: abort.signal});
+              if (!response.ok) return;
+              const next = readConfig(new DOMParser().parseFromString(await response.text(), 'text/html'));
+              if (next && JSON.stringify([next.entry, next.resources]) !== JSON.stringify([activeConfig.entry, activeConfig.resources])) { activeConfig = next; controller.abort(); }
+            } catch {} finally { clearTimeout(timer); }
+          })().finally(() => { refreshing = null; });
+          return refreshing;
+        };
+        const prepare = async config => {
+          controller = new AbortController();
+          const signal = controller.signal;
+          const received = new Map(), completed = new Set();
+          const total = config.resources.reduce((sum, item) => sum + item.bytes, 0);
+          const report = () => {
+            const loaded = [...received.values()].reduce((sum, bytes) => sum + bytes, 0);
+            show(Math.floor(95 * loaded / total), copy.loading,
+              `${completed.size} / ${config.resources.length} ${copy.files} · ${(loaded / 1048576).toFixed(1)} / ${(total / 1048576).toFixed(1)} MB`);
+          };
+          const download = async item => {
+            const url = new URL(item.url, location.href).href;
+            for (let attempt = 0; !signal.aborted; attempt++) {
+              const abort = new AbortController();
+              const cancel = () => abort.abort(); signal.addEventListener('abort', cancel, {once: true});
+              let timer;
+              const heartbeat = () => { clearTimeout(timer); timer = setTimeout(cancel, 45000); };
+              try {
+                heartbeat();
+                let saved; try { saved = await storageTask(() => caches.match(url)); } catch {}
+                const response = saved || await (location.protocol === 'file:' ? new Promise((resolve, reject) => {
+                  const xhr = new XMLHttpRequest(); xhr.open('GET', url); xhr.responseType = 'arraybuffer';
+                  const stop = () => { xhr.abort(); reject(Error('Startup transfer paused')); };
+                  abort.signal.addEventListener('abort', stop, {once:true});
+                  xhr.onprogress = event => { heartbeat(); received.set(url, Math.min(item.bytes, event.loaded)); report(); };
+                  xhr.onload = () => {
+                    abort.signal.removeEventListener('abort', stop);
+                    resolve(new Response(xhr.response, {status: xhr.status || 200, headers: {'content-type': item.style ? 'text/css' : 'text/javascript'}}));
+                  };
+                  xhr.onerror = () => { abort.signal.removeEventListener('abort', stop); reject(Error('Startup transfer paused')); };
+                  xhr.send();
+                }) : fetch(url, {signal: abort.signal, cache: attempt ? 'reload' : 'default'}));
+                if (!response.ok || !/(?:javascript|ecmascript|css)/i.test(response.headers.get('content-type') || '')) {
+                  await response.body?.cancel();
+                  await refreshPlan();
+                  throw Error(`Startup resource ${response.status}`);
+                }
+                const chunks = []; let bytes = 0;
+                if (response.body) {
+                  const reader = response.body.getReader();
+                  try {
+                    for (;;) {
+                      const part = await reader.read(); if (part.done) break;
+                      heartbeat(); chunks.push(part.value); bytes += part.value.byteLength;
+                      received.set(url, Math.min(item.bytes, bytes)); report();
+                    }
+                  } finally { reader.releaseLock(); }
+                } else { const part = await response.arrayBuffer(); chunks.push(part); bytes = part.byteLength; }
+                if (!bytes && item.bytes) throw Error('Empty startup resource');
+                // Await storage before evaluating modules, including on the first visit.
+                // The worker can then serve these complete files without another transfer.
+                if (!saved) try {
+                  await storageTask(async () => {
+                    const cache = await caches.open('learning-rogue-startup-v1');
+                    const headers = new Headers(response.headers); headers.delete('content-encoding'); headers.delete('content-length');
+                    await cache.put(url, new Response(new Blob(chunks), {headers}));
+                  });
+                } catch { /* HTTP cache still works when persistent storage is unavailable. */ }
+                received.set(url, item.bytes); completed.add(url); report(); return;
+              } catch (error) {
+                if (signal.aborted) return;
+                console.warn('[learning-rogue] Continuing startup download.', item.url, error);
+                // Replace only this unsuccessful resource, never saves or complete downloads.
+                try {
+                  await storageTask(async () => {
+                    for (const name of await caches.keys()) await (await caches.open(name)).delete(url);
+                  });
+                } catch {}
+                show(shown, copy.waiting);
+                await pause(Math.min(10000, 1000 * 2 ** Math.min(attempt, 3)) + Math.random() * 1000);
+              } finally { clearTimeout(timer); signal.removeEventListener('abort', cancel); }
+            }
+          };
+          let index = 0;
+          await Promise.all(Array.from({length: Math.min(3, config.resources.length)}, async () => {
+            while (!signal.aborted && index < config.resources.length) await download(config.resources[index++]);
+          }));
+          return !signal.aborted;
+        };
+        const start = async () => {
+          activeConfig ||= readConfig(document);
+          if (!activeConfig) return; // Vite development serves its module entry directly.
+          // Install protection early, without making worker/storage support a startup requirement.
+          if (activeConfig.worker && 'serviceWorker' in navigator) {
+            await Promise.race([
+              navigator.serviceWorker.register(new URL('./sw.js', location.href)).then(async registration => {
+                if (!navigator.serviceWorker.controller) await new Promise(resolve => {
+                  const changed = () => { navigator.serviceWorker.removeEventListener('controllerchange', changed); resolve(); };
+                  navigator.serviceWorker.addEventListener('controllerchange', changed);
+                  setTimeout(changed, 1800);
+                });
+                navigator.serviceWorker.controller?.postMessage({type:'WARM_SHELL'});
+              }).catch(() => {}), pause(1800),
+            ]);
+          }
+          while (!await prepare(activeConfig)) {}
+          show(96, copy.preparing);
+          for (const item of activeConfig.resources.filter(item => item.style)) {
+            for (;;) {
+              const loaded = await new Promise(resolve => {
+                const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = item.url;
+                const timer = setTimeout(() => { link.remove(); resolve(false); }, 45000);
+                link.onload = () => { clearTimeout(timer); resolve(true); };
+                link.onerror = () => { clearTimeout(timer); link.remove(); resolve(false); };
+                document.head.appendChild(link);
+              });
+              if (loaded) break;
+              show(shown, copy.waiting); await pause(2000 + Math.random() * 1000);
+            }
+          }
+          const script = document.createElement('script'); script.type = 'module'; script.src = activeConfig.entry;
+          script.onerror = () => {
+            show(shown, copy.waiting);
+            void refreshPlan().then(() => pause(2000 + Math.random() * 1000)).then(start);
+          };
+          document.head.appendChild(script);
+        };
+        document.addEventListener('DOMContentLoaded', () => { void start(); }, {once: true});
       })();
     </script>
     <script type="module" src="/index.tsx"></script>

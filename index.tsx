@@ -20,8 +20,9 @@ const App = deferredScreen(async () => {
     // offline storage or an installed worker in order to start the game.
     await Promise.race([cacheReady, new Promise(resolve => { timer = setTimeout(resolve, 1800); })]);
   } finally { clearTimeout(timer!); }
+  window.dispatchEvent(new Event('learning-rogue-module-ready'));
   return import('./src/App');
-});
+}, { startup: true });
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

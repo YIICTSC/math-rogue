@@ -20,13 +20,13 @@ export function ScreenLoading({ languageMode }: { languageMode?: LanguageMode })
 
 // Only retry loading failures. Re-running a module that threw an application
 // error cannot repair it. Jitter prevents a class from retrying in lockstep.
-export async function loadScreen<T>(load: () => Promise<T>): Promise<T> {
+export async function loadScreen<T>(load: () => Promise<T>, continueLoading = false): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try { return await load(); } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const workerRetries = typeof navigator !== 'undefined' && !!navigator.serviceWorker?.controller;
-      if (workerRetries || attempt >= 2 || !/fetch|network|loading.*(?:module|chunk)|importing.*module/i.test(message)) throw error;
-      await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** attempt + Math.random() * 1000));
+      if ((!continueLoading && (workerRetries || attempt >= 2)) || !/fetch|network|loading.*(?:module|chunk)|importing.*module/i.test(message)) throw error;
+      await new Promise(resolve => setTimeout(resolve, Math.min(10000, 1000 * 2 ** Math.min(attempt, 3)) + Math.random() * 1000));
     }
   }
 }
@@ -35,11 +35,21 @@ class ScreenBoundary extends Component<{
   children: React.ReactNode;
   languageMode?: LanguageMode;
   retry: () => void;
+  startup?: boolean;
 }, { failed: boolean }> {
   state = { failed: false };
+  private timer?: ReturnType<typeof setTimeout>;
+  componentDidCatch() {
+    if (this.props.startup) {
+      window.dispatchEvent(new Event('learning-rogue-startup-waiting'));
+      this.timer = setTimeout(this.props.retry, 5000 + Math.random() * 1000);
+    }
+  }
+  componentWillUnmount() { clearTimeout(this.timer); }
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
     if (!this.state.failed) return this.props.children;
+    if (this.props.startup) return null;
     const copy = copyFor(this.props.languageMode);
     return <div role="alert" className="h-full min-h-48 grid place-content-center gap-4 bg-slate-950 p-6 text-center text-slate-100">
       <p>{copy.failed}</p>
@@ -50,13 +60,13 @@ class ScreenBoundary extends Component<{
 }
 
 /** Load a selected screen without suspending or discarding the parent game. */
-export function deferredScreen<P extends object>(load: () => Promise<{ default: React.ComponentType<P> }>): React.FC<P> {
+export function deferredScreen<P extends object>(load: () => Promise<{ default: React.ComponentType<P> }>, options: { startup?: boolean } = {}): React.FC<P> {
   return function DeferredScreen(props: P) {
     const [attempt, setAttempt] = useState(0);
-    const Screen = useMemo(() => React.lazy(() => loadScreen(load)), [attempt]);
+    const Screen = useMemo(() => React.lazy(() => loadScreen(load, options.startup)), [attempt]);
     const languageMode = (props as { languageMode?: LanguageMode }).languageMode;
-    return <ScreenBoundary key={attempt} languageMode={languageMode} retry={() => setAttempt(value => value + 1)}>
-      <Suspense fallback={<ScreenLoading languageMode={languageMode} />}><Screen {...props} /></Suspense>
+    return <ScreenBoundary key={attempt} startup={options.startup} languageMode={languageMode} retry={() => setAttempt(value => value + 1)}>
+      <Suspense fallback={options.startup ? null : <ScreenLoading languageMode={languageMode} />}><Screen {...props} /></Suspense>
     </ScreenBoundary>;
   };
 }

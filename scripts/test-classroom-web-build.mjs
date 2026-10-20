@@ -54,6 +54,7 @@ try {
   await context.route(/^https:\/\//, route => route.abort());
   await context.addInitScript(() => {
     localStorage.setItem('pixel_spire_language_mode_v1', 'ENGLISH');
+    localStorage.setItem('pixel_spire_problem_set_view_v1', 'standard');
     localStorage.setItem('pixel_spire_student_profile_v1', JSON.stringify({ grade: '社会人', name: 'Classroom test' }));
     localStorage.setItem('learning_rogue_online_ranking_initial_prompt_declined_v1', '1');
     localStorage.setItem('classroom-save-proof', 'KEEP');
@@ -71,6 +72,7 @@ try {
     throw error;
   }
   console.log(`PASS: cold title at 5 Mbps with a transient 503: ${Date.now() - start} ms.`);
+  await page.locator('#startup-status').waitFor({state:'detached'});
   assert.equal(counts.get(app), 2, 'the worker retries only the failed app transfer');
   assert.equal(rootRequests, 1, 'no automatic document reload');
   assert(await page.evaluate(() => !!navigator.serviceWorker.controller));
@@ -89,7 +91,9 @@ try {
   const later = page.getByRole('button', { name: 'Later', exact: true });
   if (await later.isVisible()) await later.click();
   await page.getByRole('button', { name: 'Question', exact: true }).click();
-  await page.getByRole('button', { name: 'Start Challenge!', exact: true }).click({ timeout: 15000 });
+  const arithmeticStart = page.getByRole('button', { name: 'Start Challenge!', exact: true });
+  if (!await arithmeticStart.isEnabled()) await page.locator('button').filter({ hasText: /0\/100/ }).first().click();
+  await arithmeticStart.click({ timeout: 15000 });
   await page.locator('[data-gamepad-initial-scope="math-challenge-0"]').waitFor();
   assert([...counts.keys()].some(key => /MathChallengeScreen/.test(key)));
   assert(![...counts.keys()].some(key => /subjectData/.test(key)), 'arithmetic must not download the general question bank');

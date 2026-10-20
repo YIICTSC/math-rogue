@@ -1,8 +1,8 @@
 // Bump the shell/runtime generation when the deployed app contains UI fixes.
 // This prevents an older Pages service worker from re-serving the pre-fix bundle.
-const SHELL_CACHE = 'learning-rogue-shell-v7';
-const RUNTIME_CACHE = 'learning-rogue-runtime-v7';
-const PREVIOUS_RUNTIME_CACHE = 'learning-rogue-runtime-v6';
+const SHELL_CACHE = 'learning-rogue-shell-v8';
+const RUNTIME_CACHE = 'learning-rogue-runtime-v8';
+const PREVIOUS_RUNTIME_CACHE = 'learning-rogue-runtime-v7';
 const THEME_CACHE_PREFIX = 'learning-rogue-theme-';
 // Must match webAssetCacheService.ts. Previously v4 deleted saved v3 packs.
 const THEME_CACHE_VERSION = 'v3';
@@ -11,7 +11,13 @@ let shellWarmup;
 const NAVIGATION_WAIT_MS = 3000;
 
 const cachedResponse = async (request) => {
-  try { return await caches.match(request); } catch { return undefined; }
+  let timer;
+  try {
+    return await Promise.race([
+      caches.match(request),
+      new Promise(resolve => { timer = setTimeout(() => resolve(undefined), 2000); }),
+    ]);
+  } catch { return undefined; } finally { clearTimeout(timer); }
 };
 const storeResponse = async (cacheName, request, response) => {
   try {
@@ -25,7 +31,7 @@ const downloadAsset = async (request) => {
     || /\.(?:m?js|css|woff2?)(?:\?|$)/i.test(request.url);
   for (let attempt = 0; ; attempt++) {
     try {
-      const response = await fetch(request);
+      const response = await fetch(request, attempt ? {cache: 'reload'} : undefined);
       if (!retryable || attempt >= 2 || ![408, 429, 500, 502, 503, 504].includes(response.status)) return response;
       // Release an unsuccessful body before requesting the resource again.
       await response.body?.cancel();

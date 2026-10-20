@@ -1504,6 +1504,12 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 };
 
 const App: React.FC = () => {
+    useEffect(() => {
+        let frame = requestAnimationFrame(() => {
+            frame = requestAnimationFrame(() => window.dispatchEvent(new Event('learning-rogue-ready')));
+        });
+        return () => cancelAnimationFrame(frame);
+    }, []);
     useXboxControllerNavigation();
     const { canInstall: canInstallPwa, install: installPwa } = usePwaInstall();
     const electronApi = typeof window !== 'undefined'

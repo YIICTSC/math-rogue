@@ -26,6 +26,7 @@ function worker(fetcher, unavailable = false) {
       delete: async name => stores.delete(name),
       open: async name => { if (unavailable) throw Error('QuotaExceededError'); return cache(name); },
       match: async request => {
+        if (unavailable === 'busy') return new Promise(() => {});
         if (unavailable) throw Error('Cache unavailable');
         for (const store of stores.values()) { const response = store.get(key(request)); if (response) return response.clone(); }
       },
@@ -43,28 +44,28 @@ function worker(fetcher, unavailable = false) {
   };
 }
 
-for (const unavailable of [false, true]) {
+for (const unavailable of [false, true, 'busy']) {
   const w = worker(async () => new Response('LATEST'), unavailable);
   for (const [path, mode] of [['/math-rogue/', 'navigate'], ['/math-rogue/assets/app.js', 'cors']]) assert.equal(await (await w.request(path, mode)).text(), 'LATEST');
   await w.flush();
 }
 const retained = worker(async () => new Response('LATEST'));
-for (const name of ['learning-rogue-runtime-v6', 'learning-rogue-runtime-v5', 'learning-rogue-theme-magic-v3']) retained.cache(name);
+for (const name of ['learning-rogue-runtime-v7', 'learning-rogue-runtime-v6', 'learning-rogue-theme-magic-v3']) retained.cache(name);
 await new Promise((resolve, reject) => retained.handlers.activate({ waitUntil: p => p.then(resolve, reject) }));
-assert(retained.stores.has('learning-rogue-runtime-v6'));
+assert(retained.stores.has('learning-rogue-runtime-v7'));
 assert(retained.stores.has('learning-rogue-theme-magic-v3'));
-assert(!retained.stores.has('learning-rogue-runtime-v5'));
-assert(!retained.stores.has('learning-rogue-shell-v7'), 'activation must not wait for shell or icon downloads');
+assert(!retained.stores.has('learning-rogue-runtime-v6'));
+assert(!retained.stores.has('learning-rogue-shell-v8'), 'activation must not wait for shell or icon downloads');
 let warmup;
 retained.handlers.message({ data: { type: 'WARM_SHELL' }, waitUntil: p => warmup = p });
 await warmup;
-assert(retained.stores.has('learning-rogue-shell-v7'), 'the boot shell requests warming after protection is active');
+assert(retained.stores.has('learning-rogue-shell-v8'), 'the boot shell requests warming after protection is active');
 
 let calls = 0;
 const retry = worker(async () => ++calls < 3 ? new Response('Busy', { status: 503 }) : new Response('READY'));
 assert.equal(await (await retry.request('/assets/app.js')).text(), 'READY');
 assert.equal(calls, 3);
-assert.equal(retry.delays.length, 2);
+assert.equal(retry.delays.filter(delay => delay !== 2000).length, 2);
 await retry.flush();
 const cachedCalls = calls;
 assert.equal(await (await retry.request('/assets/app.js')).text(), 'READY');
@@ -89,9 +90,9 @@ await shared.flush();
 
 let completeNetwork;
 const offlineFirst = worker(() => new Promise(resolve => completeNetwork = resolve));
-await offlineFirst.cache('learning-rogue-shell-v7').put(`${origin}/math-rogue/index.html`, new Response('SAVED'));
+await offlineFirst.cache('learning-rogue-shell-v8').put(`${origin}/math-rogue/index.html`, new Response('SAVED'));
 assert.equal(await (await offlineFirst.request('/math-rogue/?invite=123', 'navigate')).text(), 'SAVED');
 assert(offlineFirst.delays.includes(3000));
 completeNetwork(new Response('UPDATED')); await offlineFirst.flush();
-assert.equal(await (await offlineFirst.cache('learning-rogue-shell-v7').match(`${origin}/math-rogue/?invite=123`)).text(), 'UPDATED');
+assert.equal(await (await offlineFirst.cache('learning-rogue-shell-v8').match(`${origin}/math-rogue/?invite=123`)).text(), 'UPDATED');
 console.log('PASS: cache failures, retained packs, bounded module retries, 30 in-flight requests, and saved-shell fallback.');
