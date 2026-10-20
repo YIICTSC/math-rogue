@@ -153,11 +153,67 @@ try {
     100,
   );
   await page.getByRole("button", { name: "バースト", exact: true }).click();
-  assert((await page.evaluate(() => window.__survivor.action.current.burstTime)) >= 145);
+  assert(
+    (await page.evaluate(() => window.__survivor.action.current.burstTime)) >=
+      145,
+  );
   assert.equal(
     await page.evaluate(() => window.__survivor.enemyBullets.current.length),
     0,
   );
+  const cutinHeroes = await page.evaluate(async () => {
+    const { HEROES } = await import(
+      "/src/mini-games/schoolyard-survivor/world.ts"
+    );
+    return HEROES;
+  });
+  for (const hero of cutinHeroes) {
+    await page.evaluate((hero) => {
+      const g = window.__survivor;
+      g.selectedHero.current = hero;
+      g.enemies.current = [];
+      g.gems.current = [];
+      g.action.current.burst = 100;
+      g.activateBurst();
+    }, hero);
+    const portrait = page.locator(
+      `.sy-burst-cutin [data-cutin-hero="${hero.id}"] img`,
+    );
+    await portrait.waitFor();
+    await portrait.evaluate((img) => img.decode());
+    assert(
+      (await portrait.getAttribute("src")).includes(`${hero.id}-skill-1.webp`),
+    );
+    if (
+      ["elementary-warrior", "high-school-warrior", "magic-akari"].includes(
+        hero.id,
+      )
+    ) {
+      await page.clock.runFor(300);
+      await page.screenshot({ path: `${shots}/burst-cutin-${hero.id}.png` });
+    }
+  }
+  await page.keyboard.press("Escape");
+  await page.clock.runFor(2000);
+  assert.equal(
+    await page.locator(".sy-burst-cutin").getAttribute("data-paused"),
+    "true",
+  );
+  await page.getByRole("button", { name: "続ける", exact: true }).click();
+  await page.clock.runFor(1400);
+  assert.equal(
+    await page.locator(".sy-burst-cutin").count(),
+    0,
+    "the cut-in ends after its simulation duration and freezes during pause",
+  );
+  await page.evaluate(async () => {
+    const { HEROES } = await import(
+      "/src/mini-games/schoolyard-survivor/world.ts"
+    );
+    window.__survivor.selectedHero.current = HEROES.find(
+      (h) => h.id === "magic-sakuya",
+    );
+  });
   await page.evaluate(() => {
     const g = window.__survivor;
     g.time.current = 70;
@@ -473,15 +529,33 @@ try {
     await p.screenshot({ path: `${shots}/title-${width}.png` });
     await p.locator(".sy-title-copy .sy-primary").click();
     await p.screenshot({ path: `${shots}/selection-${width}.png` });
-    if(width===390){
-      await p.getByRole('tab',{name:'魔法学園編'}).click();
-      const box=await p.locator('.sy-hero-grid').boundingBox();
-      const cdp=await p.context().newCDPSession(p),x=box.x+box.width/2,y=box.y+box.height-30;
-      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:11}]});
-      for(let i=1;i<=8;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-i*22,id:11}]});await p.waitForTimeout(20);}
-      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await p.waitForTimeout(250);
-      assert((await p.locator('.sy-hero-grid').evaluate(el=>el.scrollTop))>10,'the hero roster must scroll with a real finger gesture');
-      await p.getByRole('tab',{name:'小学生編'}).click();
+    if (width === 390) {
+      await p.getByRole("tab", { name: "魔法学園編" }).click();
+      const box = await p.locator(".sy-hero-grid").boundingBox();
+      const cdp = await p.context().newCDPSession(p),
+        x = box.x + box.width / 2,
+        y = box.y + box.height - 30;
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x, y, id: 11 }],
+      });
+      for (let i = 1; i <= 8; i++) {
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x, y: y - i * 22, id: 11 }],
+        });
+        await p.waitForTimeout(20);
+      }
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await p.waitForTimeout(250);
+      assert(
+        (await p.locator(".sy-hero-grid").evaluate((el) => el.scrollTop)) > 10,
+        "the hero roster must scroll with a real finger gesture",
+      );
+      await p.getByRole("tab", { name: "小学生編" }).click();
     }
     const start = p.locator(".sy-selection-content footer .sy-primary");
     await start.scrollIntoViewIfNeeded();
@@ -493,6 +567,14 @@ try {
     );
     assert.equal(overflow, false);
     await p.screenshot({ path: `${shots}/combat-${width}.png` });
+    await p.evaluate(() => {
+      window.__survivor.action.current.burst = 100;
+      window.__survivor.activateBurst();
+    });
+    await p.locator(".sy-burst-cutin img").evaluate((img) => img.decode());
+    await p.waitForTimeout(250);
+    await p.screenshot({ path: `${shots}/burst-cutin-${width}.png` });
+    assert(await p.locator(".sy-actions button").first().isVisible());
     const before = await p.evaluate(() => window.__survivor.player.current.x);
     await p.dispatchEvent("canvas", "touchstart", {
       touches: [{ identifier: 1, clientX: 100, clientY: height - 100 }],

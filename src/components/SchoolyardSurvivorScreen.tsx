@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { ArrowLeft, RotateCcw, Sparkles, Zap, Wind, Pause, Play } from 'lucide-react';
+import SurvivorBurstCutin, { BURST_CUTIN_FRAMES, preloadSurvivorBurst } from '../mini-games/schoolyard-survivor/SurvivorBurstCutin';
 import SurvivorLobby, { HeroPortrait } from '../mini-games/schoolyard-survivor/SurvivorLobby';
 import { HEROES, FIELDS, SCENERY_KEYS, FX_KEYS, localize, createObstacles, createFieldCanvas, moveActor, spawnPoint, type SurvivorHero, type Field } from '../mini-games/schoolyard-survivor/world';
 import '../mini-games/schoolyard-survivor/survivor.css';
@@ -532,6 +533,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const l = (ja:string,en:string,hira?:string) => localize(languageMode,ja,en,hira);
     const [inLobby,setInLobby] = useState(!debugPreview);
     const [paused,setPaused] = useState(false);
+    const [burstCutin,setBurstCutin] = useState<{heroId:SurvivorHero['id'];id:number}|null>(null);
+    const burstCutinFrames = useRef(0);
+    const burstCutinSerial = useRef(0);
     const selectedHero = useRef<SurvivorHero>(HEROES[0]);
     const selectedField = useRef<Field>(FIELDS[0]);
     const obstacles = useRef(createObstacles(FIELDS[0]));
@@ -902,6 +906,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const activateBurst = () => {
         if(gameState.current!=='PLAYING'||action.current.burst<100)return;
         action.current.burst=0;action.current.burstTime=150;player.current.flashTime=150;
+        burstCutinFrames.current=BURST_CUTIN_FRAMES;
+        setBurstCutin({heroId:selectedHero.current.id,id:++burstCutinSerial.current});
         enemyBullets.current=[];shakeAmount.current=12;
         addFx(player.current.x,player.current.y,'NOVA',800,55);addFx(player.current.x,player.current.y,'RUNE',400,100);
         enemies.current.forEach(e=>{if(Math.hypot(e.x-player.current.x,e.y-player.current.y)<650)
@@ -919,6 +925,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         if (gameState.current !== 'PLAYING') return;
 
         frameCount.current++;
+        if(burstCutinFrames.current>0&&--burstCutinFrames.current===0)setBurstCutin(null);
         const scheduled=activeTimeouts.current;activeTimeouts.current=[];
         scheduled.forEach(shot=>{if(--shot.remaining<=0)shot.callback();else activeTimeouts.current.push(shot);});
         const pad=typeof navigator.getGamepads==='function'?Array.from(navigator.getGamepads()).find(Boolean):undefined;
@@ -1733,6 +1740,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     const handleRestart = () => {
         clearAllTimeouts();clearInput();
+        burstCutinFrames.current=0;setBurstCutin(null);preloadSurvivorBurst(selectedHero.current.id);
         action.current={dash:0,dashTime:0,burst:0,burstTime:0,kills:0,wave:1,banner:180,bossSpawn:0,victory:false};
         magicFx.current=[];hazards.current=[];shakeAmount.current=0;
         obstacles.current=createObstacles(selectedField.current);bgCanvasRef.current=createFieldCanvas(selectedField.current);
@@ -1786,6 +1794,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             {!inLobby&&battleUi.boss>0&&<div className="sy-bossbar"><strong>{l('終業の鐘・ベルコロッサス','BELL COLOSSUS','しゅうぎょうの かね・ベルコロッサス')}</strong><div className="sy-meter"><i style={{width:`${Math.max(0,battleUi.boss/battleUi.bossMax*100)}%`}}/></div></div>}
             {!inLobby&&battleUi.banner>0&&!uiState.gameOver&&<div className="sy-wave-banner" key={battleUi.wave}>{battleUi.boss>0?'BOSS INCOMING':`WAVE ${battleUi.wave}`}<small>{l(selectedField.current.name[0],selectedField.current.name[1],selectedField.current.name[2])}</small></div>}
             <canvas ref={canvasRef} width={viewSize.width} height={viewSize.height} className="block w-full h-full bg-[#020617]" style={{ imageRendering: 'auto' }} />
+            {!inLobby&&!uiState.gameOver&&burstCutin&&<SurvivorBurstCutin key={burstCutin.id} heroId={burstCutin.heroId} paused={gameState.current!=='PLAYING'} languageMode={languageMode}/>}
             {gameState.current === 'MATH_CHALLENGE' && (<div className="absolute inset-0 z-30 pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={tr('全問正解でHP15回復')} languageMode={languageMode} /></div>)}
             {gameState.current === 'LEVEL_UP' && (
                 <div data-gamepad-modal data-gamepad-initial-scope={`survivor-level-up-${uiState.level}`} className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-250 pointer-events-auto p-4">

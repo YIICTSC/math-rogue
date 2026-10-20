@@ -41,6 +41,20 @@ try {
         );
       }
   }
+  const { STUDENT_ABILITIES } = await server.ssrLoadModule(
+    "/src/components/school-dungeon/student/abilities.ts",
+  );
+  const { abilityCutin } = await server.ssrLoadModule(
+    "/src/components/school-dungeon/student/cutins.ts",
+  );
+  for (const hero of HEROES) {
+    const ability = STUDENT_ABILITIES[hero.id],
+      cutin = abilityCutin(hero.id, ability.en);
+    assert(
+      cutin?.url.includes(`sprites/ultimate-cutins/${hero.id}-skill-1.webp`),
+    );
+    await access(`public/sprites/ultimate-cutins/${hero.id}-skill-1.webp`);
+  }
   const atlas = JSON.parse(
     await readFile("assets/schoolyard-survivor/atlas.json", "utf8"),
   );
