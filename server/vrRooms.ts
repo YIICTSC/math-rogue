@@ -10,6 +10,8 @@ import { vrPacket,VrStateEncoder } from '../src/mini-games/gakurogear/vrProtocol
 import {updateVrSettings} from '../src/mini-games/gakurogear/roomSettings';
 import { validLesson } from '../src/mini-games/gakuro-kart/learning';
 import { validAvatar } from '../src/mini-games/gakuro-kart/avatar';
+import {sessionResult} from '../src/services/sessionResults';
+import {endSession} from './sessionEnd';
 type Member={id:string;socket:WebSocket;alive:boolean;rate:number;at:number;metadata:string};
 type Room={host:string;world:OnlineWorld;members:Map<string,Member>;controls:Record<string,VrInput>;lastInput:Record<string,number>;emptyAt:number;encoder:VrStateEncoder};
 const rooms=new Map<string,Room>(),sockets=new WebSocketServer({noServer:true,maxPayload:512*1024,perMessageDeflate:false});
@@ -28,6 +30,7 @@ sockets.on('connection',socket=>{
    if(!room||!addPlayer(room.world,m.id,d.name)){room=undefined;send(m,{type:'error',message:'Room full, missing, or already started'});return;}
    room.world.players[m.id].avatar=d.avatar;room.members.set(m.id,m);room.emptyAt=0;clearTimeout(handshake);send(m,{type:'connected',id:m.id,code,host:m.id===room.host});emit(room);return;
   }
+  if(d.type==='session-end'){if(m.id===room.host&&endSession(sessionResult('vr',room.world),room.members.values())){room.world.phase='result';for(const[code,candidate]of rooms)if(candidate===room)rooms.delete(code);}return;}
   if(d.type==='start'){if(m.id===room.host){room.controls={};room.lastInput={};startWorld(room.world,randomInt(0x100000000));emit(room);}return;}
   if(d.type==='spectator'){if(m.id===room.host&&setVrSpectator(room.world,m.id,d.enabled)){delete room.controls[m.id];emit(room);}return;}
   if(d.type==='settings'){if(m.id===room.host&&updateVrSettings(room.world,d.settings)){for(const q of room.members.values())q.metadata='';emit(room);}return;}

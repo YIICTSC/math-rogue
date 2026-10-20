@@ -1,3 +1,4 @@
+import {useSessionResultExit} from '../../services/useSessionResultExit';
 import BombPreview from './BombPreview';
 import InviteJoin from '../shared/InviteJoin';
 import type {KartAvatar} from '../gakuro-kart/avatar';
@@ -39,6 +40,7 @@ export default function VrTitle(props:MiniGameComponentProps){const language=pro
  useVrBgm(editing?'avatar':entry==='lesson'?'lesson':entry==='online'?'lobby':'title',mission,20);
  const room=useRef<VrRoom|null>(null);useEffect(()=>{room.current?.pauseSoloEditor(editing);},[editing]);useEffect(()=>()=>{generation.current++;room.current?.close();},[]);
  const leave=()=>{generation.current++;setEditing(false);room.current?.close();room.current=null;setWorld(null);setEntry('title');setError('');setBusy(false);};
+ useSessionResultExit('vr', leave);
  const newRoom=(token:number)=>{room.current?.close();const r=new VrRoom(w=>{if(generation.current===token)setWorld(w);},error=>{if(generation.current===token)setError(error);});r.transport=transport;room.current=r;return r;};
  const choose=async(selection:LessonSelection)=>{void audioService.unlockAudio();cue('select');const token=intent==='edit'?generation.current:++generation.current;try{setBusy(true);setError('');const questions=buildLesson(selection,120);setLesson(questions);if(intent==='solo'){setEntry('solo');return;}if(intent==='soloBattle'){const r=newRoom(token);r.createSolo(name,mode==='bomb'?'bomb':'royale',questions,limit,avatar,bombMap,botCount);if(generation.current===token)setEntry('soloBattle');return;}if(intent==='edit'){room.current?.setSettings({lesson:questions});setEntry('online');return;}const r=newRoom(token);await r.create(name,mode,mission,questions,limit,avatar,bombMap);if(generation.current===token)setEntry('online');}catch(e){if(generation.current===token){setError((e as Error).message);room.current?.close();}}finally{if(generation.current===token)setBusy(false);}};
  const join=async()=>{if(!normalizeVrCode(code)||!name.trim()||busy)return;void audioService.unlockAudio();cue('select');const token=++generation.current;try{setBusy(true);setError('');const r=newRoom(token);await r.join(name,code,avatar);if(generation.current===token){setEntry('online');}}catch(e){if(generation.current===token){setError((e as Error).message);room.current?.close();}}finally{if(generation.current===token)setBusy(false);}};

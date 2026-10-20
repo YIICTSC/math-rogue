@@ -1,3 +1,4 @@
+import {useSessionResultExit} from '../../services/useSessionResultExit';
 import OnlineEntryScreen from '../shared/OnlineEntryScreen';
 import {useGameplayGamepad, PAD, openControllerMenu} from '../../hooks/useGameplayGamepad';
 import GameplayGamepadHint from '../../components/GameplayGamepadHint';
@@ -182,6 +183,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
     finally { if (generation.current === token) setBusy(false); }
   };
   const leave = () => { generation.current++; clearInput(); room.current?.close(); room.current = null; setWorld(null); setError(''); setCopied(false); setBusy(false); setPicking(null); setEntry('title'); recorded.current.clear(); };
+  useSessionResultExit('kart', leave);
   const touch = (key: keyof typeof input.current) => ({
     onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); input.current[key] = true; },
     onPointerUp: () => { input.current[key] = false; }, onPointerCancel: () => { input.current[key] = false; }, onLostPointerCapture: () => { input.current[key] = false; },

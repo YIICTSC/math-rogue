@@ -36,7 +36,10 @@ function isNativeProfile(value: unknown): value is NativeProfile {
 }
 
 /** A single room owner validates commands and broadcasts authoritative state. */
+import {sessionResult} from '../services/sessionResults';
+import {SessionEnd, sendFinalResult} from '../services/sessionResultDisplay';
 export class RpgRoom {
+  private sessionEnd = new SessionEnd('rpg', () => this.close(false));
   transport:OnlineTransport='host';
   onDungeonEvent: ((event: P2PEvent, from: string) => void) | null = null;
   private receiveDungeon(raw: unknown): boolean {
@@ -85,6 +88,7 @@ export class RpgRoom {
   private async connectServer(packet:object,onSetup?:(setup:RpgAdventureSetup)=>void){
     this.status('サーバーを起動しています。初回は最大3分お待ちください。');
     const connection=new DedicatedConnection(d=>{
+      if(this.sessionEnd.receive(d))return true;
       if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
       if(d.type==='error'){this.status(d.message);return false;}
       if(this.receiveDungeon(d))return false;
@@ -368,6 +372,7 @@ export class RpgRoom {
       );
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object") return;
+        if (this.sessionEnd.receive(raw)) return;
         if (this.receiveDungeon(raw)) return;
         const data = raw as {
           type: string;
@@ -460,6 +465,7 @@ export class RpgRoom {
       );
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object") return;
+        if (this.sessionEnd.receive(raw)) return;
         if (this.receiveDungeon(raw)) return;
         const data = raw as {
           type: string;
@@ -531,7 +537,9 @@ export class RpgRoom {
       if(this.world.revision!==revision)this.emit();
     } else this.connections.get("host")?.send({ type: "action", action });
   }
-  close() {
+  close(results = true) {
+    if (this.closed) return;
+    if (results && this.host && this.code && this.sessionEnd.end(this.world ? sessionResult('rpg', this.world) : null, this.serverConnection, packet => sendFinalResult(this.connections.values(), packet, true))) return;
     this.closed = true;
     this.serverConnection?.close();
     this.serverSocket?.close();this.serverSocket=null;

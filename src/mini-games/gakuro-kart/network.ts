@@ -9,7 +9,10 @@ import { addRacer, command, createRace, MAX_RACERS, setRaceLaps, setSpectator, s
 import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Roster } from './protocol';
 
 /** Host-authoritative 60 Hz simulation, 20 Hz controls, 10 Hz compact snapshots. */
+import {sessionResult} from '../../services/sessionResults';
+import {SessionEnd, sendFinalResult} from '../../services/sessionResultDisplay';
 export class KartRoom {
+  private sessionEnd = new SessionEnd('kart', () => this.close(false));
   transport:OnlineTransport='host';
   selfId = 'local'; code = ''; host = false; world: Race | null = null;
   private dedicated: DedicatedConnection | null = null;
@@ -167,6 +170,7 @@ export class KartRoom {
         }
         if (typeof raw !== 'string' || raw.length > 600000) return;
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
+        if (this.sessionEnd.receive(d)) { done(); resolve(); return; }
         if (d.type === 'error') { done(); reject(new Error(typeof d.message === 'string' ? d.message : 'Connection rejected')); }
         if (d.type === 'roster') { const next = acceptRoster(d as Roster, this.world); if (next) this.world = next; }
         if (d.type === 'pause') this.status(d.value ? 'ホストの画面が戻るまで一時停止しています。' : '');
@@ -181,6 +185,7 @@ export class KartRoom {
     this.lastSequence = -1;
     this.readySeed = null;
     this.dedicated=new DedicatedConnection(d=>{
+      if (this.sessionEnd.receive(d)) return true;
       if(d instanceof ArrayBuffer && this.world){const next=decodeSnapshot(d,this.world,this.lastSequence);if(next){this.world=next.world;this.lastSequence=next.sequence;this.notify(this.world);return !!this.world.players[this.selfId];}}
       if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;Object.assign(this.dedicatedHello!,{create:false,code:this.code});}
       if(d.type==='host')this.host=!!d.host;
@@ -239,7 +244,9 @@ export class KartRoom {
     if (this.host && this.world) command(this.world, this.selfId, c);
     else { const host = this.channels.get('host'); if (host?.open && (host.dataChannel?.bufferedAmount || 0) < 4096) this.sendTo(host, { type: 'command', command: c }); }
   }
-  close() {
+  close(results = true) {
+    if (this.closed) return;
+    if (results && this.host && this.code && this.sessionEnd.end(this.world ? sessionResult('kart', this.world) : null, this.dedicated, packet => sendFinalResult(this.channels.values(), packet))) return;
     if (this.closed) return; this.closed = true;
     this.dedicated?.send({type:'leave'});
     this.dedicated?.close();

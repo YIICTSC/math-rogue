@@ -8,6 +8,8 @@ import { addPlayer, applyAction, advanceWorld, createWorld, removePlayer, setSpe
 import { normalizeRpgAdventureSetup } from '../src/rpg/setup';
 import {miniUpgrade,closeMiniRooms} from './miniRooms';
 import {golfUpgrade,closeGolfRooms} from './golfRooms';
+import {sessionResult} from '../src/services/sessionResults';
+import {endSession} from './sessionEnd';
 
 type Member = { socket: WebSocket; id: string; admitted: boolean; name: string; alive: boolean; at: number; count: number; stateRevision?:number };
 type Room = { world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number; residentCache?:Map<string,CreatedResident>; heroCache?: Map<string,World["players"][string]["hero"]> };
@@ -70,6 +72,13 @@ sockets.on('connection',(socket,request)=>{
       if(m.admitted){const p=room.world.players[m.id];p.profile=d.profile;p.hp=d.profile.hp;p.maxHp=d.profile.maxHp;p.gold=d.profile.gold;init(room,m);}return;
     }
     if(!m.admitted)return;
+    if(d.type==='session-end'){
+      if(room.host===m.id && endSession(sessionResult('rpg',room.world),room.members.values())){
+        room.world.ended=true;
+        for(const [code,candidate] of rooms)if(candidate===room)rooms.delete(code);
+      }
+      return;
+    }
     if(d.type==='spectator' && room.host===m.id)setSpectator(room.world,m.id,d.enabled);
     if(d.type==='action' && d.action){try{applyAction(room.world,m.id,d.action);}catch{fail(m,'操作を処理できませんでした。');}}
     if(d.type==='dungeon-event' && d.event && typeof d.event.type==='string'){

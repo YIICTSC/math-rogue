@@ -3,6 +3,8 @@ import type { Duplex } from 'node:stream';
 import {randomInt,randomUUID} from 'node:crypto';
 import {WebSocket,WebSocketServer} from 'ws';
 import {RaceStartSync} from '../src/mini-games/gakuro-kart/startSync';
+import {sessionResult} from '../src/services/sessionResults';
+import {endSession} from './sessionEnd';
 import * as kart from '../src/mini-games/gakuro-kart/engine';
 import {roster,encodeSnapshot} from '../src/mini-games/gakuro-kart/protocol';
 import {validAvatar} from '../src/mini-games/gakuro-kart/avatar';
@@ -119,6 +121,10 @@ sockets.on('connection',(socket,request)=>{
         send(m,{type:'connected',id:m.id,code,host:room.host===m.id});
         if(room.game==='craft')send(m,{type:'init',version:8,seed:room.world.seed,width:MAP_WIDTH,height:MAP_HEIGHT,title:room.title});
         publish(room);if(room.game==='craft'&&room.host===m.id)checkpoint(room);return;
+      }
+      if(d.type==='session-end' && room.game==='kart'){
+        if(room.host===m.id && endSession(sessionResult('kart',room.world),room.members.values())){room.world.phase='result';for(const[code,candidate]of rooms)if(candidate===room)rooms.delete(code);}
+        return;
       }
       if(d.type==='leave' && room.game==='kart'){leaving=true;socket.close(1000,'Leaving room');return;}
       if(d.type==='ready' && room.game==='kart'){room.startSync.ready(room.world,m.id,d.seed);return;}

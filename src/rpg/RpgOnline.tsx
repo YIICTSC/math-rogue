@@ -1,3 +1,4 @@
+import {useSessionResultExit} from '../services/useSessionResultExit';
 import {homeMusic} from './homeTracks';
 import {currentVoxelRoom} from './voxelRooms';
 import BuildingGoalsPanel from './BuildingGoalsPanel';
@@ -475,6 +476,7 @@ export default function RpgOnline({
     onClose();
   };
   const homeRoom=world&&me?(world.life.houses.find(h=>h.id===me.life?.indoors)?.interior||currentVoxelRoom(world,me)):undefined;
+  useSessionResultExit('rpg', close);
   const padMoveAt = useRef(0);
   const controllerExploring = !!world?.started && latest.current.active && !world.ended && !me?.nativeScene && !homeRoom && !hasActivityDialog;
   useGameplayGamepad('rpg', pad => {

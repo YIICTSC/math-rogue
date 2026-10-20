@@ -1,4 +1,6 @@
 import {createHostRoomCode,roomAddress,type OnlineTransport} from '../../services/onlineTransport';
+import {sessionResult} from '../../services/sessionResults';
+import {SessionEnd, sendFinalResult} from '../../services/sessionResultDisplay';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
@@ -13,6 +15,8 @@ export class GolfRoom {
   transport:OnlineTransport='host';
   selfId = 'local'; code = ''; host = false; private observedId: string | null = null;
   private world: GolfWorld | null = null;
+  private lastView: GolfView | null = null;
+  private sessionEnd = new SessionEnd('golf', () => this.close(false));
   private dedicated: DedicatedConnection | null = null;
   get serverHosted() { return !!this.dedicated; }
   private peer: Peer | null = null;
@@ -70,10 +74,11 @@ export class GolfRoom {
   }
   private async openDedicated(hello: object) {
     const connection = new DedicatedConnection(packet => {
+      if (this.sessionEnd.receive(packet)) return true;
       if (this.closed) return false;
       if (packet.type === 'connected' && typeof packet.id === 'string' && packet.id.length <= 100 && typeof packet.code === 'string' && /^[A-Z0-9]{6}$/.test(packet.code) && typeof packet.host === 'boolean') { this.selfId = packet.id; this.code = packet.code; this.host = packet.host; }
       if (packet.type === 'error' && typeof packet.message === 'string') this.status(packet.message);
-      if (['init', 'state'].includes(packet.type) && packet.version === GOLF_PROTOCOL && Number.isInteger(packet.sequence) && packet.sequence > this.lastSequence && validView(packet.state) && packet.state.players.some(p => p.id === this.selfId)) { this.lastSequence = packet.sequence; this.update(packet.state); return true; }
+      if (['init', 'state'].includes(packet.type) && packet.version === GOLF_PROTOCOL && Number.isInteger(packet.sequence) && packet.sequence > this.lastSequence && validView(packet.state) && packet.state.players.some(p => p.id === this.selfId)) { this.lastSequence = packet.sequence; this.lastView = packet.state; this.update(packet.state); return true; }
       return false;
     }, () => { if (!this.closed) { this.close(); this.update(null); this.status('サーバーとの接続が終了しました。部屋に入り直してください。'); } });
     this.dedicated = connection; await connection.open('golf', { ...hello, protocol: GOLF_PROTOCOL });
@@ -116,9 +121,10 @@ export class GolfRoom {
       c.on('data', raw => {
         if (this.closed || typeof raw !== 'string' || raw.length > 200000) return;
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
+        if (this.sessionEnd.receive(d)) { done(); resolve(); return; }
         if (d.type === 'error') { const message = typeof d.message === 'string' ? d.message : 'Connection rejected'; this.status(message); fail(new Error(message)); }
         if (d.type === 'state' && d.version === GOLF_PROTOCOL && Number.isInteger(d.sequence) && d.sequence > this.lastSequence && validView(d.view) && d.view.players.some(p => p.id === this.selfId)) {
-          this.lastSequence = d.sequence; this.lastPacket = performance.now(); this.update(d.view); done(); resolve();
+          this.lastSequence = d.sequence; this.lastPacket = performance.now(); this.lastView = d.view; this.update(d.view); done(); resolve();
         }
       });
       const lost = () => { fail(new Error('ホストとの接続が終了しました。')); if (!this.closed) { this.close(); this.update(null); this.status('ホストとの接続が終了しました。部屋に入り直してください。'); } };
@@ -156,7 +162,9 @@ export class GolfRoom {
     catch { const message = '問題を準備できませんでした。'; if (id === this.selfId) this.status(message); else { const channel = this.channels.get(id); if (channel) this.sendTo(channel, { type: 'error', message }); } }
   }
   send(c: GolfCommand) { if (this.closed) return; if (this.dedicated) { this.dedicated.send({ type: 'command', command: c }); return; } if (this.host) this.apply(this.selfId, c); else { const host = this.channels.get('host'); if (host) this.sendTo(host, { type: 'command', command: c }); } }
-  close() {
+  close(results = true) {
+    if (this.closed) return;
+    if (results && this.host && this.code && this.sessionEnd.end(this.world || this.lastView ? sessionResult('golf', (this.world || this.lastView)!) : null, this.dedicated, packet => sendFinalResult(this.channels.values(), packet))) return;
     if (this.closed) return; this.closed = true;
     this.dedicated?.close(); this.dedicated = null;
     this.cancellations.forEach(cancel => cancel()); this.cancellations.clear();

@@ -3,6 +3,8 @@ import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import { WebSocket, WebSocketServer } from 'ws';
 import { GameMode } from '../src/types';
+import {sessionResult} from '../src/services/sessionResults';
+import {endSession} from './sessionEnd';
 import { buildLesson, type LessonSelection } from '../src/mini-games/gakuro-kart/questions';
 import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
 
@@ -84,6 +86,10 @@ export function createGolfServer(options: GolfServerOptions = {}) {
         send(m, { type: 'connected', id: m.id, code: room.code, host: m.id === room.host }); emit(room, m); return;
       }
       room.lastActive = now;
+      if(d.type==='session-end'){
+        if(m.id===room.host && endSession(sessionResult('golf',room.world),room.members.values())){room.world.phase='result';rooms.delete(room.code);}
+        return;
+      }
       try {
         if (d.type === 'spectator') {
           if (m.id === room.host && setSpectator(room.world, m.id, d.enabled)) { m.observedId = undefined; emit(room); }

@@ -1,3 +1,5 @@
+import {useSessionResultExit} from '../../services/useSessionResultExit';
+import {golfAdvanceCommand} from './keyboard';
 import InviteJoin from '../shared/InviteJoin';
 import {golfInviteUrl} from './invite';
 import {copyInviteUrl} from '../shared/copyInviteUrl';
@@ -64,6 +66,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const angle = Math.atan2(Math.sin(baseAngle + offset * Math.PI / 180), Math.cos(baseAngle + offset * Math.PI / 180));
   useEffect(() => { if (me?.phase === 'aim') { setOffset(0); setPower(.7); setClub(remaining < 22 ? 'putter' : remaining < 55 ? 'wedge' : remaining < 110 ? 'iron' : 'driver'); } }, [me?.phase, me?.shotId]);
   const leave = () => { setShowCreator(false); const old = room.current; room.current = null; old?.close(); setView(null); setMessage(''); setPicker(null);setEntry('title'); setBusy(false); };
+  useSessionResultExit('golf', leave);
   const createRoom = () => {
     const next = new GolfRoom(v => { if (mounted.current && room.current === next) setView(v); }, m => { if (mounted.current && room.current === next) setMessage(m); });
     next.transport=transport;room.current = next; return next;
@@ -89,6 +92,14 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     finally { if (mounted.current) setBusy(false); }
   };
   const send = (c: GolfCommand) => { if (!spectating && !view?.paused) room.current?.send(c); };
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || showCreator || showScores || picker || overview || spectating || view?.paused || view?.phase !== 'playing' || !me || !['ready', 'holed'].includes(me.phase) || !['Enter', ' '].includes(event.key) || (event.target as Element)?.closest('button,input,textarea,select,[contenteditable=true],[role=dialog]')) return;
+      const command = golfAdvanceCommand(me.phase, event.key);
+      if(command) {event.preventDefault(); room.current?.send(command);}
+    };
+    window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
+  }, [showCreator, showScores, picker, overview, spectating, view?.paused, view?.phase, me?.phase]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(showCreator||spectating||view?.paused||me?.phase!=='aim'||meterActive||(e.target as Element)?.closest('input,textarea,select,[role=dialog]'))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setOffset(n=>Math.max(-180,Math.min(180,n+(e.key==='ArrowLeft'?2:-2))));}else if((e.key==='ArrowUp'||e.key==='ArrowDown')&&club!=='putter'){e.preventDefault();setSpin(n=>Math.max(-1,Math.min(1,Math.round((n+(e.key==='ArrowUp'?.1:-.1))*10)/10)));}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[showCreator,spectating,view?.paused,me?.phase,meterActive,club]);
   const bonus = benefits(me?.correct ?? 0);
   const controllerAimTime=useRef(0);
