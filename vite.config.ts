@@ -19,6 +19,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    manifest: true,
   },
   base: './', // Ensure relative paths for assets to work on GitHub Pages / Vercel
 })

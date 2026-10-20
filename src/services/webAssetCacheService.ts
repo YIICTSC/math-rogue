@@ -208,7 +208,7 @@ export const registerWebServiceWorker = async () => {
   ) return;
   try {
     const serviceWorkerUrl = new URL(`${import.meta.env.BASE_URL}sw.js`, window.location.href);
-    await navigator.serviceWorker.register(serviceWorkerUrl);
+    return await navigator.serviceWorker.register(serviceWorkerUrl);
   } catch (reason) {
     console.warn('[learning-rogue] Web offline cache is unavailable.', reason);
   }

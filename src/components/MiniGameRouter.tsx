@@ -1,19 +1,21 @@
 
 import React from 'react';
-const GakuroGear = React.lazy(() => import('../mini-games/gakurogear/VrTitle'));
+import { deferredScreen } from '../utils/deferredScreen';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode, MiniGameDebugPreview } from '../types';
-import PokerGameScreen from './PokerGameScreen';
-import SchoolyardSurvivorScreen from './SchoolyardSurvivorScreen';
-import SchoolDungeonRPG from './SchoolDungeonRPG';
-import SchoolDungeonRPG2 from './SchoolDungeonRPG2';
-import KochoShowdown from './KochoShowdown';
-import PaperPlaneBattle from './PaperPlaneBattle';
-import GoHomeDash from './GoHomeDash';
-import TriviaMiniGameScreen from './TriviaMiniGameScreen';
-import PlacementTcgGame from '../mini-games/placement-tcg/PlacementTcgGame';
-import ShogiMiniGame from '../mini-games/shogi/ShogiMiniGame';
-import SchoolTrpgGame from '../mini-games/school-trpg/SchoolTrpgGame';
-import CraneGame, { type CraneGameResult } from '../mini-games/crane-game/CraneGame';
+import type { CraneGameResult } from '../mini-games/crane-game/CraneGame';
+const GakuroGear = deferredScreen(() => import('../mini-games/gakurogear/VrTitle'));
+const PokerGameScreen = deferredScreen(() => import('./PokerGameScreen'));
+const SchoolyardSurvivorScreen = deferredScreen(() => import('./SchoolyardSurvivorScreen'));
+const SchoolDungeonRPG = deferredScreen(() => import('./SchoolDungeonRPG'));
+const SchoolDungeonRPG2 = deferredScreen(() => import('./SchoolDungeonRPG2'));
+const KochoShowdown = deferredScreen(() => import('./KochoShowdown'));
+const PaperPlaneBattle = deferredScreen(() => import('./PaperPlaneBattle'));
+const GoHomeDash = deferredScreen(() => import('./GoHomeDash'));
+const TriviaMiniGameScreen = deferredScreen(() => import('./TriviaMiniGameScreen'));
+const PlacementTcgGame = deferredScreen(() => import('../mini-games/placement-tcg/PlacementTcgGame'));
+const ShogiMiniGame = deferredScreen(() => import('../mini-games/shogi/ShogiMiniGame'));
+const SchoolTrpgGame = deferredScreen(() => import('../mini-games/school-trpg/SchoolTrpgGame'));
+const CraneGame = deferredScreen(() => import('../mini-games/crane-game/CraneGame'));
 
 interface MiniGameRouterProps {
     screen: GameScreen;

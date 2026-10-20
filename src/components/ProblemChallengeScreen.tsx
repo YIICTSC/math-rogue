@@ -3,10 +3,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, CharacterAppearanceMode, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService, type BgmThemeId } from '../services/audioService';
-import MathChallengeScreen from './MathChallengeScreen';
-import KanjiChallengeScreen from './KanjiChallengeScreen';
-import EnglishChallengeScreen from './EnglishChallengeScreen';
-import GeneralChallengeScreen from './GeneralChallengeScreen';
+import { MathChallengeScreen, KanjiChallengeScreen, EnglishChallengeScreen, GeneralChallengeScreen } from './DeferredChallengeScreens';
 import MiniBattleBanner from './MiniBattleBanner';
 import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX, FlaskConical, Map as MapIcon, Globe, MapPin } from 'lucide-react';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';

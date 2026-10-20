@@ -44,13 +44,8 @@ import OnlineNameSetupModal from './components/OnlineNameSetupModal';
 import PrivacyControlsModal from './components/PrivacyControlsModal';
 import AssignmentInboxModal from './components/AssignmentInboxModal';
 import LearnerGroupInviteModal from './components/LearnerGroupInviteModal';
-import MathChallengeScreen from './components/MathChallengeScreen';
-import KanjiChallengeScreen from './components/KanjiChallengeScreen';
-import EnglishChallengeScreen from './components/EnglishChallengeScreen';
-import GeneralChallengeScreen from './components/GeneralChallengeScreen';
-import DebugMenuScreen from './components/DebugMenuScreen';
-import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
-import EventSimulationScreen from './components/EventSimulationScreen';
+import { MathChallengeScreen, KanjiChallengeScreen, EnglishChallengeScreen, GeneralChallengeScreen } from './components/DeferredChallengeScreens';
+import { deferredScreen } from './utils/deferredScreen';
 import type { GeneralProblem } from './data/subjectData';
 import { createEndlessRewardItems, getEndlessArc, getEndlessBoss, getEndlessBossById, getEndlessBossSpritePath, type EndlessRewardChoice } from './data/endlessMode';
 
@@ -213,7 +208,7 @@ const getHumanoidEnemyVoiceActionForIntent = (intent: EnemyIntent): HumanoidEnem
     return 'skill';
 };
 import MiniGameSelectScreen, { MiniGameSpriteIcon } from './components/MiniGameSelectScreen';
-import MiniGameRouter from './components/MiniGameRouter'; // Added
+const MiniGameRouter = deferredScreen(() => import('./components/MiniGameRouter'));
 import { isMiniGameUnlocked, MINI_GAMES } from './miniGameConfig'; // Added
 import type { CraneGameResult } from './mini-games/crane-game/CraneGame';
 import {
@@ -321,6 +316,9 @@ import {
 
 const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
 const RpgTitle = React.lazy(() => import('./rpg/RpgTitle'));
+const DebugMenuScreen = deferredScreen(() => import('./components/DebugMenuScreen'));
+const MagicEventSimulationScreen = deferredScreen(() => import('./components/MagicEventSimulationScreen'));
+const EventSimulationScreen = deferredScreen(() => import('./components/EventSimulationScreen'));
 
 const GakuroGolf = React.lazy(() => import('./mini-games/gakuro-golf/GakuroGolf'));
 const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));

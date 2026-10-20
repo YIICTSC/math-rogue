@@ -43,6 +43,12 @@ jobs:
       - name: Install runtime audit browser
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Verify classroom startup recovery and golf quiz
+        run: |
+          node scripts/test-startup-service-worker.mjs
+          node scripts/test-startup-recovery-browser.mjs
+          node scripts/test-golf-quiz-autoadvance.mjs
+
       - name: Build
         env:
           VITE_ENABLE_DEBUG_FEATURES: 'true'
@@ -50,6 +56,9 @@ jobs:
           VITE_WEB_PRELOAD_ENABLED: 'false'
           VITE_ONLINE_SERVER_URL: 'https://learning-rogue-online.onrender.com'
         run: pnpm run build
+
+      - name: Verify initial download budget
+        run: node scripts/verify-web-startup-budget.mjs
 
       - name: Rebase public sprite paths for GitHub Pages
         run: |

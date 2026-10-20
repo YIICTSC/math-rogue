@@ -47,6 +47,5 @@ export default function QuizPanel({ quiz, languageMode, disabled, send }: { quiz
     </div>
     {q.audioPrompt && <button disabled={disabled || !('speechSynthesis' in window)} onClick={speak}>{t('聞く')}</button>}
     <div className="gg-options" data-allow-japanese="true">{q.options.map((option, i) => <button data-quiz-action key={i} disabled={disabled || quiz.answer !== null} className={quiz.answer === i ? 'is-correct' : quiz.selected === i ? 'is-wrong' : ''} onClick={() => once('answer', i)}><b>{i + 1}</b><MathText text={option} /></button>)}</div>
-    {quiz.answer !== null && <button data-quiz-action disabled={disabled} onClick={() => once('continue')}>{t('次へ')}</button>}
   </section>;
 }

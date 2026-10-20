@@ -1,10 +1,7 @@
 import React from 'react';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
-import MathChallengeScreen from './MathChallengeScreen';
-import KanjiChallengeScreen from './KanjiChallengeScreen';
-import EnglishChallengeScreen from './EnglishChallengeScreen';
-import GeneralChallengeScreen from './GeneralChallengeScreen';
+import { MathChallengeScreen, KanjiChallengeScreen, EnglishChallengeScreen, GeneralChallengeScreen } from './DeferredChallengeScreens';
 import { storageService } from '../services/storageService';
 import { getAssignmentModePool, getAssignmentRepresentativeMode } from '../utils/assignmentUtils';
 

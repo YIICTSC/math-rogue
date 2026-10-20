@@ -62,7 +62,7 @@ try {
   const page=await browser.newPage();pages.push(page);await page.goto(`http://127.0.0.1:${fixture.address().port}`);await page.waitForFunction(()=>window.renderQuiz);
   await page.evaluate(()=>{window.quiz={shotId:1,index:0,question:lesson.questions[0],selected:null,answer:null};renderQuiz(quiz);});
   await page.locator('.gg-options button').first().waitFor();await page.keyboard.press('3');await page.keyboard.press('3');assert.equal(await page.evaluate(()=>commands.length),1);assert.equal(await page.evaluate(()=>commands[0].option),2);
-  await page.evaluate(()=>renderQuiz({...quiz,selected:2,answer:0}));await page.getByRole('button',{name:'次へ'}).focus();await page.keyboard.press('Enter');await page.waitForTimeout(950);assert.equal(await page.evaluate(()=>commands.filter(c=>c.type==='continue').length),1,'keyboard + auto-continue cannot double advance');
+  await page.evaluate(()=>renderQuiz({...quiz,selected:2,answer:0}));assert.equal(await page.getByRole('button',{name:'次へ',exact:true}).count(),0);await page.evaluate(()=>document.activeElement?.blur());await page.keyboard.press('Enter');await page.waitForTimeout(950);assert.equal(await page.evaluate(()=>commands.filter(c=>c.type==='continue').length),1,'keyboard + auto-continue cannot double advance');
   await page.evaluate(()=>renderQuiz({...quiz,index:1}));await page.locator('.gg-options button').first().focus();await page.keyboard.press('Space');assert.equal(await page.evaluate(()=>commands.at(-1).option),0);
   console.log('PASS: quiz number keys, focused Enter/Space, duplicate answer and auto-continue suppression.');
 } finally {await browser.close();await new Promise(r=>fixture.close(r));processServer.kill();signaling.kill();}
