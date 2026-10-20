@@ -25,3 +25,5 @@ node scripts/test-schoolyard-survivor-browser.mjs
 Browser screenshots are written to `tmp/schoolyard-survivor/`. Test-only Vite transforms expose the simulation to the fixture; production has no added test controls or debug shortcuts.
 
 Burst cut-ins reuse the exact Dungeons 1 `AbilityCutin` component, each hero's normal-form ultimate illustration and ability title/color (all 35 heroes). A cut-in lasts 75 simulation steps, freezes during pause/learning, never intercepts pointer input and clears on a new run. The selected hero's art is preloaded at departure.
+
+High-school and magic heroes use the same recorded voice banks and variant mapping as Dungeons for attacks, damage, healing, bursts and results. Ordinary lines are occasional and spaced by four seconds, while burst/result lines take priority. Muting, voice volume, pause, learning, hero changes and exit are respected; stopping also invalidates pending voice loads. Elementary heroes stay silent.

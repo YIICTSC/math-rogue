@@ -27,7 +27,7 @@ try {
             .replace(/\r\n/g, "\n")
             .replace(
               "    return (\n        <div data-gamepad-survivor-live=",
-              `    (window as any).__survivor={gameState,player,enemies,projectiles,enemyBullets,gems,particles,magicFx,hazards,action,time,frameCount,xp,nextLevelXp,level,score,weaponsRef,passivesRef,selectedHero,selectedField,obstacles,keys,activeTimeouts,scheduleShot,update,draw,spawnEnemy,activateDash,activateBurst,applyDamage,damagePlayer,handleMathComplete,selectUpgrade,clearInput,spriteCache};\n    return (\n        <div data-gamepad-survivor-live=`,
+              `    (window as any).__survivor={gameState,player,enemies,projectiles,enemyBullets,gems,particles,magicFx,hazards,action,time,frameCount,xp,nextLevelXp,level,score,weaponsRef,passivesRef,selectedHero,selectedField,obstacles,keys,activeTimeouts,scheduleShot,update,draw,spawnEnemy,activateDash,activateBurst,applyDamage,fireWeapon,damagePlayer,handleMathComplete,selectUpgrade,clearInput,handleRestart,spriteCache};\n    return (\n        <div data-gamepad-survivor-live=`,
             );
         },
       },
@@ -346,6 +346,81 @@ try {
   });
   await page.clock.runFor(30);
   await page.getByRole("heading", { name: "GAME OVER" }).waitFor();
+  // Survivor routes combat voices through the selected Dungeons hero and shared audio settings.
+  await page.getByRole("button", { name: "もう一度選ぶ", exact: true }).click();
+  await page.getByRole("button", { name: "出撃準備", exact: true }).click();
+  await page.getByRole("button", { name: "出撃する", exact: true }).click();
+  await page.evaluate(async () => {
+    const { audioService: a } = await import("/src/services/audioService.ts");
+    window.__voiceCalls = [];
+    a.canPlayConversationVoice = () => true;
+    for (const method of ["playHighSchoolVoiceFile", "playMagicVoiceFile"])
+      a[method] = (...args) => {
+        window.__voiceCalls.push([method, ...args]);
+        return Promise.resolve(true);
+      };
+  });
+  const voiceHeroes = cutinHeroes.filter((h) => h.chapter > 0);
+  for (const hero of voiceHeroes) {
+    await page.evaluate((hero) => {
+      const g = window.__survivor;
+      g.selectedHero.current = hero;
+      g.handleRestart();
+      g.action.current.burst = 100;
+      g.activateBurst();
+    }, hero);
+    const call = await page.evaluate(() => window.__voiceCalls.at(-1));
+    assert.equal(
+      call[0],
+      hero.chapter === 1 ? "playHighSchoolVoiceFile" : "playMagicVoiceFile",
+    );
+    assert.equal(
+      call[1],
+      hero.id.replace(/^(high-school|magic)-/, "").toUpperCase(),
+    );
+    assert.match(
+      call[2],
+      hero.chapter === 1 ? /^power-[1-5]$/ : /^spell-[1-3]$/,
+    );
+  }
+  const decoded = await page.evaluate(async () => {
+    const ctx = new AudioContext();
+    try {
+      return await Promise.all(
+        [
+          "high-school-voices/WARRIOR/attack-1.ogg",
+          "high-school-voices/WARRIOR/power-1.ogg",
+          "magic-voices/AKARI/attack-1.ogg",
+          "magic-voices/AKARI/spell-1.ogg",
+        ].map(async (path) => {
+          const r = await fetch("/sfx/" + path);
+          if (!r.ok) throw Error(path);
+          return (await ctx.decodeAudioData(await r.arrayBuffer())).duration;
+        }),
+      );
+    } finally {
+      await ctx.close();
+    }
+  });
+  assert(decoded.every((n) => n > 0));
+  const realVoices = await page.evaluate(async () => {
+    const { audioService: a } = await import("/src/services/audioService.ts"),
+      p = Object.getPrototypeOf(a);
+    const high = await p.playHighSchoolVoiceFile.call(a, "WARRIOR", "power-1");
+    p.stopSchoolHeroVoices.call(a);
+    const magic = await p.playMagicVoiceFile.call(a, "AKARI", "spell-1");
+    p.stopSchoolHeroVoices.call(a);
+    return [high, magic];
+  });
+  assert.deepEqual(realVoices, [true, true]);
+  await page.evaluate(() => {
+    const g = window.__survivor;
+    g.action.current.dashTime = 0;
+    g.action.current.burstTime = 0;
+    g.player.current.flashTime = 0;
+    g.damagePlayer(99999, 0, 0, 0);
+  });
+  await page.clock.runFor(30);
   // Actual controller hook: A and X must never click the focused pause/menu control during battle.
   await page.getByRole("button", { name: "もう一度選ぶ", exact: true }).click();
   await page.getByRole("button", { name: "出撃準備", exact: true }).click();

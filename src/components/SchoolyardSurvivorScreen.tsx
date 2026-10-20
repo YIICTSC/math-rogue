@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { ArrowLeft, RotateCcw, Sparkles, Zap, Wind, Pause, Play } from 'lucide-react';
+import { createSurvivorVoices } from '../mini-games/schoolyard-survivor/voices';
 import SurvivorBurstCutin, { BURST_CUTIN_FRAMES, preloadSurvivorBurst } from '../mini-games/schoolyard-survivor/SurvivorBurstCutin';
 import SurvivorLobby, { HeroPortrait } from '../mini-games/schoolyard-survivor/SurvivorLobby';
 import { HEROES, FIELDS, SCENERY_KEYS, FX_KEYS, localize, createObstacles, createFieldCanvas, moveActor, spawnPoint, type SurvivorHero, type Field } from '../mini-games/schoolyard-survivor/world';
@@ -533,6 +534,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const l = (ja:string,en:string,hira?:string) => localize(languageMode,ja,en,hira);
     const [inLobby,setInLobby] = useState(!debugPreview);
     const [paused,setPaused] = useState(false);
+    const survivorVoices = useRef(createSurvivorVoices(audioService));
     const [burstCutin,setBurstCutin] = useState<{heroId:SurvivorHero['id'];id:number}|null>(null);
     const burstCutinFrames = useRef(0);
     const burstCutinSerial = useRef(0);
@@ -550,7 +552,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
     const touchAnchor = useRef<{id:number;x:number;y:number}|null>(null);
     const clearInput = () => {touchAnchor.current=null;keys.current={};joystickRef.current={x:0,y:0};gamepadJoystickRef.current={x:0,y:0};setJoystickUI(null);};
-    const pauseBattle = () => {if(gameState.current==='PLAYING'){gameState.current='PAUSED';clearInput();setPaused(true);}};
+    const pauseBattle = () => {if(gameState.current==='PLAYING'){gameState.current='PAUSED';clearInput();survivorVoices.current.stop();setPaused(true);}};
     const resumeBattle = () => {clearInput();gameState.current='PLAYING';setPaused(false);};
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -688,6 +690,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     const stopSurvivorAudio = () => {
+        survivorVoices.current.stop();
         audioService.stopAllAudio();
     };
 
@@ -808,6 +811,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     const handleMathComplete = (correctCount: number) => {
         if (correctCount >= 3) { 
+            survivorVoices.current.play('heal');
             const healAmount = 15;
             player.current.hp = Math.min(player.current.maxHp, player.current.hp + healAmount);
             damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 30, value: `+${healAmount} HP`, color: 'green', life: 60 });
@@ -850,12 +854,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         damageTexts.current.push({ id: Math.random(), x: player.current.x, y: player.current.y - 20, value: `-${Math.floor(finalDmg)}`, color, life: 60 });
         const angle = Math.atan2(player.current.y - sourceY, player.current.x - sourceX);
         addParticle(player.current.x + Math.cos(angle) * 10, player.current.y + Math.sin(angle) * 10, 'SPARK', color, { life: 20, size: 4 });
+        if(player.current.hp>0)survivorVoices.current.play('damage');
         if (player.current.hp <= 0 && gameState.current === 'PLAYING') {
             stopSurvivorAudio();
             gameState.current = 'GAME_OVER';
             saveRecord();
             setUiState(prev => ({ ...prev, gameOver: true, hp: 0 }));
             audioService.playSound('lose');
+            survivorVoices.current.play('defeat');
             clearAllTimeouts();
         }
     };
@@ -906,6 +912,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const activateBurst = () => {
         if(gameState.current!=='PLAYING'||action.current.burst<100)return;
         action.current.burst=0;action.current.burstTime=150;player.current.flashTime=150;
+        survivorVoices.current.play('burst');
         burstCutinFrames.current=BURST_CUTIN_FRAMES;
         setBurstCutin({heroId:selectedHero.current.id,id:++burstCutinSerial.current});
         enemyBullets.current=[];shakeAmount.current=12;
@@ -918,7 +925,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
     const finishVictory = () => {
         action.current.victory=true;gameState.current='GAME_OVER';clearAllTimeouts();clearInput();saveRecord();
-        stopSurvivorAudio();audioService.playSound('win');setBattleUi(prev=>({...prev,victory:true}));
+        stopSurvivorAudio();audioService.playSound('win');survivorVoices.current.play('win');setBattleUi(prev=>({...prev,victory:true}));
         setUiState(prev=>({...prev,gameOver:true,hp:player.current.hp,time:time.current,score:score.current}));
     };
     const update = () => {
@@ -1277,7 +1284,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             if (dist < magnet) { g.x += (player.current.x - g.x) * 0.1; g.y += (player.current.y - g.y) * 0.1; }
             if (dist < 20) {
                 xp.current += g.value; gems.current.splice(i, 1);
-                if (xp.current >= nextLevelXp.current) { gameState.current = 'MATH_CHALLENGE'; xp.current -= nextLevelXp.current; level.current++; nextLevelXp.current = Math.floor(nextLevelXp.current * 1.25); audioService.playSound('select'); clearInput(); }
+                if (xp.current >= nextLevelXp.current) { gameState.current = 'MATH_CHALLENGE'; xp.current -= nextLevelXp.current; level.current++; nextLevelXp.current = Math.floor(nextLevelXp.current * 1.25); audioService.playSound('select'); clearInput(); survivorVoices.current.stop(); }
                 setUiState(prev => ({ ...prev, level: level.current, xpPercent: (xp.current/nextLevelXp.current)*100 }));
                 if(gameState.current!=='PLAYING')break;
             }
@@ -1340,6 +1347,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         const p = player.current;
         const anim=WEAPONS[type].animType;
         if(['SWING','CIRCLE','BLAST','RAINBOW','BEAM'].includes(anim))addFx(p.x,p.y,anim==='SWING'?'SLASH':anim==='BEAM'?'LIGHTNING':'RUNE',anim==='SWING'?190*scale:120*scale,28,Math.atan2(lastDir.current.y,lastDir.current.x));
+        if(enemies.current.some(e=>!e.dead))survivorVoices.current.play('attack');
         const count = 1 + amount + Math.floor(level/3); 
         if (Math.random() < 0.3 && gameState.current === 'PLAYING') audioService.playSound('attack');
         
@@ -1734,12 +1742,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         if (!debugPreview && opt.type === 'PASSIVE') storageService.markMiniGameDiscovered('SURVIVOR', `survivor-passive-${opt.id}`);
         if (opt.type === 'WEAPON') { const key = opt.id as WeaponType; const current = weapons[key]; setWeapons(prev => ({ ...prev, [key]: current ? { ...current, level: current.level + 1 } : { level: 1, cooldownTimer: 0 } })); }
         else if (opt.type === 'PASSIVE') { const key = opt.id as PassiveType; setPassives(prev => ({ ...prev, [key]: prev[key] + 1 })); }
-        else if (opt.type === 'HEAL') { player.current.hp = Math.min(player.current.maxHp, player.current.hp + 50); }
+        else if (opt.type === 'HEAL') { survivorVoices.current.play('heal');player.current.hp = Math.min(player.current.maxHp, player.current.hp + 50); }
         audioService.playSound('buff'); gameState.current = 'PLAYING';
     };
 
     const handleRestart = () => {
         clearAllTimeouts();clearInput();
+        survivorVoices.current.reset(selectedHero.current.id);
         burstCutinFrames.current=0;setBurstCutin(null);preloadSurvivorBurst(selectedHero.current.id);
         action.current={dash:0,dashTime:0,burst:0,burstTime:0,kills:0,wave:1,banner:180,bossSpawn:0,victory:false};
         magicFx.current=[];hazards.current=[];shakeAmount.current=0;
@@ -1814,7 +1823,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
             )}
             {joystickUI && joystickUI.active && <div className="absolute z-30 pointer-events-none" style={{ left: joystickUI.startX, top: joystickUI.startY, transform: 'translate(-50%, -50%)' }}><div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm"></div><div className="absolute w-12 h-12 rounded-full bg-white/40 shadow-2xl" style={{ left: '50%', top: '50%', transform: `translate(calc(-50% + ${joystickUI.curX - joystickUI.startX}px), calc(-50% + ${joystickUI.curY - joystickUI.startY}px))` }}></div></div>}
-            {uiState.gameOver&&<div className="sy-results" data-gamepad-modal data-gamepad-initial-scope="survivor-game-over"><p className="sy-eyebrow">{battleUi.victory?'THE FINAL BELL HAS FALLEN':'ANOTHER DAY, ANOTHER CHALLENGE'}</p><HeroPortrait id={selectedHero.current.id}/><h2>{battleUi.victory?'STAGE CLEAR!':'GAME OVER'}</h2><p>{tr(selectedHero.current.name)} · {l(selectedField.current.name[0],selectedField.current.name[1],selectedField.current.name[2])}</p><div className="sy-result-stats"><div><small>{l('生存時間','SURVIVED','せいぞん じかん')}</small><strong>{Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</strong></div><div><small>SCORE</small><strong>{uiState.score||score.current}</strong></div><div><small>K.O.</small><strong>{battleUi.kills}</strong></div></div><button data-gamepad-initial-choice className="sy-primary" onClick={()=>{gameState.current='TITLE';setInLobby(true);setUiState(prev=>({...prev,gameOver:false}));}}><RotateCcw size={18}/>{l('もう一度選ぶ','Choose again','もういちど えらぶ')}</button><button className="sy-secondary" onClick={handleExit}><ArrowLeft size={15}/>{l('ミニゲーム選択へ','Exit to mini-games','ミニゲーム せんたくへ')}</button></div>}
+            {uiState.gameOver&&<div className="sy-results" data-gamepad-modal data-gamepad-initial-scope="survivor-game-over"><p className="sy-eyebrow">{battleUi.victory?'THE FINAL BELL HAS FALLEN':'ANOTHER DAY, ANOTHER CHALLENGE'}</p><HeroPortrait id={selectedHero.current.id}/><h2>{battleUi.victory?'STAGE CLEAR!':'GAME OVER'}</h2><p>{tr(selectedHero.current.name)} · {l(selectedField.current.name[0],selectedField.current.name[1],selectedField.current.name[2])}</p><div className="sy-result-stats"><div><small>{l('生存時間','SURVIVED','せいぞん じかん')}</small><strong>{Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</strong></div><div><small>SCORE</small><strong>{uiState.score||score.current}</strong></div><div><small>K.O.</small><strong>{battleUi.kills}</strong></div></div><button data-gamepad-initial-choice className="sy-primary" onClick={()=>{gameState.current='TITLE';survivorVoices.current.stop();setInLobby(true);setUiState(prev=>({...prev,gameOver:false}));}}><RotateCcw size={18}/>{l('もう一度選ぶ','Choose again','もういちど えらぶ')}</button><button className="sy-secondary" onClick={handleExit}><ArrowLeft size={15}/>{l('ミニゲーム選択へ','Exit to mini-games','ミニゲーム せんたくへ')}</button></div>}
             {gameState.current === 'PLAYING' && <>
                 <button onClick={pauseBattle} className="sy-pause" aria-label={l('一時停止','Pause','いちじていし')}><Pause size={20}/></button>
                 <div className="sy-actions" onTouchStart={e=>e.stopPropagation()}><button onClick={activateDash} disabled={battleUi.dash>0} aria-label={l('回避ダッシュ','Dash','かいひ ダッシュ')}><Wind size={22}/><strong>{l('回避','DASH','かいひ')}</strong><small>{battleUi.dash>0?`${(battleUi.dash/60).toFixed(1)}s`:'SHIFT'}</small></button><button className={battleUi.burst>=100?'sy-burst-ready':''} onClick={activateBurst} disabled={battleUi.burst<100} aria-label={l('バースト','Burst')} style={{'--charge':`${battleUi.burst}%`} as React.CSSProperties}><Zap size={24}/><strong>{l('バースト','BURST')}</strong><small>{battleUi.burst>=100?'SPACE':`${Math.floor(battleUi.burst)}%`}</small></button></div>

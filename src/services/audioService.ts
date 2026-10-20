@@ -2294,6 +2294,16 @@ class AudioService {
       }
   }
 
+  /** Stop both playing and still-loading school hero lines when leaving a mini-game. */
+  public stopSchoolHeroVoices() {
+      const names = new Set([...this.sfxPlaybackGenerations.keys(), ...this.activeHtmlSfx.keys(), ...this.activeSfxSources.keys()]);
+      for (const name of names) {
+          if (!name.startsWith('high-school-voice-') && !name.startsWith('magic-voice-')) continue;
+          this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
+          this.stopActiveSfx(name);
+      }
+  }
+
   public stopMagicBattleVoices() {
       for (const name of Array.from(new Set([
           ...this.activeHtmlSfx.keys(),
