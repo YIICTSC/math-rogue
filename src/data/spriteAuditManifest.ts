@@ -105,8 +105,12 @@ const paperPlaneSheets = (): SpriteAuditAssetDefinition[] => [
 
 const schoolyardSheets = (): SpriteAuditAssetDefinition[] => [
   asset('sprites/schoolyard-survivor-enemies.webp', '校庭サバイバー 敵'),
-  asset('sprites/schoolyard-survivor-weapons.webp', '校庭サバイバー 武器'),
+  asset('sprites/schoolyard-survivor/weapons.webp', '校庭サバイバー 武器'),
   asset('sprites/schoolyard-survivor-effects.webp', '校庭サバイバー演出'),
+  asset('sprites/schoolyard-survivor/scenery.webp', '障害物・敵'),
+  asset('sprites/schoolyard-survivor/effects.webp', '校庭サバイバー演出'),
+  asset('sprites/schoolyard-survivor/title.webp', '校庭サバイバー', 'ui'),
+  ...PROTAGONISTS.map(hero=>asset(`sprites/wandering-student/${hero.id}.webp`,hero.name)),
 ];
 
 const triviaUiAssets = (id: string): SpriteAuditAssetDefinition[] => [
@@ -130,7 +134,7 @@ export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAudit
     ],
   },
   SURVIVOR: {
-    note: '敵・武器・演出はシート素材。プレイヤー本体はゲーム内のPixelSprite生成です。',
+    note: 'ダンジョンズ1の主人公と、Blender製の武器・敵・障害物・演出を使用します。',
     assets: schoolyardSheets(),
   },
   POKER: {

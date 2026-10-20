@@ -1,7 +1,9 @@
 
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { ArrowLeft, RotateCcw, Heart, LogOut, Sparkles, Zap, Flame, Shield, Swords, Target, Radiation, Droplets, Recycle, Volume2, Music, Mic, Activity, Wind, Maximize2, Minimize2, Crosshair, FastForward, Dice5, Star, Skull } from 'lucide-react';
-import { HERO_IMAGE_DATA } from '../constants';
+import { ArrowLeft, RotateCcw, Sparkles, Zap, Wind, Pause, Play } from 'lucide-react';
+import SurvivorLobby, { HeroPortrait } from '../mini-games/schoolyard-survivor/SurvivorLobby';
+import { HEROES, FIELDS, SCENERY_KEYS, FX_KEYS, localize, createObstacles, createFieldCanvas, moveActor, spawnPoint, type SurvivorHero, type Field } from '../mini-games/schoolyard-survivor/world';
+import '../mini-games/schoolyard-survivor/survivor.css';
 import PixelSprite, { SPRITE_TEMPLATES, createPixelSpriteCanvas } from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
@@ -318,7 +320,7 @@ const PASSIVES: Record<PassiveType, PassiveDef> = {
 export const SCHOOLYARD_WEAPON_CATALOG = Object.values(WEAPONS);
 export const SCHOOLYARD_PASSIVE_CATALOG = Object.values(PASSIVES);
 
-const SPRITE_ASSET_VERSION = 'schoolyard-survivor-v3';
+const SPRITE_ASSET_VERSION = 'schoolyard-survivor-v4';
 const SPRITE_SHEET_CELL_SIZE = 32;
 const SPRITE_SHEET_COLUMNS = 8;
 
@@ -373,6 +375,12 @@ interface EnemyDef {
 }
 
 const SCHOOLYARD_ENEMY_DEFS: Record<string, EnemyDef> = {
+    ENEMY_17: { type:'ENEMY_17', hp:22, speed:1.65, width:36, height:36, damage:6, attackKind:'ZIGZAG' },
+    ENEMY_18: { type:'ENEMY_18', hp:42, speed:1.1, width:38, height:38, damage:7, attackKind:'RANGED' },
+    ENEMY_19: { type:'ENEMY_19', hp:60, speed:1.25, width:40, height:40, damage:8, attackKind:'BURST', xpValue:3 },
+    ENEMY_20: { type:'ENEMY_20', hp:65, speed:1.8, width:40, height:40, damage:9, attackKind:'DASH', defense:1, xpValue:3 },
+    ENEMY_21: { type:'ENEMY_21', hp:50, speed:.85, width:42, height:42, damage:7, attackKind:'MINE', xpValue:2 },
+    ENEMY_22: { type:'ENEMY_22', hp:1500, speed:.7, width:100, height:100, damage:15, attackKind:'BURST', knockbackImmune:true, xpValue:30 },
     ENEMY_1: { type: 'ENEMY_1', hp: 10, speed: 1.2, width: 24, height: 24, damage: 5, attackKind: 'CONTACT' },
     ENEMY_2: { type: 'ENEMY_2', hp: 16, speed: 2.6, width: 24, height: 24, damage: 5, attackKind: 'ZIGZAG' },
     ENEMY_3: { type: 'ENEMY_3', hp: 35, speed: 1.45, width: 26, height: 26, damage: 6, defense: 1 },
@@ -424,6 +432,8 @@ interface Entity {
     attackCooldown?: number;
     movementPhase?: number;
     xpValue?: number;
+    boss?: boolean;
+    finalBoss?: boolean;
 }
 
 interface Projectile {
@@ -517,29 +527,27 @@ const createFlashSprite = (source: HTMLCanvasElement): HTMLCanvasElement => {
     return c;
 };
 
-const createSchoolyardBackground = (): HTMLCanvasElement => {
-    const c = document.createElement('canvas');
-    c.width = WORLD_WIDTH;
-    c.height = WORLD_HEIGHT;
-    const ctx = c.getContext('2d');
-    if (!ctx) return c;
-    ctx.fillStyle = '#5d4037'; 
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    for (let i = 0; i < 4000; i++) {
-        const x = Math.random() * WORLD_WIDTH;
-        const y = Math.random() * WORLD_HEIGHT;
-        const size = Math.random() * 4 + 1;
-        const type = Math.random();
-        if (type < 0.6) ctx.fillStyle = '#4e342e'; 
-        else if (type < 0.9) ctx.fillStyle = '#8d6e63';
-        else ctx.fillStyle = '#33691e';
-        ctx.fillRect(x, y, size, size);
-    }
-    return c;
-};
-
 const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
     const tr = (text: string) => trans(text, languageMode);
+    const l = (ja:string,en:string,hira?:string) => localize(languageMode,ja,en,hira);
+    const [inLobby,setInLobby] = useState(!debugPreview);
+    const [paused,setPaused] = useState(false);
+    const selectedHero = useRef<SurvivorHero>(HEROES[0]);
+    const selectedField = useRef<Field>(FIELDS[0]);
+    const obstacles = useRef(createObstacles(FIELDS[0]));
+    const heroImages = useRef<Record<string,HTMLImageElement>>({});
+    const reducedMotion = useRef(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const action = useRef({dash:0,dashTime:0,burst:0,burstTime:0,kills:0,wave:1,banner:180,bossSpawn:0,victory:false});
+    const [battleUi,setBattleUi] = useState({dash:0,burst:0,kills:0,wave:1,banner:180,boss:0,bossMax:1,victory:false});
+    const magicFx = useRef<{x:number;y:number;kind:string;age:number;life:number;size:number;angle:number}[]>([]);
+    const hazards = useRef<{x:number;y:number;age:number;radius:number}[]>([]);
+    const addFx = (x:number,y:number,kind:string,size=100,life=30,angle=0) => {
+        if(magicFx.current.length<70)magicFx.current.push({x,y,kind,size,life,age:0,angle});
+    };
+    const touchAnchor = useRef<{id:number;x:number;y:number}|null>(null);
+    const clearInput = () => {touchAnchor.current=null;keys.current={};joystickRef.current={x:0,y:0};gamepadJoystickRef.current={x:0,y:0};setJoystickUI(null);};
+    const pauseBattle = () => {if(gameState.current==='PLAYING'){gameState.current='PAUSED';clearInput();setPaused(true);}};
+    const resumeBattle = () => {clearInput();gameState.current='PLAYING';setPaused(false);};
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -548,7 +556,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const viewSizeRef = useRef({ width: 800, height: 600 }); 
     const camera = useRef({ x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 }); 
 
-    const gameState = useRef<'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP' | 'MATH_CHALLENGE'>('PLAYING');
+    const gameState = useRef<'TITLE' | 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'LEVEL_UP' | 'MATH_CHALLENGE'>(debugPreview ? 'PLAYING' : 'TITLE');
     const player = useRef<Entity>({ id: 0, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, type: 'WARRIOR', width: 24, height: 24, hp: 100, maxHp: 100, speed: PLAYER_SPEED, damage: 0, vx: 0, vy: 0, dead: false, flashTime: 0 });
     const enemies = useRef<Entity[]>([]);
     const projectiles = useRef<Projectile[]>([]);
@@ -568,7 +576,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const lastLoopTimeRef = useRef<number | null>(null);
     const accumulatorRef = useRef(0);
     const isLoopActiveRef = useRef(false);
-    const activeTimeouts = useRef<number[]>([]); 
+    const activeTimeouts = useRef<{remaining:number;callback:()=>void}[]>([]);
+    const scheduleShot = (callback:()=>void,ms:number) => {activeTimeouts.current.push({remaining:Math.ceil(ms/FIXED_STEP_MS),callback});};
 
     const [weapons, setWeapons] = useState<Record<WeaponType, { level: number, cooldownTimer: number } | undefined>>(() => {
         const initial: any = {};
@@ -581,9 +590,6 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         MAGNET: 0, TEXTBOOK: 0, ABACUS: 0, CONSOLE: 0, MILK: 0, ORIGAMI: 0
     });
 
-    useEffect(() => {
-        if (!debugPreview) storageService.markMiniGameDiscovered('SURVIVOR', 'survivor-weapon-PENCIL');
-    }, [debugPreview]);
 
     const [upgradeOptions, setUpgradeOptions] = useState<any[]>([]);
     const [uiState, setUiState] = useState({ hp: 100, maxHp: 100, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
@@ -612,8 +618,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             }
         };
         window.addEventListener('resize', updateSize);
+        const observer=new ResizeObserver(updateSize);if(containerRef.current)observer.observe(containerRef.current);
         updateSize();
-        return () => window.removeEventListener('resize', updateSize);
+        return () => {window.removeEventListener('resize', updateSize);observer.disconnect();};
     }, []);
 
     useEffect(() => {
@@ -654,21 +661,22 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const loadSpriteSheetIntoCache = (
         fileName: string,
         keys: readonly string[],
-        options: { makeFlash?: boolean } = {}
+        options: { makeFlash?: boolean; cellSize?: number } = {}
     ) => {
+        const cell = options.cellSize || SPRITE_SHEET_CELL_SIZE;
         const img = new Image();
         img.src = `${assetUrl(`sprites/${fileName}`)}?v=${SPRITE_ASSET_VERSION}`;
         img.onload = () => {
             keys.forEach((key, index) => {
                 const c = document.createElement('canvas');
-                c.width = SPRITE_SHEET_CELL_SIZE;
-                c.height = SPRITE_SHEET_CELL_SIZE;
+                c.width = cell;
+                c.height = cell;
                 const ctx = c.getContext('2d');
                 if (!ctx) return;
                 ctx.imageSmoothingEnabled = false;
-                const sx = (index % SPRITE_SHEET_COLUMNS) * SPRITE_SHEET_CELL_SIZE;
-                const sy = Math.floor(index / SPRITE_SHEET_COLUMNS) * SPRITE_SHEET_CELL_SIZE;
-                ctx.drawImage(img, sx, sy, SPRITE_SHEET_CELL_SIZE, SPRITE_SHEET_CELL_SIZE, 0, 0, SPRITE_SHEET_CELL_SIZE, SPRITE_SHEET_CELL_SIZE);
+                const sx = (index % SPRITE_SHEET_COLUMNS) * cell;
+                const sy = Math.floor(index / SPRITE_SHEET_COLUMNS) * cell;
+                ctx.drawImage(img, sx, sy, cell, cell, 0, 0, cell, cell);
                 spriteCache.current[key] = c;
                 if (options.makeFlash) spriteCache.current[`${key}_FLASH`] = createFlashSprite(c);
             });
@@ -686,16 +694,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     useEffect(() => {
-        audioService.playBGM('survivor_metal');
-        bgCanvasRef.current = createSchoolyardBackground();
-        const playerImg = new Image();
-        playerImg.src = HERO_IMAGE_DATA;
-        playerImg.onload = () => {
-             const c = document.createElement('canvas'); c.width = 32; c.height = 32;
-             const ctx = c.getContext('2d');
-             if(ctx) { ctx.drawImage(playerImg, 0, 0, 32, 32); spriteCache.current['PLAYER'] = c; spriteCache.current['PLAYER_FLASH'] = createFlashSprite(c); }
-        };
-
+        bgCanvasRef.current = createFieldCanvas(selectedField.current);
+        HEROES.forEach(hero => {const image=new Image();image.src=assetUrl(`sprites/wandering-student/${hero.id}.webp`);heroImages.current[hero.id]=image;});
         const sprites = {
             'ENEMY_1': ['SLIME', '#3b82f6', '#60a5fa'],
             'ENEMY_2': ['BAT', '#a855f7', '#c084fc'],
@@ -715,7 +715,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         });
         spriteCache.current['GEM'] = generateFromTemplate('EYE', '#eab308', '#fde047');
         loadSpriteSheetIntoCache('schoolyard-survivor-enemies.webp', SCHOOLYARD_ENEMY_ASSET_KEYS, { makeFlash: true });
-        loadSpriteSheetIntoCache('schoolyard-survivor-weapons.webp', SCHOOLYARD_WEAPON_ASSET_KEYS);
+        loadSpriteSheetIntoCache('schoolyard-survivor/weapons.webp', SCHOOLYARD_WEAPON_ASSET_KEYS, {cellSize:128});
+        loadSpriteSheetIntoCache('schoolyard-survivor/scenery.webp', SCENERY_KEYS, {cellSize:128,makeFlash:true});
+        loadSpriteSheetIntoCache('schoolyard-survivor/effects.webp', FX_KEYS, {cellSize:128});
         loadSpriteSheetIntoCache('schoolyard-survivor-effects.webp', SCHOOLYARD_EFFECT_ASSET_KEYS);
 
         isLoopActiveRef.current = true;
@@ -747,7 +749,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             frameRequestRef.current = requestAnimationFrame(loop);
         };
         frameRequestRef.current = requestAnimationFrame(loop);
-        const handleKeyDown = (e: KeyboardEvent) => keys.current[e.code] = true;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if(e.code==='Escape' && !e.repeat){if(gameState.current==='PAUSED')resumeBattle();else pauseBattle();return;}
+            if(gameState.current!=='PLAYING')return;
+            if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+            keys.current[e.code]=true;
+            if(!e.repeat&&(e.code==='ShiftLeft'||e.code==='ShiftRight'))activateDash();
+            if(!e.repeat&&(e.code==='Space'||e.code==='KeyE'))activateBurst();
+        };
+        const onBlur = () => {clearInput();pauseBattle();};
+        const onVisibility = () => {if(document.hidden)onBlur();};
+        window.addEventListener('blur',onBlur);
+        document.addEventListener('visibilitychange',onVisibility);
         const handleKeyUp = (e: KeyboardEvent) => keys.current[e.code] = false;
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
@@ -760,6 +773,8 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             lastLoopTimeRef.current = null;
             accumulatorRef.current = 0;
             window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('blur',onBlur);
+            document.removeEventListener('visibilitychange',onVisibility);
             window.removeEventListener('keyup', handleKeyUp);
             stopSurvivorAudio();
             clearAllTimeouts();
@@ -804,6 +819,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const addParticle = (x: number, y: number, type: Particle['type'], color: string, options: Partial<Particle> = {}) => {
         const angle = Math.random() * Math.PI * 2;
         const spd = Math.random() * 3 + 1;
+        if(particles.current.length>=400)return;
         particles.current.push({
             id: Math.random(),
             x, y,
@@ -819,12 +835,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     const clearAllTimeouts = () => {
-        activeTimeouts.current.forEach(id => window.clearTimeout(id));
         activeTimeouts.current = [];
     };
 
     const damagePlayer = (rawDamage: number, defense: number, sourceX: number, sourceY: number, color = 'red') => {
-        if (player.current.flashTime > 0) return;
+        if (player.current.flashTime > 0 || action.current.dashTime>0 || action.current.burstTime>0) return;
         const finalDmg = Math.max(1, rawDamage - defense);
         player.current.hp -= finalDmg;
         player.current.flashTime = 30;
@@ -866,25 +881,82 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         });
     };
 
+    const spawnEnemy = (type:string,boss=false,finalBoss=false) => {
+        if(enemies.current.length>=180&&!boss)return;
+        const distance=Math.max(300,Math.min(650,Math.hypot(viewSizeRef.current.width,viewSizeRef.current.height)/ZOOM_SCALE*.52));
+        const point=spawnPoint(player.current.x,player.current.y,Math.random()*Math.PI*2,distance,obstacles.current);
+        if(!point)return;
+        const def=SCHOOLYARD_ENEMY_DEFS[type]||SCHOOLYARD_ENEMY_DEFS.ENEMY_1;
+        const hp=Math.round(def.hp*(1+time.current*.004)*(finalBoss?3:boss?1.5:1));
+        enemies.current.push({id:Math.random(),...point,type,width:def.width,height:def.height,hp,maxHp:hp,speed:def.speed,
+            damage:def.damage+Math.floor(time.current/80),vx:0,vy:0,dead:false,flashTime:0,knockbackImmune:def.knockbackImmune,
+            defense:def.defense||0,attackKind:def.attackKind||'CONTACT',attackCooldown:90,movementPhase:Math.random()*6.28,xpValue:def.xpValue,boss,finalBoss});
+        addFx(point.x,point.y,'PORTAL',boss?180:75,45);
+    };
+    const activateDash = () => {
+        if(gameState.current!=='PLAYING'||action.current.dash>0)return;
+        action.current.dash=240;action.current.dashTime=14;
+        addFx(player.current.x,player.current.y,'SLASH',130,22,Math.atan2(lastDir.current.y,lastDir.current.x));
+        audioService.playSound('select');
+    };
+    const activateBurst = () => {
+        if(gameState.current!=='PLAYING'||action.current.burst<100)return;
+        action.current.burst=0;action.current.burstTime=150;player.current.flashTime=150;
+        enemyBullets.current=[];shakeAmount.current=12;
+        addFx(player.current.x,player.current.y,'NOVA',800,55);addFx(player.current.x,player.current.y,'RUNE',400,100);
+        enemies.current.forEach(e=>{if(Math.hypot(e.x-player.current.x,e.y-player.current.y)<650)
+            applyDamage(e,{damage:200+level.current*35,type:'EVOLVED',scale:2,hitIds:[],knockback:20,x:player.current.x,y:player.current.y} as Projectile);});
+        // A burst also vacuums experience, making dense waves rewarding on touch screens.
+        gems.current.forEach(g=>{g.x=player.current.x;g.y=player.current.y;});
+        audioService.playSound('win');
+    };
+    const finishVictory = () => {
+        action.current.victory=true;gameState.current='GAME_OVER';clearAllTimeouts();clearInput();saveRecord();
+        stopSurvivorAudio();audioService.playSound('win');setBattleUi(prev=>({...prev,victory:true}));
+        setUiState(prev=>({...prev,gameOver:true,hp:player.current.hp,time:time.current,score:score.current}));
+    };
     const update = () => {
         if (gameState.current !== 'PLAYING') return;
 
         frameCount.current++;
+        const scheduled=activeTimeouts.current;activeTimeouts.current=[];
+        scheduled.forEach(shot=>{if(--shot.remaining<=0)shot.callback();else activeTimeouts.current.push(shot);});
+        const pad=typeof navigator.getGamepads==='function'?Array.from(navigator.getGamepads()).find(Boolean):undefined;
+        if(keys.current.ShiftLeft||keys.current.ShiftRight||pad?.buttons[0]?.pressed)activateDash();
+        if(keys.current.Space||keys.current.KeyE||pad?.buttons[2]?.pressed)activateBurst();
+        if(pad?.buttons[9]?.pressed){pauseBattle();return;}
+        action.current.dash=Math.max(0,action.current.dash-1);
+        action.current.dashTime=Math.max(0,action.current.dashTime-1);
+        action.current.burstTime=Math.max(0,action.current.burstTime-1);
+        action.current.banner=Math.max(0,action.current.banner-1);
+        magicFx.current=magicFx.current.filter(fx=>++fx.age<fx.life);
+        hazards.current=hazards.current.filter(h=>++h.age<130);
+        hazards.current.forEach(h=>{if(h.age===90){addFx(h.x,h.y,'LIGHTNING',h.radius*2,30);if(Math.hypot(player.current.x-h.x,player.current.y-h.y)<h.radius)damagePlayer(15,0,h.x,h.y,'#ff829b');}});
+        if(frameCount.current%180===0&&time.current>45&&hazards.current.length<5)hazards.current.push({x:player.current.x+lastDir.current.x*100,y:player.current.y+lastDir.current.y*100,age:0,radius:65});
+        if(action.current.burstTime>0&&frameCount.current%8===0){addFx(player.current.x,player.current.y,'SPARK',120,20);fireWeapon('PENCIL',4,true,35,1.5,9,1,3,1);}
+        if(frameCount.current%10===0){
+            const boss=enemies.current.find(e=>e.boss&&!e.dead);
+            setBattleUi({dash:action.current.dash,burst:action.current.burst,kills:action.current.kills,wave:action.current.wave,banner:action.current.banner,boss:boss?.hp||0,bossMax:boss?.maxHp||1,victory:action.current.victory});
+        }
         if (frameCount.current % 60 === 0) {
             time.current++;
+            if(time.current%30===0&&time.current<=300){action.current.wave++;action.current.banner=180;
+                for(let i=0;i<10+Math.floor(time.current/15);i++)spawnEnemy(selectedField.current.enemies[i%3]);}
+            if([90,180,300].includes(time.current)){spawnEnemy('ENEMY_22',true,time.current===300);action.current.bossSpawn=time.current;action.current.banner=240;}
+
             if (passivesRef.current.MILK > 0) {
                 player.current.hp = Math.min(player.current.maxHp, player.current.hp + passivesRef.current.MILK);
             }
             setUiState(prev => ({ ...prev, time: time.current, hp: player.current.hp }));
         }
 
-        const might = 1 + (passivesRef.current.PROTEIN * 0.15);
+        const might = selectedHero.current.might * (1 + (passivesRef.current.PROTEIN * 0.15)) * (action.current.burstTime>0?1.5:1);
         const cooldownReduc = 1 - (passivesRef.current.DRILL * 0.08);
-        const area = 1 + (passivesRef.current.PROTRACTOR * 0.15);
+        const area = selectedHero.current.area * (1 + (passivesRef.current.PROTRACTOR * 0.15));
         const speed = 1 + (passivesRef.current.SHOES * 0.12);
         const defense = passivesRef.current.PAD * 2;
         const projSpeed = 1 + (passivesRef.current.LUNCHBOX * 0.15);
-        const magnet = 60 + (passivesRef.current.MAGNET * 30);
+        const magnet = 95 + selectedHero.current.magnet + (passivesRef.current.MAGNET * 30);
         const duration = 1 + (passivesRef.current.TEXTBOOK * 0.15);
         const amount = passivesRef.current.ABACUS;
         const luck = 1 + (passivesRef.current.CONSOLE * 0.15);
@@ -906,10 +978,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             lastDir.current = { x: dx, y: dy };
         }
 
-        player.current.x += dx * player.current.speed * speed;
-        player.current.y += dy * player.current.speed * speed;
-        player.current.x = Math.max(16, Math.min(WORLD_WIDTH - 16, player.current.x));
-        player.current.y = Math.max(16, Math.min(WORLD_HEIGHT - 16, player.current.y));
+        const dashing=action.current.dashTime>0;
+        moveActor(player.current,(dashing?lastDir.current.x:dx)*player.current.speed*speed*(dashing?3.4:1),(dashing?lastDir.current.y:dy)*player.current.speed*speed*(dashing?3.4:1),12,obstacles.current);
+        if(dashing&&frameCount.current%3===0)addFx(player.current.x,player.current.y,'SPARK',55,18);
         if (player.current.flashTime > 0) player.current.flashTime--;
 
         const vw = viewSizeRef.current.width / ZOOM_SCALE;
@@ -940,6 +1011,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         });
 
         enemies.current.forEach(e => {
+            if(e.dead)return;
             if (e.knockback && e.knockback.time > 0) {
                 e.x += e.knockback.x; e.y += e.knockback.y;
                 e.knockback.time--;
@@ -966,8 +1038,9 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     moveSpeed *= 0.35;
                 }
                 const len = Math.hypot(moveX, moveY) || 1;
-                e.x += (moveX / len) * moveSpeed;
-                e.y += (moveY / len) * moveSpeed;
+                const oldX=e.x,oldY=e.y;
+                moveActor(e,(moveX/len)*moveSpeed,(moveY/len)*moveSpeed,Math.min(22,e.width*.3),obstacles.current);
+                if(Math.hypot(e.x-oldX,e.y-oldY)<moveSpeed*.3)moveActor(e,Math.cos(angle+Math.PI/2)*moveSpeed,Math.sin(angle+Math.PI/2)*moveSpeed,Math.min(22,e.width*.3),obstacles.current);
             }
             const dist = Math.hypot(e.x - player.current.x, e.y - player.current.y);
             e.attackCooldown = Math.max(0, (e.attackCooldown || 0) - 1);
@@ -976,13 +1049,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     fireEnemyBullet(e, e.type === 'ENEMY_8' ? 'CHALK_BULLET' : 'BALL_BULLET', e.type === 'ENEMY_8' ? 3.4 : 2.7, e.damage, 10, e.type === 'ENEMY_8' ? '#f8fafc' : '#fb923c');
                     e.attackCooldown = e.type === 'ENEMY_8' ? 95 : 120;
                 } else if (e.attackKind === 'BURST') {
-                    const shots = e.type === 'ENEMY_6' || e.type === 'ENEMY_16' ? 7 : 5;
-                    const spread = e.type === 'ENEMY_16' ? Math.PI * 2 : Math.PI * 0.9;
+                    const shots = e.boss ? 16 : e.type === 'ENEMY_6' || e.type === 'ENEMY_16' ? 7 : 5;
+                    const spread = e.boss || e.type === 'ENEMY_16' ? Math.PI * 2 : Math.PI * 0.9;
                     for (let i = 0; i < shots; i++) {
                         const offset = spread === Math.PI * 2 ? (Math.PI * 2 / shots) * i : (i - (shots - 1) / 2) * (spread / shots);
                         fireEnemyBullet(e, 'WHISTLE_WAVE', 2.15, e.damage + 1, 12, '#93c5fd', offset, 210);
                     }
-                    e.attackCooldown = e.type === 'ENEMY_16' ? 140 : 180;
+                    e.attackCooldown = e.boss ? 110 : e.type === 'ENEMY_16' ? 140 : 180;
+                    if(e.boss){hazards.current.push({x:player.current.x,y:player.current.y,age:0,radius:85});addFx(e.x,e.y,'RUNE',180,50);}
                     addParticle(e.x, e.y, 'RING', '#93c5fd', { scale: 1.3, life: 28 });
                 } else if (e.attackKind === 'MINE') {
                     const angle = Math.atan2(player.current.y - e.y, player.current.x - e.x);
@@ -1015,7 +1089,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             b.duration--;
             if (frameCount.current % 6 === 0) addParticle(b.x, b.y, b.persistent ? 'SMOKE' : 'SPARK', b.color, { size: b.radius * 0.35, life: 12 });
             const dist = Math.hypot(b.x - player.current.x, b.y - player.current.y);
-            if (dist < b.radius + 12) {
+            if (dist < b.radius + 12 && (!b.persistent || b.duration<180)) {
                 damagePlayer(b.damage, defense, b.x, b.y, b.color);
                 if (!b.persistent) enemyBullets.current.splice(i, 1);
             } else if (b.duration <= 0 || b.x < -50 || b.x > WORLD_WIDTH + 50 || b.y < -50 || b.y > WORLD_HEIGHT + 50) {
@@ -1177,41 +1251,28 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             if (hit || p.duration <= 0) projectiles.current.splice(i, 1);
         }
 
-        const spawnRate = Math.max(5, 60 - Math.floor(time.current / 5));
-        if (frameCount.current % spawnRate === 0) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 600; 
-            const ex = player.current.x + Math.cos(angle) * dist;
-            const ey = player.current.y + Math.sin(angle) * dist;
-            const clampX = Math.max(0, Math.min(WORLD_WIDTH, ex));
-            const clampY = Math.max(0, Math.min(WORLD_HEIGHT, ey));
-            const timeSec = time.current;
-            const enemyType = pickEnemyType(timeSec);
-            const def = SCHOOLYARD_ENEMY_DEFS[enemyType] || SCHOOLYARD_ENEMY_DEFS.ENEMY_1;
-            const hpScale = 1 + Math.max(0, timeSec - 60) * 0.012;
-            const hp = Math.floor(def.hp * hpScale + Math.floor(timeSec / 45) * 4);
-            
-            enemies.current.push({ 
-                id: Math.random(), x: clampX, y: clampY, type: enemyType, 
-                width: def.width, height: def.height, hp: hp, maxHp: hp, speed: def.speed + Math.random() * 0.15, 
-                damage: def.damage + Math.floor(timeSec/70), vx: 0, vy: 0, dead: false, 
-                flashTime: 0, knockbackImmune: def.knockbackImmune, defense: def.defense || 0,
-                attackKind: def.attackKind || 'CONTACT',
-                attackCooldown: 40 + Math.floor(Math.random() * 90),
-                movementPhase: Math.random() * Math.PI * 2,
-                xpValue: def.xpValue
-            });
+        const spawnRate = Math.max(9,32-Math.floor(time.current/12));
+        if(frameCount.current%spawnRate===0&&time.current<300) {
+            const fieldEnemy=selectedField.current.enemies[Math.floor(Math.random()*3)];
+            spawnEnemy(Math.random()<.8?fieldEnemy:pickEnemyType(time.current));
         }
+        projectiles.current=projectiles.current.slice(-450);
+        enemyBullets.current=enemyBullets.current.slice(-260);
+        damageTexts.current=damageTexts.current.slice(-80);
+        // Merge distant XP instead of letting a long run accumulate thousands of objects.
+        if(gems.current.length>350){const kept=gems.current.slice(-349);kept[0].value+=gems.current.slice(0,-349).reduce((n,g)=>n+g.value,0);gems.current=kept;}
 
         enemies.current = enemies.current.filter(e => !e.dead);
+        if(gameState.current!=='PLAYING')return;
         for (let i = gems.current.length - 1; i >= 0; i--) {
             const g = gems.current[i];
             const dist = Math.hypot(g.x - player.current.x, g.y - player.current.y);
             if (dist < magnet) { g.x += (player.current.x - g.x) * 0.1; g.y += (player.current.y - g.y) * 0.1; }
             if (dist < 20) {
                 xp.current += g.value; gems.current.splice(i, 1);
-                if (xp.current >= nextLevelXp.current) { gameState.current = 'MATH_CHALLENGE'; xp.current -= nextLevelXp.current; level.current++; nextLevelXp.current = Math.floor(nextLevelXp.current * 1.25); audioService.playSound('select'); }
+                if (xp.current >= nextLevelXp.current) { gameState.current = 'MATH_CHALLENGE'; xp.current -= nextLevelXp.current; level.current++; nextLevelXp.current = Math.floor(nextLevelXp.current * 1.25); audioService.playSound('select'); clearInput(); }
                 setUiState(prev => ({ ...prev, level: level.current, xpPercent: (xp.current/nextLevelXp.current)*100 }));
+                if(gameState.current!=='PLAYING')break;
             }
         }
 
@@ -1252,20 +1313,26 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             damageTexts.current.push({ id: Math.random(), x: e.x + 10, y: e.y - 5, value: "!", color: '#94a3b8', life: 20 });
         }
 
-        const sparkCount = isCrit ? 12 : 5;
+        const sparkCount = isCrit ? 7 : 2;
         for(let i=0; i<sparkCount; i++) addParticle(e.x, e.y, 'SPARK', isCrit ? '#fbbf24' : (WEAPONS[p.type as WeaponType]?.sprite.color || 'white'), { life: 25, size: (isCrit ? 5 : 2.5) * p.scale });
 
         if (e.hp <= 0 && !e.dead) {
-            e.dead = true; score.current += 15;
+            e.dead = true; score.current += e.boss?1500:15;
+            action.current.kills++;action.current.burst=Math.min(100,action.current.burst+(e.boss?35:2.5));
+            if(action.current.kills%8===0||e.boss)addFx(e.x,e.y,e.boss?'NOVA':'SPARK',e.boss?350:75,e.boss?60:25);
+            if(e.boss){player.current.hp=Math.min(player.current.maxHp,player.current.hp+35);enemyBullets.current=[];gems.current.forEach(g=>{g.x=player.current.x;g.y=player.current.y;});}
+            if(e.finalBoss)finishVictory();
             const gemVal = e.xpValue || (e.type === 'ENEMY_6' || e.type === 'ENEMY_7' ? 10 : 1);
-            if (Math.random() < 0.75) gems.current.push({ id: Math.random(), x: e.x, y: e.y, value: gemVal, collected: false });
-            for(let i=0; i<15; i++) addParticle(e.x, e.y, 'SMOKE', 'rgba(120,120,120,0.6)', { size: (Math.random()*8+3) * p.scale, life: 50 });
+            if (e.boss || Math.random() < 0.85) gems.current.push({ id: Math.random(), x: e.x, y: e.y, value: gemVal, collected: false });
+            for(let i=0; i<5; i++) addParticle(e.x,e.y,'SPARK',WEAPONS[(p.subType||p.type) as WeaponType]?.sprite.color||'#8ee9ea',{size:Math.random()*3+1,life:22,maxLife:22});
             shakeAmount.current = 3;
         }
     };
 
     const fireWeapon = (type: WeaponType, level: number, evolved: boolean, dmg: number, scale: number, speed: number, duration: number, amount: number, luck: number) => {
         const p = player.current;
+        const anim=WEAPONS[type].animType;
+        if(['SWING','CIRCLE','BLAST','RAINBOW','BEAM'].includes(anim))addFx(p.x,p.y,anim==='SWING'?'SLASH':anim==='BEAM'?'LIGHTNING':'RUNE',anim==='SWING'?190*scale:120*scale,28,Math.atan2(lastDir.current.y,lastDir.current.x));
         const count = 1 + amount + Math.floor(level/3); 
         if (Math.random() < 0.3 && gameState.current === 'PLAYING') audioService.playSound('attack');
         
@@ -1279,12 +1346,12 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                     const angle = Math.atan2((target as Entity).y - p.y, (target as Entity).x - p.x);
                     const volleys = evolved ? 4 : 1; 
                     for(let v=0; v<volleys; v++) {
-                        const id = window.setTimeout(() => {
+                        scheduleShot(() => {
                             if (gameState.current === 'PLAYING') {
                                 projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: Math.cos(angle + (Math.random()-0.5)*0.2) * speed * (evolved?2.5:1), dy: Math.sin(angle + (Math.random()-0.5)*0.2) * speed * (evolved?2.5:1), damage: dmg, type: evolved ? 'EVOLVED' : 'PENCIL', subType: 'PENCIL', duration: 60, maxDuration: 60, penetration: evolved ? 5 : 1 + Math.floor(level/4), rotation: angle, scale: scale, knockback: 2, hitIds: [] });
                             }
                         }, v * 80);
-                        activeTimeouts.current.push(id);
+
                     }
                 }
                 break;
@@ -1311,13 +1378,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             case 'SCISSORS':
                 const swingCount = (type === 'SCISSORS' || evolved) ? 2 : 1;
                 for(let s=0; s<swingCount; s++) {
-                    const id = window.setTimeout(() => {
+                    scheduleShot(() => {
                         if (gameState.current === 'PLAYING') {
                             const offset = (s % 2 === 0) ? 0 : Math.PI;
                             projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: 0, dy: 0, damage: dmg * (type==='CUTTER'?2.5:1), type: evolved ? 'EVOLVED' : type, subType: type, duration: 25, maxDuration: 25, penetration: 999, rotation: angleToMove + offset, scale: scale * 1.5, knockback: 10, hitIds: [] });
                         }
                     }, s * 150);
-                    activeTimeouts.current.push(id);
+
                 }
                 break;
             case 'HIGHLIGHTER':
@@ -1326,13 +1393,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 break;
             case 'STAPLER':
                 for(let i=0; i<count+3; i++) {
-                    const id = window.setTimeout(() => {
+                    scheduleShot(() => {
                         if (gameState.current === 'PLAYING') {
                             const spread = evolved ? Math.PI * 2 * Math.random() : angleToMove + (Math.random()-0.5)*0.5;
                             projectiles.current.push({ id: Math.random(), x: p.x, y: p.y, dx: Math.cos(spread)*speed*2, dy: Math.sin(spread)*speed*2, damage: dmg*0.8, type: evolved ? 'EVOLVED' : 'STAPLER', subType: 'STAPLER', duration: 40, maxDuration: 40, penetration: 1, rotation: spread, scale: scale*0.5, knockback: 1, hitIds: [] });
                         }
                     }, i * 50);
-                    activeTimeouts.current.push(id);
+
                 }
                 break;
             case 'GLOBE':
@@ -1398,7 +1465,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, viewW, viewH);
         ctx.save();
         
-        if (shakeAmount.current > 0.1) {
+        if (shakeAmount.current > 0.1 && !reducedMotion.current) {
             ctx.translate((Math.random()-0.5)*shakeAmount.current, (Math.random()-0.5)*shakeAmount.current);
         }
 
@@ -1408,6 +1475,12 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
         if (bgCanvasRef.current) ctx.drawImage(bgCanvasRef.current, 0, 0);
 
+        obstacles.current.forEach(o=>{
+            const sprite=spriteCache.current[o.kind];
+            ctx.fillStyle='rgba(0,0,0,.24)';ctx.beginPath();ctx.ellipse(o.x+6,o.y+12,o.w*.62,o.h*.65,0,0,Math.PI*2);ctx.fill();
+            if(sprite){const size=o.kind==='TREE'?115:o.kind==='BENCH'?125:105;ctx.drawImage(sprite,o.x-size/2,o.y-size/2-10,size,size);}
+        });
+        hazards.current.forEach(h=>{ctx.save();ctx.fillStyle=h.age<90?'rgba(255,80,120,.12)':'rgba(255,180,190,.35)';ctx.strokeStyle='#ff7898';ctx.lineWidth=2;ctx.setLineDash([7,5]);ctx.beginPath();ctx.arc(h.x,h.y,h.radius,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(h.x,h.y,h.radius*Math.min(1,h.age/90),0,Math.PI*2);ctx.stroke();ctx.restore();});
         gems.current.forEach(g => {
             if (Math.abs(g.x - camera.current.x) > (viewW/ZOOM_SCALE) || Math.abs(g.y - camera.current.y) > (viewH/ZOOM_SCALE)) return;
             const sprite = spriteCache.current['XP_GEM'] || spriteCache.current['GEM'];
@@ -1519,13 +1592,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 let spriteKey = p.type === 'EVOLVED' ? (p.subType || 'PENCIL') : p.type;
                 const sprite = spriteCache.current[spriteKey];
                 if (sprite) {
-                    const size = 16 * p.scale;
+                    const size = 36 * p.scale;
                     if (['TRIANGLE_RULER_S', 'LUNCH_TRAY'].includes(p.type as string) || ['TRIANGLE_RULER_S', 'LUNCH_TRAY'].includes(p.subType as string)) {
                         ctx.rotate(frameCount.current * 0.5);
                     }
                     ctx.drawImage(sprite, -size/2, -size/2, size, size);
                 }
             }
+            // All attacks carry a visible Blender-forged weapon, including beam and melee weapons.
+            if(animType!=='PROJECTILE'&&spriteCache.current[weaponKey])ctx.drawImage(spriteCache.current[weaponKey],-18*p.scale,-18*p.scale,36*p.scale,36*p.scale);
             ctx.restore();
         });
 
@@ -1537,18 +1612,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 const size = Math.max(e.width, e.height); 
                 ctx.save();
                 if (e.frozen) ctx.filter = 'hue-rotate(180deg) brightness(1.5)';
-                ctx.drawImage(sprite, e.x - size/2, e.y - size/2, size * 1.3, size * 1.3); 
+                if(e.attackKind==='DASH'&&(e.attackCooldown||0)<32){ctx.strokeStyle='#ff668d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(e.x,e.y);const a=Math.atan2(player.current.y-e.y,player.current.x-e.x);ctx.lineTo(e.x+Math.cos(a)*120,e.y+Math.sin(a)*120);ctx.stroke();}
+                ctx.drawImage(sprite, e.x - size*.65, e.y - size*.65, size * 1.3, size * 1.3);
+                if(e.hp<e.maxHp){ctx.fillStyle='#18253b';ctx.fillRect(e.x-size/2,e.y+size*.55,size,3);ctx.fillStyle=e.boss?'#ffc36b':'#ff7a9f';ctx.fillRect(e.x-size/2,e.y+size*.55,size*Math.max(0,e.hp/e.maxHp),3);}
                 ctx.restore();
             }
         });
 
-        const pKey = player.current.flashTime > 0 ? 'PLAYER_FLASH' : 'PLAYER';
-        const pSprite = spriteCache.current[pKey];
-        if (pSprite) {
-            ctx.save(); ctx.translate(player.current.x, player.current.y);
-            if (lastDir.current.x < 0) ctx.scale(-1, 1);
-            ctx.drawImage(pSprite, -16, -16, 32, 32); ctx.restore();
-        }
+        magicFx.current.forEach(fx=>{const frame=Math.min(7,Math.floor(fx.age/fx.life*8));const sprite=spriteCache.current[`${fx.kind}_${frame}`];if(!sprite)return;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,(fx.life-fx.age)/10);ctx.translate(fx.x,fx.y);ctx.rotate(fx.angle);ctx.drawImage(sprite,-fx.size/2,-fx.size/2,fx.size,fx.size);ctx.restore();});
 
         particles.current.forEach(p => {
             ctx.save();
@@ -1569,6 +1640,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             }
             ctx.restore();
         });
+        const heroImage=heroImages.current[selectedHero.current.id];
+        const direction=lastDir.current;const sx=Math.sign(direction.x),sy=Math.sign(direction.y);
+        const frame=sy>0?(sx>0?4:sx<0?5:0):sy<0?(sx>0?6:sx<0?7:1):sx>0?2:sx<0?3:0;
+        ctx.save();
+        ctx.strokeStyle=action.current.burstTime>0?'#ffdb9b':'#8dfff0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(player.current.x,player.current.y+16,19,9,0,0,Math.PI*2);ctx.stroke();
+        ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(player.current.x,player.current.y+16,15,6,0,0,Math.PI*2);ctx.fill();
+        if(player.current.flashTime>0)ctx.globalAlpha=frameCount.current%6<3?.6:1;
+        if(heroImage?.complete&&heroImage.naturalWidth){const cw=heroImage.naturalWidth/4,ch=heroImage.naturalHeight/2;const bob=gameState.current==='PLAYING'?Math.sin(frameCount.current*.2)*1.5:0;ctx.shadowColor='#071d30';ctx.shadowBlur=4;ctx.drawImage(heroImage,frame%4*cw,Math.floor(frame/4)*ch,cw,ch,player.current.x-30,player.current.y-34+bob,60,60);}
+        ctx.restore();
         ctx.globalAlpha = 1.0;
 
         ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center';
@@ -1652,38 +1732,60 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     };
 
     const handleRestart = () => {
-        clearAllTimeouts(); 
-        player.current = { ...player.current, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, hp: 100, dead: false };
+        clearAllTimeouts();clearInput();
+        action.current={dash:0,dashTime:0,burst:0,burstTime:0,kills:0,wave:1,banner:180,bossSpawn:0,victory:false};
+        magicFx.current=[];hazards.current=[];shakeAmount.current=0;
+        obstacles.current=createObstacles(selectedField.current);bgCanvasRef.current=createFieldCanvas(selectedField.current);
+        setBattleUi({dash:0,burst:0,kills:0,wave:1,banner:180,boss:0,bossMax:1,victory:false});
+        setPaused(false);setInLobby(false);
+        player.current = { ...player.current, x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2, hp: selectedHero.current.hp, maxHp:selectedHero.current.hp, speed:selectedHero.current.speed, flashTime:0, dead: false };
         camera.current = { x: WORLD_WIDTH/2, y: WORLD_HEIGHT/2 };
         enemies.current = []; projectiles.current = []; enemyBullets.current = []; gems.current = []; damageTexts.current = []; particles.current = [];
         score.current = 0; time.current = 0; frameCount.current = 0; level.current = 1; xp.current = 0; nextLevelXp.current = BASE_XP_REQUIREMENT;
         setWeapons(() => {
             const initial: any = {};
             Object.keys(WEAPONS).forEach(k => initial[k] = undefined);
-            initial.PENCIL = { level: 1, cooldownTimer: 0 };
+            initial[selectedHero.current.starter] = { level: 2, cooldownTimer: 0 };
+            initial.ERASER = {level:1,cooldownTimer:0};
+            weaponsRef.current=initial;
             return initial;
         });
+        passivesRef.current={ PROTEIN:0,DRILL:0,PROTRACTOR:0,SHOES:0,PAD:0,LUNCHBOX:0,MAGNET:0,TEXTBOOK:0,ABACUS:0,CONSOLE:0,MILK:0,ORIGAMI:0 };
         setPassives({ PROTEIN: 0, DRILL: 0, PROTRACTOR: 0, SHOES: 0, PAD: 0, LUNCHBOX: 0, MAGNET: 0, TEXTBOOK: 0, ABACUS: 0, CONSOLE: 0, MILK: 0, ORIGAMI: 0 });
-        setUiState({ hp: 100, maxHp: 100, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
+        setUiState({ hp: selectedHero.current.hp, maxHp: selectedHero.current.hp, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
+        if(!debugPreview){storageService.markMiniGameDiscovered('SURVIVOR',`survivor-weapon-${selectedHero.current.starter}`);storageService.markMiniGameDiscovered('SURVIVOR','survivor-weapon-ERASER');}
         gameState.current = 'PLAYING'; audioService.playBGM('survivor_metal');
     };
 
+    const onTouchStart = (e:React.TouchEvent) => {
+        if(gameState.current!=='PLAYING'||touchAnchor.current||(e.target as Element).closest('button'))return;
+        const t=e.changedTouches[0]||e.touches[0];if(!t)return;
+        touchAnchor.current={id:t.identifier,x:t.clientX,y:t.clientY};
+        const rect=containerRef.current!.getBoundingClientRect(),x=t.clientX-rect.left,y=t.clientY-rect.top;
+        setJoystickUI({active:true,startX:x,startY:y,curX:x,curY:y});joystickRef.current={x:0,y:0};
+    };
+    const onTouchMove = (e:React.TouchEvent) => {
+        const anchor=touchAnchor.current;if(!anchor)return;
+        const t=Array.from(e.touches).find(t=>t.identifier===anchor.id);if(!t)return;
+        const dx=t.clientX-anchor.x,dy=t.clientY-anchor.y,d=Math.hypot(dx,dy),scale=d>50?50/d:1;
+        joystickRef.current={x:dx/50,y:dy/50};
+        setJoystickUI(prev=>prev?{...prev,curX:prev.startX+dx*scale,curY:prev.startY+dy*scale}:null);
+    };
+    const onTouchEnd = (e:React.TouchEvent) => {
+        if(touchAnchor.current&&Array.from(e.touches).some(t=>t.identifier===touchAnchor.current!.id))return;
+        touchAnchor.current=null;setJoystickUI(null);joystickRef.current={x:0,y:0};
+    };
+
     return (
-        <div className="mini-game-survivor-screen flex flex-col h-full w-full bg-[#020617] text-white relative items-center justify-center font-mono overflow-hidden touch-none select-none" ref={containerRef} onTouchStart={(e) => { if (gameState.current !== 'PLAYING') return; const t = e.touches[0]; setJoystickUI({ active: true, startX: t.clientX, startY: t.clientY, curX: t.clientX, curY: t.clientY }); joystickRef.current = { x: 0, y: 0 }; }} onTouchMove={(e) => { if (!joystickUI?.active) return; const t = e.touches[0]; const dx = t.clientX - joystickUI.startX; const dy = t.clientY - joystickUI.startY; const dist = Math.hypot(dx, dy); const max = 50; setJoystickUI(prev => prev ? ({ ...prev, curX: prev.startX + (dist>max ? dx/dist*max : dx), curY: prev.startY + (dist>max ? dy/dist*max : dy) }) : null); joystickRef.current = { x: dx/max, y: dy/max }; }} onTouchEnd={() => { setJoystickUI(null); joystickRef.current = { x: 0, y: 0 }; }}>
-            <div className="ios-safe-ui-x ios-safe-ui-header survivor-hud absolute top-0 left-0 w-full p-2 flex justify-between items-start pointer-events-none z-10 text-shadow-md">
-                <div className="flex flex-col gap-1 w-1/3">
-                    <div className="bg-black/60 p-2 rounded-xl border border-blue-500/50 backdrop-blur-md">
-                        <div className="text-xl font-bold text-blue-400 leading-none flex items-center gap-1"><Zap size={16}/> LV {uiState.level}</div>
-                        <div className="w-full h-3 bg-gray-800 rounded-full mt-2 overflow-hidden border border-gray-700"><div className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-200" style={{width: `${uiState.xpPercent}%`}}></div></div>
-                    </div>
-                    <div className="bg-black/60 p-2 mt-1 rounded-xl border border-red-500/50 text-red-400 font-bold flex items-center backdrop-blur-md">
-                        <Heart size={18} className="mr-2 fill-current"/> {Math.ceil(uiState.hp)}
-                    </div>
-                </div>
-                <div className="bg-black/80 p-2 rounded-xl border border-white/20 text-center backdrop-blur-lg shadow-xl"><div className="text-3xl font-black text-white tracking-widest font-mono">{Math.floor(uiState.time/60).toString().padStart(2,'0')}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="text-xs text-gray-400 font-bold mt-1">SCORE: {score.current}</div></div>
-                <div className="w-1/3 flex flex-col items-end gap-1 opacity-90 pt-2"><div className="flex flex-wrap justify-end gap-1 max-w-[160px]">{(Object.keys(weapons) as WeaponType[]).map((k) => { const v = weapons[k]; return v && (<div key={k} className={`w-8 h-8 bg-slate-800 border-2 ${v.level>=8?'border-yellow-400 shadow-[0_0_5px_rgba(250,204,21,0.5)]':'border-gray-600'} flex items-center justify-center relative p-1 rounded-lg`}><PixelSprite seed={k} name={`${WEAPONS[k].sprite.template}|${WEAPONS[k].sprite.color}`} className="w-full h-full"/><div className="absolute -bottom-1 -right-1 text-[8px] bg-black px-1 rounded-full leading-none text-white border border-gray-700 font-bold">{v.level}</div></div>)})}</div><div className="flex flex-wrap justify-end gap-1 max-w-[160px] mt-1">{(Object.keys(passives) as PassiveType[]).map((k) => { const v = passives[k]; return v > 0 && (<div key={k} className="w-7 h-7 bg-slate-900/80 border border-gray-700 flex items-center justify-center relative p-1 rounded-lg"><PixelSprite seed={k} name={`${PASSIVES[k].sprite.template}|${PASSIVES[k].sprite.color}`} className="w-full h-full"/><div className="absolute -bottom-1 -right-1 text-[8px] bg-blue-900 px-1 rounded-full leading-none text-white border border-blue-400 font-bold">{v}</div></div>)})}</div></div>
-            </div>
-            <canvas ref={canvasRef} width={viewSize.width} height={viewSize.height} className="block w-full h-full bg-[#020617]" style={{ imageRendering: 'pixelated' }} />
+        <div data-gamepad-survivor-live={gameState.current==='PLAYING'?'true':undefined} style={{touchAction:inLobby?'pan-y':'none'}} className="mini-game-survivor-screen sy-screen flex flex-col h-full w-full bg-[#020617] text-white relative items-center justify-center font-mono overflow-hidden touch-none select-none" ref={containerRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
+            {!inLobby&&<div className="sy-hud">
+                <div className="sy-vitals"><HeroPortrait id={selectedHero.current.id}/><div><strong>LV {uiState.level} <span>HP {Math.max(0,Math.ceil(uiState.hp))}/{uiState.maxHp}</span></strong><div className="sy-meter sy-hp"><i style={{width:`${Math.max(0,uiState.hp/uiState.maxHp*100)}%`}}/></div><div className="sy-meter sy-xp"><i style={{width:`${uiState.xpPercent}%`}}/></div></div></div>
+                <div className="sy-clock"><strong>{Math.floor(uiState.time/60).toString().padStart(2,'0')}:{(uiState.time%60).toString().padStart(2,'0')}</strong><small>WAVE {battleUi.wave} · {battleUi.kills} K.O.</small></div>
+                <div className="sy-equipment">{(Object.keys(weapons) as WeaponType[]).filter(k=>weapons[k]).map(k=><div key={k} title={tr(WEAPONS[k].name)}><span style={getSpriteSheetIconStyle('schoolyard-survivor/weapons.webp',SCHOOLYARD_WEAPON_ASSET_KEYS,k)}/><small>{weapons[k]!.level}</small></div>)}</div>
+            </div>}
+            {!inLobby&&battleUi.boss>0&&<div className="sy-bossbar"><strong>{l('終業の鐘・ベルコロッサス','BELL COLOSSUS','しゅうぎょうの かね・ベルコロッサス')}</strong><div className="sy-meter"><i style={{width:`${Math.max(0,battleUi.boss/battleUi.bossMax*100)}%`}}/></div></div>}
+            {!inLobby&&battleUi.banner>0&&!uiState.gameOver&&<div className="sy-wave-banner" key={battleUi.wave}>{battleUi.boss>0?'BOSS INCOMING':`WAVE ${battleUi.wave}`}<small>{l(selectedField.current.name[0],selectedField.current.name[1],selectedField.current.name[2])}</small></div>}
+            <canvas ref={canvasRef} width={viewSize.width} height={viewSize.height} className="block w-full h-full bg-[#020617]" style={{ imageRendering: 'auto' }} />
             {gameState.current === 'MATH_CHALLENGE' && (<div className="absolute inset-0 z-30 pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={tr('全問正解でHP15回復')} languageMode={languageMode} /></div>)}
             {gameState.current === 'LEVEL_UP' && (
                 <div data-gamepad-modal data-gamepad-initial-scope={`survivor-level-up-${uiState.level}`} className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-250 pointer-events-auto p-4">
@@ -1693,7 +1795,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                             let itemDef: any = opt.type === 'WEAPON' ? WEAPONS[opt.id as WeaponType] : (opt.type === 'PASSIVE' ? PASSIVES[opt.id as PassiveType] : { name: '特別給食', desc: 'HP 50回復', sprite: { template: 'POTION', color: '#f472b6' } });
                             let isEvo = opt.isEvo;
                             const weaponIconStyle = opt.type === 'WEAPON'
-                                ? getSpriteSheetIconStyle('schoolyard-survivor-weapons.webp', SCHOOLYARD_WEAPON_ASSET_KEYS, opt.id)
+                                ? getSpriteSheetIconStyle('schoolyard-survivor/weapons.webp', SCHOOLYARD_WEAPON_ASSET_KEYS, opt.id)
                                 : undefined;
                             return (
                                 <button key={idx} data-gamepad-initial-choice onClick={() => selectUpgrade(opt)} className={`bg-slate-900 border-4 ${isEvo ? 'border-yellow-400 bg-yellow-900/40 shadow-[0_0_20px_rgba(250,204,21,0.3)]' : 'border-slate-700'} hover:border-blue-400 hover:bg-slate-800 p-4 rounded-2xl flex items-center text-left transition-all group relative overflow-hidden shadow-2xl`}><div className={`w-16 h-16 bg-black/60 mr-4 ${isEvo ? 'animate-bounce' : ''} shrink-0 p-2 border-2 border-slate-600 rounded-xl shadow-inner`}>{weaponIconStyle ? <div className="w-full h-full" style={weaponIconStyle} /> : <PixelSprite seed={opt.id} name={`${itemDef.sprite.template}|${itemDef.sprite.color}`} className="w-full h-full"/>}</div><div className="flex-1"><div className="flex justify-between items-center mb-1"><div className={`text-xl font-black leading-tight ${isEvo ? 'text-yellow-300' : 'text-white'}`}>{tr(isEvo ? itemDef.evolvedName : itemDef.name)}</div><div className="text-[10px] text-blue-300 font-black bg-blue-900/60 px-3 py-1 rounded-full border border-blue-400/50 uppercase">{opt.isNew ? tr('New Weapon') : (opt.type === 'HEAL' ? tr('Bonus') : `Lv ${opt.level || 'Master'}`)}</div></div><div className="text-xs text-gray-300 leading-snug font-bold">{tr(isEvo ? itemDef.evolvedDesc : itemDef.desc)}</div>{opt.type === 'WEAPON' && !isEvo && <div className="text-[10px] text-indigo-400 mt-1 flex items-center gap-1 font-black"><Sparkles size={10}/> {tr('SYNERGY')}: {tr(PASSIVES[itemDef.synergy as PassiveType].name)}</div>}</div>{isEvo && <div className="absolute top-0 right-0 bg-gradient-to-b from-yellow-400 to-orange-600 text-black text-[10px] font-black px-4 py-1 rounded-bl-xl shadow-lg">{tr('協助進化')}</div>}</button>
@@ -1703,16 +1805,14 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 </div>
             )}
             {joystickUI && joystickUI.active && <div className="absolute z-30 pointer-events-none" style={{ left: joystickUI.startX, top: joystickUI.startY, transform: 'translate(-50%, -50%)' }}><div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm"></div><div className="absolute w-12 h-12 rounded-full bg-white/40 shadow-2xl" style={{ left: '50%', top: '50%', transform: `translate(calc(-50% + ${joystickUI.curX - joystickUI.startX}px), calc(-50% + ${joystickUI.curY - joystickUI.startY}px))` }}></div></div>}
-            {uiState.gameOver && (<div data-gamepad-modal data-gamepad-initial-scope="survivor-game-over" className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-20 pointer-events-auto animate-in fade-in duration-500"><Skull size={80} className="text-red-500 mb-4 animate-bounce"/><h2 className="text-7xl font-black text-white mb-4 tracking-tighter italic">{tr('GAME OVER')}</h2><div className="text-2xl text-yellow-400 mb-8 font-black bg-black/60 px-8 py-2 rounded-full border border-yellow-500">{tr('SURVIVED')}: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="flex flex-col gap-4 w-72"><button data-gamepad-initial-choice onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"><RotateCcw className="mr-2"/> {tr('PLAY AGAIN')}</button><button onClick={handleExit} className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-white/20 hover:bg-gray-900 flex items-center justify-center shadow-2xl transition-all"><ArrowLeft className="mr-2"/> {tr('EXIT TO MENU')}</button></div></div>)}
-            {gameState.current === 'PLAYING' && (
-                <button
-                    onClick={handleExit}
-                    aria-label="QUIT"
-                    className="survivor-pause-button absolute top-4 right-4 bg-gray-800/75 hover:bg-red-500/90 text-white px-3 py-2 rounded-xl border-2 border-white/20 z-50 pointer-events-auto shadow-2xl backdrop-blur-lg transition-all inline-flex items-center gap-1.5 font-black text-xs tracking-wider"
-                >
-                    <LogOut size={17} /> QUIT
-                </button>
-            )}
+            {uiState.gameOver&&<div className="sy-results" data-gamepad-modal data-gamepad-initial-scope="survivor-game-over"><p className="sy-eyebrow">{battleUi.victory?'THE FINAL BELL HAS FALLEN':'ANOTHER DAY, ANOTHER CHALLENGE'}</p><HeroPortrait id={selectedHero.current.id}/><h2>{battleUi.victory?'STAGE CLEAR!':'GAME OVER'}</h2><p>{tr(selectedHero.current.name)} · {l(selectedField.current.name[0],selectedField.current.name[1],selectedField.current.name[2])}</p><div className="sy-result-stats"><div><small>{l('生存時間','SURVIVED','せいぞん じかん')}</small><strong>{Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</strong></div><div><small>SCORE</small><strong>{uiState.score||score.current}</strong></div><div><small>K.O.</small><strong>{battleUi.kills}</strong></div></div><button data-gamepad-initial-choice className="sy-primary" onClick={()=>{gameState.current='TITLE';setInLobby(true);setUiState(prev=>({...prev,gameOver:false}));}}><RotateCcw size={18}/>{l('もう一度選ぶ','Choose again','もういちど えらぶ')}</button><button className="sy-secondary" onClick={handleExit}><ArrowLeft size={15}/>{l('ミニゲーム選択へ','Exit to mini-games','ミニゲーム せんたくへ')}</button></div>}
+            {gameState.current === 'PLAYING' && <>
+                <button onClick={pauseBattle} className="sy-pause" aria-label={l('一時停止','Pause','いちじていし')}><Pause size={20}/></button>
+                <div className="sy-actions" onTouchStart={e=>e.stopPropagation()}><button onClick={activateDash} disabled={battleUi.dash>0} aria-label={l('回避ダッシュ','Dash','かいひ ダッシュ')}><Wind size={22}/><strong>{l('回避','DASH','かいひ')}</strong><small>{battleUi.dash>0?`${(battleUi.dash/60).toFixed(1)}s`:'SHIFT'}</small></button><button className={battleUi.burst>=100?'sy-burst-ready':''} onClick={activateBurst} disabled={battleUi.burst<100} aria-label={l('バースト','Burst')} style={{'--charge':`${battleUi.burst}%`} as React.CSSProperties}><Zap size={24}/><strong>{l('バースト','BURST')}</strong><small>{battleUi.burst>=100?'SPACE':`${Math.floor(battleUi.burst)}%`}</small></button></div>
+            </>}
+            {paused&&<div className="sy-pause-overlay" data-gamepad-modal data-gamepad-initial-scope="survivor-pause"><h2>PAUSED</h2><p>{l('ひと休みして、また戦場へ。','Take a breath. The battlefield can wait.','ひとやすみして、また せんじょうへ。')}</p><button data-gamepad-initial-choice className="sy-primary" onClick={resumeBattle}><Play size={20}/>{l('続ける','Resume','つづける')}</button><button className="sy-secondary" onClick={()=>{setPaused(false);setInLobby(true);gameState.current='TITLE';stopSurvivorAudio();clearAllTimeouts();setUiState(prev=>({...prev,gameOver:false}));}}>{l('主人公を選び直す','Choose another hero','しゅじんこうを えらびなおす')}</button><button className="sy-secondary" onClick={handleExit}>{l('ミニゲーム選択へ','Exit to mini-games','ミニゲーム せんたくへ')}</button></div>}
+            {inLobby&&<SurvivorLobby languageMode={languageMode} weaponName={id=>tr(WEAPONS[id as WeaponType].name)} onBack={handleExit} onStart={(hero,field)=>{selectedHero.current=hero;selectedField.current=field;handleRestart();}}/>}
+
         </div>
     );
 };

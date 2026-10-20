@@ -1144,6 +1144,8 @@ export const useXboxControllerNavigation = () => {
         const goHomeGameplayActive = Boolean(document.querySelector('[data-gamepad-go-home-live="true"]'))
           && !getTopmostVisibleGamepadModal()
           && !document.querySelector('.main-challenge-screen, [data-gamepad-question-screen]');
+        const survivorGameplayActive = Boolean(document.querySelector('[data-gamepad-survivor-live="true"]'))
+          && !getTopmostVisibleGamepadModal();
         const aPressed = Boolean(gamepad.buttons[BUTTON_INDEX.A]?.pressed);
         if (goHomeGameplayActive) {
           dispatchGoHomeJump(aPressed);
@@ -1161,6 +1163,8 @@ export const useXboxControllerNavigation = () => {
             if (name === 'BACK') {
               markGamepadNavigation();
               window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_SYSTEM_MENU_EVENT));
+            } else if (survivorGameplayActive && (name === 'A' || name === 'X' || name === 'START' || name.startsWith('DPAD_'))) {
+              // Survivor reads movement, dash, burst and pause directly from the pad.
             } else if (goHomeGameplayActive && name === 'A') {
               // Held Space is emitted above so jump height follows the A-button hold duration.
             } else if (dungeonGameplayActive && name.startsWith('DPAD_')) {

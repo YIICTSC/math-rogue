@@ -30,7 +30,7 @@ type MiniGameSpriteDefinition = {
 
 const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
   GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
-  SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.webp', columns: 8, rows: 5, index: 0 },
+  SURVIVOR: { src: 'sprites/schoolyard-survivor/weapons.webp', columns: 8, rows: 5, index: 0 },
   POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },
   DUNGEON: { src: 'sprites/furai-sfc-v2-hero-base-5x5.webp', columns: 5, rows: 5, index: 0, cell: 72, gap: 16 },
   KOCHO: { src: 'sprites/kocho-hero-actions-01.webp', columns: 5, rows: 5, index: 0 },

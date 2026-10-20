@@ -48,6 +48,7 @@ type MiniGameSectionId =
 type MiniGameVisual =
     | { type: 'sprite'; value: string }
     | { type: 'image'; value: string }
+    | { type: 'survivor-weapon'; index: number }
     | { type: 'glyph'; value: string }
     | { type: 'furai-sheet'; group: 'weapons' | 'armor' | 'items'; index: number }
     | { type: 'furai-card'; templateId: string }
@@ -235,6 +236,7 @@ const renderVisual = (entry: MiniGameEntry, size = 'h-14 w-14') => {
     if (entry.visual.type === 'shogi-piece') {
         return <ShogiPieceIcon glyph={entry.visual.glyph} className="scale-[1.7]" />;
     }
+    if(entry.visual.type==='survivor-weapon'){const i=entry.visual.index;return <div className={size} style={{backgroundImage:`url("${assetUrl('sprites/schoolyard-survivor/weapons.webp')}")`,backgroundSize:'800% 500%',backgroundPosition:`${i%8*100/7}% ${Math.floor(i/8)*25}%`}}/>;}
     if (entry.visual.type === 'none') {
         return <Lock size={22} className="text-slate-500" aria-hidden="true" />;
     }
@@ -310,14 +312,14 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             metadata: [`POWER ${card.power}`],
         }));
 
-        const survivorWeapons = SCHOOLYARD_WEAPON_CATALOG.map(weapon => ({
+        const survivorWeapons = SCHOOLYARD_WEAPON_CATALOG.map((weapon,index) => ({
             id: `survivor-weapon-${weapon.id}`,
             name: weapon.name,
             description: `${weapon.desc} / ${weapon.evolvedName}: ${weapon.evolvedDesc}`,
             category: '武器',
             unlocked: isDiscovered('SURVIVOR', `survivor-weapon-${weapon.id}`),
             tracked: true,
-            visual: { type: 'sprite' as const, value: `${weapon.sprite.template}|${weapon.sprite.color}` },
+            visual: { type: 'survivor-weapon' as const, index },
             discoveryKey: `survivor-weapon-${weapon.id}`,
             metadata: [`進化: ${weapon.evolvedName}`, `連携: ${weapon.synergy}`],
         }));

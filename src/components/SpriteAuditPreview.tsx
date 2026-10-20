@@ -151,6 +151,9 @@ const getSpritePreviewLayout = (path: string): SpritePreviewLayout | null => {
   if (normalizedPath.includes('go-home-dash-jump-3')) return { columns: 3, rows: 1, aspectRatio: 840 / 724, frameDurationMs: 180 };
   if (normalizedPath.includes('go-home-dash-enemies')) return { columns: 4, rows: 4, frameDurationMs: 220 };
   if (normalizedPath.includes('go-home-dash-projectiles')) return { columns: 5, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('schoolyard-survivor/weapons')) return { columns: 8, rows: 5, frameDurationMs: 220 };
+  if (normalizedPath.includes('schoolyard-survivor/scenery')) return { columns: 8, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('schoolyard-survivor/effects')) return { columns: 8, rows: 6, frameDurationMs: 90 };
   if (normalizedPath.includes('schoolyard-survivor-enemies')) return { columns: 8, rows: 2, frameDurationMs: 220 };
   if (normalizedPath.includes('schoolyard-survivor-weapons')) return { columns: 8, rows: 5, frameDurationMs: 220 };
   if (normalizedPath.includes('schoolyard-survivor-effects')) return { columns: 8, rows: 2, frameDurationMs: 220 };
