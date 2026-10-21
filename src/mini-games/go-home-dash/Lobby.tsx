@@ -3,15 +3,17 @@ import { PROTAGONISTS } from '../../three/protagonistCatalog';
 import { isProtagonistUnlocked, protagonistUnlockRequirement } from '../../utils/protagonistUnlocks';
 import { assetUrl } from '../../utils/assetPaths';
 import { trans } from '../../utils/textUtils';
+import type { RunMode, ArcadeProfile } from './arcade';
 import type { LanguageMode } from '../../types';
 import { DASH_HERO_ART } from './heroes';
 import './dash.css';
 
 export const DASH_HEROES = PROTAGONISTS.filter(h => !h.id.startsWith('elementary-'));
 export const DEFAULT_DASH_HERO = 'high-school-warrior';
-export function DashLobby({ hero, onHero, onStart, onBack, languageMode, oneHit, exitEnabled }: {
+export function DashLobby({ hero, onHero, onStart, onBack, languageMode, oneHit, exitEnabled, runMode, onRunMode, profile }: {
   hero: string; onHero: (id: string) => void; onStart: () => void; onBack: () => void;
   languageMode: LanguageMode; oneHit: boolean; exitEnabled: boolean;
+  runMode:RunMode; onRunMode:(mode:RunMode)=>void; profile:ArcadeProfile;
 }) {
   const [picking, setPicking] = useState(false);
   const [chapter, setChapter] = useState('high-school');
@@ -32,7 +34,13 @@ export function DashLobby({ hero, onHero, onStart, onBack, languageMode, oneHit,
           </button>;
         })}</div>
       </div>}
-      <p className="dash-instructions">{L('タップ・Space・A：ジャンプ ／ Shift：ダッシュ', 'Tap · Space · A: jump / Shift: dash', 'タップ・Space・A：ジャンプ ／ Shift：ダッシュ')}<br/>{L('長押しで高く。空ではタップで羽ばたき、隙間を通過。', 'Hold for height. In flight, tap to flap through gaps.', 'ながおしでたかく。そらではタップではばたき、すきまをつうか。')}</p>
+      <div className="dash-mode-picker" role="radiogroup" aria-label={L('走り方','Run mode','はしりかた')}>
+        {(['classic','daily','practice'] as const).map(mode=><button key={mode} role="radio" aria-checked={runMode===mode} onClick={()=>onRunMode(mode)}>{mode==='classic'?L('通常','Classic','つうじょう'):mode==='daily'?L('デイリー','Daily','デイリー'):L('練習','Practice','れんしゅう')}</button>)}
+      </div>
+      <p className="dash-mode-description">{runMode==='daily'?L('今日の固定コースに挑戦。日付はUTC基準。','Today’s seeded course. Date uses UTC.','きょうのこていコースにちょうせん。ひづけはUTCきじゅん。'):runMode==='practice'?L('3000ごとに再開地点を保存。ランキング対象外。','Retry from each 3000m checkpoint. Not ranked.','3000ごとにさいかいちてんをほぞん。ランキングたいしょうがい。'):L('コイン・コンボ・変身で最高記録を目指せ！','Collect, chain combos and transform for a new best!','コイン・コンボ・へんしんでさいこうきろくをめざせ！')}</p>
+      <div className="dash-career">◉ {profile.coins} · ✦ {profile.stars} · BEST {profile.bestCombo} COMBO{runMode==='daily'&&<span> · DAILY {profile.dailyDay===new Date().toISOString().slice(0,10)?profile.dailyBest:0}</span>}</div>
+      <p className="dash-instructions">{L('タップ・Space・A：ジャンプ ／ Shift・X：ダッシュ', 'Tap · Space · A: jump / Shift · X: dash', 'タップ・Space・A：ジャンプ ／ Shift・X：ダッシュ')}<br/>{L('長押しで高く。空ではタップで羽ばたき、隙間を通過。', 'Hold for height. In flight, tap to flap through gaps.', 'ながおしでたかく。そらではタップではばたき、すきまをつうか。')}</p>
+      <details className="dash-field-guide"><summary>{L('新しいアクションを見る','Field guide','あたらしいアクションをみる')}</summary><p>{L('↓・S・Bでスライド。空中なら急降下。光るオーブの近くでジャンプすると再跳躍！ 重力反転はタップ、ウェーブとロケットは長押しで上昇。コインと回避でフィーバー、ボスにはダッシュで反撃。100コイン・スター5個で軌跡の色が変化。Pで一時停止。','Down · S · B slides or dives. Tap near a glowing orb to jump again. Tap to flip gravity; hold to rise in wave or rocket mode. Coins and dodges fuel Fever. Dash to strike the boss. Trail colors unlock at 100 coins and 5 stars. P pauses.','↓・S・Bでスライド。くうちゅうならきゅうこうか。ひかるオーブのちかくでジャンプするとさいちょうやく！ じゅうりょくはんてんはタップ、ウェーブとロケットはながおしでじょうしょう。コインとかいひでフィーバー、ボスにはダッシュではんげき。100コイン・スター5こできせきのいろがへんか。Pでいちじていし。')}</p></details>
       <button className="dash-depart" data-gamepad-initial-choice onClick={onStart}>START DASH <span>→</span></button>
       {exitEnabled && <button className="dash-back" onClick={onBack}>← {L('タイトルに戻る', 'Back to title', 'タイトルにもどる')}</button>}
     </section>

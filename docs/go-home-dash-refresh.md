@@ -110,3 +110,9 @@ Representative screenshots are saved to `tmp/home-dash-qa`.
 The asset verifier decodes every Ogg, checks uniqueness and reference hashes,
 checks that the Japanese speech QA record matches the current clip hashes,
 and validates all 208 distinct animation cells plus route/title/enemy art.
+
+## Arcade expansion
+
+See [runner research and implementation](go-home-dash-runner-research.md) for
+the nine-game source comparison, 36 added mechanics, 16 encounter patterns,
+run modes, input mappings and verification boundaries.
