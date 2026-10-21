@@ -1,3 +1,4 @@
+import { POKER_SIGNATURE_SUPPORTERS } from '../mini-games/after-school-poker/heroes';
 import React, { useMemo, useState } from 'react';
 import { BookOpen, ChevronRight, Gamepad2, Lock, X } from 'lucide-react';
 import type { LanguageMode } from '../types';
@@ -334,7 +335,7 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             discoveryKey: `survivor-passive-${passive.id}`,
         }));
 
-        const pokerSupporters = SUPPORTERS_LIBRARY.map(supporter => {
+        const pokerSupporters = [...SUPPORTERS_LIBRARY, ...POKER_SIGNATURE_SUPPORTERS].map(supporter => {
             const tracked = EXPANDED_SUPPORTER_IDS.includes(supporter.id);
             return {
                 id: `poker-supporter-${supporter.id}`,

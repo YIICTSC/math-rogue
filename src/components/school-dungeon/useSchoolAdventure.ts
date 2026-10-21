@@ -1,3 +1,4 @@
+import { isProtagonistUnlocked } from '../../utils/protagonistUnlocks';
 import {ABYSS_HEROES,abyssHero,abyssSelection,unlockedAbyssHeroes,signatureHero} from './dungeons2/roster';
 import {decorateExpedition,expedition as getExpedition} from './expeditions';
 import {studentAbility,abilityDescription,resolveStudentAbility,type StudentAbility} from './student/abilities';
@@ -27,7 +28,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const b=useRef(bridge);b.current=bridge;
  const key=`learning-rogue:school-base:${bridge.game}`;
  const baseRef=useRef<SchoolBase|null>(null);if(!baseRef.current)baseRef.current=bridge.debug?newBase():loadBase(key);const base=baseRef as {current:SchoolBase};const state=useRef(newAdventure());
- if(bridge.game===2)base.current.selectedHero=abyssSelection(base.current.selectedHero,base.current.dungeons2Clears).id;else if(!isProtagonistId(base.current.selectedHero)||abyssHero(base.current.selectedHero))base.current.selectedHero='elementary-warrior';
+ if(bridge.game===2)base.current.selectedHero=abyssSelection(base.current.selectedHero,base.current.dungeons2Clears).id;else if(!isProtagonistId(base.current.selectedHero)||abyssHero(base.current.selectedHero)||!isProtagonistUnlocked(base.current.selectedHero))base.current.selectedHero='elementary-warrior';
  const [revision,redraw]=useState(0);const [panel,setPanel]=useState<string|null>(null);
  const [dojoRun,setDojoRun]=useState<DojoRun|null>(null);const dojoRef=useRef<DojoRun|null>(null);
  const [storyIndex,setStoryIndex]=useState<number|null>(null),[storyLine,setStoryLine]=useState(0),[storyReplay,setStoryReplay]=useState(false);
@@ -47,7 +48,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const persist=()=>{if(!b.current.debug)try{localStorage.setItem(key,JSON.stringify(base.current));}catch{setMessage(text('保存領域がいっぱいです。道具を減らして再保存してください。','Storage is full. Reduce stored supplies and try again.'));refresh();return false;}refresh();return true;};
  const say=(ja:string,en:string)=>{const msg=text(ja,en);base.current.diary=[...(base.current.diary||[]),msg].slice(-40);b.current.log(msg);setMessage(msg);refresh();};
  const activeHero=()=>studentHero(dojoRef.current?base.current.selectedHero:state.current.heroId||base.current.selectedHero);
- const setHero=(heroId:string)=>{if(!isProtagonistId(heroId)||b.current.game===2&&!unlockedAbyssHeroes(base.current.dungeons2Clears).some(h=>h.id===heroId)||b.current.game===1&&abyssHero(heroId))return;base.current.selectedHero=heroId;loadStudentSprite(heroId);persist();};
+ const setHero=(heroId:string)=>{if(!isProtagonistId(heroId)||b.current.game===2&&!unlockedAbyssHeroes(base.current.dungeons2Clears).some(h=>h.id===heroId)||b.current.game===1&&(abyssHero(heroId)||!isProtagonistUnlocked(heroId)))return;base.current.selectedHero=heroId;loadStudentSprite(heroId);persist();};
  const openStory=(index:number,replay=false)=>{const s=state.current,act=personalStories(activeHero().id)[index];if(!act||(!replay&&(s.mode!=='STORY'||s.storySeen?.includes(act.floor))))return;if(!replay){s.pendingStory=index;s.pendingStoryLine=0;}setStoryIndex(index);setStoryLine(0);setStoryReplay(replay);setPanel('STUDENT_STORY');};
  const advanceStory=()=>{if(storyIndex===null)return;if(storyIndex===-1){if(storyLine<2){state.current.pendingStoryLine=storyLine+1;setStoryLine(v=>v+1);refresh();return;}const hero=classmateFor(activeHero().id);state.current.companion={heroId:hero.id,name:hero.name,role:hero.id.includes('caretaker')||hero.id.includes('hiyori')?'HEAL':'GUARD',x:b.current.player.x,y:b.current.player.y,hp:45,level:1,xp:0,order:'FOLLOW'};state.current.friendRecruited=true;for(const event of Object.values(state.current.events))if(event.kind==='FRIEND')event.done=true;delete state.current.pendingStory;delete state.current.pendingStoryLine;loadStudentSprite(hero.id);setStoryIndex(null);setPanel(null);persist();return;}const hero=activeHero(),chapter=studentChapter(hero.id),act=personalStories(hero.id)[storyIndex];if(storyLine<act.lines.length-1){if(!storyReplay)state.current.pendingStoryLine=storyLine+1;setStoryLine(v=>v+1);refresh();return;}
   if(!storyReplay&&!state.current.storySeen?.includes(act.floor)){state.current.storySeen=[...(state.current.storySeen||[]),act.floor];base.current.studentStory={...base.current.studentStory,[chapter]:Math.max(base.current.studentStory?.[chapter]||0,storyIndex+1)};say(act.title,act.englishTitle);

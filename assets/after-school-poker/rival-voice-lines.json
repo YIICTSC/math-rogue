@@ -1,0 +1,725 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "rivals": [
+    {
+      "id": "rival_lucky_nanami",
+      "name": "ラッキー七海",
+      "caption": "Japanese game character, 明るい少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3153096567,
+      "lines": {
+        "spawn": "ラッキー七海だよ。いい勝負にしよう！",
+        "damage": "わあ、その役、すごい！",
+        "win": "今日は私にツキがあったね！",
+        "defeat": "あはは、完敗！次は負けないよ。"
+      }
+    },
+    {
+      "id": "rival_math_bancho",
+      "name": "計算番長",
+      "caption": "Japanese game character, 低めの少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 558046491,
+      "lines": {
+        "spawn": "計算番長だ。数字で勝負だ！",
+        "damage": "その得点、計算外だ！",
+        "win": "答えは出たな。俺の勝ちだ！",
+        "defeat": "計算を超えた、見事な一手だ。"
+      }
+    },
+    {
+      "id": "rival_stationery_leo",
+      "name": "文具王レオ",
+      "caption": "Japanese game character, 自信家の少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1915208619,
+      "lines": {
+        "spawn": "文具王レオ、参上。切れ味を見せよう。",
+        "damage": "その切り札、なかなかだな。",
+        "win": "勝利も、きっちり書き込もう。",
+        "defeat": "負けたよ。その一手に花丸だ。"
+      }
+    },
+    {
+      "id": "rival_lunch_misuzu",
+      "name": "給食マスター美鈴",
+      "caption": "Japanese game character, 元気な少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1909345978,
+      "lines": {
+        "spawn": "給食マスター美鈴だよ。おかわり大歓迎！",
+        "damage": "わっ、お腹いっぱいの得点！",
+        "win": "ごちそうさま！私の勝ちだね。",
+        "defeat": "おいしい勝負だったね。参りました！"
+      }
+    },
+    {
+      "id": "rival_iron_hayato",
+      "name": "鉄壁ハヤト",
+      "caption": "Japanese game character, 落ち着いた少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2230758924,
+      "lines": {
+        "spawn": "鉄壁ハヤトだ。この壁を超えてみろ。",
+        "damage": "俺の守りを、抜いただと？",
+        "win": "この守り、崩せなかったな。",
+        "defeat": "壁を超えたな。お前の勝ちだ。"
+      }
+    },
+    {
+      "id": "rival_music_sora",
+      "name": "音楽室のソラ",
+      "caption": "Japanese game character, 爽やかな少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 110396662,
+      "lines": {
+        "spawn": "音楽室のソラだよ。一緒に奏でよう。",
+        "damage": "おっ、いいリズムの役だね！",
+        "win": "勝利のメロディー、聞こえたよ。",
+        "defeat": "最高のフィナーレだ。君の勝ち！"
+      }
+    },
+    {
+      "id": "rival_science_rika",
+      "name": "理科室リカ",
+      "caption": "Japanese game character, 知的な少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 558304788,
+      "lines": {
+        "spawn": "理科室リカです。勝負を実験しましょう。",
+        "damage": "予測を超える反応ね！",
+        "win": "仮説を証明したわ。私の勝ち！",
+        "defeat": "見事な結果ね。次の研究に活かすわ。"
+      }
+    },
+    {
+      "id": "rival_library_ren",
+      "name": "図書委員レン",
+      "caption": "Japanese game character, 穏やかな少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2235372489,
+      "lines": {
+        "spawn": "図書委員レンです。新しい物語を始めよう。",
+        "damage": "そんな展開が待っていたんだね。",
+        "win": "最後のページは、僕の勝利だ。",
+        "defeat": "素敵な結末だ。君に拍手を。"
+      }
+    },
+    {
+      "id": "rival_discipline_ayame",
+      "name": "風紀のアヤメ",
+      "caption": "Japanese game character, 凛とした少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1855740765,
+      "lines": {
+        "spawn": "風紀のアヤメです。正々堂々、勝負！",
+        "damage": "見事な一手。油断できませんね。",
+        "win": "規律ある勝負が、勝利を呼びます。",
+        "defeat": "あなたの勝ちです。胸を張って。"
+      }
+    },
+    {
+      "id": "rival_art_momo",
+      "name": "美術部モモ",
+      "caption": "Japanese game character, 陽気な少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3695209867,
+      "lines": {
+        "spawn": "美術部モモだよ。彩り豊かな勝負にしよう！",
+        "damage": "うわあ、鮮やかな一手！",
+        "win": "勝利の絵、完成だよ！",
+        "defeat": "君の手札、最高の作品だね！"
+      }
+    },
+    {
+      "id": "rival_track_kakeru",
+      "name": "陸上カケル",
+      "caption": "Japanese game character, 快活な少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2470050103,
+      "lines": {
+        "spawn": "陸上カケルだ。最後まで走り抜こう！",
+        "damage": "速い！一気に追い上げてきたな。",
+        "win": "ゴール！俺が先だったな！",
+        "defeat": "抜かれた！いい走りだったぜ。"
+      }
+    },
+    {
+      "id": "rival_occult_kurosaki",
+      "name": "オカルト黒崎",
+      "caption": "Japanese game character, 静かな少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3002162713,
+      "lines": {
+        "spawn": "オカルト黒崎だ。運命の札を開こう。",
+        "damage": "ふむ、運命が揺らいだか。",
+        "win": "星は俺の勝利を示していた。",
+        "defeat": "この結末も、運命の導きか。"
+      }
+    },
+    {
+      "id": "rival_president_karen",
+      "name": "生徒会長カレン",
+      "caption": "Japanese game character, 気品ある少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3509894604,
+      "lines": {
+        "spawn": "生徒会長カレンです。遠慮はいらないわ。",
+        "damage": "なるほど。実力は確かなようね。",
+        "win": "会長として、譲れない勝負だったわ。",
+        "defeat": "あなたの勝利ね。誇りに思いなさい。"
+      }
+    },
+    {
+      "id": "rival_baseball_takumi",
+      "name": "野球部タクミ",
+      "caption": "Japanese game character, 力強い少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1243198160,
+      "lines": {
+        "spawn": "野球部タクミだ。全力で打ってこい！",
+        "damage": "おおっ、ホームラン級の一手だな！",
+        "win": "ゲームセット！俺の勝ちだ！",
+        "defeat": "参った！文句なしのホームランだ。"
+      }
+    },
+    {
+      "id": "rival_twins_minato",
+      "name": "双子のミナト",
+      "caption": "Japanese game character, 軽やかな少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2925814447,
+      "lines": {
+        "spawn": "ミナトだよ。二人分のひらめきで挑むよ！",
+        "damage": "あれっ、その組み合わせは読めなかった！",
+        "win": "息ぴったり！僕たちの勝ち！",
+        "defeat": "すごいね！次は作戦を練り直すよ。"
+      }
+    },
+    {
+      "id": "rival_tea_yui",
+      "name": "茶道のユイ",
+      "caption": "Japanese game character, 上品な少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3844181060,
+      "lines": {
+        "spawn": "茶道のユイです。どうぞ、お手柔らかに。",
+        "damage": "まあ、お見事な手でございます。",
+        "win": "一服いかがですか。良い勝負でした。",
+        "defeat": "参りました。美しい一手でしたね。"
+      }
+    },
+    {
+      "id": "rival_alien_aru",
+      "name": "宇宙転校生アル",
+      "caption": "Japanese game character, 不思議な少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2779862959,
+      "lines": {
+        "spawn": "宇宙転校生アルだ。地球の勝負、楽しみだ。",
+        "damage": "観測不能！すごいエネルギーだ！",
+        "win": "宇宙的な大勝利だね！",
+        "defeat": "地球の君は、宇宙一だ！"
+      }
+    },
+    {
+      "id": "rival_principal_shion",
+      "name": "校長の孫シオン",
+      "caption": "Japanese game character, 凛々しい少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2247551882,
+      "lines": {
+        "spawn": "シオンだ。学園に恥じない勝負をしよう。",
+        "damage": "さすがだ。まだ気は抜けないな。",
+        "win": "これが、学園で磨いた実力だ。",
+        "defeat": "認めよう。君こそ学園の誇りだ。"
+      }
+    },
+    {
+      "id": "rival_galaxy_mio",
+      "name": "銀河ノートのミオ",
+      "caption": "Japanese game character, 夢見る少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2364984288,
+      "lines": {
+        "spawn": "銀河ノートのミオです。星の海へようこそ。",
+        "damage": "きらきら、すごい星の数！",
+        "win": "勝利の星座がつながったよ！",
+        "defeat": "君の一手、銀河みたいに輝いてた！"
+      }
+    },
+    {
+      "id": "rival_shop_goro",
+      "name": "購買部ゴロー",
+      "caption": "Japanese game character, 豪快な男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2147074955,
+      "lines": {
+        "spawn": "購買部ゴローだ。とびきりの勝負にしようぜ！",
+        "damage": "おっと、そりゃ大盛りの得点だ！",
+        "win": "まいど！勝利は俺がいただくぜ！",
+        "defeat": "参った参った！今日は大サービスだ！"
+      }
+    },
+    {
+      "id": "rival_maze_rin",
+      "name": "迷路名人リン",
+      "caption": "Japanese game character, 元気な少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 608833335,
+      "lines": {
+        "spawn": "迷路名人リンだよ。勝利への道、見つけるね。",
+        "damage": "あれっ、そこに抜け道があったの？",
+        "win": "ゴール発見！私の勝ち！",
+        "defeat": "君が先に出口を見つけたね！"
+      }
+    },
+    {
+      "id": "rival_raffle_hina",
+      "name": "福引きヒナ",
+      "caption": "Japanese game character, 明るい少女. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3433860024,
+      "lines": {
+        "spawn": "福引きヒナだよ。大当たりを引こう！",
+        "damage": "わあ、特等賞みたいな得点！",
+        "win": "大当たり！私の勝ちだよ！",
+        "defeat": "おめでとう！特等賞は君だね！"
+      }
+    },
+    {
+      "id": "rival_hidden_jin",
+      "name": "裏番長ジン",
+      "caption": "Japanese game character, 渋い少年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 911425456,
+      "lines": {
+        "spawn": "裏番長ジンだ。覚悟はできてるな。",
+        "damage": "やるな。まだ終わっちゃいねえ。",
+        "win": "この勝負、俺がもらったぜ。",
+        "defeat": "いい腕だ。堂々と前に進めよ。"
+      }
+    },
+    {
+      "id": "rival_graduate_akira",
+      "name": "卒業王アキラ",
+      "caption": "Japanese game character, 優しい青年. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1676704943,
+      "lines": {
+        "spawn": "卒業王アキラだ。君の成長を見せてくれ。",
+        "damage": "素晴らしい。その調子で挑むんだ！",
+        "win": "今日は僕の勝ち。次はきっと超えられる。",
+        "defeat": "卒業おめでとう。君ならもっと先へ行ける。"
+      }
+    },
+    {
+      "id": "endless_rival_principal_genda",
+      "name": "校長ゲンダ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3167846307,
+      "lines": {
+        "spawn": "校長ゲンダです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "校長ゲンダの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_nurse_makino",
+      "name": "保健室マキノ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2572740498,
+      "lines": {
+        "spawn": "保健室マキノです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "保健室マキノの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_caretaker_iwata",
+      "name": "用務員イワタ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1350427198,
+      "lines": {
+        "spawn": "用務員イワタです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "用務員イワタの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_librarian_sumire",
+      "name": "図書館司書スミレ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3719628159,
+      "lines": {
+        "spawn": "図書館司書スミレです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "図書館司書スミレの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_cafeteria_tome",
+      "name": "給食長トメ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2125986114,
+      "lines": {
+        "spawn": "給食長トメです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "給食長トメの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_coach_goro",
+      "name": "体育教師ゴロー",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 43083694,
+      "lines": {
+        "spawn": "体育教師ゴローです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "体育教師ゴローの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_crossing_guard_hana",
+      "name": "見守りハナさん",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2082537913,
+      "lines": {
+        "spawn": "見守りハナさんです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "見守りハナさんの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_stationer_matsui",
+      "name": "文房具屋マツイ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3692547929,
+      "lines": {
+        "spawn": "文房具屋マツイです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "文房具屋マツイの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_bakery_mugi",
+      "name": "パン屋ムギさん",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1457089193,
+      "lines": {
+        "spawn": "パン屋ムギさんです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "パン屋ムギさんの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_bus_driver_sabu",
+      "name": "バス運転手サブ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3631685220,
+      "lines": {
+        "spawn": "バス運転手サブです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "バス運転手サブの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_flower_rika",
+      "name": "花屋リカさん",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2356124592,
+      "lines": {
+        "spawn": "花屋リカさんです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "花屋リカさんの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_police_kondo",
+      "name": "交番の近藤さん",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1661916771,
+      "lines": {
+        "spawn": "交番の近藤さんです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "交番の近藤さんの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_cat_mike",
+      "name": "三毛ねこミケ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1055840430,
+      "lines": {
+        "spawn": "三毛ねこミケです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "三毛ねこミケの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_dog_pochi",
+      "name": "しば犬ポチ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2617962701,
+      "lines": {
+        "spawn": "しば犬ポチです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "しば犬ポチの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_rabbit_mochi",
+      "name": "うさぎモチ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2464742180,
+      "lines": {
+        "spawn": "うさぎモチです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "うさぎモチの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_hamster_kurumi",
+      "name": "ハムスターくるみ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 627666009,
+      "lines": {
+        "spawn": "ハムスターくるみです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "ハムスターくるみの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_penguin_pen",
+      "name": "ペンギンのペン太",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3286858758,
+      "lines": {
+        "spawn": "ペンギンのペン太です。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "ペンギンのペン太の勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_owl_fukuro",
+      "name": "ふくろう博士",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1740872453,
+      "lines": {
+        "spawn": "ふくろう博士です。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "ふくろう博士の勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_art_teacher_daigo",
+      "name": "美術教師ダイゴ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2026828465,
+      "lines": {
+        "spawn": "美術教師ダイゴです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "美術教師ダイゴの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_music_teacher_otoha",
+      "name": "音楽教師オトハ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3448270338,
+      "lines": {
+        "spawn": "音楽教師オトハです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "音楽教師オトハの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_science_teacher_tsubaki",
+      "name": "理科教師ツバキ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3528449717,
+      "lines": {
+        "spawn": "理科教師ツバキです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "理科教師ツバキの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_math_teacher_sakuma",
+      "name": "数学教師サクマ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3389583674,
+      "lines": {
+        "spawn": "数学教師サクマです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "数学教師サクマの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_janitor_robot_jiro",
+      "name": "掃除ロボ次郎",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3883040599,
+      "lines": {
+        "spawn": "掃除ロボ次郎です。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "掃除ロボ次郎の勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_pta_madam_reiko",
+      "name": "PTAレイコ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 29847174,
+      "lines": {
+        "spawn": "PTAレイコです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "PTAレイコの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_turtle_kamekichi",
+      "name": "かめ吉",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2044279599,
+      "lines": {
+        "spawn": "かめ吉です。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "かめ吉の勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_sparrow_chun",
+      "name": "すずめのチュン",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1347682264,
+      "lines": {
+        "spawn": "すずめのチュンです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "すずめのチュンの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_hedgehog_hari",
+      "name": "はりねずみハリ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1006252062,
+      "lines": {
+        "spawn": "はりねずみハリです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "はりねずみハリの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_red_panda_maru",
+      "name": "レッサーマル",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 4083125840,
+      "lines": {
+        "spawn": "レッサーマルです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "レッサーマルの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_alpaca_paca",
+      "name": "アルパカぱか",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1315428569,
+      "lines": {
+        "spawn": "アルパカぱかです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "アルパカぱかの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_fox_kon",
+      "name": "きつねコン",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1700516973,
+      "lines": {
+        "spawn": "きつねコンです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "きつねコンの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_convenience_nana",
+      "name": "コンビニ店長ナナ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 1856701885,
+      "lines": {
+        "spawn": "コンビニ店長ナナです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "コンビニ店長ナナの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_bookstore_honda",
+      "name": "本屋ホンダ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3623648966,
+      "lines": {
+        "spawn": "本屋ホンダです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "本屋ホンダの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_dentist_shiro",
+      "name": "歯医者シロ先生",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 3326526549,
+      "lines": {
+        "spawn": "歯医者シロ先生です。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "歯医者シロ先生の勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_curry_master_kenta",
+      "name": "カレー屋ケンタ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 4039086683,
+      "lines": {
+        "spawn": "カレー屋ケンタです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "カレー屋ケンタの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_mailman_hayashi",
+      "name": "郵便屋ハヤシ",
+      "caption": "Japanese game character, 親しみやすい男性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 225417905,
+      "lines": {
+        "spawn": "郵便屋ハヤシです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "郵便屋ハヤシの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    },
+    {
+      "id": "endless_rival_mayor_sakura",
+      "name": "町長サクラ",
+      "caption": "Japanese game character, 温かみのある女性. Clear expressive conversational speech, natural Japanese pronunciation. Distinct warm voice, playful after-school card battle, no music or background noise.",
+      "seed": 2357773597,
+      "lines": {
+        "spawn": "町長サクラです。とっておきの勝負を始めましょう！",
+        "damage": "お見事！その手は効きました。",
+        "win": "町長サクラの勝ちですね。また挑戦してください。",
+        "defeat": "参りました。あなたの一手に拍手です！"
+      }
+    }
+  ]
+}

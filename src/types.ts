@@ -1185,6 +1185,9 @@ export interface PokerBlind {
 }
 
 export interface PokerRunState {
+  protagonistId?: string;
+  bestHandScore?: number;
+  openPack?: { packId: string; content: (PokerCard | PokerSupporter | PokerConsumable)[] };
   phase?: PokerPhase;
   deck: PokerCard[];
   money: number;

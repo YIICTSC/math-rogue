@@ -2294,6 +2294,26 @@ class AudioService {
       }
   }
 
+  public playPokerRivalVoice(rivalId: string, event: 'spawn' | 'damage' | 'win' | 'defeat') {
+      if (!/^(?:endless_)?rival_[a-z0-9_]+$/.test(rivalId)) return Promise.resolve(false);
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
+      this.stopPokerRivalVoices();
+      const name = `poker-rival-voice-${rivalId}-${event}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      return this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/poker-rivals/${rivalId}/${event}.ogg`))], 8000, false, generation);
+  }
+
+  public stopPokerRivalVoices() {
+      const names = new Set([...this.sfxPlaybackGenerations.keys(), ...this.activeHtmlSfx.keys(), ...this.activeSfxSources.keys()]);
+      for (const name of names) {
+          if (!name.startsWith('poker-rival-voice-')) continue;
+          this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
+          this.stopActiveSfx(name);
+      }
+  }
+
   /** Stop both playing and still-loading school hero lines when leaving a mini-game. */
   public stopSchoolHeroVoices() {
       const names = new Set([...this.sfxPlaybackGenerations.keys(), ...this.activeHtmlSfx.keys(), ...this.activeSfxSources.keys()]);

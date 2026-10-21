@@ -1,3 +1,4 @@
+import { isProtagonistUnlocked, protagonistUnlockRequirement } from '../../utils/protagonistUnlocks';
 import React, { useState } from "react";
 import {
   ArrowLeft,
@@ -150,16 +151,19 @@ export default function SurvivorLobby({
                   </button>
                 ))}
               </div>
+              <p className="sy-unlock-hint">{l("主人公は本編のクリア回数に応じて解放されます。", "Heroes unlock with main-game clears in each chapter.", "しゅじんこうは ほんぺんの クリアかいすうに おうじて かいほうされます。")}</p>
               <div className="sy-hero-grid">
                 {HEROES.filter((h) => h.chapter === chapter).map((h) => (
                   <button
                     key={h.id}
                     aria-pressed={hero.id === h.id}
                     className="sy-hero-card"
+                    disabled={!isProtagonistUnlocked(h.id)}
+                    title={isProtagonistUnlocked(h.id) ? h.name : l(`本編クリア ${protagonistUnlockRequirement(h.id)?.clears}回で解放`, `Unlock after ${protagonistUnlockRequirement(h.id)?.clears} main-story clears`, `ほんぺんクリア ${protagonistUnlockRequirement(h.id)?.clears}かいで かいほう`)}
                     onClick={() => setHero(h)}
                   >
                     <HeroPortrait id={h.id} />
-                    <span>{trans(h.name, languageMode)}</span>
+                    <span>{!isProtagonistUnlocked(h.id) && "🔒 "}{trans(h.name, languageMode)}</span>
                   </button>
                 ))}
               </div>
@@ -222,7 +226,8 @@ export default function SurvivorLobby({
             <button
               data-gamepad-initial-choice
               className="sy-primary"
-              onClick={() => onStart(hero, field)}
+              disabled={!isProtagonistUnlocked(hero.id)}
+              onClick={() => { if (isProtagonistUnlocked(hero.id)) onStart(hero, field); }}
             >
               <Play size={18} fill="currentColor" />
               {l("出撃する", "Start run", "しゅつげきする")}

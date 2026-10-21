@@ -1,0 +1,147 @@
+{
+  "provider": "ImageGen",
+  "date": "2026-10-21",
+  "title": {
+    "generated": "exec-3fd6497f-4edd-4dd1-bc5b-1ceae0ac079d.png",
+    "references": [
+      "public/sprites/high-school/characters/0.webp",
+      "public/sprites/magic/characters/heroine-01-before.webp"
+    ]
+  },
+  "expressions": [
+    {
+      "generated": "exec-55c4d93d-7b1c-4a9c-acbb-9bfe07ed0f60.png",
+      "heroes": [
+        {
+          "id": "high-school-warrior",
+          "path": "public/sprites/high-school/characters/0.webp"
+        },
+        {
+          "id": "high-school-caretaker",
+          "path": "public/sprites/high-school/characters/1.webp"
+        },
+        {
+          "id": "high-school-assassin",
+          "path": "public/sprites/high-school/characters/2.webp"
+        },
+        {
+          "id": "high-school-mage",
+          "path": "public/sprites/high-school/characters/3.webp"
+        },
+        {
+          "id": "high-school-dodgeball",
+          "path": "public/sprites/high-school/characters/4.webp"
+        }
+      ]
+    },
+    {
+      "generated": "exec-35c6bb1f-01ff-489c-ae6a-776b0f86be6f.png",
+      "heroes": [
+        {
+          "id": "high-school-bard",
+          "path": "public/sprites/high-school/characters/5.webp"
+        },
+        {
+          "id": "high-school-librarian",
+          "path": "public/sprites/high-school/characters/6.webp"
+        },
+        {
+          "id": "high-school-chef",
+          "path": "public/sprites/high-school/characters/7.webp"
+        },
+        {
+          "id": "high-school-gardener",
+          "path": "public/sprites/high-school/characters/8.webp"
+        }
+      ]
+    },
+    {
+      "generated": "exec-39c388c1-ecab-4a4f-9897-c15f193b1d76.png",
+      "heroes": [
+        {
+          "id": "magic-akari",
+          "path": "public/sprites/magic/characters/heroine-01-before.webp"
+        },
+        {
+          "id": "magic-shizuku",
+          "path": "public/sprites/magic/characters/heroine-02-before.webp"
+        },
+        {
+          "id": "magic-hiyori",
+          "path": "public/sprites/magic/characters/heroine-03-before.webp"
+        },
+        {
+          "id": "magic-tsubasa",
+          "path": "public/sprites/magic/characters/heroine-04-before.webp"
+        },
+        {
+          "id": "magic-rei",
+          "path": "public/sprites/magic/characters/heroine-05-before.webp"
+        },
+        {
+          "id": "magic-madoka",
+          "path": "public/sprites/magic/characters/heroine-06-before.webp"
+        }
+      ]
+    },
+    {
+      "generated": "exec-7a812446-a32d-45cd-9ba1-e1b0c5d73280.png",
+      "heroes": [
+        {
+          "id": "magic-koharu",
+          "path": "public/sprites/magic/characters/heroine-07-before.webp"
+        },
+        {
+          "id": "magic-mirai",
+          "path": "public/sprites/magic/characters/heroine-08-before.webp"
+        },
+        {
+          "id": "magic-sera",
+          "path": "public/sprites/magic/characters/heroine-09-before.webp"
+        },
+        {
+          "id": "magic-ren",
+          "path": "public/sprites/magic/male-characters/ren-before.webp"
+        },
+        {
+          "id": "magic-soma",
+          "path": "public/sprites/magic/male-characters/soma-before.webp"
+        },
+        {
+          "id": "magic-minato",
+          "path": "public/sprites/magic/male-characters/minato-before.webp"
+        }
+      ]
+    },
+    {
+      "generated": "exec-a19d4f0c-33c4-4025-aea4-4ddeaa79b068.png",
+      "heroes": [
+        {
+          "id": "magic-riku",
+          "path": "public/sprites/magic/male-characters/riku-before.webp"
+        },
+        {
+          "id": "magic-yamato",
+          "path": "public/sprites/magic/male-characters/yamato-before.webp"
+        },
+        {
+          "id": "magic-leon",
+          "path": "public/sprites/magic/male-characters/leon-before.webp"
+        },
+        {
+          "id": "magic-elliot",
+          "path": "public/sprites/magic/male-characters/elliot-before.webp"
+        },
+        {
+          "id": "magic-sakuya",
+          "path": "public/sprites/magic/male-characters/sakuya-before.webp"
+        }
+      ]
+    }
+  ],
+  "supporters": {
+    "generated": "exec-aba65045-ef40-4d33-97d0-45d23c88ef4f.png",
+    "columns": 6,
+    "rows": 5
+  }
+}

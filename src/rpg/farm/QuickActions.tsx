@@ -1,3 +1,4 @@
+import { multiTouchAction } from '../../utils/multiTouchAction';
 import React, { useState } from "react";
 import type { World, Action } from "../engine";
 import type { LanguageMode } from "../../types";
@@ -105,13 +106,13 @@ export default function FarmQuickActions({
                   ? f.animals.find((a) => a.id === t.id)!.name
                   : f.pets.find((a) => a.id === t.id)!.name
             }
-            onClick={() => setSelected(`${t.kind}:${t.id}`)}
+            {...multiTouchAction(() => setSelected(`${t.kind}:${t.id}`))}
           >
             {icon(t)}
           </button>
         ))}
         <button
-          onClick={onOpen}
+          {...multiTouchAction(onOpen)}
           aria-label={L(
             "農園を詳しく見る",
             "Open farm details",
@@ -153,7 +154,7 @@ export default function FarmQuickActions({
               </select>
               <button
                 disabled={busy || !chosen}
-                onClick={() => act("plant", { crop: chosen!.id })}
+                {...multiTouchAction(() => act("plant", { crop: chosen!.id }))}
               >
                 🌱 {L("植える", "Plant", "うえる")}
               </button>
@@ -162,7 +163,7 @@ export default function FarmQuickActions({
             <>
               <button
                 disabled={busy || plot.water === cal.day}
-                onClick={() => act("water")}
+                {...multiTouchAction(() => act("water"))}
               >
                 💧{" "}
                 {plot.water === cal.day
@@ -171,14 +172,14 @@ export default function FarmQuickActions({
               </button>
               <button
                 disabled={busy || plot.growth < cropById(plot.crop)!.days}
-                onClick={() => act("harvest")}
+                {...multiTouchAction(() => act("harvest"))}
               >
                 🧺 {L("収穫", "Harvest", "しゅうかく")}
               </button>
               {!plot.fertilizer && (
                 <button
                   disabled={busy || f.compost < 1}
-                  onClick={() => act("fertilize")}
+                  {...multiTouchAction(() => act("fertilize"))}
                 >
                   🌿 {L("堆肥", "Fertilize", "たいひ")}
                 </button>
@@ -193,25 +194,25 @@ export default function FarmQuickActions({
           <>
             <button
               disabled={busy || animal.feed === cal.day || !f.feed}
-              onClick={() => act("feed")}
+              {...multiTouchAction(() => act("feed"))}
             >
               {L("えさ", "Feed", "えさ")}
             </button>
             <button
               disabled={busy || animal.brush === cal.day}
-              onClick={() => act("brush")}
+              {...multiTouchAction(() => act("brush"))}
             >
               {L("ブラシ", "Brush", "ぶらし")}
             </button>
             <button
               disabled={busy || animal.pat === cal.day}
-              onClick={() => act("pat")}
+              {...multiTouchAction(() => act("pat"))}
             >
               ♡ {L("なでる", "Pat", "なでる")}
             </button>
             <button
               disabled={busy || !animal.ready}
-              onClick={() => act("collect")}
+              {...multiTouchAction(() => act("collect"))}
             >
               🧺 {L("受け取る", "Collect", "うけとる")} {animal.ready || ""}
             </button>
@@ -221,25 +222,25 @@ export default function FarmQuickActions({
           <>
             <button
               disabled={busy || pet.cares.feed === cal.day || !f.feed}
-              onClick={() => act("feed")}
+              {...multiTouchAction(() => act("feed"))}
             >
               {L("えさ", "Feed", "えさ")}
             </button>
             <button
               disabled={busy || pet.cares.pat === cal.day}
-              onClick={() => act("pat")}
+              {...multiTouchAction(() => act("pat"))}
             >
               ♡ {L("なでる", "Pat", "なでる")}
             </button>
             <button
               disabled={busy || pet.cares.play === cal.day}
-              onClick={() => act("play")}
+              {...multiTouchAction(() => act("play"))}
             >
               {L("遊ぶ", "Play", "あそぶ")}
             </button>
             <button
               disabled={busy || pet.cares.train === cal.day}
-              onClick={() => act("train")}
+              {...multiTouchAction(() => act("train"))}
             >
               {L("しつけ", "Train", "しつけ")}
             </button>
@@ -255,7 +256,7 @@ export default function FarmQuickActions({
                     pet.hunger < 15 ||
                     world.life.time < (pet.lastTrick ?? -100) + 8
                   }
-                  onClick={() => act("trick", { trick: t[0] })}
+                  {...multiTouchAction(() => act("trick", { trick: t[0] }))}
                 >
                   ★ {copy(trickCopy(t), languageMode)}
                 </button>

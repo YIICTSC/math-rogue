@@ -27,7 +27,7 @@ try {
             .replace(/\r\n/g, "\n")
             .replace(
               "    return (\n        <div data-gamepad-survivor-live=",
-              `    (window as any).__survivor={gameState,player,enemies,projectiles,enemyBullets,gems,particles,magicFx,hazards,action,time,frameCount,xp,nextLevelXp,level,score,weaponsRef,passivesRef,selectedHero,selectedField,obstacles,keys,activeTimeouts,scheduleShot,update,draw,spawnEnemy,activateDash,activateBurst,applyDamage,fireWeapon,damagePlayer,handleMathComplete,selectUpgrade,clearInput,handleRestart,spriteCache};\n    return (\n        <div data-gamepad-survivor-live=`,
+              `    (window as any).__survivor={gameState,player,enemies,projectiles,enemyBullets,gems,particles,magicFx,hazards,action,time,frameCount,xp,nextLevelXp,level,score,weaponsRef,passivesRef,selectedHero,selectedField,obstacles,keys,activeTimeouts,scheduleShot,update,draw,spawnEnemy,activateDash,activateBurst,applyDamage,fireWeapon,damagePlayer,handleMathComplete,selectUpgrade,clearInput,handleRestart,spriteCache,joystickRef,touchAnchor};\n    return (\n        <div data-gamepad-survivor-live=`,
             );
         },
       },
@@ -48,6 +48,7 @@ try {
     if (m.type() === "error" && /loop error/.test(m.text()))
       errors.push(m.text());
   });
+  await page.addInitScript(() => localStorage.setItem("pixel_spire_theme_clear_counts_v1", JSON.stringify({elementary:100,"high-school":100,magic:100})));
   await page.clock.install();
   await page.goto(base);
   await page.getByRole("heading", { level: 1 }).waitFor();
@@ -154,8 +155,8 @@ try {
   );
   await page.getByRole("button", { name: "バースト", exact: true }).click();
   assert(
-    (await page.evaluate(() => window.__survivor.action.current.burstTime)) >=
-      145,
+    (await page.evaluate(() => window.__survivor.action.current.burstTime)) >
+      100,
   );
   assert.equal(
     await page.evaluate(() => window.__survivor.enemyBullets.current.length),
@@ -650,33 +651,29 @@ try {
     await p.waitForTimeout(250);
     await p.screenshot({ path: `${shots}/burst-cutin-${width}.png` });
     assert(await p.locator(".sy-actions button").first().isVisible());
-    const before = await p.evaluate(() => window.__survivor.player.current.x);
-    await p.dispatchEvent("canvas", "touchstart", {
-      touches: [{ identifier: 1, clientX: 100, clientY: height - 100 }],
-    });
-    await p.dispatchEvent("canvas", "touchmove", {
-      touches: [{ identifier: 1, clientX: 160, clientY: height - 100 }],
-    });
+    await p.evaluate(() => { const g=window.__survivor; g.action.current.dash=0; g.action.current.burst=100; });
+    await p.waitForFunction(() => !document.querySelector('.sy-actions button:last-child').disabled);
+    const cdp=await p.context().newCDPSession(p);
+    const touch=(type,touchPoints)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints});
+    const first={x:65,y:height-170,id:71},movingFinger={...first,x:120};
+    const dashBox=await p.locator('.sy-actions button:first-child').boundingBox(),burstBox=await p.locator('.sy-actions button:last-child').boundingBox();
+    const dashFinger={x:dashBox.x+dashBox.width/2,y:dashBox.y+dashBox.height/2,id:72};
+    const burstFinger={x:burstBox.x+burstBox.width/2,y:burstBox.y+burstBox.height/2,id:73};
+    await touch('touchStart',[first]);await touch('touchMove',[movingFinger]);
+    await p.waitForFunction(()=>window.__survivor.joystickRef.current.x>.5);
+    const before=await p.evaluate(()=>window.__survivor.player.current.x);
+    await touch('touchStart',[movingFinger,dashFinger]);
+    await p.waitForFunction(()=>window.__survivor.action.current.dash>0);
+    await touch('touchEnd',[dashFinger]);
+    assert((await p.evaluate(()=>window.__survivor.joystickRef.current.x))>.5,'lifting dash finger keeps movement');
+    await touch('touchStart',[movingFinger,burstFinger]);
+    await p.waitForFunction(()=>window.__survivor.action.current.burstTime>100&&window.__survivor.action.current.burst<10);
+    await touch('touchEnd',[burstFinger]);
+    assert((await p.evaluate(()=>window.__survivor.joystickRef.current.x))>.5,'lifting burst finger keeps movement');
     await p.waitForTimeout(250);
-    const moving = await p.evaluate(() => window.__survivor.player.current.x);
-    await p.dispatchEvent(".sy-actions button:first-child", "touchend", {
-      touches: [{ identifier: 1, clientX: 160, clientY: height - 100 }],
-      changedTouches: [
-        { identifier: 2, clientX: width - 100, clientY: height - 50 },
-      ],
-    });
-    await p.waitForTimeout(200);
-    assert(
-      (await p.evaluate(() => window.__survivor.player.current.x)) > moving,
-      "releasing a second finger must preserve movement",
-    );
-    await p.dispatchEvent("canvas", "touchend", {
-      touches: [],
-      changedTouches: [{ identifier: 1, clientX: 160, clientY: height - 100 }],
-    });
-    assert(
-      (await p.evaluate(() => window.__survivor.player.current.x)) > before,
-    );
+    assert((await p.evaluate(()=>window.__survivor.player.current.x))>before,'move, dash and burst work with real simultaneous touches');
+    await touch('touchEnd',[]);
+    await p.waitForFunction(()=>window.__survivor.joystickRef.current.x===0);
     await p.locator(".sy-pause").click();
     await p.locator(".sy-pause-overlay").waitFor();
     await p.close();

@@ -32,7 +32,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
       if (m.returning) setReturning(true);
       if (m.expired) { finish(1); return; } frame = requestAnimationFrame(draw);
     };
-    const pointer = (e: PointerEvent) => { if (e.button !== 0 || e.isPrimary === false || (e.target as Element).closest('[data-meter-ignore]')) return; e.preventDefault(); e.stopPropagation(); tap(); };
+    const pointer = (e: PointerEvent) => { if (e.button !== 0 || (e.target as Element).closest('[data-meter-ignore]')) return; e.preventDefault(); e.stopPropagation(); tap(); };
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') cancel(); else if ((e.target as Element)?.closest('[data-meter-ignore]')) return; else if (!e.repeat && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); e.stopPropagation(); tap(); } };
     const visibility = () => { if (document.hidden) cancel(); };
     frame = requestAnimationFrame(draw); document.addEventListener('pointerdown', pointer, true); document.addEventListener('keydown', key, true); document.addEventListener('visibilitychange', visibility); window.addEventListener('blur', cancel);
@@ -43,6 +43,6 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     <div className="gg-meter-heading"><b>{locked === null ? t('1回目：パワーを決める') : returning ? t('2回目：下の中心に合わせる') : t('右端まで進んでから戻ります')}</b><span>{locked === null ? `MAX ${Math.round(limit * 100)}%` : `${Math.round(locked * 100)}%`}</span></div>
     <div className={`gg-meter-track ${locked !== null ? 'is-impact' : ''}`}><span className="gg-meter-fill" style={{ width: `${(locked ?? 0) * 100}%` }}/>{locked !== null && <i className="gg-meter-lock" style={{ left: `${locked * 100}%` }}/>}<span className="gg-meter-cursor" ref={cursor}/></div>
     <div className="gg-impact-strip"><span/><i/>{locked!==null&&<b className="gg-impact-cue" aria-label={t('ここでインパクトを合わせる')}>↑</b>}</div>
-    <div className="gg-meter-actions"><button className="gg-primary" disabled={disabled} onClick={e => { if (e.detail === 0 && !state.current.active && performance.now() - lastInput.current > 250) tap(); }} onPointerDown={e => { if (e.button === 0 && e.isPrimary !== false && !state.current.active) tap(); }} onKeyDown={e => { if (!state.current.active && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tap(); } }}>{t(active ? '画面タッチで確定' : 'ショット')}</button></div>
+    <div className="gg-meter-actions"><button className="gg-primary" disabled={disabled} onClick={e => { if (e.detail === 0 && !state.current.active && performance.now() - lastInput.current > 250) tap(); }} onPointerDown={e => { if (e.button === 0 && !state.current.active) { e.preventDefault(); tap(); } }} onKeyDown={e => { if (!state.current.active && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tap(); } }}>{t(active ? '画面タッチで確定' : 'ショット')}</button></div>
   </div>;
 }

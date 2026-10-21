@@ -1022,3 +1022,5 @@
     opacity: 1;
   }
 }
+
+.sy-unlock-hint{font-size:10px;color:#aacbd8;margin:8px 0;line-height:1.6}

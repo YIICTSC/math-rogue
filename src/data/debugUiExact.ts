@@ -1,3 +1,4 @@
+import { POKER_HERO_ENGLISH, POKER_HERO_HIRAGANA } from '../mini-games/after-school-poker/heroes';
 import {VR_VIEW_ENGLISH,VR_VIEW_HIRAGANA} from '../mini-games/gakurogear/viewCopy';
 import {COIN_ENGLISH,COIN_HIRAGANA} from '../mini-games/gakuro-craft/coin-dozer/copy';
 import { SCHOOL_WANDERER_ENGLISH, SCHOOL_WANDERER_HIRAGANA } from '../components/school-dungeon/copy';
@@ -24,6 +25,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...POKER_HERO_ENGLISH,
   'ダンジョンズ1の主人公と、Blender製の武器・敵・障害物・演出を使用します。': 'Uses Dungeons 1 heroes and Blender-rendered weapons, enemies, obstacles and effects.',
  "カメラ切替": "Switch camera",
   "衣装はクローゼットに保管されました。友好度を深めてから着替えをお願いしましょう。": "The outfit is in the closet. Become closer before requesting a change.",
@@ -368,6 +370,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...POKER_HERO_HIRAGANA,
   'ダンジョンズ1の主人公と、Blender製の武器・敵・障害物・演出を使用します。': 'ダンジョンズ1の しゅじんこうと、Blenderせいの ぶき・てき・しょうがいぶつ・えんしゅつを しようします。',
  "カメラ切替": "かめらきりかえ",
   "全解除": "ぜんかいじょ",

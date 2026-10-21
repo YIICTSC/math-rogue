@@ -1,0 +1,3298 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+  "clips": {
+    "rival_lucky_nanami/spawn": {
+      "text": "ラッキー七海だよ。いい勝負にしよう！",
+      "sample_rate": 48000,
+      "seconds": 4.32,
+      "seed": 3153096567,
+      "sha256": "a389510709772aaea5cfb7f29980afc322707c8ce6c35270fc52ab63f470c9c5"
+    },
+    "rival_lucky_nanami/damage": {
+      "text": "わあ、その役、すごい！",
+      "sample_rate": 48000,
+      "seconds": 3.4,
+      "seed": 3153096567,
+      "sha256": "bb9e0e3c2243b68dcc366e64058cd2414b3fbec9dc4fa58a8c43f11582e2360d"
+    },
+    "rival_lucky_nanami/win": {
+      "text": "今日は私にツキがあったね！",
+      "sample_rate": 48000,
+      "seconds": 3.72,
+      "seed": 3153096567,
+      "sha256": "8853f71ce556de9e9674f14076645c4629b6978527d7552adb365273202500b7"
+    },
+    "rival_lucky_nanami/defeat": {
+      "text": "あはは、完敗！次は負けないよ。",
+      "sample_rate": 48000,
+      "seconds": 5.32,
+      "seed": 3153096567,
+      "sha256": "ca7ff19e57cdcd834ddfef0749927b32648384391956b282fb7de398e57df951"
+    },
+    "rival_math_bancho/spawn": {
+      "text": "計算番長だ。数字で勝負だ！",
+      "sample_rate": 48000,
+      "seconds": 4.44,
+      "seed": 558046491,
+      "sha256": "0b85f5d029a88e6d7c379efe193129ff3c50ea9e2a8660cd38de1387b3d5076a"
+    },
+    "rival_math_bancho/damage": {
+      "text": "その得点、計算外だ！",
+      "sample_rate": 48000,
+      "seconds": 3.04,
+      "seed": 558046491,
+      "sha256": "aebd917c8b29d4b8ed31522c7a4559485eba92f72c8688bb2767f2ebc015cdf3"
+    },
+    "rival_math_bancho/win": {
+      "text": "答えは出たな。俺の勝ちだ！",
+      "sample_rate": 48000,
+      "seconds": 3.92,
+      "seed": 558046491,
+      "sha256": "87a697429c2ee7eb7b6d3356b430e122b115dbdee564a881965c5a9816a5e31f"
+    },
+    "rival_math_bancho/defeat": {
+      "text": "計算を超えた、見事な一手だ。",
+      "sample_rate": 48000,
+      "seconds": 3.6,
+      "seed": 558046491,
+      "sha256": "24283bbff40dea6010947aa4c7900f3d2f68fd02d0ffcd33d7e9b5535e516ee9"
+    },
+    "rival_stationery_leo/spawn": {
+      "text": "文具王レオ、参上。切れ味を見せよう。",
+      "sample_rate": 48000,
+      "seconds": 6.56,
+      "seed": 1915208619,
+      "sha256": "2db40cbff5a74c612a2420f60b2f222c14ba78a061a15f568e1a9169a76e81a4"
+    },
+    "rival_stationery_leo/damage": {
+      "text": "その切り札、なかなかだな。",
+      "sample_rate": 48000,
+      "seconds": 5.44,
+      "seed": 1915208619,
+      "sha256": "1ec30b4dd23e744c84afc63ad2a240043840c17e3c436294a0a09215f76163f2"
+    },
+    "rival_stationery_leo/win": {
+      "text": "勝利も、きっちり書き込もう。",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 1915208619,
+      "sha256": "da8826a94399fb6608b1a257ea868ae1438dcfa04e72af87bf1538723e14cb23"
+    },
+    "rival_stationery_leo/defeat": {
+      "text": "負けたよ。その一手に花丸だ。",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 1915208619,
+      "sha256": "8f2c354dac9d99bd146c57977002c97dd84de7aa3028c3b67eee1a14d62abaa4"
+    },
+    "rival_lunch_misuzu/spawn": {
+      "text": "給食マスター美鈴だよ。おかわり大歓迎！",
+      "sample_rate": 48000,
+      "seconds": 4.88,
+      "seed": 1909345978,
+      "sha256": "f39c030f9780d3061b3d4e159624d8c3aee5adb3add3ad57ecdc7f63a51c75d9"
+    },
+    "rival_lunch_misuzu/damage": {
+      "text": "わっ、お腹いっぱいの得点！",
+      "sample_rate": 48000,
+      "seconds": 3.6,
+      "seed": 1909345978,
+      "sha256": "35c168edb7c99da9d09aaf09876931e90cbcf97bf847d14174019121648366d4"
+    },
+    "rival_lunch_misuzu/win": {
+      "text": "ごちそうさま！私の勝ちだね。",
+      "sample_rate": 48000,
+      "seconds": 4.68,
+      "seed": 1909345978,
+      "sha256": "ecb50a01f3176f95d261eb8aed03c23a24fd2da3b1696b0e50511d9f3bd1d142"
+    },
+    "rival_lunch_misuzu/defeat": {
+      "text": "おいしい勝負だったね。参りました！",
+      "sample_rate": 48000,
+      "seconds": 4.16,
+      "seed": 1909345978,
+      "sha256": "83218130741be286d5c78a326c34bf8e59e9d0d78f970f6aaf98366cb5ab5d19"
+    },
+    "rival_iron_hayato/spawn": {
+      "text": "鉄壁ハヤトだ。この壁を超えてみろ。",
+      "sample_rate": 48000,
+      "seconds": 6,
+      "seed": 2230758924,
+      "sha256": "b4cf5af3be95760225129cc6cbd8ece128c091b0bf1210c1dd2072205e6c532e"
+    },
+    "rival_iron_hayato/damage": {
+      "text": "俺の守りを、抜いただと？",
+      "sample_rate": 48000,
+      "seconds": 3.72,
+      "seed": 2230758924,
+      "sha256": "f707b613c70acdead387884bbdbaf2df90974c698a935ba77b3bc741d4cfc5a5"
+    },
+    "rival_iron_hayato/win": {
+      "text": "この守り、崩せなかったな。",
+      "sample_rate": 48000,
+      "seconds": 4.4,
+      "seed": 2230758924,
+      "sha256": "fe03857a204363a7bb1e9f4477df479f3a9719175a8f844e22c883a23c47470e"
+    },
+    "rival_iron_hayato/defeat": {
+      "text": "壁を超えたな。お前の勝ちだ。",
+      "sample_rate": 48000,
+      "seconds": 4.36,
+      "seed": 2230758924,
+      "sha256": "f4602a1ff125765d29d0749533edece9a8490e423f4d18a8505f17404a40da5d"
+    },
+    "rival_music_sora/spawn": {
+      "text": "音楽室のソラだよ。一緒に奏でよう。",
+      "sample_rate": 48000,
+      "seconds": 6.2,
+      "seed": 110396662,
+      "sha256": "4be5b11ea87a2fa1ae556f917ff43981abe53905b7695c92fdb31b2747b59bd0"
+    },
+    "rival_music_sora/damage": {
+      "text": "おっ、いいリズムの役だね！",
+      "sample_rate": 48000,
+      "seconds": 2.76,
+      "seed": 110396662,
+      "sha256": "22861c6a0926df7d3bbd1213889b39e0a7b391ba0780ac4da5135ebc91235ba8"
+    },
+    "rival_music_sora/win": {
+      "text": "勝利のメロディー、聞こえたよ。",
+      "sample_rate": 48000,
+      "seconds": 3,
+      "seed": 110396662,
+      "sha256": "73c47a0fd8975749d5b8e42387996f0a8190b0bd4e067cf027f36921414ed097"
+    },
+    "rival_music_sora/defeat": {
+      "text": "最高のフィナーレだ。君の勝ち！",
+      "sample_rate": 48000,
+      "seconds": 3.48,
+      "seed": 110396662,
+      "sha256": "fe49f521de11c0d19c20d90e2c21c0648c27970350585442e11ba032e58796ae"
+    },
+    "rival_science_rika/spawn": {
+      "text": "理科室リカです。勝負を実験しましょう。",
+      "sample_rate": 48000,
+      "seconds": 6.28,
+      "seed": 558304788,
+      "sha256": "bac2c1e353d96ea6b4d4e5e12cd406ce15b919647bdcd7b7df4abadd1e3c2859"
+    },
+    "rival_science_rika/damage": {
+      "text": "予測を超える反応ね！",
+      "sample_rate": 48000,
+      "seconds": 3.32,
+      "seed": 558304788,
+      "sha256": "ae3d58a2f8878c6bbc180ea3377621b80f0065fd97552aab36e3fee2c407d42a"
+    },
+    "rival_science_rika/win": {
+      "text": "仮説を証明したわ。私の勝ち！",
+      "sample_rate": 48000,
+      "seconds": 4.72,
+      "seed": 558304788,
+      "sha256": "c7d7545bcaa1151a6d1008cd49b808f6759ff785e07c03971b6e0ffbc702b962"
+    },
+    "rival_science_rika/defeat": {
+      "text": "見事な結果ね。次の研究に活かすわ。",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 558304788,
+      "sha256": "4c0d5b7351da6871adcf08650d20105bb64803b44e714318a0b63c5ce4c675b0"
+    },
+    "rival_library_ren/spawn": {
+      "text": "図書委員レンです。新しい物語を始めよう。",
+      "sample_rate": 48000,
+      "seconds": 6.6,
+      "seed": 2235372489,
+      "sha256": "1b70d3bb7cf693ac57e633c35be0c8eababa8d4fd8412fa7a85428d97a765568"
+    },
+    "rival_library_ren/damage": {
+      "text": "そんな展開が待っていたんだね。",
+      "sample_rate": 48000,
+      "seconds": 4.16,
+      "seed": 2235372489,
+      "sha256": "3866b91546fd2e20e6f92911f9b1ec26f7fe07dd9d8e89f3b2ac282902a9de77"
+    },
+    "rival_library_ren/win": {
+      "text": "最後のページは、僕の勝利だ。",
+      "sample_rate": 48000,
+      "seconds": 3.68,
+      "seed": 2235372489,
+      "sha256": "5520852af6b797f54d813dba7076937c78ee34f0fe4aec82b9351e3df85b7606"
+    },
+    "rival_library_ren/defeat": {
+      "text": "素敵な結末だ。君に拍手を。",
+      "sample_rate": 48000,
+      "seconds": 3.76,
+      "seed": 2235372489,
+      "sha256": "d67fd2cee8462d48f7287638ac974b819bbdbf6ddf6723ebffbb0377b9813551"
+    },
+    "rival_discipline_ayame/spawn": {
+      "text": "風紀のアヤメです。正々堂々、勝負！",
+      "sample_rate": 48000,
+      "seconds": 5.48,
+      "seed": 1855740765,
+      "sha256": "613f69c4e2da79639c0df3514993a233a3c05fb59e1b07589d27858828c8a47b"
+    },
+    "rival_discipline_ayame/damage": {
+      "text": "見事な一手。油断できませんね。",
+      "sample_rate": 48000,
+      "seconds": 6.48,
+      "seed": 1855740765,
+      "sha256": "20a1cfe35c6f9c2ba0bb1273b6ca628c07e94ca79088a7d9323a1e0907064e66"
+    },
+    "rival_discipline_ayame/win": {
+      "text": "規律ある勝負が、勝利を呼びます。",
+      "sample_rate": 48000,
+      "seconds": 6.68,
+      "seed": 1855740765,
+      "sha256": "363437a7ba1b7042cd7b8cd4464ddb2d57c4864ccdbb153c015ce0ae0cb5022d"
+    },
+    "rival_discipline_ayame/defeat": {
+      "text": "あなたの勝ちです。胸を張って。",
+      "sample_rate": 48000,
+      "seconds": 6.04,
+      "seed": 1855740765,
+      "sha256": "93cd30f20c462b6224ae7cf8b84524b56c2b08dd8072e9f7d194d566aa19139c"
+    },
+    "rival_art_momo/spawn": {
+      "text": "美術部モモだよ。彩り豊かな勝負にしよう！",
+      "sample_rate": 48000,
+      "seconds": 5,
+      "seed": 3695209867,
+      "sha256": "5bfa5cf09e4b3b5dd148220fd59ff97c9d79e7754deb84c405cffd317325cf89"
+    },
+    "rival_art_momo/damage": {
+      "text": "うわあ、鮮やかな一手！",
+      "sample_rate": 48000,
+      "seconds": 3.08,
+      "seed": 3695209867,
+      "sha256": "832b2a6f8094ab05e1cfd5edc1005d50df1b23e2836e89891791291819e38a32"
+    },
+    "rival_art_momo/win": {
+      "text": "勝利の絵、完成だよ！",
+      "sample_rate": 48000,
+      "seconds": 2.76,
+      "seed": 3695209867,
+      "sha256": "b9671ef06439ad50e15f43f6aa69070470fbe89eda763efe6814d179763cca74"
+    },
+    "rival_art_momo/defeat": {
+      "text": "君の手札、最高の作品だね！",
+      "sample_rate": 48000,
+      "seconds": 3.6,
+      "seed": 3695209867,
+      "sha256": "ea4b0fe5ca453737619d27571a087a2a5e960a4dad87dfec87a81b4047690fc1"
+    },
+    "rival_track_kakeru/spawn": {
+      "text": "陸上カケルだ。最後まで走り抜こう！",
+      "sample_rate": 48000,
+      "seconds": 4.6,
+      "seed": 2470050103,
+      "sha256": "73589a2beaa61257b81b42fd53fc5d74967552108bf038adba6d1d13c66b5527"
+    },
+    "rival_track_kakeru/damage": {
+      "text": "速い！一気に追い上げてきたな。",
+      "sample_rate": 48000,
+      "seconds": 3.56,
+      "seed": 2470050103,
+      "sha256": "0009f06e5d39d07050033da0d084ea43f325fb463627540e6c4731838ecf1fb4"
+    },
+    "rival_track_kakeru/win": {
+      "text": "ゴール！俺が先だったな！",
+      "sample_rate": 48000,
+      "seconds": 3.4,
+      "seed": 2470050103,
+      "sha256": "f2b66c7053e5e33ae022efdb307e69656b583fc66edabd4e20e1b969e80a72c6"
+    },
+    "rival_track_kakeru/defeat": {
+      "text": "抜かれた！いい走りだったぜ。",
+      "sample_rate": 48000,
+      "seconds": 3.56,
+      "seed": 2470050103,
+      "sha256": "c0a1a97adc4782b51e555a8cef58dc41dc1b9b94dbb63e6c92f3115f6ea1ca03"
+    },
+    "rival_occult_kurosaki/spawn": {
+      "text": "オカルト黒崎だ。運命の札を開こう。",
+      "sample_rate": 48000,
+      "seconds": 6.12,
+      "seed": 3002162713,
+      "sha256": "eac122e059a341bfce5743ed3ee4007f98a19390d30063dc0e8927301fad2512"
+    },
+    "rival_occult_kurosaki/damage": {
+      "text": "ふむ、運命が揺らいだか。",
+      "sample_rate": 48000,
+      "seconds": 5.04,
+      "seed": 3002162713,
+      "sha256": "0e48ed162462d8486ab18670e4cecb719c34dff0ff626b89ac7fa34d91e71519"
+    },
+    "rival_occult_kurosaki/win": {
+      "text": "星は俺の勝利を示していた。",
+      "sample_rate": 48000,
+      "seconds": 4.84,
+      "seed": 3002162713,
+      "sha256": "f9264970f4eb98a74baed96438e7c52dda9dc55e125afffc52684e3e275f74cf"
+    },
+    "rival_occult_kurosaki/defeat": {
+      "text": "この結末も、運命の導きか。",
+      "sample_rate": 48000,
+      "seconds": 5.76,
+      "seed": 3002162713,
+      "sha256": "81fc9ac786f2942397d4b40186201fa18b34e54458a709b2d262e2a06480200c"
+    },
+    "rival_president_karen/spawn": {
+      "text": "生徒会長カレンです。遠慮はいらないわ。",
+      "sample_rate": 48000,
+      "seconds": 6.04,
+      "seed": 3509894604,
+      "sha256": "2725b4e25f2f402a5001b7e5b9a5ac7bdaac5b3aa80d52173a9cec09ae771e38"
+    },
+    "rival_president_karen/damage": {
+      "text": "なるほど。実力は確かなようね。",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 3509894604,
+      "sha256": "78822b567f4826998b8f74e60b65e6b4a66996c65af43df9cf558bd3bd6b7b72"
+    },
+    "rival_president_karen/win": {
+      "text": "会長として、譲れない勝負だったわ。",
+      "sample_rate": 48000,
+      "seconds": 5.8,
+      "seed": 3509894604,
+      "sha256": "1b7d13ea974417ac3315b8e12f10a604506febbf39a1b6859cfa899e79689583"
+    },
+    "rival_president_karen/defeat": {
+      "text": "あなたの勝利ね。誇りに思いなさい。",
+      "sample_rate": 48000,
+      "seconds": 5.28,
+      "seed": 3509894604,
+      "sha256": "1e3a8bcc52bcedd8f9d9b6d3dfeae8b7a5be1f0a52dd37b47cde063acbd78a42"
+    },
+    "rival_baseball_takumi/spawn": {
+      "text": "野球部タクミだ。全力で打ってこい！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 1243198160,
+      "sha256": "8715d2a6063d61e47012ac1e90bb6ec31472c4ef7d5489ab608b16dfca8d6ef4"
+    },
+    "rival_baseball_takumi/damage": {
+      "text": "おおっ、ホームラン級の一手だな！",
+      "sample_rate": 48000,
+      "seconds": 2.96,
+      "seed": 1243198160,
+      "sha256": "cfcea41ea12eb2bc717cff0cb0b18ee121b7f8365c94410e526770a25c77b294"
+    },
+    "rival_baseball_takumi/win": {
+      "text": "ゲームセット！俺の勝ちだ！",
+      "sample_rate": 48000,
+      "seconds": 2.36,
+      "seed": 1243198160,
+      "sha256": "d018417b639c836cb20b7ed4504e0c1128dd7612f61579d283c859609d293c7b"
+    },
+    "rival_baseball_takumi/defeat": {
+      "text": "参った！文句なしのホームランだ。",
+      "sample_rate": 48000,
+      "seconds": 3.16,
+      "seed": 1243198160,
+      "sha256": "cdf881fd090b99fdd9b23f22d0c4cbd63ccf64019cd44322a0502fd31f3f9ab0"
+    },
+    "rival_twins_minato/spawn": {
+      "text": "ミナトだよ。二人分のひらめきで挑むよ！",
+      "sample_rate": 48000,
+      "seconds": 4.68,
+      "seed": 2925814447,
+      "sha256": "a5a97aae59f3b12336d950a03cba7e846161d675e5fb2574be92cba8fbb8675a"
+    },
+    "rival_twins_minato/damage": {
+      "text": "あれっ、その組み合わせは読めなかった！",
+      "sample_rate": 48000,
+      "seconds": 3.8,
+      "seed": 2925814447,
+      "sha256": "c311bf1e91ce9699dd6aa2c43edfe7b5a0bf0b1e55351338664bd428be097474"
+    },
+    "rival_twins_minato/win": {
+      "text": "息ぴったり！僕たちの勝ち！",
+      "sample_rate": 48000,
+      "seconds": 3.68,
+      "seed": 2925814447,
+      "sha256": "6c09b00c5354b7cdf4ffddd337d0f897c4cba78911152f90ab767fda22cf50c6"
+    },
+    "rival_twins_minato/defeat": {
+      "text": "すごいね！次は作戦を練り直すよ。",
+      "sample_rate": 48000,
+      "seconds": 4.36,
+      "seed": 2925814447,
+      "sha256": "0dfdc094270dc07ef2ab3b411bd41036efc89dddbc01ec1dc5b5ad7440cfa314"
+    },
+    "rival_tea_yui/spawn": {
+      "text": "茶道のユイです。どうぞ、お手柔らかに。",
+      "sample_rate": 48000,
+      "seconds": 6.24,
+      "seed": 3844181060,
+      "sha256": "d751091f56bdf4202f08d99a70ac6c6cc1848df868708a95ecb1948933c8a24b"
+    },
+    "rival_tea_yui/damage": {
+      "text": "まあ、お見事な手でございます。",
+      "sample_rate": 48000,
+      "seconds": 3.2,
+      "seed": 3844181060,
+      "sha256": "7af48d00cc594654fe3fc792a6d8f991736d4b387bdff2ca2571dafbe38af651"
+    },
+    "rival_tea_yui/win": {
+      "text": "一服いかがですか。良い勝負でした。",
+      "sample_rate": 48000,
+      "seconds": 3.64,
+      "seed": 3844181060,
+      "sha256": "30d5f1d991405f70e49f5616c479e4b29c15a22d09016b0f5381bc2d53335d93"
+    },
+    "rival_tea_yui/defeat": {
+      "text": "参りました。美しい一手でしたね。",
+      "sample_rate": 48000,
+      "seconds": 3.64,
+      "seed": 3844181060,
+      "sha256": "580bffef3869ef8edb895b8e835736e8783c2ef928c0c1540ed595384003a8a9"
+    },
+    "rival_alien_aru/spawn": {
+      "text": "宇宙転校生アルだ。地球の勝負、楽しみだ。",
+      "sample_rate": 48000,
+      "seconds": 7.08,
+      "seed": 2779862959,
+      "sha256": "138688b82b57802e3e47b0043057de8ee3e4a93c0f23bf8f81fa211781270e45"
+    },
+    "rival_alien_aru/damage": {
+      "text": "観測不能！すごいエネルギーだ！",
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 2779862959,
+      "sha256": "ed8c18fcbff5bfb67de42ddada5661daec2601aa1e4d89392aad373774146a64"
+    },
+    "rival_alien_aru/win": {
+      "text": "宇宙的な大勝利だね！",
+      "sample_rate": 48000,
+      "seconds": 3.32,
+      "seed": 2779862959,
+      "sha256": "cb7caae442727a64a00e0296f92a4abfb09b8e6d0a28c43c4c6e416694014aa0"
+    },
+    "rival_alien_aru/defeat": {
+      "text": "地球の君は、宇宙一だ！",
+      "sample_rate": 48000,
+      "seconds": 3.92,
+      "seed": 2779862959,
+      "sha256": "5b570563484c87a1cdc90ab6bef7036ca2e448af8d2a3f12292a5bf7c6f302be"
+    },
+    "rival_principal_shion/spawn": {
+      "text": "シオンだ。学園に恥じない勝負をしよう。",
+      "sample_rate": 48000,
+      "seconds": 6.56,
+      "seed": 2247551882,
+      "sha256": "b26219bcf070eb0e85190f9bdd5c5b8fa30517ad588df5bd30b639a2d380466b"
+    },
+    "rival_principal_shion/damage": {
+      "text": "さすがだ。まだ気は抜けないな。",
+      "sample_rate": 48000,
+      "seconds": 3.96,
+      "seed": 2247551882,
+      "sha256": "05d244b7c301f6d1602df4fa6c0f574919b8faf354fb8106dd130e1e30b7490e"
+    },
+    "rival_principal_shion/win": {
+      "text": "これが、学園で磨いた実力だ。",
+      "sample_rate": 48000,
+      "seconds": 4.28,
+      "seed": 2247551882,
+      "sha256": "cf8580a4e02d842d118b93013b8ef8ea71f0d9db3221bbfe527227ef7791548b"
+    },
+    "rival_principal_shion/defeat": {
+      "text": "認めよう。君こそ学園の誇りだ。",
+      "sample_rate": 48000,
+      "seconds": 4.8,
+      "seed": 2247551882,
+      "sha256": "7025bfced888b78d1968bb600e20d280c9c3bcf1e473bb39f8b49436a6b79f18"
+    },
+    "rival_galaxy_mio/spawn": {
+      "text": "銀河ノートのミオです。星の海へようこそ。",
+      "sample_rate": 48000,
+      "seconds": 6.48,
+      "seed": 2364984288,
+      "sha256": "b04750a0ce2fceb0648f65f229879d7e6989db35d01e2bdb93da64ab9925a79d"
+    },
+    "rival_galaxy_mio/damage": {
+      "text": "きらきら、すごい星の数！",
+      "sample_rate": 48000,
+      "seconds": 3.72,
+      "seed": 2364984288,
+      "sha256": "60e46b1ffe2d067225e0441178ab7dd09fff66470996e6da7eb8233c3acad167"
+    },
+    "rival_galaxy_mio/win": {
+      "text": "勝利の星座がつながったよ！",
+      "sample_rate": 48000,
+      "seconds": 2.76,
+      "seed": 2364984288,
+      "sha256": "45761516ac58f1fb3ec977dcdeeea6fec5ddb71ef1a9323fbf1ccac824cf0e29"
+    },
+    "rival_galaxy_mio/defeat": {
+      "text": "君の一手、銀河みたいに輝いてた！",
+      "sample_rate": 48000,
+      "seconds": 3.84,
+      "seed": 2364984288,
+      "sha256": "c48705293441de94624d2b0131ccd36b138e1cfd1aaa753c207b64f0e2ab3717"
+    },
+    "rival_shop_goro/spawn": {
+      "text": "購買部ゴローだ。とびきりの勝負にしようぜ！",
+      "sample_rate": 48000,
+      "seconds": 5.16,
+      "seed": 2147074955,
+      "sha256": "585aa5e431e21a48492313798641b199bf893ed397a90bfca692307e373176cf"
+    },
+    "rival_shop_goro/damage": {
+      "text": "おっと、そりゃ大盛りの得点だ！",
+      "sample_rate": 48000,
+      "seconds": 3.56,
+      "seed": 2147074955,
+      "sha256": "2b9e79e1d7ee8e486bc05d4912193495d43dfc2ed580096a5e96950a4b5dc7d2"
+    },
+    "rival_shop_goro/win": {
+      "text": "まいど！勝利は俺がいただくぜ！",
+      "sample_rate": 48000,
+      "seconds": 3.48,
+      "seed": 2147074955,
+      "sha256": "9cf61d06f8d336a8867f305038f01d81dd81cad862279838f85377e94ed133b0"
+    },
+    "rival_shop_goro/defeat": {
+      "text": "参った参った！今日は大サービスだ！",
+      "sample_rate": 48000,
+      "seconds": 4,
+      "seed": 2147074955,
+      "sha256": "2560997b968791034fae51fb262ab61be9dcd190d90d9857c294f3a501dc96a1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011100929987151176,
+        "prepare_reference": 3.294727305001288,
+        "predict_duration": 1.9213273850000405,
+        "sample_meanflow": 3.5352412899992487,
+        "unpatchify_latent": 0.00000600900239078328,
+        "decode_latent": 4.725060585999017,
+        "silentcipher_watermark": 2.166625625999586
+      }
+    },
+    "rival_maze_rin/spawn": {
+      "text": "迷路名人リンだよ。勝利への道、見つけるね。",
+      "sample_rate": 48000,
+      "seconds": 7.44,
+      "seed": 608833335,
+      "sha256": "391e97cc73635239db6565a0aa2027a1e8cd8fd4a121e02347242036a4024f43",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008451240028080065,
+        "prepare_reference": 0.00012661999789997935,
+        "predict_duration": 2.07405467100034,
+        "sample_meanflow": 4.2841170620013145,
+        "unpatchify_latent": 0.0000050580019888002425,
+        "decode_latent": 7.13601597700108,
+        "silentcipher_watermark": 3.0489422860009654
+      }
+    },
+    "rival_maze_rin/damage": {
+      "text": "あれっ、そこに抜け道があったの？",
+      "sample_rate": 48000,
+      "seconds": 3.04,
+      "seed": 608833335,
+      "sha256": "96fbd82725c36ec115575f463c4ee1381ad481638fc641d661237a7ca088921f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008093799988273531,
+        "prepare_reference": 4.0402920710002945,
+        "predict_duration": 2.0371842960012145,
+        "sample_meanflow": 2.520599077000952,
+        "unpatchify_latent": 0.000005027999577578157,
+        "decode_latent": 3.339231796999229,
+        "silentcipher_watermark": 1.6881793239990657
+      }
+    },
+    "rival_maze_rin/win": {
+      "text": "ゴール発見！私の勝ち！",
+      "sample_rate": 48000,
+      "seconds": 2.84,
+      "seed": 608833335,
+      "sha256": "aabeec91eef7fdd98f0d6a3648c450381b1e31d559fa12c2eb400620dcd26b9d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0023848140008340124,
+        "prepare_reference": 3.826160915003129,
+        "predict_duration": 1.504282249003154,
+        "sample_meanflow": 2.2808156569990388,
+        "unpatchify_latent": 0.000004998000804334879,
+        "decode_latent": 2.4909450999984983,
+        "silentcipher_watermark": 1.2706495860002178
+      }
+    },
+    "rival_maze_rin/defeat": {
+      "text": "君が先に出口を見つけたね！",
+      "sample_rate": 48000,
+      "seconds": 2.8,
+      "seed": 608833335,
+      "sha256": "4e8c6cdf022c993154d0832a846f0c4deff048487e4fb083a087c4788a8872ad",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000937422999413684,
+        "prepare_reference": 4.000998105999315,
+        "predict_duration": 1.6004184859993984,
+        "sample_meanflow": 3.1257755270016787,
+        "unpatchify_latent": 0.000005238001904217526,
+        "decode_latent": 5.199216226999852,
+        "silentcipher_watermark": 2.0357519819990557
+      }
+    },
+    "rival_raffle_hina/spawn": {
+      "text": "福引きヒナだよ。大当たりを引こう！",
+      "sample_rate": 48000,
+      "seconds": 4.2,
+      "seed": 3433860024,
+      "sha256": "743cef1e7264a877353473a8fcf165f0d25838553a2fab0429cd535776694cdb",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009258349964511581,
+        "prepare_reference": 0.00006392599971150048,
+        "predict_duration": 2.590273903999332,
+        "sample_meanflow": 4.989740002001781,
+        "unpatchify_latent": 0.00000598900078330189,
+        "decode_latent": 8.904590106001706,
+        "silentcipher_watermark": 3.343331103998935
+      }
+    },
+    "rival_raffle_hina/damage": {
+      "text": "わあ、特等賞みたいな得点！",
+      "sample_rate": 48000,
+      "seconds": 3.76,
+      "seed": 3433860024,
+      "sha256": "f943fac3a30e5de7279bd94a9d3fb21c945d9f7c664e709243961b61c2f2b69b",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008763519981584977,
+        "prepare_reference": 3.7068767829987337,
+        "predict_duration": 3.1053601169987815,
+        "sample_meanflow": 7.004414596998686,
+        "unpatchify_latent": 0.00000529800308868289,
+        "decode_latent": 7.163636700999632,
+        "silentcipher_watermark": 1.6233959540004435
+      }
+    },
+    "rival_raffle_hina/win": {
+      "text": "大当たり！私の勝ちだよ！",
+      "sample_rate": 48000,
+      "seconds": 3.64,
+      "seed": 3433860024,
+      "sha256": "1bb8c0f394ccfabcd4cd9028f90d493ac1d39751bc64a57ab4c2436e01972ada",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007833409981685691,
+        "prepare_reference": 2.054966019000858,
+        "predict_duration": 1.4735684920015046,
+        "sample_meanflow": 2.514272880001954,
+        "unpatchify_latent": 0.000004746998456539586,
+        "decode_latent": 3.1729285410001467,
+        "silentcipher_watermark": 1.6225815880025038
+      }
+    },
+    "rival_raffle_hina/defeat": {
+      "text": "おめでとう！特等賞は君だね！",
+      "sample_rate": 48000,
+      "seconds": 3.92,
+      "seed": 3433860024,
+      "sha256": "8b557aed128efd0dd4d1bb182bc08b0d08eca96d6a7506a127a55aecc181488a",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007704129966441542,
+        "prepare_reference": 2.0901020580022305,
+        "predict_duration": 1.4445055270007288,
+        "sample_meanflow": 2.5456366459984565,
+        "unpatchify_latent": 0.000005588997737504542,
+        "decode_latent": 3.942596599001263,
+        "silentcipher_watermark": 1.773805214001186
+      }
+    },
+    "rival_hidden_jin/spawn": {
+      "text": "裏番長ジンだ。覚悟はできてるな。",
+      "sample_rate": 48000,
+      "seconds": 6.16,
+      "seed": 911425456,
+      "sha256": "f5eda7e9d52fac2ae990f49bd864825765b6e3331f7a1759ada73c0ed0a27be6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0016302670010190923,
+        "prepare_reference": 0.00007632500273757614,
+        "predict_duration": 1.6936868789998698,
+        "sample_meanflow": 3.3894114469985652,
+        "unpatchify_latent": 0.0000060489983297884464,
+        "decode_latent": 5.672599961999367,
+        "silentcipher_watermark": 2.8792831329992623
+      }
+    },
+    "rival_hidden_jin/damage": {
+      "text": "やるな。まだ終わっちゃいねえ。",
+      "sample_rate": 48000,
+      "seconds": 3.8,
+      "seed": 911425456,
+      "sha256": "febced2783c065567f50c0b2a59c2d092007eb6166d887ffccfeac4f1b371204",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007128559991542716,
+        "prepare_reference": 0.0008782960030657705,
+        "predict_duration": 1.3437590629982878,
+        "sample_meanflow": 2.7564140429967665,
+        "unpatchify_latent": 0.000007341001037275419,
+        "decode_latent": 3.6710544810011925,
+        "silentcipher_watermark": 1.6516502119993675
+      }
+    },
+    "rival_hidden_jin/win": {
+      "text": "この勝負、俺がもらったぜ。",
+      "sample_rate": 48000,
+      "seconds": 4.24,
+      "seed": 911425456,
+      "sha256": "088f269949a515743b1e35871613af9e3e925dac7886b311af804fb7d83e20d9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008022689980862197,
+        "prepare_reference": 0.0006865540017315652,
+        "predict_duration": 1.5665774270019028,
+        "sample_meanflow": 2.9355453810021572,
+        "unpatchify_latent": 0.000029464001272572204,
+        "decode_latent": 4.249901683000644,
+        "silentcipher_watermark": 1.6533359269997163
+      }
+    },
+    "rival_hidden_jin/defeat": {
+      "text": "いい腕だ。堂々と前に進めよ。",
+      "sample_rate": 48000,
+      "seconds": 4.36,
+      "seed": 911425456,
+      "sha256": "21b4f2055e15bfbe5dcec221565310cefe5fd468490623d4b9fd966e07375c25",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008104510015982669,
+        "prepare_reference": 0.0007896789975347929,
+        "predict_duration": 1.3526534550001088,
+        "sample_meanflow": 2.805279440999584,
+        "unpatchify_latent": 0.000005747999239247292,
+        "decode_latent": 4.18669493699781,
+        "silentcipher_watermark": 1.7732864799982053
+      }
+    },
+    "rival_graduate_akira/spawn": {
+      "text": "卒業王アキラだ。君の成長を見せてくれ。",
+      "sample_rate": 48000,
+      "seconds": 6.64,
+      "seed": 1676704943,
+      "sha256": "4f636b217172e55c088d45b5a194f5a024cbd1eeddf0921d8da8f4432ab6096d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008355089994438458,
+        "prepare_reference": 0.00006175299859023653,
+        "predict_duration": 1.4572386239997286,
+        "sample_meanflow": 3.491120314,
+        "unpatchify_latent": 0.0000058680016081780195,
+        "decode_latent": 6.5286479979986325,
+        "silentcipher_watermark": 3.145178025999485
+      }
+    },
+    "rival_graduate_akira/damage": {
+      "text": "素晴らしい。その調子で挑むんだ！",
+      "sample_rate": 48000,
+      "seconds": 3.44,
+      "seed": 1676704943,
+      "sha256": "36d949f257b8bebad3e0da98d75b2a18937b9cd2251dfb2d3a7b47b090a26379",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007140269990486559,
+        "prepare_reference": 0.00073194499782403,
+        "predict_duration": 1.5636080840013165,
+        "sample_meanflow": 2.533706283000356,
+        "unpatchify_latent": 0.000006470003427239135,
+        "decode_latent": 3.1642564879985002,
+        "silentcipher_watermark": 1.4182504970012815
+      }
+    },
+    "rival_graduate_akira/win": {
+      "text": "今日は僕の勝ち。次はきっと超えられる。",
+      "sample_rate": 48000,
+      "seconds": 4.4,
+      "seed": 1676704943,
+      "sha256": "59f730f8801a28ab678717aed687442d28fd3b53380583b630470f355ecb45a9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009031429981405381,
+        "prepare_reference": 0.0007498720005969517,
+        "predict_duration": 1.492101949002972,
+        "sample_meanflow": 2.7518019159979303,
+        "unpatchify_latent": 0.000007180002285167575,
+        "decode_latent": 4.380881933000637,
+        "silentcipher_watermark": 2.062657714999659
+      }
+    },
+    "rival_graduate_akira/defeat": {
+      "text": "卒業おめでとう。君ならもっと先へ行ける。",
+      "sample_rate": 48000,
+      "seconds": 4.52,
+      "seed": 1676704943,
+      "sha256": "912d0f0516b6002503760174a8bbb49d784e19e01765d28bc9178002a311da84",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000932806000491837,
+        "prepare_reference": 0.000709830997948302,
+        "predict_duration": 1.7396841679983481,
+        "sample_meanflow": 3.7529480929988495,
+        "unpatchify_latent": 0.000005809000867884606,
+        "decode_latent": 4.530520694999723,
+        "silentcipher_watermark": 1.9470086959991022
+      }
+    },
+    "endless_rival_principal_genda/spawn": {
+      "text": "校長ゲンダです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.4,
+      "seed": 3167846307,
+      "sha256": "37d764c731b2926c5eb5ef247e9df7029c8ab47ddd43fdb355291ce4626501ce",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008586669973738026,
+        "prepare_reference": 0.0000635860014881473,
+        "predict_duration": 1.6701446799997939,
+        "sample_meanflow": 7.154514238998672,
+        "unpatchify_latent": 0.000006119000317994505,
+        "decode_latent": 9.053927698001644,
+        "silentcipher_watermark": 4.356875997997122
+      }
+    },
+    "endless_rival_principal_genda/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.2,
+      "seed": 3167846307,
+      "sha256": "8fa5705d48efa9ac8251bb926a8831a5ced2b4edb0fc11e3cbe37871260bc8f9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007463349975296296,
+        "prepare_reference": 0.0009746100004122127,
+        "predict_duration": 2.079453394002485,
+        "sample_meanflow": 5.742284359999758,
+        "unpatchify_latent": 0.00000610899951425381,
+        "decode_latent": 6.476075489001232,
+        "silentcipher_watermark": 2.409185530999821
+      }
+    },
+    "endless_rival_principal_genda/win": {
+      "text": "校長ゲンダの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.28,
+      "seed": 3167846307,
+      "sha256": "c29b5f63494a0d392e886714f752d89bf1e87ba1c6c2a5c5bae8b4ff86b63632",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011550210001587402,
+        "prepare_reference": 0.0007571720016130712,
+        "predict_duration": 2.6063140320002276,
+        "sample_meanflow": 3.5805770500010112,
+        "unpatchify_latent": 0.0000059689991758205,
+        "decode_latent": 5.642747563000739,
+        "silentcipher_watermark": 2.634716856999148
+      }
+    },
+    "endless_rival_principal_genda/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.88,
+      "seed": 3167846307,
+      "sha256": "771a9cd0997bb713e8ca7ce5ab60a026d176c7a6c1fcb391957260755057471e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008646530004625674,
+        "prepare_reference": 0.0008221200005209539,
+        "predict_duration": 1.7769601780019002,
+        "sample_meanflow": 3.1573125140021148,
+        "unpatchify_latent": 0.000006479000148829073,
+        "decode_latent": 4.134715866999613,
+        "silentcipher_watermark": 1.704324762999022
+      }
+    },
+    "endless_rival_nurse_makino/spawn": {
+      "text": "保健室マキノです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.4,
+      "seed": 2572740498,
+      "sha256": "0bbedb8bc0a90f2ea34d519670745b207f53913b4810d55974a6936bd39058a9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009201969987771008,
+        "prepare_reference": 0.00006665999899269082,
+        "predict_duration": 1.4445342140024877,
+        "sample_meanflow": 3.029526538000937,
+        "unpatchify_latent": 0.00000608899790677242,
+        "decode_latent": 5.497293322998303,
+        "silentcipher_watermark": 2.546602520000306
+      }
+    },
+    "endless_rival_nurse_makino/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 5.24,
+      "seed": 2572740498,
+      "sha256": "97ab6ce8488a433dd22e3a784794009c74d8f80e85ddf0367b1f7edebb0acdd2",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006446420011343434,
+        "prepare_reference": 0.0006492790016636718,
+        "predict_duration": 1.4261871839989908,
+        "sample_meanflow": 2.7975220490006905,
+        "unpatchify_latent": 0.000006469999789260328,
+        "decode_latent": 5.153416575998563,
+        "silentcipher_watermark": 2.3938847970021015
+      }
+    },
+    "endless_rival_nurse_makino/win": {
+      "text": "保健室マキノの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 6.64,
+      "seed": 2572740498,
+      "sha256": "55debf0d0e1b597f59af3865863819e5c48dfb5ce6853819ebbc3df2fb79f3f1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009283889994549099,
+        "prepare_reference": 0.0007685090022278018,
+        "predict_duration": 1.6298415479977848,
+        "sample_meanflow": 3.3332312329985143,
+        "unpatchify_latent": 0.0000063590014178771526,
+        "decode_latent": 6.496341565001785,
+        "silentcipher_watermark": 3.1747218189993873
+      }
+    },
+    "endless_rival_nurse_makino/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.64,
+      "seed": 2572740498,
+      "sha256": "ee7606eb4515a4debb69fd297e5eb7286765128bf7bd4367a5d47af71c674e13",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007906930004537571,
+        "prepare_reference": 0.0007085590004862752,
+        "predict_duration": 1.7782727210033045,
+        "sample_meanflow": 3.036573039000359,
+        "unpatchify_latent": 0.000006229001883184537,
+        "decode_latent": 4.675388807998388,
+        "silentcipher_watermark": 1.9811924859968713
+      }
+    },
+    "endless_rival_caretaker_iwata/spawn": {
+      "text": "用務員イワタです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.36,
+      "seed": 1350427198,
+      "sha256": "6345356b7c71986d9bda00c81384f210cf8fb0e5800686b089d768a0015c1ee7",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009418699992238544,
+        "prepare_reference": 0.00006433699672925286,
+        "predict_duration": 1.5491612629994052,
+        "sample_meanflow": 2.952051822001522,
+        "unpatchify_latent": 0.000006780999683542177,
+        "decode_latent": 5.358223303002887,
+        "silentcipher_watermark": 2.485568764001073
+      }
+    },
+    "endless_rival_caretaker_iwata/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.28,
+      "seed": 1350427198,
+      "sha256": "8db874f05d010eec8c1a05df8c879cf70c55380ff33010380e288b29fd83bd21",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005794339995190967,
+        "prepare_reference": 0.0008100519989966415,
+        "predict_duration": 1.4678140670002904,
+        "sample_meanflow": 2.96678518599947,
+        "unpatchify_latent": 0.000006741000106558204,
+        "decode_latent": 4.218999362001341,
+        "silentcipher_watermark": 1.806583216002764
+      }
+    },
+    "endless_rival_caretaker_iwata/win": {
+      "text": "用務員イワタの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.96,
+      "seed": 1350427198,
+      "sha256": "29f1445e4a6ade3b9109a6de4e7748abee9167563881cbfe156c7e878422bae1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009821390012803022,
+        "prepare_reference": 0.0008256830005848315,
+        "predict_duration": 1.7011994130007224,
+        "sample_meanflow": 11.43226638899796,
+        "unpatchify_latent": 0.000005719000910175964,
+        "decode_latent": 18.30542611599958,
+        "silentcipher_watermark": 6.753909009999916
+      }
+    },
+    "endless_rival_caretaker_iwata/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 1350427198,
+      "sha256": "601a14fd5ea275493299bc616adf9cf7c774337c33bd92ed1a1d367c0f2b09c5",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006877559972053859,
+        "prepare_reference": 0.0006920019986864645,
+        "predict_duration": 7.730228948999866,
+        "sample_meanflow": 7.297040438999829,
+        "unpatchify_latent": 0.000006820002454333007,
+        "decode_latent": 9.2352445860015,
+        "silentcipher_watermark": 3.279644231999555
+      }
+    },
+    "endless_rival_librarian_sumire/spawn": {
+      "text": "図書館司書スミレです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.72,
+      "seed": 3719628159,
+      "sha256": "e93d908b6cd09754bfd966385d408a1c01345ead239d3ac52fe8ad93fb800758",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0012317170003370848,
+        "prepare_reference": 0.0000839160020404961,
+        "predict_duration": 2.470798496000498,
+        "sample_meanflow": 5.21494362699741,
+        "unpatchify_latent": 0.000007391001418000087,
+        "decode_latent": 7.204107646000921,
+        "silentcipher_watermark": 2.8235312670003623
+      }
+    },
+    "endless_rival_librarian_sumire/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 5.72,
+      "seed": 3719628159,
+      "sha256": "5f519ec7371807fd4f112b469e15e31330185d10c10c11c9c896e2fd9ce1de92",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007670659979339689,
+        "prepare_reference": 0.0007926449980004691,
+        "predict_duration": 1.5576877029998286,
+        "sample_meanflow": 3.4422767340001883,
+        "unpatchify_latent": 0.000005797999619971961,
+        "decode_latent": 5.80774828200083,
+        "silentcipher_watermark": 2.479264523000893
+      }
+    },
+    "endless_rival_librarian_sumire/win": {
+      "text": "図書館司書スミレの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 7.56,
+      "seed": 3719628159,
+      "sha256": "a961828dd14168ba53f9d184e9b05c1e2e5b90024530875d40972b1b3ce47926",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009951799984264653,
+        "prepare_reference": 0.0007979829970281571,
+        "predict_duration": 1.5219561089979834,
+        "sample_meanflow": 3.498627110002417,
+        "unpatchify_latent": 0.000005737998435506597,
+        "decode_latent": 7.923312965998775,
+        "silentcipher_watermark": 3.5042768780003826
+      }
+    },
+    "endless_rival_librarian_sumire/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.88,
+      "seed": 3719628159,
+      "sha256": "910f9fbcea0f948212d5be2366891286eaca2825c1f656dc41e81b811e45696e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007357789982052054,
+        "prepare_reference": 0.0007781529966450762,
+        "predict_duration": 1.5991162350001105,
+        "sample_meanflow": 4.114793766999355,
+        "unpatchify_latent": 0.000006199003109941259,
+        "decode_latent": 4.875938173998293,
+        "silentcipher_watermark": 2.121678437997616
+      }
+    },
+    "endless_rival_cafeteria_tome/spawn": {
+      "text": "給食長トメです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.56,
+      "seed": 2125986114,
+      "sha256": "e327e15fd84638ae0b371cf07ef407314c46754a4cc6291833018807ae871b3e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010343290014134254,
+        "prepare_reference": 0.00010371600001235493,
+        "predict_duration": 1.628189947001374,
+        "sample_meanflow": 2.9014781289988605,
+        "unpatchify_latent": 0.000006079000741010532,
+        "decode_latent": 5.686977194000065,
+        "silentcipher_watermark": 3.0894578410006943
+      }
+    },
+    "endless_rival_cafeteria_tome/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.4,
+      "seed": 2125986114,
+      "sha256": "f007db662e27d623b900f163f1f2f74456dbf99d47131e2592fc70460c81d1d5",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005848190012329724,
+        "prepare_reference": 0.0008317650026583578,
+        "predict_duration": 1.9475159140019969,
+        "sample_meanflow": 3.2940505990009115,
+        "unpatchify_latent": 0.000006350001058308408,
+        "decode_latent": 2.994349433996831,
+        "silentcipher_watermark": 1.3927773060022446
+      }
+    },
+    "endless_rival_cafeteria_tome/win": {
+      "text": "給食長トメの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.08,
+      "seed": 2125986114,
+      "sha256": "1cdd2430f5a36ccffb5e1bb55b6ae327c59c027fce47c92f5e05aa12f15f2480",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009227659975294955,
+        "prepare_reference": 0.0008257490007963497,
+        "predict_duration": 1.5547290480026277,
+        "sample_meanflow": 3.0437126899996656,
+        "unpatchify_latent": 0.000006510003004223108,
+        "decode_latent": 5.304746433997934,
+        "silentcipher_watermark": 2.223466494000604
+      }
+    },
+    "endless_rival_cafeteria_tome/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.2,
+      "seed": 2125986114,
+      "sha256": "1aebb8b15d2d2c88de34fd03dcde83d658b7af00fee9c5307968659ef61ca7cf",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008801240001048427,
+        "prepare_reference": 0.0007999219997145701,
+        "predict_duration": 1.6984558239964826,
+        "sample_meanflow": 2.959967250997579,
+        "unpatchify_latent": 0.00008836400229483843,
+        "decode_latent": 4.440326993000781,
+        "silentcipher_watermark": 1.9094542689999798
+      }
+    },
+    "endless_rival_coach_goro/spawn": {
+      "text": "体育教師ゴローです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.56,
+      "seed": 43083694,
+      "sha256": "dd19e9ea9e80105d964550e1943f765b3929128390e15f86b001ca5d07ef616a",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007790809977450408,
+        "prepare_reference": 0.00020106399824726395,
+        "predict_duration": 1.3843390149995685,
+        "sample_meanflow": 2.7716244860021106,
+        "unpatchify_latent": 0.0000064400010160170496,
+        "decode_latent": 5.940444473002572,
+        "silentcipher_watermark": 2.713933316998009
+      }
+    },
+    "endless_rival_coach_goro/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.12,
+      "seed": 43083694,
+      "sha256": "ec2982ebc942f4d1a1855885d8e5c5a5a34e038f73e4c307baeb78c4f7eeb5c5",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006318310006463435,
+        "prepare_reference": 0.0007384019991150126,
+        "predict_duration": 1.8426762639974186,
+        "sample_meanflow": 2.572061456998199,
+        "unpatchify_latent": 0.000006008998752804473,
+        "decode_latent": 2.958811054002581,
+        "silentcipher_watermark": 1.3573514509989764
+      }
+    },
+    "endless_rival_coach_goro/win": {
+      "text": "体育教師ゴローの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.92,
+      "seed": 43083694,
+      "sha256": "1629fd70e2d65a906963c72b1661eeeafe7c1a579b4ba2ee819a1f52d8aedac3",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008713330025784671,
+        "prepare_reference": 0.0008235210007114802,
+        "predict_duration": 1.4909886890018242,
+        "sample_meanflow": 2.8321704600020894,
+        "unpatchify_latent": 0.000006610000127693638,
+        "decode_latent": 5.048915797000518,
+        "silentcipher_watermark": 5.1071877679969475
+      }
+    },
+    "endless_rival_coach_goro/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.92,
+      "seed": 43083694,
+      "sha256": "e211da9b73fc943e58744f3b0f2dec1adfa69667290558f3bcbbdb9f6445bf17",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006969909991312306,
+        "prepare_reference": 0.0009355619986308739,
+        "predict_duration": 2.4415065050015983,
+        "sample_meanflow": 5.2975557899990235,
+        "unpatchify_latent": 0.000006090001988923177,
+        "decode_latent": 6.138140858998668,
+        "silentcipher_watermark": 2.6573435959980998
+      }
+    },
+    "endless_rival_crossing_guard_hana/spawn": {
+      "text": "見守りハナさんです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.6,
+      "seed": 2082537913,
+      "sha256": "bb72805b39b737bc7620aa119249766f3f9d0e8b35b7adcb9fd748b5ed9debe8",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009791470001800917,
+        "prepare_reference": 0.00013189799938118085,
+        "predict_duration": 3.1155050540000957,
+        "sample_meanflow": 4.452426308002032,
+        "unpatchify_latent": 0.000006299000233411789,
+        "decode_latent": 6.612585544997273,
+        "silentcipher_watermark": 2.5115372959990054
+      }
+    },
+    "endless_rival_crossing_guard_hana/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.88,
+      "seed": 2082537913,
+      "sha256": "ad5cbb9a1d84a07c33812db3c8bcdc8f601e6b8bc85281f2c261a4ad74fd1745",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007358269976975862,
+        "prepare_reference": 0.0007184019996202551,
+        "predict_duration": 1.7527642059976642,
+        "sample_meanflow": 3.387465584997699,
+        "unpatchify_latent": 0.0000060589991335291415,
+        "decode_latent": 3.5580099349972443,
+        "silentcipher_watermark": 1.9374935650012048
+      }
+    },
+    "endless_rival_crossing_guard_hana/win": {
+      "text": "見守りハナさんの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.08,
+      "seed": 2082537913,
+      "sha256": "4fa0b266d585496e4db4aa4d8fb9ef1fec8aaf216488935036e07259e9768c06",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.003887678001774475,
+        "prepare_reference": 0.0007513320015277714,
+        "predict_duration": 1.9149401179965935,
+        "sample_meanflow": 3.1071445630004746,
+        "unpatchify_latent": 0.000005488000169862062,
+        "decode_latent": 5.499449752001965,
+        "silentcipher_watermark": 2.884847321998677
+      }
+    },
+    "endless_rival_crossing_guard_hana/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.2,
+      "seed": 2082537913,
+      "sha256": "debce59e9b920852331b4972ad39349c420e73064064ff04bcc1468d56742cb0",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0012205519997223746,
+        "prepare_reference": 0.006155759998364374,
+        "predict_duration": 1.8094210710005427,
+        "sample_meanflow": 2.925956759998371,
+        "unpatchify_latent": 0.0000060490019677672535,
+        "decode_latent": 3.8757527970010415,
+        "silentcipher_watermark": 2.0767118459989433
+      }
+    },
+    "endless_rival_stationer_matsui/spawn": {
+      "text": "文房具屋マツイです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.48,
+      "seed": 3692547929,
+      "sha256": "521297a26a7e48d46e8859c43d7835c4935bcad98379d3f9ceb46e6d0a64fb32",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010154609990422614,
+        "prepare_reference": 0.00007324000034714118,
+        "predict_duration": 1.5052892599996994,
+        "sample_meanflow": 3.4186818190028134,
+        "unpatchify_latent": 0.00000831199940876104,
+        "decode_latent": 6.776517320999119,
+        "silentcipher_watermark": 3.1087374849994376
+      }
+    },
+    "endless_rival_stationer_matsui/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 2.96,
+      "seed": 3692547929,
+      "sha256": "cdceb0269ca57b56078c78edb6b5ca4e2456e139c89f0031f1f8ae0fdc32344d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005341059986676555,
+        "prepare_reference": 0.0006391830029315315,
+        "predict_duration": 1.5237841320013104,
+        "sample_meanflow": 2.435533783002029,
+        "unpatchify_latent": 0.000006389000191120431,
+        "decode_latent": 3.081522184998903,
+        "silentcipher_watermark": 1.6626552529996843
+      }
+    },
+    "endless_rival_stationer_matsui/win": {
+      "text": "文房具屋マツイの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.68,
+      "seed": 3692547929,
+      "sha256": "69823cbdb8998b7ce6bf87b91792d411c0b0248a5dea8ad30a6d563ff41a4842",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010266669996781275,
+        "prepare_reference": 0.0007141460009734146,
+        "predict_duration": 1.9212671249988489,
+        "sample_meanflow": 3.402623391000816,
+        "unpatchify_latent": 0.000007190999895101413,
+        "decode_latent": 5.2603298149988404,
+        "silentcipher_watermark": 2.305374206000124
+      }
+    },
+    "endless_rival_stationer_matsui/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.72,
+      "seed": 3692547929,
+      "sha256": "cf523ce586cef9157f8cf90b5b1b6889d66de64fc9b66f4433c338782f204694",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.00085388499792316,
+        "prepare_reference": 0.0008017669970286079,
+        "predict_duration": 1.4918346499980544,
+        "sample_meanflow": 2.742027247997612,
+        "unpatchify_latent": 0.00009073500041267835,
+        "decode_latent": 3.7496479760011425,
+        "silentcipher_watermark": 1.6026168080024945
+      }
+    },
+    "endless_rival_bakery_mugi/spawn": {
+      "text": "パン屋ムギさんです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.2,
+      "seed": 1457089193,
+      "sha256": "c46aa253ccabfba27dcaa198819dd0d91cfbe87185a0b10db2c95157c7eae61f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009087270009331405,
+        "prepare_reference": 0.00006533700070576742,
+        "predict_duration": 1.486407014002907,
+        "sample_meanflow": 3.2507261779974215,
+        "unpatchify_latent": 0.000005919002433074638,
+        "decode_latent": 6.200296899001842,
+        "silentcipher_watermark": 5.021351654999307
+      }
+    },
+    "endless_rival_bakery_mugi/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.2,
+      "seed": 1457089193,
+      "sha256": "1067ee87145e65b29e7eea1d2e0bb50317599949abfd99868dba213e2489423d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000556007002160186,
+        "prepare_reference": 0.0006493779983429704,
+        "predict_duration": 2.580686238998169,
+        "sample_meanflow": 4.514232841000194,
+        "unpatchify_latent": 0.000006400001439033076,
+        "decode_latent": 5.756476495000243,
+        "silentcipher_watermark": 3.029323247999855
+      }
+    },
+    "endless_rival_bakery_mugi/win": {
+      "text": "パン屋ムギさんの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.52,
+      "seed": 1457089193,
+      "sha256": "c108f90ab276270b13cc62e923ab6ccab1d9adc9ba3d577f59523dbc4cb3471f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001234649997059023,
+        "prepare_reference": 0.0012697429992840625,
+        "predict_duration": 3.3494813369979966,
+        "sample_meanflow": 5.8209651349970954,
+        "unpatchify_latent": 0.0000055390009947586805,
+        "decode_latent": 6.074291411998274,
+        "silentcipher_watermark": 1.8832453490031185
+      }
+    },
+    "endless_rival_bakery_mugi/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.92,
+      "seed": 1457089193,
+      "sha256": "6aa8b9b52ae852057a39ea92e529f08cb309bba2f5b49b2eeef8bb9bb19e1a4a",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007760499975120183,
+        "prepare_reference": 0.0007694909982092213,
+        "predict_duration": 2.581326392999472,
+        "sample_meanflow": 3.724364047000563,
+        "unpatchify_latent": 0.000006089001544751227,
+        "decode_latent": 4.862854145998426,
+        "silentcipher_watermark": 1.7124685929993575
+      }
+    },
+    "endless_rival_bus_driver_sabu/spawn": {
+      "text": "バス運転手サブです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.44,
+      "seed": 3631685220,
+      "sha256": "a940537c267f77ffa50b00ec55da534f56aecbb7befcb1a6d1eee555512b7aca",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009595160008757375,
+        "prepare_reference": 0.00006120199759607203,
+        "predict_duration": 1.6774301229997945,
+        "sample_meanflow": 2.9978353250007785,
+        "unpatchify_latent": 0.000005758000042987987,
+        "decode_latent": 5.49140130700107,
+        "silentcipher_watermark": 2.3119192730009672
+      }
+    },
+    "endless_rival_bus_driver_sabu/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.08,
+      "seed": 3631685220,
+      "sha256": "316ac199c588b3c03ef9e3282c27f2c79c014d61974614146544289ef72d1d78",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005714100007025991,
+        "prepare_reference": 0.0006009040007484145,
+        "predict_duration": 1.4592586500002653,
+        "sample_meanflow": 2.6281487080013903,
+        "unpatchify_latent": 0.0000061399987316690385,
+        "decode_latent": 3.381597203999263,
+        "silentcipher_watermark": 2.9054882760028704
+      }
+    },
+    "endless_rival_bus_driver_sabu/win": {
+      "text": "バス運転手サブの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.92,
+      "seed": 3631685220,
+      "sha256": "fb5c81b1ebf5ef1a8c66c65b6742e2510447179ba7d1a4c33e9d6508b073af08",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0024543500003346708,
+        "prepare_reference": 0.00156168299872661,
+        "predict_duration": 3.3064844670007005,
+        "sample_meanflow": 5.825857788997382,
+        "unpatchify_latent": 0.000005859001248609275,
+        "decode_latent": 8.87928727599865,
+        "silentcipher_watermark": 5.495016703000147
+      }
+    },
+    "endless_rival_bus_driver_sabu/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.84,
+      "seed": 3631685220,
+      "sha256": "073ee1ecf691b557066b4bcf6033dc98b5b40962b3098302d363ba4df0eef45b",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0032167940007639118,
+        "prepare_reference": 0.0007996889980859123,
+        "predict_duration": 3.890195207000943,
+        "sample_meanflow": 6.509573741001077,
+        "unpatchify_latent": 0.000007541999366367236,
+        "decode_latent": 7.75100942300196,
+        "silentcipher_watermark": 3.53246061399841
+      }
+    },
+    "endless_rival_flower_rika/spawn": {
+      "text": "花屋リカさんです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.44,
+      "seed": 2356124592,
+      "sha256": "3fb96ce872bb5b1f1a663a2236e8267b423b759309c94e57010cf88313479a76",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008884890012268443,
+        "prepare_reference": 0.00007266000102390535,
+        "predict_duration": 1.4700332190004701,
+        "sample_meanflow": 2.977953477999108,
+        "unpatchify_latent": 0.000005728998075937852,
+        "decode_latent": 5.866502297998522,
+        "silentcipher_watermark": 2.4101439210026
+      }
+    },
+    "endless_rival_flower_rika/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.72,
+      "seed": 2356124592,
+      "sha256": "0d994972fda6502fc2b396f7baf649d0a58512a7d12a46840e03a795806f5013",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005879359996470157,
+        "prepare_reference": 0.0006518819973280188,
+        "predict_duration": 1.576640857001621,
+        "sample_meanflow": 3.0205352830016636,
+        "unpatchify_latent": 0.000006800000846851617,
+        "decode_latent": 4.549582036001084,
+        "silentcipher_watermark": 2.1631981230020756
+      }
+    },
+    "endless_rival_flower_rika/win": {
+      "text": "花屋リカさんの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 6.36,
+      "seed": 2356124592,
+      "sha256": "e34de9788adb76da121164a00e5c3430b811ef0b5fb86afb2d2363a7175ff1f6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008942780004872475,
+        "prepare_reference": 0.0006765199977962766,
+        "predict_duration": 2.5199907070018526,
+        "sample_meanflow": 6.585302807998232,
+        "unpatchify_latent": 0.000006569996912730858,
+        "decode_latent": 11.37673916300264,
+        "silentcipher_watermark": 7.49914325699865
+      }
+    },
+    "endless_rival_flower_rika/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 5,
+      "seed": 2356124592,
+      "sha256": "06c2611b3c51287e585694e5f9cce3e7fb9e929af87e6456a589ea5e6f9f6318",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008792350017756689,
+        "prepare_reference": 0.0008227100006479304,
+        "predict_duration": 3.417546669003059,
+        "sample_meanflow": 4.478752347000409,
+        "unpatchify_latent": 0.0000057779980124905705,
+        "decode_latent": 8.808771069998329,
+        "silentcipher_watermark": 2.1904360560001805
+      }
+    },
+    "endless_rival_police_kondo/spawn": {
+      "text": "交番の近藤さんです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 1661916771,
+      "sha256": "9d5bd9205aa3075dbe6bddc2c4e9b4ef624bc3bbd1e26e2b9c532aa726c2d906",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0013891130001866259,
+        "prepare_reference": 0.00006587000098079443,
+        "predict_duration": 2.3272916480018466,
+        "sample_meanflow": 4.95587801000147,
+        "unpatchify_latent": 0.0000065399981394875795,
+        "decode_latent": 11.194219674001943,
+        "silentcipher_watermark": 5.808745848000399
+      }
+    },
+    "endless_rival_police_kondo/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 2.96,
+      "seed": 1661916771,
+      "sha256": "3363d609757bd9bb83734ab528d7ffb29fcabb3a597c3dc37f9edd14d277512f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005637750000460073,
+        "prepare_reference": 0.0006039549989509396,
+        "predict_duration": 1.4306188839982497,
+        "sample_meanflow": 2.3370175050004036,
+        "unpatchify_latent": 0.000005678997695213184,
+        "decode_latent": 2.5620762450016628,
+        "silentcipher_watermark": 1.3161227050004527
+      }
+    },
+    "endless_rival_police_kondo/win": {
+      "text": "交番の近藤さんの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.36,
+      "seed": 1661916771,
+      "sha256": "a667a26339f4f4f89c561ce1f2a0c9e5fec6ebc31cc3567a60904218f4d80bd3",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008293559985759202,
+        "prepare_reference": 0.0008271029983006883,
+        "predict_duration": 1.5879313660007028,
+        "sample_meanflow": 2.8354103849997045,
+        "unpatchify_latent": 0.000005437999789137393,
+        "decode_latent": 4.410319156999321,
+        "silentcipher_watermark": 1.918893002999539
+      }
+    },
+    "endless_rival_police_kondo/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.52,
+      "seed": 1661916771,
+      "sha256": "ad0ad818835978d8e521bc1e6760dc588abe2a98cc0959e0bbcb0fa3f4fb93b5",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008630910015199333,
+        "prepare_reference": 0.0008300209992739838,
+        "predict_duration": 1.929313620999892,
+        "sample_meanflow": 2.7141848130013386,
+        "unpatchify_latent": 0.000005707999662263319,
+        "decode_latent": 3.5265430200015544,
+        "silentcipher_watermark": 1.7935759610008972
+      }
+    },
+    "endless_rival_cat_mike/spawn": {
+      "text": "三毛ねこミケです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 1055840430,
+      "sha256": "0cef89959c7748fe83f344ad87d49d2cb72cee9e199506d76d34b372a9099e2c",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009594580005796161,
+        "prepare_reference": 0.00007328999708988704,
+        "predict_duration": 1.5604647690015554,
+        "sample_meanflow": 3.156440211998415,
+        "unpatchify_latent": 0.000006089001544751227,
+        "decode_latent": 6.295863727998949,
+        "silentcipher_watermark": 2.622214963997976
+      }
+    },
+    "endless_rival_cat_mike/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.48,
+      "seed": 1055840430,
+      "sha256": "05530a5aa9cdfbe922495f9fefe9177cf3a4629e17994522ca533e8316d946ae",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005509910006367136,
+        "prepare_reference": 0.0006564399991475511,
+        "predict_duration": 1.516560110001592,
+        "sample_meanflow": 2.501077444998373,
+        "unpatchify_latent": 0.000005658999725710601,
+        "decode_latent": 3.087633489001746,
+        "silentcipher_watermark": 1.4161408779982594
+      }
+    },
+    "endless_rival_cat_mike/win": {
+      "text": "三毛ねこミケの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.96,
+      "seed": 1055840430,
+      "sha256": "4ec56fbbe96e0b41c2dbf6fc0b45c194f37607ee8e2e0d1505c19f7ca159517d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0015875390017754398,
+        "prepare_reference": 0.0012579690010170452,
+        "predict_duration": 1.6131738080002833,
+        "sample_meanflow": 2.66442152899981,
+        "unpatchify_latent": 0.000006090001988923177,
+        "decode_latent": 4.9015496549982345,
+        "silentcipher_watermark": 2.2718157920025988
+      }
+    },
+    "endless_rival_cat_mike/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.76,
+      "seed": 1055840430,
+      "sha256": "91fa4ddf89d59dabfc3e70da53ea74510d57096568c2415f8b6922242c56ae67",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006920369996805675,
+        "prepare_reference": 0.0007430240002577193,
+        "predict_duration": 1.4940811340020446,
+        "sample_meanflow": 3.1531026769989694,
+        "unpatchify_latent": 0.000008323000656673685,
+        "decode_latent": 4.372860457999195,
+        "silentcipher_watermark": 1.566636808001931
+      }
+    },
+    "endless_rival_dog_pochi/spawn": {
+      "text": "しば犬ポチです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 2617962701,
+      "sha256": "dbbefc0a93c0520d4c254c5c0b0e228a4d04bb80f74073ca8f8a186a49b2745f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008490820000588428,
+        "prepare_reference": 0.00006985599975450896,
+        "predict_duration": 1.3943618690027506,
+        "sample_meanflow": 2.7618650980002712,
+        "unpatchify_latent": 0.00000622899824520573,
+        "decode_latent": 6.200805322998349,
+        "silentcipher_watermark": 2.477149999998801
+      }
+    },
+    "endless_rival_dog_pochi/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.24,
+      "seed": 2617962701,
+      "sha256": "9c0073b5f1bac05dc6983c9082f3f2f25d73a2b08efe1fe04b52ed0b38c76cc3",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005859119992237538,
+        "prepare_reference": 0.0006338639977911953,
+        "predict_duration": 1.4751081690010324,
+        "sample_meanflow": 2.531325225998444,
+        "unpatchify_latent": 0.000005678997695213184,
+        "decode_latent": 2.584661174001667,
+        "silentcipher_watermark": 1.1855240449986013
+      }
+    },
+    "endless_rival_dog_pochi/win": {
+      "text": "しば犬ポチの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.92,
+      "seed": 2617962701,
+      "sha256": "e1b185c3c9c4012fdb176a184141c55e061a8afb38e6120805131f480c5bc383",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009350689979328308,
+        "prepare_reference": 0.0009136669978033751,
+        "predict_duration": 1.5282157929977984,
+        "sample_meanflow": 3.2089579719977337,
+        "unpatchify_latent": 0.000007000999175943434,
+        "decode_latent": 4.685409003999666,
+        "silentcipher_watermark": 2.220532542000001
+      }
+    },
+    "endless_rival_dog_pochi/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 2617962701,
+      "sha256": "cc1c543232a929310a5a682f8670c53831eeca150d4832fa561799ac2067ed29",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007203560016932897,
+        "prepare_reference": 0.0007265250023920089,
+        "predict_duration": 1.5585234760001185,
+        "sample_meanflow": 2.8117423969997617,
+        "unpatchify_latent": 0.00000715100031811744,
+        "decode_latent": 3.786901183997543,
+        "silentcipher_watermark": 1.7853934390004724
+      }
+    },
+    "endless_rival_rabbit_mochi/spawn": {
+      "text": "うさぎモチです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.36,
+      "seed": 2464742180,
+      "sha256": "44569791a77b016c61088f9b93aa72f5eeb4c964989ad040fee28a4315271174",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009704330004751682,
+        "prepare_reference": 0.0001178679995064158,
+        "predict_duration": 1.6947068469999067,
+        "sample_meanflow": 3.3165084989996103,
+        "unpatchify_latent": 0.000006008998752804473,
+        "decode_latent": 5.423315770000045,
+        "silentcipher_watermark": 2.40956987699974
+      }
+    },
+    "endless_rival_rabbit_mochi/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 2464742180,
+      "sha256": "5216441df1682d13cd7b4b036dceb9842fa363cd53f44f7cc58430839f268ec8",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005418969994934741,
+        "prepare_reference": 0.0006875159997434821,
+        "predict_duration": 1.694004982997285,
+        "sample_meanflow": 2.8960441799972614,
+        "unpatchify_latent": 0.0000062590006564278156,
+        "decode_latent": 4.566195772000356,
+        "silentcipher_watermark": 1.6879602400003932
+      }
+    },
+    "endless_rival_rabbit_mochi/win": {
+      "text": "うさぎモチの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.44,
+      "seed": 2464742180,
+      "sha256": "304a7761eb17f424ce99118cd4baeccc439c073726e0f6a9a14a9c2351ce8514",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008220689996960573,
+        "prepare_reference": 0.0007852339986129664,
+        "predict_duration": 1.5092838359996676,
+        "sample_meanflow": 2.9211994119978044,
+        "unpatchify_latent": 0.00000610899951425381,
+        "decode_latent": 6.139786275998631,
+        "silentcipher_watermark": 2.477657644998544
+      }
+    },
+    "endless_rival_rabbit_mochi/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.24,
+      "seed": 2464742180,
+      "sha256": "251da65723c075ae23c663f8a019af36b07553426a455bd6afa7a2f226aa48f0",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008193149988073856,
+        "prepare_reference": 0.0007054229972709436,
+        "predict_duration": 1.5084287659992697,
+        "sample_meanflow": 2.8069505330022366,
+        "unpatchify_latent": 0.000006890000804560259,
+        "decode_latent": 4.506713348997437,
+        "silentcipher_watermark": 1.7410292480017233
+      }
+    },
+    "endless_rival_hamster_kurumi/spawn": {
+      "text": "ハムスターくるみです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.28,
+      "seed": 627666009,
+      "sha256": "457d6126bd0269cccf4af6f1a0d89ae903b0098145298002d5c5b8c2adae293d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009227510017808527,
+        "prepare_reference": 0.00007851799819036387,
+        "predict_duration": 1.7290260920017317,
+        "sample_meanflow": 3.0969720440007222,
+        "unpatchify_latent": 0.0000063400002545677125,
+        "decode_latent": 5.888760246001766,
+        "silentcipher_watermark": 2.8221892260007735
+      }
+    },
+    "endless_rival_hamster_kurumi/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.36,
+      "seed": 627666009,
+      "sha256": "638137ca6228766bad22ebe825983f73762960be81d0ed3274b65a4d4d4587ef",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006763979981769808,
+        "prepare_reference": 0.0007616369985044003,
+        "predict_duration": 1.6584724179992918,
+        "sample_meanflow": 2.7452873770016595,
+        "unpatchify_latent": 0.00000622899824520573,
+        "decode_latent": 3.019457025002339,
+        "silentcipher_watermark": 1.3074987309992139
+      }
+    },
+    "endless_rival_hamster_kurumi/win": {
+      "text": "ハムスターくるみの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.92,
+      "seed": 627666009,
+      "sha256": "a2149118230d8c1c5f37991acff19f4acf9bd11ca10c435ab70398efae565a8b",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009115600005316082,
+        "prepare_reference": 0.0007289070017577615,
+        "predict_duration": 1.5006109880014264,
+        "sample_meanflow": 2.6157624540028337,
+        "unpatchify_latent": 0.000005628000508295372,
+        "decode_latent": 4.674654334998195,
+        "silentcipher_watermark": 1.979816580998886
+      }
+    },
+    "endless_rival_hamster_kurumi/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 627666009,
+      "sha256": "9e40703b8f0ec617d20e618aa9edce3a5790451585bd70f4d15be8fa4635fc4c",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007137539978430141,
+        "prepare_reference": 0.0006644099994446151,
+        "predict_duration": 1.3280823780005448,
+        "sample_meanflow": 2.7488078870010213,
+        "unpatchify_latent": 0.000006389000191120431,
+        "decode_latent": 4.319607598001312,
+        "silentcipher_watermark": 1.9023208759972476
+      }
+    },
+    "endless_rival_penguin_pen/spawn": {
+      "text": "ペンギンのペン太です。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.4,
+      "seed": 3286858758,
+      "sha256": "63438bf6247c0c60c3d8afed73bc1dd96e96c5fcef3698d0cef7e35b6c473fa9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000977691997832153,
+        "prepare_reference": 0.00006629000199609436,
+        "predict_duration": 1.5908092290010245,
+        "sample_meanflow": 3.1774086990008072,
+        "unpatchify_latent": 0.000005919002433074638,
+        "decode_latent": 5.509354202000395,
+        "silentcipher_watermark": 2.4018034040018392
+      }
+    },
+    "endless_rival_penguin_pen/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.52,
+      "seed": 3286858758,
+      "sha256": "142d9e61d57bc4c9bb18564aef99664bcc743aea5bbbf29a185fcdf73ae5dec1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005813179996039253,
+        "prepare_reference": 0.0006691509988741018,
+        "predict_duration": 1.6250395939969167,
+        "sample_meanflow": 2.817549205999967,
+        "unpatchify_latent": 0.000005878002411918715,
+        "decode_latent": 3.18638051599919,
+        "silentcipher_watermark": 1.7545583540013467
+      }
+    },
+    "endless_rival_penguin_pen/win": {
+      "text": "ペンギンのペン太の勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.16,
+      "seed": 3286858758,
+      "sha256": "f7c08eb378f54f5d86888b8285f6c0f1a167e13d9ca6b14c9f59450a938bd4da",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009036550000018906,
+        "prepare_reference": 0.0007446150011674035,
+        "predict_duration": 1.4155117779991997,
+        "sample_meanflow": 3.031725031996757,
+        "unpatchify_latent": 0.0000067209984990768135,
+        "decode_latent": 6.001090169000236,
+        "silentcipher_watermark": 2.47777380199841
+      }
+    },
+    "endless_rival_penguin_pen/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.44,
+      "seed": 3286858758,
+      "sha256": "e0e37833fd081be7be0c17144a5327298daf1cbb2a4701041b570e675ef1fd85",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007296699986909516,
+        "prepare_reference": 0.0008431109999946784,
+        "predict_duration": 1.4339302420012245,
+        "sample_meanflow": 2.61484488899805,
+        "unpatchify_latent": 0.000007280999852810055,
+        "decode_latent": 4.686532375002571,
+        "silentcipher_watermark": 2.4044097360019805
+      }
+    },
+    "endless_rival_owl_fukuro/spawn": {
+      "text": "ふくろう博士です。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.16,
+      "seed": 1740872453,
+      "sha256": "b01dd55be0ec74ec1d0f7d48b9bf1bc22437b9f4d18cd7989b38f789782915c1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008821090013952926,
+        "prepare_reference": 0.00006490799933089875,
+        "predict_duration": 10.780751738999243,
+        "sample_meanflow": 8.285263294998003,
+        "unpatchify_latent": 0.000006599999323952943,
+        "decode_latent": 9.306337643996812,
+        "silentcipher_watermark": 6.032714529999794
+      }
+    },
+    "endless_rival_owl_fukuro/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.4,
+      "seed": 1740872453,
+      "sha256": "ac16e9405bb923ee6c4d0cf65ae088badd057caac57dec20e66229ae1bad00fa",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005282460006128531,
+        "prepare_reference": 0.0010792949979077093,
+        "predict_duration": 1.7237289429976954,
+        "sample_meanflow": 6.911615051001718,
+        "unpatchify_latent": 0.000006549998943228275,
+        "decode_latent": 3.9289746930007823,
+        "silentcipher_watermark": 1.498494354000286
+      }
+    },
+    "endless_rival_owl_fukuro/win": {
+      "text": "ふくろう博士の勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.6,
+      "seed": 1740872453,
+      "sha256": "b8525c889f1229ea1fe5edc6c1ec831a11ec6595759362b18cdc653c50339ee6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008433610018983018,
+        "prepare_reference": 0.0007853329989302438,
+        "predict_duration": 2.153276320997975,
+        "sample_meanflow": 4.190896587999305,
+        "unpatchify_latent": 0.000006899997970322147,
+        "decode_latent": 7.11397561999911,
+        "silentcipher_watermark": 6.40326849000121
+      }
+    },
+    "endless_rival_owl_fukuro/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.64,
+      "seed": 1740872453,
+      "sha256": "78bbcb62ec1d249e94a2b40f4df937f4c3f57ba7879ad6456ddcfa5823cb6f96",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011669099985738285,
+        "prepare_reference": 0.001430057000106899,
+        "predict_duration": 4.071165697998367,
+        "sample_meanflow": 4.142916057997354,
+        "unpatchify_latent": 0.000005899000825593248,
+        "decode_latent": 3.6077010310000333,
+        "silentcipher_watermark": 1.5546975280012703
+      }
+    },
+    "endless_rival_art_teacher_daigo/spawn": {
+      "text": "美術教師ダイゴです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.8,
+      "seed": 2026828465,
+      "sha256": "1b6978a385d44b677ca7b0c47713823cfc99dfb0be369ca74732943cd09410ef",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009571640002832282,
+        "prepare_reference": 0.00007363199983956292,
+        "predict_duration": 1.5333991989973583,
+        "sample_meanflow": 3.2825618060014676,
+        "unpatchify_latent": 0.000005709000106435269,
+        "decode_latent": 6.021668890000001,
+        "silentcipher_watermark": 2.4756344349989376
+      }
+    },
+    "endless_rival_art_teacher_daigo/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.28,
+      "seed": 2026828465,
+      "sha256": "979ae1e40f5be318ddc9dfcc7a24918717ae7c793f61431515cb6ae6c8b3f522",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007889369990152773,
+        "prepare_reference": 0.0007477950020984281,
+        "predict_duration": 1.5661702559991681,
+        "sample_meanflow": 2.6677306439996755,
+        "unpatchify_latent": 0.000006599999323952943,
+        "decode_latent": 2.5663862969995535,
+        "silentcipher_watermark": 1.2968430669970985
+      }
+    },
+    "endless_rival_art_teacher_daigo/win": {
+      "text": "美術教師ダイゴの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.2,
+      "seed": 2026828465,
+      "sha256": "4c520f9134efdb42481e3f9141d0d97c81b1117d347340c143af5cbf6d008070",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009178069994959515,
+        "prepare_reference": 0.000723245000699535,
+        "predict_duration": 1.606341918999533,
+        "sample_meanflow": 2.8354382770012307,
+        "unpatchify_latent": 0.0000619730017206166,
+        "decode_latent": 4.458252091000759,
+        "silentcipher_watermark": 2.3129682670005423
+      }
+    },
+    "endless_rival_art_teacher_daigo/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.04,
+      "seed": 2026828465,
+      "sha256": "bbf7df811e3fa204d4f6d917b45b5d83e7050b2e03621ee2e1aecdace0560068",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007704799972998444,
+        "prepare_reference": 0.001307659000303829,
+        "predict_duration": 1.759561016002408,
+        "sample_meanflow": 2.6453121049999027,
+        "unpatchify_latent": 0.000006259997462620959,
+        "decode_latent": 3.962562925000384,
+        "silentcipher_watermark": 2.206438250002975
+      }
+    },
+    "endless_rival_music_teacher_otoha/spawn": {
+      "text": "音楽教師オトハです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.92,
+      "seed": 3448270338,
+      "sha256": "cb03ed3de86c4ca86c7eec2d588fcda24b418b5437f2c35182f91f26fd642eff",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009991660008381587,
+        "prepare_reference": 0.00007909899795777164,
+        "predict_duration": 2.1758521420015313,
+        "sample_meanflow": 4.441871140999865,
+        "unpatchify_latent": 0.000006480000593001023,
+        "decode_latent": 6.449781465002161,
+        "silentcipher_watermark": 2.681670273999771
+      }
+    },
+    "endless_rival_music_teacher_otoha/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.52,
+      "seed": 3448270338,
+      "sha256": "4cc3cfda5ba84266ccf92d387b533f9bae1ddd0d68c6b4735e66b0ad68d39278",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005951170023763552,
+        "prepare_reference": 0.0009863970008154865,
+        "predict_duration": 1.6016950249977526,
+        "sample_meanflow": 2.7951327440023306,
+        "unpatchify_latent": 0.000006389996997313574,
+        "decode_latent": 3.324350267997943,
+        "silentcipher_watermark": 1.6801758269975835
+      }
+    },
+    "endless_rival_music_teacher_otoha/win": {
+      "text": "音楽教師オトハの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.64,
+      "seed": 3448270338,
+      "sha256": "ee96e6c23372ad37117cd6f26e8d9ba2708c59afc0cf0c813f688e493e2c1db6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000878283000929514,
+        "prepare_reference": 0.0007891189998190384,
+        "predict_duration": 1.4838730750016111,
+        "sample_meanflow": 3.111157572002412,
+        "unpatchify_latent": 0.000005859001248609275,
+        "decode_latent": 5.792004873001133,
+        "silentcipher_watermark": 2.3681360250011494
+      }
+    },
+    "endless_rival_music_teacher_otoha/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.44,
+      "seed": 3448270338,
+      "sha256": "1f1f9a69e06517db96c1e40b5037de74947b8311016a353cc9074a5de4638ce6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007050839994917624,
+        "prepare_reference": 0.0007066149992169812,
+        "predict_duration": 1.3449369789996126,
+        "sample_meanflow": 2.7199934579984983,
+        "unpatchify_latent": 0.000005899000825593248,
+        "decode_latent": 4.533027058001608,
+        "silentcipher_watermark": 1.9733621000013954
+      }
+    },
+    "endless_rival_science_teacher_tsubaki/spawn": {
+      "text": "理科教師ツバキです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.72,
+      "seed": 3528449717,
+      "sha256": "bd7593b95afae9a2006cd7f8ca6529c5c3f4ba5ab18ba781bf6f37b11cd9daff",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008981330029200763,
+        "prepare_reference": 0.00006156299787107855,
+        "predict_duration": 1.5313325239985716,
+        "sample_meanflow": 16.819459791000554,
+        "unpatchify_latent": 0.000007651000487385318,
+        "decode_latent": 11.309135496998351,
+        "silentcipher_watermark": 3.2268272430010256
+      }
+    },
+    "endless_rival_science_teacher_tsubaki/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.6,
+      "seed": 3528449717,
+      "sha256": "0a0e3be72aa4d6743f8c023e7e4d222ddc532fc382b8ab9de4436aa468a75f5f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000638902001810493,
+        "prepare_reference": 0.0012076599996362347,
+        "predict_duration": 1.7697231029997056,
+        "sample_meanflow": 3.002154359997803,
+        "unpatchify_latent": 0.000006209000275703147,
+        "decode_latent": 4.82336013999884,
+        "silentcipher_watermark": 2.0775333710007544
+      }
+    },
+    "endless_rival_science_teacher_tsubaki/win": {
+      "text": "理科教師ツバキの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.8,
+      "seed": 3528449717,
+      "sha256": "361b317e20b8180bdee48a1d62173f86d122310edbec7ff4ea0b32159791cb7e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010771540000860114,
+        "prepare_reference": 0.0010872980019485112,
+        "predict_duration": 1.497267827999167,
+        "sample_meanflow": 3.535672317000717,
+        "unpatchify_latent": 0.000005328001861926168,
+        "decode_latent": 6.115209604999109,
+        "silentcipher_watermark": 2.490767371000402
+      }
+    },
+    "endless_rival_science_teacher_tsubaki/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 3528449717,
+      "sha256": "958dcbac3ba244b80c73aa4ae0b2c54ca6b52e12293e07263bc2d11710803140",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011210640004719608,
+        "prepare_reference": 0.000931669997953577,
+        "predict_duration": 1.452094352000131,
+        "sample_meanflow": 2.8535283929995785,
+        "unpatchify_latent": 0.0000062590006564278156,
+        "decode_latent": 4.616289166002389,
+        "silentcipher_watermark": 1.8041315820009913
+      }
+    },
+    "endless_rival_math_teacher_sakuma/spawn": {
+      "text": "数学教師サクマです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.8,
+      "seed": 3389583674,
+      "sha256": "5e997d83be402723e983e46ec1230988218c504c0a5f6227a0de8dd638e6f05f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010975539989885874,
+        "prepare_reference": 0.00006979499812587164,
+        "predict_duration": 1.6881160250013636,
+        "sample_meanflow": 3.301977649996843,
+        "unpatchify_latent": 0.000005737998435506597,
+        "decode_latent": 6.042600549000781,
+        "silentcipher_watermark": 3.0823955980013125
+      }
+    },
+    "endless_rival_math_teacher_sakuma/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.28,
+      "seed": 3389583674,
+      "sha256": "f0d52d38e1ad8ec4ea2741fdc774047c4a5578de69b8ed3992863e814edc68fc",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000538391999725718,
+        "prepare_reference": 0.0007503609995183069,
+        "predict_duration": 1.5491657800012035,
+        "sample_meanflow": 2.5844180899985076,
+        "unpatchify_latent": 0.000005688998498953879,
+        "decode_latent": 2.853169242000149,
+        "silentcipher_watermark": 1.4167452660003619
+      }
+    },
+    "endless_rival_math_teacher_sakuma/win": {
+      "text": "数学教師サクマの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.96,
+      "seed": 3389583674,
+      "sha256": "3bc9882064a7bea33435e950e8dbbd0408084d492668d4cc65c48bbe20e0b579",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009971149993361905,
+        "prepare_reference": 0.0008982750005088747,
+        "predict_duration": 1.4223576100011996,
+        "sample_meanflow": 2.8614148310007295,
+        "unpatchify_latent": 0.0000063590014178771526,
+        "decode_latent": 5.397616903999733,
+        "silentcipher_watermark": 2.1499102230009157
+      }
+    },
+    "endless_rival_math_teacher_sakuma/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.96,
+      "seed": 3389583674,
+      "sha256": "7cab20b8d8cf6dfb6ecc8535e5852ff001d83f3ee3b9fe188bf1238584f7937e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008031500001379754,
+        "prepare_reference": 0.000772893999965163,
+        "predict_duration": 1.888675800000783,
+        "sample_meanflow": 3.228323889998137,
+        "unpatchify_latent": 0.000006419999408535659,
+        "decode_latent": 3.9078723330021603,
+        "silentcipher_watermark": 1.709190565001336
+      }
+    },
+    "endless_rival_janitor_robot_jiro/spawn": {
+      "text": "掃除ロボ次郎です。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.72,
+      "seed": 3883040599,
+      "sha256": "a7c2d2b440f57f713cd0152357e58eaf81eed634e3bdbd9aab0a293b6751e5f6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0012604799994733185,
+        "prepare_reference": 0.00007122700117179193,
+        "predict_duration": 1.5603324190014973,
+        "sample_meanflow": 3.220410346999415,
+        "unpatchify_latent": 0.000006238999048946425,
+        "decode_latent": 5.728286682999169,
+        "silentcipher_watermark": 2.5822503560011683
+      }
+    },
+    "endless_rival_janitor_robot_jiro/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 5.48,
+      "seed": 3883040599,
+      "sha256": "93a0d5f3e9b595058ddb979bbefaf66d5dadc964e9a882f715b3916a6d9ca2dd",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007055230016703717,
+        "prepare_reference": 0.0006989230023464188,
+        "predict_duration": 1.4945974530019157,
+        "sample_meanflow": 3.061686318000284,
+        "unpatchify_latent": 0.000006070000381441787,
+        "decode_latent": 6.231614209002146,
+        "silentcipher_watermark": 2.383102654002869
+      }
+    },
+    "endless_rival_janitor_robot_jiro/win": {
+      "text": "掃除ロボ次郎の勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 6.24,
+      "seed": 3883040599,
+      "sha256": "6aea5e6bc920ab01835fef186bc526d2329db7b6ed7ab0673310469b7b287441",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009185240014630836,
+        "prepare_reference": 0.000707536000845721,
+        "predict_duration": 1.5272232610004721,
+        "sample_meanflow": 3.0840794239993556,
+        "unpatchify_latent": 0.000006328999006655067,
+        "decode_latent": 6.613937932001136,
+        "silentcipher_watermark": 3.0559463700010383
+      }
+    },
+    "endless_rival_janitor_robot_jiro/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.4,
+      "seed": 3883040599,
+      "sha256": "8f87b3776be349a549e75d329d66808db45eb1dc49512621b74a461ff5b3e5fe",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007807049987604842,
+        "prepare_reference": 0.0007099489994288888,
+        "predict_duration": 1.528204721002112,
+        "sample_meanflow": 3.1370113099983428,
+        "unpatchify_latent": 0.0000071309987106360495,
+        "decode_latent": 4.369927851999819,
+        "silentcipher_watermark": 1.9987516830005916
+      }
+    },
+    "endless_rival_pta_madam_reiko/spawn": {
+      "text": "PTAレイコです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.2,
+      "seed": 29847174,
+      "sha256": "23119515a2f666952e246e2f7d1b209b45d3bba334bc0241dbc67ba97532859d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008618760002718773,
+        "prepare_reference": 0.00006558800305356272,
+        "predict_duration": 1.5213965920011105,
+        "sample_meanflow": 3.049747485001717,
+        "unpatchify_latent": 0.000005308000254444778,
+        "decode_latent": 5.231535486000212,
+        "silentcipher_watermark": 2.454566075000912
+      }
+    },
+    "endless_rival_pta_madam_reiko/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.44,
+      "seed": 29847174,
+      "sha256": "010e648fdcd6b3f3f4e20da08478ee74ab71dc63f9cd86404070472d1a6cc889",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005606660015473608,
+        "prepare_reference": 0.0006173410001792945,
+        "predict_duration": 1.9021611030002532,
+        "sample_meanflow": 2.864672072999383,
+        "unpatchify_latent": 0.00000620999708189629,
+        "decode_latent": 4.409064669001964,
+        "silentcipher_watermark": 2.0316742489994795
+      }
+    },
+    "endless_rival_pta_madam_reiko/win": {
+      "text": "PTAレイコの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.56,
+      "seed": 29847174,
+      "sha256": "02e811f9524373c6c39a2c5775a99768e4a9ce78b27ea16fb9f9bbe521128c50",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007896639981481712,
+        "prepare_reference": 0.0007119859983504284,
+        "predict_duration": 1.664759192000929,
+        "sample_meanflow": 6.404224318997876,
+        "unpatchify_latent": 0.00000565799928153865,
+        "decode_latent": 9.399383095998928,
+        "silentcipher_watermark": 4.145187925998471
+      }
+    },
+    "endless_rival_pta_madam_reiko/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.24,
+      "seed": 29847174,
+      "sha256": "c84f34273458991357352fc4689a2b7ac3c810dec2a5e209127bb1b10c51d7d6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009232539996446576,
+        "prepare_reference": 0.0009112659972743131,
+        "predict_duration": 3.1259862240003713,
+        "sample_meanflow": 7.916777684000408,
+        "unpatchify_latent": 0.000007460999768227339,
+        "decode_latent": 7.4002775920016575,
+        "silentcipher_watermark": 4.222851340997295
+      }
+    },
+    "endless_rival_turtle_kamekichi/spawn": {
+      "text": "かめ吉です。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.08,
+      "seed": 2044279599,
+      "sha256": "5dfda59198884b99f35462c4b35e3c23e4744de606b054e17730206621551536",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0023801800016372,
+        "prepare_reference": 0.00009426199903828092,
+        "predict_duration": 2.7985314629986533,
+        "sample_meanflow": 4.108559401000093,
+        "unpatchify_latent": 0.000006800000846851617,
+        "decode_latent": 7.120877731998917,
+        "silentcipher_watermark": 2.7650026230003277
+      }
+    },
+    "endless_rival_turtle_kamekichi/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.8,
+      "seed": 2044279599,
+      "sha256": "4b0fc3864de8d8699402dc2136b0c4030dae07fe7bd48f9803bca3d5a5821b81",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008244710006692912,
+        "prepare_reference": 0.0014490210014628246,
+        "predict_duration": 4.300455469998269,
+        "sample_meanflow": 5.983280518001266,
+        "unpatchify_latent": 0.000006660000508418307,
+        "decode_latent": 3.729719094997563,
+        "silentcipher_watermark": 1.653320117999101
+      }
+    },
+    "endless_rival_turtle_kamekichi/win": {
+      "text": "かめ吉の勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5,
+      "seed": 2044279599,
+      "sha256": "57dacadb20e7b27f66846ae89328e81c9327e68e69131b114253f86fce72e900",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010241480013064574,
+        "prepare_reference": 0.000953973998548463,
+        "predict_duration": 1.468167620998429,
+        "sample_meanflow": 2.9617173160004313,
+        "unpatchify_latent": 0.000006419999408535659,
+        "decode_latent": 5.354909088000568,
+        "silentcipher_watermark": 2.23290409800029
+      }
+    },
+    "endless_rival_turtle_kamekichi/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.56,
+      "seed": 2044279599,
+      "sha256": "51bfde010d3c77d8f97cf23f29bc1aff6f2674ad422e6a92b0702cda7053608a",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007651800005987752,
+        "prepare_reference": 0.0008370690011361148,
+        "predict_duration": 1.649419672001386,
+        "sample_meanflow": 2.7416799319980782,
+        "unpatchify_latent": 0.000006279999070102349,
+        "decode_latent": 4.623684252001112,
+        "silentcipher_watermark": 2.05894601700129
+      }
+    },
+    "endless_rival_sparrow_chun/spawn": {
+      "text": "すずめのチュンです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 1347682264,
+      "sha256": "2b33390096e60d3ddf3d4835747ce05ee4f718d1afcefe3e5c13e0821cc787d0",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010062979999929667,
+        "prepare_reference": 0.00007227900277939625,
+        "predict_duration": 1.9158433709999372,
+        "sample_meanflow": 3.096978683002817,
+        "unpatchify_latent": 0.000005619000148726627,
+        "decode_latent": 6.118767576001119,
+        "silentcipher_watermark": 2.7776137360015127
+      }
+    },
+    "endless_rival_sparrow_chun/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.76,
+      "seed": 1347682264,
+      "sha256": "b8d651917ccdb427e948a4240af60dfb8313e6d81b3cfc707c799db1cdfe6ebe",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007247829998959787,
+        "prepare_reference": 0.0007132459977583494,
+        "predict_duration": 1.5280966060017818,
+        "sample_meanflow": 2.987302138000814,
+        "unpatchify_latent": 0.000007210997864603996,
+        "decode_latent": 4.997614047999377,
+        "silentcipher_watermark": 2.1326892690012755
+      }
+    },
+    "endless_rival_sparrow_chun/win": {
+      "text": "すずめのチュンの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.76,
+      "seed": 1347682264,
+      "sha256": "cb31eb1fffae68a7f89aad779462d2909d423f124fce820370e9428dea711eec",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008992859984573442,
+        "prepare_reference": 0.0007379419985227287,
+        "predict_duration": 1.6101913919992512,
+        "sample_meanflow": 3.4793290739980876,
+        "unpatchify_latent": 0.00000608899790677242,
+        "decode_latent": 6.270777956000529,
+        "silentcipher_watermark": 3.100246785001218
+      }
+    },
+    "endless_rival_sparrow_chun/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 1347682264,
+      "sha256": "4b53d97a320b2b805a210ee14ec19d7c10227f59de8e3df1d70aff7a5f0d9dce",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007907819999672938,
+        "prepare_reference": 0.0007759899999655318,
+        "predict_duration": 1.7200811689981492,
+        "sample_meanflow": 2.908007111000188,
+        "unpatchify_latent": 0.000006170001142891124,
+        "decode_latent": 4.31142371900205,
+        "silentcipher_watermark": 1.7997586599994975
+      }
+    },
+    "endless_rival_hedgehog_hari/spawn": {
+      "text": "はりねずみハリです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.88,
+      "seed": 1006252062,
+      "sha256": "2d8043150bb06c70a60e547b8d7e43cf2edf8342ff49a610e5791d9591365a5d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000985083999694325,
+        "prepare_reference": 0.00014825299876974896,
+        "predict_duration": 1.980459610997059,
+        "sample_meanflow": 3.364690720998624,
+        "unpatchify_latent": 0.000006959999154787511,
+        "decode_latent": 6.231440519000898,
+        "silentcipher_watermark": 2.8940842880001583
+      }
+    },
+    "endless_rival_hedgehog_hari/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3,
+      "seed": 1006252062,
+      "sha256": "cb83e1632b3837ea8a74f73e9cf10d546c93763c3a991bfdd6feb47764023c4e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005649410013575107,
+        "prepare_reference": 0.0006533050000143703,
+        "predict_duration": 1.6022715170001902,
+        "sample_meanflow": 2.6051024429980316,
+        "unpatchify_latent": 0.000005709000106435269,
+        "decode_latent": 2.847482426001079,
+        "silentcipher_watermark": 1.2926442790012516
+      }
+    },
+    "endless_rival_hedgehog_hari/win": {
+      "text": "はりねずみハリの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.04,
+      "seed": 1006252062,
+      "sha256": "4c2e620ddc3779abb80d1f3bdd1018e14bc7219dc131c26125125b6a68441183",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010866880002140533,
+        "prepare_reference": 0.0010151199967367575,
+        "predict_duration": 1.6775858080000035,
+        "sample_meanflow": 2.9998606009976356,
+        "unpatchify_latent": 0.000005899000825593248,
+        "decode_latent": 5.243128912999964,
+        "silentcipher_watermark": 2.3823940139991464
+      }
+    },
+    "endless_rival_hedgehog_hari/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.8,
+      "seed": 1006252062,
+      "sha256": "aead7fb20f0a8b6fbd91e2863f9e1b04b957248fc9f08576ad5666b9cf4254ad",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009387139980390202,
+        "prepare_reference": 0.0008689400019648019,
+        "predict_duration": 1.468471177999163,
+        "sample_meanflow": 2.7857822829973884,
+        "unpatchify_latent": 0.000005627996870316565,
+        "decode_latent": 4.165525025000534,
+        "silentcipher_watermark": 1.8826680580023094
+      }
+    },
+    "endless_rival_red_panda_maru/spawn": {
+      "text": "レッサーマルです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5,
+      "seed": 4083125840,
+      "sha256": "73bf895a472c356806a58a2a37368e1ae6ee5682430abf75233e6f26c38ac2eb",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001059897997038206,
+        "prepare_reference": 0.00007199899846455082,
+        "predict_duration": 2.0754938879981637,
+        "sample_meanflow": 3.1734639530004642,
+        "unpatchify_latent": 0.0000060589991335291415,
+        "decode_latent": 5.238963046998833,
+        "silentcipher_watermark": 2.182612866999989
+      }
+    },
+    "endless_rival_red_panda_maru/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.16,
+      "seed": 4083125840,
+      "sha256": "23e8388d75391fc6f8fbcf9cc81780820cfe30c9b91f9424a86a18418f99bac1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007982030001585372,
+        "prepare_reference": 0.0007546870001533534,
+        "predict_duration": 2.0200600499993016,
+        "sample_meanflow": 2.873834555997746,
+        "unpatchify_latent": 0.0000060589991335291415,
+        "decode_latent": 3.117043480000575,
+        "silentcipher_watermark": 1.3758029580021685
+      }
+    },
+    "endless_rival_red_panda_maru/win": {
+      "text": "レッサーマルの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.24,
+      "seed": 4083125840,
+      "sha256": "ae6cda40e461e542788737dfbcff1eed124c348a36b1b0e07694cc117a52591c",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008400859987887088,
+        "prepare_reference": 0.0007316429982893169,
+        "predict_duration": 1.708635871000297,
+        "sample_meanflow": 2.767261711000174,
+        "unpatchify_latent": 0.000007211001502582803,
+        "decode_latent": 4.129368290999992,
+        "silentcipher_watermark": 1.9177656499996374
+      }
+    },
+    "endless_rival_red_panda_maru/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.76,
+      "seed": 4083125840,
+      "sha256": "f1a245d94517cd80b4cbc8ab09e6f1af5730095a389d1fedb4dd57f84610c5ea",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007962899981066585,
+        "prepare_reference": 0.0007809070011717267,
+        "predict_duration": 1.499542453999311,
+        "sample_meanflow": 2.5430672430011327,
+        "unpatchify_latent": 0.000006059999577701092,
+        "decode_latent": 3.8543169210024644,
+        "silentcipher_watermark": 1.5282779049994133
+      }
+    },
+    "endless_rival_alpaca_paca/spawn": {
+      "text": "アルパカぱかです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.28,
+      "seed": 1315428569,
+      "sha256": "8f9be37108581ee8086738848425ab114e61193b902c22ca0ff77c775c0e1ecb",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009413180014234968,
+        "prepare_reference": 0.00006616999962716363,
+        "predict_duration": 1.6565195430011954,
+        "sample_meanflow": 3.173223952002445,
+        "unpatchify_latent": 0.000005437999789137393,
+        "decode_latent": 5.441061682999134,
+        "silentcipher_watermark": 2.9256668529997114
+      }
+    },
+    "endless_rival_alpaca_paca/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.24,
+      "seed": 1315428569,
+      "sha256": "9fbb3d07cd38c7aaac7cdeed5248f1d7f04a0c48487477134b77e150912ebc6d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007839009995223023,
+        "prepare_reference": 0.0006224479984666687,
+        "predict_duration": 1.536793272000068,
+        "sample_meanflow": 3.295175006998761,
+        "unpatchify_latent": 0.0000073409973992966115,
+        "decode_latent": 3.94235042299988,
+        "silentcipher_watermark": 2.0679526909989363
+      }
+    },
+    "endless_rival_alpaca_paca/win": {
+      "text": "アルパカぱかの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.04,
+      "seed": 1315428569,
+      "sha256": "30b3af1a3846aaffc85dfd80e052aee204c1e488bb5d5ac275a1671a936cda15",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009507129980192985,
+        "prepare_reference": 0.0007534449978265911,
+        "predict_duration": 1.5800603190000402,
+        "sample_meanflow": 3.2858374759998696,
+        "unpatchify_latent": 0.000006039001164026558,
+        "decode_latent": 5.123603149000701,
+        "silentcipher_watermark": 2.8241908790005255
+      }
+    },
+    "endless_rival_alpaca_paca/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.6,
+      "seed": 1315428569,
+      "sha256": "eeedde54ba02772283affb1cf1fa018097265963116fdfcc4e57e65f71149e96",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008854040024743881,
+        "prepare_reference": 0.000885945999471005,
+        "predict_duration": 2.0037755010016554,
+        "sample_meanflow": 2.7470525839999027,
+        "unpatchify_latent": 0.00000729100065655075,
+        "decode_latent": 2.946870162999403,
+        "silentcipher_watermark": 1.5579077639995376
+      }
+    },
+    "endless_rival_fox_kon/spawn": {
+      "text": "きつねコンです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.16,
+      "seed": 1700516973,
+      "sha256": "94bce9ff009cd97fb348e958a581719677b3f2d6e3fb8b489607105aca16e27b",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001202842999191489,
+        "prepare_reference": 0.00006935399869689718,
+        "predict_duration": 1.445710132997192,
+        "sample_meanflow": 2.942108458999428,
+        "unpatchify_latent": 0.0000061490027292165905,
+        "decode_latent": 5.027448491000541,
+        "silentcipher_watermark": 2.377510836999136
+      }
+    },
+    "endless_rival_fox_kon/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.96,
+      "seed": 1700516973,
+      "sha256": "19d32489855d9a9394849010566060295f88fae913ba9e3168e39be43bc11aef",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006054619989299681,
+        "prepare_reference": 0.0006373709984472953,
+        "predict_duration": 1.6908663579997665,
+        "sample_meanflow": 3.4044675799996185,
+        "unpatchify_latent": 0.000005518002581084147,
+        "decode_latent": 3.9028817569997045,
+        "silentcipher_watermark": 1.6616713910007093
+      }
+    },
+    "endless_rival_fox_kon/win": {
+      "text": "きつねコンの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.08,
+      "seed": 1700516973,
+      "sha256": "fec3da9f58305cd3fc2033bae2d6a4fa05de9b85a171466b42ea6f3eb9d38675",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011281200022494886,
+        "prepare_reference": 0.000788337998528732,
+        "predict_duration": 1.551367666997976,
+        "sample_meanflow": 2.984151966000354,
+        "unpatchify_latent": 0.0000059689991758205,
+        "decode_latent": 5.511202031000721,
+        "silentcipher_watermark": 2.2013874869990104
+      }
+    },
+    "endless_rival_fox_kon/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.28,
+      "seed": 1700516973,
+      "sha256": "c56e0c00546e7c6e697b52e770eb7d24d31912d22c5f86463fc17dff08d17fa4",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007468760013580322,
+        "prepare_reference": 0.0006944070009922143,
+        "predict_duration": 1.4317426119996526,
+        "sample_meanflow": 2.930654265001067,
+        "unpatchify_latent": 0.000007400998583761975,
+        "decode_latent": 4.433677234999777,
+        "silentcipher_watermark": 1.9156473250004638
+      }
+    },
+    "endless_rival_convenience_nana/spawn": {
+      "text": "コンビニ店長ナナです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.76,
+      "seed": 1856701885,
+      "sha256": "5d0ae9938f0d0f734ce56bf245d0d860226da8ee0d36f0fa9d712cb1d9140870",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008910629985621199,
+        "prepare_reference": 0.00006362599742715247,
+        "predict_duration": 1.5580360870008008,
+        "sample_meanflow": 3.225580192000052,
+        "unpatchify_latent": 0.000005799000064143911,
+        "decode_latent": 5.979819404998125,
+        "silentcipher_watermark": 2.6218534409999847
+      }
+    },
+    "endless_rival_convenience_nana/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 5.4,
+      "seed": 1856701885,
+      "sha256": "e82d2216838fdb696a5f0f18ca204b92b7f8b97e116daf2922733ca210c24286",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006327740011329297,
+        "prepare_reference": 0.0005970099991827738,
+        "predict_duration": 1.4383321000022988,
+        "sample_meanflow": 3.067262484000821,
+        "unpatchify_latent": 0.000005727997631765902,
+        "decode_latent": 5.454153631999361,
+        "silentcipher_watermark": 2.371301824998227
+      }
+    },
+    "endless_rival_convenience_nana/win": {
+      "text": "コンビニ店長ナナの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 6.6,
+      "seed": 1856701885,
+      "sha256": "79a87f43a49a57fab79f75faed8b123aec311dfe38c8201a5d69eec8f90edff1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008121440005197655,
+        "prepare_reference": 0.0008331169992743526,
+        "predict_duration": 1.6241390249997494,
+        "sample_meanflow": 3.3589769499994873,
+        "unpatchify_latent": 0.000006120000762166455,
+        "decode_latent": 7.05251710399898,
+        "silentcipher_watermark": 3.2001982310030144
+      }
+    },
+    "endless_rival_convenience_nana/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.88,
+      "seed": 1856701885,
+      "sha256": "fe125bb78167780ba42b2416f316addb1331f365d6dab2319b83d2de85428ce7",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.002046895999228582,
+        "prepare_reference": 0.0007581529935123399,
+        "predict_duration": 1.3434459089985467,
+        "sample_meanflow": 2.6503105369993136,
+        "unpatchify_latent": 0.000005959002010058612,
+        "decode_latent": 5.116044378999504,
+        "silentcipher_watermark": 2.014518625001074
+      }
+    },
+    "endless_rival_bookstore_honda/spawn": {
+      "text": "本屋ホンダです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.12,
+      "seed": 3623648966,
+      "sha256": "e5f8d8d9c842afe861eee5dfdfab3cb8bfe5de3fcdbf4c66f16f496b1e9d82ea",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008288519966299646,
+        "prepare_reference": 0.00006794199725845829,
+        "predict_duration": 1.4677821080040303,
+        "sample_meanflow": 2.8620427070054575,
+        "unpatchify_latent": 0.000006078997103031725,
+        "decode_latent": 5.4792666460052715,
+        "silentcipher_watermark": 2.403310738998698
+      }
+    },
+    "endless_rival_bookstore_honda/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.68,
+      "seed": 3623648966,
+      "sha256": "e1e60941bb9012acb7e69c5f163f20d20d476582c1b04ac7ef35d7e236099331",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005338650007615797,
+        "prepare_reference": 0.000913937998120673,
+        "predict_duration": 1.6688577760069165,
+        "sample_meanflow": 2.808228930000041,
+        "unpatchify_latent": 0.000006850001227576286,
+        "decode_latent": 4.180881261003378,
+        "silentcipher_watermark": 2.085144118005701
+      }
+    },
+    "endless_rival_bookstore_honda/win": {
+      "text": "本屋ホンダの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.96,
+      "seed": 3623648966,
+      "sha256": "acc3d7c8ca029827658a9dae0ec7988a41e0cf7e7fee029fd51bbcd66bec3941",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008039300009841099,
+        "prepare_reference": 0.0007194829959189519,
+        "predict_duration": 1.4440366600028938,
+        "sample_meanflow": 2.7868160900034127,
+        "unpatchify_latent": 0.000006139001925475895,
+        "decode_latent": 4.777216370006499,
+        "silentcipher_watermark": 2.312043348996667
+      }
+    },
+    "endless_rival_bookstore_honda/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 3623648966,
+      "sha256": "7eb7d8c86b61b7a9bbc98efe85b2d82d539d93884d71887a0e7c78db121cab01",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007357189970207401,
+        "prepare_reference": 0.0008256740038632415,
+        "predict_duration": 1.4945571290008957,
+        "sample_meanflow": 2.5502421649944154,
+        "unpatchify_latent": 0.000006049005605746061,
+        "decode_latent": 4.226087394003116,
+        "silentcipher_watermark": 1.8239021090048482
+      }
+    },
+    "endless_rival_dentist_shiro/spawn": {
+      "text": "歯医者シロ先生です。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 3326526549,
+      "sha256": "402063c8be010271b95911d99314982bed648288e4068b0a1aac687dbfcd4912",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009326260042143986,
+        "prepare_reference": 0.00009629499982111156,
+        "predict_duration": 1.5884736809966853,
+        "sample_meanflow": 2.969267991000379,
+        "unpatchify_latent": 0.0000056779972510412335,
+        "decode_latent": 6.159266672002559,
+        "silentcipher_watermark": 3.8343332869990263
+      }
+    },
+    "endless_rival_dentist_shiro/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 4.72,
+      "seed": 3326526549,
+      "sha256": "03271980d757ad1f2b166be4305cbae68471ba75ca4de5afe98a5c952e4d9286",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001013417000649497,
+        "prepare_reference": 0.0012933199977851473,
+        "predict_duration": 6.9045135190026485,
+        "sample_meanflow": 9.20961420200183,
+        "unpatchify_latent": 0.000006390000635292381,
+        "decode_latent": 14.820822083995154,
+        "silentcipher_watermark": 3.5984910530023626
+      }
+    },
+    "endless_rival_dentist_shiro/win": {
+      "text": "歯医者シロ先生の勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.92,
+      "seed": 3326526549,
+      "sha256": "ae9c1e523e0711c4e4cc13c874a0698ec484cdd2fef808ced245ed6f15660048",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009751999969012104,
+        "prepare_reference": 0.0008575019965064712,
+        "predict_duration": 4.269523522998497,
+        "sample_meanflow": 8.908159311999043,
+        "unpatchify_latent": 0.00000602900399826467,
+        "decode_latent": 12.56915904500056,
+        "silentcipher_watermark": 5.227513966005063
+      }
+    },
+    "endless_rival_dentist_shiro/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 3326526549,
+      "sha256": "d190b9d92fd05b077b804aa51518862a3f02f15c66b04fc8e40e5ba3c208a82d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010144990010303445,
+        "prepare_reference": 0.0009897209965856746,
+        "predict_duration": 2.886195721999684,
+        "sample_meanflow": 5.397779268001614,
+        "unpatchify_latent": 0.000005597998097073287,
+        "decode_latent": 8.696657572996628,
+        "silentcipher_watermark": 3.6269456980007817
+      }
+    },
+    "endless_rival_curry_master_kenta/spawn": {
+      "text": "カレー屋ケンタです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.16,
+      "seed": 4039086683,
+      "sha256": "9fb5294dc46e03c7f96361f233a5d0a049a71b83e939752bff5d0a5502525671",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0018066630000248551,
+        "prepare_reference": 0.00008942499698605388,
+        "predict_duration": 3.7989832559978822,
+        "sample_meanflow": 7.306420713997795,
+        "unpatchify_latent": 0.000006079004378989339,
+        "decode_latent": 13.788485736004077,
+        "silentcipher_watermark": 5.4694352070000605
+      }
+    },
+    "endless_rival_curry_master_kenta/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 5.4,
+      "seed": 4039086683,
+      "sha256": "d5a90b68143c8a1a24a558bd98652abdfd57a41694ccc777640903233c97403a",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005289830005494878,
+        "prepare_reference": 0.0006971950060687959,
+        "predict_duration": 1.6501997929954086,
+        "sample_meanflow": 3.023564797003928,
+        "unpatchify_latent": 0.0000058580044424161315,
+        "decode_latent": 5.973015017996659,
+        "silentcipher_watermark": 2.431470053998055
+      }
+    },
+    "endless_rival_curry_master_kenta/win": {
+      "text": "カレー屋ケンタの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 5.16,
+      "seed": 4039086683,
+      "sha256": "92d4d100252787a00f647fa758181fbbcd42f18a33a808b9aa09298a36a75e4e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008873870028764941,
+        "prepare_reference": 0.0007374010019702837,
+        "predict_duration": 1.54359087299963,
+        "sample_meanflow": 3.006064786000934,
+        "unpatchify_latent": 0.0000059689991758205,
+        "decode_latent": 6.150176930997986,
+        "silentcipher_watermark": 3.113609155996528
+      }
+    },
+    "endless_rival_curry_master_kenta/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 4039086683,
+      "sha256": "098ea8e02fb7fbfe62f20626cda46e6293bbfede587e5dd4480f66de9eb6960c",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008103950021904893,
+        "prepare_reference": 0.0007815209974069148,
+        "predict_duration": 2.026204655994661,
+        "sample_meanflow": 3.6763756729997112,
+        "unpatchify_latent": 0.000007050999556668103,
+        "decode_latent": 5.213759832004143,
+        "silentcipher_watermark": 2.3575516720011365
+      }
+    },
+    "endless_rival_mailman_hayashi/spawn": {
+      "text": "郵便屋ハヤシです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.56,
+      "seed": 225417905,
+      "sha256": "d4a1468c2711bba52784c7faca75739e75eff7e159f6baf09e4d6b51196ba06d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010252329957438633,
+        "prepare_reference": 0.000060490994655992836,
+        "predict_duration": 1.9683120109984884,
+        "sample_meanflow": 4.419097095000325,
+        "unpatchify_latent": 0.000007372000254690647,
+        "decode_latent": 7.500327850997564,
+        "silentcipher_watermark": 3.1512466709973523
+      }
+    },
+    "endless_rival_mailman_hayashi/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 2.88,
+      "seed": 225417905,
+      "sha256": "1a0d87343596dceccad0a428dde030ae7715809742659ca76cda631d1ffe2d8e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007160230015870184,
+        "prepare_reference": 0.000792481005191803,
+        "predict_duration": 2.7048579820038867,
+        "sample_meanflow": 3.4566652399953455,
+        "unpatchify_latent": 0.000006851005309727043,
+        "decode_latent": 3.6293079550014227,
+        "silentcipher_watermark": 1.80391453300399
+      }
+    },
+    "endless_rival_mailman_hayashi/win": {
+      "text": "郵便屋ハヤシの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.64,
+      "seed": 225417905,
+      "sha256": "1c94804f2795465c47a5ae78a9465f1cf4f1901fdd81d26815f5298df9784c2f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0018411450000712648,
+        "prepare_reference": 0.00103547700564377,
+        "predict_duration": 2.047701541996503,
+        "sample_meanflow": 3.232610858998669,
+        "unpatchify_latent": 0.000006299000233411789,
+        "decode_latent": 4.716262587004167,
+        "silentcipher_watermark": 2.085409974999493
+      }
+    },
+    "endless_rival_mailman_hayashi/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.64,
+      "seed": 225417905,
+      "sha256": "1e5d14eb01918c506f8e069abb6820129c48e0aa0fd342c97e3f65ad884225c3",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008887980002327822,
+        "prepare_reference": 0.0007521239967900328,
+        "predict_duration": 1.5274681570008397,
+        "sample_meanflow": 2.791384661999473,
+        "unpatchify_latent": 0.000006219001079443842,
+        "decode_latent": 3.4885615579987643,
+        "silentcipher_watermark": 1.711358754997491
+      }
+    },
+    "endless_rival_mayor_sakura/spawn": {
+      "text": "町長サクラです。とっておきの勝負を始めましょう！",
+      "sample_rate": 48000,
+      "seconds": 5.52,
+      "seed": 2357773597,
+      "sha256": "108b12f34f770039481fe586de28a6cefe4bb7a664556405cdefa40ad3dfcfa3",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008187089988496155,
+        "prepare_reference": 0.00013551300071412697,
+        "predict_duration": 1.8408991329997662,
+        "sample_meanflow": 3.009850209004071,
+        "unpatchify_latent": 0.000005998997949063778,
+        "decode_latent": 5.557183076998626,
+        "silentcipher_watermark": 2.4287471860006917
+      }
+    },
+    "endless_rival_mayor_sakura/damage": {
+      "text": "お見事！その手は効きました。",
+      "sample_rate": 48000,
+      "seconds": 3.4,
+      "seed": 2357773597,
+      "sha256": "ae925f8af40d1949ff2e2f8d2d75c11909545bf51de2a2544832eda79f30dffc",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0005192419994273223,
+        "prepare_reference": 0.000634746000287123,
+        "predict_duration": 1.5064259499995387,
+        "sample_meanflow": 2.7418629599997075,
+        "unpatchify_latent": 0.000005719004548154771,
+        "decode_latent": 3.7502786260010907,
+        "silentcipher_watermark": 1.9411221749978722
+      }
+    },
+    "endless_rival_mayor_sakura/win": {
+      "text": "町長サクラの勝ちですね。また挑戦してください。",
+      "sample_rate": 48000,
+      "seconds": 4.76,
+      "seed": 2357773597,
+      "sha256": "00e9530fdcab8ebcdc075799e07b991e246d8903b7cb91b30c81c555eaf38cc9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009551190014462918,
+        "prepare_reference": 0.0007372609979938716,
+        "predict_duration": 2.1030182640024577,
+        "sample_meanflow": 3.397927302001335,
+        "unpatchify_latent": 0.000006469002983067185,
+        "decode_latent": 4.885728237997682,
+        "silentcipher_watermark": 2.0430203919968335
+      }
+    },
+    "endless_rival_mayor_sakura/defeat": {
+      "text": "参りました。あなたの一手に拍手です！",
+      "sample_rate": 48000,
+      "seconds": 3.8,
+      "seed": 2357773597,
+      "sha256": "d3235efbe0b0fbbabdb49270d4bc17b7e3783360ca98f6f2fd21030ed4e1b332",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0007359189985436387,
+        "prepare_reference": 0.0006991929985815659,
+        "predict_duration": 1.502472107000358,
+        "sample_meanflow": 2.8212046550033847,
+        "unpatchify_latent": 0.000005909001629333943,
+        "decode_latent": 4.047886086998915,
+        "silentcipher_watermark": 1.641734988996177
+      }
+    }
+  },
+  "irodori_revision": "89f9d8fbd4d51ea019867ee1197725ede1df13c5",
+  "verified_clips": 240
+}
