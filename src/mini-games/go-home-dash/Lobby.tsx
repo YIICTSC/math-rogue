@@ -32,7 +32,7 @@ export function DashLobby({ hero, onHero, onStart, onBack, languageMode, oneHit,
           </button>;
         })}</div>
       </div>}
-      <p className="dash-instructions">{L('タップ・Space・A：ジャンプ ／ Shift：ダッシュ', 'Tap · Space · A: jump / Shift: dash', 'タップ・Space・A：ジャンプ ／ Shift：ダッシュ')}<br/>{L('長押しで高く。空では長押しで上昇、離して下降。', 'Hold for height. In flight, hold to rise; release to descend.', 'ながおしでたかく。そらではながおしでじょうしょう、はなしてかこう。')}</p>
+      <p className="dash-instructions">{L('タップ・Space・A：ジャンプ ／ Shift：ダッシュ', 'Tap · Space · A: jump / Shift: dash', 'タップ・Space・A：ジャンプ ／ Shift：ダッシュ')}<br/>{L('長押しで高く。空ではタップで羽ばたき、隙間を通過。', 'Hold for height. In flight, tap to flap through gaps.', 'ながおしでたかく。そらではタップではばたき、すきまをつうか。')}</p>
       <button className="dash-depart" data-gamepad-initial-choice onClick={onStart}>START DASH <span>→</span></button>
       {exitEnabled && <button className="dash-back" onClick={onBack}>← {L('タイトルに戻る', 'Back to title', 'タイトルにもどる')}</button>}
     </section>

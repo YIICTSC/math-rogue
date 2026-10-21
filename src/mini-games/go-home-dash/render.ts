@@ -1,12 +1,12 @@
-import { floorAt, routeAt, ROUTE_COLORS } from './routes';
+import { floorAt, routeAt, ROUTE_COLORS, routeTransition, type RouteId } from './routes';
 
-export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, art?: HTMLImageElement) {
-  const route = routeAt(seed, distance + 120), colors = ROUTE_COLORS[route.id];
-  const sky = ctx.createLinearGradient(0, 0, 0, 400);
-  sky.addColorStop(0, colors.sky); sky.addColorStop(.7, colors.glow); sky.addColorStop(1, colors.ground);
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, 800, 400);
+function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, id: RouteId, art?: HTMLImageElement) {
+  const route = {...routeAt(seed, distance + 120), id}, colors = ROUTE_COLORS[id];
   if (!art?.complete || art.naturalWidth <= 0) {
-    ctx.globalAlpha = .7; ctx.fillStyle = '#fff1cb'; ctx.beginPath(); ctx.arc(610 - distance * .005 % 180, 102, 38, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    const sky = ctx.createLinearGradient(0, 0, 0, 400);
+    sky.addColorStop(0, colors.sky); sky.addColorStop(.7, colors.glow); sky.addColorStop(1, colors.ground);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, 800, 400);
+    ctx.fillStyle = '#fff1cbb3'; ctx.beginPath(); ctx.arc(610 - distance * .005 % 180, 102, 38, 0, Math.PI * 2); ctx.fill();
     for (let layer = 0; layer < 3; layer++) {
       const spacing = 170 - layer * 35, offset = distance * (.06 + layer * .1) % spacing;
       ctx.fillStyle = ['#14203b66', '#17253d99', '#132137cc'][layer];
@@ -44,8 +44,17 @@ export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance:
   ctx.fillStyle = '#fff1dd25';
   for (let i = 0; i < 5; i++) { const x = ((i * 223 - distance * .14) % 1100 + 1100) % 1100 - 130; ctx.beginPath(); ctx.ellipse(x, 70 + i * 21, 62, 9, 0, 0, Math.PI * 2); ctx.fill(); }
   ctx.fillStyle = colors.glow;
-  for (let i = 0; i < 12; i++) { const x = ((i * 79 - distance * .6) % 880 + 880) % 880; ctx.globalAlpha = .2 + .2 * Math.sin(frame * .03 + i); ctx.fillRect(x, 130 + i * 13 % 150, 2, 2); }
-  ctx.globalAlpha = 1;
+  for (let i = 0; i < 12; i++) { const x = ((i * 79 - distance * .6) % 880 + 880) % 880; ctx.fillStyle = colors.glow + Math.round((.2 + .2 * Math.sin(frame * .03 + i)) * 255).toString(16).padStart(2, '0'); ctx.fillRect(x, 130 + i * 13 % 150, 2, 2); }
+}
+
+
+export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, art: Partial<Record<RouteId, HTMLImageElement>>) {
+  const transition = routeTransition(seed, distance + 120);
+  ctx.save();
+  if (transition.mix < 1) drawRouteLayer(ctx, seed, distance, frame, transition.from, art[transition.from]);
+  ctx.globalAlpha = transition.mix;
+  drawRouteLayer(ctx, seed, distance, frame, transition.to, art[transition.to]);
+  ctx.restore();
 }
 
 export function drawTerrain(ctx: CanvasRenderingContext2D, seed: number, distance: number, holes: {x: number; width: number}[]) {

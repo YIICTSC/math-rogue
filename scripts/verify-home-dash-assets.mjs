@@ -9,7 +9,7 @@ const speech=JSON.parse(await fs.readFile('assets/go-home-dash/speech-qa.json','
 assert.equal(speech.samples.length,156);
 const reviewed=new Map(speech.samples.map(s=>[s.clip,s.sha256]));
 const art=JSON.parse(await fs.readFile('assets/go-home-dash/illustration-build.json','utf8'));
-assert.equal(catalog.heroes.length,26);assert.equal(art.heroes.length,26);assert.equal(art.routes.length,6);
+assert.equal(catalog.heroes.length,26);assert.equal(art.heroes.length,26);assert.deepEqual(art.routes.map(r=>r.id).sort(),['school','rooftops','canal','garden','clockwork','skyway','storm'].sort());
 for(const {id} of art.routes)assert.equal((await sharp(`public/sprites/go-home-dash/routes/${id}.webp`).metadata()).width,1280);
 const hash=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
 const audioHashes=new Set();let voices=0;

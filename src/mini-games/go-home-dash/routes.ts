@@ -1,8 +1,9 @@
 import type { LanguageMode } from '../../types';
 
 export type RouteId = 'school' | 'rooftops' | 'canal' | 'garden' | 'clockwork' | 'skyway' | 'storm';
-export const OPENING_DISTANCE = 4200;
-export const ROUTE_LENGTH = 5200;
+export const DISTANCE_SCALE = 10;
+export const OPENING_DISTANCE = 3000 * DISTANCE_SCALE;
+export const ROUTE_LENGTH = 3000 * DISTANCE_SCALE;
 const routes: RouteId[] = ['rooftops', 'canal', 'garden', 'clockwork', 'skyway', 'storm'];
 const hash = (n: number) => { n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); return (n ^ (n >>> 16)) >>> 0; };
 const routeBags = new Map<number, RouteId[]>();
@@ -31,7 +32,7 @@ export function routeAt(seed: number, distance: number) {
 
 export function floorAt(seed: number, distance: number) {
   const r = routeAt(seed, distance);
-  if (r.id === 'school') return 340;
+  if (r.id === 'school' || r.id === 'skyway' || r.id === 'storm') return 340;
   // Smooth entrances and exits prevent sudden terrain walls or drops.
   const edge = Math.min(1, r.progress / 650, (ROUTE_LENGTH - r.progress) / 650);
   const envelope = edge * edge * (3 - 2 * edge);
@@ -46,8 +47,8 @@ export function routeCopy(id: RouteId, mode: LanguageMode, hint = false) {
     canal: ['水辺のスカイ橋', 'Canal skybridges', 'みずべのスカイばし', '橋の高低差と水玉スライムに注意', 'Watch the bridge slopes and water slimes', 'はしのこうていさとみずたまスライムにちゅうい'],
     garden: ['跳躍のグリーン回廊', 'Spring garden', 'ちょうやくのグリーンかいろう', '光る跳躍台で大ジャンプ', 'Bounce high from glowing spring pads', 'ひかるちょうやくだいでだいジャンプ'],
     clockwork: ['時計塔の空中回廊', 'Clocktower causeway', 'とけいとうのくうちゅうかいろう', '動く足場へ飛び乗ろう', 'Jump onto moving lift platforms', 'うごくあしばへとびのろう'],
-    skyway: ['雲上グライド', 'Cloudtop glide', 'うんじょうグライド', '飛行中は長押しで上昇・離して下降', 'In flight: hold to rise · release to descend', 'ひこうちゅうはながおしでじょうしょう・はなしてかこう'],
-    storm: ['星風エアレーン', 'Starlight air lanes', 'ほしかぜエアレーン', '上昇気流に乗って飛ぼう', 'Ride the updrafts through the sky', 'じょうしょうきりゅうにのってとぼう'],
+    skyway: ['雲上グライド', 'Cloudtop glide', 'うんじょうグライド', 'タップで羽ばたき・隙間をくぐろう', 'Tap to flap · fly through the gaps', 'タップではばたき・すきまをくぐろう'],
+    storm: ['星風エアレーン', 'Starlight air lanes', 'ほしかぜエアレーン', '気流に注意して隙間をくぐろう', 'Flap through gaps in the changing wind', 'きりゅうにちゅういしてすきまをくぐろう'],
   };
   const index = mode === 'ENGLISH' ? 1 : mode === 'HIRAGANA' ? 2 : 0;
   return copy[id][index + (hint ? 3 : 0)];
@@ -61,3 +62,13 @@ export const ROUTE_COLORS: Record<RouteId, { sky: string; glow: string; ground: 
   skyway: { sky: '#354c83', glow: '#bceeff', ground: '#8299c1' },
   storm: { sky: '#221c55', glow: '#d0a4ff', ground: '#656492' },
 };
+
+export const BACKGROUND_TRANSITION_DISTANCE = 600;
+export function routeTransition(seed: number, distance: number) {
+  const route = routeAt(seed, distance);
+  if (route.id === 'school') return {from: route.id, to: route.id, mix: 1};
+  const boundary = OPENING_DISTANCE + route.index * ROUTE_LENGTH;
+  const from = routeAt(seed, boundary - 1).id;
+  const t = Math.min(1, route.progress / BACKGROUND_TRANSITION_DISTANCE);
+  return {from, to: route.id, mix: t * t * (3 - 2 * t)};
+}

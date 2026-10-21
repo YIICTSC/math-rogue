@@ -2,8 +2,9 @@
 
 Home Dash keeps its original auto-run, tap/hold jump, learning challenges,
 upgrade cards, score recording and HP-1 waiting-room mode. The opening street
-uses the original flat ground and obstacle roster. After 4,200 world pixels,
-a run visits six themed routes in a freshly shuffled order. Each bag contains
+uses flat ground and the original obstacle roster. The map changes every
+3,000 displayed distance units (30,000 world pixels), visiting six themed
+routes in a freshly shuffled order. Each bag contains
 all six routes with no adjacent repeats; individual encounters remain random.
 
 ## Runners and controls
@@ -15,8 +16,8 @@ all six routes with no adjacent repeats; individual encounters remain random.
   The action boundary checks again so importing/resetting a story save cannot
   start a locked protagonist from a stale selection.
 - Tap/click/Space/controller A jumps; holding changes height. Shift/controller X
-  or the DASH button gives a brief acceleration and invulnerability, followed
-  by a four-second recharge. It also works in the air.
+  or the DASH button gives 1.5 seconds of acceleration and invulnerability,
+  with four seconds between activations. It also works in the air.
 - Pointer IDs, button holds and keyboard keys are tracked separately. A second
   finger can dash without releasing a jump. Focus loss, challenge entry,
   restart and leaving clear input and pending voice playback.
@@ -26,18 +27,29 @@ all six routes with no adjacent repeats; individual encounters remain random.
 
 ## Routes
 
+The opening after-school avenue also uses a 1280×640 ImageGen background
+plate, loaded and panned through the same renderer as the six later routes.
+This avoids the shifting procedural building silhouettes in the opening stage.
+Route backgrounds crossfade with smooth easing over 600 world pixels. The
+DISTANCE HUD measures travel independently of score bonuses and defeated enemies.
+
 | Route | Mechanics |
 | --- | --- |
 | Sunset rooftops | Smooth climbs/descents, moving lift platforms, paper wyverns |
 | Canal skybridges | Bridge slopes, bouncing water slimes |
 | Spring garden | Automatic high-jump pads, aerial encounters |
 | Clocktower causeway | Oscillating one-way lift platforms, firefly laser attacks |
-| Cloudtop glide | Automatic glider; hold to rise, release to descend |
-| Starlight air lanes | Gliding, changing updrafts, wind-spirit projectiles |
+| Cloudtop glide | Tap to flap through paired gates; hold to repeat flaps |
+| Starlight air lanes | Flap through paired gates with changing updrafts |
 
 Terrain enters/exits at street height with smooth slopes. Flying is introduced
-with a safe transition zone and a normal landing zone. Shaped routes do not
-spawn the old pit/stair combinations. Encounter spacing grows with speed, and
+with a safe transition zone and a normal landing zone. Ground routes include
+solid ascending stair blocks. Their visible steps share
+collision geometry: land on top, jump over side walls, and escape before
+being pushed against the left edge. Crushing costs HP and recovers the runner
+above the wall. Flight gates have a generous 182-unit gap and safe entry/exit
+zones; they survive weapons and screen-clear upgrades. Encounter spacing grows
+with speed, and
 base speed is capped. New background plates, two-pose enemy art, glider art,
 dash trails and themed terrain are drawn by the existing canvas runtime.
 

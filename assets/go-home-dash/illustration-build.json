@@ -1485,6 +1485,11 @@
   "enemies": "exec-82ec1b4e-2efa-4000-898d-2e26b0004f17.png",
   "routes": [
     {
+      "id": "school",
+      "source": "exec-3527d7d3-661e-404c-8518-51ef4b371dee.png",
+      "source_sha256": "fabdf44ee748d0232b24a7cfa84d98ad30cc9e82dc7ae34f43548400201eb5f8"
+    },
+    {
       "id": "rooftops",
       "source": "exec-44fb47db-181e-49f1-8fab-b1658a6dbb73.png",
       "source_sha256": "da92ac8e1d0f2e0d72be0b2c4fd23d366f5bc2f3cc763ca1f975de1c8b387a61"

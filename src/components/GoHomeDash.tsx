@@ -10,8 +10,9 @@ import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
 import { DashLobby, DASH_HEROES, DEFAULT_DASH_HERO } from '../mini-games/go-home-dash/Lobby';
 import { DASH_HERO_ART } from '../mini-games/go-home-dash/heroes';
-import { routeAt, floorAt, routeCopy, type RouteId } from '../mini-games/go-home-dash/routes';
+import { routeAt, floorAt, routeCopy, ROUTE_LENGTH, DISTANCE_SCALE, routeTransition, type RouteId } from '../mini-games/go-home-dash/routes';
 import { drawRoute, drawTerrain, drawRunner } from '../mini-games/go-home-dash/render';
+import { stairRects, flightGateRects, isStair, overlapsSolid } from '../mini-games/go-home-dash/obstacles';
 import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
 import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
 
@@ -32,7 +33,7 @@ const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = assetUrl('sprites/go-home-dash-projec
 type ObstacleType =
     | 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE'
     | 'STEPS' | 'HIGH_STEPS' | 'MOUNTAIN_STEPS' | 'JUMPING_SLIME' | 'DRONE' | 'TEACHER_RUNNER'
-    | 'ELEVATOR' | 'SPRING' | 'PAPER_WYVERN' | 'WATER_SLIME' | 'FIRE_FLY' | 'WIND_SPIRIT'
+    | 'FLIGHT_GATE' | 'ELEVATOR' | 'SPRING' | 'PAPER_WYVERN' | 'WATER_SLIME' | 'FIRE_FLY' | 'WIND_SPIRIT'
     | 'HALL_MONITOR' | 'CURRICULUM_BOOK' | 'LAB_BOTTLE' | 'BASKETBALL_TURRET' | 'CLOCK_GHOST' | 'SHOE_ROLLER';
 
 type ProjectileSpriteKey = 'PLAYER_PENCIL' | 'CHALK' | 'LASER' | 'BOOK' | 'BASKETBALL' | 'ALARM' | 'ERASER' | 'CHEMICAL' | 'WHISTLE';
@@ -171,6 +172,7 @@ const GoHomeDash: React.FC<{
     const routeSeedRef = useRef(1);
     const distanceRef = useRef(0);
     const lastVoiceRef = useRef(-Infinity);
+    const [travelled, setTravelled] = useState(0);
     const [route, setRoute] = useState<RouteId>('school');
     const [dashReady, setDashReady] = useState(true);
     const [flight, setFlight] = useState(false);
@@ -228,7 +230,7 @@ const GoHomeDash: React.FC<{
 
     useEffect(() => {
         let active = true;
-        for (const id of ['rooftops', 'canal', 'garden', 'clockwork', 'skyway', 'storm'] as const) {
+        for (const id of ['school', 'rooftops', 'canal', 'garden', 'clockwork', 'skyway', 'storm'] as const) {
             const image = new Image();
             image.onload = () => { if (active) routeArtRef.current[id] = image; };
             image.src = assetUrl(`sprites/go-home-dash/routes/${id}.webp`);
@@ -329,7 +331,7 @@ const GoHomeDash: React.FC<{
         jumpBoom: false,
         scoreBonus: 1,
         cleaningDuty: 0,
-        animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false
+        animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false, flapCooldown: 0
     });
 
     const obstaclesRef = useRef<Obstacle[]>([]);
@@ -413,7 +415,7 @@ const GoHomeDash: React.FC<{
         stopInputs(); audioService.stopHomeDashVoices(); lastVoiceRef.current = -Infinity;
         routeSeedRef.current = crypto.getRandomValues(new Uint32Array(1))[0];
         distanceRef.current = 0; frameCount.current = 0; shakeRef.current = 0;
-        setRoute('school'); setFlight(false); setDashReady(true);
+        setTravelled(0); setRoute('school'); setFlight(false); setDashReady(true);
         gameStateRef.current = 'PLAYING';
         scoreRef.current = 0; levelRef.current = 1; hpRef.current = initialHp; maxHpRef.current = initialMaxHp; expRef.current = 0; nextLevelExpRef.current = 200;
         setScore(0); setLevel(1); setExp(0); setHp(initialHp); setMaxHp(initialMaxHp); setNextLevelExp(200);
@@ -423,7 +425,7 @@ const GoHomeDash: React.FC<{
             animFrame: 0, animTimer: 0, jumpActionFrame: 0, autoHeal: false, autoHealTimer: 0, 
             pierceShot: false, doubleShot: false, tripleShot: false, homingShot: false, largeShot: false, landShockwave: false, 
             stompAbility: false, airStall: false, reflectShield: false, lifesteal: false, trailFire: false, jumpBoom: false,
-            scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false
+            scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false, flapCooldown: 0
         };
         obstaclesRef.current = []; projectilesRef.current = []; enemyProjectilesRef.current = []; particlesRef.current = [];
         setGameState('PLAYING');
@@ -448,6 +450,7 @@ const GoHomeDash: React.FC<{
     const triggerJump = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
+        if (p.flying) { p.vy = -4.6; p.flapCooldown = 18; voice('jump'); addParticle(p.x, p.y, '#befcff'); return; }
         if (!p.flying && !p.isFalling && p.jumpCount < p.maxJumps) {
             p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
             voice('jump');
@@ -457,7 +460,7 @@ const GoHomeDash: React.FC<{
                  obstaclesRef.current = obstaclesRef.current.filter(obs => {
                      const dx = obs.x - p.x;
                      if (dx > 0 && dx < 150 && Math.abs(obs.y - p.y) < 100) {
-                         if (['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
+                         if (['FLIGHT_GATE', 'HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
                              addParticle(obs.x, obs.y, '#94a3b8');
                              return true;
                          }
@@ -475,8 +478,8 @@ const GoHomeDash: React.FC<{
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
         if (p.dashCooldown > 0 || p.isFalling) return;
-        p.dashFrames = 26; p.dashCooldown = 240;
-        p.invulFrame = Math.max(p.invulFrame, 30);
+        p.dashFrames = 90; p.dashCooldown = 240;
+        p.invulFrame = Math.max(p.invulFrame, 94);
         if (p.isJumping) p.vy = Math.min(p.vy, -2);
         voice('dash'); audioService.playSound('buff'); addVfxRing(p.x, p.y - 30, '#83f3eb');
         setDashReady(false);
@@ -515,7 +518,7 @@ const GoHomeDash: React.FC<{
         };
     }, [onBack, exitEnabled]);
 
-    const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'CURRICULUM_BOOK', 'BASKETBALL_TURRET', 'ELEVATOR', 'SPRING'].includes(type);
+    const isDestroyable = (type: string) => !['FLIGHT_GATE', 'HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'CURRICULUM_BOOK', 'BASKETBALL_TURRET', 'ELEVATOR', 'SPRING'].includes(type);
 
     const getObstaclePool = (): ObstacleType[] => {
         const level = levelRef.current;
@@ -526,10 +529,8 @@ const GoHomeDash: React.FC<{
         if (level >= 5) pool.push('BASKETBALL_TURRET', 'CLOCK_GHOST', 'MOUNTAIN_STEPS');
         const stage = routeAt(routeSeedRef.current, distanceRef.current + 120);
         if (stage.id !== 'school') {
-            // Pits and old stair walls do not interrupt a new route's shaped
-            // terrain. New mechanics are introduced in readable isolation.
             const themed: ObstacleType[] = stage.id === 'garden' ? ['SPRING', 'PAPER_WYVERN', 'BACKPACK', 'JUMPING_SLIME'] : stage.id === 'clockwork' ? ['ELEVATOR', 'FIRE_FLY', 'CLOCK_GHOST', 'BACKPACK'] : stage.id === 'canal' ? ['WATER_SLIME', 'BIRD', 'BACKPACK', 'PAPER_WYVERN'] : stage.id === 'skyway' || stage.id === 'storm' ? ['PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'] : ['ELEVATOR', 'PAPER_WYVERN', 'BACKPACK', 'SHOE_ROLLER'];
-            return themed;
+            return stage.flight ? [] : [...themed, 'STEPS', 'HIGH_STEPS'];
         }
         return pool;
     };
@@ -543,7 +544,7 @@ const GoHomeDash: React.FC<{
         distanceRef.current += currentSpeed;
         const stage = routeAt(routeSeedRef.current, distanceRef.current + p.x);
         const floor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
-        if (stage.flight && !p.flying) { p.isFalling = false; p.vy = -4; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
+        if (stage.flight && !p.flying) { p.isFalling = false; p.y = Math.min(p.y, 280); p.vy = -4; p.flapCooldown = 18; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
         if (!stage.flight && p.flying) { p.isJumping = true; p.jumpCount = 0; p.vy = Math.max(0, p.vy); }
         p.flying = stage.flight;
         if (p.dashFrames > 0) p.dashFrames--;
@@ -563,18 +564,23 @@ const GoHomeDash: React.FC<{
         }
         if (p.jumpActionFrame > 0) p.jumpActionFrame--;
 
-        if (p.airStall && p.isPressing && p.vy > 0) {
+        if (!p.flying && p.airStall && p.isPressing && p.vy > 0) {
             p.vy *= 0.8; 
             addParticle(p.x, p.y + 10, '#00ffff');
         }
 
-        if (p.isJumping && !p.isPressing && p.vy < -2) p.vy *= 0.85; 
+        if (!p.flying && p.isJumping && !p.isPressing && p.vy < -2) p.vy *= 0.85;
         if (p.flying) {
-            p.vy += p.isPressing ? -.42 : .28;
-            if (stage.id === 'storm') p.vy -= .12 * (1 + Math.sin(distanceRef.current * .004));
+            p.flapCooldown = Math.max(0, (p.flapCooldown || 0) - 1);
+            if (p.isPressing && p.flapCooldown === 0) { p.vy = -4.6; p.flapCooldown = 18; addParticle(p.x - 12, p.y, '#befcff'); }
+            p.vy += .28;
+            if (stage.id === 'storm') p.vy -= .06 * (1 + Math.sin(distanceRef.current * .004));
             p.vy = Math.max(-4.8, Math.min(4.8, p.vy));
-            p.y = Math.max(100, Math.min(floor - 22, p.y + p.vy));
-            if (p.y <= 100 || p.y >= floor - 22) p.vy = 0;
+            p.y += p.vy;
+            if (p.y < 84 || p.y > 334) {
+                if (p.invulFrame <= 0) handlePlayerDamage(false);
+                p.y = Math.max(84, Math.min(334, p.y)); p.vy = p.y <= 84 ? 2 : -3;
+            }
             p.isJumping = true; p.isFalling = false;
         } else { p.vy += GRAVITY; p.y += p.vy; }
 
@@ -600,33 +606,21 @@ const GoHomeDash: React.FC<{
                     currentGroundLevel = Math.min(currentGroundLevel, top); isOnObject = true;
                 }
             }
-            if (['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(obs.type)) {
-                const stepsCount = obs.type === 'STEPS' ? 1 : (obs.type === 'HIGH_STEPS' ? 2 : 3);
-                const stepH = obs.height / stepsCount;
-                const stepW = obs.width / stepsCount;
-
-                // 各段をチェックして接地可能な面を探す
-                for (let s = 0; s < stepsCount; s++) {
-                    const currentW = obs.width - (s * stepW);
-                    const currentH = stepH * (s + 1);
-                    const stepTop = GROUND_Y - currentH;
-                    const stepLeft = obs.x - currentW / 2;
-                    const stepRight = obs.x + currentW / 2;
-
-                    if (p.x + 10 > stepLeft && p.x - 10 < stepRight) {
-                        // 上面に接地
-                        if (p.y <= stepTop + 20 && p.vy >= 0 && p.x > stepLeft + 5 && p.x < stepRight - 5) {
-                            if (stepTop < currentGroundLevel) {
-                                currentGroundLevel = stepTop;
-                                isOnObject = true;
-                            }
-                        } 
-                        // 前面（左側の壁）に衝突判定
-                        else if (p.x + 15 > stepLeft && p.x < stepLeft + 20 && p.y > stepTop + 5) {
-                            if (p.invulFrame <= 0) {
-                                handlePlayerDamage(false); // 地形なのでiは渡さず、消滅させない
-                            }
-                            p.x = stepLeft - 15; // 強く押し戻す
+            if (isStair(obs.type) && !p.flying) {
+                const base = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
+                for (const rect of stairRects(obs, base)) {
+                    // Sweep the incoming face over this frame as well as current overlap.
+                    const left = rect.left - currentSpeed;
+                    if (p.x + 15 <= left || p.x - 15 >= rect.left + rect.width) continue;
+                    if (p.vy >= 0 && previousY <= rect.top + 5 && p.y >= rect.top) {
+                        currentGroundLevel = Math.min(currentGroundLevel, rect.top); isOnObject = true;
+                    } else if (p.y > rect.top + 5 && p.y - 64 < base && p.x < rect.left + rect.width) {
+                        p.x = Math.min(p.x, left - 15);
+                        if (p.x <= 24) {
+                            if (p.invulFrame <= 0) handlePlayerDamage(false);
+                            // Recover above the wall instead of an unavoidable instant death.
+                            p.x = PLAYER_DEFAULT_X; p.y = base - obs.height - 8;
+                            p.vy = -6; p.isJumping = true; p.isFalling = false; p.jumpCount = 0;
                         }
                     }
                 }
@@ -655,7 +649,7 @@ const GoHomeDash: React.FC<{
         }
 
         if (!p.flying && p.y < currentGroundLevel - 3 && p.vy > 0) p.isJumping = true;
-        if (p.x < 20) { setGameOverState(); return; }
+
         if (p.invulFrame > 0) p.invulFrame--;
         
         if (p.barrierRegen && !p.barrier) {
@@ -743,11 +737,18 @@ const GoHomeDash: React.FC<{
         const spawnProb = 0.02 + (levelRef.current * 0.005) + (scoreRef.current * 0.00001);
         const dynamicGap = Math.max(440, currentSpeed * 105, MIN_OBSTACLE_GAP - (levelRef.current * 20));
 
-        if ((!lastObs || (spawnX - lastObs.x) > dynamicGap) && Math.random() < spawnProb && obstacles.length < 8) {
+        const incoming = routeAt(routeSeedRef.current, distanceRef.current + spawnX);
+        const lastGate = [...obstacles].reverse().find(o => o.type === 'FLIGHT_GATE');
+        if (stage.flight && incoming.flight && stage.index === incoming.index && incoming.progress < ROUTE_LENGTH - 1200 && (!lastGate || spawnX - lastGate.x > Math.max(520, currentSpeed * 110))) {
+            const center = 175 + Math.sin(Math.floor((distanceRef.current + spawnX) / 700) * 1.7 + routeSeedRef.current) * 30;
+            obstacles.push({id:crypto.randomUUID(),type:'FLIGHT_GATE',x:spawnX,y:center,width:72,height:340,vy:0,speedMult:1,isHard:true});
+        }
+        if (!stage.flight && (!lastObs || (spawnX - lastObs.x) > dynamicGap) && Math.random() < spawnProb && obstacles.length < 8) {
             const types = getObstaclePool();
             let type = types[Math.floor(Math.random() * types.length)];
             if (lastObs?.type === 'HOLE' && ['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(type)) type = 'BACKPACK';
             
+            if (isStair(type) && (incoming.id !== stage.id || incoming.flight)) type = 'BACKPACK';
             const isAir = ['BIRD', 'DRONE', 'CLOCK_GHOST', 'PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'].includes(type);
             const isHard = !isDestroyable(type);
             const speedMult = type === 'TEACHER_RUNNER' ? 1.8 : type === 'HALL_MONITOR' ? 1.65 : type === 'SHOE_ROLLER' ? 1.9 : (isAir ? 1.25 : 1.0);
@@ -783,6 +784,12 @@ const GoHomeDash: React.FC<{
             const obs = obstacles[i]; 
             obs.x -= currentSpeed * obs.speedMult;
             const obsFloor = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
+            if (obs.type === 'FLIGHT_GATE') {
+                if (!stage.flight) { obstacles.splice(i, 1); continue; }
+                if (p.invulFrame <= 0 && flightGateRects(obs.x, obs.width, obs.y).some(r => overlapsSolid(p.x, p.y, r))) handlePlayerDamage(false);
+                if (obs.x < -obs.width) obstacles.splice(i, 1);
+                continue;
+            }
             if (obs.type === 'ELEVATOR') {
                 const nextY = obsFloor - 56 - (1 + Math.sin(frameCount.current * .025 + (obs.phase || 0))) * 24;
                 obs.vy = nextY - obs.y; obs.y = nextY;
@@ -907,13 +914,14 @@ const GoHomeDash: React.FC<{
             audioService.playBGM('math');
         }
         scoreRef.current += (currentSpeed * 0.1 * p.scoreBonus);
-        if (frameCount.current % 10 === 0) { setRoute(stage.id); setFlight(p.flying); setDashReady(p.dashCooldown === 0); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
+        if (frameCount.current % 10 === 0) { setTravelled(Math.floor(distanceRef.current / DISTANCE_SCALE)); setRoute(stage.id); setFlight(p.flying); setDashReady(p.dashCooldown === 0); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
     };
 
     const setGameOverState = () => {
         if (gameStateRef.current === 'GAME_OVER') return;
         const finalScore = Math.floor(scoreRef.current);
         const finalLevel = levelRef.current;
+        const finalDistance = Math.floor(distanceRef.current / DISTANCE_SCALE);
         stopInputs(); audioService.stopHomeDashVoices(); voice('defeat');
         gameStateRef.current = 'GAME_OVER';
         flushSync(() => {
@@ -927,7 +935,7 @@ const GoHomeDash: React.FC<{
                 date: Date.now(),
                 score: finalScore,
                 level: finalLevel,
-                distance: finalScore
+                distance: finalDistance
             });
         }, 0);
     };
@@ -980,7 +988,7 @@ const GoHomeDash: React.FC<{
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current[routeAt(routeSeedRef.current, distanceRef.current + playerRef.current.x).id]);
+        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current);
         drawTerrain(ctx, routeSeedRef.current, distanceRef.current, holes);
         holes.forEach(hole => { ctx.fillStyle = '#ffcc80'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', hole.x, floorAt(routeSeedRef.current, distanceRef.current + hole.x) + 30); });
 
@@ -1016,6 +1024,15 @@ const GoHomeDash: React.FC<{
 
         for (const obs of obstacles) {
             if (obs.type === 'HOLE') continue;
+            if (obs.type === 'FLIGHT_GATE') {
+                for (const rect of flightGateRects(obs.x, obs.width, obs.y)) {
+                    ctx.fillStyle = '#273859'; ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+                    ctx.strokeStyle = '#a7f3ff'; ctx.lineWidth = 3; ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+                    ctx.fillStyle = '#5a8ba0';
+                    for (let y = rect.top + 12; y < rect.top + rect.height - 8; y += 22) ctx.fillRect(rect.left + 10, y, rect.width - 20, 5);
+                }
+                continue;
+            }
             if (obs.type === 'ELEVATOR' || obs.type === 'SPRING') {
                 const color = obs.type === 'SPRING' ? '#c9ff8a' : '#ffc77b';
                 ctx.fillStyle = '#1d3549'; ctx.fillRect(obs.x - obs.width / 2, obs.y - obs.height / 2, obs.width, obs.height);
@@ -1032,14 +1049,10 @@ const GoHomeDash: React.FC<{
             }
             if (obs.type === 'STEPS' || obs.type === 'HIGH_STEPS' || obs.type === 'MOUNTAIN_STEPS') {
                 ctx.fillStyle = '#8d6e63'; ctx.strokeStyle = '#2d1b0e'; ctx.lineWidth = 3;
-                const steps = obs.type === 'STEPS' ? 1 : (obs.type === 'HIGH_STEPS' ? 2 : 3);
-                const stepH = obs.height / steps;
-                const stepW = obs.width / steps;
-                for(let s=0; s<steps; s++) {
-                    const currentW = obs.width - (s * stepW);
-                    const currentH = stepH * (s + 1);
-                    ctx.fillRect(obs.x - currentW/2, GROUND_Y - currentH, currentW, currentH);
-                    ctx.strokeRect(obs.x - currentW/2, GROUND_Y - currentH, currentW, currentH);
+                for (const rect of stairRects(obs, floorAt(routeSeedRef.current, distanceRef.current + obs.x))) {
+                    ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+                    ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+                    ctx.fillStyle = '#ffcf92'; ctx.fillRect(rect.left, rect.top, rect.width, 3); ctx.fillStyle = '#8d6e63';
                 }
             } else if (obs.type === 'IRON_BARRIER') {
                 ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff";
@@ -1142,15 +1155,20 @@ const GoHomeDash: React.FC<{
         }
     };
 
+    const backdrop = routeTransition(routeSeedRef.current, distanceRef.current + 120);
     return (
         <div className={`mini-game-go-home-screen dash-shell w-full h-full text-white font-mono relative overflow-hidden select-none${compact ? ' rpg-go-home-compact' : ''}`}
-            style={{'--dash-backdrop': `url("${assetUrl(`sprites/go-home-dash/${route === 'school' ? 'title' : `routes/${route}`}.webp`)}")`} as React.CSSProperties}
+            style={{
+                '--dash-backdrop': `url("${assetUrl(`sprites/go-home-dash/${gameState === 'START' ? 'title' : `routes/${backdrop.to}`}.webp`)}")`,
+                '--dash-backdrop-prev': `url("${assetUrl(`sprites/go-home-dash/${gameState === 'START' ? 'title' : `routes/${backdrop.from}`}.webp`)}")`,
+                '--dash-backdrop-opacity': gameState === 'START' ? 1 : backdrop.mix,
+            } as React.CSSProperties}
             data-gamepad-go-home-live={gameState === 'PLAYING' ? 'true' : undefined}>
             <div className="go-home-hud pointer-events-none">
                 <div className="go-home-hud-left"><div className="flex gap-1">{Array.from({length: Math.min(12, maxHp)}, (_, i) => <Heart key={i} className={i < hp ? 'text-red-400 fill-current' : 'text-slate-700'} />)}</div>
                     <div className="dash-rank">RANK {level}<i><b style={{width: `${exp / nextLevelExp * 100}%`}} /></i></div>
                 </div>
-                <div className="go-home-distance"><div className="text-3xl font-black italic">{score.toLocaleString()}</div><small>DISTANCE</small></div>
+                <div className="go-home-distance"><div className="text-3xl font-black italic">{travelled.toLocaleString()}</div><small>DISTANCE</small></div>
             </div>
             <div className="dash-stage touch-none" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onLostPointerCapture={handlePointerUp}>
                 <canvas className="dash-overview" ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} aria-label={L('帰宅ダッシュのコース', 'Home Dash course', 'きたくダッシュのコース')} />
@@ -1161,7 +1179,7 @@ const GoHomeDash: React.FC<{
                 <div className="dash-controls">
                     <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><small>SHIFT / X</small>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('チャージ中', 'CHARGING', 'チャージちゅう')}</button>
                     <button className="dash-jump" {...multiTouchHold(held => { const wasHeld = jumpButtonHeld.current; jumpButtonHeld.current = held; refreshPressing(); if (held && !wasHeld) triggerJump(); })}
-                        onClick={e => { if (e.detail === 0) triggerJump(); }}><small>SPACE / A · HOLD</small>{flight ? L('上昇', 'RISE', 'じょうしょう') : L('ジャンプ', 'JUMP', 'ジャンプ')}</button>
+                        onClick={e => { if (e.detail === 0) triggerJump(); }}><small>SPACE / A · HOLD</small>{flight ? L('羽ばたき', 'FLAP', 'はばたき') : L('ジャンプ', 'JUMP', 'ジャンプ')}</button>
                 </div>
             </>}
             {gameState === 'START' && <DashLobby hero={selectedHero} onHero={setSelectedHero} onStart={() => { initGame(); audioService.playSound('select'); }} onBack={onBack} languageMode={languageMode} oneHit={initialHp === 1 && initialMaxHp === 1} exitEnabled={exitEnabled} />}
