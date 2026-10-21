@@ -1,0 +1,1253 @@
+{
+  "recognizer": "faster-whisper/small (Japanese), concatenated with 1s gaps",
+  "samples": [
+    {
+      "clip": "high-school-warrior/jump",
+      "expected": "飛び越える！",
+      "sha256": "97dbf67214dcfb9c7fae3061443a36a1b76f140267643ed28446042d10e4fb9f",
+      "text": "飛び越える",
+      "reading_similarity": 1.0,
+      "seconds": 1.4
+    },
+    {
+      "clip": "high-school-warrior/dash",
+      "expected": "一気に駆け抜ける！",
+      "sha256": "858efe2ebcf922d9b1362ba0766bf97a68da0d21baad4332fbcbebf636165e87",
+      "text": " いい日に駆け抜ける",
+      "reading_similarity": 0.737,
+      "seconds": 1.8
+    },
+    {
+      "clip": "high-school-warrior/flight",
+      "expected": "空だって走ってやる！",
+      "sha256": "160ca54e26d5ddf586eb6bfec8e72c6d6be112109b90dcb9eecdaab7d9b99503",
+      "text": "空だって走ってやる",
+      "reading_similarity": 1.0,
+      "seconds": 1.96
+    },
+    {
+      "clip": "high-school-warrior/damage",
+      "expected": "まだ走れる！",
+      "sha256": "d556f241c48d35edebff551913d4bb4cee799812489c6d03990b55aaa471a932",
+      "text": " まだ走れる",
+      "reading_similarity": 1.0,
+      "seconds": 1.56
+    },
+    {
+      "clip": "high-school-warrior/upgrade",
+      "expected": "いい調子だ！",
+      "sha256": "d41ed2d3ab8185980140a853afead0244279367fd8b454228fc45b69cb038e82",
+      "text": "いい調子だ",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "high-school-warrior/defeat",
+      "expected": "次こそ帰ってやる！",
+      "sha256": "65564e77e3db3f71857774b27a9247ffc5a7adfb0e1a6c6d3ed5f271498ebeaa",
+      "text": " 次こそ帰ってやる",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "high-school-caretaker/jump",
+      "expected": "よいしょ！",
+      "sha256": "1ddb24ceafb4659e891df5ccc501ae2fcfdca9ca690a691d4025c40f78bfa756",
+      "text": "よいしょ",
+      "reading_similarity": 1.0,
+      "seconds": 1.12
+    },
+    {
+      "clip": "high-school-caretaker/dash",
+      "expected": "急いで帰ろう！",
+      "sha256": "1a137d9017fe865d11050a8d87caf109f9f43793f144976dffb1303e9508b083",
+      "text": " 急いで帰ら",
+      "reading_similarity": 0.8,
+      "seconds": 1.36
+    },
+    {
+      "clip": "high-school-caretaker/flight",
+      "expected": "空のお散歩だね！",
+      "sha256": "28dd93586f28816a4f0f3ecd911ea7fc159a9aa43a1b4a3e33f2aee3800719e7",
+      "text": "空のお散歩だね",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "high-school-caretaker/damage",
+      "expected": "だいじょうぶ！",
+      "sha256": "d92edddd22a5cde91c8c26a59910f64fe56b2efffdec7c96af86898d4ef53067",
+      "text": " 大丈夫いや、",
+      "reading_similarity": 0.857,
+      "seconds": 1.32
+    },
+    {
+      "clip": "high-school-caretaker/upgrade",
+      "expected": "元気が出たよ！",
+      "sha256": "3e8e3fc2b4387f17bcedfde0ffe7a3ca295ab5b041716e08d437b8473881dd1b",
+      "text": "元気が出たよ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.56
+    },
+    {
+      "clip": "high-school-caretaker/defeat",
+      "expected": "ちょっと休憩しよう。",
+      "sha256": "7b779f20f41cd54be02e70a1f9144938b24cfb0fd78d739238274931f96687d3",
+      "text": " ちょっと休憩しよう!",
+      "reading_similarity": 1.0,
+      "seconds": 1.56
+    },
+    {
+      "clip": "high-school-assassin/jump",
+      "expected": "ここを越える。",
+      "sha256": "e629a4e0c6595f756692a063ed26ee1c5ac7c25d27d3e16b4558bc8f80b97880",
+      "text": "ここを超える。",
+      "reading_similarity": 1.0,
+      "seconds": 2.84
+    },
+    {
+      "clip": "high-school-assassin/dash",
+      "expected": "今だ、一気に行こう。",
+      "sha256": "486f02299c2759144daefc7bcbbd382f8e95758f6e3576c560437a4a429d469d",
+      "text": " 今だ、一気に行こう。",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "high-school-assassin/flight",
+      "expected": "空路で行こう。",
+      "sha256": "deb181f93c3b5217d2c6bc81e971d2372bbd645ff6c1d08b0ea980f9be16f667",
+      "text": "通路で行こう",
+      "reading_similarity": 0.857,
+      "seconds": 2.2
+    },
+    {
+      "clip": "high-school-assassin/damage",
+      "expected": "油断したな。",
+      "sha256": "e9a6175d07b19ce4ea10481ce1491fe0c36929320fb4f3118552f4dade0ba998",
+      "text": " 油断したな。",
+      "reading_similarity": 1.0,
+      "seconds": 2.8
+    },
+    {
+      "clip": "high-school-assassin/upgrade",
+      "expected": "よし、計画どおりだ。",
+      "sha256": "3495034ca36598f5769ab109218ea23faeb75edf048b48c45f7515de9913fab6",
+      "text": "よし、計画通りだ。",
+      "reading_similarity": 0.8,
+      "seconds": 2.2
+    },
+    {
+      "clip": "high-school-assassin/defeat",
+      "expected": "次は見切ってみせる。",
+      "sha256": "7152a8dda6968dcc2ba5ca4492644dc0a14ce2688df19ad3fd4268017e04994c",
+      "text": " 次は見切ってみせる。",
+      "reading_similarity": 1.0,
+      "seconds": 3.12
+    },
+    {
+      "clip": "high-school-mage/jump",
+      "expected": "跳躍開始！",
+      "sha256": "52c200ea0b80c1ab447ed9bef99a33df13e22bd81c27880fbdcb1096b372a906",
+      "text": "超薬回収!",
+      "reading_similarity": 0.737,
+      "seconds": 1.36
+    },
+    {
+      "clip": "high-school-mage/dash",
+      "expected": "加速実験！",
+      "sha256": "5c79de16d558aa214cd6a29f55d2bc40714f36b0a1e22f648ec7b4c8b37063f0",
+      "text": " 加速実験!",
+      "reading_similarity": 1.0,
+      "seconds": 1.28
+    },
+    {
+      "clip": "high-school-mage/flight",
+      "expected": "飛行実験、成功！",
+      "sha256": "8036d99eeb1f7bfa2840792ef42ff06119e6a02aba502180dcb1844f5a8bd902",
+      "text": " 飛行実験成功!",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "high-school-mage/damage",
+      "expected": "想定の範囲内よ。",
+      "sha256": "e36e5391f97cd19f3d1239a29e01e8725d23f198dc5c1a560f0662a2069a7eb4",
+      "text": " 想定の範囲内容!",
+      "reading_similarity": 0.957,
+      "seconds": 1.84
+    },
+    {
+      "clip": "high-school-mage/upgrade",
+      "expected": "性能向上ね！",
+      "sha256": "0d50530bed21b18148de7216e7e7062c6566c603c9f9cec3bf9116e0fe08ecfc",
+      "text": " 性能向上ね!",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "high-school-mage/defeat",
+      "expected": "実験はやり直しね。",
+      "sha256": "aad208c33c252a03fb772883b195b6464728648804d13c8d11fcff72e8648153",
+      "text": " 実験はやり直しね!",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "high-school-dodgeball/jump",
+      "expected": "高く跳ぶぜ！",
+      "sha256": "f4aa8488537ac9720241bdee12c5fcbe3ac36591644241ee292a9f33186355f0",
+      "text": "高く飛ぶぜ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.4
+    },
+    {
+      "clip": "high-school-dodgeball/dash",
+      "expected": "速攻だ！",
+      "sha256": "d81308f323108f4bb059f928850c49eb79c06a82232ff7ca43832084cb5a74ec",
+      "text": "速攻だ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.2
+    },
+    {
+      "clip": "high-school-dodgeball/flight",
+      "expected": "空まで決めるぜ！",
+      "sha256": "8e63a52d3ef788277f52a1399da23e57eee209726dc15d7e9a6512c395cf785d",
+      "text": "空まで決めるぜ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.76
+    },
+    {
+      "clip": "high-school-dodgeball/damage",
+      "expected": "まだまだだ！",
+      "sha256": "9d2fa309c3f9f892f90b40ea43ddc00354fd625f9800d8a58d9ec5c376a07782",
+      "text": "まだまだだ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.24
+    },
+    {
+      "clip": "high-school-dodgeball/upgrade",
+      "expected": "絶好調だぜ！",
+      "sha256": "ee9809ae1c9a76a4bcd479d62961b901c10d1fec69f9190edb6987a6b141eb08",
+      "text": "せっごちょうだぜ!",
+      "reading_similarity": 0.706,
+      "seconds": 1.48
+    },
+    {
+      "clip": "high-school-dodgeball/defeat",
+      "expected": "次は負けねえ！",
+      "sha256": "fda3bb586a5642db883fa7214742149544078b0f32e8064cca2aebe28609c1b8",
+      "text": "次は負けねぇ!",
+      "reading_similarity": 0.857,
+      "seconds": 1.48
+    },
+    {
+      "clip": "high-school-bard/jump",
+      "expected": "せーのっ！",
+      "sha256": "272e2af005313fd7c64ae36b7bef7b77d99d4309b128a01bec5e3b8aebe1ab87",
+      "text": "せーの!",
+      "reading_similarity": 0.857,
+      "seconds": 1.6
+    },
+    {
+      "clip": "high-school-bard/dash",
+      "expected": "テンポを上げるよ！",
+      "sha256": "d6d173932aeb5e96ec1c79fd5d9e2324b27321aa6397ecb4d45351193ef68459",
+      "text": "天法をあげるよ!",
+      "reading_similarity": 0.824,
+      "seconds": 1.44
+    },
+    {
+      "clip": "high-school-bard/flight",
+      "expected": "空へオンエア！",
+      "sha256": "826388d08be17db565300f7aedac9efdd62c132996ba379fccd3874d557810d6",
+      "text": "空へオンエア!",
+      "reading_similarity": 1.0,
+      "seconds": 1.64
+    },
+    {
+      "clip": "high-school-bard/damage",
+      "expected": "音は止めない！",
+      "sha256": "172c706bbf4ed7aedde755fd682bff9d05e5c47f10336447249400c1cbc119f1",
+      "text": "音は止めない!いい、",
+      "reading_similarity": 0.875,
+      "seconds": 1.36
+    },
+    {
+      "clip": "high-school-bard/upgrade",
+      "expected": "いいリズムだね！",
+      "sha256": "d61b25c61585a3ca09967c902c8a98e72990f20b74e6dae10952fc9ade5d24bb",
+      "text": "いいリズムだね。",
+      "reading_similarity": 1.0,
+      "seconds": 1.56
+    },
+    {
+      "clip": "high-school-bard/defeat",
+      "expected": "また次の放送で！",
+      "sha256": "eae2a84d631bb0677ad6709871dd013e0dbc71a5508192d33c425a1f96cec01e",
+      "text": "また次の放送で",
+      "reading_similarity": 1.0,
+      "seconds": 1.64
+    },
+    {
+      "clip": "high-school-librarian/jump",
+      "expected": "この先へ。",
+      "sha256": "1fe62ec814c5aa4677f5781542808dfc40b4b29aa614b9fa96556a80acb028aa",
+      "text": "この先へ、",
+      "reading_similarity": 1.0,
+      "seconds": 1.44
+    },
+    {
+      "clip": "high-school-librarian/dash",
+      "expected": "続きを急ごう。",
+      "sha256": "bcce2539678f9a4e633f503893dee87d0f40fef3169d2f98972881a7088fb8de",
+      "text": "鈴木を急ごう。",
+      "reading_similarity": 0.75,
+      "seconds": 1.68
+    },
+    {
+      "clip": "high-school-librarian/flight",
+      "expected": "空の物語ね。",
+      "sha256": "74c8ecfd807701fe21d4343d74399857aaaa8487985f1d486d64ff60e13cdd9f",
+      "text": "空の物語ね。",
+      "reading_similarity": 1.0,
+      "seconds": 2.08
+    },
+    {
+      "clip": "high-school-librarian/damage",
+      "expected": "まだ終わらない。",
+      "sha256": "861f6a7c35d71ae91fcb3dd5b785d870c25076b636e0638b8be103b9799a1559",
+      "text": "まだ終わらない。",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "high-school-librarian/upgrade",
+      "expected": "新しい一章ね。",
+      "sha256": "8cbadbb90ccd5bd7d35bfc8d7e02bdc4dba4a094d6492667960a9ff1edf1c0ad",
+      "text": "新しい衣装ね。",
+      "reading_similarity": 0.952,
+      "seconds": 2.08
+    },
+    {
+      "clip": "high-school-librarian/defeat",
+      "expected": "続きはまた今度。",
+      "sha256": "d9bef8d2c34b7cd310050ad73c060cd84f27c38fa3a5893c0d1342fdee045a1e",
+      "text": "鈴木はまた今度。",
+      "reading_similarity": 0.778,
+      "seconds": 2.04
+    },
+    {
+      "clip": "high-school-chef/jump",
+      "expected": "ひょいっと！",
+      "sha256": "3b295ee73261c0b67fc9483b6f254bbcd12b7b845943489c16697b46afe70d6c",
+      "text": "ひょいっと。",
+      "reading_similarity": 1.0,
+      "seconds": 2.24
+    },
+    {
+      "clip": "high-school-chef/dash",
+      "expected": "全力でお届けだ！",
+      "sha256": "3759f7a0980cb8de02ce9b94a0b293c845ed160b8e977d3e18bec1673de869b1",
+      "text": "全力でお届けだ",
+      "reading_similarity": 1.0,
+      "seconds": 3.12
+    },
+    {
+      "clip": "high-school-chef/flight",
+      "expected": "空まで配達だ！",
+      "sha256": "a9de0ad906e53e916551d0bd26c7da3b66956838b7b828d3520499eb5e080d3f",
+      "text": " 空まで排断だ",
+      "reading_similarity": 0.778,
+      "seconds": 2.88
+    },
+    {
+      "clip": "high-school-chef/damage",
+      "expected": "焦がしちまった！",
+      "sha256": "c968cb4bacada2f67428e486f6be6d8fd7888b9f7304aee42284503fa7555e50",
+      "text": "焦がしちまった",
+      "reading_similarity": 1.0,
+      "seconds": 3.0
+    },
+    {
+      "clip": "high-school-chef/upgrade",
+      "expected": "いい仕上がりだ！",
+      "sha256": "60f04f1464e58286e0b5803f7b98019eefdc5f26e78bc1965354631023d4ec95",
+      "text": " 良い仕上がりあいだ",
+      "reading_similarity": 0.75,
+      "seconds": 3.04
+    },
+    {
+      "clip": "high-school-chef/defeat",
+      "expected": "いったん仕込み直しだ。",
+      "sha256": "a7d6524aa1318aa6866bcfdb7d56375faf42b7e284d2b96e5abc5e949d7b444b",
+      "text": "みったん仕込みなおしだ 相手はエデゲイ",
+      "reading_similarity": 0.667,
+      "seconds": 4.28
+    },
+    {
+      "clip": "high-school-gardener/jump",
+      "expected": "踏まないように！",
+      "sha256": "d7932bf0f543cc3d840558f4533eb64363f4446ea021c1724f26cc71f3c79577",
+      "text": "踏まないように、",
+      "reading_similarity": 1.0,
+      "seconds": 1.76
+    },
+    {
+      "clip": "high-school-gardener/dash",
+      "expected": "風を切って行こう！",
+      "sha256": "56b918d7e1c4ac70698491fc16c36b2518912d476b7ee1fd13bef0b1e0342fee",
+      "text": "風を切っていこう!",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "high-school-gardener/flight",
+      "expected": "空にも花を！",
+      "sha256": "3f2673a5e8c3e9f51179de9e2e458691cb88b9548b6b167bf07123e915b59dd4",
+      "text": " 空にも花を!",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "high-school-gardener/damage",
+      "expected": "折れたりしない！",
+      "sha256": "3591369af35b687e464fe82838eb566d4bb8371e084f63c5be5f7afcfeefac7b",
+      "text": "惚れたりしない!",
+      "reading_similarity": 0.857,
+      "seconds": 1.96
+    },
+    {
+      "clip": "high-school-gardener/upgrade",
+      "expected": "すくすく育つぞ！",
+      "sha256": "0e6a833c0dbd6f151d47fb9ffb255a748278f0f7b98ad7b7a7c504db8dcfbc44",
+      "text": " すぐすぐ育つぞ!",
+      "reading_similarity": 0.75,
+      "seconds": 1.96
+    },
+    {
+      "clip": "high-school-gardener/defeat",
+      "expected": "また芽を出そう。",
+      "sha256": "437491dab9d2073f20b88c654b71cd741693a10b9a450dfab7abad1537e44b59",
+      "text": " また前を出そう!",
+      "reading_similarity": 0.8,
+      "seconds": 1.84
+    },
+    {
+      "clip": "magic-akari/jump",
+      "expected": "それっ！",
+      "sha256": "a85cd9b618067708e95a69fc3fcea8080241560c8bfdef7f26bb0a63fb962090",
+      "text": "それ、",
+      "reading_similarity": 0.8,
+      "seconds": 0.8
+    },
+    {
+      "clip": "magic-akari/dash",
+      "expected": "駆け抜けるよ！",
+      "sha256": "6ead5b9217547637d631ca4a3d9cf035374e458877d241ae4bb94bb85c6dce3b",
+      "text": "駆け抜けるよ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.24
+    },
+    {
+      "clip": "magic-akari/flight",
+      "expected": "空まで行っちゃおう！",
+      "sha256": "93a67c167c99316bc8ebd7f7209bd155e1057e97d412a016ca4ca5d0b33b0e3b",
+      "text": " 空まで行っちゃおう!",
+      "reading_similarity": 1.0,
+      "seconds": 1.52
+    },
+    {
+      "clip": "magic-akari/damage",
+      "expected": "まだ行ける！",
+      "sha256": "8aea9aba256fdf2e9421b8d858c74bcaca10edc7e0477c26e74b524a3621a59e",
+      "text": " まだ行ける!",
+      "reading_similarity": 1.0,
+      "seconds": 1.08
+    },
+    {
+      "clip": "magic-akari/upgrade",
+      "expected": "力が湧いてきた！",
+      "sha256": "45f8e19720527c5863cb85ae1d624f7f275a59ef557e09b33340b36e20476f9a",
+      "text": "力が湧いてきた!",
+      "reading_similarity": 1.0,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-akari/defeat",
+      "expected": "次こそがんばる！",
+      "sha256": "8443eddecdea77731f30f916bdaf952579249abc72ea4eb98052f7d3f02fd8f9",
+      "text": " 次こそ頑張る!",
+      "reading_similarity": 1.0,
+      "seconds": 1.52
+    },
+    {
+      "clip": "magic-shizuku/jump",
+      "expected": "落ち着いて、跳びます。",
+      "sha256": "847c07121b065904ecb813e4312820918ffa2d5b9801d5b27e567af85d83856c",
+      "text": "落ち着いて飛びます",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-shizuku/dash",
+      "expected": "進路、確認。",
+      "sha256": "d06f08b5f96be727bce9fcc99aa36edea97207a90513693f2245360a816a2941",
+      "text": " 進路確認",
+      "reading_similarity": 1.0,
+      "seconds": 1.96
+    },
+    {
+      "clip": "magic-shizuku/flight",
+      "expected": "気流を読んで。",
+      "sha256": "5ea5c58ceeb72b5805b0691bd67ecdd1569aa245c60a3a4c1b02439920ac899a",
+      "text": "気流を読んで",
+      "reading_similarity": 1.0,
+      "seconds": 2.84
+    },
+    {
+      "clip": "magic-shizuku/damage",
+      "expected": "問題ないわ。",
+      "sha256": "ba2419e5607ab0c9501fa2e53bbc099b7fd6db71445e800be154a44a439b190e",
+      "text": " 問題ないわ",
+      "reading_similarity": 1.0,
+      "seconds": 2.4
+    },
+    {
+      "clip": "magic-shizuku/upgrade",
+      "expected": "準備が整ったわ。",
+      "sha256": "159b7bbaeef5b5f7de785a6bfef0420595d8f8cb05235235e65f6e0af713b062",
+      "text": "準備が整ったわ 次",
+      "reading_similarity": 0.917,
+      "seconds": 2.68
+    },
+    {
+      "clip": "magic-shizuku/defeat",
+      "expected": "次は読み切るわ。",
+      "sha256": "e1a791f4386c6cb13ce550f7c1bfbf04e8d0641cd4839b5eea311dc627087b7b",
+      "text": "は読み切るわ",
+      "reading_similarity": 0.857,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-hiyori/jump",
+      "expected": "せーのっ、えいっ！",
+      "sha256": "6cd1b980e3754fdd65aaa47a1dd59736f001596f24bb41b265701953102a15a9",
+      "text": "せーの! えい!",
+      "reading_similarity": 0.833,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-hiyori/dash",
+      "expected": "追い風に乗ろう！",
+      "sha256": "e1848f69523ed3e217794336007da479199b0f6a2ad4d0ba6a836338098ba636",
+      "text": "追い風に乗ろう!",
+      "reading_similarity": 1.0,
+      "seconds": 2.08
+    },
+    {
+      "clip": "magic-hiyori/flight",
+      "expected": "空って気持ちいいね！",
+      "sha256": "4a2d28bcbc6f3955e0e091848739ab1f0a357368620e657aeaaa1821fa8ff891",
+      "text": "空って気持ちいいねー!",
+      "reading_similarity": 0.947,
+      "seconds": 2.84
+    },
+    {
+      "clip": "magic-hiyori/damage",
+      "expected": "まだ、がんばれるよ！",
+      "sha256": "6ae4c1e3e7e2a54f68cd68baf5f0c1b120baa92f27188a8800b2885b07853417",
+      "text": "まだ頑張れるよ!",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-hiyori/upgrade",
+      "expected": "元気いっぱい！",
+      "sha256": "2cc1c8c4f681137f4cbd3a6a5ff5f3a1e035eba8c92e7033720219f804544dd5",
+      "text": "元気いっぱい!",
+      "reading_similarity": 1.0,
+      "seconds": 2.08
+    },
+    {
+      "clip": "magic-hiyori/defeat",
+      "expected": "少しひとやすみ。",
+      "sha256": "5dc8d041618beedd1381a907de4e7f3e715bde71f6c267df61ada169f40cf212",
+      "text": "少しひとやすみ!",
+      "reading_similarity": 1.0,
+      "seconds": 3.56
+    },
+    {
+      "clip": "magic-tsubasa/jump",
+      "expected": "跳ぶよっ！",
+      "sha256": "25b33081f30ab0a02876bec625cd3a6b9a1299008418bc4d32685a6d9cf15418",
+      "text": "飛ぶよ!",
+      "reading_similarity": 0.857,
+      "seconds": 0.84
+    },
+    {
+      "clip": "magic-tsubasa/dash",
+      "expected": "ぶっちぎるよ！",
+      "sha256": "2ffbdbdf76d3164ad0edfec1d6f2483d6d90938e0fb4a116a9e56f20bde4092c",
+      "text": "ぶっちぎるよ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.24
+    },
+    {
+      "clip": "magic-tsubasa/flight",
+      "expected": "翼を広げて！",
+      "sha256": "3b86a8224b5d6d9d3ab4037189a00a842e6b4e771a1c4d8777ab5089065e156a",
+      "text": "翼を広げて!",
+      "reading_similarity": 1.0,
+      "seconds": 1.44
+    },
+    {
+      "clip": "magic-tsubasa/damage",
+      "expected": "へこたれないよ！",
+      "sha256": "e3c8f1c481e0f7ce639aef1ed3c5c11dd3d114884d7bcca0a6b702b55e0851ac",
+      "text": "エコたれないよ!",
+      "reading_similarity": 0.857,
+      "seconds": 1.4
+    },
+    {
+      "clip": "magic-tsubasa/upgrade",
+      "expected": "もっと速く！",
+      "sha256": "3dd9551ea51fe606be5ae3a502eb27e2a89507bebc07c94a41842690ce8ff395",
+      "text": "もっと早く!",
+      "reading_similarity": 1.0,
+      "seconds": 1.28
+    },
+    {
+      "clip": "magic-tsubasa/defeat",
+      "expected": "もう一回挑戦だ！",
+      "sha256": "d5ec23b2b8334b8db6e8b6b7d0114e684e2016e987287771bddca99db878e05d",
+      "text": "もう一回挑戦だ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-rei/jump",
+      "expected": "そこを越える。",
+      "sha256": "1cb74692804e101f6d3e92ced0e1c7b73538b853fc5ad4d3a6240e92d492e178",
+      "text": "そこを越える",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-rei/dash",
+      "expected": "道を開けて。",
+      "sha256": "cc66973cfc41d5666a06a22b10b47ff7eea2969639a221464ed167865bd4111d",
+      "text": "道を開けて",
+      "reading_similarity": 1.0,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-rei/flight",
+      "expected": "闇を抜けて飛ぶ。",
+      "sha256": "d01a4dd42aac9054d46227b59f463ed5e483421b7ab301e4eeea07ee06b51aa1",
+      "text": "闇を抜けて飛ぶ",
+      "reading_similarity": 1.0,
+      "seconds": 1.8
+    },
+    {
+      "clip": "magic-rei/damage",
+      "expected": "この程度。",
+      "sha256": "dfbf671cc911181709a357929686cab10cc1dc414a0a23390fa2605d13084456",
+      "text": "この程度",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-rei/upgrade",
+      "expected": "力が満ちる。",
+      "sha256": "6c430176c077f18e89fdc0c25ba64f2a39b856a99a367ad89788c31d3ce86d45",
+      "text": "力が満ちる",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-rei/defeat",
+      "expected": "次は逃さない。",
+      "sha256": "a00850b69123ff76a7753ef6a536e5bc5533223dc4b1379a509f52361496740f",
+      "text": "次は逃さない",
+      "reading_similarity": 1.0,
+      "seconds": 1.64
+    },
+    {
+      "clip": "magic-madoka/jump",
+      "expected": "ふわっと！",
+      "sha256": "d12560eb040d44d8be5a393b6fae9bccbd01762d6c3937f9b1973a5cbd8c41e8",
+      "text": "クワッと",
+      "reading_similarity": 0.75,
+      "seconds": 1.0
+    },
+    {
+      "clip": "magic-madoka/dash",
+      "expected": "加速しちゃうよ！",
+      "sha256": "a55092f1ff7c1a7a5e3a6d67d3b9e11e13b594771da3e347ed5b7f7f6492e8c3",
+      "text": "加速しちゃうよ",
+      "reading_similarity": 1.0,
+      "seconds": 1.4
+    },
+    {
+      "clip": "magic-madoka/flight",
+      "expected": "浮遊実験、大成功！",
+      "sha256": "12e609f508b590afd6d5af57284d9a07795cd53580e42c78b141fba826154af3",
+      "text": "不優実験大抵走",
+      "reading_similarity": 0.583,
+      "seconds": 2.44
+    },
+    {
+      "clip": "magic-madoka/damage",
+      "expected": "おっと、びっくり！",
+      "sha256": "4f44052073197b247f87b71684055b62f0206586c64cfe42e0833d00d22f530f",
+      "text": "おっと、びっくりえ、",
+      "reading_similarity": 0.933,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-madoka/upgrade",
+      "expected": "ひらめいちゃった！",
+      "sha256": "33dbbcdf0db4009c167f9df3358ea99ec4eb36cc22643abfb5ea70ad4e6f4b15",
+      "text": "ひらめいちゃった。",
+      "reading_similarity": 1.0,
+      "seconds": 1.36
+    },
+    {
+      "clip": "magic-madoka/defeat",
+      "expected": "次の実験にしよう！",
+      "sha256": "ef4ec0ff7ada84bbaca5dd65bb098b57c56d4a555cc35c8859d2b0cc786f825e",
+      "text": "次の実験にしよう。",
+      "reading_similarity": 1.0,
+      "seconds": 1.64
+    },
+    {
+      "clip": "magic-koharu/jump",
+      "expected": "よいしょっ！",
+      "sha256": "51f5d3a5150028d093f79c67cad6044af2b82b2502920f629bc92c6eecdcf4d9",
+      "text": "よいしょ。",
+      "reading_similarity": 0.889,
+      "seconds": 1.4
+    },
+    {
+      "clip": "magic-koharu/dash",
+      "expected": "風といっしょに！",
+      "sha256": "e913f0fcbbf29e0acede21761b1d682ad81fb8176d9f550c56f9d6141fad38d1",
+      "text": "風と一緒に、",
+      "reading_similarity": 1.0,
+      "seconds": 1.64
+    },
+    {
+      "clip": "magic-koharu/flight",
+      "expected": "空の風に乗ろう！",
+      "sha256": "0939d9260e812abdaaf58c23eee7229e5c77c238ffd5799ff6abc21e227c1d99",
+      "text": "空の風に乗ろう。",
+      "reading_similarity": 1.0,
+      "seconds": 2.04
+    },
+    {
+      "clip": "magic-koharu/damage",
+      "expected": "まだ平気だよ。",
+      "sha256": "6a37402014e85ccd2940b11e1b224b8f22b439e07d6d247a989fbcab2877cd84",
+      "text": "まだ平気だよ。",
+      "reading_similarity": 1.0,
+      "seconds": 2.64
+    },
+    {
+      "clip": "magic-koharu/upgrade",
+      "expected": "花が咲いたね！",
+      "sha256": "cab8b1ffc9450eec2c8722aaa37df0bc3546e17d8565f22049fa6db61df8d0c8",
+      "text": "花が咲いたね。",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "magic-koharu/defeat",
+      "expected": "また歩き出そう。",
+      "sha256": "2f7d26eba4178f18f4fd3e6eeab97b52fb5ffb51a1bf56dd8ba7db877a670ab7",
+      "text": "また歩き出そう。",
+      "reading_similarity": 1.0,
+      "seconds": 1.84
+    },
+    {
+      "clip": "magic-mirai/jump",
+      "expected": "軽やかにっ！",
+      "sha256": "3190b5192614b9a94c827ec8b7fd4cbad79c0ae3c0e5f69a4db035bf7fec446c",
+      "text": "カロヤカニ。",
+      "reading_similarity": 0.545,
+      "seconds": 1.08
+    },
+    {
+      "clip": "magic-mirai/dash",
+      "expected": "華麗にダッシュ！",
+      "sha256": "07a5c5135def725a47352fcfba712196d6b635a7ee680d0bfb4b77f7d6930054",
+      "text": "カネイニダッシュ。",
+      "reading_similarity": 0.875,
+      "seconds": 1.24
+    },
+    {
+      "clip": "magic-mirai/flight",
+      "expected": "空でも輝くよ！",
+      "sha256": "0d8842b175df483253ef78fe95b795945beefc88ff26230e962cc0a51dd9c93a",
+      "text": "空でも輝くよ。",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-mirai/damage",
+      "expected": "まだ決めるよ！",
+      "sha256": "21fddd47be99f3f1020f93a4282db5cda25db9f633f35d394242fcd7f4cb5a2a",
+      "text": "まだ決めるよ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.2
+    },
+    {
+      "clip": "magic-mirai/upgrade",
+      "expected": "最高の気分！",
+      "sha256": "fbea5d0ae6d809b0d9be0f7dba4e1bde836c181ba5daa3926046b072c6c27f21",
+      "text": "最高の気分!",
+      "reading_similarity": 1.0,
+      "seconds": 1.56
+    },
+    {
+      "clip": "magic-mirai/defeat",
+      "expected": "次はもっと華麗に！",
+      "sha256": "82e2391a1b0c47d1bd5643d0d3df75b9c0fd9cbea9f9f49ebcaf817d04ab6e86",
+      "text": "次はもっと華麗に!",
+      "reading_similarity": 1.0,
+      "seconds": 1.84
+    },
+    {
+      "clip": "magic-sera/jump",
+      "expected": "跳びます！",
+      "sha256": "310890ab6893042a389772b275446425b19f30505014db4ded441d65c6ca870b",
+      "text": "飛びます!",
+      "reading_similarity": 1.0,
+      "seconds": 1.08
+    },
+    {
+      "clip": "magic-sera/dash",
+      "expected": "道を切り開きます！",
+      "sha256": "2141f99af6e7dade7e1b87f9bd96803ce5b8a3bef43ac7209064f60e1b225bd7",
+      "text": "道を切り開きます!",
+      "reading_similarity": 1.0,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-sera/flight",
+      "expected": "光の空へ！",
+      "sha256": "600aa2c448ae5f32f993e9b54b4e2d54fff3fd4f3d492ee178b816b297cc104b",
+      "text": "光の空へ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.44
+    },
+    {
+      "clip": "magic-sera/damage",
+      "expected": "まだ諦めません！",
+      "sha256": "c247d3dc9582c0ae8163130f6da58dd92f474fb4f35398ee88092aa95859664f",
+      "text": "まだ諦めません!",
+      "reading_similarity": 1.0,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-sera/upgrade",
+      "expected": "光が満ちています！",
+      "sha256": "5327d9ab01679357d34ee245e209a734a5b3556c3d9ef16179905ae8b6237059",
+      "text": "光が日でいます!",
+      "reading_similarity": 0.8,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-sera/defeat",
+      "expected": "次こそ守り抜きます。",
+      "sha256": "0ec29c82080920a766b7cbc724bf3ada9bcaf9a89fcf625ec873a195ebbdb90e",
+      "text": "次こそ守り抜きます!",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "magic-ren/jump",
+      "expected": "ここを越える！",
+      "sha256": "d0d5829a58dd925a0a58d9377dd14c413c550d15e8ccf512219ad140520d5e16",
+      "text": "ここを超える!",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-ren/dash",
+      "expected": "一気に進む！",
+      "sha256": "2c5032ecc017972c5166c45e482bc34c9a5bd2ecbc63c30eb0e8a9f5acf020e3",
+      "text": "一気に進む!",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "magic-ren/flight",
+      "expected": "風と共に飛ぶ！",
+      "sha256": "bf336c8bab81d7ce5db03e4dda3a691753cbd0385f6a362ea2f31ebf6dea507e",
+      "text": "風とともに飛ぶ!",
+      "reading_similarity": 1.0,
+      "seconds": 2.04
+    },
+    {
+      "clip": "magic-ren/damage",
+      "expected": "まだ平気だ！",
+      "sha256": "1a0c320d73d1750b2624e2020ea8787f4b0565735b95a4453bd0b07c1c6ccfa7",
+      "text": "まだ平気だ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-ren/upgrade",
+      "expected": "よし、行ける！",
+      "sha256": "5f26f4f8e1ed866e1d78e310839bbc8f770ac29731ed37dd592c7986fcff06e3",
+      "text": "よし、いける!",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "magic-ren/defeat",
+      "expected": "もう一度立ち上がる。",
+      "sha256": "ec1394a6080f5b6748e244f19215c41a6b64398d182a2a774591b40b00729b35",
+      "text": "もう一度立ち上がる!",
+      "reading_similarity": 1.0,
+      "seconds": 2.12
+    },
+    {
+      "clip": "magic-soma/jump",
+      "expected": "静かに、飛び越える。",
+      "sha256": "39908b1e0a347fa73d6c14d016751c463c18db42c026fd8680cfa6b4d781f1b2",
+      "text": "静かに飛び越える。",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-soma/dash",
+      "expected": "速度を上げる。",
+      "sha256": "15401eb6e2857f7245c7c8412dd7031cb560572a94b1c8f6ad1c292a9f5a11c2",
+      "text": "速度を上げる。",
+      "reading_similarity": 1.0,
+      "seconds": 2.8
+    },
+    {
+      "clip": "magic-soma/flight",
+      "expected": "星の道を進もう。",
+      "sha256": "717f56cee4ac6a3361e93bfcbe9db052513a59704a91c5490ccc268923b91559",
+      "text": "星の道を進もう。",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-soma/damage",
+      "expected": "問題ない。進むぞ。",
+      "sha256": "108f0803b80cb58f9c95293821ef9029073f23b90dba87c229723585fa79a604",
+      "text": "問題ない。進むぞ。",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-soma/upgrade",
+      "expected": "調子は良好だ。",
+      "sha256": "d4d9257011ba7a2f319bd6ade1d28dadd55c8bf2a637c2194aca1ce78287091e",
+      "text": "狂子は良好だ。",
+      "reading_similarity": 0.818,
+      "seconds": 2.92
+    },
+    {
+      "clip": "magic-soma/defeat",
+      "expected": "次は成功させる。",
+      "sha256": "0a14aa5b504bf2cc41a17ec29a9bedc6dd6dc1a85d954f0ff2472916a7a4e716",
+      "text": "次は成功させる",
+      "reading_similarity": 1.0,
+      "seconds": 2.92
+    },
+    {
+      "clip": "magic-minato/jump",
+      "expected": "跳ぶよ！",
+      "sha256": "0cde753a6d3dfeb22d83da75c5ab76a7d12a5a384a87a4e38ae85add57cab9f8",
+      "text": "飛ぶよ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.12
+    },
+    {
+      "clip": "magic-minato/dash",
+      "expected": "風を追い越そう！",
+      "sha256": "f7c16c35bf98c06e0a28f5f69a51a9e5fb698b2f2d1853ffd22d8eaa31b8c6b3",
+      "text": "風を追い越そう!",
+      "reading_similarity": 1.0,
+      "seconds": 2.0
+    },
+    {
+      "clip": "magic-minato/flight",
+      "expected": "空もぼくの道！",
+      "sha256": "05b937629469cdb6ec27c33c643c2a03a60820433d4b23d7503a143d384adc54",
+      "text": "空も僕の道!",
+      "reading_similarity": 1.0,
+      "seconds": 2.16
+    },
+    {
+      "clip": "magic-minato/damage",
+      "expected": "まだ行けるよ！",
+      "sha256": "ca3970215fdb4bbbd9c0acec846322512d374bdaa1881a27d8cf992a86bf6a73",
+      "text": "まだ行けるよ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.44
+    },
+    {
+      "clip": "magic-minato/upgrade",
+      "expected": "風が味方だ！",
+      "sha256": "58170c8d85b242300b6510dc0f060242f0234aded1ea4fe71de13ee655771666",
+      "text": "風が見方だ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "magic-minato/defeat",
+      "expected": "次の風を待とう。",
+      "sha256": "ef6c17a167c3b2b83c0a869376734720b5f2660a0b33380d732b7dea26835bd7",
+      "text": "次の風を待とう",
+      "reading_similarity": 1.0,
+      "seconds": 1.92
+    },
+    {
+      "clip": "magic-riku/jump",
+      "expected": "跳躍する。",
+      "sha256": "bd7a910f28a112f61bee412157b523617257f238c17e13c0ded87b4b3e15470c",
+      "text": "強役する!",
+      "reading_similarity": 0.857,
+      "seconds": 1.84
+    },
+    {
+      "clip": "magic-riku/dash",
+      "expected": "時を逃さない。",
+      "sha256": "cb57b93fc44bea1cb226b4b0033c9f60e5e413ff83512b9a52f3f6de806f7008",
+      "text": "時を逃さない!",
+      "reading_similarity": 1.0,
+      "seconds": 3.0
+    },
+    {
+      "clip": "magic-riku/flight",
+      "expected": "空の軌道へ。",
+      "sha256": "1dc6e21d12d8ca4e505b1ce0754d5681790f0eef6b7e519e486d3cea51c43fa1",
+      "text": "さらの機動へ",
+      "reading_similarity": 0.857,
+      "seconds": 2.64
+    },
+    {
+      "clip": "magic-riku/damage",
+      "expected": "修正しよう。",
+      "sha256": "cc6ece0d436f8bfba1d5e2984a69affe8138eecc157f7f2576cce30c88940c0e",
+      "text": "修正しよう 計",
+      "reading_similarity": 0.889,
+      "seconds": 2.64
+    },
+    {
+      "clip": "magic-riku/upgrade",
+      "expected": "計算どおりだ。",
+      "sha256": "f6dfb36e476d8d06657d33c2d180dbcec94b269af0333cc8925bd73253b44281",
+      "text": "算通りだ",
+      "reading_similarity": 0.571,
+      "seconds": 2.76
+    },
+    {
+      "clip": "magic-riku/defeat",
+      "expected": "次の一手を考える。",
+      "sha256": "3438c90be4feae16160ab0ee12596dca3d0e43fb3fd2680b552ef0a8cc84ebcf",
+      "text": "次の一手を考える 飛",
+      "reading_similarity": 0.96,
+      "seconds": 3.08
+    },
+    {
+      "clip": "magic-yamato/jump",
+      "expected": "飛び越えるぜ！",
+      "sha256": "3a76b4e68d8c9ed9461d27f510a018879522a52e710d9e028affcb3465b987f6",
+      "text": "び越えるぜ",
+      "reading_similarity": 0.909,
+      "seconds": 1.44
+    },
+    {
+      "clip": "magic-yamato/dash",
+      "expected": "燃えてきたぜ！",
+      "sha256": "159e28baa52ca851c3f829e53c5b2f7d6fdd419b47d8b568064b6fae5faebdd6",
+      "text": "燃えてきたぜ",
+      "reading_similarity": 1.0,
+      "seconds": 1.52
+    },
+    {
+      "clip": "magic-yamato/flight",
+      "expected": "空まで突っ走る！",
+      "sha256": "2083104b4a7793e5a7e4f6fe2d4b9acc08a5326d701ec08fc3b6028950847edc",
+      "text": " 空まで突っ走る",
+      "reading_similarity": 1.0,
+      "seconds": 1.84
+    },
+    {
+      "clip": "magic-yamato/damage",
+      "expected": "へっ、平気だ！",
+      "sha256": "19ce9796b3221424774c0ee780ad2741fa9a63c96eec1e35ae30e71ec3ab811c",
+      "text": "へっ、平気だ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-yamato/upgrade",
+      "expected": "熱くなってきた！",
+      "sha256": "8cf9a2319ecad11d97e2434956eaf4d4979e77ec79aa3876e07b8339f355e711",
+      "text": " 暑くなってきた!",
+      "reading_similarity": 1.0,
+      "seconds": 1.56
+    },
+    {
+      "clip": "magic-yamato/defeat",
+      "expected": "次こそ決めるぜ。",
+      "sha256": "da4770b9eb31d5f387cbff4e984978cb81835f9339a994a7cbda2574e018ebf4",
+      "text": " 次こそ決めるぜ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.92
+    },
+    {
+      "clip": "magic-leon/jump",
+      "expected": "華麗に跳ぶよ！",
+      "sha256": "fafec673dc5b48c3b577866176f88efec066f6f759fbb1a65731c28aff14ac24",
+      "text": "カレーに飛ぶよ!",
+      "reading_similarity": 0.857,
+      "seconds": 1.64
+    },
+    {
+      "clip": "magic-leon/dash",
+      "expected": "ぼくについておいで！",
+      "sha256": "23759e385dc40f1235398f56652fba8af56d5e35ee451896b5a704760150cf68",
+      "text": " 僕についておいで!",
+      "reading_similarity": 1.0,
+      "seconds": 2.0
+    },
+    {
+      "clip": "magic-leon/flight",
+      "expected": "空の舞台へ！",
+      "sha256": "3727a9f8b96fb9321f8423d764911ea14c199fc0e04fc13c08fa58dc109434e8",
+      "text": "空の舞台へ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.72
+    },
+    {
+      "clip": "magic-leon/damage",
+      "expected": "まだ舞えるさ！",
+      "sha256": "71524e19c7970110b192577ef41db68c1f468c7eac6b20e848a2854630a1d6f3",
+      "text": " まだ舞えるさ!",
+      "reading_similarity": 1.0,
+      "seconds": 1.68
+    },
+    {
+      "clip": "magic-leon/upgrade",
+      "expected": "いい見せ場だね！",
+      "sha256": "f987d0dc2781bbb7e78db16e09b59c69ccba93d4915ddd10d7c0096af61567fb",
+      "text": " いい見せ場だね!",
+      "reading_similarity": 1.0,
+      "seconds": 1.84
+    },
+    {
+      "clip": "magic-leon/defeat",
+      "expected": "次は拍手をもらうよ。",
+      "sha256": "40a5607b8cf72ae8f8c572e660433c6c2df0672dcb05068e5cb211f284edb6ba",
+      "text": "次は拍手をもらうよ!",
+      "reading_similarity": 1.0,
+      "seconds": 3.28
+    },
+    {
+      "clip": "magic-elliot/jump",
+      "expected": "跳びます！",
+      "sha256": "1b3fce1c24b54593651e000b25f49f57f08836af48a364d9ae0d8d881a6a92bb",
+      "text": "飛びます",
+      "reading_similarity": 1.0,
+      "seconds": 1.28
+    },
+    {
+      "clip": "magic-elliot/dash",
+      "expected": "星を追いかけて！",
+      "sha256": "30873349daacf432f4ed96f79a8642ab2ed1ec2e987b9550a11a9fd383a5cf78",
+      "text": " 星を追いかけて",
+      "reading_similarity": 1.0,
+      "seconds": 1.88
+    },
+    {
+      "clip": "magic-elliot/flight",
+      "expected": "星空へ飛ぼう！",
+      "sha256": "78c02be2f3bd21490ab02b7bdbc080f035ff7e3695ed6ef609d00f34ef3ce447",
+      "text": " 星空へ飛ぼう",
+      "reading_similarity": 1.0,
+      "seconds": 2.04
+    },
+    {
+      "clip": "magic-elliot/damage",
+      "expected": "だいじょうぶです！",
+      "sha256": "6003319591f7b5b063bace965040b1e84d95dde0c7b17147bd59cce77595979b",
+      "text": " 大勝負です",
+      "reading_similarity": 0.625,
+      "seconds": 1.6
+    },
+    {
+      "clip": "magic-elliot/upgrade",
+      "expected": "星が導いてくれる！",
+      "sha256": "c08006ac211e98eebe3da80549139cffec6d5bcec3cdd521004a9fbc91651441",
+      "text": " 星が導いてくれる",
+      "reading_similarity": 1.0,
+      "seconds": 2.24
+    },
+    {
+      "clip": "magic-elliot/defeat",
+      "expected": "また挑みます。",
+      "sha256": "9c7c3d0eff9fa1a5419fd80adf5ea5a38c02e0d927c24a0a614f27673c590d10",
+      "text": "また挑みます",
+      "reading_similarity": 1.0,
+      "seconds": 2.08
+    },
+    {
+      "clip": "magic-sakuya/jump",
+      "expected": "影を越えて、進む。",
+      "sha256": "b3df05ba1b68c2d1327af70f5b8b051bcddc92df981dc6c6ec4b9df0d816778e",
+      "text": " 影を超えて進む",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-sakuya/dash",
+      "expected": "静かに駆ける。",
+      "sha256": "abef3346018d1289f915221d9000c956c06ad85c46873787c09f136f176db179",
+      "text": " 静かに駆ける",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-sakuya/flight",
+      "expected": "夜空を飛んでいく。",
+      "sha256": "35a4f28a60582867aab6afdbf25e45dd6fd9f3b49542b8db16d8c5f6d81f1a84",
+      "text": " 夜空を飛んでいく",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-sakuya/damage",
+      "expected": "かすり傷だ。",
+      "sha256": "812a5d21eb93d549d65ffd4f820bc100db47a2b377fec9485f234de5abc4f2fe",
+      "text": "かすりキズだ ラミン",
+      "reading_similarity": 0.8,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-sakuya/upgrade",
+      "expected": "よし、流れが来たな。",
+      "sha256": "82cfa5240a4f7b0f8ba0b0d73944d5a9573334470d0cb65ea336da8e69b7a342",
+      "text": "よし流れが来たな",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    },
+    {
+      "clip": "magic-sakuya/defeat",
+      "expected": "次は影を残さない。",
+      "sha256": "2ed749dca5a08b83ecb79885e3b26d3e54ae43ad77d438673a0411f5880c7a8f",
+      "text": " 次は影を残さない",
+      "reading_similarity": 1.0,
+      "seconds": 2.2
+    }
+  ]
+}

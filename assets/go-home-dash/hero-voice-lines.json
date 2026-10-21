@@ -1,0 +1,473 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "heroes": [
+    {
+      "id": "high-school-warrior",
+      "path": "public/sprites/high-school/characters/0.webp",
+      "seed": 62000,
+      "references": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+        "public/sfx/high-school-voices/WARRIOR/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "飛び越える！",
+        "dash": "一気に駆け抜ける！",
+        "flight": "空だって走ってやる！",
+        "damage": "まだ走れる！",
+        "upgrade": "いい調子だ！",
+        "defeat": "次こそ帰ってやる！"
+      }
+    },
+    {
+      "id": "high-school-caretaker",
+      "path": "public/sprites/high-school/characters/1.webp",
+      "seed": 62001,
+      "references": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg",
+        "public/sfx/high-school-voices/CARETAKER/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "よいしょ！",
+        "dash": "急いで帰ろう！",
+        "flight": "空のお散歩だね！",
+        "damage": "だいじょうぶ！",
+        "upgrade": "元気が出たよ！",
+        "defeat": "ちょっと休憩しよう。"
+      }
+    },
+    {
+      "id": "high-school-assassin",
+      "path": "public/sprites/high-school/characters/2.webp",
+      "seed": 62002,
+      "references": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg",
+        "public/sfx/high-school-voices/ASSASSIN/attack-2.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "ここを越える。",
+        "dash": "今だ、一気に行こう。",
+        "flight": "空路で行こう。",
+        "damage": "油断したな。",
+        "upgrade": "よし、計画どおりだ。",
+        "defeat": "次は見切ってみせる。"
+      }
+    },
+    {
+      "id": "high-school-mage",
+      "path": "public/sprites/high-school/characters/3.webp",
+      "seed": 62003,
+      "references": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg",
+        "public/sfx/high-school-voices/MAGE/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "跳躍開始！",
+        "dash": "加速実験！",
+        "flight": "飛行実験、成功！",
+        "damage": "想定の範囲内よ。",
+        "upgrade": "性能向上ね！",
+        "defeat": "実験はやり直しね。"
+      }
+    },
+    {
+      "id": "high-school-dodgeball",
+      "path": "public/sprites/high-school/characters/4.webp",
+      "seed": 62004,
+      "references": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg",
+        "public/sfx/high-school-voices/DODGEBALL/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "高く跳ぶぜ！",
+        "dash": "速攻だ！",
+        "flight": "空まで決めるぜ！",
+        "damage": "まだまだだ！",
+        "upgrade": "絶好調だぜ！",
+        "defeat": "次は負けねえ！"
+      }
+    },
+    {
+      "id": "high-school-bard",
+      "path": "public/sprites/high-school/characters/5.webp",
+      "seed": 62005,
+      "references": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg",
+        "public/sfx/high-school-voices/BARD/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "せーのっ！",
+        "dash": "テンポを上げるよ！",
+        "flight": "空へオンエア！",
+        "damage": "音は止めない！",
+        "upgrade": "いいリズムだね！",
+        "defeat": "また次の放送で！"
+      }
+    },
+    {
+      "id": "high-school-librarian",
+      "path": "public/sprites/high-school/characters/6.webp",
+      "seed": 62006,
+      "references": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg",
+        "public/sfx/high-school-voices/LIBRARIAN/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "この先へ。",
+        "dash": "続きを急ごう。",
+        "flight": "空の物語ね。",
+        "damage": "まだ終わらない。",
+        "upgrade": "新しい一章ね。",
+        "defeat": "続きはまた今度。"
+      }
+    },
+    {
+      "id": "high-school-chef",
+      "path": "public/sprites/high-school/characters/7.webp",
+      "seed": 62007,
+      "references": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg",
+        "public/sfx/high-school-voices/CHEF/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "ひょいっと！",
+        "dash": "全力でお届けだ！",
+        "flight": "空まで配達だ！",
+        "damage": "焦がしちまった！",
+        "upgrade": "いい仕上がりだ！",
+        "defeat": "いったん仕込み直しだ。"
+      }
+    },
+    {
+      "id": "high-school-gardener",
+      "path": "public/sprites/high-school/characters/8.webp",
+      "seed": 62008,
+      "references": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg",
+        "public/sfx/high-school-voices/GARDENER/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "踏まないように！",
+        "dash": "風を切って行こう！",
+        "flight": "空にも花を！",
+        "damage": "折れたりしない！",
+        "upgrade": "すくすく育つぞ！",
+        "defeat": "また芽を出そう。"
+      }
+    },
+    {
+      "id": "magic-akari",
+      "path": "public/sprites/magic/characters/heroine-01-before.webp",
+      "seed": 62009,
+      "references": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg",
+        "public/sfx/magic-voices/AKARI/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "それっ！",
+        "dash": "駆け抜けるよ！",
+        "flight": "空まで行っちゃおう！",
+        "damage": "まだ行ける！",
+        "upgrade": "力が湧いてきた！",
+        "defeat": "次こそがんばる！"
+      }
+    },
+    {
+      "id": "magic-shizuku",
+      "path": "public/sprites/magic/characters/heroine-02-before.webp",
+      "seed": 62010,
+      "references": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg",
+        "public/sfx/magic-voices/SHIZUKU/attack-2.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "落ち着いて、跳びます。",
+        "dash": "進路、確認。",
+        "flight": "気流を読んで。",
+        "damage": "問題ないわ。",
+        "upgrade": "準備が整ったわ。",
+        "defeat": "次は読み切るわ。"
+      }
+    },
+    {
+      "id": "magic-hiyori",
+      "path": "public/sprites/magic/characters/heroine-03-before.webp",
+      "seed": 62011,
+      "references": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg",
+        "public/sfx/magic-voices/HIYORI/attack-2.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "せーのっ、えいっ！",
+        "dash": "追い風に乗ろう！",
+        "flight": "空って気持ちいいね！",
+        "damage": "まだ、がんばれるよ！",
+        "upgrade": "元気いっぱい！",
+        "defeat": "少しひとやすみ。"
+      }
+    },
+    {
+      "id": "magic-tsubasa",
+      "path": "public/sprites/magic/characters/heroine-04-before.webp",
+      "seed": 62012,
+      "references": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg",
+        "public/sfx/magic-voices/TSUBASA/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "跳ぶよっ！",
+        "dash": "ぶっちぎるよ！",
+        "flight": "翼を広げて！",
+        "damage": "へこたれないよ！",
+        "upgrade": "もっと速く！",
+        "defeat": "もう一回挑戦だ！"
+      }
+    },
+    {
+      "id": "magic-rei",
+      "path": "public/sprites/magic/characters/heroine-05-before.webp",
+      "seed": 62013,
+      "references": [
+        "public/sfx/magic-voices/REI/attack-1.ogg",
+        "public/sfx/magic-voices/REI/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "そこを越える。",
+        "dash": "道を開けて。",
+        "flight": "闇を抜けて飛ぶ。",
+        "damage": "この程度。",
+        "upgrade": "力が満ちる。",
+        "defeat": "次は逃さない。"
+      }
+    },
+    {
+      "id": "magic-madoka",
+      "path": "public/sprites/magic/characters/heroine-06-before.webp",
+      "seed": 62014,
+      "references": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg",
+        "public/sfx/magic-voices/MADOKA/attack-2.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "ふわっと！",
+        "dash": "加速しちゃうよ！",
+        "flight": "浮遊実験、大成功！",
+        "damage": "おっと、びっくり！",
+        "upgrade": "ひらめいちゃった！",
+        "defeat": "次の実験にしよう！"
+      }
+    },
+    {
+      "id": "magic-koharu",
+      "path": "public/sprites/magic/characters/heroine-07-before.webp",
+      "seed": 62015,
+      "references": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg",
+        "public/sfx/magic-voices/KOHARU/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "よいしょっ！",
+        "dash": "風といっしょに！",
+        "flight": "空の風に乗ろう！",
+        "damage": "まだ平気だよ。",
+        "upgrade": "花が咲いたね！",
+        "defeat": "また歩き出そう。"
+      }
+    },
+    {
+      "id": "magic-mirai",
+      "path": "public/sprites/magic/characters/heroine-08-before.webp",
+      "seed": 62016,
+      "references": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg",
+        "public/sfx/magic-voices/MIRAI/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "軽やかにっ！",
+        "dash": "華麗にダッシュ！",
+        "flight": "空でも輝くよ！",
+        "damage": "まだ決めるよ！",
+        "upgrade": "最高の気分！",
+        "defeat": "次はもっと華麗に！"
+      }
+    },
+    {
+      "id": "magic-sera",
+      "path": "public/sprites/magic/characters/heroine-09-before.webp",
+      "seed": 62017,
+      "references": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg",
+        "public/sfx/magic-voices/SERA/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "跳びます！",
+        "dash": "道を切り開きます！",
+        "flight": "光の空へ！",
+        "damage": "まだ諦めません！",
+        "upgrade": "光が満ちています！",
+        "defeat": "次こそ守り抜きます。"
+      }
+    },
+    {
+      "id": "magic-ren",
+      "path": "public/sprites/magic/male-characters/ren-before.webp",
+      "seed": 62018,
+      "references": [
+        "public/sfx/magic-voices/REN/attack-1.ogg",
+        "public/sfx/magic-voices/REN/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "ここを越える！",
+        "dash": "一気に進む！",
+        "flight": "風と共に飛ぶ！",
+        "damage": "まだ平気だ！",
+        "upgrade": "よし、行ける！",
+        "defeat": "もう一度立ち上がる。"
+      }
+    },
+    {
+      "id": "magic-soma",
+      "path": "public/sprites/magic/male-characters/soma-before.webp",
+      "seed": 62019,
+      "references": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg",
+        "public/sfx/magic-voices/SOMA/attack-2.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "静かに、飛び越える。",
+        "dash": "速度を上げる。",
+        "flight": "星の道を進もう。",
+        "damage": "問題ない。進むぞ。",
+        "upgrade": "調子は良好だ。",
+        "defeat": "次は成功させる。"
+      }
+    },
+    {
+      "id": "magic-minato",
+      "path": "public/sprites/magic/male-characters/minato-before.webp",
+      "seed": 62020,
+      "references": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg",
+        "public/sfx/magic-voices/MINATO/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "跳ぶよ！",
+        "dash": "風を追い越そう！",
+        "flight": "空もぼくの道！",
+        "damage": "まだ行けるよ！",
+        "upgrade": "風が味方だ！",
+        "defeat": "次の風を待とう。"
+      }
+    },
+    {
+      "id": "magic-riku",
+      "path": "public/sprites/magic/male-characters/riku-before.webp",
+      "seed": 62021,
+      "references": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg",
+        "public/sfx/magic-voices/RIKU/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "跳躍する。",
+        "dash": "時を逃さない。",
+        "flight": "空の軌道へ。",
+        "damage": "修正しよう。",
+        "upgrade": "計算どおりだ。",
+        "defeat": "次の一手を考える。"
+      }
+    },
+    {
+      "id": "magic-yamato",
+      "path": "public/sprites/magic/male-characters/yamato-before.webp",
+      "seed": 62022,
+      "references": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg",
+        "public/sfx/magic-voices/YAMATO/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "飛び越えるぜ！",
+        "dash": "燃えてきたぜ！",
+        "flight": "空まで突っ走る！",
+        "damage": "へっ、平気だ！",
+        "upgrade": "熱くなってきた！",
+        "defeat": "次こそ決めるぜ。"
+      }
+    },
+    {
+      "id": "magic-leon",
+      "path": "public/sprites/magic/male-characters/leon-before.webp",
+      "seed": 62023,
+      "references": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg",
+        "public/sfx/magic-voices/LEON/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "華麗に跳ぶよ！",
+        "dash": "ぼくについておいで！",
+        "flight": "空の舞台へ！",
+        "damage": "まだ舞えるさ！",
+        "upgrade": "いい見せ場だね！",
+        "defeat": "次は拍手をもらうよ。"
+      }
+    },
+    {
+      "id": "magic-elliot",
+      "path": "public/sprites/magic/male-characters/elliot-before.webp",
+      "seed": 62024,
+      "references": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg",
+        "public/sfx/magic-voices/ELLIOT/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "跳びます！",
+        "dash": "星を追いかけて！",
+        "flight": "星空へ飛ぼう！",
+        "damage": "だいじょうぶです！",
+        "upgrade": "星が導いてくれる！",
+        "defeat": "また挑みます。"
+      }
+    },
+    {
+      "id": "magic-sakuya",
+      "path": "public/sprites/magic/male-characters/sakuya-before.webp",
+      "seed": 62025,
+      "references": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg",
+        "public/sfx/magic-voices/SAKUYA/attack-2.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "jump": "影を越えて、進む。",
+        "dash": "静かに駆ける。",
+        "flight": "夜空を飛んでいく。",
+        "damage": "かすり傷だ。",
+        "upgrade": "よし、流れが来たな。",
+        "defeat": "次は影を残さない。"
+      }
+    }
+  ]
+}

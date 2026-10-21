@@ -8,6 +8,12 @@ import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, Langua
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
+import { DashLobby, DASH_HEROES, DEFAULT_DASH_HERO } from '../mini-games/go-home-dash/Lobby';
+import { DASH_HERO_ART } from '../mini-games/go-home-dash/heroes';
+import { routeAt, floorAt, routeCopy, type RouteId } from '../mini-games/go-home-dash/routes';
+import { drawRoute, drawTerrain, drawRunner } from '../mini-games/go-home-dash/render';
+import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
+import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
 
 // --- CONSTANTS ---
 const CANVAS_WIDTH = 800;
@@ -19,31 +25,14 @@ const BASE_SPEED = 4.5;
 const PLAYER_DEFAULT_X = 120;
 const MAX_PARTICLES = 60; 
 const MIN_OBSTACLE_GAP = 500; 
-const PLAYER_DASH_FRAME_COUNT = 8;
-const PLAYER_DASH_SPRITE_BASELINE_Y = 225;
-const PLAYER_DASH_DRAW_HEIGHT = 84;
-const PLAYER_DASH_SPRITE_SRC = assetUrl('sprites/go-home-dash-8-loop-grid.webp');
-const PLAYER_DASH_FRAME_ORDER = [
-    0, // contact
-    1, // down
-    2, // push
-    3, // air
-    4, // contact
-    5, // down
-    6, // push
-    7, // air
-] as const;
-const PLAYER_JUMP_FRAME_COUNT = 3;
-const PLAYER_JUMP_SPRITE_BASELINE_Y = 594;
-const PLAYER_JUMP_DRAW_HEIGHT = 108;
-const PLAYER_JUMP_SPRITE_SRC = assetUrl('sprites/go-home-dash-jump-3.webp');
-const PLAYER_JUMP_FRAME_X_OFFSETS = [36, 40, -10];
+const PLAYER_DASH_FRAME_COUNT = 4;
 const GO_HOME_DASH_ENEMY_SPRITE_SRC = assetUrl('sprites/go-home-dash-enemies.webp');
 const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = assetUrl('sprites/go-home-dash-projectiles.webp');
 
 type ObstacleType =
     | 'BACKPACK' | 'VAULTING' | 'CHALKBOARD' | 'BIRD' | 'IRON_BARRIER' | 'HOLE'
     | 'STEPS' | 'HIGH_STEPS' | 'MOUNTAIN_STEPS' | 'JUMPING_SLIME' | 'DRONE' | 'TEACHER_RUNNER'
+    | 'ELEVATOR' | 'SPRING' | 'PAPER_WYVERN' | 'WATER_SLIME' | 'FIRE_FLY' | 'WIND_SPIRIT'
     | 'HALL_MONITOR' | 'CURRICULUM_BOOK' | 'LAB_BOTTLE' | 'BASKETBALL_TURRET' | 'CLOCK_GHOST' | 'SHOE_ROLLER';
 
 type ProjectileSpriteKey = 'PLAYER_PENCIL' | 'CHALK' | 'LASER' | 'BOOK' | 'BASKETBALL' | 'ALARM' | 'ERASER' | 'CHEMICAL' | 'WHISTLE';
@@ -94,6 +83,8 @@ interface Obstacle {
     speedMult: number;
     isHard?: boolean;
     shootCooldown?: number;
+    baseY?: number;
+    phase?: number;
 }
 
 interface Projectile {
@@ -172,11 +163,34 @@ const GoHomeDash: React.FC<{
     compact?: boolean;
     exitEnabled?: boolean;
 }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview, initialHp = 3, initialMaxHp = 3, compact = false, exitEnabled = true }) => {
+    const [selectedHero, setSelectedHero] = useState<string>(DEFAULT_DASH_HERO);
+    const heroRef = useRef(DEFAULT_DASH_HERO);
+    const heroFallbackRef = useRef<HTMLImageElement | null>(null);
+    const extraEnemiesRef = useRef<HTMLImageElement | null>(null);
+    const routeArtRef = useRef<Partial<Record<RouteId, HTMLImageElement>>>({});
+    const routeSeedRef = useRef(1);
+    const distanceRef = useRef(0);
+    const lastVoiceRef = useRef(-Infinity);
+    const [route, setRoute] = useState<RouteId>('school');
+    const [dashReady, setDashReady] = useState(true);
+    const [flight, setFlight] = useState(false);
+    const pointerIds = useRef(new Set<number>());
+    const keysHeld = useRef(new Set<string>());
+    const jumpButtonHeld = useRef(false);
+    const refreshPressing = () => { playerRef.current.isPressing = pointerIds.current.size > 0 || keysHeld.current.size > 0 || jumpButtonHeld.current; };
+    const voice = (event: 'jump' | 'dash' | 'flight' | 'damage' | 'upgrade' | 'defeat') => {
+        const now = performance.now();
+        if (event === 'jump' && now - lastVoiceRef.current < 2300) return;
+        if (!audioService.canPlayConversationVoice()) return;
+        lastVoiceRef.current = now;
+        void audioService.playHomeDashVoice(heroRef.current, event);
+    };
+    const stopInputs = () => { pointerIds.current.clear(); keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
+    const returnToTitle = () => { stopInputs(); audioService.stopHomeDashVoices(); gameStateRef.current = 'START'; setGameState('START'); };
+    const L = (ja: string, en: string, hi: string) => languageMode === 'ENGLISH' ? en : languageMode === 'HIRAGANA' ? hi : ja;
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const guideCanvasRef = useRef<HTMLCanvasElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const focusCanvasRef = useRef<HTMLCanvasElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
-    const playerJumpSpriteRef = useRef<HTMLImageElement | null>(null);
     const enemySpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const projectileSpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const [gameState, setGameState] = useState<DashGameState>('START');
@@ -194,35 +208,32 @@ const GoHomeDash: React.FC<{
     }, [debugPreview]);
 
     useEffect(() => {
-        const image = new Image();
-        image.onload = () => {
-            playerSpriteRef.current = image;
-        };
-        image.onerror = () => {
-            playerSpriteRef.current = null;
-        };
-        image.src = PLAYER_DASH_SPRITE_SRC;
-
-        return () => {
-            image.onload = null;
-            image.onerror = null;
-        };
-    }, []);
+        let active = true;
+        playerSpriteRef.current = null;
+        heroFallbackRef.current = null;
+        const sheet = new Image(), fallback = new Image();
+        sheet.onload = () => { if (active) playerSpriteRef.current = sheet; };
+        fallback.onload = () => { if (active) heroFallbackRef.current = fallback; };
+        sheet.src = assetUrl(`sprites/go-home-dash/heroes/${selectedHero}.webp`);
+        fallback.src = assetUrl(DASH_HERO_ART[selectedHero]);
+        return () => { active = false; sheet.onload = null; fallback.onload = null; };
+    }, [selectedHero]);
 
     useEffect(() => {
         const image = new Image();
-        image.onload = () => {
-            playerJumpSpriteRef.current = image;
-        };
-        image.onerror = () => {
-            playerJumpSpriteRef.current = null;
-        };
-        image.src = PLAYER_JUMP_SPRITE_SRC;
+        image.onload = () => { extraEnemiesRef.current = image; };
+        image.src = assetUrl('sprites/go-home-dash/enemies.webp');
+        return () => { image.onload = null; };
+    }, []);
 
-        return () => {
-            image.onload = null;
-            image.onerror = null;
-        };
+    useEffect(() => {
+        let active = true;
+        for (const id of ['rooftops', 'canal', 'garden', 'clockwork', 'skyway', 'storm'] as const) {
+            const image = new Image();
+            image.onload = () => { if (active) routeArtRef.current[id] = image; };
+            image.src = assetUrl(`sprites/go-home-dash/routes/${id}.webp`);
+        }
+        return () => { active = false; };
     }, []);
 
     useEffect(() => {
@@ -278,6 +289,7 @@ const GoHomeDash: React.FC<{
     }, [maxHp]);
 
     useEffect(() => () => {
+        audioService.stopHomeDashVoices();
         if (compact) audioService.stopBGM();
     }, [compact]);
 
@@ -317,14 +329,13 @@ const GoHomeDash: React.FC<{
         jumpBoom: false,
         scoreBonus: 1,
         cleaningDuty: 0,
-        animFrameTimer: 0
+        animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false
     });
 
     const obstaclesRef = useRef<Obstacle[]>([]);
     const projectilesRef = useRef<Projectile[]>([]);
     const enemyProjectilesRef = useRef<Projectile[]>([]);
     const particlesRef = useRef<Particle[]>([]);
-    const bgOffsets = useRef({ far: 0, mid: 0, near: 0 });
     const frameIdRef = useRef<number>(null);
 
     // --- UPGRADE POOL ---
@@ -386,12 +397,24 @@ const GoHomeDash: React.FC<{
         card.apply(p, setHp, setMaxHp);
         // 報酬獲得後2秒間（120フレーム）無敵にする
         p.invulFrame = 120;
+        stopInputs();
+        gameStateRef.current = 'PLAYING';
         setGameState('PLAYING');
         audioService.playBGM('survivor_metal');
         audioService.playSound('buff');
+        voice('upgrade');
     };
 
     const initGame = () => {
+        // Re-check at the action boundary so stale selections cannot bypass a
+        // reset or a main-story save imported while the lobby was open.
+        const id = isProtagonistUnlocked(selectedHero) && DASH_HEROES.some(h => h.id === selectedHero) ? selectedHero : DEFAULT_DASH_HERO;
+        setSelectedHero(id); heroRef.current = id;
+        stopInputs(); audioService.stopHomeDashVoices(); lastVoiceRef.current = -Infinity;
+        routeSeedRef.current = crypto.getRandomValues(new Uint32Array(1))[0];
+        distanceRef.current = 0; frameCount.current = 0; shakeRef.current = 0;
+        setRoute('school'); setFlight(false); setDashReady(true);
+        gameStateRef.current = 'PLAYING';
         scoreRef.current = 0; levelRef.current = 1; hpRef.current = initialHp; maxHpRef.current = initialMaxHp; expRef.current = 0; nextLevelExpRef.current = 200;
         setScore(0); setLevel(1); setExp(0); setHp(initialHp); setMaxHp(initialMaxHp); setNextLevelExp(200);
         playerRef.current = {
@@ -400,10 +423,9 @@ const GoHomeDash: React.FC<{
             animFrame: 0, animTimer: 0, jumpActionFrame: 0, autoHeal: false, autoHealTimer: 0, 
             pierceShot: false, doubleShot: false, tripleShot: false, homingShot: false, largeShot: false, landShockwave: false, 
             stompAbility: false, airStall: false, reflectShield: false, lifesteal: false, trailFire: false, jumpBoom: false,
-            scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0
+            scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false
         };
         obstaclesRef.current = []; projectilesRef.current = []; enemyProjectilesRef.current = []; particlesRef.current = [];
-        bgOffsets.current = { far: 0, mid: 0, near: 0 };
         setGameState('PLAYING');
         audioService.playBGM('survivor_metal');
     };
@@ -426,15 +448,16 @@ const GoHomeDash: React.FC<{
     const triggerJump = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        if (!p.isFalling && p.jumpCount < p.maxJumps) {
+        if (!p.flying && !p.isFalling && p.jumpCount < p.maxJumps) {
             p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
+            voice('jump');
             audioService.playSound('jump'); addParticle(p.x, p.y, '#ffffff');
             if (p.jumpBoom) {
                  addVfxRing(p.x, p.y, '#ffffff');
                  obstaclesRef.current = obstaclesRef.current.filter(obs => {
                      const dx = obs.x - p.x;
                      if (dx > 0 && dx < 150 && Math.abs(obs.y - p.y) < 100) {
-                         if (['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD'].includes(obs.type)) {
+                         if (['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
                              addParticle(obs.x, obs.y, '#94a3b8');
                              return true;
                          }
@@ -448,44 +471,51 @@ const GoHomeDash: React.FC<{
         }
     };
 
-    const handlePointerDown = (e: React.PointerEvent) => {
+    const triggerDash = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        p.isPressing = true;
-        triggerJump();
+        if (p.dashCooldown > 0 || p.isFalling) return;
+        p.dashFrames = 26; p.dashCooldown = 240;
+        p.invulFrame = Math.max(p.invulFrame, 30);
+        if (p.isJumping) p.vy = Math.min(p.vy, -2);
+        voice('dash'); audioService.playSound('buff'); addVfxRing(p.x, p.y - 30, '#83f3eb');
+        setDashReady(false);
     };
-
-    const handlePointerUp = () => { playerRef.current.isPressing = false; };
-
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (gameStateRef.current !== 'PLAYING' || e.button !== 0) return;
+        e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId);
+        pointerIds.current.add(e.pointerId); refreshPressing(); triggerJump();
+    };
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        pointerIds.current.delete(e.pointerId); refreshPressing();
+    };
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.code === 'Escape') {
-                e.preventDefault();
-                if (exitEnabled) onBack();
-                return;
+            if (gameStateRef.current !== 'PLAYING') return;
+            if (e.code === 'Escape') { e.preventDefault(); if (exitEnabled) onBack(); return; }
+            if (['ShiftLeft', 'ShiftRight', 'KeyX'].includes(e.code) || e.key === 'Shift' || e.key === 'x') {
+                e.preventDefault(); if (!e.repeat) triggerDash(); return;
             }
-            if (e.code !== 'Space' && e.code !== 'ArrowUp' && e.code !== 'KeyW') return;
-            e.preventDefault();
-            if (e.repeat) return;
-            playerRef.current.isPressing = true;
-            triggerJump();
+            if (!['Space', 'ArrowUp', 'KeyW'].includes(e.code) && e.key !== ' ') return;
+            e.preventDefault(); if (e.repeat) return;
+            keysHeld.current.add(e.code || e.key); refreshPressing(); triggerJump();
         };
-
-        const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.code !== 'Space' && e.code !== 'ArrowUp' && e.code !== 'KeyW') return;
-            e.preventDefault();
-            playerRef.current.isPressing = false;
-        };
-
+        const handleKeyUp = (e: KeyboardEvent) => { keysHeld.current.delete(e.code || e.key); refreshPressing(); };
+        const loseFocus = () => { stopInputs(); audioService.stopHomeDashVoices(); };
+        const hide = () => { if (document.hidden) loseFocus(); };
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('blur', loseFocus);
+        document.addEventListener('visibilitychange', hide);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('blur', loseFocus);
+            document.removeEventListener('visibilitychange', hide);
         };
-    }, [onBack]);
+    }, [onBack, exitEnabled]);
 
-    const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'CURRICULUM_BOOK', 'BASKETBALL_TURRET'].includes(type);
+    const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'CURRICULUM_BOOK', 'BASKETBALL_TURRET', 'ELEVATOR', 'SPRING'].includes(type);
 
     const getObstaclePool = (): ObstacleType[] => {
         const level = levelRef.current;
@@ -494,18 +524,33 @@ const GoHomeDash: React.FC<{
         if (level >= 3) pool.push('TEACHER_RUNNER', 'HALL_MONITOR', 'HIGH_STEPS');
         if (level >= 4) pool.push('LAB_BOTTLE', 'CURRICULUM_BOOK');
         if (level >= 5) pool.push('BASKETBALL_TURRET', 'CLOCK_GHOST', 'MOUNTAIN_STEPS');
+        const stage = routeAt(routeSeedRef.current, distanceRef.current + 120);
+        if (stage.id !== 'school') {
+            // Pits and old stair walls do not interrupt a new route's shaped
+            // terrain. New mechanics are introduced in readable isolation.
+            const themed: ObstacleType[] = stage.id === 'garden' ? ['SPRING', 'PAPER_WYVERN', 'BACKPACK', 'JUMPING_SLIME'] : stage.id === 'clockwork' ? ['ELEVATOR', 'FIRE_FLY', 'CLOCK_GHOST', 'BACKPACK'] : stage.id === 'canal' ? ['WATER_SLIME', 'BIRD', 'BACKPACK', 'PAPER_WYVERN'] : stage.id === 'skyway' || stage.id === 'storm' ? ['PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'] : ['ELEVATOR', 'PAPER_WYVERN', 'BACKPACK', 'SHOE_ROLLER'];
+            return themed;
+        }
         return pool;
     };
 
     const updateLogic = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        const currentSpeed = (BASE_SPEED + ((levelRef.current - 1) * 0.4)) * p.speedBoost;
+        const currentSpeed = Math.min(9, (BASE_SPEED + ((levelRef.current - 1) * 0.4)) * p.speedBoost) * (p.dashFrames > 0 ? 1.45 : 1);
+        const previousFloor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
+        const previousY = p.y;
+        distanceRef.current += currentSpeed;
+        const stage = routeAt(routeSeedRef.current, distanceRef.current + p.x);
+        const floor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
+        if (stage.flight && !p.flying) { p.isFalling = false; p.vy = -4; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
+        if (!stage.flight && p.flying) { p.isJumping = true; p.jumpCount = 0; p.vy = Math.max(0, p.vy); }
+        p.flying = stage.flight;
+        if (p.dashFrames > 0) p.dashFrames--;
+        if (p.dashCooldown > 0) p.dashCooldown--;
+        if (!p.isJumping && !p.isFalling && !p.flying && Math.abs(p.y - previousFloor) < 12) p.y = floor;
 
         frameCount.current++;
-        bgOffsets.current.far += currentSpeed * 0.1;
-        bgOffsets.current.mid += currentSpeed * 0.3;
-        bgOffsets.current.near += currentSpeed;
 
         if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;
 
@@ -524,11 +569,18 @@ const GoHomeDash: React.FC<{
         }
 
         if (p.isJumping && !p.isPressing && p.vy < -2) p.vy *= 0.85; 
-        p.vy += GRAVITY; p.y += p.vy;
+        if (p.flying) {
+            p.vy += p.isPressing ? -.42 : .28;
+            if (stage.id === 'storm') p.vy -= .12 * (1 + Math.sin(distanceRef.current * .004));
+            p.vy = Math.max(-4.8, Math.min(4.8, p.vy));
+            p.y = Math.max(100, Math.min(floor - 22, p.y + p.vy));
+            if (p.y <= 100 || p.y >= floor - 22) p.vy = 0;
+            p.isJumping = true; p.isFalling = false;
+        } else { p.vy += GRAVITY; p.y += p.vy; }
 
         if (p.isFalling && p.y > CANVAS_HEIGHT + 20) { handlePlayerDamage(true); return; }
 
-        let currentGroundLevel = GROUND_Y;
+        let currentGroundLevel = floor;
         let isOnObject = false;
 
         if (p.cleaningDuty > 0) {
@@ -540,6 +592,14 @@ const GoHomeDash: React.FC<{
 
         const obstacles = obstaclesRef.current;
         for (const obs of obstacles) {
+            if (obs.type === 'ELEVATOR' && !p.flying) {
+                const top = obs.y - obs.height / 2;
+                const previousTop = top - (obs.vy || 0);
+                const wasOnTop = Math.abs(previousY - previousTop) < 6 && !p.isJumping;
+                if (Math.abs(p.x - obs.x) < obs.width / 2 - 5 && p.vy >= 0 && (wasOnTop || previousY <= previousTop + 4) && p.y >= top - 6) {
+                    currentGroundLevel = Math.min(currentGroundLevel, top); isOnObject = true;
+                }
+            }
             if (['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(obs.type)) {
                 const stepsCount = obs.type === 'STEPS' ? 1 : (obs.type === 'HIGH_STEPS' ? 2 : 3);
                 const stepH = obs.height / stepsCount;
@@ -575,7 +635,7 @@ const GoHomeDash: React.FC<{
 
         const overHole = !isOnObject && obstacles.some(obs => obs.type === 'HOLE' && Math.abs(obs.x - p.x) < obs.width / 2);
 
-        if (p.y >= currentGroundLevel) {
+        if (!p.flying && p.y >= currentGroundLevel) {
             if (overHole || p.isFalling) p.isFalling = true;
             else {
                 if (p.isFalling) p.isFalling = false;
@@ -594,6 +654,7 @@ const GoHomeDash: React.FC<{
             }
         }
 
+        if (!p.flying && p.y < currentGroundLevel - 3 && p.vy > 0) p.isJumping = true;
         if (p.x < 20) { setGameOverState(); return; }
         if (p.invulFrame > 0) p.invulFrame--;
         
@@ -604,7 +665,7 @@ const GoHomeDash: React.FC<{
 
         if (p.autoHeal) {
             p.autoHealTimer++;
-            if (p.autoHealTimer > 1200) { setHp(h => Math.min(maxHp, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
+            if (p.autoHealTimer > 1200) { setHp(h => Math.min(maxHpRef.current, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
         }
 
         if (p.trailFire && frameCount.current % 10 === 0) {
@@ -680,20 +741,22 @@ const GoHomeDash: React.FC<{
         const spawnX = CANVAS_WIDTH + 150;
         
         const spawnProb = 0.02 + (levelRef.current * 0.005) + (scoreRef.current * 0.00001);
-        const dynamicGap = Math.max(160, MIN_OBSTACLE_GAP - (levelRef.current * 20));
+        const dynamicGap = Math.max(440, currentSpeed * 105, MIN_OBSTACLE_GAP - (levelRef.current * 20));
 
         if ((!lastObs || (spawnX - lastObs.x) > dynamicGap) && Math.random() < spawnProb && obstacles.length < 8) {
             const types = getObstaclePool();
             let type = types[Math.floor(Math.random() * types.length)];
             if (lastObs?.type === 'HOLE' && ['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(type)) type = 'BACKPACK';
             
-            const isAir = type === 'BIRD' || type === 'DRONE' || type === 'CLOCK_GHOST'; 
+            const isAir = ['BIRD', 'DRONE', 'CLOCK_GHOST', 'PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'].includes(type);
             const isHard = !isDestroyable(type);
             const speedMult = type === 'TEACHER_RUNNER' ? 1.8 : type === 'HALL_MONITOR' ? 1.65 : type === 'SHOE_ROLLER' ? 1.9 : (isAir ? 1.25 : 1.0);
             
             let width = 40;
             let height = 40;
-            if (type === 'STEPS') { width = 200; height = 60; }
+            if (type === 'ELEVATOR') { width = 170; height = 18; }
+            else if (type === 'SPRING') { width = 70; height = 15; }
+            else if (type === 'STEPS') { width = 200; height = 60; }
             else if (type === 'HIGH_STEPS') { width = 320; height = 110; }
             else if (type === 'MOUNTAIN_STEPS') { width = 480; height = 160; }
             else if (type === 'HOLE') { width = 70; }
@@ -704,37 +767,52 @@ const GoHomeDash: React.FC<{
             obstaclesRef.current.push({ 
                 id: Math.random().toString(), 
                 x: spawnX, 
-                y: isAir ? GROUND_Y - 110 - Math.random() * 70 : (type === 'HOLE' ? GROUND_Y : GROUND_Y - height / 2), 
+                y: isAir ? (stage.flight ? 115 + Math.random() * 135 : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - 110 - Math.random() * 50) : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - height / 2,
+                baseY: 0, phase: Math.random() * Math.PI * 2,
                 vy: 0,
                 width, 
                 height, 
                 type, 
                 speedMult, 
                 isHard,
-                shootCooldown: ['DRONE', 'TEACHER_RUNNER', 'LAB_BOTTLE', 'BASKETBALL_TURRET', 'CLOCK_GHOST', 'HALL_MONITOR'].includes(type) ? 80 + Math.random() * 70 : 0
+                shootCooldown: ['DRONE', 'TEACHER_RUNNER', 'LAB_BOTTLE', 'BASKETBALL_TURRET', 'CLOCK_GHOST', 'HALL_MONITOR', 'FIRE_FLY', 'WIND_SPIRIT'].includes(type) ? 80 + Math.random() * 70 : 0
             });
         }
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const obs = obstacles[i]; 
             obs.x -= currentSpeed * obs.speedMult;
+            const obsFloor = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
+            if (obs.type === 'ELEVATOR') {
+                const nextY = obsFloor - 56 - (1 + Math.sin(frameCount.current * .025 + (obs.phase || 0))) * 24;
+                obs.vy = nextY - obs.y; obs.y = nextY;
+            } else if (obs.type === 'SPRING') {
+                obs.y = obsFloor - 7;
+                if (!p.flying && Math.abs(p.x - obs.x) < 36 && p.y >= obsFloor - 15 && p.vy >= 0) {
+                    p.vy = -17; p.isJumping = true; p.jumpCount = 0;
+                    voice('jump'); audioService.playSound('jump'); addVfxRing(p.x, p.y, '#c9ff8a');
+                }
+            } else if (['PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'].includes(obs.type)) {
+                if (!obs.baseY) obs.baseY = obs.y;
+                obs.y = obs.baseY + Math.sin(frameCount.current * (obs.type === 'FIRE_FLY' ? .09 : .035) + (obs.phase || 0)) * (obs.type === 'WIND_SPIRIT' ? 28 : 16);
+            } else if (obs.vy === 0 && !['BIRD', 'DRONE', 'CLOCK_GHOST', 'HOLE'].includes(obs.type)) obs.y = obsFloor - obs.height / 2;
 
             // 特殊挙動: ジャンプ
-            if (obs.type === 'JUMPING_SLIME' && obs.y >= GROUND_Y - 20 && obs.x < 500 && Math.random() < 0.05) {
+            if ((obs.type === 'JUMPING_SLIME' || obs.type === 'WATER_SLIME') && obs.y >= obsFloor - 20 && obs.x < 500 && Math.random() < 0.05) {
                 obs.vy = -12;
             }
-            if (obs.type === 'JUMPING_SLIME' || obs.vy !== 0) {
+            if (obs.type !== 'ELEVATOR' && (obs.type === 'JUMPING_SLIME' || obs.type === 'WATER_SLIME' || obs.vy !== 0)) {
                 obs.vy += 0.5; // 敵用重力
                 obs.y += obs.vy;
-                if (obs.y > GROUND_Y - 20) {
-                    obs.y = GROUND_Y - 20;
+                if (obs.y > obsFloor - 20) {
+                    obs.y = obsFloor - 20;
                     obs.vy = 0;
                     addParticle(obs.x, GROUND_Y, '#8d6e63');
                 }
             }
 
             // 特殊挙動: 射撃
-            if (['DRONE', 'TEACHER_RUNNER', 'LAB_BOTTLE', 'BASKETBALL_TURRET', 'CLOCK_GHOST', 'HALL_MONITOR'].includes(obs.type)) {
+            if (['DRONE', 'TEACHER_RUNNER', 'LAB_BOTTLE', 'BASKETBALL_TURRET', 'CLOCK_GHOST', 'HALL_MONITOR', 'FIRE_FLY', 'WIND_SPIRIT'].includes(obs.type)) {
                 obs.shootCooldown = (obs.shootCooldown || 0) - 1;
                 if (obs.shootCooldown <= 0) {
                     const dx = p.x - obs.x;
@@ -750,7 +828,11 @@ const GoHomeDash: React.FC<{
                         spriteKey: 'CHALK',
                         radius: 7
                     };
-                    if (obs.type === 'TEACHER_RUNNER') {
+                    if (obs.type === 'FIRE_FLY') {
+                        projectile = { ...projectile, vx: -5.2, vy: 0, spriteKey: 'LASER', radius: 7 };
+                    } else if (obs.type === 'WIND_SPIRIT') {
+                        projectile = { ...projectile, vx: -3.8, vy: Math.max(-1.8, Math.min(1.8, dy / dist * 2)), spriteKey: 'ALARM', radius: 9 };
+                    } else if (obs.type === 'TEACHER_RUNNER') {
                         projectile = { ...projectile, vx: -6.2, vy: -1.2, spriteKey: Math.random() < 0.5 ? 'BOOK' : 'ERASER', radius: 9 };
                     } else if (obs.type === 'LAB_BOTTLE') {
                         projectile = { ...projectile, vx: -4.8, vy: -4.2, gravity: 0.16, spriteKey: 'CHEMICAL', radius: 10 };
@@ -783,8 +865,8 @@ const GoHomeDash: React.FC<{
                 }
             }
 
-            if (obs.type !== 'HOLE' && !['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(obs.type)) {
-                const pdx = p.x - obs.x; const pdy = (p.y - 20) - (obs.y - 20);
+            if (obs.type !== 'HOLE' && !['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
+                const pdx = p.x - obs.x; const pdy = (p.y - 30) - obs.y;
                 if (Math.sqrt(pdx * pdx + pdy * pdy) < 35 && p.invulFrame <= 0) { handlePlayerDamage(false, i); continue; }
             }
 
@@ -800,7 +882,7 @@ const GoHomeDash: React.FC<{
                         if (!proj.isPierce) projs.splice(j, 1);
                         obstacles.splice(i, 1); audioService.playSound('attack');
                         scoreRef.current += 50; addParticle(obs.x, obs.y, '#ffeb3b');
-                        if (p.lifesteal && Math.random() < 0.1) setHp(h => Math.min(maxHp, h + 1));
+                        if (p.lifesteal && Math.random() < 0.1) setHp(h => Math.min(maxHpRef.current, h + 1));
                     }
                     break;
                 }
@@ -819,17 +901,20 @@ const GoHomeDash: React.FC<{
             });
             const shuffled = [...availableUpgrades].sort(() => Math.random() - 0.5);
             setUpgradeOptions(shuffled.slice(0, 3)); 
+            stopInputs(); audioService.stopHomeDashVoices();
+            gameStateRef.current = 'CHALLENGE';
             setGameState('CHALLENGE'); 
             audioService.playBGM('math');
         }
         scoreRef.current += (currentSpeed * 0.1 * p.scoreBonus);
-        if (frameCount.current % 10 === 0) { setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
+        if (frameCount.current % 10 === 0) { setRoute(stage.id); setFlight(p.flying); setDashReady(p.dashCooldown === 0); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
     };
 
     const setGameOverState = () => {
         if (gameStateRef.current === 'GAME_OVER') return;
         const finalScore = Math.floor(scoreRef.current);
         const finalLevel = levelRef.current;
+        stopInputs(); audioService.stopHomeDashVoices(); voice('defeat');
         gameStateRef.current = 'GAME_OVER';
         flushSync(() => {
             setScore(finalScore);
@@ -849,9 +934,10 @@ const GoHomeDash: React.FC<{
 
     const handleChallengeComplete = (correctCount: number) => {
         if (correctCount >= 3) {
-            setHp(h => Math.min(maxHp, h + 1));
+            setHp(h => Math.min(maxHpRef.current, h + 1));
             audioService.playSound('buff');
         }
+        gameStateRef.current = 'LEVEL_UP';
         setGameState('LEVEL_UP');
         audioService.playSound('win');
     };
@@ -859,9 +945,11 @@ const GoHomeDash: React.FC<{
     const handlePlayerDamage = (isFall: boolean, obsIdx?: number) => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
+        if (isFall) obstaclesRef.current = obstaclesRef.current.filter(o => o.type !== 'HOLE' || Math.abs(o.x - p.x) > o.width / 2 + 30);
         if (p.barrier) {
             p.barrier = false;
-            if (isFall) { p.y = GROUND_Y; p.vy = -10; p.isFalling = false; } 
+            p.invulFrame = 45;
+            if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = -10; p.isFalling = false; }
             else if (obsIdx !== undefined) obstaclesRef.current.splice(obsIdx, 1);
             if (p.reflectShield) {
                 addVfxRing(p.x, p.y, '#00ffff');
@@ -876,8 +964,9 @@ const GoHomeDash: React.FC<{
             setGameOverState();
             return;
         }
+        voice('damage');
         p.invulFrame = 60; audioService.playSound('damage'); triggerShake();
-        if (isFall) { p.y = GROUND_Y; p.vy = 0; p.isFalling = false; }
+        if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = 0; p.isFalling = false; }
     };
 
     const draw = (ctx: CanvasRenderingContext2D) => {
@@ -891,81 +980,9 @@ const GoHomeDash: React.FC<{
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        const skyBands = [
-            '#24163a', '#322052', '#4b2c66', '#6d3b69',
-            '#974a5f', '#c45e50', '#e07b45', '#f0a14b'
-        ];
-        const bandHeight = Math.ceil(GROUND_Y / skyBands.length);
-        for (let i = 0; i < skyBands.length; i++) {
-            ctx.fillStyle = skyBands[i];
-            ctx.fillRect(0, i * bandHeight, CANVAS_WIDTH, bandHeight + 1);
-        }
-
-        const farOff = Math.floor(bgOffsets.current.far) % 384;
-        ctx.fillStyle = '#2b2448';
-        for (let x = -farOff; x < CANVAS_WIDTH + 384; x += 384) {
-            ctx.fillRect(x + 10, 236, 116, 84);
-            ctx.fillRect(x + 132, 210, 82, 110);
-            ctx.fillRect(x + 226, 248, 124, 72);
-            ctx.fillStyle = '#40355d';
-            for (let c = 0; c < 5; c++) ctx.fillRect(x + 28 + c * 18, 254, 8, 10);
-            for (let c = 0; c < 3; c++) ctx.fillRect(x + 150 + c * 18, 230, 8, 10);
-            ctx.fillStyle = '#2b2448';
-            ctx.fillRect(x + 166, 190, 18, 20);
-            ctx.fillRect(x + 170, 176, 10, 14);
-        }
-
-        const midOff = Math.floor(bgOffsets.current.mid) % 512;
-        for (let x = -midOff; x < CANVAS_WIDTH + 512; x += 512) {
-            ctx.fillStyle = '#403151';
-            ctx.fillRect(x + 26, 280, 94, 44);
-            ctx.fillRect(x + 160, 266, 104, 58);
-            ctx.fillRect(x + 306, 274, 126, 50);
-            ctx.fillStyle = '#2a2038';
-            ctx.beginPath(); ctx.moveTo(x + 14, 280); ctx.lineTo(x + 74, 236); ctx.lineTo(x + 134, 280); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(x + 144, 266); ctx.lineTo(x + 212, 220); ctx.lineTo(x + 280, 266); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(x + 288, 274); ctx.lineTo(x + 366, 224); ctx.lineTo(x + 448, 274); ctx.fill();
-            ctx.fillStyle = '#ffc857';
-            for (let c = 0; c < 3; c++) ctx.fillRect(x + 48 + c * 24, 292, 10, 10);
-            for (let c = 0; c < 3; c++) ctx.fillRect(x + 184 + c * 26, 284, 10, 10);
-            for (let c = 0; c < 4; c++) ctx.fillRect(x + 326 + c * 24, 290, 10, 10);
-            ctx.fillStyle = '#2a2038';
-            ctx.fillRect(x + 470, 226, 8, 96);
-            ctx.fillRect(x + 444, 238, 60, 6);
-            ctx.fillStyle = '#f2c14e';
-            ctx.fillRect(x + 466, 248, 16, 12);
-        }
-
-        const nearOff = Math.floor(bgOffsets.current.near) % 64;
-        ctx.fillStyle = '#2b1a23';
-        ctx.fillRect(0, GROUND_Y - 22, CANVAS_WIDTH, 22);
-        ctx.fillStyle = '#3a211e';
-        for (let x = 0; x < CANVAS_WIDTH; x += 8) {
-            const isHole = holes.some(h => x >= h.x - h.width / 2 && x <= h.x + h.width / 2);
-            if (!isHole) {
-                ctx.fillRect(x, GROUND_Y, 8, CANVAS_HEIGHT - GROUND_Y);
-                ctx.fillStyle = x % 16 === 0 ? '#4a2a22' : '#2c1918';
-                ctx.fillRect(x, GROUND_Y + 10, 8, 4);
-                ctx.fillStyle = '#3a211e';
-            }
-        }
-
-        holes.forEach(hole => {
-            if (hole.x > 0 && hole.x < CANVAS_WIDTH) { ctx.fillStyle = "#ef4444"; ctx.font = "bold 20px monospace"; ctx.textAlign = "center"; ctx.fillText("!", hole.x, GROUND_Y + 30); }
-        });
-
-        for (let x = -nearOff; x < CANVAS_WIDTH + 64; x += 64) {
-            const isHole = holes.some(h => x >= h.x - h.width / 2 && x <= h.x + h.width / 2);
-            if (!isHole) {
-                ctx.fillStyle = '#1f2937';
-                ctx.fillRect(x, GROUND_Y - 46, 5, 46);
-                ctx.fillStyle = '#475569';
-                ctx.fillRect(x, GROUND_Y - 36, 64, 4);
-                ctx.fillRect(x, GROUND_Y - 22, 64, 3);
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillRect(x + 2, GROUND_Y - 44, 2, 12);
-            }
-        }
+        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current[routeAt(routeSeedRef.current, distanceRef.current + playerRef.current.x).id]);
+        drawTerrain(ctx, routeSeedRef.current, distanceRef.current, holes);
+        holes.forEach(hole => { ctx.fillStyle = '#ffcc80'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', hole.x, floorAt(routeSeedRef.current, distanceRef.current + hole.x) + 30); });
 
         const parts = particlesRef.current;
         for (const p of parts) { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 30; ctx.fillRect(p.x, p.y, p.size, p.size); }
@@ -999,6 +1016,20 @@ const GoHomeDash: React.FC<{
 
         for (const obs of obstacles) {
             if (obs.type === 'HOLE') continue;
+            if (obs.type === 'ELEVATOR' || obs.type === 'SPRING') {
+                const color = obs.type === 'SPRING' ? '#c9ff8a' : '#ffc77b';
+                ctx.fillStyle = '#1d3549'; ctx.fillRect(obs.x - obs.width / 2, obs.y - obs.height / 2, obs.width, obs.height);
+                ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.strokeRect(obs.x - obs.width / 2, obs.y - obs.height / 2, obs.width, obs.height);
+                ctx.fillStyle = color; ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; ctx.fillText(obs.type === 'SPRING' ? '↑↑' : '↕', obs.x, obs.y - 12);
+                continue;
+            }
+            const extraIndex = ['PAPER_WYVERN', 'WATER_SLIME', 'FIRE_FLY', 'WIND_SPIRIT'].indexOf(obs.type);
+            const extraSheet = extraEnemiesRef.current;
+            if (extraIndex >= 0 && extraSheet?.complete && extraSheet.naturalWidth > 0) {
+                const w = extraSheet.naturalWidth / 4, h = extraSheet.naturalHeight / 2;
+                ctx.drawImage(extraSheet, extraIndex * w, (Math.floor(frameCount.current / 15) % 2) * h, w, h, obs.x - 33, obs.y - 33, 66, 66);
+                continue;
+            }
             if (obs.type === 'STEPS' || obs.type === 'HIGH_STEPS' || obs.type === 'MOUNTAIN_STEPS') {
                 ctx.fillStyle = '#8d6e63'; ctx.strokeStyle = '#2d1b0e'; ctx.lineWidth = 3;
                 const steps = obs.type === 'STEPS' ? 1 : (obs.type === 'HIGH_STEPS' ? 2 : 3);
@@ -1063,78 +1094,12 @@ const GoHomeDash: React.FC<{
         }
 
         const pl = playerRef.current;
-        if (pl.invulFrame % 4 < 2) {
-            const isAirborne = pl.isJumping || pl.isFalling;
-            const isLandingPose = isAirborne && !pl.isFalling && pl.vy > 3 && (GROUND_Y - pl.y) < 58;
-            const bounce = !isAirborne ? Math.sin(frameCount.current * 0.2) * 3 : 0;
-            ctx.save(); ctx.translate(pl.x, pl.y + bounce);
-            ctx.shadowBlur = 4; ctx.shadowColor = "white";
-            ctx.save();
-            if (isAirborne) {
-                if (pl.vy < -5) {
-                    ctx.rotate(-0.12);
-                    ctx.scale(0.96, 1.04);
-                } else if (!isLandingPose) {
-                    ctx.rotate(-0.03);
-                } else {
-                    ctx.rotate(0.1);
-                    ctx.scale(1.03, 0.98);
-                }
-            }
-            const jumpSprite = playerJumpSpriteRef.current;
-            const canUseJumpSprite = isAirborne && jumpSprite && jumpSprite.complete && jumpSprite.naturalWidth > 0;
-            const sprite = canUseJumpSprite ? jumpSprite : playerSpriteRef.current;
-            if (sprite && sprite.complete && sprite.naturalWidth > 0) {
-                const frameCount = canUseJumpSprite ? PLAYER_JUMP_FRAME_COUNT : PLAYER_DASH_FRAME_COUNT;
-                const frameWidth = sprite.naturalWidth / frameCount;
-                const frameHeight = sprite.naturalHeight;
-                let frame = Math.abs(pl.animFrame || 0) % frameCount;
-                let sourceFrame = frame;
-                if (canUseJumpSprite) {
-                    frame = pl.vy < -5 ? 0 : (isLandingPose ? 2 : 1);
-                    if (pl.jumpActionFrame > 6 && pl.vy < 0) frame = 0;
-                    sourceFrame = frame;
-                } else if (isAirborne) {
-                    frame = pl.vy < -5
-                        ? 1
-                        : (isLandingPose ? 5 : 2);
-                    if (pl.jumpActionFrame > 6 && pl.vy < 0) frame = 1;
-                    sourceFrame = frame;
-                } else {
-                    sourceFrame = PLAYER_DASH_FRAME_ORDER[frame] ?? frame;
-                }
-                const drawHeightTarget = canUseJumpSprite ? PLAYER_JUMP_DRAW_HEIGHT : PLAYER_DASH_DRAW_HEIGHT;
-                const baselineY = canUseJumpSprite ? PLAYER_JUMP_SPRITE_BASELINE_Y : PLAYER_DASH_SPRITE_BASELINE_Y;
-                const scale = drawHeightTarget / frameHeight;
-                const drawWidth = frameWidth * scale;
-                const drawHeight = frameHeight * scale;
-                const frameXOffset = canUseJumpSprite ? (PLAYER_JUMP_FRAME_X_OFFSETS[frame] || 0) * scale : 0;
-                const drawX = -drawWidth / 2 - frameXOffset;
-                const drawY = -(baselineY * scale);
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(
-                    sprite,
-                    sourceFrame * frameWidth,
-                    0,
-                    frameWidth,
-                    frameHeight,
-                    drawX,
-                    drawY,
-                    drawWidth,
-                    drawHeight
-                );
-            } else {
-                const template = SPRITE_TEMPLATES['HERO_SIDE'];
-                const size = 40; const pixelSize = size / 16;
-                for (let row = 0; row < 16; row++) { for (let col = 0; col < 16; col++) { const char = template[row][col]; if (char === '.') continue; ctx.fillStyle = char === '%' ? '#ffccbc' : (char === '@' ? '#000000' : '#dc2626'); ctx.fillRect(-20 + col * pixelSize, -40 + row * pixelSize, pixelSize + 0.5, pixelSize + 0.5); } }
-            }
-            ctx.restore();
-            ctx.shadowBlur = 0;
-            if (pl.barrier) { ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -20, 30, 0, Math.PI * 2); ctx.stroke(); }
-            ctx.restore();
-        }
+        if (pl.invulFrame % 4 < 2) drawRunner(ctx, playerSpriteRef.current, heroFallbackRef.current, pl, frameCount.current);
         ctx.restore();
+        if (focusCanvasRef.current && window.innerWidth <= 700 && window.innerHeight >= 700) {
+            const focus = focusCanvasRef.current.getContext('2d');
+            focus?.drawImage(ctx.canvas, 0, 0, 400, 400, 0, 0, 400, 400);
+        }
     };
 
     useEffect(() => {
@@ -1160,14 +1125,6 @@ const GoHomeDash: React.FC<{
                 const ctx = canvasRef.current.getContext('2d');
                 if (ctx) draw(ctx);
             }
-            if (gameStateRef.current === 'PLAYING' && canvasRef.current && guideCanvasRef.current) {
-                const guideCtx = guideCanvasRef.current.getContext('2d');
-                if (guideCtx) {
-                    guideCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-                    guideCtx.imageSmoothingEnabled = false;
-                    guideCtx.drawImage(canvasRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-                }
-            }
             frameIdRef.current = requestAnimationFrame(loop);
         };
         
@@ -1186,59 +1143,28 @@ const GoHomeDash: React.FC<{
     };
 
     return (
-        <div className={`mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none${compact ? ' rpg-go-home-compact' : ''}`}
-            data-gamepad-go-home-live={gameState === 'PLAYING' ? 'true' : undefined}
-            onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
-            
-            <div className="ios-safe-ui-x ios-safe-ui-header go-home-hud w-full flex justify-between items-start z-10 pointer-events-none mb-2">
-                <div className="go-home-hud-left flex flex-col gap-2">
-                    <div className="flex gap-1">{[...Array(maxHp)].map((_, i) => (<Heart key={i} size={24} className={`${i < hp ? "text-red-500 fill-current" : "text-slate-800"} drop-shadow-lg`} />))}</div>
-                    <div className="bg-black/60 px-3 py-1.5 rounded-xl border-2 border-indigo-500/50 flex flex-col w-48 backdrop-blur-md">
-                        <div className="flex justify-between text-[10px] font-black text-indigo-300"><span>RANK {level}</span><span>{Math.floor(exp)} / {nextLevelExp}</span></div>
-                        <div className="w-full h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-gradient-to-r from-indigo-600 to-purple-400 transition-all" style={{ width: `${(exp / nextLevelExp) * 100}%` }}></div></div>
-                    </div>
+        <div className={`mini-game-go-home-screen dash-shell w-full h-full text-white font-mono relative overflow-hidden select-none${compact ? ' rpg-go-home-compact' : ''}`}
+            style={{'--dash-backdrop': `url("${assetUrl(`sprites/go-home-dash/${route === 'school' ? 'title' : `routes/${route}`}.webp`)}")`} as React.CSSProperties}
+            data-gamepad-go-home-live={gameState === 'PLAYING' ? 'true' : undefined}>
+            <div className="go-home-hud pointer-events-none">
+                <div className="go-home-hud-left"><div className="flex gap-1">{Array.from({length: Math.min(12, maxHp)}, (_, i) => <Heart key={i} className={i < hp ? 'text-red-400 fill-current' : 'text-slate-700'} />)}</div>
+                    <div className="dash-rank">RANK {level}<i><b style={{width: `${exp / nextLevelExp * 100}%`}} /></i></div>
                 </div>
-                <div className="go-home-distance shrink-0 text-right">
-                    <div className="text-3xl font-black text-white italic tracking-tighter">{score.toLocaleString()}</div>
-                    <div className="text-[8px] text-indigo-400 font-bold uppercase tracking-widest bg-black/40 px-2 py-0.5 rounded">Distance</div>
-                </div>
+                <div className="go-home-distance"><div className="text-3xl font-black italic">{score.toLocaleString()}</div><small>DISTANCE</small></div>
             </div>
-
-            {gameState === 'PLAYING' && (
-                <div className="go-home-mini-guide pointer-events-none">
-                    <canvas ref={guideCanvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="w-full h-auto bg-black pixel-art" style={{ imageRendering: 'pixelated' }} />
-                </div>
-            )}
-
-            <div className="flex-grow w-full flex flex-col items-center justify-center min-h-0 relative">
-                <div className="w-full relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative p-1 bg-slate-800 rounded-[2rem] shadow-2xl border-2 border-slate-700 w-full overflow-hidden">
-                        <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="w-full h-auto bg-black rounded-[1.8rem] pixel-art aspect-[2/1]" style={{ imageRendering: 'pixelated' }} />
-                    </div>
-                </div>
+            <div className="dash-stage touch-none" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onLostPointerCapture={handlePointerUp}>
+                <canvas className="dash-overview" ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} aria-label={L('帰宅ダッシュのコース', 'Home Dash course', 'きたくダッシュのコース')} />
+                <canvas className="dash-focus" ref={focusCanvasRef} width={400} height={400} aria-hidden="true" />
             </div>
-
-            <div className="mt-4 flex flex-col items-center gap-2 pointer-events-none opacity-50 text-[10px] uppercase font-black tracking-widest">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                        <Move size={12}/>
-                        {languageMode === 'ENGLISH'
-                            ? 'CLICK / TAP / A: JUMP (HOLD TO ADJUST HEIGHT)'
-                            : t('クリック・タップ・Aでジャンプ（長押しで高さ調整）')}
-                    </div>
+            {gameState === 'PLAYING' && <>
+                <div className="dash-route" aria-live="polite"><strong>{flight ? '✦ ' : '→ '}{routeCopy(route, languageMode)}</strong><small>{routeCopy(route, languageMode, true)}</small></div>
+                <div className="dash-controls">
+                    <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><small>SHIFT / X</small>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('チャージ中', 'CHARGING', 'チャージちゅう')}</button>
+                    <button className="dash-jump" {...multiTouchHold(held => { const wasHeld = jumpButtonHeld.current; jumpButtonHeld.current = held; refreshPressing(); if (held && !wasHeld) triggerJump(); })}
+                        onClick={e => { if (e.detail === 0) triggerJump(); }}><small>SPACE / A · HOLD</small>{flight ? L('上昇', 'RISE', 'じょうしょう') : L('ジャンプ', 'JUMP', 'ジャンプ')}</button>
                 </div>
-            </div>
-
-            {gameState === 'START' && (
-                <div data-gamepad-modal data-gamepad-initial-scope="go-home-start" className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 animate-in fade-in backdrop-blur-md">
-                    <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">{initialHp===1&&initialMaxHp===1?(languageMode==='ENGLISH'?'One-hit Home Dash!':languageMode==='HIRAGANA'?'きたくダッシュいっぱつアウト!':'帰宅ダッシュ一発アウト!'):t('帰宅ダッシュ！')}</h2>
-                    <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
-                    <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">{t('障害物をよけて帰宅せよ！')}<br/>{t('ミサイルやスキルを駆使してゴールを目指せ。')}</p>
-                    <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> {t('START DASH')}</button>
-                    {exitEnabled && <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> {t('職員室に戻る')}</button>}
-                </div>
-            )}
+            </>}
+            {gameState === 'START' && <DashLobby hero={selectedHero} onHero={setSelectedHero} onStart={() => { initGame(); audioService.playSound('select'); }} onBack={onBack} languageMode={languageMode} oneHit={initialHp === 1 && initialMaxHp === 1} exitEnabled={exitEnabled} />}
 
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
@@ -1266,6 +1192,7 @@ const GoHomeDash: React.FC<{
                     <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
                     <div className="flex flex-col gap-4 w-64">
                         <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
+                        <button className="dash-result-change" onClick={returnToTitle}>{L('主人公を選び直す', 'Choose another runner', 'しゅじんこうをえらびなおす')}</button>
                         {exitEnabled && <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>}
                     </div>
                 </div>

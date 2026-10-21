@@ -1940,7 +1940,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2291,6 +2291,26 @@ class AudioService {
           await this.playMagicEventVoice(line.heroId, line.lineId);
           if (this.magicEventVoiceSequenceId !== sequenceId) return;
           await new Promise(resolve => window.setTimeout(resolve, gapMs));
+      }
+  }
+
+  public playHomeDashVoice(heroId: string, event: 'jump' | 'dash' | 'flight' | 'damage' | 'upgrade' | 'defeat') {
+      if (!/^(?:high-school|magic)-[a-z]+$/.test(heroId) || !this.canPlayConversationVoice()) return Promise.resolve(false);
+      this.init();
+      if (!this.ctx || !this.sfxGain) return Promise.resolve(false);
+      this.stopHomeDashVoices();
+      const name = `home-dash-voice-${heroId}-${event}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      return this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/go-home-dash/${heroId}/${event}.ogg`))], 8000, false, generation);
+  }
+
+  public stopHomeDashVoices() {
+      const names = new Set([...this.sfxPlaybackGenerations.keys(), ...this.activeHtmlSfx.keys(), ...this.activeSfxSources.keys()]);
+      for (const name of names) {
+          if (!name.startsWith('home-dash-voice-')) continue;
+          this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
+          this.stopActiveSfx(name);
       }
   }
 

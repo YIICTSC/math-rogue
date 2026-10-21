@@ -1165,6 +1165,8 @@ export const useXboxControllerNavigation = () => {
               window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_SYSTEM_MENU_EVENT));
             } else if (survivorGameplayActive && (name === 'A' || name === 'X' || name === 'START' || name.startsWith('DPAD_'))) {
               // Survivor reads movement, dash, burst and pause directly from the pad.
+            } else if (goHomeGameplayActive && name === 'X') {
+              dispatchKeyboardEvent('x');
             } else if (goHomeGameplayActive && name === 'A') {
               // Held Space is emitted above so jump height follows the A-button hold duration.
             } else if (dungeonGameplayActive && name.startsWith('DPAD_')) {

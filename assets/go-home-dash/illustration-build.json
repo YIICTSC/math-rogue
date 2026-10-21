@@ -1,0 +1,1518 @@
+{
+  "generator": "ImageGen",
+  "frames": 8,
+  "layout": [
+    4,
+    2
+  ],
+  "frame_size": [
+    128,
+    160
+  ],
+  "actions": {
+    "dash": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "jump": [
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "heroes": [
+    {
+      "id": "high-school-warrior",
+      "source": "exec-13b03b76-9f00-4c8e-bb2c-a9789f3fb03e.png",
+      "source_sha256": "fe69341c4432e8369010492e949a0cb939721f3c58f2cf82f419779b86e3cfae",
+      "scale": 0.3231197771587744,
+      "cells": [
+        {
+          "left": 55,
+          "top": 81,
+          "width": 329,
+          "height": 402
+        },
+        {
+          "left": 384,
+          "top": 92,
+          "width": 359,
+          "height": 395
+        },
+        {
+          "left": 798,
+          "top": 87,
+          "width": 325,
+          "height": 397
+        },
+        {
+          "left": 1173,
+          "top": 90,
+          "width": 336,
+          "height": 391
+        },
+        {
+          "left": 39,
+          "top": 668,
+          "width": 314,
+          "height": 281
+        },
+        {
+          "left": 428,
+          "top": 550,
+          "width": 331,
+          "height": 408
+        },
+        {
+          "left": 808,
+          "top": 549,
+          "width": 317,
+          "height": 293
+        },
+        {
+          "left": 1172,
+          "top": 599,
+          "width": 355,
+          "height": 342
+        }
+      ]
+    },
+    {
+      "id": "high-school-mage",
+      "source": "exec-d9ae6549-5fe2-4950-a1ec-8fc80c0b08d1.png",
+      "source_sha256": "e3c0e954bd936d052c8505c892987a199a3b9205271fe8d6fb0952cf7440c93b",
+      "scale": 0.327683615819209,
+      "cells": [
+        {
+          "left": 51,
+          "top": 76,
+          "width": 333,
+          "height": 399
+        },
+        {
+          "left": 384,
+          "top": 79,
+          "width": 342,
+          "height": 397
+        },
+        {
+          "left": 798,
+          "top": 71,
+          "width": 354,
+          "height": 406
+        },
+        {
+          "left": 1152,
+          "top": 71,
+          "width": 339,
+          "height": 407
+        },
+        {
+          "left": 56,
+          "top": 636,
+          "width": 302,
+          "height": 325
+        },
+        {
+          "left": 425,
+          "top": 534,
+          "width": 313,
+          "height": 415
+        },
+        {
+          "left": 804,
+          "top": 550,
+          "width": 274,
+          "height": 314
+        },
+        {
+          "left": 1173,
+          "top": 590,
+          "width": 341,
+          "height": 370
+        }
+      ]
+    },
+    {
+      "id": "high-school-caretaker",
+      "source": "exec-dd70b485-464d-4614-a316-62a2c8fca305.png",
+      "source_sha256": "a09c46224cdb91ec38917ef983d85fb0651dcef8a218d0c2f750054155d30fc6",
+      "scale": 0.3295194508009153,
+      "cells": [
+        {
+          "left": 75,
+          "top": 71,
+          "width": 309,
+          "height": 408
+        },
+        {
+          "left": 384,
+          "top": 76,
+          "width": 331,
+          "height": 401
+        },
+        {
+          "left": 781,
+          "top": 75,
+          "width": 330,
+          "height": 404
+        },
+        {
+          "left": 1181,
+          "top": 67,
+          "width": 262,
+          "height": 404
+        },
+        {
+          "left": 84,
+          "top": 612,
+          "width": 262,
+          "height": 341
+        },
+        {
+          "left": 449,
+          "top": 522,
+          "width": 263,
+          "height": 437
+        },
+        {
+          "left": 831,
+          "top": 525,
+          "width": 250,
+          "height": 299
+        },
+        {
+          "left": 1180,
+          "top": 560,
+          "width": 314,
+          "height": 375
+        }
+      ]
+    },
+    {
+      "id": "high-school-bard",
+      "source": "exec-1fee91d7-320d-47f3-b9f9-e9f143ee746d.png",
+      "source_sha256": "eeecf350c187b66f9a0ce85021b4600e19328e86c6386563cd892991c84773e6",
+      "scale": 0.3372093023255814,
+      "cells": [
+        {
+          "left": 44,
+          "top": 70,
+          "width": 330,
+          "height": 414
+        },
+        {
+          "left": 470,
+          "top": 72,
+          "width": 249,
+          "height": 413
+        },
+        {
+          "left": 798,
+          "top": 72,
+          "width": 344,
+          "height": 414
+        },
+        {
+          "left": 1219,
+          "top": 70,
+          "width": 266,
+          "height": 416
+        },
+        {
+          "left": 69,
+          "top": 600,
+          "width": 257,
+          "height": 360
+        },
+        {
+          "left": 432,
+          "top": 552,
+          "width": 265,
+          "height": 412
+        },
+        {
+          "left": 808,
+          "top": 540,
+          "width": 235,
+          "height": 303
+        },
+        {
+          "left": 1188,
+          "top": 584,
+          "width": 324,
+          "height": 380
+        }
+      ]
+    },
+    {
+      "id": "high-school-dodgeball",
+      "source": "exec-8990db68-c995-48aa-b9ce-115d5f35b7b9.png",
+      "source_sha256": "61953b48468f14fd6a6cacdc6ca8b6e59690edc1c5d28b14559ff181fa368c34",
+      "scale": 0.3143631436314363,
+      "cells": [
+        {
+          "left": 28,
+          "top": 57,
+          "width": 335,
+          "height": 413
+        },
+        {
+          "left": 414,
+          "top": 73,
+          "width": 353,
+          "height": 379
+        },
+        {
+          "left": 792,
+          "top": 57,
+          "width": 319,
+          "height": 418
+        },
+        {
+          "left": 1158,
+          "top": 57,
+          "width": 349,
+          "height": 375
+        },
+        {
+          "left": 30,
+          "top": 623,
+          "width": 297,
+          "height": 342
+        },
+        {
+          "left": 412,
+          "top": 513,
+          "width": 317,
+          "height": 438
+        },
+        {
+          "left": 783,
+          "top": 524,
+          "width": 369,
+          "height": 293
+        },
+        {
+          "left": 1152,
+          "top": 566,
+          "width": 362,
+          "height": 399
+        }
+      ]
+    },
+    {
+      "id": "high-school-assassin",
+      "source": "exec-02669912-9222-457e-840e-48333abd6d53.png",
+      "source_sha256": "5936bc01e5aa33d9b2f0be9bc4715927a76fe2250a29e2df0b6a2c06762a7519",
+      "scale": 0.3325635103926097,
+      "cells": [
+        {
+          "left": 42,
+          "top": 75,
+          "width": 311,
+          "height": 404
+        },
+        {
+          "left": 433,
+          "top": 82,
+          "width": 290,
+          "height": 385
+        },
+        {
+          "left": 786,
+          "top": 75,
+          "width": 343,
+          "height": 401
+        },
+        {
+          "left": 1218,
+          "top": 75,
+          "width": 284,
+          "height": 410
+        },
+        {
+          "left": 59,
+          "top": 646,
+          "width": 267,
+          "height": 330
+        },
+        {
+          "left": 435,
+          "top": 530,
+          "width": 279,
+          "height": 433
+        },
+        {
+          "left": 816,
+          "top": 535,
+          "width": 270,
+          "height": 306
+        },
+        {
+          "left": 1184,
+          "top": 585,
+          "width": 321,
+          "height": 380
+        }
+      ]
+    },
+    {
+      "id": "high-school-gardener",
+      "source": "exec-8710f50e-5f9b-4f93-acb1-b9700bf28fe6.png",
+      "source_sha256": "a070a5251df291e9399624007f92a15bcfe52e2583cf2ac5be50520beb3c04ed",
+      "scale": 0.3380281690140845,
+      "cells": [
+        {
+          "left": 51,
+          "top": 65,
+          "width": 307,
+          "height": 418
+        },
+        {
+          "left": 447,
+          "top": 72,
+          "width": 266,
+          "height": 411
+        },
+        {
+          "left": 794,
+          "top": 69,
+          "width": 340,
+          "height": 414
+        },
+        {
+          "left": 1210,
+          "top": 74,
+          "width": 291,
+          "height": 411
+        },
+        {
+          "left": 54,
+          "top": 624,
+          "width": 293,
+          "height": 332
+        },
+        {
+          "left": 454,
+          "top": 533,
+          "width": 267,
+          "height": 426
+        },
+        {
+          "left": 827,
+          "top": 537,
+          "width": 278,
+          "height": 313
+        },
+        {
+          "left": 1190,
+          "top": 583,
+          "width": 311,
+          "height": 371
+        }
+      ]
+    },
+    {
+      "id": "high-school-librarian",
+      "source": "exec-96b2d64f-824e-4368-b6ca-ed8328a00f88.png",
+      "source_sha256": "6d78793b82fca99f0ec7dbf6779f79c78a75729a0927768141bb6dccc9ffe6d3",
+      "scale": 0.3235955056179775,
+      "cells": [
+        {
+          "left": 51,
+          "top": 61,
+          "width": 324,
+          "height": 414
+        },
+        {
+          "left": 465,
+          "top": 63,
+          "width": 257,
+          "height": 416
+        },
+        {
+          "left": 805,
+          "top": 61,
+          "width": 304,
+          "height": 418
+        },
+        {
+          "left": 1193,
+          "top": 62,
+          "width": 280,
+          "height": 417
+        },
+        {
+          "left": 72,
+          "top": 613,
+          "width": 263,
+          "height": 351
+        },
+        {
+          "left": 433,
+          "top": 519,
+          "width": 285,
+          "height": 445
+        },
+        {
+          "left": 820,
+          "top": 519,
+          "width": 269,
+          "height": 320
+        },
+        {
+          "left": 1193,
+          "top": 583,
+          "width": 320,
+          "height": 373
+        }
+      ]
+    },
+    {
+      "id": "magic-akari",
+      "source": "exec-3112a098-3229-4078-b60b-0b0c635692b0.png",
+      "source_sha256": "ac5ccd1a669dd06ccc67df68b1f294658f1d9fa599f1a2a97d6c578e12e929bb",
+      "scale": 0.32653061224489793,
+      "cells": [
+        {
+          "left": 50,
+          "top": 48,
+          "width": 304,
+          "height": 434
+        },
+        {
+          "left": 453,
+          "top": 64,
+          "width": 261,
+          "height": 420
+        },
+        {
+          "left": 843,
+          "top": 61,
+          "width": 278,
+          "height": 423
+        },
+        {
+          "left": 1208,
+          "top": 46,
+          "width": 283,
+          "height": 437
+        },
+        {
+          "left": 71,
+          "top": 602,
+          "width": 268,
+          "height": 365
+        },
+        {
+          "left": 437,
+          "top": 535,
+          "width": 282,
+          "height": 441
+        },
+        {
+          "left": 838,
+          "top": 548,
+          "width": 243,
+          "height": 327
+        },
+        {
+          "left": 1179,
+          "top": 561,
+          "width": 324,
+          "height": 387
+        }
+      ]
+    },
+    {
+      "id": "magic-shizuku",
+      "source": "exec-4963603e-a149-46d7-977b-42daa8e62125.png",
+      "source_sha256": "3b561c38ec49b3a84e6d391a0a631dd95efca113b60f5e89cbe74569689cb51e",
+      "scale": 0.3185840707964602,
+      "cells": [
+        {
+          "left": 32,
+          "top": 65,
+          "width": 352,
+          "height": 427
+        },
+        {
+          "left": 447,
+          "top": 61,
+          "width": 260,
+          "height": 435
+        },
+        {
+          "left": 792,
+          "top": 61,
+          "width": 360,
+          "height": 430
+        },
+        {
+          "left": 1152,
+          "top": 56,
+          "width": 344,
+          "height": 442
+        },
+        {
+          "left": 46,
+          "top": 635,
+          "width": 278,
+          "height": 350
+        },
+        {
+          "left": 420,
+          "top": 533,
+          "width": 270,
+          "height": 452
+        },
+        {
+          "left": 793,
+          "top": 528,
+          "width": 257,
+          "height": 321
+        },
+        {
+          "left": 1168,
+          "top": 580,
+          "width": 334,
+          "height": 384
+        }
+      ]
+    },
+    {
+      "id": "high-school-chef",
+      "source": "exec-9a2b4314-4138-49e2-9711-b5f88a19d1df.png",
+      "source_sha256": "a13b158fbb364f3da4dbb2a0e97961a3f8a8e646fb00bd45131b8e3ff2125fcc",
+      "scale": 0.32142857142857145,
+      "cells": [
+        {
+          "left": 36,
+          "top": 68,
+          "width": 348,
+          "height": 404
+        },
+        {
+          "left": 384,
+          "top": 93,
+          "width": 357,
+          "height": 380
+        },
+        {
+          "left": 800,
+          "top": 68,
+          "width": 349,
+          "height": 405
+        },
+        {
+          "left": 1203,
+          "top": 70,
+          "width": 293,
+          "height": 403
+        },
+        {
+          "left": 42,
+          "top": 643,
+          "width": 289,
+          "height": 315
+        },
+        {
+          "left": 418,
+          "top": 514,
+          "width": 282,
+          "height": 448
+        },
+        {
+          "left": 785,
+          "top": 519,
+          "width": 287,
+          "height": 296
+        },
+        {
+          "left": 1156,
+          "top": 542,
+          "width": 344,
+          "height": 385
+        }
+      ]
+    },
+    {
+      "id": "magic-hiyori",
+      "source": "exec-acca5b9b-e001-4d11-ab34-660d3f5d3976.png",
+      "source_sha256": "c58f06c6278a203d62acf7f0e08d862027e6f84805a3d3a5b673141561e0cda4",
+      "scale": 0.3356643356643357,
+      "cells": [
+        {
+          "left": 60,
+          "top": 63,
+          "width": 308,
+          "height": 429
+        },
+        {
+          "left": 476,
+          "top": 73,
+          "width": 257,
+          "height": 419
+        },
+        {
+          "left": 807,
+          "top": 64,
+          "width": 330,
+          "height": 428
+        },
+        {
+          "left": 1232,
+          "top": 67,
+          "width": 247,
+          "height": 425
+        },
+        {
+          "left": 69,
+          "top": 618,
+          "width": 265,
+          "height": 363
+        },
+        {
+          "left": 460,
+          "top": 546,
+          "width": 250,
+          "height": 420
+        },
+        {
+          "left": 856,
+          "top": 546,
+          "width": 224,
+          "height": 313
+        },
+        {
+          "left": 1244,
+          "top": 569,
+          "width": 283,
+          "height": 398
+        }
+      ]
+    },
+    {
+      "id": "magic-tsubasa",
+      "source": "exec-996cf9b7-4405-45fd-b11e-e784f432a0b8.png",
+      "source_sha256": "20bb8bf50a7229d5a52d8796d17b8a7f749f837789ab629dc6094c7e6ff6f96b",
+      "scale": 0.3314285714285714,
+      "cells": [
+        {
+          "left": 43,
+          "top": 88,
+          "width": 328,
+          "height": 396
+        },
+        {
+          "left": 415,
+          "top": 86,
+          "width": 295,
+          "height": 391
+        },
+        {
+          "left": 786,
+          "top": 86,
+          "width": 350,
+          "height": 395
+        },
+        {
+          "left": 1164,
+          "top": 75,
+          "width": 308,
+          "height": 376
+        },
+        {
+          "left": 64,
+          "top": 647,
+          "width": 275,
+          "height": 316
+        },
+        {
+          "left": 420,
+          "top": 551,
+          "width": 278,
+          "height": 422
+        },
+        {
+          "left": 785,
+          "top": 557,
+          "width": 302,
+          "height": 313
+        },
+        {
+          "left": 1176,
+          "top": 580,
+          "width": 325,
+          "height": 377
+        }
+      ]
+    },
+    {
+      "id": "magic-rei",
+      "source": "exec-4bf1e76b-c586-42ec-ac6f-9c9b69e11919.png",
+      "source_sha256": "5e8b34d1cec6a8ad52ab0801b3430d26988a2c2bd1b06d1a26c1b41a02cb5af6",
+      "scale": 0.31607629427792916,
+      "cells": [
+        {
+          "left": 31,
+          "top": 78,
+          "width": 353,
+          "height": 413
+        },
+        {
+          "left": 384,
+          "top": 85,
+          "width": 321,
+          "height": 404
+        },
+        {
+          "left": 797,
+          "top": 69,
+          "width": 351,
+          "height": 421
+        },
+        {
+          "left": 1185,
+          "top": 69,
+          "width": 306,
+          "height": 421
+        },
+        {
+          "left": 54,
+          "top": 622,
+          "width": 313,
+          "height": 344
+        },
+        {
+          "left": 437,
+          "top": 538,
+          "width": 314,
+          "height": 430
+        },
+        {
+          "left": 792,
+          "top": 535,
+          "width": 302,
+          "height": 274
+        },
+        {
+          "left": 1157,
+          "top": 569,
+          "width": 367,
+          "height": 381
+        }
+      ]
+    },
+    {
+      "id": "magic-madoka",
+      "source": "exec-16fbf8c9-aad9-4d34-9bcd-ab2c321fdfd6.png",
+      "source_sha256": "a72f8dc9b81043bfd5ea3cb4c7068557c33c6fbc44b9147cf1b4299c0a9c925a",
+      "scale": 0.31868131868131866,
+      "cells": [
+        {
+          "left": 41,
+          "top": 63,
+          "width": 343,
+          "height": 410
+        },
+        {
+          "left": 384,
+          "top": 67,
+          "width": 344,
+          "height": 409
+        },
+        {
+          "left": 778,
+          "top": 62,
+          "width": 349,
+          "height": 409
+        },
+        {
+          "left": 1153,
+          "top": 62,
+          "width": 315,
+          "height": 417
+        },
+        {
+          "left": 43,
+          "top": 627,
+          "width": 331,
+          "height": 338
+        },
+        {
+          "left": 418,
+          "top": 537,
+          "width": 324,
+          "height": 422
+        },
+        {
+          "left": 787,
+          "top": 531,
+          "width": 302,
+          "height": 324
+        },
+        {
+          "left": 1158,
+          "top": 582,
+          "width": 364,
+          "height": 387
+        }
+      ]
+    },
+    {
+      "id": "magic-mirai",
+      "source": "exec-ea0870e8-83dc-4cc2-9224-d5d360c01da4.png",
+      "source_sha256": "7df9a3cdb44748b69546c8d241201ef9c12b2de029c4461d88c6b61e813ed21a",
+      "scale": 0.33488372093023255,
+      "cells": [
+        {
+          "left": 55,
+          "top": 48,
+          "width": 321,
+          "height": 430
+        },
+        {
+          "left": 444,
+          "top": 82,
+          "width": 283,
+          "height": 396
+        },
+        {
+          "left": 779,
+          "top": 60,
+          "width": 339,
+          "height": 418
+        },
+        {
+          "left": 1177,
+          "top": 50,
+          "width": 278,
+          "height": 428
+        },
+        {
+          "left": 83,
+          "top": 656,
+          "width": 252,
+          "height": 324
+        },
+        {
+          "left": 411,
+          "top": 545,
+          "width": 291,
+          "height": 427
+        },
+        {
+          "left": 777,
+          "top": 545,
+          "width": 285,
+          "height": 314
+        },
+        {
+          "left": 1181,
+          "top": 584,
+          "width": 323,
+          "height": 386
+        }
+      ]
+    },
+    {
+      "id": "magic-sera",
+      "source": "exec-59a6da2e-70d0-43c5-a439-1656f6ca585a.png",
+      "source_sha256": "cda9d9682945baae3f0d2f3e38db8f9ba6bf1c59ee8e810fac006e23aacdd171",
+      "scale": 0.3207126948775056,
+      "cells": [
+        {
+          "left": 45,
+          "top": 72,
+          "width": 331,
+          "height": 436
+        },
+        {
+          "left": 414,
+          "top": 78,
+          "width": 314,
+          "height": 425
+        },
+        {
+          "left": 798,
+          "top": 78,
+          "width": 346,
+          "height": 431
+        },
+        {
+          "left": 1186,
+          "top": 82,
+          "width": 336,
+          "height": 425
+        },
+        {
+          "left": 52,
+          "top": 638,
+          "width": 298,
+          "height": 350
+        },
+        {
+          "left": 402,
+          "top": 528,
+          "width": 313,
+          "height": 449
+        },
+        {
+          "left": 787,
+          "top": 543,
+          "width": 322,
+          "height": 341
+        },
+        {
+          "left": 1171,
+          "top": 585,
+          "width": 345,
+          "height": 400
+        }
+      ]
+    },
+    {
+      "id": "magic-soma",
+      "source": "exec-6bc80076-b095-40f1-84f1-0f6580be3ae0.png",
+      "source_sha256": "fcde721c7ba4a5998a114dd510a96a1c9431232a9f2ea433526fa3e878001a7f",
+      "scale": 0.31016042780748665,
+      "cells": [
+        {
+          "left": 25,
+          "top": 76,
+          "width": 359,
+          "height": 407
+        },
+        {
+          "left": 384,
+          "top": 91,
+          "width": 374,
+          "height": 392
+        },
+        {
+          "left": 778,
+          "top": 89,
+          "width": 374,
+          "height": 395
+        },
+        {
+          "left": 1152,
+          "top": 81,
+          "width": 337,
+          "height": 397
+        },
+        {
+          "left": 18,
+          "top": 654,
+          "width": 366,
+          "height": 282
+        },
+        {
+          "left": 384,
+          "top": 542,
+          "width": 361,
+          "height": 412
+        },
+        {
+          "left": 778,
+          "top": 527,
+          "width": 320,
+          "height": 294
+        },
+        {
+          "left": 1159,
+          "top": 556,
+          "width": 373,
+          "height": 392
+        }
+      ]
+    },
+    {
+      "id": "magic-koharu",
+      "source": "exec-ed93b34d-5269-47cf-9b20-2bb75f1003ad.png",
+      "source_sha256": "96ea3e75b09a1d097d7cec9dc037dd6b9dc46155dd997ed0cc62376635149691",
+      "scale": 0.3240223463687151,
+      "cells": [
+        {
+          "left": 41,
+          "top": 64,
+          "width": 328,
+          "height": 434
+        },
+        {
+          "left": 424,
+          "top": 72,
+          "width": 289,
+          "height": 433
+        },
+        {
+          "left": 793,
+          "top": 64,
+          "width": 330,
+          "height": 436
+        },
+        {
+          "left": 1176,
+          "top": 67,
+          "width": 298,
+          "height": 436
+        },
+        {
+          "left": 53,
+          "top": 655,
+          "width": 298,
+          "height": 320
+        },
+        {
+          "left": 432,
+          "top": 539,
+          "width": 287,
+          "height": 430
+        },
+        {
+          "left": 802,
+          "top": 545,
+          "width": 287,
+          "height": 309
+        },
+        {
+          "left": 1157,
+          "top": 596,
+          "width": 358,
+          "height": 349
+        }
+      ]
+    },
+    {
+      "id": "magic-ren",
+      "source": "exec-71b0ff80-c6da-4b50-9590-a5152da0344f.png",
+      "source_sha256": "3aebaf05a14209611f1ad00cec1f37a6e86467042f873b41d93f3017dd54a164",
+      "scale": 0.3372093023255814,
+      "cells": [
+        {
+          "left": 34,
+          "top": 71,
+          "width": 339,
+          "height": 402
+        },
+        {
+          "left": 434,
+          "top": 75,
+          "width": 283,
+          "height": 398
+        },
+        {
+          "left": 791,
+          "top": 77,
+          "width": 344,
+          "height": 399
+        },
+        {
+          "left": 1198,
+          "top": 73,
+          "width": 325,
+          "height": 400
+        },
+        {
+          "left": 39,
+          "top": 654,
+          "width": 290,
+          "height": 308
+        },
+        {
+          "left": 441,
+          "top": 548,
+          "width": 286,
+          "height": 409
+        },
+        {
+          "left": 800,
+          "top": 551,
+          "width": 277,
+          "height": 279
+        },
+        {
+          "left": 1180,
+          "top": 588,
+          "width": 322,
+          "height": 373
+        }
+      ]
+    },
+    {
+      "id": "magic-riku",
+      "source": "exec-d402299f-c277-4c77-aa88-227c41912e1d.png",
+      "source_sha256": "65d53c3b4d0f5b5a60ca4da9005daf01a6ebfef50e3760df71dec6dadc9b9f95",
+      "scale": 0.327683615819209,
+      "cells": [
+        {
+          "left": 41,
+          "top": 61,
+          "width": 331,
+          "height": 432
+        },
+        {
+          "left": 430,
+          "top": 66,
+          "width": 286,
+          "height": 419
+        },
+        {
+          "left": 789,
+          "top": 66,
+          "width": 354,
+          "height": 423
+        },
+        {
+          "left": 1186,
+          "top": 64,
+          "width": 318,
+          "height": 432
+        },
+        {
+          "left": 36,
+          "top": 633,
+          "width": 294,
+          "height": 316
+        },
+        {
+          "left": 422,
+          "top": 547,
+          "width": 298,
+          "height": 412
+        },
+        {
+          "left": 782,
+          "top": 534,
+          "width": 324,
+          "height": 294
+        },
+        {
+          "left": 1183,
+          "top": 571,
+          "width": 331,
+          "height": 372
+        }
+      ]
+    },
+    {
+      "id": "magic-minato",
+      "source": "exec-ea722e1b-9dae-4431-b2ca-e493f34e9849.png",
+      "source_sha256": "284288b02fdd43f67ffb2fc55da0f34603875b9c05130c3ab95182a069ec02ea",
+      "scale": 0.3231197771587744,
+      "cells": [
+        {
+          "left": 33,
+          "top": 99,
+          "width": 337,
+          "height": 382
+        },
+        {
+          "left": 400,
+          "top": 100,
+          "width": 319,
+          "height": 383
+        },
+        {
+          "left": 796,
+          "top": 96,
+          "width": 345,
+          "height": 385
+        },
+        {
+          "left": 1171,
+          "top": 85,
+          "width": 310,
+          "height": 389
+        },
+        {
+          "left": 23,
+          "top": 633,
+          "width": 322,
+          "height": 312
+        },
+        {
+          "left": 433,
+          "top": 531,
+          "width": 301,
+          "height": 402
+        },
+        {
+          "left": 797,
+          "top": 543,
+          "width": 307,
+          "height": 289
+        },
+        {
+          "left": 1155,
+          "top": 598,
+          "width": 359,
+          "height": 337
+        }
+      ]
+    },
+    {
+      "id": "magic-yamato",
+      "source": "exec-69c60bb6-1282-4272-80b9-723af350c040.png",
+      "source_sha256": "9ea262812763af2a25571b6050edc297cb1f172d76ab007387074961b43dcc58",
+      "scale": 0.33429394812680113,
+      "cells": [
+        {
+          "left": 35,
+          "top": 79,
+          "width": 336,
+          "height": 386
+        },
+        {
+          "left": 432,
+          "top": 88,
+          "width": 302,
+          "height": 376
+        },
+        {
+          "left": 787,
+          "top": 83,
+          "width": 346,
+          "height": 382
+        },
+        {
+          "left": 1185,
+          "top": 79,
+          "width": 331,
+          "height": 386
+        },
+        {
+          "left": 57,
+          "top": 627,
+          "width": 287,
+          "height": 311
+        },
+        {
+          "left": 423,
+          "top": 531,
+          "width": 301,
+          "height": 407
+        },
+        {
+          "left": 815,
+          "top": 533,
+          "width": 319,
+          "height": 285
+        },
+        {
+          "left": 1179,
+          "top": 576,
+          "width": 347,
+          "height": 355
+        }
+      ]
+    },
+    {
+      "id": "magic-sakuya",
+      "source": "exec-3145cd7d-38f4-4cd5-86c2-0f571ad0b338.png",
+      "source_sha256": "7c18004599349509da5fc4c2165fc07a1484cb8da1b7ad7fd8fcc53d5d0e664d",
+      "scale": 0.3020833333333333,
+      "cells": [
+        {
+          "left": 31,
+          "top": 79,
+          "width": 353,
+          "height": 402
+        },
+        {
+          "left": 384,
+          "top": 86,
+          "width": 384,
+          "height": 395
+        },
+        {
+          "left": 768,
+          "top": 79,
+          "width": 374,
+          "height": 402
+        },
+        {
+          "left": 1153,
+          "top": 79,
+          "width": 325,
+          "height": 402
+        },
+        {
+          "left": 41,
+          "top": 656,
+          "width": 327,
+          "height": 311
+        },
+        {
+          "left": 451,
+          "top": 533,
+          "width": 300,
+          "height": 431
+        },
+        {
+          "left": 808,
+          "top": 537,
+          "width": 281,
+          "height": 298
+        },
+        {
+          "left": 1167,
+          "top": 568,
+          "width": 350,
+          "height": 385
+        }
+      ]
+    },
+    {
+      "id": "magic-leon",
+      "source": "exec-a723e43a-588e-429f-9162-1e9149745a99.png",
+      "source_sha256": "604fe67e5fddac1c3dc274fbd4cc4b3aecd519c4d7fa1c620f8e55100faf102a",
+      "scale": 0.31016042780748665,
+      "cells": [
+        {
+          "left": 47,
+          "top": 58,
+          "width": 337,
+          "height": 425
+        },
+        {
+          "left": 384,
+          "top": 89,
+          "width": 374,
+          "height": 392
+        },
+        {
+          "left": 824,
+          "top": 58,
+          "width": 328,
+          "height": 426
+        },
+        {
+          "left": 1152,
+          "top": 55,
+          "width": 362,
+          "height": 399
+        },
+        {
+          "left": 36,
+          "top": 679,
+          "width": 330,
+          "height": 292
+        },
+        {
+          "left": 450,
+          "top": 537,
+          "width": 303,
+          "height": 410
+        },
+        {
+          "left": 813,
+          "top": 524,
+          "width": 288,
+          "height": 316
+        },
+        {
+          "left": 1157,
+          "top": 587,
+          "width": 358,
+          "height": 367
+        }
+      ]
+    },
+    {
+      "id": "magic-elliot",
+      "source": "exec-86bd1842-fdef-433e-ae95-46bc688c2c5e.png",
+      "source_sha256": "77c6623e0154a94cff8b02ef11f897f6c2912b91420316cd843eb55d2d9a3b92",
+      "scale": 0.3109919571045576,
+      "cells": [
+        {
+          "left": 14,
+          "top": 114,
+          "width": 368,
+          "height": 381
+        },
+        {
+          "left": 401,
+          "top": 112,
+          "width": 327,
+          "height": 383
+        },
+        {
+          "left": 781,
+          "top": 108,
+          "width": 365,
+          "height": 387
+        },
+        {
+          "left": 1172,
+          "top": 91,
+          "width": 337,
+          "height": 401
+        },
+        {
+          "left": 13,
+          "top": 675,
+          "width": 313,
+          "height": 284
+        },
+        {
+          "left": 415,
+          "top": 553,
+          "width": 315,
+          "height": 400
+        },
+        {
+          "left": 785,
+          "top": 553,
+          "width": 325,
+          "height": 312
+        },
+        {
+          "left": 1152,
+          "top": 592,
+          "width": 373,
+          "height": 361
+        }
+      ]
+    }
+  ],
+  "title": "exec-989bc639-f88a-43c9-b20e-94c019fca0d1.png",
+  "enemies": "exec-82ec1b4e-2efa-4000-898d-2e26b0004f17.png",
+  "routes": [
+    {
+      "id": "rooftops",
+      "source": "exec-44fb47db-181e-49f1-8fab-b1658a6dbb73.png",
+      "source_sha256": "da92ac8e1d0f2e0d72be0b2c4fd23d366f5bc2f3cc763ca1f975de1c8b387a61"
+    },
+    {
+      "id": "canal",
+      "source": "exec-d4bd4ffa-7ec0-4527-a048-506343db98bd.png",
+      "source_sha256": "8fdee0c7e3f54548244062c7cc6ddf4bf7989f99bd90a570c4d450210dab203d"
+    },
+    {
+      "id": "garden",
+      "source": "exec-da19d33c-27b8-4dbe-ba0f-9570e33f4838.png",
+      "source_sha256": "445d04b88a2cf07cebc975be1f43a2a6a06fd637effcf6c05c38a55a6329f3b5"
+    },
+    {
+      "id": "clockwork",
+      "source": "exec-6b8b3200-1f9d-4c00-ab8f-1855201340c7.png",
+      "source_sha256": "c40a2838ef9143b28d9abff8a2d47b019315b4816a84b5240445eb77213fbd8a"
+    },
+    {
+      "id": "skyway",
+      "source": "exec-ebd77e9d-aa7e-48c0-b4fb-770ff1dbff85.png",
+      "source_sha256": "fcfef74d61157d43594da2c8179d13b1d7d494b4ff892674b974af5f46b92c51"
+    },
+    {
+      "id": "storm",
+      "source": "exec-1a6f7f4b-bfcd-434b-8569-e39a0437dfcd.png",
+      "source_sha256": "a13c21d28248c55479b650217694ab03b0203637d5ee8d1511c8cf09fc7c55c5"
+    }
+  ]
+}

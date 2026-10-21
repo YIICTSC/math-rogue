@@ -8,6 +8,8 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:home-dash:browser": "node scripts/test-home-dash-browser.mjs",
+    "verify:home-dash:assets": "node scripts/verify-home-dash-assets.mjs",
     "test:poker:browser": "node scripts/test-poker-club-browser.mjs",
     "test:touch:screens": "node scripts/test-online-touch-screens-browser.mjs",
     "test:touch:browser": "node scripts/test-multi-touch-actions-browser.mjs",
