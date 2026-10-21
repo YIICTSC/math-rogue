@@ -21633,13 +21633,13 @@ const App: React.FC = () => {
                 )}
 
                 {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen) && (
-                    <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-emerald-950 text-amber-100">{trans("コースと問題を準備中…", languageMode)}</div>}>
+                    <React.Suspense fallback={null}>
                         <GakuroGolf languageMode={languageMode} inviteCode={golfInviteOpen?golfCode:''} onClose={()=>{setGolfInviteOpen(false);returnToTitle();}} />
                     </React.Suspense>
                 )}
 
                 {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_KART || kartInviteOpen) && (
-                    <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("コースを準備しています…", languageMode)}</div>}>
+                    <React.Suspense fallback={null}>
                         <GakuroKart languageMode={languageMode} allowHost={true} inviteCode={kartInviteOpen ? kartCode : ''} onClose={() => { setKartInviteOpen(false); returnToTitle(); }} />
                     </React.Suspense>
                 )}
@@ -21668,9 +21668,9 @@ const App: React.FC = () => {
                         />
                     </div>
                 )}
-                {rpgTitleOpen && <React.Suspense fallback={<div className="fixed inset-0 z-50 bg-slate-950"/>}><RpgTitle debugEnabled={isDebugModeActive} languageMode={languageMode} onClose={()=>setRpgTitleOpen(false)} onNew={mode=>{setRpgResumeSave(null);setRpgStartIntent(mode);setRpgTitleOpen(false);launchNewAdventure(visualTheme,true,mode==='join');}} onContinue={save=>{rpgInviteParticipantRef.current=false;rpgInviteAssignmentRef.current=save.world.setup?.assignment||null;rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;setRpgResumeSave(save);setRpgStartIntent('solo');setRpgTitleOpen(false);const setup=save.world.setup;if(setup)setVisualTheme(setup.visualTheme);setGameState(prev=>({...prev,rpgOnline:true,screen:GameScreen.MAP,player:structuredClone(save.player),visualTheme:setup?.visualTheme||prev.visualTheme,mode:(setup?.mode||prev.mode) as GameMode,modePool:setup?.modePool,answerMode:(setup?.answerMode||'CHOICE') as AnswerMode,difficultyLevel:setup?.difficultyLevel||1}));}}/></React.Suspense>}
+                {rpgTitleOpen && <React.Suspense fallback={null}><RpgTitle debugEnabled={isDebugModeActive} languageMode={languageMode} onClose={()=>setRpgTitleOpen(false)} onNew={mode=>{setRpgResumeSave(null);setRpgStartIntent(mode);setRpgTitleOpen(false);launchNewAdventure(visualTheme,true,mode==='join');}} onContinue={save=>{rpgInviteParticipantRef.current=false;rpgInviteAssignmentRef.current=save.world.setup?.assignment||null;rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;setRpgResumeSave(save);setRpgStartIntent('solo');setRpgTitleOpen(false);const setup=save.world.setup;if(setup)setVisualTheme(setup.visualTheme);setGameState(prev=>({...prev,rpgOnline:true,screen:GameScreen.MAP,player:structuredClone(save.player),visualTheme:setup?.visualTheme||prev.visualTheme,mode:(setup?.mode||prev.mode) as GameMode,modePool:setup?.modePool,answerMode:(setup?.answerMode||'CHOICE') as AnswerMode,difficultyLevel:setup?.difficultyLevel||1}));}}/></React.Suspense>}
                 {!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted && (
-                    <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
+                    <React.Suspense fallback={null}>
                         <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP && !rpgDungeonRef.current ? undefined : 'none' }}>
                             <RpgOnline
                                 languageMode={languageMode}

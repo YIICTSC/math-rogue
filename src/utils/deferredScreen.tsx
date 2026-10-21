@@ -2,9 +2,9 @@ import React, { Component, Suspense, useMemo, useState } from 'react';
 import type { LanguageMode } from '../types';
 
 const COPY = {
-  JAPANESE: { loading: '読み込み中です。通信が混み合っている場合は、このままお待ちください。', failed: '画面を読み込めませんでした。通信を確認して、もう一度お試しください。', retry: 'もう一度試す', reload: '再読み込み' },
-  HIRAGANA: { loading: 'よみこみちゅうです。つうしんが こんでいるときは、このまま おまちください。', failed: 'がめんを よみこめませんでした。つうしんを かくにんして、もういちど おためしください。', retry: 'もういちど ためす', reload: 'さいよみこみ' },
-  ENGLISH: { loading: 'Loading. Please wait while the connection is busy.', failed: 'This screen could not load. Check your connection and try again.', retry: 'Try again', reload: 'Reload' },
+  JAPANESE: { failed: '画面を読み込めませんでした。通信を確認して、もう一度お試しください。', retry: 'もう一度試す', reload: '再読み込み' },
+  HIRAGANA: { failed: 'がめんを よみこめませんでした。つうしんを かくにんして、もういちど おためしください。', retry: 'もういちど ためす', reload: 'さいよみこみ' },
+  ENGLISH: { failed: 'This screen could not load. Check your connection and try again.', retry: 'Try again', reload: 'Reload' },
 };
 
 function copyFor(mode?: LanguageMode) {
@@ -12,10 +12,6 @@ function copyFor(mode?: LanguageMode) {
     try { mode = localStorage.getItem('pixel_spire_language_mode_v1') as LanguageMode; } catch { /* Storage may be unavailable. */ }
   }
   return COPY[mode || 'JAPANESE'] || COPY.JAPANESE;
-}
-
-export function ScreenLoading({ languageMode }: { languageMode?: LanguageMode }) {
-  return <div role="status" className="h-full min-h-48 grid place-content-center gap-4 bg-slate-950 p-6 text-center text-slate-100" aria-live="polite">{copyFor(languageMode).loading}</div>;
 }
 
 // Only retry loading failures. Re-running a module that threw an application
@@ -61,12 +57,29 @@ class ScreenBoundary extends Component<{
 
 /** Load a selected screen without suspending or discarding the parent game. */
 export function deferredScreen<P extends object>(load: () => Promise<{ default: React.ComponentType<P> }>, options: { startup?: boolean } = {}): React.FC<P> {
+  // Cache the component outside the mounted wrapper. Even an already-cached
+  // import() returns a promise, so recreating React.lazy on each visit made
+  // every screen change suspend again for at least one render.
+  let loaded: React.ComponentType<P> | undefined;
+  const loadAndCache = async () => {
+    try {
+      const module = await loadScreen(load, options.startup);
+      loaded = module.default;
+      return module;
+    } catch (error) {
+      sharedScreen = React.lazy(loadAndCache);
+      throw error;
+    }
+  };
+  let sharedScreen = React.lazy(loadAndCache);
   return function DeferredScreen(props: P) {
     const [attempt, setAttempt] = useState(0);
-    const Screen = useMemo(() => React.lazy(() => loadScreen(load, options.startup)), [attempt]);
+    const LazyScreen = useMemo(() => attempt === 0 ? sharedScreen : React.lazy(loadAndCache), [attempt]);
+    const Screen = loaded || LazyScreen;
     const languageMode = (props as { languageMode?: LanguageMode }).languageMode;
     return <ScreenBoundary key={attempt} startup={options.startup} languageMode={languageMode} retry={() => setAttempt(value => value + 1)}>
-      <Suspense fallback={options.startup ? null : <ScreenLoading languageMode={languageMode} />}><Screen {...props} /></Suspense>
+      {/* index.html owns the only loading screen, shown once during startup. */}
+      <Suspense fallback={null}><Screen {...props} /></Suspense>
     </ScreenBoundary>;
   };
 }

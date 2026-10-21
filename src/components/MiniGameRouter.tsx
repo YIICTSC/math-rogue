@@ -92,7 +92,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
     }
 
     return (
-        <React.Suspense fallback={<div className="h-full bg-slate-950 text-white grid place-items-center">LOADING…</div>}><Component
+        <React.Suspense fallback={null}><Component
             onBack={onBack}
             onFinish={onFinish}
             problemMode={problemMode}

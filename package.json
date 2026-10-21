@@ -103,6 +103,7 @@
     "test:golf": "node scripts/test-gakuro-golf.mjs",
     "test:survivor": "node scripts/test-schoolyard-survivor.mjs && node scripts/test-schoolyard-survivor-voices.mjs",
     "test:survivor:browser": "node scripts/test-schoolyard-survivor-browser.mjs",
+    "test:loading-policy": "node scripts/test-loading-screen-policy-browser.mjs && node scripts/test-startup-recovery-browser.mjs",
     "test:golf:server": "node scripts/test-golf-server.mjs",
     "test:golf:dedicated": "node scripts/test-golf-dedicated-browser.mjs",
     "test:golf:browser": "node scripts/test-gakuro-golf-browser.mjs",
