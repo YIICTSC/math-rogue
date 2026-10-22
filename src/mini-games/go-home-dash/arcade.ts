@@ -72,17 +72,17 @@ export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:numb
     case 'boostRoad':addEntity(s,'sneakers',d,32);addEntity(s,'boost',d+190,0,80,10);trail(s,d+220,40,14,true);addEntity(s,'charge',d+950,32);break;
   }
 }
-export function beginArcade(s:ArcadeState,distance:number,flight:boolean) {
+export function beginArcade(s:ArcadeState,distance:number,flight:boolean,viewWidth=800) {
   s.frame++;s.clearAhead=false;s.changedVehicle=false;
   for(const key of ['comboTime','fever','magnet','double','sneakers','board','shield','lowGravity','boost','slide','noticeTime'] as const)if(s[key]>0)s[key]--;
   if(s.comboTime===0)s.combo=0;
   if(s.vehicleTime>0&&--s.vehicleTime===0){s.vehicle='normal';s.changedVehicle=true;announce(s,'landing');}
-  s.entities=s.entities.filter(e=>!e.taken&&e.d-distance>-160&&e.d-distance<3000);
-  const chunk=Math.floor((distance+900)/1800);
-  if(chunk>s.chunk){
-    s.chunk=chunk;
-    const index=chunk<16?chunk:hash(s.seed+chunk)%PATTERNS.length;
-    spawnPattern(s,PATTERNS[index],chunk*1800+700,flight||routeAt(s.seed,chunk*1800+1400).flight);
+  s.entities=s.entities.filter(e=>!e.taken&&e.d-distance>-160&&e.d-distance<Math.max(3000,viewWidth+2200));
+  const chunk=Math.floor((distance+Math.max(900,viewWidth+100))/1800);
+  while(chunk>s.chunk){
+    const next=++s.chunk;
+    const index=next<16?next:hash(s.seed+next)%PATTERNS.length;
+    spawnPattern(s,PATTERNS[index],next*1800+700,flight||routeAt(s.seed,next*1800+1400).flight);
   }
   if(s.boss){
     if(--s.boss.life<=0){s.boss=null;announce(s,'bossEscape');}

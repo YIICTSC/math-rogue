@@ -43,3 +43,28 @@
 .dash-run-summary{text-align:center;color:#ffe0a8;font-size:12px;line-height:1.8;margin:-30px 0 16px}.dash-run-summary small{display:block;color:#b7c8d6}
 @media(max-width:700px){.dash-arcade-strip{gap:9px;left:12px;right:12px}.dash-combo small{font-size:8px}.dash-effect-row{top:83px;left:12px;font-size:8px}.dash-arcade-notice{font-size:11px}.dash-mission-line{font-size:8px;gap:8px}.dash-shell .dash-stage{padding-top:105px;padding-bottom:174px}}
 @media(max-height:480px){.dash-arcade-strip{top:8px;left:120px;right:120px;margin:auto;max-width:400px;height:27px;font-size:11px}.dash-effect-row{display:none}.dash-shell .dash-stage{padding:42px 90px 65px}.dash-route{bottom:30px;left:120px}.dash-arcade-notice{bottom:53px;left:120px;font-size:10px;padding:2px 7px}.dash-mission-line{bottom:12px;left:120px;right:120px}.dash-controls .dash-slide{position:absolute;right:0;bottom:64px;min-height:40px;min-width:80px;font-size:11px}.dash-controls .dash-slide small{display:none}.dash-mode-description,.dash-career{display:none}.dash-mode-picker{margin:5px 0}.dash-mode-picker button{padding:3px;font-size:10px}.dash-field-guide{margin:3px 0}.dash-field-guide[open]{max-height:70px;overflow:auto}.dash-run-summary{margin:-4px 0 8px;font-size:10px}.dash-shell [data-gamepad-initial-scope=go-home-game-over]>svg{height:32px;margin:4px}.dash-shell [data-gamepad-initial-scope=go-home-game-over]>h2{font-size:34px}.dash-shell [data-gamepad-initial-scope=go-home-game-over]>div.text-2xl{font-size:14px;margin:0 0 10px;padding:3px 20px}.dash-shell [data-gamepad-initial-scope=go-home-game-over] .w-64{gap:5px}.dash-shell [data-gamepad-initial-scope=go-home-game-over] button{padding:6px;font-size:13px}}
+
+/* Desktop: the course is the flexible middle row, with compact HUD/footer rails. */
+@media(min-width:901px) and (min-aspect-ratio:6/5){
+ .dash-shell{display:flex;flex-direction:column;min-width:0;min-height:0;padding:72px 0 108px!important}
+ .dash-shell .dash-stage{position:relative!important;inset:auto!important;flex:1 1 0;min-height:0;min-width:0;width:100%;padding:0!important;overflow:hidden;align-items:stretch;justify-content:stretch}
+ .dash-shell .dash-stage .dash-overview{flex:1 1 0;min-width:0;min-height:0;width:100%!important;height:100%!important;max-height:none!important;aspect-ratio:auto!important;object-fit:fill!important;box-shadow:none}
+ .dash-shell .dash-stage .dash-focus{display:none!important}
+ .dash-arcade-strip{top:10px;left:220px;right:140px;max-width:600px;margin:auto}
+ .dash-effect-row{top:49px;left:16px;max-width:calc(100% - 32px)}
+ .dash-controls{left:auto;right:16px;bottom:16px;gap:10px;pointer-events:auto}
+ .dash-controls .dash-slide{position:static;min-height:58px;min-width:92px}
+ .dash-controls .dash-slide small{display:block}
+ .dash-route{left:16px;bottom:45px;max-width:calc(100% - 410px)}
+ .dash-route small{display:block}
+ .dash-mission-line{bottom:20px;left:16px;right:400px}
+ .dash-arcade-notice{bottom:82px;left:16px;max-width:calc(100% - 410px);font-size:11px;padding:3px 8px}
+}
+@media(min-width:901px) and (max-height:480px) and (min-aspect-ratio:6/5){
+ .dash-shell{padding-top:44px!important;padding-bottom:76px!important}
+ .dash-effect-row{display:none}
+ .dash-arcade-strip{top:7px;height:27px;max-width:480px}
+ .dash-controls{bottom:10px}.dash-controls button,.dash-controls .dash-slide{min-height:44px;font-size:11px}
+ .dash-route{bottom:25px}.dash-route small{font-size:8px}.dash-mission-line{bottom:8px}
+ .dash-arcade-notice{bottom:55px;font-size:9px}
+}

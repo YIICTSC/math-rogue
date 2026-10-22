@@ -15,6 +15,7 @@ import { drawRoute, drawTerrain, drawRunner } from '../mini-games/go-home-dash/r
 import { stairRects, flightGateRects, isStair, overlapsSolid } from '../mini-games/go-home-dash/obstacles';
 import { ArcadeHud } from '../mini-games/go-home-dash/ArcadeHud';
 import { createArcade, beginArcade, endArcade, activateOrb, arcadePlatform, hitArcade, dashArcade, dailySeed, seededRandom, saveArcadeRun, loadArcadeProfile, trailColor, announce, type RunMode } from '../mini-games/go-home-dash/arcade';
+import { drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
 import { drawArcade, drawArcadeRunner } from '../mini-games/go-home-dash/arcadeRender';
 import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
 import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
@@ -30,7 +31,7 @@ const PLAYER_DEFAULT_X = 120;
 const MAX_PARTICLES = 60; 
 const MIN_OBSTACLE_GAP = 500; 
 const PLAYER_DASH_FRAME_COUNT = 4;
-const GO_HOME_DASH_ENEMY_SPRITE_SRC = assetUrl('sprites/go-home-dash-enemies.webp');
+const GO_HOME_DASH_ENEMY_SPRITE_SRC = assetUrl('sprites/go-home-dash/art/enemies.webp');
 const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = assetUrl('sprites/go-home-dash-projectiles.webp');
 
 type ObstacleType =
@@ -48,20 +49,20 @@ interface SpriteCell {
 }
 
 const ENEMY_SPRITE_CELLS: Partial<Record<ObstacleType, SpriteCell>> = {
-    BACKPACK: { col: 0, row: 0, cell: 64 },
-    VAULTING: { col: 1, row: 0, cell: 64 },
-    CHALKBOARD: { col: 2, row: 0, cell: 64 },
-    BIRD: { col: 3, row: 0, cell: 64 },
-    IRON_BARRIER: { col: 0, row: 1, cell: 64 },
-    JUMPING_SLIME: { col: 1, row: 1, cell: 64 },
-    DRONE: { col: 2, row: 1, cell: 64 },
-    TEACHER_RUNNER: { col: 3, row: 1, cell: 64 },
-    HALL_MONITOR: { col: 0, row: 2, cell: 64 },
-    CURRICULUM_BOOK: { col: 1, row: 2, cell: 64 },
-    LAB_BOTTLE: { col: 2, row: 2, cell: 64 },
-    BASKETBALL_TURRET: { col: 3, row: 2, cell: 64 },
-    CLOCK_GHOST: { col: 0, row: 3, cell: 64 },
-    SHOE_ROLLER: { col: 1, row: 3, cell: 64 },
+    BACKPACK: { col: 0, row: 0, cell: 256 },
+    VAULTING: { col: 1, row: 0, cell: 256 },
+    CHALKBOARD: { col: 2, row: 0, cell: 256 },
+    BIRD: { col: 3, row: 0, cell: 256 },
+    IRON_BARRIER: { col: 0, row: 1, cell: 256 },
+    JUMPING_SLIME: { col: 1, row: 1, cell: 256 },
+    DRONE: { col: 2, row: 1, cell: 256 },
+    TEACHER_RUNNER: { col: 3, row: 1, cell: 256 },
+    HALL_MONITOR: { col: 0, row: 2, cell: 256 },
+    CURRICULUM_BOOK: { col: 1, row: 2, cell: 256 },
+    LAB_BOTTLE: { col: 2, row: 2, cell: 256 },
+    BASKETBALL_TURRET: { col: 3, row: 2, cell: 256 },
+    CLOCK_GHOST: { col: 0, row: 3, cell: 256 },
+    SHOE_ROLLER: { col: 1, row: 3, cell: 256 },
 };
 
 const PROJECTILE_SPRITE_CELLS: Record<ProjectileSpriteKey, SpriteCell> = {
@@ -206,9 +207,13 @@ const GoHomeDash: React.FC<{
     const stopInputs = () => { pointerIds.current.clear(); keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
     const returnToTitle = () => { checkpointRef.current=null;pausedRef.current=false;setPaused(false);stopInputs(); audioService.stopHomeDashVoices(); gameStateRef.current = 'START'; setGameState('START'); };
     const L = (ja: string, en: string, hi: string) => languageMode === 'ENGLISH' ? en : languageMode === 'HIRAGANA' ? hi : ja;
+    const stageRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef({width:800,height:400,scale:1});
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const focusCanvasRef = useRef<HTMLCanvasElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
+    const playerSlideRef = useRef<HTMLImageElement | null>(null);
+    const artImagesRef = useRef<ArtImages>({});
     const enemySpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const projectileSpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const [gameState, setGameState] = useState<DashGameState>('START');
@@ -229,12 +234,15 @@ const GoHomeDash: React.FC<{
         let active = true;
         playerSpriteRef.current = null;
         heroFallbackRef.current = null;
-        const sheet = new Image(), fallback = new Image();
+        playerSlideRef.current=null;
+        const sheet = new Image(), fallback = new Image(), slide = new Image();
         sheet.onload = () => { if (active) playerSpriteRef.current = sheet; };
         fallback.onload = () => { if (active) heroFallbackRef.current = fallback; };
         sheet.src = assetUrl(`sprites/go-home-dash/heroes/${selectedHero}.webp`);
         fallback.src = assetUrl(DASH_HERO_ART[selectedHero]);
-        return () => { active = false; sheet.onload = null; fallback.onload = null; };
+        slide.onload=()=>{if(active)playerSlideRef.current=slide;};
+        slide.src=assetUrl(`sprites/go-home-dash/slides/${selectedHero}.webp`);
+        return () => { active = false; sheet.onload = null; fallback.onload = null; slide.onload=null; };
     }, [selectedHero]);
 
     useEffect(() => {
@@ -584,7 +592,7 @@ const GoHomeDash: React.FC<{
         distanceRef.current += currentSpeed;
         const stage = routeAt(routeSeedRef.current, distanceRef.current + p.x);
         const floor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
-        beginArcade(arcade,distanceRef.current,stage.flight);
+        beginArcade(arcade,distanceRef.current,stage.flight,viewportRef.current.width);
         if(arcade.clearAhead){obstaclesRef.current=obstaclesRef.current.filter(o=>o.x<300);enemyProjectilesRef.current=enemyProjectilesRef.current.filter(o=>o.x<300);}
         const shouldFly = stage.flight || arcade.vehicle !== 'normal';
         if (shouldFly && !p.flying) { p.isFalling = false; p.y = Math.min(p.y, 280); p.vy = -4; p.flapCooldown = 18; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
@@ -754,7 +762,7 @@ const GoHomeDash: React.FC<{
                 }
             }
             pr.x += pr.vx; pr.y += pr.vy;
-            if (pr.x > CANVAS_WIDTH + 50 || pr.y < -50 || pr.y > CANVAS_HEIGHT + 50) projs.splice(i, 1);
+            if (pr.x > viewportRef.current.width + 50 || pr.y < -50 || pr.y > CANVAS_HEIGHT + 50) projs.splice(i, 1);
         }
 
         // 敵の弾更新
@@ -783,7 +791,7 @@ const GoHomeDash: React.FC<{
         }
 
         const lastObs = obstacles.length > 0 ? obstacles[obstacles.length - 1] : null;
-        const spawnX = CANVAS_WIDTH + 150;
+        const spawnX = viewportRef.current.width + 150;
         
         const spawnProb = 0.02 + (levelRef.current * 0.005) + (scoreRef.current * 0.00001);
         const dynamicGap = Math.max(440, currentSpeed * 105, MIN_OBSTACLE_GAP - (levelRef.current * 20));
@@ -1061,7 +1069,10 @@ const GoHomeDash: React.FC<{
     };
 
     const draw = (ctx: CanvasRenderingContext2D) => {
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        const view=viewportRef.current;
+        ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        ctx.setTransform(view.scale,0,0,view.scale,0,0);
+        ctx.fillStyle='#10182f';ctx.fillRect(0,0,view.width,view.height);
         ctx.save();
         if (shakeRef.current > 0 && !reducedMotionRef.current) {
             ctx.translate((Math.random() - 0.5) * shakeRef.current, (Math.random() - 0.5) * shakeRef.current);
@@ -1071,9 +1082,9 @@ const GoHomeDash: React.FC<{
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current);
-        drawTerrain(ctx, routeSeedRef.current, distanceRef.current, holes);
-        drawArcade(ctx,arcadeRef.current,distanceRef.current,reducedMotionRef.current);
+        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current,view.width,view.height);
+        drawTerrain(ctx, routeSeedRef.current, distanceRef.current, holes,view.width,view.height);
+        drawArcade(ctx,arcadeRef.current,distanceRef.current,reducedMotionRef.current,view.width,view.height,artImagesRef.current);
         holes.forEach(hole => { ctx.fillStyle = '#ffcc80'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', hole.x, floorAt(routeSeedRef.current, distanceRef.current + hole.x) + 30); });
 
         const parts = particlesRef.current;
@@ -1110,6 +1121,7 @@ const GoHomeDash: React.FC<{
             if (obs.type === 'HOLE') continue;
             if (obs.type === 'FLIGHT_GATE') {
                 for (const rect of flightGateRects(obs.x, obs.width, obs.y)) {
+                    if(drawArt(ctx,artImagesRef.current,'gate',rect.left,rect.top,rect.width,rect.height,'stretch'))continue;
                     ctx.fillStyle = '#273859'; ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
                     ctx.strokeStyle = '#a7f3ff'; ctx.lineWidth = 3; ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
                     ctx.fillStyle = '#5a8ba0';
@@ -1118,6 +1130,7 @@ const GoHomeDash: React.FC<{
                 continue;
             }
             if (obs.type === 'ELEVATOR' || obs.type === 'SPRING') {
+                if(drawArt(ctx,artImagesRef.current,obs.type==='SPRING'?'spring':'elevator',obs.x-obs.width/2,obs.y-obs.height/2,obs.width,obs.height+8,'stretch'))continue;
                 const color = obs.type === 'SPRING' ? '#c9ff8a' : '#ffc77b';
                 ctx.fillStyle = '#1d3549'; ctx.fillRect(obs.x - obs.width / 2, obs.y - obs.height / 2, obs.width, obs.height);
                 ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.strokeRect(obs.x - obs.width / 2, obs.y - obs.height / 2, obs.width, obs.height);
@@ -1125,6 +1138,7 @@ const GoHomeDash: React.FC<{
                 continue;
             }
             const extraIndex = ['PAPER_WYVERN', 'WATER_SLIME', 'FIRE_FLY', 'WIND_SPIRIT'].indexOf(obs.type);
+            if(extraIndex>=0&&drawArt(ctx,artImagesRef.current,(['paperWyvern','waterSlime','fireFly','windSpirit'] as const)[extraIndex],obs.x-33,obs.y-33,66,66))continue;
             const extraSheet = extraEnemiesRef.current;
             if (extraIndex >= 0 && extraSheet?.complete && extraSheet.naturalWidth > 0) {
                 const w = extraSheet.naturalWidth / 4, h = extraSheet.naturalHeight / 2;
@@ -1134,19 +1148,21 @@ const GoHomeDash: React.FC<{
             if (obs.type === 'STEPS' || obs.type === 'HIGH_STEPS' || obs.type === 'MOUNTAIN_STEPS') {
                 ctx.fillStyle = '#8d6e63'; ctx.strokeStyle = '#2d1b0e'; ctx.lineWidth = 3;
                 for (const rect of stairRects(obs, floorAt(routeSeedRef.current, distanceRef.current + obs.x))) {
+                    if(drawArt(ctx,artImagesRef.current,'step',rect.left,rect.top,rect.width,rect.height,'stretch'))continue;
                     ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
                     ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
                     ctx.fillStyle = '#ffcf92'; ctx.fillRect(rect.left, rect.top, rect.width, 3); ctx.fillStyle = '#8d6e63';
                 }
             } else if (obs.type === 'IRON_BARRIER') {
                 ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff";
-                const drew = drawSpriteCell(ctx, enemySpriteSheetRef.current, ENEMY_SPRITE_CELLS[obs.type], obs.x - obs.width / 2, GROUND_Y - obs.height, obs.width, obs.height);
+                const drew = drawArt(ctx,artImagesRef.current,'IRON_BARRIER',obs.x-obs.width/2,GROUND_Y-obs.height,obs.width,obs.height,'stretch');
                 if (!drew) {
                     ctx.fillStyle = '#e2e8f0';
                     ctx.fillRect(obs.x - obs.width/2, GROUND_Y - obs.height, obs.width, obs.height);
                 }
                 ctx.shadowBlur = 0;
             } else {
+                if(obs.type in ENEMY_SPRITE_CELLS && drawArt(ctx,artImagesRef.current,obs.type as ArtKey,obs.x-obs.width/2,obs.y-obs.height/2,obs.width,obs.height))continue;
                 const drew = drawSpriteCell(
                     ctx,
                     enemySpriteSheetRef.current,
@@ -1191,11 +1207,16 @@ const GoHomeDash: React.FC<{
         }
 
         const pl = playerRef.current;
-        drawArcadeRunner(ctx,arcadeRef.current,pl,trailColor(profileRef.current));
+        drawArcadeRunner(ctx,arcadeRef.current,pl,trailColor(profileRef.current),artImagesRef.current);
         ctx.save();
         if(arcadeRef.current.vehicle==='gravity'&&arcadeRef.current.gravity<0){ctx.translate(0,2*pl.y-64);ctx.scale(1,-1);}
-        if(arcadeRef.current.slide>0&&!pl.flying){ctx.translate(pl.x,pl.y);ctx.scale(1.18,.42);ctx.translate(-pl.x,-pl.y);}
-        if (pl.invulFrame % 4 < 2 || arcadeRef.current.fever>0 || pl.dashFrames>0) drawRunner(ctx, playerSpriteRef.current, heroFallbackRef.current, {...pl,flying:pl.flying&&arcadeRef.current.vehicle==='normal'}, frameCount.current);
+        const sliding=arcadeRef.current.slide>0&&!pl.flying&&!pl.isJumping&&!pl.isFalling;
+        if (pl.invulFrame % 4 < 2 || arcadeRef.current.fever>0 || pl.dashFrames>0) {
+            if(!sliding||!drawSlide(ctx,playerSlideRef.current,pl,frameCount.current)){
+                if(sliding){ctx.translate(pl.x,pl.y);ctx.scale(1.18,.42);ctx.translate(-pl.x,-pl.y);}
+                drawRunner(ctx, playerSpriteRef.current, heroFallbackRef.current, {...pl,flying:pl.flying&&arcadeRef.current.vehicle==='normal'}, frameCount.current,artImagesRef.current);
+            }
+        }
         ctx.restore();
         ctx.restore();
         if (focusCanvasRef.current && window.innerWidth <= 700 && window.innerHeight >= 700) {
@@ -1234,6 +1255,31 @@ const GoHomeDash: React.FC<{
         return () => { if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current); };
     }, []);
 
+    useEffect(() => {
+        const stage=stageRef.current,canvas=canvasRef.current;if(!stage||!canvas)return;
+        const resize=()=>{
+            const desktop=window.matchMedia('(min-width:901px) and (min-aspect-ratio:6/5)').matches;
+            if(desktop){
+                const {width,height}=stage.getBoundingClientRect();if(width<1||height<1)return;
+                const ratio=Math.min(2,window.devicePixelRatio||1),scale=Math.min(width/800,height/400);
+                const pw=Math.round(width*ratio),ph=Math.round(height*ratio);
+                if(canvas.width!==pw)canvas.width=pw;if(canvas.height!==ph)canvas.height=ph;
+                viewportRef.current={width:width/scale,height:height/scale,scale:scale*ratio};
+            }else{
+                if(canvas.width!==800)canvas.width=800;if(canvas.height!==400)canvas.height=400;
+                viewportRef.current={width:800,height:400,scale:1};
+            }
+        };
+        const observer=new ResizeObserver(resize);observer.observe(stage);window.addEventListener('resize',resize);resize();
+        return()=>{observer.disconnect();window.removeEventListener('resize',resize);};
+    },[]);
+
+    useEffect(()=>{
+        let active=true;
+        for(const id of ['items','hazards','enemies'] as const){const image=new Image();image.onload=()=>{if(active)artImagesRef.current[id]=image;};image.src=assetUrl(`sprites/go-home-dash/art/${id}.webp`);}
+        return()=>{active=false;};
+    },[]);
+
     const getSubjectIcon = (type: DashCardEffect['iconType']) => {
         switch(type) {
             case 'MATH': return <Brain className="text-emerald-400" />;
@@ -1260,7 +1306,7 @@ const GoHomeDash: React.FC<{
                 <div className="go-home-distance"><div className="text-3xl font-black italic">{travelled.toLocaleString()}</div><small>DISTANCE</small></div>
             </div>
             {gameState==='PLAYING'&&<ArcadeHud state={arcadeView} languageMode={languageMode} paused={paused} onPause={togglePause}/>}
-            <div className="dash-stage touch-none" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onLostPointerCapture={handlePointerUp}>
+            <div className="dash-stage touch-none" ref={stageRef} onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onLostPointerCapture={handlePointerUp}>
                 <canvas className="dash-overview" ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} aria-label={L('帰宅ダッシュのコース', 'Home Dash course', 'きたくダッシュのコース')} />
                 <canvas className="dash-focus" ref={focusCanvasRef} width={400} height={400} aria-hidden="true" />
             </div>

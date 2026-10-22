@@ -8,7 +8,7 @@ try{
  server=await createServer({logLevel:'error',server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{
   name:'home-dash-qa',enforce:'pre',
   transform(code,id){if(!id.endsWith('/src/components/GoHomeDash.tsx'))return;return code.replace('    const getSubjectIcon =',`    Object.assign(window, {__dash: {
-      get arcade(){return arcadeRef.current;}, pause:togglePause, slide:triggerSlide, init:initGame, setMode:selectRunMode, get paused(){return pausedRef.current;}, get routeArt(){return routeArtRef.current;}, get player(){return {...playerRef.current};}, get state(){return gameStateRef.current;}, get hero(){return heroRef.current;}, get seed(){return routeSeedRef.current;}, get distance(){return distanceRef.current;}, get hp(){return hpRef.current;}, get obstacles(){return obstaclesRef.current;}, get frame(){return frameCount.current;}, get enemyShots(){return enemyProjectilesRef.current;},
+      get viewport(){return viewportRef.current;}, get slideImage(){return playerSlideRef.current?.src;}, get art(){return artImagesRef.current;}, get arcade(){return arcadeRef.current;}, pause:togglePause, slide:triggerSlide, init:initGame, setMode:selectRunMode, get paused(){return pausedRef.current;}, get routeArt(){return routeArtRef.current;}, get player(){return {...playerRef.current};}, get state(){return gameStateRef.current;}, get hero(){return heroRef.current;}, get seed(){return routeSeedRef.current;}, get distance(){return distanceRef.current;}, get hp(){return hpRef.current;}, get obstacles(){return obstaclesRef.current;}, get frame(){return frameCount.current;}, get enemyShots(){return enemyProjectilesRef.current;},
       step(n=1){flushSync(()=>{for(let i=0;i<n;i++)updateLogic();});const c=canvasRef.current?.getContext('2d');if(c)draw(c);},
       arrange(seed,distance,overrides={},obs=[]){flushSync(()=>{pausedRef.current=false;setPaused(false);arcadeRef.current=createArcade(seed,runModeRef.current,distance);arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=distance;expRef.current=0;obstaclesRef.current=obs;enemyProjectilesRef.current=[];projectilesRef.current=[];playerRef.current={...playerRef.current,x:120,y:floorAt(seed,distance+120),vy:0,isJumping:false,isFalling:false,jumpCount:0,flying:false,invulFrame:0,dashFrames:0,dashCooldown:0,...overrides};setRoute(routeAt(seed,distance+120).id);setFlight(false);setDashReady(true);gameStateRef.current='PLAYING';setGameState('PLAYING');});},
       sweep(n){const seen=new Set();let max=0;flushSync(()=>{for(let i=0;i<n;i++){updateLogic();for(const e of arcadeRef.current.entities)seen.add(e.kind);max=Math.max(max,arcadeRef.current.entities.length);}});return {seen:[...seen],max,state:gameStateRef.current};},
@@ -248,6 +248,33 @@ try{
  assert.equal(await page.evaluate(async()=> (await import('/src/services/storageService.ts')).storageService.getGoHomeScores().length),rankingBeforePractice);
  await page.getByRole('button',{name:'TRY AGAIN'}).click();assert.equal(await page.evaluate(()=>__dash.distance),30000);assert.equal(await page.evaluate(()=>__dash.seed),42);
  await page.setViewportSize({width:844,height:390});await page.screenshot({path:`${output}/arcade-landscape.png`});
+ // Desktop flex sizing must fill the available stage without distorting the world.
+ await page.evaluate(()=>{__dash.init();__dash.arrange(42,0);});
+ for(const viewport of [{width:1280,height:720},{width:1920,height:1080},{width:1440,height:900},{width:2560,height:1080},{width:1024,height:460}]){
+  await page.setViewportSize(viewport);await page.clock.runFor(80);
+  const layout=await page.evaluate(()=>{const stage=document.querySelector('.dash-stage').getBoundingClientRect(),c=document.querySelector('.dash-overview'),r=c.getBoundingClientRect();return {stage:{width:stage.width,height:stage.height},canvas:{width:r.width,height:r.height},backing:{width:c.width,height:c.height},view:__dash.viewport,overflow:document.documentElement.scrollWidth>innerWidth};});
+  assert.ok(Math.abs(layout.canvas.width-viewport.width)<2,JSON.stringify(layout));
+  assert.ok(Math.abs(layout.canvas.height-layout.stage.height)<2,JSON.stringify(layout));
+  assert.ok(layout.canvas.height>=viewport.height-182,JSON.stringify(layout));
+  assert.ok(Math.abs(layout.backing.width/layout.view.width-layout.backing.height/layout.view.height)<.01);
+  assert.equal(layout.overflow,false);await page.evaluate(()=>__dash.step());
+  await page.screenshot({path:`${output}/flex-${viewport.width}x${viewport.height}.png`});
+ }
+ // Every protagonist must load and actually render their own two-frame slide.
+ await page.setViewportSize({width:1280,height:720});await page.clock.runFor(80);
+ const heroIds=await page.evaluate(async()=>Object.keys((await import('/src/mini-games/go-home-dash/heroes.ts')).DASH_HERO_ART));
+ for(const id of heroIds){
+  await page.evaluate(id=>__dash.setHero(id),id);await page.clock.runFor(1);
+  await page.waitForFunction(id=>__dash.slideImage?.endsWith('/'+id+'.webp'),id);
+  await page.evaluate(async id=>{const image=new Image();image.src='/sprites/go-home-dash/slides/'+id+'.webp';await image.decode();if(image.naturalWidth!==320||image.naturalHeight!==80)throw Error('Invalid slide '+id);},id);
+  const drawn=await page.evaluate(()=>{__dash.arrange(42,0);__dash.arcade.slide=20;const original=CanvasRenderingContext2D.prototype.drawImage,seen=[];CanvasRenderingContext2D.prototype.drawImage=function(...args){if(args[0] instanceof HTMLImageElement&&args[0].src.includes('/slides/'))seen.push(args[0].src);return original.apply(this,args);};try{__dash.step();}finally{CanvasRenderingContext2D.prototype.drawImage=original;}return seen;});
+  assert.ok(drawn.some(src=>src.endsWith('/'+id+'.webp')),'Missing slide drawing '+id);
+ }
+ await page.screenshot({path:`${output}/slide-generated.png`});
+ await page.setViewportSize({width:390,height:844});await page.clock.runFor(80);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await page.screenshot({path:`${output}/art-mobile.png`});
+ console.log('Visual QA: 5 desktop sizes, mobile overflow, and all 26 protagonist slide render paths passed.');
  console.log('Arcade: collection, timers, combo/Fever, orbs, slide/dive, hazards, vehicles, rail, boss, missions, input, pause, daily seed and practice persistence passed.',arcadeRules);
  await page.goto(base+'?unlocked&lang=ENGLISH&compact');await page.locator('.dash-lobby').waitFor();
  assert.ok(!(await page.locator('.dash-lobby').innerText()).match(/[\u3040-\u30ff\u4e00-\u9fff]/));

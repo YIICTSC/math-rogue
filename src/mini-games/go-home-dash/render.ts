@@ -1,16 +1,17 @@
+import { drawArt, type ArtImages } from './art';
 import { floorAt, routeAt, ROUTE_COLORS, routeTransition, type RouteId } from './routes';
 
-function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, id: RouteId, art?: HTMLImageElement) {
+function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, id: RouteId, art: HTMLImageElement | undefined, width: number, height: number) {
   const route = {...routeAt(seed, distance + 120), id}, colors = ROUTE_COLORS[id];
   if (!art?.complete || art.naturalWidth <= 0) {
     const sky = ctx.createLinearGradient(0, 0, 0, 400);
     sky.addColorStop(0, colors.sky); sky.addColorStop(.7, colors.glow); sky.addColorStop(1, colors.ground);
-    ctx.fillStyle = sky; ctx.fillRect(0, 0, 800, 400);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#fff1cbb3'; ctx.beginPath(); ctx.arc(610 - distance * .005 % 180, 102, 38, 0, Math.PI * 2); ctx.fill();
     for (let layer = 0; layer < 3; layer++) {
       const spacing = 170 - layer * 35, offset = distance * (.06 + layer * .1) % spacing;
       ctx.fillStyle = ['#14203b66', '#17253d99', '#132137cc'][layer];
-      for (let x = -spacing; x < 900; x += spacing) {
+      for (let x = -spacing; x < width + 100; x += spacing) {
         const bx = x - offset, height = 55 + Math.sin((x + spacing) * 7.3 + layer) * 30 + layer * 12, base = 305 + layer * 10;
         if (route.id === 'garden') {
           ctx.fillRect(bx + 20, base - height + 20, 10, height);
@@ -35,10 +36,12 @@ function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: n
   }
   if (art?.complete && art.naturalWidth > 0) {
     const pan = (1 - Math.cos(distance * .00018)) * 25;
-    ctx.drawImage(art, -pan, 0, 850, 400);
+    const targetWidth=width+50,sourceHeight=Math.min(art.naturalHeight,art.naturalWidth*height/targetWidth);
+    const sourceWidth=Math.min(art.naturalWidth,art.naturalHeight*targetWidth/height);
+    ctx.drawImage(art,0,art.naturalHeight-sourceHeight,sourceWidth,sourceHeight,-pan,0,targetWidth,height);
     const shade = ctx.createLinearGradient(0, 0, 0, 400);
     shade.addColorStop(0, '#10182f22'); shade.addColorStop(.6, '#10182f00'); shade.addColorStop(1, '#10182f88');
-    ctx.fillStyle = shade; ctx.fillRect(0, 0, 800, 400);
+    ctx.fillStyle = shade; ctx.fillRect(0, 0, width, height);
   }
   // Clouds and small drifting highlights provide depth without new textures.
   ctx.fillStyle = '#fff1dd25';
@@ -48,22 +51,22 @@ function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: n
 }
 
 
-export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, art: Partial<Record<RouteId, HTMLImageElement>>) {
+export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, art: Partial<Record<RouteId, HTMLImageElement>>, width=800, height=400) {
   const transition = routeTransition(seed, distance + 120);
   ctx.save();
-  if (transition.mix < 1) drawRouteLayer(ctx, seed, distance, frame, transition.from, art[transition.from]);
+  if (transition.mix < 1) drawRouteLayer(ctx, seed, distance, frame, transition.from, art[transition.from],width,height);
   ctx.globalAlpha = transition.mix;
-  drawRouteLayer(ctx, seed, distance, frame, transition.to, art[transition.to]);
+  drawRouteLayer(ctx, seed, distance, frame, transition.to, art[transition.to],width,height);
   ctx.restore();
 }
 
-export function drawTerrain(ctx: CanvasRenderingContext2D, seed: number, distance: number, holes: {x: number; width: number}[]) {
+export function drawTerrain(ctx: CanvasRenderingContext2D, seed: number, distance: number, holes: {x: number; width: number}[], width=800, height=400) {
   const colors = ROUTE_COLORS[routeAt(seed, distance + 120).id];
-  for (let x = 0; x < 800; x += 4) {
+  for (let x = 0; x < width; x += 4) {
     if (holes.some(h => Math.abs(x - h.x) < h.width / 2)) continue;
     const y = floorAt(seed, distance + x);
-    ctx.fillStyle = colors.ground; ctx.fillRect(x, y, 4, 400 - y);
-    ctx.fillStyle = '#10182f77'; ctx.fillRect(x, y + 12, 4, 388 - y);
+    ctx.fillStyle = colors.ground; ctx.fillRect(x, y, 4, height - y);
+    ctx.fillStyle = '#10182f77'; ctx.fillRect(x, y + 12, 4, height - 12 - y);
     ctx.fillStyle = colors.glow; ctx.fillRect(x, y, 4, 3);
     if (Math.floor((distance + x) / 56) % 2 === 0) {
       ctx.fillStyle = '#ffffff10'; ctx.fillRect(x, y + 22, 4, 5);
@@ -73,7 +76,7 @@ export function drawTerrain(ctx: CanvasRenderingContext2D, seed: number, distanc
   }
 }
 
-export function drawRunner(ctx: CanvasRenderingContext2D, sheet: HTMLImageElement | null, fallback: HTMLImageElement | null, p: {x:number;y:number;vy:number;isJumping:boolean;isFalling:boolean;animFrame:number;barrier:boolean;dashFrames:number;flying:boolean}, frame: number) {
+export function drawRunner(ctx: CanvasRenderingContext2D, sheet: HTMLImageElement | null, fallback: HTMLImageElement | null, p: {x:number;y:number;vy:number;isJumping:boolean;isFalling:boolean;animFrame:number;barrier:boolean;dashFrames:number;flying:boolean}, frame: number, art?: ArtImages) {
   ctx.save(); ctx.translate(p.x, p.y);
   if (p.dashFrames > 0) {
     const tail = ctx.createLinearGradient(-95, 0, 0, 0); tail.addColorStop(0, '#83f3eb00'); tail.addColorStop(1, '#83f3ebaa');
@@ -82,8 +85,10 @@ export function drawRunner(ctx: CanvasRenderingContext2D, sheet: HTMLImageElemen
   if (p.flying) {
     ctx.strokeStyle = '#effeff'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(-37, -77); ctx.lineTo(-8, -33); ctx.lineTo(38, -77); ctx.stroke();
+    if(!drawArt(ctx,art,'glider',-64,-102,128,34,'stretch')){
     ctx.fillStyle = '#79e8ebdd'; ctx.beginPath(); ctx.moveTo(-64, -73); ctx.lineTo(0, -98); ctx.lineTo(64, -73); ctx.lineTo(0, -78); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#fef0ad'; ctx.stroke();
+    }
     if (frame % 4 === 0) { ctx.fillStyle = '#fff5be'; ctx.fillRect(-64, -73, 3, 3); }
   }
   const airborne = p.isJumping || p.isFalling || p.flying;
