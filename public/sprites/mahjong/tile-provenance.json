@@ -1,0 +1,310 @@
+{
+  "m1": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 61,
+    "top": 38,
+    "width": 132,
+    "height": 169
+  },
+  "m2": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 265,
+    "top": 38,
+    "width": 132,
+    "height": 169
+  },
+  "m3": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 471,
+    "top": 38,
+    "width": 132,
+    "height": 169
+  },
+  "m4": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 675,
+    "top": 38,
+    "width": 133,
+    "height": 169
+  },
+  "m5": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 880,
+    "top": 38,
+    "width": 133,
+    "height": 169
+  },
+  "m6": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 1085,
+    "top": 38,
+    "width": 134,
+    "height": 169
+  },
+  "m7": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 60,
+    "top": 231,
+    "width": 133,
+    "height": 173
+  },
+  "m8": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 266,
+    "top": 231,
+    "width": 132,
+    "height": 173
+  },
+  "m9": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 471,
+    "top": 231,
+    "width": 132,
+    "height": 173
+  },
+  "z1": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 675,
+    "top": 819,
+    "width": 133,
+    "height": 174
+  },
+  "z2": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 880,
+    "top": 819,
+    "width": 133,
+    "height": 174
+  },
+  "z3": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 1085,
+    "top": 819,
+    "width": 133,
+    "height": 174
+  },
+  "z4": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 61,
+    "top": 1016,
+    "width": 132,
+    "height": 172
+  },
+  "z5": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 265,
+    "top": 1016,
+    "width": 133,
+    "height": 172
+  },
+  "z6": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 471,
+    "top": 1016,
+    "width": 132,
+    "height": 172
+  },
+  "z7": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 675,
+    "top": 1016,
+    "width": 133,
+    "height": 172
+  },
+  "star": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 880,
+    "top": 1016,
+    "width": 133,
+    "height": 172
+  },
+  "back": {
+    "source": "docs/assets/mahjong/tiles-original-review.png",
+    "left": 1086,
+    "top": 1016,
+    "width": 132,
+    "height": 172
+  },
+  "p1": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 148,
+    "top": 93,
+    "width": 261,
+    "height": 324
+  },
+  "p2": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 513,
+    "top": 93,
+    "width": 251,
+    "height": 324
+  },
+  "p3": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 870,
+    "top": 93,
+    "width": 260,
+    "height": 324
+  },
+  "p4": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 148,
+    "top": 455,
+    "width": 261,
+    "height": 323
+  },
+  "p5": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 512,
+    "top": 455,
+    "width": 253,
+    "height": 323
+  },
+  "p6": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 869,
+    "top": 455,
+    "width": 261,
+    "height": 323
+  },
+  "p7": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 148,
+    "top": 817,
+    "width": 261,
+    "height": 325
+  },
+  "p8": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 512,
+    "top": 817,
+    "width": 253,
+    "height": 325
+  },
+  "p9": {
+    "source": "public/sprites/mahjong/tiles-dots-corrected-v2.png",
+    "left": 869,
+    "top": 817,
+    "width": 261,
+    "height": 325
+  },
+  "s1": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 158,
+    "top": 75,
+    "width": 240,
+    "height": 314
+  },
+  "s2": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 519,
+    "top": 75,
+    "width": 240,
+    "height": 314
+  },
+  "s3": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 879,
+    "top": 75,
+    "width": 240,
+    "height": 314
+  },
+  "s4": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 159,
+    "top": 449,
+    "width": 239,
+    "height": 314
+  },
+  "s5": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 519,
+    "top": 449,
+    "width": 240,
+    "height": 314
+  },
+  "s6": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 879,
+    "top": 449,
+    "width": 239,
+    "height": 314
+  },
+  "s7": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 159,
+    "top": 819,
+    "width": 239,
+    "height": 327
+  },
+  "s8": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 519,
+    "top": 819,
+    "width": 240,
+    "height": 327
+  },
+  "s9": {
+    "source": "public/sprites/mahjong/tiles-bamboo-corrected-v2.png",
+    "left": 879,
+    "top": 819,
+    "width": 239,
+    "height": 327
+  },
+  "f1": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 76,
+    "top": 74,
+    "width": 290,
+    "height": 411
+  },
+  "f2": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 441,
+    "top": 74,
+    "width": 290,
+    "height": 411
+  },
+  "f3": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 806,
+    "top": 74,
+    "width": 290,
+    "height": 411
+  },
+  "f4": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 1170,
+    "top": 74,
+    "width": 290,
+    "height": 411
+  },
+  "f5": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 78,
+    "top": 534,
+    "width": 288,
+    "height": 411
+  },
+  "f6": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 440,
+    "top": 534,
+    "width": 290,
+    "height": 411
+  },
+  "f7": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 806,
+    "top": 534,
+    "width": 289,
+    "height": 411
+  },
+  "f8": {
+    "source": "public/sprites/mahjong/tiles-flowers-v1.png",
+    "left": 1171,
+    "top": 534,
+    "width": 289,
+    "height": 411
+  }
+}

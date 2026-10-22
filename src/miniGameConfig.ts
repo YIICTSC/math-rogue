@@ -195,7 +195,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     id: 'MAHJONG',
     name: 'まなび麻雀',
     titleLines: ['まなび', '麻雀'],
-    description: '牌を入れ替えて、同じ牌の組をそろえよう。',
+    description: '四人打ち麻雀を学び、牌と遺物でローグライクの旅へ。',
     screen: GameScreen.MINI_GAME_MAHJONG,
     threshold: 0,
     mainClearRequired: 4,

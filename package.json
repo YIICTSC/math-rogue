@@ -8,6 +8,8 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:mahjong": "node scripts/test-mahjong.mjs",
+    "test:mahjong:browser": "node scripts/test-mahjong-browser.mjs",
     "test:home-dash:browser": "node scripts/test-home-dash-browser.mjs",
     "verify:home-dash:assets": "node scripts/verify-home-dash-assets.mjs",
     "test:poker:browser": "node scripts/test-poker-club-browser.mjs",
