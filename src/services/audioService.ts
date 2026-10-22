@@ -1,3 +1,4 @@
+import { kochoEnemyVoice, type KochoEnemyVoiceAction } from '../mini-games/kocho/enemyVoices';
 import { kochoVoiceDuration } from '../mini-games/kocho/voices';
 import type { KochoHeroId } from '../mini-games/kocho/guests';
 import {HOBBY_SOUNDS,RHYTHM_PAD_SOUNDS,type HobbySound} from '../mini-games/gakuro-craft/gameAudio';
@@ -2304,10 +2305,29 @@ class AudioService {
   private kochoVoicePriority = -1;
   private kochoVoiceSequence = 0;
   private cancelKochoVoiceWait: (() => void) | null = null;
+  private pendingKochoReaction: {name: string; action: KochoEnemyVoiceAction; priority: number} | null = null;
+  private kochoReactionTimer: number | null = null;
 
   /** One dry voice at a time; technique calls outrank incidental movement/damage. */
-  public async playKochoVoice(hero: KochoHeroId, clip: string, priority = 1): Promise<boolean> {
-      const duration = kochoVoiceDuration(hero, clip);
+  public playKochoVoice(hero: KochoHeroId, clip: string, priority = 1): Promise<boolean> {
+      this.clearKochoReaction();
+      return this.playKochoVoiceClip(hero, clip, kochoVoiceDuration(hero, clip), priority, 'kocho-voices');
+  }
+
+  public playKochoEnemyVoice(name: string, action: KochoEnemyVoiceAction, priority = 2.5): Promise<boolean> {
+      const voice = kochoEnemyVoice(name, action);
+      if (!voice || !this.canPlayConversationVoice()) return Promise.resolve(false);
+      if (priority >= 1) this.clearKochoReaction();
+      // Keep only the strongest recent reaction while a hero technique is speaking.
+      // A new action, mute or exit clears it; never delay the tactical simulation.
+      if (priority < 1 && this.kochoVoicePriority === 3) {
+          if (!this.pendingKochoReaction || priority >= this.pendingKochoReaction.priority) this.pendingKochoReaction = {name, action, priority};
+          return Promise.resolve(false);
+      }
+      return this.playKochoVoiceClip(voice.id, action, voice.duration, priority, 'kocho-enemy-voices');
+  }
+
+  private async playKochoVoiceClip(hero: string, clip: string, duration: number, priority: number, directory: string): Promise<boolean> {
       if (!duration || !this.canPlayConversationVoice() || (priority < this.kochoVoicePriority || (priority === 1 && this.kochoVoicePriority === 1))) return false;
       this.init();
       if (!this.ctx || !this.sfxGain) return false;
@@ -2324,7 +2344,7 @@ class AudioService {
       }, duration + 5000);
       try {
           return await Promise.race([
-              this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/kocho-voices/${hero}/${clip}.ogg`))], duration + 250, false, generation, true),
+              this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/${directory}/${hero}/${clip}.ogg`))], duration + 250, false, generation, true),
               cancelled,
           ]);
       } finally {
@@ -2332,11 +2352,24 @@ class AudioService {
           if (sequence === this.kochoVoiceSequence) {
               this.kochoVoicePriority = -1;
               this.cancelKochoVoiceWait = null;
+              const reaction = this.pendingKochoReaction;
+              this.pendingKochoReaction = null;
+              if (reaction) this.kochoReactionTimer = window.setTimeout(() => {
+                  this.kochoReactionTimer = null;
+                  if (sequence === this.kochoVoiceSequence && this.kochoVoicePriority < 0) void this.playKochoEnemyVoice(reaction.name, reaction.action, reaction.priority);
+              }, 500);
           }
       }
   }
 
+  private clearKochoReaction() {
+      if (this.kochoReactionTimer !== null) window.clearTimeout(this.kochoReactionTimer);
+      this.kochoReactionTimer = null;
+      this.pendingKochoReaction = null;
+  }
+
   public stopKochoVoices() {
+      this.clearKochoReaction();
       this.kochoVoiceSequence++;
       this.kochoVoicePriority = -1;
       this.cancelKochoVoiceWait?.();

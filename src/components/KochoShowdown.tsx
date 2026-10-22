@@ -1,3 +1,4 @@
+import { selectKochoEnemyVoice, type KochoVoiceEnemy } from '../mini-games/kocho/enemyVoiceEvents';
 
 import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
@@ -814,6 +815,21 @@ const KochoShowdown: React.FC<{
         }
         if (gameState.player.hp < previous.hp && gameState.player.hp > 0 && gameState.phase === 'BATTLE') playActionVoice('damage');
     }, [gameState.player.hp, gameState.status, gameState.heroId, gameState.phase, debugPreview, isUiPreview]);
+    const enemyVoiceStateRef = useRef<{enemies: KochoVoiceEnemy[]; turns: number; phase: string}>({
+        enemies: gameState.enemies.map(e => ({...e, intent: e.intent ? {...e.intent} : undefined})),
+        turns: gameState.totalTurns, phase: gameState.phase,
+    });
+    useEffect(() => {
+        const before = enemyVoiceStateRef.current;
+        enemyVoiceStateRef.current = {
+            enemies: gameState.enemies.map(e => ({...e, intent: e.intent ? {...e.intent} : undefined})),
+            turns: gameState.totalTurns, phase: gameState.phase,
+        };
+        if (debugPreview || isUiPreview || document.hidden || !voiceMountedRef.current || gameState.phase !== 'BATTLE'
+            || gameState.status === 'GAME_OVER' || gameState.status === 'VICTORY' || gameState.status === 'WAVE_CLEAR') return;
+        const event = selectKochoEnemyVoice(before.phase === 'BATTLE' ? before.enemies : [], gameState.enemies, gameState.totalTurns !== before.turns);
+        if (event) void audioService.playKochoEnemyVoice(event.name, event.action, event.priority);
+    }, [gameState, debugPreview, isUiPreview]);
     const pendingHandFocusIndexRef = useRef<number | null>(null);
     const discoveredKochoCardsRef = useRef(new Set<string>());
     const markKochoCardDiscovered = (cardName?: string) => {

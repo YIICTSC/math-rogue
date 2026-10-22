@@ -1,0 +1,500 @@
+{
+  "samples": {
+    "enemy-00/attack": {
+      "expected": "くらえ！番長パンチ！",
+      "reading": "くらえ！番長パンチ！",
+      "sha256": "6ee38f9d25b14b7cf34be29127ab93e255e02938b2f9da2cb025b48be69e4e78",
+      "recognized": "くらえ、番長をパンチ。",
+      "seconds": 2.92,
+      "accepted_readings": [
+        "くらえ！番長パンチ！"
+      ],
+      "reading_similarity": 0.957
+    },
+    "enemy-00/damage": {
+      "expected": "ぐっ、やるじゃねえか！",
+      "reading": "ぐっ、やるじゃねえか！",
+      "sha256": "326a24aa7121cacf40116c4b57437965d88aa68d36005beaf8bfb63600d9c94a",
+      "recognized": "くっ、やるじゃねえか。",
+      "seconds": 2.56,
+      "accepted_readings": [
+        "ぐっ、やるじゃねえか！"
+      ],
+      "reading_similarity": 0.889
+    },
+    "enemy-01/attack": {
+      "expected": "燃えろ！熱血拳！",
+      "reading": "燃えろ！熱血拳！",
+      "sha256": "98d12ac2796b1027603177738d60a979aef3c969f9dce22a4471b74dd4eae102",
+      "recognized": "燃えろ、熱血剣。",
+      "seconds": 2.6,
+      "accepted_readings": [
+        "燃えろ！熱血拳！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-02/spawn": {
+      "expected": "廊下は走るなよ！",
+      "reading": "廊下は走るなよ！",
+      "sha256": "feda57d2a7284a1d65bfa572df54cbd6571f351723aba8939f648b2c931a76e5",
+      "recognized": "廊下は走るなよ。",
+      "seconds": 2.6,
+      "accepted_readings": [
+        "廊下は走るなよ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-04/attack": {
+      "expected": "受けてみなさい！指導の一撃！",
+      "reading": "受けてみなさい！指導の一撃！",
+      "sha256": "9990d2da4677bcef343ded176427110e32a10e0687ec87a6407527fb836e437b",
+      "recognized": "受けてみなさい。指導の一撃。",
+      "seconds": 2.92,
+      "accepted_readings": [
+        "受けてみなさい！指導の一撃！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-04/damage": {
+      "expected": "なんて態度だ！まだ指導は終わらん！",
+      "reading": "なんて態度だ！まだ指導は終わらん！",
+      "sha256": "568bb461aac660f6d2c4ec2640e5f0fc2cd34c1190b9da080ea03178f5dab71a",
+      "recognized": "なんて態度だ。まだ指導は終わらん。",
+      "seconds": 3.16,
+      "accepted_readings": [
+        "なんて態度だ！まだ指導は終わらん！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-06/damage": {
+      "expected": "鍛え方が違うぞ！",
+      "reading": "鍛え方が違うぞ！",
+      "sha256": "a0e9cbe24bafda00e32acc5a97006b94d4ded965ea04258581c4d5862e604dcc",
+      "recognized": "鍛え方が違うぞ",
+      "seconds": 2.6,
+      "accepted_readings": [
+        "鍛え方が違うぞ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-06/skill": {
+      "expected": "全員整列！鉄壁の号令！",
+      "reading": "全員整列！鉄壁の号令！",
+      "sha256": "dd411f5920ea3b2c80ea1e742b5b727efd9f2d7b2bf5152a6f9fa0c0bb9ab5a6",
+      "recognized": "全員整列鉄壁の亡霊",
+      "seconds": 2.72,
+      "accepted_readings": [
+        "全員整列！鉄壁の号令！"
+      ],
+      "reading_similarity": 0.941
+    },
+    "enemy-07/defeat": {
+      "expected": "お見事！素敵な演奏だったわ。",
+      "reading": "お見事！素敵な演奏だったわ。",
+      "sha256": "dfef16dec8c600d3b78723ec9d17128903bc5e7df77925c88e723e2b28de1261",
+      "recognized": "ふん、お見事。素敵な演奏だったわ。ブブー。",
+      "seconds": 4.96,
+      "accepted_readings": [
+        "お見事！素敵な演奏だったわ。"
+      ],
+      "reading_similarity": 0.865
+    },
+    "enemy-07/skill": {
+      "expected": "おやすみなさい。眠りの旋律！",
+      "reading": "おやすみなさい。眠りの旋律！",
+      "sha256": "898657c374b4e3803c8f126764b281e1e47ede30de89cdad21eb7677949cd904",
+      "recognized": "おやすみなさい眠りのせにして",
+      "seconds": 4.28,
+      "accepted_readings": [
+        "おやすみなさい。眠りの旋律！"
+      ],
+      "reading_similarity": 0.8
+    },
+    "enemy-08/attack": {
+      "expected": "くらえ！規律の鉄拳！",
+      "reading": "くらえ！規律の鉄拳！",
+      "sha256": "ae8744e05c342c5308f016b5da07622cbc197ffdbef13d5b3da425a43ff2c4cc",
+      "recognized": "くらえ!規律の鉄拳!",
+      "seconds": 3.24,
+      "accepted_readings": [
+        "くらえ！規律の鉄拳！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-10/damage": {
+      "expected": "生意気な生徒め！",
+      "reading": "生意気な生徒め！",
+      "sha256": "1f961c4e409cd76e547364eec4a9fe540084ae802d7a723495bc47bf20c5f466",
+      "recognized": "生意気な生徒ね、こ",
+      "seconds": 3.28,
+      "accepted_readings": [
+        "生意気な生徒め！"
+      ],
+      "reading_similarity": 0.842
+    },
+    "enemy-12/attack": {
+      "expected": "禁書の一撃！",
+      "reading": "禁書の一撃！",
+      "sha256": "4cd90ea35c58fa03539652d3c7365f67c46cc4209fba3a355136b3209e10c087",
+      "recognized": "禁書の一撃",
+      "seconds": 1.8,
+      "accepted_readings": [
+        "禁書の一撃！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-13/defeat": {
+      "expected": "私の負けね。お大事に。",
+      "reading": "私の負けね。お大事に。",
+      "sha256": "414ed6b0c3995e4fa4a4932481b63524993fd489a1e6fe9becd9040fc7d8eb86",
+      "recognized": "イエタシの負けね。お大事に。うん。",
+      "seconds": 3.76,
+      "accepted_readings": [
+        "私の負けね。お大事に。"
+      ],
+      "reading_similarity": 0.815
+    },
+    "enemy-15/attack": {
+      "expected": "彩れ！絵の具ストーム！",
+      "reading": "彩れ！絵の具ストーム！",
+      "sha256": "d9c34917ff3722bf5bb77da55de2fa638f17015bd4e70dfb0034e6ec96d5cf7e",
+      "recognized": "踊れ、絵の具ストーム",
+      "seconds": 3.4,
+      "accepted_readings": [
+        "彩れ！絵の具ストーム！"
+      ],
+      "reading_similarity": 0.857
+    },
+    "enemy-15/defeat": {
+      "expected": "君の感性に負けたわ。",
+      "reading": "君の感性に負けたわ。",
+      "sha256": "c5537b1725ae50bc6a5d42074dbd641667aa70add49137d22e66a9d4bebfe23b",
+      "recognized": "君の歓声に負けたわ。でっ。",
+      "seconds": 4.76,
+      "accepted_readings": [
+        "君の感性に負けたわ。"
+      ],
+      "reading_similarity": 0.923
+    },
+    "enemy-16/spawn": {
+      "expected": "残さず食べていけ！",
+      "reading": "残さず食べていけ！",
+      "sha256": "81ebd527e5edd5350945efc64e13f5eae0cff8be9f64e518ffd55a2eea2a4a8f",
+      "recognized": "残さず、食べて行け",
+      "seconds": 3.08,
+      "accepted_readings": [
+        "残さず食べていけ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-16/defeat": {
+      "expected": "負けたぜ！ごちそうさまだ！",
+      "reading": "負けたぜ！ごちそうさまだ！",
+      "sha256": "1387f9c0e506b7801334db615fbe67a2cace3f8d9a6fca54bc468b33345a7d29",
+      "recognized": "負けたぜごちそうさまだ",
+      "seconds": 3.56,
+      "accepted_readings": [
+        "負けたぜ！ごちそうさまだ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-17/attack": {
+      "expected": "全力ダッシュ！",
+      "reading": "全力ダッシュ！",
+      "sha256": "af7f7ab3c473b35ebde21bde73c6708cf4a3e30948b8705cd37eabf73cbc4270",
+      "recognized": "全力だしフ",
+      "seconds": 2.28,
+      "accepted_readings": [
+        "全力ダッシュ！"
+      ],
+      "reading_similarity": 0.824
+    },
+    "enemy-17/damage": {
+      "expected": "ペースが乱れる！",
+      "reading": "ペースが乱れる！",
+      "sha256": "7838f0e823ca229b359171a6216892ce41e1cdf2b8c3bd3485b80e2094d8b97e",
+      "recognized": "ェースが乱れる",
+      "seconds": 2.4,
+      "accepted_readings": [
+        "ペースが乱れる！"
+      ],
+      "reading_similarity": 0.875
+    },
+    "enemy-19/defeat": {
+      "expected": "朝が来てしまう。さらばだ。",
+      "reading": "朝が来てしまう。さらばだ。",
+      "sha256": "9e3c55b78643643d413a976a0f591cc0baaba57ef734d884907d32152197cfd0",
+      "recognized": "朝が来てしまうさらばだ",
+      "seconds": 3.56,
+      "accepted_readings": [
+        "朝が来てしまう。さらばだ。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-20/attack": {
+      "expected": "赤点の裁き！追試を受けろ！",
+      "reading": "赤点の裁き！追試を受けろ！",
+      "sha256": "4657022a397fb94e53414e54acc55445ab4abeb53e38c30b538b7ba0030154d9",
+      "recognized": "赤点の裁き推しを受けろ",
+      "seconds": 3.28,
+      "accepted_readings": [
+        "赤点の裁き！追試を受けろ！"
+      ],
+      "reading_similarity": 0.897
+    },
+    "enemy-21/spawn": {
+      "expected": "保護者の声を聞きなさい！",
+      "reading": "保護者の声を聞きなさい！",
+      "sha256": "07281d36a2dcbee23b7fe954b0b428f7fc1b3198b02097d627ce671e68526c73",
+      "recognized": "保護者の声を聞きなさい",
+      "seconds": 2.88,
+      "accepted_readings": [
+        "保護者の声を聞きなさい！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-21/attack": {
+      "expected": "要望書の一撃！",
+      "reading": "要望書の一撃！",
+      "sha256": "cbbcaa88611e0b751778db3a46a364e562036785280ecd000e313402ee984ac6",
+      "recognized": "要望書の一撃はい",
+      "seconds": 2.56,
+      "accepted_readings": [
+        "要望書の一撃！"
+      ],
+      "reading_similarity": 0.917
+    },
+    "enemy-23/attack": {
+      "expected": "実行委員アタック！",
+      "reading": "実行委員アタック！",
+      "sha256": "ea6fc4225865d5a2fb4812a25dc6facdd5b2112c8f3b7636985bac71e3c58986",
+      "recognized": "実行インアタック",
+      "seconds": 2.56,
+      "accepted_readings": [
+        "実行委員アタック！"
+      ],
+      "reading_similarity": 0.952
+    },
+    "enemy-23/defeat": {
+      "expected": "俺の負けだ。あとは任せた！",
+      "reading": "俺の負けだ。あとは任せた！",
+      "sha256": "090bd4201756fcc3e9472c5fe3da13d201912e5fa76f24d94eaa495a10fc39e4",
+      "recognized": "俺の負けだあとは任せた",
+      "seconds": 3.24,
+      "accepted_readings": [
+        "俺の負けだ。あとは任せた！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-24/spawn": {
+      "expected": "まだ卒業したくないの。",
+      "reading": "まだ卒業したくないの。",
+      "sha256": "10a123acfc73245060ca74bc0cbea430f4451581b841c0080e538af62cfe0415",
+      "recognized": "まだ卒業したくないの。なぜ若男は、",
+      "seconds": 3.96,
+      "accepted_readings": [
+        "まだ卒業したくないの。"
+      ],
+      "reading_similarity": 0.812
+    },
+    "enemy-24/attack": {
+      "expected": "別れの鐘よ、響け！",
+      "reading": "別れの鐘よ、響け！",
+      "sha256": "38dc645d2572ed2011d02df5f036e85ad9fd266995e7113d309cefb289280465",
+      "recognized": "我の鐘へ響け。",
+      "seconds": 3.12,
+      "accepted_readings": [
+        "別れの鐘よ、響け！"
+      ],
+      "reading_similarity": 0.842
+    },
+    "enemy-24/defeat": {
+      "expected": "ありがとう。さようなら。",
+      "reading": "ありがとう。さようなら。",
+      "sha256": "de77672bdf30d2ea3c869061577ef47f85166671f21b150d5642d354096a6b1a",
+      "recognized": "ありがとうさようなら",
+      "seconds": 3.8,
+      "accepted_readings": [
+        "ありがとう。さようなら。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-26/spawn": {
+      "expected": "この答案を、返して。",
+      "reading": "この答案を、返して。",
+      "sha256": "763e302f7f367af78216f5e1e6252507f817d3ff2973ead6a5599c219da0acd0",
+      "recognized": "この答案を返って、さっせ、",
+      "seconds": 3.68,
+      "accepted_readings": [
+        "この答案を、返して。"
+      ],
+      "reading_similarity": 0.8
+    },
+    "enemy-26/defeat": {
+      "expected": "やっと解けた。ありがとう。",
+      "reading": "やっと解けた。ありがとう。",
+      "sha256": "801c3b9f0a451a56137cf0f5df6c6267dbaf54709e30ad38049062382fd81b57",
+      "recognized": "やっと解けた ありがとう",
+      "seconds": 3.32,
+      "accepted_readings": [
+        "やっと解けた。ありがとう。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-27/spawn": {
+      "expected": "売り切れるぞ！早く並べ！",
+      "reading": "売り切れるぞ！早く並べ！",
+      "sha256": "88fcb69d68ca7ef7d2a4c083fb791ebe60d0dc7da5bb7ce472f2ddae810b7853",
+      "recognized": "売り切れるぞ 早く並べ",
+      "seconds": 3.4,
+      "accepted_readings": [
+        "売り切れるぞ！早く並べ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-27/defeat": {
+      "expected": "本日は、閉店だ！",
+      "reading": "本日は、閉店だ！",
+      "sha256": "05cea44819f96543befeb662db2c662f2f488c660b4d596b19fcc7e23c677134",
+      "recognized": "本日は閉店だ",
+      "seconds": 3.36,
+      "accepted_readings": [
+        "本日は、閉店だ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-29/spawn": {
+      "expected": "風紀の乱れは許さない！",
+      "reading": "風紀の乱れは許さない！",
+      "sha256": "fe0ef3c51889b5723c7aab7cd4ae759bbf3384668aa20c7e410298a1343c10ce",
+      "recognized": "空気の乱れは許さない",
+      "seconds": 3.24,
+      "accepted_readings": [
+        "風紀の乱れは許さない！"
+      ],
+      "reading_similarity": 0.923
+    },
+    "enemy-29/attack": {
+      "expected": "受けなさい！規律の斬撃！",
+      "reading": "受けなさい！規律の斬撃！",
+      "sha256": "9fcb5e0fc72fe0b28941b4494234eb6ba6252a8bf48315130a864fe61d2257ec",
+      "recognized": "受けなさい 規律の斬撃",
+      "seconds": 3.08,
+      "accepted_readings": [
+        "受けなさい！規律の斬撃！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-29/damage": {
+      "expected": "秩序が乱れる！",
+      "reading": "秩序が乱れる！",
+      "sha256": "3aea8a89583865f789dc1e549e4ebe4f693619684a00550f84142e54954848f2",
+      "recognized": " 秩序が乱れるそれ",
+      "seconds": 3.16,
+      "accepted_readings": [
+        "秩序が乱れる！"
+      ],
+      "reading_similarity": 0.9
+    },
+    "enemy-29/defeat": {
+      "expected": "あなたの信念、認めるわ。",
+      "reading": "あなたの信念、認めるわ。",
+      "sha256": "5087f8d3a114141d7bf1045ad4888d9799ec0a757559e3a276fdf846c1e7823d",
+      "recognized": " あなたの信念 射止めるわ",
+      "seconds": 3.52,
+      "accepted_readings": [
+        "あなたの信念、認めるわ。"
+      ],
+      "reading_similarity": 0.815
+    },
+    "enemy-30/spawn": {
+      "expected": "貸出記録を確認する。",
+      "reading": "貸出記録を確認する。",
+      "sha256": "aec2266cb992b0d88639cb2c96c492c4ff3b091df7ca830d31ba796ef2a08b5f",
+      "recognized": "貸し出し記録を確認すんす",
+      "seconds": 3.08,
+      "accepted_readings": [
+        "貸出記録を確認する。"
+      ],
+      "reading_similarity": 0.897
+    },
+    "enemy-30/skill": {
+      "expected": "禁書結界！書架の守り！",
+      "reading": "禁書結界！書架の守り！",
+      "sha256": "960fe65011ffef676ba2425d3d904059ee2e08a98e5d1758df13558ea4f40a70",
+      "recognized": "銀書決壊 書家の守り",
+      "seconds": 2.8,
+      "accepted_readings": [
+        "禁書結界！書架の守り！"
+      ],
+      "reading_similarity": 0.8
+    },
+    "enemy-32/attack": {
+      "expected": "受けたまえ！監査の鉄槌！",
+      "reading": "受けたまえ！監査の鉄槌！",
+      "sha256": "eb7755120598afdb57650b0457de10118c7fc1a15d719bd2ff40958466db9710",
+      "recognized": "受けたまえ監査の手継",
+      "seconds": 2.72,
+      "accepted_readings": [
+        "受けたまえ！監査の鉄槌！"
+      ],
+      "reading_similarity": 0.88
+    },
+    "enemy-32/damage": {
+      "expected": "予算が狂う！こんなはずでは！",
+      "reading": "予算が狂う！こんなはずでは！",
+      "sha256": "37cc6973dde12794eb11bd6ab5f3fc5b50481381437ba76836fabaedf1e9835a",
+      "recognized": "予算が狂うこんなはずでは",
+      "seconds": 2.88,
+      "accepted_readings": [
+        "予算が狂う！こんなはずでは！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-32/defeat": {
+      "expected": "決算は、お前の勝ちだ。",
+      "reading": "決算は、お前の勝ちだ。",
+      "sha256": "c7e572b827322fdb39107ab51186810d1539d870866090b270ab82aa6456c31e",
+      "recognized": "決算は、お前の口だ。",
+      "seconds": 3.0,
+      "accepted_readings": [
+        "決算は、お前の勝ちだ。"
+      ],
+      "reading_similarity": 0.917
+    },
+    "enemy-32/skill": {
+      "expected": "予算凍結！資金を回収する！",
+      "reading": "予算凍結！資金を回収する！",
+      "sha256": "b068d8e143ed4e2216ceed5d8ac286346ba4bab7569402f7ad5fec9f15a61775",
+      "recognized": "予算凍結、月に回収する。",
+      "seconds": 2.96,
+      "accepted_readings": [
+        "予算凍結！資金を回収する！"
+      ],
+      "reading_similarity": 0.8
+    },
+    "enemy-34/damage": {
+      "expected": "夜が、揺らぐ！",
+      "reading": "夜が、揺らぐ！",
+      "sha256": "0cd2a7fa10aa2f16a520912466708dc8e821165e1e009986d2c453d391f87e7e",
+      "recognized": "夜が、揺らぐ。",
+      "seconds": 1.92,
+      "accepted_readings": [
+        "夜が、揺らぐ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "enemy-34/defeat": {
+      "expected": "夜明けを、つかんだか。",
+      "reading": "夜明けを、つかんだか。",
+      "sha256": "b8c6d8c4093e0b1fb9d60f6d1b34b74d1b5fa49cccb4aef2eee11445bcb5b615",
+      "recognized": "夜明けを掴んだか、MX。",
+      "seconds": 3.12,
+      "accepted_readings": [
+        "夜明けを、つかんだか。"
+      ],
+      "reading_similarity": 1.0
+    }
+  },
+  "recognizer": "faster-whisper/turbo, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+}

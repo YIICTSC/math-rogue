@@ -1,0 +1,587 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "heroes": [
+    {
+      "id": "enemy-00",
+      "name": "不良生徒",
+      "seed": 91000,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_12/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_12/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "ここから先は通さねえ！",
+        "attack": "くらえ！番長パンチ！",
+        "damage": "ぐっ、やるじゃねえか！",
+        "defeat": "ちくしょう、覚えてろ！"
+      }
+    },
+    {
+      "id": "enemy-01",
+      "name": "熱血教師",
+      "seed": 91103,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_26/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_26/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "熱血指導の時間だ！",
+        "attack": "燃えろ！熱血拳！",
+        "damage": "いい気合いだ！",
+        "defeat": "先生の負けだ！"
+      }
+    },
+    {
+      "id": "enemy-02",
+      "name": "用務員",
+      "seed": 91206,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_00/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_00/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "廊下は走るなよ！",
+        "attack": "まとめて掃いてやる！",
+        "damage": "おっと、危ない！",
+        "defeat": "掃除し直しだな。"
+      }
+    },
+    {
+      "id": "enemy-03",
+      "name": "ガリ勉",
+      "seed": 91309,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_17/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_17/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "勝率は計算済みだ！",
+        "attack": "公式通りの一撃！",
+        "damage": "計算が合わない！",
+        "defeat": "この問題、難しすぎる！"
+      }
+    },
+    {
+      "id": "enemy-04",
+      "name": "教頭",
+      "seed": 91412,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_06/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_06/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "まずは私の話を聞きなさい！",
+        "attack": "受けてみなさい！指導の一撃！",
+        "damage": "なんて態度だ！まだ指導は終わらん！",
+        "defeat": "校長先生、申し訳ありません！",
+        "skill": "まだ話は終わっていません！長話の極意！"
+      }
+    },
+    {
+      "id": "enemy-05",
+      "name": "理科の先生",
+      "seed": 91515,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_07/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_07/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime woman, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "実験を始めましょう！",
+        "attack": "反応開始！",
+        "damage": "想定外の反応ね！",
+        "defeat": "実験は失敗だわ！",
+        "skill": "混ぜるな危険！大爆発！"
+      }
+    },
+    {
+      "id": "enemy-06",
+      "name": "体育の先生",
+      "seed": 91618,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_16/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_16/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "全員、気合いを入れろ！",
+        "attack": "必殺！体育館クラッシュ！",
+        "damage": "鍛え方が違うぞ！",
+        "defeat": "見事な運動能力だ！",
+        "skill": "全員整列！鉄壁の号令！"
+      }
+    },
+    {
+      "id": "enemy-07",
+      "name": "音楽の先生",
+      "seed": 91721,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_11/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_11/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime woman, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "私の授業へようこそ！",
+        "attack": "響け！衝撃の音色！",
+        "damage": "音程が乱れるわ！",
+        "defeat": "お見事！素敵な演奏だったわ。",
+        "skill": "おやすみなさい。眠りの旋律！"
+      },
+      "synthesis_text": {
+        "defeat": "おみごと！すてきな演奏だったわ。"
+      }
+    },
+    {
+      "id": "enemy-08",
+      "name": "生活指導",
+      "seed": 91824,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_05/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_05/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "その態度、指導が必要だ！",
+        "attack": "くらえ！規律の鉄拳！",
+        "damage": "反抗する気か！",
+        "defeat": "指導が、通じない！",
+        "skill": "校則違反！所持金没収！"
+      }
+    },
+    {
+      "id": "enemy-09",
+      "name": "校長",
+      "seed": 91927,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_13/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_13/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "校長室へ、よく来たな！",
+        "attack": "校長直伝！教育拳！",
+        "damage": "ほう、なかなかやる！",
+        "defeat": "まだ終わりではないぞ！"
+      }
+    },
+    {
+      "id": "enemy-10",
+      "name": "激怒校長",
+      "seed": 92030,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_13/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_13/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "もう容赦はせんぞ！",
+        "attack": "激怒！教育鉄拳！",
+        "damage": "生意気な生徒め！",
+        "defeat": "この私を、怒らせたな！"
+      }
+    },
+    {
+      "id": "enemy-11",
+      "name": "真・校長",
+      "seed": 92133,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_14/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_14/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "これが校長の真の力だ！",
+        "attack": "奥義！最終校則！",
+        "damage": "私の校則を超えるか！",
+        "defeat": "見事だ。お前たちの卒業を認めよう。",
+        "skill": "教頭よ、力を貸せ！"
+      }
+    },
+    {
+      "id": "enemy-12",
+      "name": "図書委員長",
+      "seed": 92236,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_18/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_18/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "図書室ではお静かに！",
+        "attack": "禁書の一撃！",
+        "damage": "本が傷つく！",
+        "defeat": "貸し出し、終了です。"
+      }
+    },
+    {
+      "id": "enemy-13",
+      "name": "保健室の先生",
+      "seed": 92339,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_09/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_09/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime woman, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "少し休んでいきなさい！",
+        "attack": "お注射の時間よ！",
+        "damage": "あら、痛いわね！",
+        "defeat": "私の負けね。お大事に。",
+        "skill": "応急処置！守りの包帯！"
+      }
+    },
+    {
+      "id": "enemy-14",
+      "name": "放送部の怪人",
+      "seed": 92442,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_20/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_20/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "全校放送を始めるぞ！",
+        "attack": "爆音！校内放送！",
+        "damage": "マイクが割れる！",
+        "defeat": "放送を終了します。",
+        "skill": "眠れ！深夜の校内放送！"
+      }
+    },
+    {
+      "id": "enemy-15",
+      "name": "美術教師",
+      "seed": 92545,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_11/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_11/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime woman, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "君も作品にしてあげる！",
+        "attack": "彩れ！絵の具ストーム！",
+        "damage": "色が混ざるわ！",
+        "defeat": "君の感性に負けたわ。"
+      }
+    },
+    {
+      "id": "enemy-16",
+      "name": "給食番長",
+      "seed": 92648,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_19/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_19/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "残さず食べていけ！",
+        "attack": "おかわりパンチ！",
+        "damage": "腹に響くぜ！",
+        "defeat": "負けたぜ！ごちそうさまだ！"
+      }
+    },
+    {
+      "id": "enemy-17",
+      "name": "校庭ランナー",
+      "seed": 92751,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_16/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_16/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "俺の速さについてこい！",
+        "attack": "全力ダッシュ！",
+        "damage": "ペースが乱れる！",
+        "defeat": "ゴールは、お前の勝ちだ！"
+      }
+    },
+    {
+      "id": "enemy-18",
+      "name": "守衛ロボ",
+      "seed": 92854,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_10/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_10/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "侵入者を確認。停止せよ。",
+        "attack": "警備攻撃、実行！",
+        "damage": "装甲損傷。",
+        "defeat": "警備機能、停止。",
+        "skill": "防衛モード。装甲強化！"
+      }
+    },
+    {
+      "id": "enemy-19",
+      "name": "旧校舎の影",
+      "seed": 92957,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_03/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_03/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Cold supernatural whisper.",
+      "lines": {
+        "spawn": "ここからは帰さない。",
+        "attack": "影よ、絡みつけ！",
+        "damage": "影が、裂ける！",
+        "defeat": "朝が来てしまう。さらばだ。"
+      }
+    },
+    {
+      "id": "enemy-20",
+      "name": "テストの化身",
+      "seed": 93060,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_17/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_17/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "抜き打ちテストを開始する！",
+        "attack": "赤点の裁き！追試を受けろ！",
+        "damage": "答案に傷が！",
+        "defeat": "まさか、満点だと！",
+        "skill": "時間延長！終わらないテスト！"
+      }
+    },
+    {
+      "id": "enemy-21",
+      "name": "PTAの圧",
+      "seed": 93163,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_06/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_06/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "保護者の声を聞きなさい！",
+        "attack": "要望書の一撃！",
+        "damage": "その態度は何ですか！",
+        "defeat": "今回は、見逃しましょう。",
+        "skill": "お小遣いは預かります！"
+      }
+    },
+    {
+      "id": "enemy-22",
+      "name": "飼育小屋番",
+      "seed": 93266,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_00/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_00/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "動物たちは俺が守る！",
+        "attack": "飼育係の底力！",
+        "damage": "おっと、危ない！",
+        "defeat": "動物には優しくしろよ。"
+      }
+    },
+    {
+      "id": "enemy-23",
+      "name": "文化祭実行委員",
+      "seed": 93369,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_24/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_24/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "文化祭は中止させない！",
+        "attack": "実行委員アタック！",
+        "damage": "準備が台無しだ！",
+        "defeat": "俺の負けだ。あとは任せた！"
+      }
+    },
+    {
+      "id": "enemy-24",
+      "name": "卒業式の亡霊",
+      "seed": 93472,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_04/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_04/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime woman, expressive enemy battle voice. Clear Japanese diction. Cold supernatural whisper.",
+      "lines": {
+        "spawn": "まだ卒業したくないの。",
+        "attack": "別れの鐘よ、響け！",
+        "damage": "思い出が、消える！",
+        "defeat": "ありがとう。さようなら。",
+        "skill": "眠って。別れの子守唄。"
+      }
+    },
+    {
+      "id": "enemy-25",
+      "name": "放課後の見回り",
+      "seed": 93575,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_00/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_00/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "放課後の巡回中だ！",
+        "attack": "そこに止まりなさい！",
+        "damage": "巡回の邪魔をするな！",
+        "defeat": "見失ったか。"
+      }
+    },
+    {
+      "id": "enemy-26",
+      "name": "答案の亡霊",
+      "seed": 93678,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_03/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_03/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Cold supernatural whisper.",
+      "lines": {
+        "spawn": "この答案を、返して。",
+        "attack": "未練の赤ペン！",
+        "damage": "答えが、消える！",
+        "defeat": "やっと解けた。ありがとう。",
+        "skill": "眠れ、終わらない答案。"
+      }
+    },
+    {
+      "id": "enemy-27",
+      "name": "購買部の圧",
+      "seed": 93781,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_19/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_19/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "売り切れるぞ！早く並べ！",
+        "attack": "焼きそばパンの恨み！",
+        "damage": "商品が崩れる！",
+        "defeat": "本日は、閉店だ！"
+      }
+    },
+    {
+      "id": "enemy-28",
+      "name": "補習監督",
+      "seed": 93884,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_02/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_02/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "補習からは逃がさん！",
+        "attack": "追試の鉄槌！",
+        "damage": "まだ追試がある！",
+        "defeat": "本日の補習は終了だ。",
+        "skill": "追加課題！終わらない補習！"
+      }
+    },
+    {
+      "id": "enemy-29",
+      "name": "風紀委員長",
+      "seed": 93987,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_01/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_01/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime woman, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "風紀の乱れは許さない！",
+        "attack": "受けなさい！規律の斬撃！",
+        "damage": "秩序が乱れる！",
+        "defeat": "あなたの信念、認めるわ。",
+        "skill": "校則違反！所持品没収！"
+      }
+    },
+    {
+      "id": "enemy-30",
+      "name": "図書室監査員",
+      "seed": 94090,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_03/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_03/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "貸出記録を確認する。",
+        "attack": "延滞の裁き！",
+        "damage": "記録にない攻撃だ！",
+        "defeat": "監査を、終了する。",
+        "skill": "禁書結界！書架の守り！"
+      }
+    },
+    {
+      "id": "enemy-31",
+      "name": "放送委員の刺客",
+      "seed": 94193,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_20/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_20/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "次の放送は、お前の敗北だ！",
+        "attack": "必殺！ハウリング！",
+        "damage": "音が、途切れる！",
+        "defeat": "電源が、落ちる！"
+      }
+    },
+    {
+      "id": "enemy-32",
+      "name": "生徒会監査",
+      "seed": 94296,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_06/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_06/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "予算の使途を説明したまえ！",
+        "attack": "受けたまえ！監査の鉄槌！",
+        "damage": "予算が狂う！こんなはずでは！",
+        "defeat": "決算は、お前の勝ちだ。",
+        "skill": "予算凍結！資金を回収する！"
+      }
+    },
+    {
+      "id": "enemy-33",
+      "name": "校則執行官",
+      "seed": 94399,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_05/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_05/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "校則に例外はない！",
+        "attack": "執行！校則の鎖！",
+        "damage": "規則への反逆か！",
+        "defeat": "その自由は、止められん。",
+        "skill": "特別指導！無限の校則！"
+      }
+    },
+    {
+      "id": "enemy-34",
+      "name": "深夜校長",
+      "seed": 94502,
+      "references": [
+        "public/sfx/enemy-voices/high-school/hs_14/spawn.ogg",
+        "public/sfx/enemy-voices/high-school/hs_14/attack.ogg"
+      ],
+      "caption": "Japanese fictional anime man, expressive enemy battle voice. Clear Japanese diction. Commanding dramatic delivery.",
+      "lines": {
+        "spawn": "深夜の授業を始めよう。",
+        "attack": "闇の校則！永遠の補習！",
+        "damage": "夜が、揺らぐ！",
+        "defeat": "夜明けを、つかんだか。",
+        "skill": "眠れ。夜明けは来ない。"
+      }
+    }
+  ]
+}

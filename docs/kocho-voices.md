@@ -32,3 +32,23 @@ KOCHO_VOICE_TEST=1 CHROMIUM_PATH=/usr/bin/chromium pnpm exec node scripts/test-k
 ```
 
 ASRの読み一致率は短い叫び声や造語の補助指標であり、品質の保証値ではない。独立した日本語認識で候補を抽出し、別のlarge-v3-turbo認識でも再確認してから読みや生成設定を修正する。連濁や「雷」の別読み、技名の辞書分割による差も考慮する。部分生成のTSカタログは `--allow-partial` で作成できるが、提出前は全424本の存在・デコード・ハッシュとカタログを検証する。
+
+## 敵の専用ボイス
+
+通常・ボス・校長3形態・エンドレス限定を含む35種類に、登場・通常攻撃・被ダメージ・撃破を各1本、特殊行動を持つ19種類には技の掛け声も追加し、合計159本を生成する。真・校長の召喚にも専用音声を持つ。台本は `assets/kocho/enemy-voice-lines.json`、CPU生成履歴は `assets/kocho/enemy-voice-build.json`、音声は `public/sfx/kocho-enemy-voices/`。既存の架空の高校編敵音声から、役柄・性別に合う声を参照して専用台詞を新規生成する。校長と激怒校長は同じ声の参照を使い、形態に応じた台詞を分ける。
+
+確定したゲーム状態の変化から1回につき最も優先度の高い1件を選び、Reactの再描画や状態更新の再評価で台詞を繰り返さない。変身は変身後の登場台詞を再生する。敵の技・攻撃は主人公の軽い被ダメージより優先し、主人公の技・勝敗台詞を遮らない。技の間に抑制した被ダメージ・撃破の反応は最も強い1件だけ保持し、技が終わって500ms後にも空きがあれば再生する。次の技・敵攻撃・画面移動などでは古い反応を破棄する。主人公と共通の1音声制御で、音声OFF・非表示・退出時の停止も共通化する。途中セーブからの再開では既にいる敵の登場台詞を繰り返さない。
+
+```sh
+/workspace/irodori-kocho/.venv/bin/python scripts/generate-kocho-voices-irodori.py --enemies --device cpu --threads 2 --cpu-autocast
+/workspace/irodori-kocho/.venv/bin/python scripts/generate-kocho-voices-irodori.py --enemies --device cpu --threads 2 --cpu-autocast --model Aratako/Irodori-TTS-v4.1-Small --steps 16 --cfg-mode independent --text-guidance 4 --caption-guidance 2 --speaker-guidance 3 --seed-offset 530 --repair-list assets/kocho/enemy-voice-repair-keys.json --regenerate
+/workspace/irodori-kocho/.venv/bin/python scripts/generate-kocho-voices-irodori.py --enemies --device cpu --threads 2 --cpu-autocast --model Aratako/Irodori-TTS-v4.1-Small --steps 32 --cfg-mode independent --text-guidance 4 --caption-guidance 2 --speaker-guidance 3 --seed-offset 1060 --repair-list assets/kocho/enemy-voice-final-refinement-keys.json --regenerate
+/workspace/irodori-kocho/.venv/bin/python scripts/audit-kocho-speech.py --enemies --threads 2
+/workspace/irodori-kocho/.venv/bin/python scripts/verify-kocho-enemy-voices.py
+node scripts/sync-kocho-enemy-voices.mjs
+KOCHO_ENEMY_VOICE_TEST=1 CHROMIUM_PATH=/usr/bin/chromium pnpm exec node scripts/test-kocho-browser.mjs
+```
+
+敵音声も独立した認識で不明瞭な候補を選び、通常版RFによる選択的な再生成を行う。短すぎる退場台詞には自然な一言を補い、予測された発話時間内の余分な発話を抑える。生成と認識は低メモリ環境では順番に実行する。配信マニフェスト生成と本番ビルド後は `scripts/verify-kocho-enemy-voices.py --distribution` でWeb/Android一覧・本番コピーの一致も確認できる。
+
+今回の159本はMF 4ステップ136本、RF 16ステップ21本、RF 32ステップ2本。全159本の認識結果と、追加確認した45本の認識結果は、配信OGGの最新SHAに対応する。

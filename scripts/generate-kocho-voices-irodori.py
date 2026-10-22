@@ -1,4 +1,4 @@
-"""Generate every Kocho skill and action with the latest inspected official Irodori CPU runtime.
+"""Generate Kocho hero and enemy voices with the latest inspected official Irodori CPU runtime.
 
 Run with the official runtime's Python after `uv sync --extra cpu`. Guest heroes use their main-story voices; the original hero uses a designed
 fictional speaker reference. Cached latents and finished clips make runs resumable.
@@ -26,10 +26,11 @@ def sha256(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--irodori-root', type=Path, default=ROOT.parent / 'irodori-kocho')
+    parser.add_argument('--enemies', action='store_true', help='Generate the dedicated enemy catalog')
     parser.add_argument('--device', default='cpu')
     parser.add_argument('--threads', type=int, default=2)
     parser.add_argument('--cpu-autocast', action='store_true', help='Use BF16 CPU autocast on an AVX512-BF16 host')
-    parser.add_argument('--only', help='Generate a single hero')
+    parser.add_argument('--only', help='Generate a single speaker')
     parser.add_argument('--events', help='Comma-separated event names')
     parser.add_argument('--model', help='Override official model, e.g. v4.1-Small for RF refinement')
     parser.add_argument('--steps', type=int, default=4)
@@ -50,7 +51,7 @@ def main():
     import numpy as np
     torch.set_num_threads(args.threads)
     repairs = set(json.loads(args.repair_list.read_text())) if args.repair_list else None
-    catalog = json.loads((ROOT / 'assets/kocho/voice-lines.json').read_text())
+    catalog = json.loads((ROOT / ('assets/kocho/enemy-voice-lines.json' if args.enemies else 'assets/kocho/voice-lines.json')).read_text())
     model_id = args.model or catalog['model']
     checkpoint = download_hf_checkpoint(model_id)
     checkpoint_digest = sha256(checkpoint)
@@ -68,11 +69,11 @@ def main():
             with torch.autocast('cpu', enabled=False):
                 return encode_watermark([audio.float() for audio in audios], **kwargs)
         runtime.watermarker.encode_batch = fp32_watermark
-    scratch = ROOT / 'tmp/kocho-voice-source'
+    scratch = ROOT / ('tmp/kocho-enemy-voice-source' if args.enemies else 'tmp/kocho-voice-source')
     scratch.mkdir(parents=True, exist_ok=True)
-    output = ROOT / 'public/sfx/kocho-voices'
+    output = ROOT / ('public/sfx/kocho-enemy-voices' if args.enemies else 'public/sfx/kocho-voices')
     provenance = {'model': catalog['model'], 'checkpoint_sha256': checkpoint_digest, 'clips': {}}
-    record = ROOT / 'assets/kocho/voice-build.json'
+    record = ROOT / ('assets/kocho/enemy-voice-build.json' if args.enemies else 'assets/kocho/voice-build.json')
     if record.exists(): provenance.update(json.loads(record.read_text()))
     provenance['irodori_revision'] = subprocess.check_output(['git', '-C', str(args.irodori_root), 'rev-parse', 'HEAD'], text=True).strip()
     provenance.pop('sampling_steps', None)
