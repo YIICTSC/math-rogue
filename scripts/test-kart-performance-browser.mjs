@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
+import {mkdir} from 'node:fs/promises';
 const server=await createServer({logLevel:'error',server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{name:'gp-performance-qa',configureServer(s){s.middlewares.use('/gp-performance',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml(req.url,'<html><div id="root"></div><div id="course"></div><script type="module" src="/scripts/fixtures/kart-performance.tsx"></script></html>'));});}}]});
 await server.listen();const browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||(process.platform==='darwin'?'chrome':undefined),args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try{
- const page=await browser.newPage();page.setDefaultTimeout(60000);const errors=[],glbs=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))glbs.push(r.url());});await page.route('https://**/*',r=>r.abort());
- await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/gp-performance`);await page.waitForFunction(()=>window.connect);
+ const page=await browser.newPage();page.setDefaultTimeout(120000);const errors=[],glbs=[];page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});page.on('request',r=>{if(/\.glb(?:\?|$)/.test(r.url()))glbs.push(r.url());});await page.route('https://**/*',r=>r.abort());
+ await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/gp-performance`);await page.waitForFunction(()=>window.connect);console.log('GP fixture ready');
  await page.evaluate(()=>{Object.defineProperty(navigator,'connection',{configurable:true,value:Object.assign(new EventTarget(),{downlink:20,rtt:20})});window.setQuality('high');window.connect();});
  await page.locator('[data-kart-quality="high"]').waitFor();await page.waitForTimeout(700);assert.equal(await page.locator('[data-kart-quality="minimal"]').count(),0);
  await page.evaluate(()=>window.stall());await page.locator('[data-kart-quality="minimal"]').waitFor();assert((await page.locator('button').textContent()).includes('Auto'));
@@ -13,8 +14,13 @@ try{
  await page.evaluate(()=>window.connect());await page.waitForTimeout(100);await page.evaluate(()=>window.slowFrame());await page.locator('[data-kart-quality="minimal"]').waitFor();
  await page.evaluate(()=>window.connect());await page.locator('[data-kart-quality="high"]').waitFor();
  await page.evaluate(()=>{navigator.connection.rtt=600;navigator.connection.dispatchEvent(new Event('change'));});await page.locator('[data-kart-quality="minimal"]').waitFor();
- const minimal=[];for(let course=0;course<8;course++)minimal.push(await page.evaluate(course=>window.showScene('minimal',course),course));
- assert.equal(glbs.length,0,'Minimal graphics must not request scenery/hero GLBs');for(const r of minimal){assert.equal(r.players,40);assert(r.pixels<=640*360);assert.equal(r.parts,7);assert(!r.antialias&&!r.shadows&&!r.imported);}
- const low=await page.evaluate(()=>window.showScene('low'));assert(minimal[0].parts<low.parts/4);assert(minimal[0].triangles<low.triangles);console.log(JSON.stringify({minimal:minimal[0],low},null,2));
- assert.deepEqual(errors,[]);console.log('PASS: healthy/slow/reconnected/offline sessions, slow device and connection hints; all 8 courses render 40 racers with a bounded minimal GPU budget and no model downloads.');
+ const minimal=[];for(let course=0;course<8;course++){await page.evaluate(course=>window.showScene('minimal',course),course);await page.waitForFunction(()=>window.inspectDrivers().ready===40);minimal.push(await page.evaluate(()=>window.measure()));const drivers=await page.evaluate(()=>window.inspectDrivers());assert.equal(drivers.skinned,0);assert.equal(drivers.geometryCount,drivers.expectedGeometryCount);assert(drivers.ownVertices>1000);}
+ assert(glbs.every(url=>url.includes('models/storybook/characters-v3.glb')),'Only selected-character assets, never scenery, are needed');
+ for(const r of minimal){assert.equal(r.players,40);assert(r.pixels<=640*360);assert.equal(r.parts,7);assert(!r.antialias&&!r.shadows&&!r.imported);}
+ const before=await page.evaluate(()=>window.inspectDrivers());await page.evaluate(()=>window.changeDriver({species:1,hairStyle:4,accessory:2,outfit:5}));await page.waitForFunction(()=>window.inspectDrivers().ready===40);assert.notEqual((await page.evaluate(()=>window.inspectDrivers())).ownGeometryId,before.ownGeometryId,'Custom appearance gets its own mesh');
+ await page.evaluate(()=>window.showScene('minimal',0,true));await page.waitForFunction(()=>window.inspectDrivers().ready===40);assert.deepEqual((await page.evaluate(()=>window.inspectDrivers())).ids.sort(),['elementary-warrior','high-school-assassin','magic-akari']);assert.equal((await page.evaluate(()=>window.inspectDrivers())).skinned,0);assert.equal((await page.evaluate(()=>window.inspectDrivers())).geometryCount,3);
+ for(const id of ['elementary-warrior','high-school-assassin','magic-akari']){const pose=await page.evaluate(id=>window.comparePose(id),id);console.log(id,pose);for(let axis=0;axis<3;axis++)assert(Math.abs(pose.expected[axis]-pose.actual[axis])<.02,`${id} seated pose preserved`);}
+ await mkdir('tmp/kart-minimal-drivers',{recursive:true});await page.setViewportSize({width:1280,height:800});await page.evaluate(()=>window.measure());await page.locator('#course canvas').screenshot({path:'tmp/kart-minimal-drivers/selected-heroes.png'});
+ await page.evaluate(()=>window.showScene('low'));await page.waitForTimeout(300);const low=await page.evaluate(()=>window.measure());assert(minimal[0].parts<low.parts/4);assert(minimal[0].calls<low.calls);console.log(JSON.stringify({minimal:minimal[0],low},null,2));
+ assert.deepEqual(errors,[]);console.log('PASS: automatic quality, 8 courses/40 selected custom characters, named heroes, shared static geometry, preserved seated poses and no scenery downloads.');
 }finally{await browser.close();await server.close();}

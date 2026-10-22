@@ -1,4 +1,5 @@
 import {ProtagonistModel} from '../../three/protagonistModel';
+import {MinimalDriver,MinimalDriverLibrary} from './MinimalDriver';
 import { COURSE_SCENERY } from './scenery';
 import {SceneryClearance} from './sceneryClearance';
 import { StorybookModels, type Placement } from '../../three/storybookModels';
@@ -27,7 +28,8 @@ export class KartScene {
   private scene = new T.Scene();
   private camera = new T.PerspectiveCamera(68, 1, .2, 1700);
   private parts: InstancePart[] = [];
-  private protagonists=new Map<string,ProtagonistModel>();
+  private protagonists=new Map<string,ProtagonistModel|MinimalDriver>();
+  private minimalDrivers?:MinimalDriverLibrary;
   private boxes: T.Object3D[] = [];
   private quizRoad = new T.Group();
   private crashObstacle = new T.Group();
@@ -53,6 +55,7 @@ export class KartScene {
   private get storyQuality(){return this.visualQuality==='minimal'?'low':this.visualQuality;}
   constructor(private canvas: HTMLCanvasElement, world: Race, private selfId: string, private preview: boolean, private onFailure: () => void, private visualQuality:KartQuality='auto') {
     this.state = world;
+    if(this.minimal)this.minimalDrivers=new MinimalDriverLibrary();
     this.sceneryClearance=new SceneryClearance(this.getTrack(world.course));
     this.renderer = new T.WebGLRenderer({ canvas, antialias: !this.minimal, powerPreference: this.minimal?'low-power':'high-performance', alpha: false });
     const profile=configureStorybook(this.renderer,this.storyQuality);
@@ -288,11 +291,11 @@ export class KartScene {
   }
   private buildCars() {
     if(this.minimal){
-      // Shared low-poly instances replace hundreds of avatar parts and GLB
-      // skeletons. Physics, racers, ranking and collisions remain unchanged.
+      // Keep the selected driver in one baked mesh; only the kart uses simple
+      // shared geometry. These two temporary parts cover asset loading/failure.
       const body=this.part(new T.BoxGeometry(1,1,1),new T.MeshBasicMaterial({color:'#fff'}),[0,.65,0],[1.6,.6,3]);body.avatarColor='outfit';
-      const driver=this.part(new T.BoxGeometry(1,1,1),new T.MeshBasicMaterial({color:'#fff'}),[0,1.22,-.4],[.65,.65,.6]);driver.avatarColor='outfit';
-      this.part(new T.BoxGeometry(.5,.5,.5),new T.MeshBasicMaterial({color:'#f0c9a1'}),[0,1.8,-.4]);
+      const driver=this.part(new T.BoxGeometry(1,1,1),new T.MeshBasicMaterial({color:'#fff'}),[0,1.22,-.4],[.65,.65,.6]);driver.avatarColor='outfit';driver.driver=true;
+      this.part(new T.BoxGeometry(.5,.5,.5),new T.MeshBasicMaterial({color:'#f0c9a1'}),[0,1.8,-.4]).driver=true;
       const wheels=new T.BoxGeometry(.4,.65,.75),dark=new T.MeshBasicMaterial({color:'#16202b'});
       for(const x of [-.9,.9])for(const z of [-1,1])this.part(wheels,dark,[x,.38,z]);
       return;
@@ -333,14 +336,14 @@ export class KartScene {
       if (p.id === me.id) { ownPoint = pt; ownDistance = s.distance; }
       this.car.position.set(pt.x, pt.y + jump + .07 + (p.crash > 0 ? Math.abs(Math.sin(p.crash * 8)) * .55 : 0), pt.z); this.car.rotation.set(-Math.atan(pt.ty), Math.atan2(pt.tx, pt.tz) + p.steer * (p.drift ? .38 : .09) + (p.crash > 0 ? (2.4 - p.crash) * Math.PI * 3 : 0), -p.steer * .045); this.car.updateMatrix();
       let hero=this.protagonists.get(p.id);
-      if(!this.minimal&&p.avatar.protagonist&&!hero){hero=new ProtagonistModel(true);this.protagonists.set(p.id,hero);this.scene.add(hero.root);}
-      if(hero){hero.set(p.avatar.protagonist);hero.root.position.copy(this.car.position);hero.root.rotation.copy(this.car.rotation);hero.update(dt,'Idle',reducedMotion);hero.root.visible=!!p.avatar.protagonist;}
+      if((this.minimal||p.avatar.protagonist)&&!hero){hero=this.minimal?new MinimalDriver(this.minimalDrivers!):new ProtagonistModel(true);this.protagonists.set(p.id,hero);this.scene.add(hero.root);}
+      if(hero){if(hero instanceof MinimalDriver)hero.setAvatar(p.avatar);else hero.set(p.avatar.protagonist);hero.root.position.copy(this.car.position);hero.root.rotation.copy(this.car.rotation);if(hero instanceof ProtagonistModel)hero.update(dt,'Idle',reducedMotion);hero.root.visible=this.minimal||!!p.avatar.protagonist;}
       // During free run, compare physical positions on the circuit across laps.
       let gap = p.distance - me.distance;
       if (me.finish) { const length = this.getTrack(w.course).length; gap = ((gap + length / 2) % length + length) % length - length / 2; }
-      if(hero)hero.root.visible=!!p.avatar.protagonist&&(this.preview||p.id===me.id||gap>=-3);
+      if(hero)hero.root.visible=(this.minimal||!!p.avatar.protagonist)&&(this.preview||p.id===me.id||gap>=-3);
       for (const part of this.parts) {
-        if(part.driver&&hero?.ready&&p.avatar.protagonist)continue;
+        if(part.driver&&hero?.ready&&(this.minimal||p.avatar.protagonist))continue;
         if (part.visible && !part.visible(p.avatar)) continue;
         const partIndex = part.mesh.count++;
         this.dummy.position.copy(part.offset); this.dummy.rotation.copy(part.rotation); this.dummy.scale.copy(part.scale);
@@ -382,6 +385,7 @@ export class KartScene {
   }
   dispose() {
     for(const hero of this.protagonists.values())hero.dispose();this.protagonists.clear();
+    this.minimalDrivers?.dispose();
     this.storybook?.dispose();this.atmosphere?.dispose();
     this.canvas.removeEventListener('webglcontextlost', this.lost);
     const geometries = new Set<T.BufferGeometry>(), materials = new Set<T.Material>();

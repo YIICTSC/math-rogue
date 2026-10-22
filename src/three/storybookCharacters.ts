@@ -20,6 +20,7 @@ function load(){if(typeof window==='undefined')return Promise.resolve(new Map<st
   const geo=new Set<T.BufferGeometry>(),mat=new Set<T.Material>();gltf.scene.traverse(o=>{if(o instanceof T.Mesh){geo.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>mat.add(m));}});geo.forEach(g=>g.dispose());mat.forEach(m=>m.dispose());resolve(bank);
  },undefined,error=>{console.warn('Character models unavailable; keeping the existing avatar.',error);resolve(new Map());});
  });}
+export const prepareStorybookCharacters=()=>load();
 /** Upgrade shared geometry in place: customization, instancing and live rigs keep their identity. */
 export function characterGeometry(name:CharacterComponent,fallback:T.BufferGeometry,shape?:(geometry:T.BufferGeometry)=>void){
  const geometry=fallback.clone();shape?.(geometry);let disposed=false,upgrading=false;

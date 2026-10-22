@@ -8,9 +8,10 @@ function load(id:string){let promise=cache.get(id);if(!promise){promise=new GLTF
 /** Each instance owns its skin, geometry and materials; scene disposal cannot invalidate another player. */
 export class ProtagonistModel {
  readonly root=new T.Group();private model?:T.Group;private rests=new Map<string,T.Quaternion>();private mixer?:T.AnimationMixer;private action?:T.AnimationAction;private clips:T.AnimationClip[]=[];private request=0;private id?:string;private disposed=false;private elapsed=0;
+ private pending:Promise<void>=Promise.resolve();
  constructor(readonly seated=false){this.root.name='LearningRogueProtagonist';}
- set(id:unknown,transformed=false){const base=isProtagonistId(id)?id:undefined;const next=base?base+(transformed&&base.startsWith('magic-')?'-transformed':''):undefined;if(this.id===next)return;this.id=next;const request=++this.request;this.clear();this.root.userData.protagonist=next||'';if(!next)return;
-  load(next).then(gltf=>{if(this.disposed||request!==this.request)return;const model=clone(gltf.scene) as T.Group;
+ set(id:unknown,transformed=false){const base=isProtagonistId(id)?id:undefined;const next=base?base+(transformed&&base.startsWith('magic-')?'-transformed':''):undefined;if(this.id===next)return this.pending;this.id=next;const request=++this.request;this.clear();this.root.userData.protagonist=next||'';if(!next)return this.pending=Promise.resolve();
+  return this.pending=load(next).then(gltf=>{if(this.disposed||request!==this.request)return;const model=clone(gltf.scene) as T.Group;
    model.traverse(o=>{if(o instanceof T.Mesh){o.geometry=o.geometry.clone();o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();o.castShadow=true;o.receiveShadow=true;}});
    // Physics owns vertical displacement. Keep the visual jump pose, without doubling the jump height.
    this.clips=gltf.animations.map(c=>new T.AnimationClip(c.name,c.duration,c.tracks.filter(t=>!t.name.endsWith('root.position')).map(t=>t.clone())));
