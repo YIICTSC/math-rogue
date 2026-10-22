@@ -1,4 +1,4 @@
-import { drawArt, type ArtImages, type ArtKey } from './art';
+import { drawDangerAura, drawHostileArt, drawArt, type ArtImages, type ArtKey } from './art';
 import { entityRects, entityY, isPickup, laserActive, type ArcadeEntity, type ArcadeState } from './arcade';
 const COLORS:Record<string,string>={coin:'#ffdc70',star:'#ff90d8',magnet:'#f49ac2',shield:'#7de9ff',double:'#fff07b',sneakers:'#a9ffb5',board:'#82b9ff',rocket:'#ffb88a',lowGravity:'#b9a5ff',gravity:'#d4a2ff',wave:'#8dffdf',charge:'#91efff',orb:'#ffed9a',pad:'#bdff80',boost:'#8dfff4'};
 const ICONS:Record<string,string>={magnet:'∩',shield:'◇',double:'×2',sneakers:'↑↑',board:'≋',rocket:'↑',lowGravity:'↓',gravity:'↕',wave:'∿',charge:'ϟ',orb:'↑',pad:'↑',boost:'»'};
@@ -29,11 +29,12 @@ export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:n
    }
    continue;
   }
-  if(e.kind==='spike'&&drawArt(ctx,art,'spike',x-e.width/2,y-e.height,e.width,e.height,'stretch'))continue;
+  if(e.kind!=='rail'){for(const r of entityRects(s,e,distance))drawDangerAura(ctx,r.x,r.y,r.w,r.h,s.frame,reducedMotion);}
+  if(e.kind==='spike'&&drawHostileArt(ctx,art,'spike',x-e.width/2,y-e.height,e.width,e.height,'stretch'))continue;
   if(e.kind==='rail'&&drawArt(ctx,art,'rail',x-e.width/2,y,e.width,26,'stretch'))continue;
   if((e.kind==='wall'||e.kind==='tunnel'||e.kind==='airGate')&&art?.hazards?.complete){
    let painted=true;
-   for(const rect of entityRects(s,e,distance))painted=drawArt(ctx,art,e.kind==='airGate'?'gate':e.kind,rect.x,rect.y,rect.w,rect.h,'stretch')&&painted;
+   for(const rect of entityRects(s,e,distance))painted=drawHostileArt(ctx,art,e.kind==='airGate'?'gate':e.kind,rect.x,rect.y,rect.w,rect.h,'stretch')&&painted;
    if(painted)continue;
   }
   if(e.kind==='spike'){
@@ -41,12 +42,12 @@ export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:n
    for(let i=0;i<e.width;i+=25){ctx.beginPath();ctx.moveTo(x-e.width/2+i,y);ctx.lineTo(x-e.width/2+i+12,y-e.height);ctx.lineTo(x-e.width/2+i+24,y);ctx.closePath();ctx.fill();ctx.stroke();}
   }else if(e.kind==='rail'){ctx.fillStyle='#e5c887';ctx.fillRect(x-e.width/2,y,e.width,8);ctx.fillStyle='#e5c88766';for(let i=-e.width/2;i<e.width/2;i+=42)ctx.fillRect(x+i,y+8,3,30);}
   else if(e.kind==='saw'){
-   ctx.save();ctx.translate(x,y+e.height/2);if(!reducedMotion)ctx.rotate(s.frame*.08);if(drawArt(ctx,art,'saw',-25,-25,50,50)){ctx.restore();continue;}ctx.fillStyle='#b5c8e7';star(ctx,0,0,25);ctx.fillStyle='#ff6f93';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.restore();
+   ctx.save();ctx.translate(x,y+e.height/2);if(!reducedMotion)ctx.rotate(s.frame*.08);if(drawHostileArt(ctx,art,'saw',-30,-30,60,60)){ctx.restore();continue;}ctx.fillStyle='#b5c8e7';star(ctx,0,0,25);ctx.fillStyle='#ff6f93';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.restore();
   }else if(e.kind==='missile'){
-   if(drawArt(ctx,art,'missile',x-32,y-6,72,34))continue;
+   if(drawHostileArt(ctx,art,'missile',x-39,y-10,86,42))continue;
    ctx.fillStyle='#ffb975';ctx.beginPath();ctx.moveTo(x-25,y+11);ctx.lineTo(x+18,y);ctx.lineTo(x+18,y+22);ctx.closePath();ctx.fill();ctx.fillStyle='#ff617d';ctx.fillRect(x+18,y+6,14,10);
   }else if(e.kind==='laser'){
-   drawArt(ctx,art,'laserEmitter',x-e.width/2-26,y-12,34,30);
+   drawHostileArt(ctx,art,'laserEmitter',x-e.width/2-26,y-12,34,30);
    const active=laserActive(s,e);ctx.fillStyle=active?'#ff6388':'#ffb87540';ctx.fillRect(x-e.width/2,y,e.width,active?14:3);ctx.strokeStyle='#ffb875';ctx.lineWidth=2;ctx.setLineDash(active?[]:[8,8]);ctx.strokeRect(x-e.width/2,y-5,e.width,24);ctx.setLineDash([]);ctx.font='bold 13px sans-serif';ctx.fillStyle='#ffe2b2';ctx.textAlign='center';ctx.fillText(active?'!':'···',x,y-12);
   }else{
    for(const r of entityRects(s,e,distance)){
@@ -57,12 +58,13 @@ export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:n
  }
  if(s.boss){
   const x=610,y=112+(reducedMotion?0:Math.sin(s.frame*.04)*14);
-  if(!drawArt(ctx,art,'boss',x-85,y-46,170,90)){
+  drawDangerAura(ctx,x-105,y-60,210,120,s.frame,reducedMotion);
+  if(!drawHostileArt(ctx,art,'boss',x-105,y-60,210,120)){
   ctx.fillStyle='#2d294e';ctx.beginPath();ctx.ellipse(x,y,63,29,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff99af';ctx.lineWidth=3;ctx.stroke();
   ctx.fillStyle='#ffcb7c';ctx.fillRect(x-16,y-9,32,13);ctx.fillStyle='#1f1735';ctx.fillRect(x-10,y-5,6,5);ctx.fillRect(x+4,y-5,6,5);
   ctx.strokeStyle='#c1eaff';ctx.beginPath();ctx.moveTo(x-85,y-16);ctx.lineTo(x-40,y-16);ctx.moveTo(x+40,y-16);ctx.lineTo(x+85,y-16);ctx.stroke();
   }
-  for(let i=0;i<3;i++){ctx.fillStyle=i<s.boss.hp?'#ff99af':'#ffffff30';ctx.fillRect(x-34+i*25,y-64,18,6);}
+  for(let i=0;i<3;i++){ctx.fillStyle=i<s.boss.hp?'#ff99af':'#ffffff30';ctx.fillRect(x-34+i*25,y-76,18,6);}
  }
  ctx.restore();
 }

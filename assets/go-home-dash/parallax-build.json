@@ -1,0 +1,142 @@
+{
+  "generator": "Blender 4.3.2 / Cycles CPU",
+  "script": "scripts/build-home-dash-parallax.py",
+  "script_sha256": "f7855e73c2c5c6781029ffe7a7d57a6fa1b996b6cc9c533dbd697fc25bc42de1",
+  "samples": 32,
+  "dimensions": [
+    1280,
+    640
+  ],
+  "paintedLayerSpeed": 0.09,
+  "architectureLayerSpeed": 0.28,
+  "foregroundLayerSpeed": 0.65,
+  "editableScene": "assets/go-home-dash/school-parallax.blend",
+  "records": [
+    {
+      "route": "school",
+      "layer": "architecture",
+      "source_sha256": "aa8bcefeb4c7be822d0be82ef6ef4e4e759e095c2404caccb8cec75abe5b5787",
+      "output": "public/sprites/go-home-dash/parallax/school-architecture.webp",
+      "sha256": "352520134171f0f76586a2596e4f81ca7316931db6a13422f6420996e70b1b57",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "school",
+      "layer": "foreground",
+      "source_sha256": "533ea65fcb7203959b9ca6af2ceb3128e012949dd36096036543c2c5053da20f",
+      "output": "public/sprites/go-home-dash/parallax/school-foreground.webp",
+      "sha256": "315d135d822acab5663077198a3877dff667fb47691823584d56bea272be81b7",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "rooftops",
+      "layer": "architecture",
+      "source_sha256": "c8a591fe54c21ccc971daf8f5df89887bf05c43d4568ac65ae180e186ab68b97",
+      "output": "public/sprites/go-home-dash/parallax/rooftops-architecture.webp",
+      "sha256": "6624d88a38f06e045b6ce9f80f435b9b44ddd3783b8c440f04d287feef6c4d37",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "rooftops",
+      "layer": "foreground",
+      "source_sha256": "e06f6a02e4b33fd37c178c240355c9950182d5197355f6fa2bba0d80e63a329f",
+      "output": "public/sprites/go-home-dash/parallax/rooftops-foreground.webp",
+      "sha256": "1c7d73cef08882e3aa677b4f11d657a4f2f18a1e84425eeccedec1b3a2ee9252",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "canal",
+      "layer": "architecture",
+      "source_sha256": "d647ff7e824c760fb8bc6c65d5bca14642661c3c4546bbe18cb06ced87c6a71c",
+      "output": "public/sprites/go-home-dash/parallax/canal-architecture.webp",
+      "sha256": "896466302f0cac0750646eaa3b1d946f55bf6df88d37af17e9c54f24fbcb2522",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "canal",
+      "layer": "foreground",
+      "source_sha256": "d0bf597108a9465a7fbd1aca32b6dbd8c417ca14ad3718d1f7e7c943dd7ac3b4",
+      "output": "public/sprites/go-home-dash/parallax/canal-foreground.webp",
+      "sha256": "3215fc0da3b0b592846856cd0774fd4d4a0f7f692e33cc868721a17456cc53ba",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "garden",
+      "layer": "architecture",
+      "source_sha256": "3763ee70a5917e7b7e43bcb71641bed41b76d7362afac8abcaa43fe4b40bfc3b",
+      "output": "public/sprites/go-home-dash/parallax/garden-architecture.webp",
+      "sha256": "bc8dda9cd735908b57f877d360b056ee815ab92ec9e9b2e1c4dfd04b0a431611",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "garden",
+      "layer": "foreground",
+      "source_sha256": "15769f8bc3449a595d96211445d1cf990ecdb525f4014de8bc0d04df0537d573",
+      "output": "public/sprites/go-home-dash/parallax/garden-foreground.webp",
+      "sha256": "500f53c390cdbb5c0cf9eb3178380c843a8c5a83a8922db4e2ec696332d5e181",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "clockwork",
+      "layer": "architecture",
+      "source_sha256": "15fad67e60239baccaadc6c13ab6e983ba28fa83a6bd3481c1ad07b2e98a816f",
+      "output": "public/sprites/go-home-dash/parallax/clockwork-architecture.webp",
+      "sha256": "b0979963f77e4f5bfe94f3f30a4aa82bb741aca7882250b422cf420727c44a58",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "clockwork",
+      "layer": "foreground",
+      "source_sha256": "c0c26cd6cfb0797de66bbf30fcd0fe1bc0a3255490d449fc14349aacbba28f54",
+      "output": "public/sprites/go-home-dash/parallax/clockwork-foreground.webp",
+      "sha256": "9cfe0ae9c940ce457aa1108b2a7a536ab9206490da38e74d76570218de194a6f",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "skyway",
+      "layer": "architecture",
+      "source_sha256": "5b6b5ec9caef529657f09b689c4dc87d88d4c75309ded8799a78838c47fabb63",
+      "output": "public/sprites/go-home-dash/parallax/skyway-architecture.webp",
+      "sha256": "ce74cb1b9a5a6ac921724d58d6b05f2840e25df7cab3005317c62e0de1037fe2",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "skyway",
+      "layer": "foreground",
+      "source_sha256": "dea8d0316f84103228f9ebe209d34d115d17c21b16121ce0cba15a0fab56f58e",
+      "output": "public/sprites/go-home-dash/parallax/skyway-foreground.webp",
+      "sha256": "107350ba9acf3645ced983ad96fe4c6f494bdacb403886851d6021e0b3799f01",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "storm",
+      "layer": "architecture",
+      "source_sha256": "b06e84749e37ce354110b6667f24ee40204a83dc8788f6f1d05e43ae01ae06b5",
+      "output": "public/sprites/go-home-dash/parallax/storm-architecture.webp",
+      "sha256": "615cf36ab07b2287ee06e653ee64603a64894fe98641c6092b02d4a435c1064d",
+      "width": 1280,
+      "height": 640
+    },
+    {
+      "route": "storm",
+      "layer": "foreground",
+      "source_sha256": "6d8c9183615704e42b8144fdd471900d33330007f8def5c6a5ab65b5669e5390",
+      "output": "public/sprites/go-home-dash/parallax/storm-foreground.webp",
+      "sha256": "ba562f0b3b2597e38a5b8a616939416f7dbddefa6321100e1df3dd91ad7b2303",
+      "width": 1280,
+      "height": 640
+    }
+  ]
+}

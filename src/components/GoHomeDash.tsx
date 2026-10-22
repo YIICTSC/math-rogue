@@ -11,11 +11,12 @@ import { trans } from '../utils/textUtils';
 import { DashLobby, DASH_HEROES, DEFAULT_DASH_HERO } from '../mini-games/go-home-dash/Lobby';
 import { DASH_HERO_ART } from '../mini-games/go-home-dash/heroes';
 import { routeAt, floorAt, routeCopy, ROUTE_LENGTH, DISTANCE_SCALE, routeTransition, type RouteId } from '../mini-games/go-home-dash/routes';
-import { drawRoute, drawTerrain, drawRunner } from '../mini-games/go-home-dash/render';
+import { drawRoute, drawTerrain, drawRunner, type ParallaxArt } from '../mini-games/go-home-dash/render';
 import { stairRects, flightGateRects, isStair, overlapsSolid } from '../mini-games/go-home-dash/obstacles';
 import { ArcadeHud } from '../mini-games/go-home-dash/ArcadeHud';
 import { createArcade, beginArcade, endArcade, activateOrb, arcadePlatform, hitArcade, dashArcade, dailySeed, seededRandom, saveArcadeRun, loadArcadeProfile, trailColor, announce, type RunMode } from '../mini-games/go-home-dash/arcade';
-import { drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
+import { advanceObstacleMotion } from '../mini-games/go-home-dash/motion';
+import { drawDangerAura, drawHostileArt, drawStairArt, drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
 import { drawArcade, drawArcadeRunner } from '../mini-games/go-home-dash/arcadeRender';
 import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
 import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
@@ -91,6 +92,7 @@ interface Obstacle {
     shootCooldown?: number;
     baseY?: number;
     phase?: number;
+    hopCooldown?: number;
 }
 
 interface Projectile {
@@ -215,6 +217,7 @@ const GoHomeDash: React.FC<{
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
     const playerSlideRef = useRef<HTMLImageElement | null>(null);
     const artImagesRef = useRef<ArtImages>({});
+    const routeLayersRef = useRef<ParallaxArt>({});
     const enemySpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const projectileSpriteSheetRef = useRef<HTMLImageElement | null>(null);
     const [gameState, setGameState] = useState<DashGameState>('START');
@@ -259,6 +262,10 @@ const GoHomeDash: React.FC<{
             const image = new Image();
             image.onload = () => { if (active) routeArtRef.current[id] = image; };
             image.src = assetUrl(`sprites/go-home-dash/routes/${id}.webp`);
+            for(const layer of ['architecture','foreground'] as const){
+                const texture=new Image();texture.onload=()=>{if(active){routeLayersRef.current[id]??={};routeLayersRef.current[id]![layer]=texture;}};
+                texture.src=assetUrl(`sprites/go-home-dash/parallax/${id}-${layer}.webp`);
+            }
         }
         return () => { active = false; };
     }, []);
@@ -604,6 +611,9 @@ const GoHomeDash: React.FC<{
         if (!p.isJumping && !p.isFalling && !p.flying && Math.abs(p.y - previousFloor) < 12) p.y = floor;
 
         frameCount.current++;
+        for(const obstacle of obstaclesRef.current){
+            if(advanceObstacleMotion(obstacle,routeSeedRef.current,distanceRef.current,currentSpeed,frameCount.current,randomRef.current))addParticle(obstacle.x,floorAt(routeSeedRef.current,distanceRef.current+obstacle.x),obstacle.type==='WATER_SLIME'?'#72c9e9':'#8d6e63');
+        }
 
         if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;
 
@@ -663,14 +673,15 @@ const GoHomeDash: React.FC<{
                 const previousTop = top - (obs.vy || 0);
                 const wasOnTop = Math.abs(previousY - previousTop) < 6 && !p.isJumping;
                 if (Math.abs(p.x - obs.x) < obs.width / 2 - 5 && p.vy >= 0 && (wasOnTop || previousY <= previousTop + 4) && p.y >= top - 6) {
+                    if(wasOnTop)p.y=Math.max(p.y,top);
                     currentGroundLevel = Math.min(currentGroundLevel, top); isOnObject = true;
                 }
             }
             if (isStair(obs.type) && !p.flying) {
                 const base = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
                 for (const rect of stairRects(obs, base)) {
-                    // Sweep the incoming face over this frame as well as current overlap.
-                    const left = rect.left - currentSpeed;
+                    // The solid and the displayed step now share the advanced position.
+                    const left = rect.left;
                     if (p.x + 15 <= left || p.x - 15 >= rect.left + rect.width) continue;
                     if (p.vy >= 0 && previousY <= rect.top + 5 && p.y >= rect.top) {
                         currentGroundLevel = Math.min(currentGroundLevel, rect.top); isOnObject = true;
@@ -690,9 +701,9 @@ const GoHomeDash: React.FC<{
         const overHole = !isOnObject && obstacles.some(obs => obs.type === 'HOLE' && Math.abs(obs.x - p.x) < obs.width / 2);
 
         if (!p.flying && p.y >= currentGroundLevel) {
-            if (overHole || p.isFalling) p.isFalling = true;
+            if (overHole || (p.isFalling && !isOnObject && previousY > currentGroundLevel + 3)) p.isFalling = true;
             else {
-                if (p.isFalling) p.isFalling = false;
+                p.isFalling = false;
                 if (p.isJumping) {
                     for (let i = 0; i < 5; i++) addParticle(p.x - 8 + i * 4, currentGroundLevel, '#cbd5e1');
                     if (p.landShockwave) {
@@ -826,11 +837,12 @@ const GoHomeDash: React.FC<{
             else if (type === 'CLOCK_GHOST') { width = 48; height = 48; }
             else if (type === 'SHOE_ROLLER') { width = 46; height = 34; }
 
+            const phase=randomRef.current()*Math.PI*2;
             obstaclesRef.current.push({ 
                 id: randomRef.current().toString(),
                 x: spawnX, 
-                y: isAir ? (stage.flight ? 115 + randomRef.current() * 135 : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - 110 - randomRef.current() * 50) : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - height / 2,
-                baseY: 0, phase: randomRef.current() * Math.PI * 2,
+                y: type==='ELEVATOR'?floorAt(routeSeedRef.current,distanceRef.current+spawnX)-80-24*Math.sin(frameCount.current*.025+phase):isAir ? (stage.flight ? 115 + randomRef.current() * 135 : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - 110 - randomRef.current() * 50) : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - height / 2,
+                phase,
                 vy: 0,
                 width, 
                 height, 
@@ -843,7 +855,7 @@ const GoHomeDash: React.FC<{
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const obs = obstacles[i]; 
-            obs.x -= currentSpeed * obs.speedMult;
+
             const obsFloor = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
             if (obs.type === 'FLIGHT_GATE') {
                 if (!stage.flight) { obstacles.splice(i, 1); continue; }
@@ -851,32 +863,9 @@ const GoHomeDash: React.FC<{
                 if (obs.x < -obs.width) obstacles.splice(i, 1);
                 continue;
             }
-            if (obs.type === 'ELEVATOR') {
-                const nextY = obsFloor - 56 - (1 + Math.sin(frameCount.current * .025 + (obs.phase || 0))) * 24;
-                obs.vy = nextY - obs.y; obs.y = nextY;
-            } else if (obs.type === 'SPRING') {
-                obs.y = obsFloor - 7;
-                if (!p.flying && Math.abs(p.x - obs.x) < 36 && p.y >= obsFloor - 15 && p.vy >= 0) {
-                    p.vy = -17; p.isJumping = true; p.jumpCount = 0;
-                    voice('jump'); audioService.playSound('jump'); addVfxRing(p.x, p.y, '#c9ff8a');
-                }
-            } else if (['PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'].includes(obs.type)) {
-                if (!obs.baseY) obs.baseY = obs.y;
-                obs.y = obs.baseY + Math.sin(frameCount.current * (obs.type === 'FIRE_FLY' ? .09 : .035) + (obs.phase || 0)) * (obs.type === 'WIND_SPIRIT' ? 28 : 16);
-            } else if (obs.vy === 0 && !['BIRD', 'DRONE', 'CLOCK_GHOST', 'HOLE'].includes(obs.type)) obs.y = obsFloor - obs.height / 2;
-
-            // 特殊挙動: ジャンプ
-            if ((obs.type === 'JUMPING_SLIME' || obs.type === 'WATER_SLIME') && obs.y >= obsFloor - 20 && obs.x < 500 && randomRef.current() < 0.05) {
-                obs.vy = -12;
-            }
-            if (obs.type !== 'ELEVATOR' && (obs.type === 'JUMPING_SLIME' || obs.type === 'WATER_SLIME' || obs.vy !== 0)) {
-                obs.vy += 0.5; // 敵用重力
-                obs.y += obs.vy;
-                if (obs.y > obsFloor - 20) {
-                    obs.y = obsFloor - 20;
-                    obs.vy = 0;
-                    addParticle(obs.x, GROUND_Y, '#8d6e63');
-                }
+            if(obs.type==='HOLE'){if(obs.x+obs.width/2<-40)obstacles.splice(i,1);continue;}
+            if (obs.type === 'SPRING' && !p.flying && Math.abs(p.x-obs.x)<36 && p.y>=obsFloor-15 && p.vy>=0) {
+                p.vy=-17;p.isJumping=true;p.jumpCount=0;voice('jump');audioService.playSound('jump');addVfxRing(p.x,p.y,'#c9ff8a');
             }
 
             // 特殊挙動: 射撃
@@ -920,7 +909,7 @@ const GoHomeDash: React.FC<{
                 }
             }
             
-            if (p.stompAbility && p.vy > 0 && isDestroyable(obs.type) && obs.type !== 'HOLE') {
+            if (p.stompAbility && p.vy > 0 && isDestroyable(obs.type)) {
                 const dx = p.x - obs.x;
                 const dy = obs.y - p.y;
                 if (Math.abs(dx) < 40 && dy > 0 && dy < 40) {
@@ -936,7 +925,7 @@ const GoHomeDash: React.FC<{
             if(p.dashFrames>0&&isDestroyable(obs.type)&&Math.abs(p.x-obs.x)<60&&Math.abs(p.y-30-obs.y)<65){
                 obstacles.splice(i,1);arcade.score+=80;arcade.stats.breaks++;announce(arcade,'smash');addVfxRing(obs.x,obs.y,'#ffdf9b');continue;
             }
-            if (obs.type !== 'HOLE' && !['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
+            if (!['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
                 const pdx = p.x - obs.x; const pdy = (p.y - (arcade.slide>0?13:30)) - obs.y;
                 if (Math.sqrt(pdx * pdx + pdy * pdy) < (arcade.slide>0?23:35) && p.invulFrame <= 0) { handlePlayerDamage(false, i); continue; }
             }
@@ -949,7 +938,7 @@ const GoHomeDash: React.FC<{
                         projs.splice(j, 1); 
                         addParticle(proj.x, proj.y, '#94a3b8'); 
                     } 
-                    else if (obs.type !== 'HOLE') {
+                    else {
                         if (!proj.isPierce) projs.splice(j, 1);
                         obstacles.splice(i, 1); audioService.playSound('attack');
                         scoreRef.current += 50; addParticle(obs.x, obs.y, '#ffeb3b');
@@ -1043,13 +1032,13 @@ const GoHomeDash: React.FC<{
         if (isFall) obstaclesRef.current = obstaclesRef.current.filter(o => o.type !== 'HOLE' || Math.abs(o.x - p.x) > o.width / 2 + 30);
         if(hitArcade(arcadeRef.current)){
             p.invulFrame=90;
-            if(isFall){p.y=floorAt(routeSeedRef.current,distanceRef.current+p.x);p.vy=-10;p.isFalling=false;}
+            if(isFall){p.y=floorAt(routeSeedRef.current,distanceRef.current+p.x);p.vy=-10;p.isFalling=false;p.isJumping=true;p.jumpCount=1;}
             if(obsIdx!==undefined)obstaclesRef.current.splice(obsIdx,1);audioService.playSound('block');return;
         }
         if (p.barrier) {
             p.barrier = false;
             p.invulFrame = 45;
-            if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = -10; p.isFalling = false; }
+            if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = -10; p.isFalling = false; p.isJumping=true; p.jumpCount=1; }
             else if (obsIdx !== undefined) obstaclesRef.current.splice(obsIdx, 1);
             if (p.reflectShield) {
                 addVfxRing(p.x, p.y, '#00ffff');
@@ -1066,7 +1055,7 @@ const GoHomeDash: React.FC<{
         }
         voice('damage');
         p.invulFrame = 60; audioService.playSound('damage'); triggerShake();
-        if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = 0; p.isFalling = false; }
+        if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = 0; p.isFalling = false; p.isJumping=false; p.jumpCount=0; }
     };
 
     const draw = (ctx: CanvasRenderingContext2D) => {
@@ -1083,10 +1072,10 @@ const GoHomeDash: React.FC<{
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current,view.width,view.height);
+        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current,view.width,view.height,routeLayersRef.current);
         drawTerrain(ctx, routeSeedRef.current, distanceRef.current, holes,view.width,view.height);
         drawArcade(ctx,arcadeRef.current,distanceRef.current,reducedMotionRef.current,view.width,view.height,artImagesRef.current);
-        holes.forEach(hole => { ctx.fillStyle = '#ffcc80'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', hole.x, floorAt(routeSeedRef.current, distanceRef.current + hole.x) + 30); });
+        holes.forEach(hole => { drawDangerAura(ctx,hole.x-hole.width/2,floorAt(routeSeedRef.current,distanceRef.current+hole.x)-10,hole.width,20,frameCount.current,reducedMotionRef.current);ctx.fillStyle = '#ff637d'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', hole.x, floorAt(routeSeedRef.current, distanceRef.current + hole.x) + 30); });
 
         const parts = particlesRef.current;
         for (const p of parts) { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 30; ctx.fillRect(p.x, p.y, p.size, p.size); }
@@ -1106,7 +1095,8 @@ const GoHomeDash: React.FC<{
         // 敵の弾の描画
         const enemyProjs = enemyProjectilesRef.current;
         for (const ep of enemyProjs) {
-            const sz = ep.isLarge ? 28 : 20;
+            const sz = ep.isLarge ? 32 : 24;
+            drawDangerAura(ctx,ep.x-sz/2,ep.y-sz/2,sz,sz,frameCount.current,reducedMotionRef.current);
             const drew = drawSpriteCell(ctx, projectileSheet, PROJECTILE_SPRITE_CELLS[ep.spriteKey || 'CHALK'], ep.x - sz / 2, ep.y - sz / 2, sz, sz);
             if (!drew) {
                 ctx.fillStyle = '#ef4444';
@@ -1122,7 +1112,8 @@ const GoHomeDash: React.FC<{
             if (obs.type === 'HOLE') continue;
             if (obs.type === 'FLIGHT_GATE') {
                 for (const rect of flightGateRects(obs.x, obs.width, obs.y)) {
-                    if(drawArt(ctx,artImagesRef.current,'gate',rect.left,rect.top,rect.width,rect.height,'stretch'))continue;
+                    drawDangerAura(ctx,rect.left,rect.top,rect.width,rect.height,frameCount.current,reducedMotionRef.current);
+                    if(drawHostileArt(ctx,artImagesRef.current,'gate',rect.left,rect.top,rect.width,rect.height,'stretch'))continue;
                     ctx.fillStyle = '#273859'; ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
                     ctx.strokeStyle = '#a7f3ff'; ctx.lineWidth = 3; ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
                     ctx.fillStyle = '#5a8ba0';
@@ -1138,8 +1129,10 @@ const GoHomeDash: React.FC<{
                 ctx.fillStyle = color; ctx.font = 'bold 18px monospace'; ctx.textAlign = 'center'; ctx.fillText(obs.type === 'SPRING' ? '↑↑' : '↕', obs.x, obs.y - 12);
                 continue;
             }
+            if(isStair(obs.type))drawDangerAura(ctx,obs.x-obs.width/2,floorAt(routeSeedRef.current,distanceRef.current+obs.x)-obs.height,obs.width,obs.height,frameCount.current,reducedMotionRef.current);
+            else drawDangerAura(ctx,obs.x-obs.width*.63,obs.y-obs.height*.7,obs.width*1.26,obs.height*1.25,frameCount.current,reducedMotionRef.current);
             const extraIndex = ['PAPER_WYVERN', 'WATER_SLIME', 'FIRE_FLY', 'WIND_SPIRIT'].indexOf(obs.type);
-            if(extraIndex>=0&&drawArt(ctx,artImagesRef.current,(['paperWyvern','waterSlime','fireFly','windSpirit'] as const)[extraIndex],obs.x-33,obs.y-33,66,66))continue;
+            if(extraIndex>=0&&drawHostileArt(ctx,artImagesRef.current,(['paperWyvern','waterSlime','fireFly','windSpirit'] as const)[extraIndex],obs.x-40,obs.type==='WATER_SLIME'?obs.y+obs.height/2-80:obs.y-40,80,80))continue;
             const extraSheet = extraEnemiesRef.current;
             if (extraIndex >= 0 && extraSheet?.complete && extraSheet.naturalWidth > 0) {
                 const w = extraSheet.naturalWidth / 4, h = extraSheet.naturalHeight / 2;
@@ -1148,22 +1141,17 @@ const GoHomeDash: React.FC<{
             }
             if (obs.type === 'STEPS' || obs.type === 'HIGH_STEPS' || obs.type === 'MOUNTAIN_STEPS') {
                 ctx.fillStyle = '#8d6e63'; ctx.strokeStyle = '#2d1b0e'; ctx.lineWidth = 3;
-                for (const rect of stairRects(obs, floorAt(routeSeedRef.current, distanceRef.current + obs.x))) {
-                    if(drawArt(ctx,artImagesRef.current,'step',rect.left,rect.top,rect.width,rect.height,'stretch'))continue;
-                    ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
-                    ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
-                    ctx.fillStyle = '#ffcf92'; ctx.fillRect(rect.left, rect.top, rect.width, 3); ctx.fillStyle = '#8d6e63';
-                }
+                for(const rect of stairRects(obs,floorAt(routeSeedRef.current,distanceRef.current+obs.x)))drawStairArt(ctx,artImagesRef.current,rect);
             } else if (obs.type === 'IRON_BARRIER') {
-                ctx.shadowBlur = 10; ctx.shadowColor = "#00ffff";
-                const drew = drawArt(ctx,artImagesRef.current,'IRON_BARRIER',obs.x-obs.width/2,GROUND_Y-obs.height,obs.width,obs.height,'stretch');
+                ctx.shadowBlur = 12; ctx.shadowColor = '#ff234b';
+                const drew = drawHostileArt(ctx,artImagesRef.current,'IRON_BARRIER',obs.x-obs.width/2,obs.y-obs.height/2,obs.width,obs.height,'stretch');
                 if (!drew) {
                     ctx.fillStyle = '#e2e8f0';
                     ctx.fillRect(obs.x - obs.width/2, GROUND_Y - obs.height, obs.width, obs.height);
                 }
                 ctx.shadowBlur = 0;
             } else {
-                if(obs.type in ENEMY_SPRITE_CELLS && drawArt(ctx,artImagesRef.current,obs.type as ArtKey,obs.x-obs.width/2,obs.y-obs.height/2,obs.width,obs.height))continue;
+                if(obs.type in ENEMY_SPRITE_CELLS && drawHostileArt(ctx,artImagesRef.current,obs.type as ArtKey,obs.x-obs.width*.63,obs.y-obs.height*.75,obs.width*1.26,obs.height*1.25))continue;
                 const drew = drawSpriteCell(
                     ctx,
                     enemySpriteSheetRef.current,

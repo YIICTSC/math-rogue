@@ -1,7 +1,18 @@
 import { drawArt, type ArtImages } from './art';
 import { floorAt, routeAt, ROUTE_COLORS, routeTransition, type RouteId } from './routes';
 
-function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, id: RouteId, art: HTMLImageElement | undefined, width: number, height: number) {
+export type ParallaxArt=Partial<Record<RouteId,Partial<Record<'architecture'|'foreground',HTMLImageElement>>>>;
+
+// Alternate mirrored painted plates: identical edge pixels, no jump on wrapping.
+export function drawScrollingLayer(ctx:CanvasRenderingContext2D,image:HTMLImageElement,distance:number,speed:number,width:number,opacity=1){
+ const h=400,w=h*image.naturalWidth/image.naturalHeight;if(!Number.isFinite(w)||w<=0)return;
+ const phase=distance*speed,first=Math.floor(phase/w),offset=phase-first*w;
+ ctx.save();ctx.globalAlpha*=opacity;
+ for(let i=-1;i<=Math.ceil(width/w)+1;i++){const x=i*w-offset;ctx.save();if((first+i)%2!==0){ctx.translate(x+w,0);ctx.scale(-1,1);ctx.drawImage(image,0,0,w,h);}else ctx.drawImage(image,x,0,w,h);ctx.restore();}
+ ctx.restore();
+}
+
+function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, id: RouteId, art: HTMLImageElement | undefined, width: number, height: number, layers: ParallaxArt) {
   const route = {...routeAt(seed, distance + 120), id}, colors = ROUTE_COLORS[id];
   if (!art?.complete || art.naturalWidth <= 0) {
     const sky = ctx.createLinearGradient(0, 0, 0, 400);
@@ -35,36 +46,38 @@ function drawRouteLayer(ctx: CanvasRenderingContext2D, seed: number, distance: n
     }
   }
   if (art?.complete && art.naturalWidth > 0) {
-    const pan = (1 - Math.cos(distance * .00018)) * 25;
-    const targetWidth=width+50,sourceHeight=Math.min(art.naturalHeight,art.naturalWidth*height/targetWidth);
-    const sourceWidth=Math.min(art.naturalWidth,art.naturalHeight*targetWidth/height);
-    ctx.drawImage(art,0,art.naturalHeight-sourceHeight,sourceWidth,sourceHeight,-pan,0,targetWidth,height);
+    drawScrollingLayer(ctx,art,distance,.09,width);
+    const scenery=layers[id];
+    if(scenery?.architecture?.complete&&scenery.architecture.naturalWidth)drawScrollingLayer(ctx,scenery.architecture,distance,.28,width,1);
+    if(scenery?.foreground?.complete&&scenery.foreground.naturalWidth)drawScrollingLayer(ctx,scenery.foreground,distance,.65,width,1);
     const shade = ctx.createLinearGradient(0, 0, 0, 400);
     shade.addColorStop(0, '#10182f22'); shade.addColorStop(.6, '#10182f00'); shade.addColorStop(1, '#10182f88');
     ctx.fillStyle = shade; ctx.fillRect(0, 0, width, height);
   }
-  // Clouds and small drifting highlights provide depth without new textures.
-  ctx.fillStyle = '#fff1dd25';
-  for (let i = 0; i < 5; i++) { const x = ((i * 223 - distance * .14) % 1100 + 1100) % 1100 - 130; ctx.beginPath(); ctx.ellipse(x, 70 + i * 21, 62, 9, 0, 0, Math.PI * 2); ctx.fill(); }
+  // Small drifting highlights complement the painted sky and Blender scenery.
   ctx.fillStyle = colors.glow;
   for (let i = 0; i < 12; i++) { const x = ((i * 79 - distance * .6) % 880 + 880) % 880; ctx.fillStyle = colors.glow + Math.round((.2 + .2 * Math.sin(frame * .03 + i)) * 255).toString(16).padStart(2, '0'); ctx.fillRect(x, 130 + i * 13 % 150, 2, 2); }
 }
 
 
-export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, art: Partial<Record<RouteId, HTMLImageElement>>, width=800, height=400) {
+export function drawRoute(ctx: CanvasRenderingContext2D, seed: number, distance: number, frame: number, art: Partial<Record<RouteId, HTMLImageElement>>, width=800, height=400, layers:ParallaxArt={}) {
   const transition = routeTransition(seed, distance + 120);
   ctx.save();
-  if (transition.mix < 1) drawRouteLayer(ctx, seed, distance, frame, transition.from, art[transition.from],width,height);
+  if (transition.mix < 1) drawRouteLayer(ctx, seed, distance, frame, transition.from, art[transition.from],width,height,layers);
   ctx.globalAlpha = transition.mix;
-  drawRouteLayer(ctx, seed, distance, frame, transition.to, art[transition.to],width,height);
+  drawRouteLayer(ctx, seed, distance, frame, transition.to, art[transition.to],width,height,layers);
   ctx.restore();
 }
 
 export function drawTerrain(ctx: CanvasRenderingContext2D, seed: number, distance: number, holes: {x: number; width: number}[], width=800, height=400) {
   const colors = ROUTE_COLORS[routeAt(seed, distance + 120).id];
   for (let x = 0; x < width; x += 4) {
-    if (holes.some(h => Math.abs(x - h.x) < h.width / 2)) continue;
     const y = floorAt(seed, distance + x);
+    if (holes.some(h => Math.abs(x - h.x) < h.width / 2)){
+      // A pit is a void in the world, not a window onto a slower-scrolling road.
+      ctx.fillStyle='#060b16';ctx.fillRect(x,y,4,height-y);
+      ctx.fillStyle='#b94c6838';ctx.fillRect(x,y,4,3);continue;
+    }
     ctx.fillStyle = colors.ground; ctx.fillRect(x, y, 4, height - y);
     ctx.fillStyle = '#10182f77'; ctx.fillRect(x, y + 12, 4, height - 12 - y);
     ctx.fillStyle = colors.glow; ctx.fillRect(x, y, 4, 3);

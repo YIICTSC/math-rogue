@@ -9,7 +9,7 @@ try{
  server=await createServer({logLevel:'error',server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{
   name:'home-dash-qa',enforce:'pre',
   transform(code,id){if(!id.endsWith('/src/components/GoHomeDash.tsx'))return;return code.replace('    const getSubjectIcon =',`    Object.assign(window, {__dash: {
-      get viewport(){return viewportRef.current;}, get slideImage(){return playerSlideRef.current?.src;}, get art(){return artImagesRef.current;}, get arcade(){return arcadeRef.current;}, pause:togglePause, slide:triggerSlide, init:initGame, setMode:selectRunMode, get paused(){return pausedRef.current;}, get routeArt(){return routeArtRef.current;}, get player(){return {...playerRef.current};}, get state(){return gameStateRef.current;}, get hero(){return heroRef.current;}, get seed(){return routeSeedRef.current;}, get distance(){return distanceRef.current;}, get hp(){return hpRef.current;}, get obstacles(){return obstaclesRef.current;}, get frame(){return frameCount.current;}, get enemyShots(){return enemyProjectilesRef.current;},
+      get routeLayers(){return routeLayersRef.current;}, get viewport(){return viewportRef.current;}, get slideImage(){return playerSlideRef.current?.src;}, get art(){return artImagesRef.current;}, get arcade(){return arcadeRef.current;}, pause:togglePause, slide:triggerSlide, init:initGame, setMode:selectRunMode, get paused(){return pausedRef.current;}, get routeArt(){return routeArtRef.current;}, get player(){return {...playerRef.current};}, get state(){return gameStateRef.current;}, get hero(){return heroRef.current;}, get seed(){return routeSeedRef.current;}, get distance(){return distanceRef.current;}, get hp(){return hpRef.current;}, get obstacles(){return obstaclesRef.current;}, get frame(){return frameCount.current;}, get shots(){return projectilesRef.current;}, get enemyShots(){return enemyProjectilesRef.current;},
       step(n=1){flushSync(()=>{for(let i=0;i<n;i++)updateLogic();});const c=canvasRef.current?.getContext('2d');if(c)draw(c);},
       arrange(seed,distance,overrides={},obs=[]){flushSync(()=>{pausedRef.current=false;setPaused(false);arcadeRef.current=createArcade(seed,runModeRef.current,distance);arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=distance;expRef.current=0;obstaclesRef.current=obs;enemyProjectilesRef.current=[];projectilesRef.current=[];playerRef.current={...playerRef.current,x:120,y:floorAt(seed,distance+120),vy:0,isJumping:false,isFalling:false,jumpCount:0,flying:false,invulFrame:0,dashFrames:0,dashCooldown:0,...overrides};setTravelled(Math.floor(distance/10));setArcadeView({...arcadeRef.current});setRoute(routeAt(seed,distance+120).id);setFlight(false);setDashReady(true);gameStateRef.current='PLAYING';setGameState('PLAYING');});},
       sweep(n){const seen=new Set();let max=0;flushSync(()=>{for(let i=0;i<n;i++){updateLogic();for(const e of arcadeRef.current.entities)seen.add(e.kind);max=Math.max(max,arcadeRef.current.entities.length);}});return {seen:[...seen],max,state:gameStateRef.current};},
@@ -67,6 +67,33 @@ try{
  await page.waitForFunction(()=>window.__dash?.hero==='magic-akari');
  await page.waitForFunction(()=>window.__dash?.routeArt.school?.naturalWidth===1280);
  await page.clock.install({time:new Date('2026-10-21T00:00:00Z')});await page.clock.pauseAt(new Date('2026-10-21T00:00:01Z'));
+ // Threat skins and layer movement are verified through the actual canvas renderer.
+ await page.waitForFunction(()=>Object.values(__dash.routeLayers).length===7&&Object.values(__dash.routeLayers).every(l=>l.architecture?.naturalWidth===1280&&l.foreground?.naturalWidth===1280));
+ const sceneryRules=await page.evaluate(async()=>{
+  const {drawScrollingLayer}=await import('/src/mini-games/go-home-dash/render.ts');
+  const c=document.createElement('canvas');c.width=800;c.height=400;const ctx=c.getContext('2d'),image=__dash.routeArt.school;
+  const original=ctx.drawImage,records=[];ctx.drawImage=function(...args){records.push(this.getTransform().e);return original.apply(this,args);};
+  const shifts=[];for(const speed of [.09,.28,.65]){records.length=0;drawScrollingLayer(ctx,image,0,speed,800);const x=records[0];records.length=0;drawScrollingLayer(ctx,image,100,speed,800);shifts.push(records[0]-x);}
+  ctx.drawImage=original;ctx.clearRect(0,0,800,400);drawScrollingLayer(ctx,image,800/.09-.01,.09,800);const before=ctx.getImageData(0,0,800,400).data;ctx.clearRect(0,0,800,400);drawScrollingLayer(ctx,image,800/.09+.01,.09,800);const after=ctx.getImageData(0,0,800,400).data;let difference=0;for(let i=0;i<before.length;i++)difference+=Math.abs(before[i]-after[i]);
+  return {shifts,seamError:difference/before.length};
+ });assert.ok(sceneryRules.shifts.every((v,i)=>Math.abs(v-[-9,-28,-65][i])<1e-6));assert.ok(sceneryRules.seamError<1,'Background seam jumps');
+ const threatDraws=await page.evaluate(async()=>{
+  const m=await import('/src/mini-games/go-home-dash/arcade.ts');
+  __dash.arrange(42,0,{},[{id:'danger-preview',type:'BACKPACK',x:350,y:320,width:40,height:40,vy:0,speedMult:1},{id:'stairs-preview',type:'HIGH_STEPS',x:650,y:300,width:180,height:96,vy:0,speedMult:1}]);
+  m.addEntity(__dash.arcade,'coin',220,45);m.addEntity(__dash.arcade,'shield',275,80);m.addEntity(__dash.arcade,'saw',450,110,50,50);__dash.arcade.boss={hp:3,life:780,shot:90};
+  const original=CanvasRenderingContext2D.prototype.drawImage,draws=[];
+  CanvasRenderingContext2D.prototype.drawImage=function(...a){if(a[0] instanceof HTMLImageElement&&a[0].src.includes('/art/'))draws.push({src:a[0].src,x:a[1],y:a[2],sourceHeight:a[4],width:a[7],height:a[8],blur:this.shadowBlur,color:this.shadowColor,flip:this.getTransform().a<0});return original.apply(this,a);};
+  try{__dash.step();}finally{CanvasRenderingContext2D.prototype.drawImage=original;}
+  return draws;
+ });
+ const frames=await page.evaluate(async()=> (await import('/src/mini-games/go-home-dash/artFrames.ts')).ART_FRAMES);
+ assert.ok(threatDraws.filter(d=>d.src.includes('/items.webp')).every(d=>d.blur===0),'Items inherit threat glow');
+ assert.ok(threatDraws.some(d=>d.src.includes('/enemies.webp')&&d.blur>=13&&Math.max(d.width,d.height)>48),'Enemies lack size/glow');
+ assert.ok(threatDraws.some(d=>d.x===frames.boss.x&&d.y===frames.boss.y&&Math.max(d.width,d.height)>150&&d.flip&&d.blur>=13),'Boss must face the runner');
+ const steps=threatDraws.filter(d=>d.x===frames.step.x&&d.y>frames.step.y&&d.y<frames.step.y+frames.step.height);assert.equal(steps.length,3);assert.ok(steps.every(d=>d.sourceHeight<frames.step.height*.2),'Whole staircase icon repeated');
+ await page.screenshot({path:`${output}/threat-readability.png`});
+ await page.evaluate(()=>{__dash.init();__dash.arrange(42,0);});
+ console.log('Threat/parallax QA: red enemy-only skins, larger enemies, left-facing boss, geometric stair faces, 3 scroll speeds and seamless wrapping passed.',sceneryRules);
  if(process.env.DASH_GUIDE_CAPTURE){
   const guideDir='public/sprites/go-home-dash/guide';await fs.mkdir(guideDir,{recursive:true});
   await page.waitForFunction(()=>__dash.art.items?.complete&&__dash.art.hazards?.complete&&__dash.slideImage);
@@ -83,7 +110,7 @@ try{
     if(id==='jump'){__dash.arrange(42,0,{y:220,vy:-3,isJumping:true});add('coin',220,120);add('coin',270,160);add('coin',320,170);add('spike',420,0,100,32);}
     if(id==='dash'){__dash.arrange(42,0,{dashFrames:300,dashCooldown:450,invulFrame:304});add('wall',410,86,65,86);add('charge',300);add('boost',520,0,90,10);}
     if(id==='slide'){s.slide=30;add('tunnel',370,90,220,54);for(let i=0;i<6;i++)add('coin',290+i*40,18);}
-    if(id==='routes'){__dash.obstacles.push({id:'guide-stair',type:'HIGH_STEPS',x:430,y:300,width:190,height:85,vy:0,speedMult:1});}
+    if(id==='routes'){__dash.obstacles.push({id:'guide-stair',type:'HIGH_STEPS',x:430,y:300,width:190,height:85,vy:0,speedMult:1},{id:'guide-pit',type:'HOLE',x:690,y:340,width:80,height:40,vy:0,speedMult:1});}
     if(id==='flight'){__dash.obstacles.push({id:'guide-gate',type:'FLIGHT_GATE',x:400,y:175,width:72,height:340,vy:0,speedMult:1});}
     if(id==='collect'){s.combo=18;s.comboTime=180;s.fever=240;s.energy=100;for(let i=0;i<9;i++)add('coin',210+i*42,40+Math.sin(i/8*Math.PI)*90);add('star',610,110);}
     if(id==='powers'){for(const [i,kind] of ['magnet','shield','double','sneakers','board','lowGravity'].entries())add(kind,230+i*90,110,34,34);}
@@ -102,6 +129,29 @@ try{
   await page.evaluate(()=>{__dash.init();__dash.arrange(42,0);});
   if(process.env.DASH_GUIDE_CAPTURE_ONLY){await browser.close();await server.close();process.exit(0);}
  }
+ // Regressions: apex-to-descent, feet-based landing, world-anchored pits and moving-lift contact.
+ const motionRules=await page.evaluate(()=>{
+  const slimes=[];
+  for(const type of ['JUMPING_SLIME','WATER_SLIME']){
+   __dash.arrange(42,0,{invulFrame:100000,expMult:0},[{id:type,type,x:700,y:200,vy:-.5,width:50,height:60,speedMult:1}]);
+   const trace=[];let landed=false;
+   for(let i=0;i<70;i++){__dash.step();const o=__dash.obstacles.find(o=>o.id===type);if(!o)throw Error('Slime removed');trace.push({y:o.y,vy:o.vy});if(o.y===310&&o.vy===0){landed=true;if(o.hopCooldown!==32)throw Error('No landing rest');break;}}
+   if(trace[0].vy!==0||Math.abs(trace[1].y-trace[0].y-.5)>.001)throw Error('Slime teleports at apex');
+   if(!landed||trace.some((p,i)=>i&&Math.abs(p.y-trace[i-1].y)>12.1))throw Error('Discontinuous slime descent');slimes.push(type);
+  }
+  __dash.arrange(42,0,{invulFrame:0,expMult:0},[{id:'edge',type:'HOLE',x:160,y:340,vy:0,width:70,height:40,speedMult:1}]);
+  __dash.step();if(__dash.player.isFalling)throw Error('Pit grabs too early');__dash.step();if(!__dash.player.isFalling)throw Error('Pit collision lags displayed edge');
+  const anchored=__dash.distance+__dash.obstacles[0].x;if(Math.abs(anchored-160)>.00001)throw Error('Pit slips in world space');
+  __dash.arrange(42,0,{invulFrame:0,expMult:0},[{id:'graze',type:'HOLE',x:90,y:340,vy:0,width:70,height:40,speedMult:1}]);
+  const hp=__dash.hp;__dash.step();if(!__dash.player.isFalling)throw Error('No edge fall');__dash.step();if(__dash.player.isFalling||__dash.player.y!==340)throw Error('Grazing a pit falls through solid road');__dash.step(25);if(__dash.hp!==hp)throw Error('Pit edge costs HP');
+  __dash.arrange(42,0,{invulFrame:0,expMult:0},[{id:'deep',type:'HOLE',x:120,y:340,vy:0,width:220,height:40,speedMult:1}]);__dash.step(30);if(__dash.hp!==hp-1||__dash.player.isFalling)throw Error('Deep pit should recover once');
+  const phase=__dash.frame*.025,y=340-56-(1+Math.sin(phase))*24;
+  __dash.arrange(42,0,{y:y-9,invulFrame:100000,expMult:0},[{id:'carry',type:'ELEVATOR',x:190,y,vy:0,width:240,height:18,speedMult:1,phase:0}]);
+  __dash.arcade.lowGravity=600;
+  for(let i=0;i<20;i++){__dash.step();const lift=__dash.obstacles.find(o=>o.id==='carry');if(Math.abs(__dash.player.y-(lift.y-9))>.01)throw Error('Feet detach from moving lift');}
+  __dash.arrange(42,0,{shootingRate:1,shootingTimer:0,invulFrame:100000,expMult:0},[{id:'bullets-over-pit',type:'HOLE',x:180,y:340,vy:0,width:40,height:40,speedMult:1}]);__dash.step(5);if(__dash.shots.length<4)throw Error('Pit eats flying projectiles');
+  __dash.init();__dash.arrange(42,0);return {slimes,pitEdge:true,pitRecovery:true,liftCarry:true};
+ });console.log('Motion regressions passed.',motionRules);
  // The opening street must load and draw the same ImageGen plate as later routes.
  await page.evaluate(async()=>{const image=new Image();image.src='/sprites/go-home-dash/routes/school.webp';await image.decode();if(image.naturalWidth!==1280||image.naturalHeight!==640)throw Error('Bad opening background');});
  await page.evaluate(()=>{Math.random=()=>.999;__dash.arrange(42,0);__dash.step(1);});

@@ -45,7 +45,7 @@ export const DASH_GUIDE_PAGES:Page[]=[
  {id:'rail',title:['レール滑走','Rail grinding','レールかっそう'],tips:[
   ['レールへ上から降りると滑走できる。コインの道を拾いながら、次のジャンプへつなごう。','Drop onto rails from above to grind. Follow the coin trail and jump toward the next platform.','レールへうえからおりるとかっそうできる。コインのみちをひろいながら、つぎのジャンプへつなごう。']]},
  {id:'hazards',title:['敵と危険なしかけ','Enemies and hazards','てきときけんなしかけ'],tips:[
-  ['トゲ・回転ノコギリ・ミサイルは避けよう。レーザーは点線の予告を見て、光っている間は近づかない。','Avoid spikes, spinning saws and missiles. Watch laser warnings: keep clear when the beam lights up.','トゲ・かいてんノコギリ・ミサイルはさけよう。レーザーはてんせんのよこくをみて、ひかっているあいだはちかづかない。'],
+  ['赤いオーラは敵・障害物の目印。トゲ・回転ノコギリ・ミサイルは避けよう。レーザーは点線の予告を見て、光っている間は近づかない。','Red auras mark enemies and hazards. Avoid spikes, spinning saws and missiles. Watch laser warnings: keep clear when the beam lights up.','あかいオーラはてき・しょうがいぶつのめじるし。トゲ・かいてんノコギリ・ミサイルはさけよう。レーザーはてんせんのよこくをみて、ひかっているあいだはちかづかない。'],
   ['敵は跳ねたり、弾を飛ばしたりする。低いトンネルはスライド、壊せる壁はダッシュで突破。','Enemies may jump or shoot. Slide under low tunnels and dash through breakable walls.','てきははねたり、たまをとばしたりする。ひくいトンネルはスライド、こわせるかべはダッシュでとっぱ。']]},
  {id:'boss',title:['ボスへ反撃','Strike back at the boss','ボスへはんげき'],tips:[
   ['追撃ドローンが現れたらミサイルを避け、ダッシュで反撃！ 上のHPを削って撃退しよう。','When the pursuit drone appears, dodge its missiles and dash to strike back! Deplete its HP to defeat it.','ついげきドローンがあらわれたらミサイルをさけ、ダッシュではんげき！ うえのHPをけずってげきたいしよう。']]},
