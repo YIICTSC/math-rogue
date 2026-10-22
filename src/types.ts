@@ -1241,6 +1241,7 @@ export interface DungeonScoreEntry {
 }
 
 export interface KochoScoreEntry {
+  heroId?: 'original' | 'rebel' | 'akari';
   id: string;
   date: number;
   stage: number;

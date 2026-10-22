@@ -87,6 +87,7 @@ const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
 const STORAGE_KEY_KOCHO_RANKING = 'pixel_spire_kocho_ranking_v1';
 const STORAGE_KEY_KOCHO_UNLOCKED_CARDS = 'pixel_spire_kocho_unlocked_cards_v1';
 const STORAGE_KEY_KOCHO_MAX_UNLOCKED_DIFFICULTY = 'pixel_spire_kocho_max_unlocked_difficulty_v1';
+const STORAGE_KEY_KOCHO_CLEARED_HEROES = 'pixel_spire_kocho_cleared_heroes_v1';
 
 // For Paper Plane Battle
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
@@ -1130,6 +1131,24 @@ export const storageService = {
   },
 
   // --- Kocho Showdown State & Scores ---
+  getKochoClearedHeroes: (): string[] => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_KOCHO_CLEARED_HEROES);
+          const parsed = stored ? JSON.parse(stored) : [];
+          const cleared = Array.isArray(parsed) ? parsed.filter(id => ['original', 'rebel', 'akari'].includes(id)) : [];
+          // Older saves have no hero field; an unlocked difficulty proves a campaign clear.
+          const scores = storageService.getKochoScores();
+          const legacyClear = storageService.getMaxUnlockedKochoDifficulty() > 1 || (Array.isArray(scores) && scores.some(s => s.victory && !s.isEndless && (!s.heroId || s.heroId === 'original')));
+          return legacyClear && !cleared.includes('original') ? ['original', ...cleared] : cleared;
+      } catch { return []; }
+  },
+  saveKochoHeroClear: (hero: string): string[] => {
+      const current = storageService.getKochoClearedHeroes();
+      const next = [...new Set([...current, ...(['original', 'rebel', 'akari'].includes(hero) ? [hero] : [])])];
+      try { localStorage.setItem(STORAGE_KEY_KOCHO_CLEARED_HEROES, JSON.stringify(next)); }
+      catch (e) { console.warn('Failed to save kocho hero progress', e); }
+      return next;
+  },
   saveKochoScore: (entry: KochoScoreEntry) => {
       try {
           const current = storageService.getKochoScores();
@@ -1800,6 +1819,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_KOCHO_RANKING);
       localStorage.removeItem(STORAGE_KEY_KOCHO_UNLOCKED_CARDS);
       localStorage.removeItem(STORAGE_KEY_KOCHO_MAX_UNLOCKED_DIFFICULTY);
+      localStorage.removeItem(STORAGE_KEY_KOCHO_CLEARED_HEROES);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);
