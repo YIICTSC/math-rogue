@@ -503,7 +503,7 @@ export default function RpgOnline({
   });
   const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':homeRoom?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
   useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,homeRoom?'home':!world||!world.started?'setup':'map',homeMusic(homeRoom));
-  if(autoJoinInvite&&!world)return <InviteJoin title={trans("学習ローグRPG",languageMode)} name={name} onName={setName} onJoin={()=>start("invite")} onClose={close} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
+  if((autoJoinInvite||intent==='join')&&!world)return <InviteJoin title={trans("学習ローグRPG",languageMode)} name={name} onName={setName} code={code} onCode={autoJoinInvite?undefined:setCode} onJoin={()=>start("invite")} onClose={autoJoinInvite?close:()=>{room.current?.close();(onTitle??onClose)();}} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
   return (
     <TranslatedUiTree mode={languageMode}>
 
