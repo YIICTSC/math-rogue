@@ -1,3 +1,5 @@
+import { kochoVoiceDuration } from '../mini-games/kocho/voices';
+import type { KochoHeroId } from '../mini-games/kocho/guests';
 import {HOBBY_SOUNDS,RHYTHM_PAD_SOUNDS,type HobbySound} from '../mini-games/gakuro-craft/gameAudio';
 import {FISHING_SOUNDS,type FishingSound} from '../rpg/fishingAudio';
 
@@ -365,6 +367,7 @@ class AudioService {
   }
 
   public handleAppBackground() {
+      this.stopKochoVoices();
       if (this.backgroundPlaybackEnabled) return;
       if (this.appIsActive) {
           this.appIsActive = false;
@@ -585,6 +588,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
+      if (this.voiceVolume === 0) this.stopKochoVoices();
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1588,7 +1592,7 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       this.applyBgmVolume();
-      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); }
+      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1757,6 +1761,7 @@ class AudioService {
       for (const audio of htmlAudios) {
           const timer = this.htmlSfxStopTimers.get(audio);
           if (timer) window.clearTimeout(timer);
+          this.htmlSfxStopTimers.delete(audio);
           audio.onended = null;
           audio.pause();
           audio.currentTime = 0;
@@ -1830,6 +1835,7 @@ class AudioService {
   ): Promise<boolean> {
       void this.resumeAudioContext();
       for (const path of paths) {
+          if (name.startsWith('kocho-voice-') && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
@@ -1856,6 +1862,7 @@ class AudioService {
               const cleanup = () => {
                   const timer = this.htmlSfxStopTimers.get(audio);
                   if (timer) window.clearTimeout(timer);
+                  this.htmlSfxStopTimers.delete(audio);
                   audios.delete(audio);
                   if (audios.size === 0) this.activeHtmlSfx.delete(name);
               };
@@ -1940,7 +1947,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2291,6 +2298,54 @@ class AudioService {
           await this.playMagicEventVoice(line.heroId, line.lineId);
           if (this.magicEventVoiceSequenceId !== sequenceId) return;
           await new Promise(resolve => window.setTimeout(resolve, gapMs));
+      }
+  }
+
+  private kochoVoicePriority = -1;
+  private kochoVoiceSequence = 0;
+  private cancelKochoVoiceWait: (() => void) | null = null;
+
+  /** One dry voice at a time; technique calls outrank incidental movement/damage. */
+  public async playKochoVoice(hero: KochoHeroId, clip: string, priority = 1): Promise<boolean> {
+      const duration = kochoVoiceDuration(hero, clip);
+      if (!duration || !this.canPlayConversationVoice() || (priority < this.kochoVoicePriority || (priority === 1 && this.kochoVoicePriority === 1))) return false;
+      this.init();
+      if (!this.ctx || !this.sfxGain) return false;
+      this.stopKochoVoices();
+      const sequence = this.kochoVoiceSequence;
+      this.kochoVoicePriority = priority;
+      const name = `kocho-voice-${hero}-${clip}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      const cancelled = new Promise<boolean>(resolve => { this.cancelKochoVoiceWait = () => resolve(false); });
+      // A stalled network/decode must not leave a tactical combo waiting forever.
+      const deadline = window.setTimeout(() => {
+          if (sequence === this.kochoVoiceSequence) this.stopKochoVoices();
+      }, duration + 5000);
+      try {
+          return await Promise.race([
+              this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/kocho-voices/${hero}/${clip}.ogg`))], duration + 250, false, generation, true),
+              cancelled,
+          ]);
+      } finally {
+          window.clearTimeout(deadline);
+          if (sequence === this.kochoVoiceSequence) {
+              this.kochoVoicePriority = -1;
+              this.cancelKochoVoiceWait = null;
+          }
+      }
+  }
+
+  public stopKochoVoices() {
+      this.kochoVoiceSequence++;
+      this.kochoVoicePriority = -1;
+      this.cancelKochoVoiceWait?.();
+      this.cancelKochoVoiceWait = null;
+      const names = new Set([...this.sfxPlaybackGenerations.keys(), ...this.activeHtmlSfx.keys(), ...this.activeSfxSources.keys()]);
+      for (const name of names) {
+          if (!name.startsWith('kocho-voice-')) continue;
+          this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
+          this.stopActiveSfx(name);
       }
   }
 

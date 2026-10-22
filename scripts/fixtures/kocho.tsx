@@ -6,6 +6,7 @@ import { useXboxControllerNavigation } from '../../src/hooks/useXboxControllerNa
 import '../../src/styles.css';
 for(const key of ['playSound','playBGM','stopBGM','playAttackEffectSound','playStatusEffectSound']) (audioService as any)[key]=()=>{};
 const params=new URLSearchParams(location.search);
+if (!params.has('voice')) audioService.setVoiceVolume(0);
 function Harness() {
   useXboxControllerNavigation();
   return <KochoShowdown onBack={()=>{document.getElementById('root')!.dataset.exited='true';}} languageMode={params.get('lang')==='en'?'ENGLISH':params.get('lang')==='hi'?'HIRAGANA':'JAPANESE'} isUiPreview={params.has('preview')}/>;

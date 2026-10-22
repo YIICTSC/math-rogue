@@ -1,0 +1,4678 @@
+{
+  "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt",
+  "samples": {
+    "rebel/skill-7ad9bff809d4": {
+      "expected": "くらえ！定規スラッシュ！",
+      "reading": "くらえ！じょうぎすらっしゅ！",
+      "sha256": "3ce47b69a8d57574f71d974261b305ae792079e0968b00a577acc82bc7e85494",
+      "recognized": "食らえ! 定義スラッシュ!",
+      "seconds": 2.64,
+      "reading_similarity": 0.783,
+      "accepted_readings": [
+        "くらえ！じょうぎすらっしゅ！"
+      ]
+    },
+    "rebel/skill-ed20efdb96fb": {
+      "expected": "くらえ！コンパス突き！",
+      "reading": "くらえ！こんぱすつき！",
+      "sha256": "64f3a19791ca45c76d951142a5407f2c4e7fbc9974a22bd161eab90a84496e14",
+      "recognized": "食らえ! コンパス付き!",
+      "seconds": 2.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！こんぱすつき！"
+      ]
+    },
+    "rebel/skill-bfe2378536bb": {
+      "expected": "一気に行くぜ！ダッシュ！",
+      "reading": "いっきにいくぜ！だっしゅ！",
+      "sha256": "d164224786cb904bcfb1f546c56233f019bf4d6010fe6fc61d21257b67fa5dd2",
+      "recognized": "一気に行くぜ! ダッシュ!",
+      "seconds": 2.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "いっきにいくぜ！だっしゅ！"
+      ]
+    },
+    "rebel/skill-c78c14413f67": {
+      "expected": "負けねえ！バックステップ！",
+      "reading": "まけねえ！ばっくすてっぷ！",
+      "sha256": "033184686be5285c32f51dbd1be28388c15846077df4214f7c2abf8469815e56",
+      "recognized": "負けねぇ! バックステップ!",
+      "seconds": 2.76,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "まけねえ！ばっくすてっぷ！"
+      ]
+    },
+    "rebel/skill-36de33f4aaf6": {
+      "expected": "くらえ！大声！",
+      "reading": "くらえ！おおごえ！",
+      "sha256": "0e9543890024d45b1e6a17cdbd4f3ef0ad09f10a741e165ff685d38d9ae6a601",
+      "recognized": "くらえ!おうごえ!",
+      "seconds": 2.04,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "くらえ！おおごえ！"
+      ]
+    },
+    "rebel/skill-dd743dde1fb1": {
+      "expected": "負けねえ！お辞儀！",
+      "reading": "まけねえ！おじぎ！",
+      "sha256": "7ed583ce1deb7dc6031b4ac7111375418b47b3a2029f374250229f4bd8500254",
+      "recognized": "負けねぇ!おじぎ!",
+      "seconds": 2.2,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "まけねえ！おじぎ！"
+      ]
+    },
+    "rebel/skill-204a1c58a810": {
+      "expected": "くらえ！回し蹴り！",
+      "reading": "くらえ！まわしげり！",
+      "sha256": "596df931e77164563943cb717fc6e08ea99819e8a6ccee711f541c7eca508dfc",
+      "recognized": "くらえ!まわしぎり!",
+      "seconds": 2.28,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "くらえ！まわしげり！"
+      ]
+    },
+    "rebel/skill-fb914dda7a93": {
+      "expected": "くらえ！チョーク投げ！",
+      "reading": "くらえ！ちょーくなげ！",
+      "sha256": "a8a5cb9742c0fd66c522cf98fe7e1604715261b4ab63efbf26835d1c95bbd2b1",
+      "recognized": "くらえ!ちょーく、投げ!",
+      "seconds": 2.72,
+      "accepted_readings": [
+        "くらえ！ちょーくなげ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-df415364bba4": {
+      "expected": "くらえ！スライディング！",
+      "reading": "くらえ！すらいでぃんぐ！",
+      "sha256": "be1b78b4591ff66c56590ae58ff2dd29725be72e92e1baa0c79be2d0b0051d8b",
+      "recognized": "ふらえ! スライディング!",
+      "seconds": 2.48,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "くらえ！すらいでぃんぐ！"
+      ]
+    },
+    "rebel/skill-ceeb59c32280": {
+      "expected": "負けねえ！教科書ガード！",
+      "reading": "まけねえ！きょうかしょがーど！",
+      "sha256": "b28e0072224bddad2b2898a15936481dde0f1fafd79a10d3ace4fa89bf39272d",
+      "recognized": "負けねぇ! 強化素ガーゴー!",
+      "seconds": 2.8,
+      "reading_similarity": 0.667,
+      "accepted_readings": [
+        "まけねえ！きょうかしょがーど！"
+      ]
+    },
+    "rebel/skill-415e94552112": {
+      "expected": "くらえ！竹刀！",
+      "reading": "くらえ！しない！",
+      "sha256": "0cb4d393abbdbcff609b0e39953c138c22c22ae57087aec14f021b004aa6ee2f",
+      "recognized": "くらえ! しない!",
+      "seconds": 2.08,
+      "accepted_readings": [
+        "くらえ！しない！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-3ace253fd105": {
+      "expected": "くらえ！金属バット！",
+      "reading": "くらえ！きんぞくばっと！",
+      "sha256": "320de818029f4f09ad7f6f82184b0c5e842e4ad2423f3d96615b1723f01403c4",
+      "recognized": "ふらえ! 金属バッド!",
+      "seconds": 2.44,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！きんぞくばっと！"
+      ]
+    },
+    "rebel/skill-8025bf2710a0": {
+      "expected": "くらえ！カウンター定規！",
+      "reading": "くらえ！かうんたーじょうぎ！",
+      "sha256": "5d7344b5ce83619a87964533f7e536c220b9f39931d8b63956397b64d23748e8",
+      "recognized": "ふらえ! カウンタージョーギー!",
+      "seconds": 2.64,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！かうんたーじょうぎ！"
+      ]
+    },
+    "rebel/skill-4cbf8fba0425": {
+      "expected": "くらえ！張り手！",
+      "reading": "くらえ！はりて！",
+      "sha256": "6bdf15e87370b03d50200f4fc8285fe32fab9853e998c239cccac76ec8c59a73",
+      "recognized": "くらえ! 張り手!",
+      "seconds": 2.08,
+      "accepted_readings": [
+        "くらえ！はりて！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-28d8134f24be": {
+      "expected": "くらえ！後ろ蹴り！",
+      "reading": "くらえ！うしろげり！",
+      "sha256": "641b980cf382da7067abc5c9f0b2296d1efdfc760209639fd002f3e706a2ae6c",
+      "recognized": "ふらえ! ウシロケリ!",
+      "seconds": 2.16,
+      "reading_similarity": 0.75,
+      "accepted_readings": [
+        "くらえ！うしろげり！"
+      ]
+    },
+    "rebel/skill-ec828a82f38d": {
+      "expected": "くらえ！釣り竿！",
+      "reading": "くらえ！つりざお！",
+      "sha256": "d6ae0ec8a90a0056a13ef7255f80360a916b55e1404ccdabf33f815af94396ad",
+      "recognized": "ふらえ! スリザオー!",
+      "seconds": 2.2,
+      "reading_similarity": 0.667,
+      "accepted_readings": [
+        "くらえ！つりざお！"
+      ]
+    },
+    "rebel/skill-762692e1a9fd": {
+      "expected": "くらえ！消火器！",
+      "reading": "くらえ！しょうかき！",
+      "sha256": "c2515699bae329ad302c72b5349e821c4ee3344ceb4d0702f646cf6e552b41a3",
+      "recognized": "くらえ!そうかち!",
+      "seconds": 2.16,
+      "reading_similarity": 0.667,
+      "accepted_readings": [
+        "くらえ！しょうかき！"
+      ]
+    },
+    "rebel/skill-89ca3b5d316e": {
+      "expected": "くらえ！タックル！",
+      "reading": "くらえ！たっくる！",
+      "sha256": "2d5aa584203f3e2957fba05749cd4afca335b7f97486e8da7d0f2cf515d71995",
+      "recognized": "くらえ、たっくる!",
+      "seconds": 2.04,
+      "accepted_readings": [
+        "くらえ！たっくる！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-5de1b913e76a": {
+      "expected": "くらえ！雷！",
+      "reading": "くらえ！かみなり！",
+      "sha256": "2a218d5c62a0f864513c4cd59e88dff581d93ecd38c5d69c249ca50352ecef82",
+      "recognized": "ふらえ! 雷!",
+      "seconds": 2.0,
+      "accepted_readings": [
+        "くらえ！かみなり！",
+        "くらえ！いかずち！"
+      ],
+      "reading_similarity": 0.857
+    },
+    "rebel/skill-90dd6a3b929d": {
+      "expected": "くらえ！回転モップ！",
+      "reading": "くらえ！かいてんもっぷ！",
+      "sha256": "eb8ebae5800b1d76bbbcc85becb46fdaeb4698b56dd17c401154dcdd2ea43274",
+      "recognized": "フラエタイテンモップ",
+      "seconds": 2.24,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！かいてんもっぷ！"
+      ]
+    },
+    "rebel/skill-d5e0163d8107": {
+      "expected": "くらえ！竹箒！",
+      "reading": "くらえ！たけぼうき！",
+      "sha256": "586957a481d372ce3562031bc685f101f27e18334447fa9e8f676adfa738fc41",
+      "recognized": "くらえ、たけぼうき!",
+      "seconds": 2.28,
+      "accepted_readings": [
+        "くらえ！たけぼうき！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-2c881400e1cb": {
+      "expected": "負けねえ！絶対防御！",
+      "reading": "まけねえ！ぜったいぼうぎょ！",
+      "sha256": "7f837e69111e1a7882562410d6940581b32b0ca9ccf569f037fb96f7c3d6162b",
+      "recognized": "負けで絶対防御",
+      "seconds": 2.64,
+      "reading_similarity": 0.87,
+      "accepted_readings": [
+        "まけねえ！ぜったいぼうぎょ！"
+      ]
+    },
+    "rebel/skill-8efb357d5690": {
+      "expected": "くらえ！リコーダー！",
+      "reading": "くらえ！りこーだー！",
+      "sha256": "162552b44dbd6c77ad365c3e8e9adb248bbcf43bddd8cb63033fae43fed9dc8f",
+      "recognized": "フラエリコーダー",
+      "seconds": 2.12,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "くらえ！りこーだー！"
+      ]
+    },
+    "rebel/skill-e98c8c07e96c": {
+      "expected": "くらえ！三角定規！",
+      "reading": "くらえ！さんかくじょうぎ！",
+      "sha256": "f35c17f38abfdd31bb418d45ee39a86560ba0b2c063255831d42c592fdaceb74",
+      "recognized": "フラエ三角ジョウリギー",
+      "seconds": 2.56,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "くらえ！さんかくじょうぎ！"
+      ]
+    },
+    "rebel/skill-8f3c4cc530b3": {
+      "expected": "くらえ！バレーボール！",
+      "reading": "くらえ！ばれーぼーる！",
+      "sha256": "b75a965826791ef0c0a470fd75821fb3819234920c99add089a960f4dcef9998",
+      "recognized": "フラエバレーボール",
+      "seconds": 2.48,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！ばれーぼーる！"
+      ]
+    },
+    "rebel/skill-0c8abadacd7f": {
+      "expected": "くらえ！吸血！",
+      "reading": "くらえ！きゅうけつ！",
+      "sha256": "9d5a1df84622236659db06cca489a083b11352b5a8e2f064b13c4e8221b27618",
+      "recognized": "くらえ、きゅうけつ!",
+      "seconds": 2.36,
+      "accepted_readings": [
+        "くらえ！きゅうけつ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-279ef142ce55": {
+      "expected": "くらえ！雑巾がけ！",
+      "reading": "くらえ！ぞうきんがけ！",
+      "sha256": "832174d49db1f41efc1e55f0d09f886a298675904942e9b63d438d78d9b5c782",
+      "recognized": "ふらえ! 増金がけ!",
+      "seconds": 2.36,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！ぞうきんがけ！"
+      ]
+    },
+    "rebel/skill-ad778811ec66": {
+      "expected": "くらえ！赤ペン連打！",
+      "reading": "くらえ！あかぺんれんだ！",
+      "sha256": "23bd745f8db76989e100c34a772f0c19efdbb2833c24b06472ddad50fc457b81",
+      "recognized": "くらえ、あかぺんれんだ!",
+      "seconds": 2.4,
+      "accepted_readings": [
+        "くらえ！あかぺんれんだ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-ddd7d104a8d5": {
+      "expected": "くらえ！連絡帳スマッシュ！",
+      "reading": "くらえ！れんらくちょうすまっしゅ！",
+      "sha256": "765976d9df5cf796550c131356cc4998e675f0d95b62dbdb56de8b227160074b",
+      "recognized": "ふらえ!連絡帳スマッシュ!",
+      "seconds": 3.0,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "くらえ！れんらくちょうすまっしゅ！"
+      ]
+    },
+    "rebel/skill-10e4fa3bc07c": {
+      "expected": "くらえ！メガホン指導！",
+      "reading": "くらえ！めがほんしどう！",
+      "sha256": "b2e0a1dcbed881f3e654538e1c8df6a17daf97fab57ecd2b1426d8381c439087",
+      "recognized": "ふらえ!メガホン指導!",
+      "seconds": 2.6,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "くらえ！めがほんしどう！"
+      ]
+    },
+    "rebel/skill-1acee1714dca": {
+      "expected": "負けねえ！保健室の包帯！",
+      "reading": "まけねえ！ほけんしつのほうたい！",
+      "sha256": "6c3492b3e868d3278131232bee0f0fd06f12603c06627e2088c00ff4329f94c6",
+      "recognized": "負けねぇ!保険室の包帯!",
+      "seconds": 2.84,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "まけねえ！ほけんしつのほうたい！"
+      ]
+    },
+    "rebel/skill-c4bdb3d7481f": {
+      "expected": "一気に行くぜ！跳び箱ダッシュ！",
+      "reading": "いっきにいくぜ！とびはこだっしゅ！",
+      "sha256": "08e641d8a30e5d37d46bcceaa5e2d9752f6e49adb4df6d915555a21c2ddd7949",
+      "recognized": "一気に行くぜぇ!飛び箱出し!",
+      "seconds": 3.08,
+      "reading_similarity": 0.897,
+      "accepted_readings": [
+        "いっきにいくぜ！とびはこだっしゅ！"
+      ]
+    },
+    "rebel/skill-dc0d10b09895": {
+      "expected": "くらえ！黒板消し投げ！",
+      "reading": "くらえ！こくばんけしなげ！",
+      "sha256": "7377b460261695aafbdabfbf814b8dc082216b793e0bbcea6bfceada97631296",
+      "recognized": "ふらえ!黒板消し投げ!",
+      "seconds": 2.64,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "くらえ！こくばんけしなげ！"
+      ]
+    },
+    "rebel/skill-97b058361aac": {
+      "expected": "くらえ！竹ぼうきスイープ！",
+      "reading": "くらえ！たけぼうきすいーぷ！",
+      "sha256": "e1bf09c0f2267d6706cc2bda5b5134c87a200c6c966998c640daeaa8a84c96c7",
+      "recognized": "ふらえ!竹ぼうきスイープ!",
+      "seconds": 2.72,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "くらえ！たけぼうきすいーぷ！"
+      ]
+    },
+    "rebel/skill-55005d5d2356": {
+      "expected": "くらえ！笛の合図！",
+      "reading": "くらえ！ふえのあいず！",
+      "sha256": "241f6fe8092539da185a75b21241c38703bb5eda99bf92fc441f84779a536c86",
+      "recognized": "ふらえ!ふえのアイズ!",
+      "seconds": 2.36,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！ふえのあいず！"
+      ]
+    },
+    "rebel/skill-657b1cc1f261": {
+      "expected": "くらえ！紅蓮連拳、解放！",
+      "reading": "くらえ！ぐれんれんけん、かいほう！",
+      "sha256": "46b057d846e86b793c263cbd6f329aa4d434094242386e75aa498f847909798d",
+      "recognized": "くらえ ぐれんれんけん 開放",
+      "seconds": 3.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！ぐれんれんけん、かいほう！"
+      ]
+    },
+    "rebel/skill-38118e233fdc": {
+      "expected": "これが俺の全力だ！叛逆の最終宣言！",
+      "reading": "これがおれのぜんりょくだ！はんぎゃくのさいしゅうせんげん！",
+      "sha256": "73d255d293f8d0112c867985b0228bdbee774cf358030d92cd095dcee345ee38",
+      "recognized": "これが俺の全力だ!反逆の最終宣言!",
+      "seconds": 4.24,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "これがおれのぜんりょくだ！はんぎゃくのさいしゅうせんげん！"
+      ]
+    },
+    "original/action-start": {
+      "expected": "校長先生！正々堂々、勝負だ！",
+      "reading": "こうちょうせんせい！せいせいどうどう、しょうぶだ！",
+      "sha256": "3e089eb0196596e4a35b84d13acfca32a3fb1307c47df7d54bf82707c3a8a995",
+      "recognized": "校長先生、生生堂堂勝負だ!",
+      "seconds": 4.12,
+      "reading_similarity": 0.818,
+      "accepted_readings": [
+        "こうちょうせんせい！せいせいどうどう、しょうぶだ！"
+      ]
+    },
+    "original/action-forward": {
+      "expected": "ここから攻める！",
+      "reading": "ここからせめる！",
+      "sha256": "1cbbbde2db46f5b012e12c4fdff2a93393d03aaebe71da34e29616381a3e0ad4",
+      "recognized": " ここから責める!",
+      "seconds": 1.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ここからせめる！"
+      ]
+    },
+    "original/action-back": {
+      "expected": "踏みとどまれ！",
+      "reading": "ふみとどまれ！",
+      "sha256": "89447c497e2ad8edac06d1d52ded3d12426654b193f546a917188060860b9476",
+      "recognized": "踏みとどまれ!",
+      "seconds": 1.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ふみとどまれ！"
+      ]
+    },
+    "original/action-turn": {
+      "expected": "隙は見せないぞ！",
+      "reading": "すきはみせないぞ！",
+      "sha256": "64748fe2515af2b4bd22483ad48730dd6fc4f16439773790e61a47c3ad4399f7",
+      "recognized": " 隙は見せないぞ!",
+      "seconds": 1.84,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "すきはみせないぞ！"
+      ]
+    },
+    "original/action-wait": {
+      "expected": "好機をつかむ！",
+      "reading": "こうきをつかむ！",
+      "sha256": "6ce9bdf86675765d06ffc27788d692eec3a5997796534265afa50e2c84fa26f5",
+      "recognized": "後期をつかむ!",
+      "seconds": 1.8,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "こうきをつかむ！"
+      ]
+    },
+    "original/action-special": {
+      "expected": "位置交換！こっちだ！",
+      "reading": "いちこうかん！こっちだ！",
+      "sha256": "165cf889810af1b279d32dafa8c6a8cb4dcc89427426198bcc7ddf577d4ed88f",
+      "recognized": " 一興感こっちだ!",
+      "seconds": 2.2,
+      "reading_similarity": 0.762,
+      "accepted_readings": [
+        "いちこうかん！こっちだ！"
+      ]
+    },
+    "original/action-damage": {
+      "expected": "まだまだ、やれる！",
+      "reading": "まだまだ、やれる！",
+      "sha256": "d3bdb79ab3158e268a3ac1d70ed36c0e9d51f44cc7576afdc0d4c12baff2eab5",
+      "recognized": "まだまだやれる!",
+      "seconds": 2.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まだまだ、やれる！"
+      ]
+    },
+    "original/action-wave-clear": {
+      "expected": "よし！この調子で進もう！",
+      "reading": "よし！このちょうしですすもう！",
+      "sha256": "21c0f086744652a3810c306bd179d85822425e57671e9caf0f1d8c9dda2e7f74",
+      "recognized": " よし、この調子で進もう!",
+      "seconds": 2.68,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "よし！このちょうしですすもう！"
+      ]
+    },
+    "original/action-victory": {
+      "expected": "俺たちの、完全勝利だ！",
+      "reading": "おれたちの、かんぜんしょうりだ！",
+      "sha256": "e145f9ee3568ac254d2653ccc0c68eea2f4ef066f3987bcf5c5022c9a1940d33",
+      "recognized": "俺たちの完全勝利だ",
+      "seconds": 3.04,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "おれたちの、かんぜんしょうりだ！"
+      ]
+    },
+    "original/action-defeat": {
+      "expected": "必ず、強くなって戻る！",
+      "reading": "かならず、つよくなってもどる！",
+      "sha256": "215cb3bd3efecf058e6650795e10529187bf55dd22444a415f9b7e15dca6a941",
+      "recognized": " 必ず強くなって戻る",
+      "seconds": 3.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かならず、つよくなってもどる！"
+      ]
+    },
+    "original/skill-7ad9bff809d4": {
+      "expected": "決めるぞ！定規スラッシュ！",
+      "reading": "きめるぞ！じょうぎすらっしゅ！",
+      "sha256": "83af90f1d6df3dc7242f267e5273521b8cdbf101d4dbd803580ba03f6e18db07",
+      "recognized": "決めるぞ上技スラッシュ 決",
+      "seconds": 3.2,
+      "reading_similarity": 0.714,
+      "accepted_readings": [
+        "きめるぞ！じょうぎすらっしゅ！"
+      ]
+    },
+    "original/skill-ed20efdb96fb": {
+      "expected": "決めるぞ！コンパス突き！",
+      "reading": "きめるぞ！こんぱすつき！",
+      "sha256": "f8c7ba75d05f72a7f5099f798f0f61ebb98f5e60f391ea046ff4a24ab2d7db8d",
+      "recognized": "めるぞコンパス月",
+      "seconds": 2.96,
+      "reading_similarity": 0.842,
+      "accepted_readings": [
+        "きめるぞ！こんぱすつき！"
+      ]
+    },
+    "original/skill-bfe2378536bb": {
+      "expected": "風を切れ！ダッシュ！",
+      "reading": "かぜをきれ！だっしゅ！",
+      "sha256": "5f0617a0f6990b6145049b4924e5b8dd214c026c7addbdd7dbd6a9d83c62f977",
+      "recognized": "風を切れダッシュ",
+      "seconds": 2.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かぜをきれ！だっしゅ！"
+      ]
+    },
+    "original/skill-c78c14413f67": {
+      "expected": "力を貸してくれ！バックステップ！",
+      "reading": "ちからをかしてくれ！ばっくすてっぷ！",
+      "sha256": "a02835e168891c3c7bb375ce540adcc86a79df2bdcf79fa82b77428167bf18b5",
+      "recognized": " 力を貸してくれバックステップ",
+      "seconds": 3.24,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！ばっくすてっぷ！"
+      ]
+    },
+    "original/skill-36de33f4aaf6": {
+      "expected": "決めるぞ！大声！",
+      "reading": "きめるぞ！おおごえ！",
+      "sha256": "002c1ea7aaedd0b362f9e5cf5e7628f023b8cf90145e98c02bcad9fa49e8d452",
+      "recognized": "決めるぞ!大声!",
+      "seconds": 2.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！おおごえ！"
+      ]
+    },
+    "original/skill-dd743dde1fb1": {
+      "expected": "力を貸してくれ！お辞儀！",
+      "reading": "ちからをかしてくれ！おじぎ！",
+      "sha256": "0de0a72c9aeac44d4078a04fa90b6778153d9171d56339b5bb2298c30749608f",
+      "recognized": " 力を貸してくれ!おちぎ!",
+      "seconds": 2.84,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "ちからをかしてくれ！おじぎ！"
+      ]
+    },
+    "original/skill-204a1c58a810": {
+      "expected": "決めるぞ！回し蹴り！",
+      "reading": "きめるぞ！まわしげり！",
+      "sha256": "d1325e186271fdfbc7fb9d9e3940c843e466f950c1a249e320d4aa57da9a7f99",
+      "recognized": "決めるぞ!まわしげり!",
+      "seconds": 2.72,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！まわしげり！"
+      ]
+    },
+    "original/skill-fb914dda7a93": {
+      "expected": "決めるぞ！チョーク投げ！",
+      "reading": "きめるぞ！ちょーくなげ！",
+      "sha256": "e18a40b7526b63155e1446973c2009c946fd12b05bf7b0ed7bb4b58f962c9208",
+      "recognized": " 決めるぞ!ちょうくなげ!",
+      "seconds": 2.8,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "きめるぞ！ちょーくなげ！"
+      ]
+    },
+    "original/skill-df415364bba4": {
+      "expected": "決めるぞ！スライディング！",
+      "reading": "きめるぞ！すらいでぃんぐ！",
+      "sha256": "719b2595d19676d7c96a57667209a7892ffd08098638d85e55325bd9c84e719f",
+      "recognized": "決めるぞ!スライディング!",
+      "seconds": 3.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！すらいでぃんぐ！"
+      ]
+    },
+    "original/skill-ceeb59c32280": {
+      "expected": "力を貸してくれ！教科書ガード！",
+      "reading": "ちからをかしてくれ！きょうかしょがーど！",
+      "sha256": "4e6b683b9792bdd80a64de1b92d3140a1256cbb264d53f0fb8faee609abf93ca",
+      "recognized": " 力を貸してくれ!強化所ガード!",
+      "seconds": 3.32,
+      "reading_similarity": 0.865,
+      "accepted_readings": [
+        "ちからをかしてくれ！きょうかしょがーど！"
+      ]
+    },
+    "original/skill-415e94552112": {
+      "expected": "決めるぞ！竹刀！",
+      "reading": "きめるぞ！しない！",
+      "sha256": "302e6193df82aceae07cbc12ccd9400bf7cabb2e6790279f424461f81a676c92",
+      "recognized": "決めるぞ!しない!",
+      "seconds": 2.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！しない！"
+      ]
+    },
+    "original/skill-3ace253fd105": {
+      "expected": "決めるぞ！金属バット！",
+      "reading": "きめるぞ！きんぞくばっと！",
+      "sha256": "98c99ac4d9b28f9c7b62ba702a2f8c597c0f22e0de0a87c571fe405ff2bf453e",
+      "recognized": "きねるぞ 金属バット",
+      "seconds": 3.0,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "きめるぞ！きんぞくばっと！"
+      ]
+    },
+    "original/skill-8025bf2710a0": {
+      "expected": "決めるぞ！カウンター定規！",
+      "reading": "きめるぞ！かうんたーじょうぎ！",
+      "sha256": "35366f888d97097b7c5945781c47d0695ec469a76fd4682332f5173528ce2878",
+      "recognized": "きねるぞ カウンター上技",
+      "seconds": 3.36,
+      "reading_similarity": 0.692,
+      "accepted_readings": [
+        "きめるぞ！かうんたーじょうぎ！"
+      ]
+    },
+    "original/skill-4cbf8fba0425": {
+      "expected": "決めるぞ！張り手！",
+      "reading": "きめるぞ！はりて！",
+      "sha256": "62139639a7c84c6608d6efa455d6e9900dad9ff59d1cf0f04dbf265af66a407e",
+      "recognized": "きねるぞ 張り手",
+      "seconds": 2.32,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "きめるぞ！はりて！"
+      ]
+    },
+    "original/skill-28d8134f24be": {
+      "expected": "決めるぞ！後ろ蹴り！",
+      "reading": "きめるぞ！うしろげり！",
+      "sha256": "9baeb37ac2a36c37b2188273d9a5bd668bc0e19dac7b8db8142b9a8f7f2b4578",
+      "recognized": "決めるぞ! 後ろげり!",
+      "seconds": 2.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！うしろげり！"
+      ]
+    },
+    "original/skill-ec828a82f38d": {
+      "expected": "決めるぞ！釣り竿！",
+      "reading": "きめるぞ！つりざお！",
+      "sha256": "8f2f044bbfcbaef5abf191319b46cb250cc111c83a1a105e9ba007764d661c96",
+      "recognized": "決めるぞ! 釣り座を!",
+      "seconds": 2.64,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "きめるぞ！つりざお！"
+      ]
+    },
+    "original/skill-762692e1a9fd": {
+      "expected": "決めるぞ！消火器！",
+      "reading": "きめるぞ！しょうかき！",
+      "sha256": "29257270d90de027e3108ee9c71f8e40115bdde9ffc5b5ef0577c7deb6be545d",
+      "recognized": "決めるぞ! 消火器!",
+      "seconds": 2.76,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！しょうかき！"
+      ]
+    },
+    "original/skill-89ca3b5d316e": {
+      "expected": "決めるぞ！タックル！",
+      "reading": "きめるぞ！たっくる！",
+      "sha256": "d4bd762e66f83eb07ac38e34423f3c440413db9671bf43c54ffa0457c0b37baf",
+      "recognized": "決めるぞ! タックル!",
+      "seconds": 2.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！たっくる！"
+      ]
+    },
+    "original/skill-5de1b913e76a": {
+      "expected": "決めるぞ！雷！",
+      "reading": "きめるぞ！かみなり！",
+      "sha256": "944032fc6beb96dcbb92de4941cc862860e402edf47d4451de023bf3e64a2233",
+      "recognized": "決めるぞ! 生かずち!",
+      "seconds": 2.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！かみなり！",
+        "きめるぞ！いかずち！"
+      ]
+    },
+    "original/skill-90dd6a3b929d": {
+      "expected": "決めるぞ！回転モップ！",
+      "reading": "きめるぞ！かいてんもっぷ！",
+      "sha256": "dfbb10fd9ae216bd369850165af0b64f4f3d84f6194d056b3d6c7e2b9ec95169",
+      "recognized": "決めるぞ! 回転モップ!",
+      "seconds": 2.96,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！かいてんもっぷ！"
+      ]
+    },
+    "original/skill-d5e0163d8107": {
+      "expected": "決めるぞ！竹箒！",
+      "reading": "きめるぞ！たけぼうき！",
+      "sha256": "97a168ccdf68172ec341f0b9ae7e3d6d7696ee749360f9d09b312b7e06b1a3ab",
+      "recognized": "決めるぞ! 竹冒険!",
+      "seconds": 2.76,
+      "reading_similarity": 0.842,
+      "accepted_readings": [
+        "きめるぞ！たけぼうき！"
+      ]
+    },
+    "original/skill-2c881400e1cb": {
+      "expected": "力を貸してくれ！絶対防御！",
+      "reading": "ちからをかしてくれ！ぜったいぼうぎょ！",
+      "sha256": "d12c19e2dbc31a66c6c11ebd83cadf5a0e3a9a9ea833a3b756e27f2c43ab8697",
+      "recognized": "力を貸してくれ!絶対防御!",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！ぜったいぼうぎょ！"
+      ]
+    },
+    "original/skill-8efb357d5690": {
+      "expected": "決めるぞ！リコーダー！",
+      "reading": "きめるぞ！りこーだー！",
+      "sha256": "53838928ee77049b6cfb61f38d7e00ddcb740dc6431dafc45ca77835a5d23f96",
+      "recognized": "決めるぞ!リコーダー!",
+      "seconds": 2.72,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！りこーだー！"
+      ]
+    },
+    "original/skill-e98c8c07e96c": {
+      "expected": "決めるぞ！三角定規！",
+      "reading": "きめるぞ！さんかくじょうぎ！",
+      "sha256": "f3abe09aa33de2eef446eb0977b4710da7e77c8f33a826227fa73af322a3c2d5",
+      "recognized": "決めるぞ!三角定義!",
+      "seconds": 3.12,
+      "reading_similarity": 0.783,
+      "accepted_readings": [
+        "きめるぞ！さんかくじょうぎ！"
+      ]
+    },
+    "original/skill-8f3c4cc530b3": {
+      "expected": "決めるぞ！バレーボール！",
+      "reading": "きめるぞ！ばれーぼーる！",
+      "sha256": "862ffcbdf48037ed5d63d1aed2cd8f2e27571224099e46191b496dacfaa1290d",
+      "recognized": "決めるぞ バレーボール",
+      "seconds": 2.84,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ばれーぼーる！"
+      ]
+    },
+    "original/skill-0c8abadacd7f": {
+      "expected": "決めるぞ！吸血！",
+      "reading": "きめるぞ！きゅうけつ！",
+      "sha256": "296458777f76d3a867bbac70b06020da337d73f26be786f7c91ef79a372dc4c7",
+      "recognized": "決めるぞ! 急決!",
+      "seconds": 2.68,
+      "accepted_readings": [
+        "きめるぞ！きゅうけつ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/skill-279ef142ce55": {
+      "expected": "決めるぞ！雑巾がけ！",
+      "reading": "きめるぞ！ぞうきんがけ！",
+      "sha256": "3424e2b72dd172d7b0f66a102f5ee00eeeba826a5bb6978989e58d5f0eb2d260",
+      "recognized": "決めるぞ 増金駆け",
+      "seconds": 2.92,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "きめるぞ！ぞうきんがけ！"
+      ]
+    },
+    "original/skill-ad778811ec66": {
+      "expected": "決めるぞ！赤ペン連打！",
+      "reading": "きめるぞ！あかぺんれんだ！",
+      "sha256": "acd536fb3760b7172ead0624b249995c20dc50fa2fbbbee8bd23fce10de553b6",
+      "recognized": "決めるぞ 赤ペン連打",
+      "seconds": 3.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！あかぺんれんだ！"
+      ]
+    },
+    "original/skill-ddd7d104a8d5": {
+      "expected": "決めるぞ！連絡帳スマッシュ！",
+      "reading": "きめるぞ！れんらくちょうすまっしゅ！",
+      "sha256": "46124298723e91b03dbcb1230044e9d3bcde60966a59ab9a6d0a40ff10eff390",
+      "recognized": "決めるぞ 連絡長スマッシュ",
+      "seconds": 3.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！れんらくちょうすまっしゅ！"
+      ]
+    },
+    "original/skill-10e4fa3bc07c": {
+      "expected": "決めるぞ！メガホン指導！",
+      "reading": "きめるぞ！めがほんしどう！",
+      "sha256": "d75c87458f7c50e99308f1bdadfa2d135e2196d20893bc0610cc14dc2d580498",
+      "recognized": "決めるぞ メガホンシロー",
+      "seconds": 3.2,
+      "reading_similarity": 0.818,
+      "accepted_readings": [
+        "きめるぞ！めがほんしどう！"
+      ]
+    },
+    "original/skill-1acee1714dca": {
+      "expected": "力を貸してくれ！保健室の包帯！",
+      "reading": "ちからをかしてくれ！ほけんしつのほうたい！",
+      "sha256": "24165bfc963e6aafad8ae05a22333f03010878b643d678f7849549f659ea8a84",
+      "recognized": "力を貸してくれ 保険室の包帯",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！ほけんしつのほうたい！"
+      ]
+    },
+    "original/skill-c4bdb3d7481f": {
+      "expected": "風を切れ！跳び箱ダッシュ！",
+      "reading": "かぜをきれ！とびはこだっしゅ！",
+      "sha256": "94f0fb1af17d240ce5172619c2df94eb6e814b60164a8d0be0d03e261e7cd4c5",
+      "recognized": "風を切れ!飛び箱脱出!",
+      "seconds": 3.12,
+      "reading_similarity": 0.963,
+      "accepted_readings": [
+        "かぜをきれ！とびはこだっしゅ！"
+      ]
+    },
+    "original/skill-dc0d10b09895": {
+      "expected": "決めるぞ！黒板消し投げ！",
+      "reading": "きめるぞ！こくばんけしなげ！",
+      "sha256": "209844e9db640ba1cbca5c87d512379bd362eea4ada2eee57f2c29d5925b71ed",
+      "recognized": "決めるぞ!刻板消し投げ!",
+      "seconds": 3.12,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "きめるぞ！こくばんけしなげ！"
+      ]
+    },
+    "original/skill-97b058361aac": {
+      "expected": "決めるぞ！竹ぼうきスイープ！",
+      "reading": "きめるぞ！たけぼうきすいーぷ！",
+      "sha256": "d85ebdb27dec07d0dea836b6e98a6667d9677f16f9d3838d91bef3a13814b0a0",
+      "recognized": "決めるぞ!竹帽機スイープ!",
+      "seconds": 3.32,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！たけぼうきすいーぷ！"
+      ]
+    },
+    "original/skill-55005d5d2356": {
+      "expected": "決めるぞ！笛の合図！",
+      "reading": "きめるぞ！ふえのあいず！",
+      "sha256": "d9259413730eec77d800c25fd6ccf8499944d8838151aa3545a47b600c6272b2",
+      "recognized": "決めるぞ 笛の合図",
+      "seconds": 2.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ふえのあいず！"
+      ]
+    },
+    "original/skill-3697d3d7e280": {
+      "expected": "決めるぞ！鉄パイプ！",
+      "reading": "きめるぞ！てつぱいぷ！",
+      "sha256": "c99e02019e88dd4166f65a4003afeb8a41c9fc7aaa75270c62de2baea1cd2429",
+      "recognized": "決めるぞ 鉄パイプ",
+      "seconds": 2.76,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！てつぱいぷ！"
+      ]
+    },
+    "original/skill-75b2faa68554": {
+      "expected": "力を貸してくれ！防犯シールド！",
+      "reading": "ちからをかしてくれ！ぼうはんしーるど！",
+      "sha256": "b4e9c5fee0a8fac9b61ededc850cd5ae51e565d61fd176d40f714586b63cbe72",
+      "recognized": "力を貸してくれ 防犯シールド",
+      "seconds": 3.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！ぼうはんしーるど！"
+      ]
+    },
+    "original/skill-c3380d9057a3": {
+      "expected": "決めるぞ！号令ラッシュ！",
+      "reading": "きめるぞ！ごうれいらっしゅ！",
+      "sha256": "eae5f610731efd831dd8ec71d2cd343c1365d6da56d97692908f0129319950c5",
+      "recognized": "決めるぞ ゴーレーラッシュ",
+      "seconds": 2.96,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "きめるぞ！ごうれいらっしゅ！"
+      ]
+    },
+    "original/skill-a4aa18ea77bc": {
+      "expected": "決めるぞ！釣り針フック！",
+      "reading": "きめるぞ！つりばりふっく！",
+      "sha256": "5781df34d397ae2a68edddea7c8786fcb5b12fa6dffe2f34b3c9141534e88386",
+      "recognized": "決めるぞ 釣り針ふっく",
+      "seconds": 3.0,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "きめるぞ！つりばりふっく！"
+      ]
+    },
+    "original/skill-692c06f91e51": {
+      "expected": "決めるぞ！教鞭ビンタ！",
+      "reading": "きめるぞ！きょうべんびんた！",
+      "sha256": "e8573fb8454a97f204558b84a5257ed167ebd39e6d174bbb15f776d3b5336176",
+      "recognized": "決めるぞ 狂弁ビンタ",
+      "seconds": 3.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！きょうべんびんた！"
+      ]
+    },
+    "original/skill-5bc68647f9b3": {
+      "expected": "決めるぞ！教鞭ショック！",
+      "reading": "きめるぞ！きょうべんしょっく！",
+      "sha256": "3a13db28d1ca8d88c89aa1e6a8495cd01ad1f071f3315ca83fa7a3e466cef45d",
+      "recognized": "決めるぞ 狂弁ショック",
+      "seconds": 3.16,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！きょうべんしょっく！"
+      ]
+    },
+    "original/skill-56a7e9190217": {
+      "expected": "風を切れ！体育倉庫前進！",
+      "reading": "かぜをきれ！たいいくそうこぜんしん！",
+      "sha256": "5e440a9ed25be72ba1457efb581c7a12e8a2d24fafdc77a3c540da8e9c846167",
+      "recognized": "かぜをきれい 体育倉庫全身",
+      "seconds": 3.56,
+      "reading_similarity": 0.97,
+      "accepted_readings": [
+        "かぜをきれ！たいいくそうこぜんしん！"
+      ]
+    },
+    "original/skill-c41e94646908": {
+      "expected": "決めるぞ！タイヤ引き！",
+      "reading": "きめるぞ！たいやひき！",
+      "sha256": "c00c4ac9e74e053d88250417118e532e18e201ed64a988f25afac9b36f0e7eff",
+      "recognized": "きねるぞ タイヤ引き",
+      "seconds": 2.8,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "きめるぞ！たいやひき！"
+      ]
+    },
+    "original/skill-16c25d039ae9": {
+      "expected": "力を貸してくれ！救急箱！",
+      "reading": "ちからをかしてくれ！きゅうきゅうばこ！",
+      "sha256": "272bf2b8abe099b5224522292fc669712b2ad55b0ef5d43c5db3e2620a19ec2c",
+      "recognized": "力を貸してくれ 救急箱",
+      "seconds": 2.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！きゅうきゅうばこ！"
+      ]
+    },
+    "original/skill-274dc62f5031": {
+      "expected": "力を貸してくれ！防災頭巾！",
+      "reading": "ちからをかしてくれ！ぼうさいずきん！",
+      "sha256": "3dd2cd302b71b6c811fac8561614789dfd1ebee26985d59f60f411e83338cec8",
+      "recognized": "力を貸してくれ!防災付近!",
+      "seconds": 3.12,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "ちからをかしてくれ！ぼうさいずきん！"
+      ]
+    },
+    "original/skill-d8fb16a12d1c": {
+      "expected": "決めるぞ！チョーク連射！",
+      "reading": "きめるぞ！ちょーくれんしゃ！",
+      "sha256": "1c5b33f507f3cbb062617ff797c0941bb5a166d1fd973316905df405f03919fc",
+      "recognized": "決めるぞ!超空連射!",
+      "seconds": 2.96,
+      "reading_similarity": 0.88,
+      "accepted_readings": [
+        "きめるぞ！ちょーくれんしゃ！"
+      ]
+    },
+    "original/skill-bf0cfcde499b": {
+      "expected": "決めるぞ！バケツ返し！",
+      "reading": "きめるぞ！ばけつかえし！",
+      "sha256": "9554207b4d969c742e1f40ff9aff1d3612929aecef3870c358d14120c2c85712",
+      "recognized": "決めるぞ!バケツ返し!",
+      "seconds": 3.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ばけつかえし！",
+        "きめるぞ！ばけつがえし！"
+      ]
+    },
+    "original/skill-69adc22ae83c": {
+      "expected": "風を切れ！花壇ジャンプ！",
+      "reading": "かぜをきれ！かだんじゃんぷ！",
+      "sha256": "ab34dd6483216aea393b39d05747fdb569eabf3c35179795bf67e33649c0e4aa",
+      "recognized": "風を切れ!カダンジャンプ!",
+      "seconds": 3.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かぜをきれ！かだんじゃんぷ！"
+      ]
+    },
+    "original/skill-7a562cc35831": {
+      "expected": "決めるぞ！朝礼アタック！",
+      "reading": "きめるぞ！ちょうれいあたっく！",
+      "sha256": "76a0779c3a08269fb6275ffd4175d3cb86f1663f892ef61a5d69734b1ac8ea64",
+      "recognized": "決めるぞ!超霊アタック!",
+      "seconds": 3.0,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ちょうれいあたっく！"
+      ]
+    },
+    "original/skill-33510aea7536": {
+      "expected": "決めるぞ！ランドセル投げ！",
+      "reading": "きめるぞ！らんどせるなげ！",
+      "sha256": "37e180f8f340c0dc139d6d6878876f20c0e434b21a3e9934af8b253cd4ce3b5f",
+      "recognized": "決めるぞ!ランドセル投げ!",
+      "seconds": 3.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！らんどせるなげ！"
+      ]
+    },
+    "original/skill-9cdac887d49f": {
+      "expected": "決めるぞ！校旗突き！",
+      "reading": "きめるぞ！こうきつき！",
+      "sha256": "86a7df488c0bffb0c5b1963d8dab517c5ff6710537c014e3ff862819852abe13",
+      "recognized": "決めるぞ!攻撃突き!",
+      "seconds": 2.88,
+      "reading_similarity": 0.947,
+      "accepted_readings": [
+        "きめるぞ！こうきつき！",
+        "きめるぞ！こうきずき！"
+      ]
+    },
+    "original/skill-77e199ca3665": {
+      "expected": "決めるぞ！ラジカセ爆音！",
+      "reading": "きめるぞ！らじかせばくおん！",
+      "sha256": "92aeb6034e74928127561f9321dbd21a1dd6a43f85cab50d9fe8abda0919b22d",
+      "recognized": "決めるぞ!ラジカ製爆音!",
+      "seconds": 3.36,
+      "reading_similarity": 0.96,
+      "accepted_readings": [
+        "きめるぞ！らじかせばくおん！"
+      ]
+    },
+    "original/skill-06c7088507e2": {
+      "expected": "力を貸してくれ！授業参観ガード！",
+      "reading": "ちからをかしてくれ！じゅぎょうさんかんがーど！",
+      "sha256": "a94d7a59e8dc800c401cb3ddcde6be33ae0a9a6e691629b17c4532bab831fbf1",
+      "recognized": "力を貸してくれ!授業参刊ガード!",
+      "seconds": 3.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！じゅぎょうさんかんがーど！"
+      ]
+    },
+    "original/skill-f074df5d24ed": {
+      "expected": "決めるぞ！雑誌投げ！",
+      "reading": "きめるぞ！ざっしなげ！",
+      "sha256": "3d533e7c0b3f1d7e43b19c141e8b92be5734dbe310b75314f5e8163e92ed84ca",
+      "recognized": "決めるぞ!雑誌投げ!",
+      "seconds": 2.72,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ざっしなげ！"
+      ]
+    },
+    "original/skill-418981e957c7": {
+      "expected": "力を貸してくれ！水筒チャージ！",
+      "reading": "ちからをかしてくれ！すいとうちゃーじ！",
+      "sha256": "f824776017e6fc9aebad95d3ed19a0621659e358f03a75005d8462fba12a9a2c",
+      "recognized": "力を貸してくれ 水頭チャージ",
+      "seconds": 3.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！すいとうちゃーじ！"
+      ]
+    },
+    "original/skill-92addf24df3b": {
+      "expected": "力を貸してくれ！スポドリ補給！",
+      "reading": "ちからをかしてくれ！すぽどりほきゅう！",
+      "sha256": "b0ff416162f9c9a3d6b255ab90d7bdae846296680d3eed1fb5f6cf64341220ff",
+      "recognized": "力を貸してくれ スポドリ補給",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！すぽどりほきゅう！"
+      ]
+    },
+    "original/skill-5ee37bf92946": {
+      "expected": "風を切れ！非常階段ダッシュ！",
+      "reading": "かぜをきれ！ひじょうかいだんだっしゅ！",
+      "sha256": "5c3acf261b48b0b2a72cc2d4810a8d17fac8610657f9c10a8a8895a1ad53a625",
+      "recognized": "風を切れ 非常階段ダッシュ",
+      "seconds": 3.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かぜをきれ！ひじょうかいだんだっしゅ！"
+      ]
+    },
+    "original/skill-f1b6e5ecc035": {
+      "expected": "風を切れ！竹馬ストライド！",
+      "reading": "かぜをきれ！たけうますとらいど！",
+      "sha256": "cde4a8f6f91b3346f9c39cd0f5f26fb1c08566f9315f81e802b5a8c61014cedb",
+      "recognized": "風を切れ 竹馬ストライド",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かぜをきれ！たけうますとらいど！"
+      ]
+    },
+    "original/skill-5a5dac484a00": {
+      "expected": "決めるぞ！ホイッスルバースト！",
+      "reading": "きめるぞ！ほいっするばーすと！",
+      "sha256": "6e7a926b3fdb2d615708881e6964a89fd58449bcf2284a84fcce538947217fc9",
+      "recognized": "決めるぞ ホイッスルバースト",
+      "seconds": 3.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ほいっするばーすと！"
+      ]
+    },
+    "original/skill-24f9bdc815eb": {
+      "expected": "決めるぞ！校内放送！",
+      "reading": "きめるぞ！こうないほうそう！",
+      "sha256": "479bc6a48ac18d6348aad3cf968e513c7ad524b06725082ac1b916707fc639a5",
+      "recognized": "決めるぞ 口内放送",
+      "seconds": 2.96,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！こうないほうそう！"
+      ]
+    },
+    "original/skill-ab204834cd47": {
+      "expected": "決めるぞ！裏門回り込み！",
+      "reading": "きめるぞ！うらもんまわりこみ！",
+      "sha256": "9fe00b98240050730ef347146ff4a700d7a26cfd70c6529d7e5aa84990a3e06d",
+      "recognized": "決めるぞ!裏門回り込み!",
+      "seconds": 3.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！うらもんまわりこみ！"
+      ]
+    },
+    "original/skill-5a8dd6e2e7ce": {
+      "expected": "決めるぞ！旋風脚！",
+      "reading": "きめるぞ！せんぷうきゃく！",
+      "sha256": "82342f6fc8b4a3b358e5d1fa4b88b1e7bc642a38b1624ef586600db6d0c91410",
+      "recognized": "決めるぞ!先鋒曲!",
+      "seconds": 3.12,
+      "reading_similarity": 0.818,
+      "accepted_readings": [
+        "きめるぞ！せんぷうきゃく！"
+      ]
+    },
+    "original/skill-98d136aab18d": {
+      "expected": "決めるぞ！たすき掛け！",
+      "reading": "きめるぞ！たすきかけ！",
+      "sha256": "aa84eda6fbefeb09b9ec7aa2111a4d424e507f7d57a01ac281b8271c9615ce7d",
+      "recognized": "決めるぞ!助け掛け!",
+      "seconds": 2.8,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "きめるぞ！たすきかけ！"
+      ]
+    },
+    "original/skill-7978784d4549": {
+      "expected": "決めるぞ！箱馬タックル！",
+      "reading": "きめるぞ！はこうまたっくる！",
+      "sha256": "7f7fad1e5452805e51620b418eb5c9429b49ada52c23ada7e98da129588d826e",
+      "recognized": "決めるぞ!箱馬タック!",
+      "seconds": 3.2,
+      "reading_similarity": 0.957,
+      "accepted_readings": [
+        "きめるぞ！はこうまたっくる！"
+      ]
+    },
+    "original/skill-e384e12ed973": {
+      "expected": "決めるぞ！フロアモップ！",
+      "reading": "きめるぞ！ふろあもっぷ！",
+      "sha256": "cdf56c1f46807a4c3447a430bb7f7c12eaf27c30ad422ff7a4745cff7b0aca6e",
+      "recognized": "キネルゾ!フロアモップ!",
+      "seconds": 2.76,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "きめるぞ！ふろあもっぷ！"
+      ]
+    },
+    "original/skill-ec244c466330": {
+      "expected": "決めるぞ！金管アラーム！",
+      "reading": "きめるぞ！きんかんあらーむ！",
+      "sha256": "4b36a5c71dab2555ba6401dd0cd31934c2dec9ded2b54430664835a532950d1d",
+      "recognized": "キネルゾ!金冠アラーム!",
+      "seconds": 2.96,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "きめるぞ！きんかんあらーむ！"
+      ]
+    },
+    "original/skill-3f117bb80d08": {
+      "expected": "力を貸してくれ！絆創膏ケア！",
+      "reading": "ちからをかしてくれ！ばんそうこうけあ！",
+      "sha256": "3a587696f79fb84d446c8772b1ab2f49d56f52fd00cc02b06c753348772ff18a",
+      "recognized": "力を貸してくれ!万層高ケア!",
+      "seconds": 3.12,
+      "reading_similarity": 0.824,
+      "accepted_readings": [
+        "ちからをかしてくれ！ばんそうこうけあ！"
+      ]
+    },
+    "original/skill-4aece503edf7": {
+      "expected": "決めるぞ！校章ブーメラン！",
+      "reading": "きめるぞ！こうしょうぶーめらん！",
+      "sha256": "27bee3c71e20ab22a4e088d606138c19608d5cca57bcda24df3ca0aa36200a17",
+      "recognized": "キネルゾ!高昇ブーベラン!",
+      "seconds": 3.28,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "きめるぞ！こうしょうぶーめらん！"
+      ]
+    },
+    "original/skill-08ef33828ceb": {
+      "expected": "決めるぞ！清掃ワゴン！",
+      "reading": "きめるぞ！せいそうわごん！",
+      "sha256": "223394e55de4544633ee136ebdf76dccbe145373638375ea956ad83d692fc9ef",
+      "recognized": "キネルゾ!清掃ワゴン!",
+      "seconds": 2.88,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "きめるぞ！せいそうわごん！"
+      ]
+    },
+    "original/skill-767e1fea64b9": {
+      "expected": "決めるぞ！鉄扇！",
+      "reading": "きめるぞ！てっせん！",
+      "sha256": "1e703ecad101c7834776751502f7914e6a4e88da6a2d28705ffd20c41b493f0b",
+      "recognized": "決めるぞ! 鉄戦!",
+      "seconds": 2.36,
+      "accepted_readings": [
+        "きめるぞ！てっせん！"
+      ],
+      "reading_similarity": 0.875
+    },
+    "original/skill-0b94c5ac5277": {
+      "expected": "決めるぞ！ドア反撃！",
+      "reading": "きめるぞ！どあはんげき！",
+      "sha256": "9781340fdf5d820c8958224f50cebfd67ac5cea03ba4732d46b2d95d566fcbce",
+      "recognized": "キネルゾ!ドア反撃!",
+      "seconds": 2.92,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "きめるぞ！どあはんげき！"
+      ]
+    },
+    "original/skill-2c11847ed6e7": {
+      "expected": "力を貸してくれ！生徒会バッジ！",
+      "reading": "ちからをかしてくれ！せいとかいばっじ！",
+      "sha256": "511a548ab34b68b492e981dcad987c65590de364db97b817ce72013665b204ea",
+      "recognized": "力を貸してくれ!生徒会バッジ!",
+      "seconds": 3.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ちからをかしてくれ！せいとかいばっじ！"
+      ]
+    },
+    "original/skill-d8c13f7f0aea": {
+      "expected": "決めるぞ！非常口スライド！",
+      "reading": "きめるぞ！ひじょうぐちすらいど！",
+      "sha256": "485aec0373ec6e42fe371ac3855200733432bee83edd81c8c2c88aeeb14b8404",
+      "recognized": "決めるぞ!非常口スライド!",
+      "seconds": 3.24,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！ひじょうぐちすらいど！"
+      ]
+    },
+    "original/skill-d6a305cbab55": {
+      "expected": "風を切れ！ロープウェイ！",
+      "reading": "かぜをきれ！ろーぷうぇい！",
+      "sha256": "8fe434bf182e72901e7d2818265a5db1f2a63fa11299b39c229f8164b88444df",
+      "recognized": "風を消え!ロープウェイ!",
+      "seconds": 3.0,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "かぜをきれ！ろーぷうぇい！"
+      ]
+    },
+    "original/skill-9caa53b57999": {
+      "expected": "決めるぞ！校歌斉唱！",
+      "reading": "きめるぞ！こうかせいしょう！",
+      "sha256": "2b0b68ec2d3ed0d3bb9da86d73b208626ca1e5cfc8fad5df7cab049b85cfa058",
+      "recognized": "決めるぞ! 効果聖章!",
+      "seconds": 3.44,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "きめるぞ！こうかせいしょう！"
+      ]
+    },
+    "original/skill-b135bb8cee39": {
+      "expected": "力を貸してくれ！救護スプレー！",
+      "reading": "ちからをかしてくれ！きゅうごすぷれー！",
+      "sha256": "cfb6ffcf5cade67d0200499a3e2ee867fbf9b1caf66d151de33e5b244f7066dd",
+      "recognized": "力を貸してくれ! 救護スプレイ!",
+      "seconds": 3.04,
+      "reading_similarity": 0.941,
+      "accepted_readings": [
+        "ちからをかしてくれ！きゅうごすぷれー！"
+      ]
+    },
+    "original/skill-c00e8449e80b": {
+      "expected": "決めるぞ！金庫破り！",
+      "reading": "きめるぞ！きんこやぶり！",
+      "sha256": "991cfeca0b4872c71ee05ccc611e8252bdc5840928ea92fc67effe0a6b0f976c",
+      "recognized": "決めるぞ! 金庫破り!",
+      "seconds": 2.76,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "きめるぞ！きんこやぶり！"
+      ]
+    },
+    "rebel/action-start": {
+      "expected": "校長！俺たちの本気を見せてやる！",
+      "reading": "こうちょう！おれたちのほんきをみせてやる！",
+      "sha256": "105671c0409d8f880dc78efa37a7e6f55fa14d6ca9e7fe492a33464cc5a1fe6d",
+      "recognized": "校長! 俺たちの本気を見せてやる!",
+      "seconds": 3.64,
+      "accepted_readings": [
+        "こうちょう！おれたちのほんきをみせてやる！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/action-forward": {
+      "expected": "一気に踏み込む！",
+      "reading": "いっきにふみこむ！",
+      "sha256": "1786b27c5b95a09e644894c30a0ab9d401daed312d29248056eac169bae8d560",
+      "recognized": "一気に踏み込む!",
+      "seconds": 1.76,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "いっきにふみこむ！"
+      ]
+    },
+    "rebel/action-back": {
+      "expected": "次の一撃に備えるぜ！",
+      "reading": "つぎのいちげきにそなえるぜ！",
+      "sha256": "5d17450e925fc571d04f8cf17a91f351452ead6921b4310148ccb2c7e78d7440",
+      "recognized": "次の一撃に備えるぜ!",
+      "seconds": 2.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "つぎのいちげきにそなえるぜ！"
+      ]
+    },
+    "rebel/action-turn": {
+      "expected": "背中は取らせねえ！",
+      "reading": "せなかはとらせねえ！",
+      "sha256": "945aa0162fb266fb8e45ab8562c1cd8c7d9ece30e35e5b87ae885dbcfc814df9",
+      "recognized": "背中は取らせねぇ!",
+      "seconds": 1.88,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "せなかはとらせねえ！"
+      ]
+    },
+    "rebel/action-wait": {
+      "expected": "勝負を決める隙を狙う！",
+      "reading": "しょうぶをきめるすきをねらう！",
+      "sha256": "db51a54c05d1d72c3339b859a708cf50e4b2cc53dc16bb86024e1bac0ed91eb2",
+      "recognized": "勝負を決める隙を狙う!",
+      "seconds": 2.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "しょうぶをきめるすきをねらう！"
+      ]
+    },
+    "rebel/action-special": {
+      "expected": "背後はもらった！",
+      "reading": "はいごはもらった！",
+      "sha256": "6b5ab4711ba53d3ec2b2f726357c6a7d0a650d85c31b58bfd730356614f9eb47",
+      "recognized": "ハイドは貰った!",
+      "seconds": 1.48,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "はいごはもらった！"
+      ]
+    },
+    "rebel/action-damage": {
+      "expected": "この程度で、折れるかよ！",
+      "reading": "このていどで、おれるかよ！",
+      "sha256": "a7242139f07cd35f9fec53ba81ae7a8c95fe276197ee7e82361fa9f3b91191ff",
+      "recognized": " この程度で折れるかよ!",
+      "seconds": 2.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "このていどで、おれるかよ！"
+      ]
+    },
+    "rebel/action-wave-clear": {
+      "expected": "突破だ！次も蹴散らす！",
+      "reading": "とっぱだ！つぎもけちらす！",
+      "sha256": "517f5488136701ae7537ae75b67c3e13ffbc8fbb9ead58e6032d41fda72e6d7e",
+      "recognized": "突破だ! 次も蹴散らす!",
+      "seconds": 2.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "とっぱだ！つぎもけちらす！"
+      ]
+    },
+    "rebel/action-victory": {
+      "expected": "これが俺たちの、叛逆だ！",
+      "reading": "これがおれたちの、はんぎゃくだ！",
+      "sha256": "a710d70e2ff854f112e82f42ffa026fe84fa945f524bc9c10d217037f46e2718",
+      "recognized": "これが俺たちの反逆だ!",
+      "seconds": 2.84,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "これがおれたちの、はんぎゃくだ！"
+      ]
+    },
+    "rebel/action-defeat": {
+      "expected": "くそっ！次こそ、勝ってやる！",
+      "reading": "くそっ！つぎこそ、かってやる！",
+      "sha256": "5925c5f29e7bd946f65de09cdfb387a8aee420bb9f26b94687deb9caaa44b0b4",
+      "recognized": "クソ! 次こそ勝ってやる!",
+      "seconds": 3.08,
+      "reading_similarity": 0.957,
+      "accepted_readings": [
+        "くそっ！つぎこそ、かってやる！"
+      ]
+    },
+    "rebel/skill-3697d3d7e280": {
+      "expected": "くらえ！鉄パイプ！",
+      "reading": "くらえ！てつぱいぷ！",
+      "sha256": "fd8147c34ea39a4aa765e55cd7e7a114e50eccbbbb9ff6a2cedbe76ee6b465ea",
+      "recognized": "くらえ 鉄パイプ",
+      "seconds": 2.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！てつぱいぷ！"
+      ]
+    },
+    "rebel/skill-75b2faa68554": {
+      "expected": "負けねえ！防犯シールド！",
+      "reading": "まけねえ！ぼうはんしーるど！",
+      "sha256": "81c2b5d9af5c229d98b0a51c4abf6a4ca770fb087422de32131908f268b56813",
+      "recognized": " 負けね 防犯シールド",
+      "seconds": 2.92,
+      "reading_similarity": 0.957,
+      "accepted_readings": [
+        "まけねえ！ぼうはんしーるど！"
+      ]
+    },
+    "rebel/skill-c3380d9057a3": {
+      "expected": "くらえ！号令ラッシュ！",
+      "reading": "くらえ！ごうれいらっしゅ！",
+      "sha256": "a97c1cc29103059e00e96c25d3d5bec93c4b4cfb1672511685411a7cd760d047",
+      "recognized": "くらえ! ゴーレイラッシュ!",
+      "seconds": 2.4,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "くらえ！ごうれいらっしゅ！"
+      ]
+    },
+    "rebel/skill-a4aa18ea77bc": {
+      "expected": "くらえ！釣り針フック！",
+      "reading": "くらえ！つりばりふっく！",
+      "sha256": "cfeae3b3dad765f8c29b7be1c57dc221bb1654bde592523c8a739283ea78d280",
+      "recognized": "くらえ! 釣り針フック!",
+      "seconds": 2.48,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "くらえ！つりばりふっく！"
+      ]
+    },
+    "rebel/skill-692c06f91e51": {
+      "expected": "くらえ！教鞭ビンタ！",
+      "reading": "くらえ！きょうべんびんた！",
+      "sha256": "24b0b9974e28ff866e0053a7298d1762a2ee5c2c175ea97d5f2e1b7fb55d0890",
+      "recognized": "くらえ、ひょうべんびんた!",
+      "seconds": 2.64,
+      "accepted_readings": [
+        "くらえ！きょうべんびんた！"
+      ],
+      "reading_similarity": 0.909
+    },
+    "rebel/skill-5bc68647f9b3": {
+      "expected": "くらえ！教鞭ショック！",
+      "reading": "くらえ！きょうべんしょっく！",
+      "sha256": "022ec6e289077b5f3717400ae4d9185c4efbee2c91d040ae8ce2de4aeeb07071",
+      "recognized": "くらえ! 表弁ショック!",
+      "seconds": 2.68,
+      "reading_similarity": 0.75,
+      "accepted_readings": [
+        "くらえ！きょうべんしょっく！"
+      ]
+    },
+    "rebel/skill-56a7e9190217": {
+      "expected": "一気に行くぜ！体育倉庫前進！",
+      "reading": "いっきにいくぜ！たいいくそうこぜんしん！",
+      "sha256": "77119f3f98b596cc27da035d2ea738cfeeda4df4f090a1fb3423e4ba727428bf",
+      "recognized": "一気に行くぜ! 体育総合全身!",
+      "seconds": 3.4,
+      "reading_similarity": 0.919,
+      "accepted_readings": [
+        "いっきにいくぜ！たいいくそうこぜんしん！"
+      ]
+    },
+    "rebel/skill-c41e94646908": {
+      "expected": "くらえ！タイヤ引き！",
+      "reading": "くらえ！たいやひき！",
+      "sha256": "99ec92e5e4e7d11a0ca734d448449e49497798dfbc05707131e7a573f228fde3",
+      "recognized": "くらえ! タイヤ引き!",
+      "seconds": 2.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！たいやひき！"
+      ]
+    },
+    "rebel/skill-16c25d039ae9": {
+      "expected": "負けねえ！救急箱！",
+      "reading": "まけねえ！きゅうきゅうばこ！",
+      "sha256": "411e1d5ce7d6e50c200618fc021736c9b73d246537bc9629c8602c2178eb6374",
+      "recognized": "負けねぇ! 救急箱!",
+      "seconds": 2.6,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "まけねえ！きゅうきゅうばこ！"
+      ]
+    },
+    "rebel/skill-274dc62f5031": {
+      "expected": "負けねえ！防災頭巾！",
+      "reading": "まけねえ！ぼうさいずきん！",
+      "sha256": "b3fee10b95764c3a0271223d5c67162fe47491c35b3e52bf7492a3b5b2f1b88e",
+      "recognized": "負けねぇ! 防災付近!",
+      "seconds": 2.72,
+      "reading_similarity": 0.818,
+      "accepted_readings": [
+        "まけねえ！ぼうさいずきん！"
+      ]
+    },
+    "rebel/skill-d8fb16a12d1c": {
+      "expected": "くらえ！チョーク連射！",
+      "reading": "くらえ！ちょーくれんしゃ！",
+      "sha256": "ce9bcc534917a5e756de216cb7bc2841157941c99e929fdf276731db5c5dbb9c",
+      "recognized": "くらえ、チョークレンシャー!",
+      "seconds": 2.32,
+      "reading_similarity": 0.957,
+      "accepted_readings": [
+        "くらえ！ちょーくれんしゃ！"
+      ]
+    },
+    "rebel/skill-bf0cfcde499b": {
+      "expected": "くらえ！バケツ返し！",
+      "reading": "くらえ！ばけつかえし！",
+      "sha256": "e959daa4fa0187f276c64df8291f1374e1a1f20d2d9ca0f0d848e48d67bd7c49",
+      "recognized": "くらえ、バケツガイス!",
+      "seconds": 2.56,
+      "reading_similarity": 0.778,
+      "accepted_readings": [
+        "くらえ！ばけつかえし！",
+        "くらえ！ばけつがえし！"
+      ]
+    },
+    "rebel/skill-69adc22ae83c": {
+      "expected": "一気に行くぜ！花壇ジャンプ！",
+      "reading": "いっきにいくぜ！かだんじゃんぷ！",
+      "sha256": "b75fb24ce304ab4637347aaa4972884819256d4560cdf80481f20a46854f8988",
+      "recognized": "一気に行くぜ!カダンジャンジャンプ!",
+      "seconds": 3.16,
+      "reading_similarity": 0.903,
+      "accepted_readings": [
+        "いっきにいくぜ！かだんじゃんぷ！"
+      ]
+    },
+    "rebel/skill-7a562cc35831": {
+      "expected": "くらえ！朝礼アタック！",
+      "reading": "くらえ！ちょうれいあたっく！",
+      "sha256": "91341516aaaace789a3b89e5138fdeb95eef096e516cedc67824837867f83f34",
+      "recognized": "くらえ!強烈アタック!",
+      "seconds": 2.44,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "くらえ！ちょうれいあたっく！"
+      ]
+    },
+    "rebel/skill-33510aea7536": {
+      "expected": "くらえ！ランドセル投げ！",
+      "reading": "くらえ！らんどせるなげ！",
+      "sha256": "f7e1e73209193bd2e88ac237918c646d5403f42d33255d6cdc3cc7c56a9a5071",
+      "recognized": "くらえ!ランドセルナゲ!",
+      "seconds": 2.72,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！らんどせるなげ！"
+      ]
+    },
+    "rebel/skill-9cdac887d49f": {
+      "expected": "くらえ！校旗突き！",
+      "reading": "くらえ！こうきつき！",
+      "sha256": "87aec4374b7008e58efe04da195d17d4e86fa82ca48c48f113dfe9cdd0fed8ef",
+      "recognized": "くらえ!コーキズキ!",
+      "seconds": 2.44,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "くらえ！こうきつき！",
+        "くらえ！こうきずき！"
+      ]
+    },
+    "rebel/skill-77e199ca3665": {
+      "expected": "くらえ！ラジカセ爆音！",
+      "reading": "くらえ！らじかせばくおん！",
+      "sha256": "e0c7e06eb7204a33313500a9358ac5353738f4beb1d35d61cec9ee3846678998",
+      "recognized": "くらえ!ラジカセ爆音!",
+      "seconds": 2.68,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！らじかせばくおん！"
+      ]
+    },
+    "rebel/skill-06c7088507e2": {
+      "expected": "負けねえ！授業参観ガード！",
+      "reading": "まけねえ！じゅぎょうさんかんがーど！",
+      "sha256": "e2c912ffa92ebcf7c75dc0f92b8921896ea2caa91d68cb7f056436857a4f7526",
+      "recognized": "負けねえ!優行参観ガード!",
+      "seconds": 3.16,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "まけねえ！じゅぎょうさんかんがーど！"
+      ]
+    },
+    "rebel/skill-f074df5d24ed": {
+      "expected": "くらえ！雑誌投げ！",
+      "reading": "くらえ！ざっしなげ！",
+      "sha256": "b348be8054e05491c02970b1dd3f81b15b3eedc6585736d22178736eef9e5184",
+      "recognized": "くらえ!雑誌投げ!",
+      "seconds": 2.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！ざっしなげ！"
+      ]
+    },
+    "rebel/skill-418981e957c7": {
+      "expected": "負けねえ！水筒チャージ！",
+      "reading": "まけねえ！すいとうちゃーじ！",
+      "sha256": "ee4afb29ad68bc63a809480a4a11d6d9cb17492d8e6d449ca3ac68d6faf77377",
+      "recognized": "負けねえ!スイートチャージ!",
+      "seconds": 3.12,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "まけねえ！すいとうちゃーじ！"
+      ]
+    },
+    "rebel/skill-92addf24df3b": {
+      "expected": "負けねえ！スポドリ補給！",
+      "reading": "まけねえ！すぽどりほきゅう！",
+      "sha256": "04a65ea416d8a4a7bb81b2ea2113d6c36255406bb14565a27c6a1b2726f7da8c",
+      "recognized": "まけめえ、すぽどりほきゅう!",
+      "seconds": 3.2,
+      "accepted_readings": [
+        "まけねえ！すぽどりほきゅう！"
+      ],
+      "reading_similarity": 0.917
+    },
+    "rebel/skill-5ee37bf92946": {
+      "expected": "一気に行くぜ！非常階段ダッシュ！",
+      "reading": "いっきにいくぜ！ひじょうかいだんだっしゅ！",
+      "sha256": "a9d905e78c702e85841a7367a375c51564ce4555dd84f0e1a755a70afae35389",
+      "recognized": "行ききに行くぜ、非常階段出し!",
+      "seconds": 3.32,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "いっきにいくぜ！ひじょうかいだんだっしゅ！"
+      ]
+    },
+    "rebel/skill-f1b6e5ecc035": {
+      "expected": "一気に行くぜ！竹馬ストライド！",
+      "reading": "いっきにいくぜ！たけうますとらいど！",
+      "sha256": "d8df9432a069b26bc7510834d42603f88b49f5c7ccb8f1521bc871426927a607",
+      "recognized": "一気に行くぜ 竹馬ストライド",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "いっきにいくぜ！たけうますとらいど！"
+      ]
+    },
+    "rebel/skill-5a5dac484a00": {
+      "expected": "くらえ！ホイッスルバースト！",
+      "reading": "くらえ！ほいっするばーすと！",
+      "sha256": "bc4c78f9ca200b189f8e1d0349c1a8b022aa4b395248431630f67f0bb866adb9",
+      "recognized": "くらえ、ほいっするバースト!",
+      "seconds": 2.64,
+      "accepted_readings": [
+        "くらえ！ほいっするばーすと！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-24f9bdc815eb": {
+      "expected": "くらえ！校内放送！",
+      "reading": "くらえ！こうないほうそう！",
+      "sha256": "be5c6e8c999053ff50ef837fd7f6adfdccd8cde6e8905a8e3e9fb44b046e4bd2",
+      "recognized": "くらえ! 公内放送!",
+      "seconds": 2.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！こうないほうそう！"
+      ]
+    },
+    "rebel/skill-ab204834cd47": {
+      "expected": "くらえ！裏門回り込み！",
+      "reading": "くらえ！うらもんまわりこみ！",
+      "sha256": "bcff9a528fcdf263e613086de20419eb3c08fe95fa8c715c06423c42b87514a2",
+      "recognized": "くらえ! 裏も回りとみ!",
+      "seconds": 2.6,
+      "reading_similarity": 0.87,
+      "accepted_readings": [
+        "くらえ！うらもんまわりこみ！"
+      ]
+    },
+    "rebel/skill-5a8dd6e2e7ce": {
+      "expected": "くらえ！旋風脚！",
+      "reading": "くらえ！せんぷうきゃく！",
+      "sha256": "04dad23f5465cc7a4f85d843ff5d8e6eb6694a6d204ab1b88f270e3cad4518a3",
+      "recognized": "くらえ! 前風客!",
+      "seconds": 2.6,
+      "reading_similarity": 0.6,
+      "accepted_readings": [
+        "くらえ！せんぷうきゃく！"
+      ]
+    },
+    "rebel/skill-98d136aab18d": {
+      "expected": "くらえ！たすき掛け！",
+      "reading": "くらえ！たすきかけ！",
+      "sha256": "a11cac8c81bda0b59e99b9350fcff8a98e4ccfcb4681a9803f264159fa5bb1c5",
+      "recognized": "くらえ、パスキカケー!",
+      "seconds": 2.28,
+      "accepted_readings": [
+        "くらえ！たすきかけ！"
+      ],
+      "reading_similarity": 0.824
+    },
+    "rebel/skill-7978784d4549": {
+      "expected": "くらえ！箱馬タックル！",
+      "reading": "くらえ！はこうまたっくる！",
+      "sha256": "3b4db18505f94b594af8130bb219e76a60cffd88896a15a4e76bda02936bc065",
+      "recognized": "くらえ! 箱ウマタックル!",
+      "seconds": 2.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！はこうまたっくる！"
+      ]
+    },
+    "rebel/skill-e384e12ed973": {
+      "expected": "くらえ！フロアモップ！",
+      "reading": "くらえ！ふろあもっぷ！",
+      "sha256": "605716f5960bca6b049f82e0c0576b9d66d06a71f1b00447a9ff47a7aefc45c7",
+      "recognized": "くらえ! フロアモップ!",
+      "seconds": 2.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！ふろあもっぷ！"
+      ]
+    },
+    "rebel/skill-ec244c466330": {
+      "expected": "くらえ！金管アラーム！",
+      "reading": "くらえ！きんかんあらーむ！",
+      "sha256": "5907cc8491d544d28c10a4962f571c05c070e56d0974fcfb712c623e37477d8d",
+      "recognized": "食らえ金顔アラーブ!",
+      "seconds": 2.36,
+      "reading_similarity": 0.818,
+      "accepted_readings": [
+        "くらえ！きんかんあらーむ！"
+      ]
+    },
+    "rebel/skill-3f117bb80d08": {
+      "expected": "負けねえ！絆創膏ケア！",
+      "reading": "まけねえ！ばんそうこうけあ！",
+      "sha256": "ce3155c1c06798f44720409cbf0d908661b32a335030dcb9eda5188341628577",
+      "recognized": "負けねぇ!万層攻撃や!",
+      "seconds": 2.76,
+      "reading_similarity": 0.64,
+      "accepted_readings": [
+        "まけねえ！ばんそうこうけあ！"
+      ]
+    },
+    "rebel/skill-4aece503edf7": {
+      "expected": "くらえ！校章ブーメラン！",
+      "reading": "くらえ！こうしょうぶーめらん！",
+      "sha256": "c0523b1bccf8b6a8c2e2e53c6001bb723ea778b1c74a498b48211d8b58db4128",
+      "recognized": "ふらえ! 高層ブーメラン!",
+      "seconds": 2.8,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！こうしょうぶーめらん！"
+      ]
+    },
+    "rebel/skill-08ef33828ceb": {
+      "expected": "くらえ！清掃ワゴン！",
+      "reading": "くらえ！せいそうわごん！",
+      "sha256": "bc3bbc73b5aec9c798849e93efef6db81ed5c500b41d3e4fb9fe8ccb97ce1cb8",
+      "recognized": "くらえ、せいそう、ワゴン!",
+      "seconds": 2.48,
+      "accepted_readings": [
+        "くらえ！せいそうわごん！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/skill-767e1fea64b9": {
+      "expected": "くらえ！鉄扇！",
+      "reading": "くらえ！てっせん！",
+      "sha256": "56454b29efdb8ee5b380e1ea0d8c01fc9008c927e222bc53edcfe05439ddd832",
+      "recognized": "ふらえ! 鉄戦!",
+      "seconds": 2.12,
+      "reading_similarity": 0.714,
+      "accepted_readings": [
+        "くらえ！てっせん！"
+      ]
+    },
+    "rebel/skill-0b94c5ac5277": {
+      "expected": "くらえ！ドア反撃！",
+      "reading": "くらえ！どあはんげき！",
+      "sha256": "d4fe6aa481f11a4e0b954f54140656bbb63527a2f3e6eba3acec9590fca94027",
+      "recognized": "ふらえ! ドア反撃!",
+      "seconds": 2.36,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！どあはんげき！"
+      ]
+    },
+    "rebel/skill-2c11847ed6e7": {
+      "expected": "負けねえ！生徒会バッジ！",
+      "reading": "まけねえ！せいとかいばっじ！",
+      "sha256": "a6a38a4c4f169889d7c894603731b0c867219bb6dad64f65a98094bbebc6d4bc",
+      "recognized": "負けねえ! 生徒会バッジ!",
+      "seconds": 3.0,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まけねえ！せいとかいばっじ！"
+      ]
+    },
+    "rebel/skill-d8c13f7f0aea": {
+      "expected": "くらえ！非常口スライド！",
+      "reading": "くらえ！ひじょうぐちすらいど！",
+      "sha256": "842fa0c9929e2cdffa0fa52e8029bf521b1c0ea13651b32760614e41e56973b2",
+      "recognized": "ふらえ! 非常口スライド!",
+      "seconds": 2.6,
+      "reading_similarity": 0.923,
+      "accepted_readings": [
+        "くらえ！ひじょうぐちすらいど！"
+      ]
+    },
+    "rebel/skill-d6a305cbab55": {
+      "expected": "一気に行くぜ！ロープウェイ！",
+      "reading": "いっきにいくぜ！ろーぷうぇい！",
+      "sha256": "99bf23c72a05bdef91694ba063a3c74bf654a8cb20f951e38191adf99e9bd37b",
+      "recognized": "一気に行くぜ! ロークウェイ!",
+      "seconds": 2.92,
+      "reading_similarity": 0.923,
+      "accepted_readings": [
+        "いっきにいくぜ！ろーぷうぇい！"
+      ]
+    },
+    "rebel/skill-9caa53b57999": {
+      "expected": "くらえ！校歌斉唱！",
+      "reading": "くらえ！こうかせいしょう！",
+      "sha256": "574ac0f1a2b2c06bdca71a40950e868924dbefdf76bacd8eed6e721ebab1f561",
+      "recognized": "ふらえ! 豪華清掌!お!",
+      "seconds": 2.76,
+      "reading_similarity": 0.4,
+      "accepted_readings": [
+        "くらえ！こうかせいしょう！"
+      ]
+    },
+    "rebel/skill-b135bb8cee39": {
+      "expected": "負けねえ！救護スプレー！",
+      "reading": "まけねえ！きゅうごすぷれー！",
+      "sha256": "5dc44844d99398be9bdb2afd2cd4a8694ac7552afe6f970ef2b066e62cc73df6",
+      "recognized": "負けねぇ!ヒューゴーソスプレー!",
+      "seconds": 3.0,
+      "accepted_readings": [
+        "まけねえ！きゅうごすぷれー！"
+      ],
+      "reading_similarity": 0.692
+    },
+    "rebel/skill-c00e8449e80b": {
+      "expected": "くらえ！金庫破り！",
+      "reading": "くらえ！きんこやぶり！",
+      "sha256": "87e9e5b07af5202618361a529b0389765acf1af024cb7c7e7dd21d6445525fbb",
+      "recognized": "くらえ!ひんこやぶり!",
+      "seconds": 2.28,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！きんこやぶり！"
+      ]
+    },
+    "rebel/skill-6feb4b413565": {
+      "expected": "くらえ！叛逆ナックル！",
+      "reading": "くらえ！はんぎゃくなっくる！",
+      "sha256": "2081e2d54323a3071b9d76294c5cbc8c6b85fbdc463ea3e3b8c665e206274fa2",
+      "recognized": "ふらえ 反逆ナックル",
+      "seconds": 2.72,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "くらえ！はんぎゃくなっくる！"
+      ]
+    },
+    "rebel/skill-b7505077b0de": {
+      "expected": "くらえ！紅蓮タックル！",
+      "reading": "くらえ！ぐれんたっくる！",
+      "sha256": "3c1f7a3abf63624ae598fc40e65d2c50abab498aff4aded0ebb740a7af28fd81",
+      "recognized": "ふらえ グレンタックル",
+      "seconds": 2.48,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "くらえ！ぐれんたっくる！"
+      ]
+    },
+    "rebel/skill-2a85aa2e3ca7": {
+      "expected": "くらえ！旋風キック！",
+      "reading": "くらえ！せんぷうきっく！",
+      "sha256": "8378c46015dfb947cd564f6432f6d913c9ffc38de9519fb682d850a9e341b75c",
+      "recognized": "ふらえ センプルキック",
+      "seconds": 2.48,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！せんぷうきっく！"
+      ]
+    },
+    "rebel/skill-6ff1e8c62994": {
+      "expected": "負けねえ！不屈のガード！",
+      "reading": "まけねえ！ふくつのがーど！",
+      "sha256": "f559df24e611f6c5e5d9cbe10c4fdf090e9833318ab141cde59a2e4c835cb611",
+      "recognized": "負けめえ 副つのガード",
+      "seconds": 2.8,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "まけねえ！ふくつのがーど！"
+      ]
+    },
+    "rebel/skill-c0f0310e6b6f": {
+      "expected": "くらえ！反撃の拳！",
+      "reading": "くらえ！はんげきのこぶし！",
+      "sha256": "20a9687dc0c7b72f071ce35bdb0b636b07f02f1c02b40f939ac05b0044f8b47c",
+      "recognized": "ふらえ 反撃の拳",
+      "seconds": 2.68,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "くらえ！はんげきのこぶし！"
+      ]
+    },
+    "rebel/skill-01fa6476e08a": {
+      "expected": "くらえ！校則ブレイカー！",
+      "reading": "くらえ！こうそくぶれいかー！",
+      "sha256": "1b402a9c5a057c79521cdc2d5b726016be3c21488af591315872e99b907f53b9",
+      "recognized": "ふらえ 高速ブレイカー",
+      "seconds": 2.96,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "くらえ！こうそくぶれいかー！"
+      ]
+    },
+    "rebel/skill-30b1b65018eb": {
+      "expected": "くらえ！紅蓮連拳、速攻！",
+      "reading": "くらえ！ぐれんれんけん、そっこう！",
+      "sha256": "dac64eb370bc4157b098639802cab0be0f050ad083f0eb320e5d4afd77dd103c",
+      "recognized": "ふらえ グレン連携 速攻",
+      "seconds": 3.36,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "くらえ！ぐれんれんけん、そっこう！"
+      ]
+    },
+    "rebel/skill-e16770b40199": {
+      "expected": "くらえ！紅蓮連拳、蓄勢！",
+      "reading": "くらえ！ぐれんれんけん、ちくせい！",
+      "sha256": "a6c15429db676a2ddbee7281c3e3c0c8a041be93fa0ad3aa6f97480972a43035",
+      "recognized": "くらえ ぐれんれんけん つせい",
+      "seconds": 3.52,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！ぐれんれんけん、ちくせい！"
+      ]
+    },
+    "rebel/skill-c5a9aef1ef80": {
+      "expected": "くらえ！紅蓮連拳、連携！",
+      "reading": "くらえ！ぐれんれんけん、れんけい！",
+      "sha256": "d72fe85c57adca7b50aa53cb80426d707a4ddfc8064ae8942dab12642179afd4",
+      "recognized": " くらえ ぐれんれんけん れんけん",
+      "seconds": 3.64,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "くらえ！ぐれんれんけん、れんけい！"
+      ]
+    },
+    "rebel/skill-6d243928e2f0": {
+      "expected": "くらえ！突破の衝撃、速攻！",
+      "reading": "くらえ！とっぱのしょうげき、そっこう！",
+      "sha256": "cb29ba64a49c733ca3a9cbe195bd1f9e8dc206918c51bf1ac0add17e3a98e6eb",
+      "recognized": "くらえ!トッパの衝撃!そっこう!",
+      "seconds": 3.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！とっぱのしょうげき、そっこう！"
+      ]
+    },
+    "rebel/skill-cc43ba973ee3": {
+      "expected": "くらえ！突破の衝撃、蓄勢！",
+      "reading": "くらえ！とっぱのしょうげき、ちくせい！",
+      "sha256": "fa43834f2f4b2a01ecbaf9099103882df44e6e80da6c25c22f7d8fe582c15a4e",
+      "recognized": "くらえ!トッパの衝撃!行くぜ!",
+      "seconds": 3.64,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "くらえ！とっぱのしょうげき、ちくせい！"
+      ]
+    },
+    "rebel/skill-59134bb325d9": {
+      "expected": "くらえ！突破の衝撃、連携！",
+      "reading": "くらえ！とっぱのしょうげき、れんけい！",
+      "sha256": "dcd3e41ce4d08c2c0324c3d2bc84ef3d08df26f0e340e7c0b041ff56882aa3d7",
+      "recognized": "くらえ!トッパの衝撃!現形!",
+      "seconds": 3.56,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "くらえ！とっぱのしょうげき、れんけい！"
+      ]
+    },
+    "rebel/skill-04154fc6716a": {
+      "expected": "くらえ！突破の衝撃、解放！",
+      "reading": "くらえ！とっぱのしょうげき、かいほう！",
+      "sha256": "e57ea5c8bbbc4ba006e7758ae8492e235c580c0874495a18408bea09d002d7f1",
+      "recognized": "くらえ!トッパの衝撃!開放!",
+      "seconds": 3.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！とっぱのしょうげき、かいほう！"
+      ]
+    },
+    "rebel/skill-0c8602520b3d": {
+      "expected": "くらえ！影抜きスライド、速攻！",
+      "reading": "くらえ！かげぬきすらいど、そっこう！",
+      "sha256": "15d2d72e8fea72272c346e626729d1d4e3227bc0ed59dc6e174d0e3a1b939b18",
+      "recognized": "くらえ!ガネ抜きスライド!そっこう!",
+      "seconds": 3.52,
+      "reading_similarity": 0.867,
+      "accepted_readings": [
+        "くらえ！かげぬきすらいど、そっこう！"
+      ]
+    },
+    "rebel/skill-5ab822ecad9d": {
+      "expected": "くらえ！影抜きスライド、蓄勢！",
+      "reading": "くらえ！かげぬきすらいど、ちくせい！",
+      "sha256": "fccf18e5e46d0d35a60a53076736b60298537f1cdab64b6851615eae2fbd3a91",
+      "recognized": "くらえ!ガネ抜きスライド!行くぜ!く",
+      "seconds": 3.72,
+      "reading_similarity": 0.667,
+      "accepted_readings": [
+        "くらえ！かげぬきすらいど、ちくせい！"
+      ]
+    },
+    "rebel/skill-895d892fcc22": {
+      "expected": "くらえ！影抜きスライド、連携！",
+      "reading": "くらえ！かげぬきすらいど、れんけい！",
+      "sha256": "9c372a2ea975a471c9de9fb2d1cd5ce299d564c53d0a1f2f2316e44322710906",
+      "recognized": "らえ!くらえ!枯れ抜きスライド連携!",
+      "seconds": 3.6,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "くらえ！かげぬきすらいど、れんけい！"
+      ]
+    },
+    "rebel/skill-0c35981c25ca": {
+      "expected": "くらえ！影抜きスライド、解放！",
+      "reading": "くらえ！かげぬきすらいど、かいほう！",
+      "sha256": "0e0718e75137cd73b7272427a52f730f1a614f1dfc7de69d4f2bd9aeee087019",
+      "recognized": "くらえ!枯れ抜き身のスライド開放!",
+      "seconds": 3.64,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "くらえ！かげぬきすらいど、かいほう！"
+      ]
+    },
+    "rebel/skill-10e92393e33e": {
+      "expected": "くらえ！旋回の嵐、速攻！",
+      "reading": "くらえ！せんかいのあらし、そっこう！",
+      "sha256": "aaf3f150a181cc415cb77d886aeeb13257e3162c7419e0df9b3362661427bff4",
+      "recognized": "くらえ!戦界の嵐速攻!",
+      "seconds": 3.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！せんかいのあらし、そっこう！"
+      ]
+    },
+    "rebel/skill-1e1b07b9e868": {
+      "expected": "くらえ！旋回の嵐、蓄勢！",
+      "reading": "くらえ！せんかいのあらし、ちくせい！",
+      "sha256": "89b9b11b028c02bfaf6f1042338fb51e903fc67357ce12f55bd24f58b37ca9fb",
+      "recognized": "くらえ!戦界の嵐蓄戦!",
+      "seconds": 3.76,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "くらえ！せんかいのあらし、ちくせい！"
+      ]
+    },
+    "rebel/skill-9694950e6e20": {
+      "expected": "くらえ！旋回の嵐、連携！",
+      "reading": "くらえ！せんかいのあらし、れんけい！",
+      "sha256": "c9e3e40c09939fd2b5e5f3dcf145473fd9ba5d9d99039f2ab4fc2fec6b68c2b7",
+      "recognized": "ふらえ! 戦隊の嵐 連携",
+      "seconds": 3.68,
+      "reading_similarity": 0.867,
+      "accepted_readings": [
+        "くらえ！せんかいのあらし、れんけい！"
+      ]
+    },
+    "rebel/skill-0743420dea1c": {
+      "expected": "くらえ！旋回の嵐、解放！",
+      "reading": "くらえ！せんかいのあらし、かいほう！",
+      "sha256": "3b4ad736ba984f04475b63ded9176950c4a2ed7dcc493704bcaba70570858611",
+      "recognized": "くらえ! 戦隊の嵐 逮捕!",
+      "seconds": 3.64,
+      "reading_similarity": 0.828,
+      "accepted_readings": [
+        "くらえ！せんかいのあらし、かいほう！"
+      ]
+    },
+    "rebel/skill-099bdfc793a6": {
+      "expected": "くらえ！見切りの一撃、速攻！",
+      "reading": "くらえ！みきりのいちげき、そっこう！",
+      "sha256": "dd29e501d12be8fbbe46568382c469851f7007eb87b54076d6cbea0fc58c8a6f",
+      "recognized": "くらえ! 右利の一撃 速攻!",
+      "seconds": 3.48,
+      "reading_similarity": 0.903,
+      "accepted_readings": [
+        "くらえ！みきりのいちげき、そっこう！"
+      ]
+    },
+    "rebel/skill-0f6cf5315aac": {
+      "expected": "くらえ！見切りの一撃、蓄勢！",
+      "reading": "くらえ！みきりのいちげき、ちくせい！",
+      "sha256": "bed295f57e1dc3a422a807a1958b973686e770846bdc1fd08d50b4e2336837bd",
+      "recognized": "くらえ! 右利の一撃 直戦!",
+      "seconds": 3.6,
+      "reading_similarity": 0.812,
+      "accepted_readings": [
+        "くらえ！みきりのいちげき、ちくせい！"
+      ]
+    },
+    "rebel/skill-afbbab8b0436": {
+      "expected": "くらえ！見切りの一撃、連携！",
+      "reading": "くらえ！みきりのいちげき、れんけい！",
+      "sha256": "8013e01a1cf14c25c74b9c809dbcb22e2a05ebbd7f8faa24d9f0096a0be2e9cd",
+      "recognized": "くらえ! 右利の一撃 連携!",
+      "seconds": 3.52,
+      "reading_similarity": 0.903,
+      "accepted_readings": [
+        "くらえ！みきりのいちげき、れんけい！"
+      ]
+    },
+    "rebel/skill-6a79e60634db": {
+      "expected": "くらえ！見切りの一撃、解放！",
+      "reading": "くらえ！みきりのいちげき、かいほう！",
+      "sha256": "53d1d1ac100f124b64be11c8600f05a75750a26746057a43afaf135dd8a83b45",
+      "recognized": "くらえ! 右利の一撃 逮捕!",
+      "seconds": 3.48,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！みきりのいちげき、かいほう！"
+      ]
+    },
+    "rebel/skill-625c517ff1ec": {
+      "expected": "くらえ！烈風掌、速攻！",
+      "reading": "くらえ！れっぷうしょう、そっこう！",
+      "sha256": "f04e23cc5d399afbf581f48554e3e0f421729ef1e1a4676048d6e4ccc87486df",
+      "recognized": "くらえ レップショー 速攻",
+      "seconds": 3.2,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！れっぷうしょう、そっこう！"
+      ]
+    },
+    "rebel/skill-282c7d0ec7df": {
+      "expected": "くらえ！烈風掌、蓄勢！",
+      "reading": "くらえ！れっぷうしょう、ちくせい！",
+      "sha256": "ee7f34cf9f5758960026f4ffb514838568b48fc363ecc56ba71e026adbdc265a",
+      "recognized": "くらえ!レップーショー蓄性!",
+      "seconds": 3.36,
+      "accepted_readings": [
+        "くらえ！れっぷうしょう、ちくせい！"
+      ],
+      "reading_similarity": 0.857
+    },
+    "rebel/skill-4e30538a9677": {
+      "expected": "くらえ！烈風掌、連携！",
+      "reading": "くらえ！れっぷうしょう、れんけい！",
+      "sha256": "de41eaf01d4c6676e493fc51e27e78754edd5bfd0fd3be1cd11ef167c35ec787",
+      "recognized": "くらえ レップショー 連携",
+      "seconds": 3.32,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！れっぷうしょう、れんけい！"
+      ]
+    },
+    "rebel/skill-063ef1072791": {
+      "expected": "くらえ！烈風掌、解放！",
+      "reading": "くらえ！れっぷうしょう、かいほう！",
+      "sha256": "7b607d1e25a17fa9a16588787523f0dfd88772fbedec3740c9d0a8aae6c25cfb",
+      "recognized": "くらえ レップショー 開放",
+      "seconds": 3.24,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！れっぷうしょう、かいほう！"
+      ]
+    },
+    "rebel/skill-7cd207b857a3": {
+      "expected": "くらえ！引き込みフック、速攻！",
+      "reading": "くらえ！ひきこみふっく、そっこう！",
+      "sha256": "0424d95912779fd03ad5e1a0210df499b792989d4322e7ab18927c61de1cd277",
+      "recognized": "くらえ 引き込み服 そこ!",
+      "seconds": 3.36,
+      "reading_similarity": 0.88,
+      "accepted_readings": [
+        "くらえ！ひきこみふっく、そっこう！"
+      ]
+    },
+    "rebel/skill-4cde7938e871": {
+      "expected": "くらえ！引き込みフック、蓄勢！",
+      "reading": "くらえ！ひきこみふっく、ちくせい！",
+      "sha256": "925e6c587d850eeefbc7458313fd569d172eb0aff0f7d7d5d7b5024bbf31a69b",
+      "recognized": "くらえ 引き込み服 蓄穢!",
+      "seconds": 3.6,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！ひきこみふっく、ちくせい！"
+      ]
+    },
+    "rebel/skill-592798dcfc98": {
+      "expected": "くらえ！引き込みフック、連携！",
+      "reading": "くらえ！ひきこみふっく、れんけい！",
+      "sha256": "622f780f005fbfca47f0efe9b9f3d53eadf9932b43e2669dcc83408a68486957",
+      "recognized": "くらえ 引き込み服 連携!",
+      "seconds": 3.44,
+      "reading_similarity": 0.963,
+      "accepted_readings": [
+        "くらえ！ひきこみふっく、れんけい！"
+      ]
+    },
+    "rebel/skill-3194090220b9": {
+      "expected": "くらえ！引き込みフック、解放！",
+      "reading": "くらえ！ひきこみふっく、かいほう！",
+      "sha256": "010db5798578088215d095b176cbb4ac0ece9cb9dbcf10942a05f21ea3e6979e",
+      "recognized": "くらえ 引き込み服 逮捕!",
+      "seconds": 3.44,
+      "reading_similarity": 0.846,
+      "accepted_readings": [
+        "くらえ！ひきこみふっく、かいほう！"
+      ]
+    },
+    "rebel/skill-89210545c569": {
+      "expected": "くらえ！離脱の一閃、速攻！",
+      "reading": "くらえ！りだつのいっせん、そっこう！",
+      "sha256": "a04692e5677df4193111bb2b4f2d8841dbaf1759972bea98c375cbe06d984c6a",
+      "recognized": "くらえ 離脱の一線 そこ!",
+      "seconds": 3.32,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "くらえ！りだつのいっせん、そっこう！"
+      ]
+    },
+    "rebel/skill-cddeb5e646b4": {
+      "expected": "くらえ！離脱の一閃、蓄勢！",
+      "reading": "くらえ！りだつのいっせん、ちくせい！",
+      "sha256": "f9cceac68b3b02f01c9f2c39bb16fca864689d12be6e9aa5e477aebe5202f276",
+      "recognized": "くらえ 離脱の一線 蓄穢!",
+      "seconds": 3.56,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "くらえ！りだつのいっせん、ちくせい！"
+      ]
+    },
+    "rebel/skill-39dd32073699": {
+      "expected": "くらえ！離脱の一閃、連携！",
+      "reading": "くらえ！りだつのいっせん、れんけい！",
+      "sha256": "00c31519028619bfe9775cdf5e9a397af88aaa9a6add8e069dd8ac59eac3600d",
+      "recognized": "くらえ! 離脱の一線! えっけっけっ!",
+      "seconds": 3.52,
+      "reading_similarity": 0.75,
+      "accepted_readings": [
+        "くらえ！りだつのいっせん、れんけい！"
+      ]
+    },
+    "rebel/skill-6b772518d29d": {
+      "expected": "くらえ！離脱の一閃、解放！",
+      "reading": "くらえ！りだつのいっせん、かいほう！",
+      "sha256": "1ea175546b5b525ab3c61f0b51ffece1f499715202e702a5119578d19def0044",
+      "recognized": "くらえ! 離脱の一線! 開放!",
+      "seconds": 3.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "くらえ！りだつのいっせん、かいほう！"
+      ]
+    },
+    "rebel/skill-56fd98870e49": {
+      "expected": "くらえ！一点狙撃、速攻！",
+      "reading": "くらえ！いってんそげき、そっこう！",
+      "sha256": "e0d78a1cececd50cd8fe86accf4c447487265cc7fa8416e91cf680da36f75c09",
+      "recognized": "くらえ! 一転掃撃! そこ!",
+      "seconds": 3.4,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！いってんそげき、そっこう！"
+      ]
+    },
+    "rebel/skill-bbd7809e8139": {
+      "expected": "くらえ！一点狙撃、蓄勢！",
+      "reading": "くらえ！いってんそげき、ちくせい！",
+      "sha256": "be2d4318c4300572b16b997ec9c498abeec1f979bd925606202a4fbc7c32cb2e",
+      "recognized": "くらえ! 一転掃撃! 作戦!",
+      "seconds": 3.56,
+      "reading_similarity": 0.828,
+      "accepted_readings": [
+        "くらえ！いってんそげき、ちくせい！"
+      ]
+    },
+    "rebel/skill-297e7d7ae1ca": {
+      "expected": "くらえ！一点狙撃、連携！",
+      "reading": "くらえ！いってんそげき、れんけい！",
+      "sha256": "163803637fcd683a10e368e2aee29b0cfdb3e972e20f2e551b049f380cb797ff",
+      "recognized": "くらえ!1転掃撃!連携!",
+      "seconds": 3.44,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！いってんそげき、れんけい！"
+      ]
+    },
+    "rebel/skill-229425fe2f81": {
+      "expected": "くらえ！一点狙撃、解放！",
+      "reading": "くらえ！いってんそげき、かいほう！",
+      "sha256": "788d4480bb93f098d2c24761e5a78ca3b013c2681d4833b55763e14c228f1ea0",
+      "recognized": "くらえ!1転掃撃!開放!",
+      "seconds": 3.44,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "くらえ！いってんそげき、かいほう！"
+      ]
+    },
+    "rebel/skill-6c717451775c": {
+      "expected": "くらえ！校則一閃、速攻！",
+      "reading": "くらえ！こうそくいっせん、そっこう！",
+      "sha256": "ed6c5cd991ec384b8e73d13ec62b09a1af654f5e877ff7ef8c9c9433ecb7990d",
+      "recognized": "くらえ!高速1000!速攻!",
+      "seconds": 3.4,
+      "reading_similarity": 0.846,
+      "accepted_readings": [
+        "くらえ！こうそくいっせん、そっこう！"
+      ]
+    },
+    "rebel/skill-5c1f1f642787": {
+      "expected": "くらえ！校則一閃、蓄勢！",
+      "reading": "くらえ！こうそくいっせん、ちくせい！",
+      "sha256": "cf40b99c6d6fbb1c0d64fea205650b9320bd86defa95262454d708d7d689f5e3",
+      "recognized": "くらえ!高速1000!蓄性!",
+      "seconds": 3.48,
+      "reading_similarity": 0.846,
+      "accepted_readings": [
+        "くらえ！こうそくいっせん、ちくせい！"
+      ]
+    },
+    "rebel/skill-cd5819dde90f": {
+      "expected": "くらえ！校則一閃、連携！",
+      "reading": "くらえ！こうそくいっせん、れんけい！",
+      "sha256": "6507ae02f2a6ed9b675348ba715e315f5beae3b50772ceeb1edd912322ff6922",
+      "recognized": "くらえ!高速1000連携!",
+      "seconds": 3.48,
+      "accepted_readings": [
+        "くらえ！こうそくいっせん、れんけい！"
+      ],
+      "reading_similarity": 0.846
+    },
+    "rebel/skill-ace1c0223f95": {
+      "expected": "くらえ！校則一閃、解放！",
+      "reading": "くらえ！こうそくいっせん、かいほう！",
+      "sha256": "f077efe5dcc115429ad2cc57700c62d39e3a9b3f3cfcf91169700b289d53fe43",
+      "recognized": "くらえ!高速1000開放!",
+      "seconds": 3.4,
+      "accepted_readings": [
+        "くらえ！こうそくいっせん、かいほう！"
+      ],
+      "reading_similarity": 0.846
+    },
+    "rebel/skill-f0598e9bd004": {
+      "expected": "くらえ！足払い、速攻！",
+      "reading": "くらえ！あしばらい、そっこう！",
+      "sha256": "770ff79a35815022e19bf49e786c3a8c8d0ed676623089c0c95989562e8bf039",
+      "recognized": "くらえ!ひばらい!速攻!",
+      "seconds": 3.12,
+      "reading_similarity": 0.87,
+      "accepted_readings": [
+        "くらえ！あしばらい、そっこう！"
+      ]
+    },
+    "rebel/skill-aef9f6ce1514": {
+      "expected": "くらえ！足払い、蓄勢！",
+      "reading": "くらえ！あしばらい、ちくせい！",
+      "sha256": "47ed91a0478a2c6f9de250c3bae92bc2db43bf7773c398468ae1565c0e3036a0",
+      "recognized": "くらえ、足払い、ち、ちくせー!",
+      "seconds": 3.36,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "くらえ！あしばらい、ちくせい！"
+      ]
+    },
+    "rebel/skill-8ffa7612a93c": {
+      "expected": "くらえ！足払い、連携！",
+      "reading": "くらえ！あしばらい、れんけい！",
+      "sha256": "b13151b20ee290523a752501c811b8de2dae4859ebb4eb4e70dbaeeb6c60ad12",
+      "recognized": "くらえ、足払い、連携!",
+      "seconds": 3.24,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "くらえ！あしばらい、れんけい！"
+      ]
+    },
+    "rebel/skill-6145bf1031b5": {
+      "expected": "くらえ！足払い、解放！",
+      "reading": "くらえ！あしばらい、かいほう！",
+      "sha256": "9acfc52b963ba8435d70153505b6df0dda51f2c8f01e6ae1212cbbd140eb9755",
+      "recognized": "くらえ、足払い、ハイホー!",
+      "seconds": 3.24,
+      "reading_similarity": 0.75,
+      "accepted_readings": [
+        "くらえ！あしばらい、かいほう！"
+      ]
+    },
+    "rebel/skill-0e21ce0595f3": {
+      "expected": "くらえ！闘気吸収、速攻！",
+      "reading": "くらえ！とうききゅうしゅう、そっこう！",
+      "sha256": "5e631e630c3ad72e7b092b6bd9654e7eb13183aade87b099346ba594d99dfd4d",
+      "recognized": "くらえ! トーキキューシュ! そっこう!",
+      "seconds": 3.32,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "くらえ！とうききゅうしゅう、そっこう！"
+      ]
+    },
+    "rebel/skill-9956906eb1ac": {
+      "expected": "くらえ！闘気吸収、蓄勢！",
+      "reading": "くらえ！とうききゅうしゅう、ちくせい！",
+      "sha256": "9256baf093ffee17726bdf642ee345574aa93ce74abbdc1aa879e6b13fa948bd",
+      "recognized": "くらえ! トーキキューシュ! ちくせい!",
+      "seconds": 3.6,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "くらえ！とうききゅうしゅう、ちくせい！"
+      ]
+    },
+    "rebel/skill-1aa3906b04fd": {
+      "expected": "くらえ！闘気吸収、連携！",
+      "reading": "くらえ！とうききゅうしゅう、れんけい！",
+      "sha256": "2e348b162d804cc88aead102e2af1a39f6528fd8978626579f19196f3fbdf041",
+      "recognized": "くらえ! トーキキューシュ! 連携!",
+      "seconds": 3.56,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "くらえ！とうききゅうしゅう、れんけい！"
+      ]
+    },
+    "rebel/skill-93e27c7b338e": {
+      "expected": "くらえ！闘気吸収、解放！",
+      "reading": "くらえ！とうききゅうしゅう、かいほう！",
+      "sha256": "9243ad378c80178b04e9e2cdf928e8a22e403b0f531eaab57df39f2aa3ee2ba6",
+      "recognized": "くらえ! トーキキューシュ! 対法!",
+      "seconds": 3.48,
+      "reading_similarity": 0.774,
+      "accepted_readings": [
+        "くらえ！とうききゅうしゅう、かいほう！"
+      ]
+    },
+    "rebel/skill-31c12c0a603e": {
+      "expected": "負けねえ！鉄壁の構え、速攻！",
+      "reading": "まけねえ！てっぺきのかまえ、そっこう！",
+      "sha256": "40fc58680f97b64d97c7ee88d7ee961809f0d071952cf9190f145a2dcb92ff12",
+      "recognized": "負けねぇ! 鉄壁の構え! そっこう!",
+      "seconds": 3.68,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "まけねえ！てっぺきのかまえ、そっこう！"
+      ]
+    },
+    "rebel/skill-968e6bf51391": {
+      "expected": "負けねえ！鉄壁の構え、蓄勢！",
+      "reading": "まけねえ！てっぺきのかまえ、ちくせい！",
+      "sha256": "a65700401a9d5755b2aa9143f70bee30b274e82b8f3fd048a3170742a8496248",
+      "recognized": "負けねぇ! 鉄壁の構え! ちくせい!",
+      "seconds": 3.96,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "まけねえ！てっぺきのかまえ、ちくせい！"
+      ]
+    },
+    "rebel/skill-0d3d3d80b931": {
+      "expected": "負けねえ！鉄壁の構え、連携！",
+      "reading": "まけねえ！てっぺきのかまえ、れんけい！",
+      "sha256": "d61d61db838c0410bfd14eecc5e426979ce90a455ccef9b67fbece26e08ec048",
+      "recognized": "負けねぇ! 決的の構え! 連携!",
+      "seconds": 3.76,
+      "reading_similarity": 0.812,
+      "accepted_readings": [
+        "まけねえ！てっぺきのかまえ、れんけい！"
+      ]
+    },
+    "rebel/skill-817dbe159ca6": {
+      "expected": "負けねえ！鉄壁の構え、解放！",
+      "reading": "まけねえ！てっぺきのかまえ、かいほう！",
+      "sha256": "d1bdc18b09e0a084e49bbe60cd151299521771122a8206239a712fdfd95acd7e",
+      "recognized": "負けねぇ! 決的の構え! 解放法!",
+      "seconds": 3.84,
+      "reading_similarity": 0.765,
+      "accepted_readings": [
+        "まけねえ！てっぺきのかまえ、かいほう！"
+      ]
+    },
+    "rebel/skill-176a32ba6570": {
+      "expected": "負けねえ！燃える気合、速攻！",
+      "reading": "まけねえ！もえるきあい、そっこう！",
+      "sha256": "da4d22c85133363c9f5ffe38ce957bd8d2a372cb2f32893caead55df23ab8fb5",
+      "recognized": "負けねぇ! 燃える気合い! 速攻!",
+      "seconds": 3.28,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "まけねえ！もえるきあい、そっこう！"
+      ]
+    },
+    "rebel/skill-d12d42bd80c6": {
+      "expected": "負けねえ！燃える気合、蓄勢！",
+      "reading": "まけねえ！もえるきあい、ちくせい！",
+      "sha256": "4013cfb2afef94a8bb388438a324b44e3c16fea25164365c2c912df6c163295b",
+      "recognized": "負けねぇ! 燃える気合い! 直戦!",
+      "seconds": 3.56,
+      "reading_similarity": 0.828,
+      "accepted_readings": [
+        "まけねえ！もえるきあい、ちくせい！"
+      ]
+    },
+    "rebel/skill-81efd3614ec7": {
+      "expected": "負けねえ！燃える気合、連携！",
+      "reading": "まけねえ！もえるきあい、れんけい！",
+      "sha256": "dd45f48ab374fd24777f69daf7b36934ecdfb56e7d98d9e8818ad4ed520e4f69",
+      "recognized": "負けねぇ 燃える気合い 連携",
+      "seconds": 3.48,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "まけねえ！もえるきあい、れんけい！"
+      ]
+    },
+    "rebel/skill-5683c14da9ba": {
+      "expected": "負けねえ！燃える気合、解放！",
+      "reading": "まけねえ！もえるきあい、かいほう！",
+      "sha256": "fa2a9584eaffc579740a6dd769717e96ed04ec4ba859499ba0b39a7b45103b93",
+      "recognized": "負けねぇ 燃える気合い 解放",
+      "seconds": 3.44,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "まけねえ！もえるきあい、かいほう！"
+      ]
+    },
+    "rebel/skill-757135d7dae1": {
+      "expected": "負けねえ！応急手当、速攻！",
+      "reading": "まけねえ！おうきゅうてあて、そっこう！",
+      "sha256": "699db122d5a8cddf11bfac301a2af9fc04fa0cabc7e8ceb6cd75a16e07b97b39",
+      "recognized": "負けねぇ 応急手当て そこ",
+      "seconds": 3.36,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "まけねえ！おうきゅうてあて、そっこう！"
+      ]
+    },
+    "rebel/skill-7d0bbc2f8974": {
+      "expected": "負けねえ！応急手当、蓄勢！",
+      "reading": "まけねえ！おうきゅうてあて、ちくせい！",
+      "sha256": "65640fcd7239ab8dd2996b96afe11ff4d876d7a48f55fd8bb0e763464a4d4f66",
+      "recognized": "負けねぇ 応急手当て 縮成",
+      "seconds": 3.72,
+      "reading_similarity": 0.824,
+      "accepted_readings": [
+        "まけねえ！おうきゅうてあて、ちくせい！"
+      ]
+    },
+    "rebel/skill-415a3f5e19cf": {
+      "expected": "負けねえ！応急手当、連携！",
+      "reading": "まけねえ！おうきゅうてあて、れんけい！",
+      "sha256": "9f64106ac9961f8e702ef242192a2fd280f3a20a4ff3f024a4068758bc3b286a",
+      "recognized": "負けねぇ 応急手当て 連携",
+      "seconds": 3.56,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "まけねえ！おうきゅうてあて、れんけい！"
+      ]
+    },
+    "rebel/skill-51eab0d8f948": {
+      "expected": "負けねえ！応急手当、解放！",
+      "reading": "まけねえ！おうきゅうてあて、かいほう！",
+      "sha256": "aea3ce97ad86c5a1427f65af6c37dec1b4f48bf1c6f08d259b83ee93fe188c0e",
+      "recognized": "負けねぇ 応急手当て 解放",
+      "seconds": 3.56,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "まけねえ！おうきゅうてあて、かいほう！"
+      ]
+    },
+    "rebel/skill-677c536cc5c2": {
+      "expected": "負けねえ！呼吸を整える、速攻！",
+      "reading": "まけねえ！こきゅうをととのえる、そっこう！",
+      "sha256": "7e4f52968bee467968b1d5b9ce96af340a920baf021fa810e4ba611518722e32",
+      "recognized": "負けねぇ呼吸を整えるこう",
+      "seconds": 3.84,
+      "reading_similarity": 0.882,
+      "accepted_readings": [
+        "まけねえ！こきゅうをととのえる、そっこう！"
+      ]
+    },
+    "rebel/skill-26e7bb83ba22": {
+      "expected": "負けねえ！呼吸を整える、蓄勢！",
+      "reading": "まけねえ！こきゅうをととのえる、ちくせい！",
+      "sha256": "b2984535707fb1c2df8484e1ce79be83e61b8602b4aa3e957ac5dfb51e81b5e6",
+      "recognized": "負けねぇ呼吸を整えるちくせい",
+      "seconds": 4.0,
+      "reading_similarity": 0.944,
+      "accepted_readings": [
+        "まけねえ！こきゅうをととのえる、ちくせい！"
+      ]
+    },
+    "rebel/skill-4f922b32b3c9": {
+      "expected": "負けねえ！呼吸を整える、連携！",
+      "reading": "まけねえ！こきゅうをととのえる、れんけい！",
+      "sha256": "9b1f376143e6704de0ee8587e323bd1502dd356c7ba807b7357048d7e1ee12a3",
+      "recognized": "負けねぇ呼吸を整える連携負",
+      "seconds": 3.92,
+      "reading_similarity": 0.919,
+      "accepted_readings": [
+        "まけねえ！こきゅうをととのえる、れんけい！"
+      ]
+    },
+    "rebel/skill-0e590642f8b6": {
+      "expected": "負けねえ！呼吸を整える、解放！",
+      "reading": "まけねえ！こきゅうをととのえる、かいほう！",
+      "sha256": "63e08c5b4cabff1f016b00d0d4757caff8440cbc6b08c4dee257fb999eb44a85",
+      "recognized": "けねぇ呼吸を整える解放",
+      "seconds": 3.92,
+      "reading_similarity": 0.914,
+      "accepted_readings": [
+        "まけねえ！こきゅうをととのえる、かいほう！"
+      ]
+    },
+    "rebel/skill-1d740ab2af9b": {
+      "expected": "負けねえ！絶対の意志、速攻！",
+      "reading": "まけねえ！ぜったいのいし、そっこう！",
+      "sha256": "dab04211417077f5b00f653c03ed126eab3d4481951b4ba99ef5536c59625314",
+      "recognized": "負けねえ絶対の石、そっこう!",
+      "seconds": 3.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まけねえ！ぜったいのいし、そっこう！"
+      ]
+    },
+    "rebel/skill-10b9db7663b8": {
+      "expected": "負けねえ！絶対の意志、蓄勢！",
+      "reading": "まけねえ！ぜったいのいし、ちくせい！",
+      "sha256": "214a63858360d211851d36bacc274932822edf27808217694826fde67e028fc0",
+      "recognized": "負けねえ絶対の石、すくせぇ!",
+      "seconds": 3.76,
+      "reading_similarity": 0.867,
+      "accepted_readings": [
+        "まけねえ！ぜったいのいし、ちくせい！"
+      ]
+    },
+    "rebel/skill-414546694d40": {
+      "expected": "負けねえ！絶対の意志、連携！",
+      "reading": "まけねえ！ぜったいのいし、れんけい！",
+      "sha256": "5b9332dd19ca5a757027a994423e66d821e24fee293410007f1626c90baeb688",
+      "recognized": "負けねえ絶対の石、でんけい!",
+      "seconds": 3.56,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "まけねえ！ぜったいのいし、れんけい！"
+      ]
+    },
+    "rebel/skill-b1f9c42845f1": {
+      "expected": "負けねえ！絶対の意志、解放！",
+      "reading": "まけねえ！ぜったいのいし、かいほう！",
+      "sha256": "89cbce181d6e6f42095b5df257aa01b173f13a938af016d229820e30a4245e90",
+      "recognized": "負けねえ絶対の石、開放!",
+      "seconds": 3.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まけねえ！ぜったいのいし、かいほう！"
+      ]
+    },
+    "rebel/skill-244a30fa740f": {
+      "expected": "負けねえ！反転退避、速攻！",
+      "reading": "まけねえ！はんてんたいひ、そっこう！",
+      "sha256": "60a5896ee4760e7aacba6d29bc968481763af760095b09a1a2843096673c6d7c",
+      "recognized": "負けねえ反転対比、そっこう!",
+      "seconds": 3.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まけねえ！はんてんたいひ、そっこう！"
+      ]
+    },
+    "rebel/skill-f087bb4c6d15": {
+      "expected": "負けねえ！反転退避、蓄勢！",
+      "reading": "まけねえ！はんてんたいひ、ちくせい！",
+      "sha256": "2a6c9708fad1afb2e893686f4b6808d8ab6df613712d20481ff13007f4bbe68b",
+      "recognized": "負けねえ反転対比、すくせぇ!",
+      "seconds": 3.68,
+      "reading_similarity": 0.867,
+      "accepted_readings": [
+        "まけねえ！はんてんたいひ、ちくせい！"
+      ]
+    },
+    "rebel/skill-22e15b357d85": {
+      "expected": "負けねえ！反転退避、連携！",
+      "reading": "まけねえ！はんてんたいひ、れんけい！",
+      "sha256": "25c8987e598a4067b4e57acd71ce58b548297420782b441161966bb9530bbc3b",
+      "recognized": "負けねぇ!反転対筆連携!",
+      "seconds": 3.44,
+      "reading_similarity": 0.774,
+      "accepted_readings": [
+        "まけねえ！はんてんたいひ、れんけい！"
+      ]
+    },
+    "rebel/skill-f5c8ac84af47": {
+      "expected": "負けねえ！反転退避、解放！",
+      "reading": "まけねえ！はんてんたいひ、かいほう！",
+      "sha256": "62cec32db03cea7fafb86f3ba6dbcb340993d23c8588842706e99a7d2f1f7356",
+      "recognized": "負けねぇ!反転対筆開放!",
+      "seconds": 3.48,
+      "reading_similarity": 0.774,
+      "accepted_readings": [
+        "まけねえ！はんてんたいひ、かいほう！"
+      ]
+    },
+    "rebel/skill-c70bcd045b00": {
+      "expected": "これが俺の全力だ！紅蓮限界突破！",
+      "reading": "これがおれのぜんりょくだ！ぐれんげんかいとっぱ！",
+      "sha256": "dcda11a3f99bc7facbc16be63926bcabb34fb92efcc0e9d155e0ba9eb0e794e6",
+      "recognized": "これが俺の全力だ!グレン・ギンデン・トイッパー!",
+      "seconds": 4.04,
+      "reading_similarity": 0.826,
+      "accepted_readings": [
+        "これがおれのぜんりょくだ！ぐれんげんかいとっぱ！"
+      ]
+    },
+    "akari/action-start": {
+      "expected": "校長先生！私の願い、受け止めて！",
+      "reading": "こうちょうせんせい！わたしのねがい、うけとめて！",
+      "sha256": "779a387ed4b5d9245b3888e1e0ae12631376f32d5ab0610e2ac2b7ac4c533b4a",
+      "recognized": "校長先生、私の願い受け止めて。",
+      "seconds": 3.8,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "こうちょうせんせい！わたしのねがい、うけとめて！"
+      ]
+    },
+    "akari/action-forward": {
+      "expected": "星の導きとともに！",
+      "reading": "ほしのみちびきとともに！",
+      "sha256": "497644ce705f3a796b571e0c4f1515a54152b9e736dc3472920bcf89c9eedbe0",
+      "recognized": "星の導きと共に、",
+      "seconds": 1.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしのみちびきとともに！"
+      ]
+    },
+    "akari/action-back": {
+      "expected": "次の輝きに備えるよ！",
+      "reading": "つぎのかがやきにそなえるよ！",
+      "sha256": "3e0ea3671ab0ac19d00d12c13386f42a8a4ef85f42201cd1a007f51ea568af40",
+      "recognized": "次の輝きに備えるよ。",
+      "seconds": 2.04,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "つぎのかがやきにそなえるよ！"
+      ]
+    },
+    "akari/action-turn": {
+      "expected": "こっちだね！見えてるよ！",
+      "reading": "こっちだね！みえてるよ！",
+      "sha256": "ec933c9251b98c4b9755891d6fd78a3a6474ae36333cc67a1055f6e51fd23c4f",
+      "recognized": "こっちだね、見えてるよ。",
+      "seconds": 2.04,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "こっちだね！みえてるよ！"
+      ]
+    },
+    "akari/action-wait": {
+      "expected": "星の流れを、見極める！",
+      "reading": "ほしのながれを、みきわめる！",
+      "sha256": "3631f056cfa8007c7dfb123cbc989d2f0cd46d25b5bf662c285c9b7ba41eb2a0",
+      "recognized": "星の流れを見極める。",
+      "seconds": 2.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしのながれを、みきわめる！"
+      ]
+    },
+    "akari/action-special": {
+      "expected": "星の力で、押し切るよ！",
+      "reading": "ほしのちからで、おしきるよ！",
+      "sha256": "561ea5d2b891e05cf2784f1e085b0659d1f935dac19862645954fec27d84ea97",
+      "recognized": "星の力で押し切るよ。",
+      "seconds": 2.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしのちからで、おしきるよ！"
+      ]
+    },
+    "akari/action-damage": {
+      "expected": "まだ、光は消えない！",
+      "reading": "まだ、ひかりはきえない！",
+      "sha256": "704e7bb5feb6387c89b8b7aafd09f3ba4eee9943d335dc5b5d0080706a08c1ba",
+      "recognized": "まだ光は消えない。",
+      "seconds": 2.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まだ、ひかりはきえない！"
+      ]
+    },
+    "akari/action-wave-clear": {
+      "expected": "道は開けた！次へ進もう！",
+      "reading": "みちはひらけた！つぎへすすもう！",
+      "sha256": "f79535c02298439f5678ac4e1e97bb4d7e5efae8133b131d8afa4aef3a03a373",
+      "recognized": "道は開けた。次へ進もう。",
+      "seconds": 2.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "みちはひらけた！つぎへすすもう！"
+      ]
+    },
+    "akari/action-victory": {
+      "expected": "私たちの願いが、未来を照らす！",
+      "reading": "わたしたちのねがいが、みらいをてらす！",
+      "sha256": "22cf208fb0a94da632162402bd6ad10eb7f834d328d6e7d2295a80532995df8a",
+      "recognized": "私たちの願いが未来を照らす",
+      "seconds": 3.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "わたしたちのねがいが、みらいをてらす！"
+      ]
+    },
+    "akari/action-defeat": {
+      "expected": "まだ、諦めない。次こそ！",
+      "reading": "まだ、あきらめない。つぎこそ！",
+      "sha256": "fa6da0699272732c673b8bb3ca0fb8ce38aca42f3893716ed5dc5392e7b2a532",
+      "recognized": "まだあきらめない次こそ",
+      "seconds": 3.04,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "まだ、あきらめない。つぎこそ！"
+      ]
+    },
+    "akari/skill-7ad9bff809d4": {
+      "expected": "輝け！定規スラッシュ！",
+      "reading": "かがやけ！じょうぎすらっしゅ！",
+      "sha256": "4ff56c8e1f0bf7eaebdc9e6cc974d5ec8670ac36921e6048cb0c8602df735fb4",
+      "recognized": "輝け上にスラッシュ",
+      "seconds": 2.56,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "かがやけ！じょうぎすらっしゅ！"
+      ]
+    },
+    "akari/skill-ed20efdb96fb": {
+      "expected": "輝け！コンパス突き！",
+      "reading": "かがやけ！こんぱすつき！",
+      "sha256": "75a2be347d930b7d01dc99c0287166e894b1c61ee0a149862f797086906e0aa0",
+      "recognized": " 輝けコンパス月",
+      "seconds": 2.48,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "かがやけ！こんぱすつき！"
+      ]
+    },
+    "akari/skill-bfe2378536bb": {
+      "expected": "道を開いて！ダッシュ！",
+      "reading": "みちをひらいて！だっしゅ！",
+      "sha256": "c662713e36401f30d2320e865c358fd0b9d3ea35ba225a1341e643cab93fa7b0",
+      "recognized": "日を開いてダッシュ",
+      "seconds": 2.12,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "みちをひらいて！だっしゅ！"
+      ]
+    },
+    "akari/skill-c78c14413f67": {
+      "expected": "星よ、力を！バックステップ！",
+      "reading": "ほしよ、ちからを！ばっくすてっぷ！",
+      "sha256": "5797acbada4306339759b0227fbb161292e9c1063a29ad3a5a5ab9a7b072ff53",
+      "recognized": " 星を力をバックステップ",
+      "seconds": 3.24,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "ほしよ、ちからを！ばっくすてっぷ！"
+      ]
+    },
+    "akari/skill-36de33f4aaf6": {
+      "expected": "輝け！大声！",
+      "reading": "かがやけ！おおごえ！",
+      "sha256": "54bdc4ecd8cfb74c9443082f3c5d8881d50a1ee30db3dbee6c2e46d77ae1cba0",
+      "recognized": "輝け大声",
+      "seconds": 2.04,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！おおごえ！"
+      ]
+    },
+    "akari/skill-dd743dde1fb1": {
+      "expected": "星よ、力を！お辞儀！",
+      "reading": "ほしよ、ちからを！おじぎ！",
+      "sha256": "134b7069643cf98decd7ac9759135eceab4a51b48d80d0df870a7a3753b49f2e",
+      "recognized": " 星を力をおじぎ",
+      "seconds": 2.72,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "ほしよ、ちからを！おじぎ！"
+      ]
+    },
+    "akari/skill-204a1c58a810": {
+      "expected": "輝け！回し蹴り！",
+      "reading": "かがやけ！まわしげり！",
+      "sha256": "6fc89dba54382b73ec87cd810e9536c538520c15a96ee326b3d4fed6f250c41d",
+      "recognized": "輝け回しげり",
+      "seconds": 2.24,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！まわしげり！"
+      ]
+    },
+    "akari/skill-fb914dda7a93": {
+      "expected": "輝け！チョーク投げ！",
+      "reading": "かがやけ！ちょーくなげ！",
+      "sha256": "fccc20ed2c77a6129928ae03a67841aba6da18f697c53576999232a7252e25ba",
+      "recognized": " 輝け超空投げ",
+      "seconds": 2.36,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "かがやけ！ちょーくなげ！"
+      ]
+    },
+    "akari/skill-df415364bba4": {
+      "expected": "輝け！スライディング！",
+      "reading": "かがやけ！すらいでぃんぐ！",
+      "sha256": "6bb96daee526ca5332ceacd49f8f9f8306c7479611abf9a2a3b701dc54902a91",
+      "recognized": "輝け!スライリング!",
+      "seconds": 2.4,
+      "reading_similarity": 0.857,
+      "accepted_readings": [
+        "かがやけ！すらいでぃんぐ！"
+      ]
+    },
+    "akari/skill-ceeb59c32280": {
+      "expected": "星よ、力を！教科書ガード！",
+      "reading": "ほしよ、ちからを！きょうかしょがーど！",
+      "sha256": "f1deb414c8cca6a4d0d20894e7051efddce7f78ddae9179abda2df891c2a22c6",
+      "recognized": "星よ!力を!教科書ガード!",
+      "seconds": 3.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！きょうかしょがーど！"
+      ]
+    },
+    "akari/skill-415e94552112": {
+      "expected": "輝け！竹刀！",
+      "reading": "かがやけ！しない！",
+      "sha256": "092fa51a7e13194979e2d2baaa3b44a69abc4caa0aa1da441da2ed17b2279cd7",
+      "recognized": "輝け 死ない",
+      "seconds": 1.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！しない！"
+      ]
+    },
+    "akari/skill-3ace253fd105": {
+      "expected": "輝け！金属バット！",
+      "reading": "かがやけ！きんぞくばっと！",
+      "sha256": "c260c0dc0235202c688ad7bef87965424528aa0f72f6a0faf13c3eabc51caf01",
+      "recognized": "輝け 金属マット",
+      "seconds": 2.44,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "かがやけ！きんぞくばっと！"
+      ]
+    },
+    "akari/skill-8025bf2710a0": {
+      "expected": "輝け！カウンター定規！",
+      "reading": "かがやけ！かうんたーじょうぎ！",
+      "sha256": "61fe608bfebc78e41978eb9765124e451fdd0d26fd9d2ff050b2a96f223987c8",
+      "recognized": "輝け カウンター上技",
+      "seconds": 2.6,
+      "reading_similarity": 0.769,
+      "accepted_readings": [
+        "かがやけ！かうんたーじょうぎ！"
+      ]
+    },
+    "akari/skill-4cbf8fba0425": {
+      "expected": "輝け！張り手！",
+      "reading": "かがやけ！はりて！",
+      "sha256": "95729bb333d98778992ad3ab291c4f3ce3d9cf928b003e72ce0162951d99ca70",
+      "recognized": "輝け 張り手",
+      "seconds": 1.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！はりて！"
+      ]
+    },
+    "akari/skill-28d8134f24be": {
+      "expected": "輝け！後ろ蹴り！",
+      "reading": "かがやけ！うしろげり！",
+      "sha256": "1e441f11d6d6c352d3caa97496fb8ecdf06baff950c0e8b580ad1a230b7a0c98",
+      "recognized": "輝け 後ろゲリ",
+      "seconds": 2.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！うしろげり！"
+      ]
+    },
+    "akari/skill-ec828a82f38d": {
+      "expected": "輝け！釣り竿！",
+      "reading": "かがやけ！つりざお！",
+      "sha256": "aaf348196cb99028cffac9705591a712cea0f4f6b27ee04400a752a482e6665a",
+      "recognized": "輝け スリゾー",
+      "seconds": 2.08,
+      "reading_similarity": 0.625,
+      "accepted_readings": [
+        "かがやけ！つりざお！"
+      ]
+    },
+    "akari/skill-762692e1a9fd": {
+      "expected": "輝け！消火器！",
+      "reading": "かがやけ！しょうかき！",
+      "sha256": "f994dde1e0eb58185432b1c5c6e102bd3c0f577c6266eb2cbbb6ce7e65abe487",
+      "recognized": "輝け 衝突",
+      "seconds": 2.04,
+      "reading_similarity": 0.778,
+      "accepted_readings": [
+        "かがやけ！しょうかき！"
+      ]
+    },
+    "akari/skill-89ca3b5d316e": {
+      "expected": "輝け！タックル！",
+      "reading": "かがやけ！たっくる！",
+      "sha256": "831f815ce3f595f0232e54ddcd8ec4206e5a8e74c0b8c6fe8384060d372b0abb",
+      "recognized": "輝け ダックル",
+      "seconds": 2.16,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "かがやけ！たっくる！"
+      ]
+    },
+    "akari/skill-5de1b913e76a": {
+      "expected": "輝け！雷！",
+      "reading": "かがやけ！かみなり！",
+      "sha256": "31b013e1725d81adf296f085e44f16a9d3d76fd77329145756ad5036361c4b8a",
+      "recognized": "輝け!雷!",
+      "seconds": 2.04,
+      "accepted_readings": [
+        "かがやけ！かみなり！",
+        "かがやけ！いかずち！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/skill-90dd6a3b929d": {
+      "expected": "輝け！回転モップ！",
+      "reading": "かがやけ！かいてんもっぷ！",
+      "sha256": "c8034f6ca83aec81e6e59a4888ed154a78be7602a93b2300a95562b855eb2485",
+      "recognized": "かがやけ、回転モップ!",
+      "seconds": 2.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！かいてんもっぷ！"
+      ]
+    },
+    "akari/skill-d5e0163d8107": {
+      "expected": "輝け！竹箒！",
+      "reading": "かがやけ！たけぼうき！",
+      "sha256": "6b5c3e5dca75aabeced14803f920cf3f8d160e194d8aef4bdd7cbb9e806a29cc",
+      "recognized": "輝け!竹帽機!",
+      "seconds": 2.16,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！たけぼうき！"
+      ]
+    },
+    "akari/skill-2c881400e1cb": {
+      "expected": "星よ、力を！絶対防御！",
+      "reading": "ほしよ、ちからを！ぜったいぼうぎょ！",
+      "sha256": "1a69ba48f05428bbd8a325bcb5ab653760476ca3283e2c5bb175e04ea066663e",
+      "recognized": "星よ!力を!絶対防御!",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ぜったいぼうぎょ！"
+      ]
+    },
+    "akari/skill-8efb357d5690": {
+      "expected": "輝け！リコーダー！",
+      "reading": "かがやけ！りこーだー！",
+      "sha256": "daaa50df1982cf85a3415b9495ab5fc96ac85c6e2703737e42e8d821348fae08",
+      "recognized": "輝け!リコーダー!",
+      "seconds": 2.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！りこーだー！"
+      ]
+    },
+    "akari/skill-e98c8c07e96c": {
+      "expected": "輝け！三角定規！",
+      "reading": "かがやけ！さんかくじょうぎ！",
+      "sha256": "d21fc4738f166b71c6ca6291b9acf7bb01d226c7937ab5ea135c8833eb76358e",
+      "recognized": "輝け!三角定義!",
+      "seconds": 2.4,
+      "reading_similarity": 0.783,
+      "accepted_readings": [
+        "かがやけ！さんかくじょうぎ！"
+      ]
+    },
+    "akari/skill-8f3c4cc530b3": {
+      "expected": "輝け！バレーボール！",
+      "reading": "かがやけ！ばれーぼーる！",
+      "sha256": "c8ea469a31f6cf934e17c89110bbe904093104b1bdffd52074a646a85c53342b",
+      "recognized": "輝け!バレーボール!",
+      "seconds": 2.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ばれーぼーる！"
+      ]
+    },
+    "akari/skill-0c8abadacd7f": {
+      "expected": "輝け！吸血！",
+      "reading": "かがやけ！きゅうけつ！",
+      "sha256": "ec95c6578a93f33b7781c6275259f90ee6589ba3c9d1aab988c8a80fd905f65e",
+      "recognized": "輝け!吸血!",
+      "seconds": 2.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！きゅうけつ！"
+      ]
+    },
+    "akari/skill-279ef142ce55": {
+      "expected": "輝け！雑巾がけ！",
+      "reading": "かがやけ！ぞうきんがけ！",
+      "sha256": "d44a198a82e91b7db969f0441cdaf447c7879ede4d4baf6c356e31463449e9c0",
+      "recognized": "輝け!増金だけ!",
+      "seconds": 2.44,
+      "reading_similarity": 0.9,
+      "accepted_readings": [
+        "かがやけ！ぞうきんがけ！"
+      ]
+    },
+    "akari/skill-ad778811ec66": {
+      "expected": "輝け！赤ペン連打！",
+      "reading": "かがやけ！あかぺんれんだ！",
+      "sha256": "f9ba71bd0e21b6bc4297b7b2bb0b01ab88b7f5b5107bdfc83d73db00f179cf30",
+      "recognized": "輝け!アタペン連打!",
+      "seconds": 2.6,
+      "reading_similarity": 0.909,
+      "accepted_readings": [
+        "かがやけ！あかぺんれんだ！"
+      ]
+    },
+    "akari/skill-ddd7d104a8d5": {
+      "expected": "輝け！連絡帳スマッシュ！",
+      "reading": "かがやけ！れんらくちょうすまっしゅ！",
+      "sha256": "01a5cce7e32d610c1d551c43cef04080064a95f69cc07efe75ca69fb221f729b",
+      "recognized": "輝け 連絡ちょうスマッシュ",
+      "seconds": 2.96,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！れんらくちょうすまっしゅ！"
+      ]
+    },
+    "akari/skill-10e4fa3bc07c": {
+      "expected": "輝け！メガホン指導！",
+      "reading": "かがやけ！めがほんしどう！",
+      "sha256": "0fd13b72f29966df6a765a578c74097bc7579e50dd75f33ad275e72779b4ed23",
+      "recognized": "輝け メガホンシロー",
+      "seconds": 2.64,
+      "reading_similarity": 0.818,
+      "accepted_readings": [
+        "かがやけ！めがほんしどう！"
+      ]
+    },
+    "akari/skill-1acee1714dca": {
+      "expected": "星よ、力を！保健室の包帯！",
+      "reading": "ほしよ、ちからを！ほけんしつのほうたい！",
+      "sha256": "12f86839b4e9d41aa2e6560ed23f1ff130b50665c909f056dc0bcdbe28130cb7",
+      "recognized": "星を力を! 保険室の崩壊!",
+      "seconds": 3.44,
+      "reading_similarity": 0.882,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほけんしつのほうたい！"
+      ]
+    },
+    "akari/skill-c4bdb3d7481f": {
+      "expected": "道を開いて！跳び箱ダッシュ！",
+      "reading": "みちをひらいて！とびはこだっしゅ！",
+      "sha256": "8967db5293edce32b19b867b57a6a0045e34ac6a4a553b254f98fec62616db17",
+      "recognized": "道を拾いて 飛び箱ダッシュ!",
+      "seconds": 2.88,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "みちをひらいて！とびはこだっしゅ！"
+      ]
+    },
+    "akari/skill-dc0d10b09895": {
+      "expected": "輝け！黒板消し投げ！",
+      "reading": "かがやけ！こくばんけしなげ！",
+      "sha256": "e0ca5a6fa97acf2145104c5e4232256ac86cc26541e2bb0f65660434948ac2bf",
+      "recognized": "輝け! 黒板消し投げ!",
+      "seconds": 2.84,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！こくばんけしなげ！"
+      ]
+    },
+    "akari/skill-97b058361aac": {
+      "expected": "輝け！竹ぼうきスイープ！",
+      "reading": "かがやけ！たけぼうきすいーぷ！",
+      "sha256": "77fc05b8a88ab5c5ebed8438758021d8189ff8d5100227d5c7e221b4cd82339f",
+      "recognized": "輝け! 竹坊木スイープ!",
+      "seconds": 2.88,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！たけぼうきすいーぷ！"
+      ]
+    },
+    "akari/skill-55005d5d2356": {
+      "expected": "輝け！笛の合図！",
+      "reading": "かがやけ！ふえのあいず！",
+      "sha256": "eb93a02f18c52b5ec9770f855cc7b45e60648d545889eb5ef1a8b129ff5bdeec",
+      "recognized": "輝け! 笛の合図!",
+      "seconds": 2.32,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ふえのあいず！"
+      ]
+    },
+    "akari/skill-3697d3d7e280": {
+      "expected": "輝け！鉄パイプ！",
+      "reading": "かがやけ！てつぱいぷ！",
+      "sha256": "4e241e149d18e87bb19a2fb59156a420d893500bc0ec00399dadcd2a8b89c3f6",
+      "recognized": "輝け! 鉄パイプ!",
+      "seconds": 2.12,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！てつぱいぷ！"
+      ]
+    },
+    "akari/skill-75b2faa68554": {
+      "expected": "星よ、力を！防犯シールド！",
+      "reading": "ほしよ、ちからを！ぼうはんしーるど！",
+      "sha256": "734d8b8ad43aa8758b43f5cf489307f3a8a9ebc942ee45bc66ac386578811600",
+      "recognized": "星を力を! 防犯シールド!",
+      "seconds": 3.44,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "ほしよ、ちからを！ぼうはんしーるど！"
+      ]
+    },
+    "akari/skill-c3380d9057a3": {
+      "expected": "輝け！号令ラッシュ！",
+      "reading": "かがやけ！ごうれいらっしゅ！",
+      "sha256": "a47bae8ac726d1e10ee84d521b970fd573aa7a88d3c0b6fe3119959bf51f3f4a",
+      "recognized": "かがやけ、ゴーレウラッシュ!",
+      "seconds": 2.44,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "かがやけ！ごうれいらっしゅ！"
+      ]
+    },
+    "akari/skill-a4aa18ea77bc": {
+      "expected": "輝け！釣り針フック！",
+      "reading": "かがやけ！つりばりふっく！",
+      "sha256": "3a4a36579a67c98924dfa103fbe221fde5a28aa04fa0eeaa83267114aa0f13c2",
+      "recognized": "かがやけ、つりばりふっく!",
+      "seconds": 2.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！つりばりふっく！"
+      ]
+    },
+    "akari/skill-692c06f91e51": {
+      "expected": "輝け！教鞭ビンタ！",
+      "reading": "かがやけ！きょうべんびんた！",
+      "sha256": "41b3742debda109745902d6e10f75173ffaffa94d40330248059e87a3c3d1d12",
+      "recognized": "かがやけ、きょうべんみんた!",
+      "seconds": 2.6,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "かがやけ！きょうべんびんた！"
+      ]
+    },
+    "akari/skill-5bc68647f9b3": {
+      "expected": "輝け！教鞭ショック！",
+      "reading": "かがやけ！きょうべんしょっく！",
+      "sha256": "5b082b0463dbcf358c940ccfacbdfbde25d139911e7eaecc46b5cdeac73da25c",
+      "recognized": "輝け狂弁ショック",
+      "seconds": 2.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！きょうべんしょっく！"
+      ]
+    },
+    "akari/skill-56a7e9190217": {
+      "expected": "道を開いて！体育倉庫前進！",
+      "reading": "みちをひらいて！たいいくそうこぜんしん！",
+      "sha256": "51cfd708e0e38052fa9dec6d7adbdead60be8613e5ef66a19030a9c863cefd6f",
+      "recognized": "道を開いて体育倉庫前進",
+      "seconds": 3.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "みちをひらいて！たいいくそうこぜんしん！"
+      ]
+    },
+    "akari/skill-c41e94646908": {
+      "expected": "輝け！タイヤ引き！",
+      "reading": "かがやけ！たいやひき！",
+      "sha256": "a4d97c11481364fdcc273820d7d6d2e70486bb71a16ca5c2718a778b234e8223",
+      "recognized": "輝けタイヤビキー",
+      "seconds": 2.2,
+      "reading_similarity": 0.842,
+      "accepted_readings": [
+        "かがやけ！たいやひき！"
+      ]
+    },
+    "akari/skill-16c25d039ae9": {
+      "expected": "星よ、力を！救急箱！",
+      "reading": "ほしよ、ちからを！きゅうきゅうばこ！",
+      "sha256": "b90cf115133d89491fa3402c51b7a357e56e7ca98953f8591b95da109117d9e7",
+      "recognized": "星よ力を急急がか",
+      "seconds": 3.04,
+      "reading_similarity": 0.69,
+      "accepted_readings": [
+        "ほしよ、ちからを！きゅうきゅうばこ！"
+      ]
+    },
+    "akari/skill-274dc62f5031": {
+      "expected": "星よ、力を！防災頭巾！",
+      "reading": "ほしよ、ちからを！ぼうさいずきん！",
+      "sha256": "825bb56f2005dff4c4025902b53170e5496952e3b1422f82806e1d707d5dc8c5",
+      "recognized": "星よ力を防災ずきん",
+      "seconds": 3.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ぼうさいずきん！"
+      ]
+    },
+    "akari/skill-d8fb16a12d1c": {
+      "expected": "輝け！チョーク連射！",
+      "reading": "かがやけ！ちょーくれんしゃ！",
+      "sha256": "e53c51c1a8bf447a8ca9795a838b3c79ecdeb51f7b00f2e60f716b8bfc68f87f",
+      "recognized": "輝け超クレンシャー",
+      "seconds": 2.4,
+      "reading_similarity": 0.88,
+      "accepted_readings": [
+        "かがやけ！ちょーくれんしゃ！"
+      ]
+    },
+    "akari/skill-bf0cfcde499b": {
+      "expected": "輝け！バケツ返し！",
+      "reading": "かがやけ！ばけつかえし！",
+      "sha256": "deccc274420d65e1b8f5bd7710397c41fb2d162012a00c86dcbbeeeb94a1f07a",
+      "recognized": "輝けバケツ返し",
+      "seconds": 2.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ばけつかえし！",
+        "かがやけ！ばけつがえし！"
+      ]
+    },
+    "akari/skill-69adc22ae83c": {
+      "expected": "道を開いて！花壇ジャンプ！",
+      "reading": "みちをひらいて！かだんじゃんぷ！",
+      "sha256": "b16bd3b14786c71f72c9b4fd5bd75e486cd089f27ba6a413881f3bc02fb5dd2b",
+      "recognized": "道を開いて、下段チョップ!",
+      "seconds": 2.88,
+      "reading_similarity": 0.714,
+      "accepted_readings": [
+        "みちをひらいて！かだんじゃんぷ！"
+      ]
+    },
+    "akari/skill-7a562cc35831": {
+      "expected": "輝け！朝礼アタック！",
+      "reading": "かがやけ！ちょうれいあたっく！",
+      "sha256": "70cfb01a775ea3b3e2efd2d4d531ed80f70c2de46a11e6681950ab015f065e3f",
+      "recognized": "輝け、超霊アタック!",
+      "seconds": 2.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ちょうれいあたっく！"
+      ]
+    },
+    "akari/skill-33510aea7536": {
+      "expected": "輝け！ランドセル投げ！",
+      "reading": "かがやけ！らんどせるなげ！",
+      "sha256": "f752b88c3ce216bfec70b08594c5484cef781af68ae18a913e3dc487a80f8d32",
+      "recognized": "輝け、ランドセル投げ!",
+      "seconds": 2.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！らんどせるなげ！"
+      ]
+    },
+    "akari/skill-9cdac887d49f": {
+      "expected": "輝け！校旗突き！",
+      "reading": "かがやけ！こうきつき！",
+      "sha256": "678c7cb79449b85826012746471427bc841c760e52297045a9242aebc15eb891",
+      "recognized": "輝け!光気つき!",
+      "seconds": 2.08,
+      "accepted_readings": [
+        "かがやけ！こうきつき！",
+        "かがやけ！こうきずき！"
+      ],
+      "reading_similarity": 0.737
+    },
+    "akari/skill-77e199ca3665": {
+      "expected": "輝け！ラジカセ爆音！",
+      "reading": "かがやけ！らじかせばくおん！",
+      "sha256": "533d67bbaaf5b40a946bb9e40be77a252f37eb3faeaf4902a00783ee1532c3ed",
+      "recognized": " 輝け! ラジカセバクーン!",
+      "seconds": 2.92,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "かがやけ！らじかせばくおん！"
+      ]
+    },
+    "akari/skill-06c7088507e2": {
+      "expected": "星よ、力を！授業参観ガード！",
+      "reading": "ほしよ、ちからを！じゅぎょうさんかんがーど！",
+      "sha256": "6094919a03460c8bfccc96cc8245b96c0615331e9f70447fd417688e8cfbfc70",
+      "recognized": "星を力おう! 授業参観ガード!",
+      "seconds": 3.8,
+      "reading_similarity": 0.872,
+      "accepted_readings": [
+        "ほしよ、ちからを！じゅぎょうさんかんがーど！"
+      ]
+    },
+    "akari/skill-f074df5d24ed": {
+      "expected": "輝け！雑誌投げ！",
+      "reading": "かがやけ！ざっしなげ！",
+      "sha256": "61cf82be1704b3af804704b9329d93095f09dae8ab7d9822fe195b09539099f6",
+      "recognized": " 輝け! 雑誌投げ!",
+      "seconds": 2.28,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ざっしなげ！"
+      ]
+    },
+    "akari/skill-418981e957c7": {
+      "expected": "星よ、力を！水筒チャージ！",
+      "reading": "ほしよ、ちからを！すいとうちゃーじ！",
+      "sha256": "1089010209143d8075e50e328e3110d79435e060aab8382a2bdbae2f97f74280",
+      "recognized": "星を力おう! 水灯チャージ!",
+      "seconds": 3.6,
+      "reading_similarity": 0.606,
+      "accepted_readings": [
+        "ほしよ、ちからを！すいとうちゃーじ！"
+      ]
+    },
+    "akari/skill-92addf24df3b": {
+      "expected": "星よ、力を！スポドリ補給！",
+      "reading": "ほしよ、ちからを！すぽどりほきゅう！",
+      "sha256": "d8d3be7c1c69d23647bf390724c4e7c1c3d2dd8f755a3f692bba77d2ea0bf18a",
+      "recognized": " 星を力おう! スポドリ補給!",
+      "seconds": 3.32,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "ほしよ、ちからを！すぽどりほきゅう！"
+      ]
+    },
+    "akari/skill-5ee37bf92946": {
+      "expected": "道を開いて！非常階段ダッシュ！",
+      "reading": "みちをひらいて！ひじょうかいだんだっしゅ！",
+      "sha256": "d159f34dbb81074cb22c1a73e0427b5df59eb1ece4a492476ddbefd86fd35dd5",
+      "recognized": "道を開いて非常階段ダッシュ!",
+      "seconds": 3.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "みちをひらいて！ひじょうかいだんだっしゅ！"
+      ]
+    },
+    "akari/skill-f1b6e5ecc035": {
+      "expected": "道を開いて！竹馬ストライド！",
+      "reading": "みちをひらいて！たけうますとらいど！",
+      "sha256": "f8d85e47930ddeaca4603ad6587c24bef7ab8277166b35cc22689e5a559821f4",
+      "recognized": "道を開いて武馬ストライド!",
+      "seconds": 3.2,
+      "reading_similarity": 0.97,
+      "accepted_readings": [
+        "みちをひらいて！たけうますとらいど！"
+      ]
+    },
+    "akari/skill-5a5dac484a00": {
+      "expected": "輝け！ホイッスルバースト！",
+      "reading": "かがやけ！ほいっするばーすと！",
+      "sha256": "026cbd183245532831e434cce35eae129907f79d48999101d492d81988178848",
+      "recognized": "輝けホイッスルバースト!",
+      "seconds": 2.76,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ほいっするばーすと！"
+      ]
+    },
+    "akari/skill-24f9bdc815eb": {
+      "expected": "輝け！校内放送！",
+      "reading": "かがやけ！こうないほうそう！",
+      "sha256": "11567765f75d1085ad72c20b43727c75198e76c6bcf8be072a37fd30899367f0",
+      "recognized": "輝け構内放送!",
+      "seconds": 2.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！こうないほうそう！"
+      ]
+    },
+    "akari/skill-ab204834cd47": {
+      "expected": "輝け！裏門回り込み！",
+      "reading": "かがやけ！うらもんまわりこみ！",
+      "sha256": "1194263ca938994f22f6a8850898cbd47e9446df09cc0ff2a3cdfc6475f7801c",
+      "recognized": "輝け!裏門回り込み",
+      "seconds": 2.8,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！うらもんまわりこみ！"
+      ]
+    },
+    "akari/skill-5a8dd6e2e7ce": {
+      "expected": "輝け！旋風脚！",
+      "reading": "かがやけ！せんぷうきゃく！",
+      "sha256": "2137c77b467de1c06a18d2bdd4bac72c1dfe5f364651cce577cb7890ff1ed9e3",
+      "recognized": " 輝け!宣風客",
+      "seconds": 2.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！せんぷうきゃく！"
+      ]
+    },
+    "akari/skill-98d136aab18d": {
+      "expected": "輝け！たすき掛け！",
+      "reading": "かがやけ！たすきかけ！",
+      "sha256": "4d13afab014e351b1b0e8f0a743615922fe48d1c6a998417986e8aca70d5b9da",
+      "recognized": " 輝け!助け!",
+      "seconds": 2.32,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "かがやけ！たすきかけ！"
+      ]
+    },
+    "akari/skill-7978784d4549": {
+      "expected": "輝け！箱馬タックル！",
+      "reading": "かがやけ！はこうまたっくる！",
+      "sha256": "d07b0d75d1e15f2ed8e4fdc0ab07b0721a40f2cf13709e406b8594c680f80538",
+      "recognized": " 輝け!箱ウモタックル",
+      "seconds": 2.76,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "かがやけ！はこうまたっくる！"
+      ]
+    },
+    "akari/skill-e384e12ed973": {
+      "expected": "輝け！フロアモップ！",
+      "reading": "かがやけ！ふろあもっぷ！",
+      "sha256": "016ab09e182655654dd5ec1271bfa86d8fd4e6e47ed62151dc95abe59c57db27",
+      "recognized": " 輝け!フロアモップ",
+      "seconds": 2.24,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ふろあもっぷ！"
+      ]
+    },
+    "akari/skill-ec244c466330": {
+      "expected": "輝け！金管アラーム！",
+      "reading": "かがやけ！きんかんあらーむ！",
+      "sha256": "56180d760013c4f018911af8fe9faedcb555f38e3eb1d2380dac12b8214d94d3",
+      "recognized": " 輝け!銀河アラーム",
+      "seconds": 2.52,
+      "reading_similarity": 0.783,
+      "accepted_readings": [
+        "かがやけ！きんかんあらーむ！"
+      ]
+    },
+    "akari/skill-3f117bb80d08": {
+      "expected": "星よ、力を！絆創膏ケア！",
+      "reading": "ほしよ、ちからを！ばんそうこうけあ！",
+      "sha256": "0e0373a5585ffe338fde04af068c73c9b95c1672fb777041731ee7bf58a41e58",
+      "recognized": "星よ!力を!万層光景や",
+      "seconds": 3.36,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "ほしよ、ちからを！ばんそうこうけあ！"
+      ]
+    },
+    "akari/skill-4aece503edf7": {
+      "expected": "輝け！校章ブーメラン！",
+      "reading": "かがやけ！こうしょうぶーめらん！",
+      "sha256": "965f7d173f15ec8cc72e9dae53ccbd1ed77bd85c5e0dc19f742a574dbc7c525e",
+      "recognized": " 輝け!交渉ブーメラン",
+      "seconds": 2.84,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！こうしょうぶーめらん！"
+      ]
+    },
+    "akari/skill-08ef33828ceb": {
+      "expected": "輝け！清掃ワゴン！",
+      "reading": "かがやけ！せいそうわごん！",
+      "sha256": "a7d7d42cfe084daba0b5e2bbe77015c59aee2a9507786d040a963291d24f723a",
+      "recognized": "輝け!清掃輪ゴン!",
+      "seconds": 2.32,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！せいそうわごん！"
+      ]
+    },
+    "akari/skill-767e1fea64b9": {
+      "expected": "輝け！鉄扇！",
+      "reading": "かがやけ！てっせん！",
+      "sha256": "25a6f9bd469737f77378a46c3539ea350d5a52a325ad4a6f15656089a531e44f",
+      "recognized": "輝け!鉄線!",
+      "seconds": 2.0,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！てっせん！"
+      ]
+    },
+    "akari/skill-0b94c5ac5277": {
+      "expected": "輝け！ドア反撃！",
+      "reading": "かがやけ！どあはんげき！",
+      "sha256": "d2dfdc73e15430c33c8aba075b35e97326ab6a3399f817a4a9999efebcfe4b7e",
+      "recognized": "輝け、ドア反撃。",
+      "seconds": 2.44,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！どあはんげき！"
+      ]
+    },
+    "akari/skill-2c11847ed6e7": {
+      "expected": "星よ、力を！生徒会バッジ！",
+      "reading": "ほしよ、ちからを！せいとかいばっじ！",
+      "sha256": "4640852120b09bef7e1f77e74d1d2ed2e1077967428dfd75e723ad505155a448",
+      "recognized": "星を力を、生徒開発ち。",
+      "seconds": 3.4,
+      "reading_similarity": 0.733,
+      "accepted_readings": [
+        "ほしよ、ちからを！せいとかいばっじ！"
+      ]
+    },
+    "akari/skill-d8c13f7f0aea": {
+      "expected": "輝け！非常口スライド！",
+      "reading": "かがやけ！ひじょうぐちすらいど！",
+      "sha256": "6facce2678c944e3076aff9ddc0cfee8fe65700f3e140f6da06f4f098cd82e34",
+      "recognized": "輝け、非常グッズスライド。",
+      "seconds": 2.76,
+      "reading_similarity": 0.897,
+      "accepted_readings": [
+        "かがやけ！ひじょうぐちすらいど！"
+      ]
+    },
+    "akari/skill-d6a305cbab55": {
+      "expected": "道を開いて！ロープウェイ！",
+      "reading": "みちをひらいて！ろーぷうぇい！",
+      "sha256": "c2d7eca4963d0fb2a49655ba8d1bdc648a05d91bc5359b07182c501fc4be7824",
+      "recognized": "道を開いてロップウェイン。",
+      "seconds": 2.52,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "みちをひらいて！ろーぷうぇい！"
+      ]
+    },
+    "akari/skill-9caa53b57999": {
+      "expected": "輝け！校歌斉唱！",
+      "reading": "かがやけ！こうかせいしょう！",
+      "sha256": "df6b8181bdd5a88ad92536a2aca053e2ec00da1461bb270cec32d335e4e1b9e7",
+      "recognized": "輝け!高下戦勝!",
+      "seconds": 2.72,
+      "accepted_readings": [
+        "かがやけ！こうかせいしょう！"
+      ],
+      "reading_similarity": 0.833
+    },
+    "akari/skill-b135bb8cee39": {
+      "expected": "星よ、力を！救護スプレー！",
+      "reading": "ほしよ、ちからを！きゅうごすぷれー！",
+      "sha256": "6e250f5b50483678d1f4f9ce0ad2c3eebc05064b3c4525ed1e656ab8a020fe5d",
+      "recognized": "星を力を、急ごすプレイ。",
+      "seconds": 3.2,
+      "reading_similarity": 0.69,
+      "accepted_readings": [
+        "ほしよ、ちからを！きゅうごすぷれー！"
+      ]
+    },
+    "akari/skill-c00e8449e80b": {
+      "expected": "輝け！金庫破り！",
+      "reading": "かがやけ！きんこやぶり！",
+      "sha256": "b19bd8745e84796e204109e12983411d13979d9182a4b79caeef1b02d81b6ff2",
+      "recognized": "輝け、金庫破り。",
+      "seconds": 2.24,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！きんこやぶり！"
+      ]
+    },
+    "akari/skill-dd2e23379c70": {
+      "expected": "輝け！星のひかり！",
+      "reading": "かがやけ！ほしのひかり！",
+      "sha256": "6ba8792282a67e00c1bffa06e2363681a11244ddb89afe8c23e73368d844736e",
+      "recognized": "輝け、星の光。",
+      "seconds": 2.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ほしのひかり！"
+      ]
+    },
+    "akari/skill-7abacb1cd43c": {
+      "expected": "道を開いて！スターダッシュ！",
+      "reading": "みちをひらいて！すたーだっしゅ！",
+      "sha256": "06706d9298dd9c7bc598c83f77acf2e81ef0ef23892637911c925c0345a35fa7",
+      "recognized": "日曜日を開いて、スターダッシュ!",
+      "seconds": 2.64,
+      "reading_similarity": 0.839,
+      "accepted_readings": [
+        "みちをひらいて！すたーだっしゅ！"
+      ]
+    },
+    "akari/skill-cb4e453470be": {
+      "expected": "輝け！星杖ストライク！",
+      "reading": "かがやけ！ほしつえすとらいく！",
+      "sha256": "35f92795e1e2a6342449618a0af192ddfcbb345be2a6129c3c0570002b5f5f20",
+      "recognized": "輝け!星ずえストライク!",
+      "seconds": 2.96,
+      "reading_similarity": 0.923,
+      "accepted_readings": [
+        "かがやけ！ほしつえすとらいく！"
+      ]
+    },
+    "akari/skill-12325b9a069a": {
+      "expected": "星よ、力を！星座シールド！",
+      "reading": "ほしよ、ちからを！せいざしーるど！",
+      "sha256": "75da913dfd32aaf805643c2cdceb01c29901dc192b8f094a1f005b29b1886c38",
+      "recognized": "星を力を!星座シールド!",
+      "seconds": 3.32,
+      "reading_similarity": 0.929,
+      "accepted_readings": [
+        "ほしよ、ちからを！せいざしーるど！"
+      ]
+    },
+    "akari/skill-4515001e08a5": {
+      "expected": "星よ、力を！星のいやし！",
+      "reading": "ほしよ、ちからを！ほしのいやし！",
+      "sha256": "981fe9509b6765da8e60b88267c16215f33d6dd46add2ff70d172222438abe56",
+      "recognized": "星を力を!星の癒やし!",
+      "seconds": 3.28,
+      "reading_similarity": 0.846,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしのいやし！"
+      ]
+    },
+    "akari/skill-9169de8d332f": {
+      "expected": "輝け！スターライトレイ！",
+      "reading": "かがやけ！すたーらいとれい！",
+      "sha256": "b518285ac8fe9c8115d1ce05cca4d070be64911c7e7d0d826172619a507caeeb",
+      "recognized": "輝け!スターナイトレイ!",
+      "seconds": 2.64,
+      "reading_similarity": 0.917,
+      "accepted_readings": [
+        "かがやけ！すたーらいとれい！"
+      ]
+    },
+    "akari/skill-26f3036a68a1": {
+      "expected": "輝け！流星連射、速攻！",
+      "reading": "かがやけ！りゅうせいれんしゃ、そっこう！",
+      "sha256": "d52ea6b499bfcd2a4f9a80c7c29ff7e56fe23c77092d561e141c14745e57a5bf",
+      "recognized": "輝け!流星連者!即行!",
+      "seconds": 3.44,
+      "reading_similarity": 0.882,
+      "accepted_readings": [
+        "かがやけ！りゅうせいれんしゃ、そっこう！"
+      ]
+    },
+    "akari/skill-e850affa7087": {
+      "expected": "輝け！流星連射、蓄勢！",
+      "reading": "かがやけ！りゅうせいれんしゃ、ちくせい！",
+      "sha256": "bc0188824403949b04184a6313324d0fb515214851467686ab8db331bf5b467f",
+      "recognized": "輝け!流星連者!即成!",
+      "seconds": 3.72,
+      "reading_similarity": 0.824,
+      "accepted_readings": [
+        "かがやけ！りゅうせいれんしゃ、ちくせい！"
+      ]
+    },
+    "akari/skill-2cbe383e0855": {
+      "expected": "輝け！流星連射、連携！",
+      "reading": "かがやけ！りゅうせいれんしゃ、れんけい！",
+      "sha256": "a37db405403551045eacdce3b84e874e471c2edd8634e2dd83853bc672c51eee",
+      "recognized": "輝け!流星連者!連携!",
+      "seconds": 3.64,
+      "reading_similarity": 0.882,
+      "accepted_readings": [
+        "かがやけ！りゅうせいれんしゃ、れんけい！"
+      ]
+    },
+    "akari/skill-f8f58d8317f5": {
+      "expected": "輝け！流星連射、解放！",
+      "reading": "かがやけ！りゅうせいれんしゃ、かいほう！",
+      "sha256": "2600f792cea9f06e3dfc3213c086ff945a481ef70ce53b8a1886e1e1b0f9ade2",
+      "recognized": "輝け!流星連者!開放!",
+      "seconds": 3.44,
+      "reading_similarity": 0.882,
+      "accepted_readings": [
+        "かがやけ！りゅうせいれんしゃ、かいほう！"
+      ]
+    },
+    "akari/skill-a14b084a7880": {
+      "expected": "輝け！彗星突進、速攻！",
+      "reading": "かがやけ！すいせいとっしん、そっこう！",
+      "sha256": "cdb1ded209b4ab3cbaa7fc90571011e13b9d8934deefc6b7fc8fdf129cc3f1fc",
+      "recognized": "輝け!水星とっしん!即行!",
+      "seconds": 3.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！すいせいとっしん、そっこう！"
+      ]
+    },
+    "akari/skill-43f5bc01c936": {
+      "expected": "輝け！彗星突進、蓄勢！",
+      "reading": "かがやけ！すいせいとっしん、ちくせい！",
+      "sha256": "3eb95b9c7590319e815b24fc4a19eaf822eb9f0383c69eb02d8d7cbd7faa4c51",
+      "recognized": "輝け!水星とっしん!作成!",
+      "seconds": 3.88,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "かがやけ！すいせいとっしん、ちくせい！"
+      ]
+    },
+    "akari/skill-3c62750826d4": {
+      "expected": "輝け！彗星突進、連携！",
+      "reading": "かがやけ！すいせいとっしん、れんけい！",
+      "sha256": "af97262b00a0e638567dcdf8ae80a5bdd6ce1e86f7a42b3866c163891949bda7",
+      "recognized": "輝け!水星とっしん!連携!",
+      "seconds": 3.72,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！すいせいとっしん、れんけい！"
+      ]
+    },
+    "akari/skill-bee2b1146115": {
+      "expected": "輝け！彗星突進、解放！",
+      "reading": "かがやけ！すいせいとっしん、かいほう！",
+      "sha256": "354a0fef4ab435ceeaa757fd1de75b91cef2cff5dba824759b9d05cf65bcf8bf",
+      "recognized": "輝け!水星突進開放!",
+      "seconds": 3.68,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！すいせいとっしん、かいほう！"
+      ]
+    },
+    "akari/skill-3ed01aced204": {
+      "expected": "輝け！光速すり抜け、速攻！",
+      "reading": "かがやけ！こうそくすりぬけ、そっこう！",
+      "sha256": "6d63aedadb4884f492de3049327c33b6ca0d85d62a69c6e1354a2721a023b2d7",
+      "recognized": "輝け!高速すり抜け!即攻!",
+      "seconds": 3.88,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "かがやけ！こうそくすりぬけ、そっこう！"
+      ]
+    },
+    "akari/skill-68d8cbf7bc4e": {
+      "expected": "輝け！光速すり抜け、蓄勢！",
+      "reading": "かがやけ！こうそくすりぬけ、ちくせい！",
+      "sha256": "0fa599fe14202f3590f66b210cc06e07c9f375ee595520e283c4347dcd759af1",
+      "recognized": "輝け!高速すり抜け!蓄性!",
+      "seconds": 3.92,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！こうそくすりぬけ、ちくせい！"
+      ]
+    },
+    "akari/skill-3a0f8393ec25": {
+      "expected": "輝け！光速すり抜け、連携！",
+      "reading": "かがやけ！こうそくすりぬけ、れんけい！",
+      "sha256": "30eded6f78927cd2bdf8ac216b6877c2446b76e6cf9f67b4da5d9087979f7e4e",
+      "recognized": "輝け!高速すり抜け!連携!",
+      "seconds": 3.84,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！こうそくすりぬけ、れんけい！"
+      ]
+    },
+    "akari/skill-4541ade2e589": {
+      "expected": "輝け！光速すり抜け、解放！",
+      "reading": "かがやけ！こうそくすりぬけ、かいほう！",
+      "sha256": "567a55c8fbd8525e349aac2e434e4647d0e1dfd468594851f8506de0b8d4651a",
+      "recognized": "輝け!高速すり抜け!開放!",
+      "seconds": 3.72,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！こうそくすりぬけ、かいほう！"
+      ]
+    },
+    "akari/skill-995a9f89dfe3": {
+      "expected": "輝け！星環スイープ、速攻！",
+      "reading": "かがやけ！せいかんすいーぷ、そっこう！",
+      "sha256": "2dfdb3d1ec268ccde6d37c12515473592e5849dcfd07e6be93440583b3bdd70a",
+      "recognized": "輝け!聖端スイープ!即攻!",
+      "seconds": 3.84,
+      "reading_similarity": 0.667,
+      "accepted_readings": [
+        "かがやけ！せいかんすいーぷ、そっこう！"
+      ]
+    },
+    "akari/skill-775aa2899b95": {
+      "expected": "輝け！星環スイープ、蓄勢！",
+      "reading": "かがやけ！せいかんすいーぷ、ちくせい！",
+      "sha256": "b33c97b2da3b88f3dc459a2ed39969dddb536b4b553d96a066cd82490b6b3b88",
+      "recognized": "輝け! 正観スイーヴ蓄性!",
+      "seconds": 4.08,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "かがやけ！せいかんすいーぷ、ちくせい！"
+      ]
+    },
+    "akari/skill-bd000df19de8": {
+      "expected": "輝け！星環スイープ、連携！",
+      "reading": "かがやけ！せいかんすいーぷ、れんけい！",
+      "sha256": "dfffa5193d6729b82263145b8502ff9a234d14fb562851b1f0249d5c3af7ca24",
+      "recognized": " 輝け! 正観スイーヴ連携!",
+      "seconds": 3.72,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "かがやけ！せいかんすいーぷ、れんけい！"
+      ]
+    },
+    "akari/skill-3f1e66e88f5e": {
+      "expected": "輝け！星環スイープ、解放！",
+      "reading": "かがやけ！せいかんすいーぷ、かいほう！",
+      "sha256": "badea9d2966166c60fbe0980b3b8e142c8ac134914b5d34b628150b99daa0b1f",
+      "recognized": " 輝け! 正観スイーヴ開放!",
+      "seconds": 3.72,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "かがやけ！せいかんすいーぷ、かいほう！"
+      ]
+    },
+    "akari/skill-82d16e8d5dd0": {
+      "expected": "輝け！鏡星カウンター、速攻！",
+      "reading": "かがやけ！きょうせいかうんたー、そっこう！",
+      "sha256": "364e4871e3bc1323c33f8f16459e4aafad5395ca55e658b41b3ca0361a96497a",
+      "recognized": " 輝け! 強制カウンター速攻!",
+      "seconds": 3.68,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！きょうせいかうんたー、そっこう！"
+      ]
+    },
+    "akari/skill-1373ab3c5728": {
+      "expected": "輝け！鏡星カウンター、蓄勢！",
+      "reading": "かがやけ！きょうせいかうんたー、ちくせい！",
+      "sha256": "86f38654971158490cd33dbb4fcdc8975bcdeb42e195ebbc71107863d2ab357e",
+      "recognized": "輝け! 強制カウンター 肢成!",
+      "seconds": 3.92,
+      "reading_similarity": 0.914,
+      "accepted_readings": [
+        "かがやけ！きょうせいかうんたー、ちくせい！"
+      ]
+    },
+    "akari/skill-e66b7227c9a2": {
+      "expected": "輝け！鏡星カウンター、連携！",
+      "reading": "かがやけ！きょうせいかうんたー、れんけい！",
+      "sha256": "10c2254cfa5af8a0f9043da1d7c46eaa6b20b825d47a2794f59ab285892a4b2a",
+      "recognized": "輝け! 強制カウンター 連携!",
+      "seconds": 3.76,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！きょうせいかうんたー、れんけい！"
+      ]
+    },
+    "akari/skill-e431263f3d6a": {
+      "expected": "輝け！鏡星カウンター、解放！",
+      "reading": "かがやけ！きょうせいかうんたー、かいほう！",
+      "sha256": "ea5e1cfe62b1e57f11f6e4f123e92fac049735e6c2442cb76a71681e7f187870",
+      "recognized": "輝け! 強制カウンター 開放!",
+      "seconds": 3.68,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！きょうせいかうんたー、かいほう！"
+      ]
+    },
+    "akari/skill-0ba698ba2073": {
+      "expected": "輝け！彗星プッシュ、速攻！",
+      "reading": "かがやけ！すいせいぷっしゅ、そっこう！",
+      "sha256": "ce7b812879353bf675375951220b7d0df5b062d5d2baf91b76b7c31be9179e68",
+      "recognized": "輝け! 水性プッシュ 速攻!",
+      "seconds": 3.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！すいせいぷっしゅ、そっこう！"
+      ]
+    },
+    "akari/skill-b1dcd0adac26": {
+      "expected": "輝け！彗星プッシュ、蓄勢！",
+      "reading": "かがやけ！すいせいぷっしゅ、ちくせい！",
+      "sha256": "1584fcc7fbbb748c773d8459d9521711a32625170c02fc61c9f0e86b73202934",
+      "recognized": "輝け! 水性プッシュ 肢成!",
+      "seconds": 3.88,
+      "reading_similarity": 0.903,
+      "accepted_readings": [
+        "かがやけ！すいせいぷっしゅ、ちくせい！"
+      ]
+    },
+    "akari/skill-e81b5fee1954": {
+      "expected": "輝け！彗星プッシュ、連携！",
+      "reading": "かがやけ！すいせいぷっしゅ、れんけい！",
+      "sha256": "34dd65c01207b1446ae91038240a0528b14944c613cd1c58c5e60e5b03bf8844",
+      "recognized": "輝け! 水性プッシュ 連携!",
+      "seconds": 3.68,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！すいせいぷっしゅ、れんけい！"
+      ]
+    },
+    "akari/skill-382416f068b8": {
+      "expected": "輝け！彗星プッシュ、解放！",
+      "reading": "かがやけ！すいせいぷっしゅ、かいほう！",
+      "sha256": "5fbe85163aa0e0f6f40f2e210f2d218bffc7d151481a18678c933174f20c0ca7",
+      "recognized": "かがやけ、水性プッシュ、開放!",
+      "seconds": 3.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！すいせいぷっしゅ、かいほう！"
+      ]
+    },
+    "akari/skill-a0826a1fd631": {
+      "expected": "輝け！星鎖フック、速攻！",
+      "reading": "かがやけ！せいさふっく、そっこう！",
+      "sha256": "30c2617b7e8484a7f1426e8390bd322bad0915a11b968b6f612b949eb82cae1d",
+      "recognized": "かがやけ、精査フック、速攻!",
+      "seconds": 3.36,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！せいさふっく、そっこう！"
+      ]
+    },
+    "akari/skill-0881ed71e0a4": {
+      "expected": "輝け！星鎖フック、蓄勢！",
+      "reading": "かがやけ！せいさふっく、ちくせい！",
+      "sha256": "5034f1a7377827a228c0f5da371f8a5704647246fdbc89ac332a37ff298bc906",
+      "recognized": "かがやけ、精査フック、蓄性!",
+      "seconds": 3.64,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！せいさふっく、ちくせい！"
+      ]
+    },
+    "akari/skill-cd4b6f6457ad": {
+      "expected": "輝け！星鎖フック、連携！",
+      "reading": "かがやけ！せいさふっく、れんけい！",
+      "sha256": "9aa00ecea66fbddde9fad50f5d86157606f940a408f4128343a6810274fda331",
+      "recognized": "かがやけ、精査フック、連携!",
+      "seconds": 3.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！せいさふっく、れんけい！"
+      ]
+    },
+    "akari/skill-293cc510d485": {
+      "expected": "輝け！星鎖フック、解放！",
+      "reading": "かがやけ！せいさふっく、かいほう！",
+      "sha256": "288c41f0e70cad1e2b0cd7736e5b34ac7ab213ce06920dadfa765205701bccd7",
+      "recognized": "輝け! 精査服! 開放!",
+      "seconds": 3.36,
+      "reading_similarity": 0.963,
+      "accepted_readings": [
+        "かがやけ！せいさふっく、かいほう！"
+      ]
+    },
+    "akari/skill-7c3c69267f59": {
+      "expected": "輝け！反動スターバースト、速攻！",
+      "reading": "かがやけ！はんどうすたーばーすと、そっこう！",
+      "sha256": "bd26007a237402ab5a8ee05f9508ac58a3520004fdc928dc528165fa43dd04de",
+      "recognized": "輝け! ハンドウスターバースト! 速攻!",
+      "seconds": 4.0,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！はんどうすたーばーすと、そっこう！"
+      ]
+    },
+    "akari/skill-082f3567865c": {
+      "expected": "輝け！反動スターバースト、蓄勢！",
+      "reading": "かがやけ！はんどうすたーばーすと、ちくせい！",
+      "sha256": "d831b28ea5ebd4a05106cca93d4e3d799aa15e01c858e0a13a17fc2b1ab8437a",
+      "recognized": "輝け! ハンドウスターバースト! 蓄勢!",
+      "seconds": 4.2,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！はんどうすたーばーすと、ちくせい！"
+      ]
+    },
+    "akari/skill-26d6716ff609": {
+      "expected": "輝け！反動スターバースト、連携！",
+      "reading": "かがやけ！はんどうすたーばーすと、れんけい！",
+      "sha256": "ee9abcd195d7fa266ed3db5db68a123b0048aa58c56564bf4535d100a3ccf778",
+      "recognized": "輝け! ハンドウスターバースト! 連携!",
+      "seconds": 4.0,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！はんどうすたーばーすと、れんけい！"
+      ]
+    },
+    "akari/skill-9798c1757723": {
+      "expected": "輝け！反動スターバースト、解放！",
+      "reading": "かがやけ！はんどうすたーばーすと、かいほう！",
+      "sha256": "8da402572f948c1e150ccd23594b5658bd7a18f1eb8ed05c04632e8950310eae",
+      "recognized": "輝け! ハンドウスターバースト! 開放!",
+      "seconds": 3.96,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！はんどうすたーばーすと、かいほう！"
+      ]
+    },
+    "akari/skill-5eef8fa841a5": {
+      "expected": "輝け！天頂の星、速攻！",
+      "reading": "かがやけ！てんちょうのほし、そっこう！",
+      "sha256": "838a511addb1fbe356fd32af197553832c2ab0808f50fe17b36ed303e7eddfe0",
+      "recognized": "輝け! 天長の星! 速攻!",
+      "seconds": 3.6,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！てんちょうのほし、そっこう！"
+      ]
+    },
+    "akari/skill-ada325159242": {
+      "expected": "輝け！天頂の星、蓄勢！",
+      "reading": "かがやけ！てんちょうのほし、ちくせい！",
+      "sha256": "dc5c49bd1673e227bd3ddbca4876c7e7d364f8faa90fe054fb07801d2824e659",
+      "recognized": "輝け 天長の星 蓄星",
+      "seconds": 3.8,
+      "reading_similarity": 0.875,
+      "accepted_readings": [
+        "かがやけ！てんちょうのほし、ちくせい！"
+      ]
+    },
+    "akari/skill-9dee596ab64d": {
+      "expected": "輝け！天頂の星、連携！",
+      "reading": "かがやけ！てんちょうのほし、れんけい！",
+      "sha256": "fd687c715a66fbb02460506f86ea24daf1dcce57fd4269f00d6e30fd45b3d013",
+      "recognized": "輝け 天長の星 連携",
+      "seconds": 3.56,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！てんちょうのほし、れんけい！"
+      ]
+    },
+    "akari/skill-f7320487f003": {
+      "expected": "輝け！天頂の星、解放！",
+      "reading": "かがやけ！てんちょうのほし、かいほう！",
+      "sha256": "e889c1fb10a25a46d9a50d9495981cda786fb1b5fd43e5532a458ce9a8bb80c4",
+      "recognized": "輝け 天長の星 開放",
+      "seconds": 3.56,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！てんちょうのほし、かいほう！"
+      ]
+    },
+    "akari/skill-37697ae1d5c7": {
+      "expected": "輝け！銀河の光、速攻！",
+      "reading": "かがやけ！ぎんがのひかり、そっこう！",
+      "sha256": "de0253532d8e76a9437fda108983900d69e794435ecf0d7ae45318772e8fecc9",
+      "recognized": "輝け 銀河の光 速攻",
+      "seconds": 3.56,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ぎんがのひかり、そっこう！"
+      ]
+    },
+    "akari/skill-1d602114a1a9": {
+      "expected": "輝け！銀河の光、蓄勢！",
+      "reading": "かがやけ！ぎんがのひかり、ちくせい！",
+      "sha256": "efbc40187eac4e958706ecb66e8b72a03063e1e1bea625c97d393c3fcf56eab4",
+      "recognized": "輝け!銀河の光、蓄星!",
+      "seconds": 3.8,
+      "reading_similarity": 0.867,
+      "accepted_readings": [
+        "かがやけ！ぎんがのひかり、ちくせい！"
+      ]
+    },
+    "akari/skill-52db36c05fb9": {
+      "expected": "輝け！銀河の光、連携！",
+      "reading": "かがやけ！ぎんがのひかり、れんけい！",
+      "sha256": "64c4709356826880bf3bc59f2d55a1a0b667e8580012fcde1b7cd9d86b211432",
+      "recognized": "輝け!銀河の光、連携!",
+      "seconds": 3.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ぎんがのひかり、れんけい！"
+      ]
+    },
+    "akari/skill-7f5ccd4613d4": {
+      "expected": "輝け！銀河の光、解放！",
+      "reading": "かがやけ！ぎんがのひかり、かいほう！",
+      "sha256": "52a38ee40b01b4d84c2cd8066c9ee6926209e6500c1ae0ef972893e31d9b6c0f",
+      "recognized": "輝け!銀河の光、開放!",
+      "seconds": 3.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！ぎんがのひかり、かいほう！"
+      ]
+    },
+    "akari/skill-52d12e3a2020": {
+      "expected": "輝け！時止めの星、速攻！",
+      "reading": "かがやけ！ときどめのほし、そっこう！",
+      "sha256": "1661f6ca8d729312d8eb641be65ce2363738e10fbbddd5c806faff85660a2648",
+      "recognized": "輝け!解き止めの星、速攻!",
+      "seconds": 3.64,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "かがやけ！ときどめのほし、そっこう！"
+      ]
+    },
+    "akari/skill-6dd96812b571": {
+      "expected": "輝け！時止めの星、蓄勢！",
+      "reading": "かがやけ！ときどめのほし、ちくせい！",
+      "sha256": "aaa760be140bd790c18e5011b84d04b9b5f141e61cd7483709f75169d09dd32a",
+      "recognized": "輝け!解き止めの星、蓄星!",
+      "seconds": 3.84,
+      "reading_similarity": 0.8,
+      "accepted_readings": [
+        "かがやけ！ときどめのほし、ちくせい！"
+      ]
+    },
+    "akari/skill-1a26271fba1a": {
+      "expected": "輝け！時止めの星、連携！",
+      "reading": "かがやけ！ときどめのほし、れんけい！",
+      "sha256": "e8b9c6f912f4271c14ceec1bed059128a67f19ef6a6312f8f932e16c62053fd0",
+      "recognized": "輝け!解き止めの星、連携!",
+      "seconds": 3.56,
+      "reading_similarity": 0.933,
+      "accepted_readings": [
+        "かがやけ！ときどめのほし、れんけい！"
+      ]
+    },
+    "akari/skill-0f0bcf8bae4c": {
+      "expected": "輝け！時止めの星、解放！",
+      "reading": "かがやけ！ときどめのほし、かいほう！",
+      "sha256": "aa101f42fd5a7a3ea4924dfa11e2a484b5279cfb649e7812074fd914b76a8743",
+      "recognized": "輝け! 輝け! 時止めの星 開放!",
+      "seconds": 3.56,
+      "reading_similarity": 0.824,
+      "accepted_readings": [
+        "かがやけ！ときどめのほし、かいほう！"
+      ]
+    },
+    "akari/skill-05c57a317b19": {
+      "expected": "輝け！月光ドレイン、速攻！",
+      "reading": "かがやけ！げっこうどれいん、そっこう！",
+      "sha256": "995dd01a4b437b3a94571f1acdfe4160d325e8823b527eb5b230cd6016f45024",
+      "recognized": "輝け! 月光ドレイン 速攻!",
+      "seconds": 3.56,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！げっこうどれいん、そっこう！"
+      ]
+    },
+    "akari/skill-b031cbdcfd2a": {
+      "expected": "輝け！月光ドレイン、蓄勢！",
+      "reading": "かがやけ！げっこうどれいん、ちくせい！",
+      "sha256": "a6559c2b9efd9c73a24000eab80490f990d725f892bf42aab3299cfb61ead633",
+      "recognized": "輝け! 月光ドレイン 蓄戦!",
+      "seconds": 3.76,
+      "reading_similarity": 0.938,
+      "accepted_readings": [
+        "かがやけ！げっこうどれいん、ちくせい！"
+      ]
+    },
+    "akari/skill-a100fc1d5fb7": {
+      "expected": "輝け！月光ドレイン、連携！",
+      "reading": "かがやけ！げっこうどれいん、れんけい！",
+      "sha256": "c48eb7f437e1e6699000144285f898ac1795de614f1f6a5ac8bd30a4845daa06",
+      "recognized": "輝け! 月光ドレイン 連携!",
+      "seconds": 3.56,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！げっこうどれいん、れんけい！"
+      ]
+    },
+    "akari/skill-022b5c500b4e": {
+      "expected": "輝け！月光ドレイン、解放！",
+      "reading": "かがやけ！げっこうどれいん、かいほう！",
+      "sha256": "9519d3b6604bb960060417bc79b890cce40c72c85aa86f5a21eac1e48276f699",
+      "recognized": "輝け 月光ドレイン 開放",
+      "seconds": 3.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "かがやけ！げっこうどれいん、かいほう！"
+      ]
+    },
+    "akari/skill-f9fc61af6ca7": {
+      "expected": "星よ、力を！守護星座、速攻！",
+      "reading": "ほしよ、ちからを！しゅごせいざ、そっこう！",
+      "sha256": "5f8103f8f014f51c117487f1533896d6bcace854a90a5ba5edc67ff23ba67dd3",
+      "recognized": "星よ 力を 守護せいざ 速攻",
+      "seconds": 4.32,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！しゅごせいざ、そっこう！"
+      ]
+    },
+    "akari/skill-d524ef4e3dec": {
+      "expected": "星よ、力を！守護星座、蓄勢！",
+      "reading": "ほしよ、ちからを！しゅごせいざ、ちくせい！",
+      "sha256": "d204e132f6d6f4c75a535d27dc94921db55d67b2fafa1d808a154409999e8649",
+      "recognized": "星よ 力を 守護せいざ 蓄勢",
+      "seconds": 4.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！しゅごせいざ、ちくせい！"
+      ]
+    },
+    "akari/skill-f4a453342226": {
+      "expected": "星よ、力を！守護星座、連携！",
+      "reading": "ほしよ、ちからを！しゅごせいざ、れんけい！",
+      "sha256": "ebacb1eacbd3242aa152b8891fd0c60c5236cd288ed14dcebe23680782fdc913",
+      "recognized": "星よ 力を 守護せいざ 連携",
+      "seconds": 4.4,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！しゅごせいざ、れんけい！"
+      ]
+    },
+    "akari/skill-1865ec1139e9": {
+      "expected": "星よ、力を！守護星座、解放！",
+      "reading": "ほしよ、ちからを！しゅごせいざ、かいほう！",
+      "sha256": "fde768dc1dc50c55634c809fcedd486715869c67811717f18e768a75a73271b1",
+      "recognized": "星よ 力を 守護せいざ 開放",
+      "seconds": 4.32,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！しゅごせいざ、かいほう！"
+      ]
+    },
+    "akari/skill-b889b2ea622a": {
+      "expected": "星よ、力を！星への祈り、速攻！",
+      "reading": "ほしよ、ちからを！ほしへのいのり、そっこう！",
+      "sha256": "9a1fb86fedd50741f19e9d2afa49fa2dc03d14e3f63843645c63e2252d8f1745",
+      "recognized": "星よ、力を!星への祈り、そっこう!",
+      "seconds": 4.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしへのいのり、そっこう！"
+      ]
+    },
+    "akari/skill-8d01fd34982b": {
+      "expected": "星よ、力を！星への祈り、蓄勢！",
+      "reading": "ほしよ、ちからを！ほしへのいのり、ちくせい！",
+      "sha256": "573ac6a3287f539be025a7818db0fb20714d9fe4f9fa399b9343dff5624c0551",
+      "recognized": "星よ、力を!星への祈り、ちくせい!",
+      "seconds": 4.8,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしへのいのり、ちくせい！"
+      ]
+    },
+    "akari/skill-31453dacd6c4": {
+      "expected": "星よ、力を！星への祈り、連携！",
+      "reading": "ほしよ、ちからを！ほしへのいのり、れんけい！",
+      "sha256": "893745395282bf4ae12dae203e169987f8155f88a33397a940fdc326d3c03782",
+      "recognized": "星よ、力を!星への祈り、連携!",
+      "seconds": 4.48,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしへのいのり、れんけい！"
+      ]
+    },
+    "akari/skill-53dc6bf35cc7": {
+      "expected": "星よ、力を！星への祈り、解放！",
+      "reading": "ほしよ、ちからを！ほしへのいのり、かいほう！",
+      "sha256": "cd2d0b2273025579cf0a1adfad71fa53e84ea44e0ac727dd9f3cf986e4d85e3d",
+      "recognized": "星よ、力を!星への祈り、開放!",
+      "seconds": 4.52,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしへのいのり、かいほう！"
+      ]
+    },
+    "akari/skill-acbce1b56dc7": {
+      "expected": "星よ、力を！癒しの星雨、速攻！",
+      "reading": "ほしよ、ちからを！いやしのほしあめ、そっこう！",
+      "sha256": "9625f4694b482a13c9ba9867a4f2ef5e64a067f9d7a2ae455cd4542250e594ae",
+      "recognized": "星よ、力を!癒しの星止め、そっこう!",
+      "seconds": 4.72,
+      "reading_similarity": 0.947,
+      "accepted_readings": [
+        "ほしよ、ちからを！いやしのほしあめ、そっこう！"
+      ]
+    },
+    "akari/skill-89a49c7ef413": {
+      "expected": "星よ、力を！癒しの星雨、蓄勢！",
+      "reading": "ほしよ、ちからを！いやしのほしあめ、ちくせい！",
+      "sha256": "6c0ad92306289ae8ccb21f1f946477f854e1a9fc295a33f9cc02e029ce3732ed",
+      "recognized": "星よ、力を、癒しの星嫁、蓄勢、",
+      "seconds": 5.04,
+      "reading_similarity": 0.947,
+      "accepted_readings": [
+        "ほしよ、ちからを！いやしのほしあめ、ちくせい！"
+      ]
+    },
+    "akari/skill-c9099dc69b20": {
+      "expected": "星よ、力を！癒しの星雨、連携！",
+      "reading": "ほしよ、ちからを！いやしのほしあめ、れんけい！",
+      "sha256": "0626920425347f67427d1ad113248376388fa3ee786ef755de33c46a2ac3ba35",
+      "recognized": "星よ、力を、癒しの星嫁、連携、",
+      "seconds": 4.72,
+      "reading_similarity": 0.947,
+      "accepted_readings": [
+        "ほしよ、ちからを！いやしのほしあめ、れんけい！"
+      ]
+    },
+    "akari/skill-9436bacd27e1": {
+      "expected": "星よ、力を！癒しの星雨、解放！",
+      "reading": "ほしよ、ちからを！いやしのほしあめ、かいほう！",
+      "sha256": "5f4dfc8ee9ed23341a693db1a00963f416cbbe70f0ade0be2d30fe354a18dd21",
+      "recognized": "星よ、力を、癒しの星嫁、開放、",
+      "seconds": 4.72,
+      "reading_similarity": 0.947,
+      "accepted_readings": [
+        "ほしよ、ちからを！いやしのほしあめ、かいほう！"
+      ]
+    },
+    "akari/skill-1c2cb75b29b7": {
+      "expected": "星よ、力を！再詠唱、速攻！",
+      "reading": "ほしよ、ちからを！さいえいしょう、そっこう！",
+      "sha256": "d13da323f10b5da5e2bf02b2bc7be34616adc0550e19e6ce7a0f3f57fb07cc85",
+      "recognized": "星よ、力を、サイエーション、速攻、",
+      "seconds": 4.24,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "ほしよ、ちからを！さいえいしょう、そっこう！"
+      ]
+    },
+    "akari/skill-4645110c60b2": {
+      "expected": "星よ、力を！再詠唱、蓄勢！",
+      "reading": "ほしよ、ちからを！さいえいしょう、ちくせい！",
+      "sha256": "7076298eb6c927a55d7a1450c2ba36c6dcf71987ab942e64c6b63328a460f90f",
+      "recognized": "星よ、力を、サイエーション、蓄勢、",
+      "seconds": 4.64,
+      "reading_similarity": 0.889,
+      "accepted_readings": [
+        "ほしよ、ちからを！さいえいしょう、ちくせい！"
+      ]
+    },
+    "akari/skill-c9d97c637123": {
+      "expected": "星よ、力を！再詠唱、連携！",
+      "reading": "ほしよ、ちからを！さいえいしょう、れんけい！",
+      "sha256": "643f3cb81394bac78c714fd0f79879141f248a3a0b98405558eecdaac7ba65ef",
+      "recognized": "星よ、力を、最優秀、連携!",
+      "seconds": 4.4,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "ほしよ、ちからを！さいえいしょう、れんけい！"
+      ]
+    },
+    "akari/skill-cc2ce55a7463": {
+      "expected": "星よ、力を！再詠唱、解放！",
+      "reading": "ほしよ、ちからを！さいえいしょう、かいほう！",
+      "sha256": "7874653cbd93255f159fe1ef30bde89f50771252b9ef427318f9ece1bf3f01a2",
+      "recognized": "星よ、力を、最優秀、解放!",
+      "seconds": 4.28,
+      "reading_similarity": 0.833,
+      "accepted_readings": [
+        "ほしよ、ちからを！さいえいしょう、かいほう！"
+      ]
+    },
+    "akari/skill-c24a866847ce": {
+      "expected": "星よ、力を！星の絶対結界、速攻！",
+      "reading": "ほしよ、ちからを！ほしのぜったいけっかい、そっこう！",
+      "sha256": "65abd5cd2eccb83b2204296fcb193b832c4fe2c38b3309b9ea085880faa9e70a",
+      "recognized": "星よ、力を、星の絶対結界、速攻!",
+      "seconds": 5.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしのぜったいけっかい、そっこう！"
+      ]
+    },
+    "akari/skill-8ef641bd697e": {
+      "expected": "星よ、力を！星の絶対結界、蓄勢！",
+      "reading": "ほしよ、ちからを！ほしのぜったいけっかい、ちくせい！",
+      "sha256": "849a7d8091b03ad83516cad7bdfb5c9c985c5f8061863a63d0a602d9a710b018",
+      "recognized": "星よ、力を、星の絶対結界、蓄勢!",
+      "seconds": 5.32,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしのぜったいけっかい、ちくせい！"
+      ]
+    },
+    "akari/skill-adaa930df81c": {
+      "expected": "星よ、力を！星の絶対結界、連携！",
+      "reading": "ほしよ、ちからを！ほしのぜったいけっかい、れんけい！",
+      "sha256": "fae043a9f446d12589be9c609c6a97f3c1648c4f342310cb86b1caf6da7ffb48",
+      "recognized": "星よ、力を、星の絶対結界、連携!ん",
+      "seconds": 5.08,
+      "reading_similarity": 0.978,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしのぜったいけっかい、れんけい！"
+      ]
+    },
+    "akari/skill-7eddf1950688": {
+      "expected": "星よ、力を！星の絶対結界、解放！",
+      "reading": "ほしよ、ちからを！ほしのぜったいけっかい、かいほう！",
+      "sha256": "f32ad5a51ad03a4ec024937ef31f8c2e4ba38c0ba7627adb5c2aae9de4f4a343",
+      "recognized": "星よ、力を!星の絶対結界、解放!",
+      "seconds": 5.08,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ほしよ、ちからを！ほしのぜったいけっかい、かいほう！"
+      ]
+    },
+    "akari/skill-f6eb51f35bae": {
+      "expected": "星よ、力を！星間ステップ、速攻！",
+      "reading": "ほしよ、ちからを！せいかんすてっぷ、そっこう！",
+      "sha256": "9bb73e94ba64f2296bbe2cf01c8c15e4e4e751f93f2fa680497c36476657a0dd",
+      "recognized": "星よ、力を!聖艦ステップ、速攻!",
+      "seconds": 4.4,
+      "reading_similarity": 0.872,
+      "accepted_readings": [
+        "ほしよ、ちからを！せいかんすてっぷ、そっこう！"
+      ]
+    },
+    "akari/skill-b228ed43136e": {
+      "expected": "星よ、力を！星間ステップ、蓄勢！",
+      "reading": "ほしよ、ちからを！せいかんすてっぷ、ちくせい！",
+      "sha256": "f70958cedf337ceb8310bd4e65d0b01d6cc388db8275901c8869b4158a408fcf",
+      "recognized": "星よ、力を!聖艦ステップ、蓄勢!",
+      "seconds": 4.72,
+      "reading_similarity": 0.872,
+      "accepted_readings": [
+        "ほしよ、ちからを！せいかんすてっぷ、ちくせい！"
+      ]
+    },
+    "akari/skill-4b67df68d4eb": {
+      "expected": "星よ、力を！星間ステップ、連携！",
+      "reading": "ほしよ、ちからを！せいかんすてっぷ、れんけい！",
+      "sha256": "358896dd763d58b263b4576d060d3b8741958806db9ec2eabe1328b8d1845735",
+      "recognized": "星よ、力を!聖艦ステップ、連携!",
+      "seconds": 4.44,
+      "reading_similarity": 0.872,
+      "accepted_readings": [
+        "ほしよ、ちからを！せいかんすてっぷ、れんけい！"
+      ]
+    },
+    "akari/skill-ca3409867040": {
+      "expected": "星よ、力を！星間ステップ、解放！",
+      "reading": "ほしよ、ちからを！せいかんすてっぷ、かいほう！",
+      "sha256": "e358bc0cb142385b0b08670b88f801d84049a06c2263df67fe8ee8f7b747d3fd",
+      "recognized": "星よ、力を!聖艦ステップ、解放!",
+      "seconds": 4.4,
+      "reading_similarity": 0.872,
+      "accepted_readings": [
+        "ほしよ、ちからを！せいかんすてっぷ、かいほう！"
+      ]
+    },
+    "akari/skill-07c3ed81bfa8": {
+      "expected": "願いを、未来へ！願いの超新星！",
+      "reading": "ねがいを、みらいへ！ねがいのちょうしんせい！",
+      "sha256": "44b35672ad3549ef19cfd6ba666bf79e8166352912341f44aef1c7e0cbb6f611",
+      "recognized": "ネガイを未来へ、ネガイの調子性!",
+      "seconds": 3.84,
+      "reading_similarity": 0.973,
+      "accepted_readings": [
+        "ねがいを、みらいへ！ねがいのちょうしんせい！"
+      ]
+    },
+    "akari/skill-1917bf309e51": {
+      "expected": "願いを、未来へ！スターライト、フィナーレ！",
+      "reading": "ねがいを、みらいへ！すたーらいと、ふぃなーれ！",
+      "sha256": "93c5ca83f5f780025ece02d137ad04b86dde86f056ce1274be3eb02fd7b6fc75",
+      "recognized": "ネガイを未来へ、スターライトフィナーレ!",
+      "seconds": 4.88,
+      "reading_similarity": 1.0,
+      "accepted_readings": [
+        "ねがいを、みらいへ！すたーらいと、ふぃなーれ！"
+      ]
+    },
+    "original/action-item": {
+      "expected": "道具だって武器になる！",
+      "reading": "どうぐだってぶきになる！",
+      "sha256": "8c1f76c834eb8d7434910450156557967b71e8865eff7c0030d945f7b692856d",
+      "recognized": "道具だって武器になる!",
+      "seconds": 2.32,
+      "accepted_readings": [
+        "どうぐだってぶきになる！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/action-item": {
+      "expected": "使えるものは全部使うぜ！",
+      "reading": "つかえるものはぜんぶつかうぜ！",
+      "sha256": "02a3cb1397d2c2851fb7959f4ade5e1b2aece36b19de3b6b632458df8a65404d",
+      "recognized": "使えるものは全部使うぜ!え?",
+      "seconds": 2.44,
+      "accepted_readings": [
+        "つかえるものはぜんぶつかうぜ！"
+      ],
+      "reading_similarity": 0.966
+    },
+    "akari/action-item": {
+      "expected": "星の贈り物、お願い！",
+      "reading": "ほしのおくりもの、おねがい！",
+      "sha256": "60f1e631e7cb71f400f782e3882811c4561c85860a324b836a0ab2eefc9e7f1f",
+      "recognized": "星の送り物、お願い!",
+      "seconds": 2.36,
+      "accepted_readings": [
+        "ほしのおくりもの、おねがい！"
+      ],
+      "reading_similarity": 1.0
+    }
+  }
+}

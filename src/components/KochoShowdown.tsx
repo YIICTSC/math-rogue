@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
+import { kochoSkillVoice, type KochoVoiceAction } from '../mini-games/kocho/voices';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AttackEffectKey, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
@@ -783,6 +784,36 @@ const KochoShowdown: React.FC<{
     
     // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
+    const voiceMountedRef = useRef(true);
+    const voiceStateRef = useRef({ hp: gameState.player.hp, status: gameState.status, hero: gameState.heroId });
+    const playActionVoice = (action: KochoVoiceAction, hero = stateRef.current.heroId) => {
+        if (debugPreview || isUiPreview || !voiceMountedRef.current) return;
+        const priority = action === 'victory' || action === 'defeat' ? 4
+            : action === 'special' || action === 'item' ? 3
+            : action === 'damage' ? 2 : 1;
+        void audioService.playKochoVoice(hero, `action-${action}`, priority);
+    };
+    useEffect(() => {
+        voiceMountedRef.current = true;
+        const stopHidden = () => { if (document.hidden) audioService.stopKochoVoices(); };
+        document.addEventListener('visibilitychange', stopHidden);
+        return () => {
+            voiceMountedRef.current = false;
+            document.removeEventListener('visibilitychange', stopHidden);
+            audioService.stopKochoVoices();
+        };
+    }, []);
+    useEffect(() => {
+        const previous = voiceStateRef.current;
+        voiceStateRef.current = { hp: gameState.player.hp, status: gameState.status, hero: gameState.heroId };
+        if (previous.hero !== gameState.heroId || debugPreview || isUiPreview) return;
+        if (gameState.status !== previous.status) {
+            if (gameState.status === 'VICTORY') { playActionVoice('victory'); return; }
+            if (gameState.status === 'GAME_OVER') { playActionVoice('defeat'); return; }
+            if (gameState.status === 'WAVE_CLEAR') { playActionVoice('wave-clear'); return; }
+        }
+        if (gameState.player.hp < previous.hp && gameState.player.hp > 0 && gameState.phase === 'BATTLE') playActionVoice('damage');
+    }, [gameState.player.hp, gameState.status, gameState.heroId, gameState.phase, debugPreview, isUiPreview]);
     const pendingHandFocusIndexRef = useRef<number | null>(null);
     const discoveredKochoCardsRef = useRef(new Set<string>());
     const markKochoCardDiscovered = (cardName?: string) => {
@@ -850,12 +881,12 @@ const KochoShowdown: React.FC<{
     }, []);
 
     const saveStateNow = useCallback(() => {
-        if (debugPreview || isUiPreview || gameState.status === 'GAME_OVER' || gameState.status === 'VICTORY') return;
+        if (debugPreview || isUiPreview || gameState.status !== 'PLAYING') return;
         storageService.saveKochoState({ ...gameState, rewardCards });
     }, [debugPreview, isUiPreview, gameState, rewardCards]);
 
     useEffect(() => {
-        if (gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY') {
+        if (gameState.status === 'PLAYING') {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
             saveDebounceRef.current = setTimeout(saveStateNow, 500);
         }
@@ -876,6 +907,7 @@ const KochoShowdown: React.FC<{
     }, []);
 
     const initGame = () => {
+        audioService.stopKochoVoices();
         const initialState = getInitialState(selectedHero);
         setGameState(initialState);
         stateRef.current = initialState;
@@ -908,13 +940,16 @@ const KochoShowdown: React.FC<{
         setNewlyUnlockedCard(null);
         storageService.saveKochoState(initialState);
         startWave(1, 0, 1);
+        playActionVoice('start', selectedHero);
     };
     const handleQuit = () => {
         saveStateNow();
+        audioService.stopKochoVoices();
         onBack();
     };
 
     const startEndlessRun = () => {
+        playActionVoice('start');
         resultSavedRef.current = false;
         const nextState: KochoGameState = {
             ...stateRef.current,
@@ -1664,6 +1699,7 @@ const KochoShowdown: React.FC<{
         }
 
         if (used) {
+            playActionVoice('item');
             audioService.playSound('buff');
             let newConsumables = state.consumables;
             if (!recycled) {
@@ -1707,6 +1743,7 @@ const KochoShowdown: React.FC<{
             intermediateState = handlePickup(newPos, intermediateState);
             
             setGameState(intermediateState);
+            playActionVoice(dir === current.player.facing ? 'forward' : 'back');
             audioService.playSound('select');
             
             const anyEnemyActing = current.enemies.some(e => e.hp > 0 && e.intent && e.intent.timer <= 1);
@@ -1732,6 +1769,7 @@ const KochoShowdown: React.FC<{
         const intermediateState = { ...current, player: { ...current.player, facing: (current.player.facing * -1) as Facing } };
         
         setGameState(intermediateState);
+        playActionVoice('turn');
         audioService.playSound('select');
         addLog("向きを変えた。");
 
@@ -1750,6 +1788,7 @@ const KochoShowdown: React.FC<{
     const handleWait = async () => {
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
+        playActionVoice('wait');
         addLog("待機した。");
         audioService.playSound('select');
         
@@ -1784,6 +1823,7 @@ const KochoShowdown: React.FC<{
         }
 
         setAnimating(true);
+        playActionVoice('special');
         addLog(current.heroId === 'rebel' ? '背後へ回り込み！' : current.heroId === 'akari' ? '押し出す！' : '位置交換！');
         audioService.playSound('select');
         addVfx('WARP', p.pos);
@@ -1873,6 +1913,8 @@ const KochoShowdown: React.FC<{
     const executeQueue = async () => {
         if (stateRef.current.status !== 'PLAYING' || animating || stateRef.current.queue.length === 0) return;
         setAnimating(true);
+        // Keep a resumable checkpoint while voiced combos are in flight.
+        if (!debugPreview && !isUiPreview) storageService.saveKochoState(stateRef.current);
         setGameState(prev => ({ ...prev, status: 'EXECUTING' }));
 
         const queue = [...stateRef.current.queue];
@@ -1886,6 +1928,10 @@ const KochoShowdown: React.FC<{
             
             activeActionCardNameRef.current = card.name;
             setActiveActionCardName(card.name);
+            const voiceClip = kochoSkillVoice(currentState.heroId, card.name);
+            const skillVoice = voiceClip && !debugPreview && !isUiPreview && voiceMountedRef.current
+                ? audioService.playKochoVoice(currentState.heroId, voiceClip, 3)
+                : Promise.resolve(false);
             addLog(`${card.name}！`);
             
             const p = currentState.player;
@@ -2235,6 +2281,8 @@ const KochoShowdown: React.FC<{
                 await new Promise(r => setTimeout(r, 90));
             }
             await new Promise(r => setTimeout(r, 400));
+            await skillVoice;
+            if (!voiceMountedRef.current) return;
             activeActionCardNameRef.current = null;
             setActiveActionCardName(null);
             

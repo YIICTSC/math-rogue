@@ -7,14 +7,23 @@ const out='tmp/kocho-qa';await fs.mkdir(out,{recursive:true});
 try {
  server=await createServer({logLevel:'error',cacheDir:'node_modules/.vite-kocho-qa',optimizeDeps:{entries:['scripts/fixtures/kocho.tsx']},server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{name:'kocho-qa',enforce:'pre',
   configureServer(s){s.middlewares.use('/kocho-test',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml(req.url,'<html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0"><div id="root" style="height:100dvh"></div><script type="module" src="/scripts/fixtures/kocho.tsx"></script></body></html>'));});},
-  transform(source,id){if(!id.endsWith('/components/KochoShowdown.tsx'))return;return "import {flushSync as qaFlush} from 'react-dom';\n"+source.replace('    // --- MAIN RENDER ---',`    Object.assign(window,{__kocho:{state:gameState,initial:getInitialState,cards:ALL_KOCHO_CARD_DB,rewards:rewardCards,pool:getUnlockedKochoCardTemplates,hydrate:hydrateState,generateRewards,execute:executeQueue,move:handleMove,special:handleSwapPosition,setState:(v:any)=>qaFlush(()=>{stateRef.current=v;setGameState({...v});})}});\n    // --- MAIN RENDER ---`);},
+  transform(source,id){if(!id.endsWith('/components/KochoShowdown.tsx'))return;return "import {flushSync as qaFlush} from 'react-dom';\n"+source.replace('    // --- MAIN RENDER ---',`    Object.assign(window,{__kocho:{state:gameState,initial:getInitialState,cards:ALL_KOCHO_CARD_DB,rewards:rewardCards,pool:getUnlockedKochoCardTemplates,hydrate:hydrateState,generateRewards,execute:executeQueue,move:handleMove,special:handleSwapPosition,turn:handleTurn,wait:handleWait,consume:useConsumable,consumables:CONSUMABLE_DB,setState:(v:any)=>qaFlush(()=>{stateRef.current=v;setGameState({...v});})}});\n    // --- MAIN RENDER ---`);},
  }]});await server.listen();
- browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox']});
+ browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',args:['--no-sandbox',...(process.env.KOCHO_VOICE_TEST?['--autoplay-policy=no-user-gesture-required']:[])]});
  const page=await browser.newPage({viewport:{width:1280,height:900},hasTouch:true});page.setDefaultTimeout(60000);
  const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});
  page.on('response',res=>{if(res.url().includes('/sprites/kocho/')&&res.status()>=400)errors.push(`${res.status()} ${res.url()}`);});
  const base=`http://127.0.0.1:${server.httpServer.address().port}/kocho-test`;
- await page.goto(base);await page.locator('.kocho-lobby').waitFor();
+ await page.goto(base+(process.env.KOCHO_VOICE_TEST?'?voice=1':''));await page.locator('.kocho-lobby').waitFor();
+ if(process.env.KOCHO_VOICE_EXPORT){
+  const catalog=await page.evaluate(async()=>{const {KOCHO_GUEST_CARDS}=await import('/src/mini-games/kocho/guests.ts');return {shared:__kocho.cards.filter(c=>!KOCHO_GUEST_CARDS.some(g=>g.name===c.name)).map(({name,type})=>({name,type})),guests:KOCHO_GUEST_CARDS.map(({hero,name,type,hiraganaName})=>({hero,name,type,hiraganaName}))};});
+  await fs.writeFile('tmp/kocho-voice-cards.json',JSON.stringify(catalog,null,2));console.log('Exported voice cards',catalog.shared.length,catalog.guests.length);await browser.close();await server.close();process.exit(0);
+ }
+ if(process.env.KOCHO_VOICE_TEST){
+  const {testKochoVoices}=await import('./test-kocho-voices.mjs');
+  await testKochoVoices(page,base);
+  assert.deepEqual(errors,[]);await browser.close();await server.close();process.exit(0);
+ }
  await page.locator('.kocho-title-art img').evaluate(img=>img.decode());
  assert.equal(await page.locator('[data-kocho-hero=rebel]').isDisabled(),true);
  assert.equal(await page.locator('[data-kocho-hero=akari]').isDisabled(),true);
