@@ -1,8 +1,9 @@
+import {normalizeRoomInput} from '../services/onlineTransport';
 export const RPG_ROOM_QUERY_PARAM = "rpgRoom";
 export const RPG_ROOM_CODE_PATTERN = /^(?:[HS]-)?[A-Z0-9]{6}$/;
 
 export function normalizeRpgRoomCode(value: string | null | undefined) {
-  const code = (value || "").trim().toUpperCase();
+  const code = normalizeRoomInput(value || "");
   return RPG_ROOM_CODE_PATTERN.test(code) ? code : "";
 }
 

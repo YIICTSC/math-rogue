@@ -13,15 +13,15 @@ export class DedicatedConnection {
     const url=new URL(base);url.protocol=['http:','ws:'].includes(url.protocol)?'ws:':'wss:';url.pathname=`/${game}`;url.search='';url.hash='';
     const health=new URL(url);health.protocol=url.protocol==='ws:'?'http:':'https:';health.pathname='/health';
     const deadline=Date.now()+timeoutMs,signal=this.abort.signal;
-    const pause=()=>new Promise<void>((resolve,reject)=>{if(signal.aborted){reject(new Error('接続を終了しました。'));return;}const end=()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);resolve();},abort=()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);reject(new Error('接続を終了しました。'));},timer=setTimeout(end,2000);signal.addEventListener('abort',abort,{once:true});});
+    const pause=()=>new Promise<void>((resolve,reject)=>{if(signal.aborted){reject(new Error('接続を終了しました。'));return;}const end=()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);resolve();},abort=()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);reject(new Error('接続を終了しました。'));},timer=setTimeout(end,1500+Math.random()*1000);signal.addEventListener('abort',abort,{once:true});});
     let ready=false;
     while(!ready&&!this.closed&&Date.now()<deadline){try{await fetch(health,{mode:'no-cors',signal:AbortSignal.any([signal,AbortSignal.timeout(Math.min(15000,Math.max(1,deadline-Date.now())))])});ready=true;}catch{if(this.closed)throw new Error('接続を終了しました。');await pause();}}
     let explicit=false,last:unknown;
     while(!this.closed&&Date.now()<deadline){
       try{const socket=new WebSocket(url);socket.binaryType='arraybuffer';this.socket=socket;
-        await new Promise<void>((resolve,reject)=>{let settled=false,connected=false;const finish=(error?:Error)=>{if(settled)return;settled=true;clearTimeout(timer);signal.removeEventListener('abort',abort);if(error){socket.onclose=null;socket.close();reject(error);}else{connected=true;resolve();}},abort=()=>finish(new Error('接続を終了しました。')),timer=setTimeout(()=>finish(new Error('サーバー起動待ちの接続を再試行します。')),Math.min(60000,Math.max(1,deadline-Date.now())));signal.addEventListener('abort',abort,{once:true});
+        await new Promise<void>((resolve,reject)=>{let settled=false,connected=false;const finish=(error?:Error)=>{if(settled)return;settled=true;clearTimeout(timer);signal.removeEventListener('abort',abort);if(error){socket.onopen=socket.onmessage=socket.onerror=socket.onclose=null;socket.close();reject(error);}else{connected=true;resolve();}},abort=()=>finish(new Error('接続を終了しました。')),timer=setTimeout(()=>finish(new Error('サーバー起動待ちの接続を再試行します。')),Math.min(20000,Math.max(1,deadline-Date.now())));signal.addEventListener('abort',abort,{once:true});
           socket.onopen=()=>this.send({type:'connect',protocol:1,...hello});
-          socket.onmessage=event=>{if(this.closed)return;let packet:any;try{packet=event.data instanceof ArrayBuffer?event.data:JSON.parse(event.data);}catch{return;}if(packet.type==='error'){explicit=true;this.receive(packet);finish(new Error(packet.message||packet.text||'接続できませんでした。'));return;}try{if(this.receive(packet))finish();}catch(error){explicit=true;finish(error instanceof Error?error:new Error(String(error)));}};
+          socket.onmessage=event=>{if(this.closed||this.socket!==socket)return;let packet:any;try{packet=event.data instanceof ArrayBuffer?event.data:JSON.parse(event.data);}catch{return;}if(packet.type==='error'){explicit=true;this.receive(packet);finish(new Error(packet.message||packet.text||'接続できませんでした。'));return;}try{if(this.receive(packet))finish();}catch(error){explicit=true;finish(error instanceof Error?error:new Error(String(error)));}};
           socket.onerror=()=>finish(new Error('サーバーへの接続を再試行します。'));
           socket.onclose=()=>{finish(new Error('サーバーへの接続を再試行します。'));if(connected){if(this.heartbeat)clearInterval(this.heartbeat);if(!this.closed)this.lost();}};
         });
@@ -30,6 +30,7 @@ export class DedicatedConnection {
     }
     throw new Error(this.closed?'接続を終了しました。':'サーバーの起動を3分待ちました。時間をおいて再接続してください。');
   }
+  get bufferedAmount(){return this.socket?.bufferedAmount??0;}
   send(packet: unknown) {
     if(this.closed || this.socket?.readyState!==WebSocket.OPEN || this.socket.bufferedAmount>16384)return false;
     this.socket.send(JSON.stringify(packet));return true;

@@ -8,7 +8,7 @@ import {initialTransport,shareRoomCode,validRoomAddress} from '../../services/on
 import type {OnlineTransport} from '../../services/onlineTransport';
 import TransportPicker from '../shared/TransportPicker';
 import WaitingHomeDash from '../shared/WaitingHomeDash';
-import StorybookQuality from '../../three/StorybookQuality';
+import KartQualityButton,{useKartPerformance} from './KartQuality';
 import CourseEditor from './CourseEditor';
 import {loadCourses} from './courseStorage';
 import type {CustomCourse} from './track';
@@ -80,6 +80,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
   const selection = useRef<LessonSelection | null>(null), recorded = useRef(new Set<string>());
   const wakeAudio = () => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); };
   const room = useRef<KartRoom | null>(null), audio = useRef<KartAudio | null>(null), generation = useRef(0);
+  const graphics=useKartPerformance(room.current,!!world&&!!room.current?.code);
   const invite = world && room.current?.host && room.current.code ? kartInviteUrl(window.location.href, shareRoomCode(room.current.code,room.current.transport)) : '';
   const copyInvitation = async () => { if (await copyInviteUrl(invite)) setInviteCopied(true); else setError('リンクを選択してコピーしてください。'); };
   const input = useRef({ left: false, right: false, brake: false, drift: false });
@@ -237,7 +238,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
   </OnlineEntryScreen>;
   return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing'+(world.phase==='lobby'?' gk-preparing':'') : 'gk-intro-root'}`} data-gamepad-live={world?.phase==='race'&&!spectating&&!picking?'race':undefined} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
     <GameplayGamepadHint mode="race"/>
-    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><StorybookQuality languageMode={languageMode}/><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span></div></header>
+    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : ()=>setEntry('title')}>← <span>{world ? 'ガレージ' : 'タイトル'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><KartQualityButton languageMode={languageMode} effective={graphics.quality} forced={graphics.forced}/><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span></div></header>
     {world && room.current?.host && room.current.code && <HostSpectator enabled={spectating} canChangeMode={['lobby', 'result'].includes(world.phase)} onChange={value => { clearInput(); room.current?.setSpectator(value); }} name={spectators.target ? me?.name : undefined} count={racers.filter(p => p.id !== self && !p.cpu && !p.spectator).length} onNext={spectators.next} languageMode={languageMode}>{me && spectators.target && <><span>#{place} / {order.length}</span><span>LAP {Math.min(world.laps, Math.max(1, Math.floor(me.distance / length) + 1))} / {world.laps}</span><span>{Math.round(me.speed * 3.6)} KM/H</span></>}</HostSpectator>}
     {error && <div className="gk-error" role="alert">{error}</div>}
     {!world ? <div className="gk-garage">
@@ -253,7 +254,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
       </>}
       </section>
     </div> : <>
-      <section className={`gk-race-view ${me?.boost ? 'is-boosting' : ''} ${world.lesson && me && !me.finish && quizProgress < QUIZ_END + 230 ? 'has-quiz' : ''} ${me?.crash ? 'is-crashing' : ''}`}><KartCanvas world={world} selfId={viewId} />
+      <section className={`gk-race-view ${me?.boost ? 'is-boosting' : ''} ${world.lesson && me && !me.finish && quizProgress < QUIZ_END + 230 ? 'has-quiz' : ''} ${me?.crash ? 'is-crashing' : ''}`}><KartCanvas world={world} selfId={viewId} quality={graphics.quality} onSlowFrame={graphics.onSlowFrame} />
         <div className="gk-vignette" />{me && me.boost > 0 && active && <div className="gk-speed-streaks" />}
         <div className="gk-hud"><div className="gk-position"><span>POSITION</span><strong>{String(place).padStart(2, '0')}<small> / {order.length}</small></strong></div><div className="gk-lap"><span>LAP</span><strong>{Math.min(world.laps, Math.max(1, Math.floor((me?.distance || 0) / length) + 1))}<small> / {world.laps}</small></strong></div><div className="gk-race-time"><span>{world.finishAt ? 'FINISH WINDOW' : 'RACE TIME'}</span><strong>{world.finishAt ? Math.ceil(world.remaining) : time(world.time)}</strong></div></div>
         <div className="gk-leaderboard">{front.map(p => <div key={p.id} className={p.id === viewId ? 'is-self' : ''}><b>{order.indexOf(p) + 1}</b><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span>{p.name}</span><small>{p.finish ? 'FIN' : p.id === viewId ? spectating ? 'WATCH' : 'YOU' : `${Math.max(0, Math.round((Math.min(length * world.laps, order[0].distance) - p.distance)))}m`}</small></div>)}</div>
@@ -264,7 +265,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
         {active && <div className="gk-drive-feedback"><b>{me?.crash ? 'CRASH!' : world.lesson && me && !me.finish && quizProgress < QUIZ_END ? 'CHOOSE YOUR LANE' : me?.jump ? 'AIR TIME' : me?.boost ? 'BOOST!' : me && me.draft > .7 ? 'SLIPSTREAM' : me && me.charge > .6 ? 'RELEASE TO BOOST' : 'AUTO ACCEL'}</b><div className="gk-charge"><i style={{ width: `${(me?.charge || 0) / 2.4 * 100}%` }} /><span /><span /></div><small>DRIFT CHARGE</small></div>}
         {world.phase === 'lobby' && <div className="gk-overlay"><section className="gk-card gk-ready-card online-collection">
           <header className="online-collection-heading"><div><small>GRID / READY ROOM</small><h2>スターティンググリッド</h2></div><strong>参加者 {racers.filter(p => !p.cpu).length} / {MAX_RACERS}</strong></header>
-          <div className="online-collection-layout"><div className="online-collection-left"><div className="online-self-preview"><KartCanvas world={preview} selfId="preview" preview /></div><div className="gk-roster online-roster" data-allow-japanese="true">{racers.filter(p=>!p.cpu).map(p => <div key={p.id} data-self={p.id===self}><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span className="online-member-name">{p.name}</span>{p.spectator ? <small>WATCH</small> : p.id === self && <small>YOU</small>}</div>)}</div></div>
+          <div className="online-collection-layout"><div className="online-collection-left"><div className="online-self-preview"><KartCanvas world={preview} selfId="preview" preview quality={graphics.quality} /></div><div className="gk-roster online-roster" data-allow-japanese="true">{racers.filter(p=>!p.cpu).map(p => <div key={p.id} data-self={p.id===self}><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span className="online-member-name">{p.name}</span>{p.spectator ? <small>WATCH</small> : p.id === self && <small>YOU</small>}</div>)}</div></div>
           <aside className="online-collection-controls">{room.current?.code && <button className="gk-code" onClick={async () => { try { await navigator.clipboard.writeText(shareRoomCode(room.current!.code,room.current!.transport)); setCopied(true); } catch { setError('コードを選択してコピーしてください。'); } }}>{shareRoomCode(room.current.code,room.current.transport)}<small>{copied ? 'コピー済み' : 'コピー'}</small></button>}
           {invite && <div className="gk-invite"><input readOnly aria-label="招待リンク" value={invite} onFocus={e => e.target.select()} /><button onClick={copyInvitation}>{inviteCopied ? 'コピーしました' : '招待URLをコピー'}</button></div>}
           <details className="online-avatar-details" open={lobbyAvatarOpen} onToggle={e=>setLobbyAvatarOpen(e.currentTarget.open)}><summary>キャラクタークリエイト</summary><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /></details>

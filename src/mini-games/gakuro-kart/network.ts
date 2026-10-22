@@ -1,4 +1,5 @@
 import { RaceStartSync } from './startSync';
+import {KartConnectionHealth} from './performance';
 import {createHostRoomCode,roomAddress,type OnlineTransport} from '../../services/onlineTransport';
 import {type CustomCourse} from './track';
 import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
@@ -12,6 +13,11 @@ import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Ro
 import {sessionResult} from '../../services/sessionResults';
 import {SessionEnd, sendFinalResult} from '../../services/sessionResultDisplay';
 export class KartRoom {
+  readonly connectionHealth=new KartConnectionHealth();
+  isSlowConnection(now=performance.now()){
+    const backlog=Math.max(this.dedicated?.bufferedAmount??0,...Array.from(this.channels.values(),c=>c.dataChannel?.bufferedAmount??0));
+    return this.connectionHealth.sample(now,backlog,true);
+  }
   private sessionEnd = new SessionEnd('kart', () => this.close(false));
   transport:OnlineTransport='host';
   selfId = 'local'; code = ''; host = false; world: Race | null = null;
@@ -23,6 +29,7 @@ export class KartRoom {
   private readySeed: number | null = null;
   private readyFrame = 0;
   private notify(world: Race) {
+    if(document.hidden)this.connectionHealth.resume(performance.now());else this.connectionHealth.packet(performance.now());
     this.update(world);
     if (world.phase !== 'countdown' || !world.paused || this.readySeed === world.seed) return;
     this.readySeed = world.seed;
@@ -43,6 +50,7 @@ export class KartRoom {
   private lastPacketAt = 0; private paused = false;
   private rates = new Map<string, { at: number; count: number }>();
   private pending = new Set<ReturnType<typeof setTimeout>>();
+  private abort=new AbortController();
   constructor(private update: (world: Race | null) => void, private status: (message: string) => void) {}
   private sendTo(c: DataConnection, data: object | ArrayBuffer) {
     if (!c.open) return;
@@ -95,17 +103,28 @@ export class KartRoom {
       if (!Array.isArray(iceServers)) throw new Error('ICE server configuration is invalid.');
       options.config = { iceServers };
     }
+    for(let attempt=0;;attempt++){
+    if(this.closed)throw new Error('接続を終了しました。');
     const peer = id ? new Peer(id, options) : new Peer(options); this.peer = peer;
-    await new Promise<void>((resolve, reject) => {
-      const t = setTimeout(() => { this.pending.delete(t); reject(new Error('接続がタイムアウトしました。')); }, 15000); this.pending.add(t);
-      const done = () => { clearTimeout(t); this.pending.delete(t); };
+    try{await new Promise<void>((resolve, reject) => {
+      const t = setTimeout(() => { done(); reject(new Error('接続がタイムアウトしました。')); }, 15000); this.pending.add(t);
+      const abort=()=>{done();reject(new Error('接続を終了しました。'));};
+      const done = () => { clearTimeout(t); this.pending.delete(t);this.abort.signal.removeEventListener('abort',abort); };
+      this.abort.signal.addEventListener('abort',abort,{once:true});
       peer.once('open', () => { done(); resolve(); });
       peer.once('error', e => { done(); reject(new Error(`Connection failed: ${e.type}`)); });
-    });
+    });}catch(error){
+      peer.destroy();
+      if(this.closed||attempt>=2||/invalid-id|unavailable-id|browser-incompatible|ssl-unavailable/.test(String(error)))throw error;
+      // Signalling can fail transiently on a crowded school network. Retry
+      // before admission, so a retry cannot create duplicate participants.
+      await new Promise(resolve=>setTimeout(resolve,750+Math.random()*750));continue;
+    }
     if (this.closed) { peer.destroy(); throw new Error('接続を終了しました。'); }
     peer.on('error', e => { if (!this.closed) this.status(`Network: ${e.type}`); });
     peer.on('disconnected', () => { if (!this.closed && !peer.destroyed) peer.reconnect(); });
     this.selfId = peer.id; return peer;
+    }
   }
   private reject(c: DataConnection, message: string) {
     const deliver = () => {
@@ -157,8 +176,10 @@ export class KartRoom {
     const peer = await this.open();
     const c = peer.connect(`gakuro-apex-v${PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);
     await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => { this.pending.delete(timeout); reject(new Error('部屋が見つからないか、接続できません。')); }, 15000); this.pending.add(timeout);
-      const done = () => { clearTimeout(timeout); this.pending.delete(timeout); };
+      const timeout = setTimeout(() => { done(); reject(new Error('部屋が見つからないか、接続できません。')); }, 15000); this.pending.add(timeout);
+      const abort=()=>{done();reject(new Error('接続を終了しました。'));};
+      const done = () => { clearTimeout(timeout); this.pending.delete(timeout);this.abort.signal.removeEventListener('abort',abort); };
+      this.abort.signal.addEventListener('abort',abort,{once:true});
       c.on('open', () => this.sendTo(c, { type: 'hello', version: PROTOCOL, name: name.slice(0, 16), hero, avatar }));
       c.on('data', raw => {
         if (this.closed) return;
@@ -247,7 +268,7 @@ export class KartRoom {
   close(results = true) {
     if (this.closed) return;
     if (results && this.host && this.code && this.sessionEnd.end(this.world ? sessionResult('kart', this.world) : null, this.dedicated, packet => sendFinalResult(this.channels.values(), packet))) return;
-    if (this.closed) return; this.closed = true;
+    if (this.closed) return; this.closed = true;this.abort.abort();
     this.dedicated?.send({type:'leave'});
     this.dedicated?.close();
     cancelAnimationFrame(this.readyFrame);

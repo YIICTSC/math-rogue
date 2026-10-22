@@ -72,7 +72,7 @@ try {
       const host = new KartRoom(w => states[0] = w, () => {}); host.transport = 'server'; rooms.push(host);
       await host.create('Host', 0, 0);
       const guest = new KartRoom(w => states[1] = w, () => {}); guest.transport = 'server'; rooms.push(guest);
-      await guest.join(host.code, 'Guest', 1);
+      await guest.join(host.code.replace(/[0-9]/g,(digit,index)=>index%2?digit:String.fromCharCode(digit.charCodeAt(0)+0xfee0)), 'Guest', 1);
       const id = guest.selfId, code = host.code;
       const departed = new KartRoom(() => {}, () => {}); departed.transport = 'server'; rooms.push(departed);
       await departed.join(code, 'Departed', 2);

@@ -22,7 +22,7 @@ try{
   await name.fill('');await code.fill('501234');assert(await submit.isDisabled());
   await name.fill('Guest');await code.fill('123');assert(await submit.isDisabled());
   await code.fill('s-abc234');assert.equal(await code.inputValue(),'S-ABC234');assert(await submit.isEnabled());
-  await code.fill('501234');await code.press('Enter');
+  await code.fill('５０1２３４');assert.equal(await code.inputValue(),'501234');await code.press('Enter');
   await form.getByRole('alert').waitFor();assert.deepEqual(await page.evaluate(()=>window.joins),[{code:'501234',name:'Guest'}]);
   assert.equal(await code.inputValue(),'501234');assert.equal(await name.inputValue(),'Guest');
   for(const viewport of [{width:390,height:844},{width:844,height:390}]){

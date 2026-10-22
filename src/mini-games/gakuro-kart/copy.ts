@@ -1,4 +1,8 @@
 const copy: [string, string, string][] = [
+ ["画質：最軽量","Graphics: Minimal","がしつ：さいけいりょう"],
+ ["画質：最軽量（自動）","Graphics: Minimal (Auto)","がしつ：さいけいりょう（じどう）"],
+ ["GPの画質を切り替える","Change GP graphics quality","GPのがしつをきりかえる"],
+ ["このオンライン通信では、自動で最軽量にしています。","Minimal graphics automatically enabled for this online session.","このオンラインつうしんでは、じどうでさいけいりょうにします。"],
  ["拡大・縮小","Zoom in / out","かくだい・しゅくしょう"],
  ["編集する点","Point to edit","へんしゅうするてん"],
  ["配置物を選ぶ","Select object","はいちぶつをえらぶ"],
