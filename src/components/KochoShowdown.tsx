@@ -1945,9 +1945,10 @@ const KochoShowdown: React.FC<{
             activeActionCardNameRef.current = card.name;
             setActiveActionCardName(card.name);
             const voiceClip = kochoSkillVoice(currentState.heroId, card.name);
-            const skillVoice = voiceClip && !debugPreview && !isUiPreview && voiceMountedRef.current
-                ? audioService.playKochoVoice(currentState.heroId, voiceClip, 3)
-                : Promise.resolve(false);
+            // Voice playback follows the action without extending its animation lock.
+            if (voiceClip && !debugPreview && !isUiPreview && voiceMountedRef.current) {
+                void audioService.playKochoVoice(currentState.heroId, voiceClip, 3);
+            }
             addLog(`${card.name}！`);
             
             const p = currentState.player;
@@ -2297,7 +2298,6 @@ const KochoShowdown: React.FC<{
                 await new Promise(r => setTimeout(r, 90));
             }
             await new Promise(r => setTimeout(r, 400));
-            await skillVoice;
             if (!voiceMountedRef.current) return;
             activeActionCardNameRef.current = null;
             setActiveActionCardName(null);

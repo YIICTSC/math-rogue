@@ -60,22 +60,19 @@ export async function testKochoVoices(page,base) {
  await page.waitForFunction(()=>__voiceCalls.some(v=>v.clip==='action-victory'));
  await arena();await page.evaluate(()=>__kocho.setState({...__kocho.state,status:'GAME_OVER'}));
  await page.waitForFunction(()=>__voiceCalls.some(v=>v.clip==='action-defeat'));
- // A queued follow-up must wait for the preceding call to finish.
+ // Even stalled voice playback must not delay the combo or returning control.
  await arena();await page.evaluate(()=>{
   __holdVoice=true;const s=__kocho.state;
   s.queue=['定規スラッシュ','コンパス突き'].map((name,i)=>({...__kocho.cards.find(c=>c.name===name),id:`queued-${i}`,currentCooldown:0,usedSlots:0}));
   __kocho.setState(s);void __kocho.execute();
  });
  await page.waitForFunction(()=>__voicePending.length===1);
- await page.waitForTimeout(600);
- assert.equal(await page.evaluate(()=>__voiceCalls.filter(v=>v.clip.startsWith('skill-')).length),1);
  const checkpoint=await page.evaluate(()=>JSON.parse(localStorage.pixel_spire_kocho_state_v1));
  assert.equal(checkpoint.status,'PLAYING');assert.equal(checkpoint.queue.length,2);assert.equal(checkpoint.enemies[0].hp,1000);
- await page.evaluate(()=>__voicePending.shift()(true));
- await page.waitForFunction(()=>__voicePending.length===1);
- assert.equal(await page.evaluate(()=>__voiceCalls.filter(v=>v.clip.startsWith('skill-')).length),2);
- await page.evaluate(()=>{__holdVoice=false;__voicePending.shift()(true);});
- await page.waitForFunction(()=>__kocho.state.status!=='EXECUTING');
+ await page.waitForFunction(()=>__kocho.state.status!=='EXECUTING',{},{timeout:2500});
+ const progress=await page.evaluate(()=>({calls:__voiceCalls.filter(v=>v.clip.startsWith('skill-')).length,pending:__voicePending.length,hp:__kocho.state.enemies[0].hp}));
+ assert.equal(progress.calls,2);assert.equal(progress.pending,2);assert.ok(progress.hp<1000,'Combo must apply damage while voices remain unresolved');
+ await page.evaluate(()=>{__holdVoice=false;__voicePending.splice(0).forEach(resolve=>resolve(true));});
  // Reload for real AudioService priority, mute and cancellation checks.
  await page.evaluate(()=>localStorage.clear());
  await page.goto(base+'?voice=1');await page.waitForFunction(()=>Boolean(window.__kocho));
@@ -113,5 +110,5 @@ export async function testKochoVoices(page,base) {
  });
  assert.equal(playback.played,true);assert.ok(playback.elapsed>=playback.expected*.75&&playback.elapsed<playback.expected+2000,JSON.stringify(playback));
  await page.evaluate(async()=>{const {audioService:a}=await import('/src/services/audioService.ts');a.stopKochoVoices();a.setVoiceVolume(0);});
- console.log('Kocho voices: 391 skill mappings + 33 actions; controller, combo pacing, priority, cancellation, mute and real OGG playback passed');
+ console.log('Kocho voices: 391 skill mappings + 33 actions; controller, nonblocking combo pacing, priority, cancellation, mute and real OGG playback passed');
 }
