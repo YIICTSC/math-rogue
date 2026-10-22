@@ -141,7 +141,7 @@ export function endArcade(s:ArcadeState,p:ArcadePlayer,distance:number) {
       if(e.kind==='coin'){s.stats.coins++;reward(s,10,2);}
       else if(e.kind==='star'){s.stats.stars++;reward(s,250,18);announce(s,'star');}
       else if(e.kind==='pad'){p.vy=-17;p.isJumping=true;p.jumpCount=0;reward(s,40,6);announce(s,'bounce');}
-      else if(e.kind==='boost'){s.boost=180;reward(s,40,6);announce(s,'boost');}
+      else if(e.kind==='boost'){s.boost=5*60;reward(s,40,6);announce(s,'boost');}
       else if(e.kind==='charge'){p.dashCooldown=0;announce(s,'charge');}
       else if(e.kind==='gravity'||e.kind==='wave'||e.kind==='rocket'){
         s.vehicle=e.kind;s.vehicleTime=540;s.gravity=1;s.changedVehicle=true;p.y=Math.min(p.y,floorAt(s.seed,distance+p.x)-30,275);p.vy=-4;p.isFalling=false;p.isJumping=true;p.jumpCount=0;announce(s,e.kind);

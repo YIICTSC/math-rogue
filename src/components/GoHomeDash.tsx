@@ -31,6 +31,7 @@ const PLAYER_DEFAULT_X = 120;
 const MAX_PARTICLES = 60; 
 const MIN_OBSTACLE_GAP = 500; 
 const PLAYER_DASH_FRAME_COUNT = 4;
+const DASH_DURATION_FRAMES = 5 * 60;
 const GO_HOME_DASH_ENEMY_SPRITE_SRC = assetUrl('sprites/go-home-dash/art/enemies.webp');
 const GO_HOME_DASH_PROJECTILE_SPRITE_SRC = assetUrl('sprites/go-home-dash-projectiles.webp');
 
@@ -516,8 +517,8 @@ const GoHomeDash: React.FC<{
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
         if (pausedRef.current || p.dashCooldown > 0 || p.isFalling) return;
-        p.dashFrames = 90; p.dashCooldown = 240;
-        p.invulFrame = Math.max(p.invulFrame, 94);
+        p.dashFrames = DASH_DURATION_FRAMES; p.dashCooldown = DASH_DURATION_FRAMES + 150;
+        p.invulFrame = Math.max(p.invulFrame, DASH_DURATION_FRAMES + 4);
         if (p.isJumping) p.vy = Math.min(p.vy, -2);
         voice('dash'); audioService.playSound('buff'); addVfxRing(p.x, p.y - 30, '#83f3eb');
         dashArcade(arcadeRef.current,p);

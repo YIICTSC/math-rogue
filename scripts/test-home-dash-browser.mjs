@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import sharp from 'sharp';
 import { createServer } from 'vite';
 import { chromium } from 'playwright';
 const output='tmp/home-dash-qa';await fs.mkdir(output,{recursive:true});
@@ -10,7 +11,7 @@ try{
   transform(code,id){if(!id.endsWith('/src/components/GoHomeDash.tsx'))return;return code.replace('    const getSubjectIcon =',`    Object.assign(window, {__dash: {
       get viewport(){return viewportRef.current;}, get slideImage(){return playerSlideRef.current?.src;}, get art(){return artImagesRef.current;}, get arcade(){return arcadeRef.current;}, pause:togglePause, slide:triggerSlide, init:initGame, setMode:selectRunMode, get paused(){return pausedRef.current;}, get routeArt(){return routeArtRef.current;}, get player(){return {...playerRef.current};}, get state(){return gameStateRef.current;}, get hero(){return heroRef.current;}, get seed(){return routeSeedRef.current;}, get distance(){return distanceRef.current;}, get hp(){return hpRef.current;}, get obstacles(){return obstaclesRef.current;}, get frame(){return frameCount.current;}, get enemyShots(){return enemyProjectilesRef.current;},
       step(n=1){flushSync(()=>{for(let i=0;i<n;i++)updateLogic();});const c=canvasRef.current?.getContext('2d');if(c)draw(c);},
-      arrange(seed,distance,overrides={},obs=[]){flushSync(()=>{pausedRef.current=false;setPaused(false);arcadeRef.current=createArcade(seed,runModeRef.current,distance);arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=distance;expRef.current=0;obstaclesRef.current=obs;enemyProjectilesRef.current=[];projectilesRef.current=[];playerRef.current={...playerRef.current,x:120,y:floorAt(seed,distance+120),vy:0,isJumping:false,isFalling:false,jumpCount:0,flying:false,invulFrame:0,dashFrames:0,dashCooldown:0,...overrides};setRoute(routeAt(seed,distance+120).id);setFlight(false);setDashReady(true);gameStateRef.current='PLAYING';setGameState('PLAYING');});},
+      arrange(seed,distance,overrides={},obs=[]){flushSync(()=>{pausedRef.current=false;setPaused(false);arcadeRef.current=createArcade(seed,runModeRef.current,distance);arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=distance;expRef.current=0;obstaclesRef.current=obs;enemyProjectilesRef.current=[];projectilesRef.current=[];playerRef.current={...playerRef.current,x:120,y:floorAt(seed,distance+120),vy:0,isJumping:false,isFalling:false,jumpCount:0,flying:false,invulFrame:0,dashFrames:0,dashCooldown:0,...overrides};setTravelled(Math.floor(distance/10));setArcadeView({...arcadeRef.current});setRoute(routeAt(seed,distance+120).id);setFlight(false);setDashReady(true);gameStateRef.current='PLAYING';setGameState('PLAYING');});},
       sweep(n){const seen=new Set();let max=0;flushSync(()=>{for(let i=0;i<n;i++){updateLogic();for(const e of arcadeRef.current.entities)seen.add(e.kind);max=Math.max(max,arcadeRef.current.entities.length);}});return {seen:[...seen],max,state:gameStateRef.current};},
       fly(n){flushSync(()=>{for(let i=0;i<n;i++){
         const p=playerRef.current, gate=obstaclesRef.current.find(o=>o.type==='FLIGHT_GATE'&&o.x>p.x-60);
@@ -28,6 +29,7 @@ try{
  browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
  const context=await browser.newContext({viewport:{width:1280,height:800},hasTouch:true});
  await context.addInitScript(()=>{const buttons=Array.from({length:17},()=>({pressed:false,touched:false,value:0}));Object.assign(window,{__pad:{id:'QA Controller',index:0,connected:true,mapping:'standard',timestamp:0,axes:[0,0,0,0],buttons}});navigator.getGamepads=()=>[window.__pad];});
+ if(process.env.DASH_GUIDE_CAPTURE)await context.addInitScript(()=>localStorage.setItem('home-dash-guide-v1','seen'));
  const page=await context.newPage(),errors=[];page.setDefaultTimeout(90000);page.on('pageerror',e=>errors.push(e.message));
  const base=`http://127.0.0.1:${server.httpServer.address().port}/dash-test`;
  await page.goto(base);await page.locator('.dash-lobby').waitFor();
@@ -35,13 +37,71 @@ try{
  await page.getByRole('tab',{name:'マジック編'}).click();assert.equal(await page.locator('.dash-hero:not(:disabled)').count(),4);
  await page.goto(base+'?unlocked');await page.locator('.dash-lobby').waitFor();
  await page.evaluate(async()=>{const {DASH_HERO_ART}=await import('/src/mini-games/go-home-dash/heroes.ts');await Promise.all(Object.keys(DASH_HERO_ART).map(async id=>{const image=new Image();image.src='/sprites/go-home-dash/heroes/'+id+'.webp';await image.decode();if(image.naturalWidth!==512||image.naturalHeight!==320)throw Error('Bad hero atlas '+id);}));});
+ assert.equal(await page.locator('.dash-roster').count(),0);
+ assert.ok(await page.locator('.dash-title-actions').evaluate(el=>el.getBoundingClientRect().right<innerWidth*.5));
  await page.screenshot({path:`${output}/title-desktop.png`});
  await page.getByRole('button',{name:'主人公を選ぶ'}).click();assert.equal(await page.locator('.dash-hero:not(:disabled)').count(),9);
  await page.getByRole('tab',{name:'マジック編'}).click();assert.equal(await page.locator('.dash-hero:not(:disabled)').count(),17);
- await page.locator('[data-hero="magic-akari"]').click();await page.getByRole('button',{name:'START DASH'}).click();
+ await page.locator('[data-hero="magic-akari"]').click();
+ for(const size of [{width:1280,height:800},{width:390,height:844},{width:844,height:390}]){await page.setViewportSize(size);await page.screenshot({path:`${output}/runner-selection-${size.width}x${size.height}.png`});}
+ await page.setViewportSize({width:1280,height:800});
+ if(process.env.DASH_LOBBY_CAPTURE_ONLY){await browser.close();await server.close();process.exit(0);}
+ await page.getByRole('button',{name:'START DASH'}).click();
+ if(!process.env.DASH_GUIDE_CAPTURE){
+  const dialog=page.getByRole('dialog');await dialog.waitFor();assert.equal(await page.evaluate(()=>__dash.state),'START');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('home-dash-guide-v1')),null);
+  await page.keyboard.press('Space');assert.equal(await page.evaluate(()=>__dash.state),'START');
+  const topics=dialog.locator('nav button');assert.equal(await topics.count(),16);
+  for(let i=0;i<16;i++){await topics.nth(i).click();await dialog.locator('article img').evaluate(async img=>{await img.decode();if(img.naturalWidth!==960)throw Error('Missing guide screenshot');});assert.equal(await topics.nth(i).getAttribute('aria-current'),'step');}
+  await topics.first().click();
+  for(const size of [{width:1280,height:800},{width:390,height:844},{width:844,height:390}]){
+   await page.setViewportSize(size);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+   const bounds=await dialog.locator('footer').boundingBox();assert.ok(bounds.y>=0&&bounds.y+bounds.height<=size.height,JSON.stringify(bounds));
+   await page.screenshot({path:`${output}/guide-${size.width}x${size.height}.png`});
+  }
+  await dialog.locator('nav button').first().click();await dialog.locator('.dash-guide-shot').click();assert.equal(await dialog.locator('.dash-guide-shot').getAttribute('aria-expanded'),'true');await page.keyboard.press('Escape');assert.equal(await dialog.count(),1);assert.equal(await dialog.locator('.dash-guide-shot').getAttribute('aria-expanded'),'false');
+  await dialog.locator('nav button').last().click();await page.setViewportSize({width:1280,height:800});
+
+  await dialog.getByRole('button',{name:'走り出す'}).click();assert.equal(await page.evaluate(()=>localStorage.getItem('home-dash-guide-v1')),'seen');
+ }
  await page.waitForFunction(()=>window.__dash?.hero==='magic-akari');
  await page.waitForFunction(()=>window.__dash?.routeArt.school?.naturalWidth===1280);
  await page.clock.install({time:new Date('2026-10-21T00:00:00Z')});await page.clock.pauseAt(new Date('2026-10-21T00:00:01Z'));
+ if(process.env.DASH_GUIDE_CAPTURE){
+  const guideDir='public/sprites/go-home-dash/guide';await fs.mkdir(guideDir,{recursive:true});
+  await page.waitForFunction(()=>__dash.art.items?.complete&&__dash.art.hazards?.complete&&__dash.slideImage);
+  await page.evaluate(()=>{window.__guideRandom=Math.random;});
+  const captures=[];
+  for(const id of ['jump','dash','slide','routes','flight','collect','powers','launch','gravity','wave','rocket','rail','hazards','boss','learning','modes'].filter(id=>!process.env.DASH_GUIDE_CAPTURE_PAGES||process.env.DASH_GUIDE_CAPTURE_PAGES.split(',').includes(id))){
+   await page.evaluate(async id=>{
+    const m=await import('/src/mini-games/go-home-dash/arcade.ts');const routes=await import('/src/mini-games/go-home-dash/routes.ts');
+    const sky=Array.from({length:16},(_,i)=>30000*i+1800).find(d=>routes.routeAt(42,d+120).flight);
+    const distance=id==='flight'?sky:id==='routes'?29700:0;
+    __dash.arrange(42,distance,{invulFrame:0});Math.random=id==='learning'?window.__guideRandom:()=>.999;
+    const s=__dash.arcade;
+    const add=(kind,d,lift=34,w=32,h=32,air=false)=>m.addEntity(__dash.arcade,kind,distance+d,lift,w,h,air);
+    if(id==='jump'){__dash.arrange(42,0,{y:220,vy:-3,isJumping:true});add('coin',220,120);add('coin',270,160);add('coin',320,170);add('spike',420,0,100,32);}
+    if(id==='dash'){__dash.arrange(42,0,{dashFrames:300,dashCooldown:450,invulFrame:304});add('wall',410,86,65,86);add('charge',300);add('boost',520,0,90,10);}
+    if(id==='slide'){s.slide=30;add('tunnel',370,90,220,54);for(let i=0;i<6;i++)add('coin',290+i*40,18);}
+    if(id==='routes'){__dash.obstacles.push({id:'guide-stair',type:'HIGH_STEPS',x:430,y:300,width:190,height:85,vy:0,speedMult:1});}
+    if(id==='flight'){__dash.obstacles.push({id:'guide-gate',type:'FLIGHT_GATE',x:400,y:175,width:72,height:340,vy:0,speedMult:1});}
+    if(id==='collect'){s.combo=18;s.comboTime=180;s.fever=240;s.energy=100;for(let i=0;i<9;i++)add('coin',210+i*42,40+Math.sin(i/8*Math.PI)*90);add('star',610,110);}
+    if(id==='powers'){for(const [i,kind] of ['magnet','shield','double','sneakers','board','lowGravity'].entries())add(kind,230+i*90,110,34,34);}
+    if(id==='launch'){add('orb',280,130);add('pad',400,0,70,12);__dash.obstacles.push({id:'guide-spring',type:'SPRING',x:530,y:315,width:55,height:30,vy:0,speedMult:1},{id:'guide-lift',type:'ELEVATOR',x:680,y:235,width:130,height:18,vy:0,speedMult:1,phase:0});}
+    if(['gravity','wave','rocket'].includes(id)){s.vehicle=id;s.vehicleTime=480;s.gravity=1;add(id,310,130);for(let i=0;i<4;i++)add('coin',390+i*60,140+i*12,18,18,true);add('airGate',700,170,65,140,true);}
+    if(id==='rail'){add('rail',390,115,360,12);for(let i=0;i<7;i++)add('coin',250+i*45,150);}
+    if(id==='hazards'){add('spike',260,0,75,32);add('saw',380,110,50,50);add('laser',520,130,150,14);add('missile',680,210,48,22,true);}
+    if(id==='boss'){s.boss={hp:3,life:780,shot:90};add('charge',270);add('missile',470,150,48,22,true);}
+    __dash.step(10);if(id==='learning')__dash.challenge();if(id==='modes')__dash.pause();
+   },id);
+   await page.clock.runFor(1);
+   if(id==='learning'){await page.waitForFunction(()=>__dash.state==='CHALLENGE');await page.locator('[data-gamepad-question-screen]').waitFor();}
+   const png=await page.screenshot();const file=`${guideDir}/${id}.webp`;await sharp(png).resize(960,600).webp({quality:86}).toFile(file);captures.push(file);
+  }
+  console.log(`Captured ${captures.length} actual gameplay screenshots for the first-run guide.`);
+  await page.evaluate(()=>{__dash.init();__dash.arrange(42,0);});
+  if(process.env.DASH_GUIDE_CAPTURE_ONLY){await browser.close();await server.close();process.exit(0);}
+ }
  // The opening street must load and draw the same ImageGen plate as later routes.
  await page.evaluate(async()=>{const image=new Image();image.src='/sprites/go-home-dash/routes/school.webp';await image.decode();if(image.naturalWidth!==1280||image.naturalHeight!==640)throw Error('Bad opening background');});
  await page.evaluate(()=>{Math.random=()=>.999;__dash.arrange(42,0);__dash.step(1);});
@@ -55,9 +115,10 @@ try{
  await page.keyboard.down('Space');const start=await page.evaluate(()=>__dash.player);assert.equal(start.jumpCount,1);assert.equal(start.isPressing,true);
  await page.evaluate(()=>__dash.step(8));const high=await page.evaluate(()=>__dash.player);assert.ok(high.y<300);
  await page.keyboard.up('Space');assert.equal(await page.evaluate(()=>__dash.player.isPressing),false);
- await page.keyboard.press('Shift');assert.ok(await page.evaluate(()=>__dash.player.dashFrames>=89));
- await page.evaluate(()=>__dash.step(60));assert.ok(await page.evaluate(()=>__dash.player.dashFrames>0));assert.ok(await page.evaluate(()=>__dash.player.invulFrame>0));
- await page.evaluate(()=>__dash.step(250));assert.equal(await page.evaluate(()=>__dash.player.dashCooldown),0);
+ await page.keyboard.press('Shift');assert.equal(await page.evaluate(()=>__dash.player.dashFrames),300);
+ await page.evaluate(()=>__dash.step(299));assert.equal(await page.evaluate(()=>__dash.player.dashFrames),1);assert.ok(await page.evaluate(()=>__dash.player.invulFrame)>0);
+ await page.evaluate(()=>__dash.step());assert.equal(await page.evaluate(()=>__dash.player.dashFrames),0);
+ await page.evaluate(()=>__dash.step(150));assert.equal(await page.evaluate(()=>__dash.player.dashCooldown),0);
  // A-button hold and X dash use the real controller navigation hook.
  await page.evaluate(()=>{__dash.arrange(42,0);__pad.buttons[0]={pressed:true,touched:true,value:1};__pad.buttons[2]={pressed:true,touched:true,value:1};});
  await page.clock.runFor(40);assert.equal(await page.evaluate(()=>__dash.player.isPressing),true);assert.ok(await page.evaluate(()=>__dash.player.dashFrames)>0);
@@ -153,7 +214,7 @@ try{
  await page.evaluate(()=>{__dash.damage();__dash.damage();__dash.damage();__dash.damage();__dash.damage();});assert.equal(await page.evaluate(()=>__dash.state),'GAME_OVER');await page.clock.runFor(1);
  assert.equal(await page.evaluate(async()=> (await import('/src/services/storageService.ts')).storageService.getGoHomeScores().length),savedBefore+1);
  await page.getByRole('button',{name:'TRY AGAIN'}).click();assert.notEqual(await page.evaluate(()=>__dash.seed),previousSeed);assert.equal(await page.evaluate(()=>__dash.hp),3);
- await page.evaluate(()=>__dash.returnToTitle());await page.getByRole('button',{name:'START DASH'}).click();await page.evaluate(()=>{__dash.damage();__dash.damage();__dash.damage();});
+ await page.evaluate(()=>__dash.returnToTitle());await page.getByRole('button',{name:'主人公を選ぶ'}).click();await page.getByRole('button',{name:'START DASH'}).click();await page.evaluate(()=>{__dash.damage();__dash.damage();__dash.damage();});
 
  await page.getByRole('button',{name:'主人公を選び直す'}).click();await page.locator('.dash-lobby').waitFor();
  await page.screenshot({path:`${output}/title-portrait.png`});
@@ -161,7 +222,7 @@ try{
  // Arcade modules use real runtime state, input and collision paths.
  await page.setViewportSize({width:1280,height:800});
  await page.goto(base+'?unlocked');await page.locator('.dash-lobby').waitFor();
- await page.getByRole('button',{name:'START DASH'}).click();await page.waitForFunction(()=>__dash?.state==='PLAYING');
+ await page.getByRole('button',{name:'主人公を選ぶ'}).click();await page.getByRole('button',{name:'START DASH'}).click();await page.waitForFunction(()=>__dash?.state==='PLAYING');
  const arcadeRules=await page.evaluate(async()=>{
   const m=await import('/src/mini-games/go-home-dash/arcade.ts');
   for(const pattern of m.PATTERNS){const s=m.createArcade(42);m.spawnPattern(s,pattern,700);if(!s.entities.length&&!s.boss)throw Error('Empty pattern '+pattern);}
@@ -180,7 +241,7 @@ try{
  for(const kind of ['shield','board']){await reset();await pickup(kind);const hp=await page.evaluate(()=>__dash.hp);await page.evaluate(()=>__dash.damage());assert.equal(await page.evaluate(()=>__dash.hp),hp);assert.equal(await page.evaluate(kind=>__dash.arcade[kind],kind),0);}
  await reset();await pickup('double');assert.ok(await page.evaluate(async()=> (await import('/src/mini-games/go-home-dash/arcade.ts')).multiplier(__dash.arcade))>=2);
  await pickup('sneakers');await page.keyboard.down('Space');assert.ok(await page.evaluate(()=>__dash.player.vy)<-17);await page.keyboard.up('Space');
- await reset();await pickup('boost',0);const beforeBoost=await page.evaluate(()=>__dash.distance);await page.evaluate(()=>__dash.step(10));assert.ok(await page.evaluate(()=>__dash.distance)-beforeBoost>50);
+ await reset();await pickup('boost',0);assert.equal(await page.evaluate(()=>__dash.arcade.boost),300);const beforeBoost=await page.evaluate(()=>__dash.distance);await page.evaluate(()=>__dash.step(10));assert.ok(await page.evaluate(()=>__dash.distance)-beforeBoost>50);
  await reset();await page.keyboard.down('Space');await page.evaluate(()=>__dash.step(20));const normalHeight=await page.evaluate(()=>__dash.player.y);await page.keyboard.up('Space');
  await reset();await pickup('lowGravity');await page.keyboard.down('Space');await page.evaluate(()=>__dash.step(20));assert.ok(await page.evaluate(()=>__dash.player.y)<normalHeight-25);await page.keyboard.up('Space');
  await reset({y:245,isJumping:true,jumpCount:1,vy:2});await page.evaluate(async()=>{const m=await import('/src/mini-games/go-home-dash/arcade.ts');m.addEntity(__dash.arcade,'orb',120,125);});
@@ -278,6 +339,11 @@ try{
  console.log('Arcade: collection, timers, combo/Fever, orbs, slide/dive, hazards, vehicles, rail, boss, missions, input, pause, daily seed and practice persistence passed.',arcadeRules);
  await page.goto(base+'?unlocked&lang=ENGLISH&compact');await page.locator('.dash-lobby').waitFor();
  assert.ok(!(await page.locator('.dash-lobby').innerText()).match(/[\u3040-\u30ff\u4e00-\u9fff]/));
+ await page.getByRole('button',{name:'How to play · Action guide'}).click();
+ assert.ok(!(await page.getByRole('dialog').innerText()).match(/[\u3040-\u30ff\u4e00-\u9fff]/));
+ await page.keyboard.press('Tab');assert.ok(await page.getByRole('dialog').evaluate(el=>el.contains(document.activeElement)));
+ await page.keyboard.press('Escape');await page.locator('.dash-title-screen').waitFor();assert.equal(await page.evaluate(()=>__dash.state),'START');
+ console.log('Onboarding: first-play gate, 16 screenshots, responsive dialog, zoom, saved dismissal and English replay passed.');
  await page.setViewportSize({width:844,height:390});await page.screenshot({path:`${output}/title-landscape.png`});
  assert.deepEqual(errors,[]);console.log('Home Dash: story unlocks, route fairness/variety, jumping, dash, flight, spring/lift, two-finger touch, focus loss, learning/retry and responsive UI passed.',rules);
 }finally{await browser?.close();await server?.close();}
