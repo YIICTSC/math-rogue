@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "SHIZUKU",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/characters/heroine-02-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for SHIZUKU. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Shizuku wrapped her moon mirror and looked straight at the sea. The horizon was wider than it seemed through the glass. Middle scene: She added a tide-pool photograph to her family report. A day off chosen freely was an important part of her life, too. Bottom scene: She reserved a beach day on next year’s schedule. What they would do could wait until they met.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-5e28cc19-54dc-406d-aa70-6ad91c037bcd.png"
+}

@@ -22,6 +22,8 @@ import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 import { getDebugMagicEndingGalleryEntries, type MagicEndingGalleryEntry } from '../services/magicEndingService';
 import { getThemedEndingCharacterName, getThemedEndingToneLabel, type ThemedEndingGalleryEntry } from '../data/themedEndingSequences';
 import ThemedEndingSequenceScreen from './ThemedEndingSequenceScreen';
+import MagicVacationCommonEndingSequenceScreen from './MagicVacationCommonEndingSequenceScreen';
+import { canPlaySummerEndingVoice } from '../data/summerEndingVoices';
 import MiniGameCompendium from './MiniGameCompendium';
 
 interface CompendiumScreenProps {
@@ -618,11 +620,12 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
                                         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
-                                            <span className={`rounded px-2 py-1 text-[10px] font-black ${ending.kind === 'friendship' ? 'bg-emerald-400 text-slate-950' : ending.kind === 'double-romance' ? 'bg-rose-500 text-white' : 'bg-pink-300 text-slate-950'}`}>
+                                            <span className={`rounded px-2 py-1 text-[10px] font-black ${ending.kind === 'friendship' ? 'bg-emerald-400 text-slate-950' : ending.kind === 'epilogue' ? 'bg-sky-300 text-slate-950' : ending.kind === 'double-romance' ? 'bg-rose-500 text-white' : 'bg-pink-300 text-slate-950'}`}>
                                                 {trans(ending.rankLabel, languageMode)}
                                             </span>
                                             <span className="flex items-center rounded bg-black/70 px-2 py-1 text-[10px] font-bold text-white">
-                                                <Volume2 size={12} className="mr-1" /> PLAY
+                                                {ending.appearanceMode === 'VACATION' && (ending.kind === 'friendship' || ending.kind === 'epilogue')
+                                                    ? <BookOpen size={12} className="mr-1" /> : <Volume2 size={12} className="mr-1" />} PLAY
                                             </span>
                                         </div>
                                     </div>
@@ -732,7 +735,19 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     onClose={() => setFullscreenArtCard(null)}
                 />
             )}
-            {selectedEnding && (
+            {selectedEnding?.storyPages && (
+                <div className="fixed inset-0 z-[75]">
+                    <MagicVacationCommonEndingSequenceScreen
+                        key={selectedEnding.id}
+                        heroId={selectedEnding.heroId}
+                        pagesOverride={selectedEnding.storyPages}
+                        languageMode={languageMode}
+                        onComplete={() => setSelectedEnding(null)}
+                    />
+                    <button data-gamepad-back aria-label={trans('閉じる', languageMode)} onClick={() => setSelectedEnding(null)} className="absolute right-3 top-3 z-20 rounded-full border border-white/20 bg-black/70 p-2.5 text-white/90 hover:text-white"><X size={24} /></button>
+                </div>
+            )}
+            {selectedEnding && !selectedEnding.storyPages && (
                 <MagicEndingReplayModal
                     ending={selectedEnding}
                     languageMode={languageMode}
@@ -824,7 +839,7 @@ const MagicEndingReplayModal: React.FC<{ ending: MagicEndingGalleryEntry; langua
         audioService.stopMagicEventVoices();
         if (lineIndex < 0) return;
         const voiceLine = ending.voiceLines?.[lineIndex];
-        if (voiceLine) {
+        if (voiceLine && canPlaySummerEndingVoice(voiceLine.lineId)) {
             void audioService.playMagicEventVoice(voiceLine.heroId, voiceLine.lineId);
         }
         return () => audioService.stopMagicEventVoices();

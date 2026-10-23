@@ -1,0 +1,12 @@
+{
+  "theme": "magic",
+  "heroId": "MIRAI_HIYORI",
+  "kind": "friendship",
+  "references": [
+    "public/sprites/magic/characters/heroine-08-before.webp",
+    "public/sprites/magic/characters/heroine-03-before.webp"
+  ],
+  "prompt": "Use case: illustration-story. Asset type: one landscape friendship CG, 1536x1024. Original wholesome school-adventure RPG Learning Rogue, summer friendship for MIRAI_HIYORI. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Story moment: Off the beach stage, Mirai breathed beside Hiyori. Before accepting flowers, she could tell a friend she was tired. Emotional direction: Mirai: “I might not have another smile in me today. Will you stay anyway?” Hiyori: “Of course. The sea is beautiful even when we watch in silence.” Show concrete action and warm platonic friendship, no romance, no flirting. Polished painted anime RPG CG, rich picturesque summer seashore setting, beautiful natural lighting, distinct composition appropriate to this specific moment. Both people must be visible, with natural hands and recognizable faces; not a collage of the references. Only these two identifiable characters. Text is handled in the game UI: NO writing, speech balloons, captions, letters, numbers, UI, watermarks, frames or checkerboard. Any notebook pages are blank. Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-d7664fa2-2d8d-4f8c-959b-481c473571bd.png"
+}

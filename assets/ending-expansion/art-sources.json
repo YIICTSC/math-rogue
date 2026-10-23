@@ -1,0 +1,38 @@
+[
+  {
+    "theme": "high-school",
+    "heroId": "WARRIOR",
+    "kind": "true",
+    "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-26665beb-7d50-4ab8-b558-0351850c3d4e.png",
+    "reference": "public/sprites/high-school/vacation-characters/0.webp",
+    "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue, protagonist warrior, summer true ending after destroying the Black Ledger Bureau's control. Input Image 1: identity and vacation-costume reference ONLY. Preserve this same character, face, hair color, gender and vacation outfit in ALL THREE scenes. Do not copy reference transparency/checkerboard. Produce one tall illustration divided into THREE EXACTLY EQUAL SQUARE SCENES stacked top to bottom, clean edge-to-edge scenes with NO frames, NO gaps, NO panel lettering; target 1024x3072. Each square is a complete separate cinematic CG, character fully readable and within that square. Top scene: on a moonlit seaside pier he opens a broken black ledger, the oppressive geometric cage above the sea dissolving into harmless light. Middle scene: at a sunrise beach he lays the now-blank ledger on sand and looks at his own free footprints. Bottom scene: relaxed and hopeful he returns toward a summer beach house with a closed notebook under his arm, the open sea behind him. Style: polished anime RPG painted CG, elegant detailed environments, consistent character, nonsexual wholesome summer adventure, emotive acting. NO text, speech bubbles, UI, numbers, watermarks or collaged duplicates.",
+    "tool": "image_gen.imagegen"
+  },
+  {
+    "theme": "high-school",
+    "heroId": "CARETAKER",
+    "kind": "true",
+    "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-8ff52fa0-5e7d-4535-8d66-d8fd5387a223.png",
+    "reference": "public/sprites/high-school/vacation-characters/1.webp",
+    "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue, protagonist caretaker, summer true ending after destroying the Black Ledger Bureau's control. Input Image 1: identity and vacation-costume reference ONLY. Preserve this same character, face, hair color, gender and vacation outfit in ALL THREE scenes. Do not copy reference transparency/checkerboard. Produce one tall illustration divided into THREE EXACTLY EQUAL SQUARE SCENES stacked top to bottom, clean edge-to-edge scenes with NO frames, NO gaps, NO panel lettering; target 1024x3072. Each square is a complete separate cinematic CG, character fully readable and within that square. Top scene: on a seaside pier she shields her pet rabbit while black ledger chains dissolve above the water. Middle scene: she kneels at an undamaged coastal tide pool and gently observes small living crabs, the pet rabbit sitting safely in her satchel away from water. Bottom scene: at a shaded beachside observation desk she opens a blank nature notebook, rabbit beside her, smiling with relief. Style: polished anime RPG painted CG, elegant detailed environments, consistent character, nonsexual wholesome summer adventure, emotive acting. NO text, speech bubbles, UI, numbers, watermarks or collaged duplicates.",
+    "tool": "image_gen.imagegen"
+  },
+  {
+    "theme": "high-school",
+    "heroId": "ASSASSIN",
+    "kind": "true",
+    "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-44ab499b-148e-49b8-a19c-89fda5252852.png",
+    "reference": "public/sprites/high-school/vacation-characters/2.webp",
+    "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue, protagonist assassin, summer true ending after destroying the Black Ledger Bureau's control. Input Image 1: identity and vacation-costume reference ONLY. Preserve this same character, face, hair color, gender and vacation outfit in ALL THREE scenes. Do not copy reference transparency/checkerboard. Produce one tall illustration divided into THREE EXACTLY EQUAL SQUARE SCENES stacked top to bottom, clean edge-to-edge scenes with NO frames, NO gaps, NO panel lettering; target 1024x3072. Each square is a complete separate cinematic CG, character fully readable and within that square. Top scene: on a lantern-lit coastal stone path the violet-haired young man folds his fan as a black surveillance reflection shatters in a pool. Middle scene: beside summer festival lanterns he takes a decorative blank identity tag off his sash, his own face unobscured. Bottom scene: he walks openly through a sunny seaside festival gate holding his folded fan, no longer hiding in shadows. Style: polished anime RPG painted CG, elegant detailed environments, consistent character, nonsexual wholesome summer adventure, emotive acting. NO text, speech bubbles, UI, numbers, watermarks or collaged duplicates.",
+    "tool": "image_gen.imagegen"
+  },
+  {
+    "theme": "high-school",
+    "heroId": "MAGE",
+    "kind": "true",
+    "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-224a84e5-d1b1-41f8-8e3d-63fa0fc06a12.png",
+    "reference": "public/sprites/high-school/vacation-characters/3.webp",
+    "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue, protagonist mage, summer true ending after destroying the Black Ledger Bureau's control. Input Image 1: identity and vacation-costume reference ONLY. Preserve this same character, face, hair color, gender and vacation outfit in ALL THREE scenes. Do not copy reference transparency/checkerboard. Produce one tall illustration divided into THREE EXACTLY EQUAL SQUARE SCENES stacked top to bottom, clean edge-to-edge scenes with NO frames, NO gaps, NO panel lettering; target 1024x3072. Each square is a complete separate cinematic CG, character fully readable and within that square. Top scene: in a coastal laboratory pavilion she opens a flask and dissolves a black glowing control crystal safely into clear water. Middle scene: on a beach table she compares harmless clear seawater samples in glass vials, looking curious instead of frightened. Bottom scene: at a seaside summer workshop she places a pair of safety goggles next to an open blank experiment notebook, smiling at the sunrise. Style: polished anime RPG painted CG, elegant detailed environments, consistent character, nonsexual wholesome summer adventure, emotive acting. NO text, speech bubbles, UI, numbers, watermarks or collaged duplicates.",
+    "tool": "image_gen.imagegen"
+  }
+]

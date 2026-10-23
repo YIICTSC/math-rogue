@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "AKARI",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/vacation-characters/heroine-01-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: protagonist-specific three-scene summer epilogue atlas for Learning Rogue; protagonist AKARI. This is ordinary vacation aftermath after Act 4, NOT the later endless battle. Image 1: identity and vacation outfit reference ONLY. Preserve the SAME character, gender, face, hair, costume and accessories in ALL three scenes. Produce THREE EXACTLY EQUAL SQUARE SCENES stacked top-to-bottom, full bleed, NO gaps, borders, lettering or scene overlap; target 1024x3072. Top scene: The morning after the battle, Akari checked on her friends at the shore. Only when everyone answered did her shoulders relax. Middle scene: At the beach house, her postcard filled with happy moments rather than heroic feats. Beside her mother’s wand, she found words for her own summer. Bottom scene: Packed to go home, Akari looked at the evening sky. Her next beach trip went into her journal as a promise unrelated to battle. Every scene must show the protagonist acting in a distinct scene, not just posed. When companions are implied use soft background silhouettes only, not invented detailed cast. Polished anime RPG painted CG; beautiful detailed summer shore, beach house or pier; warm reflective wholesome nonsexual mood. No battle or giant magic explosion. NO writing, numbers, UI, labels, logos or watermarks. All notebook pages, maps and postcards are blank or abstract colors, since the game displays text separately. Do not include the reference checkerboard.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-fa8d2b7e-61b6-4d1f-b4b0-fb7396ba1704.png"
+}

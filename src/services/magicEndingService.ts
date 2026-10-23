@@ -5,9 +5,13 @@ import { getMagicFriendshipRoutesForHero } from '../data/magicFriendshipRoutes';
 import { getMagicFriendshipEndingDialogue } from '../data/magicFriendshipEndingDialogue';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { ROMANCE_TARGETS } from '../data/romanceTargets';
+import { getMagicSummerFriendshipEnding, summerFriendshipImage } from '../data/magicSummerFriendshipEndings';
+import { summerFriendshipVoiceId } from '../data/summerEndingVoices';
+import { getMagicSummerEpilogue, resolveMagicSummerEpilogueHeroId } from '../data/magicSummerEpilogues';
+import type { EndlessEndingPage } from '../data/endlessEndingSequences';
 
 export interface MagicEndingPage {
-  kind: 'romance' | 'double-romance' | 'friendship';
+  kind: 'romance' | 'double-romance' | 'friendship' | 'epilogue';
   title: string;
   description: string;
   lines: string[];
@@ -16,6 +20,8 @@ export interface MagicEndingPage {
   fallbackImagePath?: string;
   rankLabel: string;
   metricLabel: string;
+  appearanceMode?: CharacterAppearanceMode;
+  storyPages?: EndlessEndingPage[];
 }
 
 export interface MagicEndingGalleryEntry extends MagicEndingPage {
@@ -206,6 +212,21 @@ export const getMagicEndingPages = (player: Player, heroId: string): MagicEnding
       (progress?.affection[route.id] ?? 0) >= 100
       && (progress?.stages[route.id] ?? 0) >= 2)
     .forEach((route) => {
+      if (player.appearanceMode === 'VACATION') {
+        const summer = getMagicSummerFriendshipEnding(route.id);
+        pages.push({
+          kind: 'friendship',
+          title: summer.title[0],
+          description: summer.description[0],
+          lines: summer.lines.map(line => line[0]),
+          voiceLines: [route.heroId, route.friendHeroId].map((heroId, index) => ({ heroId, lineId: summerFriendshipVoiceId(route.id, index) })),
+          imagePath: summerFriendshipImage(route.id),
+          rankLabel: '夏の友情エンド',
+          metricLabel: '絆 100 / 100',
+          appearanceMode: 'VACATION',
+        });
+        return;
+      }
       const friendName = getCharacterName(route.friendHeroId);
       const friendshipDialogue = getMagicFriendshipEndingDialogue(route.id);
       const fallbackLines = [
@@ -258,14 +279,14 @@ export const getMagicEndingPages = (player: Player, heroId: string): MagicEnding
     }
   }
 
-  return pages;
+  return pages.map(page => ({ ...page, appearanceMode: player.appearanceMode ?? 'STANDARD' }));
 };
 
 export const hasMagicEnding = (player: Player, heroId: string) =>
   getMagicEndingPages(player, heroId).length > 0;
 
 const getMagicEndingGalleryId = (heroId: string, page: MagicEndingPage) =>
-  `${heroId}:${page.kind}:${page.title}:${page.rankLabel}:${page.metricLabel}`;
+  `${heroId}:${page.kind}:${page.title}:${page.rankLabel}:${page.metricLabel}${page.appearanceMode === 'VACATION' ? ':VACATION' : ''}`;
 
 const buildMagicEndingGalleryEntry = (
   heroId: string,
@@ -285,6 +306,18 @@ export const getMagicEndingGalleryEntries = (
   unlockedAt = Date.now(),
 ): MagicEndingGalleryEntry[] => {
   return getMagicEndingPages(player, heroId).map((page) => buildMagicEndingGalleryEntry(heroId, page, unlockedAt));
+};
+
+export const buildMagicSummerEpilogueGalleryEntry = (heroId: string, unlockedAt = Date.now()): MagicEndingGalleryEntry => {
+  heroId = resolveMagicSummerEpilogueHeroId(heroId);
+  const storyPages = getMagicSummerEpilogue(heroId);
+  return {
+    id: `${heroId}:epilogue:VACATION`, heroId, heroName: getCharacterName(heroId), unlockedAt,
+    kind: 'epilogue', appearanceMode: 'VACATION', storyPages,
+    title: storyPages[0].title, description: storyPages[0].text,
+    lines: [storyPages[0].dialogue], imagePath: storyPages[0].imagePath,
+    rankLabel: '夏の後日談', metricLabel: '',
+  };
 };
 
 const DEBUG_ROMANCE_AFFECTION_BY_RANK: Record<MagicRomanceEndingRank, number> = {
@@ -364,7 +397,10 @@ export const getDebugMagicEndingGalleryEntries = (unlockedAt = 0): MagicEndingGa
 
     getMagicFriendshipRoutesForHero(heroId).forEach((route) => {
       entries.push(buildMagicEndingGalleryEntry(heroId, buildFriendshipDebugPage(heroId, route), unlockedAt));
+      const summerPlayer = { appearanceMode: 'VACATION', magicRomance: { affection: { [route.id]: 100 }, stages: { [route.id]: 2 }, selectedCounts: {}, completedEventIds: [] } } as Player;
+      entries.push(...getMagicEndingGalleryEntries(summerPlayer, heroId, unlockedAt));
     });
+    entries.push(buildMagicSummerEpilogueGalleryEntry(heroId, unlockedAt));
   });
 
   return entries;

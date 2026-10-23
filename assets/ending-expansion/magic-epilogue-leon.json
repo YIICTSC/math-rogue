@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "LEON",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/male-characters/leon-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for LEON. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Leon helped his friends clear the little seaside stage. A star’s work did not end with the final applause. Middle scene: Listening to the surf, Leon tried a new melody. Unsatisfactory measures stayed as places to improve, not flaws to conceal. Bottom scene: Leon announced his next performance to his departing friends. He openly admitted he wanted even his rivals to hear it.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-851d5170-1e58-4e03-b6bd-b518cc888929.png"
+}

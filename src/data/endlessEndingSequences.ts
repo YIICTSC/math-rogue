@@ -1,4 +1,6 @@
-import type { LanguageMode } from '../types';
+import type { CharacterAppearanceMode, LanguageMode } from '../types';
+import { HIGH_SCHOOL_VACATION_TRUE_ENDINGS, buildSummerEndingPages, type SummerStory } from './vacationEndlessEndings';
+import { MAGIC_VACATION_TRUE_ENDINGS } from './magicVacationTrueEndings';
 import { transEventText } from '../utils/textUtils';
 import { MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './visualThemes';
 import {
@@ -87,10 +89,23 @@ export const getEndlessEndingSequence = (
   characterName: string,
   theme: VisualThemeId = 'elementary',
   magicProtagonistId?: string,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): EndlessEndingSequence => {
   const resolvedTheme: VisualThemeId = theme === 'high-school' || theme === 'magic' ? theme : 'elementary';
   const entry = getRevisionEntry(characterId, resolvedTheme, magicProtagonistId);
   const resolvedCharacterName = (characterName ?? '').trim() || '主人公';
+  if (kind === 'TRUE' && appearanceMode === 'VACATION' && resolvedTheme !== 'elementary') {
+    const stories: Record<string, SummerStory> = resolvedTheme === 'magic' ? MAGIC_VACATION_TRUE_ENDINGS : HIGH_SCHOOL_VACATION_TRUE_ENDINGS;
+    const story = stories[entry.protagonistId];
+    if (!story) throw new Error(`Missing summer true ending: ${resolvedTheme}/${entry.protagonistId}`);
+    return {
+      id: `vacation-true-${entry.protagonistId.toLowerCase()}`,
+      characterId: entry.baseCharacterId,
+      characterName: resolvedCharacterName,
+      kind,
+      pages: buildSummerEndingPages(story, `sprites/endings/summer-expansion/${resolvedTheme}/true/${entry.protagonistId.toLowerCase()}`),
+    };
+  }
   const copies = kind === 'OPENING' ? entry.opening : entry.true;
   const pages = copies.map((copy) => ({
     title: copy.title,

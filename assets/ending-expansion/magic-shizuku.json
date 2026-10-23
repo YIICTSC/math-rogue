@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "SHIZUKU",
+  "kind": "true",
+  "reference": "public/sprites/magic/vacation-characters/heroine-02-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue; magic protagonist SHIZUKU, summer true ending after Chapter 50. Image 1 is an identity and summer-costume reference ONLY: preserve the SAME face, gender, hair, proportions, accessories and costume in every scene. Never include its checkerboard background. One tall atlas of THREE EXACTLY EQUAL SQUARE FULL-BLEED SCENES stacked top to bottom, target 1024x3072. No frames, no gutters, no overlapping subjects across scene boundaries. Each square is an independent emotionally acted CG, not a repeated pose. Top scene: With the observation engine stopped, her mirror reflected only the sea. Shizuku kept her responsibility, but chose for herself how to fulfill it. Middle scene: Beside the tide tables, she added time for measuring nothing. Until moonset, Shizuku enjoyed an uncalculated detour. Bottom scene: Her letter home included beach discoveries alongside the report. From now on, she would make more promises out of choice, not duty. All three scenes are on or near a picturesque summer seashore. Polished hand-painted anime RPG CG matching the character reference, detailed environments, readable storytelling, wholesome nonsexual vacation adventure. NO text, captions, letters, symbols resembling writing, numbers, UI or watermarks. Any notebooks have blank pages. Avoid added identifiable protagonists; background companions may be soft silhouettes only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-8d7a83a4-58a5-4bb8-891e-57901c7363db.png"
+}

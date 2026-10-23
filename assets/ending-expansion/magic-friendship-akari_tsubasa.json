@@ -1,0 +1,12 @@
+{
+  "theme": "magic",
+  "heroId": "AKARI_TSUBASA",
+  "kind": "friendship",
+  "references": [
+    "public/sprites/magic/vacation-characters/heroine-01-before.webp",
+    "public/sprites/magic/vacation-characters/heroine-04-before.webp"
+  ],
+  "prompt": "Use case: illustration-story. Asset type: dedicated summer friendship ending CG for Learning Rogue. Landscape 1536x1024. Image 1: identity/costume reference for AKARI, the viewpoint protagonist. Image 2: identity/costume reference for friend TSUBASA. Preserve BOTH original character identities, faces, hair, gender, accessories and vacation outfits accurately. Story moment: After a beach relay, the two shared drinks. The feet that had raced now headed for the same patch of shade. Emotional direction: Akari: “I won, but we rest together. You were dazzling out there!” Tsubasa: “Not next time! But first, we both need water.” Show concrete action and warm platonic friendship, no romance, no flirting. Polished painted anime RPG CG, rich picturesque summer seashore setting, beautiful natural lighting, distinct composition appropriate to this specific moment. Both people must be visible, with natural hands and recognizable faces; not a collage of the references. Only these two identifiable characters. Text is handled in the game UI: NO writing, speech balloons, captions, letters, numbers, UI, watermarks, frames or checkerboard. Any notebook pages are blank.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-8661df0c-aebb-47ca-9a6d-644142912467.png"
+}

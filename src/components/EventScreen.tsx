@@ -152,6 +152,8 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     ];
   }, [imageKey]);
   const magicFriendshipImages = useMemo(() => {
+    const summer = imageKey?.match(/^magic-friendship-summer:([^:]+):([^:]+)$/);
+    if (summer) return [assetUrl(`sprites/endings/summer-expansion/magic/friendship/${summer[1].toLowerCase()}_${summer[2].toLowerCase()}.webp`)];
     const match = imageKey?.match(/^magic-friendship:([^:]+):([^:]+)$/);
     if (!match) return [];
     const [, heroId, friendHeroId] = match;

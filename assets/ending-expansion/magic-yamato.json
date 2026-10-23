@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "YAMATO",
+  "kind": "true",
+  "reference": "public/sprites/magic/vacation-male-characters/yamato-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue; magic protagonist YAMATO, summer true ending after Chapter 50. Image 1 is an identity and summer-costume reference ONLY: preserve the SAME face, gender, hair, proportions, accessories and costume in every scene. Never include its checkerboard background. One tall atlas of THREE EXACTLY EQUAL SQUARE FULL-BLEED SCENES stacked top to bottom, target 1024x3072. No frames, no gutters, no overlapping subjects across scene boundaries. Each square is an independent emotionally acted CG, not a repeated pose. Top scene: After breaking the last black wall, Yamato opened his fists. With no one left to fight on the beach, he felt sea air on his palms. Middle scene: He carried a damaged beach bench and repaired its legs with friends. Blisters taught him how strength could help without a punch. Bottom scene: Sitting on the repaired bench, Yamato suggested another visit. He no longer needed a fight as an excuse to spend time together. All three scenes are on or near a picturesque summer seashore. Polished hand-painted anime RPG CG matching the character reference, detailed environments, readable storytelling, wholesome nonsexual vacation adventure. NO text, captions, letters, symbols resembling writing, numbers, UI or watermarks. Any notebooks have blank pages. Avoid added identifiable protagonists; background companions may be soft silhouettes only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-faae0e89-7616-4bb1-9412-460ce8481b13.png"
+}

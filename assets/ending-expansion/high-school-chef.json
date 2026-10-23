@@ -1,0 +1,9 @@
+{
+  "theme": "high-school",
+  "heroId": "CHEF",
+  "kind": "true",
+  "reference": "public/sprites/high-school/vacation-characters/7.webp",
+  "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue; high-school protagonist CHEF, summer true ending after Chapter 50. Image 1 is an identity and summer-costume reference ONLY: preserve the SAME face, gender, hair, proportions, accessories and costume in every scene. Never include its checkerboard background. One tall atlas of THREE EXACTLY EQUAL SQUARE FULL-BLEED SCENES stacked top to bottom, target 1024x3072. No frames, no gutters, no overlapping subjects across scene boundaries. Each square is an independent emotionally acted CG, not a repeated pose. Top scene: Back from the depths, the chef removed the black ration tag. This time, he would ask each person what they wanted to eat. Middle scene: Steam rose from the beach kitchen. The meal went not to the highest scorers first, but to anyone ready to eat while it was hot. Bottom scene: An empty chair waited at the sunset table. Anyone still finding their way home would have a place and a warm meal. All three scenes are on or near a picturesque summer seashore. Polished hand-painted anime RPG CG matching the character reference, detailed environments, readable storytelling, wholesome nonsexual vacation adventure. NO text, captions, letters, symbols resembling writing, numbers, UI or watermarks. Any notebooks have blank pages. Avoid added identifiable protagonists; background companions may be soft silhouettes only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-23261753-db0e-4086-ba6a-4ca63d27a473.png"
+}

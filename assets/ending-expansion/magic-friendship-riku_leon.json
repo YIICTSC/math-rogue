@@ -1,0 +1,12 @@
+{
+  "theme": "magic",
+  "heroId": "RIKU_LEON",
+  "kind": "friendship",
+  "references": [
+    "public/sprites/magic/male-characters/riku-before.webp",
+    "public/sprites/magic/male-characters/leon-before.webp"
+  ],
+  "prompt": "Use case: illustration-story. Asset type: one landscape friendship CG, 1536x1024. Original wholesome school-adventure RPG Learning Rogue, summer friendship for RIKU_LEON. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Story moment: Leon changed the melody on the beach stage. Without looking ahead, Riku answered with a rhythm made in the moment. Emotional direction: Riku: “I won’t read the next note. Being surprised makes a nice change.” Leon: “Then expect a splendid surprise. Just keep your hands ready to applaud!” Show concrete action and warm platonic friendship, no romance, no flirting. Polished painted anime RPG CG, rich picturesque summer seashore setting, beautiful natural lighting, distinct composition appropriate to this specific moment. Both people must be visible, with natural hands and recognizable faces; not a collage of the references. Only these two identifiable characters. Text is handled in the game UI: NO writing, speech balloons, captions, letters, numbers, UI, watermarks, frames or checkerboard. Any notebook pages are blank. Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-3f58aa2e-104b-4a03-9148-21044d4670da.png"
+}

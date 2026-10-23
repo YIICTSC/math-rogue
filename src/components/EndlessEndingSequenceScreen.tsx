@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
-import type { LanguageMode } from '../types';
+import type { CharacterAppearanceMode, LanguageMode } from '../types';
+import { SUMMER_ENDING_VOICES_READY, summerTrueVoiceId } from '../data/summerEndingVoices';
 import type { VisualThemeId } from '../data/visualThemes';
 import {
   getEndlessEndingLocalizedDialogue,
@@ -12,6 +13,8 @@ import {
 } from '../data/endlessEndingSequences';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
+import { trans } from '../utils/textUtils';
+import { getThemedEndingCharacterName } from '../data/themedEndingSequences';
 
 interface Props {
   kind: EndlessEndingKind;
@@ -20,21 +23,24 @@ interface Props {
   languageMode: LanguageMode;
   theme?: VisualThemeId;
   magicProtagonistId?: string;
+  appearanceMode?: CharacterAppearanceMode;
   onComplete: () => void;
 }
 
-const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, theme = 'elementary', magicProtagonistId, onComplete }) => {
-  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme as VisualThemeId, magicProtagonistId), [characterId, characterName, kind, magicProtagonistId, theme]);
+const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, theme = 'elementary', magicProtagonistId, appearanceMode = 'STANDARD', onComplete }) => {
+  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme, magicProtagonistId, appearanceMode), [characterId, characterName, kind, magicProtagonistId, theme, appearanceMode]);
   const [pageIndex, setPageIndex] = useState(0);
   const page = sequence.pages[pageIndex];
   const isLast = pageIndex >= sequence.pages.length - 1;
-  const voiceName = `endless-${kind.toLowerCase()}-${pageIndex + 1}`;
+  const summerTrue = kind === 'TRUE' && appearanceMode === 'VACATION' && theme !== 'elementary';
+  const voiceName = summerTrue ? summerTrueVoiceId(pageIndex) : `endless-${kind.toLowerCase()}-${pageIndex + 1}`;
   const voiceHeroId = getEndlessEndingVoiceHeroId(characterId, theme as VisualThemeId, magicProtagonistId);
   const completionStartedRef = useRef(false);
 
   useEffect(() => {
     audioService.stopHighSchoolVoices();
     audioService.stopMagicEventVoices();
+    if (summerTrue && !SUMMER_ENDING_VOICES_READY) return;
     if (theme === 'high-school') {
       void audioService.playHighSchoolVoiceFile(voiceHeroId, voiceName, 12000).catch(() => undefined);
     } else if (theme === 'magic') {
@@ -44,13 +50,21 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
       audioService.stopHighSchoolVoices();
       audioService.stopMagicEventVoices();
     };
-  }, [characterId, kind, magicProtagonistId, pageIndex, theme, voiceHeroId, voiceName]);
+  }, [characterId, kind, magicProtagonistId, pageIndex, theme, voiceHeroId, voiceName, summerTrue]);
+
+  useEffect(() => {
+    setPageIndex(0);
+    completionStartedRef.current = false;
+  }, [sequence.id]);
 
   if (!page) return null;
 
   const localizedTitle = getEndlessEndingLocalizedTitle(page, languageMode);
   const localizedText = getEndlessEndingLocalizedText(page, languageMode);
   const localizedDialogue = getEndlessEndingLocalizedDialogue(page, languageMode);
+  const localizedCharacterName = theme === 'high-school'
+    ? getThemedEndingCharacterName('high-school', sequence.characterId, languageMode)
+    : trans(sequence.characterName, languageMode);
   const isTrueEnding = kind === 'TRUE';
   const fallback = isTrueEnding
     ? 'sprites/backgrounds/learning-rogue/high-school-act-clear.webp'
@@ -115,7 +129,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
           <div className="themed-ending-sequence-copy min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-100 sm:text-lg">{localizedText}</p>
             <p className="mt-3 rounded-lg border border-amber-200/30 bg-amber-100/10 px-3 py-2 text-sm font-bold leading-relaxed text-amber-100 sm:text-base">
-              <span className="mr-2 text-xs tracking-wide text-amber-200/75">{sequence.characterName}</span>
+              <span className="mr-2 text-xs tracking-wide text-amber-200/75">{localizedCharacterName}</span>
               {localizedDialogue}
             </p>
           </div>
@@ -163,7 +177,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
         <div className="event-screen-description min-h-0 max-h-[36dvh] overflow-y-auto text-sm leading-relaxed text-slate-100 sm:text-base">
           <p className="whitespace-pre-wrap">{localizedText}</p>
           <p className="mt-3 rounded-lg border border-amber-200/30 bg-amber-100/10 px-3 py-2 text-sm font-bold leading-relaxed text-amber-100 sm:text-base">
-            <span className="mr-2 text-xs tracking-wide text-amber-200/75">{sequence.characterName}</span>
+            <span className="mr-2 text-xs tracking-wide text-amber-200/75">{localizedCharacterName}</span>
             {localizedDialogue}
           </p>
         </div>

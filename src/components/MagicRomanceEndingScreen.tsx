@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Heart, ChevronRight, Users } from 'lucide-react';
 import type { LanguageMode, Player } from '../types';
 import { getMagicEndingPages } from '../services/magicEndingService';
 import { trans, transEventText } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
+import { canPlaySummerEndingVoice } from '../data/summerEndingVoices';
 
 interface MagicRomanceEndingScreenProps {
   player: Player;
@@ -23,27 +24,26 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
   const [endingIndex, setEndingIndex] = useState(0);
   const [lineIndex, setLineIndex] = useState(-1);
   const ending = endings[endingIndex];
-  if (!ending) {
-    return null;
-  }
-  const currentText = lineIndex < 0 ? ending.description : ending.lines[lineIndex];
-  const isLast = lineIndex >= ending.lines.length - 1;
+  const completionStarted = useRef(false);
+  const currentText = lineIndex < 0 ? ending?.description : ending?.lines[lineIndex];
+  const isLast = lineIndex >= (ending?.lines.length ?? 0) - 1;
   const isFinalEnding = endingIndex >= endings.length - 1;
 
   useEffect(() => {
-    if (lineIndex < 0) {
-      audioService.stopMagicEventVoices();
-      return;
-    }
-    const voiceLine = ending.voiceLines?.[lineIndex];
-    if (!voiceLine) return;
-    void audioService.playMagicEventVoice(voiceLine.heroId, voiceLine.lineId);
+    audioService.stopMagicEventVoices();
+    const voiceLine = lineIndex < 0 ? undefined : ending?.voiceLines?.[lineIndex];
+    if (voiceLine && canPlaySummerEndingVoice(voiceLine.lineId)) void audioService.playMagicEventVoice(voiceLine.heroId, voiceLine.lineId).catch(() => undefined);
+    return () => audioService.stopMagicEventVoices();
   }, [ending, lineIndex]);
+
+  if (!ending) return null;
 
   const handleNext = () => {
     audioService.stopMagicEventVoices();
     if (isLast) {
       if (isFinalEnding) {
+        if (completionStarted.current) return;
+        completionStarted.current = true;
         onComplete();
       } else {
         setEndingIndex((current) => current + 1);
@@ -96,7 +96,7 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
             </div>
           </div>
           <p className="magic-romance-ending-text min-h-[7rem] whitespace-pre-wrap text-base leading-relaxed text-slate-100 sm:text-lg">
-            {transEventText(currentText, languageMode)}
+            {transEventText(currentText ?? '', languageMode)}
           </p>
           <button
             data-gamepad-initial-choice

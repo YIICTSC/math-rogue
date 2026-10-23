@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "SOMA",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/male-characters/soma-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for SOMA. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Soma closed the seaside duty log and shared the remaining tasks. Responsibility did not mean finishing everything alone. Middle scene: At the beach house, he let a friend recommend his drink. Enjoying an unexpected flavor became part of learning to take a holiday. Bottom scene: He left time for shared decisions in the new term’s schedule. Soma would bring the breathing room he learned at the sea back to school.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-9def25c6-5421-4463-a643-b978f01ee680.png"
+}

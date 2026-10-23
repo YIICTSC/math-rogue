@@ -226,7 +226,7 @@ import MagicVacationCommonEndingSequenceScreen from './components/MagicVacationC
 import { buildThemedEndingGalleryEntry } from './data/themedEndingSequences';
 import EndlessEndingSequenceScreen from './components/EndlessEndingSequenceScreen';
 import EndlessClearScreen from './components/EndlessClearScreen';
-import { getMagicEndingGalleryEntries, hasMagicEnding } from './services/magicEndingService';
+import { getMagicEndingGalleryEntries, hasMagicEnding, buildMagicSummerEpilogueGalleryEntry } from './services/magicEndingService';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import RpgDefeatChallengeScreen from './components/RpgDefeatChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
@@ -20543,6 +20543,7 @@ const App: React.FC = () => {
                         <EndlessEndingSequenceScreen
                             kind="TRUE"
                             theme={activeRunVisualTheme}
+                            appearanceMode={gameState.player.appearanceMode ?? 'STANDARD'}
                             characterId={gameState.player.id}
                             magicProtagonistId={activeRunVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
                             characterName={activeRunVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
@@ -22610,8 +22611,13 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.ENDING && activeRunVisualTheme === 'magic' && gameState.player.appearanceMode === 'VACATION' && !magicVacationCommonEndingSequenceComplete && (
                     <MagicVacationCommonEndingSequenceScreen
+                        key={getMagicProtagonistId(gameState.player)}
+                        heroId={getMagicProtagonistId(gameState.player)}
                         languageMode={languageMode}
-                        onComplete={() => setMagicVacationCommonEndingSequenceComplete(true)}
+                        onComplete={() => {
+                            storageService.saveMagicEndingGalleryEntries([buildMagicSummerEpilogueGalleryEntry(getMagicProtagonistId(gameState.player))]);
+                            setMagicVacationCommonEndingSequenceComplete(true);
+                        }}
                     />
                 )}
 

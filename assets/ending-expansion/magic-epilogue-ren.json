@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "REN",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/male-characters/ren-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for REN. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Ren checked the shore once for safety. This time, he would not keep watch alone until someone came to fetch him. Middle scene: On a beach shopping trip, Ren passed one bag to a friend. Practicing how to accept help was easier than he expected. Bottom scene: Looking back at the sea, Ren thought of another holiday. Next time, he wanted to invite friends, not simply people to protect.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-803dde8a-6f7b-4b8b-9f70-bfdb4f67ca81.png"
+}

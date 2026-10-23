@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "REI",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/vacation-characters/heroine-05-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: protagonist-specific three-scene summer epilogue atlas for Learning Rogue; protagonist REI. This is ordinary vacation aftermath after Act 4, NOT the later endless battle. Image 1: identity and vacation outfit reference ONLY. Preserve the SAME character, gender, face, hair, costume and accessories in ALL three scenes. Produce THREE EXACTLY EQUAL SQUARE SCENES stacked top-to-bottom, full bleed, NO gaps, borders, lettering or scene overlap; target 1024x3072. Top scene: Rei checked the shore barrier and lowered its watch talisman. Her friends smiled at a protection that let its guardian rest. Middle scene: Rei placed a smooth black pebble beside her clan talisman. Here was a memory she had chosen, not a duty assigned. Bottom scene: Before lights-out, Rei checked the morning meeting time. Not to leave alone, but to make sure she went home with everyone. Every scene must show the protagonist acting in a distinct scene, not just posed. When companions are implied use soft background silhouettes only, not invented detailed cast. Polished anime RPG painted CG; beautiful detailed summer shore, beach house or pier; warm reflective wholesome nonsexual mood. No battle or giant magic explosion. NO writing, numbers, UI, labels, logos or watermarks. All notebook pages, maps and postcards are blank or abstract colors, since the game displays text separately. Do not include the reference checkerboard.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-6508afe2-11e2-4705-9fef-eb61dbd6d531.png"
+}

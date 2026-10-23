@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "LEON",
+  "kind": "true",
+  "reference": "public/sprites/magic/vacation-male-characters/leon-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue; magic protagonist LEON, summer true ending after Chapter 50. Image 1 is an identity and summer-costume reference ONLY: preserve the SAME face, gender, hair, proportions, accessories and costume in every scene. Never include its checkerboard background. One tall atlas of THREE EXACTLY EQUAL SQUARE FULL-BLEED SCENES stacked top to bottom, target 1024x3072. No frames, no gutters, no overlapping subjects across scene boundaries. Each square is an independent emotionally acted CG, not a repeated pose. Top scene: The Bureau’s illusory audience vanished above the sea. In the quiet, Leon recognized the real voices of his friends calling him. Middle scene: His beachside piece was unfinished. When Leon missed a note, he did not hide it; he played the measure again. Bottom scene: He watched a sunset with no winner, beside his rival. He could honestly look forward to sharing their next stage. All three scenes are on or near a picturesque summer seashore. Polished hand-painted anime RPG CG matching the character reference, detailed environments, readable storytelling, wholesome nonsexual vacation adventure. NO text, captions, letters, symbols resembling writing, numbers, UI or watermarks. Any notebooks have blank pages. Avoid added identifiable protagonists; background companions may be soft silhouettes only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-85dbd1fc-1132-46e4-a332-e390c23e1d9e.png"
+}

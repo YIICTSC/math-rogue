@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "MIRAI",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/characters/heroine-08-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for MIRAI. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Mirai straightened her costume ornaments and sank into a chair. She did not need to pretend to be alone; her friends stayed beside her. Middle scene: She sang an unfinished song just for her friends. They were willing to listen before it became perfect. Bottom scene: She invited them to her next show in an unadorned voice. More than a huge audience, she wanted people she hoped to see again.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-ea77f5ea-a170-4cec-a1a0-3cdd9b76a0eb.png"
+}

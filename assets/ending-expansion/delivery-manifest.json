@@ -1,0 +1,1769 @@
+{
+  "generator": "image_gen.imagegen",
+  "counts": {
+    "high-school/true": 9,
+    "magic/true": 17,
+    "magic/friendship": 34,
+    "magic/epilogue": 17
+  },
+  "images": 163,
+  "records": [
+    {
+      "theme": "high-school",
+      "heroId": "WARRIOR",
+      "kind": "true",
+      "sourceSha256": "91bf2b1ca5fc456214ab698262453d18d3922e0a41a1edbe503acef6ca62b9dd",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/warrior/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "418cc1620e203d41d9d75ca5760a54211ebf68a68d16913ef65727c9fa9ab8c3",
+          "bytes": 294694
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/warrior/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "c31788b8bcd2ad4e147ddb03a9f081002f9943ad2ffa1095ca909c499b2de447",
+          "bytes": 248874
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/warrior/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "29d18ac428333cd3288d035e39d54f4c1f7487ae81958d706b2a364bb21a63cd",
+          "bytes": 227978
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "CARETAKER",
+      "kind": "true",
+      "sourceSha256": "75c5ad6a4f38431771f76da3d938ad7c261e539e12218afcfc03eb49e2fbdc39",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/caretaker/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "4d5666ce8fe271c8164d8cf13d31e1dc8c973cad829821025aff946c798097d5",
+          "bytes": 318618
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/caretaker/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f114cefb7e8148189744323295d6b11a0d0c90f58a917fa85a109ad0b1ffc666",
+          "bytes": 292090
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/caretaker/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f697149a2b5d702bd699424b819922cfbcab4f9804c7be5e3603380c7564259d",
+          "bytes": 215514
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "ASSASSIN",
+      "kind": "true",
+      "sourceSha256": "924fe4d83a568559db4831d07e95685f6b641a96f8502da3970dee944881d093",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/assassin/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f4d0190c684f5484dbd9e62b4d2218932c3f41c2d79c8d3bc56e1eed3865f9b0",
+          "bytes": 274820
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/assassin/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "ff8609b034347c5a35ad89a94ce500afe162500c3915276c59dbaa3dac8cea25",
+          "bytes": 211476
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/assassin/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "535b582558ae020cb9be869d37e73688e78fb1b37eef3f0ea1c97ef7e9f15f67",
+          "bytes": 280948
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "MAGE",
+      "kind": "true",
+      "sourceSha256": "50ac6bba7c0877ebc2fe1f85c45be2fc81f20ea19c279ae9847d317dd37e48ab",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/mage/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "09b6ba0f00bfd8c2ed38fc5dcceddc28a5ea964a1f797d8099c2474d139ee1d5",
+          "bytes": 250936
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/mage/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "68e710da3ea51fa3a9c598d62092ff33d1084e3a7bb3bd436aef53c9524da8d7",
+          "bytes": 233954
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/mage/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "2e66a430256f10903bcfc692eebe823821e9d09431757931980d9c1be0829b03",
+          "bytes": 212076
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "BARD",
+      "kind": "true",
+      "sourceSha256": "c50f63766706676f23ba33638b5d52fd8038839e65bb9f943967ec46bbf039d7",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/bard/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "a6674d9b2929956a2e725cc5b3a376e0b65b0da05cd62110b500387d8ab9e5d6",
+          "bytes": 225148
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/bard/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "309f1314191dcecf533d2eecf96fd54775c4f1d98e978b59fd54e95506596752",
+          "bytes": 263066
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/bard/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "6ec87906f526b3a9bb4335bd440e777c5a5027ceca42677c9bb76542bfc19037",
+          "bytes": 194246
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "CHEF",
+      "kind": "true",
+      "sourceSha256": "0ba1e70b2fcac84b8080af6a785eb4a022e43700a59dd3b4d8290321c9bcdce1",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/chef/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "5e02b23f9434e3c6e54e6039762fa3459177f097ebf0351ac7f806929c491828",
+          "bytes": 209308
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/chef/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0994fbbe1e827c7fe964077b27effa8c1561e897eb4b50f208beb0b3ed85a2f8",
+          "bytes": 281254
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/chef/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "11426f46ceaa76d6e5ef31449a8c799b530c027e308e99d5e52908bdd0947fc5",
+          "bytes": 237552
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "DODGEBALL",
+      "kind": "true",
+      "sourceSha256": "c6f20833999a0da80eb3360ac15e67d857bc5e61cd30419b3347eca07cb8c33a",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/dodgeball/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "275c51f0ea48cd88b07e6905f333f7e56df579fef347dd3f7e25279e2b848f90",
+          "bytes": 225582
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/dodgeball/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "eeff8ba0a83b5a065701d83596377bd02da5ae5daf44fbdfc82baeb4a6c3e498",
+          "bytes": 189556
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/dodgeball/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "9f6ea30ae5125fc44cd00c81a422a007ddfddd15797361f82527bba8484dd65e",
+          "bytes": 171962
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "GARDENER",
+      "kind": "true",
+      "sourceSha256": "f20d2f870e6009ac591b8062d4e2e9b7de95643eacc4729c103753c5c1d8a886",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/gardener/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "542941ec8134fdc12ec499c34bed8d94e103d1642c9b8550adb26dd008279ebf",
+          "bytes": 259058
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/gardener/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "43122232cb1aa0b22678b644133a0e483f274dff6d7c7db66281b491efa03c33",
+          "bytes": 308584
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/gardener/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "4ca57583f9ce8663ba8016497cbf32e2f352919068a341b4a8b3d296f8e027f0",
+          "bytes": 279948
+        }
+      ]
+    },
+    {
+      "theme": "high-school",
+      "heroId": "LIBRARIAN",
+      "kind": "true",
+      "sourceSha256": "feb08c0775696b749ade7d2a9ef031bd82e022dd2cc86c7fa8578630fac8fd3e",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/librarian/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "73dab9acbdc8289c38bb4875a4c59fcc7b0158edf5f76c011a27329c89a6830c",
+          "bytes": 226250
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/librarian/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "5f2b358715a403783c3c36f61b8c3f00f7ba8f7e878d8206f5cf829f9f2b846c",
+          "bytes": 230776
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/high-school/true/librarian/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "e946ab3a077bba547c58866dfd281653a684413dbe7feb8bdcf95dcb66d314de",
+          "bytes": 192936
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "AKARI",
+      "kind": "true",
+      "sourceSha256": "d68e7b6c409bb990a4fcfb208402418d44367cf6573cbaa8dc771a39a8c8137d",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/akari/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "35784abc064365a7789c33e58ed0bdc608bcad49e80f9837b65fa1cfd3d03796",
+          "bytes": 307904
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/akari/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "dbc2e68469db940b0f28e2a7f72f814193e9f61eeeedd93610b73298c98b9ce4",
+          "bytes": 217912
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/akari/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "956e3053f47951282ac1745d149bfd646b348eb5974bf412c35c03b8465c1e96",
+          "bytes": 177664
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "ELLIOT",
+      "kind": "true",
+      "sourceSha256": "ab9d80ab34726fd53f7fb1826cbd6d3ad7df57eb804c4c1b979f6fbdd9edd31b",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/elliot/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f0c09b07a4b373e3dfa9bf45795e56137df725d08956d18877ec7e545dadc013",
+          "bytes": 255678
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/elliot/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "81b0b070d5b0492be5bc5bc37e17825ab6494abd8a9a91246372bc1334792dec",
+          "bytes": 229352
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/elliot/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "535d00dbadaf7e91a7c244377b7a60c07871b9aa73dd9c5e5d35c8b7cc8a75c0",
+          "bytes": 260648
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "AKARI",
+      "kind": "epilogue",
+      "sourceSha256": "55d3bf4f5d1745103dec4fb0fc629c891f124c72ba14692956f8c94c7d22085a",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/akari/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "245202dfae356a240625b630522148354455825cd543250652be135544593d6b",
+          "bytes": 225350
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/akari/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f9e2ff1bbb176b27e0763a4a3fa8c8c514631fd1e8b6045e2e9046b7bed22605",
+          "bytes": 231420
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/akari/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "7baee99720376fa14d2504fca38de098da2c3cb08670877e749ecc1dbae3b41b",
+          "bytes": 205362
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "ELLIOT",
+      "kind": "epilogue",
+      "sourceSha256": "94b43e522b18002770423a2cdb1af31fef47e86f3579cea42c73dbe4e84ce7f6",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/elliot/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "ee366ebbefc908bfbca6ba79ffea3668b596eb0e69cc48fc59e4f11d8d382cdf",
+          "bytes": 231194
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/elliot/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "d7dcbd66e025c7cce2562f70da0f844626e0fa60043c478ea6d24fdf0f2cc4fe",
+          "bytes": 226258
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/elliot/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f8dccf2e5a994255b63a02272fb2f05eae1e8930563aea2a1b8b2f49d9d16417",
+          "bytes": 201394
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "HIYORI",
+      "kind": "epilogue",
+      "sourceSha256": "0948286ba97318d22c16d8c6ccc8276e345e95df32dd03e7dacbf4a23a56d843",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/hiyori/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "075f9f13af210efccf3085d2c2a0a62f1d7275ac798d3f8ffbb3a0dd7445de4e",
+          "bytes": 190524
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/hiyori/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "491e75dd594658b152244abc73d46a1cfd5745d98f64b7eec121faafac7cba90",
+          "bytes": 250192
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/hiyori/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "a5706af9caf0f6d8dd349b44d177ea356d35311ebf60f9178c0204e7eb2b204a",
+          "bytes": 197218
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "KOHARU",
+      "kind": "epilogue",
+      "sourceSha256": "1f35fc047bb104735815c4142d764fd938101031cb0ce6b0d9e7d24a38417ddf",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/koharu/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0de86c268418631cf2a170309cca784e5fafaa3dc83695e033155904b2a9b356",
+          "bytes": 266672
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/koharu/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "37b35b99305b0b363dc24636298cebaf8f715dac1d9f847152a6242d45a686d4",
+          "bytes": 244064
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/koharu/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "04f0ab2092cb61b12016c790c8585276ecb4ee5c7710f274d1dca2f541309e32",
+          "bytes": 243592
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "LEON",
+      "kind": "epilogue",
+      "sourceSha256": "ecfa4695c2d02584a050a98ad0e1ca97d6affc01a51bcd75f3749f91eb5834ec",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/leon/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "32bec6c8f7b82368b94044e0262a48cafcae4fbc5db90259a2dd9a66de3243ac",
+          "bytes": 230052
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/leon/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "7542b1c0eabb55982751bdbadf227f953c31882a6220dd17a362fa6242e6a330",
+          "bytes": 203414
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/leon/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0a96146a77ff39d008f04e6f3e28399b082d41f34fe60c26ddf20e9d0c206184",
+          "bytes": 264542
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MADOKA",
+      "kind": "epilogue",
+      "sourceSha256": "bc036700a3137015527110798fafc7ec3547a67f68cd27cb37a9824f247f1c84",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/madoka/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "84f11eca3f3159e93d4d31992fcc0b963b504163dda04ebfd09ed389d3ba5f44",
+          "bytes": 208904
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/madoka/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "07eb211a0130c4fe3cc6837b3cde5ba6ffd1e9fde753776fdf19e149f3149895",
+          "bytes": 182816
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/madoka/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "6223048f3ed1d8fc6c593224fe0533fff25dca1683d5c36e9ab664970dba6d81",
+          "bytes": 193854
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MINATO",
+      "kind": "epilogue",
+      "sourceSha256": "e5fbefad00cc0e0591b3a47d1083f496225bce8e043a00bb197b8570d0bbb30c",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/minato/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "232428fcf9b3adcbf368d51d495cebe93878776bb6e66b4e5d87dba308f62898",
+          "bytes": 173548
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/minato/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "79871b8929bdc5f03b4b9f456fd48c052118c0fceeeaa176b7344b72e0970b7b",
+          "bytes": 245290
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/minato/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "42e8013a91b8dfb75c20dab402747faf92e06cc4580f6661b54c43628f572112",
+          "bytes": 179338
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MIRAI",
+      "kind": "epilogue",
+      "sourceSha256": "af0578889c35a4e352d7015501a75e7e4106dac1ed339d90fcbcb1d899c87399",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/mirai/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "72e463e5888abe080c6ac19512303fbf4e35c9fb36bfa2caa79089f3d53a7b39",
+          "bytes": 215206
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/mirai/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "738b4e771aed3de5e226af67998017b9539f7fd313aefe9d744bdded423d90a9",
+          "bytes": 203206
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/mirai/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "b63e06f49c794d3650773b8aded54b102e8fbd741b8997f281f1ae96b0ca3e37",
+          "bytes": 183714
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REI",
+      "kind": "epilogue",
+      "sourceSha256": "75206d9b6d6a31e435ee86dc3395fb95154b7af6b4a0237c5e942a39073f0fbb",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/rei/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "33866d0cf9bbd2396bb8a67ad2310a9bd5c6775656ed92868d3aee8932ad154c",
+          "bytes": 205188
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/rei/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "541b3c8ceccbaacc150e54f3bef981381bae3d99fba3bacd8d1814117fbcb152",
+          "bytes": 230944
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/rei/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "d2a9516559b86a8ab47a872f9e2e8660cf84fa4aa9ee38d90c01cfe1b533c068",
+          "bytes": 178796
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REN",
+      "kind": "epilogue",
+      "sourceSha256": "0b8ae7060df5388ad884a0a1de3da165b5197caf72acdd2ce613052e778263d3",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/ren/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f9b05f687309c29a5519b3c13a5e4f6a7bc99877a3fc808b4a75c9b8a8de68d5",
+          "bytes": 256626
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/ren/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0eeaa4611257f20b4334b96a4d6ec193d1d123f0d5f1127d13d4f98772c117b0",
+          "bytes": 199420
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/ren/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "eaae844bb9047defcb7516a9f77fa5fd1ee899d9d013c0611541cf53e25c1407",
+          "bytes": 186718
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "RIKU",
+      "kind": "epilogue",
+      "sourceSha256": "988f7be57ad7021de8cf01031f8ca6c3c75bfc5e3c150bf26291167478754b26",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/riku/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "d48b49391ecd0e49d1cca71f39159a3c21ce9f0f91feba27b6a3fc86e807ebfb",
+          "bytes": 253770
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/riku/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "a26339dbbfb1e99e6903b90b0bae376cfb5e7eca451deef6c3912cb204733536",
+          "bytes": 180356
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/riku/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "e0010eb5a1f5eba9c646aa4ae59c09e84d5ce197621457852193456d3f3b4dd4",
+          "bytes": 213050
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SAKUYA",
+      "kind": "epilogue",
+      "sourceSha256": "08c331133b300d1a425ae1312315d1a056e28509b3b11042e5295094dc5424fa",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/sakuya/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "444814fbb6050d9630c76e7337e42c1261e66d1941a9b375819e8af69a8d0497",
+          "bytes": 311050
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/sakuya/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "ae96c9556fc75214aca5fda9ecab46c409394b6907a5829445ed59768a0d559b",
+          "bytes": 243032
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/sakuya/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "46df963919dad287bbf11cef6cbaaf9a222b9a57c6b3f774660ef25a90c6db8b",
+          "bytes": 207752
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SERA",
+      "kind": "epilogue",
+      "sourceSha256": "82904afea608237a48151a86888e702a8c27504c7d3f53bcd720d164ed6414cc",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/sera/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "50ced16ac34dda46fd086d6a5dc1726c0f19a4b4f896fab0aa09144dc36ca2d0",
+          "bytes": 263096
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/sera/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "c00f5df5a0615ea33cf81bd2bdefe60a4f7401b0372d90e218530052775436cb",
+          "bytes": 260642
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/sera/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "c0427d35ac0656c493cb91fe26e5864e5fd6c317ad51850097342011cf35a734",
+          "bytes": 229918
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SHIZUKU",
+      "kind": "epilogue",
+      "sourceSha256": "5531ec6a3e7b546e2695db3e9878e7c22dea08fc5527b0646a09ef8a7d067522",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/shizuku/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "baee13b2f9f915990eb3c566095f95d12f053993a46c1ea44753181376f62ee7",
+          "bytes": 238590
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/shizuku/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "cbdb6dfd6fb9b081579a651d39fb5a0b5b8fbbc744787215ac00d124d5f1d0d6",
+          "bytes": 229666
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/shizuku/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0bee3210f708614d74d33b2ffa6ef183b1d97617cd7524578d5fe21f4e06dc6b",
+          "bytes": 214222
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SOMA",
+      "kind": "epilogue",
+      "sourceSha256": "c45d774e09b57bc2f4b5d8304b4aca94978b185403559ff8dc3180833564db12",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/soma/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f0f9b40d00f40dcd2125e335521e1aa8101643ee755bfaf5d1b4b5ba6a94bc6f",
+          "bytes": 176700
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/soma/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "95fdd372f3349227be275b0989557bb36beba7758d1ecdd6abc6ede1958def8d",
+          "bytes": 189618
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/soma/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "7e129a2e713856461131b194d8a43c3644e4b6f648907ea176861925cf1c8a2b",
+          "bytes": 217068
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "TSUBASA",
+      "kind": "epilogue",
+      "sourceSha256": "c09f9d06d729254bae11a55c1008c9a6bc92c10aa127a61ef4b0c1135c4571a7",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/tsubasa/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "58e56645102599aa492427eabcd93d005f6d5b307be6c259912e6c8c9871414d",
+          "bytes": 214816
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/tsubasa/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "8a53b5ca70f1aa398815bed2c66fdba760832b216a142bf0ba5c055cb0d74973",
+          "bytes": 186696
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/tsubasa/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0f468625b8a504db1e540a714aa03d762d4b138489dc4785515aebeb3e2cefe0",
+          "bytes": 215190
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "YAMATO",
+      "kind": "epilogue",
+      "sourceSha256": "42fc807d434ec502633ee9b32ada6a6ff027fdd626e7e261df9911195a50c175",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/yamato/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "90f1fdf650774fad72eeb106829285d38c20be99099e841b0061af76f1438ab4",
+          "bytes": 251302
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/yamato/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "63b9415d2adc5699e2e0b17c734f1df84841dd4e3ef719eaebb08079f10d35b5",
+          "bytes": 232976
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/epilogue/yamato/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "33710ee7de1ccc13af9bc9a8bdb083a132bf15a7a2528a1e06afb24d4de6af22",
+          "bytes": 145580
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "AKARI_SHIZUKU",
+      "kind": "friendship",
+      "sourceSha256": "3e95f481563a596794b1d58358e16fff44e9a566d3071e737ee8d0484286c495",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/akari_shizuku.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "c9a5460d02c1d2c779638cdbc8be87b5b2d3ce1c14246ae9d87ff5b35e56e603",
+          "bytes": 413844
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "AKARI_TSUBASA",
+      "kind": "friendship",
+      "sourceSha256": "81c4a984b31e581ff5da8cdd98aba6a308fd944000cd79f886358d315335f2b2",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/akari_tsubasa.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "0966435804218316279255ddd3a8104c5f5de87251a07a75fde41b0aec03d16d",
+          "bytes": 382824
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "ELLIOT_LEON",
+      "kind": "friendship",
+      "sourceSha256": "6f17cf66013c05d27c08c8cbfa8da1446bc0ea6e51d36c65f79b191957cdd9d2",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/elliot_leon.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "387422fdf616affa4054d5f98bd078cf1800a0678eeebd878f8299c81509c264",
+          "bytes": 316422
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "ELLIOT_SOMA",
+      "kind": "friendship",
+      "sourceSha256": "8727be0c90061d6f5a707b9b5c813db9f3ddcf64951cc4e07d9447f71ad73a4c",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/elliot_soma.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "1cce862efc97c510d231d2e27b85fa33a6b010e586d81c393f6fc172c1d6077f",
+          "bytes": 322264
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "HIYORI_KOHARU",
+      "kind": "friendship",
+      "sourceSha256": "8900cc09888d93bfc599ebb9884a7e6fa3d71f4d479626ecbac8d378fd2e15c2",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/hiyori_koharu.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "2b4a9516352dc418fe6a6cfc6d151302bffca0810cfc7627c3775b9b888949e3",
+          "bytes": 372558
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "HIYORI_SERA",
+      "kind": "friendship",
+      "sourceSha256": "6ee8759daaeed55b333a6dcbaafdafcb8e50f6cc5bafd7add0fdae5e425454df",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/hiyori_sera.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "0e7fd9b71240f0bc6d25fe2f080ab0e25df13cf81f2f6c34d5f6d022e3a20e5d",
+          "bytes": 344958
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "KOHARU_HIYORI",
+      "kind": "friendship",
+      "sourceSha256": "92f4c97838f0064a354783eb120dd4bccbaf6cd581d6489219a1898673ce9d34",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/koharu_hiyori.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "1dde4c39cbfa8673ef6827ec8559737ccf29a1a345500e4224f694ff13c83c00",
+          "bytes": 340334
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "KOHARU_SERA",
+      "kind": "friendship",
+      "sourceSha256": "3fa154cf604058bbb920f9f5e71606e65e7e0f765084417c308eccb5d39c2194",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/koharu_sera.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "c5a50eca13c3d250b2e91ebfdda486748edd16a2291d35f4c917595dd7d9662c",
+          "bytes": 441640
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "LEON_ELLIOT",
+      "kind": "friendship",
+      "sourceSha256": "457f59097902899d5fdc3b63c715501f2b2d7b2ce70b9dcbaec92152b3c5aa92",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/leon_elliot.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "4873cecf833bebb609e1f5c0f30a114bb59172b5cce7058ac42c37761bb07046",
+          "bytes": 342454
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "LEON_RIKU",
+      "kind": "friendship",
+      "sourceSha256": "56e366e6723fcc6b65bc1455272a41f620c021261ef62ed02152268dbda2e379",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/leon_riku.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "ecf9e5e3c7d25ccebccfeba7bd0ae93d52d1cbdefef22f2250ec473d1b4b1fb9",
+          "bytes": 352484
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MADOKA_MIRAI",
+      "kind": "friendship",
+      "sourceSha256": "f1002c438c2cd48c587b670459ecdc6c89e57125a1b086e59b0aa890cfc714e9",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/madoka_mirai.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "7fb279384204a814f95b3431ea633e4a566d625ba83f4f6f02f968ce0d8fadd6",
+          "bytes": 400302
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MADOKA_SHIZUKU",
+      "kind": "friendship",
+      "sourceSha256": "04ef93f45be62823ed2ffc710e9139fb0deb8502f4c0dde50c9f1a243db05c05",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/madoka_shizuku.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "46e6c1dd8b6e36b76425c4789b4787bf0999e192a50272ae0067dad674a30ae1",
+          "bytes": 319278
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MINATO_ELLIOT",
+      "kind": "friendship",
+      "sourceSha256": "e2bfe1e592e4f5331598db3cdb3b10c0273cc97bf8651fea96e59a13c26be317",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/minato_elliot.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "6946347b84db2c1bcfa80329647ce88bb3bfcd4ce3d2f65c1485f7d41fa7ca4c",
+          "bytes": 325324
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MINATO_REN",
+      "kind": "friendship",
+      "sourceSha256": "d84f1300262112a9200269627ff08d2d495b06d3cedb1ff6223ce507bf2b9f73",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/minato_ren.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "64b98bf4fb3c7f9f25f4927388d39bcd3ea3e368afb11c261da713bf991f1938",
+          "bytes": 395098
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MIRAI_HIYORI",
+      "kind": "friendship",
+      "sourceSha256": "416cd41189a71b1c72a0d1b9d2fe24006ca86fc5b26df797c274cdbf1331d15e",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/mirai_hiyori.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "bce6fe8bfc9088c4adda56a0ca538f46a6a6936d20b3ad65787f6c257463e1d4",
+          "bytes": 305430
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MIRAI_MADOKA",
+      "kind": "friendship",
+      "sourceSha256": "be58becf47142efe2a2f2440430da7ac85dfcfcad1c3ec95402a6fbd520469c7",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/mirai_madoka.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "2d823067ceb3c3185cbc59a578a2d1f1506a82878bbb9d4cf40836d1d2714660",
+          "bytes": 337718
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REI_SERA",
+      "kind": "friendship",
+      "sourceSha256": "352aa406cc8e65373a20c47c24614a84417ad05a838f0ef5ff2ad300c0157e71",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/rei_sera.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "a6c8381fe0091b00137e318e97ab77f8397dcff2a741841a4c8174a78acd1231",
+          "bytes": 353440
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REI_TSUBASA",
+      "kind": "friendship",
+      "sourceSha256": "fddad02805802350b5e855da732da42ea59e715f54b46e332bef47eae9886a3b",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/rei_tsubasa.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "e5f7ef502e0f079666d78462dac458ed02a5b4af7b320bda88fc1e0f31e7f174",
+          "bytes": 326478
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REN_MINATO",
+      "kind": "friendship",
+      "sourceSha256": "b665473d724e8eeb6fb909989cc761d95ee61962c0f8871a14dd700bc44e5aa8",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/ren_minato.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "a2b712600782991542670abba1155619d0ad5d27c7d923afb744679e3876f8c7",
+          "bytes": 392218
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REN_YAMATO",
+      "kind": "friendship",
+      "sourceSha256": "29fd7e7f76d33becf9907c03236648b09e00684cecb1e2d9334ea0cb607b16b1",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/ren_yamato.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "2ced80fdb7972375c0025e0d1217a468792f5543872d36c7cdf65df85a2723b3",
+          "bytes": 352110
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "RIKU_LEON",
+      "kind": "friendship",
+      "sourceSha256": "75a77ef9a871b789c687b6f845b96cf73cd878de9440aa4729d9c11d5bc261d1",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/riku_leon.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "039352412f327f8367d976bd88e39ece0c60625f9b4d558d0c20d412e0467a14",
+          "bytes": 315690
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "RIKU_SOMA",
+      "kind": "friendship",
+      "sourceSha256": "a067f21af333d353e2ba19da6ed1c23f0925b3c4f5b53a99ec861f099722850f",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/riku_soma.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "23b478054bbeb19a258266dc617f237db1eddbe111a42df0ec247e95322f5d7b",
+          "bytes": 300910
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SAKUYA_REN",
+      "kind": "friendship",
+      "sourceSha256": "0c825bf6ea49e93eafdf046c67018216ed29731d1f4c0081e04e5f6853d3ba75",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/sakuya_ren.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "f0dab39a84191dd590e278e695a5a4dc5e478a85ec2c89ab846e9a07ff6d4be7",
+          "bytes": 333040
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SAKUYA_YAMATO",
+      "kind": "friendship",
+      "sourceSha256": "6aea736d2304952c954e3dbf13a12b9ded98104e41065d9f3ea7174396cffaea",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/sakuya_yamato.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "5b1520d1fc0d48f2aae32a23c2f103376fe910a1c46b283abf56fe6b02cd6df7",
+          "bytes": 390248
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SERA_HIYORI",
+      "kind": "friendship",
+      "sourceSha256": "21abbee9a18f6ea08fc44a077eeae4ae6a762104a33f918c4e4befabb51e9de4",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/sera_hiyori.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "218ca628452fa4a264998552948b2651b4a0485214eaacf43471606ed6c8542f",
+          "bytes": 361884
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SERA_REI",
+      "kind": "friendship",
+      "sourceSha256": "5b689c7af39ad2453e238e19221eb3266ae1d2041b255d30473dcc4fd1d29ffe",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/sera_rei.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "678cf98a656b07f43eea4afe7e433ad793a758b264b67481ea6151218965f9ad",
+          "bytes": 360868
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SHIZUKU_AKARI",
+      "kind": "friendship",
+      "sourceSha256": "3569287d1e1e66523d5ba8cdf1861fa3e192f140490eccab1012d2677c8ffc55",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/shizuku_akari.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "19da9d6716d7dace96d7fd12e384a4de9d036a7f5e9ce60cf5991fa7748dab0f",
+          "bytes": 360962
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SHIZUKU_MADOKA",
+      "kind": "friendship",
+      "sourceSha256": "a8cfbe06e3753d855e9e2e3a51d00f062493c48c08d9aa95a491c1f97e282dea",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/shizuku_madoka.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "3c44cf147758d2ffd66838d3226255d2b717e96064a17569f4acb79f2a608572",
+          "bytes": 332858
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SOMA_ELLIOT",
+      "kind": "friendship",
+      "sourceSha256": "3063592d799e310dcc24ae15c6677682e70be72b13c1dbd41c0857c9abab5963",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/soma_elliot.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "d113e8215926307439682c16d89a038184cbd17771b363bc57b9101562d69bc8",
+          "bytes": 362422
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SOMA_RIKU",
+      "kind": "friendship",
+      "sourceSha256": "53886daf57c20cc314db48a389c3b155d31999ad8a6c7d5ae252c43438e77e1a",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/soma_riku.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "e3257a96cb0a0a6c87b919d28a163a5bdfbeb15e3100d2f4812e677f6440ca4f",
+          "bytes": 393692
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "TSUBASA_AKARI",
+      "kind": "friendship",
+      "sourceSha256": "d326fc3a474edccbbc07c130427f8699c6574419fd6a5491b1ee697e596bf2a2",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/tsubasa_akari.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "2a93a75ba9371c45e216d6b41f6bf95192518a871a8eaf37196665302c87b22f",
+          "bytes": 396946
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "TSUBASA_REI",
+      "kind": "friendship",
+      "sourceSha256": "7213ab48042311ac35d7e80a84a96b0a51e7d684cd9aea1c82182301f4123181",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/tsubasa_rei.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "a769a0a68f8d4cb7ec63fc40a4717fae2f632278afc0f34c099d4ff3888a83cc",
+          "bytes": 361320
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "YAMATO_REN",
+      "kind": "friendship",
+      "sourceSha256": "a96627ca7d25977b6d75eaac6f7ba839da3ae16c31423bd63fa4888622b81c7f",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/yamato_ren.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "6c7fea5374671ba53accfb4f3cb5a9860f3af6f460ea1afb2432dbbe4f3438b5",
+          "bytes": 393798
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "YAMATO_SAKUYA",
+      "kind": "friendship",
+      "sourceSha256": "d45d8ce67a195f0d81d682fba53f7dc3af292d6c709e95d46ece4c613fa9b6d7",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/friendship/yamato_sakuya.webp",
+          "width": 1536,
+          "height": 1024,
+          "sha256": "b15b08eeee37cc9f3d41d9a76e31984869bfc8725630333d2ef33064e3317ff4",
+          "bytes": 320284
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "HIYORI",
+      "kind": "true",
+      "sourceSha256": "043c11839e89237bff3927fd0d1898fe7e0b62503bc3d81c36924e831eb572d2",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/hiyori/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "623f36abcefe0997b4613efbb656f26e1b720bfd9861e25c1d1e49dfcafb3b7e",
+          "bytes": 184584
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/hiyori/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "3c812f33704a79cb4bb1273e256bedfc9bf8f4a7c489c463603108203c43b731",
+          "bytes": 296596
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/hiyori/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "7f779b9903a13662e40dc59b441ca4b510d656558f3f7ab614a416fdf23fc4b1",
+          "bytes": 194424
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "KOHARU",
+      "kind": "true",
+      "sourceSha256": "0a10cfdf5d035b75d53dee958d8b4be2b3885605566ec10c60245a855ed4b497",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/koharu/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "be7e6ff7f910a1d82caa2b05b4e02ca2d9b34c51f78b618d9f93fac231930174",
+          "bytes": 286570
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/koharu/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0b29917b5a50b574a1dee63814be890bb49990bded67e21f4037aa59672e7e2e",
+          "bytes": 274088
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/koharu/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "3f0d5d3e0b8e1000ed56ae443b0c6bc71fcf39af55822ddb3dd9d13ce2a532ae",
+          "bytes": 276042
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "LEON",
+      "kind": "true",
+      "sourceSha256": "306a11414416b044038ada16fb5b7db7345813078ee26e89ad66bbbde63f9010",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/leon/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "442d73250ec03db2cbf7a7952ceaeedb5bf3dcac1b3731202d3b4c2c729bbfb4",
+          "bytes": 259554
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/leon/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "002a3b31049e41dd3c89da34847a07eb91edf7dfee10f59742ef5538201ac4ab",
+          "bytes": 282798
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/leon/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "398ab084f95d070dc18fc07f8b13727b46d68a04c0ea59680b5c93a693de73b0",
+          "bytes": 229126
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MADOKA",
+      "kind": "true",
+      "sourceSha256": "a6103ce80ef009d31df3e519a0733ae3f4fa9e87ae24486dee4b0e41dfa08737",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/madoka/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "546dcb17168bb115e8409cc48695152092b8f13f950d12bf55cd07a1a09db26a",
+          "bytes": 249960
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/madoka/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "a1a061d6009fcdba289e1a50f64e03670d1e45ec8b4a152fb3dd232a6c6ad916",
+          "bytes": 237984
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/madoka/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "8e2604d0052633bcdd9310edd6181c27e0e9d38c35b6c69451035c0c92365da6",
+          "bytes": 210198
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MINATO",
+      "kind": "true",
+      "sourceSha256": "1d29ac44e6392b211ebe9f80dc1c8eeae8ecbb99a5e58a6816ecd5d08c73e9f2",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/minato/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "c3e62716a1e2b2a033fe3ece40384ed6754d119a3768f5a886890bd7821c9919",
+          "bytes": 363018
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/minato/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "c5ce0982851d8f79d6319a6a895690c7c4f5776863ce7007c7440a5d53e2aa65",
+          "bytes": 292530
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/minato/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "1442342d5fe4d6db9f043f4f04621fded1dd7678a427c2bfb99ff0c98383cae5",
+          "bytes": 263020
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "MIRAI",
+      "kind": "true",
+      "sourceSha256": "053f0639d0aa62c19887b851b64176163d8bc2133780ced41f5c890d6f3e332c",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/mirai/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "e2c555ed2cc5aed3d2e4f27b6852ecda97549c066402955a8b84f34e3a4be41f",
+          "bytes": 256454
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/mirai/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "0d7569e0523672a807278528e2bcf81aa3888f6a2e00f6de98edc2925a4f303c",
+          "bytes": 237256
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/mirai/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "de15a7077a96c6596fd18e7b72a3d8b5c743354d387d2871f8118f7efe35d513",
+          "bytes": 186404
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REI",
+      "kind": "true",
+      "sourceSha256": "2b468601682909a0f1cdcb35301d893b2dfd81057ea53fe4bcd14ebea17ff342",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/rei/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "04584aae67b7438f5b63e5e0bae1095f6e768fdb434266815b32702f1f54cb6b",
+          "bytes": 253186
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/rei/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "adfa9fba8e2b5739141a20c2541019703b697c3d45ff42d36ffc1bb41e60c132",
+          "bytes": 241002
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/rei/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "f13a2570520b737f0f07fe3b81348365028fec0a33cc688daeb6887c62f2fc52",
+          "bytes": 284290
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "REN",
+      "kind": "true",
+      "sourceSha256": "4c60a909040166642a30754dc0aa7278717f0481aef2efcd0a6a47565dc44b4f",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/ren/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "eeb86a091d9208d3a41a486efacb6c8bdfd9c5c4fdafb726b526fbb0d6f67697",
+          "bytes": 285706
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/ren/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "b07f0e8c6b1d49b0966ce0622a06fb3c4d0d668bf4ee0b8674533d5da9fa1942",
+          "bytes": 236420
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/ren/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "94ad3201fdf3a5253330fa219ba04f31546ecdf68b3509f389872be23fe708d6",
+          "bytes": 229316
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "RIKU",
+      "kind": "true",
+      "sourceSha256": "3bfbdba732f632752593e1e3f88e69c39f8d5e85009fd2a6a536ee458e73dcd3",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/riku/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "18ca214fd24a574aa678590bf169e76e1e6c10a542d9207c0356d43a1eee5acb",
+          "bytes": 234458
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/riku/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "5a272bff994b2bcebcac887deca958c38a347903a7ae0fc2ebd1debc2c397583",
+          "bytes": 216104
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/riku/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "b14c29b87de8b52b9121202a254672790559e377d5252517648298d52c9b9559",
+          "bytes": 237940
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SAKUYA",
+      "kind": "true",
+      "sourceSha256": "b9c4a5f39474cca51408edff83ab6284aa2b15aef971f57036da0293cf5d1cc4",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/sakuya/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "1d93f97f844e3fa8b1a3fa4d19cd08f10e998d740c28f6ab12c9c808c1dae1cb",
+          "bytes": 250154
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/sakuya/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "14ad1e345e3f9978939e4cfc64b6c83e33398a65d0e4d8ef56cbd86ccb5aae7a",
+          "bytes": 295806
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/sakuya/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "60b745776e876590da0b333cebc7675876460488339f61acb003479b511fcd89",
+          "bytes": 239418
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SERA",
+      "kind": "true",
+      "sourceSha256": "c5d92b7d572de00da1908a05bd943418e11587bdabd1733c01bc46043a363907",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/sera/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "fe278986b073efccf03660a5b0af7a63ea6382fc3b310396eeaf29849a1e4028",
+          "bytes": 273038
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/sera/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "78bb31da4932af3f13442c4e8da4e6c0b1fcb063d98e481953a9ce95e7fa140f",
+          "bytes": 253230
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/sera/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "581e2c1b4997ba780f4b7efc6d3bc000905aea84517a7a74646dabc9264bf143",
+          "bytes": 262722
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SHIZUKU",
+      "kind": "true",
+      "sourceSha256": "aeb531add21eb674903a4cd9c47fac841d58d402c2034fd7ec6888e4fcf0865d",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/shizuku/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "7d186bc48b9733e925fa38a400f10ff7e3176ed3a4c01297401dcee0d0cd31b0",
+          "bytes": 286388
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/shizuku/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "df9de694e5e082c2237de0cd3fcb27c645e4b858b51d8a4f7f6791e2b4a47e9d",
+          "bytes": 244536
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/shizuku/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "b49d8179be4705bec84b1f2c45016ea1013840a512fb2f7cdc1f92c645a155c3",
+          "bytes": 264780
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "SOMA",
+      "kind": "true",
+      "sourceSha256": "1705e401eeef09bff0cf2cc49b3cee508ab7e1e097d6fe777c074f668c0da719",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/soma/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "bcc56aad740336e056c57b7447c5aed7078b04c6988c5dddb9ddcb1b4e63a2ce",
+          "bytes": 362696
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/soma/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "1702e5f55701a4b36cba1ddb699c466a3adcf283f52a290b12e218e3d35f2152",
+          "bytes": 228506
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/soma/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "9af1e4e6fe034e8a497e8b52fd5b9aea4de4a1354d255d147e86557e37ad75ab",
+          "bytes": 263546
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "TSUBASA",
+      "kind": "true",
+      "sourceSha256": "a738e0af53e7e344a4bd6577cdbeb0105347db5ec59a27ed4b87733d1b105ef1",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/tsubasa/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "74c9d1445f9fd2bf12ddfed5ab67e73559668f069490a50ac6a6fa7e1d3a8d12",
+          "bytes": 266904
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/tsubasa/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "1b9a59a1091dbecbe6217f939a52ed4f695a76dba10784511ed24d2700218da7",
+          "bytes": 224516
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/tsubasa/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "227da8920639e7da4147fa0e616b3311b5ea165e96583f080eb5dfc3f6174801",
+          "bytes": 230348
+        }
+      ]
+    },
+    {
+      "theme": "magic",
+      "heroId": "YAMATO",
+      "kind": "true",
+      "sourceSha256": "d2fb6d8c0c9d465c89fc354294d828dc08e965847d2f027d44b1d6e4e4813c1a",
+      "files": [
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/yamato/1.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "095d6428457132c5b5e8dbd97f816dbb7cf38d51c554547bd3f59bd77276822f",
+          "bytes": 273094
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/yamato/2.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "22970799ef6df3dd4553b34f1c3a429e83b6019d9df2f261ae75a62c54f0cdf0",
+          "bytes": 266344
+        },
+        {
+          "path": "public/sprites/endings/summer-expansion/magic/true/yamato/3.webp",
+          "width": 1024,
+          "height": 1024,
+          "sha256": "6ae5b2d4afc614e557417e8dd71524e5292eec2bfc24907e394fef9227185bfa",
+          "bytes": 223846
+        }
+      ]
+    }
+  ]
+}

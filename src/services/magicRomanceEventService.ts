@@ -9,6 +9,7 @@ import {
 } from '../data/magicVacationRomanceDialogue';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { getMagicFriendshipRoutesForHero, type MagicFriendshipRoute } from '../data/magicFriendshipRoutes';
+import { getMagicSummerFriendshipEnding } from '../data/magicSummerFriendshipEndings';
 
 interface MagicEventOption {
   label: string;
@@ -442,6 +443,7 @@ const buildFriendshipEndingEvent = (
   route: MagicFriendshipRoute,
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   setEventResultLog: (log: string | null) => void,
+  vacation = false,
 ): MagicRomanceGameEvent => {
   const friendName = getMagicCharacterName(route.friendHeroId);
   const choices = [
@@ -451,9 +453,9 @@ const buildFriendshipEndingEvent = (
   ];
 
   return {
-    title: route.endingTitle,
-    description: `${route.endingText}\n\nこれは恋愛ではなく、何周しても選び直したくなる友情の終着点だ。`,
-    imageKey: route.imageKey,
+    title: vacation ? getMagicSummerFriendshipEnding(route.id).title[0] : route.endingTitle,
+    description: vacation ? getMagicSummerFriendshipEnding(route.id).description[0] : `${route.endingText}\n\nこれは恋愛ではなく、何周しても選び直したくなる友情の終着点だ。`,
+    imageKey: vacation ? `magic-friendship-summer:${route.heroId}:${route.friendHeroId}` : route.imageKey,
     options: choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `友情ルート完了 / ${choice.text}`,
@@ -634,7 +636,7 @@ export const generateMagicRomanceSelectionEvent = (
               };
             });
             setEventData(stage >= 2
-              ? buildFriendshipEndingEvent(route, setGameState, setEventResultLog)
+              ? buildFriendshipEndingEvent(route, setGameState, setEventResultLog, vacation)
               : buildFriendshipRouteEvent(route, setGameState, setEventResultLog));
           },
         };

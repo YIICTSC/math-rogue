@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "SAKUYA",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/male-characters/sakuya-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for SAKUYA. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Sakuya walked the shore, looking at the battle’s traces. Because victory did not erase everything, he searched for what he could do now. Middle scene: Friends brought tools while Sakuya repaired the coastal path. Their help showed that atonement need not mean suffering alone. Bottom scene: Sakuya stopped work and watched the sea with his friends. Rest, return, continue: he tried allowing himself that ordinary rhythm.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-6394d919-0420-46b3-9be9-26e96a723800.png"
+}

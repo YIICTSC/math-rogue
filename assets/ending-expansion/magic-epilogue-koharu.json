@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "KOHARU",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/characters/heroine-07-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for KOHARU. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Koharu sent news of the safe shore on the morning wind. With the spirit tree informed, she could begin her own holiday. Middle scene: Walking the beach, Koharu picked up litter with friends. Sharing a guardian’s work even meant finding more shells together. Bottom scene: She added a coastal plant map to her school garden plans. The world she protected reached beyond one tree and into the wider world.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-b0ddce1c-8a94-46ea-bc0e-da87188df12f.png"
+}

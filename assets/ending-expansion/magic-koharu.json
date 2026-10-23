@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "KOHARU",
+  "kind": "true",
+  "reference": "public/sprites/magic/vacation-characters/heroine-07-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue; magic protagonist KOHARU, summer true ending after Chapter 50. Image 1 is an identity and summer-costume reference ONLY: preserve the SAME face, gender, hair, proportions, accessories and costume in every scene. Never include its checkerboard background. One tall atlas of THREE EXACTLY EQUAL SQUARE FULL-BLEED SCENES stacked top to bottom, target 1024x3072. No frames, no gutters, no overlapping subjects across scene boundaries. Each square is an independent emotionally acted CG, not a repeated pose. Top scene: Freed of the surveillance net, wind from the spirit tree reached the sea. Koharu was no longer its lone guardian, but one of many tending it. Middle scene: Even after a miracle, litter remained on the shore. Sharing bags with her friends, Koharu protected the sea through ordinary care. Bottom scene: She shared a nature map linking the shore and the academy. Behind her opened paths where anyone could become a guardian. All three scenes are on or near a picturesque summer seashore. Polished hand-painted anime RPG CG matching the character reference, detailed environments, readable storytelling, wholesome nonsexual vacation adventure. NO text, captions, letters, symbols resembling writing, numbers, UI or watermarks. Any notebooks have blank pages. Avoid added identifiable protagonists; background companions may be soft silhouettes only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-b62cda02-e4a7-44b9-87d5-ec37b40a7331.png"
+}

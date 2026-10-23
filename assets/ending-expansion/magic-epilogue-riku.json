@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "RIKU",
+  "kind": "epilogue",
+  "reference": "public/sprites/magic/male-characters/riku-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three square story CGs stacked vertically in one 1024x3072 atlas, exactly equal full-bleed scenes, no gutters. Original wholesome school-adventure RPG Learning Rogue, summer epilogue for RIKU. The supplied school-uniform reference image(s) are FACE, HAIR, GENDER and PERSONALITY references only. Dress every character in fully covered loose summer casual clothing: opaque short-sleeved collared shirt, long loose trousers or knee-length skirt, flat shoes; use the character’s signature color as trim. All torsos, shoulders, waist, hips and upper legs covered. No swimsuits, no beachwear, no revealing or tight clothing. Story action: Top scene: Riku checked his watch once by the shore, then put it away. He could judge the day after living it, without looking ahead. Middle scene: While the fishing line stayed still, Riku listened to his friends. Even uneventful time could be enjoyable when shared. Bottom scene: At the pier, Riku promised another visit. Without knowing the outcome, he could still decide to show up.  Emphasize friendly expressive faces and concrete everyday activity in a tasteful summer seaside town, beach-house terrace, park, pier or shaded promenade. Use medium or wide narrative shots, never body-focused framing. Platonic wholesome all-ages mood, respectful character acting, detailed painted anime RPG environments. Preserve identifiable faces and hair, never copy checkerboard. NO writing, speech balloons, captions, text, UI, labels, numbers, logos or watermarks. Blank notebook pages only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-07f97cdc-29dc-43e5-ba4f-674e500ea626.png"
+}

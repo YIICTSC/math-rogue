@@ -1,0 +1,9 @@
+{
+  "theme": "magic",
+  "heroId": "REN",
+  "kind": "true",
+  "reference": "public/sprites/magic/vacation-male-characters/ren-before.webp",
+  "prompt": "Use case: illustration-story. Asset type: three-scene ending storyboard atlas for the Japanese RPG Learning Rogue; magic protagonist REN, summer true ending after Chapter 50. Image 1 is an identity and summer-costume reference ONLY: preserve the SAME face, gender, hair, proportions, accessories and costume in every scene. Never include its checkerboard background. One tall atlas of THREE EXACTLY EQUAL SQUARE FULL-BLEED SCENES stacked top to bottom, target 1024x3072. No frames, no gutters, no overlapping subjects across scene boundaries. Each square is an independent emotionally acted CG, not a repeated pose. Top scene: The ledger’s final line of fire vanished. Ren lowered his wind barrier. There was time to live beside others, not only shield them. Middle scene: On their beach walk, he matched everyone’s pace instead of scouting ahead. He listened to stories about shells rather than warnings from the wind. Bottom scene: On the still evening road, Ren waved a free hand. His promise to protect now included a simpler wish: to play together again. All three scenes are on or near a picturesque summer seashore. Polished hand-painted anime RPG CG matching the character reference, detailed environments, readable storytelling, wholesome nonsexual vacation adventure. NO text, captions, letters, symbols resembling writing, numbers, UI or watermarks. Any notebooks have blank pages. Avoid added identifiable protagonists; background companions may be soft silhouettes only.",
+  "tool": "image_gen.imagegen",
+  "source": "/Users/admin/.codex/generated_images/019ffe33-7620-79d1-b505-3e5742c4e554/exec-00871285-d4b0-416c-9e74-74125583d514.png"
+}
