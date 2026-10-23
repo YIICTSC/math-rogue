@@ -1,3 +1,4 @@
+import {paperBridgeVoice} from '../data/paperPlaneBridge';
 import { cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
 import { summerEndingVoiceLimitMs } from '../data/summerEndingVoices';
 import { kochoSuperVoice } from '../mini-games/kocho/superMoves';
@@ -372,7 +373,7 @@ class AudioService {
 
   public handleAppBackground() {
       this.stopKochoVoices();
-      this.stopCardClubVoices();
+      this.stopCardClubVoices(); this.stopPaperPlaneVoices();
       if (this.backgroundPlaybackEnabled) return;
       if (this.appIsActive) {
           this.appIsActive = false;
@@ -593,7 +594,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.voiceVolume === 0) { this.stopKochoVoices(); this.stopCardClubVoices(); }
+      if (this.voiceVolume === 0) { this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1597,7 +1598,7 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       this.applyBgmVolume();
-      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); }
+      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1840,7 +1841,7 @@ class AudioService {
   ): Promise<boolean> {
       void this.resumeAudioContext();
       for (const path of paths) {
-          if ((name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
+          if ((name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
@@ -1952,7 +1953,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2397,10 +2398,35 @@ class AudioService {
       }
   }
 
+  private cancelPaperPlaneVoiceWait: (()=>void)|null=null;
+
+  public playPaperPlaneVoice(id:string,key:string) {
+      const clip=paperBridgeVoice(id,key);
+      if(!clip||!this.canPlayConversationVoice())return Promise.resolve(false);
+      this.stopPaperPlaneVoices();
+      const name=`paper-plane-voice-${id}-${key}`;
+      const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
+      this.sfxPlaybackGenerations.set(name,generation);
+      let cancelWait:()=>void=()=>{};
+      const canceled=new Promise<boolean>(resolve=>{cancelWait=()=>resolve(false);this.cancelPaperPlaneVoiceWait=cancelWait;});
+      return Promise.race([this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.maxDurationMs,false,generation,true),canceled]).finally(()=>{
+          if(this.cancelPaperPlaneVoiceWait===cancelWait)this.cancelPaperPlaneVoiceWait=null;
+      });
+  }
+  public stopPaperPlaneVoices() {
+      this.cancelPaperPlaneVoiceWait?.();
+      this.cancelPaperPlaneVoiceWait=null;
+      const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
+      for(const name of names)if(name.startsWith('paper-plane-voice-')) {
+          this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
+          this.stopActiveSfx(name);
+      }
+  }
+
   public playCardClubVoice(heroId:string,event:CardClubVoiceEvent) {
       const clip=cardClubVoice(heroId,event);
       if(!clip||!this.canPlayConversationVoice())return Promise.resolve(false);
-      this.stopCardClubVoices();
+      this.stopCardClubVoices(); this.stopPaperPlaneVoices();
       const name=`card-club-voice-${heroId}-${event}`;
       const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
       this.sfxPlaybackGenerations.set(name,generation);

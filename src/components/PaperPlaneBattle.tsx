@@ -1,3 +1,5 @@
+import {PaperBattleTitle,PaperCaptainPicker,PaperBridgeHud,PaperBridgeReport,PAPER_CAPTAINS,usePaperBridge} from './PaperPlaneBridge';
+import {PAPER_RIVALS,PAPER_DEPUTY_ENGLISH} from '../data/paperPlaneBridge';
 
 import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
@@ -1410,7 +1412,7 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void, languageMode?: 
                     <div className="mb-2 font-bold text-cyan-300">{t('POOLの循環ルール')}</div>
                     <p>{t('バトル開始時とFIRE後、生成プールから数値と色を1つずつ取り出してエネルギーカードを作ります。')}</p>
                     <p className="mt-1">{t('使ったカードはそのターンの解決後にクールプールへ移り、生成プールが空になるとクールプールがまとめて生成プールへ戻って再利用されます。')}</p>
-                    <p className="mt-1">{t('休暇・パイロット特性・イベントで追加された数値や色はプールに残り続け、以後の循環にも混ざります。')}</p>
+                    <p className="mt-1">{t('休暇・副官特性・イベントで追加された数値や色はプールに残り続け、以後の循環にも混ざります。')}</p>
                 </div>
 
                 <button data-gamepad-back onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">{t('閉じる')}</button>
@@ -1820,7 +1822,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     const [isEndless, setIsEndless] = useState(savedData?.isEndless || false);
     
     // --- SETUP PHASE STATES ---
-    const [setupStep, setSetupStep] = useState<'SHIP'|'PILOT'|'MISSION'>('SHIP');
+    const [showTitle,setShowTitle]=useState(!debugPreview);
+    const [captainId,setCaptainId]=useState<string>(PAPER_CAPTAINS.some(h=>h.id===savedData?.captainId)?savedData.captainId:'high-school-warrior');
+    const [deputyId,setDeputyId]=useState<string>(PILOTS.some(p=>p.id===savedData?.deputyId)?savedData.deputyId:(PILOTS.find(p=>savedData?.player?.talents?.some((t:Talent)=>t.id===p.intrinsicTalent.id))?.id||'PL_HERO'));
+    const rival=PAPER_RIVALS[(Math.max(1,stage)-1)%PAPER_RIVALS.length];
+    const bridge=usePaperBridge(captainId,deputyId,rival.id);
+    const [bridgeFaceHost,setBridgeFaceHost]=useState<HTMLDivElement|null>(null);
+    const [setupStep, setSetupStep] = useState<'CAPTAIN'|'SHIP'|'PILOT'|'MISSION'>('CAPTAIN');
     const [selectedShipId, setSelectedShipId] = useState<string>('SHIP_DEFAULT');
     const [pilotOptions, setPilotOptions] = useState<Pilot[]>([]);
     const [selectedPilotIndex, setSelectedPilotIndex] = useState<number>(-1);
@@ -1901,15 +1909,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         pilotOptions.forEach(pilot => markPaperPlanePilotDiscovered(pilot.id));
     }, [rewardOptions, pendingPart, newlyUnlockedPart, player.parts, player.partInventory, enemy.parts, pilotOptions, debugPreview]);
 
+    useEffect(()=>{if(!showTitle&&phase==='BATTLE')bridge.say('launch');else if(showTitle||['SETUP','TUTORIAL','VACATION','HANGAR'].includes(phase))bridge.stop();},[showTitle,phase,stage]);
+    useEffect(()=>()=>audioService.stopPaperPlaneVoices(),[]);
+
     // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
     const saveStateNow = useCallback(() => {
         if (debugPreview || phase === 'GAME_OVER' || phase === 'SETUP' || phase === 'TUTORIAL') return;
         storageService.savePaperPlaneState({
-            phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
+            phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless, captainId, deputyId,
             vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats
         });
-    }, [debugPreview, phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats]);
+    }, [debugPreview, phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless, captainId, deputyId, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats]);
 
     useEffect(() => {
         if (debugPreview) return;
@@ -1968,15 +1979,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     }, [phase, stage, player.starCoins, player.hp, selectedMissionLevel, debugPreview]);
 
     useEffect(() => {
-        // Initial BGM check based on loaded phase
-        if (phase === 'BATTLE') audioService.playBGM('paper_plane_battle');
-        else if (['VACATION', 'SHOP', 'HANGAR', 'REWARD_SELECT', 'REWARD_EQUIP', 'UPGRADE_EVENT'].includes(phase)) audioService.playBGM('paper_plane_vacation');
-        else audioService.playBGM('paper_plane_setup');
-
-        if (phase === 'SETUP') {
+        if (phase === 'SETUP' && !showTitle) {
              initPilotRoll();
         }
     }, []);
+
+    useEffect(()=>{
+        const bgm=showTitle?'paper_plane_setup':phase==='BATTLE'?'paper_plane_battle':['VACATION','HANGAR','REWARD_SELECT','REWARD_EQUIP'].includes(phase)?'paper_plane_vacation':['SETUP','TUTORIAL'].includes(phase)?'paper_plane_setup':null;
+        if(bgm)audioService.playBGM(bgm);
+    },[showTitle,phase]);
 
     // --- SETUP LOGIC ---
     const initPilotRoll = () => {
@@ -2046,6 +2057,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         // Init Game Data
         const shipTemplate = SHIPS.find(s => s.id === selectedShipId)!;
         const pilot = pilotOptions[selectedPilotIndex];
+        setDeputyId(pilot.id);
         if (!debugPreview) {
             storageService.markMiniGameDiscovered('PAPER_PLANE', `paper-ship-${shipTemplate.id}`);
             markPaperPlanePilotDiscovered(pilot.id);
@@ -2093,7 +2105,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     const returnToSetup = () => {
         setShowMissionQuiz(false);
         setPhase('SETUP');
-        setSetupStep('SHIP');
+        setSetupStep('CAPTAIN');
         setStage(1);
         setIsEndless(false);
         setNewlyUnlockedPart(null);
@@ -2540,6 +2552,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             fuel: willHealFuel ? Math.min(prev.maxFuel, prev.fuel + 1) : prev.fuel
         }));
         setBattleStats(nextBattleStats);
+        bridge.say(part.type==='CANNON'||part.type==='MISSILE'?'ready':'load');
 
         const noConsumeTriggered = part.specialEffect === 'NO_CONSUME_CHANCE' &&
             deterministicRoll(`${part.id}:${card.id}:${turn}:${hand.length}:${card.value}:${card.color}`) < 0.35;
@@ -2571,10 +2584,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         if (nextY < 0 || nextY > MAX_ROWS - SHIP_HEIGHT) { addLog("これ以上移動できません"); return; }
 
         setPlayer(prev => ({ ...prev, yOffset: nextY, fuel: prev.fuel - 1 }));
+        bridge.say('move');
         audioService.playSound('select');
     };
 
     const resolveCombat = async () => {
+        if(animating)return;
+        bridge.say('fire');
         setAnimating(true);
         setSelectedCardId(null);
         
@@ -2757,6 +2773,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         });
 
         setClashState({ active: false, phase: 'DONE', data: [] });
+        if (damageTakenThisRound > 0 && tempPlayerHp>0 && tempEnemyHp>0) bridge.say(tempPlayerHp<=player.maxHp*.3?'critical':'damage');
+        if(tempEnemyHp<enemy.hp&&tempEnemyHp>0&&tempPlayerHp>0)bridge.say('hit');
+        if(tempEnemyHp<=0&&tempPlayerHp>0)bridge.say('win');
+        if(tempPlayerHp<=0)bridge.say('lose');
         if (damageTakenThisRound > 0) {
             setBattleStats(prev => ({
                 ...prev,
@@ -3732,11 +3752,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
 
     // --- MAIN RENDER ---
     
+    if(showTitle)return <PaperBattleTitle languageMode={languageMode} resume={!!savedData&&savedData.phase!=='SETUP'&&savedData.phase!=='TUTORIAL'} onResume={()=>setShowTitle(false)} onStart={()=>{storageService.clearPaperPlaneState();returnToSetup();setShowTitle(false);}} onHelp={()=>{setPhase('TUTORIAL');setShowTitle(false);}} onBack={handleBack}/>;
+
     if (phase === 'SETUP') {
         const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
 
         return (
-            <div data-gamepad-navigation-root data-gamepad-initial-scope={`paper-setup-${setupStep}`} className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
+            <div data-gamepad-navigation-root data-gamepad-initial-scope={setupStep==='CAPTAIN'?'paper-setup-captains':`paper-setup-${setupStep}`} data-setup-step={setupStep} className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
                 <div className="paper-plane-setup-header relative z-10 flex items-center mb-2 md:mb-6">
                      <button data-gamepad-zone="paper-setup-top" data-gamepad-order={0} onClick={handleBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
@@ -3747,12 +3769,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 </div>
 
                 <div className="paper-plane-setup-tabs relative z-10 flex justify-center mb-3 md:mb-8 gap-2 md:gap-4 border-b border-gray-700 pb-1 md:pb-2">
+                     <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={-1} onClick={()=>setSetupStep('CAPTAIN')} className={`px-3 py-2 rounded-t-lg font-bold text-xs md:text-base ${setupStep==='CAPTAIN'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-400'}`}>{languageMode==='ENGLISH'?'Captain':t('艦長')}</button>
                      <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={0} onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('機体')}</button>
-                     <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={1} onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('パイロット')}</button>
+                     <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={1} onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{languageMode==='ENGLISH'?'First officer':t('副官')}</button>
                      <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={2} onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('任務')}</button>
                 </div>
 
                 <div className="paper-plane-setup-content relative z-10 flex-1 min-h-0 max-w-4xl mx-auto w-full">
+                    {setupStep==='CAPTAIN'&&<div className="h-full min-h-0 flex flex-col"><PaperCaptainPicker value={captainId} onChange={setCaptainId} languageMode={languageMode}/><button data-gamepad-zone="paper-captain-next" data-gamepad-up-zone="paper-setup-captains" className="shrink-0 min-h-[44px] bg-cyan-700 rounded px-6 py-2 self-center my-2" onClick={()=>setSetupStep('SHIP')}>{languageMode==='ENGLISH'?'Choose your ship →':t('機体を選ぶ')+' →'}</button></div>}
                     {setupStep === 'SHIP' && (
                          <div className="paper-plane-ship-grid grid grid-cols-3 gap-2 md:gap-6">
                              {SHIPS.map(ship => {
@@ -3828,7 +3852,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                             <div className="paper-plane-pilot-art w-14 h-14 md:w-20 md:h-20 mb-1 md:mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
                                                  <img src={getPaperPlanePilotImage(pilot.id)} alt="" className="w-full h-full object-contain [image-rendering:pixelated]" />
                                             </div>
-                                            <div className="paper-plane-pilot-name font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{t(pilot.name)}</div>
+                                            <div className="paper-plane-pilot-name font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{languageMode==='ENGLISH'?(PAPER_DEPUTY_ENGLISH[pilot.id]||t(pilot.name)):t(pilot.name)}</div>
                                         </div>
 
                                         <div className="paper-plane-pilot-main-trait paper-plane-scrollable-copy text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start overflow-y-auto overscroll-contain">
@@ -3956,7 +3980,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                     <p className="text-yellow-400 font-bold">{t('・オレンジ > 青 > 白 (白スロットには何色でもOK！)')}</p>
                     <p>{t('・エネルギーを入れるだけで出力が出ます。')}</p>
                     <p>{t('・全スロットを埋めると起動ボーナスが加算されます！')}</p>
-                    <p className="text-purple-400 font-bold">{t('・パイロットの才能で戦略が変わる！')}</p>
+                    <p className="text-purple-400 font-bold">{languageMode==='ENGLISH'?'Your first officer’s talents shape your strategy.':t('・副官の才能で戦略が変わる！')}</p>
                     <p>{t('・モジュール長押しで詳細を確認できます。')}</p>
                     <p className="text-green-400 font-bold">{t('・戦闘後は「休暇」で機体を強化しよう！')}</p>
                     <p className="text-blue-400 font-bold mt-2">{t('※オートセーブ機能搭載！')}</p>
@@ -3978,6 +4002,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                  <RenderTooltip />
                  <Trophy size={64} className="paper-plane-reward-trophy text-yellow-400 mb-4 animate-bounce"/>
                  <h2 className="paper-plane-reward-title text-4xl font-bold mb-4 text-white">VICTORY!</h2>
+                 <PaperBridgeReport captain={captainId} current={bridge.current} won languageMode={languageMode}/>
                  <div className="paper-plane-reward-coins text-yellow-300 text-2xl font-bold mb-4 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
                      <Star size={24} className="mr-2 fill-current"/> +{earnedCoins}
                  </div>
@@ -4382,8 +4407,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             )}
             
             {/* Header */}
-            <div className="h-12 bg-black border-b border-cyan-900 flex justify-between items-center px-4 shrink-0 z-10">
-                <div className="flex items-center gap-4">
+            <div ref={setBridgeFaceHost} className="relative h-12 bg-black border-b border-cyan-900 flex justify-between items-center px-4 shrink-0 z-10">
+                <div className="paper-plane-ship-status flex items-center gap-4">
                     <div className="flex items-center text-green-400 font-bold"><Heart size={16} className="mr-1"/> {player.hp}/{player.maxHp}</div>
                     <div className="flex items-center text-orange-400 font-bold"><Wind size={16} className="mr-1"/> {player.fuel}/{player.maxFuel}</div>
                 </div>
@@ -4403,6 +4428,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 <Suspense fallback={null}>
                     <PaperPlaneFleet3D player={player} enemy={enemy} attacking={clashState.active} />
                 </Suspense>
+
+                <PaperBridgeHud faceHost={bridgeFaceHost} captain={captainId} deputy={deputyId} rival={rival} current={bridge.current} critical={player.hp<=player.maxHp*.3} languageMode={languageMode}/>
 
                 {/* Clash Overlay */}
                 <ClashOverlay clashState={clashState} />
@@ -4495,6 +4522,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             {(phase === 'VICTORY' || phase === 'GAME_OVER') && (
                 <div data-gamepad-modal data-gamepad-initial-scope={`paper-result-${phase}`} className="paper-plane-result-overlay absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
                     <div className="paper-plane-result-panel bg-slate-800 p-8 rounded-xl border-4 border-slate-600 text-center shadow-2xl">
+                        <PaperBridgeReport captain={captainId} current={bridge.current} won={phase==='VICTORY'} languageMode={languageMode}/>
                         {phase === 'VICTORY' && (
                             <div className="paper-plane-victory-content">
                                 <Trophy size={64} className="paper-plane-result-icon text-yellow-400 mx-auto mb-4 animate-bounce"/>
@@ -4525,9 +4553,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         onClick={returnToSetup} 
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >
-                                        <Settings className="mr-2"/> {t('機体選択へ')}
+                                        <Settings className="mr-2"/> {languageMode==='ENGLISH'?'Crew & ship setup':t('艦長・機体選択へ')}
                                     </button>
-                                    <button onClick={handleBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">{t('タイトルへ戻る')}</button>
+                                    <button onClick={()=>{bridge.stop();setShowTitle(true);}} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">{t('タイトルへ戻る')}</button>
                                 </div>
                             </div>
                         )}
@@ -4542,9 +4570,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         onClick={returnToSetup}
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >
-                                        <Settings className="mr-2"/> {t('機体選択へ')}
+                                        <Settings className="mr-2"/> {languageMode==='ENGLISH'?'Crew & ship setup':t('艦長・機体選択へ')}
                                     </button>
-                                    <button onClick={handleBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">{t('タイトルへ戻る')}</button>
+                                    <button onClick={()=>{bridge.stop();setShowTitle(true);}} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">{t('タイトルへ戻る')}</button>
                                 </div>
                             </div>
                         )}

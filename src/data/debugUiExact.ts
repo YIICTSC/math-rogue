@@ -1,3 +1,4 @@
+import {PAPER_BRIDGE_ENGLISH,PAPER_BRIDGE_HIRAGANA} from './paperPlaneBridgeCopy';
 import { POKER_HERO_ENGLISH, POKER_HERO_HIRAGANA } from '../mini-games/after-school-poker/heroes';
 import { SUMMER_ENDING_ENGLISH, SUMMER_ENDING_HIRAGANA } from './summerEndingTranslations';
 import { MAHJONG_ENGLISH, MAHJONG_HIRAGANA } from '../mini-games/mahjong/copy';
@@ -28,6 +29,7 @@ import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...PAPER_BRIDGE_ENGLISH,
   ...SUMMER_ENDING_ENGLISH,
   ...KOCHO_ENGLISH,
   ...MAHJONG_ENGLISH,
@@ -376,6 +378,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...PAPER_BRIDGE_HIRAGANA,
   ...SUMMER_ENDING_HIRAGANA,
   ...KOCHO_HIRAGANA,
   ...MAHJONG_HIRAGANA,

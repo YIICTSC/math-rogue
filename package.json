@@ -148,7 +148,10 @@
     "test:vr-camera": "node scripts/test-vr-camera.mjs",
     "test:vr-view-browser": "node scripts/test-vr-view-browser.mjs",
     "test:vr-solo": "node scripts/test-vr-solo-battle.mjs",
-    "test:vr-solo-browser": "node scripts/test-vr-solo-browser.mjs"
+    "test:vr-solo-browser": "node scripts/test-vr-solo-browser.mjs",
+    "test:paper-plane:bridge": "node scripts/test-paper-plane-bridge.mjs",
+    "test:paper-plane:bridge:browser": "node scripts/test-paper-plane-bridge-browser.mjs",
+    "test:paper-plane:voices": "node scripts/test-paper-plane-voices.mjs && node scripts/test-paper-plane-bridge-browser.mjs --voices"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

@@ -1,0 +1,435 @@
+{
+  "clips": {
+    "high-school-warrior/fire": {
+      "sha256": "4fe59ecbab9b8e705922f0e73396e3bb4d280b50308b1b4517168bf0bf58d999",
+      "required_readings": [
+        "うちかたはじめ"
+      ],
+      "recognized": "打ち方、はじめ!",
+      "normalized": "うちかたはじめ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-warrior/damage": {
+      "sha256": "2caf5a30273e0e3ffc8dee579e8912cac077a912fe095678f40bc0fd76759e6e",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな 被害を報告しろ",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-caretaker/fire": {
+      "sha256": "975b8f12a0ba577a93c7d899a4345a2476033e2eed2cacc79ca36301e13d7e1c",
+      "required_readings": [
+        "うちかたはじめ"
+      ],
+      "recognized": "サゲン!打ち方始め!",
+      "normalized": "さげんうちかたはじめ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-assassin/move": {
+      "sha256": "7d96827c1985418ca477a1245c117bd6d5b82fdb502f75c79e2edf018f345c2f",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ 回避運動",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-mage/damage": {
+      "sha256": "1bbb6a0bfab8d2c2e3861e82c53de176877aa9c2f29258fb45e8e6c6a5f7582d",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな!被害を報告しろ!",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-bard/move": {
+      "sha256": "d721b74f6f7a196fe7570d82349569f1b01433d82de8dcd842ec82dd908916aa",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ、回避運動!",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-librarian/fire": {
+      "sha256": "b50fc30be5478fbdd0b0f96f842212b30014a6525e77334bae9d82e0b8da504a",
+      "required_readings": [
+        "うちかたはじめ"
+      ],
+      "recognized": "標的を捉えました。撃ち方、はじめ。",
+      "normalized": "ひょうてきをとらえましたうちかたはじめ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-librarian/damage": {
+      "sha256": "9763bde0564181cf1cf2d1c5f67cf514f4f148a5b2298d4e833df09b2e39fbc2",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな、被害を報告しろ!",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "high-school-gardener/move": {
+      "sha256": "bcd4f520052f0424ef4fd01aa71684bac8e8134aab323ea2fb96bf4a8992e337",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ回避運動",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-akari/fire": {
+      "sha256": "0097467e9c41a0edf74e1cb2c5fb629b0e1426ef7a0433ffcaec3d3520a9e75a",
+      "required_readings": [
+        "うちかたはじめ"
+      ],
+      "recognized": "星の光を束ねて打ち方、はじめ!",
+      "normalized": "ほしのひかりをたばねてうちかたはじめ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-akari/damage": {
+      "sha256": "d2ec6bd7c715899479a8bb109586536d5099ea3a503316bfb64fd8ba102a7686",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな!被害を報告しろ!",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-hiyori/move": {
+      "sha256": "82519a39a8352c958aa57f1edf4c85b6d6cabc22e3b4840b7c11462ec6822982",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ、回避運動!",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-tsubasa/damage": {
+      "sha256": "bd019ea987731be51ade69f169a484be899bb8c74aa7039f9425a86a47d80fce",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな!被害を報告しろ!",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-madoka/move": {
+      "sha256": "1d225c0d6b33729a0af832aae06a3bc6d2490f3496b5ed7ff668c569af40cef4",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ回避運動",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-koharu/damage": {
+      "sha256": "09664956da1bc6dd0ae624fca3df2617aa818bdcebea962c59905028d5773c47",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな 被害を報告しろ",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-sera/fire": {
+      "sha256": "102fdbfb595759db0b88adade2a7966e41520ea36b7a79ef4033330255fe8649",
+      "required_readings": [
+        "うちかたはじめ"
+      ],
+      "recognized": "光よ、航路を開いて、打ち方、始め!",
+      "normalized": "ひかりよこうろをひらいてうちかたはじめ",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "magic-sera/move": {
+      "sha256": "24f3f87586765a651f76c6eb9fd540bf5a329a665da36654d00b8285dd968719",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ、回避運動!",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-ren/damage": {
+      "sha256": "98acd92a9896e027b2f73a05def69c067286784be6f4b411dbf4f028c16f4c85",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな! 被害を報告しろ!",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-minato/move": {
+      "sha256": "283f093aa14fc81e66375ca85d2f0bd8a53e789d476e9addb47081b5a2ae7a3e",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ回避運動",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-riku/damage": {
+      "sha256": "ff4dc3915c46e33fdcba2b93fb5292db8239841e168eb573639dc6b01b0438d3",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな! 被害を報告しろ!",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-leon/move": {
+      "sha256": "430a453ed403a6f33d1a939dd43266bea067a8ef09e0f075173371d3e7c49c00",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "水力を右へ、回避運動!",
+      "normalized": "すいりょくをみぎへかいひうんどう",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-elliot/fire": {
+      "sha256": "34a0e6a75e8247bc460d6340e5fa1d046b382e5bf14f7ae3602f1495e94850a0",
+      "required_readings": [
+        "うちかたはじめ"
+      ],
+      "recognized": "保守を同評価に打ち方はじめ",
+      "normalized": "ほしゅをどうひょうかにうちかたはじめ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "magic-elliot/damage": {
+      "sha256": "cd593b7db2a2b65e758fa3506c2bfa4941804d0ebc7666d36abc8efb0563fbca",
+      "required_readings": [
+        "うかつな"
+      ],
+      "recognized": "うかつな被害を報告しろ",
+      "normalized": "うかつなひがいをほうこくしろ",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_HERO/ready": {
+      "sha256": "ca1750e8c8bec4574be90697373d0b5496fd58465ebe6b07ad4fb4677f848089",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "サゲンブラスターよーい",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_HERO/move": {
+      "sha256": "93939b25c0b8f1978e085a37ad51e55ba9e5efee21b5e8cdcb98ffb17376251c",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避航路確保しました",
+      "normalized": "かいひこうろかくほしました",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_SPORT/ready": {
+      "sha256": "39b826158de56797ed7e9254ea8c15f1d9ffe6683955af59ab4325763bb4462f",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "サゲンブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_SPORT/move": {
+      "sha256": "f8f092e2dcb9fa6a93f2165cdad7f7fad475ef5cdce1a7b740f72398e556e990",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避コウロ確保しました",
+      "normalized": "かいひこうろかくほしました",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_BROADCAST/ready": {
+      "sha256": "eafcac33beb45e81b72f70f011d1d625c6c2e528d99e2fd1180df97f2018e854",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "さげんブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_BROADCAST/move": {
+      "sha256": "9226cf76260e3238de04b2e19f2005d3888716b7d24f02cc11bd22125d3bcd6c",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "開飛行路 確保しました",
+      "normalized": "かいひこうみちかくほしました",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_TRACK/ready": {
+      "sha256": "0f6939b41f9ef4ed1721c867126d648377a3f6e34228b55fd425b278a68b6bb2",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "さげん ブラスター 用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_TRACK/move": {
+      "sha256": "1aa94ab14f489860238b010c7c3398e12c13781f4d9634ac3e7d763164ec3e2c",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避航路、確保しました。",
+      "normalized": "かいひこうろかくほしました",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_GARDEN/ready": {
+      "sha256": "1936f97f059a5de6de3c4bfe814cf6abeb3ef1964ce7e725e74fca5a977492a4",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "サゲンブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_GARDEN/move": {
+      "sha256": "8ae54430a5e7e12109076bfd8ca78fc01ee5ceb7f5006968244f6fef68a30ba0",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避交路 確保しました",
+      "normalized": "かいひこうみちかくほしました",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_MUSIC/ready": {
+      "sha256": "5b5adb18e73d914c610cbff982b5d02d5c4de2d0dac7e16fff2e0bf40d79184f",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "サゲンブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_MUSIC/move": {
+      "sha256": "2b38fa0f81da76c83f3ca54ff620585cfe6abde20e5cd9db8ce16bc0c949f76a",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避航路、確保しました。",
+      "normalized": "かいひこうろかくほしました",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "PL_SWEETS/ready": {
+      "sha256": "278b6713d22a11f96976394480d43fe9fa30ad2ab75eaa0997234d952cd2d5ed",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "サゲンブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_SWEETS/move": {
+      "sha256": "60167bd14daad04a2150438ea2d92eaf9936b03bc7183e5c198ebf77536ca77d",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "開飛行路 確保しました",
+      "normalized": "かいひこうみちかくほしました",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_STUDENT_PRES/ready": {
+      "sha256": "288bc90bc3fb09a5d98e85f3d4050f6aa22847fba26044862004bd2d351a6f43",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "さげん ブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_STUDENT_PRES/move": {
+      "sha256": "64d0265a21842f5ddf12ed29fa09b1061eac6cff05d319b05bbbc12f38ade399",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避公路 確保しました",
+      "normalized": "かいひこうろかくほしました",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_BOXER/ready": {
+      "sha256": "4bdfd788cb352f2e9eb5b8588875708711462c4c4e81c56149b0e1c7cbf7f8fa",
+      "required_readings": [
+        "さげんぶらすたーようい"
+      ],
+      "recognized": "サゲンブラスター用意",
+      "normalized": "さげんぶらすたーようい",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "PL_BOXER/move": {
+      "sha256": "29ba522ff668078cfabcfc0e95f7df96b46566b2d8fa8e2815a151d9fe683d9b",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避航路、確保しました。",
+      "normalized": "かいひこうろかくほしました",
+      "missing": [],
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"
+    },
+    "rival-2/fire2": {
+      "sha256": "148078f8916b31e5ac0f731f1d418c91b8950faa2dc35a7ab29a9b9d56b9fb06",
+      "required_readings": [
+        "かいひ"
+      ],
+      "recognized": "回避先も予測のないです",
+      "normalized": "かいひさきもよそくのないです",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    },
+    "rival-3/encounter": {
+      "sha256": "dbcfca429004da32ea78338536bad1dbbd65b3d677f9cd3eed10b1465b3a328b",
+      "required_readings": [
+        "とうさん"
+      ],
+      "recognized": "ここから先は、父さん",
+      "normalized": "ここからさきはとうさん",
+      "missing": [],
+      "model": "Systran/faster-whisper-small"
+    }
+  },
+  "failed": []
+}
