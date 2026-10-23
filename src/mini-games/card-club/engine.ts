@@ -90,7 +90,7 @@ export function legalActions(s:ClubState,player=s.turn):Action[]{
   }
   if(s.game==='crazyeight'){
     const top=s.table.at(-1),play=p.hand.filter(c=>top===undefined||rank(c)===8||suit(c)===s.activeSuit||rank(c)===rank(top)).flatMap(c=>rank(c)===8?[0,1,2,3].map(suit=>({type:'play' as const,cards:[c],suit})):[{type:'play' as const,cards:[c]}]);
-    return [...play,...s.stock.length?[{type:'draw' as const}]:play.length?[]:[{type:'pass' as const}]];
+    return play.length?play:s.stock.length?[{type:'draw' as const}]:[{type:'pass' as const}];
   }
   if(s.game==='gofish'||s.game==='authors'){
     if(!p.hand.length)return s.stock.length?[{type:'draw'}]:[{type:'pass'}];

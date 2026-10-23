@@ -27,8 +27,8 @@ try{
   assert.deepEqual(marriagePlayable('66',[13,26],[{card:11}],1,true),[13,26]);
   assert.deepEqual(marriagePlayable('schnapsen',[8,12,24],[{card:11}],1,false),[8,12,24]);assert.equal(marriageValue(0),11);
  });
- check('Marriage declaration reveals just the pair and claims automatically at 66',()=>{
-  const s=make('66');s.turn=0;s.trump=0;s.players[0].hand=[11,12,9,8,10,0];s.extra.points=[30,0];
+ check('Marriage after a won trick reveals just the pair and claims automatically at 66',()=>{
+  const s=make('66');s.turn=0;s.trump=0;s.players[0].hand=[11,12,9,8,10,0];s.players[0].tricks=1;s.extra.points=[30,0];
   const a=legalActions(s).find(a=>a.double&&a.cards[0]===11);assert(a);act(s,a);assert.equal(s.phase,'round');assert.equal(s.players[0].score,3);assert.equal(s.players[0].hand.length,6);assert.equal(s.extra.classic.reveals.length,2);
  });
  check('Only Schnapsen can close before winning; closing prevents draws and marriage',()=>{

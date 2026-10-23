@@ -38,13 +38,13 @@ function apply(s:ClubState,a:Action){
  const card=a.cards![0];
  if(a.double){
   c.shown[i].push(suit(card));for(const rankOffset of [11,12])c.reveals.push({player:i,card:suit(card)*13+rankOffset});
-  const points=suit(card)===s.trump?40:20;e.points[i]+=points;c.notes.push({player:i,label:'marriage',points});record(s,'marriage',i,points,card);if(autoClaim(s,i))return;
+  const points=suit(card)===s.trump?40:20;if(s.players[i].tricks===0)c.pendingMarriage[i]+=points;else e.points[i]+=points;const label=s.players[i].tricks===0?'pendingMarriage':'marriage';c.notes.push({player:i,label,points});record(s,label,i,points,card);if(autoClaim(s,i))return;
  }
  removeCards(s,i,[card]);s.trick.push({player:i,card});record(s,'play',i,undefined,card);
  if(s.trick.length===1){s.turn=1-i;return;}
  const weight=(card:number)=>(suit(card)===s.trump?20:suit(card)===suit(s.trick[0].card)?10:0)+marriageStrength(card);
  const winner=weight(s.trick[0].card)>weight(s.trick[1].card)?s.trick[0].player:s.trick[1].player;
- s.players[winner].taken.push(...s.trick.map(t=>t.card));s.players[winner].tricks++;e.points[winner]+=s.trick.reduce((sum,t)=>sum+marriageValue(t.card),0);s.lastTrick=s.trick;s.trick=[];s.turn=winner;record(s,'trick',winner);
+ s.players[winner].taken.push(...s.trick.map(t=>t.card));s.players[winner].tricks++;if(c.pendingMarriage[winner]){e.points[winner]+=c.pendingMarriage[winner];c.notes.forEach(note=>{if(note.player===winner&&note.label==='pendingMarriage')note.label='marriage';});record(s,'marriage',winner,c.pendingMarriage[winner]);c.pendingMarriage[winner]=0;}e.points[winner]+=s.trick.reduce((sum,t)=>sum+marriageValue(t.card),0);s.lastTrick=s.trick;s.trick=[];s.turn=winner;record(s,'trick',winner);
  if(c.closedBy<0&&s.stock.length){s.players[winner].hand.push(s.stock.pop()!);s.players[1-winner].hand.push(s.stock.pop()!);e.indicator=s.stock.length?e.indicator:-1;}
  if(s.players.every(p=>!p.hand.length)){
   if(c.closedBy<0)e.points[winner]+=10;

@@ -18,6 +18,11 @@ export function ginHand(cards:number[]):GinHand{
  };
  const result=solve(0);if(cache.size>5000)cache.clear();cache.set(key,result);return result;
 }
+/** A knock is evaluated only after one legal discard from eleven physical cards. */
+export function ginKnock(hand:number[],discard:number,banned=-1):GinHand|null{
+ if(hand.length!==11||new Set(hand).size!==11||!hand.includes(discard)||discard===banned)return null;
+ const result=ginHand(hand.filter(card=>card!==discard));return result.points<=10?result:null;
+}
 /** Jointly choose defender melds and chained layoffs, rather than greedily losing a meld. */
 export function ginDefense(cards:number[],targets:number[][]):number{
  const options=meldOptions(cards),seen=new Map<string,number>();
@@ -40,11 +45,12 @@ function actions(s:ClubState):Action[]{
  if(e.step==='ginOffer')return [{type:'draw',target:1},{type:'pass'}];
  if(e.step==='ginForce')return [{type:'draw'}];
  if(e.step==='ginDraw')return [{type:'draw'},...s.discard.length?[{type:'draw' as const,target:1}]:[]];
- return p.hand.filter(c=>!s.extra.classic!.drawnFromDiscard||c!==s.extra.classic!.banned).flatMap(c=>[{type:'discard' as const,cards:[c]},...ginHand(p.hand.filter(x=>x!==c)).points<=10?[{type:'knock' as const,cards:[c]}]:[]]);
+ return p.hand.filter(c=>!s.extra.classic!.drawnFromDiscard||c!==s.extra.classic!.banned).flatMap(c=>[{type:'discard' as const,cards:[c]},...ginKnock(p.hand,c,s.extra.classic!.drawnFromDiscard?s.extra.classic!.banned:-1)?[{type:'knock' as const,cards:[c]}]:[]]);
 }
 function settle(s:ClubState,i:number){
  const c=s.extra.classic!,a=ginHand(s.players[i].hand),other=1-i,b=a.points?ginDefense(s.players[other].hand,a.melds):ginHand(s.players[other].hand).points;
  const winner=a.points===0||a.points<b?i:other,points=a.points===0?b+25:winner===i?b-a.points:a.points-b+25;
+ record(s,a.points===0?'gin':'knock',i,a.points);
  award(s,winner,points,a.points===0?'gin':winner===i?'knock':'undercut');s.players[winner].bags++;c.nextDealer=1-winner;
  c.notes.push({player:i,label:'deadwood',points:a.points},{player:other,label:'deadwood',points:b});
  if(s.players[winner].score>=100){const shutout=s.players[1-winner].score===0;s.players.forEach((p,j)=>award(s,j,p.bags*25+(j===winner?100+(shutout?100:0):0),'bonus'));finish(s,[winner]);}
@@ -66,6 +72,7 @@ function cpu(v:ClubView):Action|undefined{
   const use=top>=0&&[...hand,top].some(c=>ginHand([...hand,top].filter(x=>x!==c)).points<now);
   return v.actions.find(a=>use?a.target===1:e.step==='ginOffer'?a.type==='pass':a.target===undefined)||v.actions[0];
  }
- return [...v.actions].sort((a,b)=>ginHand(hand.filter(c=>c!==a.cards![0])).points-ginHand(hand.filter(c=>c!==b.cards![0])).points||Number(b.type==='knock')-Number(a.type==='knock')||rank(b.cards![0])-rank(a.cards![0]))[0];
+ const allowed=v.actions.filter(a=>a.type!=='knock'||!!ginKnock(hand,a.cards?.[0]??-1,e.classic!.drawnFromDiscard?e.classic!.banned:-1));
+ return [...allowed].sort((a,b)=>ginHand(hand.filter(c=>c!==a.cards![0])).points-ginHand(hand.filter(c=>c!==b.cards![0])).points||Number(b.type==='knock')-Number(a.type==='knock')||rank(b.cards![0])-rank(a.cards![0]))[0];
 }
 export const ginRules:RuleExtension={start,actions,apply,cpu,nextDealer:s=>s.extra.classic!.nextDealer};

@@ -15,7 +15,15 @@ try{
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--hand-sort')){
+ if(process.argv.includes('--rule-audit')){
+  await load('ginrummy',2);await mutate(s=>{s.turn=0;s.extra.step='ginDiscard';s.extra.classic.drawnFromDiscard=false;s.players[0].hand=[1,2,3,4,5,14,15,16,17,35,51];s.players[1].hand=[0,6,7,8,13,19,20,21,26,39];});
+  assert.equal(await page.locator('.cc-gin-reveal').count(),0,'Opponent stays private before the knock');
+  await page.locator('.cc-hand [data-card="51"]').click();assert.match(await page.locator('.cc-classic').innerText(),/選択札を捨てた後: 10/);
+  const knock=page.getByRole('button',{name:/ノックして捨てる.*未組合せ点: 10/});assert.equal(await knock.count(),1);await knock.click();await page.locator('.cc-gin-reveal').waitFor();assert.equal(await page.locator('.cc-gin-reveal article').count(),2);
+  assert.match(await page.locator('.cc-gin-reveal article').first().innerText(),/未組合せ点: 10/);assert(await page.locator('.cc-gin-reveal .cc-card').count()===20);
+  for(const [width,height]of[[1280,900],[390,844],[844,390],[320,568],[568,320]]){await page.setViewportSize({width,height});assert(await page.locator('.cc-classic').evaluate(e=>e.scrollWidth<=e.clientWidth+1));await snapshot(`${dir}/gin-audit-${width}x${height}.png`);}
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({ginDiscardPreview:true,knockScore:true,revealedMelds:true,privateBeforeKnock:true,viewports:5,browserErrors:0}));
+ }else if(process.argv.includes('--hand-sort')){
   await load('doubt',4);await mutate(s=>{s.turn=0;s.players[0].hand=[40,12,0,14,39,25,52];});
   const hand=()=>page.locator('.cc-hand>.cc-card').evaluateAll(es=>es.map(e=>Number(e.dataset.card)));
   await page.locator('.cc-hand [data-card="14"]').click();
