@@ -2,7 +2,7 @@
 
 参照: https://gamefarm.jp/rule/contents.html
 
-トランプ分類 467件中、個別ルールを実装したゲーム 60件。未対応 407件。
+トランプ分類 467件中、個別ルールを実装したゲーム 68件。未対応 399件。
 
 この表は「全件対応済み」を意味しません。同じ画面・一般ルールへ未対応ゲームを流す処理はありません。
 
@@ -46,8 +46,8 @@
 | スポイルファイブ | トリックテイキング | 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [spoilfive](https://gamefarm.jp/rule/spoilfive.html) |
 | アリュエット | トリックテイキング | 4 | 未対応 | [aluette](https://gamefarm.jp/rule/aluette.html) |
 | ブラジリアン・トルーコ | トリックテイキング | 4 | 未対応 | [braziliantruco](https://gamefarm.jp/rule/braziliantruco.html) |
-| プット | トリックテイキング | 2 | 未対応 | [put](https://gamefarm.jp/rule/put.html) |
-| トリュック | トリックテイキング | 2, 4 | 未対応 | [truc](https://gamefarm.jp/rule/truc.html) |
+| プット | トリックテイキング | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [put](https://gamefarm.jp/rule/put.html) |
+| トリュック | トリックテイキング | 2, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [truc](https://gamefarm.jp/rule/truc.html) |
 | トルッコ | トリックテイキング | 4 | 未対応 | [truco](https://gamefarm.jp/rule/truco.html) |
 | カーネフェル | トリックテイキング | 4, 5, 6 | 未対応 | [karnoeffel](https://gamefarm.jp/rule/Karnoeffel.html) |
 | バッテン | トリックテイキング | 2, 3, 4 | 未対応 | [watten](https://gamefarm.jp/rule/watten.html) |
@@ -110,10 +110,10 @@
 | スリー・ノート・フォー | トリックテイキング | 4 | 未対応 | [304](https://gamefarm.jp/rule/304.html) |
 | フィフティーシックス | トリックテイキング | 4, 5, 6, 7, 8 | 未対応 | [56](https://gamefarm.jp/rule/56.html) |
 | サニー | トリックテイキング | 4 | 未対応 | [thunee](https://gamefarm.jp/rule/thunee.html) |
-| オールフォー | トリックテイキング | 2 | 未対応 | [allfour](https://gamefarm.jp/rule/allfour.html) |
+| オールフォー | トリックテイキング | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [allfour](https://gamefarm.jp/rule/allfour.html) |
 | セブンアップ | トリックテイキング | 2, 3, 4 | 未対応 | [allfour-2](https://gamefarm.jp/rule/allfour.html) |
 | ピードロ | トリックテイキング | 4 | 未対応 | [pedro](https://gamefarm.jp/rule/pedro.html) |
-| ピッチ | トリックテイキング | 2, 3, 4, 5, 6, 7 | 未対応 | [pitch](https://gamefarm.jp/rule/pitch.html) |
+| ピッチ | トリックテイキング | 2, 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [pitch](https://gamefarm.jp/rule/pitch.html) |
 | シュミア | トリックテイキング | 5, 6 | 未対応 | [smear](https://gamefarm.jp/rule/smear.html) |
 | テンポイントピッチ | トリックテイキング | 4, 5, 6 | 未対応 | [tenpointpitch](https://gamefarm.jp/rule/tenpointpitch.html) |
 | シュパーディ | トリックテイキング | 4 | 未対応 | [spady](https://gamefarm.jp/rule/spady.html) |
@@ -132,8 +132,8 @@
 | ダブル・ピノクル | トリックテイキング | 4 | 未対応 | [doublepinochle](https://gamefarm.jp/rule/doublepinochle.html) |
 | ピノクル | トリックテイキング | 4 | 未対応 | [pinochle](https://gamefarm.jp/rule/pinochle.html) |
 | リスティコントラ | トリックテイキング | 4 | 未対応 | [riskikontra](https://gamefarm.jp/rule/riskikontra.html) |
-| セドマ | トリックテイキング | 2, 4 | 未対応 | [sedma](https://gamefarm.jp/rule/sedma.html) |
-| セドミツェ | トリックテイキング | 2, 3, 4 | 未対応 | [sedmice](https://gamefarm.jp/rule/sedmice.html) |
+| セドマ | トリックテイキング | 2, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [sedma](https://gamefarm.jp/rule/sedma.html) |
+| セドミツェ | トリックテイキング | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [sedmice](https://gamefarm.jp/rule/sedmice.html) |
 | 掛谷トランプ | トリックテイキング | 4, 6 | 未対応 | [kakeya](https://gamefarm.jp/rule/kakeya.html) |
 | ナポレオン | トリックテイキング | 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [napoleon](https://gamefarm.jp/rule/napoleon.html) |
 | ツーハンドレッド | トリックテイキング | 4 | 未対応 | [200](https://gamefarm.jp/rule/200.html) |
@@ -270,7 +270,7 @@
 | パン | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [pan](https://gamefarm.jp/rule/pan.html) |
 | パスカホウス | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [paskahousu](https://gamefarm.jp/rule/paskahousu.html) |
 | ペレボドノイ・デュラック | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [perevodnoy](https://gamefarm.jp/rule/perevodnoy.html) |
-| ローリングストーン | 手札出しきりゲーム | 3, 4, 5, 6 | 未対応 | [rollingstone](https://gamefarm.jp/rule/rollingstone.html) |
+| ローリングストーン | 手札出しきりゲーム | 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [rollingstone](https://gamefarm.jp/rule/rollingstone.html) |
 | シットヘッド | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [shithead2](https://gamefarm.jp/rule/shithead2.html) |
 | スボイコジリ | 手札出しきりゲーム | 2 | 未対応 | [svoyikoziri](https://gamefarm.jp/rule/svoyikoziri.html) |
 | ベンドティア | 手札出しきりゲーム | 2, 3, 4, 5 | 未対応 | [vandtia](https://gamefarm.jp/rule/vandtia.html) |
@@ -471,7 +471,7 @@
 | フェロー | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [faro](https://gamefarm.jp/rule/faro.html) |
 | レッド・ドッグ | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [reddog](https://gamefarm.jp/rule/reddog.html) |
 | ヤブロン | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [yablon](https://gamefarm.jp/rule/yablon.html) |
-| ランター・ゴー・ラウンド | その他 | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [rantergo](https://gamefarm.jp/rule/rantergo.html) |
+| ランター・ゴー・ラウンド | その他 | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [rantergo](https://gamefarm.jp/rule/rantergo.html) |
 | エリウシス | レイアウトゲーム | 4, 5, 6, 7, 8 | 未対応 | [eleusis](https://gamefarm.jp/rule/eleusis.html) |
 | チャイニーズ・ペイシャンス | レイアウトゲーム | 2, 3, 4 | 未対応 | [chinesepatience](https://gamefarm.jp/rule/chinesepatience.html) |
 | ズウィッケン | トリックテイキング | 3 | 未対応 | [zwikken](https://gamefarm.jp/rule/zwikken.html) |

@@ -1,9 +1,10 @@
+import { TRADITIONAL_GAMES } from './traditionalCatalog';
 import { WORLD_GAMES } from './worldCatalog';
 import { POPULAR_GAMES } from './popularCatalog';
 import reference from './reference-catalog.json';
 
 export const REFERENCE_GAMES = reference.games;
-export type GameId = 'whist'|'spades'|'ohhell'|'oldmaid'|'fantan'|'crazyeight'|'gofish'|'authors'|'doubt'|'war'|'99add'|'scopa'|'scopone'|'blackjack'|'daihinmin'|'briscola'|'sueca'|'polignac'|'laus'|'kalter'|'gurka'|'spar'|'miseria'|'ciapano'|'heart2'|'memory'|'beggar'|'pishti'|'rummy'|'pitypat'|'snipsnupsnorem'|'kingsinthe'|'ginrummy'|'durak2'|'perevodnoy'|'golf'|'schwimmen'|'euchre2'|'euchre-uk'|'germanwhist'|'minnesotawhist'|'chinesewhist'|'knockout'|'nap'|'napoleon'|'cribbage'|'cassino'|'pontoon'|'66'|'schnapsen'|'ecarte'|'hokm'|'callbridge'|'sergent'|'blacklady'|'blackmaria'|'cangkul'|'getaway'|'shithead2'|'empatsatu';
+export type GameId = 'whist'|'spades'|'ohhell'|'oldmaid'|'fantan'|'crazyeight'|'gofish'|'authors'|'doubt'|'war'|'99add'|'scopa'|'scopone'|'blackjack'|'daihinmin'|'briscola'|'sueca'|'polignac'|'laus'|'kalter'|'gurka'|'spar'|'miseria'|'ciapano'|'heart2'|'memory'|'beggar'|'pishti'|'rummy'|'pitypat'|'snipsnupsnorem'|'kingsinthe'|'ginrummy'|'durak2'|'perevodnoy'|'golf'|'schwimmen'|'euchre2'|'euchre-uk'|'germanwhist'|'minnesotawhist'|'chinesewhist'|'knockout'|'nap'|'napoleon'|'cribbage'|'cassino'|'pontoon'|'66'|'schnapsen'|'ecarte'|'hokm'|'callbridge'|'sergent'|'blacklady'|'blackmaria'|'cangkul'|'getaway'|'shithead2'|'empatsatu'|'pitch'|'allfour'|'sedma'|'sedmice'|'rollingstone'|'rantergo'|'put'|'truc';
 export interface ClubGameDefinition {
   id: GameId; players:number[]; defaultPlayers:number; family:string;
   rule:string; englishRule:string;
@@ -11,6 +12,7 @@ export interface ClubGameDefinition {
 // A title becomes playable only after its own rules and scoring are implemented.
 // Unimplemented index entries must never be routed to a generic substitute.
 export const CLUB_GAMES:ClubGameDefinition[] = [
+  ...TRADITIONAL_GAMES,
   ...WORLD_GAMES,
   ...POPULAR_GAMES,
   {id:'pitypat',players:[2,3,4],defaultPlayers:4,family:'SHED',rule:'5枚の手札。ヒープの一番上と同数字を1枚出し、さらに好きな1枚を出せます。出さない場合は山札を1枚ヒープへ公開し、その数字で合わせられれば同様に出せます。手札0枚、または手札全部が同数字のペアになれば勝利。山札切れではヒープの上1枚を残してシャッフルする卓です。',englishRule:'Five-card hands. Match the heap’s top rank, then play any extra card. Otherwise reveal stock onto the heap and optionally match that rank. Empty your hand or leave only rank pairs to win. This table reshuffles the heap except its top card when stock empties.'},
