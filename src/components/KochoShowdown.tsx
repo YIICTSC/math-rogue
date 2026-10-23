@@ -1,3 +1,4 @@
+import { findKochoSuper, kochoSuperCandidates, kochoSupers, resolveKochoSuper, superArtStyle, type KochoSuperMove } from '../mini-games/kocho/superMoves';
 import { selectKochoEnemyVoice, type KochoVoiceEnemy } from '../mini-games/kocho/enemyVoiceEvents';
 
 import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
@@ -779,6 +780,13 @@ const KochoShowdown: React.FC<{
     const initialKochoState = savedKochoState ? hydrateState(savedKochoState) : getInitialState();
     const [gameState, setGameState] = useState<KochoGameState>(() => createKochoDebugPreviewState(debugPreview, initialKochoState));
 
+    const [showSuperGuide, setShowSuperGuide] = useState(false);
+    const [superCutin, setSuperCutin] = useState<KochoSuperMove | null>(null);
+    const [superChain, setSuperChain] = useState(false);
+    const closeSuperGuide = () => {
+        setShowSuperGuide(false);
+        requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('[data-kocho-super-guide]')?.focus());
+    };
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
     const [hitStopActive, setHitStopActive] = useState(false);
     const [announcement, setAnnouncement] = useState<KochoAnnouncement | null>(null);
@@ -869,6 +877,17 @@ const KochoShowdown: React.FC<{
     const [newlyUnlockedHero, setNewlyUnlockedHero] = useState<KochoHeroId | null>(null);
     const [showGuestCards, setShowGuestCards] = useState(false);
     const unlockedHeroes = unlockedKochoHeroes(clearedHeroes);
+    const superArtHero = gameState.phase === 'SETUP' ? selectedHero : gameState.heroId;
+    useEffect(() => {
+        const image = new Image();
+        image.src = assetUrl(`sprites/kocho/super-${superArtHero}.webp`);
+        if (image.decode) void image.decode().catch(() => {});
+    }, [superArtHero]);
+    useEffect(() => {
+        const move = findKochoSuper(gameState.heroId, gameState.queue.map(c=>c.name));
+        if (move && !debugPreview && !isUiPreview) void audioService.preloadKochoSuperVoice(gameState.heroId, move.id);
+    }, [gameState.heroId, gameState.queue, debugPreview, isUiPreview]);
+
     const resultSavedRef = useRef(false);
     const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState(() =>
         debugPreview ? KOCHO_DIFFICULTIES.length : storageService.getMaxUnlockedKochoDifficulty()
@@ -1666,6 +1685,7 @@ const KochoShowdown: React.FC<{
     // --- ACTION HANDLERS ---
     
     const useConsumable = (index: number) => {
+        if (showSuperGuide) return;
         if (animating) return;
         const state = stateRef.current;
         const item = state.consumables[index];
@@ -1736,6 +1756,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleMove = async (dir: -1 | 1) => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         const front = stateRef.current.player.pos + dir;
         if (stateRef.current.heroId === 'akari' && dir === stateRef.current.player.facing && stateRef.current.enemies.some(e => e.hp > 0 && e.pos === front)) {
@@ -1778,6 +1799,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleTurn = async () => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         
@@ -1802,6 +1824,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleWait = async () => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         playActionVoice('wait');
@@ -1821,6 +1844,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleSwapPosition = async () => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
         const current = stateRef.current;
@@ -1872,6 +1896,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleQueueCard = async (card: KCard, idx: number) => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         if (card.currentCooldown > 0) {
             audioService.playSound('wrong');
@@ -1913,6 +1938,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleUnqueueCard = (idx: number) => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
         const card = stateRef.current.queue[idx];
@@ -1927,6 +1953,7 @@ const KochoShowdown: React.FC<{
     };
 
     const executeQueue = async () => {
+        if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating || stateRef.current.queue.length === 0) return;
         setAnimating(true);
         // Keep a resumable checkpoint while voiced combos are in flight.
@@ -1934,6 +1961,8 @@ const KochoShowdown: React.FC<{
         setGameState(prev => ({ ...prev, status: 'EXECUTING' }));
 
         const queue = [...stateRef.current.queue];
+        const superMove = findKochoSuper(stateRef.current.heroId, queue.map(c => c.name));
+        setSuperChain(Boolean(superMove));
         const cardsReturningToHand: KCard[] = [];
         
         let currentState = { ...stateRef.current };
@@ -1950,6 +1979,7 @@ const KochoShowdown: React.FC<{
                 void audioService.playKochoVoice(currentState.heroId, voiceClip, 3);
             }
             addLog(`${card.name}！`);
+            if (superMove) for (const offset of [-1, 0, 1]) addVfx('AFTERIMAGE', Math.max(0, Math.min(6, currentState.player.pos + offset)), {sourceCardName: card.name, color: 'super', durationMs: 480, direction: currentState.player.facing});
             
             const p = currentState.player;
             const technique = resolveHeroTechnique(currentState.focus, card.technique, card.type === 'UTILITY');
@@ -2302,6 +2332,23 @@ const KochoShowdown: React.FC<{
             activeActionCardNameRef.current = null;
             setActiveActionCardName(null);
             
+            if (superMove) {
+                const from = currentState.player.pos;
+                for (const pos of [pPos, from]) addVfx('AFTERIMAGE', pos, {sourceCardName: card.name, color: 'super', durationMs: 480, direction: currentState.player.facing});
+                if (card.id === queue[queue.length - 1].id && hit) {
+                    const finish = resolveKochoSuper(superMove, currentState.player, currentState.enemies);
+                    currentState = {...currentState, player: finish.player, enemies: finish.enemies};
+                    setGameState(prev => ({...prev, player: finish.player, enemies: finish.enemies}));
+                    setSuperCutin(superMove);
+                    audioService.playAttackEffectSound('explosion', Math.max(1, finish.targets.length));
+                    if (!debugPreview && !isUiPreview) void audioService.playKochoSuperVoice(currentState.heroId, superMove.id);
+                    finish.targets.forEach(pos => {addVfx('BLAST', pos, {durationMs:700});addVfx('TEXT',pos,{text:superMove.damage,color:'text-cyan-200'});});
+                    for (let pos=Math.min(from,finish.player.pos);pos<=Math.max(from,finish.player.pos);pos++) addVfx('AFTERIMAGE',pos,{sourceCardName:card.name,color:'super',durationMs:650,direction:finish.player.facing});
+                    await new Promise(resolve => setTimeout(resolve, 650));
+                    if (!voiceMountedRef.current) return;
+                    setSuperCutin(null);
+                }
+            }
             // Check pickup after move
             setGameState(prev => handlePickup(prev.player.pos, prev));
         }
@@ -2309,8 +2356,11 @@ const KochoShowdown: React.FC<{
         activeActionCardNameRef.current = null;
         setActiveActionCardName(null);
 
+        setSuperChain(false);
+
         // Enemy Turn after combo
-        if (currentState.status !== 'GAME_OVER' && currentState.enemies.some(e => e.hp > 0)) {
+        const pendingBossEvolution = currentState.enemies.some(e => e.hp <= 0 && e.bossPhase !== undefined && e.bossPhase < 3);
+        if (currentState.status !== 'GAME_OVER' && (currentState.enemies.some(e => e.hp > 0) || pendingBossEvolution)) {
              const anyEnemyActing = currentState.enemies.some(e => e.hp > 0 && e.intent && e.intent.timer <= 1);
              const delay = anyEnemyActing ? 250 : 30;
              await new Promise(r => setTimeout(r, delay));
@@ -2815,17 +2865,17 @@ const KochoShowdown: React.FC<{
                                 />
                             ) : null;
                         })()}
-                        {v.type === 'TEXT' && <div className={`text-xl font-bold animate-bounce ${v.color || 'text-white'} drop-shadow-md`}>{v.text}</div>}
+                        {v.type === 'TEXT' && <div className={`text-xl font-bold animate-bounce ${v.color === 'super' ? '' : v.color || 'text-white'} drop-shadow-md`}>{v.text}</div>}
                         {v.type === 'AFTERIMAGE' && (
-                            <div className={`opacity-25 blur-[1px] ${v.direction === -1 ? 'scale-x-[-1]' : ''}`}>
+                            <div className={`${v.color === 'super' ? 'kocho-super-afterimage' : 'opacity-25 blur-[1px]'} ${v.direction === -1 ? 'scale-x-[-1]' : ''}`}>
                                 <KochoSheetSprite
                                     sheet="characters"
-                                    src={getKochoHeroActionAsset(activeActionCardNameRef.current, gameState.heroId).src}
-                                    cell={getKochoHeroActionAsset(activeActionCardNameRef.current, gameState.heroId).cell}
+                                    src={getKochoHeroActionAsset(v.sourceCardName, gameState.heroId).src}
+                                    cell={getKochoHeroActionAsset(v.sourceCardName, gameState.heroId).cell}
                                     columns={gameState.heroId === 'original' ? 5 : 1}
                                     rows={gameState.heroId === 'original' ? 5 : 1}
-                                    flipX={shouldFlipKochoHeroAction(activeActionCardNameRef.current)}
-                                    className={`h-16 w-16 md:h-32 md:w-32 ${v.color || 'text-white'}`}
+                                    flipX={shouldFlipKochoHeroAction(v.sourceCardName)}
+                                    className={`h-16 w-16 md:h-32 md:w-32 ${v.color === 'super' ? '' : v.color || 'text-white'}`}
                                 />
                             </div>
                         )}
@@ -2957,9 +3007,23 @@ const KochoShowdown: React.FC<{
         );
     };
 
+    const superCandidates = kochoSuperCandidates(gameState.heroId, gameState.queue.map(c=>c.name));
     // --- MAIN RENDER ---
     return (
         <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="ios-edge-to-edge kocho-showdown-root flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
+            {showSuperGuide && <div className="kocho-super-modal" data-gamepad-modal role="dialog" aria-modal="true" aria-label={tr('超必殺技')} onKeyDown={e=>{if(e.key==='Escape'){e.stopPropagation();closeSuperGuide();}else if(e.key==='Tab'){e.preventDefault();e.currentTarget.querySelector<HTMLButtonElement>('button')?.focus();}}}>
+                <section className="kocho-super-guide">
+                    <header><h2>{tr('超必殺技')}</h2><button data-gamepad-back data-gamepad-initial-choice autoFocus onClick={closeSuperGuide}>{tr('閉じる')}</button></header>
+                    <p>{tr('3枚をこの順に実行し、最後の攻撃を当てると発動。')}</p>
+                    <p>{tr('派生はどれでも可。同じ実行内で3枚をつなごう。')}</p>
+                    <p>{tr('追加ダメージは防御を貫通。ボイス終了は待ちません。')}</p>
+                    <div className="kocho-super-recipes">{kochoSupers(gameState.phase==='SETUP'?selectedHero:gameState.heroId).map(move=><article key={move.id} data-super-recipe={move.id}>
+                        <div className="kocho-super-art" aria-hidden="true" style={{...superArtStyle(move),backgroundImage:`url(${assetUrl(`sprites/kocho/super-${move.hero}.webp`)})`}}/>
+                        <h3>{tr(move.name)}</h3><ol>{move.steps.map((choices,i)=><li key={i}>{choices.length===1?tr(choices[0]):tr(choices[0].split('・')[0]+'・速攻').replace(/(?:・速攻|: Quick|・そっこう)$/,'')} {choices.length>1?'(4)':''}</li>)}</ol>
+                        <small>{tr('追加ダメージ')} +{move.damage}{move.shield?` / ${tr('シールド')} +${move.shield}`:''}{move.heal?` / ${tr('回復')} +${move.heal}`:''}</small>
+                    </article>)}</div>
+                </section>
+            </div>}
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="kocho-problem-overlay absolute inset-0 z-[100] w-full h-full pointer-events-auto">
@@ -2983,6 +3047,7 @@ const KochoShowdown: React.FC<{
                     )}
                 </div>
                 <div className="kocho-header-actions flex items-center gap-2 md:gap-4">
+                    {gameState.phase!=='SETUP' && <button data-kocho-super-guide disabled={animating} onClick={() => setShowSuperGuide(true)} className="kocho-super-guide-button">{tr('超必殺技')}</button>}
                     {gameState.isEndless && (
                         <div className="kocho-header-endless text-xs md:text-sm font-bold text-pink-200 flex items-center gap-2 bg-pink-950/50 px-2 py-1 rounded border border-pink-500/50">
                             <Skull size={14}/> {tr('撃破')} {gameState.endlessKills} / {gameState.endlessScore}{tr('点')}
@@ -3023,6 +3088,7 @@ const KochoShowdown: React.FC<{
                         <p className="kocho-hero-hint">{tr(selectedHero === 'original' ? 'クリアしてゲスト主人公と専用カードを解放しよう' : '専用アクションカード80種類。ステージ進行で報酬の種類が増加')}</p>
                         <p className="kocho-lobby-special">{tr(kochoSpecialLabel(selectedHero))}<br/>{tr(kochoSpecialDescription(selectedHero))}</p>
                         {selectedHero !== 'original' && <><p className="kocho-lobby-special">{tr(selectedHero === 'rebel' ? '闘志：通常移動・特殊アクション成功で+1。専用カードでも蓄積し、解放技で消費。上限10。' : '星光：通常移動・特殊アクション成功で+1。専用カードでも蓄積し、解放技で消費。上限10。')}</p><button className="kocho-catalog-button" onClick={() => setShowGuestCards(true)}>{tr('専用カードを見る')} (80)</button></>}
+                        <button data-kocho-super-guide onClick={() => setShowSuperGuide(true)} className="kocho-catalog-button">{tr('超必殺技')} · 12</button>
                         <h2 className="kocho-lobby-difficulty-title">{tr('難易度選択')}</h2>
                         <p className="kocho-lobby-note">{tr('Lv.1から開始し、クリアするたびに次のレベルが1つ解禁されます。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。')}</p>
                         <div className="kocho-lobby-levels">
@@ -3379,6 +3445,11 @@ const KochoShowdown: React.FC<{
                     {/* Standard Gameplay View */}
                     {gameState.phase === 'BATTLE' && (
                         <>
+                            {superCutin && <div className="kocho-super-cutin" data-kocho-super={superCutin.id} role="status">
+                                <div className="kocho-super-art" style={{...superArtStyle(superCutin),backgroundImage:`url(${assetUrl(`sprites/kocho/super-${superCutin.hero}.webp`)})`}}/>
+                                <div className="kocho-super-cutin-title"><small>SUPER FINISH</small><strong>{tr(superCutin.name)}</strong></div>
+                            </div>}
+                            {!superCutin && gameState.queue.length>0 && superCandidates.length>0 && <div className="kocho-super-hint" data-kocho-combo-hint>{tr(gameState.queue.length===3?'コンボ成立候補':'残像コンボ')} {gameState.queue.length}/3 · {gameState.queue.length===3?tr(superCandidates[0].name):`→ ${tr(superCandidates[0].steps[gameState.queue.length][0])}`}</div>}
                             {announcement && (
                                 <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
                                     <div className={`min-w-[220px] rounded-2xl border px-5 py-3 text-center shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 ${
@@ -3403,7 +3474,7 @@ const KochoShowdown: React.FC<{
                                 ))}
                             </div>
 
-                            <div className={`kocho-battle-grid grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-5xl px-2 mb-4 shrink-0 max-h-full aspect-[7/2] md:aspect-auto transition-transform duration-100 ${hitStopActive ? 'scale-[0.982]' : 'scale-100'}`}>
+                            <div className={`kocho-battle-grid ${superChain ? 'kocho-super-chain' : ''} grid grid-cols-7 gap-1 md:gap-2 w-full max-w-full md:max-w-5xl px-2 mb-4 shrink-0 max-h-full aspect-[7/2] md:aspect-auto transition-transform duration-100 ${hitStopActive ? 'scale-[0.982]' : 'scale-100'}`}>
                                 {[...Array(GRID_SIZE)].map((_, i) => (
                                     <div key={i} data-kocho-cell={i} data-danger={isDangerZone(i)} className={`kocho-ground-cell aspect-[1/2] md:aspect-[3/4] flex items-end justify-center relative ${isDangerZone(i) ? 'is-danger' : ''} ${gameState.player.pos === i ? 'is-player' : ''}`}>
                                         <img className="kocho-ground-art" src={assetUrl(kochoGroundAsset(gameState.battleStage, gameState.isEndless ? gameState.endlessFloor : 0))} alt="" draggable={false}/>

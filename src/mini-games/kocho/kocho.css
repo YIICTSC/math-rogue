@@ -74,3 +74,32 @@
   .kocho-lobby-controls { padding:12px; }
   .kocho-hero-choices img { height:70px; }
 }
+
+/* Three-card super combos: the playfield stays clear except for a 650ms finish. */
+.kocho-showdown-root { --kocho-super-blue:#49ccff; }
+.kocho-super-guide-button { color:#b9efff;border:1px solid #279ac0;border-radius:7px;padding:5px 8px;font-weight:800;font-size:11px;white-space:nowrap;background:#052d48; }
+.kocho-super-guide-button:disabled { opacity:.4; }
+.kocho-super-afterimage { opacity:.65;filter:brightness(0) saturate(100%) invert(75%) sepia(90%) saturate(1900%) hue-rotate(155deg);animation:kocho-afterimage .48s ease-out both; }
+.kocho-super-chain .is-player { filter:drop-shadow(-12px 0 1px #42bbff88) drop-shadow(-22px 0 1px #42bbff44); }
+.kocho-super-hint { position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:35;background:#03253eeb;border:1px solid var(--kocho-super-blue);color:#c5f1ff;border-radius:20px;padding:4px 10px;font-size:11px;pointer-events:none; }
+.kocho-super-cutin { position:absolute;inset:0;z-index:60;display:grid;place-items:center;background:#00132bc9;pointer-events:none;overflow:hidden;animation:kocho-super-reveal .65s ease-out both; }
+.kocho-super-art { width:100%;aspect-ratio:16/9;background-repeat:no-repeat;background-color:#062e49; }
+.kocho-super-cutin>.kocho-super-art { width:min(96%,850px);border-block:3px solid #69dfff;box-shadow:0 0 45px #28bfff88;transform:skewY(-3deg); }
+.kocho-super-cutin-title { position:absolute;bottom:10%;right:5%;max-width:90%;padding:8px 18px;background:linear-gradient(90deg,transparent,#00172ff2);text-align:right;text-shadow:2px 3px #001028; }
+.kocho-super-cutin-title small { display:block;color:#73deff;letter-spacing:.3em;font-weight:900;font-size:12px; }
+.kocho-super-cutin-title strong { font-size:clamp(18px,3.8vw,40px);line-height:1.1;color:white; }
+.kocho-super-modal { position:absolute;inset:0;z-index:120;background:#000c;display:flex;align-items:center;justify-content:center;padding:12px; }
+.kocho-super-guide { width:min(100%,1000px);max-height:95%;overflow:auto;background:#061b30;border:2px solid #37baff;border-radius:16px;padding:16px;box-shadow:0 0 40px #0078b866; }
+.kocho-super-guide header { position:sticky;top:-16px;z-index:2;display:flex;align-items:center;justify-content:space-between;background:#061b30;padding:12px 0; }
+.kocho-super-guide header h2 { font-size:22px;font-weight:900;color:#b4edff; }
+.kocho-super-guide header button { padding:7px 13px;border:1px solid #6dcfff;border-radius:7px; }
+.kocho-super-guide p { font-size:12px;color:#c3d8e8;margin-bottom:5px; }
+.kocho-super-recipes { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px; }
+.kocho-super-recipes article { background:#0b2c46;border:1px solid #316887;border-radius:9px;overflow:hidden;padding-bottom:10px; }
+.kocho-super-recipes h3 { font-size:13px;font-weight:900;color:#e3f7ff;padding:8px; }
+.kocho-super-recipes ol { list-style:decimal;padding:0 8px 5px 28px;font-size:11px; }
+.kocho-super-recipes small { display:block;padding:0 8px;font-size:10px;color:#80e6ff; }
+@keyframes kocho-afterimage { from { opacity:.7;transform:translateX(-5px); } to { opacity:0;transform:translateX(-25px); } }
+@keyframes kocho-super-reveal { 0% { opacity:0;transform:translateX(9%); } 15%,80% { opacity:1;transform:translateX(0); } 100% { opacity:0;transform:translateX(-5%); } }
+@media(max-width:650px) { .kocho-super-recipes { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }.kocho-super-guide { padding:10px; }.kocho-super-guide-button { font-size:10px;padding:4px; } }
+@media(prefers-reduced-motion:reduce) { .kocho-super-afterimage { animation:none;opacity:.4; }.kocho-super-cutin { animation:none; }.kocho-super-cutin>.kocho-super-art { transform:none; } }

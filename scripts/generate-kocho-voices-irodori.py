@@ -26,6 +26,7 @@ def sha256(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--irodori-root', type=Path, default=ROOT.parent / 'irodori-kocho')
+    parser.add_argument('--supers', action='store_true', help='Generate super-finisher voices')
     parser.add_argument('--enemies', action='store_true', help='Generate the dedicated enemy catalog')
     parser.add_argument('--device', default='cpu')
     parser.add_argument('--threads', type=int, default=2)
@@ -43,6 +44,7 @@ def main():
     parser.add_argument('--speaker-guidance', type=float, default=3)
     parser.add_argument('--repair-list', type=Path, help='JSON list of hero/event keys to regenerate')
     args = parser.parse_args()
+    if args.supers and args.enemies: parser.error('--supers and --enemies are mutually exclusive')
     if args.cpu_autocast and args.device != 'cpu': parser.error('--cpu-autocast requires --device cpu')
     sys.path.insert(0, str(args.irodori_root))
     import torch
@@ -51,7 +53,7 @@ def main():
     import numpy as np
     torch.set_num_threads(args.threads)
     repairs = set(json.loads(args.repair_list.read_text())) if args.repair_list else None
-    catalog = json.loads((ROOT / ('assets/kocho/enemy-voice-lines.json' if args.enemies else 'assets/kocho/voice-lines.json')).read_text())
+    catalog = json.loads((ROOT / ('assets/kocho/super-voice-lines.json' if args.supers else 'assets/kocho/enemy-voice-lines.json' if args.enemies else 'assets/kocho/voice-lines.json')).read_text())
     model_id = args.model or catalog['model']
     checkpoint = download_hf_checkpoint(model_id)
     checkpoint_digest = sha256(checkpoint)
@@ -69,11 +71,11 @@ def main():
             with torch.autocast('cpu', enabled=False):
                 return encode_watermark([audio.float() for audio in audios], **kwargs)
         runtime.watermarker.encode_batch = fp32_watermark
-    scratch = ROOT / ('tmp/kocho-enemy-voice-source' if args.enemies else 'tmp/kocho-voice-source')
+    scratch = ROOT / ('tmp/kocho-super-voice-source' if args.supers else 'tmp/kocho-enemy-voice-source' if args.enemies else 'tmp/kocho-voice-source')
     scratch.mkdir(parents=True, exist_ok=True)
-    output = ROOT / ('public/sfx/kocho-enemy-voices' if args.enemies else 'public/sfx/kocho-voices')
+    output = ROOT / ('public/sfx/kocho-super-voices' if args.supers else 'public/sfx/kocho-enemy-voices' if args.enemies else 'public/sfx/kocho-voices')
     provenance = {'model': catalog['model'], 'checkpoint_sha256': checkpoint_digest, 'clips': {}}
-    record = ROOT / ('assets/kocho/enemy-voice-build.json' if args.enemies else 'assets/kocho/voice-build.json')
+    record = ROOT / ('assets/kocho/super-voice-build.json' if args.supers else 'assets/kocho/enemy-voice-build.json' if args.enemies else 'assets/kocho/voice-build.json')
     if record.exists(): provenance.update(json.loads(record.read_text()))
     provenance['irodori_revision'] = subprocess.check_output(['git', '-C', str(args.irodori_root), 'rev-parse', 'HEAD'], text=True).strip()
     provenance.pop('sampling_steps', None)

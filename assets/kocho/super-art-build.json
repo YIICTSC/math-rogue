@@ -1,0 +1,73 @@
+{
+  "tool": "ImageGen",
+  "layout": {
+    "columns": 3,
+    "rows": 4,
+    "order": "left-to-right, top-to-bottom"
+  },
+  "atlases": {
+    "original": {
+      "source": "exec-d2e5ac04-3a3f-42aa-b02d-3de66b2ef54f.png",
+      "source_sha256": "2ed739d02e5ce27c6090558ac920a280a8dd2bd28b4f7c14f406e49098a62ffc",
+      "path": "public/sprites/kocho/super-original.webp",
+      "sha256": "7e6a09c977ccdba275b59274c18271d84121bc5e9147627732589da5efd72ed9",
+      "reference": "public/sprites/kocho/original-portrait.webp",
+      "panels": [
+        "蒼影・定規無双",
+        "螺旋・コンパス彗星",
+        "白天・チョーク流星群",
+        "教科書・絶対反撃",
+        "清掃奥義・龍巻天翔",
+        "雷脚・蒼天突破",
+        "月閃・竹刀一文字",
+        "轟星・満塁ホームラン",
+        "蒼海・バケツ大瀑布",
+        "校旗・鳳凰乱舞",
+        "響天・校内大交響",
+        "卒業奥義・希望の拳"
+      ]
+    },
+    "rebel": {
+      "source": "exec-b3a5af63-8f64-43bc-a0a9-e204bc96a235.png",
+      "source_sha256": "c297594930678197fecb90f6eb11db8b61ec399d321ee48a45a6324b911ae626",
+      "path": "public/sprites/kocho/super-rebel.webp",
+      "sha256": "c3aa069980d8844548a5880c160b4958b53fad7c7abb3af9ab7277e0529f3bad",
+      "reference": "public/sprites/high-school/characters/0.webp",
+      "panels": [
+        "蒼炎・紅蓮無双",
+        "雷迅・突破轟拳",
+        "影狼・月下乱舞",
+        "鏡牙・反逆カウンター",
+        "風牙・覇王掌",
+        "天鎖・紅蓮落とし",
+        "紅蓮・吸星連牙",
+        "暁・校則断罪",
+        "不屈・王者返し",
+        "幻影・旋風乱舞",
+        "閃光・一撃必中",
+        "叛逆・鳳凰天翔"
+      ]
+    },
+    "akari": {
+      "source": "exec-ec0afd53-3da4-4134-9b12-30a79a2841a2.png",
+      "source_sha256": "5228acfa273680beb44b039ea3a66f78c4d7ebcd35bdba043fe350fc715e3629",
+      "path": "public/sprites/kocho/super-akari.webp",
+      "sha256": "691ef531771690c00ea9eaca8ae14397c1d0b65ca025db052b7a0accc577c789",
+      "reference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "panels": [
+        "流星・きらめきフィナーレ",
+        "彗星・エターナルノヴァ",
+        "光速・ミラージュステップ",
+        "星環・ギャラクシーストーム",
+        "鏡星・クリスタルジャッジ",
+        "彗星・スターダストノヴァ",
+        "星鎖・ゾディアックバインド",
+        "銀河・インフィニティバースト",
+        "天頂・アストラルランス",
+        "銀河・レインボーレイ",
+        "時星・クロノスフィナーレ",
+        "月光・フェニックスウィッシュ"
+      ]
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { kochoSuperVoice } from '../mini-games/kocho/superMoves';
 import { kochoEnemyVoice, type KochoEnemyVoiceAction } from '../mini-games/kocho/enemyVoices';
 import { kochoVoiceDuration } from '../mini-games/kocho/voices';
 import type { KochoHeroId } from '../mini-games/kocho/guests';
@@ -2312,6 +2313,17 @@ class AudioService {
   public playKochoVoice(hero: KochoHeroId, clip: string, priority = 1): Promise<boolean> {
       this.clearKochoReaction();
       return this.playKochoVoiceClip(hero, clip, kochoVoiceDuration(hero, clip), priority, 'kocho-voices');
+  }
+
+  public async preloadKochoSuperVoice(hero: KochoHeroId, clip: string): Promise<void> {
+      if (!kochoSuperVoice(hero, clip) || !this.canPlayConversationVoice()) return;
+      this.init();
+      await this.loadVoiceBuffer(`kocho-voice-${hero}-${clip}`, [versionBgmPath(assetUrl(`sfx/kocho-super-voices/${hero}/${clip}.ogg`))]);
+  }
+
+  public playKochoSuperVoice(hero: KochoHeroId, clip: string): Promise<boolean> {
+      this.clearKochoReaction();
+      return this.playKochoVoiceClip(hero, clip, kochoSuperVoice(hero, clip), 3.5, 'kocho-super-voices');
   }
 
   public playKochoEnemyVoice(name: string, action: KochoEnemyVoiceAction, priority = 2.5): Promise<boolean> {

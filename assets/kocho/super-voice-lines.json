@@ -1,0 +1,125 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "heroes": [
+    {
+      "id": "original",
+      "seed": 115000,
+      "references": [
+        "assets/kocho/original-speaker.wav"
+      ],
+      "caption": "Japanese youthful male hero voice. Athletic, earnest, warm mid-high register with clear consonants and a powerful confident battle cry. A red-tracksuit school action hero. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "super-00": "超必殺！蒼影、定規無双！",
+        "super-01": "超必殺！螺旋、コンパス彗星！",
+        "super-02": "超必殺！白天、チョーク流星群！",
+        "super-03": "超必殺！教科書、絶対反撃！",
+        "super-04": "超必殺！清掃奥義、龍巻天翔！",
+        "super-05": "超必殺！雷脚、蒼天突破！",
+        "super-06": "超必殺！月閃、竹刀一文字！",
+        "super-07": "超必殺！轟星、満塁ホームラン！",
+        "super-08": "超必殺！蒼海、バケツ大瀑布！",
+        "super-09": "超必殺！校旗、鳳凰乱舞！",
+        "super-10": "超必殺！響天、校内大交響！",
+        "super-11": "超必殺！卒業奥義、希望の拳！"
+      },
+      "readings": {
+        "super-00": "ちょうひっさつ！そうえい、じょうぎむそう！",
+        "super-01": "ちょうひっさつ！らせん、コンパスすいせい！",
+        "super-02": "ちょうひっさつ！はくてん、チョークりゅうせいぐん！",
+        "super-03": "ちょうひっさつ！きょうかしょ、ぜったいはんげき！",
+        "super-04": "ちょうひっさつ！せいそうおうぎ、たつまきてんしょう！",
+        "super-05": "ちょうひっさつ！らいきゃく、そうてんとっぱ！",
+        "super-06": "ちょうひっさつ！げっせん、しないいちもんじ！",
+        "super-07": "ちょうひっさつ！ごうせい、まんるいホームラン！",
+        "super-08": "ちょうひっさつ！そうかい、バケツだいばくふ！",
+        "super-09": "ちょうひっさつ！こうき、ほうおうらんぶ！",
+        "super-10": "ちょうひっさつ！きょうてん、こうないだいこうきょう！",
+        "super-11": "ちょうひっさつ！そつぎょうおうぎ、きぼうのこぶし！"
+      },
+      "synthesis_text": {
+        "super-00": "ちょうひっさつ！そうえい、じょうぎむそう！",
+        "super-06": "ちょうひっさつ！げっせん、しないいちもんじ！"
+      }
+    },
+    {
+      "id": "rebel",
+      "seed": 113000,
+      "references": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+        "public/sfx/high-school-voices/WARRIOR/power-1.ogg"
+      ],
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "super-00": "超必殺！蒼炎、紅蓮無双！",
+        "super-01": "超必殺！雷迅、突破轟拳！",
+        "super-02": "超必殺！影狼、月下乱舞！",
+        "super-03": "超必殺！鏡牙、反逆カウンター！",
+        "super-04": "超必殺！風牙、覇王掌！",
+        "super-05": "超必殺！天鎖、紅蓮落とし！",
+        "super-06": "超必殺！紅蓮、吸星連牙！",
+        "super-07": "超必殺！暁、校則断罪！",
+        "super-08": "超必殺！不屈、王者返し！",
+        "super-09": "超必殺！幻影、旋風乱舞！",
+        "super-10": "超必殺！閃光、一撃必中！",
+        "super-11": "超必殺！叛逆、鳳凰天翔！"
+      },
+      "readings": {
+        "super-00": "ちょうひっさつ！そうえん、ぐれんむそう！",
+        "super-01": "ちょうひっさつ！らいじん、とっぱごうけん！",
+        "super-02": "ちょうひっさつ！かげろう、げっからんぶ！",
+        "super-03": "ちょうひっさつ！きょうが、はんぎゃくカウンター！",
+        "super-04": "ちょうひっさつ！ふうが、はおうしょう！",
+        "super-05": "ちょうひっさつ！てんさ、ぐれんおとし！",
+        "super-06": "ちょうひっさつ！ぐれん、きゅうせいれんが！",
+        "super-07": "ちょうひっさつ！あかつき、こうそくだんざい！",
+        "super-08": "ちょうひっさつ！ふくつ、おうじゃがえし！",
+        "super-09": "ちょうひっさつ！げんえい、せんぷうらんぶ！",
+        "super-10": "ちょうひっさつ！せんこう、いちげきひっちゅう！",
+        "super-11": "ちょうひっさつ！はんぎゃく、ほうおうてんしょう！"
+      },
+      "synthesis_text": {
+        "super-02": "ちょうひっさつ！かげろう、げっからんぶ！"
+      }
+    },
+    {
+      "id": "akari",
+      "seed": 114000,
+      "references": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg",
+        "public/sfx/magic-voices/AKARI/spell-1.ogg"
+      ],
+      "caption": "Japanese youthful female character voice. Preserve the speaker identity of the reference audio. Bright, clear, energetic action game delivery. No music or sound effects.",
+      "lines": {
+        "super-00": "超必殺！流星、きらめきフィナーレ！",
+        "super-01": "超必殺！彗星、エターナルノヴァ！",
+        "super-02": "超必殺！光速、ミラージュステップ！",
+        "super-03": "超必殺！星環、ギャラクシーストーム！",
+        "super-04": "超必殺！鏡星、クリスタルジャッジ！",
+        "super-05": "超必殺！彗星、スターダストノヴァ！",
+        "super-06": "超必殺！星鎖、ゾディアックバインド！",
+        "super-07": "超必殺！銀河、インフィニティバースト！",
+        "super-08": "超必殺！天頂、アストラルランス！",
+        "super-09": "超必殺！銀河、レインボーレイ！",
+        "super-10": "超必殺！時星、クロノスフィナーレ！",
+        "super-11": "超必殺！月光、フェニックスウィッシュ！"
+      },
+      "readings": {
+        "super-00": "ちょうひっさつ！りゅうせい、きらめきフィナーレ！",
+        "super-01": "ちょうひっさつ！すいせい、エターナルノヴァ！",
+        "super-02": "ちょうひっさつ！こうそく、ミラージュステップ！",
+        "super-03": "ちょうひっさつ！せいかん、ギャラクシーストーム！",
+        "super-04": "ちょうひっさつ！きょうせい、クリスタルジャッジ！",
+        "super-05": "ちょうひっさつ！すいせい、スターダストノヴァ！",
+        "super-06": "ちょうひっさつ！せいさ、ゾディアックバインド！",
+        "super-07": "ちょうひっさつ！ぎんが、インフィニティバースト！",
+        "super-08": "ちょうひっさつ！てんちょう、アストラルランス！",
+        "super-09": "ちょうひっさつ！ぎんが、レインボーレイ！",
+        "super-10": "ちょうひっさつ！じせい、クロノスフィナーレ！",
+        "super-11": "ちょうひっさつ！げっこう、フェニックスウィッシュ！"
+      },
+      "synthesis_text": {
+        "super-10": "ちょうひっさつ！じせい、クロノスフィナーレ！"
+      }
+    }
+  ]
+}

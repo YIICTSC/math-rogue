@@ -1,0 +1,1524 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+  "clips": {
+    "original/super-00": {
+      "sampler": "rf_velocity",
+      "effective_guidance": "independent",
+      "recipe_sha256": "012dbf25bbf628c9cbc53e8eb141bbc6381e408866294c454737f06ee2cf5aea",
+      "text": "超必殺！蒼影、定規無双！",
+      "spoken_text": "ちょうひっさつ！そうえい、じょうぎむそう！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        4.0,
+        2.0,
+        3.0
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "checkpoint_sha256": "c85de88c01700cb53538e706f128ebcb1b8513ad21d7d0e75f58bc82cdbf89f6",
+      "cfg_mode": "independent",
+      "sampling_steps": 16,
+      "sample_rate": 48000,
+      "seconds": 3.68,
+      "seed": 3148071,
+      "sha256": "6a7e59b91263401690801c54dec43c4fd8cd6c10874c8d8017299f004597c364",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0021879050000279676,
+        "prepare_reference": 0.0017935949999809964,
+        "predict_duration": 5.6656514430014795,
+        "sample_rf": 24.0526071839995,
+        "unpatchify_latent": 4.347400135884527e-05,
+        "decode_latent": 4.857475879000049,
+        "silentcipher_watermark": 1.1287549810003839
+      }
+    },
+    "original/super-01": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "6d2cd81a0bfacd72507c706c8789708f5385b5f5a57e95d12de348c221e4e6a3",
+      "text": "超必殺！螺旋、コンパス彗星！",
+      "spoken_text": "超必殺！螺旋、コンパス彗星！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.48,
+      "seed": 247586,
+      "sha256": "7a9cfe5f5848c1b4518e8aa88e71c150c5c264d53ddfe19d82f29c3608bfad10",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000767174999054987,
+        "prepare_reference": 0.0007323780009755865,
+        "predict_duration": 2.1423000849990785,
+        "sample_meanflow": 5.371624086999873,
+        "unpatchify_latent": 5.035999492974952e-06,
+        "decode_latent": 5.066483295999205,
+        "silentcipher_watermark": 1.2136465280000266
+      }
+    },
+    "original/super-02": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "d40e17852c867479ae310a2a5ff146d709eb9a3cb919068bc03bb024c49f771a",
+      "text": "超必殺！白天、チョーク流星群！",
+      "spoken_text": "超必殺！白天、チョーク流星群！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.36,
+      "seed": 9737216,
+      "sha256": "5eb374c271e7d99e6b8999c46612f28bd220d223b847432cec8c6973d7cd277d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006829180001659552,
+        "prepare_reference": 0.0007550549998995848,
+        "predict_duration": 3.050792789999832,
+        "sample_meanflow": 7.551357977999942,
+        "unpatchify_latent": 3.7939998946967535e-05,
+        "decode_latent": 8.330125017000682,
+        "silentcipher_watermark": 1.938374951001606
+      }
+    },
+    "original/super-03": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "d8181c4190773053f3a7ee9df26ab44925ccd9525d1f889164959ecf81b2918d",
+      "text": "超必殺！教科書、絶対反撃！",
+      "spoken_text": "超必殺！教科書、絶対反撃！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.36,
+      "seed": 11027045,
+      "sha256": "bc368ec80f1ead9ac87a9e06e3bf6be006a6bbc308df0632279665e1471f14c1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008583309991081478,
+        "prepare_reference": 0.0007829830010450678,
+        "predict_duration": 4.108530910998525,
+        "sample_meanflow": 8.336390524000308,
+        "unpatchify_latent": 6.773001587134786e-06,
+        "decode_latent": 8.517915303998961,
+        "silentcipher_watermark": 1.8816656399994827
+      }
+    },
+    "original/super-04": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "fd1823f4d19682f8a406c9b04e7d5bdbae264170c396820d87885d435e95d880",
+      "text": "超必殺！清掃奥義、龍巻天翔！",
+      "spoken_text": "超必殺！清掃奥義、龍巻天翔！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.8,
+      "seed": 5533170,
+      "sha256": "3ba95ff2066f4f460bf62d2c79c5b24ab7ffd93adfeda31bec01dc84aceda67a",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008057230006670579,
+        "prepare_reference": 0.0007005440002103569,
+        "predict_duration": 4.093622621998293,
+        "sample_meanflow": 10.148541466000097,
+        "unpatchify_latent": 4.5804999899701215e-05,
+        "decode_latent": 10.52679592200002,
+        "silentcipher_watermark": 2.3629655059994548
+      }
+    },
+    "original/super-05": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "2650b48ba01b6feb61af7170e93993dece223ab14cfc5a3e7fd7db14c175875e",
+      "text": "超必殺！雷脚、蒼天突破！",
+      "spoken_text": "超必殺！雷脚、蒼天突破！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 8087207,
+      "sha256": "7091b26011b49a1ba27f48964a45c2c47631e4223af69dc0719f936e72b9139f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.005449772999781999,
+        "prepare_reference": 0.0018548570005805232,
+        "predict_duration": 5.786438246999751,
+        "sample_meanflow": 5.917233414000293,
+        "unpatchify_latent": 7.360999916272704e-05,
+        "decode_latent": 5.3673953150009766,
+        "silentcipher_watermark": 1.8165055419995042
+      }
+    },
+    "original/super-06": {
+      "sampler": "rf_velocity",
+      "effective_guidance": "independent",
+      "recipe_sha256": "e6c0cc5e6909dcbd8f2435aa6de6637a28a82ac642692c68c35716c7a464dc6b",
+      "text": "超必殺！月閃、竹刀一文字！",
+      "spoken_text": "ちょうひっさつ！げっせん、しないいちもんじ！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        4.0,
+        2.0,
+        3.0
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "checkpoint_sha256": "c85de88c01700cb53538e706f128ebcb1b8513ad21d7d0e75f58bc82cdbf89f6",
+      "cfg_mode": "independent",
+      "sampling_steps": 16,
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 13070005,
+      "sha256": "e435b9670d319a7c1f54c09e5522fd2c22fa8a7bb0695667916ce0444dcf76af",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0006963389987504343,
+        "prepare_reference": 0.000688206000631908,
+        "predict_duration": 2.123177728999508,
+        "sample_rf": 16.674454018000688,
+        "unpatchify_latent": 7.337999704759568e-06,
+        "decode_latent": 5.990461216000767,
+        "silentcipher_watermark": 1.366826718000084
+      }
+    },
+    "original/super-07": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "8af2e7bb29c130ce03b71bac512e4669a93cd931bc4a4b8b91843c33361365df",
+      "text": "超必殺！轟星、満塁ホームラン！",
+      "spoken_text": "超必殺！轟星、満塁ホームラン！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.48,
+      "seed": 5386364,
+      "sha256": "f636914acfcec66df2e790ab5e652ec4c06d7de1f46ab99ed3a00719015a32e2",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0021866130009584595,
+        "prepare_reference": 0.002877789998819935,
+        "predict_duration": 2.301346521000596,
+        "sample_meanflow": 4.064382665999801,
+        "unpatchify_latent": 5.164998583495617e-06,
+        "decode_latent": 6.171330909999597,
+        "silentcipher_watermark": 4.508057257000473
+      }
+    },
+    "original/super-08": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "115eb4acbdbdfb4188533b5a1e272b6b264a30adbbdf69da8796aaf4a4248b03",
+      "text": "超必殺！蒼海、バケツ大瀑布！",
+      "spoken_text": "超必殺！蒼海、バケツ大瀑布！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.48,
+      "seed": 15417642,
+      "sha256": "ad5e38ee463844ba970804782c1ec75217e355b89c26b7b844b48b30a4f34ebc",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0021542809990933165,
+        "prepare_reference": 0.0013356630006455816,
+        "predict_duration": 5.922466634998273,
+        "sample_meanflow": 9.432129408000037,
+        "unpatchify_latent": 5.75299964111764e-06,
+        "decode_latent": 13.783155424998768,
+        "silentcipher_watermark": 3.0948380659992836
+      }
+    },
+    "original/super-09": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "a13663f78edea12a537c311ec9ef69b5cd2c9dcb1666f3ef75541c1d7354afc7",
+      "text": "超必殺！校旗、鳳凰乱舞！",
+      "spoken_text": "超必殺！校旗、鳳凰乱舞！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 9920978,
+      "sha256": "f9b4bc56a93c3ec7831be8d48fe9f021b78f4e66d89086ed9b975b49e96183a7",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.002220778000264545,
+        "prepare_reference": 0.0007663950000278419,
+        "predict_duration": 4.081440629001008,
+        "sample_meanflow": 8.080785744999957,
+        "unpatchify_latent": 6.620000931434333e-06,
+        "decode_latent": 9.855096217999744,
+        "silentcipher_watermark": 3.155003857000338
+      }
+    },
+    "original/super-10": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "40f05ad4a24dbad1e97c94a7c7bab39bd55fbad0986eafba266b9269a5aa14a0",
+      "text": "超必殺！響天、校内大交響！",
+      "spoken_text": "超必殺！響天、校内大交響！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.64,
+      "seed": 9827116,
+      "sha256": "e3b874a870624195efa8fbc114c319cd37f49cbb3f7145b6bd2038f54beb5c49",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0014786950014240574,
+        "prepare_reference": 0.0011897940003109397,
+        "predict_duration": 4.114380651999454,
+        "sample_meanflow": 6.894911609999326,
+        "unpatchify_latent": 5.215999408392236e-06,
+        "decode_latent": 5.930520200001411,
+        "silentcipher_watermark": 1.9600746739997703
+      }
+    },
+    "original/super-11": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "2c02fdb788a8c7f55314e48a0382a0ba43a05cf93ab1111d3a3a717012b38af6",
+      "text": "超必殺！卒業奥義、希望の拳！",
+      "spoken_text": "超必殺！卒業奥義、希望の拳！",
+      "references": [
+        {
+          "path": "assets/kocho/original-speaker.wav",
+          "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+        }
+      ],
+      "reference_digest": "f9d743f6a32d",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.72,
+      "seed": 581464,
+      "sha256": "03969ef81bc5e44007cd0baae0fbe87c6d0b5ae13be663d3c53a5c9df48cad9e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001180478999231127,
+        "prepare_reference": 0.0008824720007396536,
+        "predict_duration": 2.1749883709999267,
+        "sample_meanflow": 3.9758589979992394,
+        "unpatchify_latent": 5.255998985376209e-06,
+        "decode_latent": 6.744009269999879,
+        "silentcipher_watermark": 1.306271645000379
+      }
+    },
+    "rebel/super-00": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "cbc2feeda021acdba0f9d38d8dd6905bcdbbf07518de7c9e41405ffca1ca58af",
+      "text": "超必殺！蒼炎、紅蓮無双！",
+      "spoken_text": "超必殺！蒼炎、紅蓮無双！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.8,
+      "seed": 3145541,
+      "sha256": "2f003e38436da8cc6176c4ebf5b9365c0d4f36c1dff90abfded44cc555529c7e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0026437119995534886,
+        "prepare_reference": 0.0008776790000410983,
+        "predict_duration": 2.328997355998581,
+        "sample_meanflow": 5.012719371999992,
+        "unpatchify_latent": 5.138001142768189e-06,
+        "decode_latent": 4.703594914999485,
+        "silentcipher_watermark": 1.0590426309991017
+      }
+    },
+    "rebel/super-01": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "940f7a77ef45f21bb94d778bcfb8cabbacd036bfc5d95a661fa6bf9ef62f3f3a",
+      "text": "超必殺！雷迅、突破轟拳！",
+      "spoken_text": "超必殺！雷迅、突破轟拳！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.84,
+      "seed": 245586,
+      "sha256": "1db48d9a3d1e964ede507aeb72683fcf46bd836d16c56e7673ac6c34648320f3",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.002217412999016233,
+        "prepare_reference": 0.001766520999808563,
+        "predict_duration": 2.393198884001322,
+        "sample_meanflow": 5.116499059000489,
+        "unpatchify_latent": 3.9209999158629216e-05,
+        "decode_latent": 4.996792317000654,
+        "silentcipher_watermark": 1.2147032209995814
+      }
+    },
+    "rebel/super-02": {
+      "sampler": "rf_velocity",
+      "effective_guidance": "independent",
+      "recipe_sha256": "e6d0ccde3378f0cfac91dfb808763d5622a4c4273a64a0e48e2fea228a8b6036",
+      "text": "超必殺！影狼、月下乱舞！",
+      "spoken_text": "ちょうひっさつ！かげろう、げっからんぶ！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        4.0,
+        2.0,
+        3.0
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "checkpoint_sha256": "c85de88c01700cb53538e706f128ebcb1b8513ad21d7d0e75f58bc82cdbf89f6",
+      "cfg_mode": "independent",
+      "sampling_steps": 16,
+      "sample_rate": 48000,
+      "seconds": 3.48,
+      "seed": 9735746,
+      "sha256": "5d8cf2a9efc4411fab224a8e5c031a8e9ecc8cba89f81cf088a7027e046fd6cc",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0008965560009528417,
+        "prepare_reference": 0.0020422260004124837,
+        "predict_duration": 3.967968231001578,
+        "sample_rf": 26.053783157998623,
+        "unpatchify_latent": 2.0585999664035626e-05,
+        "decode_latent": 7.331178831000216,
+        "silentcipher_watermark": 1.5387296539993258
+      }
+    },
+    "rebel/super-03": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "c006037dd96222037246f2f6974d1ffb153103dae13499e64f2bc3a05bcc46f5",
+      "text": "超必殺！鏡牙、反逆カウンター！",
+      "spoken_text": "超必殺！鏡牙、反逆カウンター！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 11025045,
+      "sha256": "2a9fdd473c3c3d3712dc7c46b3b23ce58e3ea9f57191c5b8b9c9b83bcda45ce7",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.002360720000069705,
+        "prepare_reference": 0.0031272449996322393,
+        "predict_duration": 3.4634722039991175,
+        "sample_meanflow": 4.2050700840009085,
+        "unpatchify_latent": 1.6832998881000094e-05,
+        "decode_latent": 5.892028546000802,
+        "silentcipher_watermark": 1.9358922749997873
+      }
+    },
+    "rebel/super-04": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "c4fc1e0c3bb6d2002726b32cd7298df683824ca92fb5fdeffe2ab6ffcd35f9b3",
+      "text": "超必殺！風牙、覇王掌！",
+      "spoken_text": "超必殺！風牙、覇王掌！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.6,
+      "seed": 5531170,
+      "sha256": "06ba7472ee0ecf3c2a38fa1c5b7e59285fb51a3fcb0e490476353806bddec548",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011433130002842518,
+        "prepare_reference": 0.0010885640003834851,
+        "predict_duration": 2.403763030999471,
+        "sample_meanflow": 5.267366113001117,
+        "unpatchify_latent": 1.8044000171357766e-05,
+        "decode_latent": 4.644547150999642,
+        "silentcipher_watermark": 1.0265390980002849
+      }
+    },
+    "rebel/super-05": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "160dbde9a49fef773f4637db37a97289fff74e3e3fe643fafe4065118c8fa408",
+      "text": "超必殺！天鎖、紅蓮落とし！",
+      "spoken_text": "超必殺！天鎖、紅蓮落とし！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.84,
+      "seed": 8085207,
+      "sha256": "cb78257681e536de16ed13a49be5d7bef183a74d04f07f026e2fbe8f4113fe2d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011015569998562569,
+        "prepare_reference": 0.0007662450007046573,
+        "predict_duration": 2.277851284999997,
+        "sample_meanflow": 3.717789616999653,
+        "unpatchify_latent": 4.944000465911813e-06,
+        "decode_latent": 4.948536730000342,
+        "silentcipher_watermark": 1.087275537000096
+      }
+    },
+    "rebel/super-06": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "954b8ceda3f3861ab7023b0fe9336a715795b5e56a2c5302a3f3ef4b9acf6e3d",
+      "text": "超必殺！紅蓮、吸星連牙！",
+      "spoken_text": "超必殺！紅蓮、吸星連牙！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.0,
+      "seed": 13067475,
+      "sha256": "ab6bfa27bb5d0262d729c1cecec5c18efeb79b72d4103e3cbca8fb3fc831cd2e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001020168998365989,
+        "prepare_reference": 0.0007893230012996355,
+        "predict_duration": 2.1609870249994856,
+        "sample_meanflow": 3.737069667000469,
+        "unpatchify_latent": 4.911998985335231e-06,
+        "decode_latent": 5.704640858999483,
+        "silentcipher_watermark": 1.2702530860005936
+      }
+    },
+    "rebel/super-07": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "d3847b3b34f62f1695787816ea72f5c165e7310968bfeff56842fbafecf05533",
+      "text": "超必殺！暁、校則断罪！",
+      "spoken_text": "超必殺！暁、校則断罪！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.0,
+      "seed": 5384364,
+      "sha256": "190a3bcb3c797b49136d4ae68bf9523fd98ec9eb829ea90f570be5a9503bb0d4",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.00827508199836302,
+        "prepare_reference": 0.004039753999677487,
+        "predict_duration": 2.3499026310000772,
+        "sample_meanflow": 4.178483065001274,
+        "unpatchify_latent": 1.8013000953942537e-05,
+        "decode_latent": 5.068120338999506,
+        "silentcipher_watermark": 1.3298022830003902
+      }
+    },
+    "rebel/super-08": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "c2e8cf82f4771254e36c0716365e0f19ad12dfbcd174c9be6320661ee0eff8e5",
+      "text": "超必殺！不屈、王者返し！",
+      "spoken_text": "超必殺！不屈、王者返し！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.88,
+      "seed": 15415642,
+      "sha256": "c3d9335c6b81306a0e76856fae1fbeb1f1224243dce837991f8d00c58c649497",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011765420003939653,
+        "prepare_reference": 0.0008062249999056803,
+        "predict_duration": 2.163376906999474,
+        "sample_meanflow": 4.36767571999917,
+        "unpatchify_latent": 2.0978000975446776e-05,
+        "decode_latent": 4.5339952890008135,
+        "silentcipher_watermark": 1.0708060119995935
+      }
+    },
+    "rebel/super-09": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "f231e57d2eb048a5afd90b18fbf38b327d7108152c9850e28c8f0ad8eedbec29",
+      "text": "超必殺！幻影、旋風乱舞！",
+      "spoken_text": "超必殺！幻影、旋風乱舞！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.96,
+      "seed": 9918978,
+      "sha256": "57a77376aac48094ff8469a3ead222da438849bb2b3685ebe78a65ab1601d1e2",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010224630004813662,
+        "prepare_reference": 0.0007663500000489876,
+        "predict_duration": 2.1577409880010237,
+        "sample_meanflow": 5.266731613999582,
+        "unpatchify_latent": 5.010000677430071e-06,
+        "decode_latent": 4.587012236999726,
+        "silentcipher_watermark": 1.4783539489999384
+      }
+    },
+    "rebel/super-10": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "6a5462cb757af6d869614593d530175576ea9fc00c0c7c132a6626983abf521d",
+      "text": "超必殺！閃光、一撃必中！",
+      "spoken_text": "超必殺！閃光、一撃必中！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.88,
+      "seed": 9825116,
+      "sha256": "755cc43990e0cf95fd081ca8d2cc82a13c1e64a35dc0289198b074a639a0326d",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001007218999802717,
+        "prepare_reference": 0.0008449659999314463,
+        "predict_duration": 2.169855516000098,
+        "sample_meanflow": 4.1966029539999,
+        "unpatchify_latent": 2.8969001505174674e-05,
+        "decode_latent": 4.804538516000321,
+        "silentcipher_watermark": 1.0780600380003307
+      }
+    },
+    "rebel/super-11": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "83cc65154af6a0923645691231ea4552fdab6dd4cfff892265fcb5056bfeb7fa",
+      "text": "超必殺！叛逆、鳳凰天翔！",
+      "spoken_text": "超必殺！叛逆、鳳凰天翔！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+          "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+        },
+        {
+          "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+          "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+        }
+      ],
+      "reference_digest": "74878fc90d34",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.32,
+      "seed": 579464,
+      "sha256": "6ca9cc93c823624250246be8314f372dac61a3ab6caf986286a413f9e122be0e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.003329937999296817,
+        "prepare_reference": 0.0015627970005880343,
+        "predict_duration": 2.7029293079995114,
+        "sample_meanflow": 4.170838341999115,
+        "unpatchify_latent": 4.858499960391782e-05,
+        "decode_latent": 5.302382740001121,
+        "silentcipher_watermark": 1.5093058860002202
+      }
+    },
+    "akari/super-00": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "e6df934489cf38abca97c9acfaccb2be37b78087bbb53d3e2d2f5f158c3dc895",
+      "text": "超必殺！流星、きらめきフィナーレ！",
+      "spoken_text": "超必殺！流星、きらめきフィナーレ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.0,
+      "seed": 3146541,
+      "sha256": "9ce0ed4f92c3eb1bb8decc3c432642a81a099b8797dee2c3a3a7bef944755ab6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.003208673999324674,
+        "prepare_reference": 0.001823807999244309,
+        "predict_duration": 2.402295685998979,
+        "sample_meanflow": 5.69183991600039,
+        "unpatchify_latent": 3.753100099856965e-05,
+        "decode_latent": 12.485957535000125,
+        "silentcipher_watermark": 3.0327773070002877
+      }
+    },
+    "akari/super-01": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "989f9099f7eb3ae5f98658372399e0c3ff8619621424c7189e8f1fd81c72fb61",
+      "text": "超必殺！彗星、エターナルノヴァ！",
+      "spoken_text": "超必殺！彗星、エターナルノヴァ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.04,
+      "seed": 246586,
+      "sha256": "79ddb12920402fcb8f534d92587e26614375f4cd49b0ced5eac53ff577392537",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0030982719999883557,
+        "prepare_reference": 0.003801770999416476,
+        "predict_duration": 4.199414482000066,
+        "sample_meanflow": 8.012706556000921,
+        "unpatchify_latent": 4.982999598723836e-06,
+        "decode_latent": 5.6546990259994345,
+        "silentcipher_watermark": 1.1398301879999053
+      }
+    },
+    "akari/super-02": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "9f1803959813d154361b18d4f9f7b540f767c59a3830e100ae4f65298ff97121",
+      "text": "超必殺！光速、ミラージュステップ！",
+      "spoken_text": "超必殺！光速、ミラージュステップ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.0,
+      "seed": 9736216,
+      "sha256": "a3079fa731dbef024a372e51a1ecc4d34ec0f946bbeb9b24c188a39151175e65",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0019523070004652254,
+        "prepare_reference": 0.0008801509993645595,
+        "predict_duration": 2.339414587999272,
+        "sample_meanflow": 4.007882320000135,
+        "unpatchify_latent": 5.376001354306936e-06,
+        "decode_latent": 4.540108733999659,
+        "silentcipher_watermark": 1.128226516999348
+      }
+    },
+    "akari/super-03": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "0634e18089eae045f1bd0f85578c19f08ee4df386849694cbc308f78ecdebeae",
+      "text": "超必殺！星環、ギャラクシーストーム！",
+      "spoken_text": "超必殺！星環、ギャラクシーストーム！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 11026045,
+      "sha256": "f5d9b3c78dffdfd1ef825a5cd8a4982d840fc69e5e2055f099d1c2e22fe10f81",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.00136693800050125,
+        "prepare_reference": 0.0008899620006559417,
+        "predict_duration": 2.1815787660016213,
+        "sample_meanflow": 3.8742994730000646,
+        "unpatchify_latent": 4.685000021709129e-06,
+        "decode_latent": 4.799156521999976,
+        "silentcipher_watermark": 1.1064548249996733
+      }
+    },
+    "akari/super-04": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "53962da47db0a819b40393652fb6ed73fb40c12e9781883f470632c787d06c16",
+      "text": "超必殺！鏡星、クリスタルジャッジ！",
+      "spoken_text": "超必殺！鏡星、クリスタルジャッジ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.04,
+      "seed": 5532170,
+      "sha256": "8b9349d76b35856cf41902f52107da32dd4776cf47ab52b3cf7a5d17deb2d788",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001420455999323167,
+        "prepare_reference": 0.0008413789983023889,
+        "predict_duration": 2.1892467300003773,
+        "sample_meanflow": 3.91286756000045,
+        "unpatchify_latent": 4.797999281436205e-06,
+        "decode_latent": 4.535503969000274,
+        "silentcipher_watermark": 1.0988170219989115
+      }
+    },
+    "akari/super-05": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "8670c63064a949ba0cd5244f8917f11b105d9c2d8fac368116fcaed688137b8e",
+      "text": "超必殺！彗星、スターダストノヴァ！",
+      "spoken_text": "超必殺！彗星、スターダストノヴァ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.2,
+      "seed": 8086207,
+      "sha256": "d3799d94de094fd5ee3cac233b7b91ad765be4fa0d78bccc792c89c5d7474432",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009775239996088203,
+        "prepare_reference": 0.000800512001660536,
+        "predict_duration": 2.1637718599995424,
+        "sample_meanflow": 3.829608455000198,
+        "unpatchify_latent": 4.9720001698005944e-06,
+        "decode_latent": 4.827397340000971,
+        "silentcipher_watermark": 1.158503341001051
+      }
+    },
+    "akari/super-06": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "6211bcefb9eb9aaecbf9ba207ae64bdfbe597be9d351c5c336c8ea857f1add47",
+      "text": "超必殺！星鎖、ゾディアックバインド！",
+      "spoken_text": "超必殺！星鎖、ゾディアックバインド！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.12,
+      "seed": 13068475,
+      "sha256": "380baee8a88f9ce1d60d2a833b92e6ceaeed3953f4e2945037ac5fcab2a93649",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011680389998218743,
+        "prepare_reference": 0.0008651619991724147,
+        "predict_duration": 2.140007224999863,
+        "sample_meanflow": 4.5650931439995475,
+        "unpatchify_latent": 5.112000508233905e-06,
+        "decode_latent": 4.711293642998498,
+        "silentcipher_watermark": 1.1184784159995615
+      }
+    },
+    "akari/super-07": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "6a58c41d8018903005473ca14db2d2c393fe75fca4759b97950a434049b72ccd",
+      "text": "超必殺！銀河、インフィニティバースト！",
+      "spoken_text": "超必殺！銀河、インフィニティバースト！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.04,
+      "seed": 5385364,
+      "sha256": "6acfe378b04ed80ce83b6ffa18395e00bd65d1f69f921608adb9260ab1fa3fd4",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0011153249997732928,
+        "prepare_reference": 0.0008461050001642434,
+        "predict_duration": 2.119590555999821,
+        "sample_meanflow": 3.6380465069996717,
+        "unpatchify_latent": 5.281000994727947e-06,
+        "decode_latent": 4.398403249000694,
+        "silentcipher_watermark": 1.1583252330001415
+      }
+    },
+    "akari/super-08": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "cd44af285f22a8ee9caedd0f7f4b3464ca429b8ce4a52e248b1ceab47f683b99",
+      "text": "超必殺！天頂、アストラルランス！",
+      "spoken_text": "超必殺！天頂、アストラルランス！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.04,
+      "seed": 15416642,
+      "sha256": "7f369cfebdc2c097852f3038cbaad8dda836ee7ed81169d9a177c6d97dd31db9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0010290560003340943,
+        "prepare_reference": 0.0007583659989904845,
+        "predict_duration": 2.088828380999985,
+        "sample_meanflow": 3.632123961000616,
+        "unpatchify_latent": 5.027999577578157e-06,
+        "decode_latent": 4.464315009001439,
+        "silentcipher_watermark": 1.0800986960002774
+      }
+    },
+    "akari/super-09": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "d47e8baaa7d7e8dbcae86e263521fe740752608e0eb068bb8ce1b99bf0f760e6",
+      "text": "超必殺！銀河、レインボーレイ！",
+      "spoken_text": "超必殺！銀河、レインボーレイ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 3.84,
+      "seed": 9919978,
+      "sha256": "4150ebc219d543f016f73f00227dba64e40cafd995e81f1e24916782ca83d14e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.000973587999396841,
+        "prepare_reference": 0.0009596780000720173,
+        "predict_duration": 2.1300130909985455,
+        "sample_meanflow": 3.7390279870014638,
+        "unpatchify_latent": 5.416999556473456e-06,
+        "decode_latent": 4.447009464000075,
+        "silentcipher_watermark": 1.0758013319991733
+      }
+    },
+    "akari/super-10": {
+      "sampler": "rf_velocity",
+      "effective_guidance": "independent",
+      "recipe_sha256": "f7254265a5c82670799999df89e8170f5da6b302deac006ce9c307cdde5016b5",
+      "text": "超必殺！時星、クロノスフィナーレ！",
+      "spoken_text": "ちょうひっさつ！じせい、クロノスフィナーレ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        4.0,
+        2.0,
+        3.0
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "checkpoint_sha256": "c85de88c01700cb53538e706f128ebcb1b8513ad21d7d0e75f58bc82cdbf89f6",
+      "cfg_mode": "independent",
+      "sampling_steps": 16,
+      "sample_rate": 48000,
+      "seconds": 4.04,
+      "seed": 9826646,
+      "sha256": "e7bb2c85fead3353a80c0c6e956f3f73bd3651d2d75693a4132743da1849a278",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0009335979993920773,
+        "prepare_reference": 0.0008326589995704126,
+        "predict_duration": 4.2892040770002495,
+        "sample_rf": 32.04888516599931,
+        "unpatchify_latent": 0.00012085900016245432,
+        "decode_latent": 8.129734587999337,
+        "silentcipher_watermark": 1.8324935040000128
+      }
+    },
+    "akari/super-11": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "feb43286431839bc6c2d1e09eb4da183e81007360b97d257cdc99113100f5147",
+      "text": "超必殺！月光、フェニックスウィッシュ！",
+      "spoken_text": "超必殺！月光、フェニックスウィッシュ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+          "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+        },
+        {
+          "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+          "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+        }
+      ],
+      "reference_digest": "627c0025a020",
+      "explicit_seconds": null,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 4,
+      "sample_rate": 48000,
+      "seconds": 4.08,
+      "seed": 580464,
+      "sha256": "fb62f4c7e9872fb48cd899b824200f570dddccd7bcf97f3e63a4dd10dfd49c66",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.019662159000290558,
+        "prepare_reference": 0.03706494499965629,
+        "predict_duration": 15.15467914600049,
+        "sample_meanflow": 12.70384659499905,
+        "unpatchify_latent": 4.2289000703021884e-05,
+        "decode_latent": 12.209035603000302,
+        "silentcipher_watermark": 2.7732777609999175
+      }
+    }
+  },
+  "irodori_revision": "89f9d8fbd4d51ea019867ee1197725ede1df13c5",
+  "default_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "last_generation": {
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "sampling_steps": 16,
+    "cfg_mode": "independent"
+  },
+  "compute": "cpu-bf16",
+  "upstream_url": "https://github.com/Aratako/Irodori-TTS",
+  "model_device": "cpu",
+  "codec_device": "cpu",
+  "torch_version": "2.10.0+cpu",
+  "cpu_threads": 2,
+  "models": {
+    "Aratako/Irodori-TTS-v4.1-Small-MF": {
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "sampler": "meanflow",
+      "snapshot": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e"
+    },
+    "Aratako/Irodori-TTS-v4.1-Small": {
+      "checkpoint_sha256": "c85de88c01700cb53538e706f128ebcb1b8513ad21d7d0e75f58bc82cdbf89f6",
+      "sampler": "rf_velocity",
+      "snapshot": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b"
+    }
+  },
+  "silentcipher_watermark": true,
+  "references": {
+    "original": [
+      {
+        "path": "assets/kocho/original-speaker.wav",
+        "sha256": "0a79eb400331556aa74a1158672049be5936b774e614373bf9bbc471e13c709e"
+      }
+    ],
+    "rebel": [
+      {
+        "path": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+        "sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06"
+      },
+      {
+        "path": "public/sfx/high-school-voices/WARRIOR/power-1.ogg",
+        "sha256": "32bb7e0bbbe3063ca769e00538e6adce7bd940485c9873fe5c7fe8205fd96f05"
+      }
+    ],
+    "akari": [
+      {
+        "path": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+        "sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4"
+      },
+      {
+        "path": "public/sfx/magic-voices/AKARI/spell-1.ogg",
+        "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
+      }
+    ]
+  }
+}

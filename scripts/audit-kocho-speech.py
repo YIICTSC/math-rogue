@@ -8,8 +8,8 @@ from difflib import SequenceMatcher
 from pykakasi import kakasi
 from faster_whisper import WhisperModel
 ROOT=Path(__file__).resolve().parents[1]
-p=argparse.ArgumentParser();p.add_argument('--enemies',action='store_true');p.add_argument('--follow',action='store_true');p.add_argument('--keys',type=Path);p.add_argument('--model',default='small');p.add_argument('--threads',type=int,default=1);p.add_argument('--rescore-only',action='store_true');p.add_argument('--report',type=Path);p.add_argument('--batch-size',type=int,default=10);a=p.parse_args()
-catalog=json.loads((ROOT/('assets/kocho/enemy-voice-lines.json' if a.enemies else 'assets/kocho/voice-lines.json')).read_text());record=a.report or ROOT/('assets/kocho/enemy-speech-qa.json' if a.enemies else 'assets/kocho/speech-qa.json')
+p=argparse.ArgumentParser();p.add_argument('--supers',action='store_true');p.add_argument('--enemies',action='store_true');p.add_argument('--follow',action='store_true');p.add_argument('--keys',type=Path);p.add_argument('--model',default='small');p.add_argument('--threads',type=int,default=1);p.add_argument('--rescore-only',action='store_true');p.add_argument('--report',type=Path);p.add_argument('--batch-size',type=int,default=10);a=p.parse_args()
+catalog=json.loads((ROOT/('assets/kocho/super-voice-lines.json' if a.supers else 'assets/kocho/enemy-voice-lines.json' if a.enemies else 'assets/kocho/voice-lines.json')).read_text());record=a.report or ROOT/('assets/kocho/super-speech-qa.json' if a.supers else 'assets/kocho/enemy-speech-qa.json' if a.enemies else 'assets/kocho/speech-qa.json')
 review=json.loads(record.read_text()) if record.exists() else {'samples':{}}
 review['recognizer']=f'faster-whisper/{a.model}, Japanese, int8 CPU, 1s-separated batches, no text prompt'
 k=kakasi()
@@ -36,14 +36,14 @@ expected={h['id']+'/'+event:(text,h.get('readings',{}).get(event,text)) for h in
 while True:
  pending=[]
  for key,(text,reading) in expected.items():
-  path=ROOT/('public/sfx/kocho-enemy-voices' if a.enemies else 'public/sfx/kocho-voices')/f'{key}.ogg'
+  path=ROOT/('public/sfx/kocho-super-voices' if a.supers else 'public/sfx/kocho-enemy-voices' if a.enemies else 'public/sfx/kocho-voices')/f'{key}.ogg'
   if not path.exists() or time.time()-path.stat().st_mtime<1:continue
   sha=hashlib.sha256(path.read_bytes()).hexdigest()
   if review['samples'].get(key,{}).get('sha256')==sha and review['samples'][key].get('reading')==reading:continue
   try:audio,rate=sf.read(path,dtype='float32')
   except Exception:continue
   pending.append((key,text,reading,sha,resample_poly(audio,16000,rate)))
- if a.follow and len(pending)<a.batch_size and any(not (ROOT/('public/sfx/kocho-enemy-voices' if a.enemies else 'public/sfx/kocho-voices')/f'{key}.ogg').exists() for key in expected):
+ if a.follow and len(pending)<a.batch_size and any(not (ROOT/('public/sfx/kocho-super-voices' if a.supers else 'public/sfx/kocho-enemy-voices' if a.enemies else 'public/sfx/kocho-voices')/f'{key}.ogg').exists() for key in expected):
   time.sleep(4);continue
  for offset in range(0,len(pending),a.batch_size):
   spans=[];wave=[];cursor=0

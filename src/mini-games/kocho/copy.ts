@@ -1,3 +1,4 @@
+import { SUPER_ENGLISH, SUPER_HIRAGANA } from './superCopy';
 import { KOCHO_TECHNIQUE_ENGLISH, KOCHO_TECHNIQUE_HIRAGANA } from './techniques';
 const rows = [
  ['回り込み','Circle behind','まわりこみ'], ['押し出す','Shove','おしだす'], ['位置交換','Swap','いちこうかん'],
@@ -49,5 +50,5 @@ const rows = [
  ['HPを3回復。最大HPは超えない','Heal 3 HP, up to max HP','HPを3かいふく。さいだいHPはこえない'],
  ['前方4マスの敵すべてに3ダメージ','Deal 3 damage to all enemies within 4 tiles ahead','ぜんぽう4マスのてきすべてに3ダメージ'],
 ] as const;
-export const KOCHO_ENGLISH:Record<string,string> = {...Object.fromEntries(rows.map(([ja,en])=>[ja,en])),...KOCHO_TECHNIQUE_ENGLISH};
-export const KOCHO_HIRAGANA:Record<string,string> = {...Object.fromEntries(rows.map(([ja,,hi])=>[ja,hi])),...KOCHO_TECHNIQUE_HIRAGANA};
+export const KOCHO_ENGLISH:Record<string,string> = {...SUPER_ENGLISH,...Object.fromEntries(rows.map(([ja,en])=>[ja,en])),...KOCHO_TECHNIQUE_ENGLISH};
+export const KOCHO_HIRAGANA:Record<string,string> = {...SUPER_HIRAGANA,...Object.fromEntries(rows.map(([ja,,hi])=>[ja,hi])),...KOCHO_TECHNIQUE_HIRAGANA};

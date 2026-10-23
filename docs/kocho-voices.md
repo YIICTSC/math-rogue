@@ -52,3 +52,5 @@ KOCHO_ENEMY_VOICE_TEST=1 CHROMIUM_PATH=/usr/bin/chromium pnpm exec node scripts/
 敵音声も独立した認識で不明瞭な候補を選び、通常版RFによる選択的な再生成を行う。短すぎる退場台詞には自然な一言を補い、予測された発話時間内の余分な発話を抑える。生成と認識は低メモリ環境では順番に実行する。配信マニフェスト生成と本番ビルド後は `scripts/verify-kocho-enemy-voices.py --distribution` でWeb/Android一覧・本番コピーの一致も確認できる。
 
 今回の159本はMF 4ステップ136本、RF 16ステップ21本、RF 32ステップ2本。全159本の認識結果と、追加確認した45本の認識結果は、配信OGGの最新SHAに対応する。
+
+3枚の順序で発動する36種類の超必殺技（専用イラスト・音声・残像・カットイン）は [kocho-supers.md](kocho-supers.md) を参照。

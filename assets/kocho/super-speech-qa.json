@@ -1,0 +1,401 @@
+{
+  "samples": {
+    "original/super-00": {
+      "expected": "超必殺！蒼影、定規無双！",
+      "reading": "ちょうひっさつ！そうえい、じょうぎむそう！",
+      "sha256": "6a7e59b91263401690801c54dec43c4fd8cd6c10874c8d8017299f004597c364",
+      "recognized": "超必殺!相栄、定義無双。",
+      "seconds": 3.68,
+      "accepted_readings": [
+        "ちょうひっさつ！そうえい、じょうぎむそう！"
+      ],
+      "reading_similarity": 0.833
+    },
+    "original/super-01": {
+      "expected": "超必殺！螺旋、コンパス彗星！",
+      "reading": "ちょうひっさつ！らせん、コンパスすいせい！",
+      "sha256": "7a9cfe5f5848c1b4518e8aa88e71c150c5c264d53ddfe19d82f29c3608bfad10",
+      "recognized": "超必殺!らせん!コンパス水星!",
+      "seconds": 4.48,
+      "accepted_readings": [
+        "ちょうひっさつ！らせん、コンパスすいせい！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/super-02": {
+      "expected": "超必殺！白天、チョーク流星群！",
+      "reading": "ちょうひっさつ！はくてん、チョークりゅうせいぐん！",
+      "sha256": "5eb374c271e7d99e6b8999c46612f28bd220d223b847432cec8c6973d7cd277d",
+      "recognized": "超必殺!白天!超空流星軍!",
+      "seconds": 4.36,
+      "accepted_readings": [
+        "ちょうひっさつ！はくてん、チョークりゅうせいぐん！"
+      ],
+      "reading_similarity": 0.844
+    },
+    "original/super-03": {
+      "expected": "超必殺！教科書、絶対反撃！",
+      "reading": "ちょうひっさつ！きょうかしょ、ぜったいはんげき！",
+      "sha256": "bc368ec80f1ead9ac87a9e06e3bf6be006a6bbc308df0632279665e1471f14c1",
+      "recognized": "超必殺!教科書!絶対反撃!",
+      "seconds": 4.36,
+      "accepted_readings": [
+        "ちょうひっさつ！きょうかしょ、ぜったいはんげき！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/super-04": {
+      "expected": "超必殺！清掃奥義、龍巻天翔！",
+      "reading": "ちょうひっさつ！せいそうおうぎ、たつまきてんしょう！",
+      "sha256": "3ba95ff2066f4f460bf62d2c79c5b24ab7ffd93adfeda31bec01dc84aceda67a",
+      "recognized": "超必殺!清掃大義!たつまき安長!",
+      "seconds": 4.8,
+      "accepted_readings": [
+        "ちょうひっさつ！せいそうおうぎ、たつまきてんしょう！"
+      ],
+      "reading_similarity": 0.826
+    },
+    "original/super-05": {
+      "expected": "超必殺！雷脚、蒼天突破！",
+      "reading": "ちょうひっさつ！らいきゃく、そうてんとっぱ！",
+      "sha256": "7091b26011b49a1ba27f48964a45c2c47631e4223af69dc0719f936e72b9139f",
+      "recognized": "超必殺来客送転突破",
+      "seconds": 4.08,
+      "accepted_readings": [
+        "ちょうひっさつ！らいきゃく、そうてんとっぱ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/super-06": {
+      "expected": "超必殺！月閃、竹刀一文字！",
+      "reading": "ちょうひっさつ！げっせん、しないいちもんじ！",
+      "sha256": "e435b9670d319a7c1f54c09e5522fd2c22fa8a7bb0695667916ce0444dcf76af",
+      "recognized": "超必殺!月戦、死ない一問時。",
+      "seconds": 4.12,
+      "accepted_readings": [
+        "ちょうひっさつ！げっせん、しないいちもんじ！"
+      ],
+      "reading_similarity": 0.821
+    },
+    "original/super-07": {
+      "expected": "超必殺！轟星、満塁ホームラン！",
+      "reading": "ちょうひっさつ！ごうせい、まんるいホームラン！",
+      "sha256": "f636914acfcec66df2e790ab5e652ec4c06d7de1f46ab99ed3a00719015a32e2",
+      "recognized": "超必殺合成万類ホームラン",
+      "seconds": 4.48,
+      "accepted_readings": [
+        "ちょうひっさつ！ごうせい、まんるいホームラン！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/super-08": {
+      "expected": "超必殺！蒼海、バケツ大瀑布！",
+      "reading": "ちょうひっさつ！そうかい、バケツだいばくふ！",
+      "sha256": "ad5e38ee463844ba970804782c1ec75217e355b89c26b7b844b48b30a4f34ebc",
+      "recognized": "超必殺青身化けず大爆",
+      "seconds": 4.48,
+      "accepted_readings": [
+        "ちょうひっさつ！そうかい、バケツだいばくふ！"
+      ],
+      "reading_similarity": 0.722
+    },
+    "original/super-09": {
+      "expected": "超必殺！校旗、鳳凰乱舞！",
+      "reading": "ちょうひっさつ！こうき、ほうおうらんぶ！",
+      "sha256": "f9b4bc56a93c3ec7831be8d48fe9f021b78f4e66d89086ed9b975b49e96183a7",
+      "recognized": "超必殺後期放映ランブ",
+      "seconds": 4.12,
+      "accepted_readings": [
+        "ちょうひっさつ！こうき、ほうおうらんぶ！"
+      ],
+      "reading_similarity": 0.882
+    },
+    "original/super-10": {
+      "expected": "超必殺！響天、校内大交響！",
+      "reading": "ちょうひっさつ！きょうてん、こうないだいこうきょう！",
+      "sha256": "e3b874a870624195efa8fbc114c319cd37f49cbb3f7145b6bd2038f54beb5c49",
+      "recognized": "超必殺 強転 校内大好強",
+      "seconds": 4.64,
+      "accepted_readings": [
+        "ちょうひっさつ！きょうてん、こうないだいこうきょう！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/super-11": {
+      "expected": "超必殺！卒業奥義、希望の拳！",
+      "reading": "ちょうひっさつ！そつぎょうおうぎ、きぼうのこぶし！",
+      "sha256": "03969ef81bc5e44007cd0baae0fbe87c6d0b5ae13be663d3c53a5c9df48cad9e",
+      "recognized": "超必殺 卒業大義 希望の拳",
+      "seconds": 4.72,
+      "accepted_readings": [
+        "ちょうひっさつ！そつぎょうおうぎ、きぼうのこぶし！"
+      ],
+      "reading_similarity": 0.909
+    },
+    "rebel/super-00": {
+      "expected": "超必殺！蒼炎、紅蓮無双！",
+      "reading": "ちょうひっさつ！そうえん、ぐれんむそう！",
+      "sha256": "2f003e38436da8cc6176c4ebf5b9365c0d4f36c1dff90abfded44cc555529c7e",
+      "recognized": "超必殺 草園 フレーム層",
+      "seconds": 3.8,
+      "accepted_readings": [
+        "ちょうひっさつ！そうえん、ぐれんむそう！"
+      ],
+      "reading_similarity": 0.706
+    },
+    "rebel/super-01": {
+      "expected": "超必殺！雷迅、突破轟拳！",
+      "reading": "ちょうひっさつ！らいじん、とっぱごうけん！",
+      "sha256": "1db48d9a3d1e964ede507aeb72683fcf46bd836d16c56e7673ac6c34648320f3",
+      "recognized": "超必殺 雷人 突破豪権",
+      "seconds": 3.84,
+      "accepted_readings": [
+        "ちょうひっさつ！らいじん、とっぱごうけん！"
+      ],
+      "reading_similarity": 0.789
+    },
+    "rebel/super-02": {
+      "expected": "超必殺！影狼、月下乱舞！",
+      "reading": "ちょうひっさつ！かげろう、げっからんぶ！",
+      "sha256": "5d8cf2a9efc4411fab224a8e5c031a8e9ecc8cba89f81cf088a7027e046fd6cc",
+      "recognized": "超必殺!陰ろう、月化ランブ!",
+      "seconds": 3.48,
+      "accepted_readings": [
+        "ちょうひっさつ！かげろう、げっからんぶ！"
+      ],
+      "reading_similarity": 0.882
+    },
+    "rebel/super-03": {
+      "expected": "超必殺！鏡牙、反逆カウンター！",
+      "reading": "ちょうひっさつ！きょうが、はんぎゃくカウンター！",
+      "sha256": "2a9fdd473c3c3d3712dc7c46b3b23ce58e3ea9f57191c5b8b9c9b83bcda45ce7",
+      "recognized": "超必殺 超キバー 反逆カウンター",
+      "seconds": 4.08,
+      "accepted_readings": [
+        "ちょうひっさつ！きょうが、はんぎゃくカウンター！"
+      ],
+      "reading_similarity": 0.864
+    },
+    "rebel/super-04": {
+      "expected": "超必殺！風牙、覇王掌！",
+      "reading": "ちょうひっさつ！ふうが、はおうしょう！",
+      "sha256": "06ba7472ee0ecf3c2a38fa1c5b7e59285fb51a3fcb0e490476353806bddec548",
+      "recognized": "超必殺 風が破応しよう",
+      "seconds": 3.6,
+      "accepted_readings": [
+        "ちょうひっさつ！ふうが、はおうしょう！"
+      ],
+      "reading_similarity": 0.812
+    },
+    "rebel/super-05": {
+      "expected": "超必殺！天鎖、紅蓮落とし！",
+      "reading": "ちょうひっさつ！てんさ、ぐれんおとし！",
+      "sha256": "cb78257681e536de16ed13a49be5d7bef183a74d04f07f026e2fbe8f4113fe2d",
+      "recognized": "超必殺 天臭り グレン落とし",
+      "seconds": 3.84,
+      "accepted_readings": [
+        "ちょうひっさつ！てんさ、ぐれんおとし！"
+      ],
+      "reading_similarity": 0.857
+    },
+    "rebel/super-06": {
+      "expected": "超必殺！紅蓮、吸星連牙！",
+      "reading": "ちょうひっさつ！ぐれん、きゅうせいれんが！",
+      "sha256": "ab6bfa27bb5d0262d729c1cecec5c18efeb79b72d4103e3cbca8fb3fc831cd2e",
+      "recognized": "超必殺 グレン急性レンガ",
+      "seconds": 4.0,
+      "accepted_readings": [
+        "ちょうひっさつ！ぐれん、きゅうせいれんが！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/super-07": {
+      "expected": "超必殺！暁、校則断罪！",
+      "reading": "ちょうひっさつ！あかつき、こうそくだんざい！",
+      "sha256": "190a3bcb3c797b49136d4ae68bf9523fd98ec9eb829ea90f570be5a9503bb0d4",
+      "recognized": "超必殺 咲かつき 高速弾剤",
+      "seconds": 4.0,
+      "accepted_readings": [
+        "ちょうひっさつ！あかつき、こうそくだんざい！"
+      ],
+      "reading_similarity": 0.947
+    },
+    "rebel/super-08": {
+      "expected": "超必殺！不屈、王者返し！",
+      "reading": "ちょうひっさつ！ふくつ、おうじゃがえし！",
+      "sha256": "c3d9335c6b81306a0e76856fae1fbeb1f1224243dce837991f8d00c58c649497",
+      "recognized": "超必殺 副術 王者介師",
+      "seconds": 3.88,
+      "accepted_readings": [
+        "ちょうひっさつ！ふくつ、おうじゃがえし！"
+      ],
+      "reading_similarity": 0.833
+    },
+    "rebel/super-09": {
+      "expected": "超必殺！幻影、旋風乱舞！",
+      "reading": "ちょうひっさつ！げんえい、せんぷうらんぶ！",
+      "sha256": "57a77376aac48094ff8469a3ead222da438849bb2b3685ebe78a65ab1601d1e2",
+      "recognized": " 超必殺 ゲイエー 先鋒ランプ",
+      "seconds": 3.96,
+      "accepted_readings": [
+        "ちょうひっさつ！げんえい、せんぷうらんぶ！"
+      ],
+      "reading_similarity": 0.778
+    },
+    "rebel/super-10": {
+      "expected": "超必殺！閃光、一撃必中！",
+      "reading": "ちょうひっさつ！せんこう、いちげきひっちゅう！",
+      "sha256": "755cc43990e0cf95fd081ca8d2cc82a13c1e64a35dc0289198b074a639a0326d",
+      "recognized": " 超必殺 先鋒 一撃必中",
+      "seconds": 3.88,
+      "accepted_readings": [
+        "ちょうひっさつ！せんこう、いちげきひっちゅう！"
+      ],
+      "reading_similarity": 0.95
+    },
+    "rebel/super-11": {
+      "expected": "超必殺！叛逆、鳳凰天翔！",
+      "reading": "ちょうひっさつ！はんぎゃく、ほうおうてんしょう！",
+      "sha256": "6ca9cc93c823624250246be8314f372dac61a3ab6caf986286a413f9e122be0e",
+      "recognized": " 超必殺 反躍 宝を軒賞",
+      "seconds": 4.32,
+      "accepted_readings": [
+        "ちょうひっさつ！はんぎゃく、ほうおうてんしょう！"
+      ],
+      "reading_similarity": 0.683
+    },
+    "akari/super-00": {
+      "expected": "超必殺！流星、きらめきフィナーレ！",
+      "reading": "ちょうひっさつ！りゅうせい、きらめきフィナーレ！",
+      "sha256": "9ce0ed4f92c3eb1bb8decc3c432642a81a099b8797dee2c3a3a7bef944755ab6",
+      "recognized": "超必殺 流星 キラミキフィナーレ",
+      "seconds": 4.0,
+      "accepted_readings": [
+        "ちょうひっさつ！りゅうせい、きらめきフィナーレ！"
+      ],
+      "reading_similarity": 0.952
+    },
+    "akari/super-01": {
+      "expected": "超必殺！彗星、エターナルノヴァ！",
+      "reading": "ちょうひっさつ！すいせい、エターナルノヴァ！",
+      "sha256": "79ddb12920402fcb8f534d92587e26614375f4cd49b0ced5eac53ff577392537",
+      "recognized": "超必殺!推生エターナルノバー!",
+      "seconds": 4.04,
+      "accepted_readings": [
+        "ちょうひっさつ！すいせい、エターナルノヴァ！"
+      ],
+      "reading_similarity": 0.789
+    },
+    "akari/super-02": {
+      "expected": "超必殺！光速、ミラージュステップ！",
+      "reading": "ちょうひっさつ！こうそく、ミラージュステップ！",
+      "sha256": "a3079fa731dbef024a372e51a1ecc4d34ec0f946bbeb9b24c188a39151175e65",
+      "recognized": "超必殺!高速ミラージュステップ!",
+      "seconds": 4.0,
+      "accepted_readings": [
+        "ちょうひっさつ！こうそく、ミラージュステップ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/super-03": {
+      "expected": "超必殺！星環、ギャラクシーストーム！",
+      "reading": "ちょうひっさつ！せいかん、ギャラクシーストーム！",
+      "sha256": "f5d9b3c78dffdfd1ef825a5cd8a4982d840fc69e5e2055f099d1c2e22fe10f81",
+      "recognized": "超必殺!聖館ガラクシーストーム!",
+      "seconds": 4.08,
+      "accepted_readings": [
+        "ちょうひっさつ！せいかん、ギャラクシーストーム！"
+      ],
+      "reading_similarity": 0.81
+    },
+    "akari/super-04": {
+      "expected": "超必殺！鏡星、クリスタルジャッジ！",
+      "reading": "ちょうひっさつ！きょうせい、クリスタルジャッジ！",
+      "sha256": "8b9349d76b35856cf41902f52107da32dd4776cf47ab52b3cf7a5d17deb2d788",
+      "recognized": "超必殺!恐怖士クリスタルジャッジ!",
+      "seconds": 4.04,
+      "accepted_readings": [
+        "ちょうひっさつ！きょうせい、クリスタルジャッジ！"
+      ],
+      "reading_similarity": 0.889
+    },
+    "akari/super-05": {
+      "expected": "超必殺！彗星、スターダストノヴァ！",
+      "reading": "ちょうひっさつ！すいせい、スターダストノヴァ！",
+      "sha256": "d3799d94de094fd5ee3cac233b7b91ad765be4fa0d78bccc792c89c5d7474432",
+      "recognized": "超必殺!推生スターダストノバー!",
+      "seconds": 4.2,
+      "accepted_readings": [
+        "ちょうひっさつ！すいせい、スターダストノヴァ！"
+      ],
+      "reading_similarity": 0.8
+    },
+    "akari/super-06": {
+      "expected": "超必殺！星鎖、ゾディアックバインド！",
+      "reading": "ちょうひっさつ！せいさ、ゾディアックバインド！",
+      "sha256": "380baee8a88f9ce1d60d2a833b92e6ceaeed3953f4e2945037ac5fcab2a93649",
+      "recognized": "超必殺!そっさり!ゾディアックバインド!",
+      "seconds": 4.12,
+      "accepted_readings": [
+        "ちょうひっさつ！せいさ、ゾディアックバインド！"
+      ],
+      "reading_similarity": 0.878
+    },
+    "akari/super-07": {
+      "expected": "超必殺！銀河、インフィニティバースト！",
+      "reading": "ちょうひっさつ！ぎんが、インフィニティバースト！",
+      "sha256": "6acfe378b04ed80ce83b6ffa18395e00bd65d1f69f921608adb9260ab1fa3fd4",
+      "recognized": "超必殺!銀河!インフィニティバースト!",
+      "seconds": 4.04,
+      "accepted_readings": [
+        "ちょうひっさつ！ぎんが、インフィニティバースト！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/super-08": {
+      "expected": "超必殺！天頂、アストラルランス！",
+      "reading": "ちょうひっさつ！てんちょう、アストラルランス！",
+      "sha256": "7f369cfebdc2c097852f3038cbaad8dda836ee7ed81169d9a177c6d97dd31db9",
+      "recognized": "超必殺!天長!アストラルランス!",
+      "seconds": 4.04,
+      "accepted_readings": [
+        "ちょうひっさつ！てんちょう、アストラルランス！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/super-09": {
+      "expected": "超必殺！銀河、レインボーレイ！",
+      "reading": "ちょうひっさつ！ぎんが、レインボーレイ！",
+      "sha256": "4150ebc219d543f016f73f00227dba64e40cafd995e81f1e24916782ca83d14e",
+      "recognized": "超必殺!銀河!レインボーレイ!",
+      "seconds": 3.84,
+      "accepted_readings": [
+        "ちょうひっさつ！ぎんが、レインボーレイ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/super-10": {
+      "expected": "超必殺！時星、クロノスフィナーレ！",
+      "reading": "ちょうひっさつ！じせい、クロノスフィナーレ！",
+      "sha256": "e7bb2c85fead3353a80c0c6e956f3f73bd3651d2d75693a4132743da1849a278",
+      "recognized": "超必殺!次世、クロノスフィナーレ!",
+      "seconds": 4.04,
+      "accepted_readings": [
+        "ちょうひっさつ！じせい、クロノスフィナーレ！"
+      ],
+      "reading_similarity": 0.842
+    },
+    "akari/super-11": {
+      "expected": "超必殺！月光、フェニックスウィッシュ！",
+      "reading": "ちょうひっさつ！げっこう、フェニックスウィッシュ！",
+      "sha256": "fb62f4c7e9872fb48cd899b824200f570dddccd7bcf97f3e63a4dd10dfd49c66",
+      "recognized": "超必殺!月光!フェニックス一周!",
+      "seconds": 4.08,
+      "accepted_readings": [
+        "ちょうひっさつ！げっこう、フェニックスウィッシュ！"
+      ],
+      "reading_similarity": 0.909
+    }
+  },
+  "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+}
