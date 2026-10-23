@@ -98,6 +98,19 @@ export const MINI_GAMES: MiniGameConfig[] = [
     clearAction: () => storageService.clearPokerState()
   },
   {
+    id: 'CARD_CLUB',
+    name: '放課後トランプゲーム集',
+    titleLines: ['放課後', 'トランプゲーム集'],
+    description: '好きなキャラクターの顔で、世界のトランプをCPU・オンライン対戦。',
+    screen: GameScreen.MINI_GAME_CARD_CLUB,
+    threshold: 1500,
+    typeLabel: 'CARD CLUB',
+    typeColor: 'bg-emerald-900',
+    glowColor: 'rgba(234,208,142,0.5)',
+    icon: Club,
+    clearAction: () => {},
+  },
+  {
     id: 'DUNGEON',
     name: '学習ローグダンジョンズ',
     titleLines: ['学習ローグ', 'ダンジョンズ'],

@@ -96,6 +96,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: GameScreen.MINI_GAME_SURVIVOR, screen: GameScreen.MINI_GAME_SURVIVOR, label: '校庭サバイバー', group: 'ミニゲーム' },
     { id: `${GameScreen.MINI_GAME_SURVIVOR}:GAME_OVER`, screen: GameScreen.MINI_GAME_SURVIVOR, label: '校庭サバイバー：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: GameScreen.MINI_GAME_POKER, screen: GameScreen.MINI_GAME_POKER, label: '放課後ポーカー', group: 'ミニゲーム' },
+    { id: GameScreen.MINI_GAME_CARD_CLUB, screen: GameScreen.MINI_GAME_CARD_CLUB, label: '放課後トランプゲーム集', group: 'ミニゲーム' },
     { id: `${GameScreen.MINI_GAME_POKER}:POKER_PACK`, screen: GameScreen.MINI_GAME_POKER, label: '放課後ポーカー：ランダムパック', group: 'ミニゲーム', miniGameOutcome: 'POKER_PACK' },
     { id: `${GameScreen.MINI_GAME_POKER}:GAME_OVER`, screen: GameScreen.MINI_GAME_POKER, label: '放課後ポーカー：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: `${GameScreen.MINI_GAME_POKER}:ENDING`, screen: GameScreen.MINI_GAME_POKER, label: '放課後ポーカー：エンディング', group: 'ミニゲーム', miniGameOutcome: 'ENDING' },

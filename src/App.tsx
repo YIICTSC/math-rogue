@@ -948,6 +948,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.DODGEBALL_SHOOTING,
     GameScreen.BASKETBALL_LAYUP,
     GameScreen.MINI_GAME_POKER,
+    GameScreen.MINI_GAME_CARD_CLUB,
     GameScreen.MINI_GAME_SURVIVOR,
     GameScreen.MINI_GAME_DUNGEON,
     GameScreen.MINI_GAME_DUNGEON_2,
@@ -1709,6 +1710,8 @@ const App: React.FC = () => {
     ), []);
     const vrCode=useMemo(()=>typeof window==='undefined'?'':vrInviteCode(window.location.href),[]);
     const [vrInviteOpen,setVrInviteOpen]=useState(Boolean(vrCode));
+    const cardClubCode=useMemo(()=>{if(typeof window==='undefined')return '';const code=(new URLSearchParams(window.location.search).get('cardClubRoom')||'').normalize('NFKC').trim();return /^\d{6}$/.test(code)?code:'';},[]);
+    const [cardClubInviteOpen,setCardClubInviteOpen]=useState(Boolean(cardClubCode));
     const kartCode = useMemo(() => typeof window === 'undefined' ? '' : kartInviteCode(window.location.href), []);
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
     const golfCode = useMemo(() => typeof window === 'undefined' ? '' : golfInviteCode(window.location.href), []);
@@ -1754,7 +1757,7 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
-    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
+    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     // 「続きから」で読み込んだ本編の状態を、課題レターを確認してから
@@ -2665,6 +2668,7 @@ const App: React.FC = () => {
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
     useEffect(()=>{if(gameState.screen===GameScreen.GAKURO_CRAFT)setGameState(prev=>({...prev,screen:GameScreen.START_MENU}));},[gameState.screen]);
     useEffect(()=>{if(vrInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_GAKUROGEAR?prev:{...prev,screen:GameScreen.MINI_GAME_GAKUROGEAR});},[vrInviteOpen]);
+    useEffect(()=>{if(cardClubInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_CARD_CLUB?prev:{...prev,screen:GameScreen.MINI_GAME_CARD_CLUB});},[cardClubInviteOpen]);
     useEffect(()=>{if(kartInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.GAKURO_KART?prev:{...prev,screen:GameScreen.GAKURO_KART});},[kartInviteOpen]);
     const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
         && Boolean(rpgInviteCode)
@@ -7283,7 +7287,7 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         setPendingMiniGameScreen(screen);
-        if (screen === GameScreen.MINI_GAME_GAKUROGEAR) {
+        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB) {
             setPendingMiniGameScreen(null);
             setGameState(prev => ({ ...prev, screen }));
             return;
@@ -21258,7 +21262,7 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
+                            onBack={gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete('cardClubRoom');window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
                             inviteCode={vrInviteOpen?vrCode:''}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}

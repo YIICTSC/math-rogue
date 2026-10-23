@@ -1,0 +1,10475 @@
+{
+  "source": "https://gamefarm.jp/rule/contents.html",
+  "importedAt": "2026-10-23",
+  "games": [
+    {
+      "id": "41",
+      "name": "フォーティーワン",
+      "english": "Forty-One",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/41.html"
+    },
+    {
+      "id": "bidwhist",
+      "name": "ビッドホイスト",
+      "english": "Bid Whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/bidwhist.html"
+    },
+    {
+      "id": "cayenne",
+      "name": "カイエン",
+      "english": "Cayenne",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/cayenne.html"
+    },
+    {
+      "id": "chinesewhist",
+      "name": "チャイニーズ・ホイスト",
+      "english": "Chinese Whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/chinesewhist.html"
+    },
+    {
+      "id": "germanwhist",
+      "name": "ジャーマン・ホイスト",
+      "english": "German Whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/germanwhist.html"
+    },
+    {
+      "id": "minnesotawhist",
+      "name": "ミネソタ・ホイスト",
+      "english": "Minesota Whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/minnesotawhist.html"
+    },
+    {
+      "id": "openwhist",
+      "name": "オープン・ホイスト",
+      "english": "Open Whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/openwhist.html"
+    },
+    {
+      "id": "sergent",
+      "name": "サージェント・メジャー",
+      "english": "Sergeant Major",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/sergent.html"
+    },
+    {
+      "id": "whist",
+      "name": "ホイスト",
+      "english": "whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/whist.html"
+    },
+    {
+      "id": "booby",
+      "name": "ブービー",
+      "english": "Booby",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/booby.html"
+    },
+    {
+      "id": "estonianvint",
+      "name": "エストニアン・ビント",
+      "english": "Estonian Vint",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/estonianvint.html"
+    },
+    {
+      "id": "skruuvi",
+      "name": "スクルービ",
+      "english": "skruuvi",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 9,
+      "source": "https://gamefarm.jp/rule/skruuvi.html"
+    },
+    {
+      "id": "pandoeren",
+      "name": "パンドエーレン",
+      "english": "Pandoeren",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        33
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/pandoeren.html"
+    },
+    {
+      "id": "rikken",
+      "name": "リッケン",
+      "english": "Rikken",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/rikken.html"
+    },
+    {
+      "id": "solow",
+      "name": "ソロホイスト",
+      "english": "Solo Whist",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/solow.html"
+    },
+    {
+      "id": "vira",
+      "name": "ビラ",
+      "english": "Vira",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 10,
+      "source": "https://gamefarm.jp/rule/vira.html"
+    },
+    {
+      "id": "wiezen",
+      "name": "ウィーゼン",
+      "english": "Wiezen",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/wiezen.html"
+    },
+    {
+      "id": "500",
+      "name": "ファイブハンドレッド",
+      "english": "Five Hundred",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        33
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/500.html"
+    },
+    {
+      "id": "buckeuchre",
+      "name": "バックユーカー",
+      "english": "Buck Euchre",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/buckeuchre.html"
+    },
+    {
+      "id": "ecarte",
+      "name": "エカルテ",
+      "english": "Ecarte",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/ecarte.html"
+    },
+    {
+      "id": "euchre2",
+      "name": "ユーカー",
+      "english": "Euchre",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/euchre2.html"
+    },
+    {
+      "id": "euchre-uk",
+      "name": "ユーカー（英国ルール）",
+      "english": "Euchre",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/euchre_uk.html"
+    },
+    {
+      "id": "hasenpfeffer",
+      "name": "ハーゼンプフェファ",
+      "english": "Hasenpfeffer",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        25
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/hasenpfeffer.html"
+    },
+    {
+      "id": "backalley",
+      "name": "バックアレイ",
+      "english": "Back Alley",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/backalley.html"
+    },
+    {
+      "id": "fipsen",
+      "name": "フィプセン",
+      "english": "Fipsen",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        25
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/fipsen.html"
+    },
+    {
+      "id": "nap",
+      "name": "ナップ",
+      "english": "Napoleon",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/nap.html"
+    },
+    {
+      "id": "croatiapre",
+      "name": "クロアチアン・プリファランス",
+      "english": "Croatian Preference",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/croatiapre.html"
+    },
+    {
+      "id": "paston",
+      "name": "パストン",
+      "english": "Paston",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/paston.html"
+    },
+    {
+      "id": "prefa",
+      "name": "プレファ",
+      "english": "Prefa",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/prefa.html"
+    },
+    {
+      "id": "prefer-austria",
+      "name": "オーストリアのプレフェランス",
+      "english": "Préférence",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/prefer-austria.html"
+    },
+    {
+      "id": "preference",
+      "name": "プリファランス",
+      "english": "Preference",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/preference.html"
+    },
+    {
+      "id": "lhombre",
+      "name": "ロンブル",
+      "english": "l'hombre",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/lhombre.html"
+    },
+    {
+      "id": "tresillo",
+      "name": "トレシヨ",
+      "english": "Tresillo",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/tresillo.html"
+    },
+    {
+      "id": "25",
+      "name": "トゥエンティーファイブ",
+      "english": "Twenty-Five",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/25.html"
+    },
+    {
+      "id": "55",
+      "name": "フィフティーファイブ",
+      "english": "Fifty-Five",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/55.html"
+    },
+    {
+      "id": "spoilfive",
+      "name": "スポイルファイブ",
+      "english": "Spoil Five",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/spoilfive.html"
+    },
+    {
+      "id": "aluette",
+      "name": "アリュエット",
+      "english": "Aluette",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/aluette.html"
+    },
+    {
+      "id": "braziliantruco",
+      "name": "ブラジリアン・トルーコ",
+      "english": "Brazilian Truco",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/braziliantruco.html"
+    },
+    {
+      "id": "put",
+      "name": "プット",
+      "english": "Put",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/put.html"
+    },
+    {
+      "id": "truc",
+      "name": "トリュック",
+      "english": "Le Truc",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/truc.html"
+    },
+    {
+      "id": "truco",
+      "name": "トルッコ",
+      "english": "Truco",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        44
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/truco.html"
+    },
+    {
+      "id": "karnoeffel",
+      "name": "カーネフェル",
+      "english": "Karnoffel",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/Karnoeffel.html"
+    },
+    {
+      "id": "watten",
+      "name": "バッテン",
+      "english": "Watten",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/watten.html"
+    },
+    {
+      "id": "horna",
+      "name": "ホルナフャルザール・マニ",
+      "english": "Hornafjardarmanni",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/horna.html"
+    },
+    {
+      "id": "manni",
+      "name": "マニ",
+      "english": "Manni",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/manni.html"
+    },
+    {
+      "id": "alkort",
+      "name": "アルコート",
+      "english": "Alkort",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        44
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/alkort.html"
+    },
+    {
+      "id": "brus",
+      "name": "ブルス",
+      "english": "Brus",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/brus.html"
+    },
+    {
+      "id": "bestia",
+      "name": "ベスティア",
+      "english": "Bestia",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/bestia.html"
+    },
+    {
+      "id": "bourre",
+      "name": "ブーレ",
+      "english": "Bourré",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/bourre.html"
+    },
+    {
+      "id": "julepe",
+      "name": "フレペ",
+      "english": "Julepe",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        6
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/julepe.html"
+    },
+    {
+      "id": "loo",
+      "name": "ルー",
+      "english": "Loo",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "recommended": [
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/loo.html"
+    },
+    {
+      "id": "ducksoup",
+      "name": "ダックスープ",
+      "english": "Duck Soup",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/ducksoup.html"
+    },
+    {
+      "id": "finesse",
+      "name": "フィネス",
+      "english": "Finess",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        64
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/finesse.html"
+    },
+    {
+      "id": "knockout",
+      "name": "ノックアウト",
+      "english": "Knockout",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/knockout.html"
+    },
+    {
+      "id": "toepen",
+      "name": "ツーペン",
+      "english": "toepen",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/toepen.html"
+    },
+    {
+      "id": "triathlon",
+      "name": "トライアスロン",
+      "english": "Triathlon",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/triathlon.html"
+    },
+    {
+      "id": "tribello",
+      "name": "トリベーロ",
+      "english": "Tribello",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/tribello.html"
+    },
+    {
+      "id": "gooseberryhtml",
+      "name": "グズベリー・フール",
+      "english": "Gooseberry Fool",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        33
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/gooseberryhtml.html"
+    },
+    {
+      "id": "bauernstoss",
+      "name": "バウアーンシュトース",
+      "english": "Bauernstoss",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/bauernstoss.html"
+    },
+    {
+      "id": "doppelkopf",
+      "name": "ドッペルコップ",
+      "english": "Doppelkopf",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        5
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/doppelkopf.html"
+    },
+    {
+      "id": "kloepper",
+      "name": "クロッパー",
+      "english": "Kloepper",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/kloepper.html"
+    },
+    {
+      "id": "kop",
+      "name": "コップ",
+      "english": "Kop",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        16
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/kop.html"
+    },
+    {
+      "id": "owcyglowa",
+      "name": "オウシー・グロワ",
+      "english": "Owcy Glowa",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/owcyglowa.html"
+    },
+    {
+      "id": "pfalzschafkopf",
+      "name": "ファルツ地方のシャーフコップ",
+      "english": "Pfaltz Schafkopt",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/pfalzschafkopf.html"
+    },
+    {
+      "id": "schafkopf",
+      "name": "シャーフコップ",
+      "english": "Schafkopf",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/schafkopf.html"
+    },
+    {
+      "id": "sheepshead",
+      "name": "シープスヘッド",
+      "english": "Sheepshead",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/sheepshead.html"
+    },
+    {
+      "id": "spitzer",
+      "name": "スピッツァー",
+      "english": "Spitzer",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/spitzer.html"
+    },
+    {
+      "id": "sueca",
+      "name": "スエカ",
+      "english": "Sueca",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/sueca.html"
+    },
+    {
+      "id": "avinas",
+      "name": "アビナス",
+      "english": "Avinas",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/avinas.html"
+    },
+    {
+      "id": "americanskat",
+      "name": "アメリカン・スカート",
+      "english": "North American Skat",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/americanskat.html"
+    },
+    {
+      "id": "skat2",
+      "name": "スカート",
+      "english": "Skat",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/skat2.html"
+    },
+    {
+      "id": "tute-gana-pierde",
+      "name": "トゥテ・ガナ・ピエルテ",
+      "english": "Tute Gana-Pierde",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/tute-gana-pierde.html"
+    },
+    {
+      "id": "tute",
+      "name": "トゥテ",
+      "english": "Tute",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/tute.html"
+    },
+    {
+      "id": "66",
+      "name": "シックスティーシックス",
+      "english": "Sixty-Six",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/66.html"
+    },
+    {
+      "id": "bau",
+      "name": "バウアン・シュナプセン",
+      "english": "Bauernschnapsen",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/bau.html"
+    },
+    {
+      "id": "marias",
+      "name": "マリアーシュ",
+      "english": "Mariáš",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/marias.html"
+    },
+    {
+      "id": "marjapussi",
+      "name": "マルヤプッシ",
+      "english": "Marjapussi",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/marjapussi.html"
+    },
+    {
+      "id": "schnapsen",
+      "name": "シュナプセン",
+      "english": "Schnapsen",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        20
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/schnapsen.html"
+    },
+    {
+      "id": "tysiacha",
+      "name": "チシャチャ",
+      "english": "Tysiacha",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/tysiacha.html"
+    },
+    {
+      "id": "ulti",
+      "name": "ウルティ",
+      "english": "Ulti",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 9,
+      "source": "https://gamefarm.jp/rule/ulti.html"
+    },
+    {
+      "id": "bavariantarock",
+      "name": "バーバリアン・タロック",
+      "english": "Bavarian Tarock",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/bavariantarock.html"
+    },
+    {
+      "id": "dobbm",
+      "name": "ドッブン",
+      "english": "Dobbm",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        5
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/dobbm.html"
+    },
+    {
+      "id": "sixbidsolo",
+      "name": "シックス・ビッド・ソロ",
+      "english": "Six Bid solo",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/sixbidsolo.html"
+    },
+    {
+      "id": "botifarra",
+      "name": "ボティファーラ",
+      "english": "Botifarra",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/botifarra.html"
+    },
+    {
+      "id": "manillen",
+      "name": "マニーレン",
+      "english": "Manillen",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/manillen.html"
+    },
+    {
+      "id": "spanishsolo",
+      "name": "スパニッシュ・ソロ",
+      "english": "Spanish Solo",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/spanishsolo.html"
+    },
+    {
+      "id": "boonaken",
+      "name": "ボーナケン",
+      "english": "Boonaken",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/boonaken.html"
+    },
+    {
+      "id": "handjass",
+      "name": "ハントヤス",
+      "english": "Handjass",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/handjass.html"
+    },
+    {
+      "id": "rape",
+      "name": "スタエクスケ・ラペ",
+      "english": "Staekske Rape",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        5
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/rape.html"
+    },
+    {
+      "id": "schieberjass",
+      "name": "シーバー・ヤス",
+      "english": "Shieber Jass",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/schieberjass.html"
+    },
+    {
+      "id": "alsos",
+      "name": "アルショーシュ",
+      "english": "Arsós",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/alsos.html"
+    },
+    {
+      "id": "belote",
+      "name": "ブロット",
+      "english": "Belote",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/belote.html"
+    },
+    {
+      "id": "belotecontree",
+      "name": "ブロット・コントレ",
+      "english": "Belote Contrée",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/belotecontree.html"
+    },
+    {
+      "id": "clabber",
+      "name": "クラバー",
+      "english": "Clabber",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/clabber.html"
+    },
+    {
+      "id": "coinche",
+      "name": "ブロットクワンシェ",
+      "english": "Belote Coinchee",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/coinche.html"
+    },
+    {
+      "id": "klabberjass",
+      "name": "クラバヤス",
+      "english": "Klabberjass",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/klabberjass.html"
+    },
+    {
+      "id": "klaverjas",
+      "name": "クラフェルヤス",
+      "english": "Klaverjas",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/klaverjas.html"
+    },
+    {
+      "id": "mpourlot",
+      "name": "ムポイルロット",
+      "english": "Mpourloto",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mpourlot.html"
+    },
+    {
+      "id": "28",
+      "name": "トゥエンティーエイト",
+      "english": "Twenty-Eight",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        6
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/28.html"
+    },
+    {
+      "id": "304",
+      "name": "スリー・ノート・フォー",
+      "english": "Three Nought Four",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/304.html"
+    },
+    {
+      "id": "56",
+      "name": "フィフティーシックス",
+      "english": "Fifity-Six",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/56.html"
+    },
+    {
+      "id": "thunee",
+      "name": "サニー",
+      "english": "Thunee",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/thunee.html"
+    },
+    {
+      "id": "allfour",
+      "name": "オールフォー",
+      "english": "All Fourｓ",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/allfour.html"
+    },
+    {
+      "id": "allfour-2",
+      "name": "セブンアップ",
+      "english": "Seven Up",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/allfour.html"
+    },
+    {
+      "id": "pedro",
+      "name": "ピードロ",
+      "english": "Pedro",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/pedro.html"
+    },
+    {
+      "id": "pitch",
+      "name": "ピッチ",
+      "english": "Pitch",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/pitch.html"
+    },
+    {
+      "id": "smear",
+      "name": "シュミア",
+      "english": "Schmier",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        5,
+        6
+      ],
+      "recommended": [
+        6
+      ],
+      "cards": [
+        53
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/smear.html"
+    },
+    {
+      "id": "tenpointpitch",
+      "name": "テンポイントピッチ",
+      "english": "Ten Point Pitch",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/tenpointpitch.html"
+    },
+    {
+      "id": "spady",
+      "name": "シュパーディ",
+      "english": "Spady",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/spady.html"
+    },
+    {
+      "id": "stovkahra",
+      "name": "ストブカーラ",
+      "english": "Stovkahra",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/stovkahra.html"
+    },
+    {
+      "id": "trappola",
+      "name": "トラッポラ",
+      "english": "Trappola",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/trappola.html"
+    },
+    {
+      "id": "calabresella",
+      "name": "カラブレセッラ",
+      "english": "Calabresella/Treziglio",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/calabresella.html"
+    },
+    {
+      "id": "marafonb",
+      "name": "マラフォン",
+      "english": "Marafon/Beccaccino",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/marafonb.html"
+    },
+    {
+      "id": "marafonebeccacino",
+      "name": "マラフォネ・ベッカチノ",
+      "english": "Marafone Beccacino",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/marafonebeccacino.html"
+    },
+    {
+      "id": "mediatore",
+      "name": "メディアトーレ",
+      "english": "Mediatore",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/mediatore.html"
+    },
+    {
+      "id": "spizzichino",
+      "name": "スピッツィキーノ",
+      "english": "Spizzichino",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/Spizzichino.html"
+    },
+    {
+      "id": "tresette",
+      "name": "トレセッテ",
+      "english": "Tresette",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/tresette.html"
+    },
+    {
+      "id": "briscola",
+      "name": "ブリスコラ",
+      "english": "Briscola",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/briscola.html"
+    },
+    {
+      "id": "briscolachiamata",
+      "name": "ブリスコラ・キアマタ",
+      "english": "Briscola Chiamata",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        5
+      ],
+      "recommended": [
+        5
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/briscolachiamata.html"
+    },
+    {
+      "id": "madrasso",
+      "name": "マドラッソ",
+      "english": "Madrasso",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/madrasso.html"
+    },
+    {
+      "id": "bezique",
+      "name": "ベジーク",
+      "english": "Bezique",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        64
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/bezique.html"
+    },
+    {
+      "id": "doublepinochle",
+      "name": "ダブル・ピノクル",
+      "english": "Double-Deck Pinochle",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        80
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/doublepinochle.html"
+    },
+    {
+      "id": "pinochle",
+      "name": "ピノクル",
+      "english": "Pinochle",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pinochle.html"
+    },
+    {
+      "id": "riskikontra",
+      "name": "リスティコントラ",
+      "english": "Ristikontra",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/riskikontra.html"
+    },
+    {
+      "id": "sedma",
+      "name": "セドマ",
+      "english": "Sedma",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/sedma.html"
+    },
+    {
+      "id": "sedmice",
+      "name": "セドミツェ",
+      "english": "Sedmice",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/sedmice.html"
+    },
+    {
+      "id": "kakeya",
+      "name": "掛谷トランプ",
+      "english": "掛谷トランプ",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        6
+      ],
+      "recommended": [
+        4,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/kakeya.html"
+    },
+    {
+      "id": "napoleon",
+      "name": "ナポレオン",
+      "english": "ナポレオン",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/napoleon.html"
+    },
+    {
+      "id": "200",
+      "name": "ツーハンドレッド",
+      "english": "Two Hundred",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/200.html"
+    },
+    {
+      "id": "couillon",
+      "name": "クヨン",
+      "english": "Couillon",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4,
+        6,
+        8
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/couillon.html"
+    },
+    {
+      "id": "fifteens",
+      "name": "フィフティーンズ",
+      "english": "Fifteens",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/fifteens.html"
+    },
+    {
+      "id": "huutopussi",
+      "name": "フートプッシ",
+      "english": "Huutopussi",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/huutopussi.html"
+    },
+    {
+      "id": "nestors",
+      "name": "ネスターズ",
+      "english": "Nestors",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/nestors.html"
+    },
+    {
+      "id": "queensdangeon",
+      "name": "クイーンズ・ダンジョン",
+      "english": "Queen's Dungeon",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/queensdangeon.html"
+    },
+    {
+      "id": "quint",
+      "name": "クイント",
+      "english": "Quint",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        53
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/quint.html"
+    },
+    {
+      "id": "scartino",
+      "name": "スカルティノ",
+      "english": "Scartino",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/scartino.html"
+    },
+    {
+      "id": "welshwhist",
+      "name": "ウェルチホイスト",
+      "english": "Welsh Whist",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/welshwhist.html"
+    },
+    {
+      "id": "fifteen",
+      "name": "フィフティーン",
+      "english": "Fifteen",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/fifteen.html"
+    },
+    {
+      "id": "throps",
+      "name": "スロップス",
+      "english": "Throps",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/Throps.html"
+    },
+    {
+      "id": "blacklady",
+      "name": "ブラックレディー",
+      "english": "Black Lady",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/blacklady.html"
+    },
+    {
+      "id": "blackmaria",
+      "name": "ブラックマリア",
+      "english": "Black Maria",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/blackmaria.html"
+    },
+    {
+      "id": "cansellation",
+      "name": "キャンセレーション・ブラックレディー",
+      "english": "Cansellation Black Lady",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/cansellation.html"
+    },
+    {
+      "id": "dominohearts",
+      "name": "ドミノ・ハート",
+      "english": "Domino Hearts",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/dominohearts.html"
+    },
+    {
+      "id": "gongzhu",
+      "name": "ゴンジュー",
+      "english": "拱猪/Gong Zhu",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        4,
+        5
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/gongzhu.html"
+    },
+    {
+      "id": "heart2",
+      "name": "ハート",
+      "english": "Heart",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/heart2.html"
+    },
+    {
+      "id": "lorum",
+      "name": "ロールム",
+      "english": "Lórum",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/lorum.html"
+    },
+    {
+      "id": "oregonianheart",
+      "name": "オレゴニアン・ハート",
+      "english": "Oregonian Hearts",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/oregonianheart.html"
+    },
+    {
+      "id": "tetka",
+      "name": "チョトカ",
+      "english": "Tëtka",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/tetka.html"
+    },
+    {
+      "id": "blackmariah",
+      "name": "ブラックマリアー",
+      "english": "Black Mariah",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/blackmariah.html"
+    },
+    {
+      "id": "canadiansalad",
+      "name": "カナディアン・サラダ",
+      "english": "Canadian Salad",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/canadiansalad.html"
+    },
+    {
+      "id": "ciapano",
+      "name": "チアパーノ",
+      "english": "Ciapano",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/ciapano.html"
+    },
+    {
+      "id": "coteccio",
+      "name": "コテッチョ",
+      "english": "Coteccio",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/coteccio.html"
+    },
+    {
+      "id": "kalter",
+      "name": "カルターシュラーク",
+      "english": "Kalter Schlag",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/kalter.html"
+    },
+    {
+      "id": "laus",
+      "name": "ラウス",
+      "english": "Laus",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/laus.html"
+    },
+    {
+      "id": "polignac",
+      "name": "ポリニャック",
+      "english": "Polignac",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/polignac.html"
+    },
+    {
+      "id": "reversi",
+      "name": "リベルシ",
+      "english": "Le Reversi",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/reversi.html"
+    },
+    {
+      "id": "schieberamsch",
+      "name": "シーベラムシュ",
+      "english": "Schieberamsch",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/schieberamsch.html"
+    },
+    {
+      "id": "bugami",
+      "name": "バガミ",
+      "english": "Bugami",
+      "category": "トリックテイキング",
+      "subcategory": "プラスとマイナスの点数",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/bugami.html"
+    },
+    {
+      "id": "knave",
+      "name": "ネイブ",
+      "english": "Knave",
+      "category": "トリックテイキング",
+      "subcategory": "プラスとマイナスの点数",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/knave.html"
+    },
+    {
+      "id": "plonk",
+      "name": "プランク",
+      "english": "Plonk",
+      "category": "トリックテイキング",
+      "subcategory": "プラスとマイナスの点数",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/plonk.html"
+    },
+    {
+      "id": "ugly",
+      "name": "アグリ",
+      "english": "Ugly",
+      "category": "トリックテイキング",
+      "subcategory": "プラスとマイナスの点数",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/ugly.html"
+    },
+    {
+      "id": "zwanzigab",
+      "name": "ツバンツィッヒ・アプ",
+      "english": "Zwanzig ab",
+      "category": "トリックテイキング",
+      "subcategory": "プラスとマイナスの点数",
+      "players": [
+        4,
+        5
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/zwanzigab.html"
+    },
+    {
+      "id": "99",
+      "name": "ナインティーナイン",
+      "english": "Ninety-Nine",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        33,
+        36,
+        53
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/99.html"
+    },
+    {
+      "id": "callbridge",
+      "name": "コール・ブリッジ",
+      "english": "Call Bridge",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/callbridge.html"
+    },
+    {
+      "id": "israeliwhist",
+      "name": "イスラエリホイスト",
+      "english": "Israeli Whist",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/israeliwhist.html"
+    },
+    {
+      "id": "ohhell",
+      "name": "オーヘル",
+      "english": "Oh Hell!",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/ohhell.html"
+    },
+    {
+      "id": "romanianwhist",
+      "name": "ルーマニアン・ホイスト",
+      "english": "Romanian Whist",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/romanianwhist.html"
+    },
+    {
+      "id": "spades",
+      "name": "スペード",
+      "english": "Spades",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/spades.html"
+    },
+    {
+      "id": "whiskey",
+      "name": "ウィスキー",
+      "english": "Whiskey",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/whiskey.html"
+    },
+    {
+      "id": "differenzlerjass",
+      "name": "ディフェレンツラー・ヤス",
+      "english": "Differenzler Jass",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りの点数",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/differenzlerjass.html"
+    },
+    {
+      "id": "barbu",
+      "name": "バルビュ",
+      "english": "Barbu",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/barbu.html"
+    },
+    {
+      "id": "coifeur",
+      "name": "コアフュール・シーバー・ヤス",
+      "english": "Coifeur-Shieber Jass",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/coifeur.html"
+    },
+    {
+      "id": "laugavatns",
+      "name": "ラウガバトンス・マニ",
+      "english": "Laugavatnsmanni",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/laugavatns.html"
+    },
+    {
+      "id": "mizerka",
+      "name": "ミゼルカ",
+      "english": "Mizerka",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/mizerka.html"
+    },
+    {
+      "id": "rifki",
+      "name": "リフキ",
+      "english": "Rifki",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/rifki.html"
+    },
+    {
+      "id": "trex",
+      "name": "トレックス",
+      "english": "Trex",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/trex.html"
+    },
+    {
+      "id": "trjamann",
+      "name": "トリャマン",
+      "english": "Trjamann",
+      "category": "トリックテイキング",
+      "subcategory": "各種ゲーム選択",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/trjamann.html"
+    },
+    {
+      "id": "bura",
+      "name": "ブラ",
+      "english": "Bura",
+      "category": "トリックテイキング",
+      "subcategory": "2枚以上のリード可能",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/bura.html"
+    },
+    {
+      "id": "dabaifen",
+      "name": "打百分",
+      "english": "Da Bai Fen",
+      "category": "トリックテイキング",
+      "subcategory": "2枚以上のリード可能",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/dabaifen.html"
+    },
+    {
+      "id": "tomodachi",
+      "name": "友達探し",
+      "english": "Zhao Pengyou/ヅァオポンヨウ",
+      "category": "トリックテイキング",
+      "subcategory": "2枚以上のリード可能",
+      "players": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        108,
+        162,
+        216
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/tomodachi.html"
+    },
+    {
+      "id": "anarchy",
+      "name": "アナーキー",
+      "english": "Anarchy",
+      "category": "トリックテイキング",
+      "subcategory": "同時プレイ",
+      "players": [
+        4,
+        5
+      ],
+      "recommended": [
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/anarchy.html"
+    },
+    {
+      "id": "gleek",
+      "name": "グリーク",
+      "english": "Gleek",
+      "category": "トリックテイキング",
+      "subcategory": "組合せゲーム",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        44
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/gleek.html"
+    },
+    {
+      "id": "perlaggen",
+      "name": "パーラッゲン",
+      "english": "Perlaggen",
+      "category": "トリックテイキング",
+      "subcategory": "組合せゲーム",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        33
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/perlaggen.html"
+    },
+    {
+      "id": "calypso",
+      "name": "カリプソ",
+      "english": "Calypso",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        208
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/calypso.html"
+    },
+    {
+      "id": "chinkway",
+      "name": "チンクウェイ",
+      "english": "Chinkway",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/chinkway.html"
+    },
+    {
+      "id": "clogs",
+      "name": "クロッグズ",
+      "english": "Clogs",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        29,
+        36,
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/clogs.html"
+    },
+    {
+      "id": "clubs",
+      "name": "クラブ",
+      "english": "Clubs",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/clubs.html"
+    },
+    {
+      "id": "collusion",
+      "name": "コルージョン",
+      "english": "Collusion",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/collusion.html"
+    },
+    {
+      "id": "mate",
+      "name": "メイト",
+      "english": "Mate",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        20
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mate.html"
+    },
+    {
+      "id": "metamorphosis",
+      "name": "メタモーフォシス",
+      "english": "Metamorphosis",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        2,
+        3
+      ],
+      "recommended": [
+        2,
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/metamorphosis.html"
+    },
+    {
+      "id": "mismatch",
+      "name": "ミスマッチ",
+      "english": "Mismatch",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mismatch.html"
+    },
+    {
+      "id": "pickle",
+      "name": "ピクルス",
+      "english": "pickle.html",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pickle.html"
+    },
+    {
+      "id": "spidge",
+      "name": "スピッジ",
+      "english": "Spidge",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/spidge.html"
+    },
+    {
+      "id": "variety",
+      "name": "バラエティー",
+      "english": "Variety",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/variety.html"
+    },
+    {
+      "id": "ambition",
+      "name": "アンビション",
+      "english": "Ambition",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/ambition.html"
+    },
+    {
+      "id": "bieten",
+      "name": "ビーテン",
+      "english": "Bieten",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        33
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/bieten.html"
+    },
+    {
+      "id": "dehlapakad",
+      "name": "デフラ・パカード",
+      "english": "Dehla Pakad",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/dehlapakad.html"
+    },
+    {
+      "id": "democracy",
+      "name": "デモクラシー",
+      "english": "Democracy",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        48,
+        49,
+        50
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/democracy.html"
+    },
+    {
+      "id": "kaiser",
+      "name": "カイザー",
+      "english": "Kaiser",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/kaiser.html"
+    },
+    {
+      "id": "miseria",
+      "name": "ミゼリア",
+      "english": "Miseria",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40,
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/miseria.html"
+    },
+    {
+      "id": "mittlere",
+      "name": "ミットレール・ヤス",
+      "english": "Mittlere Jass",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/mittlere.html"
+    },
+    {
+      "id": "piquet",
+      "name": "ピケット",
+      "english": "Piquet",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/piquet.html"
+    },
+    {
+      "id": "spar",
+      "name": "スパー",
+      "english": "Spar",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/spar.html"
+    },
+    {
+      "id": "truf",
+      "name": "トルフ",
+      "english": "Truf",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        39,
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/truf.html"
+    },
+    {
+      "id": "cassino",
+      "name": "カシノ",
+      "english": "Cassino",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/cassino.html"
+    },
+    {
+      "id": "krypkasino",
+      "name": "クリプカシノ",
+      "english": "Krypkasino",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/krypkasino.html"
+    },
+    {
+      "id": "seep",
+      "name": "スィープ",
+      "english": "Seep",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/seep.html"
+    },
+    {
+      "id": "swazicassino",
+      "name": "スワジ・カシノ",
+      "english": "Swazi Casino",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/swazicassino.html"
+    },
+    {
+      "id": "tablanette",
+      "name": "タブラネット",
+      "english": "Tablanette",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/tablanette.html"
+    },
+    {
+      "id": "zwicker",
+      "name": "ツビッカー",
+      "english": "Zwicker",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        58
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/zwicker.html"
+    },
+    {
+      "id": "cicera",
+      "name": "チチェラ",
+      "english": "Cicera",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/cicera.html"
+    },
+    {
+      "id": "cirulla",
+      "name": "チルラ",
+      "english": "Cirulla",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/cirulla.html"
+    },
+    {
+      "id": "cocincina",
+      "name": "コチンチナ",
+      "english": "cocincins",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        80
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/cocincina"
+    },
+    {
+      "id": "cuarenta",
+      "name": "クアレンタ",
+      "english": "Cuarenta",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/cuarenta.html"
+    },
+    {
+      "id": "ronda",
+      "name": "ロンダ",
+      "english": "Ronda",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/ronda.html"
+    },
+    {
+      "id": "scopa",
+      "name": "スコパ",
+      "english": "Scopa",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        2,
+        4,
+        6
+      ],
+      "recommended": [
+        2,
+        4,
+        6
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/scopa.html"
+    },
+    {
+      "id": "scopone",
+      "name": "スコポーネ",
+      "english": "Scopone",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/scopone.html"
+    },
+    {
+      "id": "foxtrot",
+      "name": "フォックストロット",
+      "english": "Foxtrot",
+      "category": "カシノ系のゲーム",
+      "subcategory": "ピシュティの仲間",
+      "players": [
+        2,
+        6
+      ],
+      "recommended": [
+        2,
+        6
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/foxtrot.html"
+    },
+    {
+      "id": "pishti",
+      "name": "ピシュティ",
+      "english": "Pishti",
+      "category": "カシノ系のゲーム",
+      "subcategory": "ピシュティの仲間",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/pishti.html"
+    },
+    {
+      "id": "kyukan",
+      "name": "休閑垂釣",
+      "english": "休閑垂釣",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノ系類似ゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/kyukan.html"
+    },
+    {
+      "id": "laughand",
+      "name": "ラーフ・アンド・ライダウン",
+      "english": "augh and Lie Down",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノ系類似ゲーム",
+      "players": [
+        5
+      ],
+      "recommended": [
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/laughand.html"
+    },
+    {
+      "id": "mitains",
+      "name": "ミトン",
+      "english": "Mitains",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノ系類似ゲーム",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/mitains.html"
+    },
+    {
+      "id": "pifpaf",
+      "name": "ピーフ・パーフ",
+      "english": "Pif Paf",
+      "category": "ラミー系のゲーム",
+      "subcategory": "上がり勝利だけ",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pifpaf.html"
+    },
+    {
+      "id": "tonk",
+      "name": "トンク",
+      "english": "Tonk",
+      "category": "ラミー系のゲーム",
+      "subcategory": "上がり勝利だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/tonk.html"
+    },
+    {
+      "id": "kaluki",
+      "name": "カルーキ",
+      "english": "Kaluki",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/kaluki.html"
+    },
+    {
+      "id": "rummy",
+      "name": "ラミー",
+      "english": "Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/rummy.html"
+    },
+    {
+      "id": "ginrummy",
+      "name": "ジンラミー",
+      "english": "Gin Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/ginrummy.html"
+    },
+    {
+      "id": "skarnygin",
+      "name": "スカーニー・ジン",
+      "english": "Skarney Gin",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/skarnygin.html"
+    },
+    {
+      "id": "contractrummy",
+      "name": "コントラクト・ラミー",
+      "english": "Contract Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        106,
+        107,
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/contractrummy.html"
+    },
+    {
+      "id": "jamaicankaluki",
+      "name": "ジャマイカン・カルーキ",
+      "english": "Jamaican Kalooki",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/jamaicankaluki.html"
+    },
+    {
+      "id": "loba",
+      "name": "ロバ",
+      "english": "loba",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/loba.html"
+    },
+    {
+      "id": "push",
+      "name": "プッシュ",
+      "english": "Push",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/push.html"
+    },
+    {
+      "id": "telefunken",
+      "name": "テレフンケン",
+      "english": "tekefunken",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/telefunken.html"
+    },
+    {
+      "id": "313speed",
+      "name": "スリー・サーティーン・スピード",
+      "english": "3-13 Speed",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "cards": [
+        208
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/313speed.html"
+    },
+    {
+      "id": "indianrummy",
+      "name": "インディアン・ラミー",
+      "english": "Indian Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        108,
+        162
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/indianrummy.html"
+    },
+    {
+      "id": "5000rummy",
+      "name": "ファイブサウザンド・ラミー",
+      "english": "Five Hundred Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/5000rummy.htm"
+    },
+    {
+      "id": "500rummy",
+      "name": "ファイブハンドレッド・ラミー",
+      "english": "Five Hundred Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/500rummy.html"
+    },
+    {
+      "id": "banakil",
+      "name": "バナキル",
+      "english": "Banakil",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        106
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/banakil.html"
+    },
+    {
+      "id": "vazhushal",
+      "name": "バズシャル",
+      "english": "Vazhushal",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54,
+        108
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/vazhushal.html"
+    },
+    {
+      "id": "moderncanasta",
+      "name": "アメリカン・カナスタ",
+      "english": "Amarican Canasta",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/moderncanasta.html"
+    },
+    {
+      "id": "burraco",
+      "name": "ブラッコ",
+      "english": "Burraco",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/burraco.html"
+    },
+    {
+      "id": "canasta",
+      "name": "カナスタ",
+      "english": "Canasta",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108,
+        162
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/canasta.html"
+    },
+    {
+      "id": "hand",
+      "name": "ハンド・アンド・フット",
+      "english": "Hand and Foot",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        270
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/hand.html"
+    },
+    {
+      "id": "newcanasta",
+      "name": "ニューカナスタ",
+      "english": "New Canasta",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        5,
+        6
+      ],
+      "cards": [
+        108,
+        162,
+        216,
+        270,
+        324,
+        378
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/newcanasta.html"
+    },
+    {
+      "id": "penniesfrom",
+      "name": "ペニーズ・フロム・ヘブン",
+      "english": "Pennies from Heaven",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        216
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/penniesfrom.html"
+    },
+    {
+      "id": "samba",
+      "name": "サンバ",
+      "english": "Samba",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        162
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/samba.html"
+    },
+    {
+      "id": "iceberg",
+      "name": "アイスバーグ",
+      "english": "Iceberg",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/iceberg.html"
+    },
+    {
+      "id": "marriage",
+      "name": "マリッジ",
+      "english": "Marriage",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        156
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/marriage.html"
+    },
+    {
+      "id": "mille",
+      "name": "ミル",
+      "english": "Mille",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mille.html"
+    },
+    {
+      "id": "skarney",
+      "name": "スカーニー",
+      "english": "Skarney",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/skarney.html"
+    },
+    {
+      "id": "jig",
+      "name": "ジグ",
+      "english": "Jig",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ニューマーケットの仲間",
+      "players": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/jig.html"
+    },
+    {
+      "id": "newmarket",
+      "name": "ニューマーケット",
+      "english": "Newmarket",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ニューマーケットの仲間",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/newmarket.html"
+    },
+    {
+      "id": "snipsnupsnorem",
+      "name": "スニップ・スナップ・スノーラム",
+      "english": "Snip-Snap-Snorem",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ニューマーケットの仲間",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/snipsnupsnorem.html"
+    },
+    {
+      "id": "cangkul",
+      "name": "カンクル",
+      "english": "Cangkul",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/cangkul"
+    },
+    {
+      "id": "dudak",
+      "name": "デュダック",
+      "english": "Dudak",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/dudak.html"
+    },
+    {
+      "id": "durak2",
+      "name": "デュラック",
+      "english": "Durak",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/durak2.html"
+    },
+    {
+      "id": "getaway",
+      "name": "ゲットアウェイ",
+      "english": "Getaway",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/getaway.html"
+    },
+    {
+      "id": "mas",
+      "name": "マス",
+      "english": "Mas",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mas.html"
+    },
+    {
+      "id": "nlk",
+      "name": "エヌ・エル・ケイ",
+      "english": "NLK",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recommended": [
+        6
+      ],
+      "cards": [
+        32,
+        36,
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/nlk.html"
+    },
+    {
+      "id": "pan",
+      "name": "パン",
+      "english": "Pan",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/pan.html"
+    },
+    {
+      "id": "paskahousu",
+      "name": "パスカホウス",
+      "english": "Paskahousu",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/paskahousu.html"
+    },
+    {
+      "id": "perevodnoy",
+      "name": "ペレボドノイ・デュラック",
+      "english": "Perevodnoi Durak",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/perevodnoy.html"
+    },
+    {
+      "id": "rollingstone",
+      "name": "ローリングストーン",
+      "english": "Rolling Stone",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        24,
+        32,
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/rollingstone.html"
+    },
+    {
+      "id": "shithead2",
+      "name": "シットヘッド",
+      "english": "Shithead",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/shithead2.html"
+    },
+    {
+      "id": "svoyikoziri",
+      "name": "スボイコジリ",
+      "english": "SVOYI KOZIRI",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/svoyikoziri.html"
+    },
+    {
+      "id": "vandtia",
+      "name": "ベンドティア",
+      "english": "Vändtia",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/vandtia.html"
+    },
+    {
+      "id": "baohuang",
+      "name": "保皇",
+      "english": "保皇/Bao Huang",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        5
+      ],
+      "recommended": [
+        5
+      ],
+      "cards": [
+        168
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/baohuang.html"
+    },
+    {
+      "id": "bigtwo",
+      "name": "鋤大D",
+      "english": "鋤大D/Big Two",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/bigtwo.html"
+    },
+    {
+      "id": "daihinmin",
+      "name": "大貧民・大富豪",
+      "english": "大貧民・大富豪",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/daihinmin.html"
+    },
+    {
+      "id": "dasan",
+      "name": "大三",
+      "english": "大三",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/dasan.html"
+    },
+    {
+      "id": "doudizhu",
+      "name": "闘地主",
+      "english": "闘地主",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        54,
+        108
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/doudizhu.html"
+    },
+    {
+      "id": "gouji",
+      "name": "ゴウジー",
+      "english": "gou ji",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        216
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/gouji.html"
+    },
+    {
+      "id": "guandan",
+      "name": "グアンダン",
+      "english": "掼蛋/摜蛋/Guàn Dàn",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/guandan.html"
+    },
+    {
+      "id": "taiheabao",
+      "name": "泰和A包",
+      "english": "泰和A包/Tàihé A Bāo",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/taiheabao.html"
+    },
+    {
+      "id": "tienlen",
+      "name": "ティエンレン",
+      "english": "Tien Len",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/tienlen.html"
+    },
+    {
+      "id": "zhengfen",
+      "name": "争分",
+      "english": "Zheng Fen ジョンフェン",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/zhengfen.html"
+    },
+    {
+      "id": "zhengshangyou",
+      "name": "三家喜",
+      "english": "三家喜",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/zhengshangyou.html#san"
+    },
+    {
+      "id": "zhengshangyou-2",
+      "name": "争上游",
+      "english": "争上游",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/zhengshangyou.html"
+    },
+    {
+      "id": "fantan",
+      "name": "ファンタン",
+      "english": "Fan Tan",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/fantan.html"
+    },
+    {
+      "id": "pitypat",
+      "name": "ピティパット",
+      "english": "Pitty Pat",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/pitypat.html"
+    },
+    {
+      "id": "yaniv",
+      "name": "ヤニブ",
+      "english": "Yaniv",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        54,
+        105
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/yaniv.html"
+    },
+    {
+      "id": "costlycolours",
+      "name": "コストリーカラー",
+      "english": "Costly Colours",
+      "category": "クリベッジの仲間",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/costlycolours.html"
+    },
+    {
+      "id": "cribbage",
+      "name": "クリベッジ",
+      "english": "Cribbage",
+      "category": "クリベッジの仲間",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/cribbage.html"
+    },
+    {
+      "id": "jacko",
+      "name": "ジャッコ",
+      "english": "JACKO",
+      "category": "クリベッジの仲間",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/jacko.html"
+    },
+    {
+      "id": "tabletopcribbage",
+      "name": "テーブルトップ・クリベッジ",
+      "english": "Table Top Cribbage",
+      "category": "クリベッジの仲間",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/tabletopcribbage.html"
+    },
+    {
+      "id": "brag",
+      "name": "ブラッグ",
+      "english": "Brag",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーの祖先や親戚",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/brag.html"
+    },
+    {
+      "id": "petrangola",
+      "name": "ペトランゴラ",
+      "english": "Petrangola",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーの祖先や親戚",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/petrangola.html"
+    },
+    {
+      "id": "7-27",
+      "name": "セブン・テゥエンティーセブン",
+      "english": "Seven Twenty-Seven",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー類似システム",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/7-27.html"
+    },
+    {
+      "id": "guts",
+      "name": "ガッツ",
+      "english": "Guts",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー類似システム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/guts.html"
+    },
+    {
+      "id": "mus",
+      "name": "ムス",
+      "english": "Mus",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー類似システム",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/mus.html"
+    },
+    {
+      "id": "trisac",
+      "name": "トリサック",
+      "english": "TRISAC",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー類似システム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/trisac.html"
+    },
+    {
+      "id": "bonanza",
+      "name": "ボナンザ",
+      "english": "Bonanza",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52,
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/bonanza.html"
+    },
+    {
+      "id": "chorvoli",
+      "name": "チョーボリ",
+      "english": "Chor Voli",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/chorvoli.html"
+    },
+    {
+      "id": "chpoker",
+      "name": "シーサンチャン",
+      "english": "十三張/Sap San Cheung",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/chpoker.html"
+    },
+    {
+      "id": "concerto",
+      "name": "コンチェルト",
+      "english": "Concerto",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/concerto.html"
+    },
+    {
+      "id": "crash",
+      "name": "クラッシュ",
+      "english": "Crash",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/crash.html"
+    },
+    {
+      "id": "napalm",
+      "name": "ナパーム",
+      "english": "Napalm",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/napalm.html"
+    },
+    {
+      "id": "ofc",
+      "name": "オープンフェイス・チャイニーズ・ポーカー",
+      "english": "Open-face Chinese Poker/OFC",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/ofc.html"
+    },
+    {
+      "id": "portland",
+      "name": "ポートランド",
+      "english": "Portland",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/portland.html"
+    },
+    {
+      "id": "auction",
+      "name": "オークション",
+      "english": "Auction",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54,
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/auction.html"
+    },
+    {
+      "id": "babel",
+      "name": "バベル",
+      "english": "Babel",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/babel.html"
+    },
+    {
+      "id": "puck",
+      "name": "パック",
+      "english": "Puck",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/puck.html"
+    },
+    {
+      "id": "chicago",
+      "name": "シカゴ",
+      "english": "Chicago",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/chicago.html"
+    },
+    {
+      "id": "crapette",
+      "name": "クラペット",
+      "english": "La Crapette",
+      "category": "レイアウトゲーム",
+      "subcategory": "ソリティア系",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/crapette.html"
+    },
+    {
+      "id": "spiteandmalice",
+      "name": "スパイト・アンド・マリス",
+      "english": "Spite and Malice",
+      "category": "レイアウトゲーム",
+      "subcategory": "ソリティア系",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/spiteandmalice.html"
+    },
+    {
+      "id": "kingsinthe",
+      "name": "キングズ・イン・ザ・コーナーズ",
+      "english": "Kings in the Corners",
+      "category": "レイアウトゲーム",
+      "subcategory": "ソリティア系",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/kingsinthe.html"
+    },
+    {
+      "id": "tamalou",
+      "name": "タマロー",
+      "english": "Tamalou",
+      "category": "レイアウトゲーム",
+      "subcategory": "ゴルフの仲間",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52,
+        54
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/tamalou.html"
+    },
+    {
+      "id": "cactus",
+      "name": "カクタス",
+      "english": "Cactus",
+      "category": "レイアウトゲーム",
+      "subcategory": "ゴルフの仲間",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        57
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/cactus.html"
+    },
+    {
+      "id": "golf",
+      "name": "ゴルフ",
+      "english": "Golf",
+      "category": "レイアウトゲーム",
+      "subcategory": "ゴルフの仲間",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52,
+        104,
+        156
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/golf.html"
+    },
+    {
+      "id": "arlington",
+      "name": "アーリントン",
+      "english": "Arlington",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/arlington.html"
+    },
+    {
+      "id": "buried",
+      "name": "ベリード・トレジャー",
+      "english": "Buried Treasure",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/buried.html"
+    },
+    {
+      "id": "caterpillar",
+      "name": "イモムシ",
+      "english": "Caterpillar",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/caterpillar.html"
+    },
+    {
+      "id": "determinism",
+      "name": "デターミニズム",
+      "english": "Determinism",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/determinism.html"
+    },
+    {
+      "id": "dracula",
+      "name": "ドラキュラ",
+      "english": "Dracula",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/dracula.html"
+    },
+    {
+      "id": "eleusisexpress",
+      "name": "エリウシス・エキスプレス",
+      "english": "Eleusis Express",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/eleusisexpress.html"
+    },
+    {
+      "id": "leopard",
+      "name": "レパード",
+      "english": "Leopard",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/leopard.html"
+    },
+    {
+      "id": "milken",
+      "name": "ミルケン",
+      "english": "Milken",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/milken.html"
+    },
+    {
+      "id": "milkrun",
+      "name": "ミルクラン",
+      "english": "Milk Run",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        54,
+        108,
+        162
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/milkrun.html"
+    },
+    {
+      "id": "mitch",
+      "name": "ミッチ",
+      "english": "Mitch",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/mitch.html"
+    },
+    {
+      "id": "revolution",
+      "name": "リボルーション",
+      "english": "Revolution",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/revolution.html"
+    },
+    {
+      "id": "spank",
+      "name": "スパンク",
+      "english": "Spank",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "cards": [
+        72,
+        96
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/spank.html"
+    },
+    {
+      "id": "spooneye",
+      "name": "スプーンアイ",
+      "english": "Spooneye",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/spooneye.html"
+    },
+    {
+      "id": "stratosphere",
+      "name": "ストラト・スフェア",
+      "english": "Strato-sphere",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/stratosphere.html"
+    },
+    {
+      "id": "switch",
+      "name": "スイッチ",
+      "english": "Switch",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/switch.html"
+    },
+    {
+      "id": "cuttle",
+      "name": "カトル",
+      "english": "Cuttle",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/cuttle.html"
+    },
+    {
+      "id": "authors",
+      "name": "オーサー",
+      "english": "Authors",
+      "category": "交換ゲーム",
+      "subcategory": "オーサーの仲間",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/authors.html"
+    },
+    {
+      "id": "gofish",
+      "name": "ゴーフィッシュ",
+      "english": "Go Fish",
+      "category": "交換ゲーム",
+      "subcategory": "オーサーの仲間",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/gofish.html"
+    },
+    {
+      "id": "literature",
+      "name": "リテラチャー",
+      "english": "Literature",
+      "category": "交換ゲーム",
+      "subcategory": "オーサーの仲間",
+      "players": [
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/literature.html"
+    },
+    {
+      "id": "empatsatu",
+      "name": "エムパット・サツ",
+      "english": "Empat Satu",
+      "category": "交換ゲーム",
+      "subcategory": "山札や場と交換",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/empatsatu.html"
+    },
+    {
+      "id": "schwimmen",
+      "name": "シュビメン",
+      "english": "Schwimmen",
+      "category": "交換ゲーム",
+      "subcategory": "山札や場と交換",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/schwimmen.html"
+    },
+    {
+      "id": "kemps",
+      "name": "ケンプス",
+      "english": "Kemps",
+      "category": "交換ゲーム",
+      "subcategory": "山札や場と交換",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/kemps.html"
+    },
+    {
+      "id": "pokerbull",
+      "name": "ポーカー・ブル",
+      "english": "Poker Bull",
+      "category": "うそつきゲーム",
+      "subcategory": "ポーカーの役",
+      "players": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/pokerbull"
+    },
+    {
+      "id": "pokerface",
+      "name": "ポーカーフェイス",
+      "english": "Pokerface",
+      "category": "うそつきゲーム",
+      "subcategory": "ポーカーの役",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/pokerface.html"
+    },
+    {
+      "id": "pokermenteur",
+      "name": "ポーカー・マントール",
+      "english": "Poker Manteur",
+      "category": "うそつきゲーム",
+      "subcategory": "ポーカーの役",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/pokermenteur.html"
+    },
+    {
+      "id": "sevenspades",
+      "name": "セブン・スペーズ",
+      "english": "Seven Spades",
+      "category": "うそつきゲーム",
+      "subcategory": "その他",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/sevenspades.html"
+    },
+    {
+      "id": "valepaska",
+      "name": "バレパスカ",
+      "english": "Valepaska",
+      "category": "うそつきゲーム",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/valepaska.html"
+    },
+    {
+      "id": "verish",
+      "name": "ベリシ・ネ・ベリシ",
+      "english": "Verish' Ne Verish'",
+      "category": "うそつきゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/verish.html"
+    },
+    {
+      "id": "99add",
+      "name": "ナインティーナイン(加算)",
+      "english": "Ninety-nine",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/99add.html"
+    },
+    {
+      "id": "addenda",
+      "name": "アッデンダ",
+      "english": "Addenda",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/addenda.html"
+    },
+    {
+      "id": "20",
+      "name": "トゥエンティー",
+      "english": "Twenty",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/20.html"
+    },
+    {
+      "id": "attackjack",
+      "name": "アタックジャック",
+      "english": "Attack Jack",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/attackjack.html"
+    },
+    {
+      "id": "bravado",
+      "name": "ブラバード",
+      "english": "Bravado",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/bravado.html"
+    },
+    {
+      "id": "guessit",
+      "name": "ゲスイット",
+      "english": "Guess It",
+      "category": "推理ブラフゲーム",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        13
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/guessit.html"
+    },
+    {
+      "id": "candyman",
+      "name": "キャンディー売り",
+      "english": "Candyman",
+      "category": "推理ブラフゲーム",
+      "subcategory": "",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "recommended": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "cards": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/candyman.html"
+    },
+    {
+      "id": "speculation",
+      "name": "スペキュレーション",
+      "english": "Spaculation",
+      "category": "マネージメントゲーム",
+      "subcategory": "",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/speculation.html"
+    },
+    {
+      "id": "cardstock",
+      "name": "カード・ストック・マーケット",
+      "english": "Card Stock Market",
+      "category": "マネージメントゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        106
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/cardstock.html"
+    },
+    {
+      "id": "packs",
+      "name": "パックス",
+      "english": "Packs",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/packs.html"
+    },
+    {
+      "id": "primetime",
+      "name": "プライムタイム",
+      "english": "Prime Time",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2,
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/primetime.html"
+    },
+    {
+      "id": "suitmatch",
+      "name": "スートマッチ",
+      "english": "Suitmatch",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/suitmatch.html"
+    },
+    {
+      "id": "zettema",
+      "name": "ゼッテマ",
+      "english": "Zettema",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        65
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/zettema.html"
+    },
+    {
+      "id": "hollywoodgarbage",
+      "name": "ハリウッド・ガーベッジ",
+      "english": "Hollywood Garbage",
+      "category": "その他",
+      "subcategory": "",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        5,
+        6
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/hollywoodgarbage.html"
+    },
+    {
+      "id": "beggar",
+      "name": "ベガー・マイ・ネイボー",
+      "english": "Beggar My Neighbour",
+      "category": "全取得ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/beggar.html"
+    },
+    {
+      "id": "egyptian",
+      "name": "エジプティアン・ラットスクリュー",
+      "english": "Egyptian Ratscrew",
+      "category": "全取得ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/egyptian.html"
+    },
+    {
+      "id": "alcalde",
+      "name": "アルカルデ",
+      "english": "Alcalde",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/alcalde.html"
+    },
+    {
+      "id": "briscas",
+      "name": "ブリスカス",
+      "english": "Briscas",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/briscas.html"
+    },
+    {
+      "id": "caravan",
+      "name": "キャラバン",
+      "english": "Caravan",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52,
+        53
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/caravan.html"
+    },
+    {
+      "id": "colorblind",
+      "name": "カラーブラインド",
+      "english": "Color Blind",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/colorblind.html"
+    },
+    {
+      "id": "crazyeight",
+      "name": "クレイジーエイト",
+      "english": "Crazy Eight",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        52,
+        104
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/crazyeight.html"
+    },
+    {
+      "id": "divideand",
+      "name": "分割統治",
+      "english": "Divide and Conquer",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        10
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/divideand.html"
+    },
+    {
+      "id": "flunk",
+      "name": "フランク",
+      "english": "Flunk",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/flunk.html"
+    },
+    {
+      "id": "generala",
+      "name": "ジェネラーラ",
+      "english": "Générala",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/generala.html"
+    },
+    {
+      "id": "gurka",
+      "name": "グルカ",
+      "english": "Gurka",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/gurka.html"
+    },
+    {
+      "id": "hiyoko",
+      "name": "ヒヨコ",
+      "english": "ヒヨコ（ショッショ）",
+      "category": "手札出しきりゲーム",
+      "subcategory": "読みカルタ",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        45
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/hiyoko.html"
+    },
+    {
+      "id": "isuri",
+      "name": "イスリ",
+      "english": "イスリ",
+      "category": "手札出しきりゲーム",
+      "subcategory": "読みカルタ",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        46
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/isuri.html"
+    },
+    {
+      "id": "jubilee",
+      "name": "ジュビリー",
+      "english": "Jubilee",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        61
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/jubilee.html"
+    },
+    {
+      "id": "notice",
+      "name": "ノーティス",
+      "english": "ノーティス",
+      "category": "トリックテイキング",
+      "subcategory": "宣言通りのトリック",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        32,
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/notice.html"
+    },
+    {
+      "id": "panjpar",
+      "name": "パンジパー",
+      "english": "Panjpar",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/panjpar.html"
+    },
+    {
+      "id": "ribs",
+      "name": "リブズ",
+      "english": "Ribs",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        40,
+        48,
+        56,
+        64,
+        72,
+        80
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/ribs.html"
+    },
+    {
+      "id": "satat",
+      "name": "サタット",
+      "english": "Satat",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/satat.html"
+    },
+    {
+      "id": "second",
+      "name": "セカンド",
+      "english": "Seconds",
+      "category": "トリックテイキング",
+      "subcategory": "その他新作系",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/second.html"
+    },
+    {
+      "id": "secretagent",
+      "name": "シークレット・エージェント",
+      "english": "Secret Agent",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/secretagent.html"
+    },
+    {
+      "id": "solomon",
+      "name": "ソロモン",
+      "english": "Solomon",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/solomon.html"
+    },
+    {
+      "id": "oceans11",
+      "name": "オーシャンズ・イレブン",
+      "english": "Ocean's Eleven",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーハンド使用",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52,
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/oceans11.html"
+    },
+    {
+      "id": "gametolose",
+      "name": "ルーズ・ゲーム",
+      "english": "Game to Lose",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/gametolose.html"
+    },
+    {
+      "id": "regicide",
+      "name": "レジサイド",
+      "english": "Regicide",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52,
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/regicide.html"
+    },
+    {
+      "id": "tartli",
+      "name": "タルトリ",
+      "english": "Tartli",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/tartli.html"
+    },
+    {
+      "id": "porrazo",
+      "name": "ポラーソ",
+      "english": "Porrazo",
+      "category": "カシノ系のゲーム",
+      "subcategory": "スコパの仲間",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/porrazo.html"
+    },
+    {
+      "id": "cardbuluch",
+      "name": "カード・バラッチ",
+      "english": "Card Buluch",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/cardbuluch.html"
+    },
+    {
+      "id": "jamesbond",
+      "name": "ジェームズ・ボンド",
+      "english": "James Bond",
+      "category": "その他",
+      "subcategory": "",
+      "players": [
+        2,
+        3
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/jamesbond.html"
+    },
+    {
+      "id": "baloot",
+      "name": "バロート",
+      "english": "Baloot",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/baloot.html"
+    },
+    {
+      "id": "hoola",
+      "name": "フーラ",
+      "english": "Hoola",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/hoola.html"
+    },
+    {
+      "id": "sasaki",
+      "name": "ササッキ",
+      "english": "Sasaki",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/sasaki.html"
+    },
+    {
+      "id": "400",
+      "name": "400（アバァミア）",
+      "english": "400",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/400.html"
+    },
+    {
+      "id": "crazysolo",
+      "name": "クレージー・ソロ",
+      "english": "Crazy Solo",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cards": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/crazysolo.html"
+    },
+    {
+      "id": "frog",
+      "name": "フロッグ",
+      "english": "Frog",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/frog.html"
+    },
+    {
+      "id": "bastardbrag",
+      "name": "バスタード・ブラッグ",
+      "english": "Bastard Brag",
+      "category": "ポーカーの仲間",
+      "subcategory": "ブラッグの役使用",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/bastardbrag.html"
+    },
+    {
+      "id": "carousel",
+      "name": "カルーセル",
+      "english": "Carousel",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルド組み換え可能",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        53,
+        106
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/carousel.html"
+    },
+    {
+      "id": "paiken",
+      "name": "パイ・ケーン",
+      "english": "パイ・ケーン",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/paiken.html"
+    },
+    {
+      "id": "auctionpinochle",
+      "name": "オークション・ピノクル",
+      "english": "Auction Pinochle",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/auctionpinochle.html"
+    },
+    {
+      "id": "dumbal",
+      "name": "ドゥンバル",
+      "english": "Dumbal",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/dumbal.html"
+    },
+    {
+      "id": "marriagerummy",
+      "name": "マリッジ・ラミー",
+      "english": "Marriage",
+      "category": "ラミー系のゲーム",
+      "subcategory": "上がりで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        156
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/marriagerummy.html"
+    },
+    {
+      "id": "gameflipflop",
+      "name": "ゲーム・フリップ・フロップ",
+      "english": "Game Flip Flop",
+      "category": "ラミー系のゲーム",
+      "subcategory": "上がり勝利だけ",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/gameflipflop.html"
+    },
+    {
+      "id": "dummy",
+      "name": "ダムミー",
+      "english": "Dummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/dummy.html"
+    },
+    {
+      "id": "sidibarrani",
+      "name": "シディバッラニ・ヤス",
+      "english": "Sidi Barrani Jass",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/sidibarrani.html"
+    },
+    {
+      "id": "marianna",
+      "name": "マリアンナ",
+      "english": "Marianna",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/marianna.html"
+    },
+    {
+      "id": "bridge",
+      "name": "コントラクト・ブリッジ",
+      "english": "Contract Bridge",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/bridge.html"
+    },
+    {
+      "id": "hombre",
+      "name": "オンブル",
+      "english": "Hombre",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/hombre.html"
+    },
+    {
+      "id": "quadrille",
+      "name": "カドリーユ",
+      "english": "Quedrille",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/quadrille.html"
+    },
+    {
+      "id": "boston",
+      "name": "ボストン",
+      "english": "Boston",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/boston.html"
+    },
+    {
+      "id": "hokm",
+      "name": "ホクム",
+      "english": "Hokm",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/hokm.html"
+    },
+    {
+      "id": "vint",
+      "name": "ビント",
+      "english": "Vint",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/vint.html"
+    },
+    {
+      "id": "skitgubbe",
+      "name": "ホイットグッベ",
+      "english": "Skitgubbe",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/skitgubbe.html"
+    },
+    {
+      "id": "kantougan",
+      "name": "干瞪眼",
+      "english": "干瞪眼",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/kantougan.html"
+    },
+    {
+      "id": "poker",
+      "name": "ポーカー",
+      "english": "Poker",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/poker.html"
+    },
+    {
+      "id": "pokercommunity",
+      "name": "ポーカー(共有カード)",
+      "english": "Community Card Poker",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pokercommunity.html"
+    },
+    {
+      "id": "pokerstud",
+      "name": "ポーカー(スタッド)",
+      "english": "Stud Poker",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pokerstud.html"
+    },
+    {
+      "id": "pokerdraw",
+      "name": "ポーカー(ドロー)",
+      "english": "Draw Poker",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pokerdraw.html"
+    },
+    {
+      "id": "pokerspecial",
+      "name": "ポーカー(特殊)",
+      "english": "Poker (Special)",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pokerspecial.html"
+    },
+    {
+      "id": "pokerother",
+      "name": "ポーカー(その他)",
+      "english": "Poker (Other)",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカー",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/pokerother.html"
+    },
+    {
+      "id": "envitecanario",
+      "name": "エンビテ・カナリオ",
+      "english": "Envite Canario",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "recommended": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/envitecanario.html"
+    },
+    {
+      "id": "zangacanario",
+      "name": "サンガ",
+      "english": "Zanga",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/zangacanario.html"
+    },
+    {
+      "id": "325",
+      "name": "ティーン・ドー・パーチ",
+      "english": "Tīn Do Pānch(3-2-5)",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        30
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/325.html"
+    },
+    {
+      "id": "suitability",
+      "name": "スータビリティー",
+      "english": "Suitability",
+      "category": "トリックテイキング",
+      "subcategory": "プラスとマイナスの点数",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        30
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/suitability.html"
+    },
+    {
+      "id": "crazyrummy",
+      "name": "クレージーラミー",
+      "english": "Crazy Rummy",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/crazyrummy.html"
+    },
+    {
+      "id": "canastone",
+      "name": "カナストーネ",
+      "english": "Canastone",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        162
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/canastone.html"
+    },
+    {
+      "id": "slapjack",
+      "name": "スラップジャック",
+      "english": "Slapjack",
+      "category": "全取得ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 1,
+      "source": "https://gamefarm.jp/rule/slapjack.html"
+    },
+    {
+      "id": "snap",
+      "name": "スナップ",
+      "english": "Snap",
+      "category": "全取得ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 1,
+      "source": "https://gamefarm.jp/rule/snap.html"
+    },
+    {
+      "id": "cooncan",
+      "name": "クーンキャン",
+      "english": "Coon Can",
+      "category": "ラミー系のゲーム",
+      "subcategory": "上がり勝利だけ",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/cooncan.html"
+    },
+    {
+      "id": "kleurenwiezen",
+      "name": "クルーレン・ウィーゼン",
+      "english": "Kleurenwiezen",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 8,
+      "source": "https://gamefarm.jp/rule/kleurenwiezen.html"
+    },
+    {
+      "id": "sandaha",
+      "name": "三打哈",
+      "english": "三打哈",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        92
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/sandaha.html"
+    },
+    {
+      "id": "goninkan",
+      "name": "ゴニンカン",
+      "english": "ゴニンカン",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        5
+      ],
+      "recommended": [
+        5
+      ],
+      "cards": [
+        50
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/goninkan.html"
+    },
+    {
+      "id": "rumino",
+      "name": "ルーミノ",
+      "english": "Rumino",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/rumino.html"
+    },
+    {
+      "id": "mariglia",
+      "name": "マリグリア",
+      "english": "Mariglia",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mariglia.html"
+    },
+    {
+      "id": "biga",
+      "name": "打大Ａ",
+      "english": "打大A",
+      "category": "大貧民の仲間",
+      "subcategory": "",
+      "players": [
+        5
+      ],
+      "recommended": [
+        5
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 7,
+      "source": "https://gamefarm.jp/rule/biga.html"
+    },
+    {
+      "id": "hindersche",
+      "name": "ヒンダーシェ",
+      "english": "Hindersche",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/hindersche.html"
+    },
+    {
+      "id": "downandback",
+      "name": "ダウン・アンド・バック",
+      "english": "Down And Back",
+      "category": "その他",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/downandback.html"
+    },
+    {
+      "id": "jokerkaro",
+      "name": "ジョーカー・カーロ",
+      "english": "Joker Karo",
+      "category": "その他",
+      "subcategory": "",
+      "players": [
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/jokerkaro.html"
+    },
+    {
+      "id": "mura",
+      "name": "ムーラ",
+      "english": "Mura",
+      "category": "トリックテイキング",
+      "subcategory": "その他",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/mura.html"
+    },
+    {
+      "id": "sancagna",
+      "name": "サンカーニャ",
+      "english": "Sancagna",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/sancagna.html"
+    },
+    {
+      "id": "trionfetti",
+      "name": "トリオンフェッティ",
+      "english": "Trionfetti",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/trionfetti.html"
+    },
+    {
+      "id": "losinglodam",
+      "name": "ルージング・ローダム",
+      "english": "Losing Lodam",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/losinglodam.html"
+    },
+    {
+      "id": "tantrum",
+      "name": "タントラム",
+      "english": "Tantrum",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3
+      ],
+      "recommended": [
+        2,
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/tantrum.html"
+    },
+    {
+      "id": "trumps",
+      "name": "トランプス",
+      "english": "Trumps",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/trumps.html"
+    },
+    {
+      "id": "epidemic",
+      "name": "エピデミック",
+      "english": "Epidemic",
+      "category": "トリックテイキング",
+      "subcategory": "点数取得回避",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/epidemic.html"
+    },
+    {
+      "id": "shallaat",
+      "name": "シャラート",
+      "english": "Shalla'at",
+      "category": "カシノ系のゲーム",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        54
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/shallaat.html"
+    },
+    {
+      "id": "wallachen",
+      "name": "バーラッヒェン",
+      "english": "Wallachen",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/wallachen.html"
+    },
+    {
+      "id": "gaigel",
+      "name": "ガイゲル",
+      "english": "Gaigel",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        48
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/gaigel.html"
+    },
+    {
+      "id": "biriba",
+      "name": "ビリバ",
+      "english": "Biriba",
+      "category": "ラミー系のゲーム",
+      "subcategory": "メルドで得点",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        108,
+        162
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/biriba.html"
+    },
+    {
+      "id": "penneech",
+      "name": "ペニーチ",
+      "english": "Penneech",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/penneech.html"
+    },
+    {
+      "id": "liargame",
+      "name": "ライアーゲーム",
+      "english": "Liar Game",
+      "category": "交換ゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        54,
+        108
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/liargame.html"
+    },
+    {
+      "id": "construction",
+      "name": "コンストラクション",
+      "english": "Construction",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        2
+      ],
+      "recommended": [
+        2
+      ],
+      "cards": [
+        106
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/construction.html"
+    },
+    {
+      "id": "swoop",
+      "name": "スウープ",
+      "english": "Swoop",
+      "category": "手札出しきりゲーム",
+      "subcategory": "ビーティングゲーム",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        108,
+        162,
+        216
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/swoop.html"
+    },
+    {
+      "id": "raminopokerato",
+      "name": "ラミーノ・ポケラート",
+      "english": "Ramino Pokerato",
+      "category": "ラミー系のゲーム",
+      "subcategory": "罰点だけ",
+      "players": [
+        3,
+        4,
+        5
+      ],
+      "recommended": [
+        3,
+        4,
+        5
+      ],
+      "cards": [
+        108
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/raminopokerato.html"
+    },
+    {
+      "id": "logic",
+      "name": "ロジック",
+      "english": "Logic",
+      "category": "推理ブラフゲーム",
+      "subcategory": "",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        24
+      ],
+      "difficulty": 6,
+      "source": "https://gamefarm.jp/rule/logic.html"
+    },
+    {
+      "id": "chwech",
+      "name": "フェフ",
+      "english": "Chwech",
+      "category": "ユニークな新作",
+      "subcategory": "",
+      "players": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/chwech.html"
+    },
+    {
+      "id": "oldmaid",
+      "name": "オールドメイド",
+      "english": "Old Maid",
+      "category": "手札出しきりゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        51
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/oldmaid.html"
+    },
+    {
+      "id": "donkey",
+      "name": "ドンキー",
+      "english": "Donkey",
+      "category": "交換ゲーム",
+      "subcategory": "その他",
+      "players": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/donkey.html"
+    },
+    {
+      "id": "war",
+      "name": "戦争",
+      "english": "War",
+      "category": "全取得ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 1,
+      "source": "https://gamefarm.jp/rule/war.html"
+    },
+    {
+      "id": "doubt",
+      "name": "ダウト",
+      "english": "I Doubt It",
+      "category": "うそつきゲーム",
+      "subcategory": "その他",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/doubt.html"
+    },
+    {
+      "id": "memory",
+      "name": "メモリー",
+      "english": "Memory",
+      "category": "その他",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/memory.html"
+    },
+    {
+      "id": "meksiko",
+      "name": "メキシコ",
+      "english": "Meksiko",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3,
+        4
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/meksiko.html"
+    },
+    {
+      "id": "albastini",
+      "name": "アルバスティニ",
+      "english": "Albastini",
+      "category": "トリックテイキング",
+      "subcategory": "点数獲得",
+      "players": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "cards": [
+        36
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/albastini.html"
+    },
+    {
+      "id": "kungochadel",
+      "name": "クング・オク・アーデル",
+      "english": "Kung och Adel",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        4
+      ],
+      "recommended": [
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/kungochadel.html"
+    },
+    {
+      "id": "poch",
+      "name": "ポッホ",
+      "english": "Poch",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーの祖先や親戚",
+      "players": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "recommended": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        32
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/poch.html"
+    },
+    {
+      "id": "primiera",
+      "name": "プリミエラ",
+      "english": "Primiera",
+      "category": "ポーカーの仲間",
+      "subcategory": "ポーカーの祖先や親戚",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        40
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/primiera.html"
+    },
+    {
+      "id": "blackjack",
+      "name": "ブラックジャック",
+      "english": "Blackjack",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/blackjack.html"
+    },
+    {
+      "id": "pontoon",
+      "name": "ポントゥーン",
+      "english": "Pontoon",
+      "category": "加算ゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/pontoon.html"
+    },
+    {
+      "id": "baccarat",
+      "name": "バカラ",
+      "english": "Baccarat",
+      "category": "ギャンブルゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        208,
+        312,
+        416
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/baccarat.html"
+    },
+    {
+      "id": "trente",
+      "name": "トランテ・キャラント",
+      "english": "Trente et Quarante",
+      "category": "ギャンブルゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        312
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/trente.html"
+    },
+    {
+      "id": "lansqunet",
+      "name": "ランスクネット",
+      "english": "Lansqunet",
+      "category": "ギャンブルゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52,
+        108,
+        162
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/lansqunet.html"
+    },
+    {
+      "id": "faro",
+      "name": "フェロー",
+      "english": "Faro",
+      "category": "ギャンブルゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/faro.html"
+    },
+    {
+      "id": "reddog",
+      "name": "レッド・ドッグ",
+      "english": "Red Dog",
+      "category": "ギャンブルゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/reddog.html"
+    },
+    {
+      "id": "yablon",
+      "name": "ヤブロン",
+      "english": "Yablon",
+      "category": "ギャンブルゲーム",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 3,
+      "source": "https://gamefarm.jp/rule/yablon.html"
+    },
+    {
+      "id": "rantergo",
+      "name": "ランター・ゴー・ラウンド",
+      "english": "Ranter Go Round",
+      "category": "その他",
+      "subcategory": "",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "recommended": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 2,
+      "source": "https://gamefarm.jp/rule/rantergo.html"
+    },
+    {
+      "id": "eleusis",
+      "name": "エリウシス",
+      "english": "Eleusis",
+      "category": "レイアウトゲーム",
+      "subcategory": "その他",
+      "players": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        4,
+        5
+      ],
+      "cards": [
+        104
+      ],
+      "difficulty": 5,
+      "source": "https://gamefarm.jp/rule/eleusis.html"
+    },
+    {
+      "id": "chinesepatience",
+      "name": "チャイニーズ・ペイシャンス",
+      "english": "Chinese Patience",
+      "category": "レイアウトゲーム",
+      "subcategory": "ソリティア系",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        3
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/chinesepatience.html"
+    },
+    {
+      "id": "zwikken",
+      "name": "ズウィッケン",
+      "english": "Zwikken",
+      "category": "トリックテイキング",
+      "subcategory": "トリック獲得",
+      "players": [
+        3
+      ],
+      "recommended": [
+        3
+      ],
+      "cards": [
+        20
+      ],
+      "difficulty": 4,
+      "source": "https://gamefarm.jp/rule/zwikken.html"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameSc
 import type { CraneGameResult } from '../mini-games/crane-game/CraneGame';
 const GakuroGear = deferredScreen(() => import('../mini-games/gakurogear/VrTitle'));
 const PokerGameScreen = deferredScreen(() => import('./PokerGameScreen'));
+const CardClub = deferredScreen(() => import('../mini-games/card-club/CardClub'));
 const SchoolyardSurvivorScreen = deferredScreen(() => import('./SchoolyardSurvivorScreen'));
 const SchoolDungeonRPG = deferredScreen(() => import('./SchoolDungeonRPG'));
 const SchoolDungeonRPG2 = deferredScreen(() => import('./SchoolDungeonRPG2'));
@@ -62,6 +63,7 @@ export interface MiniGameComponentProps {
 const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComponentProps>>> = {
     [GameScreen.MINI_GAME_GAKUROGEAR]: GakuroGear,
     [GameScreen.MINI_GAME_POKER]: PokerGameScreen,
+    [GameScreen.MINI_GAME_CARD_CLUB]: CardClub,
     [GameScreen.MINI_GAME_SURVIVOR]: SchoolyardSurvivorScreen,
     [GameScreen.MINI_GAME_DUNGEON]: SchoolDungeonRPG,
     [GameScreen.MINI_GAME_DUNGEON_2]: SchoolDungeonRPG2,
