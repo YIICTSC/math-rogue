@@ -44,3 +44,62 @@
 @media (orientation:portrait) and (max-width:600px){
  .card-club.cc-page-table{gap:4px}.cc-page-table .cc-match{grid-template-columns:minmax(0,1fr);grid-template-rows:48px minmax(0,1fr) clamp(180px,34dvh,270px);grid-template-areas:"players" "board" "hand"}.cc-page-table .cc-match:has(.cc-result){grid-template-columns:minmax(0,1fr);grid-template-rows:48px minmax(0,1fr) clamp(200px,38dvh,310px);grid-template-areas:"players" "board" "result"}.cc-page-table .cc-match:not(:has(.cc-hand-area)):not(:has(.cc-result)){grid-template-columns:minmax(0,1fr);grid-template-rows:48px minmax(0,1fr);grid-template-areas:"players" "board"}.cc-page-table .cc-hand{flex:0 0 92px;min-height:92px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;align-items:flex-start;gap:4px;padding:10px 4px 5px}.cc-page-table .cc-hand .cc-card{width:49px;height:73px}.cc-page-table .cc-hand .cc-card small{font-size:12px}.cc-page-table .cc-hand .cc-card strong{font-size:25px}.cc-page-table .cc-header{gap:6px}.cc-page-table .cc-header button{padding:6px 10px}.cc-page-table .cc-result-standings>div{min-height:36px}.cc-page-table .cc-player-ring article{flex:0 0 120px;max-width:150px}.cc-page-table .cc-playfield{padding:4px}.cc-page-table .cc-layouts,.cc-page-table .cc-palace-layouts{grid-template-columns:repeat(auto-fit,minmax(144px,1fr))}
 }
+
+/* Paper, navy-and-gold card backs, and short table actions. */
+.card-club .cc-card,
+.card-club .cc-card:enabled:hover,
+.card-club .cc-card.cc-back{background:transparent;border:0;box-shadow:none;perspective:650px;transition:transform 140ms ease,filter 140ms ease;isolation:isolate}
+.cc-card-body{position:absolute;inset:0;display:block;transform-style:preserve-3d;transition:transform 280ms cubic-bezier(.22,.7,.25,1);pointer-events:none}
+.cc-back .cc-card-body{transform:rotateY(180deg)}
+.cc-card-front,.cc-card-reverse{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;border:1px solid #d5bd83;border-radius:7px;padding:5px;background:linear-gradient(145deg,#fffdf5,#e9e2cf);box-shadow:0 3px 7px #0007,inset 0 0 0 2px #ffffff88;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.cc-card-front>small{font-size:clamp(9px,.95em,16px);line-height:1.1;white-space:nowrap;z-index:1}
+.cc-card-front>strong{font-size:clamp(17px,2.1em,32px);line-height:1;align-self:center}
+.cc-card-front>i{align-self:flex-end;font-size:9px;font-weight:800;font-style:normal;line-height:1;transform:rotate(180deg)}
+.cc-card-reverse,.cc-flying-back,.cc-stock-stack>i,.cc-hand-backs>i{background:repeating-linear-gradient(45deg,#d6ba6420 0 1px,transparent 1px 7px),repeating-linear-gradient(-45deg,#d6ba6420 0 1px,transparent 1px 7px),linear-gradient(135deg,#173b65,#081a37);border:1px solid #ddc47f;box-shadow:0 3px 6px #0007,inset 0 0 0 2px #132a49,inset 0 0 0 3px #dfc87b88;border-radius:6px;color:#f2d684}
+.cc-card-reverse{transform:rotateY(180deg);justify-content:center}
+.cc-card-reverse b{font-size:24px;text-shadow:0 1px 7px #ffdb7888;line-height:1}
+.card-club .cc-card:enabled:hover{filter:brightness(1.07);transform:translateY(-3px)}
+.card-club .cc-card.cc-selected{transform:translateY(-8px);filter:drop-shadow(0 0 3px #f6ce62)}
+.card-club .cc-card:focus-visible{outline:3px solid #67e8f9;outline-offset:3px}
+.cc-hand{scrollbar-width:thin;scrollbar-color:#e6c77888 #071d2c88;border-radius:8px;background:linear-gradient(180deg,#14323a66,#031d2788);box-shadow:inset 0 -2px 7px #0004}
+.cc-player-ring article{position:relative;padding-right:42px}
+.cc-hand-backs{position:absolute;right:6px;bottom:7px;width:30px;height:26px;pointer-events:none}
+.cc-hand-backs>i{position:absolute;left:calc(var(--cc-back-index)*3px);bottom:0;width:14px;height:22px;transform:rotate(calc((var(--cc-back-index) - 2)*9deg));transform-origin:50% 110%}
+.cc-stock-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;color:#d5dfd7}
+.cc-stock{display:flex;align-items:center;gap:12px;min-width:80px}
+.cc-stock>span:last-child{display:grid;gap:2px;text-align:left;line-height:1.2}
+.cc-stock strong{font-size:17px;font-variant-numeric:tabular-nums;color:#ffe3a1}
+.cc-stock-stack{position:relative;display:block;flex:none;width:34px;height:45px;border:1px dashed #b6bdac55;border-radius:6px}
+.cc-stock-stack>i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:18px;transform:translate(calc(var(--cc-layer)*1.5px),calc(var(--cc-layer)*-1.5px))}
+.cc-stock-empty .cc-stock-stack{opacity:.45}
+.cc-discard-count{padding:5px 9px;border:1px dashed #c1c8b266;border-radius:7px}
+.cc-flight-layer{position:fixed;inset:0;z-index:9;pointer-events:none;overflow:hidden;contain:strict}
+.cc-flying-card,.cc-flying-back{pointer-events:none!important;min-height:0!important;will-change:transform,opacity}
+.cc-flying-card .cc-card-body{transition:none}
+@media (orientation:landscape) and (max-height:600px), (orientation:portrait) and (max-width:600px){
+ .cc-page-table .cc-player-ring article{padding-right:26px}
+ .cc-page-table .cc-hand-backs{right:5px;bottom:6px;width:21px;height:18px}
+ .cc-page-table .cc-hand-backs>i{width:10px;height:16px;left:calc(var(--cc-back-index)*2px);border-radius:3px}
+ .cc-page-table .cc-player-ring article>div{max-width:calc(100% - 35px)}
+ .cc-page-table .cc-stock-row{gap:10px;margin-top:8px;font-size:10px}
+ .cc-page-table .cc-stock{gap:9px;min-width:65px}
+ .cc-page-table .cc-stock strong{font-size:14px}
+ .cc-page-table .cc-stock-stack{width:26px;height:34px}
+ .cc-page-table .cc-stock-stack>i{font-size:14px}
+ .cc-page-table .cc-card-front{padding:3px}
+ .cc-page-table .cc-card-front>small{font-size:11px}
+ .cc-page-table .cc-card-front>strong{font-size:22px}
+ .cc-page-table .cc-card-front>i{font-size:8px}
+ .cc-page-table .cc-fantan-row .cc-card-front{padding:1px}
+ .cc-page-table .cc-fantan-row .cc-card-front>small{font-size:8px}
+ .cc-page-table .cc-fantan-row .cc-card-front>strong{font-size:12px}
+ .cc-page-table .cc-fantan-row .cc-card-front>i{display:none}
+ .cc-page-table .cc-indicator .cc-card-front>strong{font-size:16px}
+ .cc-page-table .cc-indicator .cc-card-front>small{font-size:9px}
+ .cc-page-table .cc-indicator .cc-card-front>i{display:none}
+ .cc-page-table .cc-melds .cc-card-front>i,.cc-page-table .cc-foundations .cc-card-front>i{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+ .card-club .cc-card,.card-club .cc-card-body{transition:none!important}
+ .cc-flight-layer{display:none}
+}

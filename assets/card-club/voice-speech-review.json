@@ -1,0 +1,103 @@
+{
+  "clips": {
+    "high-school-warrior/play": {
+      "sha256": "10455bb3d8238e1cda6793aa43dcd2138a91569c3b65c5369328b090668f6f1b",
+      "expected": "この一手で決める。",
+      "recognized": "この一手で決める",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.25074
+    },
+    "high-school-assassin/start": {
+      "sha256": "db7627f928bbbe92ff3666674773ebe6d0cb8dede1c9f9994982feaa4e02c5ce",
+      "expected": "札の流れを読もう。",
+      "recognized": "他の流れを読もうとEGC",
+      "similarity": 0.6667,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.03227
+    },
+    "high-school-assassin/play": {
+      "sha256": "30b701ee9b9b18dde17c3b8e44da1e2cf536148921bda27cbc9cb0bc1bc112dd",
+      "expected": "ここで仕掛ける。",
+      "recognized": "ここで仕掛けるF.E.G.",
+      "similarity": 0.8235,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00134
+    },
+    "high-school-bard/win": {
+      "sha256": "9fdf72d74a335655f5ca5476a1e2701cdda3169da1eaecad5348d8492cc81896",
+      "expected": "勝利のニュースをお届けします。",
+      "recognized": "勝利が優勢を届きまーす",
+      "similarity": 0.3636,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 6e-05
+    },
+    "high-school-chef/start": {
+      "sha256": "fdaf1a114e86df93067d66ca254fad8bf77f70a46fb86dcaf03da12da99a0cd7",
+      "expected": "今日はカードのフルコースだ。",
+      "recognized": "今日はカードの振りコースだえ、はいに",
+      "similarity": 0.8235,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.08916
+    },
+    "high-school-chef/play": {
+      "sha256": "6fb3f6814fb65c7a6c6b35194b9e99e5e21b90e8de3966047b63accac414d3f0",
+      "expected": "勝負の味付けは、この一枚。",
+      "recognized": "勝負の味付けは、この一番ね!",
+      "similarity": 0.8485,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.15927
+    },
+    "magic-shizuku/start": {
+      "sha256": "19f45c7d6e39c9d8ef53728edbdcaec881277e7466b30fa4ae6ddd5322c70555",
+      "expected": "落ち着いて、札を読みましょう。",
+      "recognized": "落ち着いて、札を読みましょう。",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018
+    },
+    "magic-tsubasa/play": {
+      "sha256": "c087a29d90cf58b475a6118bb39573208836193b23eb960e03d314483082d5c9",
+      "expected": "勝負の一枚、いっけえ。",
+      "recognized": "勝負の一枚、いっけ!",
+      "similarity": 0.96,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0001
+    },
+    "magic-rei/play": {
+      "sha256": "3e7b88fac2c2e5230d143bd2535dd7efa2ebd295f172932eb146c21ab07be473",
+      "expected": "この札で進む。",
+      "recognized": "この札で進む",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00013
+    },
+    "magic-rei/win": {
+      "sha256": "05023a836a8b44b457e89ebabb1d4854be8586863dcc60b397ca6b023c6ca7fe",
+      "expected": "勝負はついた。礼を言う。",
+      "recognized": "勝負はついた。礼を言う。",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017
+    },
+    "magic-mirai/play": {
+      "sha256": "a46c7586e4cbffa06a08d88f9ae222ce5ba0e93307fbb1b12fa4336003ca480d",
+      "expected": "見せ場は、この一枚。",
+      "recognized": "見せ場はこの1枚",
+      "similarity": 0.8421,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0002
+    }
+  }
+}

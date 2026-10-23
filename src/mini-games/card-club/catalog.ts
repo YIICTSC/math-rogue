@@ -1,10 +1,11 @@
+import { DIVERSITY_GAMES } from './diversityCatalog';
 import { TRADITIONAL_GAMES } from './traditionalCatalog';
 import { WORLD_GAMES } from './worldCatalog';
 import { POPULAR_GAMES } from './popularCatalog';
 import reference from './reference-catalog.json';
 
 export const REFERENCE_GAMES = reference.games;
-export type GameId = 'whist'|'spades'|'ohhell'|'oldmaid'|'fantan'|'crazyeight'|'gofish'|'authors'|'doubt'|'war'|'99add'|'scopa'|'scopone'|'blackjack'|'daihinmin'|'briscola'|'sueca'|'polignac'|'laus'|'kalter'|'gurka'|'spar'|'miseria'|'ciapano'|'heart2'|'memory'|'beggar'|'pishti'|'rummy'|'pitypat'|'snipsnupsnorem'|'kingsinthe'|'ginrummy'|'durak2'|'perevodnoy'|'golf'|'schwimmen'|'euchre2'|'euchre-uk'|'germanwhist'|'minnesotawhist'|'chinesewhist'|'knockout'|'nap'|'napoleon'|'cribbage'|'cassino'|'pontoon'|'66'|'schnapsen'|'ecarte'|'hokm'|'callbridge'|'sergent'|'blacklady'|'blackmaria'|'cangkul'|'getaway'|'shithead2'|'empatsatu'|'pitch'|'allfour'|'sedma'|'sedmice'|'rollingstone'|'rantergo'|'put'|'truc';
+export type GameId = 'whist'|'spades'|'ohhell'|'oldmaid'|'fantan'|'crazyeight'|'gofish'|'authors'|'doubt'|'war'|'99add'|'scopa'|'scopone'|'blackjack'|'daihinmin'|'briscola'|'sueca'|'polignac'|'laus'|'kalter'|'gurka'|'spar'|'miseria'|'ciapano'|'heart2'|'memory'|'beggar'|'pishti'|'rummy'|'pitypat'|'snipsnupsnorem'|'kingsinthe'|'ginrummy'|'durak2'|'perevodnoy'|'golf'|'schwimmen'|'euchre2'|'euchre-uk'|'germanwhist'|'minnesotawhist'|'chinesewhist'|'knockout'|'nap'|'napoleon'|'cribbage'|'cassino'|'pontoon'|'66'|'schnapsen'|'ecarte'|'hokm'|'callbridge'|'sergent'|'blacklady'|'blackmaria'|'cangkul'|'getaway'|'shithead2'|'empatsatu'|'pitch'|'allfour'|'sedma'|'sedmice'|'rollingstone'|'rantergo'|'put'|'truc'|'guessit'|'speculation'|'suitmatch'|'petrangola'|'reddog';
 export interface ClubGameDefinition {
   id: GameId; players:number[]; defaultPlayers:number; family:string;
   rule:string; englishRule:string;
@@ -12,6 +13,7 @@ export interface ClubGameDefinition {
 // A title becomes playable only after its own rules and scoring are implemented.
 // Unimplemented index entries must never be routed to a generic substitute.
 export const CLUB_GAMES:ClubGameDefinition[] = [
+  ...DIVERSITY_GAMES,
   ...TRADITIONAL_GAMES,
   ...WORLD_GAMES,
   ...POPULAR_GAMES,

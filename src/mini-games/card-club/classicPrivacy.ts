@@ -9,6 +9,6 @@ export function classicView(s:ClubState,index=-1){
  };
 }
 export function classicHideOwnHand(s:ClubState,index:number){
- return s.game==='euchre-uk'&&s.extra.step==='euchreBlind'&&index===s.dealer||s.game==='pontoon'&&index===s.dealer&&s.extra.step!=='pontoonDealer'&&s.phase!=='round'&&s.phase!=='result';
+ return s.game==='speculation'&&s.phase!=='round'&&s.phase!=='result'||s.game==='petrangola'&&s.extra.step==='petrDealer'&&index===s.dealer||s.game==='euchre-uk'&&s.extra.step==='euchreBlind'&&index===s.dealer||s.game==='pontoon'&&index===s.dealer&&s.extra.step!=='pontoonDealer'&&s.phase!=='round'&&s.phase!=='result';
 }
-export const classicHideTable=(s:ClubState)=>s.game==='schwimmen'&&s.extra.step==='swimDealer'&&s.phase==='play';
+export const classicHideTable=(s:ClubState,index=-1)=>s.game==='petrangola'&&s.extra.step==='petrDealer'&&index!==s.dealer||s.game==='schwimmen'&&s.extra.step==='swimDealer'&&s.phase==='play';

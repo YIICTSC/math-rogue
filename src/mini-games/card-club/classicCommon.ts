@@ -4,6 +4,8 @@ import { emptyClassic } from './classicModel';
 import { finish,record,roundOver } from './ruleHelpers';
 export function initClassic(s:ClubState){return s.extra.classic=emptyClassic(s.players.length);}
 export function classicDeck(game:string,n:number){
+ if(game==='guessit')return pack().filter(c=>c<13);
+ if(game==='petrangola')return pack().filter(c=>![8,9,10].includes(rank(c)));
  if(game==='sedma'||game==='sedmice')return pack().filter(c=>rank(c)===1||rank(c)>=7);
  if(game==='truc')return pack().filter(c=>rank(c)===1||rank(c)>=6);
  if(game==='rollingstone')return pack().filter(c=>rank(c)===1||rank(c)>=15-2*n);

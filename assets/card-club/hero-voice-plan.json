@@ -1,0 +1,365 @@
+{
+  "upstream": "https://github.com/Aratako/Irodori-TTS",
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "latest_code_checked": "89f9d8fbd4d51ea019867ee1197725ede1df13c5",
+  "model_selection": "Latest CPU-feasible v4.1 Small MeanFlow model. Published v4-Large 13.15 GB weights exceed this environment memory (9.7 GiB) and remaining disk (6.3 GB); latest official code and current public model list checked 2026-10-23.",
+  "heroes": [
+    {
+      "id": "high-school-warrior",
+      "reference": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+      "reference_sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06",
+      "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。反骨心があり、短く鋭く言い切る。決意の場面では熱を強めるが、大人の渋声にはしない。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "よし、カードで勝負だ。",
+        "play": "この一手で決める。",
+        "win": "勝負ありだ。いい対戦だった。",
+        "lose": "やるな。次は負けないぞ。"
+      },
+      "readings": {
+        "play": "このいってできめる。"
+      }
+    },
+    {
+      "id": "high-school-caretaker",
+      "reference": "public/sfx/high-school-voices/CARETAKER/attack-1.ogg",
+      "reference_sha256": "c3d3ea0466536c9dc25e0e26b4e934a7816cf6756432c37798399f44167e543b",
+      "caption": "高校生の女性アニメ主人公。落ち着いた柔らかい中音。生き物を見守る包容力と、静かな芯の強さを出す。安心させる台詞は穏やかに、決意は明瞭に。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "みんなで楽しく遊ぼうね。",
+        "play": "このカードにするね。",
+        "win": "勝てたね。みんな、ありがとう。",
+        "lose": "楽しかったよ。また遊ぼうね。"
+      }
+    },
+    {
+      "id": "high-school-assassin",
+      "reference": "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg",
+      "reference_sha256": "fad893db92a01df59a7445801c2b22c7189f311dc2ca3effc63edc0ba1ee9dbd",
+      "caption": "高校生の中性的な若いアニメ主人公。低めで静かな声。普段は抑制的で、秘密を抱えた距離感を出し、選択を語る場面だけ芯を強める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "札の流れを読もう。",
+        "play": "ここで仕掛ける。",
+        "win": "読みどおりだ。見事な勝負だった。",
+        "lose": "その一手は読めなかったな。"
+      },
+      "readings": {
+        "start": "ふだのながれをよもう。",
+        "play": "ここでしかける。"
+      },
+      "seconds": {
+        "start": 3.1
+      }
+    },
+    {
+      "id": "high-school-mage",
+      "reference": "public/sfx/high-school-voices/MAGE/attack-1.ogg",
+      "reference_sha256": "4df5b17fa0de456082422001ae6d8eccf1f80fdb5927062d091326335be1bc71",
+      "caption": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "カードの法則、調べてみましょう。",
+        "play": "最適な一手を試すわ。",
+        "win": "仮説は正しかったわね。",
+        "lose": "なるほど。次の仮説ができたわ。"
+      },
+      "readings": {
+        "play": "さいてきないってをためすわ。"
+      }
+    },
+    {
+      "id": "high-school-dodgeball",
+      "reference": "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg",
+      "reference_sha256": "99c489ed9c77cf0775e3904c19ee1323b50eb005feb924e9a11e4a3802372aba",
+      "caption": "高校生の男子アニメ主人公。明るく前へ押し出す中高音。スポーツ選手らしい息の勢いと素早いテンポを持ち、仲間への声かけは熱く爽やかに。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "トランプでも全力勝負だ。",
+        "play": "よし、このカードで攻める。",
+        "win": "やったぜ。ナイスゲーム。",
+        "lose": "くう、いい勝負だったな。"
+      }
+    },
+    {
+      "id": "high-school-bard",
+      "reference": "public/sfx/high-school-voices/BARD/attack-1.ogg",
+      "reference_sha256": "7acd6c93097e81ad0776bdf1730dbc6a4af517e87b94bba62e0af6fbf5cb3ef4",
+      "caption": "高校生の女性アニメ主人公。明るく通る放送部の声。言葉を届ける表現力と軽快なリズムを持ち、感動場面では温かな余韻を残す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "放課後カード対決、開幕です。",
+        "play": "さあ、注目の一枚です。",
+        "win": "勝利のニュースをお届けします。",
+        "lose": "逆転のドラマは次回に持ち越しね。"
+      },
+      "readings": {
+        "play": "さあ、ちゅうもくのいちまいです。",
+        "win": "しょうりのにゅーすをおとどけします。"
+      }
+    },
+    {
+      "id": "high-school-librarian",
+      "reference": "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg",
+      "reference_sha256": "755585379d4d3c6807c46001a49e48f850b41f536d735bc24176b3be01ff8042",
+      "caption": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "ルールを確かめて、始めましょう。",
+        "play": "この一枚が、次のページ。",
+        "win": "素敵な結末になりましたね。",
+        "lose": "思いがけない結末でしたね。"
+      }
+    },
+    {
+      "id": "high-school-chef",
+      "reference": "public/sfx/high-school-voices/CHEF/attack-1.ogg",
+      "reference_sha256": "54a96916127215f0c3dcded978beb7c47218a2b7c26d6448795d7ed8f3bfffe0",
+      "caption": "高校生の男子アニメ主人公。気さくで頼れる明るい中低音。料理長らしい面倒見のよさと勢いを持ち、冗談は親しみやすく、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "今日はカードのフルコースだ。",
+        "play": "勝負の味付けは、この一枚。",
+        "win": "勝利のおかわり、いただきだ。",
+        "lose": "うまい一手だな。参ったよ。"
+      },
+      "readings": {
+        "start": "きょうは、カードのフルコースだ。",
+        "play": "しょうぶのあじつけは、このいちまい。"
+      },
+      "seconds": {
+        "start": 3.8
+      }
+    },
+    {
+      "id": "high-school-gardener",
+      "reference": "public/sfx/high-school-voices/GARDENER/attack-1.ogg",
+      "reference_sha256": "debf1e7daee66da0f3e243ea3c70a268f218c9c36f2a9a76a7b78b3e3a797143",
+      "caption": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "ゆっくり、勝ち筋を育てよう。",
+        "play": "この一枚を、咲かせてみるね。",
+        "win": "きれいに勝利が咲いたね。",
+        "lose": "次の勝利の種が、見つかったよ。"
+      }
+    },
+    {
+      "id": "magic-akari",
+      "reference": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+      "reference_sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4",
+      "caption": "高校生の女性魔法主人公。明るくまっすぐな若い中高音。仲間を照らすリーダーらしく、前向きな台詞は弾むように、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "みんなとトランプ、楽しみだね。",
+        "play": "いくよ。わたしの一枚。",
+        "win": "やったあ。最後まで楽しかったね。",
+        "lose": "次はもっと輝いてみせるよ。"
+      }
+    },
+    {
+      "id": "magic-shizuku",
+      "reference": "public/sfx/magic-voices/SHIZUKU/attack-1.ogg",
+      "reference_sha256": "db50015dfac5abe6a34f115d1cf3df68fef7710fd80e3e3391d396cd37473183",
+      "caption": "高校生の女性魔法主人公。冷静で透明感のある中音。論理的に落ち着いて話し、感情が揺れる場面では抑えた優しさをにじませる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "落ち着いて、札を読みましょう。",
+        "play": "この一手を選びます。",
+        "win": "静かな流れが、勝利につながったわ。",
+        "lose": "見事な読みね。勉強になったわ。"
+      }
+    },
+    {
+      "id": "magic-hiyori",
+      "reference": "public/sfx/magic-voices/HIYORI/attack-1.ogg",
+      "reference_sha256": "0b5ff4889cea2238e6d53f85d748ec3639faf018a9e38b97893c59cad9d8bbe2",
+      "caption": "高校生の女性魔法主人公。柔らかく包み込む穏やかな中音。相手を安心させる温かさを持ち、守る決意は静かに強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "のんびり、楽しみましょうね。",
+        "play": "そっと、このカードを出すね。",
+        "win": "ふふ。勝ててうれしいな。",
+        "lose": "負けても、一緒に遊べてうれしいよ。"
+      },
+      "readings": {
+        "play": "そっと、このかーどをだすね。"
+      }
+    },
+    {
+      "id": "magic-tsubasa",
+      "reference": "public/sfx/magic-voices/TSUBASA/attack-1.ogg",
+      "reference_sha256": "fbb08c9e06735bc9407b593ffd982d58db493f727d153e6f9c1a4e7660713b87",
+      "caption": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "カード勝負も、燃えていくよ。",
+        "play": "勝負の一枚、いっけえ。",
+        "win": "よっしゃあ。いい勝負だったね。",
+        "lose": "くう、もう一回勝負しようよ。"
+      }
+    },
+    {
+      "id": "magic-rei",
+      "reference": "public/sfx/magic-voices/REI/attack-1.ogg",
+      "reference_sha256": "f2cd5db980769982e5e515b68abf54c272f95131a3d2a7b6c8df324d55e5cffd",
+      "caption": "高校生の女性魔法主人公。寡黙で厳格な低めの声。無駄なく静かに話し、守る言葉だけに深い庇護と意志を込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "静かに、勝負を始めよう。",
+        "play": "この札で進む。",
+        "win": "勝負はついた。礼を言う。",
+        "lose": "見事だ。次は見極める。"
+      }
+    },
+    {
+      "id": "magic-madoka",
+      "reference": "public/sfx/magic-voices/MADOKA/attack-1.ogg",
+      "reference_sha256": "c1fbd1bf012ab8a30f0d99137dfe842b0b5cdc72104492bb8035e4ee0e4d65be",
+      "caption": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "カードの組み合わせ、調べたいな。",
+        "play": "この一手、どうかな。",
+        "win": "やった。計算が合ってたね。",
+        "lose": "そっか。新しい発見になったよ。"
+      }
+    },
+    {
+      "id": "magic-koharu",
+      "reference": "public/sfx/magic-voices/KOHARU/attack-1.ogg",
+      "reference_sha256": "e5f3526a4bed6cbab9338cedffbe1c3106fa377c671ab0422dc918c902bd8b6b",
+      "caption": "高校生の女性魔法主人公。穏やかで自然体の中音。風のように柔らかく話し、仲間を導く時は落ち着いた芯を見せる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "風に乗るように、遊ぼうか。",
+        "play": "このカードを、届けるね。",
+        "win": "いい風が、吹いてくれたね。",
+        "lose": "今度は違う風を、探してみよう。"
+      }
+    },
+    {
+      "id": "magic-mirai",
+      "reference": "public/sfx/magic-voices/MIRAI/attack-1.ogg",
+      "reference_sha256": "0e26a552ca0d93acff189fcab156d49a8ceb2a18078c2dd87cae113dcf47f6f1",
+      "caption": "高校生の女性魔法主人公。華やかで表現力のある中高音。舞台のように明るく弾ませつつ、本音の場面では寂しさと温かさを自然に出す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "カードの舞台、幕を開けるよ。",
+        "play": "見せ場は、この一枚。",
+        "win": "フィナーレは、わたしの勝利ね。",
+        "lose": "次の舞台では、主役をいただくよ。"
+      }
+    },
+    {
+      "id": "magic-sera",
+      "reference": "public/sfx/magic-voices/SERA/attack-1.ogg",
+      "reference_sha256": "1e59b7944507b689bfdb01fbdf10932c284b60d85991f32e878aef3530ab2505",
+      "caption": "高校生の女性魔法主人公。礼儀正しく透明感のある中高音。異世界の記録者らしい丁寧さと、希望を失わない素直な明るさを持つ。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "今日の対戦も、大切に記録します。",
+        "play": "わたしは、この札を選びます。",
+        "win": "勝利の記録に、皆さんの名前も。",
+        "lose": "この経験も、大切な記録です。"
+      }
+    },
+    {
+      "id": "magic-ren",
+      "reference": "public/sfx/magic-voices/REN/attack-1.ogg",
+      "reference_sha256": "e4e436d327490e256e218da6d88ea63ab9ff8693a0c8bdde6654b08ebdbe51bd",
+      "caption": "高校生の男性魔法主人公。世話焼きで誠実な若い中低音。近い距離の親しみやすさを持ち、仲間を守る時は頼れる力強さを出す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "みんな、準備はいいか。始めよう。",
+        "play": "俺の番だな。これでいく。",
+        "win": "よし、勝てたな。ありがとう。",
+        "lose": "いい手だった。また相手してくれ。"
+      }
+    },
+    {
+      "id": "magic-soma",
+      "reference": "public/sfx/magic-voices/SOMA/attack-1.ogg",
+      "reference_sha256": "e415bb02e85409748d5b7bc35ddbdc0b3434424caa5d5ad756bc38280978d039",
+      "caption": "高校生の男性魔法主人公。規律正しく知的な中低音。完璧主義らしく明瞭に区切り、感情を選ぶ場面では抑えた誠実さを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "ルールを守り、正々堂々と。",
+        "play": "ここは、この札が最善だ。",
+        "win": "確かな判断が、勝利を導いたな。",
+        "lose": "読みが甘かった。次に生かそう。"
+      }
+    },
+    {
+      "id": "magic-minato",
+      "reference": "public/sfx/magic-voices/MINATO/attack-1.ogg",
+      "reference_sha256": "47603d3eb3a8c71e511fd456fb37e2c1f99bdaa370988c83b7c7d2824d01798e",
+      "caption": "高校生の男性魔法主人公。素直で努力家の若い中音。少し控えめな親しみやすさから始め、成長と決意の場面では前向きに声を張る。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "よし、カードでも頑張るよ。",
+        "play": "この一枚に、挑戦してみる。",
+        "win": "やった。練習の成果が出たよ。",
+        "lose": "次は、もっと上手くなってみせる。"
+      }
+    },
+    {
+      "id": "magic-riku",
+      "reference": "public/sfx/magic-voices/RIKU/attack-1.ogg",
+      "reference_sha256": "abb3b9fce5b7bbb57bb7225606d631b6c6abd74f0c6f88b823f4f3d1a0169e70",
+      "caption": "高校生の男性魔法主人公。飄々とした軽やかな中音。知的な余裕と遊び心を持ち、仲間を選ぶ場面では静かな本気を見せる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "さて、札の駆け引きといこうか。",
+        "play": "こんな一手は、どうかな。",
+        "win": "おや、僕の勝ちみたいだね。",
+        "lose": "はは。一本取られたね。"
+      },
+      "readings": {
+        "start": "さて、ふだのかけひきといこうか。",
+        "win": "おや、ぼくのかちみたいだね。"
+      },
+      "seconds": {
+        "start": 3.7,
+        "win": 3.1
+      }
+    },
+    {
+      "id": "magic-yamato",
+      "reference": "public/sfx/magic-voices/YAMATO/attack-1.ogg",
+      "reference_sha256": "3a756a80587a8df302f326c80b22731f74eb838b4b1dc5289c4ce3e2de6b7967",
+      "caption": "高校生の男性魔法主人公。ぶっきらぼうで熱い低めの声。乱暴な語尾の奥に情の厚さを持ち、守る台詞は腹から強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "カードだって、手は抜かねえぞ。",
+        "play": "おら、この一枚で勝負だ。",
+        "win": "よっしゃ。気持ちのいい勝負だった。",
+        "lose": "ちっ、やるじゃねえか。もう一回だ。"
+      }
+    },
+    {
+      "id": "magic-leon",
+      "reference": "public/sfx/magic-voices/LEON/attack-1.ogg",
+      "reference_sha256": "662147ab2418685022c78c69b23c1b66992875a2eb5854074bf17cd50f628689",
+      "caption": "高校生の男性魔法主人公。華やかで自信のある中高音。舞台役者のように響かせ、冗談は軽く、仲間への本音はまっすぐ輝かせる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "華麗なカードショーへ、ようこそ。",
+        "play": "目を離すなよ。この一枚だ。",
+        "win": "勝利の拍手、いただくよ。",
+        "lose": "今度の主役は、君だったね。"
+      }
+    },
+    {
+      "id": "magic-elliot",
+      "reference": "public/sfx/magic-voices/ELLIOT/attack-1.ogg",
+      "reference_sha256": "a3675002b4c4903739fe80be955eff79bae53dcac9a1fa98f6cdb978fc9d12e7",
+      "caption": "高校生の男性魔法主人公。礼儀正しく気品のある静かな中低音。星界の記録者らしい距離感と孤独を持ち、希望の台詞には柔らかな光を込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "星を読むように、札を読みましょう。",
+        "play": "この一手を、選びます。",
+        "win": "勝利の星が、微笑んだようです。",
+        "lose": "あなたの読みは、見事でした。"
+      },
+      "readings": {
+        "start": "ほしをよむように、ふだをよみましょう。",
+        "win": "しょうりのほしが、ほほえんだようです。",
+        "lose": "あなたのよみは、みごとでした。"
+      },
+      "seconds": {
+        "start": 4.2,
+        "win": 4.1,
+        "lose": 3.2
+      }
+    },
+    {
+      "id": "magic-sakuya",
+      "reference": "public/sfx/magic-voices/SAKUYA/attack-1.ogg",
+      "reference_sha256": "52ff57ffb3f6a15aa779b7a9d52e0c8327a78d804dc467f70dbe0f5c453de661",
+      "caption": "高校生の男性魔法主人公。冷たく抑えた低音。封印術師らしく言葉を重く区切り、過去を越える決意には隠れた熱と優しさを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "lines": {
+        "start": "札に隠れた道を、見極める。",
+        "play": "この一枚で、道を開く。",
+        "win": "勝負は決した。感謝する。",
+        "lose": "この敗北も、次への道だ。"
+      }
+    }
+  ]
+}

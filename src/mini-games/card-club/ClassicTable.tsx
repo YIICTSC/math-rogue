@@ -1,3 +1,5 @@
+import { DiversityTable } from './DiversityTable';
+import { DIVERSITY_IDS } from './diversityCatalog';
 import React from 'react';
 import type { Action,ClubView } from './model';
 import { CardFace } from './CardFace';
@@ -22,7 +24,7 @@ export function ClassicTable({view:v,l,send,selected,select}:{view:ClubView;l:(j
  };
  const noteLabel=(key:string)=>({high:l('ハイ','High'),low:l('ロー','Low'),jack:l('ジャック','Jack'),game:l('ゲーム','Game'),gift:l('ギフト','Gift'),gamePoints:l('ゲーム点','Game points'),marriage:l('マリッジ','Marriage'),handValue:l('手札点','Hand value'),fifteens:l('15の組','Fifteens'),pairs:l('ペア','Pairs'),runs:l('ラン','Runs'),flush:l('フラッシュ','Flush'),nobs:l('ノブ','Nobs'),heels:l('スターターJ','Jack starter'),pegging:l('プレイ中の得点','Pegging'),lastCard:l('最後の札','Last card'),swimScore:l('手札点','Hand value'),contract:l('獲得した絵札','Counting cards won'),pontoon:l('精算','Settlement')}[key]||key);
  return <section className="cc-classic" aria-label={l('ゲームの盤面','Game board')}>
-  <TraditionalTable view={v} l={l}/>
+  <TraditionalTable view={v} l={l}/>{DIVERSITY_IDS.some(id=>id===v.game)&&<DiversityTable view={v} l={l}/>}
   <WorldTable view={v} l={l} send={send} selected={selected} select={select}/>
   {!over&&instructions[step]&&<p className="cc-step" role="status">{instructions[step]}</p>}
   {v.game==='ginrummy'&&v.players[v.self].hand.length>=10&&<p>{l('未組合せ点','Deadwood')}: {ginHand(v.players[v.self].hand).points}</p>}
@@ -35,6 +37,6 @@ export function ClassicTable({view:v,l,send,selected,select}:{view:ClubView;l:(j
   {v.game==='cribbage'&&<><strong className="cc-peg-total">{l('プレイ合計','Pegging total')}: {v.total} / 31 · {l('目標','Target')}: 121</strong><p>{l('親のクリブ','Dealer’s crib')}: {v.players[v.dealer].name}</p><div className="cc-public-hand">{c.crib.map((card,i)=><CardFace key={i} card={card}/>)}</div>{(over||step==='cribCount')&&<div className="cc-layouts">{c.rows.map((cards,i)=><article key={i}><h3>{v.players[i].name}</h3><div className="cc-public-hand">{cards.map(card=><CardFace key={card} card={card}/>)}</div></article>)}</div>}</>}
   {v.game==='cassino'&&<><p className="cc-step">{l('手札1枚と獲得したい場札を選び「選んだ場札を獲得」。ビルドはまとまり全体を選びます。ビルド操作では回収札を手札に残します。','Select one hand card and table cards, then Capture selection. Select each whole build. Building requires keeping a matching capture card in hand.')}</p><div className="cc-builds">{c.rows.map((cards,i)=><article key={i}><h3>#{i+1} · {c.bids[i]} · {c.go[i]?l('複合ビルド','Compound build'):l('ビルド','Build')} · {v.players[c.owners[i]]?.name}</h3><div className="cc-public-hand">{cards.map(card=><CardFace key={card} card={card} selected={selected.includes(card)} onClick={active?()=>select(cards):undefined}/>)}</div></article>)}</div></>}
   {v.game==='pontoon'&&<div className="cc-layouts">{v.players.map((p,i)=><article key={p.id}><h3>{p.name} · {i===v.dealer?l('親','Dealer'):`${l('賭点','Stake')} ${p.stake}`}</h3><div className="cc-public-hand">{(over?p.hand:c.rows[i]).map((card,j)=><CardFace key={j} card={card}/>)}{!over&&Array.from({length:Math.max(0,p.handCount-c.rows[i].length)},(_,j)=><CardFace key={`back${j}`} card={-1}/>)}</div></article>)}</div>}
-  {c.notes.length>0&&<details className="cc-score-notes" open={over}><summary>{l('得点の内訳','Score breakdown')}</summary>{c.notes.slice(-24).map((note,i)=><p key={i}>{v.players[note.player]?.name} · {noteLabel(note.label)}: {note.points>0?'+':''}{note.points}</p>)}</details>}
+  {c.notes.length>0&&!['guessit','petrangola'].includes(v.game)&&<details className="cc-score-notes" open={over}><summary>{l('得点の内訳','Score breakdown')}</summary>{c.notes.slice(-24).map((note,i)=><p key={i}>{v.players[note.player]?.name} · {noteLabel(note.label)}: {note.points>0?'+':''}{note.points}</p>)}</details>}
  </section>;
 }

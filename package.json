@@ -8,8 +8,10 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
-    "test:card-club": "node scripts/test-card-club.mjs && node scripts/test-card-club-extensions.mjs && node scripts/test-card-club-popular.mjs && node scripts/test-card-club-world.mjs && node scripts/test-card-club-traditional.mjs",
+    "test:card-club": "node scripts/test-card-club.mjs && node scripts/test-card-club-extensions.mjs && node scripts/test-card-club-popular.mjs && node scripts/test-card-club-world.mjs && node scripts/test-card-club-traditional.mjs && node scripts/test-card-club-presentation.mjs && node scripts/test-card-club-diversity.mjs && node scripts/test-card-club-voices.mjs",
     "test:card-club:browser": "node scripts/test-card-club-browser.mjs",
+    "test:card-club:voices": "node scripts/test-card-club-browser.mjs --voices",
+    "test:card-club:effects": "node scripts/test-card-club-browser.mjs --effects",
     "test:card-club:landscape": "node scripts/test-card-club-browser.mjs --landscape",
     "test:card-club:responsive": "node scripts/test-card-club-browser.mjs --responsive",
     "report:card-club": "node scripts/report-card-club-coverage.mjs",

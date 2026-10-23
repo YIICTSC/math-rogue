@@ -1,0 +1,1088 @@
+{
+  "clips": {
+    "high-school-warrior/start": {
+      "sha256": "493ae9b8c7a84534b645e204fbe74cd832545c85bc532ea72cefeef0930454ae",
+      "expected": "よし、カードで勝負だ。",
+      "recognized": "よし、カードで勝負だ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0044,
+      "prior": {
+        "sha256": "493ae9b8c7a84534b645e204fbe74cd832545c85bc532ea72cefeef0930454ae",
+        "expected": "よし、カードで勝負だ。",
+        "recognized": "よし、カードで勝負だ",
+        "similarity": 1.0,
+        "model": "Systran/faster-whisper-small",
+        "compute": "cpu-int8"
+      },
+      "normalization": "card-reading-v3"
+    },
+    "high-school-warrior/play": {
+      "sha256": "1e68196d97f42ad06390d76818d66d3879d2f34d06abbf4bcab2ea09d6e831a4",
+      "expected": "この一手で決める。",
+      "recognized": "この言ってで決める",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0
+    },
+    "high-school-warrior/win": {
+      "sha256": "a9c23aef8c0f2172df3415df981b33eb6d76c6e402c0a23002fed4d8f1f64313",
+      "expected": "勝負ありだ。いい対戦だった。",
+      "recognized": "勝負ありだ!良い対戦だった!",
+      "similarity": 0.9375,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00531,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-warrior/lose": {
+      "sha256": "b1bcb2e8b9f3161bc8fac7134ea788aeeab3291d890e105cd39d75a182189bd5",
+      "expected": "やるな。次は負けないぞ。",
+      "recognized": "やるな次は負けないぞ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.04215,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-caretaker/start": {
+      "sha256": "7febd415b9fa7799820832a9d894bde24f241909b8cd8a2e13c127f16bc11828",
+      "expected": "みんなで楽しく遊ぼうね。",
+      "recognized": "みんなで楽しく遊ぼうね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00014,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-caretaker/play": {
+      "sha256": "eed87be69d38f8bffadc5fe9676d9cbc0f3eefc5cbf6111e9bab73a02007da71",
+      "expected": "このカードにするね。",
+      "recognized": "このカードにするね!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00011,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-caretaker/win": {
+      "sha256": "871cbd3200fe9a9e07e106f1d121a7682b1b3b300f7d5b85fbb0fa5d163b55fa",
+      "expected": "勝てたね。みんな、ありがとう。",
+      "recognized": "勝てたね!みんな、ありがとう!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00026,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-caretaker/lose": {
+      "sha256": "fef93ef1156802784d449fa64d3918f2084f47843c9daeeab02819e2372fd5a8",
+      "expected": "楽しかったよ。また遊ぼうね。",
+      "recognized": "楽しかったよ!また遊ぼうね!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-assassin/start": {
+      "sha256": "03655d615af218a5966e1e90520b7944c8412c0ff4d92a537bd6096931070303",
+      "expected": "札の流れを読もう。",
+      "recognized": "普段の流れを読もう",
+      "similarity": 0.9524,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0003
+    },
+    "high-school-assassin/play": {
+      "sha256": "0117c57b7d5775eada2058e3e4ea5736a5b23f3699e60dce51e803dd9aa33189",
+      "expected": "ここで仕掛ける。",
+      "recognized": "ここで仕掛ける",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0
+    },
+    "high-school-assassin/win": {
+      "sha256": "0c5b7f7dfc9f9a1b6a36e891e108ecab43dc4bbeaddcb4d627b51143ddcb1f5d",
+      "expected": "読みどおりだ。見事な勝負だった。",
+      "recognized": "読み通りだ 見事な勝負だった",
+      "similarity": 0.8824,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00014,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-assassin/lose": {
+      "sha256": "850dc801e400c6220e62bb841a241d1cb31f29c55da00a63ad325dd2f57d2da3",
+      "expected": "その一手は読めなかったな。",
+      "recognized": "その言っては読めなかったな",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-mage/start": {
+      "sha256": "db5dc67ace08b6f5893ac93d5d2f0344785952ad025fb0383ae938d347b9c496",
+      "expected": "カードの法則、調べてみましょう。",
+      "recognized": "カードの法則調べてみましょう!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00013,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-mage/play": {
+      "sha256": "27ce61aeed73dbc6d15d20eb2a69221ac0a076e1d8f125f778b634710c70aec5",
+      "expected": "最適な一手を試すわ。",
+      "recognized": "最適ない行ってお試すわ",
+      "similarity": 0.8889,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00024,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-mage/win": {
+      "sha256": "368f2f4c230ee4cc89a3069e1536ca506499651e6d93ddc19d12cdb60db32b1c",
+      "expected": "仮説は正しかったわね。",
+      "recognized": "仮説は正しかったわね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-mage/lose": {
+      "sha256": "3fb710129c8ce3f00988cde0ddaf6f849e5c11cc6fa4b230c235e8d17920883f",
+      "expected": "なるほど。次の仮説ができたわ。",
+      "recognized": "なるほど 次の仮説ができたわ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-dodgeball/start": {
+      "sha256": "60e417d2f7d2e360598e32f1eeb22e45c050bd533eb9700ea13859267b79f240",
+      "expected": "トランプでも全力勝負だ。",
+      "recognized": "トランプでも全力勝負だ!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-dodgeball/play": {
+      "sha256": "93f4336e25a393bce0ef868928e72749112e67e810b65b96d5600b976c88c6ae",
+      "expected": "よし、このカードで攻める。",
+      "recognized": "よし!このカードで攻める!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00019,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-dodgeball/win": {
+      "sha256": "0d3fd27c0cf003cb15931dee3aaa9f1744b0942e8ed52414c3edfe55332248f8",
+      "expected": "やったぜ。ナイスゲーム。",
+      "recognized": "やったぜ!ナイスゲーム!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00019,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-dodgeball/lose": {
+      "sha256": "100474e6f810e97e89be41caf3d10853b7450b795d83918ea224623b66e7dff5",
+      "expected": "くう、いい勝負だったな。",
+      "recognized": "くぅ、いい勝負だったなぁ",
+      "similarity": 0.88,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-bard/start": {
+      "sha256": "7daadac42ddb61d1e996694378475abe4a11bae06dddcbeb20647a5fab312d35",
+      "expected": "放課後カード対決、開幕です。",
+      "recognized": "放課後、カード対決、開幕です!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00021,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-bard/play": {
+      "sha256": "10ca246d1df0122393e485d6730bce65f9df203e2bc9826fa307633b71787960",
+      "expected": "さあ、注目の一枚です。",
+      "recognized": "さあ、注目の1枚です。",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00177,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-bard/win": {
+      "sha256": "d5c897fb31094147c7f64402f725f64281b75a3544ddb5b2007ed69a7858c127",
+      "expected": "勝利のニュースをお届けします。",
+      "recognized": "勝利のニュースをお届けします",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 3e-05,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-bard/lose": {
+      "sha256": "317118b9841721dfc9d37dafbb5f179d5b810665084b60902b9c89d163d9d630",
+      "expected": "逆転のドラマは次回に持ち越しね。",
+      "recognized": "逆転のドラマは次回に持ち越しねー!",
+      "similarity": 0.9744,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00026,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-librarian/start": {
+      "sha256": "a26a8bb4855628ee89565dba9690e23f73fd92b6ef654fc3b8a7199d0fc3eade",
+      "expected": "ルールを確かめて、始めましょう。",
+      "recognized": "ルールを確かめて始めましょう",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-librarian/play": {
+      "sha256": "42d8625c332822c87e28a48a91fa3496bfa42111ac2bbdc99fc4be7e69b56daf",
+      "expected": "この一枚が、次のページ。",
+      "recognized": "この1枚が次のページ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00019,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-librarian/win": {
+      "sha256": "3ad6b7105cb4fac9932a7561445ba36f980cdd0e07ce42c0349aca0e079982cd",
+      "expected": "素敵な結末になりましたね。",
+      "recognized": "素敵な結末になりましたね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-librarian/lose": {
+      "sha256": "9079dc95b6abb4ee6ff12e466bd6bfb4456bdf53e0f27f1211db3d2e0792900a",
+      "expected": "思いがけない結末でしたね。",
+      "recognized": "思いがけない結末でしたね。",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-chef/start": {
+      "sha256": "78dbb94abf7a6507212db595084ea184eeaeeeb6016eecb4bb372c6bc43f2dc1",
+      "expected": "今日はカードのフルコースだ。",
+      "recognized": "今日はカードのフルコースだ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.00892
+    },
+    "high-school-chef/play": {
+      "sha256": "225854d1716400a4df2942c1ca55f1beed848586ad8bfbd6c83ea2236c8ddc40",
+      "expected": "勝負の味付けは、この一枚。",
+      "recognized": "勝負の味付けは、この1枚!え?",
+      "similarity": 0.9697,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0
+    },
+    "high-school-chef/win": {
+      "sha256": "7509990a098596100dd4fb9cb16155f0f8b2aab81778adf833ae3debc4f83720",
+      "expected": "勝利のおかわり、いただきだ。",
+      "recognized": "勝利のおかわり、いただきれ!",
+      "similarity": 0.9286,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.04979,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-chef/lose": {
+      "sha256": "48b2e4be93ae8824668a51b6ce4a2c85177b9ab7c36b9e7cc578edbf934074d8",
+      "expected": "うまい一手だな。参ったよ。",
+      "recognized": "うまい!ってだなぁ!まいったよ!",
+      "similarity": 0.9231,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00016,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-gardener/start": {
+      "sha256": "e00e8b11067dc8e0e27421b9095ff227d5be3f984b7ebdc6c1481fb22002ec27",
+      "expected": "ゆっくり、勝ち筋を育てよう。",
+      "recognized": "ゆっくり!勝ち筋を育てよう!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-gardener/play": {
+      "sha256": "7adb2600c9409393a75e322c799a5f2b9c2545737883fe1e1dee7088c4ec59bf",
+      "expected": "この一枚を、咲かせてみるね。",
+      "recognized": "この1枚を逆せてみるね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-gardener/win": {
+      "sha256": "78736c0f13c632eca90db88d1df783ed6b8a1a9ada3089cc91fd695fb12e7d11",
+      "expected": "きれいに勝利が咲いたね。",
+      "recognized": "きれいに勝利が咲いたねー",
+      "similarity": 0.963,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "high-school-gardener/lose": {
+      "sha256": "88389afde4d00010b42d852d3ea13782d77e82515fd8bd3756fabefe479c8b3a",
+      "expected": "次の勝利の種が、見つかったよ。",
+      "recognized": "次の勝利の種が見つかったよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018,
+      "normalization": "card-reading-v3"
+    },
+    "magic-akari/start": {
+      "sha256": "0fd8b7869da48fb03e67fa8b231966993954c58c590a5e683efb3f0804a362f8",
+      "expected": "みんなとトランプ、楽しみだね。",
+      "recognized": "みんなとトランプ!楽しみだね!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00014,
+      "normalization": "card-reading-v3"
+    },
+    "magic-akari/play": {
+      "sha256": "97237276d85a070106eb6a8922306484b85008004444c2f39f4ef57251fea70a",
+      "expected": "いくよ。わたしの一枚。",
+      "recognized": "行くよ!私の一枚!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00016,
+      "normalization": "card-reading-v3"
+    },
+    "magic-akari/win": {
+      "sha256": "15c194e80779f48442fb26a3a14f683e9e3653a29c3edb6af2605f6f95159ca2",
+      "expected": "やったあ。最後まで楽しかったね。",
+      "recognized": "やった! 最後まで楽しかったね!",
+      "similarity": 0.9677,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00039,
+      "normalization": "card-reading-v3"
+    },
+    "magic-akari/lose": {
+      "sha256": "d1b2e7d68caa3bc6baa6d3efe84ced37f2ca35f2764bfb263391e1875fc1568f",
+      "expected": "次はもっと輝いてみせるよ。",
+      "recognized": "次はもっと輝いてみせるよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00012,
+      "normalization": "card-reading-v3"
+    },
+    "magic-shizuku/start": {
+      "sha256": "19f45c7d6e39c9d8ef53728edbdcaec881277e7466b30fa4ae6ddd5322c70555",
+      "expected": "落ち着いて、札を読みましょう。",
+      "recognized": "落ち着いて、札を読みましょう。",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018,
+      "prior": {
+        "sha256": "19f45c7d6e39c9d8ef53728edbdcaec881277e7466b30fa4ae6ddd5322c70555",
+        "expected": "落ち着いて、札を読みましょう。",
+        "recognized": "落ち着いて、普段を読みましょう",
+        "similarity": 0.8276,
+        "model": "Systran/faster-whisper-small",
+        "compute": "cpu-int8",
+        "tail_rms": 0.00018
+      },
+      "normalization": "card-reading-v3"
+    },
+    "magic-shizuku/play": {
+      "sha256": "37acc7e6430036ed021abc9da633699dc1b2333f4290e82bfa8b7cfa6bfc298d",
+      "expected": "この一手を選びます。",
+      "recognized": "ここ、ノイってを選びます",
+      "similarity": 0.9565,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00011,
+      "normalization": "card-reading-v3"
+    },
+    "magic-shizuku/win": {
+      "sha256": "af56e5620cbb45ea1e99dccb4e1bddff30ac73f74d9eb0367e44ed2015fac295",
+      "expected": "静かな流れが、勝利につながったわ。",
+      "recognized": "静かな流れが勝利につながったわ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-shizuku/lose": {
+      "sha256": "d7aa785dd12d06fca49ce9a79d00d8208b13bfdbfb63bdd86aa6aa42c26e850f",
+      "expected": "見事な読みね。勉強になったわ。",
+      "recognized": "見事な読みね、勉強になったわ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018,
+      "normalization": "card-reading-v3"
+    },
+    "magic-hiyori/start": {
+      "sha256": "1026419606a19b5fef46a2acf74a8ffee6a69bdc3af4140d744325d6740a4ba1",
+      "expected": "のんびり、楽しみましょうね。",
+      "recognized": "のんびり、楽しみましょうね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0002,
+      "normalization": "card-reading-v3"
+    },
+    "magic-hiyori/play": {
+      "sha256": "a9f52f7d02944c039c8e241d402baf45cb2f091d438722f3b2170bec83e9c1a1",
+      "expected": "そっと、このカードを出すね。",
+      "recognized": "そっとこのカードを出すねひゃっか!",
+      "similarity": 0.8571,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00011,
+      "normalization": "card-reading-v3"
+    },
+    "magic-hiyori/win": {
+      "sha256": "b2fc0fe5a084e06072d59f5fefb5e5f43c4df8d359ad52c66786f59ea0bf97c3",
+      "expected": "ふふ。勝ててうれしいな。",
+      "recognized": "フフッ、勝てて嬉しいな",
+      "similarity": 0.9524,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00022,
+      "normalization": "card-reading-v3"
+    },
+    "magic-hiyori/lose": {
+      "sha256": "1e9583bf90ebd636c9d4107edf240ca46f65b86a3329253e6aeba576025b0580",
+      "expected": "負けても、一緒に遊べてうれしいよ。",
+      "recognized": "負けても一緒に遊べて嬉しいよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017,
+      "normalization": "card-reading-v3"
+    },
+    "magic-tsubasa/start": {
+      "sha256": "c3dbacc4d2d6e8c2c4b3d585014e4e33b0146a80bbc66b811a39f8886b02a286",
+      "expected": "カード勝負も、燃えていくよ。",
+      "recognized": "カード勝負も燃えていくよ!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00245,
+      "normalization": "card-reading-v3"
+    },
+    "magic-tsubasa/play": {
+      "sha256": "c087a29d90cf58b475a6118bb39573208836193b23eb960e03d314483082d5c9",
+      "expected": "勝負の一枚、いっけえ。",
+      "recognized": "勝負の一枚、いっけ!",
+      "similarity": 0.96,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0001,
+      "prior": {
+        "sha256": "c087a29d90cf58b475a6118bb39573208836193b23eb960e03d314483082d5c9",
+        "expected": "勝負の一枚、いっけえ。",
+        "recognized": "勝負の1枚、いっけー!",
+        "similarity": 0.8,
+        "model": "Systran/faster-whisper-small",
+        "compute": "cpu-int8",
+        "tail_rms": 0.0001
+      },
+      "normalization": "card-reading-v3"
+    },
+    "magic-tsubasa/win": {
+      "sha256": "17a7605b694478b30a631e8d1e41f9ffc9028e965513d6f55ddbf3e3ff4f6c8c",
+      "expected": "よっしゃあ。いい勝負だったね。",
+      "recognized": "よっしゃ! いい勝負だったね!",
+      "similarity": 0.9655,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 8e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-tsubasa/lose": {
+      "sha256": "93ac4966ed0427182141310b790069441fde7c5c6f4031994e2bfc33ca67e24b",
+      "expected": "くう、もう一回勝負しようよ。",
+      "recognized": "ふぅ、もう一回勝負しようよ!",
+      "similarity": 0.875,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 6e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-rei/start": {
+      "sha256": "96f037b6b51e842831250203bfccf7133b5a10cb133c9b97734dccfad38622df",
+      "expected": "静かに、勝負を始めよう。",
+      "recognized": "静かに勝負を始めよう",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00014,
+      "normalization": "card-reading-v3"
+    },
+    "magic-rei/play": {
+      "sha256": "3e7b88fac2c2e5230d143bd2535dd7efa2ebd295f172932eb146c21ab07be473",
+      "expected": "この札で進む。",
+      "recognized": "この札で進む",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00013,
+      "prior": {
+        "sha256": "3e7b88fac2c2e5230d143bd2535dd7efa2ebd295f172932eb146c21ab07be473",
+        "expected": "この札で進む。",
+        "recognized": "この下で進む",
+        "similarity": 0.75,
+        "model": "Systran/faster-whisper-small",
+        "compute": "cpu-int8",
+        "tail_rms": 0.00013
+      },
+      "normalization": "card-reading-v3"
+    },
+    "magic-rei/win": {
+      "sha256": "05023a836a8b44b457e89ebabb1d4854be8586863dcc60b397ca6b023c6ca7fe",
+      "expected": "勝負はついた。礼を言う。",
+      "recognized": "勝負はついた。礼を言う。",
+      "similarity": 1.0,
+      "model": "mobiuslabsgmbh/faster-whisper-large-v3-turbo",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00017,
+      "prior": {
+        "sha256": "05023a836a8b44b457e89ebabb1d4854be8586863dcc60b397ca6b023c6ca7fe",
+        "expected": "勝負はついた。礼を言う。",
+        "recognized": "勝負はついた。レオユ。",
+        "similarity": 0.75,
+        "model": "Systran/faster-whisper-small",
+        "compute": "cpu-int8",
+        "tail_rms": 0.00017
+      },
+      "normalization": "card-reading-v3"
+    },
+    "magic-rei/lose": {
+      "sha256": "210b47719000d1fb1f582070c348551e1588c98400ceadb2eb936f5e3a906aea",
+      "expected": "見事だ。次は見極める。",
+      "recognized": "見事だ 次は見極める",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-madoka/start": {
+      "sha256": "49d4b6747a94a657d0584c48046e800d6b30a4c7eabb2b5501e7a0d1a14decac",
+      "expected": "カードの組み合わせ、調べたいな。",
+      "recognized": "カードの組み合わせ調べたいな",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00316,
+      "normalization": "card-reading-v3"
+    },
+    "magic-madoka/play": {
+      "sha256": "5b79c610b94a0f4f3e2838be8d12e3c8d881084ccb431c030e7e3f0575c0bb05",
+      "expected": "この一手、どうかな。",
+      "recognized": "この言って、どうかな?",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00341,
+      "normalization": "card-reading-v3"
+    },
+    "magic-madoka/win": {
+      "sha256": "e9fe6f02da4be0537c65d2535b5b22a17ee72ff6c5cf470f9bcae5e5fda64334",
+      "expected": "やった。計算が合ってたね。",
+      "recognized": "やった! 計算があってたね!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00059,
+      "normalization": "card-reading-v3"
+    },
+    "magic-madoka/lose": {
+      "sha256": "c7f6ab864e0eea61c0c4f07a2375c8e9b7e6cae88b43a0c2c3bf21859fe9a37b",
+      "expected": "そっか。新しい発見になったよ。",
+      "recognized": "そっか新しい発見になったよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00136,
+      "normalization": "card-reading-v3"
+    },
+    "magic-koharu/start": {
+      "sha256": "a7b1942e0e442ddf3f5e79714dcef7893c6a42a32e8f26c59b32301d7cb718c4",
+      "expected": "風に乗るように、遊ぼうか。",
+      "recognized": "風に乗るように遊ぼうか",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00016,
+      "normalization": "card-reading-v3"
+    },
+    "magic-koharu/play": {
+      "sha256": "f6f321a861fe581a6b6a5ee3ca632e3b4e4ec13883037c722505dc3c20a7f50a",
+      "expected": "このカードを、届けるね。",
+      "recognized": "このカードを届けるね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0001,
+      "normalization": "card-reading-v3"
+    },
+    "magic-koharu/win": {
+      "sha256": "53277e206ffc8def1f1dfea96391d9ec494c428c978d1e47db042289ee11a691",
+      "expected": "いい風が、吹いてくれたね。",
+      "recognized": "いい風が吹いてくれたね",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-koharu/lose": {
+      "sha256": "f9413055e2e4dc53189ba3166ffd4575d7045cb656515e84fa9ef5e0dc336184",
+      "expected": "今度は違う風を、探してみよう。",
+      "recognized": "今度は違う風を探してみよう",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 6e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-mirai/start": {
+      "sha256": "df7e207a3b3bdc99bd20e4cd3ec368aa66cc7c41a4449d5b178497e91a21510b",
+      "expected": "カードの舞台、幕を開けるよ。",
+      "recognized": "カードの舞台 幕を開けるよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00028,
+      "normalization": "card-reading-v3"
+    },
+    "magic-mirai/play": {
+      "sha256": "a46c7586e4cbffa06a08d88f9ae222ce5ba0e93307fbb1b12fa4336003ca480d",
+      "expected": "見せ場は、この一枚。",
+      "recognized": "見せ場は、この1枚!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0002,
+      "normalization": "card-reading-v3"
+    },
+    "magic-mirai/win": {
+      "sha256": "c8d460cff45b54271067baf021e2b746d4ed675c02218132e611fe5a9ad37b3f",
+      "expected": "フィナーレは、わたしの勝利ね。",
+      "recognized": "フィナーレは、私の勝利ね!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-mirai/lose": {
+      "sha256": "c69d43fb13e9c981fb36056f65482215647a180f5248c3eb2e8e73cff20e9412",
+      "expected": "次の舞台では、主役をいただくよ。",
+      "recognized": "次の舞台では主役をいただくよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00012,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sera/start": {
+      "sha256": "45a4eb9d689d9901d11df36926865a6b9409c69450578db3a06d91438a92906c",
+      "expected": "今日の対戦も、大切に記録します。",
+      "recognized": "今日の対戦も大切に記録します",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00022,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sera/play": {
+      "sha256": "d6c33f1e9304d96a3c12315f8d3e5614fef1b9c2c38f9fa9bcbb46352473b2a1",
+      "expected": "わたしは、この札を選びます。",
+      "recognized": "私はこの札を選びます",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sera/win": {
+      "sha256": "f4cb857c1d1b937ed267971e90c1fa6ca8119d8eddf21fef3c6b0e00c707bbc6",
+      "expected": "勝利の記録に、皆さんの名前も。",
+      "recognized": "勝利の記録に、みなさんの名前も!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.03775,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sera/lose": {
+      "sha256": "0612d2a3d970513514e4cecec84f4fa91913bef03210be1dc885bcaf6b111103",
+      "expected": "この経験も、大切な記録です。",
+      "recognized": "この経験も大切な記録です!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00043,
+      "normalization": "card-reading-v3"
+    },
+    "magic-ren/start": {
+      "sha256": "b85c6c9c4d7219df26355c8d43b47d914d0415706aa566e44c360b21daaec6a2",
+      "expected": "みんな、準備はいいか。始めよう。",
+      "recognized": "みんな、準備はいいか?始めよう!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-ren/play": {
+      "sha256": "7136dc3f8108ea62d2aadd1a0885399d78259a13b6f36f13d18276c35008bab7",
+      "expected": "俺の番だな。これでいく。",
+      "recognized": "俺の番だな これで行く",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00031,
+      "normalization": "card-reading-v3"
+    },
+    "magic-ren/win": {
+      "sha256": "119a06b370be8ef6de6eb44609629c66e2a984327ef3b70c8629d116cec206f3",
+      "expected": "よし、勝てたな。ありがとう。",
+      "recognized": "よし勝てたな ありがとう",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0001,
+      "normalization": "card-reading-v3"
+    },
+    "magic-ren/lose": {
+      "sha256": "60deb65c7b61c7b0dade6905da87b75f57d8a44d65dc11eebbb42555bc7c63fa",
+      "expected": "いい手だった。また相手してくれ。",
+      "recognized": "いい手だった!また相手してくれ!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00013,
+      "normalization": "card-reading-v3"
+    },
+    "magic-soma/start": {
+      "sha256": "f82637c20b6a736320dbe69fa90c82febf71b073b5d0ee0da542d5d4c963cd84",
+      "expected": "ルールを守り、正々堂々と。",
+      "recognized": "ルールを守り、せいせい堂々と",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-soma/play": {
+      "sha256": "add1a1ff025b56b8784835446b85f42f0cbee8bef8017695e8504ada446d9d65",
+      "expected": "ここは、この札が最善だ。",
+      "recognized": "ここは、この札が最前だ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00344,
+      "normalization": "card-reading-v3"
+    },
+    "magic-soma/win": {
+      "sha256": "7ce00828a9bc1f40facfa5b128b6376012f252e85067a8f6cc76bf79c53df535",
+      "expected": "確かな判断が、勝利を導いたな。",
+      "recognized": "確かな判断が、勝利を導いたな。",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018,
+      "normalization": "card-reading-v3"
+    },
+    "magic-soma/lose": {
+      "sha256": "484519d179657ad5ea1e250ace90b8207ac5cf339f7ecec1d380f9226cf04743",
+      "expected": "読みが甘かった。次に生かそう。",
+      "recognized": "読みが甘かった。次に行かそう。",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0395,
+      "normalization": "card-reading-v3"
+    },
+    "magic-minato/start": {
+      "sha256": "b65a3641f1fa90d20daf2cdd16d5d89de9bdaf4a26bbd1b58981093e78feb55b",
+      "expected": "よし、カードでも頑張るよ。",
+      "recognized": "よしカードでも頑張るよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00016,
+      "normalization": "card-reading-v3"
+    },
+    "magic-minato/play": {
+      "sha256": "ca912749247fa14137d67356d9dd4550f88279dfd31ce86c256c576f574c85bd",
+      "expected": "この一枚に、挑戦してみる。",
+      "recognized": "この1枚に挑戦してみる",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 6e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-minato/win": {
+      "sha256": "4b5fbb833564e70fbbbb96b7353e4105812d90e9b53fe3ab224af09b97f36e8d",
+      "expected": "やった。練習の成果が出たよ。",
+      "recognized": "やっぱ 練習の成果が出たよ",
+      "similarity": 0.9375,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00012,
+      "normalization": "card-reading-v3"
+    },
+    "magic-minato/lose": {
+      "sha256": "e9f5d45b6e7dea85ba40bca2882e7bf3a9859fc19d65cf0ca71116f33e4db407",
+      "expected": "次は、もっと上手くなってみせる。",
+      "recognized": "次はもっと上手くなってみせる",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00018,
+      "normalization": "card-reading-v3"
+    },
+    "magic-riku/start": {
+      "sha256": "fa9765e0691a7bf3b017c90c857f7db00d3d023b34f4083b5732d21866374d5f",
+      "expected": "さて、札の駆け引きといこうか。",
+      "recognized": "さて、普段の駆け引きと行こうか",
+      "similarity": 0.9655,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.00018
+    },
+    "magic-riku/play": {
+      "sha256": "8c2424326944288073befd941c5e7107a005ad10b1f538997d3aee3364a10f96",
+      "expected": "こんな一手は、どうかな。",
+      "recognized": "こんな言っては、どうかな?",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00023,
+      "normalization": "card-reading-v3"
+    },
+    "magic-riku/win": {
+      "sha256": "b88de7da9a0ca26520ceda186186db2111567e4d403815949a02002cf884b6a2",
+      "expected": "おや、僕の勝ちみたいだね。",
+      "recognized": "おや、僕の勝ちみたいだね。",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0002
+    },
+    "magic-riku/lose": {
+      "sha256": "4082487a3d659fd7df228c25ebd116ba395b0c3297189f43a6412217248674f5",
+      "expected": "はは。一本取られたね。",
+      "recognized": "はっは!1本撮られたね!",
+      "similarity": 0.9565,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0002,
+      "normalization": "card-reading-v3"
+    },
+    "magic-yamato/start": {
+      "sha256": "beef31830b9871bba5e5c81a646add68a610eda1971d5e10cb3e37f74b4399ca",
+      "expected": "カードだって、手は抜かねえぞ。",
+      "recognized": "カードだって、手は抜かねえぞ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 8e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-yamato/play": {
+      "sha256": "ba5499b42bb65029d93315f190e99ce5050b813830ad6c7859ab7d2faafe5052",
+      "expected": "おら、この一枚で勝負だ。",
+      "recognized": "ほら、この1枚で勝負だ!",
+      "similarity": 0.9286,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-yamato/win": {
+      "sha256": "d0f8e05b8f1d5173ccf62ed9da5de18fe5019730bcdb0c538e3ebc092d5d28ce",
+      "expected": "よっしゃ。気持ちのいい勝負だった。",
+      "recognized": "よっしゃ! 気持ちのいい勝負だった!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 6e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-yamato/lose": {
+      "sha256": "790628bfb3869676de5e0cf173e313075262123d41665741fb1bd3bdf6a0ec2c",
+      "expected": "ちっ、やるじゃねえか。もう一回だ。",
+      "recognized": "チッ、やるじゃねーかもう一回だ",
+      "similarity": 0.9375,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00012,
+      "normalization": "card-reading-v3"
+    },
+    "magic-leon/start": {
+      "sha256": "2f4fef7c226c1c2feada96de3cfc40d320e24932817b9e53a0dd99754a7c713c",
+      "expected": "華麗なカードショーへ、ようこそ。",
+      "recognized": "カレーなカード賞へ、ようこそ!",
+      "similarity": 0.8667,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00015,
+      "normalization": "card-reading-v3"
+    },
+    "magic-leon/play": {
+      "sha256": "acfa09fc28204ead529bc5613df441746c5a90aa6d01327b0fb19c87414e29cc",
+      "expected": "目を離すなよ。この一枚だ。",
+      "recognized": "目を離すなよ!この一枚だ!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 9e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-leon/win": {
+      "sha256": "38ec3d9a36905c69fd9688dfa4200fdc5b0ea23f2554f8a7ce48f14131154ff5",
+      "expected": "勝利の拍手、いただくよ。",
+      "recognized": "勝利の拍手いただくよ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00014,
+      "normalization": "card-reading-v3"
+    },
+    "magic-leon/lose": {
+      "sha256": "aae72bc72d8d2608c6fa491dbb936df4951f9ebcd6d68591d7c638f35c759f57",
+      "expected": "今度の主役は、君だったね。",
+      "recognized": "今度の主役は、君だったね!",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00014,
+      "normalization": "card-reading-v3"
+    },
+    "magic-elliot/start": {
+      "sha256": "d21f825b03057a7b3fc09a1eabfcafa9517a0a2920e987654947a4767c723a07",
+      "expected": "星を読むように、札を読みましょう。",
+      "recognized": "星を読むように札を読みましょう",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0
+    },
+    "magic-elliot/play": {
+      "sha256": "1770d6022b8ec858498f1757987a36363d90780bbd9a1ca8816b47e11ccef154",
+      "expected": "この一手を、選びます。",
+      "recognized": "この一手を選びます",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0001,
+      "normalization": "card-reading-v3"
+    },
+    "magic-elliot/win": {
+      "sha256": "daf7415d3a09fdb9699bb5e2b49cf41df0a8e8633d5611ef84ba47fb94ffc08b",
+      "expected": "勝利の星が、微笑んだようです。",
+      "recognized": "勝利の星が微笑んだようです",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0
+    },
+    "magic-elliot/lose": {
+      "sha256": "59a5c96fe5136822c3b45092822c9de3b7342b4cf5e65d2580d2e8cdf269c2b1",
+      "expected": "あなたの読みは、見事でした。",
+      "recognized": "あなたの読みは見事でした",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "normalization": "card-reading-v3",
+      "tail_rms": 0.0
+    },
+    "magic-sakuya/start": {
+      "sha256": "e1c63bb4b7e7c2a45dd864c292f6d4544fad9a364ef4bc63cd7c064d0ea6e0f0",
+      "expected": "札に隠れた道を、見極める。",
+      "recognized": "普段に隠れた道を見極める",
+      "similarity": 0.9677,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 5e-05,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sakuya/play": {
+      "sha256": "d008dbfa13b6a03efd1236690d5ba83ba62f92f1bfc3121bd3a2ca7f81ce5cbb",
+      "expected": "この一枚で、道を開く。",
+      "recognized": "この一枚で道を開く",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.0017,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sakuya/win": {
+      "sha256": "90bb0fc5dbf882b18ddf557b13a79c523a51e0be0112e12df4884e6b3e053061",
+      "expected": "勝負は決した。感謝する。",
+      "recognized": "勝負は決した感謝する",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00027,
+      "normalization": "card-reading-v3"
+    },
+    "magic-sakuya/lose": {
+      "sha256": "d64888d9ce4489419baf76c9b37804646247938849e428babc86007b69534347",
+      "expected": "この敗北も、次への道だ。",
+      "recognized": "この敗北も次への道だ",
+      "similarity": 1.0,
+      "model": "Systran/faster-whisper-small",
+      "compute": "cpu-int8",
+      "tail_rms": 0.00019,
+      "normalization": "card-reading-v3"
+    }
+  }
+}

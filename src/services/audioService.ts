@@ -1,3 +1,4 @@
+import { cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
 import { summerEndingVoiceLimitMs } from '../data/summerEndingVoices';
 import { kochoSuperVoice } from '../mini-games/kocho/superMoves';
 import { kochoEnemyVoice, type KochoEnemyVoiceAction } from '../mini-games/kocho/enemyVoices';
@@ -371,6 +372,7 @@ class AudioService {
 
   public handleAppBackground() {
       this.stopKochoVoices();
+      this.stopCardClubVoices();
       if (this.backgroundPlaybackEnabled) return;
       if (this.appIsActive) {
           this.appIsActive = false;
@@ -591,7 +593,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.voiceVolume === 0) this.stopKochoVoices();
+      if (this.voiceVolume === 0) { this.stopKochoVoices(); this.stopCardClubVoices(); }
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1595,7 +1597,7 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       this.applyBgmVolume();
-      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); }
+      if (this.isMuted) { this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1838,7 +1840,7 @@ class AudioService {
   ): Promise<boolean> {
       void this.resumeAudioContext();
       for (const path of paths) {
-          if (name.startsWith('kocho-voice-') && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
+          if ((name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
@@ -1950,7 +1952,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2395,6 +2397,24 @@ class AudioService {
       }
   }
 
+  public playCardClubVoice(heroId:string,event:CardClubVoiceEvent) {
+      const clip=cardClubVoice(heroId,event);
+      if(!clip||!this.canPlayConversationVoice())return Promise.resolve(false);
+      this.stopCardClubVoices();
+      const name=`card-club-voice-${heroId}-${event}`;
+      const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
+      this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.maxDurationMs,false,generation);
+  }
+
+  public stopCardClubVoices() {
+      const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
+      for(const name of names)if(name.startsWith('card-club-voice-')) {
+          this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
+          this.stopActiveSfx(name);
+      }
+  }
+
   public playHomeDashVoice(heroId: string, event: 'jump' | 'dash' | 'flight' | 'damage' | 'upgrade' | 'defeat') {
       if (!/^(?:high-school|magic)-[a-z]+$/.test(heroId) || !this.canPlayConversationVoice()) return Promise.resolve(false);
       this.init();
@@ -2626,6 +2646,29 @@ class AudioService {
           });
       });
       return true;
+  }
+
+  /** Original paper foley for the card anthology, on the common SFX/mute bus. */
+  public playCardClubSound(kind: 'shuffle' | 'deal' | 'play' | 'flip' | 'draw' | 'collect' | 'select') {
+      if (this.isMuted || this.sfxVolume <= 0 || !this.appIsActive || document.hidden) return;
+      this.init();
+      const ctx=this.ctx,bus=this.sfxGain,noise=this.noiseBuffer;
+      if (!ctx || !bus || !noise || ctx.state !== 'running') return;
+      const bursts=kind==='shuffle'?7:kind==='collect'?3:kind==='deal'?3:1;
+      const start=ctx.currentTime+(kind==='collect'?.08:0);
+      for(let i=0;i<bursts;i++){
+          const at=start+i*(kind==='shuffle'?.045:.035);
+          const duration=kind==='flip'?.12:kind==='select'?.035:.075;
+          const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+          source.buffer=noise;source.playbackRate.value=.85+(i%3)*.12;
+          filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(kind==='play'?850:kind==='collect'?1100:kind==='select'?2200:2600,at);
+          filter.frequency.exponentialRampToValueAtTime(kind==='flip'?650:1400,at+duration);
+          gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(kind==='select'?.07:kind==='shuffle'?.17:.24,at+.004);gain.gain.exponentialRampToValueAtTime(.001,at+duration);
+          source.connect(filter);filter.connect(gain);gain.connect(bus);
+          source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+          source.start(at);source.stop(at+duration+.01);
+      }
+      if(kind==='play'||kind==='collect')this.playOsc(kind==='play'?145:210,start,.065,'sine',.09,bus);
   }
 
   public playSound(effect: CommonSoundEffect) {

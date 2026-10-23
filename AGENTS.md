@@ -258,3 +258,8 @@ Export Optionsには少なくとも次を指定する。
 - 生成結果はリポジトリ内の`public/sprites/rpg/npcs/<npc-id>.png`へコピーして利用する。生成元は保持し、既存ファイルを上書きせず、配置前に出力先の重複を確認する。
 - NPCデータに画像パスを設定し、RPGの会話画面や冒険手帳など利用箇所から`assetUrl`で参照する。会話文や名前と重複する読み上げを避けるため、装飾表示の画像は`alt=""`にする。
 - 画像追加後は`node scripts/generate-web-asset-manifest.mjs`と`node scripts/generate-android-asset-manifest.mjs`を実行し、Web・Android双方のアセット一覧を更新する。
+
+## 放課後トランプゲーム集の追加方針
+
+- アプリ内のゲーム一覧・検索結果・参考一覧・表示件数には、実装済みで遊べるゲームだけを表示する。未実装ゲームの追跡は開発用の `docs/card-club-coverage.md` で行う。
+- ゲームを追加する際は、最初にカテゴリ別の実装数を確認し、実装0件のカテゴリ、次に実装数が少ないカテゴリを優先する。

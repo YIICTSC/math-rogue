@@ -2,7 +2,7 @@
 
 参照: https://gamefarm.jp/rule/contents.html
 
-トランプ分類 467件中、個別ルールを実装したゲーム 68件。未対応 399件。
+トランプ分類 467件中、個別ルールを実装したゲーム 73件。未対応 394件。
 
 この表は「全件対応済み」を意味しません。同じ画面・一般ルールへ未対応ゲームを流す処理はありません。
 
@@ -294,7 +294,7 @@
 | ジャッコ | クリベッジの仲間 | 2 | 未対応 | [jacko](https://gamefarm.jp/rule/jacko.html) |
 | テーブルトップ・クリベッジ | クリベッジの仲間 | 2 | 未対応 | [tabletopcribbage](https://gamefarm.jp/rule/tabletopcribbage.html) |
 | ブラッグ | ポーカーの仲間 | 4, 5, 6, 7, 8 | 未対応 | [brag](https://gamefarm.jp/rule/brag.html) |
-| ペトランゴラ | ポーカーの仲間 | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 未対応 | [petrangola](https://gamefarm.jp/rule/petrangola.html) |
+| ペトランゴラ | ポーカーの仲間 | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [petrangola](https://gamefarm.jp/rule/petrangola.html) |
 | セブン・テゥエンティーセブン | ポーカーの仲間 | 4, 5, 6, 7, 8, 9, 10 | 未対応 | [7-27](https://gamefarm.jp/rule/7-27.html) |
 | ガッツ | ポーカーの仲間 | 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 | 未対応 | [guts](https://gamefarm.jp/rule/guts.html) |
 | ムス | ポーカーの仲間 | 4 | 未対応 | [mus](https://gamefarm.jp/rule/mus.html) |
@@ -350,13 +350,13 @@
 | トゥエンティー | 加算ゲーム | 2, 3, 4 | 未対応 | [20](https://gamefarm.jp/rule/20.html) |
 | アタックジャック | 加算ゲーム | 2, 3, 4, 5 | 未対応 | [attackjack](https://gamefarm.jp/rule/attackjack.html) |
 | ブラバード | 加算ゲーム | 2, 3, 4, 5, 6 | 未対応 | [bravado](https://gamefarm.jp/rule/bravado.html) |
-| ゲスイット | 推理ブラフゲーム | 2 | 未対応 | [guessit](https://gamefarm.jp/rule/guessit.html) |
+| ゲスイット | 推理ブラフゲーム | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [guessit](https://gamefarm.jp/rule/guessit.html) |
 | キャンディー売り | 推理ブラフゲーム | 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38 | 未対応 | [candyman](https://gamefarm.jp/rule/candyman.html) |
-| スペキュレーション | マネージメントゲーム | 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 未対応 | [speculation](https://gamefarm.jp/rule/speculation.html) |
+| スペキュレーション | マネージメントゲーム | 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [speculation](https://gamefarm.jp/rule/speculation.html) |
 | カード・ストック・マーケット | マネージメントゲーム | 2, 3, 4, 5, 6 | 未対応 | [cardstock](https://gamefarm.jp/rule/cardstock.html) |
 | パックス | ユニークな新作 | 2, 3, 4, 5, 6 | 未対応 | [packs](https://gamefarm.jp/rule/packs.html) |
 | プライムタイム | ユニークな新作 | 2, 3 | 未対応 | [primetime](https://gamefarm.jp/rule/primetime.html) |
-| スートマッチ | ユニークな新作 | 2, 3, 4, 5, 6, 7 | 未対応 | [suitmatch](https://gamefarm.jp/rule/suitmatch.html) |
+| スートマッチ | ユニークな新作 | 2, 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [suitmatch](https://gamefarm.jp/rule/suitmatch.html) |
 | ゼッテマ | ユニークな新作 | 2, 3, 4, 5, 6 | 未対応 | [zettema](https://gamefarm.jp/rule/zettema.html) |
 | ハリウッド・ガーベッジ | その他 | 3, 4, 5, 6, 7, 8 | 未対応 | [hollywoodgarbage](https://gamefarm.jp/rule/hollywoodgarbage.html) |
 | ベガー・マイ・ネイボー | 全取得ゲーム | 2, 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [beggar](https://gamefarm.jp/rule/beggar.html) |
@@ -469,7 +469,7 @@
 | トランテ・キャラント | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [trente](https://gamefarm.jp/rule/trente.html) |
 | ランスクネット | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [lansqunet](https://gamefarm.jp/rule/lansqunet.html) |
 | フェロー | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [faro](https://gamefarm.jp/rule/faro.html) |
-| レッド・ドッグ | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [reddog](https://gamefarm.jp/rule/reddog.html) |
+| レッド・ドッグ | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [reddog](https://gamefarm.jp/rule/reddog.html) |
 | ヤブロン | ギャンブルゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [yablon](https://gamefarm.jp/rule/yablon.html) |
 | ランター・ゴー・ラウンド | その他 | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [rantergo](https://gamefarm.jp/rule/rantergo.html) |
 | エリウシス | レイアウトゲーム | 4, 5, 6, 7, 8 | 未対応 | [eleusis](https://gamefarm.jp/rule/eleusis.html) |

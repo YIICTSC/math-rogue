@@ -1,7 +1,7 @@
 import {readFile,writeFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const catalog=JSON.parse(await readFile(new URL('src/mini-games/card-club/reference-catalog.json',root),'utf8'));
-const code=(await Promise.all(['catalog.ts','popularCatalog.ts','worldCatalog.ts','traditionalCatalog.ts'].map(file=>readFile(new URL('src/mini-games/card-club/'+file,root),'utf8')))).join('\n');
+const code=(await Promise.all(['catalog.ts','popularCatalog.ts','worldCatalog.ts','traditionalCatalog.ts','diversityCatalog.ts'].map(file=>readFile(new URL('src/mini-games/card-club/'+file,root),'utf8')))).join('\n');
 const supported=new Set([...code.matchAll(/\{id:'([^']+)'/g)].map(m=>m[1]));
 const lines=[
  '# トランプゲーム集 対応表', '',

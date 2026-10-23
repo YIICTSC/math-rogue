@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+const server=await createServer({optimizeDeps:{noDiscovery:true},server:{middlewareMode:true,hmr:false},appType:'custom'});
+try{
+ const {createClubGame,viewFor,applyAction,legalActions}=await server.ssrLoadModule('/src/mini-games/card-club/engine.ts');
+ const {presentationDelta,presentationSnapshot}=await server.ssrLoadModule('/src/mini-games/card-club/presentation.ts');
+ const players=Array.from({length:4},(_,i)=>({id:`p${i}`,name:`P${i}`,hero:'high-school-warrior',cpu:false}));
+ let checks=0;const check=(name,fn)=>{try{fn();checks++;}catch(error){throw new Error(name,{cause:error});}};
+ check('A duplicated publication cannot replay sounds or redeal',()=>{const v=viewFor(createClubGame('rollingstone',players,42),0),before=presentationSnapshot(v);assert.equal(presentationDelta(null,v).cue,'shuffle');assert.equal(presentationDelta(before,v).cue,null);});
+ check('In-process engine mutation cannot change the saved public log or rows',()=>{const s=createClubGame('golf',players.slice(0,2),42),v=viewFor(s,0),before=presentationSnapshot(v),saved=JSON.stringify(before);assert(applyAction(s,s.turn,legalActions(s)[0]));assert.equal(JSON.stringify(before),saved);const after=viewFor(s,0);assert.equal(presentationDelta(before,after).cue,'flip');assert(before.rows.flat().every(c=>c<0));});
+ check('New events remain detectable after the bounded 24-event log rolls over',()=>{const s=createClubGame('rollingstone',players,42);s.log=Array.from({length:24},(_,i)=>({key:'bid',value:i}));const before=presentationSnapshot(viewFor(s,0));assert(applyAction(s,s.turn,legalActions(s)[0]));const delta=presentationDelta(before,viewFor(s,0));assert.equal(delta.cue,'play');assert(delta.events.some(e=>e.key==='play'));assert.equal(before.log.length,24);});
+ check('Blind draw and transfer snapshots carry counts and no opponent cards',()=>{const s=createClubGame('rollingstone',players,42),v=viewFor(s,0),before=presentationSnapshot(v);v.revision++;v.players[1].handCount++;assert.equal(presentationDelta(before,v).cue,'draw');const snap=presentationSnapshot(v);assert.equal(snap.players[1].hand,undefined);assert.equal(snap.stock,s.stock.length);});
+ check('Turn and selection changes do not invent a card action; a new deal shuffles',()=>{const v=viewFor(createClubGame('rollingstone',players,42),0),before=presentationSnapshot(v);v.turn=0;v.revision++;assert.equal(presentationDelta(before,v).cue,null);v.round++;assert.equal(presentationDelta(before,v).cue,'shuffle');});
+ check('Old Maid drawing an immediate pair still has a draw cue when both hand counts fall',()=>{const s=createClubGame('oldmaid',players.slice(0,3),42);s.players.forEach(p=>p.out=false);s.players[0].hand=[0,1];s.players[1].hand=[2,3];s.players[2].hand=[13,5];s.turn=0;const before=presentationSnapshot(viewFor(s,0));assert(applyAction(s,0,{type:'pick',target:2,index:0}));assert.equal(s.players[0].hand.length,1);assert.equal(presentationDelta(before,viewFor(s,0)).cue,'draw');});
+ check('War flips a newly public card from the blind queue even without a reveal log event',()=>{const s=createClubGame('war',players.slice(0,2),42),before=presentationSnapshot(viewFor(s,0));assert(applyAction(s,s.turn,{type:'reveal'}));assert.equal(presentationDelta(before,viewFor(s,0)).cue,'flip');});
+ console.log(JSON.stringify({presentationChecks:checks,immutableBaseline:true,publicCountsOnly:true}));
+}finally{await server.close();}
