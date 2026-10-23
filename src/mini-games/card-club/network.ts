@@ -3,8 +3,9 @@ import { createHostRoomCode, normalizeRoomInput } from '../../services/onlineTra
 import { ClubSession, validProfile, type ClubPacket } from './session';
 import type { Action, PlayerInput } from './model';
 import type { GameId } from './catalog';
+import { shouldReportPeerError } from './networkPolicy';
 
-const PROTOCOL=1;
+const PROTOCOL=2;
 type Profile=Pick<PlayerInput,'name'|'hero'>;
 export class CardClubRoom {
   private peer:Peer|null=null;private session:ClubSession|null=null;private channels=new Map<string,DataConnection>();private cpuTimer:ReturnType<typeof setInterval>|null=null;private timers=new Set<ReturnType<typeof setTimeout>>();
@@ -27,7 +28,7 @@ export class CardClubRoom {
       peer.once('open',()=>finish());peer.once('error',e=>finish(Error(e.type)));
     });
     if(this.closed){peer.destroy();throw Error('CLOSED');}this.selfId=peer.id;
-    peer.on('error',()=>{if(!this.closed)this.status('NETWORK_ERROR');});peer.on('disconnected',()=>{if(!this.closed&&!peer.destroyed)peer.reconnect();});return peer;
+    peer.on('error',e=>{if(!this.closed&&shouldReportPeerError(e.type,this.last?.phase==='game'&&this.last.view.phase!=='result',[...this.channels.values()].filter(c=>c.open).length))this.status('NETWORK_ERROR');});peer.on('disconnected',()=>{if(!this.closed&&!peer.destroyed)peer.reconnect();});return peer;
   }
   async create(profile:Profile){
     if(this.connecting||this.closed)return;this.connecting=true;this.host=true;

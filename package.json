@@ -8,6 +8,8 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:card-club": "node scripts/test-card-club.mjs && node scripts/test-card-club-extensions.mjs",
+    "report:card-club": "node scripts/report-card-club-coverage.mjs",
     "test:summer-endings": "node scripts/test-summer-endings.mjs",
     "test:summer-endings:browser": "node scripts/test-summer-endings-browser.mjs",
     "verify:summer-ending-art": "node scripts/verify-summer-ending-art.mjs",

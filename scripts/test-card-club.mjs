@@ -5,16 +5,17 @@ try{
  const {CLUB_GAMES,REFERENCE_GAMES}=await server.ssrLoadModule('/src/mini-games/card-club/catalog.ts');
  const {createClubGame,legalActions,applyAction,viewFor,cpuAction}=await server.ssrLoadModule('/src/mini-games/card-club/engine.ts');
  const {ClubSession,CARD_CLUB_HEROES}=await server.ssrLoadModule('/src/mini-games/card-club/session.ts');
+ const {EXTENDED_TRICKS,extendedDeck}=await server.ssrLoadModule('/src/mini-games/card-club/extendedTricks.ts');
  const inputs=n=>Array.from({length:n},(_,i)=>({id:`p${i}`,name:`Player ${i}`,hero:CARD_CLUB_HEROES[i].id,cpu:false}));
  assert.equal(REFERENCE_GAMES.length,467);
  assert.equal(new Set(REFERENCE_GAMES.map(g=>g.id)).size,467);
  let matches=0,moves=0;
  const verifyCards=s=>{
-   const cards=[...s.stock,...s.discard,...s.table,...s.trick.map(t=>t.card),...s.players.flatMap(p=>[...p.hand,...p.taken])];
-   const expected=s.game==='oldmaid'?51:s.game==='daihinmin'?53:['scopa','scopone'].includes(s.game)?40:52;
+   const cards=[...s.stock,...s.discard,...s.table,...s.trick.map(t=>t.card),...s.players.flatMap(p=>[...p.hand,...p.taken]),...s.extra.board.filter(c=>c>=0),...s.extra.melds.flatMap(m=>m.cards),...s.extra.piles.flat()];
+   const expected=EXTENDED_TRICKS.has(s.game)?extendedDeck(s.game,s.players.length).length:s.game==='oldmaid'?51:s.game==='daihinmin'?53:['scopa','scopone'].includes(s.game)?40:52;
    assert.equal(cards.length,expected,`${s.game}: conserved card count`);assert.equal(new Set(cards).size,expected,`${s.game}: no duplicated cards`);
  };
- for(const d of CLUB_GAMES)for(const n of [...new Set([d.players[0],d.players.at(-1)])])for(const seed of [1,15,77]){
+ for(const d of CLUB_GAMES)for(const n of d.players)for(const seed of [1,15,77]){
    const s=createClubGame(d.id,inputs(n),seed);
    for(let move=0;move<20000&&s.phase!=='result';move++){
      verifyCards(s);const v=viewFor(s,s.turn),a=cpuAction(v);assert(a,`${d.id}: no action at ${s.phase}`);assert.equal(v.seed,0,'Shuffle seed is private');if(s.phase!=='round'&&s.phase!=='result')assert.deepEqual(v.whistHonors,[0,0],'Original-hand honours stay private');
@@ -31,6 +32,7 @@ try{
  const f=createClubGame('fantan',inputs(3),1);f.turn=0;f.table=[];f.players[0].hand=[6,2];assert.deepEqual(legalActions(f),[{type:'play',cards:[6]}],'Fan Tan starts on seven and cannot pass if playable');
  const d=createClubGame('doubt',inputs(3),5);d.turn=0;d.players[0].hand=[0,1,2];d.table=[];d.claim=1;assert(applyAction(d,0,{type:'play',cards:[1,2]}));const hidden=viewFor(d,1);assert(hidden.table.every(c=>c===-1));assert(!('cards' in hidden.pending));assert(applyAction(d,1,{type:'challenge'}));assert(d.players[0].hand.includes(1)&&d.players[0].hand.includes(2),'Caught bluff takes pile');
  const packets=[];const room=new ClubSession('p0','012345',(id,p)=>packets.push({id,p}));assert(room.join(inputs(2)[0]));assert(room.join(inputs(2)[1]));assert(room.configure('gofish',3));assert(room.start(123));const t=room.state.turn,a=legalActions(room.state)[0];assert.equal(room.command('p0',a,room.state.revision),false,'Identity selects player, not claimed seat');assert.equal(room.command('p1',a,-1),false,'Stale revision rejected');room.leave('p1');assert.equal(room.state.players[1].cpu,true,'Disconnected guest is replaced by CPU');
- room.finish();assert(packets.slice(-2).every(x=>x.p.phase==='game'&&x.p.view.phase==='result'),'Host ending sends result to every player');
+ room.finish();assert.equal(packets.at(-1).p.view.phase,'result','Host ending sends result to connected players');room.rematch();assert.equal(room.members.length,1,'Disconnected seats do not remain as ghost humans in the next lobby');
+ const endPackets=[];const endRoom=new ClubSession('p0','123456',(id,p)=>endPackets.push({id,p}));endRoom.join(inputs(2)[0]);endRoom.join(inputs(2)[1]);endRoom.configure('memory',2);endRoom.start(9);endRoom.finish();assert(endPackets.slice(-2).every(x=>x.p.phase==='game'&&x.p.view.phase==='result'),'End snapshot reaches both connected humans');
  console.log(JSON.stringify({matches,moves,catalog:REFERENCE_GAMES.length,implemented:CLUB_GAMES.length,hiddenHands:true,invalidInputs:true,disconnectCPU:true}));
 }finally{await server.close();}

@@ -28,8 +28,8 @@ export class ClubSession {
   }
   tick(){const s=this.state;if(!s||s.phase==='result'||s.phase==='round'||!s.players[s.turn].cpu)return;const a=cpuAction(viewFor(s,s.turn));if(a&&applyAction(s,s.turn,a))this.publish();}
   leave(id:string){
-    if(!this.state)this.members=this.members.filter(p=>p.id!==id);
-    else {const p=this.state.players.find(p=>p.id===id);if(p){p.cpu=true;p.name=p.name+' · CPU';}}
+    this.members=this.members.filter(p=>p.id!==id);
+    if(this.state){const p=this.state.players.find(p=>p.id===id);if(p&&!p.cpu){p.cpu=true;p.name=p.name+' · CPU';}}
     this.publish();
   }
   finish(){if(this.state&&this.state.phase!=='result'){this.state.phase='result';this.state.resultReason='hostEnded';const max=Math.max(...this.state.players.map(p=>p.score));this.state.winners=this.state.players.flatMap((p,i)=>p.score===max?[i]:[]);this.state.revision++;this.publish();}}

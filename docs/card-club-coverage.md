@@ -2,7 +2,7 @@
 
 参照: https://gamefarm.jp/rule/contents.html
 
-トランプ分類 467件中、個別ルールを実装したゲーム 15件。未対応 452件。
+トランプ分類 467件中、個別ルールを実装したゲーム 32件。未対応 435件。
 
 この表は「全件対応済み」を意味しません。同じ画面・一般ルールへ未対応ゲームを流す処理はありません。
 
@@ -75,7 +75,7 @@
 | シャーフコップ | トリックテイキング | 4 | 未対応 | [schafkopf](https://gamefarm.jp/rule/schafkopf.html) |
 | シープスヘッド | トリックテイキング | 3 | 未対応 | [sheepshead](https://gamefarm.jp/rule/sheepshead.html) |
 | スピッツァー | トリックテイキング | 4 | 未対応 | [spitzer](https://gamefarm.jp/rule/spitzer.html) |
-| スエカ | トリックテイキング | 4 | 未対応 | [sueca](https://gamefarm.jp/rule/sueca.html) |
+| スエカ | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [sueca](https://gamefarm.jp/rule/sueca.html) |
 | アビナス | トリックテイキング | 4 | 未対応 | [avinas](https://gamefarm.jp/rule/avinas.html) |
 | アメリカン・スカート | トリックテイキング | 3, 4, 5 | 未対応 | [americanskat](https://gamefarm.jp/rule/americanskat.html) |
 | スカート | トリックテイキング | 3, 4, 5 | 未対応 | [skat2](https://gamefarm.jp/rule/skat2.html) |
@@ -125,7 +125,7 @@
 | メディアトーレ | トリックテイキング | 4 | 未対応 | [mediatore](https://gamefarm.jp/rule/mediatore.html) |
 | スピッツィキーノ | トリックテイキング | 2 | 未対応 | [spizzichino](https://gamefarm.jp/rule/Spizzichino.html) |
 | トレセッテ | トリックテイキング | 4 | 未対応 | [tresette](https://gamefarm.jp/rule/tresette.html) |
-| ブリスコラ | トリックテイキング | 2, 3, 4, 6 | 未対応 | [briscola](https://gamefarm.jp/rule/briscola.html) |
+| ブリスコラ | トリックテイキング | 2, 3, 4, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [briscola](https://gamefarm.jp/rule/briscola.html) |
 | ブリスコラ・キアマタ | トリックテイキング | 5 | 未対応 | [briscolachiamata](https://gamefarm.jp/rule/briscolachiamata.html) |
 | マドラッソ | トリックテイキング | 4 | 未対応 | [madrasso](https://gamefarm.jp/rule/madrasso.html) |
 | ベジーク | トリックテイキング | 2 | 未対応 | [bezique](https://gamefarm.jp/rule/bezique.html) |
@@ -152,17 +152,17 @@
 | キャンセレーション・ブラックレディー | トリックテイキング | 5, 6, 7, 8, 9, 10, 11, 12 | 未対応 | [cansellation](https://gamefarm.jp/rule/cansellation.html) |
 | ドミノ・ハート | トリックテイキング | 2, 3, 4, 5, 6, 7 | 未対応 | [dominohearts](https://gamefarm.jp/rule/dominohearts.html) |
 | ゴンジュー | トリックテイキング | 4, 5 | 未対応 | [gongzhu](https://gamefarm.jp/rule/gongzhu.html) |
-| ハート | トリックテイキング | 3, 4, 5 | 未対応 | [heart2](https://gamefarm.jp/rule/heart2.html) |
+| ハート | トリックテイキング | 3, 4, 5 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [heart2](https://gamefarm.jp/rule/heart2.html) |
 | ロールム | トリックテイキング | 3, 4 | 未対応 | [lorum](https://gamefarm.jp/rule/lorum.html) |
 | オレゴニアン・ハート | トリックテイキング | 3, 4, 5, 6, 7 | 未対応 | [oregonianheart](https://gamefarm.jp/rule/oregonianheart.html) |
 | チョトカ | トリックテイキング | 4 | 未対応 | [tetka](https://gamefarm.jp/rule/tetka.html) |
 | ブラックマリアー | トリックテイキング | 3, 4, 5, 6 | 未対応 | [blackmariah](https://gamefarm.jp/rule/blackmariah.html) |
 | カナディアン・サラダ | トリックテイキング | 3, 4, 5, 6 | 未対応 | [canadiansalad](https://gamefarm.jp/rule/canadiansalad.html) |
-| チアパーノ | トリックテイキング | 3, 4, 5 | 未対応 | [ciapano](https://gamefarm.jp/rule/ciapano.html) |
+| チアパーノ | トリックテイキング | 3, 4, 5 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [ciapano](https://gamefarm.jp/rule/ciapano.html) |
 | コテッチョ | トリックテイキング | 3, 4, 5, 6, 7 | 未対応 | [coteccio](https://gamefarm.jp/rule/coteccio.html) |
-| カルターシュラーク | トリックテイキング | 4 | 未対応 | [kalter](https://gamefarm.jp/rule/kalter.html) |
-| ラウス | トリックテイキング | 3, 4 | 未対応 | [laus](https://gamefarm.jp/rule/laus.html) |
-| ポリニャック | トリックテイキング | 3, 4, 5, 6 | 未対応 | [polignac](https://gamefarm.jp/rule/polignac.html) |
+| カルターシュラーク | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [kalter](https://gamefarm.jp/rule/kalter.html) |
+| ラウス | トリックテイキング | 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [laus](https://gamefarm.jp/rule/laus.html) |
+| ポリニャック | トリックテイキング | 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [polignac](https://gamefarm.jp/rule/polignac.html) |
 | リベルシ | トリックテイキング | 4 | 未対応 | [reversi](https://gamefarm.jp/rule/reversi.html) |
 | シーベラムシュ | トリックテイキング | 3 | 未対応 | [schieberamsch](https://gamefarm.jp/rule/schieberamsch.html) |
 | バガミ | トリックテイキング | 3, 4, 5, 6, 7 | 未対応 | [bugami](https://gamefarm.jp/rule/bugami.html) |
@@ -207,10 +207,10 @@
 | デフラ・パカード | トリックテイキング | 4 | 未対応 | [dehlapakad](https://gamefarm.jp/rule/dehlapakad.html) |
 | デモクラシー | トリックテイキング | 2, 3, 4, 5, 6 | 未対応 | [democracy](https://gamefarm.jp/rule/democracy.html) |
 | カイザー | トリックテイキング | 4 | 未対応 | [kaiser](https://gamefarm.jp/rule/kaiser.html) |
-| ミゼリア | トリックテイキング | 4 | 未対応 | [miseria](https://gamefarm.jp/rule/miseria.html) |
+| ミゼリア | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [miseria](https://gamefarm.jp/rule/miseria.html) |
 | ミットレール・ヤス | トリックテイキング | 3 | 未対応 | [mittlere](https://gamefarm.jp/rule/mittlere.html) |
 | ピケット | トリックテイキング | 2 | 未対応 | [piquet](https://gamefarm.jp/rule/piquet.html) |
-| スパー | トリックテイキング | 2, 3, 4 | 未対応 | [spar](https://gamefarm.jp/rule/spar.html) |
+| スパー | トリックテイキング | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [spar](https://gamefarm.jp/rule/spar.html) |
 | トルフ | トリックテイキング | 3, 4 | 未対応 | [truf](https://gamefarm.jp/rule/truf.html) |
 | カシノ | カシノ系のゲーム | 2, 3, 4 | 未対応 | [cassino](https://gamefarm.jp/rule/cassino.html) |
 | クリプカシノ | カシノ系のゲーム | 2, 3, 4, 5, 6 | 未対応 | [krypkasino](https://gamefarm.jp/rule/krypkasino.html) |
@@ -226,14 +226,14 @@
 | スコパ | カシノ系のゲーム | 2, 4, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [scopa](https://gamefarm.jp/rule/scopa.html) |
 | スコポーネ | カシノ系のゲーム | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [scopone](https://gamefarm.jp/rule/scopone.html) |
 | フォックストロット | カシノ系のゲーム | 2, 6 | 未対応 | [foxtrot](https://gamefarm.jp/rule/foxtrot.html) |
-| ピシュティ | カシノ系のゲーム | 2, 4 | 未対応 | [pishti](https://gamefarm.jp/rule/pishti.html) |
+| ピシュティ | カシノ系のゲーム | 2, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [pishti](https://gamefarm.jp/rule/pishti.html) |
 | 休閑垂釣 | カシノ系のゲーム | 2, 3, 4, 5, 6 | 未対応 | [kyukan](https://gamefarm.jp/rule/kyukan.html) |
 | ラーフ・アンド・ライダウン | カシノ系のゲーム | 5 | 未対応 | [laughand](https://gamefarm.jp/rule/laughand.html) |
 | ミトン | カシノ系のゲーム | 2, 3, 4 | 未対応 | [mitains](https://gamefarm.jp/rule/mitains.html) |
 | ピーフ・パーフ | ラミー系のゲーム | 3, 4, 5, 6, 7, 8 | 未対応 | [pifpaf](https://gamefarm.jp/rule/pifpaf.html) |
 | トンク | ラミー系のゲーム | 2, 3, 4, 5 | 未対応 | [tonk](https://gamefarm.jp/rule/tonk.html) |
 | カルーキ | ラミー系のゲーム | 2, 3, 4, 5, 6 | 未対応 | [kaluki](https://gamefarm.jp/rule/kaluki.html) |
-| ラミー | ラミー系のゲーム | 2, 3, 4, 5, 6 | 未対応 | [rummy](https://gamefarm.jp/rule/rummy.html) |
+| ラミー | ラミー系のゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [rummy](https://gamefarm.jp/rule/rummy.html) |
 | ジンラミー | ラミー系のゲーム | 2 | 未対応 | [ginrummy](https://gamefarm.jp/rule/ginrummy.html) |
 | スカーニー・ジン | ラミー系のゲーム | 2 | 未対応 | [skarnygin](https://gamefarm.jp/rule/skarnygin.html) |
 | コントラクト・ラミー | ラミー系のゲーム | 3, 4, 5 | 未対応 | [contractrummy](https://gamefarm.jp/rule/contractrummy.html) |
@@ -260,7 +260,7 @@
 | スカーニー | ラミー系のゲーム | 2, 3, 4 | 未対応 | [skarney](https://gamefarm.jp/rule/skarney.html) |
 | ジグ | 手札出しきりゲーム | 4, 5, 6, 7 | 未対応 | [jig](https://gamefarm.jp/rule/jig.html) |
 | ニューマーケット | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 未対応 | [newmarket](https://gamefarm.jp/rule/newmarket.html) |
-| スニップ・スナップ・スノーラム | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 未対応 | [snipsnupsnorem](https://gamefarm.jp/rule/snipsnupsnorem.html) |
+| スニップ・スナップ・スノーラム | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [snipsnupsnorem](https://gamefarm.jp/rule/snipsnupsnorem.html) |
 | カンクル | 手札出しきりゲーム | 3, 4, 5 | 未対応 | [cangkul](https://gamefarm.jp/rule/cangkul) |
 | デュダック | 手札出しきりゲーム | 2, 3, 4 | 未対応 | [dudak](https://gamefarm.jp/rule/dudak.html) |
 | デュラック | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [durak2](https://gamefarm.jp/rule/durak2.html) |
@@ -287,7 +287,7 @@
 | 三家喜 | 大貧民の仲間 | 6, 7, 8, 9, 10, 11, 12 | 未対応 | [zhengshangyou](https://gamefarm.jp/rule/zhengshangyou.html#san) |
 | 争上游 | 大貧民の仲間 | 2, 3, 4, 5, 6 | 未対応 | [zhengshangyou-2](https://gamefarm.jp/rule/zhengshangyou.html) |
 | ファンタン | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [fantan](https://gamefarm.jp/rule/fantan.html) |
-| ピティパット | 手札出しきりゲーム | 2, 3, 4 | 未対応 | [pitypat](https://gamefarm.jp/rule/pitypat.html) |
+| ピティパット | 手札出しきりゲーム | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [pitypat](https://gamefarm.jp/rule/pitypat.html) |
 | ヤニブ | 手札出しきりゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [yaniv](https://gamefarm.jp/rule/yaniv.html) |
 | コストリーカラー | クリベッジの仲間 | 2 | 未対応 | [costlycolours](https://gamefarm.jp/rule/costlycolours.html) |
 | クリベッジ | クリベッジの仲間 | 2, 3, 4 | 未対応 | [cribbage](https://gamefarm.jp/rule/cribbage.html) |
@@ -313,7 +313,7 @@
 | シカゴ | ポーカーの仲間 | 2, 3, 4 | 未対応 | [chicago](https://gamefarm.jp/rule/chicago.html) |
 | クラペット | レイアウトゲーム | 2 | 未対応 | [crapette](https://gamefarm.jp/rule/crapette.html) |
 | スパイト・アンド・マリス | レイアウトゲーム | 2 | 未対応 | [spiteandmalice](https://gamefarm.jp/rule/spiteandmalice.html) |
-| キングズ・イン・ザ・コーナーズ | レイアウトゲーム | 2, 3, 4, 5, 6 | 未対応 | [kingsinthe](https://gamefarm.jp/rule/kingsinthe.html) |
+| キングズ・イン・ザ・コーナーズ | レイアウトゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [kingsinthe](https://gamefarm.jp/rule/kingsinthe.html) |
 | タマロー | レイアウトゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [tamalou](https://gamefarm.jp/rule/tamalou.html) |
 | カクタス | レイアウトゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [cactus](https://gamefarm.jp/rule/cactus.html) |
 | ゴルフ | レイアウトゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [golf](https://gamefarm.jp/rule/golf.html) |
@@ -359,7 +359,7 @@
 | スートマッチ | ユニークな新作 | 2, 3, 4, 5, 6, 7 | 未対応 | [suitmatch](https://gamefarm.jp/rule/suitmatch.html) |
 | ゼッテマ | ユニークな新作 | 2, 3, 4, 5, 6 | 未対応 | [zettema](https://gamefarm.jp/rule/zettema.html) |
 | ハリウッド・ガーベッジ | その他 | 3, 4, 5, 6, 7, 8 | 未対応 | [hollywoodgarbage](https://gamefarm.jp/rule/hollywoodgarbage.html) |
-| ベガー・マイ・ネイボー | 全取得ゲーム | 2, 3, 4, 5, 6, 7 | 未対応 | [beggar](https://gamefarm.jp/rule/beggar.html) |
+| ベガー・マイ・ネイボー | 全取得ゲーム | 2, 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [beggar](https://gamefarm.jp/rule/beggar.html) |
 | エジプティアン・ラットスクリュー | 全取得ゲーム | 2, 3, 4, 5 | 未対応 | [egyptian](https://gamefarm.jp/rule/egyptian.html) |
 | アルカルデ | トリックテイキング | 3 | 未対応 | [alcalde](https://gamefarm.jp/rule/alcalde.html) |
 | ブリスカス | トリックテイキング | 2, 3, 4 | 未対応 | [briscas](https://gamefarm.jp/rule/briscas.html) |
@@ -369,7 +369,7 @@
 | 分割統治 | ユニークな新作 | 2 | 未対応 | [divideand](https://gamefarm.jp/rule/divideand.html) |
 | フランク | トリックテイキング | 3 | 未対応 | [flunk](https://gamefarm.jp/rule/flunk.html) |
 | ジェネラーラ | 手札出しきりゲーム | 2, 3, 4, 5, 6, 7, 8, 9, 10 | 未対応 | [generala](https://gamefarm.jp/rule/generala.html) |
-| グルカ | トリックテイキング | 3, 4, 5, 6, 7, 8 | 未対応 | [gurka](https://gamefarm.jp/rule/gurka.html) |
+| グルカ | トリックテイキング | 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [gurka](https://gamefarm.jp/rule/gurka.html) |
 | ヒヨコ | 手札出しきりゲーム | 2 | 未対応 | [hiyoko](https://gamefarm.jp/rule/hiyoko.html) |
 | イスリ | 手札出しきりゲーム | 2 | 未対応 | [isuri](https://gamefarm.jp/rule/isuri.html) |
 | ジュビリー | 加算ゲーム | 2, 3, 4, 5, 6, 7 | 未対応 | [jubilee](https://gamefarm.jp/rule/jubilee.html) |
@@ -457,7 +457,7 @@
 | ドンキー | 交換ゲーム | 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 | 未対応 | [donkey](https://gamefarm.jp/rule/donkey.html) |
 | 戦争 | 全取得ゲーム | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [war](https://gamefarm.jp/rule/war.html) |
 | ダウト | うそつきゲーム | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [doubt](https://gamefarm.jp/rule/doubt.html) |
-| メモリー | その他 | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [memory](https://gamefarm.jp/rule/memory.html) |
+| メモリー | その他 | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [memory](https://gamefarm.jp/rule/memory.html) |
 | メキシコ | トリックテイキング | 3, 4 | 未対応 | [meksiko](https://gamefarm.jp/rule/meksiko.html) |
 | アルバスティニ | トリックテイキング | 2, 3, 4, 6 | 未対応 | [albastini](https://gamefarm.jp/rule/albastini.html) |
 | クング・オク・アーデル | トリックテイキング | 4 | 未対応 | [kungochadel](https://gamefarm.jp/rule/kungochadel.html) |

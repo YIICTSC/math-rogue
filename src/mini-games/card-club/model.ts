@@ -1,8 +1,9 @@
 import type { GameId } from './catalog';
 import type { LadderState } from './ladder';
+import type { ExtensionState } from './extensionModel';
 export type PlayerInput={id:string;name:string;hero:string;cpu:boolean};
 export type ClubPlayer=PlayerInput&{hand:number[];taken:number[];score:number;tricks:number;bid:number|null;bags:number;books:number[];lives:number;out:boolean;stake:number};
-export type Action={type:'play'|'draw'|'pass'|'ask'|'pick'|'bid'|'challenge'|'accept'|'reveal'|'bust'|'hit'|'stand'|'double'|'next';cards?:number[];target?:number;value?:number;suit?:number;index?:number;form?:'set'|'run';revolution?:boolean};
+export type Action={type:'play'|'draw'|'pass'|'ask'|'pick'|'bid'|'challenge'|'accept'|'reveal'|'bust'|'hit'|'stand'|'double'|'next'|'trump'|'exchange'|'discard'|'meld'|'layoff'|'continue'|'move';cards?:number[];target?:number;value?:number;suit?:number;index?:number;form?:'set'|'run';revolution?:boolean;double?:boolean};
 export type ClubEvent={key:string;player?:number;value?:number;card?:number};
 export interface ClubState {
   version:1; game:GameId;seed:number;revision:number;phase:'bid'|'play'|'reaction'|'round'|'result';
@@ -13,6 +14,7 @@ export interface ClubState {
   capturesBy:number;winners:number[];log:ClubEvent[];resultReason:string;
   whistHonors:number[];whistWins:number[];whistPoints:number[];
   ladder:LadderState|null;
+  extra:ExtensionState;
 }
 export type ClubView=Omit<ClubState,'players'|'stock'|'discard'|'pending'>&{
   players:(Omit<ClubPlayer,'hand'|'taken'>&{hand:number[];handCount:number;takenCount:number})[];

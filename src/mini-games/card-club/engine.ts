@@ -2,6 +2,8 @@ import { definition, type GameId } from './catalog';
 import { blackjackValue, high, pack, rank, scopaValue, shuffled, sorted, suit } from './cards';
 import { actionKey, type Action, type ClubState, type ClubView, type PlayerInput } from './model';
 import { ladderActions, playLadder } from './ladder';
+import { emptyExtension } from './extensionModel';
+import { extensionFor,extensionCPU,publicExtension } from './extensions';
 
 export const event=(s:ClubState,key:string,player?:number,value?:number,card?:number)=>{s.log.push({key,player,value,card});s.log=s.log.slice(-24);};
 const trickGames=new Set<GameId>(['whist','spades','ohhell']);
@@ -18,8 +20,9 @@ function startRound(s:ClubState){
   if(s.game==='whist'&&s.players.some(p=>p.score>=5))s.players.forEach(p=>p.score=0);
   s.stock=shuffled(pack(),s.seed+s.round*1009);s.discard=[];s.table=[];s.trick=[];s.lastTrick=[];s.trump=-1;s.activeSuit=-1;s.broken=false;s.total=0;s.direction=1;s.pool=0;s.claim=1;s.pending=null;s.capturesBy=-1;s.phase='play';s.ladder=null;
   s.players.forEach(p=>{p.hand=[];p.taken=[];p.tricks=0;p.bid=null;p.books=[];p.stake=1;p.out=s.game==='99add'&&p.lives<=0;});
-  const n=s.players.length;
-  if(trickGames.has(s.game)){
+  const n=s.players.length;s.extra=emptyExtension(n);
+  if(extensionFor(s.game))extensionFor(s.game)!.start(s);
+  else if(trickGames.has(s.game)){
     const count=s.game==='ohhell'?Math.floor(52/n)-s.round:13;deal(s,count);
     s.trump=s.game==='spades'?3:s.game==='whist'?suit(s.players[s.dealer].hand.at(-1)!):s.stock.length?suit(s.stock.at(-1)!):-1;
     if(s.game==='whist')s.whistHonors=[0,1].map(team=>s.players.flatMap((p,i)=>i%2===team?p.hand:[]).filter(c=>suit(c)===s.trump&&[1,11,12,13].includes(rank(c))).length);
@@ -42,15 +45,15 @@ function startRound(s:ClubState){
     deal(s,2);s.players.forEach(p=>p.out=blackjackValue(p.hand)===21);
   }
   if(s.game==='gofish')s.players.forEach((_,i)=>books(s,i));
-  s.players.forEach(p=>{if(s.game!=='oldmaid'&&s.game!=='war')p.hand=sorted(p.hand);});
-  s.turn=next(s,s.dealer);event(s,'deal',undefined,s.round+1);
+  s.players.forEach(p=>{if(!['oldmaid','war','beggar'].includes(s.game))p.hand=sorted(p.hand);});
+  if(!extensionFor(s.game))s.turn=next(s,s.dealer);event(s,'deal',undefined,s.round+1);
   if(s.game==='daihinmin')s.turn=s.dealer;
   if(s.game==='blackjack'&&s.turn===s.dealer)settleBlackjack(s);
 }
 export function createClubGame(game:GameId,players:PlayerInput[],seed:number):ClubState {
   const d=definition(game);if(!d||!d.players.includes(players.length))throw Error('Unsupported player count');
   if(new Set(players.map(p=>p.id)).size!==players.length)throw Error('Duplicate player');
-  const s:ClubState={version:1,game,seed,revision:0,phase:'play',players:players.map(p=>({...p,name:p.name.slice(0,32),hand:[],taken:[],score:0,tricks:0,bid:null,bags:0,books:[],lives:5,out:false,stake:1})),turn:0,dealer:0,round:0,stock:[],discard:[],table:[],trick:[],lastTrick:[],trump:-1,activeSuit:-1,broken:false,total:0,direction:1,pool:0,claim:1,pending:null,capturesBy:-1,winners:[],log:[],resultReason:'',whistHonors:[0,0],whistWins:[0,0],whistPoints:[0,0],ladder:null};
+  const s:ClubState={version:1,game,seed,revision:0,phase:'play',players:players.map(p=>({...p,name:p.name.slice(0,32),hand:[],taken:[],score:0,tricks:0,bid:null,bags:0,books:[],lives:5,out:false,stake:1})),turn:0,dealer:0,round:0,stock:[],discard:[],table:[],trick:[],lastTrick:[],trump:-1,activeSuit:-1,broken:false,total:0,direction:1,pool:0,claim:1,pending:null,capturesBy:-1,winners:[],log:[],resultReason:'',whistHonors:[0,0],whistWins:[0,0],whistPoints:[0,0],ladder:null,extra:emptyExtension(players.length)};
   startRound(s);return s;
 }
 function trickCards(s:ClubState){
@@ -71,6 +74,7 @@ function totalOptions(s:ClubState,c:number){const r=rank(c);return r===1?[s.tota
 export function legalActions(s:ClubState,player=s.turn):Action[]{
   if(s.phase==='result'||player!==s.turn)return [];
   if(s.phase==='round')return [{type:'next'}];
+  const extension=extensionFor(s.game);if(extension)return extension.actions(s);
   const p=s.players[player];
   if(s.phase==='reaction')return [{type:'challenge'},{type:'accept'}];
   if(s.phase==='bid')return Array.from({length:p.hand.length+1},(_,value)=>({type:'bid' as const,value})).filter(a=>s.game!=='ohhell'||player!==s.dealer||s.players.reduce((v,p)=>v+(p.bid||0),0)+a.value!==p.hand.length);
@@ -153,8 +157,9 @@ export function applyAction(s:ClubState,player:number,action:Action):boolean {
   s.revision++;
   const p=s.players[player];
   if(action.type==='next'){
-    s.round++;s.dealer=s.game==='blackjack'?Math.floor(s.round/5)%s.players.length:s.game==='99add'?next(s,s.dealer,1):(s.dealer+1)%s.players.length;startRound(s);return true;
+    s.round++;s.dealer=extensionFor(s.game)?.nextDealer?.(s)??(s.game==='blackjack'?Math.floor(s.round/5)%s.players.length:s.game==='99add'?next(s,s.dealer,1):(s.dealer+1)%s.players.length);startRound(s);return true;
   }
+  const extension=extensionFor(s.game);if(extension){extension.apply(s,action);return true;}
   if(action.type==='bid'){
     p.bid=action.value!;event(s,'bid',player,p.bid);s.turn=next(s);if(s.players.every(p=>p.bid!==null)){s.phase='play';s.turn=next(s,s.dealer);}return true;
   }
@@ -235,15 +240,17 @@ export function applyAction(s:ClubState,player:number,action:Action):boolean {
 
 export function viewFor(s:ClubState,index:number):ClubView{
   const reveal=s.phase==='round'||s.phase==='result';
-  return {...s,players:s.players.map((p,i)=>{const {taken,hand,...publicPlayer}=p;return {...publicPlayer,hand:reveal||i===index&&s.game!=='war'?hand:s.game==='blackjack'&&i===s.dealer?hand.slice(0,1):[],handCount:hand.length,takenCount:taken.length};}),
+  return {...s,players:s.players.map((p,i)=>{const {taken,hand,...publicPlayer}=p;return {...publicPlayer,hand:reveal||i===index&&!['war','beggar'].includes(s.game)?hand:s.game==='blackjack'&&i===s.dealer?hand.slice(0,1):[],handCount:hand.length,takenCount:taken.length};}),
     seed:0,whistHonors:reveal?s.whistHonors:[0,0],stock:s.stock.length,discard:s.discard.length,pending:s.pending?{player:s.pending.player,count:s.pending.cards.length,rank:s.pending.rank}:null,
-    table:s.game==='doubt'?s.table.map(()=>-1):s.table,self:index,actions:legalActions(s,index),
+    extra:publicExtension(s),table:s.game==='doubt'?s.table.map(()=>-1):s.game==='pishti'?s.table.map((c,i)=>i<s.extra.opening?-1:c):s.table,self:index,actions:legalActions(s,index),
   };
 }
 
 /** CPU policy consumes the same filtered view as a remote player. */
 export function cpuAction(view:ClubView):Action|undefined{
   const actions=view.actions,p=view.players[view.self];if(!actions.length)return;
+  if(view.phase==='round')return actions[0];
+  const extensionAction=extensionCPU(view);if(extensionAction)return extensionAction;
   if(view.phase==='bid'){
     const estimate=p.hand.reduce((n,c)=>n+(high(c)>=12?.6:0)+(suit(c)===view.trump?.18:0),0);return actions.reduce((best,a)=>Math.abs((a.value||0)-estimate)<Math.abs((best.value||0)-estimate)?a:best);
   }
