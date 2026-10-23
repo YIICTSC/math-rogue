@@ -2,7 +2,7 @@
 
 参照: https://gamefarm.jp/rule/contents.html
 
-トランプ分類 467件中、個別ルールを実装したゲーム 48件。未対応 419件。
+トランプ分類 467件中、個別ルールを実装したゲーム 60件。未対応 407件。
 
 この表は「全件対応済み」を意味しません。同じ画面・一般ルールへ未対応ゲームを流す処理はありません。
 
@@ -15,7 +15,7 @@
 | ジャーマン・ホイスト | トリックテイキング | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [germanwhist](https://gamefarm.jp/rule/germanwhist.html) |
 | ミネソタ・ホイスト | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [minnesotawhist](https://gamefarm.jp/rule/minnesotawhist.html) |
 | オープン・ホイスト | トリックテイキング | 4 | 未対応 | [openwhist](https://gamefarm.jp/rule/openwhist.html) |
-| サージェント・メジャー | トリックテイキング | 3 | 未対応 | [sergent](https://gamefarm.jp/rule/sergent.html) |
+| サージェント・メジャー | トリックテイキング | 3 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [sergent](https://gamefarm.jp/rule/sergent.html) |
 | ホイスト | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [whist](https://gamefarm.jp/rule/whist.html) |
 | ブービー | トリックテイキング | 3 | 未対応 | [booby](https://gamefarm.jp/rule/booby.html) |
 | エストニアン・ビント | トリックテイキング | 4 | 未対応 | [estonianvint](https://gamefarm.jp/rule/estonianvint.html) |
@@ -27,7 +27,7 @@
 | ウィーゼン | トリックテイキング | 4 | 未対応 | [wiezen](https://gamefarm.jp/rule/wiezen.html) |
 | ファイブハンドレッド | トリックテイキング | 2, 3, 4, 5, 6 | 未対応 | [500](https://gamefarm.jp/rule/500.html) |
 | バックユーカー | トリックテイキング | 4 | 未対応 | [buckeuchre](https://gamefarm.jp/rule/buckeuchre.html) |
-| エカルテ | トリックテイキング | 2 | 未対応 | [ecarte](https://gamefarm.jp/rule/ecarte.html) |
+| エカルテ | トリックテイキング | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [ecarte](https://gamefarm.jp/rule/ecarte.html) |
 | ユーカー | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [euchre2](https://gamefarm.jp/rule/euchre2.html) |
 | ユーカー（英国ルール） | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [euchre-uk](https://gamefarm.jp/rule/euchre_uk.html) |
 | ハーゼンプフェファ | トリックテイキング | 4 | 未対応 | [hasenpfeffer](https://gamefarm.jp/rule/hasenpfeffer.html) |
@@ -81,11 +81,11 @@
 | スカート | トリックテイキング | 3, 4, 5 | 未対応 | [skat2](https://gamefarm.jp/rule/skat2.html) |
 | トゥテ・ガナ・ピエルテ | トリックテイキング | 3, 4, 5 | 未対応 | [tute-gana-pierde](https://gamefarm.jp/rule/tute-gana-pierde.html) |
 | トゥテ | トリックテイキング | 4 | 未対応 | [tute](https://gamefarm.jp/rule/tute.html) |
-| シックスティーシックス | トリックテイキング | 2 | 未対応 | [66](https://gamefarm.jp/rule/66.html) |
+| シックスティーシックス | トリックテイキング | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [66](https://gamefarm.jp/rule/66.html) |
 | バウアン・シュナプセン | トリックテイキング | 4 | 未対応 | [bau](https://gamefarm.jp/rule/bau.html) |
 | マリアーシュ | トリックテイキング | 2, 3, 4 | 未対応 | [marias](https://gamefarm.jp/rule/marias.html) |
 | マルヤプッシ | トリックテイキング | 4 | 未対応 | [marjapussi](https://gamefarm.jp/rule/marjapussi.html) |
-| シュナプセン | トリックテイキング | 2 | 未対応 | [schnapsen](https://gamefarm.jp/rule/schnapsen.html) |
+| シュナプセン | トリックテイキング | 2 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [schnapsen](https://gamefarm.jp/rule/schnapsen.html) |
 | チシャチャ | トリックテイキング | 3, 4 | 未対応 | [tysiacha](https://gamefarm.jp/rule/tysiacha.html) |
 | ウルティ | トリックテイキング | 3 | 未対応 | [ulti](https://gamefarm.jp/rule/ulti.html) |
 | バーバリアン・タロック | トリックテイキング | 3 | 未対応 | [bavariantarock](https://gamefarm.jp/rule/bavariantarock.html) |
@@ -147,8 +147,8 @@
 | ウェルチホイスト | トリックテイキング | 3, 4, 5, 6, 7, 8 | 未対応 | [welshwhist](https://gamefarm.jp/rule/welshwhist.html) |
 | フィフティーン | トリックテイキング | 2 | 未対応 | [fifteen](https://gamefarm.jp/rule/fifteen.html) |
 | スロップス | トリックテイキング | 3 | 未対応 | [throps](https://gamefarm.jp/rule/Throps.html) |
-| ブラックレディー | トリックテイキング | 3, 4, 5, 6, 7 | 未対応 | [blacklady](https://gamefarm.jp/rule/blacklady.html) |
-| ブラックマリア | トリックテイキング | 3, 4, 5, 6, 7 | 未対応 | [blackmaria](https://gamefarm.jp/rule/blackmaria.html) |
+| ブラックレディー | トリックテイキング | 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [blacklady](https://gamefarm.jp/rule/blacklady.html) |
+| ブラックマリア | トリックテイキング | 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [blackmaria](https://gamefarm.jp/rule/blackmaria.html) |
 | キャンセレーション・ブラックレディー | トリックテイキング | 5, 6, 7, 8, 9, 10, 11, 12 | 未対応 | [cansellation](https://gamefarm.jp/rule/cansellation.html) |
 | ドミノ・ハート | トリックテイキング | 2, 3, 4, 5, 6, 7 | 未対応 | [dominohearts](https://gamefarm.jp/rule/dominohearts.html) |
 | ゴンジュー | トリックテイキング | 4, 5 | 未対応 | [gongzhu](https://gamefarm.jp/rule/gongzhu.html) |
@@ -171,7 +171,7 @@
 | アグリ | トリックテイキング | 3, 4 | 未対応 | [ugly](https://gamefarm.jp/rule/ugly.html) |
 | ツバンツィッヒ・アプ | トリックテイキング | 4, 5 | 未対応 | [zwanzigab](https://gamefarm.jp/rule/zwanzigab.html) |
 | ナインティーナイン | トリックテイキング | 2, 3, 4 | 未対応 | [99](https://gamefarm.jp/rule/99.html) |
-| コール・ブリッジ | トリックテイキング | 4 | 未対応 | [callbridge](https://gamefarm.jp/rule/callbridge.html) |
+| コール・ブリッジ | トリックテイキング | 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [callbridge](https://gamefarm.jp/rule/callbridge.html) |
 | イスラエリホイスト | トリックテイキング | 4 | 未対応 | [israeliwhist](https://gamefarm.jp/rule/israeliwhist.html) |
 | オーヘル | トリックテイキング | 3, 4, 5, 6, 7 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [ohhell](https://gamefarm.jp/rule/ohhell.html) |
 | ルーマニアン・ホイスト | トリックテイキング | 3, 4, 5, 6 | 未対応 | [romanianwhist](https://gamefarm.jp/rule/romanianwhist.html) |
@@ -261,17 +261,17 @@
 | ジグ | 手札出しきりゲーム | 4, 5, 6, 7 | 未対応 | [jig](https://gamefarm.jp/rule/jig.html) |
 | ニューマーケット | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 未対応 | [newmarket](https://gamefarm.jp/rule/newmarket.html) |
 | スニップ・スナップ・スノーラム | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [snipsnupsnorem](https://gamefarm.jp/rule/snipsnupsnorem.html) |
-| カンクル | 手札出しきりゲーム | 3, 4, 5 | 未対応 | [cangkul](https://gamefarm.jp/rule/cangkul) |
+| カンクル | 手札出しきりゲーム | 3, 4, 5 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [cangkul](https://gamefarm.jp/rule/cangkul) |
 | デュダック | 手札出しきりゲーム | 2, 3, 4 | 未対応 | [dudak](https://gamefarm.jp/rule/dudak.html) |
 | デュラック | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [durak2](https://gamefarm.jp/rule/durak2.html) |
-| ゲットアウェイ | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 未対応 | [getaway](https://gamefarm.jp/rule/getaway.html) |
+| ゲットアウェイ | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [getaway](https://gamefarm.jp/rule/getaway.html) |
 | マス | 手札出しきりゲーム | 2, 3, 4 | 未対応 | [mas](https://gamefarm.jp/rule/mas.html) |
 | エヌ・エル・ケイ | 手札出しきりゲーム | 4, 5, 6, 7, 8, 9 | 未対応 | [nlk](https://gamefarm.jp/rule/nlk.html) |
 | パン | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [pan](https://gamefarm.jp/rule/pan.html) |
 | パスカホウス | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [paskahousu](https://gamefarm.jp/rule/paskahousu.html) |
 | ペレボドノイ・デュラック | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [perevodnoy](https://gamefarm.jp/rule/perevodnoy.html) |
 | ローリングストーン | 手札出しきりゲーム | 3, 4, 5, 6 | 未対応 | [rollingstone](https://gamefarm.jp/rule/rollingstone.html) |
-| シットヘッド | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [shithead2](https://gamefarm.jp/rule/shithead2.html) |
+| シットヘッド | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [shithead2](https://gamefarm.jp/rule/shithead2.html) |
 | スボイコジリ | 手札出しきりゲーム | 2 | 未対応 | [svoyikoziri](https://gamefarm.jp/rule/svoyikoziri.html) |
 | ベンドティア | 手札出しきりゲーム | 2, 3, 4, 5 | 未対応 | [vandtia](https://gamefarm.jp/rule/vandtia.html) |
 | 保皇 | 大貧民の仲間 | 5 | 未対応 | [baohuang](https://gamefarm.jp/rule/baohuang.html) |
@@ -336,7 +336,7 @@
 | オーサー | 交換ゲーム | 3, 4, 5, 6 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [authors](https://gamefarm.jp/rule/authors.html) |
 | ゴーフィッシュ | 交換ゲーム | 2, 3, 4, 5 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [gofish](https://gamefarm.jp/rule/gofish.html) |
 | リテラチャー | 交換ゲーム | 6, 7, 8 | 未対応 | [literature](https://gamefarm.jp/rule/literature.html) |
-| エムパット・サツ | 交換ゲーム | 2, 3, 4 | 未対応 | [empatsatu](https://gamefarm.jp/rule/empatsatu.html) |
+| エムパット・サツ | 交換ゲーム | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [empatsatu](https://gamefarm.jp/rule/empatsatu.html) |
 | シュビメン | 交換ゲーム | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [schwimmen](https://gamefarm.jp/rule/schwimmen.html) |
 | ケンプス | 交換ゲーム | 4 | 未対応 | [kemps](https://gamefarm.jp/rule/kemps.html) |
 | ポーカー・ブル | うそつきゲーム | 5, 6, 7, 8 | 未対応 | [pokerbull](https://gamefarm.jp/rule/pokerbull) |
@@ -407,7 +407,7 @@
 | オンブル | トリックテイキング | 3, 4 | 未対応 | [hombre](https://gamefarm.jp/rule/hombre.html) |
 | カドリーユ | トリックテイキング | 4 | 未対応 | [quadrille](https://gamefarm.jp/rule/quadrille.html) |
 | ボストン | トリックテイキング | 4 | 未対応 | [boston](https://gamefarm.jp/rule/boston.html) |
-| ホクム | トリックテイキング | 2, 3, 4 | 未対応 | [hokm](https://gamefarm.jp/rule/hokm.html) |
+| ホクム | トリックテイキング | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [hokm](https://gamefarm.jp/rule/hokm.html) |
 | ビント | トリックテイキング | 4 | 未対応 | [vint](https://gamefarm.jp/rule/vint.html) |
 | ホイットグッベ | 手札出しきりゲーム | 2, 3, 4, 5, 6 | 未対応 | [skitgubbe](https://gamefarm.jp/rule/skitgubbe.html) |
 | 干瞪眼 | 大貧民の仲間 | 3, 4, 5, 6 | 未対応 | [kantougan](https://gamefarm.jp/rule/kantougan.html) |

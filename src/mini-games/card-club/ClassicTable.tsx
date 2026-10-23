@@ -2,6 +2,7 @@ import React from 'react';
 import type { Action,ClubView } from './model';
 import { CardFace } from './CardFace';
 import { cardLabel,SUITS } from './cards';
+import { WorldTable } from './WorldTable';
 import { ginHand } from './gin';
 import { golfScore,swimScore } from './classicLayouts';
 
@@ -18,8 +19,9 @@ export function ClassicTable({view:v,l,send,selected,select}:{view:ClubView;l:(j
   cribDiscard:l('親のクリブへ伏せて渡す2枚を選んでください。','Select two cards to put face down in the dealer’s crib.'),cribPeg:l('合計31以下になる札を出します。出せない時だけゴー。','Play a card without exceeding 31. Say Go only if you cannot play.'),cribCount:l('子の手札、親の手札、クリブの順に手役を数えます。','Count the nondealer’s hand, dealer’s hand, then the crib.'),
   pontoonBet:l('最初の1枚を見て、1〜3点の賭点を選びます。','See your first card and stake one to three points.'),pontoonPlay:l('16以上でストップ。購入は増額して裏札、ツイストは増額なしで表札です。','Stick at 16+. Buy a hidden card by raising, or twist a face-up card without raising.'),pontoonDealer:l('親の手番。17未満なら引き、17以上で止まります。','Dealer’s turn: draw below 17 and stand at 17 or above.'),
  };
- const noteLabel=(key:string)=>({fifteens:l('15の組','Fifteens'),pairs:l('ペア','Pairs'),runs:l('ラン','Runs'),flush:l('フラッシュ','Flush'),nobs:l('ノブ','Nobs'),heels:l('スターターJ','Jack starter'),pegging:l('プレイ中の得点','Pegging'),lastCard:l('最後の札','Last card'),swimScore:l('手札点','Hand value'),contract:l('獲得した絵札','Counting cards won'),pontoon:l('精算','Settlement')}[key]||key);
+ const noteLabel=(key:string)=>({gamePoints:l('ゲーム点','Game points'),marriage:l('マリッジ','Marriage'),handValue:l('手札点','Hand value'),fifteens:l('15の組','Fifteens'),pairs:l('ペア','Pairs'),runs:l('ラン','Runs'),flush:l('フラッシュ','Flush'),nobs:l('ノブ','Nobs'),heels:l('スターターJ','Jack starter'),pegging:l('プレイ中の得点','Pegging'),lastCard:l('最後の札','Last card'),swimScore:l('手札点','Hand value'),contract:l('獲得した絵札','Counting cards won'),pontoon:l('精算','Settlement')}[key]||key);
  return <section className="cc-classic" aria-label={l('ゲームの盤面','Game board')}>
+  <WorldTable view={v} l={l} send={send} selected={selected} select={select}/>
   {!over&&instructions[step]&&<p className="cc-step" role="status">{instructions[step]}</p>}
   {v.game==='ginrummy'&&v.players[v.self].hand.length>=10&&<p>{l('未組合せ点','Deadwood')}: {ginHand(v.players[v.self].hand).points}</p>}
   {['durak2','perevodnoy'].includes(v.game)&&<><p>{l('攻撃','Attacker')}: {v.players[c.attacker]?.name} · {l('防御','Defender')}: {v.players[c.defender]?.name} · {l('攻撃上限','Attack limit')}: {c.limit}</p><div className="cc-attack-pairs">{c.rows[0].map((card,i)=><article key={i}><CardFace card={card}/><CardFace card={c.rows[1][i]??-1}/><small>{c.rows[1][i]===undefined?l('防御待ち','Awaiting defense'):l('防御済み','Defended')}</small></article>)}</div></>}

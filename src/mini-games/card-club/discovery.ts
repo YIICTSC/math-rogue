@@ -9,7 +9,7 @@ export const GENRE_LABELS:Record<string,string>={
   'その他':'Other', '全取得ゲーム':'Collecting the pack', 'ギャンブルゲーム':'Chance / betting points',
 };
 export const GENRES=Object.keys(GENRE_LABELS);
-const ALIASES:Record<string,string>={memory:'神経衰弱 しんけいすいじゃく concentration pelmanism',oldmaid:'ババ抜き ばばぬき',fantan:'七並べ しちならべ',daihinmin:'大富豪 だいふごう president',war:'戦争 せんそう',heart2:'ハーツ hearts',ginrummy:'ジンラミー gin rummy',durak2:'デュラック ドゥラーク durak',perevodnoy:'転送デュラック transfer durak',schwimmen:'31 シュビメン シュヴィメン thirty one',cassino:'カシノ カッシーノ casino',pontoon:'ポントゥーン pontoon',cribbage:'クリベッジ cribbage',napoleon:'ナポレオン napoleon'};
+const ALIASES:Record<string,string>={memory:'神経衰弱 しんけいすいじゃく concentration pelmanism',oldmaid:'ババ抜き ばばぬき',fantan:'七並べ しちならべ',daihinmin:'大富豪 だいふごう president',war:'戦争 せんそう',heart2:'ハーツ hearts',ginrummy:'ジンラミー gin rummy',durak2:'デュラック ドゥラーク durak',perevodnoy:'転送デュラック transfer durak',schwimmen:'31 シュビメン シュヴィメン thirty one',cassino:'カシノ カッシーノ casino',pontoon:'ポントゥーン pontoon',cribbage:'クリベッジ cribbage',napoleon:'ナポレオン napoleon',shithead2:'パレス palace karma china hand ten two slide',sergent:'sergeant major 853 8 5 3 サージェントメジャー',blacklady:'なかよし村 ハート hearts black lady',blackmaria:'英国 ハート hearts black maria',empatsatu:'41 empat satu'};
 export function normalizeSearch(text:string){return text.normalize('NFKC').toLocaleLowerCase().replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60)).replace(/[・･ー\-–—_/]/g,' ');}
 export function searchGames(query='',genre='',status:'all'|'available'|'unavailable'='all'){
   const words=normalizeSearch(query).trim().split(/\s+/).filter(Boolean);

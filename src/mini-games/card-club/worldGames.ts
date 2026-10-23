@@ -1,0 +1,11 @@
+import type { GameId } from './catalog';
+import type { RuleExtension } from './extensionModel';
+import { marriageRules } from './marriageGames';
+import { ecarteRules } from './ecarte';
+import { worldTrickRules } from './worldTricks';
+import { worldPenaltyRules } from './worldPenalties';
+import { worldSheddingRules } from './worldShedding';
+import { palaceRules } from './palace';
+import { empatRules } from './empatSatu';
+export const WORLD_TRICKS=new Set(['66','schnapsen','ecarte','hokm','callbridge','sergent','blacklady','blackmaria']);
+export const worldExtension=(id:GameId):RuleExtension|undefined=>['66','schnapsen'].includes(id)?marriageRules:id==='ecarte'?ecarteRules:['hokm','callbridge','sergent'].includes(id)?worldTrickRules:['blacklady','blackmaria'].includes(id)?worldPenaltyRules:['cangkul','getaway'].includes(id)?worldSheddingRules:id==='shithead2'?palaceRules:id==='empatsatu'?empatRules:undefined;

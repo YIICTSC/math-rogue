@@ -245,7 +245,7 @@ export function viewFor(s:ClubState,index:number):ClubView{
   const reveal=s.phase==='round'||s.phase==='result';
   return {...s,players:s.players.map((p,i)=>{const {taken,hand,...publicPlayer}=p;return {...publicPlayer,hand:reveal||i===index&&!classicHideOwnHand(s,i)&&!['war','beggar'].includes(s.game)?hand:s.game==='blackjack'&&i===s.dealer?hand.slice(0,1):[],handCount:hand.length,takenCount:taken.length};}),
     seed:0,whistHonors:reveal?s.whistHonors:[0,0],stock:s.stock.length,discard:s.discard.length,pending:s.pending?{player:s.pending.player,count:s.pending.cards.length,rank:s.pending.rank}:null,
-    extra:publicExtension(s),table:classicHideTable(s)?s.table.map(()=>-1):s.game==='doubt'?s.table.map(()=>-1):s.game==='pishti'?s.table.map((c,i)=>i<s.extra.opening?-1:c):s.table,self:index,actions:legalActions(s,index),
+    extra:publicExtension(s,index),table:classicHideTable(s)?s.table.map(()=>-1):s.game==='doubt'?s.table.map(()=>-1):s.game==='pishti'?s.table.map((c,i)=>i<s.extra.opening?-1:c):s.table,self:index,actions:legalActions(s,index),
   };
 }
 
