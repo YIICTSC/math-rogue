@@ -15,7 +15,23 @@ try{
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--rule-audit')){
+ if(process.argv.includes('--rummy-groups')){
+  for(const game of ['ginrummy','rummy']){
+   await load(game,2);await mutate(s=>{s.turn=0;s.extra.step=s.game==='ginrummy'?'ginDraw':'draw';s.players[0].hand=[0,1,2,13,14,15,26,27,28,35];});
+   const before=await page.evaluate(()=>JSON.stringify(window.__club.room().session.state));
+   for(const card of [0,1,2])await page.locator(`.cc-hand [data-card="${card}"]`).click();await page.getByRole('button',{name:'選択札を組にする',exact:true}).click();assert.equal(await page.locator('.cc-rummy-group').count(),1);assert.equal(await page.locator('.cc-rummy-group .cc-card').count(),3);
+   assert.equal(await page.evaluate(()=>JSON.stringify(window.__club.room().session.state)),before,'Grouping is private and does not publish a meld');
+   await page.getByRole('button',{name:'ランク順',exact:true}).click();assert.equal(await page.locator('.cc-rummy-group .cc-card').count(),3);
+   await mutate(s=>{s.players[0].hand.push(51);s.extra.step=s.game==='ginrummy'?'ginDiscard':'meld';});assert.equal(await page.locator('.cc-rummy-group .cc-card').count(),3,'Group survives a new draw');
+   await page.getByRole('button',{name:'組を自動整理',exact:true}).click();assert(await page.locator('.cc-rummy-group').count()>=2);assert.equal(await page.locator('.cc-hand .cc-card').count(),11);
+   for(const [width,height]of[[1280,900],[390,844],[844,390],[320,568],[568,320]]){await page.setViewportSize({width,height});for(const selector of ['.cc-rummy-tools','.cc-actions']){if(width>1000)await page.locator(selector).scrollIntoViewIfNeeded();const r=await page.locator(selector).boundingBox();assert(r.y>=0&&r.y+r.height<=height+1,JSON.stringify({game,width,height,selector,r}));assert(r.height>=44);}await snapshot(`${dir}/rummy-groups-${game}-${width}x${height}.png`);}
+   const count=await page.locator('.cc-rummy-group').count();await page.getByRole('button',{name:'組を解除 1',exact:true}).click();assert.equal(await page.locator('.cc-rummy-group').count(),count-1);assert.equal(await page.locator('.cc-hand .cc-card').count(),11);
+   await page.getByRole('button',{name:'組を自動整理',exact:true}).click();const removed=Number(await page.locator('.cc-rummy-group .cc-card').first().getAttribute('data-card'));await mutate((s,arg)=>{s.players[0].hand=s.players[0].hand.filter(c=>c!==arg);},removed);assert.equal(await page.locator('.cc-hand .cc-card').count(),10);assert.equal(await page.locator(`.cc-hand [data-card="${removed}"]`).count(),0);
+   if(game==='rummy'){const held=await page.locator('.cc-hand .cc-card').count(),size=await page.locator('.cc-rummy-group').first().locator('.cc-card').count();await page.getByRole('button',{name:'組を選択 1',exact:true}).click();await page.getByRole('button',{name:/^組を公開:/}).first().click();await page.waitForFunction(n=>document.querySelectorAll('.cc-hand .cc-card').length===n,held-size);}
+
+  }
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({games:2,manualGroups:true,automaticGroups:true,drawKeepsGroups:true,ungroup:true,removedCards:true,privateState:true,viewports:5,browserErrors:0}));
+ }else if(process.argv.includes('--rule-audit')){
   await load('ginrummy',2);await mutate(s=>{s.turn=0;s.extra.step='ginDiscard';s.extra.classic.drawnFromDiscard=false;s.players[0].hand=[1,2,3,4,5,14,15,16,17,35,51];s.players[1].hand=[0,6,7,8,13,19,20,21,26,39];});
   assert.equal(await page.locator('.cc-gin-reveal').count(),0,'Opponent stays private before the knock');
   await page.locator('.cc-hand [data-card="51"]').click();assert.match(await page.locator('.cc-classic').innerText(),/選択札を捨てた後: 10/);

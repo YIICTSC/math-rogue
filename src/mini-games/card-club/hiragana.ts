@@ -1,5 +1,9 @@
 // Card Club readings, kept local so card terminology does not alter other mini-games.
 export const CARD_CLUB_HIRAGANA:Record<string,string>={
+  "組を自動整理": "くみをじどうせいり",
+  "選択札を組にする": "せんたくふだをくみにする",
+  "組を選択": "くみをせんたく",
+  "組を解除": "くみをかいじょ",
   "選択札を捨てた後": "せんたくふだをすてたあと",
   "組に使った札は0点。Aは1点、絵札は10点。捨てた後の残り10枚で判定します。": "くみにつかったふだは0てん。Aは1てん、えふだは10てん。すてたあとののこり10まいではんていします。",
   "マリッジ宣言（未加算）": "まりっじせんげん（みかさん）",
