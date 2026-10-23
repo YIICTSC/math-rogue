@@ -1,3 +1,4 @@
+import { classicHideOwnHand,classicHideTable } from './classicPrivacy';
 import { definition, type GameId } from './catalog';
 import { blackjackValue, high, pack, rank, scopaValue, shuffled, sorted, suit } from './cards';
 import { actionKey, type Action, type ClubState, type ClubView, type PlayerInput } from './model';
@@ -16,9 +17,9 @@ function deal(s:ClubState,count:number){for(let n=0;n<count;n++)for(let k=1;k<=s
 function pairs(s:ClubState,index:number){const p=s.players[index];for(let r=1;r<=13;r++){const cards=p.hand.filter(c=>rank(c)===r);for(let k=0;k+1<cards.length;k+=2){take(s,index,cards.slice(k,k+2));s.discard.push(...cards.slice(k,k+2));}}p.hand=shuffled(p.hand,s.seed+s.revision+index);if(!p.hand.length)p.out=true;}
 function books(s:ClubState,index:number){const p=s.players[index];for(let r=1;r<=13;r++){const cards=p.hand.filter(c=>rank(c)===r);if(cards.length===4){take(s,index,cards);s.discard.push(...cards);p.books.push(r);p.score++;event(s,'book',index,r);}}}
 function replenish(s:ClubState){if(!s.stock.length&&s.discard.length){s.stock=shuffled(s.discard,s.seed+s.revision);s.discard=[];}}
-function startRound(s:ClubState){
+function startRound(s:ClubState,nextStock?:number[]){
   if(s.game==='whist'&&s.players.some(p=>p.score>=5))s.players.forEach(p=>p.score=0);
-  s.stock=shuffled(pack(),s.seed+s.round*1009);s.discard=[];s.table=[];s.trick=[];s.lastTrick=[];s.trump=-1;s.activeSuit=-1;s.broken=false;s.total=0;s.direction=1;s.pool=0;s.claim=1;s.pending=null;s.capturesBy=-1;s.phase='play';s.ladder=null;
+  s.stock=nextStock??shuffled(pack(),s.seed+s.round*1009);s.discard=[];s.table=[];s.trick=[];s.lastTrick=[];s.trump=-1;s.activeSuit=-1;s.broken=false;s.total=0;s.direction=1;s.pool=0;s.claim=1;s.pending=null;s.capturesBy=-1;s.phase='play';s.ladder=null;
   s.players.forEach(p=>{p.hand=[];p.taken=[];p.tricks=0;p.bid=null;p.books=[];p.stake=1;p.out=s.game==='99add'&&p.lives<=0;});
   const n=s.players.length;s.extra=emptyExtension(n);
   if(extensionFor(s.game))extensionFor(s.game)!.start(s);
@@ -153,11 +154,13 @@ function finishEmpty(s:ClubState,index:number){if(!s.players[index].hand.length)
 function finishDoubt(s:ClubState){const played=s.pending!.player;if(!s.players[played].hand.length){finishEmpty(s,played);s.pending=null;return;}s.turn=(played+1)%s.players.length;s.phase='play';s.claim=s.claim%13+1;s.pending=null;}
 export function applyAction(s:ClubState,player:number,action:Action):boolean {
   const bluffSelection=s.game==='doubt'&&s.phase==='play'&&player===s.turn&&action.type==='play'&&Array.isArray(action.cards)&&action.cards.length>=1&&action.cards.length<=4&&new Set(action.cards).size===action.cards.length&&action.cards.every(c=>s.players[player].hand.includes(c))&&Object.keys(action).every(k=>k==='type'||k==='cards');
-  if(!bluffSelection&&!legalActions(s,player).some(a=>actionKey(a)===actionKey(action)))return false;
+  const customSelection=player===s.turn&&s.phase==='play'&&!!extensionFor(s.game)?.validate?.(s,action);
+  if(!bluffSelection&&!customSelection&&!legalActions(s,player).some(a=>actionKey(a)===actionKey(action)))return false;
   s.revision++;
   const p=s.players[player];
   if(action.type==='next'){
-    s.round++;s.dealer=extensionFor(s.game)?.nextDealer?.(s)??(s.game==='blackjack'?Math.floor(s.round/5)%s.players.length:s.game==='99add'?next(s,s.dealer,1):(s.dealer+1)%s.players.length);startRound(s);return true;
+    const nextStock=extensionFor(s.game)?.nextStock?.(s);
+    s.round++;s.dealer=extensionFor(s.game)?.nextDealer?.(s)??(s.game==='blackjack'?Math.floor(s.round/5)%s.players.length:s.game==='99add'?next(s,s.dealer,1):(s.dealer+1)%s.players.length);startRound(s,nextStock);return true;
   }
   const extension=extensionFor(s.game);if(extension){extension.apply(s,action);return true;}
   if(action.type==='bid'){
@@ -240,9 +243,9 @@ export function applyAction(s:ClubState,player:number,action:Action):boolean {
 
 export function viewFor(s:ClubState,index:number):ClubView{
   const reveal=s.phase==='round'||s.phase==='result';
-  return {...s,players:s.players.map((p,i)=>{const {taken,hand,...publicPlayer}=p;return {...publicPlayer,hand:reveal||i===index&&!['war','beggar'].includes(s.game)?hand:s.game==='blackjack'&&i===s.dealer?hand.slice(0,1):[],handCount:hand.length,takenCount:taken.length};}),
+  return {...s,players:s.players.map((p,i)=>{const {taken,hand,...publicPlayer}=p;return {...publicPlayer,hand:reveal||i===index&&!classicHideOwnHand(s,i)&&!['war','beggar'].includes(s.game)?hand:s.game==='blackjack'&&i===s.dealer?hand.slice(0,1):[],handCount:hand.length,takenCount:taken.length};}),
     seed:0,whistHonors:reveal?s.whistHonors:[0,0],stock:s.stock.length,discard:s.discard.length,pending:s.pending?{player:s.pending.player,count:s.pending.cards.length,rank:s.pending.rank}:null,
-    extra:publicExtension(s),table:s.game==='doubt'?s.table.map(()=>-1):s.game==='pishti'?s.table.map((c,i)=>i<s.extra.opening?-1:c):s.table,self:index,actions:legalActions(s,index),
+    extra:publicExtension(s),table:classicHideTable(s)?s.table.map(()=>-1):s.game==='doubt'?s.table.map(()=>-1):s.game==='pishti'?s.table.map((c,i)=>i<s.extra.opening?-1:c):s.table,self:index,actions:legalActions(s,index),
   };
 }
 

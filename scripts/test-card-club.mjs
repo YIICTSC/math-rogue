@@ -1,21 +1,23 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
-const server=await createServer({configFile:'./vite.config.ts',server:{middlewareMode:true},appType:'custom'});
+const server=await createServer({optimizeDeps:{noDiscovery:true},configFile:'./vite.config.ts',server:{middlewareMode:true},appType:'custom'});
 try{
  const {CLUB_GAMES,REFERENCE_GAMES}=await server.ssrLoadModule('/src/mini-games/card-club/catalog.ts');
  const {createClubGame,legalActions,applyAction,viewFor,cpuAction}=await server.ssrLoadModule('/src/mini-games/card-club/engine.ts');
  const {ClubSession,CARD_CLUB_HEROES}=await server.ssrLoadModule('/src/mini-games/card-club/session.ts');
  const {EXTENDED_TRICKS,extendedDeck}=await server.ssrLoadModule('/src/mini-games/card-club/extendedTricks.ts');
+ const {classicDeck}=await server.ssrLoadModule('/src/mini-games/card-club/classicCommon.ts');
+ const {POPULAR_IDS}=await server.ssrLoadModule('/src/mini-games/card-club/popularCatalog.ts');
  const inputs=n=>Array.from({length:n},(_,i)=>({id:`p${i}`,name:`Player ${i}`,hero:CARD_CLUB_HEROES[i].id,cpu:false}));
  assert.equal(REFERENCE_GAMES.length,467);
  assert.equal(new Set(REFERENCE_GAMES.map(g=>g.id)).size,467);
  let matches=0,moves=0;
  const verifyCards=s=>{
-   const cards=[...s.stock,...s.discard,...s.table,...s.trick.map(t=>t.card),...s.players.flatMap(p=>[...p.hand,...p.taken]),...s.extra.board.filter(c=>c>=0),...s.extra.melds.flatMap(m=>m.cards),...s.extra.piles.flat()];
-   const expected=EXTENDED_TRICKS.has(s.game)?extendedDeck(s.game,s.players.length).length:s.game==='oldmaid'?51:s.game==='daihinmin'?53:['scopa','scopone'].includes(s.game)?40:52;
+   const cards=[...s.stock,...s.discard,...s.table,...s.trick.map(t=>t.card),...s.players.flatMap(p=>[...p.hand,...p.taken]),...s.extra.board.filter(c=>c>=0),...s.extra.melds.flatMap(m=>m.cards),...s.extra.piles.flat(),...(s.extra.classic?[...s.extra.classic.rows.flat(),...s.extra.classic.hidden.flat(),...s.extra.classic.crib].filter(c=>c>=0):[])];
+   const expected=POPULAR_IDS.includes(s.game)?classicDeck(s.game,s.players.length).length:EXTENDED_TRICKS.has(s.game)?extendedDeck(s.game,s.players.length).length:s.game==='oldmaid'?51:s.game==='daihinmin'?53:['scopa','scopone'].includes(s.game)?40:52;
    assert.equal(cards.length,expected,`${s.game}: conserved card count`);assert.equal(new Set(cards).size,expected,`${s.game}: no duplicated cards`);
  };
- for(const d of CLUB_GAMES)for(const n of d.players)for(const seed of [1,15,77]){
+ for(const d of CLUB_GAMES.filter(d=>!process.env.CLUB_ONLY||process.env.CLUB_ONLY.split(',').includes(d.id)))for(const n of d.players)for(const seed of [1,15,77]){
    const s=createClubGame(d.id,inputs(n),seed);
    for(let move=0;move<20000&&s.phase!=='result';move++){
      verifyCards(s);const v=viewFor(s,s.turn),a=cpuAction(v);assert(a,`${d.id}: no action at ${s.phase}`);assert.equal(v.seed,0,'Shuffle seed is private');if(s.phase!=='round'&&s.phase!=='result')assert.deepEqual(v.whistHonors,[0,0],'Original-hand honours stay private');

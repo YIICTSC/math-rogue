@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'vite';
-const server=await createServer({server:{middlewareMode:true},appType:'custom'});
+const server=await createServer({optimizeDeps:{noDiscovery:true},server:{middlewareMode:true},appType:'custom'});
 try{
  const {CLUB_GAMES}=await server.ssrLoadModule('/src/mini-games/card-club/catalog.ts');
  const {searchGames,GENRES}=await server.ssrLoadModule('/src/mini-games/card-club/discovery.ts');

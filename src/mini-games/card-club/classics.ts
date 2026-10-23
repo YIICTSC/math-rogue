@@ -1,0 +1,10 @@
+import type { GameId } from './catalog';
+import type { RuleExtension } from './extensionModel';
+import { ginRules } from './gin';
+import { durakRules } from './durak';
+import { golfRules,swimRules } from './classicLayouts';
+import { CLASSIC_TRICKS,classicTrickRules } from './classicTricks';
+import { cribbageRules } from './cribbage';
+import { cassinoRules } from './cassino';
+import { pontoonRules } from './pontoon';
+export const classicExtension=(id:GameId):RuleExtension|undefined=>CLASSIC_TRICKS.has(id)?classicTrickRules:id==='ginrummy'?ginRules:id==='durak2'||id==='perevodnoy'?durakRules:id==='golf'?golfRules:id==='schwimmen'?swimRules:id==='cribbage'?cribbageRules:id==='cassino'?cassinoRules:id==='pontoon'?pontoonRules:undefined;

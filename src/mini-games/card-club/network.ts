@@ -5,7 +5,7 @@ import type { Action, PlayerInput } from './model';
 import type { GameId } from './catalog';
 import { shouldReportPeerError } from './networkPolicy';
 
-const PROTOCOL=2;
+const PROTOCOL=3;
 type Profile=Pick<PlayerInput,'name'|'hero'>;
 export class CardClubRoom {
   private peer:Peer|null=null;private session:ClubSession|null=null;private channels=new Map<string,DataConnection>();private cpuTimer:ReturnType<typeof setInterval>|null=null;private timers=new Set<ReturnType<typeof setTimeout>>();
