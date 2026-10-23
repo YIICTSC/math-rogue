@@ -103,3 +103,5 @@
  .card-club .cc-card,.card-club .cc-card-body{transition:none!important}
  .cc-flight-layer{display:none}
 }
+
+.cc-hand-toolbar{display:flex;flex:none;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px;margin-bottom:4px;min-width:0}.cc-hand-toolbar h2{margin:0}.cc-hand-sort{display:flex;gap:4px}.cc-hand-sort button{min-height:44px;padding:6px 10px;font-size:12px;white-space:nowrap}.cc-hand-sort button[aria-pressed="true"]{background:#265342;border-color:#e6c778;color:#fff1bc;box-shadow:inset 0 0 0 1px #e6c778}.cc-page-table .cc-hand-toolbar h2{margin:0}.cc-page-table .cc-hand-sort button{font-size:11px;padding:5px 8px}

@@ -15,7 +15,24 @@ try{
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--voices')){
+ if(process.argv.includes('--hand-sort')){
+  await load('doubt',4);await mutate(s=>{s.turn=0;s.players[0].hand=[40,12,0,14,39,25,52];});
+  const hand=()=>page.locator('.cc-hand>.cc-card').evaluateAll(es=>es.map(e=>Number(e.dataset.card)));
+  await page.locator('.cc-hand [data-card="14"]').click();
+  const before=await page.evaluate(()=>JSON.stringify(window.__club.room().session.state));
+  await page.getByRole('button',{name:'スート順',exact:true}).click();assert.deepEqual(await hand(),[0,12,14,25,39,40,52]);
+  assert.equal(await page.locator('.cc-hand [data-card="14"]').getAttribute('aria-pressed'),'true');
+  await page.getByRole('button',{name:'ランク順',exact:true}).click();assert.deepEqual(await hand(),[0,39,14,40,12,25,52]);
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.__club.room().session.state)),before,'Sorting must not mutate game state');
+  for(const [width,height]of[[1280,900],[390,844],[844,390],[320,568],[568,320]]){
+   await page.setViewportSize({width,height});for(const b of await page.locator('.cc-hand-sort button').all()){const r=await b.boundingBox();assert(r.x>=0&&r.y>=0&&r.x+r.width<=width&&r.y+r.height<=height,JSON.stringify({width,height,r}));assert(r.height>=44);}
+   await snapshot(`${dir}/hand-sort-${width}x${height}.png`);
+  }
+  await page.evaluate(()=>window.__club.room().session.publish());assert.deepEqual(await hand(),[0,39,14,40,12,25,52]);
+  await load('daihinmin',5);await mutate(s=>{s.turn=0;s.players[0].hand=[0,1,2,12,52];});
+  assert.deepEqual(await hand(),[2,12,0,1,52]);await mutate(s=>{s.ladder.reversed=true;});assert.deepEqual(await hand(),[1,0,12,2,52],'Re-sort automatically after revolution');
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({handSorting:true,suit:true,rank:true,jokerLast:true,selectionPreserved:true,stateUnchanged:true,viewports:5,browserErrors:0}));
+ }else if(process.argv.includes('--voices')){
   await page.evaluate(()=>{window.voiceEvents=[];const original=window.audioService.playCardClubVoice.bind(window.audioService);window.audioService.playCardClubVoice=(hero,event)=>{window.voiceEvents.push({hero,event});return original(hero,event);};});
   const metadata=await page.evaluate(async()=>{
    const heroes=window.CARD_CLUB_VOICE_HEROES,durations=window.CARD_CLUB_VOICE_MS;let clips=0;

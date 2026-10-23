@@ -3,6 +3,7 @@ import type { Action, ClubState } from './model';
 export type LadderState={count:number;form:'set'|'run';rank:number;last:number;passes:number;reversed:boolean;order:number[]};
 const r=(c:number)=>c===52?100:rank(c)===1?14:rank(c)===2?15:rank(c);
 const strength=(value:number,count:number,form:'set'|'run',reversed:boolean)=>value===100?100:form==='set'?(reversed?18-value:value):(reversed?18-value:value+count-1);
+export const ladderCardStrength=(card:number,reversed:boolean)=>strength(r(card),1,'set',reversed);
 const physical=(st:number,value:number)=>st*13+(value===14?1:value===15?2:value)-1;
 export function ladderActions(s:ClubState):Action[]{
  const hand=s.players[s.turn].hand,ladder=s.ladder!,actions:Action[]=[],hasJoker=hand.includes(52);
