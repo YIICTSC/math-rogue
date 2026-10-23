@@ -17,19 +17,23 @@ try {
     } }],
   });
   await server.listen();
-  browser = await chromium.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true, args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
   const page = await browser.newPage();
   page.setDefaultTimeout(60000);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   const failures = [];
   page.on('response', response => {
-    if (response.status() >= 400 && response.url().includes('summer-expansion')) failures.push(`${response.status()} ${response.url()}`);
+    if (response.status() >= 400 && (response.url().includes('summer-expansion') || response.url().includes('/vacation-'))) failures.push(`${response.status()} ${response.url()}`);
   });
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/summer-ending-qa`, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.locator('[data-qa-ready]').waitFor({ timeout: 120000 });
   const { ENDLESS_REVISION_COPY } = await server.ssrLoadModule('/src/data/endlessEndingCopyRevision.ts');
   const { MAGIC_FRIENDSHIP_ROUTES } = await server.ssrLoadModule('/src/data/magicFriendshipRoutes.ts');
+  const { SUMMER_ENDING_VOICES_READY, summerTrueVoiceId, summerEpilogueVoiceId, summerFriendshipVoiceId, summerEndingVoiceLimitMs } = await server.ssrLoadModule('/src/data/summerEndingVoices.ts');
+  assert.equal(summerEndingVoiceLimitMs('magic','UNKNOWN','unknown',123),123,'preserve existing playback limits for other dialogue');
+  if(SUMMER_ENDING_VOICES_READY){const {SUMMER_ENDING_VOICE_MS}=await server.ssrLoadModule('/src/data/summerEndingVoiceDurations.ts');for(const [key,duration] of Object.entries(SUMMER_ENDING_VOICE_MS)){const [theme,hero,line]=key.split('/');assert.equal(summerEndingVoiceLimitMs(theme,hero,line,100),duration+500);assert.equal(summerEndingVoiceLimitMs(theme,hero,line,20000),20000);}}
+  const expectedVoices = [];
   const out = path.resolve('build/summer-ending-qa/browser'); await fs.mkdir(out, { recursive: true });
   let screens = 0;
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1280, height: 720 }]) {
@@ -62,15 +66,22 @@ try {
           }
           await button.click(); screens++;
         }
+        if (SUMMER_ENDING_VOICES_READY) {
+          if (kind === 'friendship') {
+            const route = MAGIC_FRIENDSHIP_ROUTES.find(r => r.id === id);
+            expectedVoices.push(`${route.heroId}/${summerFriendshipVoiceId(id,0)}`,`${route.friendHeroId}/${summerFriendshipVoiceId(id,1)}`);
+          } else for (let i=0;i<3;i++) expectedVoices.push(`${id}/${kind==='true'?summerTrueVoiceId(i):summerEpilogueVoiceId(i)}`);
+        }
         await page.locator('[data-qa-result="done"]').waitFor();
         assert.equal(await page.evaluate(() => __summer.completions), before + 1, 'exactly one completion');
       }
     }
   }
-  assert.deepEqual(await page.evaluate(() => __summer.voices), [], 'no requests for deferred audio');
+  assert.deepEqual(await page.evaluate(() => __summer.voices), expectedVoices, 'every dedicated line uses the correct hero and page ID');
   if (!process.argv.includes('--true-only')) {
     const { trans } = await server.ssrLoadModule('/src/utils/textUtils.ts');
     const { getMagicSummerEpilogue } = await server.ssrLoadModule('/src/data/magicSummerEpilogues.ts');
+    const galleryVoiceStart = await page.evaluate(() => __summer.voices.length);
     for (const language of ['JAPANESE', 'HIRAGANA', 'ENGLISH']) {
       await page.setViewportSize({ width: 390, height: 844 });
       await page.evaluate(language => __summer.showGallery(language), language);
@@ -91,17 +102,44 @@ try {
       const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('pixel_spire_magic_ending_gallery_v1')));
       assert.equal(stored.length, 2, 'gallery replay must not duplicate or overwrite entries');
       assert.equal(stored.find(e => e.kind === 'epilogue').storyPages.length, 3);
+      const friendship = stored.find(e => e.kind === 'friendship');
+      await page.getByRole('button').filter({hasText:trans(friendship.title,language)}).click();
+      const friendshipScope = page.locator('.magic-romance-ending-screen');
+      await friendshipScope.waitFor();
+      for(let i=0;i<3;i++) await friendshipScope.locator('.magic-romance-ending-button').click();
+      await friendshipScope.waitFor({state:'detached'});
+
     }
-    assert.deepEqual(await page.evaluate(() => __summer.voices), [], 'gallery does not request deferred voices');
+    const galleryVoices = await page.evaluate(start => __summer.voices.slice(start), galleryVoiceStart);
+    assert.deepEqual(galleryVoices, SUMMER_ENDING_VOICES_READY ? Array.from({length:3},()=>['AKARI/vacation-epilogue-1','AKARI/vacation-epilogue-1','AKARI/vacation-epilogue-2','AKARI/vacation-epilogue-3','AKARI/vacation-friendship-akari-shizuku-1','SHIZUKU/vacation-friendship-akari-shizuku-2']).flat() : [], 'gallery replay uses dedicated voice IDs, restarts and advances correctly');
   }
   // Standard ending voices still play; leaving the viewer invokes cleanup.
+  const normalVoiceStart = await page.evaluate(() => __summer.voices.length);
   await page.evaluate(() => __summer.show('true', 'WARRIOR', 'high-school', 'JAPANESE', false));
-  await page.waitForFunction(() => __summer.voices.length > 0);
+  await page.waitForFunction(n => __summer.voices.length > n, normalVoiceStart);
+  assert.equal(await page.evaluate(() => __summer.voices.at(-1)), 'WARRIOR/endless-true-1');
   const stops = await page.evaluate(() => __summer.stopped);
   await page.evaluate(() => __summer.leave());
   await page.waitForFunction(n => __summer.stopped > n, stops);
+  if (SUMMER_ENDING_VOICES_READY && process.argv.includes('--audio')) {
+    await page.evaluate(() => __summer.enableRealAudio());
+    const audioResults = await page.evaluate(async () => {
+      const {audioService:a} = await import('/src/services/audioService.ts');
+      const {SUMMER_ENDING_VOICE_MS} = await import('/src/data/summerEndingVoiceDurations.ts');
+      const cases = [['high-school','WARRIOR','vacation-endless-true-1'],['magic','AKARI','vacation-endless-true-1'],['magic','SHIZUKU','vacation-friendship-akari-shizuku-2'],['magic','SAKUYA','vacation-epilogue-3']];
+      const results=[];
+      for (const [theme,hero,line] of cases) {
+        const start=performance.now();
+        const played=await (theme==='magic'?a.playMagicEventVoice(hero,line):a.playHighSchoolVoiceFile(hero,line,12000));
+        results.push({played,elapsed:performance.now()-start,duration:SUMMER_ENDING_VOICE_MS[`${theme}/${hero}/${line}`]});
+      }
+      a.stopMagicEventVoices();a.stopHighSchoolVoices();return results;
+    });
+    for(const result of audioResults){assert.equal(result.played,true);assert.ok(result.elapsed>result.duration*.7&&result.elapsed<result.duration+2500,JSON.stringify(result));}
+    console.log('PASS: actual dedicated summer OGG playback through both themes, friendship speaker and male epilogue.');
+  }
   assert.deepEqual(errors, []); assert.deepEqual(failures, []);
-  console.log(`PASS: ${screens} rendered pages, 3 languages, portrait/landscape, every next/results button, image decode, no overflow, voice deferral and exit cleanup. Screenshots: ${out}`);
+  console.log(`PASS: ${screens} rendered pages, 3 languages, portrait/landscape, every next/results button, image decode, no overflow, dedicated voice routing and exit cleanup. Screenshots: ${out}`);
 } finally {
   await browser?.close();
   server?.httpServer?.closeAllConnections();

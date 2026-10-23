@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-10-23T02:19:03.571374+00:00",
+  "official_code_revision": "89f9d8fbd4d51ea019867ee1197725ede1df13c5",
+  "models": [
+    {
+      "id": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "lastModified": "2026-09-12T07:19:56.000Z"
+    },
+    {
+      "id": "Aratako/Irodori-TTS-v4.1-Small",
+      "revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "lastModified": "2026-08-11T02:21:55.000Z"
+    },
+    {
+      "id": "Aratako/Irodori-TTS-v4-Large",
+      "revision": "2e0c55428ce97268a507f1feeb2478f8d9148e8b",
+      "lastModified": "2026-09-27T15:37:32.000Z"
+    },
+    {
+      "id": "Aratako/Irodori-TTS-v4-Large-Quantized",
+      "revision": "bdef9592db4426bd1c99ccdf0cfc3a213223fb61",
+      "lastModified": "2026-09-27T14:36:37.000Z"
+    }
+  ],
+  "selected": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "repair_model": "Aratako/Irodori-TTS-v4.1-Small",
+  "reason": "Current v4.1 CPU-compatible line, official 4-step MeanFlow inference. Latest Large and quantized releases were also inspected: Large is 3.29B parameters, beyond this 8 GiB worker together with codec/inference buffers; published quantized variants require CUDA kernels and are explicitly not validated for CPU. Model and codec remain CPU; no GPU fallback.",
+  "cpu_quota": "200000 100000",
+  "memory_limit_bytes": 8589934592
+}

@@ -1,5 +1,5 @@
 {
-  "status": "deferred-by-user",
+  "status": "generated-and-verified",
   "requirements": "Latest official Irodori-TTS, model and codec on CPU; recheck released revision/model at generation time per AGENTS.md. Enable SUMMER_ENDING_VOICES_READY only after all 197 files pass QA.",
   "jobs": [
     {

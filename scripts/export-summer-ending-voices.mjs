@@ -4,14 +4,14 @@ import { createHash } from 'node:crypto';
 import { createServer } from 'vite';
 
 const root = process.cwd();
-const server = await createServer({ cacheDir: 'node_modules/.vite-summer-voice-plan', server: { middlewareMode: true }, logLevel: 'error' });
+const server = await createServer({ cacheDir: 'node_modules/.vite-summer-voice-plan', optimizeDeps: { noDiscovery: true, entries: [] }, server: { middlewareMode: true }, logLevel: 'error' });
 try {
   const { HIGH_SCHOOL_VACATION_TRUE_ENDINGS } = await server.ssrLoadModule('/src/data/vacationEndlessEndings.ts');
   const { MAGIC_VACATION_TRUE_ENDINGS } = await server.ssrLoadModule('/src/data/magicVacationTrueEndings.ts');
   const { MAGIC_SUMMER_EPILOGUES } = await server.ssrLoadModule('/src/data/magicSummerEpilogues.ts');
   const { MAGIC_SUMMER_FRIENDSHIP_ENDINGS } = await server.ssrLoadModule('/src/data/magicSummerFriendshipEndings.ts');
   const { MAGIC_FRIENDSHIP_ROUTES } = await server.ssrLoadModule('/src/data/magicFriendshipRoutes.ts');
-  const { summerTrueVoiceId, summerEpilogueVoiceId, summerFriendshipVoiceId } = await server.ssrLoadModule('/src/data/summerEndingVoices.ts');
+  const { summerTrueVoiceId, summerEpilogueVoiceId, summerFriendshipVoiceId, SUMMER_ENDING_VOICES_READY } = await server.ssrLoadModule('/src/data/summerEndingVoices.ts');
   const jobs = [];
   const add = async (theme, heroId, lineId, text, context) => {
     const unquote = value => value.replace(/^[^「]+「(.+)」$/, '$1');
@@ -40,6 +40,6 @@ try {
   }
   if (jobs.length !== 197 || new Set(jobs.map(j => j.output)).size !== 197) throw new Error('Incomplete/duplicate voice jobs');
   const target = path.join(root, 'assets/ending-expansion/voice-plan.json');
-  await fs.writeFile(target, JSON.stringify({ status: 'deferred-by-user', requirements: 'Latest official Irodori-TTS, model and codec on CPU; recheck released revision/model at generation time per AGENTS.md. Enable SUMMER_ENDING_VOICES_READY only after all 197 files pass QA.', jobs }, null, 2) + '\n');
+  await fs.writeFile(target, JSON.stringify({ status: SUMMER_ENDING_VOICES_READY ? 'generated-and-verified' : 'planned', requirements: 'Latest official Irodori-TTS, model and codec on CPU; recheck released revision/model at generation time per AGENTS.md. Enable SUMMER_ENDING_VOICES_READY only after all 197 files pass QA.', jobs }, null, 2) + '\n');
   console.log(`Exported ${jobs.length} voice jobs to ${target}. No audio generated.`);
 } finally { server.httpServer?.closeAllConnections(); await server.close(); }

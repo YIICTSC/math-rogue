@@ -1,0 +1,1581 @@
+{
+  "samples": {
+    "high-school/WARRIOR/vacation-endless-true-1": {
+      "expected": "俺たちの夏まで、勝手に決めさせるかよ。これで本当に、取り返したな。",
+      "reading": "おれたちの なつまで、かってに きめさせるかよ。これで ほんとうに、とりかえしたな。",
+      "sha256": "05f3934c9e16e3b8b9ab9761f321d068684c2c2d05d72c8dd38ce235dd5c2616",
+      "recognized": "俺たちの夏まで勝手に決めさせてるからよこれで本当に取り返したな",
+      "seconds": 6.96,
+      "reading_similarity": 0.972
+    },
+    "high-school/WARRIOR/vacation-endless-true-2": {
+      "expected": "正解の道がなくてもいい。間違えたら、俺たちで選び直す。",
+      "reading": "せいかいの みちが なくても いい。まちがえたら、おれたちで えらびなおす。",
+      "sha256": "3c3d217af5cbf5d94af3ea22122928183a5f88532ddd7d93dffe8727164360c4",
+      "recognized": "正解の道がなくてもいい間違えたら、俺たちで選び直す",
+      "seconds": 5.96,
+      "reading_similarity": 1.0
+    },
+    "high-school/WARRIOR/vacation-endless-true-3": {
+      "expected": "まずは飯だな。その先の冒険は、みんなで決めようぜ。",
+      "reading": "まずは めしだな。その さきの ぼうけんは、みんなで きめようぜ。",
+      "sha256": "fc4e6f003a57e1a28993510cec87470b691c67fd99dce2cdec9400b9f024c5b7",
+      "recognized": "まずはメッシュだなその先の冒険はみんなで決めようぜ",
+      "seconds": 5.72,
+      "reading_similarity": 0.963
+    },
+    "high-school/CARETAKER/vacation-endless-true-1": {
+      "expected": "怖かったね。もう大丈夫。あなたが生きていることに、点数はいらないよ。",
+      "reading": "こわかったね。もう だいじょうぶ。あなたが いきている ことに、てんすうは いらないよ。",
+      "sha256": "db0d4415dab60040a9f937b2ba089dfa1f647e7f86dbc98b0696b37f2ce8fc5c",
+      "recognized": "怖かったねもう大丈夫あなたが生きていることに点数はいらないよ",
+      "seconds": 7.64,
+      "reading_similarity": 1.0
+    },
+    "high-school/CARETAKER/vacation-endless-true-2": {
+      "expected": "知ることと、支配することは違う。私は、この子たちの暮らしを知りたいんだ。",
+      "reading": "しることと、しはいすることは ちがう。わたしは、この こたちの くらしを しりたいんだ。",
+      "sha256": "1de225a4c797871a970ce2388f370ab8fbbd9cf2a5e6d9914ce0e623ca4241c0",
+      "recognized": "知ることと支配することは違う 私はこの子たちのフラッシュを知りたいんだ",
+      "seconds": 7.48,
+      "reading_similarity": 0.946
+    },
+    "high-school/CARETAKER/vacation-endless-true-3": {
+      "expected": "次の夏も、一緒に観察しようね。知らないことがあるって、うれしいね。",
+      "reading": "つぎの なつも、いっしょに かんさつしようね。しらないことが あるって、うれしいね。",
+      "sha256": "e30d2825f882720cf6e6e233a9b23566929b7d451d813ab82c991388fe293801",
+      "recognized": "次の夏も一緒に観察しようね 知らないことがあるって嬉しいね",
+      "seconds": 7.4,
+      "reading_similarity": 1.0
+    },
+    "high-school/ASSASSIN/vacation-endless-true-1": {
+      "expected": "隠れる理由が、ひとつ減った。今夜の行き先は自分で決める。",
+      "reading": "かくれる りゆうが、ひとつ へった。こんやの いきさきは じぶんで きめる。",
+      "sha256": "98d27fca668c7dfe4b25fb344b8f98b46bcd70ddff5c0c9f4f61f424dd0f96c4",
+      "recognized": "隠れる理由が一つ 今夜の行き先は自分できねえ",
+      "seconds": 6.68,
+      "reading_similarity": 0.877
+    },
+    "high-school/ASSASSIN/vacation-endless-true-2": {
+      "expected": "本当の名前は、命令書にはない。呼んでくれる人の中にあるんだね。",
+      "reading": "ほんとうの なまえは、めいれいしょには ない。よんでくれる ひとの なかに あるんだね。",
+      "sha256": "1d1541bf9acfabb996d6255bd3d799999e2ba32654ba3164f25f640aa72b5468",
+      "recognized": "本当の名前は、命令書にはない、読んでくれる人の中にあるんだね。",
+      "seconds": 6.52,
+      "reading_similarity": 0.944
+    },
+    "high-school/ASSASSIN/vacation-endless-true-3": {
+      "expected": "今日は堂々と寄り道する。見失わないよう、隣にいて。",
+      "reading": "きょうは どうどうと よりみちする。みうしなわないよう、となりに いて。",
+      "sha256": "3345d14ba5e8ff9ab77e665d8a499918e87459026d84ab988e386f9d6a70fe5a",
+      "recognized": "今日は、堂々と寄り道する。 見失わないよ、隣にいて。",
+      "seconds": 6.08,
+      "reading_similarity": 0.983
+    },
+    "high-school/MAGE/vacation-endless-true-1": {
+      "expected": "反応終了。誰かを従わせる式なんて、これで最後にしましょう。",
+      "reading": "はんのう しゅうりょう。だれかを したがわせる しきなんて、これで さいごに しましょう。",
+      "sha256": "f63073832d7d09eb353d08e88d58d41bad5bf138439d4ed6a979300ee762aceb",
+      "recognized": "反応終了! 誰かを従わせる式なんて、これで最後にしましょう!",
+      "seconds": 5.08,
+      "reading_similarity": 1.0
+    },
+    "high-school/MAGE/vacation-endless-true-2": {
+      "expected": "同じ海でも、こんなに違う。結論より先に、もっと質問が増えたわ。",
+      "reading": "おなじ うみでも、こんなに ちがう。けつろんより さきに、もっと しつもんが ふえたわ。",
+      "sha256": "dbf6c659003e4b2b9e0f20d21449703bc166804ba8bbe4e1f00b41ad17213ab7",
+      "recognized": "同じ海でもこんなに違う、結論より先、もっと質問が増えたわ。",
+      "seconds": 7.1,
+      "reading_similarity": 0.986
+    },
+    "high-school/MAGE/vacation-endless-true-3": {
+      "expected": "助手、募集中よ。条件はひとつ。わからないことを、楽しめる人。",
+      "reading": "じょしゅ、ぼしゅうちゅうよ。じょうけんは ひとつ。わからないことを、たのしめる ひと。",
+      "sha256": "3ea030a92d5737dd5c7b030da82edae4a881a952b9ef8de378acad17b3b64679",
+      "recognized": "助手、募集中よ! 条件は一つ、わからないことを楽しめる人。",
+      "seconds": 6.2,
+      "reading_similarity": 0.944
+    },
+    "high-school/DODGEBALL/vacation-endless-true-1": {
+      "expected": "やっと試合終了だ。勝ったのは俺だけじゃない。このチーム全員だ！",
+      "reading": "やっと しあいしゅうりょうだ。かったのは おれだけじゃない。この ちーむ ぜんいんだ！",
+      "sha256": "5450a465c77d73e3a6190c02e10fe6875f2534b985471861cfe54b2731615727",
+      "recognized": "やっと試合終了だ!勝ったのは俺だけじゃない!このチーム全員だ!",
+      "seconds": 5.16,
+      "reading_similarity": 1.0
+    },
+    "high-school/DODGEBALL/vacation-endless-true-2": {
+      "expected": "落としても、また渡せばいい。パスを出す相手がいるって、最高だな。",
+      "reading": "おとしても、また わたせば いい。ぱすを だす あいてが いるって、さいこうだな。",
+      "sha256": "fde4c1fa6d71a0a8a0598131a919e044700b6d5c416fa63c9d915613393eb56c",
+      "recognized": "落としてもまた渡せばいい!パスを出す相手がいるって言って最高だな!",
+      "seconds": 4.76,
+      "reading_similarity": 0.955
+    },
+    "high-school/DODGEBALL/vacation-endless-true-3": {
+      "expected": "次も一緒に走ろうぜ。ベンチもコートも、全員分の場所を空けとく！",
+      "reading": "つぎも いっしょに はしろうぜ。べんちも こーとも、ぜんいんぶんの ばしょを あけとく！",
+      "sha256": "a30c111a4da9574101eac35bf8c5959cd617d08b9fe8967715f4f0c83a3c4525",
+      "recognized": "次も一緒に走ろうぜ!全位置もコートも全員分の場所を開けておく!",
+      "seconds": 4.72,
+      "reading_similarity": 0.88
+    },
+    "high-school/BARD/vacation-endless-true-1": {
+      "expected": "こちら、自由になった放送部です。最初のお知らせは、みんな無事、です！",
+      "reading": "こちら、じゆうに なった ほうそうぶです。さいしょの おしらせは、みんな ぶじ、です！",
+      "sha256": "6f6d41619b69630d1eaad993d42d8ce64de4c790342d3146b9309a6553fbb178",
+      "recognized": "こちら!自由になった放送部です!最初のお知らせはみんな無事です!",
+      "seconds": 6.68,
+      "reading_similarity": 1.0
+    },
+    "high-school/BARD/vacation-endless-true-2": {
+      "expected": "途中で声が裏返っても、止めないでね。これが今日の私の歌だから。",
+      "reading": "とちゅうで こえが うらがえっても、とめないでね。これが きょうの わたしの うただから。",
+      "sha256": "0e8b8a571cc403ee830d5f1a03a993ebb69dfd6382738c7e35232963bf6b0f8c",
+      "recognized": "途中で声が裏返っても止めないでね これが今日の私の歌だから",
+      "seconds": 5.84,
+      "reading_similarity": 0.973
+    },
+    "high-school/BARD/vacation-endless-true-3": {
+      "expected": "またここで会おうね。あなたの声も、次の番組で聞かせて！",
+      "reading": "また ここで あおうね。あなたの こえも、つぎの ばんぐみで きかせて！",
+      "sha256": "4c37ffcd0cb62f3cc75dc22415204fdc26abd8aa0d8588461b295f887609f5c9",
+      "recognized": "またここで会おうね あなたの声も次の番組で聞かせて",
+      "seconds": 5.36,
+      "reading_similarity": 1.0
+    },
+    "high-school/LIBRARIAN/vacation-endless-true-1": {
+      "expected": "終わったからこそ、忘れないために残す。これは、あの人たちの頁だから。",
+      "reading": "おわったからこそ、わすれない ために のこす。これは、あの ひとたちの ぺーじだから。",
+      "sha256": "105da030b20f75e4cd17f5a373ed321dd97508efd284967332d78f2dcc384d6e",
+      "recognized": "終わったからこそ忘れないために残す これはあの人たちのページだから",
+      "seconds": 6.68,
+      "reading_similarity": 0.943
+    },
+    "high-school/LIBRARIAN/vacation-endless-true-2": {
+      "expected": "格好悪いところも書いていい？そこに、私たちらしさがある気がするの。",
+      "reading": "かっこうわるい ところも かいて いい？そこに、わたしたちらしさが ある きが するの。",
+      "sha256": "0779316ac6a8e202535fcddf20c892a10b1842f3ad56fabb56ced961ba54f68d",
+      "recognized": "格好悪いところも書いていい そこに私たちらしさがある気がするの",
+      "seconds": 5.88,
+      "reading_similarity": 1.0
+    },
+    "high-school/LIBRARIAN/vacation-endless-true-3": {
+      "expected": "完結は、ここまで。ここから先は、まだ知らない私たちの話ね。",
+      "reading": "かんけつは、ここまで。ここから さきは、まだ しらない わたしたちの はなしね。",
+      "sha256": "3f16050390f85694cfb899025ddaf5ce068205c19118680b3e7118a983fbc94c",
+      "recognized": "完結はここわれ。ここから先はまだ知らない私たちの話ね。",
+      "seconds": 6.12,
+      "reading_similarity": 0.938
+    },
+    "high-school/CHEF/vacation-endless-true-1": {
+      "expected": "食べる量まで命令されてたまるか。腹の声は、自分で聞けばいい。",
+      "reading": "たべる りょうまで めいれいされて たまるか。はらの こえは、じぶんで きけば いい。",
+      "sha256": "043d0e491abcdaac52fad66aba18bfee078dbe6820a3d67834f438fbdb52529a",
+      "recognized": "食べる量まで命令されてたまるか。花の声は自分で聞けばいい。",
+      "seconds": 5.2,
+      "reading_similarity": 0.971
+    },
+    "high-school/CHEF/vacation-endless-true-2": {
+      "expected": "おかわりも休憩も遠慮するな。今日はちゃんと、自分をいたわれ。",
+      "reading": "おかわりも きゅうけいも えんりょするな。きょうは ちゃんと、じぶんを いたわれ。",
+      "sha256": "be0dafa1808528338801e8b31c991c5fef8e575f8a23e3253cb54e330a2bd21c",
+      "recognized": "おかわりも休憩も遠慮するな。今日はちゃんと自分をいたわれ。",
+      "seconds": 4.68,
+      "reading_similarity": 1.0
+    },
+    "high-school/CHEF/vacation-endless-true-3": {
+      "expected": "いつでも来い。次の冒険の帰りも、ちゃんと一人分取っとくからな。",
+      "reading": "いつでも こい。つぎの ぼうけんの かえりも、ちゃんと ひとりぶん とっとくからな。",
+      "sha256": "e4aad7ce0f5a415ed9de994c698fef2d8b0c83085e40507d9e5beaf4d992c604",
+      "recognized": "いつでもこい。次の冒険の帰りもちゃんと一人分とっとくからな。",
+      "seconds": 4.84,
+      "reading_similarity": 1.0
+    },
+    "high-school/GARDENER/vacation-endless-true-1": {
+      "expected": "全部を元通りにはできない。でも、ここから伸びる芽を守ることはできる。",
+      "reading": "ぜんぶを もとどおりには できない。でも、ここから のびる めを まもることは できる。",
+      "sha256": "22d6cd57197846729f5e3b4cdeef4c6b4087da73cf8737ad5edf713682587930",
+      "recognized": "全部を元通りにはできない。でも、ここから伸びる目を守ることはできる。",
+      "seconds": 6.32,
+      "reading_similarity": 1.0
+    },
+    "high-school/GARDENER/vacation-endless-true-2": {
+      "expected": "早く咲くことだけが強さじゃない。あなたの季節を、一緒に待とう。",
+      "reading": "はやく さくことだけが つよさじゃない。あなたの きせつを、いっしょに まとう。",
+      "sha256": "85e3e34f39f3bbb8c0254fbfacaa998e22a90b93869b32368e2153b1b42e2883",
+      "recognized": "早く咲くことだけが強さじゃない。あなたの季節を一緒に巻こう。",
+      "seconds": 5.76,
+      "reading_similarity": 0.97
+    },
+    "high-school/GARDENER/vacation-endless-true-3": {
+      "expected": "続きは学校の庭でね。次の花が咲いたら、いちばんに知らせる。",
+      "reading": "つづきは がっこうの にわでね。つぎの はなが さいたら、いちばんに しらせる。",
+      "sha256": "ce705a0da5b01474fae5a7a14b3ce70719ae9e7eb52a17d6689b9bde58bd659c",
+      "recognized": "続きは学校の庭でね。次の花がらさえから一番に知らせる。",
+      "seconds": 5.4,
+      "reading_similarity": 0.923
+    },
+    "magic/AKARI/vacation-endless-true-1": {
+      "expected": "お母さん、ここまで来たよ。次は私が、私の行きたい場所を照らすね。",
+      "reading": "おかあさん、ここまで きたよ。つぎは わたしが、わたしの いきたい ばしょを てらすね。",
+      "sha256": "35a3164eb74165cc4e92de2b03a884d233a0fdbd0b0a13c4660e91448216f540",
+      "recognized": "お母さん、ここまで来たよ。次は私が、私の行きたい場所を照らすね。",
+      "seconds": 5.96,
+      "reading_similarity": 1.0
+    },
+    "magic/AKARI/vacation-endless-true-2": {
+      "expected": "今日は私がついていく番。みんなの好きな夏も、教えてほしいな。",
+      "reading": "きょうは わたしが ついていく ばん。みんなの すきな なつも、おしえて ほしいな。",
+      "sha256": "e300e665b490f6673864182faa149a33ab9ba4bcffef28881b395387ce04059f",
+      "recognized": "今日は私がついていく番。みんなの好きな夏も教えてほしいな。",
+      "seconds": 5.36,
+      "reading_similarity": 1.0
+    },
+    "magic/AKARI/vacation-endless-true-3": {
+      "expected": "冒険はまだ続くけど、まずはいただきます！みんな一緒が、私の願いだよ。",
+      "reading": "ぼうけんは まだ つづくけど、まずは いただきます！みんな いっしょが、わたしの ねがいだよ。",
+      "sha256": "0f306ac9bae6fa461e8d592bf98748dde352c7c303d4d908551d61963bba45fa",
+      "recognized": "冒険はまだ続くけど、まずはいただきます。みんな一緒だ、私の願いだよ。",
+      "seconds": 6.6,
+      "reading_similarity": 0.974
+    },
+    "magic/SHIZUKU/vacation-endless-true-1": {
+      "expected": "守ることと閉じ込めることは、同じではありません。その証明ができました。",
+      "reading": "まもることと とじこめることは、おなじでは ありません。その しょうめいが できました。",
+      "sha256": "c4ad32441434b49ee4285f36c9aeba45d4344dbcf21a81bcd1530dff3e40a82b",
+      "recognized": "守ることと閉じ込めることは、同じではありません。その証明ができました。",
+      "seconds": 6.64,
+      "reading_similarity": 1.0
+    },
+    "magic/SHIZUKU/vacation-endless-true-2": {
+      "expected": "予測できない波も、悪くありませんね。今日は誤差ごと覚えておきます。",
+      "reading": "よそくできない なみも、わるく ありませんね。きょうは ごさごと おぼえて おきます。",
+      "sha256": "809d49a9ddf4e583bb04b02293139f7d7e05c049c4fa239243a06ab0ff7bbcc3",
+      "recognized": "予測できないなにも悪くありませんね 今日はご作戦を覚えておきます",
+      "seconds": 7.08,
+      "reading_similarity": 0.889
+    },
+    "magic/SHIZUKU/vacation-endless-true-3": {
+      "expected": "来年の夏も、私の意思でここへ来ます。よければ、隣を空けておいてください。",
+      "reading": "らいねんの なつも、わたしの いしで ここへ きます。よければ、となりを あけて おいて ください。",
+      "sha256": "76bbed101b74cecb6f630799109cc119465548081fc1cfa5dd56b888fb55fb26",
+      "recognized": "来年の夏も私の意志でここへ来ます。よければ隣分けておいてください。",
+      "seconds": 7.12,
+      "reading_similarity": 0.961
+    },
+    "magic/HIYORI/vacation-endless-true-1": {
+      "expected": "今日は私も、休ませてね。頼ることも、みんなを信じることなんだね。",
+      "reading": "きょうは わたしも、やすませてね。たよることも、みんなを しんじること なんだね。",
+      "sha256": "620ce23722b3f98263086acee7cb94b7fb077311c2d6afe49735598f9e7a46a8",
+      "recognized": "今日は私も休ませてね。頼ることも、みんなを信じることなんだね。",
+      "seconds": 9.1,
+      "reading_similarity": 1.0
+    },
+    "magic/HIYORI/vacation-endless-true-2": {
+      "expected": "元気なふりは、ここではお休み。波の音、一緒に聞こう。",
+      "reading": "げんきな ふりは、ここでは おやすみ。なみの おと、いっしょに きこう。",
+      "sha256": "d370e23bf92eaf626a8de8bef654a17407fe679b75585a9c3444b981c726f6a6",
+      "recognized": "元気なふりはここではお休み。波の音一緒に聴こう。",
+      "seconds": 7.52,
+      "reading_similarity": 1.0
+    },
+    "magic/HIYORI/vacation-endless-true-3": {
+      "expected": "私が治すだけじゃない。みんなで元気になって、また遊びに来ようね。",
+      "reading": "わたしが なおすだけじゃない。みんなで げんきに なって、また あそびに こようね。",
+      "sha256": "9f156fef42701035e50953da7283eadfaea149899ac51cc1f63f5d6438dcc1b6",
+      "recognized": "私が治すだけじゃない、みんなで元気になって、また遊びに来ようね。",
+      "seconds": 9.0,
+      "reading_similarity": 1.0
+    },
+    "magic/TSUBASA/vacation-endless-true-1": {
+      "expected": "見たか。壊したいものだけ壊せた。守りたいものは、ちゃんとここにある！",
+      "reading": "みたか。こわしたい ものだけ こわせた。まもりたい ものは、ちゃんと ここに ある！",
+      "sha256": "a344c09b631c6b86a46da11beedea4bec16d3c8a1d6263130bdf2dac5d900dd1",
+      "recognized": "見たか、壊したいものだけ壊せた、守りたいものはちゃんとここにある",
+      "seconds": 5.8,
+      "reading_similarity": 1.0
+    },
+    "magic/TSUBASA/vacation-endless-true-2": {
+      "expected": "全力だけが答えじゃないんだな。ちょうどいい熱さって、結構難しい！",
+      "reading": "ぜんりょくだけが こたえじゃないんだな。ちょうどいい あつさって、けっこう むずかしい！",
+      "sha256": "b08048deb819ca72ea6acfbcc86ff28398ff6198d4d90c09f209069e31967ac6",
+      "recognized": "全力だけが答えじゃないんだな ちょうどいい奴さって結構難しい",
+      "seconds": 5.52,
+      "reading_similarity": 0.974
+    },
+    "magic/TSUBASA/vacation-endless-true-3": {
+      "expected": "今日は一周、みんなで行こう。競走は、その後いくらでもできるさ！",
+      "reading": "きょうは いっしゅう、みんなで いこう。きょうそうは、その あと いくらでも できるさ！",
+      "sha256": "bf3728ba119626ad5e684e367fdc96565b11a04e604c53537f9ac496a43c2726",
+      "recognized": "今日は一周みんなで行こう。競争はその後いくらでもできるさ。",
+      "seconds": 4.72,
+      "reading_similarity": 1.0
+    },
+    "magic/REI/vacation-endless-true-1": {
+      "expected": "この印の意味は、これから私が決める。誰の命令にも預けはしない。",
+      "reading": "この しるしの いみは、これから わたしが きめる。だれの めいれいにも あずけは しない。",
+      "sha256": "fc6e5de7b6caf082c7ac3c6a22ce88f13c16ea44873a1974e10d34158bc74a94",
+      "recognized": "この印の意味は、これから私が決める。誰の命令にも預けはしない。",
+      "seconds": 6.64,
+      "reading_similarity": 0.93
+    },
+    "magic/REI/vacation-endless-true-2": {
+      "expected": "闇にも、休める場所を作る使い道がある。悪くないだろう。",
+      "reading": "やみにも、やすめる ばしょを つくる つかいみちが ある。わるくないだろう。",
+      "sha256": "3c1016a36847bd198394ef3d335c7689a39bec1a0b09475b1404b026c3688c0f",
+      "recognized": "闇にも、休める場所を作る使い道がある。 悪くないだろ。",
+      "seconds": 5.6,
+      "reading_similarity": 0.984
+    },
+    "magic/REI/vacation-endless-true-3": {
+      "expected": "一人で見張る夜は終わりだ。帰ろう。待っている者がいる。",
+      "reading": "ひとりで みはる よるは おわりだ。かえろう。まっている ものが いる。",
+      "sha256": "d9206749c360e6bb5e1201c3f341680c41e4eb2535418f51de23091c65e5f758",
+      "recognized": "一人で見張る夜は終わりだ。 帰ろう。待っている者がいる。",
+      "seconds": 5.72,
+      "reading_similarity": 1.0
+    },
+    "magic/MADOKA/vacation-endless-true-1": {
+      "expected": "この結果、保存します。間違えた時間も、なかったことにはしません。",
+      "reading": "この けっか、ほぞんします。まちがえた じかんも、なかったことには しません。",
+      "sha256": "dd088b7fa3f3adf4a23f04bf43deaca99d3825690272e9db3cb79bd2e4dbb52d",
+      "recognized": "の結果、保存します。 間違えた時間もなかったことにはしません。",
+      "seconds": 6.4,
+      "reading_similarity": 0.984
+    },
+    "magic/MADOKA/vacation-endless-true-2": {
+      "expected": "け、計測は休止です。今はただ、楽しいって言ってもいいですよね。",
+      "reading": "け、けいそくは きゅうしです。いまは ただ、たのしいって いっても いいですよね。",
+      "sha256": "3310370ede76de278675576c3eeb1b9376160f9fdb2e307981cd75d17d98ed36",
+      "recognized": "いけ、警告は休止です。 今はただ、楽しい一切も入れるね。",
+      "seconds": 6.8,
+      "reading_similarity": 0.781
+    },
+    "magic/MADOKA/vacation-endless-true-3": {
+      "expected": "予測不能、でも継続可能。次の実験にも、一緒に来てくれますか。",
+      "reading": "よそくふのう、でも けいぞくかのう。つぎの じっけんにも、いっしょに きてくれますか。",
+      "sha256": "e60d799fe8c4e4157a6f2e00106bd5ccb0f759a1e20de9c1c25b9b8705a2c517",
+      "recognized": "予測不納、でも継続可能。次の実験にも一緒に来てくれますな。",
+      "seconds": 8.4,
+      "reading_similarity": 0.972
+    },
+    "magic/KOHARU/vacation-endless-true-1": {
+      "expected": "聞こえる？木も海も、やっと同じ風で話せているよ。",
+      "reading": "きこえる？きも うみも、やっと おなじ かぜで はなせているよ。",
+      "sha256": "b19743f04c33b852baf52d8d734b787e19fee6b22450117fe76472fa30ab769c",
+      "recognized": "聞こえる?木も海もやっと同じ風で話せているよ。",
+      "seconds": 4.68,
+      "reading_similarity": 1.0
+    },
+    "magic/KOHARU/vacation-endless-true-2": {
+      "expected": "大きな魔法の次は、小さな片づけ。これも守り手の、大事な仕事だね。",
+      "reading": "おおきな まほうの つぎは、ちいさな かたづけ。これも まもりての、だいじな しごとだね。",
+      "sha256": "2d40dab8f27d6345c9955e0ad74858a3d45769bf79447c31b6f5373b5d26c794",
+      "recognized": "大きな魔法の次は小さな片付け。これも守り手の大事な仕事だね。",
+      "seconds": 6.48,
+      "reading_similarity": 1.0
+    },
+    "magic/KOHARU/vacation-endless-true-3": {
+      "expected": "全部を一人で見張らなくてもいい。次の風は、みんなで迎えよう。",
+      "reading": "ぜんぶを ひとりで みはらなくても いい。つぎの かぜは、みんなで むかえよう。",
+      "sha256": "9edfad69bfc899c994d1e2b633f438bb8313fa303e736e53b468fced8ae1786e",
+      "recognized": "全部を一人で見張らなくてもいい 次の風はみんなで迎えよう",
+      "seconds": 6.3,
+      "reading_similarity": 1.0
+    },
+    "magic/MIRAI/vacation-endless-true-1": {
+      "expected": "本当は怖かった。今だけは、上手に笑わなくてもいいでしょう？",
+      "reading": "ほんとうは こわかった。いまだけは、じょうずに わらわなくても いいでしょう？",
+      "sha256": "d81f89514cc2e71882bd2961b50e0bf3153bdf617b5080c7fa2d80aa0d800dc1",
+      "recognized": "本当は怖かった。 今だけは上手に笑わなくてもいいでしょ?",
+      "seconds": 5.68,
+      "reading_similarity": 0.985
+    },
+    "magic/MIRAI/vacation-endless-true-2": {
+      "expected": "今のは即興ってことにして！次の一節、みんなも一緒に歌ってね。",
+      "reading": "いまのは そっきょうって ことに して！つぎの いっせつ、みんなも いっしょに うたってね。",
+      "sha256": "7c0af5203693bd8dafbb0816fe13618b888d7543b1efa96c1e64b8b1156433d7",
+      "recognized": "今のは卒業ってことにした。 次の一説みんなも一緒に歌ってね。",
+      "seconds": 5.36,
+      "reading_similarity": 0.919
+    },
+    "magic/MIRAI/vacation-endless-true-3": {
+      "expected": "また見に来てね。次も、格好つかない私ごと届けるから。",
+      "reading": "また みに きてね。つぎも、かっこう つかない わたしごと とどけるから。",
+      "sha256": "b48fcc82094c0afcc0f03ca35ea54c0f8eabb4224a85580ea846392f76892875",
+      "recognized": "また見に来てね。 次も格好つかない私事届けるから。",
+      "seconds": 4.88,
+      "reading_similarity": 0.983
+    },
+    "magic/SERA/vacation-endless-true-1": {
+      "expected": "報告ではなく、私の思い出として。この夏を書いてもよいのですね。",
+      "reading": "ほうこくでは なく、わたしの おもいでとして。この なつを かいても よいのですね。",
+      "sha256": "50a91169e1b0922e78fcf7a94ce6fb900e3a4b8968e3408d5bdf74e9339d73cd",
+      "recognized": "報告ではなく、私の思い出としてこの夏を書いても良いのですね。",
+      "seconds": 6.52,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-endless-true-2": {
+      "expected": "冷たい、でも楽しい！この順番は、実際に来なければわかりませんでした。",
+      "reading": "つめたい、でも たのしい！この じゅんばんは、じっさいに こなければ わかりませんでした。",
+      "sha256": "f6d57b9590b7770c029190b04481d1c9bc46eb8b6f9547d90bfdd1a211056384",
+      "recognized": "寝たい、でも楽しい。この順番は実際に来なければ分かりませんでした。",
+      "seconds": 6.6,
+      "reading_similarity": 0.959
+    },
+    "magic/SERA/vacation-endless-true-3": {
+      "expected": "また来ます。この世界にも、向こうの世界にも、私のただいまを届けます。",
+      "reading": "また きます。この せかいにも、むこうの せかいにも、わたしの ただいまを とどけます。",
+      "sha256": "b75c30f7023b49d2f0adfbd14ebb813af9740ce3e51165f02f071650fa09f228",
+      "recognized": "また来ます。この世界にも、向こうの世界にも、私のただいまを届けます。",
+      "seconds": 7.08,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-endless-true-1": {
+      "expected": "もう平気だ。今度は俺も、みんなの隣で海を見ていていいよな。",
+      "reading": "もう へいきだ。こんどは おれも、みんなの となりで うみを みていて いいよな。",
+      "sha256": "bf4163aa6aa302e463ec4e0b611607b6a0e26581020ea9043439d1203b2bf96b",
+      "recognized": "もう平気だ。今度は俺もみんなの隣で海を見ていていいよな。",
+      "seconds": 6.2,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-endless-true-2": {
+      "expected": "俺が知らない景色もあるんだな。今日はそっちの案内を頼むよ。",
+      "reading": "おれが しらない けしきも あるんだな。きょうは そっちの あんないを たのむよ。",
+      "sha256": "c8fe213b6ef9e6ff7cb0007dfefbdfbed75ce3775809d988511798436fcce20a",
+      "recognized": "俺が知らない景色もあるんだな。今日は、そっちの案内を頼むよ。",
+      "seconds": 5.4,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-endless-true-3": {
+      "expected": "次は最初から、遊びに来よう。荷物は半分ずつ。それなら文句ないだろ。",
+      "reading": "つぎは さいしょから、あそびに こよう。にもつは はんぶんずつ。それなら もんく ないだろ。",
+      "sha256": "7f6f9e62b62a88b919825ea194e17880b31428467b95f5c8396b6d4a1e4ebf6e",
+      "recognized": "次は最初から遊びに行こうよ荷物は半分ずつそれなら文句ないだよ",
+      "seconds": 7.12,
+      "reading_similarity": 0.933
+    },
+    "magic/SOMA/vacation-endless-true-1": {
+      "expected": "規則は人のためにある。逆にしてしまえば、守る意味がない。",
+      "reading": "きそくは ひとの ために ある。ぎゃくに してしまえば、まもる いみが ない。",
+      "sha256": "f09cd7bd14100468cd45b4e5d68790bea2c0434c02a7ce29a517d6e52b7a2517",
+      "recognized": "規則はそのためにある逆にしてしまえば守る意味はない",
+      "seconds": 5.0,
+      "reading_similarity": 0.915
+    },
+    "magic/SOMA/vacation-endless-true-2": {
+      "expected": "完璧な温度でなくても、うまいものはうまい。そういう例外も必要だな。",
+      "reading": "かんぺきな おんどでなくても、うまいものは うまい。そういう れいがいも ひつようだな。",
+      "sha256": "7d338b784b2eb2cd3dbbf00ffe58ed7977af3c6f6f74c429e36048f249610eaf",
+      "recognized": "完璧な温度でなくても上手いものはうまいそういう例外も必要だな",
+      "seconds": 5.64,
+      "reading_similarity": 1.0
+    },
+    "magic/SOMA/vacation-endless-true-3": {
+      "expected": "来年の計画は、皆で作ろう。私一人では、今日ほど良い夏にはできない。",
+      "reading": "らいねんの けいかくは、みなで つくろう。わたし ひとりでは、きょうほど よい なつには できない。",
+      "sha256": "e4afb0acb041a58efb3b0f89b5a93ee2d47e82b3fd7c6040ad15e73a593bf5b3",
+      "recognized": "来年の計画はみんなで作ろう私一人では今日ほど良い夏にはできない",
+      "seconds": 6.28,
+      "reading_similarity": 0.902
+    },
+    "magic/MINATO/vacation-endless-true-1": {
+      "expected": "怖くなくなったわけじゃないです。でも、怖いままでも届きました。",
+      "reading": "こわく なくなった わけじゃないです。でも、こわい ままでも とどきました。",
+      "sha256": "e07f3e515c9acbd6545394ed6b8e65a82f227363a1b61ba421672da79302ef51",
+      "recognized": "怖く亡くなったわけじゃないです。でも、怖いままでも飛ぶつまさ。",
+      "seconds": 5.4,
+      "reading_similarity": 0.885
+    },
+    "magic/MINATO/vacation-endless-true-2": {
+      "expected": "あの、僕が見つけた場所があるんです。一緒に見てもらえませんか。",
+      "reading": "あの、ぼくが みつけた ばしょが あるんです。いっしょに みてもらえませんか。",
+      "sha256": "44cd85e073b21fb0294a6c063e8e74f8a6328d029d0c288e4099f637a7bc48c4",
+      "recognized": "あの、僕が見つけた場所があるんです。一緒に見てもらえませんか?",
+      "seconds": 4.92,
+      "reading_similarity": 1.0
+    },
+    "magic/MINATO/vacation-endless-true-3": {
+      "expected": "次の夏は、僕が計画してみます。まだ小さな案ですけど、聞いてください。",
+      "reading": "つぎの なつは、ぼくが けいかくしてみます。まだ ちいさな あんですけど、きいてください。",
+      "sha256": "88e4ace47878c1bd31c2e68549382b94de0989339366c0b596f35a1dce7c8f84",
+      "recognized": "次の夏は、僕が計画してみます。まだ小さな案ですけど、聞いてください。",
+      "seconds": 6.12,
+      "reading_similarity": 1.0
+    },
+    "magic/RIKU/vacation-endless-true-1": {
+      "expected": "結末の先読みは、ここまで。知らない朝も、なかなか楽しそうだ。",
+      "reading": "けつまつの さきよみは、ここまで。しらない あさも、なかなか たのしそうだ。",
+      "sha256": "3b36739d7934302d6007972b1c1e488029237548f6cbc5de34163d3579fb8707",
+      "recognized": "結末の先読みはここまで。知らない朝もなかなか楽しそうだ。",
+      "seconds": 5.72,
+      "reading_similarity": 1.0
+    },
+    "magic/RIKU/vacation-endless-true-2": {
+      "expected": "釣果はゼロでも、話は増えた。これ、かなり得した時間じゃない？",
+      "reading": "ちょうかは ぜろでも、はなしは ふえた。これ、かなり とくした じかんじゃない？",
+      "sha256": "c99ef9e53a858bef5df94442a3be1a5fc6c54f30f50fa4948115b9c1c629d317",
+      "recognized": "超過はゼロでも話は増えだこれ かなり得した時間じゃない",
+      "seconds": 5.36,
+      "reading_similarity": 0.921
+    },
+    "magic/RIKU/vacation-endless-true-3": {
+      "expected": "来年も来るよ。約束したから、って未来なら、自分で作れるしね。",
+      "reading": "らいねんも くるよ。やくそくしたから、って みらいなら、じぶんで つくれるしね。",
+      "sha256": "b93e187d344bc54866d1b55e1e2d275f8238dd8f7032e282020207732969be31",
+      "recognized": "来年も来るよう約束したから手未来なら自分で作れるしねー",
+      "seconds": 5.56,
+      "reading_similarity": 0.955
+    },
+    "magic/YAMATO/vacation-endless-true-1": {
+      "expected": "終わりだ。もう誰も、強い弱いで居場所を決められねえ。",
+      "reading": "おわりだ。もう だれも、つよい よわいで いばしょを きめられねえ。",
+      "sha256": "e7f9a9f524a1cc3f53f8a0e8e9ff87b9690c0f93acd58eb3dcad626244464d22",
+      "recognized": "終わりだもう誰も強い弱いで居場所を決められねー",
+      "seconds": 5.56,
+      "reading_similarity": 0.963
+    },
+    "magic/YAMATO/vacation-endless-true-2": {
+      "expected": "座ってみろよ。今度は壊してねえ。ちゃんと直した方だ。",
+      "reading": "すわってみろよ。こんどは こわしてねえ。ちゃんと なおした ほうだ。",
+      "sha256": "a411dc3b45162110064bf5f5c71af3c652425e969b13dbbee709c28c24d3df78",
+      "recognized": "座ってみろよ 今度は壊してねちゃんと直した方だ",
+      "seconds": 5.4,
+      "reading_similarity": 0.982
+    },
+    "magic/YAMATO/vacation-endless-true-3": {
+      "expected": "また来るぞ。別に勝負じゃなくていい。ただ、楽しかったからだ。",
+      "reading": "また くるぞ。べつに しょうぶじゃなくて いい。ただ、たのしかったからだ。",
+      "sha256": "44840575d0ef1d5bd25b85ccda64904eb94e8d8c47e27c0161594f57dea4752d",
+      "recognized": "また来るぞ。別に勝負じゃなくていい。ただ、楽しかったからだ。",
+      "seconds": 6.44,
+      "reading_similarity": 1.0
+    },
+    "magic/LEON/vacation-endless-true-1": {
+      "expected": "観客を操る舞台は終幕だ。拍手がなくても、僕の音はここに残る。",
+      "reading": "かんきゃくを あやつる ぶたいは しゅうまくだ。はくしゅが なくても、ぼくの おとは ここに のこる。",
+      "sha256": "8fb9999da08a1e46be6fdfdcf12651aad3fa8270e7aae3b3c3338739eee4d5eb",
+      "recognized": "観客を操る舞台はしうまくだ。拍手がなくても、僕の音はここに残る。",
+      "seconds": 6.72,
+      "reading_similarity": 0.988
+    },
+    "magic/LEON/vacation-endless-true-2": {
+      "expected": "天才にも練習は必要さ。その証人になってくれるなら、特等席をあげよう。",
+      "reading": "てんさいにも れんしゅうは ひつようさ。その しょうにんに なってくれるなら、とくとうせきを あげよう。",
+      "sha256": "d7b64bf2351ca8fe749e0c4bdb314ec56f37325efd8192096e43634f42eeb46b",
+      "recognized": "天才にも練習は必要さ。その承認になってくれるなら、特等席をあげよう。",
+      "seconds": 6.64,
+      "reading_similarity": 1.0
+    },
+    "magic/LEON/vacation-endless-true-3": {
+      "expected": "次も君に驚いてほしい。僕も、君の次の一手を楽しみにしている。",
+      "reading": "つぎも きみに おどろいて ほしい。ぼくも、きみの つぎの いってを たのしみに している。",
+      "sha256": "262871b0d943506ab4d58d3c42f196a091e7f80436bb420802fa669ee3cd2d90",
+      "recognized": "次も君に驚いて欲しい 僕も君の次の一手を楽しみにしている",
+      "seconds": 7.0,
+      "reading_similarity": 0.889
+    },
+    "magic/ELLIOT/vacation-endless-true-1": {
+      "expected": "これは私だけの秘密にはしません。読んで、疑って、皆さんの言葉をください。",
+      "reading": "これは わたしだけの ひみつには しません。よんで、うたがって、みなさんの ことばを ください。",
+      "sha256": "01ca7f67f3f50fed82af58319aee692d7a5b5f13ac96646ef97f99351156324b",
+      "recognized": "これは私の秘密にはしません 読んで読んで疑って皆さんの言葉をくだされ",
+      "seconds": 8.2,
+      "reading_similarity": 0.911
+    },
+    "magic/ELLIOT/vacation-endless-true-2": {
+      "expected": "説明する前に、味わうべきでしたね。これは、よい未知です。",
+      "reading": "せつめいする まえに、あじわうべきでしたね。これは、よい みちです。",
+      "sha256": "5a4d22c25d4b45295f03e47dfe77ec6a093dd1924904324be6cbf18b5e9576d2",
+      "recognized": "説明する前に味わうべきでしたね これは良い日です",
+      "seconds": 5.84,
+      "reading_similarity": 0.964
+    },
+    "magic/ELLIOT/vacation-endless-true-3": {
+      "expected": "次の頁は、あなたからどうぞ。私の知らない夏を、ぜひ教えてください。",
+      "reading": "つぎの ぺーじは、あなたから どうぞ。わたしの しらない なつを、ぜひ おしえて ください。",
+      "sha256": "eaa7dd5915e9e26c08a287d0b01aff17351323627db9fc650f9fff07b0ea0806",
+      "recognized": "次の提示はあなたからどうぞ 私の知らない夏をぜひ教えてください",
+      "seconds": 6.72,
+      "reading_similarity": 0.944
+    },
+    "magic/SAKUYA/vacation-endless-true-1": {
+      "expected": "命令は終わった。ならば、ここからの行いは全て私自身の責任だ。",
+      "reading": "めいれいは おわった。ならば、ここからの おこないは すべて わたしじしんの せきにんだ。",
+      "sha256": "516dc05f84b3a85a02106d2705dc040ef07b949ae11035e2e6e52792c47948da",
+      "recognized": "名は終わった ならばここからに行こないわ すべて私自身につきにいた",
+      "seconds": 7.6,
+      "reading_similarity": 0.778
+    },
+    "magic/SAKUYA/vacation-endless-true-2": {
+      "expected": "忘れろとは言わない。通れる道を戻す。それが、今できることだ。",
+      "reading": "わすれろとは いわない。とおれる みちを もどす。それが、いま できることだ。",
+      "sha256": "b1e3c9a576c24b81ee95002c53a5f99533abaa248d92cb804542ea7c066e2090",
+      "recognized": "忘れるとは言わない 通れに気持ち戻すそれが 今できることだ",
+      "seconds": 8.4,
+      "reading_similarity": 0.839
+    },
+    "magic/SAKUYA/vacation-endless-true-3": {
+      "expected": "次は塞ぐためではなく、渡るために来る。その時も、ここにいてくれ。",
+      "reading": "つぎは ふさぐ ためでは なく、わたる ために くる。その ときも、ここに いてくれ。",
+      "sha256": "e7962c443b079489f32d164f90fca8b51f75145b7af9d9b72efda2a867799c35",
+      "recognized": "次は去るためではなく 渡るためにくその時もここにいてくれ",
+      "seconds": 7.12,
+      "reading_similarity": 0.935
+    },
+    "magic/AKARI/vacation-friendship-akari-shizuku-1": {
+      "expected": "次はあの岬！しずく、寄り道込みで道をお願い！",
+      "reading": "つぎは あの みさき！しずく、よりみちこみで みちを おねがい！",
+      "sha256": "9bb56038a2ac3eb55ef55e43ff10cb53051f53ac25892ae82ec5a730332614ad",
+      "recognized": "次はあの見先。静く、寄り道込みで道をお願い。",
+      "seconds": 4.76,
+      "reading_similarity": 0.941
+    },
+    "magic/SHIZUKU/vacation-friendship-akari-shizuku-2": {
+      "expected": "迷子の分も確保済みです。今度は私も、寄り道を選びますね。",
+      "reading": "まいごの ぶんも かくほずみです。こんどは わたしも、よりみちを えらびますね。",
+      "sha256": "7654bab8a782680120fccae9fe2cd7aae386d1cbd65c04b91547fddaf89933a3",
+      "recognized": "毎後の分を確保ずにです。今度の私も寄り道を選びますね。",
+      "seconds": 6.28,
+      "reading_similarity": 0.836
+    },
+    "magic/AKARI/vacation-friendship-akari-tsubasa-1": {
+      "expected": "勝ったけど、休憩は一緒ね。つばさの走り、まぶしかった！",
+      "reading": "かったけど、きゅうけいは いっしょね。つばさの はしり、まぶしかった！",
+      "sha256": "c20dfb6ce98fc934cfd00c8878bfcf3c04b72fc027964324f2d57c61d88ec475",
+      "recognized": "勝ったけど、休憩は一緒ね!翼の走り、眩しかった!",
+      "seconds": 5.0,
+      "reading_similarity": 1.0
+    },
+    "magic/TSUBASA/vacation-friendship-akari-tsubasa-2": {
+      "expected": "次は負けない！でも、その前にちゃんと水分補給だな。",
+      "reading": "つぎは まけない！でも、その まえに ちゃんと すいぶんほきゅうだな。",
+      "sha256": "f03d76a0f70afc8f166e032308c3392e04ad5d1e85d6cdd7c49db659ba02912b",
+      "recognized": "次は負けないでも、その前にちゃんと水軍補給だな",
+      "seconds": 4.48,
+      "reading_similarity": 0.964
+    },
+    "magic/SHIZUKU/vacation-friendship-shizuku-akari-1": {
+      "expected": "今夜は観測記録を休みます。あなたの星の話を聞かせてください。",
+      "reading": "こんやは かんそくきろくを やすみます。あなたの ほしの はなしを きかせてください。",
+      "sha256": "a01de4b4c01052f293d85c7c60f41128780923b6685c0b87ca3416b01a360207",
+      "recognized": "今夜は観測記録をやってみますあなたの星の話をさせてください",
+      "seconds": 5.96,
+      "reading_similarity": 0.917
+    },
+    "magic/AKARI/vacation-friendship-shizuku-akari-2": {
+      "expected": "任せて！名前のない星にも、二人だけの呼び方をつけよう！",
+      "reading": "まかせて！なまえの ない ほしにも、ふたりだけの よびかたを つけよう！",
+      "sha256": "e975bcaeccb4063b0df6e97d112a219f4350c054ed1c24d9ea0a1743da9b0614",
+      "recognized": "任せて!名前のない星にも二人だけの呼び方をつけよう!",
+      "seconds": 5.04,
+      "reading_similarity": 1.0
+    },
+    "magic/SHIZUKU/vacation-friendship-shizuku-madoka-1": {
+      "expected": "本日の研究課題は、休憩を最後まで楽しむことです。",
+      "reading": "ほんじつの けんきゅうかだいは、きゅうけいを さいごまで たのしむことです。",
+      "sha256": "1e74dc42eb39b802b59a0f97cd7e15d07306530d6cc74d304a3011f863cff7a6",
+      "recognized": "本日の研究サダグは休憩を最後まで楽しめることで、それ",
+      "seconds": 5.28,
+      "reading_similarity": 0.853
+    },
+    "magic/MADOKA/vacation-friendship-shizuku-madoka-2": {
+      "expected": "そ、それなら装置はいりませんね。おかわりを頼んでもいいですか。",
+      "reading": "そ、それなら そうちは いりませんね。おかわりを たのんでも いいですか。",
+      "sha256": "214301ef3c7a68d3e8a5bde300a5cc031215238dbcdcb5dc6ba083fb332f551f",
+      "recognized": "なら装置はいりませんね。おかわりを頼んでのはいいですか?",
+      "seconds": 6.2,
+      "reading_similarity": 0.897
+    },
+    "magic/HIYORI/vacation-friendship-hiyori-koharu-1": {
+      "expected": "今日は私たちも座ろう。花を眺めるだけの時間も必要だね。",
+      "reading": "きょうは わたしたちも すわろう。はなを ながめるだけの じかんも ひつようだね。",
+      "sha256": "c005f3f1cb9aacb09f4199c6fe81d36c733e46aff1b63fa1873cbec6abacbb7e",
+      "recognized": "今日は私たちも座ろう。花を眺めるだけの時間も必要だね。",
+      "seconds": 6.84,
+      "reading_similarity": 1.0
+    },
+    "magic/KOHARU/vacation-friendship-hiyori-koharu-2": {
+      "expected": "うん。風にも少し、私たちを世話してもらおう。",
+      "reading": "うん。かぜにも すこし、わたしたちを せわしてもらおう。",
+      "sha256": "9acdf8b42511363ce6abb45ede8d2cc9742aa231e5c39d0f96faf6cb5472a999",
+      "recognized": "うん、風にも少し私たちをせわしてもらおう。",
+      "seconds": 4.16,
+      "reading_similarity": 1.0
+    },
+    "magic/HIYORI/vacation-friendship-hiyori-sera-1": {
+      "expected": "元気のためには、何もしない日も処方しなくちゃね。",
+      "reading": "げんきの ためには、なにもしない ひも しょほうしなくちゃね。",
+      "sha256": "46771be00901663ea39f6e16fd594196971cb195cdf3a25a8846f0756f5e1dcd",
+      "recognized": "元気のためには何もしない日も処方しなくちゃね",
+      "seconds": 5.84,
+      "reading_similarity": 0.943
+    },
+    "magic/SERA/vacation-friendship-hiyori-sera-2": {
+      "expected": "では一緒に実践します。ひより自身の分も、忘れずに。",
+      "reading": "では いっしょに じっせんします。ひより じしんの ぶんも、わすれずに。",
+      "sha256": "7147d30f4dda9f2515ddb32a2fa841a8929bd3ab5815b66a1cf81b3fd93aa35a",
+      "recognized": "では一緒に実践します。日寄り自身の分も忘れずに。",
+      "seconds": 5.32,
+      "reading_similarity": 0.915
+    },
+    "magic/TSUBASA/vacation-friendship-tsubasa-akari-1": {
+      "expected": "ほら、起きろ！次は競走じゃなくて、二人で大波に挑戦だ！",
+      "reading": "ほら、おきろ！つぎは きょうそうじゃなくて、ふたりで おおなみに ちょうせんだ！",
+      "sha256": "3b78ff1c14dec8e06f87bbe9bf92f9eac98cef1d13a6689d91e4bf7f04b7c8f3",
+      "recognized": "ほら、起きろ。次は競争じゃなくて、二人で大波に挑戦だ。",
+      "seconds": 4.92,
+      "reading_similarity": 1.0
+    },
+    "magic/AKARI/vacation-friendship-tsubasa-akari-2": {
+      "expected": "いいね！今度の勝利は、二人で一個にしよう！",
+      "reading": "いいね！こんどの しょうりは、ふたりで いっこに しよう！",
+      "sha256": "e1f5bd1711e415007e19e4656551a82d7029bfb023304a46cadbac48eb52ba77",
+      "recognized": "いいねー。今度の勝利は二人で一個にしよう。",
+      "seconds": 4.0,
+      "reading_similarity": 0.979
+    },
+    "magic/TSUBASA/vacation-friendship-tsubasa-rei-1": {
+      "expected": "どうだ、この火加減！今日は誰もびっくりさせないぞ。",
+      "reading": "どうだ、この ひかげん！きょうは だれも びっくりさせないぞ。",
+      "sha256": "996690c6f79869439ecbf2ee93b574a96ed4a62b6a8fffc07d993529b595957e",
+      "recognized": "どうだ、この日加減。今日は誰もびっくりさせないぞ。",
+      "seconds": 3.72,
+      "reading_similarity": 0.941
+    },
+    "magic/REI/vacation-friendship-tsubasa-rei-2": {
+      "expected": "合格だ。小さな火を守る方が、あなたには難しいらしいな。",
+      "reading": "ごうかくだ。ちいさな ひを まもる ほうが、あなたには むずかしいらしいな。",
+      "sha256": "aadb0ca25eb2b720d03e3e5b4cf4a3fc170cdef8691eb510d504a4b4f0e7c05b",
+      "recognized": "大格だ。小さな被害のモルフォールを、あなたには難しいらしいな。",
+      "seconds": 6.0,
+      "reading_similarity": 0.738
+    },
+    "magic/REI/vacation-friendship-rei-tsubasa-1": {
+      "expected": "この程度の闇なら、怖くはないだろう。灯りがよく見える。",
+      "reading": "この ていどの やみなら、こわくは ないだろう。あかりが よく みえる。",
+      "sha256": "22f05f01037ac9affc2bb58f0e4a97a13511e4db26ffe87573237d92878f23f3",
+      "recognized": "この程度の闇なら、怖くはないだろう。明かりがよく見える。",
+      "seconds": 5.48,
+      "reading_similarity": 1.0
+    },
+    "magic/TSUBASA/vacation-friendship-rei-tsubasa-2": {
+      "expected": "怖いもんか。れいが隣にいる夜だぞ。一番安心だ！",
+      "reading": "こわいもんか。れいが となりに いる よるだぞ。いちばん あんしんだ！",
+      "sha256": "7cbe64da9d0e842c1269049303019138f6b8a15d2cb8aff8000bee39066f22fe",
+      "recognized": "怖いもんか。手が隣にいるようだぞ。いつも安心だ。",
+      "seconds": 4.64,
+      "reading_similarity": 0.815
+    },
+    "magic/REI/vacation-friendship-rei-sera-1": {
+      "expected": "照らせない場所は、私が見ておく。光だけに無理をさせるな。",
+      "reading": "てらせない ばしょは、わたしが みておく。ひかりだけに むりを させるな。",
+      "sha256": "7a7a9a8b3e4a498405efd48d14c7fa23dd0a28e6c9cb85d24fe9c94fc64fe7fe",
+      "recognized": "照らせない場所は、私が見ておく、光だけに無理をさせるな。",
+      "seconds": 5.56,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-friendship-rei-sera-2": {
+      "expected": "はい。帰る時は、れいの足元にも灯りを置きますね。",
+      "reading": "はい。かえる ときは、れいの あしもとにも あかりを おきますね。",
+      "sha256": "30d5c7ca0e5c72a26c1c324587f12ebc89658a2eb2d13d8668e0e49b1198a64c",
+      "recognized": "はい。帰る時は、霊の明日にも明かりを起きますね。",
+      "seconds": 5.12,
+      "reading_similarity": 0.941
+    },
+    "magic/MADOKA/vacation-friendship-madoka-shizuku-1": {
+      "expected": "今日は、お茶が冷めるまで帰らない実験にしませんか。",
+      "reading": "きょうは、おちゃが さめるまで かえらない じっけんに しませんか。",
+      "sha256": "fd3b226f90e29a6bfaa08251706c087b0b93cf62bf4a48d25945bcdf74282177",
+      "recognized": "今日は、ご茶が覚めるまで、帰らない実験にしませんか?",
+      "seconds": 4.6,
+      "reading_similarity": 0.964
+    },
+    "magic/SHIZUKU/vacation-friendship-madoka-shizuku-2": {
+      "expected": "温かいおかわりを頼めば、かなり長い実験になりますね。",
+      "reading": "あたたかい おかわりを たのめば、かなり ながい じっけんに なりますね。",
+      "sha256": "6ba0b7aa18f09df7b02b004c088c52b904ad90abad49303f62ec09237c70e191",
+      "recognized": "温かいおかわりを守れば、かなり長い実験になりますね。",
+      "seconds": 4.92,
+      "reading_similarity": 0.9
+    },
+    "magic/MADOKA/vacation-friendship-madoka-mirai-1": {
+      "expected": "今の一拍、ずれました。でも、直さなくてもいい気がします。",
+      "reading": "いまの いっぱく、ずれました。でも、なおさなくても いい きが します。",
+      "sha256": "8b13e5750d4b0d1e44ae89ad7e142c49a73075f8deacbbeb587f7268dc4a2f3f",
+      "recognized": "今の一泊、触れました。でも、直さなくてもいい気がします。",
+      "seconds": 5.64,
+      "reading_similarity": 0.964
+    },
+    "magic/MIRAI/vacation-friendship-madoka-mirai-2": {
+      "expected": "そう、それが生演奏！もう一回、今の私たちで奏でよう！",
+      "reading": "そう、それが なまえんそう！もういっかい、いまの わたしたちで かなでよう！",
+      "sha256": "b9bc216e1ab40ef9adaf6269c690d9291eae0f7a2397910b5ffe2d768b491ae0",
+      "recognized": "そう、それが名前そう。もう一回、今の私たちで奏でよ。",
+      "seconds": 5.44,
+      "reading_similarity": 0.967
+    },
+    "magic/KOHARU/vacation-friendship-koharu-hiyori-1": {
+      "expected": "水やりは終わり。次は私たちに、冷たい飲み物をあげよう。",
+      "reading": "みずやりは おわり。つぎは わたしたちに、つめたい のみものを あげよう。",
+      "sha256": "8d3504d5a845d1cb9227eab339ce21af63a22689259122ce04d196a315ea69b2",
+      "recognized": "水やりは終わり、次は私たちに冷たい飲み物をあげよう。",
+      "seconds": 5.28,
+      "reading_similarity": 1.0
+    },
+    "magic/HIYORI/vacation-friendship-koharu-hiyori-2": {
+      "expected": "賛成。こはるちゃんが座るまで、私もちゃんと待ってるよ。",
+      "reading": "さんせい。こはるちゃんが すわるまで、わたしも ちゃんと まってるよ。",
+      "sha256": "5e5267c3d7d0f6c7c4f79767f9397a1e32c20adc5c8117e812d225b4d79fcd87",
+      "recognized": "賛成!コハルちゃんが座るまで、私もちゃんと待ってるよ。",
+      "seconds": 6.56,
+      "reading_similarity": 1.0
+    },
+    "magic/KOHARU/vacation-friendship-koharu-sera-1": {
+      "expected": "海の匂いまで、届くかな。向こうの森にも挨拶したいね。",
+      "reading": "うみの においまで、とどくかな。むこうの もりにも あいさつしたいね。",
+      "sha256": "ad3d0f5ddb17c82458f0f10ec39b6f5235e594ef8e1309a1c9c0cadb083d855f",
+      "recognized": "海の匂いまで届くかな? 向こうの森にも挨拶したいね",
+      "seconds": 4.92,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-friendship-koharu-sera-2": {
+      "expected": "今度は私が案内します。帰りの風も、一緒に探しましょう。",
+      "reading": "こんどは わたしが あんないします。かえりの かぜも、いっしょに さがしましょう。",
+      "sha256": "b498d5f1847fb00cc5b36a2885d424fa622d76c6bbc8b6c187a9e419b83cbb34",
+      "recognized": "今度は私が案内します帰りの風も一緒にかふます名",
+      "seconds": 6.7,
+      "reading_similarity": 0.836
+    },
+    "magic/MIRAI/vacation-friendship-mirai-madoka-1": {
+      "expected": "時計は置いてきて。今日はまどか自身の拍手を聞いてほしいの。",
+      "reading": "とけいは おいてきて。きょうは まどか じしんの はくしゅを きいて ほしいの。",
+      "sha256": "add53cc66d39696e82d6b56e7fc1d82a30b41182de96c86b5f269a5ba06b6f14",
+      "recognized": "時計は置いてきて今日はまどか自身が拍手を聞いて欲しいの",
+      "seconds": 4.84,
+      "reading_similarity": 0.969
+    },
+    "magic/MADOKA/vacation-friendship-mirai-madoka-2": {
+      "expected": "ひ、人前は苦手です。でも、一緒なら一礼くらいは。",
+      "reading": "ひ、ひとまえは にがてです。でも、いっしょなら いちれいくらいは。",
+      "sha256": "dc0dea72af9753a8b40906b77a76bbe431b32e674cab526c5f09a8faeab9e8c7",
+      "recognized": "きっこ前は苦手ですでも一緒なら一回辛いわ",
+      "seconds": 6.2,
+      "reading_similarity": 0.741
+    },
+    "magic/MIRAI/vacation-friendship-mirai-hiyori-1": {
+      "expected": "今日はもう、笑顔を作れないかも。それでも一緒にいてくれる？",
+      "reading": "きょうは もう、えがおを つくれないかも。それでも いっしょに いてくれる？",
+      "sha256": "880cca76f62f04ffc0fbdc85036bd1b30964ea4b42dc48bd6176ad8507cb4523",
+      "recognized": "今日はもう笑顔を作れないかもそれでも一緒にいてくれる?",
+      "seconds": 5.32,
+      "reading_similarity": 1.0
+    },
+    "magic/HIYORI/vacation-friendship-mirai-hiyori-2": {
+      "expected": "もちろん。海は、黙って見ていてもきれいだよ。",
+      "reading": "もちろん。うみは、だまって みていても きれいだよ。",
+      "sha256": "09ecf1a0ea77ead4b341a22897f946cd171bab7d648b984c16781940917d5840",
+      "recognized": "もちろん海は黙って見ていても綺麗だよ",
+      "seconds": 5.8,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-friendship-sera-hiyori-1": {
+      "expected": "摘まない記録もあるのですね。花には、その方がよい思い出です。",
+      "reading": "つまない きろくも あるのですね。はなには、その ほうが よい おもいでです。",
+      "sha256": "be5f29619a8187f3378e6e3bd50b9f37bd688a2cf71e1280ace89c7212fdffdb",
+      "recognized": "済まない記録もあるのですね花にはその方が良い思い出です",
+      "seconds": 6.08,
+      "reading_similarity": 0.968
+    },
+    "magic/HIYORI/vacation-friendship-sera-hiyori-2": {
+      "expected": "来年また会えるね。セラちゃんとも、この花とも。",
+      "reading": "らいねん また あえるね。せらちゃんとも、この はなとも。",
+      "sha256": "6649915837219f53b207b4533c6e77a891c4532f028b8f6bf1b18705a6b90b46",
+      "recognized": "来年また会えるねセラちゃんともこの花とも",
+      "seconds": 5.6,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-friendship-sera-rei-1": {
+      "expected": "暗いから見える星もある。れいが、この夜を教えてくれました。",
+      "reading": "くらいから みえる ほしも ある。れいが、この よるを おしえてくれました。",
+      "sha256": "16ac45ae8ac3b64da4842d58fc77c1a2c6a70f19b687a534a8e8b8530499ded2",
+      "recognized": "フライから見える星もある。レイガー、この夜を教えてくれました。",
+      "seconds": 6.04,
+      "reading_similarity": 0.951
+    },
+    "magic/REI/vacation-friendship-sera-rei-2": {
+      "expected": "ならば覚えておけ。帰る道を忘れたら、私が連れて帰る。",
+      "reading": "ならば おぼえておけ。かえる みちを わすれたら、わたしが つれて かえる。",
+      "sha256": "76f47ce8f34af1c9e1a015205b163bf9da1b371d33b7611ae18f7909ead2da44",
+      "recognized": "ならば覚えておけ。帰る道を忘れたら、私が連れて帰る。",
+      "seconds": 5.84,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-friendship-ren-yamato-1": {
+      "expected": "助かった。次は壊れる前に、こうやって一緒に直そうな。",
+      "reading": "たすかった。つぎは こわれる まえに、こうやって いっしょに なおそうな。",
+      "sha256": "c3c37c5af6d9eb4369e92be2df749b34f0996dd604732fc7e901843fef7c5ceb",
+      "recognized": "助かった。次は壊れる前に、こうやって一緒に直そうな。",
+      "seconds": 6.0,
+      "reading_similarity": 1.0
+    },
+    "magic/YAMATO/vacation-friendship-ren-yamato-2": {
+      "expected": "言われなくても手伝うっての。お前も、一人で運ぶなよ。",
+      "reading": "いわれなくても てつだうっての。おまえも、ひとりで はこぶなよ。",
+      "sha256": "37f4cb5aa6a6b259259892c6fa29031d761e69d2cc7bc41da8d6a7e1bc1feca0",
+      "recognized": "言われなくても手伝うっての。お前も一人で運ぶなよ。",
+      "seconds": 5.12,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-friendship-ren-minato-1": {
+      "expected": "いい場所だな。俺の知らない道、次も案内してくれよ。",
+      "reading": "いい ばしょだな。おれの しらない みち、つぎも あんないしてくれよ。",
+      "sha256": "d679132aebcbb42db24df634a09f946f8726ae0d421009a4385f7281f03e9867",
+      "recognized": "いい場所だな。俺の知らない道、次も案内してくれよ。",
+      "seconds": 5.32,
+      "reading_similarity": 1.0
+    },
+    "magic/MINATO/vacation-friendship-ren-minato-2": {
+      "expected": "はい。次は迷わず誘います。先輩の分の地図も作ってきます！",
+      "reading": "はい。つぎは まよわず さそいます。せんぱいの ぶんの ちずも つくってきます！",
+      "sha256": "504fb230cc75f8caf640df99f20a937693dcd6165126898fff76b80fc97fe82b",
+      "recognized": "はい。次は迷わず誘います。先輩の分の地図も作ってきます。",
+      "seconds": 5.28,
+      "reading_similarity": 0.969
+    },
+    "magic/SOMA/vacation-friendship-soma-riku-1": {
+      "expected": "この空欄は、あえて残す。行き先は歩きながら相談しよう。",
+      "reading": "この くうらんは、あえて のこす。いきさきは あるきながら そうだんしよう。",
+      "sha256": "a929b737b1925ad59493d0bcf9f5df5ff65b693128415f5199c9f1f8bba5ab6e",
+      "recognized": "この空欄はあえて残す。行き先は歩きながら相談しよう。",
+      "seconds": 4.92,
+      "reading_similarity": 1.0
+    },
+    "magic/RIKU/vacation-friendship-soma-riku-2": {
+      "expected": "会長がそう言うなら、最高の予定変更にしなくちゃね。",
+      "reading": "かいちょうが そう いうなら、さいこうの よていへんこうに しなくちゃね。",
+      "sha256": "c00c85fc16ae7ff6fb865a7b998dedd385f3bb65402adb40e934e3060af7d319",
+      "recognized": "会長がそういうなら最高の予定変更にしなくちゃね。",
+      "seconds": 4.08,
+      "reading_similarity": 1.0
+    },
+    "magic/SOMA/vacation-friendship-soma-elliot-1": {
+      "expected": "甘味の項目が最優先とはな。今日ばかりは異議なしだ。",
+      "reading": "かんみの こうもくが さいゆうせんとはな。きょうばかりは いぎなしだ。",
+      "sha256": "59188784fd26238462f3b97ca56767ea334bf2d3cea80809bf5f63f0e09c187b",
+      "recognized": "神秘の項目が最優先とはな 今日ばかりは生きなしだ",
+      "seconds": 4.96,
+      "reading_similarity": 0.9
+    },
+    "magic/ELLIOT/vacation-friendship-soma-elliot-2": {
+      "expected": "満場一致ですね。では、次の議題はおかわりにしましょう。",
+      "reading": "まんじょういっちですね。では、つぎの ぎだいは おかわりに しましょう。",
+      "sha256": "e6817f102052bb45bfe0515d7997f7fe1ff1bbdf404773c27e50514f37b61c60",
+      "recognized": "満場一致ですね では次の左はお変わりでしましょう",
+      "seconds": 5.04,
+      "reading_similarity": 0.9
+    },
+    "magic/MINATO/vacation-friendship-minato-ren-1": {
+      "expected": "ここを曲がると海が見えます。今日は僕に任せてください。",
+      "reading": "ここを まがると うみが みえます。きょうは ぼくに まかせてください。",
+      "sha256": "b4f834a9cdb8afe505779c54e85dab3564ee99c986690b4e8c85193067095580",
+      "recognized": "ここを曲がると海が見えます 今日は僕に任せてください",
+      "seconds": 4.56,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-friendship-minato-ren-2": {
+      "expected": "任せた。迷っても、その分一緒に歩けばいいだけだ。",
+      "reading": "まかせた。まよっても、その ぶん いっしょに あるけば いいだけだ。",
+      "sha256": "1d22445a20a085d5e70694fca8ce54c3983d8bf2d081db3ee73630008e383ad8",
+      "recognized": "任せた 迷ってもその分一緒に歩けばいいだけだ",
+      "seconds": 5.16,
+      "reading_similarity": 0.963
+    },
+    "magic/MINATO/vacation-friendship-minato-elliot-1": {
+      "expected": "名前はまだ調べ中です。でも、きれいだったことは書けますよね。",
+      "reading": "なまえは まだ しらべちゅうです。でも、きれいだったことは かけますよね。",
+      "sha256": "8e8603191da2520b0bf408b27101a5406ad4c7fa971564fc7dc4daff82b8d8f3",
+      "recognized": "前はまだ調べ中ですでも、きれいだったことはかけますよね",
+      "seconds": 6.4,
+      "reading_similarity": 0.9
+    },
+    "magic/ELLIOT/vacation-friendship-minato-elliot-2": {
+      "expected": "ええ。それは湊にしか書けない、大切な観察です。",
+      "reading": "ええ。それは みなとにしか かけない、たいせつな かんさつです。",
+      "sha256": "f5624bd660b632e72c2a907078e7bd8037d4d3e01f9f7fa99a7020d95100d5f1",
+      "recognized": "それはミナトにしかかけない大切な観測です",
+      "seconds": 4.88,
+      "reading_similarity": 0.88
+    },
+    "magic/RIKU/vacation-friendship-riku-soma-1": {
+      "expected": "珍しい未来だ。会長が何もしない午後、見逃したくないね。",
+      "reading": "めずらしい みらいだ。かいちょうが なにもしない ごご、みのがしたくないね。",
+      "sha256": "45cc6f9d27bb8c9d5132517ed7993df5e9270aaf1506da97459a75ee0a31dc50",
+      "recognized": " 珍しい未来だ会長は何もしない午後見直したくないね",
+      "seconds": 5.44,
+      "reading_similarity": 0.906
+    },
+    "magic/SOMA/vacation-friendship-riku-soma-2": {
+      "expected": "観測も休みにしろ。隣で、何もしない側に参加してくれ。",
+      "reading": "かんそくも やすみに しろ。となりで、なにもしない がわに さんかしてくれ。",
+      "sha256": "52edd346cebdf2f49c7f28e709d89f3f089086bf10811153e207cb7c65d133a1",
+      "recognized": "観測も休みに拾う 隣で何もしない側に参加してくれ",
+      "seconds": 4.96,
+      "reading_similarity": 0.952
+    },
+    "magic/RIKU/vacation-friendship-riku-leon-1": {
+      "expected": "次の音は読まないよ。驚く役も、たまには悪くないからね。",
+      "reading": "つぎの おとは よまないよ。おどろく やくも、たまには わるくないからね。",
+      "sha256": "c453d4e81e00ba97fcf1950c738b99c810c3d506eeac067d76db79551dc77ed9",
+      "recognized": "次の音は読まないよ。驚く役もたまには悪くないからね。",
+      "seconds": 5.08,
+      "reading_similarity": 1.0
+    },
+    "magic/LEON/vacation-friendship-riku-leon-2": {
+      "expected": "ならば最高の不意打ちを。拍手の準備だけはしておきたまえ！",
+      "reading": "ならば さいこうの ふいうちを。はくしゅの じゅんびだけは しておきたまえ！",
+      "sha256": "1b032f0ba7d361fffe938e8a75f3f846fcffc14141354707853b8130520abcbd",
+      "recognized": "ならば最高の振り打ちを、拍手の準備だけはして落ちたまえ!",
+      "seconds": 5.12,
+      "reading_similarity": 0.938
+    },
+    "magic/YAMATO/vacation-friendship-yamato-ren-1": {
+      "expected": "半分よこせ。友だちに楽させるくらい、俺にもできる。",
+      "reading": "はんぶん よこせ。ともだちに らくさせる くらい、おれにも できる。",
+      "sha256": "0aad1bdb41088329c2daa62ecf8c2cddf06dfab63b633b55bb52ccd80469bb06",
+      "recognized": "半分よこせ、友達に落させるくらい、俺にもできる。",
+      "seconds": 5.24,
+      "reading_similarity": 0.926
+    },
+    "magic/REN/vacation-friendship-yamato-ren-2": {
+      "expected": "助かる。じゃあ次の休憩場所は、お前に決めてもらおうかな。",
+      "reading": "たすかる。じゃあ つぎの きゅうけいばしょは、おまえに きめてもらおうかな。",
+      "sha256": "98d90307a62e4230e7a59e0ea3397c24c04a15bc3bb6a261c8f6e5576ac803c1",
+      "recognized": "助かる。じゃあ、次の休憩場所はお前に決めてもらおうかな。",
+      "seconds": 6.68,
+      "reading_similarity": 1.0
+    },
+    "magic/YAMATO/vacation-friendship-yamato-sakuya-1": {
+      "expected": "一日で全部直そうとすんな。明日も手伝う。逃げんなよ。",
+      "reading": "いちにちで ぜんぶ なおそうと すんな。あしたも てつだう。にげんなよ。",
+      "sha256": "d385580898579974b3c486ed1ec5acb3bdcfe7d92df70f3702b01d0c26faae5b",
+      "recognized": "1日で全部直そうとすんな 明日も手伝う逃げんなよ",
+      "seconds": 5.84,
+      "reading_similarity": 0.964
+    },
+    "magic/SAKUYA/vacation-friendship-yamato-sakuya-2": {
+      "expected": "逃げない。お前の手も借りる。それが、明日の約束だ。",
+      "reading": "にげない。おまえの ても かりる。それが、あしたの やくそくだ。",
+      "sha256": "7c35358d8d62d7510f451ea764b0b606fd88bc281d9862aae72321abf348f1be",
+      "recognized": "逃げない お前に手も限る それが 明日の約束だ",
+      "seconds": 6.64,
+      "reading_similarity": 0.92
+    },
+    "magic/LEON/vacation-friendship-leon-riku-1": {
+      "expected": "君も一音どうだい。眺めるだけでは、この夏は完成しないよ。",
+      "reading": "きみも いちおん どうだい。ながめるだけでは、この なつは かんせいしないよ。",
+      "sha256": "e10da20dd4ea02886a5cf26349841ea9d5a9a72f9ed3f77409d5dfe91526dec3",
+      "recognized": "君も一応どうだい?眺めるだけではこの夏は完成しない?",
+      "seconds": 6.3,
+      "reading_similarity": 0.889
+    },
+    "magic/RIKU/vacation-friendship-leon-riku-2": {
+      "expected": "参ったね。その誘いは、予測していても断れない。",
+      "reading": "まいったね。その さそいは、よそくしていても ことわれない。",
+      "sha256": "523ec380140bf68c2821b6297ecfaafb730d49b96ebcb5dc8564887f81d7e479",
+      "recognized": "まあ言ったねその誘いは予測していても断れない",
+      "seconds": 4.44,
+      "reading_similarity": 0.98
+    },
+    "magic/LEON/vacation-friendship-leon-elliot-1": {
+      "expected": "解説は後でいい。今、どう聞こえたかを教えてくれたまえ。",
+      "reading": "かいせつは あとで いい。いま、どう きこえたかを おしえてくれたまえ。",
+      "sha256": "7faf54d7a2862aad5f4d54d1fbf3fdb0fc2cdbd3f5d4e9a7aef36340ca12d799",
+      "recognized": "解説は後でいい!今、どう聞こえたか教えてくれたまい!",
+      "seconds": 4.68,
+      "reading_similarity": 0.947
+    },
+    "magic/ELLIOT/vacation-friendship-leon-elliot-2": {
+      "expected": "帰るのが惜しくなる音でした。まだ、もう一曲聞きたいです。",
+      "reading": "かえるのが おしくなる おとでした。まだ、もういっきょく ききたいです。",
+      "sha256": "fb356f84817ee17d39c2486a0b6f9a1bd9981ab5804ac395a71a24ab52177dbb",
+      "recognized": "配分が惜しくなる音でした。まだ、もう一曲聞きたいです。",
+      "seconds": 5.08,
+      "reading_similarity": 0.867
+    },
+    "magic/ELLIOT/vacation-friendship-elliot-soma-1": {
+      "expected": "改訂は二人で。夏休みの延長案も、受け付けますよ。",
+      "reading": "かいていは ふたりで。なつやすみの えんちょうあんも、うけつけますよ。",
+      "sha256": "20460ba873b6946632dd022a8ed65be446de36291c6765332ae434db64f496e4",
+      "recognized": "海底は二人で、夏休みの延長案も受け継ぎろ。",
+      "seconds": 5.0,
+      "reading_similarity": 0.897
+    },
+    "magic/SOMA/vacation-friendship-elliot-soma-2": {
+      "expected": "まず来年の再訪を追加しよう。異議は、ないだろう？",
+      "reading": "まず らいねんの さいほうを ついかしよう。いぎは、ないだろう？",
+      "sha256": "cdc1bb551da96ccec31c241175137e6acbb544c36e525449c66c42939db1c9ca",
+      "recognized": "まず、来年の最高を追加しよう。意義はないだろ?",
+      "seconds": 4.36,
+      "reading_similarity": 0.941
+    },
+    "magic/ELLIOT/vacation-friendship-elliot-leon-1": {
+      "expected": "記録は後にします。今はただ、素晴らしかったと伝えたいので。",
+      "reading": "きろくは あとに します。いまは ただ、すばらしかったと つたえたいので。",
+      "sha256": "c8b6b4138a7c44178bb503407f8212fc6d41a7b7646fbd90247ae79cd3e3bf7e",
+      "recognized": "記録は後にします。今はただ、素晴らしかったこと伝えたいので。",
+      "seconds": 5.4,
+      "reading_similarity": 0.918
+    },
+    "magic/LEON/vacation-friendship-elliot-leon-2": {
+      "expected": "最高の批評だね。君の拍手に、もう一曲で答えよう。",
+      "reading": "さいこうの ひひょうだね。きみの はくしゅに、もういっきょくで こたえよう。",
+      "sha256": "63b080c26121ea5a5d0d44427cd889173069da275395eff0ecd4a2098c36f06e",
+      "recognized": "最高の秘証だね! 君の拍手にもう一曲で答えよ!",
+      "seconds": 5.08,
+      "reading_similarity": 0.889
+    },
+    "magic/SAKUYA/vacation-friendship-sakuya-yamato-1": {
+      "expected": "道具はここに置く。明日の仕事も、お前の分を残しておいた。",
+      "reading": "どうぐは ここに おく。あしたの しごとも、おまえの ぶんを のこしておいた。",
+      "sha256": "fb33d86d8f6e02f13d3e0d11740e7d158e98827a9090fbc6374b4e8b31e999d7",
+      "recognized": "どうだ、ここにおく明日の仕事もお前の分を残しておいた",
+      "seconds": 7.0,
+      "reading_similarity": 0.918
+    },
+    "magic/YAMATO/vacation-friendship-sakuya-yamato-2": {
+      "expected": "上等。終わったら飯だ。そっちの分は俺が取っとく。",
+      "reading": "じょうとう。おわったら めしだ。そっちの ぶんは おれが とっとく。",
+      "sha256": "6c4277a8c7514edff3a13487663106647bd3a4b146623f25832a08cd3ef2ec91",
+      "recognized": "上等!終わったらメシだ!そっちの分は俺が取っとく",
+      "seconds": 6.4,
+      "reading_similarity": 0.963
+    },
+    "magic/SAKUYA/vacation-friendship-sakuya-ren-1": {
+      "expected": "見張りは交代しなくてよいのか。二人とも休んでしまうぞ。",
+      "reading": "みはりは こうたいしなくて よいのか。ふたりとも やすんでしまうぞ。",
+      "sha256": "dac63e9c7a57907824fafb6c48002bb0555908f100bc79517a962f889404caea",
+      "recognized": "見張りは交代しなくて良いのか 二人とも休んでしまうぞ",
+      "seconds": 5.8,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-friendship-sakuya-ren-2": {
+      "expected": "それでいい。今日は友だちと海を見る日なんだから。",
+      "reading": "それで いい。きょうは ともだちと うみを みる ひなんだから。",
+      "sha256": "bda53ad29c8a4bc8dd3bee17bbd432ddd1d3200fc4e7a040a45365dab727a19d",
+      "recognized": "それでいい今日は友達と海を見る日なんだからとによっ",
+      "seconds": 5.64,
+      "reading_similarity": 0.873
+    },
+    "magic/AKARI/vacation-epilogue-1": {
+      "expected": "よかった。今日はみんな、遊ぶ方の作戦会議だよ！",
+      "reading": "よかった。きょうは みんな、あそぶ ほうの さくせんかいぎだよ！",
+      "sha256": "f59ca3aafec9ab6e60ce177ade831222c31f274c88b98a7ea722ca2263fba677",
+      "recognized": "よかったー今日はみんな遊ぶ方の作戦会議だよ",
+      "seconds": 4.6,
+      "reading_similarity": 0.981
+    },
+    "magic/AKARI/vacation-epilogue-2": {
+      "expected": "強くなった話だけじゃなくて、笑った話も届けたいな。",
+      "reading": "つよくなった はなしだけじゃなくて、わらった はなしも とどけたいな。",
+      "sha256": "8e69402c84052484c92fc7711543a7eda7f356b347fa7c6c3347315ffec94525",
+      "recognized": "強くなった話だけじゃなくて笑った話も届けたいな",
+      "seconds": 4.44,
+      "reading_similarity": 1.0
+    },
+    "magic/AKARI/vacation-epilogue-3": {
+      "expected": "次も一緒に来ようね。今度は最初から最後まで、夏休みで！",
+      "reading": "つぎも いっしょに こようね。こんどは さいしょから さいごまで、なつやすみで！",
+      "sha256": "eacbf4cf6f596311e74f0e55558e1595b47825c7f556d706c34ec16702ca0569",
+      "recognized": "次も一緒に来ようね今度は最初から最後まで夏休みで",
+      "seconds": 5.16,
+      "reading_similarity": 1.0
+    },
+    "magic/SHIZUKU/vacation-epilogue-1": {
+      "expected": "観測しない朝も、記憶にはきちんと残るのですね。",
+      "reading": "かんそくしない あさも、きおくには きちんと のこるのですね。",
+      "sha256": "3b6717c5f6e1abb4683796f0afdf7edade9df53441d1f7c380eb27bd8d1d5cc7",
+      "recognized": "韓国しない朝に記憶には7分残るのですね。",
+      "seconds": 4.68,
+      "reading_similarity": 0.84
+    },
+    "magic/SHIZUKU/vacation-epilogue-2": {
+      "expected": "任務の経過と、楽しかったこと。どちらも私の報告です。",
+      "reading": "にんむの けいかと、たのしかったこと。どちらも わたしの ほうこくです。",
+      "sha256": "39ce39d96127d198773439449222abe4c94fe76832ff7b3769b7f19f0ac8ec4d",
+      "recognized": "任務に経過と楽しかったこと、どちらも私の報告です。",
+      "seconds": 5.84,
+      "reading_similarity": 0.967
+    },
+    "magic/SHIZUKU/vacation-epilogue-3": {
+      "expected": "行き先は確定。楽しみ方は未定。その方が、よい夏になりそうです。",
+      "reading": "いきさきは かくてい。たのしみかたは みてい。その ほうが、よい なつに なりそうです。",
+      "sha256": "3d5ed44186d681ff5685e5323e9b8cd49b42f5204be7df4137fbeff24823161a",
+      "recognized": "一策は書きて楽しみ方は似て、その方が強い夏になりたいです。",
+      "seconds": 7.04,
+      "reading_similarity": 0.783
+    },
+    "magic/HIYORI/vacation-epilogue-1": {
+      "expected": "ありがとう。私も少し、甘えてみようかな。",
+      "reading": "ありがとう。わたしも すこし、あまえてみようかな。",
+      "sha256": "9bb7974edd78d4e01d5463d90b771fce497582c278051df426d6085b78745f0f",
+      "recognized": "ありがとう。私も少し甘えてみようかな。れっそら。",
+      "seconds": 6.8,
+      "reading_similarity": 0.913
+    },
+    "magic/HIYORI/vacation-epilogue-2": {
+      "expected": "元気になってから出発で大丈夫。花と一緒に、待ってるね。",
+      "reading": "げんきに なってから しゅっぱつで だいじょうぶ。はなと いっしょに、まってるね。",
+      "sha256": "c2d5c6e144fc6a8308e41af3aef28ee1bca94dc07ea5437d46590633374146d5",
+      "recognized": "元気になってから出発で大丈夫。花と一緒に待ってるね。",
+      "seconds": 7.12,
+      "reading_similarity": 1.0
+    },
+    "magic/HIYORI/vacation-epilogue-3": {
+      "expected": "また来ようね。その時は私の行きたい場所にも、付き合ってね。",
+      "reading": "また こようね。その ときは わたしの いきたい ばしょにも、つきあってね。",
+      "sha256": "0c3e3e9d92358bfdc93b817fabdb2f06830a3854a8a5c522024a2d5f04fc8793",
+      "recognized": "また来ようねその時は私の行きたい場所にも付き合ってね",
+      "seconds": 8.5,
+      "reading_similarity": 1.0
+    },
+    "magic/TSUBASA/vacation-epilogue-1": {
+      "expected": "よし、誰も焼けてない！私もちゃんと、止まれるようになったな。",
+      "reading": "よし、だれも やけてない！わたしも ちゃんと、とまれるように なったな。",
+      "sha256": "e489537dc614a3f928fc2c0c5df1b48a97aced12b52eb46a37901cca51c03554",
+      "recognized": "よし、誰もやけてない私もちゃんと困れるようになったな",
+      "seconds": 5.5,
+      "reading_similarity": 0.966
+    },
+    "magic/TSUBASA/vacation-epilogue-2": {
+      "expected": "危ない時は止めてくれよ。私も、ちゃんと聞くから！",
+      "reading": "あぶない ときは とめてくれよ。わたしも、ちゃんと きくから！",
+      "sha256": "0be454b1c34c2ee36718945e3e112665614f220ab136abee06c85c916a8489c9",
+      "recognized": "危ない時は選めてくれよ!私もちゃんと聞くから!",
+      "seconds": 3.64,
+      "reading_similarity": 0.941
+    },
+    "magic/TSUBASA/vacation-epilogue-3": {
+      "expected": "次も全力で遊ぶぞ！休憩まで含めて、全力な！",
+      "reading": "つぎも ぜんりょくで あそぶぞ！きゅうけいまで ふくめて、ぜんりょくな！",
+      "sha256": "a474a63b744b87fff7e18462cbb54c5b9ca99a1f8981a1de5672587685adb53c",
+      "recognized": "次も全力で遊ぶぞ!休憩まで含めて全力な!",
+      "seconds": 4.28,
+      "reading_similarity": 1.0
+    },
+    "magic/REI/vacation-epilogue-1": {
+      "expected": "異常なし。だから、私も休む。それでよいのだろう。",
+      "reading": "いじょうなし。だから、わたしも やすむ。それで よいのだろう。",
+      "sha256": "4e8c821b0f2a1b1fadff9a008ea12c649d691b93b8ef5526dc62867354c0bdcd",
+      "recognized": "異常なしだから私も休むそれで良いのだろう た",
+      "seconds": 5.76,
+      "reading_similarity": 0.98
+    },
+    "magic/REI/vacation-epilogue-2": {
+      "expected": "ただの石だ。だが、ここへ来た私の記録にはなる。",
+      "reading": "ただの いしだ。だが、ここへ きた わたしの きろくには なる。",
+      "sha256": "0b1838b96490541e41bdc516908f0c394523a787026fd48fd62051201667c1d7",
+      "recognized": "だの石だだがここへ来た私の記録にはなる",
+      "seconds": 5.2,
+      "reading_similarity": 0.979
+    },
+    "magic/REI/vacation-epilogue-3": {
+      "expected": "置いていくなよ。私も、同じ帰り道を選んだのだから。",
+      "reading": "おいていくなよ。わたしも、おなじ かえりみちを えらんだのだから。",
+      "sha256": "7a211e998315ba390f61f4edd5c5b5dfb68832bfc64fa87632d4fa0be3bc3088",
+      "recognized": "置いて行くなよ。私も同じ帰り道を選んだのだから。",
+      "seconds": 5.6,
+      "reading_similarity": 1.0
+    },
+    "magic/MADOKA/vacation-epilogue-1": {
+      "expected": "休止中です。故障ではなく、私が決めた休止です。",
+      "reading": "きゅうしちゅうです。こしょうではなく、わたしが きめた きゅうしです。",
+      "sha256": "78db5fa195936dff2fc5825f6ceaf3982e1f2de7f970acbf510f2c3f3796b732",
+      "recognized": "休止休です。図書ではなく、私が決めた休止です。",
+      "seconds": 5.84,
+      "reading_similarity": 0.915
+    },
+    "magic/MADOKA/vacation-epilogue-2": {
+      "expected": "失敗だけで終わらなかった。それが、今回の大きな発見です。",
+      "reading": "しっぱいだけで おわらなかった。それが、こんかいの おおきな はっけんです。",
+      "sha256": "c4ee4278a6aacd4fd2b4194a1fa9c86d0a542b3933a0e970e81d9045d438531f",
+      "recognized": "失敗だけで終わらなかった。それが今回の大きな発見です。",
+      "seconds": 6.0,
+      "reading_similarity": 1.0
+    },
+    "magic/MADOKA/vacation-epilogue-3": {
+      "expected": "日時は相談して決めたいです。みんなの都合も、教えてください。",
+      "reading": "にちじは そうだんして きめたいです。みんなの つごうも、おしえてください。",
+      "sha256": "a402b965df9ed7dc37d816f8264cc062fc468aeebca071908a1bcb511a96ff84",
+      "recognized": "日記事は相談して決めたいです。みんなの都合も教えてください。うふふ",
+      "seconds": 6.08,
+      "reading_similarity": 0.87
+    },
+    "magic/KOHARU/vacation-epilogue-1": {
+      "expected": "こちらは大丈夫。今日は少し、海の友だちに会ってくるね。",
+      "reading": "こちらは だいじょうぶ。きょうは すこし、うみの ともだちに あってくるね。",
+      "sha256": "730c65c9a73f2d54a6e6b9331981a128095b3526d0f4122bd1f3cd99b5a603ae",
+      "recognized": "こちらは大丈夫今日は少し海の友達に会ってくれね",
+      "seconds": 4.88,
+      "reading_similarity": 0.968
+    },
+    "magic/KOHARU/vacation-epilogue-2": {
+      "expected": "一緒なら、きれいになるのも早いね。終わったら、ちゃんと遊ぼう。",
+      "reading": "いっしょなら、きれいに なるのも はやいね。おわったら、ちゃんと あそぼう。",
+      "sha256": "a82faeb22f51018ebff83488dc581123295e7abdfd00ade1b59cf4b62c4d304a",
+      "recognized": "一緒なら綺麗になるのも早いね終わったらちゃんと遊ぼ?",
+      "seconds": 5.04,
+      "reading_similarity": 0.984
+    },
+    "magic/KOHARU/vacation-epilogue-3": {
+      "expected": "海で教わったこと、木にも話そう。来年はみんなで確かめに来ようね。",
+      "reading": "うみで おそわったこと、きにも はなそう。らいねんは みんなで たしかめに こようね。",
+      "sha256": "4c60992eb085f7c00bfd3f6e5bf3bfa1eee77eb0993eef3e01c5c89bb015acf5",
+      "recognized": "海で教わったこと木にも話そう来年はみんなで確かめに来ようね",
+      "seconds": 5.68,
+      "reading_similarity": 1.0
+    },
+    "magic/MIRAI/vacation-epilogue-1": {
+      "expected": "今日の主役は休憩中。拍手の代わりに、冷たいお茶をお願い。",
+      "reading": "きょうの しゅやくは きゅうけいちゅう。はくしゅの かわりに、つめたい おちゃを おねがい。",
+      "sha256": "7074b599a8ba68aa226f3a35d3da8b9c4c6683fda19c9614a8537dfe3f4c0a5d",
+      "recognized": "今日の主役は休憩中拍手の代わりに冷たいお茶をお願い",
+      "seconds": 5.12,
+      "reading_similarity": 1.0
+    },
+    "magic/MIRAI/vacation-epilogue-2": {
+      "expected": "今の感想、ちゃんと聞かせてね。上手じゃない所も、一緒に育てたいの。",
+      "reading": "いまの かんそう、ちゃんと きかせてね。じょうずじゃない ところも、いっしょに そだてたいの。",
+      "sha256": "a84ae29252b2f7aad1af83682a7768f93f432fd372c6f75e664adccac4ebe417",
+      "recognized": "今の感想、ちゃんと聞かせてね。上手じゃないところも一緒に育てたいの。",
+      "seconds": 5.92,
+      "reading_similarity": 1.0
+    },
+    "magic/MIRAI/vacation-epilogue-3": {
+      "expected": "また来てね。私のためにも、会いに来てくれたらうれしい。",
+      "reading": "また きてね。わたしの ためにも、あいに きてくれたら うれしい。",
+      "sha256": "1195a0148a3e6ef707ec15f755cbb9cef413562c63131bd0254db35bd57621df",
+      "recognized": "また来てね。私のためにも、会いに来てくれたら嬉しい。",
+      "seconds": 4.72,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-epilogue-1": {
+      "expected": "記録は後回しですね。では、この波に触れてもよいですか。",
+      "reading": "きろくは あとまわしですね。では、この なみに ふれても よいですか。",
+      "sha256": "35a022d89bf144b0324fd081357188c96415bbad6faca9b96c990f9b43e2a689",
+      "recognized": "記録は後回しですね。では、この波に触れても良いですが、",
+      "seconds": 5.88,
+      "reading_similarity": 0.964
+    },
+    "magic/SERA/vacation-epilogue-2": {
+      "expected": "青だけでは足りませんでした。ここには、もっとたくさんの光があります。",
+      "reading": "あおだけでは たりませんでした。ここには、もっと たくさんの ひかりが あります。",
+      "sha256": "fab85ef0b1461981db95112ba3c79335e987ef83362491e50bceacdb98daae68",
+      "recognized": "青だけでは足りませんでした。ここには、もっとたくさんの光があります。",
+      "seconds": 6.2,
+      "reading_similarity": 1.0
+    },
+    "magic/SERA/vacation-epilogue-3": {
+      "expected": "お別れではなく、また今度。地上の約束を、私も使わせてください。",
+      "reading": "おわかれでは なく、また こんど。ちじょうの やくそくを、わたしも つかわせてください。",
+      "sha256": "697639bc66895cb6e995ffc3246d529ac88aaa41040484e1f70ff64dc54e23b1",
+      "recognized": "お別れではなく、また今度。地上の約束を、私も使わせてください。",
+      "seconds": 6.88,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-epilogue-1": {
+      "expected": "確認は終わり。俺も朝飯に混ぜてもらおうかな。",
+      "reading": "かくにんは おわり。おれも あさめしに まぜてもらおうかな。",
+      "sha256": "097c9d8f9b0170b884fbbf8eb83b71f26f0cd0dfe8ae2334ca2f97b53566e8bf",
+      "recognized": "確認は終わり。俺も朝飯に混ぜてもらおうかな。ねっ。",
+      "seconds": 5.76,
+      "reading_similarity": 0.962
+    },
+    "magic/REN/vacation-epilogue-2": {
+      "expected": "悪い、こっち頼めるか。代わりに帰り道の案内は任せてくれ。",
+      "reading": "わるい、こっち たのめるか。かわりに かえりみちの あんないは まかせてくれ。",
+      "sha256": "9c5a4b587c166ac96ae7989aec5d94024247b7d193602b38cd24802cfb311aee",
+      "recognized": "悪い。こっち頼めるか。代わりに、帰り道の案内は任せてくれ。",
+      "seconds": 6.0,
+      "reading_similarity": 1.0
+    },
+    "magic/REN/vacation-epilogue-3": {
+      "expected": "また遊びに来よう。今度は俺から、ちゃんと誘うから。",
+      "reading": "また あそびに こよう。こんどは おれから、ちゃんと さそうから。",
+      "sha256": "64d164294a7029877ed91418c14dd2f5a499d2c0057043582dab9cd64afd51fd",
+      "recognized": "また遊びに来よう。今度は俺かや。ちゃんと誘うかや。",
+      "seconds": 5.4,
+      "reading_similarity": 0.923
+    },
+    "magic/SOMA/vacation-epilogue-1": {
+      "expected": "ここから先は交代だ。私も、休暇の予定を実行させてもらう。",
+      "reading": "ここから さきは こうたいだ。わたしも、きゅうかの よていを じっこうさせてもらう。",
+      "sha256": "542003478bebd63a499ee7011b5e242bdbd6d950a8b32a86963573de25dcdcd5",
+      "recognized": "ここから先は交代だ。私も休暇の予定を実行させてもらう。",
+      "seconds": 5.04,
+      "reading_similarity": 1.0
+    },
+    "magic/SOMA/vacation-epilogue-2": {
+      "expected": "これは予定になかったな。だが、追加する価値は十分ある。",
+      "reading": "これは よていに なかったな。だが、ついかする かちは じゅうぶん ある。",
+      "sha256": "2788b563391f316dae3a1b21d43d9b4d4e3f136da2ea50062992d991d5fe4c39",
+      "recognized": "これは予定になかったな。だが、追加する価値は十分ある。",
+      "seconds": 5.0,
+      "reading_similarity": 1.0
+    },
+    "magic/SOMA/vacation-epilogue-3": {
+      "expected": "次の計画は相談から始めよう。皆の希望を、先に聞きたい。",
+      "reading": "つぎの けいかくは そうだんから はじめよう。みなの きぼうを、さきに ききたい。",
+      "sha256": "dd7e46743d7b8e21686e920df7c191c987d723331ec94e7435dabeca2402d1e3",
+      "recognized": "次の計画は相談から始めよう。みんなの希望を先に期待。",
+      "seconds": 5.24,
+      "reading_similarity": 0.97
+    },
+    "magic/MINATO/vacation-epilogue-1": {
+      "expected": "少しはできました。今度は、その少しを忘れないようにします。",
+      "reading": "すこしは できました。こんどは、その すこしを わすれないように します。",
+      "sha256": "fe4804cf55014ff5813de5f258977a3dfddb68209836516112d70c9b64bdaf93",
+      "recognized": "少しはできました。今度は、その少しを忘れないようにします。",
+      "seconds": 5.36,
+      "reading_similarity": 1.0
+    },
+    "magic/MINATO/vacation-epilogue-2": {
+      "expected": "ここ、気に入ったんです。みんなにも見てほしくて。",
+      "reading": "ここ、きにいったんです。みんなにも みてほしくて。",
+      "sha256": "29b4ae3845a448a2a3e46c0269b0b9d876b8431401a2dc73194e69b0f463d797",
+      "recognized": "ここ、気に入ったんです。みんなにも見てほしくて。",
+      "seconds": 3.68,
+      "reading_similarity": 1.0
+    },
+    "magic/MINATO/vacation-epilogue-3": {
+      "expected": "また来てください。今度は僕が、最初から案内します。",
+      "reading": "また きてください。こんどは ぼくが、さいしょから あんないします。",
+      "sha256": "5977c32da3389421bbdc0c2c17db47af27b73fcdf9819f13e93c68287518b0ee",
+      "recognized": "また来てください!今度は僕が最初から案内します!",
+      "seconds": 4.52,
+      "reading_similarity": 1.0
+    },
+    "magic/RIKU/vacation-epilogue-1": {
+      "expected": "未来の予告編はお休み。本編から見るのも、たまにはいいだろ。",
+      "reading": "みらいの よこくへんは おやすみ。ほんぺんから みるのも、たまには いいだろ。",
+      "sha256": "1e4e03474a96ec3e02955be41643ccc0c52e7a11a98faa1a2e751149c6e5747b",
+      "recognized": "未来の旅国編はおやすみ。本編から見るのもたまにはいいだろ?",
+      "seconds": 5.48,
+      "reading_similarity": 0.923
+    },
+    "magic/RIKU/vacation-epilogue-2": {
+      "expected": "魚には内緒だけど、釣れない間も結構気に入ってるんだ。",
+      "reading": "さかなには ないしょだけど、つれない あいだも けっこう きにいってるんだ。",
+      "sha256": "7b61c3a1126664bc9039057072fae67fc5f5f0fd52af2100004356d68f2265ff",
+      "recognized": "魚には内緒だけど、連れない間も結構気に入ってるんだ。",
+      "seconds": 4.44,
+      "reading_similarity": 0.921
+    },
+    "magic/RIKU/vacation-epilogue-3": {
+      "expected": "次の夏も顔を出すよ。予測じゃなくて、俺の予定としてね。",
+      "reading": "つぎの なつも かおを だすよ。よそくじゃなくて、おれの よていとしてね。",
+      "sha256": "0eec96c60f0386cca9834ad1f9c09e0ab492ab1c6ab32aadf4c6cc36d30d7cde",
+      "recognized": "次の夏も顔を出すよ 予測じゃなくて俺の予定としてね",
+      "seconds": 5.08,
+      "reading_similarity": 1.0
+    },
+    "magic/YAMATO/vacation-epilogue-1": {
+      "expected": "放っといたら危ねえだろ。手が空いてるなら、一緒に運べよ。",
+      "reading": "ほっといたら あぶねえだろ。てが あいてるなら、いっしょに はこべよ。",
+      "sha256": "9bd5e2fbb3565d290940cf3b9fb7dfe133f0c87831f3efc87198e2ccc567ffea",
+      "recognized": "ほっといたら危ねえだろ手が開いてるなら一緒に運べよ",
+      "seconds": 4.92,
+      "reading_similarity": 0.949
+    },
+    "magic/YAMATO/vacation-epilogue-2": {
+      "expected": "がたつかねえか？ならよし。次に来た時も、ここで座れるな。",
+      "reading": "がたつかねえか？なら よし。つぎに きた ときも、ここで すわれるな。",
+      "sha256": "916c19d6e42c8a1c3a3ba09aa001d04148eb3c58a2b575eae3b918f290947153",
+      "recognized": "だたつかねーかならよし 次に来た時もここで座れるな",
+      "seconds": 6.12,
+      "reading_similarity": 0.926
+    },
+    "magic/YAMATO/vacation-epilogue-3": {
+      "expected": "また来るぞ。楽しかったから。それじゃ、理由として足りねえか？",
+      "reading": "また くるぞ。たのしかったから。それじゃ、りゆうとして たりねえか？",
+      "sha256": "c4bc9684ca44757451c2d992bae054dd1cb00d1d9c93c945ff533d82635b31bb",
+      "recognized": "また来るぞ楽しかったから それじゃあ理由として足りねーか",
+      "seconds": 6.16,
+      "reading_similarity": 0.947
+    },
+    "magic/LEON/vacation-epilogue-1": {
+      "expected": "幕の後も美しく、だ。ほら、その箱は僕が運ぼう。",
+      "reading": "まくの あとも うつくしく、だ。ほら、その はこは ぼくが はこぼう。",
+      "sha256": "fe424e37002516508999afeb8ef122120496b4604d184497efcd5b7e6ef19d1d",
+      "recognized": "幕の後も美しくった!ほら、その箱は僕が箱を!",
+      "seconds": 5.52,
+      "reading_similarity": 0.808
+    },
+    "magic/LEON/vacation-epilogue-2": {
+      "expected": "まだ完成ではない。だから、もう一度聴いてもらう楽しみがある。",
+      "reading": "まだ かんせいではない。だから、もういちど きいてもらう たのしみが ある。",
+      "sha256": "ec9916d5734d082b141441cb6b72a1d6f53ade7e38ed512bd1ac9e7b686465e5",
+      "recognized": "まだ完成ではない!だから、もう一度聴いてもらう楽しみがある!",
+      "seconds": 5.36,
+      "reading_similarity": 1.0
+    },
+    "magic/LEON/vacation-epilogue-3": {
+      "expected": "特等席を空けておくよ。君たちの感想で、次の曲を育てたい。",
+      "reading": "とくとうせきを あけておくよ。きみたちの かんそうで、つぎの きょくを そだてたい。",
+      "sha256": "9357423ec7dd7e5c02356c6b389ecace96ea7fbae346886fca27c96797b88410",
+      "recognized": "特党席を開けておくよ!君たちの感想で次の曲を育てたい!",
+      "seconds": 5.72,
+      "reading_similarity": 0.901
+    },
+    "magic/ELLIOT/vacation-epilogue-1": {
+      "expected": "記録は後ほど。まず私も、同じ朝をいただきます。",
+      "reading": "きろくは のちほど。まず わたしも、おなじ あさを いただきます。",
+      "sha256": "ab3a02b5dbe83df87d73981b62add790e14caa88e0c9a12901d5cd1a868c905b",
+      "recognized": "記録は後ほど。まず私も同じ朝を受けてくれます。",
+      "seconds": 4.68,
+      "reading_similarity": 0.83
+    },
+    "magic/ELLIOT/vacation-epilogue-2": {
+      "expected": "うまく訳せませんね。ですが、忘れたくないことは確かです。",
+      "reading": "うまく やくせませんね。ですが、わすれたくないことは たしかです。",
+      "sha256": "108655984f0c67fafc26c2816f522933e71c4691334010892f54798675e801ed",
+      "recognized": "うまく約せませんでですが忘れたくないことは確かです",
+      "seconds": 5.52,
+      "reading_similarity": 0.893
+    },
+    "magic/ELLIOT/vacation-epilogue-3": {
+      "expected": "あなたの頁も加えてください。次は、それを読みながらまた来ましょう。",
+      "reading": "あなたの ぺーじも くわえてください。つぎは、それを よみながら また きましょう。",
+      "sha256": "f5eba0d92a58aaeca6632cf0304612786a981203a354da730d3d5664e6105b33",
+      "recognized": "あなたのページも加えてください 次はそれを読みながらまた来ましょう",
+      "seconds": 5.68,
+      "reading_similarity": 1.0
+    },
+    "magic/SAKUYA/vacation-epilogue-1": {
+      "expected": "見なかったことにはしない。直せる場所から、手をつける。",
+      "reading": "みなかったことには しない。なおせる ばしょから、てを つける。",
+      "sha256": "caaac4d4d57588ae9897217d4f7ab1cf388e69faba88f8febafaf1ef6146dc90",
+      "recognized": "見なかったことにはしない。直す場所から、手をつける。",
+      "seconds": 6.16,
+      "reading_similarity": 0.941
+    },
+    "magic/SAKUYA/vacation-epilogue-2": {
+      "expected": "助力は受け取る。責任まで預けるのではなく、共に直すために。",
+      "reading": "じょりょくは うけとる。せきにんまで あずけるのでは なく、ともに なおすために。",
+      "sha256": "8d196ded9f436e8bf5c67477be8912472cb8815d09d2871c0d966ebef219b9b8",
+      "recognized": "助力は受け取る責任まで預けるのではなく 共に治すために",
+      "seconds": 6.96,
+      "reading_similarity": 1.0
+    },
+    "magic/SAKUYA/vacation-epilogue-3": {
+      "expected": "今日はここまでだ。明日も来る。今度は、私から約束しよう。",
+      "reading": "きょうは ここまでだ。あしたも くる。こんどは、わたしから やくそくしよう。",
+      "sha256": "489e2a64ce828a111204ce48dbc49a30c3fa61cef430a52c0fcd5c4109772622",
+      "recognized": "今日はここまでだ。明日もく。今度はわたつか約束しよう。",
+      "seconds": 8.0,
+      "reading_similarity": 0.933
+    }
+  },
+  "recognizer": "faster-whisper/small, Japanese, int8 CPU, no prompt, 1s-separated batches"
+}

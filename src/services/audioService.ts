@@ -1,3 +1,4 @@
+import { summerEndingVoiceLimitMs } from '../data/summerEndingVoices';
 import { kochoSuperVoice } from '../mini-games/kocho/superMoves';
 import { kochoEnemyVoice, type KochoEnemyVoiceAction } from '../mini-games/kocho/enemyVoices';
 import { kochoVoiceDuration } from '../mini-games/kocho/voices';
@@ -2220,7 +2221,7 @@ class AudioService {
               versionBgmPath(`sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`),
               versionBgmPath(`sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`),
           ],
-          maxDurationMs,
+          summerEndingVoiceLimitMs('high-school', safeHeroId, safeVoiceName, maxDurationMs),
           false,
           generation,
       );
@@ -2284,7 +2285,7 @@ class AudioService {
               versionBgmPath(`sfx/magic-event-voices/${safeHeroId}/${safeLineId}.ogg`),
               versionBgmPath(`sfx/magic-event-voices/${safeHeroId}/${safeLineId}.wav`),
           ],
-          12000,
+          summerEndingVoiceLimitMs('magic', safeHeroId, safeLineId, 12000),
           false,
           generation,
           true,

@@ -16,7 +16,12 @@ import { buildMagicSummerEpilogueGalleryEntry, getMagicEndingGalleryEntries } fr
 
 const root = createRoot(document.getElementById('root')!);
 let serial = 0;
+const realMagicVoice = audioService.playMagicEventVoice.bind(audioService);
+const realStopMagic = audioService.stopMagicEventVoices.bind(audioService);
+const realStopHighSchool = audioService.stopHighSchoolVoices.bind(audioService);
+const realHighSchoolVoice = audioService.playHighSchoolVoiceFile.bind(audioService);
 const qa = {
+  enableRealAudio() { audioService.stopMagicEventVoices = realStopMagic; audioService.stopHighSchoolVoices = realStopHighSchool; audioService.playMagicEventVoice = realMagicVoice; audioService.playHighSchoolVoiceFile = realHighSchoolVoice; audioService.init(); audioService.setVoiceVolume(.8); },
   completions: 0, stopped: 0, voices: [] as string[],
   show(kind: 'true' | 'epilogue' | 'friendship', id: string, theme: VisualThemeId, languageMode: LanguageMode, vacation = true) {
     const onComplete = () => { qa.completions++; root.render(<div data-qa-result="done">done</div>); };

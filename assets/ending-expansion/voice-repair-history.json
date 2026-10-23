@@ -1,0 +1,664 @@
+{
+  "high-school/MAGE/vacation-endless-true-2": {
+    "before_primary": {
+      "expected": "同じ海でも、こんなに違う。結論より先に、もっと質問が増えたわ。",
+      "reading": "おなじ うみでも、こんなに ちがう。けつろんより さきに、もっと しつもんが ふえたわ。",
+      "sha256": "e6e31f1ecc4868e4ab089b34e1d5577674d807016f562ba7609a45fe8f813d6a",
+      "recognized": "同じ海でも、こんなに違う! ジェテロイが立てきり、もっと質問が増えたわ!",
+      "seconds": 6.08,
+      "reading_similarity": 0.789
+    },
+    "before_secondary": {
+      "expected": "同じ海でも、こんなに違う。結論より先に、もっと質問が増えたわ。",
+      "reading": "おなじ うみでも、こんなに ちがう。けつろんより さきに、もっと しつもんが ふえたわ。",
+      "sha256": "e6e31f1ecc4868e4ab089b34e1d5577674d807016f562ba7609a45fe8f813d6a",
+      "recognized": "同じ海でもこんなに違う。ジェテロイラの敵にもっと質問まふれたわ。",
+      "seconds": 6.08,
+      "reading_similarity": 0.761
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "おなじ うみでも、こんなに ちがう。けつろんより さきに、もっと しつもんが ふえたわ。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "dbf6c659003e4b2b9e0f20d21449703bc166804ba8bbe4e1f00b41ad17213ab7",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/ELLIOT/vacation-endless-true-1": {
+    "before_primary": {
+      "expected": "これは私だけの秘密にはしません。読んで、疑って、皆さんの言葉をください。",
+      "reading": "これは わたしだけの ひみつには しません。よんで、うたがって、みなさんの ことばを ください。",
+      "sha256": "ac591b0d8eb19cf10e416fd88a60c50224bc7a845c199ca5ff1e2a370b79c065",
+      "recognized": "これは私だけの秘密に湧きしませ 読んで疑って皆さんの届かぼください",
+      "seconds": 7.2,
+      "reading_similarity": 0.872
+    },
+    "before_secondary": {
+      "expected": "これは私だけの秘密にはしません。読んで、疑って、皆さんの言葉をください。",
+      "reading": "これは わたしだけの ひみつには しません。よんで、うたがって、みなさんの ことばを ください。",
+      "sha256": "ac591b0d8eb19cf10e416fd88a60c50224bc7a845c199ca5ff1e2a370b79c065",
+      "recognized": "これは私だけの秘密にはつきません。 呼んで、疑って、皆さんの届かもなさい。",
+      "seconds": 7.2,
+      "reading_similarity": 0.846
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "これは わたしだけの ひみつには しません。よんで、うたがって、みなさんの ことばを ください。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "01ca7f67f3f50fed82af58319aee692d7a5b5f13ac96646ef97f99351156324b",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/HIYORI/vacation-endless-true-1": {
+    "before_primary": {
+      "expected": "今日は私も、休ませてね。頼ることも、みんなを信じることなんだね。",
+      "reading": "きょうは わたしも、やすませてね。たよることも、みんなを しんじること なんだね。",
+      "sha256": "34143856208eb10a2bce80feafe15c7e4ce1e3c691bc193c73a01676eb8d4304",
+      "recognized": "今日は私も休ませてね。頼ることもみんなを信じることなんだね。",
+      "seconds": 8.04,
+      "reading_similarity": 1.0
+    },
+    "before_secondary": null,
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "きょうは わたしも、やすませてね。たよることも、みんなを しんじること なんだね。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "620ce23722b3f98263086acee7cb94b7fb077311c2d6afe49735598f9e7a46a8",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/HIYORI/vacation-endless-true-3": {
+    "before_primary": {
+      "expected": "私が治すだけじゃない。みんなで元気になって、また遊びに来ようね。",
+      "reading": "わたしが なおすだけじゃない。みんなで げんきに なって、また あそびに こようね。",
+      "sha256": "0635c7034ccd4e28d4326e337eae77a1b5ba9f3aef68ea1de38f72897809d4e3",
+      "recognized": "私が治すだけじゃない、みんなで元気になってまた遊びに来ようね",
+      "seconds": 8.0,
+      "reading_similarity": 1.0
+    },
+    "before_secondary": null,
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "わたしが なおすだけじゃない。みんなで げんきに なって、また あそびに こようね。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "9f156fef42701035e50953da7283eadfaea149899ac51cc1f63f5d6438dcc1b6",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/HIYORI/vacation-epilogue-3": {
+    "before_primary": {
+      "expected": "また来ようね。その時は私の行きたい場所にも、付き合ってね。",
+      "reading": "また こようね。その ときは わたしの いきたい ばしょにも、つきあってね。",
+      "sha256": "f957600c82a195897ae5650f58c17989aa60864fb4ae017ee243fa90cb5f47ed",
+      "recognized": "また来ようね。その時は私の行きたい場所にも付き合ってね。",
+      "seconds": 7.44,
+      "reading_similarity": 1.0
+    },
+    "before_secondary": null,
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "また こようね。その ときは わたしの いきたい ばしょにも、つきあってね。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "0c3e3e9d92358bfdc93b817fabdb2f06830a3854a8a5c522024a2d5f04fc8793",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/HIYORI/vacation-friendship-hiyori-sera-1": {
+    "before_primary": {
+      "expected": "元気のためには、何もしない日も処方しなくちゃね。",
+      "reading": "げんきの ためには、なにもしない ひも しょほうしなくちゃね。",
+      "sha256": "5ba800763a69e5c4f92aaa4834ecc0cd4e50e7d925eb5ef6a85115c2ea00dac1",
+      "recognized": "元気のためには、何もしない日も処方しなくちゃねー。",
+      "seconds": 6.24,
+      "reading_similarity": 0.926
+    },
+    "before_secondary": null,
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "げんきの ためには、なにもしない ひも しょほうしなくちゃね。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "46771be00901663ea39f6e16fd594196971cb195cdf3a25a8846f0756f5e1dcd",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/KOHARU/vacation-endless-true-3": {
+    "before_primary": {
+      "expected": "全部を一人で見張らなくてもいい。次の風は、みんなで迎えよう。",
+      "reading": "ぜんぶを ひとりで みはらなくても いい。つぎの かぜは、みんなで むかえよう。",
+      "sha256": "8b3cd4e9ac5fb0129ff6c41da636294f5b369d2942aa798fe3212c217d586fd3",
+      "recognized": "全部を一人で見払わなくてもいい。次の日はみんなで迎えよう。ご視聴ありがとうございました",
+      "seconds": 5.28,
+      "reading_similarity": 0.707
+    },
+    "before_secondary": {
+      "expected": "全部を一人で見張らなくてもいい。次の風は、みんなで迎えよう。",
+      "reading": "ぜんぶを ひとりで みはらなくても いい。つぎの かぜは、みんなで むかえよう。",
+      "sha256": "8b3cd4e9ac5fb0129ff6c41da636294f5b369d2942aa798fe3212c217d586fd3",
+      "recognized": "全部を一人で見張らなくてもいい次の数はみんなで迎えようありがとうございました",
+      "seconds": 5.28,
+      "reading_similarity": 0.827
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "ぜんぶを ひとりで みはらなくても いい。つぎの かぜは、みんなで むかえよう。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "9edfad69bfc899c994d1e2b633f438bb8313fa303e736e53b468fced8ae1786e",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/LEON/vacation-endless-true-3": {
+    "before_primary": {
+      "expected": "次も君に驚いてほしい。僕も、君の次の一手を楽しみにしている。",
+      "reading": "つぎも きみに おどろいて ほしい。ぼくも、きみの つぎの いってを たのしみに している。",
+      "sha256": "bf44e1e480fce452e066c7377f4328171a7e0a2888df2acefa9c26cadba9a496",
+      "recognized": "次も君に驚いて欲しい! 僕も君の次の一定を楽しんできている!",
+      "seconds": 6.0,
+      "reading_similarity": 0.795
+    },
+    "before_secondary": {
+      "expected": "次も君に驚いてほしい。僕も、君の次の一手を楽しみにしている。",
+      "reading": "つぎも きみに おどろいて ほしい。ぼくも、きみの つぎの いってを たのしみに している。",
+      "sha256": "bf44e1e480fce452e066c7377f4328171a7e0a2888df2acefa9c26cadba9a496",
+      "recognized": "次も君に驚いてほしい。 僕も君の次の一手を楽しんできてい!",
+      "seconds": 6.0,
+      "reading_similarity": 0.789
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "つぎも きみに おどろいて ほしい。ぼくも、きみの つぎの いってを たのしみに している。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "262871b0d943506ab4d58d3c42f196a091e7f80436bb420802fa669ee3cd2d90",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/LEON/vacation-friendship-leon-riku-1": {
+    "before_primary": {
+      "expected": "君も一音どうだい。眺めるだけでは、この夏は完成しないよ。",
+      "reading": "きみも いちおん どうだい。ながめるだけでは、この なつは かんせいしないよ。",
+      "sha256": "d26205d8e5936aeea0b3cb20259a10fb2e345050d5bff30c5f4de367b6474b8b",
+      "recognized": "君も各党だい 眺めるだけではこの夏は完成しないよ",
+      "seconds": 5.28,
+      "reading_similarity": 0.806
+    },
+    "before_secondary": {
+      "expected": "君も一音どうだい。眺めるだけでは、この夏は完成しないよ。",
+      "reading": "きみも いちおん どうだい。ながめるだけでは、この なつは かんせいしないよ。",
+      "sha256": "d26205d8e5936aeea0b3cb20259a10fb2e345050d5bff30c5f4de367b6474b8b",
+      "recognized": "君も描くどうだい?眺めるだけではこの夏は完成しないよ",
+      "seconds": 5.28,
+      "reading_similarity": 0.825
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "きみも いちおん どうだい。ながめるだけでは、この なつは かんせいしないよ。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "e10da20dd4ea02886a5cf26349841ea9d5a9a72f9ed3f77409d5dfe91526dec3",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/MADOKA/vacation-endless-true-3": {
+    "before_primary": {
+      "expected": "予測不能、でも継続可能。次の実験にも、一緒に来てくれますか。",
+      "reading": "よそくふのう、でも けいぞくかのう。つぎの じっけんにも、いっしょに きてくれますか。",
+      "sha256": "40b01ac565aaea562b9b82285e2ebfae752feef071bf11ede5bca64aa89393c7",
+      "recognized": "無速不能、でも軽減可能、次の実験にも一緒に来てくれなかったか、",
+      "seconds": 7.32,
+      "reading_similarity": 0.838
+    },
+    "before_secondary": {
+      "expected": "予測不能、でも継続可能。次の実験にも、一緒に来てくれますか。",
+      "reading": "よそくふのう、でも けいぞくかのう。つぎの じっけんにも、いっしょに きてくれますか。",
+      "sha256": "40b01ac565aaea562b9b82285e2ebfae752feef071bf11ede5bca64aa89393c7",
+      "recognized": "無俗不能でも計画可能次の実験にも一緒に来てくれなかった",
+      "seconds": 7.32,
+      "reading_similarity": 0.849
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "よそくふのう、でも けいぞくかのう。つぎの じっけんにも、いっしょに きてくれますか。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "e60d799fe8c4e4157a6f2e00106bd5ccb0f759a1e20de9c1c25b9b8705a2c517",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/MINATO/vacation-friendship-minato-elliot-1": {
+    "before_primary": {
+      "expected": "名前はまだ調べ中です。でも、きれいだったことは書けますよね。",
+      "reading": "なまえは まだ しらべちゅうです。でも、きれいだったことは かけますよね。",
+      "sha256": "bfb5e01e60514c2c1c0a1a3ce8cc2db82196060357fc08fd4654600ce658c34f",
+      "recognized": "名前はアマがアシャルレチュー でも綺麗だったことはかけますよね",
+      "seconds": 5.32,
+      "reading_similarity": 0.794
+    },
+    "before_secondary": {
+      "expected": "名前はまだ調べ中です。でも、きれいだったことは書けますよね。",
+      "reading": "なまえは まだ しらべちゅうです。でも、きれいだったことは かけますよね。",
+      "sha256": "bfb5e01e60514c2c1c0a1a3ce8cc2db82196060357fc08fd4654600ce658c34f",
+      "recognized": "名前はマンマンシャルレッジでも綺麗だったことは描けますよね",
+      "seconds": 5.32,
+      "reading_similarity": 0.698
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "なまえは まだ しらべちゅうです。でも、きれいだったことは かけますよね。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "8e8603191da2520b0bf408b27101a5406ad4c7fa971564fc7dc4daff82b8d8f3",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/REN/vacation-epilogue-1": {
+    "before_primary": {
+      "expected": "確認は終わり。俺も朝飯に混ぜてもらおうかな。",
+      "reading": "かくにんは おわり。おれも あさめしに まぜてもらおうかな。",
+      "sha256": "05b7584d4bd939239b58de8e9a87e70c3c27c4004e22e4c9d7cdfca8420064a6",
+      "recognized": "かさきにな。フォーアイゴ人は終わり。俺も朝飯に混ぜてもらおうかな。たれゆがね。",
+      "seconds": 5.8,
+      "reading_similarity": 0.75
+    },
+    "before_secondary": {
+      "expected": "確認は終わり。俺も朝飯に混ぜてもらおうかな。",
+      "reading": "かくにんは おわり。おれも あさめしに まぜてもらおうかな。",
+      "sha256": "05b7584d4bd939239b58de8e9a87e70c3c27c4004e22e4c9d7cdfca8420064a6",
+      "recognized": "かさきには、フォーアイゴニンは終わり。俺も朝飯に混ぜてもらおうかな。カリューがね。",
+      "seconds": 5.8,
+      "reading_similarity": 0.738
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "かくにんは おわり。おれも あさめしに まぜてもらおうかな。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "097c9d8f9b0170b884fbbf8eb83b71f26f0cd0dfe8ae2334ca2f97b53566e8bf",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/SAKUYA/vacation-endless-true-2": {
+    "before_primary": {
+      "expected": "忘れろとは言わない。通れる道を戻す。それが、今できることだ。",
+      "reading": "わすれろとは いわない。とおれる みちを もどす。それが、いま できることだ。",
+      "sha256": "2df13daf88c13f5548a239be17a9c56bbf1538a6cd57390e8ba0f5e945c64ab3",
+      "recognized": "ますぐるっと詰まらない 通れる日を戻す それが今できることだ",
+      "seconds": 7.4,
+      "reading_similarity": 0.73
+    },
+    "before_secondary": {
+      "expected": "忘れろとは言わない。通れる道を戻す。それが、今できることだ。",
+      "reading": "わすれろとは いわない。とおれる みちを もどす。それが、いま できることだ。",
+      "sha256": "2df13daf88c13f5548a239be17a9c56bbf1538a6cd57390e8ba0f5e945c64ab3",
+      "recognized": "まっすぐと一番長い。通る道を戻す。それが今できることだ。",
+      "seconds": 7.4,
+      "reading_similarity": 0.762
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "わすれろとは いわない。とおれる みちを もどす。それが、いま できることだ。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "b1e3c9a576c24b81ee95002c53a5f99533abaa248d92cb804542ea7c066e2090",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/SAKUYA/vacation-epilogue-1": {
+    "before_primary": {
+      "expected": "見なかったことにはしない。直せる場所から、手をつける。",
+      "reading": "みなかったことには しない。なおせる ばしょから、てを つける。",
+      "sha256": "4fb81dcde3bb0dbf17fae596643080c2ff610d1da9591ddbd56ede3f35484726",
+      "recognized": "いなかったのにはしない 直すぎるかでも えっ",
+      "seconds": 5.28,
+      "reading_similarity": 0.553
+    },
+    "before_secondary": {
+      "expected": "見なかったことにはしない。直せる場所から、手をつける。",
+      "reading": "みなかったことには しない。なおせる ばしょから、てを つける。",
+      "sha256": "4fb81dcde3bb0dbf17fae596643080c2ff610d1da9591ddbd56ede3f35484726",
+      "recognized": "いなかったら見らっしゃい直せるだけはでも",
+      "seconds": 5.28,
+      "reading_similarity": 0.468
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "みなかったことには しない。なおせる ばしょから、てを つける。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "caaac4d4d57588ae9897217d4f7ab1cf388e69faba88f8febafaf1ef6146dc90",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/SAKUYA/vacation-epilogue-2": {
+    "before_primary": {
+      "expected": "助力は受け取る。責任まで預けるのではなく、共に直すために。",
+      "reading": "じょりょくは うけとる。せきにんまで あずけるのでは なく、ともに なおすために。",
+      "sha256": "28db43290d9439e0affbab654f0c4d645da532f1d5b0db52af358a91d419eaf8",
+      "recognized": "頂力があるけど 責任まで預けるのではなく共に直すんだよ",
+      "seconds": 6.6,
+      "reading_similarity": 0.629
+    },
+    "before_secondary": {
+      "expected": "助力は受け取る。責任まで預けるのではなく、共に直すために。",
+      "reading": "じょりょくは うけとる。せきにんまで あずけるのでは なく、ともに なおすために。",
+      "sha256": "28db43290d9439e0affbab654f0c4d645da532f1d5b0db52af358a91d419eaf8",
+      "recognized": "努力はだけから責任まで預けるのではなく共に直せた",
+      "seconds": 6.6,
+      "reading_similarity": 0.8
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "じょりょくは うけとる。せきにんまで あずけるのでは なく、ともに なおすために。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "8d196ded9f436e8bf5c67477be8912472cb8815d09d2871c0d966ebef219b9b8",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/SAKUYA/vacation-epilogue-3": {
+    "before_primary": {
+      "expected": "今日はここまでだ。明日も来る。今度は、私から約束しよう。",
+      "reading": "きょうは ここまでだ。あしたも くる。こんどは、わたしから やくそくしよう。",
+      "sha256": "0f7f3358803fbcc5975d84ace99b0875ce0662dcb95d63add46246c0e65e49ed",
+      "recognized": "中はここまでだバスタムでだからわたすかかやつをしよう",
+      "seconds": 7.0,
+      "reading_similarity": 0.483
+    },
+    "before_secondary": {
+      "expected": "今日はここまでだ。明日も来る。今度は、私から約束しよう。",
+      "reading": "きょうは ここまでだ。あしたも くる。こんどは、わたしから やくそくしよう。",
+      "sha256": "0f7f3358803fbcc5975d84ace99b0875ce0662dcb95d63add46246c0e65e49ed",
+      "recognized": "今日はここまでだ。明日も来れ。だから、明日はやっぱしよう。",
+      "seconds": 7.0,
+      "reading_similarity": 0.678
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "きょうは ここまでだ。あしたも くる。こんどは、わたしから やくそくしよう。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "489e2a64ce828a111204ce48dbc49a30c3fa61cef430a52c0fcd5c4109772622",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/SAKUYA/vacation-friendship-sakuya-ren-1": {
+    "before_primary": {
+      "expected": "見張りは交代しなくてよいのか。二人とも休んでしまうぞ。",
+      "reading": "みはりは こうたいしなくて よいのか。ふたりとも やすんでしまうぞ。",
+      "sha256": "d8344a29d64e0dc798017e5837a29005cb8cd289f02296add5571178c5afa401",
+      "recognized": "もうやりまく今回しなくてよいのか二人ともやってるんでしちゃうぜ",
+      "seconds": 5.36,
+      "reading_similarity": 0.667
+    },
+    "before_secondary": {
+      "expected": "見張りは交代しなくてよいのか。二人とも休んでしまうぞ。",
+      "reading": "みはりは こうたいしなくて よいのか。ふたりとも やすんでしまうぞ。",
+      "sha256": "d8344a29d64e0dc798017e5837a29005cb8cd289f02296add5571178c5afa401",
+      "recognized": "メハリは後退しなくて良いながら、二人とも休んでしまう",
+      "seconds": 5.36,
+      "reading_similarity": 0.862
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "みはりは こうたいしなくて よいのか。ふたりとも やすんでしまうぞ。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "dac63e9c7a57907824fafb6c48002bb0555908f100bc79517a962f889404caea",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/SAKUYA/vacation-friendship-sakuya-yamato-1": {
+    "before_primary": {
+      "expected": "道具はここに置く。明日の仕事も、お前の分を残しておいた。",
+      "reading": "どうぐは ここに おく。あしたの しごとも、おまえの ぶんを のこしておいた。",
+      "sha256": "5764a393ca281b25546c5f84265faea349008ee6322d4027df763e04c95f204a",
+      "recognized": "道具が保護に向く 朝の仕事もお前の分を残しておいたい",
+      "seconds": 5.92,
+      "reading_similarity": 0.774
+    },
+    "before_secondary": {
+      "expected": "道具はここに置く。明日の仕事も、お前の分を残しておいた。",
+      "reading": "どうぐは ここに おく。あしたの しごとも、おまえの ぶんを のこしておいた。",
+      "sha256": "5764a393ca281b25546c5f84265faea349008ee6322d4027df763e04c95f204a",
+      "recognized": "道具はここに置く。罰探す仕事も、お前の分を残しておいた。",
+      "seconds": 5.92,
+      "reading_similarity": 0.825
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "どうぐは ここに おく。あしたの しごとも、おまえの ぶんを のこしておいた。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "fb33d86d8f6e02f13d3e0d11740e7d158e98827a9090fbc6374b4e8b31e999d7",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/SERA/vacation-friendship-koharu-sera-2": {
+    "before_primary": {
+      "expected": "今度は私が案内します。帰りの風も、一緒に探しましょう。",
+      "reading": "こんどは わたしが あんないします。かえりの かぜも、いっしょに さがしましょう。",
+      "sha256": "76c2ea99261bf697e4ab12702c206601791e9419e4df28831c3bd9180d5efbcc",
+      "recognized": "今度は私が案内します帰りの風も一緒に汚させます",
+      "seconds": 5.64,
+      "reading_similarity": 0.866
+    },
+    "before_secondary": {
+      "expected": "今度は私が案内します。帰りの風も、一緒に探しましょう。",
+      "reading": "こんどは わたしが あんないします。かえりの かぜも、いっしょに さがしましょう。",
+      "sha256": "76c2ea99261bf697e4ab12702c206601791e9419e4df28831c3bd9180d5efbcc",
+      "recognized": "今度は私が案内します。帰りのサテも一緒にケタさせましょう。",
+      "seconds": 5.64,
+      "reading_similarity": 0.87
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "こんどは わたしが あんないします。かえりの かぜも、いっしょに さがしましょう。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "b498d5f1847fb00cc5b36a2885d424fa622d76c6bbc8b6c187a9e419b83cbb34",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/SHIZUKU/vacation-endless-true-2": {
+    "before_primary": {
+      "expected": "予測できない波も、悪くありませんね。今日は誤差ごと覚えておきます。",
+      "reading": "よそくできない なみも、わるく ありませんね。きょうは ごさごと おぼえて おきます。",
+      "sha256": "291f767d65fcbe1a5767490f12830f9efbe6382ade56b2d47aec4444ee642014",
+      "recognized": "予測できない波も、がるくありませんね。今日もご視聴いただきまーす",
+      "seconds": 6.6,
+      "reading_similarity": 0.714
+    },
+    "before_secondary": {
+      "expected": "予測できない波も、悪くありませんね。今日は誤差ごと覚えておきます。",
+      "reading": "よそくできない なみも、わるく ありませんね。きょうは ごさごと おぼえて おきます。",
+      "sha256": "291f767d65fcbe1a5767490f12830f9efbe6382ade56b2d47aec4444ee642014",
+      "recognized": "予測できない波も悪くありませんね。今日はお旅のことを覚えておきます。",
+      "seconds": 6.6,
+      "reading_similarity": 0.877
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "よそくできない なみも、わるく ありませんね。きょうは ごさごと おぼえて おきます。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "809d49a9ddf4e583bb04b02293139f7d7e05c049c4fa239243a06ab0ff7bbcc3",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/TSUBASA/vacation-endless-true-2": {
+    "before_primary": {
+      "expected": "全力だけが答えじゃないんだな。ちょうどいい熱さって、結構難しい！",
+      "reading": "ぜんりょくだけが こたえじゃないんだな。ちょうどいい あつさって、けっこう むずかしい！",
+      "sha256": "2d977d001dd37a7882794186da3a4dc607be151679f938aa3feb032921ce348e",
+      "recognized": "原力だけ答えじゃないんだな、ちょうどいい奴さって結構難しい",
+      "seconds": 5.52,
+      "reading_similarity": 0.827
+    },
+    "before_secondary": {
+      "expected": "全力だけが答えじゃないんだな。ちょうどいい熱さって、結構難しい！",
+      "reading": "ぜんりょくだけが こたえじゃないんだな。ちょうどいい あつさって、けっこう むずかしい！",
+      "sha256": "2d977d001dd37a7882794186da3a4dc607be151679f938aa3feb032921ce348e",
+      "recognized": "全力だって答えじゃないんだなちょうどいいやつだって結構難しい",
+      "seconds": 5.52,
+      "reading_similarity": 0.895
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "ぜんりょくだけが こたえじゃないんだな。ちょうどいい あつさって、けっこう むずかしい！",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "b08048deb819ca72ea6acfbcc86ff28398ff6198d4d90c09f209069e31967ac6",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small",
+    "final_steps": 16
+  },
+  "magic/TSUBASA/vacation-epilogue-1": {
+    "before_primary": {
+      "expected": "よし、誰も焼けてない！私もちゃんと、止まれるようになったな。",
+      "reading": "よし、だれも やけてない！わたしも ちゃんと、とまれるように なったな。",
+      "sha256": "b55dedc5a2b00587b3df91bedf8b879c395e5016fbb0c15d4bba066db27a6071",
+      "recognized": "よし、誰も焼けてない!私もちゃんと戦うようになったな。",
+      "seconds": 4.48,
+      "reading_similarity": 0.862
+    },
+    "before_secondary": {
+      "expected": "よし、誰も焼けてない！私もちゃんと、止まれるようになったな。",
+      "reading": "よし、だれも やけてない！わたしも ちゃんと、とまれるように なったな。",
+      "sha256": "b55dedc5a2b00587b3df91bedf8b879c395e5016fbb0c15d4bba066db27a6071",
+      "recognized": "よし、誰も焼けてない。私もちゃんと蕎麦袋企業になったな。",
+      "seconds": 4.48,
+      "reading_similarity": 0.787
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "よし、だれも やけてない！わたしも ちゃんと、とまれるように なったな。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "e489537dc614a3f928fc2c0c5df1b48a97aced12b52eb46a37901cca51c03554",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  },
+  "magic/YAMATO/vacation-friendship-sakuya-yamato-2": {
+    "before_primary": {
+      "expected": "上等。終わったら飯だ。そっちの分は俺が取っとく。",
+      "reading": "じょうとう。おわったら めしだ。そっちの ぶんは おれが とっとく。",
+      "sha256": "2e0f1542e5fe1024ad192a3bd598ad7e2724e18f406e255f732ca863e3ad6afd",
+      "recognized": "ジョート!終わったらメシだ! そっちの分がもらえたってくる!",
+      "seconds": 5.32,
+      "reading_similarity": 0.704
+    },
+    "before_secondary": {
+      "expected": "上等。終わったら飯だ。そっちの分は俺が取っとく。",
+      "reading": "じょうとう。おわったら めしだ。そっちの ぶんは おれが とっとく。",
+      "sha256": "2e0f1542e5fe1024ad192a3bd598ad7e2724e18f406e255f732ca863e3ad6afd",
+      "recognized": "譲渡、終わったら飯だ!そっちの分はもらえた!",
+      "seconds": 5.32,
+      "reading_similarity": 0.72
+    },
+    "repair": {
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "steps": 4,
+      "spoken_text": "じょうとう。おわったら めしだ。そっちの ぶんは おれが とっとく。",
+      "seed_offset": 811,
+      "extend_seconds": 1,
+      "model_device": "cpu",
+      "codec_device": "cpu"
+    },
+    "final_sha256": "6c4277a8c7514edff3a13487663106647bd3a4b146623f25832a08cd3ef2ec91",
+    "final_model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+    "final_steps": 4
+  }
+}
