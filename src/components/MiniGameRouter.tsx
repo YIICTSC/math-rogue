@@ -1,3 +1,4 @@
+import IllustratedMiniGameEntry from '../mini-games/shared/IllustratedMiniGameEntry';
 
 import React from 'react';
 import { deferredScreen } from '../utils/deferredScreen';
@@ -94,6 +95,8 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
     }
 
     return (
+        <IllustratedMiniGameEntry key={screen} screen={screen} languageMode={languageMode} onBack={onBack}
+          bypass={!!debugPreview || isUiPreview || craneEventMode}>
         <React.Suspense fallback={null}><Component
             onBack={onBack}
             onFinish={onFinish}
@@ -111,7 +114,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             onCraneReplay={onCraneReplay}
             craneGold={craneGold}
             eventMode={craneEventMode}
-        /></React.Suspense>
+        /></React.Suspense></IllustratedMiniGameEntry>
     );
 };
 

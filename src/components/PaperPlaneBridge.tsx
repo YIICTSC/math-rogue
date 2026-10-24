@@ -1,3 +1,4 @@
+import ResponsiveTitleArt from '../mini-games/shared/ResponsiveTitleArt';
 import {createPortal} from 'react-dom';
 import {PAPER_BRIDGE_TEXT} from '../data/paperPlaneBridgeText';
 import React, {useCallback,useEffect,useRef,useState} from 'react';
@@ -86,7 +87,7 @@ export function PaperBridgeHud({captain,deputy,rival,current,languageMode,critic
 }
 export function PaperBattleTitle({resume,onResume,onStart,onHelp,onBack,languageMode}:{resume:boolean;onResume:()=>void;onStart:()=>void;onHelp:()=>void;onBack:()=>void;languageMode:LanguageMode}){
  const l=(jp:string,en:string)=>languageMode==='ENGLISH'?en:trans(jp,languageMode);
- return <section className="paper-battle-title" data-gamepad-navigation-root data-gamepad-initial-scope="paper-title"><img className="paper-title-art" src={assetUrl('sprites/paper-plane/bridge/title.webp')} alt=""/><div className="paper-title-copy"><small>ORIGAMI FLEET / TACTICAL BATTLE</small><h1>{l('紙飛行機バトル','PAPER PLANE BATTLE')}</h1><p>{l('その一枚が、空の運命を変える。','One sheet. A whole sky to change.')}</p><nav>{resume&&<button data-gamepad-zone="paper-title" data-gamepad-initial-choice onClick={onResume}>{l('航海を再開','Resume voyage')}</button>}<button data-gamepad-zone="paper-title" data-gamepad-initial-choice={!resume} onClick={onStart}>{l('新しい航海へ','New voyage')}</button><button data-gamepad-zone="paper-title" onClick={onHelp}>{l('遊び方','How to play')}</button><button data-gamepad-zone="paper-title" data-gamepad-back onClick={onBack}>{l('戻る','Back')}</button></nav></div></section>;
+ return <section className="paper-battle-title" data-gamepad-navigation-root data-gamepad-initial-scope="paper-title"><ResponsiveTitleArt game="paper-plane" className="paper-title-art"/><div className="paper-title-copy"><small>ORIGAMI FLEET / TACTICAL BATTLE</small><h1>{l('紙飛行機バトル','PAPER PLANE BATTLE')}</h1><p>{l('その一枚が、空の運命を変える。','One sheet. A whole sky to change.')}</p><nav>{resume&&<button data-gamepad-zone="paper-title" data-gamepad-initial-choice onClick={onResume}>{l('航海を再開','Resume voyage')}</button>}<button data-gamepad-zone="paper-title" data-gamepad-initial-choice={!resume} onClick={onStart}>{l('新しい航海へ','New voyage')}</button><button data-gamepad-zone="paper-title" onClick={onHelp}>{l('遊び方','How to play')}</button><button data-gamepad-zone="paper-title" data-gamepad-back onClick={onBack}>{l('戻る','Back')}</button></nav></div></section>;
 }
 export function PaperBridgeReport({captain,current,won,languageMode}:{captain:string;current:BridgeCue|null;won:boolean;languageMode:LanguageMode}){
  const en=languageMode==='ENGLISH';

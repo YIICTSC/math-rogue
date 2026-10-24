@@ -1,3 +1,4 @@
+import ResponsiveTitleArt from '../shared/ResponsiveTitleArt';
 import React, { useState } from "react";
 import type { LanguageMode } from "../../types";
 import { assetUrl } from "../../utils/assetPaths";
@@ -116,11 +117,7 @@ export function PokerLobby({
         select ? "poker-hero-selection" : "poker-title"
       }
     >
-      <img
-        className="poker-title-art"
-        src={assetUrl("sprites/after-school-poker/title.webp")}
-        alt=""
-      />
+      <ResponsiveTitleArt game="poker" className="poker-title-art"/>
       <button
         className="poker-lobby-back"
         onClick={select ? () => setSelect(false) : onBack}

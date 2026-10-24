@@ -1,3 +1,4 @@
+import ResponsiveTitleArt from '../shared/ResponsiveTitleArt';
 import { isProtagonistUnlocked, protagonistUnlockRequirement } from '../../utils/protagonistUnlocks';
 import React, { useState } from "react";
 import {
@@ -58,11 +59,7 @@ export default function SurvivorLobby({
       data-gamepad-modal
       data-gamepad-initial-scope={select ? "survivor-select" : "survivor-title"}
     >
-      <img
-        className="sy-keyvisual"
-        src={assetUrl("sprites/schoolyard-survivor/title.webp")}
-        alt=""
-      />
+      <ResponsiveTitleArt game="survivor" className="sy-keyvisual"/>
       <div className="sy-lobby-shade" />
       <button
         className="sy-back"

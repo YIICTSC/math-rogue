@@ -1,0 +1,751 @@
+{
+  "created": "2026-10-24",
+  "generator": "ImageGen",
+  "productionFormat": "WebP quality 88",
+  "compositions": "Independent 9:16 portrait and 16:9 landscape compositions; no rendered UI text",
+  "originalsRetained": "/workspace/generated_images",
+  "images": [
+    {
+      "game": "card-club",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/card-club-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 331278,
+      "sha256": "280185e16b6b737725cb586d144ece3283abdbec8cc830aa3d20163a8d39f888",
+      "generatedOriginal": "exec-43763322-0ea6-4969-8467-5aaceb6d928b.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "After-school Card Club: luxurious fantasy school library at sunset, emerald card table, elegant playing cards and gold suit ornaments drifting in a soft spiral, warm desk lamps, navy blue and antique gold. No casino gambling, no money. Cozy sophisticated friendship club. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "card-club",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/card-club-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 293892,
+      "sha256": "fe1266e00a33b6eef0c7a75216f3be27180f8ebe777b2f334142b3b661c3f650",
+      "generatedOriginal": "exec-64f1029f-650d-46f4-b13f-fa07084754ad.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "After-school Card Club: luxurious fantasy school library at sunset, emerald card table, elegant playing cards and gold suit ornaments drifting in a soft spiral, warm desk lamps, navy blue and antique gold. No casino gambling, no money. Cozy sophisticated friendship club. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "chess",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/chess-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 280310,
+      "sha256": "124a83cf93c1d9e88340a9eb19ed1c757a78774b1f08d389375fdf0ebf2348db",
+      "generatedOriginal": "exec-113387eb-63fa-42cc-ad14-ac8be2469b6d.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "School Chess: majestic ivory knight and black king on a polished chessboard in a school library, tall arched windows, gold afternoon light, floating geometric strategic lines, navy sapphire ivory and brass, refined intellectual adventure. Important actual game specification: A classic 8x8 chessboard, ivory and black king, queen, knight and rook pieces. No character selection exists: NO people or invented protagonists. Follow upper-right reference mood."
+    },
+    {
+      "game": "chess",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/chess-portrait-v1.webp",
+      "width": 940,
+      "height": 1672,
+      "bytes": 271756,
+      "sha256": "08a18212b857e8750c56048046ae378ad2987c2c87c85c613c1e14d6db20bbea",
+      "generatedOriginal": "exec-57490aa6-422a-4142-a435-e8bbe25ca20a.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "School Chess: majestic ivory knight and black king on a polished chessboard in a school library, tall arched windows, gold afternoon light, floating geometric strategic lines, navy sapphire ivory and brass, refined intellectual adventure. Important actual game specification: A classic 8x8 chessboard, ivory and black king, queen, knight and rook pieces. No character selection exists: NO people or invented protagonists. Follow upper-right reference mood."
+    },
+    {
+      "game": "crane",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/crane-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 348146,
+      "sha256": "3ef3608e4fac549dd9ef908971c8dbb85b84a5f1ac4a525cfffdb54e2fadf9d0",
+      "generatedOriginal": "exec-911980b5-4bb2-4e55-a241-5119f774a8b4.png",
+      "references": [
+        "public/sprites/mini-games/crane-game/crane-game-protagonist-prizes-3x2-alpha-v1.webp",
+        "public/sprites/mini-games/crane-game/crane-game-sprites-4x4-alpha-v1.webp"
+      ],
+      "scene": "School crane arcade game. Illustrate the actual prize toys from attached sprite references: orange raccoon/red-panda plush, blue dragon plush with little golden horns, yellow chick, white/orange cat with bell, red and blue capsules, and three protagonist plush dolls (red-cap elementary boy; black-haired navy-blazer schoolboy with blue/gold tie; red-ponytailed Akari in navy school blazer, red ribbon and star clip). These are TOYS inside an attractive pink/turquoise glass arcade crane cabinet, with the same red-and-silver THREE-PRONG CLAW descending. No selectable human protagonist in this game, so do not invent a human player foreground. Prize dolls must retain recognizable reference clothing and features. Polished inviting anime arcade illustration, warm glowing cabinet lights."
+    },
+    {
+      "game": "crane",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/crane-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 315018,
+      "sha256": "8af0e64fb9b79e9210488cb4754f0f35d23b36a3582befcad9e0519bae2ea02a",
+      "generatedOriginal": "exec-b53f44d3-7abb-4938-95a4-72148f7720e2.png",
+      "references": [
+        "public/sprites/mini-games/crane-game/crane-game-protagonist-prizes-3x2-alpha-v1.webp",
+        "public/sprites/mini-games/crane-game/crane-game-sprites-4x4-alpha-v1.webp"
+      ],
+      "scene": "School crane arcade game. Illustrate the actual prize toys from attached sprite references: orange raccoon/red-panda plush, blue dragon plush with little golden horns, yellow chick, white/orange cat with bell, red and blue capsules, and three protagonist plush dolls (red-cap elementary boy; black-haired navy-blazer schoolboy with blue/gold tie; red-ponytailed Akari in navy school blazer, red ribbon and star clip). These are TOYS inside an attractive pink/turquoise glass arcade crane cabinet, with the same red-and-silver THREE-PRONG CLAW descending. No selectable human protagonist in this game, so do not invent a human player foreground. Prize dolls must retain recognizable reference clothing and features. Polished inviting anime arcade illustration, warm glowing cabinet lights."
+    },
+    {
+      "game": "dungeons",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/dungeons-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 446096,
+      "sha256": "7f8fd97508f5329ced096ae21a04e49ddc4e38f3972105ab220f5a523d372f67",
+      "generatedOriginal": "exec-80321688-1dab-421c-bf2a-218c18c532ac.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp",
+        "public/sprites/wandering-student/elementary-warrior.webp",
+        "public/sprites/wandering-student/elementary-caretaker.webp",
+        "public/sprites/wandering-student/elementary-mage.webp"
+      ],
+      "scene": "Faithfully feature three actual selectable protagonists from the attached reference sheet: red-baseball-cap elementary boy, white T-shirt, blue shorts, white sneakers (NOT red tracksuit); black-haired high school boy in black/navy blazer, white shirt and blue/gold striped tie; red-ponytailed Akari with star hairclip in navy blazer, red ribbon and navy skirt. Keep their actual outfits and hairstyles. Original Learning Rogue Dungeons: turn-based school-supply roguelike exploration, the trio approaches a mossy lantern-lit stone maze staircase with treasure chest, friendly slime, star-atlas pages and a distant warm travelers' village. Jade forest, ancient bridges, adventurous school-fantasy atmosphere."
+    },
+    {
+      "game": "dungeons",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/dungeons-portrait-v1.webp",
+      "width": 940,
+      "height": 1672,
+      "bytes": 436902,
+      "sha256": "606aa17ca2699c68cd48e4c2973019470019b17a0bc9bb8b436531b0a11adcd3",
+      "generatedOriginal": "exec-74e572a6-5ffb-4ce9-bdde-79cdf1b71641.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp",
+        "public/sprites/wandering-student/elementary-warrior.webp",
+        "public/sprites/wandering-student/elementary-caretaker.webp",
+        "public/sprites/wandering-student/elementary-mage.webp"
+      ],
+      "scene": "Faithfully feature three actual selectable protagonists from the attached reference sheet: red-baseball-cap elementary boy, white T-shirt, blue shorts, white sneakers (NOT red tracksuit); black-haired high school boy in black/navy blazer, white shirt and blue/gold striped tie; red-ponytailed Akari with star hairclip in navy blazer, red ribbon and navy skirt. Keep their actual outfits and hairstyles. Original Learning Rogue Dungeons: turn-based school-supply roguelike exploration, the trio approaches a mossy lantern-lit stone maze staircase with treasure chest, friendly slime, star-atlas pages and a distant warm travelers' village. Jade forest, ancient bridges, adventurous school-fantasy atmosphere."
+    },
+    {
+      "game": "dungeons2",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/dungeons2-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 485156,
+      "sha256": "c6107b4886f7110dc233b6743385fccb20d31ab29e5162b51b96357b87507fb9",
+      "generatedOriginal": "exec-32651c41-53d0-4b79-8e63-4dd681714d82.png",
+      "references": [
+        "public/sprites/dungeons2/leon-before.webp",
+        "public/sprites/dungeons2/lyria-before.webp",
+        "public/sprites/dungeons2/orion-before.webp",
+        "public/sprites/dungeons2/noctia-before.webp",
+        "public/sprites/dungeons2/aurene-before.webp",
+        "public/sprites/dungeons2/ignis-before.webp",
+        "public/sprites/dungeons2/celis-before.webp",
+        "public/sprites/dungeons2/flora-before.webp",
+        "public/sprites/dungeons2/leif-before.webp",
+        "public/sprites/dungeons2/world/town-backdrop.webp"
+      ],
+      "scene": "Learning Rogue Dungeons 2: Deeper into the Abyss. Faithfully depict the existing nine fantasy heroes from the character reference (Lyria silver braided hair violet star knight, Celis ice-blue short hair white blue mage, Flora auburn green ranger, Noctia purple witch with tome, Aurene blonde white gold priestess, Ignis red-haired blue tunic red cape brave, Leon blond gold white paladin, Orion dark purple black spellblade, Leif brown-haired green archer). Foreground star knight Lyria with sword, red-haired Ignis, blond Leon, remaining companions layered behind. Vast ancient abyss stairway, luminous blue crystals, ruined arches, distant warm medieval village and wooded hills, darkness below and dawn above. Epic inviting JRPG key art, not schoolchildren. Preserve character costumes and faces from reference."
+    },
+    {
+      "game": "dungeons2",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/dungeons2-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 573254,
+      "sha256": "0df99f2aa18d89e362670b5135c7c8ce7c5bc4603c28bc8dffe9624b9421067c",
+      "generatedOriginal": "exec-f107f075-a12d-4b28-8d6b-17cc9d240e3b.png",
+      "references": [
+        "public/sprites/dungeons2/leon-before.webp",
+        "public/sprites/dungeons2/lyria-before.webp",
+        "public/sprites/dungeons2/orion-before.webp",
+        "public/sprites/dungeons2/noctia-before.webp",
+        "public/sprites/dungeons2/aurene-before.webp",
+        "public/sprites/dungeons2/ignis-before.webp",
+        "public/sprites/dungeons2/celis-before.webp",
+        "public/sprites/dungeons2/flora-before.webp",
+        "public/sprites/dungeons2/leif-before.webp",
+        "public/sprites/dungeons2/world/town-backdrop.webp"
+      ],
+      "scene": "Learning Rogue Dungeons 2: Deeper into the Abyss. Faithfully depict the existing nine fantasy heroes from the character reference (Lyria silver braided hair violet star knight, Celis ice-blue short hair white blue mage, Flora auburn green ranger, Noctia purple witch with tome, Aurene blonde white gold priestess, Ignis red-haired blue tunic red cape brave, Leon blond gold white paladin, Orion dark purple black spellblade, Leif brown-haired green archer). Foreground star knight Lyria with sword, red-haired Ignis, blond Leon, remaining companions layered behind. Vast ancient abyss stairway, luminous blue crystals, ruined arches, distant warm medieval village and wooded hills, darkness below and dawn above. Epic inviting JRPG key art, not schoolchildren. Preserve character costumes and faces from reference."
+    },
+    {
+      "game": "go",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/go-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 319962,
+      "sha256": "5bc15256cca260a8f15ba8e9799feb591d3efa1798d73c5f01bd4d3994d9e087",
+      "generatedOriginal": "exec-ae2fed16-8240-4578-af2c-cc9f02c1e5b9.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Nine-line Go: black and ivory go stones on a clearly visible compact NINE BY NINE wooden intersection board in a serene school club room overlooking a moss garden, bowls of stones, shafts of soft daylight, ink black jade cream gold, contemplative elegant strategy key art. Important actual game specification: Use exactly a NINE by NINE intersection go board, black and white stones and their bowls. No character selection exists: NO people or invented protagonists. Follow upper-middle reference mood."
+    },
+    {
+      "game": "go",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/go-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 328976,
+      "sha256": "c85873e808bcf55af6924680728901a070e35477873287a166e0baf748f1ab39",
+      "generatedOriginal": "exec-0b017494-614c-49e2-9e24-52ec37e31324.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Nine-line Go: black and ivory go stones on a clearly visible compact NINE BY NINE wooden intersection board in a serene school club room overlooking a moss garden, bowls of stones, shafts of soft daylight, ink black jade cream gold, contemplative elegant strategy key art. Important actual game specification: Use exactly a NINE by NINE intersection go board, black and white stones and their bowls. No character selection exists: NO people or invented protagonists. Follow upper-middle reference mood."
+    },
+    {
+      "game": "go-home",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/go-home-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 462036,
+      "sha256": "f21ea6e98d87b0323e03155c20565a612b061f25dc47667e7c75531560a42705",
+      "generatedOriginal": "exec-720c6ac0-6669-4090-b349-4edcf25859cd.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "Home Dash: high-school anime students sprinting and parkouring home across floating sunlit street platforms and school rooftops, bookbags and navy uniforms, red-orange sunset, skyway road curling through clouds, overhead wires, blossoms and wind streaks, joyous high-speed platformer illustration. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "go-home",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/go-home-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 405996,
+      "sha256": "3a6b28d1338cb7f270fefbe21e7d485ae08555106a83aaff6c9dc39d71b6a08a",
+      "generatedOriginal": "exec-6b06bdf3-47be-4c9b-acea-8dcd0a893dff.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "Home Dash: high-school anime students sprinting and parkouring home across floating sunlit street platforms and school rooftops, bookbags and navy uniforms, red-orange sunset, skyway road curling through clouds, overhead wires, blossoms and wind streaks, joyous high-speed platformer illustration. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "golf",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/golf-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 421412,
+      "sha256": "947754c4118438909ca46e0fe1617b3e82b7793e4b3fb7f9647b9af378e5e69a",
+      "generatedOriginal": "exec-457f7e07-e1cd-4321-bbe5-7feba8e34829.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "GAKURO GOLF, Learning Rogue Golf. A beautiful eighteen-hole school-adventure golf course: carefully cut green, white golf ball, red flag on a narrow flagstick, curved fairway, sand bunker and blue water hazard, wooded hills. Actual selectable protagonist avatars from the reference: black-haired high-school boy in navy/gold blazer with blue/gold striped tie putting a ball, red-ponytailed Akari with golden star clip, navy blazer with white piping, red ribbon and navy pleated skirt holding a golf club beside him. Preserve exact hair, faces and school uniforms; no replacement adult golfers or invented golf uniforms. Calm sunny sporting adventure, green cream sky-blue golden light."
+    },
+    {
+      "game": "golf",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/golf-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 332476,
+      "sha256": "f908037b178fec3e1b576bd4e1319f60ca760c70d73b910b3b3ebae20337545a",
+      "generatedOriginal": "exec-49a9a4f5-d1a7-444c-bd63-7e76088cdc94.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "GAKURO GOLF, Learning Rogue Golf. A beautiful eighteen-hole school-adventure golf course: carefully cut green, white golf ball, red flag on a narrow flagstick, curved fairway, sand bunker and blue water hazard, wooded hills. Actual selectable protagonist avatars from the reference: black-haired high-school boy in navy/gold blazer with blue/gold striped tie putting a ball, red-ponytailed Akari with golden star clip, navy blazer with white piping, red ribbon and navy pleated skirt holding a golf club beside him. Preserve exact hair, faces and school uniforms; no replacement adult golfers or invented golf uniforms. Calm sunny sporting adventure, green cream sky-blue golden light."
+    },
+    {
+      "game": "kart",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/kart-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 390244,
+      "sha256": "c57d07fb12465ca7e4d3c71f0624bc8c0a758edd77269e397af874f1237295d8",
+      "generatedOriginal": "exec-efef79d1-4278-4802-9dae-aeb4eb2bd09f.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "GAKURO GP, Learning Rogue Race. Kart racing on a colorful school-campus road circuit, three compact single-seat open racing karts with large wheels and visible steering wheels taking a corner, rival racers, boost trails, school clock tower, track barriers, knowledge-star pickup motifs. Driveable sporty small karts, not full-sized cars. The visible drivers MUST be actual selectable protagonist avatars from the reference: black-haired high-school boy in navy/gold blazer and blue/gold striped tie; red-ponytailed Akari with star clip and navy blazer/red ribbon; optional glasses blue-haired girl in navy uniform. Keep their faces, hairstyles and school clothing recognizable. Cheerful exciting arcade racing, vibrant azure orange gold, no weapons."
+    },
+    {
+      "game": "kart",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/kart-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 289688,
+      "sha256": "f0469df53cef977b93d8ef942065c29c47e40718181dddea403284bcc8b38102",
+      "generatedOriginal": "exec-55e65f5b-bc2a-49b1-9a84-55c02091c9ba.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "GAKURO GP, Learning Rogue Race. Kart racing on a colorful school-campus road circuit, three compact single-seat open racing karts with large wheels and visible steering wheels taking a corner, rival racers, boost trails, school clock tower, track barriers, knowledge-star pickup motifs. Driveable sporty small karts, not full-sized cars. The visible drivers MUST be actual selectable protagonist avatars from the reference: black-haired high-school boy in navy/gold blazer and blue/gold striped tie; red-ponytailed Akari with star clip and navy blazer/red ribbon; optional glasses blue-haired girl in navy uniform. Keep their faces, hairstyles and school clothing recognizable. Cheerful exciting arcade racing, vibrant azure orange gold, no weapons."
+    },
+    {
+      "game": "kocho",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/kocho-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 443188,
+      "sha256": "1df928fd6e310a85ab5dcf873e4bb620abd8386e997fee0e12b1ef104c3e0fc8",
+      "generatedOriginal": "exec-a5ec50a7-9112-406d-95b2-8e39b1428d26.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/kocho/original-portrait.webp"
+      ],
+      "scene": "KOCHO SHOWDOWN. Accurately depict ALL THREE existing playable heroes from the references: 1 black-haired rebellious high school boy, dark blazer with gold trim, white shirt, blue/gold diagonally striped tie, black trousers, black shoes; 2 Akari Hoshimiya, bright RED HIGH PONYTAIL, golden STAR HAIRCLIP, NAVY school blazer with WHITE PIPING and gold crest, white blouse, RED RIBBON, navy pleated skirt, navy socks, WHITE SNEAKERS with RED accents. She wears this SCHOOL UNIFORM, absolutely not a red fantasy dress, no armor, no cape. 3 younger dark spiky-haired original hero in RED ZIP-UP TRACKSUIT JACKET WITH WHITE SLEEVE STRIPES, white shirt, navy trousers, red/white sneakers. Preserve reference faces, hairstyles, eye colors and age; use anime painting quality but no character redesign. The high school boy and Akari are equally prominent as the tracksuit hero. They confront a stern bespectacled principal in an ornate school courtyard at blue twilight, flying action cards, ruler and golden star magic, playful tactical battle, no injuries. Character reference fidelity is the highest priority."
+    },
+    {
+      "game": "kocho",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/kocho-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 420366,
+      "sha256": "ba4e2d705a25b05a242fe78278eb36e8f3fac87de75375d16a71faf46ca35a53",
+      "generatedOriginal": "exec-bf533a2e-2618-4e93-b1ab-6940a903ce24.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/kocho/original-portrait.webp"
+      ],
+      "scene": "KOCHO SHOWDOWN. Accurately depict ALL THREE existing playable heroes from the references: 1 black-haired rebellious high school boy, dark blazer with gold trim, white shirt, blue/gold diagonally striped tie, black trousers, black shoes; 2 Akari Hoshimiya, bright RED HIGH PONYTAIL, golden STAR HAIRCLIP, NAVY school blazer with WHITE PIPING and gold crest, white blouse, RED RIBBON, navy pleated skirt, navy socks, WHITE SNEAKERS with RED accents. She wears this SCHOOL UNIFORM, absolutely not a red fantasy dress, no armor, no cape. 3 younger dark spiky-haired original hero in RED ZIP-UP TRACKSUIT JACKET WITH WHITE SLEEVE STRIPES, white shirt, navy trousers, red/white sneakers. Preserve reference faces, hairstyles, eye colors and age; use anime painting quality but no character redesign. The high school boy and Akari are equally prominent as the tracksuit hero. They confront a stern bespectacled principal in an ornate school courtyard at blue twilight, flying action cards, ruler and golden star magic, playful tactical battle, no injuries. Character reference fidelity is the highest priority."
+    },
+    {
+      "game": "learning-tcg",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/learning-tcg-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 404978,
+      "sha256": "a995ae2538547bd1785595bd380d61260d220c1ea013cf0b1aac140f8e617c5a",
+      "generatedOriginal": "exec-261858c1-5b14-4566-b9f8-88eb4535be1d.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Learning Rogue TCG: dramatic strategic card game on a magical academy duel tabletop, colorful illustrated ability cards swirl around the duel board, holographic geometric grid, glowing sword shield and spell motifs, knowledge crystals and golden energy, deep navy cyan crimson gold, premium collectible card adventure key art, no legible text. Important actual game specification: Actual game is a THREE-LANE PLACEMENT TCG with one unit and support per lane; elementary/high-school/magic deck themes. Show exactly three glowing lanes and unit/support cards, no unrelated battle world and no invented protagonist. Follow lower-left reference."
+    },
+    {
+      "game": "learning-tcg",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/learning-tcg-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 394664,
+      "sha256": "6713d35009aaca4772dac014118ff83ccacacbccfff082f9428d5f91edfad18b",
+      "generatedOriginal": "exec-3deb9146-bbd5-40e6-a0bb-2bba9f32545b.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Learning Rogue TCG: dramatic strategic card game on a magical academy duel tabletop, colorful illustrated ability cards swirl around the duel board, holographic geometric grid, glowing sword shield and spell motifs, knowledge crystals and golden energy, deep navy cyan crimson gold, premium collectible card adventure key art, no legible text. Important actual game specification: Actual game is a THREE-LANE PLACEMENT TCG with one unit and support per lane; elementary/high-school/magic deck themes. Show exactly three glowing lanes and unit/support cards, no unrelated battle world and no invented protagonist. Follow lower-left reference."
+    },
+    {
+      "game": "mahjong",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/mahjong-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 317830,
+      "sha256": "19ce2f88a9be60657a6581b48e00f0b7b7cf11d9dc155a596ec81b2dacb01407",
+      "generatedOriginal": "exec-adc41c34-b931-4a48-95b9-8175fd8bea3f.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Learning Mahjong: luminous ivory mahjong tiles arranged on jade green tabletop in a cozy Japanese school game club, bamboo tile motifs and subtle sakura petals, jade cream burgundy golden light, approachable strategic illustration, no money or casino, no readable text. Important actual game specification: Actual four-player riichi mahjong and a tile-collection roguelike mode; show ivory bamboo/circle/character tiles, four tile walls and jade table, no people or invented protagonists, follow middle-left reference."
+    },
+    {
+      "game": "mahjong",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/mahjong-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 257658,
+      "sha256": "d24a6944f4ee2191dc52a1942869e012db2e2111d40d31dfbc3db511e684afcf",
+      "generatedOriginal": "exec-75f8b4e0-ce84-443f-a918-2f8666cdcc41.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Learning Mahjong: luminous ivory mahjong tiles arranged on jade green tabletop in a cozy Japanese school game club, bamboo tile motifs and subtle sakura petals, jade cream burgundy golden light, approachable strategic illustration, no money or casino, no readable text. Important actual game specification: Actual four-player riichi mahjong and a tile-collection roguelike mode; show ivory bamboo/circle/character tiles, four tile walls and jade table, no people or invented protagonists, follow middle-left reference."
+    },
+    {
+      "game": "paper-plane",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/paper-plane-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 377796,
+      "sha256": "9b69cd8d1ed37af09f4f6c759af6434ac5da0e74327aced9b4f1ffbe36d74177",
+      "generatedOriginal": "exec-a9bb3b53-6700-44e6-8673-fd2da7b64c54.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "Paper Plane Tactical Fleet: imaginative origami aircraft battle above turquoise ocean and sunlit clouds, paper battleship carrier fleet with folded-paper fighter jets in formation, school notebooks and pencil map motifs subtly integrated, tiny brave anime student pilots at lower edge, grand hopeful blue white gold aviation key art, no real military insignias. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "paper-plane",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/paper-plane-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 392334,
+      "sha256": "978aefebcc8a07b75e8abe59a9eff0f094128dfa35f011aa85095d319134021b",
+      "generatedOriginal": "exec-b1dca880-67e5-4fe0-9858-4d7b2e37cd69.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "Paper Plane Tactical Fleet: imaginative origami aircraft battle above turquoise ocean and sunlit clouds, paper battleship carrier fleet with folded-paper fighter jets in formation, school notebooks and pencil map motifs subtly integrated, tiny brave anime student pilots at lower edge, grand hopeful blue white gold aviation key art, no real military insignias. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "poker",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/poker-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 316812,
+      "sha256": "565d81910fd5f33cad870f7a8519f2d8e2cc69507d3f8c792aebc8e2846caf9a",
+      "generatedOriginal": "exec-e9da41b7-6929-45b9-b365-86e2a6c2297e.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "After-school Poker: cozy school card club, smiling anime high-school friends around an emerald felt poker table, colorful non-monetary game chips and fanned playing cards, golden afternoon windows, wood library shelves, burgundy teal gold palette, friendship and strategy, no money no casino. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "poker",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/poker-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 276344,
+      "sha256": "4778929160bad71441eafa5a1dc7665f83a91760e2428c7d12633c1b19752af1",
+      "generatedOriginal": "exec-1ffa3848-d39c-46a5-9467-42db3f467343.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "After-school Poker: cozy school card club, smiling anime high-school friends around an emerald felt poker table, colorful non-monetary game chips and fanned playing cards, golden afternoon windows, wood library shelves, burgundy teal gold palette, friendship and strategy, no money no casino. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "school-trpg",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/school-trpg-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 384290,
+      "sha256": "6d8d787fcae0edc56e722c04d46c1963fb2b43ba278a5a726465f7561222b857",
+      "generatedOriginal": "exec-d8fa14e9-a298-4597-a7bd-aa63de0124e5.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "After-school School TRPG: school mystery adventure, notebook, flashlight and red six-sided die, mysterious sunset school corridor opening into a fantastical library, pinned clue map, stars and paper story fragments, orange lantern light against violet and teal shadows, adventurous hopeful storytelling. Important actual game specification: This campaign has five school mystery chapters, d6 checks, clue notebook, school-emblem fragments, clock tower and constellation chart, branching routes. There is no visual protagonist selector. Illustrate the notebook, red d6, flashlight, clue map and mysterious school library doorway WITHOUT invented foreground characters. Follow middle-right reference."
+    },
+    {
+      "game": "school-trpg",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/school-trpg-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 406744,
+      "sha256": "46383b2fdb825c7b97450a189676f0efff68c7e7e8a3076f4e1faf786d5bbc95",
+      "generatedOriginal": "exec-2fb7fcb3-f72a-4987-a898-d3c9e6e60c66.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "After-school School TRPG: school mystery adventure, notebook, flashlight and red six-sided die, mysterious sunset school corridor opening into a fantastical library, pinned clue map, stars and paper story fragments, orange lantern light against violet and teal shadows, adventurous hopeful storytelling. Important actual game specification: This campaign has five school mystery chapters, d6 checks, clue notebook, school-emblem fragments, clock tower and constellation chart, branching routes. There is no visual protagonist selector. Illustrate the notebook, red d6, flashlight, clue map and mysterious school library doorway WITHOUT invented foreground characters. Follow middle-right reference."
+    },
+    {
+      "game": "shogi",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/shogi-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 246706,
+      "sha256": "602ba522f04777ca08e3d454dff08eff1f716b66d01893863f116c13ca8958f9",
+      "generatedOriginal": "exec-e3908f2d-4c66-4dd2-9294-20e03a05694e.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Mini Shogi: beautiful warm wooden Japanese shogi board and upright gold wooden pentagonal pieces under a school club room window, maple shadows, dramatic king-piece foreground, amber ink indigo atmosphere, calm strategy illustration. No readable writing on pieces, use abstract engraved marks. Important actual game specification: This game is 5 by 5 MINI SHOGI, not a full 9x9 shogi board. Show a coherent 5x5 wooden shogi grid, pentagonal wooden pieces, king and promoted pieces, captured-piece stands; no character selection exists, so show NO people or invented protagonists. Follow upper-left reference mood."
+    },
+    {
+      "game": "shogi",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/shogi-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 243052,
+      "sha256": "c00270c2a01861cc2e4b12957288dc12a14449d8409ccbbb28baf46d8478ca96",
+      "generatedOriginal": "exec-36247172-7dbf-463d-9b43-7a45b98a2215.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Mini Shogi: beautiful warm wooden Japanese shogi board and upright gold wooden pentagonal pieces under a school club room window, maple shadows, dramatic king-piece foreground, amber ink indigo atmosphere, calm strategy illustration. No readable writing on pieces, use abstract engraved marks. Important actual game specification: This game is 5 by 5 MINI SHOGI, not a full 9x9 shogi board. Show a coherent 5x5 wooden shogi grid, pentagonal wooden pieces, king and promoted pieces, captured-piece stands; no character selection exists, so show NO people or invented protagonists. Follow upper-left reference mood."
+    },
+    {
+      "game": "stone-glow",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/stone-glow-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 355178,
+      "sha256": "eb2c8a8ff6247e75206359493d5b0d3cc01c48705242fb86e2f96aad52080520",
+      "generatedOriginal": "exec-90acbd55-ebb9-4ba8-8334-2c2661bc36a0.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Stone Glow: enchanted school science club discovers five colors of glowing gemstones and smooth pebbles, ruby sapphire emerald amber diamond arranged on a rustic wooden table, magnifying glass, specimen trays, starry magical refractions, indigo teal prismatic gold, wonder and collection strategy. Important actual game specification: This game has FOUR stone colors: red ruby, blue sapphire, green emerald, yellow amber, plus a neutral wild stone. Card purchasing and collection strategy. Show those four colored trays and ability cards, no people or invented protagonists. Follow middle-center reference."
+    },
+    {
+      "game": "stone-glow",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/stone-glow-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 338236,
+      "sha256": "b74c8b023b6edf3b83a089fb2892845c7d3adc03c03eb819f5bac62e9fa5751b",
+      "generatedOriginal": "exec-b3cf6762-74bb-4a32-8f07-67aa269fe517.png",
+      "references": [
+        "public/sprites/backgrounds/mini-games/shogi.png",
+        "public/sprites/backgrounds/mini-games/go.png",
+        "public/sprites/backgrounds/mini-games/chess.png",
+        "public/sprites/backgrounds/mini-games/mahjong.png",
+        "public/sprites/backgrounds/mini-games/stone-glow.png",
+        "public/sprites/backgrounds/mini-games/school-trpg.png",
+        "public/sprites/backgrounds/mini-games/learning-tcg.png"
+      ],
+      "scene": "Stone Glow: enchanted school science club discovers five colors of glowing gemstones and smooth pebbles, ruby sapphire emerald amber diamond arranged on a rustic wooden table, magnifying glass, specimen trays, starry magical refractions, indigo teal prismatic gold, wonder and collection strategy. Important actual game specification: This game has FOUR stone colors: red ruby, blue sapphire, green emerald, yellow amber, plus a neutral wild stone. Card purchasing and collection strategy. Show those four colored trays and ability cards, no people or invented protagonists. Follow middle-center reference."
+    },
+    {
+      "game": "survivor",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/survivor-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 415720,
+      "sha256": "137f610480cbc2af02ed3e5e05b9a00af9d3ee38b9e01b056b2b28820685e307",
+      "generatedOriginal": "exec-ca0fecdd-8aa0-410f-bd73-1131eef6727f.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp",
+        "public/sprites/wandering-student/elementary-warrior.webp",
+        "public/sprites/wandering-student/elementary-caretaker.webp",
+        "public/sprites/wandering-student/elementary-mage.webp"
+      ],
+      "scene": "Faithfully feature three actual selectable protagonists from the attached reference sheet: red-baseball-cap elementary boy, white T-shirt, blue shorts, white sneakers (NOT red tracksuit); black-haired high school boy in black/navy blazer, white shirt and blue/gold striped tie; red-ponytailed Akari with star hairclip in navy blazer, red ribbon and navy skirt. Keep their actual outfits and hairstyles. Schoolyard Survivor auto-attack survival game: pencil projectiles, a basketball, recorder and magical star effects swirl as the trio faces waves of animated school-supply monsters in a large sunset schoolyard, clock tower, dynamic teamwork, dramatic turquoise amber red."
+    },
+    {
+      "game": "survivor",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/survivor-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 379138,
+      "sha256": "d8440603205a523fff5f545143c21d5c9265765d85827d93d6145842eeab26fb",
+      "generatedOriginal": "exec-7e0bf2cc-f06f-4983-b8f3-81cc73b21d42.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp",
+        "public/sprites/wandering-student/elementary-warrior.webp",
+        "public/sprites/wandering-student/elementary-caretaker.webp",
+        "public/sprites/wandering-student/elementary-mage.webp"
+      ],
+      "scene": "Faithfully feature three actual selectable protagonists from the attached reference sheet: red-baseball-cap elementary boy, white T-shirt, blue shorts, white sneakers (NOT red tracksuit); black-haired high school boy in black/navy blazer, white shirt and blue/gold striped tie; red-ponytailed Akari with star hairclip in navy blazer, red ribbon and navy skirt. Keep their actual outfits and hairstyles. Schoolyard Survivor auto-attack survival game: pencil projectiles, a basketball, recorder and magical star effects swirl as the trio faces waves of animated school-supply monsters in a large sunset schoolyard, clock tower, dynamic teamwork, dramatic turquoise amber red."
+    },
+    {
+      "game": "vr",
+      "orientation": "landscape",
+      "asset": "public/sprites/mini-game-titles/vr-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 306656,
+      "sha256": "056aea97a64340ac32eb685742d5179bb80fae30e89e4fa506fc147e6ed26b85",
+      "generatedOriginal": "exec-995ebab0-2d61-450c-b215-a48a9ffa86ae.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "Gakuro VR Training: anime high-school stealth training in futuristic simulated school corridor, student in navy blazer and subtle luminous visor crouches behind lockers while scanning holographic patrol routes, teal hologram barriers, training drones, bright school campus vista, violet teal lime, nonlethal sporty science-fiction game key art. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    },
+    {
+      "game": "vr",
+      "orientation": "portrait",
+      "asset": "public/sprites/mini-game-titles/vr-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 306218,
+      "sha256": "6adf5d8e574d2df6a522eaf4dc069068821e4c469376d6e74c30ff155f8eb039",
+      "generatedOriginal": "exec-7e60ff7a-fa6a-426f-9b70-7b72c6e006e0.png",
+      "references": [
+        "public/sprites/high-school/characters/0.webp",
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "scene": "Gakuro VR Training: anime high-school stealth training in futuristic simulated school corridor, student in navy blazer and subtle luminous visor crouches behind lockers while scanning holographic patrol routes, teal hologram barriers, training drones, bright school campus vista, violet teal lime, nonlethal sporty science-fiction game key art. The characters MUST be existing selectable protagonists from the attached reference: the black-haired boy in black/navy blazer and blue/gold striped tie; Akari with red high ponytail, golden star clip, navy blazer white piping, red ribbon, navy pleated skirt and white/red sneakers; the dark-blue-haired glasses girl in navy uniform; optionally the brown-haired boy with green scarf. Select 3-4 of these actual characters, preserve their face, hairstyle, clothing and color design exactly; do not create generic substitute students. No transformations into fantasy armor or princess costumes."
+    }
+  ]
+}

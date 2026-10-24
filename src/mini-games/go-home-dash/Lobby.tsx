@@ -1,3 +1,4 @@
+import ResponsiveTitleArt from '../shared/ResponsiveTitleArt';
 import React, { useEffect, useState } from 'react';
 import { PROTAGONISTS } from '../../three/protagonistCatalog';
 import { isProtagonistUnlocked, protagonistUnlockRequirement } from '../../utils/protagonistUnlocks';
@@ -24,7 +25,7 @@ export function DashLobby({ hero, onHero, onStart, onBack, languageMode, oneHit,
   const start = () => { if(hasSeenDashGuide())onStart();else setGuide('start'); };
   if(guide)return <DashGuide languageMode={languageMode} starting={guide==='start'} onClose={()=>{rememberDashGuide();const depart=guide==='start';setGuide(null);if(depart)onStart();}}/>;
   if(!picking)return <div className="dash-lobby dash-title-screen" data-gamepad-modal data-gamepad-initial-scope="go-home-title" onPointerDown={e=>e.stopPropagation()}>
-    <img className="dash-title-art" src={assetUrl('sprites/go-home-dash/title.webp')} alt=""/>
+    <ResponsiveTitleArt game="go-home" className="dash-title-art"/>
     <section className="dash-title-menu">
       <div className="dash-title-copy"><small>AFTER SCHOOL / FULL SPEED</small><h2>{L('帰宅ダッシュ！','HOME DASH!','きたくダッシュ！')}</h2><p>{oneHit?L('一発アウト・HP 1','ONE HIT · HP 1','いっぱつアウト・HP 1'):L('夕焼けを追い越せ。空まで、帰り道。','Outrun the sunset. Take the skyway home.','ゆうやけをおいこせ。そらまで、かえりみち。')}</p></div>
       <nav className="dash-title-actions" aria-label={L('帰宅ダッシュメニュー','Home Dash menu','きたくダッシュメニュー')}>

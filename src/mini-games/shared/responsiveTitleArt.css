@@ -1,0 +1,28 @@
+/* New compositions reserve the upper area for titles and lower area for actions. */
+.cc-page-title .cc-title-copy{min-height:calc(100dvh - 100px);justify-content:flex-start;padding-top:20px;padding-bottom:20px}
+.cc-page-title .cc-title-copy button{margin-top:auto}
+@media(orientation:portrait){
+ .cc-page-title .cc-title-copy{padding-inline:6px}
+ .cc-page-title .cc-title-copy h1{font-size:clamp(30px,8.5vw,48px);margin-bottom:10px}
+ .cc-page-title .cc-title-copy>p{font-size:12px;line-height:1.6}
+ .poker-lobby .poker-title-copy{margin:48px 0 0;min-height:calc(100dvh - 130px);max-width:none;display:flex;flex-direction:column;align-items:center;text-align:center}
+ .poker-lobby .poker-title-copy h1{font-size:clamp(36px,10vw,60px);margin:10px 0}
+ .poker-lobby .poker-title-copy>p:not(.poker-eyebrow){font-size:12px;line-height:1.6;margin:8px 0}
+ .poker-lobby .poker-title-buttons{margin-top:auto;margin-bottom:10px}
+ .sy-lobby:not(.sy-select) .sy-lobby-shade{background:linear-gradient(180deg,#081828b8,transparent 30%,transparent 60%,#081828dd)}
+ .sy-lobby:not(.sy-select) .sy-title-copy{min-height:100dvh;padding:64px 24px 24px;display:flex;flex-direction:column;align-items:flex-start}
+ .sy-lobby:not(.sy-select) .sy-title-copy h1{font-size:clamp(36px,10vw,60px);margin-bottom:12px}
+ .sy-lobby:not(.sy-select) .sy-title-tags{margin-top:auto;margin-bottom:12px}
+ .sy-lobby:not(.sy-select) .sy-title-lead{margin-bottom:12px}
+ .wanderer-title:not(.choosing) .wanderer-title-copy{justify-content:flex-start;align-items:center;text-align:center;max-width:none;padding:max(24px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));gap:8px}
+ .wanderer-title:not(.choosing) .wanderer-title-copy h1{width:min(100%,560px)}
+ .wanderer-title:not(.choosing) .dungeons-title-logo{max-height:18dvh;object-fit:contain}
+ .wanderer-title:not(.choosing) .wanderer-title-copy>p:not(.wanderer-eyebrow){font-size:12px}
+ .wanderer-title:not(.choosing) .wanderer-title-copy nav{margin-top:auto;margin-bottom:0}
+ .wanderer-title:not(.choosing) .wanderer-title-shade{background:linear-gradient(180deg,#102c3cc9,transparent 30%,transparent 60%,#102c3ce6)}
+}
+
+@media(orientation:portrait) and (max-width:600px){
+ .game-launch-title:is(.kart,.golf,.vr) .game-launch-copy{align-self:start}
+ .game-launch-title:is(.kart,.golf,.vr) .game-launch-logo img{max-height:18dvh;object-fit:contain}
+}

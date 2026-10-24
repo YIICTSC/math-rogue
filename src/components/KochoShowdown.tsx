@@ -1,3 +1,4 @@
+import ResponsiveTitleArt from '../mini-games/shared/ResponsiveTitleArt';
 import { findKochoSuper, kochoSuperCandidates, kochoSupers, resolveKochoSuper, superArtStyle, type KochoSuperMove } from '../mini-games/kocho/superMoves';
 import { selectKochoEnemyVoice, type KochoVoiceEnemy } from '../mini-games/kocho/enemyVoiceEvents';
 
@@ -3071,8 +3072,8 @@ const KochoShowdown: React.FC<{
 
             {gameState.phase === 'SETUP' && setupPage === 'title' && (
                 <section className="kocho-lobby kocho-title-screen" data-gamepad-modal data-gamepad-initial-scope="kocho-title">
-                    <div className="kocho-title-art" style={{'--kocho-title-bg': `url(${assetUrl('sprites/kocho/title.webp')})`} as React.CSSProperties}>
-                        <img src={assetUrl('sprites/kocho/title.webp')} alt=""/>
+                    <div className="kocho-title-art">
+                        <ResponsiveTitleArt game="kocho"/>
                         <div className="kocho-title-copy"><span>KOCHO SHOWDOWN</span><h1>{tr('校長対決')}</h1><p>{tr('一歩と一枚で、校則を超えろ。')}</p></div>
                         <div className="kocho-title-actions">
                             <button data-kocho-enter data-gamepad-initial-choice onClick={() => setSetupPage('hero')}>{tr('主人公選択へ')} <Play size={20}/></button>
