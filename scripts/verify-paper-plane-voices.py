@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse,difflib,hashlib,json,re,sys,time
 ROOT=Path(__file__).resolve().parents[1]
 def normalize_spoken(text,kks):
- text=text.replace('艦橋','かんきょう').replace('銀嵐','ぎんらん').replace('夜空','よぞら').replace('星図','せいず').replace('導標','どうひょう').replace('左舷','さげん').replace('面舵','おもかじ').replace('取り舵','とりかじ').replace('撃ち方','うちかた').replace('一斉','いっせい').replace('艦','かん').replace('全','ぜん').replace('今日は','きょうは').replace('札','ふだ').replace('1本','いっぽん').replace('1手','いって')
+ text=text.replace('全力','ぜんりょく').replace('万全','ばんぜん').replace('艦橋','かんきょう').replace('銀嵐','ぎんらん').replace('夜空','よぞら').replace('星図','せいず').replace('導標','どうひょう').replace('左舷','さげん').replace('面舵','おもかじ').replace('取り舵','とりかじ').replace('撃ち方','うちかた').replace('一斉','いっせい').replace('艦','かん').replace('全','ぜん').replace('今日は','きょうは').replace('札','ふだ').replace('1本','いっぽん').replace('1手','いって')
  text=re.sub('[0-9]',lambda m:['ぜろ','いち','に','さん','よん','ご','ろく','なな','はち','きゅう'][int(m[0])],text)
  return re.sub('[^ぁ-んーa-z]','',''.join(x['hira']for x in kks.convert(text)).lower())
 def main():
@@ -19,9 +19,9 @@ def main():
   # Recalculate text comparison when the reading dictionary changes, without
   # changing the independently recognized transcript or its audio provenance.
   def refresh_readings(item):
-   if 'recognized'in item and 'expected'in item and item.get('normalization')!='bridge-reading-v2':
+   if 'recognized'in item and 'expected'in item and item.get('normalization')!='bridge-reading-v3':
     item['similarity']=round(difflib.SequenceMatcher(None,normalize(item['expected']),normalize(item['recognized'])).ratio(),4)
-    item['normalization']='bridge-reading-v2'
+    item['normalization']='bridge-reading-v3'
    for key in ['prior','secondary']:
     if key in item:refresh_readings(item[key])
   for item in qa['clips'].values():refresh_readings(item)
@@ -58,7 +58,7 @@ def main():
     if a.only_flagged and prior.get('sha256')==digest and prior.get('similarity',0)>=.85:continue
     segments,info=model.transcribe(str(target),language='ja',beam_size=4,condition_on_previous_text=False,vad_filter=False)
     recognized=''.join(seg.text for seg in segments).strip();similarity=difflib.SequenceMatcher(None,normalize(text),normalize(recognized)).ratio()
-    result={'sha256':digest,'expected':text,'recognized':recognized,'similarity':round(similarity,4),'model':model_id,'compute':'cpu-int8','cpu_threads':2,'chunk_seconds':30,'normalization':'bridge-reading-v2','tail_rms':round(tail_rms,5)}
+    result={'sha256':digest,'expected':text,'recognized':recognized,'similarity':round(similarity,4),'model':model_id,'compute':'cpu-int8','cpu_threads':2,'chunk_seconds':30,'normalization':'bridge-reading-v3','tail_rms':round(tail_rms,5)}
     if prior.get('sha256')==digest:
      result['prior']={k:v for k,v in prior.items()if k!='prior'}
      if prior.get('similarity',0)>similarity:result={**prior,'secondary':result}

@@ -15,24 +15,26 @@ export type BridgeEvent='launch'|'fire'|'move'|'load'|'damage'|'critical'|'win'|
 export const bridgePortrait=(id:string,expression:BridgeExpression='normal')=>assetUrl(`sprites/paper-plane/bridge/${id}${expression==='normal'?'':'-'+expression}.webp`);
 export function bridgeSubtitle(cue:BridgeCue,language:LanguageMode){const entry=PAPER_BRIDGE_TEXT[cue.id+'/'+cue.key];return language==='ENGLISH'?(entry?.en||cue.text):language==='HIRAGANA'?(entry?.hira||cue.text):cue.text;}
 export function bridgeExchange(event:BridgeEvent,captain:string,deputy:string,rival:string,variant=0):BridgeCue[]{
- const cue=(id:string,key:string):BridgeCue=>({id,key,text:PAPER_BRIDGE_LINES[id]?.[key]||'',expression:/damage|critical|lose/.test(key)?'damage':key==='win'?'win':/fire|ready/.test(key)?'command':'normal'});
+ const cue=(id:string,key:string):BridgeCue=>({id,key,text:PAPER_BRIDGE_LINES[id]?.[key]||'',expression:/^(damage|critical|lose)\d*$/.test(key)?'damage':/^win\d*$/.test(key)?'win':/^(fire|ready)\d*$/.test(key)?'command':'normal'});
+ const choose=(id:string,keys:string[],n=variant)=>cue(id,keys[((n%keys.length)+keys.length)%keys.length]);
+ const two=(id:string,key:string,n=variant)=>choose(id,[key,key+'2'],n);
  switch(event){
- case'launch':return[cue(captain,variant%2?'encounter':'launch'),cue(deputy,'launch'),cue(rival,'encounter')];
- case'ready':return[cue(deputy,variant%2?'ready2':'ready')];
- case'fire':return[cue(deputy,variant%2?'ready2':'ready'),cue(captain,variant%2?'fire2':'fire'),cue(rival,variant%2?'fire2':'fire')];
- case'win':return[cue(rival,'lose'),cue(deputy,'win'),cue(captain,'win')];
- case'lose':return[cue(captain,'lose'),cue(rival,'win')];
- case'hit':return[cue(rival,'damage')];
- case'damage':case'critical':return[cue(deputy,event),cue(captain,event)];
- default:return[cue(variant%2?captain:deputy,event)];
+ case'launch':return[choose(captain,['launch','encounter','launch2','encounter2']),two(deputy,'launch'),two(rival,'encounter')];
+ case'ready':return[choose(deputy,['ready','ready2','ready3','ready4'])];
+ case'fire':return[choose(deputy,['ready','ready2','ready3','ready4']),choose(captain,['fire','fire2','fire3','fire4']),choose(rival,['fire','fire2','fire3','fire4'])];
+ case'win':return[two(rival,'lose'),two(deputy,'win'),two(captain,'win')];
+ case'lose':return[two(captain,'lose'),two(rival,'win')];
+ case'hit':return[two(rival,'damage')];
+ case'damage':case'critical':return[two(deputy,event),two(captain,event)];
+ default:return[two(variant%2?captain:deputy,event,Math.floor(variant/2))];
  }
 }
 /** A bounded communication queue, independent of the combat clock. */
 export function usePaperBridge(captain:string,deputy:string,rival:string){
  const [current,setCurrent]=useState<BridgeCue|null>(null);
- const activeEvent=useRef<BridgeEvent|null>(null),prepared=useRef(false);
+ const activeEvent=useRef<BridgeEvent|null>(null),prepared=useRef(false),preparedPattern=useRef<number|null>(null);
  const queue=useRef<BridgeCue[]>([]),generation=useRef(0),busy=useRef(false),timer=useRef<ReturnType<typeof setTimeout>|null>(null),serial=useRef<Record<string,number>>({}),lastAmbient=useRef(0),releaseTimer=useRef<(()=>void)|null>(null);
- const stop=useCallback(()=>{generation.current++;queue.current=[];busy.current=false;prepared.current=false;if(timer.current)clearTimeout(timer.current);timer.current=null;releaseTimer.current?.();releaseTimer.current=null;audioService.stopPaperPlaneVoices();setCurrent(null);},[]);
+ const stop=useCallback(()=>{generation.current++;queue.current=[];busy.current=false;prepared.current=false;preparedPattern.current=null;if(timer.current)clearTimeout(timer.current);timer.current=null;releaseTimer.current?.();releaseTimer.current=null;audioService.stopPaperPlaneVoices();setCurrent(null);},[]);
  const pump=useCallback(async()=>{
   if(busy.current)return;busy.current=true;const token=generation.current;
   while(queue.current.length&&token===generation.current){
@@ -51,12 +53,16 @@ export function usePaperBridge(captain:string,deputy:string,rival:string){
   if(event==='move'||event==='load'){
    if(prepared.current||busy.current||Date.now()-lastAmbient.current<6500)return;lastAmbient.current=Date.now();
   }
-  const wasPrepared=prepared.current;
+  const wasPrepared=prepared.current,readyPattern=preparedPattern.current;
   if(['win','lose','launch','critical','ready'].includes(event)||event==='fire'&&['launch','load','move'].includes(activeEvent.current||''))stop();
   if(event==='ready')prepared.current=true;
   if(event==='fire')prepared.current=false;
   activeEvent.current=event;
-  const variant=serial.current[event]||0;serial.current[event]=variant+1;
+  // A random initial rotation varies each voyage; advancing the counter prevents immediate repeats.
+  const nextVariant=serial.current[event]??Math.floor(Math.random()*4);
+  const variant=event==='fire'&&wasPrepared&&readyPattern!==null?readyPattern:nextVariant;serial.current[event]=variant+1;
+  if(event==='ready')preparedPattern.current=variant;
+  if(event==='fire')preparedPattern.current=null;
   let cues=bridgeExchange(event,captain,deputy,rival,variant).filter(c=>c.text);
   if(event==='fire'&&wasPrepared)cues=cues.slice(1);
   // Finish a current call and response before reporting damage; discard old ambient chatter.

@@ -1,3 +1,4 @@
+import {loadD2WorldArt,drawD2Tile,drawD2GroundFeature,drawD2Monster,drawD2Building} from './dungeons2/pixelWorld';
 import { isProtagonistUnlocked } from '../../utils/protagonistUnlocks';
 import {ABYSS_HEROES,abyssHero,abyssSelection,unlockedAbyssHeroes,signatureHero} from './dungeons2/roster';
 import {decorateExpedition,expedition as getExpedition} from './expeditions';
@@ -24,7 +25,7 @@ const id=()=>`school-${Date.now()}-${Math.random()}`;
 const emptyEntity=(x:number,y:number)=>({id:Date.now()+Math.random(),type:'ITEM',x,y,char:'!',hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0},status:{sleep:0,confused:0,frozen:0,blind:0,speed:0,poison:0}});
 function loadBase(key:string):SchoolBase {try{const data=JSON.parse(localStorage.getItem(key)||'null');if(data?.version===1&&Array.isArray(data.warehouse))return data;}catch{}return newBase();}
 export function useSchoolAdventure(bridge:AdventureBridge){
- useEffect(()=>loadSchoolSprites(),[]);
+ useEffect(()=>{loadSchoolSprites();if(bridge.game===2)loadD2WorldArt();},[bridge.game]);
  const b=useRef(bridge);b.current=bridge;
  const key=`learning-rogue:school-base:${bridge.game}`;
  const baseRef=useRef<SchoolBase|null>(null);if(!baseRef.current)baseRef.current=bridge.debug?newBase():loadBase(key);const base=baseRef as {current:SchoolBase};const state=useRef(newAdventure());
@@ -358,21 +359,24 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   ctx.save();ctx.imageSmoothingEnabled=false;ctx.fillStyle=colors.C0;ctx.fillRect(0,0,w,h);
   for(let y=0;y<Math.ceil(h/ts);y++)for(let x=0;x<Math.ceil(w/ts);x++){
    const mx=startX+x,my=startY+y,tile=run.map[my]?.[mx]||'WALL',sx=x*ts,sy=y*ts;
-   if(tile==='WALL'||tile==='DOOR'){ctx.fillStyle=colors.C1;ctx.fillRect(sx,sy,ts,ts);ctx.fillStyle=colors.C0;ctx.fillRect(sx+ts/4,sy+ts/4,ts/2,ts/2);}
+   const pixel=b.current.game===2&&drawD2Tile(ctx,run.map,tile,sx,sy,ts,mx,my,{floor:1});
+   if(!pixel){if(tile==='WALL'||tile==='DOOR'){ctx.fillStyle=colors.C1;ctx.fillRect(sx,sy,ts,ts);ctx.fillStyle=colors.C0;ctx.fillRect(sx+ts/4,sy+ts/4,ts/2,ts/2);}
    else{ctx.fillStyle=tile==='WATER'?'#3b97c9':colors.C3;ctx.fillRect(sx,sy,ts,ts);if(tile==='STAIRS'){ctx.fillStyle=colors.C1;for(let i=0;i<3;i++)ctx.fillRect(sx,sy+i*ts/3,ts,2);}}
-   if(tile==='DOOR'){ctx.fillStyle='#dabc76';ctx.fillRect(sx+ts*.3,sy+ts*.15,ts*.4,ts*.7);}
-   if(run.revealed&&run.traps.some(t=>t.x===mx&&t.y===my))drawSchoolSprite(ctx,'items',12,sx,sy,ts);
+   }
+   if(pixel&&tile==='WATER')drawD2GroundFeature(ctx,'WATER',sx,sy,ts);
+   if(tile==='DOOR'&&!(pixel&&drawD2Building(ctx,'GATE',sx,sy,ts))){ctx.fillStyle='#dabc76';ctx.fillRect(sx+ts*.3,sy+ts*.15,ts*.4,ts*.7);}
+   if(run.revealed&&run.traps.some(t=>t.x===mx&&t.y===my)&&!(pixel&&drawD2GroundFeature(ctx,'TRAP',sx,sy,ts)))drawSchoolSprite(ctx,'items',12,sx,sy,ts);
    if(DOJO_STAGES[run.stage-1].key?.x===mx&&DOJO_STAGES[run.stage-1].key?.y===my&&!run.key){ctx.fillStyle='#dbaa36';ctx.font=`bold ${ts*.6}px monospace`;ctx.fillText('⚿',sx+ts*.2,sy+ts*.7);}
-   const enemy=run.enemies.find(e=>e.x===mx&&e.y===my);if(enemy){if(!drawExpansionSprite(ctx,9,sx,sy,ts)){ctx.fillStyle=colors.C0;ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.6,ts*.6);}if(enemy.sleep>0){ctx.fillStyle='#fff';ctx.font=`${ts*.25}px monospace`;ctx.fillText('Zzz',sx,sy+ts*.25);}}
+   const enemy=run.enemies.find(e=>e.x===mx&&e.y===my);if(enemy){if(!(pixel&&drawD2Monster(ctx,{enemyType:'MONITOR',dir:{x:Math.sign(run.x-enemy.x),y:Math.sign(run.y-enemy.y)},status:{sleep:enemy.sleep}},sx,sy,ts))&&!drawExpansionSprite(ctx,9,sx,sy,ts)){ctx.fillStyle=colors.C0;ctx.fillRect(sx+ts*.2,sy+ts*.2,ts*.6,ts*.6);}if(enemy.sleep>0){ctx.fillStyle='#fff';ctx.font=`${ts*.25}px monospace`;ctx.fillText('Zzz',sx,sy+ts*.25);}}
    if(mx===run.x&&my===run.y)drawHero({...b.current.player,x:run.x,y:run.y,dir:run.dir},sx,sy,ts);
   }
   ctx.restore();return true;
  };
- const safelyDrawService=(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number)=>{const service=TOWN_SERVICES.find(s=>s.kind===kind);return service?drawExpansionSprite(ctx,service.sprite,x,y,size):false;};
+ const safelyDrawService=(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number)=>{if(b.current.game===2&&drawD2Building(ctx,kind,x,y,size))return true;const service=TOWN_SERVICES.find(s=>s.kind===kind);return service?drawExpansionSprite(ctx,service.sprite,x,y,size):false;};
  const safeTurn=()=>state.current.place==='HOME'||state.current.place==='RELAY'||state.current.scene!==undefined;
  const drawBackdrop=(ctx:CanvasRenderingContext2D,w:number,h:number)=>{const s=state.current;if(s.scene!==undefined&&!(s.town&&s.floor%5!==0))drawScenery(ctx,s.scene,w,h);};
  const drawTile=(ctx:CanvasRenderingContext2D,tile:string,x:number,y:number,size:number,mx=0,my=0)=>{
-  const s=state.current;if(s.scene===undefined)return false;ctx.save();ctx.imageSmoothingEnabled=false;
+  const s=state.current;if(b.current.game===2&&drawD2Tile(ctx,b.current.map,tile,x,y,size,mx,my,{...s,biome:getExpedition(s.mode)?.biome}))return true;if(s.scene===undefined)return false;ctx.save();ctx.imageSmoothingEnabled=false;
   const river=!s.town&&mx===5&&my>=1&&my<=9,bridge=river&&tile!=='WALL';
   const palettes=[['#568044','#314e36','#c6ae70'],['#658155','#304f3b','#c6ba87'],['#ad7644','#573e30','#d6ba80'],['#bacdd0','#445e68','#e0dcc0']];
   const palette=palettes[Math.max(0,Math.min(3,s.scene-2))];
@@ -400,7 +404,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  };
  const drawTerrain=(ctx:CanvasRenderingContext2D,x:number,y:number,sx:number,sy:number,ts:number)=>{const k=positionKey(x,y),t=state.current.terrain[k],event=state.current.events[k];ctx.save();
   if(t==='SECRET'){ctx.strokeStyle=ctx.fillStyle='#9bbc0f';ctx.strokeRect(sx+ts*.3,sy+ts*.3,ts*.4,ts*.4);ctx.font=`${ts*.3}px monospace`;ctx.fillText('?',sx+ts*.4,sy+ts*.6);ctx.restore();return;}
-  if(t){ctx.fillStyle=t==='WATER'?'#3b97c9':t==='ICE'?'#b2e2f1':t==='HOLE'?'#302830':'#997745';ctx.fillRect(sx+2,sy+2,ts-4,ts-4);ctx.fillStyle='#fff';ctx.font=`${Math.floor(ts*.35)}px monospace`;ctx.fillText(t==='WATER'?'≈':t==='ICE'?'◇':t==='HOLE'?'↓':'?',sx+ts*.3,sy+ts*.6);}
+  if(t&&!(b.current.game===2&&drawD2GroundFeature(ctx,t,sx,sy,ts))){ctx.fillStyle=t==='WATER'?'#3b97c9':t==='ICE'?'#b2e2f1':t==='HOLE'?'#302830':'#997745';ctx.fillRect(sx+2,sy+2,ts-4,ts-4);ctx.fillStyle='#fff';ctx.font=`${Math.floor(ts*.35)}px monospace`;ctx.fillText(t==='WATER'?'≈':t==='ICE'?'◇':t==='HOLE'?'↓':'?',sx+ts*.3,sy+ts*.6);}
   if(event&&!event.done&&event.kind==='FRIEND'&&drawStudentSprite(ctx,classmateFor(activeHero().id).id,{x:0,y:1},sx,sy,ts)){ctx.restore();return;}
   if(event&&!event.done&&event.kind==='PICNIC'&&drawExpansionSprite(ctx,5,sx,sy,ts)){ctx.restore();return;}
   if(event&&safelyDrawService(ctx,event.kind,sx,sy,ts)){ctx.restore();return;}
@@ -448,9 +452,9 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const storeSupply=(itemId:string)=>{if(!enterMutation()||!['HOME','RELAY'].includes(state.current.place||''))return;const item=b.current.inventory.find(i=>i.id===itemId);if(!item||item.shopOwner)return;base.current.warehouse.push(cloneItem(item));consume(item);persist();};
  const withdrawSupply=(itemId:string)=>{if(!enterMutation()||!['HOME','RELAY'].includes(state.current.place||'')||b.current.inventory.length>=20)return;const item=base.current.warehouse.find(i=>i.id===itemId);if(!item)return;updateInventory((a:any[])=>[...a,cloneItem(item)]);base.current.warehouse=base.current.warehouse.filter(i=>i.id!==itemId);persist();};
  return {known:(item:any)=>b.current.known(item),series:bridge.game,expedition:getExpedition(state.current.mode),isMystery:state.current.mode==='MYSTERY'||getExpedition(state.current.mode)?.biome==='archive',abilityBlocked:Boolean(b.current.actionBlocked||b.current.suspended||b.current.gameOver||b.current.gameClear||abilityPending.current),ability:studentAbility(activeHero().id),abilityText:abilityDescription(studentAbility(activeHero().id),b.current.language==='ENGLISH'),abilities:abyssHero(activeHero().id)?.skills||[studentAbility(activeHero().id)],unlockedHeroes:unlockedAbyssHeroes(base.current.dungeons2Clears),abilityRemainingFor:abilityRemaining,abilityRemaining:abilityRemaining(),activateAbility,activateSignatureCard:(cardId:string)=>signatureHero(cardId)?.id===activeHero().id&&activateAbility(0,true),abilityBurst,incomingDamage,routeEnding:routeEpilogue(state.current.mode),sellSupply,equipSupply,newJourney,townDirection,townControl,moveTown,enterTown,departRoute,leaveRelay,townKey,storeSupply,withdrawSupply,townLines:(kind:string)=>townDialogue(kind,activeHero().id,Object.keys(base.current.clears).length),townStock:[...Object.values(EXTRA_ITEMS),ADVENTURE_ITEMS.FOOD_ONIGIRI||b.current.catalog.FOOD_ONIGIRI,ADVENTURE_ITEMS.SUPPLY_RETURN,...studentGear(activeHero().id,Math.max(1,state.current.floor))].filter(Boolean),state:state.current,hero:activeHero(),magicForm:magicForm(activeHero().id),transform:()=>{if(dojoRef.current||panelRef.current||b.current.gameOver||b.current.gameClear||state.current.transformed||!magicForm(activeHero().id)||!enterMutation())return;state.current.transformed=true;loadStudentSprite(activeHero().id,true);say('変身！与えるダメージと受けるダメージが2倍。次の階で解除。','Transformed! Deal and take double damage until the next floor.');b.current.turn();refresh();},damage:(amount:number)=>studentDamage(Math.floor(amount*(state.current.abilityFloor===state.current.floor&&(state.current.abilityPowerUntil||0)>state.current.floorTurns?1.4:1)),Boolean(state.current.transformed&&!dojoRef.current&&magicForm(activeHero().id))),selectedHero:studentHero(base.current.selectedHero),setHero,journalActs:personalStories(activeHero().id),storyAct:storyIndex===null?null:storyIndex===-1?companionStory():personalStories(activeHero().id)[storyIndex],storyLine,advanceStory,openStory,studentShop:studentGear(activeHero().id,Math.max(1,state.current.floor)),drawHero:(ctx:CanvasRenderingContext2D,entity:any,x:number,y:number,size:number)=>drawStudentSprite(ctx,activeHero().id,entity.dir||{x:0,y:1},x,y,size,Boolean(state.current.transformed&&!dojoRef.current)),dojoRun,beginDojo,exitDojo,dojoStep,dojoAction,dojoMenu,dojoKey,drawDojo,isDojoActive:()=>Boolean(dojoRef.current),base:base.current,revision,panel,setPanel,container,message,text,start,begin,setupInventory,prepareFloor,restore,snapshot,saveCommitted,canDescend,beforeMove,onPickup,pay,returnGoods,canEquip,canUnequip,beforeUse,combine,dig,containerPut,containerTake,breakContainer,trapAction,interact,interactNearby,modeUnlocked:(mode:AdventureMode)=>modeUnlocked(base.current,mode),modeRequirement,tick,recoverLoot,returnHome,drawTerrain,drawCompanion,drawBackdrop,drawTile,safeTurn,dojoComplete,townAction,visibleTile,claimMilestone,sceneTitle,catalog:bridge.catalog,
-  drawTrap:(ctx:CanvasRenderingContext2D,trap:any,x:number,y:number,size:number)=>(trap.schoolPlaced||state.current.mode==='TRAPS')&&drawSchoolSprite(ctx,'items',12,x,y,size),
+  drawTrap:(ctx:CanvasRenderingContext2D,trap:any,x:number,y:number,size:number)=>(b.current.game===2&&drawD2GroundFeature(ctx,'TRAP',x,y,size))||((trap.schoolPlaced||state.current.mode==='TRAPS')&&drawSchoolSprite(ctx,'items',12,x,y,size)),
   drawItem:(ctx:CanvasRenderingContext2D,item:any,x:number,y:number,size:number)=>drawItemArt(ctx,item?.type,x,y,size)||(EXTRA_ITEM_SPRITES[item?.type]!==undefined?drawExpansionSprite(ctx,EXTRA_ITEM_SPRITES[item.type],x,y,size):SCHOOL_ITEM_SPRITES[item?.type]!==undefined&&drawSchoolSprite(ctx,'items',SCHOOL_ITEM_SPRITES[item.type],x,y,size)),
-  drawEnemy:(ctx:CanvasRenderingContext2D,enemy:any,x:number,y:number,size:number)=>EXTRA_ENEMIES[enemy?.schoolKind]?drawExpansionSprite(ctx,EXTRA_ENEMIES[enemy.schoolKind].sprite,x,y,size):SCHOOL_ACTOR_SPRITES[enemy?.schoolKind]!==undefined&&drawSchoolSprite(ctx,'actors',SCHOOL_ACTOR_SPRITES[enemy.schoolKind],x,y,size),
+  drawEnemy:(ctx:CanvasRenderingContext2D,enemy:any,x:number,y:number,size:number)=>(b.current.game===2&&drawD2Monster(ctx,enemy,x,y,size))||(EXTRA_ENEMIES[enemy?.schoolKind]?drawExpansionSprite(ctx,EXTRA_ENEMIES[enemy.schoolKind].sprite,x,y,size):SCHOOL_ACTOR_SPRITES[enemy?.schoolKind]!==undefined&&drawSchoolSprite(ctx,'actors',SCHOOL_ACTOR_SPRITES[enemy.schoolKind],x,y,size)),
   openContainer:(item:SchoolItem)=>{if(item.capacity&&!item.cursed&&!item.shopOwner){identify(item);setContainer(item.id);setPanel('BAG');}},
   resume:()=>{if(!dojoRef.current)(state.current as any).departed=true;setPanel(null);refresh();},
   slide:(x:number,y:number,dx:number,dy:number)=>{

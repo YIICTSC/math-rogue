@@ -1967,5 +1967,1973 @@ export const PAPER_BRIDGE_TEXT:Record<string,{en:string;hira:string}>={
   "rival-3/win": {
     "en": "That is experience. Try again.",
     "hira": "けいけんのさだ。でなおしてこい。"
+  },
+  "high-school-warrior/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "high-school-warrior/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "high-school-warrior/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "high-school-warrior/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "high-school-warrior/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "high-school-warrior/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "high-school-warrior/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "high-school-warrior/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "high-school-warrior/launch2": {
+    "en": "Everyone, follow my lead!",
+    "hira": "ぜんいん、おれについてこい！"
+  },
+  "high-school-warrior/fire4": {
+    "en": "Now! Push them back!",
+    "hira": "いまだ！いっきにおしかえせ！"
+  },
+  "high-school-caretaker/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "high-school-caretaker/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "high-school-caretaker/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "high-school-caretaker/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "high-school-caretaker/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "high-school-caretaker/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "high-school-caretaker/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "high-school-caretaker/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "high-school-caretaker/launch2": {
+    "en": "Your lives are in my care. Departing.",
+    "hira": "いのちをあずかる。しゅっこうします。"
+  },
+  "high-school-caretaker/fire4": {
+    "en": "We fire to protect our friends!",
+    "hira": "なかまをまもるため、うちます！"
+  },
+  "high-school-assassin/fire3": {
+    "en": "Don't waste the opening. Pursue!",
+    "hira": "こうきをのがすな。ついげきだ！"
+  },
+  "high-school-assassin/move2": {
+    "en": "Change course. Use the clouds as cover!",
+    "hira": "しんろへんこう、くもをたてにする！"
+  },
+  "high-school-assassin/load2": {
+    "en": "Load both sides together!",
+    "hira": "さゆうのほうを、どうじにそうてん！"
+  },
+  "high-school-assassin/damage2": {
+    "en": "Armor is thinning. Hold attitude!",
+    "hira": "そうこうがうすい！しせいをたもて！"
+  },
+  "high-school-assassin/critical2": {
+    "en": "There is still a chance. Trust me!",
+    "hira": "しょうきはある。わたしをしんじて！"
+  },
+  "high-school-assassin/win2": {
+    "en": "Mission complete. Credit to everyone!",
+    "hira": "さくせんかんりょう。ぜんいんのてがらだ！"
+  },
+  "high-school-assassin/lose2": {
+    "en": "We withdraw for now. Next time we win!",
+    "hira": "いまはしりぞく。つぎはかならずかつ！"
+  },
+  "high-school-assassin/encounter2": {
+    "en": "Check comms. The enemy is right there!",
+    "hira": "つうしんをかくにん。てきはすぐそこだ！"
+  },
+  "high-school-assassin/launch2": {
+    "en": "Advance quietly. Strike at the opening.",
+    "hira": "しずかにすすめ。げきをつく。"
+  },
+  "high-school-assassin/fire4": {
+    "en": "Target caught. No escape.",
+    "hira": "とらえた。にがさない。"
+  },
+  "high-school-mage/fire3": {
+    "en": "Stop their advance. Fire!",
+    "hira": "てきのうごきをやめる。うて！"
+  },
+  "high-school-mage/move2": {
+    "en": "Full thrust. Clear their line of fire!",
+    "hira": "すいりょくぜんかい、しゃせんをはずせ！"
+  },
+  "high-school-mage/load2": {
+    "en": "Loading crew, prepare for the next opening!",
+    "hira": "そうてんはん、つぎのこうきにそなえろ！"
+  },
+  "high-school-mage/damage2": {
+    "en": "We're all right. We can still fly!",
+    "hira": "だいじょうぶだ。まだとべる！"
+  },
+  "high-school-mage/critical2": {
+    "en": "Protect the repair crew. Hold on!",
+    "hira": "しゅうりはんをまもれ。ふんばるぞ！"
+  },
+  "high-school-mage/win2": {
+    "en": "The sky has cleared. On to our next route!",
+    "hira": "そらがはれた。つぎのこうろへ！"
+  },
+  "high-school-mage/lose2": {
+    "en": "All hands, prioritize evacuation!",
+    "hira": "そういん、だっしゅつをゆうせんして！"
+  },
+  "high-school-mage/encounter2": {
+    "en": "Raise alert status. Begin combat!",
+    "hira": "けいかいをたかめて。せんとうかいし！"
+  },
+  "high-school-mage/launch2": {
+    "en": "Synchronize magic and thrust!",
+    "hira": "まりょくとすいりょく、どうちょうかいし！"
+  },
+  "high-school-mage/fire4": {
+    "en": "Release the spell. Unleash the light!",
+    "hira": "じゅつしきかいほう、ひかりをほうって！"
+  },
+  "high-school-dodgeball/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "high-school-dodgeball/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "high-school-dodgeball/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "high-school-dodgeball/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "high-school-dodgeball/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "high-school-dodgeball/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "high-school-dodgeball/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "high-school-dodgeball/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "high-school-dodgeball/launch2": {
+    "en": "Straight through! Keep moving!",
+    "hira": "しょうめんとっぱだ。あしをやめるな！"
+  },
+  "high-school-dodgeball/fire4": {
+    "en": "Try stopping our best shot!",
+    "hira": "ぜんりょくのいっきゅう、うけてみろ！"
+  },
+  "high-school-bard/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "high-school-bard/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "high-school-bard/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "high-school-bard/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "high-school-bard/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "high-school-bard/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "high-school-bard/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "high-school-bard/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "high-school-bard/launch2": {
+    "en": "Let the wind be our cue. Fly!",
+    "hira": "かぜのおとがあいず。さあ、とぼう！"
+  },
+  "high-school-bard/fire4": {
+    "en": "Let our strike ring across the sky!",
+    "hira": "そらにひびけ、ぼくらのいちげき！"
+  },
+  "high-school-librarian/fire3": {
+    "en": "Don't waste the opening. Pursue!",
+    "hira": "こうきをのがすな。ついげきだ！"
+  },
+  "high-school-librarian/move2": {
+    "en": "Change course. Use the clouds as cover!",
+    "hira": "しんろへんこう、くもをたてにする！"
+  },
+  "high-school-librarian/load2": {
+    "en": "Load both sides together!",
+    "hira": "さゆうのほうを、どうじにそうてん！"
+  },
+  "high-school-librarian/damage2": {
+    "en": "Armor is thinning. Hold attitude!",
+    "hira": "そうこうがうすい！しせいをたもて！"
+  },
+  "high-school-librarian/critical2": {
+    "en": "There is still a chance. Trust me!",
+    "hira": "しょうきはある。わたしをしんじて！"
+  },
+  "high-school-librarian/win2": {
+    "en": "Mission complete. Credit to everyone!",
+    "hira": "さくせんかんりょう。ぜんいんのてがらだ！"
+  },
+  "high-school-librarian/lose2": {
+    "en": "We withdraw for now. Next time we win!",
+    "hira": "いまはしりぞく。つぎはかならずかつ！"
+  },
+  "high-school-librarian/encounter2": {
+    "en": "Check comms. The enemy is right there!",
+    "hira": "つうしんをかくにん。てきはすぐそこだ！"
+  },
+  "high-school-librarian/launch2": {
+    "en": "Turn to a new page in the voyage log.",
+    "hira": "こうかいきろく、あたらしいぺーじへ。"
+  },
+  "high-school-librarian/fire4": {
+    "en": "I've read their aim. Begin the counterattack!",
+    "hira": "ねらいはよめた。はんげきかいし！"
+  },
+  "high-school-chef/fire3": {
+    "en": "Stop their advance. Fire!",
+    "hira": "てきのうごきをやめる。うて！"
+  },
+  "high-school-chef/move2": {
+    "en": "Full thrust. Clear their line of fire!",
+    "hira": "すいりょくぜんかい、しゃせんをはずせ！"
+  },
+  "high-school-chef/load2": {
+    "en": "Loading crew, prepare for the next opening!",
+    "hira": "そうてんはん、つぎのこうきにそなえろ！"
+  },
+  "high-school-chef/damage2": {
+    "en": "We're all right. We can still fly!",
+    "hira": "だいじょうぶだ。まだとべる！"
+  },
+  "high-school-chef/critical2": {
+    "en": "Protect the repair crew. Hold on!",
+    "hira": "しゅうりはんをまもれ。ふんばるぞ！"
+  },
+  "high-school-chef/win2": {
+    "en": "The sky has cleared. On to our next route!",
+    "hira": "そらがはれた。つぎのこうろへ！"
+  },
+  "high-school-chef/lose2": {
+    "en": "All hands, prioritize evacuation!",
+    "hira": "そういん、だっしゅつをゆうせんして！"
+  },
+  "high-school-chef/encounter2": {
+    "en": "Raise alert status. Begin combat!",
+    "hira": "けいかいをたかめて。せんとうかいし！"
+  },
+  "high-school-chef/launch2": {
+    "en": "Nobody fights hungry. Let's depart!",
+    "hira": "くうふくでたたかうなよ。しゅっぱつだ！"
+  },
+  "high-school-chef/fire4": {
+    "en": "Turn up the heat. Fire!",
+    "hira": "ひかげんはさいだいだ。うて！"
+  },
+  "high-school-gardener/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "high-school-gardener/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "high-school-gardener/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "high-school-gardener/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "high-school-gardener/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "high-school-gardener/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "high-school-gardener/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "high-school-gardener/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "high-school-gardener/launch2": {
+    "en": "Let this sky bloom too.",
+    "hira": "このそらにも、はなをさかそう。"
+  },
+  "high-school-gardener/fire4": {
+    "en": "We do more than defend. Counterattack!",
+    "hira": "まもるだけじゃない。はんげきだ！"
+  },
+  "magic-akari/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "magic-akari/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "magic-akari/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "magic-akari/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "magic-akari/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "magic-akari/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "magic-akari/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "magic-akari/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "magic-akari/launch2": {
+    "en": "Depart for the light beyond!",
+    "hira": "ひかりのむこうへ、しゅっぱつ！"
+  },
+  "magic-akari/fire4": {
+    "en": "Here comes a dazzling strike!",
+    "hira": "まぶしいくらいに、いくよ！"
+  },
+  "magic-shizuku/fire3": {
+    "en": "Don't waste the opening. Pursue!",
+    "hira": "こうきをのがすな。ついげきだ！"
+  },
+  "magic-shizuku/move2": {
+    "en": "Change course. Use the clouds as cover!",
+    "hira": "しんろへんこう、くもをたてにする！"
+  },
+  "magic-shizuku/load2": {
+    "en": "Load both sides together!",
+    "hira": "さゆうのほうを、どうじにそうてん！"
+  },
+  "magic-shizuku/damage2": {
+    "en": "Armor is thinning. Hold attitude!",
+    "hira": "そうこうがうすい！しせいをたもて！"
+  },
+  "magic-shizuku/critical2": {
+    "en": "There is still a chance. Trust me!",
+    "hira": "しょうきはある。わたしをしんじて！"
+  },
+  "magic-shizuku/win2": {
+    "en": "Mission complete. Credit to everyone!",
+    "hira": "さくせんかんりょう。ぜんいんのてがらだ！"
+  },
+  "magic-shizuku/lose2": {
+    "en": "We withdraw for now. Next time we win!",
+    "hira": "いまはしりぞく。つぎはかならずかつ！"
+  },
+  "magic-shizuku/encounter2": {
+    "en": "Check comms. The enemy is right there!",
+    "hira": "つうしんをかくにん。てきはすぐそこだ！"
+  },
+  "magic-shizuku/launch2": {
+    "en": "I'll read the waves. Hold course.",
+    "hira": "なみをよむよ。しんろ、そのまま。"
+  },
+  "magic-shizuku/fire4": {
+    "en": "Change the current with this strike!",
+    "hira": "ながれをかえる。そのいちげき！"
+  },
+  "magic-hiyori/fire3": {
+    "en": "Stop their advance. Fire!",
+    "hira": "てきのうごきをやめる。うて！"
+  },
+  "magic-hiyori/move2": {
+    "en": "Full thrust. Clear their line of fire!",
+    "hira": "すいりょくぜんかい、しゃせんをはずせ！"
+  },
+  "magic-hiyori/load2": {
+    "en": "Loading crew, prepare for the next opening!",
+    "hira": "そうてんはん、つぎのこうきにそなえろ！"
+  },
+  "magic-hiyori/damage2": {
+    "en": "We're all right. We can still fly!",
+    "hira": "だいじょうぶだ。まだとべる！"
+  },
+  "magic-hiyori/critical2": {
+    "en": "Protect the repair crew. Hold on!",
+    "hira": "しゅうりはんをまもれ。ふんばるぞ！"
+  },
+  "magic-hiyori/win2": {
+    "en": "The sky has cleared. On to our next route!",
+    "hira": "そらがはれた。つぎのこうろへ！"
+  },
+  "magic-hiyori/lose2": {
+    "en": "All hands, prioritize evacuation!",
+    "hira": "そういん、だっしゅつをゆうせんして！"
+  },
+  "magic-hiyori/encounter2": {
+    "en": "Raise alert status. Begin combat!",
+    "hira": "けいかいをたかめて。せんとうかいし！"
+  },
+  "magic-hiyori/launch2": {
+    "en": "A lovely breeze! Let's set sail!",
+    "hira": "いいかぜだね。げんきにしゅっこう！"
+  },
+  "magic-hiyori/fire4": {
+    "en": "Send them all our energy!",
+    "hira": "みんなのげんきを、とどけよう！"
+  },
+  "magic-tsubasa/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "magic-tsubasa/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "magic-tsubasa/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "magic-tsubasa/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "magic-tsubasa/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "magic-tsubasa/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "magic-tsubasa/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "magic-tsubasa/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "magic-tsubasa/launch2": {
+    "en": "Spread our wings and fly far!",
+    "hira": "つばさをひろげて、どこまでも！"
+  },
+  "magic-tsubasa/fire4": {
+    "en": "With the wind beside us, pierce through!",
+    "hira": "かぜをみかたに、うちぬこう！"
+  },
+  "magic-rei/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "magic-rei/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "magic-rei/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "magic-rei/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "magic-rei/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "magic-rei/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "magic-rei/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "magic-rei/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "magic-rei/launch2": {
+    "en": "A quiet sky. Stay alert.",
+    "hira": "しずかなそらね。ゆだんしないで。"
+  },
+  "magic-rei/fire4": {
+    "en": "Just one instant. Make an opening!",
+    "hira": "いっしゅんでいい。げきをつくって！"
+  },
+  "magic-madoka/fire3": {
+    "en": "Don't waste the opening. Pursue!",
+    "hira": "こうきをのがすな。ついげきだ！"
+  },
+  "magic-madoka/move2": {
+    "en": "Change course. Use the clouds as cover!",
+    "hira": "しんろへんこう、くもをたてにする！"
+  },
+  "magic-madoka/load2": {
+    "en": "Load both sides together!",
+    "hira": "さゆうのほうを、どうじにそうてん！"
+  },
+  "magic-madoka/damage2": {
+    "en": "Armor is thinning. Hold attitude!",
+    "hira": "そうこうがうすい！しせいをたもて！"
+  },
+  "magic-madoka/critical2": {
+    "en": "There is still a chance. Trust me!",
+    "hira": "しょうきはある。わたしをしんじて！"
+  },
+  "magic-madoka/win2": {
+    "en": "Mission complete. Credit to everyone!",
+    "hira": "さくせんかんりょう。ぜんいんのてがらだ！"
+  },
+  "magic-madoka/lose2": {
+    "en": "We withdraw for now. Next time we win!",
+    "hira": "いまはしりぞく。つぎはかならずかつ！"
+  },
+  "magic-madoka/encounter2": {
+    "en": "Check comms. The enemy is right there!",
+    "hira": "つうしんをかくにん。てきはすぐそこだ！"
+  },
+  "magic-madoka/launch2": {
+    "en": "Let's bring everyone's strength together.",
+    "hira": "みんなのちから、ひとつにしよう。"
+  },
+  "magic-madoka/fire4": {
+    "en": "Breathe together. All at once!",
+    "hira": "いきをあわせて、いっせいに！"
+  },
+  "magic-koharu/fire3": {
+    "en": "Stop their advance. Fire!",
+    "hira": "てきのうごきをやめる。うて！"
+  },
+  "magic-koharu/move2": {
+    "en": "Full thrust. Clear their line of fire!",
+    "hira": "すいりょくぜんかい、しゃせんをはずせ！"
+  },
+  "magic-koharu/load2": {
+    "en": "Loading crew, prepare for the next opening!",
+    "hira": "そうてんはん、つぎのこうきにそなえろ！"
+  },
+  "magic-koharu/damage2": {
+    "en": "We're all right. We can still fly!",
+    "hira": "だいじょうぶだ。まだとべる！"
+  },
+  "magic-koharu/critical2": {
+    "en": "Protect the repair crew. Hold on!",
+    "hira": "しゅうりはんをまもれ。ふんばるぞ！"
+  },
+  "magic-koharu/win2": {
+    "en": "The sky has cleared. On to our next route!",
+    "hira": "そらがはれた。つぎのこうろへ！"
+  },
+  "magic-koharu/lose2": {
+    "en": "All hands, prioritize evacuation!",
+    "hira": "そういん、だっしゅつをゆうせんして！"
+  },
+  "magic-koharu/encounter2": {
+    "en": "Raise alert status. Begin combat!",
+    "hira": "けいかいをたかめて。せんとうかいし！"
+  },
+  "magic-koharu/launch2": {
+    "en": "I'm a little nervous, but let's go!",
+    "hira": "すこしきんちょうするけど、いこう！"
+  },
+  "magic-koharu/fire4": {
+    "en": "I'm afraid, but I won't yield here!",
+    "hira": "こわくても、ここはゆずらない！"
+  },
+  "magic-mirai/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "magic-mirai/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "magic-mirai/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "magic-mirai/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "magic-mirai/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "magic-mirai/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "magic-mirai/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "magic-mirai/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "magic-mirai/launch2": {
+    "en": "Choose the sky route to our future!",
+    "hira": "みらいへつづくくうろをえらぼう！"
+  },
+  "magic-mirai/fire4": {
+    "en": "This move opens the way to tomorrow!",
+    "hira": "このいってで、あしたをひらく！"
+  },
+  "magic-sera/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "magic-sera/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "magic-sera/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "magic-sera/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "magic-sera/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "magic-sera/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "magic-sera/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "magic-sera/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "magic-sera/launch2": {
+    "en": "Align our helm with the guiding stars.",
+    "hira": "ほしのみちびきに、かじをあわせて。"
+  },
+  "magic-sera/fire4": {
+    "en": "Starlight, show us the way!",
+    "hira": "ほしのひかりよ、みちをしめして！"
+  },
+  "magic-ren/fire3": {
+    "en": "Don't waste the opening. Pursue!",
+    "hira": "こうきをのがすな。ついげきだ！"
+  },
+  "magic-ren/move2": {
+    "en": "Change course. Use the clouds as cover!",
+    "hira": "しんろへんこう、くもをたてにする！"
+  },
+  "magic-ren/load2": {
+    "en": "Load both sides together!",
+    "hira": "さゆうのほうを、どうじにそうてん！"
+  },
+  "magic-ren/damage2": {
+    "en": "Armor is thinning. Hold attitude!",
+    "hira": "そうこうがうすい！しせいをたもて！"
+  },
+  "magic-ren/critical2": {
+    "en": "There is still a chance. Trust me!",
+    "hira": "しょうきはある。わたしをしんじて！"
+  },
+  "magic-ren/win2": {
+    "en": "Mission complete. Credit to everyone!",
+    "hira": "さくせんかんりょう。ぜんいんのてがらだ！"
+  },
+  "magic-ren/lose2": {
+    "en": "We withdraw for now. Next time we win!",
+    "hira": "いまはしりぞく。つぎはかならずかつ！"
+  },
+  "magic-ren/encounter2": {
+    "en": "Check comms. The enemy is right there!",
+    "hira": "つうしんをかくにん。てきはすぐそこだ！"
+  },
+  "magic-ren/launch2": {
+    "en": "Advance. We have a promise to keep.",
+    "hira": "ぜんしんだ。やくそくをはたす。"
+  },
+  "magic-ren/fire4": {
+    "en": "We finish this now. Focus!",
+    "hira": "けっちゃくをつける。しゅうちゅうしろ！"
+  },
+  "magic-soma/fire3": {
+    "en": "Stop their advance. Fire!",
+    "hira": "てきのうごきをやめる。うて！"
+  },
+  "magic-soma/move2": {
+    "en": "Full thrust. Clear their line of fire!",
+    "hira": "すいりょくぜんかい、しゃせんをはずせ！"
+  },
+  "magic-soma/load2": {
+    "en": "Loading crew, prepare for the next opening!",
+    "hira": "そうてんはん、つぎのこうきにそなえろ！"
+  },
+  "magic-soma/damage2": {
+    "en": "We're all right. We can still fly!",
+    "hira": "だいじょうぶだ。まだとべる！"
+  },
+  "magic-soma/critical2": {
+    "en": "Protect the repair crew. Hold on!",
+    "hira": "しゅうりはんをまもれ。ふんばるぞ！"
+  },
+  "magic-soma/win2": {
+    "en": "The sky has cleared. On to our next route!",
+    "hira": "そらがはれた。つぎのこうろへ！"
+  },
+  "magic-soma/lose2": {
+    "en": "All hands, prioritize evacuation!",
+    "hira": "そういん、だっしゅつをゆうせんして！"
+  },
+  "magic-soma/encounter2": {
+    "en": "Raise alert status. Begin combat!",
+    "hira": "けいかいをたかめて。せんとうかいし！"
+  },
+  "magic-soma/launch2": {
+    "en": "Let's make this a fiery voyage!",
+    "hira": "あついこうかいにしようぜ！"
+  },
+  "magic-soma/fire4": {
+    "en": "Let our fighting spirit blaze!",
+    "hira": "もえあがれ、ぼくらのとうし！"
+  },
+  "magic-minato/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "magic-minato/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "magic-minato/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "magic-minato/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "magic-minato/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "magic-minato/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "magic-minato/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "magic-minato/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "magic-minato/launch2": {
+    "en": "I'll read the currents for us.",
+    "hira": "しおのながれは、ぼくがよむよ。"
+  },
+  "magic-minato/fire4": {
+    "en": "Fire like a surging wave!",
+    "hira": "おしよせるなみのように、うて！"
+  },
+  "magic-riku/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "magic-riku/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "magic-riku/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "magic-riku/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "magic-riku/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "magic-riku/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "magic-riku/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "magic-riku/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "magic-riku/launch2": {
+    "en": "Have no fear. I'll lead the way.",
+    "hira": "おそれるな。おれがさきにたつ。"
+  },
+  "magic-riku/fire4": {
+    "en": "No more doubt. I'll break through!",
+    "hira": "まよいはすてた。うちぬく！"
+  },
+  "magic-yamato/fire3": {
+    "en": "Don't waste the opening. Pursue!",
+    "hira": "こうきをのがすな。ついげきだ！"
+  },
+  "magic-yamato/move2": {
+    "en": "Change course. Use the clouds as cover!",
+    "hira": "しんろへんこう、くもをたてにする！"
+  },
+  "magic-yamato/load2": {
+    "en": "Load both sides together!",
+    "hira": "さゆうのほうを、どうじにそうてん！"
+  },
+  "magic-yamato/damage2": {
+    "en": "Armor is thinning. Hold attitude!",
+    "hira": "そうこうがうすい！しせいをたもて！"
+  },
+  "magic-yamato/critical2": {
+    "en": "There is still a chance. Trust me!",
+    "hira": "しょうきはある。わたしをしんじて！"
+  },
+  "magic-yamato/win2": {
+    "en": "Mission complete. Credit to everyone!",
+    "hira": "さくせんかんりょう。ぜんいんのてがらだ！"
+  },
+  "magic-yamato/lose2": {
+    "en": "We withdraw for now. Next time we win!",
+    "hira": "いまはしりぞく。つぎはかならずかつ！"
+  },
+  "magic-yamato/encounter2": {
+    "en": "Check comms. The enemy is right there!",
+    "hira": "つうしんをかくにん。てきはすぐそこだ！"
+  },
+  "magic-yamato/launch2": {
+    "en": "Stand tall. We are departing!",
+    "hira": "おおきくかまえろ。しゅっこうする！"
+  },
+  "magic-yamato/fire4": {
+    "en": "Force a path open. Fire!",
+    "hira": "ちからでみちをきりひらく。うて！"
+  },
+  "magic-leon/fire3": {
+    "en": "Stop their advance. Fire!",
+    "hira": "てきのうごきをやめる。うて！"
+  },
+  "magic-leon/move2": {
+    "en": "Full thrust. Clear their line of fire!",
+    "hira": "すいりょくぜんかい、しゃせんをはずせ！"
+  },
+  "magic-leon/load2": {
+    "en": "Loading crew, prepare for the next opening!",
+    "hira": "そうてんはん、つぎのこうきにそなえろ！"
+  },
+  "magic-leon/damage2": {
+    "en": "We're all right. We can still fly!",
+    "hira": "だいじょうぶだ。まだとべる！"
+  },
+  "magic-leon/critical2": {
+    "en": "Protect the repair crew. Hold on!",
+    "hira": "しゅうりはんをまもれ。ふんばるぞ！"
+  },
+  "magic-leon/win2": {
+    "en": "The sky has cleared. On to our next route!",
+    "hira": "そらがはれた。つぎのこうろへ！"
+  },
+  "magic-leon/lose2": {
+    "en": "All hands, prioritize evacuation!",
+    "hira": "そういん、だっしゅつをゆうせんして！"
+  },
+  "magic-leon/encounter2": {
+    "en": "Raise alert status. Begin combat!",
+    "hira": "けいかいをたかめて。せんとうかいし！"
+  },
+  "magic-leon/launch2": {
+    "en": "With pride in our hearts, advance!",
+    "hira": "ほこりをむねに、そらへすすめ！"
+  },
+  "magic-leon/fire4": {
+    "en": "We settle this fair and square!",
+    "hira": "せいせいどうどう、しょうぶをきめる！"
+  },
+  "magic-elliot/fire3": {
+    "en": "Hold aim. Sustained fire!",
+    "hira": "しょうじゅんそのまま、れんぞくしゃげき！"
+  },
+  "magic-elliot/move2": {
+    "en": "Hard turn! Get behind them!",
+    "hira": "きゅうせんかい！はいごにまわりこめ！"
+  },
+  "magic-elliot/load2": {
+    "en": "Divert reserve power to the main gun!",
+    "hira": "よびのちからを、しゅほうへまわせ！"
+  },
+  "magic-elliot/damage2": {
+    "en": "That hit hard. Regroup!",
+    "hira": "いまのはきいた。たてなおすぞ！"
+  },
+  "magic-elliot/critical2": {
+    "en": "We cannot go down here!",
+    "hira": "ここでしずむわけにはいかない！"
+  },
+  "magic-elliot/win2": {
+    "en": "Well done. Let's return with pride!",
+    "hira": "よくやった。むねをはってかえろう！"
+  },
+  "magic-elliot/lose2": {
+    "en": "Abandon the ship if needed. Save the crew!",
+    "hira": "きたいをすてても、なかまはまもれ！"
+  },
+  "magic-elliot/encounter2": {
+    "en": "Enemy ahead. All hands, prepare!",
+    "hira": "ぜんぽうにてきえい。かくいん、そなえろ！"
+  },
+  "magic-elliot/launch2": {
+    "en": "Spell circuits ready. An experimental voyage!",
+    "hira": "じゅつしきはりょうこう。じっけんこうかいだ！"
+  },
+  "magic-elliot/fire4": {
+    "en": "Let's show more power than the calculation!",
+    "hira": "けいさんいじょうのちから、みせよう！"
+  },
+  "magic-sakuya/fire3": {
+    "en": "Break their defense. Focus fire!",
+    "hira": "まもりをくずそう。しゅうちゅうしゃげき！"
+  },
+  "magic-sakuya/move2": {
+    "en": "Gain altitude. Break through here!",
+    "hira": "こうどをあげて。ここをぬける！"
+  },
+  "magic-sakuya/load2": {
+    "en": "Hurry the next round. We aren't done!",
+    "hira": "じだんをいそげ。まだつづくぞ！"
+  },
+  "magic-sakuya/damage2": {
+    "en": "Seal the damaged section. Stay calm!",
+    "hira": "ひがいくかくをへいさ。おちついて！"
+  },
+  "magic-sakuya/critical2": {
+    "en": "I'll protect everyone to the end!",
+    "hira": "さいごまで、みんなをまもる！"
+  },
+  "magic-sakuya/win2": {
+    "en": "We made it through. Thank you!",
+    "hira": "ききをこえたね。ありがとう！"
+  },
+  "magic-sakuya/lose2": {
+    "en": "Get the rescue gear. Never give up!",
+    "hira": "きゅうめいそうちを。さいごまであきらめない！"
+  },
+  "magic-sakuya/encounter2": {
+    "en": "They are closing in. We meet them here!",
+    "hira": "ちかづいてくる。むかえうつよ！"
+  },
+  "magic-sakuya/launch2": {
+    "en": "I'll protect you until dawn.",
+    "hira": "よあけまでは、ぼくがまもる。"
+  },
+  "magic-sakuya/fire4": {
+    "en": "We will reclaim the quiet night!",
+    "hira": "しずかなよるを、とりもどす！"
+  },
+  "PL_HERO/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_HERO/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_HERO/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_HERO/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_HERO/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_HERO/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_HERO/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_HERO/launch2": {
+    "en": "Captain, ready whenever you are!",
+    "hira": "かんちょう、いつでもいけます！"
+  },
+  "PL_NERD/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_NERD/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_NERD/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_NERD/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_NERD/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_NERD/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_NERD/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_NERD/launch2": {
+    "en": "Calculations complete. No deviation.",
+    "hira": "けいさんかんりょう。ごさはありません。"
+  },
+  "PL_GIRL/ready3": {
+    "en": "Forward enemy in our sights!",
+    "hira": "ぜんぽうのてき、しょうじゅんにいりました！"
+  },
+  "PL_GIRL/ready4": {
+    "en": "All guns awaiting the captain's signal!",
+    "hira": "ぜんぽう、かんちょうのあいずをたいき！"
+  },
+  "PL_GIRL/move2": {
+    "en": "We have cleared the enemy's aim!",
+    "hira": "てきのねらいから、はずれました！"
+  },
+  "PL_GIRL/load2": {
+    "en": "Bringing the next round. Cover us!",
+    "hira": "じだんをはこびます。えんごを！"
+  },
+  "PL_GIRL/damage2": {
+    "en": "Repair crew, please hurry!",
+    "hira": "しゅうりはん、いそいでください！"
+  },
+  "PL_GIRL/critical2": {
+    "en": "The engine has not stopped yet!",
+    "hira": "きかんはまだ、とまっていません！"
+  },
+  "PL_GIRL/win2": {
+    "en": "Victory confirmed. Well done, Captain!",
+    "hira": "しょうりをかくにん。かんちょう、おみごと！"
+  },
+  "PL_GIRL/launch2": {
+    "en": "Everyone's preparations are complete!",
+    "hira": "ぜんいんのじゅんび、ととのいました！"
+  },
+  "PL_SPORT/ready3": {
+    "en": "Fire control ready on your order!",
+    "hira": "しゃげきかんせい、いつでもどうぞ！"
+  },
+  "PL_SPORT/ready4": {
+    "en": "Aim locked. We are fully prepared!",
+    "hira": "しょうじゅんこてい。こちらはばんぜんです！"
+  },
+  "PL_SPORT/move2": {
+    "en": "Route clear. We can get through now!",
+    "hira": "しんろをかくほ。いまならぬけます！"
+  },
+  "PL_SPORT/load2": {
+    "en": "We still have plenty of reserve rounds!",
+    "hira": "よびだん、まだじゅうぶんあります！"
+  },
+  "PL_SPORT/damage2": {
+    "en": "Hull damaged. We can still move!",
+    "hira": "せんたいにそんしょう。まだうごけます！"
+  },
+  "PL_SPORT/critical2": {
+    "en": "Gathering our remaining power!",
+    "hira": "のこったちからを、あつめます！"
+  },
+  "PL_SPORT/win2": {
+    "en": "Flight stable. We can go home!",
+    "hira": "ひこうはあんてい。かえれますよ！"
+  },
+  "PL_SPORT/launch2": {
+    "en": "Ready to move at full power!",
+    "hira": "いつでもぜんりょくでうごけます！"
+  },
+  "PL_SENIOR/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_SENIOR/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_SENIOR/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_SENIOR/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_SENIOR/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_SENIOR/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_SENIOR/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_SENIOR/launch2": {
+    "en": "The juniors are at their posts too.",
+    "hira": "こうはいたちも、はいちについた。"
+  },
+  "PL_LIBRARY/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_LIBRARY/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_LIBRARY/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_LIBRARY/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_LIBRARY/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_LIBRARY/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_LIBRARY/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_LIBRARY/launch2": {
+    "en": "The route documents have been checked.",
+    "hira": "こうろのしりょう、かくにんずみみです。"
+  },
+  "PL_BROADCAST/ready3": {
+    "en": "Forward enemy in our sights!",
+    "hira": "ぜんぽうのてき、しょうじゅんにいりました！"
+  },
+  "PL_BROADCAST/ready4": {
+    "en": "All guns awaiting the captain's signal!",
+    "hira": "ぜんぽう、かんちょうのあいずをたいき！"
+  },
+  "PL_BROADCAST/move2": {
+    "en": "We have cleared the enemy's aim!",
+    "hira": "てきのねらいから、はずれました！"
+  },
+  "PL_BROADCAST/load2": {
+    "en": "Bringing the next round. Cover us!",
+    "hira": "じだんをはこびます。えんごを！"
+  },
+  "PL_BROADCAST/damage2": {
+    "en": "Repair crew, please hurry!",
+    "hira": "しゅうりはん、いそいでください！"
+  },
+  "PL_BROADCAST/critical2": {
+    "en": "The engine has not stopped yet!",
+    "hira": "きかんはまだ、とまっていません！"
+  },
+  "PL_BROADCAST/win2": {
+    "en": "Victory confirmed. Well done, Captain!",
+    "hira": "しょうりをかくにん。かんちょう、おみごと！"
+  },
+  "PL_BROADCAST/launch2": {
+    "en": "The shipwide announcement reaches every section!",
+    "hira": "かんないほうそう、ぜんくかくにとどきます！"
+  },
+  "PL_HEALTH/ready3": {
+    "en": "Fire control ready on your order!",
+    "hira": "しゃげきかんせい、いつでもどうぞ！"
+  },
+  "PL_HEALTH/ready4": {
+    "en": "Aim locked. We are fully prepared!",
+    "hira": "しょうじゅんこてい。こちらはばんぜんです！"
+  },
+  "PL_HEALTH/move2": {
+    "en": "Route clear. We can get through now!",
+    "hira": "しんろをかくほ。いまならぬけます！"
+  },
+  "PL_HEALTH/load2": {
+    "en": "We still have plenty of reserve rounds!",
+    "hira": "よびだん、まだじゅうぶんあります！"
+  },
+  "PL_HEALTH/damage2": {
+    "en": "Hull damaged. We can still move!",
+    "hira": "せんたいにそんしょう。まだうごけます！"
+  },
+  "PL_HEALTH/critical2": {
+    "en": "Gathering our remaining power!",
+    "hira": "のこったちからを、あつめます！"
+  },
+  "PL_HEALTH/win2": {
+    "en": "Flight stable. We can go home!",
+    "hira": "ひこうはあんてい。かえれますよ！"
+  },
+  "PL_HEALTH/launch2": {
+    "en": "The medical team is standing by.",
+    "hira": "きゅうごはん、たいきしています。"
+  },
+  "PL_TREASURER/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_TREASURER/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_TREASURER/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_TREASURER/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_TREASURER/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_TREASURER/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_TREASURER/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_TREASURER/launch2": {
+    "en": "Supply counts have been checked.",
+    "hira": "ほきゅうひんのかず、かくにんずみみです。"
+  },
+  "PL_TRACK/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_TRACK/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_TRACK/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_TRACK/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_TRACK/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_TRACK/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_TRACK/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_TRACK/launch2": {
+    "en": "Acceleration is ready!",
+    "hira": "かそくのじゅんび、できています！"
+  },
+  "PL_ART/ready3": {
+    "en": "Forward enemy in our sights!",
+    "hira": "ぜんぽうのてき、しょうじゅんにいりました！"
+  },
+  "PL_ART/ready4": {
+    "en": "All guns awaiting the captain's signal!",
+    "hira": "ぜんぽう、かんちょうのあいずをたいき！"
+  },
+  "PL_ART/move2": {
+    "en": "We have cleared the enemy's aim!",
+    "hira": "てきのねらいから、はずれました！"
+  },
+  "PL_ART/load2": {
+    "en": "Bringing the next round. Cover us!",
+    "hira": "じだんをはこびます。えんごを！"
+  },
+  "PL_ART/damage2": {
+    "en": "Repair crew, please hurry!",
+    "hira": "しゅうりはん、いそいでください！"
+  },
+  "PL_ART/critical2": {
+    "en": "The engine has not stopped yet!",
+    "hira": "きかんはまだ、とまっていません！"
+  },
+  "PL_ART/win2": {
+    "en": "Victory confirmed. Well done, Captain!",
+    "hira": "しょうりをかくにん。かんちょう、おみごと！"
+  },
+  "PL_ART/launch2": {
+    "en": "Let's remember the color of this sky.",
+    "hira": "そらのいろ、わすれないように。"
+  },
+  "PL_SCIENCE/ready3": {
+    "en": "Fire control ready on your order!",
+    "hira": "しゃげきかんせい、いつでもどうぞ！"
+  },
+  "PL_SCIENCE/ready4": {
+    "en": "Aim locked. We are fully prepared!",
+    "hira": "しょうじゅんこてい。こちらはばんぜんです！"
+  },
+  "PL_SCIENCE/move2": {
+    "en": "Route clear. We can get through now!",
+    "hira": "しんろをかくほ。いまならぬけます！"
+  },
+  "PL_SCIENCE/load2": {
+    "en": "We still have plenty of reserve rounds!",
+    "hira": "よびだん、まだじゅうぶんあります！"
+  },
+  "PL_SCIENCE/damage2": {
+    "en": "Hull damaged. We can still move!",
+    "hira": "せんたいにそんしょう。まだうごけます！"
+  },
+  "PL_SCIENCE/critical2": {
+    "en": "Gathering our remaining power!",
+    "hira": "のこったちからを、あつめます！"
+  },
+  "PL_SCIENCE/win2": {
+    "en": "Flight stable. We can go home!",
+    "hira": "ひこうはあんてい。かえれますよ！"
+  },
+  "PL_SCIENCE/launch2": {
+    "en": "All equipment readings are normal.",
+    "hira": "かくそうちのはんのうはせいじょうです。"
+  },
+  "PL_GARDEN/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_GARDEN/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_GARDEN/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_GARDEN/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_GARDEN/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_GARDEN/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_GARDEN/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_GARDEN/launch2": {
+    "en": "The greenery aboard is thriving too.",
+    "hira": "かんないのみどりも、げんきですよ。"
+  },
+  "PL_FESTIVAL/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_FESTIVAL/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_FESTIVAL/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_FESTIVAL/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_FESTIVAL/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_FESTIVAL/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_FESTIVAL/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_FESTIVAL/launch2": {
+    "en": "Let's give departure a grand signal!",
+    "hira": "しゅっこうのあいず、はでにいこう！"
+  },
+  "PL_SOCCER/ready3": {
+    "en": "Forward enemy in our sights!",
+    "hira": "ぜんぽうのてき、しょうじゅんにいりました！"
+  },
+  "PL_SOCCER/ready4": {
+    "en": "All guns awaiting the captain's signal!",
+    "hira": "ぜんぽう、かんちょうのあいずをたいき！"
+  },
+  "PL_SOCCER/move2": {
+    "en": "We have cleared the enemy's aim!",
+    "hira": "てきのねらいから、はずれました！"
+  },
+  "PL_SOCCER/load2": {
+    "en": "Bringing the next round. Cover us!",
+    "hira": "じだんをはこびます。えんごを！"
+  },
+  "PL_SOCCER/damage2": {
+    "en": "Repair crew, please hurry!",
+    "hira": "しゅうりはん、いそいでください！"
+  },
+  "PL_SOCCER/critical2": {
+    "en": "The engine has not stopped yet!",
+    "hira": "きかんはまだ、とまっていません！"
+  },
+  "PL_SOCCER/win2": {
+    "en": "Victory confirmed. Well done, Captain!",
+    "hira": "しょうりをかくにん。かんちょう、おみごと！"
+  },
+  "PL_SOCCER/launch2": {
+    "en": "Leave the teamwork to me!",
+    "hira": "れんけいなら、まかせてください！"
+  },
+  "PL_MUSIC/ready3": {
+    "en": "Fire control ready on your order!",
+    "hira": "しゃげきかんせい、いつでもどうぞ！"
+  },
+  "PL_MUSIC/ready4": {
+    "en": "Aim locked. We are fully prepared!",
+    "hira": "しょうじゅんこてい。こちらはばんぜんです！"
+  },
+  "PL_MUSIC/move2": {
+    "en": "Route clear. We can get through now!",
+    "hira": "しんろをかくほ。いまならぬけます！"
+  },
+  "PL_MUSIC/load2": {
+    "en": "We still have plenty of reserve rounds!",
+    "hira": "よびだん、まだじゅうぶんあります！"
+  },
+  "PL_MUSIC/damage2": {
+    "en": "Hull damaged. We can still move!",
+    "hira": "せんたいにそんしょう。まだうごけます！"
+  },
+  "PL_MUSIC/critical2": {
+    "en": "Gathering our remaining power!",
+    "hira": "のこったちからを、あつめます！"
+  },
+  "PL_MUSIC/win2": {
+    "en": "Flight stable. We can go home!",
+    "hira": "ひこうはあんてい。かえれますよ！"
+  },
+  "PL_MUSIC/launch2": {
+    "en": "The engine sounds in good rhythm!",
+    "hira": "きかんのおと、いいちょうしです！"
+  },
+  "PL_CHEM/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_CHEM/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_CHEM/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_CHEM/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_CHEM/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_CHEM/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_CHEM/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_CHEM/launch2": {
+    "en": "Fuel mixture, no problems!",
+    "hira": "ねんりょうのちょうごう、もんだいなし！"
+  },
+  "PL_DISCIPLINE/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_DISCIPLINE/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_DISCIPLINE/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_DISCIPLINE/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_DISCIPLINE/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_DISCIPLINE/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_DISCIPLINE/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_DISCIPLINE/launch2": {
+    "en": "All crew at their posts in good order.",
+    "hira": "ぜんいん、きりつよくはいちかんりょう。"
+  },
+  "PL_SWEETS/ready3": {
+    "en": "Forward enemy in our sights!",
+    "hira": "ぜんぽうのてき、しょうじゅんにいりました！"
+  },
+  "PL_SWEETS/ready4": {
+    "en": "All guns awaiting the captain's signal!",
+    "hira": "ぜんぽう、かんちょうのあいずをたいき！"
+  },
+  "PL_SWEETS/move2": {
+    "en": "We have cleared the enemy's aim!",
+    "hira": "てきのねらいから、はずれました！"
+  },
+  "PL_SWEETS/load2": {
+    "en": "Bringing the next round. Cover us!",
+    "hira": "じだんをはこびます。えんごを！"
+  },
+  "PL_SWEETS/damage2": {
+    "en": "Repair crew, please hurry!",
+    "hira": "しゅうりはん、いそいでください！"
+  },
+  "PL_SWEETS/critical2": {
+    "en": "The engine has not stopped yet!",
+    "hira": "きかんはまだ、とまっていません！"
+  },
+  "PL_SWEETS/win2": {
+    "en": "Victory confirmed. Well done, Captain!",
+    "hira": "しょうりをかくにん。かんちょう、おみごと！"
+  },
+  "PL_SWEETS/launch2": {
+    "en": "Let's have a snack when we return!",
+    "hira": "かえったら、おやつにしよう！"
+  },
+  "PL_MAP/ready3": {
+    "en": "Fire control ready on your order!",
+    "hira": "しゃげきかんせい、いつでもどうぞ！"
+  },
+  "PL_MAP/ready4": {
+    "en": "Aim locked. We are fully prepared!",
+    "hira": "しょうじゅんこてい。こちらはばんぜんです！"
+  },
+  "PL_MAP/move2": {
+    "en": "Route clear. We can get through now!",
+    "hira": "しんろをかくほ。いまならぬけます！"
+  },
+  "PL_MAP/load2": {
+    "en": "We still have plenty of reserve rounds!",
+    "hira": "よびだん、まだじゅうぶんあります！"
+  },
+  "PL_MAP/damage2": {
+    "en": "Hull damaged. We can still move!",
+    "hira": "せんたいにそんしょう。まだうごけます！"
+  },
+  "PL_MAP/critical2": {
+    "en": "Gathering our remaining power!",
+    "hira": "のこったちからを、あつめます！"
+  },
+  "PL_MAP/win2": {
+    "en": "Flight stable. We can go home!",
+    "hira": "ひこうはあんてい。かえれますよ！"
+  },
+  "PL_MAP/launch2": {
+    "en": "Recording the new route!",
+    "hira": "あたらしいこうろ、きろくします！"
+  },
+  "PL_CRAFT/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_CRAFT/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_CRAFT/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_CRAFT/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_CRAFT/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_CRAFT/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_CRAFT/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_CRAFT/launch2": {
+    "en": "Reinforcement of the seams is complete.",
+    "hira": "つぎめのほきょう、すみました。"
+  },
+  "PL_STUDENT_PRES/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_STUDENT_PRES/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_STUDENT_PRES/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_STUDENT_PRES/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_STUDENT_PRES/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_STUDENT_PRES/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_STUDENT_PRES/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_STUDENT_PRES/launch2": {
+    "en": "Coordination between teams confirmed!",
+    "hira": "かくはんのれんけい、かくにんしました！"
+  },
+  "PL_TRANSFER2/ready3": {
+    "en": "Forward enemy in our sights!",
+    "hira": "ぜんぽうのてき、しょうじゅんにいりました！"
+  },
+  "PL_TRANSFER2/ready4": {
+    "en": "All guns awaiting the captain's signal!",
+    "hira": "ぜんぽう、かんちょうのあいずをたいき！"
+  },
+  "PL_TRANSFER2/move2": {
+    "en": "We have cleared the enemy's aim!",
+    "hira": "てきのねらいから、はずれました！"
+  },
+  "PL_TRANSFER2/load2": {
+    "en": "Bringing the next round. Cover us!",
+    "hira": "じだんをはこびます。えんごを！"
+  },
+  "PL_TRANSFER2/damage2": {
+    "en": "Repair crew, please hurry!",
+    "hira": "しゅうりはん、いそいでください！"
+  },
+  "PL_TRANSFER2/critical2": {
+    "en": "The engine has not stopped yet!",
+    "hira": "きかんはまだ、とまっていません！"
+  },
+  "PL_TRANSFER2/win2": {
+    "en": "Victory confirmed. Well done, Captain!",
+    "hira": "しょうりをかくにん。かんちょう、おみごと！"
+  },
+  "PL_TRANSFER2/launch2": {
+    "en": "I'm looking forward to unfamiliar skies!",
+    "hira": "みちのそらも、たのしみです！"
+  },
+  "PL_CAFE/ready3": {
+    "en": "Fire control ready on your order!",
+    "hira": "しゃげきかんせい、いつでもどうぞ！"
+  },
+  "PL_CAFE/ready4": {
+    "en": "Aim locked. We are fully prepared!",
+    "hira": "しょうじゅんこてい。こちらはばんぜんです！"
+  },
+  "PL_CAFE/move2": {
+    "en": "Route clear. We can get through now!",
+    "hira": "しんろをかくほ。いまならぬけます！"
+  },
+  "PL_CAFE/load2": {
+    "en": "We still have plenty of reserve rounds!",
+    "hira": "よびだん、まだじゅうぶんあります！"
+  },
+  "PL_CAFE/damage2": {
+    "en": "Hull damaged. We can still move!",
+    "hira": "せんたいにそんしょう。まだうごけます！"
+  },
+  "PL_CAFE/critical2": {
+    "en": "Gathering our remaining power!",
+    "hira": "のこったちからを、あつめます！"
+  },
+  "PL_CAFE/win2": {
+    "en": "Flight stable. We can go home!",
+    "hira": "ひこうはあんてい。かえれますよ！"
+  },
+  "PL_CAFE/launch2": {
+    "en": "The refreshment supplies are aboard.",
+    "hira": "ほきゅうののみもの、つみました。"
+  },
+  "PL_BOXER/ready3": {
+    "en": "Main gun ready to fire!",
+    "hira": "しゅほう、しゃげきじゅんびよし！"
+  },
+  "PL_BOXER/ready4": {
+    "en": "Opening gun ports. Awaiting your order!",
+    "hira": "ほうもんをひらきます。ごめいれいを！"
+  },
+  "PL_BOXER/move2": {
+    "en": "Rear clear. We can turn!",
+    "hira": "こうほうをかくにん。せんかいできます！"
+  },
+  "PL_BOXER/load2": {
+    "en": "The loading crew is doing well!",
+    "hira": "そうてんはん、いいちょうしです！"
+  },
+  "PL_BOXER/damage2": {
+    "en": "Impact confirmed. Correcting attitude!",
+    "hira": "しょうげきをかくにん。しせいをなおします！"
+  },
+  "PL_BOXER/critical2": {
+    "en": "Captain, danger! Your orders!",
+    "hira": "かんちょう、きけんです！しじを！"
+  },
+  "PL_BOXER/win2": {
+    "en": "No enemy contacts. We did it!",
+    "hira": "てきえいなし。やりましたね！"
+  },
+  "PL_BOXER/launch2": {
+    "en": "Bracing for impact!",
+    "hira": "しょうげきにそなえて、かまえます！"
+  },
+  "PL_OLD_PRO/ready3": {
+    "en": "Starboard gun ready!",
+    "hira": "うげんのほう、じゅんびできました！"
+  },
+  "PL_OLD_PRO/ready4": {
+    "en": "The next shot is ready!",
+    "hira": "つぎのいっぱつ、よういできました！"
+  },
+  "PL_OLD_PRO/move2": {
+    "en": "Raising thrust to the limit!",
+    "hira": "すいりょく、げんかいまであげます！"
+  },
+  "PL_OLD_PRO/load2": {
+    "en": "Energy supply stable!",
+    "hira": "えねるぎーきょうきゅう、あんていです！"
+  },
+  "PL_OLD_PRO/damage2": {
+    "en": "Assessing damage. Stay calm!",
+    "hira": "ひがいをかくにんなか。あわてずに！"
+  },
+  "PL_OLD_PRO/critical2": {
+    "en": "Rescue crew, save everyone!",
+    "hira": "きゅうめいはん、ぜんいんをたすけて！"
+  },
+  "PL_OLD_PRO/win2": {
+    "en": "Damage checked. Everyone is safe!",
+    "hira": "そんがいをかくにん。ぜんいん、ぶじです！"
+  },
+  "PL_OLD_PRO/launch2": {
+    "en": "Don't rush. Keep your eyes on the sky.",
+    "hira": "あせるなよ。よくそらをみろ。"
+  },
+  "rival-0/encounter2": {
+    "en": "We meet again. Let's have a battle!",
+    "hira": "またあえたね。しょうぶしよう！"
+  },
+  "rival-0/fire3": {
+    "en": "Can you avoid this next strike?",
+    "hira": "こんどのいちげきは、さけられる？"
+  },
+  "rival-0/fire4": {
+    "en": "Let your guard down and I'll reach you!",
+    "hira": "ゆだんすると、とどくからね！"
+  },
+  "rival-0/damage2": {
+    "en": "Nice work. But I won't lose!",
+    "hira": "やるね。でも、まけない！"
+  },
+  "rival-0/lose2": {
+    "en": "You've grown stronger. Next time!",
+    "hira": "つよくなったね。つぎこそは！"
+  },
+  "rival-0/win2": {
+    "en": "Today's sky belongs to me!",
+    "hira": "きょうのそらは、わたしのもの！"
+  },
+  "rival-1/encounter2": {
+    "en": "Stay out of my flight path!",
+    "hira": "おれのこうろに、いっってくるな！"
+  },
+  "rival-1/fire3": {
+    "en": "I'll knock those wings out of the sky!",
+    "hira": "そのつばさ、たたきおとしてやる！"
+  },
+  "rival-1/fire4": {
+    "en": "I've caught up. Nowhere to run!",
+    "hira": "おいついたぞ。にげばはない！"
+  },
+  "rival-1/damage2": {
+    "en": "You think that will stop me?",
+    "hira": "このていどで、とまるかよ！"
+  },
+  "rival-1/lose2": {
+    "en": "Remember this. I'll repay the debt!",
+    "hira": "おぼえていろ。かりはかえす！"
+  },
+  "rival-1/win2": {
+    "en": "Too slow. Train harder!",
+    "hira": "おそいんだよ。もっときたえな！"
+  },
+  "rival-2/encounter2": {
+    "en": "Let me see your tactics.",
+    "hira": "あなたのせんじゅつ、みせてもらうわ。"
+  },
+  "rival-2/fire3": {
+    "en": "Your prediction was weak. There's the opening!",
+    "hira": "よみがあまいわ。そのげきよ！"
+  },
+  "rival-2/fire4": {
+    "en": "I already have the next move ready.",
+    "hira": "つぎのても、よういしてあるの。"
+  },
+  "rival-2/damage2": {
+    "en": "Beyond expectations. I'll adjust.",
+    "hira": "そうていいじょうね。しゅうせいするわ。"
+  },
+  "rival-2/lose2": {
+    "en": "My calculations were not enough.",
+    "hira": "けいさんが、およばなかったわね。"
+  },
+  "rival-2/win2": {
+    "en": "Preparation decides the battle.",
+    "hira": "しょうぶは、じゅんびできまるのよ。"
+  },
+  "rival-3/encounter2": {
+    "en": "Young captain, show your resolve.",
+    "hira": "わかきかんちょうよ、かくごをみせよ。"
+  },
+  "rival-3/fire3": {
+    "en": "You cannot protect the sky by fleeing!",
+    "hira": "にげこしでは、そらはまもれん！"
+  },
+  "rival-3/fire4": {
+    "en": "Bring all guns to bear. Settle this!",
+    "hira": "ぜんぽうをむけろ。けっちゃくをつける！"
+  },
+  "rival-3/damage2": {
+    "en": "A fine strike. But not yet!",
+    "hira": "みごとないちげきだ。だが、まだだ！"
+  },
+  "rival-3/lose2": {
+    "en": "I entrust the rest to you. Sail well.",
+    "hira": "のちをたくそう。よいこうかいを。"
+  },
+  "rival-3/win2": {
+    "en": "Hone your skills. We shall meet in the sky again.",
+    "hira": "うでをみがけ。またそらであおう。"
   }
 };

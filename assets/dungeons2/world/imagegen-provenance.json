@@ -1,0 +1,1690 @@
+{
+  "generator": "ImageGen",
+  "style": "Original 16-bit Western fantasy, reference used only for visual direction",
+  "directions": [
+    "S",
+    "SW",
+    "W",
+    "NW",
+    "N",
+    "NE",
+    "E",
+    "SE"
+  ],
+  "normalization": "Adaptive transparent gutters, shared scale per monster, nearest neighbor, bottom center anchor",
+  "sources": [
+    {
+      "source": "exec-2037080f-1299-41ca-bebc-acddd2be3e73.png",
+      "sha256": "b31ffd3885036b1a9f37e5982ec00390dcd377f7ecbaa1c556c535385c748c98",
+      "outputs": [
+        {
+          "name": "monsters/slime",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 224,
+              "height": 222
+            },
+            {
+              "left": 224,
+              "top": 0,
+              "width": 219,
+              "height": 222
+            },
+            {
+              "left": 443,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 665,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1109,
+              "top": 0,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1552,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/bat",
+          "rects": [
+            {
+              "left": 0,
+              "top": 222,
+              "width": 267,
+              "height": 180
+            },
+            {
+              "left": 267,
+              "top": 222,
+              "width": 212,
+              "height": 180
+            },
+            {
+              "left": 479,
+              "top": 222,
+              "width": 186,
+              "height": 180
+            },
+            {
+              "left": 665,
+              "top": 222,
+              "width": 222,
+              "height": 180
+            },
+            {
+              "left": 887,
+              "top": 222,
+              "width": 224,
+              "height": 180
+            },
+            {
+              "left": 1111,
+              "top": 222,
+              "width": 218,
+              "height": 180
+            },
+            {
+              "left": 1329,
+              "top": 222,
+              "width": 185,
+              "height": 180
+            },
+            {
+              "left": 1514,
+              "top": 222,
+              "width": 260,
+              "height": 180
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/ghost",
+          "rects": [
+            {
+              "left": 0,
+              "top": 402,
+              "width": 234,
+              "height": 242
+            },
+            {
+              "left": 234,
+              "top": 402,
+              "width": 217,
+              "height": 242
+            },
+            {
+              "left": 451,
+              "top": 402,
+              "width": 217,
+              "height": 242
+            },
+            {
+              "left": 668,
+              "top": 402,
+              "width": 219,
+              "height": 242
+            },
+            {
+              "left": 887,
+              "top": 402,
+              "width": 222,
+              "height": 242
+            },
+            {
+              "left": 1109,
+              "top": 402,
+              "width": 220,
+              "height": 242
+            },
+            {
+              "left": 1329,
+              "top": 402,
+              "width": 222,
+              "height": 242
+            },
+            {
+              "left": 1551,
+              "top": 402,
+              "width": 223,
+              "height": 242
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/drain",
+          "rects": [
+            {
+              "left": 0,
+              "top": 644,
+              "width": 222,
+              "height": 243
+            },
+            {
+              "left": 222,
+              "top": 644,
+              "width": 221,
+              "height": 243
+            },
+            {
+              "left": 443,
+              "top": 644,
+              "width": 222,
+              "height": 243
+            },
+            {
+              "left": 665,
+              "top": 644,
+              "width": 222,
+              "height": 243
+            },
+            {
+              "left": 887,
+              "top": 644,
+              "width": 222,
+              "height": 243
+            },
+            {
+              "left": 1109,
+              "top": 644,
+              "width": 221,
+              "height": 243
+            },
+            {
+              "left": 1330,
+              "top": 644,
+              "width": 222,
+              "height": 243
+            },
+            {
+              "left": 1552,
+              "top": 644,
+              "width": 222,
+              "height": 243
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-7849cce6-ba32-4b15-b360-22b74b5daf5e.png",
+      "sha256": "2f9155fe00c897dceaa92e37013a1a5df5f4f5dffda1473e9bac3b82434d3637",
+      "outputs": [
+        {
+          "name": "monsters/dragon",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 262,
+              "height": 242
+            },
+            {
+              "left": 262,
+              "top": 0,
+              "width": 220,
+              "height": 242
+            },
+            {
+              "left": 482,
+              "top": 0,
+              "width": 192,
+              "height": 242
+            },
+            {
+              "left": 674,
+              "top": 0,
+              "width": 213,
+              "height": 242
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 250,
+              "height": 242
+            },
+            {
+              "left": 1137,
+              "top": 0,
+              "width": 193,
+              "height": 242
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 219,
+              "height": 242
+            },
+            {
+              "left": 1549,
+              "top": 0,
+              "width": 225,
+              "height": 242
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/metal",
+          "rects": [
+            {
+              "left": 0,
+              "top": 242,
+              "width": 240,
+              "height": 193
+            },
+            {
+              "left": 240,
+              "top": 242,
+              "width": 228,
+              "height": 193
+            },
+            {
+              "left": 468,
+              "top": 242,
+              "width": 199,
+              "height": 193
+            },
+            {
+              "left": 667,
+              "top": 242,
+              "width": 220,
+              "height": 193
+            },
+            {
+              "left": 887,
+              "top": 242,
+              "width": 243,
+              "height": 193
+            },
+            {
+              "left": 1130,
+              "top": 242,
+              "width": 211,
+              "height": 193
+            },
+            {
+              "left": 1341,
+              "top": 242,
+              "width": 211,
+              "height": 193
+            },
+            {
+              "left": 1552,
+              "top": 242,
+              "width": 222,
+              "height": 193
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/thief",
+          "rects": [
+            {
+              "left": 0,
+              "top": 435,
+              "width": 222,
+              "height": 196
+            },
+            {
+              "left": 222,
+              "top": 435,
+              "width": 227,
+              "height": 196
+            },
+            {
+              "left": 449,
+              "top": 435,
+              "width": 216,
+              "height": 196
+            },
+            {
+              "left": 665,
+              "top": 435,
+              "width": 222,
+              "height": 196
+            },
+            {
+              "left": 887,
+              "top": 435,
+              "width": 222,
+              "height": 196
+            },
+            {
+              "left": 1109,
+              "top": 435,
+              "width": 221,
+              "height": 196
+            },
+            {
+              "left": 1330,
+              "top": 435,
+              "width": 222,
+              "height": 196
+            },
+            {
+              "left": 1552,
+              "top": 435,
+              "width": 222,
+              "height": 196
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/mandrake",
+          "rects": [
+            {
+              "left": 0,
+              "top": 631,
+              "width": 235,
+              "height": 256
+            },
+            {
+              "left": 235,
+              "top": 631,
+              "width": 228,
+              "height": 256
+            },
+            {
+              "left": 463,
+              "top": 631,
+              "width": 202,
+              "height": 256
+            },
+            {
+              "left": 665,
+              "top": 631,
+              "width": 222,
+              "height": 256
+            },
+            {
+              "left": 887,
+              "top": 631,
+              "width": 234,
+              "height": 256
+            },
+            {
+              "left": 1121,
+              "top": 631,
+              "width": 222,
+              "height": 256
+            },
+            {
+              "left": 1343,
+              "top": 631,
+              "width": 203,
+              "height": 256
+            },
+            {
+              "left": 1546,
+              "top": 631,
+              "width": 228,
+              "height": 256
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-b566091e-2d18-488a-8a30-3b849db42767.png",
+      "sha256": "9d818620a8c5fe7b64da9a198a926652de55a1e455b616f0ef76c54e84fa1660",
+      "outputs": [
+        {
+          "name": "monsters/golem",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 222,
+              "height": 223
+            },
+            {
+              "left": 222,
+              "top": 0,
+              "width": 221,
+              "height": 223
+            },
+            {
+              "left": 443,
+              "top": 0,
+              "width": 222,
+              "height": 223
+            },
+            {
+              "left": 665,
+              "top": 0,
+              "width": 222,
+              "height": 223
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 222,
+              "height": 223
+            },
+            {
+              "left": 1109,
+              "top": 0,
+              "width": 221,
+              "height": 223
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 222,
+              "height": 223
+            },
+            {
+              "left": 1552,
+              "top": 0,
+              "width": 222,
+              "height": 223
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/ninja",
+          "rects": [
+            {
+              "left": 0,
+              "top": 223,
+              "width": 222,
+              "height": 220
+            },
+            {
+              "left": 222,
+              "top": 223,
+              "width": 223,
+              "height": 220
+            },
+            {
+              "left": 445,
+              "top": 223,
+              "width": 220,
+              "height": 220
+            },
+            {
+              "left": 665,
+              "top": 223,
+              "width": 222,
+              "height": 220
+            },
+            {
+              "left": 887,
+              "top": 223,
+              "width": 222,
+              "height": 220
+            },
+            {
+              "left": 1109,
+              "top": 223,
+              "width": 221,
+              "height": 220
+            },
+            {
+              "left": 1330,
+              "top": 223,
+              "width": 222,
+              "height": 220
+            },
+            {
+              "left": 1552,
+              "top": 223,
+              "width": 222,
+              "height": 220
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/mage",
+          "rects": [
+            {
+              "left": 0,
+              "top": 443,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 222,
+              "top": 443,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 443,
+              "top": 443,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 665,
+              "top": 443,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 887,
+              "top": 443,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1109,
+              "top": 443,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 1330,
+              "top": 443,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1552,
+              "top": 443,
+              "width": 222,
+              "height": 222
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/shopkeeper",
+          "rects": [
+            {
+              "left": 0,
+              "top": 665,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 222,
+              "top": 665,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 443,
+              "top": 665,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 665,
+              "top": 665,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 887,
+              "top": 665,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1109,
+              "top": 665,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 1330,
+              "top": 665,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1552,
+              "top": 665,
+              "width": 222,
+              "height": 222
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-364924d2-7b65-4320-9a66-9f8697842c07.png",
+      "sha256": "2aeb75f707fcf0d216126933729c8ecf80db1e318095036241442016ddffa31a",
+      "outputs": [
+        {
+          "name": "monsters/boss",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 222,
+              "height": 234
+            },
+            {
+              "left": 222,
+              "top": 0,
+              "width": 227,
+              "height": 234
+            },
+            {
+              "left": 449,
+              "top": 0,
+              "width": 216,
+              "height": 234
+            },
+            {
+              "left": 665,
+              "top": 0,
+              "width": 222,
+              "height": 234
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 222,
+              "height": 234
+            },
+            {
+              "left": 1109,
+              "top": 0,
+              "width": 221,
+              "height": 234
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 222,
+              "height": 234
+            },
+            {
+              "left": 1552,
+              "top": 0,
+              "width": 222,
+              "height": 234
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/floating",
+          "rects": [
+            {
+              "left": 0,
+              "top": 234,
+              "width": 222,
+              "height": 216
+            },
+            {
+              "left": 222,
+              "top": 234,
+              "width": 221,
+              "height": 216
+            },
+            {
+              "left": 443,
+              "top": 234,
+              "width": 222,
+              "height": 216
+            },
+            {
+              "left": 665,
+              "top": 234,
+              "width": 222,
+              "height": 216
+            },
+            {
+              "left": 887,
+              "top": 234,
+              "width": 222,
+              "height": 216
+            },
+            {
+              "left": 1109,
+              "top": 234,
+              "width": 221,
+              "height": 216
+            },
+            {
+              "left": 1330,
+              "top": 234,
+              "width": 222,
+              "height": 216
+            },
+            {
+              "left": 1552,
+              "top": 234,
+              "width": 222,
+              "height": 216
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/split",
+          "rects": [
+            {
+              "left": 0,
+              "top": 450,
+              "width": 222,
+              "height": 209
+            },
+            {
+              "left": 222,
+              "top": 450,
+              "width": 223,
+              "height": 209
+            },
+            {
+              "left": 445,
+              "top": 450,
+              "width": 220,
+              "height": 209
+            },
+            {
+              "left": 665,
+              "top": 450,
+              "width": 222,
+              "height": 209
+            },
+            {
+              "left": 887,
+              "top": 450,
+              "width": 222,
+              "height": 209
+            },
+            {
+              "left": 1109,
+              "top": 450,
+              "width": 221,
+              "height": 209
+            },
+            {
+              "left": 1330,
+              "top": 450,
+              "width": 222,
+              "height": 209
+            },
+            {
+              "left": 1552,
+              "top": 450,
+              "width": 222,
+              "height": 209
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/seal",
+          "rects": [
+            {
+              "left": 0,
+              "top": 659,
+              "width": 222,
+              "height": 228
+            },
+            {
+              "left": 222,
+              "top": 659,
+              "width": 221,
+              "height": 228
+            },
+            {
+              "left": 443,
+              "top": 659,
+              "width": 222,
+              "height": 228
+            },
+            {
+              "left": 665,
+              "top": 659,
+              "width": 222,
+              "height": 228
+            },
+            {
+              "left": 887,
+              "top": 659,
+              "width": 222,
+              "height": 228
+            },
+            {
+              "left": 1109,
+              "top": 659,
+              "width": 221,
+              "height": 228
+            },
+            {
+              "left": 1330,
+              "top": 659,
+              "width": 222,
+              "height": 228
+            },
+            {
+              "left": 1552,
+              "top": 659,
+              "width": 222,
+              "height": 228
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-060aa0ae-9930-4b8c-a739-4aa560604448.png",
+      "sha256": "400a8503e484a54838152e76e95ffba4909d143c4adf46e71e0e5260fc9b637d",
+      "outputs": [
+        {
+          "name": "monsters/swallow",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 222,
+              "top": 0,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 443,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 665,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1109,
+              "top": 0,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1552,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/erase",
+          "rects": [
+            {
+              "left": 0,
+              "top": 222,
+              "width": 222,
+              "height": 233
+            },
+            {
+              "left": 222,
+              "top": 222,
+              "width": 221,
+              "height": 233
+            },
+            {
+              "left": 443,
+              "top": 222,
+              "width": 222,
+              "height": 233
+            },
+            {
+              "left": 665,
+              "top": 222,
+              "width": 222,
+              "height": 233
+            },
+            {
+              "left": 887,
+              "top": 222,
+              "width": 222,
+              "height": 233
+            },
+            {
+              "left": 1109,
+              "top": 222,
+              "width": 221,
+              "height": 233
+            },
+            {
+              "left": 1330,
+              "top": 222,
+              "width": 222,
+              "height": 233
+            },
+            {
+              "left": 1552,
+              "top": 222,
+              "width": 222,
+              "height": 233
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/rice",
+          "rects": [
+            {
+              "left": 0,
+              "top": 455,
+              "width": 222,
+              "height": 177
+            },
+            {
+              "left": 222,
+              "top": 455,
+              "width": 221,
+              "height": 177
+            },
+            {
+              "left": 443,
+              "top": 455,
+              "width": 222,
+              "height": 177
+            },
+            {
+              "left": 665,
+              "top": 455,
+              "width": 222,
+              "height": 177
+            },
+            {
+              "left": 887,
+              "top": 455,
+              "width": 222,
+              "height": 177
+            },
+            {
+              "left": 1109,
+              "top": 455,
+              "width": 221,
+              "height": 177
+            },
+            {
+              "left": 1330,
+              "top": 455,
+              "width": 222,
+              "height": 177
+            },
+            {
+              "left": 1552,
+              "top": 455,
+              "width": 222,
+              "height": 177
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/evolve",
+          "rects": [
+            {
+              "left": 0,
+              "top": 632,
+              "width": 230,
+              "height": 255
+            },
+            {
+              "left": 230,
+              "top": 632,
+              "width": 213,
+              "height": 255
+            },
+            {
+              "left": 443,
+              "top": 632,
+              "width": 219,
+              "height": 255
+            },
+            {
+              "left": 662,
+              "top": 632,
+              "width": 222,
+              "height": 255
+            },
+            {
+              "left": 884,
+              "top": 632,
+              "width": 225,
+              "height": 255
+            },
+            {
+              "left": 1109,
+              "top": 632,
+              "width": 221,
+              "height": 255
+            },
+            {
+              "left": 1330,
+              "top": 632,
+              "width": 216,
+              "height": 255
+            },
+            {
+              "left": 1546,
+              "top": 632,
+              "width": 228,
+              "height": 255
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-118c1f04-cfb5-4a71-8b0a-385ec0005a8b.png",
+      "sha256": "804cbe7488af4f9aadb3575a8af22b29200ff76be944d6cb44f688bf8e744a80",
+      "outputs": [
+        {
+          "name": "monsters/detention",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 222,
+              "top": 0,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 443,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 665,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1109,
+              "top": 0,
+              "width": 221,
+              "height": 222
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            },
+            {
+              "left": 1552,
+              "top": 0,
+              "width": 222,
+              "height": 222
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/monitor",
+          "rects": [
+            {
+              "left": 0,
+              "top": 222,
+              "width": 222,
+              "height": 221
+            },
+            {
+              "left": 222,
+              "top": 222,
+              "width": 221,
+              "height": 221
+            },
+            {
+              "left": 443,
+              "top": 222,
+              "width": 222,
+              "height": 221
+            },
+            {
+              "left": 665,
+              "top": 222,
+              "width": 222,
+              "height": 221
+            },
+            {
+              "left": 887,
+              "top": 222,
+              "width": 222,
+              "height": 221
+            },
+            {
+              "left": 1109,
+              "top": 222,
+              "width": 221,
+              "height": 221
+            },
+            {
+              "left": 1330,
+              "top": 222,
+              "width": 222,
+              "height": 221
+            },
+            {
+              "left": 1552,
+              "top": 222,
+              "width": 222,
+              "height": 221
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/mimic",
+          "rects": [
+            {
+              "left": 0,
+              "top": 443,
+              "width": 222,
+              "height": 192
+            },
+            {
+              "left": 222,
+              "top": 443,
+              "width": 221,
+              "height": 192
+            },
+            {
+              "left": 443,
+              "top": 443,
+              "width": 222,
+              "height": 192
+            },
+            {
+              "left": 665,
+              "top": 443,
+              "width": 222,
+              "height": 192
+            },
+            {
+              "left": 887,
+              "top": 443,
+              "width": 222,
+              "height": 192
+            },
+            {
+              "left": 1109,
+              "top": 443,
+              "width": 221,
+              "height": 192
+            },
+            {
+              "left": 1330,
+              "top": 443,
+              "width": 222,
+              "height": 192
+            },
+            {
+              "left": 1552,
+              "top": 443,
+              "width": 222,
+              "height": 192
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/umbrella",
+          "rects": [
+            {
+              "left": 0,
+              "top": 635,
+              "width": 222,
+              "height": 252
+            },
+            {
+              "left": 222,
+              "top": 635,
+              "width": 230,
+              "height": 252
+            },
+            {
+              "left": 452,
+              "top": 635,
+              "width": 213,
+              "height": 252
+            },
+            {
+              "left": 665,
+              "top": 635,
+              "width": 222,
+              "height": 252
+            },
+            {
+              "left": 887,
+              "top": 635,
+              "width": 222,
+              "height": 252
+            },
+            {
+              "left": 1109,
+              "top": 635,
+              "width": 213,
+              "height": 252
+            },
+            {
+              "left": 1322,
+              "top": 635,
+              "width": 230,
+              "height": 252
+            },
+            {
+              "left": 1552,
+              "top": 635,
+              "width": 222,
+              "height": 252
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-02f084e2-b3ad-4831-bcc1-4230c4d9401c.png",
+      "sha256": "0926512f6756c0552da55b6a46ea22a380f9c56cd90a7e17d40e036f2b70af14",
+      "outputs": [
+        {
+          "name": "monsters/mud",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 313,
+              "height": 315
+            },
+            {
+              "left": 313,
+              "top": 0,
+              "width": 314,
+              "height": 315
+            },
+            {
+              "left": 627,
+              "top": 0,
+              "width": 313,
+              "height": 315
+            },
+            {
+              "left": 940,
+              "top": 0,
+              "width": 314,
+              "height": 315
+            },
+            {
+              "left": 0,
+              "top": 315,
+              "width": 313,
+              "height": 312
+            },
+            {
+              "left": 313,
+              "top": 315,
+              "width": 314,
+              "height": 312
+            },
+            {
+              "left": 627,
+              "top": 315,
+              "width": 313,
+              "height": 312
+            },
+            {
+              "left": 940,
+              "top": 315,
+              "width": 314,
+              "height": 312
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        },
+        {
+          "name": "monsters/sprout",
+          "rects": [
+            {
+              "left": 0,
+              "top": 627,
+              "width": 313,
+              "height": 313
+            },
+            {
+              "left": 313,
+              "top": 627,
+              "width": 314,
+              "height": 313
+            },
+            {
+              "left": 627,
+              "top": 627,
+              "width": 313,
+              "height": 313
+            },
+            {
+              "left": 940,
+              "top": 627,
+              "width": 314,
+              "height": 313
+            },
+            {
+              "left": 0,
+              "top": 940,
+              "width": 313,
+              "height": 314
+            },
+            {
+              "left": 313,
+              "top": 940,
+              "width": 314,
+              "height": 314
+            },
+            {
+              "left": 627,
+              "top": 940,
+              "width": 313,
+              "height": 314
+            },
+            {
+              "left": 940,
+              "top": 940,
+              "width": 314,
+              "height": 314
+            }
+          ],
+          "cell": 64,
+          "columns": 8
+        }
+      ]
+    },
+    {
+      "source": "exec-85ac3f30-809e-4c95-b979-b0a334b6fdf1.png",
+      "sha256": "8221b728f15d6e6ca45b2c6398d41c9906b73d6c022b60c705c5ec446093272e"
+    },
+    {
+      "source": "exec-ba7bcdad-a1c6-4c63-b98f-d5a997104452.png",
+      "sha256": "6f6eb8d11a2de26795cad5f63350b477cefbc47f70c469828771035de74b0f6b",
+      "outputs": [
+        {
+          "name": "walls",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 314,
+              "height": 313
+            },
+            {
+              "left": 314,
+              "top": 0,
+              "width": 313,
+              "height": 313
+            },
+            {
+              "left": 627,
+              "top": 0,
+              "width": 313,
+              "height": 313
+            },
+            {
+              "left": 940,
+              "top": 0,
+              "width": 314,
+              "height": 313
+            },
+            {
+              "left": 0,
+              "top": 313,
+              "width": 314,
+              "height": 314
+            },
+            {
+              "left": 314,
+              "top": 313,
+              "width": 313,
+              "height": 314
+            },
+            {
+              "left": 627,
+              "top": 313,
+              "width": 312,
+              "height": 314
+            },
+            {
+              "left": 939,
+              "top": 313,
+              "width": 315,
+              "height": 314
+            },
+            {
+              "left": 0,
+              "top": 627,
+              "width": 314,
+              "height": 292
+            },
+            {
+              "left": 314,
+              "top": 627,
+              "width": 313,
+              "height": 292
+            },
+            {
+              "left": 627,
+              "top": 627,
+              "width": 312,
+              "height": 292
+            },
+            {
+              "left": 939,
+              "top": 627,
+              "width": 315,
+              "height": 292
+            },
+            {
+              "left": 0,
+              "top": 919,
+              "width": 314,
+              "height": 335
+            },
+            {
+              "left": 314,
+              "top": 919,
+              "width": 313,
+              "height": 335
+            },
+            {
+              "left": 627,
+              "top": 919,
+              "width": 313,
+              "height": 335
+            }
+          ],
+          "cell": 32,
+          "columns": 4
+        }
+      ]
+    },
+    {
+      "source": "exec-72cec390-95f7-4dbd-89e9-d6165d2bcef0.png",
+      "sha256": "7ed7b694d6ee6247b8479a81f7d42fce732bf76ad63f1b3bd3fcac9012e086c6",
+      "outputs": [
+        {
+          "name": "buildings",
+          "rects": [
+            {
+              "left": 0,
+              "top": 0,
+              "width": 448,
+              "height": 429
+            },
+            {
+              "left": 448,
+              "top": 0,
+              "width": 439,
+              "height": 429
+            },
+            {
+              "left": 887,
+              "top": 0,
+              "width": 443,
+              "height": 429
+            },
+            {
+              "left": 1330,
+              "top": 0,
+              "width": 444,
+              "height": 429
+            },
+            {
+              "left": 0,
+              "top": 429,
+              "width": 450,
+              "height": 458
+            },
+            {
+              "left": 450,
+              "top": 429,
+              "width": 437,
+              "height": 458
+            },
+            {
+              "left": 887,
+              "top": 429,
+              "width": 454,
+              "height": 458
+            },
+            {
+              "left": 1341,
+              "top": 429,
+              "width": 433,
+              "height": 458
+            }
+          ],
+          "cell": 128,
+          "columns": 4
+        }
+      ]
+    },
+    {
+      "source": "exec-8690b381-07e6-4beb-9a4e-f1e6a710b51d.png",
+      "sha256": "77ea42794abc633194376a7070553d392678364a86d4e036c6d33b630b2fdbae",
+      "outputs": [
+        {
+          "name": "props",
+          "rects": [
+            {
+              "left": 768,
+              "top": 743,
+              "width": 318,
+              "height": 343
+            },
+            {
+              "left": 1086,
+              "top": 743,
+              "width": 362,
+              "height": 343
+            }
+          ],
+          "cell": 64,
+          "columns": 2
+        }
+      ]
+    },
+    {
+      "source": "exec-66d59f1d-1da0-4ee3-a42b-10859d0dd142.png",
+      "sha256": "6c9271ada6560dabcf9cb91ecccbf2d26502728d9798192941d6213c6778a9d4"
+    },
+    {
+      "source": "exec-62b8df27-d0f1-458b-9e1f-c400edd0a4df.png",
+      "sha256": "b1c18d890ef2b69a9968be2950d47fa4afeda9f5eba3b061d6c2765269caaeb8"
+    }
+  ]
+}

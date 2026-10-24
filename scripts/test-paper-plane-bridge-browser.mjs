@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
+const expectedVoices=JSON.parse(await fs.readFile('assets/paper-plane/bridge-voice-plan.json','utf8')).total_clips;
 const file=`.paper-bridge-qa-${process.pid}.tsx`,dir='build/paper-plane-qa';let server,browser;
 try{
  await fs.mkdir(dir,{recursive:true});
@@ -17,27 +18,29 @@ try{
  assert.equal(await page.locator('.paper-captain-grid button').count(),9);await snap('captains-school-desktop');await page.getByRole('button',{name:'マジック編',exact:true}).click();assert.equal(await page.locator('.paper-captain-grid button').count(),17);
  await page.locator('.paper-captain-grid button').last().click();await page.getByRole('button',{name:'機体を選ぶ →',exact:true}).click();await page.getByRole('button',{name:'次へ',exact:true}).click();await page.locator('.paper-plane-pilot-grid [role=button]').first().click();await page.getByRole('button',{name:'次へ',exact:true}).click();await page.getByRole('button',{name:'出撃開始',exact:true}).click();await page.locator('.paper-captain-window').waitFor();if(fleetReady){await(await fleetReady).finished();await page.locator('canvas').waitFor();await page.waitForTimeout(1000);}assert.equal(await page.evaluate(()=>window.bgmCalls.at(-1)),'paper_plane_battle');
  if(process.argv.includes('--voices')){
-  assert.equal(await page.evaluate(()=>Object.keys(window.PAPER_VOICE_MS).length),492);
-  const decoded=await page.evaluate(async()=>{const entries=Object.entries(window.PAPER_VOICE_MS);let count=0;for(let i=0;i<entries.length;i+=8)await Promise.all(entries.slice(i,i+8).map(([key,ms])=>new Promise((resolve,reject)=>{const a=new Audio();const timeout=setTimeout(()=>reject(Error('Metadata timeout: '+key)),15000);a.onloadedmetadata=()=>{clearTimeout(timeout);if(Math.abs(a.duration*1000-ms)>80)return reject(Error('Duration mismatch: '+key+' browser='+a.duration*1000+' index='+ms));count++;a.onloadedmetadata=null;a.onerror=null;a.removeAttribute('src');a.load();resolve();};a.onerror=()=>reject(Error('Decode failed: '+key));a.src='/sfx/paper-plane-voices/'+key+'.ogg';})));return count;});assert.equal(decoded,492);
+  assert.equal(await page.evaluate(()=>Object.keys(window.PAPER_VOICE_MS).length),expectedVoices);
+  const decoded=await page.evaluate(async()=>{const entries=Object.entries(window.PAPER_VOICE_MS);let count=0;for(let i=0;i<entries.length;i+=8)await Promise.all(entries.slice(i,i+8).map(([key,ms])=>new Promise((resolve,reject)=>{const a=new Audio();const timeout=setTimeout(()=>reject(Error('Metadata timeout: '+key)),15000);a.onloadedmetadata=()=>{clearTimeout(timeout);if(Math.abs(a.duration*1000-ms)>80)return reject(Error('Duration mismatch: '+key+' browser='+a.duration*1000+' index='+ms));count++;a.onloadedmetadata=null;a.onerror=null;a.removeAttribute('src');a.load();resolve();};a.onerror=()=>reject(Error('Decode failed: '+key));a.src='/sfx/paper-plane-voices/'+key+'.ogg';})));return count;});assert.equal(decoded,expectedVoices);
   await page.evaluate(()=>{window.__paper.bridge.stop();window.audioService.setSfxVolume(0);window.audioService.setVoiceVolume(.42);window.voiceCalls=[];window.__paper.bridge.say('fire');});
   await page.waitForFunction(()=>window.voiceCalls.length>=2,null,{timeout:20000});
   const calls=await page.evaluate(()=>window.voiceCalls.slice(0,2));assert.match(calls[0].key,/^ready/);assert.match(calls[1].key,/^fire/);const duration=await page.evaluate(c=>window.PAPER_VOICE_MS[c.id+'/'+c.key],calls[0]);assert(calls[1].time-calls[0].time>=duration-100,'Reply cut off readiness report');assert(calls[1].time-calls[0].time<=duration+1500,'Unnecessary silence before reply');
   await page.evaluate(()=>{window.__paper.bridge.stop();window.voiceCalls=[];window.__paper.bridge.say('ready');});await page.waitForFunction(()=>window.voiceCalls.length===1);await page.evaluate(()=>window.__paper.bridge.say('fire'));await page.waitForFunction(()=>window.voiceCalls.length>=2,null,{timeout:20000});const armedCalls=await page.evaluate(()=>window.voiceCalls.slice(0,2));assert.match(armedCalls[0].key,/^ready/);assert.equal(armedCalls[1].id,'magic-sakuya');assert.match(armedCalls[1].key,/^fire/,'Do not repeat the readiness report at fire time');
 
+  // The call is recorded before Audio.play() resolves; wait for real playback.
+  await page.waitForFunction(()=>[...window.audioService.activeHtmlSfx].filter(([n])=>n.startsWith('paper-plane-voice-')).flatMap(([,set])=>[...set]).some(a=>!a.paused&&a.currentTime>0&&Math.abs(a.volume-.42)<.01),null,{timeout:7000});
   assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx].filter(([n])=>n.startsWith('paper-plane-voice-')).flatMap(([,set])=>[...set]).some(a=>!a.paused&&Math.abs(a.volume-.42)<.01)),'SE volume zero must not mute speech');
   await page.evaluate(()=>window.audioService.setVoiceVolume(0));assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].every(n=>!n.startsWith('paper-plane-voice-'))));
   const afterZero=await page.evaluate(()=>window.voiceCalls.length);await page.evaluate(()=>{window.audioService.setVoiceVolume(.5);window.__paper.bridge.say('fire');});await page.waitForFunction(n=>window.voiceCalls.length>n,afterZero,{timeout:7000});
 
-  await page.evaluate(()=>{window.audioService.setVoiceVolume(.5);window.__paper.bridge.stop();window.__paper.bridge.say('critical');});await page.waitForFunction(()=>window.voiceCalls.at(-1)?.key==='critical');
+  await page.evaluate(()=>{window.audioService.setVoiceVolume(.5);window.__paper.bridge.stop();window.__paper.bridge.say('critical');});await page.waitForFunction(()=>/^critical\d*$/.test(window.voiceCalls.at(-1)?.key||''));
   await page.evaluate(()=>window.audioService.toggleMute());assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].every(n=>!n.startsWith('paper-plane-voice-'))));await page.evaluate(()=>window.audioService.toggleMute());
   await page.evaluate(()=>{window.__paper.bridge.stop();window.__paper.bridge.say('fire');});await page.waitForFunction(()=>[...window.audioService.activeHtmlSfx.keys()].some(n=>n.startsWith('paper-plane-voice-')));
   await page.keyboard.press('Escape');assert(await page.evaluate(()=>window.left));assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].every(n=>!n.startsWith('paper-plane-voice-'))));
   await page.waitForTimeout(800);assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].every(n=>!n.startsWith('paper-plane-voice-'))));
-  assert.deepEqual(errors,[]);console.log(JSON.stringify({decoded:492,realCallResponse:true,independentVoiceVolume:true,zeroVoiceVolume:true,resumeAfterZero:true,mute:true,leaveStops:true,browserErrors:0}));
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({decoded:expectedVoices,realCallResponse:true,independentVoiceVolume:true,zeroVoiceVolume:true,resumeAfterZero:true,mute:true,leaveStops:true,browserErrors:0}));
  }else{
  assert.equal(await page.evaluate(()=>window.__paper.captainId),'magic-sakuya');assert(await page.evaluate(()=>window.__paper.deputyId.startsWith('PL_')));
  await page.evaluate(()=>window.__paper.saveStateNow());assert.equal(await page.evaluate(()=>window.storageService.loadPaperPlaneState().captainId),'magic-sakuya');
- await page.evaluate(()=>{window.__paper.bridge.stop();window.__paper.bridge.say('fire');});await page.waitForFunction(()=>window.voiceCalls.at(-1)?.key==='ready'||window.voiceCalls.at(-1)?.key==='ready2');
+ await page.evaluate(()=>{window.__paper.bridge.stop();window.__paper.bridge.say('fire');});await page.waitForFunction(()=>/^ready\d*$/.test(window.voiceCalls.at(-1)?.key||''));
  const before=await page.evaluate(()=>window.__paper.player.fuel);await page.locator('[data-gamepad-zone=paper-move]').last().click();assert.equal(await page.evaluate(()=>window.__paper.player.fuel),before-1,'Communications must not block movement');
  await page.waitForFunction(()=>window.voiceCalls.at(-1)?.id==='magic-sakuya'&&window.voiceCalls.at(-1)?.key.startsWith('fire'),{timeout:10000});await page.waitForFunction(()=>document.querySelector('.paper-captain-window img')?.dataset.expression==='command');await snap('command-desktop');
  await page.evaluate(()=>{window.__paper.bridge.stop();window.__paper.bridge.say('damage');});await page.waitForFunction(()=>document.querySelector('.paper-captain-window img')?.dataset.expression==='damage', {timeout:10000});await snap('damage-desktop');
@@ -58,7 +61,7 @@ try{
   await page.getByRole('button',{name:lang==='ENGLISH'?'New voyage':'あたらしい こうかいへ',exact:true}).click();await page.locator('.paper-captain-picker').waitFor();
   const text=await page.locator('.paper-captain-picker').innerText();assert(!/[一-龯]/.test(text),lang+' selection contains untranslated kanji: '+text);
   const subtitles=await page.evaluate(lang=>Object.entries(window.PAPER_BRIDGE_LINES).flatMap(([id,lines])=>Object.entries(lines).map(([key,text])=>window.bridgeSubtitle({id,key,text,expression:'normal'},lang))),lang);
-  assert.equal(subtitles.length,492);assert(subtitles.every(t=>t.length>0&&!/[一-龯]/.test(t)),lang+' subtitle coverage');
+  assert.equal(subtitles.length,expectedVoices);assert(subtitles.every(t=>t.length>0&&!/[一-龯]/.test(t)),lang+' subtitle coverage');
  }
  assert.deepEqual(errors,[]);console.log(JSON.stringify({captains:26,deputies:26,rivals:4,title:true,selection:true,saveResume:true,callResponse:true,expressionSwitch:true,nonBlocking:true,mobile:true,browserErrors:errors.length}));
  }

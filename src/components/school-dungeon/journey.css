@@ -21,3 +21,11 @@
 @media(orientation:landscape) and (max-height:500px){.dungeons-title-logo{max-height:115px;width:min(49vw,500px)}.wanderer-title-copy{gap:7px}.wanderer-title-copy .wanderer-eyebrow,.wanderer-title-copy>small{display:none}.wanderer-title .dungeons-subtitle{font-size:12px}.selected-hero-ability{font-size:9px;gap:2px}.selected-hero-ability small{font-size:8px}.wanderer-selection aside{gap:6px}.dungeon-landscape-action-panel .student-ability-button{font-size:10px;min-height:40px}}
 
 .student-hero-grid button:disabled{opacity:.4;filter:grayscale(.5);cursor:not-allowed}
+
+/* Dungeons 2 uses complete ImageGen facades, including their roofs and doors. */
+.d2-pixel-town .town-facade { inset:0; width:100%; height:100%; image-rendering:pixelated; background-repeat:no-repeat; }
+.d2-pixel-town .town-roof,.d2-pixel-town .town-window,.d2-pixel-town .town-door { display:none; }
+
+.d2-pixel-town .town-mountains { inset:0; clip-path:none; opacity:1; background-size:cover; background-position:center bottom; image-rendering:pixelated; }
+.d2-pixel-town .town-road { background:transparent; border:0; }
+.d2-pixel-town .town-road:after { display:none; }
