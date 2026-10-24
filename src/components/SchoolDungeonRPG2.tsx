@@ -2231,17 +2231,21 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             <button onClick={handleQuit} className="dungeon-quit-button absolute left-2 right-2 top-2 flex items-center justify-center gap-1 rounded border border-[#444] bg-[#222] px-2 py-1 text-[10px] font-bold text-[#777] transition-colors hover:border-gray-500 hover:text-white">
                 <LogOut size={12}/> {tr('退出')}
             </button>
-            <div className="w-40 h-40 relative">
-                <div className="absolute top-4 left-4 w-10 h-10 bg-[#333] rounded-tl-lg border-t border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft size={16} className="text-[#555]" /></div>
-                <div className="absolute top-4 right-4 w-10 h-10 bg-[#333] rounded-tr-lg border-t border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, -1)}><ArrowUpRight size={16} className="text-[#555]" /></div>
-                <div className="absolute bottom-4 left-4 w-10 h-10 bg-[#333] rounded-bl-lg border-b border-l border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, 1)}><ArrowDownLeft size={16} className="text-[#555]" /></div>
-                <div className="absolute bottom-4 right-4 w-10 h-10 bg-[#333] rounded-br-lg border-b border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight size={16} className="text-[#555]" /></div>
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-10" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-10" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-10" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-10" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
+            <div className="w-40 h-40 relative flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#333] z-10 rounded-sm"></div>
+                {/* D-PAD Buttons */}
+                <div className="absolute top-0 w-12 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={24}/></div>
+                <div className="absolute bottom-0 w-12 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={24}/></div>
+                <div className="absolute left-0 w-16 h-12 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={24}/></div>
+                <div className="absolute right-0 w-16 h-12 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={24}/></div>
+
+                {/* Diagonals */}
+                <div className="absolute top-2 left-2 w-10 h-10 bg-[#2a2a2a] rounded-tl-xl border-t border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-2 right-2 w-10 h-10 bg-[#2a2a2a] rounded-tr-xl border-t border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-2 left-2 w-10 h-10 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-2 right-2 w-10 h-10 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+
+                <div className="absolute w-10 h-10 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
             <div className="mt-8 text-[#444] font-black tracking-widest text-[10px] italic">D-PAD</div>
         </div>
@@ -2437,14 +2441,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             <div className="portrait-ability-slot"><AbilityButton adventure={adventure}/></div>
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] active:bg-[#222] cursor-pointer flex justify-center pt-2 z-10" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-10" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] active:bg-[#222] cursor-pointer flex items-center pl-2 z-10" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-10" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
-                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, -1)}><ArrowUpLeft size={16} className="text-[#444]"/></div>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, -1)}><ArrowUpRight size={16} className="text-[#444]"/></div>
-                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(-1, 1)}><ArrowDownLeft size={16} className="text-[#444]"/></div>
-                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight size={16} className="text-[#444]"/></div>
+                <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
+                <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
+                <div className="absolute left-0 w-16 h-10 bg-[#333] rounded-l-md border-l border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center pl-2 z-0" onClick={() => handleMoveInput(-1, 0)}><ArrowLeft className="text-[#666]" size={20}/></div>
+                <div className="absolute right-0 w-16 h-10 bg-[#333] rounded-r-md border-r border-t border-b border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex items-center justify-end pr-2 z-0" onClick={() => handleMoveInput(1, 0)}><ArrowRight className="text-[#666]" size={20}/></div>
+                <div className="absolute top-0 left-0 w-10 h-10 bg-[#333] rounded-tl-xl border-t border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, -1)}></div>
+                <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
+                <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
             <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10">

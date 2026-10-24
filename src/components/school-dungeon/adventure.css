@@ -16,3 +16,14 @@
 .student-picker nav{display:flex;gap:6px;flex-wrap:wrap}.student-hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:7px;max-height:340px;overflow:auto;margin:12px 0}.student-hero-grid button{display:flex;flex-direction:column;align-items:center;min-height:110px}.student-hero-grid img{width:76px;height:76px;object-fit:contain}.student-picker button[aria-pressed=true]{outline:2px solid #f2cd6d;background:#3b5559}.student-story{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;padding:20px;min-height:260px}.student-story-portrait{width:144px;height:144px;background-size:400% 200%;background-position:0 0;image-rendering:pixelated;align-self:center}.student-dialogue{min-height:100px;font-size:1.1em;line-height:1.9}.student-story small{display:block;margin-top:8px}@media(max-width:600px){.student-story{grid-template-columns:1fr;padding:10px;gap:10px}.student-story-portrait{width:96px;height:96px;margin:auto}.student-dialogue{min-height:90px}.student-hero-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 .student-picker img{filter:none}.student-picker button[aria-pressed=true]{background:#306230;color:#f0f7d6}.student-form-preview{display:flex;align-items:center;gap:12px;margin-top:12px}.student-form-preview img{height:150px;width:100px;object-fit:contain}.student-transform.active{border-color:#e8c156;background:#40345c;color:#fff3bb}.student-form-preview p{line-height:1.7}.student-story{min-width:0}.student-dialogue{overflow-wrap:anywhere}
+
+/* Keep the notebook/transform actions below the landscape exit button. */
+.school-adventure-controls{display:flex;gap:6px;pointer-events:none}
+@media (orientation:landscape),(min-width:768px){
+ .school-adventure-controls{position:absolute;top:56px;left:0}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:950px){
+ .school-adventure-controls{max-width:calc(clamp(6.75rem,18vw,8.25rem) - 10px);flex-wrap:wrap;gap:4px}
+ .school-adventure-controls button{font-size:10px;line-height:1.1;padding:4px 6px;max-width:100%}
+ .mini-game-dungeon-screen:has(.school-adventure-controls) .dungeon-landscape-dpad-panel{padding-top:120px!important}
+}

@@ -15,8 +15,10 @@ export default function SchoolAdventurePanel({adventure:a,inventory,player,itemN
  const status=(i:any)=>`${i.wet?l(' 💧ぬれ',' 💧Wet'):''}${i.cursed?l(' 🔒封印',' 🔒Sealed'):''}${i.blessed?l(' ⭐応援',' ⭐Blessed'):''}${i.capacity?` [${i.contents?.length||0}/${i.capacity}]`:''}`;
  return <>
   <div className="school-adventure-toolbar" onPointerDown={e=>e.stopPropagation()}>
+   <div className="school-adventure-controls">
    <button onClick={()=>a.setPanel(a.dojoRun?'DOJO_PLAY':'NOTE')}>{l('冒険手帳','Notebook')}</button>
    {!a.dojoRun&&a.magicForm&&<button className={s.transformed?'student-transform active':'student-transform'} disabled={Boolean(a.panel||gameOver||gameClear||s.transformed)} onClick={a.transform} title={l('与えるダメージと受けるダメージが2倍。次の階で解除。','Deal and take double damage. Ends on the next floor.')}>{s.transformed?l('変身中：攻撃・被害×2','Transformed: deal/take ×2'):l('変身','Transform')}</button>}
+   </div>
    {a.dojoRun?<span>{a.dojoRun.stage}/50 · {l('手数','Turns')} {a.dojoRun.turns}/{DOJO_STAGES[a.dojoRun.stage-1].limit}</span>:s.scene!==undefined?<span>{s.town?(s.floor%5===0?l('旅の町：安全地帯','Journey village: safe area'):l('中継町：安全地帯','Relay town: safe area')):l('景勝地：ひと休み','Scenic stop: rest')}</span>:<span>{l('下校まで','Bell in')} {Math.max(0,320-s.floorTurns)} · {s.mode==='PUZZLE'?`${s.puzzleTurns}/${(s as any).puzzleLimit||0}`:`${s.floor}/${goalFloor(s)}`}</span>}
 
    {!a.dojoRun&&s.scene===undefined&&s.mode!=='PUZZLE'&&<span>{s.night?l('夜','Night'):l('昼','Day')} · {s.weather==='RAIN'?l('雨','Rain'):s.weather==='FOG'?l('霧','Fog'):s.weather==='WIND'?l('風','Wind'):l('晴れ','Clear')}</span>}
