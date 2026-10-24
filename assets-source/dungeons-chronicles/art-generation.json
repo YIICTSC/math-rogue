@@ -13,7 +13,8 @@
       "sha256": "f80778f41c1995dfd1c5f8f99f17eab3ec88de01d6370f3602af3e3383ca59bb",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "STORY",
@@ -24,7 +25,8 @@
       "sha256": "281abb5dfd179f697cffdbe376621feadd1a97bf99478d7641bb7f2a4a1b65ff",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "BARE",
@@ -35,7 +37,8 @@
       "sha256": "c626114a5a04de157ec8c36c8a955797a88ee27e450881ee842840116097120d",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "BARE",
@@ -46,7 +49,8 @@
       "sha256": "0a657b332fb120b772e862fdd99b04b748f536d1899736bf1958f93e61d13f95",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "MYSTERY",
@@ -57,7 +61,8 @@
       "sha256": "268e6406de48bd59b75d14b5fa5014e6241082e719bd436ea04a19bcb5da1912",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "MYSTERY",
@@ -68,7 +73,8 @@
       "sha256": "59ecd27b2ce8dfb224624200ac5c71f5827a835c2bd53a6969a8c05ce86661b9",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "TRAPS",
@@ -79,7 +85,8 @@
       "sha256": "d2bbd68808364f224dd3d885fe3cb14d7fe70bd078e400cfeaec5953d4af85a7",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "TRAPS",
@@ -90,7 +97,8 @@
       "sha256": "66006e349ea8b8a78bff63065310ba99469a02d43bf7ab940998d32953fe5b09",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "NO_GEAR",
@@ -101,7 +109,8 @@
       "sha256": "3aef3c55f0b9518aafbe055048b462fe4e280ed32b45714c441ee1a0446d1fb6",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "NO_GEAR",
@@ -112,7 +121,8 @@
       "sha256": "434edd54446efafa1fc1cbe12f7a4adb9706b4e9a941babc7943292e33da9b92",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "CARDS",
@@ -123,7 +133,8 @@
       "sha256": "2ef3c184adcff267cf6f78668b7684051809881125bb6cd843ae970008a8479c",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "CARDS",
@@ -134,7 +145,8 @@
       "sha256": "b79e112d557b5fc6c9dbfd6ad2d03c7adf487f7fedd0d5d6d99246f308f00d03",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "RESCUE",
@@ -145,7 +157,8 @@
       "sha256": "8a32de41af3cec23b6348f4f8cdc8300ceb83d32340d00d7abf8ad57e445c54b",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "RESCUE",
@@ -156,7 +169,8 @@
       "sha256": "7195d20c9327473e7b81f92c997dda39c4764bfdf5900243a429e8d027e205b1",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "PUZZLE",
@@ -167,7 +181,8 @@
       "sha256": "0546508c2ac16c72c962d2a6782e4e9d1ce8951a71021ed1671f122288eb7115",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "PUZZLE",
@@ -178,7 +193,8 @@
       "sha256": "5d384220806931db85e3dba899988d975c53721f43020b850c0fc864a1b62db9",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "VERDANT",
@@ -189,7 +205,8 @@
       "sha256": "7928fa8b8cf96e7042d363604c44f46c9a4d1b9c87d618a927e0f4da0c75da61",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "VERDANT",
@@ -200,7 +217,8 @@
       "sha256": "26f0b21ef5c45899041d5d89603e23110dff9e7289aa616f7b579f3f24bf4691",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "GLACIER",
@@ -211,7 +229,8 @@
       "sha256": "2be6a4c1a5b63ecce9c624c083d9971797085b3248c125474e7c98b0b26198e1",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "GLACIER",
@@ -222,7 +241,8 @@
       "sha256": "d0dac528276c54888430e24e57e42f868447c06c5a49d1a3aff5450081e9fc00",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "TIDAL",
@@ -233,7 +253,8 @@
       "sha256": "45079256e43364ebae9de451ec5dfef37a6cb28ab1ad6bdd59b83be76b5cb4ea",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "TIDAL",
@@ -244,7 +265,8 @@
       "sha256": "dd74049aadbe90b55f977d14592978e8265fababaf2c3fa36a91a7de856c1641",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "ARCHIVE",
@@ -255,7 +277,8 @@
       "sha256": "f02374f2395545381acbe97d783b38e9d48df676894aa0cdb4faa5e0321c212e",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "ARCHIVE",
@@ -266,7 +289,8 @@
       "sha256": "91a6235a2fb1c0bef2df4765e3725f81cc571d77b41a05978720b279f3373af5",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "FOUNDRY",
@@ -277,7 +301,8 @@
       "sha256": "76b573846a833b784da1d736a2e9085a57bc762a55943bc043df665c369303d7",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "FOUNDRY",
@@ -288,7 +313,8 @@
       "sha256": "03bba12f7920d6449b7616fdd5ce5446f6548fd17cbe4a6f31d87119093d9dce",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "MIRROR",
@@ -299,7 +325,8 @@
       "sha256": "79e9ef337f80336cb5045f8a5ee4db7d24074dd8487907f0f202957198ed5c09",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "MIRROR",
@@ -310,7 +337,8 @@
       "sha256": "81c10b533ee037483b7bd56fa5f3e7fc68837fcd0c35d73059c5e94c36c3619a",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "CLOCKWORK",
@@ -321,7 +349,8 @@
       "sha256": "e374c806e8ec6be046f05a707247063b5f4fd2f53dd1c51051d2976eda846d4d",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "CLOCKWORK",
@@ -332,7 +361,8 @@
       "sha256": "7f1c36d53a5548ad6f8b7d78cacb9e07819d7b9e0914e905423090b21a6e648c",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "STORM",
@@ -343,7 +373,8 @@
       "sha256": "d8ebe103e24315ab93761514bf0d6b6d343308d4e4e1db3e0516cc3390676676",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "STORM",
@@ -354,7 +385,8 @@
       "sha256": "ad417e3f6683cb25c7c7a0e0f867628d3553018e86c67dcaac54baedae6e0dc9",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "ABYSS",
@@ -365,7 +397,8 @@
       "sha256": "fa583e445d292d66aee793055ce65b36b9b56130518c569f8581718ff096e907",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "ABYSS",
@@ -376,7 +409,8 @@
       "sha256": "786ccf41deaad1432b0c47c3b9ede88e7aab1e139f6a543389cfc697005b68db",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "VOID",
@@ -387,7 +421,8 @@
       "sha256": "2a2b14df40b45a15bb97fededb8513c7a69a41e7c01282b5096e8ad369b701fb",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "VOID",
@@ -398,7 +433,8 @@
       "sha256": "f9fd0ca9ae4d0d23822d6d316fefd9468067cc362768aff26bd64a88088bbf56",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "CHRONICLE",
@@ -409,7 +445,8 @@
       "sha256": "6bfa320a64428f4fce3924970517f58168cb3e00af6b90603db6855c07b22591",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "CHRONICLE",
@@ -420,7 +457,8 @@
       "sha256": "2407940dcf8424aca489aeaa2b67d80972cc22b2ea25b577e4458fc62dd26df7",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "CONSTELLATION",
@@ -431,7 +469,8 @@
       "sha256": "73a67d750bc6839d013ce378fc196e8e3f6aeaaf39c9a390afe1da1396f5d2e6",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "CONSTELLATION",
@@ -442,7 +481,8 @@
       "sha256": "23745ce38e4f401ebdf3071c697c4f99465f1f312adff27439d1cc9a54d11515",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "DRAGON",
@@ -453,7 +493,8 @@
       "sha256": "fffeca73c985e512e6e764cd13183c4d987687a996ac7047eadab03d1e924453",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "DRAGON",
@@ -464,7 +505,8 @@
       "sha256": "5f65d215591687a6588a0452f9138eac438789769ea3ef74051f930a24662ba8",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     },
     {
       "route": "INFINITE",
@@ -475,7 +517,8 @@
       "sha256": "c8562c0040652ff0582cfcbe5d756e2be4efc0e39cb1f76866f30ce9c88c5bbe",
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
-      "transparent": true
+      "transparent": true,
+      "sourceRetained": false
     },
     {
       "route": "INFINITE",
@@ -486,7 +529,8 @@
       "sha256": "4f598703110891f636932ac8f62ef0283b62d1f6e385a4e372770ee8c84d39a7",
       "generator": "ImageGen",
       "reference": null,
-      "transparent": false
+      "transparent": false,
+      "sourceRetained": false
     }
   ]
 }
