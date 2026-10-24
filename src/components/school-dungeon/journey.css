@@ -29,3 +29,24 @@
 .d2-pixel-town .town-mountains { inset:0; clip-path:none; opacity:1; background-size:cover; background-position:center bottom; image-rendering:pixelated; }
 .d2-pixel-town .town-road { background:transparent; border:0; }
 .d2-pixel-town .town-road:after { display:none; }
+
+.student-ability-button[aria-disabled=true]{opacity:.42}
+.d2-ability-info-backdrop{position:fixed;inset:0;z-index:100500;background:#000b;display:grid;place-items:center;padding:18px;touch-action:manipulation}
+.d2-ability-info{max-width:460px;width:100%;max-height:85dvh;overflow:auto;border:2px solid var(--ability-color);border-radius:10px;background:#182737;color:#fff3d2;padding:18px;font:14px/1.7 sans-serif;box-shadow:0 12px 48px #000a}
+.d2-ability-info h3{color:var(--ability-color);font-weight:800;font-size:18px;margin:0 0 12px}
+.d2-ability-info button{display:block;margin:16px 0 0 auto;padding:8px 18px;border:1px solid var(--ability-color);border-radius:6px;min-height:44px}
+.d2-ability-key{touch-action:manipulation;user-select:none;-webkit-touch-callout:none}
+@media(orientation:portrait) and (max-width:767px){
+ .d2-portrait-controls{height:248px!important}
+ .d2-portrait-controls>.w-32{left:12px;top:56px;transform:none}
+ .d2-portrait-actions{position:absolute;top:8px;left:8px;right:8px;display:flex;align-items:center;justify-content:flex-end;gap:6px;z-index:26}
+ .d2-portrait-actions .d2-ability-loadout{display:flex;gap:6px;width:auto;grid-template-columns:none}
+ .d2-portrait-actions .d2-ability-key{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;flex:none;padding:2px;gap:0;text-align:center;align-items:center;font-size:9px;line-height:11px}
+ .d2-portrait-actions .d2-ability-key .ability-slot-name{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;max-width:100%}
+ .d2-portrait-actions .d2-ability-key small{font-size:10px;line-height:12px}
+ .d2-portrait-actions>button{width:44px;height:44px;min-height:44px;flex:none}
+ .d2-controls-default{display:none}
+ .d2-portrait-notebook{position:absolute;left:8px;bottom:8px;width:calc(50% - 16px);z-index:26}
+ .d2-portrait-notebook .school-adventure-controls{position:static;display:flex;gap:4px;width:100%;pointer-events:none}
+ .d2-portrait-notebook .school-adventure-controls button{flex:1;min-width:0;min-height:40px!important;max-height:40px;overflow:hidden;pointer-events:auto;background:#9bbc0f;color:#0f380f;border:2px solid #306230;padding:3px 4px;font-size:10px;line-height:1.2;box-sizing:border-box}
+}

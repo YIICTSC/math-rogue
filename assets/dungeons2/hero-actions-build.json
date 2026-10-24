@@ -1,0 +1,7425 @@
+{
+  "generator": "ImageGen",
+  "rows": [
+    "walk-left",
+    "walk-right",
+    "attack",
+    "throw",
+    "swing",
+    "read",
+    "use",
+    "shoot"
+  ],
+  "directions": [
+    "S",
+    "N",
+    "E",
+    "W",
+    "SE",
+    "SW",
+    "NE",
+    "NW"
+  ],
+  "normalization": "One scale per entire atlas, matched to shipped walking body height, bottom-center anchor, nearest-neighbor, lossless WebP",
+  "frameCount": 1152,
+  "assets": [
+    {
+      "key": "lyria",
+      "heroId": "dungeons2-lyria",
+      "transformed": false,
+      "source": "exec-5810a6ef-70a5-42cd-a6e9-4108fa4e5e0f.png",
+      "source_sha256": "795a557cc4c74b5e80c5e2fccde2d8fb2db45d37353b2a14420fbc30905bb735",
+      "reference": "public/sprites/dungeons2/lyria-directions.webp",
+      "reference_sha256": "31935151cf6ff222c93c106292eee2829dad1e0ea478cd94be44dfc9df781b77",
+      "output": "public/sprites/dungeons2/actions/lyria.webp",
+      "sha256": "f90f2577bda9bf45b9d6948f4c3bf9d72b0c9f8009b6dc931dd1fd8dbfe46bc6",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.36477987421383645,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0.010309278350515464,
+        0,
+        0.0190325138778747,
+        0,
+        0.008723235527359239
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 165,
+          "height": 169
+        },
+        {
+          "left": 165,
+          "top": 0,
+          "width": 159,
+          "height": 169
+        },
+        {
+          "left": 324,
+          "top": 0,
+          "width": 158,
+          "height": 169
+        },
+        {
+          "left": 482,
+          "top": 0,
+          "width": 149,
+          "height": 169
+        },
+        {
+          "left": 631,
+          "top": 0,
+          "width": 157,
+          "height": 169
+        },
+        {
+          "left": 788,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 942,
+          "top": 0,
+          "width": 159,
+          "height": 169
+        },
+        {
+          "left": 1101,
+          "top": 0,
+          "width": 160,
+          "height": 169
+        },
+        {
+          "left": 0,
+          "top": 169,
+          "width": 162,
+          "height": 159
+        },
+        {
+          "left": 162,
+          "top": 169,
+          "width": 153,
+          "height": 159
+        },
+        {
+          "left": 315,
+          "top": 169,
+          "width": 158,
+          "height": 159
+        },
+        {
+          "left": 473,
+          "top": 169,
+          "width": 157,
+          "height": 159
+        },
+        {
+          "left": 630,
+          "top": 169,
+          "width": 166,
+          "height": 159
+        },
+        {
+          "left": 796,
+          "top": 169,
+          "width": 153,
+          "height": 159
+        },
+        {
+          "left": 949,
+          "top": 169,
+          "width": 158,
+          "height": 159
+        },
+        {
+          "left": 1107,
+          "top": 169,
+          "width": 154,
+          "height": 159
+        },
+        {
+          "left": 0,
+          "top": 328,
+          "width": 175,
+          "height": 156
+        },
+        {
+          "left": 175,
+          "top": 328,
+          "width": 151,
+          "height": 156
+        },
+        {
+          "left": 326,
+          "top": 328,
+          "width": 151,
+          "height": 156
+        },
+        {
+          "left": 477,
+          "top": 328,
+          "width": 147,
+          "height": 156
+        },
+        {
+          "left": 624,
+          "top": 328,
+          "width": 169,
+          "height": 156
+        },
+        {
+          "left": 793,
+          "top": 328,
+          "width": 149,
+          "height": 156
+        },
+        {
+          "left": 942,
+          "top": 328,
+          "width": 163,
+          "height": 156
+        },
+        {
+          "left": 1105,
+          "top": 328,
+          "width": 156,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 484,
+          "width": 163,
+          "height": 155
+        },
+        {
+          "left": 163,
+          "top": 484,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 316,
+          "top": 484,
+          "width": 170,
+          "height": 155
+        },
+        {
+          "left": 486,
+          "top": 484,
+          "width": 125,
+          "height": 155
+        },
+        {
+          "left": 611,
+          "top": 484,
+          "width": 178,
+          "height": 155
+        },
+        {
+          "left": 789,
+          "top": 484,
+          "width": 163,
+          "height": 155
+        },
+        {
+          "left": 952,
+          "top": 484,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 1112,
+          "top": 484,
+          "width": 149,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 639,
+          "width": 189,
+          "height": 154
+        },
+        {
+          "left": 189,
+          "top": 639,
+          "width": 122,
+          "height": 154
+        },
+        {
+          "left": 311,
+          "top": 639,
+          "width": 177,
+          "height": 154
+        },
+        {
+          "left": 488,
+          "top": 639,
+          "width": 106,
+          "height": 154
+        },
+        {
+          "left": 594,
+          "top": 639,
+          "width": 184,
+          "height": 154
+        },
+        {
+          "left": 778,
+          "top": 639,
+          "width": 166,
+          "height": 154
+        },
+        {
+          "left": 944,
+          "top": 639,
+          "width": 139,
+          "height": 154
+        },
+        {
+          "left": 1083,
+          "top": 639,
+          "width": 178,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 793,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 158,
+          "top": 793,
+          "width": 157,
+          "height": 149
+        },
+        {
+          "left": 315,
+          "top": 793,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 473,
+          "top": 793,
+          "width": 157,
+          "height": 149
+        },
+        {
+          "left": 630,
+          "top": 793,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 788,
+          "top": 793,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 946,
+          "top": 793,
+          "width": 157,
+          "height": 149
+        },
+        {
+          "left": 1103,
+          "top": 793,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 942,
+          "width": 161,
+          "height": 146
+        },
+        {
+          "left": 161,
+          "top": 942,
+          "width": 154,
+          "height": 146
+        },
+        {
+          "left": 315,
+          "top": 942,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 473,
+          "top": 942,
+          "width": 157,
+          "height": 146
+        },
+        {
+          "left": 630,
+          "top": 942,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 788,
+          "top": 942,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 946,
+          "top": 942,
+          "width": 157,
+          "height": 146
+        },
+        {
+          "left": 1103,
+          "top": 942,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 0,
+          "top": 1088,
+          "width": 167,
+          "height": 159
+        },
+        {
+          "left": 167,
+          "top": 1088,
+          "width": 144,
+          "height": 159
+        },
+        {
+          "left": 311,
+          "top": 1088,
+          "width": 172,
+          "height": 159
+        },
+        {
+          "left": 483,
+          "top": 1088,
+          "width": 137,
+          "height": 159
+        },
+        {
+          "left": 620,
+          "top": 1088,
+          "width": 169,
+          "height": 159
+        },
+        {
+          "left": 789,
+          "top": 1088,
+          "width": 162,
+          "height": 159
+        },
+        {
+          "left": 951,
+          "top": 1088,
+          "width": 161,
+          "height": 159
+        },
+        {
+          "left": 1112,
+          "top": 1088,
+          "width": 149,
+          "height": 159
+        }
+      ]
+    },
+    {
+      "key": "lyria-transformed",
+      "heroId": "dungeons2-lyria",
+      "transformed": true,
+      "source": "exec-afd9651e-1543-477a-afd8-fbd2a96450a5.png",
+      "source_sha256": "d85c199ec5716fe0095bd4c49b6ead57a81c4a3432d049faad02c7f62c60d492",
+      "reference": "public/sprites/dungeons2/lyria-transformed-directions.webp",
+      "reference_sha256": "c7d597222b9e85c7ae5a9749829f813d8a13cdff9924660631dfa44560aa0654",
+      "output": "public/sprites/dungeons2/actions/lyria-transformed.webp",
+      "sha256": "9c722cb5b2c56dc20c5dcd86ee4e02467bb6d87e19a66d0ae7a9000320b446ac",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.37666666666666665,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0.04344512195121951,
+        0.014481707317073171,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 165,
+          "height": 158
+        },
+        {
+          "left": 165,
+          "top": 0,
+          "width": 163,
+          "height": 158
+        },
+        {
+          "left": 328,
+          "top": 0,
+          "width": 164,
+          "height": 158
+        },
+        {
+          "left": 492,
+          "top": 0,
+          "width": 164,
+          "height": 158
+        },
+        {
+          "left": 656,
+          "top": 0,
+          "width": 164,
+          "height": 158
+        },
+        {
+          "left": 820,
+          "top": 0,
+          "width": 164,
+          "height": 158
+        },
+        {
+          "left": 984,
+          "top": 0,
+          "width": 164,
+          "height": 158
+        },
+        {
+          "left": 1148,
+          "top": 0,
+          "width": 164,
+          "height": 158
+        },
+        {
+          "left": 0,
+          "top": 158,
+          "width": 169,
+          "height": 154
+        },
+        {
+          "left": 169,
+          "top": 158,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 328,
+          "top": 158,
+          "width": 164,
+          "height": 154
+        },
+        {
+          "left": 492,
+          "top": 158,
+          "width": 164,
+          "height": 154
+        },
+        {
+          "left": 656,
+          "top": 158,
+          "width": 164,
+          "height": 154
+        },
+        {
+          "left": 820,
+          "top": 158,
+          "width": 166,
+          "height": 154
+        },
+        {
+          "left": 986,
+          "top": 158,
+          "width": 162,
+          "height": 154
+        },
+        {
+          "left": 1148,
+          "top": 158,
+          "width": 164,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 312,
+          "width": 176,
+          "height": 148
+        },
+        {
+          "left": 176,
+          "top": 312,
+          "width": 152,
+          "height": 148
+        },
+        {
+          "left": 328,
+          "top": 312,
+          "width": 174,
+          "height": 148
+        },
+        {
+          "left": 502,
+          "top": 312,
+          "width": 154,
+          "height": 148
+        },
+        {
+          "left": 656,
+          "top": 312,
+          "width": 155,
+          "height": 148
+        },
+        {
+          "left": 811,
+          "top": 312,
+          "width": 184,
+          "height": 148
+        },
+        {
+          "left": 995,
+          "top": 312,
+          "width": 153,
+          "height": 148
+        },
+        {
+          "left": 1148,
+          "top": 312,
+          "width": 164,
+          "height": 148
+        },
+        {
+          "left": 0,
+          "top": 460,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 164,
+          "top": 460,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 328,
+          "top": 460,
+          "width": 153,
+          "height": 147
+        },
+        {
+          "left": 481,
+          "top": 460,
+          "width": 175,
+          "height": 147
+        },
+        {
+          "left": 656,
+          "top": 460,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 820,
+          "top": 460,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 984,
+          "top": 460,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 1148,
+          "top": 460,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 0,
+          "top": 607,
+          "width": 167,
+          "height": 150
+        },
+        {
+          "left": 167,
+          "top": 607,
+          "width": 157,
+          "height": 150
+        },
+        {
+          "left": 324,
+          "top": 607,
+          "width": 170,
+          "height": 150
+        },
+        {
+          "left": 494,
+          "top": 607,
+          "width": 162,
+          "height": 150
+        },
+        {
+          "left": 656,
+          "top": 607,
+          "width": 174,
+          "height": 150
+        },
+        {
+          "left": 830,
+          "top": 607,
+          "width": 158,
+          "height": 150
+        },
+        {
+          "left": 988,
+          "top": 607,
+          "width": 160,
+          "height": 150
+        },
+        {
+          "left": 1148,
+          "top": 607,
+          "width": 164,
+          "height": 150
+        },
+        {
+          "left": 0,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 164,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 328,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 492,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 656,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 820,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 984,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 1148,
+          "top": 757,
+          "width": 164,
+          "height": 144
+        },
+        {
+          "left": 0,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 164,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 328,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 492,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 656,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 820,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 984,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 1148,
+          "top": 901,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 0,
+          "top": 1047,
+          "width": 174,
+          "height": 152
+        },
+        {
+          "left": 174,
+          "top": 1047,
+          "width": 154,
+          "height": 152
+        },
+        {
+          "left": 328,
+          "top": 1047,
+          "width": 166,
+          "height": 152
+        },
+        {
+          "left": 494,
+          "top": 1047,
+          "width": 162,
+          "height": 152
+        },
+        {
+          "left": 656,
+          "top": 1047,
+          "width": 168,
+          "height": 152
+        },
+        {
+          "left": 824,
+          "top": 1047,
+          "width": 167,
+          "height": 152
+        },
+        {
+          "left": 991,
+          "top": 1047,
+          "width": 148,
+          "height": 152
+        },
+        {
+          "left": 1139,
+          "top": 1047,
+          "width": 173,
+          "height": 152
+        }
+      ]
+    },
+    {
+      "key": "celis",
+      "heroId": "dungeons2-celis",
+      "transformed": false,
+      "source": "exec-819ae96f-2d6b-4ebc-a034-9249073ac9aa.png",
+      "source_sha256": "1a694ee601c822275e3e4ea79b9abb2ea4c2d863cbfcd1680270b9e51d2bdd71",
+      "reference": "public/sprites/dungeons2/celis-directions.webp",
+      "reference_sha256": "8bc434f1036ca82d784718a0bb7e250487744480f5b85f219035e97106fb9185",
+      "output": "public/sprites/dungeons2/actions/celis.webp",
+      "sha256": "23a1f0d5c686d5e3b336b752f7257d378d2d9303f041de7c4c58aa37c65097c2",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.3918918918918919,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0.0015810276679841897,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 158,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 316,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 474,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 632,
+          "top": 0,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 791,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 949,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 1107,
+          "top": 0,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 0,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 158,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 316,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 474,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 632,
+          "top": 157,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 791,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 949,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 1107,
+          "top": 157,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 0,
+          "top": 315,
+          "width": 169,
+          "height": 157
+        },
+        {
+          "left": 169,
+          "top": 315,
+          "width": 147,
+          "height": 157
+        },
+        {
+          "left": 316,
+          "top": 315,
+          "width": 172,
+          "height": 157
+        },
+        {
+          "left": 488,
+          "top": 315,
+          "width": 144,
+          "height": 157
+        },
+        {
+          "left": 632,
+          "top": 315,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 791,
+          "top": 315,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 949,
+          "top": 315,
+          "width": 156,
+          "height": 157
+        },
+        {
+          "left": 1105,
+          "top": 315,
+          "width": 160,
+          "height": 157
+        },
+        {
+          "left": 0,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 158,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 316,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 474,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 632,
+          "top": 472,
+          "width": 159,
+          "height": 156
+        },
+        {
+          "left": 791,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 949,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 1107,
+          "top": 472,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 628,
+          "width": 174,
+          "height": 156
+        },
+        {
+          "left": 174,
+          "top": 628,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 331,
+          "top": 628,
+          "width": 146,
+          "height": 156
+        },
+        {
+          "left": 477,
+          "top": 628,
+          "width": 155,
+          "height": 156
+        },
+        {
+          "left": 632,
+          "top": 628,
+          "width": 161,
+          "height": 156
+        },
+        {
+          "left": 793,
+          "top": 628,
+          "width": 152,
+          "height": 156
+        },
+        {
+          "left": 945,
+          "top": 628,
+          "width": 162,
+          "height": 156
+        },
+        {
+          "left": 1107,
+          "top": 628,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 158,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 316,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 474,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 632,
+          "top": 784,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 791,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 949,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 1107,
+          "top": 784,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 158,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 316,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 474,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 632,
+          "top": 937,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 791,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 949,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 1107,
+          "top": 937,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 1088,
+          "width": 181,
+          "height": 156
+        },
+        {
+          "left": 181,
+          "top": 1088,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 334,
+          "top": 1088,
+          "width": 147,
+          "height": 156
+        },
+        {
+          "left": 481,
+          "top": 1088,
+          "width": 151,
+          "height": 156
+        },
+        {
+          "left": 632,
+          "top": 1088,
+          "width": 172,
+          "height": 156
+        },
+        {
+          "left": 804,
+          "top": 1088,
+          "width": 133,
+          "height": 156
+        },
+        {
+          "left": 937,
+          "top": 1088,
+          "width": 156,
+          "height": 156
+        },
+        {
+          "left": 1093,
+          "top": 1088,
+          "width": 172,
+          "height": 156
+        }
+      ]
+    },
+    {
+      "key": "celis-transformed",
+      "heroId": "dungeons2-celis",
+      "transformed": true,
+      "source": "exec-687f27f3-022d-4b2f-a44e-462dfa9a3686.png",
+      "source_sha256": "2b8799280c638094c5493167e904179bb60646342a8833b7bc83e2bec61d9454",
+      "reference": "public/sprites/dungeons2/celis-transformed-directions.webp",
+      "reference_sha256": "e619605cbae5137a3d7df14017aa75e739d935f513c30347947060a58a1c2ff7",
+      "output": "public/sprites/dungeons2/actions/celis-transformed.webp",
+      "sha256": "962ff95554fc3aa47dde9bb00473b60b61e3109b2946e7708713560e8a7e0c30",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.3945578231292517,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 160,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 320,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 480,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 640,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 800,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 960,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 1120,
+          "top": 0,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 0,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 160,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 320,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 480,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 640,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 800,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 960,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 1120,
+          "top": 161,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 317,
+          "width": 174,
+          "height": 146
+        },
+        {
+          "left": 174,
+          "top": 317,
+          "width": 145,
+          "height": 146
+        },
+        {
+          "left": 319,
+          "top": 317,
+          "width": 161,
+          "height": 146
+        },
+        {
+          "left": 480,
+          "top": 317,
+          "width": 160,
+          "height": 146
+        },
+        {
+          "left": 640,
+          "top": 317,
+          "width": 160,
+          "height": 146
+        },
+        {
+          "left": 800,
+          "top": 317,
+          "width": 162,
+          "height": 146
+        },
+        {
+          "left": 962,
+          "top": 317,
+          "width": 154,
+          "height": 146
+        },
+        {
+          "left": 1116,
+          "top": 317,
+          "width": 164,
+          "height": 146
+        },
+        {
+          "left": 0,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 160,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 320,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 480,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 640,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 800,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 960,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 1120,
+          "top": 463,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 619,
+          "width": 185,
+          "height": 147
+        },
+        {
+          "left": 185,
+          "top": 619,
+          "width": 146,
+          "height": 147
+        },
+        {
+          "left": 331,
+          "top": 619,
+          "width": 149,
+          "height": 147
+        },
+        {
+          "left": 480,
+          "top": 619,
+          "width": 160,
+          "height": 147
+        },
+        {
+          "left": 640,
+          "top": 619,
+          "width": 160,
+          "height": 147
+        },
+        {
+          "left": 800,
+          "top": 619,
+          "width": 159,
+          "height": 147
+        },
+        {
+          "left": 959,
+          "top": 619,
+          "width": 138,
+          "height": 147
+        },
+        {
+          "left": 1097,
+          "top": 619,
+          "width": 183,
+          "height": 147
+        },
+        {
+          "left": 0,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 160,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 320,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 480,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 640,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 800,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 960,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 1120,
+          "top": 766,
+          "width": 160,
+          "height": 148
+        },
+        {
+          "left": 0,
+          "top": 914,
+          "width": 165,
+          "height": 151
+        },
+        {
+          "left": 165,
+          "top": 914,
+          "width": 155,
+          "height": 151
+        },
+        {
+          "left": 320,
+          "top": 914,
+          "width": 160,
+          "height": 151
+        },
+        {
+          "left": 480,
+          "top": 914,
+          "width": 160,
+          "height": 151
+        },
+        {
+          "left": 640,
+          "top": 914,
+          "width": 160,
+          "height": 151
+        },
+        {
+          "left": 800,
+          "top": 914,
+          "width": 160,
+          "height": 151
+        },
+        {
+          "left": 960,
+          "top": 914,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 1118,
+          "top": 914,
+          "width": 162,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 1065,
+          "width": 179,
+          "height": 164
+        },
+        {
+          "left": 179,
+          "top": 1065,
+          "width": 141,
+          "height": 164
+        },
+        {
+          "left": 320,
+          "top": 1065,
+          "width": 160,
+          "height": 164
+        },
+        {
+          "left": 480,
+          "top": 1065,
+          "width": 160,
+          "height": 164
+        },
+        {
+          "left": 640,
+          "top": 1065,
+          "width": 160,
+          "height": 164
+        },
+        {
+          "left": 800,
+          "top": 1065,
+          "width": 159,
+          "height": 164
+        },
+        {
+          "left": 959,
+          "top": 1065,
+          "width": 142,
+          "height": 164
+        },
+        {
+          "left": 1101,
+          "top": 1065,
+          "width": 179,
+          "height": 164
+        }
+      ]
+    },
+    {
+      "key": "flora",
+      "heroId": "dungeons2-flora",
+      "transformed": false,
+      "source": "exec-582fab9f-1bb0-417d-9356-f9352a2459df.png",
+      "source_sha256": "726dbad31519d90630efcf5101ab42b7fcfd7455023cd9588e4df67e65fbf988",
+      "reference": "public/sprites/dungeons2/flora-directions.webp",
+      "reference_sha256": "17bb54d5de5e11865099f0fa26d2225bc2636077b2c0222bed51e2e803b204bd",
+      "output": "public/sprites/dungeons2/actions/flora.webp",
+      "sha256": "bf95adb7986aacaf475ec7c6e61acfea850114812d10e257ee584e9bd48efc9c",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.3841059602649007,
+      "rowBoundaryDensities": [
+        0.003924646781789639,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 159,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 318,
+          "top": 0,
+          "width": 156,
+          "height": 158
+        },
+        {
+          "left": 474,
+          "top": 0,
+          "width": 163,
+          "height": 158
+        },
+        {
+          "left": 637,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 796,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 955,
+          "top": 0,
+          "width": 160,
+          "height": 158
+        },
+        {
+          "left": 1115,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 0,
+          "top": 158,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 159,
+          "top": 158,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 318,
+          "top": 158,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 478,
+          "top": 158,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 637,
+          "top": 158,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 796,
+          "top": 158,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 955,
+          "top": 158,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 1115,
+          "top": 158,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 313,
+          "width": 160,
+          "height": 150
+        },
+        {
+          "left": 160,
+          "top": 313,
+          "width": 162,
+          "height": 150
+        },
+        {
+          "left": 322,
+          "top": 313,
+          "width": 135,
+          "height": 150
+        },
+        {
+          "left": 457,
+          "top": 313,
+          "width": 180,
+          "height": 150
+        },
+        {
+          "left": 637,
+          "top": 313,
+          "width": 159,
+          "height": 150
+        },
+        {
+          "left": 796,
+          "top": 313,
+          "width": 159,
+          "height": 150
+        },
+        {
+          "left": 955,
+          "top": 313,
+          "width": 157,
+          "height": 150
+        },
+        {
+          "left": 1112,
+          "top": 313,
+          "width": 162,
+          "height": 150
+        },
+        {
+          "left": 0,
+          "top": 463,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 160,
+          "top": 463,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 320,
+          "top": 463,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 478,
+          "top": 463,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 637,
+          "top": 463,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 796,
+          "top": 463,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 955,
+          "top": 463,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 1115,
+          "top": 463,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 617,
+          "width": 161,
+          "height": 154
+        },
+        {
+          "left": 161,
+          "top": 617,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 318,
+          "top": 617,
+          "width": 145,
+          "height": 154
+        },
+        {
+          "left": 463,
+          "top": 617,
+          "width": 171,
+          "height": 154
+        },
+        {
+          "left": 634,
+          "top": 617,
+          "width": 162,
+          "height": 154
+        },
+        {
+          "left": 796,
+          "top": 617,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 951,
+          "top": 617,
+          "width": 153,
+          "height": 154
+        },
+        {
+          "left": 1104,
+          "top": 617,
+          "width": 170,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 771,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 159,
+          "top": 771,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 318,
+          "top": 771,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 478,
+          "top": 771,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 637,
+          "top": 771,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 796,
+          "top": 771,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 955,
+          "top": 771,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 1115,
+          "top": 771,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 925,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 159,
+          "top": 925,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 318,
+          "top": 925,
+          "width": 160,
+          "height": 149
+        },
+        {
+          "left": 478,
+          "top": 925,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 637,
+          "top": 925,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 796,
+          "top": 925,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 955,
+          "top": 925,
+          "width": 160,
+          "height": 149
+        },
+        {
+          "left": 1115,
+          "top": 925,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 1074,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 159,
+          "top": 1074,
+          "width": 166,
+          "height": 160
+        },
+        {
+          "left": 325,
+          "top": 1074,
+          "width": 151,
+          "height": 160
+        },
+        {
+          "left": 476,
+          "top": 1074,
+          "width": 161,
+          "height": 160
+        },
+        {
+          "left": 637,
+          "top": 1074,
+          "width": 148,
+          "height": 160
+        },
+        {
+          "left": 785,
+          "top": 1074,
+          "width": 170,
+          "height": 160
+        },
+        {
+          "left": 955,
+          "top": 1074,
+          "width": 152,
+          "height": 160
+        },
+        {
+          "left": 1107,
+          "top": 1074,
+          "width": 167,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "key": "flora-transformed",
+      "heroId": "dungeons2-flora",
+      "transformed": true,
+      "source": "exec-98e4b528-50a8-4cf2-8925-55f723c5dc69.png",
+      "source_sha256": "01ce4429b8e8aa9347f24c48c3d4719526c59dddcd071cee20030ac8724b77df",
+      "reference": "public/sprites/dungeons2/flora-transformed-directions.webp",
+      "reference_sha256": "8426440c7bd3ffc0b3e4ebab63cb5f17fdecc50e20124f8d39ad3e7f91cc08e3",
+      "output": "public/sprites/dungeons2/actions/flora-transformed.webp",
+      "sha256": "d50edfd0955ac7d8e56bc5b9a79fdb1ef30e89510bd2e82a25e173525285e027",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.3790849673202614,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 162,
+          "height": 160
+        },
+        {
+          "left": 162,
+          "top": 0,
+          "width": 156,
+          "height": 160
+        },
+        {
+          "left": 318,
+          "top": 0,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 477,
+          "top": 0,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 636,
+          "top": 0,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 795,
+          "top": 0,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 954,
+          "top": 0,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 1113,
+          "top": 0,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 160,
+          "width": 165,
+          "height": 159
+        },
+        {
+          "left": 165,
+          "top": 160,
+          "width": 153,
+          "height": 159
+        },
+        {
+          "left": 318,
+          "top": 160,
+          "width": 159,
+          "height": 159
+        },
+        {
+          "left": 477,
+          "top": 160,
+          "width": 159,
+          "height": 159
+        },
+        {
+          "left": 636,
+          "top": 160,
+          "width": 159,
+          "height": 159
+        },
+        {
+          "left": 795,
+          "top": 160,
+          "width": 159,
+          "height": 159
+        },
+        {
+          "left": 954,
+          "top": 160,
+          "width": 159,
+          "height": 159
+        },
+        {
+          "left": 1113,
+          "top": 160,
+          "width": 159,
+          "height": 159
+        },
+        {
+          "left": 0,
+          "top": 319,
+          "width": 164,
+          "height": 155
+        },
+        {
+          "left": 164,
+          "top": 319,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 318,
+          "top": 319,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 478,
+          "top": 319,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 636,
+          "top": 319,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 795,
+          "top": 319,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 954,
+          "top": 319,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 1109,
+          "top": 319,
+          "width": 163,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 474,
+          "width": 164,
+          "height": 153
+        },
+        {
+          "left": 164,
+          "top": 474,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 318,
+          "top": 474,
+          "width": 124,
+          "height": 153
+        },
+        {
+          "left": 442,
+          "top": 474,
+          "width": 194,
+          "height": 153
+        },
+        {
+          "left": 636,
+          "top": 474,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 795,
+          "top": 474,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 954,
+          "top": 474,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 1113,
+          "top": 474,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 627,
+          "width": 163,
+          "height": 149
+        },
+        {
+          "left": 163,
+          "top": 627,
+          "width": 155,
+          "height": 149
+        },
+        {
+          "left": 318,
+          "top": 627,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 476,
+          "top": 627,
+          "width": 160,
+          "height": 149
+        },
+        {
+          "left": 636,
+          "top": 627,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 795,
+          "top": 627,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 954,
+          "top": 627,
+          "width": 151,
+          "height": 149
+        },
+        {
+          "left": 1105,
+          "top": 627,
+          "width": 167,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 159,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 318,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 477,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 636,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 795,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 954,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 1113,
+          "top": 776,
+          "width": 159,
+          "height": 152
+        },
+        {
+          "left": 0,
+          "top": 928,
+          "width": 163,
+          "height": 149
+        },
+        {
+          "left": 163,
+          "top": 928,
+          "width": 155,
+          "height": 149
+        },
+        {
+          "left": 318,
+          "top": 928,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 477,
+          "top": 928,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 636,
+          "top": 928,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 795,
+          "top": 928,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 954,
+          "top": 928,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 1113,
+          "top": 928,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 1077,
+          "width": 169,
+          "height": 160
+        },
+        {
+          "left": 169,
+          "top": 1077,
+          "width": 149,
+          "height": 160
+        },
+        {
+          "left": 318,
+          "top": 1077,
+          "width": 157,
+          "height": 160
+        },
+        {
+          "left": 475,
+          "top": 1077,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 629,
+          "top": 1077,
+          "width": 166,
+          "height": 160
+        },
+        {
+          "left": 795,
+          "top": 1077,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 949,
+          "top": 1077,
+          "width": 164,
+          "height": 160
+        },
+        {
+          "left": 1113,
+          "top": 1077,
+          "width": 159,
+          "height": 160
+        }
+      ]
+    },
+    {
+      "key": "noctia",
+      "heroId": "dungeons2-noctia",
+      "transformed": false,
+      "source": "exec-97fcc837-2d5d-4ea7-b22d-635e9d7e8aab.png",
+      "source_sha256": "326a48088d4a02d21e54a898eaa2c0eb247220d5749e1100ea92856fca3e7674",
+      "reference": "public/sprites/dungeons2/noctia-directions.webp",
+      "reference_sha256": "11f0861b61349442e6043af3626b0ac47175719d3fae88a425ebe66dd600cd64",
+      "output": "public/sprites/dungeons2/actions/noctia.webp",
+      "sha256": "a3126e5467f5ab43d19a5c76b43707aed8156243fdee7aa07d26afeb3e3320ca",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.4233576642335766,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 165,
+          "height": 155
+        },
+        {
+          "left": 165,
+          "top": 0,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 320,
+          "top": 0,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 475,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 633,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 791,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 949,
+          "top": 0,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 1108,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 155,
+          "width": 165,
+          "height": 151
+        },
+        {
+          "left": 165,
+          "top": 155,
+          "width": 152,
+          "height": 151
+        },
+        {
+          "left": 317,
+          "top": 155,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 475,
+          "top": 155,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 633,
+          "top": 155,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 791,
+          "top": 155,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 949,
+          "top": 155,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 1108,
+          "top": 155,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 306,
+          "width": 160,
+          "height": 146
+        },
+        {
+          "left": 160,
+          "top": 306,
+          "width": 156,
+          "height": 146
+        },
+        {
+          "left": 316,
+          "top": 306,
+          "width": 159,
+          "height": 146
+        },
+        {
+          "left": 475,
+          "top": 306,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 633,
+          "top": 306,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 791,
+          "top": 306,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 949,
+          "top": 306,
+          "width": 159,
+          "height": 146
+        },
+        {
+          "left": 1108,
+          "top": 306,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 0,
+          "top": 452,
+          "width": 167,
+          "height": 156
+        },
+        {
+          "left": 167,
+          "top": 452,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 321,
+          "top": 452,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 475,
+          "top": 452,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 633,
+          "top": 452,
+          "width": 162,
+          "height": 156
+        },
+        {
+          "left": 795,
+          "top": 452,
+          "width": 155,
+          "height": 156
+        },
+        {
+          "left": 950,
+          "top": 452,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 1108,
+          "top": 452,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 608,
+          "width": 168,
+          "height": 146
+        },
+        {
+          "left": 168,
+          "top": 608,
+          "width": 148,
+          "height": 146
+        },
+        {
+          "left": 316,
+          "top": 608,
+          "width": 162,
+          "height": 146
+        },
+        {
+          "left": 478,
+          "top": 608,
+          "width": 155,
+          "height": 146
+        },
+        {
+          "left": 633,
+          "top": 608,
+          "width": 161,
+          "height": 146
+        },
+        {
+          "left": 794,
+          "top": 608,
+          "width": 155,
+          "height": 146
+        },
+        {
+          "left": 949,
+          "top": 608,
+          "width": 159,
+          "height": 146
+        },
+        {
+          "left": 1108,
+          "top": 608,
+          "width": 158,
+          "height": 146
+        },
+        {
+          "left": 0,
+          "top": 754,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 158,
+          "top": 754,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 316,
+          "top": 754,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 475,
+          "top": 754,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 633,
+          "top": 754,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 791,
+          "top": 754,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 949,
+          "top": 754,
+          "width": 159,
+          "height": 149
+        },
+        {
+          "left": 1108,
+          "top": 754,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 903,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 158,
+          "top": 903,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 317,
+          "top": 903,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 475,
+          "top": 903,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 633,
+          "top": 903,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 791,
+          "top": 903,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 949,
+          "top": 903,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 1108,
+          "top": 903,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 1057,
+          "width": 171,
+          "height": 185
+        },
+        {
+          "left": 171,
+          "top": 1057,
+          "width": 145,
+          "height": 185
+        },
+        {
+          "left": 316,
+          "top": 1057,
+          "width": 162,
+          "height": 185
+        },
+        {
+          "left": 478,
+          "top": 1057,
+          "width": 155,
+          "height": 185
+        },
+        {
+          "left": 633,
+          "top": 1057,
+          "width": 158,
+          "height": 185
+        },
+        {
+          "left": 791,
+          "top": 1057,
+          "width": 158,
+          "height": 185
+        },
+        {
+          "left": 949,
+          "top": 1057,
+          "width": 158,
+          "height": 185
+        },
+        {
+          "left": 1107,
+          "top": 1057,
+          "width": 159,
+          "height": 185
+        }
+      ]
+    },
+    {
+      "key": "noctia-transformed",
+      "heroId": "dungeons2-noctia",
+      "transformed": true,
+      "source": "exec-3622891f-b822-447c-b881-001f578c7aa6.png",
+      "source_sha256": "63826fe906f19e6f52b25902811cc9584b1f3863e391577014accb859c253dc7",
+      "reference": "public/sprites/dungeons2/noctia-transformed-directions.webp",
+      "reference_sha256": "8eb4fb8b30d5538b522a2921db18fdb0afc8e4f9146fd9bb3575280a743f6de4",
+      "output": "public/sprites/dungeons2/actions/noctia-transformed.webp",
+      "sha256": "6262d00cdc9794e362227321ce56f43e5a02f54c97dcfa5cdf46644e21b58be8",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.40559440559440557,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 163,
+          "height": 154
+        },
+        {
+          "left": 163,
+          "top": 0,
+          "width": 156,
+          "height": 154
+        },
+        {
+          "left": 319,
+          "top": 0,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 479,
+          "top": 0,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 638,
+          "top": 0,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 798,
+          "top": 0,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 958,
+          "top": 0,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 1117,
+          "top": 0,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 154,
+          "width": 165,
+          "height": 155
+        },
+        {
+          "left": 165,
+          "top": 154,
+          "width": 156,
+          "height": 155
+        },
+        {
+          "left": 321,
+          "top": 154,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 479,
+          "top": 154,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 638,
+          "top": 154,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 798,
+          "top": 154,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 958,
+          "top": 154,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 1117,
+          "top": 154,
+          "width": 160,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 309,
+          "width": 171,
+          "height": 154
+        },
+        {
+          "left": 171,
+          "top": 309,
+          "width": 150,
+          "height": 154
+        },
+        {
+          "left": 321,
+          "top": 309,
+          "width": 139,
+          "height": 154
+        },
+        {
+          "left": 460,
+          "top": 309,
+          "width": 174,
+          "height": 154
+        },
+        {
+          "left": 634,
+          "top": 309,
+          "width": 182,
+          "height": 154
+        },
+        {
+          "left": 816,
+          "top": 309,
+          "width": 140,
+          "height": 154
+        },
+        {
+          "left": 956,
+          "top": 309,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 1113,
+          "top": 309,
+          "width": 164,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 463,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 160,
+          "top": 463,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 319,
+          "top": 463,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 479,
+          "top": 463,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 638,
+          "top": 463,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 798,
+          "top": 463,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 958,
+          "top": 463,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 1117,
+          "top": 463,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 623,
+          "width": 164,
+          "height": 147
+        },
+        {
+          "left": 164,
+          "top": 623,
+          "width": 155,
+          "height": 147
+        },
+        {
+          "left": 319,
+          "top": 623,
+          "width": 160,
+          "height": 147
+        },
+        {
+          "left": 479,
+          "top": 623,
+          "width": 159,
+          "height": 147
+        },
+        {
+          "left": 638,
+          "top": 623,
+          "width": 160,
+          "height": 147
+        },
+        {
+          "left": 798,
+          "top": 623,
+          "width": 146,
+          "height": 147
+        },
+        {
+          "left": 944,
+          "top": 623,
+          "width": 173,
+          "height": 147
+        },
+        {
+          "left": 1117,
+          "top": 623,
+          "width": 160,
+          "height": 147
+        },
+        {
+          "left": 0,
+          "top": 770,
+          "width": 161,
+          "height": 154
+        },
+        {
+          "left": 161,
+          "top": 770,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 319,
+          "top": 770,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 479,
+          "top": 770,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 638,
+          "top": 770,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 798,
+          "top": 770,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 958,
+          "top": 770,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 1117,
+          "top": 770,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 924,
+          "width": 165,
+          "height": 154
+        },
+        {
+          "left": 165,
+          "top": 924,
+          "width": 154,
+          "height": 154
+        },
+        {
+          "left": 319,
+          "top": 924,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 479,
+          "top": 924,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 638,
+          "top": 924,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 798,
+          "top": 924,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 958,
+          "top": 924,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 1117,
+          "top": 924,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 1078,
+          "width": 166,
+          "height": 154
+        },
+        {
+          "left": 166,
+          "top": 1078,
+          "width": 154,
+          "height": 154
+        },
+        {
+          "left": 320,
+          "top": 1078,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 479,
+          "top": 1078,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 638,
+          "top": 1078,
+          "width": 160,
+          "height": 154
+        },
+        {
+          "left": 798,
+          "top": 1078,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 957,
+          "top": 1078,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 1115,
+          "top": 1078,
+          "width": 162,
+          "height": 154
+        }
+      ]
+    },
+    {
+      "key": "aurene",
+      "heroId": "dungeons2-aurene",
+      "transformed": false,
+      "source": "exec-232a4962-4559-4b75-963c-dc243654bc4a.png",
+      "source_sha256": "c60b42ef3059786e6727d166b654d8a9271037f16a27abba34191fd1c57af2c9",
+      "reference": "public/sprites/dungeons2/aurene-directions.webp",
+      "reference_sha256": "f80f9653e3893125ff6b48b6f6be306dfd8f2e8286edc9261db2b15df8bd4c66",
+      "output": "public/sprites/dungeons2/actions/aurene.webp",
+      "sha256": "9ffa34957dfbf89321fbaa01d680fcd5b849cdc24cf29a4b477bb9a494619d63",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.4603174603174603,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 159,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 317,
+          "top": 0,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 476,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 634,
+          "top": 0,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 793,
+          "top": 0,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 952,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 1110,
+          "top": 0,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 155,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 159,
+          "top": 155,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 317,
+          "top": 155,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 476,
+          "top": 155,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 634,
+          "top": 155,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 793,
+          "top": 155,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 952,
+          "top": 155,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 1110,
+          "top": 155,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 308,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 159,
+          "top": 308,
+          "width": 158,
+          "height": 143
+        },
+        {
+          "left": 317,
+          "top": 308,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 476,
+          "top": 308,
+          "width": 158,
+          "height": 143
+        },
+        {
+          "left": 634,
+          "top": 308,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 793,
+          "top": 308,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 952,
+          "top": 308,
+          "width": 158,
+          "height": 143
+        },
+        {
+          "left": 1110,
+          "top": 308,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 0,
+          "top": 451,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 159,
+          "top": 451,
+          "width": 158,
+          "height": 160
+        },
+        {
+          "left": 317,
+          "top": 451,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 476,
+          "top": 451,
+          "width": 158,
+          "height": 160
+        },
+        {
+          "left": 634,
+          "top": 451,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 793,
+          "top": 451,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 952,
+          "top": 451,
+          "width": 158,
+          "height": 160
+        },
+        {
+          "left": 1110,
+          "top": 451,
+          "width": 159,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 611,
+          "width": 157,
+          "height": 144
+        },
+        {
+          "left": 157,
+          "top": 611,
+          "width": 160,
+          "height": 144
+        },
+        {
+          "left": 317,
+          "top": 611,
+          "width": 159,
+          "height": 144
+        },
+        {
+          "left": 476,
+          "top": 611,
+          "width": 158,
+          "height": 144
+        },
+        {
+          "left": 634,
+          "top": 611,
+          "width": 159,
+          "height": 144
+        },
+        {
+          "left": 793,
+          "top": 611,
+          "width": 159,
+          "height": 144
+        },
+        {
+          "left": 952,
+          "top": 611,
+          "width": 158,
+          "height": 144
+        },
+        {
+          "left": 1110,
+          "top": 611,
+          "width": 159,
+          "height": 144
+        },
+        {
+          "left": 0,
+          "top": 755,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 159,
+          "top": 755,
+          "width": 158,
+          "height": 143
+        },
+        {
+          "left": 317,
+          "top": 755,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 476,
+          "top": 755,
+          "width": 158,
+          "height": 143
+        },
+        {
+          "left": 634,
+          "top": 755,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 793,
+          "top": 755,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 952,
+          "top": 755,
+          "width": 158,
+          "height": 143
+        },
+        {
+          "left": 1110,
+          "top": 755,
+          "width": 159,
+          "height": 143
+        },
+        {
+          "left": 0,
+          "top": 898,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 159,
+          "top": 898,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 317,
+          "top": 898,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 476,
+          "top": 898,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 634,
+          "top": 898,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 793,
+          "top": 898,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 952,
+          "top": 898,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 1110,
+          "top": 898,
+          "width": 159,
+          "height": 157
+        },
+        {
+          "left": 0,
+          "top": 1055,
+          "width": 162,
+          "height": 184
+        },
+        {
+          "left": 162,
+          "top": 1055,
+          "width": 164,
+          "height": 184
+        },
+        {
+          "left": 326,
+          "top": 1055,
+          "width": 150,
+          "height": 184
+        },
+        {
+          "left": 476,
+          "top": 1055,
+          "width": 158,
+          "height": 184
+        },
+        {
+          "left": 634,
+          "top": 1055,
+          "width": 159,
+          "height": 184
+        },
+        {
+          "left": 793,
+          "top": 1055,
+          "width": 159,
+          "height": 184
+        },
+        {
+          "left": 952,
+          "top": 1055,
+          "width": 158,
+          "height": 184
+        },
+        {
+          "left": 1110,
+          "top": 1055,
+          "width": 159,
+          "height": 184
+        }
+      ]
+    },
+    {
+      "key": "aurene-transformed",
+      "heroId": "dungeons2-aurene",
+      "transformed": true,
+      "source": "exec-e5023fb7-7c79-47c1-8f6d-0ec598fca522.png",
+      "source_sha256": "bf4879246b8d74d61d4403c629b7cdfe742115f1562572f6ee69ff5a030aa1e7",
+      "reference": "public/sprites/dungeons2/aurene-transformed-directions.webp",
+      "reference_sha256": "0f0e9c7af50d686e410797dc88adfab87420dc83ce1a5fb56b8912082a624006",
+      "output": "public/sprites/dungeons2/actions/aurene-transformed.webp",
+      "sha256": "819a19a140b23c42b50e5a12f2545e4ee3fc2b5100bf6f2b4ae415403ff15e63",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.42028985507246375,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 155,
+          "top": 0,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 315,
+          "top": 0,
+          "width": 146,
+          "height": 160
+        },
+        {
+          "left": 461,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 615,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 769,
+          "top": 0,
+          "width": 153,
+          "height": 160
+        },
+        {
+          "left": 922,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 1076,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 160,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 158,
+          "top": 160,
+          "width": 156,
+          "height": 155
+        },
+        {
+          "left": 314,
+          "top": 160,
+          "width": 147,
+          "height": 155
+        },
+        {
+          "left": 461,
+          "top": 160,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 615,
+          "top": 160,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 769,
+          "top": 160,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 922,
+          "top": 160,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 1076,
+          "top": 160,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 315,
+          "width": 162,
+          "height": 144
+        },
+        {
+          "left": 162,
+          "top": 315,
+          "width": 155,
+          "height": 144
+        },
+        {
+          "left": 317,
+          "top": 315,
+          "width": 135,
+          "height": 144
+        },
+        {
+          "left": 452,
+          "top": 315,
+          "width": 166,
+          "height": 144
+        },
+        {
+          "left": 618,
+          "top": 315,
+          "width": 145,
+          "height": 144
+        },
+        {
+          "left": 763,
+          "top": 315,
+          "width": 159,
+          "height": 144
+        },
+        {
+          "left": 922,
+          "top": 315,
+          "width": 153,
+          "height": 144
+        },
+        {
+          "left": 1075,
+          "top": 315,
+          "width": 155,
+          "height": 144
+        },
+        {
+          "left": 0,
+          "top": 459,
+          "width": 160,
+          "height": 156
+        },
+        {
+          "left": 160,
+          "top": 459,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 313,
+          "top": 459,
+          "width": 148,
+          "height": 156
+        },
+        {
+          "left": 461,
+          "top": 459,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 615,
+          "top": 459,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 769,
+          "top": 459,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 922,
+          "top": 459,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 1076,
+          "top": 459,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 615,
+          "width": 163,
+          "height": 158
+        },
+        {
+          "left": 163,
+          "top": 615,
+          "width": 162,
+          "height": 158
+        },
+        {
+          "left": 325,
+          "top": 615,
+          "width": 155,
+          "height": 158
+        },
+        {
+          "left": 480,
+          "top": 615,
+          "width": 135,
+          "height": 158
+        },
+        {
+          "left": 615,
+          "top": 615,
+          "width": 154,
+          "height": 158
+        },
+        {
+          "left": 769,
+          "top": 615,
+          "width": 156,
+          "height": 158
+        },
+        {
+          "left": 925,
+          "top": 615,
+          "width": 136,
+          "height": 158
+        },
+        {
+          "left": 1061,
+          "top": 615,
+          "width": 169,
+          "height": 158
+        },
+        {
+          "left": 0,
+          "top": 773,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 158,
+          "top": 773,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 316,
+          "top": 773,
+          "width": 145,
+          "height": 153
+        },
+        {
+          "left": 461,
+          "top": 773,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 615,
+          "top": 773,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 769,
+          "top": 773,
+          "width": 153,
+          "height": 153
+        },
+        {
+          "left": 922,
+          "top": 773,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 1076,
+          "top": 773,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 926,
+          "width": 163,
+          "height": 161
+        },
+        {
+          "left": 163,
+          "top": 926,
+          "width": 153,
+          "height": 161
+        },
+        {
+          "left": 316,
+          "top": 926,
+          "width": 145,
+          "height": 161
+        },
+        {
+          "left": 461,
+          "top": 926,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 615,
+          "top": 926,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 769,
+          "top": 926,
+          "width": 153,
+          "height": 161
+        },
+        {
+          "left": 922,
+          "top": 926,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 1076,
+          "top": 926,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 0,
+          "top": 1087,
+          "width": 193,
+          "height": 191
+        },
+        {
+          "left": 193,
+          "top": 1087,
+          "width": 125,
+          "height": 191
+        },
+        {
+          "left": 318,
+          "top": 1087,
+          "width": 156,
+          "height": 191
+        },
+        {
+          "left": 474,
+          "top": 1087,
+          "width": 141,
+          "height": 191
+        },
+        {
+          "left": 615,
+          "top": 1087,
+          "width": 168,
+          "height": 191
+        },
+        {
+          "left": 783,
+          "top": 1087,
+          "width": 139,
+          "height": 191
+        },
+        {
+          "left": 922,
+          "top": 1087,
+          "width": 143,
+          "height": 191
+        },
+        {
+          "left": 1065,
+          "top": 1087,
+          "width": 165,
+          "height": 191
+        }
+      ]
+    },
+    {
+      "key": "ignis",
+      "heroId": "dungeons2-ignis",
+      "transformed": false,
+      "source": "exec-447842f1-212c-4733-a020-4915e3e35a2e.png",
+      "source_sha256": "13d7842f04288c517df9650357fd1e3f67d5cd3a4433238e1b627bed2db2bf1b",
+      "reference": "public/sprites/dungeons2/ignis-directions.webp",
+      "reference_sha256": "9aa84305eae808927542ccf4f09a30ec7b48262bbedb374e4a3073bf0fbbb537",
+      "output": "public/sprites/dungeons2/actions/ignis.webp",
+      "sha256": "2c2a206cb8414b9dc5985e70106e3136762e57102500a9fa6e8430e94121c5ac",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.42028985507246375,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 154,
+          "top": 0,
+          "width": 153,
+          "height": 160
+        },
+        {
+          "left": 307,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 461,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 615,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 769,
+          "top": 0,
+          "width": 153,
+          "height": 160
+        },
+        {
+          "left": 922,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 1076,
+          "top": 0,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 160,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 154,
+          "top": 160,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 307,
+          "top": 160,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 461,
+          "top": 160,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 615,
+          "top": 160,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 769,
+          "top": 160,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 922,
+          "top": 160,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 1076,
+          "top": 160,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 316,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 154,
+          "top": 316,
+          "width": 132,
+          "height": 153
+        },
+        {
+          "left": 286,
+          "top": 316,
+          "width": 151,
+          "height": 153
+        },
+        {
+          "left": 437,
+          "top": 316,
+          "width": 178,
+          "height": 153
+        },
+        {
+          "left": 615,
+          "top": 316,
+          "width": 163,
+          "height": 153
+        },
+        {
+          "left": 778,
+          "top": 316,
+          "width": 142,
+          "height": 153
+        },
+        {
+          "left": 920,
+          "top": 316,
+          "width": 156,
+          "height": 153
+        },
+        {
+          "left": 1076,
+          "top": 316,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 469,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 154,
+          "top": 469,
+          "width": 153,
+          "height": 149
+        },
+        {
+          "left": 307,
+          "top": 469,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 461,
+          "top": 469,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 615,
+          "top": 469,
+          "width": 149,
+          "height": 149
+        },
+        {
+          "left": 764,
+          "top": 469,
+          "width": 158,
+          "height": 149
+        },
+        {
+          "left": 922,
+          "top": 469,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 1076,
+          "top": 469,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 618,
+          "width": 155,
+          "height": 149
+        },
+        {
+          "left": 155,
+          "top": 618,
+          "width": 152,
+          "height": 149
+        },
+        {
+          "left": 307,
+          "top": 618,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 461,
+          "top": 618,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 615,
+          "top": 618,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 769,
+          "top": 618,
+          "width": 153,
+          "height": 149
+        },
+        {
+          "left": 922,
+          "top": 618,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 1076,
+          "top": 618,
+          "width": 154,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 767,
+          "width": 154,
+          "height": 151
+        },
+        {
+          "left": 154,
+          "top": 767,
+          "width": 153,
+          "height": 151
+        },
+        {
+          "left": 307,
+          "top": 767,
+          "width": 154,
+          "height": 151
+        },
+        {
+          "left": 461,
+          "top": 767,
+          "width": 154,
+          "height": 151
+        },
+        {
+          "left": 615,
+          "top": 767,
+          "width": 154,
+          "height": 151
+        },
+        {
+          "left": 769,
+          "top": 767,
+          "width": 153,
+          "height": 151
+        },
+        {
+          "left": 922,
+          "top": 767,
+          "width": 154,
+          "height": 151
+        },
+        {
+          "left": 1076,
+          "top": 767,
+          "width": 154,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 918,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 154,
+          "top": 918,
+          "width": 153,
+          "height": 160
+        },
+        {
+          "left": 307,
+          "top": 918,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 461,
+          "top": 918,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 615,
+          "top": 918,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 769,
+          "top": 918,
+          "width": 153,
+          "height": 160
+        },
+        {
+          "left": 922,
+          "top": 918,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 1076,
+          "top": 918,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 1078,
+          "width": 154,
+          "height": 200
+        },
+        {
+          "left": 154,
+          "top": 1078,
+          "width": 153,
+          "height": 200
+        },
+        {
+          "left": 307,
+          "top": 1078,
+          "width": 154,
+          "height": 200
+        },
+        {
+          "left": 461,
+          "top": 1078,
+          "width": 154,
+          "height": 200
+        },
+        {
+          "left": 615,
+          "top": 1078,
+          "width": 154,
+          "height": 200
+        },
+        {
+          "left": 769,
+          "top": 1078,
+          "width": 153,
+          "height": 200
+        },
+        {
+          "left": 922,
+          "top": 1078,
+          "width": 154,
+          "height": 200
+        },
+        {
+          "left": 1076,
+          "top": 1078,
+          "width": 154,
+          "height": 200
+        }
+      ]
+    },
+    {
+      "key": "ignis-transformed",
+      "heroId": "dungeons2-ignis",
+      "transformed": true,
+      "source": "exec-b8a6c87f-006a-4028-91bd-c6ecebb4a75b.png",
+      "source_sha256": "58e8601c8ec19189f4bc3b824e2953e05c83645cda94d229c0f5fcb0e10fe4b7",
+      "reference": "public/sprites/dungeons2/ignis-transformed-directions.webp",
+      "reference_sha256": "36cf7d19b73c72aeae0f134efd4351266f0aed87f6b294529bf411adad10cdfe",
+      "output": "public/sprites/dungeons2/actions/ignis-transformed.webp",
+      "sha256": "7917b9a3bcaa95020cffbfb907cbf57e3570ad322727a5f6fb341e4627287059",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.4084507042253521,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 166,
+          "height": 158
+        },
+        {
+          "left": 166,
+          "top": 0,
+          "width": 151,
+          "height": 158
+        },
+        {
+          "left": 317,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 476,
+          "top": 0,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 634,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 793,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 952,
+          "top": 0,
+          "width": 158,
+          "height": 158
+        },
+        {
+          "left": 1110,
+          "top": 0,
+          "width": 159,
+          "height": 158
+        },
+        {
+          "left": 0,
+          "top": 158,
+          "width": 161,
+          "height": 154
+        },
+        {
+          "left": 161,
+          "top": 158,
+          "width": 156,
+          "height": 154
+        },
+        {
+          "left": 317,
+          "top": 158,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 476,
+          "top": 158,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 634,
+          "top": 158,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 793,
+          "top": 158,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 952,
+          "top": 158,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 1110,
+          "top": 158,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 312,
+          "width": 164,
+          "height": 151
+        },
+        {
+          "left": 164,
+          "top": 312,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 322,
+          "top": 312,
+          "width": 179,
+          "height": 151
+        },
+        {
+          "left": 501,
+          "top": 312,
+          "width": 135,
+          "height": 151
+        },
+        {
+          "left": 636,
+          "top": 312,
+          "width": 160,
+          "height": 151
+        },
+        {
+          "left": 796,
+          "top": 312,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 954,
+          "top": 312,
+          "width": 155,
+          "height": 151
+        },
+        {
+          "left": 1109,
+          "top": 312,
+          "width": 160,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 463,
+          "width": 162,
+          "height": 156
+        },
+        {
+          "left": 162,
+          "top": 463,
+          "width": 155,
+          "height": 156
+        },
+        {
+          "left": 317,
+          "top": 463,
+          "width": 159,
+          "height": 156
+        },
+        {
+          "left": 476,
+          "top": 463,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 634,
+          "top": 463,
+          "width": 169,
+          "height": 156
+        },
+        {
+          "left": 803,
+          "top": 463,
+          "width": 149,
+          "height": 156
+        },
+        {
+          "left": 952,
+          "top": 463,
+          "width": 179,
+          "height": 156
+        },
+        {
+          "left": 1131,
+          "top": 463,
+          "width": 138,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 619,
+          "width": 171,
+          "height": 153
+        },
+        {
+          "left": 171,
+          "top": 619,
+          "width": 154,
+          "height": 153
+        },
+        {
+          "left": 325,
+          "top": 619,
+          "width": 151,
+          "height": 153
+        },
+        {
+          "left": 476,
+          "top": 619,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 634,
+          "top": 619,
+          "width": 163,
+          "height": 153
+        },
+        {
+          "left": 797,
+          "top": 619,
+          "width": 155,
+          "height": 153
+        },
+        {
+          "left": 952,
+          "top": 619,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 1110,
+          "top": 619,
+          "width": 159,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 772,
+          "width": 159,
+          "height": 148
+        },
+        {
+          "left": 159,
+          "top": 772,
+          "width": 158,
+          "height": 148
+        },
+        {
+          "left": 317,
+          "top": 772,
+          "width": 159,
+          "height": 148
+        },
+        {
+          "left": 476,
+          "top": 772,
+          "width": 158,
+          "height": 148
+        },
+        {
+          "left": 634,
+          "top": 772,
+          "width": 159,
+          "height": 148
+        },
+        {
+          "left": 793,
+          "top": 772,
+          "width": 159,
+          "height": 148
+        },
+        {
+          "left": 952,
+          "top": 772,
+          "width": 158,
+          "height": 148
+        },
+        {
+          "left": 1110,
+          "top": 772,
+          "width": 159,
+          "height": 148
+        },
+        {
+          "left": 0,
+          "top": 920,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 159,
+          "top": 920,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 317,
+          "top": 920,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 476,
+          "top": 920,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 634,
+          "top": 920,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 793,
+          "top": 920,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 952,
+          "top": 920,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 1110,
+          "top": 920,
+          "width": 159,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 1071,
+          "width": 173,
+          "height": 168
+        },
+        {
+          "left": 173,
+          "top": 1071,
+          "width": 160,
+          "height": 168
+        },
+        {
+          "left": 333,
+          "top": 1071,
+          "width": 156,
+          "height": 168
+        },
+        {
+          "left": 489,
+          "top": 1071,
+          "width": 145,
+          "height": 168
+        },
+        {
+          "left": 634,
+          "top": 1071,
+          "width": 159,
+          "height": 168
+        },
+        {
+          "left": 793,
+          "top": 1071,
+          "width": 159,
+          "height": 168
+        },
+        {
+          "left": 952,
+          "top": 1071,
+          "width": 149,
+          "height": 168
+        },
+        {
+          "left": 1101,
+          "top": 1071,
+          "width": 168,
+          "height": 168
+        }
+      ]
+    },
+    {
+      "key": "leon",
+      "heroId": "dungeons2-leon",
+      "transformed": false,
+      "source": "exec-76779cd3-bf7a-475e-8888-ec7b44ef79f9.png",
+      "source_sha256": "92b18bb626f244696afbcffaca752e4ef761042560fc67993996f7d252c8f072",
+      "reference": "public/sprites/dungeons2/leon-directions.webp",
+      "reference_sha256": "204b76537e000887549393ce57b2b8ac646fc2dedec1e21997f51a17966de480",
+      "output": "public/sprites/dungeons2/actions/leon.webp",
+      "sha256": "c812e96e2409934e117608b2bf1b7340b80128d073d94248c9949741ee5aab54",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.41134751773049644,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 158,
+          "height": 167
+        },
+        {
+          "left": 158,
+          "top": 0,
+          "width": 157,
+          "height": 167
+        },
+        {
+          "left": 315,
+          "top": 0,
+          "width": 158,
+          "height": 167
+        },
+        {
+          "left": 473,
+          "top": 0,
+          "width": 157,
+          "height": 167
+        },
+        {
+          "left": 630,
+          "top": 0,
+          "width": 158,
+          "height": 167
+        },
+        {
+          "left": 788,
+          "top": 0,
+          "width": 158,
+          "height": 167
+        },
+        {
+          "left": 946,
+          "top": 0,
+          "width": 157,
+          "height": 167
+        },
+        {
+          "left": 1103,
+          "top": 0,
+          "width": 158,
+          "height": 167
+        },
+        {
+          "left": 0,
+          "top": 167,
+          "width": 158,
+          "height": 150
+        },
+        {
+          "left": 158,
+          "top": 167,
+          "width": 160,
+          "height": 150
+        },
+        {
+          "left": 318,
+          "top": 167,
+          "width": 155,
+          "height": 150
+        },
+        {
+          "left": 473,
+          "top": 167,
+          "width": 157,
+          "height": 150
+        },
+        {
+          "left": 630,
+          "top": 167,
+          "width": 158,
+          "height": 150
+        },
+        {
+          "left": 788,
+          "top": 167,
+          "width": 158,
+          "height": 150
+        },
+        {
+          "left": 946,
+          "top": 167,
+          "width": 157,
+          "height": 150
+        },
+        {
+          "left": 1103,
+          "top": 167,
+          "width": 158,
+          "height": 150
+        },
+        {
+          "left": 0,
+          "top": 317,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 158,
+          "top": 317,
+          "width": 175,
+          "height": 151
+        },
+        {
+          "left": 333,
+          "top": 317,
+          "width": 168,
+          "height": 151
+        },
+        {
+          "left": 501,
+          "top": 317,
+          "width": 129,
+          "height": 151
+        },
+        {
+          "left": 630,
+          "top": 317,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 788,
+          "top": 317,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 946,
+          "top": 317,
+          "width": 157,
+          "height": 151
+        },
+        {
+          "left": 1103,
+          "top": 317,
+          "width": 158,
+          "height": 151
+        },
+        {
+          "left": 0,
+          "top": 468,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 158,
+          "top": 468,
+          "width": 157,
+          "height": 155
+        },
+        {
+          "left": 315,
+          "top": 468,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 473,
+          "top": 468,
+          "width": 157,
+          "height": 155
+        },
+        {
+          "left": 630,
+          "top": 468,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 788,
+          "top": 468,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 946,
+          "top": 468,
+          "width": 157,
+          "height": 155
+        },
+        {
+          "left": 1103,
+          "top": 468,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 158,
+          "top": 623,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 315,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 473,
+          "top": 623,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 630,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 788,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 946,
+          "top": 623,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 1103,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 779,
+          "width": 158,
+          "height": 152
+        },
+        {
+          "left": 158,
+          "top": 779,
+          "width": 157,
+          "height": 152
+        },
+        {
+          "left": 315,
+          "top": 779,
+          "width": 158,
+          "height": 152
+        },
+        {
+          "left": 473,
+          "top": 779,
+          "width": 157,
+          "height": 152
+        },
+        {
+          "left": 630,
+          "top": 779,
+          "width": 158,
+          "height": 152
+        },
+        {
+          "left": 788,
+          "top": 779,
+          "width": 158,
+          "height": 152
+        },
+        {
+          "left": 946,
+          "top": 779,
+          "width": 157,
+          "height": 152
+        },
+        {
+          "left": 1103,
+          "top": 779,
+          "width": 158,
+          "height": 152
+        },
+        {
+          "left": 0,
+          "top": 931,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 158,
+          "top": 931,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 315,
+          "top": 931,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 473,
+          "top": 931,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 630,
+          "top": 931,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 788,
+          "top": 931,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 946,
+          "top": 931,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 1103,
+          "top": 931,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 1085,
+          "width": 158,
+          "height": 162
+        },
+        {
+          "left": 158,
+          "top": 1085,
+          "width": 157,
+          "height": 162
+        },
+        {
+          "left": 315,
+          "top": 1085,
+          "width": 158,
+          "height": 162
+        },
+        {
+          "left": 473,
+          "top": 1085,
+          "width": 157,
+          "height": 162
+        },
+        {
+          "left": 630,
+          "top": 1085,
+          "width": 158,
+          "height": 162
+        },
+        {
+          "left": 788,
+          "top": 1085,
+          "width": 158,
+          "height": 162
+        },
+        {
+          "left": 946,
+          "top": 1085,
+          "width": 157,
+          "height": 162
+        },
+        {
+          "left": 1103,
+          "top": 1085,
+          "width": 158,
+          "height": 162
+        }
+      ]
+    },
+    {
+      "key": "leon-transformed",
+      "heroId": "dungeons2-leon",
+      "transformed": true,
+      "source": "exec-df44a16f-86b5-41c4-8da8-5456d8a9c4d1.png",
+      "source_sha256": "1202f82d43c7df5de9756cffe10df2501126b29131f2e4e06ed8aab8063ed5d3",
+      "reference": "public/sprites/dungeons2/leon-transformed-directions.webp",
+      "reference_sha256": "1f31b4679dbe281808150399141b9c3c893d6156cd8b00bac2c43bb851c5b4d6",
+      "output": "public/sprites/dungeons2/actions/leon-transformed.webp",
+      "sha256": "5d1abc1dee5dcb2ebea8d88052e159f0a21f0746897c4eaf388672209bd72fa5",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.39492753623188404,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 168,
+          "height": 156
+        },
+        {
+          "left": 168,
+          "top": 0,
+          "width": 185,
+          "height": 156
+        },
+        {
+          "left": 353,
+          "top": 0,
+          "width": 135,
+          "height": 156
+        },
+        {
+          "left": 488,
+          "top": 0,
+          "width": 155,
+          "height": 156
+        },
+        {
+          "left": 643,
+          "top": 0,
+          "width": 161,
+          "height": 156
+        },
+        {
+          "left": 804,
+          "top": 0,
+          "width": 161,
+          "height": 156
+        },
+        {
+          "left": 965,
+          "top": 0,
+          "width": 161,
+          "height": 156
+        },
+        {
+          "left": 1126,
+          "top": 0,
+          "width": 161,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 156,
+          "width": 179,
+          "height": 149
+        },
+        {
+          "left": 179,
+          "top": 156,
+          "width": 157,
+          "height": 149
+        },
+        {
+          "left": 336,
+          "top": 156,
+          "width": 152,
+          "height": 149
+        },
+        {
+          "left": 488,
+          "top": 156,
+          "width": 155,
+          "height": 149
+        },
+        {
+          "left": 643,
+          "top": 156,
+          "width": 161,
+          "height": 149
+        },
+        {
+          "left": 804,
+          "top": 156,
+          "width": 153,
+          "height": 149
+        },
+        {
+          "left": 957,
+          "top": 156,
+          "width": 169,
+          "height": 149
+        },
+        {
+          "left": 1126,
+          "top": 156,
+          "width": 161,
+          "height": 149
+        },
+        {
+          "left": 0,
+          "top": 305,
+          "width": 173,
+          "height": 153
+        },
+        {
+          "left": 173,
+          "top": 305,
+          "width": 186,
+          "height": 153
+        },
+        {
+          "left": 359,
+          "top": 305,
+          "width": 150,
+          "height": 153
+        },
+        {
+          "left": 509,
+          "top": 305,
+          "width": 134,
+          "height": 153
+        },
+        {
+          "left": 643,
+          "top": 305,
+          "width": 161,
+          "height": 153
+        },
+        {
+          "left": 804,
+          "top": 305,
+          "width": 150,
+          "height": 153
+        },
+        {
+          "left": 954,
+          "top": 305,
+          "width": 171,
+          "height": 153
+        },
+        {
+          "left": 1125,
+          "top": 305,
+          "width": 162,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 458,
+          "width": 166,
+          "height": 153
+        },
+        {
+          "left": 166,
+          "top": 458,
+          "width": 181,
+          "height": 153
+        },
+        {
+          "left": 347,
+          "top": 458,
+          "width": 147,
+          "height": 153
+        },
+        {
+          "left": 494,
+          "top": 458,
+          "width": 149,
+          "height": 153
+        },
+        {
+          "left": 643,
+          "top": 458,
+          "width": 164,
+          "height": 153
+        },
+        {
+          "left": 807,
+          "top": 458,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 965,
+          "top": 458,
+          "width": 161,
+          "height": 153
+        },
+        {
+          "left": 1126,
+          "top": 458,
+          "width": 161,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 611,
+          "width": 173,
+          "height": 145
+        },
+        {
+          "left": 173,
+          "top": 611,
+          "width": 181,
+          "height": 145
+        },
+        {
+          "left": 354,
+          "top": 611,
+          "width": 154,
+          "height": 145
+        },
+        {
+          "left": 508,
+          "top": 611,
+          "width": 135,
+          "height": 145
+        },
+        {
+          "left": 643,
+          "top": 611,
+          "width": 161,
+          "height": 145
+        },
+        {
+          "left": 804,
+          "top": 611,
+          "width": 148,
+          "height": 145
+        },
+        {
+          "left": 952,
+          "top": 611,
+          "width": 189,
+          "height": 145
+        },
+        {
+          "left": 1141,
+          "top": 611,
+          "width": 146,
+          "height": 145
+        },
+        {
+          "left": 0,
+          "top": 756,
+          "width": 162,
+          "height": 142
+        },
+        {
+          "left": 162,
+          "top": 756,
+          "width": 172,
+          "height": 142
+        },
+        {
+          "left": 334,
+          "top": 756,
+          "width": 149,
+          "height": 142
+        },
+        {
+          "left": 483,
+          "top": 756,
+          "width": 160,
+          "height": 142
+        },
+        {
+          "left": 643,
+          "top": 756,
+          "width": 161,
+          "height": 142
+        },
+        {
+          "left": 804,
+          "top": 756,
+          "width": 161,
+          "height": 142
+        },
+        {
+          "left": 965,
+          "top": 756,
+          "width": 161,
+          "height": 142
+        },
+        {
+          "left": 1126,
+          "top": 756,
+          "width": 161,
+          "height": 142
+        },
+        {
+          "left": 0,
+          "top": 898,
+          "width": 163,
+          "height": 161
+        },
+        {
+          "left": 163,
+          "top": 898,
+          "width": 173,
+          "height": 161
+        },
+        {
+          "left": 336,
+          "top": 898,
+          "width": 147,
+          "height": 161
+        },
+        {
+          "left": 483,
+          "top": 898,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 643,
+          "top": 898,
+          "width": 161,
+          "height": 161
+        },
+        {
+          "left": 804,
+          "top": 898,
+          "width": 161,
+          "height": 161
+        },
+        {
+          "left": 965,
+          "top": 898,
+          "width": 161,
+          "height": 161
+        },
+        {
+          "left": 1126,
+          "top": 898,
+          "width": 161,
+          "height": 161
+        },
+        {
+          "left": 0,
+          "top": 1059,
+          "width": 177,
+          "height": 163
+        },
+        {
+          "left": 177,
+          "top": 1059,
+          "width": 167,
+          "height": 163
+        },
+        {
+          "left": 344,
+          "top": 1059,
+          "width": 162,
+          "height": 163
+        },
+        {
+          "left": 506,
+          "top": 1059,
+          "width": 137,
+          "height": 163
+        },
+        {
+          "left": 643,
+          "top": 1059,
+          "width": 161,
+          "height": 163
+        },
+        {
+          "left": 804,
+          "top": 1059,
+          "width": 161,
+          "height": 163
+        },
+        {
+          "left": 965,
+          "top": 1059,
+          "width": 155,
+          "height": 163
+        },
+        {
+          "left": 1120,
+          "top": 1059,
+          "width": 167,
+          "height": 163
+        }
+      ]
+    },
+    {
+      "key": "orion",
+      "heroId": "dungeons2-orion",
+      "transformed": false,
+      "source": "exec-33ffd45d-7d74-4834-8dc7-154d3c48a981.png",
+      "source_sha256": "958b3f4f435005f198b7dfc47e51839944f3799793c247789b9765a8d07781bf",
+      "reference": "public/sprites/dungeons2/orion-directions.webp",
+      "reference_sha256": "0dec7975e78a3fdc2f59c27097a58dae3cf004af4bceaa1ac3da096e4f57c21f",
+      "output": "public/sprites/dungeons2/actions/orion.webp",
+      "sha256": "7076a646ae3fff6384d27bac6ea6cbeaceb2af9422c95cee4521582b91c62992",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.3972602739726027,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 155,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 310,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 465,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 620,
+          "top": 0,
+          "width": 156,
+          "height": 160
+        },
+        {
+          "left": 776,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 931,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 1086,
+          "top": 0,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 155,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 310,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 465,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 620,
+          "top": 160,
+          "width": 156,
+          "height": 157
+        },
+        {
+          "left": 776,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 931,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 1086,
+          "top": 160,
+          "width": 155,
+          "height": 157
+        },
+        {
+          "left": 0,
+          "top": 317,
+          "width": 176,
+          "height": 150
+        },
+        {
+          "left": 176,
+          "top": 317,
+          "width": 153,
+          "height": 150
+        },
+        {
+          "left": 329,
+          "top": 317,
+          "width": 162,
+          "height": 150
+        },
+        {
+          "left": 491,
+          "top": 317,
+          "width": 129,
+          "height": 150
+        },
+        {
+          "left": 620,
+          "top": 317,
+          "width": 170,
+          "height": 150
+        },
+        {
+          "left": 790,
+          "top": 317,
+          "width": 138,
+          "height": 150
+        },
+        {
+          "left": 928,
+          "top": 317,
+          "width": 138,
+          "height": 150
+        },
+        {
+          "left": 1066,
+          "top": 317,
+          "width": 175,
+          "height": 150
+        },
+        {
+          "left": 0,
+          "top": 467,
+          "width": 159,
+          "height": 167
+        },
+        {
+          "left": 159,
+          "top": 467,
+          "width": 151,
+          "height": 167
+        },
+        {
+          "left": 310,
+          "top": 467,
+          "width": 155,
+          "height": 167
+        },
+        {
+          "left": 465,
+          "top": 467,
+          "width": 155,
+          "height": 167
+        },
+        {
+          "left": 620,
+          "top": 467,
+          "width": 135,
+          "height": 167
+        },
+        {
+          "left": 755,
+          "top": 467,
+          "width": 176,
+          "height": 167
+        },
+        {
+          "left": 931,
+          "top": 467,
+          "width": 153,
+          "height": 167
+        },
+        {
+          "left": 1084,
+          "top": 467,
+          "width": 157,
+          "height": 167
+        },
+        {
+          "left": 0,
+          "top": 634,
+          "width": 169,
+          "height": 154
+        },
+        {
+          "left": 169,
+          "top": 634,
+          "width": 156,
+          "height": 154
+        },
+        {
+          "left": 325,
+          "top": 634,
+          "width": 146,
+          "height": 154
+        },
+        {
+          "left": 471,
+          "top": 634,
+          "width": 149,
+          "height": 154
+        },
+        {
+          "left": 620,
+          "top": 634,
+          "width": 156,
+          "height": 154
+        },
+        {
+          "left": 776,
+          "top": 634,
+          "width": 167,
+          "height": 154
+        },
+        {
+          "left": 943,
+          "top": 634,
+          "width": 129,
+          "height": 154
+        },
+        {
+          "left": 1072,
+          "top": 634,
+          "width": 169,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 155,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 310,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 465,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 620,
+          "top": 788,
+          "width": 156,
+          "height": 155
+        },
+        {
+          "left": 776,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 931,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 1086,
+          "top": 788,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 155,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 310,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 465,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 620,
+          "top": 943,
+          "width": 156,
+          "height": 154
+        },
+        {
+          "left": 776,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 931,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 1086,
+          "top": 943,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 1097,
+          "width": 183,
+          "height": 171
+        },
+        {
+          "left": 183,
+          "top": 1097,
+          "width": 154,
+          "height": 171
+        },
+        {
+          "left": 337,
+          "top": 1097,
+          "width": 133,
+          "height": 171
+        },
+        {
+          "left": 470,
+          "top": 1097,
+          "width": 150,
+          "height": 171
+        },
+        {
+          "left": 620,
+          "top": 1097,
+          "width": 155,
+          "height": 171
+        },
+        {
+          "left": 775,
+          "top": 1097,
+          "width": 133,
+          "height": 171
+        },
+        {
+          "left": 908,
+          "top": 1097,
+          "width": 153,
+          "height": 171
+        },
+        {
+          "left": 1061,
+          "top": 1097,
+          "width": 180,
+          "height": 171
+        }
+      ]
+    },
+    {
+      "key": "orion-transformed",
+      "heroId": "dungeons2-orion",
+      "transformed": true,
+      "source": "exec-df0e1134-99f1-4ec0-a700-e86ccf33e262.png",
+      "source_sha256": "a4eea8345bde4aef22adac3f038718ad974c3113253ddf7864844b79bc542e2f",
+      "reference": "public/sprites/dungeons2/orion-transformed-directions.webp",
+      "reference_sha256": "e3cb4d5390ca0e8578269d33effaef3e5eb8fb78d96cd969562144d027b8b218",
+      "output": "public/sprites/dungeons2/actions/orion-transformed.webp",
+      "sha256": "d42f2313397a25a6e04be0b5f37a8852e1e1440686b430cac203965e9ef2d4e1",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.38926174496644295,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 154,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 308,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 462,
+          "top": 0,
+          "width": 153,
+          "height": 169
+        },
+        {
+          "left": 615,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 769,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 923,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 1077,
+          "top": 0,
+          "width": 154,
+          "height": 169
+        },
+        {
+          "left": 0,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 154,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 308,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 462,
+          "top": 169,
+          "width": 153,
+          "height": 161
+        },
+        {
+          "left": 615,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 769,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 923,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 1077,
+          "top": 169,
+          "width": 154,
+          "height": 161
+        },
+        {
+          "left": 0,
+          "top": 330,
+          "width": 163,
+          "height": 155
+        },
+        {
+          "left": 163,
+          "top": 330,
+          "width": 159,
+          "height": 155
+        },
+        {
+          "left": 322,
+          "top": 330,
+          "width": 122,
+          "height": 155
+        },
+        {
+          "left": 444,
+          "top": 330,
+          "width": 173,
+          "height": 155
+        },
+        {
+          "left": 617,
+          "top": 330,
+          "width": 137,
+          "height": 155
+        },
+        {
+          "left": 754,
+          "top": 330,
+          "width": 178,
+          "height": 155
+        },
+        {
+          "left": 932,
+          "top": 330,
+          "width": 135,
+          "height": 155
+        },
+        {
+          "left": 1067,
+          "top": 330,
+          "width": 164,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 485,
+          "width": 162,
+          "height": 154
+        },
+        {
+          "left": 162,
+          "top": 485,
+          "width": 146,
+          "height": 154
+        },
+        {
+          "left": 308,
+          "top": 485,
+          "width": 154,
+          "height": 154
+        },
+        {
+          "left": 462,
+          "top": 485,
+          "width": 153,
+          "height": 154
+        },
+        {
+          "left": 615,
+          "top": 485,
+          "width": 152,
+          "height": 154
+        },
+        {
+          "left": 767,
+          "top": 485,
+          "width": 156,
+          "height": 154
+        },
+        {
+          "left": 923,
+          "top": 485,
+          "width": 154,
+          "height": 154
+        },
+        {
+          "left": 1077,
+          "top": 485,
+          "width": 154,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 639,
+          "width": 163,
+          "height": 156
+        },
+        {
+          "left": 163,
+          "top": 639,
+          "width": 145,
+          "height": 156
+        },
+        {
+          "left": 308,
+          "top": 639,
+          "width": 156,
+          "height": 156
+        },
+        {
+          "left": 464,
+          "top": 639,
+          "width": 151,
+          "height": 156
+        },
+        {
+          "left": 615,
+          "top": 639,
+          "width": 164,
+          "height": 156
+        },
+        {
+          "left": 779,
+          "top": 639,
+          "width": 144,
+          "height": 156
+        },
+        {
+          "left": 923,
+          "top": 639,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 1076,
+          "top": 639,
+          "width": 155,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 154,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 308,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 462,
+          "top": 795,
+          "width": 153,
+          "height": 156
+        },
+        {
+          "left": 615,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 769,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 923,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 1077,
+          "top": 795,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 951,
+          "width": 155,
+          "height": 155
+        },
+        {
+          "left": 155,
+          "top": 951,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 308,
+          "top": 951,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 462,
+          "top": 951,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 615,
+          "top": 951,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 769,
+          "top": 951,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 923,
+          "top": 951,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 1077,
+          "top": 951,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 1106,
+          "width": 166,
+          "height": 172
+        },
+        {
+          "left": 166,
+          "top": 1106,
+          "width": 155,
+          "height": 172
+        },
+        {
+          "left": 321,
+          "top": 1106,
+          "width": 142,
+          "height": 172
+        },
+        {
+          "left": 463,
+          "top": 1106,
+          "width": 152,
+          "height": 172
+        },
+        {
+          "left": 615,
+          "top": 1106,
+          "width": 162,
+          "height": 172
+        },
+        {
+          "left": 777,
+          "top": 1106,
+          "width": 150,
+          "height": 172
+        },
+        {
+          "left": 927,
+          "top": 1106,
+          "width": 145,
+          "height": 172
+        },
+        {
+          "left": 1072,
+          "top": 1106,
+          "width": 159,
+          "height": 172
+        }
+      ]
+    },
+    {
+      "key": "leif",
+      "heroId": "dungeons2-leif",
+      "transformed": false,
+      "source": "exec-4998304e-30ab-4654-bf70-d6c6c9b6aaee.png",
+      "source_sha256": "796ab29721800ad958730bb215e3a6c827828d0d3af8c0c5420ea7ee808bdf41",
+      "reference": "public/sprites/dungeons2/leif-directions.webp",
+      "reference_sha256": "22e80712f0cc59eaa3b831c38b036c7d47f28cf88c9077d7750eec352cfd81c6",
+      "output": "public/sprites/dungeons2/actions/leif.webp",
+      "sha256": "57346156bf4fb18262bb1f1010953b99db26c15ee6adac470522276bd760e2e9",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.4,
+      "rowBoundaryDensities": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 153,
+          "height": 164
+        },
+        {
+          "left": 153,
+          "top": 0,
+          "width": 147,
+          "height": 164
+        },
+        {
+          "left": 300,
+          "top": 0,
+          "width": 157,
+          "height": 164
+        },
+        {
+          "left": 457,
+          "top": 0,
+          "width": 153,
+          "height": 164
+        },
+        {
+          "left": 610,
+          "top": 0,
+          "width": 146,
+          "height": 164
+        },
+        {
+          "left": 756,
+          "top": 0,
+          "width": 152,
+          "height": 164
+        },
+        {
+          "left": 908,
+          "top": 0,
+          "width": 162,
+          "height": 164
+        },
+        {
+          "left": 1070,
+          "top": 0,
+          "width": 153,
+          "height": 164
+        },
+        {
+          "left": 0,
+          "top": 164,
+          "width": 153,
+          "height": 158
+        },
+        {
+          "left": 153,
+          "top": 164,
+          "width": 149,
+          "height": 158
+        },
+        {
+          "left": 302,
+          "top": 164,
+          "width": 156,
+          "height": 158
+        },
+        {
+          "left": 458,
+          "top": 164,
+          "width": 152,
+          "height": 158
+        },
+        {
+          "left": 610,
+          "top": 164,
+          "width": 147,
+          "height": 158
+        },
+        {
+          "left": 757,
+          "top": 164,
+          "width": 157,
+          "height": 158
+        },
+        {
+          "left": 914,
+          "top": 164,
+          "width": 156,
+          "height": 158
+        },
+        {
+          "left": 1070,
+          "top": 164,
+          "width": 153,
+          "height": 158
+        },
+        {
+          "left": 0,
+          "top": 322,
+          "width": 162,
+          "height": 160
+        },
+        {
+          "left": 162,
+          "top": 322,
+          "width": 152,
+          "height": 160
+        },
+        {
+          "left": 314,
+          "top": 322,
+          "width": 142,
+          "height": 160
+        },
+        {
+          "left": 456,
+          "top": 322,
+          "width": 148,
+          "height": 160
+        },
+        {
+          "left": 604,
+          "top": 322,
+          "width": 146,
+          "height": 160
+        },
+        {
+          "left": 750,
+          "top": 322,
+          "width": 154,
+          "height": 160
+        },
+        {
+          "left": 904,
+          "top": 322,
+          "width": 153,
+          "height": 160
+        },
+        {
+          "left": 1057,
+          "top": 322,
+          "width": 166,
+          "height": 160
+        },
+        {
+          "left": 0,
+          "top": 482,
+          "width": 153,
+          "height": 161
+        },
+        {
+          "left": 153,
+          "top": 482,
+          "width": 153,
+          "height": 161
+        },
+        {
+          "left": 306,
+          "top": 482,
+          "width": 145,
+          "height": 161
+        },
+        {
+          "left": 451,
+          "top": 482,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 611,
+          "top": 482,
+          "width": 142,
+          "height": 161
+        },
+        {
+          "left": 753,
+          "top": 482,
+          "width": 160,
+          "height": 161
+        },
+        {
+          "left": 913,
+          "top": 482,
+          "width": 155,
+          "height": 161
+        },
+        {
+          "left": 1068,
+          "top": 482,
+          "width": 155,
+          "height": 161
+        },
+        {
+          "left": 0,
+          "top": 643,
+          "width": 163,
+          "height": 156
+        },
+        {
+          "left": 163,
+          "top": 643,
+          "width": 143,
+          "height": 156
+        },
+        {
+          "left": 306,
+          "top": 643,
+          "width": 140,
+          "height": 156
+        },
+        {
+          "left": 446,
+          "top": 643,
+          "width": 155,
+          "height": 156
+        },
+        {
+          "left": 601,
+          "top": 643,
+          "width": 154,
+          "height": 156
+        },
+        {
+          "left": 755,
+          "top": 643,
+          "width": 146,
+          "height": 156
+        },
+        {
+          "left": 901,
+          "top": 643,
+          "width": 134,
+          "height": 156
+        },
+        {
+          "left": 1035,
+          "top": 643,
+          "width": 188,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 799,
+          "width": 153,
+          "height": 153
+        },
+        {
+          "left": 153,
+          "top": 799,
+          "width": 153,
+          "height": 153
+        },
+        {
+          "left": 306,
+          "top": 799,
+          "width": 152,
+          "height": 153
+        },
+        {
+          "left": 458,
+          "top": 799,
+          "width": 150,
+          "height": 153
+        },
+        {
+          "left": 608,
+          "top": 799,
+          "width": 156,
+          "height": 153
+        },
+        {
+          "left": 764,
+          "top": 799,
+          "width": 148,
+          "height": 153
+        },
+        {
+          "left": 912,
+          "top": 799,
+          "width": 158,
+          "height": 153
+        },
+        {
+          "left": 1070,
+          "top": 799,
+          "width": 153,
+          "height": 153
+        },
+        {
+          "left": 0,
+          "top": 952,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 153,
+          "top": 952,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 306,
+          "top": 952,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 459,
+          "top": 952,
+          "width": 144,
+          "height": 155
+        },
+        {
+          "left": 603,
+          "top": 952,
+          "width": 154,
+          "height": 155
+        },
+        {
+          "left": 757,
+          "top": 952,
+          "width": 151,
+          "height": 155
+        },
+        {
+          "left": 908,
+          "top": 952,
+          "width": 162,
+          "height": 155
+        },
+        {
+          "left": 1070,
+          "top": 952,
+          "width": 153,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 1107,
+          "width": 155,
+          "height": 179
+        },
+        {
+          "left": 155,
+          "top": 1107,
+          "width": 151,
+          "height": 179
+        },
+        {
+          "left": 306,
+          "top": 1107,
+          "width": 146,
+          "height": 179
+        },
+        {
+          "left": 452,
+          "top": 1107,
+          "width": 154,
+          "height": 179
+        },
+        {
+          "left": 606,
+          "top": 1107,
+          "width": 148,
+          "height": 179
+        },
+        {
+          "left": 754,
+          "top": 1107,
+          "width": 144,
+          "height": 179
+        },
+        {
+          "left": 898,
+          "top": 1107,
+          "width": 167,
+          "height": 179
+        },
+        {
+          "left": 1065,
+          "top": 1107,
+          "width": 158,
+          "height": 179
+        }
+      ]
+    },
+    {
+      "key": "leif-transformed",
+      "heroId": "dungeons2-leif",
+      "transformed": true,
+      "source": "exec-bdc8878b-9f37-40a2-98c3-b4bd92f2f754.png",
+      "source_sha256": "f3a7a95c10c31779cef60f6fde493221a9d36861f266d992244376f42288c728",
+      "reference": "public/sprites/dungeons2/leif-transformed-directions.webp",
+      "reference_sha256": "e5b2e1638f3b12107823e17813017e3f0470399b7936a800cd3c3e6d3848f93e",
+      "output": "public/sprites/dungeons2/actions/leif-transformed.webp",
+      "sha256": "6295d85db989ee9448b89348e340f4a370f869ced2a275642b59b4902b72dc8e",
+      "cell": 96,
+      "anchor": 94,
+      "logicalCell": 192,
+      "logicalAnchor": 188,
+      "scale": 0.38926174496644295,
+      "rowBoundaryDensities": [
+        0.010309278350515464,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rects": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 158,
+          "top": 0,
+          "width": 157,
+          "height": 155
+        },
+        {
+          "left": 315,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 473,
+          "top": 0,
+          "width": 157,
+          "height": 155
+        },
+        {
+          "left": 630,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 788,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 946,
+          "top": 0,
+          "width": 157,
+          "height": 155
+        },
+        {
+          "left": 1103,
+          "top": 0,
+          "width": 158,
+          "height": 155
+        },
+        {
+          "left": 0,
+          "top": 155,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 158,
+          "top": 155,
+          "width": 157,
+          "height": 157
+        },
+        {
+          "left": 315,
+          "top": 155,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 473,
+          "top": 155,
+          "width": 157,
+          "height": 157
+        },
+        {
+          "left": 630,
+          "top": 155,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 788,
+          "top": 155,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 946,
+          "top": 155,
+          "width": 157,
+          "height": 157
+        },
+        {
+          "left": 1103,
+          "top": 155,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 0,
+          "top": 312,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 158,
+          "top": 312,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 316,
+          "top": 312,
+          "width": 159,
+          "height": 154
+        },
+        {
+          "left": 475,
+          "top": 312,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 630,
+          "top": 312,
+          "width": 155,
+          "height": 154
+        },
+        {
+          "left": 785,
+          "top": 312,
+          "width": 161,
+          "height": 154
+        },
+        {
+          "left": 946,
+          "top": 312,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 1103,
+          "top": 312,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 466,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 158,
+          "top": 466,
+          "width": 157,
+          "height": 157
+        },
+        {
+          "left": 315,
+          "top": 466,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 473,
+          "top": 466,
+          "width": 157,
+          "height": 157
+        },
+        {
+          "left": 630,
+          "top": 466,
+          "width": 158,
+          "height": 157
+        },
+        {
+          "left": 788,
+          "top": 466,
+          "width": 156,
+          "height": 157
+        },
+        {
+          "left": 944,
+          "top": 466,
+          "width": 152,
+          "height": 157
+        },
+        {
+          "left": 1096,
+          "top": 466,
+          "width": 165,
+          "height": 157
+        },
+        {
+          "left": 0,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 158,
+          "top": 623,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 315,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 473,
+          "top": 623,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 630,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 788,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 946,
+          "top": 623,
+          "width": 157,
+          "height": 156
+        },
+        {
+          "left": 1103,
+          "top": 623,
+          "width": 158,
+          "height": 156
+        },
+        {
+          "left": 0,
+          "top": 779,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 158,
+          "top": 779,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 315,
+          "top": 779,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 473,
+          "top": 779,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 630,
+          "top": 779,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 788,
+          "top": 779,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 946,
+          "top": 779,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 1103,
+          "top": 779,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 933,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 158,
+          "top": 933,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 315,
+          "top": 933,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 473,
+          "top": 933,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 630,
+          "top": 933,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 788,
+          "top": 933,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 946,
+          "top": 933,
+          "width": 157,
+          "height": 154
+        },
+        {
+          "left": 1103,
+          "top": 933,
+          "width": 158,
+          "height": 154
+        },
+        {
+          "left": 0,
+          "top": 1087,
+          "width": 175,
+          "height": 160
+        },
+        {
+          "left": 175,
+          "top": 1087,
+          "width": 156,
+          "height": 160
+        },
+        {
+          "left": 331,
+          "top": 1087,
+          "width": 142,
+          "height": 160
+        },
+        {
+          "left": 473,
+          "top": 1087,
+          "width": 157,
+          "height": 160
+        },
+        {
+          "left": 630,
+          "top": 1087,
+          "width": 160,
+          "height": 160
+        },
+        {
+          "left": 790,
+          "top": 1087,
+          "width": 142,
+          "height": 160
+        },
+        {
+          "left": 932,
+          "top": 1087,
+          "width": 155,
+          "height": 160
+        },
+        {
+          "left": 1087,
+          "top": 1087,
+          "width": 174,
+          "height": 160
+        }
+      ]
+    }
+  ]
+}

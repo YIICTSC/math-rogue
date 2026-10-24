@@ -1,3 +1,4 @@
+import {cueD2HeroAction} from './dungeons2/heroActions';
 import {loadD2WorldArt,drawD2Tile,drawD2GroundFeature,drawD2Monster,drawD2Building} from './dungeons2/pixelWorld';
 import { isProtagonistUnlocked } from '../../utils/protagonistUnlocks';
 import {ABYSS_HEROES,abyssHero,abyssSelection,unlockedAbyssHeroes,signatureHero} from './dungeons2/roster';
@@ -338,7 +339,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const exitDojo=()=>{dojoRef.current=null;setDojoRun(null);setPanel('DOJO');refresh();};
  const dojoStep=(action:DojoAction,fromMenu=false)=>{
   const run=dojoRef.current;if(!run)return false;if(panelRef.current&&!fromMenu)return true;if(run.won||run.failed){setPanel('DOJO_PLAY');return true;}
-  if(fromMenu)setPanel(null);const next=dojoAct(run,action);dojoRef.current=next;setDojoRun(next);
+  if(fromMenu)setPanel(null);const next=dojoAct(run,action);dojoRef.current=next;setDojoRun(next);if(b.current.game===2&&next.turns>run.turns){if(action.type==='MOVE')cueD2HeroAction(activeHero().id,next.x!==run.x||next.y!==run.y?'walk':'attack');else if(action.type==='TOOL')cueD2HeroAction(activeHero().id,'swing');}
   if(next.won&&!run.won){dojoComplete(next.stage,next.turns);b.current.log(text('練習クリア！学んだ作戦を冒険でも使おう。','Lesson cleared! Use this strategy in your adventure.'));setPanel('DOJO_PLAY');}
   else if(next.failed){b.current.log(text('もう一度考えてみよう。道具・位置・手数を見直そう。','Try again. Review your tools, position and turn budget.'));setPanel('DOJO_PLAY');}
   refresh();return true;
@@ -440,7 +441,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   return true;
  };
  const incomingDamage=(amount:number)=>{const s=state.current,guard=s.abilityFloor===s.floor&&(s.abilityGuardUntil||0)>s.floorTurns;const scaled=studentDamage(amount,Boolean(s.transformed&&magicForm(activeHero().id)));return guard?Math.ceil(scaled/2):scaled;};
- const moveTown=(dx:number,dy=0)=>{if(panelRef.current||dojoRef.current||b.current.suspended)return;setTownDirection({x:Math.sign(dx),y:Math.sign(dy)});state.current.townX=Math.max(1,Math.min(state.current.place==='HOME'?52:80,(state.current.townX??2)+Math.sign(dx)));refresh();};
+ const moveTown=(dx:number,dy=0)=>{if(panelRef.current||dojoRef.current||b.current.suspended)return;const oldX=state.current.townX??2;setTownDirection({x:Math.sign(dx),y:Math.sign(dy)});state.current.townX=Math.max(1,Math.min(state.current.place==='HOME'?52:80,(state.current.townX??2)+Math.sign(dx)));if(b.current.game===2&&state.current.townX!==oldX)cueD2HeroAction(activeHero().id,'walk');refresh();};
  const enterTown=(kind:string)=>{if(panelRef.current)return;const building=townBuildings(state.current.place==='HOME').find(v=>v.kind===kind);if(!building||Math.abs(building.x-(state.current.townX??2))>2)return;setPanel(kind==='DOJO'?'DOJO':'FACILITY_'+kind);};
  const departRoute=(mode:AdventureMode)=>{if(!modeUnlocked(base.current,mode)||(getExpedition(mode)?.series||1)>b.current.game)return;const s=state.current;if(mode==='STORY'&&s.mode==='STORY'&&!s.returned&&s.floor===1&&!s.storySeen?.includes(1)){s.place='DUNGEON';setPanel(null);openStory(0);refresh();return;}travelFriend.current=cloneItem(s.companion);for(const item of getPossessions())if(!base.current.warehouse.some(i=>i.id===item.id))base.current.warehouse.push(cloneItem(item));base.current.bank+=b.current.player.gold||0;setPanel(null);start(mode,base.current.warehouse.slice(0,16).map(i=>i.id),base.current.bank,null);};
  const newJourney=()=>{travelFriend.current=null;homePending.current=true;setPanel(null);start('STORY',[],0,null);};
