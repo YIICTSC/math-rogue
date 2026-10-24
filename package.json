@@ -156,6 +156,8 @@
     "test:paper-plane:bridge:browser": "node scripts/test-paper-plane-bridge-browser.mjs",
     "test:paper-plane:voices": "node scripts/test-paper-plane-voices.mjs && node scripts/test-paper-plane-bridge-browser.mjs --voices",
     "test:dungeons1:art": "node scripts/test-dungeons1-art.mjs",
+    "test:dungeons1:actions": "node scripts/test-dungeons1-actions.mjs",
+    "test:dungeons1:actions:browser": "node scripts/test-dungeons1-actions-browser.mjs",
     "test:dungeons1:art:browser": "node scripts/test-dungeons1-art-browser.mjs",
     "test:dungeons:chronicles": "node scripts/test-dungeons-chronicles.mjs && node scripts/test-dungeons-chronicle-audio.mjs",
     "test:dungeons:chronicles:browser": "node scripts/test-dungeons-chronicles-browser.mjs && node scripts/test-dungeons-chronicles-browser.mjs --series=2",

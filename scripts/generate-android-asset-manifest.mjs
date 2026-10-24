@@ -1,12 +1,18 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { isSourceAsset } from './source-asset-exclusions.mjs';
 
 const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'android-asset-pack-manifest.json');
 const generatedModulePath = path.resolve('src/generated/androidAssetPackVersions.ts');
+// Scope updates to a complete subtree while preserving entries absent from a sparse checkout.
+const scopeIndex = process.argv.indexOf('--update-prefix');
+const scope = scopeIndex < 0 ? '' : process.argv[scopeIndex + 1];
+if (scopeIndex >= 0 && (!scope || !scope.endsWith('/') || scope.startsWith('/') || scope.includes('\\') || path.posix.normalize(scope) !== scope || scope.split('/').some(part => part === '..' || part === '.'))) {
+  throw new Error('--update-prefix requires a relative directory ending in /');
+}
 const hostedBaseUrl = 'https://yiictsc.github.io/math-rogue/';
 const runtimeExtensions = new Set(['.mp3', '.ogg', '.png', '.svg', '.ttf', '.webp', '.glb']);
 
@@ -97,7 +103,7 @@ const hashFile = (filePath) => new Promise((resolve, reject) => {
   stream.on('end', () => resolve(hash.digest('hex')));
 });
 
-const discoveredFiles = (await walk(publicDir))
+const discoveredFiles = (await walk(path.join(publicDir, scope)))
   .filter(filePath => runtimeExtensions.has(path.extname(filePath).toLowerCase()))
   .filter(filePath => !filePath.endsWith('-source.webp'))
   .map(filePath => ({
@@ -121,6 +127,14 @@ const packs = Object.fromEntries(Object.entries(packDefinitions).map(([id, defin
   id,
   { id, ...definition, version: '', totalBytes: 0, files: [] },
 ]));
+
+if (scope) {
+  const previous = JSON.parse(await readFile(manifestPath, 'utf8'));
+  for (const pack of Object.values(packs)) {
+    pack.files = previous.packs[pack.id].files.filter(file => !file.path.startsWith(scope));
+    pack.totalBytes = pack.files.reduce((sum, file) => sum + file.size, 0);
+  }
+}
 
 for (const file of files) {
   const fileStat = await stat(file.filePath);

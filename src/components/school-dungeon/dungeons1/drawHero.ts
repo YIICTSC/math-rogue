@@ -1,16 +1,23 @@
 import {assetUrl} from '../../../utils/assetPaths';
 import {studentActionSnapshot,D1_ACTION_CELL} from './heroActions';
 import {studentPoseAtlas} from './poseAtlas';
-let warrior:HTMLImageElement|undefined;
-export function loadD1HeroArt(id:string){
- if(id!=='elementary-warrior'||typeof Image==='undefined')return;
- if(!warrior){warrior=new Image();warrior.src=assetUrl('sprites/dungeons1/actions/elementary-warrior.webp');}
- return warrior;
+import {D1_HERO_ACTION_KEYS} from '../../../data/dungeons1HeroActionKeys';
+const paintedAtlases=new Map<string,HTMLImageElement>();
+const MAX_PAINTED_ATLASES=8;
+export function loadD1HeroArt(id:string,transformed=false){
+ const key=id+(transformed&&id.startsWith('magic-')?'-transformed':'');
+ if(!D1_HERO_ACTION_KEYS.has(key)||typeof Image==='undefined')return;
+ let image=paintedAtlases.get(key);
+ if(image){paintedAtlases.delete(key);paintedAtlases.set(key,image);return image;}
+ image=new Image();image.src=assetUrl(`sprites/dungeons1/actions/${key}.webp`);
+ paintedAtlases.set(key,image);
+ if(paintedAtlases.size>MAX_PAINTED_ATLASES)paintedAtlases.delete(paintedAtlases.keys().next().value!);
+ return image;
 }
 /** Artwork is bottom-centered and drawn at integer pixel coordinates. */
 export function drawD1HeroAction(ctx:CanvasRenderingContext2D,id:string,source:HTMLImageElement,facing:number,x:number,y:number,size:number,transformed=false){
  const motion=studentActionSnapshot(id);if(!motion)return false;
- const painted=loadD1HeroArt(id);
+ const painted=loadD1HeroArt(id,transformed);
  ctx.save();ctx.imageSmoothingEnabled=false;
  // The painted atlas has the same 8-direction order as the legacy hero sheets.
  if(painted?.complete&&painted.naturalWidth){
