@@ -103,3 +103,19 @@
 @keyframes kocho-super-reveal { 0% { opacity:0;transform:translateX(9%); } 15%,80% { opacity:1;transform:translateX(0); } 100% { opacity:0;transform:translateX(-5%); } }
 @media(max-width:650px) { .kocho-super-recipes { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }.kocho-super-guide { padding:10px; }.kocho-super-guide-button { font-size:10px;padding:4px; } }
 @media(prefers-reduced-motion:reduce) { .kocho-super-afterimage { animation:none;opacity:.4; }.kocho-super-cutin { animation:none; }.kocho-super-cutin>.kocho-super-art { transform:none; } }
+.kocho-title-screen { --kocho-title-gold:#ffdf9d; padding:0; background:#080f20; }
+.kocho-title-screen .kocho-title-art { flex:1; width:100%; height:100%; min-height:100%; }
+.kocho-title-screen .kocho-title-art>img { object-fit:contain; object-position:center; }
+.kocho-title-screen .kocho-title-art:after { background:linear-gradient(180deg,#030a1fcc,transparent 35%,transparent 60%,#030a1fee); }
+.kocho-title-screen .kocho-title-copy { top:max(24px,env(safe-area-inset-top)); }
+.kocho-title-actions { position:absolute; z-index:2; bottom:max(24px,env(safe-area-inset-bottom)); left:16px; right:16px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.kocho-title-actions button { min-height:48px; padding:12px 28px; border:1px solid var(--kocho-title-gold); border-radius:10px; color:var(--kocho-title-gold); background:#0c1427eb; font-weight:800; }
+.kocho-title-actions button:first-child { display:flex; align-items:center; gap:12px; color:#141c30; background:linear-gradient(110deg,#ead08e,#ffecb1,#c29c52); box-shadow:0 4px 24px #0008; }
+.kocho-title-actions button:focus-visible { outline:3px solid #67e8f9; outline-offset:3px; }
+.kocho-lobby-shell.kocho-selection-shell { display:block; width:min(850px,100%); }
+.kocho-selection-shell .kocho-lobby-controls { height:100%; }
+@media (max-height:500px) and (min-width:600px) {
+  .kocho-title-screen .kocho-title-copy { top:12px; }
+  .kocho-title-screen .kocho-title-copy h1 { font-size:34px; }
+  .kocho-title-actions { bottom:max(12px,env(safe-area-inset-bottom)); flex-direction:row; justify-content:center; }
+}

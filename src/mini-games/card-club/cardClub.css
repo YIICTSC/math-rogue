@@ -110,3 +110,7 @@
 
 .cc-rummy-toolbar{display:flex;flex:none;gap:8px;align-items:center;overflow-x:auto;max-width:100%;scrollbar-width:thin}.cc-rummy-toolbar .cc-rummy-tools{flex:none;flex-wrap:nowrap;margin:0}.cc-rummy-toolbar .cc-hand-toolbar{flex:none;flex-wrap:nowrap;margin:0}.cc-rummy-toolbar button{white-space:nowrap}
 @media (orientation:portrait) and (max-width:600px){.cc-page-table .cc-match:has(.cc-rummy-hand){grid-template-rows:48px minmax(0,1fr) clamp(230px,42dvh,330px)}}
+
+/* Keep title art independent of fixed CSS backgrounds (including mobile WebKit). */
+.cc-page-title{background:#081626}
+.cc-title-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-2;pointer-events:none}

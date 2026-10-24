@@ -875,6 +875,7 @@ const KochoShowdown: React.FC<{
     const [clearedHeroes, setClearedHeroes] = useState(() => storageService.getKochoClearedHeroes());
     const [selectedHero, setSelectedHero] = useState<KochoHeroId>(() => initialKochoState.heroId);
     const [newlyUnlockedHero, setNewlyUnlockedHero] = useState<KochoHeroId | null>(null);
+    const [setupPage, setSetupPage] = useState<'title' | 'hero'>('title');
     const [showGuestCards, setShowGuestCards] = useState(false);
     const unlockedHeroes = unlockedKochoHeroes(clearedHeroes);
     const superArtHero = gameState.phase === 'SETUP' ? selectedHero : gameState.heroId;
@@ -3068,15 +3069,23 @@ const KochoShowdown: React.FC<{
                 </div>
             </div>
 
-            {gameState.phase === 'SETUP' && (
-                <div data-gamepad-modal data-gamepad-initial-scope="kocho-difficulty" className="kocho-lobby">
-                    <div className="kocho-lobby-shell">
-                        <div className="kocho-title-art" style={{'--kocho-title-bg': `url(${assetUrl('sprites/kocho/title.webp')})`} as React.CSSProperties}>
-                            <img src={assetUrl('sprites/kocho/title.webp')} alt=""/>
-                            <div className="kocho-title-copy"><span>KOCHO SHOWDOWN</span><h1>{tr('校長対決')}</h1><p>{tr('一歩と一枚で、校則を超えろ。')}</p></div>
+            {gameState.phase === 'SETUP' && setupPage === 'title' && (
+                <section className="kocho-lobby kocho-title-screen" data-gamepad-modal data-gamepad-initial-scope="kocho-title">
+                    <div className="kocho-title-art" style={{'--kocho-title-bg': `url(${assetUrl('sprites/kocho/title.webp')})`} as React.CSSProperties}>
+                        <img src={assetUrl('sprites/kocho/title.webp')} alt=""/>
+                        <div className="kocho-title-copy"><span>KOCHO SHOWDOWN</span><h1>{tr('校長対決')}</h1><p>{tr('一歩と一枚で、校則を超えろ。')}</p></div>
+                        <div className="kocho-title-actions">
+                            <button data-kocho-enter data-gamepad-initial-choice onClick={() => setSetupPage('hero')}>{tr('主人公選択へ')} <Play size={20}/></button>
+                            <button data-gamepad-back onClick={handleQuit}>{tr('戻る')}</button>
                         </div>
+                    </div>
+                </section>
+            )}
+            {gameState.phase === 'SETUP' && setupPage === 'hero' && (
+                <div data-gamepad-modal data-gamepad-initial-scope="kocho-difficulty" className="kocho-lobby">
+                    <div className="kocho-lobby-shell kocho-selection-shell">
                         <div className="kocho-lobby-controls">
-                        <div className="kocho-lobby-heading"><h2>{tr('主人公選択')}</h2><button data-gamepad-back onClick={handleQuit}>{tr('戻る')}</button></div>
+                        <div className="kocho-lobby-heading"><h2>{tr('主人公選択')}</h2><button data-gamepad-back onClick={() => setSetupPage('title')}>{tr('戻る')}</button></div>
                         <div className="kocho-hero-choices">
                             {KOCHO_HEROES.map(hero => {
                                 const locked = !unlockedHeroes.includes(hero.id);

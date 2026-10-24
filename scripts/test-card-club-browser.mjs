@@ -10,12 +10,25 @@ try{
  server=await createServer({cacheDir:'node_modules/.vite-card-club-qa',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','peerjs']},server:{host:'127.0.0.1',port:5243,hmr:false},plugins:[{name:'card-club-qa',enforce:'pre',transform(code,id){if(id.endsWith('/card-club/CardClub.tsx'))return code.replace('  return <main',hook+'\n  return <main');},configureServer(s){s.middlewares.use('/__club',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__club',`<html><head><link rel="icon" href="data:,"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{margin:0}</style></head><body><div id="root"></div><script type="module" src="/${file}"></script></body></html>`));});}}],logLevel:'error'});
  await server.listen();browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||await fs.access('/usr/bin/chromium').then(()=>'/usr/bin/chromium',()=>undefined),args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('PAGEERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.error('CONSOLE',m.text());}});
- await page.goto('http://127.0.0.1:5243/__club'+(process.argv.includes('--voices')?'?voiceTest=1':''));await page.locator('.cc-title-copy').waitFor();await page.getByRole('button',{name:'クラブへ入る'}).click();await page.getByRole('button',{name:'このキャラクターでゲーム選択'}).click();const implemented=await page.evaluate(()=>window.implemented);assert.match(await page.locator('.cc-search-count').innerText(),new RegExp(String(implemented)));assert.equal(await page.locator('.cc-games>button').count(),implemented);
+ await page.goto('http://127.0.0.1:5243/__club'+(process.argv.includes('--voices')?'?voiceTest=1':''));await page.locator('.cc-title-copy').waitFor();
+ for(const [width,height] of [[1280,900],[390,844],[844,390]]) {
+  await page.setViewportSize({width,height});
+  await page.locator('.cc-title-art').evaluate(img=>img.decode());
+  assert(await page.locator('.cc-title-art').evaluate(img=>img.naturalWidth>0));
+  const art=await page.locator('.cc-title-art').boundingBox();
+  assert(art && art.width>=width && art.height>=height,'Dedicated title image fills the viewport');
+  await page.screenshot({path:`${dir}/title-${width}x${height}.png`});
+ }
+ await page.setViewportSize({width:1280,height:900});await page.getByRole('button',{name:'クラブへ入る'}).click();await page.getByRole('button',{name:'このキャラクターでゲーム選択'}).click();const implemented=await page.evaluate(()=>window.implemented);assert.match(await page.locator('.cc-search-count').innerText(),new RegExp(String(implemented)));assert.equal(await page.locator('.cc-games>button').count(),implemented);
  assert.equal(await page.locator('.cc-reference').count(),0);assert(!/467|未対応|Reference entries/.test(await page.locator('.cc-search-count').innerText()));await page.locator('input[type=search]').fill('faro');await page.locator('.cc-empty-search').waitFor();assert.equal(await page.locator('.cc-games>button').count(),0);assert.equal(await page.locator('a[href*=faro]').count(),0);await page.locator('input[type=search]').fill('');
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--rummy-groups')){
+ if(process.argv.includes('--titles')){
+  await page.locator('.cc-header button').first().click();await page.locator('.cc-heroes').waitFor();
+  await page.locator('.cc-header button').first().click();await page.locator('.cc-title-copy').waitFor();
+  assert.deepEqual(errors,[]);console.log('PASS: title artwork at 3 viewport sizes, hero/game selection and back navigation');
+ }else if(process.argv.includes('--rummy-groups')){
   for(const game of ['ginrummy','rummy']){
    await load(game,2);await mutate(s=>{s.turn=0;s.extra.step=s.game==='ginrummy'?'ginDraw':'draw';s.players[0].hand=[0,1,2,13,14,15,26,27,28,35];});
    const before=await page.evaluate(()=>JSON.stringify(window.__club.room().session.state));

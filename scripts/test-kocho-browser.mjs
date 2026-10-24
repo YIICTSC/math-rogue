@@ -14,7 +14,7 @@ try {
  const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});
  page.on('response',res=>{if(res.url().includes('/sprites/kocho/')&&res.status()>=400)errors.push(`${res.status()} ${res.url()}`);});
  const base=`http://127.0.0.1:${server.httpServer.address().port}/kocho-test`;
- await page.goto(base+((process.env.KOCHO_VOICE_TEST||process.env.KOCHO_ENEMY_VOICE_TEST||process.env.KOCHO_SUPER_TEST||process.env.KOCHO_SUPER_AUDIO_TEST)?'?voice=1':''));await page.locator('.kocho-lobby').waitFor();
+ await page.goto(base+((process.env.KOCHO_VOICE_TEST||process.env.KOCHO_ENEMY_VOICE_TEST||process.env.KOCHO_SUPER_TEST||process.env.KOCHO_SUPER_AUDIO_TEST)?'?voice=1':''));await page.locator('[data-kocho-enter]').waitFor();await page.locator('[data-kocho-enter]').click();await page.locator('.kocho-selection-shell').waitFor();
  if(process.env.KOCHO_VOICE_EXPORT){
   const catalog=await page.evaluate(async()=>{const {KOCHO_GUEST_CARDS}=await import('/src/mini-games/kocho/guests.ts');return {shared:__kocho.cards.filter(c=>!KOCHO_GUEST_CARDS.some(g=>g.name===c.name)).map(({name,type})=>({name,type})),guests:KOCHO_GUEST_CARDS.map(({hero,name,type,hiraganaName})=>({hero,name,type,hiraganaName}))};});
   await fs.writeFile('tmp/kocho-voice-cards.json',JSON.stringify(catalog,null,2));console.log('Exported voice cards',catalog.shared.length,catalog.guests.length);await browser.close();await server.close();process.exit(0);
@@ -36,7 +36,17 @@ try {
   await testKochoVoices(page,base);
   assert.deepEqual(errors,[]);await browser.close();await server.close();process.exit(0);
  }
+ await page.locator('.kocho-lobby-heading button').click();
+ assert.equal(await page.locator('[data-kocho-hero]').count(),0);
  await page.locator('.kocho-title-art img').evaluate(img=>img.decode());
+ for(const [width,height] of [[1280,900],[390,844],[844,390]]) {
+  await page.setViewportSize({width,height});
+  const button=await page.locator('[data-kocho-enter]').boundingBox();
+  assert(button && button.y>=0 && button.y+button.height<=height);
+  await page.screenshot({path:`${out}/title-${width}x${height}.png`});
+ }
+ await page.setViewportSize({width:1280,height:900});
+ await page.locator('[data-kocho-enter]').click();
  assert.equal(await page.locator('[data-kocho-hero=rebel]').isDisabled(),true);
  assert.equal(await page.locator('[data-kocho-hero=akari]').isDisabled(),true);
  await page.screenshot({path:`${out}/title-desktop.png`});
@@ -149,7 +159,7 @@ try {
  await page.getByRole('button',{name:'主人公選択へ'}).waitFor();assert.equal(await page.evaluate(()=>localStorage.pixel_spire_kocho_ranking_v1),before);
  for(const lang of ['en','hi']) {
    await page.evaluate(()=>localStorage.removeItem('pixel_spire_kocho_state_v1'));
-   await page.goto(`${base}?lang=${lang}`);await page.locator('.kocho-lobby').waitFor();await page.locator('[data-kocho-hero=akari]').click();
+   await page.goto(`${base}?lang=${lang}`);await page.locator('[data-kocho-enter]').waitFor();await page.locator('[data-kocho-enter]').click();await page.locator('.kocho-selection-shell').waitFor();await page.locator('[data-kocho-hero=akari]').click();
    await page.screenshot({path:`${out}/title-${lang}.png`});
    if(lang==='en') {
      assert.equal(/[ぁ-んァ-ヶ一-龠]/.test(await page.locator('.kocho-lobby').innerText()),false);
