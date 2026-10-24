@@ -1,0 +1,1058 @@
+[
+  {
+    "id": "elementary-warrior",
+    "en": "the bold schoolchild",
+    "open": [
+      "強いふりをして、泣いている友だちに気づけなかった。だから、事情を聞かずには進めない。",
+      "I acted brave and missed a friend’s tears. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "強いふりをして、泣いている友だちに気づけなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I acted brave and missed a friend’s tears. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "一番先に行くより、最後の一人を迎えに行く。",
+      "I will meet the last person instead of racing to be first."
+    ],
+    "resolve": [
+      "一番先に行くより、最後の一人を迎えに行く。そのために失うものも、私の選択として覚えておく。",
+      "I will meet the last person instead of racing to be first. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-caretaker",
+    "en": "the animal keeper",
+    "open": [
+      "名前をつけた命を、最後まで見送れなかった。だから、事情を聞かずには進めない。",
+      "I could not stay until the end with a creature I had named. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "名前をつけた命を、最後まで見送れなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I could not stay until the end with a creature I had named. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "世話をすることを、閉じ込める理由にしない。",
+      "Care must never become a reason to imprison."
+    ],
+    "resolve": [
+      "世話をすることを、閉じ込める理由にしない。そのために失うものも、私の選択として覚えておく。",
+      "Care must never become a reason to imprison. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-assassin",
+    "en": "the new pupil",
+    "open": [
+      "転校するたび、前の町をなかったことにした。だから、事情を聞かずには進めない。",
+      "Each transfer made me pretend my old home never existed. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "転校するたび、前の町をなかったことにした。同じことを、この迷宮でも繰り返すのかな。",
+      "Each transfer made me pretend my old home never existed. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "別れた人のいる場所を、消さずに進みたい。",
+      "I want to move forward without erasing the places I left."
+    ],
+    "resolve": [
+      "別れた人のいる場所を、消さずに進みたい。そのために失うものも、私の選択として覚えておく。",
+      "I want to move forward without erasing the places I left. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-dodgeball",
+    "en": "the dodgeball ace",
+    "open": [
+      "勝つために狙った子が、次の日から遊ばなくなった。だから、事情を聞かずには進めない。",
+      "The child I targeted to win stopped joining our games. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "勝つために狙った子が、次の日から遊ばなくなった。同じことを、この迷宮でも繰り返すのかな。",
+      "The child I targeted to win stopped joining our games. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "勝った側だけが笑う遊びには戻らない。",
+      "I will not return to a game only the winners enjoy."
+    ],
+    "resolve": [
+      "勝った側だけが笑う遊びには戻らない。そのために失うものも、私の選択として覚えておく。",
+      "I will not return to a game only the winners enjoy. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-bard",
+    "en": "the radio monitor",
+    "open": [
+      "大きな声を出せば、皆に届くと思っていた。だから、事情を聞かずには進めない。",
+      "I thought speaking loudly meant everyone could hear me. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "大きな声を出せば、皆に届くと思っていた。同じことを、この迷宮でも繰り返すのかな。",
+      "I thought speaking loudly meant everyone could hear me. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "小さい声が消えない放送をしたい。",
+      "I want a broadcast that leaves room for quiet voices."
+    ],
+    "resolve": [
+      "小さい声が消えない放送をしたい。そのために失うものも、私の選択として覚えておく。",
+      "I want a broadcast that leaves room for quiet voices. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-librarian",
+    "en": "the library monitor",
+    "open": [
+      "返却されない本の向こうに、人がいると忘れていた。だから、事情を聞かずには進めない。",
+      "I forgot there was a person behind every overdue book. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "返却されない本の向こうに、人がいると忘れていた。同じことを、この迷宮でも繰り返すのかな。",
+      "I forgot there was a person behind every overdue book. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "規則を守るために、読む人を置いていかない。",
+      "I will not abandon readers just to protect a rule."
+    ],
+    "resolve": [
+      "規則を守るために、読む人を置いていかない。そのために失うものも、私の選択として覚えておく。",
+      "I will not abandon readers just to protect a rule. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-chef",
+    "en": "the lunch leader",
+    "open": [
+      "残した子を叱った。食べられない理由を聞かなかった。だから、事情を聞かずには進めない。",
+      "I scolded a child for leftovers without asking why. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "残した子を叱った。食べられない理由を聞かなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I scolded a child for leftovers without asking why. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "同じ量より、同じ席に座れることを大切にする。",
+      "Sharing a table matters more than eating the same amount."
+    ],
+    "resolve": [
+      "同じ量より、同じ席に座れることを大切にする。そのために失うものも、私の選択として覚えておく。",
+      "Sharing a table matters more than eating the same amount. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-gardener",
+    "en": "the garden monitor",
+    "open": [
+      "枯れた花を抜けば失敗が消えると思った。だから、事情を聞かずには進めない。",
+      "I thought pulling a dead flower would erase my mistake. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "枯れた花を抜けば失敗が消えると思った。同じことを、この迷宮でも繰り返すのかな。",
+      "I thought pulling a dead flower would erase my mistake. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "育たなかった種も、次の春の記録に残す。",
+      "Even seeds that never sprouted belong in our record of spring."
+    ],
+    "resolve": [
+      "育たなかった種も、次の春の記録に残す。そのために失うものも、私の選択として覚えておく。",
+      "Even seeds that never sprouted belong in our record of spring. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "elementary-mage",
+    "en": "the science-club leader",
+    "open": [
+      "実験を成功させるため、都合の悪い数を消した。だから、事情を聞かずには進めない。",
+      "I erased inconvenient numbers to make an experiment succeed. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "実験を成功させるため、都合の悪い数を消した。同じことを、この迷宮でも繰り返すのかな。",
+      "I erased inconvenient numbers to make an experiment succeed. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "わからないことを、誰かのせいにしない。",
+      "I will not blame someone for what I cannot explain."
+    ],
+    "resolve": [
+      "わからないことを、誰かのせいにしない。そのために失うものも、私の選択として覚えておく。",
+      "I will not blame someone for what I cannot explain. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-warrior",
+    "en": "the rebel student",
+    "open": [
+      "正しい反抗のつもりで、守りたい人を怖がらせた。だから、事情を聞かずには進めない。",
+      "My righteous rebellion frightened someone I meant to protect. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "正しい反抗のつもりで、守りたい人を怖がらせた。同じことを、この迷宮でも繰り返すのかな。",
+      "My righteous rebellion frightened someone I meant to protect. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "壊した後に暮らす人のことまで、引き受ける。",
+      "I will take responsibility for those who live after the uprising."
+    ],
+    "resolve": [
+      "壊した後に暮らす人のことまで、引き受ける。そのために失うものも、私の選択として覚えておく。",
+      "I will take responsibility for those who live after the uprising. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-caretaker",
+    "en": "the biology senior",
+    "open": [
+      "救えた命の数で、救えなかった命を隠した。だから、事情を聞かずには進めない。",
+      "I hid the lives I lost behind the number I saved. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "救えた命の数で、救えなかった命を隠した。同じことを、この迷宮でも繰り返すのかな。",
+      "I hid the lives I lost behind the number I saved. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "助ける側も弱音を言える場所を作る。",
+      "I will make room for the helpers to admit their pain."
+    ],
+    "resolve": [
+      "助ける側も弱音を言える場所を作る。そのために失うものも、私の選択として覚えておく。",
+      "I will make room for the helpers to admit their pain. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-assassin",
+    "en": "the mysterious transfer student",
+    "open": [
+      "本当の名を隠せば、誰も傷つけないと思った。だから、事情を聞かずには進めない。",
+      "I thought hiding my name would keep everyone safe. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "本当の名を隠せば、誰も傷つけないと思った。同じことを、この迷宮でも繰り返すのかな。",
+      "I thought hiding my name would keep everyone safe. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "秘密を打ち明けるかは、本人が決めるべきだ。",
+      "People must choose for themselves whether to reveal a secret."
+    ],
+    "resolve": [
+      "秘密を打ち明けるかは、本人が決めるべきだ。そのために失うものも、私の選択として覚えておく。",
+      "People must choose for themselves whether to reveal a secret. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-mage",
+    "en": "the chemistry researcher",
+    "open": [
+      "再現できない結果を、存在しないことにした。だから、事情を聞かずには進めない。",
+      "I dismissed a result because I could not reproduce it. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "再現できない結果を、存在しないことにした。同じことを、この迷宮でも繰り返すのかな。",
+      "I dismissed a result because I could not reproduce it. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "説明できなくても、起きた苦しみは消さない。",
+      "A suffering I cannot explain is still real."
+    ],
+    "resolve": [
+      "説明できなくても、起きた苦しみは消さない。そのために失うものも、私の選択として覚えておく。",
+      "A suffering I cannot explain is still real. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-dodgeball",
+    "en": "the basketball ace",
+    "open": [
+      "最後の一本を外した仲間に、何も言えなかった。だから、事情を聞かずには進めない。",
+      "I had nothing to say to the teammate who missed our final shot. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "最後の一本を外した仲間に、何も言えなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I had nothing to say to the teammate who missed our final shot. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "点数のつかない支えも、同じチームの仕事だ。",
+      "Support that scores no points still belongs to the team."
+    ],
+    "resolve": [
+      "点数のつかない支えも、同じチームの仕事だ。そのために失うものも、私の選択として覚えておく。",
+      "Support that scores no points still belongs to the team. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-bard",
+    "en": "the broadcast director",
+    "open": [
+      "編集で沈黙を切ったら、その人の迷いまで消えた。だから、事情を聞かずには進めない。",
+      "I cut a silence and erased the speaker’s uncertainty with it. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "編集で沈黙を切ったら、その人の迷いまで消えた。同じことを、この迷宮でも繰り返すのかな。",
+      "I cut a silence and erased the speaker’s uncertainty with it. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "都合のいい物語にするため、人の声を切らない。",
+      "I will not cut someone’s voice to make a convenient story."
+    ],
+    "resolve": [
+      "都合のいい物語にするため、人の声を切らない。そのために失うものも、私の選択として覚えておく。",
+      "I will not cut someone’s voice to make a convenient story. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-librarian",
+    "en": "the literary secretary",
+    "open": [
+      "上手な言葉で、言えなかった本音を隠した。だから、事情を聞かずには進めない。",
+      "Elegant sentences hid the truth I could not say. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "上手な言葉で、言えなかった本音を隠した。同じことを、この迷宮でも繰り返すのかな。",
+      "Elegant sentences hid the truth I could not say. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "結論のない頁も、最後まで読んでいたい。",
+      "I want to read even the pages that reach no conclusion."
+    ],
+    "resolve": [
+      "結論のない頁も、最後まで読んでいたい。そのために失うものも、私の選択として覚えておく。",
+      "I want to read even the pages that reach no conclusion. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-chef",
+    "en": "the cafeteria chef",
+    "open": [
+      "店を守るため、空腹の人に値札を先に見せた。だから、事情を聞かずには進めない。",
+      "To protect my kitchen, I showed a hungry person the price first. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "店を守るため、空腹の人に値札を先に見せた。同じことを、この迷宮でも繰り返すのかな。",
+      "To protect my kitchen, I showed a hungry person the price first. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "食べる資格を試す前に、温かい席を用意する。",
+      "A warm seat should come before any test of worthiness."
+    ],
+    "resolve": [
+      "食べる資格を試す前に、温かい席を用意する。そのために失うものも、私の選択として覚えておく。",
+      "A warm seat should come before any test of worthiness. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "high-school-gardener",
+    "en": "the horticulture captain",
+    "open": [
+      "整った庭から、勝手に芽吹いた草を追い出した。だから、事情を聞かずには進めない。",
+      "I uprooted a wild seedling because it spoiled my perfect garden. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "整った庭から、勝手に芽吹いた草を追い出した。同じことを、この迷宮でも繰り返すのかな。",
+      "I uprooted a wild seedling because it spoiled my perfect garden. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "手入れを、思い通りにすることと取り違えない。",
+      "I will not mistake tending for controlling."
+    ],
+    "resolve": [
+      "手入れを、思い通りにすることと取り違えない。そのために失うものも、私の選択として覚えておく。",
+      "I will not mistake tending for controlling. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-akari",
+    "en": "Akari Hoshimiya",
+    "open": [
+      "星に選ばれたと思うほど、選ばれない人が見えなくなった。だから、事情を聞かずには進めない。",
+      "Being chosen by a star made me overlook those it did not choose. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "星に選ばれたと思うほど、選ばれない人が見えなくなった。同じことを、この迷宮でも繰り返すのかな。",
+      "Being chosen by a star made me overlook those it did not choose. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "光の輪の外にも、道しるべを置いていく。",
+      "I will leave guide lights outside the circle of the chosen."
+    ],
+    "resolve": [
+      "光の輪の外にも、道しるべを置いていく。そのために失うものも、私の選択として覚えておく。",
+      "I will leave guide lights outside the circle of the chosen. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-shizuku",
+    "en": "Shizuku Mizuki",
+    "open": [
+      "冷静な答えで、泣いていい時間まで凍らせた。だから、事情を聞かずには進めない。",
+      "A calm answer froze the time someone needed to cry. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "冷静な答えで、泣いていい時間まで凍らせた。同じことを、この迷宮でも繰り返すのかな。",
+      "A calm answer froze the time someone needed to cry. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "悲しみが流れる時間を、奪わない。",
+      "I will not take away the time grief needs to flow."
+    ],
+    "resolve": [
+      "悲しみが流れる時間を、奪わない。そのために失うものも、私の選択として覚えておく。",
+      "I will not take away the time grief needs to flow. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-hiyori",
+    "en": "Hiyori Hanasaki",
+    "open": [
+      "笑って励ますたび、泣けない人を増やしていた。だから、事情を聞かずには進めない。",
+      "My cheerful encouragement made it harder for others to cry. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "笑って励ますたび、泣けない人を増やしていた。同じことを、この迷宮でも繰り返すのかな。",
+      "My cheerful encouragement made it harder for others to cry. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "元気でない日にも、隣に座る。",
+      "I will sit beside you on the days you cannot smile."
+    ],
+    "resolve": [
+      "元気でない日にも、隣に座る。そのために失うものも、私の選択として覚えておく。",
+      "I will sit beside you on the days you cannot smile. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-tsubasa",
+    "en": "Tsubasa Kagami",
+    "open": [
+      "勢いで飛び込んで、待つ人の怖さを知らなかった。だから、事情を聞かずには進めない。",
+      "I rushed ahead without understanding the fear of those waiting. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "勢いで飛び込んで、待つ人の怖さを知らなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I rushed ahead without understanding the fear of those waiting. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "戻る合図までが、私の勇気だ。",
+      "My courage must include the signal that I am coming back."
+    ],
+    "resolve": [
+      "戻る合図までが、私の勇気だ。そのために失うものも、私の選択として覚えておく。",
+      "My courage must include the signal that I am coming back. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-rei",
+    "en": "Rei Kuroha",
+    "open": [
+      "影に隠れたら、助けを呼ぶ声も届かなくなった。だから、事情を聞かずには進めない。",
+      "Hiding in shadow also hid my calls for help. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "影に隠れたら、助けを呼ぶ声も届かなくなった。同じことを、この迷宮でも繰り返すのかな。",
+      "Hiding in shadow also hid my calls for help. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "暗い場所にも、誰かを招く印を残す。",
+      "I will leave a sign inviting others into the dark."
+    ],
+    "resolve": [
+      "暗い場所にも、誰かを招く印を残す。そのために失うものも、私の選択として覚えておく。",
+      "I will leave a sign inviting others into the dark. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-madoka",
+    "en": "Madoka Midorikawa",
+    "open": [
+      "皆の願いを合わせるため、違う願いを小さくした。だから、事情を聞かずには進めない。",
+      "To unite our wishes, I made the different ones seem smaller. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "皆の願いを合わせるため、違う願いを小さくした。同じことを、この迷宮でも繰り返すのかな。",
+      "To unite our wishes, I made the different ones seem smaller. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "同じでなくても並んで立てる輪を作る。",
+      "I will make a circle where differences can stand together."
+    ],
+    "resolve": [
+      "同じでなくても並んで立てる輪を作る。そのために失うものも、私の選択として覚えておく。",
+      "I will make a circle where differences can stand together. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-koharu",
+    "en": "Koharu",
+    "open": [
+      "守ってあげると言って、相手の選ぶ手を止めた。だから、事情を聞かずには進めない。",
+      "I promised protection and stopped another person from choosing. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "守ってあげると言って、相手の選ぶ手を止めた。同じことを、この迷宮でも繰り返すのかな。",
+      "I promised protection and stopped another person from choosing. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "守るための手を、選ぶ手の上に置かない。",
+      "My protecting hand must not cover your choosing hand."
+    ],
+    "resolve": [
+      "守るための手を、選ぶ手の上に置かない。そのために失うものも、私の選択として覚えておく。",
+      "My protecting hand must not cover your choosing hand. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-mirai",
+    "en": "Mirai",
+    "open": [
+      "見えた未来を知らせれば救えると思い込んだ。だから、事情を聞かずには進めない。",
+      "I assumed showing the future would be enough to save it. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "見えた未来を知らせれば救えると思い込んだ。同じことを、この迷宮でも繰り返すのかな。",
+      "I assumed showing the future would be enough to save it. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "予言よりも、今ここにいる人の返事を聞く。",
+      "I will listen to the person here before listening to prophecy."
+    ],
+    "resolve": [
+      "予言よりも、今ここにいる人の返事を聞く。そのために失うものも、私の選択として覚えておく。",
+      "I will listen to the person here before listening to prophecy. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-sera",
+    "en": "Sera",
+    "open": [
+      "祈りが届かなかった理由を、自分の弱さだけにした。だから、事情を聞かずには進めない。",
+      "I blamed unanswered prayer entirely on my own weakness. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "祈りが届かなかった理由を、自分の弱さだけにした。同じことを、この迷宮でも繰り返すのかな。",
+      "I blamed unanswered prayer entirely on my own weakness. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "祈る人にも、休む場所が必要だ。",
+      "Those who pray also need a place to rest."
+    ],
+    "resolve": [
+      "祈る人にも、休む場所が必要だ。そのために失うものも、私の選択として覚えておく。",
+      "Those who pray also need a place to rest. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-ren",
+    "en": "Ren",
+    "open": [
+      "勇者になれば、怖かった過去を消せると思った。だから、事情を聞かずには進めない。",
+      "I thought becoming a hero would erase the time I was afraid. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "勇者になれば、怖かった過去を消せると思った。同じことを、この迷宮でも繰り返すのかな。",
+      "I thought becoming a hero would erase the time I was afraid. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "怖かった自分も連れて、先へ進む。",
+      "I will move forward with my frightened past beside me."
+    ],
+    "resolve": [
+      "怖かった自分も連れて、先へ進む。そのために失うものも、私の選択として覚えておく。",
+      "I will move forward with my frightened past beside me. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-soma",
+    "en": "Soma",
+    "open": [
+      "力を封じた理由を、誰にも話さずにいた。だから、事情を聞かずには進めない。",
+      "I never told anyone why I sealed my power. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "力を封じた理由を、誰にも話さずにいた。同じことを、この迷宮でも繰り返すのかな。",
+      "I never told anyone why I sealed my power. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "黙って背負うことだけを、強さにしない。",
+      "Silent endurance must not be our only definition of strength."
+    ],
+    "resolve": [
+      "黙って背負うことだけを、強さにしない。そのために失うものも、私の選択として覚えておく。",
+      "Silent endurance must not be our only definition of strength. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-minato",
+    "en": "Minato",
+    "open": [
+      "盾で守った人に、逃げる道を選ばせなかった。だから、事情を聞かずには進めない。",
+      "My shield protected someone while denying them the choice to flee. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "盾で守った人に、逃げる道を選ばせなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "My shield protected someone while denying them the choice to flee. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "盾の後ろにも、出口を残す。",
+      "I will leave an exit behind my shield."
+    ],
+    "resolve": [
+      "盾の後ろにも、出口を残す。そのために失うものも、私の選択として覚えておく。",
+      "I will leave an exit behind my shield. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-riku",
+    "en": "Riku",
+    "open": [
+      "勝負を降りた友に、臆病だと言ってしまった。だから、事情を聞かずには進めない。",
+      "I called a friend a coward for leaving a contest. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "勝負を降りた友に、臆病だと言ってしまった。同じことを、この迷宮でも繰り返すのかな。",
+      "I called a friend a coward for leaving a contest. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "降りる勇気まで、笑うつもりはない。",
+      "I will not mock the courage it takes to walk away."
+    ],
+    "resolve": [
+      "降りる勇気まで、笑うつもりはない。そのために失うものも、私の選択として覚えておく。",
+      "I will not mock the courage it takes to walk away. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-yamato",
+    "en": "Yamato",
+    "open": [
+      "正しい道を教えるばかりで、歩く人を見ていなかった。だから、事情を聞かずには進めない。",
+      "I kept showing the right road without watching its travelers. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "正しい道を教えるばかりで、歩く人を見ていなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I kept showing the right road without watching its travelers. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "道しるべは、人の歩幅に合わせて置く。",
+      "Guideposts should respect the traveler’s stride."
+    ],
+    "resolve": [
+      "道しるべは、人の歩幅に合わせて置く。そのために失うものも、私の選択として覚えておく。",
+      "Guideposts should respect the traveler’s stride. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-leon",
+    "en": "Leon of the Academy",
+    "open": [
+      "誓いを守るために、新しい助けの声を聞き逃した。だから、事情を聞かずには進めない。",
+      "I missed a new plea for help while protecting an old oath. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "誓いを守るために、新しい助けの声を聞き逃した。同じことを、この迷宮でも繰り返すのかな。",
+      "I missed a new plea for help while protecting an old oath. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "誓いの相手が変わったなら、誓いも問い直す。",
+      "When the people an oath serves change, the oath must be questioned."
+    ],
+    "resolve": [
+      "誓いの相手が変わったなら、誓いも問い直す。そのために失うものも、私の選択として覚えておく。",
+      "When the people an oath serves change, the oath must be questioned. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-elliot",
+    "en": "Elliot",
+    "open": [
+      "計算に合わない優しさを、誤差として切り捨てた。だから、事情を聞かずには進めない。",
+      "I dismissed kindness as an error because it did not fit my calculation. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "計算に合わない優しさを、誤差として切り捨てた。同じことを、この迷宮でも繰り返すのかな。",
+      "I dismissed kindness as an error because it did not fit my calculation. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "答えの外にいる一人も、計算から消さない。",
+      "No person outside the answer should vanish from the calculation."
+    ],
+    "resolve": [
+      "答えの外にいる一人も、計算から消さない。そのために失うものも、私の選択として覚えておく。",
+      "No person outside the answer should vanish from the calculation. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "magic-sakuya",
+    "en": "Sakuya",
+    "open": [
+      "夜の見張りで、一人きりを誇りにしていた。だから、事情を聞かずには進めない。",
+      "I was proud to keep the night watch alone. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "夜の見張りで、一人きりを誇りにしていた。同じことを、この迷宮でも繰り返すのかな。",
+      "I was proud to keep the night watch alone. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "誰かに朝を任せることも、覚えていく。",
+      "I will learn to trust someone else with the morning."
+    ],
+    "resolve": [
+      "誰かに朝を任せることも、覚えていく。そのために失うものも、私の選択として覚えておく。",
+      "I will learn to trust someone else with the morning. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-lyria",
+    "en": "Lyria",
+    "open": [
+      "星冠の重さを、一度も仲間に言わなかった。だから、事情を聞かずには進めない。",
+      "I never told my companions how heavy the star crown was. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "星冠の重さを、一度も仲間に言わなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I never told my companions how heavy the star crown was. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "冠を掲げる前に、隣の顔を見る。",
+      "Before raising a crown, I will look at the person beside me."
+    ],
+    "resolve": [
+      "冠を掲げる前に、隣の顔を見る。そのために失うものも、私の選択として覚えておく。",
+      "Before raising a crown, I will look at the person beside me. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-celis",
+    "en": "Celis",
+    "open": [
+      "傷つけまいとして、返事まで氷の中へしまった。だから、事情を聞かずには進めない。",
+      "To avoid hurting anyone, I locked even my answer in ice. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "傷つけまいとして、返事まで氷の中へしまった。同じことを、この迷宮でも繰り返すのかな。",
+      "To avoid hurting anyone, I locked even my answer in ice. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "溶ける痛みを、誰か一人に負わせない。",
+      "No one should bear the pain of thawing alone."
+    ],
+    "resolve": [
+      "溶ける痛みを、誰か一人に負わせない。そのために失うものも、私の選択として覚えておく。",
+      "No one should bear the pain of thawing alone. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-flora",
+    "en": "Flora",
+    "open": [
+      "森を守る矢が、人を拒む柵になっていた。だから、事情を聞かずには進めない。",
+      "My arrows protecting the forest became a fence against people. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "森を守る矢が、人を拒む柵になっていた。同じことを、この迷宮でも繰り返すのかな。",
+      "My arrows protecting the forest became a fence against people. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "守る森にも、訪ねて来る人の入口を残す。",
+      "A protected forest still needs a welcoming path."
+    ],
+    "resolve": [
+      "守る森にも、訪ねて来る人の入口を残す。そのために失うものも、私の選択として覚えておく。",
+      "A protected forest still needs a welcoming path. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-noctia",
+    "en": "Noctia",
+    "open": [
+      "禁書の名を恐れて、書かれた人の声を読まなかった。だから、事情を聞かずには進めない。",
+      "Fear of a forbidden title kept me from reading the people inside. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "禁書の名を恐れて、書かれた人の声を読まなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "Fear of a forbidden title kept me from reading the people inside. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "恐ろしい物語にも、語る権利を認める。",
+      "Even a frightening story deserves the right to speak."
+    ],
+    "resolve": [
+      "恐ろしい物語にも、語る権利を認める。そのために失うものも、私の選択として覚えておく。",
+      "Even a frightening story deserves the right to speak. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-aurene",
+    "en": "Aurene",
+    "open": [
+      "夜明けを約束しすぎて、夜にいる人を急がせた。だから、事情を聞かずには進めない。",
+      "I promised dawn so eagerly that I hurried those still in the night. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "夜明けを約束しすぎて、夜にいる人を急がせた。同じことを、この迷宮でも繰り返すのかな。",
+      "I promised dawn so eagerly that I hurried those still in the night. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "朝を迎える速さを、人に押しつけない。",
+      "I will not demand that everyone reach morning at my pace."
+    ],
+    "resolve": [
+      "朝を迎える速さを、人に押しつけない。そのために失うものも、私の選択として覚えておく。",
+      "I will not demand that everyone reach morning at my pace. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-ignis",
+    "en": "Ignis",
+    "open": [
+      "燃やせば終わると思って、灰の行き先を考えなかった。だから、事情を聞かずには進めない。",
+      "I thought burning something ended it and never asked where the ashes went. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "燃やせば終わると思って、灰の行き先を考えなかった。同じことを、この迷宮でも繰り返すのかな。",
+      "I thought burning something ended it and never asked where the ashes went. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "炎を使った後の朝まで、責任を持つ。",
+      "My responsibility continues into the morning after the fire."
+    ],
+    "resolve": [
+      "炎を使った後の朝まで、責任を持つ。そのために失うものも、私の選択として覚えておく。",
+      "My responsibility continues into the morning after the fire. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-leon",
+    "en": "Leon",
+    "open": [
+      "聖盾の陰で、守られた人が黙っているのを見落とした。だから、事情を聞かずには進めない。",
+      "I failed to notice the silence behind my sacred shield. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "聖盾の陰で、守られた人が黙っているのを見落とした。同じことを、この迷宮でも繰り返すのかな。",
+      "I failed to notice the silence behind my sacred shield. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "守る相手の言葉が、盾の向きを決める。",
+      "The voices I protect must decide which way my shield faces."
+    ],
+    "resolve": [
+      "守る相手の言葉が、盾の向きを決める。そのために失うものも、私の選択として覚えておく。",
+      "The voices I protect must decide which way my shield faces. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-orion",
+    "en": "Orion",
+    "open": [
+      "呪いを自分の罪にすれば、誰も責めずに済むと思った。だから、事情を聞かずには進めない。",
+      "I thought calling the curse my fault would spare everyone else. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "呪いを自分の罪にすれば、誰も責めずに済むと思った。同じことを、この迷宮でも繰り返すのかな。",
+      "I thought calling the curse my fault would spare everyone else. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "誰か一人の罪にして、世界を簡単にしない。",
+      "I will not simplify the world into one person’s guilt."
+    ],
+    "resolve": [
+      "誰か一人の罪にして、世界を簡単にしない。そのために失うものも、私の選択として覚えておく。",
+      "I will not simplify the world into one person’s guilt. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  },
+  {
+    "id": "dungeons2-leif",
+    "en": "Leif",
+    "open": [
+      "遠くを見通すほど、足元の迷子を見逃していた。だから、事情を聞かずには進めない。",
+      "The farther I looked, the easier it was to miss someone lost beside me. That is why I cannot leave without listening."
+    ],
+    "doubt": [
+      "遠くを見通すほど、足元の迷子を見逃していた。同じことを、この迷宮でも繰り返すのかな。",
+      "The farther I looked, the easier it was to miss someone lost beside me. Am I about to repeat it here?"
+    ],
+    "vow": [
+      "次の道しるべは、いま立っている場所に置く。",
+      "The next guidepost belongs where we are standing now."
+    ],
+    "resolve": [
+      "次の道しるべは、いま立っている場所に置く。そのために失うものも、私の選択として覚えておく。",
+      "The next guidepost belongs where we are standing now. I will remember the cost as part of my own choice."
+    ],
+    "farewell": [
+      "また会う約束を、縛る言葉にはしない。帰る灯だけは残しておく。",
+      "our promise to meet again will not bind you. I will leave a light for your return."
+    ]
+  }
+]

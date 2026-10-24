@@ -2,12 +2,14 @@ import {useEffect,useRef} from 'react';
 import {audioService} from '../../../services/audioService';
 import {createStudentAudio,type StudentAudioAction} from './audio';
 
-type Snapshot={heroId:string;active:boolean;runId?:string;floor:number;hp:number;gameOver:boolean;gameClear:boolean;transformed:boolean;inventory:{id:string}[];equipment:unknown;inDungeon:boolean};
+type Snapshot={movement?:string;heroId:string;active:boolean;runId?:string;floor:number;hp:number;gameOver:boolean;gameClear:boolean;transformed:boolean;inventory:{id:string}[];equipment:unknown;inDungeon:boolean};
 export function useStudentAudio(snapshot:Snapshot){
  const current=useRef(snapshot);current.current=snapshot;
  const controller=useRef<ReturnType<typeof createStudentAudio>|null>(null);
  controller.current??=createStudentAudio(audioService);
  const play=(action:StudentAudioAction,finish=false,element='star',abilityName?:string)=>{if(current.current.active&&typeof document!=='undefined'&&!document.hidden)controller.current!.play(current.current.heroId,action,finish,element,abilityName);};
+ useEffect(()=>()=>audioService.stopDungeonChronicleVoices(true),[]);
+ useEffect(()=>{if(!snapshot.active)audioService.stopDungeonChronicleVoices(true);},[snapshot.active]);
  const previous=useRef(snapshot);
  const lastPlaying=useRef({runId:snapshot.runId,floor:snapshot.floor});
  useEffect(()=>{
@@ -25,6 +27,7 @@ export function useStudentAudio(snapshot:Snapshot){
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.equipment!==before.equipment)play('equip');
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.inventory.length>before.inventory.length)play('pickup');
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.inventory.length<before.inventory.length)play('item');
- },[snapshot.heroId,snapshot.active,snapshot.runId,snapshot.floor,snapshot.hp,snapshot.gameOver,snapshot.gameClear,snapshot.transformed,snapshot.inventory,snapshot.equipment,snapshot.inDungeon]);
+  else if(snapshot.movement&&before.movement&&snapshot.movement!==before.movement)play('walk');
+ },[snapshot.movement,snapshot.heroId,snapshot.active,snapshot.runId,snapshot.floor,snapshot.hp,snapshot.gameOver,snapshot.gameClear,snapshot.transformed,snapshot.inventory,snapshot.equipment,snapshot.inDungeon]);
  return play;
 }

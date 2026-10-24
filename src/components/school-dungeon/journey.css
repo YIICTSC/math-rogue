@@ -22,7 +22,7 @@
 
 .student-hero-grid button:disabled{opacity:.4;filter:grayscale(.5);cursor:not-allowed}
 
-/* Dungeons 2 uses complete ImageGen facades, including their roofs and doors. */
+/* Both Dungeons games use the complete pixel-art facades, roofs and doors. */
 .d2-pixel-town .town-facade { inset:0; width:100%; height:100%; image-rendering:pixelated; background-repeat:no-repeat; }
 .d2-pixel-town .town-roof,.d2-pixel-town .town-window,.d2-pixel-town .town-door { display:none; }
 

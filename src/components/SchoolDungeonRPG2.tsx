@@ -586,7 +586,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     log: message => addLog(message), restart: () => startNewGame(), descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
     clearSave: () => storageService.clearDungeonState2(), itemName: item => getItemName(item), catalog: ITEM_DB, cardSupplies: DUNGEON_CARD_DB.map(card => ({category:'DECK_CARD',type:card.templateId,name:card.name,desc:card.description,value:0})),
   });
-  const studentCue = useStudentAudio({heroId:adventure.hero.id,active:launch==='PLAY'&&!showMathChallenge,runId:adventure.state.runId,floor,hp:player.hp,gameOver,gameClear,transformed:Boolean(adventure.state.transformed),inventory, equipment:player.equipment, inDungeon:adventure.state.place==='DUNGEON'&&!shopState.active});
+  const studentCue = useStudentAudio({movement:adventure.dojoRun?`dojo:${adventure.dojoRun.x},${adventure.dojoRun.y}`:['HOME','RELAY'].includes(adventure.state.place||'')?`town:${adventure.state.townX||0}`:undefined,heroId:adventure.hero.id,active:launch==='PLAY'&&!showMathChallenge,runId:adventure.state.runId,floor,hp:player.hp,gameOver,gameClear,transformed:Boolean(adventure.state.transformed),inventory, equipment:player.equipment, inDungeon:adventure.state.place==='DUNGEON'&&!shopState.active});
   const itemKnown=(item:any):boolean=>Boolean(item&&(identifiedTypes.has(item.type)||(!adventure.isMystery&&item.category!=='STAFF')));
   const allPossessions = useMemo(() => {
     if (!gameOver) return [];
@@ -653,6 +653,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const makeSignatureCard=(heroId:string):DungeonCard|null=>{const hero=abyssHero(heroId);return hero?{templateId:signatureId(hero.id),name:adventure.text(hero.card.name,hero.card.en),type:'SPECIAL',power:0,description:adventure.text('専用カード：広域攻撃・HP25回復・3ターン守護。','Signature: area attack, heal 25 HP and guard for 3 turns.'),icon:<Sparkles size={16}/>,id:`signature-${Date.now()}-${Math.random()}`}:null;};
   const restoreState = (save: any) => {
       adventure.restore(save.adventure, save.floor);
+      setGameClear(Boolean(save.gameClear || save.adventure?.rescued && save.adventure?.chronicle?.pending));
+      setGameOver(false);
       setMap(save.map);
       setVisitedMap(save.visitedMap || Array(MAP_H).fill(null).map(() => Array(MAP_W).fill(false))); 
       setFloorMapRevealed(save.floorMapRevealed || false);
@@ -683,14 +685,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const saveData = useCallback((immediate = false) => {
-      if (launch!=='PLAY' || !map.length || debugPreview || gameOver || gameClear&&adventure.state.pendingStory===undefined || adventure.state.returned&&adventure.state.place!=='HOME') { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
+      if (launch!=='PLAY' || !map.length || debugPreview || gameOver || gameClear&&adventure.state.pendingStory===undefined&&!adventure.state.chronicle?.pending || adventure.state.returned&&adventure.state.place!=='HOME') { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
       const persist = () => {
           if (adventure.state.returned&&adventure.state.place!=='HOME') return;
           const state = {
               map, visitedMap, floorMapRevealed, rooms: roomsRef.current,
               player, enemies, floorItems, traps, inventory,
               floor, level, belly, maxBelly, idMap, identifiedTypes: Array.from(identifiedTypes),
-              isEndless, adventure: adventure.snapshot(), turnCounter: turnCounter.current,
+              isEndless, gameClear, adventure: adventure.snapshot(), turnCounter: turnCounter.current,
               dungeonDeck, dungeonHand, dungeonDiscard,
               shopState, synthState
           };
@@ -928,7 +930,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       });
   }, [player.x, player.y]);
 
-  useEffect(() => { if (!gameOver && !gameClear) saveData(true); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
+  useEffect(() => { if (!gameOver && (!gameClear || adventure.state.pendingStory!==undefined || Boolean(adventure.state.chronicle?.pending))) saveData(true); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
 
   useEffect(() => {
       const list = menuListRef.current;
@@ -1567,7 +1569,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const slid = adventure.slide(tx, ty, rdx, rdy); tx = slid.x; ty = slid.y;
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) { if (target.enemyType === 'SHOPKEEPER') { addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2); setShopState({ active: true, merchantId: target.id, mode: 'BUY' }); setSelectedItemIndex(0); audioService.playSound('select'); } else { attackEnemy(target); processTurn(player.x, player.y); } return; }
-      let finalX = tx; let finalY = ty; cueD2HeroAction(adventure.hero.id,'walk'); setPlayer(p => ({ ...p, x: finalX, y: finalY }));
+      let finalX = tx; let finalY = ty; cueD2HeroAction(adventure.hero.id,'walk'); studentCue('walk'); setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       setVisitedMap(prev => { const next = prev.map(row => [...row]); let changed = false; const startX = finalX - Math.floor(VIEW_W/2); const startY = finalY - Math.floor(VIEW_H/2); for (let y = 0; y < VIEW_H; y++) { for (let x = 0; x < VIEW_W; x++) { const mx = startX + x; const my = startY + y; if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) { if (!next[my][mx]) { next[my][mx] = true; changed = true; } } } } return changed ? next : prev; });
       const trap = traps.find(t => t.x === finalX && t.y === finalY);
       if (trap) { if (trap.visible) { addLog(`${trap.name}を踏んでしまった！`, "red"); activateTrap(trap); } else { addLog("罠だ！", "red"); trap.visible = true; activateTrap(trap); } }
@@ -1659,8 +1661,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (hitEntity) {
           let dmg = adventure.damage(5 + (newRanged.power || 0)); if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
           const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; });
-          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}をたおした！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); studentCue('projectile',Boolean(dead));
-      } else { studentCue('projectile'); addLog("はずした！"); }
+          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}をたおした！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); studentCue('shoot',Boolean(dead));
+      } else { studentCue('shoot'); addLog("はずした！"); }
       processTurn(player.x, player.y);
   };
 
@@ -1779,12 +1781,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           else { const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; }); const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { throwFinished=true; gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); }
 
       } else { if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) { setFloorItems(prev => [...prev, { id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir:{x:0,y:0}, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, itemData: item }]); addLog("飛んでいった。"); } else addLog("彼方へ消え去った。"); }
-      cueD2HeroAction(adventure.hero.id,'throw'); studentCue('projectile',throwFinished); setMenuOpen(false); processTurn(player.x, player.y);
+      cueD2HeroAction(adventure.hero.id,'throw'); studentCue('throw',throwFinished); setMenuOpen(false); processTurn(player.x, player.y);
   };
 
   const handleItemAction = (index: number) => {
       const item = inventory[index]; if (!item) return;
-      const beforeTurns=adventure.state.floorTurns;if (adventure.beforeUse(item)) {if(adventure.state.floorTurns!==beforeTurns)cueD2HeroAction(adventure.hero.id,item.type.startsWith('SCROLL_')?'read':'use');return;}
+      const beforeTurns=adventure.state.floorTurns;if (adventure.beforeUse(item)) {if(adventure.state.floorTurns!==beforeTurns){cueD2HeroAction(adventure.hero.id,item.type.startsWith('SCROLL_')?'read':'use'); studentCue(item.type.startsWith('SCROLL_')?'read':'use');}return;}
       if (['WEAPON','ARMOR','ACCESSORY','RANGED'].includes(item.category) && !adventure.canEquip(item)) return;
       if (item.category === 'STAFF') {
           const { x: dx, y: dy } = player.dir; let target: Entity | null = null; let tx = player.x, ty = player.y;
@@ -1831,7 +1833,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           } else if (item.type === 'SCROLL_UP_A') { if (player.equipment?.armor) { const a = player.equipment.armor; const newA = { ...a, plus: (a.plus || 0) + 1, name: a.name.split('+')[0] + '+' + ((a.plus || 0) + 1) }; setPlayer(p => ({ ...p, equipment: { ...p.equipment!, armor: newA } })); addLog("防具が強化された！"); actionDone = true; } else addLog("防具を装備していない。"); }
           if (actionDone) { setInventory(prev => prev.filter((_, i) => i !== index)); setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); }
       } else if (item.category === 'RANGED') { setPlayer(p => { const currentEquip = p.equipment ? p.equipment.ranged : null; const newEquipment = { ...p.equipment!, ranged: item }; const newInv = [...inventory]; newInv.splice(index, 1); if (currentEquip) newInv.push(currentEquip); setInventory(newInv); addLog(`${item.name}を装備した。`); return { ...p, equipment: newEquipment }; }); actionDone = true; }
-      if (actionDone) { cueD2HeroAction(adventure.hero.id,item.type.startsWith('SCROLL_')?'read':'use'); setMenuOpen(false); processTurn(player.x, player.y); audioService.playSound('select'); }
+      if (actionDone) { cueD2HeroAction(adventure.hero.id,item.type.startsWith('SCROLL_')?'read':'use'); studentCue(item.type.startsWith('SCROLL_')?'read':'use'); setMenuOpen(false); processTurn(player.x, player.y); audioService.playSound('select'); }
   };
   const handleDropItem = (index: number) => {
       if (adventure.blocksInput() || inventory[index]?.cursed || inventory[index]?.shopOwner) return;

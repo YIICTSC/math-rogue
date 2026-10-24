@@ -1,0 +1,35 @@
+{
+  "generator": "ImageGen",
+  "heroId": "elementary-warrior",
+  "source": "elementary-warrior-actions.png",
+  "sourceSha256": "9f42112e4ca60d4dd1ce1a4ab8607980b8f1c5e3126cf1a49dd64904367184b4",
+  "reference": "public/sprites/wandering-student/elementary-warrior.webp",
+  "referenceSha256": "58b1989bf8a9c84c92886d00adde62d9c5c65f64680acfd714ed74e65bf53d4d",
+  "output": "public/sprites/dungeons1/actions/elementary-warrior.webp",
+  "sha256": "d03b268bec9a7f318d6eb5ef363ac5a7b7d70913fb3936671dcb552985cbd507",
+  "columns": [
+    "S",
+    "N",
+    "E",
+    "W",
+    "SE",
+    "SW",
+    "NE",
+    "NW"
+  ],
+  "rows": [
+    "walk-left",
+    "walk-right",
+    "attack",
+    "throw",
+    "swing",
+    "read",
+    "use",
+    "shoot"
+  ],
+  "cell": 96,
+  "baseline": 78,
+  "scale": 0.3758620689655172,
+  "frameCount": 64,
+  "normalization": "Single shared scale, bottom-center anchor matched to the shipped idle sprite, nearest-neighbor, lossless WebP"
+}

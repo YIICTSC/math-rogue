@@ -1,3 +1,4 @@
+import {chronicleVoicePath} from '../components/school-dungeon/chronicles/voices';
 import {paperBridgeVoice} from '../data/paperPlaneBridge';
 import { cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
 import { summerEndingVoiceLimitMs } from '../data/summerEndingVoices';
@@ -594,7 +595,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.voiceVolume === 0) { this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
+      if (this.voiceVolume === 0) { this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1841,7 +1842,7 @@ class AudioService {
   ): Promise<boolean> {
       void this.resumeAudioContext();
       for (const path of paths) {
-          if ((name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
+          if ((name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
@@ -1953,7 +1954,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2150,6 +2151,25 @@ class AudioService {
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
+  }
+
+  /** Original action and story voices shared by both Dungeons series. */
+  public async playDungeonChronicleVoiceFile(actor:string,action:string){
+      const path=chronicleVoicePath(actor,action);if(!path||!this.canPlayConversationVoice())return false;
+      this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      const name=`dungeon-chronicle-voice-${actor}-${action}`;
+      const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(path))],4000,false,generation,true);
+  }
+  public stopDungeonChronicleVoices(includeHeroBanks=false){
+      const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
+      for(const name of names)if(name.startsWith('dungeon-chronicle-voice-')||includeHeroBanks&&(name.startsWith('dungeons2-voice-')||name.startsWith('high-school-voice-')||name.startsWith('magic-voice-'))){
+          this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
+          // Resolve the HTML playback wait before clearing its stop timer, so an
+          // interrupted action cannot leave its speech controller busy forever.
+          for(const audio of [...(this.activeHtmlSfx.get(name)||[])]){const ended=audio.onended;audio.onended=null;audio.pause();audio.currentTime=0;ended?.call(audio,new Event('ended'));}
+          this.stopActiveSfx(name);
+      }
   }
 
   /** Offline, original Irodori v4.1 voices for the nine Dungeons 2 heroes. */

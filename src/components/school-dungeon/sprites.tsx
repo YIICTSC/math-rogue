@@ -1,3 +1,4 @@
+import {cueStudentAction} from './dungeons1/heroActions';
 import {ItemArtIcon,itemArtSpec} from './itemArt';
 import {drawStudentSprite,studentSpriteUrl} from './student/sprites';
 import {STUDENT_ITEM_DB} from './student/content';
@@ -26,8 +27,9 @@ export function TravelerCompanionIcon({companion,size=44}:{companion:Companion;s
  return <SchoolActorIcon role={companion.role} size={size}/>;
 }
 
+const companionPoses=new Map<string,{x:number;y:number;attack?:number}>();
 export function drawCompanionSprite(ctx:CanvasRenderingContext2D,friend:Companion,x:number,y:number,size:number):boolean {
- if(friend.heroId){const dirs=[{x:0,y:1},{x:-1,y:1},{x:-1,y:0},{x:-1,y:-1},{x:0,y:-1},{x:1,y:-1},{x:1,y:0},{x:1,y:1}];return drawStudentSprite(ctx,friend.heroId,dirs[friend.direction??0]||dirs[0],x,y,size);}
+ if(friend.heroId){const last=companionPoses.get(friend.heroId);if(last){if(friend.attackVisualAt&&last.attack!==friend.attackVisualAt)cueStudentAction(friend.heroId,'attack');else if(last.x!==friend.x||last.y!==friend.y)cueStudentAction(friend.heroId,'walk');}companionPoses.set(friend.heroId,{x:friend.x,y:friend.y,attack:friend.attackVisualAt});const dirs=[{x:0,y:1},{x:-1,y:1},{x:-1,y:0},{x:-1,y:-1},{x:0,y:-1},{x:1,y:-1},{x:1,y:0},{x:1,y:1}];return drawStudentSprite(ctx,friend.heroId,dirs[friend.direction??0]||dirs[0],x,y,size);}
  const lost=friend.name==='迷子の同級生',kind=lost?'lost':'companions',image=images[kind];
  const role=friend.role==='HEAL'?0:friend.role==='GUARD'?1:2;
  const direction=Math.max(0,Math.min(7,friend.direction??0)),frame=friend.moving?(friend.walkFrame||0)%2:0;

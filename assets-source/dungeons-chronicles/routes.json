@@ -1,0 +1,1322 @@
+[
+  {
+    "id": "STORY",
+    "npc": [
+      "校門の書記シオン",
+      "Shion, the Gate Scribe"
+    ],
+    "visual": "ink-stained young archivist in indigo robes, brass schoolbell and ledger",
+    "title": [
+      "欠席者の王国",
+      "The Kingdom of Empty Desks"
+    ],
+    "premise": [
+      "校長室の空席が王を名乗り、帰り道に通行税として名前を求めている。",
+      "An empty chair claims the crown and demands names as the toll home."
+    ],
+    "truth": [
+      "書記シオンは消えた同級生ではない。みんなが忘れた「帰る約束」が人になった姿だった。",
+      "Shion is a forgotten promise to return, made human."
+    ],
+    "price": [
+      "王冠を壊せば道は戻る。しかしシオンも約束へ戻り、誰も彼を覚えていられない。",
+      "Breaking the crown restores the roads but erases every memory of Shion."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "名を返す王国",
+          "Kingdom of Returned Names"
+        ],
+        "consequence": [
+          "全員の名を返し、シオンと別れた。門には名前のない小さな鈴が残る。",
+          "Everyone regains a name. Only a nameless bell remembers Shion."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "空席の共同王",
+          "The Shared Crown"
+        ],
+        "consequence": [
+          "一人を王にせず、町中が日替わりで空席を預かる。シオンは最初の案内人になった。",
+          "The town takes turns keeping the empty chair. Shion becomes its guide."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "門の外の朝",
+          "Morning Beyond the Gate"
+        ],
+        "consequence": [
+          "王冠も約束も拒み、まだ地図のない道を拓いた。シオンは初めて自分の行き先を選ぶ。",
+          "You refuse the crown and open an unmapped road. Shion chooses his own destination."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "BARE",
+    "npc": [
+      "無銭の王女リタ",
+      "Rita, the Penniless Princess"
+    ],
+    "visual": "travel-worn princess in patched cloak, empty purse and copper crown",
+    "title": [
+      "銅貨一枚の葬列",
+      "The Copper Funeral"
+    ],
+    "premise": [
+      "一文無しの王女が、自分の葬式の費用を稼ぐため九十九階を歩いている。",
+      "A penniless princess descends ninety-nine floors to pay for her own funeral."
+    ],
+    "truth": [
+      "王女が死者なのではない。王国の借金が彼女の命として数えられていた。",
+      "The kingdom has been counting its debts as the princess’s remaining life."
+    ],
+    "price": [
+      "借用書を燃やせば死者の街も消える。返済すれば次の王女が選ばれる。",
+      "Burn the debt and the city of the dead vanishes; repay it and another princess is chosen."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "空の財布の帰還",
+          "The Empty Purse Returns"
+        ],
+        "consequence": [
+          "借金を帳消しにし、死者たちの名前を街道の石に刻んだ。リタは自分の誕生日を決める。",
+          "You cancel the debt and memorialize the dead. Rita chooses her birthday."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "王冠を質に入れて",
+          "The Pawned Crown"
+        ],
+        "consequence": [
+          "王冠の価値を皆で引き受け、返済を労働でなく助け合いに変えた。",
+          "The town shares the crown’s obligation, replacing payment with mutual care."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "百階目の朝食",
+          "Breakfast on Floor One Hundred"
+        ],
+        "consequence": [
+          "葬列の先に百階目を造り、死者も生者も席につく食卓を開いた。",
+          "You build another floor: a table where the living and dead may sit together."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "MYSTERY",
+    "npc": [
+      "薬名売りのネム",
+      "Nemu, the Seller of Names"
+    ],
+    "visual": "masked apothecary in green coat with floating blank medicine labels",
+    "title": [
+      "正体を売る薬屋",
+      "The Apothecary of Identities"
+    ],
+    "premise": [
+      "名前のない薬屋では、薬の効能と引き換えに昨日の自分を忘れる。",
+      "Every identified medicine costs a memory of yesterday."
+    ],
+    "truth": [
+      "店主ネムの仮面の裏には顔でなく、治した人の病名が積もっていた。",
+      "Nemu’s mask holds the illnesses taken from every healed customer."
+    ],
+    "price": [
+      "すべてを識別すると、誰もが病を知り、同じだけ誰かを疑う。",
+      "Complete knowledge reveals every illness—and teaches everyone whom to fear."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "知らないままの信頼",
+          "Trust Without Labels"
+        ],
+        "consequence": [
+          "最後の薬の名を伏せ、飲む前に互いの話を聞く診療所を作った。",
+          "You keep the final label blank and build a clinic founded on listening."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "仮面のない処方箋",
+          "The Unmasked Prescription"
+        ],
+        "consequence": [
+          "記録を公開し、病名を責める道具にしない誓約を町と交わした。",
+          "Records become public under a covenant against blaming the sick."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "名前のない薬草園",
+          "The Nameless Herb Garden"
+        ],
+        "consequence": [
+          "薬屋を閉じ、失敗も記録する薬草園を開いた。ネムは初めて素顔で笑う。",
+          "The shop becomes a garden that records failures too. Nemu finally smiles."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "TRAPS",
+    "npc": [
+      "からくり師コハク",
+      "Kohaku, the Mechanist"
+    ],
+    "visual": "eccentric brass puppet engineer with spool limbs, red scarf and tiny wooden birds",
+    "title": [
+      "罠たちの賃上げ交渉",
+      "The Traps on Strike"
+    ],
+    "premise": [
+      "踏まれるだけの罠たちが労働組合を結成し、迷宮の出口をストライキで塞いだ。",
+      "Traps form a union and block the exit with a strike."
+    ],
+    "truth": [
+      "コハクは職人でなく、最初に壊されて名前を失った落とし穴だった。",
+      "Kohaku was the first discarded pitfall, given a body by the other traps."
+    ],
+    "price": [
+      "仕掛けを止めると迷宮は安全になるが、罠たちは二度と声を出せない。",
+      "Stopping the machinery makes the maze safe but silences its inhabitants forever."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "踏まない道の協約",
+          "A Treaty of Safe Paths"
+        ],
+        "consequence": [
+          "人と罠で安全な通路を決めた。コハクは毎朝、誰も落ちない落とし穴を磨く。",
+          "Travelers and traps agree on safe lanes. Kohaku polishes a pit no one falls into."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "仕掛けの祝祭",
+          "The Festival of Mechanisms"
+        ],
+        "consequence": [
+          "罠を競技場へ移し、驚きを傷でなく拍手に変えた。",
+          "The traps become a fairground where surprise ends in applause."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "最後の空振り",
+          "The Final Miss"
+        ],
+        "consequence": [
+          "迷宮の役目そのものを終えた。動かない罠のそばで、コハクは物語を話し始める。",
+          "You retire the maze. Beside its silent traps, Kohaku begins telling stories."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "NO_GEAR",
+    "npc": [
+      "鎧脱ぎのエダ",
+      "Eda, the Unarmored Knight"
+    ],
+    "visual": "gentle knight carrying an empty suit of armor, white gym shirt, bandaged hands",
+    "title": [
+      "鎧の中の合唱団",
+      "The Choir Inside the Armor"
+    ],
+    "premise": [
+      "脱ぎ捨てた鎧が持ち主より勇敢に振る舞い、町の決定を代わりに下す。",
+      "Discarded armor acts braver than its owners and begins ruling the town."
+    ],
+    "truth": [
+      "騎士エダが守っていたのは町でなく、弱音を言えない人々の声だった。",
+      "Eda has been guarding the voices of those who cannot admit their fear."
+    ],
+    "price": [
+      "鎧を着れば勝てる。しかし鎧の声が、自分の声に取って代わる。",
+      "Wear the armor and win; its voice will replace your own."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "震える声の議会",
+          "The Assembly of Trembling Voices"
+        ],
+        "consequence": [
+          "弱音も一票と認める町を作った。エダは何も持たない手で門を開く。",
+          "Fear gains a vote. Eda opens the gate with empty hands."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "鎧の番人交代",
+          "The Shared Sentinel"
+        ],
+        "consequence": [
+          "鎧を道具として貸し出し、英雄を一人に決めない約束を結んだ。",
+          "Armor becomes a borrowed tool. No one must remain the town’s only hero."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "素足の行進",
+          "The Barefoot March"
+        ],
+        "consequence": [
+          "鎧の支配を拒み、町人と迷宮の外へ歩いた。最初の足跡は少し震えていた。",
+          "The town leaves the armor behind. Its first footprints tremble."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "CARDS",
+    "npc": [
+      "白札のディーラー・イオ",
+      "Io, the Blank-card Dealer"
+    ],
+    "visual": "androgynous silver-haired card dealer in midnight blue, blank cards and ink-stained gloves",
+    "title": [
+      "明日を賭ける卓",
+      "The Table That Wagers Tomorrow"
+    ],
+    "premise": [
+      "勝つたびに誰かの明日が白札になり、負けた者だけが未来を覚えている。",
+      "Each victory turns someone’s tomorrow into a blank card; only losers remember it."
+    ],
+    "truth": [
+      "イオは未来を奪う胴元でなく、負け続けて未来を預かってきた最後の客だった。",
+      "Io is the last player, losing every game to keep other people’s futures safe."
+    ],
+    "price": [
+      "勝負を降りれば未来は返らない。勝ち続ければ、まだ会わない誰かが消える。",
+      "Leave and the futures remain trapped; keep winning and strangers disappear."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "配り直される明日",
+          "Tomorrow Redealt"
+        ],
+        "consequence": [
+          "全員へ白札を配り、勝者のいない新しい規則で未来を書き直した。",
+          "Everyone receives a blank card and writes rules without a sole winner."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "負け札の博物館",
+          "The Museum of Losing Hands"
+        ],
+        "consequence": [
+          "敗北の記録を公開し、イオの預かった未来を持ち主へ返した。",
+          "You reveal every loss and return the futures Io protected."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "卓をひっくり返す夜",
+          "The Night the Table Fell"
+        ],
+        "consequence": [
+          "勝負そのものを終えた。戻らない未来も抱え、イオと夜明けまで話した。",
+          "You end the game and speak with Io until dawn about futures that cannot return."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "RESCUE",
+    "npc": [
+      "拾得物係ルゥ",
+      "Ruu, Keeper of Lost Things"
+    ],
+    "visual": "small lantern-bearing courier with oversized yellow satchel full of mended toys",
+    "title": [
+      "持ち主を選ぶ忘れ物",
+      "The Lost Things Choose"
+    ],
+    "premise": [
+      "忘れ物が持ち主を審査し、「もう捨てない」と誓うまで帰還を拒んでいる。",
+      "Lost supplies refuse to return until their owners promise never to discard them again."
+    ],
+    "truth": [
+      "ルゥ自身も、誰かが忘れた助けを求める声から生まれた忘れ物だった。",
+      "Ruu was born from a forgotten cry for help."
+    ],
+    "price": [
+      "荷物だけを救えばルゥが残る。ルゥを救えば、荷物の道案内が消える。",
+      "Save the supplies and Ruu stays behind; save Ruu and their guide vanishes."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "ただいまを待つ棚",
+          "The Welcome-home Shelf"
+        ],
+        "consequence": [
+          "道具もルゥも預かる帰還棚を設けた。なくした物を責めない町が始まる。",
+          "The town gives Ruu and the supplies a home without blaming their owners."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "手渡しの約束",
+          "The Hand-delivered Promise"
+        ],
+        "consequence": [
+          "持ち主を一人ずつ訪ね、助けを求めた声まで届けた。ルゥは配達を終えた。",
+          "You visit every owner and deliver the forgotten pleas. Ruu finishes the route."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "忘れても探せる道",
+          "A Road for Finding Again"
+        ],
+        "consequence": [
+          "持ち主であることを条件にせず、誰でも探しに来られる道を開いた。",
+          "You open a path that welcomes anyone seeking something lost."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "PUZZLE",
+    "npc": [
+      "八手の囚人ハチ",
+      "Hachi, the Eight-move Prisoner"
+    ],
+    "visual": "thoughtful young prisoner in checkered cloak holding eight wooden keys",
+    "title": [
+      "正解のない八番目",
+      "The Eighth Answer"
+    ],
+    "premise": [
+      "八手で解ける盤面に、八番目の鍵だけが置かれていない。囚人は笑って待っている。",
+      "An eight-move puzzle has only seven keys. Its prisoner waits with a smile."
+    ],
+    "truth": [
+      "囚人が閉じ込められたのではない。「正解しか許されない」という規則が囚人だった。",
+      "The prisoner is the rule that allows only correct answers."
+    ],
+    "price": [
+      "一つの正解を決めると、試さなかった道の記憶がすべて消える。",
+      "Choose one right answer and every untried path is forgotten."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "九手目の自由",
+          "Freedom on Move Nine"
+        ],
+        "consequence": [
+          "一手の寄り道を認め、盤面にない九手目へ歩いた。ハチは鍵を土に埋める。",
+          "You allow a detour. Hachi buries the keys beyond the board."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "間違いの解説書",
+          "A Guide to Wrong Turns"
+        ],
+        "consequence": [
+          "失敗した道も解説書へ残した。囚人は次の挑戦者を迎える先生になる。",
+          "Failed paths enter the guidebook. Hachi becomes the next traveler’s teacher."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "盤面の外の握手",
+          "A Hand Beyond the Board"
+        ],
+        "consequence": [
+          "問題を解くより先に囚人へ手を差し出した。牢は誰の手も閉じ込められなくなる。",
+          "You reach for Hachi before solving the puzzle. The cell can no longer hold a hand."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "VERDANT",
+    "npc": [
+      "雨税吏モス",
+      "Moss, the Rain-tax Collector"
+    ],
+    "visual": "moss-haired forest tax collector in leaf cloak, rain-filled glass abacus",
+    "title": [
+      "雨を徴収する森",
+      "The Forest That Taxes Rain"
+    ],
+    "premise": [
+      "森の雨税吏は、一滴の雨にも領収書を切り、泣けない木を取り立てている。",
+      "A forest collector issues receipts for every raindrop and pursues trees unable to weep."
+    ],
+    "truth": [
+      "モスは旱魃で亡くなった森の記憶を、税の形で保存していた。",
+      "Moss preserved the memory of a drought by turning rain into a tax."
+    ],
+    "price": [
+      "徴収を止めれば森は潤うが、旱魃を語れる者はいなくなる。",
+      "End the tax and the forest drinks, but no witness to the drought remains."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "雨音の記念碑",
+          "The Rainfall Memorial"
+        ],
+        "consequence": [
+          "雨を分け、乾いた年の記録を年輪に残した。モスは傘を閉じる。",
+          "You share the rain and carve the drought into tree rings. Moss closes the umbrella."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "森の共同水帳",
+          "The Shared Water Ledger"
+        ],
+        "consequence": [
+          "木も旅人も使える水帳を作り、税を備えの約束へ変えた。",
+          "The tax becomes a shared promise to prepare for dry years."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "領収書の花吹雪",
+          "A Blossom Storm of Receipts"
+        ],
+        "consequence": [
+          "領収書を種に変えた。忘れる怖さを抱いたまま、森はもう一度春を選ぶ。",
+          "Receipts become seeds. The forest chooses spring despite its fear of forgetting."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "GLACIER",
+    "npc": [
+      "凍結判事ユキネ",
+      "Yukine, the Frozen Judge"
+    ],
+    "visual": "icy-haired woman judge in pale blue robes carrying a cracked crystal gavel",
+    "title": [
+      "判決を溶かす春",
+      "Spring That Melts the Verdict"
+    ],
+    "premise": [
+      "氷の法廷は、まだ起きていない罪を判決ごと凍らせ、未来の春を封じている。",
+      "An ice court freezes crimes before they happen, imprisoning the coming spring."
+    ],
+    "truth": [
+      "ユキネが凍らせた最初の罪は、救えなかった妹を忘れようとした自分の心だった。",
+      "Yukine first froze her own wish to forget the sister she could not save."
+    ],
+    "price": [
+      "氷を溶かせば罪は起こり得る。しかし凍らせ続ければ誰も選べない。",
+      "Thaw the court and wrongdoing becomes possible; keep it frozen and no one may choose."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "未決の春",
+          "The Unjudged Spring"
+        ],
+        "consequence": [
+          "未来を無罪にも有罪にもせず、春を迎えた。ユキネは判事席を降りる。",
+          "You welcome spring without judging the future. Yukine leaves the bench."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "溶けない証言",
+          "The Unmelting Testimony"
+        ],
+        "consequence": [
+          "記録だけを氷に残し、人を閉じ込めない法廷へ改めた。",
+          "Only evidence remains in the ice. The court stops imprisoning people."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "妹の足跡",
+          "A Sister’s Footprints"
+        ],
+        "consequence": [
+          "過去の判決を捨て、救えなかった者の足跡をたどる旅に出た。",
+          "You abandon the old verdict and follow the footsteps of those left behind."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "TIDAL",
+    "npc": [
+      "謝罪船長ナギ",
+      "Nagi, Captain of Apologies"
+    ],
+    "visual": "sea-blue coat ferry captain with paper boat hat and pearl compass",
+    "title": [
+      "謝れない者の渡し舟",
+      "The Ferry of Unspoken Apologies"
+    ],
+    "premise": [
+      "船長は言えなかった謝罪だけを乗せる。人間は重すぎると、船が乗船を拒んだ。",
+      "A ferry carries unsaid apologies but refuses people as too heavy."
+    ],
+    "truth": [
+      "ナギが待つ相手は川底の自分だった。船を沈めた罪を、自分にだけ謝れずにいた。",
+      "Nagi’s missing passenger is their own drowned past, still awaiting an apology."
+    ],
+    "price": [
+      "謝れば川は静まる。しかし許しを相手へ強いることにもなりかねない。",
+      "An apology calms the river, but it must never demand forgiveness in return."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "返事を待たない手紙",
+          "Letters Without Demands"
+        ],
+        "consequence": [
+          "許しを求めず言葉を届けた。舟は返事のない岸にも停まるようになる。",
+          "You deliver apologies without demanding forgiveness. The ferry visits silent shores."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "川底の共同船台",
+          "The Shared Shipyard"
+        ],
+        "consequence": [
+          "船を沈めた事実を公にし、町と新しい舟を造った。",
+          "The town learns the truth and builds another ferry together."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "泳いで渡る夜明け",
+          "Dawn Across the Water"
+        ],
+        "consequence": [
+          "謝罪を通貨にする渡しを終え、人が自分の力で渡れる橋を架けた。",
+          "You end the toll of apologies and build a bridge anyone may cross."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "ARCHIVE",
+    "npc": [
+      "余白司書サーラ",
+      "Sara, Librarian of Margins"
+    ],
+    "visual": "silver-braided librarian with dark purple coat and book whose pages are moth wings",
+    "title": [
+      "誰も借りていない伝記",
+      "The Biography No One Borrowed"
+    ],
+    "premise": [
+      "書庫には、生まれなかった人の伝記だけが返却され続けている。",
+      "The archive receives returned biographies of people never born."
+    ],
+    "truth": [
+      "サーラは本の人物で、読まれるたび現実の誰か一人の記憶を借りていた。",
+      "Sara is a character who borrows a living person’s memory whenever her book is read."
+    ],
+    "price": [
+      "本を閉じれば借りた記憶は戻るが、サーラの生きた証は消える。",
+      "Close the book and memories return, but every trace of Sara vanishes."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "余白に残る手紙",
+          "Letters in the Margins"
+        ],
+        "consequence": [
+          "借りた記憶を返し、余白へ互いの手紙を残した。サーラは読者でなく友だちを得る。",
+          "Memories return. Letters in the margins give Sara friends instead of borrowers."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "共同著者の書庫",
+          "The Coauthors’ Archive"
+        ],
+        "consequence": [
+          "本の人物にも訂正する権利を認め、現実と物語の共同書庫を開いた。",
+          "Characters gain the right to revise their stories in a shared archive."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "本棚の外の一頁",
+          "A Page Beyond the Shelf"
+        ],
+        "consequence": [
+          "書庫の扉を外し、サーラが自分の伝記の続きを歩き始めた。",
+          "You remove the archive’s door. Sara walks into her unwritten biography."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "FOUNDRY",
+    "npc": [
+      "恐れ鋳工ガンゼ",
+      "Ganze, the Fear Founder"
+    ],
+    "visual": "broad-shouldered soot-covered artisan with ember beard, bronze bell and tongs",
+    "title": [
+      "恐怖で鳴る下校鐘",
+      "The Bell Forged from Fear"
+    ],
+    "premise": [
+      "工作炉は子どもの怖い夢を鋳溶かし、町を守る下校の鐘を造っている。",
+      "A foundry melts children’s nightmares into the bell that protects the town."
+    ],
+    "truth": [
+      "ガンゼは誰も怖がらなくなれば役目を失うため、鐘に自分の恐怖を足していた。",
+      "Ganze feeds the bell with personal fear, terrified of becoming unnecessary."
+    ],
+    "price": [
+      "炉を壊せば夢は返るが、夜の魔物を遠ざける鐘も失う。",
+      "Destroy the furnace and dreams return, but the town loses its warding bell."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "震えを分ける鐘",
+          "The Bell of Shared Fear"
+        ],
+        "consequence": [
+          "怖い夢を皆で聞き、恐怖でなく備えを鐘に込めた。",
+          "The town listens to its nightmares and forges preparation into the bell."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "火守りの休日",
+          "The Firekeeper’s Day Off"
+        ],
+        "consequence": [
+          "炉を小さくし、見張りを交代制にした。ガンゼは初めて休日を取る。",
+          "A smaller furnace and shared watches give Ganze a first day off."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "鐘の鳴らない帰路",
+          "The Homeward Road Without Bells"
+        ],
+        "consequence": [
+          "鐘に従うのでなく、互いを迎えに行く町を選んだ。",
+          "The town stops following the bell and starts meeting one another on the road."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "MIRROR",
+    "npc": [
+      "裏市長ミオラ",
+      "Miora, Mayor of Reflections"
+    ],
+    "visual": "elegant split-haired mayor with half silver half black formal coat, hand mirror",
+    "title": [
+      "鏡のほうが本物だ",
+      "The Mirror Claims Reality"
+    ],
+    "premise": [
+      "鏡像だけが選挙権を持つ町で、現実の住民は影として立ち退きを求められた。",
+      "Reflections alone may vote; living residents are being evicted as shadows."
+    ],
+    "truth": [
+      "ミオラは現実の市長を映していない。住民が誰にも言えなかった願いを映していた。",
+      "Miora reflects not a real mayor but the wishes residents never dared express."
+    ],
+    "price": [
+      "鏡を割れば願いも砕ける。町を譲れば、現実の人が帰る場所を失う。",
+      "Break the mirror and wishes shatter; yield the town and its residents lose their home."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "二つの窓の町",
+          "The Town with Two Windows"
+        ],
+        "consequence": [
+          "鏡像と人に同じ席を作った。ミオラは朝だけ映る市長になる。",
+          "People and reflections share the council. Miora serves at dawn."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "映さない権利",
+          "The Right Not to Reflect"
+        ],
+        "consequence": [
+          "願いをすべて晒さない自由を認め、鏡を窓へ変えた。",
+          "The town gains privacy. Its mirrors become windows."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "裏側からの帰宅",
+          "Homecoming from the Other Side"
+        ],
+        "consequence": [
+          "現実と鏡の呼び名を捨て、互いの家を訪ねる祭りを開いた。",
+          "You discard the labels of real and reflected and visit one another’s homes."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "CLOCKWORK",
+    "npc": [
+      "十二時の借金取りトキ",
+      "Toki, Collector of the Twelfth Hour"
+    ],
+    "visual": "clockwork clerk with gold spectacles, pendulum cane and many stopped watches",
+    "title": [
+      "返済期限は昨日",
+      "Yesterday Was the Deadline"
+    ],
+    "premise": [
+      "時計塔が一日の余った時間を徴収し、昨日の借金を今日の人々へ請求する。",
+      "The tower collects unused hours and bills today’s people for yesterday’s debts."
+    ],
+    "truth": [
+      "トキは時間を奪うのでなく、帰れなかった人の「あと一分」を守っていた。",
+      "Toki preserves the final minute requested by those who never came home."
+    ],
+    "price": [
+      "針を進めれば待ち続けた人が老いる。止めれば新しい出会いも来ない。",
+      "Move the hands and waiting people age; stop them and no new meeting can arrive."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "待ち合わせの一分",
+          "One Minute for Meeting"
+        ],
+        "consequence": [
+          "一分を誰にも貸し付けず、帰る人を待つ広場に残した。",
+          "The last minute becomes a public square for waiting, never a loan."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "遅刻を許す鐘",
+          "The Bell That Forgives Lateness"
+        ],
+        "consequence": [
+          "期限を契約でなく目安へ変え、塔は人を待てる時計になる。",
+          "Deadlines become guides. The tower learns to wait for people."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "針のない旅時計",
+          "The Handless Travel Clock"
+        ],
+        "consequence": [
+          "時計塔を降り、それぞれの歩幅で朝へ進む道を作った。",
+          "You leave the tower and let each traveler reach morning at their own pace."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "STORM",
+    "npc": [
+      "雷廷書官ライカ",
+      "Raika, Clerk of the Thunder Court"
+    ],
+    "visual": "storm-haired celestial scribe with violet cloak, lightning quill and copper star chart",
+    "title": [
+      "雷に訴えられた星",
+      "The Star Sued by Lightning"
+    ],
+    "premise": [
+      "雷は星を「願いの不履行」で訴え、天文台を法廷にしている。",
+      "Lightning sues the stars for failing to grant wishes."
+    ],
+    "truth": [
+      "ライカは願いを記録するほど、願った人の声を雷へ変えていた。",
+      "Each recorded wish turns its speaker’s voice into another thunderbolt."
+    ],
+    "price": [
+      "判決を出せば嵐は止むが、叶わなかった願いは二度と語れない。",
+      "A verdict stops the storm but silences every unfulfilled wish."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "答えない星の灯",
+          "Light from Unanswering Stars"
+        ],
+        "consequence": [
+          "星に答えを強いず、叶わない願いにも居場所を作った。",
+          "You stop demanding answers and give unfulfilled wishes a place to remain."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "雷と紙の和解",
+          "A Treaty of Thunder and Paper"
+        ],
+        "consequence": [
+          "訴状を皆で読み、願いを命令でなく助けを求める言葉へ戻した。",
+          "The town reads the petition and turns commands back into requests for help."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "嵐を連れて歩く",
+          "Walking with the Storm"
+        ],
+        "consequence": [
+          "天文台を開放し、終わらない問いを抱えて星の下を歩いた。",
+          "You open the observatory and walk beneath the stars with unresolved questions."
+        ]
+      }
+    ],
+    "series": 1
+  },
+  {
+    "id": "ABYSS",
+    "npc": [
+      "明日葬の学生オルカ",
+      "Orca, Student of Tomorrow’s Funeral"
+    ],
+    "visual": "pale academy student in torn black uniform, luminous white memorial flowers",
+    "title": [
+      "明日の卒業葬",
+      "Tomorrow’s Graduation Funeral"
+    ],
+    "premise": [
+      "廃学園では、まだ卒業していない学生の葬列だけが明日から届く。",
+      "A ruined academy receives funeral processions from tomorrow for students not yet graduated."
+    ],
+    "truth": [
+      "オルカは生存者でなく、助からなかった未来から届いた謝辞だった。",
+      "Orca is a speech sent back from a future where no one survived."
+    ],
+    "price": [
+      "葬列を止めると警告が消える。続ければ未来を運命として受け入れることになる。",
+      "Stop the procession and lose the warning; accept it and the future becomes fate."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "未送信の卒業式",
+          "The Unsent Graduation"
+        ],
+        "consequence": [
+          "葬列を卒業式へ変え、名を呼ばれた全員に未来の返事を委ねた。",
+          "The funeral becomes a graduation whose students must answer their own futures."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "明日への弔辞",
+          "A Eulogy to Tomorrow"
+        ],
+        "consequence": [
+          "犠牲の記録を残して進路を変えた。オルカの花は新しい学園の庭で咲く。",
+          "You preserve the losses and change course. Orca’s flowers bloom at a new academy."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "深淵へ返す手紙",
+          "Letters Sent into the Abyss"
+        ],
+        "consequence": [
+          "助からなかった未来も切り捨てず、別の明日から返事を送り続けた。",
+          "You keep sending answers to the lost future from another tomorrow."
+        ]
+      }
+    ],
+    "series": 2
+  },
+  {
+    "id": "VOID",
+    "npc": [
+      "別れ園丁セツナ",
+      "Setsuna, Gardener of Farewells"
+    ],
+    "visual": "violet-haired gardener with transparent spade and potted miniature doorways",
+    "title": [
+      "別れを植える庭",
+      "The Garden That Plants Farewells"
+    ],
+    "premise": [
+      "庭の門は、二度と会えない別れを一つ植えなければ開かない。",
+      "Each garden gate requires a farewell that can never be undone."
+    ],
+    "truth": [
+      "セツナは門の向こうで待つ人ではない。誰にも見送られなかった別れの集まりだった。",
+      "Setsuna is the sum of farewells no one stayed to witness."
+    ],
+    "price": [
+      "門を閉じれば別れは増えない。しかし会いたい人のもとへも行けない。",
+      "Close the gates and no new farewell is needed—but no reunion is possible either."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "見送りの花道",
+          "The Flowered Farewell Road"
+        ],
+        "consequence": [
+          "別れを消さずに見送る道を作った。セツナには初めて帰る庭ができる。",
+          "You build a road for witnessing departures. Setsuna finally has a garden to return to."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "鍵を分ける庭",
+          "The Garden of Shared Keys"
+        ],
+        "consequence": [
+          "門の鍵を一人に持たせず、再会の責任を皆で分けた。",
+          "No one holds every key. The responsibility for reunion is shared."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "どこにも通じない門",
+          "The Gate to Nowhere"
+        ],
+        "consequence": [
+          "行き先を求めず門のそばに座った。別れだけだったセツナが、自分の名を選ぶ。",
+          "You sit beside a gate without demanding passage. Setsuna chooses a name."
+        ]
+      }
+    ],
+    "series": 2
+  },
+  {
+    "id": "CHRONICLE",
+    "npc": [
+      "記憶看護師メメ",
+      "Meme, Nurse of Memories"
+    ],
+    "visual": "soft-spoken nurse in rose and white, hourglass stethoscope and ribbon bandages",
+    "title": [
+      "傷を治すと忘れる",
+      "Healing Means Forgetting"
+    ],
+    "premise": [
+      "傷を治すたび、その傷を負った理由まで忘れる保健棟。",
+      "The infirmary heals wounds by erasing the reasons they were suffered."
+    ],
+    "truth": [
+      "メメは自分の傷を一度も治していない。患者の帰り先を忘れないためだった。",
+      "Meme has never healed a personal wound, refusing to forget where the patients belong."
+    ],
+    "price": [
+      "全員を治せば町の悲しみは消える。しかし同じ過ちを覚える者も消える。",
+      "Heal everyone and grief vanishes, along with every lesson it taught."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "痛みのない記録帳",
+          "The Painless Record"
+        ],
+        "consequence": [
+          "痛みを和らげ、理由は記録に残した。メメは誰かの世話を受ける練習を始める。",
+          "Pain eases while its causes remain recorded. Meme begins learning to accept care."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "保健棟の交代勤務",
+          "The Infirmary’s Shared Watch"
+        ],
+        "consequence": [
+          "看護を一人の犠牲にせず、町が回復の場所を支える。",
+          "The town supports healing without making one nurse its sacrifice."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "傷跡の帰還路",
+          "The Road Home with Scars"
+        ],
+        "consequence": [
+          "消したくない記憶を選ぶ権利を守り、傷跡ごと帰れる道を開いた。",
+          "You protect the right to keep memories and return home with scars intact."
+        ]
+      }
+    ],
+    "series": 2
+  },
+  {
+    "id": "CONSTELLATION",
+    "npc": [
+      "星索引ミネル",
+      "Minel, Indexer of Stars"
+    ],
+    "visual": "small celestial librarian with navy cape, orbiting book stars and silver ladder",
+    "title": [
+      "書かれると星になる町",
+      "The Town Written into Stars"
+    ],
+    "premise": [
+      "書庫に伝記を書かれた町人から順に、夜空の星へ移されていく。",
+      "Citizens become stars as soon as their biographies enter the sky archive."
+    ],
+    "truth": [
+      "ミネルが記録を急いだのは、星にならない名が世界から消えると教わったからだ。",
+      "Minel was taught that every unrecorded name would vanish from the world."
+    ],
+    "price": [
+      "星を地上へ返せば夜空は暗くなる。残せば町に人が戻らない。",
+      "Return the stars and the sky darkens; keep them and the town stays empty."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "読みかけの星空",
+          "The Unfinished Night Sky"
+        ],
+        "consequence": [
+          "伝記を完結させず、星にも地上にも続きを残した。",
+          "You leave each biography unfinished, with chapters in both sky and town."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "灯を借りる図書館",
+          "The Library of Borrowed Light"
+        ],
+        "consequence": [
+          "星の光を借りて返す仕組みにし、町人は朝ごと帰れるようになる。",
+          "Starlight becomes a loan that can be returned. Citizens come home each morning."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "名もない星の下で",
+          "Beneath Nameless Stars"
+        ],
+        "consequence": [
+          "記録されなくても存在する権利を選んだ。暗い夜に、人々の声が戻る。",
+          "You defend the right to exist without a record. Voices return to the darkened town."
+        ]
+      }
+    ],
+    "series": 2
+  },
+  {
+    "id": "DRAGON",
+    "npc": [
+      "落第竜の用務員ヴァル",
+      "Val, Janitor of Failed Dragons"
+    ],
+    "visual": "elderly humanlike dragon janitor with amber scales, broom and academy keys",
+    "title": [
+      "竜冠は落第の印",
+      "The Crown of Failed Dragons"
+    ],
+    "premise": [
+      "最終試験の竜冠は、実は卒業できなかった者にだけ授けられる。",
+      "The final trial’s dragon crown is awarded only to those who cannot graduate."
+    ],
+    "truth": [
+      "用務員ヴァルは歴代最強の首席だった。誰も落第者を迎えなかったため、卒業を取り消した。",
+      "Val was the finest graduate, but revoked that honor when no one welcomed the failures."
+    ],
+    "price": [
+      "竜を倒せば卒業できる。しかし落第者を迎える最後の一人を失う。",
+      "Defeat the dragon and graduate, but destroy the last person waiting for those who fail."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "落第者の正門",
+          "The Gate for Those Who Fail"
+        ],
+        "consequence": [
+          "合否と帰る資格を切り離した。ヴァルは初めて門を内側から開ける。",
+          "Homecoming stops depending on a passing grade. Val opens the gate from within."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "冠を置く卒業式",
+          "The Graduation Without Crowns"
+        ],
+        "consequence": [
+          "冠を皆の机へ置き、できなかったことも話す卒業式を開いた。",
+          "The crowns rest on shared desks while graduates speak of what they could not do."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "用務員の新しい鍵",
+          "The Janitor’s New Key"
+        ],
+        "consequence": [
+          "試験場を帰還所へ変えた。ヴァルの新しい鍵には「またおいで」と刻まれる。",
+          "The trial becomes a refuge. Val’s new key is engraved: come again."
+        ]
+      }
+    ],
+    "series": 2
+  },
+  {
+    "id": "INFINITE",
+    "npc": [
+      "九十九門の門衛ヨル",
+      "Yoru, Keeper of Ninety-nine Gates"
+    ],
+    "visual": "ageless dark-haired gatekeeper with layered midnight cloak and ninety-nine tiny brass keys",
+    "title": [
+      "最後の門は内側に",
+      "The Last Gate Opens Inward"
+    ],
+    "premise": [
+      "九十九番目の門には出口でなく、旅立つ前の自分が門番として立っていた。",
+      "The last gate is guarded by the traveler you were before the journey began."
+    ],
+    "truth": [
+      "ヨルは別人ではない。選ばなかった人生すべてが、帰りを待つ役を引き受けていた。",
+      "Yoru is every unchosen life, taking turns waiting for your return."
+    ],
+    "price": [
+      "一つの人生を選ぶと他の道は閉じる。全部を残せば一歩も踏み出せない。",
+      "Choose one life and other roads close; preserve every road and you cannot move."
+    ],
+    "endings": [
+      {
+        "id": "release",
+        "title": [
+          "選ばなかった友へ",
+          "To the Friend Unchosen"
+        ],
+        "consequence": [
+          "選ばない道にも別れを告げ、一つの朝へ進んだ。ヨルは門衛でなく手紙の宛先になる。",
+          "You bid the other roads farewell. Yoru becomes a correspondent instead of a guard."
+        ]
+      },
+      {
+        "id": "accord",
+        "title": [
+          "九十九の帰還灯",
+          "Ninety-nine Homecoming Lights"
+        ],
+        "consequence": [
+          "行き先を共有せずとも帰りを待てる灯を置いた。",
+          "You leave lights for one another without demanding the same destination."
+        ]
+      },
+      {
+        "id": "defy",
+        "title": [
+          "百番目の扉",
+          "The Hundredth Door"
+        ],
+        "consequence": [
+          "最後の門を壊さず、横に新しい扉を作った。鍵は、これから出会う人へ預けた。",
+          "You build a door beside the last gate and leave its key for someone not yet met."
+        ]
+      }
+    ],
+    "series": 2
+  }
+]

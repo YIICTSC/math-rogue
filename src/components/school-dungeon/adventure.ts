@@ -1,3 +1,4 @@
+import type {ChronicleRun,ChronicleRecord} from './chronicles/story';
 import {EXPEDITIONS,expedition,expeditionRequirement,type ExpeditionId} from './expeditions';
 import {routeOpen,ROUTE_ORDER} from './journey';
 import {STUDENT_ITEM_DB} from './student/content';
@@ -11,12 +12,13 @@ export interface SchoolItem {
 }
 export interface Companion {heroId?:string;name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;attackVisualAt?:number;}
 export interface AdventureState {
+ chronicle?:ChronicleRun;
  abilityCooldowns?:Record<string,{floor:number;readyAt:number}>;abilitySightUntil?:number;abilityReadyAt?:number;abilityFloor?:number;abilityGuardUntil?:number;abilityPowerUntil?:number;
  version:1;place?:'HOME'|'DUNGEON'|'RELAY';friendRecruited?:boolean;pendingStory?:number;pendingStoryLine?:number;townX?:number;leavingRelay?:boolean; heroId?:string;transformed?:boolean;storySeen?:number[]; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
  companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean}>; swallowed:Record<string,SchoolItem[]>;
  rescueTarget:number; puzzle:number; puzzleTurns:number; rescued:boolean; sealedTurns:number; returned:boolean;scene?:number;town?:boolean;weather?:string;night?:boolean;townUsed?:string[];festivalSeed?:number;
 }
-export interface SchoolBase {version:1;dungeons2Clears?:number;selectedHero?:string;studentStory?:Record<string,number>;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;dojo?:Record<number,number>;codex?:string[];diary?:string[];claimed?:string[];}
+export interface SchoolBase {chronicleRecords?:ChronicleRecord[];version:1;dungeons2Clears?:number;selectedHero?:string;studentStory?:Record<string,number>;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;dojo?:Record<number,number>;codex?:string[];diary?:string[];claimed?:string[];}
 export const MODES: {id:AdventureMode;ja:string;en:string;desc:string;english:string;floors:number}[] = [
  {id:'STORY',ja:'放課後の大冒険',en:'After-school adventure',desc:'道具持ち込み可。20階の校長先生へ。',english:'Bring equipment and challenge the principal on floor 20.',floors:20},
  {id:'BARE',ja:'手ぶらの99階',en:'Empty-handed 99 floors',desc:'倉庫の道具なし。拾った道具と知恵で99階へ。',english:'No warehouse items. Survive 99 floors with what you find.',floors:99},
