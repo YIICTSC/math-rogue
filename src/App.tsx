@@ -950,6 +950,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MINI_GAME_POKER,
     GameScreen.MINI_GAME_CARD_CLUB,
     GameScreen.MINI_GAME_SURVIVOR,
+    GameScreen.MINI_GAME_STAR_TIDE,
     GameScreen.MINI_GAME_DUNGEON,
     GameScreen.MINI_GAME_DUNGEON_2,
     GameScreen.MINI_GAME_KOCHO,

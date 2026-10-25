@@ -1,0 +1,21 @@
+import {REQUESTS} from './quests';
+export const TITLE='星潮の航路';
+export const SAVE_KEY='learning-rogue:star-tide:v1';
+export const TOOLS=[['星鉄の剣','Starsteel sword'],['潮返しの輪','Tide boomerang'],['灯火の杖','Lantern wand'],['風渡りの鉤','Wind hook'],['岩砕きの槌','Stone hammer'],['星弓','Star bow'],['月鏡の盾','Moon shield'],['暁の槍','Dawn spear']] as const;
+const seeds=[
+ ['漂着の入江','Castaway Cove','消えた潮の音','The missing tide','珊瑚の番人','Coral keeper','目を覚ますと、海は静止していた。航海士のナギは灯台守トワから、島々を結ぶ十二の星灯が消えたと聞く。','Navigator Nagi awakens beside a motionless sea. Towa asks her to relight twelve star beacons.'],
+ ['木霊の樹海','Echo Woods','名前を忘れた森','The nameless forest','根冠の鹿','Rootcrown stag','森の子ミオは、木々の名前を集めている。星灯を取り戻せば、森も記憶を取り戻すだろうか。','Mio collects the forgotten names of trees. Can the beacon restore the forest’s memory?'],
+ ['硝子の干潟','Glass Flats','砕けない約束','An unbroken promise','硝子蛇セイラ','Glass serpent','商人ルカが残した航海帳には、海が止まる前の約束が書かれていた。','Merchant Luca’s log records a promise made before the sea stopped.'],
+ ['時計の丘','Clock Hills','止まった午後','A frozen afternoon','時守の梟','Clockwork owl','丘の時計は同じ午後を指す。修理工セナは、戻せない時間より進める明日を選ぶ。','Mechanic Sena chooses tomorrow over a past she cannot restore.'],
+ ['白銀の峡谷','Silver Gorge','雪の下の便り','Letters under snow','白銀の騎士','Silver knight','配達人ユイの鞄には、届かなかった手紙がある。谷を渡り、待つ人へ言葉を届けよう。','Courier Yui still carries undelivered letters. Cross the gorge to reach those waiting.'],
+ ['熾火の火山','Ember Volcano','火を分ける町','A town sharing fire','熔甲の古亀','Ember tortoise','鍛冶師オルは最後の炉を守っている。火を独り占めするか、町へ分けるかが問われる。','Smith Or guards the final furnace. Its warmth can protect one workshop or an entire town.'],
+ ['夜凪の海岸','Nightshore','影を連れた船','A ship with a shadow','夜渡りの翼','Night manta','暗い海に、自分と同じ船が映る。ナギは失った航路と向き合う。','A shadow ship follows Nagi. She must face the route she lost.'],
+ ['星砂の砂漠','Starsand Desert','道しるべのない旅','A path without signs','砂星の竜','Starsand dragon','案内人リトは星を読めなくなった。それでも旅人の足跡は、新しい道になる。','Guide Rito can no longer read the stars. Travellers’ footsteps can make a new path.'],
+ ['雨音の都','Rainbell City','鳴らない鐘','The silent bell','雨冠の守り手','Raincrown guardian','鐘職人エマは、雨に消えた町の声を鐘へ刻む。集めた記憶が音になる。','Bellmaker Ema gathers the voices the rain washed away.'],
+ ['雲梯の浮島','Cloudstep Isles','帰る場所の形','The shape of home','蒼穹の翼王','Skywing sovereign','浮島の人々は海へ戻ることを恐れる。帰郷だけが救いではないとトワは語る。','The islanders fear returning to sea. Towa reminds Nagi that home can be rebuilt elsewhere.'],
+ ['月鏡の廃都','Moonmirror Ruins','灯を消した理由','Why the lights went out','月鏡の騎士','Moonmirror knight','星灯は嵐を押し返す代わりに、島の記憶を燃やしていた。灯を消したのは、島を守ろうとしたもう一人の航海士だった。','The beacons burned memories to repel storms. Another navigator extinguished them to save the islands.'],
+ ['暁星の灯台','Dawnstar Lighthouse','新しい航路','A new course','忘却の星竜','Oblivion dragon','記憶を燃料にしない新しい星灯を作ろう。集めた声と知恵を携え、ナギは最後の灯台へ登る。','Build a beacon that burns no memories. Carry the islands’ voices and knowledge to the final lighthouse.'],
+] as const;
+export const CHAPTERS=seeds.map((s,i)=>({id:i,name:s[0],en:s[1],title:s[2],titleEn:s[3],boss:s[4],bossEn:s[5],story:s[6],storyEn:s[7],minutes:150,rooms:24,tool:Math.min(7,i),palette:['#74ab76','#386b59','#83b9b3','#b49c65','#aeced8','#bd785b','#576889','#b9a77a','#739bad','#a5c4b3','#8688aa','#dbb88c'][i],quests:REQUESTS[i]}));
+export const ROOM_NAMES=[['船着場','Landing'],['花の小径','Flower path'],['失われた庭','Lost garden'],['川音の広場','River square'],['石橋の先','Beyond the bridge'],['風の見張り台','Wind lookout'],['忘れ物の浜','Lost-and-found shore'],['星門','Star gate'],['前庭','Forecourt'],['回廊','Gallery'],['水路','Canal'],['双子の間','Twin chamber'],['灯火の間','Lantern chamber'],['石守の間','Stone chamber'],['風穴','Wind hollow'],['環の回廊','Ring gallery'],['鍵の庭','Key garden'],['反響の間','Echo chamber'],['星図の間','Chart chamber'],['守りの回廊','Guard gallery'],['記憶庫','Memory vault'],['静寂の階段','Silent stairs'],['星灯の門','Beacon door'],['灯守の祭壇','Keeper altar']] as const;
+export const ENDINGS={restore:['暁の星灯に、新しい航路が刻まれた。島々には、まだ届いていない声や新しい出会いがある。ナギは最初の灯を守り、残された声を探す航海へ船を出した。','A new course is written into the dawn beacon. The islands still hold unheard voices and new encounters. Nagi protects the first beacon and sails to find the remaining voices.'],community:['島々の人々は互いの灯を守る約束を結んだ。届いた手紙も、芽吹いた木々も、新しい星灯を支える。ナギは一人の英雄ではなく、航路を結ぶ最初の仲間になった。','The islands promise to tend one another’s lights. Letters and growing trees sustain the new beacon. Nagi becomes the first companion of a shared voyage.']} as const;

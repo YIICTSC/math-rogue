@@ -1,6 +1,7 @@
 import React from 'react';
 import type { GameplayMode } from '../hooks/useGameplayGamepad';
 const hints: Record<GameplayMode, string> = {
+  'star-tide': 'LS / D-pad: Move · A: Sword / Interact · B: Tool · X: Dodge · Y: Glide · Menu: Journal',
   rpg: 'LS / D-pad: Move · RS: Look · A: Interact · X: Jump · Y: Map · B / Menu: Menu · LB / RB: Turn · LT / RT: Build',
   'rpg-home': 'LS / D-pad: Move / Place · A: Select / Place · B: Menu / Cancel · LB / RB: Rotate · Y: Flip · Menu: Menu',
   vr: 'LS / D-pad: Move · RS: Look · A: Collect (hold) · X: Hold (hold) · RT: Attack · B: Crouch · LB: Decoy · RB: Item · Y: Camera · Menu: Pause',

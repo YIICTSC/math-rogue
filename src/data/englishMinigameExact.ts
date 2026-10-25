@@ -1,5 +1,8 @@
 /** Curated shared English copy for mini-game catalogs without structured card translation. */
 export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  '風と火を活かし、島々を自由に巡る探索・料理・学びの2DアクションRPG。': 'Explore islands freely with wind, fire, cooking and learning in a 2D action RPG.',
+  '星潮の航路': 'Star Tide', '星潮の': 'Star', '航路': 'Tide',
+  '島々の星灯を取り戻す、探索と謎解きと学びのアクションRPG。': 'Explore islands, solve puzzles and learn in a real-time action RPG.',
   '6桁の数字の招待コードを入力してください。': 'Enter the six-digit invitation code.',
   'つぶらな瞳': 'Cute oval eyes',
   '顔の輪郭': 'Face shape', '顔つき': 'Complexion', '目の形': 'Eye shape', '瞳の色': 'Eye color',

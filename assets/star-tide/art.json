@@ -1,0 +1,48 @@
+{
+  "generator": "ImageGen",
+  "source": "/workspace/generated_images/exec-2a1735be-1d6b-4457-a82c-543d65b0099a.png",
+  "sourceSha256": "a8f3f1dd1f3898ead87fdd09c628e84ff26622608797feb17a22fbec42caf607",
+  "output": "sprites/star-tide/atlas.webp",
+  "columns": 8,
+  "rows": 8,
+  "roles": [
+    "hero walk and action",
+    "terrain",
+    "environment",
+    "enemies",
+    "bosses",
+    "weapons",
+    "NPCs"
+  ],
+  "outputSha256": "0ffbde7b54be2e5005ac4184daf3b7e78a92de62960434e2463ce495ab54c629",
+  "grounds": {
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-2163710b-1fda-40ac-b27c-1d5e343b882f.png",
+    "columns": 4,
+    "rows": 3,
+    "sourceSha256": "66f008e7ba7d7cc0496f4084380a1c2c83fa6c906cf75196955f5ae73e3dce95",
+    "outputSha256": "9c3d088b6128473e6ac8c410b3fef6229681aebce3a6072eff1db826d0f0c24c"
+  },
+  "bosses": {
+    "source": "/workspace/generated_images/exec-3beb3e7a-0b64-4c25-9b9b-d414fba3f613.png",
+    "columns": 4,
+    "rows": 3,
+    "sourceSha256": "bc76cafb7a7667a507dfb81b263ea4ab159d7c2674ef8bf0629d1be6aaadfef5",
+    "outputSha256": "73acd28ecd73aeb6acedd28364d60cf17123c4f5a3011c7b2ac4f51d1764d72c"
+  },
+  "dungeons": {
+    "source": "/workspace/generated_images/exec-df77eb64-5ecf-4246-b4c3-dea048b05a0d.png",
+    "columns": 4,
+    "rows": 3,
+    "sourceSha256": "6857be24cbe9ed9a028a3980ed2d561d2e980c3556399823844152b3ba3cbada",
+    "outputSha256": "d21341987cd395b0d0265ca2985cd3309f0d4bcb62b73b649c3e4eb61c92431a"
+  },
+  "wild": {
+    "generator": "ImageGen",
+    "source": "/workspace/generated_images/exec-886827bc-5065-4436-9f83-af2b17fc111b.png",
+    "columns": 4,
+    "rows": 4,
+    "sourceSha256": "51052120fbb2ec0b667b2313392002bf5b156f63639803d60feade13f9072ea7",
+    "outputSha256": "0545aa35d9538477a4009ca0360faac8fc42e03a0d07f1f8b6db7d7152c4ef48"
+  }
+}
