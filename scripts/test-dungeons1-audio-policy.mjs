@@ -57,3 +57,14 @@ for(const hero of ABYSS_HEROES){
  assert(!calls.some(call=>call[0]==='chronicle'));
 }
 console.log('PASS: all 9 Dungeons 2 speakers, 900 silent steps, exact named skills, no unrelated item/skill dialogue.');
+// Retired walking speech must remain silent even for old/default callers.
+const {chronicleVoicePath}=await load('src/components/school-dungeon/chronicles/voices.ts');
+for(const hero of [...PROTAGONISTS,...ABYSS_HEROES]){
+ assert.equal(chronicleVoicePath(hero.id,'walk'),undefined);
+ await assert.rejects(fs.access(`public/sfx/dungeons-chronicles/${hero.id}/walk.ogg`),{code:'ENOENT'});
+ for(const profile of ['default','dungeons1','dungeons2']){
+  const controller=createStudentAudio(port,()=>now,()=>0,profile);calls.length=0;
+  await tick();controller.play(hero.id,'walk',true);assert.deepEqual(calls,[]);
+ }
+}
+console.log('PASS: all 44 walking files removed; no voice or effect from any audio profile; walking paths rejected.');

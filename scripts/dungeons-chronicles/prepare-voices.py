@@ -4,7 +4,6 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[2]
 heroes=json.loads((root/'src/components/school-dungeon/chronicles/heroes.json').read_text());routes=json.loads((root/'assets-source/dungeons-chronicles/routes.json').read_text())
 phrases={
-'walk':['進もう。','次の道へ。','ついてきて。','一歩ずつ。'],
 'attack':['そこだ！','これで！','いくよ！','退いて！'],
  'throw':['届け！','飛んでけ！','これを！','受け取れ！'],
  'swing':['風よ！','道を開け！','力を貸して！','この一振り！'],

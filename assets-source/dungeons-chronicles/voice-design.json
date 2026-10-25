@@ -15,15 +15,6 @@
   "clips": [
     {
       "actor": "elementary-warrior",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "少年らしいの自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924000,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-warrior/walk.ogg"
-    },
-    {
-      "actor": "elementary-warrior",
       "action": "attack",
       "text": "そこだ！",
       "caption": "少年らしいの自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -209,15 +200,6 @@
     },
     {
       "actor": "elementary-caretaker",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "少年らしいの自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924001,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-caretaker/walk.ogg"
-    },
-    {
-      "actor": "elementary-caretaker",
       "action": "attack",
       "text": "これで！",
       "caption": "少年らしいの自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -395,15 +377,6 @@
       "seed": 924001,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/elementary-caretaker/ending-defy.ogg"
-    },
-    {
-      "actor": "elementary-assassin",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "少年らしいの自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924002,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-assassin/walk.ogg"
     },
     {
       "actor": "elementary-assassin",
@@ -587,15 +560,6 @@
     },
     {
       "actor": "elementary-dodgeball",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "少年らしいの自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924003,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-dodgeball/walk.ogg"
-    },
-    {
-      "actor": "elementary-dodgeball",
       "action": "attack",
       "text": "退いて！",
       "caption": "少年らしいの自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -773,15 +737,6 @@
       "seed": 924003,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/elementary-dodgeball/ending-defy.ogg"
-    },
-    {
-      "actor": "elementary-bard",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "少年らしいの自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924004,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-bard/walk.ogg"
     },
     {
       "actor": "elementary-bard",
@@ -965,15 +920,6 @@
     },
     {
       "actor": "elementary-librarian",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "少年らしいの自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924005,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-librarian/walk.ogg"
-    },
-    {
-      "actor": "elementary-librarian",
       "action": "attack",
       "text": "これで！",
       "caption": "少年らしいの自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -1151,15 +1097,6 @@
       "seed": 924005,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/elementary-librarian/ending-defy.ogg"
-    },
-    {
-      "actor": "elementary-chef",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "少年らしいの自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924006,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-chef/walk.ogg"
     },
     {
       "actor": "elementary-chef",
@@ -1343,15 +1280,6 @@
     },
     {
       "actor": "elementary-gardener",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "少年らしいの自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924007,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-gardener/walk.ogg"
-    },
-    {
-      "actor": "elementary-gardener",
       "action": "attack",
       "text": "退いて！",
       "caption": "少年らしいの自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -1529,15 +1457,6 @@
       "seed": 924007,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/elementary-gardener/ending-defy.ogg"
-    },
-    {
-      "actor": "elementary-mage",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "少年らしいの自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924008,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/elementary-mage/walk.ogg"
     },
     {
       "actor": "elementary-mage",
@@ -1721,15 +1640,6 @@
     },
     {
       "actor": "high-school-warrior",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924009,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-warrior/walk.ogg"
-    },
-    {
-      "actor": "high-school-warrior",
       "action": "attack",
       "text": "これで！",
       "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -1907,15 +1817,6 @@
       "seed": 924009,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/high-school-warrior/ending-defy.ogg"
-    },
-    {
-      "actor": "high-school-caretaker",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924010,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-caretaker/walk.ogg"
     },
     {
       "actor": "high-school-caretaker",
@@ -2099,15 +2000,6 @@
     },
     {
       "actor": "high-school-assassin",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924011,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-assassin/walk.ogg"
-    },
-    {
-      "actor": "high-school-assassin",
       "action": "attack",
       "text": "退いて！",
       "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -2285,15 +2177,6 @@
       "seed": 924011,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/high-school-assassin/ending-defy.ogg"
-    },
-    {
-      "actor": "high-school-mage",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い男性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924012,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-mage/walk.ogg"
     },
     {
       "actor": "high-school-mage",
@@ -2477,15 +2360,6 @@
     },
     {
       "actor": "high-school-dodgeball",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い男性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924013,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-dodgeball/walk.ogg"
-    },
-    {
-      "actor": "high-school-dodgeball",
       "action": "attack",
       "text": "これで！",
       "caption": "若い男性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -2663,15 +2537,6 @@
       "seed": 924013,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/high-school-dodgeball/ending-defy.ogg"
-    },
-    {
-      "actor": "high-school-bard",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い男性の自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924014,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-bard/walk.ogg"
     },
     {
       "actor": "high-school-bard",
@@ -2855,15 +2720,6 @@
     },
     {
       "actor": "high-school-librarian",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924015,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-librarian/walk.ogg"
-    },
-    {
-      "actor": "high-school-librarian",
       "action": "attack",
       "text": "退いて！",
       "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -3041,15 +2897,6 @@
       "seed": 924015,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/high-school-librarian/ending-defy.ogg"
-    },
-    {
-      "actor": "high-school-chef",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924016,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-chef/walk.ogg"
     },
     {
       "actor": "high-school-chef",
@@ -3233,15 +3080,6 @@
     },
     {
       "actor": "high-school-gardener",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924017,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/high-school-gardener/walk.ogg"
-    },
-    {
-      "actor": "high-school-gardener",
       "action": "attack",
       "text": "これで！",
       "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -3419,15 +3257,6 @@
       "seed": 924017,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/high-school-gardener/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-akari",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い女性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924018,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-akari/walk.ogg"
     },
     {
       "actor": "magic-akari",
@@ -3611,15 +3440,6 @@
     },
     {
       "actor": "magic-shizuku",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い女性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924019,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-shizuku/walk.ogg"
-    },
-    {
-      "actor": "magic-shizuku",
       "action": "attack",
       "text": "退いて！",
       "caption": "若い女性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -3797,15 +3617,6 @@
       "seed": 924019,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/magic-shizuku/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-hiyori",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い女性の自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924020,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-hiyori/walk.ogg"
     },
     {
       "actor": "magic-hiyori",
@@ -3989,15 +3800,6 @@
     },
     {
       "actor": "magic-tsubasa",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い女性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924021,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-tsubasa/walk.ogg"
-    },
-    {
-      "actor": "magic-tsubasa",
       "action": "attack",
       "text": "これで！",
       "caption": "若い女性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -4175,15 +3977,6 @@
       "seed": 924021,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/magic-tsubasa/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-rei",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い女性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924022,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-rei/walk.ogg"
     },
     {
       "actor": "magic-rei",
@@ -4367,15 +4160,6 @@
     },
     {
       "actor": "magic-madoka",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い女性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924023,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-madoka/walk.ogg"
-    },
-    {
-      "actor": "magic-madoka",
       "action": "attack",
       "text": "退いて！",
       "caption": "若い女性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -4553,15 +4337,6 @@
       "seed": 924023,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/magic-madoka/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-koharu",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い女性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924024,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-koharu/walk.ogg"
     },
     {
       "actor": "magic-koharu",
@@ -4745,15 +4520,6 @@
     },
     {
       "actor": "magic-mirai",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い女性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924025,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-mirai/walk.ogg"
-    },
-    {
-      "actor": "magic-mirai",
       "action": "attack",
       "text": "これで！",
       "caption": "若い女性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -4931,15 +4697,6 @@
       "seed": 924025,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/magic-mirai/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-sera",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い女性の自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924026,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-sera/walk.ogg"
     },
     {
       "actor": "magic-sera",
@@ -5128,15 +4885,6 @@
     },
     {
       "actor": "magic-ren",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924027,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-ren/walk.ogg"
-    },
-    {
-      "actor": "magic-ren",
       "action": "attack",
       "text": "退いて！",
       "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -5314,15 +5062,6 @@
       "seed": 924027,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/magic-ren/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-soma",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924028,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-soma/walk.ogg"
     },
     {
       "actor": "magic-soma",
@@ -5506,15 +5245,6 @@
     },
     {
       "actor": "magic-minato",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924029,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-minato/walk.ogg"
-    },
-    {
-      "actor": "magic-minato",
       "action": "attack",
       "text": "これで！",
       "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -5692,15 +5422,6 @@
       "seed": 924029,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/magic-minato/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-riku",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い男性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924030,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-riku/walk.ogg"
     },
     {
       "actor": "magic-riku",
@@ -5884,15 +5605,6 @@
     },
     {
       "actor": "magic-yamato",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い男性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924031,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-yamato/walk.ogg"
-    },
-    {
-      "actor": "magic-yamato",
       "action": "attack",
       "text": "退いて！",
       "caption": "若い男性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -6070,15 +5782,6 @@
       "seed": 924031,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/magic-yamato/ending-defy.ogg"
-    },
-    {
-      "actor": "magic-leon",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い男性の自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924032,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-leon/walk.ogg"
     },
     {
       "actor": "magic-leon",
@@ -6262,15 +5965,6 @@
     },
     {
       "actor": "magic-elliot",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924033,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-elliot/walk.ogg"
-    },
-    {
-      "actor": "magic-elliot",
       "action": "attack",
       "text": "これで！",
       "caption": "若い男性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -6451,15 +6145,6 @@
     },
     {
       "actor": "magic-sakuya",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924034,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/magic-sakuya/walk.ogg"
-    },
-    {
-      "actor": "magic-sakuya",
       "action": "attack",
       "text": "いくよ！",
       "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -6637,15 +6322,6 @@
       "seed": 924034,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/magic-sakuya/ending-defy.ogg"
-    },
-    {
-      "actor": "dungeons2-lyria",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い女性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924035,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-lyria/walk.ogg"
     },
     {
       "actor": "dungeons2-lyria",
@@ -6834,15 +6510,6 @@
     },
     {
       "actor": "dungeons2-celis",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い女性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924036,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-celis/walk.ogg"
-    },
-    {
-      "actor": "dungeons2-celis",
       "action": "attack",
       "text": "そこだ！",
       "caption": "若い女性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -7020,15 +6687,6 @@
       "seed": 924036,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/dungeons2-celis/ending-defy.ogg"
-    },
-    {
-      "actor": "dungeons2-flora",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い女性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924037,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-flora/walk.ogg"
     },
     {
       "actor": "dungeons2-flora",
@@ -7212,15 +6870,6 @@
     },
     {
       "actor": "dungeons2-noctia",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い女性の自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924038,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-noctia/walk.ogg"
-    },
-    {
-      "actor": "dungeons2-noctia",
       "action": "attack",
       "text": "いくよ！",
       "caption": "若い女性の自然な日本語。少し低めで慎重な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -7398,15 +7047,6 @@
       "seed": 924038,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/dungeons2-noctia/ending-defy.ogg"
-    },
-    {
-      "actor": "dungeons2-aurene",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い女性の自然な日本語。明るく快活な声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924039,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-aurene/walk.ogg"
     },
     {
       "actor": "dungeons2-aurene",
@@ -7590,15 +7230,6 @@
     },
     {
       "actor": "dungeons2-ignis",
-      "action": "walk",
-      "text": "進もう。",
-      "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924040,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-ignis/walk.ogg"
-    },
-    {
-      "actor": "dungeons2-ignis",
       "action": "attack",
       "text": "そこだ！",
       "caption": "若い男性の自然な日本語。穏やかで温かな声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -7776,15 +7407,6 @@
       "seed": 924040,
       "seconds": 2.1,
       "path": "sfx/dungeons-chronicles/dungeons2-ignis/ending-defy.ogg"
-    },
-    {
-      "actor": "dungeons2-leon",
-      "action": "walk",
-      "text": "次の道へ。",
-      "caption": "若い男性の自然な日本語。凛とした透明感のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924041,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-leon/walk.ogg"
     },
     {
       "actor": "dungeons2-leon",
@@ -7968,15 +7590,6 @@
     },
     {
       "actor": "dungeons2-orion",
-      "action": "walk",
-      "text": "ついてきて。",
-      "caption": "若い男性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924042,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-orion/walk.ogg"
-    },
-    {
-      "actor": "dungeons2-orion",
       "action": "attack",
       "text": "いくよ！",
       "caption": "若い男性の自然な日本語。柔らかく落ち着いた声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
@@ -8154,15 +7767,6 @@
       "seed": 924042,
       "seconds": 2.7,
       "path": "sfx/dungeons-chronicles/dungeons2-orion/ending-defy.ogg"
-    },
-    {
-      "actor": "dungeons2-leif",
-      "action": "walk",
-      "text": "一歩ずつ。",
-      "caption": "若い男性の自然な日本語。明瞭で芯のある声。短いファンタジー冒険ゲームの台詞。実在人物の模倣ではないオリジナルの声。",
-      "seed": 924043,
-      "seconds": 2.1,
-      "path": "sfx/dungeons-chronicles/dungeons2-leif/walk.ogg"
     },
     {
       "actor": "dungeons2-leif",

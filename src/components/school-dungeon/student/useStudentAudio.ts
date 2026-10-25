@@ -28,7 +28,6 @@ export function useStudentAudio(snapshot:Snapshot,profile:StudentAudioProfile='d
   else if(snapshot.inDungeon&&before.inDungeon&&equipmentKey!==before.equipmentKey)play('equip');
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.inventory.length>before.inventory.length)play('pickup');
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.inventory.length<before.inventory.length)play('item');
-  else if(snapshot.movement&&before.movement&&snapshot.movement!==before.movement)play('walk');
  },[snapshot.movement,snapshot.heroId,snapshot.active,snapshot.runId,snapshot.floor,snapshot.hp,snapshot.gameOver,snapshot.gameClear,snapshot.transformed,snapshot.inventory,equipmentKey,snapshot.inDungeon]);
  return play;
 }

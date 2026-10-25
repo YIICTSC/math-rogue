@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "auditedDate": "2026-10-25",
-  "designSha256": "a69364f9701d4bf408e6acd927d8c0e2f6469f8ca4ad78739a8ebf3aa5eee45b",
-  "generationSha256": "2590a612a008f29c797b158f1cddf24014d1cec3fbaf66004e0e838af3c317aa",
-  "generatorSha256": "fb4094cf138c69bd64d6c676c7f2fc38aa9781862939f9341b9ca134a9af5bcf",
+  "designSha256": "4c3094564d89c761d7079f61127811cbe14b70e05f16f9c9f9148f5c14896125",
+  "generationSha256": "032cecc89f29243b02d282ed50bebc519bc3fe9735dbb71cfb088a4b1671919a",
+  "generatorSha256": "570efb5a66e74a62fbbecb05a97d86dc8513c92ae41289c50706d4ee261bc7a7",
   "sourceModel": "Aratako/Irodori-TTS-v4.1-Small",
   "sourceModelRevision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
   "sourceCodeRevision": "89f9d8fbd4d51ea019867ee1197725ede1df13c5",
   "sourceDevice": "cpu",
   "sourceCodecDevice": "cpu",
   "heroCount": 26,
-  "excludedUnreferencedClips": 546,
+  "excludedUnreferencedClips": 520,
   "reusedMainBattleFiles": 423,
   "heroes": [
     {
@@ -48,7 +48,7 @@
         "public/sfx/high-school-voices/ASSASSIN/defeat-4.ogg": "7b79a4d322a6a7fbec7c26bbe46e7ce7f27161375fc835874764b94c3cd1a0d4",
         "public/sfx/high-school-voices/ASSASSIN/defeat-5.ogg": "3492e4a60ecafaefc7b15262970c54c376eb0afcde4ef488c2e7e9f7ab3f47fe"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -88,7 +88,7 @@
         "public/sfx/high-school-voices/BARD/defeat-4.ogg": "06948fdde644d5f1a88867ea2ab81c93650672f958266683bc206c8b14e014a0",
         "public/sfx/high-school-voices/BARD/defeat-5.ogg": "2861132174a1202dd9bf79ddcf34a28c99fb76a82f22bc7f189b71a81235e72b"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -128,7 +128,7 @@
         "public/sfx/high-school-voices/CARETAKER/defeat-4.ogg": "e7b4204138a27e1b68e9fe8991c58ebcae8d88822d31b6ec34601d6ce78f96cd",
         "public/sfx/high-school-voices/CARETAKER/defeat-5.ogg": "084ff30ccd826106abe12d4155dda3c12a23ce1cba0bb622513a636f9e402e41"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -168,7 +168,7 @@
         "public/sfx/high-school-voices/CHEF/defeat-4.ogg": "6cf9a1b9708f8ea10cf3c6210aa1fbd762568b76be83c7436144253857438734",
         "public/sfx/high-school-voices/CHEF/defeat-5.ogg": "db6e4b6ae327dca6378c2dc8d0e74311db9f4a905bd8cac6c73cc7d2507baa5b"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -208,7 +208,7 @@
         "public/sfx/high-school-voices/DODGEBALL/defeat-4.ogg": "e417672a92a78923dfc9e95caea3908e220e7005b321cb454b090a271121c603",
         "public/sfx/high-school-voices/DODGEBALL/defeat-5.ogg": "435250975a1e34ce908b943393594d048b31c23f1a284b018d6fe2c2e297c9fc"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -248,7 +248,7 @@
         "public/sfx/high-school-voices/GARDENER/defeat-4.ogg": "82df9ca0742a33b174d0e4b80f2538fbec2c7d4c4c83a2df66726e9b635e815c",
         "public/sfx/high-school-voices/GARDENER/defeat-5.ogg": "509bb73d1ffb5229fde721d601aeaba69374958c23d78dbf2066d1eb51353022"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -288,7 +288,7 @@
         "public/sfx/high-school-voices/LIBRARIAN/defeat-4.ogg": "471f2b92ee2d5f3352f0d108af9eba7a88d4a2d4f2797e4ce529a39943ff72a8",
         "public/sfx/high-school-voices/LIBRARIAN/defeat-5.ogg": "b1241a9cb4dce0fc844029742ff6775b3ed81c60635fdc9633b9ba0c09bfea6a"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -328,7 +328,7 @@
         "public/sfx/high-school-voices/MAGE/defeat-4.ogg": "9414d60502566ae7ea892bccc7b30a779d9b097a7f533fc923e8952d577228aa",
         "public/sfx/high-school-voices/MAGE/defeat-5.ogg": "519f314516991cb7a3bed51044a4d05d6060ddde430e4e7b58ba1c081924d865"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -368,7 +368,7 @@
         "public/sfx/high-school-voices/WARRIOR/defeat-4.ogg": "290db868d5df443be7e4c4502a225c6b9238f1102d073672830ad0a788c9825f",
         "public/sfx/high-school-voices/WARRIOR/defeat-5.ogg": "6458b86a1d5900ac5e96cf7b2c7b3d87bd20dc9b790f13061b6282d94aa03ba7"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -387,7 +387,7 @@
         "public/sfx/magic-voices/AKARI/spell-2.ogg": "8fa8a2938f791ef13a8a43092071764d72d7b2514259760b3f26c5d289847795",
         "public/sfx/magic-voices/AKARI/spell-3.ogg": "24c055439bad4c9fe3c798b04158391c99c218cd04a834f9d7cc72abdcf40270"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -406,7 +406,7 @@
         "public/sfx/magic-voices/ELLIOT/spell-2.ogg": "9a12fb215dd360cd6baee5d1d46d7b69adbf419a96dda2791e5cd79385805e72",
         "public/sfx/magic-voices/ELLIOT/spell-3.ogg": "0d0f82d9e50791ffbed4f934f5cfe3c83d60c8bbf8186df51df5923ce660545b"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -425,7 +425,7 @@
         "public/sfx/magic-voices/HIYORI/spell-2.ogg": "709ac68554c41f34e4dbb1e285eeb264e134261da8a0cda776b719883989b8c3",
         "public/sfx/magic-voices/HIYORI/spell-3.ogg": "f0c32e1f7e136252e4b7cf8fe60927dad4da11e233d81294999cd6d3aff5758e"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -444,7 +444,7 @@
         "public/sfx/magic-voices/KOHARU/spell-2.ogg": "40e12f34ecfabdfd65599ece6a594403deb09c254844bf3f8deef3435faddcd7",
         "public/sfx/magic-voices/KOHARU/spell-3.ogg": "8cd9cd2e259b33ede972b357dc5b03483b8f65e284e360010d96b52a264a2319"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -463,7 +463,7 @@
         "public/sfx/magic-voices/LEON/spell-2.ogg": "678035aca51850b356834a34f5e0038e5390ed5d7aedf21e4b4d4e21e73b74db",
         "public/sfx/magic-voices/LEON/spell-3.ogg": "78441e7ced9ea345cc595cf667388c3acc6bcf6791ecd9f8123b4143cc76ae18"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -482,7 +482,7 @@
         "public/sfx/magic-voices/MADOKA/spell-2.ogg": "9f895488c6bd52a4d5b313e4f77027fd005925ec7d1da09052797dae6582e1eb",
         "public/sfx/magic-voices/MADOKA/spell-3.ogg": "f75d77a1d037311936466e87bb3dbafd980016d810a856b7fbec7e501d1abc1b"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -501,7 +501,7 @@
         "public/sfx/magic-voices/MINATO/spell-2.ogg": "2169042e66d5420a60b58a929a5d3af3a4c27db758c08645213da125983f27b7",
         "public/sfx/magic-voices/MINATO/spell-3.ogg": "a266f4c831fe1a9429133eb0211c3f7c19ccbfff715d8992d5143e6cd1443c97"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -520,7 +520,7 @@
         "public/sfx/magic-voices/MIRAI/spell-2.ogg": "c4e3faf784884f72a214327634ce34ef45c1b8a17db17e3f5433b9a3a01cf233",
         "public/sfx/magic-voices/MIRAI/spell-3.ogg": "39546b83cd819562a4a64d05cd1ce844dfffcef89258ebe992f0cf4eea74d14e"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -539,7 +539,7 @@
         "public/sfx/magic-voices/REI/spell-2.ogg": "61ffdd9cee65252a7c1b37ef2292fdb384b79eea2b159df499b7d0e483e0483d",
         "public/sfx/magic-voices/REI/spell-3.ogg": "b2e3af2efde5287defa04d568ea34f1798d91cb71d5a211c523eb57ee98cc027"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -558,7 +558,7 @@
         "public/sfx/magic-voices/REN/spell-2.ogg": "71572014f87ef2442ab872cad6c30609b2dff90400f2a8586e9561b89ffb727d",
         "public/sfx/magic-voices/REN/spell-3.ogg": "ac0dcc833f5554097642446cc9c8fb98f6c080a1ebf7af1b51b6f006b52c0315"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -577,7 +577,7 @@
         "public/sfx/magic-voices/RIKU/spell-2.ogg": "117b09b3bbc4459ec8a20a4442e8c6acd522c243e6c929ba8f07dc7f3f70f00a",
         "public/sfx/magic-voices/RIKU/spell-3.ogg": "52489f92d6c98419992d385dbfa014268de6bd1066739ebc54b1efd2c0f7d135"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -596,7 +596,7 @@
         "public/sfx/magic-voices/SAKUYA/spell-2.ogg": "7ca2e73ae3807d19ec24fa59c6f66576c8caaea0efce2d090b0cecdb940c1f80",
         "public/sfx/magic-voices/SAKUYA/spell-3.ogg": "fe50541504e05500427b63fd2013c880479d4747de188b63c36c546d632dc053"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -615,7 +615,7 @@
         "public/sfx/magic-voices/SERA/spell-2.ogg": "296b4b4a779050a6e9b1b40fcba9516cf8cc99443d77a053c7fa0433688d93f0",
         "public/sfx/magic-voices/SERA/spell-3.ogg": "2f093b18486365b90b02a7ddaf88fcd7423f06b5d9d8c9fc67f54c85edd2576c"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -634,7 +634,7 @@
         "public/sfx/magic-voices/SHIZUKU/spell-2.ogg": "5f007e5a52d17c17255d7697469b8d55a49bc423e95d71a48fbd495a2ffc9403",
         "public/sfx/magic-voices/SHIZUKU/spell-3.ogg": "a823f1f76f9d9af7a07c6684c3583e909c80c309df248cb4f6edf2fd35eb0bb5"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -653,7 +653,7 @@
         "public/sfx/magic-voices/SOMA/spell-2.ogg": "8bf35521066e8262902a62752f1609ddb7854c9074501fa9c8ec1ddb00e3d28b",
         "public/sfx/magic-voices/SOMA/spell-3.ogg": "6eaeeb8f8d98b2b9d2272eef4a19f377febfe2211583e4633a66f3ca66db4989"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -672,7 +672,7 @@
         "public/sfx/magic-voices/TSUBASA/spell-2.ogg": "11461d3f780f8180055a842b831bb2cc9a67343ec216517ad23bf715951dc5f8",
         "public/sfx/magic-voices/TSUBASA/spell-3.ogg": "204399d364cc25d9a63cf3fb496748725b16f4ec684149906ca06455c9b6c244"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."
@@ -691,7 +691,7 @@
         "public/sfx/magic-voices/YAMATO/spell-2.ogg": "5f219aef5bebedb1e3a2e7472ba1a8ac24c55296fa5e17facfd0812f803a47b7",
         "public/sfx/magic-voices/YAMATO/spell-3.ogg": "11a6f01ac0b50586d4dd28f33fe718e2b399aa197afb9b0adef604aae91a2656"
       },
-      "excludedChronicleClips": 21,
+      "excludedChronicleClips": 20,
       "chronicleReferenceAudio": null,
       "chronicleNoRef": true,
       "identityConclusion": "Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead."

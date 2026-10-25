@@ -1,5 +1,5 @@
 import {DUNGEON_CHRONICLE_VOICE_ACTORS} from '../../../data/dungeonChronicleVoiceActors';
-export const CHRONICLE_AUDIO_ACTIONS=['walk','attack','throw','swing','read','use','shoot','pickup','equip','stairs','trap','damage','heal','win','defeat','talk','ultimate','transform','ending-release','ending-accord','ending-defy'] as const;
+export const CHRONICLE_AUDIO_ACTIONS=['attack','throw','swing','read','use','shoot','pickup','equip','stairs','trap','damage','heal','win','defeat','talk','ultimate','transform','ending-release','ending-accord','ending-defy'] as const;
 export type ChronicleVoiceAction=typeof CHRONICLE_AUDIO_ACTIONS[number];
 const actors=new Set<string>(DUNGEON_CHRONICLE_VOICE_ACTORS);
 export function chronicleVoicePath(actor:string,action:string){

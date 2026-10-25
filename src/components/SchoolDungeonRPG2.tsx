@@ -1569,7 +1569,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const slid = adventure.slide(tx, ty, rdx, rdy); tx = slid.x; ty = slid.y;
       const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) { if (target.enemyType === 'SHOPKEEPER') { addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2); setShopState({ active: true, merchantId: target.id, mode: 'BUY' }); setSelectedItemIndex(0); audioService.playSound('select'); } else { attackEnemy(target); processTurn(player.x, player.y); } return; }
-      let finalX = tx; let finalY = ty; cueD2HeroAction(adventure.hero.id,'walk'); studentCue('walk'); setPlayer(p => ({ ...p, x: finalX, y: finalY }));
+      let finalX = tx; let finalY = ty; cueD2HeroAction(adventure.hero.id,'walk'); setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       setVisitedMap(prev => { const next = prev.map(row => [...row]); let changed = false; const startX = finalX - Math.floor(VIEW_W/2); const startY = finalY - Math.floor(VIEW_H/2); for (let y = 0; y < VIEW_H; y++) { for (let x = 0; x < VIEW_W; x++) { const mx = startX + x; const my = startY + y; if (mx >= 0 && mx < MAP_W && my >= 0 && my < MAP_H) { if (!next[my][mx]) { next[my][mx] = true; changed = true; } } } } return changed ? next : prev; });
       const trap = traps.find(t => t.x === finalX && t.y === finalY);
       if (trap) { if (trap.visible) { addLog(`${trap.name}を踏んでしまった！`, "red"); activateTrap(trap); } else { addLog("罠だ！", "red"); trap.visible = true; activateTrap(trap); } }

@@ -19,7 +19,7 @@ let excluded = 0, mainFiles = 0;
 for (const actor of actors) {
   const identity = mainBattleVoiceIdentity(actor);
   const clips = design.clips.filter(clip => clip.actor === actor);
-  assert.equal(clips.length, 21);
+  assert.equal(clips.length, 20);
   for (const clip of clips) {
     assert(!clip.ref_wav && !clip.reference && !clip.referenceAudio);
     const record = delivered.get(clip.path);
@@ -38,7 +38,7 @@ for (const actor of actors) {
     excludedChronicleClips: clips.length, chronicleReferenceAudio: null, chronicleNoRef: true,
     identityConclusion: 'Chronicle clips were synthesized without speaker reference; Dungeons 1 uses the exact main-battle files instead.' });
 }
-assert.equal(excluded, 546);assert.equal(mainFiles, 423);
+assert.equal(excluded, 520);assert.equal(mainFiles, 423);
 const report = { schemaVersion: 1, auditedDate: '2026-10-25',
   designSha256: hash(designBytes), generationSha256: hash(generationBytes),
   generatorSha256: hash(generator), sourceModel: design.model, sourceModelRevision: design.modelRevision,

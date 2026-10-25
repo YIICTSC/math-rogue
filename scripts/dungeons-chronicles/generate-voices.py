@@ -9,6 +9,7 @@ report=json.loads(reportFile.read_text())['clips'] if reportFile.exists() else [
 torch.set_num_threads(3);runtime=InferenceRuntime.from_key(RuntimeKey(checkpoint=download_hf_checkpoint(design['model']),model_device='cpu',codec_device='cpu',model_precision='fp32',codec_precision='fp32'))
 started=time.time()
 for n,clip in enumerate(design['clips']):
+ if clip['action']=='walk':continue # Walking speech is intentionally retired.
  output=root/'public'/clip['path'];cached=prior.get(clip['path'])
  if cached and output.exists() and hashlib.sha256(output.read_bytes()).hexdigest()==cached['sha256']:continue
  output.parent.mkdir(parents=True,exist_ok=True);t=time.time()

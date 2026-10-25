@@ -1357,11 +1357,6 @@
   ],
   "excludedNoReferenceClips": [
     {
-      "path": "sfx/dungeons-chronicles/dungeons2-lyria/walk.ogg",
-      "sha256": "dac2127298d730552ce15a9ca48a7228fedc81781f7ca2b210d9500c598fac42",
-      "text": "一歩ずつ。"
-    },
-    {
       "path": "sfx/dungeons-chronicles/dungeons2-lyria/attack.ogg",
       "sha256": "1fedbe9c1c3b778a3cf1c99e9f7efc833de58b97dc7c65a48cad9c3b0d03ea4d",
       "text": "退いて！"
@@ -1455,11 +1450,6 @@
       "path": "sfx/dungeons-chronicles/dungeons2-lyria/ending-defy.ogg",
       "sha256": "d5c6a1f5e540310c59bbc6dce90b3e3257a9d2af88d267c4276321c7931b1063",
       "text": "まだない扉を開く。"
-    },
-    {
-      "path": "sfx/dungeons-chronicles/dungeons2-celis/walk.ogg",
-      "sha256": "435816e4fbf5ab67139e493c2e250c727cd674b5a9589c52afcc01337fe15d04",
-      "text": "進もう。"
     },
     {
       "path": "sfx/dungeons-chronicles/dungeons2-celis/attack.ogg",
@@ -1562,11 +1552,6 @@
       "text": "別の道を作ろう。"
     },
     {
-      "path": "sfx/dungeons-chronicles/dungeons2-flora/walk.ogg",
-      "sha256": "3e888084d2b08abba2d33276af618fdeb6afe0f796b3377e74d6a7188153c1ba",
-      "text": "次の道へ。"
-    },
-    {
       "path": "sfx/dungeons-chronicles/dungeons2-flora/attack.ogg",
       "sha256": "98dc9140e2b416d2966ee260990e11dd7d3f3fd7971190e689081d8eea951e5b",
       "text": "これで！"
@@ -1665,11 +1650,6 @@
       "path": "sfx/dungeons-chronicles/dungeons2-flora/ending-defy.ogg",
       "sha256": "ec48d902c49045d1fdcf5e38d3ecba1868b4e50816eefddc0662dbc6f2864393",
       "text": "答えは、これからだ。"
-    },
-    {
-      "path": "sfx/dungeons-chronicles/dungeons2-noctia/walk.ogg",
-      "sha256": "c335c140614ca1e5f05367d6fb72092adc139e0009bbdd2ea4c3e6dd08e816c9",
-      "text": "ついてきて。"
     },
     {
       "path": "sfx/dungeons-chronicles/dungeons2-noctia/attack.ogg",
@@ -1772,11 +1752,6 @@
       "text": "二つだけとは限らない。"
     },
     {
-      "path": "sfx/dungeons-chronicles/dungeons2-aurene/walk.ogg",
-      "sha256": "22b41a108c28e5f0a0870b331d6f6d7a544f6f2d2b37de4f5fac9e70496ff51c",
-      "text": "一歩ずつ。"
-    },
-    {
       "path": "sfx/dungeons-chronicles/dungeons2-aurene/attack.ogg",
       "sha256": "0544c25cf082a7e78c29889f61818ba671550198049ccbdeef7bca4a9f0c2cab",
       "text": "退いて！"
@@ -1875,11 +1850,6 @@
       "path": "sfx/dungeons-chronicles/dungeons2-aurene/ending-defy.ogg",
       "sha256": "188b5cf1d762594fb7b0e3fe2d8ca16e9b15943db2d6dc5a242c5ea46a8bbae9",
       "text": "まだない扉を開く。"
-    },
-    {
-      "path": "sfx/dungeons-chronicles/dungeons2-ignis/walk.ogg",
-      "sha256": "877957f92a763fae31a1741b2c98a8960793ac77753c331e2e955612c882d634",
-      "text": "進もう。"
     },
     {
       "path": "sfx/dungeons-chronicles/dungeons2-ignis/attack.ogg",
@@ -1982,11 +1952,6 @@
       "text": "別の道を作ろう。"
     },
     {
-      "path": "sfx/dungeons-chronicles/dungeons2-leon/walk.ogg",
-      "sha256": "5eb44137c447a403dc894db3b2a6e342a8823e6bf560c33f67490076aa5f03db",
-      "text": "次の道へ。"
-    },
-    {
       "path": "sfx/dungeons-chronicles/dungeons2-leon/attack.ogg",
       "sha256": "af7a69dc758ff17a280c98ec61ae5aedd0aab480505170f705d9f403ac76cc80",
       "text": "これで！"
@@ -2087,11 +2052,6 @@
       "text": "答えは、これからだ。"
     },
     {
-      "path": "sfx/dungeons-chronicles/dungeons2-orion/walk.ogg",
-      "sha256": "dd34a150e91336a45539c94250bdd2fa9c3440f11b8deb642ae0c834b53b7f6d",
-      "text": "ついてきて。"
-    },
-    {
       "path": "sfx/dungeons-chronicles/dungeons2-orion/attack.ogg",
       "sha256": "e92ef2ecd3d9f5d52358cd777734306c6bfe4b10c118711300d5ca8ecccdf1d1",
       "text": "いくよ！"
@@ -2190,11 +2150,6 @@
       "path": "sfx/dungeons-chronicles/dungeons2-orion/ending-defy.ogg",
       "sha256": "4917ee6615820d8e4fc935c175b3feab43810dbcc8f21bf2b4581f597c07e4d9",
       "text": "二つだけとは限らない。"
-    },
-    {
-      "path": "sfx/dungeons-chronicles/dungeons2-leif/walk.ogg",
-      "sha256": "dbba47bbf0951b995cd77157888d2e6935083bbedb82694739b02d0080c9ac2e",
-      "text": "一歩ずつ。"
     },
     {
       "path": "sfx/dungeons-chronicles/dungeons2-leif/attack.ogg",

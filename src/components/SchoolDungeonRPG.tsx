@@ -1744,7 +1744,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           return;
       }
 
-      let finalX = tx; let finalY = ty; cueStudentAction(adventure.hero.id,'walk'); studentCue('walk');
+      let finalX = tx; let finalY = ty; cueStudentAction(adventure.hero.id,'walk');
       setPlayer(p => ({ ...p, x: finalX, y: finalY }));
       
       setVisitedMap(prev => {
