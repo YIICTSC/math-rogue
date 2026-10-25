@@ -1,3 +1,5 @@
+import {drawMartialEffect} from '../dungeons1/martialEffects';
+import {TRAINING_WEAPONS,WEAPON_KINDS,type WeaponKind} from '../dungeons1/mastery';
 import {classmateFor} from '../journey';
 import {ProtagonistModel} from '../../../three/protagonistModel';
 import {isProtagonistId} from '../student/content';
@@ -13,7 +15,7 @@ interface Entity {
   dir?:{x:number;y:number}; offset?:{x:number;y:number}; equipment?:Gear; itemData?:VisualItem;
   heroId?:string;hp?:number; maxHp?:number; moving?:boolean; direction?:number; attackVisualAt?:number; status?:{sleep?:number;frozen?:number;poison?:number};
 }
-interface Effect {type:string;x:number;y:number;duration:number;maxDuration:number;value?:string;color?:string;startX?:number;startY?:number;targetX?:number;targetY?:number;dir?:{x:number;y:number};}
+interface Effect {weaponKind?:WeaponKind;martialTier?:number;type:string;x:number;y:number;duration:number;maxDuration:number;value?:string;color?:string;startX?:number;startY?:number;targetX?:number;targetY?:number;dir?:{x:number;y:number};}
 export interface DungeonFrame {
   map:string[][]; player:Entity; enemies:Entity[]; floorItems:Entity[]; traps:Entity[];
   visible:(x:number,y:number)=>boolean; sight:boolean; trapSight:boolean;
@@ -69,6 +71,14 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
   function item(item:VisualItem){
     const key=item.type+':'+(item.plus||0);let template=variants.get(key);
     if(!template){
+      const training=TRAINING_WEAPONS[item.type];
+      if(training){
+        const index=WEAPON_KINDS.indexOf(training.weaponKind),texture=new THREE.TextureLoader().load(assetUrl('sprites/dungeons1/martial/weapons.webp'));
+        texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.NearestFilter;texture.minFilter=THREE.NearestFilter;texture.repeat.set(.25,1/3);texture.offset.set(index%4/4,1-(Math.floor(index/4)+1)/3);textTextures.add(texture);
+        const mat=new THREE.SpriteMaterial({map:texture,transparent:true,depthWrite:false});materials.add(mat);
+        const sprite=new THREE.Sprite(mat);sprite.position.y=.5;sprite.userData.weaponKind=training.weaponKind;
+        template=new THREE.Group();template.add(sprite);variants.set(key,template);return template.clone(true);
+      }
       template=model(item.type==='PENCIL_SWORD'?'pencil_adventure':item.type==='PRINCIPAL_SHIELD'?'shield_adventure':itemModel(item));
       const hue=(visualHash(item.type)%360)/360;
       template.traverse(o=>{if(o instanceof THREE.Mesh){const wasArray=Array.isArray(o.material);const tinted=(wasArray?o.material as THREE.Material[]:[o.material as THREE.Material]).map(source=>{
@@ -149,6 +159,12 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
     const mat=new THREE.SpriteMaterial({map:texture,depthTest:false});
     const sprite=new THREE.Sprite(mat);sprite.scale.set(1.6,.4,1);sprite.renderOrder=20;sprite.userData.textResource=true;return sprite;
   }
+  function martialBillboard(){
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=192;
+    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.NearestFilter;textTextures.add(texture);
+    const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthWrite:false,depthTest:false}));
+    sprite.renderOrder=18;sprite.userData.textResource=true;sprite.userData.martialCanvas=canvas;return sprite;
+  }
   function remove(object:THREE.Object3D){object.traverse(o=>{(o.userData.studentModel as ProtagonistModel|undefined)?.dispose();});world.remove(object);object.traverse(o=>{if(o.userData.animationMixer){const mixer=o.userData.animationMixer as THREE.AnimationMixer;mixer.stopAllAction();mixer.uncacheRoot(mixer.getRoot());}if(o instanceof THREE.Sprite&&o.userData.textResource){const tex=o.material.map;if(tex){tex.dispose();textTextures.delete(tex);}o.material.dispose();}});}
   function node(key:string,signature:string,make:()=>THREE.Object3D){used.add(key);let n=nodes.get(key);if(n?.signature!==signature){if(n)remove(n.object);const object=make();world.add(object);n={signature,object};nodes.set(key,n);}return n.object;}
   function terrainNode(tile:string,terrain:string|undefined,x:number,y:number,frame:DungeonFrame){
@@ -213,7 +229,9 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
         if(e.hp!==undefined&&state.hp!==undefined&&e.hp<state.hp)state.hitUntil=now+.40;
           // Enemy attack offsets belong to the attacker; nearby player effects do not.
           const offsetAttack=(Math.abs(e.offset?.x||0)+Math.abs(e.offset?.y||0)>0)&&now>=state.movingUntil;
-          const attacking=base==='hero'?f.effects.some(fx=>['SLASH','PROJECTILE','MAGIC_PROJ','ABILITY'].includes(fx.type)&&Math.max(Math.abs(fx.x-e.x),Math.abs(fx.y-e.y))<=1):offsetAttack||Boolean(e.attackVisualAt&&Date.now()-e.attackVisualAt<150);
+          const martialActive=key==='player'&&f.effects.some(fx=>fx.type==='MARTIAL');
+          if(key==='player')body.traverse(o=>{if(o.name.startsWith('equipped_weapon_'))o.visible=!martialActive;});
+          const attacking=base==='hero'?martialActive||offsetAttack||f.effects.some(fx=>['SLASH','PROJECTILE','MAGIC_PROJ','ABILITY'].includes(fx.type)&&Math.max(Math.abs(fx.x-e.x),Math.abs(fx.y-e.y))<=1):offsetAttack||Boolean(e.attackVisualAt&&Date.now()-e.attackVisualAt<150);
           if(attacking)state.attackUntil=now+.35;
           const paused=Boolean(e.status?.sleep||e.status?.frozen);
           const action=e.hp!==undefined&&e.hp<=0&&base==='hero'?'Defeat':dojo?.won&&base==='hero'?'Victory':now<state.hitUntil?'Hit':now<state.attackUntil?'Attack':now<state.movingUntil||e.moving?'Walk':'Idle';
@@ -243,7 +261,8 @@ export async function createDungeonScene(host:HTMLElement, portrait=false) {
     actor(f.player,'player','hero',f.player.equipment||{});
     const selection=node('selection','selection',()=>new THREE.Mesh(ringGeo,material('#f8d876')));selection.position.set(f.player.x,.025,f.player.y);
     const facing=node('facing','facing',()=>{const g=new THREE.Group();box(g,'#fff0b5',0,.025,0,.12,.04,.12);return g;});facing.position.set(f.player.x+(f.player.dir?.x||0)*.47,.03,f.player.y+(f.player.dir?.y||0)*.47);
-    f.effects.forEach((fx,i)=>{if(!inView(fx.x,fx.y))return;const progress=1-fx.duration/Math.max(1,fx.maxDuration);const key='fx:'+i;const o=node(key,fx.type+':'+fx.value+':'+fx.color,()=>fx.type==='TEXT'?label(fx.value||'',fx.color):new THREE.Mesh(ringGeo,material(fx.color||(['EXPLOSION','THUNDER'].includes(fx.type)?'#ffb655':'#9de9ed'))));
+    f.effects.forEach((fx,i)=>{if(!inView(fx.x,fx.y))return;const progress=1-fx.duration/Math.max(1,fx.maxDuration);const key='fx:'+i;const o=node(key,fx.type+':'+fx.value+':'+fx.color+':'+fx.weaponKind+':'+fx.martialTier,()=>fx.type==='MARTIAL'?martialBillboard():fx.type==='TEXT'?label(fx.value||'',fx.color):new THREE.Mesh(ringGeo,material(fx.color||(['EXPLOSION','THUNDER'].includes(fx.type)?'#ffb655':'#9de9ed'))));
+      if(fx.type==='MARTIAL'&&o instanceof THREE.Sprite){const c=o.userData.martialCanvas as HTMLCanvasElement,ctx=c.getContext('2d')!;ctx.clearRect(0,0,192,192);drawMartialEffect(ctx,48,48,96,progress,fx.weaponKind||'fist',fx.dir,fx.martialTier||0);o.material.map!.needsUpdate=true;o.userData.weaponKind=fx.weaponKind||'fist';}
       const x=fx.startX!==undefined&&fx.targetX!==undefined?THREE.MathUtils.lerp(fx.startX,fx.targetX,progress):fx.x,y=fx.startY!==undefined&&fx.targetY!==undefined?THREE.MathUtils.lerp(fx.startY,fx.targetY,progress):fx.y;o.position.set(x,.55+progress*.65,y);if(fx.type!=='TEXT')o.scale.setScalar(.6+progress*1.3);
     });
     for(const [key,n]of nodes)if(!used.has(key)){remove(n.object);nodes.delete(key);}

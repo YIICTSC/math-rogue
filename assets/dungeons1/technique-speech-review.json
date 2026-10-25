@@ -1,0 +1,183 @@
+{
+  "model": "Systran/faster-whisper-medium",
+  "device": "cpu",
+  "compute_type": "int8",
+  "policy": "Independent larger-model recheck of primary phonetic similarity below 0.75; no transcript prompt",
+  "clips": {
+    "elementary-warrior/ultimate-earth": {
+      "sha256": "999162b37e2ca4e580eb060eb63c5b4232d8084130e7fca0531d6fa97cda6822",
+      "expected": "いっけー！ おうぎ、ちてんきょうめい！",
+      "recognized": "いっけー 奥義知天教命",
+      "similarity": 0.9032
+    },
+    "elementary-caretaker/ultimate-dawn": {
+      "sha256": "02d540582bf5f23ad34b2eefe37b42df52eddc5dccb5d844747c78c07549426a",
+      "expected": "みんなを守る！ おうぎ、ばんさいれいめい！",
+      "recognized": "みんなを守る 奥義晩祭礼儀",
+      "similarity": 0.9143
+    },
+    "elementary-assassin/sword-1": {
+      "sha256": "a30dd2f46015eb846e969ffca78bc2ea8a842aed73d3f0a3d30a8b65b1f1ca25",
+      "expected": "気配を消して！ あさつゆばらい！",
+      "recognized": "気配を消して、あさつや",
+      "similarity": 0.8
+    },
+    "elementary-assassin/ultimate-dawn": {
+      "sha256": "b3cdbf1d20d3390c82dc9cb91b922f714c7c1a2287ac00b8e7d10d111cada96c",
+      "expected": "もう逃がさない！ おうぎ、ばんさいれいめい！",
+      "recognized": "もう逃がさない!奥義!万歳礼命!",
+      "similarity": 0.8649
+    },
+    "elementary-chef/ultimate-earth": {
+      "sha256": "31b67082c75e826b9a84c25eab4ddeab4f4de62332413d093746a8e69b71a1cd",
+      "expected": "いただきます！ おうぎ、ちてんきょうめい！",
+      "recognized": "いただきます 奥義ちちんぴーきょうまい",
+      "similarity": 0.8333
+    },
+    "elementary-gardener/ultimate-earth": {
+      "sha256": "b01bc7061a413d62870b4e6139816a86d82e700fb9841c9b4f60cd2fe40a1e1f",
+      "expected": "芽を出せ！ おうぎ、ちてんきょうめい！",
+      "recognized": "目を出せ、奥義、指点共鳴!",
+      "similarity": 0.9032
+    },
+    "elementary-gardener/ultimate-heart": {
+      "sha256": "18feb0870943437287105ec9a60197ed394b46873ae42d58c848b9898a1ea708",
+      "expected": "風にのって！ おうぎ、むきゅうしんりん！",
+      "recognized": "風に乗って、奥義、無給心理",
+      "similarity": 0.9697
+    },
+    "elementary-mage/ultimate-heart": {
+      "sha256": "feb95be45d450f33b588f6a5d82b69705c0930d01dd8c078eea4bd1d7fde0595",
+      "expected": "法則発見！ おうぎ、むきゅうしんりん！",
+      "recognized": "法則発見 奥義 無給森林",
+      "similarity": 1.0
+    },
+    "high-school-warrior/ultimate-earth": {
+      "sha256": "a3961e90bb03dc1d31cd0dd53373d368fce9e93bbe7a3f5601af9e3450ca35bd",
+      "expected": "道を開け！ おうぎ、ちてんきょうめい！",
+      "recognized": "道を明け! 奥義地点照明!",
+      "similarity": 0.8485
+    },
+    "high-school-assassin/sword-1": {
+      "sha256": "3e7d18c657299592505ecc21cae379aba0e555efd58e26580d7ae0fde522d667",
+      "expected": "影から行く！ あさつゆばらい！",
+      "recognized": "影から行く 朝露ばらい",
+      "similarity": 1.0
+    },
+    "high-school-bard/ultimate-earth": {
+      "sha256": "ae93481bcf307ff2620c43c753626bdedd14e12b3abe1fbbd8186f6dbc82b06c",
+      "expected": "響かせよう！ おうぎ、ちてんきょうめい！",
+      "recognized": "響かせよう 奥義 地点共鳴",
+      "similarity": 1.0
+    },
+    "high-school-bard/ultimate-heart": {
+      "sha256": "fd28257f08a7cbcf199a07063cf8562a5e11c73bb532131f5569ff368e4d67da",
+      "expected": "声を力に！ おうぎ、むきゅうしんりん！",
+      "recognized": "声を力に、奥義、夢中森林",
+      "similarity": 0.9444
+    },
+    "high-school-librarian/ultimate-heart": {
+      "sha256": "5ba8d9397c5befc1e9169778795f94fbe0a8abfc512aaf663dfa1a8bf3729262",
+      "expected": "行間を見抜く！ おうぎ、むきゅうしんりん！",
+      "recognized": "情感を見抜く、奥義、二級心理",
+      "similarity": 0.8718
+    },
+    "high-school-chef/sword-1": {
+      "sha256": "a68238e7ec5fad5e2eeeb7cbf3a9627498fe31f8ddee733fbef493cb9eebf1e0",
+      "expected": "仕込みは万全！ あさつゆばらい！",
+      "recognized": "仕込みは晩勢!あさつよばらい!",
+      "similarity": 0.8
+    },
+    "high-school-chef/ultimate-earth": {
+      "sha256": "191b7a887d3b51d445bf1f037ea91eeeffb962a5dd90819570efc3babd4bd791",
+      "expected": "腕の見せどころ！ おうぎ、ちてんきょうめい！",
+      "recognized": "腕の見せどころ 奥義視天共鳴",
+      "similarity": 0.9474
+    },
+    "high-school-chef/ultimate-heart": {
+      "sha256": "2327f8f69f9d026b9799c4945432412d622b07bc1c73aa31a3dc425ba485d353",
+      "expected": "熱いうちに！ おうぎ、むきゅうしんりん！",
+      "recognized": "暑いうちに大火無休森林",
+      "similarity": 0.8235
+    },
+    "high-school-gardener/ultimate-heart": {
+      "sha256": "6e279af0bebe5409b9437687368c49f46bde824c1a5761d2ec3cc39263bf0e4e",
+      "expected": "命よ芽吹け！ おうぎ、むきゅうしんりん！",
+      "recognized": "命を芽吹け大きい無休森林",
+      "similarity": 0.8108
+    },
+    "magic-rei/sword-1": {
+      "sha256": "92bdd2e3bd80fcd4344e87efd6eaa651388792e9a4b764886982ab8c4e28c75c",
+      "expected": "刃の心で！ あさつゆばらい！",
+      "recognized": "刃の心であさつゆばらい",
+      "similarity": 1.0
+    },
+    "magic-rei/ultimate-dawn": {
+      "sha256": "d8cac21aceff7df7cc88f9207d7513ad3116dc7c3edd72ac2fd90b25f5323b64",
+      "expected": "この意志は折れない！ おうぎ、ばんさいれいめい！",
+      "recognized": "この意志は折れない 奥義ファン祭礼名",
+      "similarity": 0.9268
+    },
+    "magic-madoka/ultimate-heart": {
+      "sha256": "69a6ca0460582ef690bc060cdbe575e03136084705fc7f50e6297fe19b330ad4",
+      "expected": "輪になれ光！ おうぎ、むきゅうしんりん！",
+      "recognized": "輪になれ光 奥義無休森林",
+      "similarity": 1.0
+    },
+    "magic-koharu/ultimate-dawn": {
+      "sha256": "fbd738534f48342de3a14bba3b85236962652e9ae7320a0aef1f63cb9db82599",
+      "expected": "花咲く明日へ！ おうぎ、ばんさいれいめい！",
+      "recognized": "花咲く明日へ 奥義晩祭礼名",
+      "similarity": 1.0
+    },
+    "magic-koharu/ultimate-heart": {
+      "sha256": "5facc8be50be2adf47158f49170fba2df61a3da638feac65de4ec06e7f19470a",
+      "expected": "芽吹きの力で！ おうぎ、むきゅうしんりん！",
+      "recognized": "寝吹きの力で、奥義・無休森林",
+      "similarity": 0.9474
+    },
+    "magic-minato/ultimate-heart": {
+      "sha256": "613114f69e93105b178d5fc722d4b1f5963a8a6a46f3b1e5f3d977a1a95cb661",
+      "expected": "潮よ導け！ おうぎ、むきゅうしんりん！",
+      "recognized": "潮よ導け奉儀無休森林",
+      "similarity": 0.9444
+    },
+    "magic-riku/ultimate-earth": {
+      "sha256": "da9af45c108eaf6f7ec8de6add0dfee1f4e5c3f660245c6e3fb1d51b4438ecdb",
+      "expected": "踏みしめて！ おうぎ、ちてんきょうめい！",
+      "recognized": "踏みしめて、奥義地点共鳴!",
+      "similarity": 1.0
+    },
+    "magic-elliot/sword-1": {
+      "sha256": "397343acdda1dc1e6313cc5c2ba393e466112ca7ebaf835e9a403cab7c1a2ba4",
+      "expected": "誇りにかけて！ あさつゆばらい！",
+      "recognized": "怒りにかけて 朝露ばらい",
+      "similarity": 0.8571
+    },
+    "magic-elliot/ultimate-sky": {
+      "sha256": "91a6a9ce94600545f7a42aeba86d6eb6be1e597e3109f4f083d7f7b689ac7611",
+      "expected": "誇りにかけて！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "誇りにかけて、奥義、聖術伝承",
+      "similarity": 0.7805
+    },
+    "magic-sakuya/sword-1": {
+      "sha256": "0f6c95766dc2dfde87a3ca85732b8b254d9d7f73ed64c2e5d203e58eab623840",
+      "expected": "影よ舞え！ あさつゆばらい！",
+      "recognized": "影を舞え 朝露ばらい",
+      "similarity": 0.9231
+    },
+    "elementary-chef/ultimate-heart": {
+      "sha256": "09c6be96d57441b206f9ec4fb8475253922ea63414662b8ddf55523489a978b8",
+      "expected": "腕を振るうよ！ おうぎ、むきゅうしんりん！",
+      "recognized": "目を振るよ 奥義 無休死に",
+      "similarity": 0.75
+    },
+    "high-school-bard/ultimate-dawn": {
+      "sha256": "ef1caa4c97c757968613a4575d32b8e3299fa412f2688e9fb95dce4d0e536e68",
+      "expected": "世界へ届け！ おうぎ、ばんさいれいめい！",
+      "recognized": "世界へ届け、奥義万歳礼明!",
+      "similarity": 0.9444
+    }
+  },
+  "flagged": []
+}

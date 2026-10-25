@@ -4,7 +4,7 @@ import {abyssHero} from '../dungeons2/roster';
 import type {audioService} from '../../../services/audioService';
 
 export type StudentAudioAction='walk'|'throw'|'swing'|'read'|'use'|'shoot'|'ultimate'|'attack'|'projectile'|'skill'|'damage'|'heal'|'item'|'pickup'|'equip'|'stairs'|'trap'|'transform'|'talk'|'win'|'defeat';
-type AudioPort=Pick<typeof audioService,'playDungeons2VoiceFile'|'playDungeonsAbilitySound'|'playAttackEffectSound'|'playStatusEffectSound'|'playBattleSound'|'playHighSchoolVoiceFile'|'playMagicVoiceFile'|'canPlayConversationVoice'>&Partial<Pick<typeof audioService,'playDungeonChronicleVoiceFile'>>;
+type AudioPort=Pick<typeof audioService,'playDungeons2VoiceFile'|'playDungeonsAbilitySound'|'playAttackEffectSound'|'playStatusEffectSound'|'playBattleSound'|'playHighSchoolVoiceFile'|'playMagicVoiceFile'|'canPlayConversationVoice'>&Partial<Pick<typeof audioService,'playDungeonChronicleVoiceFile'|'playDungeons1TechniqueVoice'>>;
 const chances:Partial<Record<StudentAudioAction,number>>={ultimate:.65,attack:.22,projectile:.22,skill:.35,damage:.18,heal:.2,item:.2,transform:1,win:1,defeat:1,throw:.55,swing:.55,read:.7,use:.45,shoot:.5,pickup:.35,equip:.55,stairs:.85,trap:.75,talk:.65};
 export function studentVoice(heroId:string,action:StudentAudioAction,finish:boolean,random:()=>number,abilityName?:string){
  const original=abyssHero(heroId);if(original){const skill=original.skills.findIndex(s=>s.en===abilityName);const file=action==='ultimate'?(abilityName===original.card.en?'card':`ultimate-${Math.max(0,skill)+1}`):action==='transform'?'transform':action==='defeat'?'defeat':finish||action==='win'?'finish':action==='damage'?'damage':action==='heal'||action==='item'?'heal':action==='skill'?'ultimate-1':'attack';const variant=Math.max(0,Math.min(2,Math.floor(random()*3)));return {theme:'dungeons2',id:original.id.slice(10),file:variant?`${file}-alt-${variant}`:file}as const;}
@@ -18,11 +18,15 @@ export function studentVoice(heroId:string,action:StudentAudioAction,finish:bool
 /** Action-specific CPU Irodori voices; legacy banks remain available to older callers. */
 export type StudentAudioProfile='default'|'dungeons1'|'dungeons2';
 export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),random=()=>Math.random(),profile:StudentAudioProfile='default'){
- let lastVoice=-Infinity,pending=false;
+ let lastVoice=-Infinity,pending=false,techniquePending=false,techniqueGeneration=0,activeTechnique='';
  const effects=new Map<StudentAudioAction,number>();
  const previousD2=new Map<string,string>();
- return {play(heroId:string,action:StudentAudioAction,finish=false,element='star',abilityName?:string){
-  // Walking/turning must not trigger speech or a UI selection sound in either Dungeons game.
+ return {playTechnique(heroId:string,techniqueId:string){
+  if(!audio.playDungeons1TechniqueVoice||!audio.canPlayConversationVoice())return;
+  const key=heroId+':'+techniqueId;if(techniquePending&&activeTechnique===key)return;
+  const generation=++techniqueGeneration;techniquePending=true;activeTechnique=key;lastVoice=now();
+  try{void Promise.resolve(audio.playDungeons1TechniqueVoice(heroId,techniqueId)).catch(()=>false).finally(()=>{if(generation===techniqueGeneration){techniquePending=false;activeTechnique='';}});}catch{if(generation===techniqueGeneration){techniquePending=false;activeTechnique='';}}
+ },play(heroId:string,action:StudentAudioAction,finish=false,element='star',abilityName?:string){
   if(action==='walk')return;
   const mainBattle=profile==='dungeons1'&&Boolean(mainBattleVoiceIdentity(heroId));
   const establishedD2=profile==='dungeons2'&&Boolean(abyssHero(heroId));
@@ -41,7 +45,7 @@ export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),ran
   else if(action==='item')audio.playStatusEffectSound('buff');
   else audio.playBattleSound(action==='win'?'win':action==='defeat'?'lose':action==='stairs'?'jump':'select');
   // No queued lines: an action that occurs during speech stays silent.
-  if(pending||time-lastVoice<3200||!audio.canPlayConversationVoice())return;
+  if(pending||techniquePending||time-lastVoice<3200||!audio.canPlayConversationVoice())return;
   const chance=finish?1:chances[action]||0;
   if(!chance||random()>=chance)return;
   const specialized=({projectile:'throw',skill:'swing',item:'use'} as Partial<Record<StudentAudioAction,string>>)[action]||action;

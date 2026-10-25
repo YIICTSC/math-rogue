@@ -1,4 +1,5 @@
 import {directedAction} from '../student/actionGeometry';
+import {drawWeaponlessArt,loadWeaponlessArt} from './weaponlessArt';
 import {assetUrl} from '../../../utils/assetPaths';
 import {studentActionSnapshot,D1_ACTION_CELL} from './heroActions';
 import {studentPoseAtlas} from './poseAtlas';
@@ -6,6 +7,7 @@ import {D1_HERO_ACTION_KEYS} from '../../../data/dungeons1HeroActionKeys';
 const paintedAtlases=new Map<string,HTMLImageElement>();
 const MAX_PAINTED_ATLASES=8;
 export function loadD1HeroArt(id:string,transformed=false){
+ loadWeaponlessArt(id,transformed);
  const key=id+(transformed&&id.startsWith('magic-')?'-transformed':'');
  if(!D1_HERO_ACTION_KEYS.has(key)||typeof Image==='undefined')return;
  let image=paintedAtlases.get(key);
@@ -18,6 +20,7 @@ export function loadD1HeroArt(id:string,transformed=false){
 /** Artwork is bottom-centered and drawn at integer pixel coordinates. */
 export function drawD1HeroAction(ctx:CanvasRenderingContext2D,id:string,source:HTMLImageElement,facing:number,x:number,y:number,size:number,transformed=false){
  const motion=studentActionSnapshot(id);if(!motion)return false;
+ if(motion.combatPose&&drawWeaponlessArt(ctx,id,transformed,motion.combatPose||(motion.action==='shoot'||motion.action==='throw'?'thrust':motion.action==='swing'?'cleave':'slash'),facing,x,y,size,motion.progress))return true;
  const painted=loadD1HeroArt(id,transformed);
  ctx.save();ctx.imageSmoothingEnabled=false;
  // The painted atlas has the same 8-direction order as the legacy hero sheets.

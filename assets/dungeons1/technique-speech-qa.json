@@ -1,0 +1,1091 @@
+{
+  "model": "Systran/faster-whisper-small",
+  "device": "cpu",
+  "compute_type": "int8",
+  "sample_policy": "Each protagonist: sword-1 plus all four cross-weapon ultimates",
+  "expected_samples": 175,
+  "clips": {
+    "elementary-warrior/sword-1": {
+      "sha256": "ed0ca1a1823af6a34bda5b22ecd11acb19d7e592a1a097d2e0d3cbcf8c411b1c",
+      "expected": "ぼくの番だ！ あさつゆばらい！",
+      "recognized": "僕の番だ!アサツユバライ!",
+      "similarity": 1.0
+    },
+    "elementary-warrior/ultimate-dawn": {
+      "sha256": "9a4bb4b72ae5717d342db884873efd321000d0e9ca9e390eb6e4da747ecbf354",
+      "expected": "勇気いっぱい！ おうぎ、ばんさいれいめい！",
+      "recognized": "勇気いっぱい!大義!ファンサイれいめい!",
+      "similarity": 0.8108
+    },
+    "elementary-warrior/ultimate-earth": {
+      "sha256": "999162b37e2ca4e580eb060eb63c5b4232d8084130e7fca0531d6fa97cda6822",
+      "expected": "いっけー！ おうぎ、ちてんきょうめい！",
+      "recognized": "いっけー! オーディステンキョウメ!",
+      "similarity": 0.7333
+    },
+    "elementary-warrior/ultimate-sky": {
+      "sha256": "365cb4d6b600d980fc7b75e45d8c19e0bf0835c6c2dc289a4499594fb05a394c",
+      "expected": "ぼくの番だ！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "僕の番だ!青春天賞!",
+      "similarity": 0.8571
+    },
+    "elementary-warrior/ultimate-heart": {
+      "sha256": "7ffdf6f6cecb490c2c5f62cd3c90403192a5bcbf6d19cd3a5e80cf56b288226a",
+      "expected": "友だちのために！ おうぎ、むきゅうしんりん！",
+      "recognized": "友達のために大義無給心理",
+      "similarity": 0.8649
+    },
+    "elementary-caretaker/sword-1": {
+      "sha256": "60c2d962d32c9e5d6d8cda1df54e16f7600a17325c6c8c50085db242ba6dfaae",
+      "expected": "やさしく強く！ あさつゆばらい！",
+      "recognized": "優しく強く、アサツユバライ!",
+      "similarity": 1.0
+    },
+    "elementary-caretaker/ultimate-dawn": {
+      "sha256": "02d540582bf5f23ad34b2eefe37b42df52eddc5dccb5d844747c78c07549426a",
+      "expected": "みんなを守る！ おうぎ、ばんさいれいめい！",
+      "recognized": "みんなを守る!大義万歳でね!",
+      "similarity": 0.6471
+    },
+    "elementary-caretaker/ultimate-earth": {
+      "sha256": "cf51757910aead03752f3643eab0d0c28216d4f303100046f0d3bfff4c59c90b",
+      "expected": "だいじょうぶ！ おうぎ、ちてんきょうめい！",
+      "recognized": "大丈夫!大義地点共鳴!",
+      "similarity": 0.8824
+    },
+    "elementary-caretaker/ultimate-sky": {
+      "sha256": "ca0fdc36e4003eeadc23ba20a5da1be7deb68b8c5cf9d1d39af7b7ddbb362e6e",
+      "expected": "やさしく強く！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "優しく強く、大義、精準天賞!",
+      "similarity": 0.9
+    },
+    "elementary-caretaker/ultimate-heart": {
+      "sha256": "728cca7dd0dbe11d7f0b790996bad98188c2d9cf0a64649b21b995d987161109",
+      "expected": "命を守るよ！ おうぎ、むきゅうしんりん！",
+      "recognized": "命を守るよ!大義、無給心臨!",
+      "similarity": 0.7692
+    },
+    "elementary-assassin/sword-1": {
+      "sha256": "a30dd2f46015eb846e969ffca78bc2ea8a842aed73d3f0a3d30a8b65b1f1ca25",
+      "expected": "気配を消して！ あさつゆばらい！",
+      "recognized": "気配を決してはさつや",
+      "similarity": 0.6923
+    },
+    "elementary-assassin/ultimate-dawn": {
+      "sha256": "b3cdbf1d20d3390c82dc9cb91b922f714c7c1a2287ac00b8e7d10d111cada96c",
+      "expected": "もう逃がさない！ おうぎ、ばんさいれいめい！",
+      "recognized": "もう逃がさない!大義、伴才霊明!",
+      "similarity": 0.7027
+    },
+    "elementary-assassin/ultimate-earth": {
+      "sha256": "4c087d3cc5d1fbd1596569fc5b0fecfdce485b52c66abdbb4c6211b2699df441",
+      "expected": "そこだね！ おうぎ、ちてんきょうめい！",
+      "recognized": "そこだね! 王儀! 視点共鳴!",
+      "similarity": 0.9333
+    },
+    "elementary-assassin/ultimate-sky": {
+      "sha256": "902ec534aab6bba200e754cf5a475dbe46022a67a07507ebd3f38bd08364e352",
+      "expected": "気配を消して！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "気配を決して大義正順転称",
+      "similarity": 0.878
+    },
+    "elementary-assassin/ultimate-heart": {
+      "sha256": "7f20b927429f9451fe84eb5cdc4585e1ca93ed69918ef08361b24707987c4e04",
+      "expected": "見切ったよ！ おうぎ、むきゅうしんりん！",
+      "recognized": "できたよ 王儀 無給心臨",
+      "similarity": 0.75
+    },
+    "elementary-dodgeball/sword-1": {
+      "sha256": "e240ffb1144a6de30764df33302a29c320c028bbb1114e56e5aaff0c82aabfb2",
+      "expected": "ナイス狙い！ あさつゆばらい！",
+      "recognized": "ナイス狙い!アサツユバライ!あ!",
+      "similarity": 0.963
+    },
+    "elementary-dodgeball/ultimate-dawn": {
+      "sha256": "82953ea03e5ae481d209aed7186a4a2b6c233694ee9d8dd38337128e2fc9c137",
+      "expected": "最後の一本！ おうぎ、ばんさいれいめい！",
+      "recognized": "最後の1本! 王儀! バンサイレイメー!",
+      "similarity": 0.8421
+    },
+    "elementary-dodgeball/ultimate-earth": {
+      "sha256": "44d4701f7916a28a2e2dfb6b115d5e78102e9a6748ef661f85c17d0f31b2a667",
+      "expected": "全力だ！ おうぎ、ちてんきょうめい！",
+      "recognized": "全力だ!大義地点共鳴!",
+      "similarity": 0.8824
+    },
+    "elementary-dodgeball/ultimate-sky": {
+      "sha256": "10b77cc9f1389d838b1931aa51205dd7a93454414c3bbab3f09cdd329da70451",
+      "expected": "ナイス狙い！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "ナイス狙い! 王儀! 正準転勝!",
+      "similarity": 0.8649
+    },
+    "elementary-dodgeball/ultimate-heart": {
+      "sha256": "ae533d4214d749cdd4687eb586addea147eb8097c955b4e36d4c80fdf28cdc3c",
+      "expected": "勝負だよ！ おうぎ、むきゅうしんりん！",
+      "recognized": "勝負だよ!大義無給神臨!",
+      "similarity": 0.7647
+    },
+    "elementary-bard/sword-1": {
+      "sha256": "fd6ae955d894eb21700cff0c043061f5f64a7a8e890148b74a049580e666abdf",
+      "expected": "リズムに乗って！ あさつゆばらい！",
+      "recognized": "リズムに乗って、あさつ湯ばらい!",
+      "similarity": 1.0
+    },
+    "elementary-bard/ultimate-dawn": {
+      "sha256": "6c14cbc169309725c7820a2b378fead9ec36b09b2ed88e0cc5009bd678874a6b",
+      "expected": "響けぼくの音！ おうぎ、ばんさいれいめい！",
+      "recognized": "響けぼくの音!大義万歳例名!",
+      "similarity": 0.8421
+    },
+    "elementary-bard/ultimate-earth": {
+      "sha256": "686ae74636f467564b9f7e769358c9dd30b985d65a883818a3450c80f4113288",
+      "expected": "せーの！ おうぎ、ちてんきょうめい！",
+      "recognized": "せーの! 王儀地天狂明!",
+      "similarity": 1.0
+    },
+    "elementary-bard/ultimate-sky": {
+      "sha256": "356c3b54cced27705afdaef64f20737c5a8ce034c8ba2b945302f6c1c985efbf",
+      "expected": "リズムに乗って！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "リズムに乗って大義正順転称",
+      "similarity": 0.9
+    },
+    "elementary-bard/ultimate-heart": {
+      "sha256": "7e639a4ddb7f8b73d93663125e8655a3e364f3c2aba9ed616eb708c824e57a2c",
+      "expected": "声を合わせて！ おうぎ、むきゅうしんりん！",
+      "recognized": "声を合わせて! 放棄、無給森林!",
+      "similarity": 0.8889
+    },
+    "elementary-librarian/sword-1": {
+      "sha256": "ba20a244e571fb15f9fcda86d85805ba75accc8fce15068b9d208fb594c484b4",
+      "expected": "この一節で！ あさつゆばらい！",
+      "recognized": "この一説で、アサツユバライ!",
+      "similarity": 1.0
+    },
+    "elementary-librarian/ultimate-dawn": {
+      "sha256": "776db17e84c7ffefbc13519ace022442582d68ae528afd91ede5712bcebc4295",
+      "expected": "物語を開くよ！ おうぎ、ばんさいれいめい！",
+      "recognized": "物語を開くよ 王儀万歳れいめ",
+      "similarity": 0.9268
+    },
+    "elementary-librarian/ultimate-earth": {
+      "sha256": "11f9762527a61134e0417cb6beb9613b37e3148889e16970cc9eadd0f26c69ff",
+      "expected": "読めました！ おうぎ、ちてんきょうめい！",
+      "recognized": "読めました 王儀視点共鳴",
+      "similarity": 0.9375
+    },
+    "elementary-librarian/ultimate-sky": {
+      "sha256": "3820ceb34e8b68ab42bdd873157e92277a16b4357c3e04e18aa6cc753a4eff8f",
+      "expected": "この一節で！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "この一説で大義正順転称",
+      "similarity": 0.9
+    },
+    "elementary-librarian/ultimate-heart": {
+      "sha256": "9d24be3b17f52c92b2978e419ca4fa9229ef7c4699edc9e0b9bfb65b262908c8",
+      "expected": "答えはここに！ おうぎ、むきゅうしんりん！",
+      "recognized": "答えはここに、大義無給心臨",
+      "similarity": 0.7568
+    },
+    "elementary-chef/sword-1": {
+      "sha256": "2c83da7b8286205b7298b770265bd46befe815330906e187a72daab1605dd76d",
+      "expected": "仕上げだよ！ あさつゆばらい！",
+      "recognized": "仕上げだよ!アサツユバライ!",
+      "similarity": 1.0
+    },
+    "elementary-chef/ultimate-dawn": {
+      "sha256": "3c4a7175a4b4cc531830aaeef843b27191c7536ff0aba37f95dfc16697eb942d",
+      "expected": "とっておきだよ！ おうぎ、ばんさいれいめい！",
+      "recognized": "とっておきだよ 王儀万歳例目",
+      "similarity": 0.9143
+    },
+    "elementary-chef/ultimate-earth": {
+      "sha256": "31b67082c75e826b9a84c25eab4ddeab4f4de62332413d093746a8e69b71a1cd",
+      "expected": "いただきます！ おうぎ、ちてんきょうめい！",
+      "recognized": "いただきます!大木、チキンティー業務員",
+      "similarity": 0.5128
+    },
+    "elementary-chef/ultimate-sky": {
+      "sha256": "5c49c423c3244af98cee05662f72f6d1039f4b39ae2e05eae688059da29bd675",
+      "expected": "仕上げだよ！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "仕上げだよ!大技、精準天賞!",
+      "similarity": 0.8649
+    },
+    "elementary-chef/ultimate-heart": {
+      "sha256": "09c6be96d57441b206f9ec4fb8475253922ea63414662b8ddf55523489a978b8",
+      "expected": "腕を振るうよ！ おうぎ、むきゅうしんりん！",
+      "recognized": "手を振るよ!大義無休死に!",
+      "similarity": 0.625
+    },
+    "elementary-gardener/sword-1": {
+      "sha256": "137a412977ebd943f3e17e941ee938bb499512b25f0119871eded0f57712bf4f",
+      "expected": "大きく育て！ あさつゆばらい！",
+      "recognized": "大きく育て、あさつ湯ばらい!",
+      "similarity": 1.0
+    },
+    "elementary-gardener/ultimate-dawn": {
+      "sha256": "a54c6072751a5f1b873161e6da29272b8ec61e6963f0abe347dac45364ff5294",
+      "expected": "花よ咲き誇れ！ おうぎ、ばんさいれいめい！",
+      "recognized": "花よ先ほこれ! 王儀、万歳連盟!",
+      "similarity": 0.8947
+    },
+    "elementary-gardener/ultimate-earth": {
+      "sha256": "b01bc7061a413d62870b4e6139816a86d82e700fb9841c9b4f60cd2fe40a1e1f",
+      "expected": "芽を出せ！ おうぎ、ちてんきょうめい！",
+      "recognized": "目を出せ!大岐視点共鳴!",
+      "similarity": 0.7333
+    },
+    "elementary-gardener/ultimate-sky": {
+      "sha256": "b73b0c6757ca5e29141a48452f1d209b432af603a686161389fd4c8acf85e10b",
+      "expected": "大きく育て！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "大きく育て! 王儀、正順転償!",
+      "similarity": 1.0
+    },
+    "elementary-gardener/ultimate-heart": {
+      "sha256": "18feb0870943437287105ec9a60197ed394b46873ae42d58c848b9898a1ea708",
+      "expected": "風にのって！ おうぎ、むきゅうしんりん！",
+      "recognized": "風に乗って!大義無給心臨!",
+      "similarity": 0.7429
+    },
+    "elementary-mage/sword-1": {
+      "sha256": "d845e9141c1f536ef44d22011234bb9d2f5d41e437a3c5cf7c76e4904c3b763c",
+      "expected": "ひらめいた！ あさつゆばらい！",
+      "recognized": "キラメイタ!アサツユバライ!",
+      "similarity": 0.9167
+    },
+    "elementary-mage/ultimate-dawn": {
+      "sha256": "8dbab0d805fb1726ebc7194e509463e95ee5edcacb2ca378d6fee93af1aacf5d",
+      "expected": "これが大発見！ おうぎ、ばんさいれいめい！",
+      "recognized": "これが大発見!大義万歳例ね!",
+      "similarity": 0.7692
+    },
+    "elementary-mage/ultimate-earth": {
+      "sha256": "d8a243d7808e7526f2cf4cfa81f8e7f905b9703c6208c709c6401e0515847df5",
+      "expected": "実験開始！ おうぎ、ちてんきょうめい！",
+      "recognized": "実験開始!大義視点共鳴",
+      "similarity": 0.8333
+    },
+    "elementary-mage/ultimate-sky": {
+      "sha256": "e824eba95b507d2c865098048757395517c5f58355ebada92bddd28fcc969d0e",
+      "expected": "ひらめいた！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "キラメイタ、大義、精準、天賞!",
+      "similarity": 0.8333
+    },
+    "elementary-mage/ultimate-heart": {
+      "sha256": "feb95be45d450f33b588f6a5d82b69705c0930d01dd8c078eea4bd1d7fde0595",
+      "expected": "法則発見！ おうぎ、むきゅうしんりん！",
+      "recognized": "応足発見! 応援! 無給心臨!",
+      "similarity": 0.65
+    },
+    "high-school-warrior/sword-1": {
+      "sha256": "e5e9a195e02679a4ca69ab5aae9aece567b8de4ac7240f62d3296809706cc435",
+      "expected": "俺が決める！ あさつゆばらい！",
+      "recognized": "俺が決める、アサツユバライ!",
+      "similarity": 1.0
+    },
+    "high-school-warrior/ultimate-dawn": {
+      "sha256": "481015faa90e84eeb3569bcada2ddb6f1bcfb56f4c8497219103c391fadd192c",
+      "expected": "この覚悟で！ おうぎ、ばんさいれいめい！",
+      "recognized": "この覚悟で大義万歳例名",
+      "similarity": 0.8235
+    },
+    "high-school-warrior/ultimate-earth": {
+      "sha256": "a3961e90bb03dc1d31cd0dd53373d368fce9e93bbe7a3f5601af9e3450ca35bd",
+      "expected": "道を開け！ おうぎ、ちてんきょうめい！",
+      "recognized": "道を開け!大義・ステンチョーメー!",
+      "similarity": 0.6471
+    },
+    "high-school-warrior/ultimate-sky": {
+      "sha256": "db2e012928fb1f8b490143a53113e6346aaf22238eed041f1823f042d48ddada",
+      "expected": "俺が決める！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "俺が決める 王儀聖巣転賞",
+      "similarity": 0.8108
+    },
+    "high-school-warrior/ultimate-heart": {
+      "sha256": "4ac0170b8a016c41a3fa5f53b92b96a91e4eaa7c540ffdad6402b916424ff369",
+      "expected": "迷いはない！ おうぎ、むきゅうしんりん！",
+      "recognized": "迷いはない!大義無給神臨!",
+      "similarity": 0.7647
+    },
+    "high-school-caretaker/sword-1": {
+      "sha256": "cf912513abb2d12a37752ebed4127012a78d8ada1ccdbd8f7aa6d55257f315d1",
+      "expected": "心を重ねて！ あさつゆばらい！",
+      "recognized": "心を重ねて、アサツユバライ!",
+      "similarity": 1.0
+    },
+    "high-school-caretaker/ultimate-dawn": {
+      "sha256": "d03b767048ab8ee3e88e69bbf54b32240a2452e3bde65ebcb994467314f3bfe2",
+      "expected": "命をつなぐ！ おうぎ、ばんさいれいめい！",
+      "recognized": "命をつなぐ!大義万歳例目!",
+      "similarity": 0.8
+    },
+    "high-school-caretaker/ultimate-earth": {
+      "sha256": "34bf69273183ff926fc55b3cf338faeac76876b90916ac3ea08cb4783f1c5c86",
+      "expected": "守り抜くよ！ おうぎ、ちてんきょうめい！",
+      "recognized": "守り抜くよ! 王儀! 視点共鳴!",
+      "similarity": 0.9412
+    },
+    "high-school-caretaker/ultimate-sky": {
+      "sha256": "0650483f9bd1d4de5f1a2bb3ca22be40dad88dff9782f3eb6e8878aa9f5546df",
+      "expected": "心を重ねて！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "心を重ねて、大義、正順転償!",
+      "similarity": 0.9048
+    },
+    "high-school-caretaker/ultimate-heart": {
+      "sha256": "0780b44d60cba691dc7d4f5c258f065f235351e9ded244e9c23ab74955cc1cc1",
+      "expected": "もう傷つけない！ おうぎ、むきゅうしんりん！",
+      "recognized": "もう傷つけない! オーギー!無給診臨!",
+      "similarity": 0.9231
+    },
+    "high-school-assassin/sword-1": {
+      "sha256": "3e7d18c657299592505ecc21cae379aba0e555efd58e26580d7ae0fde522d667",
+      "expected": "影から行く！ あさつゆばらい！",
+      "recognized": "影から行く 朝知りを払い",
+      "similarity": 0.7407
+    },
+    "high-school-assassin/ultimate-dawn": {
+      "sha256": "0498a6c9bb43a5a96b8d8cb6105ae9be792dad07d0bc26f835fb3306064dc79f",
+      "expected": "これで終幕だ！ おうぎ、ばんさいれいめい！",
+      "recognized": "これで終末だ!大義万歳例目!",
+      "similarity": 0.7692
+    },
+    "high-school-assassin/ultimate-earth": {
+      "sha256": "f63ba741fd08c30b14a48f8f1f969719e0738038a0af89b395917523b0cf343a",
+      "expected": "隙はそこ！ おうぎ、ちてんきょうめい！",
+      "recognized": "隙はそこ 王儀 ステンキョウメイ",
+      "similarity": 0.9375
+    },
+    "high-school-assassin/ultimate-sky": {
+      "sha256": "1f9632af9392294f9ae0ce3b1f456e626c099e0fe7c1acd5efffdae1678d9d1e",
+      "expected": "影から行く！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "影から行く 王妃正順転送",
+      "similarity": 0.8649
+    },
+    "high-school-assassin/ultimate-heart": {
+      "sha256": "04e4489c04b85199a510d22309e7995070db8f418be269320f673a539b2438d8",
+      "expected": "音もなく！ おうぎ、むきゅうしんりん！",
+      "recognized": "音もなく ウォーギー無級心理",
+      "similarity": 0.8485
+    },
+    "high-school-mage/sword-1": {
+      "sha256": "5ceafcc380578480529ab74df084bdde6f1c5d4b5262e01f8fe552c651f7972c",
+      "expected": "観測完了！ あさつゆばらい！",
+      "recognized": "観測完了!アサツ読もらい!",
+      "similarity": 0.875
+    },
+    "high-school-mage/ultimate-dawn": {
+      "sha256": "78912812dd5133d296b25fba4ec81856e66badb1af052cb1da1a4b32a2303376",
+      "expected": "証明してみせる！ おうぎ、ばんさいれいめい！",
+      "recognized": "証明してみせる!応援、万歳例目!",
+      "similarity": 0.8571
+    },
+    "high-school-mage/ultimate-earth": {
+      "sha256": "73308af834ed8f80ebc69934e3302a5e71624ed71adf37e7ff4020a5e8894bb2",
+      "expected": "仮説を試す！ おうぎ、ちてんきょうめい！",
+      "recognized": "仮説を試す!応援、視点共鳴!",
+      "similarity": 0.8649
+    },
+    "high-school-mage/ultimate-sky": {
+      "sha256": "bda7d32e0cd3423e1449c51ed9d31e74fb133293d051d5c0ca2a5b9ce18911b6",
+      "expected": "観測完了！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "観測完了 王儀正順転称",
+      "similarity": 1.0
+    },
+    "high-school-mage/ultimate-heart": {
+      "sha256": "03e0afdcef6cae6a3af48fad8275108bbfa8861da3b261aa4350392321d80623",
+      "expected": "解は得られた！ おうぎ、むきゅうしんりん！",
+      "recognized": "会は得られた! オーギー無極森林!",
+      "similarity": 0.8108
+    },
+    "high-school-dodgeball/sword-1": {
+      "sha256": "15d648e0a0bdabb8bf1238cce8ce9be473492ca5ed62880271286f5a4e1ce882",
+      "expected": "真っ向から！ あさつゆばらい！",
+      "recognized": "マッコーから、アサツ呼ばない!",
+      "similarity": 0.7692
+    },
+    "high-school-dodgeball/ultimate-dawn": {
+      "sha256": "2493b1639d136e1687fdae182c69d1f1b5e88ece9fe0b0aff09fd092abec53da",
+      "expected": "最高の一撃だ！ おうぎ、ばんさいれいめい！",
+      "recognized": "最高の一撃だ!大義万歳例目!",
+      "similarity": 0.8293
+    },
+    "high-school-dodgeball/ultimate-earth": {
+      "sha256": "b4b7d1f09c4ecce4012e2f209daae3be8e8aca7c7d74e5460764842a01f80780",
+      "expected": "全力勝負！ おうぎ、ちてんきょうめい！",
+      "recognized": "全力勝負! オーギー! ステンキョウメイ!",
+      "similarity": 0.878
+    },
+    "high-school-dodgeball/ultimate-sky": {
+      "sha256": "f58eb5c9c424991bdfbb0601eb4bd730b390fd082b65679272780471e3f41a6b",
+      "expected": "真っ向から！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "真っ向から!大義正順転称!",
+      "similarity": 0.8947
+    },
+    "high-school-dodgeball/ultimate-heart": {
+      "sha256": "eb9db4229e78302c5f8ae4c302184301b8c7edca14d61fa3c003cd765d93c4e5",
+      "expected": "狙いは外さない！ おうぎ、むきゅうしんりん！",
+      "recognized": "狙いは外さない!大義無休神人!",
+      "similarity": 0.85
+    },
+    "high-school-bard/sword-1": {
+      "sha256": "0a599bbafb0f5821fdcbefe728a0bf347d8bb7e5a81bc6bfc2b83259c37eff3a",
+      "expected": "今のリズムで！ あさつゆばらい！",
+      "recognized": "今のリズムで、アサツ呼ばれ!",
+      "similarity": 0.8148
+    },
+    "high-school-bard/ultimate-dawn": {
+      "sha256": "ef1caa4c97c757968613a4575d32b8e3299fa412f2688e9fb95dce4d0e536e68",
+      "expected": "世界へ届け！ おうぎ、ばんさいれいめい！",
+      "recognized": "世界へ届け!大義万歳姉姉!",
+      "similarity": 0.6111
+    },
+    "high-school-bard/ultimate-earth": {
+      "sha256": "ae93481bcf307ff2620c43c753626bdedd14e12b3abe1fbbd8186f6dbc82b06c",
+      "expected": "響かせよう！ おうぎ、ちてんきょうめい！",
+      "recognized": "響かせよう!大義!視点興味!",
+      "similarity": 0.7273
+    },
+    "high-school-bard/ultimate-sky": {
+      "sha256": "d6c83d1ede4a9994f903eca0001dbae3a05515374c39f982f3195bd2046a459e",
+      "expected": "今のリズムで！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "今のリズムで大義正順転称",
+      "similarity": 0.9
+    },
+    "high-school-bard/ultimate-heart": {
+      "sha256": "fd28257f08a7cbcf199a07063cf8562a5e11c73bb532131f5569ff368e4d67da",
+      "expected": "声を力に！ おうぎ、むきゅうしんりん！",
+      "recognized": "声を力に!大義無休神輪!",
+      "similarity": 0.6857
+    },
+    "high-school-librarian/sword-1": {
+      "sha256": "1569b38c91c2a308539ba45828a25ceb431d065e76db7b4bb93a384c578ebf3f",
+      "expected": "解き明かそう！ あさつゆばらい！",
+      "recognized": "ときやかそう!はさつゆばらい!",
+      "similarity": 0.8462
+    },
+    "high-school-librarian/ultimate-dawn": {
+      "sha256": "97b52ef3676c3ddd308a483de457e0f8f4ec423e124738cf3066ad9d137bd1e9",
+      "expected": "終わりを書き換える！ おうぎ、ばんさいれいめい！",
+      "recognized": "終わりを書き換える! 王儀万歳連盟!",
+      "similarity": 0.9
+    },
+    "high-school-librarian/ultimate-earth": {
+      "sha256": "d284bf02303fa37ec4d56c8865d074057096b5b1143193bb0c7b54235669aa98",
+      "expected": "続きを刻む！ おうぎ、ちてんきょうめい！",
+      "recognized": "続きを刻む法義視点共鳴",
+      "similarity": 0.8889
+    },
+    "high-school-librarian/ultimate-sky": {
+      "sha256": "ebc79a565bf49cb3e3a736285afde28fdaa5b9224be7e969f42aa99e13c76b57",
+      "expected": "解き明かそう！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "ときやかそう 王儀正準転称",
+      "similarity": 0.9474
+    },
+    "high-school-librarian/ultimate-heart": {
+      "sha256": "5ba8d9397c5befc1e9169778795f94fbe0a8abfc512aaf663dfa1a8bf3729262",
+      "expected": "行間を見抜く！ おうぎ、むきゅうしんりん！",
+      "recognized": "情感を見抜く!大義未休心理!",
+      "similarity": 0.7317
+    },
+    "high-school-chef/sword-1": {
+      "sha256": "a68238e7ec5fad5e2eeeb7cbf3a9627498fe31f8ddee733fbef493cb9eebf1e0",
+      "expected": "仕込みは万全！ あさつゆばらい！",
+      "recognized": "仕込みは万勢 アサツヨバライン",
+      "similarity": 0.7097
+    },
+    "high-school-chef/ultimate-dawn": {
+      "sha256": "e51b1b8ac983424cbee71a6c4fe0a34d099ac9d900f2492d267f9aa74871dd83",
+      "expected": "究極の仕上げだ！ おうぎ、ばんさいれいめい！",
+      "recognized": "究極の仕上げだ!バンサイ命命!",
+      "similarity": 0.7907
+    },
+    "high-school-chef/ultimate-earth": {
+      "sha256": "191b7a887d3b51d445bf1f037ea91eeeffb962a5dd90819570efc3babd4bd791",
+      "expected": "腕の見せどころ！ おうぎ、ちてんきょうめい！",
+      "recognized": "腕のみせだから! オーギー日転聴名!",
+      "similarity": 0.7
+    },
+    "high-school-chef/ultimate-sky": {
+      "sha256": "7b85cd7c88e9770888aa044c7f29e324dbaecd0c0544d45844a617ad2de87c46",
+      "expected": "仕込みは万全！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "仕込みは万全! 王儀正準転称!",
+      "similarity": 1.0
+    },
+    "high-school-chef/ultimate-heart": {
+      "sha256": "2327f8f69f9d026b9799c4945432412d622b07bc1c73aa31a3dc425ba485d353",
+      "expected": "熱いうちに！ おうぎ、むきゅうしんりん！",
+      "recognized": "暑いうちに、大きい無極心臨",
+      "similarity": 0.6111
+    },
+    "high-school-gardener/sword-1": {
+      "sha256": "4c0913ab0f2afca7c600cbefbaaf5d2e0728fad3fdba71f1637782bef74c6257",
+      "expected": "風を味方に！ あさつゆばらい！",
+      "recognized": "風を味方に、浅つ湯ばらい!",
+      "similarity": 0.8571
+    },
+    "high-school-gardener/ultimate-dawn": {
+      "sha256": "00d77d4553234b47d5180f46b571b1e464f3204091aa80b4e324b4278d1dbc3b",
+      "expected": "大地とともに！ おうぎ、ばんさいれいめい！",
+      "recognized": "第1とともに大義万歳例目",
+      "similarity": 0.7778
+    },
+    "high-school-gardener/ultimate-earth": {
+      "sha256": "40be43ead6975f731ec9b727c1d19963bfe840b06fed6b7a707aa44ed68ce1f3",
+      "expected": "根を張れ！ おうぎ、ちてんきょうめい！",
+      "recognized": "ネオハレ オーギ ステンキョウメイ",
+      "similarity": 0.8
+    },
+    "high-school-gardener/ultimate-sky": {
+      "sha256": "e8171e09a2a2b9ea949435585b34c073991724beda6b9e6de34c4fc16be216f7",
+      "expected": "風を味方に！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "風を見方に、大義、正順転称",
+      "similarity": 0.9
+    },
+    "high-school-gardener/ultimate-heart": {
+      "sha256": "6e279af0bebe5409b9437687368c49f46bde824c1a5761d2ec3cc39263bf0e4e",
+      "expected": "命よ芽吹け！ おうぎ、むきゅうしんりん！",
+      "recognized": "命を芽吹け大きい無給心臨",
+      "similarity": 0.6842
+    },
+    "magic-akari/sword-1": {
+      "sha256": "7c1753052c0304ee0d27042bf5c2238b6a3ffa785c28003886ac394a56144ffb",
+      "expected": "わたしは進む！ あさつゆばらい！",
+      "recognized": "私は進む!アサツユバライ!",
+      "similarity": 1.0
+    },
+    "magic-akari/ultimate-dawn": {
+      "sha256": "46b8d4ecab8fb5ccbf58e463fddb1e84bed4147ef2318e446683d0a611397c10",
+      "expected": "みんなの明日へ！ おうぎ、ばんさいれいめい！",
+      "recognized": "みんなのアスエ! オーギ! バンサイレイメイ!",
+      "similarity": 0.8108
+    },
+    "magic-akari/ultimate-earth": {
+      "sha256": "e9ecf99398e09b8d06b07149351ab2a875a7e07ef15bd63f121c3bf2f4bde9bb",
+      "expected": "光よ集まれ！ おうぎ、ちてんきょうめい！",
+      "recognized": "光を集まれ!大義地点共鳴!",
+      "similarity": 0.8421
+    },
+    "magic-akari/ultimate-sky": {
+      "sha256": "5e76165f97b3c919ab85358def4a019af0834018bb3079270b57fc172bf56858",
+      "expected": "わたしは進む！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "私は進む! 王儀! 正順転称!",
+      "similarity": 1.0
+    },
+    "magic-akari/ultimate-heart": {
+      "sha256": "2b3ac872843a8298c7fc938b3a063bf0fbc1d60ebe6705e2ae2e266fce7e8348",
+      "expected": "希望を照らせ！ おうぎ、むきゅうしんりん！",
+      "recognized": "希望を照らせ!大義無給神臨!",
+      "similarity": 0.7778
+    },
+    "magic-shizuku/sword-1": {
+      "sha256": "dfcfd6e77631944728b0697d9c364c7d134cd565f3fd43e5dec3f2a097ec87a6",
+      "expected": "一滴の勇気！ あさつゆばらい！",
+      "recognized": "一滴の勇気 アサツユバライ",
+      "similarity": 1.0
+    },
+    "magic-shizuku/ultimate-dawn": {
+      "sha256": "2bf8f30f755d32450800adba8d8229d8cf3fadc993d6fee95444f4a691d9df8b",
+      "expected": "清らかなる力！ おうぎ、ばんさいれいめい！",
+      "recognized": "きよらかなる力、大義万歳レーメン!",
+      "similarity": 0.75
+    },
+    "magic-shizuku/ultimate-earth": {
+      "sha256": "b15e71185d6d0b414a9add1022ca3cbd09a3a7d38947324aaa9e7a4d7875975b",
+      "expected": "水よ澄みわたれ！ おうぎ、ちてんきょうめい！",
+      "recognized": "水よ済み渡れ! 王儀、地点狂礼!",
+      "similarity": 0.9474
+    },
+    "magic-shizuku/ultimate-sky": {
+      "sha256": "17add01ee5e2133f0948fd2261fc61c786957df772875430eff7fe3b11a713e5",
+      "expected": "一滴の勇気！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "一滴の勇気 王儀 正順転称",
+      "similarity": 1.0
+    },
+    "magic-shizuku/ultimate-heart": {
+      "sha256": "cde25ab827742462d422b66313128b4c89638a7246e206678574ba4c4f30f6a5",
+      "expected": "流れに乗せて！ おうぎ、むきゅうしんりん！",
+      "recognized": "流れに乗せて 王儀無給心理",
+      "similarity": 0.9714
+    },
+    "magic-hiyori/sword-1": {
+      "sha256": "def3ece66508f95afea1d9f222c696242368e4b366233e11d5e1abdac3e33920",
+      "expected": "花のように！ あさつゆばらい！",
+      "recognized": "花のように、あさつ湯ばらい!",
+      "similarity": 1.0
+    },
+    "magic-hiyori/ultimate-dawn": {
+      "sha256": "3d41e3249d8e03a559a9b947c5475d8305726733552e1cf1de1a0ef24658608b",
+      "expected": "命を抱きしめて！ おうぎ、ばんさいれいめい！",
+      "recognized": "命を抱きしめて応援、万歳連盟!",
+      "similarity": 0.8293
+    },
+    "magic-hiyori/ultimate-earth": {
+      "sha256": "26241d29c8de71e42971162b97eeb89562f1ac0470dda12ff3e21ad34b554d9b",
+      "expected": "だいじょうぶよ！ おうぎ、ちてんきょうめい！",
+      "recognized": "大丈夫よ!大義視点共鳴!",
+      "similarity": 0.8333
+    },
+    "magic-hiyori/ultimate-sky": {
+      "sha256": "fea628f785f7911241e502ad20da8604f94eb53bea8650f43d5f53030fdee89a",
+      "expected": "花のように！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "花のように! 王儀正順天賞!",
+      "similarity": 1.0
+    },
+    "magic-hiyori/ultimate-heart": {
+      "sha256": "0e17eaa678f699a803d69cbb41ef4eb6039132284a6f065db8d3d2b05ec82c96",
+      "expected": "ぬくもりを力に！ おうぎ、むきゅうしんりん！",
+      "recognized": "ぬくもりをちからに!大義無給神臨!",
+      "similarity": 0.8
+    },
+    "magic-tsubasa/sword-1": {
+      "sha256": "bb9e89e34a59600cab6cbdc07ca9b40658c7d002b1ede62666acef7125ad5719",
+      "expected": "翼を広げて！ あさつゆばらい！",
+      "recognized": "翼を広げて、あさつ湯ばない!",
+      "similarity": 0.9333
+    },
+    "magic-tsubasa/ultimate-dawn": {
+      "sha256": "20747cd6115058ba1f9aaf35a98addbcf5bf456ca83a172e5ddd1a237bc35d3d",
+      "expected": "限界の向こうへ！ おうぎ、ばんさいれいめい！",
+      "recognized": "限界の向こうへ! オーギー! バンサイレーメー!",
+      "similarity": 0.8293
+    },
+    "magic-tsubasa/ultimate-earth": {
+      "sha256": "c387590552fa3ce3690c3e59400931119c971dcf362ff91b3fcf8c1c8d7c490c",
+      "expected": "空へ飛び出せ！ おうぎ、ちてんきょうめい！",
+      "recognized": "空へ飛び出せ!大義地点共鳴!",
+      "similarity": 0.8889
+    },
+    "magic-tsubasa/ultimate-sky": {
+      "sha256": "4cd3b2dfb41bbd04d473af1a1dd503e186ab90a3c00ec7b11eaa40b4c23e5370",
+      "expected": "翼を広げて！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "翼を広げて、大義正順転称!",
+      "similarity": 0.9048
+    },
+    "magic-tsubasa/ultimate-heart": {
+      "sha256": "28cfa22c5b1a11cbe181b0fbe64bdf2538297e3c103db65e4bb17dedff7f24f3",
+      "expected": "追い風に乗れ！ おうぎ、むきゅうしんりん！",
+      "recognized": "追いかずに乗れ! 王義無給神臨!",
+      "similarity": 0.8333
+    },
+    "magic-rei/sword-1": {
+      "sha256": "92bdd2e3bd80fcd4344e87efd6eaa651388792e9a4b764886982ab8c4e28c75c",
+      "expected": "刃の心で！ あさつゆばらい！",
+      "recognized": "ヤイバの心で アサツ言わない",
+      "similarity": 0.6429
+    },
+    "magic-rei/ultimate-dawn": {
+      "sha256": "d8cac21aceff7df7cc88f9207d7513ad3116dc7c3edd72ac2fd90b25f5323b64",
+      "expected": "この意志は折れない！ おうぎ、ばんさいれいめい！",
+      "recognized": "この意志は折れない大義ファンサイゲーム",
+      "similarity": 0.65
+    },
+    "magic-rei/ultimate-earth": {
+      "sha256": "96acf678a0f8aab4c36b880627e156282e440ce72e35957f32df96e11234d052",
+      "expected": "静寂の中で！ おうぎ、ちてんきょうめい！",
+      "recognized": "静寂の中で大義視点共鳴",
+      "similarity": 0.85
+    },
+    "magic-rei/ultimate-sky": {
+      "sha256": "8999f5ebc72c55fecf0c4e0da49853763ffa3fd23dfb2ccfa6e31ee4d7cb1f7c",
+      "expected": "刃の心で！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "ヤイバの心で大義正準転称",
+      "similarity": 0.8
+    },
+    "magic-rei/ultimate-heart": {
+      "sha256": "df25219fce434fb274e4b099eb04ef1a3565933e68a71ff8d4f31559ac3ed6c3",
+      "expected": "闇を断ち切る！ おうぎ、むきゅうしんりん！",
+      "recognized": "闇を立ち切る 王儀 無給 神輪",
+      "similarity": 0.8
+    },
+    "magic-madoka/sword-1": {
+      "sha256": "b1c6acc4a8ee3524609b9c01e2fcde1c54d73a0b2cd6656b5774489f1a85b85f",
+      "expected": "くるりと行くよ！ あさつゆばらい！",
+      "recognized": "くるりと行くよ。アサス夕払い!",
+      "similarity": 0.8276
+    },
+    "magic-madoka/ultimate-dawn": {
+      "sha256": "77f9a6f6ab9f0d0a9e65a87fc9b179440874f2072a4b2f424b0d2bf29b815b86",
+      "expected": "願いよつながれ！ おうぎ、ばんさいれいめい！",
+      "recognized": "願いをつながれ! 王儀! バンサイレーメー!",
+      "similarity": 0.8421
+    },
+    "magic-madoka/ultimate-earth": {
+      "sha256": "4ff24d82afdb2b9dfcdf08966df4b7c9fe7d142abdb6d324554bae0a099d3f1a",
+      "expected": "まるく結んで！ おうぎ、ちてんきょうめい！",
+      "recognized": "丸く結んで、大義、視点共鳴!",
+      "similarity": 0.8333
+    },
+    "magic-madoka/ultimate-sky": {
+      "sha256": "b26e1d18c6977079397927ea6b4b78575b91623f4eb3bbf030609cc2007a60bc",
+      "expected": "くるりと行くよ！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "くるりと行くよ。大義、正準転勝!",
+      "similarity": 0.7692
+    },
+    "magic-madoka/ultimate-heart": {
+      "sha256": "69a6ca0460582ef690bc060cdbe575e03136084705fc7f50e6297fe19b330ad4",
+      "expected": "輪になれ光！ おうぎ、むきゅうしんりん！",
+      "recognized": "わになれひたり!大義無給心臨!",
+      "similarity": 0.7027
+    },
+    "magic-koharu/sword-1": {
+      "sha256": "f7d40245bb5e0932434a1736ee27e61f575c5536c83ffac37523a13d1e2a89fe",
+      "expected": "緑の息吹！ あさつゆばらい！",
+      "recognized": "緑のイブキ、アサツユバライ",
+      "similarity": 1.0
+    },
+    "magic-koharu/ultimate-dawn": {
+      "sha256": "fbd738534f48342de3a14bba3b85236962652e9ae7320a0aef1f63cb9db82599",
+      "expected": "花咲く明日へ！ おうぎ、ばんさいれいめい！",
+      "recognized": "花咲く明日へ大木晩祭礼姉",
+      "similarity": 0.7317
+    },
+    "magic-koharu/ultimate-earth": {
+      "sha256": "42cbe0166c4714def2e5c526e99eb718ffc07d38a5bbea2de6d6774294e29e18",
+      "expected": "春風よ！ おうぎ、ちてんきょうめい！",
+      "recognized": "はるかでよ 王儀視点共鳴",
+      "similarity": 0.875
+    },
+    "magic-koharu/ultimate-sky": {
+      "sha256": "1eabe8bf916b8242f98b21afc015662cbd36727bfe287068ee930d059361f038",
+      "expected": "緑の息吹！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "緑の岩吹 黄岐 正順転称",
+      "similarity": 0.8
+    },
+    "magic-koharu/ultimate-heart": {
+      "sha256": "5facc8be50be2adf47158f49170fba2df61a3da638feac65de4ec06e7f19470a",
+      "expected": "芽吹きの力で！ おうぎ、むきゅうしんりん！",
+      "recognized": "ネブキの力で大義無給心臨",
+      "similarity": 0.6667
+    },
+    "magic-mirai/sword-1": {
+      "sha256": "34e542cee90192ef41e239ae4d44966bd3848ef18fefb152f086b3dfe94fe441",
+      "expected": "その先へ行くよ！ あさつゆばらい！",
+      "recognized": "その先へ行くよ!アサツユバライ!",
+      "similarity": 1.0
+    },
+    "magic-mirai/ultimate-dawn": {
+      "sha256": "001e35b9e369a3fbecfe0a83b490f0526e097f2864ac005b71bc899271030153",
+      "expected": "明日を変える！ おうぎ、ばんさいれいめい！",
+      "recognized": "明日を変える! 王儀万歳例目!",
+      "similarity": 0.9143
+    },
+    "magic-mirai/ultimate-earth": {
+      "sha256": "d259ee9aae9f08985d88ad4b4a69e422217affee43eddcadeb061dc43f089903",
+      "expected": "未来はここから！ おうぎ、ちてんきょうめい！",
+      "recognized": "未来はここから!大義視点共鳴!",
+      "similarity": 0.8421
+    },
+    "magic-mirai/ultimate-sky": {
+      "sha256": "99ffc91b22d38ed8a0e5ba028f345b80d10df58959c064bf14ceaa85293fe0d6",
+      "expected": "その先へ行くよ！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "その先へ行くよ! 王儀正順転称!",
+      "similarity": 1.0
+    },
+    "magic-mirai/ultimate-heart": {
+      "sha256": "bdcfbab39dda2d04016322df1e0b72413601b12ca06f2eb8794dea8d84c6f475",
+      "expected": "きらめきを信じて！ おうぎ、むきゅうしんりん！",
+      "recognized": "きらめきを信じて 王儀無給心臨",
+      "similarity": 0.878
+    },
+    "magic-sera/sword-1": {
+      "sha256": "64ccdfdc12988328a09909d3fb6f6befc38ae0afa6f5c51bab4dba18c6ca76da",
+      "expected": "星よ守って！ あさつゆばらい！",
+      "recognized": "星を守ってアサツヨバラ",
+      "similarity": 0.8148
+    },
+    "magic-sera/ultimate-dawn": {
+      "sha256": "7516a297419c26b27b21aaa080a68984974746bd72517def57d822cc51fa809b",
+      "expected": "慈しみを力に！ おうぎ、ばんさいれいめい！",
+      "recognized": "キツくしみを力に!大義!万歳連盟!",
+      "similarity": 0.7619
+    },
+    "magic-sera/ultimate-earth": {
+      "sha256": "c23c9f5a3c4982128c119464a87b110a6204cee61a27a4a2fab25204c577862f",
+      "expected": "祈りをここに！ おうぎ、ちてんきょうめい！",
+      "recognized": "祈りをここに!王儀視点共鳴!",
+      "similarity": 0.9444
+    },
+    "magic-sera/ultimate-sky": {
+      "sha256": "15558eb6dab9a1a08b6bebf5ada2c65bbe4318175db3bbda702aff49167ea7a3",
+      "expected": "星よ守って！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "星を守って、王儀、精準転称!",
+      "similarity": 0.95
+    },
+    "magic-sera/ultimate-heart": {
+      "sha256": "9e20c0b1a638b5824d4ce81071670eaa1142420152edb6b53b76f446a3e439cf",
+      "expected": "願いを重ねて！ おうぎ、むきゅうしんりん！",
+      "recognized": "願いを重ねて大義無給心臨",
+      "similarity": 0.7692
+    },
+    "magic-ren/sword-1": {
+      "sha256": "edc0da925a79ab32efda53fe9f63d16517bbd7f2b9881183ee8f921c543f0e7d",
+      "expected": "軽やかに！ あさつゆばらい！",
+      "recognized": "かろやかに、あさつ湯ばらい!",
+      "similarity": 0.8333
+    },
+    "magic-ren/ultimate-dawn": {
+      "sha256": "70443e50740278ee02663cb31bf52816b549874e844cd714119f50565abe6c20",
+      "expected": "大地よ応えろ！ おうぎ、ばんさいれいめい！",
+      "recognized": "第1を答えろ! 王儀! 万歳例目!",
+      "similarity": 0.8421
+    },
+    "magic-ren/ultimate-earth": {
+      "sha256": "884a5794eaf1b214352a8a372f2d222fabd16d99ff160be7b0c21a53e9f57e2d",
+      "expected": "風は読めた！ おうぎ、ちてんきょうめい！",
+      "recognized": "風は止めた 王儀視点共鳴",
+      "similarity": 0.8824
+    },
+    "magic-ren/ultimate-sky": {
+      "sha256": "40cca8ffaec5cd824375376fda292a5f8192ceb86917fa035ed8eb2466c2af0b",
+      "expected": "軽やかに！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "軽やかに大義正順転称",
+      "similarity": 0.8889
+    },
+    "magic-ren/ultimate-heart": {
+      "sha256": "4bce08e3917569053d0fb50d6b2dc419f1a5419707aaf7c04251d96143956ed4",
+      "expected": "緑の道を行く！ おうぎ、むきゅうしんりん！",
+      "recognized": "緑の道を行く大義無給心臨",
+      "similarity": 0.7805
+    },
+    "magic-soma/sword-1": {
+      "sha256": "ac3535c45f9c580f00087cea13fcf9af77cba825abb12fcb06f2dda98d534920",
+      "expected": "見定めた！ あさつゆばらい！",
+      "recognized": "にさだめた アサツユバライ",
+      "similarity": 0.9167
+    },
+    "magic-soma/ultimate-dawn": {
+      "sha256": "b60b45fe4229ced7a8ed7aaf7f61691960d081f3dea37c5df6ee762cdc3a2de3",
+      "expected": "蒼き誓いを！ おうぎ、ばんさいれいめい！",
+      "recognized": "青き誓いを大義万歳例名",
+      "similarity": 0.8333
+    },
+    "magic-soma/ultimate-earth": {
+      "sha256": "f73097479d0c9063eae3968c9612462cf824ec3e0cebe69fea64b92bccd05719",
+      "expected": "星の軌道で！ おうぎ、ちてんきょうめい！",
+      "recognized": "星の軌道で、大義、地点、共鳴",
+      "similarity": 0.8889
+    },
+    "magic-soma/ultimate-sky": {
+      "sha256": "e3c23b4799ddb897e3d3987dece6c37eeb2e7848a353b7571c87d5eec57cb8f1",
+      "expected": "見定めた！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "ミサダメタ オーギ 精準転称",
+      "similarity": 0.9444
+    },
+    "magic-soma/ultimate-heart": {
+      "sha256": "593753d2b0c4bb25beb003e49e15a47a3f1cd32134f49e6c18b95d076ffa9a2b",
+      "expected": "静かに貫く！ おうぎ、むきゅうしんりん！",
+      "recognized": "静かに貫く 王義無給神臨",
+      "similarity": 0.8947
+    },
+    "magic-minato/sword-1": {
+      "sha256": "0028eb4be50e9b0f7d68b4554a3000ac02b60a9e5e8548b2d42ac1ac02b5671b",
+      "expected": "波を越えて！ あさつゆばらい！",
+      "recognized": "波を超えてアサツユバライ",
+      "similarity": 1.0
+    },
+    "magic-minato/ultimate-dawn": {
+      "sha256": "1e99f740b5de62e2dcd243674ddb285e3743332c689a56de2cf2d8ccb9cca847",
+      "expected": "海原をひらく！ おうぎ、ばんさいれいめい！",
+      "recognized": "うなばらを開く大義万歳例目",
+      "similarity": 0.8108
+    },
+    "magic-minato/ultimate-earth": {
+      "sha256": "f24b70f7845da96a997d0b7e53a28bade5fd5087980d5c5680cadbacea096137",
+      "expected": "流れをつかむ！ おうぎ、ちてんきょうめい！",
+      "recognized": "流れをつかむ大義視点共鳴",
+      "similarity": 0.8333
+    },
+    "magic-minato/ultimate-sky": {
+      "sha256": "946a7c0e2fea3d66cf1a730da27b1e10554a87c376c24e47f98baa94bb621c4f",
+      "expected": "波を越えて！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "波を超えて大義正準転称",
+      "similarity": 0.8947
+    },
+    "magic-minato/ultimate-heart": {
+      "sha256": "613114f69e93105b178d5fc722d4b1f5963a8a6a46f3b1e5f3d977a1a95cb661",
+      "expected": "潮よ導け！ おうぎ、むきゅうしんりん！",
+      "recognized": "仕様を導け!大義無給心臨!",
+      "similarity": 0.6842
+    },
+    "magic-riku/sword-1": {
+      "sha256": "615536a600cc2687e9c8f35b9e7e60af30f359e8c019330de1adf12ab03925a4",
+      "expected": "まだ前へ！ あさつゆばらい！",
+      "recognized": "まだ前、アサツユ払い",
+      "similarity": 0.8696
+    },
+    "magic-riku/ultimate-dawn": {
+      "sha256": "d4a0e936ae0e7371952ae47d5dc71e3411bf236b73e9db83196f8de1688231b4",
+      "expected": "この一歩を刻む！ おうぎ、ばんさいれいめい！",
+      "recognized": "この一歩を刻む! オーギー! バンサイレベー!",
+      "similarity": 0.8
+    },
+    "magic-riku/ultimate-earth": {
+      "sha256": "da9af45c108eaf6f7ec8de6add0dfee1f4e5c3f660245c6e3fb1d51b4438ecdb",
+      "expected": "踏みしめて！ おうぎ、ちてんきょうめい！",
+      "recognized": "踏み締めて!大義・慈天教命!",
+      "similarity": 0.7273
+    },
+    "magic-riku/ultimate-sky": {
+      "sha256": "1773fd612223184211a3ec65fcfbe609c67122a31a178fb038a4f06ea53a35a1",
+      "expected": "まだ前へ！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "まだ前! 王儀正準転称!",
+      "similarity": 0.9714
+    },
+    "magic-riku/ultimate-heart": {
+      "sha256": "b02c701ed1785d7a8ccf3d1a000e86db585f8096b140fba729a17d3b257d77c1",
+      "expected": "岩より強く！ おうぎ、むきゅうしんりん！",
+      "recognized": "岩より強く大義無給心臨",
+      "similarity": 0.7568
+    },
+    "magic-yamato/sword-1": {
+      "sha256": "cf5fa879c0c9e97ec0c7ba2497592d3ad8efbeb6b7e1a6c39bb5af17019528cd",
+      "expected": "真っすぐ行く！ あさつゆばらい！",
+      "recognized": "まっすぐ行く!アサツユバナイ!",
+      "similarity": 0.8571
+    },
+    "magic-yamato/ultimate-dawn": {
+      "sha256": "d96a6691a3ad01531684c003330f05e0f7585d63c873942b6be6e15cd207b144",
+      "expected": "魂を解き放つ！ おうぎ、ばんさいれいめい！",
+      "recognized": "魂を解き放つ!大義万歳例弁!",
+      "similarity": 0.7727
+    },
+    "magic-yamato/ultimate-earth": {
+      "sha256": "a84ca17c485b525fdd9f5142b001bd6e393ea99140912cc48c69440f5f3e588b",
+      "expected": "燃えろ心！ おうぎ、ちてんきょうめい！",
+      "recognized": "燃えろ、心! 王義地点共鳴!",
+      "similarity": 1.0
+    },
+    "magic-yamato/ultimate-sky": {
+      "sha256": "d295549a2af0a8a163fb9fc8c8903e00e058f8b1d4a6dc74653236fe4555812f",
+      "expected": "真っすぐ行く！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "真っ直ぐ行く! オーギー!精準転称!",
+      "similarity": 0.8571
+    },
+    "magic-yamato/ultimate-heart": {
+      "sha256": "238ad50fa31f0a8fba15816ba3f42e452ac962ce7df1eac53946014e87c22d10",
+      "expected": "炎よ応えろ！ おうぎ、むきゅうしんりん！",
+      "recognized": "炎よこたよ! 王義無給心臨!",
+      "similarity": 0.7895
+    },
+    "magic-leon/sword-1": {
+      "sha256": "4410768fd5a746ac5fb23b8e13e265c9431faffc11704da37f532098cad5d858",
+      "expected": "誇り高く！ あさつゆばらい！",
+      "recognized": "誇り高く、あさつ湯ばらい",
+      "similarity": 1.0
+    },
+    "magic-leon/ultimate-dawn": {
+      "sha256": "47777ba1fdca3bcce05198e263dee74e7ffd3156c05153e2f80439da690f7579",
+      "expected": "この空を越える！ おうぎ、ばんさいれいめい！",
+      "recognized": "この空を超える 王儀万歳霊明",
+      "similarity": 0.8205
+    },
+    "magic-leon/ultimate-earth": {
+      "sha256": "5661387b498c71e5602ec4335750a6c664ab6a02d2ccc4a5c723a8b910b7ed5a",
+      "expected": "道は俺が開く！ おうぎ、ちてんきょうめい！",
+      "recognized": "道は俺が開く 王儀地点共鳴",
+      "similarity": 1.0
+    },
+    "magic-leon/ultimate-sky": {
+      "sha256": "d8a002f6f872e4dc11f99389424073de6dff1a78a2ab2089aff83d6edeaed9de",
+      "expected": "誇り高く！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "誇り高く王儀正順転称",
+      "similarity": 1.0
+    },
+    "magic-leon/ultimate-heart": {
+      "sha256": "4716029e610a92f466db4a5348c54a636d19f413bb1e39d18d1ae49f62308d50",
+      "expected": "王者の一歩だ！ おうぎ、むきゅうしんりん！",
+      "recognized": "王者の一歩だ! 王儀無給神臣!",
+      "similarity": 0.9
+    },
+    "magic-elliot/sword-1": {
+      "sha256": "397343acdda1dc1e6313cc5c2ba393e466112ca7ebaf835e9a403cab7c1a2ba4",
+      "expected": "誇りにかけて！ あさつゆばらい！",
+      "recognized": "怒りにかけて 明日夕暮らし",
+      "similarity": 0.5333
+    },
+    "magic-elliot/ultimate-dawn": {
+      "sha256": "9d410ddd2769b23c64c1c8a23f7a961707a8bcb6a267b2cdf2fad578fd6deefe",
+      "expected": "この誓いを貫く！ おうぎ、ばんさいれいめい！",
+      "recognized": "この機械を貫く大義万歳例名",
+      "similarity": 0.8095
+    },
+    "magic-elliot/ultimate-earth": {
+      "sha256": "7f533e4dcf47c1ae9a002dd3eccca9a4028b06a99cc4977be69f1a99b1462052",
+      "expected": "静かに刻め！ おうぎ、ちてんきょうめい！",
+      "recognized": "静かに刻め 王儀視点共鳴",
+      "similarity": 0.9444
+    },
+    "magic-elliot/ultimate-sky": {
+      "sha256": "91a6a9ce94600545f7a42aeba86d6eb6be1e597e3109f4f083d7f7b689ac7611",
+      "expected": "誇りにかけて！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "怒りにかけて、大義、声優で一緒。",
+      "similarity": 0.5128
+    },
+    "magic-elliot/ultimate-heart": {
+      "sha256": "bd88978231b027933cc0442729ba1c1f484dfaaa84b9177f9161c05443957f7a",
+      "expected": "夜明けを導く！ おうぎ、むきゅうしんりん！",
+      "recognized": "夜明けを導く 大義無給心理",
+      "similarity": 0.8649
+    },
+    "magic-sakuya/sword-1": {
+      "sha256": "0f6c95766dc2dfde87a3ca85732b8b254d9d7f73ed64c2e5d203e58eab623840",
+      "expected": "影よ舞え！ あさつゆばらい！",
+      "recognized": "陰を前 浅つゆばない",
+      "similarity": 0.48
+    },
+    "magic-sakuya/ultimate-dawn": {
+      "sha256": "f22fade5a674071ef8ef7ee2ded197974779d7f2e3b9b654c6bc2c5ff59346bf",
+      "expected": "闇にも灯を！ おうぎ、ばんさいれいめい！",
+      "recognized": "闇にもたりを 王儀万歳例目",
+      "similarity": 0.7568
+    },
+    "magic-sakuya/ultimate-earth": {
+      "sha256": "5c94b550bd9567be6a16acbf8fd72fb6486b6b2d08c1d72a9db8803d82329ddc",
+      "expected": "夜を越えて！ おうぎ、ちてんきょうめい！",
+      "recognized": "夜を超えて 王儀 視点競米",
+      "similarity": 0.8824
+    },
+    "magic-sakuya/ultimate-sky": {
+      "sha256": "85cd7f55ac0d9bbc6d07def1ed165fcd53abb036d628ce4f7c603369ff27d08a",
+      "expected": "影よ舞え！ おうぎ、せいじゅんてんしょう！",
+      "recognized": "影を前! 王儀正順転生!",
+      "similarity": 0.9189
+    },
+    "magic-sakuya/ultimate-heart": {
+      "sha256": "9dd0b31be501ce1c04d5adfc1235d2e1971fbe74271f27f76460c3382f7e83f1",
+      "expected": "月の導きで！ おうぎ、むきゅうしんりん！",
+      "recognized": "月の導きで大義無給心臨",
+      "similarity": 0.7692
+    }
+  },
+  "flagged": [
+    "elementary-warrior/ultimate-earth",
+    "elementary-caretaker/ultimate-dawn",
+    "elementary-assassin/sword-1",
+    "elementary-assassin/ultimate-dawn",
+    "elementary-chef/ultimate-earth",
+    "elementary-chef/ultimate-heart",
+    "elementary-gardener/ultimate-earth",
+    "elementary-gardener/ultimate-heart",
+    "elementary-mage/ultimate-heart",
+    "high-school-warrior/ultimate-earth",
+    "high-school-assassin/sword-1",
+    "high-school-bard/ultimate-dawn",
+    "high-school-bard/ultimate-earth",
+    "high-school-bard/ultimate-heart",
+    "high-school-librarian/ultimate-heart",
+    "high-school-chef/sword-1",
+    "high-school-chef/ultimate-earth",
+    "high-school-chef/ultimate-heart",
+    "high-school-gardener/ultimate-heart",
+    "magic-rei/sword-1",
+    "magic-rei/ultimate-dawn",
+    "magic-madoka/ultimate-heart",
+    "magic-koharu/ultimate-dawn",
+    "magic-koharu/ultimate-heart",
+    "magic-minato/ultimate-heart",
+    "magic-riku/ultimate-earth",
+    "magic-elliot/sword-1",
+    "magic-elliot/ultimate-sky",
+    "magic-sakuya/sword-1"
+  ],
+  "complete": true
+}

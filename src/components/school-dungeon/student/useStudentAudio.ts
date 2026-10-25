@@ -29,5 +29,5 @@ export function useStudentAudio(snapshot:Snapshot,profile:StudentAudioProfile='d
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.inventory.length>before.inventory.length)play('pickup');
   else if(snapshot.inDungeon&&before.inDungeon&&snapshot.inventory.length<before.inventory.length)play('item');
  },[snapshot.movement,snapshot.heroId,snapshot.active,snapshot.runId,snapshot.floor,snapshot.hp,snapshot.gameOver,snapshot.gameClear,snapshot.transformed,snapshot.inventory,equipmentKey,snapshot.inDungeon]);
- return play;
+ return Object.assign(play,{technique:(techniqueId:string)=>{if(current.current.active&&typeof document!=='undefined'&&!document.hidden)controller.current!.playTechnique(current.current.heroId,techniqueId);}});
 }

@@ -162,7 +162,9 @@
     "test:dungeons:chronicles": "node scripts/test-dungeons-chronicles.mjs && node scripts/test-dungeons-chronicle-audio.mjs",
     "test:dungeons:chronicles:browser": "node scripts/test-dungeons-chronicles-browser.mjs && node scripts/test-dungeons-chronicles-browser.mjs --series=2",
     "test:dungeons:chronicles:media": "node scripts/test-dungeons-chronicle-media.mjs",
-    "test:dungeons:chronicles:endings": "node scripts/test-dungeons-chronicle-endings-browser.mjs && node scripts/test-dungeons-chronicle-endings-browser.mjs --series=2"
+    "test:dungeons:chronicles:endings": "node scripts/test-dungeons-chronicle-endings-browser.mjs && node scripts/test-dungeons-chronicle-endings-browser.mjs --series=2",
+    "test:dungeons1:mastery": "node scripts/test-dungeons1-mastery.mjs && node scripts/dungeons1/audit-weapon-catalog.mjs && node scripts/test-dungeons1-technique-audio.mjs && node scripts/test-dungeons1-martial-art.mjs",
+    "test:dungeons1:mastery:browser": "node scripts/test-dungeons1-mastery-browser.mjs && node scripts/test-dungeons1-technique-audio-browser.mjs && node scripts/test-dungeons1-martial-3d.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

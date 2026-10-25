@@ -3,7 +3,9 @@ import {retireShopTheft} from './school-dungeon/shops';
 import {createPortal} from 'react-dom';
 import {traceUmbrella,resolveUmbrella,type UmbrellaKind} from './school-dungeon/umbrella';
 import {drawUmbrellaEffect} from './school-dungeon/umbrellaEffects';
-import {cueStudentAction} from './school-dungeon/dungeons1/heroActions';
+import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
+import {drawMartialEffect} from './school-dungeon/dungeons1/martialEffects';
+import {cueStudentAction,cueStudentCombatPose} from './school-dungeon/dungeons1/heroActions';
 import {AbilityDetails} from './school-dungeon/student/AbilityDetails';
 import {drawStudentAbilityEffect} from './school-dungeon/student/abilityEffects';
 import {AbilityButton,AbilityBurst,DungeonBiome} from './school-dungeon/student/AbilityUI';
@@ -147,12 +149,13 @@ type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER' | 'MIMIC' | 'NOTEBOOK' | 'FIRE_SPIRIT' | 'BALL' | 'CLOCK' | 'DUST' | 'TEST_MONSTER';
-type VisualEffectType = 'UMBRELLA' | 'ABILITY' | 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ';
+type VisualEffectType = 'MARTIAL' | 'UMBRELLA' | 'ABILITY' | 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ';
 type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
 
 interface VisualEffect {
   umbrellaKind?: UmbrellaKind;
   impactValue?: string;
+  weaponKind?:WeaponKind; martialTier?:number;
   id: number;
   type: VisualEffectType;
   x: number; 
@@ -170,6 +173,7 @@ interface VisualEffect {
 }
 
 interface Item {
+  weaponKind?:WeaponKind;
   marks?: string[]; markSlots?: number; cursed?: boolean; blessed?: boolean; capacity?: number; contents?: SchoolItem[]; shopOwner?: number;
   id: string;
   category: ItemCategory;
@@ -340,6 +344,7 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     'BOMB': { category: 'CONSUMABLE', type: 'BOMB', name: '爆弾', desc: '周囲を爆破する。', value: 200 },
     ...EXTRA_SCHOOL_DUNGEON_ITEMS,
     ...ADVENTURE_ITEMS as Record<string, Omit<Item, 'id'>>,
+    ...TRAINING_WEAPONS as Record<string, Omit<Item, 'id'>>,
 };
 
 /** The complete item pool is also consumed by the in-game compendium. */
@@ -1860,8 +1865,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           return;
       }
       
+      if(adventure.series===1&&map[ty]?.[tx]&&map[ty][tx]!=='WALL'&&equippedWeaponKind(player.equipment?.weapon)==='bow'){
+          for(let distance=2;distance<=6;distance++){
+              const x=player.x+player.dir.x*distance,y=player.y+player.dir.y*distance;
+              if(!map[y]?.[x]||map[y][x]==='WALL')break;
+              const enemy=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0);
+              if(enemy){if(enemy.enemyType!=='SHOPKEEPER'){attackEnemy(enemy);processTurn(player.x,player.y);return;}break;}
+          }
+      }
       triggerPlayerAttackAnim(player.dir);
-      addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+      if(adventure.series===1){const kind=equippedWeaponKind(player.equipment?.weapon);cueStudentCombatPose(adventure.hero.id,WEAPONS[kind].pose);addVisualEffect('MARTIAL',tx,ty,{dir:player.dir,weaponKind:kind,duration:32,maxDuration:32});}
+      else addVisualEffect('SLASH', tx, ty, { dir: player.dir });
       addLog("素振りをした。");
       audioService.playSound('select');
       processTurn(player.x, player.y);
@@ -1944,7 +1958,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           if (identifiedTypes.has(item.type)) return item.name;
           return idMap[item.type] || item.name;
       })();
-      return languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].en:tr(displayName);
+      const name=languageMode==='ENGLISH'&&TRAINING_WEAPONS[item.type]?TRAINING_WEAPONS[item.type].en:languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].en:tr(displayName);
+      const kind=WEAPONS[equippedWeaponKind(item)];return item.category==='WEAPON'?`${name} [${adventure.text(kind.ja,kind.en)}]`:name;
   };
 
   const fireRangedWeapon = () => {
@@ -2069,10 +2084,31 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const attackEnemy = (target: Entity) => {
+      if(target.hp<=0)return;
+      const martial=adventure.series===1&&target.enemyType!=='SHOPKEEPER'?adventure.practiceMartialAttack():null;
+      const technique=martial?.technique;
+      const weaponKind=equippedWeaponKind(player.equipment?.weapon);
+
       if (equipmentHas(player.equipment?.weapon, 'HEAL_SWORD')) setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 3)}));
       triggerPlayerAttackAnim(player.dir);
+      if(adventure.series===1)cueStudentCombatPose(adventure.hero.id,technique?.pose||WEAPONS[weaponKind].pose);
       const targets = [target];
-      addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
+      if(adventure.series===1)addVisualEffect('MARTIAL',target.x,target.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
+      else addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
+      if(technique){
+          studentCue.technique(technique.id);
+          addLog(adventure.text(technique.ja,technique.en),'#ffe396');
+          if(technique.pattern==='burst'||technique.pattern==='sweep')for(const enemy of enemies){
+              if(enemy.id===target.id||enemy.hp<=0||enemy.enemyType==='SHOPKEEPER')continue;
+              const dx=enemy.x-player.x,dy=enemy.y-player.y;
+              if(Math.max(Math.abs(dx),Math.abs(dy))<=1&&(technique.pattern==='burst'||dx*player.dir.x+dy*player.dir.y>=0))targets.push(enemy);
+          }
+          if(technique.pattern==='pierce'){
+              const x=target.x+player.dir.x,y=target.y+player.dir.y;
+              if(map[y]?.[x]&&map[y][x]!=='WALL'){const enemy=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0&&e.enemyType!=='SHOPKEEPER');if(enemy)targets.push(enemy);}
+          }
+      }
+
 
       if (equipmentHas(player.equipment?.weapon, 'PROTRACTOR_EDGE')) {
           const {x: dx, y: dy} = player.dir;
@@ -2092,13 +2128,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               addVisualEffect('SLASH', tx, ty, { dir: offset as Direction }); 
               addVisualEffect('EXPLOSION', tx, ty, { duration: 10, maxDuration: 10, scale: 0.5 });
               const t = enemies.find(e => e.x === tx && e.y === ty);
-              if (t) targets.push(t);
+              if (t&&!targets.some(e=>e.id===t.id)) targets.push(t);
           });
       }
 
       let newEnemies = [...enemies];
       targets.forEach(t => {
-          let dmg = Math.max(1, player.attack - t.defense); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2;
+          if(adventure.series===1&&t.id!==target.id)addVisualEffect('MARTIAL',t.x,t.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
+          let dmg = Math.max(1, Math.floor(player.attack*(technique?.power||1)) - Math.floor(t.defense*(technique?.pattern==='pierce'?.5:1))); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2;
           
           const wType = player.equipment?.weapon?.type;
           if (equipmentHas(player.equipment?.weapon, 'OFUDA_RULER') && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); }
@@ -2139,7 +2176,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       });
       adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
       setEnemies(newEnemies.filter(e => e.hp > 0));
-      studentCue('attack',deads.length>0);
+      if(technique)audioService.playAttackEffectSound(deads.length>0?'finisher':'slash');else studentCue('attack',deads.length>0);
   };
 
   // ... LONG PRESS LOGIC ...
@@ -2905,7 +2942,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           const sx = (fx.x - startX) * ts;
           const sy = (fx.y - startY) * ts;
           
-          if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
+          if(fx.type==='MARTIAL'){drawMartialEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.weaponKind||'fist',fx.dir,fx.martialTier||0);}
+          else if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
           else if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
               ctx.fillStyle = fx.type === 'THUNDER' ? 'yellow' : 'white';
               ctx.globalAlpha = fx.duration / (fx.maxDuration || 20);
@@ -3008,7 +3046,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if ((adventure.isMystery || item.category === 'STAFF') && !identifiedTypes.has(item.type)) {
           return "振ってみるまで分からない。";
       }
-      return languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].englishDesc:item.desc;
+      return languageMode==='ENGLISH'&&TRAINING_WEAPONS[item.type]?TRAINING_WEAPONS[item.type].englishDesc:languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].englishDesc:item.desc;
   };
 
   // --- STYLE VARIABLES FOR THEME ---

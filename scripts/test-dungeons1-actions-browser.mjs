@@ -7,21 +7,21 @@ const entry=`.d1-actions-test-${process.pid}.ts`,out='tmp/d1-actions';let server
 const expected=process.argv.includes('--partial')?JSON.parse(await fs.readFile('assets/dungeons1/hero-actions-build.json','utf8')).assets.length:52;
 try{
  await fs.mkdir(out,{recursive:true});
- await fs.writeFile(entry,`import * as motion from './src/components/school-dungeon/dungeons1/heroActions';import * as art from './src/components/school-dungeon/dungeons1/drawHero';import {D1_HERO_ACTION_KEYS} from './src/data/dungeons1HeroActionKeys';Object.assign(window,{motion,art,keys:[...D1_HERO_ACTION_KEYS]});`);
+ await fs.writeFile(entry,`import * as motion from './src/components/school-dungeon/dungeons1/heroActions';import * as art from './src/components/school-dungeon/dungeons1/drawHero';import * as weaponless from './src/components/school-dungeon/dungeons1/weaponlessArt';import {D1_HERO_ACTION_KEYS} from './src/data/dungeons1HeroActionKeys';Object.assign(window,{motion,art,weaponless,keys:[...D1_HERO_ACTION_KEYS]});`);
  server=await createServer({server:{host:'127.0.0.1',port:0,hmr:false},logLevel:'error',plugins:[{name:'actions-fixture',configureServer(s){s.middlewares.use('/__actions',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__actions',`<html><body style="background:#30454d;color:white"><script type="module" src="/${entry}"></script></body></html>`));});}}]});
  await server.listen();const address=server.httpServer.address();
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${address.port}/__actions`);await page.waitForFunction(count=>window.keys?.length===count,expected);
  const coverage=await page.evaluate(async()=>{
-  const {motion,art,keys}=window,canvas=document.createElement('canvas');canvas.width=8*112;canvas.height=52*112;const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+  const {motion,art,weaponless,keys}=window,canvas=document.createElement('canvas');canvas.width=8*112;canvas.height=52*112;const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
   let time=1000,calls=0,firstImage;const originalNow=performance.now;performance.now=()=>time;
   const rows=['walk','walk','attack','throw','swing','read','use','shoot'];
-  const proxy={save(){},restore(){},drawImage(...args){calls++;proxy.last=args;}};
+  const proxy={save(){},restore(){},translate(){},scale(){},drawImage(...args){calls++;proxy.last=args;}};
   try{
    for(let index=0;index<keys.length;index++){
     const key=keys[index],form=key.endsWith('-transformed'),id=key.replace(/-transformed$/,'');
-    const image=art.loadD1HeroArt(id,form);await image.decode();if(index===0)firstImage=image;
+    const image=art.loadD1HeroArt(id,form);await image.decode();const gestures=weaponless.loadWeaponlessArt(id,form);await gestures.decode();if(index===0)firstImage=image;
     if(!image.src.includes('/'+key+'.webp'))throw Error('Wrong form: '+key);
     const source=new Image();source.src='/sprites/wandering-student/'+key+'.webp';await source.decode();
     for(let row=0;row<8;row++){

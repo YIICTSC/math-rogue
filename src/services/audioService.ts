@@ -1,3 +1,4 @@
+import {techniqueVoicePath} from '../components/school-dungeon/dungeons1/techniqueVoices';
 import {chronicleVoicePath} from '../components/school-dungeon/chronicles/voices';
 import {paperBridgeVoice} from '../data/paperPlaneBridge';
 import { cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
@@ -2151,6 +2152,16 @@ class AudioService {
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
+  }
+
+  /** Dedicated protagonist-specific technique calls, using the normal voice volume and stop lifecycle. */
+  public async playDungeons1TechniqueVoice(heroId:string,techniqueId:string){
+      const path=techniqueVoicePath(heroId,techniqueId);if(!path||!this.canPlayConversationVoice())return false;
+      this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      this.stopDungeonChronicleVoices(true);
+      const name=`dungeon-chronicle-voice-technique-${heroId}-${techniqueId}`;
+      const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(path))],6500,false,generation,true);
   }
 
   /** Original action and story voices shared by both Dungeons series. */
