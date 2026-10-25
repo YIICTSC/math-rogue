@@ -1,3 +1,4 @@
+import {actionGeometry} from '../student/actionGeometry';
 import {D1_ACTION_CELL,D1_ACTION_ROWS,type StudentAction} from './actionLayout';
 
 const CELL=D1_ACTION_CELL;
@@ -31,13 +32,16 @@ export function studentPoseAtlas(id:string,image:HTMLImageElement,transformed=fa
    for(let frame=0;frame<count;frame++){
     const pose=canvas(CELL,CELL),p=context(pose),ox=16,oy=16;
     const phase=action==='walk'?Math.sin(frame/6*Math.PI*2):frame===1?1:0;
+    const geometry=actionGeometry(facing,frame,action);
     const facingLeft=[3,5,7].includes(facing),side=facingLeft?-1:1;
     const bob=action==='walk'?(frame%3===1?-1:0):frame===1?-1:0;
     p.save();p.translate(ox,oy);
+    if(action!=='walk'&&geometry.behind)prop(p,action,frame,center,shoulder,hip,side,skin,sleeve,facing);
     // Alternating feet are separately posed; their shared baseline prevents skating.
-    const stride=action==='walk'?Math.round(phase*2):action==='attack'&&frame===1?side*2:0;
-    p.drawImage(source,0,hip,center,64-hip,-stride,hip,center,64-hip);
-    p.drawImage(source,center,hip,64-center,64-hip,center+stride,hip,64-center,64-hip);
+    const strideX=action==='walk'?Math.round(phase*geometry.x*2):0;
+    const strideY=action==='walk'?Math.round(phase*geometry.y*1.5):0;
+    p.drawImage(source,0,hip,center,64-hip,-strideX,hip-strideY,center,64-hip);
+    p.drawImage(source,center,hip,64-center,64-hip,center+strideX,hip+strideY,64-center,64-hip);
     if(action==='walk'){
      p.drawImage(source,0,0,64,hip,0,bob,64,hip);
     }else{
@@ -45,15 +49,18 @@ export function studentPoseAtlas(id:string,image:HTMLImageElement,transformed=fa
      // around its shoulder rather than stretching the complete character image.
      p.drawImage(source,0,0,64,shoulder,0,bob,64,shoulder);
      p.drawImage(source,left+armWidth,shoulder,width-armWidth*2,hip-shoulder,left+armWidth,shoulder+bob,width-armWidth*2,hip-shoulder);
-     const angles=action==='read'?[-.7,.7]:action==='use'?[0,side*1.7]:action==='throw'?[0,side*(frame===0?-1.6:frame===1?1.5:.3)]:action==='shoot'?[-.9,.9]:[0,side*(frame===0?-1.5:frame===1?1.4:.2)];
+     const reachAngle=geometry.angle-Math.PI/2;
+     const angles=action==='read'?[-.7,.7]:action==='use'?[0,side*(frame===1?1.7:.9)]:[reachAngle*.3,reachAngle*.3];
      for(let arm=0;arm<2;arm++){
       const ax=arm?right-armWidth+1:left,pivot=arm?ax:ax+armWidth;
       p.save();p.translate(pivot,shoulder+bob);p.rotate(angles[arm]);
       p.drawImage(source,ax,shoulder,armWidth,armHeight,arm?0:-armWidth,0,armWidth,armHeight);p.restore();
      }
      // A readable prop silhouette distinguishes actions at a 48px game tile.
-     prop(p,action,frame,center,shoulder,hip,side,skin,sleeve,facing);
+     if(!geometry.behind)prop(p,action,frame,center,shoulder,hip,side,skin,sleeve,facing);
     }
+    // Raised arms must not overwrite the directional face/hair reference.
+    if(action!=='walk')p.drawImage(source,0,0,64,shoulder,0,bob,64,shoulder);
     p.restore();out.drawImage(pose,facing*CELL,(start+frame)*CELL);
    }
   }
@@ -64,26 +71,32 @@ function sample(data:Uint8ClampedArray,x:number,y:number,fallback:string){const 
 function prop(p:CanvasRenderingContext2D,action:StudentAction,frame:number,cx:number,shoulder:number,hip:number,side:number,skin:string,sleeve:string,facing:number){
  const rect=(x:number,y:number,w:number,h:number,color:string)=>{p.fillStyle=color;p.fillRect(Math.round(x),Math.round(y),w,h);};
  const hand=(x:number,y:number)=>{rect(x-1,y-1,4,4,'#302c3e');rect(x,y,2,2,skin);};
- const front=facing!==1&&facing!==6&&facing!==7;
+ const g=actionGeometry(facing,frame,action);
+ const originY=shoulder+7;
  if(action==='read'){
-  const y=shoulder+5;
-  rect(cx-11,y,22,13,'#202b46');rect(cx-10,y,9,10,'#eee3b7');rect(cx+1,y,9,10,'#fff0cd');rect(cx-1,y,2,12,'#a78452');
-  for(let i=0;i<3;i++){rect(cx-8,y+2+i*3,5,1,'#9a9a96');rect(cx+3,y+2+i*3,5,1,'#a1a5a4');}
-  hand(cx-11,y+7);hand(cx+10,y+7);
+  // The book follows the chest plane; north-facing props are drawn behind the torso.
+  const width=g.x===0?20:14,x=cx+g.x*7-width/2,y=originY+g.y*4;
+  rect(x-1,y-1,width+2,12,'#202b46');rect(x,y,width/2-1,9,'#eee3b7');rect(x+width/2,y,width/2,9,'#fff0cd');
+  rect(x+width/2-1,y,2,10,'#a78452');hand(x-2,y+7);hand(x+width,y+7);
  }else if(action==='use'){
-  const x=cx+side*7,y=shoulder-3+(frame===1?-3:2);
+  const x=cx+g.x*9+(g.x===0?6:0),y=originY+g.y*4-(frame===1?10:4);
   rect(x-2,y,6,9,'#27374b');rect(x-1,y+3,4,5,'#66d8af');rect(x,y+3,1,3,'#ccffe7');rect(x,y-2,2,3,'#d5b47b');hand(x-2,y+7);
- }else if(action==='throw'||action==='shoot'){
-  const reach=frame===0?-6:frame===1?15:8,x=cx+side*reach,y=shoulder+4;
-  rect(cx+side*4,y,side>0?Math.max(2,reach-4):4,3,sleeve);hand(x,y);
-  if(action==='shoot'){rect(x-4,y-3,9,2,'#e5f2ee');rect(x-1,y-5,5,2,'#a3c8d2');rect(x-1,y-1,5,2,'#7195ae');}
-  else if(frame!==2){rect(x-1,y-4,4,4,'#34434f');rect(x,y-4,2,2,'#b8c9cf');}
  }else{
-  const x=cx+side*(frame===1?14:7),y=shoulder+(frame===0?-8:frame===1?9:5);
-  p.save();p.translate(Math.round(x),Math.round(y));p.rotate(side*(frame===1?1.2:-.6));
-  rect(-2,-19,4,21,'#332b3b');rect(-1,-18,2,18,action==='swing'?'#91b3d5':'#e5b963');rect(0,-17,1,14,'#fff0b6');rect(-4,0,8,2,'#946b46');rect(-1,2,2,5,'#654337');p.restore();hand(x,y+3);
-  if(action==='swing'){rect(x-2,y-19,5,5,'#385a89');rect(x-1,y-18,3,3,'#9ef0e5');}
+  // Draw in a local forward/right basis: the projectile and weapon travel along
+  // the same eight-direction vector as movement, including north and south.
+  const x=cx+g.x*g.reach,y=originY+g.y*g.reach*.7;
+  const armSteps=Math.max(1,Math.ceil(g.reach));
+  for(let i=3;i<armSteps;i++){const t=i/armSteps;rect(cx+(x-cx)*t-1,originY+(y-originY)*t-1,3,3,sleeve);}
+  hand(x,y);
+  p.save();p.translate(Math.round(x),Math.round(y));p.rotate(g.angle);
+  if(action==='throw'){
+   if(frame!==2){rect(-2,-2,5,5,'#34434f');rect(-1,-2,3,2,'#b8c9cf');}
+  }else if(action==='shoot'){
+   rect(-7,-1,17,2,'#e5f2ee');rect(5,-3,3,6,'#a3c8d2');rect(-7,-3,3,6,'#7195ae');
+  }else{
+   rect(0,-2,20,4,'#332b3b');rect(1,-1,18,2,action==='swing'?'#91b3d5':'#e5b963');rect(2,-1,14,1,'#fff0b6');rect(-1,-4,2,8,'#946b46');rect(-6,-1,5,2,'#654337');
+   if(action==='swing'){rect(18,-3,6,6,'#385a89');rect(19,-2,4,4,'#9ef0e5');}
+  }
+  p.restore();
  }
- // Back-facing book and bottle remain visible at the side, without drawing a face.
- if(!front&&action==='read')rect(cx-1,shoulder+3,2,2,'#c9ab70');
 }

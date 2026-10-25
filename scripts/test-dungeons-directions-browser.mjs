@@ -20,14 +20,14 @@ try{
  const calls=[];const spy={save(){},restore(){},drawImage(...args){calls.push(args);}};
  if(!motion.drawD2HeroAction(spy,a.heroId,dir,0,0,48,a.transformed,source))throw Error('Missing '+a.key);
  const [image,sx]=calls.at(-1);if(sx!==dir*96)throw Error('Wrong column');
- if(useCanonicalD2Pose(a.heroId,a.transformed,dir)){if(!(image instanceof HTMLCanvasElement))throw Error('Incorrect diagonal source');canonical++;}
+ if(useCanonicalD2Pose(a.heroId,a.transformed,dir,action)){if(!(image instanceof HTMLCanvasElement))throw Error('Incorrect diagonal source');canonical++;}
  else if(!(image instanceof HTMLImageElement))throw Error('Lost painted cardinal');
  if(!sprites.drawStudentSprite(ctx,a.heroId,dirs[dir],dir*64+8,row*64+40,48,a.transformed))throw Error('No visible sprite');draws++;
  }
  }
  }return {draws,canonical};}finally{performance.now=clock;}
  },assets);
- assert.equal(result.draws,1152);assert.equal(result.canonical,584);assert.deepEqual(errors,[]);await fs.mkdir('tmp/directions',{recursive:true});
+ assert.equal(result.draws,1152);assert.equal(result.canonical,868);assert.deepEqual(errors,[]);await fs.mkdir('tmp/directions',{recursive:true});
  for(const a of assets)await page.locator(`[id="${a.key}"]`).screenshot({path:`tmp/directions/${a.key}.png`});
- console.log('PASS: 18 forms, 1152 action/direction draws, 584 canonical corrections, correct original/transformed sources, zero browser errors. D1 all 52 forms verified separately.');
+ console.log('PASS: 18 forms, 1152 action/direction draws, 868 canonical draws, correct original/transformed sources, zero browser errors. D1 all 52 forms verified separately.');
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}

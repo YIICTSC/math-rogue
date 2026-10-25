@@ -23,14 +23,14 @@ try{
     const key=keys[index],form=key.endsWith('-transformed'),id=key.replace(/-transformed$/,'');
     const image=art.loadD1HeroArt(id,form);await image.decode();if(index===0)firstImage=image;
     if(!image.src.includes('/'+key+'.webp'))throw Error('Wrong form: '+key);
-    const source=new Image(); // Unreadable legacy art proves the painted path is used.
+    const source=new Image();source.src='/sprites/wandering-student/'+key+'.webp';await source.decode();
     for(let row=0;row<8;row++){
      time+=1000;motion.cueStudentAction(id,rows[row]);const start=time;time+=rows[row]==='walk'?row===0?10:160:180;
      const snapshot=motion.studentActionSnapshot(id),paintedRow=rows[row]==='walk'?(snapshot.frame<3?0:1):row;
      for(let dir=0;dir<8;dir++){
-      if(!art.drawD1HeroAction(proxy,id,source,dir,10,20,48,form))throw Error('No painted pose '+key);
+      if(!art.drawD1HeroAction(proxy,id,source,dir,10,20,48,form))throw Error('No action pose '+key);
       const [used,sx,sy,sw,sh]=proxy.last;
-      if(used!==image||sx!==dir*96||sy!==paintedRow*96||sw!==96||sh!==96)throw Error('Wrong cell '+key+'/'+row+'/'+dir);
+      const directed=['attack','throw','swing','shoot'].includes(rows[row]);if(sx!==dir*96||sy!==(directed?snapshot.row:paintedRow)*96||sw!==96||sh!==96||directed&&!(used instanceof HTMLCanvasElement)||!directed&&used!==image)throw Error('Wrong cell '+key+'/'+row+'/'+dir);
      }
      ctx.drawImage(image,0,paintedRow*96,96,96,row*112+8,index*112+8,96,96);
      time=start+snapshot.duration;
@@ -59,5 +59,5 @@ try{
   return window.art.drawD1HeroAction(ctx,'elementary-caretaker',source,0,24,24,48)&&ctx.getImageData(0,0,96,96).data.some((v,i)=>i%4===3&&v>80);
  }),'Failed painted downloads must retain a visible fallback');
  assert.deepEqual(errors,[]);await fallback.close();
- console.log(`PASS: ${expected} real WebP atlases decode, ${coverage.calls} runtime painted-cell draws, correct transformed forms, idle restoration, bounded cache, visible fallback on download failure and zero runtime errors.`);
+ console.log(`PASS: ${expected} real WebP atlases decode, ${coverage.calls} runtime action-cell draws, correct transformed forms, idle restoration, bounded cache, visible fallback on download failure and zero runtime errors.`);
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}
