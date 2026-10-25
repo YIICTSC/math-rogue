@@ -86,8 +86,6 @@ export function decorateFloor(state:AdventureState,map:string[][],px:number,py:n
  const exits: string[]=[];for(let y=0;y<map.length;y++)for(let x=0;x<map[y].length;x++)if(map[y][x]==='STAIRS')exits.push(positionKey(x,y));
  const exitsReachable=()=>{const todo=[[px,py]],seen=new Set([positionKey(px,py)]);for(const [x,y] of todo)for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,key=positionKey(nx,ny);if(map[ny]?.[nx]&&map[ny][nx]!=='WALL'&&!['WATER','HOLE'].includes(state.terrain[key])&&!seen.has(key)){seen.add(key);todo.push([nx,ny]);}}return exits.every(key=>seen.has(key));};
  for(const [key,terrain] of Object.entries(state.terrain)){if(exitsReachable())break;if(terrain==='WATER'||terrain==='HOLE')delete state.terrain[key];}
- const eventKinds=['REST','TRADER','FRIEND','STORY'];
- cells.filter(c=>!state.terrain[positionKey(c.x,c.y)]).slice(0,4).forEach((c,i)=>state.events[positionKey(c.x,c.y)]={kind:eventKinds[(i+floor)%4],done:false});
  // A wall beside a reachable cell can conceal a cache without altering the connected floor.
  for(const c of cells){const wall=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>({x:c.x+dx*2,y:c.y+dy*2})).find(p=>map[p.y]?.[p.x]==='WALL');if(wall){state.terrain[positionKey(wall.x,wall.y)]='SECRET';break;}}
  if(state.companion){const start=[[0,1],[0,-1],[-1,0],[1,0]].map(([dx,dy])=>({x:px+dx,y:py+dy})).find(p=>map[p.y]?.[p.x]==='FLOOR'&&!occupied.has(positionKey(p.x,p.y)));Object.assign(state.companion,start||{x:px,y:py});state.companion.direction=0;state.companion.moving=false;}
@@ -144,3 +142,6 @@ export function equipmentResonance(equipment:{weapon?:SchoolItem|null;armor?:Sch
  if(equipmentHas(weapon,'STAINLESS_PEN')&&equipmentHas(armor,'NAME_TAG')){bonuses.attack+=2;bonuses.defense+=2;bonuses.names.push('ものを大切にセット');}
  return bonuses;
 }
+
+/** Retire old per-floor facilities when loading existing adventures. */
+export function removeFloorFacilities(state:AdventureState){if(state.town||state.place==='HOME'||state.place==='RELAY')return;for(const [key,event] of Object.entries(state.events))if(['REST','TRADER','STORY'].includes(event.kind))delete state.events[key];}

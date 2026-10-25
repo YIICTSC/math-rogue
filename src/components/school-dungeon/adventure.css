@@ -27,3 +27,6 @@
  .school-adventure-controls button{font-size:10px;line-height:1.1;padding:4px 6px;max-width:100%}
  .mini-game-dungeon-screen:has(.school-adventure-controls) .dungeon-landscape-dpad-panel{padding-top:120px!important}
 }
+
+/* Story actors keep their full authored palette in both games. */
+.school-adventure-panel .student-story canvas,.school-adventure-panel .student-story img,.school-adventure-panel .student-story .traveler-sprite{filter:none!important}

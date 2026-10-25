@@ -1,0 +1,1 @@
+export function isPickaxe(item:any){return Boolean(item&&!item.cursed&&(/PICKAXE|SUPPLY_PICK/.test(item.type||'')||/つるはし|ツルハシ|pickaxe/i.test(item.name||''))&&(item.type!=='SUPPLY_PICK'||(item.charges||0)>0));}

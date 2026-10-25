@@ -1,12 +1,104 @@
 {
+  "dedicatedAnimations": [
+    {
+      "key": "lyria",
+      "path": "public/sprites/dungeons2/animations/lyria.webp",
+      "sha256": "009c4317d7597f38268ef2ea3da0dd092c7218608a65e60b62f7a190031a3216"
+    },
+    {
+      "key": "lyria-transformed",
+      "path": "public/sprites/dungeons2/animations/lyria-transformed.webp",
+      "sha256": "f0fb1b67c467cacfcd4a0328c2cae0dca7ccdf5647d420b4af2dba510e9c935c"
+    },
+    {
+      "key": "celis",
+      "path": "public/sprites/dungeons2/animations/celis.webp",
+      "sha256": "409f6b90b50366eb7d66a1b8e9cb1f6cd4b397b4d8b453619a0482e868a8be83"
+    },
+    {
+      "key": "celis-transformed",
+      "path": "public/sprites/dungeons2/animations/celis-transformed.webp",
+      "sha256": "2d4695aac6fb160945ae1af1734aac9e8deafa466c16e41169ce0852b9747ef6"
+    },
+    {
+      "key": "flora",
+      "path": "public/sprites/dungeons2/animations/flora.webp",
+      "sha256": "cedf22afedaf767ef9be1c4fcea1f70caf7efc4447ab95ef895d8e6740d7d999"
+    },
+    {
+      "key": "flora-transformed",
+      "path": "public/sprites/dungeons2/animations/flora-transformed.webp",
+      "sha256": "cd4d90e2e0c6ecac27db6042a66fc24889acd436fdaa9eee8a7118f405cb7860"
+    },
+    {
+      "key": "noctia",
+      "path": "public/sprites/dungeons2/animations/noctia.webp",
+      "sha256": "70c9c994de88d1fde635d0437a5fe81930a8a6c2cec1d3d3243121c565f30ed8"
+    },
+    {
+      "key": "noctia-transformed",
+      "path": "public/sprites/dungeons2/animations/noctia-transformed.webp",
+      "sha256": "f64b0dcd4fa0d62add5c43855207b2ba66f1f6e90651bc54340c9a76bac7b20b"
+    },
+    {
+      "key": "aurene",
+      "path": "public/sprites/dungeons2/animations/aurene.webp",
+      "sha256": "9baa57eacb7c2ef7cefbb5ad20d2f96ea5aabbed95b450a2f6a3fb8da0855c55"
+    },
+    {
+      "key": "aurene-transformed",
+      "path": "public/sprites/dungeons2/animations/aurene-transformed.webp",
+      "sha256": "46addfeae5fa3fe30798978c0d9ee5557ebea1e544abef6ae2b17136aba4d4ea"
+    },
+    {
+      "key": "ignis",
+      "path": "public/sprites/dungeons2/animations/ignis.webp",
+      "sha256": "b0c1b4828d895dd2754cdca9494e2eea50c6ea1623223b9833f2b8ef5d9f5897"
+    },
+    {
+      "key": "ignis-transformed",
+      "path": "public/sprites/dungeons2/animations/ignis-transformed.webp",
+      "sha256": "2014f73644e33b5d5e6b761200488ef9a8ea475ce9d70e042828c8a7306e6f82"
+    },
+    {
+      "key": "leon",
+      "path": "public/sprites/dungeons2/animations/leon.webp",
+      "sha256": "be5d6abd1487452ad67e970ee20d1089356382ca00112198de739beafff487c4"
+    },
+    {
+      "key": "leon-transformed",
+      "path": "public/sprites/dungeons2/animations/leon-transformed.webp",
+      "sha256": "8d3cc8ea30952022af67b6eff259e77f7b43c21fa0e627744dee12c7a67e29f6"
+    },
+    {
+      "key": "orion",
+      "path": "public/sprites/dungeons2/animations/orion.webp",
+      "sha256": "c28239ff0a514f6c48e042afc969847be8c9a6fa53f299e20000ad40c1cf4955"
+    },
+    {
+      "key": "orion-transformed",
+      "path": "public/sprites/dungeons2/animations/orion-transformed.webp",
+      "sha256": "deaaf12246f1d1d2895f818ee685fc79ea3c4914b32e5a732df4ce90f45beac1"
+    },
+    {
+      "key": "leif",
+      "path": "public/sprites/dungeons2/animations/leif.webp",
+      "sha256": "e8ee281cde97f3093552caa96534beda7cb2a29182af2d1414bd51d2c4a06a4e"
+    },
+    {
+      "key": "leif-transformed",
+      "path": "public/sprites/dungeons2/animations/leif-transformed.webp",
+      "sha256": "0d171d48e0c80973617d4f172cc82c2d4ce0863350ef53b41200b5932b58113c"
+    }
+  ],
   "reviewDate": "2026-10-25",
-  "runtimePhaseDraws": 13440,
+  "runtimePhaseDraws": 12288,
   "rendererSha256": {
     "src/components/school-dungeon/student/actionGeometry.ts": "c94f8af30f3b13738d911343d8cdec2796596ad19476e4c9a0ec07dcd2a55746",
     "src/components/school-dungeon/dungeons1/poseAtlas.ts": "ac3f44c3279676177f10f715aaca84ff865e4228a7ca24b4b60ff1079f530d2b",
     "src/components/school-dungeon/dungeons1/drawHero.ts": "458fe8bcb490f06173680769d3841946ddc2440ba100c4373670ad10abfa741f",
-    "src/components/school-dungeon/dungeons2/heroActions.ts": "a0af07614fff6f1d6317e72a843b9b18d1b5040c67146a5a30ca27f647c60318",
-    "src/components/school-dungeon/dungeons2/directionPolicy.ts": "80b45d4aeee13beaf01cdb317f8446da7876f2bee3405ca927b4612dde03406b"
+    "src/components/school-dungeon/dungeons2/heroActions.ts": "f1a5a987eb84062a911d56b54db1ac26992103809a1026fe9a7cd876bd5bb765",
+    "src/components/school-dungeon/dungeons2/directionPolicy.ts": "731d73b1d4f63da793590b46475778ee9c329ea4ae71cde11bc949845976f73a"
   },
   "directions": [
     "S",
@@ -18,7 +110,7 @@
     "NE",
     "NW"
   ],
-  "review": "Manual comparison of all 70 idle and action sheets; original direction sheets are the facing reference. All offensive actions use direction-aware anticipation/impact/recovery poses from the original facing. Other D1 actions retain painted art. D2 diagonal actions and normal Lyria east use articulated reference art, with alternating walk steps and back-facing prop occlusion.",
+  "review": "Manual comparison of all 70 idle and action sheets; original direction sheets are the facing reference. D1 offensive actions use direction-aware poses from the original facing. D2 uses dedicated ImageGen animations for all eighteen forms; see dedicated-animations-build.json for all 2304 frame hashes and reviewed row mappings. No procedural D2 pose fallback.",
   "forms": [
     {
       "series": 1,
@@ -2835,75 +2927,15 @@
       "referenceSha256": "31935151cf6ff222c93c106292eee2829dad1e0ea478cd94be44dfc9df781b77",
       "actions": "public/sprites/dungeons2/actions/lyria.webp",
       "actionsSha256": "f90f2577bda9bf45b9d6948f4c3bf9d72b0c9f8009b6dc931dd1fd8dbfe46bc6",
-      "canonicalDirections": [
-        2,
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          2,
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          2,
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          2,
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -2913,71 +2945,15 @@
       "referenceSha256": "c7d597222b9e85c7ae5a9749829f813d8a13cdff9924660631dfa44560aa0654",
       "actions": "public/sprites/dungeons2/actions/lyria-transformed.webp",
       "actionsSha256": "9c722cb5b2c56dc20c5dcd86ee4e02467bb6d87e19a66d0ae7a9000320b446ac",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -2987,71 +2963,15 @@
       "referenceSha256": "8bc434f1036ca82d784718a0bb7e250487744480f5b85f219035e97106fb9185",
       "actions": "public/sprites/dungeons2/actions/celis.webp",
       "actionsSha256": "23a1f0d5c686d5e3b336b752f7257d378d2d9303f041de7c4c58aa37c65097c2",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3061,71 +2981,15 @@
       "referenceSha256": "e619605cbae5137a3d7df14017aa75e739d935f513c30347947060a58a1c2ff7",
       "actions": "public/sprites/dungeons2/actions/celis-transformed.webp",
       "actionsSha256": "962ff95554fc3aa47dde9bb00473b60b61e3109b2946e7708713560e8a7e0c30",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3135,71 +2999,15 @@
       "referenceSha256": "17bb54d5de5e11865099f0fa26d2225bc2636077b2c0222bed51e2e803b204bd",
       "actions": "public/sprites/dungeons2/actions/flora.webp",
       "actionsSha256": "bf95adb7986aacaf475ec7c6e61acfea850114812d10e257ee584e9bd48efc9c",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3209,71 +3017,15 @@
       "referenceSha256": "8426440c7bd3ffc0b3e4ebab63cb5f17fdecc50e20124f8d39ad3e7f91cc08e3",
       "actions": "public/sprites/dungeons2/actions/flora-transformed.webp",
       "actionsSha256": "d50edfd0955ac7d8e56bc5b9a79fdb1ef30e89510bd2e82a25e173525285e027",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3283,71 +3035,15 @@
       "referenceSha256": "11f0861b61349442e6043af3626b0ac47175719d3fae88a425ebe66dd600cd64",
       "actions": "public/sprites/dungeons2/actions/noctia.webp",
       "actionsSha256": "a3126e5467f5ab43d19a5c76b43707aed8156243fdee7aa07d26afeb3e3320ca",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3357,71 +3053,15 @@
       "referenceSha256": "8eb4fb8b30d5538b522a2921db18fdb0afc8e4f9146fd9bb3575280a743f6de4",
       "actions": "public/sprites/dungeons2/actions/noctia-transformed.webp",
       "actionsSha256": "6262d00cdc9794e362227321ce56f43e5a02f54c97dcfa5cdf46644e21b58be8",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3431,71 +3071,15 @@
       "referenceSha256": "f80f9653e3893125ff6b48b6f6be306dfd8f2e8286edc9261db2b15df8bd4c66",
       "actions": "public/sprites/dungeons2/actions/aurene.webp",
       "actionsSha256": "9ffa34957dfbf89321fbaa01d680fcd5b849cdc24cf29a4b477bb9a494619d63",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3505,71 +3089,15 @@
       "referenceSha256": "0f0e9c7af50d686e410797dc88adfab87420dc83ce1a5fb56b8912082a624006",
       "actions": "public/sprites/dungeons2/actions/aurene-transformed.webp",
       "actionsSha256": "819a19a140b23c42b50e5a12f2545e4ee3fc2b5100bf6f2b4ae415403ff15e63",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3579,71 +3107,15 @@
       "referenceSha256": "9aa84305eae808927542ccf4f09a30ec7b48262bbedb374e4a3073bf0fbbb537",
       "actions": "public/sprites/dungeons2/actions/ignis.webp",
       "actionsSha256": "2c2a206cb8414b9dc5985e70106e3136762e57102500a9fa6e8430e94121c5ac",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3653,71 +3125,15 @@
       "referenceSha256": "36cf7d19b73c72aeae0f134efd4351266f0aed87f6b294529bf411adad10cdfe",
       "actions": "public/sprites/dungeons2/actions/ignis-transformed.webp",
       "actionsSha256": "7917b9a3bcaa95020cffbfb907cbf57e3570ad322727a5f6fb341e4627287059",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3727,71 +3143,15 @@
       "referenceSha256": "204b76537e000887549393ce57b2b8ac646fc2dedec1e21997f51a17966de480",
       "actions": "public/sprites/dungeons2/actions/leon.webp",
       "actionsSha256": "c812e96e2409934e117608b2bf1b7340b80128d073d94248c9949741ee5aab54",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3801,71 +3161,15 @@
       "referenceSha256": "1f31b4679dbe281808150399141b9c3c893d6156cd8b00bac2c43bb851c5b4d6",
       "actions": "public/sprites/dungeons2/actions/leon-transformed.webp",
       "actionsSha256": "5d1abc1dee5dcb2ebea8d88052e159f0a21f0746897c4eaf388672209bd72fa5",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3875,71 +3179,15 @@
       "referenceSha256": "0dec7975e78a3fdc2f59c27097a58dae3cf004af4bceaa1ac3da096e4f57c21f",
       "actions": "public/sprites/dungeons2/actions/orion.webp",
       "actionsSha256": "7076a646ae3fff6384d27bac6ea6cbeaceb2af9422c95cee4521582b91c62992",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -3949,71 +3197,15 @@
       "referenceSha256": "e3cb4d5390ca0e8578269d33effaef3e5eb8fb78d96cd969562144d027b8b218",
       "actions": "public/sprites/dungeons2/actions/orion-transformed.webp",
       "actionsSha256": "d42f2313397a25a6e04be0b5f37a8852e1e1440686b430cac203965e9ef2d4e1",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -4023,71 +3215,15 @@
       "referenceSha256": "22e80712f0cc59eaa3b831c38b036c7d47f28cf88c9077d7750eec352cfd81c6",
       "actions": "public/sprites/dungeons2/actions/leif.webp",
       "actionsSha256": "57346156bf4fb18262bb1f1010953b99db26c15ee6adac470522276bd760e2e9",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     },
     {
@@ -4097,71 +3233,15 @@
       "referenceSha256": "e5b2e1638f3b12107823e17813017e3f0470399b7936a800cd3c3e6d3848f93e",
       "actions": "public/sprites/dungeons2/actions/leif-transformed.webp",
       "actionsSha256": "6295d85db989ee9448b89348e340f4a370f869ced2a275642b59b4902b72dc8e",
-      "canonicalDirections": [
-        4,
-        5,
-        6,
-        7
-      ],
+      "canonicalDirections": [],
       "canonicalActionDirections": {
-        "walk": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "attack": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "throw": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "swing": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "read": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "use": [
-          4,
-          5,
-          6,
-          7
-        ],
-        "shoot": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
+        "walk": [],
+        "attack": [],
+        "throw": [],
+        "swing": [],
+        "read": [],
+        "use": [],
+        "shoot": []
       }
     }
   ]

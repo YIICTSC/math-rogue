@@ -27,7 +27,7 @@ try{
  }
  }return {draws,canonical};}finally{performance.now=clock;}
  },assets);
- assert.equal(result.draws,1152);assert.equal(result.canonical,868);assert.deepEqual(errors,[]);await fs.mkdir('tmp/directions',{recursive:true});
+ assert.equal(result.draws,1152);assert.equal(result.canonical,0);assert.deepEqual(errors,[]);await fs.mkdir('tmp/directions',{recursive:true});
  for(const a of assets)await page.locator(`[id="${a.key}"]`).screenshot({path:`tmp/directions/${a.key}.png`});
- console.log('PASS: 18 forms, 1152 action/direction draws, 868 canonical draws, correct original/transformed sources, zero browser errors. D1 all 52 forms verified separately.');
+ console.log('PASS: 18 forms, 1152 action/direction draws, 0 procedural draws, correct original/transformed sources, zero browser errors. D1 all 52 forms verified separately.');
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}

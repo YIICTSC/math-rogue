@@ -27,7 +27,6 @@ export default function SchoolAdventurePanel({adventure:a,inventory,player,itemN
 
    {!a.dojoRun&&s.scene===undefined&&s.mode!=='PUZZLE'&&<span>{s.night?l('夜','Night'):l('昼','Day')} · {s.weather==='RAIN'?l('雨','Rain'):s.weather==='FOG'?l('霧','Fog'):s.weather==='WIND'?l('風','Wind'):l('晴れ','Clear')}</span>}
    {!a.dojoRun&&gameClear&&<button onClick={()=>a.returnHome()}>{l('学校前へ帰る','Return to school base')}</button>}
-   {s.debt>0&&<button onClick={()=>a.setPanel('NOTE')}>{l('未払い','Bill')} {s.debt}</button>}
   </div>
   {a.panel&&<div className="school-adventure-backdrop" onKeyDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}>
    <section className={`school-adventure-panel ${a.panel==='STUDENT_STORY'?l('旅の物語','Journey story'):a.panel==='CHRONICLE'?'chronicle-panel':a.panel.startsWith('FACILITY_')?'journey-facility':''}`} role="dialog" aria-modal="true" aria-label={a.panel==='CHRONICLE'?l('迷宮の年代記','Dungeon chronicle'):l('学校前と冒険手帳','School base and notebook')}>
@@ -53,7 +52,6 @@ export default function SchoolAdventurePanel({adventure:a,inventory,player,itemN
       </div>
       {s.companion&&<p className="school-adventure-friend"><TravelerCompanionIcon companion={s.companion}/>{l(s.companion.name,s.companion.name)} · Lv{s.companion.level} · HP {Math.max(0,s.companion.hp)} · {s.companion.order==='WAIT'?l('待機中','Waiting'):l('同行中','Following')}</p>}
       {!a.dojoRun&&gameClear&&<button onClick={()=>a.returnHome()}>{l('学校前へ帰る','Return to school base')}</button>}
-   {s.debt>0&&<div><p>{l('購買部：未払い','Shop bill')} {s.debt} {s.alarm?l('見回り中','Monitors alerted'):''}</p><button onClick={a.pay}>{l('精算する','Pay bill')}</button><button onClick={a.returnGoods}>{l('持っている商品を返す','Return carried goods')}</button></div>}
       {equipmentResonance(player.equipment||{}).names.map(name=><p key={name}>{l('装備の共鳴','Equipment resonance')}: {l(name,name)} · +{equipmentResonance(player.equipment||{}).attack} / +{equipmentResonance(player.equipment||{}).defense}</p>)}
       <h3>{l('装備の校章・封印・応援印','Equipment emblems, seals and blessings')}</h3>
       <p>{l('工作のりで強化値と校章を合成できます。校章は4枠。封印品はお清め消しゴムで解除。応援印の道具を使うとHP20回復。','Craft glue combines enhancement and emblems, up to four slots. Cleanse sealed supplies with an eraser. Blessed supplies heal 20 HP when used.')}</p>

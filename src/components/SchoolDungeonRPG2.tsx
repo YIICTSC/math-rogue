@@ -1,3 +1,8 @@
+import {FacingButton} from './school-dungeon/FacingButton';
+import {retireShopTheft} from './school-dungeon/shops';
+import {createPortal} from 'react-dom';
+import {traceUmbrella,resolveUmbrella,type UmbrellaKind} from './school-dungeon/umbrella';
+import {drawUmbrellaEffect} from './school-dungeon/umbrellaEffects';
 import {cueD2HeroAction} from './school-dungeon/dungeons2/heroActions';
 import {AbilityDetails} from './school-dungeon/student/AbilityDetails';
 import {ABYSS_HEROES,abyssHero,signatureHero,signatureId} from './school-dungeon/dungeons2/roster';
@@ -199,7 +204,7 @@ type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY' | 'DECK_CARD';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
-type VisualEffectType = 'ABILITY' | 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ' | 'WIND' | 'CARD_EFFECT';
+type VisualEffectType = 'UMBRELLA' | 'ABILITY' | 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ' | 'WIND' | 'CARD_EFFECT';
 type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
 
 // --- DUNGEON CARD TYPES ---
@@ -215,6 +220,8 @@ interface DungeonCard {
 }
 
 interface VisualEffect {
+  umbrellaKind?: UmbrellaKind;
+  impactValue?: string;
   id: number;
   type: VisualEffectType;
   x: number; 
@@ -476,6 +483,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
 
 const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
   const tr = (text: string) => trans(text, languageMode);
+  const [facingOnly,setFacingOnly]=useState(false);const facingOnlyRef=useRef(false);facingOnlyRef.current=facingOnly;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const threeView = useDungeon3D(false);
   const [launch,setLaunch]=useState<'TITLE'|'NEW'|'PLAY'>(debugPreview?'PLAY':'TITLE');
@@ -580,7 +588,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
   const adventure = useSchoolAdventure({
-    revealMap:()=>setFloorMapRevealed(true),awardXp:amount=>gainXp(amount),abilityEffect:(x,y,color)=>addVisualEffect('ABILITY',x,y,{color,duration:28,maxDuration:28}),abilityAudio:(effect,finish,abilityName)=>studentCue('ultimate',finish,effect,abilityName),bossVictory:()=>{setGameClear(true);saveDungeonScore('Cleared');storageService.clearDungeonState2();},
+    umbrellaEffect:effect=>addVisualEffect('UMBRELLA',effect.targetX,effect.targetY,{...effect,duration:20,maxDuration:20}),revealMap:()=>setFloorMapRevealed(true),awardXp:amount=>gainXp(amount),abilityEffect:(x,y,color)=>addVisualEffect('ABILITY',x,y,{color,duration:28,maxDuration:28}),abilityAudio:(effect,finish,abilityName)=>studentCue('ultimate',finish,effect,abilityName),bossVictory:()=>{setGameClear(true);saveDungeonScore('Cleared');storageService.clearDungeonState2();},
     actionBlocked:menuOpen||shopState.active||showMap||showStatus||showHelp,game: 2, known:item=>itemKnown(item), suspended:launch!=='PLAY'||showMathChallenge, stairs:()=>setShowMathChallenge(true), debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
     setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
     log: message => addLog(message), restart: () => startNewGame(), descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
@@ -652,6 +660,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const makeSignatureCard=(heroId:string):DungeonCard|null=>{const hero=abyssHero(heroId);return hero?{templateId:signatureId(hero.id),name:adventure.text(hero.card.name,hero.card.en),type:'SPECIAL',power:0,description:adventure.text('専用カード：広域攻撃・HP25回復・3ターン守護。','Signature: area attack, heal 25 HP and guard for 3 turns.'),icon:<Sparkles size={16}/>,id:`signature-${Date.now()}-${Math.random()}`}:null;};
   const restoreState = (save: any) => {
+      save={...save,...retireShopTheft(save.adventure||{},save.player,save.inventory||[],save.enemies||[],save.floorItems||[])};
       adventure.restore(save.adventure, save.floor);
       setGameClear(Boolean(save.gameClear || save.adventure?.rescued && save.adventure?.chronicle?.pending));
       setGameOver(false);
@@ -1273,6 +1282,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const handleRestart = () => {
+    setFacingOnly(false);
     if (adventure.state.mode !== 'STORY') { adventure.newJourney(); return; }
     if (gameOver && inheritItemIdx !== null) {
         const selected = allPossessions[inheritItemIdx];
@@ -1741,28 +1751,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       else if (synthState.step === 'SELECT_MAT') { if (idx === synthState.baseIndex) { addLog("同じアイテムは選べません", "red"); audioService.playSound('wrong'); return; } if (['WEAPON', 'ARMOR'].includes(item.category)) { const baseIdx = synthState.baseIndex!; const baseItem = inventory[baseIdx]; const matItem = item; if (baseItem.category !== matItem.category) { addLog("種類が違うと合成できません", "red"); audioService.playSound('wrong'); return; } const newPlus = (baseItem.plus || 0) + (matItem.plus || 0) + 1; const newItem = adventure.combine(baseItem, matItem) as Item | null; if (!newItem) return; const glueIdx = inventory.findIndex(i => i.type === 'POT_GLUE'); if (glueIdx === -1) { setSynthState({ ...synthState, active: false }); return; } let newInv = inventory.map((it, i) => i === baseIdx ? newItem : it).filter((_, i) => i !== idx && i !== glueIdx); setInventory(newInv); addLog(`合成成功！${newItem.name}になった！`, "yellow"); addVisualEffect('FLASH', 0, 0); audioService.playSound('buff'); setSynthState({ ...synthState, active: false }); setMenuOpen(false); processTurn(player.x, player.y); } else { addLog("それは素材にできません", "red"); audioService.playSound('wrong'); } }
       else if (synthState.step === 'SELECT_TARGET') { const potIdx = synthState.baseIndex!; if (idx === potIdx) { addLog("壺自身は選べません", "red"); return; } const keys = Object.keys(ITEM_DB); const key = keys[Math.floor(Math.random() * keys.length)]; const template = ITEM_DB[key]; const newItem: Item = { ...template, id: `changed-${Date.now()}`, plus: 0 }; let newInv = inventory.map((it, i) => i === idx ? newItem : it).filter((_, i) => i !== potIdx); setInventory(newInv); addLog(`アイテムが${newItem.name}に変化した！`, "yellow"); addVisualEffect('FLASH', 0, 0); audioService.playSound('buff'); setSynthState({ ...synthState, active: false }); setMenuOpen(false); processTurn(player.x, player.y); }
   };
-  const executeStaffEffect = (item: Item, target: Entity | null, x: number, y: number): { hit: boolean, msg?: string } => {
-      cueD2HeroAction(adventure.hero.id,'swing');
-      studentCue('skill');
-      let hit = false; let msg = ""; addVisualEffect('MAGIC_PROJ', 0, 0, { startX: player.x, startY: player.y, targetX: target ? target.x : x, targetY: target ? target.y : y, duration: 5, maxDuration: 5 });
-      if (item.type === 'UMB_FIRE') { 
-          addVisualEffect('BEAM', target ? target.x : player.x+(player.dir.x*3), target ? target.y : player.y+(player.dir.y*3), { color: 'orange', targetX: target ? target.x : player.x+(player.dir.x*5), targetY: target ? target.y : player.y+(player.dir.y*5) }); 
-          if (target) { const dmg = adventure.damage(20); const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; hit = true; }
-      } 
-      else if (item.type === 'UMB_THUNDER') { 
-          addVisualEffect('THUNDER', target ? target.x : x, target ? target.y : y, { targetX: target ? target.x : x, targetY: target ? target.y : y }); 
-          if (target) { const dmg = adventure.damage(25); const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}に落雷！`; } else msg = `${target.name}に${dmg}ダメージ！`; hit = true; }
-      } 
-      else if (item.type === 'UMB_SLEEP') { addVisualEffect('TEXT', x, y, {value: 'Zzz', color: 'blue'}); if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, sleep: 10 } } : e)); msg = `${target.name}は眠ってしまった。`; hit = true; } } 
-      else if (item.type === 'UMB_BLOW') { 
-          addVisualEffect('WIND', x, y, { dir: player.dir });
-          if (target) { let tx = target.x; let ty = target.y; const dx = target.x - player.x; const dy = target.y - player.y; const ndx = Math.sign(dx); const ndy = Math.sign(dy); for (let i=0; i<5; i++) { if (map[ty+ndy][tx+ndx] !== 'WALL' && !enemies.some(e=>e.x===tx+ndx && e.y===ty+ndy)) { tx += ndx; ty += ndy; } else break; } if (tx !== target.x || ty !== target.y) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: tx, y: ty } : e)); msg = `${target.name}を吹き飛ばした！`; hit = true; } else { msg = "吹き飛ばなかった。"; hit = true; } } 
-      } 
-      else if (item.type === 'UMB_WARP') { if (target) { let attempts = 0; while (attempts < 20) { attempts++; const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H); if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry) && (rx !== player.x || ry !== player.y)) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: rx, y: ry } : e)); msg = `${target.name}はどこかへ消えた。`; hit = true; break; } } } } 
-      else if (item.type === 'UMB_CHANGE') { if (target) { const px = player.x; const py = player.y; setPlayer(p => ({...p, x: target.x, y: target.y })); setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, x: px, y: py } : e)); msg = `${target.name}と入れ替わった！`; hit = true; } } 
-      else if (item.type === 'UMB_BIND') { if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, status: { ...e.status, frozen: 10 } } : e)); msg = `${target.name}は金縛りにあった！`; hit = true; } } 
-      else if (item.type === 'UMB_HEAL') { if (target) { setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: e.maxHp } : e)); msg = `${target.name}が回復してしまった！`; hit = true; } }
-      return { hit, msg };
+  const executeStaffEffect = (item:Item,target:Entity|null,x:number,y:number):{hit:boolean;msg?:string;position?:{x:number;y:number}}=>{
+      cueD2HeroAction(adventure.hero.id,'swing'); studentCue('skill');
+      const result=resolveUmbrella(item.type,target,player,map,enemies,n=>adventure.damage(n));
+      adventure.recoverLoot(result.enemies);setEnemies(result.enemies);
+      for(const enemy of result.defeated)gainXp(enemy.xp);
+      if(result.position)setPlayer(p=>({...p,...result.position}));
+      if(result.healing)setPlayer(p=>({...p,hp:Math.min(p.maxHp,p.hp+result.healing)}));
+      addVisualEffect('UMBRELLA',x,y,{startX:player.x,startY:player.y,targetX:target?.x??x,targetY:target?.y??y,umbrellaKind:result.kind,impactValue:result.amount?String(result.amount):result.healing?'+30':undefined,duration:20,maxDuration:20});
+      if(result.kind==='warp'&&target){const destination=result.enemies.find(e=>e.id===target.id);if(destination)addVisualEffect('WARP',destination.x,destination.y,{duration:16,maxDuration:16});}
+      const msg=result.amount&&target?adventure.text(`${target.name}に${result.amount}ダメージ！`,`${target.name} took ${result.amount} damage!`):result.healing?adventure.text('傘の光でHPが30回復した！','Umbrella light restored 30 HP!'):!target?adventure.text('魔法を放ったが、命中する敵はいなかった。','The spell flew out, but hit no enemy.'):result.kind==='sleep'?adventure.text(`${target.name}は眠ってしまった。`,`${target.name} fell asleep.`):result.kind==='bind'?adventure.text(`${target.name}は金縛りにあった！`,`${target.name} was immobilized!`):result.kind==='heal'?adventure.text(`${target.name}が全回復した！`,`${target.name} fully recovered!`):result.kind==='warp'?adventure.text(result.hit?'敵をワープさせた！':'ワープ先がなかった。',result.hit?'The enemy warped away!':'No warp destination was available.'):result.kind==='change'?adventure.text('敵と場所を入れ替えた！','Swapped places with the enemy!'):adventure.text('敵を吹き飛ばした！','The enemy was blown away!');
+      return {hit:result.hit,msg,position:result.position};
   };
 
   const handleThrowItem = (index: number) => {
@@ -1786,16 +1785,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const handleItemAction = (index: number) => {
       const item = inventory[index]; if (!item) return;
-      const beforeTurns=adventure.state.floorTurns;if (adventure.beforeUse(item)) {if(adventure.state.floorTurns!==beforeTurns){cueD2HeroAction(adventure.hero.id,item.type.startsWith('SCROLL_')?'read':'use'); studentCue(item.type.startsWith('SCROLL_')?'read':'use');}return;}
+      const beforeTurns=adventure.state.floorTurns;if (adventure.beforeUse(item)) {if(adventure.state.floorTurns!==beforeTurns){setMenuOpen(false);cueD2HeroAction(adventure.hero.id,item.type==='SUPPLY_RAIN_WAND'?'swing':item.type.startsWith('SCROLL_')?'read':'use'); studentCue(item.type.startsWith('SCROLL_')?'read':'use');}return;}
       if (['WEAPON','ARMOR','ACCESSORY','RANGED'].includes(item.category) && !adventure.canEquip(item)) return;
       if (item.category === 'STAFF') {
-          const { x: dx, y: dy } = player.dir; let target: Entity | null = null; let tx = player.x, ty = player.y;
-          for(let i=1; i<=10; i++) { tx += dx; ty += dy; if (map[ty][tx] === 'WALL') break; const e = enemies.find(en => en.x === tx && en.y === ty); if (e) { target = e; break; } }
+          const shot=traceUmbrella(map,enemies,player,player.dir,10),target=shot.target;
           if ((item.charges || 0) > 0) {
-              const res = executeStaffEffect(item, target, player.x + dx, player.y + dy); if (res.msg) addLog(res.msg); else addLog("しかし何も起こらなかった。"); 
+              const res = executeStaffEffect(item,target,shot.x,shot.y); if (res.msg) addLog(res.msg); else addLog("しかし何も起こらなかった。");
               const newCharges = (item.charges || 0) - 1; const newItem = { ...item, charges: newCharges }; setInventory(prev => prev.map((it, i) => i === index ? newItem : it));
               if (!identifiedTypes.has(item.type)) { setIdentifiedTypes(prev => new Set(prev).add(item.type)); addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow"); }
-              audioService.playSound('buff'); setMenuOpen(false); processTurn(player.x, player.y);
+              audioService.playSound('buff'); setMenuOpen(false); processTurn(res.position?.x??player.x,res.position?.y??player.y);
           } else addLog("魔力が尽きている！"); 
           return;
       }
@@ -1850,7 +1848,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
   const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => setInspectedItem(item), 500); };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
-  const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => movePlayer(dx, dy);
+  const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if(facingOnlyRef.current&&adventure.state.place==='DUNGEON'&&!adventure.dojoRun){if(!adventure.blocksInput()&&!menuOpen&&!shopState.active&&!gameOver&&!gameClear&&(dx||dy))setPlayer(p=>({...p,dir:{x:dx,y:dy}}));return;}
+      movePlayer(dx,dy);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1911,8 +1912,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
       const canvas = canvasRef.current; if (!canvas) return; const ctx = canvas.getContext('2d'); if (!ctx) return; if (!map || map.length === 0) return;
       const w = canvas.width; const h = canvas.height; const ts = TILE_SIZE * SCALE; const { C0, C1, C2, C3 } = currentTheme.colors;
-      if (adventure.drawDojo(ctx,w,h,ts,currentTheme.colors,(entity,x,y,size)=>{drawPlayerFromSheets(ctx,entity,x,y,size);})) return;
-      ctx.fillStyle = C0; ctx.fillRect(0, 0, w, h); ctx.save();
+      if (adventure.drawDojo(ctx,w,h,ts,{...currentTheme.colors,C0:'#000000'},(entity,x,y,size)=>{drawPlayerFromSheets(ctx,entity,x,y,size);})) return;
+      ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h); ctx.save();
       if (shake.current.duration > 0) { const mag = 4; ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag); shake.current.duration--; }
       adventure.drawBackdrop(ctx, w, h);
       const startX = adventure.state.scene !== undefined ? 0 : player.x - Math.floor(VIEW_W/2); const startY = adventure.state.scene !== undefined ? 1 : player.y - Math.floor(VIEW_H/2);
@@ -1921,16 +1922,16 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       for (let y = 0; y < VIEW_H; y++) {
           for (let x = 0; x < VIEW_W; x++) {
               const mx = startX + x; const my = startY + y; const sx = x * ts; const sy = y * ts;
-              if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) { ctx.fillStyle = C0; ctx.fillRect(sx, sy, ts, ts); continue; }
+              if (mx < 0 || mx >= MAP_W || my < 0 || my >= MAP_H) { ctx.fillStyle = '#000000'; ctx.fillRect(sx, sy, ts, ts); continue; }
               const isRevealed = adventure.state.scene !== undefined || (adventure.visibleTile(mx, my) && (floorMapRevealed || (visitedMap[my] && visitedMap[my][mx]))); const tile = map[my][mx];
               if (isRevealed) {
                   if (!adventure.drawTile(ctx, tile, sx, sy, ts, mx, my)) {
-                  if (tile === 'WALL') { ctx.fillStyle = C1; ctx.fillRect(sx, sy, ts, ts); ctx.fillStyle = C0; ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2); }
+                  if (tile === 'WALL') { ctx.fillStyle = C1; ctx.fillRect(sx, sy, ts, ts); ctx.fillStyle = '#000000'; ctx.fillRect(sx+ts/4, sy+ts/4, ts/2, ts/2); }
                   else { ctx.fillStyle = C3; ctx.fillRect(sx, sy, ts, ts); if (tile === 'STAIRS') { ctx.fillStyle = C1; for(let i=0; i<3; i++) ctx.fillRect(sx, sy + i*(ts/3), ts, 2); } }
                   }
                   adventure.drawTerrain(ctx, mx, my, sx, sy, ts);
                   const trap = traps.find(t => t.x === mx && t.y === my); if (trap && (trap.visible || hasTrapSight)) { const sprite = spriteCache.current['TRAP']; if (!adventure.drawTrap(ctx, trap, sx, sy, ts) && sprite) ctx.drawImage(sprite, sx, sy, ts, ts); }
-              } else { ctx.fillStyle = C0; ctx.fillRect(sx, sy, ts, ts); }
+              } else { ctx.fillStyle = '#000000'; ctx.fillRect(sx, sy, ts, ts); }
               const canSeeEntities = isRevealed || hasSight;
               if (canSeeEntities) {
                   const item = floorItems.find(i => i.x === mx && i.y === my);
@@ -1959,7 +1960,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                   if (drawPlayerFromSheets(ctx, player, sx + offX, sy + offY, ts)) {
                       // drawn from fixed sheet
                   } else if (sprite) { if (flip) { ctx.save(); ctx.translate(sx + ts + offX, sy + offY); ctx.scale(-1, 1); ctx.drawImage(sprite, 0, 0, ts, ts); ctx.restore(); } else ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts); }
-                  else { ctx.fillStyle = C0; ctx.fillRect(sx + 3*SCALE + offX, sy + 3*SCALE + offY, 10*SCALE, 10*SCALE); }
+                  else { ctx.fillStyle = '#000000'; ctx.fillRect(sx + 3*SCALE + offX, sy + 3*SCALE + offY, 10*SCALE, 10*SCALE); }
                   if (diagonalLockRef.current) {
                       ctx.save();
                       ctx.font = `bold ${Math.max(12, Math.floor(ts * 0.42))}px monospace`;
@@ -1989,6 +1990,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           const sx = (fx.x - startX) * ts; const sy = (fx.y - startY) * ts;
           
           if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
+          else if(fx.type==='UMBRELLA'&&fx.umbrellaKind&&fx.startX!==undefined&&fx.startY!==undefined&&fx.targetX!==undefined&&fx.targetY!==undefined){drawUmbrellaEffect(ctx,{startX:fx.startX,startY:fx.startY,targetX:fx.targetX,targetY:fx.targetY,umbrellaKind:fx.umbrellaKind,impactValue:fx.impactValue},1-fx.duration/fx.maxDuration,startX,startY,ts);return;}
           else if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
               if (fx.type === 'THUNDER') {
                   const tx = (fx.targetX! - startX) * ts + ts/2;
@@ -2250,13 +2252,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <div className="absolute bottom-2 left-2 w-10 h-10 bg-[#2a2a2a] rounded-bl-xl border-b border-l border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
                 <div className="absolute bottom-2 right-2 w-10 h-10 bg-[#2a2a2a] rounded-br-xl border-b border-r border-[#333] active:bg-[#111] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
 
+                <FacingButton active={facingOnly} onToggle={()=>setFacingOnly(v=>!v)} text={adventure.text}/>
                 <div className="absolute w-10 h-10 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
             <div className="mt-8 text-[#444] font-black tracking-widest text-[10px] italic">D-PAD</div>
         </div>
 
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
-            <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
+            <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: '#000000', borderColor: C0 }}>
                 <div className="dungeon-top-bar w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                     <span className="font-bold tracking-widest">{adventure.dojoRun ? adventure.text('学習ローグダンジョンズ道場','Dungeons dojo') : adventure.state.place==='HOME' ? adventure.text('はじまりの町','Firstlight Town') : adventure.state.place==='RELAY' ? adventure.text('旅人の中継町','Wayfarer relay town') : adventure.expedition ? adventure.text(adventure.expedition.ja,adventure.expedition.en) : adventure.state.scene !== undefined ? adventure.sceneTitle() : tr(currentTheme.name)}</span>
                     <div className="flex gap-2">
@@ -2269,7 +2272,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <div className="w-full h-5 flex justify-between items-center px-2 text-xs font-bold z-10 shrink-0" style={{ backgroundColor: C1, color: C3 }}>
                     <span>{adventure.dojoRun?.stage ?? floor}F</span><span>Lv{adventure.dojoRun ? 1 : level}</span><span>HP{adventure.dojoRun?.hp ?? player.hp}/{adventure.dojoRun ? 7 : player.maxHp}</span><span>A{adventure.dojoRun ? 2 : player.attack}D{adventure.dojoRun ? 0 : player.defense}</span><span className="flex items-center"><Coins size={10} className="mr-0.5"/>{adventure.dojoRun ? 0 : player.gold}</span><span>🍙{adventure.dojoRun?.food ?? belly}%</span>
                 </div>
-                <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
+                <div className="relative flex-1 min-h-0 w-full bg-black">
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
                     <AbilityBurst adventure={adventure}/><DungeonBiome adventure={adventure}/>
                     <div ref={threeView.host} aria-hidden="true" style={{position:'absolute',inset:'0 0 0',visibility:threeView.ready?'visible':'hidden',pointerEvents:'none'}} />
@@ -2359,15 +2362,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                     </div>
                 )}
                 {gameClear && !adventure.dojoRun && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">{tr('ついに校長を説得した！')}</p><p className="mb-8">{tr('君は伝説の小学生となった。')}</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>{adventure.state.mode === 'STORY' ? tr('中学生編へ (エンドレス)') : adventure.text('学校前へ帰る', 'Return to school base')}</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>{tr('タイトルへ戻る')}</button></div></div>)}
-                {gameOver && !adventure.dojoRun && (
-                    <div data-gamepad-modal data-gamepad-initial-scope="dungeon-2-game-over" data-gamepad-navigation-root className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
-                        <Skull size={48} className="mb-2" style={{ color: C1 }}/>
+                {gameOver && !adventure.dojoRun && createPortal(
+                    <div data-gamepad-modal data-gamepad-initial-scope="dungeon-2-game-over" data-gamepad-navigation-root role="dialog" aria-modal="true" aria-label="Game over" className="dungeon-game-over fixed inset-0 z-[10000] flex flex-col items-center justify-center p-3 text-center gap-2" style={{ backgroundColor:'#090c13f5',color:'#f5f5e8',height:'100dvh',overflow:'hidden',paddingTop:'max(12px, env(safe-area-inset-top))',paddingBottom:'max(12px, env(safe-area-inset-bottom))',touchAction:'pan-y' }}>
+                        <Skull size={28} className="shrink-0" style={{ color: C1 }}/>
                         <h2 className="text-xl font-bold mb-1">GAME OVER</h2>
-                        <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
+                        <p className="text-[10px] shrink-0 opacity-70">Floor: {floor} / Level: {level}</p>
                         
-                        {adventure.state.mode === 'STORY' && (<div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
+                        {adventure.state.mode === 'STORY' && (<div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-md min-h-0 flex-1 flex flex-col overflow-hidden">
                             <h3 className="text-red-400 font-bold text-xs mb-2">{tr('引き継ぐアイテムを選択')}</h3>
-                            <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
+                            <div className="dungeon-inherit-list min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y custom-scrollbar space-y-1 pr-1">
                                 {allPossessions.map((item, idx) => (
                                     <div
                                         key={idx}
@@ -2397,12 +2400,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         </div>)}
 
 
-                        <button data-gamepad-initial-choice={allPossessions.length === 0 ? true : undefined} data-gamepad-zone="dungeon-actions" data-gamepad-order={0} data-gamepad-up-zone={allPossessions.length > 0 ? 'dungeon-inherit' : undefined} onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
+                        <button data-gamepad-initial-choice={allPossessions.length === 0 ? true : undefined} data-gamepad-zone="dungeon-actions" data-gamepad-order={0} data-gamepad-up-zone={allPossessions.length > 0 ? 'dungeon-inherit' : undefined} onClick={handleRestart} className="shrink-0 min-h-11 px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white flex items-center justify-center gap-2 w-full max-w-xs">
                             <RotateCcw size={16}/> {adventure.state.mode === 'STORY' && inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
                         </button>
-                        <button data-gamepad-zone="dungeon-actions" data-gamepad-order={1} onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">EXIT</button>
+                        <button data-gamepad-zone="dungeon-actions" data-gamepad-order={1} onClick={handleQuit} className="shrink-0 min-h-11 text-xs hover:underline opacity-80">EXIT</button>
                     </div>
-                )}
+                ,document.body)}
             </div>
             <div className="dungeon-log-panel w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>{logs.slice(-4).map((l) => (<div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{tr(l.message)}</div>))}</div>
         </div>
@@ -2454,6 +2457,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <div className="absolute top-0 right-0 w-10 h-10 bg-[#333] rounded-tr-xl border-t border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, -1)}></div>
                 <div className="absolute bottom-0 left-0 w-10 h-10 bg-[#333] rounded-bl-xl border-b border-l border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(-1, 1)}></div>
                 <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0" onClick={() => handleMoveInput(1, 1)}></div>
+                <FacingButton active={facingOnly} onToggle={()=>setFacingOnly(v=>!v)} text={adventure.text}/>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
             <div className="d2-portrait-actions"><AbilityButton adventure={adventure} compact/>
