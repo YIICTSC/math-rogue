@@ -1,0 +1,2305 @@
+{
+  "auditedDate": "2026-10-25",
+  "referenceGeneratorSha256": "36dfa48cd9a6b21343f0fb11cb98f303123669b7232de1f56cc8eb4d6d35e294",
+  "originalModel": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "originalRevision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+  "establishedClips": [
+    {
+      "path": "sfx/dungeons2-voices/lyria/attack.ogg",
+      "sha256": "e5c08240f5ea91a4d657d5b09f98c4effa43947efce0bada4c3275647d52a9e1",
+      "text": "星よ、切り開け！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/damage.ogg",
+      "sha256": "451a91368794dc3395841ad168e33890eccfad3556b2733413e74dddb2e431c6",
+      "text": "まだ、負けない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/finish.ogg",
+      "sha256": "2ecb05d702276b2b04cccc4bd4287782de3908c16752ee627dbe3506eea8a6ae",
+      "text": "これが、私の答え！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/heal.ogg",
+      "sha256": "a73d887e1e503a4d29562441a1f3ac6f7a4a813e01300d4f7ed738cd216180d4",
+      "text": "もう大丈夫。立て直そう。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/defeat.ogg",
+      "sha256": "84717fd3dc6741687aa5b8de875755bec037b54c3693a07eed9cab9f9b499e57",
+      "text": "みんな、ごめん……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/transform.ogg",
+      "sha256": "cfad009f6cfaa7218932c70f8795e92b239e0ad1849707d6d8e764bc4cd21ebe",
+      "text": "星冠よ、私に力を！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-1.ogg",
+      "sha256": "ec08c07bae0b8f9d412b0f0a2517c9e387075c1565777725bed999f6929d720a",
+      "text": "せいもんいっせん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-2.ogg",
+      "sha256": "c904642b8740d047beb0f8a999095f9fd25ec8aa5e4ce07eb018772122d5aba1",
+      "text": "ほしまもりのわ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-3.ogg",
+      "sha256": "26ff86dbb3b1ea886a92f883c1d41c03794a641e59ccff329122d5cf623b8c72",
+      "text": "てんきょくグランドクロス！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/card.ogg",
+      "sha256": "67dfa1a3f1fe1f6545ed334735f7eb368336f170e62d9a982142cccd5a7d75eb",
+      "text": "せいかんのちかい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/attack-alt-1.ogg",
+      "sha256": "408c49b42a8ef869ef9f4b1add6900e0bfcc80d4b741f7a3106814cb07b712c5",
+      "text": "星の刃よ、進め！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/attack-alt-2.ogg",
+      "sha256": "eb1c09ada752761e389b9b325a40978c305e03827b9cf0c6f314fe45b4453563",
+      "text": "私が切り込む！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/damage-alt-1.ogg",
+      "sha256": "2c0ea73ce7844f0e8828eddff5021adee342759b6a7176498534a4b6dc0e1a97",
+      "text": "ひるんでいられない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/damage-alt-2.ogg",
+      "sha256": "3a97621789f35a1c95118241acd30de34bb5116a136ae7a398f8b927389153c0",
+      "text": "この傷なら、戦える！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/finish-alt-1.ogg",
+      "sha256": "e7911d306c5ee2d23f8a2d7d908f207e8c2ee01e94c2c9a5103c28346d8cf721",
+      "text": "星は、見失わない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/finish-alt-2.ogg",
+      "sha256": "fc36542e7c9cfafea5643a4b7fdb8c554515096767d91ef65e089dfabc9159b2",
+      "text": "みんな、先へ進もう！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/heal-alt-1.ogg",
+      "sha256": "cded14816b2eb936399b7e67e4a647f9e083bbe43c2ad29be3decb0f9898c200",
+      "text": "星の光で、もう一度。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/heal-alt-2.ogg",
+      "sha256": "2099677d6a54165ec9323497f93f2c9030847926ae4caa769525d977cc08f80d",
+      "text": "助かった。まだ戦える！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/defeat-alt-1.ogg",
+      "sha256": "221c1b43d9645c62047581fcd4fae50b9eb0e203757879d1ff1d407d44692b24",
+      "text": "私の星を、託すね……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/defeat-alt-2.ogg",
+      "sha256": "693b34916d9104544b940d08542f4db4fd466c23a3ad2a8e9d1345dca0a9797d",
+      "text": "ここで、止まるなんて……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/transform-alt-1.ogg",
+      "sha256": "f9be5c14ab48ed92a016286013cfa2dc324563583c3386e9ebde613614208943",
+      "text": "星よ、この誓いに応えて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/transform-alt-2.ogg",
+      "sha256": "a9b35c07bb238eeb8ffe25fc0d1c86a640ad389d0aab21d801c901e55d0590da",
+      "text": "今こそ、星の力を！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-1-alt-1.ogg",
+      "sha256": "d389377beb8e142acd3771eacf468c1d77dae37a7a7e6bfa3aacad065bf02dfe",
+      "text": "星よ導け、せいもんいっせん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-1-alt-2.ogg",
+      "sha256": "a1501e434e6354b2c3ad33423c0605b45b7152e5ecc92743c2aa7aab004ffaa8",
+      "text": "せいもんいっせん、貫け！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-2-alt-1.ogg",
+      "sha256": "f57c0b4d59eac695480742f07998e1b9c92611cb7e8be3c9f4fe624af63aa1fd",
+      "text": "ほしまもりのわ、みんなを守る！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-2-alt-2.ogg",
+      "sha256": "e66a5fa59ee83e4bff587ade87cd44c299f739d084c50bc8967a3fb698c23065",
+      "text": "広がれ、ほしまもりのわ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-3-alt-1.ogg",
+      "sha256": "68aa994069c38cb568d9c8ab296ac250509513e591aff85bb5fa4e09eb377784",
+      "text": "てんきょくグランドクロス、今！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/ultimate-3-alt-2.ogg",
+      "sha256": "d39ec4788fd46ed6f0f05bcadd66f571a54b094215a963133ee832ada19facd3",
+      "text": "これで決める、グランドクロス！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/card-alt-1.ogg",
+      "sha256": "46a789df535453287c98801d40e388b602afa44e77840ce174b29dc4bdc382f9",
+      "text": "星に誓って、守り抜く！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/lyria/card-alt-2.ogg",
+      "sha256": "cfb4c2e76b255c099b6db1cc8a6413b56a2f8617bcb788393c267da8c4e34df1",
+      "text": "この一枚に、私の誓いを！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/attack.ogg",
+      "sha256": "8e363d1ae7d2f4021f12206bd7eca7c394b16fca443adfe0665f2c9021b0c091",
+      "text": "氷よ、貫いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/damage.ogg",
+      "sha256": "a9e8bdd66be3f1231a4adc187ae5513d93e4f63902d983da0d7ed139e556444b",
+      "text": "このくらい、平気。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/finish.ogg",
+      "sha256": "8371a0260e252ee51adf78f1138542146abc18d866c48daf72c1179f2281c2ef",
+      "text": "静かに、眠って。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/heal.ogg",
+      "sha256": "8abed631287f4110e105b18c24d325da3a4883a728bfb48db15565bb61d01389",
+      "text": "心を落ち着けて。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/defeat.ogg",
+      "sha256": "37537ac015b63fbcdcb88fed430d0a37c2564e2a6f20020298b893d3d229171c",
+      "text": "もう、届かないの……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/transform.ogg",
+      "sha256": "a1f3cb062efc661d5cd31b038bb015072dee819e3ac7575b485e4d9fd38e605a",
+      "text": "氷冠よ、目覚めなさい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-1.ogg",
+      "sha256": "c23be26f9b39941f9eb6992b45a92cb8ebf91918bb976317b7c1c638af74b400",
+      "text": "ひょうしょうのや！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-2.ogg",
+      "sha256": "a8ed9b3d6e759f54ff95f629ae30dd9e1b1bcd87f70bc0ca11d33b0325fab418",
+      "text": "せいひょうのいずみ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-3.ogg",
+      "sha256": "8eb0ca61ea663352f5c7721573ba09895dc6c0a29a475a20bb577d4812aa0b8a",
+      "text": "ぜつれいのおうかん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/card.ogg",
+      "sha256": "30265666139f4351f22f4e46fcb8d660b0443ca9e5a45e49861a6aa89957731e",
+      "text": "えいひょうのけいやく！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/attack-alt-1.ogg",
+      "sha256": "6c355f67c807979873151c3ff11fdc46434ad965a8e4aa800b720afe625831f8",
+      "text": "凍てつく光よ、射抜いて。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/attack-alt-2.ogg",
+      "sha256": "23156a9a33fbf66aac27bf1a0604758b1d03aa0a4ab488192d9b412954523bb0",
+      "text": "逃がさない。氷の矢よ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/damage-alt-1.ogg",
+      "sha256": "148caeec2b4f61ec35481341a60aea60f9a484789675dcbfc60f43ed6fe84a78",
+      "text": "まだ、心は凍らない。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/damage-alt-2.ogg",
+      "sha256": "822c48f75588b33a2bb00e47ce8788d745415a0537acb105787efaf1bbcef36f",
+      "text": "大丈夫、集中して。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/finish-alt-1.ogg",
+      "sha256": "14a358e8758ce3d70eef70e2497aafbc047b098df1eeb92e9e0557a64ddaf648",
+      "text": "これで、静かになるわ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/finish-alt-2.ogg",
+      "sha256": "f33413ac5787fb822a8704d39b4b5028ded695187d9b4a606ce2cea366cebbb7",
+      "text": "氷が解ける前に、行こう。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/heal-alt-1.ogg",
+      "sha256": "430cac4a078ae38cdfea6783b64ef073e93118ac050231250f394f0fa1ca2b2e",
+      "text": "澄んだ水よ、傷を癒やして。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/heal-alt-2.ogg",
+      "sha256": "5d0ce590d433bc2da007d8fa1569fd75e0668894bcd8baa74e511bb7c71e91dd",
+      "text": "ありがとう。落ち着いたわ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/defeat-alt-1.ogg",
+      "sha256": "5aade70d4326aea0d5b8a8767cdd7b8b682df6cd1fd503da0ecbf197b09131d7",
+      "text": "氷の向こうに、光が……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/defeat-alt-2.ogg",
+      "sha256": "35570e09e18334229578728ae3e88e6da8e834e373b2c92a7f8c2c3dcbdc8c73",
+      "text": "ごめん、少し眠るね……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/transform-alt-1.ogg",
+      "sha256": "25296b19746aa6b5c938045970cd49f2c32f0af572307e6d143213a196b1e8b2",
+      "text": "静かなる氷よ、私とともに。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/transform-alt-2.ogg",
+      "sha256": "4760f20a0b1a284c9a3daf2dd469831fb8400ab3357c1d5079c761e1a51d412c",
+      "text": "凍てつく力よ、目覚めて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-1-alt-1.ogg",
+      "sha256": "78402dfd731ba62ef5c4519edbff82ec6befff19f1c7556fa4b68fb2d0043f66",
+      "text": "ひょうしょうのや、射抜いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-1-alt-2.ogg",
+      "sha256": "bfceb6696579a3acb2a3370d477e483bb2ab0370103ca2b785928b52686aaef6",
+      "text": "狙いはここ、ひょうしょうのや！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-2-alt-1.ogg",
+      "sha256": "133cd7b3e2f003ac43af9cbbefce40d206137c33a19160a58bf849eaa3251535",
+      "text": "せいひょうのいずみ、癒やして。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-2-alt-2.ogg",
+      "sha256": "2ce2376a9728a8980cf22d697c885d94f4fb385b236d4eff7a0f6dbedfce47ef",
+      "text": "静まって、せいひょうのいずみ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-3-alt-1.ogg",
+      "sha256": "48a368c3431c7dca0dc8cc88475fac4a36f8f16fc7584cb1f8e2ec2009bd7b03",
+      "text": "ぜつれいのおうかん、閉ざして！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/ultimate-3-alt-2.ogg",
+      "sha256": "55b7e061b6d70e25a40de4d6d57ffd946f7c14a82d88960ab9c9bbf2adafac61",
+      "text": "逃がさない、ぜつれいのおうかん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/card-alt-1.ogg",
+      "sha256": "784ffb3a97e7f91589a48de1db5c423e3346c8f8282f8d5d0239db7034fa0252",
+      "text": "永遠の氷よ、契約をここに。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/celis/card-alt-2.ogg",
+      "sha256": "19e60b0bab1e795e8a26b410c8e77a74a6d1fb90744d812bbfb8210713cdd5d5",
+      "text": "この契約で、みんなを守る！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/attack.ogg",
+      "sha256": "0c27de9e9b37f781a30ee69b5ae4a5c69948e1240965267523f59d15cfac154d",
+      "text": "狙いは、外さない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/damage.ogg",
+      "sha256": "349747c8dc8df586a6e0efad90eb50c3dd4e04741829d5910e105c0acdbadb5a",
+      "text": "いたっ、まだまだ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/finish.ogg",
+      "sha256": "13e1d53721a926f949e1b44518b1927c974dcf5a57d361b62b79ac464969daa6",
+      "text": "やったね、大成功！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/heal.ogg",
+      "sha256": "ddf01d12ab0f1cf2e889d265ce9db7f6815e8993d3c4cf2d8088e8561adeadfa",
+      "text": "さあ、元気出して！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/defeat.ogg",
+      "sha256": "02212cfb5e970cae24c7e9fff9df33ebeb11a2e06bd5006f40a8b613e882d53c",
+      "text": "森のみんな、またね……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/transform.ogg",
+      "sha256": "083ed9ee605a8c3066ce78ef5073b3d76dfe3bede351dd77f11f5b698a449807",
+      "text": "花冠よ、一緒に咲こう！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-1.ogg",
+      "sha256": "4be523115cf3cb35b64d209a81dca315b908143f13883fbc5abdaf940122a9e1",
+      "text": "すいようのしゃせん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-2.ogg",
+      "sha256": "adba2e46fde18084858d94dcf343aec50e4388ff5fafb0a184c6c4dbce44c65d",
+      "text": "せいれいのこかげ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-3.ogg",
+      "sha256": "50d3c65639a5492f14befa91ff2bd533d1363b8231ce30e458c8fccbb46eff86",
+      "text": "ばんかのけっかい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/card.ogg",
+      "sha256": "7c1d771ce5efa69967673bc8f29b4c843c404817c051769d584a7b77f9df493e",
+      "text": "せかいじゅのめぶき！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/attack-alt-1.ogg",
+      "sha256": "233a37040c7001e1fe079eb6fec62689fbf8e086dcdf6ad6353c8f14515be2a8",
+      "text": "そこだよ、まっすぐ飛んで！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/attack-alt-2.ogg",
+      "sha256": "e70b61b8f390129964e83c07121edc0612c64a5b384404374defc74e94210643",
+      "text": "森の風よ、力を貸して！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/damage-alt-1.ogg",
+      "sha256": "88a6c61c4e996fd547b20155f98daf1d59b741e0c8c375c43ddf000970f5b02d",
+      "text": "へっちゃら、まだ動ける！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/damage-alt-2.ogg",
+      "sha256": "5c718d43111ae5d9fc18d546fed675e5c7a7bfd27bd609be860c0aba6d105c6e",
+      "text": "あいたっ、次はよけるよ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/finish-alt-1.ogg",
+      "sha256": "59682a7f788841e02baa238b9ba51bfa47a3cb79e830084cdfc4c67ec4242749",
+      "text": "ねっ、うまくいったでしょ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/finish-alt-2.ogg",
+      "sha256": "088a6b019a43166eccaa0338b1788958d54c8e07b5e59c82668b0820c883cac6",
+      "text": "森のみんなも、喜んでる！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/heal-alt-1.ogg",
+      "sha256": "15afb8dea7c2d78cdf007fc2f0e6d7975d69cc14fe2a15a131f0bcf07767bd9d",
+      "text": "お花の元気、分けてあげる！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/heal-alt-2.ogg",
+      "sha256": "a0c31e079def7803705f72fdd5613c49eb280c7a4c4ad145eaee4c7e45bac0e1",
+      "text": "ありがとう、元気いっぱい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/defeat-alt-1.ogg",
+      "sha256": "4497684b7045830c66337f393cd5e73d0b182f676d7325fc1dbcdff996ce2a8e",
+      "text": "もう少し、一緒にいたいな……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/defeat-alt-2.ogg",
+      "sha256": "f319583819fe1ae8836c8706e1974af0459ae7a7628b471385e1e1aff944490e",
+      "text": "ごめんね、矢が届かない……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/transform-alt-1.ogg",
+      "sha256": "479b2d31a79fe3ca7d05ec06e49ba5af468472527d09f5774697bfee899e8e71",
+      "text": "森のみんな、いっしょにいこう！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/transform-alt-2.ogg",
+      "sha256": "ba2df3a931e83b84b0b2eb43194521ff83d4b10b37e638b6f43054b6002ee1ec",
+      "text": "花の力で、もっと強く！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-1-alt-1.ogg",
+      "sha256": "084d9e8b6601edd5f4dfa5aaedf9bd2cde9b08c4d17112d81cdd80b1132cdd8d",
+      "text": "すいようのしゃせん、命中して！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-1-alt-2.ogg",
+      "sha256": "e4e88e6e73bd0cdc560bb51447bc3354ac91dc67727fcdd769e93300d5fce56f",
+      "text": "狙いを定めて、すいようのしゃせん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-2-alt-1.ogg",
+      "sha256": "8cfb066a53f4abe2d7cd4741d9b43f7a798661af11abafa44f7b9f9d28ba6d08",
+      "text": "せいれいのこかげ、ひと休み！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-2-alt-2.ogg",
+      "sha256": "a1ab7f640a12f4fb5c953306888b525f9f50306acfe1763531c25d0cf2339a1f",
+      "text": "みんな集まれ、せいれいのこかげ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-3-alt-1.ogg",
+      "sha256": "81570c5e3ae7b2608970d35a71ea0d4e4c2aef6fabe334e5ab03f41883c59829",
+      "text": "ばんかのけっかい、咲き誇れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/ultimate-3-alt-2.ogg",
+      "sha256": "5bcea19aa320cd97db8bcba9795a2f370d8a6761f86620baf343f2ef3163bd97",
+      "text": "いっせいに咲いて、ばんかのけっかい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/card-alt-1.ogg",
+      "sha256": "ffbf71da4e903dbf0a2c758887669c23c46eb64d982ee2123530d8f90d389bec",
+      "text": "世界樹さん、力を貸して！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/flora/card-alt-2.ogg",
+      "sha256": "a494615cf1c99f49765f0a628ca70c8997796a7dab2de9c61f2153e27890cb17",
+      "text": "小さな芽だって、未来になる！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/attack.ogg",
+      "sha256": "074402406f6d0a5e324c7b8269d8b32db1e5da18cac8fe45a8c3f648c27f15ee",
+      "text": "影に、沈みなさい。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/damage.ogg",
+      "sha256": "38598a6d9e4036aeffd30cb212a6a3c31d3c1c946b43dd0b843bbc775237bcd7",
+      "text": "ふふ、やるわね。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/finish.ogg",
+      "sha256": "cdd2d657f2322227a69f2bb4c9bbd816771f826141a63a711fc4a79564e0e7be",
+      "text": "これで、おしまい。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/heal.ogg",
+      "sha256": "2a778c83f0c41a884b0c34374fa62a59e138dd20bb4b26e4b2d148f19f34c938",
+      "text": "ひと息、つきましょう。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/defeat.ogg",
+      "sha256": "9074f0ccf4510714669d02fb9ce856eb60dde329e91fe8539e802e08f2ff067c",
+      "text": "月が、遠いわね……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/transform.ogg",
+      "sha256": "31633f9334dce2ebbc2fd73e987c6cbe903aa5737daa7f3e6f36a35ccea1ad50",
+      "text": "夜冠よ、闇をひらいて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-1.ogg",
+      "sha256": "9f4f97f85607610195276bad81028d7600bca8bb56ca57cc616b0d6129b44ca4",
+      "text": "つきかげわたり！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-2.ogg",
+      "sha256": "f5df86ae25f70f29ecf3e83c11cefc94abd990ac4682b30e8c1746645eb29c15",
+      "text": "やそうのページ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-3.ogg",
+      "sha256": "d6ba2a62621d33c4c746da54a45e21d8b1eb8d0482ee63e612740fa49fdb893b",
+      "text": "かいきげっしょく！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/card.ogg",
+      "sha256": "9e9dd79de41357d3022e5d504bac92fbc77570af9ce1d5289d7012ae9a3192b6",
+      "text": "えいげつのきんしょ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/attack-alt-1.ogg",
+      "sha256": "a40e56e5a3d4acb122503efa28e756396729af2d37cceafa71d9e5a320d93923",
+      "text": "逃げ道は、月の裏よ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/attack-alt-2.ogg",
+      "sha256": "16c9e4775256d9588446e5a6d02012ab004760fcc4e22fcc02552fed81d75c2b",
+      "text": "その影、いただくわ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/damage-alt-1.ogg",
+      "sha256": "4cf889a91811a8092759595573c8e5544ee868c1f6830f33baff16cbf3da9242",
+      "text": "あら、少し痛いわね。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/damage-alt-2.ogg",
+      "sha256": "45150539f35b3e5e9fd684496a218809ca976220408ef08d5976b9538006abeb",
+      "text": "その程度で、終わりかしら。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/finish-alt-1.ogg",
+      "sha256": "3bbf3c011daf7e091e949e4db1ef140778f842b108c4d6daffead1611e719532",
+      "text": "夢の続きは、向こうでね。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/finish-alt-2.ogg",
+      "sha256": "24070fcd7f858420b4b535f95714acf6f56c1c9514d8d7378f48c779f405250a",
+      "text": "ふふ、月が笑っているわ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/heal-alt-1.ogg",
+      "sha256": "dbe12dc7074f376ead6efe61ba9b63afed81995ec8018151e3e08373978ddcf2",
+      "text": "夜風が、傷を冷ましてくれる。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/heal-alt-2.ogg",
+      "sha256": "2c880e7fa3afcdbefb5d9f6ae2c1f44dd0922cc0c20c6c488c9ca375f65472c0",
+      "text": "ありがとう。借りておくわね。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/defeat-alt-1.ogg",
+      "sha256": "5f21a7b3cbe17ff02f86fc81eb3997133ef418fadd6639417dc3d306d7798a12",
+      "text": "私の夜が、明けるのね……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/defeat-alt-2.ogg",
+      "sha256": "8ef2f0eaae1900716141924c21e772060fbdc3aef08f5dc7205f5e6a7dafb33e",
+      "text": "あと少し、月を見ていたい……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/transform-alt-1.ogg",
+      "sha256": "f57a4119589bdd40d3ece771e743e712616bc0649ace9d18a89b2c5b0ac212c4",
+      "text": "月の帳よ、この身を包んで。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/transform-alt-2.ogg",
+      "sha256": "a96ea13edc1ee1a2f301538969109f3650231c88200567762c7a09d40cf98607",
+      "text": "本当の夜を、見せてあげる。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-1-alt-1.ogg",
+      "sha256": "787cde61be8562129fb36d63e7ab3ede75651ee595003b3a86183b893794d39a",
+      "text": "つきかげわたり、追いつける？"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-1-alt-2.ogg",
+      "sha256": "7b5d860342091d20cc183056953e3ada008d087af9d9c638d72a64538e0c92f7",
+      "text": "影をすり抜け、つきかげわたり。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-2-alt-1.ogg",
+      "sha256": "364420f4a8993fef1a79a80ae74467f93587cd79d62963e4c9f6e864a1e137d5",
+      "text": "やそうのページ、開きましょう。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-2-alt-2.ogg",
+      "sha256": "eb802027148dc3bd54d0f2964f2e6e3f26f1df4bd85bdaf76efc819ad7b7d3b3",
+      "text": "甘い夢を、やそうのページ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-3-alt-1.ogg",
+      "sha256": "3783833c5c077930b605e26f90a638e841e37b56d95bbfde811b8b43061910c4",
+      "text": "かいきげっしょく、光を閉ざせ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/ultimate-3-alt-2.ogg",
+      "sha256": "07b65101d44c0442dcac9d1b145280e957f6475ab19d26cdc74f494b36e34d68",
+      "text": "おやすみなさい、かいきげっしょく。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/card-alt-1.ogg",
+      "sha256": "f720497599bf76c8007ead46686b66b2341e98d0605bc0025f184ec5e79930c0",
+      "text": "禁じられた頁を、開くわ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/noctia/card-alt-2.ogg",
+      "sha256": "bbb5c8914fe2a5358694c45855e216191f6ef65c8cc36b77954cceec5563eed5",
+      "text": "この一枚で、夜は私のもの。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/attack.ogg",
+      "sha256": "16cc7d8c76c92cae5d8c2647644fa02830e534f66f967d7ae9e8a07f4dcd822f",
+      "text": "光よ、導いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/damage.ogg",
+      "sha256": "d4613a53ce68f2f7f052531d5cb40e692c2f09394a2ab5c5a987dc9559e5bb05",
+      "text": "私は、立っています！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/finish.ogg",
+      "sha256": "4ef77e7abe4016782d03f52f80b5262f7e4e9592780cffdd0dca2141a6bff50f",
+      "text": "安らかな、夜明けを。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/heal.ogg",
+      "sha256": "78780f89b7840042be0a276490a88790aab3434777ec38655f6313b08393deb4",
+      "text": "あなたに、癒やしの光を。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/defeat.ogg",
+      "sha256": "8ab1d6a9f63e508467f0b74c25d6ef217103e93857f2162f4f6118f4cea880ba",
+      "text": "どうか、みんなを……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/transform.ogg",
+      "sha256": "aff030b310635e0051b2011c4771c5fbdecfb4c8637365289551a95b61b9269b",
+      "text": "聖冠よ、希望を照らして！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-1.ogg",
+      "sha256": "ea719887386359cb4b87c4ca1691a9c2b85459d7c0056b2bf570176c8b444612",
+      "text": "しょこうのやり！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-2.ogg",
+      "sha256": "3b5e0fedd5815a3eecc3b7c94e93299140874a7ec1c571eac9683e5367cd4f33",
+      "text": "じあいのいのり！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-3.ogg",
+      "sha256": "f5768129c5c8759e7e0a92bf6d173611d5daf737e25e92cd2e5020106a6403c5",
+      "text": "せいじつのしゅくさい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/card.ogg",
+      "sha256": "f771a95e9b3aea006914a38bac1cc7d2bc4e8f95e1c5afe9a2aacb09483d267f",
+      "text": "よあけのふくいん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/attack-alt-1.ogg",
+      "sha256": "dc51bbedc7b0eab29d7f238ef55ce914fd27c49c74afc817ecdc8992bd0745d4",
+      "text": "希望の光よ、届いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/attack-alt-2.ogg",
+      "sha256": "df1bd1487ce8de5563e0359fa0a56d0970c6d1412ce027fc89b074b6b9ff9c4e",
+      "text": "迷いを払う、光の槍！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/damage-alt-1.ogg",
+      "sha256": "2e171222be2926d98cfe44f84ab2a4bba73e6250af767c1f5949b36d05a6dfd5",
+      "text": "まだ、祈りは消えません。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/damage-alt-2.ogg",
+      "sha256": "4e17203909876f33c3c09b802cb99ca1b03751d4c5a6a0b8875fa938a2ae75c8",
+      "text": "痛みより、守りたいものが。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/finish-alt-1.ogg",
+      "sha256": "776e0529a24ca3ea82a09ffc9f0969bcacde5fc9aec8d2f7208d87ab3f5cf5b3",
+      "text": "新しい朝が、来ますように。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/finish-alt-2.ogg",
+      "sha256": "bae98e83b92cc5c9177547642fd7ff98cc3cf8edebb04c9562f02e8811a19a4d",
+      "text": "これで、誰かを守れました。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/heal-alt-1.ogg",
+      "sha256": "7cd5821bcc7f1dc96ee879ec5c377f1ec45d29c4ac4e3f6b02697db34fb8b835",
+      "text": "大丈夫、光はここに。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/heal-alt-2.ogg",
+      "sha256": "181cd6874436e17b390bf5f2d7cb41543f66fc1945a328a3cec7be42efaee136",
+      "text": "ありがとう。心が温かいです。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/defeat-alt-1.ogg",
+      "sha256": "62ed407d0e0b2343a91c839269e0ded02fd8cdbe68a2b640ca66c17b51b2cb68",
+      "text": "私の祈りを、つないで……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/defeat-alt-2.ogg",
+      "sha256": "69d316e5e385806b86b31d7366b7e8334d4ad8822689a86e95f62172dae1a78e",
+      "text": "光を、絶やさないで……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/transform-alt-1.ogg",
+      "sha256": "ffd656003d3f119539db618d7a664693917d372c5079b5f04cb6222b7e4334f3",
+      "text": "夜明けの光よ、私とともに！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/transform-alt-2.ogg",
+      "sha256": "e527220057877acfd161aa9b388f34e86695d77e14d147c0285a13e403211000",
+      "text": "みんなの希望を、力に！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-1-alt-1.ogg",
+      "sha256": "8feb8f4942e492da0d6a356d28171fff79c8226130559783269a91e53ba0cf5b",
+      "text": "しょこうのやり、闇を払って！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-1-alt-2.ogg",
+      "sha256": "84f8592d3cd25ae0df71c3e0c6e23b5f06b49961bfceee146cb093c7852535f3",
+      "text": "光を束ねて、しょこうのやり！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-2-alt-1.ogg",
+      "sha256": "cc3e223c79df34b7fa04bde8bbcdf85d174203bc12e01e42c072056b7f8ba1a1",
+      "text": "じあいのいのり、届いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-2-alt-2.ogg",
+      "sha256": "de6d16075c56d5807ff7774e354ed01b8521ea12c1aab58e1e5acc57121bbe30",
+      "text": "立ち上がる力を、じあいのいのり！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-3-alt-1.ogg",
+      "sha256": "f2e45a179a5aa16304aee508ec7f2eb0f12dab725569e69938f02f9e52fdbe24",
+      "text": "せいじつのしゅくさい、輝いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/ultimate-3-alt-2.ogg",
+      "sha256": "1a135a3e0d0262f58e4f4abe8ca28ad8bb81007041e30779d3fa125814e91621",
+      "text": "希望を照らせ、せいじつのしゅくさい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/card-alt-1.ogg",
+      "sha256": "bee45115437174e925d5350a73f25f80af77a8480cba6aea8179a96d31a0202e",
+      "text": "この一枚に、夜明けの祈りを。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/aurene/card-alt-2.ogg",
+      "sha256": "d396d8555a8462fe5c7dbb6d088a9636bc3587f8b2aa37b8cfa447b296f7de70",
+      "text": "闇の向こうへ、光を届けます！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/attack.ogg",
+      "sha256": "21bb8b677fd0612f3ea2c8c9d2f5f9611e75e89135ac451b736074d5ed620829",
+      "text": "俺が、道を開く！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/damage.ogg",
+      "sha256": "249fb4f4328428209a83833cea4d9588eb70be1d668a40d9eaf832c9fa3ffa2c",
+      "text": "へっ、まだいける！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/finish.ogg",
+      "sha256": "dc1bed924a884558409b5718b63b68a90f9a86b5834509395b6ede8ab6cfda72",
+      "text": "よっしゃ、決まった！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/heal.ogg",
+      "sha256": "c69eee97dd86682936e7785c34c575948940ef5d88ff09848d188c5acc973c61",
+      "text": "もう一度、いくぞ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/defeat.ogg",
+      "sha256": "a180857eac04bfaf89bb88918ea211bd66f872b8f4672bed1ea70b7a06087dce",
+      "text": "くそっ、ここまでか……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/transform.ogg",
+      "sha256": "5cc06445e45914fdfe034bd48ad4b2ffcbb1c254a0b6777584d97b22b9853c11",
+      "text": "勇気よ、燃え上がれ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-1.ogg",
+      "sha256": "51c3b64e5d47c6a304fa35980894e4a51954d57fccc7ddb9e96cfe3a087cb34a",
+      "text": "ゆうきのいっせん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-2.ogg",
+      "sha256": "0cb71614cda0d47f21c423ce6d01ec04691197daa804f3d250e7dbe8d83350c4",
+      "text": "ふくつのとうし！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-3.ogg",
+      "sha256": "72e26aad66c46d8dd87cbeb2a1e4949408e98f70731958561823941031f83033",
+      "text": "ぐれんブレイバー！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/card.ogg",
+      "sha256": "07b8d4bbc5e554a10d2a69f224a0109c5abf83329e738861c5ee454b3d6a23a4",
+      "text": "ゆうしゃのちかい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/attack-alt-1.ogg",
+      "sha256": "71a3c49c24963ad4955f123a6abaff11f97106708addf371ad447f9faad7fd7a",
+      "text": "燃えろ、俺の一撃！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/attack-alt-2.ogg",
+      "sha256": "bcfd87d9a0af54f23da6c8bb90083d13701359c85c5740a376aee027551c8c53",
+      "text": "真っ向勝負だ、いくぞ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/damage-alt-1.ogg",
+      "sha256": "85cbf397e91ed9ceaf6fdd385b830b3a97c460c24097f05cef1ae534ebca394e",
+      "text": "いい一撃だ、でも負けねえ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/damage-alt-2.ogg",
+      "sha256": "52b056163c7dc294e18a9947c61fe8da54b19110c3a9f31b330cf07730309295",
+      "text": "まだまだ、燃え足りないぜ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/finish-alt-1.ogg",
+      "sha256": "2d626c4a863825fc2c0b36578f75b16b4fb6d8b1fe1579e34efeb1fffae0bcf6",
+      "text": "この調子で、突き進むぞ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/finish-alt-2.ogg",
+      "sha256": "d9cd039d6ea9795d7ef5e58f5703a3474d9d8789d414823717e8bd947061638a",
+      "text": "勇気があれば、道は開く！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/heal-alt-1.ogg",
+      "sha256": "3666703f9d37370e519e8950eaa8affc1bdb41e10f356a5926258e6b14719ea2",
+      "text": "助かった、倍にして返すぜ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/heal-alt-2.ogg",
+      "sha256": "1e301f629c46e465406ff894365bb8eb3f45ee90e84e84e3f8b6a63f81faff4e",
+      "text": "よし、火が戻ってきた！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/defeat-alt-1.ogg",
+      "sha256": "d9904144c0a953d8da3a827c484c3d46288cd634978170460fac7d2718c47a78",
+      "text": "みんな、あとは頼んだ……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/defeat-alt-2.ogg",
+      "sha256": "0ad46748d2124ec46c3d2d08dbf07e204eec6db29ee041c45fedd8c3618661db",
+      "text": "俺の炎は、まだ……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/transform-alt-1.ogg",
+      "sha256": "4af497931e4e062e40e18ad45da3d0c315473b571984734032442c1bf7c65edb",
+      "text": "限界なんて、燃やし尽くす！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/transform-alt-2.ogg",
+      "sha256": "f415b85a271e38db47ff31d46ffc1c102cf7dd1dcb2980d77d657556129bab24",
+      "text": "ここからが、本番だ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-1-alt-1.ogg",
+      "sha256": "294d6810869d088b98af7febccc66e41e0099587d01530ebd842cc4ff19bf8bb",
+      "text": "ゆうきのいっせん、突き破れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-1-alt-2.ogg",
+      "sha256": "831e08e7081581aeac0de232e9b1144525b5122afcf3c485f90695d01f4eb952",
+      "text": "道を開け、ゆうきのいっせん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-2-alt-1.ogg",
+      "sha256": "1e853fbb0c28431121f4fb34eb4f3f6a173ba6509a044c4a053b4b2fb6882441",
+      "text": "ふくつのとうし、燃え上がれ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-2-alt-2.ogg",
+      "sha256": "b6941d189605605a4d760203f81c46107bf864ea383bdb32d5967bd336e57032",
+      "text": "立ち続けるぜ、ふくつのとうし！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-3-alt-1.ogg",
+      "sha256": "b4d87c7d174ffb0924a203ea3fd86c4e3de305fc3f7f535f69864d1b53a1f361",
+      "text": "ぐれんブレイバー、ぶっ放せ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/ultimate-3-alt-2.ogg",
+      "sha256": "777b7f6b7ff56b803d0e1fe3a0d783cfa1fc52b3c49f16b90758b8b08dc91132",
+      "text": "これが俺の、ぐれんブレイバー！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/card-alt-1.ogg",
+      "sha256": "7d9cae15b7081f7b339bc50c35fc4e125b585839cd463013ba316eb9fcb9280f",
+      "text": "勇者の誓い、今こそ果たす！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/ignis/card-alt-2.ogg",
+      "sha256": "e884d1a3a93eabd72bed8a0e7c0b09dc4b0af94ec9cfd5ef2c10cd9178546532",
+      "text": "この一枚で、勝負を決める！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/attack.ogg",
+      "sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93",
+      "text": "この剣に、誓う！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/damage.ogg",
+      "sha256": "cd3afb8238061484390877fc84b67f3516407632a6fa9f40b423d82569903a5a",
+      "text": "盾は、砕けない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/finish.ogg",
+      "sha256": "53dbee1f85bb3a1e7e69c9f8d7ad83800be371585e6d9c3079852f3ba89cd717",
+      "text": "正しき道を、ここに。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/heal.ogg",
+      "sha256": "0dc1fa325e491c844487c416ccd0234a696021b77f9989efb72f679138adfc95",
+      "text": "立ち上がれ、友よ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/defeat.ogg",
+      "sha256": "0fc23b679a1c3fc386b2c7357da9fd73b1eafdf9de2abbcd8adc73b52055246c",
+      "text": "誓いを、託す……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/transform.ogg",
+      "sha256": "6dd0814af8b67af198ba4982944a866145ba64c8ffbb2613f2d574bc6d4db371",
+      "text": "日輪よ、我に守護を！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-1.ogg",
+      "sha256": "0e1f44a354c1572379353d296e2abc531cd4ee4182434267deaa3fd9d7f9349f",
+      "text": "せいたてのいちげき！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-2.ogg",
+      "sha256": "21c22141e968e9b0e6bf938c906b7c84c5e8a3ba95a30a6ab02cf79a9e43534f",
+      "text": "きしのしゅごせいやく！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-3.ogg",
+      "sha256": "f62854ecfbd257f6d5a14847ff7d237f95af085e24fcb3bb70607170a38e837d",
+      "text": "にちりんエクスカリバー！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/card.ogg",
+      "sha256": "39981870b86644f8eab72735c82f8a9b54050f137700af357107fa9027a140dd",
+      "text": "あかつきのせいけん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/attack-alt-1.ogg",
+      "sha256": "cd29638c59aeaf4a84c2ff7592626b72aab23629834b8e1ddd0488e58c1b6bc7",
+      "text": "光の刃よ、悪を断て！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/attack-alt-2.ogg",
+      "sha256": "1b9b79e202fab5341543e0e1e47d600aad3c0adfef1036ca5ec6bbd8049f37c6",
+      "text": "我が盾に、退く道はない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/damage-alt-1.ogg",
+      "sha256": "187b5f9208fd069fb0e0d9ba90bbb2990e2b7628b986e5d001687a1cf3cff81a",
+      "text": "この身は、まだ倒れぬ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/damage-alt-2.ogg",
+      "sha256": "05b6167585721724640a115f060d4de89eac95d2f18954cbe3914f08d3e7f3b6",
+      "text": "守るべきものが、ある。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/finish-alt-1.ogg",
+      "sha256": "cd6731add3ef67edfa3c829235486693f3426798c435ae9cdd1d045ba34d760d",
+      "text": "誓いは、果たされた。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/finish-alt-2.ogg",
+      "sha256": "4e89c1f1edbb66f9daf0db9481555d317ac276eff0623dbc97e320a8c4c8a928",
+      "text": "恐れず進もう、仲間たちよ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/heal-alt-1.ogg",
+      "sha256": "d8618da45c4991117438de878cdc5e44bddca6c20f02053a218f75f256f55240",
+      "text": "感謝する。守りを固めよう。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/heal-alt-2.ogg",
+      "sha256": "ce2c9c761460e1cb72531deaabcc9ee3d75eb1a64a3be55f2a8336847a9b9f5f",
+      "text": "光よ、再び立つ力を。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/defeat-alt-1.ogg",
+      "sha256": "4410240bd0ee5f8a145afd9671225ebb6d3c9953eeab5133e89dd6b281ae7b48",
+      "text": "我が盾を、引き継いでくれ……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/defeat-alt-2.ogg",
+      "sha256": "83df3d377ee08fe82fc1a68826f24047159c6c239a07f84ce0951863b49b547f",
+      "text": "すまない、守りきれぬか……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/transform-alt-1.ogg",
+      "sha256": "0369699fc79e03d0fbc27db02c9ec7afec466b04dc3a3b2188fb985df171b283",
+      "text": "聖なる光よ、我が鎧となれ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/transform-alt-2.ogg",
+      "sha256": "91e8e91b9617f3443d02f0eed7c866bb60b8b2d62ef6c9a0a57ac49f5d0bbe93",
+      "text": "この命に、守護の力を！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-1-alt-1.ogg",
+      "sha256": "edd29dbd1a8072a9cf8cbfeb8ce546ef381399ef877fb3958e8213c0816524ed",
+      "text": "せいたてのいちげき、受けよ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-1-alt-2.ogg",
+      "sha256": "a0c43f2749ef34847e57afaca888e193a2e093468a03305ede9a4b54e57c8a1a",
+      "text": "退かぬぞ、せいたてのいちげき！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-2-alt-1.ogg",
+      "sha256": "456e93bc69e560db29748ba1378c56d0b0a3e71f47ee66ce32428c9eddf8d504",
+      "text": "きしのしゅごせいやく、守り抜く！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-2-alt-2.ogg",
+      "sha256": "780df209250a5f5b9e0c8aae623e7378f38b94097ae28be4ca6ad29b8bdd7191",
+      "text": "我が誓いよ、きしのしゅごせいやく！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-3-alt-1.ogg",
+      "sha256": "f9270801445078057df4f27bca30fdf056731d3e11aefefcb81c31d4cecb7c3c",
+      "text": "にちりんエクスカリバー、輝け！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/ultimate-3-alt-2.ogg",
+      "sha256": "0db8b96b057bb3b8c572c441c4f3b04c8214c8e74f27210eb6f279bc04e74c3a",
+      "text": "光とともに、エクスカリバー！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/card-alt-1.ogg",
+      "sha256": "ecbcb41649b087cf39f24177053c76f7204627bcc8860217aa3332f705856bea",
+      "text": "暁の剣よ、正しき道を示せ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leon/card-alt-2.ogg",
+      "sha256": "2493422e7322682c311c60f10c0293db51379076e517f2eac46a44dbfc90c953",
+      "text": "この一枚に、騎士の誓いを！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/attack.ogg",
+      "sha256": "b6628b279b36b79a4ca6b5620f7cbba6632cfd0b5543dc2788359e336b821df9",
+      "text": "そこが、隙だ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/damage.ogg",
+      "sha256": "dd279aeac20a00347437160690f206d6dbc758c9de59a9bf301eea035f1e4da8",
+      "text": "まだ、終わらない。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/finish.ogg",
+      "sha256": "a95a6d3045700c5766b64632b0402a4113c32240bf698b4049fd53022e2d2317",
+      "text": "勝負は、ついた。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/heal.ogg",
+      "sha256": "6aa5f9ec340d68ddb5ad6761d619cf6e30b4bddcd12f7a5a1cb618f02bc4b223",
+      "text": "借りは、返す。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/defeat.ogg",
+      "sha256": "765a10d29cbb4889e926e592c04bd78b0abe4358ad4c91029d12798272f0f719",
+      "text": "まだ、先が……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/transform.ogg",
+      "sha256": "79911d1b5a83bec073b3a1fd96c29a18627e30e0f1b8f364047dcd057779b8eb",
+      "text": "黒月よ、この身に宿れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-1.ogg",
+      "sha256": "1c5dbec826443b9de20678f6db61659bc513390f11a495209a5c5a92e744cc24",
+      "text": "つきかげルーンざん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-2.ogg",
+      "sha256": "6f4fa3b3b39ab5a251fa92ef4c8ef5a49f30c825623d5066a2d07941372acf7c",
+      "text": "げんえいのふみこみ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-3.ogg",
+      "sha256": "0a2298115c3507c8658a1069b238de9a58526fa1571914082ab0f1a972d35491",
+      "text": "こくげつエクリプス！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/card.ogg",
+      "sha256": "548d1f4fabcf0a55ffb3c23f9cfce5b5cfc7616ff374e62a0e4516d3f5002211",
+      "text": "まけんのかくせい！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/attack-alt-1.ogg",
+      "sha256": "8a81f52a55cd26a911e2a0aa4bdd6a88306647004a76c4cda12eefd417c049fa",
+      "text": "斬る。それだけだ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/attack-alt-2.ogg",
+      "sha256": "26164d4a12dee388bb93b35aeae2ea9c9e0d7c0501deb1046d0acfb79f1cf680",
+      "text": "影より速く、踏み込む。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/damage-alt-1.ogg",
+      "sha256": "9d2bf31d2b11d21e099012e3cdf32b21b3d798c09488576d226528fb8c6b07f3",
+      "text": "浅い。動ける。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/damage-alt-2.ogg",
+      "sha256": "27f42499a444b019d98b0f1cd15f83ffdc5ddb3c04392db7ea365a82410348c8",
+      "text": "その手は、もう見た。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/finish-alt-1.ogg",
+      "sha256": "16a4413c32b8721987cafd3e15d75ffcc06e8da1e93b43af47c501e45e24f11d",
+      "text": "これで、先へ行ける。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/finish-alt-2.ogg",
+      "sha256": "9c5987223df3b2039bcc469cbeb465702ce89cf80b00f97677d6a36a06f3309c",
+      "text": "次だ。止まるな。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/heal-alt-1.ogg",
+      "sha256": "648033a4d8938617b64d1d985823f1c80a353e4138d83fc0cf3efaf44cfcf0da",
+      "text": "助かった。剣はまだ振れる。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/heal-alt-2.ogg",
+      "sha256": "edae9d922cd3dfd01312091d2074560f1474aa101b5849aa709b9ef2718602fe",
+      "text": "傷は塞いだ。行くぞ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/defeat-alt-1.ogg",
+      "sha256": "8f55618d6a45ee8d957fee0580858940523053a20df58587c33b1aef384374a7",
+      "text": "この剣を、置くのか……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/defeat-alt-2.ogg",
+      "sha256": "aa4d976314db4a48b62aae10844ef0421553ae755f80bc2a15db2f95abd75b62",
+      "text": "約束が、まだ……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/transform-alt-1.ogg",
+      "sha256": "939e028f531a32dc05f2c2ce18fba1df012a3d1e1d6940233dd45c4ecf8f3cbb",
+      "text": "闇を纏え。俺は進む。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/transform-alt-2.ogg",
+      "sha256": "fe96b89d6b9796ae0e50eae839723f20435b008cc89de67dac8344e8eb5f6a0d",
+      "text": "月よ、刃に宿れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-1-alt-1.ogg",
+      "sha256": "3ad83e3ddb9c1354ea5e59969e9627d08e6a717ade22b4efb8ff1519289c9479",
+      "text": "つきかげルーンざん、断ち切れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-1-alt-2.ogg",
+      "sha256": "4910d2debf65b538942921a13e425f5595fdc648d339a90f1f0fe6dc9e9e7cff",
+      "text": "影を刻め、つきかげルーンざん！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-2-alt-1.ogg",
+      "sha256": "57a1bf09dd6ff27152feec68baa652c00bb8b46b32fb33f6872ae643cf114104",
+      "text": "げんえいのふみこみ、捉えてみろ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-2-alt-2.ogg",
+      "sha256": "448e94d2ec99a81fc1fab1b187a89917ce43d75a2de6b7ebb5867bd357f689bc",
+      "text": "隙を穿つ、げんえいのふみこみ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-3-alt-1.ogg",
+      "sha256": "eff62611bb56c8ec7968d27fa5bd8cf0cbdf232063e88f953328e7591c178825",
+      "text": "こくげつエクリプス、消えろ。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/ultimate-3-alt-2.ogg",
+      "sha256": "5be7ec88ec4fd99570d5ae772381da5d08e8f93714c806d5f3bdd15b15b81f05",
+      "text": "終わらせる、こくげつエクリプス。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/card-alt-1.ogg",
+      "sha256": "1f0423364a9992244267d1cf9757c77999438719c485780c55eb0f8528a6a0db",
+      "text": "目覚めろ、俺の魔剣。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/orion/card-alt-2.ogg",
+      "sha256": "71a228d2e42d9fad58792535c3ae3403df455d26930d08144a361318922f2227",
+      "text": "この一枚で、闇を裂く。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/attack.ogg",
+      "sha256": "1089ccbd009a47f153195baca9bc4c73d83205959fef63cf4fba418b91a3dec4",
+      "text": "風よ、まっすぐに！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/damage.ogg",
+      "sha256": "ff0d04f83b4043b30bdbf33410044a7a4a7f01b8e072daa63085e331723eae8c",
+      "text": "っと、危ないな！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/finish.ogg",
+      "sha256": "aa54087b4bb85acefe2401323fd44a7bdc8c427435b327eeb385ea4bfe965cb5",
+      "text": "ほらね、命中！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/heal.ogg",
+      "sha256": "bacbe9340186c8c095bc7b340aaaef620df7464f65d47f179b07be19f3f4b1c3",
+      "text": "よし、調子戻った！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/defeat.ogg",
+      "sha256": "372c1110ea03fef36afc71b68e4c91c4012d993bbe99581796bfafa843f61e01",
+      "text": "ごめん、先に行って……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/transform.ogg",
+      "sha256": "75486c017419c2853890f27df5bea3486816eece0b57b136b55d55f8de68f1bf",
+      "text": "翠冠よ、風と走れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-1.ogg",
+      "sha256": "5a3da5b20f10a865c7f8bca8bad7daea7e183ab9540d167c591af261ebc764b1",
+      "text": "しっぷうのや！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-2.ogg",
+      "sha256": "c51bdfb855495fb948bb275084d4e2f8a978c4dd6d382675f5e98521362a39f8",
+      "text": "もりのみちしるべ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-3.ogg",
+      "sha256": "6e78506a982dd284c25a551e7cfe0422f218ac3c2195ad7b3418428056fbc4cd",
+      "text": "せんようのりゅうせいう！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/card.ogg",
+      "sha256": "d893fb6742570bd96ebee0ba7eb2c75aeb66be32326f91dbd3873d774601214e",
+      "text": "せいれいおうのいっし！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/attack-alt-1.ogg",
+      "sha256": "074116ee1d2a0879af54ee5f1e87366fcf291bf5f89cebe08cbbefad40ef5fcf",
+      "text": "風の道なら、見えてるよ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/attack-alt-2.ogg",
+      "sha256": "4b4189983c87a249b43007273e17ac5f67085d5ee22eee3eba5fd96210207725",
+      "text": "そこだ、矢よ走れ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/damage-alt-1.ogg",
+      "sha256": "af17cb67388ce9490cd52fe9424602525fa1975a106905643c0e3af6da97be08",
+      "text": "あぶなっ、まだ平気だよ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/damage-alt-2.ogg",
+      "sha256": "3dfe5923ea1a5782c6757afcc04463a09e4addfbcf5103afd6c22860f927e20a",
+      "text": "かすっただけ、気にしない！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/finish-alt-1.ogg",
+      "sha256": "e709af793af1af345c2a281595ae288f1e505c8b00f7e30c8e344280e8441893",
+      "text": "狙った通り、ぴったりだ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/finish-alt-2.ogg",
+      "sha256": "330ea29fb57def38ac4cb69ab8f167421f4a37461d871508c5a49f75ad812ba1",
+      "text": "よし、風向きは僕らの味方！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/heal-alt-1.ogg",
+      "sha256": "d37611126a3e8dc9f3e768af7935ff64c12e0bb9f29e661f2c26ed8f94eabf87",
+      "text": "ありがとう、足取りも軽いよ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/heal-alt-2.ogg",
+      "sha256": "b5bfccebf72f5360e516a238b514f97a805242d0cfc52cd69f1a1eb543afda05",
+      "text": "森の恵みで、元気回復！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/defeat-alt-1.ogg",
+      "sha256": "556fa9b332361d7551c0a2556f6a338aa8b415d1f54e2b1f09581509a171d0a0",
+      "text": "風が、遠くなってく……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/defeat-alt-2.ogg",
+      "sha256": "d7d0200ecb050c62f9fccd6770536bd6d05a8e3d98f7182f9d90b9f6996fcefb",
+      "text": "みんな、道を見失わないで……。"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/transform-alt-1.ogg",
+      "sha256": "7f096b78219307d5abc9d9c77511a1443985af8292570c4b4bf63fb2139683fa",
+      "text": "森の風よ、僕を導いて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/transform-alt-2.ogg",
+      "sha256": "2b8b5473288d222cae1db085f31225583732a5bdefd04b257e6111e44ae62fef",
+      "text": "もっと速く、風を追い越す！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-1-alt-1.ogg",
+      "sha256": "cb3024aebe72360447337e53ca1eba5bd2f71277db94d3944a369ff344f2bfd0",
+      "text": "しっぷうのや、飛んでいけ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-1-alt-2.ogg",
+      "sha256": "ba83d4b9399071350a5cb0c747ff790ed358975d23c6e0a5bbd660c4c07aa4a0",
+      "text": "風をつかめ、しっぷうのや！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-2-alt-1.ogg",
+      "sha256": "6609729fcce0daa8e98abdc4fb4f81dcc206be399276153b529d8f234dc3a24c",
+      "text": "もりのみちしるべ、道を教えて！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-2-alt-2.ogg",
+      "sha256": "b53e85436360e067c093bbcbf62cc8491d0632d004d031d0318ade3f28e3d807",
+      "text": "こっちだよ、もりのみちしるべ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-3-alt-1.ogg",
+      "sha256": "836576ab9786d9b6d7c2e477366a9382fca09c13f0d34c413be8737040b7a712",
+      "text": "せんようのりゅうせいう、降り注げ！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/ultimate-3-alt-2.ogg",
+      "sha256": "665413f08f13ce6d914998ee7a7aa2e09aef1363d668bbca043c836246217668",
+      "text": "空いっぱいに、せんようのりゅうせいう！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/card-alt-1.ogg",
+      "sha256": "bb3b6a5029f0d318f1baac97b6a45a69d6e0250f43e83acf6d87011bbda2cb58",
+      "text": "精霊王よ、この矢に力を！"
+    },
+    {
+      "path": "sfx/dungeons2-voices/leif/card-alt-2.ogg",
+      "sha256": "c1fecd0b50eb8da7773863f5dd767917a1752a36d552dfc6a9e41551920b0d4a",
+      "text": "一矢に込める、森との約束！"
+    }
+  ],
+  "excludedNoReferenceClips": [
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/walk.ogg",
+      "sha256": "dac2127298d730552ce15a9ca48a7228fedc81781f7ca2b210d9500c598fac42",
+      "text": "一歩ずつ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/attack.ogg",
+      "sha256": "1fedbe9c1c3b778a3cf1c99e9f7efc833de58b97dc7c65a48cad9c3b0d03ea4d",
+      "text": "退いて！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/throw.ogg",
+      "sha256": "4dc748f3e9598c6532ace9ba13d25869cf24e893f505fc06b29eeacd107ef5e3",
+      "text": "受け取れ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/swing.ogg",
+      "sha256": "7f37709ae0b9c0404c16bf644ea258dcd379d80e31c1b01dac818b1ce15d398d",
+      "text": "この一振り！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/read.ogg",
+      "sha256": "ef8592e4d1db4511ef53bbe355af4d03dda2d8dcf324e92e9ad2eabbca36a643",
+      "text": "解いてみせる。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/use.ogg",
+      "sha256": "25f58c57aaea32d918ba85357d840897978a1b3e69f4e296c3cf749e23a34dfe",
+      "text": "今が使い時。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/shoot.ogg",
+      "sha256": "f26bbd389027993c1c76785baba5cb7c204532a0255606b6b66358f1e9e848c2",
+      "text": "まっすぐに！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/pickup.ogg",
+      "sha256": "221ab9093e659f7c68be0ca3bc3b53a7547288afbaabd2264f25769c93d99e1f",
+      "text": "預かるね。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/equip.ogg",
+      "sha256": "e524958973edb12830cd7e1519b5fe6ed3c504fcbfc12e188d70dba7323ac76c",
+      "text": "備えはできた。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/stairs.ogg",
+      "sha256": "d40d52d78e12cb434e7d77ddbb3d39f36ac3e8ac3bfed707786605561d18c360",
+      "text": "灯を忘れずに。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/trap.ogg",
+      "sha256": "2fddaf1ca55f2f880351bd3367b56a472b13f7ae7b5feeb179b3a270edb6d1ff",
+      "text": "油断した！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/damage.ogg",
+      "sha256": "19df8ea7f99e89dfa2988fc727943ce5483ede493dae332e517efdb8e5c67ae7",
+      "text": "ここで止まれない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/heal.ogg",
+      "sha256": "47bd3354a337a1957f24362b8b15144273ed430abb37128335ecd11e8b288711",
+      "text": "もう大丈夫。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/win.ogg",
+      "sha256": "7565a0308f053716d3fe1bc6feb66d145c8bd03f1b9a0492ad848d5635204405",
+      "text": "続きは、町で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/defeat.ogg",
+      "sha256": "9063a08cd54afe2f20df4b474c74b8c0baeccc2102a5b0829388f1c72ce3d073",
+      "text": "灯を消さないで。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/talk.ogg",
+      "sha256": "19fbb4ca2d71de55f5565b9cc86002a0fb740a71cf28e081e445a8d01d13344e",
+      "text": "ここにいるよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/transform.ogg",
+      "sha256": "3b51fb4ac0906e8173ae255c07825044da4773ce8f8fbc4870895aee6a23eef1",
+      "text": "変わるのは、今！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/ending-release.ogg",
+      "sha256": "79a6eb35ffcfcf04f7483a87a4d1b2cf2ba57ef9c06069da7835f2acc925a056",
+      "text": "自由な朝へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/ending-accord.ogg",
+      "sha256": "e56418a03335475449bb4b180bda2e8737c3794e855a0703e3c966a0b9113e0c",
+      "text": "分け合う明日へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/ending-defy.ogg",
+      "sha256": "d5c6a1f5e540310c59bbc6dce90b3e3257a9d2af88d267c4276321c7931b1063",
+      "text": "まだない扉を開く。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/walk.ogg",
+      "sha256": "435816e4fbf5ab67139e493c2e250c727cd674b5a9589c52afcc01337fe15d04",
+      "text": "進もう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/attack.ogg",
+      "sha256": "8eb60f935a2b9bce5cf74c11529e9e945241ab800d667d380bfc9e8e8eb76b76",
+      "text": "そこだ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/throw.ogg",
+      "sha256": "8605f8633b24bef63bc22369f4cf97af72b801ab3e8500877f06e2a7eb1df988",
+      "text": "届け！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/swing.ogg",
+      "sha256": "e03ee3979fb5b0b1687453ebe5d454423d7ee03920aa755077b023bfe36d753e",
+      "text": "風よ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/read.ogg",
+      "sha256": "268d087c52d1b4ed88dac69dcab5a7a57a57d2f516cf6da8e207392b265e1f53",
+      "text": "読めたよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/use.ogg",
+      "sha256": "300b2b6ba0a7d70273c90e33b5bd26eb560fa9dc9a094f94e54b0b66a54cd41e",
+      "text": "これを使う。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/shoot.ogg",
+      "sha256": "f994ad7e6697a7b5a8e84966a8075b899a85e43871298b989812b049f0bfbf85",
+      "text": "狙いはここ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/pickup.ogg",
+      "sha256": "df07c916afbb43bc43d645c6e11618db904e5ab82fc05407f2c26143a7c48cbc",
+      "text": "見つけた。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/equip.ogg",
+      "sha256": "2f14ad43c45a87866f9311f4e75567e7c9621e27ea22bb56d9e8601d60c21917",
+      "text": "これで行こう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/stairs.ogg",
+      "sha256": "da554322a5f05b1159ffc8eccde8d92f780efe406a44110d743ce503441c910f",
+      "text": "下へ進もう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/trap.ogg",
+      "sha256": "89cf0fb89b54fad6bacdb3b22ea4dba1dfde370e1c74fcbd6cbb6e8172bd4608",
+      "text": "罠だ、注意！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/damage.ogg",
+      "sha256": "b4438a7b56e2bd50f83e4d0f6abfcdd370c0e34fc81a2760b5e2b758a7225c4d",
+      "text": "まだ平気！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/heal.ogg",
+      "sha256": "ff1480c352af29ca0d533d91c0ff3fd76ef13b882b5178007602d4f2399c6cc6",
+      "text": "息が戻った。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/win.ogg",
+      "sha256": "d15bd9eb1ddb60bc830ab6fb96369df4b92117a6fc82bf39143fac2474130ece",
+      "text": "約束を果たした。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/defeat.ogg",
+      "sha256": "b9441d5fe5bf507c30a5fa8510e8b2c55b41abad311124ebb1c20334f49ac0cd",
+      "text": "まだ、帰れない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/talk.ogg",
+      "sha256": "9a28a390323b4f883d9426dbcdf5c1b86e2d4e1b83795ef69166f68197253703",
+      "text": "話を聞かせて。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/ultimate.ogg",
+      "sha256": "02e2a033937a2d5417b6e7cdfbd22eaedcfb248c004f7dc13382d72e4130be00",
+      "text": "この約束に！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/transform.ogg",
+      "sha256": "c822faada6493a94e6c29dfc158cc9448efe0bb5b4397b50ee6cff71a13f6f6c",
+      "text": "本当の力を！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/ending-release.ogg",
+      "sha256": "060f6b78b0d0bb2a1f649f16163df8e1690d9f21cc72ca31e52b3c7a3c284699",
+      "text": "手放しても、忘れない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/ending-accord.ogg",
+      "sha256": "fc460de7073c91d5750247eaded4398ad2cfae48baea6e0acb3ffa812dd230ba",
+      "text": "一人に背負わせない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-celis/ending-defy.ogg",
+      "sha256": "2971eb034119a3b384d1f21fb3df398aafb4b915115f7afd93013ed2c4b4f47c",
+      "text": "別の道を作ろう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/walk.ogg",
+      "sha256": "3e888084d2b08abba2d33276af618fdeb6afe0f796b3377e74d6a7188153c1ba",
+      "text": "次の道へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/attack.ogg",
+      "sha256": "98dc9140e2b416d2966ee260990e11dd7d3f3fd7971190e689081d8eea951e5b",
+      "text": "これで！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/throw.ogg",
+      "sha256": "135629ce5d6ba14704e0414d7454a00afd2bae174f2eb5a1659c8de5b1f4bc89",
+      "text": "飛んでけ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/swing.ogg",
+      "sha256": "010d0bdd843c4cc6b2407f77f3fa4b80dca141570635df0fc5b14e5a6492d3ce",
+      "text": "道を開け！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/read.ogg",
+      "sha256": "f9247fa98c03e0569a252d4fbcde659f79f78c4d204961cf396d80974d9a9e4a",
+      "text": "頁を開く。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/use.ogg",
+      "sha256": "8eeaa15b9eeab3fcc3dd4542542bf91922d5af2fc0af9b8f0bab6c8085c7030e",
+      "text": "準備はいい。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/shoot.ogg",
+      "sha256": "474f87610db4b5de3c06304172cfb598bb04e924db7954806fb7ed4fb6b9fa07",
+      "text": "射線よし！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/pickup.ogg",
+      "sha256": "8821576983ca0283f856a270842ba356d620515ac3bd9366bbcb0ce1c178a61f",
+      "text": "大事にする。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/equip.ogg",
+      "sha256": "ed78e985f8bf92b8da87fa76d929deca87f6bcdd87e35ff695bbb2ec6af3ee47",
+      "text": "似合うかな。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/stairs.ogg",
+      "sha256": "ad89680b184e67d6011d042e2a225c54e5efd5180e5552961777da0cd3349c5a",
+      "text": "次の階だ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/trap.ogg",
+      "sha256": "fc707b0683ac4365e80e88addf6ced438ac03fa83a4a9df321606f4167cd5cee",
+      "text": "足元を見て。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/damage.ogg",
+      "sha256": "2f219fdc4d9a1d0916229390d8b51c245830368adeb81fbaa096ce280c3e450a",
+      "text": "くっ、痛い！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/heal.ogg",
+      "sha256": "5ce5729c703fc97d4764375b89f663dfc663fe604dda988686a09eca80e47fdb",
+      "text": "ありがとう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/win.ogg",
+      "sha256": "70772ec4a1b80b079d40b3b22c982359e10fe01455cbf4d37684c60a0f5d5a2e",
+      "text": "帰り道へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/defeat.ogg",
+      "sha256": "1deebfed4f7885bf73ef86ca2ceea0ee4f8e0c57774d5c85779e2bfa9e25468a",
+      "text": "次こそは。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/talk.ogg",
+      "sha256": "6e639ac79760cc8f8d0b3afe264d2216a6c931746b0e5b8561916af17a47a5fe",
+      "text": "君の返事は？"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/ultimate.ogg",
+      "sha256": "d92f631632e016b6af69aabfdce2666e9a1577979fef0dde06fe56ea83427a21",
+      "text": "ここを切り拓く！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/transform.ogg",
+      "sha256": "8fff36830c6c2108e0b242e7506f767583961918033aeafbf3cde7885d41eab0",
+      "text": "もう迷わない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/ending-release.ogg",
+      "sha256": "fb5d133ae6fcadd1c602ad25fc4a0b802603fe7f9bbc88a714f915c2a45fe2a7",
+      "text": "返そう、あの人へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/ending-accord.ogg",
+      "sha256": "34d400aa3ea602a8d06e2597b712159727076f9be5e25bbb97568a97c7dd7516",
+      "text": "約束を、結び直そう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-flora/ending-defy.ogg",
+      "sha256": "ec48d902c49045d1fdcf5e38d3ecba1868b4e50816eefddc0662dbc6f2864393",
+      "text": "答えは、これからだ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/walk.ogg",
+      "sha256": "c335c140614ca1e5f05367d6fb72092adc139e0009bbdd2ea4c3e6dd08e816c9",
+      "text": "ついてきて。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/attack.ogg",
+      "sha256": "55a1d95f090487810f9218b601cda9f1199bd2983657315fc0e93deb58278d2f",
+      "text": "いくよ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/throw.ogg",
+      "sha256": "0dae9faa9b78beae286ed2026deb7eb2d3811c602e16bb4d5ed6f25a56e7b7be",
+      "text": "これを！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/swing.ogg",
+      "sha256": "3529aed7257bad4c695d84b904d7f0dc645136b74d057fd968461ddd7bee5a78",
+      "text": "力を貸して！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/read.ogg",
+      "sha256": "90db14971b77562c723e238a512c563df85ca6cf2f322e9c1501ef131cee3bd0",
+      "text": "この言葉で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/use.ogg",
+      "sha256": "f21d2f2f80c5ae3a7d40da591030b62b3f9e10816f507c19c75c8edd32d5dc56",
+      "text": "まだ手はある。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/shoot.ogg",
+      "sha256": "b3e1509fbd2bcee891a13608a2c61e189db7f085046aa0691ec4310e8eccd957",
+      "text": "そこを通す！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/pickup.ogg",
+      "sha256": "57e9be2230ae42466075baea835d46fcae8cd140ac09a4bf1e056e9a45ce6317",
+      "text": "役に立つよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/equip.ogg",
+      "sha256": "f4707166ba989e1a9ac34f8154e2e62b029cd971217b1ed5f0126e6ae76e13c0",
+      "text": "頼りにする。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/stairs.ogg",
+      "sha256": "b9f99e39756d655f3949f5966e2ecd5ea1127c81fd4ff66123a1c7bfc6971a5d",
+      "text": "まだ続くね。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/trap.ogg",
+      "sha256": "2b9d1ffd4fad679ba15b05b90bed32b2e2fc72c626ec551b8b82c5f4f61f5cd6",
+      "text": "仕掛けか！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/damage.ogg",
+      "sha256": "aa414b958a32ffe436bd29cc53a397bfc23d5ae74b07249f36ac017c506ffab5",
+      "text": "負けない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/heal.ogg",
+      "sha256": "4fda2dde202c4397eb0c2da9e820827ffc64290ae59637c27e184a35cf3df507",
+      "text": "少し休もう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/win.ogg",
+      "sha256": "dd29173897e5703fcd52156fc0e156c0acd8a5543e9f668162092764eb556749",
+      "text": "みんなで帰ろう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/defeat.ogg",
+      "sha256": "06fda5c7ce35bdd25a26167c10cd07ce506586b7ac625420ca8fe19cb1e5cef8",
+      "text": "待っていて。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/talk.ogg",
+      "sha256": "a4c0c6c3be8e90c3664d5b6dd7ba6ea3af5075586dd62de4bc4581d277965a8b",
+      "text": "急がなくていい。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/ultimate.ogg",
+      "sha256": "477070d0ece2d3000cfce0ff8bbae48c437ddd0f431b39e8c2743301338335e5",
+      "text": "みんなの明日へ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/transform.ogg",
+      "sha256": "2f2c17eb0cdf79a81fe3510dc7dd2a22492408241366541fdcb071fa1adb3242",
+      "text": "光をこの手に！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/ending-release.ogg",
+      "sha256": "09efa4177d16a9baf230ad390c1fdcf2ff426a7a83953af20ec9d4475c54fa76",
+      "text": "失った名を、覚えておく。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/ending-accord.ogg",
+      "sha256": "b7da1f72a9b8c122d2f7bd4e10483fdb0a974cc1e5a5b1137333758410e23842",
+      "text": "同じ道を、違う歩幅で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-noctia/ending-defy.ogg",
+      "sha256": "f49236fc0222d059e717d2c90fb80d5c08c584610c573bd8557ba6da12e51ba1",
+      "text": "二つだけとは限らない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/walk.ogg",
+      "sha256": "22b41a108c28e5f0a0870b331d6f6d7a544f6f2d2b37de4f5fac9e70496ff51c",
+      "text": "一歩ずつ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/attack.ogg",
+      "sha256": "0544c25cf082a7e78c29889f61818ba671550198049ccbdeef7bca4a9f0c2cab",
+      "text": "退いて！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/throw.ogg",
+      "sha256": "613e3016438718f9f231f21625a2c5d62cfb9f88bcca93551c692c2c9bb981b7",
+      "text": "受け取れ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/swing.ogg",
+      "sha256": "d09485440380cbc849cfc7b4166121906895144122d024316feda14920c2fd15",
+      "text": "この一振り！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/read.ogg",
+      "sha256": "9790f5dd192399b34789c673a6babdca5f437c4aa3ba57cf77dd5217419e97a2",
+      "text": "解いてみせる。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/use.ogg",
+      "sha256": "eca3346dd296d6924b98d1e098545ea8360bd6137f6f80c6add29f330d6cb8e7",
+      "text": "今が使い時。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/shoot.ogg",
+      "sha256": "532c9ee5c7b0c36407311fc8e9416582f62152e20cb73a27c2af701b96ec9a0c",
+      "text": "まっすぐに！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/pickup.ogg",
+      "sha256": "32448d2563fa76a2d23936b2520043f990a317b7cbc3e165e5c9fc6c399ed875",
+      "text": "預かるね。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/equip.ogg",
+      "sha256": "cbaf3b37ed83723450331353d5bc15ac34f40d40268f4075bdf0604cc13aaa42",
+      "text": "備えはできた。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/stairs.ogg",
+      "sha256": "3ea0e8ed397a6220336b49fd94cc29bac9856f5cdb41da2e4c6916f0628b1b9c",
+      "text": "灯を忘れずに。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/trap.ogg",
+      "sha256": "c71eb1e870f04d3a43ef5e67aee7890646b16d123e3ada0d93cc3190bb5588b3",
+      "text": "油断した！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/damage.ogg",
+      "sha256": "b050e66bf4ffe60aff60e45ed16a8ecd8dffe271d051ba066e976f3315411cab",
+      "text": "ここで止まれない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/heal.ogg",
+      "sha256": "6cc9226514bea02a286eb55bd4ff2cc1989a3a932c9169b4630668b23d88af0b",
+      "text": "もう大丈夫。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/win.ogg",
+      "sha256": "4952483891c95a633d351e6b51b18afbdda36f138d7885e045ee9159ae723f36",
+      "text": "続きは、町で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/defeat.ogg",
+      "sha256": "f82da742d428d42e0e9fcf2b36f4980824678b80132af3169e0b428a319282a4",
+      "text": "灯を消さないで。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/talk.ogg",
+      "sha256": "c0bd706a8b42b2998d721edc5c54d7f2a7a530132b1d9647bf207fbf796d48e9",
+      "text": "ここにいるよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/ultimate.ogg",
+      "sha256": "95e945dad8d53a6394f9ec86719fc1d4bd1d160b170c84f02da49289537baaf3",
+      "text": "今、力を合わせて！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/transform.ogg",
+      "sha256": "74133de9227f09c45b46df812a38af78c9ea7bd0eea073355a485e6053829725",
+      "text": "変わるのは、今！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/ending-release.ogg",
+      "sha256": "29f5b3aee71afdf63b60afbd1bc3317f585b5b68d5b7974b9d009c210fb9ff08",
+      "text": "自由な朝へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/ending-accord.ogg",
+      "sha256": "5cb20ab63f40d27af9b4c8e4f87dec50a4e94d92ce9b912da06b36e6bb53e8e8",
+      "text": "分け合う明日へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-aurene/ending-defy.ogg",
+      "sha256": "188b5cf1d762594fb7b0e3fe2d8ca16e9b15943db2d6dc5a242c5ea46a8bbae9",
+      "text": "まだない扉を開く。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/walk.ogg",
+      "sha256": "877957f92a763fae31a1741b2c98a8960793ac77753c331e2e955612c882d634",
+      "text": "進もう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/attack.ogg",
+      "sha256": "1ef0bf10d30e3fdc81acaf7f32ec370b0c5dbbeceaf279111abd3166ffc7559f",
+      "text": "そこだ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/throw.ogg",
+      "sha256": "9b914e1dc3fdeb4b0a899b5ccd1049fcd1ea0ad5bc6d47f0b350882566899033",
+      "text": "届け！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/swing.ogg",
+      "sha256": "20449a57da38551282355dc188f9a594f33e51e058bd7b018ca77cbb5dac9eb2",
+      "text": "風よ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/read.ogg",
+      "sha256": "2f769559154c64567923d128c597d813012fbfcd4dbd256a070faa8b0232fdee",
+      "text": "読めたよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/use.ogg",
+      "sha256": "2e9cb242d27e4b02e328784b7e5f4671da72c76a6fb2db65f4d646f585dc1408",
+      "text": "これを使う。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/shoot.ogg",
+      "sha256": "504d13be471fb964a8ac4a346fb08df178cca9f641b4926aa37954df724bae72",
+      "text": "狙いはここ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/pickup.ogg",
+      "sha256": "0eca32c0c82d982dd469cde132159d95fefe31733be98b200a576ee3eda5de65",
+      "text": "見つけた。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/equip.ogg",
+      "sha256": "c49a3afff04c848f106aa411652ca4aa467a358bdd6492aeedb001afb72b3468",
+      "text": "これで行こう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/stairs.ogg",
+      "sha256": "ea37cfeb19ca3b4e913308b3475ca28f82d62f0b5ecba08aaf6355c847007220",
+      "text": "下へ進もう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/trap.ogg",
+      "sha256": "55d984de4d9b906756eb9fd5d8127c232f1de688e0ab4a3361135741926ce1a2",
+      "text": "罠だ、注意！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/damage.ogg",
+      "sha256": "cc20f6cbad828672e56fc00b7a58552be64a9cec60eefb8b6388486eb38c0ca4",
+      "text": "まだ平気！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/heal.ogg",
+      "sha256": "6d8a24a824f66ff4fee89c9815f45740535b39d039e0316687da1c3d23c8b3f1",
+      "text": "息が戻った。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/win.ogg",
+      "sha256": "6720d8b7570861f02e1e773d7e99af7f2af1cf097cab647aa56e2f1f860beab9",
+      "text": "約束を果たした。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/defeat.ogg",
+      "sha256": "b4eb7e25e1e0b0229c08fe3cebfb96b1ec3aa28e630884f8e904efc3d6b96804",
+      "text": "まだ、帰れない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/talk.ogg",
+      "sha256": "4634f03abbdbed0772df5a65b0b367a15b9c6b1c661fedf2cef2a269b61831b4",
+      "text": "話を聞かせて。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/ultimate.ogg",
+      "sha256": "3e51f4fe36ab8be44c1a86edc6846080a1cc27c3aece0a3bf971feeb81640646",
+      "text": "この約束に！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/transform.ogg",
+      "sha256": "d0fb1428a7dfe9701ec3a5269e4411154c64ecdbd3366ba2961b75365d86308d",
+      "text": "本当の力を！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/ending-release.ogg",
+      "sha256": "7d3bc41731aca0b6f70a0308dc9399dd6f7c301d0a56eb0d1a980aae1d9e67f3",
+      "text": "手放しても、忘れない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/ending-accord.ogg",
+      "sha256": "2ea0cd103817af54915531b2236fdbe37457a47100c5577728f98c69a931e2a3",
+      "text": "一人に背負わせない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-ignis/ending-defy.ogg",
+      "sha256": "7914565e68fff43ec33e6413580687be22b361a48f240bc607048f69a14a3816",
+      "text": "別の道を作ろう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/walk.ogg",
+      "sha256": "5eb44137c447a403dc894db3b2a6e342a8823e6bf560c33f67490076aa5f03db",
+      "text": "次の道へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/attack.ogg",
+      "sha256": "af7a69dc758ff17a280c98ec61ae5aedd0aab480505170f705d9f403ac76cc80",
+      "text": "これで！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/throw.ogg",
+      "sha256": "bf896a3403c2f5a93673688d3207aa75cd40d2545a0e64c3ad92c6e3d8f9cfee",
+      "text": "飛んでけ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/swing.ogg",
+      "sha256": "9d3e4415d81abef93f5648e80cf5f80defb93056da7409cd93b2d213110a8783",
+      "text": "道を開け！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/read.ogg",
+      "sha256": "26c03be4ded36eb5fab568fb11871defbcf04186f55e7cd4f5f7766c339cda6e",
+      "text": "頁を開く。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/use.ogg",
+      "sha256": "9c843b8e4dbf3514de9bc3cc407582214da4aa36c0acdb0ad12dc0069143c939",
+      "text": "準備はいい。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/shoot.ogg",
+      "sha256": "ae7f544123b644a23fb2d1c80c2f3b01c8a5bdbcdaf46f27f3d50602bafcd09a",
+      "text": "射線よし！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/pickup.ogg",
+      "sha256": "321ca028ecc40b6d89fd0a142777a4f96f5ba240afd013db3a0495021a680774",
+      "text": "大事にする。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/equip.ogg",
+      "sha256": "e0d2472d1d6d90bac852742fe47a1ba2a8bb6978d055f0a838833a9a7d9240b7",
+      "text": "似合うかな。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/stairs.ogg",
+      "sha256": "24ef9edcacb0c7f11b45899f653efaf07ff128e5209ac62b7beb8e5d9d632948",
+      "text": "次の階だ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/trap.ogg",
+      "sha256": "18c68f863a85defcea3530b0826f17f7235625ed822a26e2ac729370cc697fdc",
+      "text": "足元を見て。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/damage.ogg",
+      "sha256": "4ce4a792f37b128bed41c0140fd4cd4cf3ac1a7eeab17ea03707fb3b63fffabe",
+      "text": "くっ、痛い！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/heal.ogg",
+      "sha256": "89c99fbe47a7a9d5154ee7f8af8306f55e6dbd256c7b8cb93c0b99c0500999fd",
+      "text": "ありがとう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/win.ogg",
+      "sha256": "12e2ad58668ff2fd65021df06db4a7a4ca278829e9625dd9e21fdb366bc881cb",
+      "text": "帰り道へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/defeat.ogg",
+      "sha256": "b2043d3a283193eb7088160052783dacd3f5d8e756be059e6e348025ade9abb7",
+      "text": "次こそは。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/talk.ogg",
+      "sha256": "eb6d7b22e36ddb48ed048e7f6b700fc24c6b748388c54461cc8bee76245e90c7",
+      "text": "君の返事は？"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/ultimate.ogg",
+      "sha256": "a6f9d82a8bfe7dd46897a2d1f9d72961d1e44e624bd9d418a1bf5c4c3b9464d3",
+      "text": "ここを切り拓く！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/transform.ogg",
+      "sha256": "669fc65a475b23094ef6137ae1cfef98dfc1f270d6fe817a5d43729dc818a342",
+      "text": "もう迷わない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/ending-release.ogg",
+      "sha256": "356cb0dfcdaf2caf43364460c4e9ef13e37ab9ef1bb7a3cc267f54a20d053603",
+      "text": "返そう、あの人へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/ending-accord.ogg",
+      "sha256": "a3453b2506338d6cbe3af10441f57a5919892b47bc80c2457a214086b77cc538",
+      "text": "約束を、結び直そう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leon/ending-defy.ogg",
+      "sha256": "3af3fa9b65db488b9b6b1b49b26db33ef9703aacb8f6550a3a0a94e8d37f9975",
+      "text": "答えは、これからだ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/walk.ogg",
+      "sha256": "dd34a150e91336a45539c94250bdd2fa9c3440f11b8deb642ae0c834b53b7f6d",
+      "text": "ついてきて。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/attack.ogg",
+      "sha256": "e92ef2ecd3d9f5d52358cd777734306c6bfe4b10c118711300d5ca8ecccdf1d1",
+      "text": "いくよ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/throw.ogg",
+      "sha256": "777eceb5ff5f7c472a22b0bc9e0b4ac0efaf60e990737144d06067eec17980d1",
+      "text": "これを！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/swing.ogg",
+      "sha256": "64f46770545c70b67d8dc5d9a305ebdcbf59172fb1c94659f285bff57f51126d",
+      "text": "力を貸して！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/read.ogg",
+      "sha256": "70722b4be45e4660de62500d87967eec361c7963f5c4a8c1f1d0820d6deea862",
+      "text": "この言葉で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/use.ogg",
+      "sha256": "d9e1ce0a6c7c21fe3b940ca00149809d7db03e6240e6deb195ed00efb06ebd85",
+      "text": "まだ手はある。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/shoot.ogg",
+      "sha256": "431289df3cd7ce512381f4dce25586e61762d7c1c9a07dc51481296c9b3449d3",
+      "text": "そこを通す！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/pickup.ogg",
+      "sha256": "553ad221d033478a82a36b898fe00fdcde1eefe10c645c7724d4cdb06d05e3b7",
+      "text": "役に立つよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/equip.ogg",
+      "sha256": "6b0170af77c2de6e26bad38f24fd036525072fc4e6fc2c562460f6a8d13526c8",
+      "text": "頼りにする。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/stairs.ogg",
+      "sha256": "cee846b1ba4a85fb7ef73db8b2f454a149558026d8e21ae776272bd801de93b3",
+      "text": "まだ続くね。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/trap.ogg",
+      "sha256": "90b4c029dbe51d36c68edbe3776c56da7c87d7ee60e204b8087702fc4c512cb6",
+      "text": "仕掛けか！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/damage.ogg",
+      "sha256": "9afad58d5066debd170675b1770608427b73989493dd3ac30c884a0b1f50ebf8",
+      "text": "負けない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/heal.ogg",
+      "sha256": "7db3645d363bcadb73d39e3db018cb738019cb27a0de27b72aaf974a30bd44c1",
+      "text": "少し休もう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/win.ogg",
+      "sha256": "ab7cca4680b3b1fb4889aa9b1bc57c15f4898850fe292e95fd03beb1e5cd0615",
+      "text": "みんなで帰ろう。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/defeat.ogg",
+      "sha256": "c218558df15e49209257ffee6409dcb25223e3803dd15a3d9f9793e218b9206a",
+      "text": "待っていて。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/talk.ogg",
+      "sha256": "130451fd62f8939c9991dc38d85bce236623388720225ad463afcbf55f673909",
+      "text": "急がなくていい。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/ultimate.ogg",
+      "sha256": "5fedc670a7edc54e0ef83cf9bb117833cb3424603c64eaacd873b501cad9f544",
+      "text": "みんなの明日へ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/transform.ogg",
+      "sha256": "a47b859d253f291868c7c28eeae3f5cfe4a0cae546227a59a537856852af3f09",
+      "text": "光をこの手に！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/ending-release.ogg",
+      "sha256": "2e6392f0453a9a01f87cb539caa713b58eb1701c5fcb4f5af89ed22e237ff35f",
+      "text": "失った名を、覚えておく。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/ending-accord.ogg",
+      "sha256": "c3572e26eb147fff6ffae6fa4b103f376cac8d09c200cd9b42b28d842b44b78d",
+      "text": "同じ道を、違う歩幅で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-orion/ending-defy.ogg",
+      "sha256": "4917ee6615820d8e4fc935c175b3feab43810dbcc8f21bf2b4581f597c07e4d9",
+      "text": "二つだけとは限らない。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/walk.ogg",
+      "sha256": "dbba47bbf0951b995cd77157888d2e6935083bbedb82694739b02d0080c9ac2e",
+      "text": "一歩ずつ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/attack.ogg",
+      "sha256": "6aa9fc574679223ed618c7a6d8e50d37ab20323ed3c0214f20103fb8c2b88592",
+      "text": "退いて！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/throw.ogg",
+      "sha256": "5a245bad51ae93a4d41202f1ade2e357ae9e89f3c25c8e4db8497c0c1f32a39b",
+      "text": "受け取れ！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/swing.ogg",
+      "sha256": "c2f744f4fe44b5fd096e75079168758a8513e548752ae106269e3f1fa8c48bae",
+      "text": "この一振り！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/read.ogg",
+      "sha256": "8a9c848613b1511bfea8e9828846be3b10f1dcf492d1c506ee7386e774da8f2f",
+      "text": "解いてみせる。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/use.ogg",
+      "sha256": "0b95b42e7d55650df30be5ddfc94bfb278fe8bddcee41d5a2e2dfb9a06ac3a23",
+      "text": "今が使い時。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/shoot.ogg",
+      "sha256": "2046ae06d81d1ec3baa3e93a01ce401adf68160b8cd9e80a45fe3900ef2cfa51",
+      "text": "まっすぐに！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/pickup.ogg",
+      "sha256": "2748e2dc0b24f16434d760635e2651b3fdac454a5b3f1f0f8e93fa651a5c100b",
+      "text": "預かるね。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/equip.ogg",
+      "sha256": "03a1ce9efd288a7647b1eeae74fb32cbdbe47707873eebde5b0aa5825e1e0b41",
+      "text": "備えはできた。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/stairs.ogg",
+      "sha256": "d2671146d7213e96e6fa565ee43ccd1a8d0ceb3c260fb8c71e2d525ad106ee34",
+      "text": "灯を忘れずに。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/trap.ogg",
+      "sha256": "9e7eaf7714be6421377cbc743a5180c3623a4b468edab208135071ab33c71fc8",
+      "text": "油断した！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/damage.ogg",
+      "sha256": "255bbbf2ead6cfec3f6ca9fb75c21d6bc43bdfb58aa422f63978379f520617a1",
+      "text": "ここで止まれない！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/heal.ogg",
+      "sha256": "8394f32a70ec7f5d06134cd9f94df53d62278948b934d50ea770ad8fda2e1f18",
+      "text": "もう大丈夫。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/win.ogg",
+      "sha256": "4f6ce5cdbafcd8d680bd8831ff2bbc3c875f28fdec6abbd3b0e9f2e89014e976",
+      "text": "続きは、町で。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/defeat.ogg",
+      "sha256": "34e793e6f51ec64f8d0eafc5593a95fee789ebd74027ae7f56d12232172022c0",
+      "text": "灯を消さないで。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/talk.ogg",
+      "sha256": "8f65745834dc0003a93eebc4e879c984a44475bb3d140eea77bc136445f3585c",
+      "text": "ここにいるよ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/ultimate.ogg",
+      "sha256": "b3c24d03e515a9e13ca4b9827e198fadfb8e04638ea993162794fcd9843b562e",
+      "text": "今、力を合わせて！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/transform.ogg",
+      "sha256": "62bf52711e1b15da0d016ce8452f85b83f9549f53102f8a35c178b588f28940f",
+      "text": "変わるのは、今！"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/ending-release.ogg",
+      "sha256": "8163904c145dc5e0087b8919ff6e13c18eef7b5250896da7daae56a0d0fbe7c9",
+      "text": "自由な朝へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/ending-accord.ogg",
+      "sha256": "1f762cbacf87b985cffc632bba9543198a5ad4a9f80ff1e7b76ba62d6e0aeb41",
+      "text": "分け合う明日へ。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-leif/ending-defy.ogg",
+      "sha256": "f635d37267909b91e9e835c27a96397028808682bcb98ba660e7b656675df9b4",
+      "text": "まだない扉を開く。"
+    },
+    {
+      "path": "sfx/dungeons-chronicles/dungeons2-lyria/ultimate.ogg",
+      "sha256": "869a02d51ec6dcff870ff11ce1fd7369dd95987d46b731ea4a49460b3e7d353f",
+      "text": "今、力を合わせて！"
+    }
+  ]
+}

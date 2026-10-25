@@ -514,7 +514,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
     clearSave: () => storageService.clearDungeonState(), itemName: item => getItemName(item), catalog: ITEM_DB,
   });
-  const studentCue = useStudentAudio({movement:adventure.dojoRun?`dojo:${adventure.dojoRun.x},${adventure.dojoRun.y}`:['HOME','RELAY'].includes(adventure.state.place||'')?`town:${adventure.state.townX||0}`:undefined,heroId:adventure.hero.id,active:launch==='PLAY'&&!showMathChallenge,runId:adventure.state.runId,floor,hp:player.hp,gameOver,gameClear,transformed:Boolean(adventure.state.transformed),inventory, equipment:player.equipment, inDungeon:adventure.state.place==='DUNGEON'&&!shopState.active});
+  const studentCue = useStudentAudio({movement:adventure.dojoRun?`dojo:${adventure.dojoRun.x},${adventure.dojoRun.y}`:['HOME','RELAY'].includes(adventure.state.place||'')?`town:${adventure.state.townX||0}`:undefined,heroId:adventure.hero.id,active:launch==='PLAY'&&!showMathChallenge,runId:adventure.state.runId,floor,hp:player.hp,gameOver,gameClear,transformed:Boolean(adventure.state.transformed),inventory, equipment:player.equipment, inDungeon:adventure.state.place==='DUNGEON'&&!shopState.active},'dungeons1');
   const itemKnown=(item:any):boolean=>Boolean(item&&(identifiedTypes.has(item.type)||(!adventure.isMystery&&item.category!=='STAFF')));
   const allPossessions = useMemo(() => {
     if (!gameOver) return [];

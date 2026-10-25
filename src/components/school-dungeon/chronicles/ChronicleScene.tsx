@@ -1,10 +1,11 @@
 import {audioService} from '../../../services/audioService';
+import {hasEstablishedDungeonVoice} from '../student/battleVoicePolicy';
 import React from 'react';
 import {assetUrl} from '../../../utils/assetPaths';
 import {CHRONICLE_CHOICES,type ChronicleBranch,type chronicleScene} from './story';
 import './chronicles.css';
 export function ChronicleScene({scene,line,text,advance,choose,replay=false}:{scene:ReturnType<typeof chronicleScene>;line:number;text:(ja:string,en:string)=>string;advance:()=>void;choose:(branch:ChronicleBranch)=>void;replay?:boolean}){
- React.useEffect(()=>{audioService.stopDungeonChronicleVoices(true);if(line===0&&scene.ending)void audioService.playDungeonChronicleVoiceFile(scene.heroId,'ending-'+scene.branch);else if(scene.lines[Math.min(line,scene.lines.length-1)].speaker[0]===scene.npc[0])void audioService.playDungeonChronicleVoiceFile('npc-'+scene.routeId.toLowerCase(),scene.stage===1?'reveal':'talk');return()=>audioService.stopDungeonChronicleVoices();},[scene.routeId,scene.heroId,scene.stage,scene.ending,scene.branch,line]);
+ React.useEffect(()=>{audioService.stopDungeonChronicleVoices(true);if(line===0&&scene.ending){if(!hasEstablishedDungeonVoice(scene.heroId))void audioService.playDungeonChronicleVoiceFile(scene.heroId,'ending-'+scene.branch);}else if(scene.lines[Math.min(line,scene.lines.length-1)].speaker[0]===scene.npc[0])void audioService.playDungeonChronicleVoiceFile('npc-'+scene.routeId.toLowerCase(),scene.stage===1?'reveal':'talk');return()=>audioService.stopDungeonChronicleVoices();},[scene.routeId,scene.heroId,scene.stage,scene.ending,scene.branch,line]);
  const current=scene.lines[Math.min(line,scene.lines.length-1)],done=line>=scene.lines.length-1;
  return <section className="dungeon-chronicle" aria-label={text('迷宮の年代記','Dungeon chronicle')}>
   <div className="chronicle-art"><img className="chronicle-event" src={assetUrl(scene.eventArt)} alt=""/><img className="chronicle-npc" src={assetUrl(scene.portrait)} alt=""/></div>

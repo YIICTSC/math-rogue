@@ -1,4 +1,4 @@
-import {D1_ACTION_CELL,D1_ACTION_ROWS,type StudentAction} from './heroActions';
+import {D1_ACTION_CELL,D1_ACTION_ROWS,type StudentAction} from './actionLayout';
 
 const CELL=D1_ACTION_CELL;
 // A small LRU keeps transformed forms and hero selection from accumulating canvases.

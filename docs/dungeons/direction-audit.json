@@ -1,0 +1,737 @@
+{
+  "reviewDate": "2026-10-25",
+  "directions": [
+    "S",
+    "N",
+    "E",
+    "W",
+    "SE",
+    "SW",
+    "NE",
+    "NW"
+  ],
+  "review": "Manual comparison of all 70 idle and action sheets; original direction sheets are the facing reference. D1 retains painted art. D2 diagonal actions use articulated reference art; normal Lyria east does likewise.",
+  "forms": [
+    {
+      "series": 1,
+      "key": "elementary-assassin",
+      "reference": "public/sprites/wandering-student/elementary-assassin.webp",
+      "referenceSha256": "552a822cdb9fe303da4a6d43bb3e616761c5515645e7f47609f86c185c481b04",
+      "actions": "public/sprites/dungeons1/actions/elementary-assassin.webp",
+      "actionsSha256": "3f3745a4d100f44fea4874b1e9360f4e0fc7d9d3da33581be760625c6bb48815",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-bard",
+      "reference": "public/sprites/wandering-student/elementary-bard.webp",
+      "referenceSha256": "6041002cd4c7a672bfe728192ef64fd462685829f769b0621a5cb7f24697ac85",
+      "actions": "public/sprites/dungeons1/actions/elementary-bard.webp",
+      "actionsSha256": "a69be6a4e1aee3be79f0c65eedb470b0e0e36987c436718a982d32bae920055a",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-caretaker",
+      "reference": "public/sprites/wandering-student/elementary-caretaker.webp",
+      "referenceSha256": "71436decd700c46bab12d2af21339130033f0dad0e76ce64da12fb20a200305d",
+      "actions": "public/sprites/dungeons1/actions/elementary-caretaker.webp",
+      "actionsSha256": "69c15c362b8064dfad0a372a8023d356545f5218bfafc5c28b117ae19868f1cd",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-chef",
+      "reference": "public/sprites/wandering-student/elementary-chef.webp",
+      "referenceSha256": "73b42131464d52c745c04adccb7588958045231b1c845ee66d5839ff2653fb99",
+      "actions": "public/sprites/dungeons1/actions/elementary-chef.webp",
+      "actionsSha256": "09d8b29e8955749f572173120e5470852b1e5c60f4cbd56171bcd5e4fce63509",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-dodgeball",
+      "reference": "public/sprites/wandering-student/elementary-dodgeball.webp",
+      "referenceSha256": "76064bd63d0c193fd8fde18cee38050d5b67e252600575abc9422b47f8de6b85",
+      "actions": "public/sprites/dungeons1/actions/elementary-dodgeball.webp",
+      "actionsSha256": "0976daeb7a99877b59c18bb8c4c7e6df9bc9e3acd81d06f79c1b019f146854cd",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-gardener",
+      "reference": "public/sprites/wandering-student/elementary-gardener.webp",
+      "referenceSha256": "6776a9d2914ca10cbeeffdd19942915066487479a83bd13c63a5bac32f213a6b",
+      "actions": "public/sprites/dungeons1/actions/elementary-gardener.webp",
+      "actionsSha256": "67a70bd995c9588a417b0e0f1367361320363e03e876f8ca26c06bded0524373",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-librarian",
+      "reference": "public/sprites/wandering-student/elementary-librarian.webp",
+      "referenceSha256": "030adcc3869c6ced8355209ff326b5c03756e94cdae5431c6052c0944331ed5c",
+      "actions": "public/sprites/dungeons1/actions/elementary-librarian.webp",
+      "actionsSha256": "d5d26aab8c70475e9909947260d50769d27c93e7444c7e97df99867564d52cc1",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-mage",
+      "reference": "public/sprites/wandering-student/elementary-mage.webp",
+      "referenceSha256": "5c6a73ec864e077e8519b4ff55da49665977c5a9019f983d175c54b7cc8b7c7f",
+      "actions": "public/sprites/dungeons1/actions/elementary-mage.webp",
+      "actionsSha256": "ad8fff9f3c32ddee41a22c119d2cb9a925c452e1c76588a2d98ca4dc52fb5312",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "elementary-warrior",
+      "reference": "public/sprites/wandering-student/elementary-warrior.webp",
+      "referenceSha256": "58b1989bf8a9c84c92886d00adde62d9c5c65f64680acfd714ed74e65bf53d4d",
+      "actions": "public/sprites/dungeons1/actions/elementary-warrior.webp",
+      "actionsSha256": "d03b268bec9a7f318d6eb5ef363ac5a7b7d70913fb3936671dcb552985cbd507",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-assassin",
+      "reference": "public/sprites/wandering-student/high-school-assassin.webp",
+      "referenceSha256": "b3d93683cd5363082cd1bf58698c02a1663cb49104a6906f39fd4f6549336272",
+      "actions": "public/sprites/dungeons1/actions/high-school-assassin.webp",
+      "actionsSha256": "f3e980e393bd113c76447a2df70c5d97c6ae73943c9cc8fb702747b8636b6a01",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-bard",
+      "reference": "public/sprites/wandering-student/high-school-bard.webp",
+      "referenceSha256": "c173768408a9806358584865dbaedf01ac8c697926b5849d4d043e610843a23f",
+      "actions": "public/sprites/dungeons1/actions/high-school-bard.webp",
+      "actionsSha256": "a8f8d35db2d5f3c638783cd57255d5c7b6418e3fdfc3c535c744cded04a8c7fb",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-caretaker",
+      "reference": "public/sprites/wandering-student/high-school-caretaker.webp",
+      "referenceSha256": "dcbb9b2032d61c1a087dba6c5327deacf7b75a198f2bd6f0df8a2b0279d3a7c7",
+      "actions": "public/sprites/dungeons1/actions/high-school-caretaker.webp",
+      "actionsSha256": "709dc5043b3ebee35b279d5e78a5711b070a245496b9e939dc0cdcd6215b3843",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-chef",
+      "reference": "public/sprites/wandering-student/high-school-chef.webp",
+      "referenceSha256": "34260f0653d737c6414ae8887ae79de8e643e2f44b2810ba9558cab65d749606",
+      "actions": "public/sprites/dungeons1/actions/high-school-chef.webp",
+      "actionsSha256": "aa4653c4aaeda26a28fe0d3645b0ee786c9ea5096d6aa39b49a15b967798a29d",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-dodgeball",
+      "reference": "public/sprites/wandering-student/high-school-dodgeball.webp",
+      "referenceSha256": "418b5ddabf83645f0d1a757cf632479f50a20592305ed4554f1f85540c54e8a3",
+      "actions": "public/sprites/dungeons1/actions/high-school-dodgeball.webp",
+      "actionsSha256": "4a0bf0b979df64d242232076b2f8a33c34e67ee11b7cdfb5d88b54ad87a3fa88",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-gardener",
+      "reference": "public/sprites/wandering-student/high-school-gardener.webp",
+      "referenceSha256": "ecb4a12f4394e7fc4884ecd8679182761e8b4253903cb197aa41cfd16cb3a31d",
+      "actions": "public/sprites/dungeons1/actions/high-school-gardener.webp",
+      "actionsSha256": "fbde558546767e767ce4699589607ab1aff5750e0a44d01bfe87919591307524",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-librarian",
+      "reference": "public/sprites/wandering-student/high-school-librarian.webp",
+      "referenceSha256": "5e164771e7e2fd56a889dc69b1986ea5d9b3d71473850b8cc2c110732fa980c6",
+      "actions": "public/sprites/dungeons1/actions/high-school-librarian.webp",
+      "actionsSha256": "70ae95b8b7bb07b9a2b365228ce2f5f2ed90daeab739e5299339958dd766a044",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-mage",
+      "reference": "public/sprites/wandering-student/high-school-mage.webp",
+      "referenceSha256": "e72edc6141caae60be0632f76b061416fc9a49aae70e9e3bb99ee6442145eea8",
+      "actions": "public/sprites/dungeons1/actions/high-school-mage.webp",
+      "actionsSha256": "3d9077f2c8fdf2656712f9c3c7f0d95359f52775b736338561ab7cf8a781f83b",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "high-school-warrior",
+      "reference": "public/sprites/wandering-student/high-school-warrior.webp",
+      "referenceSha256": "c6fa9b356c0be627ceaeda555a6165fb0a04683ba7a3722a0b5b3aff9d22ce55",
+      "actions": "public/sprites/dungeons1/actions/high-school-warrior.webp",
+      "actionsSha256": "611001b7bb038db83538b03d2b8697f196d6aef42d30f5617671939a1911edfd",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-akari",
+      "reference": "public/sprites/wandering-student/magic-akari.webp",
+      "referenceSha256": "3d205fa3c3186424e14ba2c98704acefc7af34869e1782c093faaa0656f705c8",
+      "actions": "public/sprites/dungeons1/actions/magic-akari.webp",
+      "actionsSha256": "ead92b19031dd8fa87bd3f8750e5ae6552a3ef007853665853333b1ab060f11f",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-akari-transformed",
+      "reference": "public/sprites/wandering-student/magic-akari-transformed.webp",
+      "referenceSha256": "8b7a1418e0a8425b5b65137084c050863bdaeb68fa9921a249326221d9247728",
+      "actions": "public/sprites/dungeons1/actions/magic-akari-transformed.webp",
+      "actionsSha256": "a9ed8ca7aebed9d31ab06e54ba5a5230a4fc848eae9c13f0372cb079ab225fb0",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-elliot",
+      "reference": "public/sprites/wandering-student/magic-elliot.webp",
+      "referenceSha256": "3ed9b863db40b2557330b484d53c57ff5f7938671d5b3f57ad3029866c087775",
+      "actions": "public/sprites/dungeons1/actions/magic-elliot.webp",
+      "actionsSha256": "edd1fb4feac1942076ea79ca7251b2217cc421d4f2c1255a0f92b98f489e8abb",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-elliot-transformed",
+      "reference": "public/sprites/wandering-student/magic-elliot-transformed.webp",
+      "referenceSha256": "828fbf66729624b9908f87d216a46e7304bd29fa84b3bf2ff2f4123f1e3d96cd",
+      "actions": "public/sprites/dungeons1/actions/magic-elliot-transformed.webp",
+      "actionsSha256": "8c2c6b88afdd8aa1ff3ae84d0f0f04c805e42ee5bfbd4ade45d2e6f88a010d9d",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-hiyori",
+      "reference": "public/sprites/wandering-student/magic-hiyori.webp",
+      "referenceSha256": "70f4991e4f1d4692b9cfb608b1b03265839038cbf6957c35a3226b0a022772ec",
+      "actions": "public/sprites/dungeons1/actions/magic-hiyori.webp",
+      "actionsSha256": "5502f5e2e146f3a2b73fcbdab7c06b464b15b8e7e422fb37cc42ecdfe31ba2e5",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-hiyori-transformed",
+      "reference": "public/sprites/wandering-student/magic-hiyori-transformed.webp",
+      "referenceSha256": "689fdae4c6d8e2adce31ca4acf9e4f47293dcb4b260c6e40eec88ec756d5b889",
+      "actions": "public/sprites/dungeons1/actions/magic-hiyori-transformed.webp",
+      "actionsSha256": "c68728f6fc53c948b08f9235926811351cdbb7b85be748e950e9652229b38753",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-koharu",
+      "reference": "public/sprites/wandering-student/magic-koharu.webp",
+      "referenceSha256": "4bc0faf8bf912c9dcb8d907afc77bf64d257ef7466e45097963a3212cb76c41c",
+      "actions": "public/sprites/dungeons1/actions/magic-koharu.webp",
+      "actionsSha256": "f5fef630355d9c3365b37ad25fd2992262d25b8908e8d2d6d6043f8faafc4f80",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-koharu-transformed",
+      "reference": "public/sprites/wandering-student/magic-koharu-transformed.webp",
+      "referenceSha256": "e267b092886c6ed4a47efb76b927a09825737a472909d25b2faf5ae7dec4eeae",
+      "actions": "public/sprites/dungeons1/actions/magic-koharu-transformed.webp",
+      "actionsSha256": "5601317d2841c0f8be492cb9a54fb39168e64dd68d2446e45053789cd1747815",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-leon",
+      "reference": "public/sprites/wandering-student/magic-leon.webp",
+      "referenceSha256": "c6c2beee4e2e714c2e0213fbdc0fa1e67fe8fadbc27d178ccef02e425fbabb2e",
+      "actions": "public/sprites/dungeons1/actions/magic-leon.webp",
+      "actionsSha256": "5717f1ff9a165b7c930829455f5efa4fa12ec02cd23f02087d37626183f0845b",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-leon-transformed",
+      "reference": "public/sprites/wandering-student/magic-leon-transformed.webp",
+      "referenceSha256": "b8688caa39380af3478e8894ba1c7f5baa185f631f1fb70d9928a05aa1d6473c",
+      "actions": "public/sprites/dungeons1/actions/magic-leon-transformed.webp",
+      "actionsSha256": "a1b31ff295c00ee9953de2c87efb99eb5673800fb3d5e86696d77e0f5e7fa5f9",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-madoka",
+      "reference": "public/sprites/wandering-student/magic-madoka.webp",
+      "referenceSha256": "8a548d87dbb41be66fe1dc6acc9785f22cc8b6be3221eee1b12f5167473a77d4",
+      "actions": "public/sprites/dungeons1/actions/magic-madoka.webp",
+      "actionsSha256": "366ffed479df0780cbf12143644ab268afad71f7c048c5fa532f5dc7589a51df",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-madoka-transformed",
+      "reference": "public/sprites/wandering-student/magic-madoka-transformed.webp",
+      "referenceSha256": "b98952f82250bcdc52a1cacb55db41aae77cf3673778ee439ecac0b2f7d29db1",
+      "actions": "public/sprites/dungeons1/actions/magic-madoka-transformed.webp",
+      "actionsSha256": "7e81770df23a24f68072a5856f394e0b79f3faf4608fd1c3504b30803931bda3",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-minato",
+      "reference": "public/sprites/wandering-student/magic-minato.webp",
+      "referenceSha256": "71d7ad4d4ba4cf2786d7e0ad4d0f2c299481dc438ec52c08d272b2c90dced065",
+      "actions": "public/sprites/dungeons1/actions/magic-minato.webp",
+      "actionsSha256": "6aa10840b5fbcecf39a9db4f92c58a5850a4b48d7b42807e42bad0c69ee56f80",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-minato-transformed",
+      "reference": "public/sprites/wandering-student/magic-minato-transformed.webp",
+      "referenceSha256": "6ce59d567fcd89e8ca828f0813c2d236d8763ef99e9a91c63469ded6daecb1f3",
+      "actions": "public/sprites/dungeons1/actions/magic-minato-transformed.webp",
+      "actionsSha256": "80e1d9097622ecdcd887f5f106d15465c47d68aede2a8b5905acc02b65d05899",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-mirai",
+      "reference": "public/sprites/wandering-student/magic-mirai.webp",
+      "referenceSha256": "9ee31960aea47e4d9fedf276e15c379157baf8576ff5d324419f51629be261c8",
+      "actions": "public/sprites/dungeons1/actions/magic-mirai.webp",
+      "actionsSha256": "a5433054a089e2e9669fbb922760ea168a8fe3f6cc95d945065c91243cdbcee9",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-mirai-transformed",
+      "reference": "public/sprites/wandering-student/magic-mirai-transformed.webp",
+      "referenceSha256": "61b76c1d1a2c612f675b1e77eb07084cc9d8bdb209055224276fcecbf033e9b2",
+      "actions": "public/sprites/dungeons1/actions/magic-mirai-transformed.webp",
+      "actionsSha256": "ffdb7e1eee82b5a895d959334056fda20523b891da7e5147c57435f975da9282",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-rei",
+      "reference": "public/sprites/wandering-student/magic-rei.webp",
+      "referenceSha256": "75b5d39634eac9b746e6a7904468b55f07dc077db2b931d27c854aa0a48dff8e",
+      "actions": "public/sprites/dungeons1/actions/magic-rei.webp",
+      "actionsSha256": "02b37c74e78bcceb47ed01b0e5612d0444e22a9534a700c9f48cdb56a5805be2",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-rei-transformed",
+      "reference": "public/sprites/wandering-student/magic-rei-transformed.webp",
+      "referenceSha256": "04b68f3b2bd4015eb3d5a8b58508f527cd9622f23bde60a0e2f1aa8e2c1591c9",
+      "actions": "public/sprites/dungeons1/actions/magic-rei-transformed.webp",
+      "actionsSha256": "a28ce46e73c79d7a3792cf3e19d21dc12dca3b1ca79cd8a7c41b0667b984a055",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-ren",
+      "reference": "public/sprites/wandering-student/magic-ren.webp",
+      "referenceSha256": "539b56d90e246d57e53f6674dec661f2c886ab732cffc064686d5de9e574fbca",
+      "actions": "public/sprites/dungeons1/actions/magic-ren.webp",
+      "actionsSha256": "5f954eefaa7b80e0db9c829cfe976c8a244d7d589cd836fd35a6385b3c223d15",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-ren-transformed",
+      "reference": "public/sprites/wandering-student/magic-ren-transformed.webp",
+      "referenceSha256": "77285fcab782896d4bae7f435d8d82b2c068d37d734b9fbedfbc860b768b294a",
+      "actions": "public/sprites/dungeons1/actions/magic-ren-transformed.webp",
+      "actionsSha256": "c496e41e5a814901cb5770e2ef143c2920a7443046d403be654944bc2938ef1f",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-riku",
+      "reference": "public/sprites/wandering-student/magic-riku.webp",
+      "referenceSha256": "f5d124b8f83f29fda6d41575d25b7fd71607a6e6b169461979695da97a68f4c4",
+      "actions": "public/sprites/dungeons1/actions/magic-riku.webp",
+      "actionsSha256": "7419b9ce34825bebe1b2e9fb33165d3256d9b813a63e019be69f7d1e01cb461f",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-riku-transformed",
+      "reference": "public/sprites/wandering-student/magic-riku-transformed.webp",
+      "referenceSha256": "efff546d4d7510176ab7bb23408ca0ec7cf0b2455b14406b4d1edf8172a4c8e5",
+      "actions": "public/sprites/dungeons1/actions/magic-riku-transformed.webp",
+      "actionsSha256": "4a0df1d2efbc075809e702a7d1cee55f53b78f1819d5ce141cd2d48bd4c1afc1",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-sakuya",
+      "reference": "public/sprites/wandering-student/magic-sakuya.webp",
+      "referenceSha256": "3e69d9c9ac32ee1b42d29662b2e969792e3c56d832b39b9501b38584f7127a54",
+      "actions": "public/sprites/dungeons1/actions/magic-sakuya.webp",
+      "actionsSha256": "1cc0ef508a7beb7df9a37a3748fcadefc948332c18dc224372aa61bb9a3df53a",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-sakuya-transformed",
+      "reference": "public/sprites/wandering-student/magic-sakuya-transformed.webp",
+      "referenceSha256": "5b5bac3a847256a7d0eb5ee55da09a05a3ccb426754b77a4f6c1201f9fac18b7",
+      "actions": "public/sprites/dungeons1/actions/magic-sakuya-transformed.webp",
+      "actionsSha256": "ea70e7a65956bae4b847e7622925bef9d042e0300e129dc02efc2aacc16ab8ea",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-sera",
+      "reference": "public/sprites/wandering-student/magic-sera.webp",
+      "referenceSha256": "96d57f48b6169407437b95874dbbaa055359b310aa3dc2e41272976281ed217d",
+      "actions": "public/sprites/dungeons1/actions/magic-sera.webp",
+      "actionsSha256": "a4c7e6eb7fd4acf1e4ac5cd5907574f300ea3806842586f078123321cb098001",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-sera-transformed",
+      "reference": "public/sprites/wandering-student/magic-sera-transformed.webp",
+      "referenceSha256": "b77321e6601b97dc0d351fdc82328fa32d550283ea277d4009839ac9d0745907",
+      "actions": "public/sprites/dungeons1/actions/magic-sera-transformed.webp",
+      "actionsSha256": "c420d96803b3ec44c96f4840f2a097c00e14f577a14368285074ca11a5779e63",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-shizuku",
+      "reference": "public/sprites/wandering-student/magic-shizuku.webp",
+      "referenceSha256": "820a25a39e9c51c029060d6fd86b93adb4c93b33158536cc9aead9e9a754f143",
+      "actions": "public/sprites/dungeons1/actions/magic-shizuku.webp",
+      "actionsSha256": "e8bf1e788262acdc26d6ae1154d5725d11512e764f7fe79188ad8d8be0b80948",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-shizuku-transformed",
+      "reference": "public/sprites/wandering-student/magic-shizuku-transformed.webp",
+      "referenceSha256": "bbc65a6d1957152ebc1ef0e5d83cc1898c7f9f59596e2075ae70d12037dcbe2e",
+      "actions": "public/sprites/dungeons1/actions/magic-shizuku-transformed.webp",
+      "actionsSha256": "e5d1f287b4a83b097869aab5a7e0bc4ee7e73e8c22416f254d3ce1b4f99e54a4",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-soma",
+      "reference": "public/sprites/wandering-student/magic-soma.webp",
+      "referenceSha256": "14490f35fc00a474d7e6224c6ddefad7ac12304aa4e95f6893d8d2879f9cd226",
+      "actions": "public/sprites/dungeons1/actions/magic-soma.webp",
+      "actionsSha256": "26cb29b6c647ce2c6df628da96b84f479810c34d9fcd21eb8d7800edf8e79901",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-soma-transformed",
+      "reference": "public/sprites/wandering-student/magic-soma-transformed.webp",
+      "referenceSha256": "10aef6bbf092f5209bb0ee17e6394f1f2d770cc71cb5bac73204121e72d7b7fc",
+      "actions": "public/sprites/dungeons1/actions/magic-soma-transformed.webp",
+      "actionsSha256": "115b95d17990eaf7ed5b4fbafc8ea3a0cf5ece9b2c90bd57c3cb9efc3c174e79",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-tsubasa",
+      "reference": "public/sprites/wandering-student/magic-tsubasa.webp",
+      "referenceSha256": "690ad772ceea1f40892f4ad7f6c18ede46043581cc7ffa4fd932e40cefedd241",
+      "actions": "public/sprites/dungeons1/actions/magic-tsubasa.webp",
+      "actionsSha256": "228cf3aae203c796e002744b902f80c46a1ccc13b1eea875e6d34a116361baaf",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-tsubasa-transformed",
+      "reference": "public/sprites/wandering-student/magic-tsubasa-transformed.webp",
+      "referenceSha256": "91a055a5e5500679035e56823a0a72d551508469c51da43161efcc1cd47ae4b1",
+      "actions": "public/sprites/dungeons1/actions/magic-tsubasa-transformed.webp",
+      "actionsSha256": "4bfbbb9b8d9feec55750931919d978c5b7d2198671f47549508780cedc416c2e",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-yamato",
+      "reference": "public/sprites/wandering-student/magic-yamato.webp",
+      "referenceSha256": "6b36993c0eadd8b65552faa52a8042664370db26205589db5a37df4766c6f68f",
+      "actions": "public/sprites/dungeons1/actions/magic-yamato.webp",
+      "actionsSha256": "52cfb21aa9e20724f32a6aa662a6d486c90f1f98072e7ebe3cd5ed1d87ec0f7c",
+      "canonicalDirections": []
+    },
+    {
+      "series": 1,
+      "key": "magic-yamato-transformed",
+      "reference": "public/sprites/wandering-student/magic-yamato-transformed.webp",
+      "referenceSha256": "6741cb970c51f760fbd9696b1e333ba63e947764aeaa8516ae1f79a4147c7945",
+      "actions": "public/sprites/dungeons1/actions/magic-yamato-transformed.webp",
+      "actionsSha256": "dbf8278b7af167b52938f5d8ce8bc910870b3b23ad93dcda3f2f12f2d27eb453",
+      "canonicalDirections": []
+    },
+    {
+      "series": 2,
+      "key": "lyria",
+      "reference": "public/sprites/dungeons2/lyria-directions.webp",
+      "referenceSha256": "31935151cf6ff222c93c106292eee2829dad1e0ea478cd94be44dfc9df781b77",
+      "actions": "public/sprites/dungeons2/actions/lyria.webp",
+      "actionsSha256": "f90f2577bda9bf45b9d6948f4c3bf9d72b0c9f8009b6dc931dd1fd8dbfe46bc6",
+      "canonicalDirections": [
+        2,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "lyria-transformed",
+      "reference": "public/sprites/dungeons2/lyria-transformed-directions.webp",
+      "referenceSha256": "c7d597222b9e85c7ae5a9749829f813d8a13cdff9924660631dfa44560aa0654",
+      "actions": "public/sprites/dungeons2/actions/lyria-transformed.webp",
+      "actionsSha256": "9c722cb5b2c56dc20c5dcd86ee4e02467bb6d87e19a66d0ae7a9000320b446ac",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "celis",
+      "reference": "public/sprites/dungeons2/celis-directions.webp",
+      "referenceSha256": "8bc434f1036ca82d784718a0bb7e250487744480f5b85f219035e97106fb9185",
+      "actions": "public/sprites/dungeons2/actions/celis.webp",
+      "actionsSha256": "23a1f0d5c686d5e3b336b752f7257d378d2d9303f041de7c4c58aa37c65097c2",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "celis-transformed",
+      "reference": "public/sprites/dungeons2/celis-transformed-directions.webp",
+      "referenceSha256": "e619605cbae5137a3d7df14017aa75e739d935f513c30347947060a58a1c2ff7",
+      "actions": "public/sprites/dungeons2/actions/celis-transformed.webp",
+      "actionsSha256": "962ff95554fc3aa47dde9bb00473b60b61e3109b2946e7708713560e8a7e0c30",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "flora",
+      "reference": "public/sprites/dungeons2/flora-directions.webp",
+      "referenceSha256": "17bb54d5de5e11865099f0fa26d2225bc2636077b2c0222bed51e2e803b204bd",
+      "actions": "public/sprites/dungeons2/actions/flora.webp",
+      "actionsSha256": "bf95adb7986aacaf475ec7c6e61acfea850114812d10e257ee584e9bd48efc9c",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "flora-transformed",
+      "reference": "public/sprites/dungeons2/flora-transformed-directions.webp",
+      "referenceSha256": "8426440c7bd3ffc0b3e4ebab63cb5f17fdecc50e20124f8d39ad3e7f91cc08e3",
+      "actions": "public/sprites/dungeons2/actions/flora-transformed.webp",
+      "actionsSha256": "d50edfd0955ac7d8e56bc5b9a79fdb1ef30e89510bd2e82a25e173525285e027",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "noctia",
+      "reference": "public/sprites/dungeons2/noctia-directions.webp",
+      "referenceSha256": "11f0861b61349442e6043af3626b0ac47175719d3fae88a425ebe66dd600cd64",
+      "actions": "public/sprites/dungeons2/actions/noctia.webp",
+      "actionsSha256": "a3126e5467f5ab43d19a5c76b43707aed8156243fdee7aa07d26afeb3e3320ca",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "noctia-transformed",
+      "reference": "public/sprites/dungeons2/noctia-transformed-directions.webp",
+      "referenceSha256": "8eb4fb8b30d5538b522a2921db18fdb0afc8e4f9146fd9bb3575280a743f6de4",
+      "actions": "public/sprites/dungeons2/actions/noctia-transformed.webp",
+      "actionsSha256": "6262d00cdc9794e362227321ce56f43e5a02f54c97dcfa5cdf46644e21b58be8",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "aurene",
+      "reference": "public/sprites/dungeons2/aurene-directions.webp",
+      "referenceSha256": "f80f9653e3893125ff6b48b6f6be306dfd8f2e8286edc9261db2b15df8bd4c66",
+      "actions": "public/sprites/dungeons2/actions/aurene.webp",
+      "actionsSha256": "9ffa34957dfbf89321fbaa01d680fcd5b849cdc24cf29a4b477bb9a494619d63",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "aurene-transformed",
+      "reference": "public/sprites/dungeons2/aurene-transformed-directions.webp",
+      "referenceSha256": "0f0e9c7af50d686e410797dc88adfab87420dc83ce1a5fb56b8912082a624006",
+      "actions": "public/sprites/dungeons2/actions/aurene-transformed.webp",
+      "actionsSha256": "819a19a140b23c42b50e5a12f2545e4ee3fc2b5100bf6f2b4ae415403ff15e63",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "ignis",
+      "reference": "public/sprites/dungeons2/ignis-directions.webp",
+      "referenceSha256": "9aa84305eae808927542ccf4f09a30ec7b48262bbedb374e4a3073bf0fbbb537",
+      "actions": "public/sprites/dungeons2/actions/ignis.webp",
+      "actionsSha256": "2c2a206cb8414b9dc5985e70106e3136762e57102500a9fa6e8430e94121c5ac",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "ignis-transformed",
+      "reference": "public/sprites/dungeons2/ignis-transformed-directions.webp",
+      "referenceSha256": "36cf7d19b73c72aeae0f134efd4351266f0aed87f6b294529bf411adad10cdfe",
+      "actions": "public/sprites/dungeons2/actions/ignis-transformed.webp",
+      "actionsSha256": "7917b9a3bcaa95020cffbfb907cbf57e3570ad322727a5f6fb341e4627287059",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "leon",
+      "reference": "public/sprites/dungeons2/leon-directions.webp",
+      "referenceSha256": "204b76537e000887549393ce57b2b8ac646fc2dedec1e21997f51a17966de480",
+      "actions": "public/sprites/dungeons2/actions/leon.webp",
+      "actionsSha256": "c812e96e2409934e117608b2bf1b7340b80128d073d94248c9949741ee5aab54",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "leon-transformed",
+      "reference": "public/sprites/dungeons2/leon-transformed-directions.webp",
+      "referenceSha256": "1f31b4679dbe281808150399141b9c3c893d6156cd8b00bac2c43bb851c5b4d6",
+      "actions": "public/sprites/dungeons2/actions/leon-transformed.webp",
+      "actionsSha256": "5d1abc1dee5dcb2ebea8d88052e159f0a21f0746897c4eaf388672209bd72fa5",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "orion",
+      "reference": "public/sprites/dungeons2/orion-directions.webp",
+      "referenceSha256": "0dec7975e78a3fdc2f59c27097a58dae3cf004af4bceaa1ac3da096e4f57c21f",
+      "actions": "public/sprites/dungeons2/actions/orion.webp",
+      "actionsSha256": "7076a646ae3fff6384d27bac6ea6cbeaceb2af9422c95cee4521582b91c62992",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "orion-transformed",
+      "reference": "public/sprites/dungeons2/orion-transformed-directions.webp",
+      "referenceSha256": "e3cb4d5390ca0e8578269d33effaef3e5eb8fb78d96cd969562144d027b8b218",
+      "actions": "public/sprites/dungeons2/actions/orion-transformed.webp",
+      "actionsSha256": "d42f2313397a25a6e04be0b5f37a8852e1e1440686b430cac203965e9ef2d4e1",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "leif",
+      "reference": "public/sprites/dungeons2/leif-directions.webp",
+      "referenceSha256": "22e80712f0cc59eaa3b831c38b036c7d47f28cf88c9077d7750eec352cfd81c6",
+      "actions": "public/sprites/dungeons2/actions/leif.webp",
+      "actionsSha256": "57346156bf4fb18262bb1f1010953b99db26c15ee6adac470522276bd760e2e9",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "series": 2,
+      "key": "leif-transformed",
+      "reference": "public/sprites/dungeons2/leif-transformed-directions.webp",
+      "referenceSha256": "e5b2e1638f3b12107823e17813017e3f0470399b7936a800cd3c3e6d3848f93e",
+      "actions": "public/sprites/dungeons2/actions/leif-transformed.webp",
+      "actionsSha256": "6295d85db989ee9448b89348e340f4a370f869ced2a275642b59b4902b72dc8e",
+      "canonicalDirections": [
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  ]
+}

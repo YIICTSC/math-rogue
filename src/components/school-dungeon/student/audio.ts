@@ -1,4 +1,5 @@
 import {chronicleVoicePath} from '../chronicles/voices';
+import {dungeons1BattleVoice,dungeons2BattleVoice,mainBattleVoiceIdentity} from './battleVoicePolicy';
 import {abyssHero} from '../dungeons2/roster';
 import type {audioService} from '../../../services/audioService';
 
@@ -15,11 +16,16 @@ export function studentVoice(heroId:string,action:StudentAudioAction,finish:bool
  return {theme,id,file:`${name}-${variant}`} as const;
 }
 /** Action-specific CPU Irodori voices; legacy banks remain available to older callers. */
-export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),random=()=>Math.random()){
+export type StudentAudioProfile='default'|'dungeons1'|'dungeons2';
+export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),random=()=>Math.random(),profile:StudentAudioProfile='default'){
  let lastVoice=-Infinity,pending=false;
  const effects=new Map<StudentAudioAction,number>();
  const previousD2=new Map<string,string>();
  return {play(heroId:string,action:StudentAudioAction,finish=false,element='star',abilityName?:string){
+  // Walking/turning must not trigger speech or a UI selection sound in either Dungeons game.
+  if(profile!=='default'&&action==='walk')return;
+  const mainBattle=profile==='dungeons1'&&Boolean(mainBattleVoiceIdentity(heroId));
+  const establishedD2=profile==='dungeons2'&&Boolean(abyssHero(heroId));
   const time=now();
   if(time-(effects.get(action)??-Infinity)<100)return;
   effects.set(action,time);
@@ -41,12 +47,12 @@ export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),ran
   const specialized=({projectile:'throw',skill:'swing',item:'use'} as Partial<Record<StudentAudioAction,string>>)[action]||action;
   const legacyAvailable=heroId.startsWith('dungeons2-')||heroId.startsWith('high-school-')||heroId.startsWith('magic-');
   const expandedOnly=['walk','throw','swing','read','use','shoot','pickup','equip','stairs','trap','talk'].includes(action);
-  if(audio.playDungeonChronicleVoiceFile&&chronicleVoicePath(heroId,finish?'win':specialized)&&(!legacyAvailable||expandedOnly||random()<.55)){
+  if(!mainBattle&&!establishedD2&&audio.playDungeonChronicleVoiceFile&&chronicleVoicePath(heroId,finish?'win':specialized)&&(!legacyAvailable||expandedOnly||random()<.55)){
    lastVoice=time;pending=true;
    try{void Promise.resolve(audio.playDungeonChronicleVoiceFile(heroId,finish?'win':specialized)).catch(()=>false).finally(()=>{pending=false;});}catch{pending=false;}
    return;
   }
-  let voice=studentVoice(heroId,action,finish,random,abilityName);if(!voice)return;
+  let voice=mainBattle?dungeons1BattleVoice(heroId,action,finish,random):establishedD2?dungeons2BattleVoice(heroId,action,finish,random,abilityName):studentVoice(heroId,action,finish,random,abilityName);if(!voice)return;
   if(voice.theme==='dungeons2'){
    const base=voice.file.replace(/-alt-[12]$/,''),key=voice.id+':'+base;
    if(previousD2.get(key)===voice.file){const variant=voice.file===base?1:voice.file.endsWith('-1')?2:0;voice={...voice,file:variant?`${base}-alt-${variant}`:base};}

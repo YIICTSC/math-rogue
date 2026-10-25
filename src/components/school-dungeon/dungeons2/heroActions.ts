@@ -1,3 +1,6 @@
+import {studentPoseAtlas} from '../dungeons1/poseAtlas';
+import {D1_ACTION_ROWS} from '../dungeons1/actionLayout';
+import {useCanonicalD2Pose} from './directionPolicy';
 import {D2_ACTION_LAYOUT} from '../../../data/dungeons2HeroActionLayout';
 import {assetUrl} from '../../../utils/assetPaths';
 export const D2_ACTIONS=['walk-left','walk-right','attack','throw','swing','read','use','shoot'] as const;
@@ -14,8 +17,17 @@ export function d2HeroActionSnapshot(id:string,now=clock()){
  return {...m,row,progress:Math.max(0,(now-m.started)/m.duration)};
 }
 export function loadD2HeroActions(id:string,transformed=false){if(typeof Image==='undefined'||!id.startsWith('dungeons2-'))return;const key=id+(transformed?'-transformed':'');let img=images.get(key);if(!img){img=new Image();img.src=d2ActionUrl(id,transformed);images.set(key,img);}return img;}
-export function drawD2HeroAction(ctx:CanvasRenderingContext2D,id:string,frame:number,x:number,y:number,size:number,transformed=false){
+export function drawD2HeroAction(ctx:CanvasRenderingContext2D,id:string,frame:number,x:number,y:number,size:number,transformed=false,source?:HTMLImageElement){
  const motion=d2HeroActionSnapshot(id),img=loadD2HeroActions(id,transformed);if(!motion||!img?.complete||!img.naturalWidth)return false;
+ if(useCanonicalD2Pose(id,transformed,frame)){
+  if(!source){const key=id+(transformed?'-transformed':'')+':directions';source=images.get(key);if(!source){source=new Image();source.src=assetUrl(`sprites/dungeons2/${id.replace('dungeons2-','')}${transformed?'-transformed':''}-directions.webp`);images.set(key,source);}}
+  if(!source.complete||!source.naturalWidth)return false;
+  const atlas=studentPoseAtlas(id,source,transformed);if(!atlas)return false;
+  const [start,count]=D1_ACTION_ROWS[motion.action];
+  const pose=start+Math.min(count-1,Math.floor(motion.progress*count));
+  ctx.save();ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(atlas,frame*96,pose*96,96,96,Math.round(x-size*.25),Math.round(y-size*.25),size*1.5,size*1.5);ctx.restore();return true;
+ }
  ctx.save();ctx.imageSmoothingEnabled=false;
  const bob=motion.action==='walk'?Math.sin(motion.progress*Math.PI*4)*size*.018:0;
  const baseline=D2_ACTION_LAYOUT[id.replace('dungeons2-','')+(transformed?'-transformed':'')]?.baseline||124;

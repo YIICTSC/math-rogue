@@ -1,8 +1,7 @@
 import {cueD2HeroAction} from '../dungeons2/heroActions';
 
-export type StudentAction='walk'|'attack'|'throw'|'swing'|'read'|'use'|'shoot';
-export const D1_ACTION_ROWS={walk:[0,6],attack:[6,3],throw:[9,3],swing:[12,3],read:[15,3],use:[18,3],shoot:[21,3]} as const;
-export const D1_ACTION_CELL=96;
+import {D1_ACTION_ROWS,type StudentAction} from './actionLayout';
+export {D1_ACTION_ROWS,D1_ACTION_CELL,type StudentAction} from './actionLayout';
 const durations:Record<StudentAction,number>={walk:300,attack:360,throw:420,swing:480,read:720,use:600,shoot:420};
 const motions=new Map<string,{action:StudentAction;started:number;duration:number;step:number}>();
 const clock=()=>typeof performance==='undefined'?Date.now():performance.now();
