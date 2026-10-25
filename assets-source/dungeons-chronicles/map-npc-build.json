@@ -1,0 +1,268 @@
+{
+  "records": [
+    {
+      "route": "STORY",
+      "source": "public/sprites/dungeons-chronicles/npc/story.webp",
+      "sourceSha256": "f80778f41c1995dfd1c5f8f99f17eab3ec88de01d6370f3602af3e3383ca59bb",
+      "output": "public/sprites/dungeons-chronicles/map-npc/story.webp",
+      "sha256": "e63a0b336e61a0e4c2e84dcf378e1ad250e58c4272fd21eb40a254df5126fdff",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "BARE",
+      "source": "public/sprites/dungeons-chronicles/npc/bare.webp",
+      "sourceSha256": "c626114a5a04de157ec8c36c8a955797a88ee27e450881ee842840116097120d",
+      "output": "public/sprites/dungeons-chronicles/map-npc/bare.webp",
+      "sha256": "c9dc425b2a5e068c781ddc043c50eb0ceacfe005c1940c60df727c331e4033c6",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "MYSTERY",
+      "source": "public/sprites/dungeons-chronicles/npc/mystery.webp",
+      "sourceSha256": "268e6406de48bd59b75d14b5fa5014e6241082e719bd436ea04a19bcb5da1912",
+      "output": "public/sprites/dungeons-chronicles/map-npc/mystery.webp",
+      "sha256": "d12883b87af502da843f8eff9454987ff586205d19e9af129ec87512c98600a5",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "TRAPS",
+      "source": "public/sprites/dungeons-chronicles/npc/traps.webp",
+      "sourceSha256": "d2bbd68808364f224dd3d885fe3cb14d7fe70bd078e400cfeaec5953d4af85a7",
+      "output": "public/sprites/dungeons-chronicles/map-npc/traps.webp",
+      "sha256": "62e4a322870bf22ec4d579b4ab41cbc9d90cec59a1dc2e22d61b844d5db9deb7",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "NO_GEAR",
+      "source": "public/sprites/dungeons-chronicles/npc/no_gear.webp",
+      "sourceSha256": "3aef3c55f0b9518aafbe055048b462fe4e280ed32b45714c441ee1a0446d1fb6",
+      "output": "public/sprites/dungeons-chronicles/map-npc/no_gear.webp",
+      "sha256": "a30777c4e1faba9ce5cea83c5e29b06b6893b28d524804de4d8fee19979225b6",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "CARDS",
+      "source": "public/sprites/dungeons-chronicles/npc/cards.webp",
+      "sourceSha256": "2ef3c184adcff267cf6f78668b7684051809881125bb6cd843ae970008a8479c",
+      "output": "public/sprites/dungeons-chronicles/map-npc/cards.webp",
+      "sha256": "d5b4dbf3cd2b1a20b07a9a7fe5cc2cb9968a0fdce901f110662367b13cb5cbf0",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "RESCUE",
+      "source": "public/sprites/dungeons-chronicles/npc/rescue.webp",
+      "sourceSha256": "8a32de41af3cec23b6348f4f8cdc8300ceb83d32340d00d7abf8ad57e445c54b",
+      "output": "public/sprites/dungeons-chronicles/map-npc/rescue.webp",
+      "sha256": "b2a0b2a94214a730111a7069a74c6709aef8237306910a63451984b7de61ead5",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "PUZZLE",
+      "source": "public/sprites/dungeons-chronicles/npc/puzzle.webp",
+      "sourceSha256": "0546508c2ac16c72c962d2a6782e4e9d1ce8951a71021ed1671f122288eb7115",
+      "output": "public/sprites/dungeons-chronicles/map-npc/puzzle.webp",
+      "sha256": "78490dd3aa10198aec8ededdd1519ea54d020bf34aae2af5e23f419f08ba1820",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "VERDANT",
+      "source": "public/sprites/dungeons-chronicles/npc/verdant.webp",
+      "sourceSha256": "7928fa8b8cf96e7042d363604c44f46c9a4d1b9c87d618a927e0f4da0c75da61",
+      "output": "public/sprites/dungeons-chronicles/map-npc/verdant.webp",
+      "sha256": "1595b0692f8c0bebecc8bae9fe2ca131afaf2676864cfdc634876de483d644bb",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "GLACIER",
+      "source": "public/sprites/dungeons-chronicles/npc/glacier.webp",
+      "sourceSha256": "2be6a4c1a5b63ecce9c624c083d9971797085b3248c125474e7c98b0b26198e1",
+      "output": "public/sprites/dungeons-chronicles/map-npc/glacier.webp",
+      "sha256": "28499402f19e70ec30f4022b1072cfd44004f8b07f45add5a32ac7cb36d01aca",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "TIDAL",
+      "source": "public/sprites/dungeons-chronicles/npc/tidal.webp",
+      "sourceSha256": "45079256e43364ebae9de451ec5dfef37a6cb28ab1ad6bdd59b83be76b5cb4ea",
+      "output": "public/sprites/dungeons-chronicles/map-npc/tidal.webp",
+      "sha256": "93c682ec204facd40e23dd6fc01161c8aea0df93ee7bc2282f3a2dd661a81efc",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "ARCHIVE",
+      "source": "public/sprites/dungeons-chronicles/npc/archive.webp",
+      "sourceSha256": "f02374f2395545381acbe97d783b38e9d48df676894aa0cdb4faa5e0321c212e",
+      "output": "public/sprites/dungeons-chronicles/map-npc/archive.webp",
+      "sha256": "edf5a43e529f4d957804f121ae33bd6fce55f69d874ab84113b01a1659ed45f9",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "FOUNDRY",
+      "source": "public/sprites/dungeons-chronicles/npc/foundry.webp",
+      "sourceSha256": "76b573846a833b784da1d736a2e9085a57bc762a55943bc043df665c369303d7",
+      "output": "public/sprites/dungeons-chronicles/map-npc/foundry.webp",
+      "sha256": "896f3b0b807563ac7dd6c3435c8d7cced47d819cf5db3104c0cfaa56c1beefdb",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "MIRROR",
+      "source": "public/sprites/dungeons-chronicles/npc/mirror.webp",
+      "sourceSha256": "79e9ef337f80336cb5045f8a5ee4db7d24074dd8487907f0f202957198ed5c09",
+      "output": "public/sprites/dungeons-chronicles/map-npc/mirror.webp",
+      "sha256": "889048db72b67fd1b1ee645a11898ff62d1d6c3dc330978a77011418bdc8f21e",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "CLOCKWORK",
+      "source": "public/sprites/dungeons-chronicles/npc/clockwork.webp",
+      "sourceSha256": "e374c806e8ec6be046f05a707247063b5f4fd2f53dd1c51051d2976eda846d4d",
+      "output": "public/sprites/dungeons-chronicles/map-npc/clockwork.webp",
+      "sha256": "c5490af8a6dda9e7aecdb6c35d12b91d19945287ebcf97ccb461c03f27011fa9",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "STORM",
+      "source": "public/sprites/dungeons-chronicles/npc/storm.webp",
+      "sourceSha256": "d8ebe103e24315ab93761514bf0d6b6d343308d4e4e1db3e0516cc3390676676",
+      "output": "public/sprites/dungeons-chronicles/map-npc/storm.webp",
+      "sha256": "53c216288e94a387073ad8a6475995120be6bea6cab671aa56646463b646ef14",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "ABYSS",
+      "source": "public/sprites/dungeons-chronicles/npc/abyss.webp",
+      "sourceSha256": "fa583e445d292d66aee793055ce65b36b9b56130518c569f8581718ff096e907",
+      "output": "public/sprites/dungeons-chronicles/map-npc/abyss.webp",
+      "sha256": "8c1ae3bf43022c2d94b150adb4c15828df7a825f7fe55c82cf8f07b4aec8c2fa",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "VOID",
+      "source": "public/sprites/dungeons-chronicles/npc/void.webp",
+      "sourceSha256": "2a2b14df40b45a15bb97fededb8513c7a69a41e7c01282b5096e8ad369b701fb",
+      "output": "public/sprites/dungeons-chronicles/map-npc/void.webp",
+      "sha256": "5bf2ff97d534d16bedc63642a90b34611d332e952ab1bdd64ada64a0ce8b94e0",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "CHRONICLE",
+      "source": "public/sprites/dungeons-chronicles/npc/chronicle.webp",
+      "sourceSha256": "6bfa320a64428f4fce3924970517f58168cb3e00af6b90603db6855c07b22591",
+      "output": "public/sprites/dungeons-chronicles/map-npc/chronicle.webp",
+      "sha256": "1eb90ae9a0bd60ea975f8c9f470816f6de88d17b94e93b69d35c8fcf3d65a547",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "CONSTELLATION",
+      "source": "public/sprites/dungeons-chronicles/npc/constellation.webp",
+      "sourceSha256": "73a67d750bc6839d013ce378fc196e8e3f6aeaaf39c9a390afe1da1396f5d2e6",
+      "output": "public/sprites/dungeons-chronicles/map-npc/constellation.webp",
+      "sha256": "aa372561c37c5eec28c880b39f95cddc941a7f1dc2350a6045f420887094d1a8",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "DRAGON",
+      "source": "public/sprites/dungeons-chronicles/npc/dragon.webp",
+      "sourceSha256": "fffeca73c985e512e6e764cd13183c4d987687a996ac7047eadab03d1e924453",
+      "output": "public/sprites/dungeons-chronicles/map-npc/dragon.webp",
+      "sha256": "463d4a003e3338f2d2078ccca8e41cd51c7585814645e1851836ce14ba4342bc",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    },
+    {
+      "route": "INFINITE",
+      "source": "public/sprites/dungeons-chronicles/npc/infinite.webp",
+      "sourceSha256": "c8562c0040652ff0582cfcbe5d756e2be4efc0e39cb1f76866f30ce9c88c5bbe",
+      "output": "public/sprites/dungeons-chronicles/map-npc/infinite.webp",
+      "sha256": "f9d63b24acded3ad97e24caf66a93c6632af4c64222631fbd9a6e08e7882dcb1",
+      "footAnchor": [
+        64,
+        124
+      ],
+      "generator": "ImageGen (existing full-body NPC); uniform normalization only"
+    }
+  ]
+}

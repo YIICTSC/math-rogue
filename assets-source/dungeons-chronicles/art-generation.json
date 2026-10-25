@@ -1,7 +1,6 @@
 {
   "generator": "ImageGen",
   "npcStyleReference": "public/sprites/high-school/characters/0.webp",
-  "eventFormat": "960x640",
   "portraitFormat": "448x576 RGBA",
   "records": [
     {
@@ -17,18 +16,6 @@
       "sourceRetained": false
     },
     {
-      "route": "STORY",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/story-event.png",
-      "sourceSha256": "8c53b414b7c22ff5b1b221c7d67e6634c2e34220e1d41c3983e81739f863a89a",
-      "output": "public/sprites/dungeons-chronicles/event/story.webp",
-      "sha256": "281abb5dfd179f697cffdbe376621feadd1a97bf99478d7641bb7f2a4a1b65ff",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "BARE",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/bare-npc.png",
@@ -38,18 +25,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "BARE",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/bare-event.png",
-      "sourceSha256": "13dfae5cce4d0626619838abc85541bfbb82f1c13015ca027b6115d983bf6cd2",
-      "output": "public/sprites/dungeons-chronicles/event/bare.webp",
-      "sha256": "0a657b332fb120b772e862fdd99b04b748f536d1899736bf1958f93e61d13f95",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -65,18 +40,6 @@
       "sourceRetained": false
     },
     {
-      "route": "MYSTERY",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/mystery-event.png",
-      "sourceSha256": "e423c01ceb4f552f4d3b6f979cc600b5948c32f74d640fbdaf6396692cf85f78",
-      "output": "public/sprites/dungeons-chronicles/event/mystery.webp",
-      "sha256": "59ecd27b2ce8dfb224624200ac5c71f5827a835c2bd53a6969a8c05ce86661b9",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "TRAPS",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/traps-npc.png",
@@ -86,18 +49,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "TRAPS",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/traps-event.png",
-      "sourceSha256": "28a3e3c64a3825a290c4c99aa0961995173e488962f2433a1581e257db71f976",
-      "output": "public/sprites/dungeons-chronicles/event/traps.webp",
-      "sha256": "66006e349ea8b8a78bff63065310ba99469a02d43bf7ab940998d32953fe5b09",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -113,18 +64,6 @@
       "sourceRetained": false
     },
     {
-      "route": "NO_GEAR",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/no_gear-event.png",
-      "sourceSha256": "b64ca0696ab422812a3a95f7a3823f92eb2ed811467dea8dc8e7f73909f3477c",
-      "output": "public/sprites/dungeons-chronicles/event/no_gear.webp",
-      "sha256": "434edd54446efafa1fc1cbe12f7a4adb9706b4e9a941babc7943292e33da9b92",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "CARDS",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/cards-npc.png",
@@ -134,18 +73,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "CARDS",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/cards-event.png",
-      "sourceSha256": "8587c31c7340d86e8b1fcf2f0db0b64055e0ffab38e21258f2be8a84a12b6fc8",
-      "output": "public/sprites/dungeons-chronicles/event/cards.webp",
-      "sha256": "b79e112d557b5fc6c9dbfd6ad2d03c7adf487f7fedd0d5d6d99246f308f00d03",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -161,18 +88,6 @@
       "sourceRetained": false
     },
     {
-      "route": "RESCUE",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/rescue-event.png",
-      "sourceSha256": "749ae13773e1332e69375e1f7f9026ffddbe306b1ccd4049a7dc05c3b2e34f75",
-      "output": "public/sprites/dungeons-chronicles/event/rescue.webp",
-      "sha256": "7195d20c9327473e7b81f92c997dda39c4764bfdf5900243a429e8d027e205b1",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "PUZZLE",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/puzzle-npc.png",
@@ -182,18 +97,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "PUZZLE",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/puzzle-event.png",
-      "sourceSha256": "40b20119756af4b6de457b8e1f7793ca5eca43b6428be09d40364634e97713a8",
-      "output": "public/sprites/dungeons-chronicles/event/puzzle.webp",
-      "sha256": "5d384220806931db85e3dba899988d975c53721f43020b850c0fc864a1b62db9",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -209,18 +112,6 @@
       "sourceRetained": false
     },
     {
-      "route": "VERDANT",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/verdant-event.png",
-      "sourceSha256": "9631bbfa385d19425b8738880a66124f2d1b08596c3db7f5ad7288f432129d17",
-      "output": "public/sprites/dungeons-chronicles/event/verdant.webp",
-      "sha256": "26f0b21ef5c45899041d5d89603e23110dff9e7289aa616f7b579f3f24bf4691",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "GLACIER",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/glacier-npc.png",
@@ -230,18 +121,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "GLACIER",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/glacier-event.png",
-      "sourceSha256": "42dbde04f66c6109fd882a6da5c64d4380572c2bf3aa581a9a8aa824751dd3cc",
-      "output": "public/sprites/dungeons-chronicles/event/glacier.webp",
-      "sha256": "d0dac528276c54888430e24e57e42f868447c06c5a49d1a3aff5450081e9fc00",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -257,18 +136,6 @@
       "sourceRetained": false
     },
     {
-      "route": "TIDAL",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/tidal-event.png",
-      "sourceSha256": "0b541dabac916b3c7aadd3faa46cbfd7779f691d1e8db364a2ce366df72d468c",
-      "output": "public/sprites/dungeons-chronicles/event/tidal.webp",
-      "sha256": "dd74049aadbe90b55f977d14592978e8265fababaf2c3fa36a91a7de856c1641",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "ARCHIVE",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/archive-npc.png",
@@ -278,18 +145,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "ARCHIVE",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/archive-event.png",
-      "sourceSha256": "de67e49339d2988346331d6fd90e05d2ea199ec0b0c0469410d036e84c9e8e14",
-      "output": "public/sprites/dungeons-chronicles/event/archive.webp",
-      "sha256": "91a6235a2fb1c0bef2df4765e3725f81cc571d77b41a05978720b279f3373af5",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -305,18 +160,6 @@
       "sourceRetained": false
     },
     {
-      "route": "FOUNDRY",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/foundry-event.png",
-      "sourceSha256": "89377e94243d065fd93fbdf4fcd697fb5a1d89e10ec83d451884a87998269d0c",
-      "output": "public/sprites/dungeons-chronicles/event/foundry.webp",
-      "sha256": "03bba12f7920d6449b7616fdd5ce5446f6548fd17cbe4a6f31d87119093d9dce",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "MIRROR",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/mirror-npc.png",
@@ -326,18 +169,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "MIRROR",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/mirror-event.png",
-      "sourceSha256": "bb8b8ef53e90126aa4a2a381284940ebc349fb63024124c94961fd80ff8c29cc",
-      "output": "public/sprites/dungeons-chronicles/event/mirror.webp",
-      "sha256": "81c10b533ee037483b7bd56fa5f3e7fc68837fcd0c35d73059c5e94c36c3619a",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -353,18 +184,6 @@
       "sourceRetained": false
     },
     {
-      "route": "CLOCKWORK",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/clockwork-event.png",
-      "sourceSha256": "564a0ab02b6c5d619d8b85276f672dd72da626332b07d0a98aa811270a1d67d0",
-      "output": "public/sprites/dungeons-chronicles/event/clockwork.webp",
-      "sha256": "7f1c36d53a5548ad6f8b7d78cacb9e07819d7b9e0914e905423090b21a6e648c",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "STORM",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/storm-npc.png",
@@ -374,18 +193,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "STORM",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/storm-event.png",
-      "sourceSha256": "1729172b28076c8933813f14bd1807d611ec53ccd58393092733d10a173f5ec1",
-      "output": "public/sprites/dungeons-chronicles/event/storm.webp",
-      "sha256": "ad417e3f6683cb25c7c7a0e0f867628d3553018e86c67dcaac54baedae6e0dc9",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -401,18 +208,6 @@
       "sourceRetained": false
     },
     {
-      "route": "ABYSS",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/abyss-event.png",
-      "sourceSha256": "bdd6e2fa97ac2ce8b3d6ead86f2c56b325476f16b5e3738f62e229268b52cb6b",
-      "output": "public/sprites/dungeons-chronicles/event/abyss.webp",
-      "sha256": "786ccf41deaad1432b0c47c3b9ede88e7aab1e139f6a543389cfc697005b68db",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "VOID",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/void-npc.png",
@@ -422,18 +217,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "VOID",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/void-event.png",
-      "sourceSha256": "8e9ad8002377881f569c476b5d3b4e9da45687a01d7b7414c52e14181125a8bc",
-      "output": "public/sprites/dungeons-chronicles/event/void.webp",
-      "sha256": "f9fd0ca9ae4d0d23822d6d316fefd9468067cc362768aff26bd64a88088bbf56",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -449,18 +232,6 @@
       "sourceRetained": false
     },
     {
-      "route": "CHRONICLE",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/chronicle-event.png",
-      "sourceSha256": "e138cfcdded5d5e22ae110e0508da5519c49358813178a94ef225900a43e85ab",
-      "output": "public/sprites/dungeons-chronicles/event/chronicle.webp",
-      "sha256": "2407940dcf8424aca489aeaa2b67d80972cc22b2ea25b577e4458fc62dd26df7",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "CONSTELLATION",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/constellation-npc.png",
@@ -470,18 +241,6 @@
       "generator": "ImageGen",
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
-      "sourceRetained": false
-    },
-    {
-      "route": "CONSTELLATION",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/constellation-event.png",
-      "sourceSha256": "609d53c349eebea6897b08fe5b40a0ba62dde8f31388a7502e7c71fd8eec02f2",
-      "output": "public/sprites/dungeons-chronicles/event/constellation.webp",
-      "sha256": "23745ce38e4f401ebdf3071c697c4f99465f1f312adff27439d1cc9a54d11515",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
       "sourceRetained": false
     },
     {
@@ -497,18 +256,6 @@
       "sourceRetained": false
     },
     {
-      "route": "DRAGON",
-      "type": "event",
-      "source": "assets-source/dungeons-chronicles/generated/dragon-event.png",
-      "sourceSha256": "4d2b3d094f5b7d338c82429cb8ade1bbb93642b9ec9b3c2bb0a2bb8d4ae56387",
-      "output": "public/sprites/dungeons-chronicles/event/dragon.webp",
-      "sha256": "5f65d215591687a6588a0452f9138eac438789769ea3ef74051f930a24662ba8",
-      "generator": "ImageGen",
-      "reference": null,
-      "transparent": false,
-      "sourceRetained": false
-    },
-    {
       "route": "INFINITE",
       "type": "npc",
       "source": "assets-source/dungeons-chronicles/generated/infinite-npc.png",
@@ -519,6 +266,281 @@
       "reference": "public/sprites/high-school/characters/0.webp",
       "transparent": true,
       "sourceRetained": false
+    }
+  ],
+  "retiredEventPaintings": [
+    {
+      "route": "STORY",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/story-event.png",
+      "sourceSha256": "8c53b414b7c22ff5b1b221c7d67e6634c2e34220e1d41c3983e81739f863a89a",
+      "output": "public/sprites/dungeons-chronicles/event/story.webp",
+      "sha256": "281abb5dfd179f697cffdbe376621feadd1a97bf99478d7641bb7f2a4a1b65ff",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "BARE",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/bare-event.png",
+      "sourceSha256": "13dfae5cce4d0626619838abc85541bfbb82f1c13015ca027b6115d983bf6cd2",
+      "output": "public/sprites/dungeons-chronicles/event/bare.webp",
+      "sha256": "0a657b332fb120b772e862fdd99b04b748f536d1899736bf1958f93e61d13f95",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "MYSTERY",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/mystery-event.png",
+      "sourceSha256": "e423c01ceb4f552f4d3b6f979cc600b5948c32f74d640fbdaf6396692cf85f78",
+      "output": "public/sprites/dungeons-chronicles/event/mystery.webp",
+      "sha256": "59ecd27b2ce8dfb224624200ac5c71f5827a835c2bd53a6969a8c05ce86661b9",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "TRAPS",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/traps-event.png",
+      "sourceSha256": "28a3e3c64a3825a290c4c99aa0961995173e488962f2433a1581e257db71f976",
+      "output": "public/sprites/dungeons-chronicles/event/traps.webp",
+      "sha256": "66006e349ea8b8a78bff63065310ba99469a02d43bf7ab940998d32953fe5b09",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "NO_GEAR",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/no_gear-event.png",
+      "sourceSha256": "b64ca0696ab422812a3a95f7a3823f92eb2ed811467dea8dc8e7f73909f3477c",
+      "output": "public/sprites/dungeons-chronicles/event/no_gear.webp",
+      "sha256": "434edd54446efafa1fc1cbe12f7a4adb9706b4e9a941babc7943292e33da9b92",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "CARDS",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/cards-event.png",
+      "sourceSha256": "8587c31c7340d86e8b1fcf2f0db0b64055e0ffab38e21258f2be8a84a12b6fc8",
+      "output": "public/sprites/dungeons-chronicles/event/cards.webp",
+      "sha256": "b79e112d557b5fc6c9dbfd6ad2d03c7adf487f7fedd0d5d6d99246f308f00d03",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "RESCUE",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/rescue-event.png",
+      "sourceSha256": "749ae13773e1332e69375e1f7f9026ffddbe306b1ccd4049a7dc05c3b2e34f75",
+      "output": "public/sprites/dungeons-chronicles/event/rescue.webp",
+      "sha256": "7195d20c9327473e7b81f92c997dda39c4764bfdf5900243a429e8d027e205b1",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "PUZZLE",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/puzzle-event.png",
+      "sourceSha256": "40b20119756af4b6de457b8e1f7793ca5eca43b6428be09d40364634e97713a8",
+      "output": "public/sprites/dungeons-chronicles/event/puzzle.webp",
+      "sha256": "5d384220806931db85e3dba899988d975c53721f43020b850c0fc864a1b62db9",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "VERDANT",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/verdant-event.png",
+      "sourceSha256": "9631bbfa385d19425b8738880a66124f2d1b08596c3db7f5ad7288f432129d17",
+      "output": "public/sprites/dungeons-chronicles/event/verdant.webp",
+      "sha256": "26f0b21ef5c45899041d5d89603e23110dff9e7289aa616f7b579f3f24bf4691",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "GLACIER",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/glacier-event.png",
+      "sourceSha256": "42dbde04f66c6109fd882a6da5c64d4380572c2bf3aa581a9a8aa824751dd3cc",
+      "output": "public/sprites/dungeons-chronicles/event/glacier.webp",
+      "sha256": "d0dac528276c54888430e24e57e42f868447c06c5a49d1a3aff5450081e9fc00",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "TIDAL",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/tidal-event.png",
+      "sourceSha256": "0b541dabac916b3c7aadd3faa46cbfd7779f691d1e8db364a2ce366df72d468c",
+      "output": "public/sprites/dungeons-chronicles/event/tidal.webp",
+      "sha256": "dd74049aadbe90b55f977d14592978e8265fababaf2c3fa36a91a7de856c1641",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "ARCHIVE",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/archive-event.png",
+      "sourceSha256": "de67e49339d2988346331d6fd90e05d2ea199ec0b0c0469410d036e84c9e8e14",
+      "output": "public/sprites/dungeons-chronicles/event/archive.webp",
+      "sha256": "91a6235a2fb1c0bef2df4765e3725f81cc571d77b41a05978720b279f3373af5",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "FOUNDRY",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/foundry-event.png",
+      "sourceSha256": "89377e94243d065fd93fbdf4fcd697fb5a1d89e10ec83d451884a87998269d0c",
+      "output": "public/sprites/dungeons-chronicles/event/foundry.webp",
+      "sha256": "03bba12f7920d6449b7616fdd5ce5446f6548fd17cbe4a6f31d87119093d9dce",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "MIRROR",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/mirror-event.png",
+      "sourceSha256": "bb8b8ef53e90126aa4a2a381284940ebc349fb63024124c94961fd80ff8c29cc",
+      "output": "public/sprites/dungeons-chronicles/event/mirror.webp",
+      "sha256": "81c10b533ee037483b7bd56fa5f3e7fc68837fcd0c35d73059c5e94c36c3619a",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "CLOCKWORK",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/clockwork-event.png",
+      "sourceSha256": "564a0ab02b6c5d619d8b85276f672dd72da626332b07d0a98aa811270a1d67d0",
+      "output": "public/sprites/dungeons-chronicles/event/clockwork.webp",
+      "sha256": "7f1c36d53a5548ad6f8b7d78cacb9e07819d7b9e0914e905423090b21a6e648c",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "STORM",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/storm-event.png",
+      "sourceSha256": "1729172b28076c8933813f14bd1807d611ec53ccd58393092733d10a173f5ec1",
+      "output": "public/sprites/dungeons-chronicles/event/storm.webp",
+      "sha256": "ad417e3f6683cb25c7c7a0e0f867628d3553018e86c67dcaac54baedae6e0dc9",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "ABYSS",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/abyss-event.png",
+      "sourceSha256": "bdd6e2fa97ac2ce8b3d6ead86f2c56b325476f16b5e3738f62e229268b52cb6b",
+      "output": "public/sprites/dungeons-chronicles/event/abyss.webp",
+      "sha256": "786ccf41deaad1432b0c47c3b9ede88e7aab1e139f6a543389cfc697005b68db",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "VOID",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/void-event.png",
+      "sourceSha256": "8e9ad8002377881f569c476b5d3b4e9da45687a01d7b7414c52e14181125a8bc",
+      "output": "public/sprites/dungeons-chronicles/event/void.webp",
+      "sha256": "f9fd0ca9ae4d0d23822d6d316fefd9468067cc362768aff26bd64a88088bbf56",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "CHRONICLE",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/chronicle-event.png",
+      "sourceSha256": "e138cfcdded5d5e22ae110e0508da5519c49358813178a94ef225900a43e85ab",
+      "output": "public/sprites/dungeons-chronicles/event/chronicle.webp",
+      "sha256": "2407940dcf8424aca489aeaa2b67d80972cc22b2ea25b577e4458fc62dd26df7",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "CONSTELLATION",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/constellation-event.png",
+      "sourceSha256": "609d53c349eebea6897b08fe5b40a0ba62dde8f31388a7502e7c71fd8eec02f2",
+      "output": "public/sprites/dungeons-chronicles/event/constellation.webp",
+      "sha256": "23745ce38e4f401ebdf3071c697c4f99465f1f312adff27439d1cc9a54d11515",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
+    },
+    {
+      "route": "DRAGON",
+      "type": "event",
+      "source": "assets-source/dungeons-chronicles/generated/dragon-event.png",
+      "sourceSha256": "4d2b3d094f5b7d338c82429cb8ade1bbb93642b9ec9b3c2bb0a2bb8d4ae56387",
+      "output": "public/sprites/dungeons-chronicles/event/dragon.webp",
+      "sha256": "5f65d215591687a6588a0452f9138eac438789769ea3ef74051f930a24662ba8",
+      "generator": "ImageGen",
+      "reference": null,
+      "transparent": false,
+      "sourceRetained": false,
+      "outputRemoved": true
     },
     {
       "route": "INFINITE",
@@ -530,7 +552,8 @@
       "generator": "ImageGen",
       "reference": null,
       "transparent": false,
-      "sourceRetained": false
+      "sourceRetained": false,
+      "outputRemoved": true
     }
   ]
 }

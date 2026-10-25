@@ -1,6 +1,6 @@
 # Dungeon chronicles (Dungeons 1 and 2)
 
-The 22 route dossiers provide an original NPC, a special event illustration, a
+The 22 route dossiers provide an original NPC, a dedicated character-free dungeon background, a
 surreal dilemma, a revelation and three different consequences. All 16 routes
 available in Dungeons 1 and all 22 in Dungeons 2 participate, including rescue
 and the fixed-layout puzzle challenge. The six sequel-only routes stay locked
@@ -14,35 +14,31 @@ handwritten screenplays. Each route has three individually written ending titles
 and consequences, for 66 distinct endings. This is original material; it does
 not borrow characters, dialogue or settings from another game franchise.
 
-Three decision scenes appear at the first floor, 40% and 75% of the route’s goal.
-They follow legacy chapter dialogue when both occur on the same floor. A choice
-can end a harmful arrangement, share its burden or reject its premise. The most
-chosen approach determines the ending; the most recent choice breaks a tie.
-If a short rescue or a skipped floor misses a decision scene, it is queued before
-the ending so all three choices remain available. Empty legacy records default
-to an accord when replayed without stored decisions.
+NPC conversations become available from floor 1, 40% and 75% of the route’s goal. They never open automatically. A traveler-sized full-body NPC is placed on a reachable empty floor tile, with a speech bubble; face it and press A to talk. Walking into the NPC only changes facing and shows a hint. Placement checks that the NPCs cannot close a passage to stairs or other walkable tiles. Fixed puzzle layouts are not altered: where no side space exists, NPC tiles remain passable so the puzzle cannot be obstructed. Recruitment and personal chapter conversations also require explicit interaction; their pending chapters remain available on subsequent floors. Relay towns offer the same optional NPCs as visible characters.
 
-Dialogue position, decisions and the pending ending serialize in the existing
-adventure save. Conversation and choices do not spend turns or move enemies.
-Movement and menu dismissal cannot bypass a pending narrative. The ending is
-recorded per series/route/protagonist/branch and can be replayed from Records.
-Replaying never runs clear rewards or changes the run’s decisions. Completing
-STORY also retains the legacy chapter-journal completion marker.
+Players can close a conversation without choosing or marking it read. Chronicle dialogue retains its line for the next conversation, including across saves; continuing a save always returns to exploration first. No dialogue costs a turn. Unread decisions are never forced during entry, descent, or clear. The clear panel always permits returning home. Players who voluntarily made all three choices can explicitly talk with the NPC about the ending from that panel. Closing or skipping it does not record an ending. The most chosen approach determines the ending; the most recent choice breaks a tie.
+
+Completed endings are recorded per series/route/protagonist/branch and can be replayed from Records. Replaying never runs clear rewards or changes the run’s decisions. Completing STORY’s chosen ending also retains the legacy chapter-journal completion marker.
 
 ## Art
 
-- 22 individually generated transparent full-body NPC portraits.
-- 22 individually generated 960×640 special-event illustrations.
+- 22 existing ImageGen transparent full-body NPC portraits, with their original identities and costumes.
+- 22 uniformly normalized, traveler-sized transparent map sprites, with a shared foot anchor.
+- 22 newly generated 960×640 character-free dungeon backgrounds; characters are composited as separate standing portraits.
+- All 22 former event paintings and the legacy six-scene event sheet are removed from runtime assets.
 - NPC style reference: `public/sprites/high-school/characters/0.webp`.
-- Original ImageGen PNGs stay in `assets-source/dungeons-chronicles/generated/`.
-- Source and delivered WebP hashes are in `art-generation.json` beside them.
-- Narrative art keeps its full palette; the notebook’s old green filter does not
-  apply to it. Portrait and landscape layouts retain scrollable dialogue/choices.
+- `art-generation.json` records NPC provenance and the removed painting hashes. New background sources are retained as lossless WebP in `backgrounds/`, with source/delivery hashes in `background-generation.json`.
+- `map-npc-build.json` records uniform normalization of the original NPCs; it does not manufacture new character designs.
+- Narrative art preserves its authored colors. Dialogue uses full-body portraits rather than enlarged walking frames for Dungeons 2.
 
-Regenerate delivery formats with:
+Rebuild delivery formats with:
 
 ```sh
 node scripts/dungeons-chronicles/normalize-art.mjs
+node scripts/build-dungeons-map-npcs.mjs
+node scripts/build-dungeons-dialogue-backgrounds.mjs
+node scripts/generate-web-asset-manifest.mjs
+node scripts/generate-android-asset-manifest.mjs
 ```
 
 ## Original action voices
@@ -84,6 +80,8 @@ when merging the newly verified records; never ship a truncated existing pack.
 ## Verification
 
 ```sh
+node scripts/test-dungeons-optional-npcs.mjs
+node scripts/test-dungeons-optional-npcs-browser.mjs
 pnpm run test:dungeons:chronicles
 pnpm run test:dungeons:chronicles:browser
 pnpm run test:dungeons:chronicles:endings
@@ -100,3 +98,10 @@ The browser tests use actual game components and their restore/clear/input
 handlers, including both series, three choices, completion and replay,
 phone layouts and screenshots. Media checks verify all original sources,
 transparency, dimensions, distinct audio, scripts and measured amplitude bounds.
+
+## 2026-10-26 verification
+
+- Actual Dungeons 1/2 entry, all 22 route NPCs/backgrounds, A interaction, closed conversations, save/reload without automatic dialogue, skipped-event clear/return, relay-town NPCs, and passable narrow-puzzle NPCs passed browser checks.
+- Phone portrait, phone landscape and desktop conversation screenshots were reviewed. Dungeons 2 uses its authored full-body hero portraits in dialogue.
+- All 66 Dungeons 2 ending branches completed through the explicit NPC ending action, with no duplicate clear rewards.
+- All 758 hero/route dialogue pairs, original NPC and new background hashes, normalized sprite transparency, and Android asset references passed their targeted checks.

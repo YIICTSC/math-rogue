@@ -16,7 +16,7 @@ export interface AdventureState {
  chronicle?:ChronicleRun;
  abilityCooldowns?:Record<string,{floor:number;readyAt:number}>;abilitySightUntil?:number;abilityReadyAt?:number;abilityFloor?:number;abilityGuardUntil?:number;abilityPowerUntil?:number;
  version:1;place?:'HOME'|'DUNGEON'|'RELAY';friendRecruited?:boolean;pendingStory?:number;pendingStoryLine?:number;townX?:number;leavingRelay?:boolean; heroId?:string;transformed?:boolean;storySeen?:number[]; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
- companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean}>; swallowed:Record<string,SchoolItem[]>;
+ companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean;passable?:boolean}>; swallowed:Record<string,SchoolItem[]>;
  rescueTarget:number; puzzle:number; puzzleTurns:number; rescued:boolean; sealedTurns:number; returned:boolean;scene?:number;town?:boolean;weather?:string;night?:boolean;townUsed?:string[];festivalSeed?:number;
 }
 export interface SchoolBase {martial?:Record<string,MartialProgress>;chronicleRecords?:ChronicleRecord[];version:1;dungeons2Clears?:number;selectedHero?:string;studentStory?:Record<string,number>;departure?:{runId:string;items:SchoolItem[];gold:number};warehouse:SchoolItem[];bank:number;visits:number;clears:Partial<Record<AdventureMode,number>>;rescue:{floor:number;items:SchoolItem[];attempts:number}|null;story:number;dojo?:Record<number,number>;codex?:string[];diary?:string[];claimed?:string[];}

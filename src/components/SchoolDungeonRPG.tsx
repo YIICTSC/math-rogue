@@ -632,7 +632,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const saveData = useCallback((immediate = false) => {
-      if (launch!=='PLAY' || !map.length || debugPreview || gameOver || gameClear&&adventure.state.pendingStory===undefined&&!adventure.state.chronicle?.pending || adventure.state.returned&&adventure.state.place!=='HOME') { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
+      if (launch!=='PLAY' || !map.length || debugPreview || gameOver || adventure.state.returned&&adventure.state.place!=='HOME') { if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current); return; }
       const persist = () => {
           if (adventure.state.returned&&adventure.state.place!=='HOME') return;
           const state = {

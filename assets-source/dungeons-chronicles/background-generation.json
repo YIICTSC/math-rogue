@@ -1,0 +1,247 @@
+{
+  "format": "960x640 environment-only WebP",
+  "records": [
+    {
+      "route": "STORY",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "Abandoned enchanted school entrance opening toward a grand empty principal's hall, empty desks, hanging bronze school bells, crown resting on a distant empty chair; indigo twilight and warm amber windows",
+      "source": "assets-source/dungeons-chronicles/backgrounds/story.webp",
+      "sourceSha256": "58d08955a95f0e2aebb583fae2519318c6ce8ed5647b77eed559c320ef9e8e0c",
+      "output": "public/sprites/dungeons-chronicles/background/story.webp",
+      "sha256": "feeaef030cac15c05d2c59736b77a304dba40ec45a48047f3f07571f8f792a6d",
+      "originalToolOutput": "/workspace/generated_images/exec-7cb101c9-2302-4e43-9179-190e07428b76.png"
+    },
+    {
+      "route": "BARE",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A ruined underground royal passage with ninety-nine worn steps, abandoned copper coins and a broken crown, candlelit humble alcoves, faded burgundy banners; poignant but welcoming",
+      "source": "assets-source/dungeons-chronicles/backgrounds/bare.webp",
+      "sourceSha256": "d9327752f9ff94f770980e24fd35bab6e522c0bd0c9209b12d6082aaac4815b9",
+      "output": "public/sprites/dungeons-chronicles/background/bare.webp",
+      "sha256": "8a7af572302f590882e7119297474aa671911300cde81e92140c01c36b4669bc",
+      "originalToolOutput": "/workspace/generated_images/exec-bf578ed1-1278-498b-911c-ffdbb4734d39.png"
+    },
+    {
+      "route": "MYSTERY",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "An underground apothecary labyrinth, green glass medicine bottles with blank labels, misty shelves, alchemical lamps, no readable writing; emerald and gold",
+      "source": "assets-source/dungeons-chronicles/backgrounds/mystery.webp",
+      "sourceSha256": "f000d0692cfe45dbfcfabe3a614c26e954a9d0bbd3ff9d5c7d4025ca84529ae6",
+      "output": "public/sprites/dungeons-chronicles/background/mystery.webp",
+      "sha256": "c005a6e254ebe512dbb93bb5dd306a8d189e25eaf8a86aafa20df32b25412391",
+      "originalToolOutput": "/workspace/generated_images/exec-f1c11f8f-d91b-4caf-895c-2165e81e91e5.png"
+    },
+    {
+      "route": "TRAPS",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A brass mechanical dungeon workshop with dormant pressure plates, wooden gears, springs, open safe corridor through elaborate nonlethal traps; warm red and brass",
+      "source": "assets-source/dungeons-chronicles/backgrounds/traps.webp",
+      "sourceSha256": "2cccaf264537af14e99e4d8bc04c322508fbdf95fc630d7adac21c0132c61c0f",
+      "output": "public/sprites/dungeons-chronicles/background/traps.webp",
+      "sha256": "0877c156d8620ffdfadb15deb5e1d5abd2af382278acd62517a49ff216f58eee",
+      "originalToolOutput": "/workspace/generated_images/exec-d2d2bac6-3c95-42aa-a836-21812507fb25.png"
+    },
+    {
+      "route": "NO_GEAR",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "Ancient stone armory labyrinth with empty suits of armor standing on racks, a clear wide stone floor and discarded shields, white and silver afternoon light; no living or animated figures",
+      "source": "assets-source/dungeons-chronicles/backgrounds/no_gear.webp",
+      "sourceSha256": "87371c6e5f6ca6df8fe4fb27ef969692c566c8501c51b0035608a9469c674f74",
+      "output": "public/sprites/dungeons-chronicles/background/no_gear.webp",
+      "sha256": "9aa50f59624399c9a3858abac3d65134e5cd8a1607e121f03dd285ebe1f0b2ee",
+      "originalToolOutput": "/workspace/generated_images/exec-d02b6aa3-2b9d-4c59-bf7c-23a64ee93f3f.png"
+    },
+    {
+      "route": "CARDS",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A mysterious underground card palace with blank ivory playing cards forming architectural arches and tiled paths, empty midnight-blue gaming tables, golden candlelight, no card faces",
+      "source": "assets-source/dungeons-chronicles/backgrounds/cards.webp",
+      "sourceSha256": "a303438435f0cde77bc41a8dfd1c5820164c35ab1810938713828b0d3dca4f0b",
+      "output": "public/sprites/dungeons-chronicles/background/cards.webp",
+      "sha256": "1f1b0d7d74138c45626aa888db0663e3a6cc3d3eb9ac26293b58479cff15f77e",
+      "originalToolOutput": "/workspace/generated_images/exec-2be2b01e-e483-4176-b43e-73e7db414759.png"
+    },
+    {
+      "route": "RESCUE",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A lost-and-found labyrinth depot with yellow satchels, carefully repaired toys and parcel shelves, cozy lanterns, inviting open path in stone vaults",
+      "source": "assets-source/dungeons-chronicles/backgrounds/rescue.webp",
+      "sourceSha256": "89af372225f5d21d85092d9d00afedc51214f8fa5cfec697ca5b95215390a0d0",
+      "output": "public/sprites/dungeons-chronicles/background/rescue.webp",
+      "sha256": "b0d5783fec27e969e258ff5eefd4cd360b141619d5832c9d72ff6759a75814a1",
+      "originalToolOutput": "/workspace/generated_images/exec-6e7a5f3f-8cd4-46b9-b648-ae88d9a99705.png"
+    },
+    {
+      "route": "PUZZLE",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A stone logic-puzzle chamber with checkered floor, seven wooden keys and an empty eighth key recess, symmetrical bronze locked doors, spacious safe foreground; no writing",
+      "source": "assets-source/dungeons-chronicles/backgrounds/puzzle.webp",
+      "sourceSha256": "37d1456cfaf0c0963ecfd53061c24a28b78e48829479e19b87fd3fcf4373975f",
+      "output": "public/sprites/dungeons-chronicles/background/puzzle.webp",
+      "sha256": "3c52468dd50fb79cfd92c1586d5c18b7c2c7c25fbc7f843fc72a4d12b8495060",
+      "originalToolOutput": "/workspace/generated_images/exec-4f7d35e8-424b-40b9-96b4-d5f7d08d5080.png"
+    },
+    {
+      "route": "VERDANT",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A lush rainy forest labyrinth with ruined stone arches, giant mossy roots, suspended glass rain collectors and water beads, open foreground path; fresh emerald greens",
+      "source": "assets-source/dungeons-chronicles/backgrounds/verdant.webp",
+      "sourceSha256": "56c07237dcb54987533e0a4aec6607f28b9134574858206a1318dcbdfb89c565",
+      "output": "public/sprites/dungeons-chronicles/background/verdant.webp",
+      "sha256": "4f0b381547d1d7d2d9025d24b239068635a4309949a62f4ae2e7a62675e67196",
+      "originalToolOutput": "/workspace/generated_images/exec-43ccdc39-0bd5-4452-8d72-6cac2364fab7.png"
+    },
+    {
+      "route": "GLACIER",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "An immense abandoned ice courtroom inside glacier caverns, crystalline bench and empty judge podium, frozen scales and cracked ice columns, open foreground; icy blue and white",
+      "source": "assets-source/dungeons-chronicles/backgrounds/glacier.webp",
+      "sourceSha256": "8583db7c48861837f17d0c1730140c748aa7dcfc6173206396629a4802a54c75",
+      "output": "public/sprites/dungeons-chronicles/background/glacier.webp",
+      "sha256": "3dbbb5f9b99df867de6e60566fd20c952d98d2e8c6cc3a4f6221546963dbade3",
+      "originalToolOutput": "/workspace/generated_images/exec-e6efa888-1495-47f3-9cbc-97620055fbba.png"
+    },
+    {
+      "route": "TIDAL",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A subterranean tidal harbor labyrinth with empty moored wooden ferry, folded paper boats, pearl lamps and wet wooden landing, moonlit turquoise water",
+      "source": "assets-source/dungeons-chronicles/backgrounds/tidal.webp",
+      "sourceSha256": "ccc91187b33144de7d8e7a0b4dc3b73c035e631fd9beb93eb6bb176916074853",
+      "output": "public/sprites/dungeons-chronicles/background/tidal.webp",
+      "sha256": "f9a860923af27289941bcfee2607d55392e19790c68951037d24efa5c4a1b06e",
+      "originalToolOutput": "/workspace/generated_images/exec-a90e3e21-99cb-425e-817e-890c63ea58ad.png"
+    },
+    {
+      "route": "ARCHIVE",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "An endless underground library labyrinth with ancient books, spare blank pages drifting like moth wings, violet reading lamps and empty desks; generous open foreground",
+      "source": "assets-source/dungeons-chronicles/backgrounds/archive.webp",
+      "sourceSha256": "65064ca8ed5d4f3499c558e3b6e6aed88ef20d5592ff04c371ec7b43b909a5b8",
+      "output": "public/sprites/dungeons-chronicles/background/archive.webp",
+      "sha256": "e31d90b172d9290bfc62b7e705f41abb8ebff68a7ea7b2882cc5e4bde43e80fc",
+      "originalToolOutput": "/workspace/generated_images/exec-e8f9bca7-742e-4c66-90fe-9f4c4ca8faab.png"
+    },
+    {
+      "route": "FOUNDRY",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A cavernous bronze bell foundry labyrinth, giant hanging unfinished school bells, glowing safe distant furnaces, tongs and molds on benches, soot-covered stone corridors; ember orange and brown",
+      "source": "assets-source/dungeons-chronicles/backgrounds/foundry.webp",
+      "sourceSha256": "7e863e5cad59c6dc31ba40973202a27b05235cfd492c10909c11ecaa95d767b8",
+      "output": "public/sprites/dungeons-chronicles/background/foundry.webp",
+      "sha256": "054ec959c3b15f8db62311e6f94fbb395d4f464d5c51052057fe08218a5f9025",
+      "originalToolOutput": "/workspace/generated_images/exec-63cbad8f-8289-42fd-9a1d-ae6e4fa233df.png"
+    },
+    {
+      "route": "MIRROR",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A surreal mirror city labyrinth with polished silver archways, reflective empty town-hall facade and tiled street, layered dark and light architecture, reflections show only scenery; no people",
+      "source": "assets-source/dungeons-chronicles/backgrounds/mirror.webp",
+      "sourceSha256": "71a5db05211c2f8138f4456cab9221322d3af48a7eb49b8c0d9c9f6a9f9cc2a4",
+      "output": "public/sprites/dungeons-chronicles/background/mirror.webp",
+      "sha256": "b4f1fc4877974cc9a3cd15d35233d5a6a67434be13aabf7d357bd0094af4faae",
+      "originalToolOutput": "/workspace/generated_images/exec-90da0dfd-f4eb-48fe-8c2b-4bc06faf0773.png"
+    },
+    {
+      "route": "CLOCKWORK",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "Inside an ancient clocktower labyrinth, giant stopped clock faces without text, suspended pendulums, brass gears and corridors, midnight-blue shadows and warm clockwork light",
+      "source": "assets-source/dungeons-chronicles/backgrounds/clockwork.webp",
+      "sourceSha256": "71fba040b372626626325cb01626c6bd461727a35f25bd2726069f2d92c1d7e5",
+      "output": "public/sprites/dungeons-chronicles/background/clockwork.webp",
+      "sha256": "aad2ac060fd00d6cb4679f7a61a2866144cf494ddf238941e298e91de6c0f7e4",
+      "originalToolOutput": "/workspace/generated_images/exec-0ec52a84-bba6-4a12-ad2d-3fc5e420b63e.png"
+    },
+    {
+      "route": "STORM",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A stormbound observatory labyrinth turned empty celestial court, copper star maps without writing, telescope, violet sky lightning beyond broken dome, safe open stone foreground",
+      "source": "assets-source/dungeons-chronicles/backgrounds/storm.webp",
+      "sourceSha256": "a4878c980e8592795765f5261e58f15a2329f642a80f3b97e0ba6660b98a4851",
+      "output": "public/sprites/dungeons-chronicles/background/storm.webp",
+      "sha256": "61220ecbd3e3df48eb0586ca6089a52b6f3b8b992b813c43af07c33ac107c1e0",
+      "originalToolOutput": "/workspace/generated_images/exec-84fb5ead-f1b6-46d6-a42e-c89d84c99b4a.png"
+    },
+    {
+      "route": "ABYSS",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A ruined magic academy labyrinth, empty desks and shattered windows, white memorial flowers, pale blue luminous fog and ruined school corridors; no students, ghosts or bodies",
+      "source": "assets-source/dungeons-chronicles/backgrounds/abyss.webp",
+      "sourceSha256": "075e253624daca2ec425eb498e920dd6d7bc52037d131b1ad8f5273ca509e339",
+      "output": "public/sprites/dungeons-chronicles/background/abyss.webp",
+      "sha256": "03197b351b42d26321cb95dcc1243fdeb0c76679267bfca2fb3414ec688a7d1e",
+      "originalToolOutput": "/workspace/generated_images/exec-709c014d-8675-44df-a438-964ab30e34b4.png"
+    },
+    {
+      "route": "VOID",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A surreal floating garden labyrinth in the cosmic void, miniature doorways growing in pots, violet flowers, stepping-stone paths and luminous garden gate; no figures",
+      "source": "assets-source/dungeons-chronicles/backgrounds/void.webp",
+      "sourceSha256": "7f41df3618329819262fa245a7d14423e70a24057aa8ec2aaf8dadec76b5deca",
+      "output": "public/sprites/dungeons-chronicles/background/void.webp",
+      "sha256": "096a5364237e62f6058a3fb6c0683f128f97a0ddf3c98aa975e0b10c0dc42d41",
+      "originalToolOutput": "/workspace/generated_images/exec-e1b9c611-1e93-41b0-bc7d-504792803fc7.png"
+    },
+    {
+      "route": "CHRONICLE",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A quiet enchanted academy infirmary labyrinth with empty beds, rose ribbon bandages, hourglasses and glass cabinets, gentle white and rose light; no patients or medical staff",
+      "source": "assets-source/dungeons-chronicles/backgrounds/chronicle.webp",
+      "sourceSha256": "20bb96fbb24ba0290ff1227fdc6ff67b9e985dfe06344e5163eee60cf27c8f3b",
+      "output": "public/sprites/dungeons-chronicles/background/chronicle.webp",
+      "sha256": "0f6f836327d7a40a9f49a37dff364ef42f4542f2dbd009c8ff404fa125f10b2b",
+      "originalToolOutput": "/workspace/generated_images/exec-86d11953-5443-4ced-a90d-03295c24a29e.png"
+    },
+    {
+      "route": "CONSTELLATION",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "A celestial archive labyrinth floating under a deep navy starry sky, silver library ladders, orbiting blank books and star constellations, open foreground landing",
+      "source": "assets-source/dungeons-chronicles/backgrounds/constellation.webp",
+      "sourceSha256": "8b97c241ef2516d2a8f5c7a826c254238704623448040d7349dd3d06944e0e5c",
+      "output": "public/sprites/dungeons-chronicles/background/constellation.webp",
+      "sha256": "fc626e2897afa0defbc126bdb6bf4849201b9eebc1a882ccac39367106556ec0",
+      "originalToolOutput": "/workspace/generated_images/exec-ad43f872-8fac-4ee6-acbc-7c794caa8361.png"
+    },
+    {
+      "route": "DRAGON",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "An empty academy examination hall converted into a dragon-themed dungeon, amber-scale columns, dragon crown on a pedestal, abandoned broom and school keys, warm graduation sunlight; no dragon or people",
+      "source": "assets-source/dungeons-chronicles/backgrounds/dragon.webp",
+      "sourceSha256": "05c3043d8d78ff782028c79d7c52725cdb418b96e912df975cfa612c62d28f12",
+      "output": "public/sprites/dungeons-chronicles/background/dragon.webp",
+      "sha256": "82dcb6f3cd9dc49987387013dd2a857f454ce4733296319ab801707407599648",
+      "originalToolOutput": "/workspace/generated_images/exec-f562d56c-def1-42b8-81b4-cf91143adcda.png"
+    },
+    {
+      "route": "INFINITE",
+      "generator": "ImageGen",
+      "content": "character-free environment background",
+      "setting": "An impossible labyrinth of ninety-nine receding brass-trimmed doorways, midnight-blue gates repeating toward luminous dawn, keys suspended on hooks, open stone foreground",
+      "source": "assets-source/dungeons-chronicles/backgrounds/infinite.webp",
+      "sourceSha256": "6deadd379179eaa5ec512e02c69b6c6337b7e96e278c68fc9e8b7abde8b278fc",
+      "output": "public/sprites/dungeons-chronicles/background/infinite.webp",
+      "sha256": "35048bdc9b2b3b1521a2b998c12b9b912e9eefbef71a4383ad0f1f0a64ca1194",
+      "originalToolOutput": "/workspace/generated_images/exec-7462e9a0-8211-4198-b779-dac0ba3eb075.png"
+    }
+  ]
+}
