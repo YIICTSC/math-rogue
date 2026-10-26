@@ -45,6 +45,14 @@ try{
   await guest.getByRole('radio',{name:{tennis:'テニス',golf:'ゴルフ',dodgeball:'ドッジボール'}[sport],exact:true}).click();await guest.getByLabel('参加名',{exact:true}).fill(' Guest '+sport+' ');await guest.getByLabel('招待コード',{exact:true}).fill(code.replace(/[0-9]/g,d=>String.fromCharCode(d.charCodeAt(0)+65248)));assert.equal(await guest.getByLabel('招待コード',{exact:true}).inputValue(),code);
   await guest.locator('.online-invite-submit').click();await guest.waitForFunction(sport=>window.__sportsGame?.sport===sport&&window.__sportsGame.view?.phase==='lobby',sport);
   await host.waitForFunction(()=>window.view.players.length===2);assert.equal(await host.evaluate(()=>window.view.players.filter(p=>p.name.startsWith('Guest ')).length),1,'StrictMode admits a single participant');assert.equal(await host.evaluate(()=>window.view.players.find(p=>p.name.startsWith('Guest ')).name),'Guest '+sport);assert.equal(await guest.getByRole('dialog',{name:'キャラクタークリエイト',exact:true}).count(),0,'common invite reaches the lobby directly');
+  if(sport !== 'golf'){
+   const url = await guest.getByLabel('招待リンク',{exact:true}).inputValue();
+   assert.equal(new URL(url).searchParams.get(sport === 'tennis' ? 'tennisRoom' : 'dodgeballRoom'),code);
+   await guest.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async value=>{window.copiedInvite=value;}}}));
+   await guest.getByRole('button',{name:'招待URLをコピー',exact:true}).click();
+   await guest.getByRole('button',{name:'コピーしました',exact:true}).waitFor();
+   assert.equal(await guest.evaluate(()=>window.copiedInvite),url);
+  }
   await guest.screenshot({path:`${out}/${sport}-${transport}.png`});await guest.close();await host.evaluate(()=>window.room.close(false));await host.close();console.log('PASS shared invitation:',sport,transport);
  }
  const invalid=await context.newPage();await invalid.goto(base+'/__sports');await invalid.locator('.sports-invite-cta button').click();await invalid.getByRole('radio',{name:'ゴルフ',exact:true}).click();await invalid.getByLabel('参加名',{exact:true}).fill('Retry');await invalid.getByLabel('招待コード',{exact:true}).fill('999999');await invalid.locator('.online-invite-submit').click();await invalid.getByRole('alert').waitFor();await invalid.locator('.online-invite-close').click();await invalid.locator('.sports-hub').waitFor();await invalid.locator('.sports-invite-cta button').click();assert.equal(await invalid.getByLabel('参加名',{exact:true}).inputValue(),'Retry');assert.equal(await invalid.getByLabel('招待コード',{exact:true}).inputValue(),'999999');await invalid.close();

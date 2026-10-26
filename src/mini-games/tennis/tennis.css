@@ -12,3 +12,4 @@
 @media(orientation:portrait) and (max-width:680px){.tn-controls .tn-aim{position:fixed;top:max(108px,calc(var(--ios-ui-safe-top,env(safe-area-inset-top)) + 100px));right:8px;left:auto;bottom:auto;width:145px}}
 
 .tn-direction-hint{font-size:10px;line-height:1.5;margin:0 0 5px;color:#e8dfba}.tn-controls .tn-aim{width:180px}@media(orientation:landscape) and (max-height:520px){.tn-controls .tn-aim{width:130px}.tn-direction-hint{font-size:9px}}
+.tn-invite input{display:block;width:100%;margin:0 0 8px;font-size:12px}.tn-invite p{margin:8px 0 0}
