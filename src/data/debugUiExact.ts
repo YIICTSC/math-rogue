@@ -30,6 +30,13 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "技一覧": "Techniques",
+  "鍛錬のヒント": "Training tips",
+  "預ける": "Store",
+  "取り出す": "Take out",
+  "登録": "Assign",
+  "持ち物": "Inventory",
+  "技": "Techniques",
   ...MEDIA_ENGLISH,
   ...PAPER_BRIDGE_ENGLISH,
   ...SUMMER_ENDING_ENGLISH,
@@ -380,6 +387,13 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "技一覧": "わざいちらん",
+  "鍛錬のヒント": "たんれんのヒント",
+  "預ける": "あずける",
+  "取り出す": "とりだす",
+  "登録": "とうろく",
+  "持ち物": "もちもの",
+  "技": "わざ",
   ...MEDIA_HIRAGANA,
   ...PAPER_BRIDGE_HIRAGANA,
   ...SUMMER_ENDING_HIRAGANA,

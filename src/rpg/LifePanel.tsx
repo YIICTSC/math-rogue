@@ -31,7 +31,7 @@ export default function LifePanel({world,selfId,target,languageMode,send,onClose
  <header><div><small>FRONTIER LIFE</small><h2>{t(tab==='fishbook'?'釣り図鑑':house?'仲間の集まる家':'採取・クラフト')}</h2></div><button onClick={()=>{if(work)send({type:'life-cancel'});onClose();}} aria-label={t('閉じる')}>✕</button></header>
  <nav>{[['gather','採取・釣り'],['craft','クラフト'],['homes','家とミニゲーム'],['fishbook','釣り図鑑'],['inventory','所持素材']].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>setTab(id)}>{t(label)}</button>)}</nav>
  <div className="rpg-life-content">
- {tab==='inventory'&&<div className="rpg-life-bag">{Object.entries(MATERIAL_NAMES).map(([key,name])=><span key={key}>{t(name)} <b>{life.bag[key as Material]||0}</b></span>)}</div>}
+ {tab==='inventory'&&<div className="rpg-life-bag">{Object.entries(MATERIAL_NAMES).map(([key,name])=><span key={key} data-item-name={t(name)} data-material={key} data-item-count={life.bag[key as Material]||0}>{t(name)} <b>{life.bag[key as Material]||0}</b></span>)}</div>}
  {tab==='gather'&&<> <div className="rpg-life-energy"><Zap size={16}/><strong>{t('採取エネルギー')} {energyOf(life)}/{GATHER_ENERGY_MAX}</strong><button disabled={!!work||!onEnergyRequest} onClick={onEnergyRequest}>{t('問題で回復')}</button><small>{t('採取1回で1消費、1問正解で2回復。時間では回復しません。')}</small></div>
 {mapView==='3D'&&<p>{t('3Dの基本採掘・設置は0.1消費。硬い鉱石は道具で軽減。')}</p>}</>}
  {tab==='fishbook'&&<FishBook records={life.fishRecords} languageMode={languageMode}/>}
