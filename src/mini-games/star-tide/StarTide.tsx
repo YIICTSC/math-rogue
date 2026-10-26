@@ -1,3 +1,4 @@
+import{useStarMusic}from'./useStarMusic';
 import TalkPresentation from './TalkPresentation';
 import {StoryPresentation} from './StoryPresentation';
 import opening from './opening.json';
@@ -30,6 +31,7 @@ export default function StarTide(props:MiniGameComponentProps){
  const [openingLine,setOpeningLine]=useState(w.s.openingLine||0);
  const choiceVoice=useRef<string|null>(null);
  const journalFrom=useRef<'play'|'ending'>('play');
+ useStarMusic(w,page,question,journalFrom.current==='ending');
  const view=useRef(page);view.current=page;
  const focused=useRef(true);
  const active=useRef(false),pad=useRef<number|null>(null),chapter=CHAPTERS[w.s.chapter];
