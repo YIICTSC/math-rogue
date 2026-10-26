@@ -1,3 +1,4 @@
+import {bendShot} from '../shared/shotDirection';
 import {validAvatar} from '../gakuro-kart/avatar';
 import {validLesson} from '../gakuro-kart/learning';
 import {bracketSeeds,scorePoint} from './scoring';
@@ -29,7 +30,7 @@ function emptyBall(side:Side):Ball{return {x:0,y:sideY(side)*11,z:1.2,vx:0,vy:0,
 function makeMatch(w:TennisWorld,a:number,b:number|null):Match{
  const id=`r${w.round}-m${w.matches.length}`,units:Unit[]=[];
  for(const [side,team]of [[0,a],[1,b]] as const)if(team!==null)w.teams[team].members.forEach((owner,index)=>{
-  const p=owner?w.players[owner]:undefined;units.push({id:`${id}-${side}-${index}`,owner,name:p?.name||`CPU ${side+1}-${index+1}`,side:side as Side,x:w.mode==='doubles'?(index===0?-2.7:2.7):0,y:sideY(side as Side)*(index===0?10.8:6.9),vx:0,vy:0,energy:.25,stamina:1,swing:0,shot:'topspin',shotSeq:0,buffer:0,aim:0,power:.6,dash:0,cpu:!p||!p.connected,avatar:p?.avatar});
+  const p=owner?w.players[owner]:undefined;units.push({id:`${id}-${side}-${index}`,owner,name:p?.name||`CPU ${side+1}-${index+1}`,side:side as Side,x:w.mode==='doubles'?(index===0?-2.7:2.7):0,y:sideY(side as Side)*(index===0?10.8:6.9),vx:0,vy:0,energy:.25,stamina:1,swing:0,shot:'topspin',shotSeq:0,buffer:0,aim:0,directionY:0,power:.6,dash:0,cpu:!p||!p.connected,avatar:p?.avatar});
  });
  return {id,round:w.round,teams:[a,b],units,games:[0,0],points:[0,0],tiebreak:false,phase:b===null?'finished':'study',winner:b===null?a:null,reason:b===null?'bye':'',server:0,serverUnit:0,receiver:'',faults:0,ball:emptyBall(0),time:0,wait:0,rally:0,longest:0,pointSerial:0,shotSerial:0,studyAt:w.clock,pendingWinner:null,afterStudy:'serve'};
 }
@@ -79,8 +80,9 @@ function finishPoint(w:TennisWorld,m:Match,winner:Side,reason:Match['reason'],fa
 function fault(w:TennisWorld,m:Match,reason:Match['reason'],factory:LessonFactory|undefined){m.faults++;if(m.faults>=2)finishPoint(w,m,other(m.server),'double-fault',factory);else{const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason=reason;m.wait=.9;}}
 function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWorld){
  const serve=m.phase==='serve',direction=-sideY(u.side),width=w.mode==='singles'?SINGLES_WIDTH:DOUBLES_WIDTH;
- let targetX=aim*(width-.35),targetY=direction*(shot==='drop'?2.3:shot==='lob'?10.4:10.1),duration=shot==='lob'?1.75:shot==='drop'?.9:shot==='special'?.66:shot==='slice'?1.25:1.0;
- if(serve){targetX=-Math.sign(u.x)*(1.7+Math.abs(aim)*1.6);targetY=direction*5.7;duration=1.02;}
+ const depth=u.cpu?0:(u.directionY||0)*direction;
+ let targetX=aim*(width-.35),targetY=direction*((shot==='drop'?2.3:shot==='lob'?10.4:10.1)+depth*1.2),duration=shot==='lob'?1.75:shot==='drop'?.9:shot==='special'?.66:shot==='slice'?1.25:1.0;
+ if(serve){const cross=-Math.sign(u.x);targetX=cross*clamp(2.1+aim*cross*1.4,.55,3.65);targetY=direction*(5.5+depth*.4);duration=1.02;}
  duration*=1.12-power*.22;
  const z=serve?2.7:Math.max(.65,m.ball.z),startX=serve?u.x:m.ball.x,startY=serve?u.y:m.ball.y;
  const crossing=Math.abs(startY)/(Math.abs(startY)+Math.abs(targetY));if(crossing>0&&crossing<1){const minimum=2*(NET+.26-z*(1-crossing)-.08*crossing)/(9.8*crossing*(1-crossing));if(minimum>0)duration=Math.max(duration,Math.sqrt(minimum));}
@@ -111,9 +113,9 @@ export function command(w:TennisWorld,id:string,raw:unknown,factory?:LessonFacto
   if(++q.index===3){p.quiz=null;if(m.units.every(unit=>!unit.owner||!w.players[unit.owner].connected||!w.players[unit.owner].quiz))resumeAfterStudy(w,m);}else{q.selected=null;q.feedback=null;}return true;
  }
  if(m.phase==='study'||m.phase==='point'||w.paused)return false;
- if(c.type==='move'){if(![c.x,c.y].every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=1))return false;const length=Math.max(1,Math.hypot(c.x,c.y));p.input={x:c.x/length,y:c.y/length,at:w.clock};return true;}
+ if(c.type==='move'){if(![c.x,c.y].every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=1))return false;const length=Math.max(1,Math.hypot(c.x,c.y));p.input={x:c.x/length,y:c.y/length,at:w.clock};if(u.buffer>0){u.aim=p.input.x;u.directionY=p.input.y;}return true;}
  if(c.type==='dash'){if(u.stamina<.55||u.dash>0)return false;u.stamina-=.55;u.dash=.28;return true;}
- if(c.type==='swing'){if(!SHOTS.includes(c.shot)||![c.aim,c.power].every(n=>typeof n==='number'&&Number.isFinite(n))||Math.abs(c.aim)>1||c.power<0||c.power>1||u.swing>.1)return false;u.shot=c.shot;u.aim=c.aim;u.power=c.power;u.buffer=.32;attemptHit(w,m,u);return true;}
+ if(c.type==='swing'){if(!SHOTS.includes(c.shot)||![c.aim,c.power].every(n=>typeof n==='number'&&Number.isFinite(n))||Math.abs(c.aim)>1||c.power<0||c.power>1||c.directionY!==undefined&&(typeof c.directionY!=='number'||!Number.isFinite(c.directionY)||Math.abs(c.directionY)>1)||u.swing>.1)return false;u.shot=c.shot;u.aim=c.aim;u.directionY=c.directionY??0;u.power=c.power;u.buffer=.32;attemptHit(w,m,u);return true;}
  return false;
 }
 function driveUnits(w:TennisWorld,m:Match,dt:number){
@@ -144,7 +146,7 @@ function driveUnits(w:TennisWorld,m:Match,dt:number){
  }
 }
 function updateBall(w:TennisWorld,m:Match,dt:number,factory:LessonFactory|undefined){
- const b=m.ball,previousY=b.y,previousZ=b.z;b.trail.push([b.x,b.y,b.z]);if(b.trail.length>12)b.trail.shift();b.x+=b.vx*dt+.5*b.spin*dt*dt;b.vx+=b.spin*dt;b.y+=b.vy*dt;b.z+=b.vz*dt-4.9*dt*dt;b.vz-=9.8*dt;
+ const b=m.ball,previousY=b.y,previousZ=b.z;const hitter=m.units.find(u=>u.shotSeq===m.shotSerial&&u.side===b.lastSide),input=hitter?.owner?w.players[hitter.owner]?.input:undefined;if(!hitter?.cpu&&input&&w.clock-input.at<.2&&b.bounces===0){const v=bendShot(b.vx,b.vy,input,m.time,dt);b.vx=v.x;b.vy=v.y;}b.trail.push([b.x,b.y,b.z]);if(b.trail.length>12)b.trail.shift();b.x+=b.vx*dt+.5*b.spin*dt*dt;b.vx+=b.spin*dt;b.y+=b.vy*dt;b.z+=b.vz*dt-4.9*dt*dt;b.vz-=9.8*dt;
  if(previousY*b.y<0){const t=Math.abs(previousY)/(Math.abs(previousY)+Math.abs(b.y)),z=previousZ+(b.z-previousZ)*t;if(z<NET+.08){if(b.serve){b.netLet=true;b.vx*=.45;b.vy*=.45;b.vz=Math.max(.9,b.vz*.35);}else{finishPoint(w,m,other(b.lastSide),'net',factory);return;}}}
  if(b.z<=.08){b.z=.08;
   if(b.bounces===0){

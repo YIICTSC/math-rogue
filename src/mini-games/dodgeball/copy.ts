@@ -1,4 +1,10 @@
 const COPY:Record<string,[string,string]>={
+  '打球時と直後の方向入力で球筋を調整':['Aim and curve with direction input at contact and just after.','だきゅうじと ちょくごの ほうこうにゅうりょくで たますじを ちょうせい'],
+  '投球時と直後の方向入力で球筋を調整':['Aim and curve with direction input when throwing and just after.','とうきゅうじと ちょくごの ほうこうにゅうりょくで たますじを ちょうせい'],
+  '必殺ゲージ':['Super gauge','ひっさつげーじ'],
+  'テニスの素振り':['Tennis practice swing','てにすの すぶり'],
+  'ドッジボールの投球練習':['Dodgeball throwing practice','どっじぼーるの とうきゅうれんしゅう'],
+  'パッド／方向キーで移動。打球ボタンを長押しして離すと強打。打つ瞬間と直後の方向入力で球筋を調整できます。':['Move with the stick or direction keys. Hold and release a shot button for power. Aim at contact and curve with direction input just after.','ぱっど／ほうこうきーで いどう。だきゅうぼたんを ながおしして はなすと きょうだ。うつ しゅんかんと ちょくごの ほうこうにゅうりょくで たますじを ちょうせいできます。'],
   "ドッジボール": [
     "Dodgeball",
     "どっじぼーる"

@@ -1,3 +1,4 @@
+import{bendShot}from'../shared/shotDirection';
 import{validAvatar}from'../gakuro-kart/avatar';import{validLesson}from'../gakuro-kart/learning';import{bracketSeeds}from'../tennis/scoring';import type{DodgeWorld,DodgeView,Match,Unit,Side,Team,LessonFactory}from'./types';
 export type*from'./types';
 export const MAX_PLAYERS=24,MAX_MEMBERS=32,WIDTH=8,LENGTH=10,MATCH_SECONDS=180;
@@ -25,7 +26,7 @@ function drive(w:DodgeWorld,m:Match,dt:number){const b=m.ball;for(const u of m.u
  }else if(u.owner){const input=w.players[u.owner].input;if(w.clock-input.at<.35){x=input.x;y=input.y;}}
  const speed=(u.dodge>0?10:5.7)*(b.holder===u.id?.8:1)*(u.hurt>0?.3:1);u.vx=x*speed;u.vy=y*speed;u.x=clamp(u.x+u.vx*dt,-WIDTH+.55,WIDTH-.55);u.y=u.out?-sign(u.side)*(LENGTH+1.5):clamp(u.y+u.vy*dt,u.side===0?-LENGTH+.55:.65,u.side===0?-.65:LENGTH-.55);
  }}
-function fly(w:DodgeWorld,m:Match,dt:number){const b=m.ball;b.age+=dt;b.lock=Math.max(0,b.lock-dt);if(b.holder){const u=m.units.find(u=>u.id===b.holder)!;b.x=u.x;b.y=u.y;b.z=1.15;if(b.age>4)throwBall(w,m,u,0);return;}const oldX=b.x,oldY=b.y;b.trail.push([b.x,b.y,b.z]);if(b.trail.length>12)b.trail.shift();b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;if(b.flight){b.vz-=dt*(b.pass?6:1.5);if(b.special)b.vx+=Math.sin(b.age*15)*dt*7;}else{b.vx*=Math.exp(-dt*2);b.vy*=Math.exp(-dt*2);b.z=.22;}
+function fly(w:DodgeWorld,m:Match,dt:number){const b=m.ball;b.age+=dt;b.lock=Math.max(0,b.lock-dt);if(b.holder){const u=m.units.find(u=>u.id===b.holder)!;b.x=u.x;b.y=u.y;b.z=1.15;if(b.age>4)throwBall(w,m,u,0);return;}const thrower=m.units.find(u=>u.actionSeq===m.serial&&u.side===b.side),input=thrower?.owner?w.players[thrower.owner]?.input:undefined;if(b.flight&&!b.pass&&!thrower?.cpu&&input&&w.clock-input.at<.2){const v=bendShot(b.vx,b.vy,input,b.age,dt);b.vx=v.x;b.vy=v.y;}const oldX=b.x,oldY=b.y;b.trail.push([b.x,b.y,b.z]);if(b.trail.length>12)b.trail.shift();b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;if(b.flight){b.vz-=dt*(b.pass?6:1.5);if(b.special)b.vx+=Math.sin(b.age*15)*dt*7;}else{b.vx*=Math.exp(-dt*2);b.vy*=Math.exp(-dt*2);b.z=.22;}
  if(Math.abs(b.x)>WIDTH+.5){b.x=clamp(b.x,-WIDTH-.5,WIDTH+.5);b.vx*=-.55;}if(Math.abs(b.y)>LENGTH+2){b.y=clamp(b.y,-LENGTH-2,LENGTH+2);b.vy*=-.5;b.flight=0;b.side=null;}
  if(b.z<.22||b.age>1.6&&b.flight){b.z=.22;b.flight=0;b.side=null;b.vz=0;b.special=false;}
  const dx=b.x-oldX,dy=b.y-oldY,d2=dx*dx+dy*dy;

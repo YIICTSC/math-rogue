@@ -131,6 +131,8 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "test:kart:preload": "node scripts/test-kart-preload.mjs",
     "test:kart:preload:browser": "node scripts/test-kart-preload-browser.mjs",
+    "test:sports:direction": "node scripts/test-sports-direction.mjs",
+    "test:sports:direction:browser": "node scripts/test-sports-direction-browser.mjs",
     "test:dodgeball": "node scripts/test-dodgeball.mjs",
     "test:dodgeball:peer": "node scripts/test-dodgeball-peer-browser.mjs",
     "test:dodgeball:server": "node scripts/test-dodgeball-server.mjs",

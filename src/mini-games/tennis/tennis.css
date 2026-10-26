@@ -10,3 +10,5 @@
 @media(orientation:portrait) and (max-width:350px){.tn-score{min-width:158px;max-width:54%}.tn-score>div{grid-template-columns:minmax(36px,1fr) 19px 26px 9px;gap:3px;padding:4px 6px;font-size:9px}.tn-match-head nav{gap:4px}.tn-match-head nav button:first-child{width:80px;min-width:0;font-size:9px}.tn-match-head nav button:last-child{min-width:40px;padding:6px 9px}}
 @media(orientation:portrait) and (max-height:650px){.tn-controls .tn-aim{position:fixed;top:max(108px,calc(var(--ios-ui-safe-top,env(safe-area-inset-top)) + 100px));right:8px;left:auto;bottom:auto;width:145px}}
 @media(orientation:portrait) and (max-width:680px){.tn-controls .tn-aim{position:fixed;top:max(108px,calc(var(--ios-ui-safe-top,env(safe-area-inset-top)) + 100px));right:8px;left:auto;bottom:auto;width:145px}}
+
+.tn-direction-hint{font-size:10px;line-height:1.5;margin:0 0 5px;color:#e8dfba}.tn-controls .tn-aim{width:180px}@media(orientation:landscape) and (max-height:520px){.tn-controls .tn-aim{width:130px}.tn-direction-hint{font-size:9px}}

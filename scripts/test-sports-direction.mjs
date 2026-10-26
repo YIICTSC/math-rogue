@@ -1,0 +1,25 @@
+import assert from'node:assert/strict';import fs from'node:fs/promises';import{build}from'esbuild';
+await fs.mkdir('tmp/sports-direction',{recursive:true});await build({entryPoints:{tennis:'src/mini-games/tennis/engine.ts',dodge:'src/mini-games/dodgeball/engine.ts',direction:'src/mini-games/shared/shotDirection.ts'},outdir:'tmp/sports-direction',bundle:true,format:'esm',platform:'node'});
+const T=await import('../tmp/sports-direction/tennis.js'),D=await import('../tmp/sports-direction/dodge.js'),S=await import('../tmp/sports-direction/direction.js');
+const lesson=()=>({title:'Test',questions:Array.from({length:3},(_,i)=>({id:'q'+i,mode:'ADDITION',question:'1 + 1',options:['2','3','4','5'],correct:0}))});
+function ready(E){const w=E===T?E.createTennis(17):E.createDodgeball(17);for(let i=0;i<2;i++)E.addPlayer(w,'p'+i,'P'+i);(E.startTennis||E.startDodgeball)(w,lesson);for(const p of Object.values(w.players))while(p.quiz){const q=p.quiz;E.command(w,p.id,{type:'answer',id:q.id,index:q.index,option:0});E.command(w,p.id,{type:'continue',id:q.id,index:q.index});}for(const m of w.matches)for(const u of m.units)u.cpu=false;return w;}
+function tennis(){const w=ready(T),m=T.currentMatch(w,'p0'),u=m.units.find(u=>u.owner==='p0');Object.assign(u,{x:0,y:u.side===0?-5:5,swing:0});m.phase='rally';Object.assign(m.ball,{x:u.x,y:u.y,z:1.2,lastSide:1-u.side,serve:false,bounces:0});return{w,m,u};}
+function dodge(){const w=ready(D),m=D.currentMatch(w,'p0'),u=m.units.find(u=>u.owner==='p0');Object.assign(u,{x:0,y:u.side===0?-8:8,action:0});Object.assign(m.ball,{holder:u.id,age:0,x:u.x,y:u.y});return{w,m,u};}
+function hit(E,a,aim=0,depth=0){assert(E.command(a.w,'p0',E===T?{type:'swing',shot:'topspin',aim,power:.6,directionY:depth}:{type:'throw',aim,special:false}));}
+function step(E,a,seconds,input,id='p0'){for(let i=0;i<Math.round(seconds*60);i++){if(input)assert(E.command(a.w,id,{type:'move',...input}));E.tick(a.w,1/60,lesson);}}
+assert.deepEqual(S.shotDirection(new Set(['arrowright']),{x:0,y:0}),{x:1,y:0});const diagonal=S.shotDirection(new Set(['w','d']),{x:0,y:0});assert(Math.abs(Math.hypot(diagonal.x,diagonal.y)-1)<1e-12);
+for(const side of[0,1])for(const wide of[false,true]){const flip=side? -1:1;const actual=S.dodgeDirection({x:1,y:0},side,wide),expected=wide?{x:0,y:flip}:{x:flip,y:0};assert(Math.abs(actual.x-expected.x)<1e-12&&Math.abs(actual.y-expected.y)<1e-12);}
+let velocity={x:0,y:20};for(let i=1;i<=120;i++)velocity=S.bendShot(velocity.x,velocity.y,{x:1,y:0},i/60,1/60);assert(Math.abs(Math.hypot(velocity.x,velocity.y)-20)<1e-10);assert(Math.atan2(velocity.x,velocity.y)*180/Math.PI<8);assert(velocity.x>0);assert.deepEqual(S.bendShot(0,20,{x:1,y:0},.6,.02),{x:0,y:20});
+for(const[E,create]of[[T,tennis],[D,dodge]]){
+ const left=create(),right=create();hit(E,left,-1);hit(E,right,1);assert(left.m.ball.vx<right.m.ball.vx,'Direction at contact must change the launch course');
+ const neutral=create(),curve=create();hit(E,neutral);hit(E,curve);step(E,neutral,.3,{x:0,y:0});step(E,curve,.3,{x:1,y:0});assert(curve.m.ball.vx>neutral.m.ball.vx,'Fresh direction after contact must bend the live ball');
+ step(E,curve,.15,{x:1,y:0});const before={vx:curve.m.ball.vx,vy:curve.m.ball.vy};step(E,curve,.1,{x:-1,y:0});assert.equal(curve.m.ball.vx,before.vx,'Steering must stop after 0.4 seconds');assert.equal(curve.m.ball.vy,before.vy);
+ const opponent=create(),control=create();hit(E,opponent);hit(E,control);step(E,opponent,.15,{x:1,y:0},'p1');step(E,control,.15);assert.equal(opponent.m.ball.vx,control.m.ball.vx,'Opponent movement cannot steer your shot');
+ const stale=create();hit(E,stale);stale.w.clock=10;stale.w.players.p0.input={x:1,y:0,at:0};const vx=stale.m.ball.vx;step(E,stale,.1);assert.equal(stale.m.ball.vx,vx,'Stale input must not bend the ball');
+ const paused=create();hit(E,paused);paused.w.paused=true;const ball=structuredClone(paused.m.ball);step(E,paused,.1);assert.deepEqual(paused.m.ball,ball,'Pausing must also pause the steering window');
+ assert(!E.command(paused.w,'p0',{type:'move',x:Infinity,y:0}));console.log('PASS:',E===T?'Tennis':'Dodgeball','launch direction, real follow-through, expiry, speed bounds, owner-only input, stale input and pause.');
+}
+const near=tennis(),deep=tennis();hit(T,near,0,-1);hit(T,deep,0,1);const land=b=>b.y+b.vy*(b.vz+Math.sqrt(b.vz*b.vz+19.6*(b.z-.08)))/9.8;assert(land(deep.m.ball)>land(near.m.ball));
+const buffer=tennis();buffer.m.ball.x=10;assert(T.command(buffer.w,'p0',{type:'swing',shot:'topspin',aim:-1,power:.6}));assert(buffer.u.buffer>0);T.command(buffer.w,'p0',{type:'move',x:1,y:0});buffer.m.ball.x=buffer.u.x;T.tick(buffer.w,1/60,lesson);assert(buffer.m.ball.vx>0,'Buffered swings sample direction again at actual contact');
+const invalid=tennis();assert(!T.command(invalid.w,'p0',{type:'swing',shot:'topspin',aim:0,power:.5,directionY:NaN}));
+console.log('PASS: tennis depth input, buffered contact direction and invalid direction rejection; both dodgeball camera orientations and court sides.');

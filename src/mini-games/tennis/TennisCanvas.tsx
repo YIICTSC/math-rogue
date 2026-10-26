@@ -6,10 +6,10 @@ import {AVATAR_COLORS,BODY_COLORS,HAIR_COLORS,type KartAvatar} from '../gakuro-k
 import type {TennisView,Unit} from './types';
 import {HALF_LENGTH,SINGLES_WIDTH,DOUBLES_WIDTH,NET,SERVICE_LENGTH} from './engine';
 const cpuHeroes=['elementary-dodgeball','elementary-caretaker','high-school-warrior','elementary-assassin'];
-const previewUnits:Unit[]=Array.from({length:4},(_,i)=>({id:'preview'+i,owner:null,name:'',side:i<2?0:1,x:i%2===0?-2.8:2.8,y:(i<2?-1:1)*(i%2===0?10.8:6.4),vx:0,vy:0,energy:.5,stamina:1,swing:0,shot:'topspin',shotSeq:0,buffer:0,aim:0,power:.5,dash:0,cpu:true}));
+const previewUnits:Unit[]=Array.from({length:4},(_,i)=>({id:'preview'+i,owner:null,name:'',side:i<2?0:1,x:i%2===0?-2.8:2.8,y:(i<2?-1:1)*(i%2===0?10.8:6.4),vx:0,vy:0,energy:.5,stamina:1,swing:0,shot:'topspin',shotSeq:0,buffer:0,aim:0,directionY:0,power:.5,dash:0,cpu:true}));
 /** A render adapter only: court positions, hit timing and score are owned by engine.ts. */
-export default function TennisCanvas({view,selfId,preview=false,avatar}:{view:TennisView|null;selfId:string;preview?:boolean;avatar?:KartAvatar}){
- const canvas=useRef<HTMLCanvasElement>(null),state=useRef({view,selfId,preview,avatar,at:performance.now()});state.current={view,selfId,preview,avatar,at:state.current.view===view?state.current.at:performance.now()};const[failed,setFailed]=useState(false);
+export default function TennisCanvas({view,selfId,preview=false,avatar,suspended=false}:{view:TennisView|null;selfId:string;preview?:boolean;avatar?:KartAvatar;suspended?:boolean}){
+ const canvas=useRef<HTMLCanvasElement>(null),state=useRef({view,selfId,preview,avatar,suspended,at:performance.now()});state.current={view,selfId,preview,avatar,suspended,at:state.current.view===view?state.current.at:performance.now()};const[failed,setFailed]=useState(false);
  useEffect(()=>{
   const el=canvas.current!;let renderer:T.WebGLRenderer|undefined,frame=0,disposed=false;
   const scene=new T.Scene();scene.background=new T.Color('#b9e3df');scene.fog=new T.Fog('#b9e3df',62,115);
@@ -57,7 +57,7 @@ export default function TennisCanvas({view,selfId,preview=false,avatar}:{view:Te
    const resizeView=()=>{if(!renderer)return;const r=el.getBoundingClientRect();renderer.shadowMap.enabled=r.width>680;renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();};resize=new ResizeObserver(resizeView);resize.observe(el);resizeView();el.addEventListener('webglcontextlost',lost);
    let last=performance.now();
    const loop=(now:number)=>{
-    if(disposed)return;if(now-last<(el.clientWidth<680?1000/30:1000/60)-1){frame=requestAnimationFrame(loop);return;}const dt=Math.min(.05,(now-last)/1000);last=now;const current=state.current,v=current.view,m=v?.match,units=m?.units||(current.avatar?previewUnits.map((u,i)=>i===0?{...u,avatar:current.avatar}:u):previewUnits),own=units.find(u=>u.owner===current.selfId),flip=own?.side===1?-1:1;
+    if(disposed)return;if(state.current.suspended){last=now;frame=requestAnimationFrame(loop);return;}if(now-last<(el.clientWidth<680?1000/30:1000/60)-1){frame=requestAnimationFrame(loop);return;}const dt=Math.min(.05,(now-last)/1000);last=now;const current=state.current,v=current.view,m=v?.match,units=m?.units||(current.avatar?previewUnits.map((u,i)=>i===0?{...u,avatar:current.avatar}:u):previewUnits),own=units.find(u=>u.owner===current.selfId),flip=own?.side===1?-1:1;
     const portrait=camera.aspect<.85,dist=current.preview?32:portrait?35:28,height=current.preview?27:portrait?28:22;camera.position.set(flip*.25,height,flip*dist);const short=portrait&&el.clientHeight<650&&!current.preview;camera.lookAt(0,0,flip*(short?3:portrait?0:3.2));camera.fov=current.preview?43:short?42:portrait?40:34;camera.updateProjectionMatrix();
     const active=new Set(units.map(u=>u.id));for(const[id,r]of rigs)if(!active.has(id)){r.hero.dispose();r.custom.dispose();scene.remove(r.root,r.shadow,r.ring);rigs.delete(id);}
     units.forEach((u,i)=>{const r=rigs.get(u.id)||createRig(u,i),heroId=u.avatar?u.avatar.protagonist:cpuHeroes[i%cpuHeroes.length];if(r.look!==heroId){r.look=heroId;r.hero.set(heroId);}
