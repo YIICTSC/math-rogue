@@ -1424,6 +1424,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const processTurn = (px: number, py: number, overrides?: { belly?: number, hp?: number }) => {
+      facingOnlyRef.current=false;setFacingOnly(false);
       const recovered = adventure.tick(px, py);
       overrides = overrides || recovered;
       if (adventure.safeTurn()) return;

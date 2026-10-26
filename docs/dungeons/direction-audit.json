@@ -91,13 +91,19 @@
       "sha256": "0d171d48e0c80973617d4f172cc82c2d4ce0863350ef53b41200b5932b58113c"
     }
   ],
-  "reviewDate": "2026-10-25",
-  "runtimePhaseDraws": 12288,
+  "reviewDate": "2026-10-26",
+  "runtimeIdleDraws": 560,
+  "runtimeActionDraws": {
+    "dungeons1": 3328,
+    "dungeons2": 1152
+  },
   "rendererSha256": {
+    "src/components/school-dungeon/student/idleFacing.ts": "0214d5b8bffa610ca4b713ad6800db3739d8f1a79fe96f058f1d5c7e0f23ad54",
+    "src/components/school-dungeon/student/sprites.ts": "1499830a72e787a2683f947864572d97f139486ebc0fa4d24b796c70db38ff5d",
     "src/components/school-dungeon/student/actionGeometry.ts": "c94f8af30f3b13738d911343d8cdec2796596ad19476e4c9a0ec07dcd2a55746",
     "src/components/school-dungeon/dungeons1/poseAtlas.ts": "ac3f44c3279676177f10f715aaca84ff865e4228a7ca24b4b60ff1079f530d2b",
-    "src/components/school-dungeon/dungeons1/drawHero.ts": "458fe8bcb490f06173680769d3841946ddc2440ba100c4373670ad10abfa741f",
-    "src/components/school-dungeon/dungeons2/heroActions.ts": "f1a5a987eb84062a911d56b54db1ac26992103809a1026fe9a7cd876bd5bb765",
+    "src/components/school-dungeon/dungeons1/drawHero.ts": "cff2bbb8add7f96639145ec0bbf3f4540bd5b72c049713ba1a731a9149db49bd",
+    "src/components/school-dungeon/dungeons2/heroActions.ts": "85e9eca33397c0584c9bdf8f93ffec1af20021d51685ab887243e2791ed7531d",
     "src/components/school-dungeon/dungeons2/directionPolicy.ts": "731d73b1d4f63da793590b46475778ee9c329ea4ae71cde11bc949845976f73a"
   },
   "directions": [
@@ -110,11 +116,31 @@
     "NE",
     "NW"
   ],
-  "review": "Manual comparison of all 70 idle and action sheets; original direction sheets are the facing reference. D1 offensive actions use direction-aware poses from the original facing. D2 uses dedicated ImageGen animations for all eighteen forms; see dedicated-animations-build.json for all 2304 frame hashes and reviewed row mappings. No procedural D2 pose fallback.",
+  "review": "Manual review of all 70 idle forms and the 18 dedicated D2 action atlases. The D2 authored idle sheets store SW then SE; runtime remaps only these two idle cells. D1 idle and all action atlases retain logical direction order. D1 offensive actions use direction-aware poses from the original facing. D2 uses dedicated ImageGen animations for all eighteen forms; see dedicated-animations-build.json for all 2304 frame hashes and reviewed row mappings. No procedural D2 pose fallback.",
   "forms": [
     {
       "series": 1,
       "key": "elementary-assassin",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-assassin.webp",
       "referenceSha256": "552a822cdb9fe303da4a6d43bb3e616761c5515645e7f47609f86c185c481b04",
       "actions": "public/sprites/dungeons1/actions/elementary-assassin.webp",
@@ -169,6 +195,26 @@
     {
       "series": 1,
       "key": "elementary-bard",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-bard.webp",
       "referenceSha256": "6041002cd4c7a672bfe728192ef64fd462685829f769b0621a5cb7f24697ac85",
       "actions": "public/sprites/dungeons1/actions/elementary-bard.webp",
@@ -223,6 +269,26 @@
     {
       "series": 1,
       "key": "elementary-caretaker",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-caretaker.webp",
       "referenceSha256": "71436decd700c46bab12d2af21339130033f0dad0e76ce64da12fb20a200305d",
       "actions": "public/sprites/dungeons1/actions/elementary-caretaker.webp",
@@ -277,6 +343,26 @@
     {
       "series": 1,
       "key": "elementary-chef",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-chef.webp",
       "referenceSha256": "73b42131464d52c745c04adccb7588958045231b1c845ee66d5839ff2653fb99",
       "actions": "public/sprites/dungeons1/actions/elementary-chef.webp",
@@ -331,6 +417,26 @@
     {
       "series": 1,
       "key": "elementary-dodgeball",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-dodgeball.webp",
       "referenceSha256": "76064bd63d0c193fd8fde18cee38050d5b67e252600575abc9422b47f8de6b85",
       "actions": "public/sprites/dungeons1/actions/elementary-dodgeball.webp",
@@ -385,6 +491,26 @@
     {
       "series": 1,
       "key": "elementary-gardener",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-gardener.webp",
       "referenceSha256": "6776a9d2914ca10cbeeffdd19942915066487479a83bd13c63a5bac32f213a6b",
       "actions": "public/sprites/dungeons1/actions/elementary-gardener.webp",
@@ -439,6 +565,26 @@
     {
       "series": 1,
       "key": "elementary-librarian",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-librarian.webp",
       "referenceSha256": "030adcc3869c6ced8355209ff326b5c03756e94cdae5431c6052c0944331ed5c",
       "actions": "public/sprites/dungeons1/actions/elementary-librarian.webp",
@@ -493,6 +639,26 @@
     {
       "series": 1,
       "key": "elementary-mage",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-mage.webp",
       "referenceSha256": "5c6a73ec864e077e8519b4ff55da49665977c5a9019f983d175c54b7cc8b7c7f",
       "actions": "public/sprites/dungeons1/actions/elementary-mage.webp",
@@ -547,6 +713,26 @@
     {
       "series": 1,
       "key": "elementary-warrior",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/elementary-warrior.webp",
       "referenceSha256": "58b1989bf8a9c84c92886d00adde62d9c5c65f64680acfd714ed74e65bf53d4d",
       "actions": "public/sprites/dungeons1/actions/elementary-warrior.webp",
@@ -601,6 +787,26 @@
     {
       "series": 1,
       "key": "high-school-assassin",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-assassin.webp",
       "referenceSha256": "b3d93683cd5363082cd1bf58698c02a1663cb49104a6906f39fd4f6549336272",
       "actions": "public/sprites/dungeons1/actions/high-school-assassin.webp",
@@ -655,6 +861,26 @@
     {
       "series": 1,
       "key": "high-school-bard",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-bard.webp",
       "referenceSha256": "c173768408a9806358584865dbaedf01ac8c697926b5849d4d043e610843a23f",
       "actions": "public/sprites/dungeons1/actions/high-school-bard.webp",
@@ -709,6 +935,26 @@
     {
       "series": 1,
       "key": "high-school-caretaker",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-caretaker.webp",
       "referenceSha256": "dcbb9b2032d61c1a087dba6c5327deacf7b75a198f2bd6f0df8a2b0279d3a7c7",
       "actions": "public/sprites/dungeons1/actions/high-school-caretaker.webp",
@@ -763,6 +1009,26 @@
     {
       "series": 1,
       "key": "high-school-chef",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-chef.webp",
       "referenceSha256": "34260f0653d737c6414ae8887ae79de8e643e2f44b2810ba9558cab65d749606",
       "actions": "public/sprites/dungeons1/actions/high-school-chef.webp",
@@ -817,6 +1083,26 @@
     {
       "series": 1,
       "key": "high-school-dodgeball",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-dodgeball.webp",
       "referenceSha256": "418b5ddabf83645f0d1a757cf632479f50a20592305ed4554f1f85540c54e8a3",
       "actions": "public/sprites/dungeons1/actions/high-school-dodgeball.webp",
@@ -871,6 +1157,26 @@
     {
       "series": 1,
       "key": "high-school-gardener",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-gardener.webp",
       "referenceSha256": "ecb4a12f4394e7fc4884ecd8679182761e8b4253903cb197aa41cfd16cb3a31d",
       "actions": "public/sprites/dungeons1/actions/high-school-gardener.webp",
@@ -925,6 +1231,26 @@
     {
       "series": 1,
       "key": "high-school-librarian",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-librarian.webp",
       "referenceSha256": "5e164771e7e2fd56a889dc69b1986ea5d9b3d71473850b8cc2c110732fa980c6",
       "actions": "public/sprites/dungeons1/actions/high-school-librarian.webp",
@@ -979,6 +1305,26 @@
     {
       "series": 1,
       "key": "high-school-mage",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-mage.webp",
       "referenceSha256": "e72edc6141caae60be0632f76b061416fc9a49aae70e9e3bb99ee6442145eea8",
       "actions": "public/sprites/dungeons1/actions/high-school-mage.webp",
@@ -1033,6 +1379,26 @@
     {
       "series": 1,
       "key": "high-school-warrior",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/high-school-warrior.webp",
       "referenceSha256": "c6fa9b356c0be627ceaeda555a6165fb0a04683ba7a3722a0b5b3aff9d22ce55",
       "actions": "public/sprites/dungeons1/actions/high-school-warrior.webp",
@@ -1087,6 +1453,26 @@
     {
       "series": 1,
       "key": "magic-akari",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-akari.webp",
       "referenceSha256": "3d205fa3c3186424e14ba2c98704acefc7af34869e1782c093faaa0656f705c8",
       "actions": "public/sprites/dungeons1/actions/magic-akari.webp",
@@ -1141,6 +1527,26 @@
     {
       "series": 1,
       "key": "magic-akari-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-akari-transformed.webp",
       "referenceSha256": "8b7a1418e0a8425b5b65137084c050863bdaeb68fa9921a249326221d9247728",
       "actions": "public/sprites/dungeons1/actions/magic-akari-transformed.webp",
@@ -1195,6 +1601,26 @@
     {
       "series": 1,
       "key": "magic-elliot",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-elliot.webp",
       "referenceSha256": "3ed9b863db40b2557330b484d53c57ff5f7938671d5b3f57ad3029866c087775",
       "actions": "public/sprites/dungeons1/actions/magic-elliot.webp",
@@ -1249,6 +1675,26 @@
     {
       "series": 1,
       "key": "magic-elliot-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-elliot-transformed.webp",
       "referenceSha256": "828fbf66729624b9908f87d216a46e7304bd29fa84b3bf2ff2f4123f1e3d96cd",
       "actions": "public/sprites/dungeons1/actions/magic-elliot-transformed.webp",
@@ -1303,6 +1749,26 @@
     {
       "series": 1,
       "key": "magic-hiyori",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-hiyori.webp",
       "referenceSha256": "70f4991e4f1d4692b9cfb608b1b03265839038cbf6957c35a3226b0a022772ec",
       "actions": "public/sprites/dungeons1/actions/magic-hiyori.webp",
@@ -1357,6 +1823,26 @@
     {
       "series": 1,
       "key": "magic-hiyori-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-hiyori-transformed.webp",
       "referenceSha256": "689fdae4c6d8e2adce31ca4acf9e4f47293dcb4b260c6e40eec88ec756d5b889",
       "actions": "public/sprites/dungeons1/actions/magic-hiyori-transformed.webp",
@@ -1411,6 +1897,26 @@
     {
       "series": 1,
       "key": "magic-koharu",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-koharu.webp",
       "referenceSha256": "4bc0faf8bf912c9dcb8d907afc77bf64d257ef7466e45097963a3212cb76c41c",
       "actions": "public/sprites/dungeons1/actions/magic-koharu.webp",
@@ -1465,6 +1971,26 @@
     {
       "series": 1,
       "key": "magic-koharu-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-koharu-transformed.webp",
       "referenceSha256": "e267b092886c6ed4a47efb76b927a09825737a472909d25b2faf5ae7dec4eeae",
       "actions": "public/sprites/dungeons1/actions/magic-koharu-transformed.webp",
@@ -1519,6 +2045,26 @@
     {
       "series": 1,
       "key": "magic-leon",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-leon.webp",
       "referenceSha256": "c6c2beee4e2e714c2e0213fbdc0fa1e67fe8fadbc27d178ccef02e425fbabb2e",
       "actions": "public/sprites/dungeons1/actions/magic-leon.webp",
@@ -1573,6 +2119,26 @@
     {
       "series": 1,
       "key": "magic-leon-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-leon-transformed.webp",
       "referenceSha256": "b8688caa39380af3478e8894ba1c7f5baa185f631f1fb70d9928a05aa1d6473c",
       "actions": "public/sprites/dungeons1/actions/magic-leon-transformed.webp",
@@ -1627,6 +2193,26 @@
     {
       "series": 1,
       "key": "magic-madoka",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-madoka.webp",
       "referenceSha256": "8a548d87dbb41be66fe1dc6acc9785f22cc8b6be3221eee1b12f5167473a77d4",
       "actions": "public/sprites/dungeons1/actions/magic-madoka.webp",
@@ -1681,6 +2267,26 @@
     {
       "series": 1,
       "key": "magic-madoka-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-madoka-transformed.webp",
       "referenceSha256": "b98952f82250bcdc52a1cacb55db41aae77cf3673778ee439ecac0b2f7d29db1",
       "actions": "public/sprites/dungeons1/actions/magic-madoka-transformed.webp",
@@ -1735,6 +2341,26 @@
     {
       "series": 1,
       "key": "magic-minato",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-minato.webp",
       "referenceSha256": "71d7ad4d4ba4cf2786d7e0ad4d0f2c299481dc438ec52c08d272b2c90dced065",
       "actions": "public/sprites/dungeons1/actions/magic-minato.webp",
@@ -1789,6 +2415,26 @@
     {
       "series": 1,
       "key": "magic-minato-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-minato-transformed.webp",
       "referenceSha256": "6ce59d567fcd89e8ca828f0813c2d236d8763ef99e9a91c63469ded6daecb1f3",
       "actions": "public/sprites/dungeons1/actions/magic-minato-transformed.webp",
@@ -1843,6 +2489,26 @@
     {
       "series": 1,
       "key": "magic-mirai",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-mirai.webp",
       "referenceSha256": "9ee31960aea47e4d9fedf276e15c379157baf8576ff5d324419f51629be261c8",
       "actions": "public/sprites/dungeons1/actions/magic-mirai.webp",
@@ -1897,6 +2563,26 @@
     {
       "series": 1,
       "key": "magic-mirai-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-mirai-transformed.webp",
       "referenceSha256": "61b76c1d1a2c612f675b1e77eb07084cc9d8bdb209055224276fcecbf033e9b2",
       "actions": "public/sprites/dungeons1/actions/magic-mirai-transformed.webp",
@@ -1951,6 +2637,26 @@
     {
       "series": 1,
       "key": "magic-rei",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-rei.webp",
       "referenceSha256": "75b5d39634eac9b746e6a7904468b55f07dc077db2b931d27c854aa0a48dff8e",
       "actions": "public/sprites/dungeons1/actions/magic-rei.webp",
@@ -2005,6 +2711,26 @@
     {
       "series": 1,
       "key": "magic-rei-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-rei-transformed.webp",
       "referenceSha256": "04b68f3b2bd4015eb3d5a8b58508f527cd9622f23bde60a0e2f1aa8e2c1591c9",
       "actions": "public/sprites/dungeons1/actions/magic-rei-transformed.webp",
@@ -2059,6 +2785,26 @@
     {
       "series": 1,
       "key": "magic-ren",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-ren.webp",
       "referenceSha256": "539b56d90e246d57e53f6674dec661f2c886ab732cffc064686d5de9e574fbca",
       "actions": "public/sprites/dungeons1/actions/magic-ren.webp",
@@ -2113,6 +2859,26 @@
     {
       "series": 1,
       "key": "magic-ren-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-ren-transformed.webp",
       "referenceSha256": "77285fcab782896d4bae7f435d8d82b2c068d37d734b9fbedfbc860b768b294a",
       "actions": "public/sprites/dungeons1/actions/magic-ren-transformed.webp",
@@ -2167,6 +2933,26 @@
     {
       "series": 1,
       "key": "magic-riku",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-riku.webp",
       "referenceSha256": "f5d124b8f83f29fda6d41575d25b7fd71607a6e6b169461979695da97a68f4c4",
       "actions": "public/sprites/dungeons1/actions/magic-riku.webp",
@@ -2221,6 +3007,26 @@
     {
       "series": 1,
       "key": "magic-riku-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-riku-transformed.webp",
       "referenceSha256": "efff546d4d7510176ab7bb23408ca0ec7cf0b2455b14406b4d1edf8172a4c8e5",
       "actions": "public/sprites/dungeons1/actions/magic-riku-transformed.webp",
@@ -2275,6 +3081,26 @@
     {
       "series": 1,
       "key": "magic-sakuya",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-sakuya.webp",
       "referenceSha256": "3e69d9c9ac32ee1b42d29662b2e969792e3c56d832b39b9501b38584f7127a54",
       "actions": "public/sprites/dungeons1/actions/magic-sakuya.webp",
@@ -2329,6 +3155,26 @@
     {
       "series": 1,
       "key": "magic-sakuya-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-sakuya-transformed.webp",
       "referenceSha256": "5b5bac3a847256a7d0eb5ee55da09a05a3ccb426754b77a4f6c1201f9fac18b7",
       "actions": "public/sprites/dungeons1/actions/magic-sakuya-transformed.webp",
@@ -2383,6 +3229,26 @@
     {
       "series": 1,
       "key": "magic-sera",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-sera.webp",
       "referenceSha256": "96d57f48b6169407437b95874dbbaa055359b310aa3dc2e41272976281ed217d",
       "actions": "public/sprites/dungeons1/actions/magic-sera.webp",
@@ -2437,6 +3303,26 @@
     {
       "series": 1,
       "key": "magic-sera-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-sera-transformed.webp",
       "referenceSha256": "b77321e6601b97dc0d351fdc82328fa32d550283ea277d4009839ac9d0745907",
       "actions": "public/sprites/dungeons1/actions/magic-sera-transformed.webp",
@@ -2491,6 +3377,26 @@
     {
       "series": 1,
       "key": "magic-shizuku",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-shizuku.webp",
       "referenceSha256": "820a25a39e9c51c029060d6fd86b93adb4c93b33158536cc9aead9e9a754f143",
       "actions": "public/sprites/dungeons1/actions/magic-shizuku.webp",
@@ -2545,6 +3451,26 @@
     {
       "series": 1,
       "key": "magic-shizuku-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-shizuku-transformed.webp",
       "referenceSha256": "bbc65a6d1957152ebc1ef0e5d83cc1898c7f9f59596e2075ae70d12037dcbe2e",
       "actions": "public/sprites/dungeons1/actions/magic-shizuku-transformed.webp",
@@ -2599,6 +3525,26 @@
     {
       "series": 1,
       "key": "magic-soma",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-soma.webp",
       "referenceSha256": "14490f35fc00a474d7e6224c6ddefad7ac12304aa4e95f6893d8d2879f9cd226",
       "actions": "public/sprites/dungeons1/actions/magic-soma.webp",
@@ -2653,6 +3599,26 @@
     {
       "series": 1,
       "key": "magic-soma-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-soma-transformed.webp",
       "referenceSha256": "10aef6bbf092f5209bb0ee17e6394f1f2d770cc71cb5bac73204121e72d7b7fc",
       "actions": "public/sprites/dungeons1/actions/magic-soma-transformed.webp",
@@ -2707,6 +3673,26 @@
     {
       "series": 1,
       "key": "magic-tsubasa",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-tsubasa.webp",
       "referenceSha256": "690ad772ceea1f40892f4ad7f6c18ede46043581cc7ffa4fd932e40cefedd241",
       "actions": "public/sprites/dungeons1/actions/magic-tsubasa.webp",
@@ -2761,6 +3747,26 @@
     {
       "series": 1,
       "key": "magic-tsubasa-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-tsubasa-transformed.webp",
       "referenceSha256": "91a055a5e5500679035e56823a0a72d551508469c51da43161efcc1cd47ae4b1",
       "actions": "public/sprites/dungeons1/actions/magic-tsubasa-transformed.webp",
@@ -2815,6 +3821,26 @@
     {
       "series": 1,
       "key": "magic-yamato",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-yamato.webp",
       "referenceSha256": "6b36993c0eadd8b65552faa52a8042664370db26205589db5a37df4766c6f68f",
       "actions": "public/sprites/dungeons1/actions/magic-yamato.webp",
@@ -2869,6 +3895,26 @@
     {
       "series": 1,
       "key": "magic-yamato-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SE",
+        "SW",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
       "reference": "public/sprites/wandering-student/magic-yamato-transformed.webp",
       "referenceSha256": "6741cb970c51f760fbd9696b1e333ba63e947764aeaa8516ae1f79a4147c7945",
       "actions": "public/sprites/dungeons1/actions/magic-yamato-transformed.webp",
@@ -2923,6 +3969,26 @@
     {
       "series": 2,
       "key": "lyria",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/lyria-directions.webp",
       "referenceSha256": "31935151cf6ff222c93c106292eee2829dad1e0ea478cd94be44dfc9df781b77",
       "actions": "public/sprites/dungeons2/actions/lyria.webp",
@@ -2941,6 +4007,26 @@
     {
       "series": 2,
       "key": "lyria-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/lyria-transformed-directions.webp",
       "referenceSha256": "c7d597222b9e85c7ae5a9749829f813d8a13cdff9924660631dfa44560aa0654",
       "actions": "public/sprites/dungeons2/actions/lyria-transformed.webp",
@@ -2959,6 +4045,26 @@
     {
       "series": 2,
       "key": "celis",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/celis-directions.webp",
       "referenceSha256": "8bc434f1036ca82d784718a0bb7e250487744480f5b85f219035e97106fb9185",
       "actions": "public/sprites/dungeons2/actions/celis.webp",
@@ -2977,6 +4083,26 @@
     {
       "series": 2,
       "key": "celis-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/celis-transformed-directions.webp",
       "referenceSha256": "e619605cbae5137a3d7df14017aa75e739d935f513c30347947060a58a1c2ff7",
       "actions": "public/sprites/dungeons2/actions/celis-transformed.webp",
@@ -2995,6 +4121,26 @@
     {
       "series": 2,
       "key": "flora",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/flora-directions.webp",
       "referenceSha256": "17bb54d5de5e11865099f0fa26d2225bc2636077b2c0222bed51e2e803b204bd",
       "actions": "public/sprites/dungeons2/actions/flora.webp",
@@ -3013,6 +4159,26 @@
     {
       "series": 2,
       "key": "flora-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/flora-transformed-directions.webp",
       "referenceSha256": "8426440c7bd3ffc0b3e4ebab63cb5f17fdecc50e20124f8d39ad3e7f91cc08e3",
       "actions": "public/sprites/dungeons2/actions/flora-transformed.webp",
@@ -3031,6 +4197,26 @@
     {
       "series": 2,
       "key": "noctia",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/noctia-directions.webp",
       "referenceSha256": "11f0861b61349442e6043af3626b0ac47175719d3fae88a425ebe66dd600cd64",
       "actions": "public/sprites/dungeons2/actions/noctia.webp",
@@ -3049,6 +4235,26 @@
     {
       "series": 2,
       "key": "noctia-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/noctia-transformed-directions.webp",
       "referenceSha256": "8eb4fb8b30d5538b522a2921db18fdb0afc8e4f9146fd9bb3575280a743f6de4",
       "actions": "public/sprites/dungeons2/actions/noctia-transformed.webp",
@@ -3067,6 +4273,26 @@
     {
       "series": 2,
       "key": "aurene",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/aurene-directions.webp",
       "referenceSha256": "f80f9653e3893125ff6b48b6f6be306dfd8f2e8286edc9261db2b15df8bd4c66",
       "actions": "public/sprites/dungeons2/actions/aurene.webp",
@@ -3085,6 +4311,26 @@
     {
       "series": 2,
       "key": "aurene-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/aurene-transformed-directions.webp",
       "referenceSha256": "0f0e9c7af50d686e410797dc88adfab87420dc83ce1a5fb56b8912082a624006",
       "actions": "public/sprites/dungeons2/actions/aurene-transformed.webp",
@@ -3103,6 +4349,26 @@
     {
       "series": 2,
       "key": "ignis",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/ignis-directions.webp",
       "referenceSha256": "9aa84305eae808927542ccf4f09a30ec7b48262bbedb374e4a3073bf0fbbb537",
       "actions": "public/sprites/dungeons2/actions/ignis.webp",
@@ -3121,6 +4387,26 @@
     {
       "series": 2,
       "key": "ignis-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/ignis-transformed-directions.webp",
       "referenceSha256": "36cf7d19b73c72aeae0f134efd4351266f0aed87f6b294529bf411adad10cdfe",
       "actions": "public/sprites/dungeons2/actions/ignis-transformed.webp",
@@ -3139,6 +4425,26 @@
     {
       "series": 2,
       "key": "leon",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/leon-directions.webp",
       "referenceSha256": "204b76537e000887549393ce57b2b8ac646fc2dedec1e21997f51a17966de480",
       "actions": "public/sprites/dungeons2/actions/leon.webp",
@@ -3157,6 +4463,26 @@
     {
       "series": 2,
       "key": "leon-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/leon-transformed-directions.webp",
       "referenceSha256": "1f31b4679dbe281808150399141b9c3c893d6156cd8b00bac2c43bb851c5b4d6",
       "actions": "public/sprites/dungeons2/actions/leon-transformed.webp",
@@ -3175,6 +4501,26 @@
     {
       "series": 2,
       "key": "orion",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/orion-directions.webp",
       "referenceSha256": "0dec7975e78a3fdc2f59c27097a58dae3cf004af4bceaa1ac3da096e4f57c21f",
       "actions": "public/sprites/dungeons2/actions/orion.webp",
@@ -3193,6 +4539,26 @@
     {
       "series": 2,
       "key": "orion-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/orion-transformed-directions.webp",
       "referenceSha256": "e3cb4d5390ca0e8578269d33effaef3e5eb8fb78d96cd969562144d027b8b218",
       "actions": "public/sprites/dungeons2/actions/orion-transformed.webp",
@@ -3211,6 +4577,26 @@
     {
       "series": 2,
       "key": "leif",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/leif-directions.webp",
       "referenceSha256": "22e80712f0cc59eaa3b831c38b036c7d47f28cf88c9077d7750eec352cfd81c6",
       "actions": "public/sprites/dungeons2/actions/leif.webp",
@@ -3229,6 +4615,26 @@
     {
       "series": 2,
       "key": "leif-transformed",
+      "idleSourceDirections": [
+        "S",
+        "N",
+        "E",
+        "W",
+        "SW",
+        "SE",
+        "NE",
+        "NW"
+      ],
+      "idleLogicalToSource": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4,
+        6,
+        7
+      ],
       "reference": "public/sprites/dungeons2/leif-transformed-directions.webp",
       "referenceSha256": "e5b2e1638f3b12107823e17813017e3f0470399b7936a800cd3c3e6d3848f93e",
       "actions": "public/sprites/dungeons2/actions/leif-transformed.webp",
