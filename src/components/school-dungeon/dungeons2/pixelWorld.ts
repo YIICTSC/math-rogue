@@ -1,3 +1,4 @@
+import {drawMapMaterial,drawMapGroundFeature,type MaterialContext} from './mapMaterials';
 import {assetUrl} from '../../../utils/assetPaths';
 export const D2_MONSTERS=['SLIME','BAT','GHOST','DRAIN','DRAGON','METAL','THIEF','MANDRAKE','GOLEM','NINJA','MAGE','SHOPKEEPER','BOSS','FLOATING','SPLIT','SEAL','SWALLOW','ERASE','RICE','EVOLVE','DETENTION','MONITOR','MIMIC','UMBRELLA','MUD','SPROUT'] as const;
 export const D2_DIRECTIONS=[{x:0,y:1},{x:-1,y:1},{x:-1,y:0},{x:-1,y:-1},{x:0,y:-1},{x:1,y:-1},{x:1,y:0},{x:1,y:1}] as const;
@@ -24,6 +25,7 @@ export function d2WallQuarters(map:readonly (readonly string[])[],x:number,y:num
  });
 }
 export function drawD2Tile(ctx:CanvasRenderingContext2D,map:readonly (readonly string[])[],kind:string,x:number,y:number,size:number,mx:number,my:number,s:D2WorldContext):boolean{
+ if(drawMapMaterial(ctx,map,kind,x,y,size,mx,my,s,kind==='WALL'?d2WallQuarters(map,mx,my):[]))return true;
  const materials=image('materials'),walls=image('walls');if(!materials||!walls)return false;
  ctx.save();ctx.imageSmoothingEnabled=false;
  const river=s.scene!==undefined&&!s.town&&mx===5&&my>=1&&my<=9,bridge=river&&kind!=='WALL';
@@ -41,7 +43,8 @@ export function drawD2Tile(ctx:CanvasRenderingContext2D,map:readonly (readonly s
  if(kind==='STAIRS')tile(ctx,materials,7,x,y,size);
  ctx.restore();return true;
 }
-export function drawD2GroundFeature(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number){
+export function drawD2GroundFeature(ctx:CanvasRenderingContext2D,kind:string,x:number,y:number,size:number,s:MaterialContext={},mx=0,my=0){
+ if(drawMapGroundFeature(ctx,kind,x,y,size,s,mx,my))return true;
  const feature=({CRACK:0,TRAP:1,SPIKES:2,HOLE:3}as Record<string,number>)[kind];
  const index=({WATER:6,ICE:12}as Record<string,number>)[kind],img=image(feature===undefined?'materials':'features');
  if(!img||(feature===undefined&&index===undefined))return false;

@@ -411,7 +411,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  };
  const drawTerrain=(ctx:CanvasRenderingContext2D,x:number,y:number,sx:number,sy:number,ts:number)=>{const k=positionKey(x,y),t=state.current.terrain[k],event=state.current.events[k];ctx.save();
   if(t==='SECRET'){ctx.strokeStyle=ctx.fillStyle='#9bbc0f';ctx.strokeRect(sx+ts*.3,sy+ts*.3,ts*.4,ts*.4);ctx.font=`${ts*.3}px monospace`;ctx.fillText('?',sx+ts*.4,sy+ts*.6);ctx.restore();return;}
-  if(t&&!(drawD2GroundFeature(ctx,t,sx,sy,ts))){ctx.fillStyle=t==='WATER'?'#3b97c9':t==='ICE'?'#b2e2f1':t==='HOLE'?'#302830':'#997745';ctx.fillRect(sx+2,sy+2,ts-4,ts-4);ctx.fillStyle='#fff';ctx.font=`${Math.floor(ts*.35)}px monospace`;ctx.fillText(t==='WATER'?'≈':t==='ICE'?'◇':t==='HOLE'?'↓':'?',sx+ts*.3,sy+ts*.6);}
+  if(t&&!(drawD2GroundFeature(ctx,t,sx,sy,ts,state.current,x,y))){ctx.fillStyle=t==='WATER'?'#3b97c9':t==='ICE'?'#b2e2f1':t==='HOLE'?'#302830':'#997745';ctx.fillRect(sx+2,sy+2,ts-4,ts-4);ctx.fillStyle='#fff';ctx.font=`${Math.floor(ts*.35)}px monospace`;ctx.fillText(t==='WATER'?'≈':t==='ICE'?'◇':t==='HOLE'?'↓':'?',sx+ts*.3,sy+ts*.6);}
   if(event&&!event.done&&event.kind==='CHRONICLE'){drawChronicleNpc(ctx,state.current.mode,sx,sy,ts);ctx.restore();return;}
   if(event&&!event.done&&event.kind==='PERSONAL'){drawStudentSprite(ctx,classmateFor(activeHero().id).id,{x:0,y:1},sx,sy,ts);ctx.fillStyle='#fff3b8';ctx.font=`bold ${ts*.3}px sans-serif`;ctx.fillText('…',sx+ts*.6,sy+ts*.05);ctx.restore();return;}
   if(event&&!event.done&&event.kind==='FRIEND'&&drawStudentSprite(ctx,classmateFor(activeHero().id).id,{x:0,y:1},sx,sy,ts)){ctx.restore();return;}
