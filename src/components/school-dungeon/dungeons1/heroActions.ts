@@ -1,5 +1,5 @@
 import type {CombatPose} from './mastery';
-import {cueD2HeroAction} from '../dungeons2/heroActions';
+import {cueD2HeroAction,clearD2HeroAction} from '../dungeons2/heroActions';
 
 import {D1_ACTION_ROWS,type StudentAction} from './actionLayout';
 export {D1_ACTION_ROWS,D1_ACTION_CELL,type StudentAction} from './actionLayout';
@@ -19,4 +19,4 @@ export function studentActionSnapshot(id:string,now=clock()){
  const frame=m.action==='walk'?(Math.floor(progress*count)+(m.step%2)*3)%count:Math.min(count-1,Math.floor(progress*count));
  return {...m,progress,row:first+frame,frame};
 }
-export function clearStudentAction(id:string){motions.delete(id);}
+export function clearStudentAction(id:string){motions.delete(id);clearD2HeroAction(id);}

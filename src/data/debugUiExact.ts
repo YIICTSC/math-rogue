@@ -28,7 +28,9 @@ import { RPG_ROAMING_NPC_ENGLISH, RPG_ROAMING_NPC_HIRAGANA } from '../rpg/roamin
 import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
+import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...MEDIA_ENGLISH,
   ...PAPER_BRIDGE_ENGLISH,
   ...SUMMER_ENDING_ENGLISH,
   ...KOCHO_ENGLISH,
@@ -378,6 +380,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...MEDIA_HIRAGANA,
   ...PAPER_BRIDGE_HIRAGANA,
   ...SUMMER_ENDING_HIRAGANA,
   ...KOCHO_HIRAGANA,

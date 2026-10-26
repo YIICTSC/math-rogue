@@ -8,6 +8,8 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:minigame-hero-media": "node scripts/generate-minigame-media-index.mjs --check && node scripts/test-minigame-hero-media.mjs",
+    "generate:minigame-media-index": "node scripts/generate-minigame-media-index.mjs",
     "test:card-club": "node scripts/test-card-club.mjs && node scripts/test-card-club-extensions.mjs && node scripts/test-card-club-popular.mjs && node scripts/test-card-club-world.mjs && node scripts/test-card-club-traditional.mjs && node scripts/test-card-club-presentation.mjs && node scripts/test-card-club-diversity.mjs && node scripts/test-card-club-voices.mjs && node scripts/test-card-club-rule-audit.mjs",
     "test:card-club:rummy-groups": "node scripts/test-card-club-rummy-groups.mjs && node scripts/test-card-club-browser.mjs --rummy-groups",
     "test:card-club:rules": "node scripts/test-card-club-rule-audit.mjs && node scripts/test-card-club-browser.mjs --rule-audit",
@@ -45,7 +47,7 @@
     "generate:web-asset-manifest": "node scripts/generate-web-asset-manifest.mjs",
     "generate:card-effect-audit": "node scripts/generate-card-effect-japanese-english-audit.mjs",
     "generate:illustration-manifests": "pnpm run generate:card-art-manifest && pnpm run generate:enemy-art-manifest",
-    "prebuild": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests && pnpm run generate:web-asset-manifest && pnpm run generate:vacation-animation-anchors",
+    "prebuild": "pnpm run generate:minigame-media-index && pnpm run generate:relic-translations && pnpm run generate:illustration-manifests && pnpm run generate:web-asset-manifest && pnpm run generate:vacation-animation-anchors",
     "prebuild:steam": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests",
     "prebuild:ios": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests",
     "prebuild:android": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests",
