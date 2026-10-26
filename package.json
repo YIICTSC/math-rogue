@@ -168,7 +168,7 @@
     "test:dungeons1:mastery": "node scripts/test-dungeons1-mastery.mjs && node scripts/dungeons1/audit-weapon-catalog.mjs && node scripts/test-dungeons1-technique-audio.mjs && node scripts/test-dungeons1-martial-art.mjs",
     "test:dungeons1:mastery:browser": "node scripts/test-dungeons1-mastery-browser.mjs && node scripts/test-dungeons1-technique-audio-browser.mjs && node scripts/test-dungeons1-martial-3d.mjs",
     "test:dungeons2:scale": "node scripts/test-dungeons2-dedicated-animations.mjs && node scripts/test-dungeons2-sprite-scale-browser.mjs",
-    "test:star-tide": "node scripts/test-star-tide.mjs && node scripts/test-star-tide-campaign.mjs && node scripts/test-star-tide-wild.mjs && node scripts/test-star-tide-actions.mjs && node scripts/test-star-tide-sky.mjs",
+    "test:star-tide": "node scripts/test-star-tide.mjs && node scripts/test-star-tide-campaign.mjs && node scripts/test-star-tide-wild.mjs && node scripts/test-star-tide-actions.mjs && node scripts/test-star-tide-sky.mjs && node scripts/test-star-tide-study.mjs",
     "test:star-tide:browser": "node scripts/test-star-tide-browser.mjs && node scripts/test-star-tide-actions-browser.mjs && node scripts/test-star-tide-sky-browser.mjs",
     "test:star-tide:assets": "node scripts/test-star-tide-assets.mjs && node scripts/test-star-tide-graphics.mjs"
   },

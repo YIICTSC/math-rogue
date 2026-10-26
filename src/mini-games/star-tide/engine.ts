@@ -26,6 +26,9 @@ export type Save = WildSave & {
     coins: number;
     tool: number;
     weaponA: number;
+    studySeconds: number;
+    studyProblems: number;
+    pendingTravel: {kind:'exit'|'beacon'|'launch'|'leave'|'travel';value:number}|null;
     realm: 'surface' | 'sky';
     glideAwakened: boolean;
     skyTreasures: number[];
@@ -68,7 +71,7 @@ export type Shot = {
     kind?: number;
     damage?: number;
 };
-export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', weaponA: 0, realm: 'surface', glideAwakened: false, skyTreasures: [], puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
+export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', weaponA: 0, studySeconds: 0, studyProblems: 0, pendingTravel: null, realm: 'surface', glideAwakened: false, skyTreasures: [], puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
 export const key = (s: Save) => `${s.chapter}:${s.realm==='sky'?'sky':s.room}`;
 export function load(): Save { try {
     const x = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
@@ -90,6 +93,10 @@ export function load(): Save { try {
     x.coins = Math.max(0, Math.min(999999, Math.floor(Number(x.coins) || 0)));
     const wild = normalizeWild(x);
     x.hero = heroId(x.hero);
+    x.studyProblems=Number.isInteger(x.studyProblems)?Math.max(0,x.studyProblems):0;
+    x.studySeconds=Number.isFinite(x.studySeconds)?Math.max(0,Math.min(86400,x.studySeconds)):0;
+    const pending=x.pendingTravel;
+    x.pendingTravel=pending&&['exit','beacon','launch','leave','travel'].includes(pending.kind)&&Number.isInteger(pending.value)&&Math.abs(pending.value)<=11?pending:null;
     x.realm = x.realm==='sky' && x.beacons.includes(0) ? 'sky' : 'surface';
     if(x.realm!=='sky'&&typeof x.gate==='string'&&x.gate.endsWith(':sky'))x.gate=null;
     x.glideAwakened = typeof x.glideAwakened==='boolean' ? x.glideAwakened : x.beacons.includes(0);
@@ -164,7 +171,7 @@ export class World {
     kills = 0;
     dirty = false;
     time = 0;
-    constructor(s: Save) { this.s = s; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
+    constructor(s: Save) { this.s = s; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.studySeconds ??= 0;this.s.studyProblems ??= 0;this.s.pendingTravel ??= null;this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
     enter() { if(this.inSky){this.enterSky();return;} this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
         for (let y = 3; y <= 10; y++)
             for (let x = 3; x <= 16; x++)
@@ -201,6 +208,24 @@ export class World {
         for (let i = 0; i < (boss ? 1 : 2 + this.s.room % 3); i++)
             this.enemies.push({ x: boss ? 10.5 : [16.5, 15.5, 5.5, 3.5][i], y: boss ? 4.5 : [7.5, 11.5, 11.5, 9.5][i], hp: boss ? 24 + this.s.chapter * 6 : 3 + Math.floor(this.s.chapter / 2), max: boss ? 24 + this.s.chapter * 6 : 3 + Math.floor(this.s.chapter / 2), boss, kind: enemyKind(this.s.chapter, this.s.room, i), cool: i * .5 + 1, phase: 0 });
     } this.restorePuzzle(); this.dirty = true; }
+    requestStudy(kind:'exit'|'beacon'|'launch'|'leave'|'travel',value=0){
+        if(this.s.gate)return true;
+        if(this.s.studySeconds<=180)return false;
+        this.s.pendingTravel={kind,value};this.s.gate=key(this.s);this.cancelCombo();this.dirty=true;return true;
+    }
+    study(correct:number){
+        if(!this.s.gate||this.s.gate!==key(this.s))return false;
+        const pending=this.s.pendingTravel;
+        if(!pending){const done=this.resolveGate(correct);if(done){this.s.studySeconds=0;this.s.studyProblems+=3;}return done;} // Resume older checkpoint saves.
+        this.s.gate=null;this.s.pendingTravel=null;this.s.studySeconds=0;this.s.studyProblems+=3;this.dirty=true;
+        this.s.hp=Math.min(this.s.maxHp,this.s.hp+Math.max(0,correct));
+        if(pending.kind==='exit')this.exit(pending.value);
+        else if(pending.kind==='beacon'){this.s.gate=key(this.s);this.resolveGate(1);}
+        else if(pending.kind==='launch')this.launchSky();
+        else if(pending.kind==='leave')this.leaveSky();
+        else this.travelTo(pending.value);
+        return true;
+    }
     get inSky(){return this.s.realm==='sky';}
     get gliderUnlocked(){return this.s.beacons.includes(0);}
     get atLaunch(){return !this.inSky&&this.s.room===0&&Math.hypot(this.x-WIND_LAUNCH.x,this.y-WIND_LAUNCH.y)<1.3;}
@@ -218,16 +243,16 @@ export class World {
     launchSky(){
         if(!this.atLaunch||this.s.gate)return false;
         if(!this.gliderUnlocked){this.notice='glidelocked';return false;}
-        this.s.realm='sky';this.enter();this.gliding=true;return true;
+        if(this.requestStudy('launch'))return false;this.s.realm='sky';this.enter();this.gliding=true;return true;
     }
     leaveSky(){
         if(!this.inSky||this.s.gate)return false;
-        this.s.realm='surface';this.s.room=0;this.x=WIND_LAUNCH.x;this.y=WIND_LAUNCH.y;this.enter();return true;
+        if(this.requestStudy('leave'))return false;this.s.realm='surface';this.s.room=0;this.x=WIND_LAUNCH.x;this.y=WIND_LAUNCH.y;this.enter();return true;
     }
     openSkyChest(){
         if(!this.atSkyChest||this.s.gate||this.s.skyTreasures.includes(this.s.chapter))return false;
         if(this.enemies.length){this.notice='enemies';return false;}
-        this.s.gate=key(this.s);this.notice='skytreasure';this.dirty=true;return true;
+        this.s.gate=key(this.s);this.resolveGate(1);return true;
     }
     blocked(x: number, y: number, gliding=false) { const code=this.map[Math.floor(y)]?.[Math.floor(x)]??3; return (gliding?[3]:[2,3,7]).includes(code) && (this.s.room>=8||code===7||roundedSolid(this.map,x,y,code)); }
     can(x: number, y: number) { return !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y) && x > .3 && y > .3 && x < W - .3 && y < H - .3 && !this.blocked(x,y,this.gliding); }
@@ -290,18 +315,10 @@ export class World {
                 hold();
                 return;
             }
-            this.s.gate = key(this.s);
-            this.notice = 'beacon';
-            hold();
-            this.dirty = true;
-            return;
+            if(this.requestStudy('beacon')){hold();return;}
+            this.s.gate=key(this.s);this.resolveGate(1);return;
         }
-        if (advancing && !this.enemies.length && room % 4 === 3 && !this.s.solved.includes('study:' + key(this.s))) {
-            this.s.gate = key(this.s);
-            hold();
-            this.dirty = true;
-            return;
-        }
+        if(this.requestStudy('exit',dir)){hold();return;}
         if (next < 0 || next > 23)
             return;
         this.s.room = next;
@@ -545,7 +562,8 @@ export class World {
     tick(dt: number, dx: number, dy: number) {
         dt = Math.min(.035, Math.max(0, dt));
         this.time += dt;
-        this.s.seconds += dt;
+        if(this.s.gate)return;
+        this.s.seconds += dt;this.s.studySeconds+=dt;
         for (const p of this.fx) p.life -= dt;
         this.fx = this.fx.filter(p => p.life > 0);
         this.pushCooldown = Math.max(0, this.pushCooldown - dt);
@@ -696,7 +714,7 @@ export class World {
         this.notice = 'rescue';
         this.hurt = 2;
     } }
-    study(correct: number) { if (correct <= 0 || this.s.gate !== key(this.s))
+    resolveGate(correct: number) { if (correct <= 0 || this.s.gate !== key(this.s))
         return false; const k = key(this.s); if (!this.s.solved.includes('study:' + k))
         this.s.solved.push('study:' + k); this.s.gate = null; this.s.hp = Math.min(this.s.maxHp, this.s.hp + 2);
         if(this.inSky){
@@ -773,7 +791,7 @@ export class World {
     buyHeal() { if (this.s.room !== 0 || this.s.coins < 20 || this.s.hp >= this.s.maxHp || this.s.gate)
         return false; this.s.coins -= 20; this.s.hp = this.s.maxHp; this.dirty = true; return true; }
     travelTo(chapter: number) { if (!this.canTravel(chapter))
-        return false; this.s.realm='surface';this.s.chapter = chapter; this.s.maxChapter = Math.max(this.s.maxChapter, chapter); this.s.room = 0; this.x = 2.5; this.y = 7.5; this.enter(); return true; }
+        return false; if(this.requestStudy('travel',chapter))return false;this.s.realm='surface';this.s.chapter = chapter; this.s.maxChapter = Math.max(this.s.maxChapter, chapter); this.s.room = 0; this.x = 2.5; this.y = 7.5; this.enter(); return true; }
     questProgress(i: number) { const prefix = this.s.chapter + ':', current = i === 0 ? this.s.chests.filter(k => k.startsWith(prefix)).length : i === 1 ? this.s.cleared.filter(k => k.startsWith(prefix) && k !== prefix + '0').length : this.s.solved.filter(k => k.startsWith(prefix)).length, target = i === 1 ? 4 : 3, complete = this.s.quests.includes(prefix + i); return { current, target, complete, ready: current >= target && !complete }; }
     quest(i: number) { if (i < 0 || i > 2 || !this.questProgress(i).ready)
         return false; this.s.quests.push(this.s.chapter + ':' + i); this.s.maxHp = Math.min(30, this.s.maxHp + 1); this.s.hp = this.s.maxHp; this.s.coins += 40; this.dirty = true; return true; }

@@ -29,7 +29,8 @@ type MiniGameSpriteDefinition = {
 };
 
 const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
-  CARD_CLUB: { src: 'sprites/card-club/title.webp', columns: 1, rows: 1, index: 0 },
+  STAR_TIDE: { src: 'sprites/star-tide/menu-icon.webp', columns: 1, rows: 1, index: 0 },
+  CARD_CLUB: { src: 'sprites/card-club/menu-icon.webp', columns: 1, rows: 1, index: 0 },
   GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
   SURVIVOR: { src: 'sprites/schoolyard-survivor/weapons.webp', columns: 8, rows: 5, index: 0 },
   POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },

@@ -1,0 +1,28 @@
+{
+  "images": [
+    {
+      "id": "star-tide-icon",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-897be3b0-6485-4ca8-a0e4-0dccf95cfa65.png",
+      "sourceSha256": "041f840728a3a92b3d723ac4a85723d665a8786b36aa329106eabb16dfd95df8",
+      "output": "sprites/star-tide/menu-icon.webp",
+      "outputSha256": "11f57a5fe3484644655044b096f12ce3bd9e52be752944345688528bce51d39b"
+    },
+    {
+      "id": "card-club-icon",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-0b557d9a-7c90-4240-acd5-574530c804b7.png",
+      "sourceSha256": "18f82889d5d96ecbecec34062cedebbd405601a8fc42f1812eb498944d7bef3d",
+      "output": "sprites/card-club/menu-icon.webp",
+      "outputSha256": "187be10aa9ac73be61b06ab2f392f231e0f7126029f2d77a282d2432b7f8fdbc"
+    },
+    {
+      "id": "nagi-journal",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-e8d67c3c-668e-45a4-a547-691fe6ad527d.png",
+      "sourceSha256": "0506a820b0a54067d15cc173c77271100a5c5a0017446731095afefec6045273",
+      "output": "sprites/star-tide/nagi-journal.webp",
+      "outputSha256": "b5f4e26e58735b48eb3858dbade1fd26394134faa7c7d1e7bdd273950ea75c7f"
+    }
+  ]
+}

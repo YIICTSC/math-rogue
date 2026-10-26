@@ -7310,7 +7310,8 @@ const App: React.FC = () => {
         if (showDailyAssignmentNoticeForProblemSelection()) {
             return;
         }
-        if (activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
+        // Star Tide always confirms problem selection before its dedicated title.
+        if (screen !== GameScreen.MINI_GAME_STAR_TIDE && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
             applyMiniGameAssignmentConfig(screen, activeAssignment);
             return;
         }
