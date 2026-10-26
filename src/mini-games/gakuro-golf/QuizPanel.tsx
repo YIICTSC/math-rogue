@@ -5,7 +5,7 @@ import { drawProblemVisual } from '../../utils/drawProblemVisual';
 import { trans } from '../../utils/textUtils';
 import type { LanguageMode } from '../../types';
 import type { GolfCommand, GolfView } from './engine';
-export default function QuizPanel({ quiz, languageMode, disabled, send }: { quiz: NonNullable<GolfView['quiz']>; languageMode: LanguageMode; disabled: boolean; send: (c: GolfCommand) => void }) {
+export default function QuizPanel({ quiz, languageMode, disabled, send, title='ショット前の3問' }: { title?:string; quiz: NonNullable<GolfView['quiz']>; languageMode: LanguageMode; disabled: boolean; send: (c: GolfCommand) => void }) {
   const canvas = useRef<HTMLCanvasElement>(null), q = quiz.question, t = (s: string) => trans(s, languageMode);
   const symbol = q.visual?.kind === 'map_symbol' ? MAP_SYMBOL_ASSET_MAP[q.visual.symbol] : null;
   useEffect(() => { if (canvas.current && q.visual && !symbol) drawProblemVisual(canvas.current, q.visual); }, [q.id, quiz.shotId, symbol]);
@@ -38,8 +38,8 @@ export default function QuizPanel({ quiz, languageMode, disabled, send }: { quiz
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   }, [quiz.shotId, quiz.index, quiz.answer, disabled]);
   const speak = () => { if (!q.audioPrompt || !('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(q.audioPrompt.text); u.lang = q.audioPrompt.lang || 'ja-JP'; u.rate = .85; window.speechSynthesis.speak(u); };
-  return <section ref={panel} data-gamepad-question-screen data-gamepad-modal className="gg-quiz gg-panel" aria-label={t('ショット前の3問')}>
-    <header><span>{t('ショット前の3問')}</span><b>{quiz.index + 1} / 3</b></header>
+  return <section ref={panel} data-gamepad-question-screen data-gamepad-modal className="gg-quiz gg-panel" aria-label={t(title)}>
+    <header><span>{t(title)}</span><b>{quiz.index + 1} / 3</b></header>
     <div className="gg-question" data-allow-japanese="true">
       {q.passage && <p className="gg-passage">{q.passage}</p>}
       <strong><MathText text={q.question} /></strong>

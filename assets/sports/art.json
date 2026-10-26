@@ -1,0 +1,13 @@
+{
+  "generator": "ImageGen",
+  "created": "2026-10-26",
+  "source": "assets/sports/club-source.png",
+  "output": "public/sprites/sports/club.webp",
+  "size": [
+    1672,
+    941
+  ],
+  "purpose": "Original academy tennis and golf sports hub illustration",
+  "direction": "Original teenage athletes, tennis stadium, golf greens, warm academy landscape, left space for title. No text or branding.",
+  "sourceSha256": "151f44d153751dd7cfd08ab1c5abd26ad6f362a19d6911b7e8fc708edc6ce180"
+}

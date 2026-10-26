@@ -71,7 +71,8 @@ try {
     localStorage.setItem('pixel_spire_language_mode_v1', 'ENGLISH');
   });
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 90_000 });
-  await page.getByRole('heading', { name: 'Learning Rogue' }).waitFor({ state: 'visible' });
+  // A cold development server must transform the full app graph before React mounts.
+  await page.getByRole('heading', { name: 'Learning Rogue' }).waitFor({ state: 'visible', timeout: 90_000 });
   await page.waitForTimeout(300);
 
   const state = await page.evaluate(() => ({

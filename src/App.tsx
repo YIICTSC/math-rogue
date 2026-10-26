@@ -1,3 +1,4 @@
+import {tennisInviteCode} from './mini-games/tennis/invite';
 import {vrInviteCode,VR_ROOM_PARAM} from './mini-games/gakurogear/invite';
 import {prepareCraftedFirstStrike,craftedFirstStrikeActive,consumeCraftedFirstStrike} from './rpg/craftedRelics';
 import WaitingHomeDash from './mini-games/shared/WaitingHomeDash';
@@ -320,7 +321,7 @@ const DebugMenuScreen = deferredScreen(() => import('./components/DebugMenuScree
 const MagicEventSimulationScreen = deferredScreen(() => import('./components/MagicEventSimulationScreen'));
 const EventSimulationScreen = deferredScreen(() => import('./components/EventSimulationScreen'));
 
-const GakuroGolf = React.lazy(() => import('./mini-games/gakuro-golf/GakuroGolf'));
+const SportsHub = React.lazy(() => import('./mini-games/sports/SportsHub'));
 const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));
 const GakuroCraft = React.lazy(() => import('./mini-games/gakuro-craft/GakuroCraft'));
 import { demonName, canTransformEnemy, nextDemonPhase } from './rpg/demonKing';
@@ -1717,6 +1718,8 @@ const App: React.FC = () => {
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
     const golfCode = useMemo(() => typeof window === 'undefined' ? '' : golfInviteCode(window.location.href), []);
     const [golfInviteOpen,setGolfInviteOpen] = useState(Boolean(golfCode));
+    const tennisCode = useMemo(() => typeof window === 'undefined' ? '' : tennisInviteCode(window.location.href), []);
+    const [tennisInviteOpen,setTennisInviteOpen] = useState(Boolean(tennisCode));
     const craftCode = useMemo(() => typeof window === 'undefined' ? '' : craftInviteCode(window.location.href), []);
     const [craftInviteOpen, setCraftInviteOpen] = useState(false);
     const rpgInviteParticipantRef = useRef(false);
@@ -1758,7 +1761,7 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
-    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
+    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     // 「続きから」で読み込んだ本編の状態を、課題レターを確認してから
@@ -20033,7 +20036,7 @@ const App: React.FC = () => {
                                         }}
                                         className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
                                     >
-                                        <span className="flex items-center gap-1"><Flag size={15} /> {trans("ゴルフ", languageMode)}</span>
+                                        <span className="flex items-center gap-1"><Trophy size={15} /> {trans("スポーツ", languageMode)}</span>
                                     </button>
                                 </div>
 
@@ -21663,9 +21666,9 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen) && (
+                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen || tennisInviteOpen) && (
                     <React.Suspense fallback={null}>
-                        <GakuroGolf languageMode={languageMode} inviteCode={golfInviteOpen?golfCode:''} onClose={()=>{setGolfInviteOpen(false);returnToTitle();}} />
+                        <SportsHub onAnswerResult={result=>{const assignment=activeAssignment?effectiveAssignment:null;const pool=getAssignmentModePool(assignment);const custom=result.mode==='ASSIGNMENT_CUSTOM'&&(assignment?.customProblems.length||0)>0;const attributed=!!assignment&&(custom||!pool||pool.includes(result.mode));handleAssignmentAnswerResult(result);if(result.correct){handleModeCorrectProgress(result.mode,1);if(!attributed)addMiniGameUnlockCorrectCount(1);}}} languageMode={languageMode} golfInviteCode={golfInviteOpen?golfCode:''} tennisInviteCode={tennisInviteOpen?tennisCode:''} onClose={()=>{setGolfInviteOpen(false);setTennisInviteOpen(false);returnToTitle();}} />
                     </React.Suspense>
                 )}
 
