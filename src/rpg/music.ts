@@ -18,11 +18,11 @@ export const RPG_MUSIC = {
 } satisfies Record<string,Track>;
 export type RpgMusicScene=keyof typeof RPG_MUSIC;
 // Short interactions and information panels keep the surrounding scene's music.
-export const RPG_PASSIVE_MUSIC_SCENES = new Set<RpgMusicScene>(['settings','hero','craft','social','farm','city','fishing','catch','gather','story','journal','team','event','goal','games']);
+export const RPG_PASSIVE_MUSIC_SCENES = new Set<RpgMusicScene>(['arcade','settings','hero','craft','social','farm','city','fishing','catch','gather','story','journal','team','event','goal','games']);
 export function resolveRpgMusicScene(scene:RpgMusicScene|null,surrounding:RpgMusicScene='map'){
  return scene&&RPG_PASSIVE_MUSIC_SCENES.has(scene)?surrounding:scene;
 }
 export function useRpgMusic(scene:RpgMusicScene|null,priority=10,surrounding:RpgMusicScene='map',homeTrack:HomeTrackId='home'){
- const resolved=resolveRpgMusicScene(scene,surrounding);
+ const resolved=scene&&RPG_PASSIVE_MUSIC_SCENES.has(scene)?null:resolveRpgMusicScene(scene,surrounding);
  useLayoutEffect(()=>{if(!resolved)return;const song=RPG_MUSIC[resolved==='home'?homeTrack:resolved];return audioService.acquireBgmScene(song.type,song.options,priority);},[resolved,priority,homeTrack]);
 }

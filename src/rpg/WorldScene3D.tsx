@@ -430,7 +430,7 @@ export default function WorldScene3D(props: SceneProps) {
       farmStamp = "";
     const avatar=adventureAvatar();scene.add(avatar.root);
     const protagonist=new ProtagonistModel();scene.add(protagonist.root);
-    const remoteHeroes=new Map<string,{hero:ProtagonistModel;position:THREE.Vector3}>();let attackUntil=0;
+    let attackUntil=0;
     const nature=new AdventureNature(scene,profile.low);
     const previousActor=new THREE.Vector3();let boomLength=0,orbitZoom=1;
     const adaptive=new AdventureQuality();const baseRatio=renderer.getPixelRatio();
@@ -690,14 +690,7 @@ export default function WorldScene3D(props: SceneProps) {
         terrain.add(batch);
       }
     }
-    const npcRigs=new Map<string,{rig:ReturnType<typeof adventureAvatar>;target:THREE.Vector3;active:boolean}>();
-    function residentModel(id:string,x:number,z:number){
-      let npc=npcRigs.get(id);const target=new THREE.Vector3(x,terrainHeight(latest.current.world,Math.floor(x),Math.floor(z)),z);
-      if(!npc){const seed=[...id].reduce((n,c)=>n+c.charCodeAt(0),0),rig=adventureAvatar(seed);rig.root.position.copy(target);rig.root.rotation.y=(seed%8)*Math.PI/4;npc={rig,target,active:true};npcRigs.set(id,npc);}
-      npc.target.copy(target);npc.active=true;actors.add(npc.rig.root);
-    }
     function updateActors(w: World) {
-      for(const npc of npcRigs.values())npc.active=false;
       const radius = profile.low ? 12 : 19;
       actors.clear();
       for (const site of w.sites)
@@ -708,16 +701,13 @@ export default function WorldScene3D(props: SceneProps) {
           Math.abs(site.y - w.players[latest.current.selfId].y) < radius
         )
         {
-          const portrait=getRoamingNpcEvent(site.npcEventId)?.portrait;
-          if(portrait&&npcAppearance(w,portrait)!==portrait)siteBillboard(site,actors);
-          else residentModel(site.id,site.x+.5,site.y+.5);
+          siteBillboard(site,actors);
         }
       for (const r of residentsOf(w)) {
         const pos = residentPosition(w, r.id);
         if (pos.siteId || latest.current.hiddenActors?.includes(r.id)) continue;
         if(Math.hypot(pos.x-(w.players[latest.current.selfId].position3D?.x??w.players[latest.current.selfId].x),pos.y-(w.players[latest.current.selfId].position3D?.z??w.players[latest.current.selfId].y))>radius)continue;
         const custom = w.town?.customResidents?.find((v) => v.id === r.id);
-        if(!custom&&!w.town?.people[r.id]?.wearing){residentModel(r.id,pos.x+.5,pos.y+.5);continue;}
         billboard(
           actors,
           assetUrl(custom?.hero?.frames.idle[0] || residentAppearance(w,r.id,r.portrait)),
@@ -766,8 +756,9 @@ export default function WorldScene3D(props: SceneProps) {
               a.position3D?.z??a.y + 0.5,
               WORLD_SCALE.playerHeight,
               a.id,
+              true,
             );
-          else mesh(actors, cone, gold, a.position3D?.x??a.x + 0.5, playerHeight(w,a)+.5, a.position3D?.z??a.y + 0.5, 0.2, 1, 0.2);
+          else billboard(actors,assetUrl('sprites/high-school/characters/0.webp'),a.position3D?.x??a.x+.5,playerHeight(w,a)+WORLD_SCALE.playerHeight/2,a.position3D?.z??a.y+.5,WORLD_SCALE.playerHeight,a.id,true);
         }
     }
     const distantBuildings=new THREE.Group();scene.add(distantBuildings);
@@ -924,7 +915,6 @@ export default function WorldScene3D(props: SceneProps) {
         if (nextActors !== actorKey) {
           actorKey = nextActors;
           updateActors(w);
-          for(const [id,npc]of npcRigs)if(!npc.active){npc.rig.dispose();npcRigs.delete(id);}
         }
         const smooth = options.current.reducedMotion ? 1 : 1 - Math.exp(-dt * 12);
         const third=thirdRef.current&&latest.current.presentation!=='conversation';
@@ -969,12 +959,6 @@ export default function WorldScene3D(props: SceneProps) {
         scene.background = new THREE.Color(sky);
         (scene.fog as THREE.FogExp2).color.set(sky);
       }
-      for(const npc of npcRigs.values()){
-        const dt=Math.min(.1,(time-last)/1000||.016),delta=npc.target.clone().sub(npc.rig.root.position),speed=delta.length();
-        if(speed>8)npc.rig.root.position.copy(npc.target);else npc.rig.root.position.lerp(npc.target,options.current.reducedMotion?1:1-Math.exp(-dt*9));
-        if(speed>.025)npc.rig.root.rotation.y+=shortestTurn(npc.rig.root.rotation.y,Math.atan2(delta.x,delta.z))*(1-Math.exp(-dt*8));
-        npc.rig.update(time/1000,Math.min(1,speed*3),false,options.current.reducedMotion);
-      }
       // Sprites face the camera automatically; preserve the source proportions after loading.
       for (const group of [terrain, actors])
         for (const object of group.children) {
@@ -1015,11 +999,8 @@ export default function WorldScene3D(props: SceneProps) {
       const exterior=!legacyRegion(camera.position.x,camera.position.z),pool=voxelWater(w,camera.position.x,camera.position.z),underwater=!!pool&&camera.position.y<pool.surface;
       (scene.fog as THREE.FogExp2).density=underwater?.11:camera.position.y>170?.0035:profile.low?.003:.0018;
       if(underwater){scene.background=new THREE.Color('#28748b');(scene.fog as THREE.FogExp2).color.set('#28748b');}
-      const nearby=new Set<string>();for(const other of Object.values(w.players)){if(other.id===latest.current.selfId||other.spectator||other.life?.indoors)continue;const id=rpgProtagonist(other.profile,!!other.hero);if(!id)continue;const x=other.position3D?.x??other.x+.5,z=other.position3D?.z??other.y+.5;if(Math.hypot(x-avatar.root.position.x,z-avatar.root.position.z)>26)continue;
-        nearby.add(other.id);let entry=remoteHeroes.get(other.id);if(!entry){const hero=new ProtagonistModel();entry={hero,position:new THREE.Vector3(x,playerHeight(w,other),z)};remoteHeroes.set(other.id,entry);scene.add(hero.root);}entry.hero.set(id);const point=new THREE.Vector3(x,playerHeight(w,other),z),movement=point.clone().sub(entry.position);if(movement.lengthSq()>.0001)entry.hero.root.rotation.y=Math.atan2(movement.x,movement.z);entry.hero.root.position.copy(point);entry.hero.update(dt,other.position3D?.vy?'Jump':movement.lengthSq()>.0001?'Walk':'Idle',options.current.reducedMotion);entry.position.copy(point);
-      }
-      for(const[id,entry]of remoteHeroes)if(!nearby.has(id)){entry.hero.dispose();scene.remove(entry.hero.root);remoteHeroes.delete(id);}
-      for(const actor of actors.children)if(actor.userData.player)actor.visible=!remoteHeroes.get(actor.userData.player)?.hero.ready;
+      renderer.domElement.dataset.actorSprites=String(actors.children.filter(o=>o instanceof THREE.Sprite).length);
+      // Only the local protagonist uses a 3D model; every other actor keeps its artwork.
       landscape.update(w,avatar.root.position,time/1000,phase===3,options.current.reducedMotion);
       nature.update(w,avatar.root.position,time/1000,options.current.reducedMotion,phase===3);
       const detailRadius=profile.low?12:19;
@@ -1068,7 +1049,7 @@ export default function WorldScene3D(props: SceneProps) {
       window.removeEventListener("blur",cancelLook);
       document.removeEventListener("visibilitychange",cancelLook);
       element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
-      protagonist.dispose();remoteHeroes.forEach(e=>e.hero.dispose());landscape.dispose();models.dispose();avatar.dispose();nature.dispose();npcRigs.forEach(n=>n.rig.dispose());
+      protagonist.dispose();landscape.dispose();models.dispose();avatar.dispose();nature.dispose();
       batches.forEach((b) => b.dispose());
       groundMaterial?.dispose();
       geometries.forEach((g) => g.dispose());

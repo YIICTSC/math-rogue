@@ -67,7 +67,6 @@ export default function ArcadeModal({ me, siteId, ready, visible, languageMode, 
     send({ type: 'arcade-play', siteId, game, choice });
   };
   const again = () => {
-    audioService.playBGM('shop');
     baseline.current = outcome?.token;
     setGame(null); setRevealed(false); setStops(0); setWaiting(false);
   };

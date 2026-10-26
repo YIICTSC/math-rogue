@@ -23,7 +23,8 @@ export default function LifePanel({world,selfId,target,languageMode,send,onClose
  const nearby=nearbyResources(world,me);
  if(target!==null&&nearby.includes(target))nearby.sort((a,b)=>a===target?-1:b===target?1:0);
  const work=life.work,progress=work?Math.min(100,Math.max(0,(clock-work.started)/(work.expires-work.started)*100)):0;
- useRpgMusic(musicActive?(work?(work.kind==='fish'?'fishing':'gather'):tab==='fishbook'?'journal':tab==='homes'?'home':tab==='craft'?'craft':'gather'):null,20);
+ // Browsing life menus inherits the surrounding world music.
+
  const act=(a:Action)=>{if(a.type==='life-cast')void audioService.preloadRpgFishingSounds();if(a.type==='life-hit'&&work)audioService.playRpgLifeSound(natureAt(world,work.tile)?.rock?'mine':'gather');if(a.type==='life-reel')audioService.playRpgFishingSound(work?.fishing?.phase==='bite'?'hook':'reel');if(a.type==='life-craft'||a.type==='life-build')audioService.playRpgLifeSound('craft');send(a);};
  const adapter=house?homeGameWorld(world):null;
  return <div className="rpg-life-backdrop"><section className="rpg-life" role="dialog" aria-modal="true" aria-label={t('採取・クラフト')}>

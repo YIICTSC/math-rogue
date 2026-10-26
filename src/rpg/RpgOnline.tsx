@@ -1,3 +1,4 @@
+import MenuSelection from './MenuSelection';
 import { multiTouchAction } from '../utils/multiTouchAction';
 import {useSessionResultExit} from '../services/useSessionResultExit';
 import {homeMusic} from './homeTracks';
@@ -501,7 +502,7 @@ export default function RpgOnline({
       if (pad.pressed[PAD.LT]) surface?.dispatchEvent(new CustomEvent('voxel-command',{detail:'voxel-place'}));
     }
   });
-  const musicScene:RpgMusicScene = settingsOpen?'settings':heroOpen?'hero':!world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):farmOpen?'farm':cityOpen?'city':fishing.result?'catch':me?.life?.work?(me.life.work.kind==='fish'?'fishing':'gather'):storySiteId||roamingNpcSiteId?'story':homeRoom?'home':lifeOpen?(lifeInitialTab==='fishbook'?'journal':'craft'):detail==='social'||detail==='town'?'social':detail==='journal'||detail==='player'?'journal':detail==='team'?'team':detail==='event'?'event':detail==='goal'?'goal':detail==='menu'?'setup':hasActivityDialog?'team':'map';
+  const musicScene:RpgMusicScene = !world||!world.started?'setup':world.ended?(world.endReason==='clear'?'clear':'ended'):homeRoom?'home':'map';
   useRpgMusic(active&&!interactionBlocked&&!me?.nativeScene?musicScene:null,world?.ended?40:10,homeRoom?'home':!world||!world.started?'setup':'map',homeMusic(homeRoom));
   if((autoJoinInvite||intent==='join')&&!world)return <InviteJoin title={trans("学習ローグRPG",languageMode)} name={name} onName={setName} code={code} onCode={autoJoinInvite?undefined:setCode} onJoin={()=>start("invite")} onClose={autoJoinInvite?close:()=>{room.current?.close();(onTitle??onClose)();}} busy={busy} error={trans(error,languageMode)} languageMode={languageMode}/>;
   return (
@@ -511,7 +512,7 @@ export default function RpgOnline({
       {farmOpen&&world&&<FarmPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onTrack={(x,y)=>{if(!me)return;const route=findWalkingRoute(world,me.x,me.y,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;setFarmOpen(false);}} onClose={()=>setFarmOpen(false)}/>}
       {cityOpen&&world?.city&&<CityPanel world={world} selfId={selfId} send={a=>room.current?.send(a)} languageMode={languageMode} onClose={()=>setCityOpen(false)}/>}
       {heroOpen&&<HeroBuilder languageMode={languageMode} initial={hero||loadHeroDraft()} onSave={updateHero} onClose={()=>setHeroOpen(false)}/>}
-      <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-gamepad-live={controllerExploring?'rpg':undefined} data-gamepad-initial-scope="rpg" data-testid="rpg-native-map" data-resident-scene={!!residentTarget}>
+      <main className={`rpg-root ${[prefs.contrast?'rpg-high-contrast':'',prefs.largeText?'rpg-large-text':'',prefs.largeControls?'rpg-large-controls':'',prefs.reducedMotion?'rpg-reduced-motion':'',prefs.hand==='right'?'rpg-hand-right':''].join(' ')} ${!world||!world.started?'rpg-intro-root':''} ${compact&&world?.started&&me?'rpg-root--compact':''}`} data-gamepad-live={controllerExploring?'rpg':undefined} data-gamepad-initial-scope="rpg" data-testid="rpg-native-map" data-resident-scene={!!residentTarget}><MenuSelection/>
         <GameplayGamepadHint mode="rpg"/>
         <header className="rpg-header">
           <div className="rpg-brand">

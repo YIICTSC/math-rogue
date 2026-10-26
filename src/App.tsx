@@ -10041,10 +10041,6 @@ const App: React.FC = () => {
         }
     }, [gameState.enemies, gameState.screen, gameState.rpgOnline, rpgSnapshot]);
 
-    useEffect(() => {
-        if (gameState.rpgOnline && rpgArcadeSite && gameState.screen === GameScreen.MAP && !rpgSnapshot?.world.ended)
-            audioService.playBGM(rpgSnapshot?.world.players[rpgSnapshot.selfId]?.arcadeOutcome?.token !== rpgArcadeEntryTokenRef.current ? 'reward' : 'shop');
-    }, [gameState.rpgOnline, gameState.screen, rpgArcadeSite, rpgSnapshot?.world.players[rpgSnapshot?.selfId || '']?.arcadeOutcome?.token]);
 
     useEffect(() => {
         const world = rpgSnapshot?.world;
@@ -21699,7 +21695,7 @@ const App: React.FC = () => {
                                 (rpgSnapshot.world.players[rpgSnapshot.selfId].profile?.mutationRevision || 0) === (rpgSnapshot.world.players[rpgSnapshot.selfId].mutationRevision || 0)}
                             languageMode={languageMode}
                             send={action => rpgRoomRef.current?.send(action)}
-                            onClose={() => { setRpgArcadeSite(null); audioService.playBGM('map'); }}
+                            onClose={() => { setRpgArcadeSite(null); }}
                         />
                     </div>
                 )}
