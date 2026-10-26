@@ -1,3 +1,4 @@
+import {TrapControls} from './school-dungeon/TrapControls';
 import {FacingButton} from './school-dungeon/FacingButton';
 import {retireShopTheft} from './school-dungeon/shops';
 import {createPortal} from 'react-dom';
@@ -3644,6 +3645,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                 </div>
                 <AbilityButton adventure={adventure}/>
 
+                <TrapControls adventure={adventure} blocked={menuOpen||shopState.active||gameOver||gameClear}/>
                 <div className="flex flex-col items-center group">
                     <button className="w-20 h-20 bg-[#8b0000] rounded-full shadow-[0_6px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] text-2xl" onClick={toggleMenu}>B</button>
                     <span className="text-[#666] text-sm font-bold mt-1">MENU</span>
@@ -3668,7 +3670,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         </div>
 
         {/* --- BOTTOM: MOBILE ONLY CONTROLLER --- */}
-        <div className="portrait:flex landscape:hidden md:hidden order-4 w-full max-w-md h-[260px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
+        <div className="dungeon-portrait-controls portrait:flex landscape:hidden md:hidden order-4 w-full max-w-md h-[260px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0">
+            <TrapControls adventure={adventure} blocked={menuOpen||shopState.active||gameOver||gameClear}/>
             <div className="portrait-ability-slot"><AbilityButton adventure={adventure}/></div>
             <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
@@ -3685,7 +3688,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             </div>
 
             {/* Mobile Shoot Button */}
-            <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10 group">
+            <div className="dungeon-portrait-shoot absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10 group">
                 <button
                     className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]"
                     onClick={fireRangedWeapon}
@@ -3695,7 +3698,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                 ><Crosshair size={16}/></button>
             </div>
 
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
+            <div className="dungeon-ab-buttons absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
                 <div className="flex flex-col items-center group"><button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button><span className="text-[#666] text-xs font-bold mt-1">MENU</span></div>
                 <div className="flex flex-col items-center group">
                     <button 
