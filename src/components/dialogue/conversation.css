@@ -17,3 +17,8 @@
 /* Preserve contrast when a highlighted advance button is hovered. */
 .conversation-stage .conversation-actions button:hover:not(:disabled){background:#31515b;color:var(--cv-paper);border-color:#fff2ba}
 .conversation-stage .conversation-actions .conversation-primary:hover:not(:disabled){background:var(--cv-gold);color:var(--cv-ink);border-color:var(--cv-gold);filter:brightness(1.07)}
+
+/* Narrative paintings replace the cast without cropping or darkening the dedicated art. */
+.conversation-illustration{width:min(1120px,100%);height:100%;min-height:0;margin:0 auto;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#071b2840}
+.conversation-illustration img{display:block;width:100%;height:100%;min-height:0;object-fit:contain;filter:none}
+.conversation-stage[data-presentation=illustration] .conversation-script{margin-top:0}

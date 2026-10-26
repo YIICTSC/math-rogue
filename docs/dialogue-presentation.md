@@ -30,3 +30,9 @@ node scripts/generate-android-asset-manifest.mjs
 ```
 
 アセット検証は全キャストの網羅、生成元と配信ファイルのハッシュ、透明度、差分の重複、倍率・アンカー、日英48会話の話者を確認する。ブラウザ検証は320/390px縦、844px横、デスクトップ、長文・選択肢、音声再生・停止、途中再開、NPC会話中の移動停止を対象とする。コンタクトシートと画面写真は `tmp/dialogue/` などに出力する。
+
+## Star Tide narration
+
+Star Tide selects the presentation per voice-catalog speaker. Narration with dedicated art shows that illustration clearly, uncropped, in place of the character portraits. Spoken character lines keep the two-person conversation stage. This applies to the opening, island story/choice pages, windsail introduction, endings, and narrative observations in NPC encounters. Voice playback, replay, story progress and choice handlers use the same controls in either presentation. Other games keep their existing dialogue layout.
+
+`pnpm run test:star-tide:narration` checks mixed narrator/dialogue sequences, all 12 island paintings and choices, 48 NPC encounters, English, voice replay, close callbacks, and four phone/desktop sizes.

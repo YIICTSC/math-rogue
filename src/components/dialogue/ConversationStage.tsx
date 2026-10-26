@@ -18,10 +18,10 @@ export function ReactionPortrait({actor,mirror=false}:{actor:ConversationActor;m
 }
 
 /** One readable dialogue surface. Reading does not alter the caller's story state. */
-export default function ConversationStage({title,eyebrow,background,left,right,active='right',speaker,text,lineKey,progress,children,onClose,closeLabel='Close',modal=true,className='',theme='dungeon'}:{
+export default function ConversationStage({title,eyebrow,background,left,right,active='right',speaker,text,lineKey,progress,children,onClose,closeLabel='Close',modal=true,className='',theme='dungeon',illustration=false}:{
   title:string;eyebrow?:string;background:string;left:ConversationActor;right:ConversationActor;
   active?:'left'|'right'|'narrator';speaker:string;text:string;lineKey:string;progress?:string;
-  children:React.ReactNode;onClose?:()=>void;closeLabel?:string;modal?:boolean;className?:string;theme?:'dungeon'|'sea';
+  children:React.ReactNode;onClose?:()=>void;closeLabel?:string;modal?:boolean;className?:string;theme?:'dungeon'|'sea';illustration?:boolean;
 }) {
   const root=useRef<HTMLElement>(null);
   const previousFocus=useRef(typeof document==='undefined'?null:document.activeElement as HTMLElement|null);
@@ -35,7 +35,7 @@ export default function ConversationStage({title,eyebrow,background,left,right,a
       next?.focus();
     }
   },[lineKey,children]);
-  const stage=<section ref={root} className={`conversation-stage conversation-${theme} ${className}`} data-conversation-stage data-gamepad-initial-scope={lineKey} data-gamepad-modal role={modal?'dialog':undefined} aria-modal={modal||undefined} aria-label={title} onPointerDown={e=>e.stopPropagation()} onKeyDown={event=>{
+  const stage=<section ref={root} className={`conversation-stage conversation-${theme} ${className}`} data-conversation-stage data-presentation={illustration?'illustration':'conversation'} data-gamepad-initial-scope={lineKey} data-gamepad-modal role={modal?'dialog':undefined} aria-modal={modal||undefined} aria-label={title} onPointerDown={e=>e.stopPropagation()} onKeyDown={event=>{
     event.stopPropagation();
     if(event.key==='Escape'&&onClose){event.preventDefault();onClose();}
     if(event.key==='Tab'){
@@ -46,12 +46,12 @@ export default function ConversationStage({title,eyebrow,background,left,right,a
   }}>
     <div className="conversation-landscape" style={{backgroundImage:`url(${assetUrl(background)})`}} aria-hidden="true"/><div className="conversation-veil" aria-hidden="true"/>
     <header className="conversation-header"><div>{eyebrow&&<small>{eyebrow}</small>}<h2>{title}</h2></div>{onClose&&<button data-gamepad-back onClick={onClose}>{closeLabel} <span aria-hidden="true">×</span></button>}</header>
-    <div className="conversation-cast">
+    {illustration?<figure className="conversation-illustration"><img src={assetUrl(background)} alt=""/></figure>:<div className="conversation-cast">
       {[{actor:left,side:'left'},{actor:right,side:'right'}].map(({actor,side})=><figure key={side} className={`conversation-actor conversation-${side} ${active===side?'is-speaking':'is-listening'}`} data-speaker-active={active===side}>
         <div className="conversation-actor-frame"/><ReactionPortrait actor={actor} mirror={side==='left'}/><figcaption><span>{actor.name}</span><i aria-hidden="true">{active===side?'◆':'◇'}</i></figcaption>
       </figure>)}
       <div className="conversation-distance" aria-hidden="true">✦</div>
-    </div>
+    </div>}
     <div className={`conversation-script speaker-${active}`}><div className="conversation-speaker"><strong>{speaker}</strong>{progress&&<small>{progress}</small>}</div><p className="conversation-text" key={lineKey} role="status" aria-live="polite">{text}</p><div className="conversation-actions">{children}</div></div>
   </section>;
   return typeof document==='undefined'?stage:createPortal(stage,document.body);
