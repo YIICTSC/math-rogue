@@ -1,4 +1,5 @@
 import {assetUrl} from '../../../utils/assetPaths';
+import {D2_HERO_RENDER_METRICS} from '../../../data/dungeons2HeroRenderMetrics.generated';
 export const D2_ACTIONS=['walk-1','walk-2','walk-3','walk-4','attack-ready','attack-release','throw-ready','throw-release','swing-ready','swing-release','read-1','read-2','use-1','use-2','shoot-ready','shoot-release'] as const;
 export type D2HeroAction='walk'|'attack'|'throw'|'swing'|'read'|'use'|'shoot';
 const clock=()=>typeof performance==='undefined'?Date.now():performance.now();
@@ -23,5 +24,11 @@ export function drawD2HeroAction(ctx:CanvasRenderingContext2D,id:string,facing:n
  if(!motion)return false;
  const image=loadD2HeroActions(id,transformed);if(!image?.complete||!image.naturalWidth)return false;
  const row=motion.row;
- ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,facing*96,row*96,96,96,Math.round(x-size*.25),Math.round(y-size*.375),size*1.5,size*1.5);ctx.restore();return true;
+ const key=id.replace('dungeons2-','')+(transformed?'-transformed':'');
+ const metric=D2_HERO_RENDER_METRICS[key]?.[facing] ?? {scale:1.125,foot:122/128};
+ const drawn=size*metric.scale;
+ // Both atlases share the same horizontal centre and visible foot baseline.
+ // Keep this scale across all action rows so effect size never changes body size.
+ const left=x+size*.5-drawn*.5,top=y+size*metric.foot-drawn*D2_ACTION_ANCHOR/D2_ACTION_CELL;
+ ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,facing*96,row*96,96,96,Math.round(left),Math.round(top),drawn,drawn);ctx.restore();return true;
 }

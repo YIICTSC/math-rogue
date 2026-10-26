@@ -1,0 +1,1753 @@
+{
+  "version": 1,
+  "alphaThreshold": 64,
+  "method": "Median of four walking heights per direction, scaled to idle height. Feet share the idle baseline; all action rows retain this common scale.",
+  "records": [
+    {
+      "key": "lyria",
+      "idle": "public/sprites/dungeons2/lyria-directions.webp",
+      "idleSha256": "31935151cf6ff222c93c106292eee2829dad1e0ea478cd94be44dfc9df781b77",
+      "actions": "public/sprites/dungeons2/animations/lyria.webp",
+      "actionSha256": "009c4317d7597f38268ef2ea3da0dd092c7218608a65e60b62f7a190031a3216",
+      "directions": [
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            77,
+            75
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            77,
+            75
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            75,
+            75
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            75
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            75,
+            75
+          ]
+        },
+        {
+          "scale": 1.16,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            75,
+            75,
+            75
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            77,
+            76,
+            75
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            77,
+            77,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "key": "lyria-transformed",
+      "idle": "public/sprites/dungeons2/lyria-transformed-directions.webp",
+      "idleSha256": "c7d597222b9e85c7ae5a9749829f813d8a13cdff9924660631dfa44560aa0654",
+      "actions": "public/sprites/dungeons2/animations/lyria-transformed.webp",
+      "actionSha256": "f0fb1b67c467cacfcd4a0328c2cae0dca7ccdf5647d420b4af2dba510e9c935c",
+      "directions": [
+        {
+          "scale": 1.1609589,
+          "foot": 0.953125,
+          "idleHeight": 113,
+          "walkHeights": [
+            72,
+            72,
+            74,
+            74
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            76,
+            74,
+            77
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            77,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            75,
+            77,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.11764706,
+          "foot": 0.953125,
+          "idleHeight": 114,
+          "walkHeights": [
+            75,
+            77,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.10526316,
+          "foot": 0.953125,
+          "idleHeight": 112,
+          "walkHeights": [
+            76,
+            78,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.10828025,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            80,
+            79,
+            76
+          ]
+        },
+        {
+          "scale": 1.06050955,
+          "foot": 0.953125,
+          "idleHeight": 111,
+          "walkHeights": [
+            78,
+            80,
+            79,
+            76
+          ]
+        }
+      ]
+    },
+    {
+      "key": "celis",
+      "idle": "public/sprites/dungeons2/celis-directions.webp",
+      "idleSha256": "8bc434f1036ca82d784718a0bb7e250487744480f5b85f219035e97106fb9185",
+      "actions": "public/sprites/dungeons2/animations/celis.webp",
+      "actionSha256": "409f6b90b50366eb7d66a1b8e9cb1f6cd4b397b4d8b453619a0482e868a8be83",
+      "directions": [
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            78,
+            77
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            76,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            76,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            76,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            75
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "key": "celis-transformed",
+      "idle": "public/sprites/dungeons2/celis-transformed-directions.webp",
+      "idleSha256": "e619605cbae5137a3d7df14017aa75e739d935f513c30347947060a58a1c2ff7",
+      "actions": "public/sprites/dungeons2/animations/celis-transformed.webp",
+      "actionSha256": "2d4695aac6fb160945ae1af1734aac9e8deafa466c16e41169ce0852b9747ef6",
+      "directions": [
+        {
+          "scale": 1.16778523,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            74,
+            75,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.16,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            74,
+            75,
+            77,
+            75
+          ]
+        },
+        {
+          "scale": 1.17567568,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            74,
+            74,
+            77,
+            74
+          ]
+        },
+        {
+          "scale": 1.17567568,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            73,
+            74,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.17567568,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            73,
+            74,
+            75,
+            74
+          ]
+        },
+        {
+          "scale": 1.17567568,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            73,
+            74,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.18367347,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            73,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.17567568,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            74,
+            74,
+            77,
+            74
+          ]
+        }
+      ]
+    },
+    {
+      "key": "flora",
+      "idle": "public/sprites/dungeons2/flora-directions.webp",
+      "idleSha256": "17bb54d5de5e11865099f0fa26d2225bc2636077b2c0222bed51e2e803b204bd",
+      "actions": "public/sprites/dungeons2/animations/flora.webp",
+      "actionSha256": "cedf22afedaf767ef9be1c4fcea1f70caf7efc4447ab95ef895d8e6740d7d999",
+      "directions": [
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            75,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            75,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            75,
+            74,
+            76
+          ]
+        }
+      ]
+    },
+    {
+      "key": "flora-transformed",
+      "idle": "public/sprites/dungeons2/flora-transformed-directions.webp",
+      "idleSha256": "8426440c7bd3ffc0b3e4ebab63cb5f17fdecc50e20124f8d39ad3e7f91cc08e3",
+      "actions": "public/sprites/dungeons2/animations/flora-transformed.webp",
+      "actionSha256": "cd4d90e2e0c6ecac27db6042a66fc24889acd436fdaa9eee8a7118f405cb7860",
+      "directions": [
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            70,
+            70,
+            71,
+            70
+          ]
+        },
+        {
+          "scale": 1.22535211,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            71,
+            70,
+            71,
+            72
+          ]
+        },
+        {
+          "scale": 1.26086957,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            69,
+            69,
+            69,
+            69
+          ]
+        },
+        {
+          "scale": 1.26086957,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            69,
+            69,
+            69,
+            69
+          ]
+        },
+        {
+          "scale": 1.26086957,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            69,
+            69,
+            69,
+            69
+          ]
+        },
+        {
+          "scale": 1.26086957,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            69,
+            69,
+            69,
+            69
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            70,
+            69,
+            70,
+            71
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            70,
+            69,
+            70,
+            70
+          ]
+        }
+      ]
+    },
+    {
+      "key": "noctia",
+      "idle": "public/sprites/dungeons2/noctia-directions.webp",
+      "idleSha256": "11f0861b61349442e6043af3626b0ac47175719d3fae88a425ebe66dd600cd64",
+      "actions": "public/sprites/dungeons2/animations/noctia.webp",
+      "actionSha256": "70c9c994de88d1fde635d0437a5fe81930a8a6c2cec1d3d3243121c565f30ed8",
+      "directions": [
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            70,
+            70,
+            70
+          ]
+        },
+        {
+          "scale": 1.22535211,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            70,
+            72,
+            70
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            70,
+            70,
+            70
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            70,
+            70,
+            70
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            70,
+            70,
+            70
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            71,
+            70,
+            70,
+            70
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            71,
+            70,
+            70,
+            70
+          ]
+        },
+        {
+          "scale": 1.24285714,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            72,
+            70,
+            70,
+            70
+          ]
+        }
+      ]
+    },
+    {
+      "key": "noctia-transformed",
+      "idle": "public/sprites/dungeons2/noctia-transformed-directions.webp",
+      "idleSha256": "8eb4fb8b30d5538b522a2921db18fdb0afc8e4f9146fd9bb3575280a743f6de4",
+      "actions": "public/sprites/dungeons2/animations/noctia-transformed.webp",
+      "actionSha256": "f64b0dcd4fa0d62add5c43855207b2ba66f1f6e90651bc54340c9a76bac7b20b",
+      "directions": [
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            77,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            78,
+            75,
+            75
+          ]
+        },
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            79,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            78,
+            75,
+            76
+          ]
+        },
+        {
+          "scale": 1.16,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            74,
+            74
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            77,
+            74,
+            75
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            76,
+            75,
+            75
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            77,
+            75,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "key": "aurene",
+      "idle": "public/sprites/dungeons2/aurene-directions.webp",
+      "idleSha256": "f80f9653e3893125ff6b48b6f6be306dfd8f2e8286edc9261db2b15df8bd4c66",
+      "actions": "public/sprites/dungeons2/animations/aurene.webp",
+      "actionSha256": "9baa57eacb7c2ef7cefbb5ad20d2f96ea5aabbed95b450a2f6a3fb8da0855c55",
+      "directions": [
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            78,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            78,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            76,
+            76,
+            75
+          ]
+        },
+        {
+          "scale": 1.15771812,
+          "foot": 0.953125,
+          "idleHeight": 115,
+          "walkHeights": [
+            75,
+            75,
+            74,
+            74
+          ]
+        },
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            78,
+            77,
+            75
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            76,
+            74,
+            75
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            78,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            78,
+            75,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "key": "aurene-transformed",
+      "idle": "public/sprites/dungeons2/aurene-transformed-directions.webp",
+      "idleSha256": "0f0e9c7af50d686e410797dc88adfab87420dc83ce1a5fb56b8912082a624006",
+      "actions": "public/sprites/dungeons2/animations/aurene-transformed.webp",
+      "actionSha256": "46addfeae5fa3fe30798978c0d9ee5557ebea1e544abef6ae2b17136aba4d4ea",
+      "directions": [
+        {
+          "scale": 1.20833333,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            73,
+            72,
+            72,
+            71
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            74,
+            74,
+            77
+          ]
+        },
+        {
+          "scale": 1.2,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            73,
+            72,
+            71
+          ]
+        },
+        {
+          "scale": 1.25179856,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            70,
+            69,
+            68
+          ]
+        },
+        {
+          "scale": 1.2,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            73,
+            71,
+            72
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            74,
+            74,
+            77
+          ]
+        },
+        {
+          "scale": 1.2,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            73,
+            72,
+            72
+          ]
+        },
+        {
+          "scale": 1.22535211,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            72,
+            70,
+            70
+          ]
+        }
+      ]
+    },
+    {
+      "key": "ignis",
+      "idle": "public/sprites/dungeons2/ignis-directions.webp",
+      "idleSha256": "9aa84305eae808927542ccf4f09a30ec7b48262bbedb374e4a3073bf0fbbb537",
+      "actions": "public/sprites/dungeons2/animations/ignis.webp",
+      "actionSha256": "b0c1b4828d895dd2754cdca9494e2eea50c6ea1623223b9833f2b8ef5d9f5897",
+      "directions": [
+        {
+          "scale": 1.10126582,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            79,
+            79,
+            79
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            77,
+            77
+          ]
+        },
+        {
+          "scale": 1.09803922,
+          "foot": 0.953125,
+          "idleHeight": 112,
+          "walkHeights": [
+            79,
+            77,
+            76,
+            76
+          ]
+        },
+        {
+          "scale": 1.07843137,
+          "foot": 0.953125,
+          "idleHeight": 110,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.10828025,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            78,
+            79,
+            78
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            77,
+            77,
+            77
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            77,
+            77
+          ]
+        }
+      ]
+    },
+    {
+      "key": "ignis-transformed",
+      "idle": "public/sprites/dungeons2/ignis-transformed-directions.webp",
+      "idleSha256": "36cf7d19b73c72aeae0f134efd4351266f0aed87f6b294529bf411adad10cdfe",
+      "actions": "public/sprites/dungeons2/animations/ignis-transformed.webp",
+      "actionSha256": "2014f73644e33b5d5e6b761200488ef9a8ea475ce9d70e042828c8a7306e6f82",
+      "directions": [
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            77,
+            78
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            77,
+            79
+          ]
+        },
+        {
+          "scale": 1.09090909,
+          "foot": 0.953125,
+          "idleHeight": 112,
+          "walkHeights": [
+            80,
+            77,
+            77,
+            77
+          ]
+        },
+        {
+          "scale": 1.07278481,
+          "foot": 0.953125,
+          "idleHeight": 113,
+          "walkHeights": [
+            79,
+            78,
+            79,
+            79
+          ]
+        },
+        {
+          "scale": 1.10828025,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            79,
+            78
+          ]
+        },
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            77,
+            78
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            78,
+            78
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            77
+          ]
+        }
+      ]
+    },
+    {
+      "key": "leon",
+      "idle": "public/sprites/dungeons2/leon-directions.webp",
+      "idleSha256": "204b76537e000887549393ce57b2b8ac646fc2dedec1e21997f51a17966de480",
+      "actions": "public/sprites/dungeons2/animations/leon.webp",
+      "actionSha256": "be5d6abd1487452ad67e970ee20d1089356382ca00112198de739beafff487c4",
+      "directions": [
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            74,
+            75
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            74,
+            77
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            75,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.10526316,
+          "foot": 0.953125,
+          "idleHeight": 112,
+          "walkHeights": [
+            79,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            74,
+            76
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            75,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "key": "leon-transformed",
+      "idle": "public/sprites/dungeons2/leon-transformed-directions.webp",
+      "idleSha256": "1f31b4679dbe281808150399141b9c3c893d6156cd8b00bac2c43bb851c5b4d6",
+      "actions": "public/sprites/dungeons2/animations/leon-transformed.webp",
+      "actionSha256": "8d3cc8ea30952022af67b6eff259e77f7b43c21fa0e627744dee12c7a67e29f6",
+      "directions": [
+        {
+          "scale": 1.06862745,
+          "foot": 0.953125,
+          "idleHeight": 109,
+          "walkHeights": [
+            76,
+            78,
+            77,
+            73
+          ]
+        },
+        {
+          "scale": 1.10828025,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            80,
+            79,
+            74
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            77,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            77,
+            75,
+            75
+          ]
+        },
+        {
+          "scale": 1.15231788,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            75,
+            76,
+            73
+          ]
+        },
+        {
+          "scale": 1.09090909,
+          "foot": 0.953125,
+          "idleHeight": 112,
+          "walkHeights": [
+            77,
+            78,
+            77,
+            75
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            79,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            79,
+            79,
+            75
+          ]
+        }
+      ]
+    },
+    {
+      "key": "orion",
+      "idle": "public/sprites/dungeons2/orion-directions.webp",
+      "idleSha256": "0dec7975e78a3fdc2f59c27097a58dae3cf004af4bceaa1ac3da096e4f57c21f",
+      "actions": "public/sprites/dungeons2/animations/orion.webp",
+      "actionSha256": "c28239ff0a514f6c48e042afc969847be8c9a6fa53f299e20000ad40c1cf4955",
+      "directions": [
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            78,
+            78
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            79,
+            77
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            76,
+            78,
+            77
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            76,
+            78,
+            76
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            77
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            78,
+            76
+          ]
+        },
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            75,
+            78,
+            77
+          ]
+        }
+      ]
+    },
+    {
+      "key": "orion-transformed",
+      "idle": "public/sprites/dungeons2/orion-transformed-directions.webp",
+      "idleSha256": "e3cb4d5390ca0e8578269d33effaef3e5eb8fb78d96cd969562144d027b8b218",
+      "actions": "public/sprites/dungeons2/animations/orion-transformed.webp",
+      "actionSha256": "deaaf12246f1d1d2895f818ee685fc79ea3c4914b32e5a732df4ce90f45beac1",
+      "directions": [
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            79,
+            80,
+            77
+          ]
+        },
+        {
+          "scale": 1.10126582,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            79,
+            79,
+            79
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            77,
+            77,
+            75
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            76,
+            79,
+            74
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            77,
+            79,
+            76
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            76,
+            78,
+            76
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            76,
+            79,
+            78
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            75,
+            77,
+            76
+          ]
+        }
+      ]
+    },
+    {
+      "key": "leif",
+      "idle": "public/sprites/dungeons2/leif-directions.webp",
+      "idleSha256": "22e80712f0cc59eaa3b831c38b036c7d47f28cf88c9077d7750eec352cfd81c6",
+      "actions": "public/sprites/dungeons2/animations/leif.webp",
+      "actionSha256": "e8ee281cde97f3093552caa96534beda7cb2a29182af2d1414bd51d2c4a06a4e",
+      "directions": [
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            76,
+            77,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.10828025,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            78,
+            79,
+            78
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            78,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.16,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            76,
+            74,
+            71
+          ]
+        },
+        {
+          "scale": 1.16,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            77,
+            73,
+            72
+          ]
+        },
+        {
+          "scale": 1.14473684,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            76,
+            76,
+            71
+          ]
+        },
+        {
+          "scale": 1.1372549,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            80,
+            77,
+            76,
+            74
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            77,
+            77,
+            72
+          ]
+        }
+      ]
+    },
+    {
+      "key": "leif-transformed",
+      "idle": "public/sprites/dungeons2/leif-transformed-directions.webp",
+      "idleSha256": "e5b2e1638f3b12107823e17813017e3f0470399b7936a800cd3c3e6d3848f93e",
+      "actions": "public/sprites/dungeons2/animations/leif-transformed.webp",
+      "actionSha256": "0d171d48e0c80973617d4f172cc82c2d4ce0863350ef53b41200b5932b58113c",
+      "directions": [
+        {
+          "scale": 1.10126582,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            79,
+            80,
+            79
+          ]
+        },
+        {
+          "scale": 1.10828025,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            79,
+            79,
+            77
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            78,
+            79,
+            75
+          ]
+        },
+        {
+          "scale": 1.12258065,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            78,
+            77,
+            76
+          ]
+        },
+        {
+          "scale": 1.10126582,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            80,
+            79,
+            77
+          ]
+        },
+        {
+          "scale": 1.12987013,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            77,
+            77,
+            79,
+            75
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            79,
+            77,
+            79,
+            76
+          ]
+        },
+        {
+          "scale": 1.11538462,
+          "foot": 0.953125,
+          "idleHeight": 116,
+          "walkHeights": [
+            78,
+            78,
+            79,
+            76
+          ]
+        }
+      ]
+    }
+  ]
+}
