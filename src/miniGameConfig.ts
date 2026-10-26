@@ -110,7 +110,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     icon: Club,
     clearAction: () => {},
   },
-  {id:'STAR_TIDE',name:'星潮の航路',titleLines:['星潮の','航路'],description:'風と火を活かし、島々を自由に巡る探索・料理・学びの2DアクションRPG。',screen:GameScreen.MINI_GAME_STAR_TIDE,threshold:0,typeLabel:'ARPG',typeColor:'bg-teal-800',glowColor:'rgba(121,211,197,0.5)',icon:Compass,clearAction:()=>localStorage.removeItem('learning-rogue:star-tide:v1')},
+  {id:'STAR_TIDE',name:'星潮の航路',titleLines:['星潮の','航路'],description:'風と火を活かし、島々を自由に巡る探索・料理・学びの2DアクションRPG。',screen:GameScreen.MINI_GAME_STAR_TIDE,threshold:4000,typeLabel:'ARPG',typeColor:'bg-teal-800',glowColor:'rgba(121,211,197,0.5)',icon:Compass,clearAction:()=>localStorage.removeItem('learning-rogue:star-tide:v1')},
   {
     id: 'DUNGEON',
     name: '学習ローグダンジョンズ',
