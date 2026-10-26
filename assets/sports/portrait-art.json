@@ -1,0 +1,16 @@
+{
+  "generator": "ImageGen",
+  "created": "2026-10-26",
+  "reference": "assets/sports/club-source.png",
+  "original": "/workspace/generated_images/exec-d8cb9d04-5326-4175-a3a7-6f895c86364e.png",
+  "source": "assets/sports/club-portrait-source.png",
+  "output": "public/sprites/sports/club-portrait.webp",
+  "size": [
+    948,
+    1659
+  ],
+  "purpose": "Original portrait illustration for the tennis, golf and dodgeball sports title",
+  "direction": "New vertical composition preserving the original tennis girl and golfer boy, with an original dodgeball teammate. Faces in the upper half; academy sports grounds below for mobile menu overlays. No lettering or UI.",
+  "sourceSha256": "82d051d3001972f80226ca54aa1164448c030f26f8a6a47f6ec2bc5ec7d7b989",
+  "outputSha256": "5d2a73fcb303d60f0739b041e281b306b2e875bd2c2e90995b9caef087ef97d3"
+}

@@ -32,6 +32,8 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "招待された種目": "Invited sport",
+  "参加名と6桁コードで参加": "Join with your name and 6-digit code",
   "記憶のナギ": "Nagi's memory",
   ...TENNIS_ENGLISH,
   ...DODGEBALL_ENGLISH,
@@ -392,6 +394,8 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "招待された種目": "しょうたいされたしゅもく",
+  "参加名と6桁コードで参加": "さんかなまえと6けたのコードでさんか",
   "記憶のナギ": "きおくのナギ",
   ...TENNIS_HIRAGANA,
   ...DODGEBALL_HIRAGANA,

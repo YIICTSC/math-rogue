@@ -1,3 +1,4 @@
+import {useSportsInvitation} from '../shared/useSportsInvitation';
 import {useSessionResultExit} from '../../services/useSessionResultExit';
 import {golfAdvanceCommand} from './keyboard';
 import InviteJoin from '../shared/InviteJoin';
@@ -34,10 +35,10 @@ import { loadAvatar, validAvatar, type KartAvatar } from '../gakuro-kart/avatar'
 import './golf.css';
 import { useGolfAudio } from './useGolfAudio';
 const lies = { green: 'グリーン', fairway: 'フェアウェイ', rough: 'ラフ', sand: 'バンカー', water: '池', ob: 'OB' };
-export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteCode='', backLabel='学習ローグへ' }: { onClose: () => void; languageMode?: LanguageMode; inviteCode?:string;backLabel?:string }) {
+export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteCode='', inviteName, backLabel='学習ローグへ' }: { onClose: () => void; languageMode?: LanguageMode; inviteCode?:string;inviteName?:string;backLabel?:string }) {
   const [transport,setTransport]=useState<OnlineTransport>(initialTransport);
   const [view, setView] = useState<GolfView | null>(null), [message, setMessage] = useState(''), [busy, setBusy] = useState(false);
-  const [name, setName] = useState(inviteCode?'':'Player'), [code, setCode] = useState(inviteCode), [picker, setPicker] = useState<'practice' | 'host' | 'change' | null>(null);
+  const [name, setName] = useState(inviteName??(inviteCode?'':'Player')), [code, setCode] = useState(inviteCode), [picker, setPicker] = useState<'practice' | 'host' | 'change' | null>(null);
   const [club, setClub] = useState<Club>('driver'), [power, setPower] = useState(.7), [offset, setOffset] = useState(0), [overview, setOverview] = useState(false), [showScores, setShowScores] = useState(false);
   const [spin, setSpin] = useState(0), [meterActive, setMeterActive] = useState(false);
   const [avatar, setAvatar] = useState<KartAvatar>(() => { try { const saved = JSON.parse(localStorage.getItem('gakuro-golf-avatar-v1') || 'null'); return validAvatar(saved) ? saved : loadAvatar(); } catch { return loadAvatar(); } });
@@ -87,10 +88,11 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   };
   const join = async () => {
     if (busy) return; setBusy(true); setMessage(''); const current = createRoom();
-    try { await current.join(code, name.trim()); if(mounted.current&&room.current===current&&inviteCode)setShowCreator(true); }
+    try { await current.join(code, name.trim()); if(mounted.current&&room.current===current&&inviteCode&&!inviteName)setShowCreator(true); }
     catch (e) { if (mounted.current && room.current === current) { room.current = null; current.close(); setView(null); setMessage(e instanceof Error ? e.message : '接続できませんでした。'); } }
     finally { if (mounted.current) setBusy(false); }
   };
+  useSportsInvitation(inviteCode,inviteName,join);
   const send = (c: GolfCommand) => { if (!spectating && !view?.paused) room.current?.send(c); };
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
@@ -137,7 +139,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
       }
     }}><section className="gg-character-dialog gg-panel" role="dialog" aria-modal="true" aria-label={t('キャラクタークリエイト')}><header><b>YOUR GOLFER</b><button autoFocus onClick={() => setShowCreator(false)}>{t('確定')}</button></header><div className="gg-character-preview"><GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar} portrait /></div><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} activity="golf" /></section></div>;
-  if(!view&&(inviteCode||entry==='join'))return <InviteJoin title="GAKURO GOLF" name={name} onName={setName} code={code} onCode={inviteCode?undefined:setCode} onJoin={join} onClose={()=>{leave();if(inviteCode)onClose();}} busy={busy} error={t(message)} languageMode={languageMode}/>;
+  if(!view&&(inviteCode||entry==='join'))return <InviteJoin title="GAKURO GOLF" closeLabel={inviteName?t('スポーツへ戻る'):undefined} name={name} onName={setName} code={code} onCode={inviteCode?undefined:setCode} onJoin={join} onClose={()=>{leave();if(inviteCode)onClose();}} busy={busy} error={t(message)} languageMode={languageMode}/>;
   if(!view&&entry==='title'&&!picker)return <GameTitleScreen backLabel={backLabel} kind="golf" title="GAKURO GOLF" logo={<GameTitleLogo kind="golf" languageMode={languageMode}/>} subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
   if(!view&&!picker)return <><OnlineEntryScreen brand="GAKURO GOLF" title={t(entry==='practice'?'ひとりで練習':entry==='host'?'オンラインの部屋を作る':'招待に参加する')} languageMode={languageMode} onBack={()=>setEntry('title')} preview={<GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar}/>} caption={t('学んで、狙って、カップイン。')} footer={<><button aria-label={t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} className="online-entry-primary" disabled={busy||!name.trim()||(entry==='join'&&!validRoomAddress(code))} onClick={()=>entry==='join'?void join():setPicker(entry==='host'?'host':'practice')}>{t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} →</button>{busy&&<p role="status">{t(transport==='server'?'サーバーを起動しています。初回は最大3分お待ちください。':'接続中…')}</p>}</>}>
     {entry==='host'&&<TransportPicker game="golf" value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
