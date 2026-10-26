@@ -1764,6 +1764,7 @@ const App: React.FC = () => {
     // 「続きから」で読み込んだ本編の状態を、課題レターを確認してから
     // 適用するための一時保持。課題レターの既定値 START_MENU が本編の
     // 復帰先を上書きして、タイトル画面へ戻るループになるのを防ぐ。
+    const assignmentResumeRequestedRef = useRef(false);
     const [pendingAssignmentResumeState, setPendingAssignmentResumeState] = useState<GameState | null>(null);
     const [pendingResumeProblemSelection, setPendingResumeProblemSelection] = useState(false);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
@@ -2300,6 +2301,7 @@ const App: React.FC = () => {
     }, [deferredAssignmentInboxOpen, gameState.challengeMode, gameState.screen, showAssignmentLetter, showStudentGradeSurvey]);
 
     const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
+        assignmentResumeRequestedRef.current = false;
         if (!isAssignmentDeadlineActive(assignment)) return;
         launchLockedAssignmentExitRef.current = null;
         setCompletedAssignmentProblemSource(null);
@@ -6878,6 +6880,7 @@ const App: React.FC = () => {
                 // The assignment letter owns the final transition for a sent
                 // assignment.  Do not commit START_MENU to the resumable save while
                 // waiting for the learner to press 「課題を始める」.
+                assignmentResumeRequestedRef.current = true;
                 setPendingAssignmentResumeState({ ...saved });
                 return;
             }
@@ -6889,7 +6892,48 @@ const App: React.FC = () => {
         }
     };
 
+    const deferAssignmentAndContinue = () => {
+        if (isBlockingTeacherAssignment) return;
+        if (dailyAssignmentNoticeTimerRef.current !== null) {
+            window.clearTimeout(dailyAssignmentNoticeTimerRef.current);
+            dailyAssignmentNoticeTimerRef.current = null;
+        }
+        if (!isTeacherAssignmentActive && assignmentLetter) {
+            setDismissedDailyAssignmentId(assignmentLetter.id);
+            setStartedDailyAssignmentId(null);
+        }
+        const resume = assignmentResumeRequestedRef.current ? pendingAssignmentResumeState : null;
+        assignmentResumeRequestedRef.current = false;
+        const miniGame = pendingMiniGameScreen;
+        const startScreen = pendingAssignmentStartScreen;
+        setPendingManagedAssignmentLetter(null);
+        setPendingAssignmentStartScreen(null);
+        setPendingAssignmentResumeState(null);
+        setShowAssignmentLetter(false);
+        if (resume) {
+            setPendingMiniGameScreen(null);
+            setGameState({ ...resume });
+            void audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(resume.visualTheme || visualTheme, resume.player), getBgmForScreen(resume) || 'map');
+        } else if (miniGame === GameScreen.MINI_GAME_CRANE) {
+            setPendingMiniGameScreen(null);
+            setGameState(prev => ({ ...prev, screen: miniGame, craneGameContext: 'TITLE', currentEventTitle: undefined, challengeMode: undefined }));
+        } else if (miniGame) {
+            if (miniGame !== GameScreen.MINI_GAME_STAR_TIDE && isTeacherAssignmentActive && currentAssignment?.id === activeAssignment?.id && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
+                applyMiniGameAssignmentConfig(miniGame, activeAssignment);
+            } else {
+                // Keep the chosen game until its normal problem selection finishes.
+                setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
+            }
+        } else if (startScreen) {
+            setPendingMiniGameScreen(null);
+            setGameState(prev => ({ ...prev, screen: startScreen }));
+        }
+        // Main-adventure/typing/problem setup already sits behind the notice.
+        // A letter opened from the inbox has no requested launch to resume.
+    };
+
     const startAssignmentFromLetter = (assignment: AssignmentPayload, isTeacherAssignment: boolean) => {
+        assignmentResumeRequestedRef.current = false;
         audioService.playSound('select');
         if (!isAssignmentDeadlineActive(assignment)) {
             setPendingManagedAssignmentLetter(null);
@@ -19562,16 +19606,7 @@ const App: React.FC = () => {
                                         </button>
                                         {!isBlockingTeacherAssignment && <button
                                             data-gamepad-back
-                                            onClick={() => {
-                                                if (!isTeacherAssignmentActive && assignmentLetter) {
-                                                    setDismissedDailyAssignmentId(assignmentLetter.id);
-                                                    setStartedDailyAssignmentId(null);
-                                                }
-                                                 setPendingMiniGameScreen(null);
-                                                 setPendingAssignmentStartScreen(null);
-                                                 setPendingAssignmentResumeState(null);
-                                                 setShowAssignmentLetter(false);
-                                            }}
+                                            onClick={deferAssignmentAndContinue}
                                             className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
                                         >
                                             {trans("あとで", languageMode)}
@@ -20181,16 +20216,7 @@ const App: React.FC = () => {
                                 </button>
                                 {!isBlockingTeacherAssignment && <button
                                     data-gamepad-back
-                                    onClick={() => {
-                                        if (!isTeacherAssignmentActive && assignmentLetter) {
-                                            setDismissedDailyAssignmentId(assignmentLetter.id);
-                                            setStartedDailyAssignmentId(null);
-                                        }
-                                        setPendingMiniGameScreen(null);
-                                        setPendingAssignmentStartScreen(null);
-                                        setPendingAssignmentResumeState(null);
-                                        setShowAssignmentLetter(false);
-                                    }}
+                                    onClick={deferAssignmentAndContinue}
                                     className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
                                 >
                                     {trans("あとで", languageMode)}
