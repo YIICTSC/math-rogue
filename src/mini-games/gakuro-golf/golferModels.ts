@@ -15,8 +15,9 @@ export function createGolferAssets() {
     new T.MeshStandardMaterial({ color: '#263148', roughness: .34 })];
   const geometries = new Set<T.BufferGeometry>([sphere, cylinder, box,sleeve,mitten,trouser,shoe, ...parts.map(p => p.geometry)]);
   const sharedMaterials = new Set<T.Material>([...materials, ...parts.map(p => p.material)]);
-  function create(avatar: KartAvatar) {
+  function create(avatar: KartAvatar, athlete=false) {
     const root = new T.Group(), torso = new T.Group(), arms = new T.Group();root.name="StorybookGolfer";
+    const legs:{leg:T.Mesh;foot:T.Mesh}[]=[];let walkTime=0;
     const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' | 'eyeColor' }[] = [];
     const skin = new T.MeshStandardMaterial({ roughness: .43 }), shirt = new T.MeshStandardMaterial({ roughness: .48 });
     owned.push(skin, shirt);
@@ -36,7 +37,7 @@ export function createGolferAssets() {
     add(torso, parts[0].geometry, shirt, [0, .2, -.3], [.86, .8, .6]);
     for (const side of [-1, 1]) {
       const leg = add(root, trouser, materials[0], [side * .25, .5, -.13], [.16, .85, .16]); leg.rotation.z = side * -.09;
-      add(root, shoe, materials[2], [side * .29, .1, .04], [.35, .18, .55]);
+      const foot=add(root, shoe, materials[2], [side * .29, .1, .04], [.35, .18, .55]);legs.push({leg,foot});
     }
     arms.position.set(0, 1.55, -.1); torso.add(arms); arms.position.y -= 1;
     const leftArm = new T.Group(), rightArm = new T.Group();leftArm.position.x=-.34;rightArm.position.x=.34;arms.add(leftArm, rightArm);
@@ -49,15 +50,15 @@ export function createGolferAssets() {
     const club = new T.Group(); arms.add(club); club.position.set(0, -.72, .63);
     const shaft = add(club, cylinder, materials[1], [0, -.37, .27], [.025, .95, .025]); shaft.rotation.x = -.62;
     const clubHead = add(club, box, materials[1], [0, -.76, .56], [.31, .13, .17]);
-    root.scale.setScalar(1.8);
+    root.scale.setScalar(athlete?.8:1.8);
     const hero=new ProtagonistModel();hero.root.scale.setScalar(1.3);root.add(hero.root);
     let appearance=avatar,expressionOverride:number|undefined;
-    function animateHero(dt:number,swing:number){hero.update(dt);root.userData.protagonistReady=hero.ready;const ready=hero.ready;hero.root.visible=ready;for(const child of root.children)if(child!==hero.root&&child!==torso)child.visible=!ready;
+    function animateHero(dt:number,swing:number,moving=false){if(athlete)club.visible=false;walkTime+=dt;if(athlete)legs.forEach(({leg,foot},i)=>{const step=moving?Math.sin(walkTime*12+i*Math.PI):0;leg.rotation.x=step*.5;foot.position.z=.04+step*.22;foot.position.y=.1+Math.max(0,step)*.16;});hero.update(dt,athlete&&moving?'Walk':'Idle');root.userData.protagonistReady=hero.ready;const ready=hero.ready;hero.root.visible=ready;for(const child of root.children)if(child!==hero.root&&child!==torso)child.visible=!ready;
       // Animation must not reveal the unselected species, hair, face or accessories.
       const effective=expressionOverride===undefined?appearance:{...appearance,expression:expressionOverride};
       for(const child of torso.children)if(child!==arms)child.visible=!ready&&(!child.userData.visibleFor||child.userData.visibleFor(effective));
       leftArm.visible=rightArm.visible=!ready;
-      if(ready){hero.pose('upper_arm.L',-.65,.50);hero.pose('upper_arm.R',-.65,-.50);hero.pose('forearm.L',-.45,.30);hero.pose('forearm.R',-.45,-.30);hero.pose('spine',.1,swing*.45);root.updateMatrixWorld(true);hero.grip(club);}
+      if(ready){hero.pose('upper_arm.L',-.65,.50);hero.pose('upper_arm.R',-.65,-.50);hero.pose('forearm.L',-.45,.30);hero.pose('forearm.R',-.45,-.30);hero.pose('spine',.1,swing*.45);root.updateMatrixWorld(true);if(!athlete)hero.grip(club);}
     }
     function update(value: KartAvatar) {
       hero.set(value.protagonist);appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
@@ -68,7 +69,7 @@ export function createGolferAssets() {
     }
     const setExpression=(expression?:number)=>{if(expressionOverride===expression)return;expressionOverride=expression;update(appearance);};
     update(avatar);
-    return { root, torso, arms, leftArm, rightArm, club, clubHead, update,setExpression,animateHero, dispose: () => {hero.dispose();owned.forEach(m => m.dispose());} };
+    return { hero, root, torso, arms, leftArm, rightArm, club, clubHead, update,setExpression,animateHero, dispose: () => {hero.dispose();owned.forEach(m => m.dispose());} };
   }
   return { create, dispose: () => { geometries.forEach(g => g.dispose()); sharedMaterials.forEach(m => m.dispose()); } };
 }

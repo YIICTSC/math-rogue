@@ -19,7 +19,7 @@ try{
  for(const[width,height]of sizes){await page.setViewportSize({width,height});await page.waitForTimeout(200);await fits('.gg-root');await fits('.gg-shot-console');if(width>height){const dock=await page.locator('.gg-control-dock').boundingBox();assert(height-dock.y-dock.height>=35,'Dock leaves desktop taskbar clearance');}await fs.mkdir('tmp/golf-max-qa',{recursive:true});await page.screenshot({path:`tmp/golf-max-qa/shot-${width}-${height}.png`});console.log('Shot',width,height);}
  await page.setViewportSize({width:844,height:390});
  for(const[delta,mood]of [[-1,'delighted'],[0,'pleased'],[1,'frustrated'],[3,'frustrated']]) {
-  await page.evaluate(()=>{const r=window.golf.room;r.world.players.local.phase='aim';r.emit();});await page.waitForTimeout(80);
+  await page.evaluate(()=>{const r=window.golf.room;r.world.players.local.phase='aim';r.emit();});await page.waitForFunction(()=>!document.querySelector('.gg-canvas')?.dataset.reaction);
   await page.evaluate(delta=>{const r=window.golf.room,p=r.world.players.local;p.strokes=5+delta;p.phase='holed';p.capped=false;r.emit();},delta);
   await page.waitForFunction(mood=>document.querySelector('.gg-canvas')?.dataset.reaction===mood,mood);
   assert.equal(await page.locator('.gg-canvas').getAttribute('data-camera-mode'),'reaction');

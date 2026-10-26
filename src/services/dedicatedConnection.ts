@@ -8,7 +8,7 @@ export class DedicatedConnection {
   private closed = false;
   private abort = new AbortController();
   constructor(private receive: (packet: any) => boolean, private lost: () => void, private baseUrl?:string) {}
-  async open(game: 'kart' | 'craft' | 'golf' | 'online' | 'vr' | 'tennis', hello: object, timeoutMs = 180000) {
+  async open(game: 'kart' | 'craft' | 'golf' | 'online' | 'vr' | 'tennis' | 'dodgeball', hello: object, timeoutMs = 180000) {
     const base=this.baseUrl??onlineServerUrl();if(!base)throw new Error('サーバー通信はこの環境では利用できません。');
     const url=new URL(base);url.protocol=['http:','ws:'].includes(url.protocol)?'ws:':'wss:';url.pathname=`/${game}`;url.search='';url.hash='';
     const health=new URL(url);health.protocol=url.protocol==='ws:'?'http:':'https:';health.pathname='/health';

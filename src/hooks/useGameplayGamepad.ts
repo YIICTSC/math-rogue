@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-export type GameplayMode = 'rpg' | 'rpg-home' | 'vr' | 'vr-online' | 'vr-bomb' | 'race' | 'golf' | 'star-tide' | 'tennis';
+export type GameplayMode = 'rpg' | 'rpg-home' | 'vr' | 'vr-online' | 'vr-bomb' | 'race' | 'golf' | 'star-tide' | 'tennis'|'dodgeball';
 export const PAD = { A: 0, B: 1, X: 2, Y: 3, LB: 4, RB: 5, LT: 6, RT: 7, VIEW: 8, MENU: 9, LS: 10, RS: 11 } as const;
 export type GameplayPad = { active: boolean; x: number; y: number; lookX: number; lookY: number; buttons: boolean[]; pressed: boolean[]; dt: number };
 const visible = (el: Element) => !!el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden';

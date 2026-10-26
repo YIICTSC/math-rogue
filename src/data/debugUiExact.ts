@@ -1,3 +1,4 @@
+import{DODGEBALL_ENGLISH,DODGEBALL_HIRAGANA}from'../mini-games/dodgeball/copy';
 import {TENNIS_ENGLISH,TENNIS_HIRAGANA} from '../mini-games/tennis/copy';
 import {PAPER_BRIDGE_ENGLISH,PAPER_BRIDGE_HIRAGANA} from './paperPlaneBridgeCopy';
 import { POKER_HERO_ENGLISH, POKER_HERO_HIRAGANA } from '../mini-games/after-school-poker/heroes';
@@ -32,6 +33,7 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...TENNIS_ENGLISH,
+  ...DODGEBALL_ENGLISH,
   "技一覧": "Techniques",
   "鍛錬のヒント": "Training tips",
   "預ける": "Store",
@@ -390,6 +392,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...TENNIS_HIRAGANA,
+  ...DODGEBALL_HIRAGANA,
   "技一覧": "わざいちらん",
   "鍛錬のヒント": "たんれんのヒント",
   "預ける": "あずける",
