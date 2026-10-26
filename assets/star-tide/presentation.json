@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "id": "title-portrait",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-4c6f8734-f656-461e-8a28-17f772e143c9.png",
+      "sourceSha256": "30b9b17fb49d4e202100c56fdb498051dd268a3f9c74d506af42ce82ecf66195",
+      "output": "sprites/star-tide/title-portrait.webp",
+      "outputSha256": "6a4e1d4b24494787f3a74ea38d22bb1aeb40c6c3034f597ec67ac752eed2aaa2",
+      "width": 941,
+      "height": 1672
+    },
+    {
+      "id": "title-landscape",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-718c3411-53ed-4d9a-b67b-a0baec460fcf.png",
+      "sourceSha256": "e573efe52ce2e70ee98061519fa35750bafae2e92309b610c3628aa01a033965",
+      "output": "sprites/star-tide/title-landscape.webp",
+      "outputSha256": "e4fb6563d7a6db7b8c49c4e7cebd0ff3aa537048315ca94ebf9678cffd58a70a",
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "glide-awakening",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-1c05a5db-c883-4831-85b9-0113f9baad14.png",
+      "sourceSha256": "788d864bd0133d10c6aee4a646fce6a8e43b2f909a2b3428b3fa8adf1b5e4916",
+      "output": "sprites/star-tide/glide-awakening.webp",
+      "outputSha256": "aaad69d1537237225e466e52315e484c9f7a2ec539e2d81f791bdf2af214c266",
+      "width": 1536,
+      "height": 1024
+    }
+  ]
+}

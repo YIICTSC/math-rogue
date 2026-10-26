@@ -102,6 +102,8 @@ export function heroFrame(w: HeroMotion) {
 }
 
 export const UPGRADE_SHEETS = [
+  { id: 'hero-nagi-flight', columns: 6, rows: 4, transparent: true },
+  { id: 'sky-atlas', columns: 4, rows: 4, transparent: true },
   { id: 'hero-nagi-walk', columns: 12, rows: 4, transparent: true },
   { id: 'hero-nagi-profile', columns: 8, rows: 2, transparent: true },
   { id: 'hero-nagi-combo', columns: 7, rows: 8, transparent: true },

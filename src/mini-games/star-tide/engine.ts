@@ -11,6 +11,7 @@ import { stepEnemy } from './enemyAI';
 import { shapeField } from './geography';
 import { roundedSolid } from './rounding';
 import { WALK_SPEED, COMBO_GRACE, weaponAction } from './combat';
+import {skyMap, WIND_LAUNCH, SKY_RETURN, SKY_CHEST, SKY_UPDRAFTS} from './sky';
 export const W = 20, H = 14;
 export type Save = WildSave & {
     version: 1;
@@ -25,6 +26,9 @@ export type Save = WildSave & {
     coins: number;
     tool: number;
     weaponA: number;
+    realm: 'surface' | 'sky';
+    glideAwakened: boolean;
+    skyTreasures: number[];
     cleared: string[];
     solved: string[];
     chests: string[];
@@ -64,8 +68,8 @@ export type Shot = {
     kind?: number;
     damage?: number;
 };
-export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', weaponA: 0, puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
-export const key = (s: Save) => `${s.chapter}:${s.room}`;
+export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', weaponA: 0, realm: 'surface', glideAwakened: false, skyTreasures: [], puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
+export const key = (s: Save) => `${s.chapter}:${s.realm==='sky'?'sky':s.room}`;
 export function load(): Save { try {
     const x = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
     if (!x || x.version !== 1)
@@ -86,6 +90,10 @@ export function load(): Save { try {
     x.coins = Math.max(0, Math.min(999999, Math.floor(Number(x.coins) || 0)));
     const wild = normalizeWild(x);
     x.hero = heroId(x.hero);
+    x.realm = x.realm==='sky' && x.beacons.includes(0) ? 'sky' : 'surface';
+    if(x.realm!=='sky'&&typeof x.gate==='string'&&x.gate.endsWith(':sky'))x.gate=null;
+    x.glideAwakened = typeof x.glideAwakened==='boolean' ? x.glideAwakened : x.beacons.includes(0);
+    x.skyTreasures = Array.isArray(x.skyTreasures) ? [...new Set(x.skyTreasures.filter((v:unknown)=>Number.isInteger(v)&&Number(v)>=0&&Number(v)<12))] : [];
     x.weaponA = Number.isInteger(x.weaponA) && wild.ownedTools.includes(x.weaponA) ? x.weaponA : 0;
     return { ...n, ...x, ...wild, chapter: Math.max(0, Math.min(11, Math.floor(Number(x.chapter) || 0))), room: Math.max(0, Math.min(23, Math.floor(Number(x.room) || 0))), maxHp: Math.max(6, Math.min(30, Number(x.maxHp) || 6)), hp: Math.max(1, Math.min(30, Number(x.hp) || 6)), tool: wild.ownedTools.includes(Number(x.tool)) ? Number(x.tool) : 0, seconds: Math.max(0, Number(x.seconds) || 0) };
 }
@@ -156,8 +164,8 @@ export class World {
     kills = 0;
     dirty = false;
     time = 0;
-    constructor(s: Save) { this.s = s; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.enter(); }
-    enter() { this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
+    constructor(s: Save) { this.s = s; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
+    enter() { if(this.inSky){this.enterSky();return;} this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
         for (let y = 3; y <= 10; y++)
             for (let x = 3; x <= 16; x++)
                 this.map[y][x] = 5;
@@ -187,12 +195,40 @@ export class World {
             if (x > 0 && x < W - 1 && y > 0 && y < H - 1)
                 this.map[y][x] = v;
         }
-    } this.shots = []; this.switches = []; this.attack = 0; this.travel = .5; this.enemies = []; if (!this.s.visited.includes(key(this.s)))
+    } if(this.s.room===0){for(let y=3;y<=5;y++)for(let x=14;x<=16;x++)this.map[y][x]=0;} this.shots = []; this.switches = []; this.attack = 0; this.travel = .5; this.enemies = []; if (!this.s.visited.includes(key(this.s)))
         this.s.visited.push(key(this.s)); if (!this.s.cleared.includes(key(this.s)) && this.s.room > 0) {
         const boss = this.s.room === 23;
         for (let i = 0; i < (boss ? 1 : 2 + this.s.room % 3); i++)
             this.enemies.push({ x: boss ? 10.5 : [16.5, 15.5, 5.5, 3.5][i], y: boss ? 4.5 : [7.5, 11.5, 11.5, 9.5][i], hp: boss ? 24 + this.s.chapter * 6 : 3 + Math.floor(this.s.chapter / 2), max: boss ? 24 + this.s.chapter * 6 : 3 + Math.floor(this.s.chapter / 2), boss, kind: enemyKind(this.s.chapter, this.s.room, i), cool: i * .5 + 1, phase: 0 });
     } this.restorePuzzle(); this.dirty = true; }
+    get inSky(){return this.s.realm==='sky';}
+    get gliderUnlocked(){return this.s.beacons.includes(0);}
+    get atLaunch(){return !this.inSky&&this.s.room===0&&Math.hypot(this.x-WIND_LAUNCH.x,this.y-WIND_LAUNCH.y)<1.3;}
+    get atSkyReturn(){return this.inSky&&Math.hypot(this.x-SKY_RETURN.x,this.y-SKY_RETURN.y)<1.2;}
+    get atSkyChest(){return this.inSky&&Math.hypot(this.x-SKY_CHEST.x,this.y-SKY_CHEST.y)<1.4;}
+    enterSky(){
+        this.s.room=0;this.cancelCombo();this.attack=0;this.strikePending=false;this.dash=0;
+        this.map=skyMap(this.s.chapter);this.blocks=null;this.beam=null;this.circuit=null;this.ice=null;
+        this.shots=[];this.fires=[];this.fx=[];this.switches=[];this.walk=0;this.moving=false;this.notice='sky';this.travel=.5;
+        this.x=SKY_RETURN.x;this.y=SKY_RETURN.y;this.safe={x:this.x,y:this.y};this.gliding=false;
+        this.stamina=this.s.staminaMax;this.hurt=0;
+        this.enemies=this.s.cleared.includes(key(this.s))?[]:[{x:17.5,y:5.8,hp:6+this.s.chapter,max:6+this.s.chapter,kind:[2,5,9,19][this.s.chapter%4],cool:2,phase:0}];
+        if(!this.s.visited.includes(key(this.s)))this.s.visited.push(key(this.s));this.dirty=true;
+    }
+    launchSky(){
+        if(!this.atLaunch||this.s.gate)return false;
+        if(!this.gliderUnlocked){this.notice='glidelocked';return false;}
+        this.s.realm='sky';this.enter();this.gliding=true;return true;
+    }
+    leaveSky(){
+        if(!this.inSky||this.s.gate)return false;
+        this.s.realm='surface';this.s.room=0;this.x=WIND_LAUNCH.x;this.y=WIND_LAUNCH.y;this.enter();return true;
+    }
+    openSkyChest(){
+        if(!this.atSkyChest||this.s.gate||this.s.skyTreasures.includes(this.s.chapter))return false;
+        if(this.enemies.length){this.notice='enemies';return false;}
+        this.s.gate=key(this.s);this.notice='skytreasure';this.dirty=true;return true;
+    }
     blocked(x: number, y: number, gliding=false) { const code=this.map[Math.floor(y)]?.[Math.floor(x)]??3; return (gliding?[3]:[2,3,7]).includes(code) && (this.s.room>=8||code===7||roundedSolid(this.map,x,y,code)); }
     can(x: number, y: number) { return !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y) && x > .3 && y > .3 && x < W - .3 && y < H - .3 && !this.blocked(x,y,this.gliding); }
     enemyCan(x: number, y: number) { return x > .5 && y > .5 && x < W - .5 && y < H - .5 && !this.blocked(x,y) && !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y); }
@@ -234,6 +270,7 @@ export class World {
             this.exit(6);
     } }
     exit(dir: number) {
+        if(this.inSky){this.x=Math.min(18.4,Math.max(1.2,this.x));this.y=Math.min(12.4,Math.max(1.2,this.y));return;}
         const room = this.s.room, next = room + dir;
         if ((dir === 1 && room % 6 === 5 && room !== 23) || (dir === -1 && room % 6 === 0) || next < 0 || next > 23 && room !== 23) {
             this.x = Math.min(18.4, Math.max(1.2, this.x));
@@ -278,25 +315,25 @@ export class World {
         }
         this.enter();
     }
-    get npc() { return [0, 4, 12, 20].includes(this.s.room) ? this.s.room >= 8 ? { x: 3.5, y: 2.5 } : { x: 8.2, y: 4.5 } : null; }
+    get npc() { return !this.inSky && [0, 4, 12, 20].includes(this.s.room) ? this.s.room >= 8 ? { x: 3.5, y: 2.5 } : { x: 8.2, y: 4.5 } : null; }
     get canTalk() { return Boolean(this.npc && !this.enemies.length && Math.hypot(this.x - this.npc.x, this.y - this.npc.y) < 1.6); }
-    get targets() { return this.s.room % 4 === 0 ? [[8.5, 6.5], [12.5, 6.5], [10.5, 6.5]] : this.s.room % 4 === 1 ? [[8.5, 6.5], [12.5, 6.5]] : [[10.5, 6.5]]; }
-    get weather() { return ['clear', 'wind', 'rain'][Math.floor(this.s.seconds / 90 + this.s.chapter) % 3] as 'clear' | 'wind' | 'rain'; }
-    get atHarbor() { return this.s.room === 0 && Math.hypot(this.x - 2.5, this.y - 10.5) < 2; }
-    get atCamp() { return [0, 4].includes(this.s.room) && !this.enemies.length && Math.hypot(this.x - campPosition.x, this.y - campPosition.y) < 2.5 && (this.weather !== 'rain' || this.s.room === 0); }
-    get barrel() { return this.s.room < 8 && this.s.room % 2 === 1 && !this.s.exploded.includes(key(this.s)) ? { x: 12.5, y: 7.5 } : null; }
+    get targets() { if(this.inSky)return [];return this.s.room % 4 === 0 ? [[8.5, 6.5], [12.5, 6.5], [10.5, 6.5]] : this.s.room % 4 === 1 ? [[8.5, 6.5], [12.5, 6.5]] : [[10.5, 6.5]]; }
+    get weather() { if(this.inSky)return 'wind' as const;return ['clear', 'wind', 'rain'][Math.floor(this.s.seconds / 90 + this.s.chapter) % 3] as 'clear' | 'wind' | 'rain'; }
+    get atHarbor() { return !this.inSky && this.s.room === 0 && Math.hypot(this.x - 2.5, this.y - 10.5) < 2; }
+    get atCamp() { return !this.inSky && [0, 4].includes(this.s.room) && !this.enemies.length && Math.hypot(this.x - campPosition.x, this.y - campPosition.y) < 2.5 && (this.weather !== 'rain' || this.s.room === 0); }
+    get barrel() { return !this.inSky && this.s.room < 8 && this.s.room % 2 === 1 && !this.s.exploded.includes(key(this.s)) ? { x: 12.5, y: 7.5 } : null; }
     get endingKind() { return this.s.beacons.length === 12 && this.s.quests.length >= 18 && this.s.choices.filter(Boolean).length >= 6 ? 'community' : 'restore'; }
     toggleGlide() { if (this.gliding) {
         this.land();
         return true;
-    } if (this.stamina < .15)
+    } if(!this.gliderUnlocked){this.notice='glidelocked';return false;} if(this.s.gate)return false; if (this.stamina < .15)
         return false; this.gliding = true; return true; }
     land() { this.gliding = false; const tile = this.map[Math.floor(this.y)]?.[Math.floor(this.x)]; if (tile === 2 || tile === 7) {
         this.x = this.safe.x;
         this.y = this.safe.y;
         this.notice = 'landed';
     } }
-    alter(x: number, y: number, tile: number) { if (this.s.room >= 8 || x <= 0 || y <= 0 || x >= W - 1 || y >= H - 1)
+    alter(x: number, y: number, tile: number) { if (this.inSky || this.s.room >= 8 || x <= 0 || y <= 0 || x >= W - 1 || y >= H - 1)
         return false; this.map[y][x] = tile; this.s.changes[key(this.s) + ':' + x + ',' + y] = tile; this.dirty = true; return true; }
     detonate() { const b = this.barrel; if (!b)
         return; this.s.exploded.push(key(this.s)); for (const e of this.enemies)
@@ -394,7 +431,7 @@ export class World {
                 this.dirty = true;
             }
         }
-        if (this.s.room < 8) {
+        if (!this.inSky && this.s.room < 8) {
             const node = forageNodes.findIndex(p => Math.hypot(this.x - p.x, this.y - p.y) < 1.2);
             if (node >= 0) {
                 const k = key(this.s) + ':' + node;
@@ -439,7 +476,7 @@ export class World {
             else
                 this.notice = this.s.room % 4 === 3 ? 'timing' : 'tool';
         }
-        if (Math.hypot(this.x - 5.5, this.y - 9.5) < 2 && !this.s.chests.includes(key(this.s))) {
+        if (!this.inSky && Math.hypot(this.x - 5.5, this.y - 9.5) < 2 && !this.s.chests.includes(key(this.s))) {
             const route = KEY_ROUTES.find(r => r.chest === this.s.room);
             if (route && !routeReady(this.s.chapter, route, this.s.cleared, this.s.solved)) {
                 this.notice = 'branch';
@@ -529,13 +566,14 @@ export class World {
         this.travel -= dt;
         if (this.gliding) {
             this.stamina = Math.max(0, this.stamina - dt * .25);
-            if ([0, 4].includes(this.s.room) && (this.weather !== 'rain' || this.s.room === 0) && Math.hypot(this.x - campPosition.x, this.y - campPosition.y) < 2)
+            if (!this.inSky && [0, 4].includes(this.s.room) && (this.weather !== 'rain' || this.s.room === 0) && Math.hypot(this.x - campPosition.x, this.y - campPosition.y) < 2)
                 this.stamina = Math.min(this.s.staminaMax, this.stamina + dt * .4);
             if (this.stamina <= 0)
                 this.land();
         }
         else
             this.stamina = Math.min(this.s.staminaMax, this.stamina + dt * .4);
+        if(this.inSky && SKY_UPDRAFTS.some(p=>Math.hypot(this.x-p.x,this.y-p.y)<1.1))this.stamina=Math.min(this.s.staminaMax,this.stamina+dt*.9);
         const oldX = this.x, oldY = this.y, oldRoom = key(this.s);
         this.move(dx, dy, dt);
         const distance = oldRoom === key(this.s) ? Math.hypot(this.x - oldX, this.y - oldY) : 0;
@@ -660,7 +698,12 @@ export class World {
     } }
     study(correct: number) { if (correct <= 0 || this.s.gate !== key(this.s))
         return false; const k = key(this.s); if (!this.s.solved.includes('study:' + k))
-        this.s.solved.push('study:' + k); this.s.gate = null; this.s.hp = Math.min(this.s.maxHp, this.s.hp + 2); if (this.s.room === 23 && !this.s.beacons.includes(this.s.chapter)) {
+        this.s.solved.push('study:' + k); this.s.gate = null; this.s.hp = Math.min(this.s.maxHp, this.s.hp + 2);
+        if(this.inSky){
+            if(!this.s.skyTreasures.includes(this.s.chapter)){this.s.skyTreasures.push(this.s.chapter);this.s.coins+=60;this.s.spirit+=2;this.s.inventory.tonic++;}
+            this.notice='skyreward';this.dirty=true;return true;
+        }
+        if (this.s.room === 23 && !this.s.beacons.includes(this.s.chapter)) {
         this.s.beacons.push(this.s.chapter);
         this.s.coins += 100;
         this.s.maxHp = Math.min(30, this.s.maxHp + 1);
@@ -674,7 +717,7 @@ export class World {
             this.x = 2.5;
             this.y = 7.5;
             this.enter();
-            this.notice = 'charted';
+            this.notice = this.s.glideAwakened?'charted':'glider';
         }
     } this.dirty = true; return true; }
     hint(): {
@@ -706,7 +749,7 @@ export class World {
         if (this.s.room >= 8)
             this.s.spirit++;
     } delete this.s.puzzles[k]; this.notice = 'solved'; this.dirty = true; }
-    rememberPuzzle() { if (this.s.solved.includes(key(this.s)))
+    rememberPuzzle() { if(this.inSky)return; if (this.s.solved.includes(key(this.s)))
         return; const p: PuzzleSnapshot = this.blocks ? { kind: 'blocks', boxes: this.blocks.boxes.map(b => ({ ...b })) } : this.beam ? { kind: 'beam', slash: this.beam.mirrors.map(m => m.slash) } : this.circuit ? { kind: 'circuit', bits: this.circuit.bits, moves: this.circuit.moves } : this.ice ? { kind: 'ice', x: this.ice.x, y: this.ice.y, steps: this.ice.steps } : { kind: 'lights', count: this.switches.length }; const k = key(this.s); if (JSON.stringify(this.s.puzzles[k]) !== JSON.stringify(p)) {
         this.s.puzzles[k] = p;
         this.hintTarget = null;
@@ -730,7 +773,7 @@ export class World {
     buyHeal() { if (this.s.room !== 0 || this.s.coins < 20 || this.s.hp >= this.s.maxHp || this.s.gate)
         return false; this.s.coins -= 20; this.s.hp = this.s.maxHp; this.dirty = true; return true; }
     travelTo(chapter: number) { if (!this.canTravel(chapter))
-        return false; this.s.chapter = chapter; this.s.maxChapter = Math.max(this.s.maxChapter, chapter); this.s.room = 0; this.x = 2.5; this.y = 7.5; this.enter(); return true; }
+        return false; this.s.realm='surface';this.s.chapter = chapter; this.s.maxChapter = Math.max(this.s.maxChapter, chapter); this.s.room = 0; this.x = 2.5; this.y = 7.5; this.enter(); return true; }
     questProgress(i: number) { const prefix = this.s.chapter + ':', current = i === 0 ? this.s.chests.filter(k => k.startsWith(prefix)).length : i === 1 ? this.s.cleared.filter(k => k.startsWith(prefix) && k !== prefix + '0').length : this.s.solved.filter(k => k.startsWith(prefix)).length, target = i === 1 ? 4 : 3, complete = this.s.quests.includes(prefix + i); return { current, target, complete, ready: current >= target && !complete }; }
     quest(i: number) { if (i < 0 || i > 2 || !this.questProgress(i).ready)
         return false; this.s.quests.push(this.s.chapter + ':' + i); this.s.maxHp = Math.min(30, this.s.maxHp + 1); this.s.hp = this.s.maxHp; this.s.coins += 40; this.dirty = true; return true; }

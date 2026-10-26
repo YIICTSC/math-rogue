@@ -7,6 +7,7 @@ import { enemyFrame } from './enemyAI';
 import { sceneryFor, terrainCell } from './scenery';
 import { corners, roundedPath } from './rounding';
 import { weaponAction } from './combat';
+import {WIND_LAUNCH, SKY_RETURN, SKY_CHEST, SKY_UPDRAFTS, skyPlatforms} from './sky';
 
 export type Graphics = {
   heroes: Record<HeroId, HTMLImageElement>;
@@ -15,6 +16,8 @@ export type Graphics = {
   profile: HTMLImageElement;
   combo: HTMLImageElement;
   tools: HTMLImageElement;
+  flight: HTMLImageElement;
+  sky: HTMLImageElement;
   enemies: HTMLImageElement[];
   terrain: HTMLImageElement;
   props: HTMLImageElement;
@@ -34,6 +37,25 @@ function cell(ctx: CanvasRenderingContext2D, img: HTMLImageElement | undefined, 
   ctx.drawImage(img, col * sw, row * sh, sw, sh, 0, 0, width, height);
   ctx.restore();
   return true;
+}
+
+function paintSky(ctx:CanvasRenderingContext2D,w:World,graphics?:Graphics){
+ const dusk=[4,6,10].includes(w.s.chapter),gradient=ctx.createLinearGradient(0,0,0,224);
+ gradient.addColorStop(0,dusk?'#263d68':'#6da7bd');gradient.addColorStop(1,dusk?'#a7b7d2':'#d8ece4');ctx.fillStyle=gradient;ctx.fillRect(0,0,320,224);
+ for(let i=0;i<8;i++){ctx.globalAlpha=.2+(i%3)*.1;cell(ctx,graphics?.sky,4,4,0,0,(i*67+w.time*(2+i%3))%400-60,14+i*28,60+(i%3)*20);}
+ ctx.globalAlpha=1;
+ for(const[left,top,right,bottom]of skyPlatforms(w.s.chapter))cell(ctx,graphics?.sky,4,4,1,0,left*16-2,top*16,(right-left+1)*16+4,(bottom-top+1)*16+28);
+ for(let y=1;y<13;y++)for(let x=1;x<19;x++)if(w.map[y][x]===0){
+  ctx.save();const path=roundedPath(x*16,y*16,corners(w.map,x,y,0));ctx.clip(path,'evenodd');
+  ctx.fillStyle='#82a77b';ctx.fillRect(x*16,y*16,16,16);
+  cell(ctx,graphics?.floors,6,4,(w.s.chapter*2)%6,Math.floor(w.s.chapter*2/6),Math.floor(x/4)*64,Math.floor(y/4)*64,64);
+  ctx.restore();
+ }
+ const object=(index:number,x:number,y:number,size:number)=>cell(ctx,graphics?.sky,4,4,index%4,Math.floor(index/4),x*16-size/2,y*16-size*.85,size);
+ object(6,SKY_RETURN.x,SKY_RETURN.y,30);object(3,17.5,3.9,40);
+ object(w.s.skyTreasures.includes(w.s.chapter)?5:4,SKY_CHEST.x,SKY_CHEST.y,25);
+ for(const p of SKY_UPDRAFTS){object(7,p.x,p.y,42);ctx.strokeStyle='#c0fff4aa';ctx.lineWidth=1;for(let i=0;i<3;i++){const r=7+((w.time*10+i*5)%16);ctx.beginPath();ctx.ellipse(p.x*16,p.y*16-r*.5,r,r*.35,0,0,Math.PI*2);ctx.stroke();}}
+ object(11,2.5,8.5,15);object(11,12.5,11.5,15);object(12,8.5,6.5,18);
 }
 
 function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageElement,
@@ -56,7 +78,9 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
     ctx.fillStyle = `rgba(8,20,27,${alpha})`;
     ctx.beginPath(); ctx.ellipse(x * 16, y * 16 + 3, size, size * .3, 0, 0, Math.PI * 2); ctx.fill();
   };
-  const biome = biomeFor(w.s.chapter, w.s.room), indoor = w.s.room >= 8;
+  const biome = biomeFor(w.s.chapter, w.s.room), indoor = !w.inSky && w.s.room >= 8;
+  if(w.inSky)paintSky(ctx,w,graphics);
+  if(!w.inSky){
   if (!graphics?.terrain.naturalWidth && ground?.naturalWidth) {
     cell(ctx, ground, 4, 3, w.s.chapter % 4, Math.floor(w.s.chapter / 4), 0, 0, 320, 224);
   }
@@ -133,21 +157,23 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
       cell(ctx, graphics?.props, 8, 12, 3, biome.row, x * 16 + 2, y * 16 + 4, 12);
     }
   }
+  if(w.s.room===0){ctx.globalAlpha=w.gliderUnlocked?1:.5;cell(ctx,graphics?.sky,4,4,2,0,WIND_LAUNCH.x*16-18,WIND_LAUNCH.y*16-26,36);ctx.globalAlpha=1;}
+  }
  if(w.circuit){circuitTargets.forEach((p,i)=>{ctx.fillStyle=w.circuit!.bits&(1<<i)?'#ffdd7b':'#234c63';ctx.fillRect(p.x*16-7,p.y*16-7,14,14);ctx.strokeStyle='#b3e8dc';ctx.strokeRect(p.x*16-7,p.y*16-7,14,14);ctx.fillStyle='#0c2832';ctx.fillText(String(i+1),p.x*16-4,p.y*16+3);});}
  if(w.ice){for(let y=0;y<9;y++)for(let x=0;x<9;x++){ctx.fillStyle=w.ice.walls.has(`${x},${y}`)?'#345779':'#a6e6ed';ctx.fillRect((x+6)*16,(y+2)*16,16,16);ctx.strokeStyle='#72a4be';ctx.strokeRect((x+6)*16,(y+2)*16,16,16);}sprite(7,3,(w.ice.goal.x+6)*16,(w.ice.goal.y+2)*16);sprite(0,5,(w.ice.x+6)*16,(w.ice.y+2)*16);sprite(4,3,64,96);}
  if(w.beam){sprite(4,3,w.beam.start.x*16,w.beam.start.y*16);const trace=traceBeam(w.beam);ctx.strokeStyle='#ffe3a2';ctx.lineWidth=2;ctx.beginPath();trace.path.forEach((p,i)=>i?ctx.lineTo(p.x*16,p.y*16):ctx.moveTo(p.x*16,p.y*16));ctx.stroke();sprite(7,3,w.beam.goal.x*16,w.beam.goal.y*16);for(const [i,m] of w.beam.mirrors.entries()){ctx.fillStyle='#ffe4a2';ctx.fillText(String(i+1),m.x*16+5,m.y*16-2);ctx.fillStyle='#243f53';ctx.fillRect(m.x*16,m.y*16,16,16);ctx.strokeStyle='#a6e9ef';ctx.beginPath();ctx.moveTo(m.x*16+3,m.y*16+(m.slash?13:3));ctx.lineTo(m.x*16+13,m.y*16+(m.slash?3:13));ctx.stroke();}}
  if(w.blocks){for(const p of w.blocks.goals){ctx.fillStyle='#ffe6a4';ctx.strokeStyle='#f5e0a6';ctx.strokeRect(p.x*16+2,p.y*16+2,12,12);}for(const p of w.blocks.boxes)sprite(3,3,p.x*16,p.y*16,16);}
- if(w.s.room<8){forageNodes.forEach((p,i)=>{if(!w.s.foraged.includes(key(w.s)+':'+i))prop([2,3,4][(w.s.chapter+w.s.room+i)%3],p.x*16,p.y*16,18);});if([0,4].includes(w.s.room)){ctx.globalAlpha=w.weather==='rain'&&w.s.room!==0?.45:1;prop(1,campPosition.x*16,campPosition.y*16,28);ctx.globalAlpha=1;}if(w.s.room===0){prop(12,towerPosition.x*16,towerPosition.y*16,32);prop(15,40,168,28);}if(w.barrel)prop(8,w.barrel.x*16,w.barrel.y*16,22);}
+ if(!w.inSky&&w.s.room<8){forageNodes.forEach((p,i)=>{if(!w.s.foraged.includes(key(w.s)+':'+i))prop([2,3,4][(w.s.chapter+w.s.room+i)%3],p.x*16,p.y*16,18);});if([0,4].includes(w.s.room)){ctx.globalAlpha=w.weather==='rain'&&w.s.room!==0?.45:1;prop(1,campPosition.x*16,campPosition.y*16,28);ctx.globalAlpha=1;}if(w.s.room===0){prop(12,towerPosition.x*16,towerPosition.y*16,32);prop(15,40,168,28);}if(w.barrel)prop(8,w.barrel.x*16,w.barrel.y*16,22);}
  for(const f of w.fires){ctx.fillStyle=w.weather==='rain'?'#559ab7':'#fcab50';ctx.beginPath();ctx.arc(f.x*16,f.y*16,5+Math.sin(w.time*13)*2,0,Math.PI*2);ctx.fill();}
- if(w.s.room>=8){ctx.fillStyle='#19273b22';ctx.fillRect(0,0,320,224);}
+ if(!w.inSky&&w.s.room>=8){ctx.fillStyle='#19273b22';ctx.fillRect(0,0,320,224);}
  const solved=w.s.solved.includes(key(w.s));(w.blocks||w.beam||w.circuit||w.ice?[]:w.targets).forEach(([x,y],i)=>{ctx.globalAlpha=w.s.room%4===3&&!solved?(Math.sin(w.time*2)>.2?1:.25):solved||i===w.switches.length?1:.4;sprite(solved?7:4,3,x*16-8,y*16-8);ctx.globalAlpha=1;ctx.fillStyle='#fff4c8';ctx.fillText(String(i+1),x*16-2,y*16-10);});
- if(!w.s.chests.includes(key(w.s)))sprite(3,3,80,144);
+ if(!w.inSky&&!w.s.chests.includes(key(w.s)))sprite(3,3,80,144);
 
- if(w.s.room===23)sprite(7,3,280,96,24);
+ if(!w.inSky&&w.s.room===23)sprite(7,3,280,96,24);
  for(const p of w.shots){ctx.fillStyle=p.friendly?'#fbd781':'#e38bb1';if(p.friendly){ctx.save();ctx.translate(p.x*16,p.y*16-18);ctx.rotate(Math.atan2(p.vy,p.vx));sprite(p.kind===1?2:p.kind===2?3:4,6,-8,-8,16);ctx.restore();}else{ctx.beginPath();ctx.arc(p.x*16,p.y*16,2,0,7);ctx.fill();}}
  if(w.hintTarget){ctx.strokeStyle='#68eeed';ctx.lineWidth=2;ctx.strokeRect(w.hintTarget.x*16-9,w.hintTarget.y*16-9,18,18);}
   const entities: { y: number; draw: () => void }[] = [];
-  if (graphics?.props.naturalWidth) for (const p of sceneryFor(w)) entities.push({ y: p.y, draw: () => {
+  if (!w.inSky && graphics?.props.naturalWidth) for (const p of sceneryFor(w)) entities.push({ y: p.y, draw: () => {
     shadow(p.x, p.y - .2, p.size * .3, .14);
     // The canopy fades only when the player is immediately behind it.
     if (w.y < p.y && Math.abs(w.x - p.x) < .9 && p.y - w.y < 1.9) ctx.globalAlpha = .5;
@@ -195,10 +221,11 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
   }});
   entities.push({ y: w.y, draw: () => {
     shadow(w.x, w.y, w.gliding ? 6 : 8, w.gliding ? .14 : .28);
-    const motion = heroFrame(w), base=motion.sheet==='base', size=base?36:48;
-    const sheet = base?graphics?.heroes.nagi:graphics?.[motion.sheet as 'walk'|'profile'|'combo'|'tools'];
+    const flight=w.gliding&&Boolean(graphics?.flight.naturalWidth);
+    const motion = flight?{sheet:'flight',columns:6,rows:4,row:Math.abs(w.dy)>Math.abs(w.dx)?w.dy<0?1:0:w.dx<0?3:2,frame:Math.floor(w.walk*9)%6,flip:false}:heroFrame(w), base=motion.sheet==='base', size=flight?84:base?36:48;
+    const sheet = base?graphics?.heroes.nagi:graphics?.[motion.sheet as 'walk'|'profile'|'combo'|'tools'|'flight'];
     if (w.hurt > 0 && !(w.attack>0&&w.activeWeapon===6) && Math.floor(w.time * 15) % 2) ctx.globalAlpha = .5;
-    if (w.gliding) prop(0, w.x * 16, w.y * 16 - 24, 43);
+    if (w.gliding&&!flight) prop(0, w.x * 16, w.y * 16 - 24, 43);
     if (!cell(ctx, sheet, motion.columns, motion.rows, motion.frame, motion.row,
       w.x * 16 - size / 2, w.y * 16 - size * (base?88/96:120/128) - (w.gliding ? 7 : 0), size, size, motion.flip)) {
       sprite(w.dy < -.4 ? 3 : w.dx > .4 ? 6 : 0, w.dx < -.4 ? 1 : 0, w.x * 16 - 16, w.y * 16 - 23, 32);
@@ -287,7 +314,7 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
   ctx.fillStyle = vignette; ctx.fillRect(0, 0, 320, 224);
   ctx.fillStyle = '#091422bd'; ctx.fillRect(0, 0, 320, 13);
   ctx.fillStyle = '#f6ecc9'; ctx.font = '8px monospace';
-  ctx.fillText(`${w.s.chapter + 1} / 12   ${w.s.room + 1} / 24`, 6, 9);
+  ctx.fillText(w.inSky?`SKY   ${w.s.chapter+1} / 12`:`${w.s.chapter + 1} / 12   ${w.s.room + 1} / 24`, 6, 9);
 }
 
 const scenes = new WeakMap<HTMLCanvasElement, HTMLCanvasElement>();

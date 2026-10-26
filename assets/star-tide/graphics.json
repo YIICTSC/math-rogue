@@ -10713,6 +10713,505 @@
           ]
         }
       ]
+    },
+    {
+      "id": "hero-nagi-flight",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-ab3a8ba9-9823-468b-a481-10423c40c29a.png",
+      "sourceSha256": "c800175ca24c80e5e015e60871e3422bd28f6f0062a018bd4991605fc80ddbd2",
+      "output": "sprites/star-tide/hero-nagi-flight.webp",
+      "outputSha256": "2102a492ddc569e448a6fc42f4907c96efd99a47e2d31b54b19400387ace8b5a",
+      "columns": 6,
+      "rows": 4,
+      "frameSize": 128,
+      "bodyHeight": 80,
+      "transparent": true,
+      "rowCuts": [
+        0,
+        272,
+        514,
+        768,
+        1024
+      ],
+      "colCuts": [
+        0,
+        266,
+        525,
+        774,
+        1028,
+        1279,
+        1536
+      ],
+      "normalization": [
+        {
+          "row": 0,
+          "col": 0,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 80,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 77,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 77,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "scale": 0.39408866995073893,
+          "width": 98,
+          "height": 79,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 0,
+          "col": 4,
+          "scale": 0.39408866995073893,
+          "width": 96,
+          "height": 81,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 0,
+          "col": 5,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 80,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 1,
+          "col": 0,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 86,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 84,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 1,
+          "col": 2,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 85,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 1,
+          "col": 3,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 87,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "scale": 0.39408866995073893,
+          "width": 96,
+          "height": 86,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 1,
+          "col": 5,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 86,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "scale": 0.39408866995073893,
+          "width": 98,
+          "height": 79,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 2,
+          "col": 1,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 82,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 2,
+          "col": 2,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 80,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 2,
+          "col": 3,
+          "scale": 0.39408866995073893,
+          "width": 97,
+          "height": 82,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 2,
+          "col": 4,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 82,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 2,
+          "col": 5,
+          "scale": 0.39408866995073893,
+          "width": 93,
+          "height": 80,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 82,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 3,
+          "col": 1,
+          "scale": 0.39408866995073893,
+          "width": 96,
+          "height": 83,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 3,
+          "col": 2,
+          "scale": 0.39408866995073893,
+          "width": 94,
+          "height": 83,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "scale": 0.39408866995073893,
+          "width": 93,
+          "height": 83,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 3,
+          "col": 4,
+          "scale": 0.39408866995073893,
+          "width": 94,
+          "height": 83,
+          "anchor": [
+            64,
+            120
+          ]
+        },
+        {
+          "row": 3,
+          "col": 5,
+          "scale": 0.39408866995073893,
+          "width": 95,
+          "height": 82,
+          "anchor": [
+            64,
+            120
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sky-atlas",
+      "generator": "ImageGen",
+      "source": "/workspace/generated_images/exec-146daf52-93a5-4041-a9a6-d21d1701c23b.png",
+      "sourceSha256": "159b2eff8dc9721c7b7961263d071e0adab33fa297f929f90f9fd4f1cc4cd090",
+      "output": "sprites/star-tide/sky-atlas.webp",
+      "outputSha256": "d70d0afec6432a4e34e4d67c6b265c05b299160c40c92d9ebff190d63d9975ab",
+      "columns": 4,
+      "rows": 4,
+      "frameSize": 96,
+      "transparent": true,
+      "rowCuts": [
+        0,
+        343,
+        673,
+        934,
+        1245
+      ],
+      "colCuts": [
+        0,
+        340,
+        656,
+        947,
+        1263
+      ],
+      "normalization": [
+        {
+          "row": 0,
+          "col": 0,
+          "scale": 0.2564102564102564,
+          "width": 80,
+          "height": 55,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "scale": 0.30303030303030304,
+          "width": 75,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 0,
+          "col": 2,
+          "scale": 0.30303030303030304,
+          "width": 80,
+          "height": 79,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 0,
+          "col": 3,
+          "scale": 0.2702702702702703,
+          "width": 67,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 1,
+          "col": 0,
+          "scale": 0.34334763948497854,
+          "width": 80,
+          "height": 72,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "scale": 0.3404255319148936,
+          "width": 75,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 1,
+          "col": 2,
+          "scale": 0.2711864406779661,
+          "width": 73,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 1,
+          "col": 3,
+          "scale": 0.2787456445993031,
+          "width": 67,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 2,
+          "col": 0,
+          "scale": 0.3902439024390244,
+          "width": 80,
+          "height": 79,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 2,
+          "col": 1,
+          "scale": 0.25316455696202533,
+          "width": 80,
+          "height": 55,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 2,
+          "col": 2,
+          "scale": 0.31496062992125984,
+          "width": 80,
+          "height": 60,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 2,
+          "col": 3,
+          "scale": 0.3305785123966942,
+          "width": 76,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 3,
+          "col": 0,
+          "scale": 0.29304029304029305,
+          "width": 73,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 3,
+          "col": 1,
+          "scale": 0.3333333333333333,
+          "width": 80,
+          "height": 77,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 3,
+          "col": 2,
+          "scale": 0.3088803088803089,
+          "width": 75,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        },
+        {
+          "row": 3,
+          "col": 3,
+          "scale": 0.2962962962962963,
+          "width": 68,
+          "height": 80,
+          "anchor": [
+            48,
+            88
+          ]
+        }
+      ]
     }
   ]
 }

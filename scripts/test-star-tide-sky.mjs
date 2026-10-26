@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';import{build}from'esbuild';
+const r=await build({stdin:{contents:"export * from './src/mini-games/star-tide/engine';export * from './src/mini-games/star-tide/sky';",resolveDir:process.cwd()},bundle:true,platform:'node',format:'esm',write:false});const M=await import('data:text/javascript;base64,'+Buffer.from(r.outputFiles[0].text).toString('base64'));
+let stored='';globalThis.localStorage={getItem:()=>stored,setItem:(_k,v)=>stored=v};
+const w=new M.World(M.fresh());assert(!w.gliderUnlocked);assert(!w.toggleGlide());assert(!w.gliding);assert.equal(w.stamina,1);Object.assign(w,M.WIND_LAUNCH);assert(!w.launchSky());assert.equal(w.s.realm,'surface');
+w.s.room=23;w.enter();w.enemies=[];w.s.gate=M.key(w.s);assert(!w.study(0));assert(!w.gliderUnlocked);assert(w.study(1));assert(w.gliderUnlocked);assert.equal(w.notice,'glider');assert.equal(w.s.chapter,0);assert(!w.s.glideAwakened);assert(w.toggleGlide());w.toggleGlide();assert.equal(w.study(1),false);
+M.persist(w.s);assert.equal(M.load().glideAwakened,false,'Unseen reward scene survives a reload');
+const legacy={...w.s};delete legacy.glideAwakened;delete legacy.realm;delete legacy.skyTreasures;stored=JSON.stringify(legacy);const migrated=M.load();assert(migrated.glideAwakened);assert.equal(migrated.realm,'surface');assert.deepEqual(migrated.skyTreasures,[]);
+stored=JSON.stringify({...M.fresh(),realm:'sky',gate:'0:sky'});assert.equal(M.load().realm,'surface');assert.equal(M.load().gate,null);
+function flyTo(w,p){let frames=0;while(Math.hypot(w.x-p.x,w.y-p.y)>.15&&frames++<1000){const d=Math.hypot(w.x-p.x,w.y-p.y);w.tick(.02,(p.x-w.x)/d,(p.y-w.y)/d);}assert(frames<1000,'Sky route must be physically flyable');assert(w.gliding,'Route must retain enough stamina');}
+for(let chapter=0;chapter<12;chapter++){
+ const s=M.fresh();s.chapter=chapter;s.beacons=[0];s.glideAwakened=true;const sky=new M.World(s);sky.x=M.WIND_LAUNCH.x;sky.y=M.WIND_LAUNCH.y;assert(sky.launchSky());assert(sky.inSky);assert.equal(sky.s.room,0);assert.equal(M.key(sky.s),chapter+':sky');sky.hurt=999;
+ // The islands are disconnected on foot, so the new tool materially changes access.
+ const queue=[[2,7]],seen=new Set(['2,7']);sky.gliding=false;for(const[x,y]of queue)for(const[dx,dy]of[[0,1],[1,0],[0,-1],[-1,0]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(!seen.has(k)&&sky.can(nx+.5,ny+.5)){seen.add(k);queue.push([nx,ny]);}}assert(!seen.has('17,4'));assert(sky.toggleGlide());
+ flyTo(sky,M.SKY_UPDRAFTS[0]);const low=.2;sky.stamina=low;for(let i=0;i<20;i++)sky.tick(.02,0,0);assert(sky.stamina>low,'Updraft restores stamina while airborne');
+ flyTo(sky,M.SKY_UPDRAFTS[1]);flyTo(sky,M.SKY_CHEST);assert(!sky.openSkyChest(),'Guardian protects the memory');assert(sky.toggleGlide());
+ // Fight the actual guardian after landing on its island.
+ let frames=0;while(sky.enemies.length&&frames++<1000){const e=sky.enemies[0];sky.x=e.x;sky.y=e.y-.7;sky.dx=0;sky.dy=1;if(sky.attack<=0)sky.swing();sky.tick(.02,0,0);}assert.equal(sky.enemies.length,0);
+ Object.assign(sky,M.SKY_CHEST);const coins=sky.s.coins,spirit=sky.s.spirit;assert(sky.openSkyChest());assert(!sky.study(0));assert(sky.s.gate);M.persist(sky.s);const reload=new M.World(M.load());assert(reload.inSky);assert.equal(reload.s.gate,chapter+':sky');assert(reload.study(1));assert.equal(reload.s.coins,coins+60);assert.equal(reload.s.spirit,spirit+2);assert.deepEqual(reload.s.skyTreasures,[chapter]);assert.equal(reload.study(1),false);assert(!reload.openSkyChest());assert(!reload.s.beacons.includes(chapter)||chapter===0,'Sky memories cannot light story beacons');
+ assert(reload.leaveSky());assert.equal(reload.s.realm,'surface');assert.equal(reload.s.chapter,chapter);assert(reload.atLaunch);assert(reload.launchSky());reload.gliding=false;reload.safe={...M.SKY_RETURN};reload.x=5.5;reload.y=7.5;assert(reload.toggleGlide());reload.stamina=.001;reload.tick(.02,0,0);assert(!reload.gliding);assert.equal(reload.x,M.SKY_RETURN.x,'Exhaustion returns to last solid island');
+ reload.startNew();assert(!reload.gliderUnlocked);assert.equal(reload.s.realm,'surface');assert.deepEqual(reload.s.skyTreasures,[]);
+}
+console.log('PASS: story-locked glide, first-beacon grant/reload/migration, all twelve sky regions flown with real stamina/collision, disconnected walking routes, updraft recovery, actual guardian combat, persisted learning gates, unique sky rewards, safe landing and return/new voyage.');

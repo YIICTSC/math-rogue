@@ -35,7 +35,7 @@ try {
  for(const path of ['sprites/dungeons2/lyria-directions.webp','sprites/dungeons2/animations/lyria.webp','sfx/dungeons2-voices/lyria/attack.ogg','sfx/card-club-voices/magic-akari/start.ogg']) {
   assert.ok([...manifest.images,...manifest.audio].includes(path),path);
  }
- for(const suffix of ['walk','profile','combo','tools'])assert(manifest.images.includes(`sprites/star-tide/hero-nagi-${suffix}.webp`));
+ for(const suffix of ['walk','profile','combo','tools','flight'])assert(manifest.images.includes(`sprites/star-tide/hero-nagi-${suffix}.webp`));
  for(const hero of ['nagi','mio','sena'])for(const suffix of ['', '-vertical'])assert(manifest.images.includes(`sprites/star-tide/hero-${hero}${suffix}.webp`));
  const {MEDIA_ENGLISH,MEDIA_HIRAGANA}=await server.ssrLoadModule('/src/components/miniGameMediaCopy.ts');
  assert.deepEqual(Object.keys(MEDIA_ENGLISH).sort(),Object.keys(MEDIA_HIRAGANA).sort());
