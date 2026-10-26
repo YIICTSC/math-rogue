@@ -47,6 +47,10 @@ export function mediaGrid(path:string): [number,number] {
  if (/wandering-student\/|dungeons2\/.*-directions\.|go-home-dash\/heroes\//.test(path)) return [4,2];
  if (/go-home-dash\/slides\//.test(path)) return [2,1];
  if (/after-school-poker\/portraits\//.test(path)) return [6,1];
+ if (/star-tide\/hero-nagi-walk/.test(path)) return [12,4];
+ if (/star-tide\/hero-nagi-profile/.test(path)) return [8,2];
+ if (/star-tide\/hero-nagi-combo/.test(path)) return [7,8];
+ if (/star-tide\/hero-nagi-tools/.test(path)) return [7,9];
  if (/star-tide\/hero-/.test(path)) return [6,/-vertical\./.test(path)?4:8];
  if (/star-tide\/atlas/.test(path)) return [8,8];
  if (/kocho-hero-actions-/.test(path)) return [5,5];

@@ -46,11 +46,11 @@ function discardNeighbors(data,width,height) {
       for(const p of part)data[p*4+3]=0;
   }
 }
-for (const {id, source, rowCuts: suppliedRows, colCuts: suppliedCols} of sources) {
+for (const {id, source, columns: suppliedColumns, rows: suppliedRowCount, bodyHeight, rowCuts: suppliedRows, colCuts: suppliedCols} of sources) {
   const rounding = id.endsWith('-rounding');
-  const columns = rounding || ['terrain','props','boss-motion'].includes(id) ? 8 : 6;
-  const rows = id.endsWith('-vertical') || id === 'floors' ? 4 : id === 'boss-motion' ? 6 : rounding || ['terrain','props'].includes(id) ? 12 : 8;
-  const opaque = ['terrain','floors'].includes(id), tiled=opaque||rounding, frameSize = id === 'floors' ? 128 : tiled ? 64 : 96;
+  const columns = suppliedColumns ?? (rounding || ['terrain','props','boss-motion'].includes(id) ? 8 : 6);
+  const rows = suppliedRowCount ?? (id.endsWith('-vertical') || id === 'floors' ? 4 : id === 'boss-motion' ? 6 : rounding || ['terrain','props'].includes(id) ? 12 : 8);
+  const opaque = ['terrain','floors'].includes(id), tiled=opaque||rounding, frameSize = bodyHeight ? 128 : id === 'floors' ? 128 : tiled ? 64 : 96;
   const input = await fs.readFile(source), meta = await sharp(input).metadata();
   const raw=await sharp(input).ensureAlpha().raw().toBuffer(), rowInk=Array(meta.height).fill(0),colInk=Array(meta.width).fill(0);
   for(let y=0;y<meta.height;y++)for(let x=0;x<meta.width;x++)if(raw[(y*meta.width+x)*4+3]>=128){rowInk[y]++;colInk[x]++;}
@@ -81,18 +81,20 @@ for (const {id, source, rowCuts: suppliedRows, colCuts: suppliedCols} of sources
     // Shared scale across a whole hero, one species, or one boss's four poses.
     const group = id.startsWith('hero-') ? frames : id.startsWith('enemies-') ? frames.filter(f=>f.row===frame.row)
       : id==='boss-motion' ? frames.filter(f=>f.row===frame.row&&Math.floor(f.col/4)===Math.floor(frame.col/4)) : [frame];
-    const scale = tiled ? 1 : Math.min(80/Math.max(...group.map(f=>f.box.width)),80/Math.max(...group.map(f=>f.box.height)));
+    const scale = bodyHeight ? Math.min(bodyHeight/frames[0].box.height,110/Math.max(...group.map(f=>f.box.height)),110/Math.max(...group.map(f=>f.box.width))) : tiled ? 1 : Math.min(80/Math.max(...group.map(f=>f.box.width)),80/Math.max(...group.map(f=>f.box.height)));
     const width = tiled ? frameSize : Math.max(1,Math.round(frame.box.width*scale));
     const height = tiled ? frameSize : Math.max(1,Math.round(frame.box.height*scale));
     const png = await sharp(frame.data,{raw:frame.info}).extract(frame.box).resize(width,height,{kernel:'nearest',fit:'fill'}).png().toBuffer();
-    layers.push({input:png,left:frame.col*frameSize+Math.floor((frameSize-width)/2),top:frame.row*frameSize+(tiled?0:88-height)});
-    normalization.push({row:frame.row,col:frame.col,scale,width,height,anchor:tiled?null:[48,88]});
+    layers.push({input:png,left:frame.col*frameSize+Math.floor((frameSize-width)/2),top:frame.row*frameSize+(tiled?0:(bodyHeight?120:88)-height)});
+    normalization.push({row:frame.row,col:frame.col,scale,width,height,anchor:tiled?null:bodyHeight?[64,120]:[48,88]});
   }
   const bytes = await sharp({create:{width:columns*frameSize,height:rows*frameSize,channels:4,background:'#00000000'}})
     .composite(layers).webp({lossless:true,effort:6}).toBuffer();
   const output = `sprites/star-tide/${id}.webp`;
   await fs.writeFile('public/'+output,bytes);
-  records.push({id,generator:'ImageGen',source,sourceSha256:hash(input),output,outputSha256:hash(bytes),columns,rows,frameSize,transparent:!opaque,rowCuts,colCuts,normalization});
+  records.push({id,generator:'ImageGen',source,sourceSha256:hash(input),output,outputSha256:hash(bytes),columns,rows,frameSize,...(bodyHeight?{bodyHeight}:{}),transparent:!opaque,rowCuts,colCuts,normalization});
   console.log(id,`${columns*frameSize}x${rows*frameSize}`,`${(bytes.length/1024).toFixed(0)} KiB`);
 }
-await fs.writeFile('assets/star-tide/graphics.json',JSON.stringify({version:2,method:'Whole-sheet ImageGen animations, shared scale and bottom-center anchor; nearest-neighbor lossless WebP packing.',sheets:records},null,2)+'\n');
+const old=JSON.parse(await fs.readFile('assets/star-tide/graphics.json','utf8'));
+const merged=[...old.sheets.filter(r=>!records.some(n=>n.id===r.id)),...records];
+await fs.writeFile('assets/star-tide/graphics.json',JSON.stringify({version:3,method:'Whole-sheet ImageGen animations, shared scale and bottom-center anchor; nearest-neighbor lossless WebP packing.',sheets:merged},null,2)+'\n');

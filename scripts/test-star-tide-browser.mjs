@@ -10,21 +10,21 @@ await page.evaluate(()=>{
  sessionStorage.setItem('star-test-seed',JSON.stringify(s));
 });
 await page.setViewportSize({width:1000,height:1000});await page.reload();
-await page.getByRole('group',{name:'操作する仲間'}).getByRole('button').nth(2).click();
-assert.equal(await page.evaluate(()=>window.__starWorld.s.hero),'sena');
-await page.screenshot({path:'tmp/star-tide/title-crew.png'});
+assert.equal(await page.getByRole('group',{name:'操作する仲間'}).count(),0);
+assert.equal(await page.evaluate(()=>window.__starWorld.s.hero),'nagi');
+await page.screenshot({path:'tmp/star-tide/title-nagi.png'});
 await page.getByRole('button',{name:'航海を続ける'}).click();
 await page.getByRole('button',{name:'冒険手帳',exact:true}).click();
-assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('learning-rogue:star-tide:v1')).hero),'sena');
+assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('learning-rogue:star-tide:v1')).hero),'nagi');
 await page.getByRole('button',{name:'再開',exact:true}).click();
 await page.evaluate(async()=>{
- const names=['hero-nagi','hero-mio','hero-sena','hero-nagi-vertical','hero-mio-vertical','hero-sena-vertical','enemies-a','enemies-b','enemies-c','boss-motion','terrain','props','floors','shore-rounding','cliff-rounding'];
+ const names=['hero-nagi-walk','hero-nagi-profile','hero-nagi-combo','hero-nagi-tools','hero-nagi','hero-mio','hero-sena','hero-nagi-vertical','hero-mio-vertical','hero-sena-vertical','enemies-a','enemies-b','enemies-c','boss-motion','terrain','props','floors','shore-rounding','cliff-rounding'];
  await Promise.all(names.map(name=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i.naturalWidth);i.onerror=()=>reject(new Error('Missing graphics '+name));i.src='/sprites/star-tide/'+name+'.webp';})));
  window.__starWorld.tick=()=>{};
 });
 await fs.mkdir('tmp/star-tide/graphics',{recursive:true});
 for(let c=0;c<12;c++)for(let variant=0;variant<2;variant++){
- await page.evaluate(({c,variant})=>{const w=window.__starWorld;Object.assign(w.s,{chapter:c,room:variant?2:1,hero:['nagi','mio','sena'][c%3],gate:null});w.enter();Object.assign(w,{x:10.5,y:7.5,hurt:0,attack:0,time:2,dx:1,dy:0});},{c,variant});
+ await page.evaluate(({c,variant})=>{const w=window.__starWorld;Object.assign(w.s,{chapter:c,room:variant?2:1,hero:'nagi',gate:null});w.enter();Object.assign(w,{x:10.5,y:7.5,hurt:0,attack:0,time:2,dx:1,dy:0});},{c,variant});
  await page.waitForTimeout(60);
  await page.locator('canvas').screenshot({path:`tmp/star-tide/graphics/biome-${c}-${variant}.png`});
 }
@@ -32,7 +32,7 @@ for(let c=0;c<12;c++){
  await page.evaluate(c=>{const w=window.__starWorld;Object.assign(w.s,{chapter:c,room:3});w.enter();w.map=Array.from({length:14},()=>Array(20).fill(0));for(let y=3;y<=10;y++)for(let x=5;x<=14;x++)if(!(x<9&&y<7)&&!(x>11&&y>8))w.map[y][x]=2;Object.assign(w,{x:3.5,y:7.5,enemies:[],hurt:0,attack:0});},c);
  await page.waitForTimeout(50);await page.locator('canvas').screenshot({path:`tmp/star-tide/graphics/rounded-shore-${c}.png`});
 }
-for(const hero of ['nagi','mio','sena']){
+for(const hero of ['nagi']){
  await page.evaluate(hero=>{const w=window.__starWorld;Object.assign(w.s,{hero,chapter:1,room:1});w.enter();w.enemies=[];Object.assign(w,{x:10.5,y:7.5,time:0,hurt:0,dash:0,attack:0,gliding:false,moving:true,walk:0,dx:1,dy:0});},hero);
  await page.waitForTimeout(50);const a=await page.locator('canvas').screenshot();
  await page.evaluate(()=>window.__starWorld.walk=.25);await page.waitForTimeout(50);const b=await page.locator('canvas').screenshot();assert(!a.equals(b),hero+' must animate its walk');
@@ -52,7 +52,7 @@ for(let group=0;group<4;group++){
 }
 for(const [width,height] of [[390,844],[844,390]]){
  await page.setViewportSize({width,height});await page.screenshot({path:`tmp/star-tide/graphics/responsive-${width}.png`});
- assert(await page.locator('.st-stick').isVisible());assert(await page.getByRole('button',{name:'A 剣・調べる'}).isVisible());
+ assert(await page.locator('.st-stick').isVisible());assert(await page.getByRole('button',{name:'A 装備武器・調べる'}).isVisible());
 }
 for(const [width,height] of [[360,640],[390,844],[430,932],[844,390],[932,430]]){
  await page.setViewportSize({width,height});await page.waitForTimeout(100);
@@ -67,7 +67,7 @@ for(const [width,height] of [[360,640],[390,844],[430,932],[844,390],[932,430]])
 const english=await browser.newPage({viewport:{width:390,height:844}});english.on('pageerror',e=>errors.push(e.message));
 await english.goto(`http://127.0.0.1:${server.httpServer.address().port}/__star?en`);
 await english.getByRole('button',{name:'Continue voyage'}).waitFor();
-assert.equal(await english.getByRole('group',{name:'Playable crew'}).getByRole('button').count(),3);
+assert.equal(await english.getByRole('group',{name:'Playable crew'}).count(),0);
 await english.screenshot({path:'tmp/star-tide/graphics/english-title.png'});await english.close();
 const touchContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3});
 const touch=await touchContext.newPage();touch.on('pageerror',e=>errors.push(e.message));await touch.goto(`http://127.0.0.1:${server.httpServer.address().port}/__star`);
@@ -92,5 +92,5 @@ const leave=await touch.getByRole('button',{name:'保存して一覧へ',exact:t
 await touchContext.close();
 
 
-assert.deepEqual(errors,[]);console.log('PASS: boot/story, keyboard/analog/native pad, held-menu guard, glide, cooking, free island order, five mechanism views, partial save, questions, ending and three viewports; 24 biome views, all crew and boss animations, all 24 enemy species, translated crew selection; zero browser exceptions.');
+assert.deepEqual(errors,[]);console.log('PASS: boot/story, keyboard/analog/native pad, held-menu guard, glide, cooking, free island order, five mechanism views, partial save, questions, ending and three viewports; 24 biome views, Nagi and boss animations, all 24 enemy species, translated weapon loadouts; zero browser exceptions.');
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}

@@ -10,6 +10,7 @@ import { enemyKind, heroId, type HeroId } from './visuals';
 import { stepEnemy } from './enemyAI';
 import { shapeField } from './geography';
 import { roundedSolid } from './rounding';
+import { WALK_SPEED, COMBO_GRACE, weaponAction } from './combat';
 export const W = 20, H = 14;
 export type Save = WildSave & {
     version: 1;
@@ -23,6 +24,7 @@ export type Save = WildSave & {
     maxHp: number;
     coins: number;
     tool: number;
+    weaponA: number;
     cleared: string[];
     solved: string[];
     chests: string[];
@@ -60,8 +62,9 @@ export type Shot = {
     life: number;
     friendly: boolean;
     kind?: number;
+    damage?: number;
 };
-export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
+export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', weaponA: 0, puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
 export const key = (s: Save) => `${s.chapter}:${s.room}`;
 export function load(): Save { try {
     const x = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
@@ -83,6 +86,7 @@ export function load(): Save { try {
     x.coins = Math.max(0, Math.min(999999, Math.floor(Number(x.coins) || 0)));
     const wild = normalizeWild(x);
     x.hero = heroId(x.hero);
+    x.weaponA = Number.isInteger(x.weaponA) && wild.ownedTools.includes(x.weaponA) ? x.weaponA : 0;
     return { ...n, ...x, ...wild, chapter: Math.max(0, Math.min(11, Math.floor(Number(x.chapter) || 0))), room: Math.max(0, Math.min(23, Math.floor(Number(x.room) || 0))), maxHp: Math.max(6, Math.min(30, Number(x.maxHp) || 6)), hp: Math.max(1, Math.min(30, Number(x.hp) || 6)), tool: wild.ownedTools.includes(Number(x.tool)) ? Number(x.tool) : 0, seconds: Math.max(0, Number(x.seconds) || 0) };
 }
 catch {
@@ -109,6 +113,13 @@ export class World {
     moving = false;
     walk = 0;
     combo = 0;
+    comboWindow = 0;
+    comboWeapon = -1;
+    queuedSlot: boolean | null = null;
+    attackDuration = .3;
+    activeWeapon = 0;
+    attackSerial = 0;
+    strikePending = false;
     fx: { x: number; y: number; life: number; max: number; color: string; seed: number }[] = [];
     s: Save;
     x = 2.5;
@@ -145,8 +156,8 @@ export class World {
     kills = 0;
     dirty = false;
     time = 0;
-    constructor(s: Save) { this.s = s; this.enter(); }
-    enter() { this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
+    constructor(s: Save) { this.s = s; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.enter(); }
+    enter() { this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
         for (let y = 3; y <= 10; y++)
             for (let x = 3; x <= 16; x++)
                 this.map[y][x] = 5;
@@ -190,10 +201,10 @@ export class World {
         dx = this.dx;
         dy = this.dy;
     } if (!dx && !dy)
-        return; const d = Math.hypot(dx, dy), fx = dx / d, fy = dy / d; dx /= Math.max(1, d); dy /= Math.max(1, d); if (this.dash <= 0) {
+        return; const d = Math.hypot(dx, dy), fx = dx / d, fy = dy / d; dx /= Math.max(1, d); dy /= Math.max(1, d); if (this.dash <= 0 && this.attack <= 0) {
         this.dx = fx;
         this.dy = fy;
-    } const v = (this.dash > 0 ? 10 : this.gliding ? (this.weather === 'wind' ? 5.2 : 4.2) : 3.2) * dt; for (const [ax, ay] of [[dx * v, 0], [0, dy * v]]) {
+    } const v = (this.dash > 0 ? 10 : this.gliding ? (this.weather === 'wind' ? 5.2 : 4.2) : WALK_SPEED * (this.attack > 0 ? .55 : 1)) * dt; for (const [ax, ay] of [[dx * v, 0], [0, dy * v]]) {
         const nx = this.x + ax + Math.sign(ax) * .22, ny = this.y + ay + Math.sign(ay) * .22;
         if (this.blocks && this.pushCooldown <= 0) {
             const box = this.blocks.boxes.find(b => b.x === Math.floor(nx) && b.y === Math.floor(ny));
@@ -329,45 +340,28 @@ export class World {
     } this.dirty = true; return true; }
     canTravel(chapter: number) { return Number.isInteger(chapter) && chapter >= 0 && chapter < 12 && !this.s.gate && (chapter === 0 || this.s.beacons.includes(0)) && (chapter === 0 || this.s.room === 0 || this.s.charts.includes(chapter)); }
     guarded(e: Enemy) { return Boolean(e.boss && (this.s.chapter % 4 === 0 ? e.phase % 4 < 2 : this.s.chapter % 4 === 1 ? (e.exposed || 0) <= 0 : this.s.chapter % 4 === 3 ? e.phase % 5 < 1.5 : false)); }
-    swing(tool = false) {
-        if (this.attack > 0 || this.dash > 0 || tool && !this.s.ownedTools.includes(this.s.tool) || tool && this.s.tool === 6 && this.stamina < .3)
-            return;
-        this.attack = tool ? .55 : .32;
-        this.effect = tool ? this.s.tool + 1 : 0;
-        this.combo = (this.combo + 1) % 3;
-        const reach = tool && this.s.tool === 7 ? 3 : 1.7;
-        if (tool && [1, 2, 5].includes(this.s.tool))
-            this.shots.push({ x: this.x, y: this.y, vx: this.dx * 8, vy: this.dy * 8, life: 1.5, friendly: true, kind: this.s.tool });
-        if (tool && this.s.tool === 3 && Math.hypot(this.x - 10.5, this.y - 6.5) > 4) {
-            let destination = { x: this.x, y: this.y };
-            for (let i = .25; i <= 5; i += .25) {
-                const nx = this.x + this.dx * i, ny = this.y + this.dy * i;
-                if (this.map[Math.floor(ny)]?.[Math.floor(nx)] === 3)
-                    break;
-                if (this.can(nx, ny))
-                    destination = { x: nx, y: ny };
-            }
-            this.x = destination.x;
-            this.y = destination.y;
-        }
-        if (tool && this.s.tool === 6) {
-            this.hurt = .6;
-            this.stamina -= .3;
-        }
-        for (const e of this.enemies) {
-            const rx = e.x - this.x, ry = e.y - this.y;
-            if (Math.hypot(rx, ry) < reach && (rx * this.dx + ry * this.dy > -.2)) {
-                if (this.guarded(e)) {
-                    this.notice = 'bossguard';
-                    continue;
-                }
-                e.hp -= (tool ? 3 : 2) + this.s.weaponRank * .5;
-            e.flash = .15;
-            this.burst(e.x, e.y);
-                e.x += this.dx * .25;
-                e.y += this.dy * .25;
-            }
-        }
+    equip(slot: 'a' | 'b', weapon: number) {
+        if (!Number.isInteger(weapon) || !this.s.ownedTools.includes(weapon) || weapon < 0 || weapon > 7) return false;
+        if (slot === 'a') this.s.weaponA = weapon; else this.s.tool = weapon;
+        this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1;
+        this.dirty = true;
+        return true;
+    }
+    swing(tool = false, continuation = false) {
+        const weapon = tool ? this.s.tool : this.s.weaponA;
+        if (this.s.gate || this.dash > 0 || !this.s.ownedTools.includes(weapon) || weapon === 6 && this.stamina < .3) return false;
+        if (this.attack > 0) { this.queuedSlot = tool; return false; }
+        this.combo = this.comboWeapon === weapon && this.comboWindow > 0 ? (this.combo + 1) % 3 : 0;
+        this.comboWeapon = weapon; this.comboWindow = 0;
+        this.activeWeapon = weapon;
+        this.attackDuration = weaponAction(weapon).durations[this.combo];
+        this.attack = this.attackDuration;
+        this.effect = weapon + 1;
+        this.strikePending = true;
+        this.attackSerial++;
+        if (weapon === 6) { this.hurt = Math.max(this.hurt, this.attackDuration + .15); this.stamina -= .3; }
+        // Queued follow-ups cannot toggle a mirror or plate a second time.
+        if (continuation) return true;
         if (this.beam) {
             const m = this.beam.mirrors.find(m => Math.hypot(this.x - m.x - .5, this.y - m.y - .5) < 1.3);
             if (m) {
@@ -420,20 +414,20 @@ export class World {
             const b = this.barrel;
             if (b && Math.hypot(this.x - b.x, this.y - b.y) < 1.8)
                 this.detonate();
-            if (tool && this.s.tool === 4) {
+            if (weapon === 4) {
                 const x = Math.floor(this.x + this.dx), y = Math.floor(this.y + this.dy);
                 if (this.map[y]?.[x] === 3 && this.alter(x, y, 5)) {
                     this.s.inventory.ore++;
                     this.notice = 'mined';
                 }
             }
-            if (tool && this.s.tool === 2 && this.weather !== 'rain')
+            if (weapon === 2 && this.weather !== 'rain')
                 this.fires.push({ x: this.x + this.dx, y: this.y + this.dy, life: 5 });
         }
         const target = this.blocks || this.beam || this.circuit || this.ice ? undefined : this.targets[this.switches.length];
         if (target && Math.hypot(this.x - target[0], this.y - target[1]) < 1.2) {
             const required = Math.min(this.s.chapter, 7);
-            if (this.s.room < 8 || this.s.room === 23 || (this.s.room % 4 === 2 ? tool && this.s.tool === required : this.s.room % 4 === 3 ? Math.sin(this.time * 2) > .2 : !tool)) {
+            if (this.s.room < 8 || this.s.room === 23 || (this.s.room % 4 === 2 ? weapon === required : this.s.room % 4 === 3 ? Math.sin(this.time * 2) > .2 : !tool)) {
                 this.switches.push(this.switches.length);
                 if (this.switches.length >= this.targets.length) {
                     if (!this.s.solved.includes(key(this.s)))
@@ -466,9 +460,41 @@ export class World {
         }
         this.rememberPuzzle();
         this.clean();
+        return true;
     }
+    strike() {
+        const weapon = this.activeWeapon, profile = weaponAction(weapon), finisher = this.combo === 2;
+        const damage = (profile.damage + this.s.weaponRank * .5) * (finisher ? 1.5 : 1);
+        if (profile.style === 'ranged') {
+            const spread = finisher ? (weapon === 1 ? [-.14, .14] : [-.18, 0, .18]) : [0];
+            const aim = Math.atan2(this.dy, this.dx);
+            for (const offset of spread) this.shots.push({x:this.x,y:this.y,vx:Math.cos(aim+offset)*8,vy:Math.sin(aim+offset)*8,life:1.5,friendly:true,kind:weapon,damage});
+        }
+        if (weapon === 3 && Math.hypot(this.x - 10.5, this.y - 6.5) > 4) {
+            let destination = { x:this.x, y:this.y };
+            for (let i=.25;i<= (finisher?5:2.5);i+=.25) {
+                const nx=this.x+this.dx*i, ny=this.y+this.dy*i;
+                if (this.map[Math.floor(ny)]?.[Math.floor(nx)]===3) break;
+                if(this.can(nx,ny)) destination={x:nx,y:ny};
+            }
+            this.x=destination.x; this.y=destination.y;
+        }
+        const reach = profile.reach + (finisher && profile.reach ? .45 : 0);
+        for(const e of this.enemies) {
+            const rx=e.x-this.x, ry=e.y-this.y;
+            if(e.hp>0 && Math.hypot(rx,ry)<reach && (finisher && profile.style==='heavy' || rx*this.dx+ry*this.dy>-.2)) {
+                if(this.guarded(e)){this.notice='bossguard';continue;}
+                e.hp-=damage; e.flash=.15; this.burst(e.x,e.y);
+                const nx=e.x+this.dx*(finisher?.4:.2),ny=e.y+this.dy*(finisher?.4:.2);
+                if(this.enemyCan(nx,ny)){e.x=nx;e.y=ny;}
+            }
+        }
+        if(weapon===4 && finisher) this.burst(this.x+this.dx,this.y+this.dy,'#ffcb80');
+        this.clean();
+    }
+    cancelCombo() { this.queuedSlot=null; this.comboWindow=0; this.comboWeapon=-1; }
     roll() { if (this.stamina < .7 || this.dash > 0)
-        return; this.stamina -= .7; this.dash = .22; this.hurt = .35; for (const e of this.enemies)
+        return; this.cancelCombo(); this.attack=0; this.strikePending=false; this.stamina -= .7; this.dash = .22; this.hurt = .35; for (const e of this.enemies)
         if (e.boss && this.s.chapter % 4 === 1 && Math.hypot(this.x - e.x, this.y - e.y) < 2.2)
             e.exposed = 1.5; }
     clean() { const before = this.enemies.length; for (const e of this.enemies) if (e.hp <= 0) this.burst(e.x, e.y, '#a7e9dc'); this.enemies = this.enemies.filter(e => e.hp > 0); if (before > this.enemies.length) {
@@ -486,7 +512,18 @@ export class World {
         for (const p of this.fx) p.life -= dt;
         this.fx = this.fx.filter(p => p.life > 0);
         this.pushCooldown = Math.max(0, this.pushCooldown - dt);
-        this.attack = Math.max(0, this.attack - dt);
+        if (this.attack > 0) {
+            this.attack = Math.max(0, this.attack - dt);
+            if (this.strikePending && this.attack <= this.attackDuration * .58) { this.strikePending=false; this.strike(); }
+            if (this.attack === 0) {
+                this.comboWindow = COMBO_GRACE;
+                const queued=this.queuedSlot; this.queuedSlot=null;
+                if(queued!==null) this.swing(queued,true);
+            }
+        } else {
+            this.comboWindow=Math.max(0,this.comboWindow-dt);
+            if(this.comboWindow===0) this.comboWeapon=-1;
+        }
         this.hurt = Math.max(0, this.hurt - dt);
         this.dash = Math.max(0, this.dash - dt);
         this.travel -= dt;
@@ -503,7 +540,8 @@ export class World {
         this.move(dx, dy, dt);
         const distance = oldRoom === key(this.s) ? Math.hypot(this.x - oldX, this.y - oldY) : 0;
         this.moving = distance > .0001;
-        if (this.moving || this.gliding) this.walk += dt;
+        if (this.moving) this.walk += distance / WALK_SPEED;
+        else if (this.gliding) this.walk += dt;
         if (![2, 7].includes(this.map[Math.floor(this.y)]?.[Math.floor(this.x)]))
             this.safe = { x: this.x, y: this.y };
         for (const f of this.fires) {
@@ -593,7 +631,7 @@ export class World {
                         if (p.kind === 1)
                             e.exposed = 2.5;
                     if (!this.guarded(e)) {
-                        e.hp -= 3;
+                        e.hp -= p.damage ?? 3;
                         e.flash = .15;
                         this.burst(e.x, e.y);
                     }
@@ -611,7 +649,7 @@ export class World {
         this.shots = this.shots.filter(p => p.life > 0);
         this.clean();
     }
-    hit() { this.s.hp--; this.hurt = 1; if (this.s.hp <= 0) {
+    hit() { this.cancelCombo(); this.attack=0; this.strikePending=false; this.s.hp--; this.hurt = 1; if (this.s.hp <= 0) {
         this.s.hp = this.s.maxHp;
         this.s.coins = Math.max(0, this.s.coins - 10);
         this.x = 2.5;
@@ -688,7 +726,7 @@ export class World {
         this.switches = Array.from({ length: Math.min(p.count, this.targets.length) }, (_, i) => i); }
     resetPuzzle() { if (this.s.solved.includes(key(this.s)))
         return false; delete this.s.puzzles[key(this.s)]; this.x = 2.5; this.y = 7.5; this.enter(); return true; }
-    startNew() { const hero = this.s.hero; this.s = fresh(); this.s.hero = hero; this.x = 2.5; this.y = 7.5; this.dx = 1; this.dy = 0; this.stamina = 1; this.hurt = 0; this.dash = 0; this.time = 0; this.enter(); }
+    startNew() { this.s = fresh(); this.x = 2.5; this.y = 7.5; this.dx = 1; this.dy = 0; this.stamina = 1; this.hurt = 0; this.dash = 0; this.time = 0; this.enter(); }
     buyHeal() { if (this.s.room !== 0 || this.s.coins < 20 || this.s.hp >= this.s.maxHp || this.s.gate)
         return false; this.s.coins -= 20; this.s.hp = this.s.maxHp; this.dirty = true; return true; }
     travelTo(chapter: number) { if (!this.canTravel(chapter))

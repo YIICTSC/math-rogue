@@ -6,10 +6,15 @@ import { biomeFor, ENEMIES, heroFrame, visualHash, type HeroId } from './visuals
 import { enemyFrame } from './enemyAI';
 import { sceneryFor, terrainCell } from './scenery';
 import { corners, roundedPath } from './rounding';
+import { weaponAction } from './combat';
 
 export type Graphics = {
   heroes: Record<HeroId, HTMLImageElement>;
   vertical: Record<HeroId, HTMLImageElement>;
+  walk: HTMLImageElement;
+  profile: HTMLImageElement;
+  combo: HTMLImageElement;
+  tools: HTMLImageElement;
   enemies: HTMLImageElement[];
   terrain: HTMLImageElement;
   props: HTMLImageElement;
@@ -139,7 +144,7 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
  if(!w.s.chests.includes(key(w.s)))sprite(3,3,80,144);
 
  if(w.s.room===23)sprite(7,3,280,96,24);
- for(const p of w.shots){ctx.fillStyle=p.friendly?'#fbd781':'#e38bb1';if(p.friendly){ctx.save();ctx.translate(p.x*16,p.y*16);ctx.rotate(Math.atan2(p.vy,p.vx));sprite(p.kind===1?2:p.kind===2?3:4,6,-8,-8,16);ctx.restore();}else{ctx.beginPath();ctx.arc(p.x*16,p.y*16,2,0,7);ctx.fill();}}
+ for(const p of w.shots){ctx.fillStyle=p.friendly?'#fbd781':'#e38bb1';if(p.friendly){ctx.save();ctx.translate(p.x*16,p.y*16-18);ctx.rotate(Math.atan2(p.vy,p.vx));sprite(p.kind===1?2:p.kind===2?3:4,6,-8,-8,16);ctx.restore();}else{ctx.beginPath();ctx.arc(p.x*16,p.y*16,2,0,7);ctx.fill();}}
  if(w.hintTarget){ctx.strokeStyle='#68eeed';ctx.lineWidth=2;ctx.strokeRect(w.hintTarget.x*16-9,w.hintTarget.y*16-9,18,18);}
   const entities: { y: number; draw: () => void }[] = [];
   if (graphics?.props.naturalWidth) for (const p of sceneryFor(w)) entities.push({ y: p.y, draw: () => {
@@ -190,39 +195,54 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
   }});
   entities.push({ y: w.y, draw: () => {
     shadow(w.x, w.y, w.gliding ? 6 : 8, w.gliding ? .14 : .28);
-    const motion = heroFrame(w), size = 36;
-    if (w.hurt > 0 && Math.floor(w.time * 15) % 2) ctx.globalAlpha = .5;
+    const motion = heroFrame(w), base=motion.sheet==='base', size=base?36:48;
+    const sheet = base?graphics?.heroes.nagi:graphics?.[motion.sheet as 'walk'|'profile'|'combo'|'tools'];
+    if (w.hurt > 0 && !(w.attack>0&&w.activeWeapon===6) && Math.floor(w.time * 15) % 2) ctx.globalAlpha = .5;
     if (w.gliding) prop(0, w.x * 16, w.y * 16 - 24, 43);
-    if (!cell(ctx, motion.vertical ? graphics?.vertical[w.s.hero] : graphics?.heroes[w.s.hero], 6, motion.vertical ? 4 : 8, motion.frame, motion.row,
-      w.x * 16 - size / 2, w.y * 16 - size * 88 / 96 - (w.gliding ? 7 : 0), size, size, motion.flip)) {
+    if (!cell(ctx, sheet, motion.columns, motion.rows, motion.frame, motion.row,
+      w.x * 16 - size / 2, w.y * 16 - size * (base?88/96:120/128) - (w.gliding ? 7 : 0), size, size, motion.flip)) {
       sprite(w.dy < -.4 ? 3 : w.dx > .4 ? 6 : 0, w.dx < -.4 ? 1 : 0, w.x * 16 - 16, w.y * 16 - 23, 32);
     }
     ctx.globalAlpha = 1;
     if (w.attack > 0) {
-      const duration = w.effect ? .55 : .32, t = Math.min(1, (duration - w.attack) / duration);
-      const angle = Math.atan2(w.dy, w.dx), tool = w.effect - 1;
-      ctx.save(); ctx.translate(w.x * 16, w.y * 16 - 7); ctx.rotate(angle);
-      // Directional weapon layer: body sheets stay reusable across all eight tools.
-      if (tool === 4) {
-        ctx.strokeStyle = '#ffca7b'; ctx.globalAlpha = 1 - t;
-        ctx.beginPath(); ctx.ellipse(20, 7, 8 + t * 19, 3 + t * 7, 0, 0, Math.PI * 2); ctx.stroke();
-      } else if (tool === 6) {
-        ctx.fillStyle = '#a1f3eb44'; ctx.strokeStyle = '#b6fff2';
-        ctx.beginPath(); ctx.arc(4, 0, 19, -1.2, 1.2); ctx.stroke();
-      } else if (tool === 7) {
-        ctx.strokeStyle = '#ffe8a5'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(19 + Math.sin(t * Math.PI) * 24, 0); ctx.stroke();
-      } else if (w.effect === 0 || tool === 0) {
-        const sweep = (w.combo === 1 ? 1 - t : t) * 2 - 1;
-        ctx.rotate(sweep * 1.3);
-        ctx.globalAlpha = Math.sin(t * Math.PI);
-        ctx.strokeStyle = w.combo === 2 ? '#fff1b7' : '#b9f3ed'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(0, 0, w.combo === 2 ? 26 : 22, -.65, .65); ctx.stroke();
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(0, 0, 23, -.5, .55); ctx.stroke();
+      const t = Math.max(0,Math.min(1,1-w.attack/w.attackDuration)), tool = w.activeWeapon;
+      const angle=Math.atan2(w.dy,w.dx), finisher=w.combo===2, profile=weaponAction(tool);
+      const drive=Math.sin(Math.min(1,t/.7)*Math.PI), swing=(w.combo===1?1-t:t)*2-1;
+      ctx.save(); ctx.translate(w.x*16,w.y*16-18); ctx.rotate(angle);
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      // Weapons have their own directional layer; hands and body stay reusable.
+      if(tool===0) {
+        if(finisher) ctx.translate(drive*12,0); else { const arc=t<.28?-.2-t/.28*1.3:t<.62?-1.5+(t-.28)/.34*2: .5-(t-.62)/.38*.7;ctx.rotate(w.combo===1?-arc:arc); }
+        ctx.fillStyle='#9cc8d2';ctx.strokeStyle='#e8ffff';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(8,-2);ctx.lineTo(29,0);ctx.lineTo(8,2);ctx.closePath();ctx.fill();ctx.stroke();
+        ctx.strokeStyle='#eac178';ctx.beginPath();ctx.moveTo(8,-4);ctx.lineTo(8,4);ctx.moveTo(3,0);ctx.lineTo(8,0);ctx.stroke();
+        ctx.globalAlpha=drive*.8;ctx.strokeStyle=finisher?'#ffe6a2':'#b7fcf4';ctx.lineWidth=3;
+        ctx.beginPath();if(finisher){ctx.moveTo(12,0);ctx.lineTo(36,0);}else ctx.arc(0,0,29,-.8,.8);ctx.stroke();
+      } else if(tool===4) {
+        const lift=t<.38?-.6-t/.38*1.2:t<.58?-1.8+(t-.38)/.2*2.25:.45-(t-.58)/.42*.7;ctx.rotate(lift);
+        ctx.strokeStyle='#87583b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(3,0);ctx.lineTo(23,0);ctx.stroke();
+        ctx.fillStyle='#8faeb7';ctx.strokeStyle='#e8d6a1';ctx.lineWidth=1;ctx.fillRect(21,-7,9,14);ctx.strokeRect(21,-7,9,14);
+        if(t>.38){ctx.globalAlpha=(1-t)*.8;ctx.strokeStyle='#ffd496';ctx.beginPath();ctx.ellipse(25,0,5+t*20,3+t*8,0,0,Math.PI*2);ctx.stroke();}
+      } else if(tool===6) {
+        ctx.translate(drive*(finisher?9:4),0);ctx.fillStyle='#538aa9bb';ctx.strokeStyle='#d4fff6';ctx.lineWidth=2;
+        ctx.beginPath();ctx.ellipse(12,0,5,13,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.strokeStyle='#fce9a6';ctx.beginPath();ctx.arc(12,-1,6,-1.1,1.1);ctx.stroke();
+      } else if(tool===7 || tool===3) {
+        const extension=drive*(finisher?21:12);ctx.translate(extension,0);
+        if(tool===7&&w.combo===1)ctx.rotate(swing*.9);
+        ctx.strokeStyle=tool===7?'#aa7850':'#accbc8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(25,0);ctx.stroke();
+        ctx.fillStyle='#e6fbf7';ctx.beginPath();ctx.moveTo(33,0);ctx.lineTo(23,-4);ctx.lineTo(25,0);ctx.lineTo(23,4);ctx.closePath();ctx.fill();
+        if(tool===3){ctx.strokeStyle='#aeeedd';ctx.beginPath();ctx.arc(26,1,5,-Math.PI,0);ctx.stroke();}
+        ctx.globalAlpha=drive*.65;ctx.strokeStyle='#fff0b3';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(38,0);ctx.stroke();
+      } else if(tool===5) {
+        ctx.strokeStyle='#d2ab75';ctx.lineWidth=2;ctx.beginPath();ctx.arc(8,0,13,-1.35,1.35);ctx.stroke();
+        ctx.strokeStyle='#ecf4dd';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(11,-13);ctx.lineTo(11-drive*8,0);ctx.lineTo(11,13);ctx.stroke();
+        if(t<.45){ctx.beginPath();ctx.moveTo(3-drive*8,0);ctx.lineTo(25-drive*8,0);ctx.stroke();}
+      } else if(tool===1) {
+        ctx.translate(10+drive*9,0);ctx.rotate(t*8);ctx.strokeStyle='#b9faea';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,7,4,0,0,Math.PI*2);ctx.stroke();
+      } else {
+        ctx.strokeStyle='#a17f58';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1,0);ctx.lineTo(24,0);ctx.stroke();ctx.fillStyle='#ffe8a7';ctx.beginPath();ctx.arc(25,0,4,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha=drive;ctx.strokeStyle='#ffb36a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(25,0,6+drive*4,0,Math.PI*2);ctx.stroke();
       }
-      const effects = [0, 2, 3, 5, 6, 4, 7, 1];
-      cell(ctx, atlas, 8, 8, effects[Math.max(0, tool)], 6, 6, -12, tool === 4 ? 30 : 24);
       ctx.restore();
     }
     if (w.moving && !w.gliding && w.attack <= 0) {

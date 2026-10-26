@@ -2,6 +2,7 @@ import {REQUESTS} from './quests';
 export const TITLE='星潮の航路';
 export const SAVE_KEY='learning-rogue:star-tide:v1';
 export const TOOLS=[['星鉄の剣','Starsteel sword'],['潮返しの輪','Tide boomerang'],['灯火の杖','Lantern wand'],['風渡りの鉤','Wind hook'],['岩砕きの槌','Stone hammer'],['星弓','Star bow'],['月鏡の盾','Moon shield'],['暁の槍','Dawn spear']] as const;
+export const TOOL_LABELS=[['剣','Sword'],['環','Ring'],['杖','Wand'],['鉤','Hook'],['槌','Hammer'],['弓','Bow'],['盾','Shield'],['槍','Spear']] as const;
 const seeds=[
  ['漂着の入江','Castaway Cove','消えた潮の音','The missing tide','珊瑚の番人','Coral keeper','目を覚ますと、海は静止していた。航海士のナギは灯台守トワから、島々を結ぶ十二の星灯が消えたと聞く。','Navigator Nagi awakens beside a motionless sea. Towa asks her to relight twelve star beacons.'],
  ['木霊の樹海','Echo Woods','名前を忘れた森','The nameless forest','根冠の鹿','Rootcrown stag','森の子ミオは、木々の名前を集めている。星灯を取り戻せば、森も記憶を取り戻すだろうか。','Mio collects the forgotten names of trees. Can the beacon restore the forest’s memory?'],

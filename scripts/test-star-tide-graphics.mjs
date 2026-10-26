@@ -10,13 +10,13 @@ const legacy=M.fresh();delete legacy.hero;saved=JSON.stringify(legacy);assert.eq
 for(const h of M.HEROES){const s=M.fresh();s.hero=h.id;M.persist(s);assert.equal(M.load().hero,h.id);const w=new M.World(M.load());w.startNew();assert.equal(w.s.hero,h.id);}
 saved=JSON.stringify({...M.fresh(),hero:'invalid'});assert.equal(M.load().hero,'nagi');
 const motion={moving:true,walk:0,attack:0,effect:0,dash:0,hurt:0,gliding:false,time:0,dx:1,dy:0};
-assert.equal(new Set(Array.from({length:6},(_,i)=>M.heroFrame({...motion,walk:i/10}).frame)).size,6);
-assert.equal(M.heroFrame({...motion,moving:false,walk:3.2}).frame,0);
+assert.equal(new Set(Array.from({length:8},(_,i)=>M.heroFrame({...motion,walk:i/14}).frame)).size,8);
+assert.equal(M.heroFrame({...motion,moving:false,walk:3.2}).frame,2);
 assert.equal(M.heroFrame({...motion,dy:-1,dx:0}).row,1);
-assert.equal(M.heroFrame({...motion,attack:.2,dy:-1,dx:0}).vertical,true);
-assert.equal(M.heroFrame({...motion,attack:.4,effect:3,dy:1,dx:0}).row,2);
+assert.equal(M.heroFrame({...motion,attack:.2,dy:-1,dx:0}).sheet,'combo');
+assert.equal(M.heroFrame({...motion,attack:.4,effect:3,dy:1,dx:0}).row,1);
 assert.equal(M.heroFrame({...motion,dash:.15}).row,6);
-assert.equal(M.heroFrame({...motion,attack:.4,effect:7,hurt:.5}).row,5,'Shield invulnerability must not show a damage pose');
+assert.equal(M.heroFrame({...motion,attack:.4,effect:7,hurt:.5}).row,6,'Shield invulnerability must not show a damage pose');
 assert.equal(M.heroFrame({...motion,gliding:true}).row,7);
 assert.equal(new Set(M.BIOMES.map(b=>b.ja)).size,24);
 const seen=new Set();
@@ -66,4 +66,4 @@ for(const path of ['public/web-asset-manifest.json','public/android-asset-pack-m
  const manifest=JSON.parse(fs.readFileSync(path)),files=new Set(Object.values(manifest.packs).flatMap(p=>p.files.map(f=>f.path)));
  for(const r of art.sheets)assert(files.has(r.output),`${path} missing ${r.output}`);
 }
-console.log('PASS: 3 crew save migrations, 216 hero frames, 24 species/six actual AI patterns, 24 biomes, terrain collision, bounded effects, 192 R tiles/256 neighbor layouts, all normalized art frames and both delivery manifests.');
+console.log('PASS: Nagi save migration, expanded Nagi walk/combat frames, 24 species/six actual AI patterns, 24 biomes, terrain collision, bounded effects, 192 R tiles/256 neighbor layouts, all normalized art frames and both delivery manifests.');

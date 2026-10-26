@@ -1,12 +1,10 @@
 /** Shipped sprite layouts. Indices are shared by rendering and asset verification. */
 export const HEROES = [
   { id: 'nagi', ja: 'ナギ', en: 'Nagi', role: '航海士', roleEn: 'Navigator' },
-  { id: 'mio', ja: 'ミオ', en: 'Mio', role: '森の案内人', roleEn: 'Forest scout' },
-  { id: 'sena', ja: 'セナ', en: 'Sena', role: '修理工', roleEn: 'Mechanic' },
 ] as const;
 export type HeroId = typeof HEROES[number]['id'];
-export const heroId = (value: unknown): HeroId =>
-  HEROES.some(h => h.id === value) ? value as HeroId : 'nagi';
+export const heroId = (_value: unknown): HeroId =>
+  'nagi';
 
 export type EnemyBehavior = 'pursue' | 'orbit' | 'charge' | 'ranged' | 'hop' | 'sentry';
 export const ENEMIES: { ja: string; en: string; behavior: EnemyBehavior; speed: number; sheet: number; row: number }[] = [
@@ -79,24 +77,35 @@ export function visualHash(chapter: number, room: number, x: number, y: number) 
   return (n ^ n >>> 16) >>> 0;
 }
 
-export type HeroMotion = { moving: boolean; walk: number; attack: number; effect: number; dash: number; hurt: number; gliding: boolean; time: number; dx: number; dy: number };
-/** Local action clocks, never wall time: pausing does not advance an animation. */
+export type HeroMotion = { moving: boolean; walk: number; attack: number; attackDuration?: number; activeWeapon?: number; combo?: number; effect: number; dash: number; hurt: number; gliding: boolean; time: number; dx: number; dy: number };
+/** Feet advance with distance, attack frames advance with simulation time. */
 export function heroFrame(w: HeroMotion) {
-  if (w.dash > 0) return { row: 6, frame: Math.min(5, Math.floor((.22 - w.dash) / .22 * 6)), flip: w.dx < 0 };
-  if (w.gliding) return { row: 7, frame: Math.floor(w.walk * 8) % 3, flip: w.dx < 0 };
-  if (w.attack > 0) {
-    const duration = w.effect ? .55 : .32;
-    const vertical = Math.abs(w.dy) > Math.abs(w.dx);
-    return { row: vertical ? (w.effect ? 2 : 0) + (w.dy < 0 ? 1 : 0) : w.effect ? 5 : 4,
-      frame: Math.min(5, Math.floor((duration - w.attack) / duration * 6)), flip: !vertical && w.dx < 0, vertical };
+  const horizontal = Math.abs(w.dx) >= Math.abs(w.dy), direction = horizontal ? 0 : w.dy > 0 ? 1 : 2;
+  const flip = horizontal && w.dx < 0;
+  if(w.dash>0) return {sheet:'base',columns:6,rows:8,row:6,frame:Math.min(5,Math.floor((.22-w.dash)/.22*6)),flip};
+  if(w.gliding) return {sheet:'base',columns:6,rows:8,row:7,frame:Math.floor(w.walk*8)%3,flip};
+  if(w.attack>0) {
+    const weapon=w.activeWeapon ?? Math.max(0,w.effect-1), stage=w.combo??0;
+    const progress=Math.max(0,Math.min(.999,1-w.attack/(w.attackDuration??.4)));
+    if([1,2,4,5,6].includes(weapon)) {
+      const style=weapon===4?1:weapon===6?2:0;
+      return {sheet:'tools',columns:7,rows:9,row:style*3+direction,frame:Math.floor(progress*7),flip};
+    }
+    const row = direction===0?stage:direction===1?stage===2?4:3:5+stage;
+    const frame = Math.floor(progress*7);
+    return {sheet:'combo',columns:7,rows:8,row,frame:direction===1&&stage===1?6-frame:frame,flip};
   }
-  // Shield invulnerability shares the hurt timer, but must retain its tool pose.
-  if (w.hurt > .35) return { row: 7, frame: 3 + Math.floor(w.time * 10) % 3, flip: w.dx < 0 };
-  const row = Math.abs(w.dy) > Math.abs(w.dx) ? w.dy < 0 ? 1 : 0 : w.dx < 0 ? 3 : 2;
-  return { row, frame: w.moving ? Math.floor(w.walk * 10) % 6 : 0, flip: false };
+  if(w.hurt>.35) return {sheet:'base',columns:6,rows:8,row:7,frame:3+Math.floor(w.time*10)%3,flip};
+  const row = horizontal ? w.dx<0?3:2 : w.dy<0?1:0;
+  if(horizontal) return {sheet:'profile',columns:8,rows:2,row:w.dx<0?1:0,frame:w.moving?Math.floor(w.walk*14)%8:2,flip:false};
+  return {sheet:'walk',columns:12,rows:4,row,frame:w.moving?Math.floor(w.walk*20)%12:0,flip:false};
 }
 
 export const UPGRADE_SHEETS = [
+  { id: 'hero-nagi-walk', columns: 12, rows: 4, transparent: true },
+  { id: 'hero-nagi-profile', columns: 8, rows: 2, transparent: true },
+  { id: 'hero-nagi-combo', columns: 7, rows: 8, transparent: true },
+  { id: 'hero-nagi-tools', columns: 7, rows: 9, transparent: true },
   { id: 'hero-nagi', columns: 6, rows: 8, transparent: true },
   { id: 'hero-mio', columns: 6, rows: 8, transparent: true },
   { id: 'hero-sena', columns: 6, rows: 8, transparent: true },
