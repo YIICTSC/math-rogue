@@ -15,4 +15,4 @@ globalThis.peerAttempts=0;globalThis.peerError='browser-incompatible';globalThis
 await assert.rejects(new KartRoom(()=>{},()=>{}).open(),/browser-incompatible/);assert.equal(globalThis.peerAttempts,1);
 globalThis.peerHang=true;globalThis.document={removeEventListener(){}};globalThis.cancelAnimationFrame=()=>{};
 const cancelled=new KartRoom(()=>{},()=>{}),waiting=cancelled.open();cancelled.close(false);await assert.rejects(waiting,/接続を終了/);assert.equal(cancelled.pending.size,0);
-console.log('PASS: delayed snapshots/backlog/connection hints, sticky minimal mode, background immunity, render budget, transient signalling retry and fatal-error stop.');
+console.log('PASS: delayed snapshots/backlog/connection hints, independent connection diagnostics, background immunity, render budget, transient signalling retry and fatal-error stop.');

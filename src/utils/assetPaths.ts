@@ -1,4 +1,5 @@
 import { ANDROID_ASSET_PACK_VERSIONS } from '../generated/androidAssetPackVersions';
+import { preparedVisualUrl } from './preparedVisualAssets';
 
 declare const __APP_ASSET_VERSION__: string | undefined;
 
@@ -88,7 +89,8 @@ const shouldVersionAsset = (path: string): boolean =>
   path.startsWith('ui/magic/') ||
   path.startsWith('bgm/magic');
 
-export const assetUrl = (path: string): string => {
+/** Original location, including installed Android packs; bypasses prepared Blob URLs. */
+export const assetSourceUrl = (path: string): string => {
   if (/^(data:|blob:|https?:)/.test(path)) return path;
   const normalizedPath = path.normalize('NFC').replace(/^\/+/, '');
   const downloadedUrl = resolveDownloadedAndroidAssetUrl(normalizedPath);
@@ -96,6 +98,11 @@ export const assetUrl = (path: string): string => {
   const url = `${getAssetBaseUrl()}${normalizedPath}`;
   if (!shouldVersionAsset(normalizedPath)) return url;
   return `${url}${url.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
+};
+
+export const assetUrl = (path: string): string => {
+  if (/^(data:|blob:|https?:)/.test(path)) return path;
+  return preparedVisualUrl(path.normalize('NFC').replace(/^\/+/, '')) ?? assetSourceUrl(path);
 };
 
 export const getWebpFirstAssetPaths = (path: string): string[] => {

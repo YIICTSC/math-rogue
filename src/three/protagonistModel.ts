@@ -5,6 +5,7 @@ import {assetUrl} from '../utils/assetPaths';
 import {isProtagonistId} from './protagonistCatalog';
 const cache=new Map<string,Promise<GLTF>>();
 function load(id:string){let promise=cache.get(id);if(!promise){promise=new GLTFLoader().loadAsync(assetUrl(`models/protagonists/${id}.glb`));cache.set(id,promise);if(cache.size>8)cache.delete(cache.keys().next().value!);promise.catch(()=>cache.delete(id));}return promise;}
+export const prepareProtagonistModel=(id:unknown):Promise<void>=>isProtagonistId(id)?load(id).then(()=>undefined):Promise.resolve();
 /** Each instance owns its skin, geometry and materials; scene disposal cannot invalidate another player. */
 export class ProtagonistModel {
  readonly root=new T.Group();private model?:T.Group;private rests=new Map<string,T.Quaternion>();private mixer?:T.AnimationMixer;private action?:T.AnimationAction;private clips:T.AnimationClip[]=[];private request=0;private id?:string;private disposed=false;private elapsed=0;

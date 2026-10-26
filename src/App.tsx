@@ -322,7 +322,7 @@ const MagicEventSimulationScreen = deferredScreen(() => import('./components/Mag
 const EventSimulationScreen = deferredScreen(() => import('./components/EventSimulationScreen'));
 
 const SportsHub = React.lazy(() => import('./mini-games/sports/SportsHub'));
-const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));
+const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/KartEntry'));
 const GakuroCraft = React.lazy(() => import('./mini-games/gakuro-craft/GakuroCraft'));
 import { demonName, canTransformEnemy, nextDemonPhase } from './rpg/demonKing';
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';

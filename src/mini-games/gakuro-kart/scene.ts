@@ -47,8 +47,6 @@ export class KartScene {
   private headTurn = new T.Matrix4();
   private neckInverse = new T.Matrix4().makeTranslation(0,-1.87,.13);
   private headRotation = new T.Matrix4();
-  private quality = 1;
-  private frames = 0; private frameTime = 0;
   private size = { width: 0, height: 0 };
   private textures: T.Texture[] = [];
   private get minimal(){return this.visualQuality==='minimal';}
@@ -318,8 +316,6 @@ export class KartScene {
     const dt = Math.min(.06, (now - this.clock) / 1000); this.clock = now; this.elapsed += dt;
     const width = this.canvas.clientWidth, height = this.canvas.clientHeight; if (!width || !height) return;
     if (width !== this.size.width || height !== this.size.height) { this.size = { width, height };if(this.minimal)this.renderer.setPixelRatio(Math.min(devicePixelRatio||1,.65,Math.sqrt(kartRenderProfile('minimal').maxPixels/(width*height)))); this.renderer.setSize(width, height, false); this.camera.aspect = width / height; this.camera.updateProjectionMatrix(); }
-    this.frameTime += dt; this.frames++;
-    if (this.frames === 180) { if (!this.minimal&&this.frameTime / this.frames > .027 && this.quality > .65) { this.quality -= .15; this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, qualityProfile(this.storyQuality).pixelRatio) * this.quality); this.size.width = 0; } this.frames = 0; this.frameTime = 0; }
     const w = this.state, me = w.players[this.selfId] || Object.values(w.players)[0]; if (!me) return;
     this.quizRoad.visible = !!w.lesson && !me.finish && quizDistance(me.distance, this.getTrack(w.course).length) < QUIZ_END && !this.preview;
     this.crashObstacle.visible = me.crash > 0;
