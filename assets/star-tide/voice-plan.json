@@ -1,0 +1,1366 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small",
+  "device": "cpu",
+  "codecDevice": "cpu",
+  "clips": [
+    {
+      "id": "opening-0",
+      "text": "海には、道がある。潮の音と、人の記憶を結ぶ、目には見えない航路が。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/opening-0.ogg",
+      "seed": 51000,
+      "spokenText": "海には、道がある。潮の音と、人の記憶を結ぶ、目には見えないこうろが。"
+    },
+    {
+      "id": "opening-1",
+      "text": "ある夜、十二の星灯が消えた。波も風も止まり、島々は、互いを呼ぶ声を失った。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/opening-1.ogg",
+      "seed": 51001,
+      "spokenText": "ある夜、十二のほしあかりが消えた。波も風も止まり、しまじまは、互いを呼ぶ声を失った。"
+    },
+    {
+      "id": "opening-2",
+      "text": "……潮の音が、しない。私の船は？　みんなは、どこへ行ったの？",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/opening-2.ogg",
+      "seed": 51002,
+      "spokenText": "……潮の音が、しない。私の船は？　みんなは、どこへ行ったの？"
+    },
+    {
+      "id": "opening-3",
+      "text": "おかえり、ナギ。灯を戻せば、海はまた動くだろう。でも、戻るものばかりとは限らない。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/opening-3.ogg",
+      "seed": 51003,
+      "spokenText": "おかえり、ナギ。あかりを戻せば、海はまた動くだろう。でも、戻るものばかりとは限らない。"
+    },
+    {
+      "id": "opening-4",
+      "text": "灯を戻すだけじゃ、だめなんだね。……まずは、この島で待っている人の話を聞きたい。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/opening-4.ogg",
+      "seed": 51004,
+      "spokenText": "あかりを戻すだけじゃ、だめなんだね。……まずは、この島で待っている人の話を聞きたい。"
+    },
+    {
+      "id": "opening-5",
+      "text": "海図の空白は、君が決めていい。道具と知恵を携えて、島々に何を残すか、自分の目で確かめておいで。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/opening-5.ogg",
+      "seed": 51005,
+      "spokenText": "海図の空白は、君が決めていい。道具と知恵を携えて、しまじまに何を残すか、自分の目で確かめておいで。"
+    },
+    {
+      "id": "opening-6",
+      "text": "失われたものを取り戻す旅は、まだ見ぬ明日を選ぶ旅でもある。航海士ナギの、新しい航路が始まる。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/opening-6.ogg",
+      "seed": 51006,
+      "spokenText": "失われたものを取り戻す旅は、まだ見ぬ明日を選ぶ旅でもある。こうかいしナギの、新しいこうろが始まる。"
+    },
+    {
+      "id": "chapter-0",
+      "text": "目を覚ますと、海は静止していた。航海士のナギは灯台守トワから、島々を結ぶ十二の星灯が消えたと聞く。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-0.ogg",
+      "seed": 51007,
+      "spokenText": "目を覚ますと、海は静止していた。こうかいしのナギはとうだいもりトワから、しまじまを結ぶ十二のほしあかりが消えたと聞く。"
+    },
+    {
+      "id": "chapter-1",
+      "text": "森の子ミオは、木々の名前を集めている。星灯を取り戻せば、森も記憶を取り戻すだろうか。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-1.ogg",
+      "seed": 51008,
+      "spokenText": "森の子ミオは、木々の名前を集めている。ほしあかりを取り戻せば、森も記憶を取り戻すだろうか。"
+    },
+    {
+      "id": "chapter-2",
+      "text": "商人ルカが残した航海帳には、海が止まる前の約束が書かれていた。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-2.ogg",
+      "seed": 51009,
+      "spokenText": "商人ルカが残した航海帳には、海が止まる前の約束が書かれていた。"
+    },
+    {
+      "id": "chapter-3",
+      "text": "丘の時計は同じ午後を指す。修理工セナは、戻せない時間より進める明日を選ぶ。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-3.ogg",
+      "seed": 51010,
+      "spokenText": "丘の時計は同じ午後を指す。修理工セナは、戻せない時間より進める明日を選ぶ。"
+    },
+    {
+      "id": "chapter-4",
+      "text": "配達人ユイの鞄には、届かなかった手紙がある。谷を渡り、待つ人へ言葉を届けよう。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-4.ogg",
+      "seed": 51011,
+      "spokenText": "配達人ユイの鞄には、届かなかった手紙がある。谷を渡り、待つ人へ言葉を届けよう。"
+    },
+    {
+      "id": "chapter-5",
+      "text": "鍛冶師オルは最後の炉を守っている。火を独り占めするか、町へ分けるかが問われる。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-5.ogg",
+      "seed": 51012,
+      "spokenText": "鍛冶師オルは最後の炉を守っている。火を独り占めするか、町へ分けるかが問われる。"
+    },
+    {
+      "id": "chapter-6",
+      "text": "暗い海に、自分と同じ船が映る。ナギは失った航路と向き合う。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-6.ogg",
+      "seed": 51013,
+      "spokenText": "暗い海に、自分と同じ船が映る。ナギは失ったこうろと向き合う。"
+    },
+    {
+      "id": "chapter-7",
+      "text": "案内人リトは星を読めなくなった。それでも旅人の足跡は、新しい道になる。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-7.ogg",
+      "seed": 51014,
+      "spokenText": "案内人リトは星を読めなくなった。それでも旅人の足跡は、新しい道になる。"
+    },
+    {
+      "id": "chapter-8",
+      "text": "鐘職人エマは、雨に消えた町の声を鐘へ刻む。集めた記憶が音になる。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-8.ogg",
+      "seed": 51015,
+      "spokenText": "鐘職人エマは、雨に消えた町の声を鐘へ刻む。集めた記憶が音になる。"
+    },
+    {
+      "id": "chapter-9",
+      "text": "浮島の人々は海へ戻ることを恐れる。帰郷だけが救いではないとトワは語る。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-9.ogg",
+      "seed": 51016,
+      "spokenText": "うきしまの人々は海へ戻ることを恐れる。ききょうだけが救いではないとトワは語る。"
+    },
+    {
+      "id": "chapter-10",
+      "text": "星灯は嵐を押し返す代わりに、島の記憶を燃やしていた。灯を消したのは、島を守ろうとしたもう一人の航海士だった。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-10.ogg",
+      "seed": 51017,
+      "spokenText": "ほしあかりは嵐を押し返す代わりに、島の記憶を燃やしていた。あかりを消したのは、島を守ろうとしたもう一人のこうかいしだった。"
+    },
+    {
+      "id": "chapter-11",
+      "text": "記憶を燃料にしない新しい星灯を作ろう。集めた声と知恵を携え、ナギは最後の灯台へ登る。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/chapter-11.ogg",
+      "seed": 51018,
+      "spokenText": "記憶を燃料にしない新しいほしあかりを作ろう。集めた声と知恵を携え、ナギは最後のとうだいへ登る。"
+    },
+    {
+      "id": "choice-question",
+      "text": "島の人々へ、何を残す？",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/choice-question.ogg",
+      "seed": 51019,
+      "spokenText": "島の人々へ、何を残す？"
+    },
+    {
+      "id": "choice-memory",
+      "text": "人と記憶をつないでいこう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/choice-memory.ogg",
+      "seed": 51020,
+      "spokenText": "人と記憶をつないでいこう。"
+    },
+    {
+      "id": "choice-route",
+      "text": "灯台と航路を、私たちの手で築こう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/choice-route.ogg",
+      "seed": 51021,
+      "spokenText": "とうだいとこうろを、私たちの手で築こう。"
+    },
+    {
+      "id": "final-route-hint",
+      "text": "最後の灯台へは今でも挑める。ただし他の島の星灯、道具、料理が旅を支えてくれる。どこから助け、どこまで準備するかは、ナギ自身が決める。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/final-route-hint.ogg",
+      "seed": 51022,
+      "spokenText": "最後のとうだいへは今でも挑める。ただし他の島のほしあかり、道具、料理が旅を支えてくれる。どこから助け、どこまで準備するかは、ナギ自身が決める。"
+    },
+    {
+      "id": "npc-0-journey",
+      "text": "星灯を点けるだけでは、この海は戻らない。何を灯に託すかを決めるのは、ここに住む人たちだよ。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/npc-0-journey.ogg",
+      "seed": 51023,
+      "spokenText": "ほしあかりを点けるだけでは、この海は戻らない。何をあかりに託すかを決めるのは、ここに住む人たちだよ。"
+    },
+    {
+      "id": "npc-1-journey",
+      "text": "忘れても、また名前をつければいいと思ってた。でも、昔呼んでくれた声も大事なんだね。",
+      "speaker": "mio",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-1-journey.ogg",
+      "seed": 51024,
+      "spokenText": "忘れても、また名前をつければいいと思ってた。でも、昔呼んでくれた声も大事なんだね。"
+    },
+    {
+      "id": "npc-2-journey",
+      "text": "約束は守れなかった。でも航海帳を捨てなかったのは、続きを書きたかったからさ。",
+      "speaker": "luca",
+      "caption": "青年男性の声。親しみやすい中音。落ち着いた自然な標準日本語。",
+      "path": "sfx/star-tide/npc-2-journey.ogg",
+      "seed": 51025,
+      "spokenText": "約束は守れなかった。でも航海帳を捨てなかったのは、続きを書きたかったからさ。"
+    },
+    {
+      "id": "npc-3-journey",
+      "text": "同じ午後はもういらない。間違える日もあるだろうけど、時計は明日へ回してほしい。",
+      "speaker": "sena",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工らしく、落ち着いて前向きに話す。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-3-journey.ogg",
+      "seed": 51026,
+      "spokenText": "同じ午後はもういらない。間違える日もあるだろうけど、時計は明日へ回してほしい。"
+    },
+    {
+      "id": "npc-4-journey",
+      "text": "遅れた手紙でも、届けば今日の言葉になる。待っていた人に、まず会いに行こう。",
+      "speaker": "yui",
+      "caption": "大人の女性の声。優しく温かい中音。旅慣れた配達人らしく、言葉を大切に届ける。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-4-journey.ogg",
+      "seed": 51027,
+      "spokenText": "遅れた手紙でも、届けば今日の言葉になる。待っていた人に、まず会いに行こう。"
+    },
+    {
+      "id": "npc-5-journey",
+      "text": "炉を守るために町を閉ざした。いつの間にか、何のための炉か忘れていたよ。",
+      "speaker": "or",
+      "caption": "中年男性の声。低く温かな声。実直な鍛冶師。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-5-journey.ogg",
+      "seed": 51028,
+      "spokenText": "炉を守るために町を閉ざした。いつの間にか、何のための炉か忘れていたよ。"
+    },
+    {
+      "id": "npc-6-journey",
+      "text": "影の船も、置いてきた私の一部だった。沈めるのではなく、一緒に港へ連れていこう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-6-journey.ogg",
+      "seed": 51029,
+      "spokenText": "影の船も、置いてきた私の一部だった。沈めるのではなく、一緒に港へ連れていこう。"
+    },
+    {
+      "id": "npc-7-journey",
+      "text": "星が読めなくても、君の足跡を誰かが見つける。道を知ることと、道を作ることは違うんだ。",
+      "speaker": "rito",
+      "caption": "壮年の男性の声。乾いた少しかすれた中低音。旅慣れた砂漠の案内人らしい穏やかな語り。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-7-journey.ogg",
+      "seed": 51030,
+      "spokenText": "星が読めなくても、君の足跡を誰かが見つける。道を知ることと、道を作ることは違うんだ。"
+    },
+    {
+      "id": "npc-8-journey",
+      "text": "鐘の音は一つでも、中には何人もの声がある。静かな声を忘れないように鋳込むんだ。",
+      "speaker": "ema",
+      "caption": "大人の女性の声。深みのある穏やかな中音。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-8-journey.ogg",
+      "seed": 51031,
+      "spokenText": "鐘の音は一つでも、中には何人もの声がある。静かな声を忘れないように鋳込むんだ。"
+    },
+    {
+      "id": "npc-9-journey",
+      "text": "帰る場所は昔と同じ形でなくていい。迎えてくれる誰かと、また暮らしを始められれば。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/npc-9-journey.ogg",
+      "seed": 51032,
+      "spokenText": "帰る場所は昔と同じ形でなくていい。迎えてくれる誰かと、また暮らしを始められれば。"
+    },
+    {
+      "id": "npc-10-journey",
+      "text": "灯を消せば皆を守れると思った。でも、選ぶ機会まで奪ってしまった。今度は皆で決めてほしい。",
+      "speaker": "other",
+      "caption": "大人の男性の声。静かで内省的な低音。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-10-journey.ogg",
+      "seed": 51033,
+      "spokenText": "あかりを消せば皆を守れると思った。でも、選ぶ機会まで奪ってしまった。今度は皆で決めてほしい。"
+    },
+    {
+      "id": "npc-11-journey",
+      "text": "この星灯は、思い出を燃やさない。昨日を捨てなくても、明日へ進める航路にしよう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-11-journey.ogg",
+      "seed": 51034,
+      "spokenText": "このほしあかりは、思い出を燃やさない。昨日を捨てなくても、明日へ進めるこうろにしよう。"
+    },
+    {
+      "id": "npc-0-room-0",
+      "text": "浜には三つの古い航路図が流れ着いた。宝箱の記録を集めれば、島の人にも昔の港を見せられる。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/npc-0-room-0.ogg",
+      "seed": 51035,
+      "spokenText": "浜には三つの古いこうろ図が流れ着いた。宝箱の記録を集めれば、島の人にも昔の港を見せられる。"
+    },
+    {
+      "id": "npc-0-room-1",
+      "text": "石碑には、灯を点けるには知恵と記憶がいる、と刻まれている。最後の一行だけが削り取られていた。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-0-room-1.ogg",
+      "seed": 51036,
+      "spokenText": "せきひには、あかりをつけるには、ちえときおくがいる、ときざまれている。さいごのいちぎょうだけが、けずりとられていた。"
+    },
+    {
+      "id": "npc-0-room-2",
+      "text": "海の向こうから、誰かが灯を消して回った。嵐の跡がないのに、どうして？",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-0-room-2.ogg",
+      "seed": 51037,
+      "spokenText": "海の向こうから、誰かがあかりを消して回った。嵐の跡がないのに、どうして？"
+    },
+    {
+      "id": "npc-1-room-0",
+      "text": "名札を見つけたら、木を植えた人にも見せてあげたい。森の名前は、一本ずつ違うから。",
+      "speaker": "mio",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-1-room-0.ogg",
+      "seed": 51038,
+      "spokenText": "名札を見つけたら、木を植えた人にも見せてあげたい。森の名前は、一本ずつ違うから。"
+    },
+    {
+      "id": "npc-1-room-1",
+      "text": "根の奥にある星灯の灰には、古い木の名前が混じっていた。燃えたのは薪だけではないらしい。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-1-room-1.ogg",
+      "seed": 51039,
+      "spokenText": "根の奥にあるほしあかりの灰には、古い木の名前が混じっていた。燃えたのは薪だけではないらしい。"
+    },
+    {
+      "id": "npc-1-room-2",
+      "text": "灯を戻しても、名前まで消えるなら困るよ。別の燃やし方を、探してくれる？",
+      "speaker": "mio",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-1-room-2.ogg",
+      "seed": 51040,
+      "spokenText": "あかりを戻しても、名前まで消えるなら困るよ。別の燃やし方を、探してくれる？"
+    },
+    {
+      "id": "npc-2-room-0",
+      "text": "航海帳の抜けた頁を見つけてくれ。もうけ話ではなく、友人への約束が書いてある。",
+      "speaker": "luca",
+      "caption": "青年男性の声。親しみやすい中音。落ち着いた自然な標準日本語。",
+      "path": "sfx/star-tide/npc-2-room-0.ogg",
+      "seed": 51041,
+      "spokenText": "航海帳の抜けた頁を見つけてくれ。もうけ話ではなく、友人への約束が書いてある。"
+    },
+    {
+      "id": "npc-2-room-1",
+      "text": "硝子の奥で、同じ島の二つの風景が重なる。一方には港があり、もう一方には港の記憶さえない。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-2-room-1.ogg",
+      "seed": 51042,
+      "spokenText": "硝子の奥で、同じ島の二つの風景が重なる。一方には港があり、もう一方には港の記憶さえない。"
+    },
+    {
+      "id": "npc-2-room-2",
+      "text": "記憶を失えば、約束を破ったことも忘れられる。でも、それで許されたいとは思わない。",
+      "speaker": "luca",
+      "caption": "青年男性の声。親しみやすい中音。落ち着いた自然な標準日本語。",
+      "path": "sfx/star-tide/npc-2-room-2.ogg",
+      "seed": 51043,
+      "spokenText": "記憶を失えば、約束を破ったことも忘れられる。でも、それで許されたいとは思わない。"
+    },
+    {
+      "id": "npc-3-room-0",
+      "text": "設計書を三枚つなげれば時計の仕組みが分かる。動かす前に、何を回しているのか確かめたい。",
+      "speaker": "sena",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工らしく、落ち着いて前向きに話す。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-3-room-0.ogg",
+      "seed": 51044,
+      "spokenText": "設計書を三枚つなげれば時計の仕組みが分かる。動かす前に、何を回しているのか確かめたい。"
+    },
+    {
+      "id": "npc-3-room-1",
+      "text": "時計は時間を戻すのではなく、町の人の昨日を巻き取っていた。針が止まった理由が見え始める。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-3-room-1.ogg",
+      "seed": 51045,
+      "spokenText": "時計は時間を戻すのではなく、町の人の昨日を巻き取っていた。針が止まった理由が見え始める。"
+    },
+    {
+      "id": "npc-3-room-2",
+      "text": "失敗した日のことも持っていこう。間違いを覚えているから、次は別の選び方ができる。",
+      "speaker": "sena",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工らしく、落ち着いて前向きに話す。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-3-room-2.ogg",
+      "seed": 51046,
+      "spokenText": "失敗した日のことも持っていこう。間違いを覚えているから、次は別の選び方ができる。"
+    },
+    {
+      "id": "npc-4-room-0",
+      "text": "雪の道を四つ片付けてほしい。宛名が読めなくても、待っている人は見つけられるはず。",
+      "speaker": "yui",
+      "caption": "大人の女性の声。優しく温かい中音。旅慣れた配達人らしく、言葉を大切に届ける。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-4-room-0.ogg",
+      "seed": 51047,
+      "spokenText": "雪の道を四つ片付けてほしい。宛名が読めなくても、待っている人は見つけられるはず。"
+    },
+    {
+      "id": "npc-4-room-1",
+      "text": "配達されなかった手紙は、星灯を守るための避難命令だった。灯台へ向かった人だけが戻っていない。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-4-room-1.ogg",
+      "seed": 51048,
+      "spokenText": "配達されなかった手紙は、ほしあかりを守るための避難命令だった。とうだいへ向かった人だけが戻っていない。"
+    },
+    {
+      "id": "npc-4-room-2",
+      "text": "送り主の名前も残そう。手紙は言葉だけでなく、その人がいた証拠だから。",
+      "speaker": "yui",
+      "caption": "大人の女性の声。優しく温かい中音。旅慣れた配達人らしく、言葉を大切に届ける。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-4-room-2.ogg",
+      "seed": 51049,
+      "spokenText": "送り主の名前も残そう。手紙は言葉だけでなく、その人がいた証拠だから。"
+    },
+    {
+      "id": "npc-5-room-0",
+      "text": "共同炉への道を守ってくれ。火を配る仕組みが壊れたままでは、どの家も冬を越せない。",
+      "speaker": "or",
+      "caption": "中年男性の声。低く温かな声。実直な鍛冶師。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-5-room-0.ogg",
+      "seed": 51050,
+      "spokenText": "共同炉への道を守ってくれ。火を配る仕組みが壊れたままでは、どの家も冬を越せない。"
+    },
+    {
+      "id": "npc-5-room-1",
+      "text": "古い設計には、記憶の代わりに人々の約束を結ぶ環が描かれていた。試作品はまだ炉の下にある。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-5-room-1.ogg",
+      "seed": 51051,
+      "spokenText": "古い設計には、記憶の代わりに人々の約束を結ぶわが描かれていた。試作品はまだ炉の下にある。"
+    },
+    {
+      "id": "npc-5-room-2",
+      "text": "新しい環は一人では作れない。違う島の技と材料が集まれば、設計を完成できる。",
+      "speaker": "or",
+      "caption": "中年男性の声。低く温かな声。実直な鍛冶師。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-5-room-2.ogg",
+      "seed": 51052,
+      "spokenText": "新しいわは一人では作れない。違う島の技と材料が集まれば、設計を完成できる。"
+    },
+    {
+      "id": "npc-6-room-0",
+      "text": "港の影は、捨てられた船ではなく帰港を待つ記憶だった。記録を拾うと船灯が一つずつ点く。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-6-room-0.ogg",
+      "seed": 51053,
+      "spokenText": "港の影は、捨てられた船ではなくきこうを待つ記憶だった。記録を拾うとせんとうが一つずつ点く。"
+    },
+    {
+      "id": "npc-6-room-1",
+      "text": "影の船長はナギと同じ結び目を使っていた。失った航路は、誰かを置き去りにした日の航路だった。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-6-room-1.ogg",
+      "seed": 51054,
+      "spokenText": "影の船長はナギと同じ結び目を使っていた。失ったこうろは、誰かを置き去りにした日のこうろだった。"
+    },
+    {
+      "id": "npc-6-room-2",
+      "text": "置いてきた人を助けに行けなかった。でも、今ここで帰りを待つ声を、もう見捨てない。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-6-room-2.ogg",
+      "seed": 51055,
+      "spokenText": "置いてきた人を助けに行けなかった。でも、今ここで帰りを待つ声を、もう見捨てない。"
+    },
+    {
+      "id": "npc-7-room-0",
+      "text": "星図にない避難所がある。四つの道を安全にして、旅人が残した印をつないでほしい。",
+      "speaker": "rito",
+      "caption": "壮年の男性の声。乾いた少しかすれた中低音。旅慣れた砂漠の案内人らしい穏やかな語り。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-7-room-0.ogg",
+      "seed": 51056,
+      "spokenText": "せいずにない避難所がある。四つの道を安全にして、旅人が残した印をつないでほしい。"
+    },
+    {
+      "id": "npc-7-room-1",
+      "text": "砂に埋もれた碑には、星灯へ頼らない航海術が記されていた。嵐が来ても、人々は以前から渡っていた。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-7-room-1.ogg",
+      "seed": 51057,
+      "spokenText": "砂に埋もれた碑には、ほしあかりへ頼らない航海術が記されていた。嵐が来ても、人々は以前から渡っていた。"
+    },
+    {
+      "id": "npc-7-room-2",
+      "text": "完全な道しるべを待たなくていい。見えない時は、隣を歩く人に尋ねればいいんだ。",
+      "speaker": "rito",
+      "caption": "壮年の男性の声。乾いた少しかすれた中低音。旅慣れた砂漠の案内人らしい穏やかな語り。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-7-room-2.ogg",
+      "seed": 51058,
+      "spokenText": "完全な道しるべを待たなくていい。見えない時は、隣を歩く人に尋ねればいいんだ。"
+    },
+    {
+      "id": "npc-8-room-0",
+      "text": "鐘の記録には、声にならなかった願いもある。三つの箱を集めたら、一緒に読もう。",
+      "speaker": "ema",
+      "caption": "大人の女性の声。深みのある穏やかな中音。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-8-room-0.ogg",
+      "seed": 51059,
+      "spokenText": "鐘の記録には、声にならなかった願いもある。三つの箱を集めたら、一緒に読もう。"
+    },
+    {
+      "id": "npc-8-room-1",
+      "text": "鐘の下の水路は、十二の星灯をつなぐ共鳴路だった。環があれば、記憶を燃やさず力を分けられる。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-8-room-1.ogg",
+      "seed": 51060,
+      "spokenText": "鐘の下の水路は、十二のほしあかりをつなぐきょうめいろだった。わがあれば、記憶を燃やさず力を分けられる。"
+    },
+    {
+      "id": "npc-8-room-2",
+      "text": "大きな鐘だけでなく、小さな鐘も必要だよ。違う声が合わさるから、遠くまで届く。",
+      "speaker": "ema",
+      "caption": "大人の女性の声。深みのある穏やかな中音。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-8-room-2.ogg",
+      "seed": 51061,
+      "spokenText": "大きな鐘だけでなく、小さな鐘も必要だよ。違う声が合わさるから、遠くまで届く。"
+    },
+    {
+      "id": "npc-9-room-0",
+      "text": "浮島の子どもたちは地上を知らない。家の絵を集めて、帰る場所を一緒に考えよう。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-9-room-0.ogg",
+      "seed": 51062,
+      "spokenText": "うきしまの子どもたちは地上を知らない。家の絵を集めて、帰る場所を一緒に考えよう。"
+    },
+    {
+      "id": "npc-9-room-1",
+      "text": "浮島を支える星灯も消えかけている。落下を防ぐだけではなく、誰も閉じ込めない降り道が必要だ。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-9-room-1.ogg",
+      "seed": 51063,
+      "spokenText": "うきしまを支えるほしあかりも消えかけている。落下を防ぐだけではなく、誰も閉じ込めないおりみちが必要だ。"
+    },
+    {
+      "id": "npc-9-room-2",
+      "text": "海へ帰る人も、空で暮らす人もいていい。航路は、人の行き先を決めるためのものではない。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/npc-9-room-2.ogg",
+      "seed": 51064,
+      "spokenText": "海へ帰る人も、空で暮らす人もいていい。こうろは、人の行き先を決めるためのものではない。"
+    },
+    {
+      "id": "npc-10-room-0",
+      "text": "廃都の議事録は、消灯を決めた会議のものだった。賛成と反対の声を、どちらも残しておこう。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-10-room-0.ogg",
+      "seed": 51065,
+      "spokenText": "廃都の議事録は、しょうとうを決めた会議のものだった。賛成と反対の声を、どちらも残しておこう。"
+    },
+    {
+      "id": "npc-10-room-1",
+      "text": "消灯した航海士は、ナギが置いてきた仲間だった。記憶の消失を止めるため、一人で灯台へ向かっていた。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-10-room-1.ogg",
+      "seed": 51066,
+      "spokenText": "しょうとうしたこうかいしは、ナギが置いてきた仲間だった。記憶の消失を止めるため、一人でとうだいへ向かっていた。"
+    },
+    {
+      "id": "npc-10-room-2",
+      "text": "二人の航海士は、正しかった方を決めるのをやめた。島の声を集め、新しい環を完成させると約束した。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-10-room-2.ogg",
+      "seed": 51067,
+      "spokenText": "二人のこうかいしは、正しかった方を決めるのをやめた。島の声を集め、新しいわを完成させると約束した。"
+    },
+    {
+      "id": "npc-11-room-0",
+      "text": "十二の島から集まった図面、手紙、名札、鐘の記録を、新しい航海憲章へつなごう。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-11-room-0.ogg",
+      "seed": 51068,
+      "spokenText": "十二の島から集まった図面、手紙、なふだ、鐘の記録を、新しいこうかいけんしょうへつなごう。"
+    },
+    {
+      "id": "npc-11-room-1",
+      "text": "忘却の星竜は星灯が捨てた記憶の姿だった。倒すことは消し去ることではなく、すべてを環へ迎えること。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/npc-11-room-1.ogg",
+      "seed": 51069,
+      "spokenText": "忘却の星竜はほしあかりが捨てた記憶の姿だった。倒すことは消し去ることではなく、すべてをわへ迎えること。"
+    },
+    {
+      "id": "npc-11-room-2",
+      "text": "準備はできた。灯を守るのは私たちだけじゃない。帰りを待ってくれる、すべての島と一緒に進もう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/npc-11-room-2.ogg",
+      "seed": 51070,
+      "spokenText": "準備はできた。あかりを守るのは私たちだけじゃない。帰りを待ってくれる、すべての島と一緒に進もう。"
+    },
+    {
+      "id": "glider-story",
+      "text": "最初の星灯が灯ると、止まっていた風が戻った。トワはナギに、星の糸で織った帆を手渡す。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/glider-story.ogg",
+      "seed": 51071,
+      "spokenText": "最初のほしあかりがあかりると、止まっていた風が戻った。トワはナギに、星の糸で織ったほを手渡す。"
+    },
+    {
+      "id": "glider-towa",
+      "text": "海図の端は、世界の端じゃない。今度は空へおゆき。",
+      "speaker": "towa",
+      "caption": "年配の女性の声。穏やかで少し低く、温かい灯台守。ゆっくり自然な標準日本語。",
+      "path": "sfx/star-tide/glider-towa.ogg",
+      "seed": 51072,
+      "spokenText": "海図の端は、世界の端じゃない。今度は空へおゆき。"
+    },
+    {
+      "id": "glider-tip",
+      "text": "滑空で水や穴を越えられる。各島の船着場にある風の台座から、空の航路へ飛び立とう。上昇気流で力を取り戻せる。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/glider-tip.ogg",
+      "seed": 51073,
+      "spokenText": "滑空で水や穴を越えられる。各島の船着場にある風の台座から、空のこうろへ飛び立とう。上昇気流で力を取り戻せる。"
+    },
+    {
+      "id": "ending-restore",
+      "text": "暁の星灯に、新しい航路が刻まれた。島々には、まだ届いていない声や新しい出会いがある。ナギは最初の灯を守り、残された声を探す航海へ船を出した。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/ending-restore.ogg",
+      "seed": 51074,
+      "spokenText": "暁のほしあかりに、新しいこうろが刻まれた。しまじまには、まだ届いていない声や新しい出会いがある。ナギは最初のあかりを守り、残された声を探す航海へ船を出した。"
+    },
+    {
+      "id": "ending-community",
+      "text": "島々の人々は互いの灯を守る約束を結んだ。届いた手紙も、芽吹いた木々も、新しい星灯を支える。ナギは一人の英雄ではなく、航路を結ぶ最初の仲間になった。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/ending-community.ogg",
+      "seed": 51075,
+      "spokenText": "しまじまの人々は互いのあかりを守る約束を結んだ。届いた手紙も、芽吹いた木々も、新しいほしあかりを支える。ナギは一人の英雄ではなく、こうろを結ぶ最初の仲間になった。"
+    },
+    {
+      "id": "ending-narrator",
+      "text": "航海士ナギと、あなたの知恵が島々をつないだ。",
+      "speaker": "narrator",
+      "caption": "落ち着いた大人の女性のナレーション。温かく透明な中音。自然な標準日本語。余韻を大切に、物語を静かに語る。",
+      "path": "sfx/star-tide/ending-narrator.ogg",
+      "seed": 51076,
+      "spokenText": "こうかいしナギと、あなたの知恵がしまじまをつないだ。"
+    },
+    {
+      "id": "action-sword-0",
+      "text": "そこだ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-sword-0.ogg",
+      "seed": 51077,
+      "spokenText": "そこだ！"
+    },
+    {
+      "id": "action-sword-1",
+      "text": "道を開く！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-sword-1.ogg",
+      "seed": 51078,
+      "spokenText": "道を開く！"
+    },
+    {
+      "id": "action-sword-2",
+      "text": "この一撃で！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-sword-2.ogg",
+      "seed": 51079,
+      "spokenText": "この一撃で！"
+    },
+    {
+      "id": "action-sword-3",
+      "text": "もう一歩！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-sword-3.ogg",
+      "seed": 51080,
+      "spokenText": "もう一歩！"
+    },
+    {
+      "id": "action-sword-4",
+      "text": "星よ、導いて！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-sword-4.ogg",
+      "seed": 51081,
+      "spokenText": "星よ、導いて！"
+    },
+    {
+      "id": "action-sword-5",
+      "text": "いくよ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-sword-5.ogg",
+      "seed": 51082,
+      "spokenText": "いくよ！"
+    },
+    {
+      "id": "action-ring-0",
+      "text": "潮の輪よ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-ring-0.ogg",
+      "seed": 51083,
+      "spokenText": "しおのわよ！"
+    },
+    {
+      "id": "action-ring-1",
+      "text": "戻っておいで！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-ring-1.ogg",
+      "seed": 51084,
+      "spokenText": "戻っておいで！"
+    },
+    {
+      "id": "action-ring-2",
+      "text": "狙いは外さない！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-ring-2.ogg",
+      "seed": 51085,
+      "spokenText": "狙いは外さない！"
+    },
+    {
+      "id": "action-ring-3",
+      "text": "そこまで届け！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-ring-3.ogg",
+      "seed": 51086,
+      "spokenText": "そこまで届け！"
+    },
+    {
+      "id": "action-wand-0",
+      "text": "灯火よ、照らせ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-wand-0.ogg",
+      "seed": 51087,
+      "spokenText": "ともしびよ、照らせ！"
+    },
+    {
+      "id": "action-wand-1",
+      "text": "火の道を！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-wand-1.ogg",
+      "seed": 51088,
+      "spokenText": "火の道を！"
+    },
+    {
+      "id": "action-wand-2",
+      "text": "明かりを分けて！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-wand-2.ogg",
+      "seed": 51089,
+      "spokenText": "明かりを分けて！"
+    },
+    {
+      "id": "action-wand-3",
+      "text": "その闇を払う！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-wand-3.ogg",
+      "seed": 51090,
+      "spokenText": "その闇を払う！"
+    },
+    {
+      "id": "action-hook-0",
+      "text": "風をつかむ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hook-0.ogg",
+      "seed": 51091,
+      "spokenText": "風をつかむ！"
+    },
+    {
+      "id": "action-hook-1",
+      "text": "ここから先へ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hook-1.ogg",
+      "seed": 51092,
+      "spokenText": "ここから先へ！"
+    },
+    {
+      "id": "action-hook-2",
+      "text": "届いて！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hook-2.ogg",
+      "seed": 51093,
+      "spokenText": "届いて！"
+    },
+    {
+      "id": "action-hook-3",
+      "text": "引き寄せる！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hook-3.ogg",
+      "seed": 51094,
+      "spokenText": "引き寄せる！"
+    },
+    {
+      "id": "action-hammer-0",
+      "text": "打ち砕く！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hammer-0.ogg",
+      "seed": 51095,
+      "spokenText": "打ち砕く！"
+    },
+    {
+      "id": "action-hammer-1",
+      "text": "思い切って！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hammer-1.ogg",
+      "seed": 51096,
+      "spokenText": "思い切って！"
+    },
+    {
+      "id": "action-hammer-2",
+      "text": "道を作る！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hammer-2.ogg",
+      "seed": 51097,
+      "spokenText": "道を作る！"
+    },
+    {
+      "id": "action-hammer-3",
+      "text": "まだ進める！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-hammer-3.ogg",
+      "seed": 51098,
+      "spokenText": "まだ進める！"
+    },
+    {
+      "id": "action-bow-0",
+      "text": "狙いを定めて！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-bow-0.ogg",
+      "seed": 51099,
+      "spokenText": "狙いを定めて！"
+    },
+    {
+      "id": "action-bow-1",
+      "text": "星の矢よ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-bow-1.ogg",
+      "seed": 51100,
+      "spokenText": "星の矢よ！"
+    },
+    {
+      "id": "action-bow-2",
+      "text": "風を読んで！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-bow-2.ogg",
+      "seed": 51101,
+      "spokenText": "風を読んで！"
+    },
+    {
+      "id": "action-bow-3",
+      "text": "まっすぐに！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-bow-3.ogg",
+      "seed": 51102,
+      "spokenText": "まっすぐに！"
+    },
+    {
+      "id": "action-shield-0",
+      "text": "ここは守る！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-shield-0.ogg",
+      "seed": 51103,
+      "spokenText": "ここは守る！"
+    },
+    {
+      "id": "action-shield-1",
+      "text": "受け止める！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-shield-1.ogg",
+      "seed": 51104,
+      "spokenText": "受け止める！"
+    },
+    {
+      "id": "action-shield-2",
+      "text": "負けないよ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-shield-2.ogg",
+      "seed": 51105,
+      "spokenText": "負けないよ！"
+    },
+    {
+      "id": "action-shield-3",
+      "text": "みんなの道だから！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-shield-3.ogg",
+      "seed": 51106,
+      "spokenText": "みんなの道だから！"
+    },
+    {
+      "id": "action-spear-0",
+      "text": "一気に抜ける！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-spear-0.ogg",
+      "seed": 51107,
+      "spokenText": "一気に抜ける！"
+    },
+    {
+      "id": "action-spear-1",
+      "text": "ここを貫く！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-spear-1.ogg",
+      "seed": 51108,
+      "spokenText": "ここを貫く！"
+    },
+    {
+      "id": "action-spear-2",
+      "text": "踏み込む！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-spear-2.ogg",
+      "seed": 51109,
+      "spokenText": "踏み込む！"
+    },
+    {
+      "id": "action-spear-3",
+      "text": "光よ、貫け！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-spear-3.ogg",
+      "seed": 51110,
+      "spokenText": "ひかりよ、つらぬけ！"
+    },
+    {
+      "id": "action-dodge-0",
+      "text": "よっと！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-dodge-0.ogg",
+      "seed": 51111,
+      "spokenText": "よっと！"
+    },
+    {
+      "id": "action-dodge-1",
+      "text": "こっちだよ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-dodge-1.ogg",
+      "seed": 51112,
+      "spokenText": "こっちだよ！"
+    },
+    {
+      "id": "action-dodge-2",
+      "text": "危なかった！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-dodge-2.ogg",
+      "seed": 51113,
+      "spokenText": "危なかった！"
+    },
+    {
+      "id": "action-dodge-3",
+      "text": "見えてる！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-dodge-3.ogg",
+      "seed": 51114,
+      "spokenText": "見えてる！"
+    },
+    {
+      "id": "action-damage-0",
+      "text": "くっ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-damage-0.ogg",
+      "seed": 51115,
+      "spokenText": "くっ！"
+    },
+    {
+      "id": "action-damage-1",
+      "text": "まだ大丈夫！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-damage-1.ogg",
+      "seed": 51116,
+      "spokenText": "まだ大丈夫！"
+    },
+    {
+      "id": "action-damage-2",
+      "text": "ここからだよ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-damage-2.ogg",
+      "seed": 51117,
+      "spokenText": "ここからだよ！"
+    },
+    {
+      "id": "action-damage-3",
+      "text": "負けるもんか！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-damage-3.ogg",
+      "seed": 51118,
+      "spokenText": "負けるもんか！"
+    },
+    {
+      "id": "action-rescue-0",
+      "text": "戻ってこられた。もう一度！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-rescue-0.ogg",
+      "seed": 51119,
+      "spokenText": "戻ってこられた。もう一度！"
+    },
+    {
+      "id": "action-rescue-1",
+      "text": "次は道をよく見よう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-rescue-1.ogg",
+      "seed": 51120,
+      "spokenText": "次は道をよく見よう。"
+    },
+    {
+      "id": "action-rescue-2",
+      "text": "私の旅は、まだ続く。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-rescue-2.ogg",
+      "seed": 51121,
+      "spokenText": "私の旅は、まだ続く。"
+    },
+    {
+      "id": "action-heal-0",
+      "text": "元気が戻ってきた！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-heal-0.ogg",
+      "seed": 51122,
+      "spokenText": "元気が戻ってきた！"
+    },
+    {
+      "id": "action-heal-1",
+      "text": "ありがとう、助かった！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-heal-1.ogg",
+      "seed": 51123,
+      "spokenText": "ありがとう、助かった！"
+    },
+    {
+      "id": "action-heal-2",
+      "text": "これでまた進める！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-heal-2.ogg",
+      "seed": 51124,
+      "spokenText": "これでまた進める！"
+    },
+    {
+      "id": "action-glide-0",
+      "text": "風に乗って！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-glide-0.ogg",
+      "seed": 51125,
+      "spokenText": "風に乗って！"
+    },
+    {
+      "id": "action-glide-1",
+      "text": "空にも道がある！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-glide-1.ogg",
+      "seed": 51126,
+      "spokenText": "空にも道がある！"
+    },
+    {
+      "id": "action-glide-2",
+      "text": "遠くまで行こう！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-glide-2.ogg",
+      "seed": 51127,
+      "spokenText": "遠くまで行こう！"
+    },
+    {
+      "id": "action-glide-3",
+      "text": "帆よ、ひらけ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-glide-3.ogg",
+      "seed": 51128,
+      "spokenText": "ほよ、ひらけ！"
+    },
+    {
+      "id": "action-land-0",
+      "text": "着いた！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-land-0.ogg",
+      "seed": 51129,
+      "spokenText": "着いた！"
+    },
+    {
+      "id": "action-land-1",
+      "text": "いい風だった。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-land-1.ogg",
+      "seed": 51130,
+      "spokenText": "いい風だった。"
+    },
+    {
+      "id": "action-land-2",
+      "text": "ここから、また一歩。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-land-2.ogg",
+      "seed": 51131,
+      "spokenText": "ここから、また一歩。"
+    },
+    {
+      "id": "action-pickup-0",
+      "text": "見つけた！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-pickup-0.ogg",
+      "seed": 51132,
+      "spokenText": "見つけた！"
+    },
+    {
+      "id": "action-pickup-1",
+      "text": "役に立ちそう！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-pickup-1.ogg",
+      "seed": 51133,
+      "spokenText": "役に立ちそう！"
+    },
+    {
+      "id": "action-pickup-2",
+      "text": "大事にしよう。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-pickup-2.ogg",
+      "seed": 51134,
+      "spokenText": "大事にしよう。"
+    },
+    {
+      "id": "action-pickup-3",
+      "text": "持っていこう！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-pickup-3.ogg",
+      "seed": 51135,
+      "spokenText": "持っていこう！"
+    },
+    {
+      "id": "action-solved-0",
+      "text": "つながった！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-solved-0.ogg",
+      "seed": 51136,
+      "spokenText": "つながった！"
+    },
+    {
+      "id": "action-solved-1",
+      "text": "そういう仕組みなんだ！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-solved-1.ogg",
+      "seed": 51137,
+      "spokenText": "そういう仕組みなんだ！"
+    },
+    {
+      "id": "action-solved-2",
+      "text": "知恵も、立派な道具だね。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-solved-2.ogg",
+      "seed": 51138,
+      "spokenText": "知恵も、立派な道具だね。"
+    },
+    {
+      "id": "action-beacon-0",
+      "text": "この灯を、みんなへ。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-beacon-0.ogg",
+      "seed": 51139,
+      "spokenText": "このあかりを、みんなへ。"
+    },
+    {
+      "id": "action-beacon-1",
+      "text": "思い出を忘れない光に！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-beacon-1.ogg",
+      "seed": 51140,
+      "spokenText": "思い出を忘れない光に！"
+    },
+    {
+      "id": "action-beacon-2",
+      "text": "また一つ、島がつながった！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-beacon-2.ogg",
+      "seed": 51141,
+      "spokenText": "また一つ、島がつながった！"
+    },
+    {
+      "id": "action-quest-0",
+      "text": "約束、守れたね。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-quest-0.ogg",
+      "seed": 51142,
+      "spokenText": "約束、守れたね。"
+    },
+    {
+      "id": "action-quest-1",
+      "text": "間に合ってよかった！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-quest-1.ogg",
+      "seed": 51143,
+      "spokenText": "間に合ってよかった！"
+    },
+    {
+      "id": "action-quest-2",
+      "text": "次の島へ届けよう！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-quest-2.ogg",
+      "seed": 51144,
+      "spokenText": "次の島へ届けよう！"
+    },
+    {
+      "id": "action-food-0",
+      "text": "いただきます！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-food-0.ogg",
+      "seed": 51145,
+      "spokenText": "いただきます！"
+    },
+    {
+      "id": "action-food-1",
+      "text": "おいしい！　力がわいてくる。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-food-1.ogg",
+      "seed": 51146,
+      "spokenText": "おいしい！　力がわいてくる。"
+    },
+    {
+      "id": "action-food-2",
+      "text": "島の恵みに感謝だね。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-food-2.ogg",
+      "seed": 51147,
+      "spokenText": "島の恵みに感謝だね。"
+    },
+    {
+      "id": "action-cook-0",
+      "text": "よし、できあがり！",
+      "spokenText": "よし、できあがり！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-cook-0.ogg",
+      "seed": 51148
+    },
+    {
+      "id": "action-cook-1",
+      "text": "いい香り。これなら元気が出るね。",
+      "spokenText": "いい香り。これなら元気が出るね。",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-cook-1.ogg",
+      "seed": 51149
+    },
+    {
+      "id": "action-cook-2",
+      "text": "次の島へ、準備はばっちり！",
+      "spokenText": "次の島へ、準備はばっちり！",
+      "speaker": "nagi",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。自然な標準日本語。",
+      "path": "sfx/star-tide/action-cook-2.ogg",
+      "seed": 51150
+    }
+  ]
+}

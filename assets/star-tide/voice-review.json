@@ -1,0 +1,1215 @@
+{
+  "recognizer": "faster-whisper small / CPU int8 / Japanese / beam5",
+  "clips": [
+    {
+      "id": "opening-0",
+      "sha256": "9aa80b521c347549a55fb425fdb773c14e7a20af3f5e35191489151dcff332e9",
+      "expected": "海には、道がある。潮の音と、人の記憶を結ぶ、目には見えない航路が。",
+      "heard": "海には道がある 塩の音と人の記憶を結ぶ目には見えない項路が",
+      "phoneticSimilarity": 0.959,
+      "needsReview": false
+    },
+    {
+      "id": "choice-question",
+      "sha256": "c5c4db51923ff69fb4400037ca7f375774478acfc566da9a61ad08403b7292fc",
+      "expected": "島の人々へ、何を残す？",
+      "heard": "島の人々へ何を残す?",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "ending-narrator",
+      "sha256": "4530233a7e428376a22067412ade18ab303b2282027bee0791c1c5f240dacdd1",
+      "expected": "航海士ナギと、あなたの知恵が島々をつないだ。",
+      "heard": "公開しなぎと、あなたの知恵が、島島をつないだ。",
+      "phoneticSimilarity": 0.958,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-6",
+      "sha256": "43cf56bdbc87371dfcd5dbf55bc05c21c74a773b5e13e9ad7149051c33ebc866",
+      "expected": "暗い海に、自分と同じ船が映る。ナギは失った航路と向き合う。",
+      "heard": "暗闇に、自分と同じ船が映る。ナギは、失った航路と向き合う。",
+      "phoneticSimilarity": 0.954,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-2",
+      "sha256": "f4e7b0fd68729efafef4b70bb58b4e4a2ab53a820baa6acfa14422b35da2d91d",
+      "expected": "商人ルカが残した航海帳には、海が止まる前の約束が書かれていた。",
+      "heard": "承認ルカが残した公開帳には海が止まる前の約束が書かれていた",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-8",
+      "sha256": "7f3889110421e7d79bcef324b2ef6f1fcd29934a7f613b7b23dc10409bcb0d5c",
+      "expected": "鐘職人エマは、雨に消えた町の声を鐘へ刻む。集めた記憶が音になる。",
+      "heard": "金職人エマは雨に消えた町の声を金へ刻む 集めた記憶が音になる",
+      "phoneticSimilarity": 0.902,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-7",
+      "sha256": "60a8c53ebc5829cb6536296f6de02f505044a0202b612290e4874156fee11306",
+      "expected": "案内人リトは星を読めなくなった。それでも旅人の足跡は、新しい道になる。",
+      "heard": "案内人理とは、星を読めなくなった。それでも、旅人の足跡は、新しい道になる。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-9",
+      "sha256": "45cd91fc71e6e1e57d100a38211b92c023bc601028b2d50fc61967e535f06451",
+      "expected": "浮島の人々は海へ戻ることを恐れる。帰郷だけが救いではないとトワは語る。",
+      "heard": "浮島の人々は海へ戻ることを恐れる。 奇跡だけが救いではないと、とはは語る。",
+      "phoneticSimilarity": 0.907,
+      "needsReview": false
+    },
+    {
+      "id": "opening-1",
+      "sha256": "e666ca783020119519ef8d92dbb2babd5ad4ba934590cb16b380cb20edf2297e",
+      "expected": "ある夜、十二の星灯が消えた。波も風も止まり、島々は、互いを呼ぶ声を失った。",
+      "heard": "ある夜、十二の星明かりが消えた。 波も風も止まり、島島は互いを呼ぶ声を失った。",
+      "phoneticSimilarity": 0.977,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-3",
+      "sha256": "549a3213ec3c235d7304119c119f0d5a501d680a2e19365332b7f70f9899d3af",
+      "expected": "丘の時計は同じ午後を指す。修理工セナは、戻せない時間より進める明日を選ぶ。",
+      "heard": "他の時計は同じ午後を指す。修理校セナは戻せない時間より進めるアスを選ぶ。",
+      "phoneticSimilarity": 0.944,
+      "needsReview": false
+    },
+    {
+      "id": "npc-9-room-0",
+      "sha256": "c7bf8e6b86dc0ff254538923c1ba9a71c9a1c76aace97e9a488571b5b9fd069e",
+      "expected": "浮島の子どもたちは地上を知らない。家の絵を集めて、帰る場所を一緒に考えよう。",
+      "heard": "浮島の子供たちは地上を知らない 家の絵を集めて帰る場所を一緒に考えよう",
+      "phoneticSimilarity": 0.968,
+      "needsReview": false
+    },
+    {
+      "id": "npc-11-room-0",
+      "sha256": "e7af807fb678151007ff4e9a642bd600b3d42488a23f3bf678defdf50a4e210a",
+      "expected": "十二の島から集まった図面、手紙、名札、鐘の記録を、新しい航海憲章へつなごう。",
+      "heard": "12の島から集まった図面、手紙、ナフダ、鐘の記録を新しい公開検証へつなごう。",
+      "phoneticSimilarity": 0.938,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-4",
+      "sha256": "21ecfee8d4c2731382276b30da0212c1f1dc17c2799d34d9875f0191aaa16fee",
+      "expected": "配達人ユイの鞄には、届かなかった手紙がある。谷を渡り、待つ人へ言葉を届けよう。",
+      "heard": "配達人優位のカバンには届かなかった手紙がある 谷を渡り待つ人へ言葉を届けよう",
+      "phoneticSimilarity": 0.989,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-5",
+      "sha256": "01cff0efa55de423a6f394438911a8659bcbef71b96150222b96503f4d8a04f8",
+      "expected": "鍛冶師オルは最後の炉を守っている。火を独り占めするか、町へ分けるかが問われる。",
+      "heard": "火事しおるは、最後の路を守っている。 火を一人占めするか、街へ分けるかが問われる。",
+      "phoneticSimilarity": 0.963,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-1",
+      "sha256": "49c4413ddf1a56f1d7ee0ecfc5403337076590ad11ba780ff140953d87f87a38",
+      "expected": "森の子ミオは、木々の名前を集めている。星灯を取り戻せば、森も記憶を取り戻すだろうか。",
+      "heard": "森の子 ミオは木々の名前を集めている星明かりを取り戻せば森も記憶を取り戻すだろうか",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-11",
+      "sha256": "0794ea989e08f4929c62d435fa63309f92a3c8a8046523631a1736dc345a0ad8",
+      "expected": "記憶を燃料にしない新しい星灯を作ろう。集めた声と知恵を携え、ナギは最後の灯台へ登る。",
+      "heard": "記憶を燃料にしない、新しい星明かりを作ろう。集めた声と知恵を携え、奈儀は、最後の灯台へ登る。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-6-room-0",
+      "sha256": "da460b0c9e887c20b315cc0db427cdab197ef546845ff06e4cc1b2b90956ba47",
+      "expected": "港の影は、捨てられた船ではなく帰港を待つ記憶だった。記録を拾うと船灯が一つずつ点く。",
+      "heard": "港の影は、捨てられた船ではなく、飛行を待つ記憶だった。記録を拾うと、戦闘が一つずつつく。",
+      "phoneticSimilarity": 0.98,
+      "needsReview": false
+    },
+    {
+      "id": "glider-story",
+      "sha256": "9143151c3134b56b30abd9cca99ddcf1f7f515525651632185145b8022a0b5c3",
+      "expected": "最初の星灯が灯ると、止まっていた風が戻った。トワはナギに、星の糸で織った帆を手渡す。",
+      "heard": "最初の星明かりが明かりると、止まっていた風が戻った。ドアはナギに、星の糸で追った方を手渡す。",
+      "phoneticSimilarity": 0.95,
+      "needsReview": false
+    },
+    {
+      "id": "npc-1-room-1",
+      "sha256": "9c793695f86436d6c9ba4b5e18772faf6621a234e0f46d821c771c0603613226",
+      "expected": "根の奥にある星灯の灰には、古い木の名前が混じっていた。燃えたのは薪だけではないらしい。",
+      "heard": "根の奥にある星明かりの灰には、古い木の名前が混じっていた、燃えたのは巻きだけではないらしい。",
+      "phoneticSimilarity": 0.969,
+      "needsReview": false
+    },
+    {
+      "id": "npc-10-room-0",
+      "sha256": "6b062397cc4a606e2337683af048a0dde98af2b40870ba7645cc937016cca966",
+      "expected": "廃都の議事録は、消灯を決めた会議のものだった。賛成と反対の声を、どちらも残しておこう。",
+      "heard": "ハイトの議事録は、正当を決めた会議のものだった。 賛成と反対の声を、どちらも残しておこう。",
+      "phoneticSimilarity": 0.95,
+      "needsReview": false
+    },
+    {
+      "id": "npc-2-room-1",
+      "sha256": "23fca732f14a097cc082910f664a8cf6cc0792e05317636cb1ffc459005a5f71",
+      "expected": "硝子の奥で、同じ島の二つの風景が重なる。一方には港があり、もう一方には港の記憶さえない。",
+      "heard": "ガラスの奥で、同じ島の2つの風景が重なる。一方には港があり、もう一方には港の記憶さえない。",
+      "phoneticSimilarity": 0.973,
+      "needsReview": false
+    },
+    {
+      "id": "npc-3-room-1",
+      "sha256": "23e21f5157925d21fbfd7ffe984d8b12d2d11e011012a2e5e3a217d20c4df2b0",
+      "expected": "時計は時間を戻すのではなく、町の人の昨日を巻き取っていた。針が止まった理由が見え始める。",
+      "heard": "時計は時間を戻すのではなく、街の人の機能を巻き取っていた。針が止まった理由が見え始める。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-5-room-1",
+      "sha256": "a85d5780b45e4db2fe1dd76b105cb6b7aa25d80c75ca172c1e4ab93517a03fd5",
+      "expected": "古い設計には、記憶の代わりに人々の約束を結ぶ環が描かれていた。試作品はまだ炉の下にある。",
+      "heard": "古い設計には記憶の代わりに人々の約束を結ぶ我が描かれていた。試作品はまだろの下にある。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-6-room-1",
+      "sha256": "c078b5cf661a311d5d654683b22edd0ab1e6c8f5caa9e6eff74764da60baf33c",
+      "expected": "影の船長はナギと同じ結び目を使っていた。失った航路は、誰かを置き去りにした日の航路だった。",
+      "heard": "影の船長は、ナギと同じ結び目を使っていた。 失した項路は、誰かを置き去りにした日の項路だった。",
+      "phoneticSimilarity": 0.926,
+      "needsReview": false
+    },
+    {
+      "id": "npc-8-room-1",
+      "sha256": "b33a0401e7dfa4ebc843a4ed65f6a422d0165cb5ba09d9a166ea307507adaa7f",
+      "expected": "鐘の下の水路は、十二の星灯をつなぐ共鳴路だった。環があれば、記憶を燃やさず力を分けられる。",
+      "heard": "鐘の下の水路は、十二の星、灯りをつなぐ、共鳴色だった。我があれば、記憶を燃やさず、力を分けられる。",
+      "phoneticSimilarity": 0.991,
+      "needsReview": false
+    },
+    {
+      "id": "npc-9-room-1",
+      "sha256": "19e9a8b2459c81bcb0c5e81d5534d6130f1dc5785f60544eed05d6eb1ae5813e",
+      "expected": "浮島を支える星灯も消えかけている。落下を防ぐだけではなく、誰も閉じ込めない降り道が必要だ。",
+      "heard": "吹き島を支える星明かりも消えかけている 落下を防ぐだけではなく誰も閉じ込めない降り道が必要だ",
+      "phoneticSimilarity": 0.981,
+      "needsReview": false
+    },
+    {
+      "id": "opening-6",
+      "sha256": "da41de680bc9a974d807ccd099c4560d172068ab8701420ae564a3372db9d9e3",
+      "expected": "失われたものを取り戻す旅は、まだ見ぬ明日を選ぶ旅でもある。航海士ナギの、新しい航路が始まる。",
+      "heard": "失われたものを取り戻すたびは、まだ見ぬ、あすを選ぶたびでもある。公開しなぎの、新しい公路が始まる。",
+      "phoneticSimilarity": 0.972,
+      "needsReview": false
+    },
+    {
+      "id": "npc-0-room-1",
+      "sha256": "446b668042df4ffe1c02634a7d1243e49439f325b4780e82d5d4324b8073adfa",
+      "expected": "石碑には、灯を点けるには知恵と記憶がいる、と刻まれている。最後の一行だけが削り取られていた。",
+      "heard": "関比には、明かりをつけるには、知恵と記憶がいる、と刻まれている。最後の一行だけが、削り取られていた。",
+      "phoneticSimilarity": 0.962,
+      "needsReview": false
+    },
+    {
+      "id": "npc-4-room-1",
+      "sha256": "a6fa3eda71881d0a478769391f2db22b256cc882b69604b87378d18e9dd87e7d",
+      "expected": "配達されなかった手紙は、星灯を守るための避難命令だった。灯台へ向かった人だけが戻っていない。",
+      "heard": "配達されなかった手紙は星明かりを守るための避難命令だった。東台へ向かった人だけが戻っていない。",
+      "phoneticSimilarity": 0.982,
+      "needsReview": false
+    },
+    {
+      "id": "npc-7-room-1",
+      "sha256": "5de56739f35dda78ba64aea64e5861e3626293c56940072d7fd9e6feddbaef0d",
+      "expected": "砂に埋もれた碑には、星灯へ頼らない航海術が記されていた。嵐が来ても、人々は以前から渡っていた。",
+      "heard": "砂に埋もれた日には星明かりへ頼らない後悔術が記されていた 嵐が来ても人々は以前から渡っていた",
+      "phoneticSimilarity": 0.975,
+      "needsReview": false
+    },
+    {
+      "id": "npc-10-room-2",
+      "sha256": "99889d0723b9b9a419b874e65bd707d84a3ef7de56d38592804e560e96580081",
+      "expected": "二人の航海士は、正しかった方を決めるのをやめた。島の声を集め、新しい環を完成させると約束した。",
+      "heard": "二人の公会士は、正しかった方を決めるのをやめた。島の子声を集め、新しい話を完成させると約束した。",
+      "phoneticSimilarity": 0.917,
+      "needsReview": false
+    },
+    {
+      "id": "npc-10-room-1",
+      "sha256": "f076e4aa4a7b37368dff879aa3948d5f775e3715085169a1b6e77fa0f0efcc68",
+      "expected": "消灯した航海士は、ナギが置いてきた仲間だった。記憶の消失を止めるため、一人で灯台へ向かっていた。",
+      "heard": "衝突した後開始は、ナギが置いてきた仲間だった。記憶の消失を止めるため、一人で兄弟へ向かっていた。",
+      "phoneticSimilarity": 0.922,
+      "needsReview": false
+    },
+    {
+      "id": "npc-11-room-1",
+      "sha256": "9d365b71832ca763bd2e7df1c4b71d945140f4850e334daebb6d815bfb481b79",
+      "expected": "忘却の星竜は星灯が捨てた記憶の姿だった。倒すことは消し去ることではなく、すべてを環へ迎えること。",
+      "heard": "傍客の精流は、星明かりが捨てた記憶の姿だった。倒すことは消し去ることではなく、すべてをわえ迎えること。",
+      "phoneticSimilarity": 0.983,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-0",
+      "sha256": "e927867eae89151ba93b085e484bf5e67cae2f9ce2bcaf2a013b45a527e4d978",
+      "expected": "目を覚ますと、海は静止していた。航海士のナギは灯台守トワから、島々を結ぶ十二の星灯が消えたと聞く。",
+      "heard": "目を覚ますと、海は静止していた。後開始のナギは東大森ワーバから、島島をむす、十二の星明かりが消えたと聞く。",
+      "phoneticSimilarity": 0.917,
+      "needsReview": false
+    },
+    {
+      "id": "glider-tip",
+      "sha256": "4c8fb904a3723e88467e5c545d409c3f7417be26aaedb65f30aa117cad54c30b",
+      "expected": "滑空で水や穴を越えられる。各島の船着場にある風の台座から、空の航路へ飛び立とう。上昇気流で力を取り戻せる。",
+      "heard": "核空で水や穴を超えられる 核島の船千葉にある風の台座から空の公路へ飛び立とう上昇機流で力を取り戻せる",
+      "phoneticSimilarity": 0.935,
+      "needsReview": false
+    },
+    {
+      "id": "chapter-10",
+      "sha256": "c9f092af06aea482a05f171973af67abe4e3bb2cbfb656db4d8b5bca7cae2e5b",
+      "expected": "星灯は嵐を押し返す代わりに、島の記憶を燃やしていた。灯を消したのは、島を守ろうとしたもう一人の航海士だった。",
+      "heard": "星明かりは嵐を押し返す代わりに、島の記憶を燃やしていた。明かりを消したのは、島を守ろうとした、もう一人の公開師だった。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "final-route-hint",
+      "sha256": "d95350dfb0ff36bc3c090095e499b39103f48ded53bb1e349449a3de0b7cfde0",
+      "expected": "最後の灯台へは今でも挑める。ただし他の島の星灯、道具、料理が旅を支えてくれる。どこから助け、どこまで準備するかは、ナギ自身が決める。",
+      "heard": "最後の灯台へは、今でも挑める。ただし、他の島の橋、明かり、道具、料理が旅を支えてくれる。どこから助け、どこまで準備するかは、ナギ自身が決める。",
+      "phoneticSimilarity": 0.987,
+      "needsReview": false
+    },
+    {
+      "id": "ending-restore",
+      "sha256": "a8f7617dfbf230afc2d13c7e24967d87b12cc82c68d866b98d5b44cecef0c1ab",
+      "expected": "暁の星灯に、新しい航路が刻まれた。島々には、まだ届いていない声や新しい出会いがある。ナギは最初の灯を守り、残された声を探す航海へ船を出した。",
+      "heard": "赤月の星明かりに、新しい光路が刻まれた。島島には、まだ届いていない声や、新しい出会いがある。ウナギは足の明かりを守り、残された声を探す後海へ、船を出した。",
+      "phoneticSimilarity": 0.917,
+      "needsReview": false
+    },
+    {
+      "id": "ending-community",
+      "sha256": "8f616a1c1c95904ecec778acf4f01133e1b2f83f5b6b3bb80f58014bd58eee75",
+      "expected": "島々の人々は互いの灯を守る約束を結んだ。届いた手紙も、芽吹いた木々も、新しい星灯を支える。ナギは一人の英雄ではなく、航路を結ぶ最初の仲間になった。",
+      "heard": "島島の人々は互いの明かりを守る約束を結んだ。届いた手紙も、巡いた木々も、新しい星明かりを支える。ナギは一人の英雄ではなく、コウロを潰す最初の仲間になった。",
+      "phoneticSimilarity": 0.942,
+      "needsReview": false
+    },
+    {
+      "id": "opening-2",
+      "sha256": "70826269c883de5e53c30ee4af372c4b136fef3e4c99657178164584646e853e",
+      "expected": "……潮の音が、しない。私の船は？　みんなは、どこへ行ったの？",
+      "heard": "塩の音がしない 私の船はみんなはどこへ行ったの",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-damage-0",
+      "sha256": "8a52193be3ad09385f978740da9597407bc76c6d853c04eb285275ff75ba3f71",
+      "expected": "くっ！",
+      "heard": "",
+      "phoneticSimilarity": 0.0,
+      "needsReview": true,
+      "resolution": "Intentional non-lexical hit grunt. The non-silent waveform and independent medium recognition of んっ confirm a short voiced reaction; lexical transcription is not applicable."
+    },
+    {
+      "id": "action-sword-0",
+      "sha256": "ee29f225eb7a8a8feed4e2c182a748b62eb7861dcc4bac63aa4265c780baceb1",
+      "expected": "そこだ！",
+      "heard": "そこだ!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-sword-5",
+      "sha256": "1ec1871d25c220c0127af0a33fd5182ac8b403fb3dc1dbd98848b61407f85d1a",
+      "expected": "いくよ！",
+      "heard": "行くよ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hook-2",
+      "sha256": "90919f8a26b14dfe254f693844c5dc866e90d587b06e7867200ebdc81563ae0b",
+      "expected": "届いて！",
+      "heard": "届いて",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-dodge-0",
+      "sha256": "3eff4bb069c33c61f6a8fd8eb23336e9e629b64500eac9df802fe66481c75115",
+      "expected": "よっと！",
+      "heard": "よっと",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-land-0",
+      "sha256": "d14bcab1dbff70032f6cd8de144d534a067f7449086e39425189b74e0be03e32",
+      "expected": "着いた！",
+      "heard": "ついた",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-sword-1",
+      "sha256": "39d5202ee42c42b59e43ceb9e5fa4473c6c246429852e0014ece293d3cf099fd",
+      "expected": "道を開く！",
+      "heard": "道を開く",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-sword-3",
+      "sha256": "d26f139bbad44bc95ec0c545aa680d10d850481f989f1c45cc281ee2506727b0",
+      "expected": "もう一歩！",
+      "heard": "もう一歩",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-ring-0",
+      "sha256": "55691faf9c7543f0d04b6647551679963dc88eaea85da18c455cc8cd149003c3",
+      "expected": "潮の輪よ！",
+      "heard": "塩のはよ!",
+      "phoneticSimilarity": 0.8,
+      "needsReview": true,
+      "resolution": "Accepted: independent CPU medium recognizer transcribes 潮の輪よ. The small recognizer confuses the spelling of わ and は."
+    },
+    {
+      "id": "action-wand-1",
+      "sha256": "5ea2f587987477454267774ddb441e19b6f271eef9e47faac88dd1e39fbc9420",
+      "expected": "火の道を！",
+      "heard": "火の道を",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hammer-0",
+      "sha256": "aab8bb677a9d256a276d80068f611f55dc564140d904acdb6bc1ab05dbd31b88",
+      "expected": "打ち砕く！",
+      "heard": "打ち砕く",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hammer-2",
+      "sha256": "353f2a0e554ee3ce2bdd39a427d6aea516006a430952e4487c81955601eff0c0",
+      "expected": "道を作る！",
+      "heard": "道をつくる",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-bow-1",
+      "sha256": "4773155ecf1b54a34fd6189e8133f26ffc4c77b9ac5f7b91afad78247f201b64",
+      "expected": "星の矢よ！",
+      "heard": "星の屋よ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-spear-2",
+      "sha256": "74482969752621ab1f9b1f19b060fb7637c302dd2cff89e8d5d91ccefd280855",
+      "expected": "踏み込む！",
+      "heard": "踏み込む!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-spear-3",
+      "sha256": "d96406eddc12d8bef4d97356cc4aac9ae0ab34c3a1199820dadf70ee29df0984",
+      "expected": "光よ、貫け！",
+      "heard": "光を貫け",
+      "phoneticSimilarity": 0.875,
+      "needsReview": false
+    },
+    {
+      "id": "action-dodge-3",
+      "sha256": "69234b728ad07d305a766ade1e6d7789ec78d451b301b19daa5521aef23a0871",
+      "expected": "見えてる！",
+      "heard": "見えてる",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-pickup-0",
+      "sha256": "930fae8c7ed9b99b65e5e5182046cdfb63e20527888336e4cc02295e11bac0a6",
+      "expected": "見つけた！",
+      "heard": "見つけた!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-sword-2",
+      "sha256": "d0a915eb7277763e6ec32a71c64a7346d3a58defc985e39d8f3d27a9fb5e684a",
+      "expected": "この一撃で！",
+      "heard": "この一撃で",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hook-0",
+      "sha256": "68358a49e4925c610731552cce1381a82f956684981cf305b6a79acd17ee1e1f",
+      "expected": "風をつかむ！",
+      "heard": "風をつかむ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hook-3",
+      "sha256": "c35e69b7bfc551bb0aa51b367bcc4ead2b1a60a714c4b82c83575ce133527183",
+      "expected": "引き寄せる！",
+      "heard": "引き寄せる",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hammer-1",
+      "sha256": "e486b44fcb9e38d8741c45b66e0f1e3fde1249985d09872fcae68f57c490660e",
+      "expected": "思い切って！",
+      "heard": "思い切って",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hammer-3",
+      "sha256": "8250b3fe4f4f51f58c3cef2bb8574b40708e77509324a59ce5cf029602abb2ba",
+      "expected": "まだ進める！",
+      "heard": "まだスメる",
+      "phoneticSimilarity": 0.909,
+      "needsReview": false
+    },
+    {
+      "id": "action-bow-2",
+      "sha256": "0ccfc21843786331a5b5ba515f1a1195be7b4454f16404f2608c4645af145ff1",
+      "expected": "風を読んで！",
+      "heard": "風を読んで",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-bow-3",
+      "sha256": "737fa0b6e240c75cb11ab510a286c31314539bc9f3f99ff68dd4f115c2439089",
+      "expected": "まっすぐに！",
+      "heard": "真っ直ぐに",
+      "phoneticSimilarity": 0.909,
+      "needsReview": false
+    },
+    {
+      "id": "action-shield-0",
+      "sha256": "603ab658c2169b2bae744a86ebec469166699437cc7ece477f74969048d08162",
+      "expected": "ここは守る！",
+      "heard": "ここは守る",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-shield-1",
+      "sha256": "30f3ed04e105793aa0e03c406ee57fb8100baa73a1a313eb99a919a497bf3cc4",
+      "expected": "受け止める！",
+      "heard": "受け止める",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-shield-2",
+      "sha256": "b28ba194dbe64cf8833e1597c6ed52251bcccb680016591192d8ad136b8076f1",
+      "expected": "負けないよ！",
+      "heard": "負けないよ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-spear-1",
+      "sha256": "68348079a6f484de0b651359d4c71dc95d88af9510a53e670946e02ffa723609",
+      "expected": "ここを貫く！",
+      "heard": "ここを貫く",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-dodge-1",
+      "sha256": "b297135d85740c8c54ec6d03a63bb7e254ab009d2f2fba1ecd58aaa907352e75",
+      "expected": "こっちだよ！",
+      "heard": "こっちだよ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-dodge-2",
+      "sha256": "371f4245893c33fea39c8fcfc96debe50415b70d99db58a63eb9c2b95f67601c",
+      "expected": "危なかった！",
+      "heard": "危なかった",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-damage-1",
+      "sha256": "b30ae4dbd577f4bd66b39a198c283bad44a65685f304e16ee552ab75459dffdf",
+      "expected": "まだ大丈夫！",
+      "heard": "まだ大丈夫",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-glide-0",
+      "sha256": "171a139920063371a28a31cf6619325f605dcabf71ba3f0c2eea09dd281ca992",
+      "expected": "風に乗って！",
+      "heard": "風に乗って",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-solved-0",
+      "sha256": "cad6fa3f6a418a2510bfd51ea5f6356e926ed2a3c5d6487114465015962b1838",
+      "expected": "つながった！",
+      "heard": "つながった",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-sword-4",
+      "sha256": "e0d66182e4127d5a60e7948257891f7a4cf22c957d332f03d7444232b8e0e5b1",
+      "expected": "星よ、導いて！",
+      "heard": "星よ、導いて",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-ring-1",
+      "sha256": "ff43c0b087694eb15cb09779e5b1399fac8acbfcd3b83934fd16bf0ab88800ab",
+      "expected": "戻っておいで！",
+      "heard": "戻っておいで",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-ring-3",
+      "sha256": "7ddbd17d19d36142751775f505e3acce26416beb991ff70e211e05aa9920eba9",
+      "expected": "そこまで届け！",
+      "heard": "そこまで届け",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-wand-3",
+      "sha256": "f65d532e2535d74c5b0f3828cc79bd1d4eb6c8e9bb653b4d18a683d98efba42c",
+      "expected": "その闇を払う！",
+      "heard": "その闇を払う",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-hook-1",
+      "sha256": "70bee61a1f1123a30036ac670fe826fc32d654a7a556e71a89b6805e586be7d1",
+      "expected": "ここから先へ！",
+      "heard": "ここから先へ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-bow-0",
+      "sha256": "ed9c9c24e6b4e10f32b797cbfeb6f6dbd699b1e1d7fdf4e17aedc78446ebd551",
+      "expected": "狙いを定めて！",
+      "heard": "狙いを定めて",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-spear-0",
+      "sha256": "0eb76c781b3b5fcd74efe1501b6fc68f31842ea330413257d460687c477d0e08",
+      "expected": "一気に抜ける！",
+      "heard": "一気に抜ける",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-damage-2",
+      "sha256": "d4e1c59bf7a9977c94175da611ec4f13c498c6495d07e1314cb34dcb62c8947c",
+      "expected": "ここからだよ！",
+      "heard": "ここからだよ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-damage-3",
+      "sha256": "eb12bed6d98d36047eba6dd7d3de056a8e524ac73df63ca3f857263896a7874d",
+      "expected": "負けるもんか！",
+      "heard": "負けるもんか",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-glide-3",
+      "sha256": "4b274c8c271a1c3da3068e62322ee71ca25fdcd89210753d93109eb5e0e9905c",
+      "expected": "帆よ、ひらけ！",
+      "heard": "ほいよ、開け!",
+      "phoneticSimilarity": 0.909,
+      "needsReview": false
+    },
+    {
+      "id": "action-land-1",
+      "sha256": "d9997421d05e3b76841f56758c5b15feb15b6d409a6ef12f86f1f8fd74c5797b",
+      "expected": "いい風だった。",
+      "heard": "いい風だった",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-pickup-1",
+      "sha256": "b5e775449a022d1c657e7285a563ae7060dc19c55378fb21a1ed75d17f7af2b6",
+      "expected": "役に立ちそう！",
+      "heard": "役に立ちそう!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-pickup-2",
+      "sha256": "aede79dfcc1822d56c9d048fa49485526e712637e4994c6b0535dd7a12928309",
+      "expected": "大事にしよう。",
+      "heard": "大事にしよう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-pickup-3",
+      "sha256": "1c30c900c0343e0fa0edc8b296ed591603f4ec42fc6319d6ab1f6efcf93d96d8",
+      "expected": "持っていこう！",
+      "heard": "持っていこう!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-food-0",
+      "sha256": "af00925a1cfbedde2e4ee99fd6005a0af76ea5720241a0b5d7a50e2e2cea77fc",
+      "expected": "いただきます！",
+      "heard": "いただきます",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-ring-2",
+      "sha256": "3170fad3ff52a222c66722eb319524687ac2d7b78b5167c9a8dc753ea518c8f1",
+      "expected": "狙いは外さない！",
+      "heard": "狙いは外さない",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-wand-0",
+      "sha256": "6675369001ac9f2d6c5a9fd78ad70f8f5ed0d9fc1a25be239e3464735207c6f0",
+      "expected": "灯火よ、照らせ！",
+      "heard": "ともしびよ 照らせ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-wand-2",
+      "sha256": "ecb0cd3e4788328bd82e4276353ea8ffde74a79b5cdb96ec498a91633565a819",
+      "expected": "明かりを分けて！",
+      "heard": "明かりを分けて",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-glide-1",
+      "sha256": "c78b85533ea5afd19b378dd57c1ad4aaf8fbc767028f2a4303d621415ddc828a",
+      "expected": "空にも道がある！",
+      "heard": "空にも道がある",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-glide-2",
+      "sha256": "4900e7f75a8d9bd41f2329d68d720b9f06d571fd8dc6a4c22f8866ae98d1356d",
+      "expected": "遠くまで行こう！",
+      "heard": "遠くまで行こう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-quest-0",
+      "sha256": "8157dd8ab6c6ec25df98981ade344b3d9964bd4847581ec3f5689190e91415b5",
+      "expected": "約束、守れたね。",
+      "heard": "約束守れたね",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-shield-3",
+      "sha256": "58f55c8c1b686ce59c3f640693c15b82759f1a63401b0665a37e662ee46e59b0",
+      "expected": "みんなの道だから！",
+      "heard": "みんなの道だから",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-heal-0",
+      "sha256": "6cf2442171ca25549defc92182965f031bb575f15962eb122ce624bc00e216a9",
+      "expected": "元気が戻ってきた！",
+      "heard": "元気が戻ってきた",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-heal-2",
+      "sha256": "f8af39b6dcb9528026bc625df38ffa9c72d29a2a8a1629dc72217578da7f7466",
+      "expected": "これでまた進める！",
+      "heard": "これでまた進める",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-quest-2",
+      "sha256": "99643a0b8cf56dbbdb7a7a2cb2edc79ef43e84d8c7583fed1b458c0b569fd4cd",
+      "expected": "次の島へ届けよう！",
+      "heard": "次の島へ届けよう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-rescue-1",
+      "sha256": "631bdba15b7df7e961901888d75fd3fe85515a50d405a091d4a881430cd423b2",
+      "expected": "次は道をよく見よう。",
+      "heard": "次は道をよく見よう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-rescue-2",
+      "sha256": "07bda0db8851ccd25c777e3c45e985991f4c0ca54a7e334b5dc4fbebc4f8386f",
+      "expected": "私の旅は、まだ続く。",
+      "heard": "私の旅はまだ続く",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-land-2",
+      "sha256": "cfa0e5e849cd0be01296e00145f4f373c3928f76a1405befa30e87183aaef0d0",
+      "expected": "ここから、また一歩。",
+      "heard": "ここから、また一歩",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-beacon-0",
+      "sha256": "6192bc7d5d8679fd6e0217ccd6be8d741047a8a0e66a822dfa85b7af9c52a7cd",
+      "expected": "この灯を、みんなへ。",
+      "heard": "この明かりを みんなへ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-quest-1",
+      "sha256": "e7e7dd860544e3b80d38d7288a93856b6bf8b0a7a0f69e9fa1dd956838366fc8",
+      "expected": "間に合ってよかった！",
+      "heard": "間に合ってよかった",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-food-2",
+      "sha256": "a3bc3eadcd79f10612a9ed054523fee56e9ce62a1c790ee4049a224f3fdbda8f",
+      "expected": "島の恵みに感謝だね。",
+      "heard": "島の恵みに感謝だね",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-heal-1",
+      "sha256": "f431fd92e7da04ade5cbcc999264ac569aaebe063c7586f561bf5bf56e640014",
+      "expected": "ありがとう、助かった！",
+      "heard": "ありがとう!助かった!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-solved-1",
+      "sha256": "632b11a7721c69b9103d31402b229114a21994752b5939272b1a91dacb33326f",
+      "expected": "そういう仕組みなんだ！",
+      "heard": "そういう仕組みなんだ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-beacon-1",
+      "sha256": "9aa14a69c6b16381517b10c9205f384767b7859b24ca8521cff1c07be5d22b5e",
+      "expected": "思い出を忘れない光に！",
+      "heard": "思い出を忘れない光に",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-solved-2",
+      "sha256": "e50c3a33d96069e0f4f720d854397fcb1091ec73f20a2eee8ba9fe80afdb6373",
+      "expected": "知恵も、立派な道具だね。",
+      "heard": "知恵も立派な道具だね",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "choice-memory",
+      "sha256": "b5a2e9a2491765ebef0d099faffe27f131d9203121e7576cc288b4aedff7a979",
+      "expected": "人と記憶をつないでいこう。",
+      "heard": "人と記憶を繋いでいこう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-rescue-0",
+      "sha256": "043f2880781ae51fcd5d8ae6af4719c19c33fc885b2ad2018b7d5bf9da17c6b1",
+      "expected": "戻ってこられた。もう一度！",
+      "heard": "戻ってこられた もう一度",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-beacon-2",
+      "sha256": "91114aac1107c0cc23953db757a400bb3e0a0e69d00624bc3cb7931605228883",
+      "expected": "また一つ、島がつながった！",
+      "heard": "また一つ島が繋がった",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-food-1",
+      "sha256": "99a8699ab169d53546c4b7b4d60e8ea07eb80c881c56de163d88b31a544d336d",
+      "expected": "おいしい！　力がわいてくる。",
+      "heard": "美味しい!力が湧いてくる!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "choice-route",
+      "sha256": "24ec17caafb0efbc2bf76aff1bf28ea11dba98b6978f9442e21bb21956203709",
+      "expected": "灯台と航路を、私たちの手で築こう。",
+      "heard": "灯台と公路を私たちの手で気づこう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-0-room-2",
+      "sha256": "f0fc5fa5671066e81f58fbcc3912a736f9c854cab709c13cb21b25dd5d33f391",
+      "expected": "海の向こうから、誰かが灯を消して回った。嵐の跡がないのに、どうして？",
+      "heard": "海の向こうから誰かが明かりを消して回った 嵐の跡がないのにどうして",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-6-journey",
+      "sha256": "6d00515be9e9496a3d17d5b42acb9240cd6f9c5887f0e8489be79063065a7300",
+      "expected": "影の船も、置いてきた私の一部だった。沈めるのではなく、一緒に港へ連れていこう。",
+      "heard": "影の船も置いてきた私の一部だった 沈めるのではなく一緒に港へ連れていこう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-11-journey",
+      "sha256": "a7185a745b9c4be6d1bcf4e857346192ff7bdeda669a8b82f838d6f4e651da70",
+      "expected": "この星灯は、思い出を燃やさない。昨日を捨てなくても、明日へ進める航路にしよう。",
+      "heard": "この星明かりは思い出を燃やさない 昨日を捨てなくても足すへ進める項路にしよう",
+      "phoneticSimilarity": 0.93,
+      "needsReview": false
+    },
+    {
+      "id": "opening-4",
+      "sha256": "10750b8d5d4eb9d5b67207e9e1e0ae12c51decfa369418332ae67910ba0477c1",
+      "expected": "灯を戻すだけじゃ、だめなんだね。……まずは、この島で待っている人の話を聞きたい。",
+      "heard": "明かりを戻すだけじゃダメなんだね まずはこの島で待っている人の話を聞きたい",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-6-room-2",
+      "sha256": "fb6abc2159229867a74de6ff2fe603bcaa95690bea3854c6a2e8500b9bb96b9d",
+      "expected": "置いてきた人を助けに行けなかった。でも、今ここで帰りを待つ声を、もう見捨てない。",
+      "heard": "置いてきた人を助けにいけなかった でも今ここで帰りを待つ声をもう見捨てない",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-11-room-2",
+      "sha256": "17611e1a6cb03109e68ce5e385950817245004f74f872dc429813e15dc76e0dd",
+      "expected": "準備はできた。灯を守るのは私たちだけじゃない。帰りを待ってくれる、すべての島と一緒に進もう。",
+      "heard": "準備はできた。明かりを守るのは私たちだけじゃない。帰りを待ってくれる、すべての島と一緒に進もう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "opening-3",
+      "sha256": "a99417c6550407c7c1f6e622cbe96fd8042ab70db137860f9043fac26d9464b6",
+      "expected": "おかえり、ナギ。灯を戻せば、海はまた動くだろう。でも、戻るものばかりとは限らない。",
+      "heard": "おかえり、ナギ。 明かりを戻せば、海はまた動くだろう。でも、戻るものばかりとは限らない。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "glider-towa",
+      "sha256": "a5f34348496495f10007040d8184796d35a35a99517c50d51212cc089ffd90dc",
+      "expected": "海図の端は、世界の端じゃない。今度は空へおゆき。",
+      "heard": "海図の端は世界の端じゃない。今度は空へお勇気。",
+      "phoneticSimilarity": 0.982,
+      "needsReview": false
+    },
+    {
+      "id": "npc-9-journey",
+      "sha256": "6a30d3d5198a5c51e3ef5220bfd2ec8c396b00077df49100c5b28ce0739d1568",
+      "expected": "帰る場所は昔と同じ形でなくていい。迎えてくれる誰かと、また暮らしを始められれば。",
+      "heard": "帰る場所は昔と同じ形でなくていい 迎えてくれる誰かとまた暮らしを始められれば",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-9-room-2",
+      "sha256": "de6c46f034e9731a0e27bfbcf3d7b0676b51af1e687e4e0826b68fcd2a809763",
+      "expected": "海へ帰る人も、空で暮らす人もいていい。航路は、人の行き先を決めるためのものではない。",
+      "heard": "海へ帰る人も空で暮らす人もいていい 公路は人の行き先を決めるためのものではない",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-0-room-0",
+      "sha256": "6852194a6b2c0826021dfc06abd476541a603cc973c99f33ee1aa11b40290185",
+      "expected": "浜には三つの古い航路図が流れ着いた。宝箱の記録を集めれば、島の人にも昔の港を見せられる。",
+      "heard": "浜には三つの古い甲炉図が流れついた 宝箱の記録を集めれば島の人にも昔の港を見せられる",
+      "phoneticSimilarity": 0.957,
+      "needsReview": false
+    },
+    {
+      "id": "npc-0-journey",
+      "sha256": "bd35056e9181b9e0fe2cf3ed413849662da12d09256c4ec1db34be9441f43922",
+      "expected": "星灯を点けるだけでは、この海は戻らない。何を灯に託すかを決めるのは、ここに住む人たちだよ。",
+      "heard": "星明かりをつけるだけではこの海は戻らない 何を明かりに託すかを決めるのはここに住む人たちだよ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-cook-0",
+      "sha256": "114eaf537b955c78dd84c92d7c4ff55fa1afa10bca6182c8f5e9adc76bcddae8",
+      "expected": "よし、できあがり！",
+      "heard": "よし、出来上がり!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-cook-2",
+      "sha256": "d67e85a132de7375069d485356e0247b501dae50aaf7f31dcf00e267ba142e2c",
+      "expected": "次の島へ、準備はばっちり！",
+      "heard": "次の島へ、準備はばっちり!",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "action-cook-1",
+      "sha256": "ac43084a7fb16a42c33b20a6219c39e0fd9005e831894fa36ed5865512dccfc4",
+      "expected": "いい香り。これなら元気が出るね。",
+      "heard": "いい香り、これなら元気が出るね",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "opening-5",
+      "sha256": "d5e820b910b7dadaae22f542bea522e53355a04e05734e516e475bb281c9a372",
+      "expected": "海図の空白は、君が決めていい。道具と知恵を携えて、島々に何を残すか、自分の目で確かめておいで。",
+      "heard": "カイズの空白は、君が決めていい。道具と知恵を携えて、しまじまに何を残すか。自分の目で確かめておいで。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-1-journey",
+      "sha256": "c04691d751838173a2bdcb2c464a912ab71f4709f94ac009dc0d7e99c30d4a6c",
+      "expected": "忘れても、また名前をつければいいと思ってた。でも、昔呼んでくれた声も大事なんだね。",
+      "heard": "忘れてもまた名前をつければいいと思ってた でも昔呼んでくれた声も大事なんだね",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-2-journey",
+      "sha256": "c0739f1899d6a71a7a657781360b9850afbe48c7d6f4a265eb635aa9eaaf3990",
+      "expected": "約束は守れなかった。でも航海帳を捨てなかったのは、続きを書きたかったからさ。",
+      "heard": "約束は守れなかった。でも公開帳を捨てなかったのは、続きを書きたかったからさ。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-3-journey",
+      "sha256": "72353340fdf90b78d56c94b3d7cb869b4a38aed190ac216ab885746d05a92c62",
+      "expected": "同じ午後はもういらない。間違える日もあるだろうけど、時計は明日へ回してほしい。",
+      "heard": "同じ午後はもういらない間違える日もあるだろうけど時計は明日へ回してほしい",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-4-journey",
+      "sha256": "43c17124e2d2c68c31414918e72deecb1b33bad01c29f49925c01d642e3b707d",
+      "expected": "遅れた手紙でも、届けば今日の言葉になる。待っていた人に、まず会いに行こう。",
+      "heard": "遅れた手紙でも届けば今日の言葉になる 待っていた人にまず会いに行こう",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-5-journey",
+      "sha256": "d25d31c17782f4496d1e7258579c8aa58ac07952f0a7e39aa4cff493abefa03e",
+      "expected": "炉を守るために町を閉ざした。いつの間にか、何のための炉か忘れていたよ。",
+      "heard": "ローを守るために町を閉ざした いつの間にか何のための路か忘れていたよ",
+      "phoneticSimilarity": 0.946,
+      "needsReview": false
+    },
+    {
+      "id": "npc-7-journey",
+      "sha256": "4c9178fea4229198b3f0d856107bd3a3c1fdebcb718051cd8e97794bb2819930",
+      "expected": "星が読めなくても、君の足跡を誰かが見つける。道を知ることと、道を作ることは違うんだ。",
+      "heard": "星が読めなくても、君の足跡を誰かが見つける。道を知ることと、道を作ることは違うんだ。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-8-journey",
+      "sha256": "119aa34eaa0ab76aabce09bb4e76295032e00002db32884f4ea680c53d14e540",
+      "expected": "鐘の音は一つでも、中には何人もの声がある。静かな声を忘れないように鋳込むんだ。",
+      "heard": "鐘の根は一つでも、中には何人もの声がある。静かな声を忘れないようにいこむんだ。",
+      "phoneticSimilarity": 0.957,
+      "needsReview": false
+    },
+    {
+      "id": "npc-10-journey",
+      "sha256": "62a32bf845b7b131523e18846a840a4a7c73fe26d57f7a4de5f0859935feedd8",
+      "expected": "灯を消せば皆を守れると思った。でも、選ぶ機会まで奪ってしまった。今度は皆で決めてほしい。",
+      "heard": "明かりを消せば、皆を守れると思った。でも、選ぶ機会まで奪ってしまった。今度はみんなで決めてほしい。",
+      "phoneticSimilarity": 0.99,
+      "needsReview": false
+    },
+    {
+      "id": "npc-1-room-0",
+      "sha256": "71928f7811c5f31a118aa08da0bff74587ec99a081e0db9babac37e8a94e45e3",
+      "expected": "名札を見つけたら、木を植えた人にも見せてあげたい。森の名前は、一本ずつ違うから。",
+      "heard": "ナフダを見つけたら木を植えた人にも見せてあげたい 森の名前は一本ずつ違うから",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-1-room-2",
+      "sha256": "88760691eb44b33ee6f00e514d717af9795526dd0dd565ac939d957da710ed5f",
+      "expected": "灯を戻しても、名前まで消えるなら困るよ。別の燃やし方を、探してくれる？",
+      "heard": "ばかりを戻しても名前まで消えるなら困るよ 別の燃やし方を探してくれる",
+      "phoneticSimilarity": 0.974,
+      "needsReview": false
+    },
+    {
+      "id": "npc-2-room-0",
+      "sha256": "333bea2b9f1ddfe07f8e2ea47997a3601f3847e529b6251b60d06709bb435662",
+      "expected": "航海帳の抜けた頁を見つけてくれ。もうけ話ではなく、友人への約束が書いてある。",
+      "heard": "公開帳の抜けたページを見つけてくれ、もうけ話ではなく友人への約束が書いてある。",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-2-room-2",
+      "sha256": "59396fb6bf12acb1c2550860081f2e79c31dd3035199e984cfafdf0d9cd13b0f",
+      "expected": "記憶を失えば、約束を破ったことも忘れられる。でも、それで許されたいとは思わない。",
+      "heard": "記憶を失えば約束を破ったことも忘れられる でもそれで許されたいとは思わない",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-3-room-0",
+      "sha256": "841320249f529d3cb48e585e2534d31e701135f9a6d893de854a14ba1fc44a2d",
+      "expected": "設計書を三枚つなげれば時計の仕組みが分かる。動かす前に、何を回しているのか確かめたい。",
+      "heard": "設計書を3枚繋げれば、時計の仕組みがわかる。動かす前に、何を回しているのか確かめたい。",
+      "phoneticSimilarity": 0.97,
+      "needsReview": false
+    },
+    {
+      "id": "npc-3-room-2",
+      "sha256": "eba325dec88e6ee478ec2cbfac0f38485367fa57eb17dac6e260914f0c1a6df0",
+      "expected": "失敗した日のことも持っていこう。間違いを覚えているから、次は別の選び方ができる。",
+      "heard": "失敗した日のことも持っていこう 間違いを覚えているから次は別の選び方ができる",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-4-room-0",
+      "sha256": "b1e6fd8f8a9d3fb1c1294b3e51b21a4a278a211b6293635b66655ce2a92be3c3",
+      "expected": "雪の道を四つ片付けてほしい。宛名が読めなくても、待っている人は見つけられるはず。",
+      "heard": "雪の道を4つ片付けてほしい アテナが読めなくても待っている人は見つけられるはず",
+      "phoneticSimilarity": 0.976,
+      "needsReview": false
+    },
+    {
+      "id": "npc-4-room-2",
+      "sha256": "63cc7b769d7d3f0394551ecd58d5ffa395770728b2131b985642ebd3e4d9b08e",
+      "expected": "送り主の名前も残そう。手紙は言葉だけでなく、その人がいた証拠だから。",
+      "heard": "送り主の名前も残そう 手紙は言葉だけでなくその人がいた証拠だから",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-5-room-0",
+      "sha256": "40f5532356879fb244f23b2495589afda7c14cbcaadf78f606d132c5d16792ce",
+      "expected": "共同炉への道を守ってくれ。火を配る仕組みが壊れたままでは、どの家も冬を越せない。",
+      "heard": "共同路への道を守ってくれ。火を配る仕組みが壊れたままでは、どの家も冬を越せない。",
+      "phoneticSimilarity": 0.968,
+      "needsReview": false
+    },
+    {
+      "id": "npc-5-room-2",
+      "sha256": "ee9c39e553f32d1f87f7c90bc185763ce3dbc0f912175447fd32fe039b47609e",
+      "expected": "新しい環は一人では作れない。違う島の技と材料が集まれば、設計を完成できる。",
+      "heard": "新しい輪は一人では作れない 違う島の技と材料が集まれば設計を完成できる",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-7-room-0",
+      "sha256": "c1e8f14451c9f2c1e32e0e6860b4db6558ff78e86dd8a7f20ac10f31fdc39b29",
+      "expected": "星図にない避難所がある。四つの道を安全にして、旅人が残した印をつないでほしい。",
+      "heard": "せいずにない避難所がある 四つの道を安全にして旅人が残した印をつないでほしい",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-7-room-2",
+      "sha256": "6091b6127b66d48a2ca7269b072318750c7c73cea7da3c0c4de8c2b739a58d70",
+      "expected": "完全な道しるべを待たなくていい。見えない時は、隣を歩く人に尋ねればいいんだ。",
+      "heard": "完全な道しるべを待たなくていい 見えない時は隣を歩く人に訪ねればいいんだ",
+      "phoneticSimilarity": 1.0,
+      "needsReview": false
+    },
+    {
+      "id": "npc-8-room-0",
+      "sha256": "7604ad62ac0c1b92e2c6158c04a8500cfb6827310d1fdc7f5982fcbd9ce3e519",
+      "expected": "鐘の記録には、声にならなかった願いもある。三つの箱を集めたら、一緒に読もう。",
+      "heard": "金の記録には声にならなかった願いもある。三つの箱を集めたら一緒に読もう。",
+      "phoneticSimilarity": 0.953,
+      "needsReview": false
+    },
+    {
+      "id": "npc-8-room-2",
+      "sha256": "15a9d808d383373c6b7200961ef45f16cb37caa200a30c2043fb4825c069f945",
+      "expected": "大きな鐘だけでなく、小さな鐘も必要だよ。違う声が合わさるから、遠くまで届く。",
+      "heard": "大きな金だけでなく小さな金も必要だよ 違う声が合わさるから遠くまで届く",
+      "phoneticSimilarity": 0.909,
+      "needsReview": false
+    }
+  ]
+}

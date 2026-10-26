@@ -1,0 +1,23 @@
+{
+  "recognizer": "faster-whisper medium / CPU int8 / Japanese / beam5",
+  "clips": [
+    {
+      "id": "action-ring-0",
+      "sha256": "55691faf9c7543f0d04b6647551679963dc88eaea85da18c455cc8cd149003c3",
+      "expected": "潮の輪よ！",
+      "heard": "潮の輪よ"
+    },
+    {
+      "id": "action-spear-3",
+      "sha256": "d96406eddc12d8bef4d97356cc4aac9ae0ab34c3a1199820dadf70ee29df0984",
+      "expected": "光よ、貫け！",
+      "heard": "光を貫け!"
+    },
+    {
+      "id": "action-damage-0",
+      "sha256": "8a52193be3ad09385f978740da9597407bc76c6d853c04eb285275ff75ba3f71",
+      "expected": "くっ！",
+      "heard": "んっ"
+    }
+  ]
+}

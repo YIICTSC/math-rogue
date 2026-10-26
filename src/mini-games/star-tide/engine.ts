@@ -41,6 +41,8 @@ export type Save = WildSave & {
     seconds: number;
     ending: boolean;
     gate: string | null;
+    openingSeen?:boolean;
+    openingLine?:number;
     hero: HeroId;
 };
 export type Enemy = {
@@ -85,6 +87,8 @@ export function load(): Save { try {
         x[k] = [...new Set(x[k].filter((v: unknown) => typeof v === 'string'))];
     x.puzzles = puzzleRecords(x.puzzles);
     x.ending = x.ending === true;
+    x.openingSeen=x.openingSeen===true;
+    if(x.openingLine!==undefined)x.openingLine=Math.max(0,Math.min(6,Math.floor(Number(x.openingLine)||0)));
     x.gate = typeof x.gate === 'string' ? x.gate : null;
     x.maxChapter = Math.max(0, Math.min(11, Number(x.maxChapter ?? x.chapter) || 0));
     x.choices = Array.from({ length: 12 }, (_, i) => x.choices[i] === 0 || x.choices[i] === 1 ? x.choices[i] : null);

@@ -1,0 +1,125 @@
+{
+  "reference": "public/sprites/star-tide/nagi-journal.webp",
+  "towaReference": "assets-source/star-tide/towa-reference.png",
+  "records": [
+    {
+      "id": 0,
+      "source": "assets-source/star-tide/events/0.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-9f3d373f-bd1b-41f8-ac22-25457c721e2e.png",
+      "output": "public/sprites/star-tide/events/0.webp",
+      "sourceSha256": "e51b34289dfb460821f3d152a67e7fe3ca9a18badb8329b57a9918c86bd0d0be",
+      "sha256": "893d6f593007d95200df65e1e65630cea58d57d18f12d55717fbe3584e71dd2a"
+    },
+    {
+      "id": 1,
+      "source": "assets-source/star-tide/events/1.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-0ee3e1a3-1b4c-4368-8100-b819ee1a09d0.png",
+      "output": "public/sprites/star-tide/events/1.webp",
+      "sourceSha256": "e82c7236e6ee2f507ac642a6b28894e8909b49cbba09b2514b798075e88d4342",
+      "sha256": "e94fffe12967f71a64ed7520fb152729493c2f95cdcc0a9bf9889f505aee5d24"
+    },
+    {
+      "id": 2,
+      "source": "assets-source/star-tide/events/2.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-693cdd22-010e-4f32-9529-0a2960e5bc8f.png",
+      "output": "public/sprites/star-tide/events/2.webp",
+      "sourceSha256": "bd1a3526734ae207ddca17a0a148d0e725c4a7828b804fef675db13ab33f8ec0",
+      "sha256": "da078fb43a22ed02de6ef738087a8856fd3417fd95897950057e695887d5a9cb"
+    },
+    {
+      "id": 3,
+      "source": "assets-source/star-tide/events/3.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-108a137a-932e-4f5a-a849-71c189260df6.png",
+      "output": "public/sprites/star-tide/events/3.webp",
+      "sourceSha256": "95c6309476d489e4e8d8eeae5a69d2572cdf5e14116397e6419f851f557e0810",
+      "sha256": "d9b974c1112975fc54111d6426589325e5fcb7546473c7dfee309a06d244b249"
+    },
+    {
+      "id": 4,
+      "source": "assets-source/star-tide/events/4.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-31043889-bb50-461e-a8b1-f045dacfac0c.png",
+      "output": "public/sprites/star-tide/events/4.webp",
+      "sourceSha256": "2d2a4d8d2a23be1b8ead649d7f4d623f16674cf595cfd4620ad68a3bf7d7d9ae",
+      "sha256": "0bac6c074b19bbb087c4647e4007ece44cac0facafd18b699215f4a96bd77bdf"
+    },
+    {
+      "id": 5,
+      "source": "assets-source/star-tide/events/5.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-6aa4e6a0-8152-4c42-bcb6-5bdd0f8d9c5d.png",
+      "output": "public/sprites/star-tide/events/5.webp",
+      "sourceSha256": "d84a8b72aa4646145d30e19755b99d30063b35f61619ab63256698cbdf949c3c",
+      "sha256": "bdb70b113e04e57abe8b4d31881c8b4fb270b16f33a42044be145cadf439164c"
+    },
+    {
+      "id": 6,
+      "source": "assets-source/star-tide/events/6.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-5a5b0f02-73ca-4135-a66c-3272fe9bd304.png",
+      "output": "public/sprites/star-tide/events/6.webp",
+      "sourceSha256": "fa7d3d19a4586710eb1028ae6e70cf1876b04612d3f06e0902d482215fe948ea",
+      "sha256": "31ddf7a4ba835810587beec23416ffb5ee206f87d5cd7c750b677656211afc82"
+    },
+    {
+      "id": 7,
+      "source": "assets-source/star-tide/events/7.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-1a4a22df-e7ea-4d9d-8852-f4196c3a9fd5.png",
+      "output": "public/sprites/star-tide/events/7.webp",
+      "sourceSha256": "23947ef0b6ea2eab1f8d658b8972b20d9b8bea4955ebfc0fca4a828e4d9dbd49",
+      "sha256": "274826a20344b02430305057de65ebe364da9820ac97a8656c20d14e26173579"
+    },
+    {
+      "id": 8,
+      "source": "assets-source/star-tide/events/8.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-82fccedd-5d0c-45d9-b8d1-cf6473bef186.png",
+      "output": "public/sprites/star-tide/events/8.webp",
+      "sourceSha256": "69dc3ee2f0182e2b4f4b2156946dc46d00b5c16262719125b7dca40859da8026",
+      "sha256": "1dba91ea1eab6679fa99b4486dfbacfcfdbcb8f037c3fe949a61b1c9cf8ae43d"
+    },
+    {
+      "id": 9,
+      "source": "assets-source/star-tide/events/9.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-badc9d24-9a38-46bd-85ca-85cf6179ab0f.png",
+      "output": "public/sprites/star-tide/events/9.webp",
+      "sourceSha256": "f9d09eb7eeb52f0883bf625b558c7f0baa975d7eec48262b4f89c47b043bebbb",
+      "sha256": "e7e3fa327c34ec5b526a1060598c7b68e3256ebe451f6b699600b27f45c437fe"
+    },
+    {
+      "id": 10,
+      "source": "assets-source/star-tide/events/10.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-990bdceb-1498-406b-b07d-4ac3fc74708d.png",
+      "output": "public/sprites/star-tide/events/10.webp",
+      "sourceSha256": "c7f5eb4f6f437343cadcc71cdafd8c4642e0db7081e70d0eaa48a68465d44cc0",
+      "sha256": "9c1f36547c0dfe58e718c9c72c86953a34eb4977df28d2dc9c5fc2d855023778"
+    },
+    {
+      "id": 11,
+      "source": "assets-source/star-tide/events/11.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-25a8cbec-e38e-40d3-9b8d-51fd788d401e.png",
+      "output": "public/sprites/star-tide/events/11.webp",
+      "sourceSha256": "95c780f8deb9597da8f341c6c5d6744349d5d0c5b5840bf4d1ee82f5ab8aa41b",
+      "sha256": "0755ac29ff5f1ba377947bf5f8f4f45cda05f2ca3f40956c4419cb310ad3a665"
+    },
+    {
+      "id": "opening",
+      "source": "assets-source/star-tide/events/opening.webp",
+      "generator": "ImageGen",
+      "original": "/workspace/generated_images/exec-ea44456f-3cf8-45b3-8d4a-fa9681cf4e76.png",
+      "output": "public/sprites/star-tide/events/opening.webp",
+      "sourceSha256": "884c1488dbe9acf11dc65a9b1c603be4b4b22287733000331cf4199b02466d29",
+      "sha256": "7e39cd566e94aac939d7a4a75dfe8b00936c9a81bdbc63de99769a6a43bc859b"
+    }
+  ],
+  "mioReference": "assets-source/star-tide/mio-reference.png",
+  "senaReference": "assets-source/star-tide/sena-reference.png"
+}
