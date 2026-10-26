@@ -1,0 +1,4336 @@
+{
+  "version": 4,
+  "frameWidth": 384,
+  "frameHeight": 576,
+  "reports": [
+    {
+      "id": "reactions-00",
+      "raw": "assets-source/dialogue/reactions-00.png",
+      "rawSha256": "8c3cda36112885a343ed38ce98cd830798a909fd743359c7161cd946539615a9",
+      "output": "sprites/dialogue/reactions-00-a87d6766b3.webp",
+      "sha256": "a87d6766b35c1736f40bb14230581e579db4daf760a574634280f29e98829be6",
+      "bytes": 426930,
+      "actors": [
+        "elementary-warrior",
+        "elementary-caretaker"
+      ],
+      "divider": 545,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8799766771080407,
+          "anchor": 192,
+          "bounds": [
+            50,
+            13,
+            307,
+            532
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8799766771080407,
+          "anchor": 192,
+          "bounds": [
+            358,
+            13,
+            371,
+            532
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8799766771080407,
+          "anchor": 192,
+          "bounds": [
+            778,
+            13,
+            300,
+            532
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8799766771080407,
+          "anchor": 192,
+          "bounds": [
+            1142,
+            13,
+            294,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.9506091942924727,
+          "anchor": 192,
+          "bounds": [
+            46,
+            0,
+            314,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.9506091942924727,
+          "anchor": 192,
+          "bounds": [
+            409,
+            0,
+            319,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.9506091942924727,
+          "anchor": 192,
+          "bounds": [
+            762,
+            0,
+            318,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.9506091942924727,
+          "anchor": 192,
+          "bounds": [
+            1132,
+            0,
+            316,
+            541
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-01",
+      "raw": "assets-source/dialogue/reactions-01.png",
+      "rawSha256": "0d9f678eb3760d851b4b7daa51f5fb5c9da863371eeab9aa92db7692ae36dcc1",
+      "output": "sprites/dialogue/reactions-01-f7bea32941.webp",
+      "sha256": "f7bea32941d4f70ec185b67c5625a6920178e82307adbd8054a8077d4552d426",
+      "bytes": 349228,
+      "actors": [
+        "elementary-assassin",
+        "elementary-dodgeball"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.9505694406622486,
+          "anchor": 192,
+          "bounds": [
+            41,
+            28,
+            278,
+            509
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.9505694406622486,
+          "anchor": 192,
+          "bounds": [
+            358,
+            22,
+            348,
+            515
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.9505694406622486,
+          "anchor": 192,
+          "bounds": [
+            772,
+            32,
+            278,
+            505
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.9505694406622486,
+          "anchor": 192,
+          "bounds": [
+            1140,
+            22,
+            278,
+            515
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7344087198348191,
+          "anchor": 192,
+          "bounds": [
+            26,
+            2,
+            315,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7344087198348191,
+          "anchor": 192,
+          "bounds": [
+            342,
+            2,
+            390,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7344087198348191,
+          "anchor": 192,
+          "bounds": [
+            780,
+            3,
+            299,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7344087198348191,
+          "anchor": 192,
+          "bounds": [
+            1131,
+            1,
+            306,
+            531
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-02",
+      "raw": "assets-source/dialogue/reactions-02.png",
+      "rawSha256": "6db9eecbb5f664aac08918d12d7df0b2d6c5d28047757a66bfd772ec031d785d",
+      "output": "sprites/dialogue/reactions-02-2788f6bcf3.webp",
+      "sha256": "2788f6bcf3132647c3cedaee6f22c360c9c7d63912aabb1325eb90376efe23d0",
+      "bytes": 419852,
+      "actors": [
+        "elementary-bard",
+        "elementary-librarian"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.9045710377823812,
+          "anchor": 192,
+          "bounds": [
+            59,
+            12,
+            265,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.9045710377823812,
+          "anchor": 192,
+          "bounds": [
+            371,
+            14,
+            354,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.9045710377823812,
+          "anchor": 192,
+          "bounds": [
+            786,
+            12,
+            252,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.9045710377823812,
+          "anchor": 192,
+          "bounds": [
+            1140,
+            13,
+            283,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8989867357175663,
+          "anchor": 192,
+          "bounds": [
+            64,
+            10,
+            265,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8989867357175663,
+          "anchor": 192,
+          "bounds": [
+            371,
+            10,
+            368,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8989867357175663,
+          "anchor": 192,
+          "bounds": [
+            782,
+            10,
+            264,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8989867357175663,
+          "anchor": 192,
+          "bounds": [
+            1140,
+            10,
+            292,
+            533
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-03",
+      "raw": "assets-source/dialogue/reactions-03.png",
+      "rawSha256": "129d927f16a52db7e2ace503ba280676b6fc3fc524eb015b9d36354443d9f6b8",
+      "output": "sprites/dialogue/reactions-03-99f1b9f3d5.webp",
+      "sha256": "99f1b9f3d5986919804832ed0d233def250a024830641383d962be10d54b7484",
+      "bytes": 320652,
+      "actors": [
+        "elementary-chef",
+        "elementary-gardener"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8284560124950123,
+          "anchor": 192,
+          "bounds": [
+            63,
+            25,
+            244,
+            512
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8284560124950123,
+          "anchor": 192,
+          "bounds": [
+            364,
+            19,
+            349,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8284560124950123,
+          "anchor": 192,
+          "bounds": [
+            802,
+            21,
+            244,
+            516
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8284560124950123,
+          "anchor": 192,
+          "bounds": [
+            1146,
+            18,
+            258,
+            519
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8018034903091716,
+          "anchor": 192,
+          "bounds": [
+            59,
+            6,
+            259,
+            527
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8018034903091716,
+          "anchor": 192,
+          "bounds": [
+            346,
+            0,
+            350,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8018034903091716,
+          "anchor": 192,
+          "bounds": [
+            798,
+            4,
+            246,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8018034903091716,
+          "anchor": 192,
+          "bounds": [
+            1151,
+            3,
+            253,
+            530
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-04",
+      "raw": "assets-source/dialogue/reactions-04.png",
+      "rawSha256": "5babe8081513ddd80b69fd49d7bf494631ae9b4775fd4d62d0524e888ef0238f",
+      "output": "sprites/dialogue/reactions-04-2aa3b6a5d3.webp",
+      "sha256": "2aa3b6a5d355d1c3980261a37f095d377db3bdc0e897f9abae97dc1e6be97e08",
+      "bytes": 354402,
+      "actors": [
+        "elementary-mage",
+        "high-school-warrior"
+      ],
+      "divider": 531,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.751186052873658,
+          "anchor": 192,
+          "bounds": [
+            30,
+            20,
+            285,
+            499
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.751186052873658,
+          "anchor": 192,
+          "bounds": [
+            346,
+            23,
+            363,
+            496
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.751186052873658,
+          "anchor": 192,
+          "bounds": [
+            776,
+            19,
+            282,
+            500
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.751186052873658,
+          "anchor": 192,
+          "bounds": [
+            1140,
+            19,
+            269,
+            500
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7854560921711419,
+          "anchor": 192,
+          "bounds": [
+            14,
+            1,
+            365,
+            554
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7854560921711419,
+          "anchor": 192,
+          "bounds": [
+            350,
+            1,
+            401,
+            554
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7854560921711419,
+          "anchor": 192,
+          "bounds": [
+            757,
+            1,
+            363,
+            548
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7854560921711419,
+          "anchor": 192,
+          "bounds": [
+            1123,
+            3,
+            325,
+            546
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-05",
+      "raw": "assets-source/dialogue/reactions-05.png",
+      "rawSha256": "2a67af334fe43181b965eb6386daf1c08d944efc0fe89b03a923fd1a289d733a",
+      "output": "sprites/dialogue/reactions-05-df070ef332.webp",
+      "sha256": "df070ef33217dcfd7d74294f4b49da6846cf2a8c15b5cb41ea063f07dd0b4245",
+      "bytes": 459990,
+      "actors": [
+        "high-school-caretaker",
+        "high-school-assassin"
+      ],
+      "divider": 527,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.9760968407198233,
+          "anchor": 192,
+          "bounds": [
+            47,
+            24,
+            322,
+            503
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.9760968407198233,
+          "anchor": 192,
+          "bounds": [
+            389,
+            22,
+            353,
+            505
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.9760968407198233,
+          "anchor": 192,
+          "bounds": [
+            776,
+            23,
+            316,
+            504
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.9760968407198233,
+          "anchor": 192,
+          "bounds": [
+            1148,
+            22,
+            300,
+            505
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.9224658641143354,
+          "anchor": 192,
+          "bounds": [
+            16,
+            0,
+            321,
+            545
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.9224658641143354,
+          "anchor": 192,
+          "bounds": [
+            357,
+            0,
+            361,
+            545
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.9224658641143354,
+          "anchor": 192,
+          "bounds": [
+            775,
+            0,
+            295,
+            545
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.9224658641143354,
+          "anchor": 192,
+          "bounds": [
+            1112,
+            0,
+            309,
+            545
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-06",
+      "raw": "assets-source/dialogue/reactions-06.png",
+      "rawSha256": "8caab6443813969dee13b135e5f7d76b3a8ef4863784c052ecae58af65e6f87f",
+      "output": "sprites/dialogue/reactions-06-991b9ff7c8.webp",
+      "sha256": "991b9ff7c8bc69274284df96d24ab97fedaeb06879e7d2188e1a5cb4e3816401",
+      "bytes": 423292,
+      "actors": [
+        "high-school-mage",
+        "high-school-dodgeball"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.9682070688537296,
+          "anchor": 192,
+          "bounds": [
+            60,
+            34,
+            283,
+            497
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.9682070688537296,
+          "anchor": 192,
+          "bounds": [
+            418,
+            34,
+            316,
+            499
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.9682070688537296,
+          "anchor": 192,
+          "bounds": [
+            783,
+            34,
+            276,
+            498
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.9682070688537296,
+          "anchor": 192,
+          "bounds": [
+            1135,
+            34,
+            288,
+            498
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8162895986895206,
+          "anchor": 192,
+          "bounds": [
+            22,
+            5,
+            361,
+            516
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8162895986895206,
+          "anchor": 192,
+          "bounds": [
+            370,
+            5,
+            383,
+            519
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8162895986895206,
+          "anchor": 192,
+          "bounds": [
+            763,
+            5,
+            292,
+            517
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8162895986895206,
+          "anchor": 192,
+          "bounds": [
+            1122,
+            6,
+            326,
+            518
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-07",
+      "raw": "assets-source/dialogue/reactions-07.png",
+      "rawSha256": "d6b8f39e48756396d9427343d6a0336280b9d81266501f3e0b6ade5d32dcd591",
+      "output": "sprites/dialogue/reactions-07-9aabd9d4a4.webp",
+      "sha256": "9aabd9d4a439064d511d67b2139b719a5ff074474b4526181bca2c7cb03cb3a7",
+      "bytes": 395204,
+      "actors": [
+        "high-school-bard",
+        "high-school-librarian"
+      ],
+      "divider": 542,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.858957089451408,
+          "anchor": 192,
+          "bounds": [
+            13,
+            26,
+            327,
+            512
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.858957089451408,
+          "anchor": 192,
+          "bounds": [
+            375,
+            26,
+            359,
+            512
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.858957089451408,
+          "anchor": 192,
+          "bounds": [
+            745,
+            26,
+            311,
+            512
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.858957089451408,
+          "anchor": 192,
+          "bounds": [
+            1094,
+            26,
+            337,
+            512
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.9341179116123808,
+          "anchor": 192,
+          "bounds": [
+            37,
+            0,
+            337,
+            544
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.9341179116123808,
+          "anchor": 192,
+          "bounds": [
+            405,
+            1,
+            344,
+            543
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.9341179116123808,
+          "anchor": 192,
+          "bounds": [
+            781,
+            1,
+            310,
+            543
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.9341179116123808,
+          "anchor": 192,
+          "bounds": [
+            1122,
+            2,
+            326,
+            542
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-08",
+      "raw": "assets-source/dialogue/reactions-08.png",
+      "rawSha256": "dc999c323ffd0c941750d83ebd6043264200117acaaa409875fc3767ca9412b6",
+      "output": "sprites/dialogue/reactions-08-308f90b1ec.webp",
+      "sha256": "308f90b1ec8e6025854c558ccc26c7f4a66b019ae084360f68076a7557198482",
+      "bytes": 336310,
+      "actors": [
+        "high-school-chef",
+        "high-school-gardener"
+      ],
+      "divider": 542,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7764528519910646,
+          "anchor": 192,
+          "bounds": [
+            18,
+            12,
+            336,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7764528519910646,
+          "anchor": 192,
+          "bounds": [
+            361,
+            15,
+            393,
+            521
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7764528519910646,
+          "anchor": 192,
+          "bounds": [
+            762,
+            11,
+            287,
+            525
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7764528519910646,
+          "anchor": 192,
+          "bounds": [
+            1104,
+            11,
+            344,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8366143340788144,
+          "anchor": 192,
+          "bounds": [
+            38,
+            2,
+            294,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8366143340788144,
+          "anchor": 192,
+          "bounds": [
+            370,
+            3,
+            372,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8366143340788144,
+          "anchor": 192,
+          "bounds": [
+            758,
+            3,
+            299,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8366143340788144,
+          "anchor": 192,
+          "bounds": [
+            1107,
+            2,
+            316,
+            530
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-09",
+      "raw": "assets-source/dialogue/reactions-09.png",
+      "rawSha256": "fea65b44411945f21c2dc6827868c700cee4f9281b46d4053480c5e4a4b6b4e5",
+      "output": "sprites/dialogue/reactions-09-e40ead3fe7.webp",
+      "sha256": "e40ead3fe798dff7e555f5003faef84d04c0d70aa3bb654d047ec18b873d331a",
+      "bytes": 446072,
+      "actors": [
+        "magic-akari",
+        "magic-shizuku"
+      ],
+      "divider": 545,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8389967654794521,
+          "anchor": 192,
+          "bounds": [
+            67,
+            11,
+            292,
+            534
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8389967654794521,
+          "anchor": 192,
+          "bounds": [
+            358,
+            12,
+            371,
+            533
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8389967654794521,
+          "anchor": 192,
+          "bounds": [
+            801,
+            15,
+            286,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8389967654794521,
+          "anchor": 192,
+          "bounds": [
+            1132,
+            11,
+            312,
+            534
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8592600078125825,
+          "anchor": 192,
+          "bounds": [
+            45,
+            0,
+            315,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8592600078125825,
+          "anchor": 192,
+          "bounds": [
+            363,
+            0,
+            378,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8592600078125825,
+          "anchor": 192,
+          "bounds": [
+            801,
+            0,
+            295,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8592600078125825,
+          "anchor": 192,
+          "bounds": [
+            1143,
+            0,
+            305,
+            541
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-10",
+      "raw": "assets-source/dialogue/reactions-10.png",
+      "rawSha256": "b6e4bfaaf08b9012cff19f40bb506d78018ebd9e1926b917b1f1585407cf2b7d",
+      "output": "sprites/dialogue/reactions-10-db8489b08d.webp",
+      "sha256": "db8489b08d8e057c531b581543786a0279ab1caecaa57dede5487951c8f9617c",
+      "bytes": 514630,
+      "actors": [
+        "magic-hiyori",
+        "magic-tsubasa"
+      ],
+      "divider": 539,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.9373285652384593,
+          "anchor": 192,
+          "bounds": [
+            36,
+            8,
+            293,
+            531
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.9373285652384593,
+          "anchor": 192,
+          "bounds": [
+            378,
+            9,
+            317,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.9373285652384593,
+          "anchor": 192,
+          "bounds": [
+            781,
+            8,
+            251,
+            531
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.9373285652384593,
+          "anchor": 192,
+          "bounds": [
+            1133,
+            7,
+            292,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8815500479281007,
+          "anchor": 192,
+          "bounds": [
+            19,
+            0,
+            313,
+            547
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8815500479281007,
+          "anchor": 192,
+          "bounds": [
+            349,
+            0,
+            378,
+            547
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8815500479281007,
+          "anchor": 192,
+          "bounds": [
+            753,
+            0,
+            272,
+            547
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8815500479281007,
+          "anchor": 192,
+          "bounds": [
+            1113,
+            0,
+            327,
+            547
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-11",
+      "raw": "assets-source/dialogue/reactions-11.png",
+      "rawSha256": "5934895b81ea0934abed731baa70fd919b29b335569b92580afe57cebb77fbd9",
+      "output": "sprites/dialogue/reactions-11-ee62297b3c.webp",
+      "sha256": "ee62297b3c7f82a40df9b3c066e98ee3073beb55eeb62ffebeb7a01a880c7dd7",
+      "bytes": 565512,
+      "actors": [
+        "magic-rei",
+        "magic-madoka"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.886559366690098,
+          "anchor": 192,
+          "bounds": [
+            27,
+            17,
+            362,
+            514
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.886559366690098,
+          "anchor": 192,
+          "bounds": [
+            394,
+            15,
+            356,
+            516
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.886559366690098,
+          "anchor": 192,
+          "bounds": [
+            749,
+            16,
+            343,
+            514
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.886559366690098,
+          "anchor": 192,
+          "bounds": [
+            1090,
+            16,
+            352,
+            515
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8749494924964315,
+          "anchor": 192,
+          "bounds": [
+            14,
+            4,
+            381,
+            539
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8749494924964315,
+          "anchor": 192,
+          "bounds": [
+            395,
+            4,
+            376,
+            539
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8749494924964315,
+          "anchor": 192,
+          "bounds": [
+            771,
+            8,
+            339,
+            535
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8749494924964315,
+          "anchor": 192,
+          "bounds": [
+            1110,
+            7,
+            338,
+            536
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-12",
+      "raw": "assets-source/dialogue/reactions-12.png",
+      "rawSha256": "b4d141efb49d0f34e77ac478a0161b0cbdd7bc311e759226f0d686630290e7bc",
+      "output": "sprites/dialogue/reactions-12-222782e6cf.webp",
+      "sha256": "222782e6cf38a9a2e4226f297c656a5bd893ff611d6a97984d18d484ad90a743",
+      "bytes": 504498,
+      "actors": [
+        "magic-koharu",
+        "magic-mirai"
+      ],
+      "divider": 553,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8964462354489174,
+          "anchor": 192,
+          "bounds": [
+            15,
+            32,
+            354,
+            521
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8964462354489174,
+          "anchor": 192,
+          "bounds": [
+            375,
+            33,
+            369,
+            520
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8964462354489174,
+          "anchor": 192,
+          "bounds": [
+            755,
+            33,
+            340,
+            519
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8964462354489174,
+          "anchor": 192,
+          "bounds": [
+            1111,
+            32,
+            327,
+            520
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8007479446458786,
+          "anchor": 192,
+          "bounds": [
+            43,
+            6,
+            319,
+            527
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8007479446458786,
+          "anchor": 192,
+          "bounds": [
+            365,
+            5,
+            364,
+            528
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8007479446458786,
+          "anchor": 192,
+          "bounds": [
+            765,
+            4,
+            317,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8007479446458786,
+          "anchor": 192,
+          "bounds": [
+            1112,
+            4,
+            335,
+            529
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-13",
+      "raw": "assets-source/dialogue/reactions-13.png",
+      "rawSha256": "7adebf0f2043492936c40eeee3aa4b2535a20cae3acf68fa00afb467b3559a18",
+      "output": "sprites/dialogue/reactions-13-97a11e75ab.webp",
+      "sha256": "97a11e75abf10f4ea3e9f1f787e5851105f05ff52334b9f6af284e8a584a41ec",
+      "bytes": 526668,
+      "actors": [
+        "magic-sera",
+        "magic-ren"
+      ],
+      "divider": 536,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8357363232298577,
+          "anchor": 192,
+          "bounds": [
+            26,
+            6,
+            366,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8357363232298577,
+          "anchor": 192,
+          "bounds": [
+            371,
+            5,
+            387,
+            531
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8357363232298577,
+          "anchor": 192,
+          "bounds": [
+            758,
+            9,
+            342,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8357363232298577,
+          "anchor": 192,
+          "bounds": [
+            1099,
+            6,
+            349,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7882548797216613,
+          "anchor": 192,
+          "bounds": [
+            14,
+            0,
+            349,
+            550
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7882548797216613,
+          "anchor": 192,
+          "bounds": [
+            345,
+            0,
+            385,
+            550
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7882548797216613,
+          "anchor": 192,
+          "bounds": [
+            751,
+            0,
+            339,
+            550
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7882548797216613,
+          "anchor": 192,
+          "bounds": [
+            1121,
+            0,
+            327,
+            550
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-14",
+      "raw": "assets-source/dialogue/reactions-14.png",
+      "rawSha256": "0e978746a2a36d720d4c245a79be88a7cd3d3433088d9e276dec89e4d918fc9d",
+      "output": "sprites/dialogue/reactions-14-a83e5a1f05.webp",
+      "sha256": "a83e5a1f05f5753ef14ebd05e31ef297c98c2dcdce3254edec343613a8267411",
+      "bytes": 524172,
+      "actors": [
+        "magic-soma",
+        "magic-minato"
+      ],
+      "divider": 545,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8009869334075953,
+          "anchor": 192,
+          "bounds": [
+            7,
+            21,
+            365,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8009869334075953,
+          "anchor": 192,
+          "bounds": [
+            368,
+            18,
+            359,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8009869334075953,
+          "anchor": 192,
+          "bounds": [
+            723,
+            22,
+            350,
+            523
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8009869334075953,
+          "anchor": 192,
+          "bounds": [
+            1072,
+            20,
+            376,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8334658880866357,
+          "anchor": 192,
+          "bounds": [
+            7,
+            0,
+            380,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8334658880866357,
+          "anchor": 192,
+          "bounds": [
+            383,
+            0,
+            347,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8334658880866357,
+          "anchor": 192,
+          "bounds": [
+            729,
+            0,
+            369,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8334658880866357,
+          "anchor": 192,
+          "bounds": [
+            1083,
+            0,
+            365,
+            541
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-15",
+      "raw": "assets-source/dialogue/reactions-15.png",
+      "rawSha256": "c9049ac4530232e10916b9826959c17033ead1e0d6dc7f9be728c0790eb8a98a",
+      "output": "sprites/dialogue/reactions-15-2ee007b3ad.webp",
+      "sha256": "2ee007b3add6be9748fc2fe72dbb53f7c7c492f25e937dfa60bd179333fe9d63",
+      "bytes": 501750,
+      "actors": [
+        "magic-riku",
+        "magic-yamato"
+      ],
+      "divider": 539,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8971557646036623,
+          "anchor": 192,
+          "bounds": [
+            57,
+            9,
+            298,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8971557646036623,
+          "anchor": 192,
+          "bounds": [
+            365,
+            9,
+            362,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8971557646036623,
+          "anchor": 192,
+          "bounds": [
+            770,
+            10,
+            301,
+            528
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8971557646036623,
+          "anchor": 192,
+          "bounds": [
+            1124,
+            9,
+            310,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.979890310786106,
+          "anchor": 192,
+          "bounds": [
+            32,
+            0,
+            318,
+            547
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.979890310786106,
+          "anchor": 192,
+          "bounds": [
+            400,
+            0,
+            325,
+            547
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.979890310786106,
+          "anchor": 192,
+          "bounds": [
+            764,
+            0,
+            304,
+            538
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.979890310786106,
+          "anchor": 192,
+          "bounds": [
+            1113,
+            0,
+            308,
+            538
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-16",
+      "raw": "assets-source/dialogue/reactions-16.png",
+      "rawSha256": "62887e1d09960fab3f4396bb988186238276b837c9321520189706e373599124",
+      "output": "sprites/dialogue/reactions-16-f434c087bf.webp",
+      "sha256": "f434c087bfc8af3df83105f4a1719b4162022b1d97d8dba852becefeec426181",
+      "bytes": 444232,
+      "actors": [
+        "magic-leon",
+        "magic-elliot"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8081501395579737,
+          "anchor": 192,
+          "bounds": [
+            18,
+            33,
+            351,
+            500
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8081501395579737,
+          "anchor": 192,
+          "bounds": [
+            353,
+            34,
+            392,
+            499
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8081501395579737,
+          "anchor": 192,
+          "bounds": [
+            752,
+            33,
+            312,
+            500
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8081501395579737,
+          "anchor": 192,
+          "bounds": [
+            1102,
+            32,
+            342,
+            502
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8268777937640697,
+          "anchor": 192,
+          "bounds": [
+            0,
+            3,
+            354,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8268777937640697,
+          "anchor": 192,
+          "bounds": [
+            354,
+            3,
+            358,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8268777937640697,
+          "anchor": 192,
+          "bounds": [
+            712,
+            10,
+            351,
+            518
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8268777937640697,
+          "anchor": 192,
+          "bounds": [
+            1063,
+            3,
+            385,
+            525
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-17",
+      "raw": "assets-source/dialogue/reactions-17.png",
+      "rawSha256": "f05702a9fb46f39a100abcd5ee4a4929c63a0fd909b3a71254062d4d486176cc",
+      "output": "sprites/dialogue/reactions-17-81a3b7503d.webp",
+      "sha256": "81a3b7503d3754ec639096aa6ced5e3d7e6c57b81d664fb2e74ac4ed3b5770d5",
+      "bytes": 585162,
+      "actors": [
+        "magic-sakuya",
+        "dungeons2-lyria"
+      ],
+      "divider": 526,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8284026723236597,
+          "anchor": 192,
+          "bounds": [
+            8,
+            18,
+            360,
+            508
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8284026723236597,
+          "anchor": 192,
+          "bounds": [
+            368,
+            19,
+            374,
+            507
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8284026723236597,
+          "anchor": 192,
+          "bounds": [
+            742,
+            19,
+            369,
+            507
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8284026723236597,
+          "anchor": 192,
+          "bounds": [
+            1111,
+            19,
+            337,
+            507
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8326694313432259,
+          "anchor": 192,
+          "bounds": [
+            5,
+            0,
+            374,
+            560
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8326694313432259,
+          "anchor": 192,
+          "bounds": [
+            379,
+            0,
+            362,
+            551
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8326694313432259,
+          "anchor": 192,
+          "bounds": [
+            741,
+            0,
+            359,
+            553
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8326694313432259,
+          "anchor": 192,
+          "bounds": [
+            1100,
+            0,
+            348,
+            560
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-18",
+      "raw": "assets-source/dialogue/reactions-18.png",
+      "rawSha256": "6568f706281f91589b007dc988f163ffb99c40119d70576cfa75c936259a9a2d",
+      "output": "sprites/dialogue/reactions-18-6a320e93c3.webp",
+      "sha256": "6a320e93c3d579cb40505275ea97875d4b14149a53f3b8c5dc38e942dacda9d6",
+      "bytes": 593054,
+      "actors": [
+        "dungeons2-celis",
+        "dungeons2-flora"
+      ],
+      "divider": 546,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8962409353796089,
+          "anchor": 192,
+          "bounds": [
+            6,
+            12,
+            354,
+            534
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8962409353796089,
+          "anchor": 192,
+          "bounds": [
+            362,
+            11,
+            365,
+            535
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8962409353796089,
+          "anchor": 192,
+          "bounds": [
+            727,
+            16,
+            361,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8962409353796089,
+          "anchor": 192,
+          "bounds": [
+            1087,
+            12,
+            361,
+            534
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.707592036018185,
+          "anchor": 192,
+          "bounds": [
+            0,
+            0,
+            419,
+            540
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.707592036018185,
+          "anchor": 192,
+          "bounds": [
+            368,
+            0,
+            409,
+            540
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.707592036018185,
+          "anchor": 192,
+          "bounds": [
+            763,
+            0,
+            383,
+            540
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.707592036018185,
+          "anchor": 192,
+          "bounds": [
+            1096,
+            0,
+            352,
+            540
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-19",
+      "raw": "assets-source/dialogue/reactions-19.png",
+      "rawSha256": "59606130135700489b074f23c6d84e9cf8a4665df963d9d7f2c7e341db31ab8e",
+      "output": "sprites/dialogue/reactions-19-78a26383eb.webp",
+      "sha256": "78a26383eb3a0c73b78c1533799399bc7e7b9c5f8f0447359e84ff68dbb91292",
+      "bytes": 645918,
+      "actors": [
+        "dungeons2-noctia",
+        "dungeons2-aurene"
+      ],
+      "divider": 539,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8692762786982668,
+          "anchor": 192,
+          "bounds": [
+            6,
+            13,
+            366,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8692762786982668,
+          "anchor": 192,
+          "bounds": [
+            367,
+            15,
+            386,
+            522
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8692762786982668,
+          "anchor": 192,
+          "bounds": [
+            745,
+            13,
+            348,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8692762786982668,
+          "anchor": 192,
+          "bounds": [
+            1086,
+            17,
+            362,
+            522
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7400381456313462,
+          "anchor": 192,
+          "bounds": [
+            0,
+            0,
+            370,
+            534
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7400381456313462,
+          "anchor": 192,
+          "bounds": [
+            366,
+            2,
+            385,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7400381456313462,
+          "anchor": 192,
+          "bounds": [
+            750,
+            2,
+            339,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7400381456313462,
+          "anchor": 192,
+          "bounds": [
+            1087,
+            0,
+            361,
+            534
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-20",
+      "raw": "assets-source/dialogue/reactions-20.png",
+      "rawSha256": "a5400dea0e6047b6aae53d00c70b4b530b94f6c8d894b2946dd4f42f39f24ea0",
+      "output": "sprites/dialogue/reactions-20-07b2c87ec0.webp",
+      "sha256": "07b2c87ec0254055cf596494f106bec8d450eaa7586eba784c0a92f487f82aa0",
+      "bytes": 525314,
+      "actors": [
+        "dungeons2-ignis",
+        "dungeons2-leon"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7968052901530281,
+          "anchor": 192,
+          "bounds": [
+            10,
+            20,
+            341,
+            513
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7968052901530281,
+          "anchor": 192,
+          "bounds": [
+            354,
+            12,
+            384,
+            521
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7968052901530281,
+          "anchor": 192,
+          "bounds": [
+            747,
+            18,
+            348,
+            515
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7968052901530281,
+          "anchor": 192,
+          "bounds": [
+            1104,
+            14,
+            336,
+            519
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8296814437943557,
+          "anchor": 192,
+          "bounds": [
+            10,
+            6,
+            353,
+            526
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8296814437943557,
+          "anchor": 192,
+          "bounds": [
+            362,
+            3,
+            380,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8296814437943557,
+          "anchor": 192,
+          "bounds": [
+            741,
+            2,
+            353,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8296814437943557,
+          "anchor": 192,
+          "bounds": [
+            1102,
+            3,
+            345,
+            529
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-21",
+      "raw": "assets-source/dialogue/reactions-21.png",
+      "rawSha256": "70c71eec4b1555fff76bb6edf09adffe9b098044689686c38a782a19f9281046",
+      "output": "sprites/dialogue/reactions-21-1dc219b047.webp",
+      "sha256": "1dc219b047e21ef0b4b38bbee7a355c2850432963ac685c3dfbce7bc8e19f468",
+      "bytes": 461790,
+      "actors": [
+        "dungeons2-orion",
+        "dungeons2-leif"
+      ],
+      "divider": 541,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8266287938238849,
+          "anchor": 192,
+          "bounds": [
+            0,
+            21,
+            361,
+            514
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8266287938238849,
+          "anchor": 192,
+          "bounds": [
+            354,
+            16,
+            384,
+            519
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8266287938238849,
+          "anchor": 192,
+          "bounds": [
+            763,
+            21,
+            339,
+            515
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8266287938238849,
+          "anchor": 192,
+          "bounds": [
+            1118,
+            21,
+            330,
+            515
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8269349082283844,
+          "anchor": 192,
+          "bounds": [
+            20,
+            2,
+            342,
+            535
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8269349082283844,
+          "anchor": 192,
+          "bounds": [
+            343,
+            2,
+            404,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8269349082283844,
+          "anchor": 192,
+          "bounds": [
+            766,
+            1,
+            340,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8269349082283844,
+          "anchor": 192,
+          "bounds": [
+            1126,
+            5,
+            321,
+            532
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-22",
+      "raw": "assets-source/dialogue/reactions-22.png",
+      "rawSha256": "254ed7c5b8f277ed221c5e42f9daf478ac15c4812a738a1c53c69d7ba0bfee96",
+      "output": "sprites/dialogue/reactions-22-0691cd9e39.webp",
+      "sha256": "0691cd9e3979edefcdffbf3300a7242f853888f7957b4a28d770f239b862a784",
+      "bytes": 555072,
+      "actors": [
+        "chronicle-story",
+        "chronicle-bare"
+      ],
+      "divider": 537,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.835201497917656,
+          "anchor": 192,
+          "bounds": [
+            7,
+            10,
+            364,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.835201497917656,
+          "anchor": 192,
+          "bounds": [
+            362,
+            9,
+            369,
+            525
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.835201497917656,
+          "anchor": 192,
+          "bounds": [
+            725,
+            8,
+            369,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.835201497917656,
+          "anchor": 192,
+          "bounds": [
+            1091,
+            9,
+            357,
+            528
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7704068540281624,
+          "anchor": 192,
+          "bounds": [
+            0,
+            6,
+            369,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7704068540281624,
+          "anchor": 192,
+          "bounds": [
+            357,
+            0,
+            404,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7704068540281624,
+          "anchor": 192,
+          "bounds": [
+            747,
+            0,
+            377,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7704068540281624,
+          "anchor": 192,
+          "bounds": [
+            1114,
+            0,
+            334,
+            536
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-23",
+      "raw": "assets-source/dialogue/reactions-23.png",
+      "rawSha256": "09905029db247a8ef03ade9e137a0e45b8d8bc189d74fdba038f52208038f00a",
+      "output": "sprites/dialogue/reactions-23-76a707a0b6.webp",
+      "sha256": "76a707a0b6878e74cf565aff43459c2405ca9b28d413f2564502965f5a2596e8",
+      "bytes": 555370,
+      "actors": [
+        "chronicle-mystery",
+        "chronicle-traps"
+      ],
+      "divider": 539,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8417434378724359,
+          "anchor": 192,
+          "bounds": [
+            0,
+            7,
+            373,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8417434378724359,
+          "anchor": 192,
+          "bounds": [
+            357,
+            6,
+            367,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8417434378724359,
+          "anchor": 192,
+          "bounds": [
+            728,
+            6,
+            358,
+            533
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8417434378724359,
+          "anchor": 192,
+          "bounds": [
+            1090,
+            4,
+            357,
+            535
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7090018095704382,
+          "anchor": 192,
+          "bounds": [
+            16,
+            2,
+            370,
+            535
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7090018095704382,
+          "anchor": 192,
+          "bounds": [
+            355,
+            4,
+            411,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7090018095704382,
+          "anchor": 192,
+          "bounds": [
+            757,
+            0,
+            370,
+            537
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7090018095704382,
+          "anchor": 192,
+          "bounds": [
+            1116,
+            0,
+            331,
+            537
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-24",
+      "raw": "assets-source/dialogue/reactions-24.png",
+      "rawSha256": "8f9e7c1c70b50aa53235d0fffc229ba0760bf509b5229e5e061c1473dee2a6e1",
+      "output": "sprites/dialogue/reactions-24-702d8b00e8.webp",
+      "sha256": "702d8b00e8802ed82a1db3c67bf9d3197900f53b98ee82368672e959e370b939",
+      "bytes": 543620,
+      "actors": [
+        "chronicle-no_gear",
+        "chronicle-cards"
+      ],
+      "divider": 537,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7589812920530823,
+          "anchor": 192,
+          "bounds": [
+            0,
+            9,
+            389,
+            525
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7589812920530823,
+          "anchor": 192,
+          "bounds": [
+            369,
+            7,
+            403,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7589812920530823,
+          "anchor": 192,
+          "bounds": [
+            761,
+            12,
+            348,
+            522
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7589812920530823,
+          "anchor": 192,
+          "bounds": [
+            1115,
+            8,
+            333,
+            526
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7900025485453723,
+          "anchor": 192,
+          "bounds": [
+            0,
+            6,
+            376,
+            543
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7900025485453723,
+          "anchor": 192,
+          "bounds": [
+            335,
+            0,
+            436,
+            549
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7900025485453723,
+          "anchor": 192,
+          "bounds": [
+            762,
+            7,
+            347,
+            542
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7900025485453723,
+          "anchor": 192,
+          "bounds": [
+            1112,
+            6,
+            336,
+            543
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-25",
+      "raw": "assets-source/dialogue/reactions-25.png",
+      "rawSha256": "7ec8dfa5692565426900300d7319ad4d4123987f9e0fe1e05ea4de2ee3d2d487",
+      "output": "sprites/dialogue/reactions-25-16cf0522b2.webp",
+      "sha256": "16cf0522b22c2d9b5b010b5d14ec3facc582780083e45d44aad55455433e7bb3",
+      "bytes": 527534,
+      "actors": [
+        "chronicle-rescue",
+        "chronicle-puzzle"
+      ],
+      "divider": 531,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7696063435191659,
+          "anchor": 192,
+          "bounds": [
+            10,
+            6,
+            354,
+            518
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7696063435191659,
+          "anchor": 192,
+          "bounds": [
+            357,
+            8,
+            387,
+            517
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7696063435191659,
+          "anchor": 192,
+          "bounds": [
+            744,
+            8,
+            359,
+            517
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7696063435191659,
+          "anchor": 192,
+          "bounds": [
+            1102,
+            6,
+            346,
+            519
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8280305432276748,
+          "anchor": 192,
+          "bounds": [
+            0,
+            1,
+            362,
+            554
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8280305432276748,
+          "anchor": 192,
+          "bounds": [
+            337,
+            1,
+            405,
+            554
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8280305432276748,
+          "anchor": 192,
+          "bounds": [
+            739,
+            5,
+            359,
+            550
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8280305432276748,
+          "anchor": 192,
+          "bounds": [
+            1102,
+            0,
+            346,
+            555
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-26",
+      "raw": "assets-source/dialogue/reactions-26.png",
+      "rawSha256": "62ed38e21a7c6941d8df676ee8aaad4a2d3b933c12a09e733e39bd410323ce2e",
+      "output": "sprites/dialogue/reactions-26-d565d1530d.webp",
+      "sha256": "d565d1530dce51a92d0991b5a572300aac4d855d33310d8f6c29aafc8d1a9cdd",
+      "bytes": 671730,
+      "actors": [
+        "chronicle-verdant",
+        "chronicle-glacier"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8350637357885127,
+          "anchor": 192,
+          "bounds": [
+            0,
+            10,
+            388,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8350637357885127,
+          "anchor": 192,
+          "bounds": [
+            381,
+            10,
+            372,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8350637357885127,
+          "anchor": 192,
+          "bounds": [
+            753,
+            11,
+            350,
+            525
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8350637357885127,
+          "anchor": 192,
+          "bounds": [
+            1102,
+            10,
+            339,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8793122193624059,
+          "anchor": 192,
+          "bounds": [
+            3,
+            2,
+            385,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8793122193624059,
+          "anchor": 192,
+          "bounds": [
+            374,
+            1,
+            384,
+            534
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8793122193624059,
+          "anchor": 192,
+          "bounds": [
+            755,
+            2,
+            347,
+            541
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8793122193624059,
+          "anchor": 192,
+          "bounds": [
+            1101,
+            2,
+            347,
+            541
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-27",
+      "raw": "assets-source/dialogue/reactions-27.png",
+      "rawSha256": "eff38ad77f1cd283ca3c907b19664edb14b0404f7dfa27dd3e833ad727d7bd91",
+      "output": "sprites/dialogue/reactions-27-2babd50da9.webp",
+      "sha256": "2babd50da9b620e7c296356a8f1327b3cab606e2e01728167657a41a4d750c8b",
+      "bytes": 528838,
+      "actors": [
+        "chronicle-tidal",
+        "chronicle-archive"
+      ],
+      "divider": 541,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7451539572534938,
+          "anchor": 192,
+          "bounds": [
+            0,
+            3,
+            386,
+            536
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7451539572534938,
+          "anchor": 192,
+          "bounds": [
+            335,
+            3,
+            422,
+            538
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7451539572534938,
+          "anchor": 192,
+          "bounds": [
+            752,
+            3,
+            375,
+            536
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7451539572534938,
+          "anchor": 192,
+          "bounds": [
+            1123,
+            4,
+            325,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7973551932833296,
+          "anchor": 192,
+          "bounds": [
+            0,
+            2,
+            351,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7973551932833296,
+          "anchor": 192,
+          "bounds": [
+            339,
+            0,
+            401,
+            545
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7973551932833296,
+          "anchor": 192,
+          "bounds": [
+            723,
+            3,
+            365,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7973551932833296,
+          "anchor": 192,
+          "bounds": [
+            1095,
+            4,
+            353,
+            531
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-28",
+      "raw": "assets-source/dialogue/reactions-28.png",
+      "rawSha256": "85d60308ba18aad9cc7a0d9eb7df35f441f50ea01b112ff4bf8ef63a4b838e82",
+      "output": "sprites/dialogue/reactions-28-075fa6ef51.webp",
+      "sha256": "075fa6ef51ea2a6783af8bfc6a917f70d6cf588ef08d8c52c411a675f9fa9a0e",
+      "bytes": 577780,
+      "actors": [
+        "chronicle-foundry",
+        "chronicle-mirror"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8075315989944315,
+          "anchor": 192,
+          "bounds": [
+            3,
+            13,
+            353,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8075315989944315,
+          "anchor": 192,
+          "bounds": [
+            354,
+            13,
+            380,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8075315989944315,
+          "anchor": 192,
+          "bounds": [
+            733,
+            13,
+            371,
+            524
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8075315989944315,
+          "anchor": 192,
+          "bounds": [
+            1101,
+            13,
+            347,
+            524
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8456285641901019,
+          "anchor": 192,
+          "bounds": [
+            0,
+            2,
+            380,
+            531
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8456285641901019,
+          "anchor": 192,
+          "bounds": [
+            378,
+            2,
+            365,
+            531
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8456285641901019,
+          "anchor": 192,
+          "bounds": [
+            743,
+            2,
+            353,
+            531
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8456285641901019,
+          "anchor": 192,
+          "bounds": [
+            1096,
+            1,
+            352,
+            532
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-29",
+      "raw": "assets-source/dialogue/reactions-29.png",
+      "rawSha256": "dd38ea000f1a8c56e66d6962c11a3534b3dfed8792d10dc7df7731ecf324a302",
+      "output": "sprites/dialogue/reactions-29-af4b21c8cb.webp",
+      "sha256": "af4b21c8cb09dd45a933d3aed92bc993156d03fef4e241b466cd1369b30d29a8",
+      "bytes": 536248,
+      "actors": [
+        "chronicle-clockwork",
+        "chronicle-storm"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7922471556020755,
+          "anchor": 192,
+          "bounds": [
+            23,
+            22,
+            385,
+            521
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7922471556020755,
+          "anchor": 192,
+          "bounds": [
+            361,
+            21,
+            407,
+            519
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7922471556020755,
+          "anchor": 192,
+          "bounds": [
+            765,
+            22,
+            344,
+            519
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7922471556020755,
+          "anchor": 192,
+          "bounds": [
+            1098,
+            19,
+            350,
+            522
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7981309252882802,
+          "anchor": 192,
+          "bounds": [
+            4,
+            0,
+            405,
+            543
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7981309252882802,
+          "anchor": 192,
+          "bounds": [
+            407,
+            7,
+            364,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7981309252882802,
+          "anchor": 192,
+          "bounds": [
+            771,
+            4,
+            336,
+            539
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7981309252882802,
+          "anchor": 192,
+          "bounds": [
+            1107,
+            4,
+            341,
+            539
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-30",
+      "raw": "assets-source/dialogue/reactions-30.png",
+      "rawSha256": "3dcb31ed3ea5d50553b6b7489e66b54d4ffb537df4c8503204771d16c970a10b",
+      "output": "sprites/dialogue/reactions-30-bcea919d1c.webp",
+      "sha256": "bcea919d1c9a8aea0a722bf0c5c5b8ba7683f12410baa0596900c175910e7f0a",
+      "bytes": 654360,
+      "actors": [
+        "chronicle-abyss",
+        "chronicle-void"
+      ],
+      "divider": 536,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8293948315243869,
+          "anchor": 192,
+          "bounds": [
+            10,
+            10,
+            355,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8293948315243869,
+          "anchor": 192,
+          "bounds": [
+            363,
+            6,
+            369,
+            530
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8293948315243869,
+          "anchor": 192,
+          "bounds": [
+            730,
+            11,
+            366,
+            525
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8293948315243869,
+          "anchor": 192,
+          "bounds": [
+            1095,
+            5,
+            347,
+            531
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8612250322592384,
+          "anchor": 192,
+          "bounds": [
+            1,
+            0,
+            363,
+            536
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8612250322592384,
+          "anchor": 192,
+          "bounds": [
+            357,
+            0,
+            400,
+            537
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8612250322592384,
+          "anchor": 192,
+          "bounds": [
+            748,
+            0,
+            361,
+            537
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8612250322592384,
+          "anchor": 192,
+          "bounds": [
+            1096,
+            0,
+            352,
+            535
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-31",
+      "raw": "assets-source/dialogue/reactions-31.png",
+      "rawSha256": "e5dfecbacc905f6a6b5e63e791d4e6dabfc31c68ad90ef9c470e3495ffb27750",
+      "output": "sprites/dialogue/reactions-31-15bc109fc6.webp",
+      "sha256": "15bc109fc67cbbada37ef0c2abc9c2b42bee20f98a7ee9d74daed7a076a91e9a",
+      "bytes": 609322,
+      "actors": [
+        "chronicle-chronicle",
+        "chronicle-constellation"
+      ],
+      "divider": 547,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8832106499820752,
+          "anchor": 192,
+          "bounds": [
+            18,
+            16,
+            370,
+            531
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8832106499820752,
+          "anchor": 192,
+          "bounds": [
+            387,
+            14,
+            369,
+            533
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8832106499820752,
+          "anchor": 192,
+          "bounds": [
+            766,
+            14,
+            327,
+            533
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8832106499820752,
+          "anchor": 192,
+          "bounds": [
+            1100,
+            14,
+            335,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7876996567641517,
+          "anchor": 192,
+          "bounds": [
+            19,
+            0,
+            352,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7876996567641517,
+          "anchor": 192,
+          "bounds": [
+            360,
+            0,
+            397,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7876996567641517,
+          "anchor": 192,
+          "bounds": [
+            753,
+            0,
+            341,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7876996567641517,
+          "anchor": 192,
+          "bounds": [
+            1093,
+            0,
+            343,
+            525
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-32",
+      "raw": "assets-source/dialogue/reactions-32.png",
+      "rawSha256": "fdb1a2b2458d5ed18ce3bafa3c0f93111ec24595390f4d95aaa72ac86493bcd3",
+      "output": "sprites/dialogue/reactions-32-11ae9e3fca.webp",
+      "sha256": "11ae9e3fca96701cd696b78e1b550d9d5e49e01cfb5831510d8049250a02740f",
+      "bytes": 494294,
+      "actors": [
+        "chronicle-dragon",
+        "chronicle-infinite"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8063835384675844,
+          "anchor": 192,
+          "bounds": [
+            10,
+            12,
+            395,
+            525
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8063835384675844,
+          "anchor": 192,
+          "bounds": [
+            405,
+            18,
+            348,
+            518
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8063835384675844,
+          "anchor": 192,
+          "bounds": [
+            753,
+            15,
+            354,
+            521
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8063835384675844,
+          "anchor": 192,
+          "bounds": [
+            1107,
+            13,
+            333,
+            523
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7118556665268382,
+          "anchor": 192,
+          "bounds": [
+            0,
+            3,
+            415,
+            540
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7118556665268382,
+          "anchor": 192,
+          "bounds": [
+            415,
+            4,
+            364,
+            539
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7118556665268382,
+          "anchor": 192,
+          "bounds": [
+            779,
+            4,
+            369,
+            539
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7118556665268382,
+          "anchor": 192,
+          "bounds": [
+            1148,
+            3,
+            300,
+            540
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-33",
+      "raw": "assets-source/dialogue/reactions-33.png",
+      "rawSha256": "3f5920cc9db3f2faa0203c8756cd1fd7a270945c3b7664f76148d47f27ecdd90",
+      "output": "sprites/dialogue/reactions-33-d38658b813.webp",
+      "sha256": "d38658b81374f5f27b08e84c050e4cc2f66fac46344fb714bce3125d2672f092",
+      "bytes": 490798,
+      "actors": [
+        "star-nagi",
+        "star-towa"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.7422047729505217,
+          "anchor": 192,
+          "bounds": [
+            10,
+            0,
+            356,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.7422047729505217,
+          "anchor": 192,
+          "bounds": [
+            330,
+            4,
+            424,
+            522
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.7422047729505217,
+          "anchor": 192,
+          "bounds": [
+            759,
+            0,
+            347,
+            526
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.7422047729505217,
+          "anchor": 192,
+          "bounds": [
+            1114,
+            0,
+            334,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8042335549578511,
+          "anchor": 192,
+          "bounds": [
+            0,
+            8,
+            364,
+            535
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8042335549578511,
+          "anchor": 192,
+          "bounds": [
+            365,
+            15,
+            383,
+            528
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8042335549578511,
+          "anchor": 192,
+          "bounds": [
+            748,
+            14,
+            346,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8042335549578511,
+          "anchor": 192,
+          "bounds": [
+            1102,
+            16,
+            346,
+            527
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-34",
+      "raw": "assets-source/dialogue/reactions-34.png",
+      "rawSha256": "c64ec7881e5f2d5e1a6e30858a1af1316daa0d29f1e1c41ddc880e64b1640ecf",
+      "output": "sprites/dialogue/reactions-34-f8e90a83e3.webp",
+      "sha256": "f8e90a83e303837bc715ed69293d90318af304851f6f73dd69e6954dea6be339",
+      "bytes": 448890,
+      "actors": [
+        "star-mio",
+        "star-sena"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8219750435358322,
+          "anchor": 192,
+          "bounds": [
+            13,
+            20,
+            356,
+            516
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8219750435358322,
+          "anchor": 192,
+          "bounds": [
+            370,
+            18,
+            368,
+            518
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8219750435358322,
+          "anchor": 192,
+          "bounds": [
+            750,
+            24,
+            356,
+            512
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8219750435358322,
+          "anchor": 192,
+          "bounds": [
+            1113,
+            22,
+            329,
+            514
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.7462105158800846,
+          "anchor": 192,
+          "bounds": [
+            28,
+            4,
+            372,
+            526
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.7462105158800846,
+          "anchor": 192,
+          "bounds": [
+            341,
+            5,
+            434,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.7462105158800846,
+          "anchor": 192,
+          "bounds": [
+            769,
+            7,
+            372,
+            522
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.7462105158800846,
+          "anchor": 192,
+          "bounds": [
+            1152,
+            3,
+            296,
+            525
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-35",
+      "raw": "assets-source/dialogue/reactions-35.png",
+      "rawSha256": "7aeab5b2ddace9511fb2f080bcb050f08e1e7fe3fa3caa323eda838b6db1a8d4",
+      "output": "sprites/dialogue/reactions-35-56084ca08e.webp",
+      "sha256": "56084ca08e804cd888d44cab01dc7e61e31030686d0d3eadd3259c9aff132bc6",
+      "bytes": 609788,
+      "actors": [
+        "star-luca",
+        "star-yui"
+      ],
+      "divider": 537,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.903949027453423,
+          "anchor": 192,
+          "bounds": [
+            0,
+            16,
+            366,
+            504
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.903949027453423,
+          "anchor": 192,
+          "bounds": [
+            361,
+            13,
+            380,
+            507
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.903949027453423,
+          "anchor": 192,
+          "bounds": [
+            738,
+            15,
+            360,
+            505
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.903949027453423,
+          "anchor": 192,
+          "bounds": [
+            1088,
+            12,
+            360,
+            508
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8363654815694628,
+          "anchor": 192,
+          "bounds": [
+            0,
+            2,
+            382,
+            522
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8363654815694628,
+          "anchor": 192,
+          "bounds": [
+            367,
+            3,
+            371,
+            521
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8363654815694628,
+          "anchor": 192,
+          "bounds": [
+            741,
+            1,
+            357,
+            523
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8363654815694628,
+          "anchor": 192,
+          "bounds": [
+            1097,
+            1,
+            351,
+            523
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-36",
+      "raw": "assets-source/dialogue/reactions-36.png",
+      "rawSha256": "89d7bce94cc1081805a559640ef8b3a66c8658f7189f62ba49f1a2488857eda0",
+      "output": "sprites/dialogue/reactions-36-0ad5d0e46f.webp",
+      "sha256": "0ad5d0e46fdbe4942a820732814ce729e4031cc45f7ebd2cca26e0673726a730",
+      "bytes": 592802,
+      "actors": [
+        "star-or",
+        "star-rito"
+      ],
+      "divider": 534,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.8371803194493599,
+          "anchor": 192,
+          "bounds": [
+            11,
+            16,
+            366,
+            511
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.8371803194493599,
+          "anchor": 192,
+          "bounds": [
+            368,
+            12,
+            375,
+            516
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.8371803194493599,
+          "anchor": 192,
+          "bounds": [
+            723,
+            15,
+            373,
+            512
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.8371803194493599,
+          "anchor": 192,
+          "bounds": [
+            1088,
+            12,
+            360,
+            515
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8550968247563564,
+          "anchor": 192,
+          "bounds": [
+            8,
+            3,
+            372,
+            532
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8550968247563564,
+          "anchor": 192,
+          "bounds": [
+            364,
+            2,
+            391,
+            533
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8550968247563564,
+          "anchor": 192,
+          "bounds": [
+            750,
+            8,
+            357,
+            527
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8550968247563564,
+          "anchor": 192,
+          "bounds": [
+            1107,
+            3,
+            341,
+            532
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-37",
+      "raw": "assets-source/dialogue/reactions-37.png",
+      "rawSha256": "8d65f7d9b3594ce0bc2e660578cb2527da402fc01f5d472caf3e5d9cc5cfb307",
+      "output": "sprites/dialogue/reactions-37-4ddd8d485b.webp",
+      "sha256": "4ddd8d485bc51f23d85cec658e33c67c049b299467fe85d6381e8214e0d31ec5",
+      "bytes": 598322,
+      "actors": [
+        "star-ema",
+        "star-other"
+      ],
+      "divider": 543,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.838405047083003,
+          "anchor": 192,
+          "bounds": [
+            8,
+            10,
+            343,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.838405047083003,
+          "anchor": 192,
+          "bounds": [
+            373,
+            10,
+            345,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.838405047083003,
+          "anchor": 192,
+          "bounds": [
+            733,
+            10,
+            327,
+            527
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.838405047083003,
+          "anchor": 192,
+          "bounds": [
+            1096,
+            12,
+            337,
+            525
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.9121736519126985,
+          "anchor": 192,
+          "bounds": [
+            15,
+            2,
+            337,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.9121736519126985,
+          "anchor": 192,
+          "bounds": [
+            371,
+            1,
+            360,
+            530
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.9121736519126985,
+          "anchor": 192,
+          "bounds": [
+            754,
+            2,
+            329,
+            529
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.9121736519126985,
+          "anchor": 192,
+          "bounds": [
+            1123,
+            2,
+            318,
+            529
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reactions-38",
+      "raw": "assets-source/dialogue/reactions-38.png",
+      "rawSha256": "f0f365ae3e566f7db7c00fe1b75bb9914778dd2915ab966d9868073b4e85c732",
+      "output": "sprites/dialogue/reactions-38-0b16002454.webp",
+      "sha256": "0b16002454fd39a7301d80098019824bb2ac431494cf85bf67be6ff516364474",
+      "bytes": 524294,
+      "actors": [
+        "town-teacher",
+        "town-principal"
+      ],
+      "divider": 536,
+      "frames": [
+        {
+          "row": 0,
+          "column": 0,
+          "scale": 0.882567359503412,
+          "anchor": 192,
+          "bounds": [
+            46,
+            14,
+            319,
+            518
+          ]
+        },
+        {
+          "row": 0,
+          "column": 1,
+          "scale": 0.882567359503412,
+          "anchor": 192,
+          "bounds": [
+            370,
+            14,
+            367,
+            522
+          ]
+        },
+        {
+          "row": 0,
+          "column": 2,
+          "scale": 0.882567359503412,
+          "anchor": 192,
+          "bounds": [
+            767,
+            18,
+            314,
+            513
+          ]
+        },
+        {
+          "row": 0,
+          "column": 3,
+          "scale": 0.882567359503412,
+          "anchor": 192,
+          "bounds": [
+            1118,
+            17,
+            309,
+            514
+          ]
+        },
+        {
+          "row": 1,
+          "column": 0,
+          "scale": 0.8898301756370792,
+          "anchor": 192,
+          "bounds": [
+            10,
+            3,
+            363,
+            535
+          ]
+        },
+        {
+          "row": 1,
+          "column": 1,
+          "scale": 0.8898301756370792,
+          "anchor": 192,
+          "bounds": [
+            375,
+            0,
+            386,
+            538
+          ]
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "scale": 0.8898301756370792,
+          "anchor": 192,
+          "bounds": [
+            760,
+            4,
+            335,
+            534
+          ]
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "scale": 0.8898301756370792,
+          "anchor": 192,
+          "bounds": [
+            1104,
+            2,
+            344,
+            536
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+/** Wait for both generated portrait atlases and the conversation scenery. */
+export async function waitForConversationArt(page){
+ await page.locator('[data-conversation-stage]').waitFor();
+ await page.locator('[data-conversation-stage]').evaluate(async root=>{
+  const background=getComputedStyle(root.querySelector('.conversation-landscape')).backgroundImage;
+  const sources=[...root.querySelectorAll('.conversation-portrait image')].map(el=>el.getAttribute('href'));
+  if(background.startsWith('url("'))sources.push(background.slice(5,-2));
+  if(sources.length!==3)throw Error('Conversation art is missing');
+  await Promise.all(sources.map(async src=>{const image=new Image();image.src=src;await image.decode();}));
+ });
+}

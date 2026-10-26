@@ -18,6 +18,7 @@ import './adventure.css';
 export default function SchoolAdventurePanel({adventure:a,inventory,player,itemName,gameOver,gameClear,controlsHost}:{adventure:SchoolAdventure;inventory:any[];player:any;itemName:(item:any)=>string;gameOver:boolean;gameClear:boolean;controlsHost?:HTMLElement|null}){
 
  const s=a.state,l=a.text,bag=inventory.find(i=>i.id===a.container);
+ const conversation=a.panel==='CHRONICLE'||a.panel==='STUDENT_STORY'||['FACILITY_GUIDE','FACILITY_SCOUT','FACILITY_STORY_GUIDE'].includes(a.panel||'');
  const back=()=>a.resume();
  const status=(i:any)=>`${i.wet?l(' 💧ぬれ',' 💧Wet'):''}${i.cursed?l(' 🔒封印',' 🔒Sealed'):''}${i.blessed?l(' ⭐応援',' ⭐Blessed'):''}${i.capacity?` [${i.contents?.length||0}/${i.capacity}]`:''}`;
  const controls=(compact:boolean)=>(<div className={`school-adventure-controls ${a.series===1?'d1-mastery-controls':''}`}>
@@ -35,7 +36,8 @@ export default function SchoolAdventurePanel({adventure:a,inventory,player,itemN
    {!a.dojoRun&&gameClear&&<button onClick={()=>a.returnHome()}>{l('学校前へ帰る','Return to school base')}</button>}
   </div>
   {a.panel==='NOTE'&&createPortal(<AdventureNotebook adventure={a} inventory={inventory} player={player} itemName={itemName}/>,document.body)}
-  {a.panel&&a.panel!=='NOTE'&&<div className="school-adventure-backdrop" onKeyDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}>
+  {conversation&&(a.panel==='CHRONICLE'&&a.chronicleScene?<ChronicleScene scene={a.chronicleScene} line={a.chronicleLine} text={l} advance={a.chronicleAdvance} choose={a.chronicleChoose} replay={a.chronicleIsReplay} onClose={back} closeLabel={s.place==='HOME'||s.place==='RELAY'?l('町へ戻る','Back to town'):l('冒険に戻る','Resume')}/>:a.panel==='STUDENT_STORY'?<StudentStory adventure={a} onClose={back}/>:<JourneyFacility adventure={a} inventory={inventory} player={player} itemName={itemName} onClose={back}/>)}
+  {a.panel&&a.panel!=='NOTE'&&!conversation&&<div className="school-adventure-backdrop" onKeyDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}>
    <section className={`school-adventure-panel ${a.panel==='MASTERY'?'d1-mastery-panel':a.panel==='STUDENT_STORY'?l('旅の物語','Journey story'):a.panel==='CHRONICLE'?'chronicle-panel':a.panel.startsWith('FACILITY_')?'journey-facility':''}`} role="dialog" aria-modal="true" aria-label={a.panel==='MASTERY'?l('技と武器熟練度','Techniques and weapon mastery'):a.panel==='CHRONICLE'?l('迷宮の年代記','Dungeon chronicle'):l('学校前と冒険手帳','School base and notebook')}>
     <header><h2>{a.panel==='MASTERY'?l('技と武器熟練度','Techniques and weapon mastery'):a.panel==='CHRONICLE'?l('迷宮の年代記','Dungeon chronicle'):a.panel==='STUDENT_STORY'?l('旅の物語','Journey story'):a.panel.startsWith('FACILITY_')?l(TOWN_BUILDINGS.find(v=>v.kind===a.panel!.replace('FACILITY_',''))?.name||'町の施設',TOWN_BUILDINGS.find(v=>v.kind===a.panel!.replace('FACILITY_',''))?.en||'Town facility'):(a.panel==='DOJO'||a.panel==='DOJO_PLAY')?l('学習ローグダンジョンズ道場','Dungeons dojo'):a.panel==='TOWN'?l('ダンジョン途中の町','Journey village'):a.panel==='RECORDS'?l('探検の記録','Adventure records'):a.panel==='BASE'?l('学校前の集合場所','School meeting point'):a.panel==='BAG'?bag?itemName(bag):l('容器','Container'):l('放課後の冒険手帳','After-school notebook')}</h2>{<button autoFocus={a.panel!=='STUDENT_STORY'&&a.panel!=='CHRONICLE'} onClick={back}>{s.place==='HOME'||s.place==='RELAY'?l('町へ戻る','Back to town'):l('冒険に戻る','Resume')}</button>}</header>
     <div className="school-adventure-body">

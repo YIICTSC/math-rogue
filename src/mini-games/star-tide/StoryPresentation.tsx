@@ -1,10 +1,14 @@
 import React,{useEffect,useState} from 'react';
-import {assetUrl} from '../../utils/assetPaths';
 import {playStarStory,stopStarVoice} from './voice';
-import './story.css';
+import ConversationStage from '../../components/dialogue/ConversationStage';
+import {starDialogue} from './conversation';
 export function StoryPresentation({title,art,lines,children,en=false,onExit,progress}:{title:string;art:string;lines:{id:string;speaker:string;text:string}[];children?:React.ReactNode;en?:boolean;onExit?:()=>void;progress?:{index:number;total:number}}){
  const [line,setLine]=useState(0),[playing,setPlaying]=useState(false),[replay,setReplay]=useState(0),current=lines[Math.min(line,lines.length-1)];
  useEffect(()=>{setLine(0);},[art,title]);
  useEffect(()=>{let live=true;setPlaying(true);void playStarStory(current.id).finally(()=>{if(live)setPlaying(false);});return()=>{live=false;stopStarVoice();};},[current.id,replay]);
- return <div className="st-story-backdrop" role="dialog" aria-modal="true" aria-label={title} data-gamepad-initial-scope="star-tide-story" onKeyDown={e=>{e.stopPropagation();if(e.key==='Escape'&&onExit){e.preventDefault();onExit();}if(e.key==='Tab'){const buttons=[...e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')],first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}}><section className="st-story-card"><figure><img src={assetUrl(art)} alt=""/><figcaption><small>STAR TIDE · {en?'STORY':'物語'}</small><h2>{title}</h2></figcaption></figure><div className="st-story-copy"><div className="st-story-meta"><strong>{current.speaker}</strong><span>{progress?.index??line+1} / {progress?.total??lines.length}</span></div><p role="status" aria-live="polite">{current.text}</p><div className="st-story-footer"><button onClick={()=>setReplay(v=>v+1)} aria-label={en?'Replay voice':'もう一度聞く'}>{playing?'◖':'▷'} {en?'Voice':'ボイス'}</button>{line<lines.length-1?<button autoFocus onClick={()=>setLine(v=>v+1)}>{en?'Next':'次のことば'} →</button>:<div className="st-story-choices">{children}</div>}{onExit&&<button data-gamepad-back onClick={onExit}>{en?'Close':'閉じる'}</button>}</div></div></section></div>;
+ const chapter=Number(art.match(/events\/(\d+)\.webp/)?.[1]||0),actors=starDialogue(chapter,current.id,en);
+ return <ConversationStage className="st-story-backdrop" theme="sea" title={title} eyebrow={`STAR TIDE · ${en?'STORY':'物語'}`} background={art} {...actors} speaker={current.speaker} text={current.text} lineKey={current.id+':'+line} progress={`${progress?.index??line+1} / ${progress?.total??lines.length}`} onClose={onExit} closeLabel={en?'Close':'閉じる'}>
+ <button onClick={()=>setReplay(v=>v+1)} aria-label={en?'Replay voice':'もう一度聞く'}>{playing?'◖':'▷'} {en?'Voice':'ボイス'}</button>
+ {line<lines.length-1?<button autoFocus data-gamepad-initial-choice className="conversation-primary" onClick={()=>setLine(v=>v+1)}>{en?'Next':'次のことば'} →</button>:<div className="st-dialogue-choices">{children}</div>}
+ </ConversationStage>;
 }

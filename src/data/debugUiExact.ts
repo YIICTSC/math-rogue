@@ -32,6 +32,7 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "記憶のナギ": "Nagi's memory",
   ...TENNIS_ENGLISH,
   ...DODGEBALL_ENGLISH,
   "技一覧": "Techniques",
@@ -391,6 +392,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "記憶のナギ": "きおくのナギ",
   ...TENNIS_HIRAGANA,
   ...DODGEBALL_HIRAGANA,
   "技一覧": "わざいちらん",

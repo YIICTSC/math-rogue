@@ -1,3 +1,5 @@
+import ConversationStage from '../dialogue/ConversationStage';
+import {chronicleHero,chronicleRoute} from './chronicles/story';
 import {SupplyCollection,type SupplyChoice} from './SupplyCollection';
 import {studentSpriteUrl,studentDirection} from './student/sprites';
 import {HeroActionSprite} from './dungeons2/HeroActionSprite';
@@ -10,7 +12,7 @@ import React,{useEffect,useRef,useState} from 'react';
 import {assetUrl} from '../../utils/assetPaths';
 import {PROTAGONISTS,CHAPTER_LABELS,studentChapter,type StudentChapter} from './student/content';
 import type {SchoolAdventure} from './useSchoolAdventure';
-import {townBuildings,ROUTE_ORDER} from './journey';
+import {townBuildings,ROUTE_ORDER,classmateFor} from './journey';
 import {MODES} from './adventure';
 import {SchoolSupplyIcon,TravelerCompanionIcon} from './sprites';
 import './journey.css';
@@ -36,11 +38,11 @@ export function WandererTown({adventure:a,onTitle}:{adventure:SchoolAdventure;on
  <div className="town-board-hint" aria-live="polite">{nearest?`${l(nearest.name,nearest.en)} · ${l('A／↑：話す・入る','A / ↑: Talk / Enter')}`:l('十字キー：移動　A：話す・入る　B：冒険手帳','D-pad: Walk · A: Talk / Enter · B: Notebook')}</div></section>;
 
 }
-export function JourneyFacility({adventure:a,inventory,player,itemName}:{adventure:SchoolAdventure;inventory:any[];player:any;itemName:(i:any)=>string}){
+export function JourneyFacility({adventure:a,inventory,player,itemName,onClose}:{adventure:SchoolAdventure;inventory:any[];player:any;itemName:(i:any)=>string;onClose?:()=>void}){
  const l=a.text,kind=a.panel?.replace('FACILITY_','');const [selling,setSelling]=useState(false);
  const choice=(i:any,actions:SupplyChoice['actions'],extra:Partial<SupplyChoice>={}):SupplyChoice=>({id:i.id||i.type,type:a.known(i)?i.type:'UNKNOWN',name:itemName(i),description:a.known(i)?l(i.desc||'',i.englishDesc||i.desc||''):l('まだ識別されていない道具です。','This supply has not been identified.'),actions,...extra});
  if(kind==='GATE')return <div className="route-list"><p>{l('踏破した迷宮の先に、新しいルートが開かれます。','Clearing a labyrinth opens the next route.')}</p>{a.state.place==='RELAY'?<button className="primary" onClick={a.leaveRelay}>{l('算数の試練を越えて次の階へ','Take the math trial and continue')}</button>:[...ROUTE_ORDER,...availableExpeditions(a.series).map(v=>v.id),...(a.base.rescue?['RESCUE' as const]:[])].map(mode=>{const m=MODES.find(v=>v.id===mode)!;return <button key={mode} disabled={!a.modeUnlocked(mode)} onClick={()=>a.departRoute(mode)}><strong>{a.modeUnlocked(mode)?'◇':'🔒'} {l(m.ja,m.en)}</strong><small>{l(m.desc,m.english)} · {m.floors}F</small></button>;})}</div>;
- if(kind==='GUIDE'||kind==='SCOUT'||kind==='STORY_GUIDE')return <div className="town-conversation">{a.townLines(kind).map((line,i)=><p key={i}>{l(line[0],line[1])}</p>)}</div>;
+ if(kind==='GUIDE'||kind==='SCOUT'||kind==='STORY_GUIDE')return <TownConversation key={kind} adventure={a} kind={kind} onClose={onClose}/>;
  if(kind==='WAREHOUSE')return <><p>{l('持ち物と倉庫の間で道具を移します。装備中の道具は先に外してください。','Move supplies between your pack and storehouse. Unequip worn items first.')}</p><SupplyCollection choices={[
  ...inventory.map(i=>choice(i,[{label:l('預ける','Store'),run:()=>a.storeSupply(i.id)}],{id:'pack-'+i.id,badge:l('持ち物','Pack')})),
  ...a.base.warehouse.map(i=>choice(i,[{label:l('取り出す','Take out'),disabled:inventory.length>=20,run:()=>a.withdrawSupply(i.id)}],{id:'warehouse-'+i.id,badge:l('倉庫','Storehouse')}))]}/></>;
@@ -49,3 +51,10 @@ export function JourneyFacility({adventure:a,inventory,player,itemName}:{adventu
 </>:<button className="primary" disabled={Boolean((kind==='SMITH'||kind==='FESTIVAL')&&a.state.townUsed?.includes(kind))} onClick={()=>a.townAction(kind||'INN')}>{kind==='INN'?a.state.place==='HOME'?l('旅立ちの宿で休む：無料','Rest before departure: free'):l('泊まる・全回復：80','Stay and fully recover: 80'):kind==='SMITH'?l('装備の手入れ：150','Improve equipment: 150'):l('お祭りの景品：50','Festival prize: 50')}</button>}</>;
 }
 export {AdventureNotebook as CompactNotebook} from './AdventureNotebook';
+
+function TownConversation({adventure:a,kind,onClose}:{adventure:SchoolAdventure;kind:string;onClose?:()=>void}){
+ const [line,setLine]=useState(0),l=a.text,lines=a.townLines(kind),current=lines[Math.min(line,lines.length-1)],hero=chronicleHero(a.hero.id),building=a.townBuildings.find(v=>v.kind===kind),npcId=kind==='STORY_GUIDE'?'town-teacher':kind==='SCOUT'?classmateFor(a.hero.id).id:'elementary-dodgeball';
+ return <ConversationStage title={l(building?.name||'旅の案内人',building?.en||'Travel guide')} eyebrow={a.state.place==='HOME'?l('はじまりの町','Firstlight Town'):l('旅人の中継町','Wayfarer relay town')} background={`sprites/dungeons-chronicles/background/${chronicleRoute(a.state.mode).id.toLowerCase()}.webp`} left={{id:a.hero.id,name:l(a.hero.name,hero.en),reaction:line===lines.length-1?'resolve':'neutral'}} right={{id:npcId,name:l(building?.name||'旅の案内人',building?.en||'Travel guide'),reaction:line===0?'joy':line===lines.length-1?'resolve':'neutral'}} active="right" speaker={l(building?.name||'旅の案内人',building?.en||'Travel guide')} text={l(current[0],current[1])} lineKey={`${kind}:${line}`} progress={`${line+1} / ${lines.length}`} onClose={onClose||a.resume} closeLabel={l('町へ戻る','Back to town')}>
+ {line<lines.length-1?<button autoFocus data-gamepad-initial-choice className="conversation-primary" onClick={()=>setLine(v=>v+1)}>{l('次のことば','Next')} →</button>:<button autoFocus data-gamepad-initial-choice className="conversation-primary" onClick={onClose||a.resume}>{l('町へ戻る','Back to town')}</button>}
+ </ConversationStage>;
+}

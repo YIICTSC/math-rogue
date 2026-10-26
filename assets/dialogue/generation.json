@@ -1,0 +1,553 @@
+{
+  "generator": "ImageGen",
+  "created": "2026-10-26",
+  "template": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.",
+  "records": [
+    {
+      "id": "reactions-33",
+      "actors": [
+        "star-nagi",
+        "star-towa"
+      ],
+      "original": "/workspace/generated_images/exec-19eeb988-f6d4-4da7-b3ad-095e0b83bbbd.png",
+      "raw": "assets-source/dialogue/reactions-33.png",
+      "references": [
+        "public/sprites/star-tide/nagi-journal.webp",
+        "assets-source/star-tide/towa-reference.png"
+      ]
+    },
+    {
+      "id": "reactions-03",
+      "actors": [
+        "elementary-chef",
+        "elementary-gardener"
+      ],
+      "original": "/workspace/generated_images/exec-f55d1aef-22dd-4b3e-8886-477bd2eb110d.png",
+      "raw": "assets-source/dialogue/reactions-03.png",
+      "references": [
+        "assets/dialogue/references/elementary-chef.png",
+        "assets/dialogue/references/elementary-gardener.png"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 給食当番リーダー / the lunch leader. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait.\nCHARACTER B: 園芸委員 / the garden monitor. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait."
+    },
+    {
+      "id": "reactions-00",
+      "actors": [
+        "elementary-warrior",
+        "elementary-caretaker"
+      ],
+      "original": "/workspace/generated_images/exec-cb6c7c11-5562-4f29-87ad-eb66d9f74aab.png",
+      "raw": "assets-source/dialogue/reactions-00.png",
+      "references": [
+        "assets/dialogue/references/elementary-warrior.png",
+        "assets/dialogue/references/elementary-caretaker.png"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: わんぱく小学生 / the bold schoolchild. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait.\nCHARACTER B: 飼育委員 / the animal keeper. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait."
+    },
+    {
+      "id": "reactions-02",
+      "actors": [
+        "elementary-bard",
+        "elementary-librarian"
+      ],
+      "original": "/workspace/generated_images/exec-aaacc6e2-2f49-4f97-b85e-ed417f9ace39.png",
+      "raw": "assets-source/dialogue/reactions-02.png",
+      "references": [
+        "assets/dialogue/references/elementary-bard.png",
+        "assets/dialogue/references/elementary-librarian.png"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 放送委員 / the radio monitor. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait.\nCHARACTER B: 図書委員 / the library monitor. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait."
+    },
+    {
+      "id": "reactions-01",
+      "actors": [
+        "elementary-assassin",
+        "elementary-dodgeball"
+      ],
+      "original": "/workspace/generated_images/exec-fdeb3eb9-bf3a-4680-96ec-cdf8e46035ff.png",
+      "raw": "assets-source/dialogue/reactions-01.png",
+      "references": [
+        "assets/dialogue/references/elementary-assassin.png",
+        "assets/dialogue/references/elementary-dodgeball.png"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 転校生 / the new pupil. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait.\nCHARACTER B: ドッジボールのエース / the dodgeball ace. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait."
+    },
+    {
+      "id": "reactions-04",
+      "actors": [
+        "elementary-mage",
+        "high-school-warrior"
+      ],
+      "original": "/workspace/generated_images/exec-0910499d-86fc-4e3b-806a-b8bea55c89cd.png",
+      "raw": "assets-source/dialogue/reactions-04.png",
+      "references": [
+        "assets/dialogue/references/elementary-mage.png",
+        "public/sprites/high-school/characters/0.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 理科クラブ部長 / the science-club leader. This is a fully clothed schoolchild about 9–12 years old. Preserve the age, cap/hair, clothing and colors; interpret the small pixel reference as a detailed matching pixel portrait.\nCHARACTER B: 反逆の高校生 / the rebel student. "
+    },
+    {
+      "id": "reactions-05",
+      "actors": [
+        "high-school-caretaker",
+        "high-school-assassin"
+      ],
+      "original": "/workspace/generated_images/exec-05b9c319-03aa-46c8-b3a3-a331afdf85b3.png",
+      "raw": "assets-source/dialogue/reactions-05.png",
+      "references": [
+        "public/sprites/high-school/characters/1.webp",
+        "public/sprites/high-school/characters/2.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 生物部の先輩 / the biology senior. \nCHARACTER B: 謎めく転入生 / the mysterious transfer student. "
+    },
+    {
+      "id": "reactions-06",
+      "actors": [
+        "high-school-mage",
+        "high-school-dodgeball"
+      ],
+      "original": "/workspace/generated_images/exec-fa2242b4-18d8-4712-99d1-29ca699c1721.png",
+      "raw": "assets-source/dialogue/reactions-06.png",
+      "references": [
+        "public/sprites/high-school/characters/3.webp",
+        "public/sprites/high-school/characters/4.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 化学研究会長 / the chemistry researcher. \nCHARACTER B: バスケ部エース / the basketball ace. "
+    },
+    {
+      "id": "reactions-07",
+      "actors": [
+        "high-school-bard",
+        "high-school-librarian"
+      ],
+      "original": "/workspace/generated_images/exec-df7a3de5-5657-4458-9dfb-8f4e995014b9.png",
+      "raw": "assets-source/dialogue/reactions-07.png",
+      "references": [
+        "public/sprites/high-school/characters/5.webp",
+        "public/sprites/high-school/characters/6.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 放送部ディレクター / the broadcast director. \nCHARACTER B: 文芸部書記 / the literary secretary. "
+    },
+    {
+      "id": "reactions-08",
+      "actors": [
+        "high-school-chef",
+        "high-school-gardener"
+      ],
+      "original": "/workspace/generated_images/exec-7f59391a-68c3-4bab-924e-16246a6ad5b7.png",
+      "raw": "assets-source/dialogue/reactions-08.png",
+      "references": [
+        "public/sprites/high-school/characters/7.webp",
+        "public/sprites/high-school/characters/8.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 学食の料理長 / the cafeteria chef. \nCHARACTER B: 園芸部部長 / the horticulture captain. "
+    },
+    {
+      "id": "reactions-09",
+      "actors": [
+        "magic-akari",
+        "magic-shizuku"
+      ],
+      "original": "/workspace/generated_images/exec-f6b5f5f7-342d-4991-a390-376291ac666d.png",
+      "raw": "assets-source/dialogue/reactions-09.png",
+      "references": [
+        "public/sprites/magic/characters/heroine-01-before.webp",
+        "public/sprites/magic/characters/heroine-02-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 星宮あかり / Akari Hoshimiya. \nCHARACTER B: 水城しずく / Shizuku Mizuki. "
+    },
+    {
+      "id": "reactions-10",
+      "actors": [
+        "magic-hiyori",
+        "magic-tsubasa"
+      ],
+      "original": "/workspace/generated_images/exec-d09d66e3-1b2e-414a-95e3-005e407a68d8.png",
+      "raw": "assets-source/dialogue/reactions-10.png",
+      "references": [
+        "public/sprites/magic/characters/heroine-03-before.webp",
+        "public/sprites/magic/characters/heroine-04-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 花咲ひより / Hiyori Hanasaki. \nCHARACTER B: 火神つばさ / Tsubasa Kagami. "
+    },
+    {
+      "id": "reactions-11",
+      "actors": [
+        "magic-rei",
+        "magic-madoka"
+      ],
+      "original": "/workspace/generated_images/exec-0c5e388e-b5bf-4b05-9504-125fa2b0929b.png",
+      "raw": "assets-source/dialogue/reactions-11.png",
+      "references": [
+        "public/sprites/magic/characters/heroine-05-before.webp",
+        "public/sprites/magic/characters/heroine-06-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 黒羽れい / Rei Kuroha. \nCHARACTER B: 翠川まどか / Madoka Midorikawa. "
+    },
+    {
+      "id": "reactions-12",
+      "actors": [
+        "magic-koharu",
+        "magic-mirai"
+      ],
+      "original": "/workspace/generated_images/exec-9998a8bd-277c-48a7-ac19-5bd2c047d01a.png",
+      "raw": "assets-source/dialogue/reactions-12.png",
+      "references": [
+        "public/sprites/magic/characters/heroine-07-before.webp",
+        "public/sprites/magic/characters/heroine-08-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 風森こはる / Koharu. \nCHARACTER B: 紫藤みらい / Mirai. "
+    },
+    {
+      "id": "reactions-13",
+      "actors": [
+        "magic-sera",
+        "magic-ren"
+      ],
+      "original": "/workspace/generated_images/exec-748f73fc-6081-4c0e-b890-2d20e765f170.png",
+      "raw": "assets-source/dialogue/reactions-13.png",
+      "references": [
+        "public/sprites/magic/characters/heroine-09-before.webp",
+        "public/sprites/magic/male-characters/ren-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 白峰セラ / Sera. \nCHARACTER B: 朝霧 蓮 / Ren. "
+    },
+    {
+      "id": "reactions-14",
+      "actors": [
+        "magic-soma",
+        "magic-minato"
+      ],
+      "original": "/workspace/generated_images/exec-adcf63ff-2aad-416a-9761-a345720bea1b.png",
+      "raw": "assets-source/dialogue/reactions-14.png",
+      "references": [
+        "public/sprites/magic/male-characters/soma-before.webp",
+        "public/sprites/magic/male-characters/minato-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 御影 颯真 / Soma. \nCHARACTER B: 白石 湊 / Minato. "
+    },
+    {
+      "id": "reactions-15",
+      "actors": [
+        "magic-riku",
+        "magic-yamato"
+      ],
+      "original": "/workspace/generated_images/exec-c46b3c20-4391-4e8c-9584-d02d492c3f97.png",
+      "raw": "assets-source/dialogue/reactions-15.png",
+      "references": [
+        "public/sprites/magic/male-characters/riku-before.webp",
+        "public/sprites/magic/male-characters/yamato-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 天音 理玖 / Riku. \nCHARACTER B: 黒瀬 大和 / Yamato. "
+    },
+    {
+      "id": "reactions-16",
+      "actors": [
+        "magic-leon",
+        "magic-elliot"
+      ],
+      "original": "/workspace/generated_images/exec-1d3b04c8-0bfd-4f4d-86e3-53320f5c8e96.png",
+      "raw": "assets-source/dialogue/reactions-16.png",
+      "references": [
+        "public/sprites/magic/male-characters/leon-before.webp",
+        "public/sprites/magic/male-characters/elliot-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 神代 レオン / Leon of the Academy. \nCHARACTER B: エリオット・ノクス / Elliot. "
+    },
+    {
+      "id": "reactions-17",
+      "actors": [
+        "magic-sakuya",
+        "dungeons2-lyria"
+      ],
+      "original": "/workspace/generated_images/exec-27cbea02-0ff1-4986-92aa-62d40d4a8fc6.png",
+      "raw": "assets-source/dialogue/reactions-17.png",
+      "references": [
+        "public/sprites/magic/male-characters/sakuya-before.webp",
+        "public/sprites/dungeons2/lyria-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 九条 朔夜 / Sakuya. \nCHARACTER B: リリア / Lyria. "
+    },
+    {
+      "id": "reactions-18",
+      "actors": [
+        "dungeons2-celis",
+        "dungeons2-flora"
+      ],
+      "original": "/workspace/generated_images/exec-34616289-5213-40fe-a3ef-c4adcb36844a.png",
+      "raw": "assets-source/dialogue/reactions-18.png",
+      "references": [
+        "public/sprites/dungeons2/celis-before.webp",
+        "public/sprites/dungeons2/flora-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: セリス / Celis. \nCHARACTER B: フローラ / Flora. "
+    },
+    {
+      "id": "reactions-19",
+      "actors": [
+        "dungeons2-noctia",
+        "dungeons2-aurene"
+      ],
+      "original": "/workspace/generated_images/exec-d666b924-b42e-4806-b0f9-f60f3676288d.png",
+      "raw": "assets-source/dialogue/reactions-19.png",
+      "references": [
+        "public/sprites/dungeons2/noctia-before.webp",
+        "public/sprites/dungeons2/aurene-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: ノクティア / Noctia. \nCHARACTER B: オーレネ / Aurene. "
+    },
+    {
+      "id": "reactions-20",
+      "actors": [
+        "dungeons2-ignis",
+        "dungeons2-leon"
+      ],
+      "original": "/workspace/generated_images/exec-fe224f25-bf88-445f-8624-7c39a9229926.png",
+      "raw": "assets-source/dialogue/reactions-20.png",
+      "references": [
+        "public/sprites/dungeons2/ignis-before.webp",
+        "public/sprites/dungeons2/leon-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: イグニス / Ignis. \nCHARACTER B: レオン / Leon. "
+    },
+    {
+      "id": "reactions-21",
+      "actors": [
+        "dungeons2-orion",
+        "dungeons2-leif"
+      ],
+      "original": "/workspace/generated_images/exec-ac8f8cc7-450f-4911-b110-8f529b19abf0.png",
+      "raw": "assets-source/dialogue/reactions-21.png",
+      "references": [
+        "public/sprites/dungeons2/orion-before.webp",
+        "public/sprites/dungeons2/leif-before.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: オリオン / Orion. \nCHARACTER B: リーフ / Leif. "
+    },
+    {
+      "id": "reactions-22",
+      "actors": [
+        "chronicle-story",
+        "chronicle-bare"
+      ],
+      "original": "/workspace/generated_images/exec-25ecc65d-a42c-425b-8056-f8fc6cbd5192.png",
+      "raw": "assets-source/dialogue/reactions-22.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/story.webp",
+        "public/sprites/dungeons-chronicles/npc/bare.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 校門の書記シオン / Shion, the Gate Scribe. \nCHARACTER B: 無銭の王女リタ / Rita, the Penniless Princess. "
+    },
+    {
+      "id": "reactions-23",
+      "actors": [
+        "chronicle-mystery",
+        "chronicle-traps"
+      ],
+      "original": "/workspace/generated_images/exec-7eeeaacf-b9ff-479a-97ca-82370a28a8b0.png",
+      "raw": "assets-source/dialogue/reactions-23.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/mystery.webp",
+        "public/sprites/dungeons-chronicles/npc/traps.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 薬名売りのネム / Nemu, the Seller of Names. \nCHARACTER B: からくり師コハク / Kohaku, the Mechanist. "
+    },
+    {
+      "id": "reactions-24",
+      "actors": [
+        "chronicle-no_gear",
+        "chronicle-cards"
+      ],
+      "original": "/workspace/generated_images/exec-04621c22-b2e1-449f-8c66-cbc32deda423.png",
+      "raw": "assets-source/dialogue/reactions-24.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/no_gear.webp",
+        "public/sprites/dungeons-chronicles/npc/cards.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 鎧脱ぎのエダ / Eda, the Unarmored Knight. \nCHARACTER B: 白札のディーラー・イオ / Io, the Blank-card Dealer. "
+    },
+    {
+      "id": "reactions-25",
+      "actors": [
+        "chronicle-rescue",
+        "chronicle-puzzle"
+      ],
+      "original": "/workspace/generated_images/exec-3c59e04a-8769-4944-a745-5b64e8b83e0f.png",
+      "raw": "assets-source/dialogue/reactions-25.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/rescue.webp",
+        "public/sprites/dungeons-chronicles/npc/puzzle.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 拾得物係ルゥ / Ruu, Keeper of Lost Things. \nCHARACTER B: 八手の囚人ハチ / Hachi, the Eight-move Prisoner. "
+    },
+    {
+      "id": "reactions-26",
+      "actors": [
+        "chronicle-verdant",
+        "chronicle-glacier"
+      ],
+      "original": "/workspace/generated_images/exec-339babc3-cf9a-4a99-8e09-53cc5d517b08.png",
+      "raw": "assets-source/dialogue/reactions-26.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/verdant.webp",
+        "public/sprites/dungeons-chronicles/npc/glacier.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 雨税吏モス / Moss, the Rain-tax Collector. \nCHARACTER B: 凍結判事ユキネ / Yukine, the Frozen Judge. "
+    },
+    {
+      "id": "reactions-27",
+      "actors": [
+        "chronicle-tidal",
+        "chronicle-archive"
+      ],
+      "original": "/workspace/generated_images/exec-a6119acd-40c9-41c3-886c-8b899b73678f.png",
+      "raw": "assets-source/dialogue/reactions-27.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/tidal.webp",
+        "public/sprites/dungeons-chronicles/npc/archive.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 謝罪船長ナギ / Nagi, Captain of Apologies. \nCHARACTER B: 余白司書サーラ / Sara, Librarian of Margins. "
+    },
+    {
+      "id": "reactions-28",
+      "actors": [
+        "chronicle-foundry",
+        "chronicle-mirror"
+      ],
+      "original": "/workspace/generated_images/exec-ba512f4e-17b7-4ca9-b761-065800a9bd5a.png",
+      "raw": "assets-source/dialogue/reactions-28.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/foundry.webp",
+        "public/sprites/dungeons-chronicles/npc/mirror.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 恐れ鋳工ガンゼ / Ganze, the Fear Founder. \nCHARACTER B: 裏市長ミオラ / Miora, Mayor of Reflections. "
+    },
+    {
+      "id": "reactions-29",
+      "actors": [
+        "chronicle-clockwork",
+        "chronicle-storm"
+      ],
+      "original": "/workspace/generated_images/exec-33915907-5d36-4944-9a20-cf93fd173d7c.png",
+      "raw": "assets-source/dialogue/reactions-29.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/clockwork.webp",
+        "public/sprites/dungeons-chronicles/npc/storm.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 十二時の借金取りトキ / Toki, Collector of the Twelfth Hour. \nCHARACTER B: 雷廷書官ライカ / Raika, Clerk of the Thunder Court. "
+    },
+    {
+      "id": "reactions-30",
+      "actors": [
+        "chronicle-abyss",
+        "chronicle-void"
+      ],
+      "original": "/workspace/generated_images/exec-2f4ef16b-c7a3-4f5d-8eb4-aa5958c6de02.png",
+      "raw": "assets-source/dialogue/reactions-30.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/abyss.webp",
+        "public/sprites/dungeons-chronicles/npc/void.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 明日葬の学生オルカ / Orca, Student of Tomorrow’s Funeral. \nCHARACTER B: 別れ園丁セツナ / Setsuna, Gardener of Farewells. "
+    },
+    {
+      "id": "reactions-31",
+      "actors": [
+        "chronicle-chronicle",
+        "chronicle-constellation"
+      ],
+      "original": "/workspace/generated_images/exec-c80bd12d-6929-4327-b4c9-31569a5fa51e.png",
+      "raw": "assets-source/dialogue/reactions-31.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/chronicle.webp",
+        "public/sprites/dungeons-chronicles/npc/constellation.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 記憶看護師メメ / Meme, Nurse of Memories. \nCHARACTER B: 星索引ミネル / Minel, Indexer of Stars. "
+    },
+    {
+      "id": "reactions-32",
+      "actors": [
+        "chronicle-dragon",
+        "chronicle-infinite"
+      ],
+      "original": "/workspace/generated_images/exec-9729e73a-a19f-426a-b0a5-3f6f9788ae2a.png",
+      "raw": "assets-source/dialogue/reactions-32.png",
+      "references": [
+        "public/sprites/dungeons-chronicles/npc/dragon.webp",
+        "public/sprites/dungeons-chronicles/npc/infinite.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 落第竜の用務員ヴァル / Val, Janitor of Failed Dragons. \nCHARACTER B: 九十九門の門衛ヨル / Yoru, Keeper of Ninety-nine Gates. "
+    },
+    {
+      "id": "reactions-34",
+      "actors": [
+        "star-mio",
+        "star-sena"
+      ],
+      "original": "/workspace/generated_images/exec-3a60cfb3-40aa-43b1-b844-4d74c90c5bf8.png",
+      "raw": "assets-source/dialogue/reactions-34.png",
+      "references": [
+        "assets-source/star-tide/mio-reference.png",
+        "assets-source/star-tide/sena-reference.png"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: ミオ / Mio. \nCHARACTER B: セナ / Sena. "
+    },
+    {
+      "id": "reactions-35",
+      "actors": [
+        "star-luca",
+        "star-yui"
+      ],
+      "original": "/workspace/generated_images/exec-aadbeb73-3e44-4026-95c1-e41b1357950c.png",
+      "raw": "assets-source/dialogue/reactions-35.png",
+      "references": [
+        "public/sprites/star-tide/events/2.webp",
+        "public/sprites/star-tide/events/4.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: ルカ / Luca. Reference is a story scene with Nagi and another person: use ONLY the other named person, NOT the short navy-haired red-scarf Nagi. Preserve the NPC’s face and costume.\nCHARACTER B: ユイ / Yui. Reference is a story scene with Nagi and another person: use ONLY the other named person, NOT the short navy-haired red-scarf Nagi. Preserve the NPC’s face and costume."
+    },
+    {
+      "id": "reactions-36",
+      "actors": [
+        "star-or",
+        "star-rito"
+      ],
+      "original": "/workspace/generated_images/exec-2c6a69e0-e6fc-4e88-aae6-84eaacdeaf53.png",
+      "raw": "assets-source/dialogue/reactions-36.png",
+      "references": [
+        "public/sprites/star-tide/events/5.webp",
+        "public/sprites/star-tide/events/7.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: オル / Or. Reference is a story scene with Nagi and another person: use ONLY the other named person, NOT the short navy-haired red-scarf Nagi. Preserve the NPC’s face and costume.\nCHARACTER B: リト / Rito. Reference is a story scene with Nagi and another person: use ONLY the other named person, NOT the short navy-haired red-scarf Nagi. Preserve the NPC’s face and costume."
+    },
+    {
+      "id": "reactions-37",
+      "actors": [
+        "star-ema",
+        "star-other"
+      ],
+      "original": "/workspace/generated_images/exec-289e6a65-39b7-4eec-a3f3-6bc0290a5e62.png",
+      "raw": "assets-source/dialogue/reactions-37.png",
+      "references": [
+        "public/sprites/star-tide/events/8.webp",
+        "public/sprites/star-tide/events/10.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: エマ / Ema. Reference is a story scene with Nagi and another person: use ONLY the other named person, NOT the short navy-haired red-scarf Nagi. Preserve the NPC’s face and costume.\nCHARACTER B: もう一人の航海士 / The other navigator. Reference is a story scene with Nagi and another person: use ONLY the other named person, NOT the short navy-haired red-scarf Nagi. Preserve the NPC’s face and costume."
+    },
+    {
+      "id": "reactions-38",
+      "actors": [
+        "town-teacher",
+        "town-principal"
+      ],
+      "original": "/workspace/generated_images/exec-74f0500b-7851-4034-981e-0233562bb847.png",
+      "raw": "assets-source/dialogue/reactions-38.png",
+      "references": [
+        "public/sprites/high-school/characters/6.webp",
+        "public/sprites/dungeons-chronicles/npc/archive.webp"
+      ],
+      "prompt": "Production game conversation REACTION ATLAS, EXACTLY 4 COLUMNS x 2 ROWS (8 equal slots), transparent background, high resolution 4:3 sheet ideally 2048x1536. Each slot is a 2:3 standing portrait from head to mid-thigh. Keep generous transparent padding inside EACH slot; absolutely no body, fingers or accessories crossing into a neighbouring slot. TOP ROW: character A from reference 1. BOTTOM ROW: character B from reference 2. Reference 3 is ONLY a style guide: do NOT put the style-guide character in this atlas. Preserve each person's exact face, hairstyle, hair/eye colors, age, gender, distinctive outfit and accessories from their OWN reference. Use polished detailed 2D pixel-illustration portraits, crisp painted pixel clusters and expressive anime faces, not 3D voxel cubes. All figures face THREE-QUARTER LEFT and look to an off-screen conversation partner on the left. Four columns in EACH row, LEFT TO RIGHT: NEUTRAL attentive listening, JOY warm smile with modest welcoming hand gesture, CONCERN worried or sad thoughtful with hand to chest, RESOLVE quietly determined with confident gaze and a modest fist or open hand. Make facial expressions and hand/shoulder poses visibly different. Keep outfit, silhouette, anatomy, body scale, head size, head position and common bottom anchor stable through all four reactions. Fully clothed, appropriate ages, no fighting, no attack effects, no floating symbols or dramatic extra lights. NO text, labels, numbers, grid lines, UI, borders, scenery, ground or cast shadows. Exactly these two characters in four reactions each.\nCHARACTER A: 旅の先生 / Traveling teacher. Create an original mature female traveling schoolteacher, about 35 years old, brown hair in a loose braid, warm brown eyes, ivory blouse, forest-green cardigan, long brown skirt, a leather satchel and a closed atlas. Use the reference only for the game art style; this is an adult mentor, not the student in the reference.\nCHARACTER B: 校長先生 / The principal. Create an original kindly elderly male headmaster, about 60 years old, short silver hair and small round glasses, green-and-gold academic coat over a beige waistcoat, holding a small brass school bell. Use the reference only as game art style; do NOT duplicate the female librarian."
+    }
+  ],
+  "failures": []
+}

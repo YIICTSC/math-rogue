@@ -8,6 +8,10 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "generate:dialogue-art": "node scripts/normalize-dialogue-art.mjs",
+    "test:dialogue-art": "node scripts/test-dialogue-art.mjs",
+    "preview:dialogue-art": "node scripts/preview-dialogue-art.mjs",
+    "test:dialogue:browser": "node scripts/test-dialogue-browser.mjs",
     "test:minigame-hero-media": "node scripts/generate-minigame-media-index.mjs --check && node scripts/test-minigame-hero-media.mjs",
     "generate:minigame-media-index": "node scripts/generate-minigame-media-index.mjs",
     "test:card-club": "node scripts/test-card-club.mjs && node scripts/test-card-club-extensions.mjs && node scripts/test-card-club-popular.mjs && node scripts/test-card-club-world.mjs && node scripts/test-card-club-traditional.mjs && node scripts/test-card-club-presentation.mjs && node scripts/test-card-club-diversity.mjs && node scripts/test-card-club-voices.mjs && node scripts/test-card-club-rule-audit.mjs",

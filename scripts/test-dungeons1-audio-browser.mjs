@@ -78,7 +78,7 @@ else root.render(params.has('hook')?<HookProbe/>:<Game languageMode="ENGLISH" on
     await page.waitForTimeout(100);
     const voices = await page.evaluate(() => window.__calls.filter(c=>c[0].includes('VoiceFile')));
     assert.equal(voices.length, hero.startsWith('high-school-') || hero.startsWith('magic-') || hero.startsWith('dungeons2-') ? 0 : 1);
-    assert(await page.locator('.chronicle-dialogue').innerText());
+    assert(await page.locator('.conversation-script').innerText());
   }
   await page.goto(base + '?sceneHero=high-school-warrior&npc=1');await page.waitForFunction(() => window.__calls.some(c=>c[0]==='playDungeonChronicleVoiceFile'));
   assert((await page.evaluate(() => window.__calls)).some(c=>c[1].startsWith('npc-')&&c[2]==='reveal'));

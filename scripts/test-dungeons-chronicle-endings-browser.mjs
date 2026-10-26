@@ -1,3 +1,4 @@
+import {waitForConversationArt} from './helpers/dialogue.mjs';
 const series=Number(process.env.SERIES||(process.argv.includes('--series=2')?2:1));
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -22,9 +23,9 @@ try{
  for(const route of routes.filter(r=>series===2||r.series===1))for(const branch of ['release','accord','defy']){
   await page.evaluate(({mode,branch})=>{const a=window.__adventure,b=window.__bridge;const snapshot=a.snapshot();Object.assign(snapshot,{mode,place:'DUNGEON',returned:false,rescued:false,floor:99,rescueTarget:99,pendingStory:undefined,storySeen:[1,5,10,15,20,21],town:false,scene:undefined,chronicle:{version:1,mode,heroId:a.hero.id,seen:[0,1,2],choices:{0:branch,1:branch,2:branch}}});b.setGameClear(false);a.restore(snapshot,99);}, {mode:route.id,branch});
   await page.waitForFunction(()=>!window.__bridge.gameClear);await page.evaluate(()=>window.__bridge.setGameClear(true));await page.getByRole('button',{name:'Talk with the NPC about the ending',exact:true}).click();await page.waitForFunction(()=>window.__adventure.chronicleScene?.ending);
-  assert.equal(await page.evaluate(()=>window.__adventure.state.chronicle.ending),branch);assert.equal(await page.locator('.chronicle-copy h3').innerText(),route.endings.find(e=>e.id===branch).title[1]);await page.locator('.chronicle-background').evaluate(e=>e.decode());await page.locator('.chronicle-npc').evaluate(e=>e.decode());assert.equal(await page.locator('.chronicle-background').evaluate(e=>getComputedStyle(e).filter),'none');
+  assert.equal(await page.evaluate(()=>window.__adventure.state.chronicle.ending),branch);assert.equal(await page.locator('.conversation-header h2').innerText(),route.endings.find(e=>e.id===branch).title[1]);await waitForConversationArt(page);assert.equal(await page.locator('.conversation-portrait image').first().evaluate(el=>getComputedStyle(el).filter),'none');
   const clears=await page.evaluate(()=>window.__adventure.base.clears[window.__adventure.state.mode]);
-  for(let i=0;i<6;i++)await page.locator('.chronicle-copy>button').click();await page.locator('.wanderer-town').waitFor();assert.equal(await page.evaluate(()=>window.__adventure.base.clears[window.__adventure.state.mode]),clears);tested++;
+  for(let i=0;i<6;i++)await page.locator('.dialogue-chronicle .conversation-actions>button').click();await page.locator('.wanderer-town').waitFor();assert.equal(await page.evaluate(()=>window.__adventure.base.clears[window.__adventure.state.mode]),clears);tested++;
  }
  assert.equal(await page.evaluate(()=>window.__adventure.base.chronicleRecords.length),tested);assert.deepEqual(errors,[]);console.log('PASS: series '+series+' '+tested+' real ending completions across every available route, full-color generated art and no duplicate rewards.');
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}
