@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createServer} from 'vite';
-const server=await createServer({server:{middlewareMode:true},logLevel:'error'});
+const server=await createServer({optimizeDeps:{noDiscovery:true},server:{middlewareMode:true},logLevel:'error'});
 const originalImage=globalThis.Image;
 const originalPerformance=globalThis.performance;
 let now=1000;
@@ -35,6 +35,7 @@ try {
  for(const path of ['sprites/dungeons2/lyria-directions.webp','sprites/dungeons2/animations/lyria.webp','sfx/dungeons2-voices/lyria/attack.ogg','sfx/card-club-voices/magic-akari/start.ogg']) {
   assert.ok([...manifest.images,...manifest.audio].includes(path),path);
  }
+ for(const hero of ['nagi','mio','sena'])for(const suffix of ['', '-vertical'])assert(manifest.images.includes(`sprites/star-tide/hero-${hero}${suffix}.webp`));
  const {MEDIA_ENGLISH,MEDIA_HIRAGANA}=await server.ssrLoadModule('/src/components/miniGameMediaCopy.ts');
  assert.deepEqual(Object.keys(MEDIA_ENGLISH).sort(),Object.keys(MEDIA_HIRAGANA).sort());
  console.log(`PASS: 126 action-to-idle transitions, 18 forms; ${manifest.images.length} images, ${manifest.audio.length} voice files; translation parity`);

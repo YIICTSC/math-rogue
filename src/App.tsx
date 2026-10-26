@@ -19154,6 +19154,8 @@ const App: React.FC = () => {
         GameScreen.MINI_GAME_SCHOOL_TRPG,
         GameScreen.MINI_GAME_CRANE,
         GameScreen.MINI_GAME_GAKUROGEAR,
+        // Star Tide sizes its field and reserves its own mobile control insets.
+        GameScreen.MINI_GAME_STAR_TIDE,
     ].includes(gameState.screen);
 
     return (

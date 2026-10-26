@@ -169,7 +169,7 @@
     "test:dungeons1:mastery:browser": "node scripts/test-dungeons1-mastery-browser.mjs && node scripts/test-dungeons1-technique-audio-browser.mjs && node scripts/test-dungeons1-martial-3d.mjs",
     "test:star-tide": "node scripts/test-star-tide.mjs && node scripts/test-star-tide-campaign.mjs && node scripts/test-star-tide-wild.mjs",
     "test:star-tide:browser": "node scripts/test-star-tide-browser.mjs",
-    "test:star-tide:assets": "node scripts/test-star-tide-assets.mjs"
+    "test:star-tide:assets": "node scripts/test-star-tide-assets.mjs && node scripts/test-star-tide-graphics.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

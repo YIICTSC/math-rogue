@@ -19,7 +19,7 @@ const gameImages: Record<string,RegExp> = {
  POKER:/sprites\/after-school-poker\/portraits\//,
  CARD_CLUB:/sprites\/after-school-poker\/portraits\//,
  KOCHO:/sprites\/(kocho\/(original|rebel|akari|super-)|kocho-hero-actions-)/,
- STAR_TIDE:/sprites\/star-tide\/atlas/,
+ STAR_TIDE:/sprites\/star-tide\/(?:atlas|hero-)/,
  PAPER_PLANE:/sprites\/paper-plane\/pilots/,
  GAKURO:/sprites\/(gakuro-vr|gakurogear)\//,
  SCHOOL_TRPG:/sprites\/school-trpg\//,
@@ -47,6 +47,7 @@ export function mediaGrid(path:string): [number,number] {
  if (/wandering-student\/|dungeons2\/.*-directions\.|go-home-dash\/heroes\//.test(path)) return [4,2];
  if (/go-home-dash\/slides\//.test(path)) return [2,1];
  if (/after-school-poker\/portraits\//.test(path)) return [6,1];
+ if (/star-tide\/hero-/.test(path)) return [6,/-vertical\./.test(path)?4:8];
  if (/star-tide\/atlas/.test(path)) return [8,8];
  if (/kocho-hero-actions-/.test(path)) return [5,5];
  return [1,1];
