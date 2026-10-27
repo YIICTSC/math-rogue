@@ -10,7 +10,7 @@ export default function SportsCharacterPreview({sport,avatar,label}:{sport:Pract
  const canvas=useRef<HTMLCanvasElement>(null),appearance=useRef(avatar);appearance.current=avatar;
  const[failed,setFailed]=useState(false);
  useEffect(()=>{
-  const el=canvas.current!,assets=createGolferAssets(),rig=assets.create(appearance.current,true),scene=new T.Scene();
+  const el=canvas.current!,assets=createGolferAssets(),rig=assets.create(appearance.current,true,sport),scene=new T.Scene();
   const owned:(T.BufferGeometry|T.Material)[]=[],equipment=new T.Group(),camera=new T.PerspectiveCamera(38,1,.1,40);
   let renderer:T.WebGLRenderer|undefined,frame=0,dead=false,observer:ResizeObserver|undefined;
   const geo=<G extends T.BufferGeometry>(g:G)=>{owned.push(g);return g;};

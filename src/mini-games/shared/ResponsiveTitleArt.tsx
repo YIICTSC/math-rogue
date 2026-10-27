@@ -5,7 +5,7 @@ import './responsiveTitleArt.css';
 export const MINI_GAME_TITLE_ART = [
   'card-club', 'kocho', 'poker', 'survivor', 'dungeons', 'dungeons2',
   'paper-plane', 'go-home', 'shogi', 'go', 'chess', 'mahjong', 'stone-glow',
-  'school-trpg', 'learning-tcg', 'vr', 'crane', 'kart', 'golf',
+  'school-trpg', 'learning-tcg', 'vr', 'crane', 'kart', 'golf', 'tennis', 'dodgeball',
 ] as const;
 export type MiniGameTitleArt = typeof MINI_GAME_TITLE_ART[number];
 export const titleArtPath = (game: MiniGameTitleArt, orientation: 'portrait' | 'landscape') =>

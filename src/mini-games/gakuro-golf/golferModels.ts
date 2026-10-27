@@ -15,7 +15,7 @@ export function createGolferAssets() {
     new T.MeshStandardMaterial({ color: '#263148', roughness: .34 })];
   const geometries = new Set<T.BufferGeometry>([sphere, cylinder, box,sleeve,mitten,trouser,shoe, ...parts.map(p => p.geometry)]);
   const sharedMaterials = new Set<T.Material>([...materials, ...parts.map(p => p.material)]);
-  function create(avatar: KartAvatar, athlete=false) {
+  function create(avatar: KartAvatar, athlete=false, sport?:'tennis'|'dodgeball') {
     const root = new T.Group(), torso = new T.Group(), arms = new T.Group();root.name="StorybookGolfer";
     const legs:{leg:T.Mesh;foot:T.Mesh}[]=[];let walkTime=0;
     const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' | 'eyeColor' }[] = [];
@@ -43,9 +43,10 @@ export function createGolferAssets() {
     const leftArm = new T.Group(), rightArm = new T.Group();leftArm.position.x=-.34;rightArm.position.x=.34;arms.add(leftArm, rightArm);
     for (const side of [-1, 1]) {
       const limb = side === -1 ? leftArm : rightArm;
-      const upper = add(limb, sleeve, shirt, [side * -.04, -.24, .19], [.16, .34, .16]); upper.rotation.z = side * -.4; upper.rotation.x = -.65;
-      const lower = add(limb, sleeve, skin, [side * -.23, -.54, .48], [.12, .24, .12]); lower.rotation.z = side * -.25; lower.rotation.x = -.65;
-      add(limb, mitten, skin, [side * -.28, -.7, .6], [.12, .12, .13]);
+      // Golf brings both hands together. Court sports need separate, articulated arms.
+      const upper = add(limb, sleeve, shirt, sport?[side * .02, -.23, .06]:[side * -.04, -.24, .19], [.16, .34, .16]); upper.rotation.z = side * (sport ? .12 : -.4); upper.rotation.x = sport ? -.25 : -.65;
+      const lower = add(limb, sleeve, skin, sport?[side * .06, -.46, .17]:[side * -.23, -.54, .48], [.12, .24, .12]); lower.rotation.z = side * (sport ? .1 : -.25); lower.rotation.x = -.65;
+      add(limb, mitten, skin, sport?[side * .08, -.55, .28]:[side * -.28, -.7, .6], [.12, .12, .13]);
     }
     const club = new T.Group(); arms.add(club); club.position.set(0, -.72, .63);
     const shaft = add(club, cylinder, materials[1], [0, -.37, .27], [.025, .95, .025]); shaft.rotation.x = -.62;
