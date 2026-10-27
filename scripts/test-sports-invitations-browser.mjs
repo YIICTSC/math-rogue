@@ -25,8 +25,8 @@ try{
  await page.goto(base+'/__sports',{waitUntil:'domcontentloaded',timeout:120000});
  for(const[width,height]of(process.argv.includes('--basketball-only')?[]:[[390,844],[320,568],[844,390],[568,320],[1280,720]])){
   await page.setViewportSize({width,height});await page.locator('.sports-art').evaluate(el=>el.decode());
-  const source=await page.locator('.sports-art').evaluate(el=>el.currentSrc);assert.equal(source.endsWith('club-portrait.webp'),height>width,'orientation uses its dedicated artwork');
-  const heading=page.locator('.sports-dodgeball h2');assert(await heading.evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);return range.getClientRects().length===1&&el.scrollWidth<=el.clientWidth+1;}),'Dodgeball stays on one line');
+  const source=await page.locator('.sports-art').evaluate(el=>el.currentSrc);assert.equal(source.endsWith('sports-portrait-v1.webp'),height>width,'orientation uses its dedicated artwork');
+  const heading=page.locator('.sports-dodgeball strong');assert(await heading.evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);return range.getClientRects().length===1&&el.scrollWidth<=el.clientWidth+1;}),'Dodgeball stays on one line');
   if(width===390||width===844||width===1280){for(const el of await page.locator('.sports-choices button,.sports-invite-cta button').all()){const b=await el.boundingBox();assert(b.x>=0&&b.y>=0&&b.x+b.width<=width+1&&b.y+b.height<=height+1,`${width}x${height} ${JSON.stringify(b)}`);}}
   await page.screenshot({path:`${out}/title-${width}.png`});
   await page.getByRole('button',{name:'招待に参加する',exact:true}).click();await page.locator('.sports-invitation').waitFor();
