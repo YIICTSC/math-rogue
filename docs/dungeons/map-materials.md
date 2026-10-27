@@ -6,8 +6,8 @@ Each route has 24 floor variants, 24 wall variants, two appearances each for wat
 
 ## Rendering
 
-- One of four understated floor materials sets the base for each floor. Corresponding wear appears sparsely, while additional material/inlay cells provide rare accents. This avoids random checkerboard patches and repeated high-contrast motifs.
-- Coordinate/floor hashes choose all differences deterministically. Returning to a tile or loading a save cannot shuffle its appearance.
+- One of four floor materials and one of eight plain wall materials are selected once per floor. Their atlas cells can depict different materials, so individual wear, inlay and ornament cells are not mixed into ordinary surfaces. Stairs use one consistent appearance per floor.
+- Floor hashes select these materials deterministically. Returning to a tile or loading a save cannot shuffle its appearance.
 - The 24 wall textures are derived into the original 16 corner masks. All 8,448 derived cells preserve the original alpha silhouette, convex corners and concave corners. The 256 neighbor configurations per route use the existing quarter-selection logic.
 - Walls are visibly solid; niches, reliefs and structural variants appear on wall faces. Water, ice, cracks, black pits and stairs retain separate, readable appearances. Stairs also retain a small consistent downward marker.
 - Geometry, movement, terrain effects, traps, NPCs and random item generation are unchanged. Town/scenic/dojo render paths retain their existing material logic.
@@ -37,4 +37,4 @@ pnpm run build
 pnpm run server:build
 ```
 
-The media/rule check verifies all 1,408 cells are distinct within their authored set, source/output hashes, reachability of all material variants and exact wall-mask alpha. The browser check uses both actual game components, all 22 route sets, water/ice/cracks/pits/stairs, desktop and phone portrait/landscape, and 5,632 route/neighbor-mask combinations. Screenshots are written to `tmp/dungeons-map-materials/` for visual review.
+The media/rule check verifies all 1,408 cells are distinct within their authored set, source/output hashes, consistent material selection within each floor and exact wall-mask alpha. The browser check uses both actual game components, all 22 route sets, water/ice/cracks/pits/stairs, desktop and phone portrait/landscape, and 5,632 route/neighbor-mask combinations. Screenshots are written to `tmp/dungeons-map-materials/` for visual review.

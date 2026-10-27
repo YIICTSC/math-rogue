@@ -12,15 +12,16 @@ export function loadMapMaterials(mode:string){
  if(cache.size>3)cache.delete(cache.keys().next().value!);return entry;
 }
 export function materialHash(x:number,y:number,floor:number,salt=0){let n=Math.imul(x+137,374761393)^Math.imul(y+263,668265263)^Math.imul(floor+salt,1274126177);n=Math.imul(n^(n>>>13),1274126177);return(n^(n>>>16))>>>0;}
-/** Each floor keeps one coherent base material; wear and inlays stay sparse. */
-export function floorMaterialIndex(x:number,y:number,floor=1){const col=materialHash(0,0,floor)%4,detail=materialHash(x,y,floor,31);return detail%43===0?56+(detail>>>8)%8:detail%127===0?[4,5,6,7,12,13,14,15][(detail>>>8)%8]:detail%13===0?8+col:col;}
-export function wallMaterialVariant(x:number,y:number,floor=1,front=false){const n=materialHash(x,y,floor,73);return front&&n%4===0?8+(n>>>8)%8:n%5===0?16+(n>>>8)%8:(n>>>8)%8;}
+/** Choose one authored surface for the whole floor: atlas cells can differ in
+ * material and palette, so coordinate-level mixing makes adjoining tiles clash. */
+export function floorMaterialIndex(_x:number,_y:number,floor=1){return materialHash(0,0,floor)%4;}
+export function wallMaterialVariant(_x:number,_y:number,floor=1,_front=false){return materialHash(0,0,floor)%8;}
 const ready=(img:HTMLImageElement)=>img.complete&&img.naturalWidth>0;
 function drawCell(ctx:CanvasRenderingContext2D,img:HTMLImageElement,index:number,x:number,y:number,size:number){ctx.drawImage(img,index%8*64,Math.floor(index/8)*64,64,64,x,y,size,size);}
 export function drawMapMaterial(ctx:CanvasRenderingContext2D,map:readonly(readonly string[])[],kind:string,x:number,y:number,size:number,mx:number,my:number,s:MaterialContext,quarters:number[]){
  const route=materialRoute(s);if(!route)return false;const art=loadMapMaterials(route);if(!art||!ready(art.tiles)||!ready(art.walls))return false;
  const floor=s.floor||1;ctx.save();ctx.imageSmoothingEnabled=false;
- drawCell(ctx,art.tiles,kind==='STAIRS'?40+materialHash(mx,my,floor,101)%8:floorMaterialIndex(mx,my,floor),x,y,size);
+ drawCell(ctx,art.tiles,kind==='STAIRS'?40+materialHash(0,0,floor)%8:floorMaterialIndex(mx,my,floor),x,y,size);
  if(kind==='WALL'){
   const v=wallMaterialVariant(mx,my,floor,['FLOOR','STAIRS'].includes(map[my+1]?.[mx])),half=size/2;
   for(let q=0;q<4;q++){const qx=q===1||q===2?1:0,qy=q>=2?1:0;ctx.drawImage(art.walls,quarters[q]*32+qx*16,v*32+qy*16,16,16,x+qx*half,y+qy*half,half,half);}

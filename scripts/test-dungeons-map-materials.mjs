@@ -7,6 +7,14 @@ for(const r of manifest.records){for(const[path,hash]of[[r.source,r.sourceSha256
  const wall=await sharp(r.wallOutput).ensureAlpha().raw().toBuffer();for(let v=0;v<24;v++)for(let mask=0;mask<16;mask++)for(let y=0;y<32;y++)for(let x=0;x<32;x++)assert.equal(wall[((v*32+y)*512+mask*32+x)*4+3],masks[((Math.floor(mask/4)*32+y)*128+mask%4*32+x)*4+3],r.route+' wall collision silhouette changed');
  assert.equal(m.materialRoute({mode:r.route}),r.route);assert.equal(m.materialRoute({mode:r.route,town:true}),undefined);assert.equal(m.materialRoute({mode:r.route,scene:0}),undefined);
 }
-const floors=new Set(),walls=new Set();for(let f=1;f<=64;f++)for(let y=0;y<40;y++)for(let x=0;x<40;x++){const a=m.floorMaterialIndex(x,y,f);assert.equal(a,m.floorMaterialIndex(x,y,f));floors.add(a);walls.add(m.wallMaterialVariant(x,y,f,true));}
-assert.equal(floors.size,24);assert.equal(walls.size,24);assert.equal(m.materialRoute({mode:'unknown'}),undefined);
-console.log('PASS: 22 dedicated atlases, 1408 distinct authored cells, source/delivery hashes, all 24 floor/24 wall variants reachable, and 8,448 derived wall silhouettes exactly preserve original corner alpha.');
+const floors=new Set(),walls=new Set();for(let f=1;f<=64;f++){
+ const floor=m.floorMaterialIndex(0,0,f),wall=m.wallMaterialVariant(0,0,f);
+ floors.add(floor);walls.add(wall);
+ for(let y=0;y<40;y++)for(let x=0;x<40;x++){
+  assert.equal(m.floorMaterialIndex(x,y,f),floor,'adjacent floor tiles share the same material');
+  assert.equal(m.wallMaterialVariant(x,y,f,false),wall,'wall tiles share the same material');
+  assert.equal(m.wallMaterialVariant(x,y,f,true),wall,'exposed wall faces retain the floor palette');
+ }
+}
+assert.equal(floors.size,4);assert.equal(walls.size,8);assert.equal(m.materialRoute({mode:'unknown'}),undefined);
+console.log('PASS: 22 dedicated atlases, 1408 distinct authored cells, source/delivery hashes, consistent floor and wall materials across each floor, and 8,448 derived wall silhouettes preserve original corner alpha.');
