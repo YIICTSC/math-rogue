@@ -1,0 +1,1495 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "upstream": "https://github.com/Aratako/Irodori-TTS",
+  "latest_checked_at": "2026-10-27T05:38:36.505716+00:00",
+  "model_selection": "Latest 4.1 MeanFlow checkpoint, CPU + BF16. v4-Large (3.29B, >13GB FP32) was checked; 4.1-Small-MF fits the 9.7GB CPU host and is the latest 4.1 fast-inference release. Quiet sports calls use a dedicated native-Japanese VoiceDesign reference and automatic duration to preserve clear articulation.",
+  "voices": [
+    {
+      "id": "high-school-warrior",
+      "image": "public/sprites/high-school/characters/0.webp",
+      "reference": "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+      "reference_sha256": "21e809feba6b5c1bf2fde1422c6cf43e8c9728cf0df38405e1a935aad193ca06",
+      "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。反骨心があり、短く鋭く言い切る。決意の場面では熱を強めるが、大人の渋声にはしない。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "狙いはそこだ！",
+          "special": "烈風、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返してやる！",
+          "special": "烈風、スマッシュ！"
+        },
+        "basketball": {
+          "action": "この一本、決める！",
+          "special": "烈風、バースト！"
+        },
+        "dodgeball": {
+          "action": "受けてみろ！",
+          "special": "烈風、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "れっぷう、ドライブ！"
+        },
+        "tennis": {
+          "special": "れっぷう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "れっぷう、バースト！"
+        },
+        "dodgeball": {
+          "special": "れっぷう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-caretaker",
+      "image": "public/sprites/high-school/characters/1.webp",
+      "reference": "public/sfx/high-school-voices/CARETAKER/attack-1.ogg",
+      "reference_sha256": "c3d3ea0466536c9dc25e0e26b4e934a7816cf6756432c37798399f44167e543b",
+      "caption": "高校生の女性アニメ主人公。落ち着いた柔らかい中音。生き物を見守る包容力と、静かな芯の強さを出す。安心させる台詞は穏やかに、決意は明瞭に。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "そっと、届け！",
+          "special": "生命、ドライブ！"
+        },
+        "tennis": {
+          "action": "負けないよ！",
+          "special": "生命、スマッシュ！"
+        },
+        "basketball": {
+          "action": "みんなで決めよう！",
+          "special": "生命、バースト！"
+        },
+        "dodgeball": {
+          "action": "いくよ、気をつけて！",
+          "special": "生命、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "せいめい、ドライブ！"
+        },
+        "tennis": {
+          "special": "せいめい、スマッシュ！"
+        },
+        "basketball": {
+          "special": "せいめい、バースト！"
+        },
+        "dodgeball": {
+          "special": "せいめい、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-assassin",
+      "image": "public/sprites/high-school/characters/2.webp",
+      "reference": "assets/sports-performances/references/high-school-assassin-japanese.ogg",
+      "reference_sha256": "b9129354fcc3069bc8801279f761e3a6d9e6b7e13af16bc520885c0815f1c208",
+      "caption": "若い男性の落ち着いた低音。中性的でクールな高校生の声。息を混ぜすぎず静かで精密、抑えた自信。明瞭な日本語で自然な演技。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "軌道は見えた。",
+          "special": "月影、ドライブ！"
+        },
+        "tennis": {
+          "action": "そこが隙だ。",
+          "special": "月影、スマッシュ！"
+        },
+        "basketball": {
+          "action": "ここで決める。",
+          "special": "月影、バースト！"
+        },
+        "dodgeball": {
+          "action": "逃がさない。",
+          "special": "月影、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "つきかげ、ドライブ！"
+        },
+        "tennis": {
+          "special": "つきかげ、スマッシュ！"
+        },
+        "basketball": {
+          "special": "つきかげ、バースト！"
+        },
+        "dodgeball": {
+          "special": "つきかげ、ぶれいく！"
+        }
+      },
+      "reference_note": "Dedicated VoiceDesign sports reference: preserve the youthful androgynous low register and calm confidence, with clear consonants instead of whispered battle grunts.",
+      "reference_text": "狙いを定める。落ち着いて、確実に決める。",
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "auto_duration": true
+    },
+    {
+      "id": "high-school-mage",
+      "image": "public/sprites/high-school/characters/3.webp",
+      "reference": "public/sfx/high-school-voices/MAGE/attack-1.ogg",
+      "reference_sha256": "4df5b17fa0de456082422001ae6d8eccf1f80fdb5927062d091326335be1bc71",
+      "caption": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "角度、計算どおり！",
+          "special": "閃光、ドライブ！"
+        },
+        "tennis": {
+          "action": "反応速度、良好！",
+          "special": "閃光、スマッシュ！"
+        },
+        "basketball": {
+          "action": "計算どおり！",
+          "special": "閃光、バースト！"
+        },
+        "dodgeball": {
+          "action": "実験開始！",
+          "special": "閃光、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "せんこう、ドライブ！"
+        },
+        "tennis": {
+          "special": "せんこう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "せんこう、バースト！"
+        },
+        "dodgeball": {
+          "special": "せんこう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-dodgeball",
+      "image": "public/sprites/high-school/characters/4.webp",
+      "reference": "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg",
+      "reference_sha256": "99c489ed9c77cf0775e3904c19ee1323b50eb005feb924e9a11e4a3802372aba",
+      "caption": "高校生の男子アニメ主人公。明るく前へ押し出す中高音。スポーツ選手らしい息の勢いと素早いテンポを持ち、仲間への声かけは熱く爽やかに。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "ぶっ飛ばすぜ！",
+          "special": "雷鳴、ドライブ！"
+        },
+        "tennis": {
+          "action": "速攻でいくぜ！",
+          "special": "雷鳴、スマッシュ！"
+        },
+        "basketball": {
+          "action": "俺のゴールだ！",
+          "special": "雷鳴、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球だ！",
+          "special": "雷鳴、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "らいめい、ドライブ！"
+        },
+        "tennis": {
+          "special": "らいめい、スマッシュ！"
+        },
+        "basketball": {
+          "special": "らいめい、バースト！"
+        },
+        "dodgeball": {
+          "special": "らいめい、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-bard",
+      "image": "public/sprites/high-school/characters/5.webp",
+      "reference": "public/sfx/high-school-voices/BARD/attack-1.ogg",
+      "reference_sha256": "7acd6c93097e81ad0776bdf1730dbc6a4af517e87b94bba62e0af6fbf5cb3ef4",
+      "caption": "高校生の女性アニメ主人公。明るく通る放送部の声。言葉を届ける表現力と軽快なリズムを持ち、感動場面では温かな余韻を残す。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "最高の一打を！",
+          "special": "響奏、ドライブ！"
+        },
+        "tennis": {
+          "action": "さあ、オンエア！",
+          "special": "響奏、スマッシュ！"
+        },
+        "basketball": {
+          "action": "決定的瞬間だ！",
+          "special": "響奏、バースト！"
+        },
+        "dodgeball": {
+          "action": "注目、いくよ！",
+          "special": "響奏、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "きょうそう、ドライブ！"
+        },
+        "tennis": {
+          "special": "きょうそう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "きょうそう、バースト！"
+        },
+        "dodgeball": {
+          "special": "きょうそう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-librarian",
+      "image": "public/sprites/high-school/characters/6.webp",
+      "reference": "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg",
+      "reference_sha256": "755585379d4d3c6807c46001a49e48f850b41f536d735bc24176b3be01ff8042",
+      "caption": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "この一打に、想いを。",
+          "special": "詩織、ドライブ！"
+        },
+        "tennis": {
+          "action": "物語は続く。",
+          "special": "詩織、スマッシュ！"
+        },
+        "basketball": {
+          "action": "綺麗な弧を描いて。",
+          "special": "詩織、バースト！"
+        },
+        "dodgeball": {
+          "action": "勇気を、この手に。",
+          "special": "詩織、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "しおり、ドライブ！"
+        },
+        "tennis": {
+          "special": "しおり、スマッシュ！"
+        },
+        "basketball": {
+          "special": "しおり、バースト！"
+        },
+        "dodgeball": {
+          "special": "しおり、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-chef",
+      "image": "public/sprites/high-school/characters/7.webp",
+      "reference": "public/sfx/high-school-voices/CHEF/attack-1.ogg",
+      "reference_sha256": "54a96916127215f0c3dcded978beb7c47218a2b7c26d6448795d7ed8f3bfffe0",
+      "caption": "高校生の男子アニメ主人公。気さくで頼れる明るい中低音。料理長らしい面倒見のよさと勢いを持ち、冗談は親しみやすく、決意は力強く。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "いい手応えだぜ！",
+          "special": "灼熱、ドライブ！"
+        },
+        "tennis": {
+          "action": "切れ味抜群！",
+          "special": "灼熱、スマッシュ！"
+        },
+        "basketball": {
+          "action": "お待ちどう！",
+          "special": "灼熱、バースト！"
+        },
+        "dodgeball": {
+          "action": "熱々でいくぜ！",
+          "special": "灼熱、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "しゃくねつ、ドライブ！"
+        },
+        "tennis": {
+          "special": "しゃくねつ、スマッシュ！"
+        },
+        "basketball": {
+          "special": "しゃくねつ、バースト！"
+        },
+        "dodgeball": {
+          "special": "しゃくねつ、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "high-school-gardener",
+      "image": "public/sprites/high-school/characters/8.webp",
+      "reference": "public/sfx/high-school-voices/GARDENER/attack-1.ogg",
+      "reference_sha256": "debf1e7daee66da0f3e243ea3c70a268f218c9c36f2a9a76a7b78b3e3a797143",
+      "caption": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "風を読んで。",
+          "special": "翠嵐、ドライブ！"
+        },
+        "tennis": {
+          "action": "しなやかに返す。",
+          "special": "翠嵐、スマッシュ！"
+        },
+        "basketball": {
+          "action": "実りの一本！",
+          "special": "翠嵐、バースト！"
+        },
+        "dodgeball": {
+          "action": "大地を踏みしめて！",
+          "special": "翠嵐、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "すいらん、ドライブ！"
+        },
+        "tennis": {
+          "special": "すいらん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "すいらん、バースト！"
+        },
+        "dodgeball": {
+          "special": "すいらん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-akari",
+      "image": "public/sprites/magic/characters/heroine-01-before.webp",
+      "reference": "public/sfx/magic-voices/AKARI/attack-1.ogg",
+      "reference_sha256": "49d33df409df1d49c4861da8bb9ed2d233b93e8dbeacbf2590a247e0d246dfd4",
+      "caption": "高校生の女性魔法主人公。明るくまっすぐな若い中高音。仲間を照らすリーダーらしく、前向きな台詞は弾むように、決意は力強く。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "星まで飛んで！",
+          "special": "星光、ドライブ！"
+        },
+        "tennis": {
+          "action": "私が返す！",
+          "special": "星光、スマッシュ！"
+        },
+        "basketball": {
+          "action": "届け、この想い！",
+          "special": "星光、バースト！"
+        },
+        "dodgeball": {
+          "action": "勇気をこめて！",
+          "special": "星光、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "せいこう、ドライブ！"
+        },
+        "tennis": {
+          "special": "せいこう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "せいこう、バースト！"
+        },
+        "dodgeball": {
+          "special": "せいこう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-shizuku",
+      "image": "public/sprites/magic/characters/heroine-02-before.webp",
+      "reference": "public/sfx/magic-voices/SHIZUKU/attack-1.ogg",
+      "reference_sha256": "db50015dfac5abe6a34f115d1cf3df68fef7710fd80e3e3391d396cd37473183",
+      "caption": "高校生の女性魔法主人公。冷静で透明感のある中音。論理的に落ち着いて話し、感情が揺れる場面では抑えた優しさをにじませる。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "静かに、狙う。",
+          "special": "蒼波、ドライブ！"
+        },
+        "tennis": {
+          "action": "波に合わせて。",
+          "special": "蒼波、スマッシュ！"
+        },
+        "basketball": {
+          "action": "この流れに乗る。",
+          "special": "蒼波、バースト！"
+        },
+        "dodgeball": {
+          "action": "受け止めてみせる。",
+          "special": "蒼波、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "そうは、ドライブ！"
+        },
+        "tennis": {
+          "special": "そうは、スマッシュ！"
+        },
+        "basketball": {
+          "special": "そうは、バースト！"
+        },
+        "dodgeball": {
+          "special": "そうは、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-hiyori",
+      "image": "public/sprites/magic/characters/heroine-03-before.webp",
+      "reference": "public/sfx/magic-voices/HIYORI/attack-1.ogg",
+      "reference_sha256": "0b5ff4889cea2238e6d53f85d748ec3639faf018a9e38b97893c59cad9d8bbe2",
+      "caption": "高校生の女性魔法主人公。柔らかく包み込む穏やかな中音。相手を安心させる温かさを持ち、守る決意は静かに強く。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "お日さままで！",
+          "special": "陽花、ドライブ！"
+        },
+        "tennis": {
+          "action": "えいっ、返すよ！",
+          "special": "陽花、スマッシュ！"
+        },
+        "basketball": {
+          "action": "みんなに元気を！",
+          "special": "陽花、バースト！"
+        },
+        "dodgeball": {
+          "action": "負けないからね！",
+          "special": "陽花、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "ようか、ドライブ！"
+        },
+        "tennis": {
+          "special": "ようか、スマッシュ！"
+        },
+        "basketball": {
+          "special": "ようか、バースト！"
+        },
+        "dodgeball": {
+          "special": "ようか、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-tsubasa",
+      "image": "public/sprites/magic/characters/heroine-04-before.webp",
+      "reference": "public/sfx/magic-voices/TSUBASA/attack-1.ogg",
+      "reference_sha256": "fbb08c9e06735bc9407b593ffd982d58db493f727d153e6f9c1a4e7660713b87",
+      "caption": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "燃えていくよ！",
+          "special": "紅蓮、ドライブ！"
+        },
+        "tennis": {
+          "action": "熱く返す！",
+          "special": "紅蓮、スマッシュ！"
+        },
+        "basketball": {
+          "action": "ここで決める！",
+          "special": "紅蓮、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力でいくよ！",
+          "special": "紅蓮、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "ぐれん、ドライブ！"
+        },
+        "tennis": {
+          "special": "ぐれん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "ぐれん、バースト！"
+        },
+        "dodgeball": {
+          "special": "ぐれん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-rei",
+      "image": "public/sprites/magic/characters/heroine-05-before.webp",
+      "reference": "public/sfx/magic-voices/REI/attack-1.ogg",
+      "reference_sha256": "f2cd5db980769982e5e515b68abf54c272f95131a3d2a7b6c8df324d55e5cffd",
+      "caption": "高校生の女性魔法主人公。寡黙で厳格な低めの声。無駄なく静かに話し、守る言葉だけに深い庇護と意志を込める。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "狙いは外さない。",
+          "special": "黒翼、ドライブ！"
+        },
+        "tennis": {
+          "action": "この一球、返す。",
+          "special": "黒翼、スマッシュ！"
+        },
+        "basketball": {
+          "action": "そこだ。",
+          "special": "黒翼、バースト！"
+        },
+        "dodgeball": {
+          "action": "見切れるか。",
+          "special": "黒翼、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "くろつばさ、ドライブ！"
+        },
+        "tennis": {
+          "special": "くろつばさ、スマッシュ！"
+        },
+        "basketball": {
+          "special": "くろつばさ、バースト！"
+        },
+        "dodgeball": {
+          "special": "くろつばさ、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-madoka",
+      "image": "public/sprites/magic/characters/heroine-06-before.webp",
+      "reference": "public/sfx/magic-voices/MADOKA/attack-1.ogg",
+      "reference_sha256": "c1fbd1bf012ab8a30f0d99137dfe842b0b5cdc72104492bb8035e4ee0e4d65be",
+      "caption": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "素敵に飛んで！",
+          "special": "翠旋、ドライブ！"
+        },
+        "tennis": {
+          "action": "華麗に返すわ！",
+          "special": "翠旋、スマッシュ！"
+        },
+        "basketball": {
+          "action": "私のステージよ！",
+          "special": "翠旋、バースト！"
+        },
+        "dodgeball": {
+          "action": "目を離さないで！",
+          "special": "翠旋、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "すいせん、ドライブ！"
+        },
+        "tennis": {
+          "special": "すいせん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "すいせん、バースト！"
+        },
+        "dodgeball": {
+          "special": "すいせん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-koharu",
+      "image": "public/sprites/magic/characters/heroine-07-before.webp",
+      "reference": "public/sfx/magic-voices/KOHARU/attack-1.ogg",
+      "reference_sha256": "e5f3526a4bed6cbab9338cedffbe1c3106fa377c671ab0422dc918c902bd8b6b",
+      "caption": "高校生の女性魔法主人公。穏やかで自然体の中音。風のように柔らかく話し、仲間を導く時は落ち着いた芯を見せる。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "風に乗って！",
+          "special": "風花、ドライブ！"
+        },
+        "tennis": {
+          "action": "ひらりと返すね！",
+          "special": "風花、スマッシュ！"
+        },
+        "basketball": {
+          "action": "空まで跳ぶよ！",
+          "special": "風花、バースト！"
+        },
+        "dodgeball": {
+          "action": "追い風、お願い！",
+          "special": "風花、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "かざはな、ドライブ！"
+        },
+        "tennis": {
+          "special": "かざはな、スマッシュ！"
+        },
+        "basketball": {
+          "special": "かざはな、バースト！"
+        },
+        "dodgeball": {
+          "special": "かざはな、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-mirai",
+      "image": "public/sprites/magic/characters/heroine-08-before.webp",
+      "reference": "public/sfx/magic-voices/MIRAI/attack-1.ogg",
+      "reference_sha256": "0e26a552ca0d93acff189fcab156d49a8ceb2a18078c2dd87cae113dcf47f6f1",
+      "caption": "高校生の女性魔法主人公。華やかで表現力のある中高音。舞台のように明るく弾ませつつ、本音の場面では寂しさと温かさを自然に出す。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "未来へ飛ばす！",
+          "special": "紫電、ドライブ！"
+        },
+        "tennis": {
+          "action": "次は私の番！",
+          "special": "紫電、スマッシュ！"
+        },
+        "basketball": {
+          "action": "運命を決める！",
+          "special": "紫電、バースト！"
+        },
+        "dodgeball": {
+          "action": "道を切り開く！",
+          "special": "紫電、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "しでん、ドライブ！"
+        },
+        "tennis": {
+          "special": "しでん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "しでん、バースト！"
+        },
+        "dodgeball": {
+          "special": "しでん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-sera",
+      "image": "public/sprites/magic/characters/heroine-09-before.webp",
+      "reference": "public/sfx/magic-voices/SERA/attack-1.ogg",
+      "reference_sha256": "1e59b7944507b689bfdb01fbdf10932c284b60d85991f32e878aef3530ab2505",
+      "caption": "高校生の女性魔法主人公。礼儀正しく透明感のある中高音。異世界の記録者らしい丁寧さと、希望を失わない素直な明るさを持つ。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "まっすぐ、届け。",
+          "special": "白耀、ドライブ！"
+        },
+        "tennis": {
+          "action": "光をつなぐ。",
+          "special": "白耀、スマッシュ！"
+        },
+        "basketball": {
+          "action": "この一瞬に。",
+          "special": "白耀、バースト！"
+        },
+        "dodgeball": {
+          "action": "迷わず進む。",
+          "special": "白耀、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "はくよう、ドライブ！"
+        },
+        "tennis": {
+          "special": "はくよう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "はくよう、バースト！"
+        },
+        "dodgeball": {
+          "special": "はくよう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-ren",
+      "image": "public/sprites/magic/male-characters/ren-before.webp",
+      "reference": "public/sfx/magic-voices/REN/attack-1.ogg",
+      "reference_sha256": "e4e436d327490e256e218da6d88ea63ab9ff8693a0c8bdde6654b08ebdbe51bd",
+      "caption": "高校生の男性魔法主人公。世話焼きで誠実な若い中低音。近い距離の親しみやすさを持ち、仲間を守る時は頼れる力強さを出す。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "風向きはいいな。",
+          "special": "暁風、ドライブ！"
+        },
+        "tennis": {
+          "action": "もう一球！",
+          "special": "暁風、スマッシュ！"
+        },
+        "basketball": {
+          "action": "俺が決める！",
+          "special": "暁風、バースト！"
+        },
+        "dodgeball": {
+          "action": "勝負しよう！",
+          "special": "暁風、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "ぎょうふう、ドライブ！"
+        },
+        "tennis": {
+          "special": "ぎょうふう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "ぎょうふう、バースト！"
+        },
+        "dodgeball": {
+          "special": "ぎょうふう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-soma",
+      "image": "public/sprites/magic/male-characters/soma-before.webp",
+      "reference": "public/sfx/magic-voices/SOMA/attack-1.ogg",
+      "reference_sha256": "e415bb02e85409748d5b7bc35ddbdc0b3434424caa5d5ad756bc38280978d039",
+      "caption": "高校生の男性魔法主人公。規律正しく知的な中低音。完璧主義らしく明瞭に区切り、感情を選ぶ場面では抑えた誠実さを込める。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "狙いは定まった。",
+          "special": "蒼刃、ドライブ！"
+        },
+        "tennis": {
+          "action": "甘い。",
+          "special": "蒼刃、スマッシュ！"
+        },
+        "basketball": {
+          "action": "確実に決める。",
+          "special": "蒼刃、バースト！"
+        },
+        "dodgeball": {
+          "action": "覚悟はいいか。",
+          "special": "蒼刃、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "そうじん、ドライブ！"
+        },
+        "tennis": {
+          "special": "そうじん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "そうじん、バースト！"
+        },
+        "dodgeball": {
+          "special": "そうじん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-minato",
+      "image": "public/sprites/magic/male-characters/minato-before.webp",
+      "reference": "public/sfx/magic-voices/MINATO/attack-1.ogg",
+      "reference_sha256": "47603d3eb3a8c71e511fd456fb37e2c1f99bdaa370988c83b7c7d2824d01798e",
+      "caption": "高校生の男性魔法主人公。素直で努力家の若い中音。少し控えめな親しみやすさから始め、成長と決意の場面では前向きに声を張る。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "綺麗に飛んで。",
+          "special": "水鏡、ドライブ！"
+        },
+        "tennis": {
+          "action": "一緒に頑張ろう。",
+          "special": "水鏡、スマッシュ！"
+        },
+        "basketball": {
+          "action": "みんなにつなぐよ。",
+          "special": "水鏡、バースト！"
+        },
+        "dodgeball": {
+          "action": "いくよ、大丈夫。",
+          "special": "水鏡、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "すいきょう、ドライブ！"
+        },
+        "tennis": {
+          "special": "すいきょう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "すいきょう、バースト！"
+        },
+        "dodgeball": {
+          "special": "すいきょう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-riku",
+      "image": "public/sprites/magic/male-characters/riku-before.webp",
+      "reference": "public/sfx/magic-voices/RIKU/attack-1.ogg",
+      "reference_sha256": "abb3b9fce5b7bbb57bb7225606d631b6c6abd74f0c6f88b823f4f3d1a0169e70",
+      "caption": "高校生の男性魔法主人公。飄々とした軽やかな中音。知的な余裕と遊び心を持ち、仲間を選ぶ場面では静かな本気を見せる。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "リズムに乗って！",
+          "special": "天奏、ドライブ！"
+        },
+        "tennis": {
+          "action": "ほら、お返し！",
+          "special": "天奏、スマッシュ！"
+        },
+        "basketball": {
+          "action": "最高に決めるよ！",
+          "special": "天奏、バースト！"
+        },
+        "dodgeball": {
+          "action": "楽しくいこう！",
+          "special": "天奏、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "てんそう、ドライブ！"
+        },
+        "tennis": {
+          "special": "てんそう、スマッシュ！"
+        },
+        "basketball": {
+          "special": "てんそう、バースト！"
+        },
+        "dodgeball": {
+          "special": "てんそう、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-yamato",
+      "image": "public/sprites/magic/male-characters/yamato-before.webp",
+      "reference": "public/sfx/magic-voices/YAMATO/attack-1.ogg",
+      "reference_sha256": "3a756a80587a8df302f326c80b22731f74eb838b4b1dc5289c4ce3e2de6b7967",
+      "caption": "高校生の男性魔法主人公。ぶっきらぼうで熱い低めの声。乱暴な語尾の奥に情の厚さを持ち、守る台詞は腹から強く。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "力まず、いく。",
+          "special": "剛岩、ドライブ！"
+        },
+        "tennis": {
+          "action": "返してみせる。",
+          "special": "剛岩、スマッシュ！"
+        },
+        "basketball": {
+          "action": "ここは任せろ。",
+          "special": "剛岩、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力で来い！",
+          "special": "剛岩、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "ごうがん、ドライブ！"
+        },
+        "tennis": {
+          "special": "ごうがん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "ごうがん、バースト！"
+        },
+        "dodgeball": {
+          "special": "ごうがん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-leon",
+      "image": "public/sprites/magic/male-characters/leon-before.webp",
+      "reference": "public/sfx/magic-voices/LEON/attack-1.ogg",
+      "reference_sha256": "662147ab2418685022c78c69b23c1b66992875a2eb5854074bf17cd50f628689",
+      "caption": "高校生の男性魔法主人公。華やかで自信のある中高音。舞台役者のように響かせ、冗談は軽く、仲間への本音はまっすぐ輝かせる。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "鮮やかにいこう！",
+          "special": "王輝、ドライブ！"
+        },
+        "tennis": {
+          "action": "さあ、魅せようか！",
+          "special": "王輝、スマッシュ！"
+        },
+        "basketball": {
+          "action": "これが俺の舞台だ！",
+          "special": "王輝、バースト！"
+        },
+        "dodgeball": {
+          "action": "最高の勝負だ！",
+          "special": "王輝、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "おうき、ドライブ！"
+        },
+        "tennis": {
+          "special": "おうき、スマッシュ！"
+        },
+        "basketball": {
+          "special": "おうき、バースト！"
+        },
+        "dodgeball": {
+          "special": "おうき、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-elliot",
+      "image": "public/sprites/magic/male-characters/elliot-before.webp",
+      "reference": "public/sfx/magic-voices/ELLIOT/attack-1.ogg",
+      "reference_sha256": "a3675002b4c4903739fe80be955eff79bae53dcac9a1fa98f6cdb978fc9d12e7",
+      "caption": "高校生の男性魔法主人公。礼儀正しく気品のある静かな中低音。星界の記録者らしい距離感と孤独を持ち、希望の台詞には柔らかな光を込める。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "軌道を読めた。",
+          "special": "夜幻、ドライブ！"
+        },
+        "tennis": {
+          "action": "予定どおりだ。",
+          "special": "夜幻、スマッシュ！"
+        },
+        "basketball": {
+          "action": "逃さないよ。",
+          "special": "夜幻、バースト！"
+        },
+        "dodgeball": {
+          "action": "その先を読む。",
+          "special": "夜幻、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "やげん、ドライブ！"
+        },
+        "tennis": {
+          "special": "やげん、スマッシュ！"
+        },
+        "basketball": {
+          "special": "やげん、バースト！"
+        },
+        "dodgeball": {
+          "special": "やげん、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "magic-sakuya",
+      "image": "public/sprites/magic/male-characters/sakuya-before.webp",
+      "reference": "public/sfx/magic-voices/SAKUYA/attack-1.ogg",
+      "reference_sha256": "52ff57ffb3f6a15aa779b7a9d52e0c8327a78d804dc467f70dbe0f5c453de661",
+      "caption": "高校生の男性魔法主人公。冷たく抑えた低音。封印術師らしく言葉を重く区切り、過去を越える決意には隠れた熱と優しさを込める。 参照音声と同じ人物の声色と年齢感を保つ。スポーツの短く明瞭な掛け声。音楽や効果音なし。",
+      "lines": {
+        "golf": {
+          "action": "一筋、通す。",
+          "special": "桜月、ドライブ！"
+        },
+        "tennis": {
+          "action": "見事に返す。",
+          "special": "桜月、スマッシュ！"
+        },
+        "basketball": {
+          "action": "この手で決める。",
+          "special": "桜月、バースト！"
+        },
+        "dodgeball": {
+          "action": "いざ、勝負。",
+          "special": "桜月、ブレイク！"
+        }
+      },
+      "readings": {
+        "golf": {
+          "special": "さくらづき、ドライブ！"
+        },
+        "tennis": {
+          "special": "さくらづき、スマッシュ！"
+        },
+        "basketball": {
+          "special": "さくらづき、バースト！"
+        },
+        "dodgeball": {
+          "special": "さくらづき、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-male-1",
+      "label": [
+        "男性1・熱血",
+        "Male 1 · spirited",
+        "だんせい1・ねっけつ"
+      ],
+      "caption": "若い成人男性の明るい中低音。運動部らしい張り、勢いと熱さ。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "いくぜ、ここで決める！",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-male-2",
+      "label": [
+        "男性2・爽やか",
+        "Male 2 · bright",
+        "だんせい2・さわやか"
+      ],
+      "caption": "若い成人男性の澄んだ中高音。爽やかで親しみやすく、軽快なテンポ。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "いこう、いい試合にしよう！",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-male-3",
+      "label": [
+        "男性3・クール",
+        "Male 3 · cool",
+        "だんせい3・くーる"
+      ],
+      "caption": "若い成人男性の落ち着いた低音。息を混ぜすぎず静かで精密、抑えた自信。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "狙いは定まった。勝負だ。",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-male-4",
+      "label": [
+        "男性4・穏やか",
+        "Male 4 · gentle",
+        "だんせい4・おだやか"
+      ],
+      "caption": "成人男性の柔らかい中音。温厚で包容力があり、丁寧でゆったり明瞭。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "一緒に、いいプレーをしよう。",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-female-1",
+      "label": [
+        "女性1・元気",
+        "Female 1 · energetic",
+        "じょせい1・げんき"
+      ],
+      "caption": "若い成人女性のはつらつとした中高音。明るく力強く、元気なスポーツ選手。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "いくよ、全力で楽しもう！",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-female-2",
+      "label": [
+        "女性2・クール",
+        "Female 2 · cool",
+        "じょせい2・くーる"
+      ],
+      "caption": "若い成人女性の落ち着いた低めの中音。知的で切れのある子音と冷静な自信。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "準備はできた。始めましょう。",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-female-3",
+      "label": [
+        "女性3・優しい",
+        "Female 3 · warm",
+        "じょせい3・やさしい"
+      ],
+      "caption": "成人女性の柔らかい中高音。あたたかく穏やかで励ます自然な抑揚。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "大丈夫。一緒に頑張ろうね。",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    },
+    {
+      "id": "generic-female-4",
+      "label": [
+        "女性4・快活",
+        "Female 4 · lively",
+        "じょせい4・かいかつ"
+      ],
+      "caption": "若い成人女性の明るい中音。快活で少しハスキー、テンポがよく自信がある。 日本語で自然な演技。音楽や効果音なし。",
+      "preview": "さあ、最高の一本を決めよう！",
+      "lines": {
+        "golf": {
+          "action": "狙って、飛ばす！",
+          "special": "スター、ドライブ！"
+        },
+        "tennis": {
+          "action": "打ち返す！",
+          "special": "スター、スマッシュ！"
+        },
+        "basketball": {
+          "action": "シュート、決める！",
+          "special": "スター、バースト！"
+        },
+        "dodgeball": {
+          "action": "全力投球！",
+          "special": "スター、ブレイク！"
+        }
+      }
+    }
+  ],
+  "referee": {
+    "id": "referee",
+    "caption": "落ち着いて明瞭な成人男性の日本語スポーツ審判。中低音、短く正確な競技コール。過度に叫ばず、音楽や効果音なし。",
+    "preview": "試合を始めます。ルールを守って楽しみましょう。",
+    "lines": {
+      "golf": {
+        "nice": "ナイスショット！",
+        "perfect": "パーフェクトショット！",
+        "birdie": "バーディー！",
+        "eagle": "イーグル！",
+        "albatross": "アルバトロス！",
+        "par": "パー。",
+        "bogey": "ボギー。",
+        "double-bogey": "ダブルボギー。",
+        "hole-in-one": "ホールインワン！",
+        "ob": "アウトオブバウンズ。ワンペナルティー。",
+        "water": "ペナルティーエリア。ワンペナルティー。",
+        "over-par": "ホールアウト。"
+      },
+      "tennis": {
+        "fault": "フォルト。セカンドサービス。",
+        "double-fault": "ダブルフォルト。",
+        "let": "レット。",
+        "out": "アウト。",
+        "deuce": "デュース。",
+        "advantage-server": "アドバンテージ、サーバー。",
+        "advantage-receiver": "アドバンテージ、レシーバー。",
+        "game": "ゲーム。",
+        "set": "ゲーム、セット。"
+      },
+      "basketball": {
+        "two": "ツーポイント！",
+        "three": "スリーポイント！",
+        "shot-clock": "ショットクロック、バイオレーション。",
+        "game": "試合終了！"
+      },
+      "dodgeball": {
+        "out": "アウト！　外野へ移動してください。",
+        "catch": "ナイスキャッチ！",
+        "perfect": "パーフェクトキャッチ！",
+        "game": "試合終了！"
+      }
+    },
+    "readings": {
+      "tennis": {
+        "fault": "ふぉると。セカンドサービス。"
+      }
+    }
+  },
+  "clip_overrides": {
+    "generic-female-3/golf/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "generic-female-3/basketball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "referee/tennis/fault": {
+      "steps": 8,
+      "seed_offset": 1607,
+      "seconds": 2.55
+    },
+    "high-school-caretaker/golf/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "high-school-caretaker/basketball/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "high-school-assassin/golf/action": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-assassin/basketball/action": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-assassin/dodgeball/special": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-mage/basketball/action": {
+      "steps": 8,
+      "seed_offset": 1607
+    },
+    "high-school-dodgeball/dodgeball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "high-school-chef/tennis/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-shizuku/golf/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-hiyori/golf/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-hiyori/dodgeball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-rei/tennis/action": {
+      "steps": 8,
+      "seed_offset": 1607
+    },
+    "magic-rei/tennis/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "magic-madoka/tennis/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-madoka/basketball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-koharu/golf/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-koharu/tennis/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-mirai/dodgeball/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-sera/dodgeball/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-ren/basketball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-ren/dodgeball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-soma/basketball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-leon/basketball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-elliot/golf/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-elliot/tennis/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-elliot/basketball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-elliot/dodgeball/special": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "magic-sakuya/basketball/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "high-school-chef/golf/action": {
+      "steps": 8,
+      "seed_offset": 803
+    },
+    "referee/golf/par": {
+      "steps": 4,
+      "seed_offset": 71,
+      "seconds": 1.0
+    },
+    "referee/tennis/let": {
+      "steps": 4,
+      "seed_offset": 71,
+      "seconds": 1.0
+    },
+    "referee/tennis/deuce": {
+      "steps": 4,
+      "seed_offset": 71,
+      "seconds": 1.0
+    },
+    "high-school-assassin/golf/special": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-assassin/tennis/action": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-assassin/tennis/special": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-assassin/basketball/special": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "high-school-assassin/dodgeball/action": {
+      "steps": 4,
+      "seed_offset": 4801
+    },
+    "magic-rei/golf/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "magic-rei/basketball/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "magic-rei/dodgeball/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "magic-sakuya/golf/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "magic-sakuya/tennis/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    },
+    "magic-sakuya/dodgeball/special": {
+      "steps": 8,
+      "seed_offset": 2401
+    }
+  },
+  "model_checks": {
+    "Aratako/Irodori-TTS-v4.1-Small": {
+      "revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "checked_at": "2026-10-27T10:10:54.878184+00:00"
+    }
+  }
+}

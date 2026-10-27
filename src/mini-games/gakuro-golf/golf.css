@@ -228,3 +228,5 @@
 @media(orientation:landscape){.gg-playing .gg-control-dock{bottom:max(36px,calc(env(safe-area-inset-bottom) + 24px));max-height:calc(100% - 82px)}.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 176px)}}
 .gg-meter-tutorial{margin:0 0 5px;padding:5px 8px;border-left:3px solid #edbe4f;border-radius:3px;background:#fff2c9;color:#244436;font-size:12px;line-height:1.35;font-weight:700}
 @media(orientation:landscape) and (max-height:550px){.gg-meter-tutorial{font-size:10px;padding:3px 6px;margin-bottom:3px}}
+
+.gg-star-control{display:flex;align-items:center;gap:8px;margin:6px 0}.gg-star-control button{flex-shrink:0;min-height:40px;padding:6px 9px!important;font-size:11px!important}.gg-star-control button[aria-pressed=true]{background:#f5cf79!important;color:#153a3e!important;box-shadow:0 0 14px #ffe1a955}.gg-star-control small{font-size:9px;line-height:1.5;color:#bbd8cf}@media(orientation:landscape) and (max-height:500px){.gg-star-control small{display:none}.gg-star-control{margin:3px 0}}

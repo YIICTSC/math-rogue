@@ -1,0 +1,142 @@
+{
+  "generator": "ImageGen",
+  "columns": [
+    "golf",
+    "tennis",
+    "basketball",
+    "dodgeball"
+  ],
+  "sheets": [
+    {
+      "id": 0,
+      "heroes": [
+        "high-school-warrior",
+        "high-school-caretaker",
+        "high-school-assassin",
+        "high-school-mage"
+      ],
+      "rows": 4,
+      "source": "/workspace/generated_images/exec-eca2a265-bd8f-42f3-b01e-285ed851de49.png",
+      "original": "assets/sports-performances/cast-0-source.png",
+      "runtime": "sprites/sports-cutins/cast-0.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 4 character reference images strictly for each person's identity. Exactly 4 rows and FOUR columns in an even regular grid, square 1536x1536. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: high-school-warrior, high-school-caretaker, high-school-assassin, high-school-mage.",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "b7f78891ab39b66678914b959a3e9138ef713c34255b9e222cbe1bd3a9c35d1a"
+    },
+    {
+      "id": 1,
+      "heroes": [
+        "high-school-dodgeball",
+        "high-school-bard",
+        "high-school-librarian",
+        "high-school-chef"
+      ],
+      "rows": 4,
+      "source": "/workspace/generated_images/exec-15403830-79a2-4a5b-b7dd-506d58e5e38c.png",
+      "original": "assets/sports-performances/cast-1-source.png",
+      "runtime": "sprites/sports-cutins/cast-1.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 4 character reference images strictly for each person's identity. Exactly 4 rows and FOUR columns in an even regular grid, square 1536x1536. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: high-school-dodgeball, high-school-bard, high-school-librarian, high-school-chef.",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "0c11fc1204a27daa37e300b935350dfe1c02a32264cdaec922500196edc5d47f"
+    },
+    {
+      "id": 2,
+      "heroes": [
+        "high-school-gardener",
+        "magic-akari",
+        "magic-shizuku",
+        "magic-hiyori"
+      ],
+      "rows": 4,
+      "source": "/workspace/generated_images/exec-f746b294-5d82-439b-a582-a6c8f9ce89ae.png",
+      "original": "assets/sports-performances/cast-2-source.png",
+      "runtime": "sprites/sports-cutins/cast-2.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 4 character reference images strictly for each person's identity. Exactly 4 rows and FOUR columns in an even regular grid, square 1536x1536. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: high-school-gardener, magic-akari, magic-shizuku, magic-hiyori.",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "597ee230718de96cef49506bec623d5ab87b65a1d1cbb5425e2835a95ba2ec31"
+    },
+    {
+      "id": 3,
+      "heroes": [
+        "magic-tsubasa",
+        "magic-rei",
+        "magic-madoka",
+        "magic-koharu"
+      ],
+      "rows": 4,
+      "source": "/workspace/generated_images/exec-91496ee4-4122-481e-9b5b-1c5d6c6ed7b1.png",
+      "original": "assets/sports-performances/cast-3-source.png",
+      "runtime": "sprites/sports-cutins/cast-3.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 4 character reference images strictly for each person's identity. Exactly 4 rows and FOUR columns in an even regular grid, square 1536x1536. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: magic-tsubasa, magic-rei, magic-madoka, magic-koharu.",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "00c417deca6da2ca462c0938b9475cda1fd74a4ee2978cebb360068febefcb32"
+    },
+    {
+      "id": 4,
+      "heroes": [
+        "magic-mirai",
+        "magic-sera",
+        "magic-ren",
+        "magic-soma"
+      ],
+      "rows": 4,
+      "source": "/workspace/generated_images/exec-bca033fc-ef7b-4bb6-baec-0eb9656871c6.png",
+      "original": "assets/sports-performances/cast-4-source.png",
+      "runtime": "sprites/sports-cutins/cast-4.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 4 character reference images strictly for each person's identity. Exactly 4 rows and FOUR columns in an even regular grid, square 1536x1536. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: magic-mirai, magic-sera, magic-ren, magic-soma.",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "5bcacc15a6ab6f3ddb8c7f518a5b0b62ce9120ac9401a64a2ae5873e3ab3cfea"
+    },
+    {
+      "id": 5,
+      "heroes": [
+        "magic-minato",
+        "magic-riku",
+        "magic-yamato",
+        "magic-leon"
+      ],
+      "rows": 4,
+      "source": "/workspace/generated_images/exec-168f0384-cd92-482c-b8bf-1d9ed1d66999.png",
+      "original": "assets/sports-performances/cast-5-source.png",
+      "runtime": "sprites/sports-cutins/cast-5.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 4 character reference images strictly for each person's identity. Exactly 4 rows and FOUR columns in an even regular grid, square 1536x1536. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: magic-minato, magic-riku, magic-yamato, magic-leon.",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "748037a55b5830d535e71bb4610de90f7b3cd10138ab14b53a0c3817d767db6d"
+    },
+    {
+      "id": 6,
+      "heroes": [
+        "magic-elliot",
+        "magic-sakuya"
+      ],
+      "rows": 2,
+      "source": "/workspace/generated_images/exec-4af0461d-127e-4123-8e0e-6a3bbc76d980.png",
+      "original": "assets/sports-performances/cast-6-source.png",
+      "runtime": "sprites/sports-cutins/cast-6.webp",
+      "prompt": "Create a production game sprite atlas for ORIGINAL sports ultimate-move character cut-ins, using the attached 2 character reference images strictly for each person's identity. Exactly 2 rows and FOUR columns in an even regular grid, wide 1536x768. The character from reference 1 fills row 1, reference 2 row 2, and so on. Each cell is an independent centered dynamic waist-up or three-quarter anime portrait, completely contained within its own cell with equal transparent padding and NO overlap between cells. Columns in EVERY row are: 1 GOLF powerful club follow-through, visible golf club and gold star swoosh; 2 TENNIS overhead smash with visible tennis racket and lime tennis ball plus cyan comet; 3 BASKETBALL explosive jump shot with orange basketball and orange lightning; 4 DODGEBALL overarm power throw with a white/red dodgeball and violet energy spiral. Recognizably the SAME character in the four columns of their row, preserve exact face, eye color, hairstyle, gender presentation and signature hair accessories from that row's reference. Adapt outfits into tasteful original athletic training outfits using each reference's distinctive colors. Express individual personality, confident intense sports expressions, anatomically correct hands, dynamic but elegant shoulder/arm poses. Beautiful polished Japanese anime game key art, crisp expressive eyes, luminous cel shading, fine clean outlines, premium finish. Keep each face large and readable. TRANSPARENT background across the entire atlas. NO panels, NO frames, NO background scenery, NO ground shadows, NO text, NO names, NO logos, NO UI, NO reused existing game characters. Row identities in order: magic-elliot, magic-sakuya.",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "09108bc8c319bf37d6f229720c097897c70464810c9e63753ad0b3da8cc53e89"
+    }
+  ]
+}

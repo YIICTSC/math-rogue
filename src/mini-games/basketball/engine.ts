@@ -1,3 +1,4 @@
+import {sportsEvent} from '../shared/sportsEvents';
 import {validAvatar} from '../gakuro-kart/avatar';
 import {validLesson} from '../gakuro-kart/learning';
 import {bracketSeeds} from '../tennis/scoring';
@@ -58,6 +59,7 @@ function shoot(w:BasketWorld,m:Match,u:Unit,quality:number){
  const success=!!m.tutorial||rng(w)<shotChance(m,u,quality),miss=success?0:(rng(w)>.5?1:-1)*(1.15+rng(w)*.7);
  Object.assign(m.ball,{holder:null,side:u.side,flight:1,pass:false,special:u.buff>0,age:0,lock:duration,x:u.x,y:u.y,z:1.65,vx:(miss-u.x)/duration,vy:(COURT.hoopY-u.y)/duration,vz:(3.1-1.65+4.9*duration*duration)/duration,points:d>COURT.three?3:2,success,shooter:u.id,receiver:null,trail:[]});
  u.charging=false;u.charge=0;u.release=quality;u.action=.65;u.jump=dunk?.68:.5;u.motion=dunk?'dunk':'shot';u.actionSeq=m.serial+1;u.stamina=clamp(u.stamina-.08,0,1);if(u.role==='SG'||u.role==='SF')u.buff=0;
+ sportsEvent(m,'action',w.clock,u.id);
  notice(w,m,dunk?'DUNK':quality>.92?'PERFECT RELEASE':contest(m,u)>.45?'CONTESTED':'SHOT');return true;
 }
 function passBall(w:BasketWorld,m:Match,u:Unit,targetId?:string,recipient?:Unit){
@@ -96,7 +98,7 @@ function skill(w:BasketWorld,m:Match,u:Unit){
  else if(u.role==='SF'){u.dashCooldown=0;dash(w,m,u);}
  else if(u.role==='PF'){u.cooldown=0;jump(w,m,u,'rebound');}
  else if(u.role==='C'){u.cooldown=0;jump(w,m,u,'block');}
- u.actionSeq=m.serial+1;notice(w,m,'SKILL');return true;
+ u.actionSeq=m.serial+1;notice(w,m,'SKILL');sportsEvent(m,'special',w.clock,u.id);return true;
 }
 export function command(w:BasketWorld,id:string,raw:unknown,_factory?:LessonFactory){
  const p=w.players[id],c=raw as Record<string,any>;if(!p?.connected||!c||typeof c!=='object'||Array.isArray(c))return false;
@@ -134,7 +136,7 @@ function advanceTutorial(w:BasketWorld,m:Match,dt:number){const t=m.tutorial!;t.
  else if(t.stage==='pass'&&m.ball.holder&&m.ball.holder!==own.id){t.stage='receive';t.elapsed=0;}
  else if(t.stage==='receive'){const holder=m.units.find(u=>u.id===m.ball.holder);if(holder&&holder!==own&&t.elapsed>.8)passBall(w,m,holder,own.id,own);if(holder===own&&t.elapsed>1.8){const opponent=m.units.find(u=>u.side!==own.side)!;opponent.x=clamp(own.x+1,-7,7);opponent.y=own.y;takeBall(m,opponent);m.mustClear=false;t.stage='steal';t.elapsed=0;}}
 }
-function finish(w:BasketWorld,m:Match,side:Side,reason:Match['reason']){m.phase='finished';m.winner=m.teams[side];m.reason=reason;m.ball.vx=m.ball.vy=0;for(const u of m.units)if(u.owner)w.players[u.owner].quiz=null;}
+function finish(w:BasketWorld,m:Match,side:Side,reason:Match['reason']){sportsEvent(m,'referee',w.clock,undefined,'game');m.phase='finished';m.winner=m.teams[side];m.reason=reason;m.ball.vx=m.ball.vy=0;for(const u of m.units)if(u.owner)w.players[u.owner].quiz=null;}
 function cpuMove(w:BasketWorld,m:Match,u:Unit):{x:number;y:number}{
  const b=m.ball,holder=m.units.find(v=>v.id===b.holder),slot=Number(u.id.at(-1))%3;
  if(!holder){const teammates=m.units.filter(v=>v.side===u.side).sort((a,c)=>distance(a,b)-distance(c,b));if(teammates[0]===u){if(b.z>1&&b.vz<1&&distance(u,b)<ROLES[u.role].reach+.4&&u.cooldown<=0)jump(w,m,u,'rebound');return {x:b.x-u.x,y:b.y-u.y};}return {x:(slot-1)*3.5-u.x,y:3-u.y};}
@@ -180,16 +182,16 @@ function drive(w:BasketWorld,m:Match,dt:number){
 function segmentDistance(u:Unit,ax:number,ay:number,bx:number,by:number){const dx=bx-ax,dy=by-ay,den=dx*dx+dy*dy,t=den?clamp(((u.x-ax)*dx+(u.y-ay)*dy)/den,0,1):0;return Math.hypot(u.x-ax-dx*t,u.y-ay-dy*t);}
 function loose(m:Match){Object.assign(m.ball,{holder:null,flight:0,pass:false,side:null,receiver:null,age:0,lock:.2,assist:null});}
 function score(w:BasketWorld,m:Match){const b=m.ball,side=b.side!,shooter=m.units.find(u=>u.id===b.shooter);m.score[side]+=b.points;if(shooter){stat(w,shooter,'points',b.points);shooter.motion='celebrate';shooter.action=.7;}
- const assist=m.units.find(u=>u.id===b.assist);if(assist&&assist!==shooter)stat(w,assist,'assists');notice(w,m,b.points===3?'3 POINTS!':'BASKET!');
+ const assist=m.units.find(u=>u.id===b.assist);if(assist&&assist!==shooter)stat(w,assist,'assists');notice(w,m,b.points===3?'3 POINTS!':'BASKET!');sportsEvent(m,'referee',w.clock,shooter?.id,b.points===3?'three':'two');
  if(m.tutorial?.stage==='shoot'){m.tutorial.stage='complete';b.flight=0;b.holder=null;b.z=3.1;return;}
  m.possession=other(side);m.inbound=1.5;Object.assign(b,{holder:null,flight:0,z:3.1,vx:0,vy:0,vz:0,age:0});
 }
 function fly(w:BasketWorld,m:Match,dt:number){
  const b=m.ball;b.age+=dt;b.lock=Math.max(0,b.lock-dt*(b.flight?0:1));
- if(b.holder){const u=m.units.find(v=>v.id===b.holder)!;b.x=u.x;b.y=u.y;b.z=.45+Math.abs(Math.sin(b.age*12))*.9;if(m.mustClear&&rimDistance(u)>COURT.clear){m.mustClear=false;notice(w,m,'CLEARED');}if(!m.tutorial)m.shotClock-=dt;if(m.shotClock<=0){notice(w,m,'SHOT CLOCK');checkBall(m,other(u.side));}return;}
+ if(b.holder){const u=m.units.find(v=>v.id===b.holder)!;b.x=u.x;b.y=u.y;b.z=.45+Math.abs(Math.sin(b.age*12))*.9;if(m.mustClear&&rimDistance(u)>COURT.clear){m.mustClear=false;notice(w,m,'CLEARED');}if(!m.tutorial)m.shotClock-=dt;if(m.shotClock<=0){notice(w,m,'SHOT CLOCK');sportsEvent(m,'referee',w.clock,undefined,'shot-clock');checkBall(m,other(u.side));}return;}
  const oldX=b.x,oldY=b.y;b.trail.push([b.x,b.y,b.z]);if(b.trail.length>12)b.trail.shift();b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=9.8*dt;
  if(b.flight){
-  if(b.pass&&!m.tutorial){m.shotClock-=dt;if(m.shotClock<=0){notice(w,m,'SHOT CLOCK');checkBall(m,other(m.possession));return;}}
+  if(b.pass&&!m.tutorial){m.shotClock-=dt;if(m.shotClock<=0){notice(w,m,'SHOT CLOCK');sportsEvent(m,'referee',w.clock,undefined,'shot-clock');checkBall(m,other(m.possession));return;}}
   for(const u of m.units){if(m.tutorial||u.side===b.side||b.age<.08)continue;const near=segmentDistance(u,oldX,oldY,b.x,b.y);
    if(!b.pass&&u.jump>0&&u.motion==='block'&&near<ROLES[u.role].reach*.65+(u.buff>0?.5:0)&&b.z<3.3){b.vx=(u.x<0?-1:1)*3;b.vy=-3;b.vz=2;loose(m);u.action=.4;stat(w,u,'blocks');notice(w,m,'BLOCK');return;}
    if(b.pass&&near<(u.catch>0?1.1:.45)&&b.z<2.5){takeBall(m,u);stat(w,u,'steals');notice(w,m,'INTERCEPT');return;}
@@ -200,7 +202,7 @@ function fly(w:BasketWorld,m:Match,dt:number){
    b.x=clamp(b.x,-1.8,1.8);b.y=COURT.hoopY-.3;const a=rng(w)*Math.PI*2;b.vx=Math.cos(a)*2.6;b.vy=Math.sin(a)*2.1;b.vz=2.8;b.z=3.1;loose(m);notice(w,m,'REBOUND');
   }
  }else{
-  if(b.shooter===null&&!m.tutorial){m.shotClock-=dt;if(m.shotClock<=0){notice(w,m,'SHOT CLOCK');checkBall(m,other(m.possession));return;}}
+  if(b.shooter===null&&!m.tutorial){m.shotClock-=dt;if(m.shotClock<=0){notice(w,m,'SHOT CLOCK');sportsEvent(m,'referee',w.clock,undefined,'shot-clock');checkBall(m,other(m.possession));return;}}
   if(b.z<.24){b.z=.24;b.vz=Math.abs(b.vz)*.38;if(Math.abs(b.vz)<.5)b.vz=0;b.vx*=Math.exp(-dt*3);b.vy*=Math.exp(-dt*3);}
   for(const u of [...m.units].sort((a,c)=>distance(a,b)-distance(c,b))){if(b.lock>0)break;const reach=ROLES[u.role].reach+(u.buff>0&&u.role==='PF'?1.4:0),near=distance(u,b);if(u.jump>0&&near<reach&&b.vz<1.5&&b.z<3.7||b.z<.65&&near<.7){const rebound=b.shooter!==null;takeBall(m,u,rebound);if(rebound){stat(w,u,'rebounds');notice(w,m,'REBOUND WIN');}return;}}
   if(Math.abs(b.x)>COURT.width+.2||b.y<COURT.front-.2||b.y>COURT.back+.2){notice(w,m,'OUT');checkBall(m,other(m.possession));return;}

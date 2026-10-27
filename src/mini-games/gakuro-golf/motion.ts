@@ -46,11 +46,12 @@ export class BallMotion {
 }
 
 /** Trace the same 30 Hz physics used by the server, including wind, bounce and roll. */
-export function predictShot(player: PublicGolfer, club: Club, angle: number, power: number, spin = 0, impact = 0) {
+export function predictShot(player: PublicGolfer, club: Club, angle: number, power: number, spin = 0, impact = 0, special = false) {
   const world = createGolf(); addPlayer(world, 'preview', 'Preview'); world.phase = 'playing';
   const p = world.players.preview; angle += impact * 12 * Math.PI / 180;
   Object.assign(p, { hole: player.hole, correct: player.correct, x: player.x, y: 0, z: player.z,
     phase: 'moving', shotClub: club, shotAngle: angle, shotSpin: club === 'putter' ? 0 : spin, spinApplied: false, origin: { x: player.x, z: player.z }, ...shotVelocity(player, club, angle, power, spin, impact) });
+  if(special){p.vx*=1.08;p.vz*=1.08;}
   const points = [{ x: p.x, y: .55, z: p.z }];
   for (let i = 0; i < 900 && p.phase === 'moving'; i++) {
     const previous = { x: p.x, y: p.y + .55, z: p.z };

@@ -198,7 +198,10 @@
     "test:star-tide:music": "node scripts/test-star-tide-music.mjs",
     "test:star-tide:narration": "node scripts/test-star-tide-narration-browser.mjs",
     "test:star-tide:browser": "node scripts/test-star-tide-browser.mjs && node scripts/test-star-tide-actions-browser.mjs && node scripts/test-star-tide-sky-browser.mjs",
-    "test:star-tide:assets": "node scripts/test-star-tide-assets.mjs && node scripts/test-star-tide-graphics.mjs"
+    "test:star-tide:assets": "node scripts/test-star-tide-assets.mjs && node scripts/test-star-tide-graphics.mjs",
+    "test:sports-performances": "node scripts/test-sports-performances.mjs",
+    "test:sports-performances:browser": "node scripts/test-sports-performances-browser.mjs",
+    "verify:sports-performances": "node scripts/sports-performances/verify-assets.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

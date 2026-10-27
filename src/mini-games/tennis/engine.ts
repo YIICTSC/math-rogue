@@ -1,3 +1,4 @@
+import {sportsEvent} from '../shared/sportsEvents';
 import {bendShot} from '../shared/shotDirection';
 import {validAvatar} from '../gakuro-kart/avatar';
 import {validLesson} from '../gakuro-kart/learning';
@@ -75,11 +76,13 @@ export function disconnectPlayer(w:TennisWorld,id:string){const p=w.players[id];
 function finishPoint(w:TennisWorld,m:Match,winner:Side,reason:Match['reason'],factory:LessonFactory|undefined){
  if(m.phase!=='rally'&&m.phase!=='serve')return;
  m.reason=reason;m.longest=Math.max(m.longest,m.rally);m.pointSerial++;m.faults=0;m.ball.vx=m.ball.vy=m.ball.vz=0;
- const result=scorePoint(m,winner,w.targetGames);m.pendingWinner=result.match?m.teams[winner]:null;m.afterStudy=result.match?'finish':'serve';m.phase='point';m.wait=2.1;
+ const result=scorePoint(m,winner,w.targetGames);
+ if(reason==='out')sportsEvent(m,'referee',w.clock,undefined,'out');
+ if(result.match)sportsEvent(m,'referee',w.clock,undefined,'set');else if(result.game)sportsEvent(m,'referee',w.clock,undefined,'game');else if(!m.tiebreak){if(m.points[0]>=3&&m.points[1]>=3){if(m.points[0]===m.points[1])sportsEvent(m,'referee',w.clock,undefined,'deuce');else sportsEvent(m,'referee',w.clock,undefined,m.points[m.server]>m.points[other(m.server)]?'advantage-server':'advantage-receiver');}}m.pendingWinner=result.match?m.teams[winner]:null;m.afterStudy=result.match?'finish':'serve';m.phase='point';m.wait=2.1;
  // Defer question creation until point feedback has been visible.
  m.studyAt=result.game||w.clock-m.studyAt>=180?-1:m.studyAt;
 }
-function fault(w:TennisWorld,m:Match,reason:Match['reason'],factory:LessonFactory|undefined){m.faults++;if(m.faults>=2)finishPoint(w,m,other(m.server),'double-fault',factory);else{const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason=reason;m.wait=.9;}}
+function fault(w:TennisWorld,m:Match,reason:Match['reason'],factory:LessonFactory|undefined){m.faults++;sportsEvent(m,'referee',w.clock,undefined,m.faults>=2?'double-fault':'fault');if(m.faults>=2)finishPoint(w,m,other(m.server),'double-fault',factory);else{const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason=reason;m.wait=.9;}}
 function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWorld){
  const serve=m.phase==='serve',direction=-sideY(u.side),width=w.mode==='singles'?SINGLES_WIDTH:DOUBLES_WIDTH;
  const depth=u.cpu?0:(u.directionY||0)*direction;
@@ -92,6 +95,7 @@ function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWor
  // Fixed landing target and ballistic height: collision decisions belong to simulation, not rendering.
  const gravity=9.8,dx=targetX-startX,dy=targetY-startY;
  m.ball={x:startX,y:startY,z,vx:dx/duration-spin*duration*.5,vy:dy/duration,vz:(.08-z+.5*gravity*duration*duration)/duration,spin,lastSide:u.side,bounces:0,serve,netLet:false,trail:[]};
+ sportsEvent(m,shot==='special'?'special':'action',w.clock,u.id);
  m.phase='rally';m.time=0;m.rally++;m.shotSerial++;u.shot=shot;u.shotSeq=m.shotSerial;u.swing=.42;u.buffer=0;u.energy=shot==='special'?0:Math.min(1,u.energy+.10);u.stamina=Math.max(0,u.stamina-.04);
 }
 function attemptHit(w:TennisWorld,m:Match,u:Unit){
@@ -161,7 +165,7 @@ function updateBall(w:TennisWorld,m:Match,dt:number,factory:LessonFactory|undefi
    const serviceLegal=inside&&Math.abs(b.x)<=SINGLES_WIDTH+.045&&Math.abs(b.y)<=SERVICE_LENGTH+.045&&Math.sign(b.x)===-serviceXSign(m);
    if(b.serve&&!serviceLegal){fault(w,m,b.netLet?'net':'out',factory);return;}
    if(!inside){finishPoint(w,m,other(b.lastSide),'out',factory);return;}
-   if(b.serve&&b.netLet){const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason='let';m.wait=.9;return;}
+   if(b.serve&&b.netLet){sportsEvent(m,'referee',w.clock,undefined,'let');const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason='let';m.wait=.9;return;}
    b.bounces=1;b.vz=Math.max(2.8,Math.abs(b.vz)*(m.units.filter(u=>u.side===b.lastSide).sort((a,b)=>b.shotSeq-a.shotSeq)[0]?.shot==='slice'?.52:.7));b.vx*=.84;b.vy*=.82;
   }else finishPoint(w,m,b.lastSide,m.rally===1?'ace':'bounce',factory);
  }

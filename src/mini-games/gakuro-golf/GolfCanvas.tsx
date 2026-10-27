@@ -1,3 +1,4 @@
+import {createSportsEffect} from '../shared/sportsEffects';
 import { configureStorybook, paintedSurface, storybookWater } from '../../three/storybookStyle';
 import { useStorybookQuality } from '../../three/StorybookQuality';
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,17 +11,17 @@ import { createGolferAssets, type GolferRig } from './golferModels';
 import { createCourseScenery } from './courseScenery';
 const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'];
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
-export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
+export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, special = false, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; special?:boolean; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
   const orbit=useRef({yaw:0,pitch:.6,active:false,drag:null as null|{id:number;x:number;y:number}});
   const overviewPan=useRef({x:0,z:0,unitsPerPixel:1});
   const quality=useStorybookQuality();
-  const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, avatar, spectator };
+  const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, special, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, special, avatar, spectator };
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
   useEffect(()=>{orbit.current.active=false;orbit.current.drag=null;overviewPan.current.x=overviewPan.current.z=0;},[overview,holeIndex,selfId]);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     const el = canvas.current!; let renderer: THREE.WebGLRenderer | undefined, frame = 0, disposed = false;
-    const scene = new THREE.Scene(); scene.background = new THREE.Color('#9bcee5'); scene.fog = new THREE.Fog('#c6ddcc', 210, 750);
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#9bcee5'); scene.fog = new THREE.Fog('#c6ddcc', 210, 750);const sportsFx=createSportsEffect(scene,'golf');
     const resources: (THREE.BufferGeometry | THREE.Material)[] = [];
     const golferAssets = createGolferAssets();
     type Marker = { ball: THREE.Mesh; shadow: THREE.Mesh; motion: BallMotion; rig: GolferRig; player: PublicGolfer; swingStart: number; cheerStart: number; origin: THREE.Vector3; direction: number; avatarKey: string };
@@ -213,9 +214,9 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * (full ? 12 : 3))); lookAt.lerp(target, 1 - Math.exp(-dt * (full ? 12 : 5))); camera.up.set(0,full&&!orbit.current.active?0:1,full&&!orbit.current.active?1:0);camera.lookAt(lookAt);
         aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
-          const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin].join('/');
+          const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin,state.current.special].join('/');
           if (key !== previewKey) {
-            previewKey = key; const points = predictShot(me, selectedClub, direction, selectedPower, state.current.spin);
+            previewKey = key; const points = predictShot(me, selectedClub, direction, selectedPower, state.current.spin,0,state.current.special);
             const positions = lineGeo.getAttribute('position') as THREE.BufferAttribute;
             points.forEach((p,i) => positions.setXYZ(i,p.x,p.y - .39,p.z)); positions.needsUpdate = true;
             lineGeo.setDrawRange(0,points.length); lineGeo.computeBoundingSphere(); aimLine.computeLineDistances();
@@ -227,10 +228,10 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
         el.dataset.golferCount = String(nearest.size); el.dataset.ballHeight = String(ball.y); el.dataset.swing = String(me ? markers.get(me.id)?.rig.arms.rotation.z || 0 : 0);
         el.dataset.cameraMode = portrait ? 'portrait' : orbit.current.active && me?.phase!=='moving' ? 'orbit' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
         flag.rotation.y = Math.sin(now / 700) * .12;
-        scenery?.update(now);animatedWater.update(now/1000);el.dataset.blenderModels=String(scenery?.library.ready?scenery.library.group.userData.models:0);el.dataset.blenderAnimations=String(scenery?.library.group.userData.animations||0);renderer.render(scene, camera); frame = requestAnimationFrame(draw);
+        sportsFx.update(now,current?.sportsEvents,current?.players.map(p=>({id:p.id,x:p.x,y:-p.z}))??[],me?{x:me.x,y:me.y+.4,z:me.z}:undefined,!!me?.shotSpecial&&me.phase==='moving'&&!current?.paused);el.dataset.sportsFx=String(sportsFx.group.userData.ready===true);scenery?.update(now);animatedWater.update(now/1000);el.dataset.blenderModels=String(scenery?.library.ready?scenery.library.group.userData.models:0);el.dataset.blenderAnimations=String(scenery?.library.group.userData.animations||0);renderer.render(scene, camera); frame = requestAnimationFrame(draw);
       }; frame = requestAnimationFrame(draw);
     } catch (error) { console.error('Golf renderer initialization failed', error); setFailed(true); }
-    return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
+    return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); sportsFx.dispose(); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
   }, [holeIndex, portrait, quality]);
   const endDrag=(event:React.PointerEvent<HTMLCanvasElement>)=>{if(orbit.current.drag?.id===event.pointerId)orbit.current.drag=null;};
   return <><canvas className="gg-canvas" ref={canvas}

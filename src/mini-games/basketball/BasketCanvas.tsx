@@ -1,3 +1,4 @@
+import {createSportsEffect} from '../shared/sportsEffects';
 import React,{useEffect,useRef,useState} from 'react';
 import * as T from 'three';
 import {createGolferAssets} from '../gakuro-golf/golferModels';
@@ -12,7 +13,7 @@ export default function BasketCanvas({view,selfId,avatar,suspended=false}:{view:
  const canvas=useRef<HTMLCanvasElement>(null),current=useRef({view,selfId,avatar,suspended,at:performance.now()});current.current={view,selfId,avatar,suspended,at:current.current.view===view?current.current.at:performance.now()};
  const[failed,setFailed]=useState(false);
  useEffect(()=>{
-  const el=canvas.current!,scene=new T.Scene(),camera=new T.OrthographicCamera(-12,12,10,-10,.1,140),athletes=createGolferAssets();
+  const el=canvas.current!,scene=new T.Scene(),camera=new T.OrthographicCamera(-12,12,10,-10,.1,140),athletes=createGolferAssets();const sportsFx=createSportsEffect(scene,'basketball');
   const owned:(T.BufferGeometry|T.Material|T.Texture)[]=[],materials=new Map<string,T.MeshStandardMaterial>();
   type Rig={rig:ReturnType<typeof athletes.create>;appearance:string;ring:T.Mesh;shadow:T.Mesh;label:T.Sprite;labelMap:T.CanvasTexture;labelMat:T.SpriteMaterial;lastName:string;};
   const rigs=new Map<string,Rig>();let renderer:T.WebGLRenderer|undefined,observer:ResizeObserver|undefined,frame=0,dead=false;
@@ -87,11 +88,11 @@ export default function BasketCanvas({view,selfId,avatar,suspended=false}:{view:
     const tutorial=m?.tutorial;target.visible=!!tutorial&&['move','shoot','steal'].includes(tutorial.stage)||!!m?.mustClear&&!!own&&m.possession===own.side;
     if(tutorial&&own){target.position.set(tutorial.stage==='move'?tutorial.startX+2.3:tutorial.stage==='shoot'?0:m!.ball.x,.08,-(tutorial.stage==='move'?tutorial.startY:tutorial.stage==='shoot'?COURT.hoopY-2.3:m!.ball.y));}
     else if(m?.mustClear&&own){const d=Math.max(.1,Math.hypot(own.x,own.y-COURT.hoopY));target.position.set(clamp(own.x/d*(COURT.clear+.5),-7,7),.08,-clamp(COURT.hoopY+(own.y-COURT.hoopY)/d*(COURT.clear+.5),-7,7));}
-    renderer!.render(scene,camera);el.dataset.players=String(units.length);el.dataset.models=String([...rigs.values()].filter(r=>r.rig.root.userData.protagonistReady).length);el.dataset.custom=String([...rigs.values()].filter(r=>!r.rig.root.userData.protagonistReady).length);el.dataset.court='half';
+    sportsFx.update(now,m?.sportsEvents,m?.units??[],m?{x:m.ball.x,y:m.ball.z,z:-m.ball.y}:undefined,!!m?.ball.flight&&!!m.ball.special&&!state.view?.paused,m?.id);el.dataset.sportsFx=String(sportsFx.group.userData.ready===true);renderer!.render(scene,camera);el.dataset.players=String(units.length);el.dataset.models=String([...rigs.values()].filter(r=>r.rig.root.userData.protagonistReady).length);el.dataset.custom=String([...rigs.values()].filter(r=>!r.rig.root.userData.protagonistReady).length);el.dataset.court='half';
    };frame=requestAnimationFrame(render);
   }catch{setFailed(true);}
   const lost=(event:Event)=>{event.preventDefault();dead=true;cancelAnimationFrame(frame);setFailed(true);};el.addEventListener('webglcontextlost',lost);
-  return()=>{dead=true;cancelAnimationFrame(frame);observer?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values())dropRig(r);athletes.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
+  return()=>{dead=true;cancelAnimationFrame(frame);observer?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values())dropRig(r);sportsFx.dispose();athletes.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
  },[]);
  return <div className="bk-canvas">{failed?<BasketFallback view={view} selfId={selfId} avatar={avatar}/>:<canvas ref={canvas} aria-label="Basketball court 3D" data-testid="basketball-court"/>}</div>;
 }

@@ -1,3 +1,4 @@
+import {createSportsEffect} from '../shared/sportsEffects';
 import{createGolferAssets}from'../gakuro-golf/golferModels';
 import React,{useEffect,useRef,useState} from 'react';
 import * as T from 'three';
@@ -12,7 +13,7 @@ export default function TennisCanvas({view,selfId,preview=false,avatar,suspended
  const canvas=useRef<HTMLCanvasElement>(null),state=useRef({view,selfId,preview,avatar,suspended,at:performance.now()});state.current={view,selfId,preview,avatar,suspended,at:state.current.view===view?state.current.at:performance.now()};const[failed,setFailed]=useState(false);
  useEffect(()=>{
   const el=canvas.current!;let renderer:T.WebGLRenderer|undefined,frame=0,disposed=false;
-  const scene=new T.Scene();scene.background=new T.Color('#b9e3df');scene.fog=new T.Fog('#b9e3df',62,115);
+  const scene=new T.Scene();scene.background=new T.Color('#b9e3df');scene.fog=new T.Fog('#b9e3df',62,115);const sportsFx=createSportsEffect(scene,'tennis');
   const owned:(T.BufferGeometry|T.Material|T.Texture)[]=[],geometries=new Map<string,T.BufferGeometry>(),materials=new Map<string,T.MeshStandardMaterial>();
   const camera=new T.PerspectiveCamera(43,1,.1,150);
   const geo=(key:string,make:()=>T.BufferGeometry)=>{if(!geometries.has(key)){const g=make();geometries.set(key,g);owned.push(g);}return geometries.get(key)!;};
@@ -73,10 +74,10 @@ export default function TennisCanvas({view,selfId,preview=false,avatar,suspended
      const trailCount=Math.min(b.trail.length,trailPositions.count);for(let i=0;i<trailCount;i++){const p=b.trail[i];trailPositions.setXYZ(i,p[0],p[2],-p[1]);}trailPositions.needsUpdate=true;trailGeo.setDrawRange(0,trailCount);trail.visible=m.phase==='rally'&&trailCount>1;trailMat.color.set(m.units.filter(u=>u.side===b.lastSide).sort((a,b)=>b.shotSeq-a.shotSeq)[0]?.shot==='special'?'#ff9487':'#fff0a3');
      target.visible=m.phase==='rally'&&b.bounces===0;const t=(b.vz+Math.sqrt(Math.max(0,b.vz*b.vz+19.6*Math.max(0,b.z-.08))))/9.8;target.position.set(b.x+b.vx*t+.5*b.spin*t*t,.061,-b.y-b.vy*t);
     }else{ball.position.set(Math.sin(now/950)*2,1.5+Math.sin(now/320)*.5,Math.cos(now/950)*6);ballShadow.position.set(ball.position.x,.06,ball.position.z);target.visible=false;trail.visible=false;}
-    renderer!.render(scene,camera);el.dataset.custom=String([...rigs.values()].filter(r=>r.custom.root.visible).length);el.dataset.players=String(units.length);el.dataset.heroes=String([...rigs.values()].filter(r=>r.custom.root.visible||r.hero.ready).length);frame=requestAnimationFrame(loop);
+    sportsFx.update(now,m?.sportsEvents,m?.units??[],m?{x:m.ball.x,y:m.ball.z,z:-m.ball.y}:undefined,!!m&&m.phase==='rally'&&!v?.paused&&m.units.some(u=>u.shotSeq===m.shotSerial&&u.shot==='special'),m?.id);el.dataset.sportsFx=String(sportsFx.group.userData.ready===true);renderer!.render(scene,camera);el.dataset.custom=String([...rigs.values()].filter(r=>r.custom.root.visible).length);el.dataset.players=String(units.length);el.dataset.heroes=String([...rigs.values()].filter(r=>r.custom.root.visible||r.hero.ready).length);frame=requestAnimationFrame(loop);
    };frame=requestAnimationFrame(loop);
   }catch{setFailed(true);}
-  return()=>{disposed=true;cancelAnimationFrame(frame);resize?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values()){r.hero.dispose();r.custom.dispose();}athletes.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
+  return()=>{disposed=true;cancelAnimationFrame(frame);resize?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values()){r.hero.dispose();r.custom.dispose();}sportsFx.dispose();athletes.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
  },[]);
  return <div className="tennis-court-view"><canvas ref={canvas} aria-label="Tennis court" data-testid="tennis-court"/>{failed&&<CourtFallback view={view} selfId={selfId}/>}</div>;
 }

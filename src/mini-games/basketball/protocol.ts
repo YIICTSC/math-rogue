@@ -1,3 +1,4 @@
+import {validSportsEvents} from '../shared/sportsEvents';
 import {validAvatar} from '../gakuro-kart/avatar';
 import {validLesson} from '../gakuro-kart/learning';
 import {POSITIONS} from './rules';
@@ -13,7 +14,7 @@ export function validView(v:any):v is BasketView {
  for(let i=0;i<v.teams.length;i++){const t=v.teams[i];if(!t||t.id!==i||!text(t.name,80)||!Array.isArray(t.members)||t.members.length!==3||t.members.some((id:any)=>id!==null&&!ids.has(id)))return false;}
  const match=(m:any,full=false)=>{
   if(!m||!text(m.id,60)||!integer(m.round,8)||!['study','play','finished'].includes(m.phase)||!Array.isArray(m.teams)||m.teams.length!==2||m.teams.some((id:any,i:number)=>!(i===1&&id===null)&&(!integer(id,7)||!v.teams[id]))||m.winner!==null&&!m.teams.includes(m.winner)||!Array.isArray(m.score)||m.score.length!==2||!m.score.every((n:any)=>integer(n,100000)))return false;
-  if(!full)return true;
+  if(!full)return true;if(!validSportsEvents(m,'basketball'))return false;
   if(m.tutorial!==undefined){const t=m.tutorial;if(!v.practice||!t||!['move','dash','pass','receive','steal','shoot','complete'].includes(t.stage)||!ids.has(t.owner)||!finite(t.startX,10)||!finite(t.startY,10)||!finite(t.elapsed))return false;}
   if(![0,1].includes(m.possession)||typeof m.mustClear!=='boolean'||!finite(m.inbound,3)||!finite(m.shotClock,25)||!finite(m.time)||!finite(m.studyAt)||!finite(m.noticeAt)||!integer(m.serial)||!text(m.notice,80)||!Array.isArray(m.units)||m.units.length>6||m.units.length<3)return false;
   const us=new Set<string>();for(const u of m.units){if(!u||!text(u.id,80)||us.has(u.id)||u.owner!==null&&!ids.has(u.owner)||![0,1].includes(u.side)||!POSITIONS.includes(u.role)||!text(u.name,16)||typeof u.cpu!=='boolean'||typeof u.charging!=='boolean'||!stats(u.stats)||!['idle','shot','dunk','pass','drive','block','rebound','screen','steal','celebrate'].includes(u.motion)||!['x','y','vx','vy','charge','release','catch','cooldown','dodge','dashCooldown','skillCooldown','hurt','jump','screen','buff','action','aiAt'].every(k=>finite(u[k],1e5))||!['energy','stamina','focus'].every(k=>finite(u[k],1)&&u[k]>=0)||!integer(u.actionSeq)||u.avatar!==undefined&&!validAvatar(u.avatar))return false;us.add(u.id);}

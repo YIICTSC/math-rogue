@@ -1,0 +1,58 @@
+{
+  "generator": "Blender 4.3.2",
+  "source": "assets/sports-performances/ultimate-effects.blend",
+  "units": "meters",
+  "pivot": "effect center, Z up in source / Y up in glTF",
+  "effect_seconds": 1.5,
+  "sprite_frames": 16,
+  "sprite_frame_size": 256,
+  "effects": {
+    "golf": {
+      "glb": "models/sports-effects/golf.glb",
+      "strip": "sprites/sports-effects/golf.webp",
+      "objects": 3,
+      "triangles": 344,
+      "optimized_bytes": 27092,
+      "sha256": "1040d5db9fecb59a131312a40a8e42b6d28084872f0ebbdf9503ce06b3aef816",
+      "animations": 3,
+      "materials": 2
+    },
+    "tennis": {
+      "glb": "models/sports-effects/tennis.glb",
+      "strip": "sprites/sports-effects/tennis.webp",
+      "objects": 3,
+      "triangles": 424,
+      "optimized_bytes": 31924,
+      "sha256": "dca5dd5dc575d031e6b658cb464e7949ba2fe01ad72419f8c6ca7276959b2e63",
+      "animations": 3,
+      "materials": 2
+    },
+    "basketball": {
+      "glb": "models/sports-effects/basketball.glb",
+      "strip": "sprites/sports-effects/basketball.webp",
+      "objects": 3,
+      "triangles": 372,
+      "optimized_bytes": 29264,
+      "sha256": "01b4ff5e486eda685abbb4badcc793e6f65c5e0f886f161d29d6133bf175ea38",
+      "animations": 3,
+      "materials": 2
+    },
+    "dodgeball": {
+      "glb": "models/sports-effects/dodgeball.glb",
+      "strip": "sprites/sports-effects/dodgeball.webp",
+      "objects": 3,
+      "triangles": 668,
+      "optimized_bytes": 44968,
+      "sha256": "c67452f7128bbb10d90cb4eaab6971775f71f58cbf0347ecf9bcc4d67ec32d38",
+      "animations": 3,
+      "materials": 2
+    }
+  },
+  "optimization": [
+    "glTF Transform dedup",
+    "weld",
+    "resample",
+    "prune"
+  ],
+  "source_sha256": "7e7c60ecc5c9403e440bbbfbe1ba16276b358cfa4a0035d05fd79cc9ed29e5bb"
+}
