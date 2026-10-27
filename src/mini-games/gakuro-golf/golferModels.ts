@@ -15,7 +15,7 @@ export function createGolferAssets() {
     new T.MeshStandardMaterial({ color: '#263148', roughness: .34 })];
   const geometries = new Set<T.BufferGeometry>([sphere, cylinder, box,sleeve,mitten,trouser,shoe, ...parts.map(p => p.geometry)]);
   const sharedMaterials = new Set<T.Material>([...materials, ...parts.map(p => p.material)]);
-  function create(avatar: KartAvatar, athlete=false, sport?:'tennis'|'dodgeball') {
+  function create(avatar: KartAvatar, athlete=false, sport?:'tennis'|'dodgeball'|'basketball') {
     const root = new T.Group(), torso = new T.Group(), arms = new T.Group();root.name="StorybookGolfer";
     const legs:{leg:T.Mesh;foot:T.Mesh}[]=[];let walkTime=0;
     const owned: T.Material[] = [], colored: { mesh: T.Mesh; key: 'body' | 'outfit' | 'hair' | 'eyeColor' }[] = [];

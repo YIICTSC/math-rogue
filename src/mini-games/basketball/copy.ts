@@ -1,4 +1,4 @@
-const COPY:Record<string,[string,string]>={
+const COPY:Record<string,[string,string]>={"はじめてのバスケットボール":["Your first basketball game", "はじめての ばすけっとぼーる"],"黄色い輪を目印に、パッドで動こう。ボールを持つと自動でドリブル！":["Move with the stick toward the yellow ring. Dribbling is automatic when you have the ball!", "きいろい わを めじるしに、ぱっどで うごこう。ぼーるを もつと じどうで どりぶる！"],"方向を入れながら「ダッシュ」を押してみよう。":["Hold a direction and press Dash.", "ほうこうを いれながら「だっしゅ」を おしてみよう。"],"「パス」で仲間にボールを渡そう。":["Press Pass to send the ball to a teammate.", "「ぱす」で なかまに ぼーるを わたそう。"],"仲間がパスを返します。ボールが戻るところを見てみよう。":["Your teammate will pass back. Watch the ball return.", "なかまが ぱすを かえします。ぼーるが もどるところを みてみよう。"],"近くの相手から「スティール」でボールを取り返そう。":["Press Steal near the opponent to get the ball back.", "ちかくの あいてから「すてぃーる」で ぼーるを とりかえそう。"],"黄色い輪まで進んで「シュート」！リングの近くほど決まりやすいよ。":["Move to the yellow ring and press Shoot! Shots are easier close to the hoop.", "きいろい わまで すすんで「しゅーと」！りんぐの ちかくほど きまりやすいよ。"],"ナイスシュート！練習完了。このままCPU戦を始めよう。":["Nice shot! Tutorial complete. Ready for a CPU match?", "ないすしゅーと！れんしゅうかんりょう。このままCPUせんを はじめよう。"],"CPU戦を始める":["Start CPU match", "CPUせんを はじめる"],
   "バスケットボール": [
     "Basketball",
     "ばすけっとぼーる"

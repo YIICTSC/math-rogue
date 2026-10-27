@@ -1,32 +1,40 @@
-import React,{useEffect,useRef} from 'react';
-import type {BasketView} from './types';
-import {BODY_COLORS,HAIR_COLORS} from '../gakuro-kart/avatar';
-import type {KartAvatar} from '../gakuro-kart/avatar';
-/** Logical court coordinates match the authoritative simulation; rendering never advances it. */
-export default function BasketCanvas({view,selfId,avatar}:{view:BasketView|null;selfId:string;avatar?:KartAvatar;suspended?:boolean;aim?:number}){
- const canvas=useRef<HTMLCanvasElement>(null),snapshot=useRef(view);snapshot.current=view;
- useEffect(()=>{const c=canvas.current!;const ctx=c.getContext('2d')!;let frame=0;
- const draw=(now:number)=>{const r=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);if(c.width!==Math.round(r.width*dpr)||c.height!==Math.round(r.height*dpr)){c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);}const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
- const landscape=w>h*1.25,scale=Math.min(w/(landscape?36:19),h/(landscape?19:36));
- const point=(x:number,y:number,z=0)=>landscape?{x:w/2+y*scale*1.6,y:h/2+x*scale-z*scale*.7}:{x:w/2+x*scale,y:h/2-y*scale*1.6-z*scale*.7};
- const path=(points:number[][],fill?:string)=>{ctx.beginPath();points.forEach(([x,y],i)=>{const p=point(x,y);if(i)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);});if(fill){ctx.closePath();ctx.fillStyle=fill;ctx.fill();}ctx.stroke();};
- ctx.fillStyle='#102a36';ctx.fillRect(0,0,w,h);ctx.lineWidth=Math.max(1,scale*.035);ctx.strokeStyle='#c89b61';
- for(let i=0;i<16;i++)path([[-8+i,-10],[-7+i,-10],[-7+i,10],[-8+i,10]],i%2?'#dca76c':'#e3b57d');
- ctx.strokeStyle='#fff5da';ctx.lineWidth=scale*.07;path([[-8,-10],[8,-10],[8,10],[-8,10],[-8,-10]]);path([[-8,0],[8,0]]);
- const ellipse=(x:number,y:number,rad:number)=>{const p=point(x,y),a=point(-8,-10),b=point(8,10);ctx.save();ctx.beginPath();ctx.rect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y));ctx.clip();ctx.beginPath();ctx.ellipse(p.x,p.y,rad*scale*(landscape?1.6:1),rad*scale*(landscape?1:1.6),0,0,Math.PI*2);ctx.stroke();ctx.restore();};ellipse(0,0,2);
- for(const side of [-1,1]){path([[-2.6,side*10],[-2.6,side*6],[2.6,side*6],[2.6,side*10]],'#194857');ellipse(0,side*8.7,6.5);}
- ctx.fillStyle='#ffffff30';ctx.font=`bold ${scale*.5}px system-ui`;ctx.textAlign='center';ctx.fillText('GAKURO · BASKETBALL',w/2,h/2-scale*2.5);
- const v=snapshot.current,m=v?.match;
- const units=m?.units||Array.from({length:6},(_,i)=>({id:String(i),owner:null,side:i<3?0:1,x:(i%3-1)*4,y:i<3?-4:4,vx:0,vy:0,name:'CPU',action:0,actionSeq:0,avatar:avatar}));
- for(const u of [...units].sort((a,b)=>point(a.x,a.y).y-point(b.x,b.y).y)){
- const p=point(u.x,u.y),moving=Math.hypot(u.vx,u.vy)>.1,swing=moving?Math.sin(now*.016+u.id.length)*scale*.13:0;ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(p.x,p.y+scale*.2,scale*.46,scale*.16,0,0,7);ctx.fill();
- if(u.owner===selfId){ctx.strokeStyle='#fff177';ctx.lineWidth=scale*.08;ctx.beginPath();ctx.ellipse(p.x,p.y+scale*.15,scale*.58,scale*.25,0,0,7);ctx.stroke();}
- ctx.lineWidth=scale*.15;ctx.lineCap='round';ctx.strokeStyle='#183346';ctx.beginPath();ctx.moveTo(p.x-scale*.15,p.y-scale*.2);ctx.lineTo(p.x-scale*.22+swing,p.y+scale*.1);ctx.moveTo(p.x+scale*.15,p.y-scale*.2);ctx.lineTo(p.x+scale*.22-swing,p.y+scale*.1);ctx.stroke();
- ctx.fillStyle=u.side===0?'#2b9bc1':'#e76643';ctx.fillRect(p.x-scale*.27,p.y-scale*.85,scale*.54,scale*.65);ctx.strokeStyle=BODY_COLORS[u.avatar?.body??0];ctx.beginPath();ctx.moveTo(p.x-scale*.29,p.y-scale*.75);ctx.lineTo(p.x-scale*.42,p.y-scale*(u.action>0?1.2:.35));ctx.moveTo(p.x+scale*.29,p.y-scale*.75);ctx.lineTo(p.x+scale*.42,p.y-scale*(u.action>0?1.2:.35));ctx.stroke();ctx.fillStyle=BODY_COLORS[u.avatar?.body??0];ctx.beginPath();ctx.arc(p.x,p.y-scale*1.05,scale*.24,0,7);ctx.fill();ctx.fillStyle=HAIR_COLORS[u.avatar?.hair??0];ctx.beginPath();ctx.arc(p.x,p.y-scale*1.15,scale*.25,Math.PI,Math.PI*2);ctx.fill();
- ctx.fillStyle='#fff';ctx.font=`bold ${scale*.25}px system-ui`;ctx.fillText(u.id.at(-1)||'1',p.x,p.y-scale*.43);ctx.fillStyle='#143142';ctx.font=`${Math.max(9,scale*.24)}px system-ui`;ctx.fillText(u.name,p.x,p.y+scale*.6);
- }
- for(const y of [-8.7,8.7]){const p=point(0,y,3.1);ctx.strokeStyle='#fff';ctx.lineWidth=scale*.12;ctx.strokeRect(p.x-scale*.65,p.y-scale*.4,scale*1.3,scale*.5);ctx.strokeStyle='#ff653b';ctx.beginPath();ctx.ellipse(p.x,p.y+scale*.12,scale*.43,scale*.16,0,0,7);ctx.stroke();}
- if(m){const b=m.ball,p=point(b.x,b.y,b.z);ctx.fillStyle='#eb8436';ctx.strokeStyle='#7d3519';ctx.lineWidth=scale*.045;ctx.beginPath();ctx.arc(p.x,p.y,scale*.22,0,7);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(p.x-scale*.22,p.y);ctx.lineTo(p.x+scale*.22,p.y);ctx.stroke();}
- frame=requestAnimationFrame(draw);};frame=requestAnimationFrame(draw);return()=>cancelAnimationFrame(frame);},[selfId,avatar]);
- return <canvas ref={canvas} aria-label="Basketball court" style={{width:'100%',height:'100%',display:'block'}}/>;
+import React,{useEffect,useRef,useState} from 'react';
+import * as T from 'three';
+import {createGolferAssets} from '../gakuro-golf/golferModels';
+import {defaultAvatar,type KartAvatar} from '../gakuro-kart/avatar';
+import type {BasketView,Unit} from './types';
+import BasketFallback from './BasketFallback';
+const heroes=['elementary-dodgeball','high-school-warrior','magic-akari','elementary-caretaker','magic-mirai','elementary-assassin'];
+/** Rendering follows authoritative positions; the tutorial and game rules stay in engine.ts. */
+export default function BasketCanvas({view,selfId,avatar,suspended=false}:{view:BasketView|null;selfId:string;avatar?:KartAvatar;suspended?:boolean;aim?:number}){
+ const canvas=useRef<HTMLCanvasElement>(null),state=useRef({view,selfId,avatar,suspended});state.current={view,selfId,avatar,suspended};const[failed,setFailed]=useState(false);
+ useEffect(()=>{const el=canvas.current!,scene=new T.Scene(),camera=new T.OrthographicCamera(-20,20,20,-20,.1,180),assets=createGolferAssets(),owned:(T.BufferGeometry|T.Material)[]=[],rigs=new Map<string,{rig:ReturnType<typeof assets.create>;key:string;ring:T.Mesh}>();let renderer:T.WebGLRenderer|undefined,observer:ResizeObserver|undefined,frame=0,dead=false;
+ const geometry=<G extends T.BufferGeometry>(g:G)=>{owned.push(g);return g;},material=(color:string)=>{const m=new T.MeshStandardMaterial({color,roughness:.75});owned.push(m);return m;};
+ const cube=geometry(new T.BoxGeometry(1,1,1)),sphere=geometry(new T.SphereGeometry(1,20,14)),ringGeo=geometry(new T.RingGeometry(.62,.76,32));
+ const box=(x:number,y:number,z:number,w:number,h:number,d:number,color:string)=>{const m=new T.Mesh(cube,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);scene.add(m);return m;};
+ const line=(points:number[][],color='#fff4d8')=>{const g=geometry(new T.BufferGeometry().setFromPoints(points.map(([x,y])=>new T.Vector3(x,.09,-y*1.6))));const mat=new T.LineBasicMaterial({color});owned.push(mat);scene.add(new T.Line(g,mat));};
+ try{renderer=new T.WebGLRenderer({canvas:el,antialias:true});renderer.setPixelRatio(Math.min(1.8,devicePixelRatio||1));renderer.outputColorSpace=T.SRGBColorSpace;scene.background=new T.Color('#122e3b');scene.add(new T.HemisphereLight('#fff6df','#526f89',2.6));const light=new T.DirectionalLight('#fff4db',3);light.position.set(-15,35,10);scene.add(light);
+ box(0,-.2,0,48,.3,56,'#183e4b');for(let i=0;i<16;i++)box(i-7.5,0,0,.98,.08,32,i%2?'#dbac75':'#e5ba86');
+ line([[-8,-10],[8,-10],[8,10],[-8,10],[-8,-10]]);line([[-8,0],[8,0]]);
+ for(const y of[-10,10]){box(0,.05,-(y-Math.sign(y)*2)*1.6,5.2,.03,6.4,'#22586a');line([[-2.6,y],[-2.6,y-Math.sign(y)*4],[2.6,y-Math.sign(y)*4],[2.6,y]]);}
+ for(const[cy,r]of [[0,2],[-8.7,6.5],[8.7,6.5]]){const pts:number[][]=[];for(let i=0;i<=120;i++){const a=i/120*Math.PI*2,x=Math.cos(a)*r,y=cy+Math.sin(a)*r;if(Math.abs(y)<=10)pts.push([x,y]);else if(pts.length){line(pts);pts.length=0;}}if(pts.length)line(pts);}
+ for(const side of[-1,1]){const z=-side*8.7*1.6;box(0,1.7,z-side*1.1,.18,3.4,.18,'#e4ebe5');box(0,3.7,z-side*.6,2.2,1.3,.13,'#f5ede0');box(0,3.5,z-side*.51,.85,.55,.04,'#d55136');const hoop=new T.Mesh(geometry(new T.TorusGeometry(.47,.065,10,32)),material('#ef6b32'));hoop.rotation.x=Math.PI/2;hoop.position.set(0,3.1,z);scene.add(hoop);for(let i=0;i<12;i++){const a=i/12*Math.PI*2;const net=new T.Mesh(geometry(new T.CylinderGeometry(.018,.018,.6,4)),material('#f5efe1'));net.position.set(Math.cos(a)*.4,2.8,z+Math.sin(a)*.4);scene.add(net);}}
+ for(const side of[-1,1])for(let row=0;row<3;row++)box(side*(11+row),row*.6+.3,0,.9,.6,34,'#356475');
+ const ball=new T.Mesh(sphere,material('#ec8737'));ball.scale.setScalar(.28);scene.add(ball);const seam=new T.Mesh(geometry(new T.TorusGeometry(.282,.014,6,24)),material('#713b24'));ball.add(seam);seam.scale.setScalar(1/.28);
+ const markerMat=new T.MeshBasicMaterial({color:'#fff08a',side:T.DoubleSide,transparent:true,opacity:.8});owned.push(markerMat);const target=new T.Mesh(geometry(new T.RingGeometry(.8,1,40)),markerMat);target.rotation.x=-Math.PI/2;scene.add(target);
+ const resize=()=>{if(!renderer)return;const w=Math.max(1,el.clientWidth),h=Math.max(1,el.clientHeight),aspect=w/h,height=aspect>1.25?Math.max(20,38/aspect):Math.max(37,22/aspect);renderer.setSize(w,h,false);camera.left=-height*aspect/2;camera.right=height*aspect/2;camera.top=height/2;camera.bottom=-height/2;camera.updateProjectionMatrix();};observer=new ResizeObserver(resize);observer.observe(el);resize();let last=performance.now();
+ const render=(now:number)=>{if(dead)return;frame=requestAnimationFrame(render);const current=state.current;if(current.suspended||document.hidden){last=now;return;}if(now-last<1000/60-1)return;const dt=Math.min(.06,(now-last)/1000);last=now;const m=current.view?.match,wide=el.clientWidth/el.clientHeight>1.25;camera.position.set(wide?38:0,42,wide?0:38);camera.lookAt(0,0,0);
+ const units:Partial<Unit>[]=m?.units||Array.from({length:6},(_,i)=>({id:'preview'+i,x:(i%3-1)*4,y:i<3?-4:4,side:i<3?0:1,avatar:i===0&&current.avatar?current.avatar:{...defaultAvatar(i),protagonist:heroes[i]}}));const ids=new Set(units.map(u=>u.id));
+ for(const[id,r]of rigs)if(!ids.has(id)){r.rig.dispose();scene.remove(r.rig.root,r.ring);rigs.delete(id);}
+ for(const[i,u]of units.entries()){const appearance=u.avatar||{...defaultAvatar(i),protagonist:heroes[i%6]},key=JSON.stringify(appearance);let r=rigs.get(u.id!);if(!r){const rig=assets.create(appearance,true,'basketball'),mat=new T.MeshBasicMaterial({color:u.owner===current.selfId?'#fff091':u.side===0?'#64daef':'#ff9874',side:T.DoubleSide});owned.push(mat);const ring=new T.Mesh(ringGeo,mat);ring.rotation.x=-Math.PI/2;rig.root.position.set(u.x||0,0,-(u.y||0)*1.6);scene.add(rig.root,ring);r={rig,key,ring};rigs.set(u.id!,r);}if(r.key!==key){r.key=key;r.rig.update(appearance);}const moving=Math.hypot(u.vx||0,u.vy||0)>.1,held=m?.ball.holder===u.id,action=u.action||0,shooting=action>0&&m?.ball.flight&&!m.ball.pass;
+ r.rig.animateHero(dt,action,moving);const raise=shooting?-2.5:action>0?-1.4:(u.catch||0)>0?-1.2:held?-.9:-.45;for(const side of['L','R']){r.rig.hero.pose('upper_arm.'+side,raise,side==='L'?.4:-.4);r.rig.hero.pose('forearm.'+side,shooting?-.25:-.75);}r.rig.hero.pose('spine',(u.dodge||0)>0?.35:moving?.15:.04,action*.3);r.rig.leftArm.rotation.set(raise,0,.25);r.rig.rightArm.rotation.set(held?-.9+Math.sin(now/100)*.25:raise,0,-.25);r.rig.club.visible=false;
+ const follow=1-Math.exp(-dt*24);r.rig.root.position.x+=((u.x||0)-r.rig.root.position.x)*follow;r.rig.root.position.z+=(-(u.y||0)*1.6-r.rig.root.position.z)*follow;r.rig.root.position.y=shooting?Math.sin(action/.45*Math.PI)*.5:(u.dodge||0)>0?.12:0;r.rig.root.rotation.y=moving?Math.atan2(-(u.vx||0),-(u.vy||0)):u.side===0?Math.PI:0;r.ring.position.set(r.rig.root.position.x,.13,r.rig.root.position.z);}
+ if(m){const b=m.ball;ball.position.set(b.x,b.z,-b.y*1.6);ball.rotation.x=now/400;ball.rotation.z=now/600;}else ball.position.set(0,.8+Math.abs(Math.sin(now/180)),0);
+ const tutorial=m?.tutorial,own=m?.units.find(u=>u.owner===tutorial?.owner);target.visible=!!tutorial&&['move','shoot','steal'].includes(tutorial.stage);if(tutorial&&own){target.position.set(tutorial.stage==='move'?tutorial.startX+2.3:tutorial.stage==='shoot'?0:m!.ball.x,.15,-(tutorial.stage==='move'?tutorial.startY:tutorial.stage==='shoot'?(own.side===0?6.3:-6.3):m!.ball.y)*1.6);}
+ renderer!.render(scene,camera);el.dataset.players=String(units.length);el.dataset.models=String([...rigs.values()].filter(r=>r.rig.root.userData.protagonistReady).length);el.dataset.custom=String([...rigs.values()].filter(r=>!r.rig.root.userData.protagonistReady).length);};frame=requestAnimationFrame(render);
+ }catch{setFailed(true);}
+ const lost=(event:Event)=>{event.preventDefault();dead=true;cancelAnimationFrame(frame);setFailed(true);};el.addEventListener('webglcontextlost',lost);
+ return()=>{dead=true;cancelAnimationFrame(frame);observer?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values())r.rig.dispose();assets.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
+ },[]);
+ return <div className="bk-canvas">{failed?<BasketFallback view={view} selfId={selfId} avatar={avatar}/>:<canvas ref={canvas} aria-label="Basketball court 3D" data-testid="basketball-court"/>}</div>;
 }

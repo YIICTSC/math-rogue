@@ -8,6 +8,7 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:basketball:browser": "node scripts/test-basketball-3d-browser.mjs",
     "test:basketball": "node scripts/test-basketball.mjs",
     "test:sports-invitations": "pnpm run server:build && node scripts/test-sports-invitations-browser.mjs",
     "generate:dialogue-art": "node scripts/normalize-dialogue-art.mjs",

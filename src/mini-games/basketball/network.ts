@@ -23,7 +23,7 @@ export class BasketRoom{
  private observations=new Map<string,string|null>();
  private visibility=()=>{if(this.world){this.world.paused=document.hidden;this.emit();}};
  private run(){let last=performance.now(),acc=0,broadcast=0;document.addEventListener('visibilitychange',this.visibility);this.visibility();this.timer=setInterval(()=>{const now=performance.now(),dt=Math.min(.2,(now-last)/1000);last=now;acc+=dt;while(acc>=1/60){if(this.world)try{tick(this.world,1/60,this.factory);}catch{this.status('問題を準備できませんでした。');this.world.paused=true;}acc-=1/60;}broadcast+=dt;if(broadcast>=.1){broadcast=0;this.emit();}},1000/60);}
- practice(name:string){if(this.closed)return;this.host=true;this.world=createBasketball(crypto.getRandomValues(new Uint32Array(1))[0],true);addPlayer(this.world,this.selfId,name);this.run();}
+ practice(name:string,tutorial=false){if(this.closed)return;this.host=true;this.world=createBasketball(crypto.getRandomValues(new Uint32Array(1))[0],true,tutorial);addPlayer(this.world,this.selfId,name);this.run();}
  private async open(id?:string){
   const env=import.meta.env,options:PeerOptions=env.VITE_RPG_PEER_HOST?{host:env.VITE_RPG_PEER_HOST,port:Number(env.VITE_RPG_PEER_PORT||443),path:env.VITE_RPG_PEER_PATH||'/',secure:env.VITE_RPG_PEER_SECURE!=='false'}:{};
   const ice=env.VITE_BASKETBALL_ICE_SERVERS||env.VITE_GOLF_ICE_SERVERS||env.VITE_KART_ICE_SERVERS;if(ice)options.config={iceServers:JSON.parse(ice)};
