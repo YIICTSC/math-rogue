@@ -1,4 +1,6 @@
 const rows:Record<string,[string,string]>={
+ 'ショット威力':['Shot power','しょっといりょく'],'スターゲージ':['Star energy','すたーげーじ'],
+ '速く沈む球':['Fast, dipping shot','はやく しずむ たま'],'低く滑る球':['Low, skidding shot','ひくく すべる たま'],'高い山なり':['High, arcing shot','たかい やまなり'],'ネット際へ':['Just over the net','ねっとぎわへ'],'ゲージ満タンで':['Full energy only','げーじ まんたんで'],'素早く移動':['Move quickly','すばやく いどう'],'このボタンでサーブ':['Serve with this button','このぼたんで さーぶ'],'サーブ':['Serve','さーぶ'],
  'スポーツ':['Sports','すぽーつ'],'テニス':['Tennis','てにす'],'ゴルフ':['Golf','ごるふ'],'スポーツクラブ':['Sports club','すぽーつくらぶ'],
  'コートでも、グリーンでも。':['Find your game. Court or green.','こーとでも、ぐりーんでも。'],'種目を選ぶ':['Choose a sport','しゅもくをえらぶ'],
  'ラリーをつなぎ、勝利の一球へ。':['Build the rally. Make the winning shot.','らりーをつなぎ、しょうりのいっきゅうへ。'],
@@ -32,6 +34,7 @@ const rows:Record<string,[string,string]>={
  'パッド／方向キーで移動。打球ボタンを長押しして離すと強打。打つ方向でコースを選べます。':['Move with the stick or arrows. Hold and release a shot button for power. Choose a direction to place the ball.','ぱっど／ほうこうきーでいどう。だきゅうぼたんをながおししてはなすときょうだ。うつほうこうでこーすをえらべます。'],
  'Z：トップスピン　X：スライス　C：ロブ　V：ドロップ　Shift：スターショット　Space：ダッシュ':['Z: topspin · X: slice · C: lob · V: drop · Shift: star shot · Space: dash','Z：とっぷすぴん　X：すらいす　C：ろぶ　V：どろっぷ　Shift：すたーしょっと　Space：だっしゅ'],
  '打点の近くで打とう。光る着地点を目安に移動。スターゲージ満タンで必殺ショット。':['Swing near the ball. Follow its glowing landing marker. Fill the star gauge for a special shot.','だてんのちかくでうとう。ひかるちゃくちてんをめやすにいどう。すたーげーじまんたんでひっさつしょっと。'],
+ 'サーブ前は左右に立ち位置を調整できます。センターマークとサイドラインの間、ベースライン後方から打ちます。':['Before serving, move left or right behind the baseline, between the center mark and the sideline.','さーぶまえは さゆうに たちいちを ちょうせいできます。せんたーまーくと さいどらいんの あいだ、べーすらいん こうほうから うちます。'],
  'サーブはトップスピンのボタンで打てます。':['Use the topspin button to serve.','さーぶはとっぷすぴんのぼたんでうてます。'],
  'オンラインの試合はメニューを開いても進行します。':['Online matches continue while this menu is open.','おんらいんのしあいはめにゅーをひらいてもしんこうします。'],
  'ホストの画面が非表示のため、一時停止しています。':['Paused while the host screen is hidden.','ほすとのがめんがひひょうじのため、いちじていししています。'],

@@ -55,6 +55,7 @@ createRoot(document.getElementById('root')).render(<Tennis languageMode={params.
     await page.goto(`${base}?side=${side}`, { waitUntil: 'domcontentloaded', timeout: 120_000 });
     await page.waitForFunction(() => document.querySelector('[data-testid=tennis-court]')?.dataset.heroes === '4');
     assert.equal(await page.evaluate(() => window.__layoutView.match.units[window.__layoutView.match.serverUnit].owner), 'local');
+    assert.equal(await page.locator('.tn-action-illustration').count(),6);await page.evaluate(async()=>{const im=new Image();im.src='/sprites/tennis/action-icons-v1.webp';await im.decode();});
     // Exercise empty -> moving -> empty -> moving on the same renderer.
     for (const key of ['__rallyView', '__layoutView', '__rallyView']) {
       await page.evaluate(key => window.__setLayoutView(window[key]), key);
@@ -76,9 +77,10 @@ createRoot(document.getElementById('root')).render(<Tennis languageMode={params.
       assert(feet.x >= 0 && feet.x <= width && feet.y >= 0 && feet.y <= height - 5, `The retreating hero must remain visible on side ${side} at ${width}: ${JSON.stringify(feet)}`);
       const occlusion = await page.evaluate(() => {
         const u = window.__layoutView.match.units.find(u => u.owner === 'local'), v = new window.T.Vector3(u.x, 1.2, -u.y).project(window.__courtCamera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
-        return [...document.querySelectorAll('.tn-stick,.tn-aim,.tn-shot-buttons')].filter(n => { const r = n.getBoundingClientRect(); return x > r.left && x < r.right && y > r.top && y < r.bottom; }).map(n => n.className);
+        return [...document.querySelectorAll('.tn-stick,.tn-aim,.tn-shot-buttons .tn-action-face')].filter(n => { const r = n.getBoundingClientRect(); return x > r.left && x < r.right && y > r.top && y < r.bottom; }).map(n => n.className);
       });
       assert.deepEqual(occlusion, [], `Controls must not hide the serving hero on side ${side} at ${width}`);
+      assert.equal(await page.locator('.tn-shot-buttons em').count(),6);
       await page.screenshot({ path: `tmp/tennis-qa/final-layout-${width}${side ? '-side1' : ''}.png` });
     }
   }

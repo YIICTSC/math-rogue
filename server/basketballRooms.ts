@@ -22,7 +22,7 @@ export function createBasketServer({allowedOrigins=new Set<string>(),idleMs=45*6
   const timeout=setTimeout(()=>{if(!m.admitted)socket.close(1008,'Join timeout');},15000);timeout.unref();socket.on('pong',()=>{m.alive=true;});socket.on('error',()=>{});
   socket.on('message',raw=>{
    const now=Date.now();if(now-m.at>1000){m.at=now;m.count=0;}if(++m.count>85)return;let d:any;try{d=JSON.parse(String(raw));}catch{return;}if(!d||typeof d!=='object')return;
-   if(d.type==='ping'){send(m,{type:'pong'});return;}
+   if(d.type==='ping'){send(m,{type:'pong',version:BASKETBALL_PROTOCOL});return;}
    if(!m.admitted){
     if(d.type!=='connect'||d.protocol!==BASKETBALL_PROTOCOL||typeof d.name!=='string'||!d.name.trim()||d.name.length>16){fail(m,'参加名と通信バージョンを確認してください。');return;}
     if(d.create===true){if(rooms.size>=32){fail(m,'部屋が満員です。');return;}let code='';do{code=String(randomInt(500000,1000000));}while(rooms.has(code));room={code,world:createBasketball(randomInt(1,0x7fffffff)),host:m.id,members:new Map(),sequence:0,lastActive:now};rooms.set(code,room);}

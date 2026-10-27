@@ -1,6 +1,6 @@
 # Academy sports and tennis
 
-The main-menu Golf button is now Sports. The sports club offers golf, GAKURO TENNIS and GAKURO DODGEBALL. `GAKURO_GOLF` remains the internal screen identifier to preserve saved navigation and golf invitations. `?golfRoom=` still goes directly to golf; `?tennisRoom=` opens tennis joining with the correct host/server transport.
+The main-menu Golf button is now Sports. The sports club offers golf, GAKURO TENNIS, GAKURO DODGEBALL and GAKURO BASKETBALL. `GAKURO_GOLF` remains the internal screen identifier to preserve saved navigation and golf invitations. `?golfRoom=` still goes directly to golf; `?tennisRoom=` opens tennis joining with the correct host/server transport.
 
 Tennis uses the existing React/TypeScript/Three.js stack and protagonist GLBs. Simulation (`tennis/engine.ts`) is independent of the renderer (`TennisCanvas.tsx`). The original ImageGen sports-club illustration and provenance are in `assets/sports`; its WebP is shipped in the web and Android manifests. WebGL failure uses the same simulation and controls with a 2D court fallback.
 
@@ -33,3 +33,11 @@ Online supports up to 32 entrants and 40 room members including spectators. Stan
 Character creation now previews a looping tennis forehand with a strung racket, using the same arm/spine poses for custom avatars and named protagonist models. Dodgeball character creation uses an overarm throw with a released ball. Reduced-motion preference holds a preparation pose. Golf controls and character preview are unchanged.
 
 `pnpm run test:sports:direction` checks launch/depth input, buffered contact, speed-preserving follow-through, expiry, ownership, stale input, pauses and both dodgeball camera orientations. `pnpm run test:sports:direction:browser` checks same-frame keyboard aiming, follow-through, simultaneous touch-pad/shot input, custom/named preview animations and phone/desktop layouts in both sports. Physics changes apply to host/practice immediately and to the dedicated server after its usual manual Render deployment.
+
+## Illustrated touch controls and service positioning
+
+The ImageGen atlas `public/sprites/tennis/action-icons-v1.webp` supplies six distinct action illustrations: topspin, slice, lob, drop, star shot and dash. The untouched original and generation description are retained in `assets/tennis`. Each action retains a text label, keyboard hint, accessible name and desktop trajectory description. The topspin button becomes Serve while the local player serves. Portrait phones use a circular cluster at bottom-right with the movement pad on the left. Landscape keeps the controls at the sides. Shot power and star energy have compact explicit labels at top-right, away from the movement pad.
+
+Before contact, servers can move laterally behind the baseline on the score-selected deuce or advantage half. The center mark and the singles or doubles sideline limit their stance, with a small footing margin. Forward movement is locked until the serve. The ball follows the adjusted stance, then normal movement resumes. Service-box adjudication uses the original score-selected half, so moving across the center after serving cannot change the ruling. This is authoritative in solo, PeerJS host rooms and dedicated server rooms; dedicated servers receive it on their next manual deployment.
+
+`test:tennis` covers both sides, both service halves and both formats, sideline/center/baseline guards, launch position, normal movement after contact and service-box stability. `test:tennis:browser` also exercises real keyboard positioning. `test:sports-action-art` checks every atlas cell, image dimensions and transparency.

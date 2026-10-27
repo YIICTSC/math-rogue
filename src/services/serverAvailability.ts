@@ -1,3 +1,4 @@
+import {BASKETBALL_PROTOCOL} from '../mini-games/basketball/protocol';
 import {onlineServerUrl,vrServerUrl} from './dedicatedConnection';
 export type OnlineGameEndpoint='online'|'kart'|'golf'|'vr'|'tennis'|'dodgeball'|'basketball';
 /** A real browser WebSocket/pong check includes origin restrictions, without creating a room. */
@@ -8,6 +9,6 @@ export async function probeServer(game:OnlineGameEndpoint,signal:AbortSignal,tim
   let socket:WebSocket|undefined,settled=false;
   const finish=(ok:boolean)=>{if(settled)return;settled=true;clearTimeout(timer);signal.removeEventListener('abort',abort);if(socket){socket.onopen=socket.onmessage=socket.onerror=socket.onclose=null;socket.close();}resolve(ok);};
   const abort=()=>finish(false),timer=setTimeout(()=>finish(false),timeout);signal.addEventListener('abort',abort,{once:true});
-  try{socket=new WebSocket(url);socket.onopen=()=>socket?.send(JSON.stringify({type:'ping'}));socket.onmessage=e=>{try{if(JSON.parse(e.data).type==='pong')finish(true);}catch{/* Ignore unrelated packets. */}};socket.onerror=()=>finish(false);socket.onclose=()=>finish(false);}catch{finish(false);}
+  try{socket=new WebSocket(url);socket.onopen=()=>socket?.send(JSON.stringify({type:'ping'}));socket.onmessage=e=>{try{const packet=JSON.parse(e.data);if(packet.type==='pong')finish(game!=='basketball'||packet.version===BASKETBALL_PROTOCOL);}catch{/* Ignore unrelated packets. */}};socket.onerror=()=>finish(false);socket.onclose=()=>finish(false);}catch{finish(false);}
  });
 }

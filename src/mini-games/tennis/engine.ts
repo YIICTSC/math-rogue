@@ -9,6 +9,8 @@ export const SHOTS:Shot[]=['topspin','slice','lob','drop','special'];
 const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 const sideY=(side:Side)=>side===0?-1:1;
 const other=(side:Side)=>(1-side) as Side;
+// The service half belongs to the score, and must remain fixed after the server moves.
+const serviceXSign=(m:Match)=>(m.points[0]+m.points[1])%2===0?-sideY(m.server):sideY(m.server);
 function random(w:TennisWorld){w.random=(Math.imul(w.random,1664525)+1013904223)>>>0;return w.random/4294967296;}
 export function createTennis(seed=1,practice=false):TennisWorld{return {version:1,seed,random:seed>>>0,clock:0,phase:'lobby',mode:'singles',targetGames:1,practice,paused:false,title:'',players:{},teams:[],matches:[],round:0,nextRoundAt:0,champion:null,quizSerial:0};}
 export function addPlayer(w:TennisWorld,id:string,name:string,spectator=false){
@@ -139,9 +141,14 @@ function driveUnits(w:TennisWorld,m:Match,dt:number){
    }
    const length=Math.hypot(x,y);if(length>.06){x/=Math.max(1,length);y/=Math.max(1,length);}else{x=y=0;}
   }else if(u.owner){const input=w.players[u.owner]?.input;if(input&&w.clock-input.at<.4){x=input.x;y=input.y;}}
-  if(m.phase==='serve'&&m.units[m.serverUnit]===u){x=y=0;}
+  const serving=m.phase==='serve'&&m.units[m.serverUnit]===u;
+  if(serving)y=0;
   const speed=(u.cpu?5.8:7.3)*(u.dash>0?1.85:1)*(u.stamina<.1?.85:1);u.vx=x*speed;u.vy=y*speed;
-  u.x=clamp(u.x+u.vx*dt,-width-1.4,width+1.4);u.y=clamp(u.y+u.vy*dt,u.side===0?-14.0:.65,u.side===0?-.65:14.0);
+  if(serving){
+   // Keep the whole avatar's footing behind the baseline and inside the legal half.
+   const sign=serviceXSign(m),distance=clamp(sign*(u.x+u.vx*dt),.22,width-.22),nextX=sign*distance;
+   u.vx=(nextX-u.x)/dt;u.vy=0;u.x=nextX;u.y=sideY(u.side)*(HALF_LENGTH+.5);
+  }else{u.x=clamp(u.x+u.vx*dt,-width-1.4,width+1.4);u.y=clamp(u.y+u.vy*dt,u.side===0?-14.0:.65,u.side===0?-.65:14.0);}
   attemptHit(w,m,u);
  }
 }
@@ -151,7 +158,7 @@ function updateBall(w:TennisWorld,m:Match,dt:number,factory:LessonFactory|undefi
  if(b.z<=.08){b.z=.08;
   if(b.bounces===0){
    const width=w.mode==='singles'?SINGLES_WIDTH:DOUBLES_WIDTH,inside=Math.abs(b.x)<=width+.045&&Math.abs(b.y)<=HALF_LENGTH+.045&&Math.sign(b.y)===-sideY(b.lastSide);
-   const server=m.units[m.serverUnit],serviceLegal=inside&&Math.abs(b.x)<=SINGLES_WIDTH+.045&&Math.abs(b.y)<=SERVICE_LENGTH+.045&&Math.sign(b.x)===-Math.sign(server.x);
+   const serviceLegal=inside&&Math.abs(b.x)<=SINGLES_WIDTH+.045&&Math.abs(b.y)<=SERVICE_LENGTH+.045&&Math.sign(b.x)===-serviceXSign(m);
    if(b.serve&&!serviceLegal){fault(w,m,b.netLet?'net':'out',factory);return;}
    if(!inside){finishPoint(w,m,other(b.lastSide),'out',factory);return;}
    if(b.serve&&b.netLet){const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason='let';m.wait=.9;return;}

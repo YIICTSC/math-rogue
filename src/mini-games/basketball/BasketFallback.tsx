@@ -1,32 +1,25 @@
 import React,{useEffect,useRef} from 'react';
 import type {BasketView} from './types';
-import {BODY_COLORS,HAIR_COLORS} from '../gakuro-kart/avatar';
-import type {KartAvatar} from '../gakuro-kart/avatar';
-/** Logical court coordinates match the authoritative simulation; rendering never advances it. */
-export default function BasketFallback({view,selfId,avatar}:{view:BasketView|null;selfId:string;avatar?:KartAvatar;suspended?:boolean;aim?:number}){
+import {BODY_COLORS,HAIR_COLORS,type KartAvatar} from '../gakuro-kart/avatar';
+import {COURT} from './rules';
+export default function BasketFallback({view,selfId,avatar}:{view:BasketView|null;selfId:string;avatar?:KartAvatar}){
  const canvas=useRef<HTMLCanvasElement>(null),snapshot=useRef(view);snapshot.current=view;
- useEffect(()=>{const c=canvas.current!;const ctx=c.getContext('2d')!;let frame=0;
- const draw=(now:number)=>{const r=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);if(c.width!==Math.round(r.width*dpr)||c.height!==Math.round(r.height*dpr)){c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);}const w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
- const landscape=w>h*1.25,scale=Math.min(w/(landscape?36:19),h/(landscape?19:36));
- const point=(x:number,y:number,z=0)=>landscape?{x:w/2+y*scale*1.6,y:h/2+x*scale-z*scale*.7}:{x:w/2+x*scale,y:h/2-y*scale*1.6-z*scale*.7};
- const path=(points:number[][],fill?:string)=>{ctx.beginPath();points.forEach(([x,y],i)=>{const p=point(x,y);if(i)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);});if(fill){ctx.closePath();ctx.fillStyle=fill;ctx.fill();}ctx.stroke();};
- ctx.fillStyle='#102a36';ctx.fillRect(0,0,w,h);ctx.lineWidth=Math.max(1,scale*.035);ctx.strokeStyle='#c89b61';
- for(let i=0;i<16;i++)path([[-8+i,-10],[-7+i,-10],[-7+i,10],[-8+i,10]],i%2?'#dca76c':'#e3b57d');
- ctx.strokeStyle='#fff5da';ctx.lineWidth=scale*.07;path([[-8,-10],[8,-10],[8,10],[-8,10],[-8,-10]]);path([[-8,0],[8,0]]);
- const ellipse=(x:number,y:number,rad:number)=>{const p=point(x,y),a=point(-8,-10),b=point(8,10);ctx.save();ctx.beginPath();ctx.rect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y));ctx.clip();ctx.beginPath();ctx.ellipse(p.x,p.y,rad*scale*(landscape?1.6:1),rad*scale*(landscape?1:1.6),0,0,Math.PI*2);ctx.stroke();ctx.restore();};ellipse(0,0,2);
- for(const side of [-1,1]){path([[-2.6,side*10],[-2.6,side*6],[2.6,side*6],[2.6,side*10]],'#194857');ellipse(0,side*8.7,6.5);}
- ctx.fillStyle='#ffffff30';ctx.font=`bold ${scale*.5}px system-ui`;ctx.textAlign='center';ctx.fillText('GAKURO · BASKETBALL',w/2,h/2-scale*2.5);
- const v=snapshot.current,m=v?.match;const tutorial=m?.tutorial,own=m?.units.find(u=>u.owner===tutorial?.owner);if(tutorial&&own&&['move','shoot','steal'].includes(tutorial.stage)){const x=tutorial.stage==='move'?tutorial.startX+2.3:tutorial.stage==='shoot'?0:m!.ball.x,y=tutorial.stage==='move'?tutorial.startY:tutorial.stage==='shoot'?(own.side===0?6.3:-6.3):m!.ball.y,p=point(x,y);ctx.strokeStyle='#ffe879';ctx.lineWidth=scale*.12;ctx.beginPath();ctx.arc(p.x,p.y,scale*.75,0,Math.PI*2);ctx.stroke();}
- const units=m?.units||Array.from({length:6},(_,i)=>({id:String(i),owner:null,side:i<3?0:1,x:(i%3-1)*4,y:i<3?-4:4,vx:0,vy:0,name:'CPU',action:0,actionSeq:0,avatar:avatar}));
- for(const u of [...units].sort((a,b)=>point(a.x,a.y).y-point(b.x,b.y).y)){
- const p=point(u.x,u.y),moving=Math.hypot(u.vx,u.vy)>.1,swing=moving?Math.sin(now*.016+u.id.length)*scale*.13:0;ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(p.x,p.y+scale*.2,scale*.46,scale*.16,0,0,7);ctx.fill();
- if(u.owner===selfId){ctx.strokeStyle='#fff177';ctx.lineWidth=scale*.08;ctx.beginPath();ctx.ellipse(p.x,p.y+scale*.15,scale*.58,scale*.25,0,0,7);ctx.stroke();}
- ctx.lineWidth=scale*.15;ctx.lineCap='round';ctx.strokeStyle='#183346';ctx.beginPath();ctx.moveTo(p.x-scale*.15,p.y-scale*.2);ctx.lineTo(p.x-scale*.22+swing,p.y+scale*.1);ctx.moveTo(p.x+scale*.15,p.y-scale*.2);ctx.lineTo(p.x+scale*.22-swing,p.y+scale*.1);ctx.stroke();
- ctx.fillStyle=u.side===0?'#2b9bc1':'#e76643';ctx.fillRect(p.x-scale*.27,p.y-scale*.85,scale*.54,scale*.65);ctx.strokeStyle=BODY_COLORS[u.avatar?.body??0];ctx.beginPath();ctx.moveTo(p.x-scale*.29,p.y-scale*.75);ctx.lineTo(p.x-scale*.42,p.y-scale*(u.action>0?1.2:.35));ctx.moveTo(p.x+scale*.29,p.y-scale*.75);ctx.lineTo(p.x+scale*.42,p.y-scale*(u.action>0?1.2:.35));ctx.stroke();ctx.fillStyle=BODY_COLORS[u.avatar?.body??0];ctx.beginPath();ctx.arc(p.x,p.y-scale*1.05,scale*.24,0,7);ctx.fill();ctx.fillStyle=HAIR_COLORS[u.avatar?.hair??0];ctx.beginPath();ctx.arc(p.x,p.y-scale*1.15,scale*.25,Math.PI,Math.PI*2);ctx.fill();
- ctx.fillStyle='#fff';ctx.font=`bold ${scale*.25}px system-ui`;ctx.fillText(u.id.at(-1)||'1',p.x,p.y-scale*.43);ctx.fillStyle='#143142';ctx.font=`${Math.max(9,scale*.24)}px system-ui`;ctx.fillText(u.name,p.x,p.y+scale*.6);
- }
- for(const y of [-8.7,8.7]){const p=point(0,y,3.1);ctx.strokeStyle='#fff';ctx.lineWidth=scale*.12;ctx.strokeRect(p.x-scale*.65,p.y-scale*.4,scale*1.3,scale*.5);ctx.strokeStyle='#ff653b';ctx.beginPath();ctx.ellipse(p.x,p.y+scale*.12,scale*.43,scale*.16,0,0,7);ctx.stroke();}
- if(m){const b=m.ball,p=point(b.x,b.y,b.z);ctx.fillStyle='#eb8436';ctx.strokeStyle='#7d3519';ctx.lineWidth=scale*.045;ctx.beginPath();ctx.arc(p.x,p.y,scale*.22,0,7);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(p.x-scale*.22,p.y);ctx.lineTo(p.x+scale*.22,p.y);ctx.stroke();}
- frame=requestAnimationFrame(draw);};frame=requestAnimationFrame(draw);return()=>cancelAnimationFrame(frame);},[selfId,avatar]);
- return <canvas ref={canvas} aria-label="Basketball court" style={{width:'100%',height:'100%',display:'block'}}/>;
+ useEffect(()=>{const c=canvas.current!,ctx=c.getContext('2d')!;let frame=0;
+  const draw=(now:number)=>{const rect=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);if(c.width!==Math.round(rect.width*dpr)||c.height!==Math.round(rect.height*dpr)){c.width=Math.round(rect.width*dpr);c.height=Math.round(rect.height*dpr);}const w=c.width,h=c.height,portrait=w/h<.85,scale=Math.min(w/17.5,h/(portrait?24:12.7)),cx=w/2,cy=h*(portrait?.43:.55),point=(x:number,y:number,z=0)=>({x:cx+x*scale,y:cy-y*scale*.65-z*scale*.8});
+   ctx.fillStyle='#d5c59d';ctx.fillRect(0,0,w,h);ctx.fillStyle='#6c8a78';ctx.fillRect(0,h*.12,w,h*.2);ctx.fillStyle='#ad8759';ctx.fillRect(0,h*.32,w,h*.68);ctx.fillStyle='#183f4b';ctx.fillRect(w*.33,h*.09,w*.34,h*.07);ctx.fillStyle='#f8e8c2';ctx.font=`bold ${Math.max(10,scale*.38)}px system-ui`;ctx.textAlign='center';ctx.fillText('GAKURO ACADEMY · 3×3',cx,h*.14);
+   const path=(pts:number[][],fill?:string)=>{ctx.beginPath();pts.forEach(([x,y],i)=>{const p=point(x,y);if(i)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);});if(fill){ctx.closePath();ctx.fillStyle=fill;ctx.fill();}ctx.stroke();};ctx.lineWidth=scale*.04;ctx.strokeStyle='#fff0d4';
+   for(let i=0;i<24;i++){const y=COURT.front+i*15.5/24;path([[-7.5,y],[7.5,y],[7.5,y+15.5/24],[-7.5,y+15.5/24]],i%2?'#d5a875':'#dcb982');}
+   path([[-7.5,-7.5],[7.5,-7.5],[7.5,8],[-7.5,8],[-7.5,-7.5]]);path([[-2.5,8],[-2.5,2.4],[2.5,2.4],[2.5,8]],'#3f6e6a44');
+   const a=point(-7.5,8),b=point(7.5,-7.5);ctx.save();ctx.beginPath();ctx.rect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.clip();for(const[y,r]of [[COURT.hoopY,COURT.three],[2.4,2.5],[COURT.hoopY,1.25]]){const p=point(0,y);ctx.beginPath();ctx.ellipse(p.x,p.y,r*scale,r*scale*.65,0,0,Math.PI*2);ctx.stroke();}ctx.restore();
+   const m=snapshot.current?.match,units=m?.units||Array.from({length:6},(_,i)=>({id:String(i),owner:null,name:'',role:['PG','SF','C'][i%3],side:i<3?0:1,x:[-4,0,3,-3,0,3][i],y:[-.5,-3,3.2,1,1.5,4.4][i],vx:0,vy:0,action:0,jump:0,motion:'idle',avatar:i===0?avatar:undefined}));
+   const tutorial=m?.tutorial,own=m?.units.find(u=>u.owner===selfId);if(tutorial&&own){const p=point(tutorial.stage==='move'?tutorial.startX+2.3:tutorial.stage==='shoot'?0:m!.ball.x,tutorial.stage==='move'?tutorial.startY:tutorial.stage==='shoot'?COURT.hoopY-2.3:m!.ball.y);ctx.strokeStyle='#fff17c';ctx.lineWidth=scale*.12;ctx.beginPath();ctx.ellipse(p.x,p.y,scale*.8,scale*.48,0,0,7);ctx.stroke();}
+   for(const u of [...units].sort((a,b)=>b.y-a.y)){const jump=u.jump>0?Math.sin((.68-u.jump)/.68*Math.PI):0,p=point(u.x,u.y,jump),moving=Math.hypot(u.vx,u.vy)>.1,swing=moving?Math.sin(now/90)*scale*.14:0,color=u.side===0?'#338fb1':'#d77856';ctx.fillStyle='#263c373b';ctx.beginPath();const floor=point(u.x,u.y);ctx.ellipse(floor.x,floor.y+scale*.1,scale*.42,scale*.17,0,0,7);ctx.fill();if(u.owner===selfId){ctx.strokeStyle='#63f3ef';ctx.lineWidth=scale*.08;ctx.beginPath();ctx.ellipse(floor.x,floor.y,scale*.6,scale*.3,0,0,7);ctx.stroke();}
+    ctx.strokeStyle='#294250';ctx.lineWidth=scale*.15;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x-scale*.13,p.y-scale*.24);ctx.lineTo(p.x-scale*.18+swing,p.y);ctx.moveTo(p.x+scale*.13,p.y-scale*.24);ctx.lineTo(p.x+scale*.18-swing,p.y);ctx.stroke();ctx.fillStyle=color;ctx.fillRect(p.x-scale*.27,p.y-scale*.85,scale*.54,scale*.62);ctx.strokeStyle=BODY_COLORS[u.avatar?.body??0];ctx.beginPath();const raise=['shot','dunk','block','rebound'].includes(u.motion)?1.35:.45;ctx.moveTo(p.x-scale*.27,p.y-scale*.75);ctx.lineTo(p.x-scale*.45,p.y-scale*raise);ctx.moveTo(p.x+scale*.27,p.y-scale*.75);ctx.lineTo(p.x+scale*.45,p.y-scale*raise);ctx.stroke();ctx.fillStyle=BODY_COLORS[u.avatar?.body??0];ctx.beginPath();ctx.arc(p.x,p.y-scale*1.08,scale*.24,0,7);ctx.fill();ctx.fillStyle=HAIR_COLORS[u.avatar?.hair??0];ctx.beginPath();ctx.arc(p.x,p.y-scale*1.16,scale*.25,Math.PI,Math.PI*2);ctx.fill();ctx.font=`bold ${Math.max(8,scale*.24)}px system-ui`;ctx.fillStyle='#fff5dc';ctx.fillText(u.role,p.x,p.y-scale*.42);
+   }
+   const rim=point(0,COURT.hoopY,3.1);ctx.strokeStyle='#f2f1df';ctx.lineWidth=scale*.06;ctx.strokeRect(rim.x-scale*.95,rim.y-scale*.5,scale*1.9,scale*.75);ctx.strokeStyle='#e46f34';ctx.beginPath();ctx.ellipse(rim.x,rim.y+scale*.15,scale*.45,scale*.16,0,0,7);ctx.stroke();
+   if(m){const p=point(m.ball.x,m.ball.y,m.ball.z);ctx.fillStyle='#de8236';ctx.strokeStyle='#6b3f28';ctx.lineWidth=scale*.035;ctx.beginPath();ctx.arc(p.x,p.y,scale*.22,0,7);ctx.fill();ctx.stroke();}
+   frame=requestAnimationFrame(draw);
+  };frame=requestAnimationFrame(draw);return()=>cancelAnimationFrame(frame);
+ },[selfId,avatar]);
+ return <canvas ref={canvas} aria-label="Basketball court" data-court="half"/>;
 }

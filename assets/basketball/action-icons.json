@@ -1,0 +1,25 @@
+{
+  "generator": "ImageGen",
+  "source": "assets/basketball/action-icons-source.png",
+  "runtime": "sprites/basketball/action-icons-v1.webp",
+  "size": [
+    1254,
+    1254
+  ],
+  "layout": {
+    "columns": 3,
+    "rows": 3
+  },
+  "order": [
+    "shoot",
+    "pass",
+    "dash",
+    "block",
+    "rebound",
+    "steal",
+    "screen",
+    "call",
+    "special"
+  ],
+  "description": "Original illustrated basketball actions with cyan jerseys, orange balls and directional arrows. Equal atlas cells are addressed directly by CSS; the original generated artwork is retained."
+}

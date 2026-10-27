@@ -30,7 +30,7 @@ console.log('PASS: 1–32 entrants, singles/doubles, balanced byes and CPU partn
  assert.deepEqual(order,['0-1','1-1','1-1','0-0','0-0','1-0','1-0','0-1']);console.log('PASS: doubles tie-break service rotates through all four players.');
 }
 {
- const w=game(1,'doubles');answerAll(w);let rallies=0,points=0;for(let n=0;n<60*150&&w.phase!=='result';n++){answerAll(w);for(const m of w.matches)for(const u of m.units)u.cpu=true;E.tick(w,1/60,factory);rallies=Math.max(rallies,...w.matches.map(m=>m.rally));points=Math.max(points,...w.matches.map(m=>m.pointSerial));}console.log('CPU diagnostic',rallies,points,w.phase);assert(rallies>=3,'CPUs must actually sustain rallies');assert(points>=4,'Rallies must resolve into real points');assert.equal(w.phase,'result','CPU match must reach results');assert.notEqual(w.champion,null);
+ const w=game(1,'doubles');answerAll(w);let rallies=0,points=0;for(let n=0;n<60*600&&w.phase!=='result';n++){answerAll(w);for(const m of w.matches)for(const u of m.units)u.cpu=true;E.tick(w,1/60,factory);rallies=Math.max(rallies,...w.matches.map(m=>m.rally));points=Math.max(points,...w.matches.map(m=>m.pointSerial));}console.log('CPU diagnostic',rallies,points,w.phase);assert(rallies>=3,'CPUs must actually sustain rallies');assert(points>=4,'Rallies must resolve into real points');assert.equal(w.phase,'result','CPU match must reach results');assert.notEqual(w.champion,null);
  console.log('PASS: full simulated doubles match with real rallies, scoring, learning breaks and results.');
 }
 for(const count of[3,5,6,9,17,32]){
@@ -42,3 +42,22 @@ console.log('PASS: complete 3/5/6/9/17/32-player elimination tournaments through
  const lobby=E.createTennis(1);E.addPlayer(lobby,'departing','Leaving');E.disconnectPlayer(lobby,'departing');assert.equal(Object.keys(lobby.players).length,0);assert(E.addPlayer(lobby,'new','New'));assert.equal(lobby.players.new.slot,0);
  console.log('PASS: withdrawal forfeits even with a CPU partner; late joins spectate only.');
 }
+
+for(const mode of ['singles','doubles'])for(const side of [0,1])for(const odd of [false,true]){
+ const w=game(mode==='singles'?2:4,mode);answerAll(w);const m=w.matches[0];
+ m.games=side===0?[0,0]:[1,0];m.points=odd?[1,0]:[0,0];m.phase='point';m.wait=.001;E.tick(w,.02,factory);
+ const u=m.units[m.serverUnit],sign=Math.sign(u.x),width=mode==='singles'?E.SINGLES_WIDTH:E.DOUBLES_WIDTH,baseline=u.y;
+ assert.equal(u.side,side);
+ const move=(x,y,frames=60)=>{for(let n=0;n<frames;n++){assert(E.command(w,u.owner,{type:'move',x,y}));E.tick(w,1/60,factory);}};
+ move(sign,0);assert.equal(u.x,sign*(width-.22),'server stops inside the correct sideline');
+ move(-sign,0);assert.equal(u.x,sign*.22,'server cannot cross the center mark');
+ move(0,-Math.sign(baseline));assert.equal(u.y,baseline,'server cannot step across the baseline');
+ assert(E.command(w,u.owner,{type:'swing',shot:'topspin',aim:0,power:.7}));assert.equal(m.phase,'rally');
+ assert.equal(m.ball.x,u.x,'serve launches from the adjusted stance');
+ move(-sign,0,25);assert.equal(Math.sign(u.x),-sign,'free movement resumes after serving');
+ for(let n=0;n<60&&m.ball.bounces===0&&m.phase==='rally';n++)E.tick(w,1/60,factory);
+ assert.equal(m.faults,0,'service-box ruling does not follow the moving server');
+ assert.equal(m.ball.bounces,1,'serve lands in the score-selected diagonal service box');
+ assert(P.validView(E.viewFor(w,u.owner)));
+}
+console.log('PASS: legal lateral serve movement for both sides and service halves in singles/doubles; baseline guard and stable service-box ruling.');

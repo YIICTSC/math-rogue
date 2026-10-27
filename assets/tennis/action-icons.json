@@ -1,0 +1,22 @@
+{
+  "generator": "ImageGen",
+  "source": "assets/tennis/action-icons-source.png",
+  "runtime": "sprites/tennis/action-icons-v1.webp",
+  "size": [
+    1536,
+    1024
+  ],
+  "layout": {
+    "columns": 3,
+    "rows": 2
+  },
+  "order": [
+    "topspin",
+    "slice",
+    "lob",
+    "drop",
+    "special",
+    "dash"
+  ],
+  "description": "Original tennis athlete illustrations with lime tennis balls and explicit trajectory arrows. Equal cells are addressed by CSS, with the original generation preserved."
+}
