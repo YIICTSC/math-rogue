@@ -176,6 +176,7 @@
     "test:vr-server": "node scripts/test-vr-server-40.mjs",
     "test:vr-bomb-browser": "node scripts/test-vr-bomb-browser.mjs",
     "test:vr-camera": "node scripts/test-vr-camera.mjs",
+    "test:vr-actions-browser": "node scripts/test-vr-actions-browser.mjs",
     "test:vr-view-browser": "node scripts/test-vr-view-browser.mjs",
     "test:vr-solo": "node scripts/test-vr-solo-battle.mjs",
     "test:vr-solo-browser": "node scripts/test-vr-solo-browser.mjs",

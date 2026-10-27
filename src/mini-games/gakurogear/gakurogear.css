@@ -213,3 +213,45 @@
  .gear-play-surface .gear-battle-actions>.gear-footer-guide{display:none}
  .gear-play-surface .gear-objective{bottom:12px}
 }
+
+/* Illustrated VR thumb dock, shared by training, cooperative and battle modes. */
+.gear-shell.gear-play-surface{
+ --gear-action-right:max(10px,var(--ios-ui-safe-right,env(safe-area-inset-right)));
+ --gear-action-bottom:max(10px,var(--ios-ui-safe-bottom,env(safe-area-inset-bottom)));
+ --gear-action-rail:min(264px,calc(100vw - 112px - var(--gear-action-right)));
+ --gear-action-height:84px;
+}
+.gear-shell.gear-play-surface .gear-controls.gear-battle-controls{display:block!important;height:0;padding:0;overflow:visible;pointer-events:none}
+.gear-play-surface .gear-battle-controls>.gear-bomb-stick-area{position:absolute;left:max(10px,var(--ios-ui-safe-left,env(safe-area-inset-left)));bottom:var(--gear-action-bottom);pointer-events:auto}
+.gear-play-surface .gear-battle-controls .gear-battle-actions{position:absolute;right:var(--gear-action-right);bottom:var(--gear-action-bottom);width:var(--gear-action-rail);max-width:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:var(--gear-action-height);gap:5px;pointer-events:none}
+.gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;min-height:0;height:100%;margin:0;padding:3px;font-size:11px;line-height:1.15;border-radius:13px;background:#123541e8;border:1px solid #9fd5cc88;color:#f4f3d3;box-shadow:0 3px 0 #061d2ac4;pointer-events:auto;user-select:none;-webkit-touch-callout:none;touch-action:none}
+.gear-play-surface .gear-battle-actions .gear-bomb-place{grid-column:auto;background:#346957ed!important}
+.gear-play-surface .gear-battle-actions button:first-child{border-color:#f4d792;background:#305653ee}
+.gear-play-surface .gear-battle-actions button:active:not(:disabled){filter:brightness(1.3);transform:translateY(2px)}
+.gear-play-surface .gear-battle-actions button[aria-pressed=true],.gear-play-surface .gear-battle-actions .gear-action-ready{outline:2px solid #f6e38e;outline-offset:1px}
+.gear-action-art{display:block;flex:0 1 48px;min-height:30px;width:48px;height:48px;background-size:400% 300%;background-repeat:no-repeat;pointer-events:none}
+.gear-action-label{display:block;min-width:0;max-width:100%;font-weight:700;text-align:center;pointer-events:none;overflow-wrap:anywhere}
+.gear-shell.gear-play-surface .gear-battle-actions .gear-action-label small{display:block;font-size:7px;line-height:1.15;letter-spacing:0;opacity:.8}
+.gear-play-surface .gear-controls>.gear-loadout{position:absolute;inset:auto var(--gear-action-right) calc(var(--gear-action-bottom) + var(--gear-action-height)*2 + 12px) auto;width:var(--gear-action-rail);max-width:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;pointer-events:auto}
+.gear-play-surface .gear-controls>.gear-loadout>div{padding:3px;position:static;min-width:0;width:auto;max-width:none}
+.gear-play-surface .gear-controls>.gear-loadout select{font-size:11px;width:100%;min-height:32px;padding:3px}
+.gear-shell.gear-play-surface .gear-header>.gear-header-guide{display:inline-flex!important;align-items:center}
+.gear-play-surface .gear-battle-actions>.gear-footer-guide{display:none!important}
+.gear-play-surface .gear-objective{bottom:calc(var(--gear-action-height)*2 + 64px)}
+@media(orientation:portrait) and (max-width:600px){
+ .gear-shell.gear-play-surface{--gear-action-height:76px}
+ .gear-play-surface .gear-action-art{width:42px;height:42px;flex-basis:42px}
+ .gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{font-size:10px}
+ .gear-play-surface .gear-battle-controls .gear-bomb-stick{width:76px;height:76px}
+ .gear-play-surface .gear-battle-controls .gear-bomb-stick-area>small{display:none}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .gear-shell.gear-play-surface{--gear-action-height:52px;--gear-action-rail:clamp(210px,29vw,264px)}
+ .gear-shell.gear-play-surface .gear-battle-controls .gear-battle-actions button{display:grid;grid-template-columns:30px minmax(0,1fr);gap:2px;font-size:9px}
+ .gear-play-surface .gear-action-art{width:30px;height:30px;min-height:0}
+ .gear-play-surface .gear-action-label{font-size:9px}
+ .gear-shell.gear-play-surface .gear-battle-actions .gear-action-label small{font-size:6px}
+ .gear-play-surface .gear-battle-controls .gear-bomb-stick{width:64px;height:64px}
+ .gear-play-surface .gear-objective{bottom:12px}
+}
+@media(prefers-reduced-motion:reduce){.gear-play-surface .gear-battle-actions button:active{transform:none}}
