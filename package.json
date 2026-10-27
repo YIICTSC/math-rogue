@@ -138,6 +138,7 @@
     "test:sports:direction": "node scripts/test-sports-direction.mjs",
     "test:sports:direction:browser": "node scripts/test-sports-direction-browser.mjs",
     "test:dodgeball": "node scripts/test-dodgeball.mjs",
+    "test:dodgeball:actions": "node scripts/test-dodgeball-actions.mjs",
     "test:dodgeball:peer": "node scripts/test-dodgeball-peer-browser.mjs",
     "test:dodgeball:server": "node scripts/test-dodgeball-server.mjs",
     "test:dodgeball:browser": "node scripts/test-dodgeball-browser.mjs",

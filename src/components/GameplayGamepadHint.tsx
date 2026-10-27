@@ -2,7 +2,7 @@ import React from 'react';
 import type { GameplayMode } from '../hooks/useGameplayGamepad';
 const hints: Record<GameplayMode, string> = {
   basketball: 'A: Hold shot / Block · B: Pass / Steal · X: Drive · Y: Pass / Call · LB: Rebound · RB: Skill · Menu: Menu',
-  dodgeball: 'A: Throw · B: Catch · X: Dodge · Y: Pass · RB: Super',
+  dodgeball: 'A: Throw / Catch · B: Catch · X: Duck · Y: Pass · LB: Dash · LT: Jump · RB: Super · Menu: Menu',
  tennis: 'LS / D-pad: Move · A: Topspin · B: Slice · X: Lob · Y: Drop · LB: Dash · RB: Star shot · Menu: Menu',
   'star-tide': 'LS / D-pad: Move · A: Sword / Interact · B: Tool · X: Dodge · Y: Glide · Menu: Journal',
   rpg: 'LS / D-pad: Move · RS: Look · A: Interact · X: Jump · Y: Map · B / Menu: Menu · LB / RB: Turn · LT / RT: Build',
