@@ -71,6 +71,15 @@ try {
     assert.equal(p.phase, 'aim'); assert.equal(p.correct, correct); return p;
   };
   const settle = w => { for (let i = 0; i < 1000 && Object.values(w.players).some(p => p.phase === 'moving'); i++) tick(w, 1 / 30); };
+  // First-hole tutorial: a straight, centered half-power driver shot stays in play
+  // for every learning bonus, including the strongest three-correct setting.
+  for (let correct = 0; correct <= 3; correct++) {
+    const tutorialWorld = setup(), p = solve(tutorialWorld, 'p0', correct);
+    assert(command(tutorialWorld, 'p0', { type: 'shot', shotId: p.shotId, club: 'driver', angle: 0, power: .5, impact: 0 }));
+    settle(tutorialWorld);
+    assert.equal(p.penalty, false, `first-hole tutorial should stay in play with ${correct} correct answers`);
+    assert(p.z > 0, 'tutorial shot advances from the tee');
+  }
   const full = createGolf(); for (let i = 0; i < 40; i++) assert(addPlayer(full, `p${i}`, 'Player'));
   assert.equal(addPlayer(full, 'overflow', 'Overflow'), false); assert.equal(addPlayer(full, '__proto__', 'Bad'), false);
   disconnectPlayer(full, 'p7'); assert(addPlayer(full, 'replacement', 'Replacement')); assert.equal(full.players.replacement.slot, 7);

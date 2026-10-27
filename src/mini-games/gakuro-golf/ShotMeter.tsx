@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { impactAt, meterPosition, powerAt, MAX_SNAP, SWEEP_MS, MAX_HOLD_MS, IMPACT_CENTER } from './shotTiming';
+const TUTORIAL_POWER = .5;
 type TutorialStage = 'start' | 'power-moving' | 'power-wait' | 'impact-moving' | 'impact-wait';
 export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limit = 1, tutorial = false }: { disabled: boolean; limit?: number; tutorial?: boolean; onShot: (power: number, impact: number) => void; onPower: (power: number) => void; onActive: (active: boolean) => void; t: (s: string) => string }) {
   const [active, setActive] = useState(false), [locked, setLocked] = useState<number | null>(null), [returning, setReturning] = useState(false);
@@ -18,7 +19,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     const s = state.current;
     if (!s.active) { s.start = performance.now(); s.power = null; s.active = true; setActive(true); setLocked(null); setReturning(false); if (tutorial) stage('power-moving'); callbacks.current.onActive(true); return; }
     if (tutorial) {
-      if (guide.current.stage === 'power-wait') { s.power = 1; setLocked(1); callbacks.current.onPower(1); s.start = performance.now() - guide.current.stopped; stage('impact-moving'); }
+      if (guide.current.stage === 'power-wait') { s.power = TUTORIAL_POWER; setLocked(TUTORIAL_POWER); callbacks.current.onPower(TUTORIAL_POWER); s.start = performance.now() - guide.current.stopped; stage('impact-moving'); }
       else if (guide.current.stage === 'impact-wait') finish(0);
       return;
     }
@@ -39,7 +40,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     const draw = () => { const s = state.current; if (!s.active) return; let elapsed = performance.now() - s.start;
       if (tutorial) {
         const g = guide.current;
-        if (g.stage === 'power-moving' && elapsed >= SWEEP_MS * MAX_SNAP) { g.stopped = SWEEP_MS * MAX_SNAP; stage('power-wait'); }
+        if (g.stage === 'power-moving' && elapsed >= SWEEP_MS * TUTORIAL_POWER) { g.stopped = SWEEP_MS * TUTORIAL_POWER; stage('power-wait'); }
         else if (g.stage === 'impact-moving' && elapsed >= SWEEP_MS + MAX_HOLD_MS + SWEEP_MS * (1 - IMPACT_CENTER)) { g.stopped = SWEEP_MS + MAX_HOLD_MS + SWEEP_MS * (1 - IMPACT_CENTER); stage('impact-wait'); }
         if (g.stage === 'power-wait' || g.stage === 'impact-wait') elapsed = g.stopped;
       }

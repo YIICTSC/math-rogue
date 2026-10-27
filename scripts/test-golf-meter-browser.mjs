@@ -20,11 +20,11 @@ try{
  // First-time guidance stops at both ideal positions, regardless of how long the player waits.
  await page.evaluate(()=>window.tutorial(true));await page.waitForTimeout(40);base+=12000;
  await advance(base);await start.click();await advance(base+400);await start.click();assert.equal(await page.evaluate(()=>window.power),.7,'early power input is ignored');
- await advance(base+1600);assert.equal(await page.locator('.gg-meter-cursor').evaluate(e=>parseFloat(e.style.left)),97);assert((await page.locator('.gg-meter-tutorial').innerText()).includes('パワー'));
- await advance(base+9000);assert.equal(await page.locator('.gg-meter-cursor').evaluate(e=>parseFloat(e.style.left)),97,'power position remains paused');assert.equal(await page.evaluate(()=>window.shots.length),count);
- await start.click();assert.equal(await page.evaluate(()=>window.power),1);await advance(base+9200);await start.click();assert.equal(await page.evaluate(()=>window.shots.length),count,'early impact input is ignored');
+ await advance(base+1600);assert.equal(await page.locator('.gg-meter-cursor').evaluate(e=>parseFloat(e.style.left)),50);assert((await page.locator('.gg-meter-tutorial').innerText()).includes('パワー'));
+ await advance(base+9000);assert.equal(await page.locator('.gg-meter-cursor').evaluate(e=>parseFloat(e.style.left)),50,'power position remains paused');assert.equal(await page.evaluate(()=>window.shots.length),count);
+ await start.click();assert.equal(await page.evaluate(()=>window.power),.5);await advance(base+9200);await start.click();assert.equal(await page.evaluate(()=>window.shots.length),count,'early impact input is ignored');
  await advance(base+13000);assert(Math.abs(await page.locator('.gg-meter-cursor').evaluate(e=>parseFloat(e.style.left))-12)<.001);await advance(base+20000);assert.equal(await page.evaluate(()=>window.shots.length),count,'impact wait does not time out');
- await start.click();assert.equal(await page.evaluate(()=>window.shots.length),++count);assert.equal(await page.evaluate(()=>window.shots.at(-1).impact),0);
+ await start.click();assert.equal(await page.evaluate(()=>window.shots.length),++count);assert.equal(await page.evaluate(()=>window.shots.at(-1).power),.5);assert.equal(await page.evaluate(()=>window.shots.at(-1).impact),0);
  await page.evaluate(()=>window.tutorial(false));await page.waitForTimeout(40);await advance(base+21000);await start.click();await advance(base+21770);await page.locator('#course').tap();assert.equal(await page.evaluate(()=>window.power),.7,'ordinary timing resumes after tutorial');
  console.log('PASS: touch/mouse/Space/Enter MAX taps at near-peak and both hold boundaries, no duplicate/restart, normal power/impact, early tap rejection, pause, blur and timeout.');
 }finally{await browser.close();await new Promise(r=>server.close(r));}
