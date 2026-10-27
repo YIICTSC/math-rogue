@@ -1,3 +1,4 @@
+import type {BasketView,BasketWorld} from '../mini-games/basketball/types';
 import type{DodgeWorld,DodgeView}from'../mini-games/dodgeball/types';
 import type {TennisView,TennisWorld} from '../mini-games/tennis/types';
 import type { GolfView, GolfWorld } from '../mini-games/gakuro-golf/engine';
@@ -5,8 +6,9 @@ import type { Race } from '../mini-games/gakuro-kart/engine';
 import type { OnlineWorld } from '../mini-games/gakurogear/onlineEngine';
 import type { World } from '../rpg/engine';
 
-export type ResultGame = 'rpg' | 'vr' | 'kart' | 'golf' | 'tennis' | 'dodgeball';
+export type ResultGame = 'rpg' | 'vr' | 'kart' | 'golf' | 'tennis' | 'dodgeball' | 'basketball';
 export interface SessionResult { game: ResultGame; columns: string[]; rows: { id: string; name: string; rank: number; values: string[] }[] }
+export function sessionResult(game:'basketball',world:BasketWorld|BasketView):SessionResult|null;
 export function sessionResult(game:'dodgeball',world:DodgeWorld|DodgeView):SessionResult|null;
 export function sessionResult(game: 'tennis', world:TennisWorld|TennisView):SessionResult|null;
 export function sessionResult(game: 'golf', world: GolfWorld | GolfView): SessionResult | null;
@@ -17,7 +19,7 @@ export function sessionResult(game: ResultGame, world: any): SessionResult | nul
   if (!world || (game === 'rpg' ? !world.started : world.phase === 'lobby')) return null;
   const players = (Array.isArray(world.players) ? world.players : Object.values(world.players)) as any[];
   const entries = players.filter(p => !p.spectator).map(p => {
-    if(game==='tennis'||game==='dodgeball'){const teams=world.teams.filter((t:any)=>t.members.includes(p.id)),bracket=world.bracket||world.matches,wins=bracket.filter((m:any)=>m.phase==='finished'&&teams.some((t:any)=>t.id===m.winner)).length,champion=teams.some((t:any)=>t.id===world.champion);return {p,scores:[-Number(champion),-wins],values:[String(wins),String(p.correct),champion?'CHAMPION':p.connected?'—':'OUT']};}
+    if(game==='tennis'||game==='dodgeball'||game==='basketball'){const teams=world.teams.filter((t:any)=>t.members.includes(p.id)),bracket=world.bracket||world.matches,wins=bracket.filter((m:any)=>m.phase==='finished'&&teams.some((t:any)=>t.id===m.winner)).length,champion=teams.some((t:any)=>t.id===world.champion);return {p,scores:[-Number(champion),-wins],values:[String(wins),String(p.correct),champion?'CHAMPION':p.connected?'—':'OUT']};}
     if (game === 'golf') {
       const sum = p.scores.reduce((a: number, b: number) => a + b, 0);
       return { p, scores: [-p.scores.length, sum], values: [String(p.scores.length), String(sum), String(p.strokes), String(p.totalCorrect)] };
@@ -32,7 +34,7 @@ export function sessionResult(game: ResultGame, world: any): SessionResult | nul
   });
   const compare = (a: typeof entries[number], b: typeof entries[number]) => { for (let i = 0; i < a.scores.length; i++) if (a.scores[i] !== b.scores[i]) return a.scores[i] - b.scores[i]; return 0; };
   entries.sort((a, b) => compare(a, b) || a.p.id.localeCompare(b.p.id));
-  const columns = (game==='tennis'||game==='dodgeball')?['勝利 / Wins','正解 / Correct','状態 / Status']:game === 'golf' ? ['完了ホール', '確定打数', '現在ホール打数', '正解数'] : game === 'kart' ? ['タイム', '走行距離', '正解数'] : game === 'vr' ? [world.mode === 'coop' ? '回収数' : '命中 / 被弾', '支援 / 救助', '正解数', '状態'] : [world.gameMode === 'BATTLE_ROYALE' ? '撃破数' : '累計ダメージ', '正解数', '戦闘数'];
+  const columns = (game==='tennis'||game==='dodgeball'||game==='basketball')?['勝利 / Wins','正解 / Correct','状態 / Status']:game === 'golf' ? ['完了ホール', '確定打数', '現在ホール打数', '正解数'] : game === 'kart' ? ['タイム', '走行距離', '正解数'] : game === 'vr' ? [world.mode === 'coop' ? '回収数' : '命中 / 被弾', '支援 / 救助', '正解数', '状態'] : [world.gameMode === 'BATTLE_ROYALE' ? '撃破数' : '累計ダメージ', '正解数', '戦闘数'];
   return { game, columns, rows: entries.map((e, i) => ({ id: e.p.id, name: e.p.name, rank: 1 + entries.slice(0, i).filter(previous => compare(previous, e) < 0).length, values: e.values })) };
 }
 export function validSessionResult(value: unknown, game: ResultGame): value is SessionResult {

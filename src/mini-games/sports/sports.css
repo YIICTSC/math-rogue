@@ -24,3 +24,10 @@
 @media(orientation:portrait) and (max-width:700px){.sports-copy{padding-top:14px}.sports-copy h1{margin:8px 0}.sports-copy h1 span{font-size:14px;letter-spacing:.05em;margin-top:6px}.sports-copy h1 span br{display:none}.sports-copy p{margin:7px 0;font-size:11px}.sports-ball-icon{font-size:24px}}
 @media(orientation:portrait) and (max-height:700px){.sports-copy>small,.sports-copy p{display:none}.sports-copy{padding-top:12px}.sports-copy h1 span{font-size:12px}.sports-copy h1{margin:4px 0}}
 @media(orientation:landscape) and (max-height:520px){.sports-ball-icon{font-size:20px}}
+.sports-choices{grid-template-columns:repeat(4,minmax(0,1fr))}.sports-basketball h2{font-size:clamp(15px,1.9vw,28px);white-space:nowrap}.sports-invite-sports [role=radiogroup]{flex-wrap:wrap}
+@media(orientation:portrait){.sports-choices{grid-template-columns:1fr}.sports-basketball h2{font-size:22px}}
+@media(orientation:landscape) and (max-width:900px){.sports-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.sports-copy{min-height:0}.sports-basketball h2{font-size:20px}}
+@media(orientation:landscape) and (min-width:901px){.sports-choices,.sports-invite-cta{width:min(1200px,100%)}.sports-choices .sports-dodgeball h2{font-size:clamp(16px,1.8vw,24px)}.sports-choices small{font-size:8px;letter-spacing:.04em}.sports-choices button>div>svg:last-child{display:none}}
+.sports-invite-sports [role=radiogroup]{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(orientation:landscape) and (max-width:900px){.sports-copy>small,.sports-copy p{display:none}.sports-copy h1{font-size:26px;margin:4px 0}.sports-choices p{margin:3px 0}.sports-choices button{padding:7px 12px}.sports-choices h2,.sports-choices .sports-dodgeball h2,.sports-choices .sports-basketball h2{font-size:19px}.sports-choices button>span{padding-top:4px}.sports-choices button>div{margin-bottom:2px}.sports-invite-cta{margin-top:6px}}
+@media(orientation:portrait) and (max-width:360px){.sports-choices .sports-basketball h2{font-size:18px}.sports-basketball>div small{display:none}}

@@ -1,3 +1,4 @@
+import{basketballInviteCode}from'./mini-games/basketball/invite';
 import{dodgeballInviteCode}from'./mini-games/dodgeball/invite';
 import {tennisInviteCode} from './mini-games/tennis/invite';
 import {vrInviteCode,VR_ROOM_PARAM} from './mini-games/gakurogear/invite';
@@ -1719,6 +1720,8 @@ const App: React.FC = () => {
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
     const golfCode = useMemo(() => typeof window === 'undefined' ? '' : golfInviteCode(window.location.href), []);
     const [golfInviteOpen,setGolfInviteOpen] = useState(Boolean(golfCode));
+    const basketballCode=useMemo(()=>typeof window==='undefined'?'':basketballInviteCode(window.location.href),[]);
+    const[basketballInviteOpen,setBasketballInviteOpen]=useState(Boolean(basketballCode));
     const dodgeballCode=useMemo(()=>typeof window==='undefined'?'':dodgeballInviteCode(window.location.href),[]);
     const[dodgeballInviteOpen,setDodgeballInviteOpen]=useState(Boolean(dodgeballCode));
     const tennisCode = useMemo(() => typeof window === 'undefined' ? '' : tennisInviteCode(window.location.href), []);
@@ -1764,7 +1767,7 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
-    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
+    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(basketballInviteOpen&&!!basketballCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     // 「続きから」で読み込んだ本編の状態を、課題レターを確認してから
@@ -21669,9 +21672,9 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen || tennisInviteOpen || dodgeballInviteOpen) && (
+                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen || tennisInviteOpen || dodgeballInviteOpen || basketballInviteOpen) && (
                     <React.Suspense fallback={null}>
-                        <SportsHub onAnswerResult={result=>{const assignment=activeAssignment?effectiveAssignment:null;const pool=getAssignmentModePool(assignment);const custom=result.mode==='ASSIGNMENT_CUSTOM'&&(assignment?.customProblems.length||0)>0;const attributed=!!assignment&&(custom||!pool||pool.includes(result.mode));handleAssignmentAnswerResult(result);if(result.correct){handleModeCorrectProgress(result.mode,1);if(!attributed)addMiniGameUnlockCorrectCount(1);}}} languageMode={languageMode} golfInviteCode={golfInviteOpen?golfCode:''} dodgeballInviteCode={dodgeballInviteOpen?dodgeballCode:''} tennisInviteCode={tennisInviteOpen?tennisCode:''} onClose={()=>{setGolfInviteOpen(false);setTennisInviteOpen(false);setDodgeballInviteOpen(false);returnToTitle();}} />
+                        <SportsHub onAnswerResult={result=>{const assignment=activeAssignment?effectiveAssignment:null;const pool=getAssignmentModePool(assignment);const custom=result.mode==='ASSIGNMENT_CUSTOM'&&(assignment?.customProblems.length||0)>0;const attributed=!!assignment&&(custom||!pool||pool.includes(result.mode));handleAssignmentAnswerResult(result);if(result.correct){handleModeCorrectProgress(result.mode,1);if(!attributed)addMiniGameUnlockCorrectCount(1);}}} languageMode={languageMode} golfInviteCode={golfInviteOpen?golfCode:''} basketballInviteCode={basketballInviteOpen?basketballCode:''} dodgeballInviteCode={dodgeballInviteOpen?dodgeballCode:''} tennisInviteCode={tennisInviteOpen?tennisCode:''} onClose={()=>{setGolfInviteOpen(false);setTennisInviteOpen(false);setDodgeballInviteOpen(false);setBasketballInviteOpen(false);returnToTitle();}} />
                     </React.Suspense>
                 )}
 
