@@ -1,3 +1,4 @@
+import {sortDungeonItems,type DungeonSortOrder} from './sortItems';
 import {InspectSlot} from '../item-menu/InspectSlot';
 import {MasteryPanel} from './dungeons1/MasteryPanel';
 import React,{useEffect,useState,useRef} from 'react';
@@ -10,11 +11,11 @@ import './notebook.css';
 export function AdventureNotebook({adventure:a,inventory,player,itemName}:{adventure:SchoolAdventure;inventory:any[];player:any;itemName:(i:any)=>string}){
  const returnFocus=useRef<HTMLElement|null>(typeof document==='undefined'?null:document.activeElement as HTMLElement);
  useEffect(()=>()=>{returnFocus.current?.focus();},[]);
- const l=a.text,[tab,setTab]=useState('supplies'),[selected,setSelected]=useState<string|null>(null);
+ const l=a.text,[tab,setTab]=useState('supplies'),[selected,setSelected]=useState<string|null>(null),[sort,setSort]=useState<DungeonSortOrder|null>(null);
  const possessions=[...new Map([...Object.values(player.equipment||{}).filter(Boolean),...inventory].map((i:any)=>[i.id,i])).values()] as any[];
  const items=tab==='gear'?possessions.filter(i=>['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(i.category)):inventory;
  const records=[...(a.base.chronicleRecords||[]).map((r,i)=>({id:'ending-'+i,kind:'ending',recordIndex:i,line:l(r.title[0],r.title[1])})),...([['DOJO10','道場10問','10 lessons'],['DOJO50','道場50問','50 lessons'],['DISCOVER20','発見20種','20 discoveries']].map(([key,ja,en])=>({id:key,kind:'milestone',line:l(ja,en)}))),...(a.base.codex||[]).map((key,i)=>({id:'codex-'+i,kind:'discovery',line:a.catalog[key]?l(a.catalog[key].name,a.catalog[key].name):l(key.replace('ENEMY:',''),key.replace('ENEMY:','')),detail:a.catalog[key]?.desc||''})),...(a.base.diary||[]).slice().reverse().map((line,i)=>({id:'diary-'+i,kind:'diary',line}))];
- const rows=tab==='story'?a.journalActs.map((act,i)=>({...act,id:String(i)})):tab==='records'?records:items;
+ const rows=tab==='story'?a.journalActs.map((act,i)=>({...act,id:String(i)})):tab==='records'?records:sort?sortDungeonItems(items,sort,itemName,a.known):items;
  const current=rows.find((r:any)=>r.id===selected)||rows[0];
  useEffect(()=>{setSelected(null);},[tab]);
  const equipped=(i:any)=>Object.values(player.equipment||{}).some((e:any)=>e?.id===i?.id);
@@ -25,6 +26,7 @@ export function AdventureNotebook({adventure:a,inventory,player,itemName}:{adven
  <header className="notebook-heading"><div><span className="notebook-kicker">DUNGEONS · {l('旅の記録','FIELD JOURNAL')}</span><h2>{l('冒険手帳','Adventure notebook')}</h2></div><div className="notebook-resources"><span><Heart size={15}/>{player.hp}/{player.maxHp}</span><span><Coins size={15}/>{player.gold||0}</span></div><button className="notebook-close" data-gamepad-back autoFocus onClick={close} aria-label={l('冒険に戻る','Resume')}><X size={22}/></button></header>
  <nav className="notebook-tabs" aria-label={l('手帳の分類','Notebook categories')}>{[['supplies','道具','Supplies',Backpack],['gear','装備','Equipment',Sword],['story','旅の記録','Journey',BookOpen],['records','日記','Diary',Compass],...(a.series===1?[['skills','技','Techniques',Sword]]:[])].map(([id,ja,en,Icon]:any)=><button key={id} aria-pressed={tab===id} onClick={()=>setTab(id)}><Icon size={20}/><span>{l(ja,en)}</span></button>)}</nav>
  <div className={`notebook-content ${tab==='skills'?'notebook-skills':''}`}>{tab==='skills'?<MasteryPanel adventure={a} weapon={player.equipment?.weapon}/>:<><div className={`notebook-collection item-menu-grid ${tab==='story'||tab==='records'?'notebook-entries':''}`} aria-label={l('一覧','Collection')}>
+ {(tab==='supplies'||tab==='gear')&&<div className="notebook-sort-buttons" role="group" aria-label={l('並び替え','Sort')}><button aria-pressed={sort==='type'} onClick={()=>setSort('type')}>{l('種類順','Sort by type')}</button><button aria-pressed={sort==='name'} onClick={()=>setSort('name')}>{l('名前順','Sort by name')}</button><button aria-pressed={sort===null} onClick={()=>setSort(null)}>{l('元の順','Original order')}</button></div>}
  {rows.map((row:any)=>{const chosen=current?.id===row.id;return <InspectSlot key={row.id} className={`notebook-slot ${tab==='story'||tab==='records'?'':'item-menu-slot'}`} aria-pressed={chosen} aria-label={tab==='story'?l(row.title,row.englishTitle):tab==='records'?row.line:itemName(row)} onInspect={()=>setSelected(row.id)}>{tab==='story'?<><BookOpen size={22}/><span>{l(row.title,row.englishTitle)}</span><small>{storyRead(row)?'✓':'—'} · {row.floor}F</small></>:tab==='records'?<><Compass size={18}/><span>{row.line}</span></>:<>{a.known(row)?<SchoolSupplyIcon type={row.type} size={52}/>:<span className="notebook-unknown">?</span>}<span className="item-menu-label">{itemName(row)}</span>{equipped(row)&&<small className="notebook-equipped item-menu-badge">{l('装備中','Equipped')}</small>}{row.charges!==undefined&&<small className="notebook-quantity item-menu-count">{row.charges}</small>}</>}</InspectSlot>;})}
  {!rows.length&&<div className="notebook-empty"><Backpack size={32}/><p>{l('まだ記録はありません','Nothing here yet')}</p></div>}</div>
  <aside className="notebook-inspector"><div className="notebook-traveler"><div className="notebook-halo"/><DialogueActor id={a.hero.id}/><strong>{l(a.hero.name,a.hero.name)}</strong></div>

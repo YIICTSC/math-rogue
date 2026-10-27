@@ -3320,6 +3320,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
  blankItems={[]} blankIndex={0} selectBlank={()=>{}} extra={<nav className="dungeon-pouch-shop-tabs">{(['BUY','SELL'] as const).map(mode=><button key={mode} aria-pressed={shopState.mode===mode} onClick={()=>{setShopState(prev=>({...prev,mode}));setSelectedItemIndex(0);}}>{tr(mode==='BUY'?'買う':'売る')}</button>)}<span>{player.gold} G</span></nav>}/>}
 
                     {menuOpen && !adventure.dojoRun && <DungeonInventoryMenu
+ sortInventory={items=>{const selected=inventory[selectedItemIndex];setInventory(items);if(selected){const next=items.findIndex(item=>item.id===selected.id);setSelectedItemIndex(Math.max(0,next));}}}
  inventory={inventory} equipment={player.equipment||{}} selectedIndex={selectedItemIndex} selectedSlot={selectedEquipmentSlot} activeAction={selectedItemActionIndex} selectAction={setSelectedItemActionIndex} listRef={menuListRef}
  name={getItemName} description={i=>tr(getInspectedDescription(i))} known={itemKnown} text={tr} close={toggleMenu} max={MAX_INVENTORY}
  select={i=>{lastInputType.current='MOUSE';setSelectedItemIndex(i);setSelectedEquipmentSlot(null);setSelectedItemActionIndex(0);}}

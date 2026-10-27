@@ -4,11 +4,10 @@ import {chronicleStage} from './story';
 export const isConversationNpc=(event?:{kind:string})=>Boolean(event&&['CHRONICLE','PERSONAL','FRIEND'].includes(event.kind));
 
 /** Place optional encounters on reachable, empty tiles without closing a route. */
-export function syncOptionalNpcs(state:AdventureState,map:string[][],player:{x:number;y:number},entities:{x:number;y:number}[],goal:number,acts:{floor:number}[]){
+export function syncOptionalNpcs(state:AdventureState,map:string[][],player:{x:number;y:number},entities:{x:number;y:number}[],goal:number,_acts:{floor:number}[]){
  const before=JSON.stringify(state.events),key=(x:number,y:number)=>`${x},${y}`;
  const desired=new Set<string>();
  if(state.chronicle&&!state.chronicle.completed&&chronicleStage(state.floor,goal,state.chronicle)>=0)desired.add('CHRONICLE');
- if(state.mode==='STORY'&&acts.some(a=>a.floor<21&&a.floor<=state.floor&&!state.storySeen?.includes(a.floor)))desired.add('PERSONAL');
  for(const [k,event]of Object.entries(state.events))if(['CHRONICLE','PERSONAL'].includes(event.kind)&&(!desired.has(event.kind)||event.done))delete state.events[k];
  const reachable=new Set<string>(),queue=[[player.x,player.y]];
  for(let i=0;i<queue.length;i++){const [x,y]=queue[i],k=key(x,y);if(reachable.has(k)||!map[y]?.[x]||map[y][x]==='WALL')continue;reachable.add(k);for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]])queue.push([x+dx,y+dy]);}

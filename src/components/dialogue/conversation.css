@@ -30,3 +30,11 @@
 .conversation-visuals[data-show-illustration=true]>.conversation-illustration{opacity:1;visibility:visible}
 .conversation-visuals[data-show-illustration=true]>.conversation-cast{opacity:0;visibility:hidden}
 @media(prefers-reduced-motion:reduce){.conversation-visuals>.conversation-illustration,.conversation-visuals>.conversation-cast{transition:none}}
+
+/* Character stories focus on the traveler against the route scenery. */
+.conversation-cast-single{grid-template-columns:minmax(0,1fr);width:min(560px,100%);gap:0}
+.conversation-cast-single .conversation-actor{width:100%;filter:none;opacity:1;transform:none}
+.conversation-cast-single .conversation-actor figcaption{left:5%;right:5%}
+
+.conversation-solo .conversation-landscape{filter:brightness(.7) saturate(.9);transform:none}
+.conversation-solo .conversation-veil{background:linear-gradient(0deg,#07121ecc,transparent 75%)}

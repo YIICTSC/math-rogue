@@ -2313,6 +2313,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
  blankItems={[]} blankIndex={0} selectBlank={()=>{}} extra={<nav className="dungeon-pouch-shop-tabs">{(['BUY','SELL'] as const).map(mode=><button key={mode} aria-pressed={shopState.mode===mode} onClick={()=>{setShopState(prev=>({...prev,mode}));setSelectedItemIndex(0);}}>{tr(mode==='BUY'?'買う':'売る')}</button>)}<span>{player.gold} G</span>{!shopRemovedThisFloor&&<button aria-pressed={selectedItemIndex===-1} disabled={(player.gold||0)<100} onFocus={()=>setSelectedItemIndex(-1)} onClick={()=>handleShopAction(-1)}>{tr('カード除外')} (100 G)</button>}</nav>}/>}
 
                     {menuOpen && !adventure.dojoRun && <DungeonInventoryMenu
+ sortInventory={items=>{const selected=inventory[selectedItemIndex];setInventory(items);if(selected){const next=items.findIndex(item=>item.id===selected.id);setSelectedItemIndex(Math.max(0,next));}}}
  inventory={inventory} equipment={player.equipment||{}} selectedIndex={selectedItemIndex} selectedSlot={selectedEquipmentSlot} activeAction={selectedItemActionIndex} selectAction={setSelectedItemActionIndex} listRef={menuListRef}
  name={getItemName} description={i=>tr(getInspectedDescription(i))} known={itemKnown} text={tr} close={toggleMenu} max={MAX_INVENTORY}
  select={i=>{lastInputType.current='MOUSE';setSelectedItemIndex(i);setSelectedEquipmentSlot(null);setSelectedItemActionIndex(0);}}
