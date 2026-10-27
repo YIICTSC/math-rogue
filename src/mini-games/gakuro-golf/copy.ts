@@ -1,4 +1,9 @@
 const copy: [string, string, string][] = [
+  ['はじめてのショット：ボタンを押してゲージを動かそう', 'Your first shot: press the button to start the meter.', 'はじめてのショット：ボタンを おして ゲージを うごかそう'],
+  ['ゲージが止まるまで待とう', 'Wait for the meter to stop.', 'ゲージが とまるまで まとう'],
+  ['ここで押すとパワーが決まるよ', 'Press now to set your power.', 'ここで おすと パワーが きまるよ'],
+  ['ゲージが黄色に戻るまで待とう', 'Wait for the meter to return to yellow.', 'ゲージが きいろに もどるまで まとう'],
+  ['黄色に重なったら押してショット！', 'Press when it reaches yellow to shoot!', 'きいろに かさなったら おして ショット！'],
   ["スワイプでコースを動かして確認", "Swipe to move around the course", "スワイプで コースをうごかして かくにん"],
   ["1回目：パワーを決める", "First tap: set power", "1かいめ：パワーを きめる"],
   ["2回目：下の中心に合わせる", "Second tap: hit the lower center", "2かいめ：したの ちゅうしんに あわせる"],

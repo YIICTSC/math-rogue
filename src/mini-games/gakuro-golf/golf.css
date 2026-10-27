@@ -226,3 +226,5 @@
 
 /* Leave a margin above desktop taskbars without reducing the course view. */
 @media(orientation:landscape){.gg-playing .gg-control-dock{bottom:max(36px,calc(env(safe-area-inset-bottom) + 24px));max-height:calc(100% - 82px)}.gg-playing.gg-spectating .gg-control-dock{max-height:calc(100% - 176px)}}
+.gg-meter-tutorial{margin:0 0 5px;padding:5px 8px;border-left:3px solid #edbe4f;border-radius:3px;background:#fff2c9;color:#244436;font-size:12px;line-height:1.35;font-weight:700}
+@media(orientation:landscape) and (max-height:550px){.gg-meter-tutorial{font-size:10px;padding:3px 6px;margin-bottom:3px}}
