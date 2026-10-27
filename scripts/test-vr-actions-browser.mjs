@@ -36,7 +36,17 @@ try{
    for(const {name,box:r} of nodes)assert(r.left>=0&&r.top>=0&&r.right<=size.width+.5&&r.bottom<=size.height+.5,`${mode} ${size.width} ${name}: ${JSON.stringify(r)}`);
    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i].box,b=nodes[j].box;assert(!(a.left<b.right-1&&a.right>b.left+1&&a.top<b.bottom-1&&a.bottom>b.top+1),`${mode} ${size.width} controls overlap`);}
    for(const r of await page.locator('.gear-battle-actions button:visible').evaluateAll(ns=>ns.map(n=>n.getBoundingClientRect().toJSON())))assert(r.width>=44&&r.height>=44,'44px touch targets');
-   const r=await page.locator('.gear-battle-actions').boundingBox();assert(r.x+r.width>size.width-30&&r.y>size.height/2,'Right-bottom actions');
+   const r=await page.locator('.gear-battle-actions').boundingBox();assert(r.x+r.width>size.width-30&&r.y+r.height>size.height-30&&r.y>=size.height*.4,'Right-bottom actions');
+   if(size.width>size.height&&size.height<=550){
+    const layout=await page.evaluate(()=>{const a=document.querySelector('.gear-battle-actions'),r=document.querySelector('.gear-field').getBoundingClientRect();return {columns:getComputedStyle(a).gridTemplateColumns.split(' ').length,field:{left:r.left,right:r.right,width:r.width},center:(r.left+r.right)/2};});
+    assert.equal(layout.columns,2,'Landscape actions use two vertical columns');
+    assert(layout.field.left>=76,'Left HUD has its own space');
+    assert(Math.abs(layout.center-size.width/2)<size.width*.09,'Arena moves toward the screen center');
+    assert(layout.field.right<r.x,'Arena stays clear of the action dock');
+    const radar=page.locator('.gear-field>.gear-radar-panel,.gear-field>.gear-radar');
+    if(await radar.count()){const b=await radar.first().boundingBox();assert(b.x>=0&&b.x+b.width<=layout.field.left+4,'Radar stays in the left HUD space');}
+   }
+
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
    await page.screenshot({path:`${shots}/${mode}-${size.width}.png`});console.log('Layout',mode,size.width);
   }
