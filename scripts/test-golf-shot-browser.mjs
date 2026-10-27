@@ -4,7 +4,7 @@ const server=await createServer({appType:'custom',cacheDir:'node_modules/.vite-g
 const sizes=[[844,390],[568,320],[320,568],[1440,900],[390,844],[360,640],[1024,768]];
 async function fits(selector){const report=await page.locator(selector).evaluate(el=>{const box=el.getBoundingClientRect();return{scrollX:el.scrollWidth>el.clientWidth+1,scrollY:el.scrollHeight>el.clientHeight+1,x:box.x,y:box.y,right:box.right,bottom:box.bottom};});if(report.scrollY)console.log('Overflow detail',await page.locator(selector).evaluate(el=>({height:el.clientHeight,scroll:el.scrollHeight,padding:getComputedStyle(el).padding,rows:getComputedStyle(el).gridTemplateRows,children:[...el.querySelectorAll('label,button,input,select,.gg-title-actions,.gg-title-copy')].map(c=>({text:c.textContent.slice(0,24),rect:JSON.stringify(c.getBoundingClientRect()),margin:getComputedStyle(c).margin,gap:getComputedStyle(c).gap,rows:getComputedStyle(c).gridTemplateRows}))})));assert(!report.scrollX&&!report.scrollY,selector+JSON.stringify(report));assert(report.x>=-1&&report.y>=-1&&report.right<=page.viewportSize().width+1&&report.bottom<=page.viewportSize().height+1,JSON.stringify(report));}
 try{
- await page.addInitScript(()=>localStorage.setItem('storybook-3d-quality-v1','low'));
+ await page.addInitScript(()=>{localStorage.setItem('storybook-3d-quality-v1','low');localStorage.setItem('gakuro-golf-shot-tutorial-v1','done');});
  await page.goto('http://127.0.0.1:5212/__golf18',{waitUntil:'domcontentloaded'});await page.locator('.game-launch-title.golf').waitFor();for(const[width,height]of sizes){await page.setViewportSize({width,height});await fits('.game-launch-title.golf');}await page.getByRole('button',{name:'ひとりで練習',exact:true}).click();await page.locator('.online-entry-shell').waitFor();
  for(const[width,height]of sizes){await page.setViewportSize({width,height});await page.waitForTimeout(250);await fits('.online-entry-shell');for(const el of await page.locator('.online-entry-shell button,.online-entry-shell input,.online-entry-shell select').all()){const b=await el.boundingBox();assert(b.y>=0&&b.y+b.height<=height&&b.x>=0&&b.x+b.width<=width,JSON.stringify(b));}console.log('Title',width,height);}
  await page.setViewportSize({width:390,height:844});await page.locator('.online-entry-shell select').selectOption('9');await page.getByRole('button',{name:'ひとりで練習',exact:true}).click();await page.locator('[data-online-lesson=golf]').waitFor();await page.evaluate(()=>window.selectGolfLesson({mode:'ADD_1DIGIT'}));await page.locator('.gg-lobby').waitFor();assert.equal(await page.locator('.gg-lobby select').inputValue(),'9');
@@ -25,5 +25,15 @@ try{
   assert.equal(await page.locator('.gg-canvas').getAttribute('data-camera-mode'),'reaction');
  }
  await page.evaluate(()=>{const r=window.golf.room;r.world.players.local.capped=true;r.emit();});await page.waitForFunction(()=>!document.querySelector('.gg-canvas').dataset.reaction);
-assert.deepEqual(errors,[]);console.log('Golf shot UI: seven title/lobby/shot layouts, real quiz and two timing taps, hole18, stable BGM, birdie/par/bogey/double-bogey reactions and no cap celebration passed.');
+// Confirmed local snapshots drive the retry guidance; repeated renders cannot count as shots.
+ await page.evaluate(()=>{const r=window.golf.room,p=r.world.players.local;p.phase='aim';p.capped=false;p.shotId++;p.shotQuality='nice';r.emit();});
+ await page.waitForFunction(()=>!!document.querySelector('.gg-shot-console'));await page.waitForTimeout(200);
+ for(let n=1;n<=5;n++){
+  await page.evaluate(()=>{const r=window.golf.room,p=r.world.players.local;p.shotId++;p.shotQuality='miss';r.emit();});
+  await page.waitForTimeout(120);
+  if(n<5)assert.equal(await page.locator('.gg-meter-tutorial').count(),0,'tutorial waits for five misses');
+ }
+ await page.locator('.gg-meter-tutorial').waitFor();
+ assert((await page.locator('.gg-meter-tutorial').innerText()).includes('はじめてのショット'));
+ assert.deepEqual(errors,[]);console.log('Golf shot UI: seven title/lobby/shot layouts, real quiz and two timing taps, hole18, stable BGM, birdie/par/bogey/double-bogey reactions and no cap celebration passed.');
 }finally{await browser.close();await server.close();await fs.rm(file,{force:true});}

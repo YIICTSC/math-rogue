@@ -1,3 +1,4 @@
+import {initialTutorialMissTracker, recordTutorialShot} from './tutorialMisses';
 import {useSportsInvitation} from '../shared/useSportsInvitation';
 import {useSessionResultExit} from '../../services/useSessionResultExit';
 import {golfAdvanceCommand} from './keyboard';
@@ -43,6 +44,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const [spin, setSpin] = useState(0), [meterActive, setMeterActive] = useState(false);
   const [shotTutorialDone, setShotTutorialDone] = useState(() => { try { return localStorage.getItem('gakuro-golf-shot-tutorial-v1') === 'done'; } catch { return false; } });
   const tutorialShotPending = useRef(false);
+  const tutorialMisses = useRef(initialTutorialMissTracker());
   const [avatar, setAvatar] = useState<KartAvatar>(() => { try { const saved = JSON.parse(localStorage.getItem('gakuro-golf-avatar-v1') || 'null'); return validAvatar(saved) ? saved : loadAvatar(); } catch { return loadAvatar(); } });
   const [showCreator, setShowCreator] = useState(false);
   const [inviteCopied,setInviteCopied]=useState(false);
@@ -62,6 +64,12 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const spectators = useSpectatorTarget(spectating, candidates.map(p => p.id));
   const viewId = spectating ? spectators.target || self : self;
   const me = view?.players.find(p => p.id === viewId), hole = HOLES[me?.hole ?? 0];
+  useEffect(() => {
+    if (view?.phase !== 'playing' || !own || own.spectator) { tutorialMisses.current = initialTutorialMissTracker(); return; }
+    const result = recordTutorialShot(tutorialMisses.current, own.shotId, own.shotQuality);
+    tutorialMisses.current = result.tracker;
+    if (result.restart) setShotTutorialDone(false);
+  }, [view?.phase, own?.id, own?.spectator, own?.shotId, own?.shotQuality]);
   useEffect(() => { if (!spectating && me?.phase === 'moving' && tutorialShotPending.current) { tutorialShotPending.current = false; setShotTutorialDone(true); try { localStorage.setItem('gakuro-golf-shot-tutorial-v1', 'done'); } catch { /* The session still remembers completion. */ } } }, [me?.phase, spectating]);
   useEffect(() => { room.current?.observe(spectating ? spectators.target : null); }, [spectating, spectators.target]);
   useGolfAudio(view, me);
@@ -69,7 +77,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const baseAngle = me ? Math.atan2(hole.cup.x - me.x, hole.cup.z - me.z) : 0;
   const angle = Math.atan2(Math.sin(baseAngle + offset * Math.PI / 180), Math.cos(baseAngle + offset * Math.PI / 180));
   useEffect(() => { if (me?.phase === 'aim') { setOffset(0); setPower(.7); setClub(remaining < 22 ? 'putter' : remaining < 55 ? 'wedge' : remaining < 110 ? 'iron' : 'driver'); } }, [me?.phase, me?.shotId]);
-  const leave = () => { tutorialShotPending.current = false; setShowCreator(false); const old = room.current; room.current = null; old?.close(); setView(null); setMessage(''); setPicker(null);setEntry('title'); setBusy(false); };
+  const leave = () => { tutorialShotPending.current = false; tutorialMisses.current = initialTutorialMissTracker(); setShowCreator(false); const old = room.current; room.current = null; old?.close(); setView(null); setMessage(''); setPicker(null);setEntry('title'); setBusy(false); };
   useSessionResultExit('golf', leave);
   const createRoom = () => {
     const next = new GolfRoom(v => { if (mounted.current && room.current === next) setView(v); }, m => { if (mounted.current && room.current === next) setMessage(m); });
