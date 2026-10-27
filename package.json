@@ -143,6 +143,7 @@
     "test:dodgeball:peer": "node scripts/test-dodgeball-peer-browser.mjs",
     "test:dodgeball:server": "node scripts/test-dodgeball-server.mjs",
     "test:dodgeball:browser": "node scripts/test-dodgeball-browser.mjs",
+    "test:dodgeball:layout": "node scripts/test-dodgeball-layout-browser.mjs",
     "test:tennis": "node scripts/test-tennis.mjs",
     "test:tennis:peer": "node scripts/test-tennis-peer-browser.mjs",
     "test:tennis:server": "node scripts/test-tennis-server.mjs",
