@@ -34,6 +34,30 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "焼きりんご": "Roasted apple",
+  "風のきのこスープ": "Wind mushroom soup",
+  "旅人の煮込み": "Traveller stew",
+  "焼ききのこ": "Grilled mushrooms",
+  "薬草のポタージュ": "Herb potage",
+  "りんごのコンポート": "Apple compote",
+  "きのこのふわ焼き": "Fluffy mushroom bake",
+  "りんごと薬草のサラダ": "Apple herb salad",
+  "森のきのこリゾット": "Forest mushroom risotto",
+  "りんごのパイ": "Apple pie",
+  "旅立ちの串焼き": "Voyager skewers",
+  "星潮のごちそう": "Star Tide feast",
+  "料理をストックに保存。手帳の料理欄から後で食べられる。": "Dish stored. Eat it later from Food in the journal.",
+  "料理は名前ごとに保存。どこでもストックから食べられる。能力強化は最後に食べた1種類が有効。草地に火をつけると隣の草へ延焼し、雨で消える。": "Dishes are stored by name and can be eaten anywhere. Only the latest food buff applies. Fire spreads through grass and rain extinguishes it.",
+
+  "料理を作って保存": "Cook and store",
+  "ストックから食べる": "Eat from stock",
+  "移動速度強化": "Speed boost",
+  "攻撃力強化": "Attack boost",
+  "防御強化": "Defense boost",
+  "移動速度＋20％・120秒": "Speed +20% for 120s",
+  "攻撃力＋30％・120秒": "Attack +30% for 120s",
+  "被ダメージ半減・120秒": "Half damage for 120s",
+
   "ショット設定": "Shot settings",
   '並び替え': 'Sort', '種類順': 'Sort by type', '名前順': 'Sort by name', '元の順': 'Original order',
   "招待された種目": "Invited sport",
@@ -399,6 +423,30 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "焼きりんご": "やきりんご",
+  "風のきのこスープ": "かぜのきのこスープ",
+  "旅人の煮込み": "たびびとのにこみ",
+  "焼ききのこ": "やききのこ",
+  "薬草のポタージュ": "やくそうのポタージュ",
+  "りんごのコンポート": "りんごのコンポート",
+  "きのこのふわ焼き": "きのこのふわやき",
+  "りんごと薬草のサラダ": "りんごとやくそうのサラダ",
+  "森のきのこリゾット": "もりのきのこリゾット",
+  "りんごのパイ": "りんごのパイ",
+  "旅立ちの串焼き": "たびだちのくしやき",
+  "星潮のごちそう": "ほししおのごちそう",
+  "料理をストックに保存。手帳の料理欄から後で食べられる。": "りょうりをストックにほぞん。てちょうのりょうりらんからあとでたべられる。",
+  "料理は名前ごとに保存。どこでもストックから食べられる。能力強化は最後に食べた1種類が有効。草地に火をつけると隣の草へ延焼し、雨で消える。": "りょうりはなまえごとにほぞん。どこでもストックからたべられる。のうりょくきょうかはさいごにたべた1しゅるいがゆうこう。くさちにひをつけるととなりのくさへえんしょうし、あめできえる。",
+
+  "料理を作って保存": "りょうりをつくってほぞん",
+  "ストックから食べる": "ストックからたべる",
+  "移動速度強化": "いどうそくどきょうか",
+  "攻撃力強化": "こうげきりょくきょうか",
+  "防御強化": "ぼうぎょきょうか",
+  "移動速度＋20％・120秒": "いどうそくど＋20％・120びょう",
+  "攻撃力＋30％・120秒": "こうげきりょく＋30％・120びょう",
+  "被ダメージ半減・120秒": "ひダメージはんげん・120びょう",
+
   "ショット設定": "しょっとせってい",
   '並び替え': 'ならびかえ', '種類順': 'しゅるいじゅん', '名前順': 'なまえじゅん', '元の順': 'もとのじゅん',
   "招待された種目": "しょうたいされたしゅもく",

@@ -106,7 +106,7 @@ export function load(): Save { try {
     x.glideAwakened = typeof x.glideAwakened==='boolean' ? x.glideAwakened : x.beacons.includes(0);
     x.skyTreasures = Array.isArray(x.skyTreasures) ? [...new Set(x.skyTreasures.filter((v:unknown)=>Number.isInteger(v)&&Number(v)>=0&&Number(v)<12))] : [];
     x.weaponA = Number.isInteger(x.weaponA) && wild.ownedTools.includes(x.weaponA) ? x.weaponA : 0;
-    return { ...n, ...x, ...wild, chapter: Math.max(0, Math.min(11, Math.floor(Number(x.chapter) || 0))), room: Math.max(0, Math.min(23, Math.floor(Number(x.room) || 0))), maxHp: Math.max(6, Math.min(30, Number(x.maxHp) || 6)), hp: Math.max(1, Math.min(30, Number(x.hp) || 6)), tool: wild.ownedTools.includes(Number(x.tool)) ? Number(x.tool) : 0, seconds: Math.max(0, Number(x.seconds) || 0) };
+    return { ...n, ...x, ...wild, chapter: Math.max(0, Math.min(11, Math.floor(Number(x.chapter) || 0))), room: Math.max(0, Math.min(23, Math.floor(Number(x.room) || 0))), maxHp: Math.max(6, Math.min(30, Number(x.maxHp) || 6)), hp: Math.max(.5, Math.min(30, Number(x.hp) || 6)), tool: wild.ownedTools.includes(Number(x.tool)) ? Number(x.tool) : 0, seconds: Math.max(0, Number(x.seconds) || 0) };
 }
 catch {
     return fresh();
@@ -127,7 +127,7 @@ export function roomMap(chapter: number, room: number) { const map: number[][] =
             map[y][x] = 3;
         else if (pattern === 4)
             map[y][x] = room % 3 === 0 ? 2 : 6;
-    } shapeField(chapter, room, map); map[7][0] = room % 6 === 0 ? 3 : room < 8 ? 1 : 5; map[7][19] = room % 6 === 5 && room !== 23 ? 3 : room < 8 ? 1 : 5; map[0][10] = room >= 6 ? 5 : 3; map[13][10] = room < 18 ? 5 : 3; map[1][10] = map[12][10] = 5; map[6][8] = map[6][12] = map[6][10] = map[7][10] = 5; map[7][2] = map[7][17] = 5; return map; }
+    } shapeField(chapter, room, map); map[7][0] = room % 6 === 0 ? 3 : room < 8 ? 1 : 5; map[7][19] = room % 6 === 5 && room !== 23 ? 3 : room < 8 ? 1 : 5; map[0][10] = room >= 6 ? 5 : 3; map[13][10] = room < 18 ? 5 : 3; map[1][10] = map[12][10] = 5; map[6][8] = map[6][12] = map[6][10] = map[7][10] = 5; map[7][2] = map[7][17] = 5; for(const dir of [-1,1,-6,6]){const next=room+dir;const valid=next>=0&&next<24&&(dir!==-1||room%6!==0)&&(dir!==1||room%6!==5);if(room<8&&next<8&&valid){if(Math.abs(dir)===1)for(let y=1;y<H-1;y++)map[y][dir<0?0:W-1]=1;else for(let x=1;x<W-1;x++)map[dir<0?0:H-1][x]=1;}}return map; }
 export class World {
     moving = false;
     walk = 0;
@@ -155,6 +155,7 @@ export class World {
         x: number;
         y: number;
         life: number;
+        spread?:boolean;
     }[] = [];
     enemies: Enemy[] = [];
     shots: Shot[] = [];
@@ -175,7 +176,7 @@ export class World {
     kills = 0;
     dirty = false;
     time = 0;
-    constructor(s: Save) { this.s = s; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.studySeconds ??= 0;this.s.studyProblems ??= 0;this.s.pendingTravel ??= null;this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
+    constructor(s: Save) { this.s = s; this.s.dishes??={};this.s.mealBuff??=null; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.studySeconds ??= 0;this.s.studyProblems ??= 0;this.s.pendingTravel ??= null;this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
     enter() { if(this.inSky){this.enterSky();return;} this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
         for (let y = 3; y <= 10; y++)
             for (let x = 3; x <= 16; x++)
@@ -269,7 +270,7 @@ export class World {
         return; const d = Math.hypot(dx, dy), fx = dx / d, fy = dy / d; dx /= Math.max(1, d); dy /= Math.max(1, d); if (this.dash <= 0 && this.attack <= 0) {
         this.dx = fx;
         this.dy = fy;
-    } const v = (this.dash > 0 ? 10 : this.gliding ? (this.weather === 'wind' ? 5.2 : 4.2) : WALK_SPEED * (this.attack > 0 ? .55 : 1)) * dt; for (const [ax, ay] of [[dx * v, 0], [0, dy * v]]) {
+    } const v = (this.dash > 0 ? 10 : this.gliding ? (this.weather === 'wind' ? 5.2 : 4.2) : WALK_SPEED * (this.s.mealBuff?.kind==='speed'?1.2:1) * (this.attack > 0 ? .55 : 1)) * dt; for (const [ax, ay] of [[dx * v, 0], [0, dy * v]]) {
         const nx = this.x + ax + Math.sign(ax) * .22, ny = this.y + ay + Math.sign(ay) * .22;
         if (this.blocks && this.pushCooldown <= 0) {
             const box = this.blocks.boxes.find(b => b.x === Math.floor(nx) && b.y === Math.floor(ny));
@@ -289,13 +290,13 @@ export class World {
             this.y += ay;
         }
     } this.rememberPuzzle(); if (this.travel <= 0) {
-        if (this.x > 18.55)
+        if (this.x > 18.55 && this.map[Math.floor(this.y)]?.[19]!==3)
             this.exit(1);
-        if (this.x < 1.1)
+        if (this.x < 1.1 && this.map[Math.floor(this.y)]?.[0]!==3)
             this.exit(-1);
-        if (this.y < 1.1)
+        if (this.y < 1.1 && this.map[0]?.[Math.floor(this.x)]!==3)
             this.exit(-6);
-        if (this.y > 12.55)
+        if (this.y > 12.55 && this.map[13]?.[Math.floor(this.x)]!==3)
             this.exit(6);
     } }
     exit(dir: number) {
@@ -328,11 +329,11 @@ export class World {
         this.s.room = next;
         if (Math.abs(dir) === 6) {
             this.y = dir > 0 ? 1.8 : 12.2;
-            this.x = 10.5;
+            this.x = room<8&&next<8?Math.max(1.5,Math.min(18.5,this.x)):10.5;
         }
         else {
             this.x = dir > 0 ? 1.8 : 18.2;
-            this.y = 7.5;
+            this.y = room<8&&next<8?Math.max(1.5,Math.min(12.5,this.y)):7.5;
         }
         this.enter();
     }
@@ -364,11 +365,12 @@ export class World {
         for (let x = Math.floor(b.x) - 1; x <= Math.floor(b.x) + 1; x++)
             if (this.map[y]?.[x] === 3)
                 this.alter(x, y, 5); this.fires.push({ ...b, life: 3 }); this.dirty = true; this.clean(); }
-    cook(id: string) { const r = RECIPES.find(r => r.id === id); if (!r || !this.atCamp)
+    cook(id: string) { const r = RECIPES.find(r => r.id === id); if (!r || !this.atCamp || (this.s.dishes[r.id]??0)>=999)
         return false; for (const [k, n] of Object.entries(r.cost))
         if (this.s.inventory[k as keyof Inventory] < n)
             return false; for (const [k, n] of Object.entries(r.cost))
-        this.s.inventory[k as keyof Inventory] -= n; this.s.inventory[r.output]++; this.notice = 'cooked'; this.dirty = true; return true; }
+        this.s.inventory[k as keyof Inventory] -= n; this.s.dishes[r.id]=Math.min(999,(this.s.dishes[r.id]??0)+1); this.notice = 'cooked'; this.dirty = true; return true; }
+    eatDish(id:string){const r=RECIPES.find(r=>r.id===id);if(!r||(this.s.dishes[id]??0)<1||this.s.hp>=this.s.maxHp&&(!r.stamina||this.stamina>=this.s.staminaMax)&&!r.buff)return false;this.s.dishes[id]--;this.s.hp=Math.min(this.s.maxHp,this.s.hp+r.heal);if(r.stamina)this.stamina=this.s.staminaMax;if(r.buff)this.s.mealBuff={kind:r.buff,seconds:120};this.dirty=true;return true;}
     eat(kind: 'meal' | 'tonic') { if (this.s.inventory[kind] < 1 || kind === 'meal' && this.s.hp >= this.s.maxHp || kind === 'tonic' && this.stamina >= this.s.staminaMax && this.s.hp >= this.s.maxHp)
         return false; this.s.inventory[kind]--; if (kind === 'meal')
         this.s.hp = Math.min(this.s.maxHp, this.s.hp + 6);
@@ -522,7 +524,7 @@ export class World {
     }
     strike() {
         const weapon = this.activeWeapon, profile = weaponAction(weapon), finisher = this.combo === 2;
-        const damage = (profile.damage + this.s.weaponRank * .5) * (finisher ? 1.5 : 1);
+        const damage = (this.s.mealBuff?.kind==='attack'?1.3:1) * (profile.damage + this.s.weaponRank * .5) * (finisher ? 1.5 : 1);
         if (profile.style === 'ranged') {
             const spread = finisher ? (weapon === 1 ? [-.14, .14] : [-.18, 0, .18]) : [0];
             const aim = Math.atan2(this.dy, this.dx);
@@ -567,6 +569,7 @@ export class World {
         dt = Math.min(.035, Math.max(0, dt));
         this.time += dt;
         if(this.s.gate)return;
+        if(this.s.mealBuff){this.s.mealBuff.seconds=Math.max(0,this.s.mealBuff.seconds-dt);if(!this.s.mealBuff.seconds){this.s.mealBuff=null;this.dirty=true;}}
         this.s.seconds += dt;this.s.studySeconds+=dt;
         for (const p of this.fx) p.life -= dt;
         this.fx = this.fx.filter(p => p.life > 0);
@@ -606,6 +609,7 @@ export class World {
             this.safe = { x: this.x, y: this.y };
         for (const f of this.fires) {
             f.life -= dt;
+            if(!f.spread&&f.life<3&&this.weather!=='rain'&&!this.inSky&&this.s.room<8){f.spread=true;const x=Math.floor(f.x),y=Math.floor(f.y);for(const [ox,oy]of [[1,0],[-1,0],[0,1],[0,-1]])if(this.fires.length<32&&this.map[y+oy]?.[x+ox]===6){this.alter(x+ox,y+oy,1);this.fires.push({x:x+ox+.5,y:y+oy+.5,life:5});}}
             if (this.weather === 'rain')
                 f.life = 0;
             if (this.gliding && Math.hypot(f.x - this.x, f.y - this.y) < 2)
@@ -709,7 +713,7 @@ export class World {
         this.shots = this.shots.filter(p => p.life > 0);
         this.clean();
     }
-    hit() { this.cancelCombo(); this.attack=0; this.strikePending=false; this.s.hp--; this.hurt = 1; if (this.s.hp <= 0) {
+    hit() { this.cancelCombo(); this.attack=0; this.strikePending=false; this.s.hp=Math.max(0,this.s.hp-(this.s.mealBuff?.kind==='guard'?.5:1)); this.hurt = 1; if (this.s.hp <= 0) {
         this.s.hp = this.s.maxHp;
         this.s.coins = Math.max(0, this.s.coins - 10);
         this.x = 2.5;

@@ -1,0 +1,29 @@
+{
+  "generator": "ImageGen",
+  "source": "assets/star-tide/food-imagegen-source.png",
+  "source_sha256": "fd21ebb2e1756b9a727adc8a5845889639640f7b5f8ebac640857b798c3fb08c",
+  "grid": [
+    4,
+    3
+  ],
+  "cell_size": [
+    192,
+    192
+  ],
+  "runtime": "public/sprites/star-tide/food/{index}.webp",
+  "order": [
+    "meal",
+    "tonic",
+    "travel",
+    "grilled",
+    "herbSoup",
+    "compote",
+    "omelet",
+    "salad",
+    "risotto",
+    "pie",
+    "skewer",
+    "feast"
+  ],
+  "direction": "Original pixel art maritime fantasy RPG food illustrations, dark teal background, twelve distinct dishes."
+}

@@ -176,7 +176,7 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
   if (!w.inSky && graphics?.props.naturalWidth) for (const p of sceneryFor(w)) entities.push({ y: p.y, draw: () => {
     shadow(p.x, p.y - .2, p.size * .3, .14);
     // The canopy fades only when the player is immediately behind it.
-    if (w.y < p.y && Math.abs(w.x - p.x) < .9 && p.y - w.y < 1.9) ctx.globalAlpha = .5;
+    if (w.y < p.y && Math.abs(w.x - p.x) < .9 && p.y - w.y < 1.9 || w.targets.some(([x,y])=>Math.hypot(p.x-x,p.y-y)<2)) ctx.globalAlpha = .35;
     cell(ctx, graphics.props, 8, 12, p.cell, p.row, p.x * 16 - p.size / 2, p.y * 16 - p.size * 88 / 96, p.size);
     ctx.globalAlpha = 1;
   }});
@@ -278,6 +278,12 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
     }
   }});
   entities.sort((a, b) => a.y - b.y).forEach(e => e.draw());
+  // Draw readable interaction rings above scenery and actors, never underneath canopies.
+  if(!w.inSky&&!w.s.solved.includes(key(w.s))){
+    const marks=w.circuit?circuitTargets.map(p=>({x:p.x,y:p.y})):w.beam?[...w.beam.mirrors.map(p=>({x:p.x+.5,y:p.y+.5})),{x:w.beam.goal.x+.5,y:w.beam.goal.y+.5}]:w.ice?[{x:4.5,y:6.5},{x:w.ice.goal.x+6.5,y:w.ice.goal.y+2.5}]:w.blocks?w.blocks.goals.map(p=>({x:p.x+.5,y:p.y+.5})):w.targets.map(([x,y])=>({x,y}));
+    for(const [i,p]of marks.entries()){ctx.save();ctx.strokeStyle='#0b2536';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(p.x*16,p.y*16+5,9,4,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#ffe095';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#102b38';ctx.fillRect(p.x*16-6,p.y*16-17,12,10);ctx.fillStyle='#fff8c6';ctx.font='bold 8px monospace';ctx.fillText(String(i+1),p.x*16-3,p.y*16-9);ctx.restore();}
+  }
+
   for (const f of w.fx) {
     const t = 1 - f.life / f.max;
     ctx.fillStyle = f.color; ctx.globalAlpha = 1 - t;
