@@ -27,12 +27,12 @@ export const ROOMS: ReadonlyArray<{ id: RoomId; name: Localized; description: Lo
   { id: 'atelier', name: words('小さなアトリエ', 'Little atelier'), description: words('絵の具と本と、作りかけの夢。', 'Paint, books, and dreams in progress.') },
   { id: 'rainy', name: words('雨音の部屋', 'Rainy-day room'), description: words('窓を流れる雨を、一緒に眺めよう。', 'Watch the rain trickle down the window together.') },
   { id: 'attic', name: words('屋根裏の部屋', 'Attic retreat'), description: words('斜めの天井と、星の見える窓。', 'A sloping ceiling and a window to the stars.') },
-].map(room => ({ ...room, id: room.id as RoomId, image: `/sprites/kotoba-life/rooms/${room.id}.webp` }));
+].map(room => ({ ...room, id: room.id as RoomId, image: `sprites/kotoba-life/rooms/${room.id}.webp` }));
 
 export const NPCS: ReadonlyArray<{ id: NpcId; name: Localized; role: Localized; place: Localized; image: string }> = [
-  { id: 'bakery', name: words('川村さん', 'Ms. Kawamura'), role: words('パン屋さん', 'Baker'), place: words('角のパン屋', 'Corner bakery'), image: '/sprites/kotoba-life/town/bakery.webp' },
-  { id: 'florist', name: words('佐伯さん', 'Mr. Saeki'), role: words('花屋さん', 'Florist'), place: words('駅前の花屋', 'Station florist'), image: '/sprites/kotoba-life/town/florist.webp' },
-  { id: 'station', name: words('中村さん', 'Mr. Nakamura', 'なかむらさん'), role: words('まちの案内人', 'Neighborhood guide'), place: words('小さな駅前', 'Little station square'), image: '/sprites/kotoba-life/town/station.webp' },
+  { id: 'bakery', name: words('川村さん', 'Ms. Kawamura'), role: words('パン屋さん', 'Baker'), place: words('角のパン屋', 'Corner bakery'), image: 'sprites/kotoba-life/town/bakery.webp' },
+  { id: 'florist', name: words('佐伯さん', 'Mr. Saeki'), role: words('花屋さん', 'Florist'), place: words('駅前の花屋', 'Station florist'), image: 'sprites/kotoba-life/town/florist.webp' },
+  { id: 'station', name: words('中村さん', 'Mr. Nakamura', 'なかむらさん'), role: words('まちの案内人', 'Neighborhood guide'), place: words('小さな駅前', 'Little station square'), image: 'sprites/kotoba-life/town/station.webp' },
 ];
 
 export const WORD_CATEGORIES: ReadonlyArray<{ id: WordCategory; label: Localized }> = [

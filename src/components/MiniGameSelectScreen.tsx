@@ -31,7 +31,7 @@ type MiniGameSpriteDefinition = {
 
 const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
   LANTERN_WAR: { src:'sprites/lantern-war/menu-icon.webp',columns:1,rows:1,index:0 },
-  KOTOBA_LIFE: { src: 'sprites/kotoba-life/title.webp', columns: 1, rows: 1, index: 0, photographic: true },
+  KOTOBA_LIFE: { src: 'sprites/kotoba-life/menu-icon.webp', columns: 1, rows: 1, index: 0, photographic: true },
   STAR_TIDE: { src: 'sprites/star-tide/menu-icon.webp', columns: 1, rows: 1, index: 0 },
   CARD_CLUB: { src: 'sprites/card-club/menu-icon.webp', columns: 1, rows: 1, index: 0 },
   GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },

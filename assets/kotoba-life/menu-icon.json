@@ -1,0 +1,8 @@
+{
+  "generator": "imagegen",
+  "source": "sources/menu-icon.png",
+  "reference": "public/sprites/kotoba-life/title.webp",
+  "sha256": "74118c30c1b136249e62392bb64ccea991ff9b7feaf717e29a5b32431a2821cd",
+  "output": "public/sprites/kotoba-life/menu-icon.webp",
+  "purpose": "Dedicated square minigame selection icon"
+}

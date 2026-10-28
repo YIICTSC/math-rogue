@@ -17,11 +17,11 @@ const assignment={id:'kotoba-browser-questions',title:'Energy questions',units:[
 window.__answers=[];
 createRoot(document.getElementById('root')).render(<KotobaLife onBack={()=>{window.__leftGame=true;}} problemMode={GameMode.ADDITION} assignment={assignment} onAnswerResult={answer=>window.__answers.push(answer)} languageMode={location.search.includes('en')?'ENGLISH':'JAPANESE'}/>);`);
 
-const server = await createServer({ configFile: false, plugins: [react()], define: { __APP_ASSET_VERSION__: JSON.stringify('kotoba-browser-test') }, server: { host: '127.0.0.1', port: 0, hmr: false }, logLevel: 'error' });
+const server = await createServer({ configFile: false, plugins: [react(), { name: 'pages-path-rebase', transform(code, id) { if (id.endsWith('/kotoba-life/data.ts')) return code.replaceAll('/sprites/', '/math-rogue/sprites/'); } }], base: '/math-rogue/', define: { __APP_ASSET_VERSION__: JSON.stringify('kotoba-browser-test') }, server: { host: '127.0.0.1', port: 0, hmr: false }, logLevel: 'error' });
 await server.listen();
 const browser = await chromium.launch({ ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}), args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const errors = [], missing = [];
-const url = `http://127.0.0.1:${server.httpServer.address().port}/${directory}/index.html`;
+const url = `http://127.0.0.1:${server.httpServer.address().port}/math-rogue/${directory}/index.html`;
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 const observe = p => {
   p.on('pageerror', error => errors.push(error.message));
@@ -80,7 +80,7 @@ try {
   await page.getByRole('heading', { name: 'ことば日和', exact: true }).waitFor();
   await page.evaluate(async () => {
     for (const path of ['title', ...['sunroom','tatami','loft','seaside','forest','atelier','rainy','attic'].map(id => `rooms/${id}`), ...['bakery','florist','station'].map(id => `town/${id}`)]) {
-      const image = new Image(); image.src = `/sprites/kotoba-life/${path}.webp`; await image.decode();
+      const image = new Image(); image.src = `/math-rogue/sprites/kotoba-life/${path}.webp`; await image.decode();
     }
   });
   await shot('title-desktop');
@@ -89,6 +89,7 @@ try {
   await page.locator('.kl-friend-choices').getByRole('button', { name: 'もも', exact: true }).click();
   await page.getByRole('tab', { name: 'おへや', exact: true }).click();
   assert.equal(await page.locator('.kl-room-choices button').count(), 8, 'All eight rooms are available immediately');
+  await page.locator('.kl-room-choices img').evaluateAll(async images => { for (const image of images) { image.loading='eager'; await image.decode(); if (!image.naturalWidth || image.src.includes('/math-rogue/math-rogue/')) throw Error('Room image did not load from the deployed base'); } });
   await page.locator('.kl-room-choices').getByRole('button', { name: '海辺の家', exact: true }).click();
   await button('この暮らしをはじめる').click();
   await page.locator('.kl-living').waitFor();

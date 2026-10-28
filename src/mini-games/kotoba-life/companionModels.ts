@@ -74,12 +74,13 @@ export function createCompanion(id: CompanionId): CompanionModel {
       ellipsoid(ear, inner, 0, 0, .095, .09, .10, .035);
     }
   }
+  // Pico has raised cream face patches; its eyes and blush must sit in front of them.
   const eyes: THREE.Mesh[] = [];
   for (const side of [-1, 1]) {
-    const eye = ellipsoid(head, eyeMat, side * (capy ? .26 : .205), .045, .416, .058, capy ? .068 : .081, .034);
+    const eye = ellipsoid(head, eyeMat, side * (capy ? .26 : .205), .045, penguin ? .49 : .416, .058, capy ? .068 : .081, .034);
     eyes.push(eye);
     ellipsoid(eye, white, -.22, .32, .80, .25, .22, .18);
-    ellipsoid(head, blush, side * .33, -.12, .398, .085, .035, .025);
+    ellipsoid(head, blush, side * .33, -.12, penguin ? .48 : .398, .085, .035, .025);
     if (id === 'sora') for (let i = 0; i < 2; i++) {
       const whisker = geometryMesh(head, new THREE.CapsuleGeometry(.008, .16, 3, 5), noseMat, side * .37, -.19 - i * .05, .47);
       whisker.rotation.z = side * (1.45 + i * .18);
