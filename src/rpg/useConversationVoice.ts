@@ -1,9 +1,9 @@
-import { residentVoiceMoras, unlockResidentVoice } from './residentVoiceSynth';
+import { residentVoiceMoras } from './residentVoiceSynth';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { World } from './engine';
 import { socialLineText, type SocialLine } from './social';
 import { DEFAULT_CONVERSATION_VOICE, defaultHeroVoice, defaultResidentVoice } from './conversationVoice';
-import { speakConversation, stopConversationSpeech } from './conversationSpeech';
+import { speakConversation, stopConversationSpeech, unlockConversationSpeech } from './conversationSpeech';
 export default function useConversationVoice(world: World | null, selfId: string, enabled: boolean, language: string) {
   const latest = useRef(world); latest.current = world;
   const allowed = useRef(enabled); allowed.current = enabled;
@@ -13,11 +13,7 @@ export default function useConversationVoice(world: World | null, selfId: string
     const unlock = () => {
       if (unlocked.current || !allowed.current || document.hidden) return;
       unlocked.current = true;
-      unlockResidentVoice();
-      // iOS requires the first speech request to originate from a user gesture.
-      if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
-        const prime = new SpeechSynthesisUtterance(' '); prime.volume = 0; window.speechSynthesis.speak(prime);
-      }
+      unlockConversationSpeech();
     };
     window.addEventListener('pointerdown', unlock, { passive: true });
     window.addEventListener('keydown', unlock);

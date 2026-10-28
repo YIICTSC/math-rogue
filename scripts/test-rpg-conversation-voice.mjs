@@ -28,7 +28,7 @@ function App(){const [w,sw]=useState(initial),[active,sa]=useState(true),[v,sv]=
   const world=createWorld(7);addPlayer(world,'a','A');
   const memory={phrases:[],personality:'kind',autoTalk:false,conversationVoice:{...DEFAULT_CONVERSATION_VOICE,pitch:.75}};
   assert.ok(applyAction(world,'a',{type:'social-memory',memory},Date.now()));
-  assert.equal(world.players.a.memory.conversationVoice.pitch,.75);
+  assert.equal(world.players.a.memory.conversationVoice.pitch,.75);assert.equal(world.players.a.memory.conversationVoice.engine,'auto');assert.equal(world.players.a.memory.conversationVoice.intonation,DEFAULT_CONVERSATION_VOICE.intonation);
   assert.equal(applyAction(world,'a',{type:'social-memory',memory:{...memory,conversationVoice:{...memory.conversationVoice,rate:99}}},Date.now()),false);
   await vite.listen();browser=await chromium.launch({headless:true});const p=await browser.newPage({viewport:{width:390,height:844}});p.setDefaultNavigationTimeout(120000);p.setDefaultTimeout(90000);const errors=[];p.on('pageerror',e=>errors.push(e.message));
   await p.addInitScript(()=>{
@@ -48,7 +48,7 @@ function App(){const [w,sw]=useState(initial),[active,sa]=useState(true),[v,sv]=
   await p.getByRole('button',{name:'声を試聴する',exact:true}).click();await p.waitForTimeout(700);assert.ok(await p.evaluate(()=>window.calls.some(c=>c.text.includes('いっしょにつり'))));
   await p.locator('input[type=range]').first().fill('1.5');assert.equal(await p.evaluate(()=>window.voice.pitch),1.5);
   const saved=await p.evaluate(async()=>{const {saveConversationVoice,loadConversationVoice}=await import('/src/rpg/conversationVoice.ts');saveConversationVoice('hero-a',window.voice);saveConversationVoice('hero-b',{...window.voice,pitch:.6});return [loadConversationVoice('hero-a').pitch,loadConversationVoice('hero-b').pitch,loadConversationVoice('unknown').pitch];});assert.deepEqual(saved,[1.5,.6,1.1]);
-  // NPC dialogue uses its kana reading and the original Web Audio engine.
+  // Recommended NPC dialogue uses a Japanese device voice, retaining authored kana.
   const nativeCallsBeforeNpc=await p.evaluate(()=>window.calls.length);
   await p.evaluate(()=>{
     window.originalStarts=0;
@@ -56,9 +56,9 @@ function App(){const [w,sw]=useState(initial),[active,sa]=useState(true),[v,sv]=
     AudioBufferSourceNode.prototype.start=function(...args){window.originalStarts++;return start.apply(this,args);};
     window.setWorld({...window.w,town:{people:{npc:{personality:1}}},social:{talks:[...window.w.social.talks,{id:'original-npc',at:Date.now(),people:['a','npc'],lines:[{speaker:'npc',text:'今日は晴れ。',hiragana:'きょうははれ。'}]}]}});
   });
-  await p.waitForFunction(()=>window.originalStarts===1);
+  await p.waitForFunction(()=>window.calls.some(c=>c.text==='きょうははれ。'));
   await p.waitForFunction(()=>document.getElementById('caption').textContent==='');
-  assert.equal(await p.evaluate(()=>window.calls.length),nativeCallsBeforeNpc);
+  assert.equal(await p.evaluate(()=>window.calls.length),nativeCallsBeforeNpc+1);assert.equal(await p.evaluate(()=>window.originalStarts),0);
   await p.evaluate(()=>{window.longSpeech=true;window.setWorld({...window.w,social:{talks:[...window.w.social.talks,{id:'blocked',at:Date.now(),people:['a','b'],lines:[{speaker:'b',text:'停止を確認。'},{speaker:'a',text:'停止後は読まない。'}]}]}});});await p.waitForFunction(()=>window.calls.some(c=>c.text==='停止を確認。'));await p.evaluate(()=>window.setActive(false));await p.waitForTimeout(150);const n=await p.evaluate(()=>window.calls.length);await p.evaluate(()=>window.setActive(true));await p.waitForTimeout(300);assert.equal(await p.evaluate(()=>window.calls.length),n);
   await p.goto('http://127.0.0.1:5221/__voice?lang=ENGLISH');await p.getByRole('button',{name:'Preview voice',exact:true}).waitFor();await p.getByRole('button',{name:'Preview voice',exact:true}).click();await p.waitForFunction(()=>window.calls.some(c=>c.lang==='en-US'));await p.goto('http://127.0.0.1:5221/__voice?integration');await p.getByRole('button',{name:'冒険をはじめる',exact:true}).click();
   await p.waitForFunction(()=>{const v=window.fullSnapshot?.world.players.local.memory?.conversationVoice;return v?.pitch===1.2&&v?.style==='bouncy';});
@@ -75,5 +75,5 @@ function App(){const [w,sw]=useState(initial),[active,sa]=useState(true),[v,sv]=
   await p.goto('http://127.0.0.1:5221/__voice?integration');await p.getByRole('button',{name:'冒険をはじめる',exact:true}).click();await p.waitForFunction(()=>window.fullSnapshot?.world.players.local.memory?.conversationVoice?.pitch===1.5);
   await p.locator('#switchHero').click();await p.waitForFunction(()=>window.fullSnapshot?.world.players.local.memory?.conversationVoice?.pitch===.6);await p.locator('#switchHero').click();await p.waitForFunction(()=>window.fullSnapshot?.world.players.local.memory?.conversationVoice?.pitch===1.5);
   assert.equal(errors.length,0,errors.join('\n'));
-  console.log('Conversation voices passed: server bounds, per-hero storage, phrase rhythm, per-speaker pitch/rate/timbre, translated controls, preview, gesture unlock, history deduplication, volume/mute cancellation and no replay after blocking. Device speech mocked; NPC kana playback exercised through native Web Audio.');
+  console.log('Conversation voices passed: server bounds, per-hero storage, phrase rhythm, per-speaker pitch/rate/timbre, translated controls, preview, gesture unlock, history deduplication, volume/mute cancellation and no replay after blocking. Device speech mocked; recommended NPC kana uses a matching Japanese voice.');
 } finally {await browser?.close();await vite?.close();await fs.rm(file,{force:true});}

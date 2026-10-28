@@ -35,6 +35,9 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "おすすめ（明瞭な読み上げ）": "Recommended (clear speech)",
+  "おすすめは日本語に対応した端末音声を優先し、聞き取りやすい高さと速さで話します。端末音声が使えない場合は独自音声で話します。": "Recommended speech uses a matching device voice with clear pitch and pacing, and falls back to the built-in voice when unavailable.",
+
   "ことば日和": "Kotoba Days",
   ...LANTERN_ENGLISH,
   "白波の石灰段丘": "Whitewave limestone terraces",
@@ -435,6 +438,9 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "おすすめ（明瞭な読み上げ）": "おすすめ（めいりょうなよみあげ）",
+  "おすすめは日本語に対応した端末音声を優先し、聞き取りやすい高さと速さで話します。端末音声が使えない場合は独自音声で話します。": "おすすめはにほんごにたいおうしたたんまつおんせいをゆうせんし、ききとりやすいたかさとはやさではなします。たんまつおんせいがつかえないばあいはどくじおんせいではなします。",
+
   "ことば日和": "ことばびより",
   "5人の小さなともだちと、言葉を教えてのんびり暮らす。8つの部屋と町で育つ会話の生活ゲーム。": "5にんのちいさなともだちと、ことばをおしえてのんびりくらす。8つのへやとまちでそだつかいわのせいかつゲーム。",
   ...LANTERN_HIRAGANA,

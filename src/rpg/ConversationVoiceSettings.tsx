@@ -64,14 +64,15 @@ export default function ConversationVoiceSettings({
         </div>
         <p>
           {L(
-            "おすすめの声から選び、高さ・速さ・抑揚で自分らしく調整できます。オリジナル音声は、かなから個性的な声を作ります。",
-            "Choose a preset and adjust pitch, speed and expression. Original voices turn Japanese kana into a distinctive synthesized voice.",
-            "おすすめのこえからえらび、たかさ・はやさ・よくようでじぶんらしくちょうせいできます。おりじなるおんせいは、かなからこせいてきなこえをつくります。",
+            "おすすめは日本語に対応した端末音声を優先し、聞き取りやすい高さと速さで話します。端末音声が使えない場合は独自音声で話します。",
+            "Recommended speech uses a matching device voice with clear pitch and pacing, and falls back to the built-in voice when unavailable.",
+            "おすすめはにほんごにたいおうしたたんまつおんせいをゆうせんし、ききとりやすいたかさとはやさではなします。たんまつおんせいがつかえないばあいはどくじおんせいではなします。",
           )}
         </p>
         <label>
           {L("音声の種類", "Voice engine", "おんせいのしゅるい")}
-          <select value={voice.engine ?? "original"} onChange={e => update({engine: e.target.value as "original" | "device"})}>
+          <select value={voice.engine ?? "auto"} onChange={e => update({engine: e.target.value as "auto" | "original" | "device"})}>
+            <option value="auto">{L("おすすめ（明瞭な読み上げ）", "Recommended (clear speech)", "おすすめ（めいりょうなよみあげ）")}</option>
             <option value="original">{L("オリジナル音声", "Original voice", "おりじなるおんせい")}</option>
             <option value="device">{L("端末の読み上げ", "Device speech", "たんまつのよみあげ")}</option>
           </select>

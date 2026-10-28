@@ -15,5 +15,5 @@ assert.equal(api.ROOM_TOPICS.length,144);
 for(const id of ['mugi','momo','sora','kohaku','pico']){let fresh=api.selectCharacter(api.freshState(),id);const learn=api.teachWord(fresh,'星空','thing','ほしぞら');fresh=learn.state;const dialogs=[api.initialDialogue(fresh),learn.dialogue,...['feed','pet','play','rest'].map(a=>api.care(fresh,a).dialogue)];for(const d of dialogs)for(const l of d.lines){const k=api.kotobaReading(l.text.ja,fresh.companions[id].words);assert(k&&api.residentVoiceMoras(k),'Complete voiced line: '+l.text.ja);}}
 assert.equal(api.rechargeEnergy(s,0).energy,5);assert.equal(api.rechargeEnergy(s,2).energy,6);
 assert.equal(api.parseState({version:1,energy:-100}).energy,0);
-for(const voice of Object.values(api.VOICES)){const pcm=api.renderResidentVoice(api.residentVoiceMoras('こんにちは'),voice);assert(pcm.some(n=>Math.abs(n)>.01));assert(pcm.every(Number.isFinite));}
+for(const voice of Object.values(api.VOICES)){assert.equal(voice.engine,'auto','All Kotoba Days voices prefer clear native speech');const pcm=api.renderResidentVoice(api.residentVoiceMoras('こんにちは'),voice);assert(pcm.some(n=>Math.abs(n)>.01));assert(pcm.every(Number.isFinite));}
 console.log('PASS: energy, duplicate/reading guards, free care, persistence, '+observed.size+' distinct conversations, town speech kana and eight original voice profiles.');

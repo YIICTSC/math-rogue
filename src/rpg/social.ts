@@ -222,6 +222,8 @@ export function applySocial(
       ...(m.conversationVoice ? { conversationVoice: {
         enabled: m.conversationVoice.enabled, pitch: m.conversationVoice.pitch, rate: m.conversationVoice.rate,
         style: m.conversationVoice.style, timbre: m.conversationVoice.timbre,
+        ...(m.conversationVoice.engine ? { engine: m.conversationVoice.engine } : {}),
+        ...(m.conversationVoice.intonation !== undefined ? { intonation: m.conversationVoice.intonation } : {}),
       } } : {}),
     };
     w.revision++;
