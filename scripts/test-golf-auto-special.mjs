@@ -9,12 +9,18 @@ const lesson=()=>({title:'Test',questions:[0,1,2].map(i=>({id:'q'+i,mode:'ADDITI
 const world=()=>{const w=E.createGolf();E.addPlayer(w,'p','Player');E.startGolf(w,'Test');return w;};
 const w=world(),p=w.players.p;
 for(let batch=0;batch<2;batch++){p.phase='ready';E.command(w,'p',{type:'quiz'},lesson);for(let i=0;i<3;i++){E.command(w,'p',{type:'answer',shotId:p.shotId,index:i,option:2});E.command(w,'p',{type:'continue',shotId:p.shotId,index:i});}assert(Math.abs(p.starEnergy-(batch+1)/2)<1e-9);}
-for(const energy of [0,.5,1])for(const impact of [-.21,-.2,0,.2,.21,1]){
+for(const power of [.5,.97,.999,1])for(const energy of [0,.5,1])for(const impact of [-.21,-.2,0,.2,.21,1]){
  const w=world(),p=w.players.p;Object.assign(p,{phase:'aim',starEnergy:energy,shotsLeft:3,correct:3});
- assert(E.command(w,'p',{type:'shot',shotId:p.shotId,club:'driver',angle:0,power:.5,impact,special:true}));
- const special=energy===1&&Math.abs(impact)<=.2;assert.equal(p.shotSpecial,special);assert.equal(p.starEnergy,special?0:energy);
+ assert(E.command(w,'p',{type:'shot',shotId:p.shotId,club:'driver',angle:0,power,impact,special:true}));
+ const special=power===1&&energy===1&&Math.abs(impact)<=.2;assert.equal(p.shotSpecial,special);assert.equal(p.starEnergy,special?0:energy);
 }
-for(const hole of [0,5,17])for(const club of ['driver','putter'])for(const power of [.05,1])for(const angle of [0,Math.PI]){
+{
+ const w=world(),p=w.players.p;Object.assign(p,{phase:'aim',starEnergy:1,shotsLeft:3,correct:3});
+ E.command(w,'p',{type:'shot',shotId:p.shotId,club:'driver',angle:0,power:1,impact:.3});
+ for(let i=0;i<900&&p.phase==='moving';i++)E.tick(w,1/30);
+ assert.equal(p.shotSpecial,false);assert.equal(p.specialLanding,undefined);assert.notEqual(p.phase,'holed');assert.equal(p.starEnergy,1);
+}
+for(const hole of [0,5,17])for(const club of ['driver','putter'])for(const power of [1])for(const angle of [0,Math.PI]){
  const w=world(),p=w.players.p;Object.assign(p,{hole,scores:Array(hole).fill(4),phase:'aim',starEnergy:1,shotsLeft:3,correct:3});
  assert(E.command(w,'p',{type:'shot',shotId:p.shotId,club,angle,power,impact:0}));
  assert(p.shotSpecial);let peak=0;

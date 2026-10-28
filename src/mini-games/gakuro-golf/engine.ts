@@ -92,7 +92,7 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (hi
     const bonus = benefits(p.correct), impact = c.impact ?? 0, spin = c.club === 'putter' ? 0 : c.spin ?? 0;
     const angle = c.angle + impact * 12 * Math.PI / 180 + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
     Object.assign(p, shotVelocity(p, c.club, angle, c.power, spin, impact));
-    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle; p.shotSpin = spin; p.shotImpact = impact; p.shotQuality = shotQuality(impact); p.spinApplied = false; p.shotSpecial=(p.starEnergy??0)>=.999 && p.shotQuality==='nice'; p.specialLanding=undefined; if(p.shotSpecial){p.starEnergy=0;startSpecialShot(p);}
+    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle; p.shotSpin = spin; p.shotImpact = impact; p.shotQuality = shotQuality(impact); p.spinApplied = false; p.shotSpecial=(p.starEnergy??0)>=.999 && c.power===1 && p.shotQuality==='nice'; p.specialLanding=undefined; if(p.shotSpecial){p.starEnergy=0;startSpecialShot(p);}
     sportsEvent(w,p.shotSpecial?'special':'action',p.shotId,p.id); if(p.shotQuality==='nice'&&c.club!=='putter')sportsEvent(w,'referee',p.shotId,p.id,Math.abs(impact)<.06?'perfect':'nice');
     p.strokes++; p.shotsLeft--; p.shotId++; p.phase = 'moving'; p.flightTime = 0; p.penalty = false; p.penaltyKind = null; return true;
   }
