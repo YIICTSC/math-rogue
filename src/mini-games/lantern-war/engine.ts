@@ -1,3 +1,4 @@
+import {FIELD_QUESTS} from './world';
 import {HEROES,heroById,pairKey} from './roster';
 import {CHAPTERS,TERRAIN_INFO} from './story';
 import {resolveEncounter} from './combat';
@@ -19,7 +20,7 @@ export function loadCampaign():Campaign|null{
  const ids=s.formations.flatMap((f:any)=>f.slots?.filter(Boolean)||[]);
  if(s.formations.length!==3||s.formations.some((f:any)=>f.slots?.length!==6)||ids.length!==new Set(ids).size||!ids.includes(s.hero)||ids.some((id:string)=>!s.recruited.includes(id))||s.recruited.some((id:string)=>!HEROES.some(h=>h.id===id)))return null;
  if(['battle','result'].includes(s.phase)&&(!s.battle||!Array.isArray(s.battle.squads)||s.battle.map?.length!==10||s.battle.map.some((row:any)=>!Array.isArray(row)||row.length!==12||row.some((t:string)=>!TERRAIN_INFO[t]))))return null;
- if(s.battle)s.battle.paused=true;return s;
+ if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle)s.battle.paused=true;return s;
  }catch{return null;}
 }
 export function recruitFor(s:Campaign,chapter:number){
@@ -72,7 +73,7 @@ export function finishEncounter(s:Campaign){
  const retreat=pathTo(b,loser,loser.team==='ally'?{x:1,y:8}:{x:11,y:0})[0];if(retreat){loser.x=retreat.x;loser.y=retreat.y;}
  if(e.winner==='ally'){b.brave=Math.min(9,b.brave+1);for(const f of a.members){const old=level(s,f.hero);s.xp[f.hero]=(s.xp[f.hero]||0)+(living(z)?20:45);const growth=level(s,f.hero)-old;if(growth){f.maxHp+=growth*4;f.hp=Math.min(f.maxHp,f.hp+8);f.atk+=growth*2;f.def+=growth;addLog(b,f.name+' Lv.'+level(s,f.hero));}}
  for(const f of a.members)for(const partner of a.members.filter(p=>p.uid!==f.uid)){const k=pairKey(f.hero,partner.hero);s.bonds[k]=Math.min(15,(s.bonds[k]||0)+1);}}
- addLog(b,winner.name+'が交戦に勝利。'+loser.name+'は後退。');b.encounter=null;checkResult(s);return true;
+ addLog(b,winner.name+'が交戦に勝利。'+loser.name+'は後退。');b.encounter=null;s.studyPending=true;checkResult(s);return true;
 }
 export function checkResult(s:Campaign){
  const b=s.battle;if(!b||b.result)return;const allies=b.squads.filter(q=>q.team==='ally'&&living(q)),enemies=b.squads.filter(q=>q.team==='enemy'&&living(q)),c=CHAPTERS[b.chapter],goal={x:9,y:0};

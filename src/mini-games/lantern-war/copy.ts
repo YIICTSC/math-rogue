@@ -314,3 +314,6 @@ export const LANTERN_HIRAGANA:Record<string,string>={
   "後衛を優先": "こうえいをゆうせん",
   "回復役を優先": "かいふくやくをゆうせん"
 };
+
+Object.assign(LANTERN_ENGLISH,{"灯をつなぐ旅路":"Journey of the lanterns","移動中":"Travelling","行き先を選んで探索":"Choose a destination to explore","行き先を選ぶフィールドマップ":"Explorable field map","◆ 本編":"◆ Main story","◇ 仲間と寄り道":"◇ Companions and side stories","物語が進むと探索範囲が広がる":"More regions open as the story advances","仲間との交流":"Time with a companion","この場所で仲間にできる":"Meet and recruit a companion here","達成済み · 会話をもう一度読む":"Completed · Revisit the conversation","選択で報酬が変わる · 経験値と補給を獲得":"Choices change rewards · Gain experience and supplies","この場所を訪ねる":"Visit this place"});
+Object.assign(LANTERN_HIRAGANA,{"灯をつなぐ旅路":"ひをつなぐたびじ","移動中":"いどうちゅう","行き先を選んで探索":"いきさきをえらんでたんさく","行き先を選ぶフィールドマップ":"いきさきをえらぶフィールドマップ","◆ 本編":"◆ ほんぺん","◇ 仲間と寄り道":"◇ なかまとよりみち","物語が進むと探索範囲が広がる":"ものがたりがすすむとたんさくはんいがひろがる","仲間との交流":"なかまとのこうりゅう","この場所で仲間にできる":"このばしょでなかまにできる","達成済み · 会話をもう一度読む":"たっせいずみ · かいわをもういちどよむ","選択で報酬が変わる · 経験値と補給を獲得":"せんたくでほうしゅうがかわる · けいけんちとほきゅうをかくとく","この場所を訪ねる":"このばしょをたずねる"});

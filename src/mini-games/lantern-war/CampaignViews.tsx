@@ -1,3 +1,4 @@
+import ExpeditionMap from './ExpeditionMap';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import {useContext} from 'react';
 import {LanternLanguage} from './language';
@@ -10,12 +11,7 @@ import {DEFAULT_TACTICS,RULE_LABELS,CONDITION_LABELS,TARGET_LABELS} from './comb
 import {BattleArt,MapArt,Portrait} from './art';
 import type {Campaign,Tactic} from './types';
 import type {Update} from './Battlefield';
-export function FieldMap({s,update}:{s:Campaign;update:Update}){
- const [selected,setSelected]=useState(s.chapter),c=CHAPTERS[selected],unlocked=selected<=s.chapter;
- const nodes=CHAPTERS.map((c,i)=>({x:12+(i%6)*15,y:76-Math.floor(i/6)*29+(i%2)*5}));
- return <TranslatedUiTree mode={useContext(LanternLanguage)}><div className="lw-field"><div className="lw-worldmap"><div className="lw-map-scenery"/><svg viewBox="0 0 100 100" preserveAspectRatio="none" className="lw-world-routes"><polyline points={nodes.map(p=>p.x+','+p.y).join(' ')} fill="none" stroke="#dec493" strokeWidth=".35" strokeDasharray="1 1"/></svg><div className="lw-cartouche"><small>ATLAS OF THE CONFLUENCE</small><h2>継界の諸国</h2><p>歩んだ道に、灯を残す。</p></div>{nodes.map((p,i)=><button key={i} className={'lw-map-node '+(i===selected?'is-selected ':'')+(s.cleared.includes(i)?'is-clear':i<=s.chapter?'is-open':'is-locked')} style={{left:p.x+'%',top:p.y+'%'}} aria-label={'第'+(i+1)+'章 '+CHAPTERS[i].title+(i>s.chapter?' 未到達':'')} onClick={()=>setSelected(i)}><b>{s.cleared.includes(i)?'✦':i+1}</b><span>{CHAPTERS[i].place}</span></button>)}</div>
- <aside className="lw-chapter-panel lw-panel"><small>{selected<6?'Ⅰ 境界の灯':selected<12?'Ⅱ 王冠の代価':'Ⅲ 明日への継承'} · CHAPTER {String(selected+1).padStart(2,'0')}</small><h2>{c.title}</h2><p className="lw-subtitle">{c.subtitle}</p><hr/><p>勝利条件：{OBJECTIVES[c.objective]}</p><p>報酬：{c.reward} G · 薬草3個</p><p>加入する仲間：{c.recruit.map(id=>heroById(id).name).join('、')||'集結した全員で最終決戦へ'}</p>{s.cleared.includes(selected)&&<p>戦績 {'✦'.repeat(s.medals[selected]||1)} · 再戦できます</p>}<button className="lw-primary" disabled={!unlocked} onClick={()=>update(s=>beginChapter(s,selected))}>{unlocked?s.cleared.includes(selected)?'この戦場へ再出撃':'物語を進める':'前の章をクリアすると開放'}</button><button onClick={()=>update(s=>{s.phase='camp';})}>焚き火のキャンプへ</button>{unlocked&&selected>0&&selected%3===2&&<button onClick={()=>update(s=>beginChapter(s,selected,true))}>周辺の遊撃戦{s.sideCleared.includes(selected)?'（達成済み）':''}</button>}<small>戦場は一時停止から始まります。編成と作戦はキャンプで準備。</small></aside></div></TranslatedUiTree>;
-}
+export const FieldMap=ExpeditionMap;
 export function Camp({s,update}:{s:Campaign;update:Update}){
  const [tab,setTab]=useState('formation'),[selected,setSelected]=useState(s.hero as string),[squad,setSquad]=useState(0),[filter,setFilter]=useState('すべて'),[message,setMessage]=useState('');
  const h=heroById(selected),lv=level(s,selected),rules=s.tactics[selected]||DEFAULT_TACTICS;
