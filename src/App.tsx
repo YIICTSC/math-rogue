@@ -954,6 +954,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MINI_GAME_CARD_CLUB,
     GameScreen.MINI_GAME_SURVIVOR,
     GameScreen.MINI_GAME_STAR_TIDE,
+    GameScreen.MINI_GAME_LANTERN_WAR,
     GameScreen.MINI_GAME_DUNGEON,
     GameScreen.MINI_GAME_DUNGEON_2,
     GameScreen.MINI_GAME_KOCHO,
@@ -6927,7 +6928,7 @@ const App: React.FC = () => {
             setPendingMiniGameScreen(null);
             setGameState(prev => ({ ...prev, screen: miniGame, craneGameContext: 'TITLE', currentEventTitle: undefined, challengeMode: undefined }));
         } else if (miniGame) {
-            if (miniGame !== GameScreen.MINI_GAME_STAR_TIDE && isTeacherAssignmentActive && currentAssignment?.id === activeAssignment?.id && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
+            if (miniGame !== GameScreen.MINI_GAME_STAR_TIDE && miniGame !== GameScreen.MINI_GAME_LANTERN_WAR && isTeacherAssignmentActive && currentAssignment?.id === activeAssignment?.id && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
                 applyMiniGameAssignmentConfig(miniGame, activeAssignment);
             } else {
                 // Keep the chosen game until its normal problem selection finishes.
@@ -7363,8 +7364,8 @@ const App: React.FC = () => {
         if (showDailyAssignmentNoticeForProblemSelection()) {
             return;
         }
-        // Star Tide always confirms problem selection before its dedicated title.
-        if (screen !== GameScreen.MINI_GAME_STAR_TIDE && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
+        // Story campaigns confirm problem selection before their dedicated titles.
+        if (screen !== GameScreen.MINI_GAME_STAR_TIDE && screen !== GameScreen.MINI_GAME_LANTERN_WAR && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
             applyMiniGameAssignmentConfig(screen, activeAssignment);
             return;
         }
@@ -19204,8 +19205,9 @@ const App: React.FC = () => {
         GameScreen.MINI_GAME_SCHOOL_TRPG,
         GameScreen.MINI_GAME_CRANE,
         GameScreen.MINI_GAME_GAKUROGEAR,
-        // Star Tide sizes its field and reserves its own mobile control insets.
+        // These campaigns size their fields and reserve their own mobile control insets.
         GameScreen.MINI_GAME_STAR_TIDE,
+        GameScreen.MINI_GAME_LANTERN_WAR,
     ].includes(gameState.screen);
 
     return (

@@ -8,6 +8,7 @@ const GakuroGear = deferredScreen(() => import('../mini-games/gakurogear/VrTitle
 const PokerGameScreen = deferredScreen(() => import('./PokerGameScreen'));
 const CardClub = deferredScreen(() => import('../mini-games/card-club/CardClub'));
 const SchoolyardSurvivorScreen = deferredScreen(() => import('./SchoolyardSurvivorScreen'));
+const LanternWar = deferredScreen(() => import('../mini-games/lantern-war/LanternWar'));
 const StarTide = deferredScreen(() => import('../mini-games/star-tide/StarTide'));
 const SchoolDungeonRPG = deferredScreen(() => import('./SchoolDungeonRPG'));
 const SchoolDungeonRPG2 = deferredScreen(() => import('./SchoolDungeonRPG2'));
@@ -68,6 +69,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_CARD_CLUB]: CardClub,
     [GameScreen.MINI_GAME_SURVIVOR]: SchoolyardSurvivorScreen,
     [GameScreen.MINI_GAME_STAR_TIDE]: StarTide,
+    [GameScreen.MINI_GAME_LANTERN_WAR]: LanternWar,
     [GameScreen.MINI_GAME_DUNGEON]: SchoolDungeonRPG,
     [GameScreen.MINI_GAME_DUNGEON_2]: SchoolDungeonRPG2,
     [GameScreen.MINI_GAME_KOCHO]: KochoShowdown,

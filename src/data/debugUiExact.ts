@@ -1,3 +1,4 @@
+import {LANTERN_ENGLISH,LANTERN_HIRAGANA} from '../mini-games/lantern-war/copy';
 import {SPORTS_PERFORMANCE_ENGLISH,SPORTS_PERFORMANCE_HIRAGANA} from '../mini-games/shared/sportsPerformanceCopy';
 import{BASKETBALL_ENGLISH,BASKETBALL_HIRAGANA}from'../mini-games/basketball/copy';
 import{DODGEBALL_ENGLISH,DODGEBALL_HIRAGANA}from'../mini-games/dodgeball/copy';
@@ -34,6 +35,7 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  ...LANTERN_ENGLISH,
   "白波の石灰段丘": "Whitewave limestone terraces",
   "古樹の苔庭": "Ancient moss gardens",
   "水晶の湿原棚": "Crystal marsh shelves",
@@ -432,6 +434,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  ...LANTERN_HIRAGANA,
   "白波の石灰段丘": "しらなみのせっかいだんきゅう",
   "古樹の苔庭": "こじゅのこけにわ",
   "水晶の湿原棚": "すいしょうのしつげんだな",

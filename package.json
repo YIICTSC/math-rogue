@@ -201,7 +201,9 @@
     "test:star-tide:assets": "node scripts/test-star-tide-assets.mjs && node scripts/test-star-tide-graphics.mjs",
     "test:sports-performances": "node scripts/test-sports-performances.mjs",
     "test:sports-performances:browser": "node scripts/test-sports-performances-browser.mjs",
-    "verify:sports-performances": "node scripts/sports-performances/verify-assets.mjs"
+    "verify:sports-performances": "node scripts/sports-performances/verify-assets.mjs",
+    "test:lantern-war": "node scripts/test-lantern-war.mjs",
+    "test:lantern-war:browser": "node scripts/test-lantern-war-browser.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

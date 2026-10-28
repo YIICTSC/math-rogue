@@ -1,0 +1,155 @@
+[
+  {
+    "id": "dungeons2-lyria",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-celis",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-flora",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-aurene",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-noctia",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-ignis",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-leon",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-orion",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "dungeons2-leif",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "nagi",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "nagi",
+    "kind": "map",
+    "cols": 4,
+    "rows": 3,
+    "tile": 128,
+    "alphaMin": 0,
+    "alphaMax": 255
+  },
+  {
+    "id": "mio",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "sena",
+    "kind": "battle",
+    "cols": 3,
+    "rows": 2,
+    "tile": 384,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "id": "mio",
+    "kind": "map",
+    "cols": 4,
+    "rows": 3,
+    "tile": 128,
+    "alphaMin": 0,
+    "alphaMax": 255
+  },
+  {
+    "id": "sena",
+    "kind": "map",
+    "cols": 4,
+    "rows": 3,
+    "tile": 128,
+    "alphaMin": 0,
+    "alphaMax": 255
+  },
+  {
+    "id": "aster",
+    "kind": "map",
+    "cols": 4,
+    "rows": 3,
+    "tile": 128,
+    "alphaMin": 0,
+    "alphaMax": 255
+  },
+  {
+    "id": "lyra",
+    "kind": "map",
+    "cols": 4,
+    "rows": 3,
+    "tile": 128,
+    "alphaMin": 0,
+    "alphaMax": 255
+  }
+]

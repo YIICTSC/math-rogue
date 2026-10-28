@@ -41,6 +41,7 @@ export const isMiniGameUnlocked = (
 );
 
 export const MINI_GAMES: MiniGameConfig[] = [
+  {id:'LANTERN_WAR',name:'継界戦記 灯を継ぐ者たち',titleLines:['継界戦記','灯を継ぐ者たち'],description:'世界を越えた主人公たちと挑む全18章。前衛・後衛、条件付き作戦、部隊進軍で灯を継ぐ長編SRPG。',screen:GameScreen.MINI_GAME_LANTERN_WAR,threshold:4000,typeLabel:'SRPG',typeColor:'bg-emerald-950',glowColor:'rgba(215,188,128,0.5)',icon:Crown,clearAction:()=>localStorage.removeItem('learning-rogue:lantern-war:v1')},
   {
     id: 'GAKURO',
     categoryOnly: true, // Launched from the main title, not the mini-game list.
