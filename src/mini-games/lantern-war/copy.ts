@@ -1,3 +1,4 @@
+import {GUIDE_ENGLISH,GUIDE_HIRAGANA} from './Tutorial';
 export const LANTERN_ENGLISH:Record<string,string>={
  "前衛と後衛が向き合う戦闘隊列":"Opposing front and rear battle ranks",
   "継界戦記": "Confluence Chronicles",
@@ -13,7 +14,7 @@ export const LANTERN_ENGLISH:Record<string,string>={
   "軍師 · 編成と作戦を重視": "Tactician · formations and orders matter",
   "新しい旅を始める": "Begin a new journey",
   "ゲーム一覧へ": "Back to games",
-  "行動後に自動保存。音声は後日追加予定。": "Progress saves automatically. Voices will be added later.",
+  "行動後に自動保存。音声は設定で調整できます。": "Progress saves automatically. Adjust voices in settings.",
   "現在の旅を置き換えます": "Replace the current journey",
   "第": "No.",
   "章までの、このモードの保存データが置き換わります。": "chapters of this mode's saved progress will be replaced.",
@@ -165,14 +166,14 @@ export const LANTERN_HIRAGANA:Record<string,string>={
   "誰かの明日を照らす灯を継ぐ。": "だれかのあしたをてらすひをつぐ。",
   "全18章・部隊編成・作戦自動戦闘・支援会話": "ぜん18しょう・ぶたいへんせい・さくせんじどうせんとう・しえんかいわ",
   "旅の続きを開く · 第": "たびのつづきをひらく · だい",
-  "章": "あきら",
+  "章": "しょう",
   "主人公を選択": "しゅじんこうをせんたく",
   "難易度": "なんいど",
   "物語 · 味方HP補正あり": "ものがたり · みかたHPほせいあり",
   "軍師 · 編成と作戦を重視": "ぐんし · へんせいとさくせんをじゅうし",
   "新しい旅を始める": "あたらしいたびをはじめる",
   "ゲーム一覧へ": "ゲームいちらんへ",
-  "行動後に自動保存。音声は後日追加予定。": "こうどうごにじどうほぞん。おんせいはごじつついかよてい。",
+  "行動後に自動保存。音声は設定で調整できます。": "こうどうごにじどうほぞん。おんせいはせっていでちょうせいできます。",
   "現在の旅を置き換えます": "げんざいのたびをおきかえます",
   "第": "だい",
   "章までの、このモードの保存データが置き換わります。": "しょうまでの、このモードのほぞんデータがおきかわります。",
@@ -317,3 +318,5 @@ export const LANTERN_HIRAGANA:Record<string,string>={
 
 Object.assign(LANTERN_ENGLISH,{"灯をつなぐ旅路":"Journey of the lanterns","移動中":"Travelling","行き先を選んで探索":"Choose a destination to explore","行き先を選ぶフィールドマップ":"Explorable field map","◆ 本編":"◆ Main story","◇ 仲間と寄り道":"◇ Companions and side stories","物語が進むと探索範囲が広がる":"More regions open as the story advances","仲間との交流":"Time with a companion","この場所で仲間にできる":"Meet and recruit a companion here","達成済み · 会話をもう一度読む":"Completed · Revisit the conversation","選択で報酬が変わる · 経験値と補給を獲得":"Choices change rewards · Gain experience and supplies","この場所を訪ねる":"Visit this place"});
 Object.assign(LANTERN_HIRAGANA,{"灯をつなぐ旅路":"ひをつなぐたびじ","移動中":"いどうちゅう","行き先を選んで探索":"いきさきをえらんでたんさく","行き先を選ぶフィールドマップ":"いきさきをえらぶフィールドマップ","◆ 本編":"◆ ほんぺん","◇ 仲間と寄り道":"◇ なかまとよりみち","物語が進むと探索範囲が広がる":"ものがたりがすすむとたんさくはんいがひろがる","仲間との交流":"なかまとのこうりゅう","この場所で仲間にできる":"このばしょでなかまにできる","達成済み · 会話をもう一度読む":"たっせいずみ · かいわをもういちどよむ","選択で報酬が変わる · 経験値と補給を獲得":"せんたくでほうしゅうがかわる · けいけんちとほきゅうをかくとく","この場所を訪ねる":"このばしょをたずねる"});
+
+Object.assign(LANTERN_ENGLISH,GUIDE_ENGLISH);Object.assign(LANTERN_HIRAGANA,GUIDE_HIRAGANA);

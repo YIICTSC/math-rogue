@@ -22,7 +22,8 @@ export default function GroundedArmy({s,age}:{s:Campaign;age:number}){
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
  const {s,age}=latest.current,e=s.battle?.encounter;if(!e){raf=requestAnimationFrame(draw);return;}
  const event=e.events[e.index],shown=e.events.slice(0,e.index+(age>=650?1:0)),landscape=h<440&&w>h;
- const footer=landscape?58:128,lastFoot=h-footer-(landscape?12:22),spacing=Math.min(80,h*.075);
+ const footer=landscape?58:128,lastFoot=h-footer-(landscape?12:22),spacing=Math.max(8,Math.min(80,h*.075,(lastFoot-h*.64)/2));
+ c.dataset.minimumFootY=String((lastFoot-2*spacing)/h);c.dataset.maximumFootY=String(lastFoot/h);
  const bodyHeight=Math.min(210,h*(landscape?.19:.27),Math.max(80,w*.125));
  const squads=[s.battle!.squads.find(q=>q.id===e.ally)!,s.battle!.squads.find(q=>q.id===e.enemy)!];
  const actors=squads.flatMap((q,side)=>q.members.map(f=>({f,side,row:f.slot%3,front:f.slot<3}))).sort((a,b)=>a.row-b.row||Number(a.front)-Number(b.front));

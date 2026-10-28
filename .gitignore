@@ -100,3 +100,7 @@ android/bundled_media_*/src/main/assets/
 
 # Dedicated server build output
 server/dist/
+
+# Lantern War generation working files
+scripts/lantern-war/__pycache__/
+assets/lantern-war/*.lock

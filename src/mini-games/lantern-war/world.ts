@@ -1,7 +1,8 @@
+import{MAIN_SITES,SIDE_SITES}from'./scenes';
 import {CHAPTERS} from './story';
 import {heroById} from './roster';
 import type {Campaign,Line} from './types';
-export const MAIN_POINTS=[{x:10,y:84},{x:25,y:84},{x:40,y:80},{x:55,y:83},{x:72,y:79},{x:88,y:76},{x:87,y:54},{x:72,y:51},{x:57,y:55},{x:42,y:49},{x:27,y:54},{x:12,y:48},{x:12,y:25},{x:28,y:21},{x:44,y:25},{x:59,y:20},{x:75,y:23},{x:89,y:15}];
+export const MAIN_POINTS=MAIN_SITES.map(({x,y})=>({x,y}));
 type FieldQuest={id:string;title:string;place:string;hero:string;unlock:number;x:number;y:number;request:string;reply:string;resolution:string;choices:[string,string]};
 const rows:[string,string,string,number,number,number,string,string,string,[string,string]][]=[
  ['渡し守の約束','川辺の渡し場','high-school-caretaker',0,17,68,'橋が落ちて、薬を届けられない家がある。','先に薬を運ぶ。あなたは、ここで帰りを待つ人を支えて。','渡し場に灯がともり、救護の舟が岸を離れた。',['薬草を分けて舟を出す','村人と一緒に迂回路を探す']],
@@ -23,9 +24,16 @@ const rows:[string,string,string,number,number,number,string,string,string,[stri
  ['盾を下ろす場所','旧街道の番所','dungeons2-leon',15,63,8,'守るための盾でも、いつかは下ろせる場所が必要だ。','ここを、その場所にしよう。通る人を止める門ではなくて。','番所の兵が兜を脱ぎ、旅人と同じ食卓についた。',['休める宿を整える','街道の見張りを交代制にする']],
  ['夜明け前の火','星見の焚き火','dungeons2-ignis',16,82,9,'怖くないって言えたらよかった。でも、やっぱり怖いよ。','怖いままでいい。一歩ずつ、隣を歩こう。','夜明けを待つ焚き火の輪に、空いた席が一つずつ埋まった。',['皆の不安を聞く','一緒に最後の道を歩く']],
 ];
-export const FIELD_QUESTS:FieldQuest[]=rows.map((r,i)=>({id:'side-'+i,title:r[0],place:r[1],hero:r[2],unlock:r[3],x:r[4],y:r[5],request:r[6],reply:r[7],resolution:r[8],choices:r[9]}));
+export const FIELD_QUESTS:FieldQuest[]=rows.map((r,i)=>({id:'side-'+i,title:r[0],place:r[1],hero:r[2],unlock:r[3],x:SIDE_SITES[i].x,y:SIDE_SITES[i].y,request:r[6],reply:r[7],resolution:r[8],choices:r[9]}));
 export function fieldLines(id:string):Line[]{const q=FIELD_QUESTS.find(q=>q.id===id)!;return [{who:'narrator',text:q.place+'で、旅人たちを待つ声があった。'},{who:q.hero,text:q.request,reaction:'concern'},{who:'$hero',text:q.reply,reaction:'resolve'},{who:q.hero,text:heroById(q.hero).motto,reaction:'neutral'},{who:'$hero',text:'ここから先は、一緒に考えよう。誰かが帰れる道を、もう一本増やしたい。',reaction:'joy'},{who:'narrator',text:q.resolution}];}
 export function finishFieldQuest(s:Campaign,choice:number){const q=FIELD_QUESTS.find(q=>q.id===s.fieldQuest);if(!q)return;const done=s.fieldCompleted||[];if(!done.includes(q.id)){s.fieldCompleted=[...done,q.id];s.fieldChoices={...s.fieldChoices,[q.id]:choice};s.gold+=choice===0?100:160;s.supplies+=choice===0?3:1;s.xp[q.hero]=(s.xp[q.hero]||0)+70;if(!s.recruited.includes(q.hero)){s.recruited.push(q.hero);const target=s.formations.find(f=>f.slots.filter(Boolean).length<(s.chapter<6?3:s.chapter<12?4:6));if(target){const slot=target.slots.indexOf(null);if(slot>=0)target.slots[slot]=q.hero;}}}s.fieldQuest=undefined;s.phase='field';s.storyIndex=0;}
 export function locationPoint(id:string){return id.startsWith('main-')?MAIN_POINTS[Number(id.slice(5))]||MAIN_POINTS[0]:FIELD_QUESTS.find(q=>q.id===id)||MAIN_POINTS[0];}
 export function canVisit(s:Campaign,id:string){if(id.startsWith('main-'))return Number(id.slice(5))<=s.chapter;return (FIELD_QUESTS.find(q=>q.id===id)?.unlock??99)<=s.chapter;}
 export function travelPath(s:Campaign,from:string,to:string){if(!canVisit(s,to))return [];const anchor=(id:string)=>id.startsWith('main-')?Number(id.slice(5)):FIELD_QUESTS.find(q=>q.id===id)?.unlock||0;const a=anchor(from),b=anchor(to),steps:string[]=[];if(!from.startsWith('main-'))steps.push('main-'+a);for(let i=a;i!==b;){i+=b>a?1:-1;steps.push('main-'+i);}if(!to.startsWith('main-'))steps.push(to);return steps;}
+
+const ROAD_BENDS:number[][][]=[[[22,69],[34,69],[43,67]],[[40,62],[34,60]],[[40,62],[48,64],[57,68],[65,73],[74,74]],[[72,65],[73,55],[80,48],[84,41]],[[84,41],[77,46],[70,51]],[[56,52],[47,48],[36,43],[28,40],[22,36]],[[27,36],[35,39],[42,42]],[[43,44],[38,47]],[[44,49],[50,52]],[[61,49],[64,41]],[[77,35]],[[77,28],[68,24],[59,24],[48,22],[37,21]],[[33,19],[41,18]],[[56,17],[62,16]],[[65,18],[60,20]],[[54,17],[52,13]],[[60,15],[69,13],[78,12]]];
+/** Landmarks follow the painted roads rather than a uniform snake grid. */
+export function mapWaypoints(from:string,to:string):{x:number;y:number}[]{
+ if(from.startsWith('main-')&&to.startsWith('main-')){const a=Number(from.slice(5)),b=Number(to.slice(5));if(Math.abs(a-b)===1){const bends=ROAD_BENDS[Math.min(a,b)].map(([x,y])=>({x,y}));return [...(b>a?bends:bends.reverse()),locationPoint(to)];}}
+ return [locationPoint(to)];
+}

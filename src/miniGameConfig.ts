@@ -41,7 +41,6 @@ export const isMiniGameUnlocked = (
 );
 
 export const MINI_GAMES: MiniGameConfig[] = [
-  {id:'LANTERN_WAR',name:'継界戦記 灯を継ぐ者たち',titleLines:['継界戦記','灯を継ぐ者たち'],description:'世界を越えた主人公たちと挑む全18章。前衛・後衛、条件付き作戦、部隊進軍で灯を継ぐ長編SRPG。',screen:GameScreen.MINI_GAME_LANTERN_WAR,threshold:4000,typeLabel:'SRPG',typeColor:'bg-emerald-950',glowColor:'rgba(215,188,128,0.5)',icon:Crown,clearAction:()=>localStorage.removeItem('learning-rogue:lantern-war:v1')},
   {
     id: 'GAKURO',
     categoryOnly: true, // Launched from the main title, not the mini-game list.
@@ -164,6 +163,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     clearAction: () => storageService.clearDungeonState2()
   },
   {id:'STAR_TIDE',name:'星潮の航路',titleLines:['星潮の','航路'],description:'風と火を活かし、島々を自由に巡る探索・料理・学びの2DアクションRPG。',screen:GameScreen.MINI_GAME_STAR_TIDE,threshold:4000,typeLabel:'ARPG',typeColor:'bg-teal-800',glowColor:'rgba(121,211,197,0.5)',icon:Compass,clearAction:()=>localStorage.removeItem('learning-rogue:star-tide:v1')},
+  {id:'LANTERN_WAR',name:'継界戦記 灯を継ぐ者たち',titleLines:['継界戦記','灯を継ぐ者たち'],description:'世界を越えた主人公たちと挑む全18章。前衛・後衛、条件付き作戦、部隊進軍で灯を継ぐ長編SRPG。',screen:GameScreen.MINI_GAME_LANTERN_WAR,threshold:4500,typeLabel:'SRPG',typeColor:'bg-emerald-950',glowColor:'rgba(215,188,128,0.5)',icon:Crown,clearAction:()=>localStorage.removeItem('learning-rogue:lantern-war:v1')},
   {
     id: 'SHOGI',
     name: 'ミニ将棋',

@@ -1,3 +1,5 @@
+import {battleVoice,stopLanternVoice,beginLanternBattleVoice}from'./voices';
+import {Tutorial}from'./Tutorial';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import {useContext} from 'react';
 import {LanternLanguage} from './language';
@@ -7,7 +9,7 @@ import {MapArt,BattleArt,cutin} from './art';
 import {MapScenery,battleBackground} from './MapScenery';
 import GroundedArmy from './GroundedArmy';
 import {heroById,WEAPONS} from './roster';
-import {CHAPTERS,OBJECTIVES,TERRAIN_INFO} from './story';
+import {CHAPTERS,OBJECTIVES,TERRAIN_INFO,SUPPORTS} from './story';
 import {orderMove,restSquad,braveSkill,useItem,living,pathTo,encounterPreview,startEncounter,finishEncounter} from './engine';
 import type {Campaign,Squad} from './types';
 export type Update=(f:(s:Campaign)=>unknown)=>void;
@@ -17,7 +19,7 @@ export function Battlefield({s,update}:{s:Campaign;update:Update}){
  const choose=(x:number,y:number)=>{const ally=b.squads.find(q=>q.team==='ally'&&living(q)&&q.x===x&&q.y===y);if(ally)setSelected(ally.id);else update(s=>orderMove(s,selected,x,y));setCursor({x,y});};
  const danger=new Set(b.squads.filter(q=>q.team==='enemy'&&living(q)).flatMap(q=>b.map.flatMap((row,y)=>row.map((t,x)=>Math.abs(q.x-x)+Math.abs(q.y-y)<=3?x+','+y:'')).filter(Boolean)));
  return <TranslatedUiTree mode={useContext(LanternLanguage)}><div className="lw-war">
- <div className="lw-warbar"><div><small>CHAPTER {String(b.chapter+1).padStart(2,'0')} · {chapter.place}</small><h2>{chapter.title}</h2><p>{b.sideQuest?'遊撃戦：敵部隊を全滅':OBJECTIVES[chapter.objective]}{chapter.objective==='defend'?'（'+(60+chapter.turns*6)+'秒）':''}</p></div><div><b>{Math.max(0,Math.ceil(b.limit-b.time))}s</b><span>BRAVE ◆ {b.brave}</span><button className="lw-primary" disabled={!!b.pending} onClick={()=>update(s=>{s.battle!.paused=!s.battle!.paused;})}>{b.paused?'▶ 進軍開始':'Ⅱ 一時停止'}</button></div></div>
+ <Tutorial topic="battle" blocked={!!b.pending||!!b.encounter} onOpen={()=>update(s=>{if(s.battle)s.battle.paused=true;})}/><div className="lw-warbar"><div><small>CHAPTER {String(b.chapter+1).padStart(2,'0')} · {chapter.place}</small><h2>{chapter.title}</h2><p>{b.sideQuest?'遊撃戦：敵部隊を全滅':OBJECTIVES[chapter.objective]}{chapter.objective==='defend'?'（'+(60+chapter.turns*6)+'秒）':''}</p></div><div><b>{Math.max(0,Math.ceil(b.limit-b.time))}s</b><span>BRAVE ◆ {b.brave}</span><button className="lw-primary" disabled={!!b.pending} onClick={()=>update(s=>{s.battle!.paused=!s.battle!.paused;})}>{b.paused?'▶ 進軍開始':'Ⅱ 一時停止'}</button></div></div>
  <div className="lw-warbody"><div className="lw-map-wrap"><div className={'lw-battlemap lw-biome-'+chapter.theme} role="group" aria-label="進軍マップ" tabIndex={0} onKeyDown={e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();setCursor(p=>({x:Math.max(0,Math.min(11,p.x+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0))),y:Math.max(0,Math.min(9,p.y+(e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)))}));}if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(cursor.x,cursor.y);}}}>
  <MapScenery map={b.map} theme={chapter.theme} chapter={b.chapter}/>
  {b.map.flatMap((row,y)=>row.map((t,x)=><button key={x+','+y} aria-label={x+','+y+' '+TERRAIN_INFO[t].name} className={'lw-cell lw-terrain-'+(t==='#'?'wall':t==='.'?'plain':t)+(cursor.x===x&&cursor.y===y?' is-cursor':'')+(showDanger&&danger.has(x+','+y)?' is-danger':'')+(q?.path.some(p=>p.x===x&&p.y===y)?' is-path':'')} style={{left:x/12*100+'%',top:y/10*100+'%'}} onClick={()=>choose(x,y)}><span>{t==='g'?'⚑':t==='h'?'♜':t==='t'?'◆':''}</span></button>))}
@@ -35,8 +37,11 @@ function CombatStage({s,update}:{s:Campaign;update:Update}){
  const a=s.battle!.squads.find(q=>q.id===e.ally)!,z=s.battle!.squads.find(q=>q.id===e.enemy)!;
  useEffect(()=>{setAge(0);if(finished)return;const start=performance.now(),timer=setInterval(()=>setAge((performance.now()-start)*speed),50);const advance=setTimeout(()=>update(s=>{if(s.battle?.encounter)s.battle.encounter.index++;}),1600/speed);return()=>{clearInterval(timer);clearTimeout(advance);};},[e.index,speed,finished]);
  const actor=event?.actorHero||a.members[0].hero,target=event?.targetHero||z.members[0].hero;
+ useEffect(()=>{beginLanternBattleVoice();return stopLanternVoice;},[]);
+ useEffect(()=>{const key=`${s.chapter}:${s.battle!.time}:${e.ally}:${e.enemy}:${e.index}`;if(finished){battleVoice(a.members.find(f=>f.hp>0)?.hero||a.members[0].hero,e.winner==='ally'?'win':'defeat',key);return;}if(!event)return;if(event.actorHero.startsWith('enemy-')){battleVoice(event.targetHero,event.hp<=0?'defeat':'damage',key);return;}const lead=a.members.find(f=>f.hp>0&&SUPPORTS.some(p=>p.a===actor&&p.b===f.hero||p.b===actor&&p.a===f.hero))?.hero||a.members.find(f=>f.hero!==actor)?.hero;if(event.passive&&event.name.startsWith('援護'))battleVoice(actor,'support',key,lead);else if(event.heal)battleVoice(event.targetHero,'heal',key);else battleVoice(actor,event.skill&&event.name===heroById(actor).skill?'ultimate':'attack',key);},[e.index,finished]);
+
  const c=cutin(actor),isAlly=!actor.startsWith('enemy-'),action=age<400?'windup':age<1100?event?.skill?'ultimate':'attack':'ready';
- return <TranslatedUiTree mode={useContext(LanternLanguage)}><div className="lw-combat" role="dialog" aria-modal="true" aria-label="部隊自動戦闘"><div className="lw-combat-bg" style={{backgroundImage:'url('+assetUrl(battleBackground(s.battle!.chapter))+')'}}/>
+ return <TranslatedUiTree mode={useContext(LanternLanguage)}><div className="lw-combat" role="dialog" aria-modal="true" aria-label="部隊自動戦闘"><div className="lw-combat-bg" style={{backgroundImage:(s.battle!.chapter===15?'linear-gradient(#071b4a88,#071b4a88),':'')+'url('+assetUrl(battleBackground(s.battle!.chapter))+')'}}/>
  <header><small>AUTOMATIC BATTLE · AP ◆ / PP ◇</small><div><button onClick={()=>setSpeed(speed===1?3:1)}>{speed}×</button><button onClick={()=>update(finishEncounter)}>演出をスキップ</button></div></header>
  <div className="lw-combat-formation"><b>{a.name}</b><strong>{a.members.length} <small>VS</small> {z.members.length}</strong><b>{z.name}</b></div>
  <ArmyStage s={s} age={age}/>

@@ -11,7 +11,7 @@
 
 /* The map is painted with generated terrain and props; buttons are clear hit areas. */
 .lw-map-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;image-rendering:auto}
-.lw-root .lw-battlemap .lw-cell,.lw-root .lw-battlemap .lw-cell:hover{background:transparent;border-color:#f6e7b413;z-index:1}
+.lw-root .lw-battlemap .lw-cell,.lw-root .lw-battlemap .lw-cell:hover{background:transparent;border-color:transparent;z-index:1}
 .lw-root .lw-battlemap .lw-cell:before,.lw-root .lw-battlemap .lw-cell:after,.lw-root .lw-battlemap .lw-cell>span{display:none}
 .lw-root .lw-battlemap .lw-cell.is-danger{background:#b43b4438}
 .lw-root .lw-battlemap .lw-cell.is-path{background:#77ddd72b;box-shadow:inset 0 0 0 2px #c9fff1b3}
@@ -254,3 +254,11 @@
 .lw-story-cast .lw-portrait-normalized.is-small{margin-top:175px}
 @media(max-width:600px) and (orientation:portrait){.lw-story-cast .lw-portrait-normalized{width:210%;max-width:400px;height:auto;margin-top:170px}.lw-story-cast .lw-portrait-normalized.is-small{margin-top:280px}}
 @media(max-height:500px) and (orientation:landscape){.lw-story-cast .lw-portrait-normalized{width:115%;max-width:380px;height:auto;margin-top:0}.lw-story-cast .lw-portrait-normalized.is-small{margin-top:50px}}
+
+.lw-help{justify-self:end;margin:8px 0}.lw-guide-backdrop{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#050f1bdf;backdrop-filter:blur(8px)}.lw-guide{width:min(720px,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;outline:none}.lw-guide header h2{margin:4px 0}.lw-guide-image{width:100%;max-height:32dvh;object-fit:contain;border:1px solid #cfba7659;border-radius:8px;background:#102635}.lw-guide-diagram{display:grid;gap:10px;place-items:center;min-height:130px;background:#102d39;border:1px solid #c9b47a55;color:#ffe1a0;font-size:24px;border-radius:10px}.lw-guide article h3{margin:0 0 8px}.lw-guide article p{line-height:1.85;margin:0}.lw-guide footer{display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;padding:8px 0;background:#132d36}.lw-guide footer button:first-child{margin-right:auto}@media(orientation:landscape) and (max-height:550px){.lw-guide{display:grid;grid-template-columns:minmax(180px,1fr) 1.2fr;gap:10px}.lw-guide header,.lw-guide footer{grid-column:1/-1}.lw-guide-image{max-height:37dvh}.lw-guide-diagram{min-height:90px}.lw-guide article{font-size:13px}.lw-guide article p{line-height:1.6}}
+
+.lw-title{isolation:isolate;align-content:center}.lw-title-landscape{background:linear-gradient(90deg,#06131ed9 0%,#06131e77 38%,#06131e11 65%),var(--lw-title-landscape) center/cover no-repeat}.lw-title-controls{background:#09242be0;backdrop-filter:blur(8px)}@media(orientation:portrait){.lw-title-landscape{position:fixed;background:linear-gradient(#06131e44,#06131e00 35%,#06131ecc 85%),var(--lw-title-portrait) center/cover no-repeat}.lw-title{display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;min-height:100%;gap:30dvh}.lw-title-text h1{font-size:clamp(36px,9vw,64px)}.lw-title-text p,.lw-title-text>span{display:none}.lw-title-controls{padding:16px}.lw-title-text h2{margin-bottom:0}}
+
+.lw-exploration-map .lw-map-node span{opacity:0;pointer-events:none;transition:opacity .15s}.lw-exploration-map .lw-map-node.is-selected span,.lw-exploration-map .lw-map-node:hover span,.lw-exploration-map .lw-map-node:focus-visible span{opacity:1}.lw-exploration-map .lw-map-node.is-selected,.lw-exploration-map .lw-map-node:focus-visible{z-index:8}
+
+@media(max-width:700px){.lw-field-heading{left:8px;right:8px;top:4px;display:flex;align-items:center;gap:6px;padding:4px 8px;max-height:32px;overflow:hidden}.lw-field-heading>small{display:none}.lw-field-heading>b{font-size:11px;white-space:nowrap}.lw-field-heading>span{font-size:8px;margin-left:auto;white-space:nowrap}.lw-field-legend{bottom:2px;padding:3px;font-size:8px;gap:4px 12px}.lw-field-legend>span:last-child{display:none}}

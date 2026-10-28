@@ -1,5 +1,5 @@
 export type Weapon='sword'|'lance'|'axe'|'bow'|'magic'|'staff';
-export type Terrain='.'|'f'|'m'|'w'|'#'|'b'|'h'|'t'|'g';
+export type Terrain='r'|'.'|'f'|'m'|'w'|'#'|'b'|'h'|'t'|'g';
 export type Objective='rout'|'seize'|'defend'|'escape'|'escort'|'boss';
 export type Phase='field'|'camp'|'story'|'battle'|'result'|'ending';
 export type Line={who:string;text:string;reaction?:'neutral'|'joy'|'concern'|'resolve'};

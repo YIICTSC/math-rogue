@@ -1,0 +1,236 @@
+{
+  "battle": {
+    "title": "戦闘の遊び方",
+    "slides": [
+      {
+        "title": "止めて考え、進軍を始める",
+        "body": "戦場は最初は停止中。味方の部隊を選び、目的地を押して経路を指定します。「進軍開始」で時間が進み、「一時停止」で考え直せます。",
+        "englishTitle": "Pause, plan, then march",
+        "englishBody": "Select an allied squad, then a destination. Start the march to advance time, or pause to change orders.",
+        "visual": "march",
+        "hiraganaTitle": "とめてかんがえ、しんぐんをはじめる",
+        "hiraganaBody": "せんじょうはさいしょはていしちゅう。みかたのぶたいをえらび、もくてきちをおしてけいろをしていします。「しんぐんかいし」でじかんがすすみ、「いちじていし」でかんがえなおせます。"
+      },
+      {
+        "title": "勝利条件と本拠を守る",
+        "body": "上部の勝利条件と残り時間を確認。敵全滅・星門制圧・防衛・護衛など、章ごとに目的が違います。本拠を奪われないよう守りましょう。",
+        "englishTitle": "Protect the objective and your base",
+        "englishBody": "Check the objective and time limit. Missions include routing, seizing, defending and escorting. Protect your home base.",
+        "visual": "objective",
+        "hiraganaTitle": "しょうりじょうけんとほんきょをまもる",
+        "hiraganaBody": "じょうぶのしょうりじょうけんとのこりじかんをかくにん。てきぜんめつ・ほしもんせいあつ・ぼうえい・ごえいなど、しょうごとにもくてきがちがいます。ほんきょをうばわれないようまもりましょう。"
+      },
+      {
+        "title": "接敵したら予測を確認",
+        "body": "部隊が接触すると進軍が止まり、戦闘予測が出ます。損害が大きいときは退避して編成や援護位置を見直せます。",
+        "englishTitle": "Review the battle forecast",
+        "englishBody": "Contact pauses the march and opens a forecast. Retreat if losses look severe, then adjust formation and support.",
+        "visual": "forecast",
+        "hiraganaTitle": "せってきしたらよそくをかくにん",
+        "hiraganaBody": "ぶたいがせっしょくするとしんぐんがどまり、せんとうよそくがでます。そんがいがおおきいときはたいひしてへんせいやえんごいちをみなおせます。"
+      },
+      {
+        "title": "APは行動、PPは反応",
+        "body": "交戦では作戦を上から判定して自動行動。通常攻撃や回復は1AP、固有必殺や一列攻撃は2AP。PPは庇う・反撃・応急手当などに使います。",
+        "englishTitle": "AP for actions, PP for reactions",
+        "englishBody": "Tactics are checked from top to bottom. Strikes and healing cost 1 AP; ultimates and row attacks cost 2. PP powers cover, counters and first aid.",
+        "visual": "resources",
+        "hiraganaTitle": "APはこうどう、PPははんのう",
+        "hiraganaBody": "こうせんではさくせんをうえからはんていしてじどうこうどう。つうじょうこうげきやかいふくは1AP、こゆうひっさつやいちれつこうげきは2AP。PPはかばう・はんげき・おうきゅうてあてなどにつかいます。"
+      },
+      {
+        "title": "前衛と後衛、別部隊の援護",
+        "body": "前衛が近接攻撃を受け止め、後衛の弓・魔法・回復役が支えます。別の弓・魔法・杖部隊を3マス以内に置くと援護できます。",
+        "englishTitle": "Front rank, rear rank and support",
+        "englishBody": "Front fighters absorb melee attacks while rear archers, mages and healers help. A separate bow, magic or staff squad within 3 tiles can assist.",
+        "visual": "formation",
+        "hiraganaTitle": "ぜんえいとこうえい、べつぶたいのえんご",
+        "hiraganaBody": "ぜんえいがきんせつこうげきをうけとめ、こうえいのゆみ・まほう・かいふくやくがささえます。べつのゆみ・まほう・つえぶたいを3ますいないにおくとえんごできます。"
+      },
+      {
+        "title": "スタミナ切れと休息に注意",
+        "body": "交戦後はスタミナが減ります。休息は8秒かかり、その間AP・PPが0で無防備。敵から離れた回復拠点で立て直しましょう。",
+        "englishTitle": "Manage stamina and rest",
+        "englishBody": "Encounters drain stamina. Rest takes 8 seconds and leaves the squad exposed with zero AP and PP. Regroup at a safe recovery base.",
+        "visual": "rest",
+        "hiraganaTitle": "すたみなきれときゅうそくにちゅうい",
+        "hiraganaBody": "こうせんのちはすたみながへります。きゅうそくは8びょうかかり、そのかんAP・PPが0でむぼうび。てきからはなれたかいふくきょてんでたてなおしましょう。"
+      },
+      {
+        "title": "地形とブレイブを使う",
+        "body": "森・丘は進軍に時間がかかり、深水・城壁は通れません。薬草やブレイブの癒し・号令も、右側の指示から使えます。",
+        "englishTitle": "Use terrain and Brave skills",
+        "englishBody": "Woods and hills slow movement; deep water and walls block it. Use herbs and Brave healing or rally commands from the orders panel.",
+        "visual": "terrain",
+        "hiraganaTitle": "ちけいとぶれいぶをつかう",
+        "hiraganaBody": "もり・おかはしんぐんにじかんがかかり、ふかみず・じょうへきはとうれません。やくそうやぶれいぶのいやし・ごうれいも、みぎがわのしじからつかえます。"
+      }
+    ],
+    "hiraganaTitle": "せんとうのあそびほう"
+  },
+  "formation": {
+    "title": "部隊編成の遊び方",
+    "slides": [
+      {
+        "title": "仲間を選び、配置先を押す",
+        "body": "左で仲間を選び、部隊番号と配置枠を押します。既に配置した仲間なら移動や入れ替え。定員を越える配置はできません。",
+        "englishTitle": "Choose a hero, then a slot",
+        "englishBody": "Select a hero, choose a squad, then press a slot. Assigned heroes move or swap. Squad capacity limits assignments.",
+        "visual": "formation",
+        "hiraganaTitle": "なかまをえらび、はいちさきをおす",
+        "hiraganaBody": "ひだりでなかまをえらび、ぶたいばんごうとはいちわくをおします。すでにはいちしたなかまならいどうやいれかえ。ていいんをこえるはいちはできません。"
+      },
+      {
+        "title": "前衛で守り、後衛で支える",
+        "body": "上の3枠が前衛、下の3枠が後衛。守り手を前に、弓・魔法・回復役を後ろに置き、役割を組み合わせましょう。",
+        "englishTitle": "Build a balanced formation",
+        "englishBody": "The top three slots are the front rank; the bottom three are the rear. Put protectors in front and ranged fighters or healers behind.",
+        "visual": "formation",
+        "hiraganaTitle": "ぜんえいでまもり、こうえいでささえる",
+        "hiraganaBody": "うえの3わくがぜんえい、したの3わくがこうえい。まもりてをまえに、ゆみ・まほう・かいふくやくをうしろにおき、やくわりをくみあわせましょう。"
+      },
+      {
+        "title": "出身世界で仲間を探す",
+        "body": "左の出身世界で一覧を絞れます。同じ部隊で戦うと絆が育つので、支援会話を読みたい組み合わせも試してみましょう。",
+        "englishTitle": "Find heroes and grow bonds",
+        "englishBody": "Filter heroes by their world. Fighting in one squad grows bonds, so try pairs whose support conversations interest you.",
+        "visual": "bonds",
+        "hiraganaTitle": "しゅっしんせかいでなかまをさがす",
+        "hiraganaBody": "ひだりのしゅっしんせかいでいちらんをしぼれます。おなじぶたいでたたかうときずながそだつので、しえんかいわをよみたいくみあわせもためしてみましょう。"
+      }
+    ],
+    "hiraganaTitle": "ぶたいへんせいのあそびほう"
+  },
+  "tactics": {
+    "title": "作戦設定の遊び方",
+    "slides": [
+      {
+        "title": "技・条件・対象を組み合わせる",
+        "body": "仲間ごとに作戦を設定します。「技」で行動、「条件」で使う場面、「対象」で誰を狙うかを決めます。",
+        "englishTitle": "Choose skill, condition and target",
+        "englishBody": "Set tactics for each hero. Skill chooses the action, condition chooses when, and target chooses whom it affects.",
+        "visual": "resources",
+        "hiraganaTitle": "わざ・じょうけん・たいしょうをくみあわせる",
+        "hiraganaBody": "なかまごとにさくせんをせっていします。「わざ」でこうどう、「じょうけん」でつかうばめん、「たいしょう」でだれをねらうかをきめます。"
+      },
+      {
+        "title": "優先したい作戦を上へ",
+        "body": "上から順に判定し、最初に条件とAPが足りる作戦を実行します。回復や必殺を優先するなら上に置き、↑で順序を変えましょう。",
+        "englishTitle": "Put priority rules first",
+        "englishBody": "Rules run from top to bottom. The first usable rule wins. Move healing or ultimates upward with the arrow if they should take priority.",
+        "visual": "resources",
+        "hiraganaTitle": "ゆうせんしたいさくせんをうえへ",
+        "hiraganaBody": "うえからじゅんにはんていし、さいしょにじょうけんとAPがたりるさくせんをじっこうします。かいふくやひっさつをゆうせんするならうえにおき、↑でじゅんじょをかえましょう。"
+      },
+      {
+        "title": "行動できる作戦を残す",
+        "body": "固有必殺と一列攻撃は2AP。杖以外は回復できません。迷ったら「作戦をおまかせに戻す」で初期設定に戻せます。",
+        "englishTitle": "Keep a usable fallback",
+        "englishBody": "Ultimates and row attacks cost 2 AP; only staff users heal. Restore default tactics if you need a reliable starting point.",
+        "visual": "resources",
+        "hiraganaTitle": "こうどうできるさくせんをのこす",
+        "hiraganaBody": "こゆうひっさつといちれつこうげきは2AP。つえいがいはかいふくできません。まよったら「さくせんをおまかせにもどす」でしょきせっていにもどせます。"
+      }
+    ],
+    "hiraganaTitle": "さくせんせっていのあそびほう"
+  },
+  "bonds": {
+    "title": "支援会話の遊び方",
+    "slides": [
+      {
+        "title": "同じ部隊で絆を育てる",
+        "body": "同じ部隊で交戦すると仲間同士の絆が増えます。必要な仲間を両方迎えると、対応する会話が一覧に出ます。",
+        "englishTitle": "Grow bonds in the same squad",
+        "englishBody": "Fight together to grow bonds. Recruit both partners to see their conversation entry.",
+        "visual": "bonds",
+        "hiraganaTitle": "おなじぶたいできずなをそだてる",
+        "hiraganaBody": "おなじぶたいでこうせんするとなかまどうしのきずながふえます。ひつようななかまをりょうほうむかえると、たいおうするかいわがいちらんにでます。"
+      },
+      {
+        "title": "CからB、Aへ進む",
+        "body": "支援は3段階。必要な絆がたまると「会話を読む」を押せます。前の段階を読んでから、次の会話へ進みます。",
+        "englishTitle": "Advance from C to B to A",
+        "englishBody": "There are three ranks. Read an available conversation when its bond requirement is met, then unlock the next rank.",
+        "visual": "bonds",
+        "hiraganaTitle": "CからB、Aへすすむ",
+        "hiraganaBody": "しえんは3だんかい。ひつようなきずながたまると「かいわをよむ」をおせます。まえのだんかいをよんでから、つぎのかいわへすすみます。"
+      },
+      {
+        "title": "仲間の言葉を振り返る",
+        "body": "選んだ仲間の焚き火の言葉も確認できます。絆が深い仲間同士は戦闘でも攻撃を補い合います。",
+        "englishTitle": "Listen to companions",
+        "englishBody": "Inspect the selected hero’s campfire words. Strong bonds also help companions support one another in battle.",
+        "visual": "bonds",
+        "hiraganaTitle": "なかまのことばをふりかえる",
+        "hiraganaBody": "えらんだなかまのたきひのことばもかくにんできます。きずながふかいなかまどうしはせんとうでもこうげきをおぎないあいます。"
+      }
+    ],
+    "hiraganaTitle": "しえんかいわのあそびほう"
+  },
+  "forge": {
+    "title": "育成・鍛冶の遊び方",
+    "slides": [
+      {
+        "title": "能力と固有必殺を確認",
+        "body": "仲間を選ぶと、レベル・経験値・武器・能力・固有必殺が表示されます。役割に合う仲間を育てましょう。",
+        "englishTitle": "Review stats and ultimates",
+        "englishBody": "Select a hero to inspect level, experience, weapon, stats and ultimate. Train heroes to match their role.",
+        "visual": "resources",
+        "hiraganaTitle": "のうりょくとこゆうひっさつをかくにん",
+        "hiraganaBody": "なかまをえらぶと、れべる・けいけんち・ぶき・のうりょく・こゆうひっさつがひょうじされます。やくわりにあうなかまをそだてましょう。"
+      },
+      {
+        "title": "合同訓練で経験値を得る",
+        "body": "100Gで経験値50を獲得。レベル上限は20です。Lv.9になると、交戦時のAPが1増えます。",
+        "englishTitle": "Train for experience",
+        "englishBody": "Spend 100 G for 50 XP, up to level 20. Reaching level 9 grants one extra AP per encounter.",
+        "visual": "resources",
+        "hiraganaTitle": "ごうどうくんれんでけいけんちをえる",
+        "hiraganaBody": "100Gでけいけんち50をかくとく。れべるじょうげんは20です。Lv.9になると、こうせんときのAPが1ふえます。"
+      },
+      {
+        "title": "武器は4段階まで強化",
+        "body": "武器強化は最大4段階。費用は段階ごとに増え、攻撃力が上がります。戦闘不能の仲間は次の出撃で回復します。",
+        "englishTitle": "Forge weapons up to four times",
+        "englishBody": "Each upgrade costs more gold and raises attack, up to four upgrades. Fallen companions recover on the next sortie.",
+        "visual": "forge",
+        "hiraganaTitle": "ぶきは4だんかいまできょうか",
+        "hiraganaBody": "ぶききょうかはさいだい4だんかい。ひようはだんかいごとにふえ、こうげきりょくがあがります。せんとうふのうのなかまはつぎのしゅつげきでかいふくします。"
+      }
+    ],
+    "hiraganaTitle": "いくせい・かじのあそびほう"
+  },
+  "journal": {
+    "title": "旅の記録の遊び方",
+    "slides": [
+      {
+        "title": "進行と仲間の記録を見る",
+        "body": "仲間の人数、本編18章、遊撃戦6戦の進み具合を確認できます。部隊指揮の手引きも、ここから読み直せます。",
+        "englishTitle": "Review journey progress",
+        "englishBody": "Review recruits, the 18 main chapters and six skirmishes. Revisit the command handbook here.",
+        "visual": "journal",
+        "hiraganaTitle": "しんこうとなかまのきろくをみる",
+        "hiraganaBody": "なかまのにんずう、ほんぺん18しょう、ゆうげきせん6せんのすすみぐあいをかくにんできます。ぶたいしきのてびきも、ここからよみなおせます。"
+      },
+      {
+        "title": "章の物語と再戦",
+        "body": "クリア済みの章には星の評価と物語が残ります。「再戦する」でその章にもう一度出撃できます。現在の編成を確認してから挑みましょう。",
+        "englishTitle": "Revisit chapters",
+        "englishBody": "Cleared chapters retain their rating and story. Replay a chapter after reviewing your current formation.",
+        "visual": "journal",
+        "hiraganaTitle": "しょうのものがたとさいせん",
+        "hiraganaBody": "くりあすみのしょうにはほしのひょうかとものがたりがのこります。「さいせんする」でそのしょうにもういちどしゅつげきできます。げんざいのへんせいをかくにんしてからいどみましょう。"
+      },
+      {
+        "title": "世界地図から寄り道へ",
+        "body": "本編だけでなく、仲間との寄り道も探してみましょう。物語が進むほど探索範囲が広がり、選択で補給や報酬が変わります。",
+        "englishTitle": "Explore side stories",
+        "englishBody": "Travel to side stories as well as main chapters. New regions open with progress, and choices change supplies and rewards.",
+        "visual": "map",
+        "hiraganaTitle": "せかいちずからよりみちへ",
+        "hiraganaBody": "ほんぺんだけでなく、なかまとのよりみちもさがしてみましょう。ものがたりがすすむほどたんさくはんいがひろがり、せんたくでほきゅうやほうしゅうがかわります。"
+      }
+    ],
+    "hiraganaTitle": "たびのきろくのあそびほう"
+  }
+}

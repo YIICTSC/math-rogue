@@ -1,3 +1,4 @@
+import lanternVoiceManifest from '../mini-games/lantern-war/voiceManifest.json';
 import {sportsVoicePath,sportsVoiceDuration,sportsVoiceAvailable} from '../mini-games/shared/sportsVoices';
 import {STAR_VOICE_IDS} from '../mini-games/star-tide/voiceIds';
 import {techniqueVoicePath} from '../components/school-dungeon/dungeons1/techniqueVoices';
@@ -377,7 +378,7 @@ class AudioService {
 
   public handleAppBackground() {
       if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));
-      this.stopStarTideVoices(); this.stopSportsVoices();
+      this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices();
       this.stopKochoVoices();
       this.stopCardClubVoices(); this.stopPaperPlaneVoices();
       if (this.backgroundPlaybackEnabled) return;
@@ -600,7 +601,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
+      if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1604,7 +1605,7 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       this.applyBgmVolume();
-      if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
+      if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1847,7 +1848,7 @@ class AudioService {
   ): Promise<boolean> {
       void this.resumeAudioContext();
       for (const path of paths) {
-          if ((name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
+          if ((name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
@@ -1959,7 +1960,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2156,6 +2157,20 @@ class AudioService {
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
+  }
+
+  public async playLanternWarVoiceFile(id:string){
+      const clip=Object.values(lanternVoiceManifest as Record<string,{id:string;path:string;duration:number}>).find(c=>c.id===id);
+      if(!/^[a-f0-9]{20}$/.test(id)||!clip||!clip.path.startsWith('sfx/')||clip.path.includes('..')||!this.canPlayConversationVoice())return false;
+      this.stopLanternWarVoices();this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      const name='lantern-war-voice-'+id,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.duration*1000+350,false,generation,true);
+  }
+  public stopLanternWarVoices(){
+      const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
+      for(const name of names)if(name.startsWith('lantern-war-voice-')){this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);for(const audio of [...(this.activeHtmlSfx.get(name)||[])]){const ended=audio.onended;audio.onended=null;audio.pause();audio.currentTime=0;ended?.call(audio,new Event('ended'));}this.stopActiveSfx(name);}
+      const cached=Object.keys(this.voiceBuffers).filter(name=>name.startsWith('lantern-war-voice-'));
+      for(const name of cached.slice(0,Math.max(0,cached.length-16)))delete this.voiceBuffers[name];
   }
 
   public async playSportsVoiceFile(id:string){

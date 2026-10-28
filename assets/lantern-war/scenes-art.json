@@ -1,0 +1,96 @@
+[
+  {
+    "name": "story-atlas",
+    "source": "assets/lantern-war/story-atlas-source.png",
+    "sha256": "8b6ddaca87b08841dd07678aafe3af41d2c888b38a84435f5a1cd33cb6592e2b",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      5
+    ],
+    "outputs": [
+      "story-snow",
+      "story-canal",
+      "story-workshop",
+      "story-theater",
+      "story-marsh",
+      "story-ruins",
+      "story-skybridge",
+      "story-camp",
+      "story-drydock",
+      "story-seal"
+    ]
+  },
+  {
+    "name": "grounded-atlas",
+    "source": "assets/lantern-war/grounded-atlas-source.png",
+    "sha256": "ae6157f14d939755b762cc1596685e74cfa0da293837d453a8f42471ea3fa7a4",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      4
+    ],
+    "outputs": [
+      "battle-snow",
+      "battle-drydock",
+      "battle-canal",
+      "battle-theater",
+      "battle-marsh",
+      "battle-ruins",
+      "battle-workshop",
+      "battle-seal"
+    ]
+  },
+  {
+    "name": "regional-terrain",
+    "source": "assets/lantern-war/regional-terrain-source.png",
+    "sha256": "e9da33cb54857449e6e7184bbe718d5883007da8b8422d4d61ae22e5099e17e4",
+    "generator": "ImageGen",
+    "grid": [
+      4,
+      4
+    ],
+    "outputs": [
+      "regional-terrain"
+    ]
+  },
+  {
+    "name": "terrain-boundaries",
+    "source": "assets/lantern-war/terrain-boundaries-source.png",
+    "sha256": "8b0503b625aefcbf53a2248e2dcb31a0fb7ae7f7a48b1b0b802285d8d5d413d5",
+    "generator": "ImageGen",
+    "grid": [
+      4,
+      6
+    ],
+    "outputs": [
+      "terrain-boundaries"
+    ]
+  },
+  {
+    "name": "bridge-parts",
+    "source": "assets/lantern-war/bridge-parts-source.png",
+    "sha256": "ab87eec02a381f2926f5a4b26f1d156cd9e1ff967674d5fdeeaa8aff053ddce2",
+    "generator": "ImageGen",
+    "grid": [
+      3,
+      2
+    ],
+    "outputs": [
+      "bridge-parts"
+    ]
+  },
+  {
+    "name": "connected-terrain",
+    "source": "assets/lantern-war/connected-terrain-source.png",
+    "sha256": "712485f15cadbb6226562a7b0cbee07645bb46a6bc4b15f574e75f85d3489b43",
+    "generator": "ImageGen",
+    "grid": [
+      4,
+      2
+    ],
+    "outputs": [
+      "connected-terrain"
+    ]
+  }
+]

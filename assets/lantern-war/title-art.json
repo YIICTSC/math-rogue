@@ -1,0 +1,20 @@
+[
+  {
+    "name": "title-landscape",
+    "source": "assets/lantern-war/title-landscape-source.png",
+    "runtime": "sprites/lantern-war/title-landscape.webp",
+    "generator": "ImageGen"
+  },
+  {
+    "name": "title-portrait",
+    "source": "assets/lantern-war/title-portrait-source.png",
+    "runtime": "sprites/lantern-war/title-portrait.webp",
+    "generator": "ImageGen"
+  },
+  {
+    "name": "menu-icon",
+    "source": "assets/lantern-war/menu-icon-source.png",
+    "runtime": "sprites/lantern-war/menu-icon.webp",
+    "generator": "ImageGen"
+  }
+]

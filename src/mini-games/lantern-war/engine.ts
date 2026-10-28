@@ -1,3 +1,4 @@
+import{connectedBattleTerrain}from'./battleTerrain';
 import {FIELD_QUESTS} from './world';
 import {HEROES,heroById,pairKey} from './roster';
 import {CHAPTERS,TERRAIN_INFO} from './story';
@@ -20,7 +21,7 @@ export function loadCampaign():Campaign|null{
  const ids=s.formations.flatMap((f:any)=>f.slots?.filter(Boolean)||[]);
  if(s.formations.length!==3||s.formations.some((f:any)=>f.slots?.length!==6)||ids.length!==new Set(ids).size||!ids.includes(s.hero)||ids.some((id:string)=>!s.recruited.includes(id))||s.recruited.some((id:string)=>!HEROES.some(h=>h.id===id)))return null;
  if(['battle','result'].includes(s.phase)&&(!s.battle||!Array.isArray(s.battle.squads)||s.battle.map?.length!==10||s.battle.map.some((row:any)=>!Array.isArray(row)||row.length!==12||row.some((t:string)=>!TERRAIN_INFO[t]))))return null;
- if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle)s.battle.paused=true;return s;
+ if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle){s.battle.map=connectedBattleTerrain(s.battle.map);s.battle.paused=true;}if(s.checkpoint?.map)s.checkpoint.map=connectedBattleTerrain(s.checkpoint.map);return s;
  }catch{return null;}
 }
 export function recruitFor(s:Campaign,chapter:number){
