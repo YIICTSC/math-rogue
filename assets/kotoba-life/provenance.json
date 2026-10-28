@@ -1,0 +1,165 @@
+{
+  "game": "Kotoba Days / ことば日和",
+  "generatedAt": "2026-10-28",
+  "generator": "ImageGen",
+  "sourcePolicy": "Original generated files retained at original location and copied byte-for-byte here. First five source prompts were issued in a preceding quota-limited session; exact prompt text was not preserved and is not reconstructed as an execution record.",
+  "designIntent": {
+    "rooms": "Eight distinct photoreal warm lived-in interiors with open center floor for separate real-time 3D characters. No baked-in characters or UI.",
+    "town": "Three fictional photoreal everyday Japanese townspeople on the right, facing the open left foreground for small 3D animal visitors. Baker: woman; florist: young man; station: elderly man.",
+    "title": "Five original animal companions, caramel capybara with sage scarf, lavender rabbit with peach scarf, cocoa otter with aqua satchel, peach fox with sky-blue scarf, blue-gray penguin with yellow bow, in a photographic cozy room."
+  },
+  "sources": [
+    {
+      "id": "rooms-a",
+      "original": "/workspace/generated_images/exec-0ea7d986-a646-4ece-9509-42f8f4adc04d.png",
+      "source": "assets/kotoba-life/sources/rooms-a.png",
+      "generatedWith": "ImageGen",
+      "sha256": "18efcf02a06f84f6fa5aa31dbf87b39166400a916a10620e15880d3108f477fa",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "rooms-b",
+      "original": "/workspace/generated_images/exec-e2926d16-e191-4e2e-b860-ead605fe0554.png",
+      "source": "assets/kotoba-life/sources/rooms-b.png",
+      "generatedWith": "ImageGen",
+      "sha256": "539bf928d3ba9fd1d7e459d37e0e83b0b47d42bdc5470927f295c537e62b7a1e",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "town-bakery",
+      "original": "/workspace/generated_images/exec-d0c47210-2409-4e8f-bf0d-d5d63f1c9733.png",
+      "source": "assets/kotoba-life/sources/town-bakery.png",
+      "generatedWith": "ImageGen",
+      "sha256": "6a95308e6f09804b261b40beb76702d1adb2ac471c821ad484aaae25d08a47c2",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "town-florist",
+      "original": "/workspace/generated_images/exec-2e5b71c1-f471-4f83-a0f9-0301291b0a68.png",
+      "source": "assets/kotoba-life/sources/town-florist.png",
+      "generatedWith": "ImageGen",
+      "sha256": "511397dfd5385feadf84981aa9529cf2cd78adff21cf72b14818c4aec161959e",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "town-station",
+      "original": "/workspace/generated_images/exec-57f1c191-8660-433f-b531-0cf81f05042e.png",
+      "source": "assets/kotoba-life/sources/town-station.png",
+      "generatedWith": "ImageGen",
+      "sha256": "22c4d074d86062f5cd6826d4fded966c8342af6493162de83d65f854cfa89f8c",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "title",
+      "original": "/workspace/generated_images/exec-0051125d-218c-4356-b8cf-97c88cc3c9a2.png",
+      "source": "assets/kotoba-life/sources/title.png",
+      "generatedWith": "ImageGen",
+      "sha256": "eddd0a3e6e4c7aeb55fa31399e765fea04439d98ea4d693320179a3c5288eab2",
+      "width": 1536,
+      "height": 1024
+    }
+  ],
+  "outputs": [
+    {
+      "path": "public/sprites/kotoba-life/rooms/sunroom.webp",
+      "source": "rooms-a",
+      "crop": {
+        "left": 2,
+        "top": 2,
+        "width": 764,
+        "height": 501
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/tatami.webp",
+      "source": "rooms-a",
+      "crop": {
+        "left": 770,
+        "top": 2,
+        "width": 764,
+        "height": 501
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/loft.webp",
+      "source": "rooms-a",
+      "crop": {
+        "left": 2,
+        "top": 507,
+        "width": 764,
+        "height": 515
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/seaside.webp",
+      "source": "rooms-a",
+      "crop": {
+        "left": 770,
+        "top": 507,
+        "width": 764,
+        "height": 515
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/forest.webp",
+      "source": "rooms-b",
+      "crop": {
+        "left": 2,
+        "top": 2,
+        "width": 764,
+        "height": 508
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/atelier.webp",
+      "source": "rooms-b",
+      "crop": {
+        "left": 770,
+        "top": 2,
+        "width": 764,
+        "height": 508
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/rainy.webp",
+      "source": "rooms-b",
+      "crop": {
+        "left": 2,
+        "top": 514,
+        "width": 764,
+        "height": 508
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/rooms/attic.webp",
+      "source": "rooms-b",
+      "crop": {
+        "left": 770,
+        "top": 514,
+        "width": 764,
+        "height": 508
+      }
+    },
+    {
+      "path": "public/sprites/kotoba-life/town/bakery.webp",
+      "source": "town-bakery"
+    },
+    {
+      "path": "public/sprites/kotoba-life/town/florist.webp",
+      "source": "town-florist"
+    },
+    {
+      "path": "public/sprites/kotoba-life/town/station.webp",
+      "source": "town-station"
+    },
+    {
+      "path": "public/sprites/kotoba-life/title.webp",
+      "source": "title"
+    }
+  ]
+}

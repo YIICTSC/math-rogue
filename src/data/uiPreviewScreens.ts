@@ -89,6 +89,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: GameScreen.GARDEN, screen: GameScreen.GARDEN, label: 'ガーデン', group: '冒険' },
 
     { id: GameScreen.MINI_GAME_SELECT, screen: GameScreen.MINI_GAME_SELECT, label: 'ミニゲーム選択', group: 'ミニゲーム' },
+    { id: GameScreen.MINI_GAME_KOTOBA_LIFE, screen: GameScreen.MINI_GAME_KOTOBA_LIFE, label: 'ことば日和', group: 'ミニゲーム' },
     { id: GameScreen.DODGEBALL_SHOOTING, screen: GameScreen.DODGEBALL_SHOOTING, label: 'ドッジボール先制', group: 'ミニゲーム' },
     { id: GameScreen.BASKETBALL_LAYUP, screen: GameScreen.BASKETBALL_LAYUP, label: '速攻レイアップ', group: 'ミニゲーム' },
     { id: GameScreen.MINI_GAME_GO_HOME, screen: GameScreen.MINI_GAME_GO_HOME, label: '帰宅ダッシュ', group: 'ミニゲーム' },

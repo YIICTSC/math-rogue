@@ -8,6 +8,9 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:kotoba-life": "node scripts/test-kotoba-life.mjs",
+    "test:kotoba-life:browser": "node scripts/test-kotoba-life-browser.mjs",
+    "generate:kotoba-readings": "node scripts/generate-kotoba-readings.mjs",
     "test:basketball:browser": "node scripts/test-basketball-3d-browser.mjs",
     "test:sports-action-art": "node scripts/test-sports-action-art.mjs",
     "test:basketball": "node scripts/test-basketball.mjs",

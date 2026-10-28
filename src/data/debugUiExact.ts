@@ -35,6 +35,7 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "ことば日和": "Kotoba Days",
   ...LANTERN_ENGLISH,
   "白波の石灰段丘": "Whitewave limestone terraces",
   "古樹の苔庭": "Ancient moss gardens",
@@ -434,6 +435,8 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "ことば日和": "ことばびより",
+  "5人の小さなともだちと、言葉を教えてのんびり暮らす。8つの部屋と町で育つ会話の生活ゲーム。": "5にんのちいさなともだちと、ことばをおしえてのんびりくらす。8つのへやとまちでそだつかいわのせいかつゲーム。",
   ...LANTERN_HIRAGANA,
   "白波の石灰段丘": "しらなみのせっかいだんきゅう",
   "古樹の苔庭": "こじゅのこけにわ",

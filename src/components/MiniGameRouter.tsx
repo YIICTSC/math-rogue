@@ -5,6 +5,7 @@ import { deferredScreen } from '../utils/deferredScreen';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode, MiniGameDebugPreview } from '../types';
 import type { CraneGameResult } from '../mini-games/crane-game/CraneGame';
 const GakuroGear = deferredScreen(() => import('../mini-games/gakurogear/VrTitle'));
+const KotobaLife = deferredScreen(() => import('../mini-games/kotoba-life/KotobaLife'));
 const PokerGameScreen = deferredScreen(() => import('./PokerGameScreen'));
 const CardClub = deferredScreen(() => import('../mini-games/card-club/CardClub'));
 const SchoolyardSurvivorScreen = deferredScreen(() => import('./SchoolyardSurvivorScreen'));
@@ -64,6 +65,7 @@ export interface MiniGameComponentProps {
  * 今後ミニゲームが増えた場合は、ここに追加するだけでApp.tsxを触らずに済みます
  */
 const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComponentProps>>> = {
+    [GameScreen.MINI_GAME_KOTOBA_LIFE]: KotobaLife,
     [GameScreen.MINI_GAME_GAKUROGEAR]: GakuroGear,
     [GameScreen.MINI_GAME_POKER]: PokerGameScreen,
     [GameScreen.MINI_GAME_CARD_CLUB]: CardClub,

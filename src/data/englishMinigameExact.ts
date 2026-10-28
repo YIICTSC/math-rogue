@@ -1,5 +1,7 @@
 /** Curated shared English copy for mini-game catalogs without structured card translation. */
 export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  'ことば日和': 'Kotoba Days',
+  '5人の小さなともだちと、言葉を教えてのんびり暮らす。8つの部屋と町で育つ会話の生活ゲーム。': 'Teach words and share slow days with five little friends. A cozy conversation life sim with eight rooms and a town to explore.',
   '風と火を活かし、島々を自由に巡る探索・料理・学びの2DアクションRPG。': 'Explore islands freely with wind, fire, cooking and learning in a 2D action RPG.',
   '星潮の航路': 'Star Tide', '星潮の': 'Star', '航路': 'Tide',
   '島々の星灯を取り戻す、探索と謎解きと学びのアクションRPG。': 'Explore islands, solve puzzles and learn in a real-time action RPG.',

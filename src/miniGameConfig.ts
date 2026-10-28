@@ -1,7 +1,7 @@
 
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
-import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3 } from 'lucide-react';
+import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
 import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
 
 export interface MiniGameConfig {
@@ -41,6 +41,19 @@ export const isMiniGameUnlocked = (
 );
 
 export const MINI_GAMES: MiniGameConfig[] = [
+  {
+    id: 'KOTOBA_LIFE',
+    name: 'ことば日和',
+    titleLines: ['ことば日和'],
+    description: '5人の小さなともだちと、言葉を教えてのんびり暮らす。8つの部屋と町で育つ会話の生活ゲーム。',
+    screen: GameScreen.MINI_GAME_KOTOBA_LIFE,
+    threshold: 0,
+    typeLabel: 'LIFE',
+    typeColor: 'bg-emerald-800',
+    glowColor: 'rgba(168,200,160,0.5)',
+    icon: Heart,
+    clearAction: () => localStorage.removeItem('learning-rogue:kotoba-life:v1'),
+  },
   {
     id: 'GAKURO',
     categoryOnly: true, // Launched from the main title, not the mini-game list.

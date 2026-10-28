@@ -955,6 +955,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MINI_GAME_SURVIVOR,
     GameScreen.MINI_GAME_STAR_TIDE,
     GameScreen.MINI_GAME_LANTERN_WAR,
+    GameScreen.MINI_GAME_KOTOBA_LIFE,
     GameScreen.MINI_GAME_DUNGEON,
     GameScreen.MINI_GAME_DUNGEON_2,
     GameScreen.MINI_GAME_KOCHO,
@@ -19208,6 +19209,7 @@ const App: React.FC = () => {
         // These campaigns size their fields and reserve their own mobile control insets.
         GameScreen.MINI_GAME_STAR_TIDE,
         GameScreen.MINI_GAME_LANTERN_WAR,
+        GameScreen.MINI_GAME_KOTOBA_LIFE,
     ].includes(gameState.screen);
 
     return (

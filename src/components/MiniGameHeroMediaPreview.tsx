@@ -12,6 +12,7 @@ import type {LanguageMode} from '../types';
 // These are source banks, not newly generated/reinterpreted animations.
 const sharedVoice = /sfx\/(high-school-voices|magic-voices)\//;
 const gameImages: Record<string,RegExp> = {
+ KOTOBA_LIFE:/sprites\/kotoba-life\//,
  DUNGEON:/sprites\/(wandering-student|dungeons1)\//,
  DUNGEON_2:/sprites\/dungeons2\//,
  SURVIVOR:/sprites\/wandering-student\//,
