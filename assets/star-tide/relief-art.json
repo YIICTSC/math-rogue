@@ -1,0 +1,26 @@
+{
+  "generator": "ImageGen",
+  "source": "assets/star-tide/relief-imagegen-source.png",
+  "sha256": "37c8e772f48a68a517b95e147d7454c95e123fae779548d138035ef5039fc1d7",
+  "grid": [
+    4,
+    6
+  ],
+  "cell": 128,
+  "columns": [
+    "terrace surface",
+    "cliff face",
+    "south staircase",
+    "waterfall"
+  ],
+  "rows": [
+    "limestone coast",
+    "moss forest",
+    "crystal marsh",
+    "ochre canyon",
+    "alpine snow",
+    "volcanic basalt"
+  ],
+  "runtime": "sprites/star-tide/relief.webp",
+  "geometry": "Shared rounded paths, continuous single material patches, aligned stair cutouts; no independent corner sprites."
+}

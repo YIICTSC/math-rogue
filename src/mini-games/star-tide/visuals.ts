@@ -66,7 +66,10 @@ const BIOME_NAMES = [
 export const BIOMES: Biome[] = BIOME_NAMES.flatMap((n, row) => [0, 1].map(variant => ({
   ja: n[variant * 2], en: n[variant * 2 + 1], row, variant, ambient: n[4], particle: n[5],
 })));
+export const TERRACE_BIOMES=[['白波の石灰段丘','Whitewave limestone terraces'],['古樹の苔庭','Ancient moss gardens'],['水晶の湿原棚','Crystal marsh shelves'],['琥珀の峡谷','Amber canyon'],['雪解けの段丘','Snowmelt terraces'],['黒曜の溶岩棚','Obsidian lava shelves']] as const;
+BIOMES.push(...TERRACE_BIOMES.map(([ja,en],row)=>({ja,en,row,variant:2,ambient:BIOMES[row*2].ambient,particle:BIOMES[row*2].particle})));
 export function biomeFor(chapter: number, room: number): Biome {
+  if(room<8&&room%4===3)return BIOMES[24+chapter%6];
   return BIOMES[chapter * 2 + (room % 4 >= 2 ? 1 : 0)];
 }
 

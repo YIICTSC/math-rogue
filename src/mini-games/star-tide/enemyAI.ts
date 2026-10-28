@@ -1,3 +1,4 @@
+import {elevationAt} from './elevation';
 import type { Enemy, World } from './engine';
 import { ENEMIES } from './visuals';
 
@@ -46,10 +47,10 @@ export function stepEnemy(w: World, e: Enemy, dt: number) {
     speed *= distance > 3 ? .6 : .12;
   }
   // Axis separation lets enemies slide along a wall instead of freezing diagonally.
-  if (w.enemyCan(e.x + vx * speed * dt, e.y)) e.x += vx * speed * dt;
-  if (w.enemyCan(e.x, e.y + vy * speed * dt)) e.y += vy * speed * dt;
+  if (w.enemyCan(e.x + vx * speed * dt, e.y,e)) e.x += vx * speed * dt;
+  if (w.enemyCan(e.x, e.y + vy * speed * dt,e)) e.y += vy * speed * dt;
   e.moving = speed > .15 && Math.hypot(vx, vy) > .1;
-  if (Math.hypot(w.x - e.x, w.y - e.y) < .65 && w.hurt <= 0) w.hit();
+  if ((w.inSky||Math.abs(elevationAt(w.s.chapter,w.s.room,w.x,w.y)-elevationAt(w.s.chapter,w.s.room,e.x,e.y))<.45)&&Math.hypot(w.x - e.x, w.y - e.y) < .65 && w.hurt <= 0) w.hit();
 }
 
 export function enemyFrame(e: Enemy) {

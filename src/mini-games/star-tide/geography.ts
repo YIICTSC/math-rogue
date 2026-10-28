@@ -1,3 +1,4 @@
+import {terracesFor} from './elevation';
 import { visualHash } from './visuals';
 
 /** Clustered groves, pools and outcrops replace isolated random single-cell obstacles.
@@ -21,8 +22,11 @@ export function shapeField(chapter: number, room: number, map: number[][]) {
       if ((x === 6 || x === 13) && y === 3) map[y][x] = 3;
     } else if (pool && room % 3 !== 1) {
       map[y][x] = 2;
-    } else if (grove || n % 5 === 0) {
+    } else if (grove || room % 2 === 1 && (x-16)**2+(y-10)**2<3) {
       map[y][x] = 3;
     } else if (n % 3 === 0) map[y][x] = 6;
   }
+  // Connected raised pockets: each has a visible stair back to a protected main lane.
+  for(const t of terracesFor(chapter,room))for(let y=t.y;y<t.y+t.height;y++)for(let x=t.x;x<t.x+t.width;x++)map[y][x]=0;
+
 }

@@ -1,3 +1,4 @@
+import {elevationAt,canTraverseHeight,terracesFor,vistaPoint} from './elevation';
 import { freshWild, normalizeWild, RECIPES, forageNodes, campPosition, towerPosition, type WildSave, type Inventory } from './wild';
 import { puzzleRecords, type PuzzleSnapshot } from './puzzleSave';
 import { circuitChamber, circuitTargets, toggle, solveCircuit, type Circuit } from './circuitPuzzles';
@@ -260,8 +261,8 @@ export class World {
         this.s.gate=key(this.s);this.resolveGate(1);return true;
     }
     blocked(x: number, y: number, gliding=false) { const code=this.map[Math.floor(y)]?.[Math.floor(x)]??3; return (gliding?[3]:[2,3,7]).includes(code) && (this.s.room>=8||code===7||roundedSolid(this.map,x,y,code)); }
-    can(x: number, y: number) { return !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y) && x > .3 && y > .3 && x < W - .3 && y < H - .3 && !this.blocked(x,y,this.gliding); }
-    enemyCan(x: number, y: number) { return x > .5 && y > .5 && x < W - .5 && y < H - .5 && !this.blocked(x,y) && !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y); }
+    can(x: number, y: number) { if(!this.inSky&&!canTraverseHeight(this.s.chapter,this.s.room,this,{x,y},this.gliding))return false;return !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y) && x > .3 && y > .3 && x < W - .3 && y < H - .3 && !this.blocked(x,y,this.gliding); }
+    enemyCan(x: number, y: number,from?:{x:number;y:number}) { if(from&&!this.inSky&&!canTraverseHeight(this.s.chapter,this.s.room,from,{x,y}))return false;return x > .5 && y > .5 && x < W - .5 && y < H - .5 && !this.blocked(x,y) && !this.blocks?.boxes.some(b => Math.floor(x) === b.x && Math.floor(y) === b.y); }
     burst(x: number, y: number, color = '#ffe6a0') { this.fx.push({ x, y, color, life: .4, max: .4, seed: this.fx.length % 7 }); if (this.fx.length > 32) this.fx.shift(); }
     move(dx: number, dy: number, dt: number) { if (this.dash > 0) {
         dx = this.dx;
@@ -337,6 +338,7 @@ export class World {
         }
         this.enter();
     }
+    get vista(){if(this.inSky)return null;return terracesFor(this.s.chapter,this.s.room).map((t,i)=>({...vistaPoint(t),level:t.level,id:key(this.s)+':vista:'+i})).find(p=>!this.s.foraged.includes(p.id)&&Math.hypot(this.x-p.x,this.y-p.y)<.7&&elevationAt(this.s.chapter,this.s.room,this.x,this.y)>=p.level-.1)??null;}
     get npc() { return !this.inSky && [0, 4, 12, 20].includes(this.s.room) ? this.s.room >= 8 ? { x: 3.5, y: 2.5 } : { x: 8.2, y: 4.5 } : null; }
     get canTalk() { return Boolean(this.npc && !this.enemies.length && Math.hypot(this.x - this.npc.x, this.y - this.npc.y) < 1.6); }
     get targets() { if(this.inSky)return [];return this.s.room % 4 === 0 ? [[8.5, 6.5], [12.5, 6.5], [10.5, 6.5]] : this.s.room % 4 === 1 ? [[8.5, 6.5], [12.5, 6.5]] : [[10.5, 6.5]]; }
@@ -455,6 +457,7 @@ export class World {
             }
         }
         if (!this.inSky && this.s.room < 8) {
+            if(this.vista){this.s.foraged.push(this.vista.id);this.s.inventory.ore+=2;this.s.inventory.herb++;this.s.coins+=10;this.notice='vista';this.dirty=true;}
             const node = forageNodes.findIndex(p => Math.hypot(this.x - p.x, this.y - p.y) < 1.2);
             if (node >= 0) {
                 const k = key(this.s) + ':' + node;
@@ -542,11 +545,11 @@ export class World {
         const reach = profile.reach + (finisher && profile.reach ? .45 : 0);
         for(const e of this.enemies) {
             const rx=e.x-this.x, ry=e.y-this.y;
-            if(e.hp>0 && Math.hypot(rx,ry)<reach && (finisher && profile.style==='heavy' || rx*this.dx+ry*this.dy>-.2)) {
+            if(e.hp>0 && (this.inSky||Math.abs(elevationAt(this.s.chapter,this.s.room,this.x,this.y)-elevationAt(this.s.chapter,this.s.room,e.x,e.y))<.45) && Math.hypot(rx,ry)<reach && (finisher && profile.style==='heavy' || rx*this.dx+ry*this.dy>-.2)) {
                 if(this.guarded(e)){this.notice='bossguard';continue;}
                 e.hp-=damage; e.flash=.15; this.burst(e.x,e.y);
                 const nx=e.x+this.dx*(finisher?.4:.2),ny=e.y+this.dy*(finisher?.4:.2);
-                if(this.enemyCan(nx,ny)){e.x=nx;e.y=ny;}
+                if(this.enemyCan(nx,ny,e)){e.x=nx;e.y=ny;}
             }
         }
         if(weapon===4 && finisher) this.burst(this.x+this.dx,this.y+this.dy,'#ffcb80');
@@ -598,7 +601,7 @@ export class World {
         }
         else
             this.stamina = Math.min(this.s.staminaMax, this.stamina + dt * .4);
-        if(this.inSky && SKY_UPDRAFTS.some(p=>Math.hypot(this.x-p.x,this.y-p.y)<1.1))this.stamina=Math.min(this.s.staminaMax,this.stamina+dt*.9);
+        if(this.inSky && SKY_UPDRAFTS.some(p=>Math.hypot(this.x-p.x,this.y-p.y)<.7))this.stamina=Math.min(this.s.staminaMax,this.stamina+dt*.9);
         const oldX = this.x, oldY = this.y, oldRoom = key(this.s);
         this.move(dx, dy, dt);
         const distance = oldRoom === key(this.s) ? Math.hypot(this.x - oldX, this.y - oldY) : 0;
@@ -651,7 +654,7 @@ export class World {
                     this.enemies.push({ x: 6 + i * 8, y: 7.5, hp: 4 + this.s.chapter, max: 4 + this.s.chapter, kind: enemyKind(this.s.chapter, this.s.room, i), cool: 1 + i, phase: 0, boss: false });
             }
             const nx = e.x + (this.x - e.x) / d * dt * speed, ny = e.y + (this.y - e.y) / d * dt * speed;
-            if (this.enemyCan(nx, ny)) {
+            if (this.enemyCan(nx, ny,e)) {
                 e.x = nx;
                 e.y = ny;
             }

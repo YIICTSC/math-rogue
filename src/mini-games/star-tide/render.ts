@@ -1,3 +1,4 @@
+import {terracesFor,elevationAt,vistaPoint} from './elevation';
 import { forageNodes, campPosition, towerPosition } from './wild';
 import { circuitTargets } from './circuitPuzzles';
 import { traceBeam } from './beamPuzzles';
@@ -10,6 +11,7 @@ import { weaponAction } from './combat';
 import {WIND_LAUNCH, SKY_RETURN, SKY_CHEST, SKY_UPDRAFTS, skyPlatforms} from './sky';
 
 export type Graphics = {
+  relief?:HTMLImageElement;
   heroes: Record<HeroId, HTMLImageElement>;
   vertical: Record<HeroId, HTMLImageElement>;
   walk: HTMLImageElement;
@@ -37,6 +39,33 @@ function cell(ctx: CanvasRenderingContext2D, img: HTMLImageElement | undefined, 
   ctx.drawImage(img, col * sw, row * sh, sw, sh, 0, 0, width, height);
   ctx.restore();
   return true;
+}
+
+/** One continuous clipped contour supplies the top, cliff face, rounded corners and stair cutout. */
+function paintRelief(ctx:CanvasRenderingContext2D,w:World,art?:HTMLImageElement){
+ if(w.inSky||w.s.room>=8)return;
+ const colors=['#52936e','#63865c','#8eb8b9','#c59b58','#d3e7eb','#52515b'];
+ for(const [i,t]of terracesFor(w.s.chapter,w.s.room).entries()){
+  const x=t.x*16,y=t.y*16,width=t.width*16,height=t.height*16,lift=t.level*8,row=w.s.chapter%6;
+  ctx.save();ctx.fillStyle='#071d284d';ctx.beginPath();ctx.roundRect(x+2,y+height-1,width,4,3);ctx.fill();
+  const outline=new Path2D();outline.roundRect(x,y-lift,width,height+lift,8);
+  ctx.save();ctx.clip(outline);ctx.fillStyle='#354449';ctx.fillRect(x,y-lift,width,height+lift);
+  cell(ctx,art,4,6,1,row,x,y+height-lift,width,lift);
+  ctx.fillStyle='#081c2a55';ctx.fillRect(x+width-3,y,3,height);
+  ctx.restore();
+  const top=new Path2D();top.roundRect(x,y-lift,width,height,8);
+  ctx.save();ctx.clip(top);ctx.fillStyle=colors[row];ctx.fillRect(x,y-lift,width,height);
+  cell(ctx,art,4,6,0,row,x,y-lift,width,height);
+  ctx.restore();ctx.strokeStyle='#b8c7a259';ctx.lineWidth=.65;ctx.stroke(top);
+  // The staircase spans the same physical slope used by collision and foot placement.
+  cell(ctx,art,4,6,2,row,t.rampX*16,(t.y+t.height-1)*16-lift,16,16+lift);
+  if(!art?.naturalWidth){ctx.fillStyle='#a2b397';ctx.fillRect(t.rampX*16,(t.y+t.height-1)*16-lift,16,16+lift);for(let j=0;j<5;j++){ctx.fillStyle=j%2?'#526b64':'#d4d9bd';ctx.fillRect(t.rampX*16,(t.y+t.height-1)*16-lift+j*(16+lift)/5,16,2);}}
+  // A decorative fall is embedded in the cliff, never drawn as a disconnected square.
+  if(i===1&&w.s.chapter%6!==3){ctx.save();ctx.clip(outline);cell(ctx,art,4,6,3,row,x+3,y+height-lift,10,lift);ctx.restore();}
+  const point=vistaPoint(t),py=point.y*16-lift;
+  if(!w.s.foraged.includes(w.s.chapter+':'+w.s.room+':vista:'+i)){ctx.fillStyle='#132e43';ctx.beginPath();ctx.arc(point.x*16,py,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffe6a0';ctx.beginPath();ctx.moveTo(point.x*16,py-4);ctx.lineTo(point.x*16+3,py);ctx.lineTo(point.x*16,py+4);ctx.lineTo(point.x*16-3,py);ctx.closePath();ctx.fill();}
+  ctx.restore();
+ }
 }
 
 function paintSky(ctx:CanvasRenderingContext2D,w:World,graphics?:Graphics){
@@ -85,7 +114,7 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
     cell(ctx, ground, 4, 3, w.s.chapter % 4, Math.floor(w.s.chapter / 4), 0, 0, 320, 224);
   }
   if (graphics?.floors.naturalWidth && !indoor) {
-    const index = biome.row * 2 + biome.variant;
+    const index = biome.row * 2 + biome.variant%2;
     for (let y = 0; y < 224; y += 64) for (let x = 0; x < 320; x += 64)
       cell(ctx, graphics.floors, 6, 4, index % 6, Math.floor(index / 6), x, y, 64);
     // Worn lanes are continuous trails rather than isolated patches at logic markers.
@@ -159,11 +188,12 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
   }
   if(w.s.room===0){ctx.globalAlpha=w.gliderUnlocked?1:.5;cell(ctx,graphics?.sky,4,4,2,0,WIND_LAUNCH.x*16-18,WIND_LAUNCH.y*16-26,36);ctx.globalAlpha=1;}
   }
+ paintRelief(ctx,w,graphics?.relief);
  if(w.circuit){circuitTargets.forEach((p,i)=>{ctx.fillStyle=w.circuit!.bits&(1<<i)?'#ffdd7b':'#234c63';ctx.fillRect(p.x*16-7,p.y*16-7,14,14);ctx.strokeStyle='#b3e8dc';ctx.strokeRect(p.x*16-7,p.y*16-7,14,14);ctx.fillStyle='#0c2832';ctx.fillText(String(i+1),p.x*16-4,p.y*16+3);});}
  if(w.ice){for(let y=0;y<9;y++)for(let x=0;x<9;x++){ctx.fillStyle=w.ice.walls.has(`${x},${y}`)?'#345779':'#a6e6ed';ctx.fillRect((x+6)*16,(y+2)*16,16,16);ctx.strokeStyle='#72a4be';ctx.strokeRect((x+6)*16,(y+2)*16,16,16);}sprite(7,3,(w.ice.goal.x+6)*16,(w.ice.goal.y+2)*16);sprite(0,5,(w.ice.x+6)*16,(w.ice.y+2)*16);sprite(4,3,64,96);}
  if(w.beam){sprite(4,3,w.beam.start.x*16,w.beam.start.y*16);const trace=traceBeam(w.beam);ctx.strokeStyle='#ffe3a2';ctx.lineWidth=2;ctx.beginPath();trace.path.forEach((p,i)=>i?ctx.lineTo(p.x*16,p.y*16):ctx.moveTo(p.x*16,p.y*16));ctx.stroke();sprite(7,3,w.beam.goal.x*16,w.beam.goal.y*16);for(const [i,m] of w.beam.mirrors.entries()){ctx.fillStyle='#ffe4a2';ctx.fillText(String(i+1),m.x*16+5,m.y*16-2);ctx.fillStyle='#243f53';ctx.fillRect(m.x*16,m.y*16,16,16);ctx.strokeStyle='#a6e9ef';ctx.beginPath();ctx.moveTo(m.x*16+3,m.y*16+(m.slash?13:3));ctx.lineTo(m.x*16+13,m.y*16+(m.slash?3:13));ctx.stroke();}}
  if(w.blocks){for(const p of w.blocks.goals){ctx.fillStyle='#ffe6a4';ctx.strokeStyle='#f5e0a6';ctx.strokeRect(p.x*16+2,p.y*16+2,12,12);}for(const p of w.blocks.boxes)sprite(3,3,p.x*16,p.y*16,16);}
- if(!w.inSky&&w.s.room<8){forageNodes.forEach((p,i)=>{if(!w.s.foraged.includes(key(w.s)+':'+i))prop([2,3,4][(w.s.chapter+w.s.room+i)%3],p.x*16,p.y*16,18);});if([0,4].includes(w.s.room)){ctx.globalAlpha=w.weather==='rain'&&w.s.room!==0?.45:1;prop(1,campPosition.x*16,campPosition.y*16,28);ctx.globalAlpha=1;}if(w.s.room===0){prop(12,towerPosition.x*16,towerPosition.y*16,32);prop(15,40,168,28);}if(w.barrel)prop(8,w.barrel.x*16,w.barrel.y*16,22);}
+ if(!w.inSky&&w.s.room<8){forageNodes.forEach((p,i)=>{if(!w.s.foraged.includes(key(w.s)+':'+i))prop([2,3,4][(w.s.chapter+w.s.room+i)%3],p.x*16,p.y*16-elevationAt(w.s.chapter,w.s.room,p.x,p.y)*8,18);});if([0,4].includes(w.s.room)){ctx.globalAlpha=w.weather==='rain'&&w.s.room!==0?.45:1;prop(1,campPosition.x*16,campPosition.y*16,28);ctx.globalAlpha=1;}if(w.s.room===0){prop(12,towerPosition.x*16,towerPosition.y*16,32);prop(15,40,168,28);}if(w.barrel)prop(8,w.barrel.x*16,w.barrel.y*16,22);}
  for(const f of w.fires){ctx.fillStyle=w.weather==='rain'?'#559ab7':'#fcab50';ctx.beginPath();ctx.arc(f.x*16,f.y*16,5+Math.sin(w.time*13)*2,0,Math.PI*2);ctx.fill();}
  if(!w.inSky&&w.s.room>=8){ctx.fillStyle='#19273b22';ctx.fillRect(0,0,320,224);}
  const solved=w.s.solved.includes(key(w.s));(w.blocks||w.beam||w.circuit||w.ice?[]:w.targets).forEach(([x,y],i)=>{ctx.globalAlpha=w.s.room%4===3&&!solved?(Math.sin(w.time*2)>.2?1:.25):solved||i===w.switches.length?1:.4;sprite(solved?7:4,3,x*16-8,y*16-8);ctx.globalAlpha=1;ctx.fillStyle='#fff4c8';ctx.fillText(String(i+1),x*16-2,y*16-10);});
@@ -172,18 +202,18 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
  if(!w.inSky&&w.s.room===23)sprite(7,3,280,96,24);
  for(const p of w.shots){ctx.fillStyle=p.friendly?'#fbd781':'#e38bb1';if(p.friendly){ctx.save();ctx.translate(p.x*16,p.y*16-18);ctx.rotate(Math.atan2(p.vy,p.vx));sprite(p.kind===1?2:p.kind===2?3:4,6,-8,-8,16);ctx.restore();}else{ctx.beginPath();ctx.arc(p.x*16,p.y*16,2,0,7);ctx.fill();}}
  if(w.hintTarget){ctx.strokeStyle='#68eeed';ctx.lineWidth=2;ctx.strokeRect(w.hintTarget.x*16-9,w.hintTarget.y*16-9,18,18);}
-  const entities: { y: number; draw: () => void }[] = [];
-  if (!w.inSky && graphics?.props.naturalWidth) for (const p of sceneryFor(w)) entities.push({ y: p.y, draw: () => {
+  const entities: { x:number;y: number; draw: () => void }[] = [];
+  if (!w.inSky && graphics?.props.naturalWidth) for (const p of sceneryFor(w)) entities.push({ x:p.x,y: p.y, draw: () => {
     shadow(p.x, p.y - .2, p.size * .3, .14);
     // The canopy fades only when the player is immediately behind it.
     if (w.y < p.y && Math.abs(w.x - p.x) < .9 && p.y - w.y < 1.9 || w.targets.some(([x,y])=>Math.hypot(p.x-x,p.y-y)<2)) ctx.globalAlpha = .35;
     cell(ctx, graphics.props, 8, 12, p.cell, p.row, p.x * 16 - p.size / 2, p.y * 16 - p.size * 88 / 96, p.size);
     ctx.globalAlpha = 1;
   }});
-  if (w.npc) { const npc = w.npc; entities.push({ y: npc.y, draw: () => {
+  if (w.npc) { const npc = w.npc; entities.push({ x:npc.x,y: npc.y, draw: () => {
     shadow(npc.x, npc.y, 7); sprite((w.s.chapter + w.s.room) % 8, 7, npc.x * 16 - 14, npc.y * 16 - 22, 28);
   }}); }
-  for (const e of w.enemies) entities.push({ y: e.y, draw: () => {
+  for (const e of w.enemies) entities.push({ x:e.x,y: e.y, draw: () => {
     const profile = ENEMIES[e.kind] || ENEMIES[0];
     const boss = Boolean(e.boss), sz = boss ? 58 : 30;
     const bob = !boss && ['orbit', 'hop'].includes(profile.behavior)
@@ -219,7 +249,7 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
     ctx.fillStyle = boss ? '#f6c587' : '#f2ae80';
     ctx.fillRect(e.x * 16 - (boss ? 20 : 10), barY, (boss ? 40 : 20) * Math.max(0, e.hp / e.max), 2);
   }});
-  entities.push({ y: w.y, draw: () => {
+  entities.push({ x:w.x,y: w.y, draw: () => {
     shadow(w.x, w.y, w.gliding ? 6 : 8, w.gliding ? .14 : .28);
     const flight=w.gliding&&Boolean(graphics?.flight.naturalWidth);
     const motion = flight?{sheet:'flight',columns:6,rows:4,row:Math.abs(w.dy)>Math.abs(w.dx)?w.dy<0?1:0:w.dx<0?3:2,frame:Math.floor(w.walk*9)%6,flip:false}:heroFrame(w), base=motion.sheet==='base', size=flight?84:base?36:48;
@@ -277,7 +307,7 @@ function paintScene(ctx: CanvasRenderingContext2D, w: World, atlas: HTMLImageEle
       const step = w.walk * 6 % 1; ctx.fillRect(w.x * 16 - w.dx * 7 - step * 4, w.y * 16 + 2, 2 - step, 1);
     }
   }});
-  entities.sort((a, b) => a.y - b.y).forEach(e => e.draw());
+  entities.sort((a,b)=>(a.y-b.y)*16-(w.inSky?0:elevationAt(w.s.chapter,w.s.room,a.x,a.y)-elevationAt(w.s.chapter,w.s.room,b.x,b.y))*8).forEach(e=>{ctx.save();if(!w.inSky)ctx.translate(0,-elevationAt(w.s.chapter,w.s.room,e.x,e.y)*8);e.draw();ctx.restore();});
   // Draw readable interaction rings above scenery and actors, never underneath canopies.
   if(!w.inSky&&!w.s.solved.includes(key(w.s))){
     const marks=w.circuit?circuitTargets.map(p=>({x:p.x,y:p.y})):w.beam?[...w.beam.mirrors.map(p=>({x:p.x+.5,y:p.y+.5})),{x:w.beam.goal.x+.5,y:w.beam.goal.y+.5}]:w.ice?[{x:4.5,y:6.5},{x:w.ice.goal.x+6.5,y:w.ice.goal.y+2.5}]:w.blocks?w.blocks.goals.map(p=>({x:p.x+.5,y:p.y+.5})):w.targets.map(([x,y])=>({x,y}));

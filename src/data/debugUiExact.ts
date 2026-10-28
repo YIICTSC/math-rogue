@@ -34,6 +34,15 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "白波の石灰段丘": "Whitewave limestone terraces",
+  "古樹の苔庭": "Ancient moss gardens",
+  "水晶の湿原棚": "Crystal marsh shelves",
+  "琥珀の峡谷": "Amber canyon",
+  "雪解けの段丘": "Snowmelt terraces",
+  "黒曜の溶岩棚": "Obsidian lava shelves",
+  "高台の隠し採集地を発見！鉱石2・薬草1・10枚を入手。": "Hidden terrace cache found! +2 ore, 1 herb and 10 coins.",
+  "Aで高台の採集地を調べる。坂で登り、帆で下へ滑空できる。": "Press A to search the terrace cache. Climb the stairs or glide down.",
+
   "焼きりんご": "Roasted apple",
   "風のきのこスープ": "Wind mushroom soup",
   "旅人の煮込み": "Traveller stew",
@@ -423,6 +432,15 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "白波の石灰段丘": "しらなみのせっかいだんきゅう",
+  "古樹の苔庭": "こじゅのこけにわ",
+  "水晶の湿原棚": "すいしょうのしつげんだな",
+  "琥珀の峡谷": "こはくのきょうこく",
+  "雪解けの段丘": "ゆきどけのだんきゅう",
+  "黒曜の溶岩棚": "こくようのようがんだな",
+  "高台の隠し採集地を発見！鉱石2・薬草1・10枚を入手。": "たかだいのかくしさいしゅうちをはっけん！こうせき2・やくそう1・10まいをにゅうしゅ。",
+  "Aで高台の採集地を調べる。坂で登り、帆で下へ滑空できる。": "Aでたかだいのさいしゅうちをしらべる。さかでのぼり、ほでしたへかっくうできる。",
+
   "焼きりんご": "やきりんご",
   "風のきのこスープ": "かぜのきのこスープ",
   "旅人の煮込み": "たびびとのにこみ",
