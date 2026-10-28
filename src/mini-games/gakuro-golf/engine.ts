@@ -20,7 +20,7 @@ export interface Golfer {
   phase: PlayerPhase; shotsLeft: number; correct: number; totalCorrect: number; shotId: number;
   questionHistory?: string[]; lesson: KartLesson | null; answers: number[]; feedback: number | null;
   origin: Point; flightTime: number; penalty: boolean; penaltyKind: 'water' | 'ob' | null; capped: boolean;
-  avatar: KartAvatar; shotClub: Club; shotAngle: number; shotSpin: number; shotImpact: number; shotQuality: 'nice' | 'good' | 'miss'; spinApplied: boolean; starEnergy?:number; shotSpecial?:boolean;
+  avatar: KartAvatar; shotClub: Club; shotAngle: number; shotSpin: number; shotImpact: number; shotQuality: 'nice' | 'good' | 'miss'; spinApplied: boolean; starEnergy?:number; shotSpecial?:boolean; specialLanding?: Point;
 }
 export interface GolfWorld extends SportsEventBuffer { phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean; holeCount: number }
 export type GolfCommand =
@@ -83,17 +83,17 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (hi
   if (c.type === 'answer' && p.phase === 'quiz' && p.lesson && p.feedback === null && c.shotId === p.shotId && c.index === p.answers.length && Number.isInteger(c.option) && c.option >= 0 && c.option < 4) {
     const q = p.lesson.questions[c.index]; if (!q) return false;
     p.answers.push(c.option); p.feedback = q.correct;
-    if (c.option === q.correct) { p.correct++; p.totalCorrect++; p.starEnergy=Math.min(1,(p.starEnergy??0)+1/3); } return true;
+    if (c.option === q.correct) { p.correct++; p.totalCorrect++; p.starEnergy=Math.min(1,(p.starEnergy??0)+1/6); } return true;
   }
   if (c.type === 'continue' && p.phase === 'quiz' && p.feedback !== null && c.shotId === p.shotId && c.index === p.answers.length - 1) {
     p.feedback = null; if (p.answers.length === 3) { p.phase = 'aim'; p.shotsLeft = 3; p.lesson = null; } return true;
   }
-  if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1 && (c.impact === undefined || Number.isFinite(c.impact) && Math.abs(c.impact) <= 1) && (c.spin === undefined || Number.isFinite(c.spin) && Math.abs(c.spin) <= 1) && (c.special===undefined||typeof c.special==='boolean') && (!c.special||(p.starEnergy??0)>=.999&&c.club!=='putter')) {
+  if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1 && (c.impact === undefined || Number.isFinite(c.impact) && Math.abs(c.impact) <= 1) && (c.spin === undefined || Number.isFinite(c.spin) && Math.abs(c.spin) <= 1) && (c.special===undefined||typeof c.special==='boolean')) {
     const bonus = benefits(p.correct), impact = c.impact ?? 0, spin = c.club === 'putter' ? 0 : c.spin ?? 0;
     const angle = c.angle + impact * 12 * Math.PI / 180 + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
     Object.assign(p, shotVelocity(p, c.club, angle, c.power, spin, impact));
-    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle; p.shotSpin = spin; p.shotImpact = impact; p.shotQuality = shotQuality(impact); p.spinApplied = false; p.shotSpecial=!!c.special; if(c.special){p.starEnergy=0;p.vx*=1.08;p.vz*=1.08;}
-    sportsEvent(w,c.special?'special':'action',p.shotId,p.id); if(p.shotQuality==='nice'&&c.club!=='putter')sportsEvent(w,'referee',p.shotId,p.id,Math.abs(impact)<.06?'perfect':'nice');
+    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle; p.shotSpin = spin; p.shotImpact = impact; p.shotQuality = shotQuality(impact); p.spinApplied = false; p.shotSpecial=(p.starEnergy??0)>=.999 && p.shotQuality==='nice'; p.specialLanding=undefined; if(p.shotSpecial){p.starEnergy=0;startSpecialShot(p);}
+    sportsEvent(w,p.shotSpecial?'special':'action',p.shotId,p.id); if(p.shotQuality==='nice'&&c.club!=='putter')sportsEvent(w,'referee',p.shotId,p.id,Math.abs(impact)<.06?'perfect':'nice');
     p.strokes++; p.shotsLeft--; p.shotId++; p.phase = 'moving'; p.flightTime = 0; p.penalty = false; p.penaltyKind = null; return true;
   }
   if (c.type === 'next' && p.phase === 'holed') {
@@ -110,12 +110,38 @@ export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'correct
   const loft = (spec.loft - (club === 'putter' ? 0 : spin * 9)) * Math.PI / 180;
   return { vx: Math.sin(angle) * speed * Math.cos(loft), vz: Math.cos(angle) * speed * Math.cos(loft), vy: Math.sin(loft) * speed };
 }
+/** Server-owned cinematic: launch along the player's shot, then recover any distance with spin. */
+export function startSpecialShot(p: Golfer) {
+  const travel = Math.max(8, Math.min(160, Math.hypot(p.vx, p.vz) * 2.8));
+  p.specialLanding = {x:p.origin.x + Math.sin(p.shotAngle)*travel,z:p.origin.z + Math.cos(p.shotAngle)*travel};
+}
+export function specialShotPosition(p: Golfer, at: number) {
+  const landing=p.specialLanding!,cup=HOLES[p.hole].cup;
+  const air=Math.min(1,at/3),roll=Math.max(0,Math.min(1,(at-3)/2.5));
+  if(at<3) return {x:p.origin.x+(landing.x-p.origin.x)*air,z:p.origin.z+(landing.z-p.origin.z)*air,y:Math.sin(Math.PI*air)*(34+Math.min(30,distance(p.origin,landing)*.2))};
+  // Accelerate into a violent top/backspin recovery, then ease directly into the cup.
+  const ease=roll*roll*(3-2*roll);
+  return {x:landing.x+(cup.x-landing.x)*ease,z:landing.z+(cup.z-landing.z)*ease,y:.5*Math.sin(Math.PI*roll)};
+}
+function sinkShot(w: GolfWorld,p: Golfer) {
+  const hole=HOLES[p.hole];p.x=hole.cup.x;p.y=0;p.z=hole.cup.z;
+  const delta=p.strokes-hole.par;
+  sportsEvent(w,'referee',p.shotId,p.id,p.strokes===1?'hole-in-one':delta<=-3?'albatross':delta===-2?'eagle':delta===-1?'birdie':delta===0?'par':delta===1?'bogey':delta===2?'double-bogey':'over-par');
+  completeHole(p);
+}
 export function tick(w: GolfWorld, dt: number) {
   if (w.phase !== 'playing' || w.paused || !Number.isFinite(dt) || dt <= 0 || dt > .1) return;
   for (const p of Object.values(w.players)) {
     if (p.spectator || p.phase !== 'moving' || !p.connected) continue;
     const hole = HOLES[p.hole], previous = { x: p.x, z: p.z };
     p.flightTime += dt;
+    if(p.shotSpecial && p.specialLanding){
+      const point=specialShotPosition(p,p.flightTime);
+      p.vx=(point.x-p.x)/dt;p.vy=(point.y-p.y)/dt;p.vz=(point.z-p.z)/dt;
+      Object.assign(p,point);
+      if(p.flightTime>=5.5)sinkShot(w,p);
+      continue;
+    }
     if (p.y > 0 || p.vy > 0) { p.vy -= 9.8 * dt; p.vx += hole.wind.x * dt; p.vz += hole.wind.z * dt; }
     p.x += p.vx * dt; p.z += p.vz * dt; p.y += p.vy * dt;
     if (p.y <= 0) {
@@ -131,7 +157,7 @@ export function tick(w: GolfWorld, dt: number) {
       const speed = Math.hypot(p.vx, p.vz), dx = p.x - previous.x, dz = p.z - previous.z;
       const t = Math.max(0, Math.min(1, ((hole.cup.x - previous.x) * dx + (hole.cup.z - previous.z) * dz) / (dx * dx + dz * dz || 1)));
       const near = distance(hole.cup, { x: previous.x + dx * t, z: previous.z + dz * t });
-      if (near < .9 && speed < 9 && Math.abs(p.vy) < 5) { p.x = hole.cup.x; p.z = hole.cup.z; const delta=p.strokes-hole.par; sportsEvent(w,'referee',p.shotId,p.id,p.strokes===1?'hole-in-one':delta<=-3?'albatross':delta===-2?'eagle':delta===-1?'birdie':delta===0?'par':delta===1?'bogey':delta===2?'double-bogey':'over-par'); completeHole(p); continue; }
+      if (near < .9 && speed < 9 && Math.abs(p.vy) < 5) { sinkShot(w,p); continue; }
       if (p.vy < -2) { p.vy *= -.25; p.vx *= .72; p.vz *= .72; } else {
         p.vy = 0; const friction = lie === 'green' ? 1.2 : lie === 'sand' ? 8 : lie === 'rough' ? 6 : 3;
         const ratio = Math.max(0, speed - friction * dt) / (speed || 1); p.vx *= ratio; p.vz *= ratio;

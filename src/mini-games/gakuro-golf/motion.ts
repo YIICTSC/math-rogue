@@ -1,4 +1,4 @@
-import { addPlayer, createGolf, shotVelocity, tick, type Club, type PublicGolfer } from './engine';
+import { addPlayer, createGolf, startSpecialShot, shotVelocity, tick, type Club, type PublicGolfer } from './engine';
 
 type Sample = { at: number; player: PublicGolfer };
 export const BALL_RENDER_DELAY = 220;
@@ -51,7 +51,7 @@ export function predictShot(player: PublicGolfer, club: Club, angle: number, pow
   const p = world.players.preview; angle += impact * 12 * Math.PI / 180;
   Object.assign(p, { hole: player.hole, correct: player.correct, x: player.x, y: 0, z: player.z,
     phase: 'moving', shotClub: club, shotAngle: angle, shotSpin: club === 'putter' ? 0 : spin, spinApplied: false, origin: { x: player.x, z: player.z }, ...shotVelocity(player, club, angle, power, spin, impact) });
-  if(special){p.vx*=1.08;p.vz*=1.08;}
+  if(special){p.shotSpecial=true;startSpecialShot(p);}
   const points = [{ x: p.x, y: .55, z: p.z }];
   for (let i = 0; i < 900 && p.phase === 'moving'; i++) {
     const previous = { x: p.x, y: p.y + .55, z: p.z };

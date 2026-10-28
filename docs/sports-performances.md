@@ -12,7 +12,7 @@ Only clips present in `sportsVoiceDurations.json` are fetched or played. Run `no
 
 ## Rules and effects
 
-- Golf's star gauge gains one third per correct answer. A full gauge enables a star shot with a non-putter club. The server consumes the gauge and boosts horizontal launch velocity by 8%; aiming and distance prediction apply the same boost. Ordinary shots retain their existing physics. Hole score, hazards and shot quality determine official calls, with no nice-shot call for putting.
+- Golf's star gauge gains one sixth per correct answer and persists across quizzes until spent. At 100%, yellow/nice impact (absolute impact <= .2) automatically triggers a special with any club; no special button or client flag is required. Other impacts preserve the charge. A server-owned 5.5-second path launches high along the selected direction, then recovers under/overshoot with powerful spin and guarantees one cup-in without hazard penalties. Normal shots retain ordinary physics. Prediction shares the special path. The first charged shot uses the guided power/impact freeze and saves completion only after confirmed special activation. A fireball/ember trail follows the interpolated ball alongside the Blender gold effect. Golf official calls use a dedicated young female Japanese caddy reference; other sports retain the original official.
 - Tennis's fault, double-fault, let, out, game, set, deuce and advantage calls follow scoring. Advantage compares the two scores with the current server, including extended deuce games; tie-breaks do not announce advantage.
 - Basketball calls match the game's 2/3-point scoring, possession-clock violations and match end. Position abilities trigger character presentations only after successful activation.
 - Dodgeball distinguishes catches, perfect catches, elimination into the outfield and match end. Charged specials, dash shots and counters use the confirmed powered-throw presentation.
@@ -33,6 +33,8 @@ The `.blend`, reproducible authoring script, optimization recipe, hashes, materi
 
 ```bash
 pnpm run test:sports-performances
+node scripts/test-golf-auto-special.mjs
+node scripts/test-golf-compact-browser.mjs
 pnpm run verify:sports-performances
 pnpm run test:sports-performances:browser
 pnpm run build

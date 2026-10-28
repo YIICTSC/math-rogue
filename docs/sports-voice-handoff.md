@@ -80,7 +80,7 @@ ASRモデルは既定small、CPU int8、ローカルキャッシュ必須。再�
 - ImageGenで26人×4競技＝104ポーズを7枚の透過アトラスに生成済み。元画像・プロンプト・ハッシュは `assets/sports-performances/cutin-build.json`、実行画像は `public/sprites/sports-cutins`。
 - Blenderで4競技別GLBと16フレームの透過エフェクトを生成・glTF Transformで最適化済み。ソース `.blend` と生成スクリプトを保持。GLBは約27～45KB、各3アニメーション。`effect-build.json` 参照。
 - 4競技の3DレンダラーへBlenderエフェクトを接続済み。
-- ゴルフに正解で蓄積するスターゲージと必殺ショットを追加。サーバーでゲージ消費を検証し、水平初速を8%増やす。予測表示も同じ倍率を適用する。
+- ゴルフは6問正解で必殺ゲージ満タン。黄色インパクトで自動発動し、天高い弾道・火球・強烈なスピンでカップインする。専用ボタンは廃止。初回満タン時は停止式チュートリアルを行う。
 
 ## 保守時の検証
 
@@ -95,3 +95,7 @@ pnpm run server:build
 実画面テストは4競技の縦横、必殺技ボタン、専用カットイン、GLB読込、音声選択と試聴、ミュート・一時停止・イベント重複を確認する。生成・再生成後は全件ASR記録のSHAも確認する。
 
 Web／Androidのアセット一覧は音声・イラスト・GLBの変更後に再生成する。Renderは明示依頼時だけ手動デプロイ。4競技のサーバー側イベントとゴルフ機能も変更しているため、mainへのプッシュだけでは専用サーバーに反映されない。
+
+## ゴルフの女性キャディ更新
+
+ゴルフの審判コール12本は `voice_profiles` の `golf-caddy` で生成し、既存の `referee/golf/*` に出力する。若い日本人女性キャディの専用参照を `assets/sports-performances/references/golf-caddy.ogg` に保存する。再開は `--only golf-caddy`。参照を初めて作る場合だけ `--design-reference golf-caddy` を追加する。他競技の男性審判および310本のランタイムIDは維持する。

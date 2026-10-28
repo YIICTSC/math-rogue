@@ -1,7 +1,7 @@
 {
   "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
   "upstream": "https://github.com/Aratako/Irodori-TTS",
-  "latest_checked_at": "2026-10-27T05:38:36.505716+00:00",
+  "latest_checked_at": "2026-10-28T00:15:34.925338+00:00",
   "model_selection": "Latest 4.1 MeanFlow checkpoint, CPU + BF16. v4-Large (3.29B, >13GB FP32) was checked; 4.1-Small-MF fits the 9.7GB CPU host and is the latest 4.1 fast-inference release. Quiet sports calls use a dedicated native-Japanese VoiceDesign reference and automatic duration to preserve clear articulation.",
   "voices": [
     {
@@ -1254,13 +1254,13 @@
     "lines": {
       "golf": {
         "nice": "ナイスショット！",
-        "perfect": "パーフェクトショット！",
+        "perfect": "パーフェクトショット！お見事です！",
         "birdie": "バーディー！",
-        "eagle": "イーグル！",
-        "albatross": "アルバトロス！",
-        "par": "パー。",
-        "bogey": "ボギー。",
-        "double-bogey": "ダブルボギー。",
+        "eagle": "イーグルです！素晴らしいですね！",
+        "albatross": "アルバトロスです！お見事です！",
+        "par": "パーです。いい調子ですね！",
+        "bogey": "ボギーです。次も頑張りましょう！",
+        "double-bogey": "ダブルボギーです。次で取り返しましょう！",
         "hole-in-one": "ホールインワン！",
         "ob": "アウトオブバウンズ。ワンペナルティー。",
         "water": "ペナルティーエリア。ワンペナルティー。",
@@ -1428,8 +1428,8 @@
     },
     "referee/golf/par": {
       "steps": 4,
-      "seed_offset": 71,
-      "seconds": 1.0
+      "seed_offset": 6701,
+      "seconds": 2.5
     },
     "referee/tennis/let": {
       "steps": 4,
@@ -1484,12 +1484,109 @@
     "magic-sakuya/dodgeball/special": {
       "steps": 8,
       "seed_offset": 2401
+    },
+    "referee/golf/nice": {
+      "steps": 4,
+      "seed_offset": 6301,
+      "seconds": 1.5
+    },
+    "referee/golf/perfect": {
+      "steps": 4,
+      "seed_offset": 6701,
+      "seconds": 3.2
+    },
+    "referee/golf/birdie": {
+      "steps": 4,
+      "seed_offset": 6301,
+      "seconds": 1.2
+    },
+    "referee/golf/eagle": {
+      "steps": 4,
+      "seed_offset": 6701,
+      "seconds": 3.3
+    },
+    "referee/golf/albatross": {
+      "steps": 4,
+      "seed_offset": 6701,
+      "seconds": 3.3
+    },
+    "referee/golf/bogey": {
+      "steps": 4,
+      "seed_offset": 6701,
+      "seconds": 3.5
+    },
+    "referee/golf/double-bogey": {
+      "steps": 4,
+      "seed_offset": 6701,
+      "seconds": 4
+    },
+    "referee/golf/hole-in-one": {
+      "steps": 4,
+      "seed_offset": 6301,
+      "seconds": 2.2
+    },
+    "referee/golf/ob": {
+      "steps": 4,
+      "seed_offset": 6301,
+      "seconds": 3.5
+    },
+    "referee/golf/water": {
+      "steps": 4,
+      "seed_offset": 6301,
+      "seconds": 3.5
+    },
+    "referee/golf/over-par": {
+      "steps": 4,
+      "seed_offset": 6301,
+      "seconds": 1.4
     }
   },
   "model_checks": {
     "Aratako/Irodori-TTS-v4.1-Small": {
       "revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
       "checked_at": "2026-10-27T10:10:54.878184+00:00"
+    },
+    "Aratako/Irodori-TTS-v4.1-Small-MF": {
+      "revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "checked_at": "2026-10-28T00:15:34.925338+00:00"
     }
-  }
+  },
+  "voice_profiles": [
+    {
+      "id": "golf-caddy",
+      "output_id": "referee",
+      "caption": "成人女性の柔らかい中高音。あたたかく穏やかで励ます自然な抑揚。若い女性キャディの明るい応援。日本語で自然な演技。音楽や効果音なし。",
+      "reference": "assets/sports-performances/references/golf-caddy.ogg",
+      "reference_text": "大丈夫。一緒に頑張ろうね。",
+      "auto_duration": false,
+      "lines": {
+        "golf": {
+          "nice": "ナイスショット！",
+          "perfect": "パーフェクトショット！お見事です！",
+          "birdie": "バーディー！",
+          "eagle": "イーグルです！素晴らしいですね！",
+          "albatross": "アルバトロスです！お見事です！",
+          "par": "パーです。いい調子ですね！",
+          "bogey": "ボギーです。次も頑張りましょう！",
+          "double-bogey": "ダブルボギーです。次で取り返しましょう！",
+          "hole-in-one": "ホールインワン！",
+          "ob": "アウトオブバウンズ。ワンペナルティー。",
+          "water": "ペナルティーエリア。ワンペナルティー。",
+          "over-par": "ホールアウト。"
+        }
+      },
+      "reference_sha256": "51cb117d3622774d15307916ccc598ff73bbe7a092f970ea7089f0e4de67262b",
+      "reference_source": "public/sfx/sports/generic-female-3/preview.ogg",
+      "readings": {
+        "golf": {
+          "perfect": "ぱーふぇくとしょっと！おみごとです！",
+          "eagle": "いーぐるです！すばらしいですね！",
+          "albatross": "あるばとろすです！おみごとです！",
+          "par": "ぱーです。いいちょうしですね！",
+          "bogey": "ぼぎーです。つぎもがんばりましょう！",
+          "double-bogey": "だぶるぼぎーです。つぎでとりかえしましょう！"
+        }
+      }
+    }
+  ]
 }

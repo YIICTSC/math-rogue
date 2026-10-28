@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { impactAt, meterPosition, powerAt, MAX_SNAP, SWEEP_MS, MAX_HOLD_MS, IMPACT_CENTER } from './shotTiming';
 const TUTORIAL_POWER = .5;
 type TutorialStage = 'start' | 'power-moving' | 'power-wait' | 'impact-moving' | 'impact-wait';
-export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limit = 1, tutorial = false }: { disabled: boolean; limit?: number; tutorial?: boolean; onShot: (power: number, impact: number) => void; onPower: (power: number) => void; onActive: (active: boolean) => void; t: (s: string) => string }) {
+export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limit = 1, tutorial = false, specialTutorial = false }: { disabled: boolean; limit?: number; tutorial?: boolean; specialTutorial?: boolean; onShot: (power: number, impact: number) => void; onPower: (power: number) => void; onActive: (active: boolean) => void; t: (s: string) => string }) {
   const [active, setActive] = useState(false), [locked, setLocked] = useState<number | null>(null), [returning, setReturning] = useState(false);
   const state = useRef({ start: 0, power: null as number | null, active: false });
   const [tutorialStage, setTutorialStage] = useState<TutorialStage>('start');
@@ -57,7 +57,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
   }, [active, disabled, tutorial]);
   useEffect(() => () => { state.current.active = false; callbacks.current.onActive(false); }, []);
   return <div className="gg-timing" data-active={active} data-returning={returning}>
-    {tutorial && <p className="gg-meter-tutorial" role="status">{t(tutorialStage === 'start' ? 'はじめてのショット：ボタンを押してゲージを動かそう' : tutorialStage === 'power-moving' ? 'ゲージが止まるまで待とう' : tutorialStage === 'power-wait' ? 'ここで押すとパワーが決まるよ' : tutorialStage === 'impact-moving' ? 'ゲージが黄色に戻るまで待とう' : '黄色に重なったら押してショット！')}</p>}
+    {tutorial && <p className="gg-meter-tutorial" role="status">{t(tutorialStage === 'start' ? specialTutorial ? '必殺ゲージ満タン！黄色インパクトで自動発動。ボタンを押そう' : 'はじめてのショット：ボタンを押してゲージを動かそう' : tutorialStage === 'power-moving' ? 'ゲージが止まるまで待とう' : tutorialStage === 'power-wait' ? 'ここで押すとパワーが決まるよ' : tutorialStage === 'impact-moving' ? 'ゲージが黄色に戻るまで待とう' : specialTutorial ? '黄色で押そう！強烈なスピンでカップイン！' : '黄色に重なったら押してショット！')}</p>}
     <div className="gg-meter-heading"><b>{locked === null ? t('1回目：パワーを決める') : returning ? t('2回目：下の中心に合わせる') : t('右端まで進んでから戻ります')}</b><span>{locked === null ? `MAX ${Math.round(limit * 100)}%` : `${Math.round(locked * 100)}%`}</span></div>
     <div className={`gg-meter-track ${locked !== null ? 'is-impact' : ''}`}><span className="gg-meter-fill" style={{ width: `${(locked ?? 0) * 100}%` }}/>{locked !== null && <i className="gg-meter-lock" style={{ left: `${locked * 100}%` }}/>}<span className="gg-meter-cursor" ref={cursor}/></div>
     <div className="gg-impact-strip"><span/><i/>{locked!==null&&<b className="gg-impact-cue" aria-label={t('ここでインパクトを合わせる')}>↑</b>}</div>

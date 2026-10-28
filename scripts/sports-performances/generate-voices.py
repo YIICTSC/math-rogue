@@ -12,7 +12,7 @@ def sha(p):
 def main():
  p=argparse.ArgumentParser();p.add_argument('--device',choices=['cpu'],default='cpu');p.add_argument('--threads',type=int,default=2);p.add_argument('--limit',type=int);p.add_argument('--only');p.add_argument('--model');p.add_argument('--regenerate',action='store_true');p.add_argument('--retakes',type=Path);p.add_argument('--design-reference');p.add_argument('--design-reference-only',action='store_true');p.add_argument('--seconds',type=float);p.add_argument('--extra-seconds',type=float,default=0);p.add_argument('--seed-offset',type=int,default=0);p.add_argument('--steps',type=int,choices=[4,8,16,32]);a=p.parse_args();selected=set(json.loads(a.retakes.read_text()))if a.retakes else None
  plan=json.loads((ROOT/'assets/sports-performances/voice-plan.json').read_text())
- groups={v.get('model',plan['model'])for v in [*plan['voices'],plan['referee']]if not a.only or v['id']==a.only}
+ groups={v.get('model',plan['model'])for v in [*plan['voices'],plan['referee'],*plan.get('voice_profiles',[])]if not a.only or v['id']==a.only}
  if not a.model and len(groups)>1:
   for group in sorted(groups):subprocess.run([sys.executable,__file__,*sys.argv[1:],'--model',group],check=True)
   return
@@ -46,13 +46,13 @@ def main():
  def save():
   t=record.with_suffix('.tmp');t.write_text(json.dumps(build,ensure_ascii=False,indent=2)+'\n');t.replace(record)
  generated=0
- speakers=[*plan['voices'],plan['referee']]
+ speakers=[*plan['voices'],plan['referee'],*plan.get('voice_profiles',[])]
  # VoiceDesign establishes one reusable reference for each of the 8 custom voices and the official.
  for speaker in sorted(speakers,key=lambda s:0 if 'preview'in s else 1):
   ident=speaker['id']
   if speaker.get('model',plan['model'])!=model_repo:continue
   if a.only and ident!=a.only:continue
-  if selected is not None and not any(k.startswith(ident+'/')for k in selected):continue
+  if selected is not None and not any(k.startswith(speaker.get('output_id',ident)+'/')for k in selected):continue
   if a.design_reference==ident:
    reference=ROOT/speaker['reference'];reference.parent.mkdir(parents=True,exist_ok=True)
    if not reference.exists():
@@ -72,9 +72,11 @@ def main():
   else:ref_wav=output/ident/'preview.ogg'
   latent=scratch/(ident+'-ref.pt')
   for event,text in jobs:
-   key=ident+'/'+event
+   key=speaker.get('output_id',ident)+'/'+event
+   if any(profile.get('output_id')==ident and event.split('/')[0] in profile['lines'] for profile in plan.get('voice_profiles',[])):continue
+   target_ident=speaker.get('output_id',ident)
    if selected is not None and key not in selected:continue
-   target=output/ident/(event+'.ogg');target.parent.mkdir(parents=True,exist_ok=True)
+   target=output/target_ident/(event+'.ogg');target.parent.mkdir(parents=True,exist_ok=True)
    override=plan.get('clip_overrides',{}).get(key,{});steps=a.steps or override.get('steps',4);offset=a.seed_offset or override.get('seed_offset',0)
    caption=speaker['caption'];spoken=speaker.get('readings',{}).get(event.split('/')[0],{}).get(event.split('/')[-1],text);reading=''.join(v['hira']for v in kana.convert(spoken));moras=len(re.sub(r'[^ぁ-ゖー]|[ゃゅょぁぃぅぇぉ]','',reading));seconds=a.seconds or override.get('seconds') or round(max(.8,min(5.5,.15*moras+.45+a.extra_seconds)),2);seed=730000+int(hashlib.sha256(key.encode()).hexdigest()[:7],16)+offset
    reference_sha=sha(ref_wav)if ref_wav.exists()and event!='preview'else None

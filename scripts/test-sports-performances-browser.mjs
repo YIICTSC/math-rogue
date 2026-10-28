@@ -18,7 +18,7 @@ browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--
 const base=`http://127.0.0.1:${server.httpServer.address().port}/__performance`;
 for(const sport of (process.env.SPORTS_QA_SPORTS?.split(',')??['golf','tennis','basketball','dodgeball']))for(const [width,height]of[[390,844],[844,390]]){
  await page.setViewportSize({width,height});await page.goto(base+'?sport='+sport,{waitUntil:'domcontentloaded',timeout:120000});await page.waitForFunction(()=>!!window.__setView);await page.waitForFunction(()=>document.querySelector('canvas[data-sports-fx="true"]'));
- if(sport==='golf'){await page.locator('.gg-shot-settings summary').click();const button=page.getByRole('button',{name:/スターショット準備/});await button.click();assert.equal(await page.getByRole('button',{name:/スターショット選択中/}).getAttribute('aria-pressed'),'true');await page.locator('.gg-shot-settings summary').click();await page.evaluate(()=>window.__fire());}
+ if(sport==='golf'){assert.equal(await page.getByRole('button',{name:/スターショット/}).count(),0);await page.evaluate(()=>window.__fire());}
  else await page.getByRole('button',{name:sport==='tennis'?'スターショット':sport==='basketball'?'スキル':/^必殺球/,exact:true}).click();
  const banner=page.locator('[data-sport-cutin]');await banner.waitFor();assert.equal(await banner.getAttribute('data-speaker'),'magic-akari');const art=await page.locator('.sports-cutin-art').evaluate(n=>getComputedStyle(n).backgroundImage);assert(art.includes('cast-2.webp'));
  await page.evaluate(async()=>{for(const n of document.querySelectorAll('.sports-cutin-art,.sports-rendered-burst')){const im=new Image();im.src=getComputedStyle(n).backgroundImage.slice(5,-2);await im.decode();}});

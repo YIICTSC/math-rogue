@@ -5,7 +5,7 @@ import numpy as np,soundfile as sf
 from faster_whisper import WhisperModel
 from pykakasi import kakasi
 ROOT=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--limit',type=int);p.add_argument('--model',default='small');p.add_argument('--beam-size',type=int,default=1);p.add_argument('--threads',type=int,default=2);p.add_argument('--recheck-flagged',action='store_true');p.add_argument('--output',type=Path);p.add_argument('--refresh-only',action='store_true');args=p.parse_args();kana=kakasi()
+p=argparse.ArgumentParser();p.add_argument('--limit',type=int);p.add_argument('--only');p.add_argument('--model',default='small');p.add_argument('--beam-size',type=int,default=1);p.add_argument('--threads',type=int,default=2);p.add_argument('--recheck-flagged',action='store_true');p.add_argument('--output',type=Path);p.add_argument('--refresh-only',action='store_true');args=p.parse_args();kana=kakasi()
 plan=json.loads((ROOT/'assets/sports-performances/voice-plan.json').read_text());technique_readings={}
 for speaker in plan['voices']:
  for sport,lines in speaker['lines'].items():
@@ -13,7 +13,7 @@ for speaker in plan['voices']:
   if reading:technique_readings[lines['special'].split('、')[0]]=reading.split('、')[0]
 def norm(text):
  for word,reading in sorted(technique_readings.items(),key=lambda item:-len(item[0])):text=text.replace(word,reading)
- for word,reading in {'star':'すたー','drive':'どらいぶ','burst':'ばーすと','break':'ぶれいく','smash':'すまっしゅ'}.items():text=re.sub(r'\b'+word+r'\b',reading,text,flags=re.I)
+ for word,reading in {'out of bounds':'あうとおぶばうんず','1penalty':'わんぺなるてぃー','one penalty':'わんぺなるてぃー','hole in one':'ほーるいんわん','perfect shot':'ぱーふぇくとしょっと','nice shot':'ないすしょっと','double bogey':'だぶるぼぎー','birdie':'ばーでぃー','eagle':'いーぐる','albatross':'あるばとろす','bogey':'ぼぎー','par':'ぱー','star':'すたー','drive':'どらいぶ','burst':'ばーすと','break':'ぶれいく','smash':'すまっしゅ'}.items():text=re.sub(r'\b'+word+r'\b',reading,text,flags=re.I)
  text=re.sub(r'([0-9])日',lambda m:'零一二三四五六七八九'[int(m[1])]+'日',text)
  text=text.replace('1本','一本').replace('2','ツー').replace('3','スリー');text=''.join(x['hira']for x in kana.convert(text));return re.sub('[^ぁ-ゖー]','',text)
 def distance(a,b):
@@ -27,6 +27,7 @@ record=args.output or ROOT/'assets/sports-performances/voice-asr-review.json';re
 review['normalization']='Kana via pykakasi, canonical technique readings from the plan, standard English sports loanwords and Japanese counters; original ASR transcripts are retained.'
 build=json.loads((ROOT/'assets/sports-performances/voice-build.json').read_text());model=None;count=0
 for ident,clip in build['clips'].items():
+ if args.only and ident!=args.only:continue
  path=ROOT/clip['output'];digest=hashlib.sha256(path.read_bytes()).hexdigest();prior=review['clips'].get(ident,{})
  if prior.get('sha256')==digest:
   a,b=norm(prior['spoken_text']),norm(prior['heard']);cer=round(distance(a,b)/max(1,len(a)),4);prior.update(kana_expected=a,kana_heard=b,cer=cer,needs_review=not prior['heard'] or cer>(.4 if len(a)<7 else .32))

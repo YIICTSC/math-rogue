@@ -1,4 +1,11 @@
 const copy: [string, string, string][] = [
+  ['強烈なスピンでカップを狙う！','Powerful spin pulls the ball toward the cup!','きょうれつなスピンで カップをねらう！'],
+  ['必殺ショット準備完了','Special shot ready','ひっさつショットじゅんびかんりょう'],
+  ['必殺ゲージ','Special gauge','ひっさつゲージ'],
+  ['黄色インパクトで必殺ショットが自動発動！','Hit the yellow impact zone to unleash your special shot!','きいろインパクトで ひっさつショットが じどうはつどう！'],
+  ['6問正解で必殺ゲージ満タン','Six correct answers fill the special gauge','6もんせいかいで ひっさつゲージまんタン'],
+  ['必殺ゲージ満タン！黄色インパクトで自動発動。ボタンを押そう','Special gauge full! Yellow impact triggers it automatically. Press to start.','ひっさつゲージまんタン！きいろインパクトで じどうはつどう。ボタンをおそう'],
+  ['黄色で押そう！強烈なスピンでカップイン！','Press on yellow! Powerful spin pulls the ball into the cup!','きいろでおそう！きょうれつなスピンで カップイン！'],
   ['はじめてのショット：ボタンを押してゲージを動かそう', 'Your first shot: press the button to start the meter.', 'はじめてのショット：ボタンを おして ゲージを うごかそう'],
   ['ゲージが止まるまで待とう', 'Wait for the meter to stop.', 'ゲージが とまるまで まとう'],
   ['ここで押すとパワーが決まるよ', 'Press now to set your power.', 'ここで おすと パワーが きまるよ'],

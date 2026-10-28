@@ -16,7 +16,7 @@ if(id.endsWith('/shared/SportsPresentation.tsx'))return code.replace('setTimeout
 },configureServer(s){s.middlewares.use('/__performance',async(req,res)=>res.end(await s.transformIndexHtml('/__performance',`<meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body,#root{height:100%;margin:0}.sports-cutin-banner{animation:none!important;translate:0 0!important;opacity:1!important}</style><div id="root"></div><script type="module" src="/${entry}"></script>`)));}}]});await server.listen();
 browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const page=await browser.newPage({viewport:{width:390,height:844},hasTouch:true});debugPage=page;page.setDefaultTimeout(90000);page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()===404&&/\/(sprites\/(sports-|sports\/)|models\/sports-|sfx\/sports\/)/.test(r.url()))missing.push(r.url());});
 const base=`http://127.0.0.1:${server.httpServer.address().port}/__performance`;
-await page.addInitScript(()=>{if(new URLSearchParams(location.search).has('tutorial'))localStorage.removeItem('gakuro-golf-shot-tutorial-v1');else localStorage.setItem('gakuro-golf-shot-tutorial-v1','done');});
+await page.addInitScript(()=>{if(new URLSearchParams(location.search).has('specialTutorial'))localStorage.removeItem('gakuro-golf-special-tutorial-v1');else localStorage.setItem('gakuro-golf-special-tutorial-v1','done');if(new URLSearchParams(location.search).has('tutorial'))localStorage.removeItem('gakuro-golf-shot-tutorial-v1');else localStorage.setItem('gakuro-golf-shot-tutorial-v1','done');});
 for(const[width,height]of(process.env.GOLF_QA_SIZES?JSON.parse(process.env.GOLF_QA_SIZES):[[390,844],[844,390],[320,568],[568,320],[1280,720]])){
  await page.setViewportSize({width,height});await page.goto(base+'?sport=golf',{waitUntil:'domcontentloaded',timeout:120000});await page.locator('.gg-shot-settings').waitFor();
  assert.equal(await page.locator('.gg-shot-settings').getAttribute('open'),null);
@@ -31,5 +31,16 @@ for(const[width,height]of(process.env.GOLF_QA_SIZES?JSON.parse(process.env.GOLF_
  await page.locator('.gg-meter-actions button').click();await page.waitForFunction(()=>document.querySelector('.gg-timing')?.getAttribute('data-active')==='true');assert.equal(await page.locator('.gg-shot-settings').getAttribute('open'),null,'settings close without resetting the active shot meter');
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('learning-rogue:golf-meter',{detail:'cancel'})));console.log('PASS compact golf',width,height);
 }
-await page.setViewportSize({width:390,height:844});await page.goto(base+'?sport=golf&tutorial=1');await page.locator('.gg-meter-tutorial').waitFor();await page.screenshot({path:out+'/tutorial.png'});assert.deepEqual(errors,[]);console.log('PASS: compact portrait/landscape cards, working club/spin/aim, uninterrupted shot timing and first-shot tutorial.');
+await page.setViewportSize({width:390,height:844});await page.goto(base+'?sport=golf&tutorial=1');await page.locator('.gg-meter-tutorial').waitFor();await page.screenshot({path:out+'/tutorial.png'});await page.goto(base+'?sport=golf&specialTutorial=1');
+await page.getByText('必殺ゲージ満タン！黄色インパクトで自動発動。ボタンを押そう').waitFor();
+assert.equal(await page.getByRole('button',{name:/スターショット/}).count(),0);
+await page.locator('.gg-meter-actions button').click();
+await page.getByText('ここで押すとパワーが決まるよ').waitFor();await page.locator('.gg-meter-actions button').click();
+await page.getByText('黄色で押そう！強烈なスピンでカップイン！').waitFor();await page.screenshot({path:out+'/special-tutorial.png'});await page.locator('.gg-meter-actions button').click();
+await page.waitForFunction(()=>window.__room.world.players.local.shotSpecial&&localStorage.getItem('gakuro-golf-special-tutorial-v1')==='done');
+assert.equal(await page.evaluate(()=>window.__commands.filter(c=>c.type==='shot').length),1);
+await page.waitForFunction(()=>document.querySelector('canvas')?.dataset.sportsFx==='true');
+await page.screenshot({path:out+'/special-fired.png'});
+console.log('PASS automatic special, guided power/yellow freeze, single shot, saved first-time completion and loaded Blender effect.');
+assert.deepEqual(errors,[]);console.log('PASS: compact portrait/landscape cards, working club/spin/aim, uninterrupted shot timing and first-shot tutorial.');
 }catch(e){if(debugPage){await debugPage.screenshot({path:out+'/failure.png',timeout:10000}).catch(()=>{});console.error(await debugPage.locator('body').innerText().catch(()=>''));}throw e;}finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}
