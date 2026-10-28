@@ -64,16 +64,15 @@ export default function ConversationVoiceSettings({
         </div>
         <p>
           {L(
-            "おすすめは日本語に対応した端末音声を優先し、聞き取りやすい高さと速さで話します。端末音声が使えない場合は独自音声で話します。",
-            "Recommended speech uses a matching device voice with clear pitch and pacing, and falls back to the built-in voice when unavailable.",
-            "おすすめはにほんごにたいおうしたたんまつおんせいをゆうせんし、ききとりやすいたかさとはやさではなします。たんまつおんせいがつかえないばあいはどくじおんせいではなします。",
+            "オリジナル音声は、ことばをはっきり発音しながら、ケロケロと跳ねる声で話します。高さ・速さ・抑揚で個性を調整できます。",
+            "Original voices combine clear syllables with playful, warbling pitch. Adjust pitch, speed and expression to shape each character.",
+            "オリジナルおんせいは、ことばをはっきりはつおんしながら、ケロケロとはねるこえではなします。たかさ・はやさ・よくようでこせいをちょうせいできます。",
           )}
         </p>
         <label>
           {L("音声の種類", "Voice engine", "おんせいのしゅるい")}
-          <select value={voice.engine ?? "auto"} onChange={e => update({engine: e.target.value as "auto" | "original" | "device"})}>
-            <option value="auto">{L("おすすめ（明瞭な読み上げ）", "Recommended (clear speech)", "おすすめ（めいりょうなよみあげ）")}</option>
-            <option value="original">{L("オリジナル音声", "Original voice", "おりじなるおんせい")}</option>
+          <select value={voice.engine === "auto" ? "original" : voice.engine ?? "original"} onChange={e => update({engine: e.target.value as "auto" | "original" | "device"})}>
+            <option value="original">{L("オリジナル音声（おすすめ）", "Original character voice (recommended)", "オリジナルおんせい（おすすめ）")}</option>
             <option value="device">{L("端末の読み上げ", "Device speech", "たんまつのよみあげ")}</option>
           </select>
         </label>

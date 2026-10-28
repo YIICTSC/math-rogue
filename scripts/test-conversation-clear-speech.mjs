@@ -9,17 +9,29 @@ const synth=new Synth();globalThis.window={AudioContext:Context,speechSynthesis:
 const built=await build({stdin:{contents:"export * from './src/rpg/conversationVoice';export * from './src/rpg/conversationSpeech';export * from './src/rpg/residentVoiceSynth';",resolveDir:process.cwd()},bundle:true,write:false,platform:'node',format:'esm',plugins:[{name:'audio',setup(b){b.onResolve({filter:/services\/audioService$/},()=>({path:'audio',namespace:'stub'}));b.onLoad({filter:/.*/,namespace:'stub'},()=>({contents:'export const audioService=globalThis.__voiceAudio;'}));}}]});
 const api=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
 const voice=api.DEFAULT_CONVERSATION_VOICE,ja={name:'Kyoko Enhanced',lang:'ja-JP',localService:true,default:false},en={name:'English',lang:'en-US',localService:true};
-assert.equal(api.conversationDevicePlan('こんにちは、きょうははれ。',{...voice,style:'playful'}).length,1);
-assert.equal(voice.engine,'auto');assert(api.validConversationVoice(voice));assert.equal(api.selectConversationDeviceVoice([en], 'JAPANESE',0),undefined);
-assert.equal(api.selectConversationDeviceVoice([en,ja,{...ja,name:'Remote',localService:false}],'JAPANESE',1),ja);
-for(const pitch of [.5,2])for(const rate of [.6,1.6]){const p=api.conversationDevicePlan('こんにちは！',{...voice,pitch,rate})[0];assert(p.pitch>=.85&&p.pitch<=1.25);assert(p.rate>=.82&&p.rate<=1.08);}
-// Asynchronous voice discovery must wait for the proper locale, then play just once.
-const delayed=api.speakConversation('こんにちは。',voice,'JAPANESE');assert.equal(calls.length,0);synth.voices=[en,ja];synth.dispatchEvent(new Event('voiceschanged'));assert.equal(await delayed,true);assert.equal(calls.length,1);assert.equal(calls[0].voice,ja);assert.equal(buffers,0);
-synth.voices=[];const cancelled=api.speakConversation('またね。',voice,'JAPANESE');api.stopConversationSpeech();synth.voices=[ja];synth.dispatchEvent(new Event('voiceschanged'));assert.equal(await cancelled,false);assert.equal(calls.length,1);assert.equal(buffers,0);
-// A native failure before the first sound uses one fallback, retaining cancellation ownership.
-mode='error';assert.equal(await api.speakConversation('おはよう。',voice,'JAPANESE'),true);assert.equal(buffers,1);
-mode='hold';const interrupted=api.speakConversation('こんにちは。',voice,'JAPANESE');await Promise.resolve();const current=calls.at(-1);current.onerror?.();assert.equal(await interrupted,false);assert.equal(buffers,1,'Never repeat a phrase after it already started');
-mode='complete';synth.voices=[en];assert.equal(await api.speakConversation('あいうえお',voice,'JAPANESE'),true);assert.equal(buffers,2);assert(calls.every(u=>u.voice===ja),'No English voice for Japanese');
-mode='hold';synth.voices=[ja];const muted=api.speakConversation('げんき？',voice,'JAPANESE');allowed=false;assert.equal(await muted,false);allowed=true;
-assert.equal(api.residentVoiceMoras('コーヒー')[0].duration>.2,true,'Long vowels are sustained, not re-articulated');
-console.log('PASS recommended locale selection, bounded pitch/rate, delayed voice discovery, cancellation, one-time fallback, no repeated partial phrase, mute and sustained long vowels.');
+
+assert.equal(voice.engine,'original');assert(api.validConversationVoice(voice));
+globalThis.localStorage={getItem:()=>JSON.stringify({previous:{...voice,engine:'auto'},manual:{...voice,engine:'device'}})};
+assert.equal(api.loadConversationVoice('previous').engine,'original');assert.equal(api.loadConversationVoice('manual').engine,'device');
+assert.equal(api.selectConversationDeviceVoice([en], 'JAPANESE',0),undefined);
+synth.voices=[en,ja];
+assert.equal(await api.speakConversation('こんにちは。',voice,'JAPANESE'),true);
+assert.equal(buffers,1);assert.equal(calls.length,0,'Never prefer device speech over original kana synthesis');
+assert.equal(await api.speakConversation('げんき？',{...voice,engine:'auto'},'JAPANESE'),true);
+assert.equal(buffers,2);assert.equal(calls.length,0,'Previous auto settings now use original voices too');
+api.unlockConversationSpeech();assert.equal(calls.length,0,'No native speech priming in original mode');
+// Device speech remains an explicit, optional alternative.
+const device={...voice,engine:'device'};synth.voices=[];
+const delayed=api.speakConversation('こんにちは。',device,'JAPANESE');synth.voices=[en,ja];synth.dispatchEvent(new Event('voiceschanged'));assert.equal(await delayed,true);assert.equal(calls.length,1);assert.equal(calls[0].voice,ja);
+synth.voices=[];const cancelled=api.speakConversation('またね。',device,'JAPANESE');api.stopConversationSpeech();synth.voices=[ja];synth.dispatchEvent(new Event('voiceschanged'));assert.equal(await cancelled,false);assert.equal(calls.length,1);
+mode='error';assert.equal(await api.speakConversation('おはよう。',device,'JAPANESE'),false);assert.equal(buffers,2);
+assert.equal(api.residentVoiceMoras('コーヒー')[0].duration>.2,true);
+const moras=api.residentVoiceMoras('きゃくがりんごをたべる。げんき？');
+const signatures=new Set();
+for(const style of ['smooth','bouncy','warm','calm','playful','robot'])for(const timbre of [0,1,2,3]){
+ const pcm=api.renderResidentVoice(moras,{...voice,style,timbre});assert(pcm.every(n=>Number.isFinite(n)&&Math.abs(n)<=.85));assert(pcm.some(n=>Math.abs(n)>.05));signatures.add(Buffer.from(pcm.buffer).toString('base64'));
+}
+assert.equal(signatures.size,24,'Every style/timbre pair has a different voice');
+assert.deepEqual(api.residentVoiceMoras('こんにちは'),api.residentVoiceMoras('こんにちわ'));
+assert.notDeepEqual(api.renderResidentVoice(moras,{...voice,style:'robot',intonation:0}),api.renderResidentVoice(moras,{...voice,style:'playful',intonation:1}));
+console.log('PASS original-first routing including legacy auto, no native priming, explicit-device compatibility, sustained vowels and 24 finite/distinct character styles.');

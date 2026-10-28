@@ -21,7 +21,7 @@ const formants = [[800,1200,2500],[300,2300,3000],[350,1300,2400],[500,1900,2600
 
 /** Unknown scripts are rejected rather than assigned invented readings. */
 export function residentVoiceMoras(text: string): VoiceMora[] | null {
-  const input = text.normalize('NFKC').replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 96));
+  const input = text.normalize('NFKC').replace(/こんにちは/g,'こんにちわ').replace(/こんばんは/g,'こんばんわ').replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 96));
   const result: VoiceMora[] = [];
   for (const letter of [...input].slice(0, 240)) {
     const previous = result.at(-1);
@@ -69,6 +69,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
   const vowels=[resonator(),resonator(),resonator()],friction=resonator(),nasal=resonator();
   tune(nasal,280,180,sampleRate);
   let offset=0,phase=0,seed=1471,lastPulse=0,phraseIndex=0;
+  const steps=[0,2,-1,3,-2,1],openPhase=[.56,.44,.61,.68][voice.timbre]??.56;
   for(let index=0;index<units.length;index++){
     const m=units[index],length=sizes[index];
     if(m.vowel<0){offset+=length;phraseIndex=0;continue;}
@@ -84,8 +85,12 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
     const noiseFrequency=/^sh|^ch|^j|^hy/.test(c)?3600:/^s|^ts|^z/.test(c)?6500:/^k|^g/.test(c)?2600:labial?1200:1900;
     tune(friction,noiseFrequency,/^s|^sh|^ts|^ch/.test(c)?2200:1600,sampleRate);
     const target=formants[m.vowel],prev=previous&&previous.vowel>=0?formants[previous.vowel]:target;
-    const contour=voice.style==='robot'?0:expression*(Math.min(phraseIndex,16)*-.006+Math.sin(phraseIndex*(bright?1.2:.55))*(bright?.055:.025));
-    const fundamental=165*Math.max(.65,Math.min(1.7,voice.pitch))*(1+contour);
+    // A small stepped melody gives each mora a playful 'kero' inflection.
+    // Articulation and vowel formants stay independent of the character effect.
+    const depth=voice.style==='robot'?0:expression*(voice.style==='playful'?1.5:bright?1.25:voice.style==='calm'?.55:.85);
+    const note=steps[phraseIndex%steps.length]*depth;
+    const previousNote=phraseIndex?steps[(phraseIndex-1)%steps.length]*depth:note;
+    const fundamental=165*Math.max(.65,Math.min(1.7,voice.pitch));
     const boundarySample=offset>0?pcm[offset-1]:0;
     for(let i=0;i<length;i++){
       const time=i/sampleRate,position=i/length;
@@ -95,10 +100,17 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
         for(let j=0;j<3;j++)tune(vowels[j],(c?start[j]*(1-blend)+target[j]*blend:prev[j]*(1-connected)+target[j]*connected)*color,110+j*95,sampleRate);
       }
       seed=(Math.imul(seed,1664525)+1013904223)|0;const noise=seed/2147483648;
-      const f0=fundamental*(1+(m.question?Math.max(0,position-.45)*.32*expression:0)+(voice.style==='robot'?0:.003*Math.sin(time*107)));
+      const vowelTime=Math.max(0,time-onset),glide=Math.min(1,vowelTime/(.026/rate));
+      const pitchStep=previousNote+(note-previousNote)*glide;
+      const kero=voice.style==='robot'?0:Math.sin(vowelTime*2*Math.PI*(voice.style==='playful'?27:bright?21:17))*.024*expression*glide;
+      const f0=fundamental*Math.pow(2,pitchStep/12)*(1+kero+(m.question?Math.max(0,position-.55)*.22*expression:0));
       phase+=f0/sampleRate;const cycle=phase%1;
-      const pulse=cycle<.62?.5*(1-Math.cos(Math.PI*cycle/.62)):.5*(1+Math.cos(Math.PI*(cycle-.62)/.38));
-      const excitation=(pulse-lastPulse)*sampleRate/f0*.32+Math.sin(phase*2*Math.PI)*.13;
+      const pulse=cycle<openPhase?.5*(1-Math.cos(Math.PI*cycle/openPhase)):.5*(1+Math.cos(Math.PI*(cycle-openPhase)/(1-openPhase)));
+      // A band-limited buzz supplies the upper harmonics needed to hear F2/F3 clearly.
+      const dt=f0/sampleRate;let buzz=2*cycle-1;
+      if(cycle<dt){const t=cycle/dt;buzz-=t+t-t*t-1;}
+      else if(cycle>1-dt){const t=(cycle-1)/dt;buzz-=t*t+t+t+1;}
+      const excitation=(pulse-lastPulse)*sampleRate/f0*.24+buzz*.28+Math.sin(phase*2*Math.PI)*.04;
       lastPulse=pulse;
       const vowel=filter(vowels[0],excitation+noise*.014)+filter(vowels[1],excitation)*.62+filter(vowels[2],excitation)*.32;
       const nasalVoice=filter(nasal,excitation)*1.5+Math.sin(phase*2*Math.PI)*.10;
@@ -109,12 +121,12 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
       else if(isNasal){const mix=Math.max(0,1-time/onset);value=vowel*(1-mix)+nasalVoice*mix;}
       else if(stop||affricate){
         if(time<closure)value=voicedConsonant?nasalVoice*.2:0;
-        else if(time<burstEnd)value+=frictionVoice*(voicedConsonant?.22:.55)*(1-(time-closure)/(burstEnd-closure));
-        if(affricate&&time>=closure&&time<onset)value+=frictionVoice*.45*(1-voicedGain);
+        else if(time<burstEnd)value+=frictionVoice*(voicedConsonant?.18:.35)*(1-(time-closure)/(burstEnd-closure));
+        if(affricate&&time>=closure&&time<onset)value+=frictionVoice*.32*(1-voicedGain);
         else if(stop&&time>=burstEnd&&time<onset)value+=frictionVoice*.16*(1-voicedGain);
       }else if(fricative){
         const mix=Math.max(0,1-time/onset);
-        value+=frictionVoice*(/^h/.test(c)?.22:.45)*mix;
+        value+=frictionVoice*(/^h/.test(c)?.20:.32)*mix;
         if(voicedConsonant)value+=nasalVoice*.16*mix;
       }else if(c==='r'&&time<closure)value*=.12;
       if(devoiced)value+=frictionVoice*.045*voicedGain;

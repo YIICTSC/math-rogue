@@ -11,14 +11,15 @@ export default function useConversationVoice(world: World | null, selfId: string
   const [line, setLine] = useState<SocialLine>();
   useEffect(() => {
     const unlock = () => {
-      if (unlocked.current || !allowed.current || document.hidden) return;
+      if (!allowed.current || document.hidden) return;
       unlocked.current = true;
-      unlockConversationSpeech();
+      const explicitDevice=Object.values(latest.current?.players||{}).some(p=>p.memory?.conversationVoice?.engine==='device')||latest.current?.town?.customResidents?.some(r=>r.voice?.engine==='device');
+      unlockConversationSpeech(language==='ENGLISH'||explicitDevice?'device':'original');
     };
     window.addEventListener('pointerdown', unlock, { passive: true });
     window.addEventListener('keydown', unlock);
     return () => { window.removeEventListener('pointerdown', unlock); window.removeEventListener('keydown', unlock); };
-  }, []);
+  }, [language]);
   const talks = world?.social?.talks;
   useEffect(() => {
     if (room.current !== selfId) { room.current = selfId; seen.current = new Set((talks || []).map(t => t.id)); generation.current++; stopConversationSpeech(); setLine(undefined); }

@@ -17,9 +17,9 @@ function deviceSpeechSupported() {
 }
 let deviceUnlocked = false;
 /** Call from a tap/key gesture, including before a dialogue React effect starts on iOS. */
-export function unlockConversationSpeech() {
+export function unlockConversationSpeech(engine: ConversationVoice["engine"] = "original") {
   const context = unlockResidentVoice();
-  if (!deviceUnlocked && !stopCurrent && deviceSpeechSupported()) {
+  if (engine === "device" && !deviceUnlocked && !stopCurrent && deviceSpeechSupported()) {
     try {
       const prime = new SpeechSynthesisUtterance(' '); prime.lang = 'ja-JP'; prime.volume = 0;
       window.speechSynthesis.speak(prime); deviceUnlocked = true;
@@ -180,7 +180,7 @@ export async function speakConversation(text: string, config: ConversationVoice,
   if (!conversationSpeechSupported() || !config.enabled || !audioService.canPlayConversationVoice()) return false;
   const moras = language !== 'ENGLISH' ? residentVoiceMoras(text) : null;
   const fallback = () => moras && residentVoiceSupported() ? speakOriginal(moras, config) : Promise.resolve(false);
-  if (config.engine === 'original' && moras && residentVoiceSupported()) return fallback();
+  if (config.engine !== 'device' && moras && residentVoiceSupported()) return fallback();
   if (!deviceSpeechSupported()) return config.engine === 'device' ? false : fallback();
   const result = await speakDevice(text, config, language);
   if (result === 'completed') return true;

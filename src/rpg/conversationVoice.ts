@@ -9,7 +9,7 @@ export interface ConversationVoice {
 }
 export const DEFAULT_CONVERSATION_VOICE: ConversationVoice = {
   enabled: true,
-  engine: "auto",
+  engine: "original",
   pitch: 1.1,
   rate: 1,
   style: "smooth",
@@ -118,7 +118,7 @@ export function loadConversationVoice(key: string, fallback: ConversationVoice =
     const bank = JSON.parse(
       localStorage.getItem("rpg-conversation-voices-v1") || "{}",
     );
-    if (Object.hasOwn(bank, key) && validConversationVoice(bank[key])) return { ...bank[key] };
+    if (Object.hasOwn(bank, key) && validConversationVoice(bank[key])) return { ...bank[key], engine: bank[key].engine === "auto" ? "original" : bank[key].engine };
     // Move the old shared custom-hero setting to the first selected voice only.
     if (legacyKey && Object.hasOwn(bank, legacyKey) && validConversationVoice(bank[legacyKey])) {
       const voice = { ...bank[legacyKey] };

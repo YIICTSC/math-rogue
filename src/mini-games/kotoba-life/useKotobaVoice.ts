@@ -9,7 +9,7 @@ export function useKotobaVoice({line,characterId,npcId,words,enabled,voiceEnable
  const generation=useRef(0);const supported=conversationSpeechSupported();
  const reading=line?kotobaReading(line.text.ja,words):null;
  const unreadable=languageMode!=='ENGLISH'&&!!line&&line.speaker!=='narrator'&&(!reading||!residentVoiceMoras(reading));
- useEffect(()=>{const unlock=()=>unlockConversationSpeech();window.addEventListener('pointerdown',unlock,{passive:true});window.addEventListener('keydown',unlock);return()=>{window.removeEventListener('pointerdown',unlock);window.removeEventListener('keydown',unlock);};},[]);
+ useEffect(()=>{const unlock=()=>unlockConversationSpeech(languageMode==='ENGLISH'?'device':'original');window.addEventListener('pointerdown',unlock,{passive:true});window.addEventListener('keydown',unlock);return()=>{window.removeEventListener('pointerdown',unlock);window.removeEventListener('keydown',unlock);};},[languageMode]);
  useEffect(()=>{
   const token=++generation.current;stopConversationSpeech();setSpeaking(false);setFinished(true);
   if(!enabled||!voiceEnabled||!line||line.speaker==='narrator'||document.hidden||unreadable)return;
