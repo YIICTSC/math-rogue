@@ -1,3 +1,4 @@
+import techniqueCopy from './techniqueCopy.json';
 import {GUIDE_ENGLISH,GUIDE_HIRAGANA} from './Tutorial';
 export const LANTERN_ENGLISH:Record<string,string>={
  "前衛と後衛が向き合う戦闘隊列":"Opposing front and rear battle ranks",
@@ -324,3 +325,5 @@ Object.assign(LANTERN_ENGLISH,{"灯をつなぐ旅路":"Journey of the lanterns"
 Object.assign(LANTERN_HIRAGANA,{"灯をつなぐ旅路":"ひをつなぐたびじ","移動中":"いどうちゅう","行き先を選んで探索":"いきさきをえらんでたんさく","行き先を選ぶフィールドマップ":"いきさきをえらぶフィールドマップ","◆ 本編":"◆ ほんぺん","◇ 仲間と寄り道":"◇ なかまとよりみち","物語が進むと探索範囲が広がる":"ものがたりがすすむとたんさくはんいがひろがる","仲間との交流":"なかまとのこうりゅう","この場所で仲間にできる":"このばしょでなかまにできる","達成済み · 会話をもう一度読む":"たっせいずみ · かいわをもういちどよむ","選択で報酬が変わる · 経験値と補給を獲得":"せんたくでほうしゅうがかわる · けいけんちとほきゅうをかくとく","この場所を訪ねる":"このばしょをたずねる"});
 
 Object.assign(LANTERN_ENGLISH,GUIDE_ENGLISH);Object.assign(LANTERN_HIRAGANA,GUIDE_HIRAGANA);
+
+Object.assign(LANTERN_ENGLISH,techniqueCopy.english);Object.assign(LANTERN_HIRAGANA,techniqueCopy.hiragana);

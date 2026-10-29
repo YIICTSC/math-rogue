@@ -124,12 +124,12 @@
       },
       {
         "title": "行動できる作戦を残す",
-        "body": "固有必殺と一列攻撃は2AP。杖以外は回復できません。迷ったら「作戦をおまかせに戻す」で初期設定に戻せます。",
+        "body": "固有技はLv.3・6・12で習得し、未習得の技は選べません。共通技もレベルで増えます。固有回復技は杖以外でも使えます。強化・弱体は交戦中のみ有効。通常攻撃を最後に残しましょう。",
         "englishTitle": "Keep a usable fallback",
-        "englishBody": "Ultimates and row attacks cost 2 AP; only staff users heal. Restore default tactics if you need a reliable starting point.",
+        "englishBody": "Personal arts unlock at levels 3, 6 and 12; shared arts unlock as you grow. Personal healing arts work without a staff. Stat changes last for one encounter. Keep a basic strike as your final fallback.",
         "visual": "resources",
         "hiraganaTitle": "こうどうできるさくせんをのこす",
-        "hiraganaBody": "こゆうひっさつといちれつこうげきは2AP。つえいがいはかいふくできません。まよったら「さくせんをおまかせにもどす」でしょきせっていにもどせます。"
+        "hiraganaBody": "こゆうわざはLv.3・6・12でしゅうとくし、みしゅうえのわざはえらべません。きょうつうわざもれべるでふえます。こゆうかいふくわざはつえいがいでもつかえます。きょうか・じゃくたいはこうせんちゅうのみゆうこう。つうじょうこうげきをさいごにのこしましょう。"
       }
     ],
     "hiraganaTitle": "さくせんせっていのあそびほう"

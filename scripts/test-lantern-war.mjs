@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createServer} from 'vite';
-const server=await createServer({logLevel:'error',optimizeDeps:{noDiscovery:true},server:{middlewareMode:true},appType:'custom'});
+const server=await createServer({logLevel:'error',optimizeDeps:{noDiscovery:true},server:{middlewareMode:true,watch:null},appType:'custom'});
 try{
  const E=await server.ssrLoadModule('/src/mini-games/lantern-war/engine.ts'),C=await server.ssrLoadModule('/src/mini-games/lantern-war/combat.ts'),{CHAPTERS,SUPPORTS,supportLines}=await server.ssrLoadModule('/src/mini-games/lantern-war/story.ts'),{HEROES}=await server.ssrLoadModule('/src/mini-games/lantern-war/roster.ts');
  const W=await server.ssrLoadModule('/src/mini-games/lantern-war/world.ts');assert.equal(W.FIELD_QUESTS.length,18);const expedition=E.newCampaign('aster');assert.equal(W.canVisit(expedition,'main-1'),false);assert(W.canVisit(expedition,'side-0'));for(const q of W.FIELD_QUESTS){assert(HEROES.some(h=>h.id===q.hero));assert.equal(W.fieldLines(q.id).length,6);}expedition.fieldQuest='side-0';expedition.phase='story';W.finishFieldQuest(expedition,0);assert(expedition.recruited.includes('high-school-caretaker'));assert.equal(expedition.phase,'field');const earned=expedition.gold;expedition.fieldQuest='side-0';W.finishFieldQuest(expedition,1);assert.equal(expedition.gold,earned);assert.equal(W.travelPath(expedition,'main-0','side-0').at(-1),'side-0');assert.equal(CHAPTERS.length,18);assert.equal(new Set(CHAPTERS.map(c=>c.map.join(''))).size,18);assert.equal(SUPPORTS.length*3,36);

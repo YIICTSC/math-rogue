@@ -1,3 +1,4 @@
+import{PERSONAL_TECHNIQUES}from'./techniques';
 import{connectedBattleTerrain}from'./battleTerrain';
 import {FIELD_QUESTS} from './world';
 import {HEROES,heroById,pairKey} from './roster';
@@ -72,7 +73,7 @@ export function finishEncounter(s:Campaign){
  for(const id of e.support){const helper=b.squads.find(q=>q.id===id);if(helper)helper.stamina=Math.max(0,helper.stamina-1);}
  const winner=e.winner==='ally'?a:z,loser=e.winner==='ally'?z:a;loser.wait=5;
  const retreat=pathTo(b,loser,loser.team==='ally'?{x:1,y:8}:{x:11,y:0})[0];if(retreat){loser.x=retreat.x;loser.y=retreat.y;}
- if(e.winner==='ally'){b.brave=Math.min(9,b.brave+1);for(const f of a.members){const old=level(s,f.hero);s.xp[f.hero]=(s.xp[f.hero]||0)+(living(z)?20:45);const growth=level(s,f.hero)-old;if(growth){f.maxHp+=growth*4;f.hp=Math.min(f.maxHp,f.hp+8);f.atk+=growth*2;f.def+=growth;addLog(b,f.name+' Lv.'+level(s,f.hero));}}
+ if(e.winner==='ally'){b.brave=Math.min(9,b.brave+1);for(const f of a.members){const old=level(s,f.hero);s.xp[f.hero]=(s.xp[f.hero]||0)+(living(z)?20:45);const growth=level(s,f.hero)-old;if(growth){f.maxHp+=growth*4;f.hp=Math.min(f.maxHp,f.hp+8);f.atk+=growth*2;f.def+=growth;addLog(b,f.name+' Lv.'+level(s,f.hero));for(const t of PERSONAL_TECHNIQUES[f.hero]||[])if(old<t.level&&level(s,f.hero)>=t.level)addLog(b,f.name+'「'+t.name+'」を習得');}}
  for(const f of a.members)for(const partner of a.members.filter(p=>p.uid!==f.uid)){const k=pairKey(f.hero,partner.hero);s.bonds[k]=Math.min(15,(s.bonds[k]||0)+1);}}
  addLog(b,winner.name+'が交戦に勝利。'+loser.name+'は後退。');b.encounter=null;s.studyPending=true;checkResult(s);return true;
 }

@@ -5,9 +5,9 @@ export type Phase='field'|'camp'|'story'|'battle'|'result'|'ending';
 export type Line={who:string;text:string;reaction?:'neutral'|'joy'|'concern'|'resolve'};
 export interface Hero{id:string;name:string;origin:string;role:string;weapon:Weapon;skill:string;motto:string;color:string;join:number;hp:number;atk:number;def:number;speed:number;move:number;portrait:string;}
 export interface Chapter{id:number;title:string;place:string;subtitle:string;objective:Objective;turns:number;theme:number;reward:number;recruit:string[];map:string[];intro:Line[];outro:Line[];dilemma?:[string,string];}
-export type RuleSkill='strike'|'ultimate'|'heal'|'row';
-export type Condition='always'|'wounded'|'many'|'armored';
-export type TargetRule='lowest'|'front'|'back'|'healer';
+export type RuleSkill='strike'|'ultimate'|'heal'|'row'|'guard'|'rally'|'cleanse'|'break'|'quick'|'execute'|'art1'|'art2'|'art3';
+export type Condition='always'|'wounded'|'many'|'armored'|'selfwounded'|'critical'|'allycritical'|'single'|'first'|'later'|'rear'|'caster'|'enemywounded'|'afflicted'|'reserve'|'healthy';
+export type TargetRule='lowest'|'front'|'back'|'healer'|'strongest'|'fastest'|'softest'|'armored'|'caster'|'mosthp'|'mostap'|'self';
 export interface Tactic{skill:RuleSkill;condition:Condition;target:TargetRule;}
 export interface Formation{slots:(string|null)[];}
 export interface Fighter{uid:string;hero:string;name:string;team:'ally'|'enemy';slot:number;hp:number;maxHp:number;atk:number;def:number;speed:number;weapon:Weapon;ap:number;pp:number;status?:'stun'|'burn';}
