@@ -18,7 +18,7 @@ export function dressHero(model:T.Object3D, avatar:KartAvatar, sport?:Sport, hai
   const visible=(i:number)=>{const name=(parts as Record<string,string>)[String(Math.round(part.getX(i)))]||'';const isHair=name.startsWith('hair')||['long_hair','side_locks','top_bun'].includes(name);if(hairOnly)return isHair;if(custom&&avatar.customHair&&isHair)return false;const prefix=SPORTS.find(s=>name.startsWith(s+'_'));if(prefix)return prefix===kit;return kit==='regular'||isHair||['skin','eyes','face'].includes(name);};
   const index:number[]=[];for(let i=0;i<source.indices.length;i+=3)if(visible(source.indices[i]))index.push(...source.indices.slice(i,i+3));g.setIndex(index);
   const paints:Record<number,T.Color>={1:new T.Color(BODY_COLORS[avatar.body]),2:new T.Color(HAIR_COLORS[avatar.hair]),3:new T.Color(AVATAR_COLORS[avatar.outfit]),4:new T.Color(AVATAR_COLORS[avatar.bottom??7]),5:new T.Color(AVATAR_COLORS[(avatar.outfit+3)%AVATAR_COLORS.length])};
-  for(let i=0;i<color.count;i++) {const role=Math.round(tint.getX(i));const paint=(custom||role>=3&&kit!=='regular')?paints[role]:undefined;if(paint)color.setXYZ(i,paint.r,paint.g,paint.b);else color.setXYZ(i,source.colors.getX(i),source.colors.getY(i),source.colors.getZ(i));}
+  for(let i=0;i<color.count;i++) {const role=Math.round(tint.getX(i));const paint=!avatar.originalColors&&(custom||role>=3&&kit!=='regular')?paints[role]:undefined;if(paint)color.setXYZ(i,paint.r,paint.g,paint.b);else color.setXYZ(i,source.colors.getX(i),source.colors.getY(i),source.colors.getZ(i));}
   color.needsUpdate=true;g.computeBoundingSphere();
  });
  model.userData.wardrobe=kit;model.userData.customBase=avatar.customBase||'';

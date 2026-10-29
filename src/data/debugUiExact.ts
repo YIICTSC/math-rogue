@@ -35,6 +35,7 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "元のキャラの色に戻す": "Restore original character colors",
   "カートの色": "Kart color",
   "バスケットボールのシュート練習": "Basketball shooting practice",
   "オリジナル人型キャラ": "Original human character",
@@ -455,6 +456,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "元のキャラの色に戻す": "もとのキャラのいろにもどす",
   "カートの色": "カートのいろ",
   "バスケットボールのシュート練習": "バスケットボールのシュートれんしゅう",
   "オリジナル人型キャラ": "オリジナルひとがたキャラ",

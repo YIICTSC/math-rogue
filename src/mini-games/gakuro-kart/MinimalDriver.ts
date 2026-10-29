@@ -4,7 +4,7 @@ import {ProtagonistModel} from '../../three/protagonistModel';
 import {prepareStorybookCharacters} from '../../three/storybookCharacters';
 import {createAvatarParts,type AvatarPart} from './avatarModels';
 import {AVATAR_COLORS,BODY_COLORS,HAIR_COLORS,EYE_COLORS,type KartAvatar} from './avatar';
-export const driverAppearanceKey=(a:KartAvatar)=>a.protagonist||(a.customBase?JSON.stringify([a.customBase,a.customHair,a.body,a.hair,a.outfit,a.bottom,a.wardrobe]):undefined)||[a.species,a.body,a.outfit,a.hair,a.accessory,a.hairStyle,a.expression,a.faceShape??0,a.faceStyle??0,a.eyeStyle??0,a.eyeColor??0].join(',');
+export const driverAppearanceKey=(a:KartAvatar)=>a.protagonist||(a.customBase?JSON.stringify([a.customBase,a.customHair,a.originalColors,a.body,a.hair,a.outfit,a.bottom,a.wardrobe]):undefined)||[a.species,a.body,a.outfit,a.hair,a.accessory,a.hairStyle,a.expression,a.faceShape??0,a.faceStyle??0,a.eyeStyle??0,a.eyeColor??0].join(',');
 
 // Bake the selected character once, not its animation/skeleton every frame.
 // Geometry is shared by matching racers and owned by this race scene only.

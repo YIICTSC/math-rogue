@@ -18,7 +18,7 @@ try{
   await page.getByRole('button',{name:'この主人公から作成',exact:true}).click();assert.equal(await page.evaluate(()=>window.avatar.customBase),'magic-akari');
   await page.getByRole('button',{name:'髪パーツを選ぶ',exact:true}).click();await page.getByRole('button',{name:'高校編',exact:true}).click();await page.getByRole('button',{name:'反逆の高校生',exact:true}).click();
   for(const label of ['体・肌の色 3','髪の色 5','服の色 2','ボトムの色 4'])await page.getByRole('button',{name:label,exact:true}).click();
-  assert.equal(await page.evaluate(()=>window.avatar.customHair),'high-school-warrior');await page.getByRole('button',{name:'バスケユニフォーム',exact:true}).click();
+  await page.getByRole('button',{name:'元のキャラの色に戻す',exact:true}).click();assert.equal(await page.evaluate(()=>window.avatar.originalColors),true);assert.equal(await page.evaluate(()=>window.avatar.customHair),'high-school-warrior');await page.getByRole('button',{name:'バスケユニフォーム',exact:true}).click();
   await page.waitForFunction(()=>[...document.querySelectorAll('canvas')].some(c=>c.dataset.protagonistReady==='true'));await page.screenshot({path:dir+'/'+sport+'-custom.png'});await page.reload();await page.waitForFunction(()=>!!window.avatar);assert.equal(await page.evaluate(()=>window.avatar?.customHair),'high-school-warrior');
   await page.evaluate(()=>localStorage.removeItem('wardrobe-test'));
  }
