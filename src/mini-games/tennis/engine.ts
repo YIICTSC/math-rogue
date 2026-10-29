@@ -1,3 +1,4 @@
+import {cpuSpecialReady,spendCpuSpecial,initialCpuSpecialBudget} from '../shared/cpuSpecialBudget';
 import {sportsEvent} from '../shared/sportsEvents';
 import {bendShot} from '../shared/shotDirection';
 import {validAvatar} from '../gakuro-kart/avatar';
@@ -35,7 +36,7 @@ function makeMatch(w:TennisWorld,a:number,b:number|null):Match{
  for(const [side,team]of [[0,a],[1,b]] as const)if(team!==null)w.teams[team].members.forEach((owner,index)=>{
   const p=owner?w.players[owner]:undefined;units.push({id:`${id}-${side}-${index}`,owner,name:p?.name||`CPU ${side+1}-${index+1}`,side:side as Side,x:w.mode==='doubles'?(index===0?-2.7:2.7):0,y:sideY(side as Side)*(index===0?10.8:6.9),vx:0,vy:0,energy:.25,stamina:1,swing:0,shot:'topspin',shotSeq:0,buffer:0,aim:0,directionY:0,power:.6,dash:0,cpu:!p||!p.connected,avatar:p?.avatar});
  });
- return {id,round:w.round,teams:[a,b],units,games:[0,0],points:[0,0],tiebreak:false,phase:b===null?'finished':'study',winner:b===null?a:null,reason:b===null?'bye':'',server:0,serverUnit:0,receiver:'',faults:0,ball:emptyBall(0),time:0,wait:0,rally:0,longest:0,pointSerial:0,shotSerial:0,studyAt:w.clock,pendingWinner:null,afterStudy:'serve'};
+ return {id,cpuSpecialAt:initialCpuSpecialBudget(w.clock),round:w.round,teams:[a,b],units,games:[0,0],points:[0,0],tiebreak:false,phase:b===null?'finished':'study',winner:b===null?a:null,reason:b===null?'bye':'',server:0,serverUnit:0,receiver:'',faults:0,ball:emptyBall(0),time:0,wait:0,rally:0,longest:0,pointSerial:0,shotSerial:0,studyAt:w.clock,pendingWinner:null,afterStudy:'serve'};
 }
 function prepareServe(m:Match,w:TennisWorld){
  m.phase='serve';m.time=0;m.wait=0;m.rally=0;m.reason='';
@@ -95,7 +96,7 @@ function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWor
  // Fixed landing target and ballistic height: collision decisions belong to simulation, not rendering.
  const gravity=9.8,dx=targetX-startX,dy=targetY-startY;
  m.ball={x:startX,y:startY,z,vx:dx/duration-spin*duration*.5,vy:dy/duration,vz:(.08-z+.5*gravity*duration*duration)/duration,spin,lastSide:u.side,bounces:0,serve,netLet:false,trail:[]};
- sportsEvent(m,shot==='special'?'special':'action',w.clock,u.id);
+ sportsEvent(m,shot==='special'?'special':'action',w.clock,u.id);if(u.cpu&&shot==='special')spendCpuSpecial(m,u.side,w.clock);
  m.phase='rally';m.time=0;m.rally++;m.shotSerial++;u.shot=shot;u.shotSeq=m.shotSerial;u.swing=.42;u.buffer=0;u.energy=shot==='special'?0:Math.min(1,u.energy+.10);u.stamina=Math.max(0,u.stamina-.04);
 }
 function attemptHit(w:TennisWorld,m:Match,u:Unit){
@@ -104,7 +105,7 @@ function attemptHit(w:TennisWorld,m:Match,u:Unit){
  if(m.phase!=='rally'||m.ball.lastSide===u.side||m.ball.z<.22||m.ball.z>3.7||Math.hypot(m.ball.x-u.x,m.ball.y-u.y)>1.65)return false;
  if(m.ball.serve&&(m.ball.bounces===0||m.receiver!==u.id))return false;
  if(Math.sign(m.ball.y)!==sideY(u.side))return false;
- let shot=u.shot;if(shot==='special'&&u.energy<.99)shot='topspin';ballFlight(m,u,shot,u.aim,u.power,w);return true;
+ let shot=u.shot;if(shot==='special'&&(u.energy<.99||u.cpu&&!cpuSpecialReady(m,u.side,w.clock)))shot='topspin';ballFlight(m,u,shot,u.aim,u.power,w);return true;
 }
 export function command(w:TennisWorld,id:string,raw:unknown,factory?:LessonFactory){
  const p=w.players[id],c=raw as Record<string,any>;if(!p||!p.connected||!c||typeof c!=='object'||Array.isArray(c))return false;
@@ -139,7 +140,7 @@ function driveUnits(w:TennisWorld,m:Match,dt:number){
      const root=(b.vz+Math.sqrt(Math.max(0,b.vz*b.vz+19.6*Math.max(0,b.z-.8))))/9.8;
      const horizon=clamp(root,.05,1.3),targetX=clamp(b.x+b.vx*horizon+b.spin*horizon*horizon*.5,-width-.45,width+.45),targetY=clamp(b.y+b.vy*horizon,sideY(u.side)>0?.8:-13.2,sideY(u.side)>0?13.2:-.8);
      const teammates=m.units.filter(v=>v.side===u.side),nearest=teammates.sort((a,b)=>Math.hypot(a.x-targetX,a.y-targetY)-Math.hypot(b.x-targetX,b.y-targetY))[0];
-     if(b.serve?m.receiver===u.id:nearest===u){x=targetX-u.x;y=targetY-u.y;u.buffer=.25;u.shot=b.z>2.3?'topspin':u.energy>=1?'special':m.rally%7===4?'drop':m.rally%5===3?'lob':m.rally%3===1?'slice':'topspin';u.aim=Math.sin(m.shotSerial*2.2+u.side)*.86;u.power=.48+(m.rally%3)*.1;}
+     if(b.serve?m.receiver===u.id:nearest===u){x=targetX-u.x;y=targetY-u.y;u.buffer=.25;u.shot=b.z>2.3?'topspin':u.energy>=1&&cpuSpecialReady(m,u.side,w.clock)?'special':m.rally%7===4?'drop':m.rally%5===3?'lob':m.rally%3===1?'slice':'topspin';u.aim=Math.sin(m.shotSerial*2.2+u.side)*.86;u.power=.48+(m.rally%3)*.1;}
      else{x=(u.id.endsWith('-1')?2.7:-2.7)-u.x;y=sideY(u.side)*6-u.y;}
     }else{x=(w.mode==='doubles'?(u.id.endsWith('-1')?2.6:-2.6):0)-u.x;y=sideY(u.side)*(w.mode==='doubles'&&u.id.endsWith('-1')?6.5:10)-u.y;}
    }

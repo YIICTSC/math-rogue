@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';import{build}from'esbuild';import fs from'node:fs/promises';await fs.mkdir('tmp/cpu-special',{recursive:true});
+const lesson=()=>({title:'Test',questions:[0,1,2].map(i=>({id:'q'+i,mode:'ADDITION',question:'1+1',options:['2','3','4','5'],correct:0}))});
+for(const game of ['tennis','basketball','dodgeball']){
+ const privateName=game==='tennis'?'tryHit':game==='basketball'?'skill':'throwBall';
+ const code=await fs.readFile(`src/mini-games/${game}/engine.ts`,'utf8');const actual=game==='tennis'?(code.match(/function (\w+)\(w:TennisWorld,m:Match,u:Unit\)\{/)?.[1]||'tryHit'):privateName;
+ await build({stdin:{contents:code+`\nexport {${actual} as attempt};`,resolveDir:process.cwd()+`/src/mini-games/${game}`,loader:'ts'},outfile:`tmp/cpu-special/${game}.mjs`,bundle:true,format:'esm',platform:'node'});const E=await import(`../tmp/cpu-special/${game}.mjs`),title=game[0].toUpperCase()+game.slice(1),w=E['create'+title](23,true);E.addPlayer(w,'local','P');E['start'+title](w,lesson);const m=w.matches[0],cpu=m.units.find(u=>u.cpu),mate=m.units.find(u=>u.cpu&&u.side===cpu.side&&u!==cpu)||cpu,human=m.units.find(u=>u.owner==='local');m.phase=game==='tennis'?'rally':'play';m.tutorial=undefined;m.inbound=0;m.mustClear=false;
+ function fire(u){u.energy=1;u.action=0;u.swing=0;u.cooldown=0;u.skillCooldown=0;u.charging=false;u.stamina=1;u.role='SG';u.buff=0;u.shot='special';u.buffer=.25;u.x=0;u.y=game==='tennis'?(u.side===0?-5:5):-2;Object.assign(m.ball,{holder:u.id,lastSide:1-u.side,x:u.x,y:u.y,z:1,serve:false,flight:0});m.wait=0;
+ if(game==='tennis')E.attempt(w,m,u);else if(game==='basketball')E.attempt(w,m,u);else{u.dash=.4;u.counter=1;E.attempt(w,m,u,0,true);}
+ return m.sportsEvents?.at(-1)?.kind==='special'&&m.sportsEvents?.at(-1)?.actor===u.id;
+ }
+ w.clock=0;assert(!fire(cpu),game+': no immediate opening special');w.clock=24;assert(fire(cpu),game+': ready CPU can use special');w.clock=25;const before=m.sportsSerial;fire(mate);assert((m.sportsEvents??[]).filter(e=>e.id>before).every(e=>e.kind!=='special'),game+': teammates share cooldown despite full energy');assert(fire(human),game+': humans retain their own energy rules');w.clock=48;assert(fire(cpu),game+': cooldown expires');const copy=structuredClone(m);assert.deepEqual(copy.cpuSpecialAt,m.cpuSpecialAt);console.log('PASS',game,'team cooldown, energy refill, human exemption and serialized timer');
+}

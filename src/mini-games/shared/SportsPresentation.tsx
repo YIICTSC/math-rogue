@@ -9,9 +9,9 @@ import {sportsSpeaker,sportsVoicePath,sportsVoiceAvailable,SPORTS_HEROES} from '
 import type {Sport,SportsEvent} from './sportsEvents';
 import {SportsVoiceQueue,type SportsVoiceCue} from './sportsVoiceQueue';
 import './sportsPresentation.css';
-export interface SportsActor {id:string;name:string;avatar?:KartAvatar}
-export interface SportsPresentationProps {sport:Sport;stream:string|null;events?:SportsEvent[];actors:SportsActor[];paused?:boolean;languageMode:LanguageMode;focusActor?:string}
-export default function SportsPresentation({sport,stream,events,actors,paused=false,languageMode,focusActor}:SportsPresentationProps){
+export interface SportsActor {id:string;name:string;avatar?:KartAvatar;owner?:string|null}
+export interface SportsPresentationProps {sport:Sport;stream:string|null;events?:SportsEvent[];actors:SportsActor[];paused?:boolean;languageMode:LanguageMode;focusActor?:string;viewerId?:string}
+export default function SportsPresentation({sport,stream,events,actors,paused=false,languageMode,focusActor,viewerId}:SportsPresentationProps){
  const t=(s:string)=>trans(s,languageMode),cursor=useRef<{stream:string|null;id:number}>({stream:null,id:0}),[cutin,setCutin]=useState<{key:string;speaker:string;name:string}|null>(null),currentActors=useRef(actors);currentActors.current=actors;
  const queue=useRef<SportsVoiceQueue|null>(null);if(!queue.current)queue.current=new SportsVoiceQueue(id=>audioService.playSportsVoiceFile(id),()=>audioService.stopSportsVoices());
  useEffect(()=>{
@@ -32,11 +32,11 @@ export default function SportsPresentation({sport,stream,events,actors,paused=fa
    if(e.kind==='referee'){cues.push({id:`referee/${sport}/${e.call}`,priority:1});continue;}
    const index=currentActors.current.findIndex(a=>a.id===e.actor),actor=currentActors.current[index];if(!actor)continue;
    const speaker=sportsSpeaker(actor.avatar,Math.max(0,index));
-   if(e.kind==='special'){setCutin({key:`${stream}:${e.id}`,speaker,name:actor.name});cues.push({id:`${speaker}/${sport}/special`,priority:2});}
+   if(e.kind==='special'){if(sport==='golf'||!!viewerId&&actor.owner===viewerId)setCutin({key:`${stream}:${e.id}`,speaker,name:actor.name});else setCutin(null);cues.push({id:`${speaker}/${sport}/special`,priority:2});}
    else cues.push({id:`${speaker}/${sport}/action`,priority:0});
   }
   queue.current?.enqueue(cues);
- },[events,stream,sport,paused,focusActor]);
+ },[events,stream,sport,paused,focusActor,viewerId]);
  useEffect(()=>{if(!cutin)return;const timer=setTimeout(()=>setCutin(null),1450);return()=>clearTimeout(timer);},[cutin?.key]);
  // Warm just the current court's performers; never download the full cast to start a match.
  useEffect(()=>{

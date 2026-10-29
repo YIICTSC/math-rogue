@@ -1,3 +1,4 @@
+import {cpuSpecialReady,spendCpuSpecial,initialCpuSpecialBudget} from '../shared/cpuSpecialBudget';
 import {sportsEvent} from '../shared/sportsEvents';
 import {validAvatar} from '../gakuro-kart/avatar';
 import {validLesson} from '../gakuro-kart/learning';
@@ -23,7 +24,7 @@ function makeMatch(w:BasketWorld,a:number,b:number|null):Match{
  const id=`r${w.round}-m${w.matches.length}`,units:Unit[]=[];
  for(const[side,team]of [[0,a],[1,b]] as const)if(team!==null){const used=new Set(w.teams[team].members.flatMap(id=>id?[w.players[id].role||'SF']:[]));w.teams[team].members.forEach((owner,i)=>{const p=owner?w.players[owner]:undefined,role=p?.role||(['PG','SF','C'] as Position[]).find(r=>!used.has(r))||'C';used.add(role);
   units.push({id:`${id}-${side}-${i}`,owner,name:p?.name||`CPU ${side+1}-${i+1}`,side,role,x:0,y:0,vx:0,vy:0,cpu:!p||!p.connected,avatar:p?.avatar,energy:.35,stamina:1,focus:.65,charge:0,charging:false,release:0,motion:'idle',action:0,actionSeq:0,cooldown:0,dashCooldown:0,skillCooldown:0,dodge:0,catch:0,hurt:0,jump:0,screen:0,buff:0,aiAt:0,stats:emptyStats()});});}
- const m:Match={id,round:w.round,teams:[a,b],units,phase:b===null?'finished':'study',winner:b===null?a:null,reason:b===null?'bye':'',score:[0,0],time:0,studyAt:0,shotClock:24,possession:0,mustClear:false,inbound:0,serial:0,notice:'',noticeAt:0,ball:{x:0,y:-3.5,z:1,vx:0,vy:0,vz:0,holder:null,side:null,flight:0,special:false,pass:false,age:0,lock:0,trail:[],shooter:null,receiver:null,assist:null,points:2,success:false}};
+ const m:Match={id,cpuSpecialAt:initialCpuSpecialBudget(w.clock),round:w.round,teams:[a,b],units,phase:b===null?'finished':'study',winner:b===null?a:null,reason:b===null?'bye':'',score:[0,0],time:0,studyAt:0,shotClock:24,possession:0,mustClear:false,inbound:0,serial:0,notice:'',noticeAt:0,ball:{x:0,y:-3.5,z:1,vx:0,vy:0,vz:0,holder:null,side:null,flight:0,special:false,pass:false,age:0,lock:0,trail:[],shooter:null,receiver:null,assist:null,points:2,success:false}};
  checkBall(m,0);return m;
 }
 function study(w:BasketWorld,m:Match,factory:LessonFactory|undefined){
@@ -90,10 +91,11 @@ function steal(w:BasketWorld,m:Match,u:Unit){
 }
 function screen(w:BasketWorld,m:Match,u:Unit){if(m.possession!==u.side||m.ball.holder===u.id||u.cooldown>0||u.stamina<.12)return false;u.screen=1.5;u.action=1.5;u.motion='screen';u.stamina-=.12;u.cooldown=1.9;notice(w,m,'SCREEN');return true;}
 function skill(w:BasketWorld,m:Match,u:Unit){
+ if(u.cpu&&!cpuSpecialReady(m,u.side,w.clock))return false;
  if(u.energy<.999||u.skillCooldown>0||m.tutorial||m.inbound>0||u.charging)return false;if(['PF','C'].includes(u.role)&&(m.ball.holder===u.id||u.stamina<.13))return false;
  if(['PG','SG','SF'].includes(u.role)&&m.ball.holder!==u.id)return false;
  if(u.role==='PG'&&u.stamina<.2)return false;
- u.energy=0;u.skillCooldown=18;u.buff=u.role==='SG'?6:4;u.actionSeq=m.serial+1;
+ if(u.cpu)spendCpuSpecial(m,u.side,w.clock);u.energy=0;u.skillCooldown=18;u.buff=u.role==='SG'?6:4;u.actionSeq=m.serial+1;
  if(u.role==='PG'){u.dashCooldown=0;dash(w,m,u);u.dodge=.75;}
  else if(u.role==='SF'){u.dashCooldown=0;dash(w,m,u);}
  else if(u.role==='PF'){u.cooldown=0;jump(w,m,u,'rebound');}

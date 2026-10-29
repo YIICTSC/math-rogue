@@ -1,3 +1,4 @@
+import type {CpuSpecialBudget} from '../shared/cpuSpecialBudget';
 import type {SportsEventBuffer} from '../shared/sportsEvents';
 import type {KartAvatar} from '../gakuro-kart/avatar';
 import type {Player as BasePlayer,PublicPlayer as BasePublicPlayer,PublicQuiz,LessonFactory,Team} from '../tennis/types';
@@ -22,7 +23,7 @@ export interface Ball {
 }
 export type TutorialStage='move'|'dash'|'pass'|'receive'|'steal'|'shoot'|'complete';
 export interface Tutorial {stage:TutorialStage;owner:string;startX:number;startY:number;elapsed:number;}
-export interface Match extends SportsEventBuffer {
+export interface Match extends SportsEventBuffer, CpuSpecialBudget {
  tutorial?:Tutorial;id:string;round:number;teams:[number,number|null];units:Unit[];
  phase:'study'|'play'|'finished';winner:number|null;reason:'bye'|'time'|'forfeit'|'';
  score:[number,number];shotClock:number;time:number;studyAt:number;ball:Ball;serial:number;
