@@ -4,8 +4,8 @@ Tennis, basketball and dodgeball show character cut-ins only for the local human
 performer (`viewerId` compared with unit ownership). Opposing players, teammate
 CPUs and spectators receive voice and the existing on-court ball/action effects,
 without the screen-space portrait or burst. An incoming special also clears any
-previous local banner. Local banners are clipped to 260 x 64 px at the screen edge;
-the large screen-space burst is disabled. Golf retains its previous presentation.
+previous local banner. Local performers retain the original large animated portrait banner and
+screen-space burst. Golf retains its previous presentation.
 
 CPU specials share a 24-second cooldown per team, with a 12-second opening delay
 from match creation. The timestamps live on the authoritative match and survive
