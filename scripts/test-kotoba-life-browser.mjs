@@ -15,9 +15,9 @@ import {GameMode} from '/src/types';
 import '/src/styles.css';
 const assignment={id:'kotoba-browser-questions',title:'Energy questions',units:[],customProblems:[0,1,2].map(i=>({id:'energy-'+i,question:'1 + 1 = ?',answer:'2',options:['2','3','4','5']})),dueAt:'2099-01-01T00:00:00.000Z',gameMode:'FREE',answerMode:'CHOICE',createdAt:'2026-10-28T00:00:00.000Z'};
 window.__answers=[];
-createRoot(document.getElementById('root')).render(<KotobaLife onBack={()=>{window.__leftGame=true;}} problemMode={GameMode.ADDITION} assignment={assignment} onAnswerResult={answer=>window.__answers.push(answer)} languageMode={location.search.includes('en')?'ENGLISH':'JAPANESE'}/>);`);
+const root=createRoot(document.getElementById('root'));window.__kotobaRerender=()=>root.render(<KotobaLife onBack={()=>{window.__leftGame=true;}} problemMode={GameMode.ADDITION} assignment={assignment} onAnswerResult={answer=>window.__answers.push(answer)} languageMode={location.search.includes('en')?'ENGLISH':'JAPANESE'}/>);window.__kotobaRerender();`);
 
-const server = await createServer({ configFile: false, plugins: [react(), { name: 'pages-path-rebase', transform(code, id) { if (id.endsWith('/kotoba-life/data.ts')) return code.replaceAll('/sprites/', '/math-rogue/sprites/'); } }], base: '/math-rogue/', define: { __APP_ASSET_VERSION__: JSON.stringify('kotoba-browser-test') }, server: { host: '127.0.0.1', port: 0, hmr: false }, logLevel: 'error' });
+const server = await createServer({ configFile: false, plugins: [react(), { name: 'pages-path-rebase', transform(code, id) { if (id.endsWith('/kotoba-life/data.ts')) return code.replaceAll('/sprites/', '/math-rogue/sprites/'); } }], base: '/math-rogue/', define: { __APP_ASSET_VERSION__: JSON.stringify('kotoba-browser-test') }, server: { host: '127.0.0.1', port: 0, hmr: false, watch: null }, logLevel: 'error' });
 await server.listen();
 const browser = await chromium.launch({ ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}), args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const errors = [], missing = [];
@@ -165,6 +165,13 @@ try {
   await page.locator('.kl-study>header').getByRole('button', { name: 'おへやに戻る', exact: true }).click();
   assert.equal((await saved()).energy, 0, 'Cancelling a quiz gives no energy');
   await button('ことば').click(); await button('問題でチャージする').click();
+  await page.locator('.kl-study').getByRole('button', { name: '2', exact: true }).waitFor();
+  const answers = page.locator('.kl-study').getByRole('button', { name: /^[2-5]$/ });
+  const order = await answers.allTextContents();
+  for (let render = 0; render < 3; render++) {
+    await page.evaluate(async () => { window.__kotobaRerender(); await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))); });
+    assert.deepEqual(await answers.allTextContents(), order, 'Parent updates do not reshuffle answer buttons during a tap');
+  }
   for (let index = 0; index < 3; index++) {
     await page.locator('.kl-study').getByRole('button', { name: index === 0 ? '2' : '3', exact: true }).click();
     await page.waitForFunction(count => window.__answers.length >= count, index + 1);

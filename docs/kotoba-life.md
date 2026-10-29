@@ -10,4 +10,8 @@
 
 保存キー: `learning-rogue:kotoba-life:v1`。端末の保存領域が使えない場合は警告し、セッション内のプレイは継続する。WebGL非対応時にはキャラクターのSVG表示へ切り替える。
 
+3Dキャラクターはタイトル絵を造形・配色の基準とした、関節付きのぬいぐるみモデル。カピバラの茶色い鼻先、うさぎの長い耳、カワウソのひげとポシェット、きつねの頬と先端の白いしっぽ、ペンギンのハート型の顔模様を個別に造形する。顔とお腹の模様は曲面上の頂点色で表現し、毛先と共通の配色を使う。短い毛束を部位ごとにまとめたメッシュ、毛並み・織物用の256px凹凸マップ、布の縫い目、目の光沢、自己影を使用。画像を貼った板への置換ではなく、会話・お世話で動くリアルタイム3Dを維持する。
+
+モデルは1体あたり約12.3万〜20.0万三角形、40〜71メッシュ、256pxマップ3枚。毛束ごとの描画呼出しや外部ダウンロードは不要。キャラ変更ではモデル資源を破棄して同じ描画エンジンを再利用し、画面を離れる際にはテクスチャ・影・WebGL資源も解放する。`node scripts/test-kotoba-visuals.mjs` で目の可視性、形状・動作の有限値、資源解放と描画量を検証し、`node scripts/test-kotoba-plush-browser.mjs` で全5体の立ち姿・手振り・食事・発話、スマホ縦横、WebGL復帰を確認する。比較用画像は `tmp/kotoba-plush/` に保存する。
+
 検証: `node scripts/test-kotoba-life.mjs`、`node scripts/test-kotoba-life-browser.mjs`、既存 `node scripts/test-rpg-resident-voice.mjs`。ブラウザテスト画像は `tmp/kotoba-life-browser/` に保存する。生成画像の元と来歴は `assets/kotoba-life/`。

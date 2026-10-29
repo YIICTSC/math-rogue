@@ -36,25 +36,32 @@ export default function CompanionScene(props: CompanionSceneProps) {
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = .90;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const canvas = renderer.domElement;
     canvas.setAttribute('aria-hidden', 'true');
     Object.assign(canvas.style, { width: '100%', height: '100%', display: 'block', touchAction: 'manipulation' });
     element.prepend(canvas);
     const scene = new THREE.Scene();
-    scene.add(new THREE.HemisphereLight('#fff5e5', '#8d8092', 2.3));
-    const key = new THREE.DirectionalLight('#fff1dc', 3.0); key.position.set(-3, 5, 4); scene.add(key);
-    const fill = new THREE.DirectionalLight('#d6edff', 1.3); fill.position.set(4, 2, 1); scene.add(fill);
-    const rim = new THREE.DirectionalLight('#fff6e9', 2.0); rim.position.set(1, 4, -3); scene.add(rim);
+    scene.add(new THREE.HemisphereLight('#fff6e9', '#b0a1a1', 1.0));
+    const key = new THREE.DirectionalLight('#fff0d9', 2.5); key.position.set(-3, 5, 5); scene.add(key);
+    key.target.position.set(0, 1.2, 0); scene.add(key.target);
+    key.castShadow = true; key.shadow.mapSize.set(1024, 1024);
+    Object.assign(key.shadow.camera, { left: -2.6, right: 2.6, top: 2.6, bottom: -2.6, near: .1, far: 12 });
+    key.shadow.normalBias = .018; key.shadow.bias = -.00015; key.shadow.radius = 3;
+    const fill = new THREE.DirectionalLight('#e4eeff', .65); fill.position.set(4, 2, 2); scene.add(fill);
+    const rim = new THREE.DirectionalLight('#fff4dd', 2.4); rim.position.set(1, 4, -3); scene.add(rim);
     const camera = new THREE.OrthographicCamera(-2, 2, 1.75, -1.75, .1, 30);
     camera.position.set(0, 1.68, 6); camera.lookAt(0, 1.25, 0);
-    const model = createCompanion(props.characterId);
+    let currentCharacter = latest.current.characterId;
+    let model = createCompanion(currentCharacter);
     scene.add(model.root);
     const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 128;
     const ctx = shadowCanvas.getContext('2d');
     if (ctx) {
       const gradient = ctx.createRadialGradient(64, 64, 5, 64, 64, 64);
-      gradient.addColorStop(0, 'rgba(43,35,31,.30)'); gradient.addColorStop(.4, 'rgba(43,35,31,.18)'); gradient.addColorStop(1, 'rgba(43,35,31,0)');
+      gradient.addColorStop(0, 'rgba(43,35,31,.40)'); gradient.addColorStop(.4, 'rgba(43,35,31,.22)'); gradient.addColorStop(1, 'rgba(43,35,31,0)');
       ctx.fillStyle = gradient; ctx.fillRect(0, 0, 128, 128);
     }
     const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
@@ -78,7 +85,7 @@ export default function CompanionScene(props: CompanionSceneProps) {
       camera.left = -sceneHeight * aspect / 2; camera.right = -camera.left;
       camera.top = sceneHeight / 2; camera.bottom = -camera.top; camera.updateProjectionMatrix();
       const town = !!latest.current.town;
-      const characterScale = props.characterId === 'momo' ? .84 : 1;
+      const characterScale = latest.current.characterId === 'momo' ? .84 : 1;
       model.root.scale.setScalar(characterScale * (town ? .82 : 1));
       model.root.position.x = town ? -sceneHeight * aspect * .23 : 0;
       shadow.position.x = model.root.position.x; shadow.scale.setScalar(town ? .80 : 1);
@@ -95,6 +102,14 @@ export default function CompanionScene(props: CompanionSceneProps) {
       if (disposed || lost || !visible || document.hidden) return;
       animationTime += Math.min((now - lastTime) / 1000, .05); lastTime = now;
       const p = latest.current;
+      if (p.characterId !== currentCharacter) {
+        const previousModel = model;
+        currentCharacter = p.characterId; model = createCompanion(currentCharacter); scene.add(model.root);
+        // Acquire shared programs before disposing their previous material owners.
+        renderer.compile(scene, camera);
+        scene.remove(previousModel.root); previousModel.dispose();
+        reactionStart = animationTime; sizeScene();
+      }
       if (p.reaction !== previousReaction || p.reactionKey !== previousKey) {
         previousReaction = p.reaction; previousKey = p.reactionKey; reactionStart = animationTime;
       }
@@ -131,9 +146,9 @@ export default function CompanionScene(props: CompanionSceneProps) {
       motionQuery.removeEventListener('change', motionChange); document.removeEventListener('visibilitychange', visibilityChange);
       canvas.removeEventListener('webglcontextlost', onLost); canvas.removeEventListener('webglcontextrestored', onRestored);
       canvas.removeEventListener('pointerdown', onPointerDown); canvas.removeEventListener('pointerup', onPointerUp);
-      model.dispose(); shadowTexture.dispose(); shadowMaterial.dispose(); shadowGeometry.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
+      model.dispose(); key.shadow.dispose(); shadowTexture.dispose(); shadowMaterial.dispose(); shadowGeometry.dispose(); renderer.dispose(); renderer.forceContextLoss(); canvas.remove();
     };
-  }, [props.characterId, contextRevision]);
+  }, [contextRevision]);
 
   const english = props.languageMode === 'ENGLISH';
   const petLabel = english ? 'Pet your friend' : 'なでる';

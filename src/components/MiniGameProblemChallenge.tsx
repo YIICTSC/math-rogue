@@ -5,6 +5,10 @@ import { MathChallengeScreen, KanjiChallengeScreen, EnglishChallengeScreen, Gene
 import { storageService } from '../services/storageService';
 import { getAssignmentModePool, getAssignmentRepresentativeMode } from '../utils/assignmentUtils';
 
+// Keep custom-only assignments stable across parent renders; a new empty array
+// would reshuffle GeneralChallengeScreen's answer buttons in the middle of a tap.
+const EMPTY_ASSIGNMENT_MODE_POOL: string[] = [];
+
 interface MiniGameProblemChallengeProps {
   mode: GameMode;
   modePool?: string[];
@@ -62,7 +66,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
       ? getAssignmentRepresentativeMode(assignment!)
       : mode;
   const effectiveModePool = assignmentHasCustomProblems
-    ? (assignmentModePoolForPlay || [])
+    ? (assignmentModePoolForPlay || EMPTY_ASSIGNMENT_MODE_POOL)
     : (assignmentModePoolForPlay || modePool);
   const effectiveAnswerMode = assignment?.answerMode || answerMode;
   const effectiveCustomProblems = assignment?.gameMode === 'FREE' ? assignment.customProblems : undefined;
