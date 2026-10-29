@@ -84,7 +84,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
     const voicedConsonant=/^[gdbzjvmnrwy]/.test(c);
     const palatal=c.includes('y')||/^sh|^ch|^j/.test(c),labial=/^[pbmfvw]/.test(c);
     const closure=(stop||affricate?(voicedConsonant?.012:.018):c==='r'?.012:0)/rate;
-    const onset=(affricate?.052:fricative?.048:isNasal?.040:c==='r'?.030:velar?.058:c?.036:.008)/rate;
+    const onset=(affricate?.062:fricative?.048:isNasal?.040:c==='r'?.030:velar?.058:stop?.052:c?.036:.008)/rate;
     const burstEnd=closure+.012/rate,transition=onset+.014/rate;
     const devoiced=(m.vowel===1||m.vowel===2)&&unvoiced(c)&&(!next||next.vowel<0||unvoiced(next.consonant));
     const noiseFrequency=/^sh|^ch|^j|^hy/.test(c)?3600:/^s|^ts|^z/.test(c)?6500:/^k|^g/.test(c)?2600:labial?1200:1900;
@@ -126,20 +126,26 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
       const nasalVoice=filter(nasal,excitation)*1.5+Math.sin(phase*2*Math.PI)*.10;
       const frictionVoice=filter(friction,noise);
       let voicedGain=c?Math.max(0,Math.min(1,(time-closure)/(onset-closure||.001))):1;
-      // Velar releases need a soft vowel entrance as well as a quieter noise burst.
-      if(velar)voicedGain=voicedGain*voicedGain*(3-2*voicedGain);
+      // Plosives and affricates need a soft vowel entrance as well as quieter noise.
+      if(stop||affricate)voicedGain=voicedGain*voicedGain*(3-2*voicedGain);
       let value=vowel*voicedGain*(devoiced?.65:1);
       if(syllabic)value=nasalVoice*.8;
-      else if(isNasal){const mix=Math.max(0,1-time/onset);value=vowel*(1-mix)+nasalVoice*mix;}
+      else if(isNasal){
+        const mix=Math.max(0,1-time/onset),rise=Math.min(1,time/(.010/rate));
+        value=vowel*(1-mix)+nasalVoice*mix*.55*rise*rise*(3-2*rise);
+      }
       else if(stop||affricate){
-        if(time<closure)value=voicedConsonant?nasalVoice*.2:0;
-        else if(time<burstEnd)value+=frictionVoice*(velar?(voicedConsonant?.06:.08):(voicedConsonant?.13:.22))*Math.sin(Math.PI*(time-closure)/(burstEnd-closure))**2;
-        if(affricate&&time>=closure&&time<onset)value+=frictionVoice*.32*(1-voicedGain)*Math.min(1,(time-closure)/(.005/rate));
-        else if(stop&&time>=burstEnd&&time<onset)value+=frictionVoice*(velar?.025:.16)*(1-voicedGain)*Math.min(1,(time-burstEnd)/(.004/rate));
+        if(time<closure)value=voicedConsonant?nasalVoice*.10*(1-time/closure)**2:0;
+        else if(time<burstEnd)value+=frictionVoice*(affricate?(voicedConsonant?.03:.04):(voicedConsonant?.06:.08))*Math.sin(Math.PI*(time-closure)/(burstEnd-closure))**2;
+        if(affricate&&time>=closure&&time<onset){
+          const rise=Math.min(1,(time-closure)/(.009/rate));
+          value+=frictionVoice*(voicedConsonant?.12:.14)*(1-voicedGain)*rise*rise*(3-2*rise);
+        }
+        else if(stop&&time>=burstEnd&&time<onset)value+=frictionVoice*(velar?.025:.035)*(1-voicedGain)*Math.min(1,(time-burstEnd)/(.004/rate));
       }else if(fricative){
-        const mix=Math.max(0,1-time/onset);
-        value+=frictionVoice*(/^h/.test(c)?.20:.32)*mix;
-        if(voicedConsonant)value+=nasalVoice*.16*mix;
+        const mix=Math.max(0,1-time/onset),rise=Math.min(1,time/(.008/rate)),softRise=rise*rise*(3-2*rise);
+        value+=frictionVoice*(/^h/.test(c)?.20:.32)*mix*softRise;
+        if(voicedConsonant)value+=nasalVoice*.16*mix*softRise;
       }else if(c==='r'&&time<closure)value*=.12;
       if(devoiced)value+=frictionVoice*.045*voicedGain;
       const attack=previous&&previous.vowel>=0?1:Math.min(1,time/.006);
