@@ -61,3 +61,13 @@ for(const mode of ['singles','doubles'])for(const side of [0,1])for(const odd of
  assert(P.validView(E.viewFor(w,u.owner)));
 }
 console.log('PASS: legal lateral serve movement for both sides and service halves in singles/doubles; baseline guard and stable service-box ruling.');
+assert.equal(E.createTennis().targetGames,3,'New matches default to three games');
+for(const [age,returned,offset=0]of [[0,true],[.15,false],[null,false],[0,true,-1.1]]){
+ const w=game(2);answerAll(w);const m=w.matches[0],attacker=m.units[0],receiver=m.units[1];
+ m.phase='rally';m.shotSerial=5;attacker.shot='special';attacker.shotSeq=5;receiver.x=0;receiver.y=5;receiver.swing=0;receiver.cpu=false;receiver.buffer=age===null?0:.32-age;
+ m.ball={star:true,x:0,y:5+offset,z:1,vx:0,vy:offset?40:8,vz:0,spin:0,lastSide:attacker.side,bounces:1,serve:false,netLet:false,trail:[]};
+ attacker.shot='slice'; // Queuing the next shot cannot weaken an airborne star ball.
+ E.tick(w,offset?.025:.01,factory);
+ assert.equal(m.phase,returned?'rally':'point');if(returned)assert.equal(m.ball.lastSide,receiver.side);else assert(receiver.spinStun>0);
+}
+console.log('PASS: three-game default, precise star return and mistimed spinning loss.');

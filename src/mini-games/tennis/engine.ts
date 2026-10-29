@@ -14,7 +14,7 @@ const other=(side:Side)=>(1-side) as Side;
 // The service half belongs to the score, and must remain fixed after the server moves.
 const serviceXSign=(m:Match)=>(m.points[0]+m.points[1])%2===0?-sideY(m.server):sideY(m.server);
 function random(w:TennisWorld){w.random=(Math.imul(w.random,1664525)+1013904223)>>>0;return w.random/4294967296;}
-export function createTennis(seed=1,practice=false):TennisWorld{return {version:1,seed,random:seed>>>0,clock:0,phase:'lobby',mode:'singles',targetGames:1,practice,paused:false,title:'',players:{},teams:[],matches:[],round:0,nextRoundAt:0,champion:null,quizSerial:0};}
+export function createTennis(seed=1,practice=false):TennisWorld{return {version:1,seed,random:seed>>>0,clock:0,phase:'lobby',mode:'singles',targetGames:3,practice,paused:false,title:'',players:{},teams:[],matches:[],round:0,nextRoundAt:0,champion:null,quizSerial:0};}
 export function addPlayer(w:TennisWorld,id:string,name:string,spectator=false){
  if(w.phase==='result'||typeof id!=='string'||!id||id.length>100||w.players[id]||Object.keys(w.players).length>=MAX_MEMBERS||typeof name!=='string'||!name.trim())return false;
  const playing=Object.values(w.players).filter(p=>!p.spectator).length;
@@ -47,7 +47,7 @@ function prepareServe(m:Match,w:TennisWorld){
  const server=servers[w.mode==='doubles'?(gameIndex+rotation)%servers.length:0];m.serverUnit=m.units.indexOf(server);
  const courtHalf=sum%2===0?1:-1;
  server.x=courtHalf*sideY(serveSide)*-1.8;server.y=sideY(serveSide)*(HALF_LENGTH+.5);
- for(const u of m.units){u.buffer=0;u.vx=u.vy=0;if(u!==server){const index=m.units.filter(v=>v.side===u.side).indexOf(u);u.x=w.mode==='doubles'?(u.side===serveSide?-Math.sign(server.x)*2.7:index===0?-2.7:2.7):courtHalf*sideY(serveSide)*2.3;u.y=sideY(u.side)*(u.side===serveSide?5.8:10.4);}}
+ for(const u of m.units){u.spinStun=0;u.buffer=0;u.vx=u.vy=0;if(u!==server){const index=m.units.filter(v=>v.side===u.side).indexOf(u);u.x=w.mode==='doubles'?(u.side===serveSide?-Math.sign(server.x)*2.7:index===0?-2.7:2.7):courtHalf*sideY(serveSide)*2.3;u.y=sideY(u.side)*(u.side===serveSide?5.8:10.4);}}
  const receivers=m.units.filter(u=>u.side!==serveSide).sort((a,b)=>Math.abs(a.x+server.x)-Math.abs(b.x+server.x));m.receiver=receivers[0].id;if(w.mode==='doubles'&&receivers[1])receivers[1].y=sideY(receivers[1].side)*6.8;
  m.ball=emptyBall(serveSide);m.ball.x=server.x;m.ball.y=server.y;
 }
@@ -95,16 +95,18 @@ function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWor
  const spin=serve?0:shot==='slice'?aim*1.4:shot==='special'?aim*2.5:0;
  // Fixed landing target and ballistic height: collision decisions belong to simulation, not rendering.
  const gravity=9.8,dx=targetX-startX,dy=targetY-startY;
- m.ball={x:startX,y:startY,z,vx:dx/duration-spin*duration*.5,vy:dy/duration,vz:(.08-z+.5*gravity*duration*duration)/duration,spin,lastSide:u.side,bounces:0,serve,netLet:false,trail:[]};
+ m.ball={star:shot==='special'&&!serve,x:startX,y:startY,z,vx:dx/duration-spin*duration*.5,vy:dy/duration,vz:(.08-z+.5*gravity*duration*duration)/duration,spin,lastSide:u.side,bounces:0,serve,netLet:false,trail:[]};
  sportsEvent(m,shot==='special'?'special':'action',w.clock,u.id);if(u.cpu&&shot==='special')spendCpuSpecial(m,u.side,w.clock);
  m.phase='rally';m.time=0;m.rally++;m.shotSerial++;u.shot=shot;u.shotSeq=m.shotSerial;u.swing=.42;u.buffer=0;u.energy=shot==='special'?0:Math.min(1,u.energy+.10);u.stamina=Math.max(0,u.stamina-.04);
 }
 function attemptHit(w:TennisWorld,m:Match,u:Unit){
- if(u.buffer<=0||u.swing>.14)return false;
+ if(u.buffer<=0||u.swing>.14||(u.spinStun??0)>0)return false;
  if(m.phase==='serve'){if(m.units[m.serverUnit]!==u||m.wait>0)return false;ballFlight(m,u,'topspin',u.aim,u.power,w);return true;}
  if(m.phase!=='rally'||m.ball.lastSide===u.side||m.ball.z<.22||m.ball.z>3.7||Math.hypot(m.ball.x-u.x,m.ball.y-u.y)>1.65)return false;
  if(m.ball.serve&&(m.ball.bounces===0||m.receiver!==u.id))return false;
  if(Math.sign(m.ball.y)!==sideY(u.side))return false;
+ const incomingStar=!!m.ball.star;
+ if(incomingStar){if(Math.hypot(m.ball.x-u.x,m.ball.y-u.y)>1.05)return false;if(u.buffer<.24){u.spinStun=1.25;u.buffer=0;finishPoint(w,m,m.ball.lastSide,'winner',undefined);return false;}}
  let shot=u.shot;if(shot==='special'&&(u.energy<.99||u.cpu&&!cpuSpecialReady(m,u.side,w.clock)))shot='topspin';ballFlight(m,u,shot,u.aim,u.power,w);return true;
 }
 export function command(w:TennisWorld,id:string,raw:unknown,factory?:LessonFactory){
@@ -127,7 +129,7 @@ export function command(w:TennisWorld,id:string,raw:unknown,factory?:LessonFacto
 }
 function driveUnits(w:TennisWorld,m:Match,dt:number){
  const width=w.mode==='singles'?SINGLES_WIDTH:DOUBLES_WIDTH;
- for(const u of m.units){u.swing=Math.max(0,u.swing-dt);u.buffer=Math.max(0,u.buffer-dt);u.dash=Math.max(0,u.dash-dt);u.stamina=Math.min(1,u.stamina+dt*.16);
+ for(const u of m.units){u.spinStun=Math.max(0,(u.spinStun??0)-dt);if(u.spinStun>0){u.vx=u.vy=0;continue;}u.swing=Math.max(0,u.swing-dt);u.buffer=Math.max(0,u.buffer-dt);u.dash=Math.max(0,u.dash-dt);u.stamina=Math.min(1,u.stamina+dt*.16);
   let x=0,y=0;
   if(u.cpu){
    if(m.phase==='serve'){if(m.units[m.serverUnit]===u&&m.time>.9&&m.wait<=0){u.shot='topspin';u.aim=random(w)*1.4-.7;u.power=.55;u.buffer=.3;}}
@@ -140,7 +142,7 @@ function driveUnits(w:TennisWorld,m:Match,dt:number){
      const root=(b.vz+Math.sqrt(Math.max(0,b.vz*b.vz+19.6*Math.max(0,b.z-.8))))/9.8;
      const horizon=clamp(root,.05,1.3),targetX=clamp(b.x+b.vx*horizon+b.spin*horizon*horizon*.5,-width-.45,width+.45),targetY=clamp(b.y+b.vy*horizon,sideY(u.side)>0?.8:-13.2,sideY(u.side)>0?13.2:-.8);
      const teammates=m.units.filter(v=>v.side===u.side),nearest=teammates.sort((a,b)=>Math.hypot(a.x-targetX,a.y-targetY)-Math.hypot(b.x-targetX,b.y-targetY))[0];
-     if(b.serve?m.receiver===u.id:nearest===u){x=targetX-u.x;y=targetY-u.y;u.buffer=.25;u.shot=b.z>2.3?'topspin':u.energy>=1&&cpuSpecialReady(m,u.side,w.clock)?'special':m.rally%7===4?'drop':m.rally%5===3?'lob':m.rally%3===1?'slice':'topspin';u.aim=Math.sin(m.shotSerial*2.2+u.side)*.86;u.power=.48+(m.rally%3)*.1;}
+     if(b.serve?m.receiver===u.id:nearest===u){x=targetX-u.x;y=targetY-u.y;const star=!!b.star;if(!star)u.buffer=.25;else if(u.buffer<=0&&Math.hypot(b.x-u.x,b.y-u.y)<=1.05)u.buffer=random(w)<.45?.32:.20;u.shot=b.z>2.3?'topspin':u.energy>=1&&cpuSpecialReady(m,u.side,w.clock)?'special':m.rally%7===4?'drop':m.rally%5===3?'lob':m.rally%3===1?'slice':'topspin';u.aim=Math.sin(m.shotSerial*2.2+u.side)*.86;u.power=.48+(m.rally%3)*.1;}
      else{x=(u.id.endsWith('-1')?2.7:-2.7)-u.x;y=sideY(u.side)*6-u.y;}
     }else{x=(w.mode==='doubles'?(u.id.endsWith('-1')?2.6:-2.6):0)-u.x;y=sideY(u.side)*(w.mode==='doubles'&&u.id.endsWith('-1')?6.5:10)-u.y;}
    }
@@ -159,6 +161,7 @@ function driveUnits(w:TennisWorld,m:Match,dt:number){
 }
 function updateBall(w:TennisWorld,m:Match,dt:number,factory:LessonFactory|undefined){
  const b=m.ball,previousY=b.y,previousZ=b.z;const hitter=m.units.find(u=>u.shotSeq===m.shotSerial&&u.side===b.lastSide),input=hitter?.owner?w.players[hitter.owner]?.input:undefined;if(!hitter?.cpu&&input&&w.clock-input.at<.2&&b.bounces===0){const v=bendShot(b.vx,b.vy,input,m.time,dt);b.vx=v.x;b.vy=v.y;}b.trail.push([b.x,b.y,b.z]);if(b.trail.length>12)b.trail.shift();b.x+=b.vx*dt+.5*b.spin*dt*dt;b.vx+=b.spin*dt;b.y+=b.vy*dt;b.z+=b.vz*dt-4.9*dt*dt;b.vz-=9.8*dt;
+ if(b.star&&!b.serve&&b.z>=.22&&b.z<=2.5){const caught=m.units.find(u=>u.side!==b.lastSide&&Math.hypot(b.x-u.x,b.y-u.y)<.72);if(caught){if(attemptHit(w,m,caught)||m.phase!=='rally')return;caught.spinStun=1.25;caught.buffer=0;finishPoint(w,m,b.lastSide,'winner',factory);return;}}
  if(previousY*b.y<0){const t=Math.abs(previousY)/(Math.abs(previousY)+Math.abs(b.y)),z=previousZ+(b.z-previousZ)*t;if(z<NET+.08){if(b.serve){b.netLet=true;b.vx*=.45;b.vy*=.45;b.vz=Math.max(.9,b.vz*.35);}else{finishPoint(w,m,other(b.lastSide),'net',factory);return;}}}
  if(b.z<=.08){b.z=.08;
   if(b.bounces===0){
@@ -181,7 +184,7 @@ export function tick(w:TennisWorld,dt:number,factory?:LessonFactory){
   if(!w.practice&&(!connected[0]||!connected[1])){m.phase='finished';m.winner=connected[0]?m.teams[0]:connected[1]?m.teams[1]:null;m.reason='forfeit';for(const u of m.units)if(u.owner)w.players[u.owner].quiz=null;continue;}
   if(m.phase==='study'){if(m.units.every(u=>!u.owner||!w.players[u.owner].connected||!w.players[u.owner].quiz))resumeAfterStudy(w,m);continue;}
   m.time+=dt;m.wait=Math.max(0,m.wait-dt);
-  if(m.phase==='point'){if(m.wait===0){if(m.studyAt===-1)beginStudy(w,m,factory,m.afterStudy,m.pendingWinner);else prepareServe(m,w);}continue;}
+  if(m.phase==='point'){for(const u of m.units)u.spinStun=Math.max(0,(u.spinStun??0)-dt);if(m.wait===0){if(m.studyAt===-1)beginStudy(w,m,factory,m.afterStudy,m.pendingWinner);else prepareServe(m,w);}continue;}
   driveUnits(w,m,dt);
   if(m.phase==='rally')updateBall(w,m,dt,factory);
   else if(m.phase==='serve'){const server=m.units[m.serverUnit];m.ball.x=server.x;m.ball.y=server.y;m.ball.z=1.3+Math.sin(w.clock*3)*.1;if(m.time>20&&!server.cpu)fault(w,m,'out',factory);}
