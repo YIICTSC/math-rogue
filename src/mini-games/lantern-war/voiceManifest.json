@@ -573,5 +573,105 @@
     "id": "db92f22d97f550b90449",
     "path": "sfx/dungeons2-voices/leif/defeat.ogg",
     "duration": 1.546292
+  },
+  "aster\n道を切り開く！": {
+    "id": "e6428897bb25c0dc28ae",
+    "path": "sfx/lantern-war/aster/e6428897bb25c0dc28ae.ogg",
+    "duration": 2.149977
+  },
+  "aster\nまだ、立てる！": {
+    "id": "f0eb8543a627283bb593",
+    "path": "sfx/lantern-war/aster/f0eb8543a627283bb593.ogg",
+    "duration": 1.81
+  },
+  "aster\nありがとう。もう一度！": {
+    "id": "b0d9834dcf0d13880cc9",
+    "path": "sfx/lantern-war/aster/b0d9834dcf0d13880cc9.ogg",
+    "duration": 2.66
+  },
+  "aster\n暁を継ぐ剣！": {
+    "id": "2a6d751183cc5fce6d0b",
+    "path": "sfx/lantern-war/aster/2a6d751183cc5fce6d0b.ogg",
+    "duration": 3.62
+  },
+  "aster\nここは僕が支える！": {
+    "id": "c86d8755f6f29b1849f1",
+    "path": "sfx/lantern-war/aster/c86d8755f6f29b1849f1.ogg",
+    "duration": 2.49
+  },
+  "aster\nみんなで、つかんだ勝利だ。": {
+    "id": "314a3db6bfa6b0970380",
+    "path": "sfx/lantern-war/aster/314a3db6bfa6b0970380.ogg",
+    "duration": 3.172902
+  },
+  "aster\nこの灯を、託す。": {
+    "id": "7a32ac9c9301e84590eb",
+    "path": "sfx/lantern-war/aster/7a32ac9c9301e84590eb.ogg",
+    "duration": 2.66
+  },
+  "aster\n星灯の切先！": {
+    "id": "06e4c6b487b37d22ec92",
+    "path": "sfx/lantern-war/aster/06e4c6b487b37d22ec92.ogg",
+    "duration": 3.12
+  },
+  "aster\n隣人の号令！": {
+    "id": "39f4329e5d60d06913dc",
+    "path": "sfx/lantern-war/aster/39f4329e5d60d06913dc.ogg",
+    "duration": 3.12
+  },
+  "aster\n暁路の三日月！": {
+    "id": "c24d5317ab071022aa35",
+    "path": "sfx/lantern-war/aster/c24d5317ab071022aa35.ogg",
+    "duration": 3.12
+  },
+  "lyra\n私が道を開く！": {
+    "id": "9a2ec2af498fc62e78d1",
+    "path": "sfx/lantern-war/lyra/9a2ec2af498fc62e78d1.ogg",
+    "duration": 2.49
+  },
+  "lyra\nこのくらいで！": {
+    "id": "cf7168146eff6875ae4c",
+    "path": "sfx/lantern-war/lyra/cf7168146eff6875ae4c.ogg",
+    "duration": 1.81
+  },
+  "lyra\nありがとう。まだ戦える！": {
+    "id": "151f7475b016a272e1a5",
+    "path": "sfx/lantern-war/lyra/151f7475b016a272e1a5.ogg",
+    "duration": 3
+  },
+  "lyra\n暁を継ぐ剣！": {
+    "id": "2c0eb92cd6f385e77556",
+    "path": "sfx/lantern-war/lyra/2c0eb92cd6f385e77556.ogg",
+    "duration": 3.12
+  },
+  "lyra\n背中は私に任せて！": {
+    "id": "3fc39878a84a79a521c6",
+    "path": "sfx/lantern-war/lyra/3fc39878a84a79a521c6.ogg",
+    "duration": 2.83
+  },
+  "lyra\nみんな、よく戦ったね。": {
+    "id": "0686831fdc50257027fa",
+    "path": "sfx/lantern-war/lyra/0686831fdc50257027fa.ogg",
+    "duration": 2.83
+  },
+  "lyra\nごめん……後を、お願い。": {
+    "id": "9d46c43912ea2894cd28",
+    "path": "sfx/lantern-war/lyra/9d46c43912ea2894cd28.ogg",
+    "duration": 3.92
+  },
+  "lyra\n帰郷の踏み込み！": {
+    "id": "7fc1248700474b6cb2fd",
+    "path": "sfx/lantern-war/lyra/7fc1248700474b6cb2fd.ogg",
+    "duration": 3.72
+  },
+  "lyra\n灯守の構え！": {
+    "id": "eabc2330360cb68828fd",
+    "path": "sfx/lantern-war/lyra/eabc2330360cb68828fd.ogg",
+    "duration": 3.12
+  },
+  "lyra\n王冠を解く剣！": {
+    "id": "cb7b4fc658c6f33a5b5a",
+    "path": "sfx/lantern-war/lyra/cb7b4fc658c6f33a5b5a.ogg",
+    "duration": 3.12
   }
 }

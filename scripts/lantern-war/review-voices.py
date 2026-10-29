@@ -5,7 +5,7 @@ import numpy as np,soundfile as sf
 from faster_whisper import WhisperModel
 from pykakasi import kakasi
 root=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser();p.add_argument('--limit',type=int);p.add_argument('--model',default='small');p.add_argument('--beam-size',type=int,default=1);p.add_argument('--threads',type=int,default=1);p.add_argument('--only');p.add_argument('--recheck',action='store_true');p.add_argument('--follow',action='store_true');p.add_argument('--name-context',action='store_true',help='Provide the proper-name vocabulary, never the expected sentence, to ASR');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--limit',type=int);p.add_argument('--model',default='small');p.add_argument('--beam-size',type=int,default=1);p.add_argument('--threads',type=int,default=1);p.add_argument('--only');p.add_argument('--recheck',action='store_true');p.add_argument('--force',action='store_true');p.add_argument('--follow',action='store_true');p.add_argument('--name-context',action='store_true',help='Provide the proper-name vocabulary, never the expected sentence, to ASR');a=p.parse_args()
 path=root/'assets/lantern-war/voice-review.json';model=None;count=0;k=kakasi();checked=set()
 from voice_review_rules import assess
 
@@ -19,7 +19,7 @@ try:
     if a.follow:continue
     raise ValueError('Voice file/record hash mismatch: '+ident)
    old=review['clips'].get(ident,{})
-   if (ident,digest)in checked or old.get('sha256')==digest and not(a.recheck and old.get('needs_review')):continue
+   if (ident,digest)in checked or old.get('sha256')==digest and not a.force and not(a.recheck and old.get('needs_review')):continue
    if a.limit is not None and count>=a.limit:break
    if model is None:model=WhisperModel(a.model,device='cpu',compute_type='int8',cpu_threads=a.threads,num_workers=1,local_files_only=True)
    data,rate=sf.read(file);duration=len(data)/rate;assert .3<duration<15.5 and np.isfinite(data).all()and .002<np.sqrt(np.mean(data**2))<.6

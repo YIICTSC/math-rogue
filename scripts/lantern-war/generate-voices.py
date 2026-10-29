@@ -14,7 +14,7 @@ rt.codec._normalize_loudness=torch.autocast('cpu',enabled=False)(rt.codec._norma
 def mark(audios,**kw):
  with torch.autocast('cpu',enabled=False):return watermark([x.float()for x in audios],**kw)
 rt.watermarker.encode_batch=mark;assert rt.watermarker.ready
-scratch=r/'tmp/lantern-voices';scratch.mkdir(parents=True,exist_ok=True);record=r/'assets/lantern-war/voice-build.json';b=json.loads(record.read_text())if record.exists()else {'clips':{},'references':{}};b.update(model=model,model_revision=revision,irodori_revision=code,model_device='cpu',codec_device='cpu',compute='bf16',threads=2,steps=4,silentcipher_watermark=True,latest_checked_at=datetime.datetime.now(datetime.timezone.utc).isoformat());kana=kakasi();selected=set(json.loads(args.retakes.read_text()))if args.retakes else None;made=0
+scratch=r/'tmp/lantern-voices';scratch.mkdir(parents=True,exist_ok=True);record=r/'assets/lantern-war/voice-build.json';b=json.loads(record.read_text())if record.exists()else {'clips':{},'references':{}};b.update(model=model,model_revision=revision,irodori_revision=code,model_device='cpu',codec_device='cpu',compute='bf16',threads=2,steps=plan.get('default_steps',4),silentcipher_watermark=True,latest_checked_at=datetime.datetime.now(datetime.timezone.utc).isoformat());kana=kakasi();selected=set(json.loads(args.retakes.read_text()))if args.retakes else None;made=0
 sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def save():
  t=record.with_suffix('.tmp');t.write_text(json.dumps(b,ensure_ascii=False,indent=2)+'\n');t.replace(record)
@@ -51,7 +51,7 @@ for speaker,v in plan['speakers'].items():
   corrections=r/'assets/lantern-war/voice-corrections.json'
   try:live=json.loads(corrections.read_text())if corrections.exists()else{}
   except json.JSONDecodeError:live={}
-  override={**plan.get('clip_overrides',{}).get(c['id'],{}),**live.get(c['id'],{})};steps=override.get('steps',4);spoken=override.get('spoken_text',c['text']);seed=910000+int(c['id'][:7],16)+(args.seed_offset if args.seed_offset is not None else override.get('seed_offset',0));target=r/'public'/c['path'];text=c['text'];reading=''.join(x['hira']for x in kana.convert(text));seconds=override.get('seconds',round(max(1.4,min(12.5,len(reading)*.125+.5)),2))
+  override={**plan.get('clip_overrides',{}).get(c['id'],{}),**live.get(c['id'],{})};steps=override.get('steps',plan.get('default_steps',4));spoken=override.get('spoken_text',c['text']);seed=910000+int(c['id'][:7],16)+(args.seed_offset if args.seed_offset is not None else override.get('seed_offset',0));target=r/'public'/c['path'];text=c['text'];reading=''.join(x['hira']for x in kana.convert(text));seconds=override.get('seconds',round(max(1.4,min(12.5,len(reading)*plan.get('seconds_per_mora',.125)+.5)),2))
   recipe={'text':text,'speaker':speaker,'caption':override.get('caption',v['caption']),'seed':seed,'reference_sha256':digest,'seconds_requested':seconds,'model_revision':revision,'steps':steps,'spoken_text':spoken};recipe_sha=hashlib.sha256(json.dumps(recipe,sort_keys=True,ensure_ascii=False).encode()).hexdigest();prior=b['clips'].get(c['id'],{})
   if target.exists()and prior.get('sha256')==sha(target) and (prior.get('recipe_sha256')==recipe_sha or all(prior.get(k)==recipe[k]for k in ['text','speaker','caption','seed','reference_sha256','seconds_requested','model_revision','steps']) and prior.get('spoken_text',prior.get('text'))==spoken):continue
   if pending and pending[0][1]['steps']!=steps:flush()

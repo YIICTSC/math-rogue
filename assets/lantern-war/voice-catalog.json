@@ -681,5 +681,146 @@
       "move": 4
     }
   ],
-  "clips": []
+  "clips": [
+    {
+      "id": "e6428897bb25c0dc28ae",
+      "speaker": "aster",
+      "text": "道を切り開く！",
+      "kind": "attack",
+      "path": "sfx/lantern-war/aster/e6428897bb25c0dc28ae.ogg"
+    },
+    {
+      "id": "f0eb8543a627283bb593",
+      "speaker": "aster",
+      "text": "まだ、立てる！",
+      "kind": "damage",
+      "path": "sfx/lantern-war/aster/f0eb8543a627283bb593.ogg"
+    },
+    {
+      "id": "b0d9834dcf0d13880cc9",
+      "speaker": "aster",
+      "text": "ありがとう。もう一度！",
+      "kind": "heal",
+      "path": "sfx/lantern-war/aster/b0d9834dcf0d13880cc9.ogg"
+    },
+    {
+      "id": "2a6d751183cc5fce6d0b",
+      "speaker": "aster",
+      "text": "暁を継ぐ剣！",
+      "kind": "ultimate",
+      "path": "sfx/lantern-war/aster/2a6d751183cc5fce6d0b.ogg"
+    },
+    {
+      "id": "c86d8755f6f29b1849f1",
+      "speaker": "aster",
+      "text": "ここは僕が支える！",
+      "kind": "support",
+      "path": "sfx/lantern-war/aster/c86d8755f6f29b1849f1.ogg"
+    },
+    {
+      "id": "314a3db6bfa6b0970380",
+      "speaker": "aster",
+      "text": "みんなで、つかんだ勝利だ。",
+      "kind": "win",
+      "path": "sfx/lantern-war/aster/314a3db6bfa6b0970380.ogg"
+    },
+    {
+      "id": "7a32ac9c9301e84590eb",
+      "speaker": "aster",
+      "text": "この灯を、託す。",
+      "kind": "defeat",
+      "path": "sfx/lantern-war/aster/7a32ac9c9301e84590eb.ogg"
+    },
+    {
+      "id": "06e4c6b487b37d22ec92",
+      "speaker": "aster",
+      "text": "星灯の切先！",
+      "kind": "technique",
+      "path": "sfx/lantern-war/aster/06e4c6b487b37d22ec92.ogg"
+    },
+    {
+      "id": "39f4329e5d60d06913dc",
+      "speaker": "aster",
+      "text": "隣人の号令！",
+      "kind": "technique",
+      "path": "sfx/lantern-war/aster/39f4329e5d60d06913dc.ogg"
+    },
+    {
+      "id": "c24d5317ab071022aa35",
+      "speaker": "aster",
+      "text": "暁路の三日月！",
+      "kind": "technique",
+      "path": "sfx/lantern-war/aster/c24d5317ab071022aa35.ogg"
+    },
+    {
+      "id": "9a2ec2af498fc62e78d1",
+      "speaker": "lyra",
+      "text": "私が道を開く！",
+      "kind": "attack",
+      "path": "sfx/lantern-war/lyra/9a2ec2af498fc62e78d1.ogg"
+    },
+    {
+      "id": "cf7168146eff6875ae4c",
+      "speaker": "lyra",
+      "text": "このくらいで！",
+      "kind": "damage",
+      "path": "sfx/lantern-war/lyra/cf7168146eff6875ae4c.ogg"
+    },
+    {
+      "id": "151f7475b016a272e1a5",
+      "speaker": "lyra",
+      "text": "ありがとう。まだ戦える！",
+      "kind": "heal",
+      "path": "sfx/lantern-war/lyra/151f7475b016a272e1a5.ogg"
+    },
+    {
+      "id": "2c0eb92cd6f385e77556",
+      "speaker": "lyra",
+      "text": "暁を継ぐ剣！",
+      "kind": "ultimate",
+      "path": "sfx/lantern-war/lyra/2c0eb92cd6f385e77556.ogg"
+    },
+    {
+      "id": "3fc39878a84a79a521c6",
+      "speaker": "lyra",
+      "text": "背中は私に任せて！",
+      "kind": "support",
+      "path": "sfx/lantern-war/lyra/3fc39878a84a79a521c6.ogg"
+    },
+    {
+      "id": "0686831fdc50257027fa",
+      "speaker": "lyra",
+      "text": "みんな、よく戦ったね。",
+      "kind": "win",
+      "path": "sfx/lantern-war/lyra/0686831fdc50257027fa.ogg"
+    },
+    {
+      "id": "9d46c43912ea2894cd28",
+      "speaker": "lyra",
+      "text": "ごめん……後を、お願い。",
+      "kind": "defeat",
+      "path": "sfx/lantern-war/lyra/9d46c43912ea2894cd28.ogg"
+    },
+    {
+      "id": "7fc1248700474b6cb2fd",
+      "speaker": "lyra",
+      "text": "帰郷の踏み込み！",
+      "kind": "technique",
+      "path": "sfx/lantern-war/lyra/7fc1248700474b6cb2fd.ogg"
+    },
+    {
+      "id": "eabc2330360cb68828fd",
+      "speaker": "lyra",
+      "text": "灯守の構え！",
+      "kind": "technique",
+      "path": "sfx/lantern-war/lyra/eabc2330360cb68828fd.ogg"
+    },
+    {
+      "id": "cb7b4fc658c6f33a5b5a",
+      "speaker": "lyra",
+      "text": "王冠を解く剣！",
+      "kind": "technique",
+      "path": "sfx/lantern-war/lyra/cb7b4fc658c6f33a5b5a.ogg"
+    }
+  ]
 }

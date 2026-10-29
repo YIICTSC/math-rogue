@@ -1,10 +1,11 @@
 {
   "story_voices": "discarded",
   "technique_media": "discarded",
-  "audition_only": [
+  "audition_only": [],
+  "reason": "Approved adult v3 references for Aster and Lyra battle recordings only. Story voices and prototype artwork remain discarded.",
+  "generated_voices": "battle-only",
+  "battle_speakers": [
     "aster",
     "lyra"
-  ],
-  "reason": "User rejected story voice identities and technique artwork/animation; new image-guided fantasy protagonist auditions are not final story recordings.",
-  "generated_voices": "discarded"
+  ]
 }
