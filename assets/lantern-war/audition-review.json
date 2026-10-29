@@ -1,0 +1,69 @@
+{
+  "device": "cpu",
+  "clips": {
+    "0705f23eb18781f2740c": {
+      "expected": "僕はアステル。仲間と一緒に、この世界の明日を切り開く。君の力も、貸してくれるかい？",
+      "cer": 0.0444,
+      "needs_review": false,
+      "required_name": null,
+      "name_verified": true,
+      "review_rules": 2,
+      "dictionary_sha256": "71bc547e35257ef24f5b39e35269ef8b811d5f39cfe07a3325675adcc022a2dc",
+      "speaker": "aster",
+      "heard": "僕はアステル!仲間と一緒にこの世界のアスを切り開く!君の力も貸してくれるかい?",
+      "sha256": "99d3574ec5612324319f8b940e875615ef150c342bf2dba560151c0ec4539f26",
+      "duration": 6.87,
+      "model": "small",
+      "name_context": null,
+      "previous": null
+    },
+    "ddaaa1a78b1a6d4da9fe": {
+      "expected": "ここから先は、僕が守る！ 道を開け！",
+      "cer": 0.0,
+      "needs_review": false,
+      "required_name": null,
+      "name_verified": true,
+      "review_rules": 2,
+      "dictionary_sha256": "71bc547e35257ef24f5b39e35269ef8b811d5f39cfe07a3325675adcc022a2dc",
+      "speaker": "aster",
+      "heard": "ここから先は僕が守る!道を開け!",
+      "sha256": "886568d29c83f4a0aaa4193ea99c4d20b9b6312c1dbce0d2698b55592fd8772c",
+      "duration": 3.5,
+      "model": "small",
+      "name_context": null,
+      "previous": null
+    },
+    "18e08135a055b9215034": {
+      "expected": "私はリュラ。大丈夫、ひとりで背負わなくていい。私たちなら、きっと未来を変えられる。",
+      "cer": 0.0,
+      "needs_review": false,
+      "required_name": null,
+      "name_verified": true,
+      "review_rules": 2,
+      "dictionary_sha256": "71bc547e35257ef24f5b39e35269ef8b811d5f39cfe07a3325675adcc022a2dc",
+      "speaker": "lyra",
+      "heard": "私はリュラ!大丈夫!一人で背負わなくていい!私たちなら、きっと未来を変えられる!",
+      "sha256": "114d72a6e20a9e4fae1bc63f071ebe11bc697d68cc95e43b1b9629bbb565fc40",
+      "duration": 6.87,
+      "model": "small",
+      "name_context": null,
+      "previous": null
+    },
+    "f2ff72504a505582271f": {
+      "expected": "もう迷わない！ 私が、みんなを守る！",
+      "cer": 0.0,
+      "needs_review": false,
+      "required_name": null,
+      "name_verified": true,
+      "review_rules": 2,
+      "dictionary_sha256": "71bc547e35257ef24f5b39e35269ef8b811d5f39cfe07a3325675adcc022a2dc",
+      "speaker": "lyra",
+      "heard": "もう迷わない!私がみんなを守る!",
+      "sha256": "082eddc890dd631a5198ace2831f1f6f60dc7491091d4f23358107e92c6fc682",
+      "duration": 3.37,
+      "model": "small",
+      "name_context": null,
+      "previous": null
+    }
+  }
+}

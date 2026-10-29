@@ -1,8 +1,12 @@
 from pathlib import Path
 import json,hashlib,datetime
 r=Path(__file__).resolve().parents[2];p=json.loads((r/'assets/lantern-war/voice-catalog.json').read_text());sports=json.loads((r/'assets/sports-performances/voice-plan.json').read_text());d2=json.loads((r/'assets-source/dungeons2/voice-design.json').read_text());star=json.loads((r/'assets/star-tide/voice-plan.json').read_text());speakers={}
+policy_path=r/'assets/lantern-war/voice-policy.json';policy=json.loads(policy_path.read_text())if policy_path.exists()else{}
+auditions=json.loads((r/'assets/lantern-war/audition-plan.json').read_text())if(r/'assets/lantern-war/audition-plan.json').exists()else{}
 for h in p['heroes']:
- ident=h['id'];v=next((v for v in sports['voices']if v['id']==ident),None)
+ ident=h['id']
+ if ident in policy.get('audition_only',[]):speakers[ident]=auditions['speakers'][ident];continue
+ v=next((v for v in sports['voices']if v['id']==ident),None)
  if v:speakers[ident]={'caption':v['caption'],'reference':v['reference']};continue
  if ident.startswith('dungeons2-'):
   old=next(v for v in d2['heroes']if ident=='dungeons2-'+v['id']);speakers[ident]={'caption':old['caption']+' 日本語を母語とする自然な演技。','reference':f"public/sfx/dungeons2-voices/{old['id']}/attack.ogg"};continue
@@ -12,6 +16,7 @@ for h in p['heroes']:
 old=next(v for v in star['clips']if v['speaker']=='narrator');speakers['narrator']={'caption':old['caption'],'reference':'assets-source/star-tide/voice-anchors/narrator.wav'}
 for hero in p['heroes']:
  ident=hero['id']
+ if policy.get('generated_voices')=='discarded' or ident in policy.get('audition_only',[]):continue
  directory=(r/'public/sfx/high-school-voices'/ident[12:].upper() if ident.startswith('high-school-') else r/'public/sfx/magic-voices'/ident[6:].upper() if ident.startswith('magic-') else r/'public/sfx/dungeons2-voices'/ident[10:] if ident.startswith('dungeons2-') else None)
  for event,text in {'attack':'道を切り開く！','damage':'まだ、立てる！','heal':'ありがとう。もう一度！','win':'みんなで、つかんだ明日だ。','defeat':'この灯を、託す。'}.items():
   prefix='finish'if event=='win'else event

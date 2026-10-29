@@ -1,0 +1,116 @@
+{
+  "clips": {
+    "0705f23eb18781f2740c": {
+      "text": "僕はアステル。仲間と一緒に、この世界の明日を切り開く。君の力も、貸してくれるかい？",
+      "speaker": "aster",
+      "caption": "日本語の王道ファンタジーアニメの青年主人公。二十歳前後の男性。青髪と白金の鎧、青いマントをまとう若き剣士。明るく澄んだ芯のある中高音。若々しく爽やか、勇敢で誠実。自然な標準語、子音を明瞭に。会話では親しみと温かさ、決意ではまっすぐな力強さ。低く老けた声や過度な息漏れではなく、朗々とした前に響く発声。音楽や効果音なし。",
+      "seed": 8274387,
+      "reference_sha256": "78888dde2cd59fdd2c66a3f8ff96098cc699a9ce236f9660f6dd066556b996fe",
+      "seconds_requested": 6.75,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "僕はアステル。仲間と一緒に、この世界の明日を切り開く。君の力も、貸してくれるかい？",
+      "path": "sfx/lantern-war-auditions/aster-1.ogg",
+      "kind": "audition",
+      "recipe_sha256": "42c3309320fcc2ac5ff23fe7fdc12dd4744a05addd61eeca16ffc85d39cf424a",
+      "sha256": "99d3574ec5612324319f8b940e875615ef150c342bf2dba560151c0ec4539f26",
+      "duration": 6.92,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "0705f23eb18781f2740c",
+        "ddaaa1a78b1a6d4da9fe"
+      ]
+    },
+    "ddaaa1a78b1a6d4da9fe": {
+      "text": "ここから先は、僕が守る！ 道を開け！",
+      "speaker": "aster",
+      "caption": "日本語の王道ファンタジーアニメの青年主人公。二十歳前後の男性。青髪と白金の鎧、青いマントをまとう若き剣士。明るく澄んだ芯のある中高音。若々しく爽やか、勇敢で誠実。自然な標準語、子音を明瞭に。会話では親しみと温かさ、決意ではまっすぐな力強さ。低く老けた声や過度な息漏れではなく、朗々とした前に響く発声。音楽や効果音なし。",
+      "seed": 233344202,
+      "reference_sha256": "78888dde2cd59fdd2c66a3f8ff96098cc699a9ce236f9660f6dd066556b996fe",
+      "seconds_requested": 3.38,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "ここから先は、僕が守る！ 道を開け！",
+      "path": "sfx/lantern-war-auditions/aster-2.ogg",
+      "kind": "audition",
+      "recipe_sha256": "ed861a468be8490b4ffde51ea2bfabbced893a3dda745b53870dffae198d6428",
+      "sha256": "886568d29c83f4a0aaa4193ea99c4d20b9b6312c1dbce0d2698b55592fd8772c",
+      "duration": 3.5,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "0705f23eb18781f2740c",
+        "ddaaa1a78b1a6d4da9fe"
+      ]
+    },
+    "18e08135a055b9215034": {
+      "text": "私はリュラ。大丈夫、ひとりで背負わなくていい。私たちなら、きっと未来を変えられる。",
+      "speaker": "lyra",
+      "caption": "日本語の王道ファンタジーアニメの正統派女性主人公。二十歳前後の女性。赤い編み髪と白金の鎧、緑のマントをまとう凛とした女剣士。透明感のある明るい中高音、気品と若々しさ、意志の強さと優しさ。自然な標準語、子音を明瞭に。可愛すぎる幼児声ではなく、落ち着いた少女から若い成人の伸びやかな声。戦闘では鋭く勇ましく、日常では温かく自然。音楽や効果音なし。",
+      "seed": 26995395,
+      "reference_sha256": "fbb0d8bb1aa4b8f50d86449236aebd9c4f1cfab8a468afb5c43ba4849c637d85",
+      "seconds_requested": 6.75,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "私はリュラ。大丈夫、ひとりで背負わなくていい。私たちなら、きっと未来を変えられる。",
+      "path": "sfx/lantern-war-auditions/lyra-1.ogg",
+      "kind": "audition",
+      "recipe_sha256": "488e7eb02204f026e937725d162b2fcf2ae3b541df83adf7d73d5aed04dcbc66",
+      "sha256": "114d72a6e20a9e4fae1bc63f071ebe11bc697d68cc95e43b1b9629bbb565fc40",
+      "duration": 6.92,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "18e08135a055b9215034",
+        "f2ff72504a505582271f"
+      ]
+    },
+    "f2ff72504a505582271f": {
+      "text": "もう迷わない！ 私が、みんなを守る！",
+      "speaker": "lyra",
+      "caption": "日本語の王道ファンタジーアニメの正統派女性主人公。二十歳前後の女性。赤い編み髪と白金の鎧、緑のマントをまとう凛とした女剣士。透明感のある明るい中高音、気品と若々しさ、意志の強さと優しさ。自然な標準語、子音を明瞭に。可愛すぎる幼児声ではなく、落ち着いた少女から若い成人の伸びやかな声。戦闘では鋭く勇ましく、日常では温かく自然。音楽や効果音なし。",
+      "seed": 255711701,
+      "reference_sha256": "fbb0d8bb1aa4b8f50d86449236aebd9c4f1cfab8a468afb5c43ba4849c637d85",
+      "seconds_requested": 3.25,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "もう迷わない！ 私が、みんなを守る！",
+      "path": "sfx/lantern-war-auditions/lyra-2.ogg",
+      "kind": "audition",
+      "recipe_sha256": "9044b48e38b606671c49405d9f70ec9c7364a1f1f52f93e38f984343049d8b62",
+      "sha256": "082eddc890dd631a5198ace2831f1f6f60dc7491091d4f23358107e92c6fc682",
+      "duration": 3.37,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "18e08135a055b9215034",
+        "f2ff72504a505582271f"
+      ]
+    }
+  },
+  "references": {
+    "aster": {
+      "path": "assets/lantern-war/references/aster-fantasy-v2.ogg",
+      "sha256": "78888dde2cd59fdd2c66a3f8ff96098cc699a9ce236f9660f6dd066556b996fe",
+      "caption": "日本語の王道ファンタジーアニメの青年主人公。二十歳前後の男性。青髪と白金の鎧、青いマントをまとう若き剣士。明るく澄んだ芯のある中高音。若々しく爽やか、勇敢で誠実。自然な標準語、子音を明瞭に。会話では親しみと温かさ、決意ではまっすぐな力強さ。低く老けた声や過度な息漏れではなく、朗々とした前に響く発声。音楽や効果音なし。",
+      "designed": true
+    },
+    "lyra": {
+      "path": "assets/lantern-war/references/lyra-fantasy-v2.ogg",
+      "sha256": "fbb0d8bb1aa4b8f50d86449236aebd9c4f1cfab8a468afb5c43ba4849c637d85",
+      "caption": "日本語の王道ファンタジーアニメの正統派女性主人公。二十歳前後の女性。赤い編み髪と白金の鎧、緑のマントをまとう凛とした女剣士。透明感のある明るい中高音、気品と若々しさ、意志の強さと優しさ。自然な標準語、子音を明瞭に。可愛すぎる幼児声ではなく、落ち着いた少女から若い成人の伸びやかな声。戦闘では鋭く勇ましく、日常では温かく自然。音楽や効果音なし。",
+      "designed": true
+    }
+  },
+  "model": "Aratako/Irodori-TTS-v4.1-Small",
+  "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+  "irodori_revision": "59be938c99d48b5653ca5aa3fdd0cddaa56940e5",
+  "model_device": "cpu",
+  "codec_device": "cpu",
+  "compute": "bf16",
+  "threads": 2,
+  "steps": 12,
+  "silentcipher_watermark": true,
+  "latest_checked_at": "2026-10-29T05:49:01.056861+00:00"
+}

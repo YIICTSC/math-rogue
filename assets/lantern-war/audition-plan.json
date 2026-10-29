@@ -1,0 +1,51 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small",
+  "speakers": {
+    "aster": {
+      "caption": "日本語の王道ファンタジーアニメの青年主人公。二十歳前後の男性。青髪と白金の鎧、青いマントをまとう若き剣士。明るく澄んだ芯のある中高音。若々しく爽やか、勇敢で誠実。自然な標準語、子音を明瞭に。会話では親しみと温かさ、決意ではまっすぐな力強さ。低く老けた声や過度な息漏れではなく、朗々とした前に響く発声。音楽や効果音なし。",
+      "reference": "assets/lantern-war/references/aster-fantasy-v2.ogg",
+      "reference_sha256": "78888dde2cd59fdd2c66a3f8ff96098cc699a9ce236f9660f6dd066556b996fe",
+      "design_text": "僕はアステル。仲間と一緒に、この世界の明日を切り開く。君の力も、貸してくれるかい？"
+    },
+    "lyra": {
+      "caption": "日本語の王道ファンタジーアニメの正統派女性主人公。二十歳前後の女性。赤い編み髪と白金の鎧、緑のマントをまとう凛とした女剣士。透明感のある明るい中高音、気品と若々しさ、意志の強さと優しさ。自然な標準語、子音を明瞭に。可愛すぎる幼児声ではなく、落ち着いた少女から若い成人の伸びやかな声。戦闘では鋭く勇ましく、日常では温かく自然。音楽や効果音なし。",
+      "reference": "assets/lantern-war/references/lyra-fantasy-v2.ogg",
+      "reference_sha256": "fbb0d8bb1aa4b8f50d86449236aebd9c4f1cfab8a468afb5c43ba4849c637d85",
+      "design_text": "私はリュラ。大丈夫、ひとりで背負わなくていい。私たちなら、きっと未来を変えられる。"
+    }
+  },
+  "clips": [
+    {
+      "id": "0705f23eb18781f2740c",
+      "speaker": "aster",
+      "text": "僕はアステル。仲間と一緒に、この世界の明日を切り開く。君の力も、貸してくれるかい？",
+      "kind": "audition",
+      "path": "sfx/lantern-war-auditions/aster-1.ogg"
+    },
+    {
+      "id": "ddaaa1a78b1a6d4da9fe",
+      "speaker": "aster",
+      "text": "ここから先は、僕が守る！ 道を開け！",
+      "kind": "audition",
+      "path": "sfx/lantern-war-auditions/aster-2.ogg"
+    },
+    {
+      "id": "18e08135a055b9215034",
+      "speaker": "lyra",
+      "text": "私はリュラ。大丈夫、ひとりで背負わなくていい。私たちなら、きっと未来を変えられる。",
+      "kind": "audition",
+      "path": "sfx/lantern-war-auditions/lyra-1.ogg"
+    },
+    {
+      "id": "f2ff72504a505582271f",
+      "speaker": "lyra",
+      "text": "もう迷わない！ 私が、みんなを守る！",
+      "kind": "audition",
+      "path": "sfx/lantern-war-auditions/lyra-2.ogg"
+    }
+  ],
+  "image_references": {
+    "aster": "public/sprites/lantern-war/heroes/aster-ready.webp",
+    "lyra": "public/sprites/lantern-war/heroes/lyra-ready.webp"
+  }
+}
