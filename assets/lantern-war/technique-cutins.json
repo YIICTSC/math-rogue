@@ -1,0 +1,3722 @@
+[
+  {
+    "id": "aster",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/aster.png",
+    "sourceSha256": "74ea6cb46dbb2b96876efdc7f889454858835b472a81fe91958ab16b0c8602c1",
+    "gutters": {
+      "vertical": 42,
+      "left": 78,
+      "right": 33
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "星灯の切先",
+        "file": "public/sprites/lantern-war/cutins/aster-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 638,
+          "height": 633
+        },
+        "trimmedSize": [
+          578,
+          579
+        ],
+        "normalizationScale": 1.2573402417962003,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "b2fc0b2a5753315358d765bd78dd369c75554c13aeebcc4506909273d165c47d"
+      },
+      {
+        "skill": "art2",
+        "name": "隣人の号令",
+        "file": "public/sprites/lantern-war/cutins/aster-art2.webp",
+        "sourceRect": {
+          "left": 638,
+          "top": 0,
+          "width": 616,
+          "height": 625
+        },
+        "trimmedSize": [
+          578,
+          595
+        ],
+        "normalizationScale": 1.2285714285714286,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "2b2d268d78f9c0cc09fb8e45dd9257e51686cf4159cafbe9c90289bdc515617b"
+      },
+      {
+        "skill": "art3",
+        "name": "暁路の三日月",
+        "file": "public/sprites/lantern-war/cutins/aster-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 633,
+          "width": 638,
+          "height": 621
+        },
+        "trimmedSize": [
+          587,
+          539
+        ],
+        "normalizationScale": 1.2350936967632027,
+        "contentLongEdge": 725,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "8354d87c509ba1b7cc268e03b0b54460a29b121d9b5894e8b8a6f936c5ad31c7"
+      },
+      {
+        "skill": "ultimate",
+        "name": "暁を継ぐ剣",
+        "file": "public/sprites/lantern-war/cutins/aster-ultimate.webp",
+        "sourceRect": {
+          "left": 638,
+          "top": 625,
+          "width": 616,
+          "height": 629
+        },
+        "trimmedSize": [
+          545,
+          597
+        ],
+        "normalizationScale": 1.221105527638191,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "14c4baf1a77dd187fc37f42c68f3d7f19af3cb52beda7efe730c7d6110e567ec"
+      }
+    ]
+  },
+  {
+    "id": "lyra",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/lyra.png",
+    "sourceSha256": "382ce60f54b662918df3e75d20f4d9a5f4118e4d04561fb5be2020ea5e5b294e",
+    "gutters": {
+      "vertical": 134,
+      "left": 79,
+      "right": 67
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "帰郷の踏み込み",
+        "file": "public/sprites/lantern-war/cutins/lyra-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 724,
+          "height": 540
+        },
+        "trimmedSize": [
+          472,
+          387
+        ],
+        "normalizationScale": 1.555084745762712,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "9e4e10ed95a7850a8af6156b13acb612a973797642ad1539285687a14b78a2f3"
+      },
+      {
+        "skill": "art2",
+        "name": "灯守の構え",
+        "file": "public/sprites/lantern-war/cutins/lyra-art2.webp",
+        "sourceRect": {
+          "left": 724,
+          "top": 0,
+          "width": 691,
+          "height": 548
+        },
+        "trimmedSize": [
+          473,
+          450
+        ],
+        "normalizationScale": 1.5348837209302326,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "22ea3e278e3bbee8706fb852240824ae99c6e920c95c5cd64774be7fc5dd430d"
+      },
+      {
+        "skill": "art3",
+        "name": "王冠を解く剣",
+        "file": "public/sprites/lantern-war/cutins/lyra-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 540,
+          "width": 724,
+          "height": 571
+        },
+        "trimmedSize": [
+          466,
+          482
+        ],
+        "normalizationScale": 1.516597510373444,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7ca8cc23af8a51ca194e84a312b93a0a07e4d2b58ae55f2d67d29144c86a9ea7"
+      },
+      {
+        "skill": "ultimate",
+        "name": "暁を継ぐ剣",
+        "file": "public/sprites/lantern-war/cutins/lyra-ultimate.webp",
+        "sourceRect": {
+          "left": 724,
+          "top": 548,
+          "width": 691,
+          "height": 563
+        },
+        "trimmedSize": [
+          484,
+          485
+        ],
+        "normalizationScale": 1.5010309278350515,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7ee5601114e35f73c24e357b1d5d8278a6ace7df8262f4c51df7a6c89bf318c0"
+      }
+    ]
+  },
+  {
+    "id": "high-school-warrior",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-warrior.png",
+    "sourceSha256": "4628d9071a66e8dea9a4136ba03a735ad4071a70f60b4c20bb177aa4a17b9ef7",
+    "gutters": {
+      "vertical": 51,
+      "left": 57,
+      "right": 30
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "校門破り",
+        "file": "public/sprites/lantern-war/cutins/high-school-warrior-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 634,
+          "height": 635
+        },
+        "trimmedSize": [
+          540,
+          593
+        ],
+        "normalizationScale": 1.2495784148397977,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e3d1dfd5dfa51d14980727372f62faf89f73ab577bbcf4d06b4db4638e6f1be4"
+      },
+      {
+        "skill": "art2",
+        "name": "放課後の檄",
+        "file": "public/sprites/lantern-war/cutins/high-school-warrior-art2.webp",
+        "sourceRect": {
+          "left": 634,
+          "top": 0,
+          "width": 620,
+          "height": 626
+        },
+        "trimmedSize": [
+          519,
+          595
+        ],
+        "normalizationScale": 1.2134453781512604,
+        "contentLongEdge": 722,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3ab625f970f7dc03d091ccc2cd81651db77749fec0b41eab1ebba647475d9820"
+      },
+      {
+        "skill": "art3",
+        "name": "制服の二閃",
+        "file": "public/sprites/lantern-war/cutins/high-school-warrior-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 635,
+          "width": 634,
+          "height": 619
+        },
+        "trimmedSize": [
+          566,
+          560
+        ],
+        "normalizationScale": 1.2968197879858658,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "1e39391ceff9755a8fec7e390461dfc2f86e3c9b417577a09d6eaea27f6528db"
+      },
+      {
+        "skill": "ultimate",
+        "name": "反逆の一閃",
+        "file": "public/sprites/lantern-war/cutins/high-school-warrior-ultimate.webp",
+        "sourceRect": {
+          "left": 634,
+          "top": 626,
+          "width": 620,
+          "height": 628
+        },
+        "trimmedSize": [
+          574,
+          573
+        ],
+        "normalizationScale": 1.2682926829268293,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "442710fda08462f26d3ace7c1baa40410f8b36f29618714abfef617e9410e7b6"
+      }
+    ]
+  },
+  {
+    "id": "high-school-caretaker",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-caretaker.png",
+    "sourceSha256": "df6c1a35320716eac8c1d7498ef5dc39ee173791e95039d473db617ba52f826a",
+    "gutters": {
+      "vertical": 73,
+      "left": 85,
+      "right": 83
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "若葉の手当て",
+        "file": "public/sprites/lantern-war/cutins/high-school-caretaker-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 625,
+          "height": 611
+        },
+        "trimmedSize": [
+          486,
+          491
+        ],
+        "normalizationScale": 1.5071283095723014,
+        "contentLongEdge": 740,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "737cd2fb4eff0d6102158522f6962b779ae7faead59223d78263614624c51a29"
+      },
+      {
+        "skill": "art2",
+        "name": "細胞の目覚め",
+        "file": "public/sprites/lantern-war/cutins/high-school-caretaker-art2.webp",
+        "sourceRect": {
+          "left": 625,
+          "top": 0,
+          "width": 629,
+          "height": 618
+        },
+        "trimmedSize": [
+          503,
+          537
+        ],
+        "normalizationScale": 1.3594040968342644,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "750868eb85cd36358d77d6b778e1a34297920eb13ba36abe4652ca64dd9fb6ea"
+      },
+      {
+        "skill": "art3",
+        "name": "命脈の花冠",
+        "file": "public/sprites/lantern-war/cutins/high-school-caretaker-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 611,
+          "width": 625,
+          "height": 643
+        },
+        "trimmedSize": [
+          517,
+          573
+        ],
+        "normalizationScale": 1.2897033158813263,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "10a9368c8b81067ce30acf7baa409b7e82dbc138e97b563f610af75e7faa9dff"
+      },
+      {
+        "skill": "ultimate",
+        "name": "生命の連環",
+        "file": "public/sprites/lantern-war/cutins/high-school-caretaker-ultimate.webp",
+        "sourceRect": {
+          "left": 625,
+          "top": 618,
+          "width": 629,
+          "height": 636
+        },
+        "trimmedSize": [
+          565,
+          551
+        ],
+        "normalizationScale": 1.297345132743363,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ee797c0d3c1d47901b039169c5f38a9e7f7ee32c657985c560c8a897e8aa5d72"
+      }
+    ]
+  },
+  {
+    "id": "high-school-assassin",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-assassin.png",
+    "sourceSha256": "b171915e9a7d5297546393f4ba179e91e5d29668c41cc9404609744d89c4e029",
+    "gutters": {
+      "vertical": 55,
+      "left": 74,
+      "right": 64
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "消える足音",
+        "file": "public/sprites/lantern-war/cutins/high-school-assassin-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 634,
+          "height": 623
+        },
+        "trimmedSize": [
+          569,
+          566
+        ],
+        "normalizationScale": 1.3040421792618628,
+        "contentLongEdge": 742,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a92327ffecd5641bc31fc7de7f6a6ed6a101998e795261e89929837d6ff47375"
+      },
+      {
+        "skill": "art2",
+        "name": "影縫いの針",
+        "file": "public/sprites/lantern-war/cutins/high-school-assassin-art2.webp",
+        "sourceRect": {
+          "left": 634,
+          "top": 0,
+          "width": 620,
+          "height": 625
+        },
+        "trimmedSize": [
+          578,
+          580
+        ],
+        "normalizationScale": 1.2603448275862068,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a1feb33d23756a1b5804bfa6ed2a4c381c60759838c1eca5bd19e02654971a33"
+      },
+      {
+        "skill": "art3",
+        "name": "名もなき残像",
+        "file": "public/sprites/lantern-war/cutins/high-school-assassin-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 623,
+          "width": 634,
+          "height": 631
+        },
+        "trimmedSize": [
+          584,
+          555
+        ],
+        "normalizationScale": 1.2654109589041096,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "8ff9b49066d643b977f1a0bb026d6c03b9ebe4562b554cbcf97f1466dc3663bd"
+      },
+      {
+        "skill": "ultimate",
+        "name": "無音の影走り",
+        "file": "public/sprites/lantern-war/cutins/high-school-assassin-ultimate.webp",
+        "sourceRect": {
+          "left": 634,
+          "top": 625,
+          "width": 620,
+          "height": 629
+        },
+        "trimmedSize": [
+          571,
+          572
+        ],
+        "normalizationScale": 1.2657342657342658,
+        "contentLongEdge": 724,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "b00c52a94ac82121f62d0d4f9bfdf0f75c49f373fa3f4c56eefb3a19e139cfe9"
+      }
+    ]
+  },
+  {
+    "id": "high-school-mage",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-mage.png",
+    "sourceSha256": "3b144b7761fdb9114536a43a62721cd9a8565b19fd4b66b47a7981aef699c632",
+    "gutters": {
+      "vertical": 38,
+      "left": 71,
+      "right": 44
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "触媒の火花",
+        "file": "public/sprites/lantern-war/cutins/high-school-mage-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 642,
+          "height": 635
+        },
+        "trimmedSize": [
+          579,
+          575
+        ],
+        "normalizationScale": 1.2590673575129534,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "880a11df4724f2d392951ea9367069c2ecb929f5ade45fdaa8c16b0a07eff665"
+      },
+      {
+        "skill": "art2",
+        "name": "結合ほどき",
+        "file": "public/sprites/lantern-war/cutins/high-school-mage-art2.webp",
+        "sourceRect": {
+          "left": 642,
+          "top": 0,
+          "width": 612,
+          "height": 624
+        },
+        "trimmedSize": [
+          545,
+          568
+        ],
+        "normalizationScale": 1.2852112676056338,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "27c5b5359ef1b3150c58fa980b840cef219091c161a141d55c7c27058c89beae"
+      },
+      {
+        "skill": "art3",
+        "name": "臨界の波紋",
+        "file": "public/sprites/lantern-war/cutins/high-school-mage-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 635,
+          "width": 642,
+          "height": 619
+        },
+        "trimmedSize": [
+          587,
+          557
+        ],
+        "normalizationScale": 1.243611584327087,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a0bae2f9675558d92193893212ac64446a864f36622ebd39656804b1d0ba6019"
+      },
+      {
+        "skill": "ultimate",
+        "name": "連鎖反応",
+        "file": "public/sprites/lantern-war/cutins/high-school-mage-ultimate.webp",
+        "sourceRect": {
+          "left": 642,
+          "top": 624,
+          "width": 612,
+          "height": 630
+        },
+        "trimmedSize": [
+          571,
+          565
+        ],
+        "normalizationScale": 1.2714535901926445,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3a076d77c2bb8d4ab3c0417e7e7445f40b388b9597bda67cdaa6b04c84ee2ba0"
+      }
+    ]
+  },
+  {
+    "id": "high-school-dodgeball",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-dodgeball.png",
+    "sourceSha256": "698feda6fa76866a8c6a287fb6b6579643979506c337c1077c3971a09614a522",
+    "gutters": {
+      "vertical": 32,
+      "left": 84,
+      "right": 39
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "リバウンド突き",
+        "file": "public/sprites/lantern-war/cutins/high-school-dodgeball-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 628,
+          "height": 629
+        },
+        "trimmedSize": [
+          549,
+          573
+        ],
+        "normalizationScale": 1.287958115183246,
+        "contentLongEdge": 738,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7083bfaf30dc791913b41cb8e3671ad6eb28afd58f7d780ebf341a3c539f9c06"
+      },
+      {
+        "skill": "art2",
+        "name": "勝利へのアシスト",
+        "file": "public/sprites/lantern-war/cutins/high-school-dodgeball-art2.webp",
+        "sourceRect": {
+          "left": 628,
+          "top": 0,
+          "width": 626,
+          "height": 633
+        },
+        "trimmedSize": [
+          484,
+          615
+        ],
+        "normalizationScale": 1.2260162601626017,
+        "contentLongEdge": 754,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "bb599f08e5aa4d39fdf33ff9f9af6ff5ca66bd0d857b991a94c43e86a3cd11bd"
+      },
+      {
+        "skill": "art3",
+        "name": "決勝の速攻",
+        "file": "public/sprites/lantern-war/cutins/high-school-dodgeball-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 629,
+          "width": 628,
+          "height": 625
+        },
+        "trimmedSize": [
+          573,
+          525
+        ],
+        "normalizationScale": 1.287958115183246,
+        "contentLongEdge": 738,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "388f992fd4e22e40a79344337e84c9eafb9a78050c0a8e7e88a70e20d71ab701"
+      },
+      {
+        "skill": "ultimate",
+        "name": "逆転のラストパス",
+        "file": "public/sprites/lantern-war/cutins/high-school-dodgeball-ultimate.webp",
+        "sourceRect": {
+          "left": 628,
+          "top": 633,
+          "width": 626,
+          "height": 621
+        },
+        "trimmedSize": [
+          596,
+          579
+        ],
+        "normalizationScale": 1.2248322147651007,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "254a7e4d414151d03c43c1d055aea3b67459d7d0c2ade1414c3b9ad661c3d944"
+      }
+    ]
+  },
+  {
+    "id": "high-school-bard",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-bard.png",
+    "sourceSha256": "3a9b875dce038ef5d969e651f480800858d379b4142e7293cfc5b799bda01225",
+    "gutters": {
+      "vertical": 36,
+      "left": 68,
+      "right": 19
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "音圧の矢",
+        "file": "public/sprites/lantern-war/cutins/high-school-bard-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 644,
+          "height": 611
+        },
+        "trimmedSize": [
+          544,
+          532
+        ],
+        "normalizationScale": 1.3511029411764706,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a99b1d924d164d960691543de4f34a9265421fd75a7fe3df6cff401c70a85b33"
+      },
+      {
+        "skill": "art2",
+        "name": "勇気のオンエア",
+        "file": "public/sprites/lantern-war/cutins/high-school-bard-art2.webp",
+        "sourceRect": {
+          "left": 644,
+          "top": 0,
+          "width": 624,
+          "height": 625
+        },
+        "trimmedSize": [
+          486,
+          616
+        ],
+        "normalizationScale": 1.1948051948051948,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "cc6866b94f2058681b7a6c82d1080a4965a819d44f0870232d289dde3acb11eb"
+      },
+      {
+        "skill": "art3",
+        "name": "夜明けの合唱",
+        "file": "public/sprites/lantern-war/cutins/high-school-bard-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 611,
+          "width": 644,
+          "height": 630
+        },
+        "trimmedSize": [
+          517,
+          550
+        ],
+        "normalizationScale": 1.3363636363636364,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "20b72ec70b5943cd0d0ef3703e002864af49151bd0b4fa77aaafd16dd2af2f3b"
+      },
+      {
+        "skill": "ultimate",
+        "name": "未来への生放送",
+        "file": "public/sprites/lantern-war/cutins/high-school-bard-ultimate.webp",
+        "sourceRect": {
+          "left": 644,
+          "top": 625,
+          "width": 624,
+          "height": 616
+        },
+        "trimmedSize": [
+          579,
+          590
+        ],
+        "normalizationScale": 1.2559322033898306,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "92e75027685efa54791b2895790218b3d8c9cf57e5ce3d2583f3c29338f4b263"
+      }
+    ]
+  },
+  {
+    "id": "high-school-librarian",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-librarian.png",
+    "sourceSha256": "729023b080021efa8889c3b974d3cd85db7101939fba9765a66b4e69293664ca",
+    "gutters": {
+      "vertical": 97,
+      "left": 24,
+      "right": 16
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "余白の刃",
+        "file": "public/sprites/lantern-war/cutins/high-school-librarian-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 710,
+          "height": 549
+        },
+        "trimmedSize": [
+          565,
+          503
+        ],
+        "normalizationScale": 1.2991150442477877,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "631c75f527c8dd5cf20ce4ac64e91a1ef49cc88b3ec660015d8025cace1492cd"
+      },
+      {
+        "skill": "art2",
+        "name": "封じの栞",
+        "file": "public/sprites/lantern-war/cutins/high-school-librarian-art2.webp",
+        "sourceRect": {
+          "left": 710,
+          "top": 0,
+          "width": 705,
+          "height": 550
+        },
+        "trimmedSize": [
+          529,
+          535
+        ],
+        "normalizationScale": 1.3925233644859814,
+        "contentLongEdge": 745,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "0d4945e984c30999466679496750b8f1b572e8c773c94dffa99a8395ef119772"
+      },
+      {
+        "skill": "art3",
+        "name": "終章の伏線",
+        "file": "public/sprites/lantern-war/cutins/high-school-librarian-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 549,
+          "width": 710,
+          "height": 562
+        },
+        "trimmedSize": [
+          564,
+          537
+        ],
+        "normalizationScale": 1.2872340425531914,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "cf406ee97ce7534ceca342c83ea89a2b2a1c43c8eb5f1443933106916bac15de"
+      },
+      {
+        "skill": "ultimate",
+        "name": "未完の叙事詩",
+        "file": "public/sprites/lantern-war/cutins/high-school-librarian-ultimate.webp",
+        "sourceRect": {
+          "left": 710,
+          "top": 550,
+          "width": 705,
+          "height": 561
+        },
+        "trimmedSize": [
+          581,
+          543
+        ],
+        "normalizationScale": 1.2633390705679863,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "8a4dc2412e0bbe33e54ab18da65957d4320ab781b1caf4caf01f36a5356c0262"
+      }
+    ]
+  },
+  {
+    "id": "high-school-chef",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-chef.png",
+    "sourceSha256": "5178e88081165e9eeef6472068d6710a6698239e0e72f93d8dc5ef1aba13f54d",
+    "gutters": {
+      "vertical": 41,
+      "left": 80,
+      "right": 78
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "鉄鍋くだき",
+        "file": "public/sprites/lantern-war/cutins/high-school-chef-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 655,
+          "height": 617
+        },
+        "trimmedSize": [
+          522,
+          501
+        ],
+        "normalizationScale": 1.3850574712643677,
+        "contentLongEdge": 723,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7c9f3c6e2b8485b700a4923686fcbe0d7d20c749ff4415327235f197029c7693"
+      },
+      {
+        "skill": "art2",
+        "name": "まかないの湯気",
+        "file": "public/sprites/lantern-war/cutins/high-school-chef-art2.webp",
+        "sourceRect": {
+          "left": 655,
+          "top": 0,
+          "width": 605,
+          "height": 614
+        },
+        "trimmedSize": [
+          490,
+          494
+        ],
+        "normalizationScale": 1.4777327935222673,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "846ecd96cce4659c5576cd0ec62a47a96299be8ab30fc3273dbc3ea517981a5f"
+      },
+      {
+        "skill": "art3",
+        "name": "満腹の大回転",
+        "file": "public/sprites/lantern-war/cutins/high-school-chef-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 617,
+          "width": 655,
+          "height": 631
+        },
+        "trimmedSize": [
+          574,
+          514
+        ],
+        "normalizationScale": 1.2630662020905923,
+        "contentLongEdge": 725,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3bce3cd92b249319e1c4e35c84a91004845975d48c7a1e3300f90a984cd1ad0b"
+      },
+      {
+        "skill": "ultimate",
+        "name": "腹いっぱいの約束",
+        "file": "public/sprites/lantern-war/cutins/high-school-chef-ultimate.webp",
+        "sourceRect": {
+          "left": 655,
+          "top": 614,
+          "width": 605,
+          "height": 634
+        },
+        "trimmedSize": [
+          553,
+          539
+        ],
+        "normalizationScale": 1.3254972875226039,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e452f689db47e071c1b33dafaa55034d94f23aedd56c0d81d340ed74fe3565c7"
+      }
+    ]
+  },
+  {
+    "id": "high-school-gardener",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/high-school-gardener.png",
+    "sourceSha256": "f1542f08a50cf0c2351c55d583b3a24f9edc6ad8f124fb696b265dd8c5c1b5d0",
+    "gutters": {
+      "vertical": 75,
+      "left": 112,
+      "right": 85
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "芽吹きの一矢",
+        "file": "public/sprites/lantern-war/cutins/high-school-gardener-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 646,
+          "height": 619
+        },
+        "trimmedSize": [
+          548,
+          517
+        ],
+        "normalizationScale": 1.3375912408759123,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "05d03e8eb9d2ad59afb92442ee0305e98d4f85719218047d14ca138b2dd996f8"
+      },
+      {
+        "skill": "art2",
+        "name": "蔓絡み",
+        "file": "public/sprites/lantern-war/cutins/high-school-gardener-art2.webp",
+        "sourceRect": {
+          "left": 646,
+          "top": 0,
+          "width": 608,
+          "height": 606
+        },
+        "trimmedSize": [
+          534,
+          514
+        ],
+        "normalizationScale": 1.3764044943820224,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "01d4eb7097177ef05b730d590fdfbaddc7eaede71e6004ee62f8e0b13086bf84"
+      },
+      {
+        "skill": "art3",
+        "name": "種まきの連弓",
+        "file": "public/sprites/lantern-war/cutins/high-school-gardener-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 619,
+          "width": 646,
+          "height": 635
+        },
+        "trimmedSize": [
+          552,
+          517
+        ],
+        "normalizationScale": 1.3242753623188406,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "718009ded657062727100c996cd743eea8af8c53ddc211b47c1946fa6f919b97"
+      },
+      {
+        "skill": "ultimate",
+        "name": "荒野の芽吹き",
+        "file": "public/sprites/lantern-war/cutins/high-school-gardener-ultimate.webp",
+        "sourceRect": {
+          "left": 646,
+          "top": 606,
+          "width": 608,
+          "height": 648
+        },
+        "trimmedSize": [
+          524,
+          582
+        ],
+        "normalizationScale": 1.2766323024054982,
+        "contentLongEdge": 743,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "0033cf8200ed0dc5d5b7b025c7b8f405b99d7edbdad939ee5d76f8dc729469d7"
+      }
+    ]
+  },
+  {
+    "id": "magic-akari",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-akari.png",
+    "sourceSha256": "f97be195a77fe283eee2cfcf5b419441204c16e652991689ee9ab2bc94953608",
+    "gutters": {
+      "vertical": 81,
+      "left": 52,
+      "right": 25
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "星火の粒",
+        "file": "public/sprites/lantern-war/cutins/magic-akari-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 671,
+          "height": 615
+        },
+        "trimmedSize": [
+          565,
+          547
+        ],
+        "normalizationScale": 1.297345132743363,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4d76829c2daa7885bb14bb08e79ed4ab4d4b9783930e50d6527c3e061bf6ddcc"
+      },
+      {
+        "skill": "art2",
+        "name": "願いの応援",
+        "file": "public/sprites/lantern-war/cutins/magic-akari-art2.webp",
+        "sourceRect": {
+          "left": 671,
+          "top": 0,
+          "width": 607,
+          "height": 615
+        },
+        "trimmedSize": [
+          505,
+          553
+        ],
+        "normalizationScale": 1.3363471971066907,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7bf61690aff41d02e52ac87c00ec19a306b0d8b55328117143d7c23a08f331a8"
+      },
+      {
+        "skill": "art3",
+        "name": "流星の花束",
+        "file": "public/sprites/lantern-war/cutins/magic-akari-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 615,
+          "width": 671,
+          "height": 615
+        },
+        "trimmedSize": [
+          571,
+          550
+        ],
+        "normalizationScale": 1.276707530647986,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4161225c04d0f6a0c1192c204492823ba12d65327d53aca88227ec40a2b65a15"
+      },
+      {
+        "skill": "ultimate",
+        "name": "スターリンク",
+        "file": "public/sprites/lantern-war/cutins/magic-akari-ultimate.webp",
+        "sourceRect": {
+          "left": 671,
+          "top": 615,
+          "width": 607,
+          "height": 615
+        },
+        "trimmedSize": [
+          523,
+          571
+        ],
+        "normalizationScale": 1.2942206654991244,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a64ae545ecd663366de8b8ba669aecbe8deda431a1145a49dd47a53d75758836"
+      }
+    ]
+  },
+  {
+    "id": "magic-shizuku",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-shizuku.png",
+    "sourceSha256": "76c68a98cf053507326d8568543dfa83a60d3c313973e0e5e204f753a7c49a8a",
+    "gutters": {
+      "vertical": 63,
+      "left": 56,
+      "right": 58
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "水鏡の針",
+        "file": "public/sprites/lantern-war/cutins/magic-shizuku-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 629,
+          "height": 621
+        },
+        "trimmedSize": [
+          573,
+          549
+        ],
+        "normalizationScale": 1.293193717277487,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "96aab2d7a25839a89885fb751c1ad4a6e1fda79a96a7858714931b182a6e0cdd"
+      },
+      {
+        "skill": "art2",
+        "name": "凪の抱擁",
+        "file": "public/sprites/lantern-war/cutins/magic-shizuku-art2.webp",
+        "sourceRect": {
+          "left": 629,
+          "top": 0,
+          "width": 625,
+          "height": 626
+        },
+        "trimmedSize": [
+          562,
+          567
+        ],
+        "normalizationScale": 1.306878306878307,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a582c1098c14820405dabf12b9eff8a661591b6ae0671050c9cd9ddfe185575b"
+      },
+      {
+        "skill": "art3",
+        "name": "氷晶の結び目",
+        "file": "public/sprites/lantern-war/cutins/magic-shizuku-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 621,
+          "width": 629,
+          "height": 633
+        },
+        "trimmedSize": [
+          569,
+          568
+        ],
+        "normalizationScale": 1.281195079086116,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "22b8932f4eac1efbf90cb7e299a1d520d776ccbc6efcd40d5d69c6f86d13fb9d"
+      },
+      {
+        "skill": "ultimate",
+        "name": "ルナリフレクト",
+        "file": "public/sprites/lantern-war/cutins/magic-shizuku-ultimate.webp",
+        "sourceRect": {
+          "left": 629,
+          "top": 626,
+          "width": 625,
+          "height": 628
+        },
+        "trimmedSize": [
+          583,
+          570
+        ],
+        "normalizationScale": 1.267581475128645,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "d1e6ff59849c200b9e5b07bce5b9f4c4e9deea215e4eae7210c1c9e806983f7d"
+      }
+    ]
+  },
+  {
+    "id": "magic-hiyori",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-hiyori.png",
+    "sourceSha256": "8aee5e14fa66f30da49dfb10d26e3b733b85865ce9ae9d7f28607e60e58d8af1",
+    "gutters": {
+      "vertical": 115,
+      "left": 68,
+      "right": 104
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "花びらの手当て",
+        "file": "public/sprites/lantern-war/cutins/magic-hiyori-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 632,
+          "height": 583
+        },
+        "trimmedSize": [
+          467,
+          474
+        ],
+        "normalizationScale": 1.5316455696202531,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "6e662270c01822e1506f142fcc99497aefb97ca2d3cc0b2e4cfecdb1c678003b"
+      },
+      {
+        "skill": "art2",
+        "name": "陽だまりの円",
+        "file": "public/sprites/lantern-war/cutins/magic-hiyori-art2.webp",
+        "sourceRect": {
+          "left": 632,
+          "top": 0,
+          "width": 646,
+          "height": 614
+        },
+        "trimmedSize": [
+          540,
+          518
+        ],
+        "normalizationScale": 1.3611111111111112,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "d8fcb047d1cc63a69fe0d4754ff81bfbeb7ee3bfb359df6cb46186d48b36cf30"
+      },
+      {
+        "skill": "art3",
+        "name": "春告げの祝福",
+        "file": "public/sprites/lantern-war/cutins/magic-hiyori-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 583,
+          "width": 632,
+          "height": 647
+        },
+        "trimmedSize": [
+          486,
+          568
+        ],
+        "normalizationScale": 1.295774647887324,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ef95dff1fe6f5ef781690cf524421f3e12d88be6ee5cf4269b24aaae974fc216"
+      },
+      {
+        "skill": "ultimate",
+        "name": "ブルームヒール",
+        "file": "public/sprites/lantern-war/cutins/magic-hiyori-ultimate.webp",
+        "sourceRect": {
+          "left": 632,
+          "top": 614,
+          "width": 646,
+          "height": 616
+        },
+        "trimmedSize": [
+          570,
+          514
+        ],
+        "normalizationScale": 1.287719298245614,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4f06ba918ae8f1f7b760d9c902d247f885b1eb728b4f4cf7135db0615862611a"
+      }
+    ]
+  },
+  {
+    "id": "magic-tsubasa",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-tsubasa.png",
+    "sourceSha256": "99f4c60a64e38f573f5be14a9344ff49a36cfa3ec8b78e580bd7c18cd80b9f74",
+    "gutters": {
+      "vertical": 40,
+      "left": 61,
+      "right": 33
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "焔翼の爪",
+        "file": "public/sprites/lantern-war/cutins/magic-tsubasa-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 642,
+          "height": 638
+        },
+        "trimmedSize": [
+          576,
+          564
+        ],
+        "normalizationScale": 1.2690972222222223,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "c046e2f18a21f66e3e1eb41d2df9332857c2b4d195be8cc1efe78603f53e793c"
+      },
+      {
+        "skill": "art2",
+        "name": "火勢の鼓舞",
+        "file": "public/sprites/lantern-war/cutins/magic-tsubasa-art2.webp",
+        "sourceRect": {
+          "left": 642,
+          "top": 0,
+          "width": 612,
+          "height": 635
+        },
+        "trimmedSize": [
+          547,
+          613
+        ],
+        "normalizationScale": 1.2169657422512234,
+        "contentLongEdge": 746,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "12338059bda0ef6fe0e3a0726245472e7ec639f3e1aa4f95b64ca72e0fa0536e"
+      },
+      {
+        "skill": "art3",
+        "name": "紅蓮の旋回",
+        "file": "public/sprites/lantern-war/cutins/magic-tsubasa-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 638,
+          "width": 642,
+          "height": 616
+        },
+        "trimmedSize": [
+          580,
+          550
+        ],
+        "normalizationScale": 1.256896551724138,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "f00f469462188499f8131ae002f8303304400df29b0b62bd2ac7bde663341481"
+      },
+      {
+        "skill": "ultimate",
+        "name": "フォージバースト",
+        "file": "public/sprites/lantern-war/cutins/magic-tsubasa-ultimate.webp",
+        "sourceRect": {
+          "left": 642,
+          "top": 635,
+          "width": 612,
+          "height": 619
+        },
+        "trimmedSize": [
+          575,
+          573
+        ],
+        "normalizationScale": 1.2678260869565217,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a437e30cf1daa5d57dc3b9401561e30009cb1acd9c018e05f01d33a0afd86473"
+      }
+    ]
+  },
+  {
+    "id": "magic-rei",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-rei.png",
+    "sourceSha256": "559e435835109d261c30449e598143c237951081fba1c1cfebafa7cb1b05c153",
+    "gutters": {
+      "vertical": 55,
+      "left": 60,
+      "right": 20
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "夜羽の突き",
+        "file": "public/sprites/lantern-war/cutins/magic-rei-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 650,
+          "height": 601
+        },
+        "trimmedSize": [
+          577,
+          533
+        ],
+        "normalizationScale": 1.2634315424610052,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "201c5d5d3a2156e6a0704985b9be4b422dfeab956b4a9ef4fcee14d14e0c9a61"
+      },
+      {
+        "skill": "art2",
+        "name": "黒羽の目眩",
+        "file": "public/sprites/lantern-war/cutins/magic-rei-art2.webp",
+        "sourceRect": {
+          "left": 650,
+          "top": 0,
+          "width": 628,
+          "height": 589
+        },
+        "trimmedSize": [
+          569,
+          536
+        ],
+        "normalizationScale": 1.2759226713532512,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "c177463ac5aa30f487f1c48616899421e0d333f5c03f93f517cb0b560b5b392a"
+      },
+      {
+        "skill": "art3",
+        "name": "月蝕の追い刃",
+        "file": "public/sprites/lantern-war/cutins/magic-rei-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 601,
+          "width": 650,
+          "height": 629
+        },
+        "trimmedSize": [
+          594,
+          556
+        ],
+        "normalizationScale": 1.2272727272727273,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "466cfe65f58341c1c70e6123415cc8774dc9befcb71b0deed64a7313df03f513"
+      },
+      {
+        "skill": "ultimate",
+        "name": "影札結界",
+        "file": "public/sprites/lantern-war/cutins/magic-rei-ultimate.webp",
+        "sourceRect": {
+          "left": 650,
+          "top": 589,
+          "width": 628,
+          "height": 641
+        },
+        "trimmedSize": [
+          590,
+          597
+        ],
+        "normalizationScale": 1.2077051926298157,
+        "contentLongEdge": 721,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "291f1be894839f6ff25e265d6bdcf4087f16750176e00efd1406edf8cb8d650a"
+      }
+    ]
+  },
+  {
+    "id": "magic-madoka",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-madoka.png",
+    "sourceSha256": "ed1b1e0d8b5168cc8a00b6b90b06c25c75de4273359f64aecd17e201755f6cbc",
+    "gutters": {
+      "vertical": 71,
+      "left": 76,
+      "right": 79
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "翠風の刃",
+        "file": "public/sprites/lantern-war/cutins/magic-madoka-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 647,
+          "height": 632
+        },
+        "trimmedSize": [
+          582,
+          579
+        ],
+        "normalizationScale": 1.2646048109965635,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a0fa649c1c0b34404f80ca4830ff3c3d49e2d6f7c6a1ebce9fb659c43f438856"
+      },
+      {
+        "skill": "art2",
+        "name": "結びのそよ風",
+        "file": "public/sprites/lantern-war/cutins/magic-madoka-art2.webp",
+        "sourceRect": {
+          "left": 647,
+          "top": 0,
+          "width": 607,
+          "height": 618
+        },
+        "trimmedSize": [
+          550,
+          529
+        ],
+        "normalizationScale": 1.3363636363636364,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e4b7cf8b8e78767ccdcc8d7310b3e49b8db0ec8e7d2b85c084b246905aacc79c"
+      },
+      {
+        "skill": "art3",
+        "name": "若葉の輪舞",
+        "file": "public/sprites/lantern-war/cutins/magic-madoka-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 632,
+          "width": 647,
+          "height": 622
+        },
+        "trimmedSize": [
+          583,
+          553
+        ],
+        "normalizationScale": 1.267581475128645,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e960aec9e88ee79a19e92876a793997e634d43b35bf4854df499090420a9cede"
+      },
+      {
+        "skill": "ultimate",
+        "name": "クロックリロード",
+        "file": "public/sprites/lantern-war/cutins/magic-madoka-ultimate.webp",
+        "sourceRect": {
+          "left": 647,
+          "top": 618,
+          "width": 607,
+          "height": 636
+        },
+        "trimmedSize": [
+          535,
+          601
+        ],
+        "normalizationScale": 1.3044925124792013,
+        "contentLongEdge": 784,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "1fa02c38327785f0645254003ca5ba06e72becdcb3be19fc216373c4b3066218"
+      }
+    ]
+  },
+  {
+    "id": "magic-koharu",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-koharu.png",
+    "sourceSha256": "aa7d5425c085635a9e18fd2290f90944501c40dc2de847b16b1353ea2e673c35",
+    "gutters": {
+      "vertical": 41,
+      "left": 52,
+      "right": 44
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "風見の矢",
+        "file": "public/sprites/lantern-war/cutins/magic-koharu-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 651,
+          "height": 622
+        },
+        "trimmedSize": [
+          592,
+          598
+        ],
+        "normalizationScale": 1.225752508361204,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e8c8a52f0f64865299c169c7adcc129a294c6e4c4a4a5960ad0cac5af6cc64fd"
+      },
+      {
+        "skill": "art2",
+        "name": "追い風の歌",
+        "file": "public/sprites/lantern-war/cutins/magic-koharu-art2.webp",
+        "sourceRect": {
+          "left": 651,
+          "top": 0,
+          "width": 612,
+          "height": 627
+        },
+        "trimmedSize": [
+          580,
+          609
+        ],
+        "normalizationScale": 1.2364532019704433,
+        "contentLongEdge": 753,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ec6175ad25760c3c149e2ac2cb3ce03ae07c0412784afb89768f59cfa1326856"
+      },
+      {
+        "skill": "art3",
+        "name": "風渡りの連射",
+        "file": "public/sprites/lantern-war/cutins/magic-koharu-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 622,
+          "width": 651,
+          "height": 624
+        },
+        "trimmedSize": [
+          608,
+          548
+        ],
+        "normalizationScale": 1.2023026315789473,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "6ea0228ad73f207edbc01a6711a3682c02c8bad28a4ee46a949025f7641fc979"
+      },
+      {
+        "skill": "ultimate",
+        "name": "ゲイルステップ",
+        "file": "public/sprites/lantern-war/cutins/magic-koharu-ultimate.webp",
+        "sourceRect": {
+          "left": 651,
+          "top": 627,
+          "width": 612,
+          "height": 619
+        },
+        "trimmedSize": [
+          585,
+          571
+        ],
+        "normalizationScale": 1.2717948717948717,
+        "contentLongEdge": 744,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "22469cb7c092483e44c34dbeaf65409fd9b053dc9c597591cf900ab6350a1ddc"
+      }
+    ]
+  },
+  {
+    "id": "magic-mirai",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-mirai.png",
+    "sourceSha256": "942550ff0989066bd10ce0a736d3227a8f48322e0db80516686745d6e11a8551",
+    "gutters": {
+      "vertical": 106,
+      "left": 28,
+      "right": 11
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "紫電の粒",
+        "file": "public/sprites/lantern-war/cutins/magic-mirai-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 730,
+          "height": 557
+        },
+        "trimmedSize": [
+          603,
+          490
+        ],
+        "normalizationScale": 1.2106135986733002,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "d00a8f50ef9cbd8ff50d5066bbe8a28de10e47a0c527bb5366e4bc207d4409c9"
+      },
+      {
+        "skill": "art2",
+        "name": "明日への予告",
+        "file": "public/sprites/lantern-war/cutins/magic-mirai-art2.webp",
+        "sourceRect": {
+          "left": 730,
+          "top": 0,
+          "width": 685,
+          "height": 559
+        },
+        "trimmedSize": [
+          577,
+          542
+        ],
+        "normalizationScale": 1.2738301559792027,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "5534421a48e1ea607979b909fc12c04351b90206cc3830e61cb6542c914c2bb4"
+      },
+      {
+        "skill": "art3",
+        "name": "可能性の分岐",
+        "file": "public/sprites/lantern-war/cutins/magic-mirai-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 557,
+          "width": 730,
+          "height": 554
+        },
+        "trimmedSize": [
+          531,
+          520
+        ],
+        "normalizationScale": 1.3822975517890772,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "c4887c0fdce649b9be4415d554a82464db1332d55109b453bc47a38cfcf5a0d3"
+      },
+      {
+        "skill": "ultimate",
+        "name": "ドリームアンコール",
+        "file": "public/sprites/lantern-war/cutins/magic-mirai-ultimate.webp",
+        "sourceRect": {
+          "left": 730,
+          "top": 559,
+          "width": 685,
+          "height": 552
+        },
+        "trimmedSize": [
+          569,
+          535
+        ],
+        "normalizationScale": 1.2741652021089631,
+        "contentLongEdge": 725,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e53e271b8971b4a903a6ada40a277683029ad8ecf0bdac39828edfea4e60627c"
+      }
+    ]
+  },
+  {
+    "id": "magic-sera",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-sera.png",
+    "sourceSha256": "8a129400d88a522d7fff47a1f56d7bf3106818a9e13bd400c1d71a785c68241a",
+    "gutters": {
+      "vertical": 281,
+      "left": 85,
+      "right": 104
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "雪明かりの癒し",
+        "file": "public/sprites/lantern-war/cutins/magic-sera-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 711,
+          "height": 564
+        },
+        "trimmedSize": [
+          401,
+          429
+        ],
+        "normalizationScale": 1.710955710955711,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "f6f0a4de85b8e83022117e76cc4e10b9e0eacb9f3d0d9211fad040260157e7ae"
+      },
+      {
+        "skill": "art2",
+        "name": "白峰の守り",
+        "file": "public/sprites/lantern-war/cutins/magic-sera-art2.webp",
+        "sourceRect": {
+          "left": 711,
+          "top": 0,
+          "width": 704,
+          "height": 577
+        },
+        "trimmedSize": [
+          413,
+          428
+        ],
+        "normalizationScale": 1.72196261682243,
+        "contentLongEdge": 737,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "9938284708b43bb71dcaef011bc52b92c3a3c458a87110b0674e29d904526273"
+      },
+      {
+        "skill": "art3",
+        "name": "銀雪の祈り",
+        "file": "public/sprites/lantern-war/cutins/magic-sera-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 564,
+          "width": 711,
+          "height": 547
+        },
+        "trimmedSize": [
+          396,
+          461
+        ],
+        "normalizationScale": 1.6073752711496747,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "8e4b14a5a822285710cb3feb3dfc67b162d11a281689633f47601f1b319c6317"
+      },
+      {
+        "skill": "ultimate",
+        "name": "セレスティアルコード",
+        "file": "public/sprites/lantern-war/cutins/magic-sera-ultimate.webp",
+        "sourceRect": {
+          "left": 711,
+          "top": 577,
+          "width": 704,
+          "height": 534
+        },
+        "trimmedSize": [
+          442,
+          426
+        ],
+        "normalizationScale": 1.6855203619909502,
+        "contentLongEdge": 745,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4718e104495185603af9b5f2f990dc6af98731b85da692af594afe4bad83c95b"
+      }
+    ]
+  },
+  {
+    "id": "magic-ren",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-ren.png",
+    "sourceSha256": "ec8ff1f37bbfaab690e5f481e3c45dac1bfe71bf0df985c1953903b8542755b3",
+    "gutters": {
+      "vertical": 45,
+      "left": 81,
+      "right": 44
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "朝霧の槍先",
+        "file": "public/sprites/lantern-war/cutins/magic-ren-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 626,
+          "height": 635
+        },
+        "trimmedSize": [
+          571,
+          541
+        ],
+        "normalizationScale": 1.287215411558669,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "930bf57d4be6d64867a03da2c5046072577a1edfcd8a59ea68354a925cfb9e68"
+      },
+      {
+        "skill": "art2",
+        "name": "雲間の号令",
+        "file": "public/sprites/lantern-war/cutins/magic-ren-art2.webp",
+        "sourceRect": {
+          "left": 626,
+          "top": 0,
+          "width": 628,
+          "height": 646
+        },
+        "trimmedSize": [
+          582,
+          578
+        ],
+        "normalizationScale": 1.2628865979381443,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "07bba848f20c5d66c113409f903c640281b5cd13ca53eb32c67ef6a3b14233c1"
+      },
+      {
+        "skill": "art3",
+        "name": "黎光の貫き",
+        "file": "public/sprites/lantern-war/cutins/magic-ren-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 635,
+          "width": 626,
+          "height": 619
+        },
+        "trimmedSize": [
+          562,
+          539
+        ],
+        "normalizationScale": 1.2971530249110321,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "eb5cbae7012d6c5a927d8e56d107be9d7f31b3b13474136b399ea7a02d8aab89"
+      },
+      {
+        "skill": "ultimate",
+        "name": "風の防護",
+        "file": "public/sprites/lantern-war/cutins/magic-ren-ultimate.webp",
+        "sourceRect": {
+          "left": 626,
+          "top": 646,
+          "width": 628,
+          "height": 608
+        },
+        "trimmedSize": [
+          592,
+          560
+        ],
+        "normalizationScale": 1.258445945945946,
+        "contentLongEdge": 745,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "77fbfbd36e3efef5bda0f0298109fd1dc5e3c0630f0ef62d4d1e4e19526417e4"
+      }
+    ]
+  },
+  {
+    "id": "magic-soma",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-soma.png",
+    "sourceSha256": "34e519e97ddef0b7b89a5ff8fb22793cc38878d01f35fa47f27e8731abeaa3a1",
+    "gutters": {
+      "vertical": 302,
+      "left": 147,
+      "right": 104
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "影砕きの槍",
+        "file": "public/sprites/lantern-war/cutins/magic-soma-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 740,
+          "height": 588
+        },
+        "trimmedSize": [
+          465,
+          383
+        ],
+        "normalizationScale": 1.5612903225806452,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ec3cf114035cea7e84b0888829d7d83da48e85b1519bbcefef0b7aaed009ed82"
+      },
+      {
+        "skill": "art2",
+        "name": "静寂の盾",
+        "file": "public/sprites/lantern-war/cutins/magic-soma-art2.webp",
+        "sourceRect": {
+          "left": 740,
+          "top": 0,
+          "width": 675,
+          "height": 555
+        },
+        "trimmedSize": [
+          417,
+          389
+        ],
+        "normalizationScale": 1.776978417266187,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "166f41b6abb52e4b5584295529d22d4afd9d996f8e8f8bacfd9e6059c3c9764c"
+      },
+      {
+        "skill": "art3",
+        "name": "深影の追撃",
+        "file": "public/sprites/lantern-war/cutins/magic-soma-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 588,
+          "width": 740,
+          "height": 523
+        },
+        "trimmedSize": [
+          445,
+          370
+        ],
+        "normalizationScale": 1.6292134831460674,
+        "contentLongEdge": 725,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4445f480e3378bc292bebb7b4e82721938f2b029d77a8cb4bef83df7fffb62fd"
+      },
+      {
+        "skill": "ultimate",
+        "name": "氷の秩序",
+        "file": "public/sprites/lantern-war/cutins/magic-soma-ultimate.webp",
+        "sourceRect": {
+          "left": 740,
+          "top": 555,
+          "width": 675,
+          "height": 556
+        },
+        "trimmedSize": [
+          370,
+          459
+        ],
+        "normalizationScale": 1.5991285403050108,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "b707dc41b07be5f20162830bf4d774a28795d6da51e96b78bcf4d3fdb862e7e6"
+      }
+    ]
+  },
+  {
+    "id": "magic-minato",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-minato.png",
+    "sourceSha256": "2294354573453fa2bcea72e4b6f08614b00e577fc39609099cd7f3116c99a293",
+    "gutters": {
+      "vertical": 88,
+      "left": 55,
+      "right": 44
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "波紋の手当て",
+        "file": "public/sprites/lantern-war/cutins/magic-minato-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 646,
+          "height": 594
+        },
+        "trimmedSize": [
+          534,
+          546
+        ],
+        "normalizationScale": 1.3663003663003663,
+        "contentLongEdge": 746,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "81b9440b4eded5f23607475e86f4b012f31d491c1b59f74f3b21c4ce3965ca38"
+      },
+      {
+        "skill": "art2",
+        "name": "潮騒の浄化",
+        "file": "public/sprites/lantern-war/cutins/magic-minato-art2.webp",
+        "sourceRect": {
+          "left": 646,
+          "top": 0,
+          "width": 617,
+          "height": 645
+        },
+        "trimmedSize": [
+          559,
+          612
+        ],
+        "normalizationScale": 1.1895424836601307,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "00115b0d4c292c5b67e6e7a758fe7dcacbfc0257d8f00d1ff9d7fa08e2659a22"
+      },
+      {
+        "skill": "art3",
+        "name": "港灯の大円",
+        "file": "public/sprites/lantern-war/cutins/magic-minato-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 594,
+          "width": 646,
+          "height": 652
+        },
+        "trimmedSize": [
+          527,
+          577
+        ],
+        "normalizationScale": 1.266897746967071,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "61922d761e1ac4b306e08b682a9c38dc229ca25f471fc7db2c65db4cabe2aaa4"
+      },
+      {
+        "skill": "ultimate",
+        "name": "水の治癒",
+        "file": "public/sprites/lantern-war/cutins/magic-minato-ultimate.webp",
+        "sourceRect": {
+          "left": 646,
+          "top": 645,
+          "width": 617,
+          "height": 601
+        },
+        "trimmedSize": [
+          552,
+          525
+        ],
+        "normalizationScale": 1.3460144927536233,
+        "contentLongEdge": 743,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "cc34ca3649ab9fd702957802ae7e0f700677c9b8c01bd110004a67e5b781ed8d"
+      }
+    ]
+  },
+  {
+    "id": "magic-riku",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-riku.png",
+    "sourceSha256": "778072baf3a5796f93fa8cf7a3cfe79765a84413facda295283351bbab2bd90d",
+    "gutters": {
+      "vertical": 166,
+      "left": 106,
+      "right": 44
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "共鳴の矢",
+        "file": "public/sprites/lantern-war/cutins/magic-riku-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 747,
+          "height": 577
+        },
+        "trimmedSize": [
+          466,
+          478
+        ],
+        "normalizationScale": 1.5313807531380754,
+        "contentLongEdge": 732,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "5a010525ad5cef16a00e1fe7312faec82edb5a9213dba69c3eca245a0cba04e5"
+      },
+      {
+        "skill": "art2",
+        "name": "調律の拍",
+        "file": "public/sprites/lantern-war/cutins/magic-riku-art2.webp",
+        "sourceRect": {
+          "left": 747,
+          "top": 0,
+          "width": 668,
+          "height": 583
+        },
+        "trimmedSize": [
+          372,
+          497
+        ],
+        "normalizationScale": 1.4748490945674044,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "e12c4f353751d5c5422b9f7e74a06ca45c498791b63c4f5f4dee950b464449a6"
+      },
+      {
+        "skill": "art3",
+        "name": "交響の波動",
+        "file": "public/sprites/lantern-war/cutins/magic-riku-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 577,
+          "width": 747,
+          "height": 534
+        },
+        "trimmedSize": [
+          485,
+          367
+        ],
+        "normalizationScale": 1.5092783505154639,
+        "contentLongEdge": 732,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "c985299df64953604c0828a1f5a4c118c5e91cc569791d3f8012f86f9b014bbb"
+      },
+      {
+        "skill": "ultimate",
+        "name": "時間観測",
+        "file": "public/sprites/lantern-war/cutins/magic-riku-ultimate.webp",
+        "sourceRect": {
+          "left": 747,
+          "top": 583,
+          "width": 668,
+          "height": 528
+        },
+        "trimmedSize": [
+          429,
+          450
+        ],
+        "normalizationScale": 1.6466666666666667,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "1f4a505ff9e5e936f8e0c95874ff843464138dca540821e2effa9844e03f3063"
+      }
+    ]
+  },
+  {
+    "id": "magic-yamato",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-yamato.png",
+    "sourceSha256": "58c124ec1a62a1aa23987f5b9aa85ad4f38e193e0850eff8376b6137a932c9ac",
+    "gutters": {
+      "vertical": 226,
+      "left": 62,
+      "right": 58
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "黒鉄の割撃",
+        "file": "public/sprites/lantern-war/cutins/magic-yamato-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 730,
+          "height": 569
+        },
+        "trimmedSize": [
+          493,
+          455
+        ],
+        "normalizationScale": 1.4969574036511155,
+        "contentLongEdge": 738,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3524789da8bf782ec851f7ddf61cae20358554ae0bc3badbfbfdd06ee58140ef"
+      },
+      {
+        "skill": "art2",
+        "name": "不屈の城壁",
+        "file": "public/sprites/lantern-war/cutins/magic-yamato-art2.webp",
+        "sourceRect": {
+          "left": 730,
+          "top": 0,
+          "width": 685,
+          "height": 574
+        },
+        "trimmedSize": [
+          486,
+          462
+        ],
+        "normalizationScale": 1.5164609053497942,
+        "contentLongEdge": 737,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "888e126e65ffaed566d3d9eb162805ca722fae9db74972b690a8834eee5150f5"
+      },
+      {
+        "skill": "art3",
+        "name": "烈地の断罪",
+        "file": "public/sprites/lantern-war/cutins/magic-yamato-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 569,
+          "width": 730,
+          "height": 542
+        },
+        "trimmedSize": [
+          493,
+          454
+        ],
+        "normalizationScale": 1.4787018255578093,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "280c7b05236080765369b1d5809ad2205b3c54cb84dd558b6e0633f253a4ab8c"
+      },
+      {
+        "skill": "ultimate",
+        "name": "炎拳",
+        "file": "public/sprites/lantern-war/cutins/magic-yamato-ultimate.webp",
+        "sourceRect": {
+          "left": 730,
+          "top": 574,
+          "width": 685,
+          "height": 537
+        },
+        "trimmedSize": [
+          467,
+          451
+        ],
+        "normalizationScale": 1.5781584582441113,
+        "contentLongEdge": 737,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4318d23d4fafded5a3a2bc55df027d6b9d391640fb6e7d655fb83391b19757c8"
+      }
+    ]
+  },
+  {
+    "id": "magic-leon",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-leon.png",
+    "sourceSha256": "1d2ca149c3dffdd0e74c8a735022d856b949245f003cfb3825f7e395d6080e69",
+    "gutters": {
+      "vertical": 199,
+      "left": 124,
+      "right": 84
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "陽炎の火種",
+        "file": "public/sprites/lantern-war/cutins/magic-leon-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 712,
+          "height": 569
+        },
+        "trimmedSize": [
+          419,
+          428
+        ],
+        "normalizationScale": 1.705607476635514,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "f6a4db5521dc4ff34fda713c6a9873f695949dace4f6c8fd114007e0398cff8d"
+      },
+      {
+        "skill": "art2",
+        "name": "獅子の咆哮",
+        "file": "public/sprites/lantern-war/cutins/magic-leon-art2.webp",
+        "sourceRect": {
+          "left": 712,
+          "top": 0,
+          "width": 703,
+          "height": 569
+        },
+        "trimmedSize": [
+          409,
+          438
+        ],
+        "normalizationScale": 1.6552511415525115,
+        "contentLongEdge": 725,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "f00519afb0af541dd0e8e28f1206068ac7c8a1bcd5f81be19256e4ec2c11be76"
+      },
+      {
+        "skill": "art3",
+        "name": "天陽の輪",
+        "file": "public/sprites/lantern-war/cutins/magic-leon-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 569,
+          "width": 712,
+          "height": 542
+        },
+        "trimmedSize": [
+          437,
+          401
+        ],
+        "normalizationScale": 1.6819221967963387,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "d4411702a6b4656b96228ae2c5478fd05148dde9aa91e268d500ad6da77dbf19"
+      },
+      {
+        "skill": "ultimate",
+        "name": "音と幻術",
+        "file": "public/sprites/lantern-war/cutins/magic-leon-ultimate.webp",
+        "sourceRect": {
+          "left": 712,
+          "top": 569,
+          "width": 703,
+          "height": 542
+        },
+        "trimmedSize": [
+          428,
+          435
+        ],
+        "normalizationScale": 1.6620689655172414,
+        "contentLongEdge": 723,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4e7de298f2b78bafa0c32e5207cc6cedd0f90a647a2bebbe7ca3e37c62fa2ac4"
+      }
+    ]
+  },
+  {
+    "id": "magic-elliot",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-elliot.png",
+    "sourceSha256": "83f609cffccc586ae002ad3f17e4ddffa6ca9fef5f52fcb1fc1f22506e3ecf5b",
+    "gutters": {
+      "vertical": 229,
+      "left": 113,
+      "right": 75
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "夜譜の針",
+        "file": "public/sprites/lantern-war/cutins/magic-elliot-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 729,
+          "height": 568
+        },
+        "trimmedSize": [
+          457,
+          431
+        ],
+        "normalizationScale": 1.588621444201313,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "89b97d029f29bef42f78930c0cda1c235eb33f0420761b173d7596b60d23c88e"
+      },
+      {
+        "skill": "art2",
+        "name": "忘却の余韻",
+        "file": "public/sprites/lantern-war/cutins/magic-elliot-art2.webp",
+        "sourceRect": {
+          "left": 729,
+          "top": 0,
+          "width": 686,
+          "height": 540
+        },
+        "trimmedSize": [
+          445,
+          437
+        ],
+        "normalizationScale": 1.6404494382022472,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "350dc1a263acc83b3cab20404229d8588cd3e203351b9ffab9a273dad7de8fa2"
+      },
+      {
+        "skill": "art3",
+        "name": "星夜の終奏",
+        "file": "public/sprites/lantern-war/cutins/magic-elliot-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 568,
+          "width": 729,
+          "height": 543
+        },
+        "trimmedSize": [
+          495,
+          414
+        ],
+        "normalizationScale": 1.4808080808080808,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "293a91d4b4a5e4abf32261cf4ec48f9f813c92d2139e3c0e921895cf44063001"
+      },
+      {
+        "skill": "ultimate",
+        "name": "星界魔法",
+        "file": "public/sprites/lantern-war/cutins/magic-elliot-ultimate.webp",
+        "sourceRect": {
+          "left": 729,
+          "top": 540,
+          "width": 686,
+          "height": 571
+        },
+        "trimmedSize": [
+          451,
+          494
+        ],
+        "normalizationScale": 1.4716599190283401,
+        "contentLongEdge": 727,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "362e0971fa013de6a52e9286409b572f4266f849164ddca653e0cc17f50ab983"
+      }
+    ]
+  },
+  {
+    "id": "magic-sakuya",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/magic-sakuya.png",
+    "sourceSha256": "9277892d93628097d5fe72448e58980186b36523ac79638456fd68a1bb2075c8",
+    "gutters": {
+      "vertical": 190,
+      "left": 120,
+      "right": 47
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "朔月の一閃",
+        "file": "public/sprites/lantern-war/cutins/magic-sakuya-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 748,
+          "height": 559
+        },
+        "trimmedSize": [
+          499,
+          388
+        ],
+        "normalizationScale": 1.4629258517034067,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7b96d1e232e340197e1a844fa691f0521a3b8f3aa3f421dbcdfb6bd339658995"
+      },
+      {
+        "skill": "art2",
+        "name": "影留め",
+        "file": "public/sprites/lantern-war/cutins/magic-sakuya-art2.webp",
+        "sourceRect": {
+          "left": 748,
+          "top": 0,
+          "width": 667,
+          "height": 548
+        },
+        "trimmedSize": [
+          477,
+          471
+        ],
+        "normalizationScale": 1.5387840670859538,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "fe14f5c49e328c2f56344e690956cca887d98d6a486a8d9930c9056e741e3a86"
+      },
+      {
+        "skill": "art3",
+        "name": "無月の双影",
+        "file": "public/sprites/lantern-war/cutins/magic-sakuya-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 559,
+          "width": 748,
+          "height": 552
+        },
+        "trimmedSize": [
+          514,
+          414
+        ],
+        "normalizationScale": 1.4202334630350195,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "cea5aa60cd81c51094c532ba6c52f8476ae7fc6fe3e097c91204cfc8d45dd873"
+      },
+      {
+        "skill": "ultimate",
+        "name": "闇と封印",
+        "file": "public/sprites/lantern-war/cutins/magic-sakuya-ultimate.webp",
+        "sourceRect": {
+          "left": 748,
+          "top": 548,
+          "width": 667,
+          "height": 563
+        },
+        "trimmedSize": [
+          446,
+          507
+        ],
+        "normalizationScale": 1.4595660749506902,
+        "contentLongEdge": 740,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "c76e452647a94ef5f798cf43312eb6a3b51673f2c98775a4f227f6d87fc86489"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-lyria",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-lyria.png",
+    "sourceSha256": "d6cc7147df279b33a8d813f6fb2f4a7119e11b5a3dc5f23bf478316b5e3efad7",
+    "gutters": {
+      "vertical": 200,
+      "left": 127,
+      "right": 46
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "星剣の刺突",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-lyria-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 714,
+          "height": 563
+        },
+        "trimmedSize": [
+          479,
+          357
+        ],
+        "normalizationScale": 1.5281837160751566,
+        "contentLongEdge": 732,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4ed9ae5d3eda49c6c9400be37b96935f04eeb11e7441447ace67e3d3f4696639"
+      },
+      {
+        "skill": "art2",
+        "name": "守星の構え",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-lyria-art2.webp",
+        "sourceRect": {
+          "left": 714,
+          "top": 0,
+          "width": 701,
+          "height": 527
+        },
+        "trimmedSize": [
+          452,
+          403
+        ],
+        "normalizationScale": 1.6106194690265487,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "23e138949c126636acd218c7faba6cda4db2e96cf87937b89cb44ef9d66b9374"
+      },
+      {
+        "skill": "art3",
+        "name": "星冠の追閃",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-lyria-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 563,
+          "width": 714,
+          "height": 548
+        },
+        "trimmedSize": [
+          467,
+          397
+        ],
+        "normalizationScale": 1.5653104925053534,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a16bf46ffa0f5efe671f9a289b3d0e59bba8cffd1eab069ebd989c8d06e03b94"
+      },
+      {
+        "skill": "ultimate",
+        "name": "天極グランドクロス",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-lyria-ultimate.webp",
+        "sourceRect": {
+          "left": 714,
+          "top": 527,
+          "width": 701,
+          "height": 584
+        },
+        "trimmedSize": [
+          450,
+          501
+        ],
+        "normalizationScale": 1.467065868263473,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "039ea14f92576268f921a3c5ce76befbfc706191cd36350aa1bd18940d558e2a"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-celis",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-celis.png",
+    "sourceSha256": "388cf6dd8cedc42a521693b327642748bff9373137a3cdb0d345e862e6da6456",
+    "gutters": {
+      "vertical": 201,
+      "left": 113,
+      "right": 82
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "霜花の針",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-celis-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 711,
+          "height": 559
+        },
+        "trimmedSize": [
+          478,
+          437
+        ],
+        "normalizationScale": 1.5292887029288702,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "23f9ba302e410e6c9b3f21e3c4bc1a5bfe8878fdae623c8f84dd932c79f5d54c"
+      },
+      {
+        "skill": "art2",
+        "name": "氷封の印",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-celis-art2.webp",
+        "sourceRect": {
+          "left": 711,
+          "top": 0,
+          "width": 704,
+          "height": 550
+        },
+        "trimmedSize": [
+          430,
+          455
+        ],
+        "normalizationScale": 1.6153846153846154,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ac6d1cb97d7fac4cc4929fab4a5b6c8de4a7a5876bbc077ae017f1886f1d817f"
+      },
+      {
+        "skill": "art3",
+        "name": "冬明けの浄雪",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-celis-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 559,
+          "width": 711,
+          "height": 552
+        },
+        "trimmedSize": [
+          468,
+          434
+        ],
+        "normalizationScale": 1.561965811965812,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "fe49e014bce0533955d11a5e2eb792dc38b7b9546a8342739e03655f0e86a084"
+      },
+      {
+        "skill": "ultimate",
+        "name": "絶零の王冠",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-celis-ultimate.webp",
+        "sourceRect": {
+          "left": 711,
+          "top": 550,
+          "width": 704,
+          "height": 561
+        },
+        "trimmedSize": [
+          467,
+          477
+        ],
+        "normalizationScale": 1.5450733752620545,
+        "contentLongEdge": 737,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "187ced78775dde288914b99cf810055668dfcfcab690f8bb48d0fff5a0263b2f"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-flora",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-flora.png",
+    "sourceSha256": "ab8efca25f1869627f098ef0a3026d9fd64700c1dc547b6790b213b9731e5a44",
+    "gutters": {
+      "vertical": 194,
+      "left": 130,
+      "right": 111
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "花蕾の矢",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-flora-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 733,
+          "height": 583
+        },
+        "trimmedSize": [
+          508,
+          455
+        ],
+        "normalizationScale": 1.454724409448819,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a2f2325a4dbfc06a3e765b267b87ef727200ed08a7d074991c43700f8b271dd2"
+      },
+      {
+        "skill": "art2",
+        "name": "根の抱擁",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-flora-art2.webp",
+        "sourceRect": {
+          "left": 733,
+          "top": 0,
+          "width": 682,
+          "height": 563
+        },
+        "trimmedSize": [
+          417,
+          412
+        ],
+        "normalizationScale": 1.7482014388489209,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "6217a57958c56412dd302595986ab20f4604cea740992013e88d24e4e166dcee"
+      },
+      {
+        "skill": "art3",
+        "name": "新緑の連弓",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-flora-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 583,
+          "width": 733,
+          "height": 528
+        },
+        "trimmedSize": [
+          474,
+          384
+        ],
+        "normalizationScale": 1.529535864978903,
+        "contentLongEdge": 725,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "fc7daec1707af24bae65a7a6a955aa1f176d4f85e5604266931ded908dc7ae3e"
+      },
+      {
+        "skill": "ultimate",
+        "name": "万花の結界",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-flora-ultimate.webp",
+        "sourceRect": {
+          "left": 733,
+          "top": 563,
+          "width": 682,
+          "height": 548
+        },
+        "trimmedSize": [
+          460,
+          436
+        ],
+        "normalizationScale": 1.6065217391304347,
+        "contentLongEdge": 739,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4722cc5e494a87fa4c87b40f6aea2ba01dcd67a5f7b2e5b6f7e530e40750cb91"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-noctia",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-noctia.png",
+    "sourceSha256": "443468945cda0a979c72708fded65103c5944e9f533dad54bb310d67eee0cbec",
+    "gutters": {
+      "vertical": 189,
+      "left": 88,
+      "right": 50
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "禁頁の吸光",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-noctia-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 708,
+          "height": 570
+        },
+        "trimmedSize": [
+          441,
+          433
+        ],
+        "normalizationScale": 1.655328798185941,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "9f9218a0d8ce0740b6fd207dd23facc5e21c8599e28634e39e117033a473227a"
+      },
+      {
+        "skill": "art2",
+        "name": "黒書の封印",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-noctia-art2.webp",
+        "sourceRect": {
+          "left": 708,
+          "top": 0,
+          "width": 707,
+          "height": 566
+        },
+        "trimmedSize": [
+          475,
+          451
+        ],
+        "normalizationScale": 1.5326315789473683,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "b85fb13b68c2470904b68fc8ca117dfb733e6fdf96a894e404d3dfde532a3434"
+      },
+      {
+        "skill": "art3",
+        "name": "夜の終わり",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-noctia-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 570,
+          "width": 708,
+          "height": 541
+        },
+        "trimmedSize": [
+          437,
+          432
+        ],
+        "normalizationScale": 1.6636155606407323,
+        "contentLongEdge": 727,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "03afbbbd8279670922f92d355eae12af0dfe194a85dde8cb7a3c533d192e1765"
+      },
+      {
+        "skill": "ultimate",
+        "name": "皆既月蝕",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-noctia-ultimate.webp",
+        "sourceRect": {
+          "left": 708,
+          "top": 566,
+          "width": 707,
+          "height": 545
+        },
+        "trimmedSize": [
+          454,
+          465
+        ],
+        "normalizationScale": 1.5827956989247312,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7645b356d9deeee22273a5099229522c718a5a4f004583eb0847750b99f0f77c"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-aurene",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-aurene.png",
+    "sourceSha256": "31a6252879e95d449fc1f218f42b6f7a66ddd27d0228e00cb8f4315f3c70f74a",
+    "gutters": {
+      "vertical": 202,
+      "left": 78,
+      "right": 55
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "金灯の癒し",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-aurene-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 709,
+          "height": 556
+        },
+        "trimmedSize": [
+          428,
+          418
+        ],
+        "normalizationScale": 1.7313084112149533,
+        "contentLongEdge": 741,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "8eeeb0463363492e8f01e3c0a959a2f7cb44a898e9a0677bfefd31242de2fdd1"
+      },
+      {
+        "skill": "art2",
+        "name": "祈りの洗礼",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-aurene-art2.webp",
+        "sourceRect": {
+          "left": 709,
+          "top": 0,
+          "width": 706,
+          "height": 551
+        },
+        "trimmedSize": [
+          425,
+          436
+        ],
+        "normalizationScale": 1.6811926605504588,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "2a77f3b441c5f4ccb31fad48f52195db37da7e81e616886795057ef70e588abc"
+      },
+      {
+        "skill": "art3",
+        "name": "黎明の聖環",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-aurene-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 556,
+          "width": 709,
+          "height": 555
+        },
+        "trimmedSize": [
+          449,
+          420
+        ],
+        "normalizationScale": 1.6325167037861916,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a3702f4dab64852efce9e088d057748e5ee65dafa6ed92521897e68cb11f52b0"
+      },
+      {
+        "skill": "ultimate",
+        "name": "聖日の祝祭",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-aurene-ultimate.webp",
+        "sourceRect": {
+          "left": 709,
+          "top": 551,
+          "width": 706,
+          "height": 560
+        },
+        "trimmedSize": [
+          473,
+          449
+        ],
+        "normalizationScale": 1.558139534883721,
+        "contentLongEdge": 737,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "38a53b7f38a763a43f1c2e2243ff84000a3dc2c47e4282e537b9315ed4f51c6f"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-ignis",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-ignis.png",
+    "sourceSha256": "dd88656750a5a30e3f4bade23a4210da151c87faa326d35b46b29b58bbb5c7ce",
+    "gutters": {
+      "vertical": 143,
+      "left": 152,
+      "right": 70
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "熾火の斬撃",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-ignis-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 735,
+          "height": 577
+        },
+        "trimmedSize": [
+          435,
+          357
+        ],
+        "normalizationScale": 1.6781609195402298,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "4d316c99d2184e38fe0f26d002a3297048db868bfd739c06f38ba7cac5e3f67f"
+      },
+      {
+        "skill": "art2",
+        "name": "勇炎の檄",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-ignis-art2.webp",
+        "sourceRect": {
+          "left": 735,
+          "top": 0,
+          "width": 680,
+          "height": 555
+        },
+        "trimmedSize": [
+          436,
+          447
+        ],
+        "normalizationScale": 1.6711409395973154,
+        "contentLongEdge": 747,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "66638bbe6f28eace3e37b95d985fa17ab08e605d0941027d14cc32aa79ef9fe0"
+      },
+      {
+        "skill": "art3",
+        "name": "火山の旋斧",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-ignis-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 577,
+          "width": 735,
+          "height": 534
+        },
+        "trimmedSize": [
+          471,
+          367
+        ],
+        "normalizationScale": 1.5414012738853504,
+        "contentLongEdge": 726,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "f04d0e13df05086ab858bee035ae621b6ce44564e91213a3a87f0b8c475393bf"
+      },
+      {
+        "skill": "ultimate",
+        "name": "紅蓮ブレイバー",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-ignis-ultimate.webp",
+        "sourceRect": {
+          "left": 735,
+          "top": 555,
+          "width": 680,
+          "height": 556
+        },
+        "trimmedSize": [
+          464,
+          447
+        ],
+        "normalizationScale": 1.5581896551724137,
+        "contentLongEdge": 723,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "61edf90c5abc022b6d27ff49d50cb67d169407c2c1b285d92511254c2bee323c"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-leon",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-leon.png",
+    "sourceSha256": "9fc5d45e15f046001c8a45133a25a9dd21d323cfd33721779ae59a60975c5864",
+    "gutters": {
+      "vertical": 175,
+      "left": 124,
+      "right": 71
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "獅盾の槍打",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leon-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 741,
+          "height": 560
+        },
+        "trimmedSize": [
+          505,
+          398
+        ],
+        "normalizationScale": 1.4396039603960396,
+        "contentLongEdge": 727,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "914e5fa280ae364fe66aee71fe4e9c0d33e820c8347f6a8ee34e83e417540eef"
+      },
+      {
+        "skill": "art2",
+        "name": "不退の誓い",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leon-art2.webp",
+        "sourceRect": {
+          "left": 741,
+          "top": 0,
+          "width": 674,
+          "height": 554
+        },
+        "trimmedSize": [
+          475,
+          427
+        ],
+        "normalizationScale": 1.5410526315789475,
+        "contentLongEdge": 732,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3b7b90c2819284e0e8529cb8be398f55c2b6888570d5e612510ef508f7a8cb50"
+      },
+      {
+        "skill": "art3",
+        "name": "城壁割り",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leon-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 560,
+          "width": 741,
+          "height": 551
+        },
+        "trimmedSize": [
+          522,
+          421
+        ],
+        "normalizationScale": 1.3946360153256705,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "a525ee7a589050275fe6a070c3031d9fb6762493006bbfcb999f5d5accfd4344"
+      },
+      {
+        "skill": "ultimate",
+        "name": "日輪エクスカリバー",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leon-ultimate.webp",
+        "sourceRect": {
+          "left": 741,
+          "top": 554,
+          "width": 674,
+          "height": 557
+        },
+        "trimmedSize": [
+          463,
+          465
+        ],
+        "normalizationScale": 1.5849462365591398,
+        "contentLongEdge": 737,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "376cd9194ffd6383533430300029bfc8ceec05d1abdc954e789b1bdbf6ccfea4"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-orion",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-orion.png",
+    "sourceSha256": "8b845039b36364832b17ed8f70c0eef2c5cd4f9f2943d43192adbae6693c0d96",
+    "gutters": {
+      "vertical": 122,
+      "left": 116,
+      "right": 85
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "宵闇の吸刃",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-orion-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 710,
+          "height": 563
+        },
+        "trimmedSize": [
+          468,
+          409
+        ],
+        "normalizationScale": 1.5726495726495726,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "bb92ee2945ae4ea546b6738a10650bca41c4792e6361819d81109e035ee8585a"
+      },
+      {
+        "skill": "art2",
+        "name": "星狩りの威圧",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-orion-art2.webp",
+        "sourceRect": {
+          "left": 710,
+          "top": 0,
+          "width": 705,
+          "height": 553
+        },
+        "trimmedSize": [
+          511,
+          420
+        ],
+        "normalizationScale": 1.4403131115459882,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "d168e3453d522396e0993dfe0361d14623d782f4284e228a001e958a5c064716"
+      },
+      {
+        "skill": "art3",
+        "name": "夜道の道標",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-orion-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 563,
+          "width": 710,
+          "height": 548
+        },
+        "trimmedSize": [
+          505,
+          389
+        ],
+        "normalizationScale": 1.4514851485148514,
+        "contentLongEdge": 733,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3e417c30c1f58f7bbf0f67cc2d76befa9699f4a200e8ecad00f37a3cc8ced8ce"
+      },
+      {
+        "skill": "ultimate",
+        "name": "黒月エクリプス",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-orion-ultimate.webp",
+        "sourceRect": {
+          "left": 710,
+          "top": 553,
+          "width": 705,
+          "height": 558
+        },
+        "trimmedSize": [
+          501,
+          433
+        ],
+        "normalizationScale": 1.4451097804391217,
+        "contentLongEdge": 724,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "6fbcecfacbfe476f7e82a721eb8f5515ddc81e5294592f6cfa814ddb76660373"
+      }
+    ]
+  },
+  {
+    "id": "dungeons2-leif",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-leif.png",
+    "sourceSha256": "4f650eefb812adfd9a786ee440f999b5f5c5a5b0b044e42ea5d9fc0da98d34f2",
+    "gutters": {
+      "vertical": 213,
+      "left": 91,
+      "right": 98
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "足跡消しの矢",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leif-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 730,
+          "height": 558
+        },
+        "trimmedSize": [
+          466,
+          410
+        ],
+        "normalizationScale": 1.5643776824034334,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7ee5dbcca17e8ac54e48099eee55e0cf52a0f1eace47a8b7877f83fa40dc4a95"
+      },
+      {
+        "skill": "art2",
+        "name": "影蔓の罠",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leif-art2.webp",
+        "sourceRect": {
+          "left": 730,
+          "top": 0,
+          "width": 685,
+          "height": 542
+        },
+        "trimmedSize": [
+          480,
+          383
+        ],
+        "normalizationScale": 1.5291666666666666,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "d4ee09a739791a01add042b9922b30eab320f5775d5c4c9fbd50a84b46d4f412"
+      },
+      {
+        "skill": "art3",
+        "name": "木漏れ日の連弓",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leif-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 558,
+          "width": 730,
+          "height": 553
+        },
+        "trimmedSize": [
+          501,
+          403
+        ],
+        "normalizationScale": 1.467065868263473,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ed2cbf215bec74c60912c51f818d92a4594176236693d7eb5471cd5158d4a9c3"
+      },
+      {
+        "skill": "ultimate",
+        "name": "千葉の流星雨",
+        "file": "public/sprites/lantern-war/cutins/dungeons2-leif-ultimate.webp",
+        "sourceRect": {
+          "left": 730,
+          "top": 542,
+          "width": 685,
+          "height": 569
+        },
+        "trimmedSize": [
+          492,
+          448
+        ],
+        "normalizationScale": 1.4959349593495934,
+        "contentLongEdge": 736,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "41665b45678ca803a22cd4aee6d91406a307bff0bb59a0bace958dc0ea911cd5"
+      }
+    ]
+  },
+  {
+    "id": "nagi",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/nagi.png",
+    "sourceSha256": "9f059f02c78004833548846d480a2379504a67f70a1ffbf36ecf4b738cc38e28",
+    "gutters": {
+      "vertical": 170,
+      "left": 115,
+      "right": 51
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "潮風の一矢",
+        "file": "public/sprites/lantern-war/cutins/nagi-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 733,
+          "height": 554
+        },
+        "trimmedSize": [
+          507,
+          387
+        ],
+        "normalizationScale": 1.4477317554240632,
+        "contentLongEdge": 734,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "bb057372a7e8dfc76387c72f6ed780173354f531296d78d2be707e98a3f39c11"
+      },
+      {
+        "skill": "art2",
+        "name": "帆を張る号令",
+        "file": "public/sprites/lantern-war/cutins/nagi-art2.webp",
+        "sourceRect": {
+          "left": 733,
+          "top": 0,
+          "width": 682,
+          "height": 555
+        },
+        "trimmedSize": [
+          486,
+          487
+        ],
+        "normalizationScale": 1.5030800821355237,
+        "contentLongEdge": 732,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "3e0b447f3816d445f52a56e08189418fe390532b2ed558f456c048f875535c2f"
+      },
+      {
+        "skill": "art3",
+        "name": "星海の散光",
+        "file": "public/sprites/lantern-war/cutins/nagi-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 554,
+          "width": 733,
+          "height": 557
+        },
+        "trimmedSize": [
+          499,
+          423
+        ],
+        "normalizationScale": 1.496993987975952,
+        "contentLongEdge": 747,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "ee2c3112a9eec8622e6c95494fc4b804e629a8bda22fa562bbf4216fd5e71ed8"
+      },
+      {
+        "skill": "ultimate",
+        "name": "新しい航路",
+        "file": "public/sprites/lantern-war/cutins/nagi-ultimate.webp",
+        "sourceRect": {
+          "left": 733,
+          "top": 555,
+          "width": 682,
+          "height": 556
+        },
+        "trimmedSize": [
+          472,
+          472
+        ],
+        "normalizationScale": 1.5423728813559323,
+        "contentLongEdge": 728,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "8aa50a69c9cb4550ed9f1ad5dfe7f84132973d4d241ff1e4ca560e6b1a44809a"
+      }
+    ]
+  },
+  {
+    "id": "mio",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/mio.png",
+    "sourceSha256": "01a2a2bd96b1e684c2c7718f61283f50fc0e9521e8010976ced21b8abbdf82cf",
+    "gutters": {
+      "vertical": 187,
+      "left": 117,
+      "right": 85
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "樹音の矢",
+        "file": "public/sprites/lantern-war/cutins/mio-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 724,
+          "height": 564
+        },
+        "trimmedSize": [
+          469,
+          428
+        ],
+        "normalizationScale": 1.5543710021321961,
+        "contentLongEdge": 729,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "940472c6b1cc86c5ca433a92570db9e7d35b108693580d27aca91731319c39f5"
+      },
+      {
+        "skill": "art2",
+        "name": "木霊の手当て",
+        "file": "public/sprites/lantern-war/cutins/mio-art2.webp",
+        "sourceRect": {
+          "left": 724,
+          "top": 0,
+          "width": 691,
+          "height": 550
+        },
+        "trimmedSize": [
+          435,
+          384
+        ],
+        "normalizationScale": 1.6781609195402298,
+        "contentLongEdge": 730,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "7b676bcc57b535356318fc7c4010f8eff0fa6fd21ee58400ba84a83445c4a16f"
+      },
+      {
+        "skill": "art3",
+        "name": "森渡りの連射",
+        "file": "public/sprites/lantern-war/cutins/mio-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 564,
+          "width": 724,
+          "height": 547
+        },
+        "trimmedSize": [
+          480,
+          398
+        ],
+        "normalizationScale": 1.5229166666666667,
+        "contentLongEdge": 731,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "6c9b89948ea169e1bae8044c3be4b1fb85fa1e26748e3f8e9ceea64ddfcbdffc"
+      },
+      {
+        "skill": "ultimate",
+        "name": "木霊の連矢",
+        "file": "public/sprites/lantern-war/cutins/mio-ultimate.webp",
+        "sourceRect": {
+          "left": 724,
+          "top": 550,
+          "width": 691,
+          "height": 561
+        },
+        "trimmedSize": [
+          499,
+          438
+        ],
+        "normalizationScale": 1.4729458917835672,
+        "contentLongEdge": 735,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "1bd836ab2ebcf33562bfb730dffb9bf344202a05ae6bff5ab7c78703f3eaab70"
+      }
+    ]
+  },
+  {
+    "id": "sena",
+    "generator": "ImageGen",
+    "source": "assets/lantern-war/technique-cutins/sena.png",
+    "sourceSha256": "9f92c502e4a1e6a3c18c8f172612b0cb27b8ebf0d6c0de02c3c2ff18f850db93",
+    "gutters": {
+      "vertical": 157,
+      "left": 85,
+      "right": 57
+    },
+    "frames": [
+      {
+        "skill": "art1",
+        "name": "歯車くだき",
+        "file": "public/sprites/lantern-war/cutins/sena-art1.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 0,
+          "width": 712,
+          "height": 561
+        },
+        "trimmedSize": [
+          445,
+          410
+        ],
+        "normalizationScale": 1.644943820224719,
+        "contentLongEdge": 732,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "54a92e9467d2e963a79e29b848b713cb5e364a54ebc48c3b3014f2f512217d59"
+      },
+      {
+        "skill": "art2",
+        "name": "巻き戻しの手当て",
+        "file": "public/sprites/lantern-war/cutins/sena-art2.webp",
+        "sourceRect": {
+          "left": 712,
+          "top": 0,
+          "width": 703,
+          "height": 556
+        },
+        "trimmedSize": [
+          436,
+          470
+        ],
+        "normalizationScale": 1.5851063829787233,
+        "contentLongEdge": 745,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "c76a1de092b3cd0e3d6d4aa119505e3f599c51edfd794e9fcf18c27a448a2280"
+      },
+      {
+        "skill": "art3",
+        "name": "時針の二連打",
+        "file": "public/sprites/lantern-war/cutins/sena-art3.webp",
+        "sourceRect": {
+          "left": 0,
+          "top": 561,
+          "width": 712,
+          "height": 550
+        },
+        "trimmedSize": [
+          469,
+          437
+        ],
+        "normalizationScale": 1.603411513859275,
+        "contentLongEdge": 752,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "2ef5ff3085917dccb433c195c8e66c733ccfeccece5e9d4ac1be7515539a4c6f"
+      },
+      {
+        "skill": "ultimate",
+        "name": "明日へ回す歯車",
+        "file": "public/sprites/lantern-war/cutins/sena-ultimate.webp",
+        "sourceRect": {
+          "left": 712,
+          "top": 556,
+          "width": 703,
+          "height": 555
+        },
+        "trimmedSize": [
+          464,
+          486
+        ],
+        "normalizationScale": 1.52880658436214,
+        "contentLongEdge": 743,
+        "visibleLongEdgeTarget": 720,
+        "canvasSize": 816,
+        "sha256": "33bcffe5dc14097ddb3f26dad42978e35fb4ef99ecf8ee19d4c406f7da1b39d9"
+      }
+    ]
+  }
+]

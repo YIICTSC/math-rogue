@@ -16,6 +16,10 @@ export type Update=(f:(s:Campaign)=>unknown)=>void;
 export function Battlefield({s,update}:{s:Campaign;update:Update}){
  const b=s.battle!,[selected,setSelected]=useState('ally-0'),[showDanger,setDanger]=useState(false),[cursor,setCursor]=useState({x:1,y:8});
  const q=b.squads.find(q=>q.id===selected),chapter=CHAPTERS[b.chapter],preview=useMemo(()=>encounterPreview(s),[s]);
+ useEffect(()=>{
+  const paths=new Set((preview?.events||b.encounter?.events||[]).filter(e=>e.skill).map(e=>cutin(e.actorHero,e.name)).filter((p):p is string=>!!p));
+  for(const path of paths){const image=new Image();image.src=assetUrl(path);}
+ },[preview,b.encounter?.events]);
  const choose=(x:number,y:number)=>{const ally=b.squads.find(q=>q.team==='ally'&&living(q)&&q.x===x&&q.y===y);if(ally)setSelected(ally.id);else update(s=>orderMove(s,selected,x,y));setCursor({x,y});};
  const danger=new Set(b.squads.filter(q=>q.team==='enemy'&&living(q)).flatMap(q=>b.map.flatMap((row,y)=>row.map((t,x)=>Math.abs(q.x-x)+Math.abs(q.y-y)<=3?x+','+y:'')).filter(Boolean)));
  return <TranslatedUiTree mode={useContext(LanternLanguage)}><div className="lw-war">
@@ -40,7 +44,7 @@ function CombatStage({s,update}:{s:Campaign;update:Update}){
  useEffect(()=>{beginLanternBattleVoice();return stopLanternVoice;},[]);
  useEffect(()=>{const key=`${s.chapter}:${s.battle!.time}:${e.ally}:${e.enemy}:${e.index}`;if(finished){battleVoice(a.members.find(f=>f.hp>0)?.hero||a.members[0].hero,e.winner==='ally'?'win':'defeat',key);return;}if(!event)return;if(event.actorHero.startsWith('enemy-')){battleVoice(event.targetHero,event.hp<=0?'defeat':'damage',key);return;}const lead=a.members.find(f=>f.hp>0&&SUPPORTS.some(p=>p.a===actor&&p.b===f.hero||p.b===actor&&p.a===f.hero))?.hero||a.members.find(f=>f.hero!==actor)?.hero;if(event.passive&&event.name.startsWith('援護'))battleVoice(actor,'support',key,lead);else if(event.heal)battleVoice(event.targetHero,'heal',key);else battleVoice(actor,event.skill&&event.name===heroById(actor).skill?'ultimate':'attack',key);},[e.index,finished]);
 
- const c=cutin(actor),isAlly=!actor.startsWith('enemy-'),action=age<400?'windup':age<1100?event?.skill?'ultimate':'attack':'ready';
+ const c=cutin(actor,event?.name),isAlly=!actor.startsWith('enemy-'),action=age<400?'windup':age<1100?event?.skill?'ultimate':'attack':'ready';
  return <TranslatedUiTree mode={useContext(LanternLanguage)}><div className="lw-combat" role="dialog" aria-modal="true" aria-label="部隊自動戦闘"><div className="lw-combat-bg" style={{backgroundImage:(s.battle!.chapter===15?'linear-gradient(#071b4a88,#071b4a88),':'')+'url('+assetUrl(battleBackground(s.battle!.chapter))+')'}}/>
  <header><small>AUTOMATIC BATTLE · AP ◆ / PP ◇</small><div><button onClick={()=>setSpeed(speed===1?3:1)}>{speed}×</button><button onClick={()=>update(finishEncounter)}>演出をスキップ</button></div></header>
  <div className="lw-combat-formation"><b>{a.name}</b><strong>{a.members.length} <small>VS</small> {z.members.length}</strong><b>{z.name}</b></div>

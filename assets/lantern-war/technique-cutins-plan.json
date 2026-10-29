@@ -1,0 +1,1042 @@
+[
+  {
+    "id": "aster",
+    "name": "アステル",
+    "source": "assets/lantern-war/technique-cutins/aster.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "星灯の切先",
+      "隣人の号令",
+      "暁路の三日月",
+      "暁を継ぐ剣"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/aster.webp",
+      "battle": {
+        "path": "sprites/lantern-war/heroes/aster-ready.webp",
+        "cols": 1,
+        "rows": 1,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for アステル (aster). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 星灯の切先 (pierce); TOP RIGHT 隣人の号令 (rally); BOTTOM LEFT 暁路の三日月 (sweep); BOTTOM RIGHT original signature ultimate 暁を継ぐ剣. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "lyra",
+    "name": "リュラ",
+    "source": "assets/lantern-war/technique-cutins/lyra.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "帰郷の踏み込み",
+      "灯守の構え",
+      "王冠を解く剣",
+      "暁を継ぐ剣"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/lyra.webp",
+      "battle": {
+        "path": "sprites/lantern-war/heroes/lyra-ready.webp",
+        "cols": 1,
+        "rows": 1,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for リュラ (lyra). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 帰郷の踏み込み (assault); TOP RIGHT 灯守の構え (guard); BOTTOM LEFT 王冠を解く剣 (execute); BOTTOM RIGHT original signature ultimate 暁を継ぐ剣. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "high-school-warrior",
+    "name": "反逆の高校生",
+    "source": "assets/lantern-war/technique-cutins/high-school-warrior.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "校門破り",
+      "放課後の檄",
+      "制服の二閃",
+      "反逆の一閃"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-warrior.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/0.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 反逆の高校生 (high-school-warrior). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 校門破り (sunder); TOP RIGHT 放課後の檄 (rally); BOTTOM LEFT 制服の二閃 (flurry); BOTTOM RIGHT original signature ultimate 反逆の一閃. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-caretaker",
+    "name": "生物部の先輩",
+    "source": "assets/lantern-war/technique-cutins/high-school-caretaker.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "若葉の手当て",
+      "細胞の目覚め",
+      "命脈の花冠",
+      "生命の連環"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-caretaker.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/1.png",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 生物部の先輩 (high-school-caretaker). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 若葉の手当て (mend); TOP RIGHT 細胞の目覚め (cleanse); BOTTOM LEFT 命脈の花冠 (renew); BOTTOM RIGHT original signature ultimate 生命の連環. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-assassin",
+    "name": "謎めく転入生",
+    "source": "assets/lantern-war/technique-cutins/high-school-assassin.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "消える足音",
+      "影縫いの針",
+      "名もなき残像",
+      "無音の影走り"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-assassin.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/2.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 謎めく転入生 (high-school-assassin). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 消える足音 (snipe); TOP RIGHT 影縫いの針 (stun); BOTTOM LEFT 名もなき残像 (flurry); BOTTOM RIGHT original signature ultimate 無音の影走り. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-mage",
+    "name": "化学研究会長",
+    "source": "assets/lantern-war/technique-cutins/high-school-mage.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "触媒の火花",
+      "結合ほどき",
+      "臨界の波紋",
+      "連鎖反応"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-mage.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/3.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 化学研究会長 (high-school-mage). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 触媒の火花 (burn); TOP RIGHT 結合ほどき (weaken); BOTTOM LEFT 臨界の波紋 (sweep); BOTTOM RIGHT original signature ultimate 連鎖反応. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-dodgeball",
+    "name": "バスケ部エース",
+    "source": "assets/lantern-war/technique-cutins/high-school-dodgeball.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "リバウンド突き",
+      "勝利へのアシスト",
+      "決勝の速攻",
+      "逆転のラストパス"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-dodgeball.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/4.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for バスケ部エース (high-school-dodgeball). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT リバウンド突き (assault); TOP RIGHT 勝利へのアシスト (rally); BOTTOM LEFT 決勝の速攻 (flurry); BOTTOM RIGHT original signature ultimate 逆転のラストパス. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-bard",
+    "name": "放送部ディレクター",
+    "source": "assets/lantern-war/technique-cutins/high-school-bard.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "音圧の矢",
+      "勇気のオンエア",
+      "夜明けの合唱",
+      "未来への生放送"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-bard.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/5.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 放送部ディレクター (high-school-bard). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 音圧の矢 (snipe); TOP RIGHT 勇気のオンエア (rally); BOTTOM LEFT 夜明けの合唱 (renew); BOTTOM RIGHT original signature ultimate 未来への生放送. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-librarian",
+    "name": "文芸部書記",
+    "source": "assets/lantern-war/technique-cutins/high-school-librarian.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "余白の刃",
+      "封じの栞",
+      "終章の伏線",
+      "未完の叙事詩"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-librarian.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/6.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 文芸部書記 (high-school-librarian). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 余白の刃 (pierce); TOP RIGHT 封じの栞 (weaken); BOTTOM LEFT 終章の伏線 (execute); BOTTOM RIGHT original signature ultimate 未完の叙事詩. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-chef",
+    "name": "学食の料理長",
+    "source": "assets/lantern-war/technique-cutins/high-school-chef.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "鉄鍋くだき",
+      "まかないの湯気",
+      "満腹の大回転",
+      "腹いっぱいの約束"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-chef.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/7.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 学食の料理長 (high-school-chef). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 鉄鍋くだき (sunder); TOP RIGHT まかないの湯気 (mend); BOTTOM LEFT 満腹の大回転 (sweep); BOTTOM RIGHT original signature ultimate 腹いっぱいの約束. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "high-school-gardener",
+    "name": "園芸部部長",
+    "source": "assets/lantern-war/technique-cutins/high-school-gardener.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "芽吹きの一矢",
+      "蔓絡み",
+      "種まきの連弓",
+      "荒野の芽吹き"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/high-school-gardener.webp",
+      "battle": {
+        "path": "sprites/high-school/characters-idle-sheets/8.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 園芸部部長 (high-school-gardener). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 芽吹きの一矢 (snipe); TOP RIGHT 蔓絡み (stun); BOTTOM LEFT 種まきの連弓 (flurry); BOTTOM RIGHT original signature ultimate 荒野の芽吹き. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-akari",
+    "name": "星宮あかり",
+    "source": "assets/lantern-war/technique-cutins/magic-akari.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "星火の粒",
+      "願いの応援",
+      "流星の花束",
+      "スターリンク"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-akari.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-01-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 星宮あかり (magic-akari). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 星火の粒 (burn); TOP RIGHT 願いの応援 (rally); BOTTOM LEFT 流星の花束 (sweep); BOTTOM RIGHT original signature ultimate スターリンク. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-shizuku",
+    "name": "水城しずく",
+    "source": "assets/lantern-war/technique-cutins/magic-shizuku.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "水鏡の針",
+      "凪の抱擁",
+      "氷晶の結び目",
+      "ルナリフレクト"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-shizuku.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-02-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 水城しずく (magic-shizuku). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 水鏡の針 (pierce); TOP RIGHT 凪の抱擁 (cleanse); BOTTOM LEFT 氷晶の結び目 (stun); BOTTOM RIGHT original signature ultimate ルナリフレクト. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-hiyori",
+    "name": "花咲ひより",
+    "source": "assets/lantern-war/technique-cutins/magic-hiyori.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "花びらの手当て",
+      "陽だまりの円",
+      "春告げの祝福",
+      "ブルームヒール"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-hiyori.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-03-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 花咲ひより (magic-hiyori). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 花びらの手当て (mend); TOP RIGHT 陽だまりの円 (guard); BOTTOM LEFT 春告げの祝福 (renew); BOTTOM RIGHT original signature ultimate ブルームヒール. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-tsubasa",
+    "name": "火神つばさ",
+    "source": "assets/lantern-war/technique-cutins/magic-tsubasa.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "焔翼の爪",
+      "火勢の鼓舞",
+      "紅蓮の旋回",
+      "フォージバースト"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-tsubasa.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-04-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 火神つばさ (magic-tsubasa). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 焔翼の爪 (burn); TOP RIGHT 火勢の鼓舞 (rally); BOTTOM LEFT 紅蓮の旋回 (sweep); BOTTOM RIGHT original signature ultimate フォージバースト. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-rei",
+    "name": "黒羽れい",
+    "source": "assets/lantern-war/technique-cutins/magic-rei.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "夜羽の突き",
+      "黒羽の目眩",
+      "月蝕の追い刃",
+      "影札結界"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-rei.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-05-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 黒羽れい (magic-rei). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 夜羽の突き (pierce); TOP RIGHT 黒羽の目眩 (weaken); BOTTOM LEFT 月蝕の追い刃 (execute); BOTTOM RIGHT original signature ultimate 影札結界. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-madoka",
+    "name": "翠川まどか",
+    "source": "assets/lantern-war/technique-cutins/magic-madoka.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "翠風の刃",
+      "結びのそよ風",
+      "若葉の輪舞",
+      "クロックリロード"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-madoka.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-06-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 翠川まどか (magic-madoka). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 翠風の刃 (snipe); TOP RIGHT 結びのそよ風 (cleanse); BOTTOM LEFT 若葉の輪舞 (sweep); BOTTOM RIGHT original signature ultimate クロックリロード. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-koharu",
+    "name": "風森こはる",
+    "source": "assets/lantern-war/technique-cutins/magic-koharu.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "風見の矢",
+      "追い風の歌",
+      "風渡りの連射",
+      "ゲイルステップ"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-koharu.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-07-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 風森こはる (magic-koharu). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 風見の矢 (snipe); TOP RIGHT 追い風の歌 (rally); BOTTOM LEFT 風渡りの連射 (flurry); BOTTOM RIGHT original signature ultimate ゲイルステップ. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-mirai",
+    "name": "紫藤みらい",
+    "source": "assets/lantern-war/technique-cutins/magic-mirai.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "紫電の粒",
+      "明日への予告",
+      "可能性の分岐",
+      "ドリームアンコール"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-mirai.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-08-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 紫藤みらい (magic-mirai). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 紫電の粒 (pierce); TOP RIGHT 明日への予告 (stun); BOTTOM LEFT 可能性の分岐 (sweep); BOTTOM RIGHT original signature ultimate ドリームアンコール. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-sera",
+    "name": "白峰セラ",
+    "source": "assets/lantern-war/technique-cutins/magic-sera.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "雪明かりの癒し",
+      "白峰の守り",
+      "銀雪の祈り",
+      "セレスティアルコード"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-sera.webp",
+      "battle": {
+        "path": "sprites/magic/characters-idle-sheets/heroine-09-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 白峰セラ (magic-sera). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 雪明かりの癒し (mend); TOP RIGHT 白峰の守り (guard); BOTTOM LEFT 銀雪の祈り (renew); BOTTOM RIGHT original signature ultimate セレスティアルコード. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space.\nFour SMALL isolated stickers with very compact effects. Absolutely NO floating particles, sparkles, free snowflakes or haze in the empty gutters. All effects hug the character tightly. Keep the middle 20% horizontal and vertical strips completely EMPTY with alpha zero, and wide empty outer border. This is essential for slicing clean independent game assets."
+  },
+  {
+    "id": "magic-ren",
+    "name": "朝霧 蓮",
+    "source": "assets/lantern-war/technique-cutins/magic-ren.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "朝霧の槍先",
+      "雲間の号令",
+      "黎光の貫き",
+      "風の防護"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-ren.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/ren-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 朝霧 蓮 (magic-ren). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 朝霧の槍先 (pierce); TOP RIGHT 雲間の号令 (rally); BOTTOM LEFT 黎光の貫き (execute); BOTTOM RIGHT original signature ultimate 風の防護. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-soma",
+    "name": "御影 颯真",
+    "source": "assets/lantern-war/technique-cutins/magic-soma.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "影砕きの槍",
+      "静寂の盾",
+      "深影の追撃",
+      "氷の秩序"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-soma.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/soma-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 御影 颯真 (magic-soma). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 影砕きの槍 (sunder); TOP RIGHT 静寂の盾 (guard); BOTTOM LEFT 深影の追撃 (flurry); BOTTOM RIGHT original signature ultimate 氷の秩序. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space.\nFour SMALL isolated stickers with very compact effects. Absolutely NO floating particles, sparkles, free snowflakes or haze in the empty gutters. All effects hug the character tightly. Keep the middle 20% horizontal and vertical strips completely EMPTY with alpha zero, and wide empty outer border. This is essential for slicing clean independent game assets."
+  },
+  {
+    "id": "magic-minato",
+    "name": "白石 湊",
+    "source": "assets/lantern-war/technique-cutins/magic-minato.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "波紋の手当て",
+      "潮騒の浄化",
+      "港灯の大円",
+      "水の治癒"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-minato.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/minato-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 白石 湊 (magic-minato). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 波紋の手当て (mend); TOP RIGHT 潮騒の浄化 (cleanse); BOTTOM LEFT 港灯の大円 (renew); BOTTOM RIGHT original signature ultimate 水の治癒. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell."
+  },
+  {
+    "id": "magic-riku",
+    "name": "天音 理玖",
+    "source": "assets/lantern-war/technique-cutins/magic-riku.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "共鳴の矢",
+      "調律の拍",
+      "交響の波動",
+      "時間観測"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-riku.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/riku-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 天音 理玖 (magic-riku). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 共鳴の矢 (snipe); TOP RIGHT 調律の拍 (rally); BOTTOM LEFT 交響の波動 (sweep); BOTTOM RIGHT original signature ultimate 時間観測. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space.\nFour SMALL isolated stickers with very compact effects. Absolutely NO floating particles, sparkles, free snowflakes or haze in the empty gutters. All effects hug the character tightly. Keep the middle 20% horizontal and vertical strips completely EMPTY with alpha zero, and wide empty outer border. This is essential for slicing clean independent game assets."
+  },
+  {
+    "id": "magic-yamato",
+    "name": "黒瀬 大和",
+    "source": "assets/lantern-war/technique-cutins/magic-yamato.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "黒鉄の割撃",
+      "不屈の城壁",
+      "烈地の断罪",
+      "炎拳"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-yamato.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/yamato-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 黒瀬 大和 (magic-yamato). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 黒鉄の割撃 (sunder); TOP RIGHT 不屈の城壁 (guard); BOTTOM LEFT 烈地の断罪 (execute); BOTTOM RIGHT original signature ultimate 炎拳. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "magic-leon",
+    "name": "神代 レオン",
+    "source": "assets/lantern-war/technique-cutins/magic-leon.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "陽炎の火種",
+      "獅子の咆哮",
+      "天陽の輪",
+      "音と幻術"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-leon.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/leon-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 神代 レオン (magic-leon). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 陽炎の火種 (burn); TOP RIGHT 獅子の咆哮 (weaken); BOTTOM LEFT 天陽の輪 (sweep); BOTTOM RIGHT original signature ultimate 音と幻術. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "magic-elliot",
+    "name": "エリオット・ノクス",
+    "source": "assets/lantern-war/technique-cutins/magic-elliot.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "夜譜の針",
+      "忘却の余韻",
+      "星夜の終奏",
+      "星界魔法"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-elliot.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/elliot-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for エリオット・ノクス (magic-elliot). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 夜譜の針 (drain); TOP RIGHT 忘却の余韻 (weaken); BOTTOM LEFT 星夜の終奏 (execute); BOTTOM RIGHT original signature ultimate 星界魔法. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "magic-sakuya",
+    "name": "九条 朔夜",
+    "source": "assets/lantern-war/technique-cutins/magic-sakuya.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "朔月の一閃",
+      "影留め",
+      "無月の双影",
+      "闇と封印"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/magic-sakuya.webp",
+      "battle": {
+        "path": "sprites/magic/male-characters-idle-sheets/sakuya-after.webp",
+        "cols": 2,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for 九条 朔夜 (magic-sakuya). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 朔月の一閃 (pierce); TOP RIGHT 影留め (stun); BOTTOM LEFT 無月の双影 (flurry); BOTTOM RIGHT original signature ultimate 闇と封印. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-lyria",
+    "name": "リリア",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-lyria.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "星剣の刺突",
+      "守星の構え",
+      "星冠の追閃",
+      "天極グランドクロス"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-lyria.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-lyria-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for リリア (dungeons2-lyria). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 星剣の刺突 (pierce); TOP RIGHT 守星の構え (guard); BOTTOM LEFT 星冠の追閃 (flurry); BOTTOM RIGHT original signature ultimate 天極グランドクロス. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-celis",
+    "name": "セリス",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-celis.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "霜花の針",
+      "氷封の印",
+      "冬明けの浄雪",
+      "絶零の王冠"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-celis.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-celis-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for セリス (dungeons2-celis). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 霜花の針 (pierce); TOP RIGHT 氷封の印 (stun); BOTTOM LEFT 冬明けの浄雪 (cleanse); BOTTOM RIGHT original signature ultimate 絶零の王冠. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-flora",
+    "name": "フローラ",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-flora.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "花蕾の矢",
+      "根の抱擁",
+      "新緑の連弓",
+      "万花の結界"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-flora.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-flora-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for フローラ (dungeons2-flora). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 花蕾の矢 (snipe); TOP RIGHT 根の抱擁 (mend); BOTTOM LEFT 新緑の連弓 (flurry); BOTTOM RIGHT original signature ultimate 万花の結界. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-noctia",
+    "name": "ノクティア",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-noctia.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "禁頁の吸光",
+      "黒書の封印",
+      "夜の終わり",
+      "皆既月蝕"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-noctia.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-noctia-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for ノクティア (dungeons2-noctia). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 禁頁の吸光 (drain); TOP RIGHT 黒書の封印 (weaken); BOTTOM LEFT 夜の終わり (execute); BOTTOM RIGHT original signature ultimate 皆既月蝕. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-aurene",
+    "name": "オーレネ",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-aurene.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "金灯の癒し",
+      "祈りの洗礼",
+      "黎明の聖環",
+      "聖日の祝祭"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-aurene.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-aurene-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for オーレネ (dungeons2-aurene). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 金灯の癒し (mend); TOP RIGHT 祈りの洗礼 (cleanse); BOTTOM LEFT 黎明の聖環 (renew); BOTTOM RIGHT original signature ultimate 聖日の祝祭. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-ignis",
+    "name": "イグニス",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-ignis.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "熾火の斬撃",
+      "勇炎の檄",
+      "火山の旋斧",
+      "紅蓮ブレイバー"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-ignis.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-ignis-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for イグニス (dungeons2-ignis). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 熾火の斬撃 (burn); TOP RIGHT 勇炎の檄 (rally); BOTTOM LEFT 火山の旋斧 (sweep); BOTTOM RIGHT original signature ultimate 紅蓮ブレイバー. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-leon",
+    "name": "レオン",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-leon.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "獅盾の槍打",
+      "不退の誓い",
+      "城壁割り",
+      "日輪エクスカリバー"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-leon.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-leon-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for レオン (dungeons2-leon). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 獅盾の槍打 (assault); TOP RIGHT 不退の誓い (guard); BOTTOM LEFT 城壁割り (sunder); BOTTOM RIGHT original signature ultimate 日輪エクスカリバー. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-orion",
+    "name": "オリオン",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-orion.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "宵闇の吸刃",
+      "星狩りの威圧",
+      "夜道の道標",
+      "黒月エクリプス"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-orion.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-orion-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for オリオン (dungeons2-orion). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 宵闇の吸刃 (drain); TOP RIGHT 星狩りの威圧 (weaken); BOTTOM LEFT 夜道の道標 (snipe); BOTTOM RIGHT original signature ultimate 黒月エクリプス. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "dungeons2-leif",
+    "name": "リーフ",
+    "source": "assets/lantern-war/technique-cutins/dungeons2-leif.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "足跡消しの矢",
+      "影蔓の罠",
+      "木漏れ日の連弓",
+      "千葉の流星雨"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/dungeons2-leif.webp",
+      "battle": {
+        "path": "sprites/lantern-war/dungeons2-leif-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for リーフ (dungeons2-leif). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 足跡消しの矢 (snipe); TOP RIGHT 影蔓の罠 (stun); BOTTOM LEFT 木漏れ日の連弓 (flurry); BOTTOM RIGHT original signature ultimate 千葉の流星雨. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "nagi",
+    "name": "ナギ",
+    "source": "assets/lantern-war/technique-cutins/nagi.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "潮風の一矢",
+      "帆を張る号令",
+      "星海の散光",
+      "新しい航路"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/nagi.webp",
+      "battle": {
+        "path": "sprites/lantern-war/nagi-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for ナギ (nagi). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 潮風の一矢 (snipe); TOP RIGHT 帆を張る号令 (rally); BOTTOM LEFT 星海の散光 (sweep); BOTTOM RIGHT original signature ultimate 新しい航路. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "mio",
+    "name": "ミオ",
+    "source": "assets/lantern-war/technique-cutins/mio.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "樹音の矢",
+      "木霊の手当て",
+      "森渡りの連射",
+      "木霊の連矢"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/mio.webp",
+      "battle": {
+        "path": "sprites/lantern-war/mio-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for ミオ (mio). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 樹音の矢 (snipe); TOP RIGHT 木霊の手当て (mend); BOTTOM LEFT 森渡りの連射 (flurry); BOTTOM RIGHT original signature ultimate 木霊の連矢. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  },
+  {
+    "id": "sena",
+    "name": "セナ",
+    "source": "assets/lantern-war/technique-cutins/sena.png",
+    "generator": "ImageGen",
+    "grid": [
+      2,
+      2
+    ],
+    "names": [
+      "歯車くだき",
+      "巻き戻しの手当て",
+      "時針の二連打",
+      "明日へ回す歯車"
+    ],
+    "references": {
+      "portrait": "public/sprites/lantern-war/dialogue-normalized/sena.webp",
+      "battle": {
+        "path": "sprites/lantern-war/sena-battle.webp",
+        "cols": 3,
+        "rows": 2,
+        "index": 0
+      }
+    },
+    "prompt": "Create a polished Japanese fantasy tactical RPG special-move illustration atlas for セナ (sena). The reference has canonical face/normal outfit on LEFT and canonical BATTLE outfit on RIGHT. Preserve identity, hair, face and EXACT RIGHT-HAND BATTLE COSTUME, accessories, weapon design. 2 columns x 2 rows precise equal square cells, transparent background. Four completely separately drawn energetic full-body anime key illustrations, NOT copies or mirrored standing sprites. Reading order: TOP LEFT 歯車くだき (sunder); TOP RIGHT 巻き戻しの手当て (cleanse); BOTTOM LEFT 時針の二連打 (flurry); BOTTOM RIGHT original signature ultimate 明日へ回す歯車. Match each Japanese technique's meaning: healing techniques gentle restorative magic; guard protective barriers; rally inspiring raised hand; attack techniques dynamic correct weapon movements. Rich high quality hand-painted anime, crisp expressive eyes, elaborate luminous elemental VFX, detailed textiles and metals. CRITICAL ISOLATION: within EACH cell leave at least 18% of cell width/height as completely EMPTY TRANSPARENT padding on ALL FOUR sides; all hair, clothes, weapon tips, trails, sparks and effects must fit in the middle 64% of their own cell. This creates a broad empty cross between cells. Effects fully enclosed, no lines crossing gutters. No scenery, no floor/shadow, no rectangles/borders, no labels/text/watermark. Never crop body, weapon or VFX. Same person exactly once in each cell.\nLAYOUT OVERRIDE: This is a SPARSE CONTACT SHEET, not a poster. Make the four illustrations SMALL. Each entire illustration INCLUDING VFX occupies at most 48% of its cell width and height. Exact centers at (25%,25%),(75%,25%),(25%,75%),(75%,75%). Keep outer 12% of total image fully transparent and central vertical strip x=44%..56% and horizontal strip y=44%..56% fully transparent. Large empty transparent space is essential; do not fill the canvas. No luminous haze near canvas edges. No artwork in the gutter. Zoom OUT until all four figures and effects are fully surrounded by broad empty space."
+  }
+]

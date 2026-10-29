@@ -274,3 +274,6 @@
 
 .lw-technique-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}.lw-technique-grid details{background:#0c2631;border:1px solid #bda47666;border-radius:8px;padding:12px}.lw-technique-grid summary{cursor:pointer;list-style:none}.lw-technique-grid b{font-size:14px;color:#f4d79a}.lw-technique-grid p{font-size:12px;margin-top:10px}.lw-technique-grid .is-locked{opacity:.6}.lw-tactic-presets{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.lw-rules>div{flex-wrap:wrap}.lw-rules select{max-width:100%}
 @media(max-width:600px){.lw-technique-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lw-technique-grid details{padding:10px;min-height:72px}.lw-technique-grid b{font-size:12px}.lw-technique-grid details[open]{grid-column:1/-1}}
+/* Keep the complete dedicated technique illustration, including weapon and VFX tips. */
+.lw-cutin-art{height:100%;width:48%;padding:4px;box-sizing:border-box}
+.lw-cutin-art>img{display:block;object-fit:contain}
