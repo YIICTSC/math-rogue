@@ -1,0 +1,212 @@
+[
+  {
+    "id": "elementary-assassin",
+    "before": 1205044,
+    "bytes": 697048,
+    "errors": 0
+  },
+  {
+    "id": "elementary-bard",
+    "before": 1270732,
+    "bytes": 735184,
+    "errors": 0
+  },
+  {
+    "id": "elementary-caretaker",
+    "before": 1185820,
+    "bytes": 685888,
+    "errors": 0
+  },
+  {
+    "id": "elementary-chef",
+    "before": 1185820,
+    "bytes": 685888,
+    "errors": 0
+  },
+  {
+    "id": "elementary-dodgeball",
+    "before": 1198636,
+    "bytes": 693328,
+    "errors": 0
+  },
+  {
+    "id": "elementary-gardener",
+    "before": 1187428,
+    "bytes": 686824,
+    "errors": 0
+  },
+  {
+    "id": "elementary-librarian",
+    "before": 1309180,
+    "bytes": 757504,
+    "errors": 0
+  },
+  {
+    "id": "elementary-mage",
+    "before": 1310788,
+    "bytes": 758440,
+    "errors": 0
+  },
+  {
+    "id": "elementary-warrior",
+    "before": 1166596,
+    "bytes": 674728,
+    "errors": 0
+  },
+  {
+    "id": "high-school-assassin",
+    "before": 1251508,
+    "bytes": 724024,
+    "errors": 0
+  },
+  {
+    "id": "high-school-bard",
+    "before": 1495012,
+    "bytes": 865384,
+    "errors": 0
+  },
+  {
+    "id": "high-school-caretaker",
+    "before": 1405300,
+    "bytes": 813304,
+    "errors": 0
+  },
+  {
+    "id": "high-school-chef",
+    "before": 1360444,
+    "bytes": 787264,
+    "errors": 0
+  },
+  {
+    "id": "high-school-dodgeball",
+    "before": 1371652,
+    "bytes": 793768,
+    "errors": 0
+  },
+  {
+    "id": "high-school-gardener",
+    "before": 1349236,
+    "bytes": 780760,
+    "errors": 0
+  },
+  {
+    "id": "high-school-librarian",
+    "before": 1520644,
+    "bytes": 880264,
+    "errors": 0
+  },
+  {
+    "id": "high-school-mage",
+    "before": 1403716,
+    "bytes": 812392,
+    "errors": 0
+  },
+  {
+    "id": "high-school-warrior",
+    "before": 1389292,
+    "bytes": 804016,
+    "errors": 0
+  },
+  {
+    "id": "magic-akari",
+    "before": 1360444,
+    "bytes": 787264,
+    "errors": 0
+  },
+  {
+    "id": "magic-elliot",
+    "before": 1277164,
+    "bytes": 738928,
+    "errors": 0
+  },
+  {
+    "id": "magic-hiyori",
+    "before": 1341220,
+    "bytes": 776104,
+    "errors": 0
+  },
+  {
+    "id": "magic-koharu",
+    "before": 1464580,
+    "bytes": 847720,
+    "errors": 0
+  },
+  {
+    "id": "magic-leon",
+    "before": 1248316,
+    "bytes": 722176,
+    "errors": 0
+  },
+  {
+    "id": "magic-madoka",
+    "before": 1459784,
+    "bytes": 844936,
+    "errors": 0
+  },
+  {
+    "id": "magic-minato",
+    "before": 1289956,
+    "bytes": 746344,
+    "errors": 0
+  },
+  {
+    "id": "magic-mirai",
+    "before": 1328404,
+    "bytes": 768664,
+    "errors": 0
+  },
+  {
+    "id": "magic-rei",
+    "before": 1419724,
+    "bytes": 821680,
+    "errors": 0
+  },
+  {
+    "id": "magic-ren",
+    "before": 1264324,
+    "bytes": 731464,
+    "errors": 0
+  },
+  {
+    "id": "magic-riku",
+    "before": 1264324,
+    "bytes": 731464,
+    "errors": 0
+  },
+  {
+    "id": "magic-sakuya",
+    "before": 1403716,
+    "bytes": 812392,
+    "errors": 0
+  },
+  {
+    "id": "magic-sera",
+    "before": 1462972,
+    "bytes": 846784,
+    "errors": 0
+  },
+  {
+    "id": "magic-shizuku",
+    "before": 1509436,
+    "bytes": 873760,
+    "errors": 0
+  },
+  {
+    "id": "magic-soma",
+    "before": 1277164,
+    "bytes": 738928,
+    "errors": 0
+  },
+  {
+    "id": "magic-tsubasa",
+    "before": 1430932,
+    "bytes": 828184,
+    "errors": 0
+  },
+  {
+    "id": "magic-yamato",
+    "before": 1419724,
+    "bytes": 821680,
+    "errors": 0
+  }
+]

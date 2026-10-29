@@ -332,14 +332,14 @@ export class KartScene {
       if (p.id === me.id) { ownPoint = pt; ownDistance = s.distance; }
       this.car.position.set(pt.x, pt.y + jump + .07 + (p.crash > 0 ? Math.abs(Math.sin(p.crash * 8)) * .55 : 0), pt.z); this.car.rotation.set(-Math.atan(pt.ty), Math.atan2(pt.tx, pt.tz) + p.steer * (p.drift ? .38 : .09) + (p.crash > 0 ? (2.4 - p.crash) * Math.PI * 3 : 0), -p.steer * .045); this.car.updateMatrix();
       let hero=this.protagonists.get(p.id);
-      if((this.minimal||p.avatar.protagonist)&&!hero){hero=this.minimal?new MinimalDriver(this.minimalDrivers!):new ProtagonistModel(true);this.protagonists.set(p.id,hero);this.scene.add(hero.root);}
-      if(hero){if(hero instanceof MinimalDriver)hero.setAvatar(p.avatar);else hero.set(p.avatar.protagonist);hero.root.position.copy(this.car.position);hero.root.rotation.copy(this.car.rotation);if(hero instanceof ProtagonistModel)hero.update(dt,'Idle',reducedMotion);hero.root.visible=this.minimal||!!p.avatar.protagonist;}
+      if((this.minimal||(p.avatar.protagonist||p.avatar.customBase))&&!hero){hero=this.minimal?new MinimalDriver(this.minimalDrivers!):new ProtagonistModel(true);this.protagonists.set(p.id,hero);this.scene.add(hero.root);}
+      if(hero){hero.setAvatar(p.avatar);hero.root.position.copy(this.car.position);hero.root.rotation.copy(this.car.rotation);if(hero instanceof ProtagonistModel)hero.update(dt,'Idle',reducedMotion);hero.root.visible=this.minimal||!!(p.avatar.protagonist||p.avatar.customBase);}
       // During free run, compare physical positions on the circuit across laps.
       let gap = p.distance - me.distance;
       if (me.finish) { const length = this.getTrack(w.course).length; gap = ((gap + length / 2) % length + length) % length - length / 2; }
-      if(hero)hero.root.visible=(this.minimal||!!p.avatar.protagonist)&&(this.preview||p.id===me.id||gap>=-3);
+      if(hero)hero.root.visible=(this.minimal||!!(p.avatar.protagonist||p.avatar.customBase))&&(this.preview||p.id===me.id||gap>=-3);
       for (const part of this.parts) {
-        if(part.driver&&hero?.ready&&(this.minimal||p.avatar.protagonist))continue;
+        if(part.driver&&hero?.ready&&(this.minimal||(p.avatar.protagonist||p.avatar.customBase)))continue;
         if (part.visible && !part.visible(p.avatar)) continue;
         const partIndex = part.mesh.count++;
         this.dummy.position.copy(part.offset); this.dummy.rotation.copy(part.rotation); this.dummy.scale.copy(part.scale);
@@ -353,8 +353,8 @@ export class KartScene {
         this.dummy.updateMatrix();
         if(part.motion==='head'||part.motion==='eye'){this.headTurn.makeTranslation(0,1.87,-.13).multiply(this.headRotation.makeRotationY(p.steer*.13+(reducedMotion?0:Math.sin(now/2000+index)*.018))).multiply(this.neckInverse);this.dummy.matrix.premultiply(this.headTurn);}
         this.matrix.multiplyMatrices(this.car.matrix, this.dummy.matrix); part.mesh.setMatrixAt(partIndex, this.matrix);
-        if (part.colored) part.mesh.setColorAt(partIndex, this.color.set(AVATAR_COLORS[p.avatar.outfit]));
-        if (part.avatarColor) { const colors = part.avatarColor === 'body' ? BODY_COLORS : part.avatarColor === 'hair' ? HAIR_COLORS : part.avatarColor === 'eyeColor' ? EYE_COLORS : AVATAR_COLORS; part.mesh.setColorAt(partIndex, this.color.set(colors[p.avatar[part.avatarColor] ?? 0])); }
+        if (part.colored) part.mesh.setColorAt(partIndex, this.color.set(AVATAR_COLORS[p.avatar.kartColor??p.avatar.outfit]));
+        if (part.avatarColor) { const colors = part.avatarColor === 'body' ? BODY_COLORS : part.avatarColor === 'hair' ? HAIR_COLORS : part.avatarColor === 'eyeColor' ? EYE_COLORS : AVATAR_COLORS; part.mesh.setColorAt(partIndex, this.color.set(colors[part.avatarColor==='outfit'&&!part.driver?(p.avatar.kartColor??p.avatar.outfit):(p.avatar[part.avatarColor]??0)])); }
       }
     });
     for (const part of this.parts) { part.mesh.instanceMatrix.needsUpdate = true; if (part.mesh.instanceColor) part.mesh.instanceColor.needsUpdate = true; }

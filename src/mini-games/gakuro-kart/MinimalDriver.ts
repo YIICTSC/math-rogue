@@ -4,7 +4,7 @@ import {ProtagonistModel} from '../../three/protagonistModel';
 import {prepareStorybookCharacters} from '../../three/storybookCharacters';
 import {createAvatarParts,type AvatarPart} from './avatarModels';
 import {AVATAR_COLORS,BODY_COLORS,HAIR_COLORS,EYE_COLORS,type KartAvatar} from './avatar';
-export const driverAppearanceKey=(a:KartAvatar)=>a.protagonist||[a.species,a.body,a.outfit,a.hair,a.accessory,a.hairStyle,a.expression,a.faceShape??0,a.faceStyle??0,a.eyeStyle??0,a.eyeColor??0].join(',');
+export const driverAppearanceKey=(a:KartAvatar)=>a.protagonist||(a.customBase?JSON.stringify([a.customBase,a.customHair,a.body,a.hair,a.outfit,a.bottom,a.wardrobe]):undefined)||[a.species,a.body,a.outfit,a.hair,a.accessory,a.hairStyle,a.expression,a.faceShape??0,a.faceStyle??0,a.eyeStyle??0,a.eyeColor??0].join(',');
 
 // Bake the selected character once, not its animation/skeleton every frame.
 // Geometry is shared by matching racers and owned by this race scene only.
@@ -32,10 +32,10 @@ export class MinimalDriverLibrary {
   if(!merged)throw Error('Driver geometry could not merge');merged.computeBoundingBox();merged.computeBoundingSphere();return merged;
  }
  private async bake(avatar:KartAvatar):Promise<T.BufferGeometry>{
-  if(avatar.protagonist){
+  if(avatar.protagonist||avatar.customBase){
    const driver=new ProtagonistModel(true);
    try{
-   await driver.set(avatar.protagonist);if(this.disposed||!driver.ready)throw Error('Driver unavailable');
+   await driver.setAvatar(avatar);if(this.disposed||!driver.ready)throw Error('Driver unavailable');
    driver.update(0,'Idle',true);const model=driver.root;model.updateMatrixWorld(true);
    const parts:T.BufferGeometry[]=[],point=new T.Vector3();
    model.traverse(object=>{

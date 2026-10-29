@@ -3,7 +3,7 @@ import{createGolferAssets}from'../gakuro-golf/golferModels';
 import React,{useEffect,useRef,useState} from 'react';
 import * as T from 'three';
 import {ProtagonistModel} from '../../three/protagonistModel';
-import {AVATAR_COLORS,BODY_COLORS,HAIR_COLORS,type KartAvatar} from '../gakuro-kart/avatar';
+import {defaultAvatar,AVATAR_COLORS,BODY_COLORS,HAIR_COLORS,type KartAvatar} from '../gakuro-kart/avatar';
 import type {TennisView,Unit} from './types';
 import {HALF_LENGTH,SINGLES_WIDTH,DOUBLES_WIDTH,NET,SERVICE_LENGTH} from './engine';
 const cpuHeroes=['elementary-dodgeball','elementary-caretaker','high-school-warrior','elementary-assassin'];
@@ -26,7 +26,7 @@ export default function TennisCanvas({view,selfId,preview=false,avatar,suspended
   const rigs=new Map<string,Rig>();
   const label=(name:string,color:string)=>{const c=document.createElement('canvas');c.width=512;c.height=96;const x=c.getContext('2d')!;x.fillStyle='#102c3ae8';x.beginPath();x.roundRect(6,8,500,76,25);x.fill();x.strokeStyle=color;x.lineWidth=4;x.stroke();x.font='600 35px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#fff8e0';x.fillText(name.slice(0,16),256,48,460);const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;owned.push(texture);const m=new T.SpriteMaterial({map:texture,transparent:true,depthWrite:false});owned.push(m);const sprite=new T.Sprite(m);sprite.scale.set(2.7,.5,1);return sprite;};
   const createRig=(u:Unit,i:number)=>{
-   const root=new T.Group(),fallback=new T.Group(),arm=new T.Group(),racket=new T.Group(),hero=new ProtagonistModel();const custom=athletes.create(u.avatar||{species:0,body:0,outfit:0,hair:0,accessory:0,hairStyle:0,kart:0,expression:0},true,'tennis');root.add(hero.root,fallback,arm,custom.root);hero.root.scale.setScalar(1.05);
+   const root=new T.Group(),fallback=new T.Group(),arm=new T.Group(),racket=new T.Group();const custom=athletes.create(u.avatar||{species:0,body:0,outfit:0,hair:0,accessory:0,hairStyle:0,kart:0,expression:0},true,'tennis');const hero=custom.hero;root.add(fallback,arm,custom.root);
    const outfit=AVATAR_COLORS[u.avatar?.outfit??i%8],skin=BODY_COLORS[u.avatar?.body??0],hair=HAIR_COLORS[u.avatar?.hair??i%3];
    sphere(fallback,0,1.75,0,.45,skin);sphere(fallback,0,2.04,-.07,.44,hair);box(fallback,0,1.04,0,.67,.75,.43,outfit);box(fallback,0,.69,0,.7,.2,.45,'#f6f0da');
    for(const s of[-1,1]){box(fallback,s*.2,.35,0,.19,.64,.21,skin);box(fallback,s*.2,.07,.10,.25,.14,.43,'#ecf3ed');sphere(fallback,s*.15,1.79,.40,.055,'#253447');}
@@ -60,11 +60,12 @@ export default function TennisCanvas({view,selfId,preview=false,avatar,suspended
    const loop=(now:number)=>{
     if(disposed)return;if(state.current.suspended){last=now;frame=requestAnimationFrame(loop);return;}if(now-last<(el.clientWidth<680?1000/30:1000/60)-1){frame=requestAnimationFrame(loop);return;}const dt=Math.min(.05,(now-last)/1000);last=now;const current=state.current,v=current.view,m=v?.match,units=m?.units||(current.avatar?previewUnits.map((u,i)=>i===0?{...u,avatar:current.avatar}:u):previewUnits),own=units.find(u=>u.owner===current.selfId),flip=own?.side===1?-1:1;
     const portrait=camera.aspect<.85,dist=current.preview?32:portrait?35:28,height=current.preview?27:portrait?28:22;camera.position.set(flip*.25,height,flip*dist);const short=portrait&&el.clientHeight<650&&!current.preview;camera.lookAt(0,0,flip*(short?3:portrait?0:3.2));camera.fov=current.preview?43:short?42:portrait?40:34;camera.updateProjectionMatrix();
-    const active=new Set(units.map(u=>u.id));for(const[id,r]of rigs)if(!active.has(id)){r.hero.dispose();r.custom.dispose();scene.remove(r.root,r.shadow,r.ring);rigs.delete(id);}
-    units.forEach((u,i)=>{const r=rigs.get(u.id)||createRig(u,i),heroId=u.avatar?u.avatar.protagonist:cpuHeroes[i%cpuHeroes.length];if(r.look!==heroId){r.look=heroId;r.hero.set(heroId);}
+    const active=new Set(units.map(u=>u.id));for(const[id,r]of rigs)if(!active.has(id)){r.custom.dispose();scene.remove(r.root,r.shadow,r.ring);rigs.delete(id);}
+    units.forEach((u,i)=>{const r=rigs.get(u.id)||createRig(u,i);const appearance=u.avatar||{...defaultAvatar(i),protagonist:cpuHeroes[i%cpuHeroes.length]};const key=JSON.stringify(appearance);if(r.appearance!==key){r.appearance=key;r.custom.update(appearance);}
      r.root.position.x+=(u.x-r.root.position.x)*Math.min(1,dt*22);r.root.position.z+=(-u.y-r.root.position.z)*Math.min(1,dt*22);r.root.rotation.y=u.side===0?Math.PI:0;
      if(r.lastShot!==u.shotSeq){r.lastShot=u.shotSeq;r.swingAt=now;}
-     const swing=Math.max(0,1-(now-r.swingAt)/420),moving=Math.hypot(u.vx,u.vy)>.2;r.hero.update(dt,moving?'Walk':'Idle');const useCustom=!!u.avatar&&!u.avatar.protagonist;r.custom.root.visible=useCustom;r.hero.root.visible=!useCustom;r.fallback.visible=!useCustom&&!r.hero.ready;if(useCustom){const key=JSON.stringify(u.avatar);if(r.appearance!==key){r.appearance=key;r.custom.update(u.avatar!);}r.custom.animateHero(dt,swing,moving);r.custom.rightArm.visible=false;r.custom.leftArm.rotation.set(-.7+(moving?Math.sin(now/140)*.15:0),0,.35);r.custom.arms.rotation.set(0,0,0);}
+     const swing=Math.max(0,1-(now-r.swingAt)/420),moving=Math.hypot(u.vx,u.vy)>.2;r.custom.root.visible=true;r.fallback.visible=false;r.custom.animateHero(dt,swing,moving);r.custom.rightArm.visible=false;r.custom.leftArm.rotation.set(-.7+(moving?Math.sin(now/140)*.15:0),0,.35);r.custom.arms.rotation.set(0,0,0);
+     for(const part of r.arm.children)if(part!==r.racket)part.visible=!r.hero.ready;
      r.hero.pose('upper_arm.R',-.85-swing*1.25,-.55-swing*.7);r.hero.pose('forearm.R',-.75+swing*.35);r.hero.pose('upper_arm.L',-.65+swing*.25,.45);r.hero.pose('forearm.L',-.85);r.hero.pose('spine',.12,swing*.55);if(!moving){r.hero.pose('thigh.L',-.12,.12);r.hero.pose('thigh.R',-.12,-.12);r.hero.pose('shin.L',.24);r.hero.pose('shin.R',.24);}
      r.root.position.y=(u.shot==='lob'&&swing>0?Math.sin(swing*Math.PI)*.25:0);r.arm.rotation.x=-.55-swing*1.4;r.arm.rotation.z=-.7-swing*.7;r.racket.rotation.y=swing*1.8;
      const bone=r.root.getObjectByName('forearmR');if(bone&&r.hero.ready){r.root.updateMatrixWorld(true);const pos=bone.localToWorld(new T.Vector3(0,.28,0));r.arm.position.copy(r.root.worldToLocal(pos));r.arm.position.x+=.35;}else r.arm.position.set(.37,1.3,.04);
@@ -77,7 +78,7 @@ export default function TennisCanvas({view,selfId,preview=false,avatar,suspended
     sportsFx.update(now,m?.sportsEvents,m?.units??[],m?{x:m.ball.x,y:m.ball.z,z:-m.ball.y}:undefined,!!m&&m.phase==='rally'&&!v?.paused&&m.units.some(u=>u.shotSeq===m.shotSerial&&u.shot==='special'),m?.id);el.dataset.sportsFx=String(sportsFx.group.userData.ready===true);renderer!.render(scene,camera);el.dataset.custom=String([...rigs.values()].filter(r=>r.custom.root.visible).length);el.dataset.players=String(units.length);el.dataset.heroes=String([...rigs.values()].filter(r=>r.custom.root.visible||r.hero.ready).length);frame=requestAnimationFrame(loop);
    };frame=requestAnimationFrame(loop);
   }catch{setFailed(true);}
-  return()=>{disposed=true;cancelAnimationFrame(frame);resize?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values()){r.hero.dispose();r.custom.dispose();}sportsFx.dispose();athletes.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
+  return()=>{disposed=true;cancelAnimationFrame(frame);resize?.disconnect();el.removeEventListener('webglcontextlost',lost);for(const r of rigs.values()){r.custom.dispose();}sportsFx.dispose();athletes.dispose();owned.forEach(o=>o.dispose());renderer?.dispose();};
  },[]);
  return <div className="tennis-court-view"><canvas ref={canvas} aria-label="Tennis court" data-testid="tennis-court"/>{failed&&<CourtFallback view={view} selfId={selfId}/>}</div>;
 }

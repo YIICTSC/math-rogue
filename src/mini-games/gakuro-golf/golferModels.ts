@@ -62,7 +62,7 @@ export function createGolferAssets() {
       if(ready){hero.pose('upper_arm.L',-.65,.50);hero.pose('upper_arm.R',-.65,-.50);hero.pose('forearm.L',-.45,.30);hero.pose('forearm.R',-.45,-.30);hero.pose('spine',.1,swing*.45);root.updateMatrixWorld(true);if(!athlete)hero.grip(club);}
     }
     function update(value: KartAvatar) {
-      hero.set(value.protagonist);appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
+      hero.setAvatar(value,sport||'golf');appearance=value;const effective=expressionOverride===undefined?value:{...value,expression:expressionOverride};
       skin.color.set(BODY_COLORS[value.body]); shirt.color.set(AVATAR_COLORS[value.outfit]);
       const palette = { body: BODY_COLORS[value.body], outfit: AVATAR_COLORS[value.outfit], hair: HAIR_COLORS[value.hair], eyeColor: EYE_COLORS[value.eyeColor ?? 0] };
       for (const { mesh, key } of colored) (mesh.material as T.MeshStandardMaterial).color.set(palette[key]);

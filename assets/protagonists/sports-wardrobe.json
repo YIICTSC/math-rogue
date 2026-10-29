@@ -1,0 +1,146 @@
+{
+  "generator": "/workspace/math-rogue/scripts/blender/build-sports-wardrobe.py",
+  "designs": "scripts/blender/voxel-heroes/designs.json",
+  "models": [
+    {
+      "id": "elementary-warrior",
+      "bytes": 1166596
+    },
+    {
+      "id": "elementary-caretaker",
+      "bytes": 1185820
+    },
+    {
+      "id": "elementary-assassin",
+      "bytes": 1205044
+    },
+    {
+      "id": "elementary-dodgeball",
+      "bytes": 1198636
+    },
+    {
+      "id": "elementary-bard",
+      "bytes": 1270732
+    },
+    {
+      "id": "elementary-librarian",
+      "bytes": 1309180
+    },
+    {
+      "id": "elementary-chef",
+      "bytes": 1185820
+    },
+    {
+      "id": "elementary-gardener",
+      "bytes": 1187428
+    },
+    {
+      "id": "elementary-mage",
+      "bytes": 1310788
+    },
+    {
+      "id": "high-school-warrior",
+      "bytes": 1389292
+    },
+    {
+      "id": "high-school-caretaker",
+      "bytes": 1405300
+    },
+    {
+      "id": "high-school-assassin",
+      "bytes": 1251508
+    },
+    {
+      "id": "high-school-mage",
+      "bytes": 1403716
+    },
+    {
+      "id": "high-school-dodgeball",
+      "bytes": 1371652
+    },
+    {
+      "id": "high-school-bard",
+      "bytes": 1495012
+    },
+    {
+      "id": "high-school-librarian",
+      "bytes": 1520644
+    },
+    {
+      "id": "high-school-chef",
+      "bytes": 1360444
+    },
+    {
+      "id": "high-school-gardener",
+      "bytes": 1349236
+    },
+    {
+      "id": "magic-akari",
+      "bytes": 1360444
+    },
+    {
+      "id": "magic-shizuku",
+      "bytes": 1509436
+    },
+    {
+      "id": "magic-hiyori",
+      "bytes": 1341220
+    },
+    {
+      "id": "magic-tsubasa",
+      "bytes": 1430932
+    },
+    {
+      "id": "magic-rei",
+      "bytes": 1419724
+    },
+    {
+      "id": "magic-madoka",
+      "bytes": 1459784
+    },
+    {
+      "id": "magic-koharu",
+      "bytes": 1464580
+    },
+    {
+      "id": "magic-mirai",
+      "bytes": 1328404
+    },
+    {
+      "id": "magic-sera",
+      "bytes": 1462972
+    },
+    {
+      "id": "magic-ren",
+      "bytes": 1264324
+    },
+    {
+      "id": "magic-soma",
+      "bytes": 1277164
+    },
+    {
+      "id": "magic-minato",
+      "bytes": 1289956
+    },
+    {
+      "id": "magic-riku",
+      "bytes": 1264324
+    },
+    {
+      "id": "magic-yamato",
+      "bytes": 1419724
+    },
+    {
+      "id": "magic-leon",
+      "bytes": 1248316
+    },
+    {
+      "id": "magic-elliot",
+      "bytes": 1277164
+    },
+    {
+      "id": "magic-sakuya",
+      "bytes": 1403716
+    }
+  ]
+}

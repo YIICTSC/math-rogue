@@ -35,6 +35,23 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "カートの色": "Kart color",
+  "バスケットボールのシュート練習": "Basketball shooting practice",
+  "オリジナル人型キャラ": "Original human character",
+  "各編のパーツで作成": "Create from story character parts",
+  "この主人公から作成": "Create from this hero",
+  "素体を選ぶ": "Choose a base character",
+  "髪のパーツ": "Hair parts",
+  "髪パーツを選ぶ": "Choose hair parts",
+  "素体の髪に戻す": "Restore base hair",
+  "参加する衣装": "Match outfit",
+  "スポーツ衣装": "Sports outfit",
+  "テニスウェア": "Tennis kit",
+  "バスケユニフォーム": "Basketball uniform",
+  "ドッジボールウェア": "Dodgeball kit",
+  "ゴルフウェア": "Golf kit",
+  "ボトムの色": "Bottoms color",
+
   "オリジナル音声（おすすめ）": "Original character voice (recommended)",
   "オリジナル音声は、ことばをはっきり発音しながら、ケロケロと跳ねる声で話します。高さ・速さ・抑揚で個性を調整できます。": "Original voices combine clear syllables with playful, warbling pitch. Adjust pitch, speed and expression to shape each character.",
 
@@ -438,6 +455,23 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "カートの色": "カートのいろ",
+  "バスケットボールのシュート練習": "バスケットボールのシュートれんしゅう",
+  "オリジナル人型キャラ": "オリジナルひとがたキャラ",
+  "各編のパーツで作成": "かくへんのパーツでさくせい",
+  "この主人公から作成": "このしゅじんこうからさくせい",
+  "素体を選ぶ": "そたいをえらぶ",
+  "髪のパーツ": "かみのパーツ",
+  "髪パーツを選ぶ": "かみパーツをえらぶ",
+  "素体の髪に戻す": "そたいのかみにもどす",
+  "参加する衣装": "さんかするいしょう",
+  "スポーツ衣装": "スポーツいしょう",
+  "テニスウェア": "テニスウェア",
+  "バスケユニフォーム": "バスケユニフォーム",
+  "ドッジボールウェア": "ドッジボールウェア",
+  "ゴルフウェア": "ゴルフウェア",
+  "ボトムの色": "ボトムのいろ",
+
   "オリジナル音声（おすすめ）": "オリジナルおんせい（おすすめ）",
   "オリジナル音声は、ことばをはっきり発音しながら、ケロケロと跳ねる声で話します。高さ・速さ・抑揚で個性を調整できます。": "オリジナルおんせいは、ことばをはっきりはつおんしながら、ケロケロとはねるこえではなします。たかさ・はやさ・よくようでこせいをちょうせいできます。",
 
