@@ -102,3 +102,10 @@
  .dg-playing .dg-actions button{grid-template-columns:28px minmax(0,1fr)}
  .dg-playing .dg-action-face{width:28px;height:28px}
 }
+
+/* Desktop controls overlay the lower corners; reserve less vertical space for the court. */
+@media(orientation:landscape) and (min-height:551px) and (min-width:1000px){
+ .dg-playing{--dg-action-height:60px;--dg-actions-width:260px;--dg-court-bottom:calc(var(--dg-safe-bottom) + var(--dg-controls-height) + 12px)}
+ .dg-playing .dg-action-face{width:38px;height:38px}
+ .dg-playing .dg-controls .dg-direction-hint{left:120px;bottom:8px}
+}
