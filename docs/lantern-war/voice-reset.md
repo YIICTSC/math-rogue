@@ -10,3 +10,13 @@
 `assets/lantern-war/voice-policy.json` でストーリー音声の再生成を停止し、2人を見本生成中として扱う。`catalog.mjs` / `prepare-voices.py` はこの方針を尊重する。
 
 見本は `audition-plan.json` と `generate-auditions.py` で生成する。会話・戦闘の各2本を、同じ新規参照音声から生成。参照設計16 steps、見本12 steps、モデルとcodecはCPU・bf16。Irodori-TTSとモデルのrevision・seed・参照音声のhashは `audition-build.json` に記録する。見本を本編の全台詞としては登録しない。
+
+## v3：成人の声域へ再設計
+
+見た目より若く聞こえるというフィードバックを受け、全身イラストと会話用立ち絵を再確認。アステルは成人男性の中低音と胸の響き、リュラは成人女性の安定した中音域と厚みを重視し、参照音声から設計し直した。新しいseedと16 stepsで各1本、比較用に同じ会話台詞を生成する。`generate-auditions.py --references-only` を使用し、音声設計の出力そのものを見本として保存する。本編用の大量生成は行わない。
+
+2本ともCPU生成の記録・hashとASR検査を確認。試聴ファイルは `public/sfx/lantern-war-auditions/{aster,lyra}-v3.ogg`。以前の見本と区別できる名前で出力する。
+
+## v3を戦闘音声として採用
+
+ユーザーからv3を参照した戦闘音声の生成指示を受け、2人の戦闘に限定して生成を再開。各10本（基本7種・個人技3種）の台本と再生先を用意する。却下されたv2の試聴音源・参照音声を整理し、v3の音声とhashを固定する。ストーリー音声と他キャラの専用音声、試作アニメーションの生成停止は継続する。詳細は `adult-battle-voices.md`。

@@ -1,10 +1,4 @@
 {
-  "7a32ac9c9301e84590eb": {
-    "spoken_text": "この ともしびを、たくす。",
-    "seconds": 3.2,
-    "steps": 8,
-    "seed_offset": 41
-  },
   "1249564c729f371e02a0": {
     "spoken_text": "この ともしびを、たくす。",
     "seconds": 3.2,
@@ -525,5 +519,47 @@
   },
   "933c9e31ace0dc1907d3": {
     "seconds": 3.05
+  },
+  "2a6d751183cc5fce6d0b": {
+    "steps": 24,
+    "seconds": 3.5,
+    "spoken_text": "暁を継ぐ、つるぎ！",
+    "seed_offset": 29
+  },
+  "06e4c6b487b37d22ec92": {
+    "steps": 16,
+    "seconds": 3.0
+  },
+  "39f4329e5d60d06913dc": {
+    "steps": 16,
+    "seconds": 3.0
+  },
+  "c24d5317ab071022aa35": {
+    "steps": 16,
+    "seconds": 3.0
+  },
+  "2c0eb92cd6f385e77556": {
+    "steps": 16,
+    "seconds": 3.0
+  },
+  "7fc1248700474b6cb2fd": {
+    "steps": 24,
+    "seconds": 3.6,
+    "spoken_text": "帰郷の、踏み込み！",
+    "seed_offset": 31
+  },
+  "eabc2330360cb68828fd": {
+    "steps": 16,
+    "seconds": 3.0
+  },
+  "cb7b4fc658c6f33a5b5a": {
+    "steps": 16,
+    "seconds": 3.0
+  },
+  "9d46c43912ea2894cd28": {
+    "spoken_text": "ごめん。後を、お願い。",
+    "steps": 16,
+    "seconds": 3.8,
+    "seed_offset": 11
   }
 }

@@ -1,16 +1,451 @@
 {
-  "clips": {},
+  "clips": {
+    "e6428897bb25c0dc28ae": {
+      "text": "道を切り開く！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 戦闘中の鋭く短い掛け声。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 242355001,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 2.03,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "道を切り開く！",
+      "path": "sfx/lantern-war/aster/e6428897bb25c0dc28ae.ogg",
+      "kind": "attack",
+      "recipe_sha256": "f021e1836a4442059366eb3ecbebb12d886cf405cd20a2d36de1852d2d546d80",
+      "sha256": "e1c72eca9d2ab17823afc2a45a5640b1a74308ea36244e016166dd067735ff71",
+      "duration": 2.15,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "e6428897bb25c0dc28ae",
+        "f0eb8543a627283bb593"
+      ]
+    },
+    "f0eb8543a627283bb593": {
+      "text": "まだ、立てる！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 傷を受けて耐える、短い強がり。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 253532932,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 1.69,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "まだ、立てる！",
+      "path": "sfx/lantern-war/aster/f0eb8543a627283bb593.ogg",
+      "kind": "damage",
+      "recipe_sha256": "2d43690af89b9b2a4d14ed919658b09733e0149e1855897c5fe9cbd25c39eb20",
+      "sha256": "2b2b258488e128bffbb91f95fbe0deacad33a8cf5fb4244cbfb5f6f1c9a3c846",
+      "duration": 1.81,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "e6428897bb25c0dc28ae",
+        "f0eb8543a627283bb593"
+      ]
+    },
+    "b0d9834dcf0d13880cc9": {
+      "text": "ありがとう。もう一度！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 回復への感謝、息を整えた自然な声。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 186350308,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 2.54,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "ありがとう。もう一度！",
+      "path": "sfx/lantern-war/aster/b0d9834dcf0d13880cc9.ogg",
+      "kind": "heal",
+      "recipe_sha256": "e96f6a69a877a8de24b32598bcf28b09cd2e62dc3c15bd2012a23237e9f45dd3",
+      "sha256": "f7861d100c57567a162a98437c7a05561145cd3bea92a84d14ba74eeeff081a4",
+      "duration": 2.66,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "b0d9834dcf0d13880cc9",
+        "2a6d751183cc5fce6d0b"
+      ]
+    },
+    "2a6d751183cc5fce6d0b": {
+      "text": "暁を継ぐ剣！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 必殺技名を凛と力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 45398558,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 3.5,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 24,
+      "spoken_text": "暁を継ぐ、つるぎ！",
+      "path": "sfx/lantern-war/aster/2a6d751183cc5fce6d0b.ogg",
+      "kind": "ultimate",
+      "recipe_sha256": "27f21cde99699435ebdf36c1dd78e8ef9783e176e40adff9218e2ef1f4685f63",
+      "sha256": "61e582ae9beae5825fbf5a3233fe0124e864752fb1de9be3c98675dabf27ba30",
+      "duration": 3.62,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "2a6d751183cc5fce6d0b"
+      ]
+    },
+    "c86d8755f6f29b1849f1": {
+      "text": "ここは僕が支える！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 仲間を支える、頼もしさと温かさ。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 211073829,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 2.37,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "ここは僕が支える！",
+      "path": "sfx/lantern-war/aster/c86d8755f6f29b1849f1.ogg",
+      "kind": "support",
+      "recipe_sha256": "34d2089c77f69fdea5d5798a2276fb6dd8fa30890327305ebf6f57e24546b74e",
+      "sha256": "5084d251d67f0229e781b20c4e2f72cc8f8ff8f988207b6b87b61c70da920641",
+      "duration": 2.49,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "c86d8755f6f29b1849f1",
+        "314a3db6bfa6b0970380"
+      ]
+    },
+    "314a3db6bfa6b0970380": {
+      "text": "みんなで、つかんだ勝利だ。",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 戦いを終えた安堵と仲間への感謝。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 52594315,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 3.05,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "みんなで、つかんだ勝利だ。",
+      "path": "sfx/lantern-war/aster/314a3db6bfa6b0970380.ogg",
+      "kind": "win",
+      "recipe_sha256": "0667c7f638d6ea56718e8ce7aea0fb8ddf75d0b48c452f6d2b523328891317d4",
+      "sha256": "ee191756eb3c9436ec15ee83a67833926057dd9c1e1acfcf1ff01239a290e461",
+      "duration": 3.17,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "c86d8755f6f29b1849f1",
+        "314a3db6bfa6b0970380"
+      ]
+    },
+    "7a32ac9c9301e84590eb": {
+      "text": "この灯を、託す。",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 力を使い果たし、仲間へ託す静かな声。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 129043833,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 2.54,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "このともしびを、たくす。",
+      "path": "sfx/lantern-war/aster/7a32ac9c9301e84590eb.ogg",
+      "kind": "defeat",
+      "recipe_sha256": "fee35adef5bf18d36953deb1ae265979c53759b25394aa6eaf7dd8fd026257ad",
+      "sha256": "d59708789f16cf95e69ba5e81915c47979696674b7f1337e53a8dbf7e3bc620f",
+      "duration": 2.66,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "7a32ac9c9301e84590eb",
+        "06e4c6b487b37d22ec92"
+      ]
+    },
+    "06e4c6b487b37d22ec92": {
+      "text": "星灯の切先！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 固有技名を明瞭に、短く力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 8138523,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 3.0,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "せいとうのきっさき！",
+      "path": "sfx/lantern-war/aster/06e4c6b487b37d22ec92.ogg",
+      "kind": "technique",
+      "recipe_sha256": "acd3de74b6da4549e394978fef8583328b4b84d79516fc4ed22ab994bc02b343",
+      "sha256": "de53ea5f02d101890b32630c20c3ee2d64ed294dd99758e7e0c9461b855e6867",
+      "duration": 3.12,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "2a6d751183cc5fce6d0b",
+        "06e4c6b487b37d22ec92"
+      ]
+    },
+    "39f4329e5d60d06913dc": {
+      "text": "隣人の号令！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 固有技名を明瞭に、短く力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 61679065,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 3.0,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "りんじんのごうれい！",
+      "path": "sfx/lantern-war/aster/39f4329e5d60d06913dc.ogg",
+      "kind": "technique",
+      "recipe_sha256": "c5c645ca7b3759d8ba6b79796c25c771b5d8626802c00f5b4b52394a2dd65f02",
+      "sha256": "59d82caa6a292a92dcb4749c2dcc0ed7ecdde024e3f4ba9cdd5f4a0b543b8ba0",
+      "duration": 3.12,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "39f4329e5d60d06913dc",
+        "c24d5317ab071022aa35"
+      ]
+    },
+    "c24d5317ab071022aa35": {
+      "text": "暁路の三日月！",
+      "speaker": "aster",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。 固有技名を明瞭に、短く力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 204650465,
+      "reference_sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "seconds_requested": 3.0,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "ぎょうろのみかづき！",
+      "path": "sfx/lantern-war/aster/c24d5317ab071022aa35.ogg",
+      "kind": "technique",
+      "recipe_sha256": "95e570fe4862670c5b8cc802ea8e23a9379d73f866bd2699930fc12ecc8548ef",
+      "sha256": "4012697951cf27cbb3db2e1137e9efd660f299a2ecf7eb415c493820b508751d",
+      "duration": 3.12,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "39f4329e5d60d06913dc",
+        "c24d5317ab071022aa35"
+      ]
+    },
+    "9a2ec2af498fc62e78d1": {
+      "text": "私が道を開く！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 戦闘中の鋭く短い掛け声。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 162582234,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 2.37,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "私が道を開く！",
+      "path": "sfx/lantern-war/lyra/9a2ec2af498fc62e78d1.ogg",
+      "kind": "attack",
+      "recipe_sha256": "23ca900d1c962df8e86a11b502f0f55ea4cae3ad395bf61310015d87aa41a46c",
+      "sha256": "526fcaddab8a14dac4e7768c51d435d4cd9ecd3643230f22108956e880b67228",
+      "duration": 2.49,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "9a2ec2af498fc62e78d1",
+        "cf7168146eff6875ae4c"
+      ]
+    },
+    "cf7168146eff6875ae4c": {
+      "text": "このくらいで！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 傷を受けて耐える、短い強がり。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 218429745,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 1.69,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "このくらいで！",
+      "path": "sfx/lantern-war/lyra/cf7168146eff6875ae4c.ogg",
+      "kind": "damage",
+      "recipe_sha256": "e6f377fe0382a9362b41d9165194a184d4d2886bc52c6eb9baff910d72b0bd18",
+      "sha256": "3e00ed13f15353e7524e5f466676e2c1ebf9c3bb7bf3a7cb5b59a7aebf787a45",
+      "duration": 1.81,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "9a2ec2af498fc62e78d1",
+        "cf7168146eff6875ae4c"
+      ]
+    },
+    "151f7475b016a272e1a5": {
+      "text": "ありがとう。まだ戦える！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 回復への感謝、息を整えた自然な声。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 23058935,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 2.88,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "ありがとう。まだ戦える！",
+      "path": "sfx/lantern-war/lyra/151f7475b016a272e1a5.ogg",
+      "kind": "heal",
+      "recipe_sha256": "16e2045d11520cf7a8c3fbd62dcce92c70c9ab8ada1f3e03931d90c8eee43706",
+      "sha256": "527a3a7133b601d7105839957e21101ddd4fb724574c4fb76dfddab97a817a8f",
+      "duration": 3.0,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "151f7475b016a272e1a5"
+      ]
+    },
+    "2c0eb92cd6f385e77556": {
+      "text": "暁を継ぐ剣！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 必殺技名を凛と力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 47107650,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 3.0,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "あかつきをつぐつるぎ！",
+      "path": "sfx/lantern-war/lyra/2c0eb92cd6f385e77556.ogg",
+      "kind": "ultimate",
+      "recipe_sha256": "66719dff1fa43b8213b95043aa040eb36940581d70a2fd8c0390fc1050e130cc",
+      "sha256": "9d42b44e9d864348df0b9aa1dd73b6836954f2b45ee3f67e6fd3406f60da9aa8",
+      "duration": 3.12,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "2c0eb92cd6f385e77556"
+      ]
+    },
+    "3fc39878a84a79a521c6": {
+      "text": "背中は私に任せて！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 仲間を支える、頼もしさと温かさ。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 67771447,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 2.71,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "背中は私に任せて！",
+      "path": "sfx/lantern-war/lyra/3fc39878a84a79a521c6.ogg",
+      "kind": "support",
+      "recipe_sha256": "f59c96d803c14ab18c6b8858631a387a314dc6a91ff08dd17aedb9a7281fc2dc",
+      "sha256": "aeadba19e665d1b18d642645d21b7869afeb53a8b9a69b92938e65203499cb23",
+      "duration": 2.83,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "3fc39878a84a79a521c6",
+        "0686831fdc50257027fa"
+      ]
+    },
+    "0686831fdc50257027fa": {
+      "text": "みんな、よく戦ったね。",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 戦いを終えた安堵と仲間への感謝。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 7752417,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 2.71,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 12,
+      "spoken_text": "みんな、よく戦ったね。",
+      "path": "sfx/lantern-war/lyra/0686831fdc50257027fa.ogg",
+      "kind": "win",
+      "recipe_sha256": "73cfae29b485ee2e781fd7b86b17d096aa0f534f5283b7e76a62104e5d58419e",
+      "sha256": "46bf4153c6af9f6dd760be773c6fd8dc9b6b8dc11dea92036e0831f4de677852",
+      "duration": 2.83,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "3fc39878a84a79a521c6",
+        "0686831fdc50257027fa"
+      ]
+    },
+    "9d46c43912ea2894cd28": {
+      "text": "ごめん……後を、お願い。",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 力を使い果たし、仲間へ託す静かな声。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 165826302,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 3.8,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "ごめん。後を、お願い。",
+      "path": "sfx/lantern-war/lyra/9d46c43912ea2894cd28.ogg",
+      "kind": "defeat",
+      "recipe_sha256": "58c903eb908cc12aaaa085d62652cf31071a357508823144bd6885bbebe4ef08",
+      "sha256": "ebdbafadfc2dfcb0f100d226fcdffdb05eb099dde70e2b583b131d2a01832e47",
+      "duration": 3.92,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "9d46c43912ea2894cd28"
+      ]
+    },
+    "7fc1248700474b6cb2fd": {
+      "text": "帰郷の踏み込み！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 固有技名を明瞭に、短く力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 134870295,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 3.6,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 24,
+      "spoken_text": "帰郷の、踏み込み！",
+      "path": "sfx/lantern-war/lyra/7fc1248700474b6cb2fd.ogg",
+      "kind": "technique",
+      "recipe_sha256": "28da036843d21fdae39c911442d479aa383dd7fe9374d55766c568fd04c82a8a",
+      "sha256": "77ab367e943e9e0406169a7a2984390567aee168349044ec3962ce5a7f6fbc40",
+      "duration": 3.72,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "7fc1248700474b6cb2fd"
+      ]
+    },
+    "eabc2330360cb68828fd": {
+      "text": "灯守の構え！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 固有技名を明瞭に、短く力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 247047395,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 3.0,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "ひもりのかまえ！",
+      "path": "sfx/lantern-war/lyra/eabc2330360cb68828fd.ogg",
+      "kind": "technique",
+      "recipe_sha256": "ce24baa1051f6087c5636d6898606aabad477938317c4202258e5eb17590a018",
+      "sha256": "cfe56c01b7d36d8a1f60f7dd42ee059f65873c4c5ce4031a68c99f37c2dd972d",
+      "duration": 3.12,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "7fc1248700474b6cb2fd",
+        "eabc2330360cb68828fd"
+      ]
+    },
+    "cb7b4fc658c6f33a5b5a": {
+      "text": "王冠を解く剣！",
+      "speaker": "lyra",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。 固有技名を明瞭に、短く力強く告げる。 参照音声と同じ人物の声質と成人の声域を保つ。",
+      "seed": 214276012,
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seconds_requested": 3.0,
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "steps": 16,
+      "spoken_text": "おうかんをとくつるぎ！",
+      "path": "sfx/lantern-war/lyra/cb7b4fc658c6f33a5b5a.ogg",
+      "kind": "technique",
+      "recipe_sha256": "5f71d281bac66fe208af257a711ad32b517095758862ac0d98ad667de7e8bb5d",
+      "sha256": "90e51f065cbf7a9b19f63a9b0a88a40f629797c8a261290723d6ff58e83bd9e3",
+      "duration": 3.12,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "cb7b4fc658c6f33a5b5a"
+      ]
+    }
+  },
   "references": {
     "aster": {
-      "path": "assets/lantern-war/references/aster-fantasy-v2.ogg",
-      "sha256": "78888dde2cd59fdd2c66a3f8ff96098cc699a9ce236f9660f6dd066556b996fe",
-      "caption": "日本語の王道ファンタジーアニメの青年主人公。二十歳前後の男性。青髪と白金の鎧、青いマントをまとう若き剣士。明るく澄んだ芯のある中高音。若々しく爽やか、勇敢で誠実。自然な標準語、子音を明瞭に。会話では親しみと温かさ、決意ではまっすぐな力強さ。低く老けた声や過度な息漏れではなく、朗々とした前に響く発声。音楽や効果音なし。",
+      "path": "assets/lantern-war/references/aster-fantasy-v3.ogg",
+      "sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6",
+      "caption": "日本語を母語とする、三十歳前後の成人男性の声。落ち着いた中低音、胸に響く厚みと自然な艶がある。白金の鎧と青いマントをまとう、経験を積んだ端正な騎士。責任感、頼もしさ、静かな勇気。明るさは穏やかな微笑みとして表し、音域は安定した男性の中低音を保つ。腹から支えた発声、明瞭な子音、自然な会話速度と落ち着いた間。決意を感じる力強い語尾。音楽、効果音、背景音なし。",
       "designed": true
     },
     "lyra": {
-      "path": "assets/lantern-war/references/lyra-fantasy-v2.ogg",
-      "sha256": "fbb0d8bb1aa4b8f50d86449236aebd9c4f1cfab8a468afb5c43ba4849c637d85",
-      "caption": "日本語の王道ファンタジーアニメの正統派女性主人公。二十歳前後の女性。赤い編み髪と白金の鎧、緑のマントをまとう凛とした女剣士。透明感のある明るい中高音、気品と若々しさ、意志の強さと優しさ。自然な標準語、子音を明瞭に。可愛すぎる幼児声ではなく、落ち着いた少女から若い成人の伸びやかな声。戦闘では鋭く勇ましく、日常では温かく自然。音楽や効果音なし。",
+      "path": "assets/lantern-war/references/lyra-fantasy-v3.ogg",
+      "sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "caption": "日本語を母語とする、二十代後半から三十歳前後の成人女性の声。落ち着いた女性の中音域、豊かな響きとしなやかな芯。赤い編み髪と白金の鎧、緑のマントをまとう気品ある熟練の女剣士。自信、包容力、落ち着いた意志の強さを持つ。成熟した女性らしい柔らかな厚みと、きりっとした明瞭な発声。自然な会話速度、静かに相手を安心させる抑揚。音域は安定した成人女性の中音域を保ち、語尾まで凛と力強い。音楽、効果音、背景音なし。",
       "designed": true
     },
     "high-school-warrior": {
@@ -248,14 +683,14 @@
       "designed": false
     }
   },
-  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-  "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+  "model": "Aratako/Irodori-TTS-v4.1-Small",
+  "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
   "irodori_revision": "59be938c99d48b5653ca5aa3fdd0cddaa56940e5",
   "model_device": "cpu",
   "codec_device": "cpu",
   "compute": "bf16",
   "threads": 2,
-  "steps": 4,
+  "steps": 12,
   "silentcipher_watermark": true,
-  "latest_checked_at": "2026-10-29T04:12:18.160121+00:00"
+  "latest_checked_at": "2026-10-29T07:09:24.947340+00:00"
 }
