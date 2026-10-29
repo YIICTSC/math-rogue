@@ -1,3 +1,4 @@
+import {COZY_CHATS,cozyChat,CASUAL_REPLIES} from './cozyDialogue';
 import { ROOM_TOPICS, PERSONA, type ReplyId } from './dialogueCorpus';
 import {
   CHARACTERS, CHARACTER_IDS, ROOM_IDS, NPC_IDS, CATEGORY_IDS, words,
@@ -38,7 +39,7 @@ export interface LifeState {
   lastPlayed: number;
 }
 export interface DialogueLine { speaker: 'pet' | 'npc' | 'narrator'; text: Localized; reaction: Reaction }
-export interface Dialogue { id: string; kind: 'talk' | 'care' | 'learn' | 'town'; npcId?: NpcId; lines: DialogueLine[]; choices?: {id: ReplyId; label:Localized}[] }
+export interface Dialogue { id: string; kind: 'talk' | 'care' | 'learn' | 'town'; npcId?: NpcId; lines: DialogueLine[]; choices?: {id: ReplyId; label:Localized}[]; chatId?:string }
 export interface Interaction { state: LifeState; dialogue: Dialogue }
 export type TeachStatus = 'learned' | 'duplicate' | 'empty' | 'too-long' | 'no-energy' | 'full' | 'reading-required' | 'invalid-reading';
 export interface TeachResult { state: LifeState; status: TeachStatus; dialogue?: Dialogue }
@@ -271,21 +272,21 @@ function wordConversation(word: LearnedWord, variation: number): DialogueLine[] 
 export function talk(state: LifeState): Interaction {
   const companion = currentCompanion(state);
   const turn = companion.talkCount;
-  const topic = ROOM_TOPICS[(turn * 53 + CHARACTER_IDS.indexOf(state.character) * 17) % ROOM_TOPICS.length];
+  const topic = ROOM_TOPICS[(Math.floor(turn / 2) * 53 + CHARACTER_IDS.indexOf(state.character) * 17) % ROOM_TOPICS.length];
   const response = PERSONA[topic.theme][state.character];
-  const lines: DialogueLine[] = [pet(topic.opening.ja,topic.opening.en,'think'),pet(response.ja,response.en,'happy')];
-  if (companion.words.length) lines.push(...wordConversation(companion.words[turn % companion.words.length],Math.floor(turn / Math.max(1,companion.words.length))));
+  const scene = turn % 2 === 0 ? cozyChat(state.character,turn,companion.affinity) : undefined;
+  const lines: DialogueLine[] = scene ? scene.lines.map((line,i)=>pet(line.ja,line.en,i===0?'think':'happy')) : [pet(topic.opening.ja,topic.opening.en,'think'),pet(response.ja,response.en,'happy')];
+  if (!scene && companion.words.length) lines.push(...wordConversation(companion.words[Math.floor(turn/2) % companion.words.length],Math.floor(turn / (2*Math.max(1,companion.words.length)))));
   const setting = ROOM_CONTEXT[state.room];
   const hour = new Date().getHours();
   const time = TIME_CONTEXT[hour < 6 ? 0 : hour < 12 ? 1 : hour < 18 ? 2 : 3];
-  if (turn % 2 === 0) lines.push(pet(setting.ja,setting.en,'happy'));
-  if (turn % 3 === 0) lines.push(pet(time.ja,time.en,'think'));
-  if (companion.affinity >= 30 && turn % 5 === 0) lines.push(pet('こんな話を覚えていてくれる人がいる。ぼくには、それがうれしい。','Having someone who remembers these little stories makes me happy.','shy'));
-  if (turn % 4 === 0) { const context = ROOM_TOPICS[(Math.floor(turn / ROOM_TOPICS.length)*19+turn+31)%ROOM_TOPICS.length]; lines.push(pet(context.opening.ja,context.opening.en,'think')); }
+  if (!scene && turn % 5 === 0) lines.push(pet(setting.ja,setting.en,'happy'));
+  if (!scene && turn % 7 === 0) lines.push(pet(time.ja,time.en,'think'));
+  if (!scene && companion.affinity >= 30 && turn % 11 === 0) lines.push(pet('こんな話を覚えていてくれる人がいる。ぼくには、それがうれしい。','Having someone who remembers these little stories makes me happy.','shy'));
   const next: CompanionState = { ...companion, talkCount: turn + 1,
     affinity: clamp(companion.affinity + 2, 0, 999), mood: 'happy', satiety: Math.max(20, companion.satiety - 1),
     traits: { ...companion.traits, kindness: clamp(companion.traits.kindness + 1) } };
-  return { state: changeCompanion(state, next), dialogue: { ...dialogue(state, 'talk', lines), choices: replyChoices } };
+  return { state: changeCompanion(state, next), dialogue: { ...dialogue(state, 'talk', lines), choices: scene?.choices || replyChoices, ...(scene ? {chatId:scene.id} : {}) } };
 }
 
 export function care(state: LifeState, action: CareAction): Interaction {
@@ -402,13 +403,14 @@ export function visitTown(state: LifeState, place: NpcId): Interaction {
 export const characterName = (state: LifeState): Localized => CHARACTERS.find(character => character.id === state.character)!.name;
 
 const replyChoices = [
- {id:'curious' as const,label:words('もっと聞かせて','Tell me more')},
- {id:'kind' as const,label:words('一緒だとうれしいね','It is lovely together')},
- {id:'playful' as const,label:words('想像してみよう','Let us imagine it')},
+ {id:'curious' as const,label:words('それで、どうなったの？','And what happened?')},
+ {id:'kind' as const,label:words('わかる気がする','I think I get it')},
+ {id:'playful' as const,label:words('もしも、の話しよう','What if…?')},
 ];
 export function respondToDialogue(state:LifeState, previous:Dialogue, choice:ReplyId):Interaction {
  const c=currentCompanion(state); const last=previous.lines.find(l=>l.speaker==='pet');
- const phrase=choice==='curious' ? words('次は、一緒に確かめてみよう。見つけたら、いちばんに教えるね。','Let us find out together next time. You will be the first to know.') : choice==='kind' ? words('うん。聞いてくれる人がいると、小さな発見まで大切になるね。','Yes. When someone listens, even little discoveries become precious.') : words('もしお話の続きが夢に出てきたら、明日また聞いてね。','If the story continues in my dreams, ask me about it tomorrow.');
+ const scene=COZY_CHATS.find(chat=>chat.id===previous.chatId&&chat.hero===state.character);
+ const phrase=scene?.replies[choice] || CASUAL_REPLIES[state.character][choice];
  const next=remember({...c,affinity:clamp(c.affinity+1,0,999)},last?.text||phrase);
  return {state:changeCompanion(state,next),dialogue:dialogue(state,'talk',[pet(phrase.ja,phrase.en,choice==='playful'?'dance':'happy')])};
 }

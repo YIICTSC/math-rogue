@@ -109,7 +109,9 @@ try {
   assert.equal((await saved()).energy, 5, 'Duplicate teaching never spends energy');
   await closeDialog();
   await button('おしゃべり').click();
-  assert.match(await readDialogue({ chooseReply: true }), /りんご/, 'Conversation actually uses the taught word');
+  assert.match(await readDialogue({ chooseReply: true }), /月|団子|うさぎ/, 'First authored scene and its selected reply stay on the moon-shop topic');
+  await button('おしゃべり').click();
+  assert.match(await readDialogue({ chooseReply: true }), /りんご/, 'Alternating conversation still uses the taught word');
   assert.equal((await saved()).energy, 5, 'Chat and replies are free');
   for (const action of ['なでなで', 'おやつにしよう', 'いっしょに遊ぶ', 'のんびり休む']) {
     await button('ふれあい').click();
