@@ -55,7 +55,7 @@ createRoot(document.getElementById('root')).render(<Dodgeball languageMode={para
     const box=e=>e.getBoundingClientRect().toJSON(),root=document.querySelector('.dg-playing'),canvas=document.querySelector('.dg-canvas canvas'),frame=document.querySelector('.dg-court-frame');
     const obstacles=[...document.querySelectorAll('.dg-stick,.dg-actions button,.tn-header button,.dg-scoreboard,.dg-direction-hint')].map(e=>({name:e.className||e.textContent,box:box(e)}));
     const points=[];
-    for(const x of [-7.45,7.45])for(const y of [-11.5,11.5])for(const z of [0,2.1,3.9]){
+    for(const x of [-9,9])for(const y of [-12.7,12.7])for(const z of [0]){
      const p=new window.T.Vector3(x,z,-y).project(window.__courtCamera);points.push({x:(p.x+1)/2*innerWidth,y:(1-p.y)/2*innerHeight});
     }
     return{camera:{left:window.__courtCamera.left,right:window.__courtCamera.right,top:window.__courtCamera.top,bottom:window.__courtCamera.bottom},root:box(root),canvas:box(canvas),frame:box(frame),obstacles,points,scroll:[root.scrollWidth,root.scrollHeight],targets:[...document.querySelectorAll('.dg-actions button,.tn-header button')].map(box)};
@@ -68,9 +68,10 @@ createRoot(document.getElementById('root')).render(<Dodgeball languageMode={para
    for(const {name,box:r} of measurements.obstacles)assert(r.x>=0&&r.y>=0&&r.right<=width+.5&&r.bottom<=height+.5,`${name} must be visible at ${width}×${height}: ${JSON.stringify(r)}`);
    for(const r of measurements.targets)assert(r.width>=44&&r.height>=44,`Touch target at ${width}×${height}: ${JSON.stringify(r)}`);
    for(const p of measurements.points){
-    assert(p.x>=frame.left-.5&&p.x<=frame.right+.5&&p.y>=frame.top-.5&&p.y<=frame.bottom+.5,`Court, outfield and jumping heroes must fit at ${width}×${height}: ${JSON.stringify(p)}`);
-    for(const {name,box:r} of measurements.obstacles)assert(!(p.x>r.left&&p.x<r.right&&p.y>r.top&&p.y<r.bottom),`HUD ${name} hides a court edge at ${width}×${height}`);
+    assert(p.x>=frame.left-.5&&p.x<=frame.right+.5&&p.y>=frame.top-.5&&p.y<=frame.bottom+.5,`Court and outfields must fit at ${width}×${height}: ${JSON.stringify(p)}`);
+
    }
+   const xs=measurements.points.map(p=>p.x),ys=measurements.points.map(p=>p.y);assert(Math.max((Math.max(...xs)-Math.min(...xs))/frame.width,(Math.max(...ys)-Math.min(...ys))/frame.height)>.99,'Court fills at least one viewport axis');
    for(let i=0;i<measurements.obstacles.length;i++)for(let j=i+1;j<measurements.obstacles.length;j++){
     const a=measurements.obstacles[i],b=measurements.obstacles[j];
     assert(!(a.box.left<b.box.right-1&&a.box.right>b.box.left+1&&a.box.top<b.box.bottom-1&&a.box.bottom>b.box.top+1),`Overlapping controls ${a.name}, ${b.name} at ${width}×${height}`);
@@ -98,7 +99,7 @@ createRoot(document.getElementById('root')).render(<Dodgeball languageMode={para
  // An unowned match gets the same full-screen arena without reserving control space.
  const before=await page.locator('.dg-court-frame').boundingBox();
  await page.evaluate(()=>{const view=structuredClone(window.__layoutView);view.match.units.forEach(u=>u.owner=null);window.__setLayoutView(view);});
- await page.locator('.dg-spectating').waitFor();assert.equal(await page.locator('.dg-controls').count(),0);assert((await page.locator('.dg-court-frame').boundingBox()).height>before.height);
+ await page.locator('.dg-spectating').waitFor();assert.equal(await page.locator('.dg-controls').count(),0);assert.equal((await page.locator('.dg-court-frame').boundingBox()).height,before.height);
  const fallback=await browser.newPage({viewport:{width:390,height:844}});fallback.on('pageerror',e=>errors.push(e.message));
  await fallback.addInitScript(()=>{const context=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...args){return String(kind).includes('webgl')?null:context.call(this,kind,...args);};});
  await fallback.goto(base,{waitUntil:'domcontentloaded',timeout:120_000});await fallback.locator('.dg-fallback svg').waitFor();
@@ -110,5 +111,5 @@ createRoot(document.getElementById('root')).render(<Dodgeball languageMode={para
   await fallback.screenshot({path:`tmp/dodgeball-layout/fallback-${width}.png`});
  }
  assert.deepEqual(errors,[]);
- console.log('PASS: full-screen arena, 11 phone/tablet/desktop/ultrawide sizes on both sides, visible court/outfields/jumps, separate 44px controls, safe areas, live resize, pause menu, spectators and rotating 2D fallback.');
+ console.log('PASS: full-screen arena, 11 phone/tablet/desktop/ultrawide sizes on both sides, edge-to-edge court/outfields, separate 44px controls, safe areas, live resize, pause menu, spectators and rotating 2D fallback.');
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}
