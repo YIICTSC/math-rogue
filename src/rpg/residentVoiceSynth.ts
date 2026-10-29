@@ -1,3 +1,4 @@
+import {planResidentPhrases,residentPitchSemitones} from './residentVoiceProsody';
 import type { ConversationVoice } from './conversationVoice';
 
 /** Original, asset-free kana formant synthesizer. No sampled or proprietary voices. */
@@ -68,14 +69,15 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
   const expression=voice.intonation??.65,bright=voice.style==='bouncy'||voice.style==='playful';
   const vowels=[resonator(),resonator(),resonator()],friction=resonator(),nasal=resonator();
   tune(nasal,280,180,sampleRate);
-  let offset=0,phase=0,seed=1471,lastPulse=0,phraseIndex=0;
-  const steps=[0,2,-1,3,-2,1],openPhase=[.56,.44,.61,.68][voice.timbre]??.56;
+  let offset=0,phase=0,seed=1471,lastPulse=0;
+  const phrases=planResidentPhrases(units);
+  const openPhase=[.56,.44,.61,.68][voice.timbre]??.56;
   for(let index=0;index<units.length;index++){
     const m=units[index],length=sizes[index];
     if(m.vowel<0){
       // Silence must not retain ringing filter energy into the next phrase.
       for(const r of [...vowels,friction,nasal])r.x1=r.x2=r.y1=r.y2=0;
-      offset+=length;phraseIndex=0;continue;
+      offset+=length;continue;
     }
     const previous=units[index-1],next=units[index+1],c=m.consonant;
     const velar=/^[kg]/.test(c);
@@ -84,7 +86,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
     const voicedConsonant=/^[gdbzjvmnrwy]/.test(c);
     const palatal=c.includes('y')||/^sh|^ch|^j/.test(c),labial=/^[pbmfvw]/.test(c);
     const closure=(stop||affricate?(voicedConsonant?.012:.018):c==='r'?.012:0)/rate;
-    const onset=(affricate?.062:fricative?.048:isNasal?.040:c==='r'?.030:velar?.058:stop?.052:c?.036:.008)/rate;
+    const onset=(affricate?.062:fricative?.048:isNasal?.040:c==='r'?.030:velar?.070:stop?.052:c?.036:.008)/rate;
     const burstEnd=closure+.012/rate,transition=onset+.014/rate;
     const devoiced=(m.vowel===1||m.vowel===2)&&unvoiced(c)&&(!next||next.vowel<0||unvoiced(next.consonant));
     const noiseFrequency=/^sh|^ch|^j|^hy/.test(c)?3600:/^s|^ts|^z/.test(c)?6500:/^k|^g/.test(c)?2600:labial?1200:1900;
@@ -92,11 +94,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
     friction.x1=friction.x2=friction.y1=friction.y2=0;
     tune(friction,noiseFrequency,/^s|^sh|^ts|^ch/.test(c)||velar?2200:1600,sampleRate);
     const target=formants[m.vowel],prev=previous&&previous.vowel>=0?formants[previous.vowel]:target;
-    // A small stepped melody gives each mora a playful 'kero' inflection.
-    // Articulation and vowel formants stay independent of the character effect.
-    const depth=voice.style==='robot'?0:expression*(voice.style==='playful'?1.5:bright?1.25:voice.style==='calm'?.55:.85);
-    const note=steps[phraseIndex%steps.length]*depth;
-    const previousNote=phraseIndex?steps[(phraseIndex-1)%steps.length]*depth:note;
+    const phrase=phrases[index];
     const fundamental=165*Math.max(.65,Math.min(1.7,voice.pitch));
     const boundarySample=offset>0?pcm[offset-1]:0;
     for(let i=0;i<length;i++){
@@ -110,10 +108,11 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
         }
       }
       seed=(Math.imul(seed,1664525)+1013904223)|0;const noise=seed/2147483648;
-      const vowelTime=Math.max(0,time-onset),glide=Math.min(1,vowelTime/(.026/rate));
-      const pitchStep=previousNote+(note-previousNote)*glide;
-      const kero=voice.style==='robot'?0:Math.sin(vowelTime*2*Math.PI*(voice.style==='playful'?27:bright?21:17))*.024*expression*glide;
-      const f0=fundamental*Math.pow(2,pitchStep/12)*(1+kero+(m.question?Math.max(0,position-.55)*.22*expression:0));
+      const phraseTime=phrase.offset+time*rate;
+      const pitchStep=residentPitchSemitones(phrase,phraseTime,voice);
+      // Keep the character's mild flutter continuous, rather than restarting at every vowel.
+      const kero=voice.style==='robot'?0:Math.sin(phraseTime*2*Math.PI*(voice.style==='playful'?23:bright?19:16))*.003*expression;
+      const f0=fundamental*Math.pow(2,pitchStep/12)*(1+kero);
       phase+=f0/sampleRate;const cycle=phase%1;
       const pulse=cycle<openPhase?.5*(1-Math.cos(Math.PI*cycle/openPhase)):.5*(1+Math.cos(Math.PI*(cycle-openPhase)/(1-openPhase)));
       // A band-limited buzz supplies the upper harmonics needed to hear F2/F3 clearly.
@@ -153,7 +152,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
       const blendPosition=Math.min(1,time/.006),blend=blendPosition*blendPosition*(3-2*blendPosition);
       pcm[offset+i]=boundarySample*(1-blend)+value*attack*release*blend;
     }
-    offset+=length;phraseIndex++;
+    offset+=length;
   }
   // Remove low-frequency rumble before peak normalization so consonants stay audible.
   let previousInput=0,previousOutput=0,peak=0;

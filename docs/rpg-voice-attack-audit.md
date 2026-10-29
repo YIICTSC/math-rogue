@@ -1,6 +1,6 @@
 # オリジナル音声の立ち上がり調査
 
-基準コミット: `e7a87822`。通常音・拗音・外来音を含む115音、3文脈（語頭・母音の後・促音の後）、4種の高さ／速さ／話し方、4声質の計5,520窓を比較した。生成文字数の上限を越えないよう18例ずつ合成し、全測定窓の存在と有限値を検証する。
+基準コミット: `e7a87822`。表は破裂音調整時点の `feccc092` との比較。通常音・拗音・外来音を含む115音、3文脈（語頭・母音の後・促音の後）、4種の高さ／速さ／話し方、4声質の計5,520窓を比較した。生成文字数の上限を越えないよう18例ずつ合成し、全測定窓の存在と有限値を検証する。
 
 破裂・摩擦の重なり、急な有声前置き、速い母音の立ち上がりが、タ・ダ・パ・バ行と「ち・つ・じ」に残っていた。マ・ナ行には強い鼻音の出だしもあった。
 
@@ -26,7 +26,7 @@
 
 ```sh
 node scripts/audit-resident-voice-attacks.mjs --revision e7a87822 --output tmp/attacks-before.json
-node scripts/audit-resident-voice-attacks.mjs --check --output tmp/attacks-after.json
+node scripts/audit-resident-voice-attacks.mjs --revision feccc092 --check --output tmp/attacks-after.json
 node scripts/test-resident-voice-attacks.mjs
 node scripts/test-conversation-clear-speech.mjs
 node scripts/test-rpg-resident-voice.mjs
