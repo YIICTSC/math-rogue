@@ -1,3 +1,4 @@
+import {battleMission} from './royale';
 import {blocked,clearSight,distance,WEAPONS,type Point} from './engine';
 import {answer,type OnlineWorld,type Participant,type VrInput} from './onlineEngine';
 import {completeQuiz,requestSupply,safeRadius,magazineSize} from './onlineRules';
@@ -12,6 +13,7 @@ export class SoloBots {
  private clock=0;
  private brains=new Map<string,Brain>();
  private navigation=new Map<string,boolean>();
+ private coverKey='';
  constructor(readonly ids:string[]){}
  update(w:OnlineWorld,controls:Record<string,VrInput>,dt:number){
   if(w.paused)return;this.clock+=dt;
@@ -63,12 +65,15 @@ export class SoloBots {
   if(bestH===0&&path.length&&clear(path.at(-1)!,to))path.push({...to});return path;
  }
  private royale(w:OnlineWorld,p:Participant,b:Brain):VrInput{
+  const coverKey=(w.royale?.covers??[]).map(c=>c.id).join(',');if(coverKey!==this.coverKey){this.navigation.clear();this.coverKey=coverKey;}
+  w={...w,mission:battleMission(w)};
   const input=idle(),own=p.run.player,weapon=WEAPONS[p.run.weapon],armed=p.weapons[p.run.weapon];
   const enemies=Object.values(w.players).filter(q=>q!==p&&q.connected&&!q.spectator&&!q.out&&!q.quiz&&(q.run.stealth<=0||distance(own,q.run.player)<2)).sort((a,c)=>distance(own,a.run.player)-distance(own,c.run.player));
   const target=enemies[0],radius=safeRadius(w);let goal:Point|undefined;
   if(Math.hypot(own.x,own.z)>radius-1.5)goal={x:own.x*.7,z:own.z*.7};
   else if(!armed){goal=w.supplies.filter(s=>s.kind==='weapon'&&s.readyAt<=w.time).sort((a,c)=>distance(own,a)-distance(own,c))[0];}
   else if(p.hits>0){goal=w.supplies.filter(s=>s.kind==='repair'&&s.readyAt<=w.time&&distance(own,s)<8).sort((a,c)=>distance(own,a)-distance(own,c))[0];}
+  if(!goal&&p.battle.shield<2)goal=w.supplies.filter(s=>s.kind==='shield'&&s.readyAt<=w.time&&distance(own,s)<7).sort((a,c)=>distance(own,a)-distance(own,c))[0];
   if(armed&&p.run.ammo<weapon.cost){
    if(p.run.items[1]>0){input.item=1;input.useItem=true;}
    else if(p.energy>=25)input.reload=true;
@@ -80,6 +85,8 @@ export class SoloBots {
    input.shoot=!!armed&&d<weapon.range-.1&&sight;
    if(!goal&&(!armed||!sight||d>weapon.range*.65))goal=target.run.player;
   }
+  input.sprint=!!goal&&!input.shoot&&distance(own,goal)>5;
+  input.cover=w.time-p.battle.hitAt<1.2&&!!target&&p.battle.materials>0&&!w.royale?.covers.some(c=>c.owner===p.id);
   b.path=goal?this.route(w,own,goal):[];
   if(!armed&&!goal)b.path=this.route(w,own,{x:0,z:0});
   return input;

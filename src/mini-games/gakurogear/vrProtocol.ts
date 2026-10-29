@@ -1,3 +1,4 @@
+export const VR_PROTOCOL_VERSION=7;
 import type { OnlineWorld } from './onlineEngine';
 // Terrain and lessons are metadata; shared co-op patrols are sent once, not 40 times.
 export function vrPacket(w:OnlineWorld,full=false){

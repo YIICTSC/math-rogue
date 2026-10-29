@@ -1,0 +1,59 @@
+.gear-shell.gear-play-surface.gear-royale{font-family:system-ui,sans-serif;color:#fff;background:#84a56c}
+.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale>.gear-equipment{display:none!important}
+.gear-shell.gear-play-surface.gear-royale .gear-royale-legend{display:none}
+.gear-shell.gear-play-surface.gear-royale .gear-royale-status{position:absolute;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:5px 14px;z-index:12;width:230px;padding:8px 12px;background:#17313ae8;border-radius:5px 5px 15px 15px;border-top:3px solid #a9e6ff;pointer-events:none;font-size:13px;box-shadow:0 3px 12px #14212830}
+.gear-royale-status small{flex-basis:100%;text-align:center;color:#cddcfb;font-size:11px}.gear-royale-status.is-danger{border-color:#ff9986;background:#5b2935eb}.gear-royale-status strong{font-size:11px;color:#ffd9c5}
+.gear-shell.gear-play-surface.gear-royale .gear-radar-panel{left:auto;right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));width:116px;height:auto;background:#182e3be8;border:2px solid #bdc7ed80;border-radius:12px}.gear-shell.gear-play-surface.gear-royale .gear-radar-panel small{display:none}.gear-shell.gear-play-surface.gear-royale .gear-radar-panel .gear-radar{width:100%;height:auto}
+.gear-shell.gear-play-surface.gear-royale .gear-online-roster{top:166px;right:10px;pointer-events:auto;border-radius:7px;max-width:180px;max-height:35dvh;overflow:auto}.gear-shell.gear-play-surface.gear-royale .gear-mission-hud{top:96px;left:10px;right:auto;max-width:220px}.gear-shell.gear-play-surface.gear-royale .gear-mission-status{display:none}.gear-shell.gear-play-surface.gear-royale .gear-mission-hud details{background:#18333ee8}
+.gear-shell.gear-play-surface.gear-royale>.gear-viewbar{max-width:230px;right:auto;gap:3px}.gear-shell.gear-play-surface.gear-royale>.gear-viewbar button{font-size:10px;min-height:30px;padding:3px 6px}
+.gear-royale-vitals{position:absolute;left:max(12px,env(safe-area-inset-left));bottom:154px;width:210px;z-index:12;padding:8px 10px;background:#18323bdc;border-radius:10px;pointer-events:none;font-size:11px}
+.gear-royale-vitals>div{display:grid;grid-template-columns:64px 1fr 30px;align-items:center;gap:5px;margin-bottom:5px}.gear-royale-vitals b{text-align:right;font-variant-numeric:tabular-nums}.gear-royale-vitals meter{width:100%;height:10px;appearance:none;border:0;background:#071a2a;border-radius:4px;overflow:hidden}.gear-royale-vitals meter::-webkit-meter-bar{background:#071a2a;border:0}.gear-royale-vitals meter::-webkit-meter-optimum-value{background:#8ed88c}.gear-royale-vitals meter::-moz-meter-bar{background:#8ed88c}.gear-royale-vitals .is-shield meter::-webkit-meter-optimum-value{background:#68cffa}.gear-royale-vitals .is-stamina meter::-webkit-meter-optimum-value{background:#eee7b0}.gear-royale-vitals small{font-size:10px;color:#bfd7df}
+.gear-royale-feed{position:absolute;left:12px;top:150px;max-width:240px;z-index:9;pointer-events:none;font-size:11px}.gear-royale-feed p{margin:3px 0;padding:4px 7px;background:#172d3ce6;border-radius:4px;overflow-wrap:anywhere}.gear-royale-feed span{color:#f6ce78}
+.gear-royale-pickup{position:absolute;top:65%;left:50%;transform:translateX(-50%);z-index:8;max-width:60%;background:#1e4150e8;border-radius:20px;padding:5px 12px;font-size:12px;pointer-events:none}
+.gear-royale-damage{position:absolute;left:50%;top:42%;font-size:72px;line-height:1;width:180px;height:180px;text-align:center;color:#ff876f;z-index:8;text-shadow:0 2px 4px #521e20;pointer-events:none}
+.gear-royale-hit{position:absolute;left:50%;top:44%;font-size:38px;transform:translate(-50%,-50%);color:#ffe6a8;pointer-events:none;text-shadow:0 1px 5px #432b1c;z-index:8}
+.gear-royale-reticle{position:absolute;transform:translate(-50%,-50%);width:15px;height:15px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 2px 1px #182b37;pointer-events:none;z-index:4}.gear-royale-reticle::after{content:'';position:absolute;left:5px;top:5px;width:2px;height:2px;background:white}
+.gear-royale-loadout{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(350px,calc(100% - 490px));pointer-events:auto;background:#17303be8;padding:7px;border-radius:12px;border:1px solid #b0ccdc70}
+.gear-royale-weapon-name{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:0 3px 5px;gap:4px}.gear-royale-weapon-name strong{font-size:17px;color:#f7e7ae}
+.gear-royale-slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-royale-slots button{position:relative;padding:2px;min-height:46px;border-radius:6px;border:1px solid #94aab9;background:#31556b;line-height:1}.gear-royale-slots button>span{font-size:23px}.gear-royale-slots small{position:absolute;top:3px;left:3px;font-size:9px}.gear-royale-slots b{position:absolute;bottom:2px;right:3px;font-size:9px}.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-royale-slots button[aria-pressed=true]{border:2px solid #ffe9a2;background:#416d85;box-shadow:0 0 0 1px #ffe9a260}.gear-royale-slots button:disabled{opacity:.38}
+.gear-royale-loadout label{display:flex;align-items:center;gap:6px;font-size:10px;margin-top:5px}.gear-royale-loadout select{min-width:0;flex:1;color:#fff;border:1px solid #9bb7c1;background:#234553;border-radius:5px;padding:5px;font-size:11px}
+.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-battle-controls .gear-battle-actions{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:46px;width:250px;max-width:250px}
+.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-battle-controls .gear-battle-actions button{min-height:46px;font-size:11px;padding:4px;background:#193a4ee8;border-radius:10px;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px}.gear-shell.gear-play-surface.gear-royale .gear-action-art{width:34px;height:34px;flex:0 0 34px}.gear-shell.gear-play-surface.gear-royale .gear-action-symbol{width:30px;flex:0 0 30px;font-size:25px;line-height:1;color:#a6e9ff}.gear-shell.gear-play-surface.gear-royale .gear-battle-actions button[aria-pressed=true]{border-color:#ffe9a2!important;background:#42666b!important}
+.gear-shell.gear-play-surface.gear-royale .gear-battle-actions button:first-child{background:#226a82ed!important;border-color:#b1edff!important}.gear-royale button:focus-visible{outline:3px solid #ffe9a2;outline-offset:2px}
+@media(max-width:700px) and (orientation:portrait){
+ .gear-shell.gear-play-surface.gear-royale .gear-royale-status{top:94px;left:12px;transform:none;width:192px;font-size:12px;padding:6px;gap:4px 12px}.gear-shell.gear-play-surface.gear-royale .gear-radar-panel{top:10px;width:96px}.gear-shell.gear-play-surface.gear-royale>.gear-viewbar{top:51px;max-width:calc(100% - 120px)}
+ .gear-shell.gear-play-surface.gear-royale .gear-mission-hud{top:172px;max-width:185px}.gear-shell.gear-play-surface.gear-royale .gear-online-roster{top:145px;max-width:120px;font-size:9px}.gear-royale-feed{top:210px;font-size:10px;max-width:180px}
+ .gear-royale-vitals{bottom:118px;width:117px;padding:6px;font-size:10px}.gear-royale-vitals>div{grid-template-columns:1fr 25px;gap:3px;margin-bottom:4px}.gear-royale-vitals>div>span{grid-column:1/-1;font-size:9px}.gear-royale-vitals small{font-size:9px}
+ .gear-royale-loadout{bottom:228px;width:calc(100% - 24px);padding:6px}.gear-royale-loadout label{margin-top:4px}.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-battle-controls .gear-battle-actions{width:calc(100vw - 152px);max-width:230px;grid-auto-rows:50px;gap:4px}.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-battle-controls .gear-battle-actions button{font-size:10px;min-height:50px;padding:3px;gap:2px}.gear-shell.gear-play-surface.gear-royale .gear-action-art{width:27px;height:27px;flex-basis:27px}.gear-shell.gear-play-surface.gear-royale .gear-action-symbol{width:23px;flex-basis:23px;font-size:23px}.gear-royale-pickup{top:48%;max-width:80%}
+}
+@media(orientation:landscape) and (max-height:550px){
+ .gear-shell.gear-play-surface.gear-royale>.gear-viewbar{max-width:185px}
+ .gear-shell.gear-play-surface.gear-royale .gear-royale-status{width:190px;padding:5px;font-size:11px;top:8px}.gear-shell.gear-play-surface.gear-royale .gear-radar-panel{width:85px;top:8px}.gear-shell.gear-play-surface.gear-royale .gear-online-roster{top:115px;right:10px;font-size:9px}.gear-shell.gear-play-surface.gear-royale .gear-mission-hud{top:83px;max-width:190px}.gear-royale-feed{top:119px;font-size:9px;max-width:160px}
+ .gear-royale-vitals{bottom:90px;width:160px;padding:5px;font-size:9px}.gear-royale-vitals>div{grid-template-columns:53px 1fr 23px;margin-bottom:3px}.gear-royale-vitals small{font-size:8px}
+ .gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-battle-controls .gear-battle-actions{width:200px;max-width:200px;grid-auto-rows:40px;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-battle-controls .gear-battle-actions button{min-height:40px;font-size:9px;padding:3px}.gear-shell.gear-play-surface.gear-royale .gear-action-art{width:28px;height:28px;flex-basis:28px}.gear-shell.gear-play-surface.gear-royale .gear-action-symbol{font-size:23px;width:25px;flex-basis:25px}
+ .gear-royale-loadout{width:min(300px,calc(100% - 410px));bottom:8px;left:calc(50% - 15px);padding:5px}.gear-shell.gear-play-surface.gear-shell.gear-play-surface.gear-royale .gear-royale-slots button{min-height:39px}.gear-royale-loadout label{margin-top:3px}.gear-royale-loadout select{padding:3px;font-size:10px}
+}
+
+.gear-shell.gear-play-surface.gear-royale .gear-radar-panel{position:absolute}
+.gear-shell.gear-play-surface.gear-royale>.gear-viewbar button{font-size:9px;padding:3px 5px}
+/* Keep the battle view continuous behind the thumb controls. */
+.gear-shell.gear-play-surface.gear-royale .gear-field{inset:0;width:100%;height:100%}
+.gear-shell.gear-play-surface.gear-royale .gear-canvas canvas{image-rendering:auto}
+.gear-shell.gear-play-surface.gear-royale>.gear-header{background:none;height:auto;right:auto}
+@media(max-width:700px) and (orientation:portrait){.gear-royale-vitals{bottom:90px}}
+
+.gear-royale-reticle[data-hit=true]{border-color:#ffe6a8;box-shadow:0 0 5px #ffe6a8}
+.gear-royale-reticle[data-hit=true]::after{content:"×";font-size:28px;line-height:1;left:-5px;top:-8px;width:auto;height:auto;background:none;color:#ffe6a8}
+/* Short portrait phones keep the middle of the screen open for the character. */
+@media(max-width:700px) and (orientation:portrait) and (max-height:650px){
+ .gear-shell.gear-play-surface.gear-royale .gear-royale-loadout{left:12px;transform:none;width:117px;bottom:90px;padding:5px}
+ .gear-royale-loadout .gear-royale-slots{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .gear-shell.gear-play-surface.gear-royale .gear-royale-slots button{min-height:34px;font-size:10px}
+ .gear-royale-loadout .gear-royale-weapon-name{font-size:9px;overflow-wrap:anywhere}.gear-royale-loadout .gear-royale-weapon-name strong{font-size:13px}
+ .gear-royale-loadout label>span{display:none}.gear-royale-loadout select{width:100%;font-size:9px;padding:4px 1px}
+ .gear-shell.gear-play-surface.gear-royale .gear-royale-vitals{top:155px;bottom:auto;width:117px;padding:5px}
+ .gear-royale-vitals>div{grid-template-columns:47px minmax(0,1fr) 18px;font-size:8px;gap:3px}
+ .gear-royale-vitals>div>span{grid-column:auto;font-size:8px}.gear-royale-vitals meter{height:8px}.gear-royale-vitals small{display:none}
+ .gear-shell.gear-play-surface.gear-royale .gear-mission-hud{top:218px;max-width:117px}
+}

@@ -1,3 +1,4 @@
+import {storm} from './royale';
 import React,{useState} from 'react';
 import {MISSIONS} from './engine';
 import {playerSeats,zoneOffset,safeRadius} from './onlineRules';
@@ -19,9 +20,11 @@ export default function VrRadar({world,player,en}:{world:OnlineWorld;player:Part
   return <div className="gear-radar-panel"><button type="button" aria-pressed={full} onClick={()=>setFull(v=>!v)}>{en?(full?'Nearby radar':'Expand radar'):(full?'近傍レーダー':'レーダーを拡大')}</button><svg role="img" className="gear-radar" viewBox={`${x-range} ${z-range} ${range*2} ${range*2}`} aria-label={en?(full?'Arena radar':'Nearby radar'):(full?'全体レーダー':'近傍レーダー')}>
     <rect x={x-range} y={z-range} width={range*2} height={range*2} fill="#071e20"/>
     {world.mission.obstacles.filter(b=>Math.abs(b.x-x)<range+b.w&&Math.abs(b.z-z)<range+b.d).map((b,i)=><rect key={i} x={b.x-b.w/2} y={b.z-b.d/2} width={b.w} height={b.d} fill="#667b6f"/>)}
+    {world.mode==='royale'&&<circle cx={0} cy={0} r={storm(world).next} fill="none" stroke="#ffffff" strokeWidth={range*.02} strokeDasharray={`${range*.08} ${range*.05}`}/>}
+    {world.royale?.covers.filter(c=>c.hp>0).map(c=><rect key={`c${c.id}`} x={c.x-c.w/2} y={c.z-c.d/2} width={c.w} height={c.d} fill="#68cfff"/>)}
     {world.mode==='royale'&&<circle cx={0} cy={0} r={safeRadius(world)} fill="none" stroke="#72f7bd" strokeWidth={range*.025}/>}
-    {world.supplies.filter(s=>s.readyAt<=world.time).map(s=><circle key={`s${s.id}`} cx={s.x} cy={s.z} r={markSize} fill={s.kind==='ammo'?'#ffd36e':s.kind==='energy'?'#70dfff':'#ff92bb'}/>)}
-    {playerSeats(world).filter(p=>p.connected&&p.id!==player.id).map(p=><circle key={p.id} cx={p.run.player.x} cy={p.run.player.z} r={markSize} fill={p.out?'#566165':'#ed9fff'}/>)}
+    {world.supplies.filter(s=>s.readyAt<=world.time).map(s=><circle key={`s${s.id}`} cx={s.x} cy={s.z} r={markSize} fill={s.kind==='shield'?'#68cfff':s.kind==='materials'?'#e8c19a':s.kind==='ammo'?'#ffd36e':s.kind==='energy'?'#70dfff':'#ff92bb'}/>)}
+    {playerSeats(world).filter(p=>p.connected&&p.id!==player.id&&(world.mode!=='royale'||(!p.out&&!p.quiz&&p.run.stealth<=0&&Math.hypot(p.run.player.x-player.run.player.x,p.run.player.z-player.run.player.z)<12))).map(p=><circle key={p.id} cx={p.run.player.x} cy={p.run.player.z} r={markSize} fill={p.out?'#566165':'#ed9fff'}/>)}
     {objective&&<path d={`M${objective.x} ${objective.z-selfSize}l${selfSize} ${selfSize}l${-selfSize} ${selfSize}l${-selfSize} ${-selfSize}Z`} fill="#ffe58a" stroke="#172a25" strokeWidth={range*.012}/>}
     <path d={`M${player.run.player.x} ${player.run.player.z+selfSize}l${selfSize*.65} ${-selfSize*1.6}l${-selfSize*.65} ${selfSize*.3}l${-selfSize*.65} ${-selfSize*.3}Z`} transform={`rotate(${-player.run.player.angle*180/Math.PI} ${player.run.player.x} ${player.run.player.z})`} fill="white" stroke="#10202a" strokeWidth={range*.02}/>
     {!full&&delta&&distance>range*.75&&<path d={`M0 ${range*.72}l${range*.08} ${-range*.14}h${-range*.16}Z`} transform={`translate(${x} ${z}) rotate(${-Math.atan2(delta.x,delta.z)*180/Math.PI})`} fill="#ffe58a"/>}

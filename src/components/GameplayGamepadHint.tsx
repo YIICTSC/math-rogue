@@ -13,6 +13,6 @@ const hints: Record<GameplayMode, string> = {
   race: 'LS / D-pad: Steer · LT: Brake · A / RT: Drift · B / X: Item · Menu: Menu',
   golf: 'LS / D-pad: Aim / Spin · LB / RB: Club · A: Shot / Power / Impact · B: Cancel · X: Scores · Y: Course · Menu: Menu',
 };
-export default function GameplayGamepadHint({mode}:{mode:GameplayMode}) {
-  return <small className="xbox-gameplay-hint" aria-label="Xbox controls">Xbox · {hints[mode]}</small>;
+export default function GameplayGamepadHint({mode,variant}:{mode:GameplayMode;variant?:'royale'}) {
+  return <small className="xbox-gameplay-hint" aria-label="Xbox controls">Xbox · {variant==='royale'?'LS / D-pad: Move · RS: Look · RT (hold): Fire · LT: Reload · B: Crouch · LS (hold): Sprint · LB: Cover · RB: Item · RS: Supply · X (hold): Hold · Y: Camera · Menu: Pause':hints[mode]}</small>;
 }

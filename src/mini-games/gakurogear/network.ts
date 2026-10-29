@@ -3,13 +3,12 @@ import {DedicatedConnection,vrServerUrl} from '../../services/dedicatedConnectio
 import {updateVrSettings,type VrSettings} from './roomSettings';
 import {createHostRoomCode,roomAddress,shareRoomCode,type OnlineTransport} from '../../services/onlineTransport';
 import {vrCommand,clearVrPulses} from './roomCommands';
-import {vrPacket,readVrWorld} from './vrProtocol';
+import {VR_PROTOCOL_VERSION,vrPacket,readVrWorld} from './vrProtocol';
 import {setVrSpectator,completeQuiz,requestSupply,returnToLobby} from './onlineRules';
 import {validAvatar,defaultAvatar,type KartAvatar} from '../gakuro-kart/avatar';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
-import { addPlayer, answer, createWorld, startWorld, retryCoop, tickWorld, validInput, type OnlineMode, type OnlineWorld } from './onlineEngine';
-import type { Input } from './engine';
+import { addPlayer, answer, createWorld, startWorld, retryCoop, tickWorld, validInput, type OnlineMode, type OnlineWorld, type VrInput } from './onlineEngine';
 export {vrServerUrl} from '../../services/dedicatedConnection';
 import {sessionResult} from '../../services/sessionResults';
 import {SessionEnd, sendFinalResult} from '../../services/sessionResultDisplay';
@@ -21,7 +20,7 @@ export class VrRoom {
   get shareCode(){return shareRoomCode(this.code,this.transport);}
   host = false; selfId = ''; code = ''; world: OnlineWorld | null = null;
   private peer: Peer | null = null; private connections = new Map<string, DataConnection>(); private timer: ReturnType<typeof setInterval> | null = null;
-  private controls: Record<string, Input & { reload?: boolean }> = {}; private lastInput: Record<string, number> = {}; private closed = false;
+  private controls: Record<string, VrInput> = {}; private lastInput: Record<string, number> = {}; private closed = false;
   constructor(private update: (w: OnlineWorld) => void, private status: (s: string) => void) {}
   private send(c: DataConnection, data: unknown) { if (c.open && (c.dataChannel?.bufferedAmount ?? 0) < 200000) c.send(JSON.stringify(data)); }
   private emit() { if (!this.world || this.closed) return; this.update(structuredClone(this.world)); this.connections.forEach(c=>this.send(c,vrPacket(this.world!))); }
@@ -51,10 +50,10 @@ export class VrRoom {
   async create(name: string, mode: OnlineMode, missionId: number, lesson: KartLesson, limit: number, avatar: KartAvatar = defaultAvatar(), bombMap=0) {
     if(this.transport==='server'){await this.connectDedicated({create:true,name,mode,missionId,lesson,limit,avatar,bombMap});return;}
     this.host = true; this.code = createHostRoomCode();
-    const peer = await this.open(`gakuro-vr-v6-${this.code}`); this.world = createWorld(mode, missionId, lesson, limit); this.world.bombMap=bombMap;addPlayer(this.world, this.selfId, name); this.world.players[this.selfId].avatar = avatar;
+    const peer = await this.open(`gakuro-vr-v${VR_PROTOCOL_VERSION}-${this.code}`); this.world = createWorld(mode, missionId, lesson, limit); this.world.bombMap=bombMap;addPlayer(this.world, this.selfId, name); this.world.players[this.selfId].avatar = avatar;
     peer.on('connection', c => {
       c.on('data', raw => { if (typeof raw !== 'string' || raw.length > 2000 || !this.world) return; let d: any; try { d = JSON.parse(raw); } catch { return; }
-        if (d.type === 'hello' && d.version === 6 && validAvatar(d.avatar) && typeof d.name === 'string' && addPlayer(this.world, c.peer, d.name)) { this.world.players[c.peer].avatar = d.avatar; this.connections.set(c.peer,c);this.send(c,vrPacket(this.world,true));this.emit(); }
+        if (d.type === 'hello' && d.version === VR_PROTOCOL_VERSION && validAvatar(d.avatar) && typeof d.name === 'string' && addPlayer(this.world, c.peer, d.name)) { this.world.players[c.peer].avatar = d.avatar; this.connections.set(c.peer,c);this.send(c,vrPacket(this.world,true));this.emit(); }
         else if (this.world.players[c.peer]) this.receive(c.peer, d);
         else { this.send(c, { type: 'error', text: 'Room full or already started' }); c.close(); }
       });
@@ -65,14 +64,14 @@ export class VrRoom {
   }
   async join(name: string, code: string, avatar: KartAvatar = defaultAvatar()) {
     const address=roomAddress(code,this.transport);this.transport=address.transport;this.code=address.code;if(this.transport==='server'){await this.connectDedicated({create:false,name,code:this.code,avatar});return;} if (!/^[A-Z0-9]{6}$/.test(this.code)) throw new Error('Invalid room code');
-    const peer = await this.open(); const c = peer.connect(`gakuro-vr-v6-${this.code}`, { reliable: true }); this.connections.set('host', c);
-    await new Promise<void>((resolve, reject) => { const timeout = setTimeout(() => reject(new Error('Room connection timeout')), 20000); c.on('open', () => this.send(c, { type: 'hello', version: 6, name, avatar })); c.on('data', raw => { let d: any; try { d = JSON.parse(String(raw)); } catch { return; } if(this.sessionEnd.receive(d)){clearTimeout(timeout);resolve();return;} if(this.closed)return; if (d.type === 'error') { clearTimeout(timeout); reject(new Error(d.text)); } if(d.type==='world'||d.type==='state'){const world=readVrWorld(d,this.world);if(!world||!world.players[this.selfId]||!validLesson(world.lesson,120))return;clearTimeout(timeout);this.world=world;this.update(world);resolve();} }); c.on('error', e => { clearTimeout(timeout); reject(e); }); c.on('close', () => {if(!this.closed)this.status('Host disconnected. Return to title to reconnect.');}); });
+    const peer = await this.open(); const c = peer.connect(`gakuro-vr-v${VR_PROTOCOL_VERSION}-${this.code}`, { reliable: true }); this.connections.set('host', c);
+    await new Promise<void>((resolve, reject) => { const timeout = setTimeout(() => reject(new Error('Room connection timeout')), 20000); c.on('open', () => this.send(c, { type: 'hello', version: VR_PROTOCOL_VERSION, name, avatar })); c.on('data', raw => { let d: any; try { d = JSON.parse(String(raw)); } catch { return; } if(this.sessionEnd.receive(d)){clearTimeout(timeout);resolve();return;} if(this.closed)return; if (d.type === 'error') { clearTimeout(timeout); reject(new Error(d.text)); } if(d.type==='world'||d.type==='state'){const world=readVrWorld(d,this.world);if(!world||!world.players[this.selfId]||!validLesson(world.lesson,120))return;clearTimeout(timeout);this.world=world;this.update(world);resolve();} }); c.on('error', e => { clearTimeout(timeout); reject(e); }); c.on('close', () => {if(!this.closed)this.status('Host disconnected. Return to title to reconnect.');}); });
   }
   private receive(id:string,d:any){if(this.world)vrCommand(this.world,id,d,this.controls,this.lastInput);}
   private transmit(d:object){if(this.dedicated){this.dedicated.send(d);return;}const c=this.connections.get('host');if(c)this.send(c,d);}
-  private async connectDedicated(hello:object){this.dedicated=new DedicatedConnection(packet=>{if(this.sessionEnd.receive(packet))return true;if(this.closed)return false;if(packet.type==='connected'){this.selfId=packet.id;this.code=packet.code;this.host=packet.host;return false;}if(packet.type==='host')this.host=!!packet.host;if(packet.type==='error')this.status(packet.message);if(packet.type==='world'||packet.type==='state'){const world=readVrWorld(packet,this.world);if(world&&world.players[this.selfId]&&validLesson(world.lesson,120)){this.world=world;this.update(world);return true;}}return false;},()=>{if(!this.closed)this.status('Server disconnected. Return to title to reconnect.');},vrServerUrl());await this.dedicated.open('vr',{version:6,...hello});}
+  private async connectDedicated(hello:object){this.dedicated=new DedicatedConnection(packet=>{if(this.sessionEnd.receive(packet))return true;if(this.closed)return false;if(packet.type==='connected'){this.selfId=packet.id;this.code=packet.code;this.host=packet.host;return false;}if(packet.type==='host')this.host=!!packet.host;if(packet.type==='error')this.status(packet.message);if(packet.type==='world'||packet.type==='state'){const world=readVrWorld(packet,this.world);if(world&&world.players[this.selfId]&&validLesson(world.lesson,120)){this.world=world;this.update(world);return true;}}return false;},()=>{if(!this.closed)this.status('Server disconnected. Return to title to reconnect.');},vrServerUrl());await this.dedicated.open('vr',{version:VR_PROTOCOL_VERSION,...hello});}
   private action(d:object){if(this.dedicated||!this.host)this.transmit(d);else{this.receive(this.selfId,d);this.emit();}}
-  input(input:Input&{reload?:boolean;bomb?:boolean;remote?:boolean}){if(this.dedicated||!this.host)this.transmit({type:'input',input});else this.receive(this.selfId,{type:'input',input});}
+  input(input:VrInput){if(this.dedicated||!this.host)this.transmit({type:'input',input});else this.receive(this.selfId,{type:'input',input});}
   answer(choice:number,round?:number){this.action({type:'answer',choice,round});}
   completeQuiz(){this.action({type:'quizComplete'});}
   supply(){this.action({type:'supply'});}

@@ -12,5 +12,5 @@ export function useVrSpectator(world:OnlineWorld,selfId:string){
  return {own,spectating,viewId,autoSwitch,setAutoSwitch,viewed:world.players[viewId],next,count:candidates.length};
 }
 export default function VrSpectator({world,room,en,view}:{world:OnlineWorld;room:VrRoom;en:boolean;view:ReturnType<typeof useVrSpectator>}){
- return room.host&&!room.solo?<HostSpectator enabled={view.spectating} canChangeMode={world.phase!=='playing'} onChange={v=>room.setSpectator(v)} name={view.viewed?.id!==room.selfId?view.viewed?.name:undefined} count={view.count} onNext={view.next} autoSwitch={view.autoSwitch} onAutoSwitch={view.setAutoSwitch} languageMode={en?'ENGLISH':'JAPANESE'}/>:null;
+ return room.host&&!room.solo&&(world.phase!=='playing'||view.spectating)?<HostSpectator enabled={view.spectating} canChangeMode={world.phase!=='playing'} onChange={v=>room.setSpectator(v)} name={view.viewed?.id!==room.selfId?view.viewed?.name:undefined} count={view.count} onNext={view.next} autoSwitch={view.autoSwitch} onAutoSwitch={view.setAutoSwitch} languageMode={en?'ENGLISH':'JAPANESE'}/>:null;
 }

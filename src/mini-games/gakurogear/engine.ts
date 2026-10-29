@@ -1,7 +1,7 @@
 export type Point = { x: number; z: number; y?: number };
 export type Terrain = Point & { w: number; d: number; height: number };
 export type Obstacle = Point & { w: number; d: number; h: number; clearance?: number; switchId?: number; kind: 'wall' | 'desk' | 'shelf' | 'planter' | 'crawl' | 'door' };
-export type Mission = { size?: number; terrain?: Terrain[]; theme?: number; targetKinds?: ('file' | 'rescue' | 'relay')[]; requireSwitches?: boolean; defend?: Point & { seconds: number }; switches?: Point[]; sensors?: (Point & { w: number; d: number; period: number })[]; difficulty: number; ammo: number; sleepDuration: number; guardSpeed: number; sightRange: number; detectionRate: number; requiredHolds: number; requiredShots: number; id: number; name: string; en: string; hint: string; hintEn: string; par: number; limit: number; spawn: Point; exit: Point; targets: Point[]; obstacles: Obstacle[]; routes: Point[][]; cameras: (Point & { angle: number })[] };
+export type Mission = { arena?:'royale'; size?: number; terrain?: Terrain[]; theme?: number; targetKinds?: ('file' | 'rescue' | 'relay')[]; requireSwitches?: boolean; defend?: Point & { seconds: number }; switches?: Point[]; sensors?: (Point & { w: number; d: number; period: number })[]; difficulty: number; ammo: number; sleepDuration: number; guardSpeed: number; sightRange: number; detectionRate: number; requiredHolds: number; requiredShots: number; id: number; name: string; en: string; hint: string; hintEn: string; par: number; limit: number; spawn: Point; exit: Point; targets: Point[]; obstacles: Obstacle[]; routes: Point[][]; cameras: (Point & { angle: number })[] };
 const p = (x: number, z: number): Point => ({ x, z });
 const box = (x: number, z: number, w: number, d: number, h = 2.5, kind: Obstacle['kind'] = 'wall'): Obstacle => ({ x, z, w, d, h, kind });
 const desks = [-4, 0, 4].flatMap(x => [-2, 2].map(z => box(x, z, 2, 1.2, 1, 'desk')));
@@ -197,7 +197,7 @@ function sleepGuard(m: Mission, s: Run, index: number, method: 'hold' | 'shot' |
   if (method === 'hold' && !g.heldOnce) { g.heldOnce = true; s.holds++; }
   if (method === 'shot' && !g.shotOnce) { g.shotOnce = true; s.shots++; }
 }
-export function step(m: Mission, s: Run, input: Input, dt: number) {
+export function step(m: Mission, s: Run, input: Input, dt: number, speedMultiplier = 1) {
   if (s.status !== 'playing') return;
   dt = Math.min(Math.max(dt, 0), .05);
   equip(m,s,input);
@@ -238,7 +238,7 @@ export function step(m: Mission, s: Run, input: Input, dt: number) {
     }
     s.bubble = { ...s.player, end, life: .4, hit: hits.length > 0 };
   }
-  const len = Math.hypot(input.x, input.z), speed = (s.crouch ? 1.65 : 3.3) * (s.boost > 0 ? 1.6 : 1);
+  const len = Math.hypot(input.x, input.z), speed = speedMultiplier * (s.crouch ? 1.65 : 3.3) * (s.boost > 0 ? 1.6 : 1);
   if (len > .1) {
     const dx = input.x / Math.max(1, len) * speed * dt, dz = input.z / Math.max(1, len) * speed * dt;
     if (input.facing === undefined) s.player.angle = Math.atan2(input.x, input.z);

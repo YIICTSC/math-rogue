@@ -6,7 +6,7 @@ import { WebSocket,WebSocketServer } from 'ws';
 import { addPlayer,createWorld,startWorld,tickWorld,type OnlineWorld,type VrInput } from '../src/mini-games/gakurogear/onlineEngine';
 import { returnToLobby } from '../src/mini-games/gakurogear/onlineRules';
 import { vrCommand,clearVrPulses } from '../src/mini-games/gakurogear/roomCommands';
-import { vrPacket,VrStateEncoder } from '../src/mini-games/gakurogear/vrProtocol';
+import { VR_PROTOCOL_VERSION,vrPacket,VrStateEncoder } from '../src/mini-games/gakurogear/vrProtocol';
 import {updateVrSettings} from '../src/mini-games/gakurogear/roomSettings';
 import { validLesson } from '../src/mini-games/gakuro-kart/learning';
 import { validAvatar } from '../src/mini-games/gakuro-kart/avatar';
@@ -22,7 +22,7 @@ sockets.on('connection',socket=>{
  const handshake=setTimeout(()=>{if(!room)socket.close(1008,'Handshake timeout');},20000);
  socket.on('pong',()=>{m.alive=true;});socket.on('error',()=>{});
  socket.on('message',raw=>{let d:any;try{d=JSON.parse(raw.toString());}catch{return;}if(!d||typeof d!=='object'||Array.isArray(d))return;const now=Date.now();if(now-m.at>=1000){m.at=now;m.rate=0;}if(++m.rate>50)return;if(d.type==='ping'){send(m,{type:'pong'});return;}
-  try{if(!room){if(d.type!=='connect'||d.protocol!==1||d.version!==6||typeof d.name!=='string'||!validAvatar(d.avatar)){send(m,{type:'error',message:'Invalid VR connection'});return;}
+  try{if(!room){if(d.type!=='connect'||d.protocol!==1||d.version!==VR_PROTOCOL_VERSION||typeof d.name!=='string'||!validAvatar(d.avatar)){send(m,{type:'error',message:'Invalid VR connection'});return;}
    let code='';if(d.create){if(rooms.size>=4||!['coop','royale','bomb'].includes(d.mode)||!Number.isInteger(d.missionId)||d.missionId<1||d.missionId>100||!validLesson(d.lesson,120)||!Number.isFinite(d.limit)||!Number.isInteger(d.bombMap??0)||(d.bombMap??0)<0||(d.bombMap??0)>2){send(m,{type:'error',message:'Invalid room settings or server full'});return;}
     do{code=String(randomInt(500000,1000000));}while(rooms.has(code));
     room={host:m.id,world:createWorld(d.mode,d.missionId,d.lesson,d.limit),members:new Map(),controls:{},lastInput:{},emptyAt:0,encoder:new VrStateEncoder()};room.world.bombMap=d.bombMap??0;rooms.set(code,room);
