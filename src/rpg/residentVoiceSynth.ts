@@ -72,7 +72,11 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
   const steps=[0,2,-1,3,-2,1],openPhase=[.56,.44,.61,.68][voice.timbre]??.56;
   for(let index=0;index<units.length;index++){
     const m=units[index],length=sizes[index];
-    if(m.vowel<0){offset+=length;phraseIndex=0;continue;}
+    if(m.vowel<0){
+      // Silence must not retain ringing filter energy into the next phrase.
+      for(const r of [...vowels,friction,nasal])r.x1=r.x2=r.y1=r.y2=0;
+      offset+=length;phraseIndex=0;continue;
+    }
     const previous=units[index-1],next=units[index+1],c=m.consonant;
     const stop=/^[kgtdbp]/.test(c)&&!/^ts|^ch/.test(c),affricate=/^ch|^ts|^j/.test(c);
     const fricative=/^s|^sh|^z|^h|^f|^v/.test(c),isNasal=/^[mn]/.test(c),syllabic=c==='nasal';
@@ -83,6 +87,8 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
     const burstEnd=closure+.012/rate,transition=onset+.014/rate;
     const devoiced=(m.vowel===1||m.vowel===2)&&unvoiced(c)&&(!next||next.vowel<0||unvoiced(next.consonant));
     const noiseFrequency=/^sh|^ch|^j|^hy/.test(c)?3600:/^s|^ts|^z/.test(c)?6500:/^k|^g/.test(c)?2600:labial?1200:1900;
+    // A new consonant must not retune an old, still-ringing noise resonator.
+    friction.x1=friction.x2=friction.y1=friction.y2=0;
     tune(friction,noiseFrequency,/^s|^sh|^ts|^ch/.test(c)?2200:1600,sampleRate);
     const target=formants[m.vowel],prev=previous&&previous.vowel>=0?formants[previous.vowel]:target;
     // A small stepped melody gives each mora a playful 'kero' inflection.
@@ -97,7 +103,10 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
       if(i%48===0){
         const blend=Math.min(1,time/transition),connected=Math.min(1,time/(.02/rate));
         const start=[180,palatal?2300:labial?800:/^[kg]/.test(c)?1700:1800,2800];
-        for(let j=0;j<3;j++)tune(vowels[j],(c?start[j]*(1-blend)+target[j]*blend:prev[j]*(1-connected)+target[j]*connected)*color,110+j*95,sampleRate);
+        for(let j=0;j<3;j++){
+          const destination=c?start[j]*(1-blend)+target[j]*blend:target[j];
+          tune(vowels[j],(prev[j]*(1-connected)+destination*connected)*color,110+j*95,sampleRate);
+        }
       }
       seed=(Math.imul(seed,1664525)+1013904223)|0;const noise=seed/2147483648;
       const vowelTime=Math.max(0,time-onset),glide=Math.min(1,vowelTime/(.026/rate));
@@ -121,8 +130,8 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
       else if(isNasal){const mix=Math.max(0,1-time/onset);value=vowel*(1-mix)+nasalVoice*mix;}
       else if(stop||affricate){
         if(time<closure)value=voicedConsonant?nasalVoice*.2:0;
-        else if(time<burstEnd)value+=frictionVoice*(voicedConsonant?.18:.35)*(1-(time-closure)/(burstEnd-closure));
-        if(affricate&&time>=closure&&time<onset)value+=frictionVoice*.32*(1-voicedGain);
+        else if(time<burstEnd)value+=frictionVoice*(voicedConsonant?.13:.22)*Math.sin(Math.PI*(time-closure)/(burstEnd-closure))**2;
+        if(affricate&&time>=closure&&time<onset)value+=frictionVoice*.32*(1-voicedGain)*Math.min(1,(time-closure)/(.005/rate));
         else if(stop&&time>=burstEnd&&time<onset)value+=frictionVoice*.16*(1-voicedGain);
       }else if(fricative){
         const mix=Math.max(0,1-time/onset);
@@ -132,7 +141,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
       if(devoiced)value+=frictionVoice*.045*voicedGain;
       const attack=previous&&previous.vowel>=0?1:Math.min(1,time/.006);
       const release=next&&next.vowel>=0?1:Math.min(1,(length-i)/(sampleRate*.018));
-      const blend=Math.min(1,time/.003);
+      const blendPosition=Math.min(1,time/.006),blend=blendPosition*blendPosition*(3-2*blendPosition);
       pcm[offset+i]=boundarySample*(1-blend)+value*attack*release*blend;
     }
     offset+=length;phraseIndex++;
