@@ -17,6 +17,7 @@ import {newCampaign,loadCampaign,saveCampaign,clone,tick,advanceStory,claimResul
 import {FieldMap,Camp} from './CampaignViews';
 import {Battlefield,type Update} from './Battlefield';
 import {Portrait,BattleArt} from './art';
+import {Tutorial} from './Tutorial';
 import type {Campaign,Line} from './types';
 import './lantern-war.css';
 export default function LanternWar({onBack,onFinish,languageMode='JAPANESE',problemMode=GameMode.MIXED,problemModePool,answerMode,assignment,onAnswerResult}:MiniGameComponentProps){
@@ -41,7 +42,7 @@ export default function LanternWar({onBack,onFinish,languageMode='JAPANESE',prob
  <small className="lw-title-credit">全18章・部隊編成・作戦自動戦闘・支援会話</small>
  {setupOpen&&<dialog ref={setupDialog} role="dialog" aria-modal="true" className="lw-journey-dialog lw-panel" onCancel={()=>setSetupOpen(false)} aria-labelledby="lw-journey-heading"><h2 id="lw-journey-heading">主人公を選択</h2><div className="lw-title-controls"><div className="lw-hero-choices" role="group" aria-label="主人公を選択">{(['aster','lyra'] as const).map(id=><button key={id} aria-pressed={hero===id} onClick={()=>setHero(id)}><BattleArt id={id}/><b>{heroById(id).name}</b><small>{id==='aster'?'王冠よりも、隣の声を。':'帰る場所を守る剣を。'}</small></button>)}</div><label>難易度<select value={difficulty} onChange={e=>setDifficulty(e.target.value as Campaign['difficulty'])}><option value="story">物語 · 味方HP補正あり</option><option value="tactician">軍師 · 編成と作戦を重視</option></select></label><button className="lw-primary" onClick={()=>{setSetupOpen(false);s?setConfirmNew(true):start();}}>選んだ主人公で始める</button><button onClick={()=>setSetupOpen(false)}>タイトルへ戻る</button><small>行動後に自動保存。音声は設定で調整できます。</small></div></dialog>}
  {confirmNew&&<div className="lw-modal"><div className="lw-panel" role="dialog" aria-modal="true" aria-label="新しい旅を始める"><h2>現在の旅を置き換えます</h2><p>第{s!.chapter+1}章までの、このモードの保存データが置き換わります。</p><button onClick={start}>選んだ主人公で始める</button><button autoFocus onClick={()=>setConfirmNew(false)}>続きの旅を残す</button></div></div>}
- </div>:s&&<><header className="lw-header"><button onClick={exit}>‹ 保存して一覧へ</button><span>継界戦記 <small>灯を継ぐ者たち</small></span><div>{s.gold} G · 薬草 {s.supplies}<small>{s.difficulty==='story'?'物語':'軍師'}</small></div></header>
+ </div>:s&&<><header className="lw-header"><button onClick={exit}>‹ 保存して一覧へ</button><span>継界戦記 <small>灯を継ぐ者たち</small></span>{s.phase==='battle'&&s.battle&&<Tutorial topic="battle" blocked={!!s.battle.pending||!!s.battle.encounter} onOpen={()=>update(s=>{if(s.battle)s.battle.paused=true;})}/>}<div>{s.gold} G · 薬草 {s.supplies}<small>{s.difficulty==='story'?'物語':'軍師'}</small></div></header>
  <div className="lw-screen" hidden={!!s.studyPending}>
  {s.phase==='field'&&<FieldMap s={s} update={update}/>}
  {s.phase==='camp'&&<Camp s={s} update={update}/>}

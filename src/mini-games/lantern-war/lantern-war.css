@@ -277,3 +277,211 @@
 /* Keep the complete dedicated technique illustration, including weapon and VFX tips. */
 .lw-cutin-art{height:100%;width:48%;padding:4px;box-sizing:border-box}
 .lw-cutin-art>img{display:block;object-fit:contain}
+
+.lw-header .lw-help {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 32px;
+  margin: 0 6px;
+  padding: 5px 10px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* On phone landscape, give the tactical map nearly all available vertical space. */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 600px) {
+  .lw-header {
+    min-height: 38px;
+    padding: 2px 8px;
+  }
+
+  .lw-header > button {
+    min-height: 28px;
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+
+  .lw-header > span {
+    font-size: 12px;
+    letter-spacing: .08em;
+  }
+
+  .lw-header > div {
+    font-size: 9px;
+  }
+
+  .lw-header .lw-help {
+    min-height: 24px;
+    margin: 0 4px;
+    padding: 2px 7px;
+    font-size: 8px;
+    line-height: 1;
+  }
+
+  .lw-war {
+    position: relative;
+  }
+
+  .lw-warbar {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    pointer-events: none;
+  }
+
+  .lw-warbar > div:first-child,
+  .lw-warbar > div:last-child {
+    position: absolute;
+    top: 6px;
+    width: min(17vw, calc((100vw - max(144px, 18vw) - (100dvh - 60px) * 1.2) / 2 - 8px));
+    padding: 5px 6px;
+    border: 1px solid #cbb47788;
+    border-radius: 6px;
+    background: #09232ae8;
+    box-shadow: 0 3px 12px #03171ca8;
+    pointer-events: auto;
+  }
+
+  .lw-warbar > div:first-child {
+    left: 4px;
+    width: min(17vw, calc(100vw - max(144px, 18vw) - (100dvh - 60px) * 1.2 - 8px));
+  }
+
+  .lw-warbar > div:last-child {
+    right: 4px;
+    width: calc(max(144px, 18vw) - 8px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    align-content: start;
+    gap: 3px;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .lw-warbar h2 {
+    font-size: clamp(9px, 2.5vh, 12px);
+    line-height: 1.2;
+    letter-spacing: .02em;
+  }
+
+  .lw-warbar p {
+    margin-top: 3px;
+    font-size: 7px;
+    line-height: 1.3;
+  }
+
+  .lw-warbar small {
+    font-size: 6px;
+    line-height: 1.1;
+  }
+
+  .lw-warbar b {
+    font-size: clamp(12px, 3vh, 16px);
+    line-height: 1;
+  }
+
+  .lw-warbar span {
+    font-size: 7px;
+  }
+
+  .lw-warbar button {
+    width: 100%;
+    min-width: 0;
+    min-height: 25px;
+    padding: 3px 4px;
+    font-size: 7px;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .lw-warbody {
+    grid-template-columns: minmax(0, 1fr) minmax(144px, 18vw);
+  }
+
+  .lw-map-wrap {
+    position: relative;
+    align-items: flex-end;
+    padding: 2px;
+  }
+
+  .lw-battlemap {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    flex: 0 1 auto;
+    aspect-ratio: 12 / 10;
+  }
+
+  .lw-maplegend {
+    position: absolute;
+    left: auto;
+    right: 4px;
+    bottom: 4px;
+    width: min(17vw, calc(100vw - max(144px, 18vw) - (100dvh - 60px) * 1.2 - 8px));
+    max-width: none;
+    transform: none;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding: 4px;
+    gap: 3px 6px;
+    border-radius: 4px;
+    background: #09232ac9;
+    font-size: 7px;
+    line-height: 1.2;
+    pointer-events: none;
+  }
+
+  .lw-orders {
+    padding: 78px 5px 5px;
+  }
+
+  .lw-orders h3 {
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+
+  .lw-orders p {
+    font-size: 8px;
+    line-height: 1.35;
+  }
+
+  .lw-orders button {
+    min-height: 28px;
+    margin: 2px 0;
+    padding: 4px 3px;
+    font-size: 8px;
+    line-height: 1.25;
+  }
+
+  .lw-actions {
+    gap: 3px;
+    margin-bottom: 5px;
+  }
+
+  .lw-orders > button[aria-pressed] {
+    margin-top: 3px;
+  }
+
+  .lw-log {
+    flex: 0 0 22px;
+    min-height: 22px;
+    max-height: 22px;
+    padding: 2px 8px;
+    overflow: hidden;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  .lw-log[open] {
+    flex-basis: min(22dvh, 92px);
+    max-height: min(22dvh, 92px);
+    overflow: auto;
+  }
+}

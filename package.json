@@ -2,7 +2,7 @@
   "name": "learning-rogue",
   "private": true,
   "packageManager": "pnpm@11.19.0",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
   "author": "YIICTSC",
   "type": "module",

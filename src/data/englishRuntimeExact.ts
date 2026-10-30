@@ -1,5 +1,10 @@
 import { RPG_ENGLISH } from './rpgEnglish';
+import {RELEASE_109_ENGLISH} from './release109';
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
+  ...RELEASE_109_ENGLISH,
+  '星潮の航路': 'Star Tide',
+  'ことば日和': 'Kotoba Biyori',
+  '継界戦記 灯を継ぐ者たち': 'Confluence Chronicles: Heirs of the Lantern',
   'GAKURO VRトレーニング': 'GAKURO VR Training',
   'VRトレーニング': 'VR Training',
   '学校を舞台にした3Dステルス訓練。見回りをかわして資料を回収し、脱出せよ。': '3D school stealth training. Evade patrols, retrieve files, and extract.',

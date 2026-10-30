@@ -1,5 +1,11 @@
 // Generated from trans() UI literals. Mini-game content and debug-only screens are excluded.
+import {RELEASE_109_HIRAGANA} from './release109';
 export const HIRAGANA_UI_EXACT: Record<string, string> = {
+  ...RELEASE_109_HIRAGANA,
+  "星潮の航路": "ほししおのこうろ",
+  "ことば日和": "ことばびより",
+  "継界戦記 灯を継ぐ者たち": "けいかいせんき ひをつぐものたち",
+  "学習ローグダンジョンズ2": "がくしゅうろーぐだんじょんず2",
   "退出": "たいしゅつ",
   "分類": "ぶんるい",
   "効果": "こうか",
