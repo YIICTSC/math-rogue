@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { build } from 'esbuild';
+await build({entryPoints:['src/utils/enemyHpScaling.ts'],bundle:true,platform:'node',format:'esm',outfile:'tmp/enemy-hp-scaling.mjs'});
+const {estimateBossScalingSingleCardDamage:estimate}=await import('../tmp/enemy-hp-scaling.mjs');
+const card=(extra)=>({name:'test',type:'ATTACK',target:'ENEMY',...extra});
+assert.equal(estimate([]),0);
+assert.equal(estimate([card({damage:10}),card({type:'SKILL',poison:20})]),20);
+assert.equal(estimate([card({damage:10,poison:6})]),16);
+assert.equal(estimate([card({damage:2,poison:4,playCopies:9})]),60);
+assert.equal(estimate([card({damage:10,poison:6})],2),32);
+assert.equal(estimate([card({damage:999,poison:999,target:'SELF'})]),0);
+assert.equal(estimate([card({damage:6,poison:3}),card({damage:10})]),10);
+assert.equal(estimate([card({poison:20})])*1.2,24);
+console.log('PASS enemy HP scaling: poison-only, combined, copies, transformation, strongest card and self exclusion');
