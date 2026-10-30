@@ -3,6 +3,7 @@ import sys,json,hashlib,subprocess,time,gc,ctypes,datetime,argparse,fcntl
 from pathlib import Path
 r=Path(__file__).resolve().parents[2];sys.path.insert(0,str(r.parent/'Irodori-TTS'))
 generation_lock=(r/'assets/lantern-war/generation.lock').open('w');fcntl.flock(generation_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+cpu_audio_lock=(r/'assets/lantern-war/cpu-audio-heavy.lock').open('a');fcntl.flock(cpu_audio_lock,fcntl.LOCK_EX)
 p=argparse.ArgumentParser();p.add_argument('--batch-size',type=int,default=2);p.add_argument('--only');p.add_argument('--limit',type=int);p.add_argument('--retakes',type=Path);p.add_argument('--seed-offset',type=int);args=p.parse_args()
 import torch,numpy as np,soundfile as sf
 from pykakasi import kakasi

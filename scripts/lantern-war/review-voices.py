@@ -6,6 +6,9 @@ from faster_whisper import WhisperModel
 from pykakasi import kakasi
 root=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser();p.add_argument('--limit',type=int);p.add_argument('--model',default='small');p.add_argument('--beam-size',type=int,default=1);p.add_argument('--threads',type=int,default=1);p.add_argument('--only');p.add_argument('--recheck',action='store_true');p.add_argument('--force',action='store_true');p.add_argument('--follow',action='store_true');p.add_argument('--name-context',action='store_true',help='Provide the proper-name vocabulary, never the expected sentence, to ASR');a=p.parse_args()
+cpu_audio_lock=None
+if a.model not in {'tiny','tiny.en','base','base.en','small','small.en'}:
+ cpu_audio_lock=(root/'assets/lantern-war/cpu-audio-heavy.lock').open('a');fcntl.flock(cpu_audio_lock,fcntl.LOCK_EX)
 path=root/'assets/lantern-war/voice-review.json';model=None;count=0;k=kakasi();checked=set()
 from voice_review_rules import assess
 

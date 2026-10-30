@@ -1,11 +1,8 @@
 {
-  "story_voices": "discarded",
+  "generated_voices": "story-and-techniques",
+  "story_voices": "enabled",
+  "narration_voices": "restored-from-history",
   "technique_media": "discarded",
   "audition_only": [],
-  "reason": "Approved adult v3 references for Aster and Lyra battle recordings only. Story voices and prototype artwork remain discarded.",
-  "generated_voices": "battle-only",
-  "battle_speakers": [
-    "aster",
-    "lyra"
-  ]
+  "reason": "User authorized fresh reference-matched story and shouted katakana personal-technique voices; preserve existing recordings and upstream artwork."
 }

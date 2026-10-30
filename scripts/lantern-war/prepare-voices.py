@@ -3,6 +3,8 @@ import json,hashlib,datetime,subprocess
 r=Path(__file__).resolve().parents[2];p=json.loads((r/'assets/lantern-war/voice-catalog.json').read_text());sports=json.loads((r/'assets/sports-performances/voice-plan.json').read_text());d2=json.loads((r/'assets-source/dungeons2/voice-design.json').read_text());star=json.loads((r/'assets/star-tide/voice-plan.json').read_text());speakers={}
 policy_path=r/'assets/lantern-war/voice-policy.json';policy=json.loads(policy_path.read_text())if policy_path.exists()else{}
 auditions=json.loads((r/'assets/lantern-war/audition-plan.json').read_text())if(r/'assets/lantern-war/audition-plan.json').exists()else{}
+if policy.get('generated_voices')=='story-and-techniques':
+ subprocess.run(['node',str(r/'scripts/lantern-war/prepare-story-techniques.mjs')],cwd=r,check=True);raise SystemExit(0)
 if policy.get('generated_voices')=='battle-only':
  subprocess.run(['node',str(r/'scripts/lantern-war/prepare-adult-battle.mjs')],cwd=r,check=True);raise SystemExit(0)
 for h in p['heroes']:
