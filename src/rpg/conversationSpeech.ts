@@ -1,3 +1,4 @@
+import {resumeGameAudio} from '../services/webAudioSession';
 import { residentVoiceMoras, renderResidentVoice, residentVoiceSupported, unlockResidentVoice } from "./residentVoiceSynth";
 import { audioService } from "../services/audioService";
 import { speechPlan, type ConversationVoice } from "./conversationVoice";
@@ -54,7 +55,7 @@ function speakOriginal(moras: NonNullable<ReturnType<typeof residentVoiceMoras>>
       if (!ctx) { cancel(); return; }
       timeout = setTimeout(cancel, 3000);
       void (async () => {
-        if (ctx.state !== 'running') await ctx.resume();
+        if (ctx.state !== 'running' && !await resumeGameAudio(ctx)) { cancel(); return; }
         if (ended) return;
         if (!audioService.canPlayConversationVoice()) { cancel(); return; }
         const samples = renderResidentVoice(moras, config);

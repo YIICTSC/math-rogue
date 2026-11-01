@@ -13,7 +13,7 @@ export const DASH_GUIDE_PAGES:Page[]=[
   ['スマホは下の操作ボタンも使える。ジャンプを押したまま、別の指でダッシュできる。','On touchscreens, use the bottom buttons. Hold jump and dash with another finger.','スマホはしたのそうさボタンもつかえる。ジャンプをおしたまま、べつのゆびでダッシュできる。']]},
  {id:'dash',title:['5秒ターボ・ダッシュ','Five-second turbo dash','5びょうターボ・ダッシュ'],tips:[
   ['Shift・X・ダッシュボタンで5秒加速！ 加速中は敵や壊せる壁へ突進できる。','Press Shift, controller X or DASH for five seconds of speed. Charge through enemies and breakable walls.','Shift・X・ダッシュボタンで5びょうかそく！ かそくちゅうはてきやこわせるかべへとっしんできる。'],
-  ['再充電が終わるとまた使える。電池アイテムは待ち時間をリセット。矢印の加速パッドも5秒間スピードアップ。','Use it again after recharging. A battery resets the cooldown. Arrow boost pads also give five seconds of speed.','さいじゅうでんがおわるとまたつかえる。でんちアイテムはまちじかんをリセット。やじるしのかそくパッドも5びょうかんスピードアップ。']]},
+  ['ダッシュは1エリアに1回。次のマップに入ると復活。電池はフローを補充し、矢印パッドは5秒間加速。','Dash once per area. Enter the next map to restore it. Batteries add Flow energy; arrow pads boost speed for five seconds.','ダッシュは1エリアに1かい。つぎのマップではふっかつ。でんちはフローをほじゅうし、やじるしパッドは5びょうかそく。']]},
  {id:'slide',title:['スライド・急降下','Slide and dive','スライド・きゅうこうか'],tips:[
   ['↓・S・コントローラーB・スライドボタンで姿勢を低くし、低いトンネルをくぐろう。','Press Down, S, controller B or SLIDE to duck under low tunnels.','↓・S・コントローラーB・スライドボタンでしせいをひくくし、ひくいトンネルをくぐろう。'],
   ['空中では同じ操作で急降下。空を飛んでいる間はスライドできない。','The same action dives while jumping. Sliding is unavailable in flying stages.','くうちゅうではおなじそうさできゅうこうか。そらをとんでいるあいだはスライドできない。']]},

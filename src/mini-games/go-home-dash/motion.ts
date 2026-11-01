@@ -1,14 +1,18 @@
 import { floorAt } from './routes';
 export interface MovingObstacle {
  type:string;x:number;y:number;vy:number;width:number;height:number;speedMult:number;
- phase?:number;baseY?:number;hopCooldown?:number;
+ phase?:number;baseY?:number;hopCooldown?:number;baseGap?:number;gateGap?:number;
 }
 /** Advance once, before player contacts. Rendering and collision use these same positions. */
 export function advanceObstacleMotion(o:MovingObstacle,seed:number,distance:number,speed:number,frame:number,random:()=>number){
  o.x-=speed*o.speedMult;
  const floor=floorAt(seed,distance+o.x),ground=floor-o.height/2;
  if(o.type==='HOLE'){o.y=floor;return false;}
- if(o.type==='FLIGHT_GATE')return false;
+ if(o.type==='FLIGHT_GATE'){
+  if(o.baseY!==undefined)o.y=o.baseY+Math.sin(frame*.018+(o.phase??0))*10;
+  if(o.baseGap!==undefined)o.gateGap=o.baseGap+Math.sin(frame*.013+(o.phase??0))*7;
+  return false;
+ }
  if(o.type==='ELEVATOR'){
   const next=floor-56-(1+Math.sin(frame*.025+(o.phase??0)))*24;o.vy=next-o.y;o.y=next;return false;
  }

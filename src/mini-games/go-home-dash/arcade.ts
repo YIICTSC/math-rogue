@@ -14,7 +14,7 @@ export interface ArcadePlayer {
 }
 export interface ArcadeStats { coins: number; stars: number; dodges: number; breaks: number; perfects: number; bosses: number; missions: number }
 export interface ArcadeState {
-  seed: number; runMode: RunMode; frame: number; chunk: number; serial: number; entities: ArcadeEntity[];
+  dashArea: number; dashUsed: boolean; seed: number; runMode: RunMode; frame: number; chunk: number; serial: number; entities: ArcadeEntity[];
   combo: number; bestCombo: number; comboTime: number; fever: number; energy: number;
   magnet: number; double: number; sneakers: number; board: number; shield: number; lowGravity: number;
   boost: number; slide: number; vehicle: Vehicle; vehicleTime: number; gravity: number;
@@ -28,7 +28,7 @@ export const hash = (n: number) => { n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n
 export function dailySeed(day = new Date().toISOString().slice(0,10)) { return [...day].reduce((n,c)=>hash(n+c.charCodeAt(0)), 1701); }
 export function seededRandom(seed: number) { let n=seed;return ()=>{n=(n+0x6d2b79f5)|0;let t=Math.imul(n^(n>>>15),1|n);t^=t+Math.imul(t^(t>>>7),61|t);return ((t^(t>>>14))>>>0)/4294967296;}; }
 export function createArcade(seed: number, runMode: RunMode = 'classic', distance = 0): ArcadeState {
-  return {seed,runMode,frame:0,chunk:Math.floor(distance/1800)-1,serial:0,entities:[],combo:0,bestCombo:0,comboTime:0,fever:0,energy:0,magnet:0,double:0,sneakers:0,board:0,shield:0,lowGravity:0,boost:0,slide:0,vehicle:'normal',vehicleTime:0,gravity:1,stats:{coins:0,stars:0,dodges:0,breaks:0,perfects:0,bosses:0,missions:0},missionDone:[false,false,false],score:0,notice:'',noticeTime:0,boss:null,clearAhead:false,changedVehicle:false};
+  return {dashArea:routeAt(seed,distance+120).index,dashUsed:false,seed,runMode,frame:0,chunk:Math.floor(distance/1800)-1,serial:0,entities:[],combo:0,bestCombo:0,comboTime:0,fever:0,energy:0,magnet:0,double:0,sneakers:0,board:0,shield:0,lowGravity:0,boost:0,slide:0,vehicle:'normal',vehicleTime:0,gravity:1,stats:{coins:0,stars:0,dodges:0,breaks:0,perfects:0,bosses:0,missions:0},missionDone:[false,false,false],score:0,notice:'',noticeTime:0,boss:null,clearAhead:false,changedVehicle:false};
 }
 export function announce(s: ArcadeState, notice: string) {s.notice=notice;s.noticeTime=110;}
 export function addEntity(s: ArcadeState, kind: ArcadeEntity['kind'], d: number, lift: number, width=26,height=26,air=false) {
@@ -73,11 +73,13 @@ export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:numb
   }
 }
 export function beginArcade(s:ArcadeState,distance:number,flight:boolean,viewWidth=800) {
+  const area=routeAt(s.seed,distance+120).index;
+  if(area!==s.dashArea){s.dashArea=area;s.dashUsed=false;announce(s,'areaDash');}
   s.frame++;s.clearAhead=false;s.changedVehicle=false;
   for(const key of ['comboTime','fever','magnet','double','sneakers','board','shield','lowGravity','boost','slide','noticeTime'] as const)if(s[key]>0)s[key]--;
   if(s.comboTime===0)s.combo=0;
   if(s.vehicleTime>0&&--s.vehicleTime===0){s.vehicle='normal';s.changedVehicle=true;announce(s,'landing');}
-  s.entities=s.entities.filter(e=>!e.taken&&e.d-distance>-160&&e.d-distance<Math.max(3000,viewWidth+2200));
+  s.entities=s.entities.filter(e=>!e.taken&&e.d+e.width/2-distance>-40&&e.d-e.width/2-distance<Math.max(3000,viewWidth+2200));
   const chunk=Math.floor((distance+Math.max(900,viewWidth+100))/1800);
   while(chunk>s.chunk){
     const next=++s.chunk;
@@ -97,7 +99,9 @@ export function activateOrb(s:ArcadeState,p:ArcadePlayer,distance:number) {
   s.stats.perfects++;reward(s,100,12);announce(s,'perfect');return true;
 }
 export function dashArcade(s:ArcadeState,p:ArcadePlayer) {
-  if(s.boss){s.boss.hp--;s.boss.life=Math.max(s.boss.life,180);p.dashCooldown=80;reward(s,100,10);announce(s,'bossHit');if(s.boss.hp<=0){s.boss=null;s.stats.bosses++;s.score+=1500;s.entities=s.entities.filter(e=>e.kind!=='missile');announce(s,'bossWin');}}
+  if(s.dashUsed)return;
+  s.dashUsed=true;
+  if(s.boss){s.boss.hp=0;s.boss.life=Math.max(s.boss.life,180);reward(s,100,10);announce(s,'bossHit');if(s.boss.hp<=0){s.boss=null;s.stats.bosses++;s.score+=1500;s.entities=s.entities.filter(e=>e.kind!=='missile');announce(s,'bossWin');}}
 }
 export function hitArcade(s:ArcadeState):boolean {
   if(s.fever>0)return true;
@@ -142,7 +146,7 @@ export function endArcade(s:ArcadeState,p:ArcadePlayer,distance:number) {
       else if(e.kind==='star'){s.stats.stars++;reward(s,250,18);announce(s,'star');}
       else if(e.kind==='pad'){p.vy=-17;p.isJumping=true;p.jumpCount=0;reward(s,40,6);announce(s,'bounce');}
       else if(e.kind==='boost'){s.boost=5*60;reward(s,40,6);announce(s,'boost');}
-      else if(e.kind==='charge'){p.dashCooldown=0;announce(s,'charge');}
+      else if(e.kind==='charge'){s.energy=Math.min(99,s.energy+18);announce(s,'charge');}
       else if(e.kind==='gravity'||e.kind==='wave'||e.kind==='rocket'){
         s.vehicle=e.kind;s.vehicleTime=540;s.gravity=1;s.changedVehicle=true;p.y=Math.min(p.y,floorAt(s.seed,distance+p.x)-30,275);p.vy=-4;p.isFalling=false;p.isJumping=true;p.jumpCount=0;announce(s,e.kind);
       }else {s[e.kind as 'magnet'|'shield'|'double'|'sneakers'|'board'|'lowGravity']=600;announce(s,e.kind);}

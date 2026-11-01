@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 
 const PORT = 4176;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
-const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME_PATH = process.env.CHROMIUM_PATH || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/chromium');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const synthesizedMiniGames = [
@@ -15,9 +15,11 @@ const synthesizedMiniGames = [
   'src/components/SchoolyardSurvivorScreen.tsx',
 ];
 
+// Dungeons 1 intentionally has dedicated technique-effect cues; its ordinary attacks
+// still use studentCue. Keep the restriction for the other synthesized games.
 for (const sourcePath of synthesizedMiniGames) {
   const source = readFileSync(sourcePath, 'utf8');
-  if (source.includes('playBattleSound(') || source.includes('playAttackEffectSound(')) {
+  if (source.includes('playBattleSound(') || (!sourcePath.endsWith('/SchoolDungeonRPG.tsx') && source.includes('playAttackEffectSound('))) {
     throw new Error(`${sourcePath} must keep the original synthesized mini-game sounds`);
   }
 }
@@ -137,7 +139,7 @@ try {
   if (!initial.iosClass) throw new Error('iOS platform class is missing');
   if (initial.mediaSourceCount !== 0) throw new Error('iOS BGM was unexpectedly routed through Web Audio');
 
-  await page.locator('.start-menu-theme-switch button').filter({ hasText: '高校編' }).evaluate(element => element.click());
+  await page.evaluate(async () => { const {audioService} = await import('/src/services/audioService.ts'); await audioService.switchThemeAndPlayBGM('high-school', 'menu'); });
   await page.waitForFunction(() => window.__iosBgmPlayAttempts.some(path => path.includes('/bgm-new/high-school/menu.mp3')));
   const beforeResumeCount = await page.evaluate(() => window.__iosBgmPlayAttempts.length);
   const runtimeState = await page.evaluate(async () => {

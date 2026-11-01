@@ -1,3 +1,4 @@
+import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from '../services/webAudioSession';
 import {planResidentPhrases,residentPitchSemitones} from './residentVoiceProsody';
 import type { ConversationVoice } from './conversationVoice';
 
@@ -163,6 +164,7 @@ export function renderResidentVoice(moras: VoiceMora[], voice: ConversationVoice
 }
 
 let context: AudioContext | undefined;
+let unregisterAudio: (() => void) | undefined;
 export function residentVoiceSupported() {
   return typeof window !== 'undefined' && !!(window.AudioContext || (window as unknown as {webkitAudioContext?: typeof AudioContext}).webkitAudioContext);
 }
@@ -170,8 +172,10 @@ export function unlockResidentVoice(): AudioContext | undefined {
   if (!residentVoiceSupported()) return;
   const Constructor = window.AudioContext || (window as unknown as {webkitAudioContext: typeof AudioContext}).webkitAudioContext;
   try {
-    if (!context || context.state === 'closed') context = new Constructor();
-    if (context.state === 'suspended') void context.resume().catch(() => {});
+    if (!context || context.state === 'closed') {
+      unregisterAudio?.(); prepareWebAudioSession(); context = new Constructor(); unregisterAudio = registerGameAudio(context);
+    }
+    void resumeGameAudio(context);
     return context;
   } catch { return undefined; }
 }

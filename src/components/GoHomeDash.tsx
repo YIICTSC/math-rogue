@@ -12,11 +12,11 @@ import { DashLobby, DASH_HEROES, DEFAULT_DASH_HERO } from '../mini-games/go-home
 import { DASH_HERO_ART } from '../mini-games/go-home-dash/heroes';
 import { routeAt, floorAt, routeCopy, ROUTE_LENGTH, DISTANCE_SCALE, routeTransition, type RouteId } from '../mini-games/go-home-dash/routes';
 import { drawRoute, drawTerrain, drawRunner, type ParallaxArt } from '../mini-games/go-home-dash/render';
-import { stairRects, flightGateRects, isStair, overlapsSolid } from '../mini-games/go-home-dash/obstacles';
+import { stairRects, flightGateShape, flightGateRects, isStair, overlapsSolid } from '../mini-games/go-home-dash/obstacles';
 import { ArcadeHud } from '../mini-games/go-home-dash/ArcadeHud';
-import { createArcade, beginArcade, endArcade, activateOrb, arcadePlatform, hitArcade, dashArcade, dailySeed, seededRandom, saveArcadeRun, loadArcadeProfile, trailColor, announce, type RunMode } from '../mini-games/go-home-dash/arcade';
+import { createArcade, addEntity, beginArcade, endArcade, activateOrb, arcadePlatform, hitArcade, dashArcade, dailySeed, seededRandom, saveArcadeRun, loadArcadeProfile, trailColor, announce, type RunMode } from '../mini-games/go-home-dash/arcade';
 import { advanceObstacleMotion } from '../mini-games/go-home-dash/motion';
-import { drawDangerAura, drawHostileArt, drawStairArt, drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
+import { drawDangerAura, drawHostileArt, drawFlightPillar, drawStairArt, drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
 import { drawArcade, drawArcadeRunner } from '../mini-games/go-home-dash/arcadeRender';
 import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
 import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
@@ -91,6 +91,8 @@ interface Obstacle {
     isHard?: boolean;
     shootCooldown?: number;
     baseY?: number;
+    baseGap?: number;
+    gateGap?: number;
     phase?: number;
     hopCooldown?: number;
 }
@@ -523,8 +525,8 @@ const GoHomeDash: React.FC<{
     const triggerDash = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        if (pausedRef.current || p.dashCooldown > 0 || p.isFalling) return;
-        p.dashFrames = DASH_DURATION_FRAMES; p.dashCooldown = DASH_DURATION_FRAMES + 150;
+        if (pausedRef.current || arcadeRef.current.dashUsed || p.isFalling) return;
+        p.dashFrames = DASH_DURATION_FRAMES; p.dashCooldown = 1;
         p.invulFrame = Math.max(p.invulFrame, DASH_DURATION_FRAMES + 4);
         if (p.isJumping) p.vy = Math.min(p.vy, -2);
         voice('dash'); audioService.playSound('buff'); addVfxRing(p.x, p.y - 30, '#83f3eb');
@@ -586,9 +588,9 @@ const GoHomeDash: React.FC<{
         const stage = routeAt(routeSeedRef.current, distanceRef.current + 120);
         if (stage.id !== 'school') {
             const themed: ObstacleType[] = stage.id === 'garden' ? ['SPRING', 'PAPER_WYVERN', 'BACKPACK', 'JUMPING_SLIME'] : stage.id === 'clockwork' ? ['ELEVATOR', 'FIRE_FLY', 'CLOCK_GHOST', 'BACKPACK'] : stage.id === 'canal' ? ['WATER_SLIME', 'BIRD', 'BACKPACK', 'PAPER_WYVERN'] : stage.id === 'skyway' || stage.id === 'storm' ? ['PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'] : ['ELEVATOR', 'PAPER_WYVERN', 'BACKPACK', 'SHOE_ROLLER'];
-            return stage.flight ? [] : [...themed, 'STEPS', 'HIGH_STEPS'];
+            return stage.flight ? [] : [...themed, 'STEPS', 'HIGH_STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'];
         }
-        return pool;
+        return [...pool, 'STEPS', 'STEPS', ...(level >= 3 ? ['HIGH_STEPS' as ObstacleType] : [])];
     };
 
     const updateLogic = () => {
@@ -601,13 +603,13 @@ const GoHomeDash: React.FC<{
         const stage = routeAt(routeSeedRef.current, distanceRef.current + p.x);
         const floor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
         beginArcade(arcade,distanceRef.current,stage.flight,viewportRef.current.width);
-        if(arcade.clearAhead){obstaclesRef.current=obstaclesRef.current.filter(o=>o.x<300);enemyProjectilesRef.current=enemyProjectilesRef.current.filter(o=>o.x<300);}
+        if(arcade.clearAhead){obstaclesRef.current=obstaclesRef.current.filter(o=>o.x-o.width/2<=viewportRef.current.width+40);enemyProjectilesRef.current=enemyProjectilesRef.current.filter(o=>o.x<=viewportRef.current.width+40);}
         const shouldFly = stage.flight || arcade.vehicle !== 'normal';
         if (shouldFly && !p.flying) { p.isFalling = false; p.y = Math.min(p.y, 280); p.vy = -4; p.flapCooldown = 18; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
         if (!shouldFly && p.flying) { p.isJumping = true; p.jumpCount = 0; p.vy = Math.max(0, p.vy); }
         p.flying = shouldFly;
         if (p.dashFrames > 0) p.dashFrames--;
-        if (p.dashCooldown > 0) p.dashCooldown--;
+        p.dashCooldown = arcade.dashUsed ? 1 : 0;
         if (!p.isJumping && !p.isFalling && !p.flying && Math.abs(p.y - previousFloor) < 12) p.y = floor;
 
         frameCount.current++;
@@ -810,9 +812,10 @@ const GoHomeDash: React.FC<{
 
         const incoming = routeAt(routeSeedRef.current, distanceRef.current + spawnX);
         const lastGate = [...obstacles].reverse().find(o => o.type === 'FLIGHT_GATE');
-        if (stage.flight && incoming.flight && stage.index === incoming.index && incoming.progress < ROUTE_LENGTH - 1200 && (!lastGate || spawnX - lastGate.x > Math.max(520, currentSpeed * 110))) {
-            const center = 175 + Math.sin(Math.floor((distanceRef.current + spawnX) / 700) * 1.7 + routeSeedRef.current) * 30;
-            obstacles.push({id:crypto.randomUUID(),type:'FLIGHT_GATE',x:spawnX,y:center,width:72,height:340,vy:0,speedMult:1,isHard:true});
+        const gateShape = flightGateShape(routeSeedRef.current, distanceRef.current + spawnX);
+        const gateSpacing = Math.max(330, currentSpeed * 72) + ((lastGate?.width ?? 0) + gateShape.width) / 2;
+        if (incoming.flight && stage.index === incoming.index && incoming.progress < ROUTE_LENGTH - 1200 && (!lastGate || spawnX - lastGate.x > gateSpacing)) {
+            obstacles.push({id:crypto.randomUUID(),type:'FLIGHT_GATE',x:spawnX,y:gateShape.baseY,height:340,...gateShape,gateGap:gateShape.baseGap,vy:0,speedMult:1,isHard:true});
         }
         const arcadeHazardAhead=arcade.entities.some(e=>!e.taken&&!['coin','star'].includes(e.kind)&&e.d-distanceRef.current>100&&e.d-distanceRef.current<1350);
         if (!p.flying && arcade.vehicle === 'normal' && !arcadeHazardAhead && !arcade.boss && (!lastObs || (spawnX - lastObs.x) > dynamicGap) && randomRef.current() < spawnProb && obstacles.length < 8) {
@@ -837,6 +840,13 @@ const GoHomeDash: React.FC<{
             else if (type === 'CLOCK_GHOST') { width = 48; height = 48; }
             else if (type === 'SHOE_ROLLER') { width = 46; height = 34; }
 
+            if (isStair(type)) {
+                const shape={type,x:spawnX,width,height};
+                const base=floorAt(routeSeedRef.current,distanceRef.current+spawnX);
+                const steps=stairRects(shape,base);
+                for (const rect of steps) addEntity(arcade,'coin',distanceRef.current+rect.left+rect.width/2,base-rect.top+30,18,18);
+                if (type==='MOUNTAIN_STEPS') {const top=steps[steps.length-1];addEntity(arcade,'star',distanceRef.current+top.left+top.width/2,height+58,24,24);}
+            }
             const phase=randomRef.current()*Math.PI*2;
             obstaclesRef.current.push({ 
                 id: randomRef.current().toString(),
@@ -858,8 +868,7 @@ const GoHomeDash: React.FC<{
 
             const obsFloor = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
             if (obs.type === 'FLIGHT_GATE') {
-                if (!stage.flight) { obstacles.splice(i, 1); continue; }
-                if (p.invulFrame <= 0 && flightGateRects(obs.x, obs.width, obs.y).some(r => overlapsSolid(p.x, p.y, r))) handlePlayerDamage(false);
+                if (p.flying && p.invulFrame <= 0 && flightGateRects(obs.x, obs.width, obs.y, obs.gateGap).some(r => overlapsSolid(p.x, p.y, r))) handlePlayerDamage(false);
                 if (obs.x < -obs.width) obstacles.splice(i, 1);
                 continue;
             }
@@ -962,7 +971,7 @@ const GoHomeDash: React.FC<{
         }
         if(arcadeDamage)handlePlayerDamage(false);
         if(gameStateRef.current!=='PLAYING')return;
-        if(arcade.changedVehicle){obstaclesRef.current=[];enemyProjectilesRef.current=[];p.invulFrame=Math.max(p.invulFrame,45);}
+        if(arcade.changedVehicle){p.invulFrame=Math.max(p.invulFrame,45);}
         if(arcade.runMode==='practice'){
             const checkpointDistance=Math.floor(distanceRef.current/ROUTE_LENGTH)*ROUTE_LENGTH;
             if(checkpointDistance>0&&checkpointDistance>(checkpointRef.current?.distance??0)){
@@ -986,7 +995,7 @@ const GoHomeDash: React.FC<{
             audioService.playBGM('math');
         }
         scoreRef.current += (currentSpeed * 0.1 * p.scoreBonus);
-        if (frameCount.current % 10 === 0) { setArcadeView({...arcade,stats:{...arcade.stats},missionDone:[...arcade.missionDone]}); setTravelled(Math.floor(distanceRef.current / DISTANCE_SCALE)); setRoute(stage.id); setFlight(p.flying); setDashReady(p.dashCooldown === 0); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
+        if (frameCount.current % 10 === 0) { setArcadeView({...arcade,stats:{...arcade.stats},missionDone:[...arcade.missionDone]}); setTravelled(Math.floor(distanceRef.current / DISTANCE_SCALE)); setRoute(stage.id); setFlight(p.flying); setDashReady(!arcade.dashUsed); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
     };
 
     const setGameOverState = () => {
@@ -1111,13 +1120,11 @@ const GoHomeDash: React.FC<{
         for (const obs of obstacles) {
             if (obs.type === 'HOLE') continue;
             if (obs.type === 'FLIGHT_GATE') {
-                for (const rect of flightGateRects(obs.x, obs.width, obs.y)) {
+                const rects=flightGateRects(obs.x,obs.width,obs.y,obs.gateGap);
+                for (let index=0;index<rects.length;index++) {
+                    const rect=rects[index];
                     drawDangerAura(ctx,rect.left,rect.top,rect.width,rect.height,frameCount.current,reducedMotionRef.current);
-                    if(drawHostileArt(ctx,artImagesRef.current,'gate',rect.left,rect.top,rect.width,rect.height,'stretch'))continue;
-                    ctx.fillStyle = '#273859'; ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
-                    ctx.strokeStyle = '#a7f3ff'; ctx.lineWidth = 3; ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
-                    ctx.fillStyle = '#5a8ba0';
-                    for (let y = rect.top + 12; y < rect.top + rect.height - 8; y += 22) ctx.fillRect(rect.left + 10, y, rect.width - 20, 5);
+                    drawFlightPillar(ctx,artImagesRef.current,rect,index===0);
                 }
                 continue;
             }
@@ -1302,7 +1309,7 @@ const GoHomeDash: React.FC<{
             {gameState === 'PLAYING' && <>
                 <div className="dash-route" aria-live="polite"><strong>{flight ? '✦ ' : '→ '}{routeCopy(route, languageMode)}</strong><small>{routeCopy(route, languageMode, true)}</small></div>
                 <div className="dash-controls">
-                    <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><small>SHIFT / X</small>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('チャージ中', 'CHARGING', 'チャージちゅう')}</button>
+                    <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><small>SHIFT / X</small>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('次のエリアで復活', 'NEXT AREA', 'つぎのエリアでふっかつ')}</button>
                     <button className="dash-slide" disabled={flight} {...multiTouchAction(triggerSlide)}><small>↓ / S / B</small>{L('スライド','SLIDE','スライド')}</button>
                     <button className="dash-jump" {...multiTouchHold(held => { const wasHeld = jumpButtonHeld.current; jumpButtonHeld.current = held; refreshPressing(); if (held && !wasHeld) triggerJump(); })}
                         onClick={e => { if (e.detail === 0) triggerJump(); }}><small>SPACE / A · HOLD</small>{arcadeView.vehicle==='gravity'?L('重力反転','FLIP','じゅうりょくはんてん'):arcadeView.vehicle==='wave'?L('ウェーブ','WAVE','ウェーブ'):arcadeView.vehicle==='rocket'?L('上昇','RISE','じょうしょう'):flight ? L('羽ばたき', 'FLAP', 'はばたき') : L('ジャンプ', 'JUMP', 'ジャンプ')}</button>

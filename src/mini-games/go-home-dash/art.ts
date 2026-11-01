@@ -52,3 +52,18 @@ export function drawStairArt(ctx:CanvasRenderingContext2D,images:ArtImages,rect:
  ctx.fillStyle='#ffd18b';ctx.fillRect(x,y,w,4);ctx.fillStyle='#a97547';ctx.fillRect(x,y+4,w,3);
  ctx.strokeStyle='#ff6476';ctx.lineWidth=1.5;ctx.strokeRect(x+.75,y+.75,Math.max(0,w-1.5),Math.max(0,h-1.5));
 }
+
+// Modular pillar material: repeat only the neutral body texture, then draw the
+// gap-facing end cap separately. Never stretch a complete gate over a long wall.
+export function drawFlightPillar(ctx:CanvasRenderingContext2D,images:ArtImages,rect:{left:number;top:number;width:number;height:number},upper:boolean) {
+ const {left:x,top:y,width:w,height:h}=rect;if(h<=0)return;
+ ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+ const shade=ctx.createLinearGradient(x,0,x+w,0);shade.addColorStop(0,'#182b45');shade.addColorStop(.3,'#3e657b');shade.addColorStop(.75,'#25465f');shade.addColorStop(1,'#14243c');ctx.fillStyle=shade;ctx.fillRect(x,y,w,h);
+ const image=images.hazards,frame=ART_FRAMES.gate;
+ if(image?.complete&&image.naturalWidth){ctx.globalAlpha=.22;for(let yy=y;yy<y+h;yy+=32)ctx.drawImage(image,frame.x+frame.width*.3,frame.y+frame.height*.4,frame.width*.4,frame.height*.16,x,yy,w,32);ctx.globalAlpha=1;}
+ ctx.fillStyle='#8bced999';ctx.fillRect(x+3,y,3,h);ctx.fillRect(x+w-6,y,3,h);
+ ctx.strokeStyle='#95c8d433';ctx.lineWidth=1;for(let yy=y+24;yy<y+h-12;yy+=32){ctx.beginPath();ctx.moveTo(x+8,yy);ctx.lineTo(x+w-8,yy);ctx.stroke();}
+ const cap=upper?y+h-13:y;ctx.fillStyle='#142839';ctx.fillRect(x,cap,w,13);ctx.fillStyle='#ffdb9b';ctx.fillRect(x,upper?cap+9:cap,w,4);
+ ctx.fillStyle='#56bed0';for(let xx=x+9;xx<x+w-6;xx+=16)ctx.fillRect(xx,cap+5,7,3);
+ ctx.restore();
+}

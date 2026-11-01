@@ -1,3 +1,4 @@
+import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from '../../services/webAudioSession';
 import { lapQuestion } from './learning';
 import type { Race } from './engine';
 /** Original synthesized engine, soundtrack and race cues. */
@@ -13,12 +14,15 @@ export class KartAudio {
   private lastDistance = 0; private lastSpeed = 0; private lastCrash = false; private lastSlow = false;
   private lastAnswers = 0; private lastQuizLap = -1; private lastLap = 0; private finished = false; private seed = -1; private lastJump = false;
   private step = 0; private nextBeat = 0; private boost = false; private countdown = 0; private item = false;
+  private unregisterAudio?: () => void;
   enabled = true;
   async unlock(): Promise<boolean> {
+    if (this.context?.state === 'closed') this.context = null;
     if (!this.context) {
+      prepareWebAudioSession();
       const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AC) return false;
-      this.context = new AC(); this.master = this.context.createGain(); this.master.gain.value = this.enabled ? .4 : 0; this.master.connect(this.context.destination);
+      this.context = new AC(); this.unregisterAudio?.(); this.unregisterAudio = registerGameAudio(this.context); this.master = this.context.createGain(); this.master.gain.value = this.enabled ? .4 : 0; this.master.connect(this.context.destination);
       this.motor = this.context.createOscillator(); this.motor.type = 'sawtooth'; this.motorGain = this.context.createGain(); this.motorGain.gain.value = 0;
       const filter = this.context.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 850; this.filter = filter;
       this.motor.connect(filter); filter.connect(this.motorGain); this.motorGain.connect(this.master); this.motor.start();
@@ -34,21 +38,7 @@ export class KartAudio {
     if (isRunning()) return true;
     if (this.unlockPromise) return this.unlockPromise;
 
-    // iOS WebViews can acknowledge the first resume() while still leaving the
-    // context suspended. Retry after that transition settles, as the app-wide
-    // audio service does, instead of silently leaving every kart cue muted.
-    const resume = (async () => {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (isRunning()) return true;
-        await Promise.race([
-          context.resume().catch(() => undefined),
-          new Promise<void>(resolve => window.setTimeout(resolve, 300)),
-        ]);
-        if (isRunning()) return true;
-        if (attempt < 2) await new Promise<void>(resolve => window.setTimeout(resolve, 150 * (attempt + 1)));
-      }
-      return isRunning();
-    })();
+    const resume = resumeGameAudio(context);
     this.unlockPromise = resume;
     try {
       return await resume;
@@ -106,5 +96,5 @@ export class KartAudio {
       }
     }
   }
-  close() { this.motor?.stop(); this.skid?.stop(); void this.context?.close(); this.context = null; this.motor = null; this.master = null; }
+  close() { this.unregisterAudio?.(); this.unregisterAudio = undefined; this.motor?.stop(); this.skid?.stop(); void this.context?.close(); this.context = null; this.motor = null; this.master = null; }
 }

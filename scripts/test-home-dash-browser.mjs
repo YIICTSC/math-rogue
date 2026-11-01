@@ -90,7 +90,7 @@ try{
  assert.ok(threatDraws.filter(d=>d.src.includes('/items.webp')).every(d=>d.blur===0),'Items inherit threat glow');
  assert.ok(threatDraws.some(d=>d.src.includes('/enemies.webp')&&d.blur>=13&&Math.max(d.width,d.height)>48),'Enemies lack size/glow');
  assert.ok(threatDraws.some(d=>d.x===frames.boss.x&&d.y===frames.boss.y&&Math.max(d.width,d.height)>150&&d.flip&&d.blur>=13),'Boss must face the runner');
- const steps=threatDraws.filter(d=>d.x===frames.step.x&&d.y>frames.step.y&&d.y<frames.step.y+frames.step.height);assert.equal(steps.length,3);assert.ok(steps.every(d=>d.sourceHeight<frames.step.height*.2),'Whole staircase icon repeated');
+ const steps=threatDraws.filter(d=>d.x===frames.step.x&&d.y>frames.step.y&&d.y<frames.step.y+frames.step.height);assert.equal(steps.length,5);assert.ok(steps.every(d=>d.sourceHeight<frames.step.height*.2),'Whole staircase icon repeated');
  await page.screenshot({path:`${output}/threat-readability.png`});
  await page.evaluate(()=>{__dash.init();__dash.arrange(42,0);});
  console.log('Threat/parallax QA: red enemy-only skins, larger enemies, left-facing boss, geometric stair faces, 3 scroll speeds and seamless wrapping passed.',sceneryRules);
@@ -168,7 +168,11 @@ try{
  await page.keyboard.press('Shift');assert.equal(await page.evaluate(()=>__dash.player.dashFrames),300);
  await page.evaluate(()=>__dash.step(299));assert.equal(await page.evaluate(()=>__dash.player.dashFrames),1);assert.ok(await page.evaluate(()=>__dash.player.invulFrame)>0);
  await page.evaluate(()=>__dash.step());assert.equal(await page.evaluate(()=>__dash.player.dashFrames),0);
- await page.evaluate(()=>__dash.step(150));assert.equal(await page.evaluate(()=>__dash.player.dashCooldown),0);
+ await page.evaluate(()=>__dash.step(150));assert.equal(await page.evaluate(()=>__dash.player.dashCooldown),1);
+ await page.keyboard.press('Shift');assert.equal(await page.evaluate(()=>__dash.player.dashFrames),0,'Time cannot recharge an area dash');
+ await page.evaluate(()=>{__dash.arcade.entities=[];__dash.arcade.dashArea=-1;__dash.arcade.dashUsed=true;__dash.arrange(42,29879,{expMult:0});__dash.arcade.dashUsed=true;__dash.step();});
+ assert.equal(await page.evaluate(()=>__dash.arcade.dashUsed),false,'Entering a new map restores dash');
+ await page.keyboard.press('Shift');assert.ok(await page.evaluate(()=>__dash.player.dashFrames)>0);
  // A-button hold and X dash use the real controller navigation hook.
  await page.evaluate(()=>{__dash.arrange(42,0);__pad.buttons[0]={pressed:true,touched:true,value:1};__pad.buttons[2]={pressed:true,touched:true,value:1};});
  await page.clock.runFor(40);assert.equal(await page.evaluate(()=>__dash.player.isPressing),true);assert.ok(await page.evaluate(()=>__dash.player.dashFrames)>0);
@@ -202,6 +206,11 @@ try{
  await page.evaluate(()=>{__dash.arrange(42,0,{},[{id:'spring',type:'SPRING',x:120,y:333,width:70,height:15,vy:0,speedMult:1}]);__dash.step();});assert.ok(await page.evaluate(()=>__dash.player.vy)<-15);
  await page.evaluate(()=>{__dash.arrange(42,0,{y:255,vy:5,isJumping:true},[{id:'lift',type:'ELEVATOR',x:120,y:270,width:170,height:18,vy:0,speedMult:1,phase:0}]);__dash.step(3);});
  assert.ok(await page.evaluate(()=>Math.abs(__dash.player.y-(__dash.obstacles[0].y-9)))<5);
+ // Pattern preparation and vehicle expiry must not erase visible pillars/platforms.
+ await page.evaluate(()=>{__dash.arrange(42,0,{},[{id:'persistent-pillar',type:'IRON_BARRIER',x:650,y:290,width:80,height:100,vy:0,speedMult:1}]);__dash.arcade.chunk=-1;__dash.step();});
+ assert.ok(await page.evaluate(()=>__dash.obstacles.some(o=>o.id==='persistent-pillar')),'Preparing a pattern erased a visible pillar');
+ await page.evaluate(()=>{__dash.arcade.vehicle='rocket';__dash.arcade.vehicleTime=1;__dash.step();});
+ assert.ok(await page.evaluate(()=>__dash.obstacles.some(o=>o.id==='persistent-pillar')),'Vehicle expiry erased a visible pillar');
  // Tap flaps immediately; gate pairs collide outside the gap but permit its center.
  await page.evaluate(r=>{__dash.arrange(42,r.distance,{flying:true,y:220,vy:3,invulFrame:0});__dash.step(1);},sky);
  await page.keyboard.press('Space');assert.ok(await page.evaluate(()=>__dash.player.vy)<-4);
@@ -217,6 +226,10 @@ try{
  await page.evaluate(r=>__dash.arrange(42,r.distance,{flying:true,y:215,vy:0,invulFrame:0,expMult:0}),sky);
  await page.evaluate(()=>__dash.fly(1300));assert.equal(await page.evaluate(()=>__dash.hp),flightHP);
  assert.equal(await page.evaluate(()=>__dash.state),'PLAYING');
+ const gateCourse=await page.evaluate(()=>__dash.obstacles.filter(o=>o.type==='FLIGHT_GATE').map(o=>({width:o.width,gap:o.gateGap,x:o.x})));
+ assert.ok(new Set(gateCourse.map(o=>o.width)).size>1,'Flight pillars need variable thickness');
+ assert.ok(new Set(gateCourse.map(o=>Math.round(o.gap))).size>1,'Flight openings need variable height');
+ assert.ok(gateCourse.every(o=>o.gap>=148&&o.gap<=220),'Flight openings must remain traversable');
  await page.screenshot({path:`${output}/flight-gates.png`});
  // A stair side is solid, pushes the runner back, and only damages on crushing.
  const stair={id:'stairs',type:'HIGH_STEPS',x:280,y:285,width:320,height:110,vy:0,speedMult:1};
@@ -226,8 +239,8 @@ try{
  assert.equal(await page.evaluate(()=>__dash.state),'PLAYING');
  await page.screenshot({path:`${output}/solid-stairs.png`});
  // Landing from above remains safe on the visible stair tops.
- await page.evaluate(stair=>{__dash.arrange(42,0,{x:270,y:250,vy:5,isJumping:true,invulFrame:0},[stair]);__dash.step(3);},stair);
- assert.ok(await page.evaluate(()=>__dash.player.y)>260);assert.ok(await page.evaluate(()=>__dash.player.y)<270);assert.equal(await page.evaluate(()=>__dash.hp),stairHP-1);
+ await page.evaluate(stair=>{__dash.arrange(42,0,{x:270,y:250,vy:5,isJumping:true,invulFrame:0},[stair]);__dash.step(4);},stair);
+ assert.ok(await page.evaluate(()=>__dash.player.y)>=270);assert.ok(await page.evaluate(()=>__dash.player.y)<=275);assert.equal(await page.evaluate(()=>__dash.hp),stairHP-1);
  // Capture both background plates during an actual route transition.
  await page.evaluate(async()=>{const {OPENING_DISTANCE}=await import('/src/mini-games/go-home-dash/routes.ts');__dash.arrange(42,OPENING_DISTANCE+180,{invulFrame:100000});__dash.step(1);});
  await page.screenshot({path:`${output}/background-transition.png`});
@@ -323,10 +336,10 @@ try{
  await page.evaluate(()=>__dash.init());await reset();await page.keyboard.press('s');await page.evaluate(async()=>{const m=await import('/src/mini-games/go-home-dash/arcade.ts');const s=__dash.arcade;m.addEntity(s,'laser',120,55,180,14);s.frame=100;__dash.step();});assert.equal(await page.evaluate(()=>__dash.hp),3);
  // An upper one-way rail supports a safe landing and optional star route.
  await reset({y:230,vy:7,isJumping:true});await page.evaluate(async()=>{const m=await import('/src/mini-games/go-home-dash/arcade.ts');m.addEntity(__dash.arcade,'rail',220,105,460,12);__dash.step();});assert.equal(await page.evaluate(()=>__dash.player.y),235);
- // Boss attacks and three real dash presses defeat it; charge pickups reset cooldown.
+ // A saved once-per-area dash counters the boss; batteries never recharge it.
  await reset();await page.evaluate(async()=>{const m=await import('/src/mini-games/go-home-dash/arcade.ts');m.spawnPattern(__dash.arcade,'bossRush',700);__dash.step(95);});assert.ok(await page.evaluate(()=>__dash.arcade.entities.some(e=>e.kind==='missile')));
  await page.screenshot({path:`${output}/arcade-boss.png`});
- for(let i=0;i<3;i++){await pickup('charge');await page.keyboard.press('Shift');}assert.equal(await page.evaluate(()=>__dash.arcade.boss),null);assert.equal(await page.evaluate(()=>__dash.arcade.stats.bosses),1);
+ await page.keyboard.press('Shift');await pickup('charge');assert.equal(await page.evaluate(()=>__dash.arcade.dashUsed),true);assert.equal(await page.evaluate(()=>__dash.arcade.boss),null);assert.equal(await page.evaluate(()=>__dash.arcade.stats.bosses),1);
  // Mission rewards fire once; Fever protects without dropping the combo.
  await reset();await page.evaluate(async()=>{const m=await import('/src/mini-games/go-home-dash/arcade.ts');const s=__dash.arcade;for(let i=0;i<25;i++)m.addEntity(s,'coin',120,30);__dash.step();});assert.equal(await page.evaluate(()=>__dash.arcade.stats.missions),1);
  await page.evaluate(()=>__dash.step(5));assert.equal(await page.evaluate(()=>__dash.arcade.stats.missions),1);

@@ -1,4 +1,4 @@
-import { drawDangerAura, drawHostileArt, drawArt, type ArtImages, type ArtKey } from './art';
+import { drawDangerAura, drawFlightPillar, drawHostileArt, drawArt, type ArtImages, type ArtKey } from './art';
 import { entityRects, entityY, isPickup, laserActive, type ArcadeEntity, type ArcadeState } from './arcade';
 const COLORS:Record<string,string>={coin:'#ffdc70',star:'#ff90d8',magnet:'#f49ac2',shield:'#7de9ff',double:'#fff07b',sneakers:'#a9ffb5',board:'#82b9ff',rocket:'#ffb88a',lowGravity:'#b9a5ff',gravity:'#d4a2ff',wave:'#8dffdf',charge:'#91efff',orb:'#ffed9a',pad:'#bdff80',boost:'#8dfff4'};
 const ICONS:Record<string,string>={magnet:'∩',shield:'◇',double:'×2',sneakers:'↑↑',board:'≋',rocket:'↑',lowGravity:'↓',gravity:'↕',wave:'∿',charge:'ϟ',orb:'↑',pad:'↑',boost:'»'};
@@ -30,11 +30,12 @@ export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:n
    continue;
   }
   if(e.kind!=='rail'){for(const r of entityRects(s,e,distance))drawDangerAura(ctx,r.x,r.y,r.w,r.h,s.frame,reducedMotion);}
+  if(e.kind==='airGate'){for(const [i,r] of entityRects(s,e,distance).entries())drawFlightPillar(ctx,art||{},{left:r.x,top:r.y,width:r.w,height:r.h},i===0);continue;}
   if(e.kind==='spike'&&drawHostileArt(ctx,art,'spike',x-e.width/2,y-e.height,e.width,e.height,'stretch'))continue;
   if(e.kind==='rail'&&drawArt(ctx,art,'rail',x-e.width/2,y,e.width,26,'stretch'))continue;
-  if((e.kind==='wall'||e.kind==='tunnel'||e.kind==='airGate')&&art?.hazards?.complete){
+  if((e.kind==='wall'||e.kind==='tunnel')&&art?.hazards?.complete){
    let painted=true;
-   for(const rect of entityRects(s,e,distance))painted=drawHostileArt(ctx,art,e.kind==='airGate'?'gate':e.kind,rect.x,rect.y,rect.w,rect.h,'stretch')&&painted;
+   for(const rect of entityRects(s,e,distance))painted=drawHostileArt(ctx,art,e.kind,rect.x,rect.y,rect.w,rect.h,'stretch')&&painted;
    if(painted)continue;
   }
   if(e.kind==='spike'){
