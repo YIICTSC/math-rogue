@@ -1,5 +1,7 @@
 import {voyageBackground} from './voyage';
+import {LanternVacation} from './vacationArt';
 import {ENDLESS_OBJECTIVES,interactEndless} from './endless';
+import {warEnemy} from './enemyRoster';
 import {battleVoice,stopLanternVoice,beginLanternBattleVoice}from'./voices';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import {useContext} from 'react';
@@ -41,6 +43,7 @@ export function Battlefield({s,update}:{s:Campaign;update:Update}){
  </div></TranslatedUiTree>;
 }
 function CombatStage({s,update}:{s:Campaign;update:Update}){
+ const vacation=useContext(LanternVacation);
  const e=s.battle!.encounter!,[speed,setSpeed]=useState(1),[age,setAge]=useState(0),event=e.events[e.index],finished=e.index>=e.events.length;
  const a=s.battle!.squads.find(q=>q.id===e.ally)!,z=s.battle!.squads.find(q=>q.id===e.enemy)!;
  useEffect(()=>{setAge(0);if(finished)return;const start=performance.now(),timer=setInterval(()=>setAge((performance.now()-start)*speed),50);const advance=setTimeout(()=>update(s=>{if(s.battle?.encounter)s.battle.encounter.index++;}),1600/speed);return()=>{clearInterval(timer);clearTimeout(advance);};},[e.index,speed,finished]);
@@ -54,8 +57,8 @@ function CombatStage({s,update}:{s:Campaign;update:Update}){
  <div className="lw-combat-formation"><b>{a.name}</b><strong>{a.members.length} <small>VS</small> {z.members.length}</strong><b>{z.name}</b></div>
  <ArmyStage s={s} age={age}/>
  {!finished&&event&&<>
- {event.skill&&age<600&&<div className="lw-cutin"><div className="lw-cutin-art">{actor.startsWith('end-')?<EndlessCutin id={actor}/>:c?<img src={assetUrl(c)} alt=""/>:<BattleArt id={actor} action="ultimate"/>}</div><span>◆ {event.name}</span></div>}
- <div className="lw-combat-caption" role="status"><small>{event.passive?'PASSIVE · PP ◇':'ACTIVE · AP ◆'}</small><h2>{event.name}</h2><p>{event.actorHero.startsWith('enemy-')?'境界兵':heroById(event.actorHero).name} → {event.targetHero.startsWith('enemy-')?'境界兵':heroById(event.targetHero).name}</p><span>{e.index+1} / {e.events.length}</span></div></>}
+ {event.skill&&age<600&&<div className="lw-cutin"><div className="lw-cutin-art">{vacation?<BattleArt id={actor} action="ultimate" facing={actor.startsWith('enemy-')?'left':'right'}/>:actor.startsWith('end-')?<EndlessCutin id={actor}/>:c?<img src={assetUrl(c)} alt=""/>:<BattleArt id={actor} action="ultimate"/>}</div><span>◆ {event.name}</span></div>}
+ <div className="lw-combat-caption" role="status"><small>{event.passive?'PASSIVE · PP ◇':'ACTIVE · AP ◆'}</small><h2>{event.name}</h2><p>{warEnemy(event.actorHero)?.name||heroById(event.actorHero).name} → {warEnemy(event.targetHero)?.name||heroById(event.targetHero).name}</p><span>{e.index+1} / {e.events.length}</span></div></>}
  {finished&&<div className="lw-combat-end"><small>ENGAGEMENT COMPLETE</small><h2>{e.winner==='ally'?'敵部隊を押し返した':'味方部隊が後退'}</h2><p>味方損害 {e.allyLoss} / 敵損害 {e.enemyLoss}</p><button autoFocus className="lw-primary" onClick={()=>update(finishEncounter)}>戦場へ戻る</button></div>}
  </div></TranslatedUiTree>;
 }

@@ -8,6 +8,8 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
+    "test:lantern-war:enemies": "node scripts/test-lantern-enemies.mjs",
+    "test:lantern-war:vacation": "node scripts/test-lantern-vacation.mjs",
     "test:kotoba-life": "node scripts/test-kotoba-life.mjs",
     "test:kotoba-life:browser": "node scripts/test-kotoba-life-browser.mjs",
     "generate:kotoba-readings": "node scripts/generate-kotoba-readings.mjs",

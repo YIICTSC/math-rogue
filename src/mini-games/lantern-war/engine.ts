@@ -1,6 +1,7 @@
 import {validVoyageSite} from './voyage';
 import {migrateEndlessIdentity} from './endlessRoster';
 import {checkEndless,tickEndless,claimEndless} from './endless';
+import {campaignEnemy,warEnemy} from './enemyRoster';
 import{PERSONAL_TECHNIQUES}from'./techniques';
 import{connectedBattleTerrain}from'./battleTerrain';
 import {FIELD_QUESTS} from './world';
@@ -46,16 +47,16 @@ export function assign(s:Campaign,id:string,squad:number,slot:number){
  if(old)s.formations[old.si].slots[old.i]=displaced;target.slots[slot]=id;return true;
 }
 function fighter(s:Campaign,id:string,slot:number,team:'ally'|'enemy',index=0):Fighter{
- const h=heroById(id),lv=team==='ally'?level(s,id):1+Math.floor(index/2),weapon:Weapon=team==='ally'?h.weapon:(['sword','lance','axe','bow','magic','staff'] as Weapon[])[Number(id.slice(6))%6];
+ const h=heroById(id),enemy=warEnemy(id),lv=team==='ally'?level(s,id):1+Math.floor(index/2),weapon:Weapon=team==='ally'?h.weapon:enemy?.weapon||'sword';
  const hp=(team==='ally'?h.hp:26)+(lv-1)*4+(team==='ally'&&s.difficulty==='story'?12:0);
- return {uid:team+'-'+id+'-'+slot,hero:id,name:team==='ally'?h.name:['灰鎧兵','封門兵','熾火兵','夜渡りの射手','裂界術師','灰灯の司祭'][index%6],team,slot,hp,maxHp:hp,atk:(team==='ally'?h.atk:10)+(lv-1)*2+(s.forge[id]||0)*2,def:(team==='ally'?h.def:4)+Math.floor(lv*.8),speed:(team==='ally'?h.speed:6)+Math.floor(lv/2),weapon,ap:2,pp:2};
+ return {uid:team+'-'+id+'-'+slot,hero:id,name:team==='ally'?h.name:enemy?.name||'境界兵',team,slot,hp,maxHp:hp,atk:(team==='ally'?h.atk:10)+(lv-1)*2+(s.forge[id]||0)*2,def:(team==='ally'?h.def:4)+Math.floor(lv*.8),speed:(team==='ally'?h.speed:6)+Math.floor(lv/2),weapon,ap:2,pp:2};
 }
 export function createBattle(s:Campaign,chapter=s.chapter,replay=false,sideQuest=false):Battle{
  const c=CHAPTERS[chapter],map=c.map.map(row=>row.split('') as Terrain[]);map[6][10]='t';
  const squads:Squad[]=s.formations.map((f,i)=>({id:'ally-'+i,team:'ally' as const,name:'第'+(i+1)+'部隊',x:1+i,y:8,members:f.slots.flatMap((id,slot)=>id?[fighter(s,id,slot,'ally')]:[]),stamina:5,maxStamina:5,rest:0,wait:0,path:[],kind:0,facing:2,moving:false})).filter(q=>q.members.length);
  const positions=[[9,0],[7,2],[9,4],[5,3],[10,6],[6,0]],count=chapter<2?3:4+Math.floor(chapter/7);
  for(let i=0;i<count;i++){let [x,y]=positions[i];if(TERRAIN_INFO[map[y][x]].cost>=99){x=10;y=i+1;}
- const members=Array.from({length:chapter<2?1:2+Math.floor(chapter/6)},(_,j)=>fighter(s,'enemy-'+((i+j+chapter)%6),j<2?j:j+1,'enemy',chapter+(i+j)%4));
+ const members=Array.from({length:chapter<2?1:2+Math.floor(chapter/6)},(_,j)=>fighter(s,campaignEnemy(chapter,i,j).id,j<2?j:j+1,'enemy',chapter+(i+j)%4));
  if(i===0)for(const f of members){f.hp+=14;f.maxHp+=14;}
  squads.push({id:'enemy-'+i,team:'enemy',name:i===0?(chapter===16?'灯守ヴェスパー':chapter===17?'忘却の王冠':'境界の守備隊'):'境界の第'+i+'隊',x,y,members,stamina:5,maxStamina:5,rest:0,wait:0,path:[],boss:i===0,kind:(i+chapter)%6,facing:3,moving:false});}
  if(c.objective==='escort')squads.push({id:'civil',team:'civil',name:'種を運ぶ旅人',x:0,y:8,members:[{...fighter(s,'high-school-caretaker',0,'ally'),hp:80,maxHp:80}],stamina:9,maxStamina:9,rest:0,wait:0,path:[],kind:0,facing:2,moving:false});

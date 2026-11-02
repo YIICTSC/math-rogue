@@ -24,4 +24,4 @@ export type VoyageRegion='emerald'|'glacier'|'ember'|'starlit';
 export type VoyageKind='island'|'coast'|'naval'|'fortress'|'ruins'|'mainland';
 export interface VoyageSite{id:string;depth:number;page:number;step:number;route:number;region:VoyageRegion;kind:VoyageKind;x:number;y:number;}
 export interface EndlessMission{site?:VoyageSite;depth:number;title:string;theme:number;objective:EndlessObjective;weather:'clear'|'rain'|'fog'|'heat'|'storm';hold:number;installations:Installation[];recruit:string;story:Line[];reward:number;reinforcements:number;}
-export interface EndlessProgress{plottedDepth?:number;chartedRoutes?:{depth:number;route:number}[];active:boolean;route?:number;blessings?:{attack:number;guard:number;vitality:number};seed:number;depth:number;wins:number;best:number;history:string[];}
+export interface EndlessProgress{introSeen?:boolean;plottedDepth?:number;chartedRoutes?:{depth:number;route:number}[];active:boolean;route?:number;blessings?:{attack:number;guard:number;vitality:number};seed:number;depth:number;wins:number;best:number;history:string[];}

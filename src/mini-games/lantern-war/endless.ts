@@ -1,6 +1,7 @@
 import {voyageSite,VOYAGE_REGION_NAMES,VOYAGE_KIND_NAMES} from './voyage';
 import {clone,createBattle,distance,living} from './engine';
 import {ENDLESS_CAST,recruitLines} from './endlessRoster';
+import {ENDLESS_ENEMIES} from './enemyRoster';
 import type {Campaign,Battle,EndlessMission,EndlessObjective,Installation,Line,Terrain} from './types';
 export const ENDLESS_OBJECTIVES:Record<EndlessObjective,string>={rout:'敵軍を全滅させる',boss:'敵将を撃破する',seize:'星門を制圧する',escape:'全生存部隊を星門周辺へ撤退させる',escort:'旅人を星門へ護送する',defend:'180秒間、本拠を防衛する',beacons:'3基の灯台をすべて確保する',relic:'秘宝を回収し、本拠へ持ち帰る'};
 export function endlessUnlocked(s:Campaign){return s.cleared.includes(17);}
@@ -43,7 +44,7 @@ export function makeEndlessBattle(s:Campaign):Battle{
  for(let i=0;i<enemyCount;i++){
  const q=clone(enemies[i%enemies.length]);q.id='end-enemy-'+i;q.boss=i===0;q.x=2+i%8;q.y=i<8?1:2;b.map[q.y][q.x]='.';q.name=q.boss?'裂界の旗将':'第'+(i+1)+'混成軍';
  q.kind=Math.floor(random()*6);q.stamina=q.maxStamina=5;q.path=[];
- for(const [j,f]of q.members.entries()){f.uid=q.id+'-'+j;f.weapon=pick(['sword','lance','axe','bow','magic','staff'] as const);f.hero='enemy-'+Math.floor(random()*6);const strength=average+Math.floor(p.depth*.6);f.maxHp=f.hp=28+strength*4;f.atk=10+strength*2;f.def=4+Math.floor(strength*.7);f.speed=6+Math.floor(strength*.4);}
+ for(const [j,f]of q.members.entries()){const enemy=pick(ENDLESS_ENEMIES);f.uid=q.id+'-'+j;f.weapon=enemy.weapon;f.hero=enemy.id;f.name=enemy.name;const strength=average+Math.floor(p.depth*.6);f.maxHp=f.hp=28+strength*4;f.atk=10+strength*2;f.def=4+Math.floor(strength*.7);f.speed=6+Math.floor(strength*.4);}
  b.squads.push(q);
  }
  if(objective==='escort'){const civil=clone(b.squads[0]);civil.id='civil';civil.team='civil';civil.name='灯を運ぶ旅人';civil.x=2;civil.y=7;civil.members=[{...civil.members[0],uid:'end-civil',hp:180,maxHp:180}];b.squads.push(civil);}

@@ -1,0 +1,134 @@
+{
+  "dungeons2-celis": {
+    "dialogue": "rrrr"
+  },
+  "lyra": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-lyria": {
+    "dialogue": "rrrr"
+  },
+  "aster": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-flora": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-noctia": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-aurene": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-orion": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-leon": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-leif": {
+    "dialogue": "rrrr"
+  },
+  "dungeons2-ignis": {
+    "dialogue": "llll"
+  },
+  "mio": {
+    "dialogue": "llll"
+  },
+  "end-sable": {
+    "dialogue": "rrrr"
+  },
+  "nagi": {
+    "dialogue": "rrrr"
+  },
+  "sena": {
+    "dialogue": "rrrr"
+  },
+  "end-vesper": {
+    "dialogue": "llll"
+  },
+  "high-school-caretaker": {
+    "dialogue": "rrrr"
+  },
+  "high-school-dodgeball": {
+    "dialogue": "llll"
+  },
+  "high-school-bard": {
+    "dialogue": "rrrr"
+  },
+  "high-school-warrior": {
+    "dialogue": "llll"
+  },
+  "high-school-chef": {
+    "dialogue": "llll"
+  },
+  "high-school-librarian": {
+    "dialogue": "llll"
+  },
+  "high-school-assassin": {
+    "dialogue": "llll"
+  },
+  "high-school-gardener": {
+    "dialogue": "rrrr"
+  },
+  "magic-akari": {
+    "dialogue": "llll"
+  },
+  "magic-shizuku": {
+    "dialogue": "llll"
+  },
+  "magic-hiyori": {
+    "dialogue": "rrrr"
+  },
+  "magic-rei": {
+    "dialogue": "llll"
+  },
+  "magic-tsubasa": {
+    "dialogue": "llll"
+  },
+  "magic-madoka": {
+    "dialogue": "llll"
+  },
+  "magic-ren": {
+    "dialogue": "llll"
+  },
+  "magic-soma": {
+    "dialogue": "rrrr"
+  },
+  "magic-minato": {
+    "dialogue": "llll"
+  },
+  "magic-koharu": {
+    "dialogue": "rrrr"
+  },
+  "magic-riku": {
+    "dialogue": "llll"
+  },
+  "magic-leon": {
+    "dialogue": "llll"
+  },
+  "magic-yamato": {
+    "dialogue": "rrrr"
+  },
+  "magic-mirai": {
+    "dialogue": "rrrr"
+  },
+  "magic-elliot": {
+    "dialogue": "rrrr"
+  },
+  "magic-sera": {
+    "dialogue": "llll"
+  },
+  "magic-sakuya": {
+    "dialogue": "llll"
+  },
+  "end-ren": {
+    "dialogue": "llll"
+  },
+  "end-hikari": {
+    "dialogue": "llll"
+  },
+  "high-school-mage": {
+    "dialogue": "llll"
+  }
+}

@@ -1,7 +1,10 @@
+import {LanternVacation,vacationMetric,vacationPortraitSource} from './vacationArt';
 import {mirrorArt,type Facing} from './artFacing';
+import {warEnemy} from './enemyRoster';
+import {enemyMetric} from './enemyArtMetrics';
 import ENDLESS_METRICS from './endlessBattleMetrics.json';
 import {ENDLESS_CAST} from './endlessRoster';
-import React,{useEffect,useState} from 'react';
+import React,{useContext,useEffect,useState} from 'react';
 import {assetUrl} from '../../utils/assetPaths';
 import {battleSource,type BattleAction} from './battleSources';
 import {PERSONAL_TECHNIQUES} from './techniques';
@@ -11,21 +14,27 @@ export function Atlas({src,cols=1,rows=1,frame=0,className='',flip=false}:{src:s
  return <svg className={'lw-atlas '+className} style={{transform:flip?'scaleX(-1)':undefined}} viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><svg x="0" y="0" width="100" height="100" overflow="hidden"><image href={assetUrl(src)} x={-(frame%cols)*100} y={-Math.floor(frame/cols)*100} width={cols*100} height={rows*100} preserveAspectRatio={cols===1&&rows===1?'xMidYMax meet':'none'}/></svg></svg>;
 }
 export function BattleArt({id,action='ready',className='',facing='right'}:{id:string;action?:ArtAction;className?:string;facing?:Facing}){
- const [frame,setFrame]=useState(0);
+ const vacation=useContext(LanternVacation),[frame,setFrame]=useState(0);
  useEffect(()=>{setFrame(0);if(action==='ready')return;const timer=setInterval(()=>setFrame(f=>(f+1)%4),160);return()=>clearInterval(timer);},[id,action]);
- const flip=mirrorArt(id,action,frame,facing);
+ const flip=mirrorArt(id,action,frame,facing,vacation);
+ const vm=vacation?vacationMetric(id,action,frame):undefined;if(vm){const source=battleSource(id,action,frame,true);return <svg className={'lw-atlas '+className} style={{transform:flip?'scaleX(-1)':undefined}} viewBox={`${vm.x+vm.bounds.x-12} ${vm.y+vm.bounds.y-12} ${vm.bounds.w+24} ${vm.bounds.h+24}`} aria-hidden="true" preserveAspectRatio="xMidYMax meet"><image href={assetUrl(source.path)} width={vm.w*source.cols} height={vm.h*source.rows}/></svg>;}
+ const enemy=warEnemy(id),em=enemyMetric(id,action);if(enemy&&em){const source=battleSource(id,action);return <svg className={'lw-atlas '+className} style={{transform:flip?'scaleX(-1)':undefined}} viewBox={`${em.bounds.x-8} ${em.bounds.y-8} ${em.bounds.w+16} ${em.bounds.h+16}`} aria-hidden="true" preserveAspectRatio="xMidYMax meet"><image href={assetUrl(source.path)} width={em.w} height={em.h}/></svg>;}
  const row=ENDLESS_CAST.findIndex(h=>h.id===id);if(row>=0){const m=(ENDLESS_METRICS as Record<string,Record<BattleAction,{x:number;y:number;bounds:{x:number;y:number;w:number;h:number}}[]>>)[id]?.[action]?.[0];if(m)return <svg className={'lw-atlas '+className} style={{transform:flip?'scaleX(-1)':undefined}} viewBox={`${m.x+m.bounds.x-16} ${m.y+m.bounds.y-16} ${m.bounds.w+32} ${m.bounds.h+32}`} aria-hidden="true" preserveAspectRatio="xMidYMax meet"><image href={assetUrl('sprites/lantern-war/endless/actions-'+id+'.webp')} width="2304" height="1792"/></svg>;}
  return <Atlas {...battleArt(id,action,frame)} className={className} flip={flip}/>;
 }
 export function MapArt({id,direction=2,walking=false}:{id:string;direction?:number;walking?:boolean}){
+ const vacation=useContext(LanternVacation);if(vacation&&id!=='civil'&&!id.startsWith('enemy-'))return <BattleArt id={id} facing={direction===3?'left':'right'}/>;
  const row=ENDLESS_CAST.findIndex(h=>h.id===id);if(row>=0)return <BattleArt id={id} facing={direction===3?'left':'right'}/>;
  if(['aster','lyra','nagi','mio','sena'].includes(id))return <Atlas src={'sprites/lantern-war/'+id+'-map.webp'} cols={4} rows={3} frame={direction+(walking?4:0)}/>;
  if(id==='civil')return <Atlas src="sprites/wandering-student/high-school-caretaker.webp" cols={4} rows={2} frame={direction}/>;
- if(id.startsWith('enemy-'))return <Atlas src={'sprites/furai-sfc-v2-enemy-5x5-1.webp'} cols={5} rows={5} frame={Number(id.slice(6))%6}/>;
+ if(warEnemy(id))return <BattleArt id={id} facing={direction===2?'right':'left'}/>;
  return <Atlas src={id.startsWith('dungeons2-')?'sprites/dungeons2/'+id.slice(10)+'-directions.webp':'sprites/wandering-student/'+id+'.webp'} cols={4} rows={2} frame={direction}/>;
 }
 export function Portrait({id,reaction='neutral',facing}:{id:string;reaction?:'neutral'|'joy'|'concern'|'resolve';facing?:Facing}){
- const flip=facing?mirrorArt(id,'dialogue',Math.max(0,['neutral','joy','concern','resolve'].indexOf(reaction)),facing):false;
+ const vacation=useContext(LanternVacation),reactionFrame=Math.max(0,['neutral','joy','concern','resolve'].indexOf(reaction));
+ const flip=facing?mirrorArt(id,'dialogue',reactionFrame,facing,vacation):false;
+ const vp=vacation?vacationPortraitSource(id):undefined;
+ if(vp)return <svg className="lw-dialogue-portrait lw-portrait-normalized" style={{transform:flip?'scaleX(-1)':undefined}} data-reaction={reaction} data-vacation={id} viewBox="0 0 448 704" overflow="hidden" aria-hidden="true"><svg width="448" height="704" overflow="hidden"><image href={assetUrl(vp.path)} x={-reactionFrame*448} width="1792" height="704"/></svg></svg>;
  const row=ENDLESS_CAST.findIndex(h=>h.id===id);if(row>=0){const frame=Math.max(0,['neutral','joy','concern','resolve'].indexOf(reaction));return <svg className="lw-dialogue-portrait lw-portrait-normalized" style={{transform:flip?'scaleX(-1)':undefined}} data-reaction={reaction} viewBox="0 0 448 704" overflow="hidden" preserveAspectRatio="xMidYMin meet" aria-hidden="true"><svg x="56" y="28" width="336" height="528" viewBox="0 0 448 704" overflow="hidden" preserveAspectRatio="none"><image href={assetUrl('sprites/lantern-war/endless/dialogue-'+id+'.png')} x={-frame*448} y="0" width="1792" height="704" preserveAspectRatio="none"/></svg></svg>;}
  const frame=['neutral','joy','concern','resolve'].indexOf(reaction);return <svg className={'lw-dialogue-portrait lw-portrait-normalized'+(['nagi','mio','sena'].includes(id)?' is-small':'')} style={{transform:flip?'scaleX(-1)':undefined}} data-dialogue-original={['aster','lyra'].includes(id)?id:undefined} data-reaction={reaction} viewBox="0 0 448 704" overflow="hidden" preserveAspectRatio="xMidYMin meet" aria-hidden="true"><svg width="448" height="704" overflow="hidden"><image href={assetUrl('sprites/lantern-war/dialogue-normalized/'+id+'.webp')} x={-Math.max(0,frame)*448} y="0" width="1792" height="704"/></svg></svg>;
 }

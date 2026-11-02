@@ -22,7 +22,7 @@ export function resolveEncounter(s:Campaign,ally:Squad,enemy:Squad,supports:Squa
  const helper=squad.members.find(f=>f.hp>0&&['bow','magic','staff'].includes(f.weapon));if(!helper)continue;
  const targets=alive(helper.weapon==='staff'?squad.team:squad.team==='ally'?'enemy':'ally');if(!targets.length)continue;
  const z=targets.sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
- record(helper,z,helper.weapon==='staff'?-10:7,'援護・'+heroById(helper.hero).role,false,true);support.push(squad.id);
+ record(helper,z,helper.weapon==='staff'?-10:7,'援護・'+(helper.team==='enemy'?helper.name:heroById(helper.hero).role),false,true);support.push(squad.id);
  }
  const order=[...fighters].sort((a,b)=>b.speed-a.speed||(a.team==='ally'?-1:1));
  for(let round=0;round<4;round++){

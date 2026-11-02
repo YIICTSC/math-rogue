@@ -13,6 +13,12 @@ export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.f
   "任せて！ この灯を、あなたたちの帰り道にも届けるから。": "Leave it to me! My light will guide you home too.",
   "僕はカイ。この入江を守っている。どの海から来た人も、追い返したくない。": "I'm Kai. I guard this cove. I won't turn anyone away, whatever sea they came from.",
 
+  "王冠の向こう、潮風の先へ": "Beyond the crown, toward the sea breeze",
+  "夏の旅装をまとったアステルとリュラ、仲間たちが帆船で新しい航路へ出発する": "Aster, Lyra and their companions set sail in summer travel clothes.",
+  "戦いを終えた仲間たちは、重い鎧を旅の衣に着替え、港に集まった。帰る場所を守った灯は、まだ見ぬ世界の道標になる。": "Their battle over, the companions trade their heavy armor for traveling clothes and gather at the harbor. The lantern that protected their home will now guide them toward an unknown world.",
+  "帆を上げよう。海の向こうには、助けを待つ砦も、誰かと笑う浜辺もある。これまで育てた仲間とともに、終わりのない航海へ。": "Raise the sails. Beyond the sea lie fortresses awaiting help and shores to share with friends. Set out on an endless voyage with the companions you have raised.",
+  "仲間と無窮航路へ出航": "Set sail with your companions",
+  "出航の物語をもう一度": "Replay the departure story",
   "無窮航路": "Infinite Voyage",
   "無窮航路 · エンドレスストーリー": "Infinite Voyage · Endless story",
   "クリアした仲間と無窮航路へ": "Sail the Infinite Voyage with your victorious party",

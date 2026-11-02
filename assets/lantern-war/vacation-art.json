@@ -1,0 +1,51 @@
+{
+  "intro": "exec-7a799e3e-5490-4503-b412-29cff30af45b.png",
+  "rejectedInitialSheets": {
+    "main": [
+      {
+        "id": "aster",
+        "file": "exec-c3e6ec35-bea9-44f0-b31f-91fd65e8df34.png"
+      },
+      {
+        "id": "lyra",
+        "file": "exec-17f7d5f3-e34b-424c-af2a-a83ad05b1b64.png"
+      }
+    ],
+    "groups": [
+      {
+        "ids": [
+          "dungeons2-lyria",
+          "dungeons2-celis",
+          "dungeons2-flora",
+          "dungeons2-noctia"
+        ],
+        "actions": "exec-3e60c908-3de1-45e3-ade4-20739d4dd491.png"
+      },
+      {
+        "ids": [
+          "dungeons2-aurene",
+          "dungeons2-ignis",
+          "dungeons2-leon",
+          "dungeons2-orion"
+        ],
+        "actions": "exec-fb557b26-57ec-4219-a975-eb07d2a27a2c.png"
+      },
+      {
+        "ids": [
+          "dungeons2-leif",
+          "nagi",
+          "mio",
+          "sena"
+        ],
+        "actions": "exec-0cee5a71-a81d-4eb6-8944-13c7d76a7370.png"
+      },
+      {
+        "ids": [
+          "end-vesper",
+          "end-sable"
+        ],
+        "actions": "exec-0ba265d5-dd0f-4435-88c1-ef32f260f721.png"
+      }
+    ]
+  }
+}

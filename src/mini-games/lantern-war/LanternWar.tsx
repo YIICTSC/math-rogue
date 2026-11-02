@@ -1,3 +1,4 @@
+import {LanternVacation} from './vacationArt';
 import {EndlessHub} from './EndlessHub';
 import {startEndless,endlessUnlocked,endlessLines,chooseBlessing} from './endless';
 import{endingNarration,endingCrown,narrationParts}from'./endingText';
@@ -34,7 +35,7 @@ export default function LanternWar({onBack,onFinish,languageMode='JAPANESE',prob
  useEffect(()=>{const stop=()=>{if(document.hidden)stopLanternVoice();};document.addEventListener('visibilitychange',stop);window.addEventListener('blur',stopLanternVoice);return()=>{stopLanternVoice();document.removeEventListener('visibilitychange',stop);window.removeEventListener('blur',stopLanternVoice);};},[]);
  const exit=()=>{stopLanternVoice();if(s)setSaveError(!saveCampaign(s));onBack();};
  const start=()=>{setS(newCampaign(hero,difficulty));setEntered(true);setConfirmNew(false);setSetupOpen(false);};
- return <LanternLanguage.Provider value={languageMode}><TranslatedUiTree mode={languageMode}><section className="lw-root" style={Object.fromEntries(["scenery-0","scenery-1","scenery-3","world-map","title-landscape","title-portrait"].map(name=>["--lw-"+name,"url("+assetUrl("sprites/lantern-war/"+name+".webp")+")"])) as React.CSSProperties} data-gamepad-navigation-root data-lantern-war>
+ return <LanternLanguage.Provider value={languageMode}><LanternVacation.Provider value={!!s?.endless?.active&&entered}><TranslatedUiTree mode={languageMode}><section className="lw-root" style={Object.fromEntries(["scenery-0","scenery-1","scenery-3","world-map","title-landscape","title-portrait"].map(name=>["--lw-"+name,"url("+assetUrl("sprites/lantern-war/"+name+".webp")+")"])) as React.CSSProperties} data-gamepad-navigation-root data-lantern-war>
 
  {!entered?<div className="lw-title">
  <picture className="lw-title-art"><source media="(orientation: portrait)" srcSet={assetUrl('sprites/lantern-war/title-portrait.webp')}/><img src={assetUrl('sprites/lantern-war/title-landscape.webp')} alt="" fetchPriority="high"/></picture><div className="lw-title-shade"/>
@@ -55,7 +56,7 @@ export default function LanternWar({onBack,onFinish,languageMode='JAPANESE',prob
  </div></>}
  {entered&&s?.studyPending&&<div className="lw-study"><button onClick={exit}>‹ 保存して一覧へ</button><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} languageMode={languageMode} problemOffset={s.studyProblems||0} onComplete={()=>update(s=>{s.studyPending=false;s.studyProblems=(s.studyProblems||0)+3;if(s.battle)s.battle.paused=true;})}/></div>}
  {saveError&&<div className="lw-save-error" role="alert">保存領域が不足しています。進行は画面内に保持しています。</div>}
- </section></TranslatedUiTree></LanternLanguage.Provider>;
+ </section></TranslatedUiTree></LanternVacation.Provider></LanternLanguage.Provider>;
 }
 function getLines(s:Campaign):Line[]{if(s.battle?.endless)return endlessLines(s);if(s.storyKind==='side'&&s.fieldQuest)return fieldLines(s.fieldQuest);if(s.storyKind==='support'){const [index,rank]=(s.supportId||'0:0').split(':').map(Number);return supportLines(index,rank);}const chapter=s.battle?.chapter??s.chapter;return s.storyKind==='outro'?CHAPTERS[chapter].outro:CHAPTERS[chapter].intro;}
 function Story({s,update}:{s:Campaign;update:Update}){
