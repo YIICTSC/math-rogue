@@ -1,3 +1,4 @@
+import {checkEndless,tickEndless,claimEndless} from './endless';
 import{PERSONAL_TECHNIQUES}from'./techniques';
 import{connectedBattleTerrain}from'./battleTerrain';
 import {FIELD_QUESTS} from './world';
@@ -19,10 +20,15 @@ export function saveCampaign(s:Campaign){try{localStorage.setItem(SAVE_KEY,JSON.
 export function loadCampaign():Campaign|null{
  try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
  if(!s||s.version!==1||!['aster','lyra'].includes(s.hero)||!['story','tactician'].includes(s.difficulty)||!['field','camp','story','battle','result','ending'].includes(s.phase)||!Number.isInteger(s.chapter)||s.chapter<0||s.chapter>17||!['recruited','formations','cleared','sideCleared','supports'].every(k=>Array.isArray(s[k]))||!['xp','forge','tactics','bonds','choices','medals'].every(k=>s[k]&&typeof s[k]==='object')||!Number.isFinite(s.gold)||!Number.isFinite(s.supplies))return null;
+ if(s.endless&&(!s.cleared.includes(17)||!Number.isSafeInteger(s.endless.depth)||s.endless.depth<1||!Number.isFinite(s.endless.seed)||typeof s.endless.active!=='boolean'||!['wins','best'].every(k=>Number.isSafeInteger(s.endless[k])&&s.endless[k]>=0)||!Array.isArray(s.endless.history)))return null;
+ const validMission=(b:any)=>!b?.endless||(s.endless&&Number.isFinite(b.endless.reward)&&b.endless.reward>=0&&HEROES.some(h=>h.id===b.endless.recruit)&&Number.isSafeInteger(b.endless.depth)&&b.endless.depth>0&&['rout','boss','defend','escort','escape','seize','beacons','relic'].includes(b.endless.objective)&&['clear','rain','fog','heat','storm'].includes(b.endless.weather)&&Array.isArray(b.endless.story)&&b.endless.story.length>0&&b.endless.story.every((l:any)=>typeof l.text==='string'&&typeof l.who==='string')&&Array.isArray(b.endless.installations)&&b.endless.installations.every((o:any)=>['wall','cannon','sniper','beacon','mine','bridge','relic','spring'].includes(o.kind)&&Number.isInteger(o.x)&&o.x>=0&&o.x<12&&Number.isInteger(o.y)&&o.y>=0&&o.y<10&&Number.isFinite(o.hp)));
+ if(!validMission(s.battle)||!validMission(s.checkpoint))return null;
+ if(s.checkpoint&&(!Array.isArray(s.checkpoint.map)||s.checkpoint.map.length!==10||s.checkpoint.map.some((r:any)=>!Array.isArray(r)||r.length!==12||r.some((t:string)=>!TERRAIN_INFO[t]))))return null;
+ if(s.endless?.blessings&&!['attack','guard','vitality'].every(k=>Number.isSafeInteger(s.endless.blessings[k])&&s.endless.blessings[k]>=0))return null;
  const ids=s.formations.flatMap((f:any)=>f.slots?.filter(Boolean)||[]);
  if(s.formations.length!==3||s.formations.some((f:any)=>f.slots?.length!==6)||ids.length!==new Set(ids).size||!ids.includes(s.hero)||ids.some((id:string)=>!s.recruited.includes(id))||s.recruited.some((id:string)=>!HEROES.some(h=>h.id===id)))return null;
  if(['battle','result'].includes(s.phase)&&(!s.battle||!Array.isArray(s.battle.squads)||s.battle.map?.length!==10||s.battle.map.some((row:any)=>!Array.isArray(row)||row.length!==12||row.some((t:string)=>!TERRAIN_INFO[t]))))return null;
- if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle){s.battle.map=connectedBattleTerrain(s.battle.map);s.battle.paused=true;}if(s.checkpoint?.map)s.checkpoint.map=connectedBattleTerrain(s.checkpoint.map);return s;
+ if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle){if(!s.battle.endless)s.battle.map=connectedBattleTerrain(s.battle.map);s.battle.paused=true;}if(s.checkpoint?.map&&!s.checkpoint.endless)s.checkpoint.map=connectedBattleTerrain(s.checkpoint.map);return s;
  }catch{return null;}
 }
 export function recruitFor(s:Campaign,chapter:number){
@@ -78,7 +84,7 @@ export function finishEncounter(s:Campaign){
  addLog(b,winner.name+'が交戦に勝利。'+loser.name+'は後退。');b.encounter=null;s.studyPending=true;checkResult(s);return true;
 }
 export function checkResult(s:Campaign){
- const b=s.battle;if(!b||b.result)return;const allies=b.squads.filter(q=>q.team==='ally'&&living(q)),enemies=b.squads.filter(q=>q.team==='enemy'&&living(q)),c=CHAPTERS[b.chapter],goal={x:9,y:0};
+ const b=s.battle;if(!b||b.result)return;if(b.endless){checkEndless(s);return;}const allies=b.squads.filter(q=>q.team==='ally'&&living(q)),enemies=b.squads.filter(q=>q.team==='enemy'&&living(q)),c=CHAPTERS[b.chapter],goal={x:9,y:0};
  const end=(result:'win'|'lose',reason:string)=>{b.result=result;b.reason=reason;b.paused=true;s.phase='result';};
  if(!allies.length){end('lose','全味方部隊が戦闘不能。編成と作戦を見直して再挑戦しよう。');return;}
  if(enemies.some(q=>q.x===2&&q.y===8)){end('lose','味方本拠点を制圧された。');return;}
@@ -93,6 +99,7 @@ export function checkResult(s:Campaign){
 }
 export function tick(s:Campaign,dt=.5){
  const b=s.battle;if(!b||b.paused||b.result||b.encounter||b.pending)return false;
+ dt=Math.max(0,Math.min(1,dt));if(b.endless)tickEndless(s,dt);
  const prev=Math.floor(b.time/1.5);b.time+=Math.min(1,dt);const step=Math.floor(b.time/1.5)!==prev;
  for(const q of b.squads.filter(living)){
  q.moving=false;q.wait=Math.max(0,q.wait-dt);
@@ -100,7 +107,7 @@ export function tick(s:Campaign,dt=.5){
  if(!step||q.wait>0)continue;
  if(q.team==='enemy'&&!q.boss&&b.time>8&&!q.path.length){const targets=b.squads.filter(t=>t.team!=='enemy'&&living(t));targets.sort((a,z)=>distance(a,q)-distance(z,q));if(targets[0])q.path=pathTo(b,q,targets[0]);}
  if(q.team==='civil'&&!q.path.length)q.path=pathTo(b,q,{x:9,y:0});
- if(q.path.length&&q.stamina>0&&Math.floor(b.time/1.5)%TERRAIN_INFO[b.map[q.y][q.x]].cost===0){const next=q.path.shift()!,dx=next.x-q.x,dy=next.y-q.y;q.facing=dy>0?0:dy<0?1:dx>0?2:3;q.x=next.x;q.y=next.y;q.moving=true;}
+ if(q.path.length&&q.stamina>0&&Math.floor(b.time/1.5)%TERRAIN_INFO[b.map[q.y][q.x]].cost===0){const next=q.path.shift()!,dx=next.x-q.x,dy=next.y-q.y;q.facing=dy>0?0:dy<0?1:dx>0?2:3;q.x=next.x;q.y=next.y;q.moving=true;if(b.endless?.weather==='rain')q.wait=2;}
  if(q.team==='ally'&&['h','t'].includes(b.map[q.y][q.x])){
  const key=q.x+','+q.y;
  if(!b.captured.includes(key)){b.captured.push(key);b.brave=Math.min(9,b.brave+1);addLog(b,'拠点を解放。ブレイブ+1。');if(b.map[q.y][q.x]==='t'){s.gold+=150;s.supplies+=2;b.treasure=true;}}
@@ -116,11 +123,11 @@ export function tick(s:Campaign,dt=.5){
  checkResult(s);return true;
 }
 export function beginChapter(s:Campaign,chapter=s.chapter,sideQuest=false){
- if(chapter>s.chapter||chapter<0||chapter>17)return false;
+ if(s.endless?.active||chapter>s.chapter||chapter<0||chapter>17)return false;
  const replay=s.cleared.includes(chapter);recruitFor(s,chapter);s.resultClaimed=false;s.battle=createBattle(s,chapter,replay,sideQuest);s.checkpoint=clone(s.battle);s.storyIndex=0;s.storyKind='intro';s.phase=replay||sideQuest?'battle':'story';return true;
 }
 export function claimResult(s:Campaign){
- const b=s.battle;if(!b||b.result!=='win'||s.resultClaimed)return false;s.resultClaimed=true;
+ const b=s.battle;if(!b||b.result!=='win'||s.resultClaimed)return false;if(b.endless)return claimEndless(s);s.resultClaimed=true;
  const first=!b.replay&&!b.sideQuest,c=CHAPTERS[b.chapter];s.gold+=first?c.reward:b.sideQuest&&!s.sideCleared.includes(b.chapter)?Math.floor(c.reward*.65):60;s.supplies+=first?3:1;
  if(b.sideQuest&&!s.sideCleared.includes(b.chapter))s.sideCleared.push(b.chapter);
  if(first){s.cleared.push(b.chapter);s.medals[b.chapter]=Math.max(1,3-(b.squads.some(q=>q.team==='ally'&&!living(q))?1:0)-(b.time>b.limit*.7?1:0));s.storyKind='outro';s.storyIndex=0;s.phase='story';}
@@ -128,6 +135,7 @@ export function claimResult(s:Campaign){
 }
 export function advanceStory(s:Campaign,length:number,choice?:number){
  if(s.phase!=='story')return false;if(s.storyIndex<length-1){s.storyIndex++;return true;}
+ if(s.battle?.endless){if(s.storyKind==='intro')s.phase='battle';else{s.phase='field';s.battle=null;s.checkpoint=null;}return true;}
  if(s.storyKind==='intro'){s.phase='battle';return true;}if(s.storyKind==='support'){s.phase='camp';return true;}
  const c=s.battle?.chapter??s.chapter;if(CHAPTERS[c].dilemma){s.choices[c]=choice??0;if(choice===1)s.supplies+=2;else s.gold+=80;}
  if(c===17){s.phase='ending';return true;}s.chapter=c+1;recruitFor(s,s.chapter);s.phase='field';s.battle=null;s.checkpoint=null;return true;

@@ -1,9 +1,11 @@
+import {ENDLESS_CAST} from './endlessRoster';
 export type BattleAction='ready'|'windup'|'attack'|'guard'|'hurt'|'ultimate';
 export const BATTLE_ACTIONS:BattleAction[]=['ready','windup','attack','guard','hurt','ultimate'];
 const high=['warrior','caretaker','assassin','mage','dodgeball','bard','librarian','chef','gardener'];
 const girls=['akari','shizuku','hiyori','tsubasa','rei','madoka','koharu','mirai','sera'];
 export function battleSource(id:string,action:BattleAction='ready',frame=0){
  const src=(path:string,cols=1,rows=1,index=0)=>({path,cols,rows,index});
+ const row=ENDLESS_CAST.findIndex(h=>h.id===id);if(row>=0)return src('sprites/lantern-war/endless/actions-'+id+'.webp',3,2,BATTLE_ACTIONS.indexOf(action));
  if(['aster','lyra'].includes(id))return src('sprites/lantern-war/heroes/'+id+'-'+action+'.webp');
  if(id.startsWith('dungeons2-')||['nagi','mio','sena'].includes(id))return src('sprites/lantern-war/'+id+'-battle.webp',3,2,({ready:0,windup:1,attack:2,guard:3,hurt:4,ultimate:5})[action]);
  const kind=action==='ready'||action==='guard'?'idle':action==='hurt'?'hit':action==='ultimate'?'skill':'attack';

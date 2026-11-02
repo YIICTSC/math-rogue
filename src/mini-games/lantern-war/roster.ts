@@ -1,3 +1,4 @@
+import {ENDLESS_CAST} from './endlessRoster';
 import {PROTAGONISTS} from '../../three/protagonistCatalog';
 import {MAGIC_HEROES,MAGIC_MALE_PROTAGONISTS} from '../../data/magicHeroes';
 import {ABYSS_HEROES} from '../../components/school-dungeon/dungeons2/roster';
@@ -28,6 +29,7 @@ export const HEROES:Hero[]=[
  make('mio','ミオ','星潮の航路','木霊の道案内','bow','木霊の連矢','木々の名前を、忘れた人にも教えてあげたい。','#9bd29c',5,'star-mio'),
  make('sena','セナ','星潮の航路','時計の修理工','axe','明日へ回す歯車','戻せない時間より、進める明日を直そう。','#d9b2a1',8,'star-sena'),
 ];
+HEROES.push(...ENDLESS_CAST);
 export const heroById=(id:string)=>HEROES.find(h=>h.id===id)||HEROES[0];
 export const WEAPONS:Record<Weapon,string>={sword:'剣',lance:'槍',axe:'斧',bow:'弓',magic:'魔法',staff:'杖'};
 export const pairKey=(a:string,b:string)=>[a,b].sort().join('|');

@@ -1,0 +1,398 @@
+{
+  "aster": {
+    "dialogue": "rrrr",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "lyra": {
+    "dialogue": "rrrr",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "high-school-warrior": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "high-school-caretaker": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "high-school-assassin": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "rrrr"
+  },
+  "high-school-mage": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "high-school-dodgeball": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "high-school-bard": {
+    "dialogue": "rrrr",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "high-school-librarian": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "lrll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "high-school-chef": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "high-school-gardener": {
+    "dialogue": "rrrr",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrlr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "magic-akari": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-shizuku": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-hiyori": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-tsubasa": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-rei": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-madoka": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-koharu": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "llll",
+    "ultimate": "rrrr"
+  },
+  "magic-mirai": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-sera": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-ren": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrlr",
+    "ultimate": "rrrr"
+  },
+  "magic-soma": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-minato": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-riku": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-yamato": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-leon": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-elliot": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "lrrl",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "magic-sakuya": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "lrrl",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "dungeons2-lyria": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-celis": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-flora": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-noctia": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-aurene": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-ignis": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-leon": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-orion": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "dungeons2-leif": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "nagi": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "mio": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "sena": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "end-vesper": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "llll",
+    "attack": "llll",
+    "guard": "llll",
+    "hurt": "llll",
+    "ultimate": "llll"
+  },
+  "end-sable": {
+    "dialogue": "rrrr",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  },
+  "end-hikari": {
+    "dialogue": "llll",
+    "ready": "llll",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "llll",
+    "ultimate": "rrrr"
+  },
+  "end-ren": {
+    "dialogue": "llll",
+    "ready": "rrrr",
+    "windup": "rrrr",
+    "attack": "rrrr",
+    "guard": "rrrr",
+    "hurt": "rrrr",
+    "ultimate": "rrrr"
+  }
+}

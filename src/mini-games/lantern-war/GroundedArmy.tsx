@@ -1,3 +1,4 @@
+import {artFacing,mirrorArt} from './artFacing';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import {useContext} from 'react';
 import {LanternLanguage} from './language';
@@ -5,13 +6,14 @@ import React,{useEffect,useRef} from 'react';
 import {assetUrl} from '../../utils/assetPaths';
 import {battleSource,type BattleAction} from './battleSources';
 import METRICS from './battleMetrics.json';
+import ENDLESS_METRICS from './endlessBattleMetrics.json';
 import type {Campaign} from './types';
 const images=new Map<string,HTMLImageElement>();
-const metrics=METRICS as Record<string,Record<BattleAction,{x:number;y:number;w:number;h:number;bounds:{x:number;y:number;w:number;h:number};footX:number;footY:number;bodyBounds?:{x:number;y:number;w:number;h:number};contacts?:{x:number;y:number;width:number}[]}[]>>;
+const metrics={...METRICS,...ENDLESS_METRICS} as Record<string,Record<BattleAction,{x:number;y:number;w:number;h:number;bounds:{x:number;y:number;w:number;h:number};footX:number;footY:number;bodyBounds?:{x:number;y:number;w:number;h:number};contacts?:{x:number;y:number;width:number}[]}[]>>;
 function art(path:string){let img=images.get(path);if(!img){img=new Image();img.src=assetUrl(path);images.set(path,img);}return img;}
 function groundShadow(ctx:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:number,opacity:number){ctx.save();ctx.translate(x,y);ctx.scale(1,ry/rx);const gradient=ctx.createRadialGradient(0,0,0,0,0,rx);gradient.addColorStop(0,'rgba(7,14,23,'+opacity+')');gradient.addColorStop(.45,'rgba(7,14,23,'+(opacity*.62)+')');gradient.addColorStop(1,'rgba(7,14,23,0)');ctx.fillStyle=gradient;ctx.beginPath();ctx.arc(0,0,rx,0,Math.PI*2);ctx.fill();ctx.restore();}
-/** Source artwork is inspected per family: school/magic/enemies face left; the newly authored fantasy and Star Tide poses face right. */
-export const sourceFacesRight=(id:string)=>['aster','lyra','nagi','mio','sena'].includes(id)||id.startsWith('dungeons2-');
+/** Source directions are reviewed per character, action and animation frame. */
+export const sourceFacesRight=(id:string,action:BattleAction='ready',frame=0)=>artFacing(id,action,frame)==='right';
 export default function GroundedArmy({s,age}:{s:Campaign;age:number}){
  const canvas=useRef<HTMLCanvasElement>(null),latest=useRef({s,age});latest.current={s,age};
  useEffect(()=>{let raf=0;
@@ -30,11 +32,14 @@ export default function GroundedArmy({s,age}:{s:Campaign;age:number}){
  for(const {f,side,row,front} of actors){
  const last=[...shown].reverse().find(v=>v.target===f.uid),hp=last?.hp??f.hp,active=event?.actor===f.uid&&age<1200,target=event?.target===f.uid&&age>=650&&age<1300;
  const action:BattleAction=active?(age<400?'windup':event?.skill?'ultimate':'attack'):target&&!event?.heal?'hurt':'ready';
- const frame=action==='ready'?Math.floor(now/1200)%4:Math.floor(Math.max(0,age)/160)%4,spec=battleSource(f.hero,action,frame),m=metrics[f.hero]?.[action]?.[frame],idle=metrics[f.hero]?.ready?.[0];
- if(!m||!idle)continue;const img=art(spec.path);if(!img.complete||!img.naturalWidth)continue;
+ const frame=action==='ready'?Math.floor(now/1200)%4:Math.floor(Math.max(0,age)/160)%4,spec=battleSource(f.hero,action,frame);
+ const img=art(spec.path);if(!img.complete||!img.naturalWidth)continue;
+ const cw=img.naturalWidth/spec.cols,ch=img.naturalHeight/spec.rows;
+ const fallback={x:(spec.index%spec.cols)*cw,y:Math.floor(spec.index/spec.cols)*ch,w:cw,h:ch,bounds:{x:0,y:0,w:cw,h:ch},bodyBounds:{x:0,y:0,w:cw,h:ch},footX:cw/2,footY:ch};
+ const m=metrics[f.hero]?.[action]?.[frame]||fallback,idle=metrics[f.hero]?.ready?.[0]||fallback;
  const xRatio=side===0?(front?.29:.085)+row*.075:(front?.71:.915)-row*.075;
  const lunge=active&&age>400&&age<1050?(side===0?1:-1)*Math.min(44,w*.035):0;
- const x=xRatio*w+lunge,y=lastFoot-(2-row)*spacing,reference=Math.max(.2,(idle.footY-(idle.bodyBounds?.y??idle.bounds.y))/idle.h),scale=bodyHeight/(reference*m.h),flip=side===0?!sourceFacesRight(f.hero):sourceFacesRight(f.hero);
+ const x=xRatio*w+lunge,y=lastFoot-(2-row)*spacing,reference=Math.max(.2,(idle.footY-(idle.bodyBounds?.y??idle.bounds.y))/idle.h),scale=bodyHeight/(reference*m.h),flip=mirrorArt(f.hero,action,frame,side===0?'right':'left');
  ctx.save();ctx.globalAlpha=hp<=0?.24:1;
  // Three ground layers: short cast shadow, soft ambient footprint, and dark sole contacts.
  groundShadow(ctx,x+bodyHeight*.15,y+7,bodyHeight*.44,bodyHeight*.075,.28);
