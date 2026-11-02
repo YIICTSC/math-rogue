@@ -3403,5 +3403,145 @@
     "id": "77b54e67bcfd97ed0035",
     "path": "sfx/lantern-war/narrator/77b54e67bcfd97ed0035.ogg",
     "duration": 5.52
+  },
+  "end-vesper\n道を開ける！": {
+    "id": "38161a2b6ba26ad2ae1b",
+    "path": "sfx/lantern-war/endless/end-vesper/38161a2b6ba26ad2ae1b.ogg",
+    "duration": 2.72
+  },
+  "end-vesper\nまだ倒れぬ！": {
+    "id": "c1cafef79394d3b0e63b",
+    "path": "sfx/lantern-war/endless/end-vesper/c1cafef79394d3b0e63b.ogg",
+    "duration": 1.74
+  },
+  "end-vesper\n感謝する。": {
+    "id": "fc272b0dec3b3635cc51",
+    "path": "sfx/lantern-war/endless/end-vesper/fc272b0dec3b3635cc51.ogg",
+    "duration": 1.74
+  },
+  "end-vesper\n贖いの城塞！": {
+    "id": "4a80313bfc607a803ba9",
+    "path": "sfx/lantern-war/endless/end-vesper/4a80313bfc607a803ba9.ogg",
+    "duration": 3.52
+  },
+  "end-vesper\n背中は私が守る！": {
+    "id": "0e7227e6e3fff4deb260",
+    "path": "sfx/lantern-war/endless/end-vesper/0e7227e6e3fff4deb260.ogg",
+    "duration": 2.54
+  },
+  "end-vesper\n今度こそ、守り抜いた。": {
+    "id": "5fccec8eb955ca97c53c",
+    "path": "sfx/lantern-war/endless/end-vesper/5fccec8eb955ca97c53c.ogg",
+    "duration": 2.7
+  },
+  "end-vesper\n皆を、頼む。": {
+    "id": "2d01897b9c6376b522c3",
+    "path": "sfx/lantern-war/endless/end-vesper/2d01897b9c6376b522c3.ogg",
+    "duration": 1.9
+  },
+  "end-sable\nそこだ！": {
+    "id": "b0a2d75cf38c93f5e54e",
+    "path": "sfx/lantern-war/endless/end-sable/b0a2d75cf38c93f5e54e.ogg",
+    "duration": 1.52
+  },
+  "end-sable\nまだ、撃てる！": {
+    "id": "caec86a33a152b0cf8a0",
+    "path": "sfx/lantern-war/endless/end-sable/caec86a33a152b0cf8a0.ogg",
+    "duration": 1.74
+  },
+  "end-sable\n助かった。": {
+    "id": "868f922b990ad1afe0bf",
+    "path": "sfx/lantern-war/endless/end-sable/868f922b990ad1afe0bf.ogg",
+    "duration": 1.58
+  },
+  "end-sable\n夜明けの照準！": {
+    "id": "48320ba9a5396e21da71",
+    "path": "sfx/lantern-war/endless/end-sable/48320ba9a5396e21da71.ogg",
+    "duration": 2.82
+  },
+  "end-sable\n援護する！": {
+    "id": "80591dd18a32ee0bad79",
+    "path": "sfx/lantern-war/endless/end-sable/80591dd18a32ee0bad79.ogg",
+    "duration": 1.58
+  },
+  "end-sable\n全員、無事だな。": {
+    "id": "f14b0cb4351784fe9d37",
+    "path": "sfx/lantern-war/endless/end-sable/f14b0cb4351784fe9d37.ogg",
+    "duration": 2.22
+  },
+  "end-sable\n先に、行け。": {
+    "id": "5198363a387ff4b34066",
+    "path": "sfx/lantern-war/endless/end-sable/5198363a387ff4b34066.ogg",
+    "duration": 2.62
+  },
+  "end-hikari\nいくよ！": {
+    "id": "03cc1383672222f57851",
+    "path": "sfx/lantern-war/endless/end-hikari/03cc1383672222f57851.ogg",
+    "duration": 1.52
+  },
+  "end-hikari\nまだ平気！": {
+    "id": "c04e5fc24080c4871464",
+    "path": "sfx/lantern-war/endless/end-hikari/c04e5fc24080c4871464.ogg",
+    "duration": 1.58
+  },
+  "end-hikari\nありがとう！": {
+    "id": "33483456949ec66ba259",
+    "path": "sfx/lantern-war/endless/end-hikari/33483456949ec66ba259.ogg",
+    "duration": 1.58
+  },
+  "end-hikari\n真夏の灯台！": {
+    "id": "73aaa35ed074f6d3fd92",
+    "path": "sfx/lantern-war/endless/end-hikari/73aaa35ed074f6d3fd92.ogg",
+    "duration": 2.82
+  },
+  "end-hikari\n一緒に帰ろう！": {
+    "id": "691f52449c232f98957e",
+    "path": "sfx/lantern-war/endless/end-hikari/691f52449c232f98957e.ogg",
+    "duration": 2.22
+  },
+  "end-hikari\nみんな、おつかれさま！": {
+    "id": "739ba12c34f738d681ba",
+    "path": "sfx/lantern-war/endless/end-hikari/739ba12c34f738d681ba.ogg",
+    "duration": 2.38
+  },
+  "end-hikari\nごめんね……あとは、お願い。": {
+    "id": "85629dbb5e2f479bc7ea",
+    "path": "sfx/lantern-war/endless/end-hikari/85629dbb5e2f479bc7ea.ogg",
+    "duration": 3.02
+  },
+  "end-ren\nそこまでだ！": {
+    "id": "02bf92999839508160b9",
+    "path": "sfx/lantern-war/endless/end-ren/02bf92999839508160b9.ogg",
+    "duration": 2.52
+  },
+  "end-ren\nまだ、守れる！": {
+    "id": "9d3bc642ecafd777b7c9",
+    "path": "sfx/lantern-war/endless/end-ren/9d3bc642ecafd777b7c9.ogg",
+    "duration": 1.9
+  },
+  "end-ren\nありがとう。助かった。": {
+    "id": "1fa9f534ea257a8b8478",
+    "path": "sfx/lantern-war/endless/end-ren/1fa9f534ea257a8b8478.ogg",
+    "duration": 2.54
+  },
+  "end-ren\n潮騒の祝福！": {
+    "id": "30ec63236086ce0d1c52",
+    "path": "sfx/lantern-war/endless/end-ren/30ec63236086ce0d1c52.ogg",
+    "duration": 2.82
+  },
+  "end-ren\n君は僕が守る！": {
+    "id": "9c70c794ca3ae12c3608",
+    "path": "sfx/lantern-war/endless/end-ren/9c70c794ca3ae12c3608.ogg",
+    "duration": 2.22
+  },
+  "end-ren\nさあ、みんなで帰ろう。": {
+    "id": "04c6e215f2a7e05fbe8a",
+    "path": "sfx/lantern-war/endless/end-ren/04c6e215f2a7e05fbe8a.ogg",
+    "duration": 2.54
+  },
+  "end-ren\n帰る場所を、頼む。": {
+    "id": "e020ae6cf99dcdfc5361",
+    "path": "sfx/lantern-war/endless/end-ren/e020ae6cf99dcdfc5361.ogg",
+    "duration": 2.54
   }
 }

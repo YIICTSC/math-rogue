@@ -1,0 +1,74 @@
+{
+  "38161a2b6ba26ad2ae1b": {
+    "speaker": "end-vesper",
+    "text": "道を開ける！",
+    "asr": "道を駆ける",
+    "sha256": "eb0be79f4a1b56dacf73d0e4a61e27acf8b240c5b32ff10134e3cf52ca05275c",
+    "duration": 1.9,
+    "peak": 0.6479693651199341,
+    "rms": 0.10240957480316015,
+    "clipped_fraction": 0.0,
+    "model": "Whisper medium",
+    "device": "cpu"
+  },
+  "4a80313bfc607a803ba9": {
+    "speaker": "end-vesper",
+    "text": "贖いの城塞！",
+    "asr": "あがないの 上祭",
+    "sha256": "673e00dcf4b6800c253e0aa730facb7b1c963ed7ed0924436f72510c63c58fbf",
+    "duration": 3.52,
+    "peak": 0.6013988256454468,
+    "rms": 0.10873851961934751,
+    "clipped_fraction": 0.0,
+    "model": "Whisper medium",
+    "device": "cpu"
+  },
+  "48320ba9a5396e21da71": {
+    "speaker": "end-sable",
+    "text": "夜明けの照準！",
+    "asr": "夜明けの章順",
+    "sha256": "8c7d549c56d0683cca4c18a33a491e56720ffd4f883b6a3d1f91dfd0bcb6919d",
+    "duration": 2.82,
+    "peak": 0.5442229509353638,
+    "rms": 0.09839380132458539,
+    "clipped_fraction": 0.0,
+    "model": "Whisper medium",
+    "device": "cpu"
+  },
+  "80591dd18a32ee0bad79": {
+    "speaker": "end-sable",
+    "text": "援護する！",
+    "asr": "援護する",
+    "sha256": "8e69f8bc2822fcd39ac547642180051feeee4edd1cc0634622864286c6a4a3bd",
+    "duration": 1.58,
+    "peak": 0.6827909350395203,
+    "rms": 0.09852459692649475,
+    "clipped_fraction": 0.0,
+    "model": "Whisper medium",
+    "device": "cpu"
+  },
+  "5198363a387ff4b34066": {
+    "speaker": "end-sable",
+    "text": "先に、行け。",
+    "asr": "先に行け",
+    "sha256": "83dced954b60826dc4a8a894a252d5fb09d0ad27a4838e8b2f64e11eddc5f28b",
+    "duration": 2.62,
+    "peak": 0.6534151434898376,
+    "rms": 0.10141902446400439,
+    "clipped_fraction": 0.0,
+    "model": "Whisper medium",
+    "device": "cpu"
+  },
+  "02bf92999839508160b9": {
+    "speaker": "end-ren",
+    "text": "そこまでだ！",
+    "asr": "スコアおでだ",
+    "sha256": "5b6ea2be0a89f7dfe6acefa36d829dc53e174e3b134eddfd898189be3a25af77",
+    "duration": 1.58,
+    "peak": 0.7291586995124817,
+    "rms": 0.10814960184875819,
+    "clipped_fraction": 0.0,
+    "model": "Whisper medium",
+    "device": "cpu"
+  }
+}

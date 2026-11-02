@@ -3,7 +3,7 @@ export const ANDROID_ASSET_PACK_VERSIONS = {
   "visual-elementary": "deaa0e0bf3489d02",
   "visual-high-school": "a01e4fb2d1adf353",
   "visual-magic": "10eb2fe55c69c745",
-  "audio-common": "9794dd812c34534e",
+  "audio-common": "e5c2e0a21a113bfc",
   "audio-high-school": "f731f5634c18fc41",
   "audio-magic": "9567a2898d502cbd"
 } as const;

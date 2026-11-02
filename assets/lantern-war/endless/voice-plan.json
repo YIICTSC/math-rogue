@@ -1,0 +1,360 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "default_steps": 4,
+  "seconds_per_mora": 0.16,
+  "speakers": {
+    "end-vesper": {
+      "reference": "assets/lantern-war/endless/references/end-vesper.ogg",
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。",
+      "design_text": "今度こそ、この盾で帰る場所を守る。私の背中に続いてくれ。",
+      "design_seed": 971007,
+      "visual_reference": "public/sprites/lantern-war/endless/dialogue-end-vesper.png",
+      "reference_sha256": "6b2f6e6cfef8cd89ee88fec7fadfcc6f57ba8f289204bb990a6fae91e1a1ff59"
+    },
+    "end-sable": {
+      "reference": "assets/lantern-war/endless/references/end-sable.ogg",
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。",
+      "design_text": "この一発は、仲間を無事に帰すために。俺が援護する。安心して進め。",
+      "design_seed": 971008,
+      "visual_reference": "public/sprites/lantern-war/endless/dialogue-end-sable.png",
+      "reference_sha256": "63b3c1545a48b4ad2fb0a62aa3ad37af4e176064b84eb5f3b2d8df5a51f47d1f"
+    },
+    "end-hikari": {
+      "reference": "assets/lantern-war/endless/references/end-hikari.ogg",
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。",
+      "design_text": "私はミレア。海の向こうから来た人にも、帰り道の灯を届けたい。",
+      "design_seed": 971009,
+      "visual_reference": "public/sprites/lantern-war/endless/dialogue-end-hikari.png",
+      "reference_sha256": "3815a416e0f003b9a47515c29e3a85c62f31675b8e9bc6284c4665236b7e0911"
+    },
+    "end-ren": {
+      "reference": "assets/lantern-war/endless/references/end-ren.ogg",
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。",
+      "design_text": "僕はカイ。この入江を守っている。誰もが帰れる岸辺を、一緒に守ろう。",
+      "design_seed": 971010,
+      "visual_reference": "public/sprites/lantern-war/endless/dialogue-end-ren.png",
+      "reference_sha256": "ed8705c6dbfc5d2048de2443ad0286292207389cdd2adf1a373c411ed37def96"
+    }
+  },
+  "clips": [
+    {
+      "id": "38161a2b6ba26ad2ae1b",
+      "speaker": "end-vesper",
+      "text": "道を開ける！",
+      "kind": "attack",
+      "path": "sfx/lantern-war/endless/end-vesper/38161a2b6ba26ad2ae1b.ogg"
+    },
+    {
+      "id": "c1cafef79394d3b0e63b",
+      "speaker": "end-vesper",
+      "text": "まだ倒れぬ！",
+      "kind": "damage",
+      "path": "sfx/lantern-war/endless/end-vesper/c1cafef79394d3b0e63b.ogg"
+    },
+    {
+      "id": "fc272b0dec3b3635cc51",
+      "speaker": "end-vesper",
+      "text": "感謝する。",
+      "kind": "heal",
+      "path": "sfx/lantern-war/endless/end-vesper/fc272b0dec3b3635cc51.ogg"
+    },
+    {
+      "id": "4a80313bfc607a803ba9",
+      "speaker": "end-vesper",
+      "text": "贖いの城塞！",
+      "kind": "ultimate",
+      "path": "sfx/lantern-war/endless/end-vesper/4a80313bfc607a803ba9.ogg"
+    },
+    {
+      "id": "0e7227e6e3fff4deb260",
+      "speaker": "end-vesper",
+      "text": "背中は私が守る！",
+      "kind": "support",
+      "path": "sfx/lantern-war/endless/end-vesper/0e7227e6e3fff4deb260.ogg"
+    },
+    {
+      "id": "5fccec8eb955ca97c53c",
+      "speaker": "end-vesper",
+      "text": "今度こそ、守り抜いた。",
+      "kind": "win",
+      "path": "sfx/lantern-war/endless/end-vesper/5fccec8eb955ca97c53c.ogg"
+    },
+    {
+      "id": "2d01897b9c6376b522c3",
+      "speaker": "end-vesper",
+      "text": "皆を、頼む。",
+      "kind": "defeat",
+      "path": "sfx/lantern-war/endless/end-vesper/2d01897b9c6376b522c3.ogg"
+    },
+    {
+      "id": "b0a2d75cf38c93f5e54e",
+      "speaker": "end-sable",
+      "text": "そこだ！",
+      "kind": "attack",
+      "path": "sfx/lantern-war/endless/end-sable/b0a2d75cf38c93f5e54e.ogg"
+    },
+    {
+      "id": "caec86a33a152b0cf8a0",
+      "speaker": "end-sable",
+      "text": "まだ、撃てる！",
+      "kind": "damage",
+      "path": "sfx/lantern-war/endless/end-sable/caec86a33a152b0cf8a0.ogg"
+    },
+    {
+      "id": "868f922b990ad1afe0bf",
+      "speaker": "end-sable",
+      "text": "助かった。",
+      "kind": "heal",
+      "path": "sfx/lantern-war/endless/end-sable/868f922b990ad1afe0bf.ogg"
+    },
+    {
+      "id": "48320ba9a5396e21da71",
+      "speaker": "end-sable",
+      "text": "夜明けの照準！",
+      "kind": "ultimate",
+      "path": "sfx/lantern-war/endless/end-sable/48320ba9a5396e21da71.ogg"
+    },
+    {
+      "id": "80591dd18a32ee0bad79",
+      "speaker": "end-sable",
+      "text": "援護する！",
+      "kind": "support",
+      "path": "sfx/lantern-war/endless/end-sable/80591dd18a32ee0bad79.ogg"
+    },
+    {
+      "id": "f14b0cb4351784fe9d37",
+      "speaker": "end-sable",
+      "text": "全員、無事だな。",
+      "kind": "win",
+      "path": "sfx/lantern-war/endless/end-sable/f14b0cb4351784fe9d37.ogg"
+    },
+    {
+      "id": "5198363a387ff4b34066",
+      "speaker": "end-sable",
+      "text": "先に、行け。",
+      "kind": "defeat",
+      "path": "sfx/lantern-war/endless/end-sable/5198363a387ff4b34066.ogg"
+    },
+    {
+      "id": "03cc1383672222f57851",
+      "speaker": "end-hikari",
+      "text": "いくよ！",
+      "kind": "attack",
+      "path": "sfx/lantern-war/endless/end-hikari/03cc1383672222f57851.ogg"
+    },
+    {
+      "id": "c04e5fc24080c4871464",
+      "speaker": "end-hikari",
+      "text": "まだ平気！",
+      "kind": "damage",
+      "path": "sfx/lantern-war/endless/end-hikari/c04e5fc24080c4871464.ogg"
+    },
+    {
+      "id": "33483456949ec66ba259",
+      "speaker": "end-hikari",
+      "text": "ありがとう！",
+      "kind": "heal",
+      "path": "sfx/lantern-war/endless/end-hikari/33483456949ec66ba259.ogg"
+    },
+    {
+      "id": "73aaa35ed074f6d3fd92",
+      "speaker": "end-hikari",
+      "text": "真夏の灯台！",
+      "kind": "ultimate",
+      "path": "sfx/lantern-war/endless/end-hikari/73aaa35ed074f6d3fd92.ogg"
+    },
+    {
+      "id": "691f52449c232f98957e",
+      "speaker": "end-hikari",
+      "text": "一緒に帰ろう！",
+      "kind": "support",
+      "path": "sfx/lantern-war/endless/end-hikari/691f52449c232f98957e.ogg"
+    },
+    {
+      "id": "739ba12c34f738d681ba",
+      "speaker": "end-hikari",
+      "text": "みんな、おつかれさま！",
+      "kind": "win",
+      "path": "sfx/lantern-war/endless/end-hikari/739ba12c34f738d681ba.ogg"
+    },
+    {
+      "id": "85629dbb5e2f479bc7ea",
+      "speaker": "end-hikari",
+      "text": "ごめんね……あとは、お願い。",
+      "kind": "defeat",
+      "path": "sfx/lantern-war/endless/end-hikari/85629dbb5e2f479bc7ea.ogg"
+    },
+    {
+      "id": "02bf92999839508160b9",
+      "speaker": "end-ren",
+      "text": "そこまでだ！",
+      "kind": "attack",
+      "path": "sfx/lantern-war/endless/end-ren/02bf92999839508160b9.ogg"
+    },
+    {
+      "id": "9d3bc642ecafd777b7c9",
+      "speaker": "end-ren",
+      "text": "まだ、守れる！",
+      "kind": "damage",
+      "path": "sfx/lantern-war/endless/end-ren/9d3bc642ecafd777b7c9.ogg"
+    },
+    {
+      "id": "1fa9f534ea257a8b8478",
+      "speaker": "end-ren",
+      "text": "ありがとう。助かった。",
+      "kind": "heal",
+      "path": "sfx/lantern-war/endless/end-ren/1fa9f534ea257a8b8478.ogg"
+    },
+    {
+      "id": "30ec63236086ce0d1c52",
+      "speaker": "end-ren",
+      "text": "潮騒の祝福！",
+      "kind": "ultimate",
+      "path": "sfx/lantern-war/endless/end-ren/30ec63236086ce0d1c52.ogg"
+    },
+    {
+      "id": "9c70c794ca3ae12c3608",
+      "speaker": "end-ren",
+      "text": "君は僕が守る！",
+      "kind": "support",
+      "path": "sfx/lantern-war/endless/end-ren/9c70c794ca3ae12c3608.ogg"
+    },
+    {
+      "id": "04c6e215f2a7e05fbe8a",
+      "speaker": "end-ren",
+      "text": "さあ、みんなで帰ろう。",
+      "kind": "win",
+      "path": "sfx/lantern-war/endless/end-ren/04c6e215f2a7e05fbe8a.ogg"
+    },
+    {
+      "id": "e020ae6cf99dcdfc5361",
+      "speaker": "end-ren",
+      "text": "帰る場所を、頼む。",
+      "kind": "defeat",
+      "path": "sfx/lantern-war/endless/end-ren/e020ae6cf99dcdfc5361.ogg"
+    }
+  ],
+  "clip_overrides": {
+    "38161a2b6ba26ad2ae1b": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 短く鋭い攻撃の掛け声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "c1cafef79394d3b0e63b": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 被弾して踏みとどまる、短い苦痛と決意。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "fc272b0dec3b3635cc51": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 仲間への自然な感謝。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "4a80313bfc607a803ba9": {
+      "steps": 8,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 必殺技の名前を、力強く明瞭に叫ぶ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "spoken_text": "あがないのじょうさい！",
+      "seconds": 2.7
+    },
+    "0e7227e6e3fff4deb260": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 仲間に声を届ける、頼もしい援護。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "5fccec8eb955ca97c53c": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 勝利の安堵と仲間への優しさ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "2d01897b9c6376b522c3": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 力尽きて仲間に託す、静かな声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "spoken_text": "みんなを、たのむ。"
+    },
+    "b0a2d75cf38c93f5e54e": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 短く鋭い攻撃の掛け声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "caec86a33a152b0cf8a0": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 被弾して踏みとどまる、短い苦痛と決意。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "868f922b990ad1afe0bf": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 仲間への自然な感謝。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "48320ba9a5396e21da71": {
+      "steps": 8,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 必殺技の名前を、力強く明瞭に叫ぶ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "spoken_text": "よあけのしょうじゅん！",
+      "seconds": 2.7
+    },
+    "80591dd18a32ee0bad79": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 仲間に声を届ける、頼もしい援護。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "f14b0cb4351784fe9d37": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 勝利の安堵と仲間への優しさ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "5198363a387ff4b34066": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 力尽きて仲間に託す、静かな声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "03cc1383672222f57851": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 短く鋭い攻撃の掛け声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "c04e5fc24080c4871464": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 被弾して踏みとどまる、短い苦痛と決意。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "33483456949ec66ba259": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 仲間への自然な感謝。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "73aaa35ed074f6d3fd92": {
+      "steps": 8,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 必殺技の名前を、力強く明瞭に叫ぶ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "spoken_text": "まなつのとうだい！",
+      "seconds": 2.7
+    },
+    "691f52449c232f98957e": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 仲間に声を届ける、頼もしい援護。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "739ba12c34f738d681ba": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 勝利の安堵と仲間への優しさ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "85629dbb5e2f479bc7ea": {
+      "steps": 4,
+      "caption": "日本語の成人女性。20代前半の、澄んだ中音域。珊瑚色の長い髪、花飾りをつけた海辺の灯台守ミレア。人懐っこい温かさと、灯を守る時の芯の強さ。子どもっぽすぎない、明瞭で自然な標準語。既存のあかりとは別人として設計する。 力尽きて仲間に託す、静かな声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "02bf92999839508160b9": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 短く鋭い攻撃の掛け声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "9d3bc642ecafd777b7c9": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 被弾して踏みとどまる、短い苦痛と決意。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "1fa9f534ea257a8b8478": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 仲間への自然な感謝。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "30ec63236086ce0d1c52": {
+      "steps": 8,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 必殺技の名前を、力強く明瞭に叫ぶ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "spoken_text": "しおさいのしゅくふく！",
+      "seconds": 2.7
+    },
+    "9c70c794ca3ae12c3608": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 仲間に声を届ける、頼もしい援護。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "04c6e215f2a7e05fbe8a": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 勝利の安堵と仲間への優しさ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    },
+    "e020ae6cf99dcdfc5361": {
+      "steps": 4,
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 力尽きて仲間に託す、静かな声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。"
+    }
+  }
+}

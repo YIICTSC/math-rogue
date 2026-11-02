@@ -1,0 +1,9 @@
+import fs from'node:fs/promises';import{createHash}from'node:crypto';import assert from'node:assert/strict';
+const dir='assets/lantern-war/endless/',read=async n=>JSON.parse(await fs.readFile(dir+n+'.json','utf8')),sha=b=>createHash('sha256').update(b).digest('hex');
+const plan=await read('voice-plan'),build=await read('voice-build'),review=await read('voice-review'),accepted=await read('voice-acceptance');const file='src/mini-games/lantern-war/voiceManifest.json',manifest=JSON.parse(await fs.readFile(file,'utf8')),before=JSON.parse(JSON.stringify(manifest));
+assert.equal(plan.clips.length,28);assert.equal(build.model_device,'cpu');assert.equal(build.codec_device,'cpu');
+for(const c of plan.clips){const record=build.clips[c.id],ref=plan.speakers[c.speaker],raw=await fs.readFile('public/'+c.path);assert.equal(sha(raw),record.sha256);assert.equal(review[c.id]?.sha256,record.sha256);assert.equal(accepted[c.id]?.sha256,record.sha256);assert.equal(accepted[c.id]?.decision,'accepted');assert.equal(sha(await fs.readFile(ref.reference)),record.reference_sha256);assert.equal(record.model_device,'cpu');assert.equal(record.codec_device,'cpu');assert(record.duration>.3&&record.duration<15);assert(review[c.id].rms>.005&&review[c.id].peak<1&&review[c.id].clipped_fraction<.001);manifest[c.speaker+'\n'+c.text]={id:c.id,path:c.path,duration:record.duration};}
+const owned=new Set(plan.clips.map(c=>c.speaker+'\n'+c.text));
+for(const [key,entry]of Object.entries(before))if(!owned.has(key))assert.deepEqual(manifest[key],entry,'Existing voice entry changed');
+if(!process.argv.includes('--verify'))await fs.writeFile(file,JSON.stringify(manifest,null,2)+'\n');else for(const c of plan.clips)assert.deepEqual(before[c.speaker+'\n'+c.text],manifest[c.speaker+'\n'+c.text]);
+console.log('PASS: 28 verified endless battle calls, 4 independent reference voices, existing entries preserved.');

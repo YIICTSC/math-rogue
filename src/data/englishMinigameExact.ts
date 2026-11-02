@@ -1,5 +1,18 @@
 /** Curated shared English copy for mini-game catalogs without structured card translation. */
 export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  "ミレア": "Mirea",
+  "カイ": "Kai",
+  "珊瑚岬": "Coral Cape",
+  "潮風の入江": "Seabreeze Cove",
+  "岬の灯術師": "Cape Lightweaver",
+  "潮路の守護者": "Tideway Guardian",
+  "帰り道を照らす灯は、波にだって消せない。": "Even the waves cannot put out the light that guides us home.",
+  "どの海から来た人にも、帰る岸辺を残そう。": "Let us keep a shore to return to, no matter which sea you came from.",
+  "私はミレア。珊瑚岬の灯台を守っているの。": "I'm Mirea. I keep the lighthouse at Coral Cape.",
+  "灯台が消えたら、帰ってくる船が道を失う。ここからは退けない。": "If the lighthouse goes dark, returning ships will lose their way. I cannot abandon it.",
+  "任せて！ この灯を、あなたたちの帰り道にも届けるから。": "Leave it to me! My light will guide you home too.",
+  "僕はカイ。この入江を守っている。どの海から来た人も、追い返したくない。": "I'm Kai. I guard this cove. I won't turn anyone away, whatever sea they came from.",
+
   "無窮航路": "Infinite Voyage",
   "無窮航路 · エンドレスストーリー": "Infinite Voyage · Endless story",
   "クリアした仲間と無窮航路へ": "Sail the Infinite Voyage with your victorious party",

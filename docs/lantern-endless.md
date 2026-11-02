@@ -4,7 +4,7 @@
 
 ## 航路の構成
 
-毎回3つの航路から選ぶ。セーブされたシードと到達数・航路選択で戦場が決まり、敗北時は同じ戦場で再挑戦できる。10×12の地形・軍勢・気象・目的を生成する。最初の4航路では専用ストーリーを経て敵将ヴェスパー、離反狙撃手セーブル、夏衣装のあかり、夏衣装のレンが順に加入する。以後は4つの後日譚のテーマと天候・戦場に応じた会話へ移る。航路数にゲーム上の上限は設けない。
+毎回3つの航路から選ぶ。セーブされたシードと到達数・航路選択で戦場が決まり、敗北時は同じ戦場で再挑戦できる。10×12の地形・軍勢・気象・目的を生成する。最初の4航路では専用ストーリーを経て敵将ヴェスパー、離反狙撃手セーブル、灯台守ミレア、守護者カイが順に加入する。以後は4つの後日譚のテーマと天候・戦場に応じた会話へ移る。航路数にゲーム上の上限は設けない。
 
 勝利条件：敵全滅／敵将撃破／星門制圧／全生存部隊撤退／旅人護送／180秒防衛／灯台3基確保／秘宝回収と本拠帰還。
 
@@ -29,7 +29,7 @@
 - `cutins.png`：4人分の専用必殺カットイン。
 - `battle.png`：最初に作成した全身4人のデザイン参照。実際の戦闘描画は上記のアクションシートを使用する。
 
-ImageGenで新規生成。`node scripts/build-lantern-action-reference.mjs` で既存アスターの実際の6アクションを1枚に合成し、この合成シートとキャラクターのデザインを参照して4人分を生成した。既定の出力先は `.codex-artifacts/lantern-endless/aster-actions-reference.png`（`LANTERN_ARTIFACT_DIR` で変更可）。今回の確認画像は `/workspace/artifacts/lantern-endless/` にも保持。その後 `node scripts/normalize-lantern-actions.mjs <end-id> <raw-sheet>` で間隔・縮尺・足位置を整え、`endlessBattleMetrics.json` に描画座標を記録する。新しい録音ボイスは追加していない。
+ImageGenで新規生成。`node scripts/build-lantern-action-reference.mjs` で既存アスターの実際の6アクションを1枚に合成し、この合成シートとキャラクターのデザインを参照して4人分を生成した。既定の出力先は `.codex-artifacts/lantern-endless/aster-actions-reference.png`（`LANTERN_ARTIFACT_DIR` で変更可）。今回の確認画像は `/workspace/artifacts/lantern-endless/` にも保持。その後 `node scripts/normalize-lantern-actions.mjs <end-id> <raw-sheet>` で間隔・縮尺・足位置を整え、`endlessBattleMetrics.json` に描画座標を記録する。4人の専用戦闘ボイスは [endless-battle-voices.md](lantern-war/endless-battle-voices.md) の手順で追加する。
 
 生成元素材は作業環境の `/workspace/generated_images/` に保持。
 
@@ -37,8 +37,8 @@ ImageGenで新規生成。`node scripts/build-lantern-action-reference.mjs` で�
 |---|---|---|
 |ヴェスパー|`exec-1b796f46-eb07-4384-9ca2-5ad6afe72e54.png`|`exec-05785b71-b422-4bf2-b03d-207faff65edf.png`|
 |セーブル|`exec-9d22639d-5b2f-413a-8f85-e123879ca0f9.png`|`exec-7e03fc76-cf69-4205-b239-45829b5a6d61.png`|
-|あかり・夏の灯|`exec-1a91e52d-e914-45c4-8075-673e7fda6928.png`|`exec-d3966b7e-059c-4e4b-9ce1-1b0249230546.png`|
-|レン・潮風の誓い|`exec-8a4de52d-acc9-4932-963b-dd7b292c240d.png`|`exec-e77913f2-0fbc-4de9-885c-105e46631797.png`|
+|ミレア|`exec-1a91e52d-e914-45c4-8075-673e7fda6928.png`|`exec-d3966b7e-059c-4e4b-9ce1-1b0249230546.png`|
+|カイ|`exec-8a4de52d-acc9-4932-963b-dd7b292c240d.png`|`exec-e77913f2-0fbc-4de9-885c-105e46631797.png`|
 
 カットイン生成元：`exec-d97449d7-6771-42d4-9d2d-8354401d0c94.png`。
 
@@ -58,3 +58,5 @@ ImageGenで新規生成。`node scripts/build-lantern-action-reference.mjs` で�
 - `pnpm run typecheck`、`pnpm run audit:english:gate`、`pnpm run build`。
 
 ストーリー・戦場・報酬を自動生成するエンドレス追加の初期バージョン。数百時間にわたる難易度バランスやiOS実機での操作は別途継続検証が必要。
+
+ミレアとカイは既存のあかり・レンの衣装差分ではなく、独立した主人公。既存セーブ・素材参照の互換のため内部ID `end-hikari` / `end-ren` は維持する。プロフィール・加入会話・声の参照は独立して管理する。

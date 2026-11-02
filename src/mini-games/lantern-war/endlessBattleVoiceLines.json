@@ -1,0 +1,6 @@
+{
+ "end-vesper":{"attack":"道を開ける！","damage":"まだ倒れぬ！","heal":"感謝する。","ultimate":"贖いの城塞！","support":"背中は私が守る！","win":"今度こそ、守り抜いた。","defeat":"皆を、頼む。"},
+ "end-sable":{"attack":"そこだ！","damage":"まだ、撃てる！","heal":"助かった。","ultimate":"夜明けの照準！","support":"援護する！","win":"全員、無事だな。","defeat":"先に、行け。"},
+ "end-hikari":{"attack":"いくよ！","damage":"まだ平気！","heal":"ありがとう！","ultimate":"真夏の灯台！","support":"一緒に帰ろう！","win":"みんな、おつかれさま！","defeat":"ごめんね……あとは、お願い。"},
+ "end-ren":{"attack":"そこまでだ！","damage":"まだ、守れる！","heal":"ありがとう。助かった。","ultimate":"潮騒の祝福！","support":"君は僕が守る！","win":"さあ、みんなで帰ろう。","defeat":"帰る場所を、頼む。"}
+}

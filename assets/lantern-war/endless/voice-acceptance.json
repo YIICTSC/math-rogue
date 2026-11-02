@@ -1,0 +1,282 @@
+{
+  "38161a2b6ba26ad2ae1b": {
+    "decision": "accepted",
+    "sha256": "602544ead29b38a29e3192f62a17f218eea4360bc9cd27ede7202d7bb96b21ba",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Retake: small ASR confirms 道を開ける after explicit reading and additional time."
+  },
+  "c1cafef79394d3b0e63b": {
+    "decision": "accepted",
+    "sha256": "48e9fc15771689f6a914685bb93981f03d77c4d4b06b69e784495080ceb2ce4f",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "fc272b0dec3b3635cc51": {
+    "decision": "accepted",
+    "sha256": "ea0d69dbbfd72eb7452d0b5a0402cbbdfc56a82d34d87cca735de8730448192c",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "4a80313bfc607a803ba9": {
+    "decision": "accepted",
+    "sha256": "673e00dcf4b6800c253e0aa730facb7b1c963ed7ed0924436f72510c63c58fbf",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Retake: unprompted medium recognizes あがないの上祭; terminology-assisted medium confirms あがないのじょうさい. Lexicon and prompt recorded in voice-review-dictionary.json."
+  },
+  "0e7227e6e3fff4deb260": {
+    "decision": "accepted",
+    "sha256": "2308efc1aede8c3c222abf65a753d4cfdd534b297ed8cf1a9637df4d16d353bd",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "5fccec8eb955ca97c53c": {
+    "decision": "accepted",
+    "sha256": "d44b5978b118fa5b5a8747d14f65acc82001e7d0e3250794c024129511349f5c",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "2d01897b9c6376b522c3": {
+    "decision": "accepted",
+    "sha256": "b10838ab4d9d298818ba4b5dc8ceb603ca414f253c163f2190f6aac138aa8ed0",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "b0a2d75cf38c93f5e54e": {
+    "decision": "accepted",
+    "sha256": "570d2a71a914da72ad88ea0ce71cc17c5bed2c38b375b0d2cb5fc4e298d558c9",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "caec86a33a152b0cf8a0": {
+    "decision": "accepted",
+    "sha256": "6d4f14cfed2e7ba85dd610f6f570fd686ef70605d728bbd0676da515ccdfea60",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "868f922b990ad1afe0bf": {
+    "decision": "accepted",
+    "sha256": "b69eb185a7a0ebe3be421669037cc64f7bf75bef099c49bd696566359ccb4188",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "48320ba9a5396e21da71": {
+    "decision": "accepted",
+    "sha256": "8c7d549c56d0683cca4c18a33a491e56720ffd4f883b6a3d1f91dfd0bcb6919d",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Unprompted medium recognizes 夜明けの章順: same よあけのしょうじゅん reading as 夜明けの照準."
+  },
+  "80591dd18a32ee0bad79": {
+    "decision": "accepted",
+    "sha256": "8e69f8bc2822fcd39ac547642180051feeee4edd1cc0634622864286c6a4a3bd",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Unprompted medium confirms 援護する."
+  },
+  "f14b0cb4351784fe9d37": {
+    "decision": "accepted",
+    "sha256": "949fe8d4e1b6bec1d22b5fcec2f63111de7a9969303165750b3fade09d48c459",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "5198363a387ff4b34066": {
+    "decision": "accepted",
+    "sha256": "83dced954b60826dc4a8a894a252d5fb09d0ad27a4838e8b2f64e11eddc5f28b",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Retake: unprompted medium confirms 先に行け."
+  },
+  "03cc1383672222f57851": {
+    "decision": "accepted",
+    "sha256": "cc24d0627b8a0d0e3446c2beabb6648e6c8a806afc6f031be28aec2de82c0604",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "c04e5fc24080c4871464": {
+    "decision": "accepted",
+    "sha256": "6af407ca7128e4d04c708f33e7751a43603198139a4193489af6aafcedb3a3e5",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "33483456949ec66ba259": {
+    "decision": "accepted",
+    "sha256": "9ba15316cd8b7675694fc5025897a8afefcdb6efaca452b164b84b673bca443b",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "73aaa35ed074f6d3fd92": {
+    "decision": "accepted",
+    "sha256": "b002a2f3b458262821ef003e293a1c1d26f71766d6916d98950c23e067cb8381",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "691f52449c232f98957e": {
+    "decision": "accepted",
+    "sha256": "32a14322b4a0a9b7194954c2c08de98b29348e4dc7a611e8a4c6410cad367e3a",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "739ba12c34f738d681ba": {
+    "decision": "accepted",
+    "sha256": "4c1ae132a4dcca123798a6eb332bc92ad6a55a1aa595be28da8b31cbbd48a883",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "85629dbb5e2f479bc7ea": {
+    "decision": "accepted",
+    "sha256": "ff8a688ce9b8d24c2d293cfb1e2a907cdc1b8a9d67f7281344f51fd4cbfeae2c",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "02bf92999839508160b9": {
+    "decision": "accepted",
+    "sha256": "b0bb15d98ea4274f3c803fde92a655db6e42709d0ef353b9ec6c71215b70a474",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Retake: small ASR confirms そこまでだ."
+  },
+  "9d3bc642ecafd777b7c9": {
+    "decision": "accepted",
+    "sha256": "ca9e3121153d87ae3f4e691de3cb3d3316c4fb54f5a42e8d7d380ae8b183524c",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "1fa9f534ea257a8b8478": {
+    "decision": "accepted",
+    "sha256": "570c1e3b079abafb2c1c6cc8b885c312429ba0e542b4b420ed64a87b2495d856",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "30ec63236086ce0d1c52": {
+    "decision": "accepted",
+    "sha256": "eccf7ffb4b89b08145428e2e2fa67a763e69fcde90b95f365f4e0c418ee5675b",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "9c70c794ca3ae12c3608": {
+    "decision": "accepted",
+    "sha256": "79d5cd94fe33a00a242c8ec13f26f75c5b463a7a4541fa76a0f65851ca7a84ac",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "04c6e215f2a7e05fbe8a": {
+    "decision": "accepted",
+    "sha256": "1b6427c244e9cd1ead31644e3a10dad7ea58289dea53d361df6296853f6a29f9",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  },
+  "e020ae6cf99dcdfc5361": {
+    "decision": "accepted",
+    "sha256": "fea7fa1507ec70d893e8350d02e6be2fbb92de33973bd79602e191ffef110c11",
+    "checks": [
+      "CPU ASR transcript and phonetic review",
+      "reference hash",
+      "waveform peak, RMS and clipping"
+    ],
+    "note": "Recognized words match, allowing punctuation, spacing and equivalent Kanji spellings."
+  }
+}

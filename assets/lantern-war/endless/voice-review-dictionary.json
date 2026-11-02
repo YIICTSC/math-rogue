@@ -1,0 +1,11 @@
+{
+  "4a80313bfc607a803ba9": {
+    "text": "贖いの城塞！",
+    "asr": "あがないのじょうさい。",
+    "sha256": "673e00dcf4b6800c253e0aa730facb7b1c963ed7ed0924436f72510c63c58fbf",
+    "initial_prompt": "日本語のファンタジー戦闘台詞。固有技名：贖いの城塞（あがないのじょうさい）、夜明けの照準（よあけのしょうじゅん）、真夏の灯台（まなつのとうだい）、潮騒の祝福（しおさいのしゅくふく）。",
+    "model": "Whisper medium",
+    "device": "cpu",
+    "reason": "Terminology-assisted confirmation following unprompted phonetic reading あがないの上祭."
+  }
+}

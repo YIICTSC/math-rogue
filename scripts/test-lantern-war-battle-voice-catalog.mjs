@@ -16,8 +16,10 @@ for(const hero of ['aster','lyra']){
 assert.equal(plan.speakers['magic-minato'].reference,'public/sfx/magic-voices/MINATO/attack-1.ogg');
 for(const chapter of m.CHAPTERS.slice(0,2)){const line=chapter.intro[3];assert.equal(line.who,'$hero','Opening resolve line belongs to selected commander');for(const hero of ['aster','lyra'])assert(plan.clips.some(c=>c.speaker===hero&&c.text===(hero==='lyra'?line.text.replaceAll('僕','私'):line.text)),'Selected commander recording '+hero);assert(!plan.clips.some(c=>c.speaker===chapter.intro[1].who&&c.text===line.text),'Do not record the commander line with the companion voice');}
 const crownLine=m.CHAPTERS.at(-1).outro[1];assert.equal(crownLine.who,'$hero','Crown decision belongs to selected commander');for(const hero of ['aster','lyra'])assert(plan.clips.some(c=>c.speaker===hero&&c.text===crownLine.text),'Crown decision recording '+hero);assert(!plan.clips.some(c=>c.speaker==='magic-akari'&&c.text===crownLine.text));
+const endlessPlan=JSON.parse(await fs.readFile('assets/lantern-war/endless/voice-plan.json','utf8'));assert.equal(Object.keys(endlessPlan.speakers).length,4);
 const names=new Set();
 for(const h of m.HEROES){
+ if(endlessPlan.speakers[h.id]){for(const kind of m.BATTLE_VOICE_KINDS)assert(endlessPlan.clips.some(c=>c.speaker===h.id&&c.kind===kind&&c.text===m.battleVoiceText(h.id,kind)));continue;}
  assert(plan.clips.some(c=>c.speaker===h.id&&c.text===h.motto),'Ending motto '+h.id);
  if(h.id.startsWith('high-school-')||h.id.startsWith('magic-')&&h.id!=='magic-minato')assert(plan.speakers[h.id].reference.endsWith('/endless-true-1.ogg'),'Use canonical story reference '+h.id);
  const kit=m.PERSONAL_TECHNIQUES[h.id];assert.deepEqual(kit.map(t=>t.level),[3,6,12]);

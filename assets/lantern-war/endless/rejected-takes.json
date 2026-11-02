@@ -1,0 +1,106 @@
+[
+  {
+    "id": "38161a2b6ba26ad2ae1b",
+    "record": {
+      "text": "道を開ける！",
+      "speaker": "end-vesper",
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 短く鋭い攻撃の掛け声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "seed": 59720786,
+      "reference_sha256": "6b2f6e6cfef8cd89ee88fec7fadfcc6f57ba8f289204bb990a6fae91e1a1ff59",
+      "seconds_requested": 1.78,
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "steps": 4,
+      "spoken_text": "道を開ける！",
+      "path": "sfx/lantern-war/endless/end-vesper/38161a2b6ba26ad2ae1b.ogg",
+      "kind": "attack",
+      "recipe_sha256": "f536091cf5c076413a9a103fb40044a191eb7d038bef2393fc7c78a1a465fd87",
+      "sha256": "eb0be79f4a1b56dacf73d0e4a61e27acf8b240c5b32ff10134e3cf52ca05275c",
+      "duration": 1.9,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "38161a2b6ba26ad2ae1b"
+      ]
+    },
+    "asr": "道を駆ける",
+    "reason": "Secondary ASR confirms changed or unintelligible words; regenerate with explicit reading and more time."
+  },
+  {
+    "id": "4a80313bfc607a803ba9",
+    "record": {
+      "text": "贖いの城塞！",
+      "speaker": "end-vesper",
+      "caption": "日本語の成人女性。20代後半から30代前半の落ち着いた中低音。銀髪、黒金の鎧と赤い外套を着た歴戦の女将軍。凛とした芯と胸の響き。幼い少女声ではない。威厳があり、贖罪と守る決意を秘めた自然な演技。明瞭な標準語。 必殺技の名前を、力強く明瞭に叫ぶ。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "seed": 79029699,
+      "reference_sha256": "6b2f6e6cfef8cd89ee88fec7fadfcc6f57ba8f289204bb990a6fae91e1a1ff59",
+      "seconds_requested": 2.7,
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "steps": 8,
+      "spoken_text": "あがないのじょうさい！",
+      "path": "sfx/lantern-war/endless/end-vesper/4a80313bfc607a803ba9.ogg",
+      "kind": "ultimate",
+      "recipe_sha256": "f8c1f9b421b3c4b11238af74aa6f54d8ccdc7ecf0a00f9179a2e7e5e7c285922",
+      "sha256": "e80075f175dbb376043962a228d5356914d06a89f4d12f25bf511562984a2f5c",
+      "duration": 2.82,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "4a80313bfc607a803ba9"
+      ]
+    },
+    "asr": "あがないの情勢",
+    "reason": "Secondary ASR confirms changed or unintelligible words; regenerate with explicit reading and more time."
+  },
+  {
+    "id": "5198363a387ff4b34066",
+    "record": {
+      "text": "先に、行け。",
+      "speaker": "end-sable",
+      "caption": "日本語の成人男性。20代後半から30代の低めの声。黒髪、緑の外套をまとった寡黙な狙撃手。息を漏らしすぎず、静かな確信と仲間への温かさを感じる、明瞭で自然な標準語。幼い少年声や極端な老人声ではない。 力尽きて仲間に託す、静かな声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "seed": 86468115,
+      "reference_sha256": "63b3c1545a48b4ad2fb0a62aa3ad37af4e176064b84eb5f3b2d8df5a51f47d1f",
+      "seconds_requested": 1.62,
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "steps": 4,
+      "spoken_text": "先に、行け。",
+      "path": "sfx/lantern-war/endless/end-sable/5198363a387ff4b34066.ogg",
+      "kind": "defeat",
+      "recipe_sha256": "608ca1b9a635c726fc24646aaba80321fc729ad2e98a250ebc76e495ce30746e",
+      "sha256": "c7536fac1ff637282970b7eda94dc61782cff26bb86b734abeeff05c16e24cf9",
+      "duration": 1.74,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "5198363a387ff4b34066"
+      ]
+    },
+    "asr": "先に行くぜ",
+    "reason": "Secondary ASR confirms changed or unintelligible words; regenerate with explicit reading and more time."
+  },
+  {
+    "id": "02bf92999839508160b9",
+    "record": {
+      "text": "そこまでだ！",
+      "speaker": "end-ren",
+      "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 短く鋭い攻撃の掛け声。 参照と同じ人物の声色と年齢感。指定の台詞だけを一度発声。背景音と音楽なし。",
+      "seed": 3791833,
+      "reference_sha256": "ed8705c6dbfc5d2048de2443ad0286292207389cdd2adf1a373c411ed37def96",
+      "seconds_requested": 1.46,
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "steps": 4,
+      "spoken_text": "そこまでだ！",
+      "path": "sfx/lantern-war/endless/end-ren/02bf92999839508160b9.ogg",
+      "kind": "attack",
+      "recipe_sha256": "71fdb6a98ef70a35c98ab3918ecd29e39656df64512392e1c2eced419fa286de",
+      "sha256": "5b6ea2be0a89f7dfe6acefa36d829dc53e174e3b134eddfd898189be3a25af77",
+      "duration": 1.58,
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "batch_members": [
+        "02bf92999839508160b9"
+      ]
+    },
+    "asr": "スコアおでだ",
+    "reason": "Secondary ASR confirms changed or unintelligible words; regenerate with explicit reading and more time."
+  }
+]
