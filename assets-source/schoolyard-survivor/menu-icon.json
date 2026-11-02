@@ -1,0 +1,14 @@
+{
+  "generator": "ImageGen",
+  "reference": "public/sprites/schoolyard-survivor/title.webp",
+  "source": "exec-a6a1edce-d268-4ab9-99c1-b75eb71b356d.png",
+  "source_sha256": "56d4d7e576b11a5c9a1e564166ec4ec4378b4df880aa4f224ffae214cd491fb6",
+  "source_retained": "Session generated_images; original not modified",
+  "output": "public/sprites/schoolyard-survivor/menu-icon.webp",
+  "output_sha256": "df05ed2cbe835af58fa1183c67d1412e0a1a3ec13e1eb54bc35a81e12c91508b",
+  "size": [
+    512,
+    512
+  ],
+  "visual": "Red-capped schoolboy, glowing pencil, flying monster textbooks and evening schoolyard; no lettering."
+}

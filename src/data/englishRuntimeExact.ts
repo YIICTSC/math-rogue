@@ -1,6 +1,28 @@
 import { RPG_ENGLISH } from './rpgEnglish';
 import {RELEASE_109_ENGLISH} from './release109';
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
+  "障害物をかわし、教科を育てて帰宅を目指そう。": "Dodge obstacles and race home. Upgrade your skills.",
+  "行動を予約し、連携で敵を倒す戦略バトル。": "Queue actions and outsmart your enemies.",
+  "牌と遺物を集め、麻雀の冒険へ出かけよう。": "Learn mahjong. Explore with tiles and relics.",
+  "石ころと鉱山カードで、得点を競い合おう。": "Gather pebbles, buy mines and compete for points.",
+  "サイコロで進める、放課後の物語。": "Roll dice and live out a school-life adventure.",
+  "カードを配置し、3レーンの制圧を目指そう。": "Place cards and capture three lanes.",
+  "石を囲んで取り、盤上の陣地を広げよう。": "Surround and capture your opponent's stones.",
+
+  "ことばを教え、小さなともだちと暮らす会話ゲーム。": "Teach words and share life with little friends.",
+  "見回りをかわし、資料を集めて学校から脱出。": "Evade patrols, collect files and escape school.",
+  "役をそろえ、サポーターと高得点を目指そう。": "Build poker hands and recruit score-boosting allies.",
+  "パーツで機体を組み、3×3マスの自動バトル。": "Build a mech for tactical 3×3 auto-battles.",
+  "カードとひらめき技で挑む、奥深い迷宮探索。": "Explore deep dungeons with cards and new techniques.",
+  "風と火を活かし、探索と料理を楽しむ冒険RPG。": "Explore islands, harness the elements and cook.",
+  "駒を動かし、王を守る戦い方を学ぶ5×5将棋。": "Learn to move pieces and defend your king in 5×5 shogi.",
+  "駒の動きを覚え、キングを守る戦略を磨こう。": "Learn chess moves and tactics to protect your king.",
+
+  "武器を育て、校庭に迫る敵の大群を切り抜けよう。": "Upgrade weapons. Survive the schoolyard hordes.",
+  "世界のトランプゲームを、ひとりでもオンラインでも。": "World card games, solo or online.",
+  "道具とひらめき技を駆使して、毎回変わる迷宮を探索。": "Explore shifting dungeons with items and techniques.",
+  "仲間を編成し、作戦と部隊指揮で戦場を切り開こう。": "Build squads, plan tactics and command the battlefield.",
+
   ...RELEASE_109_ENGLISH,
   '星潮の航路': 'Star Tide',
   'ことば日和': 'Kotoba Biyori',
