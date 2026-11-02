@@ -1,4 +1,4 @@
-import {prepareWebAudioSession} from './webAudioSession';
+import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
 import lanternVoiceManifest from '../mini-games/lantern-war/voiceManifest.json';
 import {sportsVoicePath,sportsVoiceDuration,sportsVoiceAvailable} from '../mini-games/shared/sportsVoices';
 import {STAR_VOICE_IDS} from '../mini-games/star-tide/voiceIds';
@@ -97,6 +97,7 @@ class AudioService {
   private redirectMagicHeroVoice(heroId:string,action:'attack'|'damage'|'spell'){const voice=this.rpgHeroVoice;this.rpgHeroVoice=null;const result=this.playMagicVoice(heroId,action);this.rpgHeroVoice=voice;return result;}
 
   private ctx: AudioContext | null = null;
+  private unregisterAudio?: () => void;
   private masterGain: GainNode | null = null;
   private bgmGain: GainNode | null = null;
   private sfxGain: GainNode | null = null;
@@ -229,6 +230,7 @@ class AudioService {
   public init() {
     prepareWebAudioSession();
     if (this.ctx?.state === 'closed') {
+        this.unregisterAudio?.();
         // Native HTML BGM can outlive a WebKit AudioContext. Release it before
         // clearing references, or the next screen cannot stop the old stream.
         if (this.currentHtmlAudio) this.retireHtmlBgm(this.currentHtmlAudio);
@@ -252,7 +254,7 @@ class AudioService {
         this.bgmMediaSources.clear();
     }
     if (this.ctx) {
-        if (this.ctx.state !== 'running') this.ctx.resume().catch(e => console.warn(e));
+        if (this.appIsActive && !this.foregroundRecoveryPromise && this.ctx.state !== 'running') void resumeGameAudio(this.ctx, false, () => this.appIsActive);
         return;
     }
 
@@ -260,10 +262,11 @@ class AudioService {
     if (!AudioContextClass) return;
 
     this.ctx = new AudioContextClass();
+    this.unregisterAudio = registerGameAudio(this.ctx!, () => this.appIsActive && !this.foregroundRecoveryPromise);
     
     // Master Chain
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 0.4;
+    this.masterGain.gain.value = this.isMuted ? 0 : 0.4;
     
     // Simple Delay/Reverb Effect (Echo)
     const delay = this.ctx.createDelay();
@@ -310,10 +313,7 @@ class AudioService {
           // WKWebView can complete a background suspend after the first foreground
           // resume request. Retrying after the suspend has settled prevents the
           // context from being left permanently silent.
-          await Promise.race([
-              this.ctx.resume().catch(() => undefined),
-              new Promise<void>(resolve => window.setTimeout(resolve, 300)),
-          ]);
+          await resumeGameAudio(this.ctx, false, () => this.appIsActive);
           if ((this.ctx.state as AudioContextState) === 'running') return true;
           if (attempt + 1 < retryCount) {
               await new Promise<void>(resolve => window.setTimeout(resolve, 150 * (attempt + 1)));
@@ -354,6 +354,8 @@ class AudioService {
   public async unlockAudio() {
       if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
       const lifecycleGeneration = this.appLifecycleGeneration;
+      this.init();
+      if (this.ctx) void resumeGameAudio(this.ctx, true, () => this.appIsActive);
       const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
       // A pointer event can start this asynchronous recovery immediately before
       // iOS backgrounds the app. Never let that stale gesture restart BGM after
@@ -561,11 +563,13 @@ class AudioService {
       if (!this.getRhythmAudioState().active || this.isMuted || this.sfxVolume <= 0) return;
       this.init();
       const cue=RHYTHM_PAD_SOUNDS[Math.max(0,Math.min(3,Math.trunc(lane)||0))], name=`rpg-games/${cue}`,gain=Math.max(0,Math.min(1,volume));
-      const buffer=this.sfxBuffers[name];
-      if(buffer && this.ctx?.state==='running' && this.startSfxSource(name,buffer,HOBBY_SOUNDS[cue],true,gain))return;
-      // First presses stay in the SFX bus too: iOS ignores HTML media volume.
-      void this.loadSfxBuffer(name);
-      this.playRhythmPadFallback(lane,gain);
+      this.runSfxWhenReady(() => {
+          const buffer=this.sfxBuffers[name];
+          if(buffer && this.startSfxSource(name,buffer,HOBBY_SOUNDS[cue],true,gain))return;
+          // First presses stay in the SFX bus too: iOS ignores HTML media volume.
+          void this.loadSfxBuffer(name);
+          this.playRhythmPadFallback(lane,gain);
+      }, 200);
   }
 
   public async preloadHobbySounds(cues: HobbySound[]) {
@@ -1805,7 +1809,7 @@ class AudioService {
       volume = 1,
       directOutput = false,
   ) {
-      if (!this.ctx || !this.sfxGain) return false;
+      if (!this.ctx || !this.sfxGain || this.ctx.state !== 'running') return false;
       if (!overlap) this.stopActiveSfx(name);
       try {
           const source = this.ctx.createBufferSource();
@@ -1861,8 +1865,15 @@ class AudioService {
       overlap: boolean,
       generation: number,
   ): Promise<boolean> {
+      const lifecycle = this.appLifecycleGeneration;
+      const canPlay = () => !this.isMuted && this.appIsActive
+          && lifecycle === this.appLifecycleGeneration
+          && (typeof document === 'undefined' || !document.hidden)
+          && this.getHtmlSfxVolume(name) > 0;
+      if (!canPlay()) return false;
       void this.resumeAudioContext();
       for (const path of paths) {
+          if (!canPlay()) return false;
           if ((name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
@@ -1873,6 +1884,7 @@ class AudioService {
                   audio.play().then(() => true).catch(() => false),
                   new Promise<boolean>(resolve => window.setTimeout(() => resolve(false), 1500)),
               ]);
+              if (!canPlay()) { audio.pause(); return false; }
               if (!didStart) {
                   audio.pause();
                   continue;
@@ -1940,20 +1952,28 @@ class AudioService {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return false;
 
+      const lifecycle = this.appLifecycleGeneration;
+      const canPlay = () => !this.isMuted && this.appIsActive
+          && lifecycle === this.appLifecycleGeneration
+          && (typeof document === 'undefined' || !document.hidden)
+          && this.getHtmlSfxVolume(name) > 0;
+
       // Keep the pre-2026-09-20 playback behavior as the primary path. Voice
       // clips played through HTMLAudioElement bypass the WebAudio master delay,
       // so they start immediately and stay dry instead of gaining an echo.
       const htmlStarted = await this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation);
       if (htmlStarted) return true;
+      if (!canPlay()) return false;
 
       // Some browsers reject delayed HTMLAudioElement.play() calls. Retain a
       // WebAudio fallback for that case only, but route it directly to the
       // destination so the fallback matches the old dry voice sound as closely
       // as possible instead of entering the global SFX/BGM delay loop.
       const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
-      if (contextReady && this.ctx?.state === 'running') {
+      if (canPlay() && contextReady && this.ctx?.state === 'running') {
           const buffer = await this.loadVoiceBuffer(name, paths);
           if (this.sfxPlaybackGenerations.get(name) !== generation) return true;
+          if (!canPlay()) return false;
           if (buffer && this.startSfxSource(
               name,
               buffer,
@@ -2025,35 +2045,23 @@ class AudioService {
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
 
+      const lifecycle = this.appLifecycleGeneration;
+      const canPlay = () => this.canPlaySfx() && lifecycle === this.appLifecycleGeneration
+          && (overlap || this.sfxPlaybackGenerations.get(name) === generation);
       const startPlayback = () => {
-          if (this.sfxPlaybackGenerations.get(name) !== generation) return;
+          if (!canPlay()) return;
           const cached = this.sfxBuffers[name];
-          if (cached) {
-              if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
-              return;
-          }
+          if (cached && !this.foregroundRecoveryPromise && this.ctx?.state === 'running'
+              && this.startSfxSource(name, cached, maxDurationMs, overlap)) return;
 
-          // Use the packaged file on the first play too. Waiting for a fetch and
-          // falling back immediately made every first mini-game action sound like
-          // the old oscillator-only SE, especially on iOS.
-          void this.playHtmlSfx(
-              name,
-              this.getSfxPlaybackPaths(name),
-              maxDurationMs,
-              overlap,
-              generation,
-          ).then(played => {
-              if (!played && this.sfxPlaybackGenerations.get(name) === generation) fallback();
-          });
+          // Native media can still play while WebKit's context is interrupted.
+          // Try it immediately, even for cached clips, without awaiting resume().
+          void this.playHtmlSfx(name, this.getSfxPlaybackPaths(name), maxDurationMs, overlap, generation)
+              .then(played => {
+                  if (!played && canPlay()) this.runSfxWhenReady(fallback);
+              });
           void this.loadSfxBuffer(name);
       };
-
-      if (this.ctx.state !== 'running') {
-          void this.resumeAudioContext().then(ready => {
-              if (ready) startPlayback();
-          });
-          return;
-      }
       startPlayback();
   }
 
@@ -2064,7 +2072,7 @@ class AudioService {
    * sound as a fallback for browsers/builds where the packaged file is absent.
    */
   private playIosAnswerSfx(effect: 'correct' | 'wrong') {
-      if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
+      if (!this.canPlaySfx()) return;
       const name = `answer-${effect}`;
       const maxDurationMs = effect === 'correct' ? 700 : 400;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
@@ -2116,7 +2124,7 @@ class AudioService {
           (colors[element] || colors.star).forEach((note,i)=>this.playOsc(note,t+i*.065,.24,'triangle',.045,this.sfxGain));
       };
       this.playAttackEffectSound(element==='fire'?'fire':element==='shadow'?'drain':element==='slash'?'finisher':element==='thunder'?'lightning':element==='leaf'?'plant':element==='song'?'soundwave':'flash');
-      if (this.ctx.state === 'running') accent(); else void this.resumeAudioContext().then(ready=>{if(ready)accent();});
+      this.runSfxWhenReady(accent);
   }
 
   public playAttackEffectSound(effect: AttackEffectKey, hitCount: number = 1) {
@@ -2747,56 +2755,55 @@ class AudioService {
       }
   }
 
-  /**
-   * A foreground event and a gameplay tap can arrive in the same run loop on
-   * iOS. Queue synthesized UI sounds behind the recovery promise so the
-   * context cannot be reported as running while the background suspend is
-   * still winning the race.
-   */
-  private deferSynthSoundUntilForegroundRecovery(effect: CommonSoundEffect): boolean {
-      const recovery = this.foregroundRecoveryPromise;
-      if (!recovery) return false;
-      void recovery.then(() => {
-          if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
-          if (this.ctx?.state === 'running') {
-              this.playSynthSound(effect);
-              return;
-          }
-          void this.resumeAudioContext(IS_IOS_BUILD ? 2 : 1).then(ready => {
-              if (ready && this.appIsActive && (typeof document === 'undefined' || !document.hidden)) {
-                  this.playSynthSound(effect);
-              }
-          });
-      });
-      return true;
+  private canPlaySfx() {
+      return !this.isMuted && this.sfxVolume > 0 && this.appIsActive
+          && (typeof document === 'undefined' || !document.hidden);
+  }
+
+  /** All synthesized mini-game cues share the same foreground recovery barrier. */
+  private runSfxWhenReady(play: () => void, maxDelayMs = 1000) {
+      if (!this.canPlaySfx()) return;
+      const requestedAt = performance.now(), lifecycle = this.appLifecycleGeneration;
+      const canPlay = () => this.canPlaySfx() && lifecycle === this.appLifecycleGeneration
+          && performance.now() - requestedAt < maxDelayMs;
+      const start = () => {
+          if (!canPlay()) return;
+          this.init();
+          if (this.ctx?.state === 'running') { play(); return; }
+          void this.resumeAudioContext().then(ready => { if (ready && canPlay()) play(); });
+      };
+      if (this.foregroundRecoveryPromise) void this.foregroundRecoveryPromise.then(start);
+      else start();
   }
 
   /** Original paper foley for the card anthology, on the common SFX/mute bus. */
   public playCardClubSound(kind: 'shuffle' | 'deal' | 'play' | 'flip' | 'draw' | 'collect' | 'select') {
       if (this.isMuted || this.sfxVolume <= 0 || !this.appIsActive || document.hidden) return;
       this.init();
-      const ctx=this.ctx,bus=this.sfxGain,noise=this.noiseBuffer;
-      if (!ctx || !bus || !noise || ctx.state !== 'running') return;
-      const bursts=kind==='shuffle'?7:kind==='collect'?3:kind==='deal'?3:1;
-      const start=ctx.currentTime+(kind==='collect'?.08:0);
-      for(let i=0;i<bursts;i++){
-          const at=start+i*(kind==='shuffle'?.045:.035);
-          const duration=kind==='flip'?.12:kind==='select'?.035:.075;
-          const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
-          source.buffer=noise;source.playbackRate.value=.85+(i%3)*.12;
-          filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(kind==='play'?850:kind==='collect'?1100:kind==='select'?2200:2600,at);
-          filter.frequency.exponentialRampToValueAtTime(kind==='flip'?650:1400,at+duration);
-          gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(kind==='select'?.07:kind==='shuffle'?.17:.24,at+.004);gain.gain.exponentialRampToValueAtTime(.001,at+duration);
-          source.connect(filter);filter.connect(gain);gain.connect(bus);
-          source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
-          source.start(at);source.stop(at+duration+.01);
-      }
-      if(kind==='play'||kind==='collect')this.playOsc(kind==='play'?145:210,start,.065,'sine',.09,bus);
+      this.runSfxWhenReady(() => {
+          const ctx=this.ctx,bus=this.sfxGain,noise=this.noiseBuffer;
+          if (!ctx || !bus || !noise) return;
+          const bursts=kind==='shuffle'?7:kind==='collect'?3:kind==='deal'?3:1;
+          const start=ctx.currentTime+(kind==='collect'?.08:0);
+          for(let i=0;i<bursts;i++){
+              const at=start+i*(kind==='shuffle'?.045:.035);
+              const duration=kind==='flip'?.12:kind==='select'?.035:.075;
+              const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+              source.buffer=noise;source.playbackRate.value=.85+(i%3)*.12;
+              filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(kind==='play'?850:kind==='collect'?1100:kind==='select'?2200:2600,at);
+              filter.frequency.exponentialRampToValueAtTime(kind==='flip'?650:1400,at+duration);
+              gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(kind==='select'?.07:kind==='shuffle'?.17:.24,at+.004);gain.gain.exponentialRampToValueAtTime(.001,at+duration);
+              source.connect(filter);filter.connect(gain);gain.connect(bus);
+              source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+              source.start(at);source.stop(at+duration+.01);
+          }
+          if(kind==='play'||kind==='collect')this.playOsc(kind==='play'?145:210,start,.065,'sine',.09,bus);
+      });
   }
 
   public playSound(effect: CommonSoundEffect) {
       this.init();
-      if (this.isMuted) return;
+      if (!this.canPlaySfx()) return;
       if (IS_IOS_BUILD && (effect === 'correct' || effect === 'wrong')) {
           const recovery = this.foregroundRecoveryPromise;
           if (recovery) {
@@ -2806,15 +2813,7 @@ class AudioService {
           }
           return;
       }
-      if (!this.ctx || !this.sfxGain) return;
-      if (this.deferSynthSoundUntilForegroundRecovery(effect)) return;
-      if (this.ctx.state !== 'running') {
-          void this.resumeAudioContext().then(ready => {
-              if (ready) this.playSound(effect);
-          });
-          return;
-      }
-      this.playSynthSound(effect);
+      this.runSfxWhenReady(() => this.playSynthSound(effect));
   }
 
   public playShogiGimmickSound(family: string, tier: number = 1) {
@@ -2832,86 +2831,66 @@ class AudioService {
       const resolvedTier = Math.max(1, Math.min(4, rawTier));
       if (!this.ctx || !this.sfxGain) return;
 
-      const recovery = this.foregroundRecoveryPromise;
-      if (recovery) {
-          void recovery.then(() => {
-              if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
-              this.playShogiGimmickSound(normalizedFamily, resolvedTier);
+      this.runSfxWhenReady(() => {
+          const t = this.ctx!.currentTime;
+          const noteCount = resolvedTier + 1;
+          this.playSound(profile.baseSound);
+          profile.notes.slice(0, noteCount).forEach((freq, index) => {
+              this.playOsc(
+                  freq,
+                  t + index * profile.spacing,
+                  profile.duration,
+                  profile.wave,
+                  profile.volume,
+                  this.sfxGain!,
+              );
           });
-          return;
-      }
 
-      if (this.ctx.state !== 'running') {
-          void this.resumeAudioContext().then(ready => {
-              if (ready) this.playShogiGimmickSound(normalizedFamily, resolvedTier);
-          });
-          return;
-      }
-
-      const t = this.ctx.currentTime;
-      const noteCount = resolvedTier + 1;
-      this.playSound(profile.baseSound);
-      profile.notes.slice(0, noteCount).forEach((freq, index) => {
-          this.playOsc(
-              freq,
-              t + index * profile.spacing,
-              profile.duration,
-              profile.wave,
-              profile.volume,
-              this.sfxGain!,
-          );
+          if (resolvedTier >= 2) {
+              this.playOsc(
+                  Math.max(48, profile.notes[0] / 2),
+                  t,
+                  profile.duration + 0.12,
+                  'triangle',
+                  0.11,
+                  this.sfxGain,
+              );
+          }
+          if (resolvedTier >= 3) {
+              this.playOsc(
+                  Math.min(3200, profile.notes[2] * 2),
+                  t + profile.spacing * 1.5,
+                  profile.duration + 0.06,
+                  'sine',
+                  0.08,
+                  this.sfxGain,
+              );
+          }
+          if (resolvedTier >= 4) {
+              const motifEnd = t + profile.spacing * 4;
+              this.playOsc(
+                  Math.max(36, profile.notes[0] / 4),
+                  t,
+                  profile.duration + 0.24,
+                  'sawtooth',
+                  0.08,
+                  this.sfxGain,
+              );
+              this.playOsc(
+                  Math.min(3600, profile.notes[4] * 1.5),
+                  motifEnd,
+                  profile.duration + 0.08,
+                  'sine',
+                  0.065,
+                  this.sfxGain,
+              );
+          }
       });
-
-      if (resolvedTier >= 2) {
-          this.playOsc(
-              Math.max(48, profile.notes[0] / 2),
-              t,
-              profile.duration + 0.12,
-              'triangle',
-              0.11,
-              this.sfxGain,
-          );
-      }
-      if (resolvedTier >= 3) {
-          this.playOsc(
-              Math.min(3200, profile.notes[2] * 2),
-              t + profile.spacing * 1.5,
-              profile.duration + 0.06,
-              'sine',
-              0.08,
-              this.sfxGain,
-          );
-      }
-      if (resolvedTier >= 4) {
-          const motifEnd = t + profile.spacing * 4;
-          this.playOsc(
-              Math.max(36, profile.notes[0] / 4),
-              t,
-              profile.duration + 0.24,
-              'sawtooth',
-              0.08,
-              this.sfxGain,
-          );
-          this.playOsc(
-              Math.min(3600, profile.notes[4] * 1.5),
-              motifEnd,
-              profile.duration + 0.08,
-              'sine',
-              0.065,
-              this.sfxGain,
-          );
-      }
   }
 
   public playBattleSound(effect: CommonSoundEffect) {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
-      if (this.ctx.state !== 'running') {
-          void this.resumeAudioContext().then(ready => {
-              if (ready) this.playBattleSound(effect);
-          });
-          return;
-      }
       const fileByEffect: Record<CommonSoundEffect, { name: string; maxDurationMs: number; overlap?: boolean }> = {
           select: { name: 'attack-effects/flash', maxDurationMs: 420 },
           attack: { name: 'attack-effects/impact', maxDurationMs: 720, overlap: true },

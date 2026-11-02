@@ -35,10 +35,8 @@ export class KartAudio {
     }
     const context = this.context;
     const isRunning = () => context.state === 'running';
-    if (isRunning()) return true;
-    if (this.unlockPromise) return this.unlockPromise;
-
-    const resume = resumeGameAudio(context);
+    if (isRunning()) { void resumeGameAudio(context, true); return true; }
+    const resume = resumeGameAudio(context, true);
     this.unlockPromise = resume;
     try {
       return await resume;
@@ -62,6 +60,7 @@ export class KartAudio {
   }
   update(w: Race | null, id: string) {
     if (!this.context || !this.motor || !this.motorGain) return;
+    if (this.context.state !== 'running') { if (!this.unlockPromise) void this.unlock(); return; }
     if (w && w.seed !== this.seed) { this.seed = w.seed; this.boost = false; this.item = false; this.lastAnswers = 0; this.lastQuizLap = -1; this.lastCrash = false; this.lastSlow = false; this.lastLap = 0; this.finished = false; this.lastJump = false; this.lastDistance = 0; this.lastSpeed = 0; }
     const p = w?.players[id], racing = w?.phase === 'race' && !w.paused && p && !document.hidden;
     this.motor.frequency.setTargetAtTime(racing ? 52 + (p.speed % 19) * 3 + Math.floor(p.speed / 19) * 17 : 40, this.context.currentTime, .06);
@@ -96,5 +95,5 @@ export class KartAudio {
       }
     }
   }
-  close() { this.unregisterAudio?.(); this.unregisterAudio = undefined; this.motor?.stop(); this.skid?.stop(); void this.context?.close(); this.context = null; this.motor = null; this.master = null; }
+  close() { this.unregisterAudio?.(); this.unregisterAudio = undefined; this.motor?.stop(); this.skid?.stop(); void this.context?.close(); this.context = null; this.motor = null; this.master = null; this.unlockPromise = null; this.seed = -1; this.nextBeat = 0; }
 }

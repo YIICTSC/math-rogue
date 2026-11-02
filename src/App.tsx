@@ -1494,10 +1494,12 @@ const App: React.FC = () => {
         // Keep the gesture recovery hook active so the first interaction also restores
         // BGM, effects and voices instead of only unlocking audio at initial launch.
         window.addEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true, passive: true });
+        window.addEventListener('touchend', unlockAudioFromUserGesture, { capture: true, passive: true });
         window.addEventListener('keydown', unlockAudioFromUserGesture, { capture: true });
 
         return () => {
             window.removeEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true });
+            window.removeEventListener('touchend', unlockAudioFromUserGesture, { capture: true });
             window.removeEventListener('keydown', unlockAudioFromUserGesture, { capture: true });
         };
     }, []);

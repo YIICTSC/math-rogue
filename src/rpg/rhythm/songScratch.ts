@@ -1,3 +1,4 @@
+import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from '../../services/webAudioSession';
 /** Scratches the live song with a variable delay, without moving its transport. */
 export function createScratchGraph(context: BaseAudioContext, source: AudioNode) {
   const dry = context.createGain(), wet = context.createGain(), delay = context.createDelay(.2), output = context.createGain();
@@ -43,6 +44,7 @@ export function createScratchGraph(context: BaseAudioContext, source: AudioNode)
 
 export function createSongScratch(audio: HTMLAudioElement) {
   let context: AudioContext | undefined;
+  let unregisterAudio: (() => void) | undefined;
   let graph: ReturnType<typeof createScratchGraph> | undefined;
   let timer: ReturnType<typeof setInterval> | undefined;
   let volume = 1;
@@ -52,13 +54,15 @@ export function createSongScratch(audio: HTMLAudioElement) {
     if (!context) {
       const Constructor = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!Constructor) return;
+      prepareWebAudioSession();
       context = new Constructor();
+      unregisterAudio = registerGameAudio(context, () => !disposed && !audio.paused);
       graph = createScratchGraph(context, context.createMediaElementSource(audio));
       graph.output.connect(context.destination);
       graph.output.gain.value = volume;
       audio.volume = 1;
     }
-    if (context.state === 'suspended') void context.resume().catch(() => {});
+    void resumeGameAudio(context, true);
   };
   const setActive = (active: boolean) => {
     if (active) prepare();
@@ -72,6 +76,7 @@ export function createSongScratch(audio: HTMLAudioElement) {
     audio.volume = graph ? 1 : value;
   }, dispose() {
     disposed = true;
+    unregisterAudio?.();
     setActive(false);
     graph?.dispose();
     if (context) void context.close().catch(() => {});
