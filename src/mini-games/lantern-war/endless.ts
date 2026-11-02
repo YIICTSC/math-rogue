@@ -1,3 +1,4 @@
+import {selectBanter} from './banter';
 import {voyageSite,VOYAGE_REGION_NAMES,VOYAGE_KIND_NAMES} from './voyage';
 import {clone,createBattle,distance,living} from './engine';
 import {ENDLESS_CAST,recruitLines} from './endlessRoster';
@@ -8,7 +9,7 @@ export function endlessUnlocked(s:Campaign){return s.cleared.includes(17);}
 export function startEndless(s:Campaign,seed=Date.now()>>>0){if(!endlessUnlocked(s))return false;s.endless??={active:true,seed,depth:1,wins:0,best:0,history:[]};s.endless.active=true;s.phase='field';s.battle=null;s.checkpoint=null;return true;}
 export function leaveEndless(s:Campaign){if(s.endless)s.endless.active=false;s.phase='field';s.battle=null;s.checkpoint=null;s.studyPending=false;}
 const log=(b:Battle,message:string)=>{b.log=[message,...b.log].slice(0,50);};
-export function makeEndlessBattle(s:Campaign):Battle{
+export function makeEndlessBattle(s:Campaign,originalBanter=true):Battle{
  const p=s.endless!,site=voyageSite(p,p.route||0);let seed=(p.seed^Math.imul(p.depth,2654435761)^Math.imul(p.route||0,2246822519))>>>0;
  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const pick=<T,>(a:readonly T[])=>a[Math.floor(random()*a.length)];
@@ -59,13 +60,14 @@ export function makeEndlessBattle(s:Campaign):Battle{
  {who:recruit,text:episodes[3],reaction:'resolve'},
  ]:recruitLines(recruit);
  const story:Line[]=[{who:'narrator',text:`第${p.depth}航路。王冠の向こうに、まだ帰り道を待つ世界があった。`},{who:'$hero',text:`${title}へ進もう。今度の目標は「${ENDLESS_OBJECTIVES[objective]}」。力だけでなく、道を選ぶ戦いだ。`,reaction:'resolve'},...encounter];
- b.endless={site,depth:p.depth,title,theme,objective,weather,hold:0,installations,recruit,story,reward:250+p.depth*35,reinforcements:0};
+ const banter=originalBanter?selectBanter(s):undefined;if(banter)story.push(...clone(banter.lines));
+ b.endless={banterId:banter?.id,site,depth:p.depth,title,theme,objective,weather,hold:0,installations,recruit,story,reward:250+p.depth*35,reinforcements:0};
  b.limit=600;b.time=0;b.seed=seed;b.wave=true;b.paused=true;b.result=undefined;b.encounter=null;b.pending=null;b.captured=[];b.treasure=false;
  b.log=[`${title}：${ENDLESS_OBJECTIVES[objective]}`,siege?'城壁は隣接部隊の破城または薬草2個の爆薬で破壊できます。':naval?'船の甲板と乗り込み橋で戦う海上戦。砲撃と狙撃の射線に注意。':'地形と架橋を活かし、拠点を結ぶ道を確保しよう。'];return b;
 }
-export function beginEndless(s:Campaign){if(!s.endless?.active||!endlessUnlocked(s)||s.phase!=='field')return false;s.battle=makeEndlessBattle(s);s.checkpoint=clone(s.battle);s.resultClaimed=false;s.storyKind='intro';s.storyIndex=0;s.phase='story';return true;}
+export function beginEndless(s:Campaign,originalBanter=true){if(!s.endless?.active||!endlessUnlocked(s)||s.phase!=='field')return false;s.battle=makeEndlessBattle(s,originalBanter);s.checkpoint=clone(s.battle);s.resultClaimed=false;s.storyKind='intro';s.storyIndex=0;s.phase='story';return true;}
 export function claimEndless(s:Campaign){const b=s.battle,m=b?.endless,p=s.endless;if(!m||!p||b?.result!=='win'||s.resultClaimed)return false;s.resultClaimed=true;s.gold+=m.reward;s.supplies+=3;p.chartedRoutes=[...(p.chartedRoutes||[]).filter(v=>v.depth!==m.depth),{depth:m.depth,route:m.site?.route??p.route??0}].slice(-48);delete p.plottedDepth;p.wins++;p.best=Math.max(p.best,p.depth);p.depth++;p.route=0;p.history=[`第${m.depth}航路・${m.title}`, ...p.history].slice(0,30);if(!s.recruited.includes(m.recruit)){s.recruited.push(m.recruit);s.xp[m.recruit]=Math.max(0,...Object.values(s.xp));}s.storyKind='outro';s.storyIndex=0;s.phase='story';return true;}
-export function endlessLines(s:Campaign):Line[]{const m=s.battle!.endless!;return s.storyKind==='intro'?m.story:[{who:m.recruit,text:'この戦場を越えた仲間として、次の航路にも同行する。',reaction:'joy'},{who:'$hero',text:'勝利は終わりではない。休息と編成を済ませたら、次の灯へ。',reaction:'resolve'}];}
+export function endlessLines(s:Campaign,omitOriginal=false):Line[]{const m=s.battle!.endless!;return s.storyKind==='intro'?(omitOriginal?m.story.filter(l=>!l.banterId):m.story):[{who:m.recruit,text:'この戦場を越えた仲間として、次の航路にも同行する。',reaction:'joy'},{who:'$hero',text:'勝利は終わりではない。休息と編成を済ませたら、次の灯へ。',reaction:'resolve'}];}
 function lineClear(b:Battle,a:{x:number;y:number},z:{x:number;y:number}){const n=Math.max(Math.abs(a.x-z.x),Math.abs(a.y-z.y));for(let i=1;i<n;i++)if(b.map[Math.round(a.y+(z.y-a.y)*i/n)]?.[Math.round(a.x+(z.x-a.x)*i/n)]==='#')return false;return true;}
 export function interactEndless(s:Campaign,squadId:string,id:string,bomb=false){const b=s.battle,m=b?.endless,q=b?.squads.find(q=>q.id===squadId),o=m?.installations.find(o=>o.id===id);if(!b||!m||!q||q.team!=='ally'||!living(q)||!o||b.result||b.pending||b.encounter||q.wait>0||distance(q,o)>1)return false;
  if(o.kind==='wall'){

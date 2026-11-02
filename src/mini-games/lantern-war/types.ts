@@ -2,7 +2,7 @@ export type Weapon='sword'|'lance'|'axe'|'bow'|'magic'|'staff';
 export type Terrain='r'|'.'|'f'|'m'|'w'|'#'|'b'|'h'|'t'|'g';
 export type Objective='rout'|'seize'|'defend'|'escape'|'escort'|'boss';
 export type Phase='field'|'camp'|'story'|'battle'|'result'|'ending';
-export type Line={who:string;text:string;reaction?:'neutral'|'joy'|'concern'|'resolve'};
+export type Line={cast?:[string,string];banterId?:string;who:string;text:string;reaction?:'neutral'|'joy'|'concern'|'resolve'};
 export interface Hero{id:string;name:string;origin:string;role:string;weapon:Weapon;skill:string;motto:string;color:string;join:number;hp:number;atk:number;def:number;speed:number;move:number;portrait:string;}
 export interface Chapter{id:number;title:string;place:string;subtitle:string;objective:Objective;turns:number;theme:number;reward:number;recruit:string[];map:string[];intro:Line[];outro:Line[];dilemma?:[string,string];}
 export type RuleSkill='strike'|'ultimate'|'heal'|'row'|'guard'|'rally'|'cleanse'|'break'|'quick'|'execute'|'art1'|'art2'|'art3';
@@ -23,5 +23,5 @@ export interface Installation{id:string;kind:InstallationKind;x:number;y:number;
 export type VoyageRegion='emerald'|'glacier'|'ember'|'starlit';
 export type VoyageKind='island'|'coast'|'naval'|'fortress'|'ruins'|'mainland';
 export interface VoyageSite{id:string;depth:number;page:number;step:number;route:number;region:VoyageRegion;kind:VoyageKind;x:number;y:number;}
-export interface EndlessMission{site?:VoyageSite;depth:number;title:string;theme:number;objective:EndlessObjective;weather:'clear'|'rain'|'fog'|'heat'|'storm';hold:number;installations:Installation[];recruit:string;story:Line[];reward:number;reinforcements:number;}
-export interface EndlessProgress{introSeen?:boolean;plottedDepth?:number;chartedRoutes?:{depth:number;route:number}[];active:boolean;route?:number;blessings?:{attack:number;guard:number;vitality:number};seed:number;depth:number;wins:number;best:number;history:string[];}
+export interface EndlessMission{banterId?:string;banterRecorded?:boolean;site?:VoyageSite;depth:number;title:string;theme:number;objective:EndlessObjective;weather:'clear'|'rain'|'fog'|'heat'|'storm';hold:number;installations:Installation[];recruit:string;story:Line[];reward:number;reinforcements:number;}
+export interface EndlessProgress{banterSeen?:Record<string,number>;banterLast?:string;introSeen?:boolean;plottedDepth?:number;chartedRoutes?:{depth:number;route:number}[];active:boolean;route?:number;blessings?:{attack:number;guard:number;vitality:number};seed:number;depth:number;wins:number;best:number;history:string[];}
