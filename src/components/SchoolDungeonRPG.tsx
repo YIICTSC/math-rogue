@@ -8,7 +8,7 @@ import {traceUmbrella,resolveUmbrella,type UmbrellaKind} from './school-dungeon/
 import {drawUmbrellaEffect} from './school-dungeon/umbrellaEffects';
 import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
 import {drawMartialEffect} from './school-dungeon/dungeons1/martialEffects';
-import {cueStudentAction,cueStudentCombatPose} from './school-dungeon/dungeons1/heroActions';
+import {cueStudentAction} from './school-dungeon/dungeons1/heroActions';
 import {AbilityDetails} from './school-dungeon/student/AbilityDetails';
 import {drawStudentAbilityEffect} from './school-dungeon/student/abilityEffects';
 import {AbilityButton,AbilityBurst,DungeonBiome} from './school-dungeon/student/AbilityUI';
@@ -1878,7 +1878,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
       }
       triggerPlayerAttackAnim(player.dir);
-      if(adventure.series===1){const kind=equippedWeaponKind(player.equipment?.weapon);cueStudentCombatPose(adventure.hero.id,WEAPONS[kind].pose);addVisualEffect('MARTIAL',tx,ty,{dir:player.dir,weaponKind:kind,duration:32,maxDuration:32});}
+      if(adventure.series===1){const kind=equippedWeaponKind(player.equipment?.weapon);addVisualEffect('MARTIAL',tx,ty,{dir:player.dir,weaponKind:kind,duration:32,maxDuration:32});}
       else addVisualEffect('SLASH', tx, ty, { dir: player.dir });
       addLog("素振りをした。");
       audioService.playSound('select');
@@ -2096,7 +2096,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
       if (equipmentHas(player.equipment?.weapon, 'HEAL_SWORD')) setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 3)}));
       triggerPlayerAttackAnim(player.dir);
-      if(adventure.series===1)cueStudentCombatPose(adventure.hero.id,technique?.pose||WEAPONS[weaponKind].pose);
       const targets = [target];
       if(adventure.series===1)addVisualEffect('MARTIAL',target.x,target.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
       else addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });

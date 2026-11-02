@@ -4,6 +4,6 @@ export type ChronicleVoiceAction=typeof CHRONICLE_AUDIO_ACTIONS[number];
 const actors=new Set<string>(DUNGEON_CHRONICLE_VOICE_ACTORS);
 export function chronicleVoicePath(actor:string,action:string){
  if(!actors.has(actor))return undefined;
- if(actor.startsWith('npc-')?!['talk','reveal'].includes(action):!CHRONICLE_AUDIO_ACTIONS.includes(action as ChronicleVoiceAction))return undefined;
+ if(actor.startsWith('npc-')||!CHRONICLE_AUDIO_ACTIONS.includes(action as ChronicleVoiceAction))return undefined;
  return `sfx/dungeons-chronicles/${actor}/${action}.ogg`;
 }

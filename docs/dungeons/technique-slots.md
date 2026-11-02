@@ -34,3 +34,7 @@ Speech sequences have cancellation epochs: a new technique, mute, pause or exit 
 6. `node scripts/technique-cuts/merge-d2-intros.mjs` installs the verified shout pools after all 27 are complete.
 
 Long-running generation is resumable from the recorded clips. Avoid running full TypeScript/build audits concurrently with model inference on memory-constrained workspaces.
+
+## Presentation policy
+
+All Dungeons 1 techniques use the regular eight-direction attack animation. Single-direction illustrated technique sheets and their runtime loader have been retired. Weapon-specific effects remain separate and unchanged. NPC events in both Dungeons games retain their dialogue text and reactions but play no NPC speech; protagonist action and ending voices remain available.

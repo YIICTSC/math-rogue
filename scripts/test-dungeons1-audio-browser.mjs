@@ -74,14 +74,14 @@ else root.render(params.has('hook')?<HookProbe/>:<Game languageMode="ENGLISH" on
     await page.screenshot({ path: `${out}/${hero}.png` });console.log('PASS real dungeon movement and finisher:', hero);
   }
   for (const hero of ['high-school-warrior', 'magic-akari', 'elementary-warrior', 'dungeons2-lyria']) {
-    await page.goto(base + '?sceneHero=' + hero);await page.locator('.dungeon-chronicle').waitFor();
+    await page.goto(base + '?sceneHero=' + hero);await page.locator('.dialogue-chronicle').waitFor();
     await page.waitForTimeout(100);
     const voices = await page.evaluate(() => window.__calls.filter(c=>c[0].includes('VoiceFile')));
     assert.equal(voices.length, hero.startsWith('high-school-') || hero.startsWith('magic-') || hero.startsWith('dungeons2-') ? 0 : 1);
     assert(await page.locator('.conversation-script').innerText());
   }
-  await page.goto(base + '?sceneHero=high-school-warrior&npc=1');await page.waitForFunction(() => window.__calls.some(c=>c[0]==='playDungeonChronicleVoiceFile'));
-  assert((await page.evaluate(() => window.__calls)).some(c=>c[1].startsWith('npc-')&&c[2]==='reveal'));
+  await page.goto(base + '?sceneHero=high-school-warrior&npc=1');await page.locator('.dialogue-chronicle').waitFor();await page.waitForTimeout(100);
+  assert(!(await page.evaluate(() => window.__calls)).some(c=>c[1]?.startsWith('npc-')),'NPC dialogue remains silent');
   assert.deepEqual(errors, []);
-  console.log('PASS: real WARRIOR/AKARI dungeon walking is silent, kills use the main-battle bank, cloned equipment is silent, real equip SE remains, unreferenced hero endings are skipped, NPC/elementary dialogue remains.');
+  console.log('PASS: real WARRIOR/AKARI dungeon walking is silent, kills use the main-battle bank, cloned equipment is silent, real equip SE remains, unreferenced hero endings are skipped, NPC dialogue is silent and elementary hero endings remain.');
 } finally { await browser?.close();server?.httpServer?.closeAllConnections();await server?.close();await fs.rm(entry,{force:true}); }

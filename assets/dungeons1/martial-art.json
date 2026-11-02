@@ -10,7 +10,15 @@
   ],
   "cell": 96,
   "normalization": "One shared scale per hero, bottom-center anchor matched to original reference, nearest-neighbor, lossless WebP; empty-handed poses. Weapon art is a separate effect atlas.",
-  "assets": [
+  "weapons": {
+    "output": "public/sprites/dungeons1/martial/weapons.webp",
+    "source": "exec-1f57c96b-9ec4-4ecc-bdde-5a3520a59dec.png",
+    "sourceSha256": "97fe141d63ac129edb8ef9685736b5296dab692e20a554c221ff474044fc3c96",
+    "sha256": "c8cb6647629c79695c4bbe2f1fade97b7e8d19b42e426dfadf547d76960aed92",
+    "columns": 4,
+    "rows": 3
+  },
+  "retiredAssets": [
     {
       "key": "elementary-assassin",
       "output": "public/sprites/dungeons1/martial/elementary-assassin.webp",
@@ -636,12 +644,6 @@
       "poses": 4
     }
   ],
-  "weapons": {
-    "output": "public/sprites/dungeons1/martial/weapons.webp",
-    "source": "exec-1f57c96b-9ec4-4ecc-bdde-5a3520a59dec.png",
-    "sourceSha256": "97fe141d63ac129edb8ef9685736b5296dab692e20a554c221ff474044fc3c96",
-    "sha256": "c8cb6647629c79695c4bbe2f1fade97b7e8d19b42e426dfadf547d76960aed92",
-    "columns": 4,
-    "rows": 3
-  }
+  "assets": [],
+  "retirement": "Single-direction technique poses retired; all attacks use normal eight-direction actions. Weapon effect atlas remains active."
 }

@@ -7,7 +7,7 @@ for(const action of ['throw','swing','read','use','shoot','pickup','equip','stai
  now+=5000;c.play('elementary-warrior',action);assert.equal(calls.at(-1)[1],action);const n=calls.length;now+=5000;c.play('dungeons2-lyria','read');assert.equal(calls.length,n,'pending speech must not overlap');resolve(true);await new Promise(r=>setImmediate(r));
 }
 allow=false;const count=calls.length;now+=5000;c.play('elementary-warrior','read');assert.equal(calls.length,count);
-assert.equal(chronicleVoicePath('npc-story','reveal'),'sfx/dungeons-chronicles/npc-story/reveal.ogg');assert.equal(chronicleVoicePath('../private','read'),undefined);assert.equal(chronicleVoicePath('dungeons2-lyria','../secret'),undefined);assert.equal(chronicleVoicePath('npc-story','attack'),undefined);
-console.log('PASS: 16 action-specific elementary voices, speech/mute gates, no overlap, NPC speech routing and strict path validation.');
+assert.equal(chronicleVoicePath('npc-story','reveal'),undefined);assert.equal(chronicleVoicePath('../private','read'),undefined);assert.equal(chronicleVoicePath('dungeons2-lyria','../secret'),undefined);assert.equal(chronicleVoicePath('npc-story','attack'),undefined);
+console.log('PASS: 16 action-specific elementary voices, speech/mute gates, no overlap, silent NPC event policy and strict path validation.');
 
 now+=5000;const beforeWalk=calls.length;c.play('elementary-warrior','walk',true);assert.equal(calls.length,beforeWalk);assert.equal(chronicleVoicePath('elementary-warrior','walk'),undefined);
