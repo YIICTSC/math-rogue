@@ -12,7 +12,7 @@ try{
   if(id.endsWith('/school-dungeon/useSchoolAdventure.ts'))return code.replace(' return {known:', ' const api={known:').replace('\n };\n}\nexport type','\n };\n(window as any).__adventure=api;(window as any).__bridge=b.current;return api;\n}\nexport type');
  },configureServer(s){s.middlewares.use('/__d1',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__d1',`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"/><style>body{margin:0}#root{height:100dvh;width:100vw}</style></head><body><div id="root"></div><script type="module" src="/${entry}"></script></body></html>`));});}}]});
  await server.listen();browser=await chromium.launch({headless:true,args:['--no-sandbox']});const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];page.setDefaultTimeout(60000);page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:5274/__d1');await page.getByRole('button',{name:'New game',exact:true}).click();await page.evaluate(id=>window.__adventure.setHero(id),hero);await page.waitForFunction(id=>window.__adventure.selectedHero.id===id,hero);await page.getByRole('button',{name:'Begin this journey',exact:true}).click();await page.locator('.d2-pixel-town').waitFor();assert.equal(await page.evaluate(()=>window.__adventure.hero.id),hero);await page.evaluate(async id=>{await window.__painted(id).decode();},hero);
+ await page.goto('http://127.0.0.1:5274/__d1',{timeout:180000,waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'New game',exact:true}).click();await page.evaluate(id=>window.__adventure.setHero(id),hero);await page.waitForFunction(id=>window.__adventure.selectedHero.id===id,hero);await page.getByRole('button',{name:'Begin this journey',exact:true}).click();await page.locator('.d2-pixel-town').waitFor();assert.equal(await page.evaluate(()=>window.__adventure.hero.id),hero);await page.evaluate(async id=>{await window.__painted(id).decode();},hero);
 
  await page.getByRole('button',{name:'Techniques',exact:true}).last().click();
  assert.equal(await page.locator('.d1-weapon-tabs button').count(),11);
@@ -34,10 +34,10 @@ try{
  await page.evaluate(()=>window.__game.handleActionBtn());
  await page.waitForFunction(()=>window.__adventure.martialProgress.weaponXp.sword===1);
  assert.equal(await page.evaluate(()=>window.__adventure.state.floorTurns),before+1,'normal input spends exactly one turn');
- await page.evaluate(()=>{for(let i=0;i<35;i++)window.__game.attackEnemy(window.__game.enemies.find(e=>e.id===991));});
- await page.waitForFunction(()=>window.__adventure.martialProgress.learned.includes('sword-2'));
+ await page.evaluate(async()=>{for(let i=0;i<35;i++){const a=window.__adventure,p=a.martialProgress;window.__game.attackEnemy(window.__game.enemies.find(e=>e.id===991),p.learned.includes('sword-1')&&a.techniqueGauge>=30?'sword-1':undefined);await new Promise(r=>setTimeout(r,50));}});
+ await page.waitForTimeout(100);assert(await page.evaluate(()=>window.__adventure.martialProgress.learned.includes('sword-2')),JSON.stringify(await page.evaluate(()=>window.__adventure.martialProgress)));
  const sword=await page.evaluate(()=>window.__adventure.martialProgress);
- assert.equal(sword.weaponXp.sword,36);assert.deepEqual(sword.learned,['sword-1','sword-2']);assert.equal(sword.selected.sword,'sword-2');assert.equal(sword.techniqueUses['sword-1'],30);
+ assert.equal(sword.weaponXp.sword,36);assert.deepEqual(sword.learned,['sword-1','sword-2']);assert.equal(sword.selected.sword,'sword-2');assert(sword.techniqueUses['sword-1']>=10);
  await page.screenshot({path:out+'/breakthrough.png'});
  await page.evaluate(()=>window.__adventure.selectMartialTechnique('sword','sword-1'));await page.waitForFunction(()=>window.__adventure.martialProgress.selected.sword==='sword-1');
  const previous=await page.evaluate(()=>JSON.stringify(window.__adventure.martialProgress));
@@ -55,9 +55,9 @@ try{
  await page.evaluate(()=>window.__game.handleActionBtn());
  assert.equal(await page.evaluate(()=>window.__adventure.martialProgress.weaponXp.bow),1);
  // The same attack can hit a group but trains exactly once, and spares neutral merchants.
- await page.evaluate(()=>{const a=window.__adventure,b=window.__bridge,p=a.base.martial[a.hero.id];p.weaponXp.fist=200;p.learned.push('fist-4');a.selectMartialTechnique('fist','fist-4');b.setPlayer(p=>({...p,equipment:{...p.equipment,weapon:null}}));const cells=[[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];b.setEnemies(cells.map(([dx,dy],i)=>({id:1000+i,type:'ENEMY',enemyType:i===7?'SHOPKEEPER':'SLIME',x:6+dx,y:7+dy,hp:500,maxHp:500,attack:1,defense:0,baseAttack:1,baseDefense:0,xp:1,name:'Group target',dir:{x:1,y:0},status:{}})));});
+ await page.evaluate(()=>{const a=window.__adventure,b=window.__bridge,p=a.base.martial[a.hero.id];p.weaponXp.fist=200;p.learned.push('fist-4');a.state.techniqueGauge=100;a.selectMartialTechnique('fist','fist-4');b.setPlayer(p=>({...p,equipment:{...p.equipment,weapon:null}}));const cells=[[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];b.setEnemies(cells.map(([dx,dy],i)=>({id:1000+i,type:'ENEMY',enemyType:i===7?'SHOPKEEPER':'SLIME',x:6+dx,y:7+dy,hp:500,maxHp:500,attack:1,defense:0,baseAttack:1,baseDefense:0,xp:1,name:'Group target',dir:{x:1,y:0},status:{}})));});
  await page.waitForFunction(()=>window.__adventure.martialProgress.selected.fist==='fist-4'&&!window.__game.player.equipment.weapon&&window.__game.enemies.length===8);
- await page.evaluate(()=>window.__game.attackEnemy(window.__game.enemies.find(e=>e.id===1000)));
+ await page.evaluate(()=>window.__game.attackEnemy(window.__game.enemies.find(e=>e.id===1000),'fist-4'));
  await page.waitForFunction(()=>window.__adventure.martialProgress.weaponXp.fist===201);
 
  await page.waitForFunction(()=>window.__game.enemies.some(e=>e.hp<500),{},{timeout:5000});

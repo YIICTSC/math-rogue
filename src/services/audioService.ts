@@ -1,8 +1,8 @@
+import {techniqueVoiceParts,dungeonTechniqueKey,type TechniqueSpeechMode,type VoicePart} from '../components/school-dungeon/techniques/voiceParts';
 import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
 import lanternVoiceManifest from '../mini-games/lantern-war/voiceManifest.json';
 import {sportsVoicePath,sportsVoiceDuration,sportsVoiceAvailable} from '../mini-games/shared/sportsVoices';
 import {STAR_VOICE_IDS} from '../mini-games/star-tide/voiceIds';
-import {techniqueVoicePath} from '../components/school-dungeon/dungeons1/techniqueVoices';
 import {chronicleVoicePath} from '../components/school-dungeon/chronicles/voices';
 import {paperBridgeVoice} from '../data/paperPlaneBridge';
 import { cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
@@ -2229,13 +2229,22 @@ class AudioService {
   }
 
   /** Dedicated protagonist-specific technique calls, using the normal voice volume and stop lifecycle. */
-  public async playDungeons1TechniqueVoice(heroId:string,techniqueId:string){
-      const path=techniqueVoicePath(heroId,techniqueId);if(!path||!this.canPlayConversationVoice())return false;
+  private dungeonTechniqueSequence=0;
+  public async playDungeons1TechniqueVoice(heroId:string,techniqueId:string,mode:TechniqueSpeechMode='normal'){
+      const parts=techniqueVoiceParts(dungeonTechniqueKey(heroId,techniqueId),mode);
+      if(!parts.length||!this.canPlayConversationVoice())return false;
       this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
       this.stopDungeonChronicleVoices(true);
-      const name=`dungeon-chronicle-voice-technique-${heroId}-${techniqueId}`;
-      const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
-      return this.playVoiceFile(name,[versionBgmPath(assetUrl(path))],6500,false,generation,true);
+      const sequence=this.dungeonTechniqueSequence;
+      let played=false;
+      for(const part of parts){
+          if(sequence!==this.dungeonTechniqueSequence||!this.canPlayConversationVoice())return false;
+          const name=`dungeon-chronicle-voice-part-${part.id}`;
+          const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
+          played=await this.playVoiceFile(name,[versionBgmPath(assetUrl(part.path))],Math.ceil(part.duration*1000)+250,false,generation,true);
+          if(!played)return false;
+      }
+      return played;
   }
 
   /** Original action and story voices shared by both Dungeons series. */
@@ -2247,6 +2256,7 @@ class AudioService {
       return this.playVoiceFile(name,[versionBgmPath(assetUrl(path))],4000,false,generation,true);
   }
   public stopDungeonChronicleVoices(includeHeroBanks=false){
+      this.dungeonTechniqueSequence++;
       const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
       for(const name of names)if(name.startsWith('dungeon-chronicle-voice-')||includeHeroBanks&&(name.startsWith('dungeons2-voice-')||name.startsWith('high-school-voice-')||name.startsWith('magic-voice-'))){
           this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
@@ -2260,6 +2270,8 @@ class AudioService {
   /** Offline, original Irodori v4.1 voices for the nine Dungeons 2 heroes. */
   public async playDungeons2VoiceFile(heroId: string, voiceName: string) {
       if (!/^(lyria|celis|flora|noctia|aurene|ignis|leon|orion|leif)$/.test(heroId) || !/^(attack|damage|finish|heal|defeat|transform|ultimate-[123]|card)(?:-alt-[12])?$/.test(voiceName)) return false;
+      const technique=voiceName.replace(/-alt-[12]$/,'');
+      if(/^(ultimate-[123]|card)$/.test(technique))return this.playDungeons1TechniqueVoice(`dungeons2-${heroId}`,technique,technique==='card'||technique==='ultimate-3'?'finisher':'normal');
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return false;
       const name = `dungeons2-voice-${heroId}-${voiceName}`;
@@ -2419,9 +2431,9 @@ class AudioService {
   private kochoReactionTimer: number | null = null;
 
   /** One dry voice at a time; technique calls outrank incidental movement/damage. */
-  public playKochoVoice(hero: KochoHeroId, clip: string, priority = 1): Promise<boolean> {
+  public playKochoVoice(hero: KochoHeroId, clip: string, priority = 1, mode:TechniqueSpeechMode='normal'): Promise<boolean> {
       this.clearKochoReaction();
-      return this.playKochoVoiceClip(hero, clip, kochoVoiceDuration(hero, clip), priority, 'kocho-voices');
+      return this.playKochoVoiceClip(hero, clip, kochoVoiceDuration(hero, clip), priority, 'kocho-voices',clip.startsWith('skill-')?techniqueVoiceParts(`kocho/${hero}/${clip}`,mode):undefined);
   }
 
   public async preloadKochoSuperVoice(hero: KochoHeroId, clip: string): Promise<void> {
@@ -2432,7 +2444,7 @@ class AudioService {
 
   public playKochoSuperVoice(hero: KochoHeroId, clip: string): Promise<boolean> {
       this.clearKochoReaction();
-      return this.playKochoVoiceClip(hero, clip, kochoSuperVoice(hero, clip), 3.5, 'kocho-super-voices');
+      return this.playKochoVoiceClip(hero, clip, kochoSuperVoice(hero, clip), 3.5, 'kocho-super-voices',techniqueVoiceParts(`kocho/${hero}/${clip}`,'finisher'));
   }
 
   public playKochoEnemyVoice(name: string, action: KochoEnemyVoiceAction, priority = 2.5): Promise<boolean> {
@@ -2448,16 +2460,15 @@ class AudioService {
       return this.playKochoVoiceClip(voice.id, action, voice.duration, priority, 'kocho-enemy-voices');
   }
 
-  private async playKochoVoiceClip(hero: string, clip: string, duration: number, priority: number, directory: string): Promise<boolean> {
+  private async playKochoVoiceClip(hero: string, clip: string, duration: number, priority: number, directory: string, parts?:VoicePart[]): Promise<boolean> {
       if (!duration || !this.canPlayConversationVoice() || (priority < this.kochoVoicePriority || (priority === 1 && this.kochoVoicePriority === 1))) return false;
       this.init();
       if (!this.ctx || !this.sfxGain) return false;
       this.stopKochoVoices();
       const sequence = this.kochoVoiceSequence;
       this.kochoVoicePriority = priority;
-      const name = `kocho-voice-${hero}-${clip}`;
-      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
-      this.sfxPlaybackGenerations.set(name, generation);
+      const clips=parts?.length?parts:[{id:`${hero}-${clip}`,path:`sfx/${directory}/${hero}/${clip}.ogg`,duration:duration/1000}];
+      const speak=async()=>{let played=false;for(const part of clips){if(sequence!==this.kochoVoiceSequence||!this.canPlayConversationVoice())return false;const name=`kocho-voice-part-${part.id}`,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);played=await this.playVoiceFile(name,[versionBgmPath(assetUrl(part.path))],Math.ceil(part.duration*1000)+250,false,generation,true);if(!played)return false;}return played;};
       const cancelled = new Promise<boolean>(resolve => { this.cancelKochoVoiceWait = () => resolve(false); });
       // A stalled network/decode must not leave a tactical combo waiting forever.
       const deadline = window.setTimeout(() => {
@@ -2465,7 +2476,7 @@ class AudioService {
       }, duration + 5000);
       try {
           return await Promise.race([
-              this.playVoiceFile(name, [versionBgmPath(assetUrl(`sfx/${directory}/${hero}/${clip}.ogg`))], duration + 250, false, generation, true),
+              speak(),
               cancelled,
           ]);
       } finally {

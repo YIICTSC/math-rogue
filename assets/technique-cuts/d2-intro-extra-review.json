@@ -1,0 +1,19 @@
+{
+  "celis-0": {
+    "sha256": "dde5ae38a31d2f2419fac7f6bde36de93a7e8ac43968bf5f3f1c61f0697e7213",
+    "secondary_asr_model": "Whisper medium, CPU int8",
+    "secondary_asr": "氷なさい",
+    "reading": "こおりなさい",
+    "decision": "Retain: secondary recognition matches the intended pronunciation despite the small-model kanji substitution."
+  },
+  "lyria-0": {
+    "sha256": "ebc0dcb7d37aecfa48eae9baefa18d22aaa1c9bf871ca577e38dd336e1079011",
+    "secondary_asr_before_trim": "行くよ、いろよ!",
+    "decision": "Retain complete first phrase; remove repeated trailing syllables at 1.28–1.52 s using documented trim. Small ASR verifies 行くよ after trim."
+  },
+  "flora-0": {
+    "sha256": "c38be62699a4fed30c504c79f210d2f06d62927bbf9e70e87c66ff34f8f5bda5",
+    "recognized_text": "はい、行くよー",
+    "decision": "Retain: natural short lead-in and emphatic vowel; still a reusable technique shout, with no extra technique name or different actor."
+  }
+}

@@ -1,5 +1,5 @@
 import {LEGACY_WEAPON_KINDS} from './weaponCatalog';
-/** Dungeons 1 martial progression. Plain serializable data; no rendering or storage side effects. */
+/** Shared Dungeons 1/2 martial progression. Plain serializable data; no rendering or storage side effects. */
 export const WEAPON_KINDS=['fist','sword','greatsword','rapier','axe','spear','staff','hammer','bow','whip','chakram'] as const;
 export type WeaponKind=typeof WEAPON_KINDS[number];
 export type CombatPose='slash'|'cleave'|'thrust'|'kick';
@@ -26,14 +26,14 @@ export const TECHNIQUES:Technique[]=WEAPON_KINDS.flatMap(kind=>names[kind].map((
  {id:'ultimate-sky',kind:'spear',ja:'奥義・星巡天翔',en:'Secret Art: Starbound Flight',tier:5,power:2.7,pattern:'burst',pose:'thrust',requires:['spear','bow','chakram']},
  {id:'ultimate-heart',kind:'fist',ja:'奥義・無窮心輪',en:'Secret Art: Boundless Heart',tier:5,power:2.7,pattern:'burst',pose:'kick',requires:['fist','whip','staff']},
 ] as Technique[]);
-export interface MartialProgress {weaponXp:Partial<Record<WeaponKind,number>>;techniqueUses:Record<string,number>;learned:string[];selected:Partial<Record<WeaponKind,string>>;}
-export function newMartialProgress():MartialProgress{return {weaponXp:{},techniqueUses:{},learned:[],selected:{}};}
+export interface MartialProgress {weaponXp:Partial<Record<WeaponKind,number>>;techniqueUses:Record<string,number>;learned:string[];selected:Partial<Record<WeaponKind,string>>;slots:Partial<Record<WeaponKind,string[]>>;}
+export function newMartialProgress():MartialProgress{return {weaponXp:{},techniqueUses:{},learned:[],selected:{},slots:{}};}
 const bounded=(v:unknown,max=1000000)=>typeof v==='number'&&Number.isFinite(v)?Math.min(max,Math.max(0,Math.floor(v))):0;
 /** Migrate absent/partial legacy saves, and reject unknown IDs rather than breaking combat. */
 export function normalizeMartialProgress(raw?:Partial<MartialProgress>|null):MartialProgress{
  const p=newMartialProgress();for(const k of WEAPON_KINDS)p.weaponXp[k]=bounded(raw?.weaponXp?.[k],330);
  for(const t of TECHNIQUES)if(Array.isArray(raw?.learned)&&raw.learned.includes(t.id)){p.learned.push(t.id);p.techniqueUses[t.id]=bounded(raw?.techniqueUses?.[t.id]);}
- for(const k of WEAPON_KINDS){const t=TECHNIQUES.find(t=>t.id===raw?.selected?.[k]&&t.kind===k);if(t&&p.learned.includes(t.id))p.selected[k]=t.id;}return p;
+ for(const k of WEAPON_KINDS){const t=TECHNIQUES.find(t=>t.id===raw?.selected?.[k]&&t.kind===k);if(t&&p.learned.includes(t.id))p.selected[k]=t.id;const valid=TECHNIQUES.filter(t=>t.kind===k&&p.learned.includes(t.id)).map(t=>t.id);const stored=raw?.slots?.[k];const seen=new Set<string>();p.slots[k]=Array.from({length:4},(_,i)=>{const id=(Array.isArray(stored)?stored:valid)[i]||'';if(!valid.includes(id)||seen.has(id))return '';seen.add(id);return id;});}return p;
 }
 export const weaponThreshold=(level:number)=>3*level*(level+1);
 export function weaponLevel(p:MartialProgress,kind:WeaponKind){let level=0;while(level<10&&(p.weaponXp[kind]||0)>=weaponThreshold(level+1))level++;return level;}
@@ -52,15 +52,17 @@ export function canSpark(p:MartialProgress,t:Technique){
  if(t.tier===1)return true;const previous=`${t.kind}-${t.tier-1}`;return p.learned.includes(previous)&&techniqueRank(p,previous)>=2;
 }
 /** One award per real attack, regardless of targets or hits. Empty swings never call this. */
-export function practiceAttack(current:MartialProgress,kind:WeaponKind,random= Math.random){
- const p=normalizeMartialProgress(current),before=weaponLevel(p,kind),used=selectedTechnique(p,kind);
+export function practiceAttack(current:MartialProgress,kind:WeaponKind,random= Math.random,techniqueId?:string){
+ const p=normalizeMartialProgress(current),before=weaponLevel(p,kind),used=TECHNIQUES.find(t=>t.id===techniqueId&&t.kind===kind&&p.learned.includes(t.id));
  p.weaponXp[kind]=Math.min(330,(p.weaponXp[kind]||0)+1);if(used)p.techniqueUses[used.id]=(p.techniqueUses[used.id]||0)+1;
  const candidates=TECHNIQUES.filter(t=>t.kind===kind&&canSpark(p,t)).sort((a,b)=>a.tier-b.tier);
  const sparked=candidates.length&&random()<.22?candidates[0]:undefined;
- if(sparked){p.learned.push(sparked.id);p.selected[kind]=sparked.id;}
+ if(sparked){p.learned.push(sparked.id);p.selected[kind]=sparked.id;p.techniqueUses[sparked.id]=(p.techniqueUses[sparked.id]||0)+1;const slots=[...(p.slots[kind]||['','','',''])],empty=slots.indexOf('');if(empty>=0){slots[empty]=sparked.id;p.slots[kind]=slots;}}
  return {progress:p,technique:sparked||used,sparked,leveled:weaponLevel(p,kind)>before};
 }
 export const TRAINING_WEAPONS=Object.fromEntries(WEAPON_KINDS.filter(k=>k!=='fist').map((kind,i)=>{
  const label=['','青芯の練習剣','黒板の大剣','星図の細剣','木霊の手斧','風見の長槍','天文の杖','予鈴の大槌','若葉の弓','紫苑のリボン鞭','銀月の輪刃'][i+1];
  const type=`D1_TRAINING_${kind.toUpperCase()}`;return [type,{type,category:'WEAPON',weaponKind:kind,name:label,en:`${WEAPONS[kind].en} of practice`,desc:`${WEAPONS[kind].ja}。攻撃+4。実戦で武器熟練度と技を育てる。`,englishDesc:`${WEAPONS[kind].en}. Attack +4. Practice against foes to master techniques.`,power:4,value:200}];
 }));
+
+export function techniqueCost(t:Technique,rank=0){return Math.max(20,[0,30,45,60,80,100][t.tier]-Math.min(5,rank)*2);}

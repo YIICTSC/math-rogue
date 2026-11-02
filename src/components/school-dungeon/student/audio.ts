@@ -1,3 +1,4 @@
+import type {TechniqueSpeechMode} from '../techniques/voiceParts';
 import {chronicleVoicePath} from '../chronicles/voices';
 import {dungeons1BattleVoice,dungeons2BattleVoice,mainBattleVoiceIdentity} from './battleVoicePolicy';
 import {abyssHero} from '../dungeons2/roster';
@@ -21,11 +22,11 @@ export function createStudentAudio(audio:AudioPort,now=()=>performance.now(),ran
  let lastVoice=-Infinity,pending=false,techniquePending=false,techniqueGeneration=0,activeTechnique='';
  const effects=new Map<StudentAudioAction,number>();
  const previousD2=new Map<string,string>();
- return {playTechnique(heroId:string,techniqueId:string){
+ return {playTechnique(heroId:string,techniqueId:string,mode:TechniqueSpeechMode='normal'){
   if(!audio.playDungeons1TechniqueVoice||!audio.canPlayConversationVoice())return;
   const key=heroId+':'+techniqueId;if(techniquePending&&activeTechnique===key)return;
   const generation=++techniqueGeneration;techniquePending=true;activeTechnique=key;lastVoice=now();
-  try{void Promise.resolve(audio.playDungeons1TechniqueVoice(heroId,techniqueId)).catch(()=>false).finally(()=>{if(generation===techniqueGeneration){techniquePending=false;activeTechnique='';}});}catch{if(generation===techniqueGeneration){techniquePending=false;activeTechnique='';}}
+  try{void Promise.resolve(audio.playDungeons1TechniqueVoice(heroId,techniqueId,mode)).catch(()=>false).finally(()=>{if(generation===techniqueGeneration){techniquePending=false;activeTechnique='';}});}catch{if(generation===techniqueGeneration){techniquePending=false;activeTechnique='';}}
  },play(heroId:string,action:StudentAudioAction,finish=false,element='star',abilityName?:string){
   if(action==='walk')return;
   const mainBattle=profile==='dungeons1'&&Boolean(mainBattleVoiceIdentity(heroId));

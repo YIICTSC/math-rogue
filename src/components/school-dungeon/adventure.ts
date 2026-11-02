@@ -14,6 +14,7 @@ export interface SchoolItem {
 export interface Companion {heroId?:string;name:string;role:'HEAL'|'GUARD'|'FETCH';x:number;y:number;hp:number;level:number;xp:number;order:'FOLLOW'|'WAIT';direction?:number;walkFrame?:number;moving?:boolean;attackVisualAt?:number;}
 export interface AdventureState {
  chronicle?:ChronicleRun;
+ techniqueGauge?:number;
  abilityCooldowns?:Record<string,{floor:number;readyAt:number}>;abilitySightUntil?:number;abilityReadyAt?:number;abilityFloor?:number;abilityGuardUntil?:number;abilityPowerUntil?:number;
  version:1;place?:'HOME'|'DUNGEON'|'RELAY';friendRecruited?:boolean;pendingStory?:number;pendingStoryLine?:number;townX?:number;leavingRelay?:boolean; heroId?:string;transformed?:boolean;storySeen?:number[]; runId?:string; mode:AdventureMode; floor:number; floorTurns:number; terrain:Record<string,Terrain>; debt:number; alarm:boolean;
  companion:Companion|null; pouch:string[]; events:Record<string,{kind:string;done:boolean;passable?:boolean}>; swallowed:Record<string,SchoolItem[]>;

@@ -1,3 +1,6 @@
+import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
+import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
+import {drawMartialEffect} from './school-dungeon/dungeons1/martialEffects';
 import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
 import {TrapControls} from './school-dungeon/TrapControls';
 import {FacingButton} from './school-dungeon/FacingButton';
@@ -206,7 +209,7 @@ type TileType = 'WALL' | 'FLOOR' | 'STAIRS' | 'HALLWAY';
 type Direction = { x: 0 | 1 | -1, y: 0 | 1 | -1 };
 type ItemCategory = 'WEAPON' | 'ARMOR' | 'RANGED' | 'CONSUMABLE' | 'SYNTH' | 'STAFF' | 'ACCESSORY' | 'DECK_CARD';
 type EnemyType = 'SLIME' | 'GHOST' | 'DRAIN' | 'DRAGON' | 'METAL' | 'FLOATING' | 'THIEF' | 'BAT' | 'BOSS' | 'MANDRAKE' | 'GOLEM' | 'NINJA' | 'MAGE' | 'SHOPKEEPER';
-type VisualEffectType = 'UMBRELLA' | 'ABILITY' | 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ' | 'WIND' | 'CARD_EFFECT';
+type VisualEffectType = 'MARTIAL' | 'UMBRELLA' | 'ABILITY' | 'SLASH' | 'THUNDER' | 'EXPLOSION' | 'TEXT' | 'FLASH' | 'PROJECTILE' | 'WARP' | 'BEAM' | 'MAGIC_PROJ' | 'WIND' | 'CARD_EFFECT';
 type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
 
 // --- DUNGEON CARD TYPES ---
@@ -222,6 +225,7 @@ interface DungeonCard {
 }
 
 interface VisualEffect {
+  weaponKind?:WeaponKind; martialTier?:number;
   umbrellaKind?: UmbrellaKind;
   impactValue?: string;
   id: number;
@@ -346,6 +350,7 @@ interface RoomRect {
 
 // --- ITEM DATABASE ---
 const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
+    ...TRAINING_WEAPONS as Record<string,Omit<Item,'id'>>,
     'PENCIL_SWORD': { category: 'WEAPON', type: 'PENCIL_SWORD', name: 'えんぴつソード', desc: '削りたて。攻撃+4', power: 4, value: 200 },
     'METAL_BAT': { category: 'WEAPON', type: 'METAL_BAT', name: '金属バット', desc: 'どうたぬき級。攻撃+8', power: 8, value: 500 },
     'PROTRACTOR_EDGE': { category: 'WEAPON', type: 'PROTRACTOR_EDGE', name: '分度器エッジ', desc: '前方3方向を攻撃できる。攻撃+3', power: 3, value: 400 },
@@ -1625,6 +1630,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
            if (!adventure.canDescend()) return; addLog("階段を降りる..."); audioService.playSound('select'); setShowMathChallenge(true); return; }
       const tx = player.x + player.dir.x; const ty = player.y + player.dir.y; const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) { if (target.enemyType === 'SHOPKEEPER') { addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2); setShopState({ active: true, merchantId: target.id, mode: 'BUY' }); setSelectedItemIndex(0); audioService.playSound('select'); } else { attackEnemy(target); processTurn(player.x, player.y); } return; }
+      if(map[ty]?.[tx]&&map[ty][tx]!=='WALL'&&equippedWeaponKind(player.equipment?.weapon)==='bow'){
+          for(let distance=2;distance<=6;distance++){
+              const x=player.x+player.dir.x*distance,y=player.y+player.dir.y*distance;
+              if(!map[y]?.[x]||map[y][x]==='WALL')break;
+              const rangedTarget=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0);
+              if(rangedTarget){if(rangedTarget.enemyType!=='SHOPKEEPER'){attackEnemy(rangedTarget);processTurn(player.x,player.y);}return;}
+          }
+      }
       triggerPlayerAttackAnim(player.dir); addVisualEffect('SLASH', tx, ty, { dir: player.dir }); addLog("素振りをした。"); audioService.playSound('select'); processTurn(player.x, player.y);
   };
 
@@ -1702,25 +1715,56 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const triggerPlayerAttackAnim = (dir: Direction) => { cueD2HeroAction(adventure.hero.id,'attack'); const shift = 6; setPlayer(p => ({ ...p, offset: { x: dir.x * shift, y: dir.y * shift } })); setTimeout(() => setPlayer(p => ({ ...p, offset: { x: 0, y: 0 } })), 100); };
-  const attackEnemy = (target: Entity) => {
+  const attackEnemy = (target: Entity, techniqueId?:string) => {
+      if(target.hp<=0)return;
+      const martial=target.enemyType!=='SHOPKEEPER'?adventure.practiceMartialAttack(techniqueId):null;
+      if(techniqueId&&!martial)return false;
+      const technique=martial?.technique,weaponKind=equippedWeaponKind(player.equipment?.weapon);
+
       if (equipmentHas(player.equipment?.weapon, 'HEAL_SWORD')) setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 3)}));
-      triggerPlayerAttackAnim(player.dir); const targets = [target]; addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
+      triggerPlayerAttackAnim(player.dir); const targets = [target]; addVisualEffect('MARTIAL',target.x,target.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
+      if(technique){
+          studentCue.technique(technique.id,technique.tier===5?'finisher':'normal');
+          addLog(adventure.text(technique.ja,technique.en),'#ffe396');
+          if(technique.pattern==='burst'||technique.pattern==='sweep')for(const enemy of enemies){
+              if(enemy.id===target.id||enemy.hp<=0||enemy.enemyType==='SHOPKEEPER')continue;
+              const dx=enemy.x-player.x,dy=enemy.y-player.y;
+              if(Math.max(Math.abs(dx),Math.abs(dy))<=1&&(technique.pattern==='burst'||dx*player.dir.x+dy*player.dir.y>=0))targets.push(enemy);
+          }
+          if(technique.pattern==='pierce'){
+              const x=target.x+player.dir.x,y=target.y+player.dir.y;
+              if(map[y]?.[x]&&map[y][x]!=='WALL'){const enemy=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0&&e.enemyType!=='SHOPKEEPER');if(enemy)targets.push(enemy);}
+          }
+      }
+
+
       if (equipmentHas(player.equipment?.weapon, 'PROTRACTOR_EDGE')) {
           const {x: dx, y: dy} = player.dir; const others = [];
           if (dx === 0 && dy === -1) others.push({x: -1, y: -1}, {x: 1, y: -1}); else if (dx === 0 && dy === 1) others.push({x: 1, y: 1}, {x: -1, y: 1}); else if (dx === -1 && dy === 0) others.push({x: -1, y: 1}, {x: -1, y: -1}); else if (dx === 1 && dy === 0) others.push({x: 1, y: -1}, {x: 1, y: 1}); else if (dx === -1 && dy === -1) others.push({x: 0, y: -1}, {x: -1, y: 0}); else if (dx === 1 && dy === -1) others.push({x: 0, y: -1}, {x: 1, y: 0}); else if (dx === -1 && dy === 1) others.push({x: -1, y: 0}, {x: 0, y: 1}); else if (dx === 1 && dy === 1) others.push({x: 1, y: 0}, {x: 0, y: 1}); 
           others.forEach(offset => { const tx = player.x + offset.x; const ty = player.y + offset.y; addVisualEffect('SLASH', tx, ty, { dir: offset as Direction }); addVisualEffect('EXPLOSION', tx, ty, { duration: 10, maxDuration: 10, scale: 0.5 }); const t = enemies.find(e => e.x === tx && e.y === ty); if (t) targets.push(t); });
       }
       let newEnemies = [...enemies];
-      targets.forEach(t => {
-          let dmg = Math.max(1, player.attack - t.defense); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2; const wType = player.equipment?.weapon?.type;
+      targets.filter((t,i)=>targets.findIndex(e=>e.id===t.id)===i).forEach(t => {
+          let dmg = Math.max(1, Math.floor(player.attack*(technique?.power||1))-Math.floor(t.defense*(technique?.pattern==='pierce'?.5:1))); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2; const wType = player.equipment?.weapon?.type;
           if (equipmentHas(player.equipment?.weapon, 'OFUDA_RULER') && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); } if (equipmentHas(player.equipment?.weapon, 'VITAMIN_INJECT') && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); } if (equipmentHas(player.equipment?.weapon, 'STAINLESS_PEN') && t.enemyType === 'METAL') dmg = 1; if (equipmentHas(player.equipment?.weapon, 'RICH_WATCH') && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); } if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
           dmg = adventure.damage(dmg); newEnemies = newEnemies.map(e => { if (e.id === t.id) { const nhp = e.hp - dmg; addLog(`${e.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' }); if (nhp <= 0 && equipmentHas(player.equipment?.weapon, 'LADLE') && Math.random() < 0.3) { const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` }; setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]); addLog(`${e.name}を肉に変えた！`, currentTheme.colors.C2); } return { ...e, hp: nhp }; } return e; });
       });
       const deads = newEnemies.filter(e => e.hp <= 0); deads.forEach(d => { if (d.enemyType === 'BOSS') { setGameClear(true); audioService.playSound('win'); saveDungeonScore("Cleared"); storageService.clearDungeonState2(); addVisualEffect('FLASH', 0, 0, { duration: 30, maxDuration: 30 }); } else { addLog(`${d.name}を倒した！ (${d.xp} XP)`); gainXp(d.xp); } });
       adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
-      setEnemies(newEnemies.filter(e => e.hp > 0)); studentCue('attack',deads.length>0);
+      setEnemies(newEnemies.filter(e => e.hp > 0)); if(technique)audioService.playAttackEffectSound(deads.length>0?'finisher':'slash');else studentCue('attack',deads.length>0);
+      return true;
   };
 
+  const useMartialTechnique=(id:string)=>{
+      if(menuOpen||shopState.active||gameOver||gameClear||adventure.abilityBlocked||adventure.state.place!=='DUNGEON'||adventure.state.mode==='PUZZLE'||adventure.isDojoActive()||(adventure.panel&&adventure.panel!=='TECHNIQUES')||(player.status.sleep||0)>0||(player.status.frozen||0)>0)return false;
+      const kind=equippedWeaponKind(player.equipment?.weapon),range=kind==='bow'?6:1;
+      let target:Entity|undefined;
+      for(let n=1;n<=range;n++){const x=player.x+player.dir.x*n,y=player.y+player.dir.y*n;if(!map[y]?.[x]||map[y][x]==='WALL')break;const e=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0);if(e){if(e.enemyType!=='SHOPKEEPER')target=e;break;}}
+      if(!target)return false;
+      if(adventure.panel==='TECHNIQUES')adventure.closeTechniquePanel();
+      if(!attackEnemy(target,id))return false;
+      processTurn(player.x,player.y);return true;
+  };
   const handlePressStart = () => {
       if (adventure.isDojoActive()) return; if (adventure.blocksInput() || menuOpen || shopState.active || gameOver || gameClear) return; fastForwardInterval.current = setTimeout(() => setIsFastForwarding(true), 400); };
   const handlePressEnd = (e?: React.TouchEvent | React.MouseEvent) => { if (e) e.preventDefault(); if (fastForwardInterval.current) { clearTimeout(fastForwardInterval.current); fastForwardInterval.current = null; } if (!isFastForwarding) handleActionBtn(); else setIsFastForwarding(false); };
@@ -1992,7 +2036,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           fx.duration--; let currentX = fx.x; let currentY = fx.y;
           const sx = (fx.x - startX) * ts; const sy = (fx.y - startY) * ts;
           
-          if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
+          if(fx.type==='MARTIAL'){drawMartialEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.weaponKind||'fist',fx.dir,fx.martialTier||0);}
+          else if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
           else if(fx.type==='UMBRELLA'&&fx.umbrellaKind&&fx.startX!==undefined&&fx.startY!==undefined&&fx.targetX!==undefined&&fx.targetY!==undefined){drawUmbrellaEffect(ctx,{startX:fx.startX,startY:fx.startY,targetX:fx.targetX,targetY:fx.targetY,umbrellaKind:fx.umbrellaKind,impactValue:fx.impactValue},1-fx.duration/fx.maxDuration,startX,startY,ts);return;}
           else if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
               if (fx.type === 'THUNDER') {
@@ -2368,7 +2413,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                     </div>
                 ,document.body)}
             </div>
-            <div className="dungeon-log-panel w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>{logs.slice(-4).map((l) => (<div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{tr(l.message)}</div>))}</div>
+            <TechniqueBar adventure={adventure} weapon={player.equipment?.weapon} logs={logs.map(l=>tr(l.message))} blocked={menuOpen||shopState.active||gameOver||gameClear} onUse={useMartialTechnique}/>
+
         </div>
 
         <div className="dungeon-landscape-action-panel hidden landscape:flex md:flex order-3 w-64 flex-col items-center justify-between p-4 bg-[#161616] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">

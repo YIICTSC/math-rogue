@@ -1,0 +1,272 @@
+{
+  "lyria-0": {
+    "sha256": "ebc0dcb7d37aecfa48eae9baefa18d22aaa1c9bf871ca577e38dd336e1079011",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "lyria-1": {
+    "sha256": "5fae51484d46f6e0cdcbe32ea849ec6359541f5821288f7c6ea42f3f175b7929",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "lyria-2": {
+    "sha256": "7b44e224c394164c68fda452d457fbcd77535f631f351e91459b85936b6403e4",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "celis-0": {
+    "sha256": "dde5ae38a31d2f2419fac7f6bde36de93a7e8ac43968bf5f3f1c61f0697e7213",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Medium ASR 氷なさい confirms the intended reading こおりなさい."
+  },
+  "celis-1": {
+    "sha256": "0821486a6c4ed6288685b7a32607635e9049ac7a88147eb2ab36efa254108bb5",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "celis-2": {
+    "sha256": "c04cd918162fc6ce96472f948c66aa49c581e08559898c6b7ea44f579d864cc7",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "flora-0": {
+    "sha256": "c38be62699a4fed30c504c79f210d2f06d62927bbf9e70e87c66ff34f8f5bda5",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Natural additional はい and elongated final vowel are acceptable for this reusable shout."
+  },
+  "flora-1": {
+    "sha256": "ad8c8722a5c103f7920105b6c43ed7572130388accbeffa28d0d5c4758cb8b91",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "flora-2": {
+    "sha256": "9cd53365021d8ae2c6ec235258363461149f17a34df145b369e748c6ce6d8143",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "noctia-0": {
+    "sha256": "27e852914126c0b40033a9d3552e7a8ae7bce71c838dd329629399eca7654e33",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "noctia-1": {
+    "sha256": "cbbbfdb2f5f5dd0131b23829884e1b32cf4396c6cf41ef878036d55f1b06fb7b",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "noctia-2": {
+    "sha256": "b2c8a63d1cd92aea5afc4496e3154c504d48f179d684a7a5728ae28d2b6f5a6c",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "aurene-0": {
+    "sha256": "837ee12af50458ced73f040c04ee15fb9f25d5f40669e4ea920e36d822f3adb4",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Small ASR recognizes the invocation as 光を; both forms are usable short calls, with no unintended skill name."
+  },
+  "aurene-1": {
+    "sha256": "008b9928ccb801ff7ddfdbde2511f707fcdabcc359c81327f5e19ea547a74856",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "aurene-2": {
+    "sha256": "e6d66d51bab7bb54e7cacc038baa7e4b84e1ceec2501d1641cc22ed34c3dce05",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "ignis-0": {
+    "sha256": "fc65d32295b7b6dc1d8cda6307ece8a8d2cf4d6c96a2bb803d693f19db92b928",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "ignis-1": {
+    "sha256": "9e677ad318340c0e176efbea658c97a1821724a96cc822571b92b141506e36c0",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "ignis-2": {
+    "sha256": "d7d58ca1a7c63bfe9b9a86347a03c13452913fed9378828529024b9df116df4a",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "leon-0": {
+    "sha256": "a07c4fb562e20f13fc795f4d3245a95efc6a45e608de47ed6060906bd9eed6f5",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "マイル and 参る have the same intended reading まいる."
+  },
+  "leon-1": {
+    "sha256": "0c971db9f0c527b5912701b45105e5bcd0b26d02d6b5fc23f550e40af2f0b19e",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "leon-2": {
+    "sha256": "1369dd7a03844004d14bca64161cea7b5b043b6c0b8c2750031cd056442281d9",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "orion-0": {
+    "sha256": "22195aea30bf4b3ebaad87eef7379578f3d9b15fce140da78d95d74ee1515d00",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "orion-1": {
+    "sha256": "89b5d6f18c4bd6fbcb7a47d31b346e281033f5309b101519d89bb27e8a23f142",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "好き and 隙 have the same intended reading すき."
+  },
+  "orion-2": {
+    "sha256": "68cf132d4c8a00c8cd8f6b988fbf136eda1ffd3c425507ef6078734126a8fbb9",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "leif-0": {
+    "sha256": "1c2f9a02bffedfa075357d01da9cc2898d5e85a8f6099f2f990a725b0da071bd",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "leif-1": {
+    "sha256": "49c8ffc9b23de8a2d68444545583607a87444b3fe664658fcbe9c03fbe93d7ba",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  },
+  "leif-2": {
+    "sha256": "2757d297f83988b40dcc689ab4145540d17c55d73088fdc04e2a531083c3d70e",
+    "decision": "accepted",
+    "checks": [
+      "reference source hash",
+      "CPU ASR transcript review",
+      "waveform peak and clipping"
+    ],
+    "note": "Recognized phrase agrees with intended call, allowing punctuation and emphatic vowel variation."
+  }
+}

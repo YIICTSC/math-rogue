@@ -1,0 +1,2169 @@
+﻿actor,cue,original_line,prelude,technique_name,prelude_only_source
+d1/elementary-warrior,d1/elementary-warrior/fist-1,いっけー！ 踏風掌！,いっけー！,踏風掌！,False
+d1/elementary-warrior,d1/elementary-warrior/fist-2,ぼくの番だ！ 昇陽連脚！,ぼくの番だ！,昇陽連脚！,False
+d1/elementary-warrior,d1/elementary-warrior/fist-3,友だちのために！ 空鳴り拳！,友だちのために！,空鳴り拳！,False
+d1/elementary-warrior,d1/elementary-warrior/fist-4,勇気いっぱい！ 天環無拍！,勇気いっぱい！,天環無拍！,False
+d1/elementary-warrior,d1/elementary-warrior/sword-1,ぼくの番だ！ 朝露払い！,ぼくの番だ！,朝露払い！,False
+d1/elementary-warrior,d1/elementary-warrior/sword-2,友だちのために！ 双葉返し！,友だちのために！,双葉返し！,False
+d1/elementary-warrior,d1/elementary-warrior/sword-3,勇気いっぱい！ 宵星の輪舞！,勇気いっぱい！,宵星の輪舞！,False
+d1/elementary-warrior,d1/elementary-warrior/sword-4,いっけー！ 黎明一文字！,いっけー！,黎明一文字！,False
+d1/elementary-warrior,d1/elementary-warrior/greatsword-1,友だちのために！ 雲割り！,友だちのために！,雲割り！,False
+d1/elementary-warrior,d1/elementary-warrior/greatsword-2,勇気いっぱい！ 夕凪おろし！,勇気いっぱい！,夕凪おろし！,False
+d1/elementary-warrior,d1/elementary-warrior/greatsword-3,いっけー！ 月稜断！,いっけー！,月稜断！,False
+d1/elementary-warrior,d1/elementary-warrior/greatsword-4,ぼくの番だ！ 蒼天境界斬！,ぼくの番だ！,蒼天境界斬！,False
+d1/elementary-warrior,d1/elementary-warrior/rapier-1,勇気いっぱい！ 針雨！,勇気いっぱい！,針雨！,False
+d1/elementary-warrior,d1/elementary-warrior/rapier-2,いっけー！ 星縫い！,いっけー！,星縫い！,False
+d1/elementary-warrior,d1/elementary-warrior/rapier-3,ぼくの番だ！ 銀糸の螺旋！,ぼくの番だ！,銀糸の螺旋！,False
+d1/elementary-warrior,d1/elementary-warrior/rapier-4,友だちのために！ 流星点描！,友だちのために！,流星点描！,False
+d1/elementary-warrior,d1/elementary-warrior/axe-1,いっけー！ 木霊打ち！,いっけー！,木霊打ち！,False
+d1/elementary-warrior,d1/elementary-warrior/axe-2,ぼくの番だ！ 朱葉落とし！,ぼくの番だ！,朱葉落とし！,False
+d1/elementary-warrior,d1/elementary-warrior/axe-3,友だちのために！ 岩戸裂き！,友だちのために！,岩戸裂き！,False
+d1/elementary-warrior,d1/elementary-warrior/axe-4,勇気いっぱい！ 天樹崩し！,勇気いっぱい！,天樹崩し！,False
+d1/elementary-warrior,d1/elementary-warrior/spear-1,ぼくの番だ！ 風見突き！,ぼくの番だ！,風見突き！,False
+d1/elementary-warrior,d1/elementary-warrior/spear-2,友だちのために！ 燕渡り！,友だちのために！,燕渡り！,False
+d1/elementary-warrior,d1/elementary-warrior/spear-3,勇気いっぱい！ 碧雷穿！,勇気いっぱい！,碧雷穿！,False
+d1/elementary-warrior,d1/elementary-warrior/spear-4,いっけー！ 星河貫き！,いっけー！,星河貫き！,False
+d1/elementary-warrior,d1/elementary-warrior/staff-1,友だちのために！ 小枝払い！,友だちのために！,小枝払い！,False
+d1/elementary-warrior,d1/elementary-warrior/staff-2,勇気いっぱい！ 水鏡返し！,勇気いっぱい！,水鏡返し！,False
+d1/elementary-warrior,d1/elementary-warrior/staff-3,いっけー！ 天秤回し！,いっけー！,天秤回し！,False
+d1/elementary-warrior,d1/elementary-warrior/staff-4,ぼくの番だ！ 万象の円！,ぼくの番だ！,万象の円！,False
+d1/elementary-warrior,d1/elementary-warrior/hammer-1,勇気いっぱい！ 鐘ひとつ！,勇気いっぱい！,鐘ひとつ！,False
+d1/elementary-warrior,d1/elementary-warrior/hammer-2,いっけー！ 地響き拍子！,いっけー！,地響き拍子！,False
+d1/elementary-warrior,d1/elementary-warrior/hammer-3,ぼくの番だ！ 砕月の鼓動！,ぼくの番だ！,砕月の鼓動！,False
+d1/elementary-warrior,d1/elementary-warrior/hammer-4,友だちのために！ 暁鐘轟天！,友だちのために！,暁鐘轟天！,False
+d1/elementary-warrior,d1/elementary-warrior/bow-1,いっけー！ 風糸射ち！,いっけー！,風糸射ち！,False
+d1/elementary-warrior,d1/elementary-warrior/bow-2,ぼくの番だ！ 双虹の矢！,ぼくの番だ！,双虹の矢！,False
+d1/elementary-warrior,d1/elementary-warrior/bow-3,友だちのために！ 星屑時雨！,友だちのために！,星屑時雨！,False
+d1/elementary-warrior,d1/elementary-warrior/bow-4,勇気いっぱい！ 天弧七彩！,勇気いっぱい！,天弧七彩！,False
+d1/elementary-warrior,d1/elementary-warrior/whip-1,ぼくの番だ！ 草波打ち！,ぼくの番だ！,草波打ち！,False
+d1/elementary-warrior,d1/elementary-warrior/whip-2,友だちのために！ 紫電の結び！,友だちのために！,紫電の結び！,False
+d1/elementary-warrior,d1/elementary-warrior/whip-3,勇気いっぱい！ 風花乱れ！,勇気いっぱい！,風花乱れ！,False
+d1/elementary-warrior,d1/elementary-warrior/whip-4,いっけー！ 星環の舞！,いっけー！,星環の舞！,False
+d1/elementary-warrior,d1/elementary-warrior/chakram-1,友だちのために！ 弧月投げ！,友だちのために！,弧月投げ！,False
+d1/elementary-warrior,d1/elementary-warrior/chakram-2,勇気いっぱい！ 双輪巡り！,勇気いっぱい！,双輪巡り！,False
+d1/elementary-warrior,d1/elementary-warrior/chakram-3,いっけー！ 風輪連華！,いっけー！,風輪連華！,False
+d1/elementary-warrior,d1/elementary-warrior/chakram-4,ぼくの番だ！ 天輪帰航！,ぼくの番だ！,天輪帰航！,False
+d1/elementary-warrior,d1/elementary-warrior/ultimate-dawn,勇気いっぱい！ 奥義・万彩黎明！,勇気いっぱい！,奥義・万彩黎明！,False
+d1/elementary-warrior,d1/elementary-warrior/ultimate-earth,いっけー！ 奥義・地天共鳴！,いっけー！,奥義・地天共鳴！,False
+d1/elementary-warrior,d1/elementary-warrior/ultimate-sky,ぼくの番だ！ 奥義・星巡天翔！,ぼくの番だ！,奥義・星巡天翔！,False
+d1/elementary-warrior,d1/elementary-warrior/ultimate-heart,友だちのために！ 奥義・無窮心輪！,友だちのために！,奥義・無窮心輪！,False
+d1/elementary-caretaker,d1/elementary-caretaker/fist-1,だいじょうぶ！ 踏風掌！,だいじょうぶ！,踏風掌！,False
+d1/elementary-caretaker,d1/elementary-caretaker/fist-2,やさしく強く！ 昇陽連脚！,やさしく強く！,昇陽連脚！,False
+d1/elementary-caretaker,d1/elementary-caretaker/fist-3,命を守るよ！ 空鳴り拳！,命を守るよ！,空鳴り拳！,False
+d1/elementary-caretaker,d1/elementary-caretaker/fist-4,みんなを守る！ 天環無拍！,みんなを守る！,天環無拍！,False
+d1/elementary-caretaker,d1/elementary-caretaker/sword-1,やさしく強く！ 朝露払い！,やさしく強く！,朝露払い！,False
+d1/elementary-caretaker,d1/elementary-caretaker/sword-2,命を守るよ！ 双葉返し！,命を守るよ！,双葉返し！,False
+d1/elementary-caretaker,d1/elementary-caretaker/sword-3,みんなを守る！ 宵星の輪舞！,みんなを守る！,宵星の輪舞！,False
+d1/elementary-caretaker,d1/elementary-caretaker/sword-4,だいじょうぶ！ 黎明一文字！,だいじょうぶ！,黎明一文字！,False
+d1/elementary-caretaker,d1/elementary-caretaker/greatsword-1,命を守るよ！ 雲割り！,命を守るよ！,雲割り！,False
+d1/elementary-caretaker,d1/elementary-caretaker/greatsword-2,みんなを守る！ 夕凪おろし！,みんなを守る！,夕凪おろし！,False
+d1/elementary-caretaker,d1/elementary-caretaker/greatsword-3,だいじょうぶ！ 月稜断！,だいじょうぶ！,月稜断！,False
+d1/elementary-caretaker,d1/elementary-caretaker/greatsword-4,やさしく強く！ 蒼天境界斬！,やさしく強く！,蒼天境界斬！,False
+d1/elementary-caretaker,d1/elementary-caretaker/rapier-1,みんなを守る！ 針雨！,みんなを守る！,針雨！,False
+d1/elementary-caretaker,d1/elementary-caretaker/rapier-2,だいじょうぶ！ 星縫い！,だいじょうぶ！,星縫い！,False
+d1/elementary-caretaker,d1/elementary-caretaker/rapier-3,やさしく強く！ 銀糸の螺旋！,やさしく強く！,銀糸の螺旋！,False
+d1/elementary-caretaker,d1/elementary-caretaker/rapier-4,命を守るよ！ 流星点描！,命を守るよ！,流星点描！,False
+d1/elementary-caretaker,d1/elementary-caretaker/axe-1,だいじょうぶ！ 木霊打ち！,だいじょうぶ！,木霊打ち！,False
+d1/elementary-caretaker,d1/elementary-caretaker/axe-2,やさしく強く！ 朱葉落とし！,やさしく強く！,朱葉落とし！,False
+d1/elementary-caretaker,d1/elementary-caretaker/axe-3,命を守るよ！ 岩戸裂き！,命を守るよ！,岩戸裂き！,False
+d1/elementary-caretaker,d1/elementary-caretaker/axe-4,みんなを守る！ 天樹崩し！,みんなを守る！,天樹崩し！,False
+d1/elementary-caretaker,d1/elementary-caretaker/spear-1,やさしく強く！ 風見突き！,やさしく強く！,風見突き！,False
+d1/elementary-caretaker,d1/elementary-caretaker/spear-2,命を守るよ！ 燕渡り！,命を守るよ！,燕渡り！,False
+d1/elementary-caretaker,d1/elementary-caretaker/spear-3,みんなを守る！ 碧雷穿！,みんなを守る！,碧雷穿！,False
+d1/elementary-caretaker,d1/elementary-caretaker/spear-4,だいじょうぶ！ 星河貫き！,だいじょうぶ！,星河貫き！,False
+d1/elementary-caretaker,d1/elementary-caretaker/staff-1,命を守るよ！ 小枝払い！,命を守るよ！,小枝払い！,False
+d1/elementary-caretaker,d1/elementary-caretaker/staff-2,みんなを守る！ 水鏡返し！,みんなを守る！,水鏡返し！,False
+d1/elementary-caretaker,d1/elementary-caretaker/staff-3,だいじょうぶ！ 天秤回し！,だいじょうぶ！,天秤回し！,False
+d1/elementary-caretaker,d1/elementary-caretaker/staff-4,やさしく強く！ 万象の円！,やさしく強く！,万象の円！,False
+d1/elementary-caretaker,d1/elementary-caretaker/hammer-1,みんなを守る！ 鐘ひとつ！,みんなを守る！,鐘ひとつ！,False
+d1/elementary-caretaker,d1/elementary-caretaker/hammer-2,だいじょうぶ！ 地響き拍子！,だいじょうぶ！,地響き拍子！,False
+d1/elementary-caretaker,d1/elementary-caretaker/hammer-3,やさしく強く！ 砕月の鼓動！,やさしく強く！,砕月の鼓動！,False
+d1/elementary-caretaker,d1/elementary-caretaker/hammer-4,命を守るよ！ 暁鐘轟天！,命を守るよ！,暁鐘轟天！,False
+d1/elementary-caretaker,d1/elementary-caretaker/bow-1,だいじょうぶ！ 風糸射ち！,だいじょうぶ！,風糸射ち！,False
+d1/elementary-caretaker,d1/elementary-caretaker/bow-2,やさしく強く！ 双虹の矢！,やさしく強く！,双虹の矢！,False
+d1/elementary-caretaker,d1/elementary-caretaker/bow-3,命を守るよ！ 星屑時雨！,命を守るよ！,星屑時雨！,False
+d1/elementary-caretaker,d1/elementary-caretaker/bow-4,みんなを守る！ 天弧七彩！,みんなを守る！,天弧七彩！,False
+d1/elementary-caretaker,d1/elementary-caretaker/whip-1,やさしく強く！ 草波打ち！,やさしく強く！,草波打ち！,False
+d1/elementary-caretaker,d1/elementary-caretaker/whip-2,命を守るよ！ 紫電の結び！,命を守るよ！,紫電の結び！,False
+d1/elementary-caretaker,d1/elementary-caretaker/whip-3,みんなを守る！ 風花乱れ！,みんなを守る！,風花乱れ！,False
+d1/elementary-caretaker,d1/elementary-caretaker/whip-4,だいじょうぶ！ 星環の舞！,だいじょうぶ！,星環の舞！,False
+d1/elementary-caretaker,d1/elementary-caretaker/chakram-1,命を守るよ！ 弧月投げ！,命を守るよ！,弧月投げ！,False
+d1/elementary-caretaker,d1/elementary-caretaker/chakram-2,みんなを守る！ 双輪巡り！,みんなを守る！,双輪巡り！,False
+d1/elementary-caretaker,d1/elementary-caretaker/chakram-3,だいじょうぶ！ 風輪連華！,だいじょうぶ！,風輪連華！,False
+d1/elementary-caretaker,d1/elementary-caretaker/chakram-4,やさしく強く！ 天輪帰航！,やさしく強く！,天輪帰航！,False
+d1/elementary-caretaker,d1/elementary-caretaker/ultimate-dawn,みんなを守る！ 奥義・万彩黎明！,みんなを守る！,奥義・万彩黎明！,False
+d1/elementary-caretaker,d1/elementary-caretaker/ultimate-earth,だいじょうぶ！ 奥義・地天共鳴！,だいじょうぶ！,奥義・地天共鳴！,False
+d1/elementary-caretaker,d1/elementary-caretaker/ultimate-sky,やさしく強く！ 奥義・星巡天翔！,やさしく強く！,奥義・星巡天翔！,False
+d1/elementary-caretaker,d1/elementary-caretaker/ultimate-heart,命を守るよ！ 奥義・無窮心輪！,命を守るよ！,奥義・無窮心輪！,False
+d1/elementary-assassin,d1/elementary-assassin/fist-1,そこだね！ 踏風掌！,そこだね！,踏風掌！,False
+d1/elementary-assassin,d1/elementary-assassin/fist-2,気配を消して！ 昇陽連脚！,気配を消して！,昇陽連脚！,False
+d1/elementary-assassin,d1/elementary-assassin/fist-3,見切ったよ！ 空鳴り拳！,見切ったよ！,空鳴り拳！,False
+d1/elementary-assassin,d1/elementary-assassin/fist-4,もう逃がさない！ 天環無拍！,もう逃がさない！,天環無拍！,False
+d1/elementary-assassin,d1/elementary-assassin/sword-1,気配を消して！ 朝露払い！,気配を消して！,朝露払い！,False
+d1/elementary-assassin,d1/elementary-assassin/sword-2,見切ったよ！ 双葉返し！,見切ったよ！,双葉返し！,False
+d1/elementary-assassin,d1/elementary-assassin/sword-3,もう逃がさない！ 宵星の輪舞！,もう逃がさない！,宵星の輪舞！,False
+d1/elementary-assassin,d1/elementary-assassin/sword-4,そこだね！ 黎明一文字！,そこだね！,黎明一文字！,False
+d1/elementary-assassin,d1/elementary-assassin/greatsword-1,見切ったよ！ 雲割り！,見切ったよ！,雲割り！,False
+d1/elementary-assassin,d1/elementary-assassin/greatsword-2,もう逃がさない！ 夕凪おろし！,もう逃がさない！,夕凪おろし！,False
+d1/elementary-assassin,d1/elementary-assassin/greatsword-3,そこだね！ 月稜断！,そこだね！,月稜断！,False
+d1/elementary-assassin,d1/elementary-assassin/greatsword-4,気配を消して！ 蒼天境界斬！,気配を消して！,蒼天境界斬！,False
+d1/elementary-assassin,d1/elementary-assassin/rapier-1,もう逃がさない！ 針雨！,もう逃がさない！,針雨！,False
+d1/elementary-assassin,d1/elementary-assassin/rapier-2,そこだね！ 星縫い！,そこだね！,星縫い！,False
+d1/elementary-assassin,d1/elementary-assassin/rapier-3,気配を消して！ 銀糸の螺旋！,気配を消して！,銀糸の螺旋！,False
+d1/elementary-assassin,d1/elementary-assassin/rapier-4,見切ったよ！ 流星点描！,見切ったよ！,流星点描！,False
+d1/elementary-assassin,d1/elementary-assassin/axe-1,そこだね！ 木霊打ち！,そこだね！,木霊打ち！,False
+d1/elementary-assassin,d1/elementary-assassin/axe-2,気配を消して！ 朱葉落とし！,気配を消して！,朱葉落とし！,False
+d1/elementary-assassin,d1/elementary-assassin/axe-3,見切ったよ！ 岩戸裂き！,見切ったよ！,岩戸裂き！,False
+d1/elementary-assassin,d1/elementary-assassin/axe-4,もう逃がさない！ 天樹崩し！,もう逃がさない！,天樹崩し！,False
+d1/elementary-assassin,d1/elementary-assassin/spear-1,気配を消して！ 風見突き！,気配を消して！,風見突き！,False
+d1/elementary-assassin,d1/elementary-assassin/spear-2,見切ったよ！ 燕渡り！,見切ったよ！,燕渡り！,False
+d1/elementary-assassin,d1/elementary-assassin/spear-3,もう逃がさない！ 碧雷穿！,もう逃がさない！,碧雷穿！,False
+d1/elementary-assassin,d1/elementary-assassin/spear-4,そこだね！ 星河貫き！,そこだね！,星河貫き！,False
+d1/elementary-assassin,d1/elementary-assassin/staff-1,見切ったよ！ 小枝払い！,見切ったよ！,小枝払い！,False
+d1/elementary-assassin,d1/elementary-assassin/staff-2,もう逃がさない！ 水鏡返し！,もう逃がさない！,水鏡返し！,False
+d1/elementary-assassin,d1/elementary-assassin/staff-3,そこだね！ 天秤回し！,そこだね！,天秤回し！,False
+d1/elementary-assassin,d1/elementary-assassin/staff-4,気配を消して！ 万象の円！,気配を消して！,万象の円！,False
+d1/elementary-assassin,d1/elementary-assassin/hammer-1,もう逃がさない！ 鐘ひとつ！,もう逃がさない！,鐘ひとつ！,False
+d1/elementary-assassin,d1/elementary-assassin/hammer-2,そこだね！ 地響き拍子！,そこだね！,地響き拍子！,False
+d1/elementary-assassin,d1/elementary-assassin/hammer-3,気配を消して！ 砕月の鼓動！,気配を消して！,砕月の鼓動！,False
+d1/elementary-assassin,d1/elementary-assassin/hammer-4,見切ったよ！ 暁鐘轟天！,見切ったよ！,暁鐘轟天！,False
+d1/elementary-assassin,d1/elementary-assassin/bow-1,そこだね！ 風糸射ち！,そこだね！,風糸射ち！,False
+d1/elementary-assassin,d1/elementary-assassin/bow-2,気配を消して！ 双虹の矢！,気配を消して！,双虹の矢！,False
+d1/elementary-assassin,d1/elementary-assassin/bow-3,見切ったよ！ 星屑時雨！,見切ったよ！,星屑時雨！,False
+d1/elementary-assassin,d1/elementary-assassin/bow-4,もう逃がさない！ 天弧七彩！,もう逃がさない！,天弧七彩！,False
+d1/elementary-assassin,d1/elementary-assassin/whip-1,気配を消して！ 草波打ち！,気配を消して！,草波打ち！,False
+d1/elementary-assassin,d1/elementary-assassin/whip-2,見切ったよ！ 紫電の結び！,見切ったよ！,紫電の結び！,False
+d1/elementary-assassin,d1/elementary-assassin/whip-3,もう逃がさない！ 風花乱れ！,もう逃がさない！,風花乱れ！,False
+d1/elementary-assassin,d1/elementary-assassin/whip-4,そこだね！ 星環の舞！,そこだね！,星環の舞！,False
+d1/elementary-assassin,d1/elementary-assassin/chakram-1,見切ったよ！ 弧月投げ！,見切ったよ！,弧月投げ！,False
+d1/elementary-assassin,d1/elementary-assassin/chakram-2,もう逃がさない！ 双輪巡り！,もう逃がさない！,双輪巡り！,False
+d1/elementary-assassin,d1/elementary-assassin/chakram-3,そこだね！ 風輪連華！,そこだね！,風輪連華！,False
+d1/elementary-assassin,d1/elementary-assassin/chakram-4,気配を消して！ 天輪帰航！,気配を消して！,天輪帰航！,False
+d1/elementary-assassin,d1/elementary-assassin/ultimate-dawn,もう逃がさない！ 奥義・万彩黎明！,もう逃がさない！,奥義・万彩黎明！,False
+d1/elementary-assassin,d1/elementary-assassin/ultimate-earth,そこだね！ 奥義・地天共鳴！,そこだね！,奥義・地天共鳴！,False
+d1/elementary-assassin,d1/elementary-assassin/ultimate-sky,気配を消して！ 奥義・星巡天翔！,気配を消して！,奥義・星巡天翔！,False
+d1/elementary-assassin,d1/elementary-assassin/ultimate-heart,見切ったよ！ 奥義・無窮心輪！,見切ったよ！,奥義・無窮心輪！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/fist-1,全力だ！ 踏風掌！,全力だ！,踏風掌！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/fist-2,ナイス狙い！ 昇陽連脚！,ナイス狙い！,昇陽連脚！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/fist-3,勝負だよ！ 空鳴り拳！,勝負だよ！,空鳴り拳！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/fist-4,最後の一本！ 天環無拍！,最後の一本！,天環無拍！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/sword-1,ナイス狙い！ 朝露払い！,ナイス狙い！,朝露払い！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/sword-2,勝負だよ！ 双葉返し！,勝負だよ！,双葉返し！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/sword-3,最後の一本！ 宵星の輪舞！,最後の一本！,宵星の輪舞！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/sword-4,全力だ！ 黎明一文字！,全力だ！,黎明一文字！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/greatsword-1,勝負だよ！ 雲割り！,勝負だよ！,雲割り！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/greatsword-2,最後の一本！ 夕凪おろし！,最後の一本！,夕凪おろし！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/greatsword-3,全力だ！ 月稜断！,全力だ！,月稜断！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/greatsword-4,ナイス狙い！ 蒼天境界斬！,ナイス狙い！,蒼天境界斬！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/rapier-1,最後の一本！ 針雨！,最後の一本！,針雨！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/rapier-2,全力だ！ 星縫い！,全力だ！,星縫い！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/rapier-3,ナイス狙い！ 銀糸の螺旋！,ナイス狙い！,銀糸の螺旋！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/rapier-4,勝負だよ！ 流星点描！,勝負だよ！,流星点描！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/axe-1,全力だ！ 木霊打ち！,全力だ！,木霊打ち！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/axe-2,ナイス狙い！ 朱葉落とし！,ナイス狙い！,朱葉落とし！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/axe-3,勝負だよ！ 岩戸裂き！,勝負だよ！,岩戸裂き！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/axe-4,最後の一本！ 天樹崩し！,最後の一本！,天樹崩し！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/spear-1,ナイス狙い！ 風見突き！,ナイス狙い！,風見突き！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/spear-2,勝負だよ！ 燕渡り！,勝負だよ！,燕渡り！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/spear-3,最後の一本！ 碧雷穿！,最後の一本！,碧雷穿！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/spear-4,全力だ！ 星河貫き！,全力だ！,星河貫き！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/staff-1,勝負だよ！ 小枝払い！,勝負だよ！,小枝払い！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/staff-2,最後の一本！ 水鏡返し！,最後の一本！,水鏡返し！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/staff-3,全力だ！ 天秤回し！,全力だ！,天秤回し！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/staff-4,ナイス狙い！ 万象の円！,ナイス狙い！,万象の円！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/hammer-1,最後の一本！ 鐘ひとつ！,最後の一本！,鐘ひとつ！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/hammer-2,全力だ！ 地響き拍子！,全力だ！,地響き拍子！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/hammer-3,ナイス狙い！ 砕月の鼓動！,ナイス狙い！,砕月の鼓動！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/hammer-4,勝負だよ！ 暁鐘轟天！,勝負だよ！,暁鐘轟天！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/bow-1,全力だ！ 風糸射ち！,全力だ！,風糸射ち！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/bow-2,ナイス狙い！ 双虹の矢！,ナイス狙い！,双虹の矢！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/bow-3,勝負だよ！ 星屑時雨！,勝負だよ！,星屑時雨！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/bow-4,最後の一本！ 天弧七彩！,最後の一本！,天弧七彩！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/whip-1,ナイス狙い！ 草波打ち！,ナイス狙い！,草波打ち！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/whip-2,勝負だよ！ 紫電の結び！,勝負だよ！,紫電の結び！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/whip-3,最後の一本！ 風花乱れ！,最後の一本！,風花乱れ！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/whip-4,全力だ！ 星環の舞！,全力だ！,星環の舞！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/chakram-1,勝負だよ！ 弧月投げ！,勝負だよ！,弧月投げ！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/chakram-2,最後の一本！ 双輪巡り！,最後の一本！,双輪巡り！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/chakram-3,全力だ！ 風輪連華！,全力だ！,風輪連華！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/chakram-4,ナイス狙い！ 天輪帰航！,ナイス狙い！,天輪帰航！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/ultimate-dawn,最後の一本！ 奥義・万彩黎明！,最後の一本！,奥義・万彩黎明！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/ultimate-earth,全力だ！ 奥義・地天共鳴！,全力だ！,奥義・地天共鳴！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/ultimate-sky,ナイス狙い！ 奥義・星巡天翔！,ナイス狙い！,奥義・星巡天翔！,False
+d1/elementary-dodgeball,d1/elementary-dodgeball/ultimate-heart,勝負だよ！ 奥義・無窮心輪！,勝負だよ！,奥義・無窮心輪！,False
+d1/elementary-bard,d1/elementary-bard/fist-1,せーの！ 踏風掌！,せーの！,踏風掌！,False
+d1/elementary-bard,d1/elementary-bard/fist-2,リズムに乗って！ 昇陽連脚！,リズムに乗って！,昇陽連脚！,False
+d1/elementary-bard,d1/elementary-bard/fist-3,声を合わせて！ 空鳴り拳！,声を合わせて！,空鳴り拳！,False
+d1/elementary-bard,d1/elementary-bard/fist-4,響けぼくの音！ 天環無拍！,響けぼくの音！,天環無拍！,False
+d1/elementary-bard,d1/elementary-bard/sword-1,リズムに乗って！ 朝露払い！,リズムに乗って！,朝露払い！,False
+d1/elementary-bard,d1/elementary-bard/sword-2,声を合わせて！ 双葉返し！,声を合わせて！,双葉返し！,False
+d1/elementary-bard,d1/elementary-bard/sword-3,響けぼくの音！ 宵星の輪舞！,響けぼくの音！,宵星の輪舞！,False
+d1/elementary-bard,d1/elementary-bard/sword-4,せーの！ 黎明一文字！,せーの！,黎明一文字！,False
+d1/elementary-bard,d1/elementary-bard/greatsword-1,声を合わせて！ 雲割り！,声を合わせて！,雲割り！,False
+d1/elementary-bard,d1/elementary-bard/greatsword-2,響けぼくの音！ 夕凪おろし！,響けぼくの音！,夕凪おろし！,False
+d1/elementary-bard,d1/elementary-bard/greatsword-3,せーの！ 月稜断！,せーの！,月稜断！,False
+d1/elementary-bard,d1/elementary-bard/greatsword-4,リズムに乗って！ 蒼天境界斬！,リズムに乗って！,蒼天境界斬！,False
+d1/elementary-bard,d1/elementary-bard/rapier-1,響けぼくの音！ 針雨！,響けぼくの音！,針雨！,False
+d1/elementary-bard,d1/elementary-bard/rapier-2,せーの！ 星縫い！,せーの！,星縫い！,False
+d1/elementary-bard,d1/elementary-bard/rapier-3,リズムに乗って！ 銀糸の螺旋！,リズムに乗って！,銀糸の螺旋！,False
+d1/elementary-bard,d1/elementary-bard/rapier-4,声を合わせて！ 流星点描！,声を合わせて！,流星点描！,False
+d1/elementary-bard,d1/elementary-bard/axe-1,せーの！ 木霊打ち！,せーの！,木霊打ち！,False
+d1/elementary-bard,d1/elementary-bard/axe-2,リズムに乗って！ 朱葉落とし！,リズムに乗って！,朱葉落とし！,False
+d1/elementary-bard,d1/elementary-bard/axe-3,声を合わせて！ 岩戸裂き！,声を合わせて！,岩戸裂き！,False
+d1/elementary-bard,d1/elementary-bard/axe-4,響けぼくの音！ 天樹崩し！,響けぼくの音！,天樹崩し！,False
+d1/elementary-bard,d1/elementary-bard/spear-1,リズムに乗って！ 風見突き！,リズムに乗って！,風見突き！,False
+d1/elementary-bard,d1/elementary-bard/spear-2,声を合わせて！ 燕渡り！,声を合わせて！,燕渡り！,False
+d1/elementary-bard,d1/elementary-bard/spear-3,響けぼくの音！ 碧雷穿！,響けぼくの音！,碧雷穿！,False
+d1/elementary-bard,d1/elementary-bard/spear-4,せーの！ 星河貫き！,せーの！,星河貫き！,False
+d1/elementary-bard,d1/elementary-bard/staff-1,声を合わせて！ 小枝払い！,声を合わせて！,小枝払い！,False
+d1/elementary-bard,d1/elementary-bard/staff-2,響けぼくの音！ 水鏡返し！,響けぼくの音！,水鏡返し！,False
+d1/elementary-bard,d1/elementary-bard/staff-3,せーの！ 天秤回し！,せーの！,天秤回し！,False
+d1/elementary-bard,d1/elementary-bard/staff-4,リズムに乗って！ 万象の円！,リズムに乗って！,万象の円！,False
+d1/elementary-bard,d1/elementary-bard/hammer-1,響けぼくの音！ 鐘ひとつ！,響けぼくの音！,鐘ひとつ！,False
+d1/elementary-bard,d1/elementary-bard/hammer-2,せーの！ 地響き拍子！,せーの！,地響き拍子！,False
+d1/elementary-bard,d1/elementary-bard/hammer-3,リズムに乗って！ 砕月の鼓動！,リズムに乗って！,砕月の鼓動！,False
+d1/elementary-bard,d1/elementary-bard/hammer-4,声を合わせて！ 暁鐘轟天！,声を合わせて！,暁鐘轟天！,False
+d1/elementary-bard,d1/elementary-bard/bow-1,せーの！ 風糸射ち！,せーの！,風糸射ち！,False
+d1/elementary-bard,d1/elementary-bard/bow-2,リズムに乗って！ 双虹の矢！,リズムに乗って！,双虹の矢！,False
+d1/elementary-bard,d1/elementary-bard/bow-3,声を合わせて！ 星屑時雨！,声を合わせて！,星屑時雨！,False
+d1/elementary-bard,d1/elementary-bard/bow-4,響けぼくの音！ 天弧七彩！,響けぼくの音！,天弧七彩！,False
+d1/elementary-bard,d1/elementary-bard/whip-1,リズムに乗って！ 草波打ち！,リズムに乗って！,草波打ち！,False
+d1/elementary-bard,d1/elementary-bard/whip-2,声を合わせて！ 紫電の結び！,声を合わせて！,紫電の結び！,False
+d1/elementary-bard,d1/elementary-bard/whip-3,響けぼくの音！ 風花乱れ！,響けぼくの音！,風花乱れ！,False
+d1/elementary-bard,d1/elementary-bard/whip-4,せーの！ 星環の舞！,せーの！,星環の舞！,False
+d1/elementary-bard,d1/elementary-bard/chakram-1,声を合わせて！ 弧月投げ！,声を合わせて！,弧月投げ！,False
+d1/elementary-bard,d1/elementary-bard/chakram-2,響けぼくの音！ 双輪巡り！,響けぼくの音！,双輪巡り！,False
+d1/elementary-bard,d1/elementary-bard/chakram-3,せーの！ 風輪連華！,せーの！,風輪連華！,False
+d1/elementary-bard,d1/elementary-bard/chakram-4,リズムに乗って！ 天輪帰航！,リズムに乗って！,天輪帰航！,False
+d1/elementary-bard,d1/elementary-bard/ultimate-dawn,響けぼくの音！ 奥義・万彩黎明！,響けぼくの音！,奥義・万彩黎明！,False
+d1/elementary-bard,d1/elementary-bard/ultimate-earth,せーの！ 奥義・地天共鳴！,せーの！,奥義・地天共鳴！,False
+d1/elementary-bard,d1/elementary-bard/ultimate-sky,リズムに乗って！ 奥義・星巡天翔！,リズムに乗って！,奥義・星巡天翔！,False
+d1/elementary-bard,d1/elementary-bard/ultimate-heart,声を合わせて！ 奥義・無窮心輪！,声を合わせて！,奥義・無窮心輪！,False
+d1/elementary-librarian,d1/elementary-librarian/fist-1,読めました！ 踏風掌！,読めました！,踏風掌！,False
+d1/elementary-librarian,d1/elementary-librarian/fist-2,この一節で！ 昇陽連脚！,この一節で！,昇陽連脚！,False
+d1/elementary-librarian,d1/elementary-librarian/fist-3,答えはここに！ 空鳴り拳！,答えはここに！,空鳴り拳！,False
+d1/elementary-librarian,d1/elementary-librarian/fist-4,物語を開くよ！ 天環無拍！,物語を開くよ！,天環無拍！,False
+d1/elementary-librarian,d1/elementary-librarian/sword-1,この一節で！ 朝露払い！,この一節で！,朝露払い！,False
+d1/elementary-librarian,d1/elementary-librarian/sword-2,答えはここに！ 双葉返し！,答えはここに！,双葉返し！,False
+d1/elementary-librarian,d1/elementary-librarian/sword-3,物語を開くよ！ 宵星の輪舞！,物語を開くよ！,宵星の輪舞！,False
+d1/elementary-librarian,d1/elementary-librarian/sword-4,読めました！ 黎明一文字！,読めました！,黎明一文字！,False
+d1/elementary-librarian,d1/elementary-librarian/greatsword-1,答えはここに！ 雲割り！,答えはここに！,雲割り！,False
+d1/elementary-librarian,d1/elementary-librarian/greatsword-2,物語を開くよ！ 夕凪おろし！,物語を開くよ！,夕凪おろし！,False
+d1/elementary-librarian,d1/elementary-librarian/greatsword-3,読めました！ 月稜断！,読めました！,月稜断！,False
+d1/elementary-librarian,d1/elementary-librarian/greatsword-4,この一節で！ 蒼天境界斬！,この一節で！,蒼天境界斬！,False
+d1/elementary-librarian,d1/elementary-librarian/rapier-1,物語を開くよ！ 針雨！,物語を開くよ！,針雨！,False
+d1/elementary-librarian,d1/elementary-librarian/rapier-2,読めました！ 星縫い！,読めました！,星縫い！,False
+d1/elementary-librarian,d1/elementary-librarian/rapier-3,この一節で！ 銀糸の螺旋！,この一節で！,銀糸の螺旋！,False
+d1/elementary-librarian,d1/elementary-librarian/rapier-4,答えはここに！ 流星点描！,答えはここに！,流星点描！,False
+d1/elementary-librarian,d1/elementary-librarian/axe-1,読めました！ 木霊打ち！,読めました！,木霊打ち！,False
+d1/elementary-librarian,d1/elementary-librarian/axe-2,この一節で！ 朱葉落とし！,この一節で！,朱葉落とし！,False
+d1/elementary-librarian,d1/elementary-librarian/axe-3,答えはここに！ 岩戸裂き！,答えはここに！,岩戸裂き！,False
+d1/elementary-librarian,d1/elementary-librarian/axe-4,物語を開くよ！ 天樹崩し！,物語を開くよ！,天樹崩し！,False
+d1/elementary-librarian,d1/elementary-librarian/spear-1,この一節で！ 風見突き！,この一節で！,風見突き！,False
+d1/elementary-librarian,d1/elementary-librarian/spear-2,答えはここに！ 燕渡り！,答えはここに！,燕渡り！,False
+d1/elementary-librarian,d1/elementary-librarian/spear-3,物語を開くよ！ 碧雷穿！,物語を開くよ！,碧雷穿！,False
+d1/elementary-librarian,d1/elementary-librarian/spear-4,読めました！ 星河貫き！,読めました！,星河貫き！,False
+d1/elementary-librarian,d1/elementary-librarian/staff-1,答えはここに！ 小枝払い！,答えはここに！,小枝払い！,False
+d1/elementary-librarian,d1/elementary-librarian/staff-2,物語を開くよ！ 水鏡返し！,物語を開くよ！,水鏡返し！,False
+d1/elementary-librarian,d1/elementary-librarian/staff-3,読めました！ 天秤回し！,読めました！,天秤回し！,False
+d1/elementary-librarian,d1/elementary-librarian/staff-4,この一節で！ 万象の円！,この一節で！,万象の円！,False
+d1/elementary-librarian,d1/elementary-librarian/hammer-1,物語を開くよ！ 鐘ひとつ！,物語を開くよ！,鐘ひとつ！,False
+d1/elementary-librarian,d1/elementary-librarian/hammer-2,読めました！ 地響き拍子！,読めました！,地響き拍子！,False
+d1/elementary-librarian,d1/elementary-librarian/hammer-3,この一節で！ 砕月の鼓動！,この一節で！,砕月の鼓動！,False
+d1/elementary-librarian,d1/elementary-librarian/hammer-4,答えはここに！ 暁鐘轟天！,答えはここに！,暁鐘轟天！,False
+d1/elementary-librarian,d1/elementary-librarian/bow-1,読めました！ 風糸射ち！,読めました！,風糸射ち！,False
+d1/elementary-librarian,d1/elementary-librarian/bow-2,この一節で！ 双虹の矢！,この一節で！,双虹の矢！,False
+d1/elementary-librarian,d1/elementary-librarian/bow-3,答えはここに！ 星屑時雨！,答えはここに！,星屑時雨！,False
+d1/elementary-librarian,d1/elementary-librarian/bow-4,物語を開くよ！ 天弧七彩！,物語を開くよ！,天弧七彩！,False
+d1/elementary-librarian,d1/elementary-librarian/whip-1,この一節で！ 草波打ち！,この一節で！,草波打ち！,False
+d1/elementary-librarian,d1/elementary-librarian/whip-2,答えはここに！ 紫電の結び！,答えはここに！,紫電の結び！,False
+d1/elementary-librarian,d1/elementary-librarian/whip-3,物語を開くよ！ 風花乱れ！,物語を開くよ！,風花乱れ！,False
+d1/elementary-librarian,d1/elementary-librarian/whip-4,読めました！ 星環の舞！,読めました！,星環の舞！,False
+d1/elementary-librarian,d1/elementary-librarian/chakram-1,答えはここに！ 弧月投げ！,答えはここに！,弧月投げ！,False
+d1/elementary-librarian,d1/elementary-librarian/chakram-2,物語を開くよ！ 双輪巡り！,物語を開くよ！,双輪巡り！,False
+d1/elementary-librarian,d1/elementary-librarian/chakram-3,読めました！ 風輪連華！,読めました！,風輪連華！,False
+d1/elementary-librarian,d1/elementary-librarian/chakram-4,この一節で！ 天輪帰航！,この一節で！,天輪帰航！,False
+d1/elementary-librarian,d1/elementary-librarian/ultimate-dawn,物語を開くよ！ 奥義・万彩黎明！,物語を開くよ！,奥義・万彩黎明！,False
+d1/elementary-librarian,d1/elementary-librarian/ultimate-earth,読めました！ 奥義・地天共鳴！,読めました！,奥義・地天共鳴！,False
+d1/elementary-librarian,d1/elementary-librarian/ultimate-sky,この一節で！ 奥義・星巡天翔！,この一節で！,奥義・星巡天翔！,False
+d1/elementary-librarian,d1/elementary-librarian/ultimate-heart,答えはここに！ 奥義・無窮心輪！,答えはここに！,奥義・無窮心輪！,False
+d1/elementary-chef,d1/elementary-chef/fist-1,いただきます！ 踏風掌！,いただきます！,踏風掌！,False
+d1/elementary-chef,d1/elementary-chef/fist-2,仕上げだよ！ 昇陽連脚！,仕上げだよ！,昇陽連脚！,False
+d1/elementary-chef,d1/elementary-chef/fist-3,腕を振るうよ！ 空鳴り拳！,腕を振るうよ！,空鳴り拳！,False
+d1/elementary-chef,d1/elementary-chef/fist-4,とっておきだよ！ 天環無拍！,とっておきだよ！,天環無拍！,False
+d1/elementary-chef,d1/elementary-chef/sword-1,仕上げだよ！ 朝露払い！,仕上げだよ！,朝露払い！,False
+d1/elementary-chef,d1/elementary-chef/sword-2,腕を振るうよ！ 双葉返し！,腕を振るうよ！,双葉返し！,False
+d1/elementary-chef,d1/elementary-chef/sword-3,とっておきだよ！ 宵星の輪舞！,とっておきだよ！,宵星の輪舞！,False
+d1/elementary-chef,d1/elementary-chef/sword-4,いただきます！ 黎明一文字！,いただきます！,黎明一文字！,False
+d1/elementary-chef,d1/elementary-chef/greatsword-1,腕を振るうよ！ 雲割り！,腕を振るうよ！,雲割り！,False
+d1/elementary-chef,d1/elementary-chef/greatsword-2,とっておきだよ！ 夕凪おろし！,とっておきだよ！,夕凪おろし！,False
+d1/elementary-chef,d1/elementary-chef/greatsword-3,いただきます！ 月稜断！,いただきます！,月稜断！,False
+d1/elementary-chef,d1/elementary-chef/greatsword-4,仕上げだよ！ 蒼天境界斬！,仕上げだよ！,蒼天境界斬！,False
+d1/elementary-chef,d1/elementary-chef/rapier-1,とっておきだよ！ 針雨！,とっておきだよ！,針雨！,False
+d1/elementary-chef,d1/elementary-chef/rapier-2,いただきます！ 星縫い！,いただきます！,星縫い！,False
+d1/elementary-chef,d1/elementary-chef/rapier-3,仕上げだよ！ 銀糸の螺旋！,仕上げだよ！,銀糸の螺旋！,False
+d1/elementary-chef,d1/elementary-chef/rapier-4,腕を振るうよ！ 流星点描！,腕を振るうよ！,流星点描！,False
+d1/elementary-chef,d1/elementary-chef/axe-1,いただきます！ 木霊打ち！,いただきます！,木霊打ち！,False
+d1/elementary-chef,d1/elementary-chef/axe-2,仕上げだよ！ 朱葉落とし！,仕上げだよ！,朱葉落とし！,False
+d1/elementary-chef,d1/elementary-chef/axe-3,腕を振るうよ！ 岩戸裂き！,腕を振るうよ！,岩戸裂き！,False
+d1/elementary-chef,d1/elementary-chef/axe-4,とっておきだよ！ 天樹崩し！,とっておきだよ！,天樹崩し！,False
+d1/elementary-chef,d1/elementary-chef/spear-1,仕上げだよ！ 風見突き！,仕上げだよ！,風見突き！,False
+d1/elementary-chef,d1/elementary-chef/spear-2,腕を振るうよ！ 燕渡り！,腕を振るうよ！,燕渡り！,False
+d1/elementary-chef,d1/elementary-chef/spear-3,とっておきだよ！ 碧雷穿！,とっておきだよ！,碧雷穿！,False
+d1/elementary-chef,d1/elementary-chef/spear-4,いただきます！ 星河貫き！,いただきます！,星河貫き！,False
+d1/elementary-chef,d1/elementary-chef/staff-1,腕を振るうよ！ 小枝払い！,腕を振るうよ！,小枝払い！,False
+d1/elementary-chef,d1/elementary-chef/staff-2,とっておきだよ！ 水鏡返し！,とっておきだよ！,水鏡返し！,False
+d1/elementary-chef,d1/elementary-chef/staff-3,いただきます！ 天秤回し！,いただきます！,天秤回し！,False
+d1/elementary-chef,d1/elementary-chef/staff-4,仕上げだよ！ 万象の円！,仕上げだよ！,万象の円！,False
+d1/elementary-chef,d1/elementary-chef/hammer-1,とっておきだよ！ 鐘ひとつ！,とっておきだよ！,鐘ひとつ！,False
+d1/elementary-chef,d1/elementary-chef/hammer-2,いただきます！ 地響き拍子！,いただきます！,地響き拍子！,False
+d1/elementary-chef,d1/elementary-chef/hammer-3,仕上げだよ！ 砕月の鼓動！,仕上げだよ！,砕月の鼓動！,False
+d1/elementary-chef,d1/elementary-chef/hammer-4,腕を振るうよ！ 暁鐘轟天！,腕を振るうよ！,暁鐘轟天！,False
+d1/elementary-chef,d1/elementary-chef/bow-1,いただきます！ 風糸射ち！,いただきます！,風糸射ち！,False
+d1/elementary-chef,d1/elementary-chef/bow-2,仕上げだよ！ 双虹の矢！,仕上げだよ！,双虹の矢！,False
+d1/elementary-chef,d1/elementary-chef/bow-3,腕を振るうよ！ 星屑時雨！,腕を振るうよ！,星屑時雨！,False
+d1/elementary-chef,d1/elementary-chef/bow-4,とっておきだよ！ 天弧七彩！,とっておきだよ！,天弧七彩！,False
+d1/elementary-chef,d1/elementary-chef/whip-1,仕上げだよ！ 草波打ち！,仕上げだよ！,草波打ち！,False
+d1/elementary-chef,d1/elementary-chef/whip-2,腕を振るうよ！ 紫電の結び！,腕を振るうよ！,紫電の結び！,False
+d1/elementary-chef,d1/elementary-chef/whip-3,とっておきだよ！ 風花乱れ！,とっておきだよ！,風花乱れ！,False
+d1/elementary-chef,d1/elementary-chef/whip-4,いただきます！ 星環の舞！,いただきます！,星環の舞！,False
+d1/elementary-chef,d1/elementary-chef/chakram-1,腕を振るうよ！ 弧月投げ！,腕を振るうよ！,弧月投げ！,False
+d1/elementary-chef,d1/elementary-chef/chakram-2,とっておきだよ！ 双輪巡り！,とっておきだよ！,双輪巡り！,False
+d1/elementary-chef,d1/elementary-chef/chakram-3,いただきます！ 風輪連華！,いただきます！,風輪連華！,False
+d1/elementary-chef,d1/elementary-chef/chakram-4,仕上げだよ！ 天輪帰航！,仕上げだよ！,天輪帰航！,False
+d1/elementary-chef,d1/elementary-chef/ultimate-dawn,とっておきだよ！ 奥義・万彩黎明！,とっておきだよ！,奥義・万彩黎明！,False
+d1/elementary-chef,d1/elementary-chef/ultimate-earth,いただきます！ 奥義・地天共鳴！,いただきます！,奥義・地天共鳴！,False
+d1/elementary-chef,d1/elementary-chef/ultimate-sky,仕上げだよ！ 奥義・星巡天翔！,仕上げだよ！,奥義・星巡天翔！,False
+d1/elementary-chef,d1/elementary-chef/ultimate-heart,腕を振るうよ！ 奥義・無窮心輪！,腕を振るうよ！,奥義・無窮心輪！,False
+d1/elementary-gardener,d1/elementary-gardener/fist-1,芽を出せ！ 踏風掌！,芽を出せ！,踏風掌！,False
+d1/elementary-gardener,d1/elementary-gardener/fist-2,大きく育て！ 昇陽連脚！,大きく育て！,昇陽連脚！,False
+d1/elementary-gardener,d1/elementary-gardener/fist-3,風にのって！ 空鳴り拳！,風にのって！,空鳴り拳！,False
+d1/elementary-gardener,d1/elementary-gardener/fist-4,花よ咲き誇れ！ 天環無拍！,花よ咲き誇れ！,天環無拍！,False
+d1/elementary-gardener,d1/elementary-gardener/sword-1,大きく育て！ 朝露払い！,大きく育て！,朝露払い！,False
+d1/elementary-gardener,d1/elementary-gardener/sword-2,風にのって！ 双葉返し！,風にのって！,双葉返し！,False
+d1/elementary-gardener,d1/elementary-gardener/sword-3,花よ咲き誇れ！ 宵星の輪舞！,花よ咲き誇れ！,宵星の輪舞！,False
+d1/elementary-gardener,d1/elementary-gardener/sword-4,芽を出せ！ 黎明一文字！,芽を出せ！,黎明一文字！,False
+d1/elementary-gardener,d1/elementary-gardener/greatsword-1,風にのって！ 雲割り！,風にのって！,雲割り！,False
+d1/elementary-gardener,d1/elementary-gardener/greatsword-2,花よ咲き誇れ！ 夕凪おろし！,花よ咲き誇れ！,夕凪おろし！,False
+d1/elementary-gardener,d1/elementary-gardener/greatsword-3,芽を出せ！ 月稜断！,芽を出せ！,月稜断！,False
+d1/elementary-gardener,d1/elementary-gardener/greatsword-4,大きく育て！ 蒼天境界斬！,大きく育て！,蒼天境界斬！,False
+d1/elementary-gardener,d1/elementary-gardener/rapier-1,花よ咲き誇れ！ 針雨！,花よ咲き誇れ！,針雨！,False
+d1/elementary-gardener,d1/elementary-gardener/rapier-2,芽を出せ！ 星縫い！,芽を出せ！,星縫い！,False
+d1/elementary-gardener,d1/elementary-gardener/rapier-3,大きく育て！ 銀糸の螺旋！,大きく育て！,銀糸の螺旋！,False
+d1/elementary-gardener,d1/elementary-gardener/rapier-4,風にのって！ 流星点描！,風にのって！,流星点描！,False
+d1/elementary-gardener,d1/elementary-gardener/axe-1,芽を出せ！ 木霊打ち！,芽を出せ！,木霊打ち！,False
+d1/elementary-gardener,d1/elementary-gardener/axe-2,大きく育て！ 朱葉落とし！,大きく育て！,朱葉落とし！,False
+d1/elementary-gardener,d1/elementary-gardener/axe-3,風にのって！ 岩戸裂き！,風にのって！,岩戸裂き！,False
+d1/elementary-gardener,d1/elementary-gardener/axe-4,花よ咲き誇れ！ 天樹崩し！,花よ咲き誇れ！,天樹崩し！,False
+d1/elementary-gardener,d1/elementary-gardener/spear-1,大きく育て！ 風見突き！,大きく育て！,風見突き！,False
+d1/elementary-gardener,d1/elementary-gardener/spear-2,風にのって！ 燕渡り！,風にのって！,燕渡り！,False
+d1/elementary-gardener,d1/elementary-gardener/spear-3,花よ咲き誇れ！ 碧雷穿！,花よ咲き誇れ！,碧雷穿！,False
+d1/elementary-gardener,d1/elementary-gardener/spear-4,芽を出せ！ 星河貫き！,芽を出せ！,星河貫き！,False
+d1/elementary-gardener,d1/elementary-gardener/staff-1,風にのって！ 小枝払い！,風にのって！,小枝払い！,False
+d1/elementary-gardener,d1/elementary-gardener/staff-2,花よ咲き誇れ！ 水鏡返し！,花よ咲き誇れ！,水鏡返し！,False
+d1/elementary-gardener,d1/elementary-gardener/staff-3,芽を出せ！ 天秤回し！,芽を出せ！,天秤回し！,False
+d1/elementary-gardener,d1/elementary-gardener/staff-4,大きく育て！ 万象の円！,大きく育て！,万象の円！,False
+d1/elementary-gardener,d1/elementary-gardener/hammer-1,花よ咲き誇れ！ 鐘ひとつ！,花よ咲き誇れ！,鐘ひとつ！,False
+d1/elementary-gardener,d1/elementary-gardener/hammer-2,芽を出せ！ 地響き拍子！,芽を出せ！,地響き拍子！,False
+d1/elementary-gardener,d1/elementary-gardener/hammer-3,大きく育て！ 砕月の鼓動！,大きく育て！,砕月の鼓動！,False
+d1/elementary-gardener,d1/elementary-gardener/hammer-4,風にのって！ 暁鐘轟天！,風にのって！,暁鐘轟天！,False
+d1/elementary-gardener,d1/elementary-gardener/bow-1,芽を出せ！ 風糸射ち！,芽を出せ！,風糸射ち！,False
+d1/elementary-gardener,d1/elementary-gardener/bow-2,大きく育て！ 双虹の矢！,大きく育て！,双虹の矢！,False
+d1/elementary-gardener,d1/elementary-gardener/bow-3,風にのって！ 星屑時雨！,風にのって！,星屑時雨！,False
+d1/elementary-gardener,d1/elementary-gardener/bow-4,花よ咲き誇れ！ 天弧七彩！,花よ咲き誇れ！,天弧七彩！,False
+d1/elementary-gardener,d1/elementary-gardener/whip-1,大きく育て！ 草波打ち！,大きく育て！,草波打ち！,False
+d1/elementary-gardener,d1/elementary-gardener/whip-2,風にのって！ 紫電の結び！,風にのって！,紫電の結び！,False
+d1/elementary-gardener,d1/elementary-gardener/whip-3,花よ咲き誇れ！ 風花乱れ！,花よ咲き誇れ！,風花乱れ！,False
+d1/elementary-gardener,d1/elementary-gardener/whip-4,芽を出せ！ 星環の舞！,芽を出せ！,星環の舞！,False
+d1/elementary-gardener,d1/elementary-gardener/chakram-1,風にのって！ 弧月投げ！,風にのって！,弧月投げ！,False
+d1/elementary-gardener,d1/elementary-gardener/chakram-2,花よ咲き誇れ！ 双輪巡り！,花よ咲き誇れ！,双輪巡り！,False
+d1/elementary-gardener,d1/elementary-gardener/chakram-3,芽を出せ！ 風輪連華！,芽を出せ！,風輪連華！,False
+d1/elementary-gardener,d1/elementary-gardener/chakram-4,大きく育て！ 天輪帰航！,大きく育て！,天輪帰航！,False
+d1/elementary-gardener,d1/elementary-gardener/ultimate-dawn,花よ咲き誇れ！ 奥義・万彩黎明！,花よ咲き誇れ！,奥義・万彩黎明！,False
+d1/elementary-gardener,d1/elementary-gardener/ultimate-earth,芽を出せ！ 奥義・地天共鳴！,芽を出せ！,奥義・地天共鳴！,False
+d1/elementary-gardener,d1/elementary-gardener/ultimate-sky,大きく育て！ 奥義・星巡天翔！,大きく育て！,奥義・星巡天翔！,False
+d1/elementary-gardener,d1/elementary-gardener/ultimate-heart,風にのって！ 奥義・無窮心輪！,風にのって！,奥義・無窮心輪！,False
+d1/elementary-mage,d1/elementary-mage/fist-1,実験開始！ 踏風掌！,実験開始！,踏風掌！,False
+d1/elementary-mage,d1/elementary-mage/fist-2,ひらめいた！ 昇陽連脚！,ひらめいた！,昇陽連脚！,False
+d1/elementary-mage,d1/elementary-mage/fist-3,法則発見！ 空鳴り拳！,法則発見！,空鳴り拳！,False
+d1/elementary-mage,d1/elementary-mage/fist-4,これが大発見！ 天環無拍！,これが大発見！,天環無拍！,False
+d1/elementary-mage,d1/elementary-mage/sword-1,ひらめいた！ 朝露払い！,ひらめいた！,朝露払い！,False
+d1/elementary-mage,d1/elementary-mage/sword-2,法則発見！ 双葉返し！,法則発見！,双葉返し！,False
+d1/elementary-mage,d1/elementary-mage/sword-3,これが大発見！ 宵星の輪舞！,これが大発見！,宵星の輪舞！,False
+d1/elementary-mage,d1/elementary-mage/sword-4,実験開始！ 黎明一文字！,実験開始！,黎明一文字！,False
+d1/elementary-mage,d1/elementary-mage/greatsword-1,法則発見！ 雲割り！,法則発見！,雲割り！,False
+d1/elementary-mage,d1/elementary-mage/greatsword-2,これが大発見！ 夕凪おろし！,これが大発見！,夕凪おろし！,False
+d1/elementary-mage,d1/elementary-mage/greatsword-3,実験開始！ 月稜断！,実験開始！,月稜断！,False
+d1/elementary-mage,d1/elementary-mage/greatsword-4,ひらめいた！ 蒼天境界斬！,ひらめいた！,蒼天境界斬！,False
+d1/elementary-mage,d1/elementary-mage/rapier-1,これが大発見！ 針雨！,これが大発見！,針雨！,False
+d1/elementary-mage,d1/elementary-mage/rapier-2,実験開始！ 星縫い！,実験開始！,星縫い！,False
+d1/elementary-mage,d1/elementary-mage/rapier-3,ひらめいた！ 銀糸の螺旋！,ひらめいた！,銀糸の螺旋！,False
+d1/elementary-mage,d1/elementary-mage/rapier-4,法則発見！ 流星点描！,法則発見！,流星点描！,False
+d1/elementary-mage,d1/elementary-mage/axe-1,実験開始！ 木霊打ち！,実験開始！,木霊打ち！,False
+d1/elementary-mage,d1/elementary-mage/axe-2,ひらめいた！ 朱葉落とし！,ひらめいた！,朱葉落とし！,False
+d1/elementary-mage,d1/elementary-mage/axe-3,法則発見！ 岩戸裂き！,法則発見！,岩戸裂き！,False
+d1/elementary-mage,d1/elementary-mage/axe-4,これが大発見！ 天樹崩し！,これが大発見！,天樹崩し！,False
+d1/elementary-mage,d1/elementary-mage/spear-1,ひらめいた！ 風見突き！,ひらめいた！,風見突き！,False
+d1/elementary-mage,d1/elementary-mage/spear-2,法則発見！ 燕渡り！,法則発見！,燕渡り！,False
+d1/elementary-mage,d1/elementary-mage/spear-3,これが大発見！ 碧雷穿！,これが大発見！,碧雷穿！,False
+d1/elementary-mage,d1/elementary-mage/spear-4,実験開始！ 星河貫き！,実験開始！,星河貫き！,False
+d1/elementary-mage,d1/elementary-mage/staff-1,法則発見！ 小枝払い！,法則発見！,小枝払い！,False
+d1/elementary-mage,d1/elementary-mage/staff-2,これが大発見！ 水鏡返し！,これが大発見！,水鏡返し！,False
+d1/elementary-mage,d1/elementary-mage/staff-3,実験開始！ 天秤回し！,実験開始！,天秤回し！,False
+d1/elementary-mage,d1/elementary-mage/staff-4,ひらめいた！ 万象の円！,ひらめいた！,万象の円！,False
+d1/elementary-mage,d1/elementary-mage/hammer-1,これが大発見！ 鐘ひとつ！,これが大発見！,鐘ひとつ！,False
+d1/elementary-mage,d1/elementary-mage/hammer-2,実験開始！ 地響き拍子！,実験開始！,地響き拍子！,False
+d1/elementary-mage,d1/elementary-mage/hammer-3,ひらめいた！ 砕月の鼓動！,ひらめいた！,砕月の鼓動！,False
+d1/elementary-mage,d1/elementary-mage/hammer-4,法則発見！ 暁鐘轟天！,法則発見！,暁鐘轟天！,False
+d1/elementary-mage,d1/elementary-mage/bow-1,実験開始！ 風糸射ち！,実験開始！,風糸射ち！,False
+d1/elementary-mage,d1/elementary-mage/bow-2,ひらめいた！ 双虹の矢！,ひらめいた！,双虹の矢！,False
+d1/elementary-mage,d1/elementary-mage/bow-3,法則発見！ 星屑時雨！,法則発見！,星屑時雨！,False
+d1/elementary-mage,d1/elementary-mage/bow-4,これが大発見！ 天弧七彩！,これが大発見！,天弧七彩！,False
+d1/elementary-mage,d1/elementary-mage/whip-1,ひらめいた！ 草波打ち！,ひらめいた！,草波打ち！,False
+d1/elementary-mage,d1/elementary-mage/whip-2,法則発見！ 紫電の結び！,法則発見！,紫電の結び！,False
+d1/elementary-mage,d1/elementary-mage/whip-3,これが大発見！ 風花乱れ！,これが大発見！,風花乱れ！,False
+d1/elementary-mage,d1/elementary-mage/whip-4,実験開始！ 星環の舞！,実験開始！,星環の舞！,False
+d1/elementary-mage,d1/elementary-mage/chakram-1,法則発見！ 弧月投げ！,法則発見！,弧月投げ！,False
+d1/elementary-mage,d1/elementary-mage/chakram-2,これが大発見！ 双輪巡り！,これが大発見！,双輪巡り！,False
+d1/elementary-mage,d1/elementary-mage/chakram-3,実験開始！ 風輪連華！,実験開始！,風輪連華！,False
+d1/elementary-mage,d1/elementary-mage/chakram-4,ひらめいた！ 天輪帰航！,ひらめいた！,天輪帰航！,False
+d1/elementary-mage,d1/elementary-mage/ultimate-dawn,これが大発見！ 奥義・万彩黎明！,これが大発見！,奥義・万彩黎明！,False
+d1/elementary-mage,d1/elementary-mage/ultimate-earth,実験開始！ 奥義・地天共鳴！,実験開始！,奥義・地天共鳴！,False
+d1/elementary-mage,d1/elementary-mage/ultimate-sky,ひらめいた！ 奥義・星巡天翔！,ひらめいた！,奥義・星巡天翔！,False
+d1/elementary-mage,d1/elementary-mage/ultimate-heart,法則発見！ 奥義・無窮心輪！,法則発見！,奥義・無窮心輪！,False
+d1/high-school-warrior,d1/high-school-warrior/fist-1,道を開け！ 踏風掌！,道を開け！,踏風掌！,False
+d1/high-school-warrior,d1/high-school-warrior/fist-2,俺が決める！ 昇陽連脚！,俺が決める！,昇陽連脚！,False
+d1/high-school-warrior,d1/high-school-warrior/fist-3,迷いはない！ 空鳴り拳！,迷いはない！,空鳴り拳！,False
+d1/high-school-warrior,d1/high-school-warrior/fist-4,この覚悟で！ 天環無拍！,この覚悟で！,天環無拍！,False
+d1/high-school-warrior,d1/high-school-warrior/sword-1,俺が決める！ 朝露払い！,俺が決める！,朝露払い！,False
+d1/high-school-warrior,d1/high-school-warrior/sword-2,迷いはない！ 双葉返し！,迷いはない！,双葉返し！,False
+d1/high-school-warrior,d1/high-school-warrior/sword-3,この覚悟で！ 宵星の輪舞！,この覚悟で！,宵星の輪舞！,False
+d1/high-school-warrior,d1/high-school-warrior/sword-4,道を開け！ 黎明一文字！,道を開け！,黎明一文字！,False
+d1/high-school-warrior,d1/high-school-warrior/greatsword-1,迷いはない！ 雲割り！,迷いはない！,雲割り！,False
+d1/high-school-warrior,d1/high-school-warrior/greatsword-2,この覚悟で！ 夕凪おろし！,この覚悟で！,夕凪おろし！,False
+d1/high-school-warrior,d1/high-school-warrior/greatsword-3,道を開け！ 月稜断！,道を開け！,月稜断！,False
+d1/high-school-warrior,d1/high-school-warrior/greatsword-4,俺が決める！ 蒼天境界斬！,俺が決める！,蒼天境界斬！,False
+d1/high-school-warrior,d1/high-school-warrior/rapier-1,この覚悟で！ 針雨！,この覚悟で！,針雨！,False
+d1/high-school-warrior,d1/high-school-warrior/rapier-2,道を開け！ 星縫い！,道を開け！,星縫い！,False
+d1/high-school-warrior,d1/high-school-warrior/rapier-3,俺が決める！ 銀糸の螺旋！,俺が決める！,銀糸の螺旋！,False
+d1/high-school-warrior,d1/high-school-warrior/rapier-4,迷いはない！ 流星点描！,迷いはない！,流星点描！,False
+d1/high-school-warrior,d1/high-school-warrior/axe-1,道を開け！ 木霊打ち！,道を開け！,木霊打ち！,False
+d1/high-school-warrior,d1/high-school-warrior/axe-2,俺が決める！ 朱葉落とし！,俺が決める！,朱葉落とし！,False
+d1/high-school-warrior,d1/high-school-warrior/axe-3,迷いはない！ 岩戸裂き！,迷いはない！,岩戸裂き！,False
+d1/high-school-warrior,d1/high-school-warrior/axe-4,この覚悟で！ 天樹崩し！,この覚悟で！,天樹崩し！,False
+d1/high-school-warrior,d1/high-school-warrior/spear-1,俺が決める！ 風見突き！,俺が決める！,風見突き！,False
+d1/high-school-warrior,d1/high-school-warrior/spear-2,迷いはない！ 燕渡り！,迷いはない！,燕渡り！,False
+d1/high-school-warrior,d1/high-school-warrior/spear-3,この覚悟で！ 碧雷穿！,この覚悟で！,碧雷穿！,False
+d1/high-school-warrior,d1/high-school-warrior/spear-4,道を開け！ 星河貫き！,道を開け！,星河貫き！,False
+d1/high-school-warrior,d1/high-school-warrior/staff-1,迷いはない！ 小枝払い！,迷いはない！,小枝払い！,False
+d1/high-school-warrior,d1/high-school-warrior/staff-2,この覚悟で！ 水鏡返し！,この覚悟で！,水鏡返し！,False
+d1/high-school-warrior,d1/high-school-warrior/staff-3,道を開け！ 天秤回し！,道を開け！,天秤回し！,False
+d1/high-school-warrior,d1/high-school-warrior/staff-4,俺が決める！ 万象の円！,俺が決める！,万象の円！,False
+d1/high-school-warrior,d1/high-school-warrior/hammer-1,この覚悟で！ 鐘ひとつ！,この覚悟で！,鐘ひとつ！,False
+d1/high-school-warrior,d1/high-school-warrior/hammer-2,道を開け！ 地響き拍子！,道を開け！,地響き拍子！,False
+d1/high-school-warrior,d1/high-school-warrior/hammer-3,俺が決める！ 砕月の鼓動！,俺が決める！,砕月の鼓動！,False
+d1/high-school-warrior,d1/high-school-warrior/hammer-4,迷いはない！ 暁鐘轟天！,迷いはない！,暁鐘轟天！,False
+d1/high-school-warrior,d1/high-school-warrior/bow-1,道を開け！ 風糸射ち！,道を開け！,風糸射ち！,False
+d1/high-school-warrior,d1/high-school-warrior/bow-2,俺が決める！ 双虹の矢！,俺が決める！,双虹の矢！,False
+d1/high-school-warrior,d1/high-school-warrior/bow-3,迷いはない！ 星屑時雨！,迷いはない！,星屑時雨！,False
+d1/high-school-warrior,d1/high-school-warrior/bow-4,この覚悟で！ 天弧七彩！,この覚悟で！,天弧七彩！,False
+d1/high-school-warrior,d1/high-school-warrior/whip-1,俺が決める！ 草波打ち！,俺が決める！,草波打ち！,False
+d1/high-school-warrior,d1/high-school-warrior/whip-2,迷いはない！ 紫電の結び！,迷いはない！,紫電の結び！,False
+d1/high-school-warrior,d1/high-school-warrior/whip-3,この覚悟で！ 風花乱れ！,この覚悟で！,風花乱れ！,False
+d1/high-school-warrior,d1/high-school-warrior/whip-4,道を開け！ 星環の舞！,道を開け！,星環の舞！,False
+d1/high-school-warrior,d1/high-school-warrior/chakram-1,迷いはない！ 弧月投げ！,迷いはない！,弧月投げ！,False
+d1/high-school-warrior,d1/high-school-warrior/chakram-2,この覚悟で！ 双輪巡り！,この覚悟で！,双輪巡り！,False
+d1/high-school-warrior,d1/high-school-warrior/chakram-3,道を開け！ 風輪連華！,道を開け！,風輪連華！,False
+d1/high-school-warrior,d1/high-school-warrior/chakram-4,俺が決める！ 天輪帰航！,俺が決める！,天輪帰航！,False
+d1/high-school-warrior,d1/high-school-warrior/ultimate-dawn,この覚悟で！ 奥義・万彩黎明！,この覚悟で！,奥義・万彩黎明！,False
+d1/high-school-warrior,d1/high-school-warrior/ultimate-earth,道を開け！ 奥義・地天共鳴！,道を開け！,奥義・地天共鳴！,False
+d1/high-school-warrior,d1/high-school-warrior/ultimate-sky,俺が決める！ 奥義・星巡天翔！,俺が決める！,奥義・星巡天翔！,False
+d1/high-school-warrior,d1/high-school-warrior/ultimate-heart,迷いはない！ 奥義・無窮心輪！,迷いはない！,奥義・無窮心輪！,False
+d1/high-school-caretaker,d1/high-school-caretaker/fist-1,守り抜くよ！ 踏風掌！,守り抜くよ！,踏風掌！,False
+d1/high-school-caretaker,d1/high-school-caretaker/fist-2,心を重ねて！ 昇陽連脚！,心を重ねて！,昇陽連脚！,False
+d1/high-school-caretaker,d1/high-school-caretaker/fist-3,もう傷つけない！ 空鳴り拳！,もう傷つけない！,空鳴り拳！,False
+d1/high-school-caretaker,d1/high-school-caretaker/fist-4,命をつなぐ！ 天環無拍！,命をつなぐ！,天環無拍！,False
+d1/high-school-caretaker,d1/high-school-caretaker/sword-1,心を重ねて！ 朝露払い！,心を重ねて！,朝露払い！,False
+d1/high-school-caretaker,d1/high-school-caretaker/sword-2,もう傷つけない！ 双葉返し！,もう傷つけない！,双葉返し！,False
+d1/high-school-caretaker,d1/high-school-caretaker/sword-3,命をつなぐ！ 宵星の輪舞！,命をつなぐ！,宵星の輪舞！,False
+d1/high-school-caretaker,d1/high-school-caretaker/sword-4,守り抜くよ！ 黎明一文字！,守り抜くよ！,黎明一文字！,False
+d1/high-school-caretaker,d1/high-school-caretaker/greatsword-1,もう傷つけない！ 雲割り！,もう傷つけない！,雲割り！,False
+d1/high-school-caretaker,d1/high-school-caretaker/greatsword-2,命をつなぐ！ 夕凪おろし！,命をつなぐ！,夕凪おろし！,False
+d1/high-school-caretaker,d1/high-school-caretaker/greatsword-3,守り抜くよ！ 月稜断！,守り抜くよ！,月稜断！,False
+d1/high-school-caretaker,d1/high-school-caretaker/greatsword-4,心を重ねて！ 蒼天境界斬！,心を重ねて！,蒼天境界斬！,False
+d1/high-school-caretaker,d1/high-school-caretaker/rapier-1,命をつなぐ！ 針雨！,命をつなぐ！,針雨！,False
+d1/high-school-caretaker,d1/high-school-caretaker/rapier-2,守り抜くよ！ 星縫い！,守り抜くよ！,星縫い！,False
+d1/high-school-caretaker,d1/high-school-caretaker/rapier-3,心を重ねて！ 銀糸の螺旋！,心を重ねて！,銀糸の螺旋！,False
+d1/high-school-caretaker,d1/high-school-caretaker/rapier-4,もう傷つけない！ 流星点描！,もう傷つけない！,流星点描！,False
+d1/high-school-caretaker,d1/high-school-caretaker/axe-1,守り抜くよ！ 木霊打ち！,守り抜くよ！,木霊打ち！,False
+d1/high-school-caretaker,d1/high-school-caretaker/axe-2,心を重ねて！ 朱葉落とし！,心を重ねて！,朱葉落とし！,False
+d1/high-school-caretaker,d1/high-school-caretaker/axe-3,もう傷つけない！ 岩戸裂き！,もう傷つけない！,岩戸裂き！,False
+d1/high-school-caretaker,d1/high-school-caretaker/axe-4,命をつなぐ！ 天樹崩し！,命をつなぐ！,天樹崩し！,False
+d1/high-school-caretaker,d1/high-school-caretaker/spear-1,心を重ねて！ 風見突き！,心を重ねて！,風見突き！,False
+d1/high-school-caretaker,d1/high-school-caretaker/spear-2,もう傷つけない！ 燕渡り！,もう傷つけない！,燕渡り！,False
+d1/high-school-caretaker,d1/high-school-caretaker/spear-3,命をつなぐ！ 碧雷穿！,命をつなぐ！,碧雷穿！,False
+d1/high-school-caretaker,d1/high-school-caretaker/spear-4,守り抜くよ！ 星河貫き！,守り抜くよ！,星河貫き！,False
+d1/high-school-caretaker,d1/high-school-caretaker/staff-1,もう傷つけない！ 小枝払い！,もう傷つけない！,小枝払い！,False
+d1/high-school-caretaker,d1/high-school-caretaker/staff-2,命をつなぐ！ 水鏡返し！,命をつなぐ！,水鏡返し！,False
+d1/high-school-caretaker,d1/high-school-caretaker/staff-3,守り抜くよ！ 天秤回し！,守り抜くよ！,天秤回し！,False
+d1/high-school-caretaker,d1/high-school-caretaker/staff-4,心を重ねて！ 万象の円！,心を重ねて！,万象の円！,False
+d1/high-school-caretaker,d1/high-school-caretaker/hammer-1,命をつなぐ！ 鐘ひとつ！,命をつなぐ！,鐘ひとつ！,False
+d1/high-school-caretaker,d1/high-school-caretaker/hammer-2,守り抜くよ！ 地響き拍子！,守り抜くよ！,地響き拍子！,False
+d1/high-school-caretaker,d1/high-school-caretaker/hammer-3,心を重ねて！ 砕月の鼓動！,心を重ねて！,砕月の鼓動！,False
+d1/high-school-caretaker,d1/high-school-caretaker/hammer-4,もう傷つけない！ 暁鐘轟天！,もう傷つけない！,暁鐘轟天！,False
+d1/high-school-caretaker,d1/high-school-caretaker/bow-1,守り抜くよ！ 風糸射ち！,守り抜くよ！,風糸射ち！,False
+d1/high-school-caretaker,d1/high-school-caretaker/bow-2,心を重ねて！ 双虹の矢！,心を重ねて！,双虹の矢！,False
+d1/high-school-caretaker,d1/high-school-caretaker/bow-3,もう傷つけない！ 星屑時雨！,もう傷つけない！,星屑時雨！,False
+d1/high-school-caretaker,d1/high-school-caretaker/bow-4,命をつなぐ！ 天弧七彩！,命をつなぐ！,天弧七彩！,False
+d1/high-school-caretaker,d1/high-school-caretaker/whip-1,心を重ねて！ 草波打ち！,心を重ねて！,草波打ち！,False
+d1/high-school-caretaker,d1/high-school-caretaker/whip-2,もう傷つけない！ 紫電の結び！,もう傷つけない！,紫電の結び！,False
+d1/high-school-caretaker,d1/high-school-caretaker/whip-3,命をつなぐ！ 風花乱れ！,命をつなぐ！,風花乱れ！,False
+d1/high-school-caretaker,d1/high-school-caretaker/whip-4,守り抜くよ！ 星環の舞！,守り抜くよ！,星環の舞！,False
+d1/high-school-caretaker,d1/high-school-caretaker/chakram-1,もう傷つけない！ 弧月投げ！,もう傷つけない！,弧月投げ！,False
+d1/high-school-caretaker,d1/high-school-caretaker/chakram-2,命をつなぐ！ 双輪巡り！,命をつなぐ！,双輪巡り！,False
+d1/high-school-caretaker,d1/high-school-caretaker/chakram-3,守り抜くよ！ 風輪連華！,守り抜くよ！,風輪連華！,False
+d1/high-school-caretaker,d1/high-school-caretaker/chakram-4,心を重ねて！ 天輪帰航！,心を重ねて！,天輪帰航！,False
+d1/high-school-caretaker,d1/high-school-caretaker/ultimate-dawn,命をつなぐ！ 奥義・万彩黎明！,命をつなぐ！,奥義・万彩黎明！,False
+d1/high-school-caretaker,d1/high-school-caretaker/ultimate-earth,守り抜くよ！ 奥義・地天共鳴！,守り抜くよ！,奥義・地天共鳴！,False
+d1/high-school-caretaker,d1/high-school-caretaker/ultimate-sky,心を重ねて！ 奥義・星巡天翔！,心を重ねて！,奥義・星巡天翔！,False
+d1/high-school-caretaker,d1/high-school-caretaker/ultimate-heart,もう傷つけない！ 奥義・無窮心輪！,もう傷つけない！,奥義・無窮心輪！,False
+d1/high-school-assassin,d1/high-school-assassin/fist-1,隙はそこ！ 踏風掌！,隙はそこ！,踏風掌！,False
+d1/high-school-assassin,d1/high-school-assassin/fist-2,影から行く！ 昇陽連脚！,影から行く！,昇陽連脚！,False
+d1/high-school-assassin,d1/high-school-assassin/fist-3,音もなく！ 空鳴り拳！,音もなく！,空鳴り拳！,False
+d1/high-school-assassin,d1/high-school-assassin/fist-4,これで終幕だ！ 天環無拍！,これで終幕だ！,天環無拍！,False
+d1/high-school-assassin,d1/high-school-assassin/sword-1,影から行く！ 朝露払い！,影から行く！,朝露払い！,False
+d1/high-school-assassin,d1/high-school-assassin/sword-2,音もなく！ 双葉返し！,音もなく！,双葉返し！,False
+d1/high-school-assassin,d1/high-school-assassin/sword-3,これで終幕だ！ 宵星の輪舞！,これで終幕だ！,宵星の輪舞！,False
+d1/high-school-assassin,d1/high-school-assassin/sword-4,隙はそこ！ 黎明一文字！,隙はそこ！,黎明一文字！,False
+d1/high-school-assassin,d1/high-school-assassin/greatsword-1,音もなく！ 雲割り！,音もなく！,雲割り！,False
+d1/high-school-assassin,d1/high-school-assassin/greatsword-2,これで終幕だ！ 夕凪おろし！,これで終幕だ！,夕凪おろし！,False
+d1/high-school-assassin,d1/high-school-assassin/greatsword-3,隙はそこ！ 月稜断！,隙はそこ！,月稜断！,False
+d1/high-school-assassin,d1/high-school-assassin/greatsword-4,影から行く！ 蒼天境界斬！,影から行く！,蒼天境界斬！,False
+d1/high-school-assassin,d1/high-school-assassin/rapier-1,これで終幕だ！ 針雨！,これで終幕だ！,針雨！,False
+d1/high-school-assassin,d1/high-school-assassin/rapier-2,隙はそこ！ 星縫い！,隙はそこ！,星縫い！,False
+d1/high-school-assassin,d1/high-school-assassin/rapier-3,影から行く！ 銀糸の螺旋！,影から行く！,銀糸の螺旋！,False
+d1/high-school-assassin,d1/high-school-assassin/rapier-4,音もなく！ 流星点描！,音もなく！,流星点描！,False
+d1/high-school-assassin,d1/high-school-assassin/axe-1,隙はそこ！ 木霊打ち！,隙はそこ！,木霊打ち！,False
+d1/high-school-assassin,d1/high-school-assassin/axe-2,影から行く！ 朱葉落とし！,影から行く！,朱葉落とし！,False
+d1/high-school-assassin,d1/high-school-assassin/axe-3,音もなく！ 岩戸裂き！,音もなく！,岩戸裂き！,False
+d1/high-school-assassin,d1/high-school-assassin/axe-4,これで終幕だ！ 天樹崩し！,これで終幕だ！,天樹崩し！,False
+d1/high-school-assassin,d1/high-school-assassin/spear-1,影から行く！ 風見突き！,影から行く！,風見突き！,False
+d1/high-school-assassin,d1/high-school-assassin/spear-2,音もなく！ 燕渡り！,音もなく！,燕渡り！,False
+d1/high-school-assassin,d1/high-school-assassin/spear-3,これで終幕だ！ 碧雷穿！,これで終幕だ！,碧雷穿！,False
+d1/high-school-assassin,d1/high-school-assassin/spear-4,隙はそこ！ 星河貫き！,隙はそこ！,星河貫き！,False
+d1/high-school-assassin,d1/high-school-assassin/staff-1,音もなく！ 小枝払い！,音もなく！,小枝払い！,False
+d1/high-school-assassin,d1/high-school-assassin/staff-2,これで終幕だ！ 水鏡返し！,これで終幕だ！,水鏡返し！,False
+d1/high-school-assassin,d1/high-school-assassin/staff-3,隙はそこ！ 天秤回し！,隙はそこ！,天秤回し！,False
+d1/high-school-assassin,d1/high-school-assassin/staff-4,影から行く！ 万象の円！,影から行く！,万象の円！,False
+d1/high-school-assassin,d1/high-school-assassin/hammer-1,これで終幕だ！ 鐘ひとつ！,これで終幕だ！,鐘ひとつ！,False
+d1/high-school-assassin,d1/high-school-assassin/hammer-2,隙はそこ！ 地響き拍子！,隙はそこ！,地響き拍子！,False
+d1/high-school-assassin,d1/high-school-assassin/hammer-3,影から行く！ 砕月の鼓動！,影から行く！,砕月の鼓動！,False
+d1/high-school-assassin,d1/high-school-assassin/hammer-4,音もなく！ 暁鐘轟天！,音もなく！,暁鐘轟天！,False
+d1/high-school-assassin,d1/high-school-assassin/bow-1,隙はそこ！ 風糸射ち！,隙はそこ！,風糸射ち！,False
+d1/high-school-assassin,d1/high-school-assassin/bow-2,影から行く！ 双虹の矢！,影から行く！,双虹の矢！,False
+d1/high-school-assassin,d1/high-school-assassin/bow-3,音もなく！ 星屑時雨！,音もなく！,星屑時雨！,False
+d1/high-school-assassin,d1/high-school-assassin/bow-4,これで終幕だ！ 天弧七彩！,これで終幕だ！,天弧七彩！,False
+d1/high-school-assassin,d1/high-school-assassin/whip-1,影から行く！ 草波打ち！,影から行く！,草波打ち！,False
+d1/high-school-assassin,d1/high-school-assassin/whip-2,音もなく！ 紫電の結び！,音もなく！,紫電の結び！,False
+d1/high-school-assassin,d1/high-school-assassin/whip-3,これで終幕だ！ 風花乱れ！,これで終幕だ！,風花乱れ！,False
+d1/high-school-assassin,d1/high-school-assassin/whip-4,隙はそこ！ 星環の舞！,隙はそこ！,星環の舞！,False
+d1/high-school-assassin,d1/high-school-assassin/chakram-1,音もなく！ 弧月投げ！,音もなく！,弧月投げ！,False
+d1/high-school-assassin,d1/high-school-assassin/chakram-2,これで終幕だ！ 双輪巡り！,これで終幕だ！,双輪巡り！,False
+d1/high-school-assassin,d1/high-school-assassin/chakram-3,隙はそこ！ 風輪連華！,隙はそこ！,風輪連華！,False
+d1/high-school-assassin,d1/high-school-assassin/chakram-4,影から行く！ 天輪帰航！,影から行く！,天輪帰航！,False
+d1/high-school-assassin,d1/high-school-assassin/ultimate-dawn,これで終幕だ！ 奥義・万彩黎明！,これで終幕だ！,奥義・万彩黎明！,False
+d1/high-school-assassin,d1/high-school-assassin/ultimate-earth,隙はそこ！ 奥義・地天共鳴！,隙はそこ！,奥義・地天共鳴！,False
+d1/high-school-assassin,d1/high-school-assassin/ultimate-sky,影から行く！ 奥義・星巡天翔！,影から行く！,奥義・星巡天翔！,False
+d1/high-school-assassin,d1/high-school-assassin/ultimate-heart,音もなく！ 奥義・無窮心輪！,音もなく！,奥義・無窮心輪！,False
+d1/high-school-mage,d1/high-school-mage/fist-1,仮説を試す！ 踏風掌！,仮説を試す！,踏風掌！,False
+d1/high-school-mage,d1/high-school-mage/fist-2,観測完了！ 昇陽連脚！,観測完了！,昇陽連脚！,False
+d1/high-school-mage,d1/high-school-mage/fist-3,解は得られた！ 空鳴り拳！,解は得られた！,空鳴り拳！,False
+d1/high-school-mage,d1/high-school-mage/fist-4,証明してみせる！ 天環無拍！,証明してみせる！,天環無拍！,False
+d1/high-school-mage,d1/high-school-mage/sword-1,観測完了！ 朝露払い！,観測完了！,朝露払い！,False
+d1/high-school-mage,d1/high-school-mage/sword-2,解は得られた！ 双葉返し！,解は得られた！,双葉返し！,False
+d1/high-school-mage,d1/high-school-mage/sword-3,証明してみせる！ 宵星の輪舞！,証明してみせる！,宵星の輪舞！,False
+d1/high-school-mage,d1/high-school-mage/sword-4,仮説を試す！ 黎明一文字！,仮説を試す！,黎明一文字！,False
+d1/high-school-mage,d1/high-school-mage/greatsword-1,解は得られた！ 雲割り！,解は得られた！,雲割り！,False
+d1/high-school-mage,d1/high-school-mage/greatsword-2,証明してみせる！ 夕凪おろし！,証明してみせる！,夕凪おろし！,False
+d1/high-school-mage,d1/high-school-mage/greatsword-3,仮説を試す！ 月稜断！,仮説を試す！,月稜断！,False
+d1/high-school-mage,d1/high-school-mage/greatsword-4,観測完了！ 蒼天境界斬！,観測完了！,蒼天境界斬！,False
+d1/high-school-mage,d1/high-school-mage/rapier-1,証明してみせる！ 針雨！,証明してみせる！,針雨！,False
+d1/high-school-mage,d1/high-school-mage/rapier-2,仮説を試す！ 星縫い！,仮説を試す！,星縫い！,False
+d1/high-school-mage,d1/high-school-mage/rapier-3,観測完了！ 銀糸の螺旋！,観測完了！,銀糸の螺旋！,False
+d1/high-school-mage,d1/high-school-mage/rapier-4,解は得られた！ 流星点描！,解は得られた！,流星点描！,False
+d1/high-school-mage,d1/high-school-mage/axe-1,仮説を試す！ 木霊打ち！,仮説を試す！,木霊打ち！,False
+d1/high-school-mage,d1/high-school-mage/axe-2,観測完了！ 朱葉落とし！,観測完了！,朱葉落とし！,False
+d1/high-school-mage,d1/high-school-mage/axe-3,解は得られた！ 岩戸裂き！,解は得られた！,岩戸裂き！,False
+d1/high-school-mage,d1/high-school-mage/axe-4,証明してみせる！ 天樹崩し！,証明してみせる！,天樹崩し！,False
+d1/high-school-mage,d1/high-school-mage/spear-1,観測完了！ 風見突き！,観測完了！,風見突き！,False
+d1/high-school-mage,d1/high-school-mage/spear-2,解は得られた！ 燕渡り！,解は得られた！,燕渡り！,False
+d1/high-school-mage,d1/high-school-mage/spear-3,証明してみせる！ 碧雷穿！,証明してみせる！,碧雷穿！,False
+d1/high-school-mage,d1/high-school-mage/spear-4,仮説を試す！ 星河貫き！,仮説を試す！,星河貫き！,False
+d1/high-school-mage,d1/high-school-mage/staff-1,解は得られた！ 小枝払い！,解は得られた！,小枝払い！,False
+d1/high-school-mage,d1/high-school-mage/staff-2,証明してみせる！ 水鏡返し！,証明してみせる！,水鏡返し！,False
+d1/high-school-mage,d1/high-school-mage/staff-3,仮説を試す！ 天秤回し！,仮説を試す！,天秤回し！,False
+d1/high-school-mage,d1/high-school-mage/staff-4,観測完了！ 万象の円！,観測完了！,万象の円！,False
+d1/high-school-mage,d1/high-school-mage/hammer-1,証明してみせる！ 鐘ひとつ！,証明してみせる！,鐘ひとつ！,False
+d1/high-school-mage,d1/high-school-mage/hammer-2,仮説を試す！ 地響き拍子！,仮説を試す！,地響き拍子！,False
+d1/high-school-mage,d1/high-school-mage/hammer-3,観測完了！ 砕月の鼓動！,観測完了！,砕月の鼓動！,False
+d1/high-school-mage,d1/high-school-mage/hammer-4,解は得られた！ 暁鐘轟天！,解は得られた！,暁鐘轟天！,False
+d1/high-school-mage,d1/high-school-mage/bow-1,仮説を試す！ 風糸射ち！,仮説を試す！,風糸射ち！,False
+d1/high-school-mage,d1/high-school-mage/bow-2,観測完了！ 双虹の矢！,観測完了！,双虹の矢！,False
+d1/high-school-mage,d1/high-school-mage/bow-3,解は得られた！ 星屑時雨！,解は得られた！,星屑時雨！,False
+d1/high-school-mage,d1/high-school-mage/bow-4,証明してみせる！ 天弧七彩！,証明してみせる！,天弧七彩！,False
+d1/high-school-mage,d1/high-school-mage/whip-1,観測完了！ 草波打ち！,観測完了！,草波打ち！,False
+d1/high-school-mage,d1/high-school-mage/whip-2,解は得られた！ 紫電の結び！,解は得られた！,紫電の結び！,False
+d1/high-school-mage,d1/high-school-mage/whip-3,証明してみせる！ 風花乱れ！,証明してみせる！,風花乱れ！,False
+d1/high-school-mage,d1/high-school-mage/whip-4,仮説を試す！ 星環の舞！,仮説を試す！,星環の舞！,False
+d1/high-school-mage,d1/high-school-mage/chakram-1,解は得られた！ 弧月投げ！,解は得られた！,弧月投げ！,False
+d1/high-school-mage,d1/high-school-mage/chakram-2,証明してみせる！ 双輪巡り！,証明してみせる！,双輪巡り！,False
+d1/high-school-mage,d1/high-school-mage/chakram-3,仮説を試す！ 風輪連華！,仮説を試す！,風輪連華！,False
+d1/high-school-mage,d1/high-school-mage/chakram-4,観測完了！ 天輪帰航！,観測完了！,天輪帰航！,False
+d1/high-school-mage,d1/high-school-mage/ultimate-dawn,証明してみせる！ 奥義・万彩黎明！,証明してみせる！,奥義・万彩黎明！,False
+d1/high-school-mage,d1/high-school-mage/ultimate-earth,仮説を試す！ 奥義・地天共鳴！,仮説を試す！,奥義・地天共鳴！,False
+d1/high-school-mage,d1/high-school-mage/ultimate-sky,観測完了！ 奥義・星巡天翔！,観測完了！,奥義・星巡天翔！,False
+d1/high-school-mage,d1/high-school-mage/ultimate-heart,解は得られた！ 奥義・無窮心輪！,解は得られた！,奥義・無窮心輪！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/fist-1,全力勝負！ 踏風掌！,全力勝負！,踏風掌！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/fist-2,真っ向から！ 昇陽連脚！,真っ向から！,昇陽連脚！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/fist-3,狙いは外さない！ 空鳴り拳！,狙いは外さない！,空鳴り拳！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/fist-4,最高の一撃だ！ 天環無拍！,最高の一撃だ！,天環無拍！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/sword-1,真っ向から！ 朝露払い！,真っ向から！,朝露払い！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/sword-2,狙いは外さない！ 双葉返し！,狙いは外さない！,双葉返し！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/sword-3,最高の一撃だ！ 宵星の輪舞！,最高の一撃だ！,宵星の輪舞！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/sword-4,全力勝負！ 黎明一文字！,全力勝負！,黎明一文字！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/greatsword-1,狙いは外さない！ 雲割り！,狙いは外さない！,雲割り！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/greatsword-2,最高の一撃だ！ 夕凪おろし！,最高の一撃だ！,夕凪おろし！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/greatsword-3,全力勝負！ 月稜断！,全力勝負！,月稜断！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/greatsword-4,真っ向から！ 蒼天境界斬！,真っ向から！,蒼天境界斬！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/rapier-1,最高の一撃だ！ 針雨！,最高の一撃だ！,針雨！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/rapier-2,全力勝負！ 星縫い！,全力勝負！,星縫い！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/rapier-3,真っ向から！ 銀糸の螺旋！,真っ向から！,銀糸の螺旋！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/rapier-4,狙いは外さない！ 流星点描！,狙いは外さない！,流星点描！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/axe-1,全力勝負！ 木霊打ち！,全力勝負！,木霊打ち！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/axe-2,真っ向から！ 朱葉落とし！,真っ向から！,朱葉落とし！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/axe-3,狙いは外さない！ 岩戸裂き！,狙いは外さない！,岩戸裂き！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/axe-4,最高の一撃だ！ 天樹崩し！,最高の一撃だ！,天樹崩し！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/spear-1,真っ向から！ 風見突き！,真っ向から！,風見突き！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/spear-2,狙いは外さない！ 燕渡り！,狙いは外さない！,燕渡り！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/spear-3,最高の一撃だ！ 碧雷穿！,最高の一撃だ！,碧雷穿！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/spear-4,全力勝負！ 星河貫き！,全力勝負！,星河貫き！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/staff-1,狙いは外さない！ 小枝払い！,狙いは外さない！,小枝払い！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/staff-2,最高の一撃だ！ 水鏡返し！,最高の一撃だ！,水鏡返し！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/staff-3,全力勝負！ 天秤回し！,全力勝負！,天秤回し！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/staff-4,真っ向から！ 万象の円！,真っ向から！,万象の円！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/hammer-1,最高の一撃だ！ 鐘ひとつ！,最高の一撃だ！,鐘ひとつ！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/hammer-2,全力勝負！ 地響き拍子！,全力勝負！,地響き拍子！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/hammer-3,真っ向から！ 砕月の鼓動！,真っ向から！,砕月の鼓動！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/hammer-4,狙いは外さない！ 暁鐘轟天！,狙いは外さない！,暁鐘轟天！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/bow-1,全力勝負！ 風糸射ち！,全力勝負！,風糸射ち！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/bow-2,真っ向から！ 双虹の矢！,真っ向から！,双虹の矢！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/bow-3,狙いは外さない！ 星屑時雨！,狙いは外さない！,星屑時雨！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/bow-4,最高の一撃だ！ 天弧七彩！,最高の一撃だ！,天弧七彩！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/whip-1,真っ向から！ 草波打ち！,真っ向から！,草波打ち！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/whip-2,狙いは外さない！ 紫電の結び！,狙いは外さない！,紫電の結び！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/whip-3,最高の一撃だ！ 風花乱れ！,最高の一撃だ！,風花乱れ！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/whip-4,全力勝負！ 星環の舞！,全力勝負！,星環の舞！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/chakram-1,狙いは外さない！ 弧月投げ！,狙いは外さない！,弧月投げ！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/chakram-2,最高の一撃だ！ 双輪巡り！,最高の一撃だ！,双輪巡り！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/chakram-3,全力勝負！ 風輪連華！,全力勝負！,風輪連華！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/chakram-4,真っ向から！ 天輪帰航！,真っ向から！,天輪帰航！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/ultimate-dawn,最高の一撃だ！ 奥義・万彩黎明！,最高の一撃だ！,奥義・万彩黎明！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/ultimate-earth,全力勝負！ 奥義・地天共鳴！,全力勝負！,奥義・地天共鳴！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/ultimate-sky,真っ向から！ 奥義・星巡天翔！,真っ向から！,奥義・星巡天翔！,False
+d1/high-school-dodgeball,d1/high-school-dodgeball/ultimate-heart,狙いは外さない！ 奥義・無窮心輪！,狙いは外さない！,奥義・無窮心輪！,False
+d1/high-school-bard,d1/high-school-bard/fist-1,響かせよう！ 踏風掌！,響かせよう！,踏風掌！,False
+d1/high-school-bard,d1/high-school-bard/fist-2,今のリズムで！ 昇陽連脚！,今のリズムで！,昇陽連脚！,False
+d1/high-school-bard,d1/high-school-bard/fist-3,声を力に！ 空鳴り拳！,声を力に！,空鳴り拳！,False
+d1/high-school-bard,d1/high-school-bard/fist-4,世界へ届け！ 天環無拍！,世界へ届け！,天環無拍！,False
+d1/high-school-bard,d1/high-school-bard/sword-1,今のリズムで！ 朝露払い！,今のリズムで！,朝露払い！,False
+d1/high-school-bard,d1/high-school-bard/sword-2,声を力に！ 双葉返し！,声を力に！,双葉返し！,False
+d1/high-school-bard,d1/high-school-bard/sword-3,世界へ届け！ 宵星の輪舞！,世界へ届け！,宵星の輪舞！,False
+d1/high-school-bard,d1/high-school-bard/sword-4,響かせよう！ 黎明一文字！,響かせよう！,黎明一文字！,False
+d1/high-school-bard,d1/high-school-bard/greatsword-1,声を力に！ 雲割り！,声を力に！,雲割り！,False
+d1/high-school-bard,d1/high-school-bard/greatsword-2,世界へ届け！ 夕凪おろし！,世界へ届け！,夕凪おろし！,False
+d1/high-school-bard,d1/high-school-bard/greatsword-3,響かせよう！ 月稜断！,響かせよう！,月稜断！,False
+d1/high-school-bard,d1/high-school-bard/greatsword-4,今のリズムで！ 蒼天境界斬！,今のリズムで！,蒼天境界斬！,False
+d1/high-school-bard,d1/high-school-bard/rapier-1,世界へ届け！ 針雨！,世界へ届け！,針雨！,False
+d1/high-school-bard,d1/high-school-bard/rapier-2,響かせよう！ 星縫い！,響かせよう！,星縫い！,False
+d1/high-school-bard,d1/high-school-bard/rapier-3,今のリズムで！ 銀糸の螺旋！,今のリズムで！,銀糸の螺旋！,False
+d1/high-school-bard,d1/high-school-bard/rapier-4,声を力に！ 流星点描！,声を力に！,流星点描！,False
+d1/high-school-bard,d1/high-school-bard/axe-1,響かせよう！ 木霊打ち！,響かせよう！,木霊打ち！,False
+d1/high-school-bard,d1/high-school-bard/axe-2,今のリズムで！ 朱葉落とし！,今のリズムで！,朱葉落とし！,False
+d1/high-school-bard,d1/high-school-bard/axe-3,声を力に！ 岩戸裂き！,声を力に！,岩戸裂き！,False
+d1/high-school-bard,d1/high-school-bard/axe-4,世界へ届け！ 天樹崩し！,世界へ届け！,天樹崩し！,False
+d1/high-school-bard,d1/high-school-bard/spear-1,今のリズムで！ 風見突き！,今のリズムで！,風見突き！,False
+d1/high-school-bard,d1/high-school-bard/spear-2,声を力に！ 燕渡り！,声を力に！,燕渡り！,False
+d1/high-school-bard,d1/high-school-bard/spear-3,世界へ届け！ 碧雷穿！,世界へ届け！,碧雷穿！,False
+d1/high-school-bard,d1/high-school-bard/spear-4,響かせよう！ 星河貫き！,響かせよう！,星河貫き！,False
+d1/high-school-bard,d1/high-school-bard/staff-1,声を力に！ 小枝払い！,声を力に！,小枝払い！,False
+d1/high-school-bard,d1/high-school-bard/staff-2,世界へ届け！ 水鏡返し！,世界へ届け！,水鏡返し！,False
+d1/high-school-bard,d1/high-school-bard/staff-3,響かせよう！ 天秤回し！,響かせよう！,天秤回し！,False
+d1/high-school-bard,d1/high-school-bard/staff-4,今のリズムで！ 万象の円！,今のリズムで！,万象の円！,False
+d1/high-school-bard,d1/high-school-bard/hammer-1,世界へ届け！ 鐘ひとつ！,世界へ届け！,鐘ひとつ！,False
+d1/high-school-bard,d1/high-school-bard/hammer-2,響かせよう！ 地響き拍子！,響かせよう！,地響き拍子！,False
+d1/high-school-bard,d1/high-school-bard/hammer-3,今のリズムで！ 砕月の鼓動！,今のリズムで！,砕月の鼓動！,False
+d1/high-school-bard,d1/high-school-bard/hammer-4,声を力に！ 暁鐘轟天！,声を力に！,暁鐘轟天！,False
+d1/high-school-bard,d1/high-school-bard/bow-1,響かせよう！ 風糸射ち！,響かせよう！,風糸射ち！,False
+d1/high-school-bard,d1/high-school-bard/bow-2,今のリズムで！ 双虹の矢！,今のリズムで！,双虹の矢！,False
+d1/high-school-bard,d1/high-school-bard/bow-3,声を力に！ 星屑時雨！,声を力に！,星屑時雨！,False
+d1/high-school-bard,d1/high-school-bard/bow-4,世界へ届け！ 天弧七彩！,世界へ届け！,天弧七彩！,False
+d1/high-school-bard,d1/high-school-bard/whip-1,今のリズムで！ 草波打ち！,今のリズムで！,草波打ち！,False
+d1/high-school-bard,d1/high-school-bard/whip-2,声を力に！ 紫電の結び！,声を力に！,紫電の結び！,False
+d1/high-school-bard,d1/high-school-bard/whip-3,世界へ届け！ 風花乱れ！,世界へ届け！,風花乱れ！,False
+d1/high-school-bard,d1/high-school-bard/whip-4,響かせよう！ 星環の舞！,響かせよう！,星環の舞！,False
+d1/high-school-bard,d1/high-school-bard/chakram-1,声を力に！ 弧月投げ！,声を力に！,弧月投げ！,False
+d1/high-school-bard,d1/high-school-bard/chakram-2,世界へ届け！ 双輪巡り！,世界へ届け！,双輪巡り！,False
+d1/high-school-bard,d1/high-school-bard/chakram-3,響かせよう！ 風輪連華！,響かせよう！,風輪連華！,False
+d1/high-school-bard,d1/high-school-bard/chakram-4,今のリズムで！ 天輪帰航！,今のリズムで！,天輪帰航！,False
+d1/high-school-bard,d1/high-school-bard/ultimate-dawn,世界へ届け！ 奥義・万彩黎明！,世界へ届け！,奥義・万彩黎明！,False
+d1/high-school-bard,d1/high-school-bard/ultimate-earth,響かせよう！ 奥義・地天共鳴！,響かせよう！,奥義・地天共鳴！,False
+d1/high-school-bard,d1/high-school-bard/ultimate-sky,今のリズムで！ 奥義・星巡天翔！,今のリズムで！,奥義・星巡天翔！,False
+d1/high-school-bard,d1/high-school-bard/ultimate-heart,声を力に！ 奥義・無窮心輪！,声を力に！,奥義・無窮心輪！,False
+d1/high-school-librarian,d1/high-school-librarian/fist-1,続きを刻む！ 踏風掌！,続きを刻む！,踏風掌！,False
+d1/high-school-librarian,d1/high-school-librarian/fist-2,解き明かそう！ 昇陽連脚！,解き明かそう！,昇陽連脚！,False
+d1/high-school-librarian,d1/high-school-librarian/fist-3,行間を見抜く！ 空鳴り拳！,行間を見抜く！,空鳴り拳！,False
+d1/high-school-librarian,d1/high-school-librarian/fist-4,終わりを書き換える！ 天環無拍！,終わりを書き換える！,天環無拍！,False
+d1/high-school-librarian,d1/high-school-librarian/sword-1,解き明かそう！ 朝露払い！,解き明かそう！,朝露払い！,False
+d1/high-school-librarian,d1/high-school-librarian/sword-2,行間を見抜く！ 双葉返し！,行間を見抜く！,双葉返し！,False
+d1/high-school-librarian,d1/high-school-librarian/sword-3,終わりを書き換える！ 宵星の輪舞！,終わりを書き換える！,宵星の輪舞！,False
+d1/high-school-librarian,d1/high-school-librarian/sword-4,続きを刻む！ 黎明一文字！,続きを刻む！,黎明一文字！,False
+d1/high-school-librarian,d1/high-school-librarian/greatsword-1,行間を見抜く！ 雲割り！,行間を見抜く！,雲割り！,False
+d1/high-school-librarian,d1/high-school-librarian/greatsword-2,終わりを書き換える！ 夕凪おろし！,終わりを書き換える！,夕凪おろし！,False
+d1/high-school-librarian,d1/high-school-librarian/greatsword-3,続きを刻む！ 月稜断！,続きを刻む！,月稜断！,False
+d1/high-school-librarian,d1/high-school-librarian/greatsword-4,解き明かそう！ 蒼天境界斬！,解き明かそう！,蒼天境界斬！,False
+d1/high-school-librarian,d1/high-school-librarian/rapier-1,終わりを書き換える！ 針雨！,終わりを書き換える！,針雨！,False
+d1/high-school-librarian,d1/high-school-librarian/rapier-2,続きを刻む！ 星縫い！,続きを刻む！,星縫い！,False
+d1/high-school-librarian,d1/high-school-librarian/rapier-3,解き明かそう！ 銀糸の螺旋！,解き明かそう！,銀糸の螺旋！,False
+d1/high-school-librarian,d1/high-school-librarian/rapier-4,行間を見抜く！ 流星点描！,行間を見抜く！,流星点描！,False
+d1/high-school-librarian,d1/high-school-librarian/axe-1,続きを刻む！ 木霊打ち！,続きを刻む！,木霊打ち！,False
+d1/high-school-librarian,d1/high-school-librarian/axe-2,解き明かそう！ 朱葉落とし！,解き明かそう！,朱葉落とし！,False
+d1/high-school-librarian,d1/high-school-librarian/axe-3,行間を見抜く！ 岩戸裂き！,行間を見抜く！,岩戸裂き！,False
+d1/high-school-librarian,d1/high-school-librarian/axe-4,終わりを書き換える！ 天樹崩し！,終わりを書き換える！,天樹崩し！,False
+d1/high-school-librarian,d1/high-school-librarian/spear-1,解き明かそう！ 風見突き！,解き明かそう！,風見突き！,False
+d1/high-school-librarian,d1/high-school-librarian/spear-2,行間を見抜く！ 燕渡り！,行間を見抜く！,燕渡り！,False
+d1/high-school-librarian,d1/high-school-librarian/spear-3,終わりを書き換える！ 碧雷穿！,終わりを書き換える！,碧雷穿！,False
+d1/high-school-librarian,d1/high-school-librarian/spear-4,続きを刻む！ 星河貫き！,続きを刻む！,星河貫き！,False
+d1/high-school-librarian,d1/high-school-librarian/staff-1,行間を見抜く！ 小枝払い！,行間を見抜く！,小枝払い！,False
+d1/high-school-librarian,d1/high-school-librarian/staff-2,終わりを書き換える！ 水鏡返し！,終わりを書き換える！,水鏡返し！,False
+d1/high-school-librarian,d1/high-school-librarian/staff-3,続きを刻む！ 天秤回し！,続きを刻む！,天秤回し！,False
+d1/high-school-librarian,d1/high-school-librarian/staff-4,解き明かそう！ 万象の円！,解き明かそう！,万象の円！,False
+d1/high-school-librarian,d1/high-school-librarian/hammer-1,終わりを書き換える！ 鐘ひとつ！,終わりを書き換える！,鐘ひとつ！,False
+d1/high-school-librarian,d1/high-school-librarian/hammer-2,続きを刻む！ 地響き拍子！,続きを刻む！,地響き拍子！,False
+d1/high-school-librarian,d1/high-school-librarian/hammer-3,解き明かそう！ 砕月の鼓動！,解き明かそう！,砕月の鼓動！,False
+d1/high-school-librarian,d1/high-school-librarian/hammer-4,行間を見抜く！ 暁鐘轟天！,行間を見抜く！,暁鐘轟天！,False
+d1/high-school-librarian,d1/high-school-librarian/bow-1,続きを刻む！ 風糸射ち！,続きを刻む！,風糸射ち！,False
+d1/high-school-librarian,d1/high-school-librarian/bow-2,解き明かそう！ 双虹の矢！,解き明かそう！,双虹の矢！,False
+d1/high-school-librarian,d1/high-school-librarian/bow-3,行間を見抜く！ 星屑時雨！,行間を見抜く！,星屑時雨！,False
+d1/high-school-librarian,d1/high-school-librarian/bow-4,終わりを書き換える！ 天弧七彩！,終わりを書き換える！,天弧七彩！,False
+d1/high-school-librarian,d1/high-school-librarian/whip-1,解き明かそう！ 草波打ち！,解き明かそう！,草波打ち！,False
+d1/high-school-librarian,d1/high-school-librarian/whip-2,行間を見抜く！ 紫電の結び！,行間を見抜く！,紫電の結び！,False
+d1/high-school-librarian,d1/high-school-librarian/whip-3,終わりを書き換える！ 風花乱れ！,終わりを書き換える！,風花乱れ！,False
+d1/high-school-librarian,d1/high-school-librarian/whip-4,続きを刻む！ 星環の舞！,続きを刻む！,星環の舞！,False
+d1/high-school-librarian,d1/high-school-librarian/chakram-1,行間を見抜く！ 弧月投げ！,行間を見抜く！,弧月投げ！,False
+d1/high-school-librarian,d1/high-school-librarian/chakram-2,終わりを書き換える！ 双輪巡り！,終わりを書き換える！,双輪巡り！,False
+d1/high-school-librarian,d1/high-school-librarian/chakram-3,続きを刻む！ 風輪連華！,続きを刻む！,風輪連華！,False
+d1/high-school-librarian,d1/high-school-librarian/chakram-4,解き明かそう！ 天輪帰航！,解き明かそう！,天輪帰航！,False
+d1/high-school-librarian,d1/high-school-librarian/ultimate-dawn,終わりを書き換える！ 奥義・万彩黎明！,終わりを書き換える！,奥義・万彩黎明！,False
+d1/high-school-librarian,d1/high-school-librarian/ultimate-earth,続きを刻む！ 奥義・地天共鳴！,続きを刻む！,奥義・地天共鳴！,False
+d1/high-school-librarian,d1/high-school-librarian/ultimate-sky,解き明かそう！ 奥義・星巡天翔！,解き明かそう！,奥義・星巡天翔！,False
+d1/high-school-librarian,d1/high-school-librarian/ultimate-heart,行間を見抜く！ 奥義・無窮心輪！,行間を見抜く！,奥義・無窮心輪！,False
+d1/high-school-chef,d1/high-school-chef/fist-1,腕の見せどころ！ 踏風掌！,腕の見せどころ！,踏風掌！,False
+d1/high-school-chef,d1/high-school-chef/fist-2,仕込みは万全！ 昇陽連脚！,仕込みは万全！,昇陽連脚！,False
+d1/high-school-chef,d1/high-school-chef/fist-3,熱いうちに！ 空鳴り拳！,熱いうちに！,空鳴り拳！,False
+d1/high-school-chef,d1/high-school-chef/fist-4,究極の仕上げだ！ 天環無拍！,究極の仕上げだ！,天環無拍！,False
+d1/high-school-chef,d1/high-school-chef/sword-1,仕込みは万全！ 朝露払い！,仕込みは万全！,朝露払い！,False
+d1/high-school-chef,d1/high-school-chef/sword-2,熱いうちに！ 双葉返し！,熱いうちに！,双葉返し！,False
+d1/high-school-chef,d1/high-school-chef/sword-3,究極の仕上げだ！ 宵星の輪舞！,究極の仕上げだ！,宵星の輪舞！,False
+d1/high-school-chef,d1/high-school-chef/sword-4,腕の見せどころ！ 黎明一文字！,腕の見せどころ！,黎明一文字！,False
+d1/high-school-chef,d1/high-school-chef/greatsword-1,熱いうちに！ 雲割り！,熱いうちに！,雲割り！,False
+d1/high-school-chef,d1/high-school-chef/greatsword-2,究極の仕上げだ！ 夕凪おろし！,究極の仕上げだ！,夕凪おろし！,False
+d1/high-school-chef,d1/high-school-chef/greatsword-3,腕の見せどころ！ 月稜断！,腕の見せどころ！,月稜断！,False
+d1/high-school-chef,d1/high-school-chef/greatsword-4,仕込みは万全！ 蒼天境界斬！,仕込みは万全！,蒼天境界斬！,False
+d1/high-school-chef,d1/high-school-chef/rapier-1,究極の仕上げだ！ 針雨！,究極の仕上げだ！,針雨！,False
+d1/high-school-chef,d1/high-school-chef/rapier-2,腕の見せどころ！ 星縫い！,腕の見せどころ！,星縫い！,False
+d1/high-school-chef,d1/high-school-chef/rapier-3,仕込みは万全！ 銀糸の螺旋！,仕込みは万全！,銀糸の螺旋！,False
+d1/high-school-chef,d1/high-school-chef/rapier-4,熱いうちに！ 流星点描！,熱いうちに！,流星点描！,False
+d1/high-school-chef,d1/high-school-chef/axe-1,腕の見せどころ！ 木霊打ち！,腕の見せどころ！,木霊打ち！,False
+d1/high-school-chef,d1/high-school-chef/axe-2,仕込みは万全！ 朱葉落とし！,仕込みは万全！,朱葉落とし！,False
+d1/high-school-chef,d1/high-school-chef/axe-3,熱いうちに！ 岩戸裂き！,熱いうちに！,岩戸裂き！,False
+d1/high-school-chef,d1/high-school-chef/axe-4,究極の仕上げだ！ 天樹崩し！,究極の仕上げだ！,天樹崩し！,False
+d1/high-school-chef,d1/high-school-chef/spear-1,仕込みは万全！ 風見突き！,仕込みは万全！,風見突き！,False
+d1/high-school-chef,d1/high-school-chef/spear-2,熱いうちに！ 燕渡り！,熱いうちに！,燕渡り！,False
+d1/high-school-chef,d1/high-school-chef/spear-3,究極の仕上げだ！ 碧雷穿！,究極の仕上げだ！,碧雷穿！,False
+d1/high-school-chef,d1/high-school-chef/spear-4,腕の見せどころ！ 星河貫き！,腕の見せどころ！,星河貫き！,False
+d1/high-school-chef,d1/high-school-chef/staff-1,熱いうちに！ 小枝払い！,熱いうちに！,小枝払い！,False
+d1/high-school-chef,d1/high-school-chef/staff-2,究極の仕上げだ！ 水鏡返し！,究極の仕上げだ！,水鏡返し！,False
+d1/high-school-chef,d1/high-school-chef/staff-3,腕の見せどころ！ 天秤回し！,腕の見せどころ！,天秤回し！,False
+d1/high-school-chef,d1/high-school-chef/staff-4,仕込みは万全！ 万象の円！,仕込みは万全！,万象の円！,False
+d1/high-school-chef,d1/high-school-chef/hammer-1,究極の仕上げだ！ 鐘ひとつ！,究極の仕上げだ！,鐘ひとつ！,False
+d1/high-school-chef,d1/high-school-chef/hammer-2,腕の見せどころ！ 地響き拍子！,腕の見せどころ！,地響き拍子！,False
+d1/high-school-chef,d1/high-school-chef/hammer-3,仕込みは万全！ 砕月の鼓動！,仕込みは万全！,砕月の鼓動！,False
+d1/high-school-chef,d1/high-school-chef/hammer-4,熱いうちに！ 暁鐘轟天！,熱いうちに！,暁鐘轟天！,False
+d1/high-school-chef,d1/high-school-chef/bow-1,腕の見せどころ！ 風糸射ち！,腕の見せどころ！,風糸射ち！,False
+d1/high-school-chef,d1/high-school-chef/bow-2,仕込みは万全！ 双虹の矢！,仕込みは万全！,双虹の矢！,False
+d1/high-school-chef,d1/high-school-chef/bow-3,熱いうちに！ 星屑時雨！,熱いうちに！,星屑時雨！,False
+d1/high-school-chef,d1/high-school-chef/bow-4,究極の仕上げだ！ 天弧七彩！,究極の仕上げだ！,天弧七彩！,False
+d1/high-school-chef,d1/high-school-chef/whip-1,仕込みは万全！ 草波打ち！,仕込みは万全！,草波打ち！,False
+d1/high-school-chef,d1/high-school-chef/whip-2,熱いうちに！ 紫電の結び！,熱いうちに！,紫電の結び！,False
+d1/high-school-chef,d1/high-school-chef/whip-3,究極の仕上げだ！ 風花乱れ！,究極の仕上げだ！,風花乱れ！,False
+d1/high-school-chef,d1/high-school-chef/whip-4,腕の見せどころ！ 星環の舞！,腕の見せどころ！,星環の舞！,False
+d1/high-school-chef,d1/high-school-chef/chakram-1,熱いうちに！ 弧月投げ！,熱いうちに！,弧月投げ！,False
+d1/high-school-chef,d1/high-school-chef/chakram-2,究極の仕上げだ！ 双輪巡り！,究極の仕上げだ！,双輪巡り！,False
+d1/high-school-chef,d1/high-school-chef/chakram-3,腕の見せどころ！ 風輪連華！,腕の見せどころ！,風輪連華！,False
+d1/high-school-chef,d1/high-school-chef/chakram-4,仕込みは万全！ 天輪帰航！,仕込みは万全！,天輪帰航！,False
+d1/high-school-chef,d1/high-school-chef/ultimate-dawn,究極の仕上げだ！ 奥義・万彩黎明！,究極の仕上げだ！,奥義・万彩黎明！,False
+d1/high-school-chef,d1/high-school-chef/ultimate-earth,腕の見せどころ！ 奥義・地天共鳴！,腕の見せどころ！,奥義・地天共鳴！,False
+d1/high-school-chef,d1/high-school-chef/ultimate-sky,仕込みは万全！ 奥義・星巡天翔！,仕込みは万全！,奥義・星巡天翔！,False
+d1/high-school-chef,d1/high-school-chef/ultimate-heart,熱いうちに！ 奥義・無窮心輪！,熱いうちに！,奥義・無窮心輪！,False
+d1/high-school-gardener,d1/high-school-gardener/fist-1,根を張れ！ 踏風掌！,根を張れ！,踏風掌！,False
+d1/high-school-gardener,d1/high-school-gardener/fist-2,風を味方に！ 昇陽連脚！,風を味方に！,昇陽連脚！,False
+d1/high-school-gardener,d1/high-school-gardener/fist-3,命よ芽吹け！ 空鳴り拳！,命よ芽吹け！,空鳴り拳！,False
+d1/high-school-gardener,d1/high-school-gardener/fist-4,大地とともに！ 天環無拍！,大地とともに！,天環無拍！,False
+d1/high-school-gardener,d1/high-school-gardener/sword-1,風を味方に！ 朝露払い！,風を味方に！,朝露払い！,False
+d1/high-school-gardener,d1/high-school-gardener/sword-2,命よ芽吹け！ 双葉返し！,命よ芽吹け！,双葉返し！,False
+d1/high-school-gardener,d1/high-school-gardener/sword-3,大地とともに！ 宵星の輪舞！,大地とともに！,宵星の輪舞！,False
+d1/high-school-gardener,d1/high-school-gardener/sword-4,根を張れ！ 黎明一文字！,根を張れ！,黎明一文字！,False
+d1/high-school-gardener,d1/high-school-gardener/greatsword-1,命よ芽吹け！ 雲割り！,命よ芽吹け！,雲割り！,False
+d1/high-school-gardener,d1/high-school-gardener/greatsword-2,大地とともに！ 夕凪おろし！,大地とともに！,夕凪おろし！,False
+d1/high-school-gardener,d1/high-school-gardener/greatsword-3,根を張れ！ 月稜断！,根を張れ！,月稜断！,False
+d1/high-school-gardener,d1/high-school-gardener/greatsword-4,風を味方に！ 蒼天境界斬！,風を味方に！,蒼天境界斬！,False
+d1/high-school-gardener,d1/high-school-gardener/rapier-1,大地とともに！ 針雨！,大地とともに！,針雨！,False
+d1/high-school-gardener,d1/high-school-gardener/rapier-2,根を張れ！ 星縫い！,根を張れ！,星縫い！,False
+d1/high-school-gardener,d1/high-school-gardener/rapier-3,風を味方に！ 銀糸の螺旋！,風を味方に！,銀糸の螺旋！,False
+d1/high-school-gardener,d1/high-school-gardener/rapier-4,命よ芽吹け！ 流星点描！,命よ芽吹け！,流星点描！,False
+d1/high-school-gardener,d1/high-school-gardener/axe-1,根を張れ！ 木霊打ち！,根を張れ！,木霊打ち！,False
+d1/high-school-gardener,d1/high-school-gardener/axe-2,風を味方に！ 朱葉落とし！,風を味方に！,朱葉落とし！,False
+d1/high-school-gardener,d1/high-school-gardener/axe-3,命よ芽吹け！ 岩戸裂き！,命よ芽吹け！,岩戸裂き！,False
+d1/high-school-gardener,d1/high-school-gardener/axe-4,大地とともに！ 天樹崩し！,大地とともに！,天樹崩し！,False
+d1/high-school-gardener,d1/high-school-gardener/spear-1,風を味方に！ 風見突き！,風を味方に！,風見突き！,False
+d1/high-school-gardener,d1/high-school-gardener/spear-2,命よ芽吹け！ 燕渡り！,命よ芽吹け！,燕渡り！,False
+d1/high-school-gardener,d1/high-school-gardener/spear-3,大地とともに！ 碧雷穿！,大地とともに！,碧雷穿！,False
+d1/high-school-gardener,d1/high-school-gardener/spear-4,根を張れ！ 星河貫き！,根を張れ！,星河貫き！,False
+d1/high-school-gardener,d1/high-school-gardener/staff-1,命よ芽吹け！ 小枝払い！,命よ芽吹け！,小枝払い！,False
+d1/high-school-gardener,d1/high-school-gardener/staff-2,大地とともに！ 水鏡返し！,大地とともに！,水鏡返し！,False
+d1/high-school-gardener,d1/high-school-gardener/staff-3,根を張れ！ 天秤回し！,根を張れ！,天秤回し！,False
+d1/high-school-gardener,d1/high-school-gardener/staff-4,風を味方に！ 万象の円！,風を味方に！,万象の円！,False
+d1/high-school-gardener,d1/high-school-gardener/hammer-1,大地とともに！ 鐘ひとつ！,大地とともに！,鐘ひとつ！,False
+d1/high-school-gardener,d1/high-school-gardener/hammer-2,根を張れ！ 地響き拍子！,根を張れ！,地響き拍子！,False
+d1/high-school-gardener,d1/high-school-gardener/hammer-3,風を味方に！ 砕月の鼓動！,風を味方に！,砕月の鼓動！,False
+d1/high-school-gardener,d1/high-school-gardener/hammer-4,命よ芽吹け！ 暁鐘轟天！,命よ芽吹け！,暁鐘轟天！,False
+d1/high-school-gardener,d1/high-school-gardener/bow-1,根を張れ！ 風糸射ち！,根を張れ！,風糸射ち！,False
+d1/high-school-gardener,d1/high-school-gardener/bow-2,風を味方に！ 双虹の矢！,風を味方に！,双虹の矢！,False
+d1/high-school-gardener,d1/high-school-gardener/bow-3,命よ芽吹け！ 星屑時雨！,命よ芽吹け！,星屑時雨！,False
+d1/high-school-gardener,d1/high-school-gardener/bow-4,大地とともに！ 天弧七彩！,大地とともに！,天弧七彩！,False
+d1/high-school-gardener,d1/high-school-gardener/whip-1,風を味方に！ 草波打ち！,風を味方に！,草波打ち！,False
+d1/high-school-gardener,d1/high-school-gardener/whip-2,命よ芽吹け！ 紫電の結び！,命よ芽吹け！,紫電の結び！,False
+d1/high-school-gardener,d1/high-school-gardener/whip-3,大地とともに！ 風花乱れ！,大地とともに！,風花乱れ！,False
+d1/high-school-gardener,d1/high-school-gardener/whip-4,根を張れ！ 星環の舞！,根を張れ！,星環の舞！,False
+d1/high-school-gardener,d1/high-school-gardener/chakram-1,命よ芽吹け！ 弧月投げ！,命よ芽吹け！,弧月投げ！,False
+d1/high-school-gardener,d1/high-school-gardener/chakram-2,大地とともに！ 双輪巡り！,大地とともに！,双輪巡り！,False
+d1/high-school-gardener,d1/high-school-gardener/chakram-3,根を張れ！ 風輪連華！,根を張れ！,風輪連華！,False
+d1/high-school-gardener,d1/high-school-gardener/chakram-4,風を味方に！ 天輪帰航！,風を味方に！,天輪帰航！,False
+d1/high-school-gardener,d1/high-school-gardener/ultimate-dawn,大地とともに！ 奥義・万彩黎明！,大地とともに！,奥義・万彩黎明！,False
+d1/high-school-gardener,d1/high-school-gardener/ultimate-earth,根を張れ！ 奥義・地天共鳴！,根を張れ！,奥義・地天共鳴！,False
+d1/high-school-gardener,d1/high-school-gardener/ultimate-sky,風を味方に！ 奥義・星巡天翔！,風を味方に！,奥義・星巡天翔！,False
+d1/high-school-gardener,d1/high-school-gardener/ultimate-heart,命よ芽吹け！ 奥義・無窮心輪！,命よ芽吹け！,奥義・無窮心輪！,False
+d1/magic-akari,d1/magic-akari/fist-1,光よ集まれ！ 踏風掌！,光よ集まれ！,踏風掌！,False
+d1/magic-akari,d1/magic-akari/fist-2,わたしは進む！ 昇陽連脚！,わたしは進む！,昇陽連脚！,False
+d1/magic-akari,d1/magic-akari/fist-3,希望を照らせ！ 空鳴り拳！,希望を照らせ！,空鳴り拳！,False
+d1/magic-akari,d1/magic-akari/fist-4,みんなの明日へ！ 天環無拍！,みんなの明日へ！,天環無拍！,False
+d1/magic-akari,d1/magic-akari/sword-1,わたしは進む！ 朝露払い！,わたしは進む！,朝露払い！,False
+d1/magic-akari,d1/magic-akari/sword-2,希望を照らせ！ 双葉返し！,希望を照らせ！,双葉返し！,False
+d1/magic-akari,d1/magic-akari/sword-3,みんなの明日へ！ 宵星の輪舞！,みんなの明日へ！,宵星の輪舞！,False
+d1/magic-akari,d1/magic-akari/sword-4,光よ集まれ！ 黎明一文字！,光よ集まれ！,黎明一文字！,False
+d1/magic-akari,d1/magic-akari/greatsword-1,希望を照らせ！ 雲割り！,希望を照らせ！,雲割り！,False
+d1/magic-akari,d1/magic-akari/greatsword-2,みんなの明日へ！ 夕凪おろし！,みんなの明日へ！,夕凪おろし！,False
+d1/magic-akari,d1/magic-akari/greatsword-3,光よ集まれ！ 月稜断！,光よ集まれ！,月稜断！,False
+d1/magic-akari,d1/magic-akari/greatsword-4,わたしは進む！ 蒼天境界斬！,わたしは進む！,蒼天境界斬！,False
+d1/magic-akari,d1/magic-akari/rapier-1,みんなの明日へ！ 針雨！,みんなの明日へ！,針雨！,False
+d1/magic-akari,d1/magic-akari/rapier-2,光よ集まれ！ 星縫い！,光よ集まれ！,星縫い！,False
+d1/magic-akari,d1/magic-akari/rapier-3,わたしは進む！ 銀糸の螺旋！,わたしは進む！,銀糸の螺旋！,False
+d1/magic-akari,d1/magic-akari/rapier-4,希望を照らせ！ 流星点描！,希望を照らせ！,流星点描！,False
+d1/magic-akari,d1/magic-akari/axe-1,光よ集まれ！ 木霊打ち！,光よ集まれ！,木霊打ち！,False
+d1/magic-akari,d1/magic-akari/axe-2,わたしは進む！ 朱葉落とし！,わたしは進む！,朱葉落とし！,False
+d1/magic-akari,d1/magic-akari/axe-3,希望を照らせ！ 岩戸裂き！,希望を照らせ！,岩戸裂き！,False
+d1/magic-akari,d1/magic-akari/axe-4,みんなの明日へ！ 天樹崩し！,みんなの明日へ！,天樹崩し！,False
+d1/magic-akari,d1/magic-akari/spear-1,わたしは進む！ 風見突き！,わたしは進む！,風見突き！,False
+d1/magic-akari,d1/magic-akari/spear-2,希望を照らせ！ 燕渡り！,希望を照らせ！,燕渡り！,False
+d1/magic-akari,d1/magic-akari/spear-3,みんなの明日へ！ 碧雷穿！,みんなの明日へ！,碧雷穿！,False
+d1/magic-akari,d1/magic-akari/spear-4,光よ集まれ！ 星河貫き！,光よ集まれ！,星河貫き！,False
+d1/magic-akari,d1/magic-akari/staff-1,希望を照らせ！ 小枝払い！,希望を照らせ！,小枝払い！,False
+d1/magic-akari,d1/magic-akari/staff-2,みんなの明日へ！ 水鏡返し！,みんなの明日へ！,水鏡返し！,False
+d1/magic-akari,d1/magic-akari/staff-3,光よ集まれ！ 天秤回し！,光よ集まれ！,天秤回し！,False
+d1/magic-akari,d1/magic-akari/staff-4,わたしは進む！ 万象の円！,わたしは進む！,万象の円！,False
+d1/magic-akari,d1/magic-akari/hammer-1,みんなの明日へ！ 鐘ひとつ！,みんなの明日へ！,鐘ひとつ！,False
+d1/magic-akari,d1/magic-akari/hammer-2,光よ集まれ！ 地響き拍子！,光よ集まれ！,地響き拍子！,False
+d1/magic-akari,d1/magic-akari/hammer-3,わたしは進む！ 砕月の鼓動！,わたしは進む！,砕月の鼓動！,False
+d1/magic-akari,d1/magic-akari/hammer-4,希望を照らせ！ 暁鐘轟天！,希望を照らせ！,暁鐘轟天！,False
+d1/magic-akari,d1/magic-akari/bow-1,光よ集まれ！ 風糸射ち！,光よ集まれ！,風糸射ち！,False
+d1/magic-akari,d1/magic-akari/bow-2,わたしは進む！ 双虹の矢！,わたしは進む！,双虹の矢！,False
+d1/magic-akari,d1/magic-akari/bow-3,希望を照らせ！ 星屑時雨！,希望を照らせ！,星屑時雨！,False
+d1/magic-akari,d1/magic-akari/bow-4,みんなの明日へ！ 天弧七彩！,みんなの明日へ！,天弧七彩！,False
+d1/magic-akari,d1/magic-akari/whip-1,わたしは進む！ 草波打ち！,わたしは進む！,草波打ち！,False
+d1/magic-akari,d1/magic-akari/whip-2,希望を照らせ！ 紫電の結び！,希望を照らせ！,紫電の結び！,False
+d1/magic-akari,d1/magic-akari/whip-3,みんなの明日へ！ 風花乱れ！,みんなの明日へ！,風花乱れ！,False
+d1/magic-akari,d1/magic-akari/whip-4,光よ集まれ！ 星環の舞！,光よ集まれ！,星環の舞！,False
+d1/magic-akari,d1/magic-akari/chakram-1,希望を照らせ！ 弧月投げ！,希望を照らせ！,弧月投げ！,False
+d1/magic-akari,d1/magic-akari/chakram-2,みんなの明日へ！ 双輪巡り！,みんなの明日へ！,双輪巡り！,False
+d1/magic-akari,d1/magic-akari/chakram-3,光よ集まれ！ 風輪連華！,光よ集まれ！,風輪連華！,False
+d1/magic-akari,d1/magic-akari/chakram-4,わたしは進む！ 天輪帰航！,わたしは進む！,天輪帰航！,False
+d1/magic-akari,d1/magic-akari/ultimate-dawn,みんなの明日へ！ 奥義・万彩黎明！,みんなの明日へ！,奥義・万彩黎明！,False
+d1/magic-akari,d1/magic-akari/ultimate-earth,光よ集まれ！ 奥義・地天共鳴！,光よ集まれ！,奥義・地天共鳴！,False
+d1/magic-akari,d1/magic-akari/ultimate-sky,わたしは進む！ 奥義・星巡天翔！,わたしは進む！,奥義・星巡天翔！,False
+d1/magic-akari,d1/magic-akari/ultimate-heart,希望を照らせ！ 奥義・無窮心輪！,希望を照らせ！,奥義・無窮心輪！,False
+d1/magic-shizuku,d1/magic-shizuku/fist-1,水よ澄みわたれ！ 踏風掌！,水よ澄みわたれ！,踏風掌！,False
+d1/magic-shizuku,d1/magic-shizuku/fist-2,一滴の勇気！ 昇陽連脚！,一滴の勇気！,昇陽連脚！,False
+d1/magic-shizuku,d1/magic-shizuku/fist-3,流れに乗せて！ 空鳴り拳！,流れに乗せて！,空鳴り拳！,False
+d1/magic-shizuku,d1/magic-shizuku/fist-4,清らかなる力！ 天環無拍！,清らかなる力！,天環無拍！,False
+d1/magic-shizuku,d1/magic-shizuku/sword-1,一滴の勇気！ 朝露払い！,一滴の勇気！,朝露払い！,False
+d1/magic-shizuku,d1/magic-shizuku/sword-2,流れに乗せて！ 双葉返し！,流れに乗せて！,双葉返し！,False
+d1/magic-shizuku,d1/magic-shizuku/sword-3,清らかなる力！ 宵星の輪舞！,清らかなる力！,宵星の輪舞！,False
+d1/magic-shizuku,d1/magic-shizuku/sword-4,水よ澄みわたれ！ 黎明一文字！,水よ澄みわたれ！,黎明一文字！,False
+d1/magic-shizuku,d1/magic-shizuku/greatsword-1,流れに乗せて！ 雲割り！,流れに乗せて！,雲割り！,False
+d1/magic-shizuku,d1/magic-shizuku/greatsword-2,清らかなる力！ 夕凪おろし！,清らかなる力！,夕凪おろし！,False
+d1/magic-shizuku,d1/magic-shizuku/greatsword-3,水よ澄みわたれ！ 月稜断！,水よ澄みわたれ！,月稜断！,False
+d1/magic-shizuku,d1/magic-shizuku/greatsword-4,一滴の勇気！ 蒼天境界斬！,一滴の勇気！,蒼天境界斬！,False
+d1/magic-shizuku,d1/magic-shizuku/rapier-1,清らかなる力！ 針雨！,清らかなる力！,針雨！,False
+d1/magic-shizuku,d1/magic-shizuku/rapier-2,水よ澄みわたれ！ 星縫い！,水よ澄みわたれ！,星縫い！,False
+d1/magic-shizuku,d1/magic-shizuku/rapier-3,一滴の勇気！ 銀糸の螺旋！,一滴の勇気！,銀糸の螺旋！,False
+d1/magic-shizuku,d1/magic-shizuku/rapier-4,流れに乗せて！ 流星点描！,流れに乗せて！,流星点描！,False
+d1/magic-shizuku,d1/magic-shizuku/axe-1,水よ澄みわたれ！ 木霊打ち！,水よ澄みわたれ！,木霊打ち！,False
+d1/magic-shizuku,d1/magic-shizuku/axe-2,一滴の勇気！ 朱葉落とし！,一滴の勇気！,朱葉落とし！,False
+d1/magic-shizuku,d1/magic-shizuku/axe-3,流れに乗せて！ 岩戸裂き！,流れに乗せて！,岩戸裂き！,False
+d1/magic-shizuku,d1/magic-shizuku/axe-4,清らかなる力！ 天樹崩し！,清らかなる力！,天樹崩し！,False
+d1/magic-shizuku,d1/magic-shizuku/spear-1,一滴の勇気！ 風見突き！,一滴の勇気！,風見突き！,False
+d1/magic-shizuku,d1/magic-shizuku/spear-2,流れに乗せて！ 燕渡り！,流れに乗せて！,燕渡り！,False
+d1/magic-shizuku,d1/magic-shizuku/spear-3,清らかなる力！ 碧雷穿！,清らかなる力！,碧雷穿！,False
+d1/magic-shizuku,d1/magic-shizuku/spear-4,水よ澄みわたれ！ 星河貫き！,水よ澄みわたれ！,星河貫き！,False
+d1/magic-shizuku,d1/magic-shizuku/staff-1,流れに乗せて！ 小枝払い！,流れに乗せて！,小枝払い！,False
+d1/magic-shizuku,d1/magic-shizuku/staff-2,清らかなる力！ 水鏡返し！,清らかなる力！,水鏡返し！,False
+d1/magic-shizuku,d1/magic-shizuku/staff-3,水よ澄みわたれ！ 天秤回し！,水よ澄みわたれ！,天秤回し！,False
+d1/magic-shizuku,d1/magic-shizuku/staff-4,一滴の勇気！ 万象の円！,一滴の勇気！,万象の円！,False
+d1/magic-shizuku,d1/magic-shizuku/hammer-1,清らかなる力！ 鐘ひとつ！,清らかなる力！,鐘ひとつ！,False
+d1/magic-shizuku,d1/magic-shizuku/hammer-2,水よ澄みわたれ！ 地響き拍子！,水よ澄みわたれ！,地響き拍子！,False
+d1/magic-shizuku,d1/magic-shizuku/hammer-3,一滴の勇気！ 砕月の鼓動！,一滴の勇気！,砕月の鼓動！,False
+d1/magic-shizuku,d1/magic-shizuku/hammer-4,流れに乗せて！ 暁鐘轟天！,流れに乗せて！,暁鐘轟天！,False
+d1/magic-shizuku,d1/magic-shizuku/bow-1,水よ澄みわたれ！ 風糸射ち！,水よ澄みわたれ！,風糸射ち！,False
+d1/magic-shizuku,d1/magic-shizuku/bow-2,一滴の勇気！ 双虹の矢！,一滴の勇気！,双虹の矢！,False
+d1/magic-shizuku,d1/magic-shizuku/bow-3,流れに乗せて！ 星屑時雨！,流れに乗せて！,星屑時雨！,False
+d1/magic-shizuku,d1/magic-shizuku/bow-4,清らかなる力！ 天弧七彩！,清らかなる力！,天弧七彩！,False
+d1/magic-shizuku,d1/magic-shizuku/whip-1,一滴の勇気！ 草波打ち！,一滴の勇気！,草波打ち！,False
+d1/magic-shizuku,d1/magic-shizuku/whip-2,流れに乗せて！ 紫電の結び！,流れに乗せて！,紫電の結び！,False
+d1/magic-shizuku,d1/magic-shizuku/whip-3,清らかなる力！ 風花乱れ！,清らかなる力！,風花乱れ！,False
+d1/magic-shizuku,d1/magic-shizuku/whip-4,水よ澄みわたれ！ 星環の舞！,水よ澄みわたれ！,星環の舞！,False
+d1/magic-shizuku,d1/magic-shizuku/chakram-1,流れに乗せて！ 弧月投げ！,流れに乗せて！,弧月投げ！,False
+d1/magic-shizuku,d1/magic-shizuku/chakram-2,清らかなる力！ 双輪巡り！,清らかなる力！,双輪巡り！,False
+d1/magic-shizuku,d1/magic-shizuku/chakram-3,水よ澄みわたれ！ 風輪連華！,水よ澄みわたれ！,風輪連華！,False
+d1/magic-shizuku,d1/magic-shizuku/chakram-4,一滴の勇気！ 天輪帰航！,一滴の勇気！,天輪帰航！,False
+d1/magic-shizuku,d1/magic-shizuku/ultimate-dawn,清らかなる力！ 奥義・万彩黎明！,清らかなる力！,奥義・万彩黎明！,False
+d1/magic-shizuku,d1/magic-shizuku/ultimate-earth,水よ澄みわたれ！ 奥義・地天共鳴！,水よ澄みわたれ！,奥義・地天共鳴！,False
+d1/magic-shizuku,d1/magic-shizuku/ultimate-sky,一滴の勇気！ 奥義・星巡天翔！,一滴の勇気！,奥義・星巡天翔！,False
+d1/magic-shizuku,d1/magic-shizuku/ultimate-heart,流れに乗せて！ 奥義・無窮心輪！,流れに乗せて！,奥義・無窮心輪！,False
+d1/magic-hiyori,d1/magic-hiyori/fist-1,だいじょうぶよ！ 踏風掌！,だいじょうぶよ！,踏風掌！,False
+d1/magic-hiyori,d1/magic-hiyori/fist-2,花のように！ 昇陽連脚！,花のように！,昇陽連脚！,False
+d1/magic-hiyori,d1/magic-hiyori/fist-3,ぬくもりを力に！ 空鳴り拳！,ぬくもりを力に！,空鳴り拳！,False
+d1/magic-hiyori,d1/magic-hiyori/fist-4,命を抱きしめて！ 天環無拍！,命を抱きしめて！,天環無拍！,False
+d1/magic-hiyori,d1/magic-hiyori/sword-1,花のように！ 朝露払い！,花のように！,朝露払い！,False
+d1/magic-hiyori,d1/magic-hiyori/sword-2,ぬくもりを力に！ 双葉返し！,ぬくもりを力に！,双葉返し！,False
+d1/magic-hiyori,d1/magic-hiyori/sword-3,命を抱きしめて！ 宵星の輪舞！,命を抱きしめて！,宵星の輪舞！,False
+d1/magic-hiyori,d1/magic-hiyori/sword-4,だいじょうぶよ！ 黎明一文字！,だいじょうぶよ！,黎明一文字！,False
+d1/magic-hiyori,d1/magic-hiyori/greatsword-1,ぬくもりを力に！ 雲割り！,ぬくもりを力に！,雲割り！,False
+d1/magic-hiyori,d1/magic-hiyori/greatsword-2,命を抱きしめて！ 夕凪おろし！,命を抱きしめて！,夕凪おろし！,False
+d1/magic-hiyori,d1/magic-hiyori/greatsword-3,だいじょうぶよ！ 月稜断！,だいじょうぶよ！,月稜断！,False
+d1/magic-hiyori,d1/magic-hiyori/greatsword-4,花のように！ 蒼天境界斬！,花のように！,蒼天境界斬！,False
+d1/magic-hiyori,d1/magic-hiyori/rapier-1,命を抱きしめて！ 針雨！,命を抱きしめて！,針雨！,False
+d1/magic-hiyori,d1/magic-hiyori/rapier-2,だいじょうぶよ！ 星縫い！,だいじょうぶよ！,星縫い！,False
+d1/magic-hiyori,d1/magic-hiyori/rapier-3,花のように！ 銀糸の螺旋！,花のように！,銀糸の螺旋！,False
+d1/magic-hiyori,d1/magic-hiyori/rapier-4,ぬくもりを力に！ 流星点描！,ぬくもりを力に！,流星点描！,False
+d1/magic-hiyori,d1/magic-hiyori/axe-1,だいじょうぶよ！ 木霊打ち！,だいじょうぶよ！,木霊打ち！,False
+d1/magic-hiyori,d1/magic-hiyori/axe-2,花のように！ 朱葉落とし！,花のように！,朱葉落とし！,False
+d1/magic-hiyori,d1/magic-hiyori/axe-3,ぬくもりを力に！ 岩戸裂き！,ぬくもりを力に！,岩戸裂き！,False
+d1/magic-hiyori,d1/magic-hiyori/axe-4,命を抱きしめて！ 天樹崩し！,命を抱きしめて！,天樹崩し！,False
+d1/magic-hiyori,d1/magic-hiyori/spear-1,花のように！ 風見突き！,花のように！,風見突き！,False
+d1/magic-hiyori,d1/magic-hiyori/spear-2,ぬくもりを力に！ 燕渡り！,ぬくもりを力に！,燕渡り！,False
+d1/magic-hiyori,d1/magic-hiyori/spear-3,命を抱きしめて！ 碧雷穿！,命を抱きしめて！,碧雷穿！,False
+d1/magic-hiyori,d1/magic-hiyori/spear-4,だいじょうぶよ！ 星河貫き！,だいじょうぶよ！,星河貫き！,False
+d1/magic-hiyori,d1/magic-hiyori/staff-1,ぬくもりを力に！ 小枝払い！,ぬくもりを力に！,小枝払い！,False
+d1/magic-hiyori,d1/magic-hiyori/staff-2,命を抱きしめて！ 水鏡返し！,命を抱きしめて！,水鏡返し！,False
+d1/magic-hiyori,d1/magic-hiyori/staff-3,だいじょうぶよ！ 天秤回し！,だいじょうぶよ！,天秤回し！,False
+d1/magic-hiyori,d1/magic-hiyori/staff-4,花のように！ 万象の円！,花のように！,万象の円！,False
+d1/magic-hiyori,d1/magic-hiyori/hammer-1,命を抱きしめて！ 鐘ひとつ！,命を抱きしめて！,鐘ひとつ！,False
+d1/magic-hiyori,d1/magic-hiyori/hammer-2,だいじょうぶよ！ 地響き拍子！,だいじょうぶよ！,地響き拍子！,False
+d1/magic-hiyori,d1/magic-hiyori/hammer-3,花のように！ 砕月の鼓動！,花のように！,砕月の鼓動！,False
+d1/magic-hiyori,d1/magic-hiyori/hammer-4,ぬくもりを力に！ 暁鐘轟天！,ぬくもりを力に！,暁鐘轟天！,False
+d1/magic-hiyori,d1/magic-hiyori/bow-1,だいじょうぶよ！ 風糸射ち！,だいじょうぶよ！,風糸射ち！,False
+d1/magic-hiyori,d1/magic-hiyori/bow-2,花のように！ 双虹の矢！,花のように！,双虹の矢！,False
+d1/magic-hiyori,d1/magic-hiyori/bow-3,ぬくもりを力に！ 星屑時雨！,ぬくもりを力に！,星屑時雨！,False
+d1/magic-hiyori,d1/magic-hiyori/bow-4,命を抱きしめて！ 天弧七彩！,命を抱きしめて！,天弧七彩！,False
+d1/magic-hiyori,d1/magic-hiyori/whip-1,花のように！ 草波打ち！,花のように！,草波打ち！,False
+d1/magic-hiyori,d1/magic-hiyori/whip-2,ぬくもりを力に！ 紫電の結び！,ぬくもりを力に！,紫電の結び！,False
+d1/magic-hiyori,d1/magic-hiyori/whip-3,命を抱きしめて！ 風花乱れ！,命を抱きしめて！,風花乱れ！,False
+d1/magic-hiyori,d1/magic-hiyori/whip-4,だいじょうぶよ！ 星環の舞！,だいじょうぶよ！,星環の舞！,False
+d1/magic-hiyori,d1/magic-hiyori/chakram-1,ぬくもりを力に！ 弧月投げ！,ぬくもりを力に！,弧月投げ！,False
+d1/magic-hiyori,d1/magic-hiyori/chakram-2,命を抱きしめて！ 双輪巡り！,命を抱きしめて！,双輪巡り！,False
+d1/magic-hiyori,d1/magic-hiyori/chakram-3,だいじょうぶよ！ 風輪連華！,だいじょうぶよ！,風輪連華！,False
+d1/magic-hiyori,d1/magic-hiyori/chakram-4,花のように！ 天輪帰航！,花のように！,天輪帰航！,False
+d1/magic-hiyori,d1/magic-hiyori/ultimate-dawn,命を抱きしめて！ 奥義・万彩黎明！,命を抱きしめて！,奥義・万彩黎明！,False
+d1/magic-hiyori,d1/magic-hiyori/ultimate-earth,だいじょうぶよ！ 奥義・地天共鳴！,だいじょうぶよ！,奥義・地天共鳴！,False
+d1/magic-hiyori,d1/magic-hiyori/ultimate-sky,花のように！ 奥義・星巡天翔！,花のように！,奥義・星巡天翔！,False
+d1/magic-hiyori,d1/magic-hiyori/ultimate-heart,ぬくもりを力に！ 奥義・無窮心輪！,ぬくもりを力に！,奥義・無窮心輪！,False
+d1/magic-tsubasa,d1/magic-tsubasa/fist-1,空へ飛び出せ！ 踏風掌！,空へ飛び出せ！,踏風掌！,False
+d1/magic-tsubasa,d1/magic-tsubasa/fist-2,翼を広げて！ 昇陽連脚！,翼を広げて！,昇陽連脚！,False
+d1/magic-tsubasa,d1/magic-tsubasa/fist-3,追い風に乗れ！ 空鳴り拳！,追い風に乗れ！,空鳴り拳！,False
+d1/magic-tsubasa,d1/magic-tsubasa/fist-4,限界の向こうへ！ 天環無拍！,限界の向こうへ！,天環無拍！,False
+d1/magic-tsubasa,d1/magic-tsubasa/sword-1,翼を広げて！ 朝露払い！,翼を広げて！,朝露払い！,False
+d1/magic-tsubasa,d1/magic-tsubasa/sword-2,追い風に乗れ！ 双葉返し！,追い風に乗れ！,双葉返し！,False
+d1/magic-tsubasa,d1/magic-tsubasa/sword-3,限界の向こうへ！ 宵星の輪舞！,限界の向こうへ！,宵星の輪舞！,False
+d1/magic-tsubasa,d1/magic-tsubasa/sword-4,空へ飛び出せ！ 黎明一文字！,空へ飛び出せ！,黎明一文字！,False
+d1/magic-tsubasa,d1/magic-tsubasa/greatsword-1,追い風に乗れ！ 雲割り！,追い風に乗れ！,雲割り！,False
+d1/magic-tsubasa,d1/magic-tsubasa/greatsword-2,限界の向こうへ！ 夕凪おろし！,限界の向こうへ！,夕凪おろし！,False
+d1/magic-tsubasa,d1/magic-tsubasa/greatsword-3,空へ飛び出せ！ 月稜断！,空へ飛び出せ！,月稜断！,False
+d1/magic-tsubasa,d1/magic-tsubasa/greatsword-4,翼を広げて！ 蒼天境界斬！,翼を広げて！,蒼天境界斬！,False
+d1/magic-tsubasa,d1/magic-tsubasa/rapier-1,限界の向こうへ！ 針雨！,限界の向こうへ！,針雨！,False
+d1/magic-tsubasa,d1/magic-tsubasa/rapier-2,空へ飛び出せ！ 星縫い！,空へ飛び出せ！,星縫い！,False
+d1/magic-tsubasa,d1/magic-tsubasa/rapier-3,翼を広げて！ 銀糸の螺旋！,翼を広げて！,銀糸の螺旋！,False
+d1/magic-tsubasa,d1/magic-tsubasa/rapier-4,追い風に乗れ！ 流星点描！,追い風に乗れ！,流星点描！,False
+d1/magic-tsubasa,d1/magic-tsubasa/axe-1,空へ飛び出せ！ 木霊打ち！,空へ飛び出せ！,木霊打ち！,False
+d1/magic-tsubasa,d1/magic-tsubasa/axe-2,翼を広げて！ 朱葉落とし！,翼を広げて！,朱葉落とし！,False
+d1/magic-tsubasa,d1/magic-tsubasa/axe-3,追い風に乗れ！ 岩戸裂き！,追い風に乗れ！,岩戸裂き！,False
+d1/magic-tsubasa,d1/magic-tsubasa/axe-4,限界の向こうへ！ 天樹崩し！,限界の向こうへ！,天樹崩し！,False
+d1/magic-tsubasa,d1/magic-tsubasa/spear-1,翼を広げて！ 風見突き！,翼を広げて！,風見突き！,False
+d1/magic-tsubasa,d1/magic-tsubasa/spear-2,追い風に乗れ！ 燕渡り！,追い風に乗れ！,燕渡り！,False
+d1/magic-tsubasa,d1/magic-tsubasa/spear-3,限界の向こうへ！ 碧雷穿！,限界の向こうへ！,碧雷穿！,False
+d1/magic-tsubasa,d1/magic-tsubasa/spear-4,空へ飛び出せ！ 星河貫き！,空へ飛び出せ！,星河貫き！,False
+d1/magic-tsubasa,d1/magic-tsubasa/staff-1,追い風に乗れ！ 小枝払い！,追い風に乗れ！,小枝払い！,False
+d1/magic-tsubasa,d1/magic-tsubasa/staff-2,限界の向こうへ！ 水鏡返し！,限界の向こうへ！,水鏡返し！,False
+d1/magic-tsubasa,d1/magic-tsubasa/staff-3,空へ飛び出せ！ 天秤回し！,空へ飛び出せ！,天秤回し！,False
+d1/magic-tsubasa,d1/magic-tsubasa/staff-4,翼を広げて！ 万象の円！,翼を広げて！,万象の円！,False
+d1/magic-tsubasa,d1/magic-tsubasa/hammer-1,限界の向こうへ！ 鐘ひとつ！,限界の向こうへ！,鐘ひとつ！,False
+d1/magic-tsubasa,d1/magic-tsubasa/hammer-2,空へ飛び出せ！ 地響き拍子！,空へ飛び出せ！,地響き拍子！,False
+d1/magic-tsubasa,d1/magic-tsubasa/hammer-3,翼を広げて！ 砕月の鼓動！,翼を広げて！,砕月の鼓動！,False
+d1/magic-tsubasa,d1/magic-tsubasa/hammer-4,追い風に乗れ！ 暁鐘轟天！,追い風に乗れ！,暁鐘轟天！,False
+d1/magic-tsubasa,d1/magic-tsubasa/bow-1,空へ飛び出せ！ 風糸射ち！,空へ飛び出せ！,風糸射ち！,False
+d1/magic-tsubasa,d1/magic-tsubasa/bow-2,翼を広げて！ 双虹の矢！,翼を広げて！,双虹の矢！,False
+d1/magic-tsubasa,d1/magic-tsubasa/bow-3,追い風に乗れ！ 星屑時雨！,追い風に乗れ！,星屑時雨！,False
+d1/magic-tsubasa,d1/magic-tsubasa/bow-4,限界の向こうへ！ 天弧七彩！,限界の向こうへ！,天弧七彩！,False
+d1/magic-tsubasa,d1/magic-tsubasa/whip-1,翼を広げて！ 草波打ち！,翼を広げて！,草波打ち！,False
+d1/magic-tsubasa,d1/magic-tsubasa/whip-2,追い風に乗れ！ 紫電の結び！,追い風に乗れ！,紫電の結び！,False
+d1/magic-tsubasa,d1/magic-tsubasa/whip-3,限界の向こうへ！ 風花乱れ！,限界の向こうへ！,風花乱れ！,False
+d1/magic-tsubasa,d1/magic-tsubasa/whip-4,空へ飛び出せ！ 星環の舞！,空へ飛び出せ！,星環の舞！,False
+d1/magic-tsubasa,d1/magic-tsubasa/chakram-1,追い風に乗れ！ 弧月投げ！,追い風に乗れ！,弧月投げ！,False
+d1/magic-tsubasa,d1/magic-tsubasa/chakram-2,限界の向こうへ！ 双輪巡り！,限界の向こうへ！,双輪巡り！,False
+d1/magic-tsubasa,d1/magic-tsubasa/chakram-3,空へ飛び出せ！ 風輪連華！,空へ飛び出せ！,風輪連華！,False
+d1/magic-tsubasa,d1/magic-tsubasa/chakram-4,翼を広げて！ 天輪帰航！,翼を広げて！,天輪帰航！,False
+d1/magic-tsubasa,d1/magic-tsubasa/ultimate-dawn,限界の向こうへ！ 奥義・万彩黎明！,限界の向こうへ！,奥義・万彩黎明！,False
+d1/magic-tsubasa,d1/magic-tsubasa/ultimate-earth,空へ飛び出せ！ 奥義・地天共鳴！,空へ飛び出せ！,奥義・地天共鳴！,False
+d1/magic-tsubasa,d1/magic-tsubasa/ultimate-sky,翼を広げて！ 奥義・星巡天翔！,翼を広げて！,奥義・星巡天翔！,False
+d1/magic-tsubasa,d1/magic-tsubasa/ultimate-heart,追い風に乗れ！ 奥義・無窮心輪！,追い風に乗れ！,奥義・無窮心輪！,False
+d1/magic-rei,d1/magic-rei/fist-1,静寂の中で！ 踏風掌！,静寂の中で！,踏風掌！,False
+d1/magic-rei,d1/magic-rei/fist-2,刃の心で！ 昇陽連脚！,刃の心で！,昇陽連脚！,False
+d1/magic-rei,d1/magic-rei/fist-3,闇を断ち切る！ 空鳴り拳！,闇を断ち切る！,空鳴り拳！,False
+d1/magic-rei,d1/magic-rei/fist-4,この意志は折れない！ 天環無拍！,この意志は折れない！,天環無拍！,False
+d1/magic-rei,d1/magic-rei/sword-1,刃の心で！ 朝露払い！,刃の心で！,朝露払い！,False
+d1/magic-rei,d1/magic-rei/sword-2,闇を断ち切る！ 双葉返し！,闇を断ち切る！,双葉返し！,False
+d1/magic-rei,d1/magic-rei/sword-3,この意志は折れない！ 宵星の輪舞！,この意志は折れない！,宵星の輪舞！,False
+d1/magic-rei,d1/magic-rei/sword-4,静寂の中で！ 黎明一文字！,静寂の中で！,黎明一文字！,False
+d1/magic-rei,d1/magic-rei/greatsword-1,闇を断ち切る！ 雲割り！,闇を断ち切る！,雲割り！,False
+d1/magic-rei,d1/magic-rei/greatsword-2,この意志は折れない！ 夕凪おろし！,この意志は折れない！,夕凪おろし！,False
+d1/magic-rei,d1/magic-rei/greatsword-3,静寂の中で！ 月稜断！,静寂の中で！,月稜断！,False
+d1/magic-rei,d1/magic-rei/greatsword-4,刃の心で！ 蒼天境界斬！,刃の心で！,蒼天境界斬！,False
+d1/magic-rei,d1/magic-rei/rapier-1,この意志は折れない！ 針雨！,この意志は折れない！,針雨！,False
+d1/magic-rei,d1/magic-rei/rapier-2,静寂の中で！ 星縫い！,静寂の中で！,星縫い！,False
+d1/magic-rei,d1/magic-rei/rapier-3,刃の心で！ 銀糸の螺旋！,刃の心で！,銀糸の螺旋！,False
+d1/magic-rei,d1/magic-rei/rapier-4,闇を断ち切る！ 流星点描！,闇を断ち切る！,流星点描！,False
+d1/magic-rei,d1/magic-rei/axe-1,静寂の中で！ 木霊打ち！,静寂の中で！,木霊打ち！,False
+d1/magic-rei,d1/magic-rei/axe-2,刃の心で！ 朱葉落とし！,刃の心で！,朱葉落とし！,False
+d1/magic-rei,d1/magic-rei/axe-3,闇を断ち切る！ 岩戸裂き！,闇を断ち切る！,岩戸裂き！,False
+d1/magic-rei,d1/magic-rei/axe-4,この意志は折れない！ 天樹崩し！,この意志は折れない！,天樹崩し！,False
+d1/magic-rei,d1/magic-rei/spear-1,刃の心で！ 風見突き！,刃の心で！,風見突き！,False
+d1/magic-rei,d1/magic-rei/spear-2,闇を断ち切る！ 燕渡り！,闇を断ち切る！,燕渡り！,False
+d1/magic-rei,d1/magic-rei/spear-3,この意志は折れない！ 碧雷穿！,この意志は折れない！,碧雷穿！,False
+d1/magic-rei,d1/magic-rei/spear-4,静寂の中で！ 星河貫き！,静寂の中で！,星河貫き！,False
+d1/magic-rei,d1/magic-rei/staff-1,闇を断ち切る！ 小枝払い！,闇を断ち切る！,小枝払い！,False
+d1/magic-rei,d1/magic-rei/staff-2,この意志は折れない！ 水鏡返し！,この意志は折れない！,水鏡返し！,False
+d1/magic-rei,d1/magic-rei/staff-3,静寂の中で！ 天秤回し！,静寂の中で！,天秤回し！,False
+d1/magic-rei,d1/magic-rei/staff-4,刃の心で！ 万象の円！,刃の心で！,万象の円！,False
+d1/magic-rei,d1/magic-rei/hammer-1,この意志は折れない！ 鐘ひとつ！,この意志は折れない！,鐘ひとつ！,False
+d1/magic-rei,d1/magic-rei/hammer-2,静寂の中で！ 地響き拍子！,静寂の中で！,地響き拍子！,False
+d1/magic-rei,d1/magic-rei/hammer-3,刃の心で！ 砕月の鼓動！,刃の心で！,砕月の鼓動！,False
+d1/magic-rei,d1/magic-rei/hammer-4,闇を断ち切る！ 暁鐘轟天！,闇を断ち切る！,暁鐘轟天！,False
+d1/magic-rei,d1/magic-rei/bow-1,静寂の中で！ 風糸射ち！,静寂の中で！,風糸射ち！,False
+d1/magic-rei,d1/magic-rei/bow-2,刃の心で！ 双虹の矢！,刃の心で！,双虹の矢！,False
+d1/magic-rei,d1/magic-rei/bow-3,闇を断ち切る！ 星屑時雨！,闇を断ち切る！,星屑時雨！,False
+d1/magic-rei,d1/magic-rei/bow-4,この意志は折れない！ 天弧七彩！,この意志は折れない！,天弧七彩！,False
+d1/magic-rei,d1/magic-rei/whip-1,刃の心で！ 草波打ち！,刃の心で！,草波打ち！,False
+d1/magic-rei,d1/magic-rei/whip-2,闇を断ち切る！ 紫電の結び！,闇を断ち切る！,紫電の結び！,False
+d1/magic-rei,d1/magic-rei/whip-3,この意志は折れない！ 風花乱れ！,この意志は折れない！,風花乱れ！,False
+d1/magic-rei,d1/magic-rei/whip-4,静寂の中で！ 星環の舞！,静寂の中で！,星環の舞！,False
+d1/magic-rei,d1/magic-rei/chakram-1,闇を断ち切る！ 弧月投げ！,闇を断ち切る！,弧月投げ！,False
+d1/magic-rei,d1/magic-rei/chakram-2,この意志は折れない！ 双輪巡り！,この意志は折れない！,双輪巡り！,False
+d1/magic-rei,d1/magic-rei/chakram-3,静寂の中で！ 風輪連華！,静寂の中で！,風輪連華！,False
+d1/magic-rei,d1/magic-rei/chakram-4,刃の心で！ 天輪帰航！,刃の心で！,天輪帰航！,False
+d1/magic-rei,d1/magic-rei/ultimate-dawn,この意志は折れない！ 奥義・万彩黎明！,この意志は折れない！,奥義・万彩黎明！,False
+d1/magic-rei,d1/magic-rei/ultimate-earth,静寂の中で！ 奥義・地天共鳴！,静寂の中で！,奥義・地天共鳴！,False
+d1/magic-rei,d1/magic-rei/ultimate-sky,刃の心で！ 奥義・星巡天翔！,刃の心で！,奥義・星巡天翔！,False
+d1/magic-rei,d1/magic-rei/ultimate-heart,闇を断ち切る！ 奥義・無窮心輪！,闇を断ち切る！,奥義・無窮心輪！,False
+d1/magic-madoka,d1/magic-madoka/fist-1,まるく結んで！ 踏風掌！,まるく結んで！,踏風掌！,False
+d1/magic-madoka,d1/magic-madoka/fist-2,くるりと行くよ！ 昇陽連脚！,くるりと行くよ！,昇陽連脚！,False
+d1/magic-madoka,d1/magic-madoka/fist-3,輪になれ光！ 空鳴り拳！,輪になれ光！,空鳴り拳！,False
+d1/magic-madoka,d1/magic-madoka/fist-4,願いよつながれ！ 天環無拍！,願いよつながれ！,天環無拍！,False
+d1/magic-madoka,d1/magic-madoka/sword-1,くるりと行くよ！ 朝露払い！,くるりと行くよ！,朝露払い！,False
+d1/magic-madoka,d1/magic-madoka/sword-2,輪になれ光！ 双葉返し！,輪になれ光！,双葉返し！,False
+d1/magic-madoka,d1/magic-madoka/sword-3,願いよつながれ！ 宵星の輪舞！,願いよつながれ！,宵星の輪舞！,False
+d1/magic-madoka,d1/magic-madoka/sword-4,まるく結んで！ 黎明一文字！,まるく結んで！,黎明一文字！,False
+d1/magic-madoka,d1/magic-madoka/greatsword-1,輪になれ光！ 雲割り！,輪になれ光！,雲割り！,False
+d1/magic-madoka,d1/magic-madoka/greatsword-2,願いよつながれ！ 夕凪おろし！,願いよつながれ！,夕凪おろし！,False
+d1/magic-madoka,d1/magic-madoka/greatsword-3,まるく結んで！ 月稜断！,まるく結んで！,月稜断！,False
+d1/magic-madoka,d1/magic-madoka/greatsword-4,くるりと行くよ！ 蒼天境界斬！,くるりと行くよ！,蒼天境界斬！,False
+d1/magic-madoka,d1/magic-madoka/rapier-1,願いよつながれ！ 針雨！,願いよつながれ！,針雨！,False
+d1/magic-madoka,d1/magic-madoka/rapier-2,まるく結んで！ 星縫い！,まるく結んで！,星縫い！,False
+d1/magic-madoka,d1/magic-madoka/rapier-3,くるりと行くよ！ 銀糸の螺旋！,くるりと行くよ！,銀糸の螺旋！,False
+d1/magic-madoka,d1/magic-madoka/rapier-4,輪になれ光！ 流星点描！,輪になれ光！,流星点描！,False
+d1/magic-madoka,d1/magic-madoka/axe-1,まるく結んで！ 木霊打ち！,まるく結んで！,木霊打ち！,False
+d1/magic-madoka,d1/magic-madoka/axe-2,くるりと行くよ！ 朱葉落とし！,くるりと行くよ！,朱葉落とし！,False
+d1/magic-madoka,d1/magic-madoka/axe-3,輪になれ光！ 岩戸裂き！,輪になれ光！,岩戸裂き！,False
+d1/magic-madoka,d1/magic-madoka/axe-4,願いよつながれ！ 天樹崩し！,願いよつながれ！,天樹崩し！,False
+d1/magic-madoka,d1/magic-madoka/spear-1,くるりと行くよ！ 風見突き！,くるりと行くよ！,風見突き！,False
+d1/magic-madoka,d1/magic-madoka/spear-2,輪になれ光！ 燕渡り！,輪になれ光！,燕渡り！,False
+d1/magic-madoka,d1/magic-madoka/spear-3,願いよつながれ！ 碧雷穿！,願いよつながれ！,碧雷穿！,False
+d1/magic-madoka,d1/magic-madoka/spear-4,まるく結んで！ 星河貫き！,まるく結んで！,星河貫き！,False
+d1/magic-madoka,d1/magic-madoka/staff-1,輪になれ光！ 小枝払い！,輪になれ光！,小枝払い！,False
+d1/magic-madoka,d1/magic-madoka/staff-2,願いよつながれ！ 水鏡返し！,願いよつながれ！,水鏡返し！,False
+d1/magic-madoka,d1/magic-madoka/staff-3,まるく結んで！ 天秤回し！,まるく結んで！,天秤回し！,False
+d1/magic-madoka,d1/magic-madoka/staff-4,くるりと行くよ！ 万象の円！,くるりと行くよ！,万象の円！,False
+d1/magic-madoka,d1/magic-madoka/hammer-1,願いよつながれ！ 鐘ひとつ！,願いよつながれ！,鐘ひとつ！,False
+d1/magic-madoka,d1/magic-madoka/hammer-2,まるく結んで！ 地響き拍子！,まるく結んで！,地響き拍子！,False
+d1/magic-madoka,d1/magic-madoka/hammer-3,くるりと行くよ！ 砕月の鼓動！,くるりと行くよ！,砕月の鼓動！,False
+d1/magic-madoka,d1/magic-madoka/hammer-4,輪になれ光！ 暁鐘轟天！,輪になれ光！,暁鐘轟天！,False
+d1/magic-madoka,d1/magic-madoka/bow-1,まるく結んで！ 風糸射ち！,まるく結んで！,風糸射ち！,False
+d1/magic-madoka,d1/magic-madoka/bow-2,くるりと行くよ！ 双虹の矢！,くるりと行くよ！,双虹の矢！,False
+d1/magic-madoka,d1/magic-madoka/bow-3,輪になれ光！ 星屑時雨！,輪になれ光！,星屑時雨！,False
+d1/magic-madoka,d1/magic-madoka/bow-4,願いよつながれ！ 天弧七彩！,願いよつながれ！,天弧七彩！,False
+d1/magic-madoka,d1/magic-madoka/whip-1,くるりと行くよ！ 草波打ち！,くるりと行くよ！,草波打ち！,False
+d1/magic-madoka,d1/magic-madoka/whip-2,輪になれ光！ 紫電の結び！,輪になれ光！,紫電の結び！,False
+d1/magic-madoka,d1/magic-madoka/whip-3,願いよつながれ！ 風花乱れ！,願いよつながれ！,風花乱れ！,False
+d1/magic-madoka,d1/magic-madoka/whip-4,まるく結んで！ 星環の舞！,まるく結んで！,星環の舞！,False
+d1/magic-madoka,d1/magic-madoka/chakram-1,輪になれ光！ 弧月投げ！,輪になれ光！,弧月投げ！,False
+d1/magic-madoka,d1/magic-madoka/chakram-2,願いよつながれ！ 双輪巡り！,願いよつながれ！,双輪巡り！,False
+d1/magic-madoka,d1/magic-madoka/chakram-3,まるく結んで！ 風輪連華！,まるく結んで！,風輪連華！,False
+d1/magic-madoka,d1/magic-madoka/chakram-4,くるりと行くよ！ 天輪帰航！,くるりと行くよ！,天輪帰航！,False
+d1/magic-madoka,d1/magic-madoka/ultimate-dawn,願いよつながれ！ 奥義・万彩黎明！,願いよつながれ！,奥義・万彩黎明！,False
+d1/magic-madoka,d1/magic-madoka/ultimate-earth,まるく結んで！ 奥義・地天共鳴！,まるく結んで！,奥義・地天共鳴！,False
+d1/magic-madoka,d1/magic-madoka/ultimate-sky,くるりと行くよ！ 奥義・星巡天翔！,くるりと行くよ！,奥義・星巡天翔！,False
+d1/magic-madoka,d1/magic-madoka/ultimate-heart,輪になれ光！ 奥義・無窮心輪！,輪になれ光！,奥義・無窮心輪！,False
+d1/magic-koharu,d1/magic-koharu/fist-1,春風よ！ 踏風掌！,春風よ！,踏風掌！,False
+d1/magic-koharu,d1/magic-koharu/fist-2,緑の息吹！ 昇陽連脚！,緑の息吹！,昇陽連脚！,False
+d1/magic-koharu,d1/magic-koharu/fist-3,芽吹きの力で！ 空鳴り拳！,芽吹きの力で！,空鳴り拳！,False
+d1/magic-koharu,d1/magic-koharu/fist-4,花咲く明日へ！ 天環無拍！,花咲く明日へ！,天環無拍！,False
+d1/magic-koharu,d1/magic-koharu/sword-1,緑の息吹！ 朝露払い！,緑の息吹！,朝露払い！,False
+d1/magic-koharu,d1/magic-koharu/sword-2,芽吹きの力で！ 双葉返し！,芽吹きの力で！,双葉返し！,False
+d1/magic-koharu,d1/magic-koharu/sword-3,花咲く明日へ！ 宵星の輪舞！,花咲く明日へ！,宵星の輪舞！,False
+d1/magic-koharu,d1/magic-koharu/sword-4,春風よ！ 黎明一文字！,春風よ！,黎明一文字！,False
+d1/magic-koharu,d1/magic-koharu/greatsword-1,芽吹きの力で！ 雲割り！,芽吹きの力で！,雲割り！,False
+d1/magic-koharu,d1/magic-koharu/greatsword-2,花咲く明日へ！ 夕凪おろし！,花咲く明日へ！,夕凪おろし！,False
+d1/magic-koharu,d1/magic-koharu/greatsword-3,春風よ！ 月稜断！,春風よ！,月稜断！,False
+d1/magic-koharu,d1/magic-koharu/greatsword-4,緑の息吹！ 蒼天境界斬！,緑の息吹！,蒼天境界斬！,False
+d1/magic-koharu,d1/magic-koharu/rapier-1,花咲く明日へ！ 針雨！,花咲く明日へ！,針雨！,False
+d1/magic-koharu,d1/magic-koharu/rapier-2,春風よ！ 星縫い！,春風よ！,星縫い！,False
+d1/magic-koharu,d1/magic-koharu/rapier-3,緑の息吹！ 銀糸の螺旋！,緑の息吹！,銀糸の螺旋！,False
+d1/magic-koharu,d1/magic-koharu/rapier-4,芽吹きの力で！ 流星点描！,芽吹きの力で！,流星点描！,False
+d1/magic-koharu,d1/magic-koharu/axe-1,春風よ！ 木霊打ち！,春風よ！,木霊打ち！,False
+d1/magic-koharu,d1/magic-koharu/axe-2,緑の息吹！ 朱葉落とし！,緑の息吹！,朱葉落とし！,False
+d1/magic-koharu,d1/magic-koharu/axe-3,芽吹きの力で！ 岩戸裂き！,芽吹きの力で！,岩戸裂き！,False
+d1/magic-koharu,d1/magic-koharu/axe-4,花咲く明日へ！ 天樹崩し！,花咲く明日へ！,天樹崩し！,False
+d1/magic-koharu,d1/magic-koharu/spear-1,緑の息吹！ 風見突き！,緑の息吹！,風見突き！,False
+d1/magic-koharu,d1/magic-koharu/spear-2,芽吹きの力で！ 燕渡り！,芽吹きの力で！,燕渡り！,False
+d1/magic-koharu,d1/magic-koharu/spear-3,花咲く明日へ！ 碧雷穿！,花咲く明日へ！,碧雷穿！,False
+d1/magic-koharu,d1/magic-koharu/spear-4,春風よ！ 星河貫き！,春風よ！,星河貫き！,False
+d1/magic-koharu,d1/magic-koharu/staff-1,芽吹きの力で！ 小枝払い！,芽吹きの力で！,小枝払い！,False
+d1/magic-koharu,d1/magic-koharu/staff-2,花咲く明日へ！ 水鏡返し！,花咲く明日へ！,水鏡返し！,False
+d1/magic-koharu,d1/magic-koharu/staff-3,春風よ！ 天秤回し！,春風よ！,天秤回し！,False
+d1/magic-koharu,d1/magic-koharu/staff-4,緑の息吹！ 万象の円！,緑の息吹！,万象の円！,False
+d1/magic-koharu,d1/magic-koharu/hammer-1,花咲く明日へ！ 鐘ひとつ！,花咲く明日へ！,鐘ひとつ！,False
+d1/magic-koharu,d1/magic-koharu/hammer-2,春風よ！ 地響き拍子！,春風よ！,地響き拍子！,False
+d1/magic-koharu,d1/magic-koharu/hammer-3,緑の息吹！ 砕月の鼓動！,緑の息吹！,砕月の鼓動！,False
+d1/magic-koharu,d1/magic-koharu/hammer-4,芽吹きの力で！ 暁鐘轟天！,芽吹きの力で！,暁鐘轟天！,False
+d1/magic-koharu,d1/magic-koharu/bow-1,春風よ！ 風糸射ち！,春風よ！,風糸射ち！,False
+d1/magic-koharu,d1/magic-koharu/bow-2,緑の息吹！ 双虹の矢！,緑の息吹！,双虹の矢！,False
+d1/magic-koharu,d1/magic-koharu/bow-3,芽吹きの力で！ 星屑時雨！,芽吹きの力で！,星屑時雨！,False
+d1/magic-koharu,d1/magic-koharu/bow-4,花咲く明日へ！ 天弧七彩！,花咲く明日へ！,天弧七彩！,False
+d1/magic-koharu,d1/magic-koharu/whip-1,緑の息吹！ 草波打ち！,緑の息吹！,草波打ち！,False
+d1/magic-koharu,d1/magic-koharu/whip-2,芽吹きの力で！ 紫電の結び！,芽吹きの力で！,紫電の結び！,False
+d1/magic-koharu,d1/magic-koharu/whip-3,花咲く明日へ！ 風花乱れ！,花咲く明日へ！,風花乱れ！,False
+d1/magic-koharu,d1/magic-koharu/whip-4,春風よ！ 星環の舞！,春風よ！,星環の舞！,False
+d1/magic-koharu,d1/magic-koharu/chakram-1,芽吹きの力で！ 弧月投げ！,芽吹きの力で！,弧月投げ！,False
+d1/magic-koharu,d1/magic-koharu/chakram-2,花咲く明日へ！ 双輪巡り！,花咲く明日へ！,双輪巡り！,False
+d1/magic-koharu,d1/magic-koharu/chakram-3,春風よ！ 風輪連華！,春風よ！,風輪連華！,False
+d1/magic-koharu,d1/magic-koharu/chakram-4,緑の息吹！ 天輪帰航！,緑の息吹！,天輪帰航！,False
+d1/magic-koharu,d1/magic-koharu/ultimate-dawn,花咲く明日へ！ 奥義・万彩黎明！,花咲く明日へ！,奥義・万彩黎明！,False
+d1/magic-koharu,d1/magic-koharu/ultimate-earth,春風よ！ 奥義・地天共鳴！,春風よ！,奥義・地天共鳴！,False
+d1/magic-koharu,d1/magic-koharu/ultimate-sky,緑の息吹！ 奥義・星巡天翔！,緑の息吹！,奥義・星巡天翔！,False
+d1/magic-koharu,d1/magic-koharu/ultimate-heart,芽吹きの力で！ 奥義・無窮心輪！,芽吹きの力で！,奥義・無窮心輪！,False
+d1/magic-mirai,d1/magic-mirai/fist-1,未来はここから！ 踏風掌！,未来はここから！,踏風掌！,False
+d1/magic-mirai,d1/magic-mirai/fist-2,その先へ行くよ！ 昇陽連脚！,その先へ行くよ！,昇陽連脚！,False
+d1/magic-mirai,d1/magic-mirai/fist-3,きらめきを信じて！ 空鳴り拳！,きらめきを信じて！,空鳴り拳！,False
+d1/magic-mirai,d1/magic-mirai/fist-4,明日を変える！ 天環無拍！,明日を変える！,天環無拍！,False
+d1/magic-mirai,d1/magic-mirai/sword-1,その先へ行くよ！ 朝露払い！,その先へ行くよ！,朝露払い！,False
+d1/magic-mirai,d1/magic-mirai/sword-2,きらめきを信じて！ 双葉返し！,きらめきを信じて！,双葉返し！,False
+d1/magic-mirai,d1/magic-mirai/sword-3,明日を変える！ 宵星の輪舞！,明日を変える！,宵星の輪舞！,False
+d1/magic-mirai,d1/magic-mirai/sword-4,未来はここから！ 黎明一文字！,未来はここから！,黎明一文字！,False
+d1/magic-mirai,d1/magic-mirai/greatsword-1,きらめきを信じて！ 雲割り！,きらめきを信じて！,雲割り！,False
+d1/magic-mirai,d1/magic-mirai/greatsword-2,明日を変える！ 夕凪おろし！,明日を変える！,夕凪おろし！,False
+d1/magic-mirai,d1/magic-mirai/greatsword-3,未来はここから！ 月稜断！,未来はここから！,月稜断！,False
+d1/magic-mirai,d1/magic-mirai/greatsword-4,その先へ行くよ！ 蒼天境界斬！,その先へ行くよ！,蒼天境界斬！,False
+d1/magic-mirai,d1/magic-mirai/rapier-1,明日を変える！ 針雨！,明日を変える！,針雨！,False
+d1/magic-mirai,d1/magic-mirai/rapier-2,未来はここから！ 星縫い！,未来はここから！,星縫い！,False
+d1/magic-mirai,d1/magic-mirai/rapier-3,その先へ行くよ！ 銀糸の螺旋！,その先へ行くよ！,銀糸の螺旋！,False
+d1/magic-mirai,d1/magic-mirai/rapier-4,きらめきを信じて！ 流星点描！,きらめきを信じて！,流星点描！,False
+d1/magic-mirai,d1/magic-mirai/axe-1,未来はここから！ 木霊打ち！,未来はここから！,木霊打ち！,False
+d1/magic-mirai,d1/magic-mirai/axe-2,その先へ行くよ！ 朱葉落とし！,その先へ行くよ！,朱葉落とし！,False
+d1/magic-mirai,d1/magic-mirai/axe-3,きらめきを信じて！ 岩戸裂き！,きらめきを信じて！,岩戸裂き！,False
+d1/magic-mirai,d1/magic-mirai/axe-4,明日を変える！ 天樹崩し！,明日を変える！,天樹崩し！,False
+d1/magic-mirai,d1/magic-mirai/spear-1,その先へ行くよ！ 風見突き！,その先へ行くよ！,風見突き！,False
+d1/magic-mirai,d1/magic-mirai/spear-2,きらめきを信じて！ 燕渡り！,きらめきを信じて！,燕渡り！,False
+d1/magic-mirai,d1/magic-mirai/spear-3,明日を変える！ 碧雷穿！,明日を変える！,碧雷穿！,False
+d1/magic-mirai,d1/magic-mirai/spear-4,未来はここから！ 星河貫き！,未来はここから！,星河貫き！,False
+d1/magic-mirai,d1/magic-mirai/staff-1,きらめきを信じて！ 小枝払い！,きらめきを信じて！,小枝払い！,False
+d1/magic-mirai,d1/magic-mirai/staff-2,明日を変える！ 水鏡返し！,明日を変える！,水鏡返し！,False
+d1/magic-mirai,d1/magic-mirai/staff-3,未来はここから！ 天秤回し！,未来はここから！,天秤回し！,False
+d1/magic-mirai,d1/magic-mirai/staff-4,その先へ行くよ！ 万象の円！,その先へ行くよ！,万象の円！,False
+d1/magic-mirai,d1/magic-mirai/hammer-1,明日を変える！ 鐘ひとつ！,明日を変える！,鐘ひとつ！,False
+d1/magic-mirai,d1/magic-mirai/hammer-2,未来はここから！ 地響き拍子！,未来はここから！,地響き拍子！,False
+d1/magic-mirai,d1/magic-mirai/hammer-3,その先へ行くよ！ 砕月の鼓動！,その先へ行くよ！,砕月の鼓動！,False
+d1/magic-mirai,d1/magic-mirai/hammer-4,きらめきを信じて！ 暁鐘轟天！,きらめきを信じて！,暁鐘轟天！,False
+d1/magic-mirai,d1/magic-mirai/bow-1,未来はここから！ 風糸射ち！,未来はここから！,風糸射ち！,False
+d1/magic-mirai,d1/magic-mirai/bow-2,その先へ行くよ！ 双虹の矢！,その先へ行くよ！,双虹の矢！,False
+d1/magic-mirai,d1/magic-mirai/bow-3,きらめきを信じて！ 星屑時雨！,きらめきを信じて！,星屑時雨！,False
+d1/magic-mirai,d1/magic-mirai/bow-4,明日を変える！ 天弧七彩！,明日を変える！,天弧七彩！,False
+d1/magic-mirai,d1/magic-mirai/whip-1,その先へ行くよ！ 草波打ち！,その先へ行くよ！,草波打ち！,False
+d1/magic-mirai,d1/magic-mirai/whip-2,きらめきを信じて！ 紫電の結び！,きらめきを信じて！,紫電の結び！,False
+d1/magic-mirai,d1/magic-mirai/whip-3,明日を変える！ 風花乱れ！,明日を変える！,風花乱れ！,False
+d1/magic-mirai,d1/magic-mirai/whip-4,未来はここから！ 星環の舞！,未来はここから！,星環の舞！,False
+d1/magic-mirai,d1/magic-mirai/chakram-1,きらめきを信じて！ 弧月投げ！,きらめきを信じて！,弧月投げ！,False
+d1/magic-mirai,d1/magic-mirai/chakram-2,明日を変える！ 双輪巡り！,明日を変える！,双輪巡り！,False
+d1/magic-mirai,d1/magic-mirai/chakram-3,未来はここから！ 風輪連華！,未来はここから！,風輪連華！,False
+d1/magic-mirai,d1/magic-mirai/chakram-4,その先へ行くよ！ 天輪帰航！,その先へ行くよ！,天輪帰航！,False
+d1/magic-mirai,d1/magic-mirai/ultimate-dawn,明日を変える！ 奥義・万彩黎明！,明日を変える！,奥義・万彩黎明！,False
+d1/magic-mirai,d1/magic-mirai/ultimate-earth,未来はここから！ 奥義・地天共鳴！,未来はここから！,奥義・地天共鳴！,False
+d1/magic-mirai,d1/magic-mirai/ultimate-sky,その先へ行くよ！ 奥義・星巡天翔！,その先へ行くよ！,奥義・星巡天翔！,False
+d1/magic-mirai,d1/magic-mirai/ultimate-heart,きらめきを信じて！ 奥義・無窮心輪！,きらめきを信じて！,奥義・無窮心輪！,False
+d1/magic-sera,d1/magic-sera/fist-1,祈りをここに！ 踏風掌！,祈りをここに！,踏風掌！,False
+d1/magic-sera,d1/magic-sera/fist-2,星よ守って！ 昇陽連脚！,星よ守って！,昇陽連脚！,False
+d1/magic-sera,d1/magic-sera/fist-3,願いを重ねて！ 空鳴り拳！,願いを重ねて！,空鳴り拳！,False
+d1/magic-sera,d1/magic-sera/fist-4,慈しみを力に！ 天環無拍！,慈しみを力に！,天環無拍！,False
+d1/magic-sera,d1/magic-sera/sword-1,星よ守って！ 朝露払い！,星よ守って！,朝露払い！,False
+d1/magic-sera,d1/magic-sera/sword-2,願いを重ねて！ 双葉返し！,願いを重ねて！,双葉返し！,False
+d1/magic-sera,d1/magic-sera/sword-3,慈しみを力に！ 宵星の輪舞！,慈しみを力に！,宵星の輪舞！,False
+d1/magic-sera,d1/magic-sera/sword-4,祈りをここに！ 黎明一文字！,祈りをここに！,黎明一文字！,False
+d1/magic-sera,d1/magic-sera/greatsword-1,願いを重ねて！ 雲割り！,願いを重ねて！,雲割り！,False
+d1/magic-sera,d1/magic-sera/greatsword-2,慈しみを力に！ 夕凪おろし！,慈しみを力に！,夕凪おろし！,False
+d1/magic-sera,d1/magic-sera/greatsword-3,祈りをここに！ 月稜断！,祈りをここに！,月稜断！,False
+d1/magic-sera,d1/magic-sera/greatsword-4,星よ守って！ 蒼天境界斬！,星よ守って！,蒼天境界斬！,False
+d1/magic-sera,d1/magic-sera/rapier-1,慈しみを力に！ 針雨！,慈しみを力に！,針雨！,False
+d1/magic-sera,d1/magic-sera/rapier-2,祈りをここに！ 星縫い！,祈りをここに！,星縫い！,False
+d1/magic-sera,d1/magic-sera/rapier-3,星よ守って！ 銀糸の螺旋！,星よ守って！,銀糸の螺旋！,False
+d1/magic-sera,d1/magic-sera/rapier-4,願いを重ねて！ 流星点描！,願いを重ねて！,流星点描！,False
+d1/magic-sera,d1/magic-sera/axe-1,祈りをここに！ 木霊打ち！,祈りをここに！,木霊打ち！,False
+d1/magic-sera,d1/magic-sera/axe-2,星よ守って！ 朱葉落とし！,星よ守って！,朱葉落とし！,False
+d1/magic-sera,d1/magic-sera/axe-3,願いを重ねて！ 岩戸裂き！,願いを重ねて！,岩戸裂き！,False
+d1/magic-sera,d1/magic-sera/axe-4,慈しみを力に！ 天樹崩し！,慈しみを力に！,天樹崩し！,False
+d1/magic-sera,d1/magic-sera/spear-1,星よ守って！ 風見突き！,星よ守って！,風見突き！,False
+d1/magic-sera,d1/magic-sera/spear-2,願いを重ねて！ 燕渡り！,願いを重ねて！,燕渡り！,False
+d1/magic-sera,d1/magic-sera/spear-3,慈しみを力に！ 碧雷穿！,慈しみを力に！,碧雷穿！,False
+d1/magic-sera,d1/magic-sera/spear-4,祈りをここに！ 星河貫き！,祈りをここに！,星河貫き！,False
+d1/magic-sera,d1/magic-sera/staff-1,願いを重ねて！ 小枝払い！,願いを重ねて！,小枝払い！,False
+d1/magic-sera,d1/magic-sera/staff-2,慈しみを力に！ 水鏡返し！,慈しみを力に！,水鏡返し！,False
+d1/magic-sera,d1/magic-sera/staff-3,祈りをここに！ 天秤回し！,祈りをここに！,天秤回し！,False
+d1/magic-sera,d1/magic-sera/staff-4,星よ守って！ 万象の円！,星よ守って！,万象の円！,False
+d1/magic-sera,d1/magic-sera/hammer-1,慈しみを力に！ 鐘ひとつ！,慈しみを力に！,鐘ひとつ！,False
+d1/magic-sera,d1/magic-sera/hammer-2,祈りをここに！ 地響き拍子！,祈りをここに！,地響き拍子！,False
+d1/magic-sera,d1/magic-sera/hammer-3,星よ守って！ 砕月の鼓動！,星よ守って！,砕月の鼓動！,False
+d1/magic-sera,d1/magic-sera/hammer-4,願いを重ねて！ 暁鐘轟天！,願いを重ねて！,暁鐘轟天！,False
+d1/magic-sera,d1/magic-sera/bow-1,祈りをここに！ 風糸射ち！,祈りをここに！,風糸射ち！,False
+d1/magic-sera,d1/magic-sera/bow-2,星よ守って！ 双虹の矢！,星よ守って！,双虹の矢！,False
+d1/magic-sera,d1/magic-sera/bow-3,願いを重ねて！ 星屑時雨！,願いを重ねて！,星屑時雨！,False
+d1/magic-sera,d1/magic-sera/bow-4,慈しみを力に！ 天弧七彩！,慈しみを力に！,天弧七彩！,False
+d1/magic-sera,d1/magic-sera/whip-1,星よ守って！ 草波打ち！,星よ守って！,草波打ち！,False
+d1/magic-sera,d1/magic-sera/whip-2,願いを重ねて！ 紫電の結び！,願いを重ねて！,紫電の結び！,False
+d1/magic-sera,d1/magic-sera/whip-3,慈しみを力に！ 風花乱れ！,慈しみを力に！,風花乱れ！,False
+d1/magic-sera,d1/magic-sera/whip-4,祈りをここに！ 星環の舞！,祈りをここに！,星環の舞！,False
+d1/magic-sera,d1/magic-sera/chakram-1,願いを重ねて！ 弧月投げ！,願いを重ねて！,弧月投げ！,False
+d1/magic-sera,d1/magic-sera/chakram-2,慈しみを力に！ 双輪巡り！,慈しみを力に！,双輪巡り！,False
+d1/magic-sera,d1/magic-sera/chakram-3,祈りをここに！ 風輪連華！,祈りをここに！,風輪連華！,False
+d1/magic-sera,d1/magic-sera/chakram-4,星よ守って！ 天輪帰航！,星よ守って！,天輪帰航！,False
+d1/magic-sera,d1/magic-sera/ultimate-dawn,慈しみを力に！ 奥義・万彩黎明！,慈しみを力に！,奥義・万彩黎明！,False
+d1/magic-sera,d1/magic-sera/ultimate-earth,祈りをここに！ 奥義・地天共鳴！,祈りをここに！,奥義・地天共鳴！,False
+d1/magic-sera,d1/magic-sera/ultimate-sky,星よ守って！ 奥義・星巡天翔！,星よ守って！,奥義・星巡天翔！,False
+d1/magic-sera,d1/magic-sera/ultimate-heart,願いを重ねて！ 奥義・無窮心輪！,願いを重ねて！,奥義・無窮心輪！,False
+d1/magic-ren,d1/magic-ren/fist-1,風は読めた！ 踏風掌！,風は読めた！,踏風掌！,False
+d1/magic-ren,d1/magic-ren/fist-2,軽やかに！ 昇陽連脚！,軽やかに！,昇陽連脚！,False
+d1/magic-ren,d1/magic-ren/fist-3,緑の道を行く！ 空鳴り拳！,緑の道を行く！,空鳴り拳！,False
+d1/magic-ren,d1/magic-ren/fist-4,大地よ応えろ！ 天環無拍！,大地よ応えろ！,天環無拍！,False
+d1/magic-ren,d1/magic-ren/sword-1,軽やかに！ 朝露払い！,軽やかに！,朝露払い！,False
+d1/magic-ren,d1/magic-ren/sword-2,緑の道を行く！ 双葉返し！,緑の道を行く！,双葉返し！,False
+d1/magic-ren,d1/magic-ren/sword-3,大地よ応えろ！ 宵星の輪舞！,大地よ応えろ！,宵星の輪舞！,False
+d1/magic-ren,d1/magic-ren/sword-4,風は読めた！ 黎明一文字！,風は読めた！,黎明一文字！,False
+d1/magic-ren,d1/magic-ren/greatsword-1,緑の道を行く！ 雲割り！,緑の道を行く！,雲割り！,False
+d1/magic-ren,d1/magic-ren/greatsword-2,大地よ応えろ！ 夕凪おろし！,大地よ応えろ！,夕凪おろし！,False
+d1/magic-ren,d1/magic-ren/greatsword-3,風は読めた！ 月稜断！,風は読めた！,月稜断！,False
+d1/magic-ren,d1/magic-ren/greatsword-4,軽やかに！ 蒼天境界斬！,軽やかに！,蒼天境界斬！,False
+d1/magic-ren,d1/magic-ren/rapier-1,大地よ応えろ！ 針雨！,大地よ応えろ！,針雨！,False
+d1/magic-ren,d1/magic-ren/rapier-2,風は読めた！ 星縫い！,風は読めた！,星縫い！,False
+d1/magic-ren,d1/magic-ren/rapier-3,軽やかに！ 銀糸の螺旋！,軽やかに！,銀糸の螺旋！,False
+d1/magic-ren,d1/magic-ren/rapier-4,緑の道を行く！ 流星点描！,緑の道を行く！,流星点描！,False
+d1/magic-ren,d1/magic-ren/axe-1,風は読めた！ 木霊打ち！,風は読めた！,木霊打ち！,False
+d1/magic-ren,d1/magic-ren/axe-2,軽やかに！ 朱葉落とし！,軽やかに！,朱葉落とし！,False
+d1/magic-ren,d1/magic-ren/axe-3,緑の道を行く！ 岩戸裂き！,緑の道を行く！,岩戸裂き！,False
+d1/magic-ren,d1/magic-ren/axe-4,大地よ応えろ！ 天樹崩し！,大地よ応えろ！,天樹崩し！,False
+d1/magic-ren,d1/magic-ren/spear-1,軽やかに！ 風見突き！,軽やかに！,風見突き！,False
+d1/magic-ren,d1/magic-ren/spear-2,緑の道を行く！ 燕渡り！,緑の道を行く！,燕渡り！,False
+d1/magic-ren,d1/magic-ren/spear-3,大地よ応えろ！ 碧雷穿！,大地よ応えろ！,碧雷穿！,False
+d1/magic-ren,d1/magic-ren/spear-4,風は読めた！ 星河貫き！,風は読めた！,星河貫き！,False
+d1/magic-ren,d1/magic-ren/staff-1,緑の道を行く！ 小枝払い！,緑の道を行く！,小枝払い！,False
+d1/magic-ren,d1/magic-ren/staff-2,大地よ応えろ！ 水鏡返し！,大地よ応えろ！,水鏡返し！,False
+d1/magic-ren,d1/magic-ren/staff-3,風は読めた！ 天秤回し！,風は読めた！,天秤回し！,False
+d1/magic-ren,d1/magic-ren/staff-4,軽やかに！ 万象の円！,軽やかに！,万象の円！,False
+d1/magic-ren,d1/magic-ren/hammer-1,大地よ応えろ！ 鐘ひとつ！,大地よ応えろ！,鐘ひとつ！,False
+d1/magic-ren,d1/magic-ren/hammer-2,風は読めた！ 地響き拍子！,風は読めた！,地響き拍子！,False
+d1/magic-ren,d1/magic-ren/hammer-3,軽やかに！ 砕月の鼓動！,軽やかに！,砕月の鼓動！,False
+d1/magic-ren,d1/magic-ren/hammer-4,緑の道を行く！ 暁鐘轟天！,緑の道を行く！,暁鐘轟天！,False
+d1/magic-ren,d1/magic-ren/bow-1,風は読めた！ 風糸射ち！,風は読めた！,風糸射ち！,False
+d1/magic-ren,d1/magic-ren/bow-2,軽やかに！ 双虹の矢！,軽やかに！,双虹の矢！,False
+d1/magic-ren,d1/magic-ren/bow-3,緑の道を行く！ 星屑時雨！,緑の道を行く！,星屑時雨！,False
+d1/magic-ren,d1/magic-ren/bow-4,大地よ応えろ！ 天弧七彩！,大地よ応えろ！,天弧七彩！,False
+d1/magic-ren,d1/magic-ren/whip-1,軽やかに！ 草波打ち！,軽やかに！,草波打ち！,False
+d1/magic-ren,d1/magic-ren/whip-2,緑の道を行く！ 紫電の結び！,緑の道を行く！,紫電の結び！,False
+d1/magic-ren,d1/magic-ren/whip-3,大地よ応えろ！ 風花乱れ！,大地よ応えろ！,風花乱れ！,False
+d1/magic-ren,d1/magic-ren/whip-4,風は読めた！ 星環の舞！,風は読めた！,星環の舞！,False
+d1/magic-ren,d1/magic-ren/chakram-1,緑の道を行く！ 弧月投げ！,緑の道を行く！,弧月投げ！,False
+d1/magic-ren,d1/magic-ren/chakram-2,大地よ応えろ！ 双輪巡り！,大地よ応えろ！,双輪巡り！,False
+d1/magic-ren,d1/magic-ren/chakram-3,風は読めた！ 風輪連華！,風は読めた！,風輪連華！,False
+d1/magic-ren,d1/magic-ren/chakram-4,軽やかに！ 天輪帰航！,軽やかに！,天輪帰航！,False
+d1/magic-ren,d1/magic-ren/ultimate-dawn,大地よ応えろ！ 奥義・万彩黎明！,大地よ応えろ！,奥義・万彩黎明！,False
+d1/magic-ren,d1/magic-ren/ultimate-earth,風は読めた！ 奥義・地天共鳴！,風は読めた！,奥義・地天共鳴！,False
+d1/magic-ren,d1/magic-ren/ultimate-sky,軽やかに！ 奥義・星巡天翔！,軽やかに！,奥義・星巡天翔！,False
+d1/magic-ren,d1/magic-ren/ultimate-heart,緑の道を行く！ 奥義・無窮心輪！,緑の道を行く！,奥義・無窮心輪！,False
+d1/magic-soma,d1/magic-soma/fist-1,星の軌道で！ 踏風掌！,星の軌道で！,踏風掌！,False
+d1/magic-soma,d1/magic-soma/fist-2,見定めた！ 昇陽連脚！,見定めた！,昇陽連脚！,False
+d1/magic-soma,d1/magic-soma/fist-3,静かに貫く！ 空鳴り拳！,静かに貫く！,空鳴り拳！,False
+d1/magic-soma,d1/magic-soma/fist-4,蒼き誓いを！ 天環無拍！,蒼き誓いを！,天環無拍！,False
+d1/magic-soma,d1/magic-soma/sword-1,見定めた！ 朝露払い！,見定めた！,朝露払い！,False
+d1/magic-soma,d1/magic-soma/sword-2,静かに貫く！ 双葉返し！,静かに貫く！,双葉返し！,False
+d1/magic-soma,d1/magic-soma/sword-3,蒼き誓いを！ 宵星の輪舞！,蒼き誓いを！,宵星の輪舞！,False
+d1/magic-soma,d1/magic-soma/sword-4,星の軌道で！ 黎明一文字！,星の軌道で！,黎明一文字！,False
+d1/magic-soma,d1/magic-soma/greatsword-1,静かに貫く！ 雲割り！,静かに貫く！,雲割り！,False
+d1/magic-soma,d1/magic-soma/greatsword-2,蒼き誓いを！ 夕凪おろし！,蒼き誓いを！,夕凪おろし！,False
+d1/magic-soma,d1/magic-soma/greatsword-3,星の軌道で！ 月稜断！,星の軌道で！,月稜断！,False
+d1/magic-soma,d1/magic-soma/greatsword-4,見定めた！ 蒼天境界斬！,見定めた！,蒼天境界斬！,False
+d1/magic-soma,d1/magic-soma/rapier-1,蒼き誓いを！ 針雨！,蒼き誓いを！,針雨！,False
+d1/magic-soma,d1/magic-soma/rapier-2,星の軌道で！ 星縫い！,星の軌道で！,星縫い！,False
+d1/magic-soma,d1/magic-soma/rapier-3,見定めた！ 銀糸の螺旋！,見定めた！,銀糸の螺旋！,False
+d1/magic-soma,d1/magic-soma/rapier-4,静かに貫く！ 流星点描！,静かに貫く！,流星点描！,False
+d1/magic-soma,d1/magic-soma/axe-1,星の軌道で！ 木霊打ち！,星の軌道で！,木霊打ち！,False
+d1/magic-soma,d1/magic-soma/axe-2,見定めた！ 朱葉落とし！,見定めた！,朱葉落とし！,False
+d1/magic-soma,d1/magic-soma/axe-3,静かに貫く！ 岩戸裂き！,静かに貫く！,岩戸裂き！,False
+d1/magic-soma,d1/magic-soma/axe-4,蒼き誓いを！ 天樹崩し！,蒼き誓いを！,天樹崩し！,False
+d1/magic-soma,d1/magic-soma/spear-1,見定めた！ 風見突き！,見定めた！,風見突き！,False
+d1/magic-soma,d1/magic-soma/spear-2,静かに貫く！ 燕渡り！,静かに貫く！,燕渡り！,False
+d1/magic-soma,d1/magic-soma/spear-3,蒼き誓いを！ 碧雷穿！,蒼き誓いを！,碧雷穿！,False
+d1/magic-soma,d1/magic-soma/spear-4,星の軌道で！ 星河貫き！,星の軌道で！,星河貫き！,False
+d1/magic-soma,d1/magic-soma/staff-1,静かに貫く！ 小枝払い！,静かに貫く！,小枝払い！,False
+d1/magic-soma,d1/magic-soma/staff-2,蒼き誓いを！ 水鏡返し！,蒼き誓いを！,水鏡返し！,False
+d1/magic-soma,d1/magic-soma/staff-3,星の軌道で！ 天秤回し！,星の軌道で！,天秤回し！,False
+d1/magic-soma,d1/magic-soma/staff-4,見定めた！ 万象の円！,見定めた！,万象の円！,False
+d1/magic-soma,d1/magic-soma/hammer-1,蒼き誓いを！ 鐘ひとつ！,蒼き誓いを！,鐘ひとつ！,False
+d1/magic-soma,d1/magic-soma/hammer-2,星の軌道で！ 地響き拍子！,星の軌道で！,地響き拍子！,False
+d1/magic-soma,d1/magic-soma/hammer-3,見定めた！ 砕月の鼓動！,見定めた！,砕月の鼓動！,False
+d1/magic-soma,d1/magic-soma/hammer-4,静かに貫く！ 暁鐘轟天！,静かに貫く！,暁鐘轟天！,False
+d1/magic-soma,d1/magic-soma/bow-1,星の軌道で！ 風糸射ち！,星の軌道で！,風糸射ち！,False
+d1/magic-soma,d1/magic-soma/bow-2,見定めた！ 双虹の矢！,見定めた！,双虹の矢！,False
+d1/magic-soma,d1/magic-soma/bow-3,静かに貫く！ 星屑時雨！,静かに貫く！,星屑時雨！,False
+d1/magic-soma,d1/magic-soma/bow-4,蒼き誓いを！ 天弧七彩！,蒼き誓いを！,天弧七彩！,False
+d1/magic-soma,d1/magic-soma/whip-1,見定めた！ 草波打ち！,見定めた！,草波打ち！,False
+d1/magic-soma,d1/magic-soma/whip-2,静かに貫く！ 紫電の結び！,静かに貫く！,紫電の結び！,False
+d1/magic-soma,d1/magic-soma/whip-3,蒼き誓いを！ 風花乱れ！,蒼き誓いを！,風花乱れ！,False
+d1/magic-soma,d1/magic-soma/whip-4,星の軌道で！ 星環の舞！,星の軌道で！,星環の舞！,False
+d1/magic-soma,d1/magic-soma/chakram-1,静かに貫く！ 弧月投げ！,静かに貫く！,弧月投げ！,False
+d1/magic-soma,d1/magic-soma/chakram-2,蒼き誓いを！ 双輪巡り！,蒼き誓いを！,双輪巡り！,False
+d1/magic-soma,d1/magic-soma/chakram-3,星の軌道で！ 風輪連華！,星の軌道で！,風輪連華！,False
+d1/magic-soma,d1/magic-soma/chakram-4,見定めた！ 天輪帰航！,見定めた！,天輪帰航！,False
+d1/magic-soma,d1/magic-soma/ultimate-dawn,蒼き誓いを！ 奥義・万彩黎明！,蒼き誓いを！,奥義・万彩黎明！,False
+d1/magic-soma,d1/magic-soma/ultimate-earth,星の軌道で！ 奥義・地天共鳴！,星の軌道で！,奥義・地天共鳴！,False
+d1/magic-soma,d1/magic-soma/ultimate-sky,見定めた！ 奥義・星巡天翔！,見定めた！,奥義・星巡天翔！,False
+d1/magic-soma,d1/magic-soma/ultimate-heart,静かに貫く！ 奥義・無窮心輪！,静かに貫く！,奥義・無窮心輪！,False
+d1/magic-minato,d1/magic-minato/fist-1,流れをつかむ！ 踏風掌！,流れをつかむ！,踏風掌！,False
+d1/magic-minato,d1/magic-minato/fist-2,波を越えて！ 昇陽連脚！,波を越えて！,昇陽連脚！,False
+d1/magic-minato,d1/magic-minato/fist-3,潮よ導け！ 空鳴り拳！,潮よ導け！,空鳴り拳！,False
+d1/magic-minato,d1/magic-minato/fist-4,海原をひらく！ 天環無拍！,海原をひらく！,天環無拍！,False
+d1/magic-minato,d1/magic-minato/sword-1,波を越えて！ 朝露払い！,波を越えて！,朝露払い！,False
+d1/magic-minato,d1/magic-minato/sword-2,潮よ導け！ 双葉返し！,潮よ導け！,双葉返し！,False
+d1/magic-minato,d1/magic-minato/sword-3,海原をひらく！ 宵星の輪舞！,海原をひらく！,宵星の輪舞！,False
+d1/magic-minato,d1/magic-minato/sword-4,流れをつかむ！ 黎明一文字！,流れをつかむ！,黎明一文字！,False
+d1/magic-minato,d1/magic-minato/greatsword-1,潮よ導け！ 雲割り！,潮よ導け！,雲割り！,False
+d1/magic-minato,d1/magic-minato/greatsword-2,海原をひらく！ 夕凪おろし！,海原をひらく！,夕凪おろし！,False
+d1/magic-minato,d1/magic-minato/greatsword-3,流れをつかむ！ 月稜断！,流れをつかむ！,月稜断！,False
+d1/magic-minato,d1/magic-minato/greatsword-4,波を越えて！ 蒼天境界斬！,波を越えて！,蒼天境界斬！,False
+d1/magic-minato,d1/magic-minato/rapier-1,海原をひらく！ 針雨！,海原をひらく！,針雨！,False
+d1/magic-minato,d1/magic-minato/rapier-2,流れをつかむ！ 星縫い！,流れをつかむ！,星縫い！,False
+d1/magic-minato,d1/magic-minato/rapier-3,波を越えて！ 銀糸の螺旋！,波を越えて！,銀糸の螺旋！,False
+d1/magic-minato,d1/magic-minato/rapier-4,潮よ導け！ 流星点描！,潮よ導け！,流星点描！,False
+d1/magic-minato,d1/magic-minato/axe-1,流れをつかむ！ 木霊打ち！,流れをつかむ！,木霊打ち！,False
+d1/magic-minato,d1/magic-minato/axe-2,波を越えて！ 朱葉落とし！,波を越えて！,朱葉落とし！,False
+d1/magic-minato,d1/magic-minato/axe-3,潮よ導け！ 岩戸裂き！,潮よ導け！,岩戸裂き！,False
+d1/magic-minato,d1/magic-minato/axe-4,海原をひらく！ 天樹崩し！,海原をひらく！,天樹崩し！,False
+d1/magic-minato,d1/magic-minato/spear-1,波を越えて！ 風見突き！,波を越えて！,風見突き！,False
+d1/magic-minato,d1/magic-minato/spear-2,潮よ導け！ 燕渡り！,潮よ導け！,燕渡り！,False
+d1/magic-minato,d1/magic-minato/spear-3,海原をひらく！ 碧雷穿！,海原をひらく！,碧雷穿！,False
+d1/magic-minato,d1/magic-minato/spear-4,流れをつかむ！ 星河貫き！,流れをつかむ！,星河貫き！,False
+d1/magic-minato,d1/magic-minato/staff-1,潮よ導け！ 小枝払い！,潮よ導け！,小枝払い！,False
+d1/magic-minato,d1/magic-minato/staff-2,海原をひらく！ 水鏡返し！,海原をひらく！,水鏡返し！,False
+d1/magic-minato,d1/magic-minato/staff-3,流れをつかむ！ 天秤回し！,流れをつかむ！,天秤回し！,False
+d1/magic-minato,d1/magic-minato/staff-4,波を越えて！ 万象の円！,波を越えて！,万象の円！,False
+d1/magic-minato,d1/magic-minato/hammer-1,海原をひらく！ 鐘ひとつ！,海原をひらく！,鐘ひとつ！,False
+d1/magic-minato,d1/magic-minato/hammer-2,流れをつかむ！ 地響き拍子！,流れをつかむ！,地響き拍子！,False
+d1/magic-minato,d1/magic-minato/hammer-3,波を越えて！ 砕月の鼓動！,波を越えて！,砕月の鼓動！,False
+d1/magic-minato,d1/magic-minato/hammer-4,潮よ導け！ 暁鐘轟天！,潮よ導け！,暁鐘轟天！,False
+d1/magic-minato,d1/magic-minato/bow-1,流れをつかむ！ 風糸射ち！,流れをつかむ！,風糸射ち！,False
+d1/magic-minato,d1/magic-minato/bow-2,波を越えて！ 双虹の矢！,波を越えて！,双虹の矢！,False
+d1/magic-minato,d1/magic-minato/bow-3,潮よ導け！ 星屑時雨！,潮よ導け！,星屑時雨！,False
+d1/magic-minato,d1/magic-minato/bow-4,海原をひらく！ 天弧七彩！,海原をひらく！,天弧七彩！,False
+d1/magic-minato,d1/magic-minato/whip-1,波を越えて！ 草波打ち！,波を越えて！,草波打ち！,False
+d1/magic-minato,d1/magic-minato/whip-2,潮よ導け！ 紫電の結び！,潮よ導け！,紫電の結び！,False
+d1/magic-minato,d1/magic-minato/whip-3,海原をひらく！ 風花乱れ！,海原をひらく！,風花乱れ！,False
+d1/magic-minato,d1/magic-minato/whip-4,流れをつかむ！ 星環の舞！,流れをつかむ！,星環の舞！,False
+d1/magic-minato,d1/magic-minato/chakram-1,潮よ導け！ 弧月投げ！,潮よ導け！,弧月投げ！,False
+d1/magic-minato,d1/magic-minato/chakram-2,海原をひらく！ 双輪巡り！,海原をひらく！,双輪巡り！,False
+d1/magic-minato,d1/magic-minato/chakram-3,流れをつかむ！ 風輪連華！,流れをつかむ！,風輪連華！,False
+d1/magic-minato,d1/magic-minato/chakram-4,波を越えて！ 天輪帰航！,波を越えて！,天輪帰航！,False
+d1/magic-minato,d1/magic-minato/ultimate-dawn,海原をひらく！ 奥義・万彩黎明！,海原をひらく！,奥義・万彩黎明！,False
+d1/magic-minato,d1/magic-minato/ultimate-earth,流れをつかむ！ 奥義・地天共鳴！,流れをつかむ！,奥義・地天共鳴！,False
+d1/magic-minato,d1/magic-minato/ultimate-sky,波を越えて！ 奥義・星巡天翔！,波を越えて！,奥義・星巡天翔！,False
+d1/magic-minato,d1/magic-minato/ultimate-heart,潮よ導け！ 奥義・無窮心輪！,潮よ導け！,奥義・無窮心輪！,False
+d1/magic-riku,d1/magic-riku/fist-1,踏みしめて！ 踏風掌！,踏みしめて！,踏風掌！,False
+d1/magic-riku,d1/magic-riku/fist-2,まだ前へ！ 昇陽連脚！,まだ前へ！,昇陽連脚！,False
+d1/magic-riku,d1/magic-riku/fist-3,岩より強く！ 空鳴り拳！,岩より強く！,空鳴り拳！,False
+d1/magic-riku,d1/magic-riku/fist-4,この一歩を刻む！ 天環無拍！,この一歩を刻む！,天環無拍！,False
+d1/magic-riku,d1/magic-riku/sword-1,まだ前へ！ 朝露払い！,まだ前へ！,朝露払い！,False
+d1/magic-riku,d1/magic-riku/sword-2,岩より強く！ 双葉返し！,岩より強く！,双葉返し！,False
+d1/magic-riku,d1/magic-riku/sword-3,この一歩を刻む！ 宵星の輪舞！,この一歩を刻む！,宵星の輪舞！,False
+d1/magic-riku,d1/magic-riku/sword-4,踏みしめて！ 黎明一文字！,踏みしめて！,黎明一文字！,False
+d1/magic-riku,d1/magic-riku/greatsword-1,岩より強く！ 雲割り！,岩より強く！,雲割り！,False
+d1/magic-riku,d1/magic-riku/greatsword-2,この一歩を刻む！ 夕凪おろし！,この一歩を刻む！,夕凪おろし！,False
+d1/magic-riku,d1/magic-riku/greatsword-3,踏みしめて！ 月稜断！,踏みしめて！,月稜断！,False
+d1/magic-riku,d1/magic-riku/greatsword-4,まだ前へ！ 蒼天境界斬！,まだ前へ！,蒼天境界斬！,False
+d1/magic-riku,d1/magic-riku/rapier-1,この一歩を刻む！ 針雨！,この一歩を刻む！,針雨！,False
+d1/magic-riku,d1/magic-riku/rapier-2,踏みしめて！ 星縫い！,踏みしめて！,星縫い！,False
+d1/magic-riku,d1/magic-riku/rapier-3,まだ前へ！ 銀糸の螺旋！,まだ前へ！,銀糸の螺旋！,False
+d1/magic-riku,d1/magic-riku/rapier-4,岩より強く！ 流星点描！,岩より強く！,流星点描！,False
+d1/magic-riku,d1/magic-riku/axe-1,踏みしめて！ 木霊打ち！,踏みしめて！,木霊打ち！,False
+d1/magic-riku,d1/magic-riku/axe-2,まだ前へ！ 朱葉落とし！,まだ前へ！,朱葉落とし！,False
+d1/magic-riku,d1/magic-riku/axe-3,岩より強く！ 岩戸裂き！,岩より強く！,岩戸裂き！,False
+d1/magic-riku,d1/magic-riku/axe-4,この一歩を刻む！ 天樹崩し！,この一歩を刻む！,天樹崩し！,False
+d1/magic-riku,d1/magic-riku/spear-1,まだ前へ！ 風見突き！,まだ前へ！,風見突き！,False
+d1/magic-riku,d1/magic-riku/spear-2,岩より強く！ 燕渡り！,岩より強く！,燕渡り！,False
+d1/magic-riku,d1/magic-riku/spear-3,この一歩を刻む！ 碧雷穿！,この一歩を刻む！,碧雷穿！,False
+d1/magic-riku,d1/magic-riku/spear-4,踏みしめて！ 星河貫き！,踏みしめて！,星河貫き！,False
+d1/magic-riku,d1/magic-riku/staff-1,岩より強く！ 小枝払い！,岩より強く！,小枝払い！,False
+d1/magic-riku,d1/magic-riku/staff-2,この一歩を刻む！ 水鏡返し！,この一歩を刻む！,水鏡返し！,False
+d1/magic-riku,d1/magic-riku/staff-3,踏みしめて！ 天秤回し！,踏みしめて！,天秤回し！,False
+d1/magic-riku,d1/magic-riku/staff-4,まだ前へ！ 万象の円！,まだ前へ！,万象の円！,False
+d1/magic-riku,d1/magic-riku/hammer-1,この一歩を刻む！ 鐘ひとつ！,この一歩を刻む！,鐘ひとつ！,False
+d1/magic-riku,d1/magic-riku/hammer-2,踏みしめて！ 地響き拍子！,踏みしめて！,地響き拍子！,False
+d1/magic-riku,d1/magic-riku/hammer-3,まだ前へ！ 砕月の鼓動！,まだ前へ！,砕月の鼓動！,False
+d1/magic-riku,d1/magic-riku/hammer-4,岩より強く！ 暁鐘轟天！,岩より強く！,暁鐘轟天！,False
+d1/magic-riku,d1/magic-riku/bow-1,踏みしめて！ 風糸射ち！,踏みしめて！,風糸射ち！,False
+d1/magic-riku,d1/magic-riku/bow-2,まだ前へ！ 双虹の矢！,まだ前へ！,双虹の矢！,False
+d1/magic-riku,d1/magic-riku/bow-3,岩より強く！ 星屑時雨！,岩より強く！,星屑時雨！,False
+d1/magic-riku,d1/magic-riku/bow-4,この一歩を刻む！ 天弧七彩！,この一歩を刻む！,天弧七彩！,False
+d1/magic-riku,d1/magic-riku/whip-1,まだ前へ！ 草波打ち！,まだ前へ！,草波打ち！,False
+d1/magic-riku,d1/magic-riku/whip-2,岩より強く！ 紫電の結び！,岩より強く！,紫電の結び！,False
+d1/magic-riku,d1/magic-riku/whip-3,この一歩を刻む！ 風花乱れ！,この一歩を刻む！,風花乱れ！,False
+d1/magic-riku,d1/magic-riku/whip-4,踏みしめて！ 星環の舞！,踏みしめて！,星環の舞！,False
+d1/magic-riku,d1/magic-riku/chakram-1,岩より強く！ 弧月投げ！,岩より強く！,弧月投げ！,False
+d1/magic-riku,d1/magic-riku/chakram-2,この一歩を刻む！ 双輪巡り！,この一歩を刻む！,双輪巡り！,False
+d1/magic-riku,d1/magic-riku/chakram-3,踏みしめて！ 風輪連華！,踏みしめて！,風輪連華！,False
+d1/magic-riku,d1/magic-riku/chakram-4,まだ前へ！ 天輪帰航！,まだ前へ！,天輪帰航！,False
+d1/magic-riku,d1/magic-riku/ultimate-dawn,この一歩を刻む！ 奥義・万彩黎明！,この一歩を刻む！,奥義・万彩黎明！,False
+d1/magic-riku,d1/magic-riku/ultimate-earth,踏みしめて！ 奥義・地天共鳴！,踏みしめて！,奥義・地天共鳴！,False
+d1/magic-riku,d1/magic-riku/ultimate-sky,まだ前へ！ 奥義・星巡天翔！,まだ前へ！,奥義・星巡天翔！,False
+d1/magic-riku,d1/magic-riku/ultimate-heart,岩より強く！ 奥義・無窮心輪！,岩より強く！,奥義・無窮心輪！,False
+d1/magic-yamato,d1/magic-yamato/fist-1,燃えろ心！ 踏風掌！,燃えろ心！,踏風掌！,False
+d1/magic-yamato,d1/magic-yamato/fist-2,真っすぐ行く！ 昇陽連脚！,真っすぐ行く！,昇陽連脚！,False
+d1/magic-yamato,d1/magic-yamato/fist-3,炎よ応えろ！ 空鳴り拳！,炎よ応えろ！,空鳴り拳！,False
+d1/magic-yamato,d1/magic-yamato/fist-4,魂を解き放つ！ 天環無拍！,魂を解き放つ！,天環無拍！,False
+d1/magic-yamato,d1/magic-yamato/sword-1,真っすぐ行く！ 朝露払い！,真っすぐ行く！,朝露払い！,False
+d1/magic-yamato,d1/magic-yamato/sword-2,炎よ応えろ！ 双葉返し！,炎よ応えろ！,双葉返し！,False
+d1/magic-yamato,d1/magic-yamato/sword-3,魂を解き放つ！ 宵星の輪舞！,魂を解き放つ！,宵星の輪舞！,False
+d1/magic-yamato,d1/magic-yamato/sword-4,燃えろ心！ 黎明一文字！,燃えろ心！,黎明一文字！,False
+d1/magic-yamato,d1/magic-yamato/greatsword-1,炎よ応えろ！ 雲割り！,炎よ応えろ！,雲割り！,False
+d1/magic-yamato,d1/magic-yamato/greatsword-2,魂を解き放つ！ 夕凪おろし！,魂を解き放つ！,夕凪おろし！,False
+d1/magic-yamato,d1/magic-yamato/greatsword-3,燃えろ心！ 月稜断！,燃えろ心！,月稜断！,False
+d1/magic-yamato,d1/magic-yamato/greatsword-4,真っすぐ行く！ 蒼天境界斬！,真っすぐ行く！,蒼天境界斬！,False
+d1/magic-yamato,d1/magic-yamato/rapier-1,魂を解き放つ！ 針雨！,魂を解き放つ！,針雨！,False
+d1/magic-yamato,d1/magic-yamato/rapier-2,燃えろ心！ 星縫い！,燃えろ心！,星縫い！,False
+d1/magic-yamato,d1/magic-yamato/rapier-3,真っすぐ行く！ 銀糸の螺旋！,真っすぐ行く！,銀糸の螺旋！,False
+d1/magic-yamato,d1/magic-yamato/rapier-4,炎よ応えろ！ 流星点描！,炎よ応えろ！,流星点描！,False
+d1/magic-yamato,d1/magic-yamato/axe-1,燃えろ心！ 木霊打ち！,燃えろ心！,木霊打ち！,False
+d1/magic-yamato,d1/magic-yamato/axe-2,真っすぐ行く！ 朱葉落とし！,真っすぐ行く！,朱葉落とし！,False
+d1/magic-yamato,d1/magic-yamato/axe-3,炎よ応えろ！ 岩戸裂き！,炎よ応えろ！,岩戸裂き！,False
+d1/magic-yamato,d1/magic-yamato/axe-4,魂を解き放つ！ 天樹崩し！,魂を解き放つ！,天樹崩し！,False
+d1/magic-yamato,d1/magic-yamato/spear-1,真っすぐ行く！ 風見突き！,真っすぐ行く！,風見突き！,False
+d1/magic-yamato,d1/magic-yamato/spear-2,炎よ応えろ！ 燕渡り！,炎よ応えろ！,燕渡り！,False
+d1/magic-yamato,d1/magic-yamato/spear-3,魂を解き放つ！ 碧雷穿！,魂を解き放つ！,碧雷穿！,False
+d1/magic-yamato,d1/magic-yamato/spear-4,燃えろ心！ 星河貫き！,燃えろ心！,星河貫き！,False
+d1/magic-yamato,d1/magic-yamato/staff-1,炎よ応えろ！ 小枝払い！,炎よ応えろ！,小枝払い！,False
+d1/magic-yamato,d1/magic-yamato/staff-2,魂を解き放つ！ 水鏡返し！,魂を解き放つ！,水鏡返し！,False
+d1/magic-yamato,d1/magic-yamato/staff-3,燃えろ心！ 天秤回し！,燃えろ心！,天秤回し！,False
+d1/magic-yamato,d1/magic-yamato/staff-4,真っすぐ行く！ 万象の円！,真っすぐ行く！,万象の円！,False
+d1/magic-yamato,d1/magic-yamato/hammer-1,魂を解き放つ！ 鐘ひとつ！,魂を解き放つ！,鐘ひとつ！,False
+d1/magic-yamato,d1/magic-yamato/hammer-2,燃えろ心！ 地響き拍子！,燃えろ心！,地響き拍子！,False
+d1/magic-yamato,d1/magic-yamato/hammer-3,真っすぐ行く！ 砕月の鼓動！,真っすぐ行く！,砕月の鼓動！,False
+d1/magic-yamato,d1/magic-yamato/hammer-4,炎よ応えろ！ 暁鐘轟天！,炎よ応えろ！,暁鐘轟天！,False
+d1/magic-yamato,d1/magic-yamato/bow-1,燃えろ心！ 風糸射ち！,燃えろ心！,風糸射ち！,False
+d1/magic-yamato,d1/magic-yamato/bow-2,真っすぐ行く！ 双虹の矢！,真っすぐ行く！,双虹の矢！,False
+d1/magic-yamato,d1/magic-yamato/bow-3,炎よ応えろ！ 星屑時雨！,炎よ応えろ！,星屑時雨！,False
+d1/magic-yamato,d1/magic-yamato/bow-4,魂を解き放つ！ 天弧七彩！,魂を解き放つ！,天弧七彩！,False
+d1/magic-yamato,d1/magic-yamato/whip-1,真っすぐ行く！ 草波打ち！,真っすぐ行く！,草波打ち！,False
+d1/magic-yamato,d1/magic-yamato/whip-2,炎よ応えろ！ 紫電の結び！,炎よ応えろ！,紫電の結び！,False
+d1/magic-yamato,d1/magic-yamato/whip-3,魂を解き放つ！ 風花乱れ！,魂を解き放つ！,風花乱れ！,False
+d1/magic-yamato,d1/magic-yamato/whip-4,燃えろ心！ 星環の舞！,燃えろ心！,星環の舞！,False
+d1/magic-yamato,d1/magic-yamato/chakram-1,炎よ応えろ！ 弧月投げ！,炎よ応えろ！,弧月投げ！,False
+d1/magic-yamato,d1/magic-yamato/chakram-2,魂を解き放つ！ 双輪巡り！,魂を解き放つ！,双輪巡り！,False
+d1/magic-yamato,d1/magic-yamato/chakram-3,燃えろ心！ 風輪連華！,燃えろ心！,風輪連華！,False
+d1/magic-yamato,d1/magic-yamato/chakram-4,真っすぐ行く！ 天輪帰航！,真っすぐ行く！,天輪帰航！,False
+d1/magic-yamato,d1/magic-yamato/ultimate-dawn,魂を解き放つ！ 奥義・万彩黎明！,魂を解き放つ！,奥義・万彩黎明！,False
+d1/magic-yamato,d1/magic-yamato/ultimate-earth,燃えろ心！ 奥義・地天共鳴！,燃えろ心！,奥義・地天共鳴！,False
+d1/magic-yamato,d1/magic-yamato/ultimate-sky,真っすぐ行く！ 奥義・星巡天翔！,真っすぐ行く！,奥義・星巡天翔！,False
+d1/magic-yamato,d1/magic-yamato/ultimate-heart,炎よ応えろ！ 奥義・無窮心輪！,炎よ応えろ！,奥義・無窮心輪！,False
+d1/magic-leon,d1/magic-leon/fist-1,道は俺が開く！ 踏風掌！,道は俺が開く！,踏風掌！,False
+d1/magic-leon,d1/magic-leon/fist-2,誇り高く！ 昇陽連脚！,誇り高く！,昇陽連脚！,False
+d1/magic-leon,d1/magic-leon/fist-3,王者の一歩だ！ 空鳴り拳！,王者の一歩だ！,空鳴り拳！,False
+d1/magic-leon,d1/magic-leon/fist-4,この空を越える！ 天環無拍！,この空を越える！,天環無拍！,False
+d1/magic-leon,d1/magic-leon/sword-1,誇り高く！ 朝露払い！,誇り高く！,朝露払い！,False
+d1/magic-leon,d1/magic-leon/sword-2,王者の一歩だ！ 双葉返し！,王者の一歩だ！,双葉返し！,False
+d1/magic-leon,d1/magic-leon/sword-3,この空を越える！ 宵星の輪舞！,この空を越える！,宵星の輪舞！,False
+d1/magic-leon,d1/magic-leon/sword-4,道は俺が開く！ 黎明一文字！,道は俺が開く！,黎明一文字！,False
+d1/magic-leon,d1/magic-leon/greatsword-1,王者の一歩だ！ 雲割り！,王者の一歩だ！,雲割り！,False
+d1/magic-leon,d1/magic-leon/greatsword-2,この空を越える！ 夕凪おろし！,この空を越える！,夕凪おろし！,False
+d1/magic-leon,d1/magic-leon/greatsword-3,道は俺が開く！ 月稜断！,道は俺が開く！,月稜断！,False
+d1/magic-leon,d1/magic-leon/greatsword-4,誇り高く！ 蒼天境界斬！,誇り高く！,蒼天境界斬！,False
+d1/magic-leon,d1/magic-leon/rapier-1,この空を越える！ 針雨！,この空を越える！,針雨！,False
+d1/magic-leon,d1/magic-leon/rapier-2,道は俺が開く！ 星縫い！,道は俺が開く！,星縫い！,False
+d1/magic-leon,d1/magic-leon/rapier-3,誇り高く！ 銀糸の螺旋！,誇り高く！,銀糸の螺旋！,False
+d1/magic-leon,d1/magic-leon/rapier-4,王者の一歩だ！ 流星点描！,王者の一歩だ！,流星点描！,False
+d1/magic-leon,d1/magic-leon/axe-1,道は俺が開く！ 木霊打ち！,道は俺が開く！,木霊打ち！,False
+d1/magic-leon,d1/magic-leon/axe-2,誇り高く！ 朱葉落とし！,誇り高く！,朱葉落とし！,False
+d1/magic-leon,d1/magic-leon/axe-3,王者の一歩だ！ 岩戸裂き！,王者の一歩だ！,岩戸裂き！,False
+d1/magic-leon,d1/magic-leon/axe-4,この空を越える！ 天樹崩し！,この空を越える！,天樹崩し！,False
+d1/magic-leon,d1/magic-leon/spear-1,誇り高く！ 風見突き！,誇り高く！,風見突き！,False
+d1/magic-leon,d1/magic-leon/spear-2,王者の一歩だ！ 燕渡り！,王者の一歩だ！,燕渡り！,False
+d1/magic-leon,d1/magic-leon/spear-3,この空を越える！ 碧雷穿！,この空を越える！,碧雷穿！,False
+d1/magic-leon,d1/magic-leon/spear-4,道は俺が開く！ 星河貫き！,道は俺が開く！,星河貫き！,False
+d1/magic-leon,d1/magic-leon/staff-1,王者の一歩だ！ 小枝払い！,王者の一歩だ！,小枝払い！,False
+d1/magic-leon,d1/magic-leon/staff-2,この空を越える！ 水鏡返し！,この空を越える！,水鏡返し！,False
+d1/magic-leon,d1/magic-leon/staff-3,道は俺が開く！ 天秤回し！,道は俺が開く！,天秤回し！,False
+d1/magic-leon,d1/magic-leon/staff-4,誇り高く！ 万象の円！,誇り高く！,万象の円！,False
+d1/magic-leon,d1/magic-leon/hammer-1,この空を越える！ 鐘ひとつ！,この空を越える！,鐘ひとつ！,False
+d1/magic-leon,d1/magic-leon/hammer-2,道は俺が開く！ 地響き拍子！,道は俺が開く！,地響き拍子！,False
+d1/magic-leon,d1/magic-leon/hammer-3,誇り高く！ 砕月の鼓動！,誇り高く！,砕月の鼓動！,False
+d1/magic-leon,d1/magic-leon/hammer-4,王者の一歩だ！ 暁鐘轟天！,王者の一歩だ！,暁鐘轟天！,False
+d1/magic-leon,d1/magic-leon/bow-1,道は俺が開く！ 風糸射ち！,道は俺が開く！,風糸射ち！,False
+d1/magic-leon,d1/magic-leon/bow-2,誇り高く！ 双虹の矢！,誇り高く！,双虹の矢！,False
+d1/magic-leon,d1/magic-leon/bow-3,王者の一歩だ！ 星屑時雨！,王者の一歩だ！,星屑時雨！,False
+d1/magic-leon,d1/magic-leon/bow-4,この空を越える！ 天弧七彩！,この空を越える！,天弧七彩！,False
+d1/magic-leon,d1/magic-leon/whip-1,誇り高く！ 草波打ち！,誇り高く！,草波打ち！,False
+d1/magic-leon,d1/magic-leon/whip-2,王者の一歩だ！ 紫電の結び！,王者の一歩だ！,紫電の結び！,False
+d1/magic-leon,d1/magic-leon/whip-3,この空を越える！ 風花乱れ！,この空を越える！,風花乱れ！,False
+d1/magic-leon,d1/magic-leon/whip-4,道は俺が開く！ 星環の舞！,道は俺が開く！,星環の舞！,False
+d1/magic-leon,d1/magic-leon/chakram-1,王者の一歩だ！ 弧月投げ！,王者の一歩だ！,弧月投げ！,False
+d1/magic-leon,d1/magic-leon/chakram-2,この空を越える！ 双輪巡り！,この空を越える！,双輪巡り！,False
+d1/magic-leon,d1/magic-leon/chakram-3,道は俺が開く！ 風輪連華！,道は俺が開く！,風輪連華！,False
+d1/magic-leon,d1/magic-leon/chakram-4,誇り高く！ 天輪帰航！,誇り高く！,天輪帰航！,False
+d1/magic-leon,d1/magic-leon/ultimate-dawn,この空を越える！ 奥義・万彩黎明！,この空を越える！,奥義・万彩黎明！,False
+d1/magic-leon,d1/magic-leon/ultimate-earth,道は俺が開く！ 奥義・地天共鳴！,道は俺が開く！,奥義・地天共鳴！,False
+d1/magic-leon,d1/magic-leon/ultimate-sky,誇り高く！ 奥義・星巡天翔！,誇り高く！,奥義・星巡天翔！,False
+d1/magic-leon,d1/magic-leon/ultimate-heart,王者の一歩だ！ 奥義・無窮心輪！,王者の一歩だ！,奥義・無窮心輪！,False
+d1/magic-elliot,d1/magic-elliot/fist-1,静かに刻め！ 踏風掌！,静かに刻め！,踏風掌！,False
+d1/magic-elliot,d1/magic-elliot/fist-2,誇りにかけて！ 昇陽連脚！,誇りにかけて！,昇陽連脚！,False
+d1/magic-elliot,d1/magic-elliot/fist-3,夜明けを導く！ 空鳴り拳！,夜明けを導く！,空鳴り拳！,False
+d1/magic-elliot,d1/magic-elliot/fist-4,この誓いを貫く！ 天環無拍！,この誓いを貫く！,天環無拍！,False
+d1/magic-elliot,d1/magic-elliot/sword-1,誇りにかけて！ 朝露払い！,誇りにかけて！,朝露払い！,False
+d1/magic-elliot,d1/magic-elliot/sword-2,夜明けを導く！ 双葉返し！,夜明けを導く！,双葉返し！,False
+d1/magic-elliot,d1/magic-elliot/sword-3,この誓いを貫く！ 宵星の輪舞！,この誓いを貫く！,宵星の輪舞！,False
+d1/magic-elliot,d1/magic-elliot/sword-4,静かに刻め！ 黎明一文字！,静かに刻め！,黎明一文字！,False
+d1/magic-elliot,d1/magic-elliot/greatsword-1,夜明けを導く！ 雲割り！,夜明けを導く！,雲割り！,False
+d1/magic-elliot,d1/magic-elliot/greatsword-2,この誓いを貫く！ 夕凪おろし！,この誓いを貫く！,夕凪おろし！,False
+d1/magic-elliot,d1/magic-elliot/greatsword-3,静かに刻め！ 月稜断！,静かに刻め！,月稜断！,False
+d1/magic-elliot,d1/magic-elliot/greatsword-4,誇りにかけて！ 蒼天境界斬！,誇りにかけて！,蒼天境界斬！,False
+d1/magic-elliot,d1/magic-elliot/rapier-1,この誓いを貫く！ 針雨！,この誓いを貫く！,針雨！,False
+d1/magic-elliot,d1/magic-elliot/rapier-2,静かに刻め！ 星縫い！,静かに刻め！,星縫い！,False
+d1/magic-elliot,d1/magic-elliot/rapier-3,誇りにかけて！ 銀糸の螺旋！,誇りにかけて！,銀糸の螺旋！,False
+d1/magic-elliot,d1/magic-elliot/rapier-4,夜明けを導く！ 流星点描！,夜明けを導く！,流星点描！,False
+d1/magic-elliot,d1/magic-elliot/axe-1,静かに刻め！ 木霊打ち！,静かに刻め！,木霊打ち！,False
+d1/magic-elliot,d1/magic-elliot/axe-2,誇りにかけて！ 朱葉落とし！,誇りにかけて！,朱葉落とし！,False
+d1/magic-elliot,d1/magic-elliot/axe-3,夜明けを導く！ 岩戸裂き！,夜明けを導く！,岩戸裂き！,False
+d1/magic-elliot,d1/magic-elliot/axe-4,この誓いを貫く！ 天樹崩し！,この誓いを貫く！,天樹崩し！,False
+d1/magic-elliot,d1/magic-elliot/spear-1,誇りにかけて！ 風見突き！,誇りにかけて！,風見突き！,False
+d1/magic-elliot,d1/magic-elliot/spear-2,夜明けを導く！ 燕渡り！,夜明けを導く！,燕渡り！,False
+d1/magic-elliot,d1/magic-elliot/spear-3,この誓いを貫く！ 碧雷穿！,この誓いを貫く！,碧雷穿！,False
+d1/magic-elliot,d1/magic-elliot/spear-4,静かに刻め！ 星河貫き！,静かに刻め！,星河貫き！,False
+d1/magic-elliot,d1/magic-elliot/staff-1,夜明けを導く！ 小枝払い！,夜明けを導く！,小枝払い！,False
+d1/magic-elliot,d1/magic-elliot/staff-2,この誓いを貫く！ 水鏡返し！,この誓いを貫く！,水鏡返し！,False
+d1/magic-elliot,d1/magic-elliot/staff-3,静かに刻め！ 天秤回し！,静かに刻め！,天秤回し！,False
+d1/magic-elliot,d1/magic-elliot/staff-4,誇りにかけて！ 万象の円！,誇りにかけて！,万象の円！,False
+d1/magic-elliot,d1/magic-elliot/hammer-1,この誓いを貫く！ 鐘ひとつ！,この誓いを貫く！,鐘ひとつ！,False
+d1/magic-elliot,d1/magic-elliot/hammer-2,静かに刻め！ 地響き拍子！,静かに刻め！,地響き拍子！,False
+d1/magic-elliot,d1/magic-elliot/hammer-3,誇りにかけて！ 砕月の鼓動！,誇りにかけて！,砕月の鼓動！,False
+d1/magic-elliot,d1/magic-elliot/hammer-4,夜明けを導く！ 暁鐘轟天！,夜明けを導く！,暁鐘轟天！,False
+d1/magic-elliot,d1/magic-elliot/bow-1,静かに刻め！ 風糸射ち！,静かに刻め！,風糸射ち！,False
+d1/magic-elliot,d1/magic-elliot/bow-2,誇りにかけて！ 双虹の矢！,誇りにかけて！,双虹の矢！,False
+d1/magic-elliot,d1/magic-elliot/bow-3,夜明けを導く！ 星屑時雨！,夜明けを導く！,星屑時雨！,False
+d1/magic-elliot,d1/magic-elliot/bow-4,この誓いを貫く！ 天弧七彩！,この誓いを貫く！,天弧七彩！,False
+d1/magic-elliot,d1/magic-elliot/whip-1,誇りにかけて！ 草波打ち！,誇りにかけて！,草波打ち！,False
+d1/magic-elliot,d1/magic-elliot/whip-2,夜明けを導く！ 紫電の結び！,夜明けを導く！,紫電の結び！,False
+d1/magic-elliot,d1/magic-elliot/whip-3,この誓いを貫く！ 風花乱れ！,この誓いを貫く！,風花乱れ！,False
+d1/magic-elliot,d1/magic-elliot/whip-4,静かに刻め！ 星環の舞！,静かに刻め！,星環の舞！,False
+d1/magic-elliot,d1/magic-elliot/chakram-1,夜明けを導く！ 弧月投げ！,夜明けを導く！,弧月投げ！,False
+d1/magic-elliot,d1/magic-elliot/chakram-2,この誓いを貫く！ 双輪巡り！,この誓いを貫く！,双輪巡り！,False
+d1/magic-elliot,d1/magic-elliot/chakram-3,静かに刻め！ 風輪連華！,静かに刻め！,風輪連華！,False
+d1/magic-elliot,d1/magic-elliot/chakram-4,誇りにかけて！ 天輪帰航！,誇りにかけて！,天輪帰航！,False
+d1/magic-elliot,d1/magic-elliot/ultimate-dawn,この誓いを貫く！ 奥義・万彩黎明！,この誓いを貫く！,奥義・万彩黎明！,False
+d1/magic-elliot,d1/magic-elliot/ultimate-earth,静かに刻め！ 奥義・地天共鳴！,静かに刻め！,奥義・地天共鳴！,False
+d1/magic-elliot,d1/magic-elliot/ultimate-sky,誇りにかけて！ 奥義・星巡天翔！,誇りにかけて！,奥義・星巡天翔！,False
+d1/magic-elliot,d1/magic-elliot/ultimate-heart,夜明けを導く！ 奥義・無窮心輪！,夜明けを導く！,奥義・無窮心輪！,False
+d1/magic-sakuya,d1/magic-sakuya/fist-1,夜を越えて！ 踏風掌！,夜を越えて！,踏風掌！,False
+d1/magic-sakuya,d1/magic-sakuya/fist-2,影よ舞え！ 昇陽連脚！,影よ舞え！,昇陽連脚！,False
+d1/magic-sakuya,d1/magic-sakuya/fist-3,月の導きで！ 空鳴り拳！,月の導きで！,空鳴り拳！,False
+d1/magic-sakuya,d1/magic-sakuya/fist-4,闇にも灯を！ 天環無拍！,闇にも灯を！,天環無拍！,False
+d1/magic-sakuya,d1/magic-sakuya/sword-1,影よ舞え！ 朝露払い！,影よ舞え！,朝露払い！,False
+d1/magic-sakuya,d1/magic-sakuya/sword-2,月の導きで！ 双葉返し！,月の導きで！,双葉返し！,False
+d1/magic-sakuya,d1/magic-sakuya/sword-3,闇にも灯を！ 宵星の輪舞！,闇にも灯を！,宵星の輪舞！,False
+d1/magic-sakuya,d1/magic-sakuya/sword-4,夜を越えて！ 黎明一文字！,夜を越えて！,黎明一文字！,False
+d1/magic-sakuya,d1/magic-sakuya/greatsword-1,月の導きで！ 雲割り！,月の導きで！,雲割り！,False
+d1/magic-sakuya,d1/magic-sakuya/greatsword-2,闇にも灯を！ 夕凪おろし！,闇にも灯を！,夕凪おろし！,False
+d1/magic-sakuya,d1/magic-sakuya/greatsword-3,夜を越えて！ 月稜断！,夜を越えて！,月稜断！,False
+d1/magic-sakuya,d1/magic-sakuya/greatsword-4,影よ舞え！ 蒼天境界斬！,影よ舞え！,蒼天境界斬！,False
+d1/magic-sakuya,d1/magic-sakuya/rapier-1,闇にも灯を！ 針雨！,闇にも灯を！,針雨！,False
+d1/magic-sakuya,d1/magic-sakuya/rapier-2,夜を越えて！ 星縫い！,夜を越えて！,星縫い！,False
+d1/magic-sakuya,d1/magic-sakuya/rapier-3,影よ舞え！ 銀糸の螺旋！,影よ舞え！,銀糸の螺旋！,False
+d1/magic-sakuya,d1/magic-sakuya/rapier-4,月の導きで！ 流星点描！,月の導きで！,流星点描！,False
+d1/magic-sakuya,d1/magic-sakuya/axe-1,夜を越えて！ 木霊打ち！,夜を越えて！,木霊打ち！,False
+d1/magic-sakuya,d1/magic-sakuya/axe-2,影よ舞え！ 朱葉落とし！,影よ舞え！,朱葉落とし！,False
+d1/magic-sakuya,d1/magic-sakuya/axe-3,月の導きで！ 岩戸裂き！,月の導きで！,岩戸裂き！,False
+d1/magic-sakuya,d1/magic-sakuya/axe-4,闇にも灯を！ 天樹崩し！,闇にも灯を！,天樹崩し！,False
+d1/magic-sakuya,d1/magic-sakuya/spear-1,影よ舞え！ 風見突き！,影よ舞え！,風見突き！,False
+d1/magic-sakuya,d1/magic-sakuya/spear-2,月の導きで！ 燕渡り！,月の導きで！,燕渡り！,False
+d1/magic-sakuya,d1/magic-sakuya/spear-3,闇にも灯を！ 碧雷穿！,闇にも灯を！,碧雷穿！,False
+d1/magic-sakuya,d1/magic-sakuya/spear-4,夜を越えて！ 星河貫き！,夜を越えて！,星河貫き！,False
+d1/magic-sakuya,d1/magic-sakuya/staff-1,月の導きで！ 小枝払い！,月の導きで！,小枝払い！,False
+d1/magic-sakuya,d1/magic-sakuya/staff-2,闇にも灯を！ 水鏡返し！,闇にも灯を！,水鏡返し！,False
+d1/magic-sakuya,d1/magic-sakuya/staff-3,夜を越えて！ 天秤回し！,夜を越えて！,天秤回し！,False
+d1/magic-sakuya,d1/magic-sakuya/staff-4,影よ舞え！ 万象の円！,影よ舞え！,万象の円！,False
+d1/magic-sakuya,d1/magic-sakuya/hammer-1,闇にも灯を！ 鐘ひとつ！,闇にも灯を！,鐘ひとつ！,False
+d1/magic-sakuya,d1/magic-sakuya/hammer-2,夜を越えて！ 地響き拍子！,夜を越えて！,地響き拍子！,False
+d1/magic-sakuya,d1/magic-sakuya/hammer-3,影よ舞え！ 砕月の鼓動！,影よ舞え！,砕月の鼓動！,False
+d1/magic-sakuya,d1/magic-sakuya/hammer-4,月の導きで！ 暁鐘轟天！,月の導きで！,暁鐘轟天！,False
+d1/magic-sakuya,d1/magic-sakuya/bow-1,夜を越えて！ 風糸射ち！,夜を越えて！,風糸射ち！,False
+d1/magic-sakuya,d1/magic-sakuya/bow-2,影よ舞え！ 双虹の矢！,影よ舞え！,双虹の矢！,False
+d1/magic-sakuya,d1/magic-sakuya/bow-3,月の導きで！ 星屑時雨！,月の導きで！,星屑時雨！,False
+d1/magic-sakuya,d1/magic-sakuya/bow-4,闇にも灯を！ 天弧七彩！,闇にも灯を！,天弧七彩！,False
+d1/magic-sakuya,d1/magic-sakuya/whip-1,影よ舞え！ 草波打ち！,影よ舞え！,草波打ち！,False
+d1/magic-sakuya,d1/magic-sakuya/whip-2,月の導きで！ 紫電の結び！,月の導きで！,紫電の結び！,False
+d1/magic-sakuya,d1/magic-sakuya/whip-3,闇にも灯を！ 風花乱れ！,闇にも灯を！,風花乱れ！,False
+d1/magic-sakuya,d1/magic-sakuya/whip-4,夜を越えて！ 星環の舞！,夜を越えて！,星環の舞！,False
+d1/magic-sakuya,d1/magic-sakuya/chakram-1,月の導きで！ 弧月投げ！,月の導きで！,弧月投げ！,False
+d1/magic-sakuya,d1/magic-sakuya/chakram-2,闇にも灯を！ 双輪巡り！,闇にも灯を！,双輪巡り！,False
+d1/magic-sakuya,d1/magic-sakuya/chakram-3,夜を越えて！ 風輪連華！,夜を越えて！,風輪連華！,False
+d1/magic-sakuya,d1/magic-sakuya/chakram-4,影よ舞え！ 天輪帰航！,影よ舞え！,天輪帰航！,False
+d1/magic-sakuya,d1/magic-sakuya/ultimate-dawn,闇にも灯を！ 奥義・万彩黎明！,闇にも灯を！,奥義・万彩黎明！,False
+d1/magic-sakuya,d1/magic-sakuya/ultimate-earth,夜を越えて！ 奥義・地天共鳴！,夜を越えて！,奥義・地天共鳴！,False
+d1/magic-sakuya,d1/magic-sakuya/ultimate-sky,影よ舞え！ 奥義・星巡天翔！,影よ舞え！,奥義・星巡天翔！,False
+d1/magic-sakuya,d1/magic-sakuya/ultimate-heart,月の導きで！ 奥義・無窮心輪！,月の導きで！,奥義・無窮心輪！,False
+kocho/original,kocho/original/skill-7ad9bff809d4,決めるぞ！定規スラッシュ！,決めるぞ！,定規スラッシュ！,False
+kocho/original,kocho/original/skill-ed20efdb96fb,決めるぞ！コンパス突き！,決めるぞ！,コンパス突き！,False
+kocho/original,kocho/original/skill-bfe2378536bb,風を切れ！ダッシュ！,風を切れ！,ダッシュ！,False
+kocho/original,kocho/original/skill-c78c14413f67,力を貸してくれ！バックステップ！,力を貸してくれ！,バックステップ！,False
+kocho/original,kocho/original/skill-36de33f4aaf6,決めるぞ！大声！,決めるぞ！,大声！,False
+kocho/original,kocho/original/skill-dd743dde1fb1,力を貸してくれ！お辞儀！,力を貸してくれ！,お辞儀！,False
+kocho/original,kocho/original/skill-204a1c58a810,決めるぞ！回し蹴り！,決めるぞ！,回し蹴り！,False
+kocho/original,kocho/original/skill-fb914dda7a93,決めるぞ！チョーク投げ！,決めるぞ！,チョーク投げ！,False
+kocho/original,kocho/original/skill-df415364bba4,決めるぞ！スライディング！,決めるぞ！,スライディング！,False
+kocho/original,kocho/original/skill-ceeb59c32280,力を貸してくれ！教科書ガード！,力を貸してくれ！,教科書ガード！,False
+kocho/original,kocho/original/skill-415e94552112,決めるぞ！竹刀！,決めるぞ！,竹刀！,False
+kocho/original,kocho/original/skill-3ace253fd105,決めるぞ！金属バット！,決めるぞ！,金属バット！,False
+kocho/original,kocho/original/skill-8025bf2710a0,決めるぞ！カウンター定規！,決めるぞ！,カウンター定規！,False
+kocho/original,kocho/original/skill-4cbf8fba0425,決めるぞ！張り手！,決めるぞ！,張り手！,False
+kocho/original,kocho/original/skill-28d8134f24be,決めるぞ！後ろ蹴り！,決めるぞ！,後ろ蹴り！,False
+kocho/original,kocho/original/skill-ec828a82f38d,決めるぞ！釣り竿！,決めるぞ！,釣り竿！,False
+kocho/original,kocho/original/skill-762692e1a9fd,決めるぞ！消火器！,決めるぞ！,消火器！,False
+kocho/original,kocho/original/skill-89ca3b5d316e,決めるぞ！タックル！,決めるぞ！,タックル！,False
+kocho/original,kocho/original/skill-5de1b913e76a,決めるぞ！雷！,決めるぞ！,雷！,False
+kocho/original,kocho/original/skill-90dd6a3b929d,決めるぞ！回転モップ！,決めるぞ！,回転モップ！,False
+kocho/original,kocho/original/skill-d5e0163d8107,決めるぞ！竹箒！,決めるぞ！,竹箒！,False
+kocho/original,kocho/original/skill-2c881400e1cb,力を貸してくれ！絶対防御！,力を貸してくれ！,絶対防御！,False
+kocho/original,kocho/original/skill-8efb357d5690,決めるぞ！リコーダー！,決めるぞ！,リコーダー！,False
+kocho/original,kocho/original/skill-e98c8c07e96c,決めるぞ！三角定規！,決めるぞ！,三角定規！,False
+kocho/original,kocho/original/skill-8f3c4cc530b3,決めるぞ！バレーボール！,決めるぞ！,バレーボール！,False
+kocho/original,kocho/original/skill-0c8abadacd7f,決めるぞ！吸血！,決めるぞ！,吸血！,False
+kocho/original,kocho/original/skill-279ef142ce55,決めるぞ！雑巾がけ！,決めるぞ！,雑巾がけ！,False
+kocho/original,kocho/original/skill-ad778811ec66,決めるぞ！赤ペン連打！,決めるぞ！,赤ペン連打！,False
+kocho/original,kocho/original/skill-ddd7d104a8d5,決めるぞ！連絡帳スマッシュ！,決めるぞ！,連絡帳スマッシュ！,False
+kocho/original,kocho/original/skill-10e4fa3bc07c,決めるぞ！メガホン指導！,決めるぞ！,メガホン指導！,False
+kocho/original,kocho/original/skill-1acee1714dca,力を貸してくれ！保健室の包帯！,力を貸してくれ！,保健室の包帯！,False
+kocho/original,kocho/original/skill-c4bdb3d7481f,風を切れ！跳び箱ダッシュ！,風を切れ！,跳び箱ダッシュ！,False
+kocho/original,kocho/original/skill-dc0d10b09895,決めるぞ！黒板消し投げ！,決めるぞ！,黒板消し投げ！,False
+kocho/original,kocho/original/skill-97b058361aac,決めるぞ！竹ぼうきスイープ！,決めるぞ！,竹ぼうきスイープ！,False
+kocho/original,kocho/original/skill-55005d5d2356,決めるぞ！笛の合図！,決めるぞ！,笛の合図！,False
+kocho/original,kocho/original/skill-3697d3d7e280,決めるぞ！鉄パイプ！,決めるぞ！,鉄パイプ！,False
+kocho/original,kocho/original/skill-75b2faa68554,力を貸してくれ！防犯シールド！,力を貸してくれ！,防犯シールド！,False
+kocho/original,kocho/original/skill-c3380d9057a3,決めるぞ！号令ラッシュ！,決めるぞ！,号令ラッシュ！,False
+kocho/original,kocho/original/skill-a4aa18ea77bc,決めるぞ！釣り針フック！,決めるぞ！,釣り針フック！,False
+kocho/original,kocho/original/skill-692c06f91e51,決めるぞ！教鞭ビンタ！,決めるぞ！,教鞭ビンタ！,False
+kocho/original,kocho/original/skill-5bc68647f9b3,決めるぞ！教鞭ショック！,決めるぞ！,教鞭ショック！,False
+kocho/original,kocho/original/skill-56a7e9190217,風を切れ！体育倉庫前進！,風を切れ！,体育倉庫前進！,False
+kocho/original,kocho/original/skill-c41e94646908,決めるぞ！タイヤ引き！,決めるぞ！,タイヤ引き！,False
+kocho/original,kocho/original/skill-16c25d039ae9,力を貸してくれ！救急箱！,力を貸してくれ！,救急箱！,False
+kocho/original,kocho/original/skill-274dc62f5031,力を貸してくれ！防災頭巾！,力を貸してくれ！,防災頭巾！,False
+kocho/original,kocho/original/skill-d8fb16a12d1c,決めるぞ！チョーク連射！,決めるぞ！,チョーク連射！,False
+kocho/original,kocho/original/skill-bf0cfcde499b,決めるぞ！バケツ返し！,決めるぞ！,バケツ返し！,False
+kocho/original,kocho/original/skill-69adc22ae83c,風を切れ！花壇ジャンプ！,風を切れ！,花壇ジャンプ！,False
+kocho/original,kocho/original/skill-7a562cc35831,決めるぞ！朝礼アタック！,決めるぞ！,朝礼アタック！,False
+kocho/original,kocho/original/skill-33510aea7536,決めるぞ！ランドセル投げ！,決めるぞ！,ランドセル投げ！,False
+kocho/original,kocho/original/skill-9cdac887d49f,決めるぞ！校旗突き！,決めるぞ！,校旗突き！,False
+kocho/original,kocho/original/skill-77e199ca3665,決めるぞ！ラジカセ爆音！,決めるぞ！,ラジカセ爆音！,False
+kocho/original,kocho/original/skill-06c7088507e2,力を貸してくれ！授業参観ガード！,力を貸してくれ！,授業参観ガード！,False
+kocho/original,kocho/original/skill-f074df5d24ed,決めるぞ！雑誌投げ！,決めるぞ！,雑誌投げ！,False
+kocho/original,kocho/original/skill-418981e957c7,力を貸してくれ！水筒チャージ！,力を貸してくれ！,水筒チャージ！,False
+kocho/original,kocho/original/skill-92addf24df3b,力を貸してくれ！スポドリ補給！,力を貸してくれ！,スポドリ補給！,False
+kocho/original,kocho/original/skill-5ee37bf92946,風を切れ！非常階段ダッシュ！,風を切れ！,非常階段ダッシュ！,False
+kocho/original,kocho/original/skill-f1b6e5ecc035,風を切れ！竹馬ストライド！,風を切れ！,竹馬ストライド！,False
+kocho/original,kocho/original/skill-5a5dac484a00,決めるぞ！ホイッスルバースト！,決めるぞ！,ホイッスルバースト！,False
+kocho/original,kocho/original/skill-24f9bdc815eb,決めるぞ！校内放送！,決めるぞ！,校内放送！,False
+kocho/original,kocho/original/skill-ab204834cd47,決めるぞ！裏門回り込み！,決めるぞ！,裏門回り込み！,False
+kocho/original,kocho/original/skill-5a8dd6e2e7ce,決めるぞ！旋風脚！,決めるぞ！,旋風脚！,False
+kocho/original,kocho/original/skill-98d136aab18d,決めるぞ！たすき掛け！,決めるぞ！,たすき掛け！,False
+kocho/original,kocho/original/skill-7978784d4549,決めるぞ！箱馬タックル！,決めるぞ！,箱馬タックル！,False
+kocho/original,kocho/original/skill-e384e12ed973,決めるぞ！フロアモップ！,決めるぞ！,フロアモップ！,False
+kocho/original,kocho/original/skill-ec244c466330,決めるぞ！金管アラーム！,決めるぞ！,金管アラーム！,False
+kocho/original,kocho/original/skill-3f117bb80d08,力を貸してくれ！絆創膏ケア！,力を貸してくれ！,絆創膏ケア！,False
+kocho/original,kocho/original/skill-4aece503edf7,決めるぞ！校章ブーメラン！,決めるぞ！,校章ブーメラン！,False
+kocho/original,kocho/original/skill-08ef33828ceb,決めるぞ！清掃ワゴン！,決めるぞ！,清掃ワゴン！,False
+kocho/original,kocho/original/skill-767e1fea64b9,決めるぞ！鉄扇！,決めるぞ！,鉄扇！,False
+kocho/original,kocho/original/skill-0b94c5ac5277,決めるぞ！ドア反撃！,決めるぞ！,ドア反撃！,False
+kocho/original,kocho/original/skill-2c11847ed6e7,力を貸してくれ！生徒会バッジ！,力を貸してくれ！,生徒会バッジ！,False
+kocho/original,kocho/original/skill-d8c13f7f0aea,決めるぞ！非常口スライド！,決めるぞ！,非常口スライド！,False
+kocho/original,kocho/original/skill-d6a305cbab55,風を切れ！ロープウェイ！,風を切れ！,ロープウェイ！,False
+kocho/original,kocho/original/skill-9caa53b57999,決めるぞ！校歌斉唱！,決めるぞ！,校歌斉唱！,False
+kocho/original,kocho/original/skill-b135bb8cee39,力を貸してくれ！救護スプレー！,力を貸してくれ！,救護スプレー！,False
+kocho/original,kocho/original/skill-c00e8449e80b,決めるぞ！金庫破り！,決めるぞ！,金庫破り！,False
+kocho/rebel,kocho/rebel/skill-7ad9bff809d4,くらえ！定規スラッシュ！,くらえ！,定規スラッシュ！,False
+kocho/rebel,kocho/rebel/skill-ed20efdb96fb,くらえ！コンパス突き！,くらえ！,コンパス突き！,False
+kocho/rebel,kocho/rebel/skill-bfe2378536bb,一気に行くぜ！ダッシュ！,一気に行くぜ！,ダッシュ！,False
+kocho/rebel,kocho/rebel/skill-c78c14413f67,負けねえ！バックステップ！,負けねえ！,バックステップ！,False
+kocho/rebel,kocho/rebel/skill-36de33f4aaf6,くらえ！大声！,くらえ！,大声！,False
+kocho/rebel,kocho/rebel/skill-dd743dde1fb1,負けねえ！お辞儀！,負けねえ！,お辞儀！,False
+kocho/rebel,kocho/rebel/skill-204a1c58a810,くらえ！回し蹴り！,くらえ！,回し蹴り！,False
+kocho/rebel,kocho/rebel/skill-fb914dda7a93,くらえ！チョーク投げ！,くらえ！,チョーク投げ！,False
+kocho/rebel,kocho/rebel/skill-df415364bba4,くらえ！スライディング！,くらえ！,スライディング！,False
+kocho/rebel,kocho/rebel/skill-ceeb59c32280,負けねえ！教科書ガード！,負けねえ！,教科書ガード！,False
+kocho/rebel,kocho/rebel/skill-415e94552112,くらえ！竹刀！,くらえ！,竹刀！,False
+kocho/rebel,kocho/rebel/skill-3ace253fd105,くらえ！金属バット！,くらえ！,金属バット！,False
+kocho/rebel,kocho/rebel/skill-8025bf2710a0,くらえ！カウンター定規！,くらえ！,カウンター定規！,False
+kocho/rebel,kocho/rebel/skill-4cbf8fba0425,くらえ！張り手！,くらえ！,張り手！,False
+kocho/rebel,kocho/rebel/skill-28d8134f24be,くらえ！後ろ蹴り！,くらえ！,後ろ蹴り！,False
+kocho/rebel,kocho/rebel/skill-ec828a82f38d,くらえ！釣り竿！,くらえ！,釣り竿！,False
+kocho/rebel,kocho/rebel/skill-762692e1a9fd,くらえ！消火器！,くらえ！,消火器！,False
+kocho/rebel,kocho/rebel/skill-89ca3b5d316e,くらえ！タックル！,くらえ！,タックル！,False
+kocho/rebel,kocho/rebel/skill-5de1b913e76a,くらえ！雷！,くらえ！,雷！,False
+kocho/rebel,kocho/rebel/skill-90dd6a3b929d,くらえ！回転モップ！,くらえ！,回転モップ！,False
+kocho/rebel,kocho/rebel/skill-d5e0163d8107,くらえ！竹箒！,くらえ！,竹箒！,False
+kocho/rebel,kocho/rebel/skill-2c881400e1cb,負けねえ！絶対防御！,負けねえ！,絶対防御！,False
+kocho/rebel,kocho/rebel/skill-8efb357d5690,くらえ！リコーダー！,くらえ！,リコーダー！,False
+kocho/rebel,kocho/rebel/skill-e98c8c07e96c,くらえ！三角定規！,くらえ！,三角定規！,False
+kocho/rebel,kocho/rebel/skill-8f3c4cc530b3,くらえ！バレーボール！,くらえ！,バレーボール！,False
+kocho/rebel,kocho/rebel/skill-0c8abadacd7f,くらえ！吸血！,くらえ！,吸血！,False
+kocho/rebel,kocho/rebel/skill-279ef142ce55,くらえ！雑巾がけ！,くらえ！,雑巾がけ！,False
+kocho/rebel,kocho/rebel/skill-ad778811ec66,くらえ！赤ペン連打！,くらえ！,赤ペン連打！,False
+kocho/rebel,kocho/rebel/skill-ddd7d104a8d5,くらえ！連絡帳スマッシュ！,くらえ！,連絡帳スマッシュ！,False
+kocho/rebel,kocho/rebel/skill-10e4fa3bc07c,くらえ！メガホン指導！,くらえ！,メガホン指導！,False
+kocho/rebel,kocho/rebel/skill-1acee1714dca,負けねえ！保健室の包帯！,負けねえ！,保健室の包帯！,False
+kocho/rebel,kocho/rebel/skill-c4bdb3d7481f,一気に行くぜ！跳び箱ダッシュ！,一気に行くぜ！,跳び箱ダッシュ！,False
+kocho/rebel,kocho/rebel/skill-dc0d10b09895,くらえ！黒板消し投げ！,くらえ！,黒板消し投げ！,False
+kocho/rebel,kocho/rebel/skill-97b058361aac,くらえ！竹ぼうきスイープ！,くらえ！,竹ぼうきスイープ！,False
+kocho/rebel,kocho/rebel/skill-55005d5d2356,くらえ！笛の合図！,くらえ！,笛の合図！,False
+kocho/rebel,kocho/rebel/skill-3697d3d7e280,くらえ！鉄パイプ！,くらえ！,鉄パイプ！,False
+kocho/rebel,kocho/rebel/skill-75b2faa68554,負けねえ！防犯シールド！,負けねえ！,防犯シールド！,False
+kocho/rebel,kocho/rebel/skill-c3380d9057a3,くらえ！号令ラッシュ！,くらえ！,号令ラッシュ！,False
+kocho/rebel,kocho/rebel/skill-a4aa18ea77bc,くらえ！釣り針フック！,くらえ！,釣り針フック！,False
+kocho/rebel,kocho/rebel/skill-692c06f91e51,くらえ！教鞭ビンタ！,くらえ！,教鞭ビンタ！,False
+kocho/rebel,kocho/rebel/skill-5bc68647f9b3,くらえ！教鞭ショック！,くらえ！,教鞭ショック！,False
+kocho/rebel,kocho/rebel/skill-56a7e9190217,一気に行くぜ！体育倉庫前進！,一気に行くぜ！,体育倉庫前進！,False
+kocho/rebel,kocho/rebel/skill-c41e94646908,くらえ！タイヤ引き！,くらえ！,タイヤ引き！,False
+kocho/rebel,kocho/rebel/skill-16c25d039ae9,負けねえ！救急箱！,負けねえ！,救急箱！,False
+kocho/rebel,kocho/rebel/skill-274dc62f5031,負けねえ！防災頭巾！,負けねえ！,防災頭巾！,False
+kocho/rebel,kocho/rebel/skill-d8fb16a12d1c,くらえ！チョーク連射！,くらえ！,チョーク連射！,False
+kocho/rebel,kocho/rebel/skill-bf0cfcde499b,くらえ！バケツ返し！,くらえ！,バケツ返し！,False
+kocho/rebel,kocho/rebel/skill-69adc22ae83c,一気に行くぜ！花壇ジャンプ！,一気に行くぜ！,花壇ジャンプ！,False
+kocho/rebel,kocho/rebel/skill-7a562cc35831,くらえ！朝礼アタック！,くらえ！,朝礼アタック！,False
+kocho/rebel,kocho/rebel/skill-33510aea7536,くらえ！ランドセル投げ！,くらえ！,ランドセル投げ！,False
+kocho/rebel,kocho/rebel/skill-9cdac887d49f,くらえ！校旗突き！,くらえ！,校旗突き！,False
+kocho/rebel,kocho/rebel/skill-77e199ca3665,くらえ！ラジカセ爆音！,くらえ！,ラジカセ爆音！,False
+kocho/rebel,kocho/rebel/skill-06c7088507e2,負けねえ！授業参観ガード！,負けねえ！,授業参観ガード！,False
+kocho/rebel,kocho/rebel/skill-f074df5d24ed,くらえ！雑誌投げ！,くらえ！,雑誌投げ！,False
+kocho/rebel,kocho/rebel/skill-418981e957c7,負けねえ！水筒チャージ！,負けねえ！,水筒チャージ！,False
+kocho/rebel,kocho/rebel/skill-92addf24df3b,負けねえ！スポドリ補給！,負けねえ！,スポドリ補給！,False
+kocho/rebel,kocho/rebel/skill-5ee37bf92946,一気に行くぜ！非常階段ダッシュ！,一気に行くぜ！,非常階段ダッシュ！,False
+kocho/rebel,kocho/rebel/skill-f1b6e5ecc035,一気に行くぜ！竹馬ストライド！,一気に行くぜ！,竹馬ストライド！,False
+kocho/rebel,kocho/rebel/skill-5a5dac484a00,くらえ！ホイッスルバースト！,くらえ！,ホイッスルバースト！,False
+kocho/rebel,kocho/rebel/skill-24f9bdc815eb,くらえ！校内放送！,くらえ！,校内放送！,False
+kocho/rebel,kocho/rebel/skill-ab204834cd47,くらえ！裏門回り込み！,くらえ！,裏門回り込み！,False
+kocho/rebel,kocho/rebel/skill-5a8dd6e2e7ce,くらえ！旋風脚！,くらえ！,旋風脚！,False
+kocho/rebel,kocho/rebel/skill-98d136aab18d,くらえ！たすき掛け！,くらえ！,たすき掛け！,False
+kocho/rebel,kocho/rebel/skill-7978784d4549,くらえ！箱馬タックル！,くらえ！,箱馬タックル！,False
+kocho/rebel,kocho/rebel/skill-e384e12ed973,くらえ！フロアモップ！,くらえ！,フロアモップ！,False
+kocho/rebel,kocho/rebel/skill-ec244c466330,くらえ！金管アラーム！,くらえ！,金管アラーム！,False
+kocho/rebel,kocho/rebel/skill-3f117bb80d08,負けねえ！絆創膏ケア！,負けねえ！,絆創膏ケア！,False
+kocho/rebel,kocho/rebel/skill-4aece503edf7,くらえ！校章ブーメラン！,くらえ！,校章ブーメラン！,False
+kocho/rebel,kocho/rebel/skill-08ef33828ceb,くらえ！清掃ワゴン！,くらえ！,清掃ワゴン！,False
+kocho/rebel,kocho/rebel/skill-767e1fea64b9,くらえ！鉄扇！,くらえ！,鉄扇！,False
+kocho/rebel,kocho/rebel/skill-0b94c5ac5277,くらえ！ドア反撃！,くらえ！,ドア反撃！,False
+kocho/rebel,kocho/rebel/skill-2c11847ed6e7,負けねえ！生徒会バッジ！,負けねえ！,生徒会バッジ！,False
+kocho/rebel,kocho/rebel/skill-d8c13f7f0aea,くらえ！非常口スライド！,くらえ！,非常口スライド！,False
+kocho/rebel,kocho/rebel/skill-d6a305cbab55,一気に行くぜ！ロープウェイ！,一気に行くぜ！,ロープウェイ！,False
+kocho/rebel,kocho/rebel/skill-9caa53b57999,くらえ！校歌斉唱！,くらえ！,校歌斉唱！,False
+kocho/rebel,kocho/rebel/skill-b135bb8cee39,負けねえ！救護スプレー！,負けねえ！,救護スプレー！,False
+kocho/rebel,kocho/rebel/skill-c00e8449e80b,くらえ！金庫破り！,くらえ！,金庫破り！,False
+kocho/rebel,kocho/rebel/skill-6feb4b413565,くらえ！叛逆ナックル！,くらえ！,叛逆ナックル！,False
+kocho/rebel,kocho/rebel/skill-b7505077b0de,くらえ！紅蓮タックル！,くらえ！,紅蓮タックル！,False
+kocho/rebel,kocho/rebel/skill-2a85aa2e3ca7,くらえ！旋風キック！,くらえ！,旋風キック！,False
+kocho/rebel,kocho/rebel/skill-6ff1e8c62994,負けねえ！不屈のガード！,負けねえ！,不屈のガード！,False
+kocho/rebel,kocho/rebel/skill-c0f0310e6b6f,くらえ！反撃の拳！,くらえ！,反撃の拳！,False
+kocho/rebel,kocho/rebel/skill-01fa6476e08a,くらえ！校則ブレイカー！,くらえ！,校則ブレイカー！,False
+kocho/rebel,kocho/rebel/skill-30b1b65018eb,くらえ！紅蓮連拳、速攻！,くらえ！,紅蓮連拳、速攻！,False
+kocho/rebel,kocho/rebel/skill-e16770b40199,くらえ！紅蓮連拳、蓄勢！,くらえ！,紅蓮連拳、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-c5a9aef1ef80,くらえ！紅蓮連拳、連携！,くらえ！,紅蓮連拳、連携！,False
+kocho/rebel,kocho/rebel/skill-657b1cc1f261,くらえ！紅蓮連拳、解放！,くらえ！,紅蓮連拳、解放！,False
+kocho/rebel,kocho/rebel/skill-6d243928e2f0,くらえ！突破の衝撃、速攻！,くらえ！,突破の衝撃、速攻！,False
+kocho/rebel,kocho/rebel/skill-cc43ba973ee3,くらえ！突破の衝撃、蓄勢！,くらえ！,突破の衝撃、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-59134bb325d9,くらえ！突破の衝撃、連携！,くらえ！,突破の衝撃、連携！,False
+kocho/rebel,kocho/rebel/skill-04154fc6716a,くらえ！突破の衝撃、解放！,くらえ！,突破の衝撃、解放！,False
+kocho/rebel,kocho/rebel/skill-0c8602520b3d,くらえ！影抜きスライド、速攻！,くらえ！,影抜きスライド、速攻！,False
+kocho/rebel,kocho/rebel/skill-5ab822ecad9d,くらえ！影抜きスライド、蓄勢！,くらえ！,影抜きスライド、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-895d892fcc22,くらえ！影抜きスライド、連携！,くらえ！,影抜きスライド、連携！,False
+kocho/rebel,kocho/rebel/skill-0c35981c25ca,くらえ！影抜きスライド、解放！,くらえ！,影抜きスライド、解放！,False
+kocho/rebel,kocho/rebel/skill-10e92393e33e,くらえ！旋回の嵐、速攻！,くらえ！,旋回の嵐、速攻！,False
+kocho/rebel,kocho/rebel/skill-1e1b07b9e868,くらえ！旋回の嵐、蓄勢！,くらえ！,旋回の嵐、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-9694950e6e20,くらえ！旋回の嵐、連携！,くらえ！,旋回の嵐、連携！,False
+kocho/rebel,kocho/rebel/skill-0743420dea1c,くらえ！旋回の嵐、解放！,くらえ！,旋回の嵐、解放！,False
+kocho/rebel,kocho/rebel/skill-099bdfc793a6,くらえ！見切りの一撃、速攻！,くらえ！,見切りの一撃、速攻！,False
+kocho/rebel,kocho/rebel/skill-0f6cf5315aac,くらえ！見切りの一撃、蓄勢！,くらえ！,見切りの一撃、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-afbbab8b0436,くらえ！見切りの一撃、連携！,くらえ！,見切りの一撃、連携！,False
+kocho/rebel,kocho/rebel/skill-6a79e60634db,くらえ！見切りの一撃、解放！,くらえ！,見切りの一撃、解放！,False
+kocho/rebel,kocho/rebel/skill-625c517ff1ec,くらえ！烈風掌、速攻！,くらえ！,烈風掌、速攻！,False
+kocho/rebel,kocho/rebel/skill-282c7d0ec7df,くらえ！烈風掌、蓄勢！,くらえ！,烈風掌、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-4e30538a9677,くらえ！烈風掌、連携！,くらえ！,烈風掌、連携！,False
+kocho/rebel,kocho/rebel/skill-063ef1072791,くらえ！烈風掌、解放！,くらえ！,烈風掌、解放！,False
+kocho/rebel,kocho/rebel/skill-7cd207b857a3,くらえ！引き込みフック、速攻！,くらえ！,引き込みフック、速攻！,False
+kocho/rebel,kocho/rebel/skill-4cde7938e871,くらえ！引き込みフック、蓄勢！,くらえ！,引き込みフック、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-592798dcfc98,くらえ！引き込みフック、連携！,くらえ！,引き込みフック、連携！,False
+kocho/rebel,kocho/rebel/skill-3194090220b9,くらえ！引き込みフック、解放！,くらえ！,引き込みフック、解放！,False
+kocho/rebel,kocho/rebel/skill-89210545c569,くらえ！離脱の一閃、速攻！,くらえ！,離脱の一閃、速攻！,False
+kocho/rebel,kocho/rebel/skill-cddeb5e646b4,くらえ！離脱の一閃、蓄勢！,くらえ！,離脱の一閃、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-39dd32073699,くらえ！離脱の一閃、連携！,くらえ！,離脱の一閃、連携！,False
+kocho/rebel,kocho/rebel/skill-6b772518d29d,くらえ！離脱の一閃、解放！,くらえ！,離脱の一閃、解放！,False
+kocho/rebel,kocho/rebel/skill-56fd98870e49,くらえ！一点狙撃、速攻！,くらえ！,一点狙撃、速攻！,False
+kocho/rebel,kocho/rebel/skill-bbd7809e8139,くらえ！一点狙撃、蓄勢！,くらえ！,一点狙撃、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-297e7d7ae1ca,くらえ！一点狙撃、連携！,くらえ！,一点狙撃、連携！,False
+kocho/rebel,kocho/rebel/skill-229425fe2f81,くらえ！一点狙撃、解放！,くらえ！,一点狙撃、解放！,False
+kocho/rebel,kocho/rebel/skill-6c717451775c,くらえ！校則一閃、速攻！,くらえ！,校則一閃、速攻！,False
+kocho/rebel,kocho/rebel/skill-5c1f1f642787,くらえ！校則一閃、蓄勢！,くらえ！,校則一閃、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-cd5819dde90f,くらえ！校則一閃、連携！,くらえ！,校則一閃、連携！,False
+kocho/rebel,kocho/rebel/skill-ace1c0223f95,くらえ！校則一閃、解放！,くらえ！,校則一閃、解放！,False
+kocho/rebel,kocho/rebel/skill-f0598e9bd004,くらえ！足払い、速攻！,くらえ！,足払い、速攻！,False
+kocho/rebel,kocho/rebel/skill-aef9f6ce1514,くらえ！足払い、蓄勢！,くらえ！,足払い、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-8ffa7612a93c,くらえ！足払い、連携！,くらえ！,足払い、連携！,False
+kocho/rebel,kocho/rebel/skill-6145bf1031b5,くらえ！足払い、解放！,くらえ！,足払い、解放！,False
+kocho/rebel,kocho/rebel/skill-0e21ce0595f3,くらえ！闘気吸収、速攻！,くらえ！,闘気吸収、速攻！,False
+kocho/rebel,kocho/rebel/skill-9956906eb1ac,くらえ！闘気吸収、蓄勢！,くらえ！,闘気吸収、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-1aa3906b04fd,くらえ！闘気吸収、連携！,くらえ！,闘気吸収、連携！,False
+kocho/rebel,kocho/rebel/skill-93e27c7b338e,くらえ！闘気吸収、解放！,くらえ！,闘気吸収、解放！,False
+kocho/rebel,kocho/rebel/skill-31c12c0a603e,負けねえ！鉄壁の構え、速攻！,負けねえ！,鉄壁の構え、速攻！,False
+kocho/rebel,kocho/rebel/skill-968e6bf51391,負けねえ！鉄壁の構え、蓄勢！,負けねえ！,鉄壁の構え、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-0d3d3d80b931,負けねえ！鉄壁の構え、連携！,負けねえ！,鉄壁の構え、連携！,False
+kocho/rebel,kocho/rebel/skill-817dbe159ca6,負けねえ！鉄壁の構え、解放！,負けねえ！,鉄壁の構え、解放！,False
+kocho/rebel,kocho/rebel/skill-176a32ba6570,負けねえ！燃える気合、速攻！,負けねえ！,燃える気合、速攻！,False
+kocho/rebel,kocho/rebel/skill-d12d42bd80c6,負けねえ！燃える気合、蓄勢！,負けねえ！,燃える気合、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-81efd3614ec7,負けねえ！燃える気合、連携！,負けねえ！,燃える気合、連携！,False
+kocho/rebel,kocho/rebel/skill-5683c14da9ba,負けねえ！燃える気合、解放！,負けねえ！,燃える気合、解放！,False
+kocho/rebel,kocho/rebel/skill-757135d7dae1,負けねえ！応急手当、速攻！,負けねえ！,応急手当、速攻！,False
+kocho/rebel,kocho/rebel/skill-7d0bbc2f8974,負けねえ！応急手当、蓄勢！,負けねえ！,応急手当、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-415a3f5e19cf,負けねえ！応急手当、連携！,負けねえ！,応急手当、連携！,False
+kocho/rebel,kocho/rebel/skill-51eab0d8f948,負けねえ！応急手当、解放！,負けねえ！,応急手当、解放！,False
+kocho/rebel,kocho/rebel/skill-677c536cc5c2,負けねえ！呼吸を整える、速攻！,負けねえ！,呼吸を整える、速攻！,False
+kocho/rebel,kocho/rebel/skill-26e7bb83ba22,負けねえ！呼吸を整える、蓄勢！,負けねえ！,呼吸を整える、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-4f922b32b3c9,負けねえ！呼吸を整える、連携！,負けねえ！,呼吸を整える、連携！,False
+kocho/rebel,kocho/rebel/skill-0e590642f8b6,負けねえ！呼吸を整える、解放！,負けねえ！,呼吸を整える、解放！,False
+kocho/rebel,kocho/rebel/skill-1d740ab2af9b,負けねえ！絶対の意志、速攻！,負けねえ！,絶対の意志、速攻！,False
+kocho/rebel,kocho/rebel/skill-10b9db7663b8,負けねえ！絶対の意志、蓄勢！,負けねえ！,絶対の意志、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-414546694d40,負けねえ！絶対の意志、連携！,負けねえ！,絶対の意志、連携！,False
+kocho/rebel,kocho/rebel/skill-b1f9c42845f1,負けねえ！絶対の意志、解放！,負けねえ！,絶対の意志、解放！,False
+kocho/rebel,kocho/rebel/skill-244a30fa740f,負けねえ！反転退避、速攻！,負けねえ！,反転退避、速攻！,False
+kocho/rebel,kocho/rebel/skill-f087bb4c6d15,負けねえ！反転退避、蓄勢！,負けねえ！,反転退避、蓄勢！,False
+kocho/rebel,kocho/rebel/skill-22e15b357d85,負けねえ！反転退避、連携！,負けねえ！,反転退避、連携！,False
+kocho/rebel,kocho/rebel/skill-f5c8ac84af47,負けねえ！反転退避、解放！,負けねえ！,反転退避、解放！,False
+kocho/rebel,kocho/rebel/skill-c70bcd045b00,これが俺の全力だ！紅蓮限界突破！,これが俺の全力だ！,紅蓮限界突破！,False
+kocho/rebel,kocho/rebel/skill-38118e233fdc,これが俺の全力だ！叛逆の最終宣言！,これが俺の全力だ！,叛逆の最終宣言！,False
+kocho/akari,kocho/akari/skill-7ad9bff809d4,輝け！定規スラッシュ！,輝け！,定規スラッシュ！,False
+kocho/akari,kocho/akari/skill-ed20efdb96fb,輝け！コンパス突き！,輝け！,コンパス突き！,False
+kocho/akari,kocho/akari/skill-bfe2378536bb,道を開いて！ダッシュ！,道を開いて！,ダッシュ！,False
+kocho/akari,kocho/akari/skill-c78c14413f67,星よ、力を！バックステップ！,星よ、力を！,バックステップ！,False
+kocho/akari,kocho/akari/skill-36de33f4aaf6,輝け！大声！,輝け！,大声！,False
+kocho/akari,kocho/akari/skill-dd743dde1fb1,星よ、力を！お辞儀！,星よ、力を！,お辞儀！,False
+kocho/akari,kocho/akari/skill-204a1c58a810,輝け！回し蹴り！,輝け！,回し蹴り！,False
+kocho/akari,kocho/akari/skill-fb914dda7a93,輝け！チョーク投げ！,輝け！,チョーク投げ！,False
+kocho/akari,kocho/akari/skill-df415364bba4,輝け！スライディング！,輝け！,スライディング！,False
+kocho/akari,kocho/akari/skill-ceeb59c32280,星よ、力を！教科書ガード！,星よ、力を！,教科書ガード！,False
+kocho/akari,kocho/akari/skill-415e94552112,輝け！竹刀！,輝け！,竹刀！,False
+kocho/akari,kocho/akari/skill-3ace253fd105,輝け！金属バット！,輝け！,金属バット！,False
+kocho/akari,kocho/akari/skill-8025bf2710a0,輝け！カウンター定規！,輝け！,カウンター定規！,False
+kocho/akari,kocho/akari/skill-4cbf8fba0425,輝け！張り手！,輝け！,張り手！,False
+kocho/akari,kocho/akari/skill-28d8134f24be,輝け！後ろ蹴り！,輝け！,後ろ蹴り！,False
+kocho/akari,kocho/akari/skill-ec828a82f38d,輝け！釣り竿！,輝け！,釣り竿！,False
+kocho/akari,kocho/akari/skill-762692e1a9fd,輝け！消火器！,輝け！,消火器！,False
+kocho/akari,kocho/akari/skill-89ca3b5d316e,輝け！タックル！,輝け！,タックル！,False
+kocho/akari,kocho/akari/skill-5de1b913e76a,輝け！雷！,輝け！,雷！,False
+kocho/akari,kocho/akari/skill-90dd6a3b929d,輝け！回転モップ！,輝け！,回転モップ！,False
+kocho/akari,kocho/akari/skill-d5e0163d8107,輝け！竹箒！,輝け！,竹箒！,False
+kocho/akari,kocho/akari/skill-2c881400e1cb,星よ、力を！絶対防御！,星よ、力を！,絶対防御！,False
+kocho/akari,kocho/akari/skill-8efb357d5690,輝け！リコーダー！,輝け！,リコーダー！,False
+kocho/akari,kocho/akari/skill-e98c8c07e96c,輝け！三角定規！,輝け！,三角定規！,False
+kocho/akari,kocho/akari/skill-8f3c4cc530b3,輝け！バレーボール！,輝け！,バレーボール！,False
+kocho/akari,kocho/akari/skill-0c8abadacd7f,輝け！吸血！,輝け！,吸血！,False
+kocho/akari,kocho/akari/skill-279ef142ce55,輝け！雑巾がけ！,輝け！,雑巾がけ！,False
+kocho/akari,kocho/akari/skill-ad778811ec66,輝け！赤ペン連打！,輝け！,赤ペン連打！,False
+kocho/akari,kocho/akari/skill-ddd7d104a8d5,輝け！連絡帳スマッシュ！,輝け！,連絡帳スマッシュ！,False
+kocho/akari,kocho/akari/skill-10e4fa3bc07c,輝け！メガホン指導！,輝け！,メガホン指導！,False
+kocho/akari,kocho/akari/skill-1acee1714dca,星よ、力を！保健室の包帯！,星よ、力を！,保健室の包帯！,False
+kocho/akari,kocho/akari/skill-c4bdb3d7481f,道を開いて！跳び箱ダッシュ！,道を開いて！,跳び箱ダッシュ！,False
+kocho/akari,kocho/akari/skill-dc0d10b09895,輝け！黒板消し投げ！,輝け！,黒板消し投げ！,False
+kocho/akari,kocho/akari/skill-97b058361aac,輝け！竹ぼうきスイープ！,輝け！,竹ぼうきスイープ！,False
+kocho/akari,kocho/akari/skill-55005d5d2356,輝け！笛の合図！,輝け！,笛の合図！,False
+kocho/akari,kocho/akari/skill-3697d3d7e280,輝け！鉄パイプ！,輝け！,鉄パイプ！,False
+kocho/akari,kocho/akari/skill-75b2faa68554,星よ、力を！防犯シールド！,星よ、力を！,防犯シールド！,False
+kocho/akari,kocho/akari/skill-c3380d9057a3,輝け！号令ラッシュ！,輝け！,号令ラッシュ！,False
+kocho/akari,kocho/akari/skill-a4aa18ea77bc,輝け！釣り針フック！,輝け！,釣り針フック！,False
+kocho/akari,kocho/akari/skill-692c06f91e51,輝け！教鞭ビンタ！,輝け！,教鞭ビンタ！,False
+kocho/akari,kocho/akari/skill-5bc68647f9b3,輝け！教鞭ショック！,輝け！,教鞭ショック！,False
+kocho/akari,kocho/akari/skill-56a7e9190217,道を開いて！体育倉庫前進！,道を開いて！,体育倉庫前進！,False
+kocho/akari,kocho/akari/skill-c41e94646908,輝け！タイヤ引き！,輝け！,タイヤ引き！,False
+kocho/akari,kocho/akari/skill-16c25d039ae9,星よ、力を！救急箱！,星よ、力を！,救急箱！,False
+kocho/akari,kocho/akari/skill-274dc62f5031,星よ、力を！防災頭巾！,星よ、力を！,防災頭巾！,False
+kocho/akari,kocho/akari/skill-d8fb16a12d1c,輝け！チョーク連射！,輝け！,チョーク連射！,False
+kocho/akari,kocho/akari/skill-bf0cfcde499b,輝け！バケツ返し！,輝け！,バケツ返し！,False
+kocho/akari,kocho/akari/skill-69adc22ae83c,道を開いて！花壇ジャンプ！,道を開いて！,花壇ジャンプ！,False
+kocho/akari,kocho/akari/skill-7a562cc35831,輝け！朝礼アタック！,輝け！,朝礼アタック！,False
+kocho/akari,kocho/akari/skill-33510aea7536,輝け！ランドセル投げ！,輝け！,ランドセル投げ！,False
+kocho/akari,kocho/akari/skill-9cdac887d49f,輝け！校旗突き！,輝け！,校旗突き！,False
+kocho/akari,kocho/akari/skill-77e199ca3665,輝け！ラジカセ爆音！,輝け！,ラジカセ爆音！,False
+kocho/akari,kocho/akari/skill-06c7088507e2,星よ、力を！授業参観ガード！,星よ、力を！,授業参観ガード！,False
+kocho/akari,kocho/akari/skill-f074df5d24ed,輝け！雑誌投げ！,輝け！,雑誌投げ！,False
+kocho/akari,kocho/akari/skill-418981e957c7,星よ、力を！水筒チャージ！,星よ、力を！,水筒チャージ！,False
+kocho/akari,kocho/akari/skill-92addf24df3b,星よ、力を！スポドリ補給！,星よ、力を！,スポドリ補給！,False
+kocho/akari,kocho/akari/skill-5ee37bf92946,道を開いて！非常階段ダッシュ！,道を開いて！,非常階段ダッシュ！,False
+kocho/akari,kocho/akari/skill-f1b6e5ecc035,道を開いて！竹馬ストライド！,道を開いて！,竹馬ストライド！,False
+kocho/akari,kocho/akari/skill-5a5dac484a00,輝け！ホイッスルバースト！,輝け！,ホイッスルバースト！,False
+kocho/akari,kocho/akari/skill-24f9bdc815eb,輝け！校内放送！,輝け！,校内放送！,False
+kocho/akari,kocho/akari/skill-ab204834cd47,輝け！裏門回り込み！,輝け！,裏門回り込み！,False
+kocho/akari,kocho/akari/skill-5a8dd6e2e7ce,輝け！旋風脚！,輝け！,旋風脚！,False
+kocho/akari,kocho/akari/skill-98d136aab18d,輝け！たすき掛け！,輝け！,たすき掛け！,False
+kocho/akari,kocho/akari/skill-7978784d4549,輝け！箱馬タックル！,輝け！,箱馬タックル！,False
+kocho/akari,kocho/akari/skill-e384e12ed973,輝け！フロアモップ！,輝け！,フロアモップ！,False
+kocho/akari,kocho/akari/skill-ec244c466330,輝け！金管アラーム！,輝け！,金管アラーム！,False
+kocho/akari,kocho/akari/skill-3f117bb80d08,星よ、力を！絆創膏ケア！,星よ、力を！,絆創膏ケア！,False
+kocho/akari,kocho/akari/skill-4aece503edf7,輝け！校章ブーメラン！,輝け！,校章ブーメラン！,False
+kocho/akari,kocho/akari/skill-08ef33828ceb,輝け！清掃ワゴン！,輝け！,清掃ワゴン！,False
+kocho/akari,kocho/akari/skill-767e1fea64b9,輝け！鉄扇！,輝け！,鉄扇！,False
+kocho/akari,kocho/akari/skill-0b94c5ac5277,輝け！ドア反撃！,輝け！,ドア反撃！,False
+kocho/akari,kocho/akari/skill-2c11847ed6e7,星よ、力を！生徒会バッジ！,星よ、力を！,生徒会バッジ！,False
+kocho/akari,kocho/akari/skill-d8c13f7f0aea,輝け！非常口スライド！,輝け！,非常口スライド！,False
+kocho/akari,kocho/akari/skill-d6a305cbab55,道を開いて！ロープウェイ！,道を開いて！,ロープウェイ！,False
+kocho/akari,kocho/akari/skill-9caa53b57999,輝け！校歌斉唱！,輝け！,校歌斉唱！,False
+kocho/akari,kocho/akari/skill-b135bb8cee39,星よ、力を！救護スプレー！,星よ、力を！,救護スプレー！,False
+kocho/akari,kocho/akari/skill-c00e8449e80b,輝け！金庫破り！,輝け！,金庫破り！,False
+kocho/akari,kocho/akari/skill-dd2e23379c70,輝け！星のひかり！,輝け！,星のひかり！,False
+kocho/akari,kocho/akari/skill-7abacb1cd43c,道を開いて！スターダッシュ！,道を開いて！,スターダッシュ！,False
+kocho/akari,kocho/akari/skill-cb4e453470be,輝け！星杖ストライク！,輝け！,星杖ストライク！,False
+kocho/akari,kocho/akari/skill-12325b9a069a,星よ、力を！星座シールド！,星よ、力を！,星座シールド！,False
+kocho/akari,kocho/akari/skill-4515001e08a5,星よ、力を！星のいやし！,星よ、力を！,星のいやし！,False
+kocho/akari,kocho/akari/skill-9169de8d332f,輝け！スターライトレイ！,輝け！,スターライトレイ！,False
+kocho/akari,kocho/akari/skill-26f3036a68a1,輝け！流星連射、速攻！,輝け！,流星連射、速攻！,False
+kocho/akari,kocho/akari/skill-e850affa7087,輝け！流星連射、蓄勢！,輝け！,流星連射、蓄勢！,False
+kocho/akari,kocho/akari/skill-2cbe383e0855,輝け！流星連射、連携！,輝け！,流星連射、連携！,False
+kocho/akari,kocho/akari/skill-f8f58d8317f5,輝け！流星連射、解放！,輝け！,流星連射、解放！,False
+kocho/akari,kocho/akari/skill-a14b084a7880,輝け！彗星突進、速攻！,輝け！,彗星突進、速攻！,False
+kocho/akari,kocho/akari/skill-43f5bc01c936,輝け！彗星突進、蓄勢！,輝け！,彗星突進、蓄勢！,False
+kocho/akari,kocho/akari/skill-3c62750826d4,輝け！彗星突進、連携！,輝け！,彗星突進、連携！,False
+kocho/akari,kocho/akari/skill-bee2b1146115,輝け！彗星突進、解放！,輝け！,彗星突進、解放！,False
+kocho/akari,kocho/akari/skill-3ed01aced204,輝け！光速すり抜け、速攻！,輝け！,光速すり抜け、速攻！,False
+kocho/akari,kocho/akari/skill-68d8cbf7bc4e,輝け！光速すり抜け、蓄勢！,輝け！,光速すり抜け、蓄勢！,False
+kocho/akari,kocho/akari/skill-3a0f8393ec25,輝け！光速すり抜け、連携！,輝け！,光速すり抜け、連携！,False
+kocho/akari,kocho/akari/skill-4541ade2e589,輝け！光速すり抜け、解放！,輝け！,光速すり抜け、解放！,False
+kocho/akari,kocho/akari/skill-995a9f89dfe3,輝け！星環スイープ、速攻！,輝け！,星環スイープ、速攻！,False
+kocho/akari,kocho/akari/skill-775aa2899b95,輝け！星環スイープ、蓄勢！,輝け！,星環スイープ、蓄勢！,False
+kocho/akari,kocho/akari/skill-bd000df19de8,輝け！星環スイープ、連携！,輝け！,星環スイープ、連携！,False
+kocho/akari,kocho/akari/skill-3f1e66e88f5e,輝け！星環スイープ、解放！,輝け！,星環スイープ、解放！,False
+kocho/akari,kocho/akari/skill-82d16e8d5dd0,輝け！鏡星カウンター、速攻！,輝け！,鏡星カウンター、速攻！,False
+kocho/akari,kocho/akari/skill-1373ab3c5728,輝け！鏡星カウンター、蓄勢！,輝け！,鏡星カウンター、蓄勢！,False
+kocho/akari,kocho/akari/skill-e66b7227c9a2,輝け！鏡星カウンター、連携！,輝け！,鏡星カウンター、連携！,False
+kocho/akari,kocho/akari/skill-e431263f3d6a,輝け！鏡星カウンター、解放！,輝け！,鏡星カウンター、解放！,False
+kocho/akari,kocho/akari/skill-0ba698ba2073,輝け！彗星プッシュ、速攻！,輝け！,彗星プッシュ、速攻！,False
+kocho/akari,kocho/akari/skill-b1dcd0adac26,輝け！彗星プッシュ、蓄勢！,輝け！,彗星プッシュ、蓄勢！,False
+kocho/akari,kocho/akari/skill-e81b5fee1954,輝け！彗星プッシュ、連携！,輝け！,彗星プッシュ、連携！,False
+kocho/akari,kocho/akari/skill-382416f068b8,輝け！彗星プッシュ、解放！,輝け！,彗星プッシュ、解放！,False
+kocho/akari,kocho/akari/skill-a0826a1fd631,輝け！星鎖フック、速攻！,輝け！,星鎖フック、速攻！,False
+kocho/akari,kocho/akari/skill-0881ed71e0a4,輝け！星鎖フック、蓄勢！,輝け！,星鎖フック、蓄勢！,False
+kocho/akari,kocho/akari/skill-cd4b6f6457ad,輝け！星鎖フック、連携！,輝け！,星鎖フック、連携！,False
+kocho/akari,kocho/akari/skill-293cc510d485,輝け！星鎖フック、解放！,輝け！,星鎖フック、解放！,False
+kocho/akari,kocho/akari/skill-7c3c69267f59,輝け！反動スターバースト、速攻！,輝け！,反動スターバースト、速攻！,False
+kocho/akari,kocho/akari/skill-082f3567865c,輝け！反動スターバースト、蓄勢！,輝け！,反動スターバースト、蓄勢！,False
+kocho/akari,kocho/akari/skill-26d6716ff609,輝け！反動スターバースト、連携！,輝け！,反動スターバースト、連携！,False
+kocho/akari,kocho/akari/skill-9798c1757723,輝け！反動スターバースト、解放！,輝け！,反動スターバースト、解放！,False
+kocho/akari,kocho/akari/skill-5eef8fa841a5,輝け！天頂の星、速攻！,輝け！,天頂の星、速攻！,False
+kocho/akari,kocho/akari/skill-ada325159242,輝け！天頂の星、蓄勢！,輝け！,天頂の星、蓄勢！,False
+kocho/akari,kocho/akari/skill-9dee596ab64d,輝け！天頂の星、連携！,輝け！,天頂の星、連携！,False
+kocho/akari,kocho/akari/skill-f7320487f003,輝け！天頂の星、解放！,輝け！,天頂の星、解放！,False
+kocho/akari,kocho/akari/skill-37697ae1d5c7,輝け！銀河の光、速攻！,輝け！,銀河の光、速攻！,False
+kocho/akari,kocho/akari/skill-1d602114a1a9,輝け！銀河の光、蓄勢！,輝け！,銀河の光、蓄勢！,False
+kocho/akari,kocho/akari/skill-52db36c05fb9,輝け！銀河の光、連携！,輝け！,銀河の光、連携！,False
+kocho/akari,kocho/akari/skill-7f5ccd4613d4,輝け！銀河の光、解放！,輝け！,銀河の光、解放！,False
+kocho/akari,kocho/akari/skill-52d12e3a2020,輝け！時止めの星、速攻！,輝け！,時止めの星、速攻！,False
+kocho/akari,kocho/akari/skill-6dd96812b571,輝け！時止めの星、蓄勢！,輝け！,時止めの星、蓄勢！,False
+kocho/akari,kocho/akari/skill-1a26271fba1a,輝け！時止めの星、連携！,輝け！,時止めの星、連携！,False
+kocho/akari,kocho/akari/skill-0f0bcf8bae4c,輝け！時止めの星、解放！,輝け！,時止めの星、解放！,False
+kocho/akari,kocho/akari/skill-05c57a317b19,輝け！月光ドレイン、速攻！,輝け！,月光ドレイン、速攻！,False
+kocho/akari,kocho/akari/skill-b031cbdcfd2a,輝け！月光ドレイン、蓄勢！,輝け！,月光ドレイン、蓄勢！,False
+kocho/akari,kocho/akari/skill-a100fc1d5fb7,輝け！月光ドレイン、連携！,輝け！,月光ドレイン、連携！,False
+kocho/akari,kocho/akari/skill-022b5c500b4e,輝け！月光ドレイン、解放！,輝け！,月光ドレイン、解放！,False
+kocho/akari,kocho/akari/skill-f9fc61af6ca7,星よ、力を！守護星座、速攻！,星よ、力を！,守護星座、速攻！,False
+kocho/akari,kocho/akari/skill-d524ef4e3dec,星よ、力を！守護星座、蓄勢！,星よ、力を！,守護星座、蓄勢！,False
+kocho/akari,kocho/akari/skill-f4a453342226,星よ、力を！守護星座、連携！,星よ、力を！,守護星座、連携！,False
+kocho/akari,kocho/akari/skill-1865ec1139e9,星よ、力を！守護星座、解放！,星よ、力を！,守護星座、解放！,False
+kocho/akari,kocho/akari/skill-b889b2ea622a,星よ、力を！星への祈り、速攻！,星よ、力を！,星への祈り、速攻！,False
+kocho/akari,kocho/akari/skill-8d01fd34982b,星よ、力を！星への祈り、蓄勢！,星よ、力を！,星への祈り、蓄勢！,False
+kocho/akari,kocho/akari/skill-31453dacd6c4,星よ、力を！星への祈り、連携！,星よ、力を！,星への祈り、連携！,False
+kocho/akari,kocho/akari/skill-53dc6bf35cc7,星よ、力を！星への祈り、解放！,星よ、力を！,星への祈り、解放！,False
+kocho/akari,kocho/akari/skill-acbce1b56dc7,星よ、力を！癒しの星雨、速攻！,星よ、力を！,癒しの星雨、速攻！,False
+kocho/akari,kocho/akari/skill-89a49c7ef413,星よ、力を！癒しの星雨、蓄勢！,星よ、力を！,癒しの星雨、蓄勢！,False
+kocho/akari,kocho/akari/skill-c9099dc69b20,星よ、力を！癒しの星雨、連携！,星よ、力を！,癒しの星雨、連携！,False
+kocho/akari,kocho/akari/skill-9436bacd27e1,星よ、力を！癒しの星雨、解放！,星よ、力を！,癒しの星雨、解放！,False
+kocho/akari,kocho/akari/skill-1c2cb75b29b7,星よ、力を！再詠唱、速攻！,星よ、力を！,再詠唱、速攻！,False
+kocho/akari,kocho/akari/skill-4645110c60b2,星よ、力を！再詠唱、蓄勢！,星よ、力を！,再詠唱、蓄勢！,False
+kocho/akari,kocho/akari/skill-c9d97c637123,星よ、力を！再詠唱、連携！,星よ、力を！,再詠唱、連携！,False
+kocho/akari,kocho/akari/skill-cc2ce55a7463,星よ、力を！再詠唱、解放！,星よ、力を！,再詠唱、解放！,False
+kocho/akari,kocho/akari/skill-c24a866847ce,星よ、力を！星の絶対結界、速攻！,星よ、力を！,星の絶対結界、速攻！,False
+kocho/akari,kocho/akari/skill-8ef641bd697e,星よ、力を！星の絶対結界、蓄勢！,星よ、力を！,星の絶対結界、蓄勢！,False
+kocho/akari,kocho/akari/skill-adaa930df81c,星よ、力を！星の絶対結界、連携！,星よ、力を！,星の絶対結界、連携！,False
+kocho/akari,kocho/akari/skill-7eddf1950688,星よ、力を！星の絶対結界、解放！,星よ、力を！,星の絶対結界、解放！,False
+kocho/akari,kocho/akari/skill-f6eb51f35bae,星よ、力を！星間ステップ、速攻！,星よ、力を！,星間ステップ、速攻！,False
+kocho/akari,kocho/akari/skill-b228ed43136e,星よ、力を！星間ステップ、蓄勢！,星よ、力を！,星間ステップ、蓄勢！,False
+kocho/akari,kocho/akari/skill-4b67df68d4eb,星よ、力を！星間ステップ、連携！,星よ、力を！,星間ステップ、連携！,False
+kocho/akari,kocho/akari/skill-ca3409867040,星よ、力を！星間ステップ、解放！,星よ、力を！,星間ステップ、解放！,False
+kocho/akari,kocho/akari/skill-07c3ed81bfa8,願いを、未来へ！願いの超新星！,願いを、未来へ！,願いの超新星！,False
+kocho/akari,kocho/akari/skill-1917bf309e51,願いを、未来へ！スターライト、フィナーレ！,願いを、未来へ！,スターライト、フィナーレ！,False
+kocho/original,kocho/original/super-00,超必殺！蒼影、定規無双！,超必殺！,蒼影、定規無双！,False
+kocho/original,kocho/original/super-01,超必殺！螺旋、コンパス彗星！,超必殺！,螺旋、コンパス彗星！,False
+kocho/original,kocho/original/super-02,超必殺！白天、チョーク流星群！,超必殺！,白天、チョーク流星群！,False
+kocho/original,kocho/original/super-03,超必殺！教科書、絶対反撃！,超必殺！,教科書、絶対反撃！,False
+kocho/original,kocho/original/super-04,超必殺！清掃奥義、龍巻天翔！,超必殺！,清掃奥義、龍巻天翔！,False
+kocho/original,kocho/original/super-05,超必殺！雷脚、蒼天突破！,超必殺！,雷脚、蒼天突破！,False
+kocho/original,kocho/original/super-06,超必殺！月閃、竹刀一文字！,超必殺！,月閃、竹刀一文字！,False
+kocho/original,kocho/original/super-07,超必殺！轟星、満塁ホームラン！,超必殺！,轟星、満塁ホームラン！,False
+kocho/original,kocho/original/super-08,超必殺！蒼海、バケツ大瀑布！,超必殺！,蒼海、バケツ大瀑布！,False
+kocho/original,kocho/original/super-09,超必殺！校旗、鳳凰乱舞！,超必殺！,校旗、鳳凰乱舞！,False
+kocho/original,kocho/original/super-10,超必殺！響天、校内大交響！,超必殺！,響天、校内大交響！,False
+kocho/original,kocho/original/super-11,超必殺！卒業奥義、希望の拳！,超必殺！,卒業奥義、希望の拳！,False
+kocho/rebel,kocho/rebel/super-00,超必殺！蒼炎、紅蓮無双！,超必殺！,蒼炎、紅蓮無双！,False
+kocho/rebel,kocho/rebel/super-01,超必殺！雷迅、突破轟拳！,超必殺！,雷迅、突破轟拳！,False
+kocho/rebel,kocho/rebel/super-02,超必殺！影狼、月下乱舞！,超必殺！,影狼、月下乱舞！,False
+kocho/rebel,kocho/rebel/super-03,超必殺！鏡牙、反逆カウンター！,超必殺！,鏡牙、反逆カウンター！,False
+kocho/rebel,kocho/rebel/super-04,超必殺！風牙、覇王掌！,超必殺！,風牙、覇王掌！,False
+kocho/rebel,kocho/rebel/super-05,超必殺！天鎖、紅蓮落とし！,超必殺！,天鎖、紅蓮落とし！,False
+kocho/rebel,kocho/rebel/super-06,超必殺！紅蓮、吸星連牙！,超必殺！,紅蓮、吸星連牙！,False
+kocho/rebel,kocho/rebel/super-07,超必殺！暁、校則断罪！,超必殺！,暁、校則断罪！,False
+kocho/rebel,kocho/rebel/super-08,超必殺！不屈、王者返し！,超必殺！,不屈、王者返し！,False
+kocho/rebel,kocho/rebel/super-09,超必殺！幻影、旋風乱舞！,超必殺！,幻影、旋風乱舞！,False
+kocho/rebel,kocho/rebel/super-10,超必殺！閃光、一撃必中！,超必殺！,閃光、一撃必中！,False
+kocho/rebel,kocho/rebel/super-11,超必殺！叛逆、鳳凰天翔！,超必殺！,叛逆、鳳凰天翔！,False
+kocho/akari,kocho/akari/super-00,超必殺！流星、きらめきフィナーレ！,超必殺！,流星、きらめきフィナーレ！,False
+kocho/akari,kocho/akari/super-01,超必殺！彗星、エターナルノヴァ！,超必殺！,彗星、エターナルノヴァ！,False
+kocho/akari,kocho/akari/super-02,超必殺！光速、ミラージュステップ！,超必殺！,光速、ミラージュステップ！,False
+kocho/akari,kocho/akari/super-03,超必殺！星環、ギャラクシーストーム！,超必殺！,星環、ギャラクシーストーム！,False
+kocho/akari,kocho/akari/super-04,超必殺！鏡星、クリスタルジャッジ！,超必殺！,鏡星、クリスタルジャッジ！,False
+kocho/akari,kocho/akari/super-05,超必殺！彗星、スターダストノヴァ！,超必殺！,彗星、スターダストノヴァ！,False
+kocho/akari,kocho/akari/super-06,超必殺！星鎖、ゾディアックバインド！,超必殺！,星鎖、ゾディアックバインド！,False
+kocho/akari,kocho/akari/super-07,超必殺！銀河、インフィニティバースト！,超必殺！,銀河、インフィニティバースト！,False
+kocho/akari,kocho/akari/super-08,超必殺！天頂、アストラルランス！,超必殺！,天頂、アストラルランス！,False
+kocho/akari,kocho/akari/super-09,超必殺！銀河、レインボーレイ！,超必殺！,銀河、レインボーレイ！,False
+kocho/akari,kocho/akari/super-10,超必殺！時星、クロノスフィナーレ！,超必殺！,時星、クロノスフィナーレ！,False
+kocho/akari,kocho/akari/super-11,超必殺！月光、フェニックスウィッシュ！,超必殺！,月光、フェニックスウィッシュ！,False
+d2/lyria,d2/lyria/ultimate-1,せいもんいっせん！,,せいもんいっせん！,False
+d2/lyria,d2/lyria/ultimate-2,ほしまもりのわ！,,ほしまもりのわ！,False
+d2/lyria,d2/lyria/ultimate-3,てんきょくグランドクロス！,,てんきょくグランドクロス！,False
+d2/lyria,d2/lyria/card,せいかんのちかい！,,せいかんのちかい！,False
+d2/lyria,d2-prefix/lyria/ultimate-1-alt-1,星よ導け、せいもんいっせん！,星よ導け、,せいもんいっせん！,True
+d2/lyria,d2-prefix/lyria/ultimate-2-alt-2,広がれ、ほしまもりのわ！,広がれ、,ほしまもりのわ！,True
+d2/celis,d2/celis/ultimate-1,ひょうしょうのや！,,ひょうしょうのや！,False
+d2/celis,d2/celis/ultimate-2,せいひょうのいずみ！,,せいひょうのいずみ！,False
+d2/celis,d2/celis/ultimate-3,ぜつれいのおうかん！,,ぜつれいのおうかん！,False
+d2/celis,d2/celis/card,えいひょうのけいやく！,,えいひょうのけいやく！,False
+d2/celis,d2-prefix/celis/ultimate-1-alt-2,狙いはここ、ひょうしょうのや！,狙いはここ、,ひょうしょうのや！,True
+d2/celis,d2-prefix/celis/ultimate-2-alt-2,静まって、せいひょうのいずみ！,静まって、,せいひょうのいずみ！,True
+d2/celis,d2-prefix/celis/ultimate-3-alt-2,逃がさない、ぜつれいのおうかん！,逃がさない、,ぜつれいのおうかん！,True
+d2/flora,d2/flora/ultimate-1,すいようのしゃせん！,,すいようのしゃせん！,False
+d2/flora,d2/flora/ultimate-2,せいれいのこかげ！,,せいれいのこかげ！,False
+d2/flora,d2/flora/ultimate-3,ばんかのけっかい！,,ばんかのけっかい！,False
+d2/flora,d2/flora/card,せかいじゅのめぶき！,,せかいじゅのめぶき！,False
+d2/flora,d2-prefix/flora/ultimate-1-alt-2,狙いを定めて、すいようのしゃせん！,狙いを定めて、,すいようのしゃせん！,True
+d2/flora,d2-prefix/flora/ultimate-2-alt-2,みんな集まれ、せいれいのこかげ！,みんな集まれ、,せいれいのこかげ！,True
+d2/flora,d2-prefix/flora/ultimate-3-alt-2,いっせいに咲いて、ばんかのけっかい！,いっせいに咲いて、,ばんかのけっかい！,True
+d2/noctia,d2/noctia/ultimate-1,つきかげわたり！,,つきかげわたり！,False
+d2/noctia,d2/noctia/ultimate-2,やそうのページ！,,やそうのページ！,False
+d2/noctia,d2/noctia/ultimate-3,かいきげっしょく！,,かいきげっしょく！,False
+d2/noctia,d2/noctia/card,えいげつのきんしょ！,,えいげつのきんしょ！,False
+d2/noctia,d2-prefix/noctia/ultimate-1-alt-2,影をすり抜け、つきかげわたり。,影をすり抜け、,つきかげわたり。,True
+d2/noctia,d2-prefix/noctia/ultimate-2-alt-2,甘い夢を、やそうのページ。,甘い夢を、,やそうのページ。,True
+d2/noctia,d2-prefix/noctia/ultimate-3-alt-2,おやすみなさい、かいきげっしょく。,おやすみなさい、,かいきげっしょく。,True
+d2/aurene,d2/aurene/ultimate-1,しょこうのやり！,,しょこうのやり！,False
+d2/aurene,d2/aurene/ultimate-2,じあいのいのり！,,じあいのいのり！,False
+d2/aurene,d2/aurene/ultimate-3,せいじつのしゅくさい！,,せいじつのしゅくさい！,False
+d2/aurene,d2/aurene/card,よあけのふくいん！,,よあけのふくいん！,False
+d2/aurene,d2-prefix/aurene/ultimate-1-alt-2,光を束ねて、しょこうのやり！,光を束ねて、,しょこうのやり！,True
+d2/aurene,d2-prefix/aurene/ultimate-2-alt-2,立ち上がる力を、じあいのいのり！,立ち上がる力を、,じあいのいのり！,True
+d2/aurene,d2-prefix/aurene/ultimate-3-alt-2,希望を照らせ、せいじつのしゅくさい！,希望を照らせ、,せいじつのしゅくさい！,True
+d2/ignis,d2/ignis/ultimate-1,ゆうきのいっせん！,,ゆうきのいっせん！,False
+d2/ignis,d2/ignis/ultimate-2,ふくつのとうし！,,ふくつのとうし！,False
+d2/ignis,d2/ignis/ultimate-3,ぐれんブレイバー！,,ぐれんブレイバー！,False
+d2/ignis,d2/ignis/card,ゆうしゃのちかい！,,ゆうしゃのちかい！,False
+d2/ignis,d2-prefix/ignis/ultimate-1-alt-2,道を開け、ゆうきのいっせん！,道を開け、,ゆうきのいっせん！,True
+d2/ignis,d2-prefix/ignis/ultimate-2-alt-2,立ち続けるぜ、ふくつのとうし！,立ち続けるぜ、,ふくつのとうし！,True
+d2/ignis,d2-prefix/ignis/ultimate-3-alt-2,これが俺の、ぐれんブレイバー！,これが俺の、,ぐれんブレイバー！,True
+d2/leon,d2/leon/ultimate-1,せいたてのいちげき！,,せいたてのいちげき！,False
+d2/leon,d2/leon/ultimate-2,きしのしゅごせいやく！,,きしのしゅごせいやく！,False
+d2/leon,d2/leon/ultimate-3,にちりんエクスカリバー！,,にちりんエクスカリバー！,False
+d2/leon,d2/leon/card,あかつきのせいけん！,,あかつきのせいけん！,False
+d2/leon,d2-prefix/leon/ultimate-1-alt-2,退かぬぞ、せいたてのいちげき！,退かぬぞ、,せいたてのいちげき！,True
+d2/leon,d2-prefix/leon/ultimate-2-alt-2,我が誓いよ、きしのしゅごせいやく！,我が誓いよ、,きしのしゅごせいやく！,True
+d2/orion,d2/orion/ultimate-1,つきかげルーンざん！,,つきかげルーンざん！,False
+d2/orion,d2/orion/ultimate-2,げんえいのふみこみ！,,げんえいのふみこみ！,False
+d2/orion,d2/orion/ultimate-3,こくげつエクリプス！,,こくげつエクリプス！,False
+d2/orion,d2/orion/card,まけんのかくせい！,,まけんのかくせい！,False
+d2/orion,d2-prefix/orion/ultimate-1-alt-2,影を刻め、つきかげルーンざん！,影を刻め、,つきかげルーンざん！,True
+d2/orion,d2-prefix/orion/ultimate-2-alt-2,隙を穿つ、げんえいのふみこみ。,隙を穿つ、,げんえいのふみこみ。,True
+d2/orion,d2-prefix/orion/ultimate-3-alt-2,終わらせる、こくげつエクリプス。,終わらせる、,こくげつエクリプス。,True
+d2/leif,d2/leif/ultimate-1,しっぷうのや！,,しっぷうのや！,False
+d2/leif,d2/leif/ultimate-2,もりのみちしるべ！,,もりのみちしるべ！,False
+d2/leif,d2/leif/ultimate-3,せんようのりゅうせいう！,,せんようのりゅうせいう！,False
+d2/leif,d2/leif/card,せいれいおうのいっし！,,せいれいおうのいっし！,False
+d2/leif,d2-prefix/leif/ultimate-1-alt-2,風をつかめ、しっぷうのや！,風をつかめ、,しっぷうのや！,True
+d2/leif,d2-prefix/leif/ultimate-2-alt-2,こっちだよ、もりのみちしるべ！,こっちだよ、,もりのみちしるべ！,True
+d2/leif,d2-prefix/leif/ultimate-3-alt-2,空いっぱいに、せんようのりゅうせいう！,空いっぱいに、,せんようのりゅうせいう！,True

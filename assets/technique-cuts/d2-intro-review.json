@@ -1,0 +1,272 @@
+{
+  "lyria-0": {
+    "expected": "いくよ！",
+    "asr": "行くよ!",
+    "sha256": "ebc0dcb7d37aecfa48eae9baefa18d22aaa1c9bf871ca577e38dd336e1079011",
+    "duration": 1.04,
+    "peak": 0.5177373290061951,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/lyria/attack.ogg",
+    "reference_sha256": "e5c08240f5ea91a4d657d5b09f98c4effa43947efce0bada4c3275647d52a9e1"
+  },
+  "lyria-1": {
+    "expected": "ここで決める！",
+    "asr": "ここで決める!",
+    "sha256": "5fae51484d46f6e0cdcbe32ea849ec6359541f5821288f7c6ea42f3f175b7929",
+    "duration": 2.0,
+    "peak": 0.6070766448974609,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/lyria/attack.ogg",
+    "reference_sha256": "e5c08240f5ea91a4d657d5b09f98c4effa43947efce0bada4c3275647d52a9e1"
+  },
+  "lyria-2": {
+    "expected": "星よ、力を！",
+    "asr": "星よ、力を!",
+    "sha256": "7b44e224c394164c68fda452d457fbcd77535f631f351e91459b85936b6403e4",
+    "duration": 2.0,
+    "peak": 0.712112545967102,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/lyria/attack.ogg",
+    "reference_sha256": "e5c08240f5ea91a4d657d5b09f98c4effa43947efce0bada4c3275647d52a9e1"
+  },
+  "celis-0": {
+    "expected": "凍りなさい！",
+    "asr": "降りなさい",
+    "sha256": "dde5ae38a31d2f2419fac7f6bde36de93a7e8ac43968bf5f3f1c61f0697e7213",
+    "duration": 2.0,
+    "peak": 0.49159133434295654,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/celis/attack.ogg",
+    "reference_sha256": "8e363d1ae7d2f4021f12206bd7eca7c394b16fca443adfe0665f2c9021b0c091"
+  },
+  "celis-1": {
+    "expected": "狙いはここ！",
+    "asr": "狙いはここ",
+    "sha256": "0821486a6c4ed6288685b7a32607635e9049ac7a88147eb2ab36efa254108bb5",
+    "duration": 2.0,
+    "peak": 0.6394429206848145,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/celis/attack.ogg",
+    "reference_sha256": "8e363d1ae7d2f4021f12206bd7eca7c394b16fca443adfe0665f2c9021b0c091"
+  },
+  "celis-2": {
+    "expected": "静まりなさい！",
+    "asr": "静まりなさい",
+    "sha256": "c04cd918162fc6ce96472f948c66aa49c581e08559898c6b7ea44f579d864cc7",
+    "duration": 2.0,
+    "peak": 0.5414841771125793,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/celis/attack.ogg",
+    "reference_sha256": "8e363d1ae7d2f4021f12206bd7eca7c394b16fca443adfe0665f2c9021b0c091"
+  },
+  "flora-0": {
+    "expected": "いくよ！",
+    "asr": "はい、行くよー",
+    "sha256": "c38be62699a4fed30c504c79f210d2f06d62927bbf9e70e87c66ff34f8f5bda5",
+    "duration": 1.6,
+    "peak": 0.4402068555355072,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/flora/attack.ogg",
+    "reference_sha256": "0c27de9e9b37f781a30ee69b5ae4a5c69948e1240965267523f59d15cfac154d"
+  },
+  "flora-1": {
+    "expected": "風をつかんで！",
+    "asr": "風をつかんでー!",
+    "sha256": "ad8c8722a5c103f7920105b6c43ed7572130388accbeffa28d0d5c4758cb8b91",
+    "duration": 2.0,
+    "peak": 0.4917580783367157,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/flora/attack.ogg",
+    "reference_sha256": "0c27de9e9b37f781a30ee69b5ae4a5c69948e1240965267523f59d15cfac154d"
+  },
+  "flora-2": {
+    "expected": "みんなのために！",
+    "asr": "みんなのために",
+    "sha256": "9cd53365021d8ae2c6ec235258363461149f17a34df145b369e748c6ce6d8143",
+    "duration": 2.0,
+    "peak": 0.5700134634971619,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/flora/attack.ogg",
+    "reference_sha256": "0c27de9e9b37f781a30ee69b5ae4a5c69948e1240965267523f59d15cfac154d"
+  },
+  "noctia-0": {
+    "expected": "見せてあげる。",
+    "asr": "みせてあげる",
+    "sha256": "27e852914126c0b40033a9d3552e7a8ae7bce71c838dd329629399eca7654e33",
+    "duration": 2.0,
+    "peak": 0.6186891198158264,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/noctia/attack.ogg",
+    "reference_sha256": "074402406f6d0a5e324c7b8269d8b32db1e5da18cac8fe45a8c3f648c27f15ee"
+  },
+  "noctia-1": {
+    "expected": "おやすみ。",
+    "asr": "おやすみ",
+    "sha256": "cbbbfdb2f5f5dd0131b23829884e1b32cf4396c6cf41ef878036d55f1b06fb7b",
+    "duration": 2.0,
+    "peak": 0.5008023381233215,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/noctia/attack.ogg",
+    "reference_sha256": "074402406f6d0a5e324c7b8269d8b32db1e5da18cac8fe45a8c3f648c27f15ee"
+  },
+  "noctia-2": {
+    "expected": "逃がさないわ。",
+    "asr": "逃がさないわ",
+    "sha256": "b2c8a63d1cd92aea5afc4496e3154c504d48f179d684a7a5728ae28d2b6f5a6c",
+    "duration": 2.0,
+    "peak": 0.6925371289253235,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/noctia/attack.ogg",
+    "reference_sha256": "074402406f6d0a5e324c7b8269d8b32db1e5da18cac8fe45a8c3f648c27f15ee"
+  },
+  "aurene-0": {
+    "expected": "光よ！",
+    "asr": "光を",
+    "sha256": "837ee12af50458ced73f040c04ee15fb9f25d5f40669e4ea920e36d822f3adb4",
+    "duration": 1.6,
+    "peak": 0.5178864002227783,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/aurene/attack.ogg",
+    "reference_sha256": "16cc7d8c76c92cae5d8c2647644fa02830e534f66f967d7ae9e8a07f4dcd822f"
+  },
+  "aurene-1": {
+    "expected": "祈りを力に！",
+    "asr": "祈りを力に",
+    "sha256": "008b9928ccb801ff7ddfdbde2511f707fcdabcc359c81327f5e19ea547a74856",
+    "duration": 2.0,
+    "peak": 0.5442277789115906,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/aurene/attack.ogg",
+    "reference_sha256": "16cc7d8c76c92cae5d8c2647644fa02830e534f66f967d7ae9e8a07f4dcd822f"
+  },
+  "aurene-2": {
+    "expected": "希望を照らして！",
+    "asr": "希望を照らして",
+    "sha256": "e6d66d51bab7bb54e7cacc038baa7e4b84e1ceec2501d1641cc22ed34c3dce05",
+    "duration": 2.0,
+    "peak": 0.5465973019599915,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/aurene/attack.ogg",
+    "reference_sha256": "16cc7d8c76c92cae5d8c2647644fa02830e534f66f967d7ae9e8a07f4dcd822f"
+  },
+  "ignis-0": {
+    "expected": "いくぜ！",
+    "asr": "行くぜー!",
+    "sha256": "fc65d32295b7b6dc1d8cda6307ece8a8d2cf4d6c96a2bb803d693f19db92b928",
+    "duration": 1.6,
+    "peak": 0.5091463327407837,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/ignis/attack.ogg",
+    "reference_sha256": "21bb8b677fd0612f3ea2c8c9d2f5f9611e75e89135ac451b736074d5ed620829"
+  },
+  "ignis-1": {
+    "expected": "燃え上がれ！",
+    "asr": "燃え上がれ!",
+    "sha256": "9e677ad318340c0e176efbea658c97a1821724a96cc822571b92b141506e36c0",
+    "duration": 2.0,
+    "peak": 0.5667029619216919,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/ignis/attack.ogg",
+    "reference_sha256": "21bb8b677fd0612f3ea2c8c9d2f5f9611e75e89135ac451b736074d5ed620829"
+  },
+  "ignis-2": {
+    "expected": "ここで決める！",
+    "asr": "ここで決める!",
+    "sha256": "d7d58ca1a7c63bfe9b9a86347a03c13452913fed9378828529024b9df116df4a",
+    "duration": 2.0,
+    "peak": 0.4963400065898895,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/ignis/attack.ogg",
+    "reference_sha256": "21bb8b677fd0612f3ea2c8c9d2f5f9611e75e89135ac451b736074d5ed620829"
+  },
+  "leon-0": {
+    "expected": "参る！",
+    "asr": "マイル!",
+    "sha256": "a07c4fb562e20f13fc795f4d3245a95efc6a45e608de47ed6060906bd9eed6f5",
+    "duration": 1.6,
+    "peak": 0.5841730237007141,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/leon/attack.ogg",
+    "reference_sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93"
+  },
+  "leon-1": {
+    "expected": "勝負だ！",
+    "asr": "勝負だ",
+    "sha256": "0c971db9f0c527b5912701b45105e5bcd0b26d02d6b5fc23f550e40af2f0b19e",
+    "duration": 1.6,
+    "peak": 0.5187485814094543,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/leon/attack.ogg",
+    "reference_sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93"
+  },
+  "leon-2": {
+    "expected": "守り抜く！",
+    "asr": "守り抜く",
+    "sha256": "1369dd7a03844004d14bca64161cea7b5b043b6c0b8c2750031cd056442281d9",
+    "duration": 2.0,
+    "peak": 0.42332255840301514,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/leon/attack.ogg",
+    "reference_sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93"
+  },
+  "orion-0": {
+    "expected": "いくぞ。",
+    "asr": "行くぞ",
+    "sha256": "22195aea30bf4b3ebaad87eef7379578f3d9b15fce140da78d95d74ee1515d00",
+    "duration": 1.6,
+    "peak": 0.7737993001937866,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/orion/attack.ogg",
+    "reference_sha256": "b6628b279b36b79a4ca6b5620f7cbba6632cfd0b5543dc2788359e336b821df9"
+  },
+  "orion-1": {
+    "expected": "隙は逃さない。",
+    "asr": "好きは逃さない",
+    "sha256": "89b5d6f18c4bd6fbcb7a47d31b346e281033f5309b101519d89bb27e8a23f142",
+    "duration": 2.0,
+    "peak": 0.7747308611869812,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/orion/attack.ogg",
+    "reference_sha256": "b6628b279b36b79a4ca6b5620f7cbba6632cfd0b5543dc2788359e336b821df9"
+  },
+  "orion-2": {
+    "expected": "これで終わりだ。",
+    "asr": "これで終わりだ",
+    "sha256": "68cf132d4c8a00c8cd8f6b988fbf136eda1ffd3c425507ef6078734126a8fbb9",
+    "duration": 2.0,
+    "peak": 0.7578740119934082,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/orion/attack.ogg",
+    "reference_sha256": "b6628b279b36b79a4ca6b5620f7cbba6632cfd0b5543dc2788359e336b821df9"
+  },
+  "leif-0": {
+    "expected": "いくよ！",
+    "asr": "行くよ!",
+    "sha256": "1c2f9a02bffedfa075357d01da9cc2898d5e85a8f6099f2f990a725b0da071bd",
+    "duration": 1.6,
+    "peak": 0.5776993036270142,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/leif/attack.ogg",
+    "reference_sha256": "1089ccbd009a47f153195baca9bc4c73d83205959fef63cf4fba418b91a3dec4"
+  },
+  "leif-1": {
+    "expected": "狙いを定めて！",
+    "asr": "狙いを定めて",
+    "sha256": "49c8ffc9b23de8a2d68444545583607a87444b3fe664658fcbe9c03fbe93d7ba",
+    "duration": 2.0,
+    "peak": 0.534420371055603,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/leif/attack.ogg",
+    "reference_sha256": "1089ccbd009a47f153195baca9bc4c73d83205959fef63cf4fba418b91a3dec4"
+  },
+  "leif-2": {
+    "expected": "風に乗せて！",
+    "asr": "風に乗せて",
+    "sha256": "2757d297f83988b40dcc689ab4145540d17c55d73088fdc04e2a531083c3d70e",
+    "duration": 2.0,
+    "peak": 0.7409589290618896,
+    "clipped_fraction": 0.0,
+    "reference": "public/sfx/dungeons2-voices/leif/attack.ogg",
+    "reference_sha256": "1089ccbd009a47f153195baca9bc4c73d83205959fef63cf4fba418b91a3dec4"
+  }
+}

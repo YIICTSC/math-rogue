@@ -1,3 +1,4 @@
+import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
 import {TrapControls} from './school-dungeon/TrapControls';
 import {FacingButton} from './school-dungeon/FacingButton';
@@ -2086,9 +2087,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       setTimeout(() => setPlayer(p => ({ ...p, offset: { x: 0, y: 0 } })), 100);
   };
 
-  const attackEnemy = (target: Entity) => {
+  const attackEnemy = (target: Entity, techniqueId?:string) => {
       if(target.hp<=0)return;
-      const martial=adventure.series===1&&target.enemyType!=='SHOPKEEPER'?adventure.practiceMartialAttack():null;
+      const martial=adventure.series===1&&target.enemyType!=='SHOPKEEPER'?adventure.practiceMartialAttack(techniqueId):null;
+      if(techniqueId&&!martial)return false;
       const technique=martial?.technique;
       const weaponKind=equippedWeaponKind(player.equipment?.weapon);
 
@@ -2099,7 +2101,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if(adventure.series===1)addVisualEffect('MARTIAL',target.x,target.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
       else addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
       if(technique){
-          studentCue.technique(technique.id);
+          studentCue.technique(technique.id,technique.tier===5?'finisher':'normal');
           addLog(adventure.text(technique.ja,technique.en),'#ffe396');
           if(technique.pattern==='burst'||technique.pattern==='sweep')for(const enemy of enemies){
               if(enemy.id===target.id||enemy.hp<=0||enemy.enemyType==='SHOPKEEPER')continue;
@@ -2136,7 +2138,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       }
 
       let newEnemies = [...enemies];
-      targets.forEach(t => {
+      targets.filter((t,i)=>targets.findIndex(e=>e.id===t.id)===i).forEach(t => {
           if(adventure.series===1&&t.id!==target.id)addVisualEffect('MARTIAL',t.x,t.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
           let dmg = Math.max(1, Math.floor(player.attack*(technique?.power||1)) - Math.floor(t.defense*(technique?.pattern==='pierce'?.5:1))); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2;
           
@@ -2180,9 +2182,20 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       adventure.recoverLoot(newEnemies.filter(e => e.hp > 0));
       setEnemies(newEnemies.filter(e => e.hp > 0));
       if(technique)audioService.playAttackEffectSound(deads.length>0?'finisher':'slash');else studentCue('attack',deads.length>0);
+      return true;
   };
 
   // ... LONG PRESS LOGIC ...
+  const useMartialTechnique=(id:string)=>{
+      if(menuOpen||shopState.active||gameOver||gameClear||adventure.abilityBlocked||adventure.state.place!=='DUNGEON'||adventure.state.mode==='PUZZLE'||adventure.isDojoActive()||(adventure.panel&&adventure.panel!=='TECHNIQUES')||(player.status.sleep||0)>0||(player.status.frozen||0)>0)return false;
+      const kind=equippedWeaponKind(player.equipment?.weapon),range=kind==='bow'?6:1;
+      let target:Entity|undefined;
+      for(let n=1;n<=range;n++){const x=player.x+player.dir.x*n,y=player.y+player.dir.y*n;if(!map[y]?.[x]||map[y][x]==='WALL')break;const e=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0);if(e){if(e.enemyType!=='SHOPKEEPER')target=e;break;}}
+      if(!target)return false;
+      if(adventure.panel==='TECHNIQUES')adventure.closeTechniquePanel();
+      if(!attackEnemy(target,id))return false;
+      processTurn(player.x,player.y);return true;
+  };
   const handlePressStart = () => {
       if (adventure.isDojoActive()) return;
       if (adventure.blocksInput() || menuOpen || shopState.active || gameOver || gameClear) return;
@@ -3395,11 +3408,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                 </div>
             </div>
 
-            <div className="dungeon-log-panel w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                {logs.slice(-4).map((l) => (
-                    <div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{tr(l.message)}</div>
-                ))}
-            </div>
+            <TechniqueBar adventure={adventure} weapon={player.equipment?.weapon} logs={logs.map(l=>tr(l.message))} blocked={menuOpen||shopState.active||gameOver||gameClear} onUse={useMartialTechnique}/>
+
         </div>
 
         {/* --- RIGHT: BUTTONS (PC/Tablet Landscape & Desktop) --- */}

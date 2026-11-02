@@ -1970,7 +1970,7 @@ const KochoShowdown: React.FC<{
         let currentState = { ...stateRef.current };
 
         // Execute all player cards
-        for (const card of queue) {
+        for (const [cardIndex,card] of queue.entries()) {
             if (currentState.status === 'GAME_OVER') break;
             
             activeActionCardNameRef.current = card.name;
@@ -1978,7 +1978,7 @@ const KochoShowdown: React.FC<{
             const voiceClip = kochoSkillVoice(currentState.heroId, card.name);
             // Voice playback follows the action without extending its animation lock.
             if (voiceClip && !debugPreview && !isUiPreview && voiceMountedRef.current) {
-                void audioService.playKochoVoice(currentState.heroId, voiceClip, 3);
+                void audioService.playKochoVoice(currentState.heroId, voiceClip, 3,queue.length>1?(cardIndex===0?'combo-first':'combo'):'normal');
             }
             addLog(`${card.name}！`);
             if (superMove) for (const offset of [-1, 0, 1]) addVfx('AFTERIMAGE', Math.max(0, Math.min(6, currentState.player.pos + offset)), {sourceCardName: card.name, color: 'super', durationMs: 480, direction: currentState.player.facing});

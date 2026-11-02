@@ -1,0 +1,23 @@
+{
+ "d1/elementary-caretaker/spear-4":{"nameUnavailable":"Original ASR contains only the prelude; no complete skill name could be isolated"},
+ "d1/elementary-dodgeball/axe-1":{"nameUnavailable":"Original words do not establish a safe skill-name boundary"},
+ "d1/elementary-chef/spear-1":{"nameUnavailable":"Original ASR contains only the prelude; no complete skill name could be isolated"},
+ "d1/high-school-warrior/spear-4":{"boundary":0.85},
+ "d1/high-school-bard/fist-1":{"boundary":1.12},
+ "d1/high-school-bard/chakram-3":{"boundary":0.95},
+ "d1/high-school-chef/sword-1":{"boundary":1.35},
+ "d1/high-school-chef/greatsword-1":{"boundary":1.19},
+ "d1/high-school-chef/rapier-4":{"boundary":1.26},
+ "d1/high-school-chef/axe-1":{"boundary":1.23},
+ "d1/high-school-chef/axe-2":{"boundary":1.46},
+ "d1/high-school-chef/staff-1":{"boundary":1.19},
+ "d1/high-school-chef/hammer-2":{"boundary":1.32},
+ "d1/high-school-chef/whip-3":{"boundary":1.45},
+ "d1/high-school-chef/chakram-2":{"boundary":1.36},
+ "d1/magic-sera/axe-3":{"nameUnavailable":"No complete named technique could be verified after the prelude"},
+ "kocho/rebel/skill-c78c14413f67":{"boundary":1.27},
+ "kocho/rebel/skill-204a1c58a810":{"boundary":0.69},
+ "kocho/rebel/skill-415e94552112":{"boundary":0.91},
+ "kocho/rebel/skill-e98c8c07e96c":{"boundary":0.72},
+ "kocho/rebel/skill-9694950e6e20":{"boundary":0.86}
+}

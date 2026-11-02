@@ -1,0 +1,70 @@
+[
+  {
+    "key": "leon-1",
+    "clip": {
+      "actor": "d2/leon",
+      "text": "我が誓いに！",
+      "path": "sfx/technique-cuts/d2-leon-intro-1.ogg",
+      "duration": 2.0,
+      "sha256": "5f5161e145b0b58e4baf3c303e93fee821ac003168fd056174bb4a27f5cec8ac",
+      "reference": "public/sfx/dungeons2-voices/leon/attack.ogg",
+      "reference_sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93",
+      "caption": "成人に近い若い男性。低く豊かなバリトン、胸に響く堂々とした声。落ち着いた威厳と誠実さ、頼れる聖騎士。ゆっくりすぎず、はっきり力強く。 参照音声と同じ人物の声色と年齢感を維持。戦闘の技を繰り出す短く明瞭な掛け声。指定された言葉だけを一度、力強く発声する。背景音・音楽なし。",
+      "seed": 158607,
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "code_revision": "59be938c99d48b5653ca5aa3fdd0cddaa56940e5",
+      "device": "cpu",
+      "codec_device": "cpu",
+      "steps": 4
+    },
+    "small_asr": "わがしかい",
+    "medium_asr": "我が視界に",
+    "decision": "Replace with a clearer character-appropriate shout using the same reference voice. Do not publish this take."
+  },
+  {
+    "key": "leon-2",
+    "clip": {
+      "actor": "d2/leon",
+      "text": "退かぬぞ！",
+      "path": "sfx/technique-cuts/d2-leon-intro-2.ogg",
+      "duration": 2.0,
+      "sha256": "16eba35a967fbc360cbff484dabf70ecaa0f3e81b7fe08ff200ecacdf2cd97ae",
+      "reference": "public/sfx/dungeons2-voices/leon/attack.ogg",
+      "reference_sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93",
+      "caption": "成人に近い若い男性。低く豊かなバリトン、胸に響く堂々とした声。落ち着いた威厳と誠実さ、頼れる聖騎士。ゆっくりすぎず、はっきり力強く。 参照音声と同じ人物の声色と年齢感を維持。戦闘の技を繰り出す短く明瞭な掛け声。指定された言葉だけを一度、力強く発声する。背景音・音楽なし。",
+      "seed": 158608,
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "code_revision": "59be938c99d48b5653ca5aa3fdd0cddaa56940e5",
+      "device": "cpu",
+      "codec_device": "cpu",
+      "steps": 4
+    },
+    "small_asr": "カード!トッツ!",
+    "medium_asr": "さぁ、どうぞ!",
+    "decision": "Replace with a clearer character-appropriate shout using the same reference voice. Do not publish this take."
+  },
+  {
+    "key": "leon-1",
+    "clip": {
+      "actor": "d2/leon",
+      "text": "覚悟せよ！",
+      "path": "sfx/technique-cuts/d2-leon-intro-1.ogg",
+      "duration": 2.0,
+      "sha256": "c0485de17d880ff1a20fb9c53fbc72508c694868a1cc53c4da0256904fb530da",
+      "reference": "public/sfx/dungeons2-voices/leon/attack.ogg",
+      "reference_sha256": "a37e743d3e4b9d8708aff8727639a499b57cdbb704213f5c7fa1d77124e56a93",
+      "caption": "成人に近い若い男性。低く豊かなバリトン、胸に響く堂々とした声。落ち着いた威厳と誠実さ、頼れる聖騎士。ゆっくりすぎず、はっきり力強く。 参照音声と同じ人物の声色と年齢感を維持。戦闘の技を繰り出す短く明瞭な掛け声。指定された言葉だけを一度、力強く発声する。背景音・音楽なし。",
+      "seed": 168607,
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "model_revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "code_revision": "59be938c99d48b5653ca5aa3fdd0cddaa56940e5",
+      "device": "cpu",
+      "codec_device": "cpu",
+      "steps": 4
+    },
+    "small_asr": "覚悟しよう",
+    "decision": "Replace with shorter, unambiguous shout 勝負だ！ instead of publishing a potentially changed imperative."
+  }
+]
