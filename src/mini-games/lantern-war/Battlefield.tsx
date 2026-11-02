@@ -6,7 +6,9 @@ import {battleVoice,stopLanternVoice,beginLanternBattleVoice}from'./voices';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import {useContext} from 'react';
 import {LanternLanguage} from './language';
-import React,{useEffect,useMemo,useState} from 'react';
+import React,{useEffect,useMemo,useState,useRef} from 'react';
+import {audioService} from '../../services/audioService';
+import {battleSound} from './battleSounds';
 import {assetUrl} from '../../utils/assetPaths';
 import {MapArt,BattleArt,cutin,EndlessCutin} from './art';
 import {MapScenery,battleBackground} from './MapScenery';
@@ -48,6 +50,16 @@ function CombatStage({s,update}:{s:Campaign;update:Update}){
  const a=s.battle!.squads.find(q=>q.id===e.ally)!,z=s.battle!.squads.find(q=>q.id===e.enemy)!;
  useEffect(()=>{setAge(0);if(finished)return;const start=performance.now(),timer=setInterval(()=>setAge((performance.now()-start)*speed),50);const advance=setTimeout(()=>update(s=>{if(s.battle?.encounter)s.battle.encounter.index++;}),1600/speed);return()=>{clearInterval(timer);clearTimeout(advance);};},[e.index,speed,finished]);
  const actor=event?.actorHero||a.members[0].hero,target=event?.targetHero||z.members[0].hero;
+ const sounded=useRef<number>(-1);
+ const soundEvent=useRef(e.index);
+ useEffect(()=>{
+  if(soundEvent.current!==e.index){soundEvent.current=e.index;return;}
+  if(finished||!event||age<650||sounded.current===e.index)return;
+  sounded.current=e.index;
+  const weapon=[...a.members,...z.members].find(f=>f.uid===event.actor)?.weapon||'sword';
+  const cue=battleSound(event,weapon);
+  if('attack' in cue)audioService.playAttackEffectSound(cue.attack);else audioService.playStatusEffectSound(cue.status);
+ },[age,e.index,finished,event,a,z]);
  useEffect(()=>{beginLanternBattleVoice();return stopLanternVoice;},[]);
  useEffect(()=>{const key=`${s.chapter}:${s.battle!.time}:${e.ally}:${e.enemy}:${e.index}`;if(finished){battleVoice(a.members.find(f=>f.hp>0)?.hero||a.members[0].hero,e.winner==='ally'?'win':'defeat',key);return;}if(!event)return;if(event.actorHero.startsWith('enemy-')){battleVoice(event.targetHero,event.hp<=0?'defeat':'damage',key);return;}const lead=a.members.find(f=>f.hp>0&&SUPPORTS.some(p=>p.a===actor&&p.b===f.hero||p.b===actor&&p.a===f.hero))?.hero||a.members.find(f=>f.hero!==actor)?.hero;if(event.passive&&event.name.startsWith('援護'))battleVoice(actor,'support',key,lead);else if(event.heal)battleVoice(event.targetHero,'heal',key);else battleVoice(actor,event.skill?(event.name===heroById(actor).skill?'ultimate':'technique'):'attack',key,undefined,event.name);},[e.index,finished]);
 
