@@ -20,5 +20,8 @@ export interface Campaign{endless?:EndlessProgress;version:1;worldLocation?:stri
 export type EndlessObjective=Objective|'beacons'|'relic';
 export type InstallationKind='wall'|'cannon'|'sniper'|'beacon'|'mine'|'bridge'|'relic'|'spring';
 export interface Installation{id:string;kind:InstallationKind;x:number;y:number;hp:number;maxHp:number;team:'ally'|'enemy'|'neutral';cooldown:number;}
-export interface EndlessMission{depth:number;title:string;theme:number;objective:EndlessObjective;weather:'clear'|'rain'|'fog'|'heat'|'storm';hold:number;installations:Installation[];recruit:string;story:Line[];reward:number;reinforcements:number;}
-export interface EndlessProgress{active:boolean;route?:number;blessings?:{attack:number;guard:number;vitality:number};seed:number;depth:number;wins:number;best:number;history:string[];}
+export type VoyageRegion='emerald'|'glacier'|'ember'|'starlit';
+export type VoyageKind='island'|'coast'|'naval'|'fortress'|'ruins'|'mainland';
+export interface VoyageSite{id:string;depth:number;page:number;step:number;route:number;region:VoyageRegion;kind:VoyageKind;x:number;y:number;}
+export interface EndlessMission{site?:VoyageSite;depth:number;title:string;theme:number;objective:EndlessObjective;weather:'clear'|'rain'|'fog'|'heat'|'storm';hold:number;installations:Installation[];recruit:string;story:Line[];reward:number;reinforcements:number;}
+export interface EndlessProgress{plottedDepth?:number;chartedRoutes?:{depth:number;route:number}[];active:boolean;route?:number;blessings?:{attack:number;guard:number;vitality:number};seed:number;depth:number;wins:number;best:number;history:string[];}

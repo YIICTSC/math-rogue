@@ -1,0 +1,267 @@
+{
+  "generator": "ImageGen",
+  "references": [
+    "expedition-map.webp",
+    "terrain-meadow.webp",
+    "map-props.webp",
+    "battle-bg-harbor.webp"
+  ],
+  "regions": [
+    "emerald",
+    "glacier",
+    "ember",
+    "starlit"
+  ],
+  "terrainCells": [
+    "ground",
+    "alternate-ground",
+    "gravel",
+    "paving",
+    "forest-floor",
+    "rock",
+    "deep-water",
+    "shallow-water",
+    "masonry",
+    "ruined-paving",
+    "deck",
+    "quay",
+    "sand",
+    "regional-ground",
+    "ancient-stone",
+    "portal"
+  ],
+  "propCells": [
+    "broad-tree",
+    "conifer",
+    "coastal-tree",
+    "crystal-tree",
+    "boulders",
+    "outcrop",
+    "cliff",
+    "mountain",
+    "watchtower",
+    "gate",
+    "camp",
+    "supplies",
+    "column",
+    "lantern",
+    "flowers",
+    "reeds"
+  ],
+  "records": [
+    {
+      "name": "chart-emerald",
+      "source": "/workspace/generated_images/exec-f1f9924e-df1c-4601-840c-7d906630966f.png",
+      "output": "public/sprites/lantern-war/voyage/chart-emerald.webp",
+      "width": 1024,
+      "height": 2048,
+      "alpha": false,
+      "sha256": "89227c025e452d2187f4b70e4d22987cc72f59caac3f8ebd13e7485d2a181db9"
+    },
+    {
+      "name": "battle-emerald-land",
+      "source": "/workspace/generated_images/exec-54b2b6ac-b14e-44ff-a31b-b51cf7deba13.png",
+      "output": "public/sprites/lantern-war/voyage/battle-emerald-land.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "bd7c1ea3fd4a452ce67b6748694bd141eab1ec8b0d7b9d5aa24f397348ee4ae4"
+    },
+    {
+      "name": "battle-emerald-naval",
+      "source": "/workspace/generated_images/exec-43000074-7670-4c6c-add8-4d8a0a85558d.png",
+      "output": "public/sprites/lantern-war/voyage/battle-emerald-naval.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "3d92f20597c37f969e19eca67208a9969753c167d12cb63199ad0b442d712606"
+    },
+    {
+      "name": "chart-glacier",
+      "source": "/workspace/generated_images/exec-8f598e2c-b85f-4f23-ad09-002d14527e0b.png",
+      "output": "public/sprites/lantern-war/voyage/chart-glacier.webp",
+      "width": 1024,
+      "height": 2048,
+      "alpha": false,
+      "sha256": "99db01aafdbf7a6a55315479beb92c865cceebc3d509acd74d469aeb22c9a9ba"
+    },
+    {
+      "name": "battle-glacier-land",
+      "source": "/workspace/generated_images/exec-719d649d-db81-48fd-9963-f78b67f44301.png",
+      "output": "public/sprites/lantern-war/voyage/battle-glacier-land.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "635e8856687240307dad0750b7725243612a3e62b4f6f30ca8b240a23f0c76ed"
+    },
+    {
+      "name": "battle-glacier-naval",
+      "source": "/workspace/generated_images/exec-953ef958-919c-4501-ade1-b5b55d609e5f.png",
+      "output": "public/sprites/lantern-war/voyage/battle-glacier-naval.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "0049ba5e1fb21003de7754cf4403055ed8fad9a86fcc5422e846fcd3842b0d25"
+    },
+    {
+      "name": "chart-ember",
+      "source": "/workspace/generated_images/exec-24afec24-9c2f-43ed-bf5d-86f3777923b2.png",
+      "output": "public/sprites/lantern-war/voyage/chart-ember.webp",
+      "width": 1024,
+      "height": 2048,
+      "alpha": false,
+      "sha256": "049d0f706c502338763f47005217b604c5a6e40f501838b75ccbfca4d8c0aff3"
+    },
+    {
+      "name": "battle-ember-land",
+      "source": "/workspace/generated_images/exec-0ad9d012-9463-464f-82e3-809e205bbdab.png",
+      "output": "public/sprites/lantern-war/voyage/battle-ember-land.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "8192c56fdd87546c97e54c7fc714898cded8e6261d15f4993bf6223ebfcf6ec8"
+    },
+    {
+      "name": "battle-ember-naval",
+      "source": "/workspace/generated_images/exec-34e8c834-2ae2-4979-bea9-017f328676dc.png",
+      "output": "public/sprites/lantern-war/voyage/battle-ember-naval.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "479df2015c8ffa043ee670135b0e0c34d7953d77d68baa76ac398bbf66e0998a",
+      "replacedSource": "/workspace/generated_images/exec-0309e0c9-e0e5-4975-b973-cfca36f60823.png"
+    },
+    {
+      "name": "chart-starlit",
+      "source": "/workspace/generated_images/exec-2159a658-6f58-4c28-b17c-c2138fefa184.png",
+      "output": "public/sprites/lantern-war/voyage/chart-starlit.webp",
+      "width": 1024,
+      "height": 2048,
+      "alpha": false,
+      "sha256": "ffc838b476247124649ff3d22b0aef382eb076b6e26f806c31180f36cf1cef50"
+    },
+    {
+      "name": "battle-starlit-land",
+      "source": "/workspace/generated_images/exec-aaba5889-ec27-480a-a7ea-28a09a4b9af7.png",
+      "output": "public/sprites/lantern-war/voyage/battle-starlit-land.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "7442abc4016f2a7bf15fab8e37d3c87bcc9d6aef58108e2f9099dae7297ecf10"
+    },
+    {
+      "name": "battle-starlit-naval",
+      "source": "/workspace/generated_images/exec-f8e9c9d0-838f-41b7-8561-00cd1d033a43.png",
+      "output": "public/sprites/lantern-war/voyage/battle-starlit-naval.webp",
+      "width": 1600,
+      "height": 900,
+      "alpha": false,
+      "sha256": "f078050039b496cc8699dc326c87dd1606cd777eb32071aa2dc3d940fdd5eac4",
+      "replacedSource": "/workspace/generated_images/exec-6eb3d8f8-8fb3-49d9-b8ca-3216d5b44a24.png"
+    },
+    {
+      "name": "terrain-emerald",
+      "source": "/workspace/generated_images/exec-626de266-c84f-4dbb-8446-fdbac90c93f9.png",
+      "output": "public/sprites/lantern-war/voyage/terrain-emerald.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "974545cfd1993bfec488bac635b5bd7918f351ce650717572a77e9e928f251cb"
+    },
+    {
+      "name": "props-emerald",
+      "source": "/workspace/generated_images/exec-8da5ec0e-7601-4756-a418-cde2e3dc530b.png",
+      "output": "public/sprites/lantern-war/voyage/props-emerald.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "0b711ea818822df8baf49b5a5b54c66d41fe1f501949aa42eb2efe372128f150",
+      "normalization": "Individual 4x4 cells alpha-trimmed, fit within 216x224, baseline y238/256"
+    },
+    {
+      "name": "terrain-glacier",
+      "source": "/workspace/generated_images/exec-604b19b2-3b65-4c3c-82f6-1f656e8c43e3.png",
+      "output": "public/sprites/lantern-war/voyage/terrain-glacier.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "e09007cdd83f04a7f992bda60fc325011ae62a99c2de13c6c44fb266751d7dd5"
+    },
+    {
+      "name": "props-glacier",
+      "source": "/workspace/generated_images/exec-78ad7093-92cf-4a0b-b44e-c133d1ba7889.png",
+      "output": "public/sprites/lantern-war/voyage/props-glacier.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "771a778e64480ac55bb21f58f9b43b8a4bc5e89ae3f4f9c61e083bdeee670719",
+      "normalization": "Individual 4x4 cells alpha-trimmed, fit within 216x224, baseline y238/256"
+    },
+    {
+      "name": "terrain-ember",
+      "source": "/workspace/generated_images/exec-a99af9c4-9050-4e33-93ec-f2e5bc69ae9a.png",
+      "output": "public/sprites/lantern-war/voyage/terrain-ember.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "f390ca291422df4634a86151639bd466f5a9140936805a784e99c206fab8db39"
+    },
+    {
+      "name": "props-ember",
+      "source": "/workspace/generated_images/exec-31eeb985-ab10-437b-a130-741dcc2f9c83.png",
+      "output": "public/sprites/lantern-war/voyage/props-ember.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "a8d4c7d3235c8de4004a08273432288ca98aeb63190048db81dcd7944b8d313a",
+      "normalization": "Individual 4x4 cells alpha-trimmed, fit within 216x224, baseline y238/256"
+    },
+    {
+      "name": "terrain-starlit",
+      "source": "/workspace/generated_images/exec-336c3511-5f8f-4bbf-860f-ad863864672a.png",
+      "output": "public/sprites/lantern-war/voyage/terrain-starlit.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "695e8579b40607e6c4074cc34fd14252c3732ec9f29078aa663cd9ce7a0e3a63"
+    },
+    {
+      "name": "props-starlit",
+      "source": "/workspace/generated_images/exec-58a60ab5-87c1-47bc-ae5c-944e0e5b4231.png",
+      "output": "public/sprites/lantern-war/voyage/props-starlit.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "a11a400f1ccfda219ce4377396ea45f81fd913efd4021e73242771416127f797",
+      "normalization": "Individual 4x4 cells alpha-trimmed, fit within 216x224, baseline y238/256"
+    },
+    {
+      "name": "props-naval",
+      "source": "/workspace/generated_images/exec-8dac5791-877c-45e1-92c1-cf0537f4ca9b.png",
+      "output": "public/sprites/lantern-war/voyage/props-naval.webp",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "normalization": "Individual 4x4 cells alpha-trimmed, fit within 216x224, baseline y238/256",
+      "sha256": "e445005eea532fd0c9ec39cf70fa4202f13892c2565db479334307bf6dd09721"
+    }
+  ],
+  "navalPropCells": [
+    "mast-sail",
+    "mast-crows-nest",
+    "mast-rigging",
+    "pulley",
+    "barrels",
+    "capstan",
+    "cargo",
+    "cannons",
+    "cabin",
+    "command-door",
+    "shelter",
+    "supplies",
+    "timber",
+    "lantern",
+    "rope",
+    "lifebuoy"
+  ]
+}

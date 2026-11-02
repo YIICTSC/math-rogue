@@ -1,3 +1,4 @@
+import voyageCopy from './voyageCopy.json';
 import techniqueCopy from './techniqueCopy.json';
 import {GUIDE_ENGLISH,GUIDE_HIRAGANA} from './Tutorial';
 export const LANTERN_ENGLISH:Record<string,string>={
@@ -327,3 +328,5 @@ Object.assign(LANTERN_HIRAGANA,{"灯をつなぐ旅路":"ひをつなぐたび�
 Object.assign(LANTERN_ENGLISH,GUIDE_ENGLISH);Object.assign(LANTERN_HIRAGANA,GUIDE_HIRAGANA);
 
 Object.assign(LANTERN_ENGLISH,techniqueCopy.english);Object.assign(LANTERN_HIRAGANA,techniqueCopy.hiragana);
+
+Object.assign(LANTERN_ENGLISH,voyageCopy.english);Object.assign(LANTERN_HIRAGANA,voyageCopy.hiragana);

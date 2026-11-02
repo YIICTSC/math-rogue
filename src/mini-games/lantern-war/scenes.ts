@@ -1,3 +1,4 @@
+import {voyageBackground} from './voyage';
 import type{Campaign}from'./types';
 export type Climate='default'|'snow'|'drydock'|'canal'|'marsh';
 type Site={x:number;y:number;background:string;battleBackground?:string;climate:Climate;theme:number};
@@ -13,4 +14,4 @@ MAIN_SITES.forEach((site,i)=>{site.battleBackground=grounded[i];});
 export const SIDE_SITES:Site[]=[site(27,56,'battle-bg-bridge'),site(26,51,'story-workshop'),site(37,75,'battle-bg-meadow'),site(78,79,'battle-bg-harbor'),site(70,94,'story-ruins'),site(22,59,'battle-bg-forest'),site(94,68,'battle-bg-harbor'),site(29,39,'story-snow','snow'),site(59,41,'battle-bg-library','canal'),site(58,49,'battle-bg-forest'),site(36,43,'story-workshop'),site(57,30,'battle-bg-library'),site(60,65,'battle-bg-meadow'),site(24,23,'story-marsh','marsh'),site(37,16,'story-ruins'),site(47,27,'story-theater'),site(60,16,'scenery-0'),site(72,25,'story-camp')];
 export const mainSite=(chapter:number)=>MAIN_SITES[Math.max(0,Math.min(17,chapter))];
 export const siteForLocation=(id:string)=>id.startsWith('side-')?SIDE_SITES[Number(id.slice(5))]||MAIN_SITES[0]:mainSite(Number(id.slice(5))||0);
-export function storyBackground(s:Campaign){const scene=s.storyKind==='support'?'story-camp':s.storyKind==='side'&&s.fieldQuest?siteForLocation(s.fieldQuest).background:mainSite(s.battle?.chapter??s.chapter).background;return 'sprites/lantern-war/'+scene+'.webp';}
+export function storyBackground(s:Campaign){if(s.battle?.endless?.site&&s.storyKind!=='support')return voyageBackground(s.battle.endless.site);const scene=s.storyKind==='support'?'story-camp':s.storyKind==='side'&&s.fieldQuest?siteForLocation(s.fieldQuest).background:mainSite(s.battle?.chapter??s.chapter).background;return 'sprites/lantern-war/'+scene+'.webp';}
