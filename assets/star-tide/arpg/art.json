@@ -25,6 +25,24 @@
     "chain",
     "loot"
   ],
+  "actionOrder": [
+    "sword",
+    "ring",
+    "wand",
+    "hook",
+    "hammer",
+    "bow",
+    "shield",
+    "spear",
+    "dodge",
+    "guard",
+    "target",
+    "burst",
+    "glide",
+    "interact",
+    "journal",
+    "map"
+  ],
   "records": [
     {
       "name": "relics",
@@ -51,6 +69,19 @@
       "cell": 128,
       "output": "public/sprites/star-tide/arpg/combat-fx.webp",
       "outputSha256": "60fe3b32db9b0e159bff37d256b2ac5a024d3af197f4c4e7305d19e73f1b4831"
+    },
+    {
+      "name": "action-icons",
+      "generator": "ImageGen",
+      "source": "assets/star-tide/arpg/action-icons-imagegen-source.png",
+      "sourceSha256": "945b961e5c2aa9f514240fc0874a1d9ad075ae8a8afd9215f44ce4f425645090",
+      "grid": [
+        4,
+        4
+      ],
+      "cell": 128,
+      "output": "public/sprites/star-tide/arpg/action-icons.webp",
+      "outputSha256": "f1867d1ef580a42f0846310ff40ea58bac1daef4ce0bd6fdcc3e1058c47c6d9c"
     },
     {
       "name": "altars",

@@ -156,6 +156,8 @@ export class World {
     attackMode:AttackMode = 'normal';
     chargeHeld=false;
     chargeTime=0;
+    chargeSlot=false;
+    chargeAuto=false;
     counterWindow=0;
     perfectDodge=false;
     mechanism:MechanismState=mechanismState();
@@ -437,6 +439,7 @@ export class World {
     guarded(e: Enemy) { return Boolean(e.boss && (this.s.chapter % 4 === 0 ? e.phase % 4 < 2 : this.s.chapter % 4 === 1 ? (e.exposed || 0) <= 0 : this.s.chapter % 4 === 3 ? e.phase % 5 < 1.5 : false)); }
     equip(slot: 'a' | 'b', weapon: number) {
         if (!Number.isInteger(weapon) || !this.s.ownedTools.includes(weapon) || weapon < 0 || weapon > 7) return false;
+        this.chargeHeld=false;this.chargeTime=0;
         if (slot === 'a') this.s.weaponA = weapon; else this.s.tool = weapon;
         this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1;
         this.dirty = true;
@@ -550,8 +553,8 @@ export class World {
         this.clean();
         return true;
     }
-    beginCharge(){if(this.s.gate||this.attack>0||this.dash>0)return;this.chargeHeld=true;this.chargeTime=0;}
-    releaseCharge(){if(!this.chargeHeld)return false;const ready=this.chargeTime>=.5;this.chargeHeld=false;this.chargeTime=0;return this.swing(false,false,ready?'charged':'normal');}
+    beginCharge(tool=false,automatic=false){if(this.s.gate||this.guarding||this.attack>0&&!automatic||this.dash>0)return false;this.chargeHeld=true;this.chargeTime=0;this.chargeSlot=tool;this.chargeAuto=automatic;return true;}
+    releaseCharge(){if(!this.chargeHeld)return false;const ready=this.chargeTime>=.5;this.chargeHeld=false;this.chargeTime=0;return this.swing(this.chargeSlot,false,ready?'charged':'normal');}
     drainChannel(){for(let y=3;y<=10;y++)this.map[y][10]=5;}
     useMechanism(weapon:number){
         const info=this.mechanismInfo;if(!info||['blocks','beam','circuit','ice','balance','memory'].includes(info.kind))return;
@@ -662,7 +665,7 @@ export class World {
         for(const link of this.links)link.life-=dt;this.links=this.links.filter(link=>link.life>0);
         if(this.lootToast){this.lootToast.seconds-=dt;if(this.lootToast.seconds<=0)this.lootToast=null;}this.lastMove={x:dx,y:dy};if(this.guarding)this.guardAge+=dt;this.drive=Math.max(0,this.drive-dt);this.chainCooldown=Math.max(0,this.chainCooldown-dt);if(this.trial)this.trial.elapsed+=dt;for(const f of this.floating){f.life-=dt;f.y-=dt*.4;}this.floating=this.floating.filter(f=>f.life>0);
         this.counterWindow=Math.max(0,this.counterWindow-dt);
-        if(this.chargeHeld)this.chargeTime=Math.min(1,this.chargeTime+dt);
+        if(this.chargeHeld){this.chargeTime=Math.min(1,this.chargeTime+dt);if(this.chargeAuto&&this.chargeTime>=.5&&this.attack<=0&&this.dash<=0)this.releaseCharge();}
         this.stepMechanism(dt);
         this.s.seconds += dt;this.s.studySeconds+=dt;
         for (const p of this.fx) p.life -= dt;
