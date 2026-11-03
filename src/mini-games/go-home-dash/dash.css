@@ -135,3 +135,52 @@
  .dash-guide-overlay{padding:6px}.dash-guide-panel{padding:10px 14px}.dash-guide-panel>header{margin-bottom:6px}.dash-guide-panel h2{font-size:17px}.dash-guide-body{gap:14px}.dash-guide-body>nav{width:175px}.dash-guide-body>nav button{padding:7px;font-size:10px}.dash-guide-shot img{max-height:45vh}.dash-guide-panel>footer{margin-top:6px;padding-top:8px}.dash-guide-content h3{font-size:18px}.dash-guide-content li{font-size:11px}
 }
 .dash-shell .dash-guide-panel>header h2{font-size:clamp(15px,2.2vw,22px)!important;font-style:normal;letter-spacing:0;line-height:1.4}
+/* Rush controls stay on the edge, leaving the approaching lanes visible. */
+.dash-speed-pill{position:absolute;z-index:12;top:124px;right:20px;display:grid;grid-template-columns:auto auto;align-items:center;gap:3px 10px;padding:7px 11px;background:#082c36d9;border-radius:10px;font-size:11px;color:#c7fff0;pointer-events:none;font-variant-numeric:tabular-nums}
+.dash-speed-pill>i{grid-column:1/-1;width:112px;height:3px;background:#ffffff24;border-radius:4px;overflow:hidden}.dash-speed-pill em{display:block;height:100%;background:linear-gradient(90deg,#68dbcc,#f6db94)}.dash-speed-pill>small{grid-column:1/-1;color:#fff0b5}
+.dash-lane-controls{position:absolute;z-index:20;left:50%;bottom:113px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;color:#b9e5dc;font:10px system-ui;pointer-events:auto}
+.dash-lane-controls>button{min-width:54px;min-height:46px;border-radius:14px;background:#12383fe8;border:1px solid #91dbce;color:#f3ffdc;font-size:22px;touch-action:none}
+.dash-rush-record{font:11px/1.5 system-ui;color:#a9eede;padding:8px;text-align:center}
+@media(max-width:700px) and (min-height:481px){.dash-speed-pill{top:111px;right:12px;font-size:9px;padding:5px 8px}.dash-lane-controls{bottom:108px}.dash-lane-controls>button{min-width:58px}.dash-speed-pill>i{width:90px}}
+@media(max-height:480px){.dash-speed-pill{top:45px;right:12px;font-size:8px;padding:4px 8px}.dash-speed-pill>i{width:90px}.dash-lane-controls{bottom:10px;left:50%;gap:12px}.dash-lane-controls>button{min-height:44px;min-width:48px}.dash-lane-controls>span{font-size:8px}}
+
+.dash-lane-controls>button{display:grid;place-items:center}
+/* Full-bleed playfields. Portrait keeps the overview/close-up pair except in depth runs. */
+.dash-shell .dash-stage{position:absolute!important;inset:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;gap:0!important;overflow:hidden}
+.dash-shell .dash-stage .dash-overview{display:block!important;flex:1 1 0!important;width:100%!important;height:100%!important;max-height:none!important;aspect-ratio:auto!important;object-fit:fill!important;box-shadow:none!important}
+.dash-shell .dash-stage .dash-focus{display:none!important}
+@media(max-width:700px) and (orientation:portrait){
+ .dash-shell:not(.dash-is-depth) .dash-stage{flex-direction:column!important}
+ .dash-shell:not(.dash-is-depth) .dash-stage .dash-overview{flex:0 0 auto!important;width:100%!important;height:50vw!important;max-height:35%!important;aspect-ratio:2/1!important}
+ .dash-shell:not(.dash-is-depth) .dash-stage .dash-focus{display:block!important;flex:1 1 0!important;width:100%!important;height:0!important;min-height:0!important;max-height:none!important;aspect-ratio:auto!important;object-fit:fill!important;box-shadow:none!important}
+ .dash-shell.dash-is-depth .dash-stage .dash-overview{height:100%!important;max-height:none!important;aspect-ratio:auto!important}
+ .dash-shell.dash-is-depth .dash-stage .dash-focus{display:none!important}
+ .dash-is-depth .dash-arcade-notice{top:115px;bottom:auto}
+}
+/* Illustrated action controls share the basketball/tennis visual language. */
+.dash-action-art{display:block;flex-shrink:0;width:100%;height:100%;background-repeat:no-repeat;background-size:300% 200%;image-rendering:auto}
+.dash-shell .dash-controls{left:auto;right:max(14px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));gap:10px;align-items:end}
+.dash-shell .dash-controls>button,.dash-shell .dash-controls>.dash-slide{position:static;display:grid;justify-items:center;align-content:start;gap:5px;min-width:82px;max-width:100px;min-height:98px;padding:0 2px;border:0;border-radius:0;background:none;box-shadow:none;font-size:11px;line-height:1.25;overflow:visible}
+.dash-controls .dash-action-face{position:relative;display:block;width:72px;height:72px;border-radius:50%;border:2px solid #b6f1dc;box-shadow:0 4px 0 #071e2c,0 0 16px #48b5bc25;background:#123242;overflow:hidden}
+.dash-controls .dash-action-art{border-radius:50%}.dash-controls .dash-jump .dash-action-face{border-color:#f8d794}.dash-controls .dash-slide .dash-action-face{border-color:#9bbdec}
+.dash-shell .dash-controls .dash-action-face small{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);display:block;font:7px/1.2 system-ui;white-space:nowrap;padding:2px 4px;border-radius:4px;background:#061d2cdd;color:#f4f9e1}
+.dash-controls button>strong{display:block;max-width:90px;min-height:25px;font:700 11px/1.25 system-ui;text-shadow:0 2px 4px #061321}
+.dash-controls button:disabled .dash-action-face{filter:grayscale(.8) brightness(.55);box-shadow:none}.dash-controls button:active .dash-action-face{transform:translateY(3px);box-shadow:0 1px 0 #071e2c}
+.dash-shell .dash-pause{display:grid;place-items:center;min-width:38px;min-height:34px;padding:1px;background:#123543e8}.dash-pause .dash-action-art{width:27px;height:27px;border-radius:5px}
+.dash-lane-controls>button{width:64px;height:58px;padding:0;border-radius:15px;overflow:hidden;background:#123543de;box-shadow:0 3px 0 #071e2c}.dash-lane-controls .dash-action-art{width:100%;height:100%}
+.dash-lane-controls{bottom:130px}.dash-speed-pill{top:94px}.dash-route{bottom:150px}.dash-mission-line{bottom:124px}
+.dash-title-actions button,.dash-runner-footer>.dash-depart,.dash-runner-footer>.dash-menu-secondary,.dash-selection header>.dash-menu-secondary,.dash-mode-picker button,.dash-pause-overlay button{display:inline-flex;align-items:center;justify-content:center;gap:9px}
+.dash-title-actions button>svg,.dash-runner-footer button>svg,.dash-selection header button>svg{flex-shrink:0}
+.dash-pause-overlay h2{display:flex;align-items:center;justify-content:center;gap:12px}.dash-pause-overlay h2 .dash-action-art{width:42px;height:42px;border-radius:10px}
+.dash-shell [data-gamepad-initial-scope='go-home-game-over'] button{display:flex;align-items:center;justify-content:center;gap:9px}
+@media(max-width:700px) and (orientation:portrait){
+ .dash-shell .dash-controls{left:12px;right:12px;justify-content:space-between;gap:6px}.dash-shell .dash-controls>button{min-width:76px;font-size:10px}
+ .dash-shell .dash-controls .dash-action-face small{display:none}.dash-controls .dash-action-face{width:68px;height:68px}.dash-controls button>strong{font-size:10px}
+ .dash-lane-controls{bottom:121px}.dash-speed-pill{top:91px;right:12px;font-size:8px}.dash-speed-pill>i{width:80px}.dash-arcade-notice{bottom:185px;font-size:10px}.dash-is-depth .dash-arcade-notice{top:117px;bottom:auto}
+ .dash-route{bottom:164px}.dash-mission-line{bottom:144px}
+}
+@media(max-height:480px){
+ .dash-shell .dash-controls{left:auto;right:10px;bottom:8px;gap:7px}.dash-shell .dash-controls>button,.dash-shell .dash-controls>.dash-slide{min-width:57px;max-width:64px;min-height:70px;gap:3px;padding:0}.dash-controls .dash-action-face{width:49px;height:49px}.dash-controls button>strong{font-size:8px;min-height:18px}.dash-shell .dash-controls .dash-action-face small{display:none}
+ .dash-lane-controls{left:12px;bottom:9px;transform:none;gap:7px}.dash-lane-controls>button{width:49px;height:47px;min-width:49px;min-height:47px}.dash-lane-controls>span{font-size:7px}
+ .dash-speed-pill{top:45px;right:10px;font-size:7px;opacity:.9}.dash-speed-pill>i{width:74px}.dash-route{top:54px;bottom:auto;left:12px;font-size:8px;max-width:150px}.dash-route small{font-size:6px}.dash-arcade-notice{top:87px;bottom:auto;left:12px;max-width:210px;font-size:8px}.dash-mission-line{bottom:83px;left:12px;font-size:7px}
+}

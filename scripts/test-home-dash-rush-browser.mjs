@@ -1,0 +1,60 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import sharp from 'sharp';
+import {createServer} from 'vite';
+import {chromium} from 'playwright';
+const output='tmp/home-dash-rush/qa';await fs.mkdir(output,{recursive:true});let server,browser;
+try{
+ server=await createServer({configFile:false,cacheDir:'node_modules/.vite-home-rush',optimizeDeps:{noDiscovery:true,include:['react','react-dom','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},logLevel:'error',server:{host:'127.0.0.1',port:0,hmr:false,watch:null},plugins:[{name:'rush-qa',enforce:'pre',transform(code,id){
+ if(!id.endsWith('/src/components/GoHomeDash.tsx'))return;
+ return code.replace("if (gameStateRef.current === 'PLAYING') {","if (gameStateRef.current === 'PLAYING' && !(window as any).__freezeHomeRush) {").replace("if (gameStateRef.current !== 'GAME_OVER' && canvasRef.current)","if (gameStateRef.current !== 'GAME_OVER' && canvasRef.current && !(window as any).__pauseRushPaint)").replace('    const getSubjectIcon =',`    Object.assign(window,{__rush:{
+ get viewport(){return viewportRef.current;},get arcade(){return arcadeRef.current;},get player(){return playerRef.current;},get distance(){return distanceRef.current;},get hp(){return hpRef.current;},get state(){return gameStateRef.current;},get renderer(){return rushRendererRef.current;},get rear(){return rearSpriteRef.current;},get paused(){return pausedRef.current;},hero:setSelectedHero,pause:togglePause,damage:handlePlayerDamage,
+ arrange(kind='run',progress=0){flushSync(()=>{const seed=42,start=kind==='depth'?8400:2200,len=kind==='depth'?3500:1850,d=kind==='run'?0:start+len*progress-120;arcadeRef.current=createArcade(seed);arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=d;obstaclesRef.current=[];projectilesRef.current=[];enemyProjectilesRef.current=[];expRef.current=0;scoreRef.current=0;hpRef.current=3;setHp(3);pausedRef.current=false;setPaused(false);const p=playerRef.current;Object.assign(p,{x:120,y:floorAt(seed,d+120),vy:0,isJumping:false,isFalling:false,flying:false,invulFrame:0,dashFrames:0,jumpCount:0,expMult:0,barrier:false,speedBoost:1,shootingRate:0});syncRush(arcadeRef.current,p,d,p.y);setArcadeView({...arcadeRef.current,rush:{...arcadeRef.current.rush}});gameStateRef.current='PLAYING';setGameState('PLAYING');});},
+ step(n=1){flushSync(()=>{for(let i=0;i<n;i++)updateLogic();});const ctx=canvasRef.current?.getContext('2d');if(ctx)draw(ctx);},
+ foe(){obstaclesRef.current=[{id:'homing-test',type:'BIRD',x:250,y:200,vy:0,width:40,height:40,speedMult:1}];Object.assign(playerRef.current,{y:230,vy:1,isJumping:true,jumpCount:1});},
+ }});\n    const getSubjectIcon =`);
+ },configureServer(s){s.middlewares.use('/dash-rush-test',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/dash-rush-test','<html><meta name="viewport" content="width=device-width,initial-scale=1"><div id="root" style="height:100dvh"></div><script type="module" src="/scripts/fixtures/home-dash.tsx"></script>'));});}}]});
+ await server.listen();browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader-webgl']});
+ const context=await browser.newContext({viewport:{width:1280,height:800},hasTouch:true});await context.addInitScript(()=>{localStorage.setItem('home-dash-guide-v1','seen');window.__freezeHomeRush=true;window.__testPad={axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,touched:false,value:0})),id:'Rush QA',mapping:'standard',index:0,connected:true,timestamp:0};navigator.getGamepads=()=>[window.__testPad];});
+ const page=await context.newPage(),errors=[],missing=[];page.setDefaultTimeout(90000);page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR',e.message);});page.on('response',r=>{if(r.status()>=400&&r.url().includes('/sprites/go-home-dash/rush/')){missing.push(r.url());console.error('MISSING REAR',r.url());}});
+ await page.goto('http://127.0.0.1:'+server.httpServer.address().port+'/dash-rush-test?unlocked',{waitUntil:'domcontentloaded',timeout:90000});console.log('Rush fixture loaded');await page.locator('.dash-lobby').waitFor();await page.getByRole('button',{name:'主人公を選ぶ'}).click();await page.getByRole('button',{name:'START DASH'}).click();await page.waitForFunction(()=>window.__rush);
+ await page.evaluate(()=>__rush.arrange('loop',.5));await page.waitForFunction(()=>__rush.renderer?.ready);await page.evaluate(()=>__rush.step());assert.equal(await page.locator('.dash-overview').getAttribute('data-rush-renderer'),'webgl','Primary course must use the actual Blender GLB');
+ for(const [kind,progress]of [['loop',.22],['loop',.5],['loop',.76],['depth',.18]]){await page.evaluate(([k,p])=>{__rush.arrange(k,p);__rush.step();},[kind,progress]);await page.screenshot({path:`${output}/${kind}-${progress}.png`});}
+ if(process.env.DASH_RUSH_CAPTURE){for(const [kind,id]of [['loop','loop360'],['depth','skyway3d']]){await page.setViewportSize({width:960,height:600});await page.evaluate(k=>{__rush.arrange(k,.35);__rush.step();},kind);const buffer=await page.screenshot();await sharp(buffer).webp({quality:90}).toFile(`public/sprites/go-home-dash/guide/${id}.webp`);}}
+ await page.setViewportSize({width:1280,height:800});await page.evaluate(()=>__rush.arrange('depth',.1));await page.keyboard.press('ArrowLeft');await page.evaluate(()=>__rush.step(6));assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),-1);assert((await page.evaluate(()=>__rush.arcade.rush.laneX))<-.7);
+ await page.getByRole('button',{name:'右のレーンへ',exact:true}).click();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0);
+ await page.evaluate(()=>{window.__testPad.axes[0]=.9;__rush.step(2);window.__testPad.axes[0]=0;__rush.step();});assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),1,'Controller stick steers the depth course');
+ await page.keyboard.down('Space');await page.evaluate(()=>__rush.step(10));await page.keyboard.up('Space');assert((await page.evaluate(()=>__rush.player.y))<290,'Depth jump has real height');
+ await page.evaluate(()=>__rush.arrange('depth',.1));await page.keyboard.press('ArrowDown');assert((await page.evaluate(()=>__rush.arcade.slide))>0);
+ await page.evaluate(()=>__rush.arrange());await page.keyboard.down('ArrowDown');await page.evaluate(()=>__rush.step(40));assert((await page.evaluate(()=>__rush.arcade.rush.charge))>=24);await page.keyboard.up('ArrowDown');assert((await page.evaluate(()=>__rush.arcade.rush.turbo))>150,'Held Slide releases a spin dash');
+ await page.evaluate(()=>{__rush.arrange();__rush.foe();});await page.keyboard.press('Space');assert.equal(await page.evaluate(()=>__rush.arcade.rush.homings),1,'Jump chains a homing attack');
+ await page.evaluate(()=>__rush.arrange('depth',.1));await page.keyboard.press('p');const frozen=await page.evaluate(()=>__rush.distance);await page.evaluate(()=>__rush.step(60));assert.equal(await page.evaluate(()=>__rush.distance),frozen);await page.keyboard.press('p');
+ const assertLayout=async(kind,w,h)=>{
+  await page.waitForFunction(({kind,w})=>{const focus=document.querySelector('.dash-focus');return getComputedStyle(focus).display!=='none'===(w<=700&&innerHeight>innerWidth&&kind!=='depth');},{kind,w});
+  const layout=await page.evaluate(()=>{const rect=n=>{const b=n.getBoundingClientRect();return{x:b.x,y:b.y,width:b.width,height:b.height};};return{stage:rect(document.querySelector('.dash-stage')),overview:rect(document.querySelector('.dash-overview')),focus:rect(document.querySelector('.dash-focus')),twin:getComputedStyle(document.querySelector('.dash-focus')).display!=='none',overflow:document.documentElement.scrollWidth>innerWidth};});
+  const twin=w<=700&&h>w&&kind!=='depth';assert.equal(layout.twin,twin,`${kind} ${w}×${h}: only portrait depth runs use one view`);assert.equal(layout.overflow,false);
+  for(const b of [layout.stage,layout.overview]){assert(Math.abs(b.x)<1&&Math.abs(b.width-w)<1,'Playfield reaches both horizontal edges');}
+  assert(Math.abs(layout.stage.y)<1&&Math.abs(layout.stage.height-h)<1,'Stage fills the available height');
+  if(twin){assert(Math.abs(layout.focus.y-layout.overview.height)<1&&Math.abs(layout.focus.height+layout.overview.height-h)<1,'Normal portrait views meet without gaps');assert(Math.abs(layout.focus.width-w)<1);}
+  else assert(Math.abs(layout.overview.y)<1&&Math.abs(layout.overview.height-h)<1,'Single view fills the stage');
+ };
+ for(const [w,h]of [[320,568],[390,844],[430,932],[844,390],[568,320],[768,1024],[1280,800],[1920,1080]]){
+  await page.setViewportSize({width:w,height:h});
+  for(const kind of ['run','loop','depth']){
+   await page.evaluate(k=>{__rush.arrange(k,.18);__rush.step();},kind);await assertLayout(kind,w,h);
+   if(w===390||kind==='depth'&&[844,568].includes(w))await page.screenshot({path:`${output}/${kind}-${w}.png`});
+   if(kind==='depth')for(const node of await page.locator('.dash-lane-controls button').all()){const b=await node.boundingBox();assert(b&&b.x>=0&&b.y>=0&&b.x+b.width<=w+1&&b.y+b.height<=h+1,'Lane controls fit the viewport');}
+  }
+ }
+ // Cross the actual stage boundaries without arranging a new state between frames.
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>__rush.arrange('depth',-.001));await assertLayout('run',390,844);
+ await page.evaluate(()=>__rush.step(3));assert.equal(await page.evaluate(()=>__rush.arcade.rush.kind),'depth');await assertLayout('depth',390,844);
+ await page.evaluate(()=>__rush.arrange('depth',.999));await page.evaluate(()=>__rush.step(3));assert.equal(await page.evaluate(()=>__rush.arcade.rush.kind),'run');await assertLayout('run',390,844);
+ await page.setViewportSize({width:1280,height:800});const heroes=await page.evaluate(async()=>Object.keys((await import('/src/mini-games/go-home-dash/heroes.ts')).DASH_HERO_ART));
+ // Paint each verified hero explicitly; continuous software WebGL is unnecessary during image loading.
+ await page.evaluate(()=>{window.__pauseRushPaint=true;});
+ for(const id of heroes){if(process.argv.includes('--partial')){try{await fs.access('public/sprites/go-home-dash/rush/rear/'+id+'.webp');}catch{continue;}}await page.evaluate(id=>__rush.hero(id),id);try{await page.waitForFunction(id=>__rush.rear?.complete&&__rush.rear?.src.includes('/'+id+'.webp'),id,{timeout:45000});}catch(e){console.error('Rear animation failed to load',id,await page.evaluate(()=>({src:__rush.rear?.src,state:__rush.state})));throw e;}await page.evaluate(()=>{__rush.arrange('depth',.18);__rush.step(8);});}
+ await page.evaluate(()=>{window.__pauseRushPaint=false;});
+ await page.evaluate(()=>__rush.renderer.canvas.dispatchEvent(new Event('webglcontextlost',{cancelable:true})));await page.evaluate(()=>__rush.step());assert.equal(await page.locator('.dash-overview').getAttribute('data-rush-renderer'),'canvas','A lost GPU context preserves a playable course');await page.screenshot({path:`${output}/context-fallback.png`});
+ assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);console.log('PASS Blender GLB 360° lanes and depth scene, keyboard/touch/controller steering, jumping/sliding, spin charge, homing attack, frozen pause, 24 full-bleed layouts, portrait twin/single transitions, 26 rear hero animations, and context-loss fallback.');
+}finally{await browser?.close();await server?.close();}

@@ -6,12 +6,12 @@ import { chromium } from 'playwright';
 const output='tmp/home-dash-qa';await fs.mkdir(output,{recursive:true});
 let server,browser;
 try{
- server=await createServer({logLevel:'error',server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{
+ server=await createServer({configFile:false,cacheDir:'node_modules/.vite-home-dash',optimizeDeps:{noDiscovery:true,include:['react','react-dom','react-dom/client','react/jsx-runtime','react/jsx-dev-runtime','lucide-react']},logLevel:'error',server:{host:'127.0.0.1',port:0,hmr:false,watch:null},plugins:[{
   name:'home-dash-qa',enforce:'pre',
   transform(code,id){if(!id.endsWith('/src/components/GoHomeDash.tsx'))return;return code.replace('    const getSubjectIcon =',`    Object.assign(window, {__dash: {
       get routeLayers(){return routeLayersRef.current;}, get viewport(){return viewportRef.current;}, get slideImage(){return playerSlideRef.current?.src;}, get art(){return artImagesRef.current;}, get arcade(){return arcadeRef.current;}, pause:togglePause, slide:triggerSlide, init:initGame, setMode:selectRunMode, get paused(){return pausedRef.current;}, get routeArt(){return routeArtRef.current;}, get player(){return {...playerRef.current};}, get state(){return gameStateRef.current;}, get hero(){return heroRef.current;}, get seed(){return routeSeedRef.current;}, get distance(){return distanceRef.current;}, get hp(){return hpRef.current;}, get obstacles(){return obstaclesRef.current;}, get frame(){return frameCount.current;}, get shots(){return projectilesRef.current;}, get enemyShots(){return enemyProjectilesRef.current;},
       step(n=1){flushSync(()=>{for(let i=0;i<n;i++)updateLogic();});const c=canvasRef.current?.getContext('2d');if(c)draw(c);},
-      arrange(seed,distance,overrides={},obs=[]){flushSync(()=>{pausedRef.current=false;setPaused(false);arcadeRef.current=createArcade(seed,runModeRef.current,distance);arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=distance;expRef.current=0;obstaclesRef.current=obs;enemyProjectilesRef.current=[];projectilesRef.current=[];playerRef.current={...playerRef.current,x:120,y:floorAt(seed,distance+120),vy:0,isJumping:false,isFalling:false,jumpCount:0,flying:false,invulFrame:0,dashFrames:0,dashCooldown:0,...overrides};setTravelled(Math.floor(distance/10));setArcadeView({...arcadeRef.current});setRoute(routeAt(seed,distance+120).id);setFlight(false);setDashReady(true);gameStateRef.current='PLAYING';setGameState('PLAYING');});},
+      arrange(seed,distance,overrides={},obs=[]){flushSync(()=>{pausedRef.current=false;setPaused(false);arcadeRef.current=createArcade(seed,runModeRef.current,distance);arcadeRef.current.rush.enabled=false;arcadeRef.current.chunk=Infinity;routeSeedRef.current=seed;distanceRef.current=distance;expRef.current=0;obstaclesRef.current=obs;enemyProjectilesRef.current=[];projectilesRef.current=[];playerRef.current={...playerRef.current,x:120,y:floorAt(seed,distance+120),vy:0,isJumping:false,isFalling:false,jumpCount:0,flying:false,invulFrame:0,dashFrames:0,dashCooldown:0,...overrides};setTravelled(Math.floor(distance/10));setArcadeView({...arcadeRef.current});setRoute(routeAt(seed,distance+120).id);setFlight(false);setDashReady(true);gameStateRef.current='PLAYING';setGameState('PLAYING');});},
       sweep(n){const seen=new Set();let max=0;flushSync(()=>{for(let i=0;i<n;i++){updateLogic();for(const e of arcadeRef.current.entities)seen.add(e.kind);max=Math.max(max,arcadeRef.current.entities.length);}});return {seen:[...seen],max,state:gameStateRef.current};},
       fly(n){flushSync(()=>{for(let i=0;i<n;i++){
         const p=playerRef.current, gate=obstaclesRef.current.find(o=>o.type==='FLIGHT_GATE'&&o.x>p.x-60);
@@ -30,7 +30,7 @@ try{
  const context=await browser.newContext({viewport:{width:1280,height:800},hasTouch:true});
  await context.addInitScript(()=>{const buttons=Array.from({length:17},()=>({pressed:false,touched:false,value:0}));Object.assign(window,{__pad:{id:'QA Controller',index:0,connected:true,mapping:'standard',timestamp:0,axes:[0,0,0,0],buttons}});navigator.getGamepads=()=>[window.__pad];});
  if(process.env.DASH_GUIDE_CAPTURE)await context.addInitScript(()=>localStorage.setItem('home-dash-guide-v1','seen'));
- const page=await context.newPage(),errors=[];page.setDefaultTimeout(90000);page.on('pageerror',e=>errors.push(e.message));
+ const page=await context.newPage(),errors=[];page.setDefaultTimeout(90000);page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR',e.message);});
  const base=`http://127.0.0.1:${server.httpServer.address().port}/dash-test`;
  await page.goto(base);await page.locator('.dash-lobby').waitFor();
  await page.getByRole('button',{name:'主人公を選ぶ'}).click();assert.equal(await page.locator('.dash-hero:not(:disabled)').count(),2);
@@ -51,8 +51,8 @@ try{
   const dialog=page.getByRole('dialog');await dialog.waitFor();assert.equal(await page.evaluate(()=>__dash.state),'START');
   assert.equal(await page.evaluate(()=>localStorage.getItem('home-dash-guide-v1')),null);
   await page.keyboard.press('Space');assert.equal(await page.evaluate(()=>__dash.state),'START');
-  const topics=dialog.locator('nav button');assert.equal(await topics.count(),16);
-  for(let i=0;i<16;i++){await topics.nth(i).click();await dialog.locator('article img').evaluate(async img=>{await img.decode();if(img.naturalWidth!==960)throw Error('Missing guide screenshot');});assert.equal(await topics.nth(i).getAttribute('aria-current'),'step');}
+  const topics=dialog.locator('nav button');assert.equal(await topics.count(),18);
+  for(let i=0;i<18;i++){await topics.nth(i).click();await dialog.locator('article img').evaluate(async img=>{await img.decode();if(img.naturalWidth!==960)throw Error('Missing guide screenshot');});assert.equal(await topics.nth(i).getAttribute('aria-current'),'step');}
   await topics.first().click();
   for(const size of [{width:1280,height:800},{width:390,height:844},{width:844,height:390}]){
    await page.setViewportSize(size);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

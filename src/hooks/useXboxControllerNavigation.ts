@@ -1169,6 +1169,8 @@ export const useXboxControllerNavigation = () => {
               dispatchKeyboardEvent('x');
             } else if (goHomeGameplayActive && name === 'B') {
               dispatchKeyboardEvent('s');
+            } else if (goHomeGameplayActive && name.startsWith('DPAD_')) {
+              // The depth-running course reads lane changes directly from the pad.
             } else if (goHomeGameplayActive && name === 'START') {
               dispatchKeyboardEvent('p');
             } else if (goHomeGameplayActive && name === 'A') {

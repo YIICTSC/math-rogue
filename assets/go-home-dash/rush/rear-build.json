@@ -1,0 +1,1181 @@
+{
+  "generator": "ImageGen: reference-conditioned rear-view sprint strips",
+  "normalizer": "scripts/prepare-home-dash-rear.mjs",
+  "frames": 4,
+  "layout": [
+    4,
+    1
+  ],
+  "records": [
+    {
+      "id": "high-school-warrior",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-warrior.png",
+      "sourceSHA256": "4fc1a05f2a376d4510eefc70c45f92261e7507ff795c5cde5bdf8459d2546a5d",
+      "reference": "public/sprites/high-school/characters/0.webp",
+      "referenceSHA256": "6a6ac83e8bd7e698675076b92cfbd4852b8e196015b0ab8e1dafbdd13a8ead48",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-warrior.webp",
+      "sha256": "9588abfbab55d7e8554371dc2a9de2a4d8355510182cee5414014d21f58fd051",
+      "bounds": [
+        {
+          "left": 133,
+          "top": 56,
+          "width": 293,
+          "height": 612
+        },
+        {
+          "left": 133,
+          "top": 52,
+          "width": 270,
+          "height": 617
+        },
+        {
+          "left": 139,
+          "top": 57,
+          "width": 272,
+          "height": 613
+        },
+        {
+          "left": 142,
+          "top": 53,
+          "width": 267,
+          "height": 618
+        }
+      ],
+      "scale": 0.21324717285945072,
+      "baseline": 671,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-caretaker",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-caretaker.png",
+      "sourceSHA256": "4f8c8d80c4a3d18d73c829b6102e205dc8a4716395156221c8c70caef9e2cf02",
+      "reference": "public/sprites/high-school/characters/1.webp",
+      "referenceSHA256": "100f20253ade6ab92826045dafad3b212b6cd0e8a2479c4b626e7064dea6f9a8",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-caretaker.webp",
+      "sha256": "49b098d6a7e34e63bbe63627424951f373e5e513d2f00c5f770d42fed91e7760",
+      "bounds": [
+        {
+          "left": 156,
+          "top": 58,
+          "width": 228,
+          "height": 625
+        },
+        {
+          "left": 157,
+          "top": 58,
+          "width": 223,
+          "height": 588
+        },
+        {
+          "left": 160,
+          "top": 58,
+          "width": 224,
+          "height": 625
+        },
+        {
+          "left": 164,
+          "top": 58,
+          "width": 200,
+          "height": 592
+        }
+      ],
+      "scale": 0.2112,
+      "baseline": 683,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-assassin",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-assassin.png",
+      "sourceSHA256": "bd57e023028ef375213489eaa507cf998be29ba0f867b0a8850a4315ee29948f",
+      "reference": "public/sprites/high-school/characters/2.webp",
+      "referenceSHA256": "00617e686ead7b025bd8b0570e9ef446170f6ba668d6c87b9b536d61a2b71d21",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-assassin.webp",
+      "sha256": "17848a31f633a3d5c2a205226c15f986d5144173da398c51a9ed65f56395d9d8",
+      "bounds": [
+        {
+          "left": 164,
+          "top": 42,
+          "width": 269,
+          "height": 627
+        },
+        {
+          "left": 154,
+          "top": 42,
+          "width": 277,
+          "height": 627
+        },
+        {
+          "left": 154,
+          "top": 42,
+          "width": 286,
+          "height": 627
+        },
+        {
+          "left": 153,
+          "top": 42,
+          "width": 272,
+          "height": 624
+        }
+      ],
+      "scale": 0.21052631578947367,
+      "baseline": 669,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-mage",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-mage.png",
+      "sourceSHA256": "1dc0dd1e3a96c4afaa963c4bf9cb0d73cdc4f569f48d467440278fbf0e576879",
+      "reference": "public/sprites/high-school/characters/3.webp",
+      "referenceSHA256": "d999cb7abff8f9546935f59f94f345f7b4f26c37b27fb83613ce5bbb69231603",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-mage.webp",
+      "sha256": "deec0a07707b9508a47138e092489da2608e045fe5f3cc66d0745fe995699791",
+      "bounds": [
+        {
+          "left": 164,
+          "top": 44,
+          "width": 265,
+          "height": 625
+        },
+        {
+          "left": 139,
+          "top": 34,
+          "width": 281,
+          "height": 562
+        },
+        {
+          "left": 119,
+          "top": 50,
+          "width": 279,
+          "height": 621
+        },
+        {
+          "left": 113,
+          "top": 42,
+          "width": 296,
+          "height": 568
+        }
+      ],
+      "scale": 0.20722135007849293,
+      "baseline": 671,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-dodgeball",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-dodgeball.png",
+      "sourceSHA256": "5cd1ebee5ba7e915f5f76706c67a7e1fd7ba814cd70d4c0c711cf02af2f5973a",
+      "reference": "public/sprites/high-school/characters/4.webp",
+      "referenceSHA256": "32cd7cfbfbccf10d5bc3906575012f49c0a311aea60e93be67d260e55f8b26d2",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-dodgeball.webp",
+      "sha256": "6cbc825469166cb1374053373491e2068390a6be64dcd8702a874fd87ff1c6db",
+      "bounds": [
+        {
+          "left": 131,
+          "top": 36,
+          "width": 275,
+          "height": 633
+        },
+        {
+          "left": 133,
+          "top": 31,
+          "width": 274,
+          "height": 627
+        },
+        {
+          "left": 139,
+          "top": 33,
+          "width": 280,
+          "height": 636
+        },
+        {
+          "left": 133,
+          "top": 30,
+          "width": 273,
+          "height": 628
+        }
+      ],
+      "scale": 0.20657276995305165,
+      "baseline": 669,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-bard",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-bard.png",
+      "sourceSHA256": "504ad70bbce52e1478c3c5ba90ed3c45e7f3e760ffbbb7425dbecb113f5ff6fc",
+      "reference": "public/sprites/high-school/characters/5.webp",
+      "referenceSHA256": "32554e91587fcaf07ec3165228c6ef3b7bcea66651d1249fd5ab433bf20ec334",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-bard.webp",
+      "sha256": "369243ce2615d39b2aa6b943efe76cf87940b60dcfbd2e0768cead9a882473fa",
+      "bounds": [
+        {
+          "left": 150,
+          "top": 50,
+          "width": 259,
+          "height": 619
+        },
+        {
+          "left": 148,
+          "top": 48,
+          "width": 243,
+          "height": 601
+        },
+        {
+          "left": 133,
+          "top": 50,
+          "width": 256,
+          "height": 617
+        },
+        {
+          "left": 146,
+          "top": 48,
+          "width": 235,
+          "height": 619
+        }
+      ],
+      "scale": 0.21256038647342995,
+      "baseline": 669,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-librarian",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-librarian.png",
+      "sourceSHA256": "6f602b1e1bdd2804dac48974745f538e201e0786e0fa7dde0eccfbc6e91526e7",
+      "reference": "public/sprites/high-school/characters/6.webp",
+      "referenceSHA256": "2a4e42f72e76a6a1b7bec34daa323b40b30325b0ffe3cfd8ebde496d2095d75f",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-librarian.webp",
+      "sha256": "aad489f9bfb9bd37e1edaf0a6e7bc4dc27af48119245ede4cfdae851e78fe896",
+      "bounds": [
+        {
+          "left": 152,
+          "top": 52,
+          "width": 258,
+          "height": 615
+        },
+        {
+          "left": 149,
+          "top": 46,
+          "width": 251,
+          "height": 600
+        },
+        {
+          "left": 144,
+          "top": 51,
+          "width": 267,
+          "height": 615
+        },
+        {
+          "left": 139,
+          "top": 45,
+          "width": 256,
+          "height": 590
+        }
+      ],
+      "scale": 0.21221864951768488,
+      "baseline": 667,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-chef",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-chef.png",
+      "sourceSHA256": "0c32d5b6426dd6ed977d1a3c3a2ccbaab68e6e3fcc9a5fe522d114607d18893e",
+      "reference": "public/sprites/high-school/characters/7.webp",
+      "referenceSHA256": "0931b486c45c97ac3e398298acc3c5fa02d71e450a4170abf91aa4cfa3c8b7f3",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-chef.webp",
+      "sha256": "5c0c1945cf3d8996ed6c6681a8a7d633ebac0eaab3451953e4f2a3b3a20dfe5d",
+      "bounds": [
+        {
+          "left": 133,
+          "top": 27,
+          "width": 257,
+          "height": 653
+        },
+        {
+          "left": 125,
+          "top": 23,
+          "width": 279,
+          "height": 650
+        },
+        {
+          "left": 153,
+          "top": 26,
+          "width": 247,
+          "height": 654
+        },
+        {
+          "left": 133,
+          "top": 23,
+          "width": 276,
+          "height": 650
+        }
+      ],
+      "scale": 0.2009132420091324,
+      "baseline": 680,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "high-school-gardener",
+      "source": "assets/go-home-dash/rush/rear-sources/high-school-gardener.png",
+      "sourceSHA256": "938b9a020888c14871d95f1468afb333a19feaee86980650495f4a8f14d7da5f",
+      "reference": "public/sprites/high-school/characters/8.webp",
+      "referenceSHA256": "77e3340bdd403b413dc0d358d63a2c2edfd2a02f999650e6e0061012f72b3d41",
+      "output": "public/sprites/go-home-dash/rush/rear/high-school-gardener.webp",
+      "sha256": "10723b239ccc39e65968e4a03c1a7859372e466d5a041f9a8c585b2d7e3b0434",
+      "bounds": [
+        {
+          "left": 157,
+          "top": 59,
+          "width": 262,
+          "height": 632
+        },
+        {
+          "left": 152,
+          "top": 45,
+          "width": 256,
+          "height": 576
+        },
+        {
+          "left": 152,
+          "top": 56,
+          "width": 255,
+          "height": 633
+        },
+        {
+          "left": 124,
+          "top": 51,
+          "width": 268,
+          "height": 559
+        }
+      ],
+      "scale": 0.2043343653250774,
+      "baseline": 691,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-akari",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-akari.png",
+      "sourceSHA256": "ffa2acd6500e9f7cfe5c998df28932edb9a1c41bea1c7847d25762c1fe60b1e7",
+      "reference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "referenceSHA256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-akari.webp",
+      "sha256": "88529680fc4e2c241eee39cb974dc0c98c1811722448cb3636e4d156f88617b8",
+      "bounds": [
+        {
+          "left": 129,
+          "top": 40,
+          "width": 290,
+          "height": 634
+        },
+        {
+          "left": 129,
+          "top": 37,
+          "width": 299,
+          "height": 629
+        },
+        {
+          "left": 128,
+          "top": 40,
+          "width": 296,
+          "height": 634
+        },
+        {
+          "left": 125,
+          "top": 38,
+          "width": 296,
+          "height": 628
+        }
+      ],
+      "scale": 0.20722135007849293,
+      "baseline": 674,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-shizuku",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-shizuku.png",
+      "sourceSHA256": "2d1e33bd73764c7c3fa9bda43f4fab2fdc91bc3e2584cbf16070c757685edc29",
+      "reference": "public/sprites/magic/characters/heroine-02-before.webp",
+      "referenceSHA256": "eb96e13071539bf0332ff3d2635ef948fbbf637c80fbe5dc550eb4d1fec31065",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-shizuku.webp",
+      "sha256": "2f4994037b9d081bdda26458f51377403e533a6049930690969fbee19bbc15d9",
+      "bounds": [
+        {
+          "left": 142,
+          "top": 40,
+          "width": 241,
+          "height": 651
+        },
+        {
+          "left": 140,
+          "top": 32,
+          "width": 271,
+          "height": 586
+        },
+        {
+          "left": 137,
+          "top": 40,
+          "width": 265,
+          "height": 651
+        },
+        {
+          "left": 132,
+          "top": 32,
+          "width": 277,
+          "height": 583
+        }
+      ],
+      "scale": 0.20030349013657056,
+      "baseline": 691,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-hiyori",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-hiyori.png",
+      "sourceSHA256": "7a50593e409940431f8d2401d74cf50e37d96f619c8725bf410f6f5b173044b1",
+      "reference": "public/sprites/magic/characters/heroine-03-before.webp",
+      "referenceSHA256": "ff7ac4ca6fdb2f4127e8c75b51fd247ebde3195fbd7e77338a95c536b32945bc",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-hiyori.webp",
+      "sha256": "64e287efdf252c973c8932424232621261063830fafad8922bc9c1f01eb556d2",
+      "bounds": [
+        {
+          "left": 169,
+          "top": 40,
+          "width": 245,
+          "height": 648
+        },
+        {
+          "left": 179,
+          "top": 33,
+          "width": 250,
+          "height": 565
+        },
+        {
+          "left": 143,
+          "top": 40,
+          "width": 241,
+          "height": 648
+        },
+        {
+          "left": 125,
+          "top": 32,
+          "width": 225,
+          "height": 590
+        }
+      ],
+      "scale": 0.20121951219512196,
+      "baseline": 688,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-tsubasa",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-tsubasa.png",
+      "sourceSHA256": "2b86fd57576ac695cf1de9efbf62af96e6c16e1cff4b648ecbf34dde20448f8a",
+      "reference": "public/sprites/magic/characters/heroine-04-before.webp",
+      "referenceSHA256": "ea6f4e5e411bed1886e729cb37ba25b29f0b845be96ecdc9b2d2b35b94fd9267",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-tsubasa.webp",
+      "sha256": "6674f97195a63f9f2ba17209f9572272c568c565f59feaf339a3a40faa6b62c5",
+      "bounds": [
+        {
+          "left": 136,
+          "top": 28,
+          "width": 248,
+          "height": 671
+        },
+        {
+          "left": 168,
+          "top": 24,
+          "width": 223,
+          "height": 593
+        },
+        {
+          "left": 173,
+          "top": 27,
+          "width": 233,
+          "height": 672
+        },
+        {
+          "left": 166,
+          "top": 24,
+          "width": 209,
+          "height": 614
+        }
+      ],
+      "scale": 0.19555555555555557,
+      "baseline": 699,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-rei",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-rei.png",
+      "sourceSHA256": "499f5f74c13ab6d650d26c72871177eddc9584c93676f1c17792bacd0d4951fa",
+      "reference": "public/sprites/magic/characters/heroine-05-before.webp",
+      "referenceSHA256": "e97bea945a33b1853f4c1af167c0c8b22917cd4ee60672bc6979470617074910",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-rei.webp",
+      "sha256": "2c50fcbd3f1ecf0fd13fe6d274b42740ea9041e1263c9e4b6751ad0542ebf8a8",
+      "bounds": [
+        {
+          "left": 144,
+          "top": 43,
+          "width": 283,
+          "height": 645
+        },
+        {
+          "left": 106,
+          "top": 42,
+          "width": 319,
+          "height": 599
+        },
+        {
+          "left": 113,
+          "top": 51,
+          "width": 308,
+          "height": 637
+        },
+        {
+          "left": 113,
+          "top": 46,
+          "width": 303,
+          "height": 594
+        }
+      ],
+      "scale": 0.2043343653250774,
+      "baseline": 688,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-madoka",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-madoka.png",
+      "sourceSHA256": "91ff6ee498e33cb9cb165bdcbfbf037f04e1bfeb95f01d0a20a7877941ec29b6",
+      "reference": "public/sprites/magic/characters/heroine-06-before.webp",
+      "referenceSHA256": "496779c5cbe5612e417120130427161043f89da5eb468905fb1ba4f0304adf3d",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-madoka.webp",
+      "sha256": "0d546e86fe964e03b0a980a6d6a2d498bf6e1bf0a6fdd23569f99ffb1d173d30",
+      "bounds": [
+        {
+          "left": 68,
+          "top": 41,
+          "width": 403,
+          "height": 643
+        },
+        {
+          "left": 66,
+          "top": 39,
+          "width": 412,
+          "height": 579
+        },
+        {
+          "left": 75,
+          "top": 41,
+          "width": 397,
+          "height": 643
+        },
+        {
+          "left": 69,
+          "top": 39,
+          "width": 416,
+          "height": 585
+        }
+      ],
+      "scale": 0.20465116279069767,
+      "baseline": 684,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-koharu",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-koharu.png",
+      "sourceSHA256": "bfb373f1e6bceec18b948c736352e3c125fbaf791555735f4359bb6c5a742fb7",
+      "reference": "public/sprites/magic/characters/heroine-07-before.webp",
+      "referenceSHA256": "0bb257718cbeb4fb9272c2ee19c8ab5b854554a60ef5f57aebc4c62fe106df40",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-koharu.webp",
+      "sha256": "7ee90174aaa61e81ac07580c6037539c6e6846af69bef808c8310050d5599240",
+      "bounds": [
+        {
+          "left": 158,
+          "top": 62,
+          "width": 212,
+          "height": 614
+        },
+        {
+          "left": 147,
+          "top": 62,
+          "width": 255,
+          "height": 548
+        },
+        {
+          "left": 165,
+          "top": 62,
+          "width": 231,
+          "height": 614
+        },
+        {
+          "left": 161,
+          "top": 62,
+          "width": 249,
+          "height": 560
+        }
+      ],
+      "scale": 0.21498371335504887,
+      "baseline": 676,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-mirai",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-mirai.png",
+      "sourceSHA256": "ff32317029739d0c3a31514e26403f99bae73f7e5b1dbe32ea3b9d5a65dd9e13",
+      "reference": "public/sprites/magic/characters/heroine-08-before.webp",
+      "referenceSHA256": "2bcb00ef06161e18aaed288713ec824bb51e5eca01228a0d80e7d88a81f39052",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-mirai.webp",
+      "sha256": "028a516e8d2e04dbd609d6112f4f66957e1cf02d38e8f399f09a704d48bfb0db",
+      "bounds": [
+        {
+          "left": 134,
+          "top": 18,
+          "width": 262,
+          "height": 681
+        },
+        {
+          "left": 133,
+          "top": 18,
+          "width": 257,
+          "height": 614
+        },
+        {
+          "left": 150,
+          "top": 18,
+          "width": 256,
+          "height": 681
+        },
+        {
+          "left": 128,
+          "top": 19,
+          "width": 260,
+          "height": 607
+        }
+      ],
+      "scale": 0.19383259911894274,
+      "baseline": 699,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-sera",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-sera.png",
+      "sourceSHA256": "07274f999cbe0ac35ebac7247b4ef710aed15a3abf607bf5a6d64a523aab8dfd",
+      "reference": "public/sprites/magic/characters/heroine-09-before.webp",
+      "referenceSHA256": "a6d316137d5e334830139bd470cff7b08bd6f5820ba60212fa0d94d58338163a",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-sera.webp",
+      "sha256": "cfa99c445ed6b598c63399fcf0ddd41dde528810655d7024d13987ee5bf8859a",
+      "bounds": [
+        {
+          "left": 98,
+          "top": 47,
+          "width": 295,
+          "height": 634
+        },
+        {
+          "left": 109,
+          "top": 39,
+          "width": 314,
+          "height": 598
+        },
+        {
+          "left": 156,
+          "top": 45,
+          "width": 305,
+          "height": 636
+        },
+        {
+          "left": 117,
+          "top": 38,
+          "width": 317,
+          "height": 599
+        }
+      ],
+      "scale": 0.2052877138413686,
+      "baseline": 681,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-ren",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-ren.png",
+      "sourceSHA256": "5ffd328d058a55c454c9246ee06f7c17ebb743c1d6a7bfc1f29d191c73aae53d",
+      "reference": "public/sprites/magic/male-characters/ren-before.webp",
+      "referenceSHA256": "8d1c9d62f9b11e4f31398479c1baedc315b67ea30c17be64c1e4f30388eb8909",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-ren.webp",
+      "sha256": "d7c9d2f29c3aaf6982be85add7e71ce818a661b0bfd1503aeb27f1d33c10ad26",
+      "bounds": [
+        {
+          "left": 160,
+          "top": 42,
+          "width": 311,
+          "height": 643
+        },
+        {
+          "left": 152,
+          "top": 38,
+          "width": 296,
+          "height": 625
+        },
+        {
+          "left": 146,
+          "top": 40,
+          "width": 293,
+          "height": 645
+        },
+        {
+          "left": 134,
+          "top": 39,
+          "width": 298,
+          "height": 619
+        }
+      ],
+      "scale": 0.20401854714064915,
+      "baseline": 685,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-soma",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-soma.png",
+      "sourceSHA256": "d5f2210abd2f2712f7be04b18b9154f47f7ca1d4d58b24b1a42d53cb886619db",
+      "reference": "public/sprites/magic/male-characters/soma-before.webp",
+      "referenceSHA256": "f678bac2a49bf4f87c554836dec42babd494e1322389c273bc481f6bcd2ca374",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-soma.webp",
+      "sha256": "f0da21e31b46c6aa14c899ff8b3061b52c2830b74d7bb839915d22c315c52d99",
+      "bounds": [
+        {
+          "left": 124,
+          "top": 27,
+          "width": 369,
+          "height": 667
+        },
+        {
+          "left": 64,
+          "top": 26,
+          "width": 392,
+          "height": 627
+        },
+        {
+          "left": 56,
+          "top": 32,
+          "width": 416,
+          "height": 664
+        },
+        {
+          "left": 55,
+          "top": 28,
+          "width": 403,
+          "height": 610
+        }
+      ],
+      "scale": 0.19701492537313434,
+      "baseline": 696,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-minato",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-minato.png",
+      "sourceSHA256": "0c0497ea874080eaeb8d9b4a621ca69c959f81a5eb6ab78c1dd3edfec6a81c4d",
+      "reference": "public/sprites/magic/male-characters/minato-before.webp",
+      "referenceSHA256": "d39864d09051066e00dbeeeaa55cde197cbeac8b73f5ce078b1ac8a4a113c33d",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-minato.webp",
+      "sha256": "f5e7dc819a09427722010bd145803d93e276ae621eea2a76420bc583ebbc3f5f",
+      "bounds": [
+        {
+          "left": 128,
+          "top": 45,
+          "width": 332,
+          "height": 644
+        },
+        {
+          "left": 89,
+          "top": 30,
+          "width": 366,
+          "height": 609
+        },
+        {
+          "left": 94,
+          "top": 42,
+          "width": 318,
+          "height": 647
+        },
+        {
+          "left": 78,
+          "top": 30,
+          "width": 376,
+          "height": 623
+        }
+      ],
+      "scale": 0.20030349013657056,
+      "baseline": 689,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-riku",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-riku.png",
+      "sourceSHA256": "339c9ca0e78adf27c790652439d00de12fc25cfa8269612af811375e5f1c9e73",
+      "reference": "public/sprites/magic/male-characters/riku-before.webp",
+      "referenceSHA256": "49b406bdffc30641eb83fbdb5722ac70dfd160e6e1e8591eaf3604cf14123053",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-riku.webp",
+      "sha256": "8e70b03339d4db7612618f412062591fa37f607afdc4ff43401e82a4b59c42c1",
+      "bounds": [
+        {
+          "left": 165,
+          "top": 28,
+          "width": 220,
+          "height": 663
+        },
+        {
+          "left": 171,
+          "top": 26,
+          "width": 219,
+          "height": 578
+        },
+        {
+          "left": 166,
+          "top": 29,
+          "width": 223,
+          "height": 663
+        },
+        {
+          "left": 146,
+          "top": 27,
+          "width": 221,
+          "height": 601
+        }
+      ],
+      "scale": 0.1981981981981982,
+      "baseline": 692,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-yamato",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-yamato.png",
+      "sourceSHA256": "af109540998364c22e10068af38089ae666ae726546e8c884a86a1180bba99a5",
+      "reference": "public/sprites/magic/male-characters/yamato-before.webp",
+      "referenceSHA256": "7192422c525d5c25bf2d6f3b8cc24a35a59d47aae1c97f0f51a7acac428270fe",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-yamato.webp",
+      "sha256": "c4e438e2cb7a19ddae7a3813c43f0470bd4ac2866f3c451cba3828818315cc53",
+      "bounds": [
+        {
+          "left": 130,
+          "top": 28,
+          "width": 296,
+          "height": 657
+        },
+        {
+          "left": 126,
+          "top": 28,
+          "width": 302,
+          "height": 593
+        },
+        {
+          "left": 114,
+          "top": 28,
+          "width": 299,
+          "height": 656
+        },
+        {
+          "left": 119,
+          "top": 28,
+          "width": 306,
+          "height": 607
+        }
+      ],
+      "scale": 0.2009132420091324,
+      "baseline": 685,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-leon",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-leon.png",
+      "sourceSHA256": "81ed2c25959287b3037e605a5aa833ac643475d349f5d59e7530619385160d02",
+      "reference": "public/sprites/magic/male-characters/leon-before.webp",
+      "referenceSHA256": "58fa633366fb7f13c39642ed9b4a21ffbe8a8b375b366901984077e41f1e1b0b",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-leon.webp",
+      "sha256": "8b7669ed8612338b0e859d89e57a21f272693dd3202bdc04e90b20f8c6f86f73",
+      "bounds": [
+        {
+          "left": 180,
+          "top": 52,
+          "width": 230,
+          "height": 618
+        },
+        {
+          "left": 164,
+          "top": 51,
+          "width": 228,
+          "height": 619
+        },
+        {
+          "left": 151,
+          "top": 63,
+          "width": 220,
+          "height": 607
+        },
+        {
+          "left": 147,
+          "top": 52,
+          "width": 225,
+          "height": 618
+        }
+      ],
+      "scale": 0.21324717285945072,
+      "baseline": 670,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-elliot",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-elliot.png",
+      "sourceSHA256": "716752151f4368eaee1d1920dd5e33f6ac659bd6a0412307bbb3889631a40796",
+      "reference": "public/sprites/magic/male-characters/elliot-before.webp",
+      "referenceSHA256": "f5c8a79bdd8fbe534b8e1311bc842789547acac5ea494eb093b3efe4a5719394",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-elliot.webp",
+      "sha256": "ff519490fb13a25701fd6ee7c35598cc7c86e805ad789f1a7e3796eef6d29d08",
+      "bounds": [
+        {
+          "left": 97,
+          "top": 54,
+          "width": 364,
+          "height": 613
+        },
+        {
+          "left": 70,
+          "top": 44,
+          "width": 400,
+          "height": 601
+        },
+        {
+          "left": 83,
+          "top": 56,
+          "width": 367,
+          "height": 612
+        },
+        {
+          "left": 78,
+          "top": 49,
+          "width": 392,
+          "height": 600
+        }
+      ],
+      "scale": 0.21153846153846154,
+      "baseline": 668,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    },
+    {
+      "id": "magic-sakuya",
+      "source": "assets/go-home-dash/rush/rear-sources/magic-sakuya.png",
+      "sourceSHA256": "f2b4a71a5840feb03b9bfee6b3fc3339feff286090b41990e48b2edc2218efa4",
+      "reference": "public/sprites/magic/male-characters/sakuya-before.webp",
+      "referenceSHA256": "ace00526f7e393c5d64c481e862c5a85438fea08be3a58c42f01ab4ca7da0f60",
+      "output": "public/sprites/go-home-dash/rush/rear/magic-sakuya.webp",
+      "sha256": "c346eb098eb6dbbae34139e6c6ffb59deee8a17693e84958833466317d4ea0b9",
+      "bounds": [
+        {
+          "left": 73,
+          "top": 17,
+          "width": 408,
+          "height": 686
+        },
+        {
+          "left": 82,
+          "top": 14,
+          "width": 392,
+          "height": 612
+        },
+        {
+          "left": 64,
+          "top": 18,
+          "width": 401,
+          "height": 685
+        },
+        {
+          "left": 52,
+          "top": 15,
+          "width": 417,
+          "height": 621
+        }
+      ],
+      "scale": 0.19158200290275762,
+      "baseline": 703,
+      "frameSize": [
+        128,
+        160
+      ],
+      "anchor": [
+        64,
+        150
+      ]
+    }
+  ]
+}

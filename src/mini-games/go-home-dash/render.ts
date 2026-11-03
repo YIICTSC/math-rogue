@@ -1,3 +1,4 @@
+import {drawAura} from './aura';
 import { drawArt, type ArtImages } from './art';
 import { floorAt, routeAt, ROUTE_COLORS, routeTransition, type RouteId } from './routes';
 
@@ -89,15 +90,10 @@ export function drawTerrain(ctx: CanvasRenderingContext2D, seed: number, distanc
   }
 }
 
-export function drawRunner(ctx: CanvasRenderingContext2D, sheet: HTMLImageElement | null, fallback: HTMLImageElement | null, p: {x:number;y:number;vy:number;isJumping:boolean;isFalling:boolean;animFrame:number;barrier:boolean;dashFrames:number;flying:boolean}, frame: number, art?: ArtImages) {
+export function drawRunner(ctx: CanvasRenderingContext2D, sheet: HTMLImageElement | null, fallback: HTMLImageElement | null, p: {x:number;y:number;vy:number;isJumping:boolean;isFalling:boolean;animFrame:number;barrier:boolean;dashFrames:number;flying:boolean}, frame: number, art?: ArtImages,reducedMotion=false) {
   ctx.save(); ctx.translate(p.x, p.y);
-  if (p.dashFrames > 0) {
-    const tail = ctx.createLinearGradient(-95, 0, 0, 0); tail.addColorStop(0, '#83f3eb00'); tail.addColorStop(1, '#83f3ebaa');
-    ctx.fillStyle = tail; ctx.fillRect(-95, -37, 90, 27);
-  }
+  if(p.dashFrames>0||p.barrier)drawAura(ctx,0,0,'#77f2da',p.dashFrames>0?.85:.5,frame,reducedMotion);
   if (p.flying) {
-    ctx.strokeStyle = '#effeff'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(-37, -77); ctx.lineTo(-8, -33); ctx.lineTo(38, -77); ctx.stroke();
     if(!drawArt(ctx,art,'glider',-64,-102,128,34,'stretch')){
     ctx.fillStyle = '#79e8ebdd'; ctx.beginPath(); ctx.moveTo(-64, -73); ctx.lineTo(0, -98); ctx.lineTo(64, -73); ctx.lineTo(0, -78); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#fef0ad'; ctx.stroke();
@@ -113,6 +109,6 @@ export function drawRunner(ctx: CanvasRenderingContext2D, sheet: HTMLImageElemen
   } else if (fallback?.complete && fallback.naturalWidth > 0) {
     ctx.drawImage(fallback, -38, -84, 76, 84);
   }
-  if (p.barrier) { ctx.strokeStyle = '#80ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, -35, 34, 46, 0, 0, Math.PI * 2); ctx.stroke(); }
+
   ctx.restore();
 }

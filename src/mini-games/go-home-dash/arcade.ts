@@ -1,4 +1,5 @@
 import { floorAt, routeAt } from './routes';
+import {createRush,rushAt,type RushState} from './rush';
 
 export type RunMode = 'classic' | 'daily' | 'practice';
 export type Vehicle = 'normal' | 'gravity' | 'wave' | 'rocket';
@@ -14,6 +15,7 @@ export interface ArcadePlayer {
 }
 export interface ArcadeStats { coins: number; stars: number; dodges: number; breaks: number; perfects: number; bosses: number; missions: number }
 export interface ArcadeState {
+  rush:RushState;patternIndex:number;protectionSpawnAt:number;
   dashArea: number; dashUsed: boolean; seed: number; runMode: RunMode; frame: number; chunk: number; serial: number; entities: ArcadeEntity[];
   combo: number; bestCombo: number; comboTime: number; fever: number; energy: number;
   magnet: number; double: number; sneakers: number; board: number; shield: number; lowGravity: number;
@@ -28,7 +30,7 @@ export const hash = (n: number) => { n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n
 export function dailySeed(day = new Date().toISOString().slice(0,10)) { return [...day].reduce((n,c)=>hash(n+c.charCodeAt(0)), 1701); }
 export function seededRandom(seed: number) { let n=seed;return ()=>{n=(n+0x6d2b79f5)|0;let t=Math.imul(n^(n>>>15),1|n);t^=t+Math.imul(t^(t>>>7),61|t);return ((t^(t>>>14))>>>0)/4294967296;}; }
 export function createArcade(seed: number, runMode: RunMode = 'classic', distance = 0): ArcadeState {
-  return {dashArea:routeAt(seed,distance+120).index,dashUsed:false,seed,runMode,frame:0,chunk:Math.floor(distance/1800)-1,serial:0,entities:[],combo:0,bestCombo:0,comboTime:0,fever:0,energy:0,magnet:0,double:0,sneakers:0,board:0,shield:0,lowGravity:0,boost:0,slide:0,vehicle:'normal',vehicleTime:0,gravity:1,stats:{coins:0,stars:0,dodges:0,breaks:0,perfects:0,bosses:0,missions:0},missionDone:[false,false,false],score:0,notice:'',noticeTime:0,boss:null,clearAhead:false,changedVehicle:false};
+  return {rush:createRush(),patternIndex:Math.floor(distance/1800),protectionSpawnAt:-10000,dashArea:routeAt(seed,distance+120).index,dashUsed:false,seed,runMode,frame:0,chunk:Math.floor(distance/1800)-1,serial:0,entities:[],combo:0,bestCombo:0,comboTime:0,fever:0,energy:0,magnet:0,double:0,sneakers:0,board:0,shield:0,lowGravity:0,boost:0,slide:0,vehicle:'normal',vehicleTime:0,gravity:1,stats:{coins:0,stars:0,dodges:0,breaks:0,perfects:0,bosses:0,missions:0},missionDone:[false,false,false],score:0,notice:'',noticeTime:0,boss:null,clearAhead:false,changedVehicle:false};
 }
 export function announce(s: ArcadeState, notice: string) {s.notice=notice;s.noticeTime=110;}
 export function addEntity(s: ArcadeState, kind: ArcadeEntity['kind'], d: number, lift: number, width=26,height=26,air=false) {
@@ -40,7 +42,7 @@ export function entityY(s: ArcadeState, e: ArcadeEntity) {
 }
 export function multiplier(s: ArcadeState) {return (1+Math.min(4,Math.floor(s.combo/10)))*(s.double>0?2:1)*(s.fever>0?2:1);}
 export function reward(s: ArcadeState, value=20, energy=4) {
-  s.combo++;s.bestCombo=Math.max(s.bestCombo,s.combo);s.comboTime=360;s.score+=value*multiplier(s);
+  s.rush.momentum=Math.min(100,s.rush.momentum+energy*.65);s.combo++;s.bestCombo=Math.max(s.bestCombo,s.combo);s.comboTime=360;s.score+=value*multiplier(s);
   if(s.fever<=0){s.energy=Math.min(100,s.energy+energy);if(s.energy>=100){s.energy=0;s.fever=480;announce(s,'fever');}}
 }
 export function missionProgress(s: ArcadeState) {return [s.stats.coins,s.stats.dodges,s.stats.breaks];}
@@ -49,12 +51,13 @@ export function checkMissions(s: ArcadeState) {missionProgress(s).forEach((v,i)=
 function trail(s:ArcadeState,d:number,lift:number,count=8,arc=false,air=false){for(let i=0;i<count;i++)addEntity(s,'coin',d+i*46,lift+(arc?Math.sin(i/(count-1)*Math.PI)*92:0),18,18,air);}
 export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:number, flight=false) {
   s.clearAhead=true;
+  if(d>=12000&&d-s.protectionSpawnAt>=14000&&s.shield<=0&&s.board<=0&&hash(s.seed+Math.floor(d/1800)*967)%12===0){addEntity(s,hash(s.seed+Math.floor(d))%2?'shield':'board',d+1050,flight?150:34,30,30,flight);s.protectionSpawnAt=d;}
   if(flight){
-    trail(s,d,150,10,false,true);addEntity(s,['magnet','double','board','charge'][hash(s.seed+s.chunk)%4] as Pickup,d+280,150,30,30,true);
+    trail(s,d,150,10,false,true);addEntity(s,['magnet','double','sneakers','charge'][hash(s.seed+s.chunk)%4] as Pickup,d+280,150,30,30,true);
     addEntity(s,'star',d+650,120,26,26,true);return;
   }
   switch(name){
-    case 'coinRoad':trail(s,d,28);addEntity(s,'shield',d+450,36);break;
+    case 'coinRoad':trail(s,d,28);break;
     case 'magnetTrail':addEntity(s,'magnet',d,36);trail(s,d+160,80,13,true);break;
     case 'orbSpikes':addEntity(s,'orb',d+180,110,42,42);addEntity(s,'spike',d+330,0,115,34);trail(s,d+130,55,9,true);break;
     case 'slideTunnel':addEntity(s,'tunnel',d+240,90,180,54);trail(s,d+80,18,9);announce(s,'slideHint');break;
@@ -68,11 +71,11 @@ export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:numb
     case 'bossRush':s.boss={hp:3,life:780,shot:90};announce(s,'bossHint');addEntity(s,'charge',d,32);break;
     case 'skyRail':addEntity(s,'orb',d+40,80,42,42);addEntity(s,'rail',d+400,105,460,12);trail(s,d+220,140);trail(s,d+200,24);addEntity(s,'star',d+420,160);announce(s,'upperHint');break;
     case 'springChain':addEntity(s,'pad',d+150,0,64,12);trail(s,d+180,70,9,true);addEntity(s,'pad',d+650,0,64,12);addEntity(s,'star',d+860,150);break;
-    case 'treasureRoad':addEntity(s,'double',d,34);addEntity(s,'board',d+240,34);trail(s,d+300,30,14,true);addEntity(s,'star',d+900,130);break;
+    case 'treasureRoad':addEntity(s,'double',d,34);addEntity(s,'magnet',d+240,34);trail(s,d+300,30,14,true);addEntity(s,'star',d+900,130);break;
     case 'boostRoad':addEntity(s,'sneakers',d,32);addEntity(s,'boost',d+190,0,80,10);trail(s,d+220,40,14,true);addEntity(s,'charge',d+950,32);break;
   }
 }
-export function beginArcade(s:ArcadeState,distance:number,flight:boolean,viewWidth=800) {
+export function beginArcade(s:ArcadeState,distance:number,flight:boolean,viewWidth=800,special=false) {
   const area=routeAt(s.seed,distance+120).index;
   if(area!==s.dashArea){s.dashArea=area;s.dashUsed=false;announce(s,'areaDash');}
   s.frame++;s.clearAhead=false;s.changedVehicle=false;
@@ -83,8 +86,10 @@ export function beginArcade(s:ArcadeState,distance:number,flight:boolean,viewWid
   const chunk=Math.floor((distance+Math.max(900,viewWidth+100))/1800);
   while(chunk>s.chunk){
     const next=++s.chunk;
-    const index=next<16?next:hash(s.seed+next)%PATTERNS.length;
-    spawnPattern(s,PATTERNS[index],next*1800+700,flight||routeAt(s.seed,next*1800+1400).flight);
+    const d=next*1800+700;
+    const fits=!s.rush.enabled||rushAt(s.seed,d).kind==='run'&&rushAt(s.seed,d+1300).kind==='run';
+    if(!special&&fits){const serial=s.patternIndex++,index=serial<16?serial:hash(s.seed+serial)%PATTERNS.length;spawnPattern(s,PATTERNS[index],d,flight||routeAt(s.seed,next*1800+1400).flight);}
+
   }
   if(s.boss){
     if(--s.boss.life<=0){s.boss=null;announce(s,'bossEscape');}
@@ -105,7 +110,7 @@ export function dashArcade(s:ArcadeState,p:ArcadePlayer) {
 }
 export function hitArcade(s:ArcadeState):boolean {
   if(s.fever>0)return true;
-  s.combo=0;s.comboTime=0;s.energy=Math.max(0,s.energy-20);
+  s.rush.momentum=Math.max(0,s.rush.momentum-45);s.combo=0;s.comboTime=0;s.energy=Math.max(0,s.energy-20);
   if(s.shield>0){s.shield=0;announce(s,'saved');return true;}
   if(s.board>0){s.board=0;announce(s,'boardBreak');return true;}
   if(s.vehicle==='rocket'){s.vehicle='normal';s.vehicleTime=0;s.changedVehicle=true;announce(s,'boardBreak');return true;}

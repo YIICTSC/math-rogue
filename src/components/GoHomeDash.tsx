@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { flushSync } from 'react-dom';
-import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
+import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronLeft, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { SPRITE_TEMPLATES } from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -13,11 +13,16 @@ import { DASH_HERO_ART } from '../mini-games/go-home-dash/heroes';
 import { routeAt, floorAt, routeCopy, ROUTE_LENGTH, DISTANCE_SCALE, routeTransition, type RouteId } from '../mini-games/go-home-dash/routes';
 import { drawRoute, drawTerrain, drawRunner, type ParallaxArt } from '../mini-games/go-home-dash/render';
 import { stairRects, flightGateShape, flightGateRects, isStair, overlapsSolid } from '../mini-games/go-home-dash/obstacles';
+import {DashActionIcon} from '../mini-games/go-home-dash/DashActionIcon';
 import { ArcadeHud } from '../mini-games/go-home-dash/ArcadeHud';
 import { createArcade, addEntity, beginArcade, endArcade, activateOrb, arcadePlatform, hitArcade, dashArcade, dailySeed, seededRandom, saveArcadeRun, loadArcadeProfile, trailColor, announce, type RunMode } from '../mini-games/go-home-dash/arcade';
 import { advanceObstacleMotion } from '../mini-games/go-home-dash/motion';
 import { drawDangerAura, drawHostileArt, drawFlightPillar, drawStairArt, drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
 import { drawArcade, drawArcadeRunner } from '../mini-games/go-home-dash/arcadeRender';
+import {rushSpeed,syncRush,stepRush,chargeRush,releaseRushCharge,shiftRushLane} from '../mini-games/go-home-dash/rush';
+import {drawRushFallback} from '../mini-games/go-home-dash/rushFallback';
+import type {RushRenderer,RushRenderFrame} from '../mini-games/go-home-dash/rushRenderer';
+import {reward} from '../mini-games/go-home-dash/arcade';
 import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
 import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
 
@@ -188,6 +193,8 @@ const GoHomeDash: React.FC<{
     const selectRunMode = (mode: RunMode) => { runModeRef.current=mode;setRunMode(mode);checkpointRef.current=null; };
     const [selectedHero, setSelectedHero] = useState<string>(DEFAULT_DASH_HERO);
     const heroRef = useRef(DEFAULT_DASH_HERO);
+    const rearSpriteRef=useRef<HTMLImageElement|null>(null);
+    const rushRendererRef=useRef<RushRenderer|null>(null);
     const heroFallbackRef = useRef<HTMLImageElement | null>(null);
     const extraEnemiesRef = useRef<HTMLImageElement | null>(null);
     const routeArtRef = useRef<Partial<Record<RouteId, HTMLImageElement>>>({});
@@ -209,11 +216,11 @@ const GoHomeDash: React.FC<{
         lastVoiceRef.current = now;
         void audioService.playHomeDashVoice(heroRef.current, event);
     };
-    const stopInputs = () => { pointerIds.current.clear(); keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
+    const stopInputs = () => { arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;pointerIds.current.clear(); keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
     const returnToTitle = () => { checkpointRef.current=null;pausedRef.current=false;setPaused(false);stopInputs(); audioService.stopHomeDashVoices(); gameStateRef.current = 'START'; setGameState('START'); };
     const L = (ja: string, en: string, hi: string) => languageMode === 'ENGLISH' ? en : languageMode === 'HIRAGANA' ? hi : ja;
     const stageRef = useRef<HTMLDivElement>(null);
-    const viewportRef = useRef({width:800,height:400,scale:1});
+    const viewportRef = useRef<{width:number;height:number;scale:number;focus?:{width:number;height:number;scale:number}}>({width:800,height:400,scale:1});
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const focusCanvasRef = useRef<HTMLCanvasElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
@@ -241,6 +248,7 @@ const GoHomeDash: React.FC<{
         playerSpriteRef.current = null;
         heroFallbackRef.current = null;
         playerSlideRef.current=null;
+        const rear=new Image();rearSpriteRef.current=null;rear.onload=()=>{if(active)rearSpriteRef.current=rear;};rear.src=assetUrl(`sprites/go-home-dash/rush/rear/${selectedHero}.webp`);
         const sheet = new Image(), fallback = new Image(), slide = new Image();
         sheet.onload = () => { if (active) playerSpriteRef.current = sheet; };
         fallback.onload = () => { if (active) heroFallbackRef.current = fallback; };
@@ -248,7 +256,7 @@ const GoHomeDash: React.FC<{
         fallback.src = assetUrl(DASH_HERO_ART[selectedHero]);
         slide.onload=()=>{if(active)playerSlideRef.current=slide;};
         slide.src=assetUrl(`sprites/go-home-dash/slides/${selectedHero}.webp`);
-        return () => { active = false; sheet.onload = null; fallback.onload = null; slide.onload=null; };
+        return () => { active = false; sheet.onload = null; fallback.onload = null; slide.onload=null;rear.onload=null; };
     }, [selectedHero]);
 
     useEffect(() => {
@@ -494,6 +502,11 @@ const GoHomeDash: React.FC<{
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current, arcade=arcadeRef.current;
         if (pausedRef.current) return;
+        if(arcade.rush.kind==='loop'){arcade.rush.jumpQueued=true;audioService.playSound('jump');return;}
+        if(arcade.rush.kind==='run'&&p.isJumping&&arcade.rush.flash===0){
+            const target=obstaclesRef.current.filter(o=>isDestroyable(o.type)&&o.x>p.x&&o.x-p.x<230&&Math.abs(o.y-(p.y-35))<150).sort((a,b)=>a.x-b.x)[0];
+            if(target){obstaclesRef.current=obstaclesRef.current.filter(o=>o!==target);p.x=Math.min(260,target.x);p.vy=-8;p.invulFrame=Math.max(p.invulFrame,12);p.jumpCount=0;arcade.rush.homings++;arcade.rush.flash=36;arcade.stats.breaks++;reward(arcade,180,12);announce(arcade,'homing');addVfxRing(target.x,target.y,'#8effd8');audioService.playSound('attack');voice('jump');return;}
+        }
         arcade.slide=0;
         if (activateOrb(arcade,p,distanceRef.current)) { voice('jump'); audioService.playSound('jump'); return; }
         if (arcade.vehicle === 'gravity') { arcade.gravity *= -1;p.vy=arcade.gravity*4;voice('jump');return; }
@@ -536,9 +549,11 @@ const GoHomeDash: React.FC<{
     const triggerSlide = () => {
         if (gameStateRef.current !== 'PLAYING' || pausedRef.current) return;
         const p=playerRef.current;if(p.flying)return;
-        arcadeRef.current.slide=52;
+        arcadeRef.current.slide=52;arcadeRef.current.rush.chargeHeld=true;
         if(p.isJumping){p.vy=12;addVfxRing(p.x,p.y-24,'#8cecff');}
     };
+    const releaseSlide=()=>{if(document.hidden||!document.hasFocus()||pausedRef.current){arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;return;}if(releaseRushCharge(arcadeRef.current))audioService.playSound('buff');};
+    const steer=(direction:number)=>{if(!pausedRef.current)shiftRushLane(arcadeRef.current,direction);};
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         if (gameStateRef.current !== 'PLAYING' || e.button !== 0) return;
         e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId);
@@ -552,6 +567,7 @@ const GoHomeDash: React.FC<{
             if (gameStateRef.current !== 'PLAYING') return;
             if (e.code === 'KeyP' || e.key.toLowerCase() === 'p') { e.preventDefault();if(!e.repeat)togglePause();return; }
             if (pausedRef.current) return;
+            if(['ArrowLeft','ArrowRight','KeyA','KeyD'].includes(e.code)||['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();if(!e.repeat)steer(e.key==='ArrowLeft'||e.code==='KeyA'?-1:1);return;}
             if (['ArrowDown','KeyS'].includes(e.code)||e.key==='ArrowDown'||e.key.toLowerCase()==='s') {e.preventDefault();if(!e.repeat)triggerSlide();return;}
             if (e.code === 'Escape') { e.preventDefault(); if (exitEnabled) onBack(); return; }
             if (['ShiftLeft', 'ShiftRight', 'KeyX'].includes(e.code) || e.key === 'Shift' || e.key === 'x') {
@@ -561,7 +577,7 @@ const GoHomeDash: React.FC<{
             e.preventDefault(); if (e.repeat) return;
             keysHeld.current.add(e.code || e.key); refreshPressing(); triggerJump();
         };
-        const handleKeyUp = (e: KeyboardEvent) => { keysHeld.current.delete(e.code || e.key); refreshPressing(); };
+        const handleKeyUp = (e: KeyboardEvent) => { if(['ArrowDown','KeyS'].includes(e.code)||e.key==='ArrowDown'||e.key.toLowerCase()==='s')releaseSlide();keysHeld.current.delete(e.code || e.key); refreshPressing(); };
         const loseFocus = () => { stopInputs(); audioService.stopHomeDashVoices();if(gameStateRef.current==='PLAYING'){pausedRef.current=true;setPaused(true);} };
         const hide = () => { if (document.hidden) loseFocus(); };
         window.addEventListener('keydown', handleKeyDown);
@@ -593,16 +609,56 @@ const GoHomeDash: React.FC<{
         return [...pool, 'STEPS', 'STEPS', ...(level >= 3 ? ['HIGH_STEPS' as ObstacleType] : [])];
     };
 
+    const finishFrame=(currentSpeed:number,stage:ReturnType<typeof routeAt>)=>{
+        const p=playerRef.current,arcade=arcadeRef.current;
+        const addExp = 0.1 * (currentSpeed / BASE_SPEED) * p.expMult;
+        expRef.current += addExp;
+        if (expRef.current >= nextLevelExpRef.current) {
+            levelRef.current++; expRef.current = 0; nextLevelExpRef.current += 100;
+            const hasWeapon = p.shootingRate > 0;
+            const availableUpgrades = UPGRADE_POOL.filter(card => {
+                if (card.requiresWeapon && !hasWeapon) return false;
+                return true;
+            });
+            const shuffled = [...availableUpgrades].sort(() => randomRef.current() - 0.5);
+            setUpgradeOptions(shuffled.slice(0, 3));
+            stopInputs(); audioService.stopHomeDashVoices();
+            gameStateRef.current = 'CHALLENGE';
+            setGameState('CHALLENGE');
+            audioService.playBGM('math');
+        }
+        scoreRef.current += (currentSpeed * 0.1 * p.scoreBonus);
+        if (frameCount.current % 10 === 0) { setArcadeView({...arcade,rush:{...arcade.rush},stats:{...arcade.stats},missionDone:[...arcade.missionDone]}); setTravelled(Math.floor(distanceRef.current / DISTANCE_SCALE)); setRoute(stage.id); setFlight(p.flying); setDashReady(!arcade.dashUsed); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
+    };
+
+
     const updateLogic = () => {
         if (gameStateRef.current !== 'PLAYING' || pausedRef.current) return;
         const p = playerRef.current, arcade=arcadeRef.current;
-        const currentSpeed = Math.min(9, (BASE_SPEED + ((levelRef.current - 1) * 0.4)) * p.speedBoost) * (p.dashFrames > 0 ? 1.45 : arcade.boost>0?1.2:1);
+        const currentSpeed = rushSpeed(arcade,Math.min(9,(BASE_SPEED+(levelRef.current-1)*.4)*p.speedBoost),p);
         const previousFloor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
         const previousY = p.y;
         distanceRef.current += currentSpeed;
         const stage = routeAt(routeSeedRef.current, distanceRef.current + p.x);
         const floor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
-        beginArcade(arcade,distanceRef.current,stage.flight,viewportRef.current.width);
+        const rushChanged=syncRush(arcade,p,distanceRef.current,floor);
+        beginArcade(arcade,distanceRef.current,stage.flight,viewportRef.current.width,arcade.rush.kind!=='run');
+        if(rushChanged){setArcadeView({...arcade,rush:{...arcade.rush}});obstaclesRef.current=[];enemyProjectilesRef.current=[];projectilesRef.current=[];particlesRef.current=[];}
+        const heldPad=navigator.getGamepads?.()?.[0],padSlide=!!heldPad?.buttons[1]?.pressed;if(padSlide)arcade.rush.chargeHeld=true;else if(arcade.rush.padSlideHeld)releaseSlide();arcade.rush.padSlideHeld=padSlide;
+        chargeRush(arcade,p);
+        if(arcade.rush.kind!=='run'){
+            frameCount.current++;p.animFrame=Math.floor(frameCount.current/4)%4;p.invulFrame=Math.max(0,p.invulFrame-1);p.dashFrames=Math.max(0,p.dashFrames-1);p.flying=false;
+            const pad=navigator.getGamepads?.()?.[0];const direction=pad?(pad.buttons[14]?.pressed?-1:pad.buttons[15]?.pressed?1:Math.abs(pad.axes[0]||0)>.55?Math.sign(pad.axes[0]):0):0;
+            if(direction&&direction!==arcade.rush.padDirection)shiftRushLane(arcade,direction);arcade.rush.padDirection=direction;
+            if(p.barrierRegen&&!p.barrier&&++p.barrierTimer>600){p.barrier=true;p.barrierTimer=0;}
+            if(p.autoHeal&&++p.autoHealTimer>1200){setHp(h=>Math.min(maxHpRef.current,h+1));p.autoHealTimer=0;}
+            if(p.shootingRate>0&&--p.shootingTimer<=0){p.shootingTimer=p.shootingRate;const target=arcade.rush.objects.find(e=>!e.taken&&e.kind==='barrier'&&e.lane===arcade.rush.lane&&e.at-distanceRef.current>120&&e.at-distanceRef.current<650);if(target){target.taken=true;arcade.stats.breaks++;reward(arcade,80,6);arcade.rush.flash=15;}}
+            const coinsBefore=arcade.stats.coins,noticeBefore=arcade.notice;
+            if(stepRush(arcade,p,distanceRef.current,floor))handlePlayerDamage(false);
+            if(arcade.stats.coins>coinsBefore&&arcade.frame%6===0)audioService.playSound('select');
+            if(arcade.notice!==noticeBefore&&['star','loopTrick','mission','fever'].includes(arcade.notice))audioService.playSound('correct');
+            if(gameStateRef.current==='PLAYING'){if(arcade.score){scoreRef.current+=arcade.score;arcade.score=0;}finishFrame(currentSpeed,stage);}return;
+        }
         if(arcade.clearAhead){obstaclesRef.current=obstaclesRef.current.filter(o=>o.x-o.width/2<=viewportRef.current.width+40);enemyProjectilesRef.current=enemyProjectilesRef.current.filter(o=>o.x<=viewportRef.current.width+40);}
         const shouldFly = stage.flight || arcade.vehicle !== 'normal';
         if (shouldFly && !p.flying) { p.isFalling = false; p.y = Math.min(p.y, 280); p.vy = -4; p.flapCooldown = 18; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
@@ -617,7 +673,7 @@ const GoHomeDash: React.FC<{
             if(advanceObstacleMotion(obstacle,routeSeedRef.current,distanceRef.current,currentSpeed,frameCount.current,randomRef.current))addParticle(obstacle.x,floorAt(routeSeedRef.current,distanceRef.current+obstacle.x),obstacle.type==='WATER_SLIME'?'#72c9e9':'#8d6e63');
         }
 
-        if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;
+        if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;else if(p.x>PLAYER_DEFAULT_X)p.x-=Math.min(12,(p.x-PLAYER_DEFAULT_X)*.14);
 
         p.animFrameTimer = (p.animFrameTimer || 0) + 1;
         const animThreshold = Math.max(2, 6 - Math.floor(currentSpeed * 0.5));
@@ -978,24 +1034,7 @@ const GoHomeDash: React.FC<{
                 checkpointRef.current={distance:checkpointDistance,seed:routeSeedRef.current,level:levelRef.current,score:scoreRef.current};announce(arcade,'checkpoint');
             }
         }
-        const addExp = 0.1 * (currentSpeed / BASE_SPEED) * p.expMult;
-        expRef.current += addExp;
-        if (expRef.current >= nextLevelExpRef.current) {
-            levelRef.current++; expRef.current = 0; nextLevelExpRef.current += 100;
-            const hasWeapon = p.shootingRate > 0;
-            const availableUpgrades = UPGRADE_POOL.filter(card => {
-                if (card.requiresWeapon && !hasWeapon) return false;
-                return true;
-            });
-            const shuffled = [...availableUpgrades].sort(() => randomRef.current() - 0.5);
-            setUpgradeOptions(shuffled.slice(0, 3)); 
-            stopInputs(); audioService.stopHomeDashVoices();
-            gameStateRef.current = 'CHALLENGE';
-            setGameState('CHALLENGE'); 
-            audioService.playBGM('math');
-        }
-        scoreRef.current += (currentSpeed * 0.1 * p.scoreBonus);
-        if (frameCount.current % 10 === 0) { setArcadeView({...arcade,stats:{...arcade.stats},missionDone:[...arcade.missionDone]}); setTravelled(Math.floor(distanceRef.current / DISTANCE_SCALE)); setRoute(stage.id); setFlight(p.flying); setDashReady(!arcade.dashUsed); setScore(Math.floor(scoreRef.current)); setExp(expRef.current); setLevel(levelRef.current); setNextLevelExp(nextLevelExpRef.current); }
+        finishFrame(currentSpeed,stage);
     };
 
     const setGameOverState = () => {
@@ -1067,8 +1106,8 @@ const GoHomeDash: React.FC<{
         if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = 0; p.isFalling = false; p.isJumping=false; p.jumpCount=0; }
     };
 
-    const draw = (ctx: CanvasRenderingContext2D) => {
-        const view=viewportRef.current;
+    const drawFocus=()=>{const view=viewportRef.current.focus,ctx=focusCanvasRef.current?.getContext('2d');if(view&&ctx)draw(ctx,view,true);};
+    const draw = (ctx: CanvasRenderingContext2D,view=viewportRef.current,focusPass=false) => {
         ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
         ctx.setTransform(view.scale,0,0,view.scale,0,0);
         ctx.fillStyle='#10182f';ctx.fillRect(0,0,view.width,view.height);
@@ -1078,16 +1117,28 @@ const GoHomeDash: React.FC<{
             shakeRef.current *= 0.9;
         }
 
+        const arcade=arcadeRef.current;
+        if(arcade.rush.kind!=='run'){
+            const f:RushRenderFrame={state:arcade,distance:distanceRef.current,jump:Math.max(0,floorAt(routeSeedRef.current,distanceRef.current+120)-playerRef.current.y),frame:frameCount.current,side:playerSpriteRef.current,rear:rearSpriteRef.current,reduced:reducedMotionRef.current};
+            if(!rushRendererRef.current?.draw(ctx,view.width,view.height,f))drawRushFallback(ctx,view.width,view.height,f);
+            ctx.canvas.dataset.rushKind=arcade.rush.kind;ctx.restore();
+            if(!focusPass)drawFocus();return;
+        }
+        ctx.canvas.dataset.rushKind='run';
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        drawRoute(ctx, routeSeedRef.current, distanceRef.current, frameCount.current, routeArtRef.current,view.width,view.height,routeLayersRef.current);
-        drawTerrain(ctx, routeSeedRef.current, distanceRef.current, holes,view.width,view.height);
-        drawArcade(ctx,arcadeRef.current,distanceRef.current,reducedMotionRef.current,view.width,view.height,artImagesRef.current);
+        const twin=!!viewportRef.current.focus,origin=focusPass?Math.max(0,playerRef.current.x-view.width*.28):0;
+        const offsetY=focusPass||twin?0:view.height*.79-340,cover=focusPass||twin?1:Math.max(1,view.height/400);
+        ctx.save();ctx.scale(cover,cover);
+        drawRoute(ctx,routeSeedRef.current,distanceRef.current+origin,frameCount.current,routeArtRef.current,view.width/cover,Math.max(400,view.height/cover),routeLayersRef.current);ctx.restore();
+        ctx.translate(-origin,offsetY);
+        drawTerrain(ctx,routeSeedRef.current,distanceRef.current,holes,view.width+origin,view.height-offsetY);
+        drawArcade(ctx,arcadeRef.current,distanceRef.current,reducedMotionRef.current,view.width+origin,view.height-offsetY,artImagesRef.current);
         holes.forEach(hole => { drawDangerAura(ctx,hole.x-hole.width/2,floorAt(routeSeedRef.current,distanceRef.current+hole.x)-10,hole.width,20,frameCount.current,reducedMotionRef.current);ctx.fillStyle = '#ff637d'; ctx.font = 'bold 22px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', hole.x, floorAt(routeSeedRef.current, distanceRef.current + hole.x) + 30); });
 
         const parts = particlesRef.current;
-        for (const p of parts) { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 30; ctx.fillRect(p.x, p.y, p.size, p.size); }
+        for(const p of parts){ctx.globalAlpha=p.life/30;const glow=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*2.5);glow.addColorStop(0,p.color);glow.addColorStop(1,p.color+'00');ctx.fillStyle=glow;ctx.fillRect(p.x-p.size*2.5,p.y-p.size*2.5,p.size*5,p.size*5);}
         ctx.globalAlpha = 1.0;
 
         const projectileSheet = projectileSpriteSheetRef.current;
@@ -1203,22 +1254,19 @@ const GoHomeDash: React.FC<{
         }
 
         const pl = playerRef.current;
-        drawArcadeRunner(ctx,arcadeRef.current,pl,trailColor(profileRef.current),artImagesRef.current);
+        drawArcadeRunner(ctx,arcadeRef.current,pl,trailColor(profileRef.current),artImagesRef.current,reducedMotionRef.current);
         ctx.save();
         if(arcadeRef.current.vehicle==='gravity'&&arcadeRef.current.gravity<0){ctx.translate(0,2*pl.y-64);ctx.scale(1,-1);}
         const sliding=arcadeRef.current.slide>0&&!pl.flying&&!pl.isJumping&&!pl.isFalling;
         if (pl.invulFrame % 4 < 2 || arcadeRef.current.fever>0 || pl.dashFrames>0) {
             if(!sliding||!drawSlide(ctx,playerSlideRef.current,pl,frameCount.current)){
                 if(sliding){ctx.translate(pl.x,pl.y);ctx.scale(1.18,.42);ctx.translate(-pl.x,-pl.y);}
-                drawRunner(ctx, playerSpriteRef.current, heroFallbackRef.current, {...pl,flying:pl.flying&&arcadeRef.current.vehicle==='normal'}, frameCount.current,artImagesRef.current);
+                drawRunner(ctx, playerSpriteRef.current, heroFallbackRef.current, {...pl,flying:pl.flying&&arcadeRef.current.vehicle==='normal'}, frameCount.current,artImagesRef.current,reducedMotionRef.current);
             }
         }
         ctx.restore();
         ctx.restore();
-        if (focusCanvasRef.current && window.innerWidth <= 700 && window.innerHeight >= 700) {
-            const focus = focusCanvasRef.current.getContext('2d');
-            focus?.drawImage(ctx.canvas, 0, 0, 400, 400, 0, 0, 400, 400);
-        }
+        if(!focusPass)drawFocus();
     };
 
     useEffect(() => {
@@ -1254,27 +1302,31 @@ const GoHomeDash: React.FC<{
     useEffect(() => {
         const stage=stageRef.current,canvas=canvasRef.current;if(!stage||!canvas)return;
         const resize=()=>{
-            const desktop=window.matchMedia('(min-width:901px) and (min-aspect-ratio:6/5)').matches;
-            if(desktop){
-                const {width,height}=stage.getBoundingClientRect();if(width<1||height<1)return;
-                const ratio=Math.min(2,window.devicePixelRatio||1),scale=Math.min(width/800,height/400);
-                const pw=Math.round(width*ratio),ph=Math.round(height*ratio);
-                if(canvas.width!==pw)canvas.width=pw;if(canvas.height!==ph)canvas.height=ph;
-                viewportRef.current={width:width/scale,height:height/scale,scale:scale*ratio};
-            }else{
-                if(canvas.width!==800)canvas.width=800;if(canvas.height!==400)canvas.height=400;
-                viewportRef.current={width:800,height:400,scale:1};
-            }
+            const box=canvas.getBoundingClientRect();if(box.width<1||box.height<1)return;
+            const ratio=Math.min(2,window.devicePixelRatio||1),focus=focusCanvasRef.current,fb=focus?.getBoundingClientRect(),twin=!!focus&&getComputedStyle(focus).display!=='none'&&!!fb&&fb.height>1;
+            const width=Math.max(800,box.width/box.height*400),scale=box.width/width;
+            const pw=Math.round(box.width*ratio),ph=Math.round(box.height*ratio);if(canvas.width!==pw)canvas.width=pw;if(canvas.height!==ph)canvas.height=ph;
+            viewportRef.current={width,height:box.height/scale,scale:scale*ratio};
+            if(twin&&focus&&fb){const height=480,scale=fb.height/height,fw=Math.round(fb.width*ratio),fh=Math.round(fb.height*ratio);if(focus.width!==fw)focus.width=fw;if(focus.height!==fh)focus.height=fh;viewportRef.current.focus={width:fb.width/scale,height,scale:scale*ratio};}
         };
-        const observer=new ResizeObserver(resize);observer.observe(stage);window.addEventListener('resize',resize);resize();
+        const observer=new ResizeObserver(resize);observer.observe(stage);observer.observe(canvas);if(focusCanvasRef.current)observer.observe(focusCanvasRef.current);window.addEventListener('resize',resize);resize();
         return()=>{observer.disconnect();window.removeEventListener('resize',resize);};
-    },[]);
+
+    },[arcadeView.rush.kind]);
 
     useEffect(()=>{
         let active=true;
         for(const id of ['items','hazards','enemies'] as const){const image=new Image();image.onload=()=>{if(active)artImagesRef.current[id]=image;};image.src=assetUrl(`sprites/go-home-dash/art/${id}.webp`);}
         return()=>{active=false;};
     },[]);
+
+    useEffect(()=>{
+        if(gameState==='START')return;
+        let active=true;
+        void import('../mini-games/go-home-dash/rushRenderer').then(m=>{if(active&&!rushRendererRef.current)rushRendererRef.current=m.createRushRenderer();});
+        return()=>{active=false;};
+    },[gameState==='START']);
+    useEffect(()=>()=>{rushRendererRef.current?.dispose();rushRendererRef.current=null;},[]);
 
     const getSubjectIcon = (type: DashCardEffect['iconType']) => {
         switch(type) {
@@ -1288,7 +1340,7 @@ const GoHomeDash: React.FC<{
 
     const backdrop = routeTransition(routeSeedRef.current, distanceRef.current + 120);
     return (
-        <div className={`mini-game-go-home-screen dash-shell w-full h-full text-white font-mono relative overflow-hidden select-none${compact ? ' rpg-go-home-compact' : ''}`}
+        <div className={`mini-game-go-home-screen dash-shell ${arcadeView.rush.kind==='depth'?'dash-is-depth':''} w-full h-full text-white font-mono relative overflow-hidden select-none${compact ? ' rpg-go-home-compact' : ''}`}
             style={{
                 '--dash-backdrop': `url("${assetUrl(`sprites/go-home-dash/${gameState === 'START' ? 'title' : `routes/${backdrop.to}`}.webp`)}")`,
                 '--dash-backdrop-prev': `url("${assetUrl(`sprites/go-home-dash/${gameState === 'START' ? 'title' : `routes/${backdrop.from}`}.webp`)}")`,
@@ -1308,17 +1360,18 @@ const GoHomeDash: React.FC<{
             </div>
             {gameState === 'PLAYING' && <>
                 <div className="dash-route" aria-live="polite"><strong>{flight ? '✦ ' : '→ '}{routeCopy(route, languageMode)}</strong><small>{routeCopy(route, languageMode, true)}</small></div>
+                {arcadeView.rush.kind==='depth'&&<div className="dash-lane-controls" role="group" aria-label={L('レーン移動','Change lane','レーンいどう')}><button aria-label={L('左のレーンへ','Move one lane left','ひだりのレーンへ')} {...multiTouchAction(()=>steer(-1))}><DashActionIcon action="left"/></button><span>← → / A D</span><button aria-label={L('右のレーンへ','Move one lane right','みぎのレーンへ')} {...multiTouchAction(()=>steer(1))}><DashActionIcon action="right"/></button></div>}
                 <div className="dash-controls">
-                    <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><small>SHIFT / X</small>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('次のエリアで復活', 'NEXT AREA', 'つぎのエリアでふっかつ')}</button>
-                    <button className="dash-slide" disabled={flight} {...multiTouchAction(triggerSlide)}><small>↓ / S / B</small>{L('スライド','SLIDE','スライド')}</button>
+                    <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><span className="dash-action-face"><DashActionIcon action="dash"/><small>SHIFT / X</small></span><strong>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('次のエリアで復活', 'NEXT AREA', 'つぎのエリアでふっかつ')}</strong></button>
+                    <button className="dash-slide" disabled={flight} {...multiTouchHold(held=>{if(held)triggerSlide();else releaseSlide();})} onClick={e=>{if(e.detail===0)triggerSlide();}}><span className="dash-action-face"><DashActionIcon action="slide"/><small>↓ / S / B</small></span><strong>{L('スライド','SLIDE','スライド')}</strong></button>
                     <button className="dash-jump" {...multiTouchHold(held => { const wasHeld = jumpButtonHeld.current; jumpButtonHeld.current = held; refreshPressing(); if (held && !wasHeld) triggerJump(); })}
-                        onClick={e => { if (e.detail === 0) triggerJump(); }}><small>SPACE / A · HOLD</small>{arcadeView.vehicle==='gravity'?L('重力反転','FLIP','じゅうりょくはんてん'):arcadeView.vehicle==='wave'?L('ウェーブ','WAVE','ウェーブ'):arcadeView.vehicle==='rocket'?L('上昇','RISE','じょうしょう'):flight ? L('羽ばたき', 'FLAP', 'はばたき') : L('ジャンプ', 'JUMP', 'ジャンプ')}</button>
+                        onClick={e => { if (e.detail === 0) triggerJump(); }}><span className="dash-action-face"><DashActionIcon action="jump"/><small>SPACE / A</small></span><strong>{arcadeView.vehicle==='gravity'?L('重力反転','FLIP','じゅうりょくはんてん'):arcadeView.vehicle==='wave'?L('ウェーブ','WAVE','ウェーブ'):arcadeView.vehicle==='rocket'?L('上昇','RISE','じょうしょう'):flight ? L('羽ばたき', 'FLAP', 'はばたき') : L('ジャンプ', 'JUMP', 'ジャンプ')}</strong></button>
                 </div>
             </>}
             {gameState === 'START' && <DashLobby hero={selectedHero} onHero={setSelectedHero} onStart={() => { initGame(); audioService.playSound('select'); }} onBack={onBack} languageMode={languageMode} runMode={runMode} onRunMode={selectRunMode} profile={profileRef.current} oneHit={initialHp === 1 && initialMaxHp === 1} exitEnabled={exitEnabled} />}
 
             {paused&&gameState==='PLAYING'&&<div className="dash-pause-overlay" data-gamepad-modal data-gamepad-initial-scope="dash-paused">
-                <h2>{L('ひと休み','PAUSED','ひとやすみ')}</h2><button data-gamepad-initial-choice onClick={togglePause}>{L('走り続ける','RESUME RUN','はしりつづける')}</button><button onClick={returnToTitle}>{L('タイトルへ','Back to title','タイトルへ')}</button>
+                <h2><DashActionIcon action="pause"/>{L('ひと休み','PAUSED','ひとやすみ')}</h2><button data-gamepad-initial-choice onClick={togglePause}><Play size={24} aria-hidden/>{L('走り続ける','RESUME RUN','はしりつづける')}</button><button onClick={returnToTitle}><Home size={24} aria-hidden/>{L('タイトルへ','Back to title','タイトルへ')}</button>
             </div>}
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
@@ -1343,12 +1396,12 @@ const GoHomeDash: React.FC<{
 
             {gameState === 'GAME_OVER' && (
                 <div data-gamepad-modal data-gamepad-initial-scope="go-home-game-over" className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
-                    <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {travelled.toLocaleString()}m</div>
+                    <div className="dash-rush-record">360° LOOP {arcadeView.rush.loops} · SKYWAY {arcadeView.rush.depths} · HOMING {arcadeView.rush.homings}</div><Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {travelled.toLocaleString()}m</div>
                     <div className="dash-run-summary">◉ {arcadeView.stats.coins} · ✦ {arcadeView.stats.stars} · {arcadeView.bestCombo} COMBO · {arcadeView.stats.missions}/3 MISSIONS<br/>SCORE {score.toLocaleString()}{runMode==='practice'&&<small>{L('練習・記録対象外','PRACTICE · NOT RANKED','れんしゅう・きろくたいしょうがい')}</small>}</div>
                     <div className="flex flex-col gap-4 w-64">
-                        <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
+                        <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none"><RotateCcw size={24} aria-hidden/>TRY AGAIN</button>
                         <button className="dash-result-change" onClick={returnToTitle}>{L('主人公を選び直す', 'Choose another runner', 'しゅじんこうをえらびなおす')}</button>
-                        {exitEnabled && <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>}
+                        {exitEnabled && <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors"><Home size={22} aria-hidden/>EXIT</button>}
                     </div>
                 </div>
             )}

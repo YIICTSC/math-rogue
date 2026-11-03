@@ -26,7 +26,7 @@ export const DASH_GUIDE_PAGES:Page[]=[
  {id:'collect',title:['コイン・コンボ・フィーバー','Coins, combos and Fever','コイン・コンボ・フィーバー'],tips:[
   ['コインとレアスターを集め、敵をかわしてコンボをつなごう。間が空くとコンボが切れる。','Collect coins and rare stars, and dodge enemies to chain combos. Long gaps break the chain.','コインとレアスターをあつめ、てきをかわしてコンボをつなごう。まがあくとコンボがきれる。'],
   ['FLOWが満タンになるとフィーバー！ 回収や回避で勢いを保とう。コイン25枚・回避8回・破壊3回のミッションにも挑戦。','Fill FLOW to enter Fever! Keep collecting and dodging. Missions reward 25 coins, eight dodges and three breaks.','FLOWがまんタンになるとフィーバー！ かいしゅうやかいひでいきおいをたもとう。コイン25まい・かいひ8かい・はかい3かいのミッションにもちょうせん。'],
-  ['集めた記録は保存される。累計100コイン・スター5個で軌跡の色が変わる。','Your collection is saved. Trail colors unlock at 100 total coins and five stars.','あつめたきろくはほぞんされる。るいけい100コイン・スター5こできせきのいろがかわる。']]},
+  ['集めた記録は保存される。累計100コイン・スター5個でオーラの色が変わる。','Your collection is saved. Aura colors unlock at 100 total coins and five stars.','あつめたきろくはほぞんされる。るいけい100コイン・スター5こでオーラのいろがかわる。']]},
  {id:'powers',title:['お助けアイテム','Power-ups','おたすけアイテム'],tips:[
   ['磁石はコインを引き寄せ、2枚コインはスコア倍率アップ。シールドは被弾を防ぎ、ボードは1回の衝突を身代わりにする。','Magnets attract coins; double coins increase your score multiplier. Shields protect you and boards absorb one collision.','じしゃくはコインをひきよせ、2まいコインはスコアばいりつアップ。シールドはひだんをふせぎ、ボードは1かいのしょうとつをみがわりにする。'],
   ['羽付きシューズはジャンプ強化、羽のアイテムは低重力。効果中のアイテムは画面上部で確認できる。','Winged shoes strengthen jumps; the feather lowers gravity. Active effects appear at the top of the screen.','はねつきシューズはジャンプきょうか、はねのアイテムはていじゅうりょく。こうかちゅうのアイテムはがめんじょうぶでかくにんできる。']]},
@@ -55,6 +55,12 @@ export const DASH_GUIDE_PAGES:Page[]=[
  {id:'modes',title:['モード・一時停止・再挑戦','Modes, pause and retry','モード・いちじていし・さいちょうせん'],tips:[
   ['通常は最高記録に挑戦。デイリーはUTC日付ごとの固定コース。練習はDISTANCE 3000ごとの地点から再開でき、ランキング対象外。','Classic chases your best. Daily uses a fixed course per UTC date. Practice retries from each 3000 DISTANCE checkpoint and is not ranked.','つうじょうはさいこうきろくにちょうせん。デイリーはUTCひづけごとのこていコース。れんしゅうはDISTANCE 3000ごとのちてんからさいかいでき、ランキングたいしょうがい。'],
   ['P・画面の一時停止ボタンでひと休み。HPがなくなったら再挑戦、または主人公を選び直せる。遊び方はタイトルからいつでも確認できる。','Press P or the pause button for a break. When HP runs out, retry or choose another runner. Reopen this guide from the title anytime.','P・がめんのいちじていしボタンでひとやすみ。HPがなくなったらさいちょうせん、またはしゅじんこうをえらびなおせる。あそびかたはタイトルからいつでもかくにんできる。']]},
+ {id:'loop360',title:['360°ループとスピンダッシュ','360° loops and Spin Dash','360°ループとスピンダッシュ'],tips:[
+  ['スライドを長押しして、離すとスピンダッシュ！ 6秒のクールダウンがある。コイン回収や回避でMOMENTUMを高め、速さをつなごう。','Hold Slide, then release for a Spin Dash! It has a six-second cooldown. Collect and dodge to build Momentum and sustain speed.','スライドをながおしして、はなすとスピンダッシュ！ 6びょうのクールダウンがある。コインかいしゅうやかいひでMOMENTUMをたかめ、はやさをつなごう。'],
+  ['ループでは内側のレーンを360度駆け抜ける。頂点付近でジャンプを押すとエアトリック！ 空中では前方の敵に向かってもう一度ジャンプでホーミング攻撃。','Run a complete 360° along the inner loop. Press Jump near the apex for a trick! During a normal jump, press again near an enemy ahead to chain a homing attack.','ループではうちがわのレーンを360どかけぬける。ちょうてんふきんでジャンプをおすとエアトリック！ くうちゅうではぜんぽうのてきにむかってもういちどジャンプでホーミングこうげき。']]},
+ {id:'skyway3d',title:['奥へ走る3Dスカイウェイ','Run into the 3D Skyway','おくへはしる3Dスカイウェイ'],tips:[
+  ['←→・A/D・コントローラーの左右・画面の矢印で3つのレーンを移動。全主人公が専用の背面ランアニメで奥へ走る。','Use Left/Right, A/D, the controller stick/D-pad or touch arrows to switch among three lanes. Every protagonist has a dedicated rear-view run.','←→・A/D・コントローラーのさゆう・がめんのやじるしで3つのレーンをいどう。ぜんしゅじんこうがせんようのはいめんランアニメでおくへはしる。'],
+  ['低い障害物と穴はジャンプ、高いバーはスライド。安全なレーンのコインをたどり、ノーミス突破ボーナスを狙おう。シールドとボードはまれにだけ出現。','Jump over low barriers and gaps; slide under overhead bars. Follow coins along a safe lane and aim for a flawless bonus. Shields and boards are rare finds.','ひくいしょうがいぶつとあなはジャンプ、たかいバーはスライド。あんぜんなレーンのコインをたどり、ノーミスとっぱボーナスをねらおう。シールドとボードはまれにだけしゅつげん。']]},
 ];
 export function DashGuide({languageMode,starting,onClose}:{languageMode:LanguageMode;starting:boolean;onClose:()=>void}){
  const [index,setIndex]=useState(0),[zoom,setZoom]=useState(false);
