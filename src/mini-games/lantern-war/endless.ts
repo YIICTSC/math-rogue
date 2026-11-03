@@ -1,3 +1,4 @@
+import {repairDeployments} from './deployment';
 import {selectBanter} from './banter';
 import {voyageSite,VOYAGE_REGION_NAMES,VOYAGE_KIND_NAMES} from './voyage';
 import {clone,createBattle,distance,living} from './engine';
@@ -63,7 +64,7 @@ export function makeEndlessBattle(s:Campaign,originalBanter=true):Battle{
  const banter=originalBanter?selectBanter(s):undefined;if(banter)story.push(...clone(banter.lines));
  b.endless={banterId:banter?.id,site,depth:p.depth,title,theme,objective,weather,hold:0,installations,recruit,story,reward:250+p.depth*35,reinforcements:0};
  b.limit=600;b.time=0;b.seed=seed;b.wave=true;b.paused=true;b.result=undefined;b.encounter=null;b.pending=null;b.captured=[];b.treasure=false;
- b.log=[`${title}：${ENDLESS_OBJECTIVES[objective]}`,siege?'城壁は隣接部隊の破城または薬草2個の爆薬で破壊できます。':naval?'船の甲板と乗り込み橋で戦う海上戦。砲撃と狙撃の射線に注意。':'地形と架橋を活かし、拠点を結ぶ道を確保しよう。'];return b;
+ b.log=[`${title}：${ENDLESS_OBJECTIVES[objective]}`,siege?'城壁は隣接部隊の破城または薬草2個の爆薬で破壊できます。':naval?'船の甲板と乗り込み橋で戦う海上戦。砲撃と狙撃の射線に注意。':'地形と架橋を活かし、拠点を結ぶ道を確保しよう。'];repairDeployments(b);return b;
 }
 export function beginEndless(s:Campaign,originalBanter=true){if(!s.endless?.active||!endlessUnlocked(s)||s.phase!=='field')return false;s.battle=makeEndlessBattle(s,originalBanter);s.checkpoint=clone(s.battle);s.resultClaimed=false;s.storyKind='intro';s.storyIndex=0;s.phase='story';return true;}
 export function claimEndless(s:Campaign){const b=s.battle,m=b?.endless,p=s.endless;if(!m||!p||b?.result!=='win'||s.resultClaimed)return false;s.resultClaimed=true;s.gold+=m.reward;s.supplies+=3;p.chartedRoutes=[...(p.chartedRoutes||[]).filter(v=>v.depth!==m.depth),{depth:m.depth,route:m.site?.route??p.route??0}].slice(-48);delete p.plottedDepth;p.wins++;p.best=Math.max(p.best,p.depth);p.depth++;p.route=0;p.history=[`第${m.depth}航路・${m.title}`, ...p.history].slice(0,30);if(!s.recruited.includes(m.recruit)){s.recruited.push(m.recruit);s.xp[m.recruit]=Math.max(0,...Object.values(s.xp));}s.storyKind='outro';s.storyIndex=0;s.phase='story';return true;}

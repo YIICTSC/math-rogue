@@ -4,6 +4,7 @@ import {migrateEndlessIdentity} from './endlessRoster';
 import {checkEndless,tickEndless,claimEndless} from './endless';
 import {campaignEnemy,warEnemy} from './enemyRoster';
 import{PERSONAL_TECHNIQUES}from'./techniques';
+import {repairDeployments} from './deployment';
 import{connectedBattleTerrain}from'./battleTerrain';
 import {FIELD_QUESTS} from './world';
 import {HEROES,heroById,pairKey} from './roster';
@@ -33,7 +34,7 @@ export function loadCampaign():Campaign|null{
  const ids=s.formations.flatMap((f:any)=>f.slots?.filter(Boolean)||[]);
  if(s.formations.length!==3||s.formations.some((f:any)=>f.slots?.length!==6)||ids.length!==new Set(ids).size||!ids.includes(s.hero)||ids.some((id:string)=>!s.recruited.includes(id))||s.recruited.some((id:string)=>!HEROES.some(h=>h.id===id)))return null;
  if(['battle','result'].includes(s.phase)&&(!s.battle||!Array.isArray(s.battle.squads)||s.battle.map?.length!==10||s.battle.map.some((row:any)=>!Array.isArray(row)||row.length!==12||row.some((t:string)=>!TERRAIN_INFO[t]))))return null;
- if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle){if(!s.battle.endless)s.battle.map=connectedBattleTerrain(s.battle.map);s.battle.paused=true;}if(s.checkpoint?.map&&!s.checkpoint.endless)s.checkpoint.map=connectedBattleTerrain(s.checkpoint.map);return migrateEndlessIdentity(s);
+ if(s.storyKind==='side'&&!FIELD_QUESTS.some(q=>q.id===s.fieldQuest)){s.phase='field';s.storyKind='intro';s.fieldQuest=undefined;}s.fieldCompleted=Array.isArray(s.fieldCompleted)?s.fieldCompleted.filter((id:string)=>FIELD_QUESTS.some(q=>q.id===id)):[];if(s.battle){if(!s.battle.endless)s.battle.map=connectedBattleTerrain(s.battle.map);s.battle.paused=true;repairDeployments(s.battle);}if(s.checkpoint?.map&&!s.checkpoint.endless)s.checkpoint.map=connectedBattleTerrain(s.checkpoint.map);if(s.checkpoint)repairDeployments(s.checkpoint);s.encountersSinceStudy=Number.isInteger(s.encountersSinceStudy)&&s.encountersSinceStudy>=0?s.encountersSinceStudy%3:0;return migrateEndlessIdentity(s);
  }catch{return null;}
 }
 export function recruitFor(s:Campaign,chapter:number){
@@ -61,7 +62,7 @@ export function createBattle(s:Campaign,chapter=s.chapter,replay=false,sideQuest
  if(i===0)for(const f of members){f.hp+=14;f.maxHp+=14;}
  squads.push({id:'enemy-'+i,team:'enemy',name:i===0?(chapter===16?'灯守ヴェスパー':chapter===17?'忘却の王冠':'境界の守備隊'):'境界の第'+i+'隊',x,y,members,stamina:5,maxStamina:5,rest:0,wait:0,path:[],boss:i===0,kind:(i+chapter)%6,facing:3,moving:false});}
  if(c.objective==='escort')squads.push({id:'civil',team:'civil',name:'種を運ぶ旅人',x:0,y:8,members:[{...fighter(s,'high-school-caretaker',0,'ally'),hp:80,maxHp:80}],stamina:9,maxStamina:9,rest:0,wait:0,path:[],kind:0,facing:2,moving:false});
- return {chapter,map,squads,time:0,limit:360+chapter*12,paused:true,brave:3,log:['作戦を確認して進軍開始。タップで部隊を選び、目的地を指定。'],seed:20261028+chapter,encounter:null,pending:null,treasure:false,replay,sideQuest,wave:false,captured:[]};
+ const battle:Battle={chapter,map,squads,time:0,limit:360+chapter*12,paused:true,brave:3,log:['作戦を確認して進軍開始。タップで部隊を選び、目的地を指定。'],seed:20261028+chapter,encounter:null,pending:null,treasure:false,replay,sideQuest,wave:false,captured:[]};repairDeployments(battle);return battle;
 }
 export function pathTo(b:Battle,q:{x:number;y:number},goal:{x:number;y:number}){
  const queue=[{x:q.x,y:q.y,cost:0,path:[] as {x:number;y:number}[]}],costs=new Map<string,number>([[q.x+','+q.y,0]]);
@@ -77,6 +78,13 @@ export function braveSkill(s:Campaign,id:string,kind:'heal'|'rally'){const b=s.b
 const addLog=(b:Battle,t:string)=>{b.log=[t,...b.log].slice(0,50);};
 export function encounterPreview(s:Campaign){const b=s.battle;if(!b?.pending)return null;const a=b.squads.find(q=>q.id===b.pending![0])!,e=b.squads.find(q=>q.id===b.pending![1])!;return resolveEncounter(s,a,e,b.squads.filter(q=>q.id!==a.id&&q.id!==e.id&&q.team!=='civil'&&living(q)&&distance(q,q.team==='ally'?a:e)<=3));}
 export function startEncounter(s:Campaign){const b=s.battle,e=encounterPreview(s);if(!b||!e)return false;b.encounter=e;b.pending=null;b.paused=true;return true;}
+/** Preview the exact awards before returning to the map; claiming is still atomic. */
+export function encounterRewards(s:Campaign){
+ const e=s.battle?.encounter,a=s.battle?.squads.find(q=>q.id===e?.ally);
+ if(!e||!a||e.winner!=='ally')return [];
+ const enemyAlive=e.final.some(f=>f.team==='enemy'&&f.hp>0),xp=enemyAlive?20:45;
+ return a.members.map(f=>{const old=level(s,f.hero),next=1+Math.floor(((s.xp[f.hero]||0)+xp)/100);return {hero:f.hero,name:f.name,xp,old,next,learned:(PERSONAL_TECHNIQUES[f.hero]||[]).filter(t=>old<t.level&&next>=t.level).map(t=>t.name)};});
+}
 export function finishEncounter(s:Campaign){
  const b=s.battle,e=b?.encounter;if(!b||!e)return false;
  const a=b.squads.find(q=>q.id===e.ally)!,z=b.squads.find(q=>q.id===e.enemy)!;
@@ -86,7 +94,7 @@ export function finishEncounter(s:Campaign){
  const retreat=pathTo(b,loser,loser.team==='ally'?{x:1,y:8}:{x:11,y:0})[0];if(retreat){loser.x=retreat.x;loser.y=retreat.y;}
  if(e.winner==='ally'){b.brave=Math.min(9,b.brave+1);for(const f of a.members){const old=level(s,f.hero);s.xp[f.hero]=(s.xp[f.hero]||0)+(living(z)?20:45);const growth=level(s,f.hero)-old;if(growth){f.maxHp+=growth*4;f.hp=Math.min(f.maxHp,f.hp+8);f.atk+=growth*2;f.def+=growth;addLog(b,f.name+' Lv.'+level(s,f.hero));for(const t of PERSONAL_TECHNIQUES[f.hero]||[])if(old<t.level&&level(s,f.hero)>=t.level)addLog(b,f.name+'「'+t.name+'」を習得');}}
  for(const f of a.members)for(const partner of a.members.filter(p=>p.uid!==f.uid)){const k=pairKey(f.hero,partner.hero);s.bonds[k]=Math.min(15,(s.bonds[k]||0)+1);}}
- addLog(b,winner.name+'が交戦に勝利。'+loser.name+'は後退。');b.encounter=null;s.studyPending=true;checkResult(s);return true;
+ addLog(b,winner.name+'が交戦に勝利。'+loser.name+'は後退。');b.encounter=null;s.encountersSinceStudy=(s.encountersSinceStudy||0)+1;if(s.encountersSinceStudy>=3){s.encountersSinceStudy=0;s.studyPending=true;}checkResult(s);return true;
 }
 export function checkResult(s:Campaign){
  const b=s.battle;if(!b||b.result)return;if(b.endless){checkEndless(s);return;}const allies=b.squads.filter(q=>q.team==='ally'&&living(q)),enemies=b.squads.filter(q=>q.team==='enemy'&&living(q)),c=CHAPTERS[b.chapter],goal={x:9,y:0};
@@ -104,6 +112,7 @@ export function checkResult(s:Campaign){
 }
 export function tick(s:Campaign,dt=.5){
  const b=s.battle;if(!b||b.paused||b.result||b.encounter||b.pending)return false;
+ if(b.squads.some(q=>!b.map[q.y]?.[q.x]||TERRAIN_INFO[b.map[q.y][q.x]].cost>=99))repairDeployments(b);
  dt=Math.max(0,Math.min(1,dt));if(b.endless)tickEndless(s,dt);
  const prev=Math.floor(b.time/1.5);b.time+=Math.min(1,dt);const step=Math.floor(b.time/1.5)!==prev;
  for(const q of b.squads.filter(living)){
@@ -124,8 +133,15 @@ export function tick(s:Campaign,dt=.5){
  const a=b.squads.find(q=>q.team==='ally'&&living(q)&&distance(e,q)<=1);
  if(a){b.pending=[a.id,e.id];b.paused=true;break;}
  }
- if(b.time>=45&&!b.wave&&b.chapter>=5){b.wave=true;const template=b.squads.find(q=>q.team==='enemy'&&!q.boss);if(template){const wave=clone(template);wave.id='enemy-wave';wave.name='東方の増援';wave.x=11;wave.y=6;wave.path=[];for(const f of wave.members){f.uid+='-wave';f.hp=f.maxHp;}b.squads.push(wave);addLog(b,'東側の裂け目から敵増援！');}}
+ if(b.time>=45&&!b.wave&&b.chapter>=5){b.wave=true;const template=b.squads.find(q=>q.team==='enemy'&&!q.boss);if(template){const wave=clone(template);wave.id='enemy-wave';wave.name='東方の増援';wave.x=11;wave.y=6;wave.path=[];for(const f of wave.members){f.uid+='-wave';f.hp=f.maxHp;}b.squads.push(wave);repairDeployments(b);addLog(b,'東側の裂け目から敵増援！');}}
  checkResult(s);return true;
+}
+/** Substeps preserve collisions, timed hazards and immediate encounter pauses at any speed. */
+export function advanceMarch(s:Campaign){
+ const speed=[1,2,4].includes(s.battle?.marchSpeed||1)?s.battle?.marchSpeed||1:1,moved=new Set<string>();let changed=false;
+ for(let i=0;i<speed;i++){if(s.studyPending)break;if(!tick(s,.5))break;changed=true;for(const q of s.battle!.squads)if(q.moving)moved.add(q.id);}
+ if(changed)for(const q of s.battle!.squads)q.moving=moved.has(q.id);
+ return changed;
 }
 export function beginChapter(s:Campaign,chapter=s.chapter,sideQuest=false){
  if(s.endless?.active||chapter>s.chapter||chapter<0||chapter>17)return false;
@@ -145,7 +161,7 @@ export function advanceStory(s:Campaign,length:number,choice?:number){
  const c=s.battle?.chapter??s.chapter;if(CHAPTERS[c].dilemma){s.choices[c]=choice??0;if(choice===1)s.supplies+=2;else s.gold+=80;}
  if(c===17){s.phase='ending';return true;}s.chapter=c+1;recruitFor(s,s.chapter);s.phase='field';s.battle=null;s.checkpoint=null;return true;
 }
-export function retryBattle(s:Campaign){if(!s.checkpoint)return false;s.battle=clone(s.checkpoint);s.battle.paused=true;s.phase='battle';s.resultClaimed=false;return true;}
+export function retryBattle(s:Campaign){if(!s.checkpoint)return false;s.battle=clone(s.checkpoint);repairDeployments(s.battle);s.battle.paused=true;s.phase='battle';s.resultClaimed=false;return true;}
 export function train(s:Campaign,id:string){if(!s.recruited.includes(id)||s.gold<100||level(s,id)>=20)return false;s.gold-=100;s.xp[id]=(s.xp[id]||0)+50;return true;}
 export function forge(s:Campaign,id:string){const rank=s.forge[id]||0,cost=150+rank*150;if(!s.recruited.includes(id)||s.gold<cost||rank>=4)return false;s.gold-=cost;s.forge[id]=rank+1;return true;}
 export function useItem(s:Campaign,id:string){const q=s.battle?.squads.find(q=>q.id===id);if(!q||s.supplies<1||s.battle?.encounter||s.battle?.pending)return false;s.supplies--;for(const f of q.members)f.hp=Math.min(f.maxHp,f.hp+20);return true;}

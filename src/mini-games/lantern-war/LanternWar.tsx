@@ -17,7 +17,7 @@ import type {MiniGameComponentProps} from '../../components/MiniGameRouter';
 import {assetUrl} from '../../utils/assetPaths';
 import {CHAPTERS,SUPPORTS,supportLines,supportKey} from './story';
 import {HEROES,heroById} from './roster';
-import {newCampaign,loadCampaign,saveCampaign,clone,tick,advanceStory,claimResult,retryBattle,SAVE_KEY} from './engine';
+import {newCampaign,loadCampaign,saveCampaign,clone,advanceMarch,advanceStory,claimResult,retryBattle,SAVE_KEY} from './engine';
 import {FieldMap,Camp} from './CampaignViews';
 import {Battlefield,type Update} from './Battlefield';
 import {Portrait,BattleArt} from './art';
@@ -31,7 +31,7 @@ export default function LanternWar({onBack,onFinish,languageMode='JAPANESE',prob
  useLanternMusic(entered,s);
  const update:Update=f=>setS(prev=>{if(!prev)return prev;const next=clone(prev);f(next);return next;});
  useEffect(()=>{if(!s)return;const timer=setTimeout(()=>setSaveError(!saveCampaign(s)),200);return()=>clearTimeout(timer);},[s]);
- useEffect(()=>{if(!entered)return;const timer=setInterval(()=>setS(prev=>{if(!prev||prev.phase!=='battle'||!prev.battle||prev.battle.paused||prev.studyPending||document.hidden)return prev;const next=clone(prev);tick(next);return next;}),500);return()=>clearInterval(timer);},[entered]);
+ useEffect(()=>{if(!entered)return;const timer=setInterval(()=>setS(prev=>{if(!prev||prev.phase!=='battle'||!prev.battle||prev.battle.paused||prev.studyPending||document.hidden)return prev;const next=clone(prev);advanceMarch(next);return next;}),500);return()=>clearInterval(timer);},[entered]);
  useEffect(()=>{const pause=()=>{if(document.hidden)update(s=>{if(s.battle)s.battle.paused=true;});};document.addEventListener('visibilitychange',pause);return()=>document.removeEventListener('visibilitychange',pause);},[]);
  useEffect(()=>{const stop=()=>{if(document.hidden)stopLanternVoice();};document.addEventListener('visibilitychange',stop);window.addEventListener('blur',stopLanternVoice);return()=>{stopLanternVoice();document.removeEventListener('visibilitychange',stop);window.removeEventListener('blur',stopLanternVoice);};},[]);
  const exit=()=>{stopLanternVoice();if(s)setSaveError(!saveCampaign(s));onBack();};

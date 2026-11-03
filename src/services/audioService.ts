@@ -1889,7 +1889,8 @@ class AudioService {
                   audio.pause();
                   continue;
               }
-              if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) {
+              // Voices may overlap, but an exit/mute must also cancel a delayed play().
+              if ((!overlap || this.isVoiceSfxName(name)) && this.sfxPlaybackGenerations.get(name) !== generation) {
                   audio.pause();
                   audio.currentTime = 0;
                   return true;
@@ -2182,12 +2183,13 @@ class AudioService {
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
   }
 
-  public async playLanternWarVoiceFile(id:string){
+  public async playLanternWarVoiceFile(id:string,overlap=false){
       const clip=Object.values(lanternVoiceManifest as Record<string,{id:string;path:string;duration:number}>).find(c=>c.id===id);
       if(!/^[a-f0-9]{20}$/.test(id)||!clip||!clip.path.startsWith('sfx/')||clip.path.includes('..')||!this.canPlayConversationVoice())return false;
-      this.stopLanternWarVoices();this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
-      const name='lantern-war-voice-'+id,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
-      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.duration*1000+350,false,generation,true);
+      if(!overlap)this.stopLanternWarVoices();this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      // Overlapping calls share the cancellation generation, including repeated clips.
+      const name='lantern-war-voice-'+id,generation=(this.sfxPlaybackGenerations.get(name)??0)+(overlap?0:1);this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.duration*1000+350,overlap,generation,true);
   }
   public stopLanternWarVoices(){
       const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);

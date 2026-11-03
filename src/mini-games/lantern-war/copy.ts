@@ -330,3 +330,16 @@ Object.assign(LANTERN_ENGLISH,GUIDE_ENGLISH);Object.assign(LANTERN_HIRAGANA,GUID
 Object.assign(LANTERN_ENGLISH,techniqueCopy.english);Object.assign(LANTERN_HIRAGANA,techniqueCopy.hiragana);
 
 Object.assign(LANTERN_ENGLISH,voyageCopy.english);Object.assign(LANTERN_HIRAGANA,voyageCopy.hiragana);
+
+Object.assign(LANTERN_ENGLISH,{
+ '進軍速度':'March speed','交戦リザルト':'Engagement results','おすすめ方針':'Formation priority',
+ '攻守のバランス':'Balanced offense and defense','攻撃・速さを重視':'Attack and speed','回復・耐久を重視':'Healing and endurance',
+ 'この部隊をおすすめ編成に':'Recommend this squad','他の部隊の編成は維持されます。':'Other squads keep their formations.',
+ 'この部隊と待機中の仲間から、前後衛と絆を考慮して編成しました。':'Arranged this squad and reserves by front/rear roles and bonds.',
+});
+Object.assign(LANTERN_HIRAGANA,{
+ '進軍速度':'しんぐんそくど','交戦リザルト':'こうせんりざると','おすすめ方針':'おすすめほうしん',
+ '攻守のバランス':'こうしゅのばらんす','攻撃・速さを重視':'こうげき・はやさをじゅうし','回復・耐久を重視':'かいふく・たいきゅうをじゅうし',
+ 'この部隊をおすすめ編成に':'このぶたいをおすすめへんせいに','他の部隊の編成は維持されます。':'ほかのぶたいのへんせいはいじされます。',
+ 'この部隊と待機中の仲間から、前後衛と絆を考慮して編成しました。':'このぶたいとたいきちゅうのなかまから、ぜんこうえいときずなをこうりょしてへんせいしました。',
+});

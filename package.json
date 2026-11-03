@@ -211,7 +211,7 @@
     "test:lantern-war:facing": "node scripts/test-lantern-facing.mjs",
     "test:lantern-war:endless": "node scripts/test-lantern-endless.mjs",
     "test:lantern-war:endless:browser": "node scripts/test-lantern-endless-browser.mjs",
-    "test:lantern-war": "node scripts/test-lantern-war.mjs",
+    "test:lantern-war": "node scripts/test-lantern-war.mjs && node scripts/test-lantern-war-polish.mjs",
     "test:lantern-war:browser": "node scripts/test-lantern-war-browser.mjs",
     "test:lantern-war:banter": "node scripts/test-lantern-banter.mjs",
     "export:lantern-war:banter": "node scripts/export-lantern-banter.mjs",

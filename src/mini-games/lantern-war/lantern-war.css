@@ -496,3 +496,52 @@
 @media(prefers-reduced-motion:reduce){.lw-voyage-ship{transition:none}}
 .lw-voyage{min-height:calc(100vh - 4rem);background:#0b2229}.lw-voyage figure{margin:0;width:100%;background:#102b35}.lw-voyage figure img{display:block;width:100%;max-height:65vh;object-fit:contain;aspect-ratio:16/9}.lw-voyage article{max-width:960px;margin:auto;padding:clamp(20px,4vw,46px);color:#f3e6c7}.lw-voyage h1{font-size:clamp(24px,4vw,44px);margin:.4em 0}.lw-voyage p{line-height:1.9}.lw-voyage small{color:#d7bc80}
 .lw-voyage .lw-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}.lw-voyage .lw-actions button{flex:1 1 220px;width:auto;min-height:48px;white-space:normal}
+/* Keep encounter forecasts entirely visible on short landscape phone screens. */
+@media(orientation:landscape) and (max-height:600px){
+ .lw-root .lw-modal:has(.lw-prediction){position:fixed;inset:0;padding:max(6px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));z-index:100}
+ .lw-root .lw-modal .lw-prediction{width:min(760px,100%);height:min(380px,100%);max-height:100%;min-height:0;overflow:hidden;padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto minmax(0,1fr) auto auto auto;gap:4px 10px;align-content:stretch}
+ .lw-prediction>small,.lw-prediction>h2,.lw-prediction>.lw-predict-sides,.lw-prediction>p{grid-column:1/-1}
+ .lw-root .lw-prediction>small{font-size:8px;line-height:1.2}.lw-root .lw-prediction>h2{font-size:18px;line-height:1.2}
+ .lw-root .lw-prediction .lw-predict-sides{min-height:0;margin:0;gap:8px;align-items:stretch}
+ .lw-root .lw-prediction .lw-predict-sides>div{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;gap:2px}
+ .lw-root .lw-prediction .lw-predict-sides>.lw-atlas{min-height:0}.lw-root .lw-prediction .lw-predict-sides .lw-atlas{height:100%;width:100%;max-width:160px;min-height:0;object-fit:contain}
+ .lw-root .lw-prediction .lw-predict-sides>strong{align-self:center;font-size:20px}.lw-root .lw-prediction .lw-predict-sides b{font-size:12px;line-height:1.3}
+ .lw-root .lw-prediction>p{margin:0;font-size:11px;line-height:1.4}
+ .lw-root .lw-prediction>button{margin:2px 0 0;min-height:44px;padding:6px 10px;font-size:12px;align-self:end}
+}
+
+
+/* March controls and per-squad recommendations share the existing touch targets. */
+.lw-root .lw-march-speed{min-height:38px;font-variant-numeric:tabular-nums;padding:6px 12px}
+.lw-formation-advice{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:15px 0;padding:12px;border:1px solid #c4b17a66;border-radius:8px;background:#0c252c}
+.lw-formation-advice label{display:grid;gap:5px;font-size:12px}
+.lw-formation-advice small{width:100%;color:#b8cfca;font-size:11px}
+.lw-parameter-card.is-supported{background:#21493ced;border-color:#a4e8ba}
+/* Results occupy the defeated side, leaving the surviving army's reaction visible. */
+.lw-root .lw-combat-end{inset:30% 3% 3% auto;width:43%;padding:18px;gap:12px;justify-content:center;border:1px solid #d5bf88;border-radius:12px;background:#08212bee;box-shadow:0 8px 24px #06151d88;z-index:8;overflow:auto}
+.lw-root .lw-combat-end.result-enemy{left:3%;right:auto}
+.lw-root .lw-combat-end h2{font-size:clamp(16px,2.3vw,28px);line-height:1.4}
+.lw-root .lw-combat-end p{font-size:12px}
+.lw-combat-rewards{width:100%;overflow:auto;min-height:0;display:grid;gap:6px;text-align:left;font:12px/1.5 system-ui}
+.lw-combat-rewards>div{display:grid;grid-template-columns:1fr auto auto;column-gap:8px;border-bottom:1px solid #a9c2b64d;padding:5px 0}
+.lw-combat-rewards strong{color:#f3da8a;grid-column:1/-1}
+.lw-combat-rewards small{grid-column:1/-1;color:#b6e3bc}
+.lw-combat-end>button{flex-shrink:0;min-height:44px}
+.lw-combat.is-finished.winner-ally .lw-parameter-deck.enemy,.lw-combat.is-finished.winner-enemy .lw-parameter-deck.ally{opacity:0}
+@media(max-width:600px) and (orientation:portrait){
+ .lw-root .lw-combat-end{inset:43% 2% 2% auto;width:46%;padding:10px;gap:8px}
+ .lw-root .lw-combat-end.result-enemy{left:2%;right:auto}
+ .lw-root .lw-combat-end p{font-size:10px}
+ .lw-combat-rewards{font-size:10px}
+ .lw-combat-rewards>div{grid-template-columns:1fr auto;gap:3px}.lw-combat-rewards>div>b{grid-column:1/-1}
+ .lw-formation-advice button{font-size:12px;min-height:44px}
+}
+@media(orientation:landscape) and (max-height:600px){
+ .lw-root .lw-combat-end{inset:22% 3% 3% auto;padding:10px;gap:6px}
+ .lw-root .lw-combat-end.result-enemy{left:3%;right:auto}
+ .lw-root .lw-combat-end>small{font-size:8px}.lw-root .lw-combat-end h2{font-size:16px}.lw-root .lw-combat-end p{font-size:10px}
+ .lw-combat-rewards{font-size:10px;max-height:34vh}.lw-combat-rewards>div{padding:3px 0}
+ .lw-root .lw-march-speed{min-height:32px;width:100%;margin:2px 0}
+}
+
+.lw-root .lw-squad{transition:left var(--lw-march-duration,.8s) linear,top var(--lw-march-duration,.8s) linear}
