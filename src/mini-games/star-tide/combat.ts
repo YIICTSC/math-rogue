@@ -1,6 +1,13 @@
 /** Both face buttons equip the same eight weapons. Timing is in simulation seconds. */
 export const WALK_SPEED = 3.8;
-export const COMBO_GRACE = .28;
+export const COMBO_GRACE = .34;
+export type AttackMode = 'normal' | 'charged' | 'counter' | 'aerial';
+export const SPECIAL_MOVES: Record<Exclude<AttackMode,'normal'>, readonly (readonly [string,string])[]> = {
+ charged: [['潮輪旋風','Tide cyclone'],['大潮の環','Great tide ring'],['星火の花','Starfire bloom'],['錨の一撃','Anchor breaker'],['地鳴り','Quake hammer'],['流星連射','Meteor volley'],['月鏡障壁','Moon barrier'],['暁の長閃','Dawn lance']],
+ counter: [['返潮の太刀','Riptide counter'],['追潮の環','Chasing ring'],['反照の火','Reflected flame'],['逆波の鉤','Backwash hook'],['岩返し','Stone riposte'],['見切り矢','Snap arrow'],['月輪反射','Moon reflection'],['星返し','Star riposte']],
+ aerial: [['流星斬り','Meteor dive'],['空渡りの環','Sky ring'],['降り星の火','Falling starfire'],['風の錨','Wind anchor'],['隕石落とし','Meteor hammer'],['星雨','Star rain'],['月の着地','Moon landing'],['天降る暁','Skyfall lance']]
+};
+export const attackName=(weapon:number,stage:number,mode:AttackMode)=>mode==='normal'?weaponAction(weapon).moves[stage]:SPECIAL_MOVES[mode][weapon];
 export type WeaponStyle = 'blade' | 'ranged' | 'heavy' | 'guard' | 'thrust';
 export const WEAPON_ACTIONS: { style: WeaponStyle; durations: number[]; reach: number; damage: number; moves: readonly (readonly [string, string])[] }[] = [
   { style:'blade', durations:[.30,.32,.40], reach:1.7, damage:2, moves:[['潮斬り','Tide slash'],['返し波','Returning wave'],['星穿ち','Star pierce']] },

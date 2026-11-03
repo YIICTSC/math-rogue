@@ -80,7 +80,7 @@ export function visualHash(chapter: number, room: number, x: number, y: number) 
   return (n ^ n >>> 16) >>> 0;
 }
 
-export type HeroMotion = { moving: boolean; walk: number; attack: number; attackDuration?: number; activeWeapon?: number; combo?: number; effect: number; dash: number; hurt: number; gliding: boolean; time: number; dx: number; dy: number };
+export type HeroMotion = { attackMode?:'normal'|'charged'|'counter'|'aerial'; moving: boolean; walk: number; attack: number; attackDuration?: number; activeWeapon?: number; combo?: number; effect: number; dash: number; hurt: number; gliding: boolean; time: number; dx: number; dy: number };
 /** Feet advance with distance, attack frames advance with simulation time. */
 export function heroFrame(w: HeroMotion) {
   const horizontal = Math.abs(w.dx) >= Math.abs(w.dy), direction = horizontal ? 0 : w.dy > 0 ? 1 : 2;
@@ -88,7 +88,7 @@ export function heroFrame(w: HeroMotion) {
   if(w.dash>0) return {sheet:'base',columns:6,rows:8,row:6,frame:Math.min(5,Math.floor((.22-w.dash)/.22*6)),flip};
   if(w.gliding) return {sheet:'base',columns:6,rows:8,row:7,frame:Math.floor(w.walk*8)%3,flip};
   if(w.attack>0) {
-    const weapon=w.activeWeapon ?? Math.max(0,w.effect-1), stage=w.combo??0;
+    const weapon=w.activeWeapon ?? Math.max(0,w.effect-1), stage=w.attackMode==='charged'?1:w.attackMode==='counter'||w.attackMode==='aerial'?2:w.combo??0;
     const progress=Math.max(0,Math.min(.999,1-w.attack/(w.attackDuration??.4)));
     if([1,2,4,5,6].includes(weapon)) {
       const style=weapon===4?1:weapon===6?2:0;

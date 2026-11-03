@@ -1,3 +1,6 @@
+import {freshGrowth,normalizeGrowth,combatStats,TALENTS,RELICS,talentPoints,levelFor,type GrowthSave,type Difficulty} from './progression';
+import {encounterFor} from './encounters';
+import {MECHANISMS,mechanismPoints,mechanismState,type MechanismState} from './mechanisms';
 import {elevationAt,canTraverseHeight,terracesFor,vistaPoint} from './elevation';
 import { freshWild, normalizeWild, RECIPES, forageNodes, campPosition, towerPosition, type WildSave, type Inventory } from './wild';
 import { puzzleRecords, type PuzzleSnapshot } from './puzzleSave';
@@ -11,10 +14,10 @@ import { enemyKind, heroId, type HeroId } from './visuals';
 import { stepEnemy } from './enemyAI';
 import { shapeField } from './geography';
 import { roundedSolid } from './rounding';
-import { WALK_SPEED, COMBO_GRACE, weaponAction } from './combat';
+import { WALK_SPEED, COMBO_GRACE, weaponAction, type AttackMode } from './combat';
 import {skyMap, WIND_LAUNCH, SKY_RETURN, SKY_CHEST, SKY_UPDRAFTS} from './sky';
 export const W = 20, H = 14;
-export type Save = WildSave & {
+export type Save = WildSave & GrowthSave & {
     version: 1;
     puzzles: Record<string, PuzzleSnapshot>;
     unlockedTools: number;
@@ -59,6 +62,9 @@ export type Enemy = {
     summoned?: boolean;
     facing?: number;
     moving?: boolean;
+    elite?:boolean;
+    burn?:number;
+    burnPower?:number;
     windup?: number;
     strike?: number;
     aim?: number;
@@ -74,7 +80,7 @@ export type Shot = {
     kind?: number;
     damage?: number;
 };
-export const fresh = (): Save => ({ ...freshWild(), version: 1, hero: 'nagi', weaponA: 0, studySeconds: 0, studyProblems: 0, pendingTravel: null, realm: 'surface', glideAwakened: false, skyTreasures: [], puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
+export const fresh = (): Save => ({ ...freshWild(),...freshGrowth(), version: 1, hero: 'nagi', weaponA: 0, studySeconds: 0, studyProblems: 0, pendingTravel: null, realm: 'surface', glideAwakened: false, skyTreasures: [], puzzles: {}, unlockedTools: 0, maxChapter: 0, beacons: [], chapter: 0, room: 0, hp: 6, maxHp: 6, coins: 0, tool: 0, cleared: [], solved: [], chests: [], visited: [], quests: [], choices: [], seconds: 0, ending: false, gate: null });
 export const key = (s: Save) => `${s.chapter}:${s.realm==='sky'?'sky':s.room}`;
 export function load(): Save { try {
     const x = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
@@ -97,17 +103,18 @@ export function load(): Save { try {
     x.unlockedTools = Math.max(0, Math.min(7, Number(x.unlockedTools ?? x.maxChapter) || 0));
     x.coins = Math.max(0, Math.min(999999, Math.floor(Number(x.coins) || 0)));
     const wild = normalizeWild(x);
+    const growth=normalizeGrowth(x);
     x.hero = heroId(x.hero);
     x.studyProblems=Number.isInteger(x.studyProblems)?Math.max(0,x.studyProblems):0;
     x.studySeconds=Number.isFinite(x.studySeconds)?Math.max(0,Math.min(86400,x.studySeconds)):0;
     const pending=x.pendingTravel;
     x.pendingTravel=pending&&['exit','beacon','launch','leave','travel'].includes(pending.kind)&&Number.isInteger(pending.value)&&Math.abs(pending.value)<=11?pending:null;
-    x.realm = x.realm==='sky' && x.beacons.includes(0) ? 'sky' : 'surface';
+    x.realm = x.realm==='sky' && (x.beacons.includes(0)||growth.cycle>0) ? 'sky' : 'surface';
     if(x.realm!=='sky'&&typeof x.gate==='string'&&x.gate.endsWith(':sky'))x.gate=null;
     x.glideAwakened = typeof x.glideAwakened==='boolean' ? x.glideAwakened : x.beacons.includes(0);
     x.skyTreasures = Array.isArray(x.skyTreasures) ? [...new Set(x.skyTreasures.filter((v:unknown)=>Number.isInteger(v)&&Number(v)>=0&&Number(v)<12))] : [];
     x.weaponA = Number.isInteger(x.weaponA) && wild.ownedTools.includes(x.weaponA) ? x.weaponA : 0;
-    return { ...n, ...x, ...wild, chapter: Math.max(0, Math.min(11, Math.floor(Number(x.chapter) || 0))), room: Math.max(0, Math.min(23, Math.floor(Number(x.room) || 0))), maxHp: Math.max(6, Math.min(30, Number(x.maxHp) || 6)), hp: Math.max(.5, Math.min(30, Number(x.hp) || 6)), tool: wild.ownedTools.includes(Number(x.tool)) ? Number(x.tool) : 0, seconds: Math.max(0, Number(x.seconds) || 0) };
+    return { ...n, ...x, ...wild,...growth, chapter: Math.max(0, Math.min(11, Math.floor(Number(x.chapter) || 0))), room: Math.max(0, Math.min(23, Math.floor(Number(x.room) || 0))), maxHp: Math.max(6, Math.min(30, Number(x.maxHp) || 6)), hp: Math.max(.5, Math.min(30, Number(x.hp) || 6)), tool: wild.ownedTools.includes(Number(x.tool)) ? Number(x.tool) : 0, seconds: Math.max(0, Number(x.seconds) || 0) };
 }
 catch {
     return fresh();
@@ -130,6 +137,29 @@ export function roomMap(chapter: number, room: number) { const map: number[][] =
             map[y][x] = room % 3 === 0 ? 2 : 6;
     } shapeField(chapter, room, map); map[7][0] = room % 6 === 0 ? 3 : room < 8 ? 1 : 5; map[7][19] = room % 6 === 5 && room !== 23 ? 3 : room < 8 ? 1 : 5; map[0][10] = room >= 6 ? 5 : 3; map[13][10] = room < 18 ? 5 : 3; map[1][10] = map[12][10] = 5; map[6][8] = map[6][12] = map[6][10] = map[7][10] = 5; map[7][2] = map[7][17] = 5; for(const dir of [-1,1,-6,6]){const next=room+dir;const valid=next>=0&&next<24&&(dir!==-1||room%6!==0)&&(dir!==1||room%6!==5);if(room<8&&next<8&&valid){if(Math.abs(dir)===1)for(let y=1;y<H-1;y++)map[y][dir<0?0:W-1]=1;else for(let x=1;x<W-1;x++)map[dir<0?0:H-1][x]=1;}}return map; }
 export class World {
+    hitStop=0;
+    guarding=false;
+    guardAge=0;
+    parrySerial=0;
+    driveSerial=0;
+    drive=0;
+    target:Enemy|null=null;
+    lastMove={x:0,y:0};
+    chainCooldown=0;
+    trial:{wave:number;elapsed:number}|null=null;
+    links:{x:number;y:number;tx:number;ty:number;life:number}[]=[];
+    lootToast:{id:string;duplicate:boolean;seconds:number}|null=null;
+    floating:{x:number;y:number;text:string;color:string;life:number}[]=[];
+    get stats(){return combatStats(this.s);}
+    get trialKind(){return this.inSky?null:this.s.room===17?'hunt':this.s.room===21?'arena':null;}
+    get atTrial(){return Boolean(this.trialKind&&!this.trial&&!this.enemies.length&&Math.hypot(this.x-10.5,this.y-6.5)<1.5);}
+    attackMode:AttackMode = 'normal';
+    chargeHeld=false;
+    chargeTime=0;
+    counterWindow=0;
+    perfectDodge=false;
+    mechanism:MechanismState=mechanismState();
+    get mechanismInfo(){return this.inSky?undefined:MECHANISMS[this.s.room];}
     moving = false;
     walk = 0;
     combo = 0;
@@ -177,8 +207,8 @@ export class World {
     kills = 0;
     dirty = false;
     time = 0;
-    constructor(s: Save) { this.s = s; this.s.dishes??={};this.s.mealBuff??=null; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.studySeconds ??= 0;this.s.studyProblems ??= 0;this.s.pendingTravel ??= null;this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
-    enter() { if(this.inSky){this.enterSky();return;} this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = [8, 12, 14].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
+    constructor(s: Save) { this.s=s;Object.assign(this.s,normalizeGrowth(s)); this.s.dishes??={};this.s.mealBuff??=null; this.s.hero = 'nagi'; this.s.weaponA ??= 0; this.s.studySeconds ??= 0;this.s.studyProblems ??= 0;this.s.pendingTravel ??= null;this.s.realm ??= 'surface'; this.s.skyTreasures ??= []; this.enter(); }
+    enter() { this.resetCombatExtras();if(this.inSky){this.enterSky();return;} this.chargeHeld=false;this.chargeTime=0;this.counterWindow=0;this.mechanism=mechanismState();this.queuedSlot = null; this.comboWindow = 0; this.comboWeapon = -1; this.combo = 0; this.strikePending = false; this.notice = ''; this.moving = false; this.walk = 0; this.fx = []; this.gliding = false; this.fires = []; this.safe = { x: this.x, y: this.y }; this.hintTarget = null; this.map = roomMap(this.s.chapter, this.s.room); this.circuit = this.s.room===8 && !this.s.solved.includes(key(this.s)) ? circuitChamber(this.s.chapter * 7 + this.s.room) : null; this.ice = this.s.room === 19 && !this.s.solved.includes(key(this.s)) ? iceChamber(this.s.chapter) : null; if (this.circuit) {
         for (let y = 3; y <= 10; y++)
             for (let x = 3; x <= 16; x++)
                 this.map[y][x] = 5;
@@ -188,16 +218,19 @@ export class World {
                 this.map[y][x] = this.ice.walls.has(`${x - 6},${y - 2}`) ? 3 : 5;
         for (let y = 4; y <= 9; y++)
             this.map[y][4] = 5;
-    } this.beam = [11, 15, 18, 22].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? beamChamber(this.s.chapter + this.s.room) : null; if (this.beam) {
+    } this.beam = this.s.room===11 && !this.s.solved.includes(key(this.s)) ? beamChamber(this.s.chapter + this.s.room) : null; if (this.beam) {
         for (let y = 3; y <= 10; y++)
             for (let x = 3; x <= 16; x++)
                 this.map[y][x] = 5;
-    } this.blocks = this.s.room >= 8 && [9, 13, 16, 20].includes(this.s.room) && !this.s.solved.includes(key(this.s)) ? blockChamber(this.s.chapter + this.s.room) : null; if (this.blocks) {
+    } this.blocks = this.s.room===9 && !this.s.solved.includes(key(this.s)) ? blockChamber(this.s.chapter + this.s.room) : null; if (this.blocks) {
         for (let y = 3; y <= 9; y++)
             for (let x = 7; x <= 13; x++)
                 this.map[y][x] = 5;
         for (const p of this.blocks.walls)
             this.map[p.y][p.x] = 3;
+    } if(this.mechanismInfo&&!['blocks','circuit','beam','ice'].includes(this.mechanismInfo.kind)){
+        for(let y=3;y<=10;y++)for(let x=6;x<=14;x++)this.map[y][x]=5;
+        if(this.mechanismInfo.kind==='tide'&&!this.s.solved.includes(key(this.s)))for(let y=3;y<=10;y++)this.map[y][10]=2;
     } if (this.s.room < 8) {
         for (const p of [...forageNodes, campPosition, towerPosition])
             this.map[Math.floor(p.y)][Math.floor(p.x)] = 0;
@@ -213,7 +246,7 @@ export class World {
         const boss = this.s.room === 23;
         for (let i = 0; i < (boss ? 1 : 2 + this.s.room % 3); i++)
             this.enemies.push({ x: boss ? 10.5 : [16.5, 15.5, 5.5, 3.5][i], y: boss ? 4.5 : [7.5, 11.5, 11.5, 9.5][i], hp: boss ? 24 + this.s.chapter * 6 : 3 + Math.floor(this.s.chapter / 2), max: boss ? 24 + this.s.chapter * 6 : 3 + Math.floor(this.s.chapter / 2), boss, kind: enemyKind(this.s.chapter, this.s.room, i), cool: i * .5 + 1, phase: 0 });
-    } this.restorePuzzle(); this.dirty = true; }
+    } this.scaleEnemies();this.restorePuzzle(); this.dirty = true; }
     requestStudy(kind:'exit'|'beacon'|'launch'|'leave'|'travel',value=0){
         if(this.s.gate)return true;
         if(this.s.studySeconds<=180)return false;
@@ -233,18 +266,18 @@ export class World {
         return true;
     }
     get inSky(){return this.s.realm==='sky';}
-    get gliderUnlocked(){return this.s.beacons.includes(0);}
+    get gliderUnlocked(){return this.s.beacons.includes(0)||this.s.cycle>0;}
     get atLaunch(){return !this.inSky&&this.s.room===0&&Math.hypot(this.x-WIND_LAUNCH.x,this.y-WIND_LAUNCH.y)<1.3;}
     get atSkyReturn(){return this.inSky&&Math.hypot(this.x-SKY_RETURN.x,this.y-SKY_RETURN.y)<1.2;}
     get atSkyChest(){return this.inSky&&Math.hypot(this.x-SKY_CHEST.x,this.y-SKY_CHEST.y)<1.4;}
-    enterSky(){
+    enterSky(){this.resetCombatExtras();this.chargeHeld=false;this.chargeTime=0;this.counterWindow=0;
         this.s.room=0;this.cancelCombo();this.attack=0;this.strikePending=false;this.dash=0;
         this.map=skyMap(this.s.chapter);this.blocks=null;this.beam=null;this.circuit=null;this.ice=null;
         this.shots=[];this.fires=[];this.fx=[];this.switches=[];this.walk=0;this.moving=false;this.notice='sky';this.travel=.5;
         this.x=SKY_RETURN.x;this.y=SKY_RETURN.y;this.safe={x:this.x,y:this.y};this.gliding=false;
         this.stamina=this.s.staminaMax;this.hurt=0;
         this.enemies=this.s.cleared.includes(key(this.s))?[]:[{x:17.5,y:5.8,hp:6+this.s.chapter,max:6+this.s.chapter,kind:[2,5,9,19][this.s.chapter%4],cool:2,phase:0}];
-        if(!this.s.visited.includes(key(this.s)))this.s.visited.push(key(this.s));this.dirty=true;
+        this.scaleEnemies();if(!this.s.visited.includes(key(this.s)))this.s.visited.push(key(this.s));this.dirty=true;
     }
     launchSky(){
         if(!this.atLaunch||this.s.gate)return false;
@@ -271,7 +304,7 @@ export class World {
         return; const d = Math.hypot(dx, dy), fx = dx / d, fy = dy / d; dx /= Math.max(1, d); dy /= Math.max(1, d); if (this.dash <= 0 && this.attack <= 0) {
         this.dx = fx;
         this.dy = fy;
-    } const v = (this.dash > 0 ? 10 : this.gliding ? (this.weather === 'wind' ? 5.2 : 4.2) : WALK_SPEED * (this.s.mealBuff?.kind==='speed'?1.2:1) * (this.attack > 0 ? .55 : 1)) * dt; for (const [ax, ay] of [[dx * v, 0], [0, dy * v]]) {
+    } const v = (this.dash > 0 ? 10 : this.gliding ? (this.weather === 'wind' ? 5.2 : 4.2) : WALK_SPEED*this.stats.speed*(this.guarding?.5:1) * (this.s.mealBuff?.kind==='speed'?1.2:1) * (this.attack > 0 ? .55 : 1)) * dt; for (const [ax, ay] of [[dx * v, 0], [0, dy * v]]) {
         const nx = this.x + ax + Math.sign(ax) * .22, ny = this.y + ay + Math.sign(ay) * .22;
         if (this.blocks && this.pushCooldown <= 0) {
             const box = this.blocks.boxes.find(b => b.x === Math.floor(nx) && b.y === Math.floor(ny));
@@ -339,13 +372,13 @@ export class World {
         this.enter();
     }
     get vista(){if(this.inSky)return null;return terracesFor(this.s.chapter,this.s.room).map((t,i)=>({...vistaPoint(t),level:t.level,id:key(this.s)+':vista:'+i})).find(p=>!this.s.foraged.includes(p.id)&&Math.hypot(this.x-p.x,this.y-p.y)<.7&&elevationAt(this.s.chapter,this.s.room,this.x,this.y)>=p.level-.1)??null;}
-    get npc() { return !this.inSky && [0, 4, 12, 20].includes(this.s.room) ? this.s.room >= 8 ? { x: 3.5, y: 2.5 } : { x: 8.2, y: 4.5 } : null; }
+    get npc() { return this.inSky?null:encounterFor(this.s.chapter,this.s.room); }
     get canTalk() { return Boolean(this.npc && !this.enemies.length && Math.hypot(this.x - this.npc.x, this.y - this.npc.y) < 1.6); }
-    get targets() { if(this.inSky)return [];return this.s.room % 4 === 0 ? [[8.5, 6.5], [12.5, 6.5], [10.5, 6.5]] : this.s.room % 4 === 1 ? [[8.5, 6.5], [12.5, 6.5]] : [[10.5, 6.5]]; }
+    get targets() { return this.mechanismInfo?mechanismPoints(this.mechanismInfo.kind).map(p=>[p.x,p.y]):[]; }
     get weather() { if(this.inSky)return 'wind' as const;return ['clear', 'wind', 'rain'][Math.floor(this.s.seconds / 90 + this.s.chapter) % 3] as 'clear' | 'wind' | 'rain'; }
     get atHarbor() { return !this.inSky && this.s.room === 0 && Math.hypot(this.x - 2.5, this.y - 10.5) < 2; }
     get atCamp() { return !this.inSky && [0, 4].includes(this.s.room) && !this.enemies.length && Math.hypot(this.x - campPosition.x, this.y - campPosition.y) < 2.5 && (this.weather !== 'rain' || this.s.room === 0); }
-    get barrel() { return !this.inSky && this.s.room < 8 && this.s.room % 2 === 1 && !this.s.exploded.includes(key(this.s)) ? { x: 12.5, y: 7.5 } : null; }
+    get barrel() { return !this.inSky && this.s.room === 1 && !this.s.exploded.includes(key(this.s)) ? { x: 12.5, y: 7.5 } : null; }
     get endingKind() { return this.s.beacons.length === 12 && this.s.quests.length >= 18 && this.s.choices.filter(Boolean).length >= 6 ? 'community' : 'restore'; }
     toggleGlide() { if (this.gliding) {
         this.land();
@@ -409,14 +442,19 @@ export class World {
         this.dirty = true;
         return true;
     }
-    swing(tool = false, continuation = false) {
+    swing(tool = false, continuation = false, requested:AttackMode='normal') {
         const weapon = tool ? this.s.tool : this.s.weaponA;
-        if (this.s.gate || this.dash > 0 || !this.s.ownedTools.includes(weapon) || weapon === 6 && this.stamina < .3) return false;
+        if (this.guarding||this.s.gate || this.dash > 0 || !this.s.ownedTools.includes(weapon) || weapon === 6 && this.stamina < .3) return false;
         if (this.attack > 0) { this.queuedSlot = tool; return false; }
-        this.combo = this.comboWeapon === weapon && this.comboWindow > 0 ? (this.combo + 1) % 3 : 0;
+        const mode=requested!=='normal'?requested:this.gliding?'aerial':this.counterWindow>0?'counter':'normal';
+        if(mode==='charged'&&this.stamina<this.stats.chargeCost+(weapon===6?.3:0)){this.notice='stamina';return false;}
+        if(mode==='charged')this.stamina-=this.stats.chargeCost;
+        this.attackMode=mode;this.counterWindow=0;
+        this.combo = mode==='normal'&&this.comboWeapon === weapon && this.comboWindow > 0 ? (this.combo + 1) % 3 : 0;
         this.comboWeapon = weapon; this.comboWindow = 0;
-        this.activeWeapon = weapon;
-        this.attackDuration = weaponAction(weapon).durations[this.combo];
+        this.faceTarget();this.activeWeapon = weapon;
+        this.attackDuration = mode==='charged'?.72:mode==='aerial'?.54:mode==='counter'?.26:weaponAction(weapon).durations[this.combo];
+        if(mode==='aerial'&&!this.inSky&&!this.blocked(this.x,this.y,false))this.gliding=false;
         this.attack = this.attackDuration;
         this.effect = weapon + 1;
         this.strikePending = true;
@@ -487,21 +525,7 @@ export class World {
             if (weapon === 2 && this.weather !== 'rain')
                 this.fires.push({ x: this.x + this.dx, y: this.y + this.dy, life: 5 });
         }
-        const target = this.blocks || this.beam || this.circuit || this.ice ? undefined : this.targets[this.switches.length];
-        if (target && Math.hypot(this.x - target[0], this.y - target[1]) < 1.2) {
-            const required = Math.min(this.s.chapter, 7);
-            if (this.s.room < 8 || this.s.room === 23 || (this.s.room % 4 === 2 ? weapon === required : this.s.room % 4 === 3 ? Math.sin(this.time * 2) > .2 : !tool)) {
-                this.switches.push(this.switches.length);
-                if (this.switches.length >= this.targets.length) {
-                    if (!this.s.solved.includes(key(this.s)))
-                        this.markSolved();
-                    this.notice = 'solved';
-                    this.dirty = true;
-                }
-            }
-            else
-                this.notice = this.s.room % 4 === 3 ? 'timing' : 'tool';
-        }
+        if(!this.s.solved.includes(key(this.s)))this.useMechanism(weapon);
         if (!this.inSky && Math.hypot(this.x - 5.5, this.y - 9.5) < 2 && !this.s.chests.includes(key(this.s))) {
             const route = KEY_ROUTES.find(r => r.chest === this.s.room);
             if (route && !routeReady(this.s.chapter, route, this.s.cleared, this.s.solved)) {
@@ -510,6 +534,7 @@ export class World {
                 return;
             }
             this.s.chests.push(key(this.s));
+            if([2,7,10,14,18,22].includes(this.s.room))this.awardRelic(this.s.room);
             this.s.coins += 15;
             this.s.hp = Math.min(this.s.maxHp, this.s.hp + 2);
             this.notice = 'chest';
@@ -525,11 +550,40 @@ export class World {
         this.clean();
         return true;
     }
+    beginCharge(){if(this.s.gate||this.attack>0||this.dash>0)return;this.chargeHeld=true;this.chargeTime=0;}
+    releaseCharge(){if(!this.chargeHeld)return false;const ready=this.chargeTime>=.5;this.chargeHeld=false;this.chargeTime=0;return this.swing(false,false,ready?'charged':'normal');}
+    drainChannel(){for(let y=3;y<=10;y++)this.map[y][10]=5;}
+    useMechanism(weapon:number){
+        const info=this.mechanismInfo;if(!info||['blocks','beam','circuit','ice','balance','memory'].includes(info.kind))return;
+        const m=this.mechanism,points=mechanismPoints(info.kind),i=points.findIndex(p=>Math.hypot(p.x-this.x,p.y-this.y)<1.15);
+        if(i<0)return;
+        let done=false;
+        switch(info.kind){
+          case 'forge':done=weapon===Math.min(this.s.chapter,7);if(!done)this.notice='tool';break;
+          case 'bells':if(i===m.progress)m.progress++;else{m.progress=i===0?1:0;this.notice='sequence';}done=m.progress===3;break;
+          case 'wind':if(i===m.progress&&(i===0?this.dx>.7:this.dy<-.7))m.progress++;else this.notice='direction';done=m.progress===2;break;
+          case 'tide':if(i===0){m.progress=1;this.drainChannel();}else done=m.progress===1;break;
+          case 'lens':if(i===0)m.dial=(m.dial+1)%4;else{done=m.dial===1;if(!done)this.notice='align';}break;
+          case 'relay':if(i===0){m.progress=1;m.timer=8;}else done=m.progress===1&&m.timer>0;break;
+          case 'pulse':{const beat=Math.floor(this.time/Math.PI);if(Math.sin(this.time*2)>.65&&m.latched!==beat){m.latched=beat;m.progress++;done=m.progress===3;}else this.notice='timing';break;}
+        }
+        if(done)this.markSolved();else this.rememberPuzzle();
+    }
+    stepMechanism(dt:number){
+        const info=this.mechanismInfo;if(!info||this.s.solved.includes(key(this.s)))return;
+        const m=this.mechanism;if(m.timer>0){m.timer=Math.max(0,m.timer-dt);if(!m.timer&&['balance','relay'].includes(info.kind)){m.progress=0;this.rememberPuzzle();}}
+        if(!['balance','memory'].includes(info.kind))return;
+        const points=mechanismPoints(info.kind),i=points.findIndex(p=>Math.hypot(p.x-this.x,p.y-this.y)<.55);
+        if(i===m.latched)return;m.latched=i;if(i<0)return;
+        if(info.kind==='balance'){if(i===0){m.progress=1;m.timer=4;}else if(m.progress===1&&m.timer>0)this.markSolved();}
+        else{if(i===m.progress)m.progress++;else{m.progress=i===0?1:0;this.notice='sequence';}if(m.progress===3)this.markSolved();}
+        this.rememberPuzzle();
+    }
     strike() {
-        const weapon = this.activeWeapon, profile = weaponAction(weapon), finisher = this.combo === 2;
-        const damage = (this.s.mealBuff?.kind==='attack'?1.3:1) * (profile.damage + this.s.weaponRank * .5) * (finisher ? 1.5 : 1);
+        const weapon = this.activeWeapon, profile = weaponAction(weapon), special=this.attackMode!=='normal',finisher = this.combo === 2||special;
+        const damage = (this.s.mealBuff?.kind==='attack'?1.3:1) * (profile.damage + this.s.weaponRank * .5) * (this.attackMode==='charged'?2.3*this.stats.charged:this.attackMode==='counter'?1.8*this.stats.counter:finisher?1.5*(this.s.talents.includes('finish')?1.25:1):1)*this.stats.damage*(this.drive>0?1.5:1);
         if (profile.style === 'ranged') {
-            const spread = finisher ? (weapon === 1 ? [-.14, .14] : [-.18, 0, .18]) : [0];
+            const spread = this.attackMode==='charged'?[-.32,-.16,0,.16,.32]:finisher ? (weapon === 1 ? [-.14, .14] : [-.18, 0, .18]) : [0];
             const aim = Math.atan2(this.dy, this.dx);
             for (const offset of spread) this.shots.push({x:this.x,y:this.y,vx:Math.cos(aim+offset)*8,vy:Math.sin(aim+offset)*8,life:1.5,friendly:true,kind:weapon,damage});
         }
@@ -542,37 +596,74 @@ export class World {
             }
             this.x=destination.x; this.y=destination.y;
         }
-        const reach = profile.reach + (finisher && profile.reach ? .45 : 0);
+        const radial=this.attackMode==='aerial'||this.attackMode==='charged'&&['blade','heavy','guard'].includes(profile.style);
+        const reach = profile.reach + (finisher && profile.reach ? (special?1:.45) : 0);
         for(const e of this.enemies) {
             const rx=e.x-this.x, ry=e.y-this.y;
-            if(e.hp>0 && (this.inSky||Math.abs(elevationAt(this.s.chapter,this.s.room,this.x,this.y)-elevationAt(this.s.chapter,this.s.room,e.x,e.y))<.45) && Math.hypot(rx,ry)<reach && (finisher && profile.style==='heavy' || rx*this.dx+ry*this.dy>-.2)) {
+            if(e.hp>0 && (this.inSky||Math.abs(elevationAt(this.s.chapter,this.s.room,this.x,this.y)-elevationAt(this.s.chapter,this.s.room,e.x,e.y))<.45) && Math.hypot(rx,ry)<reach && (radial || finisher && profile.style==='heavy' || rx*this.dx+ry*this.dy>-.2)) {
+                if(special)e.exposed=2;
                 if(this.guarded(e)){this.notice='bossguard';continue;}
-                e.hp-=damage; e.flash=.15; this.burst(e.x,e.y);
+                this.damageEnemy(e,damage);
                 const nx=e.x+this.dx*(finisher?.4:.2),ny=e.y+this.dy*(finisher?.4:.2);
                 if(this.enemyCan(nx,ny,e)){e.x=nx;e.y=ny;}
             }
         }
+        if(this.attackMode==='charged'&&weapon===6){for(const shot of this.shots)if(!shot.friendly&&Math.hypot(shot.x-this.x,shot.y-this.y)<3){shot.friendly=true;shot.vx*=-1;shot.vy*=-1;shot.damage=damage;}}
+        if(special)this.burst(this.x,this.y,this.attackMode==='counter'?'#c8ffec':'#b7dfff');
         if(weapon===4 && finisher) this.burst(this.x+this.dx,this.y+this.dy,'#ffcb80');
         this.clean();
     }
     cancelCombo() { this.queuedSlot=null; this.comboWindow=0; this.comboWeapon=-1; }
-    roll() { if (this.stamina < .7 || this.dash > 0)
-        return; this.cancelCombo(); this.attack=0; this.strikePending=false; this.stamina -= .7; this.dash = .22; this.hurt = .35; for (const e of this.enemies)
+    roll() { if (this.s.gate||this.stamina < this.stats.dodgeCost || this.dash > 0)
+        return;this.guarding=false;if(Math.hypot(this.lastMove.x,this.lastMove.y)>.2){const d=Math.hypot(this.lastMove.x,this.lastMove.y);this.dx=this.lastMove.x/d;this.dy=this.lastMove.y/d;} this.chargeHeld=false;this.chargeTime=0;this.perfectDodge=this.enemies.some(e=>Math.hypot(e.x-this.x,e.y-this.y)<2.5&&((e.windup||0)>0&&(e.windup||0)<.3||(e.strike||0)>0))||this.shots.some(p=>!p.friendly&&Math.hypot(p.x-this.x,p.y-this.y)<1.5);this.counterWindow=(this.perfectDodge?1.4:.8)+this.stats.counterTime;if(this.perfectDodge){this.gainEnergy(10);this.notice='perfect';this.burst(this.x,this.y,'#c8ffec');}this.cancelCombo(); this.attack=0; this.strikePending=false; this.stamina -= this.stats.dodgeCost; this.dash = .22; this.hurt = .35; for (const e of this.enemies)
         if (e.boss && this.s.chapter % 4 === 1 && Math.hypot(this.x - e.x, this.y - e.y) < 2.2)
             e.exposed = 1.5; }
-    clean() { const before = this.enemies.length; for (const e of this.enemies) if (e.hp <= 0) this.burst(e.x, e.y, '#a7e9dc'); this.enemies = this.enemies.filter(e => e.hp > 0); if (before > this.enemies.length) {
-        this.s.coins += (before - this.enemies.length) * 3;
-        this.dirty = true;
-    } if (!this.enemies.length && !this.s.cleared.includes(key(this.s))) {
-        this.s.cleared.push(key(this.s));
-        this.s.hp = Math.min(this.s.maxHp, this.s.hp + .5);
-        this.dirty = true;
-    } }
+    clean() {
+        const defeated=this.enemies.filter(e=>e.hp<=0),oldLevel=levelFor(this.s.xp);
+        for(const e of defeated){this.burst(e.x,e.y,'#a7e9dc');this.s.bestiary[e.kind]=(this.s.bestiary[e.kind]||0)+1;this.s.xp+=Math.round((e.boss?120:e.elite?60:18)*(1+this.s.cycle*.25));this.s.hp=Math.min(this.s.maxHp,this.s.hp+this.stats.heal);}
+        this.enemies=this.enemies.filter(e=>e.hp>0);
+        if(defeated.length){this.s.coins+=defeated.length*3;this.dirty=true;if(levelFor(this.s.xp)>oldLevel)this.notice='levelup';}
+        if(!this.enemies.length&&this.trial){
+            if(this.trialKind==='arena'&&this.trial.wave<3){this.trial.wave++;this.spawnTrial();return;}
+            const id=`${this.s.cycle}:${this.s.chapter}:${this.s.room}`,best=`${this.s.chapter}:${this.s.room}`;
+            if(!this.s.trials.includes(id)){this.s.trials.push(id);this.s.coins+=60;this.s.dust+=3;this.s.xp+=80;this.awardRelic(this.s.room+5);}
+            this.s.trialBest[best]=Math.min(this.s.trialBest[best]||Infinity,this.trial.elapsed);this.trial=null;this.notice='trialwon';this.s.hp=Math.min(this.s.maxHp,this.s.hp+2);this.dirty=true;
+        }
+        if(!this.enemies.length&&!this.s.cleared.includes(key(this.s))){this.s.cleared.push(key(this.s));this.s.hp=Math.min(this.s.maxHp,this.s.hp+.5);this.dirty=true;}
+    }
+    resetCombatExtras(){this.hitStop=0;this.guarding=false;this.guardAge=0;this.target=null;this.trial=null;this.lastMove={x:0,y:0};this.floating=[];this.links=[];this.lootToast=null;this.chainCooldown=0;this.drive=0;}
+    scaleEnemies(){const scale=(1+this.s.cycle*.4)*(this.s.difficulty==='heroic'?1.4:1);for(const e of this.enemies){e.hp=Math.round(e.hp*scale);e.max=e.hp;}}
+    faceTarget(){if(this.target&&!this.enemies.includes(this.target))this.target=null;if(this.target&&this.dash<=0&&this.attack<=0){const dx=this.target.x-this.x,dy=this.target.y-this.y,d=Math.hypot(dx,dy);if(d>12||d<.01){if(d>12)this.target=null;return;}this.dx=dx/d;this.dy=dy/d;}}
+    lockTarget(){const list=[...this.enemies].sort((a,b)=>Math.hypot(a.x-this.x,a.y-this.y)-Math.hypot(b.x-this.x,b.y-this.y));const i=this.target?list.indexOf(this.target):-1;this.target=list[i+1]||null;this.faceTarget();}
+    startGuard(){if(this.s.gate||this.dash>0||this.guarding||this.stamina<.15)return false;this.cancelCombo();this.attack=0;this.strikePending=false;this.chargeHeld=false;this.chargeTime=0;this.guarding=true;this.guardAge=0;return true;}
+    gainEnergy(n:number){this.s.energy=Math.min(100,this.s.energy+n*this.stats.energy);this.dirty=true;}
+    awaken(){if(this.s.gate||this.s.energy<100||this.drive>0)return false;this.s.energy=0;this.drive=this.stats.driveDuration;this.driveSerial++;this.guarding=false;this.cancelCombo();this.attack=0;this.strikePending=false;this.chargeHeld=false;this.chargeTime=0;this.hurt=Math.max(this.hurt,.5);for(const e of this.enemies)if(Math.hypot(e.x-this.x,e.y-this.y)<3.5){e.exposed=2;this.damageEnemy(e,5+this.s.weaponRank);}this.burst(this.x,this.y,'#9df7ff');this.notice='awaken';this.clean();this.dirty=true;return true;}
+    damageEnemy(e:Enemy,amount:number,effects=true){
+        if(e.hp<=0)return;const critical=effects&&Math.random()<this.stats.crit,damage=amount*(critical?1.6:1),dealt=Math.min(e.hp,damage);
+        e.hp-=damage;e.flash=.15;if(critical||this.attackMode==='charged')this.hitStop=Math.max(this.hitStop,.035);this.burst(e.x,e.y,critical?'#ffdd80':'#bfece5');this.floating.push({x:e.x,y:e.y-1,text:(critical?'! ':'')+damage.toFixed(damage<2?1:0),color:critical?'#ffe38f':'#efffe8',life:.7});if(this.floating.length>24)this.floating.shift();this.gainEnergy(3+dealt*1.2);
+        if(effects&&this.stats.burn){e.burn=3;e.burnPower=this.stats.burn;}
+        if(effects&&this.stats.chain&&this.chainCooldown<=0){const next=this.enemies.find(other=>other!==e&&other.hp>0&&Math.hypot(other.x-e.x,other.y-e.y)<2.6);if(next){this.chainCooldown=.35;this.links.push({x:e.x,y:e.y,tx:next.x,ty:next.y,life:.25});this.damageEnemy(next,damage*(.35+.1*this.stats.chain),false);this.burst(next.x,next.y,'#b7d6ff');}}
+    }
+    awardRelic(seed:number){const relic=RELICS[(this.s.chapter*3+seed)%RELICS.length];this.lootToast={id:relic.id,duplicate:this.s.relics.includes(relic.id),seconds:3};this.burst(this.x,this.y,'#ffeaa0');if(this.s.relics.includes(relic.id)){this.s.dust++;this.notice='dust';}else{this.s.relics.push(relic.id);this.s.relicRanks[relic.id]=1;if(this.s.equippedRelics.length<2)this.s.equippedRelics.push(relic.id);this.notice='relic';}this.dirty=true;}
+    equipRelic(id:string){if(!this.s.relics.includes(id))return false;const i=this.s.equippedRelics.indexOf(id);if(i>=0)this.s.equippedRelics.splice(i,1);else if(this.s.equippedRelics.length<2)this.s.equippedRelics.push(id);else this.s.equippedRelics=[this.s.equippedRelics[1],id];this.dirty=true;return true;}
+    upgradeRelic(id:string){const rank=this.s.relicRanks[id]||0;if(!this.s.relics.includes(id)||rank>=3||this.s.dust<rank*3)return false;this.s.dust-=rank*3;this.s.relicRanks[id]=rank+1;this.dirty=true;return true;}
+    learnTalent(id:string){const t=TALENTS.find(t=>t.id===id);if(!t||this.s.talents.includes(id)||talentPoints(this.s)<t.cost||'requires'in t&&!this.s.talents.includes(t.requires))return false;this.s.talents.push(id);this.dirty=true;return true;}
+    resetTalents(){this.s.talents=[];this.dirty=true;}
+    setDifficulty(value:Difficulty){if(!['story','voyage','heroic'].includes(value))return;const old=this.s.difficulty==='heroic'?1.4:1,next=value==='heroic'?1.4:1;for(const e of this.enemies){const ratio=e.hp/e.max;e.max=Math.max(1,Math.round(e.max*next/old));e.hp=e.max*ratio;}this.s.difficulty=value;this.dirty=true;}
+    startTrial(){if(!this.atTrial||this.s.gate)return false;this.cancelCombo();this.attack=0;this.strikePending=false;this.chargeHeld=false;this.guarding=false;this.target=null;this.trial={wave:1,elapsed:0};this.spawnTrial();this.notice='trialstart';return true;}
+    spawnTrial(){this.target=null;for(let y=3;y<=11;y++)for(let x=3;x<=16;x++)this.map[y][x]=5;const count=this.trialKind==='hunt'?1:2+(this.trial?.wave||1);this.enemies=Array.from({length:count},(_,i)=>{const hp=this.trialKind==='hunt'?18+this.s.chapter*5:4+this.s.chapter+(this.trial?.wave||1);return{x:[13.5,15.5,6.5,4.5,10.5][i],y:[4.5,8.5,4.5,8.5,10.5][i],hp,max:hp,kind:enemyKind(this.s.chapter,this.s.room,i),elite:this.trialKind==='hunt',cool:1+i*.3,phase:0};});this.scaleEnemies();}
+    newVoyagePlus(){if(!this.s.ending&&this.s.beacons.length<12)return false;const previous=this.s;this.s={...fresh(),...previous,cycle:previous.cycle+1,chapter:0,room:0,hp:previous.maxHp,beacons:[],choices:[],ending:false,postgame:false,cleared:[],solved:[],chests:[],visited:[],quests:[],foraged:[],changes:{},exploded:[],puzzles:{},skyTreasures:[],charts:[],gate:null,pendingTravel:null,realm:'surface',studySeconds:0,openingSeen:true,glideAwakened:true,energy:0};this.x=2.5;this.y=7.5;this.enter();this.dirty=true;return true;}
     tick(dt: number, dx: number, dy: number) {
         dt = Math.min(.035, Math.max(0, dt));
         this.time += dt;
         if(this.s.gate)return;
+        if(this.hitStop>0){this.hitStop=Math.max(0,this.hitStop-dt);return;}
         if(this.s.mealBuff){this.s.mealBuff.seconds=Math.max(0,this.s.mealBuff.seconds-dt);if(!this.s.mealBuff.seconds){this.s.mealBuff=null;this.dirty=true;}}
+        for(const link of this.links)link.life-=dt;this.links=this.links.filter(link=>link.life>0);
+        if(this.lootToast){this.lootToast.seconds-=dt;if(this.lootToast.seconds<=0)this.lootToast=null;}this.lastMove={x:dx,y:dy};if(this.guarding)this.guardAge+=dt;this.drive=Math.max(0,this.drive-dt);this.chainCooldown=Math.max(0,this.chainCooldown-dt);if(this.trial)this.trial.elapsed+=dt;for(const f of this.floating){f.life-=dt;f.y-=dt*.4;}this.floating=this.floating.filter(f=>f.life>0);
+        this.counterWindow=Math.max(0,this.counterWindow-dt);
+        if(this.chargeHeld)this.chargeTime=Math.min(1,this.chargeTime+dt);
+        this.stepMechanism(dt);
         this.s.seconds += dt;this.s.studySeconds+=dt;
         for (const p of this.fx) p.life -= dt;
         this.fx = this.fx.filter(p => p.life > 0);
@@ -600,10 +691,10 @@ export class World {
                 this.land();
         }
         else
-            this.stamina = Math.min(this.s.staminaMax, this.stamina + dt * .4);
+            this.stamina = Math.min(this.s.staminaMax, this.stamina + dt*.4*this.stats.regen*(this.guarding?.4:1)+(this.drive>0?dt*.3:0));
         if(this.inSky && SKY_UPDRAFTS.some(p=>Math.hypot(this.x-p.x,this.y-p.y)<.7))this.stamina=Math.min(this.s.staminaMax,this.stamina+dt*.9);
         const oldX = this.x, oldY = this.y, oldRoom = key(this.s);
-        this.move(dx, dy, dt);
+        this.move(dx, dy, dt);this.faceTarget();
         const distance = oldRoom === key(this.s) ? Math.hypot(this.x - oldX, this.y - oldY) : 0;
         this.moving = distance > .0001;
         if (this.moving) this.walk += distance / WALK_SPEED;
@@ -630,6 +721,7 @@ export class World {
         if (this.s.gate)
             return;
         for (const e of this.enemies) {
+            if((e.burn||0)>0){e.burn=Math.max(0,(e.burn||0)-dt);e.hp-=dt*1.2*(e.burnPower||1);}if(e.hp<=0)continue;
             if (e.hp <= 0)
                 continue;
             e.flash = Math.max(0, (e.flash || 0) - dt);
@@ -659,7 +751,7 @@ export class World {
                 e.y = ny;
             }
             if (d < .65 && this.hurt <= 0)
-                this.hit();
+                this.hit(e);
             if (e.cool < 0 && (e.boss || e.kind % 3 === 2)) {
                 e.strike = .32;
                 e.cool = e.boss ? (e.hp < e.max / 2 ? .9 : 1.6) : 3;
@@ -698,9 +790,7 @@ export class World {
                         if (p.kind === 1)
                             e.exposed = 2.5;
                     if (!this.guarded(e)) {
-                        e.hp -= p.damage ?? 3;
-                        e.flash = .15;
-                        this.burst(e.x, e.y);
+                        this.damageEnemy(e,p.damage??3);
                     }
                         else
                             this.notice = 'bossguard';
@@ -709,14 +799,18 @@ export class World {
                     }
             }
             else if (this.hurt <= 0 && Math.hypot(p.x - this.x, p.y - this.y) < .45) {
-                this.hit();
-                p.life = 0;
+                this.hit(p);
+                if(!p.friendly)p.life = 0;
             }
         }
         this.shots = this.shots.filter(p => p.life > 0);
         this.clean();
     }
-    hit() { this.cancelCombo(); this.attack=0; this.strikePending=false; this.s.hp=Math.max(0,this.s.hp-(this.s.mealBuff?.kind==='guard'?.5:1)); this.hurt = 1; if (this.s.hp <= 0) {
+    hit(source?:{x:number;y:number}) {
+        const facing=!source||(source.x-this.x)*this.dx+(source.y-this.y)*this.dy>-.15;
+        if(this.guarding&&facing&&this.guardAge<=.18&&this.stamina>=.15){this.stamina-=.15;this.counterWindow=1.4+this.stats.counterTime;this.hurt=.3;this.parrySerial++;this.hitStop=.045;this.gainEnergy(18);if(this.stats.tideSet)this.stamina=Math.min(this.s.staminaMax,this.stamina+.25);for(const p of this.shots)if(!p.friendly&&Math.hypot(p.x-this.x,p.y-this.y)<2.5){p.friendly=true;p.vx*=-1;p.vy*=-1;p.damage=4;}for(const e of this.enemies)if(Math.hypot(e.x-this.x,e.y-this.y)<2.5)e.exposed=2;this.burst(this.x,this.y,'#d3ffff');this.notice='parry';return;}
+        const blocked=this.guarding&&facing&&this.stamina>=.25;if(blocked)this.stamina-=.25;else this.guarding=false;
+        this.chargeHeld=false;this.chargeTime=0;this.counterWindow=0;this.cancelCombo();this.attack=0;this.strikePending=false;this.s.hp=Math.max(0,this.s.hp-(this.s.mealBuff?.kind==='guard'?.5:1)*this.stats.guard*(this.s.difficulty==='story'?.65:this.s.difficulty==='heroic'?1.25:1)*(blocked?.25:1)); this.hurt = 1; if (this.s.hp <= 0) {
         this.s.hp = this.s.maxHp;
         this.s.coins = Math.max(0, this.s.coins - 10);
         this.x = 2.5;
@@ -774,18 +868,19 @@ export class World {
         return solution?.length ? { kind: 'ice', index: solution[0] } : { kind: 'reset' };
     } return { kind: 'general' }; }
     markSolved() { const k = key(this.s); if (!this.s.solved.includes(k)) {
-        this.s.solved.push(k);
+        this.s.solved.push(k);this.s.xp+=10;
         if (this.s.room >= 8)
             this.s.spirit++;
     } delete this.s.puzzles[k]; this.notice = 'solved'; this.dirty = true; }
     rememberPuzzle() { if(this.inSky)return; if (this.s.solved.includes(key(this.s)))
-        return; const p: PuzzleSnapshot = this.blocks ? { kind: 'blocks', boxes: this.blocks.boxes.map(b => ({ ...b })) } : this.beam ? { kind: 'beam', slash: this.beam.mirrors.map(m => m.slash) } : this.circuit ? { kind: 'circuit', bits: this.circuit.bits, moves: this.circuit.moves } : this.ice ? { kind: 'ice', x: this.ice.x, y: this.ice.y, steps: this.ice.steps } : { kind: 'lights', count: this.switches.length }; const k = key(this.s); if (JSON.stringify(this.s.puzzles[k]) !== JSON.stringify(p)) {
+        return; const p: PuzzleSnapshot = this.mechanismInfo&&!['blocks','beam','circuit','ice'].includes(this.mechanismInfo.kind)?{kind:'mechanism',type:this.mechanismInfo.kind,progress:this.mechanism.progress,dial:this.mechanism.dial}:this.blocks ? { kind: 'blocks', boxes: this.blocks.boxes.map(b => ({ ...b })) } : this.beam ? { kind: 'beam', slash: this.beam.mirrors.map(m => m.slash) } : this.circuit ? { kind: 'circuit', bits: this.circuit.bits, moves: this.circuit.moves } : this.ice ? { kind: 'ice', x: this.ice.x, y: this.ice.y, steps: this.ice.steps } : { kind: 'lights', count: this.switches.length }; const k = key(this.s); if (JSON.stringify(this.s.puzzles[k]) !== JSON.stringify(p)) {
         this.s.puzzles[k] = p;
         this.hintTarget = null;
         this.dirty = true;
     } }
     restorePuzzle() { const p = this.s.puzzles[key(this.s)]; if (!p)
-        return; if (p.kind === 'blocks' && this.blocks && p.boxes.length === this.blocks.boxes.length && new Set(p.boxes.map(b => b.x + ',' + b.y)).size === p.boxes.length && p.boxes.every(b => b.x >= 7 && b.x <= 13 && b.y >= 3 && b.y <= 9 && this.map[b.y]?.[b.x] !== 3))
+        return; if(p.kind==='mechanism'&&p.type===this.mechanismInfo?.kind){this.mechanism.progress=['balance','relay'].includes(p.type)?0:p.progress;this.mechanism.dial=p.dial;if(p.type==='tide'&&p.progress)this.drainChannel();}
+        if (p.kind === 'blocks' && this.blocks && p.boxes.length === this.blocks.boxes.length && new Set(p.boxes.map(b => b.x + ',' + b.y)).size === p.boxes.length && p.boxes.every(b => b.x >= 7 && b.x <= 13 && b.y >= 3 && b.y <= 9 && this.map[b.y]?.[b.x] !== 3))
         this.blocks.boxes = p.boxes.map(b => ({ ...b })); if (p.kind === 'beam' && this.beam && p.slash.length === 4)
         this.beam.mirrors.forEach((m, i) => m.slash = p.slash[i]); if (p.kind === 'circuit' && this.circuit) {
         this.circuit.bits = p.bits;
@@ -805,5 +900,5 @@ export class World {
         return false; if(this.requestStudy('travel',chapter))return false;this.s.realm='surface';this.s.chapter = chapter; this.s.maxChapter = Math.max(this.s.maxChapter, chapter); this.s.room = 0; this.x = 2.5; this.y = 7.5; this.enter(); return true; }
     questProgress(i: number) { const prefix = this.s.chapter + ':', current = i === 0 ? this.s.chests.filter(k => k.startsWith(prefix)).length : i === 1 ? this.s.cleared.filter(k => k.startsWith(prefix) && k !== prefix + '0').length : this.s.solved.filter(k => k.startsWith(prefix)).length, target = i === 1 ? 4 : 3, complete = this.s.quests.includes(prefix + i); return { current, target, complete, ready: current >= target && !complete }; }
     quest(i: number) { if (i < 0 || i > 2 || !this.questProgress(i).ready)
-        return false; this.s.quests.push(this.s.chapter + ':' + i); this.s.maxHp = Math.min(30, this.s.maxHp + 1); this.s.hp = this.s.maxHp; this.s.coins += 40; this.dirty = true; return true; }
+        return false; this.s.quests.push(this.s.chapter + ':' + i);this.s.xp+=40; this.s.maxHp = Math.min(30, this.s.maxHp + 1); this.s.hp = this.s.maxHp; this.s.coins += 40; this.dirty = true; return true; }
 }

@@ -33,7 +33,7 @@ const shield=arena();shield.equip('a',6);shield.stamina=.2;assert(!shield.swing(
 const walk=arena();walk.move(1,0,.1);assert(Math.abs(walk.x-7-M.WALK_SPEED*.1)<1e-9);assert.equal(M.WALK_SPEED,3.8);
 const analog=arena();analog.tick(.03,.3,0);assert(Math.abs(analog.walk-.009)<1e-9,'Step clock follows actual travel distance');
 const diagonal=arena();diagonal.move(1,1,.1);assert(Math.abs(Math.hypot(diagonal.x-7,diagonal.y-7)-.38)<1e-9);
-const puzzle=arena();puzzle.s.chapter=2;puzzle.s.room=14;puzzle.enter();puzzle.circuit=null;puzzle.equip('a',2);puzzle.x=10.5;puzzle.y=6.5;puzzle.swing();assert.equal(puzzle.switches.length,1,'Required tool can activate a chamber from A');
+const puzzle=arena();puzzle.s.chapter=2;puzzle.s.room=10;puzzle.enter();puzzle.circuit=null;puzzle.equip('a',2);puzzle.x=10.5;puzzle.y=6.5;puzzle.swing();assert(puzzle.s.solved.includes(M.key(puzzle.s)),'Required tool can activate a chamber from A');
 const mirror=arena();mirror.s.room=11;mirror.enter();const m=mirror.beam.mirrors[0],original=m.slash;mirror.x=m.x+.5;mirror.y=m.y+.5;mirror.swing();mirror.swing();advance(mirror,.7);assert.equal(m.slash,!original,'Queued combos cannot toggle an interaction twice');
 M.persist(switched.s);assert.equal(M.load().weaponA,0);assert.equal(M.load().tool,7);
 console.log('PASS: Nagi-only save migration, both slots/all eight weapons, timed one-hit impacts, buffered three-stage combos, ranged finishers, direction lock, interruptions, faster normalized walking, distance-based footsteps and interactions on A.');

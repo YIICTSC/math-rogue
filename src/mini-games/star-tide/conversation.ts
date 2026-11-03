@@ -1,7 +1,6 @@
 import catalog from './voiceCatalog.json';
 import type {ConversationActor,Reaction} from '../../components/dialogue/ConversationStage';
-const names:Record<string,readonly[string,string]>={nagi:['ナギ','Nagi'],towa:['トワ','Towa'],mio:['ミオ','Mio'],sena:['セナ','Sena'],luca:['ルカ','Luca'],yui:['ユイ','Yui'],or:['オル','Or'],rito:['リト','Rito'],ema:['エマ','Ema'],other:['もう一人の航海士','The other navigator']};
-const counterparts=['towa','mio','luca','sena','yui','or','nagi','rito','ema','towa','other','towa'];
+import {ACTOR_NAMES as names,COUNTERPARTS as counterparts} from './encounters';
 const journeyMoods:Reaction[]=['neutral','concern','concern','resolve','resolve','concern','concern','resolve','neutral','joy','concern','resolve'];
 export function starDialogue(chapter:number,id:string,en:boolean){
   const speaker=(catalog as Record<string,{speaker:string}>)[id]?.speaker||'narrator';

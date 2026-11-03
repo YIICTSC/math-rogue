@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-03",
+  "normalization": "Isolate authored grid cells; trim transparent padding; preserve aspect ratio; repack with at least six pixels of transparent breathing room.",
+  "relicOrder": [
+    "shell",
+    "conch",
+    "crescent",
+    "fang",
+    "sun",
+    "bloom",
+    "feather",
+    "compass",
+    "lens",
+    "leaf",
+    "knot",
+    "mirror"
+  ],
+  "fxOrder": [
+    "slash",
+    "impact",
+    "guard",
+    "starburst",
+    "fire",
+    "wind",
+    "chain",
+    "loot"
+  ],
+  "records": [
+    {
+      "name": "relics",
+      "generator": "ImageGen",
+      "source": "assets/star-tide/arpg/relics-imagegen-source.png",
+      "sourceSha256": "01669d61523f867c4c96b51698b2d6c17865351bf83091bea157440cfae47f6a",
+      "grid": [
+        4,
+        3
+      ],
+      "cell": 128,
+      "output": "public/sprites/star-tide/arpg/relics.webp",
+      "outputSha256": "bafbba549e41dce461edcc86362d9b555c518fa83031acecc92321050917808d"
+    },
+    {
+      "name": "combat-fx",
+      "generator": "ImageGen",
+      "source": "assets/star-tide/arpg/combat-fx-imagegen-source.png",
+      "sourceSha256": "343e07465629165eaf976f0c714aca9ecc4877331895b937cf500153e43b61f0",
+      "grid": [
+        4,
+        2
+      ],
+      "cell": 128,
+      "output": "public/sprites/star-tide/arpg/combat-fx.webp",
+      "outputSha256": "60fe3b32db9b0e159bff37d256b2ac5a024d3af197f4c4e7305d19e73f1b4831"
+    },
+    {
+      "name": "altars",
+      "generator": "Blender 4.3.2 / Cycles CPU, 48 samples, orthographic transparent render",
+      "source": "assets/star-tide/arpg/blender/trial-altars.blend",
+      "script": "scripts/star-tide/build-trial-altars.py",
+      "grid": [
+        3,
+        1
+      ],
+      "cell": 128,
+      "output": "public/sprites/star-tide/arpg/altars.webp",
+      "outputSha256": "e0416db8b9dc50db07efd749afef14db4483be5fd5c65b77421243e6c52c3ab8"
+    }
+  ]
+}

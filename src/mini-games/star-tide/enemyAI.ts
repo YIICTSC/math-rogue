@@ -10,7 +10,7 @@ export function stepEnemy(w: World, e: Enemy, dt: number) {
   e.exposed = Math.max(0, (e.exposed || 0) - dt);
   e.strike = Math.max(0, (e.strike || 0) - dt);
   const dx = w.x - e.x, dy = w.y - e.y, distance = Math.hypot(dx, dy) || 1;
-  let vx = dx / distance, vy = dy / distance, speed = profile.speed;
+  let vx = dx / distance, vy = dy / distance, speed = profile.speed*(e.elite?1.15:1);
   e.facing = dx < 0 ? -1 : 1;
   if (e.windup && e.windup > 0) {
     e.windup = Math.max(0, e.windup - dt);
@@ -50,7 +50,7 @@ export function stepEnemy(w: World, e: Enemy, dt: number) {
   if (w.enemyCan(e.x + vx * speed * dt, e.y,e)) e.x += vx * speed * dt;
   if (w.enemyCan(e.x, e.y + vy * speed * dt,e)) e.y += vy * speed * dt;
   e.moving = speed > .15 && Math.hypot(vx, vy) > .1;
-  if ((w.inSky||Math.abs(elevationAt(w.s.chapter,w.s.room,w.x,w.y)-elevationAt(w.s.chapter,w.s.room,e.x,e.y))<.45)&&Math.hypot(w.x - e.x, w.y - e.y) < .65 && w.hurt <= 0) w.hit();
+  if ((w.inSky||Math.abs(elevationAt(w.s.chapter,w.s.room,w.x,w.y)-elevationAt(w.s.chapter,w.s.room,e.x,e.y))<.45)&&Math.hypot(w.x - e.x, w.y - e.y) < .65 && w.hurt <= 0) w.hit(e);
 }
 
 export function enemyFrame(e: Enemy) {
