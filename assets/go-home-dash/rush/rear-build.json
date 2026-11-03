@@ -415,39 +415,39 @@
     {
       "id": "magic-akari",
       "source": "assets/go-home-dash/rush/rear-sources/magic-akari.png",
-      "sourceSHA256": "ffa2acd6500e9f7cfe5c998df28932edb9a1c41bea1c7847d25762c1fe60b1e7",
+      "sourceSHA256": "15a40e265eea28a8a0938d39fbce6a7b40aab4f9890fa40c3afd87617037862a",
       "reference": "public/sprites/magic/characters/heroine-01-before.webp",
       "referenceSHA256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
       "output": "public/sprites/go-home-dash/rush/rear/magic-akari.webp",
-      "sha256": "88529680fc4e2c241eee39cb974dc0c98c1811722448cb3636e4d156f88617b8",
+      "sha256": "02cfff47eb663b44864a7718bf1499fb39b107252c2194c5784951871e743efa",
       "bounds": [
         {
-          "left": 129,
-          "top": 40,
-          "width": 290,
-          "height": 634
+          "left": 153,
+          "top": 100,
+          "width": 219,
+          "height": 497
         },
         {
-          "left": 129,
-          "top": 37,
-          "width": 299,
-          "height": 629
+          "left": 157,
+          "top": 98,
+          "width": 210,
+          "height": 517
         },
         {
-          "left": 128,
-          "top": 40,
-          "width": 296,
-          "height": 634
+          "left": 162,
+          "top": 97,
+          "width": 204,
+          "height": 523
         },
         {
-          "left": 125,
-          "top": 38,
-          "width": 296,
-          "height": 628
+          "left": 160,
+          "top": 97,
+          "width": 199,
+          "height": 497
         }
       ],
-      "scale": 0.20722135007849293,
-      "baseline": 674,
+      "scale": 0.25239005736137665,
+      "baseline": 620,
       "frameSize": [
         128,
         160

@@ -45,3 +45,5 @@ node scripts/generate-android-asset-manifest.mjs --update-prefix sprites/go-home
 ## 奥行き区間のジャンプとスライド
 
 全26主人公について `rush/actions/<id>.webp` に4列×2行の専用アトラスを追加。上段は離陸・上昇・頂点・着地、下段は姿勢を低くする・滑走2コマ・立ち上がり。ImageGen原画は `assets/go-home-dash/rush/action-sources/` に保存する。`node scripts/prepare-home-dash-actions.mjs` で512×320へ正規化し、全8コマを同じ倍率・足元基準で配置する。走行との切り替えは跳躍の高さ・上下速度・スライド残時間で決め、WebGLとCanvasの両方へ適用する。
+
+背面差分の衣装・髪型の正本は `heroes/<id>.webp` の通常右向きスプライト。元絵にないズボン・タイツを追加しない。あかり・しずく・ひより・つばさ・まどか・セラは元の素足と靴下の範囲を保ち、元からタイツの主人公は維持する。あかりの髪型は単一のポニーテールで、背面走行とジャンプ・スライドを統一する。
