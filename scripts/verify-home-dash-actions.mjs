@@ -1,0 +1,5 @@
+import fs from 'node:fs/promises';import sharp from 'sharp';import assert from 'node:assert/strict';
+const ids=(await fs.readdir('public/sprites/go-home-dash/rush/actions')).sort(),layers=[];assert.equal(ids.length,26);
+for(const [i,id]of ids.entries()){const file='public/sprites/go-home-dash/rush/actions/'+id;const {data,info}=await sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.equal(info.width,512);assert.equal(info.height,320);for(let row=0;row<2;row++)for(let f=0;f<4;f++){let count=0;for(let y=0;y<160;y++)for(let x=0;x<128;x++){const a=data[((row*160+y)*512+f*128+x)*4+3];if(a>32){count++;assert(x>=6&&x<=122&&y>=8&&y<=151,id+' clipped');}}assert(count>400,id+' empty');}layers.push({input:await sharp(file).resize(256,160).png().toBuffer(),left:i%3*256,top:Math.floor(i/3)*160});}
+if(process.argv.includes('--preview'))await sharp({create:{width:768,height:1440,channels:4,background:'#26333b'}}).composite(layers).png().toFile('/tmp/dash-actions-preview.png');
+console.log('PASS 26 atlases / 208 action frames: dimensions, alpha margins and nonempty silhouettes.');

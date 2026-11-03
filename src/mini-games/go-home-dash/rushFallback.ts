@@ -19,7 +19,7 @@ export function drawRushFallback(ctx:CanvasRenderingContext2D,w:number,h:number,
    if(e.kind==='coin'||e.kind==='star'){ctx.beginPath();ctx.arc(q.x,q.y-25*q.scale,Math.max(2,8*q.scale),0,Math.PI*2);ctx.fill();}else ctx.fillRect(q.x-sz/2,q.y-(e.kind==='lowBar'?85:sz)*q.scale,sz,e.kind==='gap'?sz*.22:sz);
   }
   const x=400+r.laneX*120,y=345-f.jump*.7;drawAura(ctx,x,y,'#7df5db',r.momentum/100+(r.turbo>0?.5:0),f.frame,f.reduced);
-  if(f.rear?.complete&&f.rear.naturalWidth){const cell=f.rear.naturalWidth/4,frame=Math.floor(f.frame/5)%4;ctx.drawImage(f.rear,frame*cell,0,cell,f.rear.naturalHeight,x-42,y-110,84,110);}
+  const action=f.actions?.complete&&(f.jump>1||f.state.slide>0),sheet=action?f.actions:f.rear;if(sheet?.complete&&sheet.naturalWidth){const cell=sheet.naturalWidth/4,ch=action?sheet.naturalHeight/2:sheet.naturalHeight,frame=action?(f.jump>1?(f.jump<22?((f.vy??0)<0?0:3):(f.vy??0)<-2?1:2):(f.state.slide>44?0:f.state.slide<9?3:1+Math.floor(f.frame/7)%2)):Math.floor(f.frame/5)%4;ctx.drawImage(sheet,frame*cell,action&&f.jump<=1?ch:0,cell,ch,x-42,y-110,84,110);}
  }
  ctx.restore();ctx.canvas.dataset.rushRenderer='canvas';
 }

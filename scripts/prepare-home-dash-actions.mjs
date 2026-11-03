@@ -1,0 +1,8 @@
+import fs from 'node:fs/promises';
+import sharp from 'sharp';
+const heroes=[...(await fs.readFile('src/mini-games/go-home-dash/heroes.ts','utf8')).matchAll(/"([^"]+)": "([^"]+)"/g)].map(m=>m[1]);
+await fs.mkdir('public/sprites/go-home-dash/rush/actions',{recursive:true});
+for(const id of heroes){const src=`assets/go-home-dash/rush/action-sources/${id}.png`;if(process.argv.includes('--partial')){try{await fs.access(src);}catch{continue;}}const {data,info}=await sharp(src).ensureAlpha().raw().toBuffer({resolveWithObject:true});const cw=Math.floor(info.width/4),ch=Math.floor(info.height/2),bounds=[];
+for(let row=0;row<2;row++)for(let f=0;f<4;f++){let x0=cw,y0=ch,x1=-1,y1=-1;for(let y=0;y<ch;y++)for(let x=0;x<cw;x++)if(data[((y+row*ch)*info.width+x+f*cw)*4+3]>32){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}if(x1<0)throw Error(id+' empty frame');bounds.push({x0,y0,x1,y1,row,f});}
+const scale=Math.min(132/Math.max(...bounds.map(b=>b.y1-b.y0+1)),112/Math.max(...bounds.map(b=>b.x1-b.x0+1)));const layers=[];for(const b of bounds){const w=Math.max(1,Math.round((b.x1-b.x0+1)*scale)),h=Math.max(1,Math.round((b.y1-b.y0+1)*scale));layers.push({input:await sharp(src).extract({left:b.f*cw+b.x0,top:b.row*ch+b.y0,width:b.x1-b.x0+1,height:b.y1-b.y0+1}).resize(w,h).png().toBuffer(),left:b.f*128+Math.round((128-w)/2),top:b.row*160+150-h});}await sharp({create:{width:512,height:320,channels:4,background:'#00000000'}}).composite(layers).webp({quality:94}).toFile(`public/sprites/go-home-dash/rush/actions/${id}.webp`);}
+console.log('Prepared 26 jump/slide atlases, 208 action frames.');

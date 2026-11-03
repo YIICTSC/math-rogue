@@ -194,6 +194,7 @@ const GoHomeDash: React.FC<{
     const [selectedHero, setSelectedHero] = useState<string>(DEFAULT_DASH_HERO);
     const heroRef = useRef(DEFAULT_DASH_HERO);
     const rearSpriteRef=useRef<HTMLImageElement|null>(null);
+    const rearActionRef=useRef<HTMLImageElement|null>(null);
     const rushRendererRef=useRef<RushRenderer|null>(null);
     const heroFallbackRef = useRef<HTMLImageElement | null>(null);
     const extraEnemiesRef = useRef<HTMLImageElement | null>(null);
@@ -248,6 +249,7 @@ const GoHomeDash: React.FC<{
         playerSpriteRef.current = null;
         heroFallbackRef.current = null;
         playerSlideRef.current=null;
+        const actions=new Image();rearActionRef.current=null;actions.onload=()=>{if(active)rearActionRef.current=actions;};actions.src=assetUrl(`sprites/go-home-dash/rush/actions/${selectedHero}.webp`);
         const rear=new Image();rearSpriteRef.current=null;rear.onload=()=>{if(active)rearSpriteRef.current=rear;};rear.src=assetUrl(`sprites/go-home-dash/rush/rear/${selectedHero}.webp`);
         const sheet = new Image(), fallback = new Image(), slide = new Image();
         sheet.onload = () => { if (active) playerSpriteRef.current = sheet; };
@@ -256,7 +258,7 @@ const GoHomeDash: React.FC<{
         fallback.src = assetUrl(DASH_HERO_ART[selectedHero]);
         slide.onload=()=>{if(active)playerSlideRef.current=slide;};
         slide.src=assetUrl(`sprites/go-home-dash/slides/${selectedHero}.webp`);
-        return () => { active = false; sheet.onload = null; fallback.onload = null; slide.onload=null;rear.onload=null; };
+        return () => { active = false; sheet.onload = null; fallback.onload = null; slide.onload=null;rear.onload=null;actions.onload=null; };
     }, [selectedHero]);
 
     useEffect(() => {
@@ -1119,7 +1121,7 @@ const GoHomeDash: React.FC<{
 
         const arcade=arcadeRef.current;
         if(arcade.rush.kind!=='run'){
-            const f:RushRenderFrame={state:arcade,distance:distanceRef.current,jump:Math.max(0,floorAt(routeSeedRef.current,distanceRef.current+120)-playerRef.current.y),frame:frameCount.current,side:playerSpriteRef.current,rear:rearSpriteRef.current,reduced:reducedMotionRef.current};
+            const f:RushRenderFrame={state:arcade,distance:distanceRef.current,jump:Math.max(0,floorAt(routeSeedRef.current,distanceRef.current+120)-playerRef.current.y),frame:frameCount.current,vy:playerRef.current.vy,side:playerSpriteRef.current,rear:rearSpriteRef.current,actions:rearActionRef.current,reduced:reducedMotionRef.current};
             if(!rushRendererRef.current?.draw(ctx,view.width,view.height,f))drawRushFallback(ctx,view.width,view.height,f);
             ctx.canvas.dataset.rushKind=arcade.rush.kind;ctx.restore();
             if(!focusPass)drawFocus();return;

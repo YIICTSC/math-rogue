@@ -41,3 +41,7 @@ node scripts/generate-android-asset-manifest.mjs --update-prefix sprites/go-home
 - `node scripts/test-home-dash-rush-browser.mjs`：Blender GLBの実描画、タッチ・キーボード・ゲームパッド、停止、8画面サイズ×3区間の表示、奥行き区間の前後での2画面／1画面切り替え、全主人公の背面アニメ、WebGL喪失時の継続。
 - `DASH_RUSH_CAPTURE=1 node scripts/test-home-dash-rush-browser.mjs`：追加2項目のアクション図鑑を実プレイ画面で更新。
 - `node scripts/test-home-dash-browser.mjs`：従来の飛行・障害物・強化・学習・再挑戦。既存ギミックを単独検証する配置フィクスチャでは新しいコース切り替えを止め、新規ブラウザ試験で混在時の操作を検証する。
+
+## 奥行き区間のジャンプとスライド
+
+全26主人公について `rush/actions/<id>.webp` に4列×2行の専用アトラスを追加。上段は離陸・上昇・頂点・着地、下段は姿勢を低くする・滑走2コマ・立ち上がり。ImageGen原画は `assets/go-home-dash/rush/action-sources/` に保存する。`node scripts/prepare-home-dash-actions.mjs` で512×320へ正規化し、全8コマを同じ倍率・足元基準で配置する。走行との切り替えは跳躍の高さ・上下速度・スライド残時間で決め、WebGLとCanvasの両方へ適用する。

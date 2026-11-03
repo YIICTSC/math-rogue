@@ -4,7 +4,7 @@ import {assetUrl} from '../../utils/assetPaths';
 import type {ArcadeState} from './arcade';
 import {loopPose} from './rush';
 
-export interface RushRenderFrame {state:ArcadeState;distance:number;jump:number;frame:number;side:HTMLImageElement|null;rear:HTMLImageElement|null;reduced:boolean;}
+export interface RushRenderFrame {state:ArcadeState;distance:number;jump:number;frame:number;vy?:number;side:HTMLImageElement|null;rear:HTMLImageElement|null;actions?:HTMLImageElement|null;reduced:boolean;}
 /** A render adapter driven by the existing fixed-step simulation; no second game clock. */
 export function createRushRenderer(){
  const canvas=document.createElement('canvas');let renderer:THREE.WebGLRenderer;
@@ -41,8 +41,8 @@ export function createRushRenderer(){
   const rw=Math.min(1280,Math.max(400,Math.round(w))),rh=Math.max(250,Math.round(rw*h/w));
   if(rw!==lastWidth||rh!==lastHeight){renderer.setSize(rw,rh,false);lastWidth=rw;lastHeight=rh;camera.aspect=rw/rh;}
   const r=f.state.rush,isLoop=r.kind==='loop';depth.visible=!isLoop;loop.visible=isLoop;
-  const sheet=isLoop?f.side:f.rear;hero.visible=!!sheet?.complete&&!!sheet.naturalWidth;
-  if(hero.visible&&sheet){spriteCtx.clearRect(0,0,128,160);const cell=sheet.naturalWidth/4,ch=isLoop?sheet.naturalHeight/2:sheet.naturalHeight;const frame=Math.floor(f.frame/Math.max(3,8-r.speed*.35))%4;spriteCtx.drawImage(sheet,frame*cell,0,cell,ch,0,0,128,160);spriteTexture.needsUpdate=true;}
+  const action=!isLoop&&f.actions?.complete&&(f.jump>1||f.state.slide>0),slidingAction=action&&f.jump<=1;const sheet=isLoop?f.side:action?f.actions:f.rear;hero.visible=!!sheet?.complete&&!!sheet.naturalWidth;
+  if(hero.visible&&sheet){spriteCtx.clearRect(0,0,128,160);const cell=sheet.naturalWidth/4,ch=isLoop||action?sheet.naturalHeight/2:sheet.naturalHeight;const frame=action?(slidingAction?(f.state.slide>44?0:f.state.slide<9?3:1+Math.floor(f.frame/7)%2):f.jump<22?((f.vy??0)<0?0:3):(f.vy??0)<-2?1:2):Math.floor(f.frame/Math.max(3,8-r.speed*.35))%4;spriteCtx.drawImage(sheet,frame*cell,slidingAction?ch:0,cell,ch,0,0,128,160);spriteTexture.needsUpdate=true;}
   const boost=r.turbo>0||f.state.boost>0||f.state.fever>0;
   const baseFov=isLoop?43:58+(f.reduced?0:Math.min(12,r.speed*.65));
   camera.fov=camera.aspect<1?THREE.MathUtils.radToDeg(2*Math.atan(Math.tan(THREE.MathUtils.degToRad(baseFov/2))/camera.aspect)):baseFov;camera.updateProjectionMatrix();
@@ -56,7 +56,7 @@ export function createRushRenderer(){
    const phase=f.distance*.035;
    tiles.forEach((o,i)=>o.position.set(0,0,-i*24+phase%24));arches.forEach((o,i)=>o.position.set(0,0,-i*30+phase%30-8));
    decor.forEach(({o,i,side})=>o.position.set(side*(9+i%3*3),-1,-i*20+phase%20));
-   const sliding=f.state.slide>0&&f.jump<10;hero.position.set(r.laneX*3,(sliding?.57:1.07)+Math.max(0,f.jump)*.025,2);hero.scale.set(1.9,sliding?1.3:2.4,1);(hero.material as THREE.SpriteMaterial).rotation=f.reduced?0:(r.lane-r.laneX)*-.18;
+   const sliding=f.state.slide>0&&f.jump<10;hero.position.set(r.laneX*3,1.07+Math.max(0,f.jump)*.025,2);hero.scale.set(1.9,2.4,1);(hero.material as THREE.SpriteMaterial).rotation=f.reduced?0:(r.lane-r.laneX)*-.18;
    shadow.visible=true;shadow.position.set(r.laneX*3,.045,2);
    const live=new Set<number>();
    for(const e of r.objects){const ahead=e.at-f.distance-120;if(e.taken||ahead< -100||ahead>2900)continue;live.add(e.id);let o=props.get(e.id);
