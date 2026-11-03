@@ -1,3 +1,4 @@
+import {storageService} from '../../services/storageService';
 import SportsPresentation from '../shared/SportsPresentation';
 import {initialTutorialMissTracker, recordTutorialShot} from './tutorialMisses';
 import {useSportsInvitation} from '../shared/useSportsInvitation';
@@ -62,6 +63,8 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; room.current?.close(); room.current = null; }; }, []);
   const self = room.current?.selfId || '', own = view?.players.find(p => p.id === self);
   const spectating = !!own?.spectator;
+  const pointRecorded=useRef(new Set<string>());
+  useEffect(()=>{const q=view?.quiz;if(!q||spectating||q.selected===null||q.answer===null)return;const receipt=`golf:${self}:${q.shotId}:${q.index}:${q.question.id}`;if(pointRecorded.current.has(receipt))return;pointRecorded.current.add(receipt);storageService.saveAssignmentAnswer({pointReceipt:receipt,mode:q.question.mode,problemId:q.question.problemId,problemKey:q.question.id,question:q.question.question,correct:q.selected===q.answer,correctAnswer:q.question.options[q.answer],selectedAnswer:q.question.options[q.selected],answeredAt:new Date().toISOString(),elapsedMs:0});},[view?.quiz?.shotId,view?.quiz?.index,view?.quiz?.selected,view?.quiz?.answer,spectating,self]);
   const candidates = (view?.players || []).filter(p => p.id !== self && p.connected && !p.spectator);
   const spectators = useSpectatorTarget(spectating, candidates.map(p => p.id));
   const viewId = spectating ? spectators.target || self : self;

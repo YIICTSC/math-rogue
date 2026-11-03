@@ -81,6 +81,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
     const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
     const isAssignmentAnswer = !!assignment && (isCustomAssignmentAnswer || !assignmentModePool || assignmentModePool.includes(result.mode));
     storageService.saveAssignmentAnswer({
+            pointReceipt: result.pointReceipt,
       assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
       mode: result.mode,
       subjectId: result.subjectId,

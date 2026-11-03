@@ -216,7 +216,10 @@
     "test:lantern-war:browser": "node scripts/test-lantern-war-browser.mjs",
     "test:lantern-war:banter": "node scripts/test-lantern-banter.mjs",
     "export:lantern-war:banter": "node scripts/export-lantern-banter.mjs",
-    "test:lantern-war:banter:browser": "node scripts/test-lantern-banter-browser.mjs"
+    "test:lantern-war:banter:browser": "node scripts/test-lantern-banter-browser.mjs",
+    "test:points": "node scripts/test-point-exchange.mjs",
+    "test:points:browser": "node scripts/test-point-exchange-browser.mjs",
+    "verify:points:art": "node scripts/verify-point-exchange-art.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

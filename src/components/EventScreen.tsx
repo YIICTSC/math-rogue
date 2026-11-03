@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
@@ -90,6 +91,7 @@ interface EventScreenProps {
 }
 
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary', appearanceMode = 'STANDARD', imageZoomEnabled = false }) => {
+  const pointsSession=React.useRef(crypto.randomUUID());
   const supporterNpcProfile = useMemo(() => {
     const fileName = imageKey?.match(/^high-school-supporter-npc\/([^/]+)$/)?.[1];
     return HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.find(profile => profile.imageFile === fileName);
@@ -292,6 +294,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   const handleOptionAction = useCallback((option: EventOption) => {
     if (inputLocked || resultLog) return;
     setChoiceLocked(true);
+    if(option.isCorrect===true) void awardAnswer({correct:true,pointReceipt:`event:${pointsSession.current}:${title}:${description}`});
     try {
       option.action(isTsukaponQuickQuiz && tsukaponQuizOpen
         ? { quickQuizProgress: tsukaponQuizText.length > 0 ? typedDescription.length / tsukaponQuizText.length : 1 }
@@ -335,6 +338,8 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
 
   return (
     <div
+      data-learning-question-screen={options.some(o=>typeof o.isCorrect==='boolean')||undefined}
+      data-learning-question-key={`${title}:${description}`}
       data-gamepad-initial-scope="event-screen"
       className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
       style={{

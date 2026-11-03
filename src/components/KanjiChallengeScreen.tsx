@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -35,6 +36,8 @@ interface ExtendedKanjiProblem extends KanjiProblem {
 }
 
 const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
+  const pointQuestionRef = React.useRef<{problem:unknown;index:number;receipt:string}>({problem:null,index:-1,receipt:''});
+  const getPointReceipt=(problem:unknown,index:number)=>{const q=pointQuestionRef.current;if(q.problem!==problem||q.index!==index){q.problem=problem;q.index=index;q.receipt=crypto.randomUUID();}return q.receipt;};
   const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -172,6 +175,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       }
     }
     const answerResult = {
+      pointReceipt: getPointReceipt(problems[currentProblemIndex],currentProblemIndex),
       mode,
       subjectId: mode,
       correct: isCorrect,
@@ -202,6 +206,8 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       audioService.playSound('wrong');
       storageService.saveHintStreak(mode, 0);
     }
+
+    if (!debugSkip) void awardAnswer(answerResult);
 
     setTimeout(() => {
       onAnswerResult?.(answerResult);

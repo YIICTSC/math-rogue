@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { BookOpen, CheckCircle, XCircle } from 'lucide-react';
@@ -23,6 +24,8 @@ interface MathProblem {
 }
 
 const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
+  const pointQuestionRef = React.useRef<{problem:unknown;index:number;receipt:string}>({problem:null,index:-1,receipt:''});
+  const getPointReceipt=(problem:unknown,index:number)=>{const q=pointQuestionRef.current;if(q.problem!==problem||q.index!==index){q.problem=problem;q.index=index;q.receipt=crypto.randomUUID();}return q.receipt;};
   const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -217,6 +220,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     
     const isCorrect = option === problems[currentProblemIndex].answer;
     const answerResult = {
+      pointReceipt: getPointReceipt(problems[currentProblemIndex],currentProblemIndex),
       mode,
       subjectId: mode,
       correct: isCorrect,
@@ -242,6 +246,8 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       setFeedback('WRONG');
       audioService.playSound('wrong');
     }
+
+    if (!debugSkip) void awardAnswer(answerResult);
 
     setTimeout(() => {
       onAnswerResult?.(answerResult);

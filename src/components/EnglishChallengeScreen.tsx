@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, VolumeX } from 'lucide-react';
@@ -34,6 +35,8 @@ interface ExtendedEnglishProblem extends EnglishProblem {
 const ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER = 0.05;
 
 const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
+  const pointQuestionRef = React.useRef<{problem:unknown;index:number;receipt:string}>({problem:null,index:-1,receipt:''});
+  const getPointReceipt=(problem:unknown,index:number)=>{const q=pointQuestionRef.current;if(q.problem!==problem||q.index!==index){q.problem=problem;q.index=index;q.receipt=crypto.randomUUID();}return q.receipt;};
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -196,6 +199,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
     const answerResult = {
+      pointReceipt: getPointReceipt(problems[currentProblemIndex],currentProblemIndex),
       mode,
       subjectId: mode,
       correct: isCorrect,
@@ -225,6 +229,8 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       audioService.playSound('wrong');
       storageService.saveHintStreak(mode, 0);
     }
+
+    if (!debugSkip) void awardAnswer(answerResult);
 
     setTimeout(() => {
       onAnswerResult?.(answerResult);

@@ -1,3 +1,5 @@
+import PointExchangeEntry from './point-exchange/PointExchange';
+import QuestionExperience from './point-exchange/QuestionExperience';
 import {RELEASE_109} from './data/release109';
 import{basketballInviteCode}from'./mini-games/basketball/invite';
 import{dodgeballInviteCode}from'./mini-games/dodgeball/invite';
@@ -16230,6 +16232,7 @@ const App: React.FC = () => {
         const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
         const isAssignmentAnswer = !!assignment && (isCustomAssignmentAnswer || !assignmentModePool || assignmentModePool.includes(result.mode));
         storageService.saveAssignmentAnswer({
+            pointReceipt: result.pointReceipt,
             assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
             mode: result.mode,
             subjectId: result.subjectId,
@@ -19417,6 +19420,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                <QuestionExperience languageMode={languageMode}/>
                 {gameState.screen === GameScreen.START_MENU && (
                     <div data-gamepad-initial-scope="start-menu" className={`start-menu-root w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
                         <div
@@ -20055,6 +20059,7 @@ const App: React.FC = () => {
                                 )}
 
                                 <div className="start-menu-utility-row flex gap-2 w-full justify-between">
+                                    <PointExchangeEntry languageMode={languageMode} disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}/>
                                     <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 text-xs font-bold border-b-4 border-r-4 border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <BookOpen className="mb-1" size={20} /> {trans("図鑑", languageMode)}
                                     </button>

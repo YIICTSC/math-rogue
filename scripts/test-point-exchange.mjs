@@ -1,0 +1,17 @@
+import {build} from 'esbuild';import assert from 'node:assert/strict';
+const result=await build({stdin:{contents:"export * from './src/point-exchange/store';export * from './src/point-exchange/catalog';",resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'node'});
+const values=new Map();let fail=false;globalThis.localStorage={getItem:k=>values.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('storage full');values.set(k,v);}};globalThis.window=new EventTarget();let errors=0;window.addEventListener('learning-points-error',()=>errors++);
+const E=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
+assert.equal(E.BACKGROUNDS.length,18);assert.equal(new Set(E.PRODUCTS.map(p=>p.id)).size,E.PRODUCTS.length);
+assert.equal(E.readPoints().earned,0);assert.equal(await E.awardAnswer({correct:false,pointReceipt:'wrong'}),false);
+await Promise.all(Array.from({length:10},(_,i)=>E.awardAnswer({correct:true,pointReceipt:'answer-'+i})));assert.equal(E.readPoints().earned,10);
+await E.awardAnswer({correct:true,pointReceipt:'answer-0',answeredAt:'callback-later'});assert.equal(E.readPoints().earned,10,'Callback and component cannot award the same answer twice');
+assert.deepEqual(await Promise.all([E.buyProduct('bg:notebook'),E.buyProduct('bg:notebook')]),[true,false]);assert.equal(E.readPoints().spent,10);assert.equal(E.readPoints().owned.length,1);
+assert.equal(await E.buyProduct('theater'),false);assert.equal(await E.setBackground('stars'),false);assert(await E.setBackground('notebook'));await E.changePoints(s=>{s.shuffle=true;s.favorites=['notebook'];return true;});assert(await E.setBackground(''));assert.equal(E.readPoints().shuffle,false,'Default background must also stop the playlist');assert(await E.setBackground('notebook'));
+const project={id:'story',name:'Test story',background:'',left:'aster',right:'lyra',vacation:false,lines:[{actor:'aster',side:'left',mood:'joy',text:'Hello',pause:1}]};assert.equal(await E.saveProject(project),false,'Theater must be unlocked');
+await Promise.all(Array.from({length:220},(_,i)=>E.awardAnswer({correct:true,pointReceipt:'extra-'+i})));assert(await E.buyProduct('theater'));assert(await E.saveProject(project));assert.equal(E.readPoints().spent,210,'Editing and saving are free');
+assert(!E.validProject({...project,lines:[{...project.lines[0],pause:-1}]}));assert(!E.validProject({...project,lines:[{...project.lines[0],text:'x'.repeat(501)}]}));assert(!E.validProject({...project,lines:[]}));
+for(let i=1;i<24;i++)assert(await E.saveProject({...project,id:'story'+i}));assert.equal(await E.saveProject({...project,id:'overflow'}),false);assert(await E.saveProject({...project,name:'Updated'}));
+await Promise.all(Array.from({length:30},(_,i)=>E.awardAnswer({correct:true,pointReceipt:'fund-'+i})));const saved=values.get(E.POINT_KEY);fail=true;assert.equal(await E.buyProduct('bgm:rest'),false);assert.equal(values.get(E.POINT_KEY),saved,'Failed save cannot charge points or grant an item');fail=false;assert(errors>0);
+values.set(E.POINT_KEY,'corrupt');assert.equal(await E.awardAnswer({correct:true,pointReceipt:'cannot-overwrite'}),false);assert.equal(values.get(E.POINT_KEY),'corrupt','Corrupted data is preserved for recovery');values.set(E.POINT_KEY,saved);assert.equal(E.readPoints().projects.length,24);
+console.log('PASS answer deduplication, concurrent awards/exchanges, affordability, ownership, unlock gating, project validation/limits, free saves, reloads and write-failure preservation.');

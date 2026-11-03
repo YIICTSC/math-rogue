@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card as ICard, CardType, Enemy, EnemyIntentType, LanguageMode, Player, Potion, SelectionState, VisualEffectInstance } from '../types';
 import { audioService } from '../services/audioService';
@@ -200,6 +201,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const seenShakeEffectIdsRef = useRef<Set<string>>(new Set());
 
     const [input, setInput] = useState('');
+    const pointsSession=React.useRef(crypto.randomUUID());
     const [promptSequence,setPromptSequence] = useState(0);
     const battleExperience = useMemo(()=>combatExperience,[battleKey,act,floor]);
     const [prompt, setPrompt] = useState<TypingPrompt | null>(null);
@@ -390,6 +392,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
 
     const handleSuccess = () => {
         if (!prompt || !currentCard) return;
+        void awardAnswer({correct:true,pointReceipt:`typing:${pointsSession.current}:${battleKey}:${currentCard.id}:${promptSequence}`});
         audioService.playBattleSound('attack');
         setStatusMessage(`${trans(currentCard.name, languageMode)} を自動使用`);
         setWrongInputStreak(0);

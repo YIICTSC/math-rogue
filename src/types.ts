@@ -968,6 +968,7 @@ export interface AssignmentPayload {
 }
 
 export interface AssignmentAnswerRecord {
+  pointReceipt?: string;
   assignmentId?: string;
   mode: string;
   subjectId?: string;
@@ -997,6 +998,7 @@ export interface AssignmentReviewProblem {
 }
 
 export interface AssignmentAnswerResult {
+  pointReceipt?: string;
   mode: string;
   /** Stable learning subject identifier used by scoped endless rewards. */
   subjectId?: string;

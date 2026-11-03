@@ -1,0 +1,294 @@
+{
+  "generator": "ImageGen: original Learning Rogue character and scene illustrations",
+  "normalizer": "scripts/prepare-point-exchange-art.mjs",
+  "records": [
+    {
+      "id": "notebook",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/notebook-landscape.png",
+      "output": "public/sprites/point-exchange/notebook-landscape.webp",
+      "sourceSHA256": "3ec8a115a3aa346fe5ecfcae6d462f17aba5025d3626437145d8ab946e9cbc46",
+      "sha256": "c2cd1a5dba7f1799fdfa6a82518b435723f944c1068ff8c33e6c7b7dd099fcdc"
+    },
+    {
+      "id": "notebook",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/notebook-portrait.png",
+      "output": "public/sprites/point-exchange/notebook-portrait.webp",
+      "sourceSHA256": "65dc1109fe72dfa13407a1fb392215d8baaf523ce3c53708e10872845694ac27",
+      "sha256": "2f092b9648561ca5dc0750c5ae27880bb108652a787344bf2a1bc625e909a490"
+    },
+    {
+      "id": "window",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/window-landscape.png",
+      "output": "public/sprites/point-exchange/window-landscape.webp",
+      "sourceSHA256": "a15bc08ff0eaa0a9a42d961ff4dcbf030195b9b36bc26f6fb380548de19c2474",
+      "sha256": "70cf0bad9c09351d3061e7bbdaca0b8f8011d992a2bf83e645dab81e21de22a1"
+    },
+    {
+      "id": "window",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/window-portrait.png",
+      "output": "public/sprites/point-exchange/window-portrait.webp",
+      "sourceSHA256": "ecbcf51d52a6219ac4cb06ef14754f54ffe3857dd3676c4da2a0ab962b4ddb8d",
+      "sha256": "7ac3e7b744d13c698de64ee75f73a3f7fed1c61633d151e26157df42bfc8411a"
+    },
+    {
+      "id": "study",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/study-landscape.png",
+      "output": "public/sprites/point-exchange/study-landscape.webp",
+      "sourceSHA256": "a76b576c77e00a77283c114e352a75c2a9e4a1f95b010dc96f10921e2138a1ea",
+      "sha256": "93744ef311b2dd64bb6007a963bcb1423951fa405f7394c6f5f7c52c6e5d901f"
+    },
+    {
+      "id": "study",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/study-portrait.png",
+      "output": "public/sprites/point-exchange/study-portrait.webp",
+      "sourceSHA256": "592b8b2d56b390a767eec64833a3611d4aa2b78c7dac63c59d1605c2468e9f63",
+      "sha256": "b498c61fce0a8a2c578ef993086eaf8ab24091b23feb0abf66fb4d673856dd9f"
+    },
+    {
+      "id": "stars",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/stars-landscape.png",
+      "output": "public/sprites/point-exchange/stars-landscape.webp",
+      "sourceSHA256": "c9fd6e20ec942c775568eb1cb75839e04e399ebf0cddabe88478542703edf2c8",
+      "sha256": "1461d840dacc4cbb3763ec3f6785c040799d4f221445a3050d9f5a23d1f63284"
+    },
+    {
+      "id": "stars",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/stars-portrait.png",
+      "output": "public/sprites/point-exchange/stars-portrait.webp",
+      "sourceSHA256": "4b5a8c650c63b4e9756778e1e0df459f3fd347f2043bd048e435b82b94efa2db",
+      "sha256": "eb4294cd9151c80d74006a529721133012188365435e924cec7489b5837d0a89"
+    },
+    {
+      "id": "sky",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/sky-landscape.png",
+      "output": "public/sprites/point-exchange/sky-landscape.webp",
+      "sourceSHA256": "09a285b582cc7685c898355efc2d8ce94daeceac83ef6583694b072eafa5e9b0",
+      "sha256": "4d197423dbc2c70aaec2da75fba39d3814c9df660a2fd91435463fba8ab16be7"
+    },
+    {
+      "id": "sky",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/sky-portrait.png",
+      "output": "public/sprites/point-exchange/sky-portrait.webp",
+      "sourceSHA256": "d2286f6b92443658b19c58509efaf4da8886cf3ccf842a878b9553fc86551811",
+      "sha256": "8f953a0f643ebf2c1a3f8f8d580e5459de29a117c5810cd69d511f816e85001e"
+    },
+    {
+      "id": "tree",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/tree-landscape.png",
+      "output": "public/sprites/point-exchange/tree-landscape.webp",
+      "sourceSHA256": "926769ef52d502facde2b30e1e94b5840befe2ea8c6dbdd0e038660359f6d8fa",
+      "sha256": "9582c1e8417a42a73a317445b1f9693441845703967dddd22d0d814478f25337"
+    },
+    {
+      "id": "tree",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/tree-portrait.png",
+      "output": "public/sprites/point-exchange/tree-portrait.webp",
+      "sourceSHA256": "4808ca61779603378b141037fc040703d44822444d48cb511b79e147789d531f",
+      "sha256": "2dc3bda50175db263090321445fd69344a4137d85f971810f2012c9b40bbaef7"
+    },
+    {
+      "id": "pudding",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/pudding-landscape.png",
+      "output": "public/sprites/point-exchange/pudding-landscape.webp",
+      "sourceSHA256": "bffc6b66bbe1852ce27c4bcb693bd9bc3d04d773fbefc8fc5216c0ff334531c1",
+      "sha256": "cccfbbb9e7a4db50d3df5cca888872230b343dba1110527ea96956e779069755"
+    },
+    {
+      "id": "pudding",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/pudding-portrait.png",
+      "output": "public/sprites/point-exchange/pudding-portrait.webp",
+      "sourceSHA256": "34cebcb159778500ac5f89bed61a3d63c0a1c9077409d1850cb626a566517956",
+      "sha256": "0412262bc94c233c9e6d2fd87d025deb6e8931ff674d03099403720d3b7ef31a"
+    },
+    {
+      "id": "garden",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/garden-landscape.png",
+      "output": "public/sprites/point-exchange/garden-landscape.webp",
+      "sourceSHA256": "2788ee9659e1e00d42e60a4442b550268ebdda8aa91eebaac4f54f8de36aff14",
+      "sha256": "2a9ab3892e372e4212cea139eded61e2b054b4a414c9588d725b09207be5922a"
+    },
+    {
+      "id": "garden",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/garden-portrait.png",
+      "output": "public/sprites/point-exchange/garden-portrait.webp",
+      "sourceSHA256": "dac2f3fa02f70e0dd314f1d53e4f89b64ac715652be26840de3dade8262d20cb",
+      "sha256": "2f6dd5a30acb93dfda9cb960778faf2d816a552b6b4732ef115dc8e1b1d3b83e"
+    },
+    {
+      "id": "experiment",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/experiment-landscape.png",
+      "output": "public/sprites/point-exchange/experiment-landscape.webp",
+      "sourceSHA256": "b7777c97312109e51f570859ca074808a94062f4e84f022ec5b8c637e21ff538",
+      "sha256": "49400b0a4d02b2950af827948e06f4a5bbe6c69f387d4d71a4e2e17d8068d07e"
+    },
+    {
+      "id": "experiment",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/experiment-portrait.png",
+      "output": "public/sprites/point-exchange/experiment-portrait.webp",
+      "sourceSHA256": "2610881a6c8a6e448617f4226e600a106933b0b7398dbe18ac142e5cced5dbef",
+      "sha256": "62e74e6b93bc90bddaae7673df67c57cb2fda7ea11cf75b8489b97905849518f"
+    },
+    {
+      "id": "sakura",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/sakura-landscape.png",
+      "output": "public/sprites/point-exchange/sakura-landscape.webp",
+      "sourceSHA256": "29236e716d99cef1f478692d39a7f270368ef08ea579847f167983c6e9e9cdda",
+      "sha256": "e5d3b608b9e89e90fcc66de651bc0213ab88dfc9805fef9913a8d8ca55a34e48"
+    },
+    {
+      "id": "sakura",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/sakura-portrait.png",
+      "output": "public/sprites/point-exchange/sakura-portrait.webp",
+      "sourceSHA256": "72afa48931b6f920bf9830b635fb4751c000a22ca78ea4049a342ffdd29c9bb1",
+      "sha256": "3b1279febe41c69e2b6fbc9e594a1256a72990016e6a94842776f0c8dee00a7d"
+    },
+    {
+      "id": "rain",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/rain-landscape.png",
+      "output": "public/sprites/point-exchange/rain-landscape.webp",
+      "sourceSHA256": "1f90e55dc0533c7ca0f62650e8d9ea86cbf9f796edbd4bb207bbdbf8adbe734f",
+      "sha256": "10a1046eb51f6dc3d87cb1ea82c6a4e59980c6c4cf5e0646dfa0333ab5a8119f"
+    },
+    {
+      "id": "rain",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/rain-portrait.png",
+      "output": "public/sprites/point-exchange/rain-portrait.webp",
+      "sourceSHA256": "ba1cbe0e67aca8648543c0ac6e84cec90180295afa0a457d8370dea17df437e4",
+      "sha256": "d334d2957147c77af2a7a239a4456f1b7e5047771ebef6a271954ded9f6434ec"
+    },
+    {
+      "id": "snow",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/snow-landscape.png",
+      "output": "public/sprites/point-exchange/snow-landscape.webp",
+      "sourceSHA256": "f9ba97e49dc470666272b67c2c3e655f9e5ca3b31b23130ce608b4259f046828",
+      "sha256": "c0ab20eda9f1f47682c079329bfdfa21b603e5f754be3b2817e451634fa783fd"
+    },
+    {
+      "id": "snow",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/snow-portrait.png",
+      "output": "public/sprites/point-exchange/snow-portrait.webp",
+      "sourceSHA256": "0364890f878cc56f2ac6936b3f2cf9546b6eacf4ca06cc91edd836319ff57ac7",
+      "sha256": "c4b9533f3e89921fb8195fe10c9cbcfaebfd6cbb0befdd5a749ad812a13db3d4"
+    },
+    {
+      "id": "chibi",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/chibi-landscape.png",
+      "output": "public/sprites/point-exchange/chibi-landscape.webp",
+      "sourceSHA256": "308b724e015beb4818c71b5d916813abebe777ae03054598342293acf47508eb",
+      "sha256": "06e3b1cb73eaac6830f61953b26589299bf35b2aec9634af3377b805dfed8e30"
+    },
+    {
+      "id": "chibi",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/chibi-portrait.png",
+      "output": "public/sprites/point-exchange/chibi-portrait.webp",
+      "sourceSHA256": "b605c7806f53a16224cd88bf896bb499cbda1c1bbe0276532b6b71f518e74c81",
+      "sha256": "745d54b7ecb4fc415fe4d77d6a9a8a97cadc65754ee0f25befc31da789d5ddb4"
+    },
+    {
+      "id": "film",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/film-landscape.png",
+      "output": "public/sprites/point-exchange/film-landscape.webp",
+      "sourceSHA256": "c7514ccf317d818cee343d222899f14d8a8d43f6b45f4cc9b8ace6f77a1730db",
+      "sha256": "99e7713c90eaf9a1e73234342ef45494d261931e6dd11810adfd2883b0015614"
+    },
+    {
+      "id": "film",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/film-portrait.png",
+      "output": "public/sprites/point-exchange/film-portrait.webp",
+      "sourceSHA256": "6851d2d3cd3ab99740226285abae6a343638be0aa03fee60dd5c1f2381f34e59",
+      "sha256": "05489f4e954bf8a043fa44bdb08ccd4c34efd2fbda3da678f0959bdc85b88b11"
+    },
+    {
+      "id": "ink",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/ink-landscape.png",
+      "output": "public/sprites/point-exchange/ink-landscape.webp",
+      "sourceSHA256": "5985b11b734070d7628fcf6c6b37ee8cf7f754261965f0a4172a334af2860a83",
+      "sha256": "fefd6b7e85e7c1e02aeafc2e71ce2fcb05c8672fdf4bafb9e8b7bf83bdea9f56"
+    },
+    {
+      "id": "ink",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/ink-portrait.png",
+      "output": "public/sprites/point-exchange/ink-portrait.webp",
+      "sourceSHA256": "c2c06eff20dfea741826529b6bdb472fe5c3e0f44705f23047cbc68033fc7ef0",
+      "sha256": "681c1cd82955c725d52bc0625bf22e13ae90dc5b0cf014ec960f6076fef73149"
+    },
+    {
+      "id": "paper",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/paper-landscape.png",
+      "output": "public/sprites/point-exchange/paper-landscape.webp",
+      "sourceSHA256": "8682dbdd17b0c04c833ff3911843197ee41aa54b5faed3ee23ef6cd290e982bf",
+      "sha256": "25ce696c9a519214dba729ddbdc63262acde09ec780871c29a01d2cad67d99eb"
+    },
+    {
+      "id": "paper",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/paper-portrait.png",
+      "output": "public/sprites/point-exchange/paper-portrait.webp",
+      "sourceSHA256": "c0d62f8a267dc280bc265ba06226698850687f519bcf6b4a76335b9df6bc6ccf",
+      "sha256": "fc0c0b5d607b198cf5a774e8453958439b0591b8a2000be745e1cf029b026528"
+    },
+    {
+      "id": "oil",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/oil-landscape.png",
+      "output": "public/sprites/point-exchange/oil-landscape.webp",
+      "sourceSHA256": "181fb24bba2b4fa153dceae6c3bfccefce4da8f331d7bd158c8bee1bed7ffc4b",
+      "sha256": "01cd2cea1f27020f2f51bdef26091e8995e2badec218148ab9c57394b29f3428"
+    },
+    {
+      "id": "oil",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/oil-portrait.png",
+      "output": "public/sprites/point-exchange/oil-portrait.webp",
+      "sourceSHA256": "c5bb202b777f6c0df3890ba3dcd9ca830fcebadcbbfbbe59babb2b85cde4bf8c",
+      "sha256": "4ee930a3881bcdaa060087ef81be7812e3640ea8e137acb77a3a7b87ac84e777"
+    },
+    {
+      "id": "pixel",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/pixel-landscape.png",
+      "output": "public/sprites/point-exchange/pixel-landscape.webp",
+      "sourceSHA256": "4cb7d5c2a730ff43198cf618e7d6917ba78e67bd8f1823e2c74816e38fd8e1e9",
+      "sha256": "6fb99743ac49424a52ac7baf4c43d59624f419b678ba26752b0c21f2e9156d33"
+    },
+    {
+      "id": "pixel",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/pixel-portrait.png",
+      "output": "public/sprites/point-exchange/pixel-portrait.webp",
+      "sourceSHA256": "f920b45227390d31953a2af11048e6c5e7a10321c98c901f6f625a6e0178add2",
+      "sha256": "d0d720d08f5be3977eefd3dc9883a2025b44308741ec2af36940b3892130ee69"
+    }
+  ]
+}

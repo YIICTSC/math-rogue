@@ -41,7 +41,7 @@ function QuizDialog({quiz,answer,waiting,onAnswer,onNext,onClose,t}: {quiz:Quiz;
   useEffect(()=>{if(canvas.current&&q.visual)drawProblemVisual(canvas.current,q.visual);},[q]);
   useEffect(()=>()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel();},[q]);
   const symbol=q.visual?.kind==='map_symbol'?MAP_SYMBOL_ASSET_MAP[q.visual.symbol]:null;
-  return <div className="gc-shade"><section className="gc-quiz gc-panel" role="dialog" aria-modal="true" aria-label={t('問題で回復')}>
+  return <div className="gc-shade"><section data-gamepad-question-screen data-gamepad-initial-scope={`craft-${quiz.token}`} className="gc-quiz gc-panel" role="dialog" aria-modal="true" aria-label={t('問題で回復')}>
     <header><div><small>LEARNING BREAK</small><h2>{t('問題で回復')}</h2></div><button onClick={onClose} aria-label={t('閉じる')}>✕</button></header>
     <p>{t('正解でエネルギー +30。不正解でも減りません。')}</p>
     <div className="gc-question" data-allow-japanese="true">{q.passage&&<p>{q.passage}</p>}<MathText text={q.question}/></div>
@@ -89,7 +89,7 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
   const record=(r:Answer)=>{
     if(recorded.current.has(r.token))return;recorded.current.add(r.token);
     const q=r.question,assignment=room.current?.host?selection.current?.assignment:undefined;
-    const result={mode:q.mode,subjectId:q.mode,correct:r.correct,elapsedMs:r.elapsedMs,problemId:q.problemId,problemKey:q.problemId||`${q.mode}:${q.question}`,question:q.question,correctAnswer:r.answer,selectedAnswer:r.selected};
+    const result={pointReceipt:`craft:${r.token}`,mode:q.mode,subjectId:q.mode,correct:r.correct,elapsedMs:r.elapsedMs,problemId:q.problemId,problemKey:q.problemId||`${q.mode}:${q.question}`,question:q.question,correctAnswer:r.answer,selectedAnswer:r.selected};
     storageService.saveAssignmentAnswer({...result,assignmentId:assignment?.id,unitName:q.unitName,answeredAt:new Date().toISOString()});
     if(assignment)managementPortalService.queueAnswer(assignment,result);managementPortalService.queueLearningActivity(result,assignment);
   };

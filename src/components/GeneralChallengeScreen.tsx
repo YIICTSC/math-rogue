@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 import { drawProblemVisual } from '../utils/drawProblemVisual';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -144,6 +145,8 @@ const isEnglishAudioFocusProblem = (problem: ExtendedGeneralProblem | undefined,
 };
 
 const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits, debugProblems = EMPTY_DEBUG_PROBLEMS, previewOnly = false }) => {
+  const pointQuestionRef = React.useRef<{problem:unknown;index:number;receipt:string}>({problem:null,index:-1,receipt:''});
+  const getPointReceipt=(problem:unknown,index:number)=>{const q=pointQuestionRef.current;if(q.problem!==problem||q.index!==index){q.problem=problem;q.index=index;q.receipt=crypto.randomUUID();}return q.receipt;};
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -589,6 +592,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       if (!previewOnly) storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
     }
     const answerResult = {
+      pointReceipt: getPointReceipt(problems[currentProblemIndex],currentProblemIndex),
       mode: problems[currentProblemIndex].sourceMode,
       subjectId: problems[currentProblemIndex].sourceMode,
       correct: isCorrect,
@@ -607,6 +611,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       const cycleScope = getProblemCycleScope(solvedProblem.sourceMode, assignmentFilterForMode(assignmentUnits, solvedProblem.sourceMode));
       storageService.markProblemCycleCorrect(cycleScope, answerResult.problemKey);
     }
+
+    if (!previewOnly && debugProblems.length === 0) void awardAnswer(answerResult);
 
     setTimeout(() => {
       onAnswerResult?.(answerResult);

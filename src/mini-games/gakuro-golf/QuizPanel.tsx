@@ -38,7 +38,7 @@ export default function QuizPanel({ quiz, languageMode, disabled, send, title='ã
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   }, [quiz.shotId, quiz.index, quiz.answer, disabled]);
   const speak = () => { if (!q.audioPrompt || !('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(q.audioPrompt.text); u.lang = q.audioPrompt.lang || 'ja-JP'; u.rate = .85; window.speechSynthesis.speak(u); };
-  return <section ref={panel} data-gamepad-question-screen data-gamepad-modal className="gg-quiz gg-panel" aria-label={t(title)}>
+  return <section ref={panel} data-gamepad-question-screen data-gamepad-initial-scope={`golf-${quiz.shotId}-${quiz.index}`} data-gamepad-modal className="gg-quiz gg-panel" aria-label={t(title)}>
     <header><span>{t(title)}</span><b>{quiz.index + 1} / 3</b></header>
     <div className="gg-question" data-allow-japanese="true">
       {q.passage && <p className="gg-passage">{q.passage}</p>}

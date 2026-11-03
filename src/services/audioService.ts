@@ -1,3 +1,4 @@
+import {readPoints} from '../point-exchange/store';
 import {techniqueVoiceParts,dungeonTechniqueKey,type TechniqueSpeechMode,type VoicePart} from '../components/school-dungeon/techniques/voiceParts';
 import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
 import lanternVoiceManifest from '../mini-games/lantern-war/voiceManifest.json';
@@ -1242,6 +1243,7 @@ class AudioService {
   public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true, options?: BgmPlaybackOptions) {
       const scene = this.currentBgmScene();
       if (scene) { type = scene.type; loop = true; options = scene.options; }
+      if (type === 'menu' && !scene) { const chosen=readPoints().bgm; if(chosen) type=chosen as typeof type; }
       if (type === 'random') {
           await this.playRandomBGM();
           return;

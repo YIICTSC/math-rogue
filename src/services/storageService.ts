@@ -1,3 +1,4 @@
+import {awardAnswer} from '../point-exchange/store';
 
 import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
 import type { MagicEndingGalleryEntry } from './magicEndingService';
@@ -489,6 +490,7 @@ export const storageService = {
   },
 
   saveAssignmentAnswer: (record: AssignmentAnswerRecord) => {
+    void awardAnswer(record);
     try {
       const current = storageService.getAssignmentAnswers();
       localStorage.setItem(STORAGE_KEY_ASSIGNMENT_ANSWERS, JSON.stringify([...current, record]));
@@ -1794,6 +1796,7 @@ export const storageService = {
       keysToRemove.forEach(key => localStorage.removeItem(key));
       Object.entries(entries).forEach(([key, value]) => localStorage.setItem(key, value));
 
+      if(typeof window!=='undefined') window.dispatchEvent(new CustomEvent('learning-points-changed'));
       return { importedKeys: Object.keys(entries).length };
   },
 
