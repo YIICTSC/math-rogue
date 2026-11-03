@@ -19425,7 +19425,20 @@ const App: React.FC = () => {
                 <QuestionExperience languageMode={languageMode}/>
                 {gameState.screen === GameScreen.START_MENU && (
                     <div data-gamepad-initial-scope="start-menu" className={`start-menu-root w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
-                        <div className="points-title-corner"><PointExchangeEntry languageMode={languageMode} disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}/></div>
+                        <div className="points-title-corner"><PointExchangeEntry languageMode={languageMode} disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}/><button
+                            type="button"
+                            onClick={() => setShowCreditsModal(true)}
+                            className={`start-menu-credit-button points-title-credit flex items-center gap-1.5 rounded px-3 py-2 text-[11px] font-black tracking-[0.18em] shadow-lg transition-colors focus:outline-none focus:ring-2 ${
+                                visualTheme === 'magic'
+                                    ? 'border border-fuchsia-200/80 bg-violet-950/75 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,0.26)] hover:bg-fuchsia-200 hover:text-violet-950 focus:ring-fuchsia-200'
+                                    : visualTheme === 'high-school'
+                                        ? 'border border-red-200/80 bg-slate-950/75 text-red-100 shadow-[0_0_18px_rgba(248,113,113,0.22)] hover:bg-red-200 hover:text-slate-950 focus:ring-red-200'
+                                        : 'border border-amber-300/70 bg-black/65 text-amber-100 shadow-[0_0_14px_rgba(251,191,36,0.2)] hover:bg-amber-300 hover:text-slate-950 focus:ring-amber-200'
+                            }`}
+                                    aria-label={trans('クレジットロールを開く', languageMode)}
+                        >
+                            CREDIT
+                        </button></div>
                         <div
                             className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme !== 'elementary' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
@@ -19681,21 +19694,6 @@ const App: React.FC = () => {
                             )}
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={() => setShowCreditsModal(true)}
-                            className={`start-menu-credit-button ios-safe-edge-left absolute bottom-3 right-3 z-20 flex items-center gap-1.5 rounded px-3 py-2 text-[11px] font-black tracking-[0.18em] shadow-lg transition-colors focus:outline-none focus:ring-2 ${
-                                visualTheme === 'magic'
-                                    ? 'border border-fuchsia-200/80 bg-violet-950/75 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,0.26)] hover:bg-fuchsia-200 hover:text-violet-950 focus:ring-fuchsia-200'
-                                    : visualTheme === 'high-school'
-                                        ? 'border border-red-200/80 bg-slate-950/75 text-red-100 shadow-[0_0_18px_rgba(248,113,113,0.22)] hover:bg-red-200 hover:text-slate-950 focus:ring-red-200'
-                                        : 'border border-amber-300/70 bg-black/65 text-amber-100 shadow-[0_0_14px_rgba(251,191,36,0.2)] hover:bg-amber-300 hover:text-slate-950 focus:ring-amber-200'
-                            }`}
-                                    aria-label={trans('クレジットロールを開く', languageMode)}
-                        >
-                            <ScrollText size={14} />
-                            CREDIT
-                        </button>
 
                         {showCreditsModal && (
                             <div
