@@ -1,0 +1,348 @@
+[
+  {
+    "id": "cast-0",
+    "actors": [
+      "aster",
+      "lyra",
+      "high-school-warrior",
+      "high-school-caretaker"
+    ],
+    "names": [
+      "アステル",
+      "リュラ",
+      "反逆の高校生",
+      "生物部の先輩"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-0.png"
+  },
+  {
+    "id": "cast-1",
+    "actors": [
+      "high-school-assassin",
+      "high-school-mage",
+      "high-school-dodgeball",
+      "high-school-bard"
+    ],
+    "names": [
+      "謎めく転入生",
+      "化学研究会長",
+      "バスケ部エース",
+      "放送部ディレクター"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-1.png"
+  },
+  {
+    "id": "cast-2",
+    "actors": [
+      "high-school-librarian",
+      "high-school-chef",
+      "high-school-gardener",
+      "magic-akari"
+    ],
+    "names": [
+      "文芸部書記",
+      "学食の料理長",
+      "園芸部部長",
+      "星宮あかり"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-2.png"
+  },
+  {
+    "id": "cast-3",
+    "actors": [
+      "magic-shizuku",
+      "magic-hiyori",
+      "magic-tsubasa",
+      "magic-rei"
+    ],
+    "names": [
+      "水城しずく",
+      "花咲ひより",
+      "火神つばさ",
+      "黒羽れい"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-3.png"
+  },
+  {
+    "id": "cast-4",
+    "actors": [
+      "magic-madoka",
+      "magic-koharu",
+      "magic-mirai",
+      "magic-sera"
+    ],
+    "names": [
+      "翠川まどか",
+      "風森こはる",
+      "紫藤みらい",
+      "白峰セラ"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-4.png"
+  },
+  {
+    "id": "cast-5",
+    "actors": [
+      "magic-ren",
+      "magic-soma",
+      "magic-minato",
+      "magic-riku"
+    ],
+    "names": [
+      "朝霧 蓮",
+      "御影 颯真",
+      "白石 湊",
+      "天音 理玖"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-5.png"
+  },
+  {
+    "id": "cast-6",
+    "actors": [
+      "magic-yamato",
+      "magic-leon",
+      "magic-elliot",
+      "magic-sakuya"
+    ],
+    "names": [
+      "黒瀬 大和",
+      "神代 レオン",
+      "エリオット・ノクス",
+      "九条 朔夜"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-6.png"
+  },
+  {
+    "id": "cast-7",
+    "actors": [
+      "dungeons2-lyria",
+      "dungeons2-celis",
+      "dungeons2-flora",
+      "dungeons2-noctia"
+    ],
+    "names": [
+      "リリア",
+      "セリス",
+      "フローラ",
+      "ノクティア"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-7.png"
+  },
+  {
+    "id": "cast-8",
+    "actors": [
+      "dungeons2-aurene",
+      "dungeons2-ignis",
+      "dungeons2-leon",
+      "dungeons2-orion"
+    ],
+    "names": [
+      "オーレネ",
+      "イグニス",
+      "レオン",
+      "オリオン"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-8.png"
+  },
+  {
+    "id": "cast-9",
+    "actors": [
+      "dungeons2-leif",
+      "nagi",
+      "mio",
+      "sena"
+    ],
+    "names": [
+      "リーフ",
+      "ナギ",
+      "ミオ",
+      "セナ"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-9.png"
+  },
+  {
+    "id": "cast-10",
+    "actors": [
+      "end-vesper",
+      "end-sable",
+      "end-hikari",
+      "end-ren"
+    ],
+    "names": [
+      "ヴェスパー",
+      "セーブル",
+      "ミレア",
+      "カイ"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-10.png"
+  },
+  {
+    "id": "cast-11",
+    "actors": [
+      "elementary-warrior",
+      "elementary-caretaker",
+      "elementary-assassin",
+      "elementary-dodgeball"
+    ],
+    "names": [
+      "わんぱく小学生",
+      "飼育委員",
+      "転校生",
+      "ドッジボールのエース"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-11.png"
+  },
+  {
+    "id": "cast-12",
+    "actors": [
+      "elementary-bard",
+      "elementary-librarian",
+      "elementary-chef",
+      "elementary-gardener"
+    ],
+    "names": [
+      "放送委員",
+      "図書委員",
+      "給食当番リーダー",
+      "園芸委員"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-12.png"
+  },
+  {
+    "id": "cast-13",
+    "actors": [
+      "elementary-mage",
+      "PL_HERO",
+      "PL_NERD",
+      "PL_GIRL"
+    ],
+    "names": [
+      "理科クラブ部長",
+      "元気な転校生",
+      "メカニック",
+      "委員長"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-13.png"
+  },
+  {
+    "id": "cast-14",
+    "actors": [
+      "PL_SPORT",
+      "PL_SENIOR",
+      "PL_LIBRARY",
+      "PL_BROADCAST"
+    ],
+    "names": [
+      "エース",
+      "謎の上級生",
+      "図書委員",
+      "放送委員"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-14.png"
+  },
+  {
+    "id": "cast-15",
+    "actors": [
+      "PL_HEALTH",
+      "PL_TREASURER",
+      "PL_TRACK",
+      "PL_ART"
+    ],
+    "names": [
+      "保健委員",
+      "会計係",
+      "陸上部",
+      "美術部"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-15.png"
+  },
+  {
+    "id": "cast-16",
+    "actors": [
+      "PL_SCIENCE",
+      "PL_GARDEN",
+      "PL_FESTIVAL",
+      "PL_SOCCER"
+    ],
+    "names": [
+      "理科研究会",
+      "園芸委員",
+      "文化祭実行委員",
+      "サッカー部主将"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-16.png"
+  },
+  {
+    "id": "cast-17",
+    "actors": [
+      "PL_MUSIC",
+      "PL_CHEM",
+      "PL_DISCIPLINE",
+      "PL_SWEETS"
+    ],
+    "names": [
+      "吹奏楽部",
+      "薬品庫の番人",
+      "風紀委員",
+      "購買部の常連"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-17.png"
+  },
+  {
+    "id": "cast-18",
+    "actors": [
+      "PL_MAP",
+      "PL_CRAFT",
+      "PL_STUDENT_PRES",
+      "PL_CAFE"
+    ],
+    "names": [
+      "地図マニア",
+      "工作名人",
+      "生徒会長",
+      "喫茶部の看板娘"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-18.png"
+  },
+  {
+    "id": "cast-19",
+    "actors": [
+      "PL_BOXER",
+      "PL_OLD_PRO",
+      "kocho-original",
+      "kotoba-mugi"
+    ],
+    "names": [
+      "ボクシング部",
+      "伝説の卒業生",
+      "赤ジャージの勇者",
+      "むぎ"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-19.png"
+  },
+  {
+    "id": "cast-20",
+    "actors": [
+      "kotoba-momo",
+      "kotoba-sora",
+      "kotoba-kohaku",
+      "kotoba-pico"
+    ],
+    "names": [
+      "もも",
+      "そら",
+      "こはく",
+      "ぴこ"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-20.png"
+  },
+  {
+    "id": "cast-21",
+    "actors": [
+      "PL_TRANSFER2"
+    ],
+    "names": [
+      "旅好き転校生"
+    ],
+    "reference": "assets/point-exchange/cast-references/group-21.png"
+  }
+]

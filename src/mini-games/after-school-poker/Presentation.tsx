@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../../point-exchange/debug';
 import ResponsiveTitleArt from '../shared/ResponsiveTitleArt';
 import React, { useState } from "react";
 import type { LanguageMode } from "../../types";
@@ -100,7 +101,7 @@ export function PokerLobby({
   languageMode: LanguageMode;
   canContinue: boolean;
   onContinue: () => void;
-  onStart: (hero: string) => void;
+  onStart: (hero: string,endless?:boolean) => void;
   onBack: () => void;
 }) {
   const [select, setSelect] = useState(false),
@@ -271,6 +272,7 @@ export function PokerLobby({
               >
                 {l("相棒と参戦", "Take your seat", "あいぼうと さんせん")} →
               </button>
+              {debugRewardsUnlocked() && <button className="poker-gold-button" disabled={!isProtagonistUnlocked(hero)} onClick={()=>onStart(hero,true)}>{l("エンドレスモード","Endless mode","エンドレスモード")}</button>}
               <small>
                 {l(
                   "相棒はサポーター枠を1つ使用します。",

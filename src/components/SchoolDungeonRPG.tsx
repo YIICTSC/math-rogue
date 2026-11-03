@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
 import {TrapControls} from './school-dungeon/TrapControls';
@@ -1183,7 +1184,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       };
   };
 
-  const generateFloor = (f: number) => {
+  const generateFloor = (f: number, endlessMode=isEndless) => {
     const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
     
@@ -1223,7 +1224,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     const sx = Math.floor(lastRoom.x + lastRoom.w/2);
     const sy = Math.floor(lastRoom.y + lastRoom.h/2);
 
-    if (f === 20 && !isEndless) {
+    if (f === 20 && !endlessMode) {
         addLog("強烈な殺気を感じる...", "red");
         triggerShake(20);
         newEnemies.push({
@@ -1251,7 +1252,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
     // --- Dedicated Shop Spawning Process ---
     // 25% chance of a shop appearing on 2F+
-    if (f >= 2 && !isEndless && Math.random() < 0.25) {
+    if (f >= 2 && !endlessMode && Math.random() < 0.25) {
         // Find a room that isn't the start room or the stairs room
         const shopRoomOptions = rooms.filter(r => 
             !(px >= r.x && px < r.x + r.w && py >= r.y && py < r.y + r.h) &&
@@ -2269,7 +2270,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       audioService.playSound('select');
   };
 
-  const startEndlessMode = () => { if (adventure.state.mode !== 'STORY') { adventure.returnHome(); return; } setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
+  const startEndlessMode = () => { if (adventure.state.mode !== 'STORY' && !debugRewardsUnlocked()) { adventure.returnHome(); return; } const next=Math.max(21,floor+1); setIsEndless(true); setGameClear(false); setFloor(next); generateFloor(next,true); addLog("中学生編(エンドレス)開始！"); };
 
   const handleSynthesisStep = () => {
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex;
@@ -3341,6 +3342,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
  blankItems={Array.from(identifiedTypes).filter((type:any)=>type.startsWith('SCROLL')).map((type:any)=>({...ITEM_DB[type],id:type}))}
  blankIndex={blankScrollSelectionIndex} selectBlank={setBlankScrollSelectionIndex}/>}
 
+                    {debugRewardsUnlocked() && !gameClear && !isEndless && !adventure.dojoRun && <button className="absolute top-12 right-2 z-40 border-2 p-2 bg-black text-white" onClick={startEndlessMode}>{tr('中学生編へ (エンドレス)')}</button>}
                     {gameClear && !adventure.dojoRun && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
                             <Award size={48} className="mb-4" style={{ color: C2 }}/>

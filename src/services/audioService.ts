@@ -2185,6 +2185,18 @@ class AudioService {
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
   }
 
+  private theaterVoiceRequest=0;
+  public async playTheaterVoiceFile(id:string){
+      this.stopLanternWarVoices();const ticket=this.theaterVoiceRequest;
+      const {default:catalog}=await import('../point-exchange/voiceCatalog');
+      const clip=catalog.find(c=>c.id===id);
+      if(ticket!==this.theaterVoiceRequest||!clip||!this.canPlayConversationVoice())return false;
+      this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      const name='lantern-war-voice-'+id,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
+      this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.duration*1000+350,false,generation,true);
+  }
+
   public async playLanternWarVoiceFile(id:string,overlap=false){
       const clip=Object.values(lanternVoiceManifest as Record<string,{id:string;path:string;duration:number}>).find(c=>c.id===id);
       if(!/^[a-f0-9]{20}$/.test(id)||!clip||!clip.path.startsWith('sfx/')||clip.path.includes('..')||!this.canPlayConversationVoice())return false;
@@ -2194,6 +2206,7 @@ class AudioService {
       return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.duration*1000+350,overlap,generation,true);
   }
   public stopLanternWarVoices(){
+      this.theaterVoiceRequest++;
       const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
       for(const name of names)if(name.startsWith('lantern-war-voice-')){this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);for(const audio of [...(this.activeHtmlSfx.get(name)||[])]){const ended=audio.onended;audio.onended=null;audio.pause();audio.currentTime=0;ended?.call(audio,new Event('ended'));}this.stopActiveSfx(name);}
       const cached=Object.keys(this.voiceBuffers).filter(name=>name.startsWith('lantern-war-voice-'));

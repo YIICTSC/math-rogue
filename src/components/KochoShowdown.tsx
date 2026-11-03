@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../point-exchange/debug';
 import ResponsiveTitleArt from '../mini-games/shared/ResponsiveTitleArt';
 import { findKochoSuper, kochoSuperCandidates, kochoSupers, resolveKochoSuper, superArtStyle, type KochoSuperMove } from '../mini-games/kocho/superMoves';
 import { selectKochoEnemyVoice, type KochoVoiceEnemy } from '../mini-games/kocho/enemyVoiceEvents';
@@ -878,7 +879,7 @@ const KochoShowdown: React.FC<{
     const [newlyUnlockedHero, setNewlyUnlockedHero] = useState<KochoHeroId | null>(null);
     const [setupPage, setSetupPage] = useState<'title' | 'hero'>('title');
     const [showGuestCards, setShowGuestCards] = useState(false);
-    const unlockedHeroes = unlockedKochoHeroes(clearedHeroes);
+    const unlockedHeroes = debugRewardsUnlocked() ? KOCHO_HEROES.map(h=>h.id) : unlockedKochoHeroes(clearedHeroes);
     const superArtHero = gameState.phase === 'SETUP' ? selectedHero : gameState.heroId;
     useEffect(() => {
         const image = new Image();
@@ -3076,6 +3077,7 @@ const KochoShowdown: React.FC<{
                         <ResponsiveTitleArt game="kocho"/>
                         <div className="kocho-title-copy"><span>KOCHO SHOWDOWN</span><h1>{tr('校長対決')}</h1><p>{tr('一歩と一枚で、校則を超えろ。')}</p></div>
                         <div className="kocho-title-actions">
+                            {debugRewardsUnlocked() && <button onClick={startEndlessRun}>{tr('放課後エンドレスへ')}</button>}
                             <button data-kocho-enter data-gamepad-initial-choice onClick={() => setSetupPage('hero')}>{tr('主人公選択へ')} <Play size={20}/></button>
                             <button data-gamepad-back onClick={handleQuit}>{tr('戻る')}</button>
                         </div>

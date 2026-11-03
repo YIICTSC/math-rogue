@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../../point-exchange/debug';
 import {repairDeployments} from './deployment';
 import {selectBanter} from './banter';
 import {voyageSite,VOYAGE_REGION_NAMES,VOYAGE_KIND_NAMES} from './voyage';
@@ -6,7 +7,7 @@ import {ENDLESS_CAST,recruitLines} from './endlessRoster';
 import {ENDLESS_ENEMIES} from './enemyRoster';
 import type {Campaign,Battle,EndlessMission,EndlessObjective,Installation,Line,Terrain} from './types';
 export const ENDLESS_OBJECTIVES:Record<EndlessObjective,string>={rout:'敵軍を全滅させる',boss:'敵将を撃破する',seize:'星門を制圧する',escape:'全生存部隊を星門周辺へ撤退させる',escort:'旅人を星門へ護送する',defend:'180秒間、本拠を防衛する',beacons:'3基の灯台をすべて確保する',relic:'秘宝を回収し、本拠へ持ち帰る'};
-export function endlessUnlocked(s:Campaign){return s.cleared.includes(17);}
+export function endlessUnlocked(s:Campaign){return debugRewardsUnlocked()||s.cleared.includes(17);}
 export function startEndless(s:Campaign,seed=Date.now()>>>0){if(!endlessUnlocked(s))return false;s.endless??={active:true,seed,depth:1,wins:0,best:0,history:[]};s.endless.active=true;s.phase='field';s.battle=null;s.checkpoint=null;return true;}
 export function leaveEndless(s:Campaign){if(s.endless)s.endless.active=false;s.phase='field';s.battle=null;s.checkpoint=null;s.studyPending=false;}
 const log=(b:Battle,message:string)=>{b.log=[message,...b.log].slice(0,50);};

@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../../point-exchange/debug';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import type { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AttackEffectKey, GameMode } from '../../types';
@@ -524,7 +525,7 @@ const DuelBoard: React.FC<{
 const StartOverlay: React.FC<{
   savedRun: PlacementRun | null;
   languageMode?: LanguageMode;
-  onStart: (continueSaved: boolean, edition?: PlacementTcgEdition) => void;
+  onStart: (continueSaved: boolean, edition?: PlacementTcgEdition, endless?:boolean) => void;
   onBack: () => void;
 }> = ({ savedRun, languageMode, onStart, onBack }) => {
   const [edition, setEdition] = useState<PlacementTcgEdition>('ELEMENTARY');
@@ -694,7 +695,7 @@ const StartOverlay: React.FC<{
       <button type="button" className="placement-tcg-secondary-button" onClick={() => onStart(false, edition)}>
         NEW RUN // {editionLabel[edition]}
       </button>
-      <button type="button" className="placement-tcg-secondary-button" onClick={() => setManager('DECK')}>DECK EDITOR</button>
+      <>{debugRewardsUnlocked() && <button type="button" className="placement-tcg-secondary-button" onClick={()=>onStart(false,edition,true)}>ENDLESS MODE →</button>}</><button type="button" className="placement-tcg-secondary-button" onClick={() => setManager('DECK')}>DECK EDITOR</button>
       <button type="button" className="placement-tcg-secondary-button" onClick={() => setManager('COLLECTION')}>CARD COLLECTION</button>
       <button type="button" className="placement-tcg-text-button" onClick={onBack}>{copy(languageMode, 'ミニゲーム選択へ戻る', 'ミニゲームせんたくへもどる', 'BACK TO MINI-GAMES')}</button>
     </div>
@@ -1080,10 +1081,10 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     savePlacementRun(nextRun);
   };
 
-  const startRun = (continueSaved: boolean, edition: PlacementTcgEdition = 'ELEMENTARY') => {
+  const startRun = (continueSaved: boolean, edition: PlacementTcgEdition = 'ELEMENTARY', endless=false) => {
     const nextRun = continueSaved && savedRunAtOpen ? savedRunAtOpen : createNewPlacementRun(edition);
     if (!continueSaved) clearPlacementRun();
-    beginBattle(nextRun);
+    beginBattle(endless&&debugRewardsUnlocked()?{...nextRun,mode:'ENDLESS',battleIndex:10,endlessFloor:1}:nextRun);
     if (continueSaved && nextRun.pendingRewardCardIds?.length) {
       setRewardChoices([...nextRun.pendingRewardCardIds]);
       setRewardAdvanceRun(nextRun.pendingRewardStage === 'DECK' ? nextRun : null);

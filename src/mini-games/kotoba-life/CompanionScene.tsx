@@ -165,7 +165,7 @@ export default function CompanionScene(props: CompanionSceneProps) {
   </div>;
 }
 
-function FallbackCompanion({ characterId, reaction, onPet, label }: { characterId: CompanionId; reaction: string; onPet?: () => void; label: string }) {
+export function FallbackCompanion({ characterId, reaction, onPet, label }: { characterId: CompanionId; reaction: string; onPet?: () => void; label: string }) {
   const p = COMPANION_PALETTES[characterId];
   const rabbit = characterId === 'momo', fox = characterId === 'kohaku', penguin = characterId === 'pico';
   return <button type="button" aria-label={label} onClick={onPet} style={{ border: 0, background: 'transparent', padding: 0, width: '100%', maxHeight: '100%', cursor: 'pointer' }}>

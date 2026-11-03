@@ -289,6 +289,358 @@
       "output": "public/sprites/point-exchange/pixel-portrait.webp",
       "sourceSHA256": "f920b45227390d31953a2af11048e6c5e7a10321c98c901f6f625a6e0178add2",
       "sha256": "d0d720d08f5be3977eefd3dc9883a2025b44308741ec2af36940b3892130ee69"
+    },
+    {
+      "id": "cast-0",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-0-master.png",
+      "output": "public/sprites/point-exchange/cast-0-landscape.webp",
+      "sourceSHA256": "fd44d763399f15a3fe9fc16eac7275bec6e43ac18e0a0b8c96b1ede687dfd951",
+      "sha256": "f46a1ac428d63c4127279dc181db3effea6ef9c8cd492c0a3dd017de4317e465"
+    },
+    {
+      "id": "cast-0",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-0-master.png",
+      "output": "public/sprites/point-exchange/cast-0-portrait.webp",
+      "sourceSHA256": "fd44d763399f15a3fe9fc16eac7275bec6e43ac18e0a0b8c96b1ede687dfd951",
+      "sha256": "75fea8a98fd047bc8c6e85f2f4758c87e7074d0e1d16bbd486616cf2a17e1ac9"
+    },
+    {
+      "id": "cast-1",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-1-master.png",
+      "output": "public/sprites/point-exchange/cast-1-landscape.webp",
+      "sourceSHA256": "fd80153e9df30b87e5ba856fda09c18681616fcff1ad1282615ae5b7deff60f5",
+      "sha256": "381b1cc778a5d3fea519bf93be3c03888510f0d16441085ef1a62df51efecc65"
+    },
+    {
+      "id": "cast-1",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-1-master.png",
+      "output": "public/sprites/point-exchange/cast-1-portrait.webp",
+      "sourceSHA256": "fd80153e9df30b87e5ba856fda09c18681616fcff1ad1282615ae5b7deff60f5",
+      "sha256": "a0a2a89d8551e38dec5d61c755758af8f646fd18b8e651719ca59a1c7a43e2b9"
+    },
+    {
+      "id": "cast-2",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-2-master.png",
+      "output": "public/sprites/point-exchange/cast-2-landscape.webp",
+      "sourceSHA256": "96af6f5dcdf9be2dc6ff60da383a08cfee3e2f52b48697a0b14bf8e733c8f5fc",
+      "sha256": "01e02778d4b6338c290364ed7fe9b4ac19314dc0685d7db39e844f2f0e425025"
+    },
+    {
+      "id": "cast-2",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-2-master.png",
+      "output": "public/sprites/point-exchange/cast-2-portrait.webp",
+      "sourceSHA256": "96af6f5dcdf9be2dc6ff60da383a08cfee3e2f52b48697a0b14bf8e733c8f5fc",
+      "sha256": "3810b91c1ab442a6b1266132bc57d45a07e2dd5c32320352d4d9d658e1b2e5b0"
+    },
+    {
+      "id": "cast-3",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-3-master.png",
+      "output": "public/sprites/point-exchange/cast-3-landscape.webp",
+      "sourceSHA256": "dbda4097fee42b788e277c1d4953b96a8aa5a98b1f95e900aa527f50a653e818",
+      "sha256": "4a6a4de997658389f8829312419acfd102f4aab0cd969604fb051af69c4a60a7"
+    },
+    {
+      "id": "cast-3",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-3-master.png",
+      "output": "public/sprites/point-exchange/cast-3-portrait.webp",
+      "sourceSHA256": "dbda4097fee42b788e277c1d4953b96a8aa5a98b1f95e900aa527f50a653e818",
+      "sha256": "ca4362e8ffa2b676f05c6ab31d2139e0f6e3ebf8c85f0784f5b98a2e947a5c91"
+    },
+    {
+      "id": "cast-4",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-4-master.png",
+      "output": "public/sprites/point-exchange/cast-4-landscape.webp",
+      "sourceSHA256": "5aa5466c2d2b52b6b20632a6c1e4e9a6657a3ff387dfefb2880e9c87a5e9044a",
+      "sha256": "c3b672594fbd8d96005340cc9934512e533fa59eeec848c8f01c908040f90c56"
+    },
+    {
+      "id": "cast-4",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-4-master.png",
+      "output": "public/sprites/point-exchange/cast-4-portrait.webp",
+      "sourceSHA256": "5aa5466c2d2b52b6b20632a6c1e4e9a6657a3ff387dfefb2880e9c87a5e9044a",
+      "sha256": "c1d58afa97729a4adbdaf08f11baac5f2fe5ab7e2d678c503b3330c3f11a1ee9"
+    },
+    {
+      "id": "cast-5",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-5-master.png",
+      "output": "public/sprites/point-exchange/cast-5-landscape.webp",
+      "sourceSHA256": "0b19a96d7796642e0be6b5c61d19f678b322e44722366cf71e29becdc6b63706",
+      "sha256": "e65d57dff5390576db58cf4df2d9660d0c3652dd4bb7d271a4df9048e4d915b8"
+    },
+    {
+      "id": "cast-5",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-5-master.png",
+      "output": "public/sprites/point-exchange/cast-5-portrait.webp",
+      "sourceSHA256": "0b19a96d7796642e0be6b5c61d19f678b322e44722366cf71e29becdc6b63706",
+      "sha256": "880c7e84c383271acec3ef5230abc981af8774dac7040d2e86367c534a094625"
+    },
+    {
+      "id": "cast-6",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-6-master.png",
+      "output": "public/sprites/point-exchange/cast-6-landscape.webp",
+      "sourceSHA256": "e7e1e808c56cafa1432c4324660d636b5975985a9abdd7dd9710be403ebeb8ea",
+      "sha256": "401d1e80a7a5d8ad0438fe56ad3325dc1c06e73847d5644c5368282974da281d"
+    },
+    {
+      "id": "cast-6",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-6-master.png",
+      "output": "public/sprites/point-exchange/cast-6-portrait.webp",
+      "sourceSHA256": "e7e1e808c56cafa1432c4324660d636b5975985a9abdd7dd9710be403ebeb8ea",
+      "sha256": "1c8f9579a4922ad8b72d6fe137fb51ef2bbc5147296fef0dc26930c032072e89"
+    },
+    {
+      "id": "cast-7",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-7-master.png",
+      "output": "public/sprites/point-exchange/cast-7-landscape.webp",
+      "sourceSHA256": "e7e642dcb815715786d2ed9c35f1ea756e469a22e4331517b83e6ef02b6591d3",
+      "sha256": "2d06f0ee78ec37e892e42b4c8e2848bd043f73d7fb130a0d9cd1bd7951e440a8"
+    },
+    {
+      "id": "cast-7",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-7-master.png",
+      "output": "public/sprites/point-exchange/cast-7-portrait.webp",
+      "sourceSHA256": "e7e642dcb815715786d2ed9c35f1ea756e469a22e4331517b83e6ef02b6591d3",
+      "sha256": "ae35c0100bd1b88a97884adcdd6b3595694dee866860f75b5286a73cd220278c"
+    },
+    {
+      "id": "cast-8",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-8-master.png",
+      "output": "public/sprites/point-exchange/cast-8-landscape.webp",
+      "sourceSHA256": "151bc317a01215210ff75f488611b59f9429221484365625f4142c0a0339ff1c",
+      "sha256": "6d9efbc27436bc3316fa25b1ec77804c9e312453050b244f925689d99bc441d4"
+    },
+    {
+      "id": "cast-8",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-8-master.png",
+      "output": "public/sprites/point-exchange/cast-8-portrait.webp",
+      "sourceSHA256": "151bc317a01215210ff75f488611b59f9429221484365625f4142c0a0339ff1c",
+      "sha256": "19c577b3f561a1963bd526b1d966b1aeba63016beba7cd3f8c48314dd541de87"
+    },
+    {
+      "id": "cast-9",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-9-master.png",
+      "output": "public/sprites/point-exchange/cast-9-landscape.webp",
+      "sourceSHA256": "90dba3dc6d2b881e629a74ae59732642b34639eed8b60e95eafaf74cd5dab868",
+      "sha256": "dc60ab61ba39381969e87bc938c3df55f83e8f480bea6a0149085a0d265ce109"
+    },
+    {
+      "id": "cast-9",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-9-master.png",
+      "output": "public/sprites/point-exchange/cast-9-portrait.webp",
+      "sourceSHA256": "90dba3dc6d2b881e629a74ae59732642b34639eed8b60e95eafaf74cd5dab868",
+      "sha256": "4235ff40373bc1690fcab8d7b266d471ebc2b271ba26b346f56966cfb2d3d359"
+    },
+    {
+      "id": "cast-10",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-10-master.png",
+      "output": "public/sprites/point-exchange/cast-10-landscape.webp",
+      "sourceSHA256": "e8928de5de1b96ab62f0640ff91ccc86869d8d3c82a535b18a7ace522e2366ad",
+      "sha256": "3e8d20cfd40c0b8f0acd20919c1d1a830feefd668c70ae7defb1ff3dd7443e49"
+    },
+    {
+      "id": "cast-10",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-10-master.png",
+      "output": "public/sprites/point-exchange/cast-10-portrait.webp",
+      "sourceSHA256": "e8928de5de1b96ab62f0640ff91ccc86869d8d3c82a535b18a7ace522e2366ad",
+      "sha256": "7813e9a1e9417878928540f1a1775e050b24a2a24870b2feefae535ec8923d5d"
+    },
+    {
+      "id": "cast-11",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-11-master.png",
+      "output": "public/sprites/point-exchange/cast-11-landscape.webp",
+      "sourceSHA256": "760ed7a5a6482190f50d34c307ba721ab37abbe1e93034a2aaf09991659e1198",
+      "sha256": "7cc5550b3bd3d14c30bc441f21a720ff45eea4537f7efa7d8ec0440780672ccf"
+    },
+    {
+      "id": "cast-11",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-11-master.png",
+      "output": "public/sprites/point-exchange/cast-11-portrait.webp",
+      "sourceSHA256": "760ed7a5a6482190f50d34c307ba721ab37abbe1e93034a2aaf09991659e1198",
+      "sha256": "0842c76b20dcc55aa29267fac56b25a024a05851a85c4eb42d9ef4ab4ca3dc55"
+    },
+    {
+      "id": "cast-12",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-12-master.png",
+      "output": "public/sprites/point-exchange/cast-12-landscape.webp",
+      "sourceSHA256": "3ec35ddc27cc166a7971b71150bf6495aa57088f7643d62de1be46eed443afca",
+      "sha256": "b7681d8165572069fab0cfba8e08936a64fd49df5605e45808fd909569f33593"
+    },
+    {
+      "id": "cast-12",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-12-master.png",
+      "output": "public/sprites/point-exchange/cast-12-portrait.webp",
+      "sourceSHA256": "3ec35ddc27cc166a7971b71150bf6495aa57088f7643d62de1be46eed443afca",
+      "sha256": "738bdadc90e0376c897cd6572858ca82c4c9b4ade2e1f29aa1f13ee19f3d415d"
+    },
+    {
+      "id": "cast-13",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-13-master.png",
+      "output": "public/sprites/point-exchange/cast-13-landscape.webp",
+      "sourceSHA256": "aeafdb54a34e775a006eda7a21eb59a7afb956f12bc6363d58d07c4ebec3851f",
+      "sha256": "7c8853f4438f5edae1e17d6fd38bbf87c9fd20dd1fec31ecd6b7bfc216333c32"
+    },
+    {
+      "id": "cast-13",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-13-master.png",
+      "output": "public/sprites/point-exchange/cast-13-portrait.webp",
+      "sourceSHA256": "aeafdb54a34e775a006eda7a21eb59a7afb956f12bc6363d58d07c4ebec3851f",
+      "sha256": "597e5c9883e9eb2656c7fa5eb4c875b31d3056368e0a404f5f237c20968fe575"
+    },
+    {
+      "id": "cast-14",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-14-master.png",
+      "output": "public/sprites/point-exchange/cast-14-landscape.webp",
+      "sourceSHA256": "46d8a7a8735850d3d1dbe3a4d54d038a2657029d8dc09f3f346095bd82d56da7",
+      "sha256": "d07ca7cef044243f7663b52616fc3e492c1d9f9467d7a57d477ec7f1120ac512"
+    },
+    {
+      "id": "cast-14",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-14-master.png",
+      "output": "public/sprites/point-exchange/cast-14-portrait.webp",
+      "sourceSHA256": "46d8a7a8735850d3d1dbe3a4d54d038a2657029d8dc09f3f346095bd82d56da7",
+      "sha256": "22c00a2300ff568b3b1749b5e73fd13c61e178d085284506ba8fc4133da12ad1"
+    },
+    {
+      "id": "cast-15",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-15-master.png",
+      "output": "public/sprites/point-exchange/cast-15-landscape.webp",
+      "sourceSHA256": "0e5aa6a9912933b76b5d85a8e6b405bc4752a1af160cc8f38df2051951149caf",
+      "sha256": "39594a2489d919040c0694012284b0cc21fe3324f33b82a22db65767a2e75ac6"
+    },
+    {
+      "id": "cast-15",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-15-master.png",
+      "output": "public/sprites/point-exchange/cast-15-portrait.webp",
+      "sourceSHA256": "0e5aa6a9912933b76b5d85a8e6b405bc4752a1af160cc8f38df2051951149caf",
+      "sha256": "ed7aba1b8d823afd514c50b2700d38d7e3fffe5159b411f95592d1f14bda4dd1"
+    },
+    {
+      "id": "cast-16",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-16-master.png",
+      "output": "public/sprites/point-exchange/cast-16-landscape.webp",
+      "sourceSHA256": "e15aff32c97bb2929568c15c27f05b15903c1129f21d3af194592a5d91dad4d0",
+      "sha256": "fb6548ab6e3ce7295d24f2883d0f9b490d83b7f2f188ea0b4ec192374d4721dd"
+    },
+    {
+      "id": "cast-16",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-16-master.png",
+      "output": "public/sprites/point-exchange/cast-16-portrait.webp",
+      "sourceSHA256": "e15aff32c97bb2929568c15c27f05b15903c1129f21d3af194592a5d91dad4d0",
+      "sha256": "5446c506b8b4a915d9cb6dbd8f21a5ca636320773c1d7072bd3bf6dd241d34dd"
+    },
+    {
+      "id": "cast-17",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-17-master.png",
+      "output": "public/sprites/point-exchange/cast-17-landscape.webp",
+      "sourceSHA256": "e17f019107b0843caa8c277640ee7019bbc4bffb7d5bb32c0996c5d9123923d7",
+      "sha256": "5be92309315552dbd824129697c314986f6a97e9c11f50114297192bfe70e334"
+    },
+    {
+      "id": "cast-17",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-17-master.png",
+      "output": "public/sprites/point-exchange/cast-17-portrait.webp",
+      "sourceSHA256": "e17f019107b0843caa8c277640ee7019bbc4bffb7d5bb32c0996c5d9123923d7",
+      "sha256": "866b451a6f1083268ce9a377ff5a6215c77c907021063785ef68626fa8d32361"
+    },
+    {
+      "id": "cast-18",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-18-master.png",
+      "output": "public/sprites/point-exchange/cast-18-landscape.webp",
+      "sourceSHA256": "88d45910fc5b04d3f50d86ec1cb44425506f59db746eeb96e4bb5c49b584a6c0",
+      "sha256": "d3a43ee52e1106c18b36818ca180362d1f07a18767bf70bb2cd7f70e1ce9a31c"
+    },
+    {
+      "id": "cast-18",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-18-master.png",
+      "output": "public/sprites/point-exchange/cast-18-portrait.webp",
+      "sourceSHA256": "88d45910fc5b04d3f50d86ec1cb44425506f59db746eeb96e4bb5c49b584a6c0",
+      "sha256": "98140b559371236239493c38ca18fded8612ad196cbc327c465fa88c5e9838cc"
+    },
+    {
+      "id": "cast-19",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-19-master.png",
+      "output": "public/sprites/point-exchange/cast-19-landscape.webp",
+      "sourceSHA256": "6a01ae77ab9279b409aa509c2e9d44bb2692992b93e6988456852134375e691a",
+      "sha256": "cd007aaab6eb508161a75822acecfce0833d3a10b4d4fa5fc08a4e9f6141b4aa"
+    },
+    {
+      "id": "cast-19",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-19-master.png",
+      "output": "public/sprites/point-exchange/cast-19-portrait.webp",
+      "sourceSHA256": "6a01ae77ab9279b409aa509c2e9d44bb2692992b93e6988456852134375e691a",
+      "sha256": "47ce0055f954a7c72412d22103d9595c94c930ceab1232c183d8970ade0b75cd"
+    },
+    {
+      "id": "cast-20",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-20-master.png",
+      "output": "public/sprites/point-exchange/cast-20-landscape.webp",
+      "sourceSHA256": "c89184c40f2f1df837153a9ab8b2e6ae1ea0093086a6a97a1f6794decbf6f7f2",
+      "sha256": "c8891b157ad078486e7cbe256e827efb3ce5b63f45928d84e3c903abc59bbafc"
+    },
+    {
+      "id": "cast-20",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-20-master.png",
+      "output": "public/sprites/point-exchange/cast-20-portrait.webp",
+      "sourceSHA256": "c89184c40f2f1df837153a9ab8b2e6ae1ea0093086a6a97a1f6794decbf6f7f2",
+      "sha256": "f3c71d4faf6b5c16aba355580cca446c8136c5fb746e710e78977f36319df6db"
+    },
+    {
+      "id": "cast-21",
+      "orientation": "landscape",
+      "source": "assets/point-exchange/backgrounds/cast-21-master.png",
+      "output": "public/sprites/point-exchange/cast-21-landscape.webp",
+      "sourceSHA256": "311251888c3da7c5a17049328273ff5ea4bc4510cc902930550eecdef3c25b18",
+      "sha256": "454758ffddc0cb53b8fd7aa87d9e1da047b9a1899ada2af91ac14a8b6caf40d9"
+    },
+    {
+      "id": "cast-21",
+      "orientation": "portrait",
+      "source": "assets/point-exchange/backgrounds/cast-21-master.png",
+      "output": "public/sprites/point-exchange/cast-21-portrait.webp",
+      "sourceSHA256": "311251888c3da7c5a17049328273ff5ea4bc4510cc902930550eecdef3c25b18",
+      "sha256": "caf55236f363a34258d2c70c8ff847726745fc9f893af276ba912a7e0d0e77d1"
     }
   ]
 }

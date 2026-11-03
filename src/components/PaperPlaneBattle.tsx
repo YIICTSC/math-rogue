@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {PaperBattleTitle,PaperCaptainPicker,PaperBridgeHud,PaperBridgeReport,PAPER_CAPTAINS,usePaperBridge} from './PaperPlaneBridge';
 import {PAPER_RIVALS,PAPER_DEPUTY_ENGLISH} from '../data/paperPlaneBridge';
 
@@ -2046,7 +2047,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         audioService.playSound('select');
     };
     
-    const confirmSetup = () => {
+    const confirmSetup = (debugEndless=false) => {
+        const endless=debugEndless&&debugRewardsUnlocked();
         if (selectedPilotIndex === -1) {
             audioService.playSound('wrong');
             return;
@@ -2096,9 +2098,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             talents: allTalents
         });
         
-        setStage(1);
-        setIsEndless(false);
-        initBattle(1, allTalents);
+        setStage(endless?FINAL_STAGE_NORMAL+1:1);
+        setIsEndless(endless);
+        initBattle(endless?FINAL_STAGE_NORMAL+1:1, allTalents, endless);
         audioService.playBGM('paper_plane_battle'); // Switch BGM
     };
     
@@ -2118,7 +2120,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
 
     const addLog = (msg: string) => setLogs(prev => [t(msg), ...prev.slice(0, 4)]);
 
-    const initBattle = (stageNum: number, resolvedTalents?: Talent[]) => {
+    const initBattle = (stageNum: number, resolvedTalents?: Talent[], endlessMode=isEndless) => {
         let enemyIdx;
         let template;
 
@@ -2141,7 +2143,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         if (selectedMissionLevel >= 5) dur += 2;
         if (selectedMissionLevel >= 7) hp = Math.floor(hp * 1.2);
 
-        if (isEndless) {
+        if (endlessMode) {
              const loop = Math.max(1, stageNum - FINAL_STAGE_NORMAL);
              hp += loop * 30;
              dur += loop * 2;
@@ -3958,9 +3960,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                 </div>
                             </div>
                             
-                            <button data-gamepad-zone="paper-mission-start" data-gamepad-order={0} data-gamepad-up-zone="paper-mission-level" onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-3 md:py-4 rounded-xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
+                            <button data-gamepad-zone="paper-mission-start" data-gamepad-order={0} data-gamepad-up-zone="paper-mission-level" onClick={()=>confirmSetup()} className="bg-red-600 hover:bg-red-500 text-white w-full py-3 md:py-4 rounded-xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
                                 <Target className="mr-2"/> {t('出撃開始')}
                             </button>
+                            {debugRewardsUnlocked() && <button className="bg-purple-700 p-3 rounded-xl w-full" onClick={()=>confirmSetup(true)}>{t('エンドレスモード')}</button>}
                         </div>
                     )}
                 </div>

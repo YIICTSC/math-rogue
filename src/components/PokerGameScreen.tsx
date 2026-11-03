@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../point-exchange/debug';
 import { PokerLobby, PokerPortrait, PokerSignatureIcon, PokerClubArt, PokerUseEffect, type PokerExpression } from '../mini-games/after-school-poker/Presentation';
 import { DEFAULT_POKER_HERO, POKER_HEROES, POKER_SIGNATURE_SUPPORTERS, signatureSupporter, keepsakeEnglish } from '../mini-games/after-school-poker/heroes';
 import { createPokerVoices } from '../mini-games/after-school-poker/voices';
@@ -1030,7 +1031,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       }
   }, [runState, phase, saveData]);
 
-  const initRun = (hero = DEFAULT_POKER_HERO) => {
+  const initRun = (hero = DEFAULT_POKER_HERO, debugEndless=false) => {
+      const endless=debugEndless&&debugRewardsUnlocked();
       if (!isProtagonistUnlocked(hero)) return;
       playLatch.current = false;
       packLatch.current = false;
@@ -1040,9 +1042,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           deck,
           protagonistId: hero,
           money: 4,
-          ante: 1,
+          ante: endless?9:1,
           blindIndex: 0,
-          currentBlind: getBlindConfig(1, 0),
+          currentBlind: getBlindConfig(endless?9:1, 0),
           supporters: [signatureSupporter(hero)],
           consumables: [],
           handLevels: { ...Object.keys(POKER_HAND_LEVELS).reduce((acc, key) => ({ ...acc, [key]: 1 }), {}) },
@@ -1054,7 +1056,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           discardPile: [],
           shopInventory: [],
           shopVoucher: null,
-          isEndless: false,
+          isEndless: endless,
           voucherRestockedAnte: 0,
           persistentCounters: {},
           handSizeModifier: 0,
@@ -2234,7 +2236,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       );
   }
 
-  if (lobby) return <PokerLobby languageMode={languageMode} canContinue={canContinue} onBack={onBack} onContinue={() => { setLobby(false); audioService.playBGM(phase === 'PLAY' ? 'poker_play' : 'poker_shop'); }} onStart={hero => { initRun(hero); setCanContinue(false); setLobby(false); }} />;
+  if (lobby) return <PokerLobby languageMode={languageMode} canContinue={canContinue} onBack={onBack} onContinue={() => { setLobby(false); audioService.playBGM(phase === 'PLAY' ? 'poker_play' : 'poker_shop'); }} onStart={(hero,endless) => { initRun(hero,endless); setCanContinue(false); setLobby(false); }} />;
 
   if (phase === 'BLIND_SELECT') {
       const config = runState.currentBlind;

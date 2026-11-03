@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
 import {drawMartialEffect} from './school-dungeon/dungeons1/martialEffects';
@@ -1337,7 +1338,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       return { id: Date.now() + Math.random(), type: 'ENEMY', x, y, char: t[0], name, hp, maxHp: hp, baseAttack: Math.floor(atk), baseDefense: Math.floor(def), attack: Math.floor(atk), defense: Math.floor(def), xp: Math.floor(xp), dir: {x:0, y:0}, enemyType: t, visualTier: Math.min(4, 1 + Math.floor((floorLevel - 1) / 5)), status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } };
   };
 
-  const generateFloor = (f: number) => {
+  const generateFloor = (f: number, endlessMode=isEndless) => {
     setShopRemovedThisFloor(false);
     const newMap: TileType[][] = Array(MAP_H).fill(null).map(() => Array(MAP_W).fill('WALL'));
     const rooms: {x:number, y:number, w:number, h:number}[] = [];
@@ -1380,11 +1381,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         }
     }
     const lastRoom = rooms[rooms.length - 1]; const sx = Math.floor(lastRoom.x + lastRoom.w/2); const sy = Math.floor(lastRoom.y + lastRoom.h/2);
-    if (f === 20 && !isEndless) { addLog("強烈な殺気を感じる...", "red"); triggerShake(20); newEnemies.push({ id: Date.now(), type: 'ENEMY', x: sx, y: sy, char: 'B', name: "校長先生(真)", hp: 500, maxHp: 500, baseAttack: 30, baseDefense: 10, attack: 30, defense: 10, xp: 5000, dir: {x:0, y:0}, enemyType: 'BOSS', status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } }); } else newMap[sy][sx] = 'STAIRS';
+    if (f === 20 && !endlessMode) { addLog("強烈な殺気を感じる...", "red"); triggerShake(20); newEnemies.push({ id: Date.now(), type: 'ENEMY', x: sx, y: sy, char: 'B', name: "校長先生(真)", hp: 500, maxHp: 500, baseAttack: 30, baseDefense: 10, attack: 30, defense: 10, xp: 5000, dir: {x:0, y:0}, enemyType: 'BOSS', status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } }); } else newMap[sy][sx] = 'STAIRS';
     const candidates: {x: number, y: number}[] = [];
     for(let y=0; y<MAP_H; y++) { for(let x=0; x<MAP_W; x++) { if (newMap[y][x] === 'FLOOR' && (x !== px || y !== py) && (x !== sx || y !== sy)) candidates.push({x, y}); } }
     candidates.sort(() => Math.random() - 0.5);
-    if (f >= 2 && !isEndless && Math.random() < 0.25) {
+    if (f >= 2 && !endlessMode && Math.random() < 0.25) {
         const shopRoomOptions = rooms.filter(r => !(px >= r.x && px < r.x + r.w && py >= r.y && py < r.y + r.h) && !(sx >= r.x && sx < r.x + r.w && sy >= r.y && sy < r.y + r.h));
         if (shopRoomOptions.length > 0) {
             const shopRoom = shopRoomOptions[Math.floor(Math.random() * shopRoomOptions.length)];
@@ -1786,7 +1787,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const toggleMenu = () => {
       if (adventure.townControl(0,0,true)) return;
       if (adventure.dojoMenu()) return; if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); setSelectedItemActionIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
-  const startEndlessMode = () => { if (adventure.state.mode !== 'STORY') { adventure.returnHome(); return; } setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
+  const startEndlessMode = () => { if (adventure.state.mode !== 'STORY' && !debugRewardsUnlocked()) { adventure.returnHome(); return; } const next=Math.max(21,floor+1); setIsEndless(true); setGameClear(false); setFloor(next); generateFloor(next,true); addLog("中学生編(エンドレス)開始！"); };
   const handleSynthesisStep = () => {
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex; const item = inventory[idx];
       if (synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
@@ -2367,6 +2368,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
  blankItems={Array.from(identifiedTypes).filter((type:any)=>type.startsWith('SCROLL')).map((type:any)=>({...ITEM_DB[type],id:type}))}
  blankIndex={blankScrollSelectionIndex} selectBlank={setBlankScrollSelectionIndex}/>}
 
+                    {debugRewardsUnlocked() && !gameClear && !isEndless && !adventure.dojoRun && <button className="absolute top-12 right-2 z-40 border-2 p-2 bg-black text-white" onClick={startEndlessMode}>{tr('中学生編へ (エンドレス)')}</button>}
                     {gameClear && !adventure.dojoRun && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">{tr('ついに校長を説得した！')}</p><p className="mb-8">{tr('君は伝説の小学生となった。')}</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>{adventure.state.mode === 'STORY' ? tr('中学生編へ (エンドレス)') : adventure.text('学校前へ帰る', 'Return to school base')}</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>{tr('タイトルへ戻る')}</button></div></div>)}
                 {gameOver && !adventure.dojoRun && createPortal(
                     <div data-gamepad-modal data-gamepad-initial-scope="dungeon-2-game-over" data-gamepad-navigation-root role="dialog" aria-modal="true" aria-label="Game over" className="dungeon-game-over fixed inset-0 z-[10000] flex flex-col items-center justify-center p-3 text-center gap-2" style={{ backgroundColor:'#090c13f5',color:'#f5f5e8',height:'100dvh',overflow:'hidden',paddingTop:'max(12px, env(safe-area-inset-top))',paddingBottom:'max(12px, env(safe-area-inset-bottom))',touchAction:'pan-y' }}>

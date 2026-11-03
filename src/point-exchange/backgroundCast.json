@@ -1,0 +1,590 @@
+[
+  {
+    "id": "cast-0",
+    "actors": [
+      "aster",
+      "lyra",
+      "high-school-warrior",
+      "high-school-caretaker"
+    ],
+    "names": [
+      "アステル",
+      "リュラ",
+      "反逆の高校生",
+      "生物部の先輩"
+    ],
+    "name": [
+      "星灯のピクニック",
+      "Lantern picnic",
+      "ほしあかりのピクニック"
+    ],
+    "style": [
+      "水彩画",
+      "Watercolor",
+      "すいさいが"
+    ],
+    "prompt": "lush watercolor picnic under ancient trees",
+    "category": "quiet"
+  },
+  {
+    "id": "cast-1",
+    "actors": [
+      "high-school-assassin",
+      "high-school-mage",
+      "high-school-dodgeball",
+      "high-school-bard"
+    ],
+    "names": [
+      "謎めく転入生",
+      "化学研究会長",
+      "バスケ部エース",
+      "放送部ディレクター"
+    ],
+    "name": [
+      "ちび科学部の休日",
+      "Chibi science holiday",
+      "ちびかがくぶのきゅうじつ"
+    ],
+    "style": [
+      "2頭身ちびアニメ",
+      "Two-head chibi anime",
+      "2とうしんちびアニメ"
+    ],
+    "prompt": "two-head chibi anime playful miniature laboratory garden",
+    "category": "fun"
+  },
+  {
+    "id": "cast-2",
+    "actors": [
+      "high-school-librarian",
+      "high-school-chef",
+      "high-school-gardener",
+      "magic-akari"
+    ],
+    "names": [
+      "文芸部書記",
+      "学食の料理長",
+      "園芸部部長",
+      "星宮あかり"
+    ],
+    "name": [
+      "劇画の放課後食堂",
+      "Gekiga school diner",
+      "げきがのほうかごしょくどう"
+    ],
+    "style": [
+      "劇画",
+      "Gekiga",
+      "げきが"
+    ],
+    "prompt": "dynamic gekiga manga ink and restrained red accents, cozy noodle diner",
+    "category": "fun"
+  },
+  {
+    "id": "cast-3",
+    "actors": [
+      "magic-shizuku",
+      "magic-hiyori",
+      "magic-tsubasa",
+      "magic-rei"
+    ],
+    "names": [
+      "水城しずく",
+      "花咲ひより",
+      "火神つばさ",
+      "黒羽れい"
+    ],
+    "name": [
+      "水彩の星見会",
+      "Watercolor stargazing",
+      "すいさいのほしみかい"
+    ],
+    "style": [
+      "水彩画",
+      "Watercolor",
+      "すいさいが"
+    ],
+    "prompt": "delicate watercolor stargazing on a school rooftop",
+    "category": "season"
+  },
+  {
+    "id": "cast-4",
+    "actors": [
+      "magic-madoka",
+      "magic-koharu",
+      "magic-mirai",
+      "magic-sera"
+    ],
+    "names": [
+      "翠川まどか",
+      "風森こはる",
+      "紫藤みらい",
+      "白峰セラ"
+    ],
+    "name": [
+      "魔法の切り絵庭園",
+      "Papercut magic garden",
+      "まほうのきりえていえん"
+    ],
+    "style": [
+      "切り絵",
+      "Papercut",
+      "きりえ"
+    ],
+    "prompt": "layered paper cut collage magical botanical greenhouse",
+    "category": "quiet"
+  },
+  {
+    "id": "cast-5",
+    "actors": [
+      "magic-ren",
+      "magic-soma",
+      "magic-minato",
+      "magic-riku"
+    ],
+    "names": [
+      "朝霧 蓮",
+      "御影 颯真",
+      "白石 湊",
+      "天音 理玖"
+    ],
+    "name": [
+      "油絵の読書旅行",
+      "Oil-painted reading trip",
+      "あぶらえのどくしょりょこう"
+    ],
+    "style": [
+      "油絵・名画風",
+      "Classical oil painting",
+      "あぶらえ・めいがふう"
+    ],
+    "prompt": "classical impressionist oil painting on a sunny train terrace",
+    "category": "epic"
+  },
+  {
+    "id": "cast-6",
+    "actors": [
+      "magic-yamato",
+      "magic-leon",
+      "magic-elliot",
+      "magic-sakuya"
+    ],
+    "names": [
+      "黒瀬 大和",
+      "神代 レオン",
+      "エリオット・ノクス",
+      "九条 朔夜"
+    ],
+    "name": [
+      "夜空の映画館",
+      "Cinema under the stars",
+      "よぞらのえいがかん"
+    ],
+    "style": [
+      "映画アニメ",
+      "Cinematic anime",
+      "えいがアニメ"
+    ],
+    "prompt": "cinematic anime night festival outdoor cinema",
+    "category": "season"
+  },
+  {
+    "id": "cast-7",
+    "actors": [
+      "dungeons2-lyria",
+      "dungeons2-celis",
+      "dungeons2-flora",
+      "dungeons2-noctia"
+    ],
+    "names": [
+      "リリア",
+      "セリス",
+      "フローラ",
+      "ノクティア"
+    ],
+    "name": [
+      "ちび冒険者の工房",
+      "Chibi adventurers workshop",
+      "ちびぼうけんしゃのこうぼう"
+    ],
+    "style": [
+      "3頭身ちびアニメ",
+      "Three-head chibi anime",
+      "3とうしんちびアニメ"
+    ],
+    "prompt": "three-head chibi anime dollhouse artisan workshop",
+    "category": "fun"
+  },
+  {
+    "id": "cast-8",
+    "actors": [
+      "dungeons2-aurene",
+      "dungeons2-ignis",
+      "dungeons2-leon",
+      "dungeons2-orion"
+    ],
+    "names": [
+      "オーレネ",
+      "イグニス",
+      "レオン",
+      "オリオン"
+    ],
+    "name": [
+      "名画の光の回廊",
+      "Gallery of light",
+      "めいがのひかりのかいろう"
+    ],
+    "style": [
+      "名画風",
+      "Classical painting",
+      "めいがふう"
+    ],
+    "prompt": "luminous classical oil painting majestic museum colonnade",
+    "category": "epic"
+  },
+  {
+    "id": "cast-9",
+    "actors": [
+      "dungeons2-leif",
+      "nagi",
+      "mio",
+      "sena"
+    ],
+    "names": [
+      "リーフ",
+      "ナギ",
+      "ミオ",
+      "セナ"
+    ],
+    "name": [
+      "絵本の空中散歩",
+      "Storybook sky walk",
+      "えほんのくうちゅうさんぽ"
+    ],
+    "style": [
+      "絵本",
+      "Storybook",
+      "えほん"
+    ],
+    "prompt": "gouache picture book floating stepping stone gardens",
+    "category": "epic"
+  },
+  {
+    "id": "cast-10",
+    "actors": [
+      "end-vesper",
+      "end-sable",
+      "end-hikari",
+      "end-ren"
+    ],
+    "names": [
+      "ヴェスパー",
+      "セーブル",
+      "ミレア",
+      "カイ"
+    ],
+    "name": [
+      "航海者の実写映画",
+      "Voyagers cinema",
+      "こうかいしゃのじっしゃえいが"
+    ],
+    "style": [
+      "実写映画風",
+      "Live-action cinema",
+      "じっしゃえいがふう"
+    ],
+    "prompt": "photoreal live-action fantasy movie still, adult cast on tropical sailing ship deck",
+    "category": "epic"
+  },
+  {
+    "id": "cast-11",
+    "actors": [
+      "elementary-warrior",
+      "elementary-caretaker",
+      "elementary-assassin",
+      "elementary-dodgeball"
+    ],
+    "names": [
+      "わんぱく小学生",
+      "飼育委員",
+      "転校生",
+      "ドッジボールのエース"
+    ],
+    "name": [
+      "ちびっこ宝探し",
+      "Little treasure hunters",
+      "ちびっこたからさがし"
+    ],
+    "style": [
+      "2頭身ちびアニメ",
+      "Two-head chibi anime",
+      "2とうしんちびアニメ"
+    ],
+    "prompt": "two-head chibi anime cheerful children treasure hunting park",
+    "category": "fun"
+  },
+  {
+    "id": "cast-12",
+    "actors": [
+      "elementary-bard",
+      "elementary-librarian",
+      "elementary-chef",
+      "elementary-gardener"
+    ],
+    "names": [
+      "放送委員",
+      "図書委員",
+      "給食当番リーダー",
+      "園芸委員"
+    ],
+    "name": [
+      "クレヨンの夢学校",
+      "Crayon dream school",
+      "クレヨンのゆめがっこう"
+    ],
+    "style": [
+      "クレヨン画",
+      "Crayon drawing",
+      "クレヨンが"
+    ],
+    "prompt": "wax crayon and colored pencil playful school courtyard",
+    "category": "quiet"
+  },
+  {
+    "id": "cast-13",
+    "actors": [
+      "elementary-mage",
+      "PL_HERO",
+      "PL_NERD",
+      "PL_GIRL"
+    ],
+    "names": [
+      "理科クラブ部長",
+      "元気な転校生",
+      "メカニック",
+      "委員長"
+    ],
+    "name": [
+      "空への工作室",
+      "Workshop to the skies",
+      "そらへのこうさくしつ"
+    ],
+    "style": [
+      "クレイ・フェルト",
+      "Clay / felt",
+      "クレイ・フェルト"
+    ],
+    "prompt": "handmade miniature stop-motion clay and felt paper airplane workshop",
+    "category": "fun"
+  },
+  {
+    "id": "cast-14",
+    "actors": [
+      "PL_SPORT",
+      "PL_SENIOR",
+      "PL_LIBRARY",
+      "PL_BROADCAST"
+    ],
+    "names": [
+      "エース",
+      "謎の上級生",
+      "図書委員",
+      "放送委員"
+    ],
+    "name": [
+      "ドットの大空便",
+      "Pixel sky mail",
+      "ドットのおおぞらびん"
+    ],
+    "style": [
+      "ドット絵",
+      "Pixel art",
+      "ドットえ"
+    ],
+    "prompt": "rich high-resolution pixel art, paper airplane delivery above fluffy clouds",
+    "category": "season"
+  },
+  {
+    "id": "cast-15",
+    "actors": [
+      "PL_HEALTH",
+      "PL_TREASURER",
+      "PL_TRACK",
+      "PL_ART"
+    ],
+    "names": [
+      "保健委員",
+      "会計係",
+      "陸上部",
+      "美術部"
+    ],
+    "name": [
+      "水彩の部活旅行",
+      "Watercolor club trip",
+      "すいさいのぶかつりょこう"
+    ],
+    "style": [
+      "水彩画",
+      "Watercolor",
+      "すいさいが"
+    ],
+    "prompt": "gentle watercolor travel sketch paper airplane pilots at mountain lake",
+    "category": "quiet"
+  },
+  {
+    "id": "cast-16",
+    "actors": [
+      "PL_SCIENCE",
+      "PL_GARDEN",
+      "PL_FESTIVAL",
+      "PL_SOCCER"
+    ],
+    "names": [
+      "理科研究会",
+      "園芸委員",
+      "文化祭実行委員",
+      "サッカー部主将"
+    ],
+    "name": [
+      "切り絵の夏祭り",
+      "Papercut summer festival",
+      "きりえのなつまつり"
+    ],
+    "style": [
+      "切り絵",
+      "Papercut",
+      "きりえ"
+    ],
+    "prompt": "layered papercut lantern festival paper airplane pilots",
+    "category": "season"
+  },
+  {
+    "id": "cast-17",
+    "actors": [
+      "PL_MUSIC",
+      "PL_CHEM",
+      "PL_DISCIPLINE",
+      "PL_SWEETS"
+    ],
+    "names": [
+      "吹奏楽部",
+      "薬品庫の番人",
+      "風紀委員",
+      "購買部の常連"
+    ],
+    "name": [
+      "劇画の空中音楽会",
+      "Gekiga sky concert",
+      "げきがのくうちゅうおんがくかい"
+    ],
+    "style": [
+      "劇画",
+      "Gekiga",
+      "げきが"
+    ],
+    "prompt": "vibrant gekiga brush ink open-air music stage paper airplane pilots",
+    "category": "fun"
+  },
+  {
+    "id": "cast-18",
+    "actors": [
+      "PL_MAP",
+      "PL_CRAFT",
+      "PL_STUDENT_PRES",
+      "PL_CAFE"
+    ],
+    "names": [
+      "地図マニア",
+      "工作名人",
+      "生徒会長",
+      "喫茶部の看板娘"
+    ],
+    "name": [
+      "三頭身の世界旅行",
+      "Chibi world tour",
+      "さんとうしんのせかいりょこう"
+    ],
+    "style": [
+      "3頭身ちびアニメ",
+      "Three-head chibi anime",
+      "3とうしんちびアニメ"
+    ],
+    "prompt": "three-head chibi anime colorful globe-travelling paper airplane explorers",
+    "category": "fun"
+  },
+  {
+    "id": "cast-19",
+    "actors": [
+      "PL_BOXER",
+      "PL_OLD_PRO",
+      "kocho-original",
+      "kotoba-mugi"
+    ],
+    "names": [
+      "ボクシング部",
+      "伝説の卒業生",
+      "赤ジャージの勇者",
+      "むぎ"
+    ],
+    "name": [
+      "フェルトの友情広場",
+      "Felt friendship plaza",
+      "フェルトのゆうじょうひろば"
+    ],
+    "style": [
+      "フェルト人形",
+      "Felt puppets",
+      "フェルトにんぎょう"
+    ],
+    "prompt": "tactile felt puppet and clay diorama friendship picnic, preserve three humans and one bear",
+    "category": "fun"
+  },
+  {
+    "id": "cast-20",
+    "actors": [
+      "kotoba-momo",
+      "kotoba-sora",
+      "kotoba-kohaku",
+      "kotoba-pico"
+    ],
+    "names": [
+      "もも",
+      "そら",
+      "こはく",
+      "ぴこ"
+    ],
+    "name": [
+      "どうぶつ星雲喫茶",
+      "Animal nebula cafe",
+      "どうぶつせいうんきっさ"
+    ],
+    "style": [
+      "水彩絵本",
+      "Watercolor storybook",
+      "すいさいえほん"
+    ],
+    "prompt": "whimsical storybook watercolor four animal friends running a floating nebula cafe",
+    "category": "quiet"
+  },
+  {
+    "id": "cast-21",
+    "actors": [
+      "PL_TRANSFER2"
+    ],
+    "names": [
+      "旅好き転校生"
+    ],
+    "name": [
+      "旅好き転校生の世界地図",
+      "The traveler’s world map",
+      "たびずきてんこうせいのせかいちず"
+    ],
+    "style": [
+      "旅の水彩画",
+      "Travel watercolor",
+      "たびのすいさいが"
+    ],
+    "prompt": "watercolor travel journal overlooking islands and tiny paper airplanes",
+    "category": "quiet"
+  }
+]

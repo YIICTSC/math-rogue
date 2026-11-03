@@ -1,3 +1,4 @@
+import {debugRewardsUnlocked} from '../../point-exchange/debug';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LanguageMode } from '../../types';
 import { assetUrl } from '../../utils/assetPaths';
@@ -101,7 +102,7 @@ export default function MahjongGame({ onBack, languageMode = 'JAPANESE', onMissi
           ['learn', '四人打ちを学ぶ', '自分＋CPU3人。13枚からツモって14枚。東風戦で基本を学びます。', '01 / RIICHI BASICS'],
           ['full', '四人打ち・半荘', '東場・南場を通して対局。役・符・翻・リーチ・鳴き・点数精算を体験。', '02 / FULL MATCH'],
           ['rogue', '牌の旅・ローグライク', '面子を選んで得点化。教本・遺物・花牌・金箔牌を組み合わせ、8つの関門へ。', '03 / BUILD YOUR RUN'],
-        ] as const).map(([next, title, description, badge]) => <article key={next}><small>{badge}</small><h2>{tr(title)}</h2><p>{tr(description)}</p><button type="button" className="mj-primary" data-gamepad-zone="mahjong-modes" onClick={() => openMode(next)}>{tr('開始')}</button>{next === 'rogue' && continueAvailable && <button type="button" onClick={() => openMode('rogue', true)}>{tr('続きから')}</button>}</article>)}</div>
+        ] as const).map(([next, title, description, badge]) => <article key={next}><small>{badge}</small><h2>{tr(title)}</h2><p>{tr(description)}</p><button type="button" className="mj-primary" data-gamepad-zone="mahjong-modes" onClick={() => openMode(next)}>{tr('開始')}</button>{next === 'rogue' && debugRewardsUnlocked() && <button type="button" onClick={()=>{openMode('rogue');setRogue(rogueStep({...createRogue(),stage:8,phase:'won'},{type:'next'}));}}>{tr('エンドレスへ')}</button>}{next === 'rogue' && continueAvailable && <button type="button" onClick={() => openMode('rogue', true)}>{tr('続きから')}</button>}</article>)}</div>
       </div> : mode === 'rogue' ? <>
         {saveFailed && <p role="alert">{tr('保存できませんでした。端末の空き容量を確認してください。')}</p>}
         <div className="mj-run-stats"><b>{tr('関門')} {rogue.stage} / {rogue.stage > 8 ? '∞' : 8}</b><span>{tr('目標')} {rogueGoal(rogue.stage).toLocaleString()}</span><span>{tr('コイン')} {rogue.coins}</span><span>{tr('交換')} {rogue.exchanges}</span><span>{tr('道具')} {rogue.tools}</span></div>
