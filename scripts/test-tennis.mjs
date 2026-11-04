@@ -5,14 +5,14 @@ const factory=()=>({title:'Arithmetic',questions:Array.from({length:3},(_,i)=>({
 function answerAll(w){for(const p of Object.values(w.players))while(p.quiz){const q=p.quiz;assert(E.command(w,p.id,{type:'answer',id:q.id,index:q.index,option:1}));assert(E.command(w,p.id,{type:'continue',id:q.id,index:q.index}));}}
 function game(count,mode='singles'){const w=E.createTennis(55,count===1);for(let i=0;i<count;i++)assert(E.addPlayer(w,'p'+i,'Player '+i));assert(E.configure(w,mode,1));assert(E.startTennis(w,factory));return w;}
 for(const n of Array.from({length:32},(_,i)=>i+1))for(const mode of ['singles','doubles']){const w=game(n,mode),teams=w.teams.length,size=2**Math.ceil(Math.log2(teams));assert.equal(w.matches.length,size/2);assert.equal(w.matches.filter(m=>m.reason==='bye').length,size-teams);assert.equal(new Set(w.teams.flatMap(t=>t.members.filter(Boolean))).size,n);assert(P.validView(E.viewFor(w,'p0')));for(const match of w.matches)if(match.teams[1]!==null)assert.equal(match.units.length,mode==='singles'?2:4);}
-{const w=game(3);const bye=w.matches.find(m=>m.reason==='bye'),id=bye.units[0].owner;assert.notEqual(E.viewFor(w,id).match.id,bye.id,'Bye entrants automatically watch the active court');}
-console.log('PASS: 1–32 entrants, singles/doubles, balanced byes and CPU partners.');
+{const w=game(3);assert(w.matches.every(m=>m.teams[1]!==null&&m.phase==='study'));for(const id of Object.keys(w.players))assert(E.viewFor(w,id).match.units.some(u=>u.owner===id),'Every entrant starts on their own live court');}
+console.log('PASS: 1–32 entrants, singles/doubles, no byes and balanced CPU fill.');
 {
  const w=E.createTennis(1);for(const id of ['a','b','c','d'])assert(E.addPlayer(w,id,id));
  E.disconnectPlayer(w,'b');assert(E.addPlayer(w,'replacement','Replacement'));E.configure(w,'doubles',1);
  const preview=E.viewFor(w,'a').players.filter(p=>!p.spectator).map(p=>p.id);
  assert.deepEqual(preview,['a','replacement','c','d']);assert(E.startTennis(w,factory));
- assert.deepEqual(w.teams.map(t=>t.members),[preview.slice(0,2),preview.slice(2)]);
+ assert.deepEqual(w.teams.map(t=>t.members),[[preview[0],preview[2]],[preview[1],preview[3]]]);
  console.log('PASS: lobby pair preview matches the real teams after a player leaves and a new player joins.');
 }
 {
@@ -34,13 +34,13 @@ console.log('PASS: 1–32 entrants, singles/doubles, balanced byes and CPU partn
  console.log('PASS: full simulated doubles match with real rallies, scoring, learning breaks and results.');
 }
 for(const count of[3,5,6,9,17,32]){
- const w=game(count);let steps=0;while(w.phase!=='result'&&steps++<20000){answerAll(w);for(const m of w.matches.filter(m=>m.round===w.round)){if(m.phase==='point')m.wait=.001;if(['serve','rally'].includes(m.phase)){m.phase='rally';Object.assign(m.ball,{x:9,y:5,z:.081,vx:0,vy:0,vz:-1,spin:0,bounces:0,lastSide:0,serve:false});}}E.tick(w,.05,factory);}assert.equal(w.phase,'result',`${count} player tournament finishes`);assert(w.champion!==null);assert.equal(w.matches.filter(m=>m.phase==='finished'&&m.reason!=='bye').length,count-1);
+ const w=game(count);let steps=0;while(w.phase!=='result'&&steps++<20000){answerAll(w);for(const m of w.matches.filter(m=>m.round===w.round)){if(m.phase==='point')m.wait=.001;if(['serve','rally'].includes(m.phase)){m.phase='rally';Object.assign(m.ball,{x:9,y:5,z:.081,vx:0,vy:0,vz:-1,spin:0,bounces:0,lastSide:0,serve:false});}}E.tick(w,.05,factory);}assert.equal(w.phase,'result',`${count} player tournament finishes`);assert(w.champion!==null);assert.equal(w.matches.filter(m=>m.phase==='finished'&&m.reason!=='bye').length,w.teams.length/2*Math.log2(w.teams.length));
 }
-console.log('PASS: complete 3/5/6/9/17/32-player elimination tournaments through the final.');
+console.log('PASS: complete 3/5/6/9/17/32-player placement tournaments through the final.');
 {
- const w=game(3,'doubles');answerAll(w);const m=w.matches[0],team=w.teams[1];assert.equal(team.members[1],null);E.disconnectPlayer(w,team.members[0]);E.tick(w,.02,factory);assert.equal(m.reason,'forfeit');assert.equal(m.winner,0);assert(E.addPlayer(w,'late','Late'));assert(w.players.late.spectator);assert.equal(E.command(w,'late',{type:'swing',shot:'special',aim:0,power:1}),false);
+ const w=game(3,'doubles');answerAll(w);const m=w.matches[0],team=w.teams[1];assert.equal(team.members[1],null);E.disconnectPlayer(w,team.members[0]);E.tick(w,.02,factory);assert.notEqual(m.phase,'finished');assert(E.addPlayer(w,'late','Late',false,factory));assert(!w.players.late.spectator);assert(E.currentMatch(w,'late')?.units.some(u=>u.owner==='late'&&!u.cpu));
  const lobby=E.createTennis(1);E.addPlayer(lobby,'departing','Leaving');E.disconnectPlayer(lobby,'departing');assert.equal(Object.keys(lobby.players).length,0);assert(E.addPlayer(lobby,'new','New'));assert.equal(lobby.players.new.slot,0);
- console.log('PASS: withdrawal forfeits even with a CPU partner; late joins spectate only.');
+ console.log('PASS: departed players become CPU; late joins play immediately.');
 }
 
 for(const mode of ['singles','doubles'])for(const side of [0,1])for(const odd of [false,true]){

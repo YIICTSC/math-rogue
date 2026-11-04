@@ -1,8 +1,8 @@
+import {tournamentTeamCount,tournamentPairs,tournamentRounds,tournamentOrder,lateTeamSeat,releaseDisconnected} from '../shared/sportsTournament';
 import {cpuSpecialReady,spendCpuSpecial,initialCpuSpecialBudget} from '../shared/cpuSpecialBudget';
 import {sportsEvent} from '../shared/sportsEvents';
 import {validAvatar} from '../gakuro-kart/avatar';
 import {validLesson} from '../gakuro-kart/learning';
-import {bracketSeeds} from '../tennis/scoring';
 import {COURT,ROLES,POSITIONS,MATCH_SECONDS,SHOT_SECONDS,CHARGE_MAX,clamp,distance,rimDistance,shotQuality,shotChance,emptyStats,contest} from './rules';
 import type {BasketWorld,BasketView,Match,Unit,Side,Team,LessonFactory,Position,Stats} from './types';
 export type * from './types';
@@ -11,34 +11,37 @@ export const MAX_PLAYERS=24,MAX_MEMBERS=32,WIDTH=COURT.width,LENGTH=COURT.back;
 const rng=(w:BasketWorld)=>{w.random=(Math.imul(w.random,1664525)+1013904223)>>>0;return w.random/4294967296;};
 const other=(side:Side)=>(1-side) as Side;
 function notice(w:BasketWorld,m:Match,text:string){m.notice=text;m.noticeAt=w.clock;m.serial++;}
-function stat(w:BasketWorld,u:Unit,key:keyof Stats,value=1){u.stats[key]+=value;if(u.owner){const p=w.players[u.owner];p.stats??=emptyStats();p.stats[key]+=value;}u.energy=clamp(u.energy+.12,0,1);}
+function stat(w:BasketWorld,u:Unit,key:keyof Stats,value=1){u.stats[key]+=value;if(u.owner&&!currentMatch(w,u.owner)?.warmup){const p=w.players[u.owner];p.stats??=emptyStats();p.stats[key]+=value;}u.energy=clamp(u.energy+.12,0,1);}
 export function createBasketball(seed=1,practice=false,tutorial=false):BasketWorld{return {version:2,tutorialRequested:practice&&tutorial,seed,random:seed>>>0,clock:0,phase:'lobby',practice,paused:false,title:'',players:{},teams:[],matches:[],round:0,nextRoundAt:0,champion:null,quizSerial:0};}
-export function addPlayer(w:BasketWorld,id:string,name:string,spectator=false){
- if(w.phase==='result'||!id||id.length>100||Object.hasOwn(w.players,id)||['__proto__','constructor','prototype'].includes(id)||Object.keys(w.players).length>=MAX_MEMBERS||typeof name!=='string'||!name.trim())return false;
+export function addPlayer(w:BasketWorld,id:string,name:string,spectator=false,factory?:LessonFactory){
+ if(!spectator&&Object.values(w.players).filter(p=>p.connected&&!p.spectator).length>=MAX_PLAYERS)return false;
+ if(w.phase==='result'||!id||id.length>100||Object.hasOwn(w.players,id)||['__proto__','constructor','prototype'].includes(id)||Object.values(w.players).filter(p=>p.connected).length>=MAX_MEMBERS||typeof name!=='string'||!name.trim())return false;
+let lateFactory=factory;if(w.phase==='playing'&&!spectator&&Object.values(w.players).filter(p=>p.connected&&!p.spectator).length<MAX_PLAYERS){try{const lesson=factory?.([]);if(!validLesson(lesson)||lesson.questions.length!==3)return false;const prepared=structuredClone(lesson);lateFactory=()=>structuredClone(prepared);}catch{return false;}}
+ if(w.phase==='playing'&&Object.keys(w.players).length>=MAX_MEMBERS)releaseDisconnected(w);
  const used=new Set(Object.values(w.players).map(p=>p.slot));let slot=0;while(used.has(slot))slot++;
- w.players[id]={id,name:name.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,16)||'Player',slot,connected:true,spectator:spectator||w.phase!=='lobby'||Object.values(w.players).filter(p=>!p.spectator).length>=MAX_PLAYERS,role:'SF',stats:emptyStats(),correct:0,history:[],quiz:null,input:{x:0,y:0,at:0}};return true;
+ w.players[id]={id,name:name.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,16)||'Player',slot,connected:true,spectator,role:'SF',stats:emptyStats(),correct:0,history:[],quiz:null,input:{x:0,y:0,at:0}};if(w.phase==='playing'&&!w.players[id].spectator)seatLatePlayer(w,id,lateFactory);return true;
 }
 export function setSpectator(w:BasketWorld,id:string,enabled:unknown){const p=w.players[id];if(w.phase!=='lobby'||!p||typeof enabled!=='boolean'||!enabled&&Object.values(w.players).filter(p=>p.connected&&!p.spectator).length>=MAX_PLAYERS)return false;p.spectator=enabled;return true;}
-function teamsFor(w:BasketWorld):Team[]{const ids=Object.values(w.players).filter(p=>p.connected&&!p.spectator).map(p=>p.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(rng(w)*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}const count=Math.max(2,Math.ceil(ids.length/3)),teams:Team[]=Array.from({length:count},(_,id)=>({id,name:`TEAM ${id+1}`,members:[null,null,null]}));ids.forEach((id,i)=>{teams[i%count].members[Math.floor(i/count)]=id;});return teams;}
+function teamsFor(w:BasketWorld):Team[]{const ids=Object.values(w.players).filter(p=>p.connected&&!p.spectator).map(p=>p.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(rng(w)*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}const count=tournamentTeamCount(ids.length,3),teams:Team[]=Array.from({length:count},(_,id)=>({id,name:`TEAM ${id+1}`,members:[null,null,null]}));ids.forEach((id,i)=>{teams[i%count].members[Math.floor(i/count)]=id;});return teams;}
 function makeMatch(w:BasketWorld,a:number,b:number|null):Match{
- const id=`r${w.round}-m${w.matches.length}`,units:Unit[]=[];
+ const id=`r${w.round}-m${w.matches.length}-${Math.round(w.clock*1000)}`,units:Unit[]=[];
  for(const[side,team]of [[0,a],[1,b]] as const)if(team!==null){const used=new Set(w.teams[team].members.flatMap(id=>id?[w.players[id].role||'SF']:[]));w.teams[team].members.forEach((owner,i)=>{const p=owner?w.players[owner]:undefined,role=p?.role||(['PG','SF','C'] as Position[]).find(r=>!used.has(r))||'C';used.add(role);
   units.push({id:`${id}-${side}-${i}`,owner,name:p?.name||`CPU ${side+1}-${i+1}`,side,role,x:0,y:0,vx:0,vy:0,cpu:!p||!p.connected,avatar:p?.avatar,energy:.35,stamina:1,focus:.65,charge:0,charging:false,release:0,motion:'idle',action:0,actionSeq:0,cooldown:0,dashCooldown:0,skillCooldown:0,dodge:0,catch:0,hurt:0,jump:0,screen:0,buff:0,aiAt:0,stats:emptyStats()});});}
  const m:Match={id,cpuSpecialAt:initialCpuSpecialBudget(w.clock),round:w.round,teams:[a,b],units,phase:b===null?'finished':'study',winner:b===null?a:null,reason:b===null?'bye':'',score:[0,0],time:0,studyAt:0,shotClock:24,possession:0,mustClear:false,inbound:0,serial:0,notice:'',noticeAt:0,ball:{x:0,y:-3.5,z:1,vx:0,vy:0,vz:0,holder:null,side:null,flight:0,special:false,pass:false,age:0,lock:0,trail:[],shooter:null,receiver:null,assist:null,points:2,success:false}};
  checkBall(m,0);return m;
 }
-function study(w:BasketWorld,m:Match,factory:LessonFactory|undefined){
+function study(w:BasketWorld,m:Match,factory:LessonFactory|undefined){if(m.warmup){m.phase='play';return;}
  const ps=m.units.flatMap(u=>u.owner&&w.players[u.owner].connected?[w.players[u.owner]]:[]),lessons=ps.map(p=>{const l=factory?.(p.history);if(!validLesson(l)||l.questions.length!==3)throw Error('Invalid basketball lesson');return structuredClone(l);});
  m.phase='study';m.studyAt=m.time;for(const u of m.units){u.charging=false;u.charge=0;u.vx=u.vy=0;}
  ps.forEach((p,i)=>{p.quiz={id:++w.quizSerial,index:0,lesson:lessons[i],selected:null,feedback:null};p.input={x:0,y:0,at:w.clock};});if(!ps.length)m.phase='play';
 }
 export function startBasketball(w:BasketWorld,factory:LessonFactory){
  if(w.phase!=='lobby'||!validLesson(factory([])))return false;const count=Object.values(w.players).filter(p=>p.connected&&!p.spectator).length;if(count<(w.practice?1:2))return false;
- w.teams=teamsFor(w);w.phase='playing';w.round=0;w.matches=[];w.champion=null;w.nextRoundAt=0;const seeds=bracketSeeds(w.teams.length);
+ w.teams=teamsFor(w);w.phase='playing';w.round=0;w.matches=[];w.champion=null;w.nextRoundAt=0;const seeds=w.teams.map(t=>t.id);
  try{for(let i=0;i<seeds.length;i+=2){const a=seeds[i],b=seeds[i+1];if(a===null&&b===null)continue;const m=makeMatch(w,a??b!,a===null?null:b);w.matches.push(m);if(w.tutorialRequested&&w.practice)initTutorial(m);if(m.phase!=='finished')study(w,m,factory);}}
  catch{w.phase='lobby';w.matches=[];w.teams=[];for(const p of Object.values(w.players))p.quiz=null;return false;}return true;
 }
-export function currentMatch(w:BasketWorld,id:string){return w.matches.find(m=>m.round===w.round&&m.units.some(u=>u.owner===id));}
+export function currentMatch(w:BasketWorld,id:string){const own=w.matches.filter(m=>m.round===w.round&&m.units.some(u=>u.owner===id));return own.find(m=>m.phase!=='finished')||own[0];}
 export function disconnectPlayer(w:BasketWorld,id:string){const p=w.players[id];if(!p)return;if(w.phase==='lobby'){delete w.players[id];return;}p.connected=false;p.quiz=null;p.input={x:0,y:0,at:w.clock};for(const m of w.matches)for(const u of m.units)if(u.owner===id){u.cpu=true;u.charging=false;}}
 export function rematch(w:BasketWorld){if(w.phase!=='result')return false;w.phase='lobby';w.matches=[];w.teams=[];w.champion=null;w.nextRoundAt=0;for(const[id,p]of Object.entries(w.players))if(!p.connected)delete w.players[id];else{p.correct=0;p.stats=emptyStats();p.history=[];p.quiz=null;p.input={x:0,y:0,at:w.clock};}return true;}
 function takeBall(m:Match,u:Unit,rebound=false){
@@ -104,7 +107,7 @@ function skill(w:BasketWorld,m:Match,u:Unit){
 }
 export function command(w:BasketWorld,id:string,raw:unknown,_factory?:LessonFactory){
  const p=w.players[id],c=raw as Record<string,any>;if(!p?.connected||!c||typeof c!=='object'||Array.isArray(c))return false;
- if(c.type==='avatar'){if(w.phase!=='lobby'||!validAvatar(c.avatar))return false;p.avatar=structuredClone(c.avatar);return true;}
+ if(c.type==='avatar'){if(!validAvatar(c.avatar))return false;p.avatar=structuredClone(c.avatar);for(const m of w.matches.filter(m=>m.round===w.round))for(const u of m.units)if(u.owner===id)u.avatar=p.avatar;return true;}
  if(c.type==='role'){if(w.phase!=='lobby'||!POSITIONS.includes(c.role))return false;p.role=c.role;return true;}
  if(p.spectator||w.phase!=='playing')return false;const m=currentMatch(w,id),u=m?.units.find(u=>u.owner===id);if(!m||!u||m.phase==='finished')return false;
  if(c.type==='answer'||c.type==='continue'){
@@ -216,8 +219,6 @@ export function tick(w:BasketWorld,dt:number,factory?:LessonFactory){
  const round=w.matches.filter(m=>m.round===w.round);
  for(const m of round){
   if(m.phase==='finished')continue;
-  const connected=m.teams.map(t=>{const humans=w.teams[t!].members.filter((id):id is string=>id!==null);return !humans.length||humans.some(id=>w.players[id].connected);});
-  if(!w.practice&&(!connected[0]||!connected[1])){finish(w,m,connected[0]?0:1,'forfeit');continue;}
   if(m.phase==='study'){if(m.units.every(u=>!u.owner||!w.players[u.owner].connected||!w.players[u.owner].quiz))m.phase='play';continue;}
   if(m.tutorial?.stage==='complete')continue;
   if(m.tutorial){drive(w,m,dt);fly(w,m,dt);advanceTutorial(w,m,dt);continue;}
@@ -227,15 +228,22 @@ export function tick(w:BasketWorld,dt:number,factory?:LessonFactory){
   if(m.time>=MATCH_SECONDS&&m.score[0]!==m.score[1]&&(!m.ball.flight||m.ball.pass)){finish(w,m,m.score[0]>m.score[1]?0:1,'time');continue;}
   const holder=m.units.find(u=>u.id===m.ball.holder);if(m.time<MATCH_SECONDS&&m.time-m.studyAt>=60&&(m.inbound>0||holder&&!holder.charging))study(w,m,factory);
  }
- if(round.every(m=>m.phase==='finished')){
-  if(!w.nextRoundAt)w.nextRoundAt=w.clock+3;if(w.clock<w.nextRoundAt)return;const winners=round.map(m=>m.winner).filter((n):n is number=>n!==null);
-  if(winners.length<=1){w.champion=winners[0]??null;w.phase='result';return;}
-  w.round++;w.nextRoundAt=0;for(let i=0;i<winners.length;i+=2){const m=makeMatch(w,winners[i],winners[i+1]??null);w.matches.push(m);if(m.phase!=='finished')study(w,m,factory);}
+ if(round.some(m=>!m.warmup&&m.phase!=='finished')){w.matches=w.matches.filter(m=>!m.warmup||m.phase!=='finished');for(const done of round.filter(m=>!m.warmup&&m.phase==='finished'&&m.teams[1]!==null)){if(w.matches.some(m=>m.warmup&&m.round===w.round&&m.teams[0]===done.teams[0]))continue;const practice=makeMatch(w,done.teams[0],done.teams[1]);practice.warmup=true;w.matches.push(practice);practice.phase='play';}}
+ if(round.filter(m=>!m.warmup).every(m=>m.phase==='finished')){
+  if(!w.nextRoundAt)w.nextRoundAt=w.clock+3;if(w.clock<w.nextRoundAt)return;if(w.round+1>=tournamentRounds(w.teams)){w.champion=tournamentOrder(w.teams,w.matches)[0]??null;w.phase='result';return;}
+  w.round++;w.nextRoundAt=0;w.matches=w.matches.filter(m=>!m.warmup);for(const [a,b]of tournamentPairs(w.teams,w.matches)){const m=makeMatch(w,a,b);w.matches.push(m);study(w,m,factory);}
  }
 }
 export function viewFor(w:BasketWorld,id:string,observe?:string|null):BasketView{
  const own=currentMatch(w,id),watched=w.matches.find(m=>m.id===observe&&m.round===w.round),m=own&&own.phase!=='finished'?own:watched||w.matches.find(m=>m.round===w.round&&m.phase!=='finished')||own||w.matches.at(-1)||null,p=w.players[id],q=p?.quiz;let quiz:BasketView['quiz']=null;
  if(q){const{correct,...question}=q.lesson.questions[q.index];quiz={id:q.id,index:q.index,question:structuredClone(question),selected:q.selected,answer:q.feedback};}
  const publicMatch=m?structuredClone(m):null;if(publicMatch)publicMatch.ball.success=false;
- return {version:2,clock:w.clock,phase:w.phase,practice:w.practice,paused:w.paused,title:w.title,players:Object.values(w.players).map(({id,name,slot,connected,spectator,avatar,correct,quiz,role,stats})=>({id,name,slot,connected,spectator,avatar,correct,studying:!!quiz,role:role||'SF',stats:structuredClone(stats||emptyStats())})),teams:structuredClone(w.teams),bracket:w.matches.map(({id,round,teams,phase,winner,reason,score})=>({id,round,teams:[...teams],phase,winner,reason,score:[...score]})),round:w.round,champion:w.champion,match:publicMatch,quiz};
+ return {version:2,clock:w.clock,phase:w.phase,practice:w.practice,paused:w.paused,title:w.title,players:Object.values(w.players).map(({id,name,slot,connected,spectator,avatar,correct,quiz,role,stats})=>({id,name,slot,connected,spectator,avatar,correct,studying:!!quiz,role:role||'SF',stats:structuredClone(stats||emptyStats())})),teams:structuredClone(w.teams),bracket:w.matches.filter(m=>!m.warmup).map(({id,round,teams,phase,winner,reason,score})=>({id,round,teams:[...teams],phase,winner,reason,score:[...score]})),round:w.round,champion:w.champion,match:publicMatch,quiz};
+}
+
+function seatLatePlayer(w:BasketWorld,id:string,factory?:LessonFactory){
+ for(const team of w.teams)team.members=team.members.map(owner=>owner&&!w.players[owner]?.connected?null:owner);
+ const seat=lateTeamSeat(w.teams,id,3);for(const t of w.teams){const named=t as Team;if(!named.name)named.name='TEAM '+(t.id+1);}
+ if(seat.newCourt){const m=makeMatch(w,...seat.newCourt);w.matches.push(m);study(w,m,factory);return;}
+ for(const m of w.matches.filter(m=>m.round===w.round&&m.phase!=='finished')){const side=m.teams.indexOf(seat.team);if(side<0)continue;const u=m.units.filter(u=>u.side===side)[seat.seat];if(!u)continue;Object.assign(u,{owner:id,name:w.players[id].name,cpu:false});if(m.phase==='study'){const lesson=factory?.([]);if(!validLesson(lesson)||lesson.questions.length!==3)continue;w.players[id].quiz={id:++w.quizSerial,index:0,lesson:structuredClone(lesson),selected:null,feedback:null};}}
 }

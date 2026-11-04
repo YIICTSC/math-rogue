@@ -19,7 +19,7 @@ export function sessionResult(game: ResultGame, world: any): SessionResult | nul
   if (!world || (game === 'rpg' ? !world.started : world.phase === 'lobby')) return null;
   const players = (Array.isArray(world.players) ? world.players : Object.values(world.players)) as any[];
   const entries = players.filter(p => !p.spectator).map(p => {
-    if(game==='tennis'||game==='dodgeball'||game==='basketball'){const teams=world.teams.filter((t:any)=>t.members.includes(p.id)),bracket=world.bracket||world.matches,wins=bracket.filter((m:any)=>m.phase==='finished'&&teams.some((t:any)=>t.id===m.winner)).length,champion=teams.some((t:any)=>t.id===world.champion);return {p,scores:[-Number(champion),-wins],values:[String(wins),String(p.correct),champion?'CHAMPION':p.connected?'—':'OUT']};}
+    if(game==='tennis'||game==='dodgeball'||game==='basketball'){const teams=world.teams.filter((t:any)=>t.members.includes(p.id)),bracket=world.bracket||world.matches,wins=bracket.filter((m:any)=>!m.warmup&&m.phase==='finished'&&teams.some((t:any)=>t.id===m.winner)).length,champion=teams.some((t:any)=>t.id===world.champion);return {p,scores:[-Number(champion),-wins],values:[String(wins),String(p.correct),champion?'CHAMPION':p.connected?'—':'OUT']};}
     if (game === 'golf') {
       const sum = p.scores.reduce((a: number, b: number) => a + b, 0);
       return { p, scores: [-p.scores.length, sum], values: [String(p.scores.length), String(sum), String(p.strokes), String(p.totalCorrect)] };

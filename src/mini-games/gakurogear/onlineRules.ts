@@ -13,6 +13,7 @@ export function safeRadius(w: OnlineWorld): number {
  return storm(w).radius;
 }
 export function zoneOffset(w:OnlineWorld,index:number):Point {
+ const stable=w.coopZones?.[playerSeats(w)[index]?.id];if(stable)return stable;
  const count=playerSeats(w).length,columns=Math.ceil(Math.sqrt(count)),rows=Math.ceil(count/columns),base=MISSIONS[w.missionId-1],spacing=2*(base.size??8)+1;
  return {x:(index%columns-(columns-1)/2)*spacing,z:(Math.floor(index/columns)-(rows-1)/2)*spacing};
 }
@@ -35,7 +36,7 @@ export function quizLesson(w:OnlineWorld,p:Participant):KartLesson {
 }
 export function requestSupply(w:OnlineWorld,id:string) {
  const p=w.players[id];if(w.phase!=='playing'||p?.spectator||!p?.connected||p.quiz||w.paused||(w.mode!=='bomb'&&w.time<p.nextSupplyAt))return false;
- if(w.mode==='bomb'){if(p.out||p.bomb.stock>=12)return false;beginQuiz(w,p,'bomb');}else beginQuiz(w,p,'supply');return true;
+ if(w.mode==='bomb'){if(p.bomb.stock>=12)return false;beginQuiz(w,p,'bomb');}else beginQuiz(w,p,'supply');return true;
 }
 export function completeQuiz(w:OnlineWorld,id:string) {
  const p=w.players[id];if(w.mode==='bomb')return false;if(p?.spectator||!p?.quiz||p.answers.length!==3)return false;
@@ -108,11 +109,11 @@ export function returnToLobby(w:OnlineWorld,next=false) {
  if(w.phase!=='result'||Object.values(w.players).some(p=>p.connected&&p.quiz))return false;
  if(next&&w.mode==='coop')w.missionId=Math.min(MISSIONS.length,w.missionId+1);
  Object.keys(w.players).forEach(id=>{if(!w.players[id].connected)delete w.players[id];});
- w.mission=structuredClone(MISSIONS[w.missionId-1]);w.phase='lobby';w.time=0;w.winner=[];w.supplies=[];w.bombArena=undefined;w.royale=undefined;w.paused=false;return true;
+ w.mission=structuredClone(MISSIONS[w.missionId-1]);w.phase='lobby';w.time=0;w.winner=[];w.supplies=[];w.bombArena=undefined;w.bombPractice=undefined;w.coopZones=undefined;w.royale=undefined;w.paused=false;return true;
 }
 
 export function readyToExtract(w:OnlineWorld,p:Participant){
  if(p.spectator)return false;
- const m=MISSIONS[w.missionId-1],index=playerSeats(w).findIndex(q=>q.id===p.id),count=m.switches?.length??0;
+ const m=MISSIONS[w.missionId-1],index=w.coopZones?.[p.id]?.index??playerSeats(w).findIndex(q=>q.id===p.id),count=m.switches?.length??0;
  return p.run.collected.every(Boolean)&&p.run.holds>=m.requiredHolds&&p.run.shots>=m.requiredShots&&p.run.defended>=(m.defend?.seconds??0)&&(!m.requireSwitches||p.run.switches.slice(index*count,(index+1)*count).every(Boolean));
 }

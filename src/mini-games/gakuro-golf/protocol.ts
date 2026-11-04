@@ -19,6 +19,10 @@ export function validView(v: any): v is GolfView {
     if (p.shotClub !== undefined && !['driver','iron','wedge','putter'].includes(p.shotClub)) return false;
     if (p.origin !== undefined && (!p.origin || ![p.origin.x,p.origin.z].every(n=>Number.isFinite(n)&&Math.abs(n)<10000))) return false;
   }
+  if (v.practicePlayer !== undefined) {
+    const official=v.players.find(p=>p.id===v.practicePlayer?.id);
+    if(v.phase!=='playing'||!official||official.phase!=='finished'||official.spectator||official.slot!==v.practicePlayer.slot||!validView({...v,players:[v.practicePlayer],practicePlayer:undefined,observedId:null}))return false;
+  }
   if (v.observedId != null && (typeof v.observedId !== 'string' || !ids.has(v.observedId))) return false;
   if (v.quiz !== null) {
     const q = v.quiz;

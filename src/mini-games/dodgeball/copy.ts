@@ -1,4 +1,7 @@
 const COPY:Record<string,[string,string]>={
+ '練習中・順位確定済み':['Practice · result locked','れんしゅうちゅう・じゅんいかくていずみ'],
+ '順位決定戦':['Placement round','じゅんいけっていせん'],
+
   "ナイスパス": ["NICE PASS","ないすぱす"],
   "チームの体力": ["Team health", "ちーむのたいりょく"],
   "残り時間": ["Time left", "のこりじかん"],

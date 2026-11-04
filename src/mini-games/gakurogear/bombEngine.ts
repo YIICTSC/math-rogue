@@ -35,21 +35,40 @@ export function makeBombArena(w:OnlineWorld) {
   ids.forEach((id,i)=>{const p=w.players[id];p.run=createRun(w.mission);p.run.player={...cellPoint(a,spawn[i].x,spawn[i].z),angle:0};p.bomb=newBombLoadout();p.hits=0;p.out=false;p.invulnerable=2;});
 }
 function solid(a:BombArena,x:number,z:number){return x<0||z<0||x>=a.side||z>=a.side||a.cells[z*a.side+x]!==0;}
-export function placeBomb(w:OnlineWorld,p:Participant){if(p.spectator)return false;const a=w.bombArena;if(!a||p.out||p.quiz||!p.bomb.stock||a.bombs.filter(b=>b.owner===p.id).length>=p.bomb.capacity)return false;const c=pointCell(a,p.run.player);if(solid(a,c.x,c.z)||a.bombs.some(b=>b.x===c.x&&b.z===c.z))return false;
-  a.bombs.push({id:++a.serial,owner:p.id,...c,range:p.bomb.range,fuse:p.bomb.remote?20:2.5,remote:p.bomb.remote,pass:playerSeats(w).filter(q=>{const v=pointCell(a,q.run.player);return v.x===c.x&&v.z===c.z;}).map(q=>q.id),dx:0,dz:0,move:0});p.bomb.stock--;return true;
+export function placeBomb(w:OnlineWorld,p:Participant){if(p.spectator)return false;const a=p.out?w.bombPractice:w.bombArena;if(!a||p.quiz||!p.bomb.stock||a.bombs.filter(b=>b.owner===p.id).length>=p.bomb.capacity)return false;const c=pointCell(a,p.run.player);if(solid(a,c.x,c.z)||a.bombs.some(b=>b.x===c.x&&b.z===c.z))return false;
+  a.bombs.push({id:++a.serial,owner:p.id,...c,range:p.bomb.range,fuse:p.bomb.remote?20:2.5,remote:p.bomb.remote,pass:playerSeats(w).filter(q=>q.out===p.out).filter(q=>{const v=pointCell(a,q.run.player);return v.x===c.x&&v.z===c.z;}).map(q=>q.id),dx:0,dz:0,move:0});p.bomb.stock--;return true;
 }
-function explode(w:OnlineWorld,b:ArenaBomb){const a=w.bombArena!;a.bombs=a.bombs.filter(q=>q!==b);const tiles=[{x:b.x,z:b.z}];for(const [dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]])for(let i=1;i<=b.range;i++){const x=b.x+dx*i,z=b.z+dz*i;if(x<0||z<0||x>=a.side||z>=a.side||a.cells[z*a.side+x]===1)break;tiles.push({x,z});if(a.cells[z*a.side+x]===2){a.cells[z*a.side+x]=0;const kinds:BombUpgrade[]=['flame','remote','kick','speed','capacity'];a.drops.push({id:++a.serial,x,z,kind:kinds[((x*7+z*13+w.seed)>>>0)%5]});break;}}
+function explode(w:OnlineWorld,a:BombArena,b:ArenaBomb){a.bombs=a.bombs.filter(q=>q!==b);const tiles=[{x:b.x,z:b.z}];for(const [dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]])for(let i=1;i<=b.range;i++){const x=b.x+dx*i,z=b.z+dz*i;if(x<0||z<0||x>=a.side||z>=a.side||a.cells[z*a.side+x]===1)break;tiles.push({x,z});if(a.cells[z*a.side+x]===2){a.cells[z*a.side+x]=0;const kinds:BombUpgrade[]=['flame','remote','kick','speed','capacity'];a.drops.push({id:++a.serial,x,z,kind:kinds[((x*7+z*13+w.seed)>>>0)%5]});break;}}
   for(const tile of tiles){a.flames.push({...tile,until:w.time+.65,owner:b.owner});for(const other of a.bombs)if(other.x===tile.x&&other.z===tile.z)other.fuse=0;}
 }
-export function tickBombArena(w:OnlineWorld,controls:Record<string,VrInput>,dt:number){const a=w.bombArena!;
-  for(const p of playerSeats(w)){p.invulnerable=Math.max(0,p.invulnerable-dt);if(!p.connected||p.out||p.quiz)continue;const input=controls[p.id];if(!input)continue;const speed=p.bomb.speed*dt,n=Math.max(1,Math.hypot(input.x,input.z));
+/** Eliminated and late players continue in an independent practice arena. */
+export function respawnBomb(w:OnlineWorld,p:Participant){
+  if(!w.bombArena)return;
+  if(!w.bombPractice)w.bombPractice={...w.bombArena,cells:[...w.bombArena.cells],drops:[],bombs:[],flames:[],serial:0};
+  const a=w.bombPractice,occupied=playerSeats(w).filter(q=>q!==p&&q.connected&&q.out);
+  const candidates=a.cells.flatMap((v,i)=>v===0?[{x:i%a.side,z:Math.floor(i/a.side)}]:[]);
+  const safe=candidates.filter(c=>!a.bombs.some(b=>b.x===c.x&&b.z===c.z)&&!a.flames.some(f=>f.x===c.x&&f.z===c.z));
+  const choices=safe.length?safe:candidates;
+  const score=(c:{x:number;z:number})=>Math.min(a.side,...occupied.map(q=>{const v=pointCell(a,q.run.player);return Math.hypot(c.x-v.x,c.z-v.z);}));
+  choices.sort((a,b)=>score(b)-score(a));
+  const c=choices[0];if(!c)return;
+  p.out=true;p.respawnHits=0;p.quiz=false;p.bomb=newBombLoadout();p.run.status='playing';p.invulnerable=3;
+  p.run.player={...cellPoint(a,c.x,c.z),angle:0};
+}
+export function tickBombArena(w:OnlineWorld,controls:Record<string,VrInput>,dt:number){
+ tickBombLayer(w,controls,dt,w.bombArena!,false);
+ if(w.bombPractice)tickBombLayer(w,controls,dt,w.bombPractice,true);
+}
+function tickBombLayer(w:OnlineWorld,controls:Record<string,VrInput>,dt:number,a:BombArena,practice:boolean){
+ const seats=playerSeats(w).filter(p=>p.out===practice);
+  for(const p of seats){p.invulnerable=Math.max(0,p.invulnerable-dt);if(!p.connected||p.quiz)continue;const input=controls[p.id];if(!input)continue;const speed=p.bomb.speed*dt,n=Math.max(1,Math.hypot(input.x,input.z));
     for(const [dx,dz]of[[input.x/n*speed,0],[0,input.z/n*speed]]){const next={x:p.run.player.x+dx,z:p.run.player.z+dz},corners=[[-.27,-.27],[-.27,.27],[.27,-.27],[.27,.27]].map(([x,z])=>pointCell(a,{x:next.x+x,z:next.z+z}));if(corners.some(c=>solid(a,c.x,c.z)))continue;
       const hit=a.bombs.find(b=>!b.pass.includes(p.id)&&corners.some(c=>c.x===b.x&&c.z===b.z));if(hit){if(p.bomb.kick){const kx=Math.sign(dx),kz=Math.sign(dz);if(!solid(a,hit.x+kx,hit.z+kz)&&!a.bombs.some(b=>b!==hit&&b.x===hit.x+kx&&b.z===hit.z+kz)){hit.dx=kx;hit.dz=kz;}}continue;}Object.assign(p.run.player,next);if(dx||dz)p.run.player.angle=Math.atan2(dx,dz);
     }
     if(input.bomb)placeBomb(w,p);if(input.remote)for(const b of a.bombs)if(b.owner===p.id&&b.remote)b.fuse=0;
     const c=pointCell(a,p.run.player);for(const drop of [...a.drops])if(drop.x===c.x&&drop.z===c.z){if(drop.kind==='flame')p.bomb.range=Math.min(8,p.bomb.range+1);if(drop.kind==='capacity')p.bomb.capacity=Math.min(6,p.bomb.capacity+1);if(drop.kind==='speed')p.bomb.speed=Math.min(6,p.bomb.speed+.5);if(drop.kind==='remote')p.bomb.remote=true;if(drop.kind==='kick')p.bomb.kick=true;a.drops=a.drops.filter(d=>d!==drop);}
   }
-  for(const b of a.bombs){b.pass=b.pass.filter(id=>{const p=w.players[id];if(!p)return false;const c=cellPoint(a,b.x,b.z);return Math.abs(p.run.player.x-c.x)<CELL/2+.3&&Math.abs(p.run.player.z-c.z)<CELL/2+.3;});b.fuse-=dt;if(b.dx||b.dz){b.move+=dt;if(b.move>=.12){b.move=0;const x=b.x+b.dx,z=b.z+b.dz;if(solid(a,x,z)||a.bombs.some(q=>q!==b&&q.x===x&&q.z===z)||playerSeats(w).some(p=>!p.out&&p.connected&&pointCell(a,p.run.player).x===x&&pointCell(a,p.run.player).z===z)){b.dx=b.dz=0;}else{b.x=x;b.z=z;}}}}
-  for(let n=0;n<240;n++){const b=a.bombs.find(b=>b.fuse<=0);if(!b)break;explode(w,b);}a.flames=a.flames.filter(f=>f.until>w.time);
-  for(const p of playerSeats(w)){if(!p.connected||p.out||p.invulnerable>0)continue;const c=pointCell(a,p.run.player),f=a.flames.find(f=>f.x===c.x&&f.z===c.z);if(f){p.hits++;p.invulnerable=1;if(w.players[f.owner]&&f.owner!==p.id)w.players[f.owner].stats.hits++;if(p.hits>=3){p.out=true;p.quiz=false;p.run.status='caught';}}}
+  for(const b of a.bombs){b.pass=b.pass.filter(id=>{const p=w.players[id];if(!p)return false;const c=cellPoint(a,b.x,b.z);return Math.abs(p.run.player.x-c.x)<CELL/2+.3&&Math.abs(p.run.player.z-c.z)<CELL/2+.3;});b.fuse-=dt;if(b.dx||b.dz){b.move+=dt;if(b.move>=.12){b.move=0;const x=b.x+b.dx,z=b.z+b.dz;if(solid(a,x,z)||a.bombs.some(q=>q!==b&&q.x===x&&q.z===z)||seats.some(p=>p.connected&&pointCell(a,p.run.player).x===x&&pointCell(a,p.run.player).z===z)){b.dx=b.dz=0;}else{b.x=x;b.z=z;}}}}
+  for(let n=0;n<240;n++){const b=a.bombs.find(b=>b.fuse<=0);if(!b)break;explode(w,a,b);}a.flames=a.flames.filter(f=>f.until>w.time);
+  for(const p of seats){if(!p.connected||p.out!==practice||p.invulnerable>0)continue;const c=pointCell(a,p.run.player),f=a.flames.find(f=>f.x===c.x&&f.z===c.z);if(f){if(practice)p.respawnHits++;else p.hits++;p.invulnerable=1;if(w.players[f.owner]&&f.owner!==p.id)w.players[f.owner].stats.hits++;if((practice?p.respawnHits:p.hits)>=3)respawnBomb(w,p);}}
 }

@@ -15,7 +15,7 @@ export interface MatchProps {
 }
 export default function BasketMatch(p:MatchProps){
  const{view,m,u,self,active,t}=p,held=!!u&&m.ball.holder===u.id,attack=!!u&&m.possession===u.side;
- const mode=m.tutorial?t('チュートリアル'):m.inbound>0?t('チェックボール'):m.mustClear?t('外側へボールを運ぼう'):!m.ball.holder?t('リバウンド'):attack?t('オフェンス'):t('ディフェンス');
+ const mode=m.warmup?t('練習中・順位確定済み'):m.tutorial?t('チュートリアル'):m.inbound>0?t('チェックボール'):m.mustClear?t('外側へボールを運ぼう'):!m.ball.holder?t('リバウンド'):attack?t('オフェンス'):t('ディフェンス');
  const role=u?ROLES[u.role]:null,actions=u?actionButtons(m,u):[],skillUnit=m.units.find(v=>v.actionSeq===m.serial),event=m.notice==='SKILL'&&skillUnit?ROLES[skillUnit.role].skill:m.notice;
  const eventText:Record<string,string>={'SHOT':'シュート','DUNK':'ダンク！','3 POINTS!':'3ポイント！','BASKET!':'ナイスシュート！','PERFECT RELEASE':'パーフェクト！','CONTESTED':'シュート妨害','PASS':'パス','STEAL':'スティール！','INTERCEPT':'パスカット！','BLOCK':'ブロック！','REBOUND':'リバウンド','REBOUND WIN':'リバウンド獲得！','SHOT CLOCK':'ショットクロック','CLEARED':'クリア！','OUT':'アウト','SCREEN':'スクリーン','BLOCK ATTEMPT':'','REBOUND ATTEMPT':''};
  return <section className="bk-match" aria-label={t('バスケットボールの試合')}>

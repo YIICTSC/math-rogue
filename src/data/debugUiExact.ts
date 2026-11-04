@@ -35,6 +35,10 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "主人公を選ぶ": "Choose your hero",
+  "主人公を選んでから開始してください。": "Choose a hero before starting.",
+  "ひとりで開始して、後から仲間を招待できます。": "Start solo and invite friends at any time.",
+  "問題の設定": "Lesson settings",
   "元のキャラの色に戻す": "Restore original character colors",
   "カートの色": "Kart color",
   "バスケットボールのシュート練習": "Basketball shooting practice",
@@ -456,6 +460,10 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "主人公を選ぶ": "しゅじんこうをえらぶ",
+  "主人公を選んでから開始してください。": "しゅじんこうをえらんでからかいししてください。",
+  "ひとりで開始して、後から仲間を招待できます。": "ひとりでかいしして、あとからなかまをしょうたいできます。",
+  "問題の設定": "もんだいのせってい",
   "元のキャラの色に戻す": "もとのキャラのいろにもどす",
   "カートの色": "カートのいろ",
   "バスケットボールのシュート練習": "バスケットボールのシュートれんしゅう",

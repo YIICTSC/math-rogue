@@ -37,7 +37,7 @@ try{
  console.log('PASS: portrait artwork, five responsive layouts, one-line Dodgeball, shared invitation inputs and English/Hiragana.');
  await page.close();
  if(!process.argv.includes('--layouts-only')){
- for(const transport of['host','server'])for(const sport of(process.argv.includes('--basketball-only')?['basketball']:['tennis','golf','dodgeball','basketball'])){
+ for(const transport of['host','server'])for(const sport of(process.argv.includes('--basketball-only')?['basketball']:process.argv.includes('--golf-only')?['golf']:['tennis','golf','dodgeball','basketball'])){
   const host=await context.newPage();await host.goto(base+'/__net');await host.waitForFunction(()=>window.rooms);
   await host.evaluate(async({sport,transport})=>{window.room=new window.rooms[sport](v=>window.view=v,m=>window.message=m);window.room.transport=transport;await window.room.create('Host');},{sport,transport});
   const code=await host.evaluate(()=>window.room.code);assert(/^\d{6}$/.test(code));
@@ -70,11 +70,37 @@ try{
    const time=await guest.evaluate(()=>window.__sportsGame.view.match.time);await guest.waitForFunction(time=>window.__sportsGame.view.match.time>time+.2,time);
 
   }
+  if(sport!=='basketball'){
+   await host.evaluate(async()=>{const{buildLesson}=await import('/src/mini-games/gakuro-kart/questions.ts');window.room.setLesson(h=>buildLesson({mode:'ADDITION'},3,h),{mode:'ADDITION'});window.room.start();});
+   await guest.waitForFunction(()=>window.__sportsGame?.view?.phase==='playing');
+  }
+  const late=await context.newPage();await late.goto(base+'/__sports?'+sport+'Room='+code);await late.locator('[data-invite-entry]').waitFor();await late.getByLabel('参加名',{exact:true}).fill('Late '+sport);await late.locator('.online-invite-submit').click();
+  await late.waitForFunction(sport=>{const game=window.__sportsGame,id=game?.room?.selfId,v=game?.view;return v?.phase==='playing'&&v.players.some(p=>p.id===id&&!p.spectator)&&(sport==='golf'||v.match?.units.some(u=>u.owner===id));},sport);
+  const creator=late.getByRole('dialog',{name:'キャラクタークリエイト',exact:true});if(await creator.count())await creator.getByRole('button',{name:'確定',exact:true}).click();
+  await late.screenshot({path:`${out}/${sport}-late-${transport}.png`});
+  if(sport==='golf'&&transport==='host'){
+   const id=await guest.evaluate(()=>window.__sportsGame.room.selfId);await host.evaluate(id=>{const w=window.room.world,p=w.players[id];p.hole=w.holeCount-1;p.scores=Array(w.holeCount).fill(3);p.strokes=3;p.phase='holed';},id);
+   await guest.evaluate(()=>window.__sportsGame.room.send({type:'next'}));await guest.waitForFunction(()=>!!window.__sportsGame.view.practicePlayer);
+   await guest.getByText('練習ラウンド・公式スコアは確定済み',{exact:true}).waitFor();await guest.evaluate(()=>window.__sportsGame.room.send({type:'quiz'}));await guest.waitForFunction(()=>!!window.__sportsGame.view.quiz);
+   for(let i=0;i<3;i++){
+    await guest.evaluate(()=>{const q=window.__sportsGame.view.quiz;window.__sportsGame.room.send({type:'answer',shotId:q.shotId,index:q.index,option:0});});await guest.waitForFunction(()=>window.__sportsGame.view.quiz?.selected!==null);
+    await guest.evaluate(()=>{const q=window.__sportsGame.view.quiz;window.__sportsGame.room.send({type:'continue',shotId:q.shotId,index:q.index});});await guest.waitForFunction(i=>i===2?!window.__sportsGame.view.quiz:window.__sportsGame.view.quiz?.index===i+1,i);
+   }
+   for(const[width,height]of[[390,844],[844,390]]){await guest.setViewportSize({width,height});const meter=await guest.locator('.gg-shot-meter').boundingBox();assert(meter&&meter.width>=260&&meter.x>=0&&meter.x+meter.width<=width+1,'Practice status must not squeeze the shot controls');await guest.screenshot({path:`${out}/golf-practice-${width}.png`});}
+   assert.equal(await guest.evaluate(()=>window.__sportsGame.view.players.find(p=>p.id===window.__sportsGame.room.selfId).scores.length),18);
+  }
+  if(sport==='tennis'&&transport==='host'){
+   await host.evaluate(()=>{const w=window.room.world,m=w.matches[0];for(const p of Object.values(w.players))p.quiz=null;m.phase='finished';m.winner=m.teams[0];});
+   await guest.waitForFunction(()=>window.__sportsGame.view.match?.warmup===true&&!window.__sportsGame.view.quiz);
+   for(const[width,height]of[[390,844],[844,390]]){await guest.setViewportSize({width,height});await guest.getByText('練習中・順位確定済み',{exact:true}).waitFor();await guest.screenshot({path:`${out}/tennis-warmup-${width}.png`});}
+   const before=await guest.evaluate(()=>{const g=window.__sportsGame,id=g.room.selfId;return g.view.match.units.find(u=>u.owner===id).x;});await guest.evaluate(()=>window.__sportsGame.room.send({type:'move',x:1,y:0}));await guest.waitForFunction(before=>{const g=window.__sportsGame;return Math.abs(g.view.match.units.find(u=>u.owner===g.room.selfId).x-before)>.05;},before);
+  }
+  await late.close();
   await guest.screenshot({path:`${out}/${sport}-${transport}.png`});await guest.close();await host.evaluate(()=>window.room.close(false));await host.close();console.log('PASS shared invitation:',sport,transport);
  }
  const invalid=await context.newPage();await invalid.goto(base+'/__sports');await invalid.locator('.sports-invite-cta button').click();await invalid.getByRole('radio',{name:'ゴルフ',exact:true}).click();await invalid.getByLabel('参加名',{exact:true}).fill('Retry');await invalid.getByLabel('招待コード',{exact:true}).fill('999999');await invalid.locator('.online-invite-submit').click();await invalid.getByRole('alert').waitFor();await invalid.locator('.online-invite-close').click();await invalid.locator('.sports-hub').waitFor();await invalid.locator('.sports-invite-cta button').click();assert.equal(await invalid.getByLabel('参加名',{exact:true}).inputValue(),'Retry');assert.equal(await invalid.getByLabel('招待コード',{exact:true}).inputValue(),'999999');await invalid.close();
  // Existing URL invitations continue to ask for the participant's name.
  const linked=await context.newPage();await linked.goto(base+'/__sports?golfRoom=000001');await linked.locator('[data-invite-entry]').waitFor();assert.equal(await linked.getByLabel('参加名',{exact:true}).inputValue(),'');assert(await linked.locator('.online-invite-submit').isDisabled());await linked.close();
  }
- assert.deepEqual(errors,[]);console.log(process.argv.includes('--layouts-only')?'PASS: sports title and shared invitation layouts.':'PASS: all four sports join actual WebRTC and dedicated rooms with one name entry, six-digit/full-width codes, no duplicate joins, failure retry and existing URL invitation compatibility.');
+ assert.deepEqual(errors,[]);console.log(process.argv.includes('--layouts-only')?'PASS: sports title and shared invitation layouts.':'PASS: sports join actual WebRTC and dedicated rooms with one name entry, six-digit/full-width codes, no duplicate joins, active-game arrivals, playable post-defeat warmups, failure retry and existing URL invitation compatibility.');
 }finally{await browser?.close();await server?.close();signaling?.kill();dedicated?.kill();await fs.rm(entry,{force:true});}

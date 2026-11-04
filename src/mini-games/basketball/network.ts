@@ -37,7 +37,7 @@ export class BasketRoom{
  async create(name:string){if(this.transport==='server'){await this.server({create:true,name});return;}this.host=true;this.code=createHostRoomCode();const peer=await this.open(prefix+this.code);this.world=createBasketball(crypto.getRandomValues(new Uint32Array(1))[0]);addPlayer(this.world,this.selfId,name);
   peer.on('connection',c=>{if(this.closed||this.channels.has(c.peer)||this.channels.size>=MAX_MEMBERS-1){c.close();return;}this.channels.set(c.peer,c);let admitted=false,at=performance.now(),count=0;const timeout=setTimeout(()=>{if(!admitted)c.close();this.pending.delete(timeout);},25000);this.pending.add(timeout);
    c.on('data',raw=>{if(this.closed||!this.world||typeof raw!=='string'||raw.length>2048)return;const now=performance.now();if(now-at>1000){at=now;count=0;}if(++count>85)return;let d:any;try{d=JSON.parse(raw);}catch{return;}if(!d||typeof d!=='object')return;
-    if(d.type==='hello'){if(admitted||d.version!==BASKETBALL_PROTOCOL||!addPlayer(this.world,c.peer,d.name)){this.packet(c,{type:'error',message:'参加できません。部屋の空き人数を確認してください。'});return;}admitted=true;clearTimeout(timeout);this.pending.delete(timeout);this.emit();}
+    if(d.type==='hello'){if(admitted||d.version!==BASKETBALL_PROTOCOL||!addPlayer(this.world,c.peer,d.name,false,this.factory)){this.packet(c,{type:'error',message:'参加できません。部屋の空き人数を確認してください。'});return;}admitted=true;clearTimeout(timeout);this.pending.delete(timeout);this.emit();}
     else if(admitted&&d.type==='command')this.apply(c.peer,d.command);
     else if(admitted&&d.type==='observe'){this.observations.set(c.peer,typeof d.id==='string'?d.id:null);}
     else if(admitted&&d.type==='spectator'){if(setSpectator(this.world,c.peer,d.enabled))this.emit();}

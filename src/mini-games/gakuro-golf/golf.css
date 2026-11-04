@@ -269,6 +269,8 @@
 .gg-playing .gg-shot-controls{color:var(--gg-ink)}
 .gg-shot-controls input[type=range]{accent-color:#24674c}
 .gg-playing .gg-control-dock .gg-play-ui:has(>.gg-shot-controls){display:flex;overflow:hidden}
+.gg-playing .gg-control-dock .gg-play-ui.gg-practicing:has(>.gg-shot-controls){flex-direction:column;gap:4px}
+.gg-practicing>.gg-flying{flex:0 0 auto;width:100%;min-width:0;margin:0;padding:4px 8px;font-size:11px;line-height:1.4}
 .gg-playing .gg-shot-controls{display:flex;flex-direction:column;flex:1;min-height:0}
 .gg-shot-controls>.gg-shot-setup{flex:0 1 auto;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .gg-shot-controls>.gg-shot-meter{flex:0 0 auto}

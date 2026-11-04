@@ -68,7 +68,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const candidates = (view?.players || []).filter(p => p.id !== self && p.connected && !p.spectator);
   const spectators = useSpectatorTarget(spectating, candidates.map(p => p.id));
   const viewId = spectating ? spectators.target || self : self;
-  const me = view?.players.find(p => p.id === viewId), hole = HOLES[me?.hole ?? 0];
+  const me = view?.practicePlayer?.id===viewId ? view.practicePlayer : view?.players.find(p => p.id === viewId), hole = HOLES[me?.hole ?? 0];
   useEffect(() => {
     if (view?.phase !== 'playing' || !own || own.spectator) { tutorialMisses.current = initialTutorialMissTracker(); return; }
     const result = recordTutorialShot(tutorialMisses.current, own.shotId, own.shotQuality);
@@ -181,7 +181,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     {message && <div role="alert" className="gg-message">{t(message)}</div>}
     {picker ? <LessonPicker languageMode={languageMode} busy={busy} error={message} onSelect={selectLesson} onBack={() => { if (!busy) { setPicker(null); setMessage(''); } }} /> : <>
       <section className={`gg-stage ${!view || view.phase === 'lobby' ? 'gg-preview' : ''} ${me?.phase === 'aim' ? 'gg-aiming' : ''}`}>
-        <GolfCanvas view={view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} spin={club === 'putter' ? 0 : spin} avatar={spectating ? me?.avatar || avatar : avatar} />
+        <GolfCanvas view={view?.practicePlayer?{...view,players:view.players.map(p=>p.id===view.practicePlayer!.id?view.practicePlayer!:p)}:view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} spin={club === 'putter' ? 0 : spin} avatar={spectating ? me?.avatar || avatar : avatar} />
         {view && view.phase !== 'lobby' && me && <>
           <CourseHud player={me} hole={hole} remaining={remaining} aim={angle} players={view.players} holeCount={view.holeCount} t={t}/>
 
@@ -190,7 +190,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
           <div className="gg-control-dock">
           <div className="gg-course-tools" data-meter-ignore="true"><StorybookQuality languageMode={languageMode}/><button aria-pressed={overview} onClick={() => setOverview(!overview)}>{t(overview ? 'ボールを追う' : 'コース全景')}</button><button aria-expanded={showScores} onClick={() => setShowScores(!showScores)}>{t('スコアボード')}</button><CourseMap player={me} hole={hole} aim={angle} players={view.players} t={t}/></div>
           {overview && <p className="gg-overview-hint">{t('スワイプでコースを動かして確認')}</p>}
-          {view.phase === 'playing' && <div className="gg-play-ui">
+          {view.phase === 'playing' && <div className={`gg-play-ui${view.practicePlayer?' gg-practicing':''}`}>
             {!spectating && me.phase === 'ready' && <section className="gg-shot gg-panel"><h2>{t('次のショットを強くしよう')}</h2>{me.penalty && <p role="status">{t('池・OB：1打罰で元の位置へ')}</p>}<p>{t('3問の効果は次の3ショットに適用。罰打は回数に含みません。')}</p><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'quiz' })}>{t('3問に挑戦')}</button></section>}
             {view.quiz && (!spectating || view.observedId === spectators.target) && <QuizPanel quiz={view.quiz} languageMode={languageMode} disabled={view.paused || spectating} send={send} />}
             {!spectating && me.phase === 'aim' && <div className="gg-shot-controls" data-meter-active={meterActive}>
@@ -204,7 +204,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
             </div>}
             {me.phase === 'moving' && <p className="gg-flying" role="status">{me.shotQuality && me.shotQuality !== 'good' && <strong className={`gg-shot-quality ${me.shotQuality}`}>{me.shotSpecial ? 'SPECIAL SHOT!' : me.shotQuality === 'nice' ? 'NICE SHOT!' : 'MISS'}</strong>}{t(me.shotSpecial?'強烈なスピンでカップを狙う！':'ボールの行方を見よう')}</p>}
             {!spectating && me.phase === 'holed' && <section className="gg-shot gg-panel"><p className="gg-eyebrow">HOLE {me.hole + 1} / COMPLETE</p><h2>{t(me.capped ? '打数上限でホール終了' : 'カップイン！')}</h2><p>{me.strokes} {t('打')} · PAR {hole.par} · {me.strokes - hole.par > 0 ? '+' : ''}{me.strokes - hole.par}</p><button className="gg-primary" disabled={view.paused} onClick={() => send({ type: 'next' })}>{t(me.hole === view.holeCount - 1 ? 'ラウンド結果へ' : '次のホール')}</button></section>}
-            {me.phase === 'finished' && <p className="gg-flying" role="status">{t('完走！ほかのプレイヤーの終了を待っています。')}</p>}
+            {view.practicePlayer && <p className="gg-flying" role="status">{t('練習ラウンド・公式スコアは確定済み')}</p>}
           </div>}
           </div>
           {(showScores || view.phase === 'result') && <section className={`gg-scores gg-panel ${view.phase==='result'?'gg-round-result':''}`}><header><h2>{t(view.phase === 'result' ? 'ラウンド結果' : 'スコアボード')}</h2>{view.phase !== 'result' && <button onClick={() => setShowScores(false)}>{t('閉じる')}</button>}</header><p className="gg-muted">{t('選んだホールの合計打数が少ない人が勝ち。同点は同順位です。')}</p><div className="gg-result-grid"><div className="gg-score-scroll"><table><thead><tr><th>{t('順位')}</th><th>{t('参加名')}</th>{HOLES.slice(0,view.holeCount).map((_, i) => <th key={i}>H{i + 1}</th>)}<th>{t('合計')}</th><th>{t('状態')}</th></tr></thead><tbody>{scoreRows.map(p => <tr key={p.id} className={p.id === me.id ? 'is-self' : ''}><td>{p.phase === 'finished' ? 1 + scoreRows.filter(other => other.phase === 'finished' && other.scores.reduce((s, n) => s + n, 0) < p.scores.reduce((s, n) => s + n, 0)).length : '—'}</td><td data-allow-japanese="true">{p.name}</td>{HOLES.slice(0,view.holeCount).map((_, i) => <td key={i}>{p.scores[i] ?? '—'}</td>)}<td>{p.scores.reduce((s, n) => s + n, 0)}</td><td>{t(!p.connected && p.phase !== 'finished' ? '途中退出' : p.phase === 'finished' ? '完走' : 'プレイ中')}</td></tr>)}</tbody></table></div>{view.phase === 'result' && <aside className="gg-result-actions">{room.current?.host?<><label>{t('プレイするホール数')}<select value={holeCount} onChange={e=>setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H</option>)}</select></label><button className="gg-primary" onClick={()=>{setShowScores(false);room.current?.rematch(holeCount);}}>{t('次のラウンドへ')}</button></>:<p>{t('ホストの開始を待っています。')}</p>}<button onClick={leave}>{t('クラブハウスへ')}</button></aside>}</div></section>}

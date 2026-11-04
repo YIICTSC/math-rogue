@@ -1,4 +1,5 @@
 const copy: [string, string, string][] = [
+  ['練習ラウンド・公式スコアは確定済み','Practice round · official score locked','れんしゅうらうんど・こうしきすこあはかくていずみ'],
   ['ここがパワーMAX！押して決めよう','This is MAX power! Press to lock it.','ここがパワーまっくす！おしてきめよう'],
   ['強烈なスピンでカップを狙う！','Powerful spin pulls the ball toward the cup!','きょうれつなスピンで カップをねらう！'],
   ['必殺ショット準備完了','Special shot ready','ひっさつショットじゅんびかんりょう'],

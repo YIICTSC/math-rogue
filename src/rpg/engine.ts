@@ -18,7 +18,7 @@ import { STORIES, storyForSite, applyStory, type StoryAction, type StoryProgress
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
 import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
-import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
+import { cloneRpgAdventureSetup, isRpgAdventureSetup, normalizeRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 import { getEncounterEnemyNamePool } from "../services/geminiService";
 import type { VisualThemeId } from "../data/visualThemes";
 import { ROAMING_NPC_EVENTS } from './roamingNpcs';
@@ -199,7 +199,8 @@ export type Action = RoomAction | VoxelAction | FarmAction | CityAction | TownAc
     }
   | { type: "native-learning"; correctAnswers:number }
   | { type: "native-profile"; profile: NativeProfile }
-  | { type: "rpg-start" };
+  | { type: "rpg-start" }
+  | { type: "rpg-setup"; setup:RpgAdventureSetup };
 export function random(seed: number) {
   let n = seed >>> 0;
   return () => {
@@ -714,10 +715,13 @@ export function applyAction(
     w.revision++;
     return true;
   };
+  if(action.type==='rpg-setup'){
+    if(w.started||Object.keys(w.players)[0]!==id||!isRpgAdventureSetup(action.setup))return false;
+    const setup=normalizeRpgAdventureSetup({...action.setup,assignment:w.setup?.assignment});
+    if(!setup)return false;w.setup=cloneRpgAdventureSetup(setup);w.revision++;return true;
+  }
   if (action.type === "rpg-start") {
     if (w.started || Object.keys(w.players)[0] !== id) return false;
-    if (Object.keys(w.players).length < 2)
-      return tell("参加者が2人以上集まると開始できます。");
     w.started = true;
     w.deadlineAt = w.timeLimitMinutes ? now + w.timeLimitMinutes * 60 * 1000 : 0;
     log(w, "参加者が集合し、冒険が始まりました！");

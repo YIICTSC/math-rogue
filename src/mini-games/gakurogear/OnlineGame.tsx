@@ -19,6 +19,7 @@ import type {OnlineWorld,VrInput} from './onlineEngine';
 import {playerSeats,zoneOffset,quizLesson,safeRadius,readyToExtract} from './onlineRules';
 import {MISSIONS,WEAPONS,type Input} from './engine';
 import Quiz from './Quiz';
+const baseTargets=(w:OnlineWorld)=>MISSIONS[w.missionId-1].targets;
 export default function OnlineGame({room,world,onBack,en,onConfigure,editing=false}:{room:VrRoom;world:OnlineWorld;onBack:()=>void;en:boolean;onConfigure?:()=>void;editing?:boolean}) {
   const editingRef=useRef(editing);editingRef.current=editing;
   useVrBgm(world.phase==='result'?'clear':world.mode==='royale'?'royale':'training',world.missionId,30);
@@ -30,8 +31,8 @@ export default function OnlineGame({room,world,onBack,en,onConfigure,editing=fal
   const keys=useRef(new Set<string>()),drag=useRef<{id:number;x:number}|null>(null),[quizDone,setQuizDone]=useState('');
   const observer=useVrSpectator(world,room.selfId),p=observer.viewed,viewId=useRef(observer.viewId);viewId.current=observer.viewId;
   useEffect(()=>{
-    if(!host.current)return;const ids=playerSeats(world).map(p=>p.id),index=Math.max(0,ids.indexOf(viewId.current)),columns=Math.ceil(Math.sqrt(ids.length)),rows=Math.ceil(ids.length/columns),base=MISSIONS[world.missionId-1];
-    const renderMission=world.mode==='coop'?{...world.mission,defend:base.defend?{...base.defend,x:base.defend.x+(index%columns-(columns-1)/2)*(2*(base.size??8)+1),z:base.defend.z+(Math.floor(index/columns)-(rows-1)/2)*(2*(base.size??8)+1)}:undefined,exit:{x:base.exit.x+(index%columns-(columns-1)/2)*(2*(base.size??8)+1),z:base.exit.z+(Math.floor(index/columns)-(rows-1)/2)*(2*(base.size??8)+1)}}:world.mission;
+    if(!host.current)return;const ids=playerSeats(world).map(p=>p.id),index=Math.max(0,ids.indexOf(viewId.current)),offset=zoneOffset(world,index),base=MISSIONS[world.missionId-1];
+    const renderMission=world.mode==='coop'?{...world.mission,defend:base.defend?{...base.defend,x:base.defend.x+offset.x,z:base.defend.z+offset.z}:undefined,exit:{x:base.exit.x+offset.x,z:base.exit.z+offset.z}}:world.mission;
     const scene=createScene(host.current,renderMission,world.players[room.selfId]?.avatar);let frame=0;
     const down=(e:KeyboardEvent)=>{if(editingRef.current||latest.current.paused||latest.current.phase!=='playing'||latest.current.players[room.selfId]?.quiz||(e.target instanceof HTMLElement&&e.target.closest('select,input,textarea')))return;if(['KeyW','KeyA','KeyS','KeyD','KeyC','KeyE','KeyF','KeyR','KeyT','KeyQ','KeyJ','KeyL','KeyX','KeyB','KeyV','ShiftLeft','ShiftRight','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)){e.preventDefault();e.stopPropagation();keys.current.add(e.code);if(!e.repeat){if(e.code==='KeyC')input.current.crouch=!input.current.crouch;if(e.code==='KeyB')room.supply();if(e.code==='KeyX')input.current.useItem=true;if(e.code==='KeyR'&&!isRoyale)input.current.shoot=true;if(e.code==='KeyT')input.current.reload=true;if(e.code==='KeyQ')input.current.decoy=true;if(e.code==='KeyV')input.current.cover=true;if(e.code.startsWith('Digit'))input.current.weapon=Number(e.code.slice(-1))-1;}}};
     const up=(e:KeyboardEvent)=>keys.current.delete(e.code),blur=()=>{keys.current.clear();input.current={x:0,z:0,crouch:true,interact:false,decoy:false};room.input(input.current);};
@@ -43,7 +44,7 @@ export default function OnlineGame({room,world,onBack,en,onConfigure,editing=fal
     };
     const inputTimer=setInterval(publish,50);
     const sounds=createRunAudio();let priorHits=0,priorReload=0,priorAvatar='',priorTarget=viewId.current;const loop=()=>{const w=latest.current,own=w.players[room.selfId];if(!own)return;const watched=w.players[viewId.current]??own;if(watched.id!==priorTarget){view.current.yaw=watched.run.player.angle;priorTarget=watched.id;}
-      sounds(watched.run);if(own.hits>priorHits)cue('fail');if(own.reloading>priorReload+.5)cue('reload');priorHits=own.hits;priorReload=own.reloading;const displayRun=w.mode==='coop'?{...watched.run,collected:playerSeats(w).flatMap(p=>p.run.collected)}:watched.run;
+      sounds(watched.run);if(own.hits>priorHits)cue('fail');if(own.reloading>priorReload+.5)cue('reload');priorHits=own.hits;priorReload=own.reloading;const displayRun=w.mode==='coop'?{...watched.run,collected:Object.values(w.coopZones||{}).filter((z,i,zones)=>zones.findIndex(q=>q.index===z.index)===i).sort((a,b)=>a.index-b.index).flatMap(z=>{const peers=playerSeats(w).filter(p=>w.coopZones?.[p.id]?.index===z.index);return baseTargets(w).map((_,i)=>peers.every(p=>p.run.collected[i]));})}:watched.run;
       const avatar=watched.avatar??defaultAvatar(),avatarKey=JSON.stringify(avatar);if(avatarKey!==priorAvatar){scene.setAvatar(avatar);priorAvatar=avatarKey;}
       const base=MISSIONS[w.missionId-1],offset=zoneOffset(w,Math.max(0,playerSeats(w).findIndex(p=>p.id===watched.id)));
 

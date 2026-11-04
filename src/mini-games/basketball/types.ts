@@ -23,7 +23,7 @@ export interface Ball {
 }
 export type TutorialStage='move'|'dash'|'pass'|'receive'|'steal'|'shoot'|'complete';
 export interface Tutorial {stage:TutorialStage;owner:string;startX:number;startY:number;elapsed:number;}
-export interface Match extends SportsEventBuffer, CpuSpecialBudget {
+export interface Match extends SportsEventBuffer, CpuSpecialBudget {warmup?:boolean;
  tutorial?:Tutorial;id:string;round:number;teams:[number,number|null];units:Unit[];
  phase:'study'|'play'|'finished';winner:number|null;reason:'bye'|'time'|'forfeit'|'';
  score:[number,number];shotClock:number;time:number;studyAt:number;ball:Ball;serial:number;

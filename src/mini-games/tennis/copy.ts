@@ -1,4 +1,7 @@
 const rows:Record<string,[string,string]>={
+ '練習中・順位確定済み':['Practice · result locked','れんしゅうちゅう・じゅんいかくていずみ'],
+ '順位決定戦':['Placement round','じゅんいけっていせん'],
+
  'ショット威力':['Shot power','しょっといりょく'],'スターゲージ':['Star energy','すたーげーじ'],
  '速く沈む球':['Fast, dipping shot','はやく しずむ たま'],'低く滑る球':['Low, skidding shot','ひくく すべる たま'],'高い山なり':['High, arcing shot','たかい やまなり'],'ネット際へ':['Just over the net','ねっとぎわへ'],'ゲージ満タンで':['Full energy only','げーじ まんたんで'],'素早く移動':['Move quickly','すばやく いどう'],'このボタンでサーブ':['Serve with this button','このぼたんで さーぶ'],'サーブ':['Serve','さーぶ'],
  'スポーツ':['Sports','すぽーつ'],'テニス':['Tennis','てにす'],'ゴルフ':['Golf','ごるふ'],'スポーツクラブ':['Sports club','すぽーつくらぶ'],
