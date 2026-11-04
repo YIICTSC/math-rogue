@@ -1,0 +1,41 @@
+{
+  "state": "diagnostic-only-not-adopted",
+  "checked_at": "2026-11-03T11:19:46.576001+00:00",
+  "model": "kotoba-tech/kotoba-whisper-v2.0-faster",
+  "model_revision": "f44edd35eaeb2274e85ac7b31fb2c6f59ff1c4bc",
+  "device": "cpu",
+  "compute_type": "int8",
+  "threads": 2,
+  "beam_size": 5,
+  "no_expected_text_prompt": true,
+  "clips": [
+    {
+      "id": "637aac13cddb2f01a1c8",
+      "speaker": "end-sable",
+      "text": "匂いで敵にばれる。帰還後の一杯を、少し濃くしておいてくれ。",
+      "path": "tmp/lantern-banter-voices/kotoba-pilot/637aac13cddb2f01a1c8-5a707671ba78.ogg",
+      "sha256": "5a707671ba7885700517b6e7c6af286347d5fde27dd061005a9dc4f86bad4606",
+      "heard": "匂いで敵にバレる期間後の一杯を少し濃くしておいてくれ",
+      "previous_asr": "臭いで敵にバレる 期間後の一杯を少し濃くしておいてくれ",
+      "previous_review_model": "medium",
+      "previous_sha256": "5a707671ba7885700517b6e7c6af286347d5fde27dd061005a9dc4f86bad4606",
+      "assessment": {
+        "expected": "匂いで敵にばれる。帰還後の一杯を、少し濃くしておいてくれ。",
+        "cer": 0.0625,
+        "needs_review": false,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "a758b6474c539a56a2c7aabfb503fc851b2e12abac2f0e476ae0a5cc20346a75",
+        "raw_cer": 0.0625,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "missing_required_phrases": [],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      }
+    }
+  ]
+}

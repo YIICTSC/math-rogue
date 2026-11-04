@@ -1,0 +1,41 @@
+{
+  "state": "diagnostic-only-not-adopted",
+  "checked_at": "2026-11-03T07:17:30.384799+00:00",
+  "model": "kotoba-tech/kotoba-whisper-v2.0-faster",
+  "model_revision": "f44edd35eaeb2274e85ac7b31fb2c6f59ff1c4bc",
+  "device": "cpu",
+  "compute_type": "int8",
+  "threads": 2,
+  "beam_size": 5,
+  "no_expected_text_prompt": true,
+  "clips": [
+    {
+      "id": "186ebf66511a60edeb9a",
+      "speaker": "dungeons2-leon",
+      "text": "盾の留め金、出撃前に見てもらえますか。",
+      "path": "tmp/lantern-banter-voices/kotoba-pilot/186ebf66511a60edeb9a-4ec1b25d2bfe.ogg",
+      "sha256": "4ec1b25d2bfe4b2933b66d22d1e5a74199b89f131b7f037eade2f9c096c66aa5",
+      "heard": "盾の留め金出撃前に見てもらえますか",
+      "previous_asr": "縦の止め金、出撃前に見てもらえますか?",
+      "previous_review_model": "small",
+      "previous_sha256": "4ec1b25d2bfe4b2933b66d22d1e5a74199b89f131b7f037eade2f9c096c66aa5",
+      "assessment": {
+        "expected": "盾の留め金、出撃前に見てもらえますか。",
+        "cer": 0.2174,
+        "needs_review": true,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "2805b03580f1bc2f667f2c29b13ad78df2a929b4952f453807e46420b7e3412e",
+        "raw_cer": 0.2174,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "missing_required_phrases": [],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      }
+    }
+  ]
+}

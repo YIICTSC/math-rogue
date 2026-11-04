@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-11-03T01:23:22.428779+00:00",
+  "irodori_revision": "59be938c99d48b5653ca5aa3fdd0cddaa56940e5",
+  "code_up_to_date_with_origin_main": true,
+  "models": {
+    "Aratako/Irodori-TTS-v4.1-Small-MF": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+    "Aratako/Irodori-TTS-v4.1-Small": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+    "Aratako/Irodori-TTS-v4-Large": "2e0c55428ce97268a507f1feeb2478f8d9148e8b"
+  },
+  "selected": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "reason": "Current official v4.1 MeanFlow checkpoint with the documented four-step inference; CPU-only 2-core/8-GiB environment.",
+  "model_device": "cpu",
+  "codec_device": "cpu"
+}

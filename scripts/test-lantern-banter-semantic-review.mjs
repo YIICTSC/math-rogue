@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {requireSemanticReview} from './lantern-war/banter-semantic-review.mjs';
+const clip={id:'full-line',kind:'banter'},recording={sha256:'current'},near={cer:.05};
+assert.throws(()=>requireSemanticReview(clip,recording,near,{accepted:[]}),/needs semantic/);
+assert.throws(()=>requireSemanticReview(clip,recording,near,{accepted:[{id:clip.id,sha256:'previous',decision:'checked'}]}),/needs semantic/);
+assert.throws(()=>requireSemanticReview(clip,recording,near,{accepted:[{id:'other-line',sha256:'current',decision:'checked'}]}),/needs semantic/);
+assert.doesNotThrow(()=>requireSemanticReview(clip,recording,near,{accepted:[{id:clip.id,sha256:'current',decision:'independent transcript checked'}]}));
+assert.doesNotThrow(()=>requireSemanticReview(clip,recording,{cer:0},{accepted:[]}));
+assert.doesNotThrow(()=>requireSemanticReview({id:'reply',kind:'banter-reply'},recording,{cer:0},{accepted:[]}));
+console.log('PASS: non-exact full dialogue requires a semantic approval tied to the same clip and current audio hash.');

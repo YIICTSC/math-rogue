@@ -1,0 +1,1479 @@
+{
+  "36a501d2a766dd6b4895": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "84453a36454a05b2f518": {
+    "seed_offset": 181,
+    "steps": 40,
+    "seconds": 1.1,
+    "spoken_text": "うん。",
+    "caption": "日本語の成人男性。20代半ばの穏やかな中低音。黒髪に白と青の海辺の装束をまとい、日傘を旗にする守護者カイ。柔らかい口調の奥に揺るがぬ決意。既存のレンとは別人として設計し、幼い少年声ではなく温かく明瞭な声。 参照と同じ人物、同じ年齢感。会話の出だしや相槌に使える、自然で短い受け止め。 台本の短い言葉だけを一度。言い足し、背景音、音楽なし。 穏やかに、少しゆっくり、語頭から明瞭な相槌を一度だけ発声。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "abc1b6adad66b772698a": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "06cc1a34915a751d1421": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "5acfdd0e7594cea4e7ba": {
+    "seed_offset": 34,
+    "steps": 8
+  },
+  "0c18ea1081ba40785013": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "8d4b2cf48292f95cdda2": {
+    "seed_offset": 82,
+    "steps": 40,
+    "required_phrases": [
+      "傷病者"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "てきみかたのしょうびょうしゃを、おなじやねのしたで？",
+    "reading_reviewed": true,
+    "require_lexical_exact": true,
+    "semantic_review_reason": "Transcript repeated で after the question; require exact phonetics."
+  },
+  "d4a45204da72a4a7fa3c": {
+    "seed_offset": 99,
+    "steps": 40,
+    "seconds": 1.8,
+    "spoken_text": "ふふ、もう。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "fbdf434bf8e7c46e3738": {
+    "seed_offset": 48,
+    "steps": 8,
+    "seconds": 1.8,
+    "spoken_text": "ええ、そうね。"
+  },
+  "a2d3ccc7262d1247f8c9": {
+    "spoken_text": "どうしてだろうね。",
+    "seconds": 2.2,
+    "steps": 8,
+    "seed_offset": 65
+  },
+  "334128a80366a5bc61f4": {
+    "spoken_text": "うん。",
+    "seconds": 1.1,
+    "steps": 12,
+    "seed_offset": 113
+  },
+  "6eaaf9a5a92dd1b58232": {
+    "spoken_text": "ふっ、おもしろいね。",
+    "seconds": 2.2,
+    "steps": 12,
+    "seed_offset": 65
+  },
+  "7fdbd393d95c2c83c75d": {
+    "spoken_text": "ありがとう、たすかるよ。",
+    "seconds": 2.6,
+    "steps": 8,
+    "seed_offset": 48
+  },
+  "3d4a435465ad4a7cfdb7": {
+    "spoken_text": "それはまとう。",
+    "seconds": 1.8,
+    "steps": 40,
+    "seed_offset": 150,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "1326fe6d1d5923161bbf": {
+    "spoken_text": "そうか……。",
+    "seconds": 1.5,
+    "steps": 8,
+    "seed_offset": 48
+  },
+  "0d5700180baac0839f35": {
+    "spoken_text": "ほのおのしりょう、こぶしからとらせて。",
+    "seconds": 3.8,
+    "steps": 12,
+    "seed_offset": 79
+  },
+  "0174f7aa5b31cf8a7724": {
+    "spoken_text": "たてのたいねつしけん、きょうりょくしてくれる？",
+    "seconds": 4.3,
+    "steps": 12,
+    "seed_offset": 79
+  },
+  "01f0f3d4a5426d759095": {
+    "seed_offset": 48,
+    "steps": 12,
+    "seconds": 4.15,
+    "spoken_text": "しあいのじっきょうみたいに、とつげきをもりあげるなよ。"
+  },
+  "04962de1b61adf46c6d2": {
+    "seed_offset": 113,
+    "steps": 40,
+    "seconds": 2.74,
+    "spoken_text": "あのしるし、ふんでもだいじょうぶか？",
+    "required_prefix": "あの印",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "reading_reviewed": true
+  },
+  "0ee80d47a87ffdad6dc5": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "1515adafa3c398806074": {
+    "seed_offset": 116,
+    "steps": 40,
+    "seconds": 1.65,
+    "spoken_text": "きがかりだわ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "2292d49e28884f4533d6": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "688f03347c7c60bc5c0e": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "02a9307a8984941304e4": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "347ca26101d9fa7ca853": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "572be882a6091167e461": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "71c445dcfc6ff91368b7": {
+    "seed_offset": 116,
+    "steps": 40,
+    "seconds": 1.15,
+    "spoken_text": "ええ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "76c5cd3313c61c21a75a": {
+    "seed_offset": 65,
+    "steps": 40,
+    "required_phrases": [
+      "戦況"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "たてにまいくをつけたら、せんきょうがわかるね。",
+    "reading_reviewed": true
+  },
+  "88e4c3c5ba0a2cdc3668": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "c12cb36de2295985d1c4": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "f11b8c018456c8468ec3": {
+    "seed_offset": 150,
+    "steps": 40,
+    "seconds": 1.1,
+    "spoken_text": "おう。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "24ea47891c9deda0f005": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "5f153239f104bf1458f3": {
+    "seed_offset": 65,
+    "steps": 16,
+    "spoken_text": "どうおもうんだ？",
+    "seconds": 1.84
+  },
+  "01fa9f531c478403c88a": {
+    "seed_offset": 130,
+    "steps": 40,
+    "spoken_text": "ふっ、おもしろいな。",
+    "seconds": 2.2,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "2269d95a68ea4925b6cf": {
+    "seed_offset": 113,
+    "steps": 40,
+    "spoken_text": "いせかいのはなにも、ふるさとのなをつけるのか？",
+    "seconds": 4.34,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "400e5d981c40705d540d": {
+    "seed_offset": 65,
+    "steps": 40,
+    "required_phrases": [
+      "苗にも",
+      "名前は要るか"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "そだつばしょをかくしたなえにも、なまえはいるか。",
+    "reading_reviewed": true
+  },
+  "4753096dfd80bcb98966": {
+    "seed_offset": 65,
+    "steps": 16,
+    "spoken_text": "ちょっとまて。",
+    "seconds": 1.66
+  },
+  "6e5d4cdeeaddd218d1fd": {
+    "seed_offset": 65,
+    "steps": 16,
+    "spoken_text": "いっしょにやろう。",
+    "seconds": 2.02
+  },
+  "7b6611fc5cd856c2783e": {
+    "seed_offset": 113,
+    "steps": 40,
+    "spoken_text": "ああ。",
+    "seconds": 1.3,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "9c3ec78bc6e39efcc890": {
+    "seed_offset": 113,
+    "steps": 40,
+    "spoken_text": "すこしきになるな。",
+    "seconds": 2.02,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "9dfbe2d884cf7ad8556d": {
+    "seed_offset": 411,
+    "steps": 40,
+    "spoken_text": "たすかるよ。",
+    "seconds": 1.48,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "caption": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。 参照音声と同じ人物の声色と年齢感を保つ。音楽や効果音なし。",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "f9fe9d39954cde554ce1": {
+    "spoken_text": "へえ、そうか。",
+    "seconds": 1.66,
+    "steps": 40,
+    "seed_offset": 164,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "009ce876c781d8690885": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "47083c9af1320da51f1b": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "60e0c5914a588d95f3ff": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "7b66e72ca6d0f5898908": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "7e9c264259a632694fe0": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "e4ae490cead661f07078": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "e5b2a2f05d1ba6ad7561": {
+    "seed_offset": 85,
+    "steps": 40,
+    "spoken_text": "ええ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.1
+  },
+  "3c655e0f09f177857d39": {
+    "seed_offset": 68,
+    "steps": 40,
+    "spoken_text": "そういうことね……。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.75
+  },
+  "45c18e7af2af991e60ab": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "4e0c095e4a52870fa63a": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "561ba11953036fc898e2": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "5fa2c42622e17fe107bd": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "6b57aed292b3db608fea": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "8207a594c499ae467d6e": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "93720a19770f274d9308": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "97cfd7b7912ef5db61be": {
+    "seed_offset": 51,
+    "steps": 40,
+    "spoken_text": "ふふっ、困ったわね。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.89
+  },
+  "a056ac40f970841c5b0d": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "ace7d706689ffa9029f4": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "b4b10bfafa7810b67b03": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "06373a276294cee46bdd": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "1031ee2800854f08843b": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "1846d8d721cc6411c67a": {
+    "seed_offset": 34,
+    "steps": 8
+  },
+  "8875ff20bdadb40283b1": {
+    "seed_offset": 34,
+    "steps": 8
+  },
+  "abac14522968451ce42e": {
+    "seed_offset": 34,
+    "steps": 8
+  },
+  "b9b07b3a162edc64f9c0": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "bd073982f7d41b74b52a": {
+    "seed_offset": 34,
+    "steps": 8
+  },
+  "bf9f3d4a8790daf654bb": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "3450dcf02830673376b5": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "4482a33ea258840ac81e": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "589055d69a2d739864fd": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "b76cdb22ebf378051743": {
+    "seed_offset": 65,
+    "steps": 40,
+    "required_prefix": {
+      "text": "樹の成長",
+      "readings": [
+        "きのせいちょう"
+      ]
+    },
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "きのせいちょうを、すこしはやめられたら……。",
+    "reading_reviewed": true
+  },
+  "db9ee8de8cade2a6f199": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "e314ef2b5c4c36c0f3c4": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "ff106fcb2ee6f968ca6c": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "f2b1973c4714efff40eb": {
+    "required_phrases": [
+      "王座"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "きみのけんはおうざではなく、かえりみちをさすんだね。",
+    "seed_offset": 31,
+    "reading_reviewed": true,
+    "required_prefix": {
+      "text": "君の剣",
+      "readings": [
+        "きみのけん",
+        "きみのつるぎ"
+      ]
+    }
+  },
+  "a53a970fbff2e27be419": {
+    "required_phrases": [
+      "戦場"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ははうえのつえをせんじょうへもつのは、こわくないかい。",
+    "seed_offset": 82,
+    "reading_reviewed": true,
+    "required_prefix": {
+      "text": "母上の杖を戦場へ",
+      "readings": [
+        "ははうえのつえをせんじょうへ"
+      ]
+    },
+    "semantic_review_reason": "ASR heard 母親への instead of 母上の; require the exact family address and opening."
+  },
+  "4d43acd1a36a94a8fb30": {
+    "required_phrases": [
+      "王冠"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "いえのせきむとおうかん。にげたといわれるかしら。",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "5880746ba0530e5fcd62": {
+    "required_phrases": [
+      "追手"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "王家の追っ手に見つからず、民に帰還を知らせたい。",
+    "seed_offset": 65,
+    "reading_reviewed": true,
+    "pronunciation_note": "Only pronunciation spelling 追手→追っ手 in synthesis input; original subtitle and lexeme unchanged."
+  },
+  "91262513d709f9560e4a": {
+    "required_phrases": [
+      "奪いたくない"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ゆるすことばをいそいで、あなたのせきにんをうばいたくない。",
+    "seed_offset": 65,
+    "reading_reviewed": true
+  },
+  "f3b4b10beb1015f13724": {
+    "require_lexical_exact": true,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "めいれいよりさきにきずをみろって、おれがいってくる。",
+    "seed_offset": 65,
+    "reading_reviewed": true
+  },
+  "553e6d0592e8f3ef6fde": {
+    "required_phrases": [
+      "怒鳴る"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 5.0,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "……怒鳴る声で、患者の息を消さないでね。",
+    "seed_offset": 116,
+    "reading_reviewed": true,
+    "tuning_note": "Official docs/parameters.md Better Text Adherence (RF): modestly increase text CFG after the default; same approved reference and speaker guidance.",
+    "pronunciation_note": "Use the original kanji with a silent lead-in and slightly stronger text guidance after kana variants were misheard; subtitle and reference are unchanged.",
+    "require_lexical_exact": true,
+    "semantic_review_reason": "ASR heard an extra え after the original line."
+  },
+  "b968e2fea146e6a6b46f": {
+    "required_phrases": [
+      "負傷者",
+      "置け"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ふしょうしゃをおけってめいれいなら、おれがやぶる。",
+    "seed_offset": 116,
+    "reading_reviewed": true,
+    "semantic_review_reason": "初回認識で「負傷者」が「勝者」に欠落したため、冒頭の語を必須にする。"
+  },
+  "74435a134a1e8bead1f1": {
+    "required_phrases": [
+      "先頭に立て"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ゆうしゃならせんとうにたて、だってさ。",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "885338d495574559d7ae": {
+    "required_phrases": [
+      "袖を上げて",
+      "見せて"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "かくしているきず、そでをあげてみせて。",
+    "seed_offset": 82,
+    "reading_reviewed": true
+  },
+  "dfb5953717c8d2ba70f5": {
+    "required_phrases": [
+      "名前",
+      "目次"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ぼくのなまえは、もくじにのせなくていい。",
+    "seed_offset": 65,
+    "reading_reviewed": true
+  },
+  "cee35a937ba926f77df9": {
+    "required_phrases": [
+      "禁書"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "きんしょに、なまえをけすじゅつはある？",
+    "seed_offset": 99,
+    "reading_reviewed": true
+  },
+  "6cd2a763e69b39c593b3": {
+    "required_phrases": [
+      "客でもいい"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "めいぼになまえがかけないきゃくでもいい？",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "103f727eecc560869602": {
+    "required_phrases": [
+      "跳躍",
+      "正当化"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "できるわ。でもむりなちょうやくを、けいさんでせいとうかしないで。",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "b8b988dfb9c3bbd01ca2": {
+    "required_phrases": [
+      "踏める"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "みかたのあしばだ。こわがらずふめるよう、さきにせつめいすべきだったな。",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "099c0f1bfc4b1cfecc33": {
+    "required_phrases": [
+      "腹"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "はらがなるおともいれろ。えいゆうだってはらはへる。",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "205dff5279cccbc962d8": {
+    "required_prefix": {
+      "text": "家の記録",
+      "readings": [
+        "いえのきろく",
+        "うちのきろく"
+      ]
+    },
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "いえのきろくから、けされたつきのぺーじがあるの？",
+    "seed_offset": 48,
+    "reading_reviewed": true
+  },
+  "e861dc45b91fd93bdcfc": {
+    "required_phrases": [
+      "消した理由",
+      "見せて"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "けしたりゆうをしりたいの。うつしがのこっていたらみせて。",
+    "seed_offset": 31,
+    "reading_reviewed": true
+  },
+  "4205301509671c2033c0": {
+    "required_phrases": [
+      "年輪"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 4.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "傷の原因はネンリンだけじゃ読めない。村の人にも聞こう。",
+    "seed_offset": 82,
+    "reading_reviewed": true,
+    "tuning_note": "Official docs/parameters.md Better Text Adherence (RF): modestly increase text CFG after the default; same approved reference and speaker guidance.",
+    "pronunciation_note": "Target-word katakana pronunciation spelling after kana/original-kanji variants retained the same ASR confusion. Original subtitle and approved voice unchanged."
+  },
+  "cfbed98b8ed4271c2617": {
+    "required_phrases": [
+      "根も"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ふういんのあるとちじゃ、ねものびにくいな。",
+    "seed_offset": 65,
+    "reading_reviewed": true,
+    "require_lexical_exact": true,
+    "semantic_review_reason": "ASR heard では instead of the original じゃ; preserve the character wording."
+  },
+  "9ff16f17fc17ebeab29f": {
+    "required_phrases": [
+      "見張り"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "みはりのきにあなをあけるなら、あとでうめろ。",
+    "seed_offset": 82,
+    "reading_reviewed": true
+  },
+  "def46359ee1ca84633fe": {
+    "required_phrases": [
+      "治癒"
+    ],
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "わたしのいんをこわがって、ちゆをまちがえるなよ。",
+    "seed_offset": 31,
+    "reading_reviewed": true
+  },
+  "c6da386c5f61047ef13f": {
+    "required_prefix": {
+      "text": "星界の時計",
+      "readings": [
+        "せいかいのとけい"
+      ]
+    },
+    "require_lexical_exact": true,
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "せいかいのとけい、めもりがたりません。",
+    "seed_offset": 116,
+    "reading_reviewed": true
+  },
+  "1c64868e4c432f27e146": {
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "すいみんそのものをすすめてくれるかお、かくさなくていいわよ。",
+    "reading_reviewed": true,
+    "required_phrases": [
+      "睡眠",
+      "薦めて"
+    ],
+    "semantic_review_reason": "Sleep is now correct; medium still hears すめて rather than すすめて. Require both words.",
+    "seed_offset": 34
+  },
+  "41738b495a35a481def3": {
+    "seed_offset": 187,
+    "steps": 40,
+    "spoken_text": "ええ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 0.9,
+    "semantic_review_reason": "1.7秒枠では台詞外の声が生じたため、短い肯定だけに収める。"
+  },
+  "479f3be74b6b4c8a8bf6": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "590ff8f00f639f1e7bc3": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "22b92869c3880fa8b5c1": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "77801f44783bdd1b5716": {
+    "seed_offset": 51,
+    "steps": 12
+  },
+  "8c505fdb5b1fc2fc39e7": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "b1bf50ed244aa2c9c8e7": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "b4fd5093fd40749f2cf2": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "afa16063bcb4714c42c6": {
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "暮らしをシルスには、何から尋ねればいいでしょう。",
+    "reading_reviewed": true,
+    "required_phrases": [
+      "記すには"
+    ],
+    "semantic_review_reason": "Independent medium beam5 confirms a changed lexical word despite CER below full-line tolerance.",
+    "seed_offset": 102,
+    "pronunciation_note": "Target-word katakana pronunciation spelling after kana/original-kanji variants retained the same ASR confusion. Original subtitle and approved voice unchanged."
+  },
+  "d822046769c5f058a00b": {
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "みらいをしるすものと、かこをしるすものですね。",
+    "reading_reviewed": true,
+    "required_phrases": [
+      "未来を記す者",
+      "過去を記す者"
+    ],
+    "semantic_review_reason": "Independent medium beam5 confirms a changed lexical word despite CER below full-line tolerance.",
+    "seed_offset": 85
+  },
+  "2b3d7fca441b88cfb26b": {
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "steps": 40,
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "spoken_text": "ゆうしゃのきろく、いさましくはじめたほうがいいですか。",
+    "reading_reviewed": true,
+    "required_phrases": [
+      "勇ましく"
+    ],
+    "semantic_review_reason": "Independent medium beam5 confirms a changed lexical word despite CER below full-line tolerance.",
+    "seed_offset": 17
+  },
+  "3fde92378ac774aaac72": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "b607df08e440379afa02": {
+    "seed_offset": 51,
+    "steps": 12
+  },
+  "ce17da5caaaaee9d309f": {
+    "seed_offset": 85,
+    "steps": 40,
+    "require_lexical_exact": true,
+    "semantic_review_reason": "Full dialogue transcript suggests extra or substituted words; require original wording.",
+    "spoken_text": "会長の休憩、予定表から拾ってきました。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "ce74f55d21c0ab899727": {
+    "seed_offset": 102,
+    "steps": 40,
+    "spoken_text": "そうでしたか……。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.61
+  },
+  "0372f86bbc64b072ad00": {
+    "seed_offset": 51,
+    "steps": 12,
+    "required_phrases": [
+      "不適切",
+      "比率"
+    ],
+    "semantic_review_reason": "Transcript suggests a substituted meaning-bearing word; require the original phrase."
+  },
+  "07cd264e44fc4499ed9b": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "37a4e52bbfaf125dbcc4": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "bc83de2a9e16f4bd3882": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "954bd0a85b340065dc59": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "e4ef085c12381cbd95bc": {
+    "seed_offset": 34,
+    "steps": 8
+  },
+  "f5f0ecd44b4dcf6810d4": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "d43146730c80e97b1e62": {
+    "required_phrases": [
+      {
+        "text": "2組",
+        "readings": [
+          "ふたくみ",
+          "にくみ"
+        ]
+      },
+      "寝覚め"
+    ],
+    "semantic_review_reason": "Accept equivalent written 2組/二組 with the number checked explicitly; reject other counts.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "31597fc0ee420bb4723e": {
+    "required_phrases": [
+      "狙撃点"
+    ],
+    "semantic_review_reason": "Both checks heard a dropped or extra sound in this short full line; require the complete original wording.",
+    "require_lexical_exact": true,
+    "seed_offset": 51,
+    "steps": 40,
+    "spoken_text": "狙撃点へも、お茶を持っていきます。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "e01231adfc9d6c6b5ef2": {
+    "required_phrases": [
+      "帰還路"
+    ],
+    "semantic_review_reason": "Independent Japanese ASR also heard a different meaning-bearing word; require the original phrase.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "f976665eb8cda752c61c": {
+    "required_prefix": "現地で組み直します",
+    "semantic_review_reason": "Both checks heard a dropped or extra sound in this short full line; require the complete original wording.",
+    "required_phrases": [
+      "机より"
+    ]
+  },
+  "04252775803ec15a8c8c": {
+    "required_phrases": [
+      "教えてください"
+    ],
+    "semantic_review_reason": "Independent ASR heard missing or altered original wording; require the complete phrase.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "125ef9f17d5dc5245daa": {
+    "required_prefix": "落とし物扱いですか",
+    "semantic_review_reason": "Transcript suggests a substituted meaning-bearing word; require the original phrase.",
+    "seed_offset": 17,
+    "steps": 8,
+    "required_phrases": [
+      "赤で"
+    ]
+  },
+  "11672e6e0262d64ff338": {
+    "required_prefix": "消えた足跡",
+    "required_phrases": [
+      "見えるかな"
+    ],
+    "semantic_review_reason": "Japanese ASR independently heard 冷えた and 見えるだな; require the intended opening and question.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "0584df88ecae7faffd12": {
+    "seed_offset": 68,
+    "steps": 40,
+    "spoken_text": "気がかりですね。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.47
+  },
+  "2abb36677674ee82ae9e": {
+    "seed_offset": 170,
+    "steps": 40,
+    "spoken_text": "げんじゅつの古い台本、きんしょにないかい。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "semantic_review_reason": "認識結果に台詞にない発話が続く疑いがあるため、発音全体の一致を必須にする。",
+    "required_phrases": [
+      "幻術",
+      "禁書"
+    ],
+    "require_lexical_exact": true
+  },
+  "31e183a5fad02c0d2a22": {
+    "seed_offset": 85,
+    "steps": 40,
+    "required_prefix": {
+      "text": "故郷の一日が長い",
+      "readings": [
+        "こきょうのいちにちがながい",
+        "ふるさとのいちにちがながい"
+      ]
+    },
+    "semantic_review_reason": "冒頭、昼寝および語尾を確認する。",
+    "required_phrases": [
+      "昼寝",
+      {
+        "text": "いけませんね",
+        "readings": [
+          "いけませんね"
+        ]
+      }
+    ],
+    "spoken_text": "こきょうのいちにちが長いのです。こちらで昼寝が短い理由に使ってはいけませんね。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "4f177f164190030bf518": {
+    "seed_offset": 153,
+    "steps": 40,
+    "spoken_text": "わたしもちからをかそう。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 2.7,
+    "semantic_review_reason": "複数回の読み違いに対し読みを明示し、短い生成時間に余裕を持たせる。"
+  },
+  "8e92afe01912c4867e75": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "fb5a76f83182671cfa33": {
+    "required_phrases": [
+      "明かす"
+    ],
+    "semantic_review_reason": "Full dialogue transcript suggests extra or substituted words; require original wording.",
+    "seed_offset": 34,
+    "steps": 8,
+    "required_prefix": "呼ぶ名だけで構いません"
+  },
+  "6a3e9dc02227941fdde1": {
+    "required_phrases": [
+      "氷に慣れると"
+    ],
+    "semantic_review_reason": "Initial ASR heard 氷濡れると; require the original expression before publishing.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "187726a230745975ffb3": {
+    "seed_offset": 187,
+    "steps": 40,
+    "spoken_text": "ほしのけんで、わたしのふういんも、やぶれるか。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "required_phrases": [
+      "剣で",
+      "封印も",
+      "破れるか"
+    ],
+    "semantic_review_reason": "複数の認識で助詞もがをに変わったため、読みと区切りを明示する。"
+  },
+  "3319eec8618951964392": {
+    "seed_offset": 153,
+    "steps": 40,
+    "spoken_text": "れいをいおう。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 2.2,
+    "semantic_review_reason": "複数回の読み違いに対し読みを明示し、短い生成時間に余裕を持たせる。"
+  },
+  "4401a1567a3bf4d8c126": {
+    "seed_offset": 136,
+    "steps": 40,
+    "require_lexical_exact": true,
+    "semantic_review_reason": "Full dialogue transcript contains extra or substituted words despite numeric CER tolerance; require original wording.",
+    "spoken_text": "不満はない。昔は配る順番を、階級で決めていた。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "652f769d5f743841afe7": {
+    "seed_offset": 187,
+    "steps": 40,
+    "required_phrases": [
+      "境界",
+      {
+        "text": "細く",
+        "readings": [
+          "ほそく"
+        ]
+      },
+      "数え直す"
+    ],
+    "require_lexical_exact": true,
+    "semantic_review_reason": "単独語「細く」の自動読みの揺れを防ぎ、文脈に合う「ほそく」と指定する。",
+    "spoken_text": "きょうかいをほそくする。安全のためにとめたものを、いまこそかぞえなおす。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "83222241232237cbd414": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "964547b08217e1cd3586": {
+    "required_phrases": [
+      "稽古"
+    ],
+    "semantic_review_reason": "稽古 (けいこ) must not be mistaken for 傾向 (けいこう); require exact full-line phonetics.",
+    "require_lexical_exact": true
+  },
+  "8c084847bd19c7c823cd": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "a60e354a672a3b45e449": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "a9302bbe03b2766d1f4b": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "ada8e069a2050dc133cf": {
+    "seed_offset": 51,
+    "steps": 40,
+    "spoken_text": "うん。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.1
+  },
+  "bef0f9b2a73c3031e7dc": {
+    "seed_offset": 153,
+    "steps": 40,
+    "spoken_text": "待て、よく考えよう。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 2.7,
+    "semantic_review_reason": "短い生成枠で冒頭・語尾が欠落したため余裕を持たせる。"
+  },
+  "1072c204f7e7f7c0e9a5": {
+    "required_phrases": [
+      "保存しないでください"
+    ],
+    "semantic_review_reason": "ASR heard missing or different words; confirm the original phrase before publication.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "04b28a95682571de7b14": {
+    "required_phrases": [
+      "眠れなさそう"
+    ],
+    "require_lexical_exact": true,
+    "semantic_review_reason": "ASR heard missing or different words; confirm the original phrase before publication.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "3ab7b7b2f1a4821a87cb": {
+    "required_prefix": "入江に",
+    "semantic_review_reason": "ASR heard missing or different words; confirm the original phrase before publication.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "266420ef19a6c58cd60b": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "c29897004e206fe00583": {
+    "seed_offset": 153,
+    "steps": 40,
+    "spoken_text": "ふっ、やるものだ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 2.3,
+    "semantic_review_reason": "「ふっ」の欠落を防ぐため、全文の発音一致を確認する。",
+    "require_lexical_exact": true,
+    "required_prefix": {
+      "text": "ふっ",
+      "readings": [
+        "ふっ",
+        "ふ"
+      ]
+    }
+  },
+  "cc77667f3feb82e19d3a": {
+    "seed_offset": 85,
+    "steps": 40,
+    "required_phrases": [
+      "急がせないでくれ"
+    ],
+    "semantic_review_reason": "Medium ASR heard いそがけない rather than 急がせない; require the original phrase.",
+    "spoken_text": "現実の客席には、まだ拍手できぬ者がいる。急がせないでくれ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0
+  },
+  "d26cc713fe244b858c9a": {
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "c49e3a987a1615c82d26": {
+    "required_phrases": [
+      "休ませましょう"
+    ],
+    "semantic_review_reason": "ASR heard an altered word despite numeric CER tolerance; verify the original phrase.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "bbf65d476647e8895a6e": {
+    "required_phrases": [
+      "秒針"
+    ],
+    "semantic_review_reason": "ASR heard an altered word despite numeric CER tolerance; verify the original phrase.",
+    "seed_offset": 34,
+    "steps": 12
+  },
+  "a2cc4bdb3cbe7b0702cc": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "d62b76aaea7e35388081": {
+    "seed_offset": 119,
+    "steps": 40,
+    "spoken_text": "きがかりだ。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 2.1,
+    "semantic_review_reason": "複数回の読み違いに対し読みを明示し、短い生成時間に余裕を持たせる。"
+  },
+  "e069e63479993b368afc": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "e1a99b1e3cdc0b0cb508": {
+    "seed_offset": 51,
+    "steps": 8,
+    "required_phrases": [
+      "星図",
+      "故郷"
+    ],
+    "semantic_review_reason": "ASR heard 公表 instead of 故郷; require both meaning-bearing words."
+  },
+  "e7ad6408a024350ae3b1": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "efc1e16174cb4533d394": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "9fe9e7552bf64e4331ec": {
+    "required_phrases": [
+      "撃たない"
+    ],
+    "require_lexical_exact": true,
+    "semantic_review_reason": "ASR heard a different negative phrase and extra speech; require original wording.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "5d5658a2a0aa2607b0bd": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "b6365fd178ae9cff04ae": {
+    "seed_offset": 51,
+    "steps": 40,
+    "spoken_text": "気がかりですね。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.47
+  },
+  "f19277a50645a05478b2": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "f5c8f9788b3e1d3554b0": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "f6ee8663d73a85be8f1b": {
+    "seed_offset": 51,
+    "steps": 40,
+    "spoken_text": "そうか……。",
+    "model": "Aratako/Irodori-TTS-v4.1-Small",
+    "cfg_scale_text": 3.5,
+    "cfg_scale_caption": 3.0,
+    "cfg_scale_speaker": 5.0,
+    "seconds": 1.19
+  },
+  "a5c08ff1b5b8714d61c4": {
+    "required_prefix": "私が持つ前に無人で",
+    "semantic_review_reason": "Initial transcript omitted or changed the original opening; require complete opening."
+  },
+  "86ce05bef46aedeebdb3": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "d02917fe1e1ae87a8b61": {
+    "required_phrases": [
+      "市場のおばあさん"
+    ],
+    "semantic_review_reason": "ASR heard 一番おばあさん; require original location and particle."
+  },
+  "1b96dc59d61b066cf685": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "96ca69d00b2b88878716": {
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "c9d9deba38c0685ec8f7": {
+    "required_phrases": [
+      "船室",
+      "特等席"
+    ],
+    "semantic_review_reason": "First transcript heard 先出 and 極頭席; require original cabin and special-seat wording."
+  },
+  "04b636ec4312f232ef1c": {
+    "require_lexical_exact": true,
+    "semantic_review_reason": "Both ASR models heard possible extra syllables after the question; require the original full line.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "9adb8781632fd5bad1b0": {
+    "required_phrases": [
+      "岸から森まで",
+      "二人でつなごう"
+    ],
+    "semantic_review_reason": "Transcript suggests a changed or omitted word; require the intended full-dialogue meaning.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "2357821a6a5d30040210": {
+    "required_prefix": {
+      "text": "伐られた森",
+      "readings": [
+        "きられたもり"
+      ]
+    },
+    "semantic_review_reason": "Transcript suggests a changed or omitted word; require the intended full-dialogue meaning.",
+    "seed_offset": 17,
+    "steps": 8,
+    "spoken_text": "きられた森の名前、覚えてる？",
+    "pronunciation_note": "Explicit きられた reading for 伐られた; original subtitle and meaning unchanged."
+  },
+  "622eaaa1394ea274f884": {
+    "required_phrases": [
+      {
+        "text": "先に朝ご飯",
+        "readings": [
+          "さきにあさごはん"
+        ]
+      }
+    ],
+    "semantic_review_reason": "Confirmed original 先に朝ご飯; contextual reading ごはん, not ごめし.",
+    "seed_offset": 17,
+    "steps": 8
+  },
+  "215341c0507c9ce3bc06": {
+    "required_phrases": [
+      "償う場所"
+    ],
+    "semantic_review_reason": "ASR heard すぐなう rather than つぐなう; require the original phrase."
+  },
+  "ef110d482bcc87f11c2e": {
+    "required_prefix": "地名しか聞かなかった",
+    "semantic_review_reason": "Medium ASR heard 使命, so require the original opening 地名."
+  },
+  "03db98ffbf6488800b24": {
+    "required_phrases": [
+      {
+        "text": "必要な灯",
+        "readings": [
+          "ひつようなあかり",
+          "ひつようなともしび"
+        ]
+      }
+    ],
+    "semantic_review_reason": "ASR heard かかり; require correct 灯 reading.",
+    "seed_offset": 68,
+    "steps": 12
+  },
+  "5e6eba4ea8068e0b61b4": {
+    "required_phrases": [
+      "船を頼むよ"
+    ],
+    "semantic_review_reason": "ASR omitted final よ; require the complete line ending.",
+    "seed_offset": 17,
+    "steps": 8
+  }
+}

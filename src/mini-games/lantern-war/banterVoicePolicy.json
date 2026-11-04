@@ -1,0 +1,4504 @@
+{
+  "mode": "hybrid",
+  "version": 1,
+  "fullVoicePairs": [
+    "aster|lyra",
+    "aster|high-school-warrior",
+    "magic-leon|dungeons2-leon",
+    "nagi|end-hikari",
+    "end-vesper|end-sable",
+    "mio|end-vesper",
+    "end-vesper|end-ren",
+    "high-school-mage|magic-yamato",
+    "high-school-bard|high-school-chef",
+    "magic-shizuku|magic-mirai",
+    "magic-madoka|magic-elliot",
+    "magic-sera|magic-riku",
+    "magic-minato|dungeons2-aurene",
+    "high-school-caretaker|high-school-assassin",
+    "high-school-librarian|magic-tsubasa",
+    "magic-hiyori|dungeons2-celis",
+    "magic-akari|magic-ren",
+    "magic-koharu|magic-soma",
+    "dungeons2-lyria|dungeons2-ignis",
+    "dungeons2-noctia|sena",
+    "high-school-dodgeball|magic-rei",
+    "dungeons2-orion|dungeons2-leif",
+    "high-school-gardener|magic-sakuya",
+    "dungeons2-flora|nagi",
+    "high-school-caretaker|end-ren",
+    "high-school-chef|end-sable",
+    "magic-mirai|dungeons2-noctia",
+    "dungeons2-aurene|sena",
+    "dungeons2-ignis|end-hikari",
+    "lyra|dungeons2-leif",
+    "high-school-warrior|magic-hiyori",
+    "high-school-bard|dungeons2-leon",
+    "magic-akari|magic-tsubasa",
+    "magic-rei|magic-minato",
+    "magic-yamato|dungeons2-celis",
+    "magic-madoka|magic-koharu",
+    "magic-sera|magic-ren",
+    "magic-soma|magic-leon",
+    "high-school-assassin|high-school-librarian",
+    "high-school-mage|magic-riku",
+    "high-school-gardener|magic-elliot",
+    "dungeons2-orion|mio",
+    "high-school-dodgeball|magic-shizuku",
+    "magic-sakuya|dungeons2-lyria",
+    "dungeons2-flora|end-ren",
+    "high-school-gardener|end-sable",
+    "mio|end-hikari",
+    "aster|magic-akari",
+    "high-school-warrior|high-school-caretaker",
+    "high-school-assassin|dungeons2-noctia",
+    "magic-hiyori|magic-riku",
+    "magic-elliot|nagi",
+    "lyra|magic-mirai",
+    "high-school-chef|magic-tsubasa",
+    "magic-rei|magic-madoka",
+    "magic-koharu|sena",
+    "magic-sera|dungeons2-ignis",
+    "magic-ren|magic-soma",
+    "magic-minato|dungeons2-celis",
+    "magic-leon|dungeons2-flora",
+    "dungeons2-aurene|dungeons2-orion",
+    "high-school-mage|dungeons2-leon",
+    "high-school-dodgeball|high-school-bard",
+    "magic-yamato|dungeons2-leif",
+    "high-school-librarian|magic-shizuku",
+    "high-school-chef|magic-sakuya",
+    "magic-tsubasa|dungeons2-lyria",
+    "dungeons2-celis|end-vesper",
+    "magic-ren|end-sable",
+    "aster|magic-soma",
+    "high-school-warrior|dungeons2-ignis",
+    "high-school-caretaker|high-school-mage",
+    "high-school-assassin|end-ren",
+    "magic-hiyori|dungeons2-aurene",
+    "magic-rei|magic-riku",
+    "magic-akari|magic-madoka",
+    "magic-mirai|magic-sakuya",
+    "magic-yamato|magic-elliot",
+    "magic-leon|dungeons2-noctia",
+    "dungeons2-orion|end-hikari",
+    "lyra|magic-shizuku",
+    "high-school-librarian|magic-koharu",
+    "high-school-gardener|magic-sera",
+    "magic-minato|dungeons2-flora",
+    "nagi|mio",
+    "high-school-dodgeball|dungeons2-lyria",
+    "high-school-bard|dungeons2-leif",
+    "dungeons2-leon|sena",
+    "lyra|end-vesper",
+    "magic-madoka|end-vesper",
+    "aster|end-sable",
+    "magic-hiyori|dungeons2-orion",
+    "magic-riku|dungeons2-leif",
+    "dungeons2-ignis|end-sable",
+    "aster|high-school-chef"
+  ],
+  "selectionNotes": [
+    "王権・命令・撤退の責任を問い直すやり取り",
+    "過去の傷や恐怖を相手に打ち明ける場面",
+    "故郷・帰還・家族に結びつく人物固有の会話",
+    "二人のレオン、食事、忘れ物、休息の印象的な軽口",
+    "全44人を4〜6組ずつ含め、人物の声と関係を偏らせない"
+  ],
+  "replyKinds": [
+    "question",
+    "agree",
+    "acknowledge",
+    "resolve",
+    "concern",
+    "surprise",
+    "tease",
+    "thanks",
+    "refuse",
+    "reflect"
+  ],
+  "replies": {
+    "aster": {
+      "question": "君はどう思う？",
+      "agree": "そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "共に進もう。",
+      "concern": "無理はしないで。",
+      "surprise": "そうだったのか。",
+      "tease": "ふふっ、参ったな。",
+      "thanks": "ありがとう。",
+      "refuse": "少し待とう。",
+      "reflect": "そうか……。"
+    },
+    "lyra": {
+      "question": "あなたはどう思う？",
+      "agree": "ええ、その通りね。",
+      "acknowledge": "ええ。",
+      "resolve": "一緒に進みましょう。",
+      "concern": "気がかりね。",
+      "surprise": "あら、そうなの。",
+      "tease": "ふふっ、困った人ね。",
+      "thanks": "感謝するわ。",
+      "refuse": "それは待って。",
+      "reflect": "そう……。"
+    },
+    "high-school-warrior": {
+      "question": "どういうことだ？",
+      "agree": "ああ、その通りだ。",
+      "acknowledge": "ああ。",
+      "resolve": "俺も行く。",
+      "concern": "無茶するなよ。",
+      "surprise": "おい、マジか。",
+      "tease": "はっ、やるじゃねえか。",
+      "thanks": "助かる。",
+      "refuse": "そいつは待て。",
+      "reflect": "そうか……。"
+    },
+    "high-school-caretaker": {
+      "question": "どうしたの？",
+      "agree": "ええ、そうね。",
+      "acknowledge": "ええ。",
+      "resolve": "一緒にやりましょう。",
+      "concern": "無理しないでね。",
+      "surprise": "あら、そうだったの。",
+      "tease": "ふふっ、もう。",
+      "thanks": "ありがとうね。",
+      "refuse": "待って、落ち着いて。",
+      "reflect": "そうだったのね……。"
+    },
+    "high-school-assassin": {
+      "question": "どうしてだろうね。",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "僕も手を貸す。",
+      "concern": "少し気になるね。",
+      "surprise": "へえ、意外だ。",
+      "tease": "ふっ、面白いね。",
+      "thanks": "ありがとう、助かるよ。",
+      "refuse": "それは待とう。",
+      "reflect": "そうか……。"
+    },
+    "high-school-mage": {
+      "question": "どう考える？",
+      "agree": "ええ、その通り。",
+      "acknowledge": "ええ。",
+      "resolve": "試してみましょう。",
+      "concern": "気がかりだわ。",
+      "surprise": "それは予想外ね。",
+      "tease": "ふふっ、興味深いわ。",
+      "thanks": "協力、感謝するわ。",
+      "refuse": "待って、確かめましょう。",
+      "reflect": "なるほどね……。"
+    },
+    "high-school-dodgeball": {
+      "question": "どうする？",
+      "agree": "そうだな！",
+      "acknowledge": "おう。",
+      "resolve": "一緒にやろうぜ。",
+      "concern": "無理すんなよ。",
+      "surprise": "おっ、そうなのか！",
+      "tease": "ははっ、やるな！",
+      "thanks": "サンキューな。",
+      "refuse": "ちょっと待った。",
+      "reflect": "そっか……。"
+    },
+    "high-school-bard": {
+      "question": "どう思う？",
+      "agree": "そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう。",
+      "concern": "ちょっと心配だね。",
+      "surprise": "へえ、そうなんだ。",
+      "tease": "ははっ、参ったね。",
+      "thanks": "ありがとう、助かる。",
+      "refuse": "待って、まず確認。",
+      "reflect": "そっか……。"
+    },
+    "high-school-librarian": {
+      "question": "どうでしょうか。",
+      "agree": "ええ、そうですね。",
+      "acknowledge": "はい。",
+      "resolve": "一緒に考えましょう。",
+      "concern": "気になりますね。",
+      "surprise": "それは意外です。",
+      "tease": "ふふっ、なるほど。",
+      "thanks": "ありがとうございます。",
+      "refuse": "少し待ってください。",
+      "reflect": "そうでしたか……。"
+    },
+    "high-school-chef": {
+      "question": "どうするんだ？",
+      "agree": "ああ、そうだな。",
+      "acknowledge": "ああ。",
+      "resolve": "俺も手を貸すぞ。",
+      "concern": "無茶はするな。",
+      "surprise": "おっと、そう来たか。",
+      "tease": "ははっ、参ったな。",
+      "thanks": "助かったぜ。",
+      "refuse": "待て、慌てるな。",
+      "reflect": "そうか……。"
+    },
+    "high-school-gardener": {
+      "question": "どう思うんだ？",
+      "agree": "ああ、そうだな。",
+      "acknowledge": "ああ。",
+      "resolve": "一緒にやろう。",
+      "concern": "少し気になるな。",
+      "surprise": "へえ、そうか。",
+      "tease": "ふっ、面白いな。",
+      "thanks": "助かるよ。",
+      "refuse": "ちょっと待て。",
+      "reflect": "なるほどな……。"
+    },
+    "magic-akari": {
+      "question": "どう思う？",
+      "agree": "うん、そうだよね！",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう！",
+      "concern": "大丈夫かな。",
+      "surprise": "えっ、そうなの？",
+      "tease": "えへへっ、もう。",
+      "thanks": "ありがとう！",
+      "refuse": "ちょっと待ってね。",
+      "reflect": "そっか……。"
+    },
+    "magic-shizuku": {
+      "question": "どう考える？",
+      "agree": "ええ、その通り。",
+      "acknowledge": "ええ。",
+      "resolve": "一緒に確かめましょう。",
+      "concern": "気になるわね。",
+      "surprise": "それは意外ね。",
+      "tease": "ふふっ、困ったわね。",
+      "thanks": "感謝するわ。",
+      "refuse": "待って、落ち着いて。",
+      "reflect": "そういうことね……。"
+    },
+    "magic-hiyori": {
+      "question": "どうしたのかな？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろうね。",
+      "concern": "無理しないでね。",
+      "surprise": "あら、そうなんだ。",
+      "tease": "ふふっ、もう。",
+      "thanks": "ありがとうね。",
+      "refuse": "少し待ってね。",
+      "reflect": "そうだったんだね……。"
+    },
+    "magic-tsubasa": {
+      "question": "どうする？",
+      "agree": "うん、その通り！",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう！",
+      "concern": "無茶しないでね。",
+      "surprise": "えっ、そうなの！",
+      "tease": "あははっ、参ったな。",
+      "thanks": "ありがと、助かった！",
+      "refuse": "ちょっと待った！",
+      "reflect": "そっか……。"
+    },
+    "magic-rei": {
+      "question": "どういうことだ？",
+      "agree": "ああ、その通りだ。",
+      "acknowledge": "ああ。",
+      "resolve": "私も力を貸そう。",
+      "concern": "気がかりだな。",
+      "surprise": "そうだったのか。",
+      "tease": "ふっ、やるものだ。",
+      "thanks": "礼を言う。",
+      "refuse": "待て、落ち着け。",
+      "reflect": "そうか……。"
+    },
+    "magic-madoka": {
+      "question": "どうでしょうか？",
+      "agree": "はい、そうですね。",
+      "acknowledge": "はい。",
+      "resolve": "私もやってみます。",
+      "concern": "少し心配です。",
+      "surprise": "えっ、そうなんですか。",
+      "tease": "ふふっ、困りました。",
+      "thanks": "ありがとうございます。",
+      "refuse": "あの、待ってください。",
+      "reflect": "そうでしたか……。"
+    },
+    "magic-koharu": {
+      "question": "どう思う？",
+      "agree": "ええ、そうね。",
+      "acknowledge": "ええ。",
+      "resolve": "一緒に進みましょう。",
+      "concern": "少し気がかりね。",
+      "surprise": "あら、そうなの。",
+      "tease": "ふふっ、もう。",
+      "thanks": "ありがとう。",
+      "refuse": "少し待ちましょう。",
+      "reflect": "そうだったのね……。"
+    },
+    "magic-mirai": {
+      "question": "どうかしら？",
+      "agree": "ええ、その通りよ。",
+      "acknowledge": "ええ。",
+      "resolve": "一緒にやりましょう。",
+      "concern": "気がかりね。",
+      "surprise": "あら、そう来るの。",
+      "tease": "ふふっ、やるわね。",
+      "thanks": "ありがとう、助かるわ。",
+      "refuse": "ちょっと待って。",
+      "reflect": "そうだったのね……。"
+    },
+    "magic-sera": {
+      "question": "どうでしょうか？",
+      "agree": "はい、そうですね。",
+      "acknowledge": "はい。",
+      "resolve": "一緒にやりましょう。",
+      "concern": "少し心配です。",
+      "surprise": "そうだったんですね。",
+      "tease": "ふふっ、なるほど。",
+      "thanks": "ありがとうございます。",
+      "refuse": "少し待ってください。",
+      "reflect": "そうでしたか……。"
+    },
+    "magic-ren": {
+      "question": "どう思う？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう。",
+      "concern": "無理はしないでね。",
+      "surprise": "そうだったんだ。",
+      "tease": "ははっ、参ったな。",
+      "thanks": "ありがとう、助かるよ。",
+      "refuse": "ちょっと待ってね。",
+      "reflect": "そっか……。"
+    },
+    "magic-soma": {
+      "question": "どう考えますか。",
+      "agree": "ええ、その通りです。",
+      "acknowledge": "はい。",
+      "resolve": "共に取り組みましょう。",
+      "concern": "気がかりですね。",
+      "surprise": "それは想定外です。",
+      "tease": "ふっ、参りましたね。",
+      "thanks": "感謝します。",
+      "refuse": "待って、確認を。",
+      "reflect": "そうでしたか……。"
+    },
+    "magic-minato": {
+      "question": "どうでしょうか？",
+      "agree": "はい、そうですね！",
+      "acknowledge": "はい。",
+      "resolve": "僕もやってみます。",
+      "concern": "少し心配です。",
+      "surprise": "えっ、本当ですか。",
+      "tease": "えへへっ、困りました。",
+      "thanks": "ありがとうございます！",
+      "refuse": "あの、待ってください。",
+      "reflect": "そうだったんですね……。"
+    },
+    "magic-riku": {
+      "question": "どう思う？",
+      "agree": "うん、その通り。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやってみよう。",
+      "concern": "ちょっと気になるね。",
+      "surprise": "へえ、意外だね。",
+      "tease": "ふふっ、やるね。",
+      "thanks": "ありがとう、助かる。",
+      "refuse": "まあ、少し待とう。",
+      "reflect": "そっか……。"
+    },
+    "magic-yamato": {
+      "question": "どういうことだ？",
+      "agree": "ああ、そうだな。",
+      "acknowledge": "ああ。",
+      "resolve": "俺も手を貸す。",
+      "concern": "無茶すんなよ。",
+      "surprise": "おい、マジかよ。",
+      "tease": "はっ、やるじゃねえか。",
+      "thanks": "助かったぜ。",
+      "refuse": "おい、ちょっと待て。",
+      "reflect": "そうかよ……。"
+    },
+    "magic-leon": {
+      "question": "どう考える？",
+      "agree": "ああ、その通りだ。",
+      "acknowledge": "ああ。",
+      "resolve": "共にやろうじゃないか。",
+      "concern": "気になるな。",
+      "surprise": "ほう、そう来たか。",
+      "tease": "ふっ、やるじゃないか。",
+      "thanks": "感謝するよ。",
+      "refuse": "待て、慌てるな。",
+      "reflect": "そうだったのか……。"
+    },
+    "magic-elliot": {
+      "question": "どうでしょうか。",
+      "agree": "ええ、そうですね。",
+      "acknowledge": "はい。",
+      "resolve": "私もお手伝いします。",
+      "concern": "気がかりですね。",
+      "surprise": "それは意外でした。",
+      "tease": "ふふっ、参りました。",
+      "thanks": "ありがとうございます。",
+      "refuse": "少々お待ちください。",
+      "reflect": "そうでしたか……。"
+    },
+    "magic-sakuya": {
+      "question": "どういうことだ。",
+      "agree": "ああ、その通りだ。",
+      "acknowledge": "ああ。",
+      "resolve": "私も力を貸そう。",
+      "concern": "気がかりだ。",
+      "surprise": "そうだったのか。",
+      "tease": "ふっ、やるものだ。",
+      "thanks": "礼を言おう。",
+      "refuse": "待て、よく考えよう。",
+      "reflect": "そうか……。"
+    },
+    "dungeons2-lyria": {
+      "question": "どう思いますか。",
+      "agree": "ええ、そうですね。",
+      "acknowledge": "はい。",
+      "resolve": "共に進みましょう。",
+      "concern": "気がかりですね。",
+      "surprise": "そうだったのですね。",
+      "tease": "ふふっ、参りました。",
+      "thanks": "感謝します。",
+      "refuse": "少し待ちましょう。",
+      "reflect": "そうでしたか……。"
+    },
+    "dungeons2-celis": {
+      "question": "どう考えますか。",
+      "agree": "ええ、その通りです。",
+      "acknowledge": "はい。",
+      "resolve": "共に確かめましょう。",
+      "concern": "気がかりですね。",
+      "surprise": "それは意外ですね。",
+      "tease": "ふふっ、困りましたね。",
+      "thanks": "感謝します。",
+      "refuse": "待って、落ち着いて。",
+      "reflect": "そうでしたか……。"
+    },
+    "dungeons2-flora": {
+      "question": "どう思う？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう。",
+      "concern": "少し心配だね。",
+      "surprise": "あら、そうなの。",
+      "tease": "ふふっ、もう。",
+      "thanks": "ありがとうね。",
+      "refuse": "少し待ってね。",
+      "reflect": "そうだったのね……。"
+    },
+    "dungeons2-noctia": {
+      "question": "どうかしら。",
+      "agree": "ええ、その通りね。",
+      "acknowledge": "ええ。",
+      "resolve": "一緒に考えましょう。",
+      "concern": "気になるわね。",
+      "surprise": "あら、意外ね。",
+      "tease": "ふふっ、面白いわ。",
+      "thanks": "ありがとう、助かるわ。",
+      "refuse": "待って、よく考えて。",
+      "reflect": "そういうことね……。"
+    },
+    "dungeons2-aurene": {
+      "question": "どうでしょうか。",
+      "agree": "ええ、そうですね。",
+      "acknowledge": "はい。",
+      "resolve": "共に参りましょう。",
+      "concern": "心配ですね。",
+      "surprise": "そうだったのですね。",
+      "tease": "ふふっ、困りました。",
+      "thanks": "ありがとうございます。",
+      "refuse": "少しお待ちください。",
+      "reflect": "そうでしたか……。"
+    },
+    "dungeons2-ignis": {
+      "question": "どう思うかな？",
+      "agree": "うん、そうだね！",
+      "acknowledge": "うん。",
+      "resolve": "僕も一緒に行くよ。",
+      "concern": "ちょっと心配だよ。",
+      "surprise": "えっ、本当に？",
+      "tease": "あははっ、参ったな。",
+      "thanks": "ありがとう、助かった！",
+      "refuse": "ちょっと待って。",
+      "reflect": "そっか……。"
+    },
+    "dungeons2-leon": {
+      "question": "どう考えますか。",
+      "agree": "ええ、その通りです。",
+      "acknowledge": "はい。",
+      "resolve": "私も力を貸します。",
+      "concern": "気がかりですね。",
+      "surprise": "そうだったのですね。",
+      "tease": "ふっ、参りました。",
+      "thanks": "感謝します。",
+      "refuse": "待って、落ち着いて。",
+      "reflect": "そうでしたか……。"
+    },
+    "dungeons2-orion": {
+      "question": "どう考える。",
+      "agree": "ああ、その通りだ。",
+      "acknowledge": "ああ。",
+      "resolve": "私も共に行こう。",
+      "concern": "気がかりだな。",
+      "surprise": "そうだったのか。",
+      "tease": "ふっ、面白いな。",
+      "thanks": "礼を言う。",
+      "refuse": "待て、よく考えよう。",
+      "reflect": "そうか……。"
+    },
+    "dungeons2-leif": {
+      "question": "どう思う？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "僕も手を貸すよ。",
+      "concern": "少し気になるね。",
+      "surprise": "へえ、そうなんだ。",
+      "tease": "ははっ、やるね。",
+      "thanks": "ありがとう、助かるよ。",
+      "refuse": "ちょっと待とう。",
+      "reflect": "そっか……。"
+    },
+    "nagi": {
+      "question": "どう思う？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒に進もう。",
+      "concern": "少し気がかりだね。",
+      "surprise": "へえ、そうなんだ。",
+      "tease": "ははっ、参ったな。",
+      "thanks": "ありがとう、助かるよ。",
+      "refuse": "ちょっと待とう。",
+      "reflect": "そっか……。"
+    },
+    "mio": {
+      "question": "どうかな？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう。",
+      "concern": "少し心配だね。",
+      "surprise": "えっ、そうなの？",
+      "tease": "ふふっ、面白いね。",
+      "thanks": "ありがとうね。",
+      "refuse": "少し待って。",
+      "reflect": "そっか……。"
+    },
+    "sena": {
+      "question": "どう思う？",
+      "agree": "うん、その通り。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやってみよう。",
+      "concern": "ちょっと気になるね。",
+      "surprise": "おや、そうなんだ。",
+      "tease": "ははっ、参ったね。",
+      "thanks": "ありがとう、助かる。",
+      "refuse": "待って、確かめよう。",
+      "reflect": "なるほどね……。"
+    },
+    "end-vesper": {
+      "question": "どう考える。",
+      "agree": "ああ、その通りだ。",
+      "acknowledge": "ああ。",
+      "resolve": "共に進もう。",
+      "concern": "気がかりだな。",
+      "surprise": "そうだったのか。",
+      "tease": "ふっ、やるものだな。",
+      "thanks": "礼を言おう。",
+      "refuse": "待て、落ち着こう。",
+      "reflect": "そうか……。"
+    },
+    "end-sable": {
+      "question": "どう思う。",
+      "agree": "ああ、そうだな。",
+      "acknowledge": "ああ。",
+      "resolve": "俺も力を貸す。",
+      "concern": "気がかりだな。",
+      "surprise": "そうだったのか。",
+      "tease": "ふっ、参ったな。",
+      "thanks": "助かる。",
+      "refuse": "待て、よく見よう。",
+      "reflect": "そうか……。"
+    },
+    "end-hikari": {
+      "question": "どう思う？",
+      "agree": "うん、そうだよね！",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろうね。",
+      "concern": "ちょっと心配だね。",
+      "surprise": "えっ、そうなの？",
+      "tease": "ふふっ、参ったな。",
+      "thanks": "ありがとう！",
+      "refuse": "ちょっと待ってね。",
+      "reflect": "そっか……。"
+    },
+    "end-ren": {
+      "question": "どう思う？",
+      "agree": "うん、そうだね。",
+      "acknowledge": "うん。",
+      "resolve": "一緒にやろう。",
+      "concern": "少し気がかりだね。",
+      "surprise": "そうだったんだね。",
+      "tease": "ふふっ、参ったな。",
+      "thanks": "ありがとう、助かるよ。",
+      "refuse": "少し待とう。",
+      "reflect": "そうか……。"
+    }
+  },
+  "cueByPair": {
+    "aster|lyra": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|high-school-warrior": [
+      "reflect",
+      "refuse"
+    ],
+    "aster|high-school-caretaker": [
+      "question",
+      "reflect"
+    ],
+    "aster|high-school-assassin": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|high-school-mage": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|high-school-dodgeball": [
+      "resolve",
+      "acknowledge"
+    ],
+    "aster|high-school-bard": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|high-school-librarian": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|high-school-chef": [
+      "question",
+      "refuse"
+    ],
+    "aster|high-school-gardener": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|magic-akari": [
+      "reflect",
+      "concern"
+    ],
+    "aster|magic-shizuku": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|magic-hiyori": [
+      "reflect",
+      "reflect"
+    ],
+    "aster|magic-tsubasa": [
+      "resolve",
+      "acknowledge"
+    ],
+    "aster|magic-rei": [
+      "question",
+      "concern"
+    ],
+    "aster|magic-madoka": [
+      "acknowledge",
+      "resolve"
+    ],
+    "aster|magic-koharu": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|magic-mirai": [
+      "acknowledge",
+      "question"
+    ],
+    "aster|magic-sera": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|magic-ren": [
+      "concern",
+      "concern"
+    ],
+    "aster|magic-soma": [
+      "acknowledge",
+      "refuse"
+    ],
+    "aster|magic-minato": [
+      "concern",
+      "acknowledge"
+    ],
+    "aster|magic-riku": [
+      "question",
+      "question"
+    ],
+    "aster|magic-yamato": [
+      "reflect",
+      "reflect"
+    ],
+    "aster|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|magic-elliot": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|dungeons2-celis": [
+      "reflect",
+      "acknowledge"
+    ],
+    "aster|dungeons2-flora": [
+      "question",
+      "agree"
+    ],
+    "aster|dungeons2-noctia": [
+      "reflect",
+      "reflect"
+    ],
+    "aster|dungeons2-aurene": [
+      "concern",
+      "reflect"
+    ],
+    "aster|dungeons2-ignis": [
+      "acknowledge",
+      "resolve"
+    ],
+    "aster|dungeons2-leon": [
+      "acknowledge",
+      "agree"
+    ],
+    "aster|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|nagi": [
+      "reflect",
+      "reflect"
+    ],
+    "aster|mio": [
+      "question",
+      "resolve"
+    ],
+    "aster|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "aster|end-vesper": [
+      "reflect",
+      "reflect"
+    ],
+    "aster|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "aster|end-hikari": [
+      "resolve",
+      "acknowledge"
+    ],
+    "aster|end-ren": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|high-school-warrior": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|high-school-caretaker": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|high-school-assassin": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|high-school-mage": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|high-school-dodgeball": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|high-school-bard": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|high-school-librarian": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|high-school-chef": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|high-school-gardener": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|magic-akari": [
+      "acknowledge",
+      "agree"
+    ],
+    "lyra|magic-shizuku": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|magic-hiyori": [
+      "reflect",
+      "acknowledge"
+    ],
+    "lyra|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|magic-rei": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|magic-madoka": [
+      "acknowledge",
+      "question"
+    ],
+    "lyra|magic-koharu": [
+      "concern",
+      "reflect"
+    ],
+    "lyra|magic-mirai": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|magic-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|magic-soma": [
+      "acknowledge",
+      "resolve"
+    ],
+    "lyra|magic-minato": [
+      "question",
+      "resolve"
+    ],
+    "lyra|magic-riku": [
+      "question",
+      "question"
+    ],
+    "lyra|magic-yamato": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|magic-elliot": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|magic-sakuya": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|dungeons2-noctia": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|dungeons2-ignis": [
+      "question",
+      "concern"
+    ],
+    "lyra|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "lyra|dungeons2-orion": [
+      "acknowledge",
+      "refuse"
+    ],
+    "lyra|dungeons2-leif": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|nagi": [
+      "question",
+      "resolve"
+    ],
+    "lyra|mio": [
+      "reflect",
+      "reflect"
+    ],
+    "lyra|sena": [
+      "question",
+      "resolve"
+    ],
+    "lyra|end-vesper": [
+      "reflect",
+      "refuse"
+    ],
+    "lyra|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "lyra|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "lyra|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|high-school-caretaker": [
+      "reflect",
+      "refuse"
+    ],
+    "high-school-warrior|high-school-assassin": [
+      "reflect",
+      "resolve"
+    ],
+    "high-school-warrior|high-school-mage": [
+      "question",
+      "resolve"
+    ],
+    "high-school-warrior|high-school-dodgeball": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-warrior|high-school-bard": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|high-school-librarian": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|high-school-chef": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|high-school-gardener": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-akari": [
+      "acknowledge",
+      "agree"
+    ],
+    "high-school-warrior|magic-shizuku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-hiyori": [
+      "reflect",
+      "resolve"
+    ],
+    "high-school-warrior|magic-tsubasa": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-warrior|magic-rei": [
+      "refuse",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-madoka": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-warrior|magic-koharu": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-mirai": [
+      "surprise",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-minato": [
+      "concern",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-riku": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-yamato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-leon": [
+      "surprise",
+      "acknowledge"
+    ],
+    "high-school-warrior|magic-elliot": [
+      "question",
+      "resolve"
+    ],
+    "high-school-warrior|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|dungeons2-celis": [
+      "question",
+      "reflect"
+    ],
+    "high-school-warrior|dungeons2-flora": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-warrior|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|dungeons2-ignis": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-warrior|dungeons2-leon": [
+      "acknowledge",
+      "agree"
+    ],
+    "high-school-warrior|dungeons2-orion": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|dungeons2-leif": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-warrior|nagi": [
+      "question",
+      "agree"
+    ],
+    "high-school-warrior|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-warrior|end-vesper": [
+      "surprise",
+      "reflect"
+    ],
+    "high-school-warrior|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-warrior|end-hikari": [
+      "question",
+      "reflect"
+    ],
+    "high-school-warrior|end-ren": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|high-school-assassin": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|high-school-mage": [
+      "reflect",
+      "refuse"
+    ],
+    "high-school-caretaker|high-school-dodgeball": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|high-school-bard": [
+      "refuse",
+      "acknowledge"
+    ],
+    "high-school-caretaker|high-school-librarian": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|high-school-chef": [
+      "question",
+      "resolve"
+    ],
+    "high-school-caretaker|high-school-gardener": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|magic-akari": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-shizuku": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|magic-hiyori": [
+      "question",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-tsubasa": [
+      "question",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-rei": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-madoka": [
+      "concern",
+      "concern"
+    ],
+    "high-school-caretaker|magic-koharu": [
+      "question",
+      "resolve"
+    ],
+    "high-school-caretaker|magic-mirai": [
+      "concern",
+      "question"
+    ],
+    "high-school-caretaker|magic-sera": [
+      "question",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|magic-minato": [
+      "refuse",
+      "concern"
+    ],
+    "high-school-caretaker|magic-riku": [
+      "question",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-yamato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|magic-leon": [
+      "refuse",
+      "reflect"
+    ],
+    "high-school-caretaker|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|magic-sakuya": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|dungeons2-celis": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-caretaker|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-caretaker|dungeons2-noctia": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-caretaker|dungeons2-ignis": [
+      "concern",
+      "reflect"
+    ],
+    "high-school-caretaker|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-caretaker|dungeons2-orion": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|dungeons2-leif": [
+      "question",
+      "reflect"
+    ],
+    "high-school-caretaker|nagi": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-caretaker|mio": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|end-vesper": [
+      "reflect",
+      "question"
+    ],
+    "high-school-caretaker|end-sable": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-caretaker|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-caretaker|end-ren": [
+      "question",
+      "reflect"
+    ],
+    "high-school-assassin|high-school-mage": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|high-school-dodgeball": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-assassin|high-school-bard": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-assassin|high-school-librarian": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-assassin|high-school-chef": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|high-school-gardener": [
+      "acknowledge",
+      "thanks"
+    ],
+    "high-school-assassin|magic-akari": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-shizuku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-hiyori": [
+      "reflect",
+      "question"
+    ],
+    "high-school-assassin|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-rei": [
+      "question",
+      "refuse"
+    ],
+    "high-school-assassin|magic-madoka": [
+      "refuse",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-koharu": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-assassin|magic-mirai": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-riku": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-yamato": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|magic-sakuya": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|dungeons2-lyria": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-assassin|dungeons2-celis": [
+      "reflect",
+      "refuse"
+    ],
+    "high-school-assassin|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|dungeons2-noctia": [
+      "question",
+      "concern"
+    ],
+    "high-school-assassin|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|dungeons2-ignis": [
+      "concern",
+      "reflect"
+    ],
+    "high-school-assassin|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-assassin|dungeons2-orion": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|nagi": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-assassin|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-assassin|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-assassin|end-ren": [
+      "question",
+      "resolve"
+    ],
+    "high-school-mage|high-school-dodgeball": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|high-school-bard": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|high-school-librarian": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-mage|high-school-chef": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|high-school-gardener": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-mage|magic-akari": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-mage|magic-shizuku": [
+      "thanks",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-hiyori": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-mage|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-rei": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-madoka": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-mage|magic-koharu": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-mage|magic-mirai": [
+      "reflect",
+      "question"
+    ],
+    "high-school-mage|magic-sera": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-minato": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-yamato": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-mage|magic-leon": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-mage|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|dungeons2-lyria": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-mage|dungeons2-celis": [
+      "question",
+      "refuse"
+    ],
+    "high-school-mage|dungeons2-flora": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-mage|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|dungeons2-ignis": [
+      "reflect",
+      "concern"
+    ],
+    "high-school-mage|dungeons2-leon": [
+      "question",
+      "concern"
+    ],
+    "high-school-mage|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-mage|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-mage|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|high-school-bard": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|high-school-librarian": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-dodgeball|high-school-chef": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|high-school-gardener": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-akari": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-dodgeball|magic-shizuku": [
+      "question",
+      "concern"
+    ],
+    "high-school-dodgeball|magic-hiyori": [
+      "acknowledge",
+      "concern"
+    ],
+    "high-school-dodgeball|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-rei": [
+      "question",
+      "reflect"
+    ],
+    "high-school-dodgeball|magic-madoka": [
+      "question",
+      "resolve"
+    ],
+    "high-school-dodgeball|magic-koharu": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-mirai": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-dodgeball|magic-sera": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-dodgeball|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-soma": [
+      "question",
+      "agree"
+    ],
+    "high-school-dodgeball|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-yamato": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-dodgeball|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|dungeons2-noctia": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|dungeons2-aurene": [
+      "question",
+      "resolve"
+    ],
+    "high-school-dodgeball|dungeons2-ignis": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-dodgeball|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|dungeons2-orion": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-dodgeball|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|nagi": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-dodgeball|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-dodgeball|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|high-school-librarian": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|high-school-chef": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|high-school-gardener": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-akari": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-bard|magic-shizuku": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-bard|magic-hiyori": [
+      "acknowledge",
+      "concern"
+    ],
+    "high-school-bard|magic-tsubasa": [
+      "reflect",
+      "refuse"
+    ],
+    "high-school-bard|magic-rei": [
+      "question",
+      "refuse"
+    ],
+    "high-school-bard|magic-madoka": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-koharu": [
+      "acknowledge",
+      "refuse"
+    ],
+    "high-school-bard|magic-mirai": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-sera": [
+      "question",
+      "resolve"
+    ],
+    "high-school-bard|magic-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-riku": [
+      "question",
+      "surprise"
+    ],
+    "high-school-bard|magic-yamato": [
+      "question",
+      "resolve"
+    ],
+    "high-school-bard|magic-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|magic-sakuya": [
+      "question",
+      "reflect"
+    ],
+    "high-school-bard|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|dungeons2-noctia": [
+      "question",
+      "reflect"
+    ],
+    "high-school-bard|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|dungeons2-ignis": [
+      "reflect",
+      "concern"
+    ],
+    "high-school-bard|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|dungeons2-orion": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-bard|dungeons2-leif": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-bard|nagi": [
+      "question",
+      "resolve"
+    ],
+    "high-school-bard|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|sena": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-bard|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-bard|end-hikari": [
+      "resolve",
+      "acknowledge"
+    ],
+    "high-school-bard|end-ren": [
+      "resolve",
+      "acknowledge"
+    ],
+    "high-school-librarian|high-school-chef": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|high-school-gardener": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-akari": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-shizuku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-hiyori": [
+      "question",
+      "reflect"
+    ],
+    "high-school-librarian|magic-tsubasa": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-librarian|magic-rei": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-madoka": [
+      "question",
+      "refuse"
+    ],
+    "high-school-librarian|magic-koharu": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-librarian|magic-mirai": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-sera": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-minato": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-yamato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|dungeons2-lyria": [
+      "acknowledge",
+      "question"
+    ],
+    "high-school-librarian|dungeons2-celis": [
+      "question",
+      "resolve"
+    ],
+    "high-school-librarian|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|dungeons2-noctia": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-librarian|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|dungeons2-ignis": [
+      "question",
+      "reflect"
+    ],
+    "high-school-librarian|dungeons2-leon": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-librarian|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|mio": [
+      "resolve",
+      "acknowledge"
+    ],
+    "high-school-librarian|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-librarian|end-vesper": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-librarian|end-sable": [
+      "question",
+      "refuse"
+    ],
+    "high-school-librarian|end-hikari": [
+      "question",
+      "refuse"
+    ],
+    "high-school-librarian|end-ren": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-chef|high-school-gardener": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-akari": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-shizuku": [
+      "thanks",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-hiyori": [
+      "reflect",
+      "thanks"
+    ],
+    "high-school-chef|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-rei": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-madoka": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-koharu": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-mirai": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-sera": [
+      "concern",
+      "refuse"
+    ],
+    "high-school-chef|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-yamato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|magic-elliot": [
+      "question",
+      "reflect"
+    ],
+    "high-school-chef|magic-sakuya": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-chef|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-noctia": [
+      "question",
+      "reflect"
+    ],
+    "high-school-chef|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-ignis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-chef|end-hikari": [
+      "question",
+      "question"
+    ],
+    "high-school-chef|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-akari": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-shizuku": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-hiyori": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-gardener|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-rei": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-gardener|magic-madoka": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-koharu": [
+      "question",
+      "refuse"
+    ],
+    "high-school-gardener|magic-mirai": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-sera": [
+      "question",
+      "reflect"
+    ],
+    "high-school-gardener|magic-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-minato": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-riku": [
+      "question",
+      "surprise"
+    ],
+    "high-school-gardener|magic-yamato": [
+      "acknowledge",
+      "surprise"
+    ],
+    "high-school-gardener|magic-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-gardener|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|dungeons2-celis": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|dungeons2-flora": [
+      "acknowledge",
+      "resolve"
+    ],
+    "high-school-gardener|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|dungeons2-ignis": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-gardener|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|dungeons2-orion": [
+      "question",
+      "resolve"
+    ],
+    "high-school-gardener|dungeons2-leif": [
+      "reflect",
+      "resolve"
+    ],
+    "high-school-gardener|nagi": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "high-school-gardener|end-vesper": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-gardener|end-sable": [
+      "reflect",
+      "reflect"
+    ],
+    "high-school-gardener|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "high-school-gardener|end-ren": [
+      "question",
+      "reflect"
+    ],
+    "magic-akari|magic-shizuku": [
+      "question",
+      "question"
+    ],
+    "magic-akari|magic-hiyori": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|magic-tsubasa": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|magic-rei": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|magic-madoka": [
+      "question",
+      "surprise"
+    ],
+    "magic-akari|magic-koharu": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|magic-mirai": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-akari|magic-sera": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|magic-ren": [
+      "question",
+      "thanks"
+    ],
+    "magic-akari|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|magic-yamato": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-akari|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|magic-elliot": [
+      "acknowledge",
+      "surprise"
+    ],
+    "magic-akari|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-celis": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-akari|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-noctia": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-ignis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|dungeons2-orion": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-akari|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|nagi": [
+      "question",
+      "refuse"
+    ],
+    "magic-akari|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-akari|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-akari|end-hikari": [
+      "resolve",
+      "acknowledge"
+    ],
+    "magic-akari|end-ren": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-shizuku|magic-hiyori": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-tsubasa": [
+      "acknowledge",
+      "concern"
+    ],
+    "magic-shizuku|magic-rei": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-madoka": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-koharu": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-mirai": [
+      "concern",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-yamato": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-shizuku|magic-leon": [
+      "refuse",
+      "acknowledge"
+    ],
+    "magic-shizuku|magic-elliot": [
+      "reflect",
+      "resolve"
+    ],
+    "magic-shizuku|magic-sakuya": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-shizuku|dungeons2-lyria": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-shizuku|dungeons2-celis": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-shizuku|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-shizuku|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-shizuku|dungeons2-ignis": [
+      "reflect",
+      "thanks"
+    ],
+    "magic-shizuku|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|dungeons2-orion": [
+      "question",
+      "resolve"
+    ],
+    "magic-shizuku|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|nagi": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-shizuku|mio": [
+      "question",
+      "resolve"
+    ],
+    "magic-shizuku|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|end-vesper": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-shizuku|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-shizuku|end-hikari": [
+      "acknowledge",
+      "thanks"
+    ],
+    "magic-shizuku|end-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-tsubasa": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-hiyori|magic-rei": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-madoka": [
+      "question",
+      "resolve"
+    ],
+    "magic-hiyori|magic-koharu": [
+      "question",
+      "concern"
+    ],
+    "magic-hiyori|magic-mirai": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-sera": [
+      "question",
+      "reflect"
+    ],
+    "magic-hiyori|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-riku": [
+      "question",
+      "concern"
+    ],
+    "magic-hiyori|magic-yamato": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-hiyori|magic-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-elliot": [
+      "concern",
+      "acknowledge"
+    ],
+    "magic-hiyori|magic-sakuya": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-hiyori|dungeons2-lyria": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-hiyori|dungeons2-celis": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-hiyori|dungeons2-flora": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-hiyori|dungeons2-noctia": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-hiyori|dungeons2-aurene": [
+      "concern",
+      "concern"
+    ],
+    "magic-hiyori|dungeons2-ignis": [
+      "reflect",
+      "question"
+    ],
+    "magic-hiyori|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|dungeons2-orion": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-hiyori|dungeons2-leif": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-hiyori|nagi": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-hiyori|mio": [
+      "acknowledge",
+      "concern"
+    ],
+    "magic-hiyori|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|end-vesper": [
+      "concern",
+      "reflect"
+    ],
+    "magic-hiyori|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-hiyori|end-hikari": [
+      "question",
+      "concern"
+    ],
+    "magic-hiyori|end-ren": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-tsubasa|magic-rei": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-madoka": [
+      "question",
+      "concern"
+    ],
+    "magic-tsubasa|magic-koharu": [
+      "question",
+      "question"
+    ],
+    "magic-tsubasa|magic-mirai": [
+      "resolve",
+      "refuse"
+    ],
+    "magic-tsubasa|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-minato": [
+      "question",
+      "refuse"
+    ],
+    "magic-tsubasa|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-yamato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|magic-elliot": [
+      "question",
+      "refuse"
+    ],
+    "magic-tsubasa|magic-sakuya": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-lyria": [
+      "resolve",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-celis": [
+      "question",
+      "resolve"
+    ],
+    "magic-tsubasa|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-ignis": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-tsubasa|dungeons2-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|dungeons2-leif": [
+      "resolve",
+      "acknowledge"
+    ],
+    "magic-tsubasa|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|mio": [
+      "question",
+      "resolve"
+    ],
+    "magic-tsubasa|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|end-vesper": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-tsubasa|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-tsubasa|end-hikari": [
+      "question",
+      "reflect"
+    ],
+    "magic-tsubasa|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-rei|magic-madoka": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|magic-koharu": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-rei|magic-mirai": [
+      "acknowledge",
+      "concern"
+    ],
+    "magic-rei|magic-sera": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-rei|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|magic-minato": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-rei|magic-riku": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-rei|magic-yamato": [
+      "question",
+      "concern"
+    ],
+    "magic-rei|magic-leon": [
+      "question",
+      "resolve"
+    ],
+    "magic-rei|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|magic-sakuya": [
+      "refuse",
+      "resolve"
+    ],
+    "magic-rei|dungeons2-lyria": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-rei|dungeons2-celis": [
+      "question",
+      "reflect"
+    ],
+    "magic-rei|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-rei|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-rei|dungeons2-ignis": [
+      "reflect",
+      "concern"
+    ],
+    "magic-rei|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-rei|nagi": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-rei|mio": [
+      "question",
+      "concern"
+    ],
+    "magic-rei|sena": [
+      "question",
+      "question"
+    ],
+    "magic-rei|end-vesper": [
+      "question",
+      "reflect"
+    ],
+    "magic-rei|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-rei|end-hikari": [
+      "acknowledge",
+      "thanks"
+    ],
+    "magic-rei|end-ren": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-madoka|magic-koharu": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-madoka|magic-mirai": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|magic-soma": [
+      "reflect",
+      "resolve"
+    ],
+    "magic-madoka|magic-minato": [
+      "question",
+      "question"
+    ],
+    "magic-madoka|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-madoka|magic-yamato": [
+      "question",
+      "question"
+    ],
+    "magic-madoka|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|magic-elliot": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-madoka|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-noctia": [
+      "question",
+      "agree"
+    ],
+    "magic-madoka|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-ignis": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-madoka|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|dungeons2-leif": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-madoka|nagi": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-madoka|mio": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-madoka|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|end-vesper": [
+      "concern",
+      "reflect"
+    ],
+    "magic-madoka|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-madoka|end-ren": [
+      "question",
+      "resolve"
+    ],
+    "magic-koharu|magic-mirai": [
+      "question",
+      "tease"
+    ],
+    "magic-koharu|magic-sera": [
+      "question",
+      "resolve"
+    ],
+    "magic-koharu|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|magic-soma": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|magic-minato": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|magic-yamato": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|magic-leon": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-koharu|magic-elliot": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|dungeons2-celis": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-koharu|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|dungeons2-ignis": [
+      "reflect",
+      "agree"
+    ],
+    "magic-koharu|dungeons2-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|dungeons2-orion": [
+      "reflect",
+      "thanks"
+    ],
+    "magic-koharu|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-koharu|sena": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-koharu|end-vesper": [
+      "acknowledge",
+      "agree"
+    ],
+    "magic-koharu|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-koharu|end-hikari": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-koharu|end-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-mirai|magic-sera": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-mirai|magic-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-mirai|magic-soma": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-mirai|magic-minato": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-mirai|magic-riku": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-mirai|magic-yamato": [
+      "concern",
+      "reflect"
+    ],
+    "magic-mirai|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-mirai|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-mirai|magic-sakuya": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-mirai|dungeons2-lyria": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-mirai|dungeons2-celis": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-mirai|dungeons2-flora": [
+      "resolve",
+      "refuse"
+    ],
+    "magic-mirai|dungeons2-noctia": [
+      "question",
+      "resolve"
+    ],
+    "magic-mirai|dungeons2-aurene": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-mirai|dungeons2-ignis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-mirai|dungeons2-leon": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-mirai|dungeons2-orion": [
+      "question",
+      "resolve"
+    ],
+    "magic-mirai|dungeons2-leif": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-mirai|nagi": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-mirai|mio": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-mirai|sena": [
+      "question",
+      "reflect"
+    ],
+    "magic-mirai|end-vesper": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-mirai|end-sable": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-mirai|end-hikari": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-mirai|end-ren": [
+      "reflect",
+      "resolve"
+    ],
+    "magic-sera|magic-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|magic-soma": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-sera|magic-minato": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-sera|magic-riku": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-sera|magic-yamato": [
+      "resolve",
+      "refuse"
+    ],
+    "magic-sera|magic-leon": [
+      "question",
+      "question"
+    ],
+    "magic-sera|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|dungeons2-celis": [
+      "question",
+      "resolve"
+    ],
+    "magic-sera|dungeons2-flora": [
+      "question",
+      "refuse"
+    ],
+    "magic-sera|dungeons2-noctia": [
+      "question",
+      "agree"
+    ],
+    "magic-sera|dungeons2-aurene": [
+      "reflect",
+      "resolve"
+    ],
+    "magic-sera|dungeons2-ignis": [
+      "question",
+      "concern"
+    ],
+    "magic-sera|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|dungeons2-orion": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-sera|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|nagi": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-sera|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-sera|end-vesper": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-sera|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sera|end-hikari": [
+      "question",
+      "agree"
+    ],
+    "magic-sera|end-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|magic-soma": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-ren|magic-minato": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|magic-riku": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-ren|magic-yamato": [
+      "acknowledge",
+      "thanks"
+    ],
+    "magic-ren|magic-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|magic-elliot": [
+      "question",
+      "reflect"
+    ],
+    "magic-ren|magic-sakuya": [
+      "question",
+      "resolve"
+    ],
+    "magic-ren|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|dungeons2-flora": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-ren|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|dungeons2-aurene": [
+      "concern",
+      "thanks"
+    ],
+    "magic-ren|dungeons2-ignis": [
+      "resolve",
+      "thanks"
+    ],
+    "magic-ren|dungeons2-leon": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-ren|dungeons2-orion": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-ren|dungeons2-leif": [
+      "question",
+      "concern"
+    ],
+    "magic-ren|nagi": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-ren|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-ren|sena": [
+      "thanks",
+      "tease"
+    ],
+    "magic-ren|end-vesper": [
+      "question",
+      "resolve"
+    ],
+    "magic-ren|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-ren|end-hikari": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-ren|end-ren": [
+      "question",
+      "resolve"
+    ],
+    "magic-soma|magic-minato": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-soma|magic-riku": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-soma|magic-yamato": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-soma|magic-leon": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-soma|magic-elliot": [
+      "acknowledge",
+      "thanks"
+    ],
+    "magic-soma|magic-sakuya": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-lyria": [
+      "reflect",
+      "thanks"
+    ],
+    "magic-soma|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-ignis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|dungeons2-orion": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-soma|dungeons2-leif": [
+      "reflect",
+      "question"
+    ],
+    "magic-soma|nagi": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-soma|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|sena": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-soma|end-vesper": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-soma|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-soma|end-ren": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-minato|magic-riku": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|magic-yamato": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-minato|magic-leon": [
+      "question",
+      "concern"
+    ],
+    "magic-minato|magic-elliot": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|magic-sakuya": [
+      "concern",
+      "concern"
+    ],
+    "magic-minato|dungeons2-lyria": [
+      "question",
+      "resolve"
+    ],
+    "magic-minato|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|dungeons2-flora": [
+      "concern",
+      "reflect"
+    ],
+    "magic-minato|dungeons2-noctia": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-minato|dungeons2-aurene": [
+      "acknowledge",
+      "concern"
+    ],
+    "magic-minato|dungeons2-ignis": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-minato|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|dungeons2-leif": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-minato|nagi": [
+      "question",
+      "tease"
+    ],
+    "magic-minato|mio": [
+      "acknowledge",
+      "concern"
+    ],
+    "magic-minato|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|end-vesper": [
+      "surprise",
+      "reflect"
+    ],
+    "magic-minato|end-sable": [
+      "question",
+      "tease"
+    ],
+    "magic-minato|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-minato|end-ren": [
+      "question",
+      "question"
+    ],
+    "magic-riku|magic-yamato": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-riku|magic-leon": [
+      "acknowledge",
+      "surprise"
+    ],
+    "magic-riku|magic-elliot": [
+      "acknowledge",
+      "agree"
+    ],
+    "magic-riku|magic-sakuya": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-riku|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-riku|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-riku|dungeons2-flora": [
+      "question",
+      "agree"
+    ],
+    "magic-riku|dungeons2-noctia": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-riku|dungeons2-aurene": [
+      "question",
+      "question"
+    ],
+    "magic-riku|dungeons2-ignis": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-riku|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-riku|dungeons2-orion": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-riku|dungeons2-leif": [
+      "question",
+      "refuse"
+    ],
+    "magic-riku|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-riku|mio": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-riku|sena": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-riku|end-vesper": [
+      "resolve",
+      "reflect"
+    ],
+    "magic-riku|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-riku|end-hikari": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-riku|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-yamato|magic-leon": [
+      "acknowledge",
+      "question"
+    ],
+    "magic-yamato|magic-elliot": [
+      "resolve",
+      "thanks"
+    ],
+    "magic-yamato|magic-sakuya": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-yamato|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-yamato|dungeons2-celis": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-yamato|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-yamato|dungeons2-noctia": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-yamato|dungeons2-aurene": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-yamato|dungeons2-ignis": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-yamato|dungeons2-leon": [
+      "question",
+      "tease"
+    ],
+    "magic-yamato|dungeons2-orion": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-yamato|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-yamato|nagi": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-yamato|mio": [
+      "question",
+      "concern"
+    ],
+    "magic-yamato|sena": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-yamato|end-vesper": [
+      "question",
+      "tease"
+    ],
+    "magic-yamato|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-yamato|end-hikari": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-yamato|end-ren": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-leon|magic-elliot": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-leon|magic-sakuya": [
+      "resolve",
+      "acknowledge"
+    ],
+    "magic-leon|dungeons2-lyria": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-leon|dungeons2-celis": [
+      "question",
+      "tease"
+    ],
+    "magic-leon|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-leon|dungeons2-noctia": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-leon|dungeons2-aurene": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-leon|dungeons2-ignis": [
+      "reflect",
+      "refuse"
+    ],
+    "magic-leon|dungeons2-leon": [
+      "resolve",
+      "tease"
+    ],
+    "magic-leon|dungeons2-orion": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-leon|dungeons2-leif": [
+      "reflect",
+      "question"
+    ],
+    "magic-leon|nagi": [
+      "resolve",
+      "refuse"
+    ],
+    "magic-leon|mio": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-leon|sena": [
+      "question",
+      "tease"
+    ],
+    "magic-leon|end-vesper": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-leon|end-sable": [
+      "question",
+      "tease"
+    ],
+    "magic-leon|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-leon|end-ren": [
+      "acknowledge",
+      "tease"
+    ],
+    "magic-elliot|magic-sakuya": [
+      "resolve",
+      "acknowledge"
+    ],
+    "magic-elliot|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-elliot|dungeons2-celis": [
+      "acknowledge",
+      "refuse"
+    ],
+    "magic-elliot|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-elliot|dungeons2-noctia": [
+      "reflect",
+      "question"
+    ],
+    "magic-elliot|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-elliot|dungeons2-ignis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-elliot|dungeons2-leon": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-elliot|dungeons2-orion": [
+      "acknowledge",
+      "resolve"
+    ],
+    "magic-elliot|dungeons2-leif": [
+      "question",
+      "reflect"
+    ],
+    "magic-elliot|nagi": [
+      "reflect",
+      "resolve"
+    ],
+    "magic-elliot|mio": [
+      "reflect",
+      "resolve"
+    ],
+    "magic-elliot|sena": [
+      "question",
+      "question"
+    ],
+    "magic-elliot|end-vesper": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-elliot|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-elliot|end-hikari": [
+      "reflect",
+      "question"
+    ],
+    "magic-elliot|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-sakuya|dungeons2-lyria": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sakuya|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sakuya|dungeons2-flora": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-sakuya|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sakuya|dungeons2-aurene": [
+      "question",
+      "reflect"
+    ],
+    "magic-sakuya|dungeons2-ignis": [
+      "question",
+      "concern"
+    ],
+    "magic-sakuya|dungeons2-leon": [
+      "question",
+      "resolve"
+    ],
+    "magic-sakuya|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sakuya|dungeons2-leif": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-sakuya|nagi": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-sakuya|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "magic-sakuya|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "magic-sakuya|end-vesper": [
+      "acknowledge",
+      "agree"
+    ],
+    "magic-sakuya|end-sable": [
+      "reflect",
+      "reflect"
+    ],
+    "magic-sakuya|end-hikari": [
+      "question",
+      "concern"
+    ],
+    "magic-sakuya|end-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|dungeons2-celis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|dungeons2-flora": [
+      "question",
+      "agree"
+    ],
+    "dungeons2-lyria|dungeons2-noctia": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|dungeons2-aurene": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-lyria|dungeons2-ignis": [
+      "resolve",
+      "concern"
+    ],
+    "dungeons2-lyria|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|dungeons2-orion": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|dungeons2-leif": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|nagi": [
+      "question",
+      "tease"
+    ],
+    "dungeons2-lyria|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|end-vesper": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-lyria|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-lyria|end-hikari": [
+      "acknowledge",
+      "refuse"
+    ],
+    "dungeons2-lyria|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-celis|dungeons2-flora": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-celis|dungeons2-noctia": [
+      "question",
+      "concern"
+    ],
+    "dungeons2-celis|dungeons2-aurene": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-celis|dungeons2-ignis": [
+      "concern",
+      "reflect"
+    ],
+    "dungeons2-celis|dungeons2-leon": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-celis|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-celis|dungeons2-leif": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-celis|nagi": [
+      "question",
+      "tease"
+    ],
+    "dungeons2-celis|mio": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-celis|sena": [
+      "question",
+      "tease"
+    ],
+    "dungeons2-celis|end-vesper": [
+      "refuse",
+      "reflect"
+    ],
+    "dungeons2-celis|end-sable": [
+      "acknowledge",
+      "thanks"
+    ],
+    "dungeons2-celis|end-hikari": [
+      "acknowledge",
+      "thanks"
+    ],
+    "dungeons2-celis|end-ren": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-flora|dungeons2-noctia": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-flora|dungeons2-aurene": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-flora|dungeons2-ignis": [
+      "question",
+      "concern"
+    ],
+    "dungeons2-flora|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-flora|dungeons2-orion": [
+      "acknowledge",
+      "concern"
+    ],
+    "dungeons2-flora|dungeons2-leif": [
+      "acknowledge",
+      "tease"
+    ],
+    "dungeons2-flora|nagi": [
+      "concern",
+      "tease"
+    ],
+    "dungeons2-flora|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-flora|sena": [
+      "acknowledge",
+      "tease"
+    ],
+    "dungeons2-flora|end-vesper": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-flora|end-sable": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-flora|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-flora|end-ren": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-noctia|dungeons2-aurene": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-noctia|dungeons2-ignis": [
+      "question",
+      "concern"
+    ],
+    "dungeons2-noctia|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-noctia|dungeons2-orion": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-noctia|dungeons2-leif": [
+      "acknowledge",
+      "question"
+    ],
+    "dungeons2-noctia|nagi": [
+      "acknowledge",
+      "tease"
+    ],
+    "dungeons2-noctia|mio": [
+      "question",
+      "reflect"
+    ],
+    "dungeons2-noctia|sena": [
+      "question",
+      "tease"
+    ],
+    "dungeons2-noctia|end-vesper": [
+      "question",
+      "reflect"
+    ],
+    "dungeons2-noctia|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-noctia|end-hikari": [
+      "acknowledge",
+      "tease"
+    ],
+    "dungeons2-noctia|end-ren": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-aurene|dungeons2-ignis": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-aurene|dungeons2-leon": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-aurene|dungeons2-orion": [
+      "question",
+      "question"
+    ],
+    "dungeons2-aurene|dungeons2-leif": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-aurene|nagi": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-aurene|mio": [
+      "thanks",
+      "acknowledge"
+    ],
+    "dungeons2-aurene|sena": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-aurene|end-vesper": [
+      "question",
+      "reflect"
+    ],
+    "dungeons2-aurene|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-aurene|end-hikari": [
+      "acknowledge",
+      "reflect"
+    ],
+    "dungeons2-aurene|end-ren": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-ignis|dungeons2-leon": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-ignis|dungeons2-orion": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-ignis|dungeons2-leif": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-ignis|nagi": [
+      "resolve",
+      "acknowledge"
+    ],
+    "dungeons2-ignis|mio": [
+      "concern",
+      "reflect"
+    ],
+    "dungeons2-ignis|sena": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-ignis|end-vesper": [
+      "acknowledge",
+      "concern"
+    ],
+    "dungeons2-ignis|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-ignis|end-hikari": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-ignis|end-ren": [
+      "question",
+      "question"
+    ],
+    "dungeons2-leon|dungeons2-orion": [
+      "acknowledge",
+      "thanks"
+    ],
+    "dungeons2-leon|dungeons2-leif": [
+      "reflect",
+      "resolve"
+    ],
+    "dungeons2-leon|nagi": [
+      "question",
+      "refuse"
+    ],
+    "dungeons2-leon|mio": [
+      "acknowledge",
+      "refuse"
+    ],
+    "dungeons2-leon|sena": [
+      "question",
+      "tease"
+    ],
+    "dungeons2-leon|end-vesper": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-leon|end-sable": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-leon|end-hikari": [
+      "acknowledge",
+      "tease"
+    ],
+    "dungeons2-leon|end-ren": [
+      "acknowledge",
+      "resolve"
+    ],
+    "dungeons2-orion|dungeons2-leif": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-orion|nagi": [
+      "resolve",
+      "tease"
+    ],
+    "dungeons2-orion|mio": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-orion|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-orion|end-vesper": [
+      "acknowledge",
+      "question"
+    ],
+    "dungeons2-orion|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-orion|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-orion|end-ren": [
+      "question",
+      "resolve"
+    ],
+    "dungeons2-leif|nagi": [
+      "question",
+      "reflect"
+    ],
+    "dungeons2-leif|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "dungeons2-leif|sena": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-leif|end-vesper": [
+      "question",
+      "acknowledge"
+    ],
+    "dungeons2-leif|end-sable": [
+      "reflect",
+      "reflect"
+    ],
+    "dungeons2-leif|end-hikari": [
+      "acknowledge",
+      "question"
+    ],
+    "dungeons2-leif|end-ren": [
+      "acknowledge",
+      "resolve"
+    ],
+    "nagi|mio": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "nagi|sena": [
+      "question",
+      "resolve"
+    ],
+    "nagi|end-vesper": [
+      "acknowledge",
+      "surprise"
+    ],
+    "nagi|end-sable": [
+      "question",
+      "acknowledge"
+    ],
+    "nagi|end-hikari": [
+      "acknowledge",
+      "acknowledge"
+    ],
+    "nagi|end-ren": [
+      "question",
+      "reflect"
+    ],
+    "mio|sena": [
+      "question",
+      "tease"
+    ],
+    "mio|end-vesper": [
+      "question",
+      "acknowledge"
+    ],
+    "mio|end-sable": [
+      "question",
+      "reflect"
+    ],
+    "mio|end-hikari": [
+      "acknowledge",
+      "question"
+    ],
+    "mio|end-ren": [
+      "question",
+      "concern"
+    ],
+    "sena|end-vesper": [
+      "reflect",
+      "reflect"
+    ],
+    "sena|end-sable": [
+      "question",
+      "reflect"
+    ],
+    "sena|end-hikari": [
+      "acknowledge",
+      "resolve"
+    ],
+    "sena|end-ren": [
+      "reflect",
+      "question"
+    ],
+    "end-vesper|end-sable": [
+      "reflect",
+      "reflect"
+    ],
+    "end-vesper|end-hikari": [
+      "acknowledge",
+      "question"
+    ],
+    "end-vesper|end-ren": [
+      "resolve",
+      "tease"
+    ],
+    "end-sable|end-hikari": [
+      "acknowledge",
+      "resolve"
+    ],
+    "end-sable|end-ren": [
+      "question",
+      "acknowledge"
+    ],
+    "end-hikari|end-ren": [
+      "acknowledge",
+      "acknowledge"
+    ]
+  },
+  "cueReviewNotes": [
+    {
+      "pair": "aster|dungeons2-celis",
+      "line": 0,
+      "cue": "reflect",
+      "reason": "避難者が待つ状況の説明で、相手への制止ではない"
+    },
+    {
+      "pair": "lyra|magic-hiyori",
+      "line": 1,
+      "cue": "acknowledge",
+      "reason": "小さな声を待てる長所を伝える肯定的な説明"
+    },
+    {
+      "pair": "high-school-mage|magic-koharu",
+      "line": 1,
+      "cue": "resolve",
+      "reason": "一緒に風を待つ提案"
+    },
+    {
+      "pair": "high-school-dodgeball|magic-soma",
+      "line": 1,
+      "cue": "agree",
+      "reason": "求めていた指摘への受け入れ"
+    },
+    {
+      "pair": "magic-shizuku|magic-tsubasa",
+      "line": 1,
+      "cue": "concern",
+      "reason": "緊張するという自身の気持ちで、するなの禁止ではない"
+    },
+    {
+      "pair": "magic-koharu|dungeons2-ignis",
+      "line": 1,
+      "cue": "agree",
+      "reason": "周囲への安全も準備したという肯定"
+    },
+    {
+      "pair": "magic-ren|dungeons2-noctia",
+      "line": 0,
+      "cue": "acknowledge",
+      "reason": "自分の行動を控える説明"
+    },
+    {
+      "pair": "magic-yamato|mio",
+      "line": 0,
+      "cue": "question",
+      "reason": "禁止かどうか相手に確かめる質問"
+    },
+    {
+      "pair": "magic-sakuya|dungeons2-aurene",
+      "line": 1,
+      "cue": "reflect",
+      "reason": "過去と赦しを語る深刻な説明"
+    },
+    {
+      "pair": "dungeons2-aurene|end-hikari",
+      "line": 1,
+      "cue": "reflect",
+      "reason": "帰りを待つ人を気遣う祈りの依頼"
+    },
+    {
+      "pair": "sena|end-sable",
+      "line": 1,
+      "cue": "reflect",
+      "reason": "待てる時間についての内省"
+    }
+  ]
+}

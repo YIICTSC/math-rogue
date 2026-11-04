@@ -1,0 +1,151 @@
+{
+  "state": "isolated-test-not-published",
+  "checked_at": "2026-11-03T02:44:31.810337+00:00",
+  "official_recipe": "Irodori README Sway Sampling, RF6 with sway -1; slightly higher text CFG for pronunciation.",
+  "clips": [
+    {
+      "id": "553e6d0592e8f3ef6fde",
+      "speaker": "high-school-caretaker",
+      "text": "怒鳴る声で、患者の息を消さないでね。",
+      "spoken_text": "どなるこえで、かんじゃのいきをけさないでね。",
+      "path": "tmp/lantern-banter-voices/sway-pilot/553e6d0592e8f3ef6fde.ogg",
+      "sha256": "9abfdb88a020e1969a70b4d2c59c5fa9960a250f0af110560cc91b2c922e6b09",
+      "reference_sha256": "3d0cd0437eeb619a49e251af5d0645b9d4852769c69f705098c3347689667e05",
+      "seed": 90296711,
+      "seconds_requested": 4.02,
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "steps": 6,
+      "t_schedule_mode": "sway",
+      "sway_coeff": -1.0,
+      "cfg_scale_text": 4.5,
+      "cfg_scale_caption": 3,
+      "cfg_scale_speaker": 5,
+      "elapsed_seconds": 36.86,
+      "review": {
+        "expected": "どなるこえで、かんじゃのいきをけさないでね。",
+        "cer": 0.05,
+        "needs_review": true,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "55fa5249a7881e91d24184bd69e0f38ad4eb925ac00d6d8cc56c5806796b92d1",
+        "raw_cer": 0.05,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "6af89806596b5cdb2f578092974adc78238e27cdddda5638af38985bc03c9962",
+        "missing_required_phrases": [
+          "怒鳴る"
+        ],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      },
+      "heard": "となる声で患者の息を消さないでね",
+      "wave": {
+        "duration": 4.139977324263039,
+        "peak": 0.8637633323669434,
+        "rms": 0.09719991711455422,
+        "finite": true
+      }
+    },
+    {
+      "id": "4205301509671c2033c0",
+      "speaker": "magic-koharu",
+      "text": "傷の原因は年輪だけじゃ読めない。村の人にも聞こう。",
+      "spoken_text": "きずのげんいんはねんりんだけじゃよめない。むらのひとにもきこう。",
+      "path": "tmp/lantern-banter-voices/sway-pilot/4205301509671c2033c0.ogg",
+      "sha256": "3b1d2133bf12ffed9c72afa320f0a967a9b6abbe40b9b0d4683b6dd96b285e17",
+      "reference_sha256": "739c31f4fc90d86e0714b86ebaff49fb6eebfc6a3ceb10d2443443d06a2e144c",
+      "seed": 70139320,
+      "seconds_requested": 5.62,
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "steps": 6,
+      "t_schedule_mode": "sway",
+      "sway_coeff": -1.0,
+      "cfg_scale_text": 4.5,
+      "cfg_scale_caption": 3,
+      "cfg_scale_speaker": 5,
+      "elapsed_seconds": 73.29,
+      "review": {
+        "expected": "きずのげんいんはねんりんだけじゃよめない。むらのひとにもきこう。",
+        "cer": 0.0667,
+        "needs_review": true,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "55fa5249a7881e91d24184bd69e0f38ad4eb925ac00d6d8cc56c5806796b92d1",
+        "raw_cer": 0.0667,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "96813fd3614cd8ad16ec39d515161acc257ca8c02e61fd8729bc1f5ddf827026",
+        "missing_required_phrases": [
+          "年輪"
+        ],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      },
+      "heard": "傷の原因は年齢んだけじゃ読めない 村の人にも聞こう",
+      "wave": {
+        "duration": 5.74,
+        "peak": 0.629081666469574,
+        "rms": 0.1017071179039942,
+        "finite": true
+      }
+    },
+    {
+      "id": "5880746ba0530e5fcd62",
+      "speaker": "lyra",
+      "text": "王家の追手に見つからず、民に帰還を知らせたい。",
+      "spoken_text": "おうけのおってにみつからず、たみにきかんをしらせたい。",
+      "path": "tmp/lantern-banter-voices/sway-pilot/5880746ba0530e5fcd62.ogg",
+      "sha256": "56cbe79b6e2b0e3a81a757638f4a79bde435edff0d958c0a707e49737f1960f3",
+      "reference_sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556",
+      "seed": 93712893,
+      "seconds_requested": 4.82,
+      "model": "Aratako/Irodori-TTS-v4.1-Small",
+      "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "model_device": "cpu",
+      "codec_device": "cpu",
+      "steps": 6,
+      "t_schedule_mode": "sway",
+      "sway_coeff": -1.0,
+      "cfg_scale_text": 4.5,
+      "cfg_scale_caption": 3,
+      "cfg_scale_speaker": 5,
+      "elapsed_seconds": 38.27,
+      "review": {
+        "expected": "おうけのおってにみつからず、たみにきかんをしらせたい。",
+        "cer": 0.12,
+        "needs_review": true,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "55fa5249a7881e91d24184bd69e0f38ad4eb925ac00d6d8cc56c5806796b92d1",
+        "raw_cer": 0.12,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "479982f57e801f22a73c142c2c02c535a70b770255885a58fef1ff611d9a7f0b",
+        "missing_required_phrases": [
+          "追手"
+        ],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      },
+      "heard": "お受けのお手に見つからず ただみ帰還を知らせたい",
+      "wave": {
+        "duration": 4.94,
+        "peak": 0.7196469902992249,
+        "rms": 0.11386535561649891,
+        "finite": true
+      }
+    }
+  ]
+}

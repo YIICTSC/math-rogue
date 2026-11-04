@@ -63,7 +63,7 @@ function getLines(s:Campaign,english=false):Line[]{if(s.battle?.endless)return e
 function Story({s,update}:{s:Campaign;update:Update}){
  const language=useContext(LanternLanguage);
  const lines=getLines(s,language==='ENGLISH'),displayIndex=Math.min(s.storyIndex,lines.length-1),line=lines[displayIndex],chapter=s.battle?.chapter??s.chapter,c=CHAPTERS[chapter],speaker=line.who==='$hero'?s.hero:line.who;
- useEffect(()=>{if(language==='ENGLISH'||s.battle?.endless)return;void playLanternLine(speaker,speaker===s.hero&&s.hero==='lyra'?line.text.replaceAll('僕','私'):line.text);return stopLanternVoice;},[speaker,line.text,s.hero,language]);
+ useEffect(()=>{if(language==='ENGLISH'||s.battle?.endless&&!line.banterId)return;void playLanternLine(speaker,!line.banterId&&speaker===s.hero&&s.hero==='lyra'?line.text.replaceAll('僕','私'):line.text);return stopLanternVoice;},[speaker,line.text,line.banterId,s.hero,language,!!s.battle?.endless]);
  const sideQuest=s.storyKind==='side'?FIELD_QUESTS.find(q=>q.id===s.fieldQuest):undefined;
  const pair=s.storyKind==='support'?SUPPORTS[Number((s.supportId||'0:0').split(':')[0])]:undefined,leftActor=line.cast?.[0]||pair?.a||s.hero;
  const counterpart=line.cast?.[1]||sideQuest?.hero||pair?.b||(speaker==='narrator'||speaker===s.hero?(lines.find(l=>!['$hero','narrator'].includes(l.who))?.who||'high-school-warrior'):speaker);

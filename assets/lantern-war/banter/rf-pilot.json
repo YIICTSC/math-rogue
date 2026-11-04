@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-11-02T22:42:53.562493+00:00",
+  "id": "9dfbe2d884cf7ad8556d",
+  "speaker": "high-school-gardener",
+  "text": "助かるよ。",
+  "spoken_text": "たすかるよ。",
+  "reference": "public/sfx/high-school-voices/GARDENER/endless-true-1.ogg",
+  "reference_sha256": "d5e5fb8c7c886e4c34c24629202721a86d176135e4ae1222cfc77a67e59d3c8d",
+  "model": "Aratako/Irodori-TTS-v4.1-Small",
+  "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+  "model_device": "cpu",
+  "codec_device": "cpu",
+  "steps": 40,
+  "cfg_scale_text": 3.5,
+  "caption": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。 参照音声と同じ人物の声色と年齢感を保つ。音楽や効果音なし。",
+  "audio": "tmp/lantern-banter-voices/diagnostics/9dfbe2d884cf7ad8556d-rf.ogg",
+  "sha256": "5ee57fed36e65307130f7b9276973df1979161635aba7565080a5b80a135e455",
+  "duration": 1.6,
+  "peak": 0.8549569249153137,
+  "heard": "助かるよー",
+  "assessment": {
+    "expected": "たすかるよ。",
+    "cer": 0.0,
+    "needs_review": false,
+    "required_name": null,
+    "name_verified": true,
+    "review_rules": 2,
+    "dictionary_sha256": "233aee1b60d87a340bdf793f80e324d2e3e68ceb550c9239d316d8178bcd67fd",
+    "raw_cer": 0.2,
+    "banter_review_rules": 2,
+    "phonetic_equivalence": true,
+    "cer_limit": 0.18
+  },
+  "purpose": "Comparison only; not integrated into shipped manifest.",
+  "pitch_check": {
+    "method": "Coarse autocorrelation F0 sanity check, not a speaker identity proof. Same approved reference remains the speaker condition.",
+    "reference": {
+      "median_hz": 207.7922077922078,
+      "voiced_frames": 242
+    },
+    "generated": {
+      "median_hz": 195.1219512195122,
+      "voiced_frames": 107
+    }
+  },
+  "state": "adopted",
+  "integrated_path": "sfx/lantern-war/banter/high-school-gardener/9dfbe2d884cf7ad8556d.ogg"
+}

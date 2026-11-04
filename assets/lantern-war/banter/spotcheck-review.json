@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-11-02T21:22:02.956292+00:00",
+  "method": "Sequential CPU medium ASR, without expected text prompt; inspect suspected first-pass ambiguities despite passing CER.",
+  "clips": [
+    {
+      "id": "0d5700180baac0839f35",
+      "sha256": "da5a1d092ffab1a1986ccb02920b726da3d25a03c8456813a1ca731c1644fd18",
+      "heard": "炎の資料、拳から取らせて",
+      "needs_review": false,
+      "reason": null
+    },
+    {
+      "id": "9c3bc48176796b64f779",
+      "sha256": "80e95ce2c153af0fe4428120052f717a3174d1c822a2a759c22db06f716e2942",
+      "heard": "帰還した全員を呼ぶ声にする 特典の代わりにね",
+      "needs_review": false,
+      "reason": null
+    },
+    {
+      "id": "04962de1b61adf46c6d2",
+      "sha256": "1d2fa8f9184673aa2e221f742af79223a7ceb5243bb96609420fdbb261bf339d",
+      "heard": "あの印、踏んでも大丈夫か?はい!",
+      "needs_review": true,
+      "reason": "Both ASR checks heard an extra はい after the complete scripted question; regenerate without the added word."
+    },
+    {
+      "id": "e0ab4d0e240580b29ebf",
+      "sha256": "a7c216a468153708114173d84592560cff614337431c77aa61cc795e3bce67ff",
+      "heard": "数字を捨てず名前を横に書こう 両方なくさないで",
+      "needs_review": false,
+      "reason": null
+    },
+    {
+      "id": "eb3b3704b6aa42a30936",
+      "sha256": "7e9b941172af46cd240b96739b36eb7cd4961b233c019fb7734b96ea9d25e07a",
+      "heard": "一番やりの前に俺が道を開けるぜ",
+      "needs_review": false,
+      "reason": null
+    }
+  ]
+}

@@ -1,0 +1,1079 @@
+{
+  "state": "semantic-review-complete-retries-queued",
+  "checked_at": "2026-11-03T00:36:06.578012+00:00",
+  "method": "CPU medium int8, beam5, no expected text prompt. Existing delivered audio retained.",
+  "clips": [
+    {
+      "id": "f2b1973c4714efff40eb",
+      "text": "君の剣は王座ではなく、帰り道を指すんだね。",
+      "heard": "君の剣は大沢ではなく、帰り道を指すんだね",
+      "sha256": "799b9f2fd51c80006c4c6d8b7df89eedb5096249df248a16c9b5039a951dc122",
+      "cer": 0.12,
+      "needs_review": false
+    },
+    {
+      "id": "b63dc75860ac86d21dbe",
+      "text": "あなたが前に灯を運ぶなら、私は帰る人の列を守る。",
+      "heard": "あなたが前に明かりを運ぶなら、私は帰る人の列を守る。",
+      "sha256": "640f284dbff6020a031a6cdc6d97adbebeea56a9576813e75220d24a641004f1",
+      "cer": 0.1212,
+      "needs_review": false
+    },
+    {
+      "id": "43486c4ed447d38cc25d",
+      "text": "王命でも、間違っていたら止めてほしい。",
+      "heard": "応命でも、間違っていたら止めてほしい",
+      "sha256": "ed754fc00903c1a77749e124b7c7e55b8d9b39db9bf9f1872919fa00f8840ba6",
+      "cer": 0.15,
+      "needs_review": false
+    },
+    {
+      "id": "55b7e4dc57ce0451fb74",
+      "text": "僕の配膳だけ多いのは、王家への礼儀かな。",
+      "heard": "僕の敗然だけ多いのは、王家の礼儀かな?",
+      "sha256": "5316939581261bb7a610e9ef2adaad0d763df0bb6d0f89a47fef4c112d299c0f",
+      "cer": 0.0417,
+      "needs_review": false
+    },
+    {
+      "id": "a53a970fbff2e27be419",
+      "text": "母上の杖を戦場へ持つのは、怖くないかい。",
+      "heard": "母上の杖を戦者場へ持つのは 怖くないかい",
+      "sha256": "0ac055970511ea0a2854a76beb179662ff298bfac46146022f225f7b438e0147",
+      "cer": 0.12,
+      "needs_review": false
+    },
+    {
+      "id": "4d43acd1a36a94a8fb30",
+      "text": "家の責務と王冠。逃げたと言われるかしら。",
+      "heard": "家の責務と保管、逃げたと言われるかしら",
+      "sha256": "cf80ca0dd9da98e4cabefa8f5e4be40f51add9dbad07a74e1a67adc4473b1f46",
+      "cer": 0.0909,
+      "needs_review": false
+    },
+    {
+      "id": "5880746ba0530e5fcd62",
+      "text": "王家の追手に見つからず、民に帰還を知らせたい。",
+      "heard": "王家の御手に見つからず、民に帰還を知らせたい。",
+      "sha256": "8369d5559fce36fbee2691b00895e2ec65cb7be1f9324d51b1dfa5278eb8f908",
+      "cer": 0.04,
+      "needs_review": false
+    },
+    {
+      "id": "91262513d709f9560e4a",
+      "text": "許す言葉を急いで、あなたの責任を奪いたくない。",
+      "heard": "許す言葉を急いで、あなたの責任を奪え…",
+      "sha256": "dbe1df74d35002921929dd14f68511c2fa128122168b3109c8bd784420e8b207",
+      "cer": 0.1852,
+      "needs_review": true
+    },
+    {
+      "id": "f3b4b10beb1015f13724",
+      "text": "命令より先に傷を見ろって、俺が言ってくる。",
+      "heard": "命令より先に傷を見ろって、 俺が言ってくるいい?",
+      "sha256": "5087d705f648e3a66467532392f8a6a76439a224e2a535b83b0509d3b7c8f909",
+      "cer": 0.0833,
+      "needs_review": false
+    },
+    {
+      "id": "553e6d0592e8f3ef6fde",
+      "text": "怒鳴る声で、患者の息を消さないでね。",
+      "heard": "となる声で患者の息を消さないでね",
+      "sha256": "e6dea0043d7f1e1da8ef30e7cf3624895f3e01cb7c38258cb662a2688d86b034",
+      "cer": 0.05,
+      "needs_review": false
+    },
+    {
+      "id": "b968e2fea146e6a6b46f",
+      "text": "負傷者を置けって命令なら、俺が破る。",
+      "heard": "負傷者を受けて命令なら、俺が破る",
+      "sha256": "fa2115fbebcc29392d4ae4af578906af1ea530eb4c843560c3e36c9935fadf1e",
+      "cer": 0.087,
+      "needs_review": false
+    },
+    {
+      "id": "74435a134a1e8bead1f1",
+      "text": "勇者なら先頭に立て、だってさ。",
+      "heard": "勇者なら先攻に勝て だってさ",
+      "sha256": "a64c1864d445c0fcd24531a173a00913a4299e7641efbd321c7b2f3f7b028157",
+      "cer": 0.1176,
+      "needs_review": false
+    },
+    {
+      "id": "885338d495574559d7ae",
+      "text": "隠している傷、袖を上げて見せて。",
+      "heard": "隠している傷、それをやってみせて?",
+      "sha256": "fd6ee7e7b6ecca220cb6200d44b15eb7555b63da00d23a0d068227b39e925f14",
+      "cer": 0.1765,
+      "needs_review": false
+    },
+    {
+      "id": "e19d4719fef2657883ca",
+      "text": "命を測る数字って、時々怖くなるの。",
+      "heard": "命を計る数字って時々怖くなるの",
+      "sha256": "d801fe27f020054feae592747e582aa5ea12b2db8a9c8b43abf66f80d06563ad",
+      "cer": 0.0,
+      "needs_review": false
+    },
+    {
+      "id": "8d4b2cf48292f95cdda2",
+      "text": "敵味方の傷病者を、同じ屋根の下で？",
+      "heard": "敵味方の商業者を同じ屋根の下で",
+      "sha256": "8c8f1454b7c8ac2ecb12870d40d0c440845dda371dbfdba130087b920b64ceb9",
+      "cer": 0.0417,
+      "needs_review": false
+    },
+    {
+      "id": "dfb5953717c8d2ba70f5",
+      "text": "僕の名前は、目次に載せなくていい。",
+      "heard": "僕の鍋はもう無事に乗せなくていい",
+      "sha256": "3db66a021ad1a7d409ba842b6ce75f0bd088ccf6fc3dce05735e8f79da26bc42",
+      "cer": 0.2222,
+      "needs_review": true
+    },
+    {
+      "id": "ed12e88090e41cd833e9",
+      "text": "貸出札には印だけで。読む場所まで無くさないでください。",
+      "heard": "貸し出し札には印だけで読む場所までなくさないでください",
+      "sha256": "398667fdd50fb763e70dd956050ba9ab540faf5291f22635e0b6b9589ece5941",
+      "cer": 0.129,
+      "needs_review": false
+    },
+    {
+      "id": "cee35a937ba926f77df9",
+      "text": "禁書に、名前を消す術はある？",
+      "heard": "近所に名前を消す術はある",
+      "sha256": "f763ceb09b221a890b3b28f603221861f70a9f8f769d419cb6ff0f9872276c6e",
+      "cer": 0.0588,
+      "needs_review": false
+    },
+    {
+      "id": "6cd2a763e69b39c593b3",
+      "text": "名簿に名前が書けない客でもいい？",
+      "heard": "名簿に名前が書けないキャップでもいい",
+      "sha256": "caa921d418ae3da64588cadfa2fa99f93a06d47e29fb081bae1d66fe7c8164e1",
+      "cer": 0.1053,
+      "needs_review": false
+    },
+    {
+      "id": "103f727eecc560869602",
+      "text": "できるわ。でも無理な跳躍を、計算で正当化しないで。",
+      "heard": "できるわでも無理な創薬も計算で正当化しない",
+      "sha256": "43385ecc4ca30d018a3a5dd14acb7b7adffe0ec6cc0dc8beef1add1fadcb12a4",
+      "cer": 0.1379,
+      "needs_review": false
+    },
+    {
+      "id": "04962de1b61adf46c6d2",
+      "text": "あの印、踏んでも大丈夫か？",
+      "heard": "あのチルシ踏んでも大丈夫か",
+      "sha256": "778c8f2049a49f555c3a977725c8267bb0595d7108d6701a4747fbc3ad72fcf0",
+      "cer": 0.0625,
+      "needs_review": false
+    },
+    {
+      "id": "b8b988dfb9c3bbd01ca2",
+      "text": "味方の足場だ。怖がらず踏めるよう、先に説明すべきだったな。",
+      "heard": "味方の足場だ 怖がらず詰めるよう先に説明すべきだったな",
+      "sha256": "78e7bdb67ca3a2f26fd431e297a24fd42036b20a99a83564c08ca3761c22e7a6",
+      "cer": 0.0312,
+      "needs_review": false
+    },
+    {
+      "id": "099c0f1bfc4b1cfecc33",
+      "text": "腹が鳴る音も入れろ。英雄だって腹は減る。",
+      "heard": "鼻が鳴る音も入れろ 英雄だって鼻は減る",
+      "sha256": "b5d816b87533082c663cdc6cacc430e05eca4a5d10de140ddc56742cb1785bd8",
+      "cer": 0.087,
+      "needs_review": false
+    },
+    {
+      "id": "76c5cd3313c61c21a75a",
+      "text": "盾にマイクをつけたら、戦況が分かるね。",
+      "heard": "縦にマイクをつけたら選挙がわかる ね",
+      "sha256": "a18f80af3031a787ced8387f16b5a502da02692ea794b136b0708bf6695ac534",
+      "cer": 0.0476,
+      "needs_review": false
+    },
+    {
+      "id": "205dff5279cccbc962d8",
+      "text": "家の記録から、消された月の頁があるの？",
+      "heard": "いじえの記録から消された月のページがあるの?",
+      "sha256": "ec44ed2bad493ef3f6cfb9503a2dab0c00ac6448fb7bd2fda9e6972304f64b14",
+      "cer": 0.0455,
+      "needs_review": false
+    },
+    {
+      "id": "e861dc45b91fd93bdcfc",
+      "text": "消した理由を知りたいの。写しが残っていたら見せて。",
+      "heard": "テスタリーを知りたいの 映しが残っていたら見てて",
+      "sha256": "cf3768293d65efa2cb89eec321d0f9fc5154c089f296c67a6ace2f2b9aa8231e",
+      "cer": 0.1923,
+      "needs_review": true
+    },
+    {
+      "id": "ebaa1ce85064de3a19f4",
+      "text": "あるよ。でも私を怖がる人のためにも、捨てないで。",
+      "heard": "あるよ!でも、私を怖がる人のためにも、捨てないで!",
+      "sha256": "57878ccf0614ec7896454b513d839ab958abd607c8d2cf2bf7240cc71054be64",
+      "cer": 0.0,
+      "needs_review": false
+    },
+    {
+      "id": "347ca26101d9fa7ca853",
+      "text": "精霊樹の年輪は、森の歴史でしょうか。",
+      "heard": "精霊樹の年輪は森の歴史でしょうか",
+      "sha256": "f963a8db160e87e50d1e6ecc1917cca33a39b0a7d34341823e1030c178c1c614",
+      "cer": 0.0,
+      "needs_review": false
+    },
+    {
+      "id": "4205301509671c2033c0",
+      "text": "傷の原因は年輪だけじゃ読めない。村の人にも聞こう。",
+      "heard": "傷の原因はメンディーだけで読めない村の人にも聞こう",
+      "sha256": "856f2264fae9df044a6c35b821275a8b50aae89af763cf34c699aed65eaff424",
+      "cer": 0.2,
+      "needs_review": true
+    },
+    {
+      "id": "30f8c2576c8ba3bedb03",
+      "text": "今日は小さい火の練習だね。焦げそうなら止めて。",
+      "heard": "今日は小さい日の練習だね 焦げそうなら止めて",
+      "sha256": "130fb0a36523d04b00754cf4ba2b4772b26d54a42c3dccd1a01522d6894ec207",
+      "cer": 0.0741,
+      "needs_review": false
+    },
+    {
+      "id": "2269d95a68ea4925b6cf",
+      "text": "異世界の花にも、故郷の名をつけるのか？",
+      "heard": "異世界のは何も、ふるさとの名をつけるのか?",
+      "sha256": "2a173c034bcaf26043bdb515a65dada55d42ca4ba8ff165d786dd2b851c31ce2",
+      "cer": 0.0952,
+      "needs_review": false
+    },
+    {
+      "id": "400e5d981c40705d540d",
+      "text": "育つ場所を隠した苗にも、名前は要るか。",
+      "heard": "育つ場所を隠した前にも名前は言えた",
+      "sha256": "86647b5c5408ae19ae2e8523c248be970c4230c129daffe635d25c43fd419ea9",
+      "cer": 0.1364,
+      "needs_review": false
+    },
+    {
+      "id": "cfbed98b8ed4271c2617",
+      "text": "封印のある土地じゃ、根も伸びにくいな。",
+      "heard": "封印のある土地じゃ でも伸びにくいなぁ",
+      "sha256": "86a7aa309d609fa8d94d75a54f1e4e96af6dcda96f44adeb37fc4ed0c38ee41c",
+      "cer": 0.1053,
+      "needs_review": false
+    },
+    {
+      "id": "9ff16f17fc17ebeab29f",
+      "text": "見張りの木に穴を開けるなら、あとで埋めろ。",
+      "heard": "ニハリの木に穴を開けるなら、後で埋めろはっ",
+      "sha256": "4e48fc720f79388b92af1ed747b39f983186d975cc21f9968a21e3684c9cb6fb",
+      "cer": 0.1429,
+      "needs_review": false
+    },
+    {
+      "id": "c15f7db97beb7cf29456",
+      "text": "名前を叫ぶ間に門が開いたら、普通に入ろうね。",
+      "heard": "名前を叫ぶ間に門が開いたら 普通に入ろうね",
+      "sha256": "adc0e89192eaabf2762a452b8ffa07f1909ce05efc36c1c5c025fec294696708",
+      "cer": 0.0,
+      "needs_review": false
+    },
+    {
+      "id": "61e4f6dded947cd01c09",
+      "text": "出撃前に装置が鳴った！　敵襲？",
+      "heard": "出撃前に装置が鳴ったテキシュー",
+      "sha256": "5176ec6a8b10006a9a946bde5cb6bf29552cb18c136d931a716b5395f1feec45",
+      "cer": 0.05,
+      "needs_review": false
+    },
+    {
+      "id": "c98196d23391ae054e68",
+      "text": "蓮、忘れ物ない？　私が確認する番！",
+      "heard": "レン、忘れ物ない?私が確認する番!",
+      "sha256": "82b07a3a68538e981891a1caf4d67bd1d4b20f9ae3b5be8f259f424281859b14",
+      "cer": 0.0952,
+      "needs_review": false
+    },
+    {
+      "id": "def46359ee1ca84633fe",
+      "text": "私の印を怖がって、治癒を間違えるなよ。",
+      "heard": "私の印を怖がって 自由を間違えるなよ",
+      "sha256": "52c68bd429941aa9e8fc63b67758305b9983c7066ffa2ba6a7cb76777fb44cce",
+      "cer": 0.0909,
+      "needs_review": false
+    },
+    {
+      "id": "b76cdb22ebf378051743",
+      "text": "樹の成長を、少し早められたら……。",
+      "heard": "一気の成長を少し早められたら",
+      "sha256": "beaece90725981b7a6a4c761d34b00c9d6b59f25f405ae0d7109e5ca80c1bf1e",
+      "cer": 0.1111,
+      "needs_review": false
+    },
+    {
+      "id": "96504e042aa383335121",
+      "text": "待って。枝で眠る鳥の朝まで、早めないでね。",
+      "heard": "待って、枝で眠る鳥の朝まで早めないでね",
+      "sha256": "07bd2020a9f64534c642f3e60d5fd3b91eee64fa6004e0b1461985d53159b265",
+      "cer": 0.0,
+      "needs_review": false
+    },
+    {
+      "id": "c6da386c5f61047ef13f",
+      "text": "星界の時計、目盛りが足りません。",
+      "heard": "警戒の時計がたくさん目盛りが足りません",
+      "sha256": "5b813c664664c41655bbe3312a2f4c68fad50ca45af8eb45bff5eb9c68e42ad3",
+      "cer": 0.4118,
+      "needs_review": true
+    },
+    {
+      "id": "330f2a17587b96691da7",
+      "text": "森の道は、予定通りには空かないわ。",
+      "heard": "森の道は予定通りにはあかないわ",
+      "sha256": "434bec49b2c66186e8969d865d06d009c95acb433892529d53851bb4a40e7cf9",
+      "cer": 0.0,
+      "needs_review": false
+    },
+    {
+      "id": "6e7973e51454228467c3",
+      "text": "森の時計は、鐘では動かないわ。",
+      "heard": "森の時計は鐘では動かないわ",
+      "sha256": "d153bae4ee4e2423cdfdd9dc07ff28f8974a203da549b0e3139338b9fca5be27",
+      "cer": 0.0,
+      "needs_review": false
+    }
+  ],
+  "semantic_checked_at": "2026-11-03T01:04:07.233931+00:00",
+  "retry_count": 28,
+  "decisions": [
+    {
+      "id": "f2b1973c4714efff40eb",
+      "speaker": "aster",
+      "text": "君の剣は王座ではなく、帰り道を指すんだね。",
+      "heard": "君の剣は大沢ではなく、帰り道を指すんだね",
+      "sha256": "799b9f2fd51c80006c4c6d8b7df89eedb5096249df248a16c9b5039a951dc122",
+      "requirements": {
+        "required_phrases": [
+          "王座"
+        ]
+      },
+      "reading": "きみのけんはおうざではなく、かえりみちをさすんだね。",
+      "decision": "retry with original approved reference",
+      "superseded_mechanical_reading": "くんのつるぎはおうざではなく、かえりみちをさすんだね。"
+    },
+    {
+      "id": "a53a970fbff2e27be419",
+      "speaker": "aster",
+      "text": "母上の杖を戦場へ持つのは、怖くないかい。",
+      "heard": "母上の杖を戦者場へ持つのは 怖くないかい",
+      "sha256": "0ac055970511ea0a2854a76beb179662ff298bfac46146022f225f7b438e0147",
+      "requirements": {
+        "required_phrases": [
+          "戦場"
+        ]
+      },
+      "reading": "ははうえのつえをせんじょうへもつのは、こわくないかい。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "4d43acd1a36a94a8fb30",
+      "speaker": "lyra",
+      "text": "家の責務と王冠。逃げたと言われるかしら。",
+      "heard": "家の責務と保管、逃げたと言われるかしら",
+      "sha256": "cf80ca0dd9da98e4cabefa8f5e4be40f51add9dbad07a74e1a67adc4473b1f46",
+      "requirements": {
+        "required_phrases": [
+          "王冠"
+        ]
+      },
+      "reading": "いえのせきむとおうかん。にげたといわれるかしら。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "5880746ba0530e5fcd62",
+      "speaker": "lyra",
+      "text": "王家の追手に見つからず、民に帰還を知らせたい。",
+      "heard": "王家の御手に見つからず、民に帰還を知らせたい。",
+      "sha256": "8369d5559fce36fbee2691b00895e2ec65cb7be1f9324d51b1dfa5278eb8f908",
+      "requirements": {
+        "required_phrases": [
+          "追手"
+        ]
+      },
+      "reading": "おうけのおってにみつからず、たみにきかんをしらせたい。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "91262513d709f9560e4a",
+      "speaker": "lyra",
+      "text": "許す言葉を急いで、あなたの責任を奪いたくない。",
+      "heard": "許す言葉を急いで、あなたの責任を奪え…",
+      "sha256": "dbe1df74d35002921929dd14f68511c2fa128122168b3109c8bd784420e8b207",
+      "requirements": {
+        "required_phrases": [
+          "奪いたくない"
+        ]
+      },
+      "reading": "ゆるすことばをいそいで、あなたのせきにんをうばいたくない。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "f3b4b10beb1015f13724",
+      "speaker": "high-school-warrior",
+      "text": "命令より先に傷を見ろって、俺が言ってくる。",
+      "heard": "命令より先に傷を見ろって、 俺が言ってくるいい?",
+      "sha256": "5087d705f648e3a66467532392f8a6a76439a224e2a535b83b0509d3b7c8f909",
+      "requirements": {
+        "require_lexical_exact": true
+      },
+      "reading": "めいれいよりさきにきずをみろって、おれがいってくる。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "553e6d0592e8f3ef6fde",
+      "speaker": "high-school-caretaker",
+      "text": "怒鳴る声で、患者の息を消さないでね。",
+      "heard": "となる声で患者の息を消さないでね",
+      "sha256": "e6dea0043d7f1e1da8ef30e7cf3624895f3e01cb7c38258cb662a2688d86b034",
+      "requirements": {
+        "required_phrases": [
+          "怒鳴る"
+        ]
+      },
+      "reading": "どなるこえで、かんじゃのいきをけさないでね。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "b968e2fea146e6a6b46f",
+      "speaker": "high-school-warrior",
+      "text": "負傷者を置けって命令なら、俺が破る。",
+      "heard": "負傷者を受けて命令なら、俺が破る",
+      "sha256": "fa2115fbebcc29392d4ae4af578906af1ea530eb4c843560c3e36c9935fadf1e",
+      "requirements": {
+        "required_phrases": [
+          "置け"
+        ]
+      },
+      "reading": "ふしょうしゃをおけってめいれいなら、おれがやぶる。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "74435a134a1e8bead1f1",
+      "speaker": "high-school-warrior",
+      "text": "勇者なら先頭に立て、だってさ。",
+      "heard": "勇者なら先攻に勝て だってさ",
+      "sha256": "a64c1864d445c0fcd24531a173a00913a4299e7641efbd321c7b2f3f7b028157",
+      "requirements": {
+        "required_phrases": [
+          "先頭に立て"
+        ]
+      },
+      "reading": "ゆうしゃならせんとうにたて、だってさ。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "885338d495574559d7ae",
+      "speaker": "high-school-caretaker",
+      "text": "隠している傷、袖を上げて見せて。",
+      "heard": "隠している傷、それをやってみせて?",
+      "sha256": "fd6ee7e7b6ecca220cb6200d44b15eb7555b63da00d23a0d068227b39e925f14",
+      "requirements": {
+        "required_phrases": [
+          "袖を上げて",
+          "見せて"
+        ]
+      },
+      "reading": "かくしているきず、そでをあげてみせて。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "8d4b2cf48292f95cdda2",
+      "speaker": "high-school-caretaker",
+      "text": "敵味方の傷病者を、同じ屋根の下で？",
+      "heard": "敵味方の商業者を同じ屋根の下で",
+      "sha256": "8c8f1454b7c8ac2ecb12870d40d0c440845dda371dbfdba130087b920b64ceb9",
+      "requirements": {
+        "required_phrases": [
+          "傷病者"
+        ]
+      },
+      "reading": "てきみかたのしょうびょうしゃを、おなじやねのしたで？",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "dfb5953717c8d2ba70f5",
+      "speaker": "high-school-assassin",
+      "text": "僕の名前は、目次に載せなくていい。",
+      "heard": "僕の鍋はもう無事に乗せなくていい",
+      "sha256": "3db66a021ad1a7d409ba842b6ce75f0bd088ccf6fc3dce05735e8f79da26bc42",
+      "requirements": {
+        "required_phrases": [
+          "名前",
+          "目次"
+        ]
+      },
+      "reading": "ぼくのなまえは、もくじにのせなくていい。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "cee35a937ba926f77df9",
+      "speaker": "high-school-assassin",
+      "text": "禁書に、名前を消す術はある？",
+      "heard": "近所に名前を消す術はある",
+      "sha256": "f763ceb09b221a890b3b28f603221861f70a9f8f769d419cb6ff0f9872276c6e",
+      "requirements": {
+        "required_phrases": [
+          "禁書"
+        ]
+      },
+      "reading": "きんしょに、なまえをけすじゅつはある？",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "6cd2a763e69b39c593b3",
+      "speaker": "high-school-assassin",
+      "text": "名簿に名前が書けない客でもいい？",
+      "heard": "名簿に名前が書けないキャップでもいい",
+      "sha256": "caa921d418ae3da64588cadfa2fa99f93a06d47e29fb081bae1d66fe7c8164e1",
+      "requirements": {
+        "required_phrases": [
+          "客"
+        ]
+      },
+      "reading": "めいぼになまえがかけないきゃくでもいい？",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "103f727eecc560869602",
+      "speaker": "magic-shizuku",
+      "text": "できるわ。でも無理な跳躍を、計算で正当化しないで。",
+      "heard": "できるわでも無理な創薬も計算で正当化しない",
+      "sha256": "43385ecc4ca30d018a3a5dd14acb7b7adffe0ec6cc0dc8beef1add1fadcb12a4",
+      "requirements": {
+        "required_phrases": [
+          "跳躍",
+          "正当化"
+        ]
+      },
+      "reading": "できるわ。でもむりなちょうやくを、けいさんでせいとうかしないで。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "04962de1b61adf46c6d2",
+      "speaker": "high-school-dodgeball",
+      "text": "あの印、踏んでも大丈夫か？",
+      "heard": "あのチルシ踏んでも大丈夫か",
+      "sha256": "778c8f2049a49f555c3a977725c8267bb0595d7108d6701a4747fbc3ad72fcf0",
+      "requirements": {
+        "required_prefix": "あの印"
+      },
+      "reading": "あのしるし、ふんでもだいじょうぶか？",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "b8b988dfb9c3bbd01ca2",
+      "speaker": "magic-rei",
+      "text": "味方の足場だ。怖がらず踏めるよう、先に説明すべきだったな。",
+      "heard": "味方の足場だ 怖がらず詰めるよう先に説明すべきだったな",
+      "sha256": "78e7bdb67ca3a2f26fd431e297a24fd42036b20a99a83564c08ca3761c22e7a6",
+      "requirements": {
+        "required_phrases": [
+          "踏める"
+        ]
+      },
+      "reading": "みかたのあしばだ。こわがらずふめるよう、さきにせつめいすべきだったな。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "099c0f1bfc4b1cfecc33",
+      "speaker": "high-school-chef",
+      "text": "腹が鳴る音も入れろ。英雄だって腹は減る。",
+      "heard": "鼻が鳴る音も入れろ 英雄だって鼻は減る",
+      "sha256": "b5d816b87533082c663cdc6cacc430e05eca4a5d10de140ddc56742cb1785bd8",
+      "requirements": {
+        "required_phrases": [
+          "腹"
+        ]
+      },
+      "reading": "はらがなるおともいれろ。えいゆうだってはらはへる。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "76c5cd3313c61c21a75a",
+      "speaker": "high-school-bard",
+      "text": "盾にマイクをつけたら、戦況が分かるね。",
+      "heard": "縦にマイクをつけたら選挙がわかる ね",
+      "sha256": "a18f80af3031a787ced8387f16b5a502da02692ea794b136b0708bf6695ac534",
+      "requirements": {
+        "required_phrases": [
+          "戦況"
+        ]
+      },
+      "reading": "たてにまいくをつけたら、せんきょうがわかるね。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "205dff5279cccbc962d8",
+      "speaker": "high-school-librarian",
+      "text": "家の記録から、消された月の頁があるの？",
+      "heard": "いじえの記録から消された月のページがあるの?",
+      "sha256": "ec44ed2bad493ef3f6cfb9503a2dab0c00ac6448fb7bd2fda9e6972304f64b14",
+      "requirements": {
+        "required_prefix": {
+          "text": "家の記録",
+          "readings": [
+            "いえのきろく",
+            "うちのきろく"
+          ]
+        }
+      },
+      "reading": "いえのきろくから、けされたつきのぺーじがあるの？",
+      "decision": "retry with original approved reference",
+      "superseded_mechanical_reading": "いえのきろくから、けされたがつのぺーじがあるの？"
+    },
+    {
+      "id": "e861dc45b91fd93bdcfc",
+      "speaker": "magic-shizuku",
+      "text": "消した理由を知りたいの。写しが残っていたら見せて。",
+      "heard": "テスタリーを知りたいの 映しが残っていたら見てて",
+      "sha256": "cf3768293d65efa2cb89eec321d0f9fc5154c089f296c67a6ace2f2b9aa8231e",
+      "requirements": {
+        "required_phrases": [
+          "消した理由",
+          "見せて"
+        ]
+      },
+      "reading": "けしたりゆうをしりたいの。うつしがのこっていたらみせて。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "4205301509671c2033c0",
+      "speaker": "magic-koharu",
+      "text": "傷の原因は年輪だけじゃ読めない。村の人にも聞こう。",
+      "heard": "傷の原因はメンディーだけで読めない村の人にも聞こう",
+      "sha256": "856f2264fae9df044a6c35b821275a8b50aae89af763cf34c699aed65eaff424",
+      "requirements": {
+        "required_phrases": [
+          "年輪"
+        ]
+      },
+      "reading": "きずのげんいんはねんりんだけじゃよめない。むらのひとにもきこう。",
+      "decision": "retry with original approved reference",
+      "superseded_mechanical_reading": "きずのげんいんはねんりんだけじゃよめない。むらのにんにもきこう。"
+    },
+    {
+      "id": "400e5d981c40705d540d",
+      "speaker": "high-school-gardener",
+      "text": "育つ場所を隠した苗にも、名前は要るか。",
+      "heard": "育つ場所を隠した前にも名前は言えた",
+      "sha256": "86647b5c5408ae19ae2e8523c248be970c4230c129daffe635d25c43fd419ea9",
+      "requirements": {
+        "required_phrases": [
+          "苗にも",
+          "名前は要るか"
+        ]
+      },
+      "reading": "そだつばしょをかくしたなえにも、なまえはいるか。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "cfbed98b8ed4271c2617",
+      "speaker": "high-school-gardener",
+      "text": "封印のある土地じゃ、根も伸びにくいな。",
+      "heard": "封印のある土地じゃ でも伸びにくいなぁ",
+      "sha256": "86a7aa309d609fa8d94d75a54f1e4e96af6dcda96f44adeb37fc4ed0c38ee41c",
+      "requirements": {
+        "required_phrases": [
+          "根も"
+        ]
+      },
+      "reading": "ふういんのあるとちじゃ、ねものびにくいな。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "9ff16f17fc17ebeab29f",
+      "speaker": "high-school-gardener",
+      "text": "見張りの木に穴を開けるなら、あとで埋めろ。",
+      "heard": "ニハリの木に穴を開けるなら、後で埋めろはっ",
+      "sha256": "4e48fc720f79388b92af1ed747b39f983186d975cc21f9968a21e3684c9cb6fb",
+      "requirements": {
+        "required_phrases": [
+          "見張り"
+        ]
+      },
+      "reading": "みはりのきにあなをあけるなら、あとでうめろ。",
+      "decision": "retry with original approved reference",
+      "superseded_mechanical_reading": "みはりのきにあなをひらけるなら、あとでうめろ。"
+    },
+    {
+      "id": "def46359ee1ca84633fe",
+      "speaker": "magic-rei",
+      "text": "私の印を怖がって、治癒を間違えるなよ。",
+      "heard": "私の印を怖がって 自由を間違えるなよ",
+      "sha256": "52c68bd429941aa9e8fc63b67758305b9983c7066ffa2ba6a7cb76777fb44cce",
+      "requirements": {
+        "required_phrases": [
+          "治癒"
+        ]
+      },
+      "reading": "わたしのいんをこわがって、ちゆをまちがえるなよ。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "b76cdb22ebf378051743",
+      "speaker": "magic-madoka",
+      "text": "樹の成長を、少し早められたら……。",
+      "heard": "一気の成長を少し早められたら",
+      "sha256": "beaece90725981b7a6a4c761d34b00c9d6b59f25f405ae0d7109e5ca80c1bf1e",
+      "requirements": {
+        "required_prefix": {
+          "text": "樹の成長",
+          "readings": [
+            "きのせいちょう"
+          ]
+        }
+      },
+      "reading": "きのせいちょうを、すこしはやめられたら……。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "c6da386c5f61047ef13f",
+      "speaker": "magic-madoka",
+      "text": "星界の時計、目盛りが足りません。",
+      "heard": "警戒の時計がたくさん目盛りが足りません",
+      "sha256": "5b813c664664c41655bbe3312a2f4c68fad50ca45af8eb45bff5eb9c68e42ad3",
+      "requirements": {
+        "required_prefix": {
+          "text": "星界の時計",
+          "readings": [
+            "せいかいのとけい"
+          ]
+        },
+        "require_lexical_exact": true
+      },
+      "reading": "せいかいのとけい、めもりがたりません。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "1c64868e4c432f27e146",
+      "speaker": "magic-mirai",
+      "text": "睡眠そのものを薦めてくれる顔、隠さなくていいわよ。",
+      "heard": "遂にそのものを勧めてくれる顔隠さなくていいわよ",
+      "sha256": "b0fa1e12b99d52aef4f0cee4d8f70d360adfab57758126bc9d8b766a3787e678",
+      "requirements": {
+        "required_phrases": [
+          "睡眠"
+        ]
+      },
+      "reading": "すいみんそのものをすすめてくれるかお、かくさなくていいわよ。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "afa16063bcb4714c42c6",
+      "speaker": "magic-sera",
+      "text": "暮らしを記すには、何から尋ねればいいでしょう。",
+      "heard": "暮らしを知る国は何から尋ねればいいでしょう",
+      "sha256": "7005344acd4d070886a9514152d23aa4658ed243c5328b05e29cdd4038e9fea7",
+      "requirements": {
+        "required_phrases": [
+          "記すには"
+        ]
+      },
+      "reading": "くらしをしるすには、なにからたずねればいいでしょう。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "d822046769c5f058a00b",
+      "speaker": "magic-sera",
+      "text": "未来を記す者と、過去を記す者ですね。",
+      "heard": "未来を知るくものと過去を知るくものですね",
+      "sha256": "ac8fa38cf2b76aabe8b9e3ddc95bbc812657358e0ed9107a1d51f38c3e780cad",
+      "requirements": {
+        "required_phrases": [
+          "未来を記す者",
+          "過去を記す者"
+        ]
+      },
+      "reading": "みらいをしるすものと、かこをしるすものですね。",
+      "decision": "retry with original approved reference"
+    },
+    {
+      "id": "2b3d7fca441b88cfb26b",
+      "speaker": "magic-sera",
+      "text": "勇者の記録、勇ましく始めた方がいいですか。",
+      "heard": "勇者の記録、イカマスク始めた方がいいですか?",
+      "sha256": "6b8a1dd1c02bf5764dbb5509d875234b5c59c00e806bf1a7dd7f3f47227f1f17",
+      "requirements": {
+        "required_phrases": [
+          "勇ましく"
+        ]
+      },
+      "reading": "ゆうしゃのきろく、いさましくはじめたほうがいいですか。",
+      "decision": "retry with original approved reference"
+    }
+  ],
+  "accepted": [
+    {
+      "id": "b63dc75860ac86d21dbe",
+      "sha256": "640f284dbff6020a031a6cdc6d97adbebeea56a9576813e75220d24a641004f1",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "43486c4ed447d38cc25d",
+      "sha256": "ed754fc00903c1a77749e124b7c7e55b8d9b39db9bf9f1872919fa00f8840ba6",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "55b7e4dc57ce0451fb74",
+      "sha256": "5316939581261bb7a610e9ef2adaad0d763df0bb6d0f89a47fef4c112d299c0f",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "e19d4719fef2657883ca",
+      "sha256": "d801fe27f020054feae592747e582aa5ea12b2db8a9c8b43abf66f80d06563ad",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "ed12e88090e41cd833e9",
+      "sha256": "398667fdd50fb763e70dd956050ba9ab540faf5291f22635e0b6b9589ece5941",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "ebaa1ce85064de3a19f4",
+      "sha256": "57878ccf0614ec7896454b513d839ab958abd607c8d2cf2bf7240cc71054be64",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "347ca26101d9fa7ca853",
+      "sha256": "f963a8db160e87e50d1e6ecc1917cca33a39b0a7d34341823e1030c178c1c614",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "30f8c2576c8ba3bedb03",
+      "sha256": "130fb0a36523d04b00754cf4ba2b4772b26d54a42c3dccd1a01522d6894ec207",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "2269d95a68ea4925b6cf",
+      "sha256": "2a173c034bcaf26043bdb515a65dada55d42ca4ba8ff165d786dd2b851c31ce2",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "c15f7db97beb7cf29456",
+      "sha256": "adc0e89192eaabf2762a452b8ffa07f1909ce05efc36c1c5c025fec294696708",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "61e4f6dded947cd01c09",
+      "sha256": "5176ec6a8b10006a9a946bde5cb6bf29552cb18c136d931a716b5395f1feec45",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "c98196d23391ae054e68",
+      "sha256": "82b07a3a68538e981891a1caf4d67bd1d4b20f9ae3b5be8f259f424281859b14",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "96504e042aa383335121",
+      "sha256": "07bd2020a9f64534c642f3e60d5fd3b91eee64fa6004e0b1461985d53159b265",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "330f2a17587b96691da7",
+      "sha256": "434bec49b2c66186e8969d865d06d009c95acb433892529d53851bb4a40e7cf9",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "6e7973e51454228467c3",
+      "sha256": "d153bae4ee4e2423cdfdd9dc07ff28f8974a203da549b0e3139338b9fca5be27",
+      "decision": "accepted after independent transcript review; exact words or legitimate homophone/contextual reading"
+    },
+    {
+      "id": "98b2de01b64e7c417614",
+      "sha256": "81bc247e239b1b605be1aae5f71d972609781d9b7622f627bf7dfb9c38b30319",
+      "decision": "accepted after independent medium beam5 review; lexical text verified"
+    },
+    {
+      "id": "c1a0b1f7588422aee9f9",
+      "sha256": "8fcb609690f5ae7bfdf3a04ed8c316485f0b6570a62dd839c36a1b16b490e7f9",
+      "decision": "accepted after independent medium beam5 review; lexical text verified"
+    },
+    {
+      "id": "4d43acd1a36a94a8fb30",
+      "sha256": "d8f861239b9e03c5198e6575a1b26f215d9da59740143b3e7b4e4f97fa44bdb1",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "103f727eecc560869602",
+      "sha256": "3fdbc85a766d4a464760959e127c4c318fd90456d6b5fe78f0c07ad655d75542",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "04962de1b61adf46c6d2",
+      "sha256": "193e4e8b345b143764d1c2f1b2ef317d108e9a1e79e0b298a7aaa1d1cc30493f",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "099c0f1bfc4b1cfecc33",
+      "sha256": "cf7e24ce45b16ace5e8847022e68c23bd172d2676174a5605df53657476481e5",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "205dff5279cccbc962d8",
+      "sha256": "9bdf93b9305410b01540b9cc7d3c354f7138e8164d72df1b3a359782a56c63c7",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "400e5d981c40705d540d",
+      "sha256": "495c2b24fc78aa53616157d28cefd5bbd06ccd80deed90ef88caa86ccaae830a",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "74435a134a1e8bead1f1",
+      "sha256": "6650a6dbc010079518a753deeb82057b28294ffb7311d77bcc0211dfb4aed6b2",
+      "decision": "corrected required content confirmed in independent medium transcript; remaining differences are homophones or full-line particle tolerance"
+    },
+    {
+      "id": "b8b988dfb9c3bbd01ca2",
+      "sha256": "23e737052004391365fdf43868ad4592e3510ee95dc9fbd5a2e8d0a3e7b6bf78",
+      "decision": "medium transcript confirms required words and meaning; homophone/particle-only full-line differences"
+    },
+    {
+      "id": "1c64868e4c432f27e146",
+      "sha256": "9ce59b090ff8405f130574954f8f895e6e46337d7e4ec73189d3299a4b518261",
+      "decision": "medium transcript confirms required words and meaning; homophone/particle-only full-line differences"
+    },
+    {
+      "id": "90f8154fa54fce585789",
+      "sha256": "594871a9fd4d591e14676de79f960ea97b0d242d7f5b550436445fe8abe3c411",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "今日の朝ごはんから秘密のない温かい話になりますよ"
+    },
+    {
+      "id": "2f19f1b3d425af0b5092",
+      "sha256": "61888631da10f0d205a365f45bdca929a51cd89fde79c64a6550521c7e8f081b",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "あるよ、見た責任まで装置に押し付けないようにしている。"
+    },
+    {
+      "id": "3510abc2031286fb527a",
+      "sha256": "505a3500a0aa5097d2f3ffaed0dc5bd0e925a765b4e0f9cd273e89ca236527a9",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "君の知らない痛みまで先に見たくない調べるなら並んでいこう"
+    },
+    {
+      "id": "0170405518d52ebbadfc",
+      "sha256": "92391f4285940d490fc7845e9c0b849d6f2a72567f69e33f9a5276636520b384",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "正解の礼儀は知らねえが背中は任せろ"
+    },
+    {
+      "id": "b2826b2b5fb97851cf53",
+      "sha256": "0e877e3a950f62a02cc0d3b68370492d2b2a881837df885b48f68fdf4d03cf07",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "氷で拳を冷やしたらずっと殴れそうだ"
+    },
+    {
+      "id": "200deed92bac91884bbd",
+      "sha256": "e294e975b89fc135ddf5952a0a6b8036702a8f452c80f9e6a210825a09490e53",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "逃げるだけの勝ち方は気にくわねえ"
+    },
+    {
+      "id": "62e1493114be49fc8baf",
+      "sha256": "f67405baaf28c8856d5932311877bd22d516877d7d1b310ce5f89043dee25b3a",
+      "decision": "Independent Japanese ASR transcript reviewed: intended words retained; remaining differences are homophones or natural colloquial inflection.",
+      "heard": "君の予定表を見て行っているのか?まず2人で休もう"
+    },
+    {
+      "id": "d43146730c80e97b1e62",
+      "sha256": "8c7fa13cbf2a504e92d3a25abce1c9bbdeed8f7d542b149f46a880c93e1999b8",
+      "decision": "Medium and independent Japanese ASR confirm all words and explicitly recognize 2組, equivalent to 二組; other counts rejected.",
+      "heard": "やけどさせたら寝覚めが悪い まず耐熱手袋を2組持ってこい"
+    },
+    {
+      "id": "e069e63479993b368afc",
+      "sha256": "50e6b104c7442f854209a31a14077c3e17c0eb68178ac0df9bda91778f359990",
+      "decision": "Transcript checked: 寝ぐされ is the same spoken reading as 根腐れ; remaining words match.",
+      "heard": "寝ぐされはするよ患者と同じに欲しい量を聞いてみよう"
+    },
+    {
+      "id": "ebfd2b6522712b4018c4",
+      "sha256": "ce1d50f02d3061b40fdd28eee75bb7cd25a42832de7745db94126396275cbe2f",
+      "decision": "Independent Japanese ASR confirms the negative wording; earlier transcription differed only in an elongated ending.",
+      "heard": "僕が怖くても進むのは命令されたからじゃない"
+    },
+    {
+      "id": "5d5658a2a0aa2607b0bd",
+      "sha256": "902d9f77050b35a8949ba92e5cf6c154020f6f8fea19d2d3d46b05b77a1a3436",
+      "decision": "Medium transcript checked: 聖門 and 星紋 share せいもん; all other words match.",
+      "heard": "うん、勇者と聖門の剣士じゃなくて、寝不足の二人としてね"
+    },
+    {
+      "id": "86ce05bef46aedeebdb3",
+      "sha256": "41068609d3b4aefecb93e9c3b01dfe49f3db17e12183688eb5fd252403254c12",
+      "decision": "Japanese 灯 is correctly read あかり in context; semantic words retained.",
+      "heard": "隠したい日もある。だが帰還後は君の明かりに腕を出そう"
+    },
+    {
+      "id": "617f90a3f4e0fb63bea3",
+      "sha256": "abd06338bef10518fd0d3ae5f8d41a576140546bc0d26442be6dc54a1ea7b528",
+      "decision": "Japanese 灯 is correctly read あかり in context; semantic words retained.",
+      "heard": "君の明かりは夜をなくしたがってはいないのだな"
+    },
+    {
+      "id": "d02917fe1e1ae87a8b61",
+      "sha256": "a88fff4b5b35cb5aef015c355a09c3c8530354047d98077476f68a4898e4e778",
+      "decision": "Medium ASR confirms the complete original words, including 市場; remaining differences are kana/kanji transcription.",
+      "heard": "旗はたたんで、市場のおばあさんにだけパンの注文を残そう"
+    },
+    {
+      "id": "a60e354a672a3b45e449",
+      "sha256": "ef81f4efb391d825855d0941c96ea1ae0e8940224eaf94375782f9d88fa44313",
+      "decision": "Medium ASR reviewed; intended words retained, remaining differences are homophones or punctuation.",
+      "heard": "道を開けた人も戻れるよう 私は橋に立ちます"
+    },
+    {
+      "id": "ee2c606386518de96d3d",
+      "sha256": "73abcf36f8e5e40ab3746121c06da25aded9554f8db45f0d37cd2019eaad71c8",
+      "decision": "Medium ASR reviewed; intended words retained, remaining differences are homophones or punctuation.",
+      "heard": "閉じる時刻も入れよう 君は本に夢中だと食事の鐘を聞かないから"
+    },
+    {
+      "id": "a1fc43510899f2ab7299",
+      "sha256": "546d5d1c64a09df54719abedfc0f4981ce699c576ad74456dbfdd674c229b2ab",
+      "decision": "Medium ASR reviewed; intended words retained, remaining differences are homophones or punctuation.",
+      "heard": "うん レオン用だけじゃ演奏家の止め具と混ざるところだったね"
+    },
+    {
+      "id": "622eaaa1394ea274f884",
+      "sha256": "4ec6e3055313b775ec6439adee3d6409f3d5fd22c4a71a5c6ddbf777533cbcce",
+      "decision": "Medium and independent Japanese ASR confirm the original words; 朝ご飯 is correctly read ごはん.",
+      "heard": "できるよ でもお腹の音までは修理できないな先に朝ごはんにしよう"
+    },
+    {
+      "id": "637aac13cddb2f01a1c8",
+      "sha256": "5a707671ba7885700517b6e7c6af286347d5fde27dd061005a9dc4f86bad4606",
+      "decision": "Medium and independent Japanese ASR confirm the same pronunciation; 帰還後 and 期間後 are homophones in this context.",
+      "heard": "匂いで敵にバレる期間後の一杯を少し濃くしておいてくれ"
+    },
+    {
+      "id": "5e6eba4ea8068e0b61b4",
+      "sha256": "a689fbdd7c679bb42c65506c8c4b2848ee174e5ac3bb5372ba2fd0750d9d18a9",
+      "decision": "Medium ASR retains all original words including final よ; 見先/岬 and 明かり/灯 have the intended context reading.",
+      "heard": "その間は見先の明かりをかすね 私が点検するときは君の星に船を頼むよ"
+    },
+    {
+      "id": "03db98ffbf6488800b24",
+      "sha256": "f0941175abf0baf052273ad35e1e100d0f16c595fa24759958777b45e406ed72",
+      "decision": "独立した日本語ASRでも全文を確認。灯は文脈に合う「あかり」の読みで、意味は一致。",
+      "heard": "夜だから必要な明かりだもの船の眠る暗さまで奪いたくはないよ"
+    }
+  ],
+  "additional_semantic_repairs": 4
+}

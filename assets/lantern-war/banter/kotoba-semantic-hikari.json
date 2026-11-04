@@ -1,0 +1,41 @@
+{
+  "state": "diagnostic-only-not-adopted",
+  "checked_at": "2026-11-03T19:24:25.216247+00:00",
+  "model": "kotoba-tech/kotoba-whisper-v2.0-faster",
+  "model_revision": "f44edd35eaeb2274e85ac7b31fb2c6f59ff1c4bc",
+  "device": "cpu",
+  "compute_type": "int8",
+  "threads": 2,
+  "beam_size": 5,
+  "no_expected_text_prompt": true,
+  "clips": [
+    {
+      "id": "03db98ffbf6488800b24",
+      "speaker": "end-hikari",
+      "text": "夜だから必要な灯だもの。船の眠る暗さまで、奪いたくはないよ。",
+      "path": "tmp/lantern-banter-voices/kotoba-pilot/03db98ffbf6488800b24-f0941175abf0.ogg",
+      "sha256": "f0941175abf0baf052273ad35e1e100d0f16c595fa24759958777b45e406ed72",
+      "heard": "夜だから必要な明かりだもの船の眠る暗さまで奪いたくはないよ",
+      "previous_asr": "夜だから必要な明かりだもの 船の眠る暗さまで奪いたくはないよ",
+      "previous_review_model": "small",
+      "previous_sha256": "f0941175abf0baf052273ad35e1e100d0f16c595fa24759958777b45e406ed72",
+      "assessment": {
+        "expected": "夜だから必要な灯だもの。船の眠る暗さまで、奪いたくはないよ。",
+        "cer": 0.1081,
+        "needs_review": false,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "a758b6474c539a56a2c7aabfb503fc851b2e12abac2f0e476ae0a5cc20346a75",
+        "raw_cer": 0.1081,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "184205f4392e2aec70de7ccaff4658b62239a89e74eb1596de32c58cb9239827",
+        "missing_required_phrases": [],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      }
+    }
+  ]
+}

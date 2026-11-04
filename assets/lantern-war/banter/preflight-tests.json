@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-11-03T01:36:45.537346+00:00",
+  "head": "009a5962eb1c17667d2749d0c572ebbc52471ae6",
+  "phase": "partial-corpus-preflight",
+  "not_final_pack_validation": true,
+  "passed": [
+    "16 Python queue/pronunciation/review test methods",
+    "test-lantern-banter-voices.mjs --plan-only",
+    "test-lantern-banter-routing.mjs",
+    "test-lantern-banter.mjs",
+    "test-lantern-endless-voices.mjs",
+    "test-lantern-war-browser.mjs"
+  ],
+  "screenshots_visually_inspected": {
+    "tmp/lantern-war/story-mobile.png": "6f53642f3db14464ce2738690a6de6009b308e1b2aacaf350f0f400b74ad3e8e",
+    "tmp/lantern-war/combat-desktop.png": "c48a1cccd741d9effdb82bbdfccc1631f7685da9916993c2438cfb8264626f4e"
+  },
+  "pending": [
+    "all 630 recordings accepted",
+    "final manifest integration",
+    "full corpus playback verification",
+    "final web and Android asset manifests",
+    "English gate",
+    "web build",
+    "server build",
+    "commit and main push"
+  ]
+}

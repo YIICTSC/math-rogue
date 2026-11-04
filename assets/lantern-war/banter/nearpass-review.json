@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-11-02T22:35:16.086127+00:00",
+  "method": "CPU medium without expected text prompt; investigate semantic changes suspected in small-model near-passes.",
+  "clips": [
+    {
+      "text": "一緒に確かめましょう。",
+      "heard": "一緒に確かめましょう",
+      "sha256": "95b27224d184e2590d794652d3545243d3e5d1fb74f52e4fab77cb1c2db05fa5",
+      "cer": 0.0,
+      "model": "medium",
+      "needs_review": false
+    },
+    {
+      "text": "それは意外ね。",
+      "heard": "それは意外ね",
+      "sha256": "f907bebf4d2b49f7b0077be963be5456cfc6f67fc4b35e47e75574ef20324955",
+      "cer": 0.0,
+      "model": "medium",
+      "needs_review": false
+    }
+  ]
+}

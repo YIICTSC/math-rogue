@@ -1,0 +1,41 @@
+{
+  "state": "diagnostic-only-not-adopted",
+  "checked_at": "2026-11-03T06:43:54.623051+00:00",
+  "model": "kotoba-tech/kotoba-whisper-v2.0-faster",
+  "model_revision": "f44edd35eaeb2274e85ac7b31fb2c6f59ff1c4bc",
+  "device": "cpu",
+  "compute_type": "int8",
+  "threads": 2,
+  "beam_size": 5,
+  "no_expected_text_prompt": true,
+  "clips": [
+    {
+      "id": "ebfd2b6522712b4018c4",
+      "speaker": "dungeons2-ignis",
+      "text": "僕が怖くても進むのは、命令されたからじゃない。",
+      "path": "tmp/lantern-banter-voices/kotoba-pilot/ebfd2b6522712b4018c4-ce1d50f02d30.ogg",
+      "sha256": "ce1d50f02d3061b40fdd28eee75bb7cd25a42832de7745db94126396275cbe2f",
+      "heard": "僕が怖くても進むのは命令されたからじゃない",
+      "previous_asr": "僕が怖くても進むのは命令されたからじゃなーい",
+      "previous_review_model": "small",
+      "previous_sha256": "ce1d50f02d3061b40fdd28eee75bb7cd25a42832de7745db94126396275cbe2f",
+      "assessment": {
+        "expected": "僕が怖くても進むのは、命令されたからじゃない。",
+        "cer": 0.0,
+        "needs_review": false,
+        "required_name": null,
+        "name_verified": true,
+        "review_rules": 2,
+        "dictionary_sha256": "2805b03580f1bc2f667f2c29b13ad78df2a929b4952f453807e46420b7e3412e",
+        "raw_cer": 0.0,
+        "banter_review_rules": 6,
+        "phonetic_equivalence": false,
+        "cer_limit": 0.18,
+        "content_requirements_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "missing_required_phrases": [],
+        "required_prefix_ok": true,
+        "lexical_exact_ok": true
+      }
+    }
+  ]
+}
