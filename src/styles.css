@@ -19876,3 +19876,21 @@ textarea {
     min-height: 44px;
   }
 }
+
+/* Keep the departure action reachable even for very long upgraded card names. */
+.main-rest-screen[data-rest-mode="DONE"] .rest-panel {
+  min-height: 0;
+  overflow: hidden;
+}
+.main-rest-screen[data-rest-mode="DONE"] .rest-message {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  overscroll-behavior: contain;
+}
+.main-rest-screen[data-rest-mode="DONE"] .rest-panel > button {
+  flex-shrink: 0;
+  margin-top: clamp(0.5rem, 2dvh, 2rem);
+  max-width: 100%;
+}

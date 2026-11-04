@@ -363,7 +363,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
                 <DoorOpen className="mr-3" /> {trans(restTitle, languageMode)}
             </h2>
-            <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
+            <p className="rest-message text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
             {mode === 'CHOICE' && (
                 <div className="rest-choice-grid flex flex-wrap justify-center gap-4 md:gap-8">
@@ -634,7 +634,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             {mode === 'DONE' && (
                 <button 
                     onClick={onLeave}
-                    className="bg-orange-700 hover:bg-orange-600 text-white px-8 py-3 rounded text-xl font-bold border-2 border-white shadow-lg animate-bounce mt-8 mx-auto"
+                    className="bg-orange-700 hover:bg-orange-600 text-white px-8 py-3 rounded text-xl font-bold border-2 border-white shadow-lg mt-8 mx-auto"
                 >
                     {trans(isVacationRun ? '旅を続ける' : '出発する', languageMode)}{typingMode && ' [Enter]'}
                 </button>
