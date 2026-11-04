@@ -1,4 +1,4 @@
-import {OPENING_DISTANCE,ROUTE_LENGTH,routeAt} from './routes';
+import {OPENING_DISTANCE,ROUTE_LENGTH} from './routes';
 import type {ArcadePlayer,ArcadeState} from './arcade';
 import {announce,hash,reward,checkMissions} from './arcade';
 
@@ -19,11 +19,7 @@ export function createRush():RushState{return {transition:null,trickTime:0,trick
 export function rushAt(seed:number,distance:number){
  const depthSection=Math.floor((distance-DEPTH_START)/DEPTH_SPACING),depthStart=DEPTH_START+depthSection*DEPTH_SPACING;
  if(depthSection>=0&&distance<depthStart+DEPTH_LENGTH)return{section:1000000+depthSection,start:depthStart,length:DEPTH_LENGTH,variant:hash(seed+depthSection)%3,kind:'depth' as RushKind,progress:(distance-depthStart)/DEPTH_LENGTH};
- const section=Math.max(0,Math.floor((distance-RUSH_OFFSET)/RUSH_SPACING)),start=RUSH_OFFSET+section*RUSH_SPACING,length=1850;
- // Reserve the full area and both camera hand-offs; a loop never straddles a depth boundary.
- const area=Math.floor((start-DEPTH_START)/DEPTH_SPACING),begin=DEPTH_START+area*DEPTH_SPACING;
- const following=begin+DEPTH_SPACING,blocked=area>=0&&start<begin+DEPTH_LENGTH+700||start+length+700>following&&following>=DEPTH_START;
- return{section,start,length,variant:hash(seed+section)%3,kind:!blocked&&!routeAt(seed,start+length/2).flight&&distance>=start&&distance<start+length?'loop' as RushKind:'run' as RushKind,progress:Math.max(0,Math.min(1,(distance-start)/length))};
+ return{section:-1,start:0,length:0,variant:0,kind:'run' as RushKind,progress:0};
 }
 export const transitionProgress=(r:RushState)=>r.transition?Math.min(1,r.transition.frame/TRANSITION_FRAMES):1;
 export const easeRush=(t:number)=>t*t*(3-2*t);

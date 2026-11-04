@@ -189,3 +189,15 @@
 @media(prefers-reduced-motion:reduce){.dash-arcade-notice.is-trick{animation:none}}
 
 @media(max-width:700px) and (orientation:portrait){.dash-shell:not(.dash-is-depth) .dash-arcade-notice.is-trick{top:calc(23dvh + 24px)}}
+/* Keep steering under the left thumb and actions under the right thumb. */
+.dash-shell.dash-is-depth .dash-lane-controls{left:max(12px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));transform:none;gap:8px}
+.dash-is-depth .dash-lane-controls>span{position:absolute;bottom:calc(100% + 6px);left:0;white-space:nowrap}
+@media(max-width:700px) and (orientation:portrait){
+ .dash-shell.dash-is-depth .dash-controls{left:auto;right:max(10px,env(safe-area-inset-right));gap:4px}
+ .dash-shell.dash-is-depth .dash-controls>button{min-width:46px;max-width:52px;min-height:76px;padding:0}
+ .dash-is-depth .dash-controls .dash-action-face{width:46px;height:46px}
+ .dash-is-depth .dash-controls button>strong{max-width:52px;font-size:9px}
+ .dash-is-depth .dash-lane-controls>button{width:56px;height:56px;min-width:56px;min-height:56px}
+ .dash-is-depth .dash-lane-controls>span{display:none}
+}
+@media(max-height:480px){.dash-shell.dash-is-depth .dash-lane-controls{bottom:max(12px,env(safe-area-inset-bottom))}}

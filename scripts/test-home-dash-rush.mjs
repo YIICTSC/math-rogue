@@ -14,12 +14,8 @@ for(let seed=0;seed<100;seed++){
 }
 assert(protection>0&&protection/patterns<.06,'Protection must remain available but genuinely rare');
 const s=E.createArcade(42),p=player();
-assert.equal(E.rushAt(42,0).kind,'run');assert.equal(E.rushAt(42,2200).kind,'loop');assert.equal(E.rushAt(42,30000).kind,'depth');assert.equal(E.rushAt(42,60000).kind,'run');
-E.syncRush(s,p,2200-120,340);assert.equal(s.rush.kind,'loop');assert.equal(p.flying,false);
-assert(E.rushSpeed(s,4.5,p)>=8.5,'Loops preserve enough momentum to climb');
-const bottom=E.loopPose(.16),top=E.loopPose(.5),exit=E.loopPose(.84);assert(Math.abs(bottom.x)<1e-6&&Math.abs(top.x)<1e-6&&Math.abs(exit.x)<1e-6);assert(top.y>11&&bottom.y<1);assert(Math.abs(exit.angle-Math.PI*2)<1e-6,'Lane completes a genuine 360 degree rotation');
-E.syncRush(s,p,2200+1850*.5-120,340);s.rush.jumpQueued=true;E.stepRush(s,p,2200+1850*.5-120,340);assert.equal(s.stats.perfects,1);assert(s.stats.coins>=9);s.rush.jumpQueued=true;E.stepRush(s,p,2200+1850*.5-120,340);assert.equal(s.stats.perfects,1,'One apex reward per loop');
-E.syncRush(s,p,2200+1850-119,340);assert.equal(s.rush.kind,'run');assert.equal(s.rush.loops,1);E.syncRush(s,p,2200+1850-118,340);assert.equal(s.rush.loops,1,'Section rewards cannot repeat');
+assert.equal(E.rushAt(42,0).kind,'run');assert.equal(E.rushAt(42,2200).kind,'run');assert.equal(E.rushAt(42,30000).kind,'depth');assert.equal(E.rushAt(42,60000).kind,'run');
+for(let d=0;d<300000;d+=100)assert.notEqual(E.rushAt(42,d).kind,'loop','360 loops are retired');
 for(let seed=0;seed<100;seed++){
  const state=E.createArcade(seed),runner=player();E.syncRush(state,runner,30000-120,340);for(let i=0;i<E.TRANSITION_FRAMES*2;i++)E.advanceRushTransition(state,runner,340);const waves=new Map();
  for(const e of state.rush.objects.filter(e=>['barrier','lowBar','gap'].includes(e.kind))){const lanes=waves.get(e.at)||new Set();lanes.add(e.lane);waves.set(e.at,lanes);}
@@ -31,7 +27,7 @@ assert(obstacle('barrier').hit);assert(!obstacle('barrier',70).hit);assert(obsta
 const coin=obstacle('coin');assert.equal(coin.a.stats.coins,1);E.stepRush(coin.a,coin.b,29880,340);assert.equal(coin.a.stats.coins,1,'Pickups only reward once');
 const spin=E.createArcade(9),runner=player();spin.rush.chargeHeld=true;for(let i=0;i<40;i++)E.chargeRush(spin,runner);assert(E.releaseRushCharge(spin));assert(spin.rush.turbo>=180);assert(E.rushSpeed(spin,4.5,runner)>4.5);spin.rush.charge=90;assert.equal(E.releaseRushCharge(spin),false,'Spin cooldown prevents spam');
 spin.rush.momentum=100;runner.dashFrames=20;assert(E.rushSpeed(spin,9,runner)<=18,'Peak speed remains bounded');
-console.log(`PASS 360° lane geometry, apex timing/reward once, safe lanes for 100 seeds, depth jump/slide/gap collisions, steering limits, spin cooldown, momentum cap; ${protection}/${patterns} rare protection drops.`);
+console.log(`PASS retired 360° loop scheduling, safe lanes for 100 seeds, depth jump/slide/gap collisions, steering limits, spin cooldown, momentum cap; ${protection}/${patterns} rare protection drops.`);
 
 assert.equal(E.DEPTH_LENGTH,30000);assert.equal(E.rushAt(1,59999).kind,'depth');
 const travel=E.createArcade(5),traveler=player();E.syncRush(travel,traveler,29880,340);assert.equal(travel.rush.kind,'run');assert.equal(travel.rush.transition.direction,'toDepth');for(let i=0;i<E.TRANSITION_FRAMES-1;i++)E.advanceRushTransition(travel,traveler,340);assert(E.sideTransitionX(travel.rush,800)>800);E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.kind,'depth');assert.equal(travel.rush.transition.phase,'arrive');assert(!E.shiftRushLane(travel,1));for(let i=0;i<E.TRANSITION_FRAMES;i++)E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.transition,null);E.syncRush(travel,traveler,59880,340);assert.equal(travel.rush.kind,'depth');assert.equal(travel.rush.depths,1);for(let i=0;i<E.TRANSITION_FRAMES;i++)E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.kind,'run');assert.equal(E.sideTransitionX(travel.rush,800),-100);for(let i=0;i<E.TRANSITION_FRAMES;i++)E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.depths,1);assert.equal(E.sideTransitionX(travel.rush,800),120);
