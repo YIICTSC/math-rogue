@@ -14,21 +14,29 @@ for(let seed=0;seed<100;seed++){
 }
 assert(protection>0&&protection/patterns<.06,'Protection must remain available but genuinely rare');
 const s=E.createArcade(42),p=player();
-assert.equal(E.rushAt(42,0).kind,'run');assert.equal(E.rushAt(42,2200).kind,'loop');assert.equal(E.rushAt(42,8400).kind,'depth');assert.equal(E.rushAt(42,14000).kind,'run');
+assert.equal(E.rushAt(42,0).kind,'run');assert.equal(E.rushAt(42,2200).kind,'loop');assert.equal(E.rushAt(42,30000).kind,'depth');assert.equal(E.rushAt(42,60000).kind,'run');
 E.syncRush(s,p,2200-120,340);assert.equal(s.rush.kind,'loop');assert.equal(p.flying,false);
 assert(E.rushSpeed(s,4.5,p)>=8.5,'Loops preserve enough momentum to climb');
 const bottom=E.loopPose(.16),top=E.loopPose(.5),exit=E.loopPose(.84);assert(Math.abs(bottom.x)<1e-6&&Math.abs(top.x)<1e-6&&Math.abs(exit.x)<1e-6);assert(top.y>11&&bottom.y<1);assert(Math.abs(exit.angle-Math.PI*2)<1e-6,'Lane completes a genuine 360 degree rotation');
 E.syncRush(s,p,2200+1850*.5-120,340);s.rush.jumpQueued=true;E.stepRush(s,p,2200+1850*.5-120,340);assert.equal(s.stats.perfects,1);assert(s.stats.coins>=9);s.rush.jumpQueued=true;E.stepRush(s,p,2200+1850*.5-120,340);assert.equal(s.stats.perfects,1,'One apex reward per loop');
 E.syncRush(s,p,2200+1850-119,340);assert.equal(s.rush.kind,'run');assert.equal(s.rush.loops,1);E.syncRush(s,p,2200+1850-118,340);assert.equal(s.rush.loops,1,'Section rewards cannot repeat');
 for(let seed=0;seed<100;seed++){
- const state=E.createArcade(seed),runner=player();E.syncRush(state,runner,8400-120,340);const waves=new Map();
+ const state=E.createArcade(seed),runner=player();E.syncRush(state,runner,30000-120,340);for(let i=0;i<E.TRANSITION_FRAMES*2;i++)E.advanceRushTransition(state,runner,340);const waves=new Map();
  for(const e of state.rush.objects.filter(e=>['barrier','lowBar','gap'].includes(e.kind))){const lanes=waves.get(e.at)||new Set();lanes.add(e.lane);waves.set(e.at,lanes);}
- assert.equal(waves.size,5);for(const lanes of waves.values())assert(lanes.size<=2,'Every depth wave has a safe lane');
+ assert(waves.size>=50);for(const lanes of waves.values())assert(lanes.size<=2,'Every depth wave has a safe lane');
  assert.equal(E.shiftRushLane(state,-1),true);E.shiftRushLane(state,-1);assert.equal(state.rush.lane,-1);for(let i=0;i<3;i++)E.shiftRushLane(state,1);assert.equal(state.rush.lane,1);
 }
-function obstacle(kind,lift=0,slide=0){const a=E.createArcade(7),b=player();E.syncRush(a,b,8280,340);b.invulFrame=0;b.y=340-lift;a.slide=slide;a.rush.objects=[{id:1,lane:0,at:8400,kind,taken:false}];return {a,b,hit:E.stepRush(a,b,8280,340)};}
+function obstacle(kind,lift=0,slide=0){const a=E.createArcade(7),b=player();E.syncRush(a,b,29880,340);for(let i=0;i<E.TRANSITION_FRAMES*2;i++)E.advanceRushTransition(a,b,340);b.invulFrame=0;b.y=340-lift;a.slide=slide;a.rush.objects=[{id:1,lane:0,at:30000,kind,taken:false}];return {a,b,hit:E.stepRush(a,b,29880,340)};}
 assert(obstacle('barrier').hit);assert(!obstacle('barrier',70).hit);assert(obstacle('lowBar').hit);assert(!obstacle('lowBar',0,20).hit);assert(obstacle('gap').hit);assert(!obstacle('gap',40).hit);
-const coin=obstacle('coin');assert.equal(coin.a.stats.coins,1);E.stepRush(coin.a,coin.b,8280,340);assert.equal(coin.a.stats.coins,1,'Pickups only reward once');
+const coin=obstacle('coin');assert.equal(coin.a.stats.coins,1);E.stepRush(coin.a,coin.b,29880,340);assert.equal(coin.a.stats.coins,1,'Pickups only reward once');
 const spin=E.createArcade(9),runner=player();spin.rush.chargeHeld=true;for(let i=0;i<40;i++)E.chargeRush(spin,runner);assert(E.releaseRushCharge(spin));assert(spin.rush.turbo>=180);assert(E.rushSpeed(spin,4.5,runner)>4.5);spin.rush.charge=90;assert.equal(E.releaseRushCharge(spin),false,'Spin cooldown prevents spam');
 spin.rush.momentum=100;runner.dashFrames=20;assert(E.rushSpeed(spin,9,runner)<=18,'Peak speed remains bounded');
 console.log(`PASS 360° lane geometry, apex timing/reward once, safe lanes for 100 seeds, depth jump/slide/gap collisions, steering limits, spin cooldown, momentum cap; ${protection}/${patterns} rare protection drops.`);
+
+assert.equal(E.DEPTH_LENGTH,30000);assert.equal(E.rushAt(1,59999).kind,'depth');
+const travel=E.createArcade(5),traveler=player();E.syncRush(travel,traveler,29880,340);assert.equal(travel.rush.kind,'run');assert.equal(travel.rush.transition.direction,'toDepth');for(let i=0;i<E.TRANSITION_FRAMES-1;i++)E.advanceRushTransition(travel,traveler,340);assert(E.sideTransitionX(travel.rush,800)>800);E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.kind,'depth');assert.equal(travel.rush.transition.phase,'arrive');assert(!E.shiftRushLane(travel,1));for(let i=0;i<E.TRANSITION_FRAMES;i++)E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.transition,null);E.syncRush(travel,traveler,59880,340);assert.equal(travel.rush.kind,'depth');assert.equal(travel.rush.depths,1);for(let i=0;i<E.TRANSITION_FRAMES;i++)E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.kind,'run');assert.equal(E.sideTransitionX(travel.rush,800),-100);for(let i=0;i<E.TRANSITION_FRAMES;i++)E.advanceRushTransition(travel,traveler,340);assert.equal(travel.rush.depths,1);assert.equal(E.sideTransitionX(travel.rush,800),120);
+const stunt=E.createArcade(3),acrobat=player();Object.assign(acrobat,{y:250,isJumping:true,jumpCount:1});assert(E.airTrick(stunt,acrobat,340));assert(stunt.rush.trickTime>60);assert(!E.airTrick(stunt,acrobat,340));assert.equal(stunt.stats.perfects,1);
+for(let d=0;d<300000;d+=100)if(E.rushAt(1,d).kind==='loop'){const part=E.rushAt(1,d);assert.notEqual(E.rushAt(1,part.start).kind,'depth');assert.notEqual(E.rushAt(1,part.start+part.length-1).kind,'depth');}
+console.log('PASS full-area depth length, all 84-frame safe handoffs, side edge poses, one reward per crossing, repeatable depth areas and once-per-jump air trick.');
+
+const startSide=E.sideLoopPose(.16),apexSide=E.sideLoopPose(.5),endSide=E.sideLoopPose(.84);assert(Math.abs(startSide.x-endSide.x)<1e-6);assert.equal(apexSide.lift,208);assert.equal(E.sideLoopPose(1).x,120);assert(E.sideLoopPose(.5,54).lift>apexSide.lift,'Apex trick leaps away from the rail');assert.equal(E.sideLoopPose(.5,54,true).lift,apexSide.lift,'Reduced motion preserves the rail pose');

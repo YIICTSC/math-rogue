@@ -1,3 +1,4 @@
+import {drawSideLoop,drawTrickBurst,trickRotation} from '../mini-games/go-home-dash/courseEffects';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronLeft, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
@@ -19,7 +20,7 @@ import { createArcade, addEntity, beginArcade, endArcade, activateOrb, arcadePla
 import { advanceObstacleMotion } from '../mini-games/go-home-dash/motion';
 import { drawDangerAura, drawHostileArt, drawFlightPillar, drawStairArt, drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
 import { drawArcade, drawArcadeRunner } from '../mini-games/go-home-dash/arcadeRender';
-import {rushSpeed,syncRush,stepRush,chargeRush,releaseRushCharge,shiftRushLane} from '../mini-games/go-home-dash/rush';
+import {rushSpeed,syncRush,stepRush,chargeRush,releaseRushCharge,shiftRushLane,advanceRushTransition,sideTransitionX,sideLoopPose,rushAt,airTrick,easeRush,transitionProgress} from '../mini-games/go-home-dash/rush';
 import {drawRushFallback} from '../mini-games/go-home-dash/rushFallback';
 import type {RushRenderer,RushRenderFrame} from '../mini-games/go-home-dash/rushRenderer';
 import {reward} from '../mini-games/go-home-dash/arcade';
@@ -503,12 +504,13 @@ const GoHomeDash: React.FC<{
     const triggerJump = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current, arcade=arcadeRef.current;
-        if (pausedRef.current) return;
+        if (pausedRef.current||arcade.rush.transition) return;
         if(arcade.rush.kind==='loop'){arcade.rush.jumpQueued=true;audioService.playSound('jump');return;}
         if(arcade.rush.kind==='run'&&p.isJumping&&arcade.rush.flash===0){
             const target=obstaclesRef.current.filter(o=>isDestroyable(o.type)&&o.x>p.x&&o.x-p.x<230&&Math.abs(o.y-(p.y-35))<150).sort((a,b)=>a.x-b.x)[0];
             if(target){obstaclesRef.current=obstaclesRef.current.filter(o=>o!==target);p.x=Math.min(260,target.x);p.vy=-8;p.invulFrame=Math.max(p.invulFrame,12);p.jumpCount=0;arcade.rush.homings++;arcade.rush.flash=36;arcade.stats.breaks++;reward(arcade,180,12);announce(arcade,'homing');addVfxRing(target.x,target.y,'#8effd8');audioService.playSound('attack');voice('jump');return;}
         }
+        if(p.isJumping&&p.jumpCount>=p.maxJumps&&airTrick(arcade,p,arcade.rush.kind==='depth'?340:floorAt(routeSeedRef.current,distanceRef.current+p.x))){audioService.playSound('correct');voice('jump');return;}
         arcade.slide=0;
         if (activateOrb(arcade,p,distanceRef.current)) { voice('jump'); audioService.playSound('jump'); return; }
         if (arcade.vehicle === 'gravity') { arcade.gravity *= -1;p.vy=arcade.gravity*4;voice('jump');return; }
@@ -540,7 +542,7 @@ const GoHomeDash: React.FC<{
     const triggerDash = () => {
         if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
-        if (pausedRef.current || arcadeRef.current.dashUsed || p.isFalling) return;
+        if (pausedRef.current || arcadeRef.current.rush.transition || arcadeRef.current.dashUsed || p.isFalling) return;
         p.dashFrames = DASH_DURATION_FRAMES; p.dashCooldown = 1;
         p.invulFrame = Math.max(p.invulFrame, DASH_DURATION_FRAMES + 4);
         if (p.isJumping) p.vy = Math.min(p.vy, -2);
@@ -549,7 +551,7 @@ const GoHomeDash: React.FC<{
         setDashReady(false);
     };
     const triggerSlide = () => {
-        if (gameStateRef.current !== 'PLAYING' || pausedRef.current) return;
+        if (gameStateRef.current !== 'PLAYING' || pausedRef.current || arcadeRef.current.rush.transition) return;
         const p=playerRef.current;if(p.flying)return;
         arcadeRef.current.slide=52;arcadeRef.current.rush.chargeHeld=true;
         if(p.isJumping){p.vy=12;addVfxRing(p.x,p.y-24,'#8cecff');}
@@ -637,18 +639,25 @@ const GoHomeDash: React.FC<{
     const updateLogic = () => {
         if (gameStateRef.current !== 'PLAYING' || pausedRef.current) return;
         const p = playerRef.current, arcade=arcadeRef.current;
+        if(arcade.rush.transition){
+            const changed=advanceRushTransition(arcade,p,340);arcade.frame++;if(arcade.noticeTime>0)arcade.noticeTime--;frameCount.current++;p.animFrame=Math.floor(frameCount.current/4)%4;
+            if(changed){setTravelled(Math.floor(distanceRef.current/DISTANCE_SCALE));setRoute(routeAt(routeSeedRef.current,distanceRef.current+120).id);obstaclesRef.current=[];enemyProjectilesRef.current=[];projectilesRef.current=[];particlesRef.current=[];}
+            if(changed||frameCount.current%4===0||!arcade.rush.transition)setArcadeView({...arcade,rush:{...arcade.rush}});return;
+        }
         const currentSpeed = rushSpeed(arcade,Math.min(9,(BASE_SPEED+(levelRef.current-1)*.4)*p.speedBoost),p);
         const previousFloor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
         const previousY = p.y;
         distanceRef.current += currentSpeed;
         const stage = routeAt(routeSeedRef.current, distanceRef.current + p.x);
-        const floor = floorAt(routeSeedRef.current, distanceRef.current + p.x);
+        const floor = arcade.rush.kind==='depth'?340:floorAt(routeSeedRef.current, distanceRef.current + p.x);
         const rushChanged=syncRush(arcade,p,distanceRef.current,floor);
         beginArcade(arcade,distanceRef.current,stage.flight,viewportRef.current.width,arcade.rush.kind!=='run');
-        if(rushChanged){setArcadeView({...arcade,rush:{...arcade.rush}});obstaclesRef.current=[];enemyProjectilesRef.current=[];projectilesRef.current=[];particlesRef.current=[];}
+        if(arcade.rush.transition){distanceRef.current=(arcade.rush.transition.direction==='toDepth'?arcade.rush.start:arcade.rush.start+arcade.rush.length)-120;setArcadeView({...arcade,rush:{...arcade.rush}});return;}
+        if(rushChanged)setArcadeView({...arcade,rush:{...arcade.rush}});
         const heldPad=navigator.getGamepads?.()?.[0],padSlide=!!heldPad?.buttons[1]?.pressed;if(padSlide)arcade.rush.chargeHeld=true;else if(arcade.rush.padSlideHeld)releaseSlide();arcade.rush.padSlideHeld=padSlide;
         chargeRush(arcade,p);
         if(arcade.rush.kind!=='run'){
+            if(arcade.rush.kind==='loop'){for(const o of obstaclesRef.current)advanceObstacleMotion(o,routeSeedRef.current,distanceRef.current,currentSpeed,frameCount.current,randomRef.current);obstaclesRef.current=obstaclesRef.current.filter(o=>o.x+o.width/2>0);for(const e of enemyProjectilesRef.current)e.x-=currentSpeed+4;for(const e of projectilesRef.current)e.x+=8;particlesRef.current=[];}
             frameCount.current++;p.animFrame=Math.floor(frameCount.current/4)%4;p.invulFrame=Math.max(0,p.invulFrame-1);p.dashFrames=Math.max(0,p.dashFrames-1);p.flying=false;
             const pad=navigator.getGamepads?.()?.[0];const direction=pad?(pad.buttons[14]?.pressed?-1:pad.buttons[15]?.pressed?1:Math.abs(pad.axes[0]||0)>.55?Math.sign(pad.axes[0]):0):0;
             if(direction&&direction!==arcade.rush.padDirection)shiftRushLane(arcade,direction);arcade.rush.padDirection=direction;
@@ -661,6 +670,7 @@ const GoHomeDash: React.FC<{
             if(arcade.notice!==noticeBefore&&['star','loopTrick','mission','fever'].includes(arcade.notice))audioService.playSound('correct');
             if(gameStateRef.current==='PLAYING'){if(arcade.score){scoreRef.current+=arcade.score;arcade.score=0;}finishFrame(currentSpeed,stage);}return;
         }
+        if(!p.isJumping&&!p.isFalling)arcade.rush.trickDone=false;
         if(arcade.clearAhead){obstaclesRef.current=obstaclesRef.current.filter(o=>o.x-o.width/2<=viewportRef.current.width+40);enemyProjectilesRef.current=enemyProjectilesRef.current.filter(o=>o.x<=viewportRef.current.width+40);}
         const shouldFly = stage.flight || arcade.vehicle !== 'normal';
         if (shouldFly && !p.flying) { p.isFalling = false; p.y = Math.min(p.y, 280); p.vy = -4; p.flapCooldown = 18; voice('flight'); addVfxRing(p.x, p.y - 30, '#befcff'); }
@@ -868,15 +878,16 @@ const GoHomeDash: React.FC<{
         const spawnProb = 0.02 + (levelRef.current * 0.005) + (scoreRef.current * 0.00001);
         const dynamicGap = Math.max(440, currentSpeed * 105, MIN_OBSTACLE_GAP - (levelRef.current * 20));
 
+        const courseOpen=[-700,0,700].every(offset=>!arcade.rush.enabled||rushAt(routeSeedRef.current,distanceRef.current+spawnX+offset).kind==='run');
         const incoming = routeAt(routeSeedRef.current, distanceRef.current + spawnX);
         const lastGate = [...obstacles].reverse().find(o => o.type === 'FLIGHT_GATE');
         const gateShape = flightGateShape(routeSeedRef.current, distanceRef.current + spawnX);
         const gateSpacing = Math.max(330, currentSpeed * 72) + ((lastGate?.width ?? 0) + gateShape.width) / 2;
-        if (incoming.flight && stage.index === incoming.index && incoming.progress < ROUTE_LENGTH - 1200 && (!lastGate || spawnX - lastGate.x > gateSpacing)) {
+        if (courseOpen && incoming.flight && stage.index === incoming.index && incoming.progress < ROUTE_LENGTH - 1200 && (!lastGate || spawnX - lastGate.x > gateSpacing)) {
             obstacles.push({id:crypto.randomUUID(),type:'FLIGHT_GATE',x:spawnX,y:gateShape.baseY,height:340,...gateShape,gateGap:gateShape.baseGap,vy:0,speedMult:1,isHard:true});
         }
         const arcadeHazardAhead=arcade.entities.some(e=>!e.taken&&!['coin','star'].includes(e.kind)&&e.d-distanceRef.current>100&&e.d-distanceRef.current<1350);
-        if (!p.flying && arcade.vehicle === 'normal' && !arcadeHazardAhead && !arcade.boss && (!lastObs || (spawnX - lastObs.x) > dynamicGap) && randomRef.current() < spawnProb && obstacles.length < 8) {
+        if (courseOpen && !p.flying && arcade.vehicle === 'normal' && !arcadeHazardAhead && !arcade.boss && (!lastObs || (spawnX - lastObs.x) > dynamicGap) && randomRef.current() < spawnProb && obstacles.length < 8) {
             const types = getObstaclePool();
             let type = types[Math.floor(randomRef.current() * types.length)];
             if (lastObs?.type === 'HOLE' && ['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS'].includes(type)) type = 'BACKPACK';
@@ -1120,17 +1131,17 @@ const GoHomeDash: React.FC<{
         }
 
         const arcade=arcadeRef.current;
-        if(arcade.rush.kind!=='run'){
-            const f:RushRenderFrame={state:arcade,distance:distanceRef.current,jump:Math.max(0,floorAt(routeSeedRef.current,distanceRef.current+120)-playerRef.current.y),frame:frameCount.current,vy:playerRef.current.vy,side:playerSpriteRef.current,rear:rearSpriteRef.current,actions:rearActionRef.current,reduced:reducedMotionRef.current};
+        if(arcade.rush.kind==='depth'){
+            const f:RushRenderFrame={state:arcade,distance:distanceRef.current,jump:Math.max(0,340-(arcade.rush.transition?.phase==='depart'?arcade.rush.transition.fromY+(340-arcade.rush.transition.fromY)*easeRush(Math.min(1,transitionProgress(arcade.rush)*2)):playerRef.current.y)),frame:frameCount.current,vy:playerRef.current.vy,side:playerSpriteRef.current,rear:rearSpriteRef.current,actions:rearActionRef.current,reduced:reducedMotionRef.current};
             if(!rushRendererRef.current?.draw(ctx,view.width,view.height,f))drawRushFallback(ctx,view.width,view.height,f);
-            ctx.canvas.dataset.rushKind=arcade.rush.kind;ctx.restore();
+            ctx.canvas.dataset.rushKind=arcade.rush.kind;ctx.canvas.dataset.rushTransition=arcade.rush.transition?arcade.rush.transition.direction+'-'+arcade.rush.transition.phase:'none';ctx.restore();
             if(!focusPass)drawFocus();return;
         }
-        ctx.canvas.dataset.rushKind='run';
+        ctx.canvas.dataset.rushKind=arcade.rush.kind;ctx.canvas.dataset.rushRenderer='canvas';ctx.canvas.dataset.rushModel='side-course';ctx.canvas.dataset.rushTransition=arcade.rush.transition?arcade.rush.transition.direction+'-'+arcade.rush.transition.phase:'none';
         const obstacles = obstaclesRef.current;
         const holes = obstacles.filter(o => o.type === 'HOLE');
 
-        const twin=!!viewportRef.current.focus,origin=focusPass?Math.max(0,playerRef.current.x-view.width*.28):0;
+        const twin=!!viewportRef.current.focus,sidePose=arcade.rush.kind==='loop'?sideLoopPose(arcade.rush.progress,arcade.rush.trickTime,reducedMotionRef.current):null,displayX=arcade.rush.transition?sideTransitionX(arcade.rush,viewportRef.current.width):sidePose?.x??playerRef.current.x,origin=focusPass?(arcade.rush.transition?Math.max(0,120-view.width*.28)*(arcade.rush.transition.direction==='toDepth'?1-easeRush(transitionProgress(arcade.rush)):easeRush(transitionProgress(arcade.rush))):Math.max(0,displayX-view.width*.28)):0;
         const offsetY=focusPass||twin?0:view.height*.79-340,cover=focusPass||twin?1:Math.max(1,view.height/400);
         ctx.save();ctx.scale(cover,cover);
         drawRoute(ctx,routeSeedRef.current,distanceRef.current+origin,frameCount.current,routeArtRef.current,view.width/cover,Math.max(400,view.height/cover),routeLayersRef.current);ctx.restore();
@@ -1255,12 +1266,18 @@ const GoHomeDash: React.FC<{
             }
         }
 
-        const pl = playerRef.current;
+        const loopPreview=rushAt(arcade.seed,distanceRef.current+120+900);
+        if(sidePose||loopPreview.kind==='loop'){const progress=sidePose?arcade.rush.progress:(distanceRef.current+120-loopPreview.start)/loopPreview.length;drawSideLoop(ctx,arcade,progress,floorAt(routeSeedRef.current,distanceRef.current+120),reducedMotionRef.current);}
+        const pl={...playerRef.current,x:displayX,y:sidePose?floorAt(routeSeedRef.current,distanceRef.current+120)-sidePose.lift:arcade.rush.transition?.direction==='toDepth'?arcade.rush.transition.fromY+(playerRef.current.y-arcade.rush.transition.fromY)*easeRush(Math.min(1,transitionProgress(arcade.rush)*2)):playerRef.current.y};
+        const stuntAngle=(sidePose?-sidePose.angle:0)+((sidePose||pl.isJumping)?trickRotation(arcade,reducedMotionRef.current):0);
+        drawTrickBurst(ctx,pl.x+38*Math.sin(stuntAngle),pl.y-38*Math.cos(stuntAngle)+38,arcade,reducedMotionRef.current);
+        if(arcade.rush.trickTime>36&&!reducedMotionRef.current){for(let echo=3;echo>=1;echo--){ctx.save();ctx.globalAlpha=.2*(1-echo/4);ctx.translate(pl.x-echo*12,pl.y+echo*4);ctx.rotate((sidePose?-sidePose.angle:0)+trickRotation(arcade)-echo*.3);drawRunner(ctx,playerSpriteRef.current,heroFallbackRef.current,{...pl,x:0,y:0},frameCount.current,artImagesRef.current,true);ctx.restore();}}
         drawArcadeRunner(ctx,arcadeRef.current,pl,trailColor(profileRef.current),artImagesRef.current,reducedMotionRef.current);
         ctx.save();
+        if(sidePose||pl.isJumping){const angle=(sidePose?-sidePose.angle:0)+trickRotation(arcade,reducedMotionRef.current);ctx.translate(pl.x,pl.y);ctx.rotate(angle);ctx.translate(-pl.x,-pl.y);}
         if(arcadeRef.current.vehicle==='gravity'&&arcadeRef.current.gravity<0){ctx.translate(0,2*pl.y-64);ctx.scale(1,-1);}
         const sliding=arcadeRef.current.slide>0&&!pl.flying&&!pl.isJumping&&!pl.isFalling;
-        if (pl.invulFrame % 4 < 2 || arcadeRef.current.fever>0 || pl.dashFrames>0) {
+        if (arcade.rush.kind==='loop' || arcade.rush.transition || pl.invulFrame % 4 < 2 || arcadeRef.current.fever>0 || pl.dashFrames>0) {
             if(!sliding||!drawSlide(ctx,playerSlideRef.current,pl,frameCount.current)){
                 if(sliding){ctx.translate(pl.x,pl.y);ctx.scale(1.18,.42);ctx.translate(-pl.x,-pl.y);}
                 drawRunner(ctx, playerSpriteRef.current, heroFallbackRef.current, {...pl,flying:pl.flying&&arcadeRef.current.vehicle==='normal'}, frameCount.current,artImagesRef.current,reducedMotionRef.current);
@@ -1361,7 +1378,7 @@ const GoHomeDash: React.FC<{
                 <canvas className="dash-focus" ref={focusCanvasRef} width={400} height={400} aria-hidden="true" />
             </div>
             {gameState === 'PLAYING' && <>
-                <div className="dash-route" aria-live="polite"><strong>{flight ? '✦ ' : '→ '}{routeCopy(route, languageMode)}</strong><small>{routeCopy(route, languageMode, true)}</small></div>
+                <div className="dash-route" aria-live="polite"><strong>{arcadeView.rush.kind==='depth'?L('3Dスカイウェイ','3D SKYWAY','3Dスカイウェイ'):<>{flight ? '✦ ' : '→ '}{routeCopy(route, languageMode)}</>}</strong><small>{arcadeView.rush.kind==='depth'?L('3000mの奥行きエリア・左右でレーン移動','3000m depth area · change lanes with left/right','3000mのおくゆきエリア・さゆうでレーンいどう'):routeCopy(route, languageMode, true)}</small></div>
                 {arcadeView.rush.kind==='depth'&&<div className="dash-lane-controls" role="group" aria-label={L('レーン移動','Change lane','レーンいどう')}><button aria-label={L('左のレーンへ','Move one lane left','ひだりのレーンへ')} {...multiTouchAction(()=>steer(-1))}><DashActionIcon action="left"/></button><span>← → / A D</span><button aria-label={L('右のレーンへ','Move one lane right','みぎのレーンへ')} {...multiTouchAction(()=>steer(1))}><DashActionIcon action="right"/></button></div>}
                 <div className="dash-controls">
                     <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><span className="dash-action-face"><DashActionIcon action="dash"/><small>SHIFT / X</small></span><strong>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('次のエリアで復活', 'NEXT AREA', 'つぎのエリアでふっかつ')}</strong></button>

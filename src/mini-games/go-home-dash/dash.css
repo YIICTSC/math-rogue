@@ -184,3 +184,8 @@
  .dash-lane-controls{left:12px;bottom:9px;transform:none;gap:7px}.dash-lane-controls>button{width:49px;height:47px;min-width:49px;min-height:47px}.dash-lane-controls>span{font-size:7px}
  .dash-speed-pill{top:45px;right:10px;font-size:7px;opacity:.9}.dash-speed-pill>i{width:74px}.dash-route{top:54px;bottom:auto;left:12px;font-size:8px;max-width:150px}.dash-route small{font-size:6px}.dash-arcade-notice{top:87px;bottom:auto;left:12px;max-width:210px;font-size:8px}.dash-mission-line{bottom:83px;left:12px;font-size:7px}
 }
+.dash-arcade-notice.is-trick{left:auto;right:16px;top:142px;bottom:auto;transform-origin:right center;font-size:clamp(18px,3.5vw,30px);font-weight:1000;color:#fff2b1;border-color:#98fff0;background:linear-gradient(115deg,#563f84eb,#174d67ed);text-shadow:0 0 14px #f9adfd;box-shadow:0 0 24px #85fff16b;animation:dash-trick-pop .35s ease-out}
+@keyframes dash-trick-pop{from{transform:scale(.72);opacity:.3}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.dash-arcade-notice.is-trick{animation:none}}
+
+@media(max-width:700px) and (orientation:portrait){.dash-shell:not(.dash-is-depth) .dash-arcade-notice.is-trick{top:calc(23dvh + 24px)}}

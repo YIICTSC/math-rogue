@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {assetUrl} from '../../utils/assetPaths';
 import type {ArcadeState} from './arcade';
-import {loopPose} from './rush';
+import {loopPose,easeRush,transitionProgress} from './rush';
+import {drawTrickBurst,trickRotation} from './courseEffects';
 
 export interface RushRenderFrame {state:ArcadeState;distance:number;jump:number;frame:number;vy?:number;side:HTMLImageElement|null;rear:HTMLImageElement|null;actions?:HTMLImageElement|null;reduced:boolean;}
 /** A render adapter driven by the existing fixed-step simulation; no second game clock. */
@@ -37,7 +38,7 @@ export function createRushRenderer(){
   loop.add(prefabs.get('LoopTrack')!.clone());ready=true;
  }).catch(()=>{ready=false;});
  function draw(ctx:CanvasRenderingContext2D,w:number,h:number,f:RushRenderFrame){
-  if(!alive||!available||!ready)return false;
+  if(!alive||!available||!ready||f.state.rush.kind!=='depth')return false;
   const rw=Math.min(1280,Math.max(400,Math.round(w))),rh=Math.max(250,Math.round(rw*h/w));
   if(rw!==lastWidth||rh!==lastHeight){renderer.setSize(rw,rh,false);lastWidth=rw;lastHeight=rh;camera.aspect=rw/rh;}
   const r=f.state.rush,isLoop=r.kind==='loop';depth.visible=!isLoop;loop.visible=isLoop;
@@ -66,8 +67,17 @@ export function createRushRenderer(){
    }
    for(const [id,o]of props)if(!live.has(id)){depth.remove(o);if(o instanceof THREE.Mesh&&o.geometry.type==='BoxGeometry'){o.geometry.dispose();(o.material as THREE.Material).dispose();}props.delete(id);}
   }
+  const transition=r.transition,t=easeRush(transitionProgress(r));
+  // Screen-space entry passes over the road; depth testing would hide the runner underneath it.
+  (hero.material as THREE.SpriteMaterial).depthTest=!(transition?.direction==='toDepth'&&transition.phase==='arrive');
+  if(transition?.direction==='toDepth'&&transition.phase==='arrive'){
+   camera.updateMatrixWorld();const screen=hero.position.clone().project(camera);screen.y=THREE.MathUtils.lerp(-1.45,screen.y,1-Math.pow(1-transitionProgress(r),3));hero.position.copy(screen.unproject(camera));shadow.visible=t>.8;
+  }else if(transition?.direction==='toSide'&&transition.phase==='depart'){
+   hero.position.z-=t*70;hero.position.x=transition.fromLane*3*(1-t);hero.scale.multiplyScalar(1-t*.55);shadow.position.set(hero.position.x,.045,hero.position.z);
+  }
+  if(!transition)(hero.material as THREE.SpriteMaterial).rotation+=trickRotation(f.state,f.reduced);
   aura.visible=hero.visible&&(boost||r.momentum>12||f.state.shield>0);aura.position.copy(hero.position);aura.position.z-=.08;aura.scale.set(3.2,4.2,1);(aura.material as THREE.SpriteMaterial).opacity=boost?.75:.35;
-  try{renderer.render(scene,camera);ctx.drawImage(canvas,0,0,w,h);ctx.canvas.dataset.rushRenderer='webgl';ctx.canvas.dataset.rushModel='blender';return true;}catch{available=false;return false;}
+  try{renderer.render(scene,camera);ctx.drawImage(canvas,0,0,w,h);camera.updateMatrixWorld();const screen=hero.position.clone().project(camera);drawTrickBurst(ctx,(screen.x+1)*w/2,(1-screen.y)*h/2+32,f.state,f.reduced,Math.min(w/800,h/400));ctx.canvas.dataset.rushRenderer='webgl';ctx.canvas.dataset.rushModel='blender';return true;}catch{available=false;return false;}
  }
  function dispose(){if(!alive)return;alive=false;canvas.removeEventListener('webglcontextlost',lost);canvas.removeEventListener('webglcontextrestored',restored);disposeTree(scene);for(const o of prefabs.values())disposeTree(o);spriteTexture.dispose();glowTexture.dispose();skyTexture.dispose();renderer.dispose();renderer.forceContextLoss();}
  return {draw,dispose,loading,get ready(){return ready;},get canvas(){return canvas;}};

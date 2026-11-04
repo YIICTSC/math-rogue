@@ -1,5 +1,6 @@
 import type {RushRenderFrame} from './rushRenderer';
-import {loopPose} from './rush';
+import {loopPose,easeRush,transitionProgress} from './rush';
+import {drawTrickBurst,trickRotation} from './courseEffects';
 import {drawRunner} from './render';
 import {drawAura} from './aura';
 /** Same course and collisions, rendered in Canvas when WebGL is lost or unavailable. */
@@ -18,8 +19,11 @@ export function drawRushFallback(ctx:CanvasRenderingContext2D,w:number,h:number,
   for(const e of [...r.objects].sort((a,b)=>b.at-a.at)){const d=e.at-f.distance-120;if(e.taken||d< -80||d>3000)continue;const q=project(e.lane,d),sz=q.scale*45;ctx.fillStyle=e.kind==='coin'||e.kind==='star'?'#ffde76':e.kind==='boost'?'#87ffe1':e.kind==='gap'?'#041726':'#ff7185';
    if(e.kind==='coin'||e.kind==='star'){ctx.beginPath();ctx.arc(q.x,q.y-25*q.scale,Math.max(2,8*q.scale),0,Math.PI*2);ctx.fill();}else ctx.fillRect(q.x-sz/2,q.y-(e.kind==='lowBar'?85:sz)*q.scale,sz,e.kind==='gap'?sz*.22:sz);
   }
-  const x=400+r.laneX*120,y=345-f.jump*.7;drawAura(ctx,x,y,'#7df5db',r.momentum/100+(r.turbo>0?.5:0),f.frame,f.reduced);
+  const t=easeRush(transitionProgress(r)),arrive=r.transition?.direction==='toDepth'&&r.transition.phase==='arrive',depart=r.transition?.direction==='toSide'&&r.transition.phase==='depart';
+  const x=400+(depart?r.transition!.fromLane:r.laneX)*120*(depart?1-t:1),y=arrive?bottom+130+(345-f.jump*.7-bottom-130)*(1-Math.pow(1-transitionProgress(r),3)):depart?345-200*t:345-f.jump*.7,heroScale=depart?1-.85*t:1;drawAura(ctx,x,y,'#7df5db',r.momentum/100+(r.turbo>0?.5:0),f.frame,f.reduced);
+  drawTrickBurst(ctx,x,y,f.state,f.reduced);ctx.save();ctx.translate(x,y);ctx.scale(heroScale,heroScale);ctx.rotate(trickRotation(f.state,f.reduced));ctx.translate(-x,-y);
   const action=f.actions?.complete&&(f.jump>1||f.state.slide>0),sheet=action?f.actions:f.rear;if(sheet?.complete&&sheet.naturalWidth){const cell=sheet.naturalWidth/4,ch=action?sheet.naturalHeight/2:sheet.naturalHeight,frame=action?(f.jump>1?(f.jump<22?((f.vy??0)<0?0:3):(f.vy??0)<-2?1:2):(f.state.slide>44?0:f.state.slide<9?3:1+Math.floor(f.frame/7)%2)):Math.floor(f.frame/5)%4;ctx.drawImage(sheet,frame*cell,action&&f.jump<=1?ch:0,cell,ch,x-42,y-110,84,110);}
+  ctx.restore();
  }
  ctx.restore();ctx.canvas.dataset.rushRenderer='canvas';
 }
