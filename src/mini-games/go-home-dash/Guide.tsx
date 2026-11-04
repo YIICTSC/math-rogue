@@ -6,11 +6,19 @@ let seenThisSession=false;
 export function hasSeenDashGuide(){try{return seenThisSession||localStorage.getItem(SEEN_KEY)==='seen';}catch{return seenThisSession;}}
 export function rememberDashGuide(){seenThisSession=true;try{localStorage.setItem(SEEN_KEY,'seen');}catch{/* The session still remembers when storage is unavailable. */}}
 type Copy=[string,string,string];
-type Page={id:string;title:Copy;tips:Copy[]};
+type Page={id:string;title:Copy;tips:Copy[];image?:string};
 export const DASH_GUIDE_PAGES:Page[]=[
  {id:'jump',title:['ジャンプと操作','Jump and controls','ジャンプとそうさ'],tips:[
   ['画面タップ・Space・コントローラーAでジャンプ。長押しで高く飛ぶ。2段・3段ジャンプは強化カードで解放。','Tap the course, press Space or controller A to jump. Hold for height. Upgrade cards unlock double and triple jumps.','がめんタップ・Space・コントローラーAでジャンプ。ながおしでたかくとぶ。2だん・3だんジャンプはきょうかカードでかいほう。'],
   ['スマホは下の操作ボタンも使える。ジャンプを押したまま、別の指でダッシュできる。','On touchscreens, use the bottom buttons. Hold jump and dash with another finger.','スマホはしたのそうさボタンもつかえる。ジャンプをおしたまま、べつのゆびでダッシュできる。']]},
+ {id:'air-trick',image:'jump',title:['エアトリック','Air trick','エアトリック'],tips:[
+  ['ジャンプ回数を使い切った後、十分な高さでジャンプボタン・Space・Aをもう一度押すと発動。通常はジャンプの後にもう一度、2段ジャンプ取得後は2段目の後に押そう。','After using all available jumps, press JUMP, Space or A again while high enough in the air. With double jump, use both jumps first.','ジャンプかいすうをつかいきったあと、じゅうぶんなたかさでジャンプボタン・Space・Aをもういちど。2だんジャンプなら2だんめのあとにおそう。'],
+  ['回転と光の粒をまとい、上向きに跳ね直してボーナス獲得！ 着地まで1回。平面・奥行きコースで使えるが、飛行中や画面切り替え中は使えない。','Spin with glowing particles, bounce upward and earn a bonus! Once per landing, on side-view and depth courses. Unavailable while flying or changing scenes.','かいてんとひかりのつぶをまとい、うえにはねてボーナス！ ちゃくちまで1かい。へいめん・おくゆきでつかえる。ひこうちゅう・がめんきりかえちゅうはつかえない。'],
+  ['エアトリック自体に無敵時間はない。光っていても接触ダメージに注意。近くにホーミング対象がいる場合はホーミング攻撃を優先する。','Air tricks grant no invincibility: glowing does not prevent contact damage. A valid nearby homing target takes priority.','エアトリックにむてきじかんはない。ひかっていてもぶつからないように。ちかくにホーミングできるあいてがいると、ホーミングをゆうせんする。']]},
+ {id:'homing',image:'dash',title:['ホーミング攻撃','Homing attack','ホーミングこうげき'],tips:[
+  ['平面コースのジャンプ中、前方の近くに壊せる敵・障害物がいるとき、ジャンプボタン・Space・Aをもう一度押すと自動で狙う。常時・自動発動ではなく、入力が必要。','While jumping on a side-view course, press JUMP, Space or A again to target a nearby breakable enemy or obstacle ahead. Requires input; it is not automatic or always available.','へいめんコースでジャンプちゅう、まえのちかくにこわせるてき・しょうがいぶつがいたら、ジャンプボタン・Space・Aをもういちど。じどうではなく、ボタンそうさがひつよう。'],
+  ['対象を壊して上向きに跳ね、ジャンプ回数が回復。約0.2秒の無敵が付き、連続発動の間隔は通常約0.6秒。長い無敵ではないので周囲に注意。','Break the target, bounce up and restore your jumps. Grants about 0.2 seconds of invincibility; normally allow about 0.6 seconds between homing attacks. Watch nearby hazards.','あいてをこわしてうえにはね、ジャンプかいすうがかいふく。むてきはやく0.2びょう。つぎのホーミングまではふつうやく0.6びょう。まわりにもきをつけよう。'],
+  ['ジャンプ回数を使い切っていても発動できる。穴・階段・鉄の障壁などは対象外。地上・奥行きコース・画面切り替え中は発動しない。','Works even after all jumps are used. Holes, stairs and iron barriers cannot be targeted. Unavailable on the ground, in depth courses or during scene changes.','ジャンプをつかいきっていてもつかえる。あな・かいだん・てつのかべなどはねらえない。ちじょう・おくゆきコース・がめんきりかえちゅうはつかえない。']]},
  {id:'dash',title:['5秒ターボ・ダッシュ','Five-second turbo dash','5びょうターボ・ダッシュ'],tips:[
   ['Shift・X・ダッシュボタンで5秒加速！ 加速中は敵や壊せる壁へ突進できる。','Press Shift, controller X or DASH for five seconds of speed. Charge through enemies and breakable walls.','Shift・X・ダッシュボタンで5びょうかそく！ かそくちゅうはてきやこわせるかべへとっしんできる。'],
   ['ダッシュは1エリアに1回。次のマップに入ると復活。電池はフローを補充し、矢印パッドは5秒間加速。','Dash once per area. Enter the next map to restore it. Batteries add Flow energy; arrow pads boost speed for five seconds.','ダッシュは1エリアに1かい。つぎのマップではふっかつ。でんちはフローをほじゅうし、やじるしパッドは5びょうかそく。']]},
@@ -83,9 +91,9 @@ export function DashGuide({languageMode,starting,onClose}:{languageMode:Language
    <div className="dash-guide-body">
     <nav aria-label={L('説明の項目','Guide topics','せつめいのこうもく')}>{DASH_GUIDE_PAGES.map((p,i)=><button key={p.id} aria-current={i===index?'step':undefined} onClick={()=>setIndex(i)}><small>{String(i+1).padStart(2,'0')}</small>{p.title[lang]}</button>)}</nav>
     <article className="dash-guide-content" aria-live="polite">
-     <p className="dash-guide-count">{index+1} / {DASH_GUIDE_PAGES.length} · {L('実際のゲーム画面','Actual gameplay screenshot','じっさいのゲームがめん')}</p>
+     <p className="dash-guide-count">{index+1} / {DASH_GUIDE_PAGES.length} · {page.image?L('操作の参考画面','Control reference screenshot','そうさのさんこうがめん'):L('実際のゲーム画面','Actual gameplay screenshot','じっさいのゲームがめん')}</p>
      <h3>{page.title[lang]}</h3>
-     <button className={`dash-guide-shot${zoom?' is-zoomed':''}`} aria-expanded={zoom} aria-label={L('スクリーンショットを拡大・縮小','Enlarge or shrink screenshot','スクリーンショットをかくだい・しゅくしょう')} onClick={()=>setZoom(!zoom)}><img src={assetUrl(`sprites/go-home-dash/guide/${page.id}.webp`)} alt={page.title[lang]} width={960} height={600}/><span>{L('タップで拡大','Tap to enlarge','タップでかくだい')}</span></button>
+     <button className={`dash-guide-shot${zoom?' is-zoomed':''}`} aria-expanded={zoom} aria-label={L('スクリーンショットを拡大・縮小','Enlarge or shrink screenshot','スクリーンショットをかくだい・しゅくしょう')} onClick={()=>setZoom(!zoom)}><img src={assetUrl(`sprites/go-home-dash/guide/${page.image||page.id}.webp`)} alt={page.title[lang]} width={960} height={600}/><span>{L('タップで拡大','Tap to enlarge','タップでかくだい')}</span></button>
      <ul>{page.tips.map((tip,i)=><li key={i}>{tip[lang]}</li>)}</ul>
     </article>
    </div>
