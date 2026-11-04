@@ -4,16 +4,20 @@ import {spawn} from 'node:child_process';
 import {createServer as netServer} from 'node:net';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
-let server,browser,backend;
+let server,browser,backend,signaling;
 const errors=[],out='tmp/online-rpg-entry';
 const freePort=()=>new Promise(resolve=>{const s=netServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 try{
- await mkdir(out,{recursive:true});const port=await freePort();
+ await mkdir(out,{recursive:true});const port=await freePort(),peerPort=await freePort();
+ signaling=spawn(process.execPath,['--input-type=module','-e',`import{PeerServer}from'peer';PeerServer({host:'127.0.0.1',port:${peerPort},path:'/rpg-flow'},()=>process.send('ready'));`],{stdio:['ignore','ignore','inherit','ipc']});
+ await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Peer startup timeout')),15000);signaling.once('message',()=>{clearTimeout(t);resolve();});});
  backend=spawn(process.execPath,['server/dist/index.mjs'],{env:{...process.env,PORT:String(port)},stdio:['ignore','pipe','inherit']});
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Server startup timeout')),30000);backend.stdout.once('data',()=>{clearTimeout(timer);resolve();});backend.once('error',reject);});
- server=await createServer({cacheDir:'node_modules/.vite-rpg-entry-isolation',logLevel:'error',optimizeDeps:{entries:['index.html']},define:{'import.meta.env.VITE_ENABLE_DEBUG_FEATURES':'"true"','import.meta.env.VITE_ONLINE_SERVER_URL':JSON.stringify(`ws://127.0.0.1:${port}`)},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},plugins:[{name:'rpg-entry-isolation',enforce:'pre',async load(id){if(!id.endsWith('/src/App.tsx'))return;const source=await readFile(id,'utf8'),at=source.lastIndexOf('\n    return (');assert(at>0);return source.slice(0,at)+`
+ server=await createServer({cacheDir:'node_modules/.vite-rpg-entry-isolation',logLevel:'error',optimizeDeps:{entries:['index.html']},define:{'import.meta.env.VITE_ENABLE_DEBUG_FEATURES':'"true"','import.meta.env.VITE_RPG_PEER_HOST':'"127.0.0.1"','import.meta.env.VITE_RPG_PEER_PORT':JSON.stringify(String(peerPort)),'import.meta.env.VITE_RPG_PEER_PATH':'"/rpg-flow"','import.meta.env.VITE_RPG_PEER_SECURE':'"false"','import.meta.env.VITE_RPG_ICE_SERVERS':'"[]"','import.meta.env.VITE_ONLINE_SERVER_URL':JSON.stringify(`ws://127.0.0.1:${port}`)},server:{host:'127.0.0.1',port:0,hmr:false,watch:null},plugins:[{name:'rpg-entry-isolation',enforce:'pre',async load(id){if(!id.endsWith('/src/App.tsx'))return;const source=await readFile(id,'utf8'),at=source.lastIndexOf('\n    return (');assert(at>0);return source.slice(0,at)+`
  (window as any).__rpgEntry={state:gameState,room:rpgRoomRef.current,snapshot:rpgSnapshotRef.current,
- start:()=>launchNewAdventure(visualTheme,true),character:()=>handleCharacterSelect(themedCharacters[0]),
+ title:()=>{setShowAssignmentLetter(false);setRpgTitleOpen(true);},character:()=>handleCharacterSelect(themedCharacters[0]),
+ mode:(value)=>handleModeSelect(value||GameMode.MULTIPLICATION),difficulty:()=>handleDifficultySelect(1),relic:()=>handleRelicSelect(starterRelics[0]),prepared:rpgPreparationComplete,
+ seedGift:()=>{storageService.saveRewardCardToAlbum({...gameState.player.deck[0],id:'flow-reward',rewardCard:true,rewardSource:'ASSIGNMENT'});setRewardCardAlbumVersion(v=>v+1);},album:()=>storageService.getRewardCardAlbum(),
  exit:returnToTitle,lose:resolveBattleDefeat,recover:handleRpgDefeatChallengeComplete,mainSave:()=>storageService.loadGame(),starter:()=>storageService.hasSkippedFirstStarterRelic(),
  seedMain:()=>{const next={...gameState,screen:GameScreen.START_MENU,rpgOnline:undefined,act:3,floor:19,isEndless:false,challengeMode:undefined,player:{...gameState.player,gold:777,deck:[{...gameState.player.deck[0],id:'main-sentinel-card'}]}};storageService.saveGame({...next,screen:GameScreen.MAP});setGameState(next);},
  changeRpg:()=>setGameState(prev=>({...prev,player:{...prev.player,gold:9,deck:[{...prev.player.deck[0],id:'rpg-sentinel-card'}]}}))};
@@ -27,24 +31,48 @@ try{
  await host.getByRole('button',{name:'小学5年生',exact:true}).click();await host.getByRole('button',{name:'あとで決める',exact:true}).last().click();
  console.log('App ready');await host.waitForFunction(()=>window.__rpgEntry);await host.evaluate(()=>window.__rpgEntry.seedMain());console.log('SEEDED',await host.evaluate(()=>({gold:window.__rpgEntry.state.player.gold,screen:window.__rpgEntry.state.screen})));await host.waitForFunction(()=>window.__rpgEntry.state.player.gold===777);
  const main=await host.evaluate(()=>({player:window.__rpgEntry.state.player,floor:window.__rpgEntry.state.floor,act:window.__rpgEntry.state.act,save:window.__rpgEntry.mainSave(),starter:window.__rpgEntry.starter()}));
- await host.evaluate(()=>window.__rpgEntry.start());await host.locator('.rpg-entry-form').waitFor();
- assert.equal(await host.evaluate(()=>window.__rpgEntry.state.player.deck.some(c=>c.id==='main-sentinel-card')),false);
- await host.getByRole('button',{name:'部屋を作る',exact:true}).click();await host.getByLabel('冒険者の名前',{exact:true}).fill('Host');
- await host.getByRole('button',{name:/サーバー通信.*beta/}).click();await host.screenshot({path:`${out}/host-entry.png`});
- await host.getByRole('button',{name:'オンラインの部屋を作る',exact:true}).click();await host.waitForFunction(()=>window.__rpgEntry.state.screen==='CHARACTER_SELECTION'&&window.__rpgEntry.snapshot?.world.players[window.__rpgEntry.snapshot.selfId]?.name==='Host');
- await host.evaluate(()=>window.__rpgEntry.character());await host.getByRole('button',{name:'ゲーム開始',exact:true}).waitFor();assert(await host.getByRole('button',{name:'ゲーム開始',exact:true}).isEnabled());
- assert.equal(await host.evaluate(()=>window.__rpgEntry.starter()),main.starter,'RPG selection must not consume the main starter relic flag');
- const code=await host.evaluate(()=>window.__rpgEntry.room.code);await host.getByRole('button',{name:'ゲーム開始',exact:true}).click();await host.waitForFunction(()=>window.__rpgEntry.snapshot?.world.started);
- const guestContext=await browser.newContext({viewport:{width:390,height:844},hasTouch:true});guestContext.setDefaultTimeout(90000);await guestContext.addInitScript(()=>{try{localStorage.setItem('pixel_spire_language_mode_v1','JAPANESE');}catch{}});guestContext.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
- const guest=await guestContext.newPage();await guest.goto(base+'/?rpgRoom='+code,{waitUntil:'domcontentloaded',timeout:120000});
- await guest.locator('[data-invite-entry]').waitFor();assert.equal(await guest.getByLabel('参加名',{exact:true}).inputValue(),'');await guest.screenshot({path:`${out}/join-name-first.png`});await guest.getByLabel('参加名',{exact:true}).fill('Late adventurer');await guest.locator('.online-invite-submit').click();
- await guest.waitForFunction(()=>window.__rpgEntry.state.screen==='CHARACTER_SELECTION'&&window.__rpgEntry.snapshot?.world.players[window.__rpgEntry.snapshot.selfId]?.name==='Late adventurer');await guest.screenshot({path:`${out}/joined-character-selection.png`});
- await guest.evaluate(()=>window.__rpgEntry.character());await guest.waitForFunction(()=>window.__rpgEntry.state.screen==='MAP'&&window.__rpgEntry.snapshot?.world.started);await guest.locator('.rpg-map-container').first().waitFor({state:'visible'});
- for(const [width,height]of [[390,844],[844,390]]){await guest.setViewportSize({width,height});await guest.screenshot({path:`${out}/late-map-${width}.png`});}
- assert.equal(await host.evaluate(()=>Object.keys(window.__rpgEntry.snapshot.world.players).length),2);
- await host.evaluate(()=>window.__rpgEntry.lose());await host.waitForFunction(()=>window.__rpgEntry.state.screen==='RPG_DEFEAT_CHALLENGE');await host.evaluate(()=>window.__rpgEntry.recover());await host.waitForFunction(()=>window.__rpgEntry.state.screen==='MAP');
- await host.evaluate(()=>window.__rpgEntry.changeRpg());await host.waitForFunction(()=>window.__rpgEntry.state.player.gold===9);await host.evaluate(()=>window.__rpgEntry.exit());await host.waitForFunction(()=>!window.__rpgEntry.state.rpgOnline);
- const restored=await host.evaluate(()=>({player:window.__rpgEntry.state.player,floor:window.__rpgEntry.state.floor,act:window.__rpgEntry.state.act,save:window.__rpgEntry.mainSave()}));
- assert.deepEqual(restored.player,main.player);assert.equal(restored.floor,19);assert.equal(restored.act,3);assert.deepEqual(restored.save,main.save);assert.deepEqual(errors,[]);
- console.log('PASS: actual App admits a name before character selection, solo host starts, active-game guest enters, portrait/landscape maps render, RPG inventory and main save remain independent.');
-}catch(e){console.log('RPG diagnostics',errors);if(browser)for(const [i,p]of browser.contexts().flatMap(c=>c.pages()).entries()){console.log('STATE',i,await p.evaluate(()=>({gold:window.__rpgEntry?.state.player.gold,screen:window.__rpgEntry?.state.screen,rpg:window.__rpgEntry?.state.rpgOnline})));console.log('PAGE',i,(await p.locator('body').innerText()).slice(0,2000));await p.screenshot({path:`${out}/failure-${i}.png`}).catch(()=>{});}throw e;}finally{await browser?.close();await server?.close();backend?.kill();}
+ await host.evaluate(()=>window.__rpgEntry.seedGift());
+ const screen=(page,value)=>page.waitForFunction(v=>window.__rpgEntry.state.screen===v,value);
+ const call=(page,name)=>page.evaluate(name=>window.__rpgEntry[name](),name);
+ const title=async(page,label)=>{await call(page,'title');await page.getByRole('button',{name:label,exact:true}).click();};
+ const prepare=async(page,gift=false,custom=false)=>{
+  await screen(page,'CHARACTER_SELECTION');await page.getByRole('button',{name:'主人公ビルダー',exact:true}).waitFor();
+  if(custom){
+   await page.evaluate(async()=>{const{saveHero,HERO_ACTIONS}=await import('/src/rpg/customHero.ts');const c=document.createElement('canvas');c.width=c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#d4ba78';ctx.fillRect(2,2,12,12);const image=c.toDataURL('image/png');saveHero({version:1,name:'Flow custom hero',portrait:image,frames:Object.fromEntries(HERO_ACTIONS.map(a=>[a,[image]])),voice:{theme:'high-school',heroId:'WARRIOR'}});});
+   await page.getByRole('button',{name:'主人公ビルダー',exact:true}).click();await page.locator('.rpg-hero-builder').getByRole('button',{name:'保存してこの主人公を使う',exact:true}).click();
+  }else await call(page,'character');
+  await screen(page,'RELIC_SELECTION');assert.equal(await page.evaluate(()=>window.__rpgEntry.prepared),false);
+  await call(page,'relic');await screen(page,'REWARD_CARD_ALBUM');assert.equal(await page.getByRole('button',{name:'削除',exact:true}).count(),0,'RPG selection never deletes main reward cards');
+  await page.getByRole('button',{name:gift?'このカードで始める':'今回は使わない',exact:true}).first().click();await screen(page,'MAP');await page.waitForFunction(()=>window.__rpgEntry.prepared);
+ };
+ const isolated=async()=>{const online=await host.evaluate(()=>!!window.__rpgEntry.room?.code&&!!window.__rpgEntry.room?.world?.started);await call(host,'exit');if(online)await host.locator('#online-session-result').getByRole('button',{name:'閉じる / Close',exact:true}).click();await host.waitForFunction(()=>!window.__rpgEntry.state.rpgOnline);assert.deepEqual(await host.evaluate(()=>({player:window.__rpgEntry.state.player,floor:window.__rpgEntry.state.floor,act:window.__rpgEntry.state.act,save:window.__rpgEntry.mainSave(),starter:window.__rpgEntry.starter()})),main);};
+ // The title's actual solo callback must lead directly to lessons, with no online entry form.
+ await title(host,'ひとりで遊ぶ');await screen(host,'MODE_SELECTION');assert.equal(await host.locator('.rpg-entry-tabs,.rpg-entry-form').count(),0);
+ await call(host,'mode');await screen(host,'DIFFICULTY_SELECTION');await call(host,'difficulty');await screen(host,'CHARACTER_SELECTION');
+ await host.getByRole('button',{name:'主人公ビルダー',exact:true}).click();await host.locator('.rpg-hero-builder').waitFor();await host.locator('.rpg-hero-builder').getByRole('button',{name:'閉じる',exact:true}).click();
+ await prepare(host,true);await host.waitForFunction(()=>window.__rpgEntry.snapshot?.world.started);await host.locator('.rpg-map-container').waitFor();
+ assert.equal(await host.evaluate(()=>window.__rpgEntry.room.code),'');assert(await host.evaluate(()=>window.__rpgEntry.state.player.deck.some(c=>c.id.startsWith('rpg-starter-reward-'))));
+ assert.equal(await host.evaluate(()=>window.__rpgEntry.album().length),1);await host.screenshot({path:`${out}/solo-map.png`});await isolated();console.log('PASS solo: title → lesson → difficulty → hero/builder → relic → reward → world, no online options, copied reward and protected main save.');
+ for(const transport of(process.argv.includes('--server-only')?['server']:['server','host'])){
+  console.log('Starting host flow',transport);await title(host,'オンラインで遊ぶ');await host.locator('.rpg-entry-form').waitFor();assert.equal(await host.locator('.rpg-entry-tabs').count(),0);
+  assert.equal(await host.locator('.rpg-entry-form').getByRole('button',{name:'ひとりで遊ぶ',exact:true}).count(),0);assert.equal(await host.evaluate(()=>window.__rpgEntry.state.player.deck.some(c=>c.id==='main-sentinel-card')),false);await host.screenshot({path:`${out}/host-entry-${transport}.png`});
+  await host.getByLabel('冒険者の名前',{exact:true}).fill('Host');if(transport==='server')await host.getByRole('button',{name:/サーバー通信.*beta/}).click();
+  await host.getByRole('button',{name:'オンラインの部屋を作る',exact:true}).click();await host.locator('.rpg-waiting-panel').waitFor();
+  assert(await host.getByRole('button',{name:'ゲーム開始',exact:true}).isDisabled());assert.equal(await host.evaluate(()=>window.__rpgEntry.state.screen),'MAP');
+  const code=await host.evaluate(()=>window.__rpgEntry.room.code);
+  for(const[width,height]of[[390,844],[844,390]]){await host.setViewportSize({width,height});for(const button of await host.locator('.rpg-room-actions button').all()){const r=await button.boundingBox();assert(r&&r.height>=40&&r.height<=74&&r.x>=0&&r.x+r.width<=width+1,'Compact room actions stay reachable');}if(width>height){const startRect=await host.getByRole('button',{name:'ゲーム開始',exact:true}).boundingBox();assert(startRect&&startRect.y+startRect.height<=height,'Landscape start button is visible without scrolling');}await host.screenshot({path:`${out}/room-${transport}-${width}.png`});}
+  const guestContext=await browser.newContext({viewport:{width:390,height:844},hasTouch:true});guestContext.setDefaultTimeout(90000);await guestContext.addInitScript(()=>{try{localStorage.setItem('pixel_spire_language_mode_v1','JAPANESE');}catch{}});guestContext.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
+  const guest=await guestContext.newPage();await guest.goto(base+'/?rpgRoom='+code,{waitUntil:'domcontentloaded',timeout:120000});await guest.locator('[data-invite-entry]').waitFor();await guest.getByLabel('参加名',{exact:true}).fill('Guest early');await guest.locator('.online-invite-submit').click();
+  await screen(guest,'CHARACTER_SELECTION');console.log('Guest admitted',transport);await host.waitForFunction(()=>Object.values(window.__rpgEntry.snapshot.world.players).some(p=>p.name==='Guest early'));
+  assert.equal(await guest.evaluate(()=>Object.values(window.__rpgEntry.room.world.players).some(p=>p.id===window.__rpgEntry.room.selfId)),true,'Admission is complete before choosing a character');
+  await host.getByRole('button',{name:'問題の設定',exact:true}).click();await screen(host,'MODE_SELECTION');await call(host,'mode');await call(host,'difficulty');await prepare(host,false,true);await host.waitForFunction(()=>window.__rpgEntry.snapshot.world.players[window.__rpgEntry.room.selfId].hero?.name==='Flow custom hero');console.log('Host prepared',transport);
+  const before=await host.evaluate(()=>({deck:window.__rpgEntry.state.player.deck,relics:window.__rpgEntry.state.player.relics}));
+  await host.getByRole('button',{name:'問題の設定',exact:true}).click();await host.evaluate(()=>window.__rpgEntry.mode('ADDITION'));await call(host,'difficulty');await screen(host,'MAP');assert.deepEqual(await host.evaluate(()=>({deck:window.__rpgEntry.state.player.deck,relics:window.__rpgEntry.state.player.relics})),before,'Editing problems does not repeat hero/relic/card selection');
+  await host.getByRole('button',{name:'ゲーム開始',exact:true}).click();await host.waitForFunction(()=>window.__rpgEntry.snapshot.world.started);await prepare(guest,false);await guest.locator('.rpg-map-container').waitFor();await guest.close();
+  // Manual code entry from the title also completes admission after the game starts.
+  const late=await guestContext.newPage();await late.goto(base,{waitUntil:'domcontentloaded',timeout:120000});await late.waitForFunction(()=>window.__rpgEntry);await late.getByRole('button',{name:'小学5年生',exact:true}).click();await late.getByRole('button',{name:'あとで決める',exact:true}).last().click();await title(late,'招待に参加する');await late.locator('[data-invite-entry]').waitFor();await late.getByLabel('招待コード',{exact:true}).fill(code);await late.getByLabel('参加名',{exact:true}).fill('Late guest');await late.locator('.online-invite-submit').click();await prepare(late,false);await late.locator('.rpg-map-container').waitFor();await late.screenshot({path:`${out}/late-${transport}.png`});await guestContext.close();
+  if(transport==='server'){await call(host,'lose');await screen(host,'RPG_DEFEAT_CHALLENGE');await call(host,'recover');await screen(host,'MAP');await call(host,'changeRpg');await host.waitForFunction(()=>window.__rpgEntry.state.player.gold===9);}await isolated();await host.setViewportSize({width:390,height:844});console.log('PASS '+transport+': compact ROOM, admission before preparation, host setting edits, start while guest prepares, late join and main save isolation.');
+ }
+ assert.deepEqual(errors,[]);
+
+}catch(e){console.log('RPG diagnostics',errors);if(browser)for(const [i,p]of browser.contexts().flatMap(c=>c.pages()).entries()){console.log('STATE',i,await p.evaluate(()=>({gold:window.__rpgEntry?.state.player.gold,screen:window.__rpgEntry?.state.screen,rpg:window.__rpgEntry?.state.rpgOnline})));console.log('PAGE',i,(await p.locator('body').innerText()).slice(0,2000));await p.screenshot({path:`${out}/failure-${i}.png`}).catch(()=>{});}throw e;}finally{await browser?.close();await server?.close();backend?.kill();signaling?.kill();}

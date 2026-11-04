@@ -8,6 +8,7 @@ import { assetUrl } from '../utils/assetPaths';
 
 interface RewardCardAlbumScreenProps {
   cards: ICard[];
+  readOnly?: boolean;
   onBack: () => void;
   onSelect?: (card: ICard | null) => void;
   onDelete: (cardId: string) => void;
@@ -16,6 +17,7 @@ interface RewardCardAlbumScreenProps {
 
 const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
   cards,
+  readOnly = false,
   onBack,
   onSelect,
   onDelete,
@@ -137,12 +139,12 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
                         {trans('このカードで始める', languageMode)}
                       </button>
                     )}
-                    <button
+                    {!readOnly && <button
                       onClick={() => setDeleteTargetCard(card)}
                       className="flex items-center justify-center rounded-lg border border-red-500/60 bg-red-950/70 px-3 py-2 text-xs font-black text-red-100 hover:bg-red-900"
                     >
                       <Trash2 className="mr-1" size={14} /> {trans('削除', languageMode)}
-                    </button>
+                    </button>}
                   </div>
                 </div>
               ))}

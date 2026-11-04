@@ -1918,3 +1918,33 @@
 .rpg-building-goals button { width: 100%; justify-content: center; margin-top: 10px; padding: 10px; border: 1px solid #c1c59a; border-radius: 8px; background: #39564a; color: #fff0c3; font: inherit; }
 .rpg-building-goals button:disabled { opacity: .45; }
 @media (max-width:380px) {.rpg-building-goals li { grid-template-columns: minmax(0,1fr); }.rpg-building-goals li small { grid-column: 1; }}
+
+/* The ROOM preparation actions stay compact and reachable in either orientation. */
+.rpg-room-setup .rpg-waiting-lobby{width:100%;max-width:1120px;box-sizing:border-box;min-height:0;overflow:auto;padding:12px;gap:12px;margin:0 auto}
+.rpg-room-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.rpg-room-setup .rpg-room-actions button{width:100%;min-height:44px;max-height:none;padding:8px 10px;font-size:13px;line-height:1.35;border-radius:8px;white-space:normal;overflow-wrap:anywhere}
+.rpg-room-setup .rpg-waiting-panel{display:flex;flex:0 0 auto;padding:14px;overflow:visible}
+.rpg-room-setup .rpg-waiting-roster{flex:0 0 auto;margin-top:12px}
+.rpg-room-setup .rpg-waiting-invite{flex-wrap:wrap;gap:8px}
+.rpg-room-setup .rpg-waiting-invite button{min-height:44px;padding:8px 12px;font-size:12px}
+.rpg-room-setup .rpg-start-adventure{min-height:44px;padding:9px 14px;font-size:14px}
+.rpg-solo-loading{display:grid;place-content:center;min-height:100dvh;background:#11282d;color:#f0dfb9}
+@media(orientation:landscape) and (max-height:550px){
+ .rpg-room-setup .rpg-header{height:48px;min-height:48px}
+ .rpg-room-setup>.host-spectator{margin:4px 12px;padding:0;border:0;background:transparent;box-shadow:none}
+ .rpg-room-setup>.host-spectator button{min-height:44px}
+ .rpg-room-setup .rpg-waiting-lobby{display:flex;padding:6px 12px;gap:6px}
+ .rpg-room-setup .rpg-waiting-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.9fr);gap:6px 12px;padding:10px;align-items:start}
+ .rpg-room-setup .rpg-room-actions{grid-column:1;grid-row:1;margin:0}
+ .rpg-room-setup .rpg-waiting-heading{grid-column:2;grid-row:1;align-self:center}
+ .rpg-room-setup .rpg-waiting-heading h1{font-size:16px}
+ .rpg-room-setup .rpg-waiting-heading p,.rpg-room-setup .rpg-waiting-roster h2,.rpg-room-setup .rpg-waiting-start-area p{display:none}
+ .rpg-room-setup .rpg-waiting-roster{grid-column:1;grid-row:2/4;margin:0}
+ .rpg-room-setup .rpg-waiting-roster ul{max-height:110px;margin:0}
+ .rpg-room-setup .rpg-waiting-invite{grid-column:2;grid-row:2;margin:0;padding:4px 8px}
+ .rpg-room-setup .rpg-room-code{display:inline;font-size:22px;line-height:1.2;letter-spacing:.1em}
+ .rpg-room-setup .rpg-waiting-start-area,.rpg-room-setup .rpg-waiting-host-message{grid-column:2;grid-row:3;margin:0!important}
+ .rpg-room-setup .rpg-waiting-mini-heading{min-height:44px;padding:6px 12px}
+ .rpg-room-setup .rpg-waiting-mini-heading h2{font-size:12px}
+ .rpg-room-setup .rpg-waiting-mini-heading p,.rpg-room-setup .rpg-waiting-mini-heading>span{display:none}
+}
