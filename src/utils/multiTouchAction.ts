@@ -1,6 +1,7 @@
-import type { MouseEvent, PointerEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent, PointerEvent } from "react";
 
 const lastTouch = new WeakMap<HTMLElement, number>();
+const keyboardClickArmed = new WeakSet<HTMLButtonElement>();
 const heldPointers = new WeakMap<HTMLElement, Set<number>>();
 const activeHolds = new Map<HTMLButtonElement, (held: boolean) => void>();
 const resetHolds = () => {
@@ -39,24 +40,29 @@ export function multiTouchAction(action: () => void) {
       event.preventDefault();
       event.stopPropagation();
       lastTouch.set(event.currentTarget, performance.now());
+      keyboardClickArmed.delete(event.currentTarget);
       action();
     },
     onPointerUp(event: PointerEvent<HTMLButtonElement>) {
       if (event.pointerType !== 'mouse') lastTouch.set(event.currentTarget, performance.now());
     },
+    onKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      const button = event.currentTarget;
+      keyboardClickArmed.add(button);
+      window.setTimeout(() => keyboardClickArmed.delete(button), 500);
+    },
     onClick(event: MouseEvent<HTMLButtonElement>) {
       event.stopPropagation();
       if (event.currentTarget.disabled) return;
+      const now = performance.now();
+      const recentlyTouched = now - (lastTouch.get(event.currentTarget) ?? -Infinity) <= 800;
       const physicalMouse =
         "pointerType" in event.nativeEvent &&
         event.nativeEvent.pointerType === "mouse";
-      if (
-        event.detail === 0 ||
-        physicalMouse ||
-        performance.now() - (lastTouch.get(event.currentTarget) ?? -Infinity) >
-          800
-      )
-        action();
+      const keyboardActivation = event.detail === 0 && keyboardClickArmed.has(event.currentTarget);
+      keyboardClickArmed.delete(event.currentTarget);
+      if (physicalMouse || keyboardActivation || !recentlyTouched) action();
     },
     style: { touchAction: "none" as const },
   };

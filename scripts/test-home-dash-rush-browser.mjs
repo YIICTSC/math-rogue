@@ -20,6 +20,22 @@ try{
  const page=await context.newPage(),errors=[],missing=[];page.setDefaultTimeout(90000);page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR',e.message);});page.on('response',r=>{if(r.status()>=400&&r.url().includes('/sprites/go-home-dash/rush/')){missing.push(r.url());console.error('MISSING REAR',r.url());}});
  await page.goto('http://127.0.0.1:'+server.httpServer.address().port+'/dash-rush-test?unlocked',{waitUntil:'domcontentloaded',timeout:90000});console.log('Rush fixture loaded');await page.locator('.dash-lobby').waitFor();await page.getByRole('button',{name:'主人公を選ぶ'}).click();await page.getByRole('button',{name:'START DASH'}).click();await page.waitForFunction(()=>window.__rush);
  await page.evaluate(()=>__rush.arrange('depth',.5));await page.waitForFunction(()=>__rush.renderer?.ready);await page.waitForFunction(()=>__rush.side?.complete&&__rush.side.naturalWidth>0&&__rush.rear?.complete&&__rush.rear.naturalWidth>0);await page.evaluate(()=>__rush.step());assert.equal(await page.locator('.dash-overview').getAttribute('data-rush-renderer'),'webgl','Primary course must use the actual Blender GLB');
+ // A touch tap must steer only once (PointerDown + the browser's synthetic Click).
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{__rush.arrange('depth',.1);__rush.arcade.rush.lane=-1;});
+ await page.getByRole('button',{name:'右のレーンへ',exact:true}).tap();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0,'One touch tap advances exactly one lane');
+ await page.evaluate(()=>{__rush.arcade.rush.lane=1;});await page.getByRole('button',{name:'左のレーンへ',exact:true}).tap();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0,'One left touch tap advances exactly one lane');
+ // A horizontal touch swipe on the 3D playfield steers, while not also jumping.
+ await page.evaluate(()=>{__rush.arcade.rush.lane=-1;});const touch=await context.newCDPSession(page);
+ await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:185,y:400,id:1}]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:285,y:400,id:1}]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await page.waitForTimeout(50);
+ assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0,'A right swipe advances exactly one lane');
+ assert.equal(await page.evaluate(()=>__rush.player.vy),0,'A lane swipe does not trigger a jump');
+ await page.evaluate(()=>{__rush.arcade.rush.lane=1;});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:285,y:400,id:2}]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:185,y:400,id:2}]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await page.waitForTimeout(50);
+ assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0,'A left swipe advances exactly one lane');await touch.detach();await page.setViewportSize({width:1280,height:800});
  if(!process.argv.includes('--actions-only')){
  for(const [kind,progress]of [['loop',.22],['loop',.5],['loop',.76],['depth',.18]]){await page.evaluate(([k,p])=>{__rush.arrange(k,p);__rush.step();},[kind,progress]);await page.screenshot({path:`${output}/${kind}-${progress}.png`});}
  if(process.env.DASH_RUSH_CAPTURE){for(const [kind,id]of [['loop','loop360'],['depth','skyway3d']]){await page.setViewportSize({width:960,height:600});await page.evaluate(k=>{__rush.arrange(k,.35);__rush.step();},kind);const buffer=await page.screenshot();await sharp(buffer).webp({quality:90}).toFile(`public/sprites/go-home-dash/guide/${id}.webp`);}}

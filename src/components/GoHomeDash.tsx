@@ -208,6 +208,7 @@ const GoHomeDash: React.FC<{
     const [dashReady, setDashReady] = useState(true);
     const [flight, setFlight] = useState(false);
     const pointerIds = useRef(new Set<number>());
+    const laneSwipe = useRef<{ pointerId: number; startX: number; startY: number; moved: boolean } | null>(null);
     const keysHeld = useRef(new Set<string>());
     const jumpButtonHeld = useRef(false);
     const refreshPressing = () => { playerRef.current.isPressing = pointerIds.current.size > 0 || keysHeld.current.size > 0 || jumpButtonHeld.current; };
@@ -218,7 +219,7 @@ const GoHomeDash: React.FC<{
         lastVoiceRef.current = now;
         void audioService.playHomeDashVoice(heroRef.current, event);
     };
-    const stopInputs = () => { arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;pointerIds.current.clear(); keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
+    const stopInputs = () => { arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;pointerIds.current.clear();laneSwipe.current=null; keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
     const returnToTitle = () => { checkpointRef.current=null;pausedRef.current=false;setPaused(false);stopInputs(); audioService.stopHomeDashVoices(); gameStateRef.current = 'START'; setGameState('START'); };
     const L = (ja: string, en: string, hi: string) => languageMode === 'ENGLISH' ? en : languageMode === 'HIRAGANA' ? hi : ja;
     const stageRef = useRef<HTMLDivElement>(null);
@@ -561,9 +562,33 @@ const GoHomeDash: React.FC<{
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         if (gameStateRef.current !== 'PLAYING' || e.button !== 0) return;
         e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId);
-        pointerIds.current.add(e.pointerId); refreshPressing(); triggerJump();
+        pointerIds.current.add(e.pointerId); refreshPressing();
+        if (arcadeRef.current.rush.kind === 'depth' && e.pointerType !== 'mouse') {
+            laneSwipe.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, moved: false };
+            return;
+        }
+        triggerJump();
+    };
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        const gesture = laneSwipe.current;
+        if (!gesture || gesture.pointerId !== e.pointerId || gesture.moved) return;
+        const dx = e.clientX - gesture.startX;
+        const dy = e.clientY - gesture.startY;
+        const threshold = Math.max(36, Math.min(64, viewportRef.current.width * 0.08));
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < threshold) return;
+        gesture.moved = true;
+        if (Math.abs(dx) >= Math.abs(dy) * 1.2) steer(Math.sign(dx));
     };
     const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        const gesture = laneSwipe.current;
+        if (gesture?.pointerId === e.pointerId) {
+            laneSwipe.current = null;
+            if (!gesture.moved) triggerJump();
+        }
+        pointerIds.current.delete(e.pointerId); refreshPressing();
+    };
+    const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (laneSwipe.current?.pointerId === e.pointerId) laneSwipe.current = null;
         pointerIds.current.delete(e.pointerId); refreshPressing();
     };
     useEffect(() => {
@@ -1373,7 +1398,7 @@ const GoHomeDash: React.FC<{
                 <div className="go-home-distance"><div className="text-3xl font-black italic">{travelled.toLocaleString()}</div><small>DISTANCE</small></div>
             </div>
             {gameState==='PLAYING'&&<ArcadeHud state={arcadeView} languageMode={languageMode} paused={paused} onPause={togglePause}/>}
-            <div className="dash-stage touch-none" ref={stageRef} onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onLostPointerCapture={handlePointerUp}>
+            <div className="dash-stage touch-none" ref={stageRef} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel} onLostPointerCapture={handlePointerCancel}>
                 <canvas className="dash-overview" ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} aria-label={L('帰宅ダッシュのコース', 'Home Dash course', 'きたくダッシュのコース')} />
                 <canvas className="dash-focus" ref={focusCanvasRef} width={400} height={400} aria-hidden="true" />
             </div>

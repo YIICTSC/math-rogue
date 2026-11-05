@@ -61,12 +61,12 @@ try {
   assert((await page.evaluate(() => __touch.x)) > 0.2);
   await page.waitForTimeout(950);
   await touch("touchEnd", [second]);
-  await page.getByRole("button",{name:"ITEM",exact:true}).dispatchEvent("click",{detail:1});
+  await page.getByRole("button",{name:"ITEM",exact:true}).dispatchEvent("click",{detail:0});
   await page.waitForTimeout(50);
   assert.equal(
     await page.evaluate(() => __touch.item),
     1,
-    "no synthetic duplicate",
+    "a detail=0 touch compatibility click must not duplicate PointerDown",
   );
   await touch("touchStart", [first, third]);
   await page.waitForFunction(() => __touch.drift && __touch.x > 0.2);
