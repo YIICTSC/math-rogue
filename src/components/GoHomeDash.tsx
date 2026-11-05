@@ -20,12 +20,15 @@ import { createArcade, addEntity, beginArcade, endArcade, activateOrb, arcadePla
 import { advanceObstacleMotion } from '../mini-games/go-home-dash/motion';
 import { drawDangerAura, drawHostileArt, drawFlightPillar, drawStairArt, drawArt, drawSlide, type ArtImages, type ArtKey } from '../mini-games/go-home-dash/art';
 import { drawArcade, drawArcadeRunner } from '../mini-games/go-home-dash/arcadeRender';
-import {rushSpeed,syncRush,stepRush,chargeRush,releaseRushCharge,shiftRushLane,advanceRushTransition,sideTransitionX,sideLoopPose,rushAt,airTrick,easeRush,transitionProgress} from '../mini-games/go-home-dash/rush';
+import {rushSpeed,syncRush,stepRush,chargeRush,releaseRushCharge,shiftRushLane,moveRushLane,advanceRushTransition,sideTransitionX,sideLoopPose,rushAt,airTrick,easeRush,transitionProgress} from '../mini-games/go-home-dash/rush';
 import {drawRushFallback} from '../mini-games/go-home-dash/rushFallback';
 import type {RushRenderer,RushRenderFrame} from '../mini-games/go-home-dash/rushRenderer';
 import {reward} from '../mini-games/go-home-dash/arcade';
 import { isProtagonistUnlocked } from '../utils/protagonistUnlocks';
 import { multiTouchAction, multiTouchHold } from '../utils/multiTouchAction';
+
+const DEPTH_LANE_TOUCH_NUDGE=0.3;
+const DEPTH_LANE_TOUCH_SPEED=0.04;
 
 // --- CONSTANTS ---
 const CANVAS_WIDTH = 800;
@@ -209,6 +212,10 @@ const GoHomeDash: React.FC<{
     const [flight, setFlight] = useState(false);
     const pointerIds = useRef(new Set<number>());
     const laneSwipe = useRef<{ pointerId: number; startX: number; startY: number; moved: boolean } | null>(null);
+    const laneButtonHeld = useRef({left:false,right:false});
+    const laneButtonPointers = useRef(new Map<number,number>());
+    const laneButtonLastTouch = useRef(new WeakMap<HTMLButtonElement,number>());
+    const laneButtonLastKeyboard = useRef(new WeakMap<HTMLButtonElement,number>());
     const keysHeld = useRef(new Set<string>());
     const jumpButtonHeld = useRef(false);
     const refreshPressing = () => { playerRef.current.isPressing = pointerIds.current.size > 0 || keysHeld.current.size > 0 || jumpButtonHeld.current; };
@@ -219,7 +226,7 @@ const GoHomeDash: React.FC<{
         lastVoiceRef.current = now;
         void audioService.playHomeDashVoice(heroRef.current, event);
     };
-    const stopInputs = () => { arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;pointerIds.current.clear();laneSwipe.current=null; keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
+    const stopInputs = () => { arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;pointerIds.current.clear();laneSwipe.current=null;laneButtonPointers.current.clear();laneButtonHeld.current.left=false;laneButtonHeld.current.right=false;keysHeld.current.clear(); jumpButtonHeld.current = false; playerRef.current.isPressing = false; };
     const returnToTitle = () => { checkpointRef.current=null;pausedRef.current=false;setPaused(false);stopInputs(); audioService.stopHomeDashVoices(); gameStateRef.current = 'START'; setGameState('START'); };
     const L = (ja: string, en: string, hi: string) => languageMode === 'ENGLISH' ? en : languageMode === 'HIRAGANA' ? hi : ja;
     const stageRef = useRef<HTMLDivElement>(null);
@@ -559,6 +566,42 @@ const GoHomeDash: React.FC<{
     };
     const releaseSlide=()=>{if(document.hidden||!document.hasFocus()||pausedRef.current){arcadeRef.current.rush.chargeHeld=false;arcadeRef.current.rush.charge=0;return;}if(releaseRushCharge(arcadeRef.current))audioService.playSound('buff');};
     const steer=(direction:number)=>{if(!pausedRef.current)shiftRushLane(arcadeRef.current,direction);};
+    const holdLaneButton=(direction:number,held:boolean)=>{
+        const side=direction<0?'left':'right';
+        if(!held){laneButtonHeld.current[side]=false;return;}
+        const rush=arcadeRef.current.rush;
+        if(pausedRef.current||rush.kind!=='depth'||rush.transition||laneButtonHeld.current[side])return;
+        laneButtonHeld.current[side]=true;
+        moveRushLane(arcadeRef.current,direction,DEPTH_LANE_TOUCH_NUDGE);
+    };
+    const laneButtonPointerDown=(event:React.PointerEvent<HTMLButtonElement>,direction:number)=>{
+        if(event.button!==0||event.currentTarget.disabled)return;
+        event.preventDefault();event.stopPropagation();
+        if(event.pointerType==='mouse'){steer(direction);return;}
+        laneButtonLastTouch.current.set(event.currentTarget,performance.now());
+        event.currentTarget.setPointerCapture(event.pointerId);
+        const alreadyHeld=[...laneButtonPointers.current.values()].includes(direction);
+        laneButtonPointers.current.set(event.pointerId,direction);
+        if(!alreadyHeld)holdLaneButton(direction,true);
+    };
+    const laneButtonPointerUp=(event:React.PointerEvent<HTMLButtonElement>)=>{
+        const direction=laneButtonPointers.current.get(event.pointerId);
+        if(direction===undefined)return;
+        laneButtonPointers.current.delete(event.pointerId);
+        laneButtonLastTouch.current.set(event.currentTarget,performance.now());
+        if(![...laneButtonPointers.current.values()].includes(direction))holdLaneButton(direction,false);
+    };
+    const laneButtonClick=(event:React.MouseEvent<HTMLButtonElement>,direction:number)=>{
+        event.stopPropagation();
+        const lastTouch=laneButtonLastTouch.current.get(event.currentTarget)??-Infinity;
+        const lastKeyboard=laneButtonLastKeyboard.current.get(event.currentTarget)??-Infinity;
+        if(event.detail===0&&performance.now()-lastTouch>800&&performance.now()-lastKeyboard>800)steer(direction);
+    };
+    const handleLaneButtonKey=(event:React.KeyboardEvent<HTMLButtonElement>,direction:number)=>{
+        if(event.key!=='Enter'&&event.key!==' ')return;
+        event.preventDefault();event.stopPropagation();
+        if(!event.repeat){laneButtonLastKeyboard.current.set(event.currentTarget,performance.now());steer(direction);}
+    };
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         if (gameStateRef.current !== 'PLAYING' || e.button !== 0) return;
         e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId);
@@ -665,6 +708,7 @@ const GoHomeDash: React.FC<{
         if (gameStateRef.current !== 'PLAYING' || pausedRef.current) return;
         const p = playerRef.current, arcade=arcadeRef.current;
         if(arcade.rush.transition){
+            laneButtonPointers.current.clear();laneButtonHeld.current.left=false;laneButtonHeld.current.right=false;
             const changed=advanceRushTransition(arcade,p,340);arcade.frame++;if(arcade.noticeTime>0)arcade.noticeTime--;frameCount.current++;p.animFrame=Math.floor(frameCount.current/4)%4;
             if(changed){setTravelled(Math.floor(distanceRef.current/DISTANCE_SCALE));setRoute(routeAt(routeSeedRef.current,distanceRef.current+120).id);obstaclesRef.current=[];enemyProjectilesRef.current=[];projectilesRef.current=[];particlesRef.current=[];}
             if(changed||frameCount.current%4===0||!arcade.rush.transition)setArcadeView({...arcade,rush:{...arcade.rush}});return;
@@ -686,9 +730,12 @@ const GoHomeDash: React.FC<{
             frameCount.current++;p.animFrame=Math.floor(frameCount.current/4)%4;p.invulFrame=Math.max(0,p.invulFrame-1);p.dashFrames=Math.max(0,p.dashFrames-1);p.flying=false;
             const pad=navigator.getGamepads?.()?.[0];const direction=pad?(pad.buttons[14]?.pressed?-1:pad.buttons[15]?.pressed?1:Math.abs(pad.axes[0]||0)>.55?Math.sign(pad.axes[0]):0):0;
             if(direction&&direction!==arcade.rush.padDirection)shiftRushLane(arcade,direction);arcade.rush.padDirection=direction;
+            const laneButtonDirection=Number(laneButtonHeld.current.right)-Number(laneButtonHeld.current.left);
+            if(laneButtonDirection)moveRushLane(arcade,laneButtonDirection,DEPTH_LANE_TOUCH_SPEED);
+            else if(arcade.rush.kind!=='depth'){laneButtonPointers.current.clear();laneButtonHeld.current.left=false;laneButtonHeld.current.right=false;}
             if(p.barrierRegen&&!p.barrier&&++p.barrierTimer>600){p.barrier=true;p.barrierTimer=0;}
             if(p.autoHeal&&++p.autoHealTimer>1200){setHp(h=>Math.min(maxHpRef.current,h+1));p.autoHealTimer=0;}
-            if(p.shootingRate>0&&--p.shootingTimer<=0){p.shootingTimer=p.shootingRate;const target=arcade.rush.objects.find(e=>!e.taken&&e.kind==='barrier'&&e.lane===arcade.rush.lane&&e.at-distanceRef.current>120&&e.at-distanceRef.current<650);if(target){target.taken=true;arcade.stats.breaks++;reward(arcade,80,6);arcade.rush.flash=15;}}
+            if(p.shootingRate>0&&--p.shootingTimer<=0){p.shootingTimer=p.shootingRate;const target=arcade.rush.objects.find(e=>!e.taken&&e.kind==='barrier'&&Math.abs(e.lane-arcade.rush.laneX)<.5&&e.at-distanceRef.current>120&&e.at-distanceRef.current<650);if(target){target.taken=true;arcade.stats.breaks++;reward(arcade,80,6);arcade.rush.flash=15;}}
             const coinsBefore=arcade.stats.coins,noticeBefore=arcade.notice;
             if(stepRush(arcade,p,distanceRef.current,floor))handlePlayerDamage(false);
             if(arcade.stats.coins>coinsBefore&&arcade.frame%6===0)audioService.playSound('select');
@@ -1404,7 +1451,7 @@ const GoHomeDash: React.FC<{
             </div>
             {gameState === 'PLAYING' && <>
                 <div className="dash-route" aria-live="polite"><strong>{arcadeView.rush.kind==='depth'?L('3Dスカイウェイ','3D SKYWAY','3Dスカイウェイ'):<>{flight ? '✦ ' : '→ '}{routeCopy(route, languageMode)}</>}</strong><small>{arcadeView.rush.kind==='depth'?L('3000mの奥行きエリア・左右でレーン移動','3000m depth area · change lanes with left/right','3000mのおくゆきエリア・さゆうでレーンいどう'):routeCopy(route, languageMode, true)}</small></div>
-                {arcadeView.rush.kind==='depth'&&<div className="dash-lane-controls" role="group" aria-label={L('レーン移動','Change lane','レーンいどう')}><button aria-label={L('左のレーンへ','Move one lane left','ひだりのレーンへ')} {...multiTouchAction(()=>steer(-1))}><DashActionIcon action="left"/></button><span>← → / A D</span><button aria-label={L('右のレーンへ','Move one lane right','みぎのレーンへ')} {...multiTouchAction(()=>steer(1))}><DashActionIcon action="right"/></button></div>}
+                {arcadeView.rush.kind==='depth'&&<div className="dash-lane-controls" role="group" aria-label={L('レーン移動','Steering','レーンいどう')}><button aria-label={L('左へ移動（長押しで続ける）','Move left; hold to keep moving','ひだりへいどう・ながおしでつづける')} onPointerDown={event=>laneButtonPointerDown(event,-1)} onPointerUp={laneButtonPointerUp} onPointerCancel={laneButtonPointerUp} onLostPointerCapture={laneButtonPointerUp} onClick={event=>laneButtonClick(event,-1)} onKeyDown={event=>handleLaneButtonKey(event,-1)}><DashActionIcon action="left"/></button><span>{L('← → 長押しで移動','Hold ← → to steer','← → ながおしでいどう')}</span><button aria-label={L('右へ移動（長押しで続ける）','Move right; hold to keep moving','みぎへいどう・ながおしでつづける')} onPointerDown={event=>laneButtonPointerDown(event,1)} onPointerUp={laneButtonPointerUp} onPointerCancel={laneButtonPointerUp} onLostPointerCapture={laneButtonPointerUp} onClick={event=>laneButtonClick(event,1)} onKeyDown={event=>handleLaneButtonKey(event,1)}><DashActionIcon action="right"/></button></div>}
                 <div className="dash-controls">
                     <button className="dash-boost" {...multiTouchAction(triggerDash)} disabled={!dashReady}><span className="dash-action-face"><DashActionIcon action="dash"/><small>SHIFT / X</small></span><strong>{dashReady ? L('ダッシュ', 'DASH', 'ダッシュ') : L('次のエリアで復活', 'NEXT AREA', 'つぎのエリアでふっかつ')}</strong></button>
                     <button className="dash-slide" disabled={flight} {...multiTouchHold(held=>{if(held)triggerSlide();else releaseSlide();})} onClick={e=>{if(e.detail===0)triggerSlide();}}><span className="dash-action-face"><DashActionIcon action="slide"/><small>↓ / S / B</small></span><strong>{L('スライド','SLIDE','スライド')}</strong></button>

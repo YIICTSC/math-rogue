@@ -20,10 +20,10 @@ try{
  const page=await context.newPage(),errors=[],missing=[];page.setDefaultTimeout(90000);page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR',e.message);});page.on('response',r=>{if(r.status()>=400&&r.url().includes('/sprites/go-home-dash/rush/')){missing.push(r.url());console.error('MISSING REAR',r.url());}});
  await page.goto('http://127.0.0.1:'+server.httpServer.address().port+'/dash-rush-test?unlocked',{waitUntil:'domcontentloaded',timeout:90000});console.log('Rush fixture loaded');await page.locator('.dash-lobby').waitFor();await page.getByRole('button',{name:'主人公を選ぶ'}).click();await page.getByRole('button',{name:'START DASH'}).click();await page.waitForFunction(()=>window.__rush);
  await page.evaluate(()=>__rush.arrange('depth',.5));await page.waitForFunction(()=>__rush.renderer?.ready);await page.waitForFunction(()=>__rush.side?.complete&&__rush.side.naturalWidth>0&&__rush.rear?.complete&&__rush.rear.naturalWidth>0);await page.evaluate(()=>__rush.step());assert.equal(await page.locator('.dash-overview').getAttribute('data-rush-renderer'),'webgl','Primary course must use the actual Blender GLB');
- // A touch tap must steer only once (PointerDown + the browser's synthetic Click).
- await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{__rush.arrange('depth',.1);__rush.arcade.rush.lane=-1;});
- await page.getByRole('button',{name:'右のレーンへ',exact:true}).tap();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0,'One touch tap advances exactly one lane');
- await page.evaluate(()=>{__rush.arcade.rush.lane=1;});await page.getByRole('button',{name:'左のレーンへ',exact:true}).tap();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0,'One left touch tap advances exactly one lane');
+ // A touch tap nudges only partway; it must not snap the runner from center to an edge lane.
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{__rush.arrange('depth',.1);__rush.arcade.rush.lane=0;});
+ await page.getByRole('button',{name:/右へ移動/}).tap();const rightTap=await page.evaluate(()=>__rush.arcade.rush.lane);assert(rightTap>0&&rightTap<.8,'A short right tap moves partway, not to the edge');
+ await page.evaluate(()=>{__rush.arcade.rush.lane=0;});await page.getByRole('button',{name:/左へ移動/}).tap();const leftTap=await page.evaluate(()=>__rush.arcade.rush.lane);assert(leftTap<0&&leftTap>-.8,'A short left tap moves partway, not to the edge');
  // A horizontal touch swipe on the 3D playfield steers, while not also jumping.
  await page.evaluate(()=>{__rush.arcade.rush.lane=-1;});const touch=await context.newCDPSession(page);
  await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:185,y:400,id:1}]});
@@ -40,7 +40,7 @@ try{
  for(const [kind,progress]of [['loop',.22],['loop',.5],['loop',.76],['depth',.18]]){await page.evaluate(([k,p])=>{__rush.arrange(k,p);__rush.step();},[kind,progress]);await page.screenshot({path:`${output}/${kind}-${progress}.png`});}
  if(process.env.DASH_RUSH_CAPTURE){for(const [kind,id]of [['loop','loop360'],['depth','skyway3d']]){await page.setViewportSize({width:960,height:600});await page.evaluate(k=>{__rush.arrange(k,.35);__rush.step();},kind);const buffer=await page.screenshot();await sharp(buffer).webp({quality:90}).toFile(`public/sprites/go-home-dash/guide/${id}.webp`);}}
  await page.setViewportSize({width:1280,height:800});await page.evaluate(()=>__rush.arrange('depth',.1));await page.keyboard.press('ArrowLeft');await page.evaluate(()=>__rush.step(6));assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),-1);assert((await page.evaluate(()=>__rush.arcade.rush.laneX))<-.7);
- await page.getByRole('button',{name:'右のレーンへ',exact:true}).click();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0);
+ await page.getByRole('button',{name:/右へ移動/}).click();assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),0);
  await page.evaluate(()=>{window.__testPad.axes[0]=.9;__rush.step(2);window.__testPad.axes[0]=0;__rush.step();});assert.equal(await page.evaluate(()=>__rush.arcade.rush.lane),1,'Controller stick steers the depth course');
  await page.keyboard.down('Space');await page.evaluate(()=>__rush.step(10));await page.keyboard.up('Space');assert((await page.evaluate(()=>__rush.player.y))<290,'Depth jump has real height');
  await page.evaluate(()=>__rush.arrange('depth',.1));await page.keyboard.press('ArrowDown');assert((await page.evaluate(()=>__rush.arcade.slide))>0);

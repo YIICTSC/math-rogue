@@ -198,6 +198,6 @@
  .dash-is-depth .dash-controls .dash-action-face{width:46px;height:46px}
  .dash-is-depth .dash-controls button>strong{max-width:52px;font-size:9px}
  .dash-is-depth .dash-lane-controls>button{width:56px;height:56px;min-width:56px;min-height:56px}
- .dash-is-depth .dash-lane-controls>span{display:none}
+ .dash-is-depth .dash-lane-controls>span{display:block;font-size:8px;text-shadow:0 1px 3px #00131d}
 }
 @media(max-height:480px){.dash-shell.dash-is-depth .dash-lane-controls{bottom:max(12px,env(safe-area-inset-bottom))}}

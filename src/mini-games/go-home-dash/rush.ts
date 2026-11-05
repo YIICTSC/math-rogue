@@ -82,10 +82,11 @@ export function syncRush(s:ArcadeState,p:ArcadePlayer,distance:number,floor:numb
  if(r.kind==='run'&&upcoming.kind!=='run'&&r.warned!==upcoming.section){r.warned=upcoming.section;announce(s,upcoming.kind==='loop'?'loopSoon':'depthSoon');}
  return changed;
 }
-export function shiftRushLane(s:ArcadeState,direction:number){
- if(s.rush.kind!=='depth'||s.rush.transition)return false;
- s.rush.lane=Math.max(-1,Math.min(1,s.rush.lane+Math.sign(direction)));return true;
+export function moveRushLane(s:ArcadeState,direction:number,amount:number){
+ if(s.rush.kind!=='depth'||s.rush.transition||!direction||!Number.isFinite(amount)||amount<=0)return false;
+ s.rush.lane=Math.max(-1,Math.min(1,s.rush.lane+Math.sign(direction)*amount));return true;
 }
+export function shiftRushLane(s:ArcadeState,direction:number){return moveRushLane(s,direction,1);}
 export function releaseRushCharge(s:ArcadeState){
  const r=s.rush;r.chargeHeld=false;
  if(r.kind==='run'&&r.charge>=24&&r.chargeCooldown===0){r.turbo=150+Math.min(90,r.charge);r.momentum=Math.min(100,r.momentum+25);r.flash=32;r.chargeCooldown=360;announce(s,'spinRelease');r.charge=0;return true;}
