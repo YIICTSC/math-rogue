@@ -1767,10 +1767,20 @@
 .rpg-roaming-npc-dialog .rpg-npc-event-close { margin-top: 18px; background: #263b3c; }
 @media(max-width:600px) { .rpg-story-dialog { padding: 18px; }.rpg-story-dialog-layout { grid-template-columns: 1fr; gap: 8px; }.rpg-story-dialog-portrait { height: min(28vh, 210px); }.rpg-story-dialog h2 { font-size: 21px; margin: 2px 0 12px; } }
 .rpg-hero-selection { height: 100%; display: flex; flex-direction: column; background: #101e2b; color: #f4efdd; }
-.rpg-hero-selection nav { display: flex; justify-content: center; gap: 12px; padding: 12px; flex-shrink: 0; }
-.rpg-hero-selection nav button { padding: 12px 24px; border: 1px solid #738d93; border-radius: 8px; background: #243d4a; }
+.rpg-hero-tabs { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:6px; width:100%; max-width:720px; margin:0 auto; padding:4px 8px; flex-shrink:0; }
+.rpg-hero-tabs button { display:flex; align-items:center; justify-content:center; gap:4px; min-width:0; min-height:44px; padding:6px 8px; border:2px solid #738d93; border-radius:8px; background:#243d4a; font-size:12px; line-height:1.2; overflow-wrap:anywhere; }
+.rpg-hero-tabs small { font-size:10px; color:#c2d5d6; }
 .rpg-hero-selection button[aria-pressed=true] { border: 2px solid #f1d07f; background: #395e5e; }
 .rpg-hero-content { position: relative; flex: 1; min-height: 0; }
+@media(orientation:landscape) and (max-height:550px) and (min-width:600px){
+ .rpg-character-preparation .rpg-invite-theme label{justify-content:flex-start;max-width:200px;gap:6px;font-size:11px}
+ .rpg-character-preparation .rpg-hero-tabs{position:absolute;top:0;right:0;z-index:2;width:calc(100% - 220px);max-width:none}
+ .rpg-character-preparation .character-selection-shell{padding:6px 12px 0!important}
+ .rpg-character-preparation .character-selection-header{margin-bottom:6px!important}
+ .rpg-character-preparation .character-selection-header h2{font-size:20px!important;line-height:1.15!important;margin-bottom:2px!important}
+ .rpg-character-preparation .character-selection-header>p{font-size:11px!important;line-height:1.3!important}
+}
+
 .rpg-hero-browser { height: 100%; display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 20px; padding: 15px 24px; }
 .rpg-hero-browser section { display: flex; flex-direction: column; min-height: 0; }
 .rpg-hero-browser h1,.rpg-hero-browser h2 { font-size: 24px; font-weight: 800; }
@@ -1889,7 +1899,7 @@
   .rpg-entry-heading { flex-wrap: nowrap; }
 }
 
-.rpg-invite-theme{flex-shrink:0;padding:8px 16px;background:#1d3b42;color:#fff3ce}.rpg-invite-theme label{display:flex;align-items:center;justify-content:center;gap:12px}.rpg-invite-theme select{padding:8px 12px;border:1px solid #b9ba8b;border-radius:8px;background:#294d55;color:#fff3ce}
+.rpg-invite-theme{flex-shrink:0;padding:4px 12px;background:#1d3b42;color:#fff3ce;font-size:12px}.rpg-invite-theme label{display:flex;align-items:center;justify-content:center;gap:8px}.rpg-invite-theme select{min-height:44px;padding:6px 10px;border:1px solid #b9ba8b;border-radius:8px;background:#294d55;color:#fff3ce}
 /* Map shortcuts have fixed, separate lanes in both rendering modes. */
 .rpg-root .rpg-map-container .rpg-compact-message{height:32px;min-height:32px!important;max-height:32px;padding:4px 8px}.rpg-root .rpg-map-container .rpg-settings-map-button{top:46px;left:8px;width:44px;padding:4px;min-height:40px!important}.rpg-root .rpg-map-container .rpg-season-badge{top:46px;left:60px;max-width:calc(100% - 140px);min-height:40px;padding:6px 10px}.rpg-root .rpg-map-container .rpg-view-switch{top:46px;right:8px;min-height:40px}
 @media(orientation:landscape) and (max-height:550px){.rpg-root .rpg-map-container .rpg-settings-map-button,.rpg-root .rpg-map-container .rpg-season-badge{top:42px}.rpg-root .rpg-map-container .rpg-view-switch{top:6px}}

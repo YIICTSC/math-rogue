@@ -35,6 +35,8 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "敵キャラ": "Enemies",
+  "ビルダー": "Builder",
   "もう一度試す": "Try again",
   "主人公・レリック・ご褒美カードを選んで準備を整えよう。": "Choose a hero, a relic and an optional reward card to get ready.",
   "主人公を選ぶ": "Choose your hero",
@@ -462,6 +464,8 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "敵キャラ": "てきキャラ",
+  "ビルダー": "ビルダー",
   "もう一度試す": "もういちどためす",
   "主人公・レリック・ご褒美カードを選んで準備を整えよう。": "しゅじんこう・れりっく・ごほうびかーどをえらんでじゅんびをととのえよう。",
   "主人公を選ぶ": "しゅじんこうをえらぶ",
