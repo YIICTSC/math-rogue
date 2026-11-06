@@ -1,5 +1,12 @@
 # 学習ローグの作業環境
 
+## Android AAB のアップロード署名
+
+- Play Console に登録済みのアップロード証明書の SHA-256 は `88:70:03:B1:9C:1C:4F:A0:2E:7D:31:C5:BD:E7:64:72:42:EE:72:B5:95:FD:DF:D6:E1:A9:5C:3E:79:27:32:5B`。AAB 作成時はこの証明書との一致を確認する。
+- この Mac では `bash scripts/build-android-signed-local.sh --verify-only` で署名設定を確認し、Web 資材のビルドと Capacitor 同期を済ませてから `bash scripts/build-android-signed-local.sh` で署名済み AAB を作る。スクリプトは `build/android-upload-key/learning-rogue-upload-key.p12` と macOS キーチェーンを使用する。
+- GitHub Actions の `ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD` は 2026-11-06 に同じ鍵へ更新済み。秘密鍵とパスワードは Git・ログ・チャットに記載しない。
+- バージョン名・versionCode はビルド前に別途確認する。署名設定の更新はバージョンの更新や Play Console への提出を意味しない。
+
 - 学習ローグに関する調査・編集・テストは、Windows・macOS・Linux・クラウドなど、どの環境でも行える。特定の端末や絶対パスを唯一の正規作業場所として扱わない。
 - 各環境では、GitHubの `YIICTSC/math-rogue` に由来するGit管理されたチェックアウトまたはワークツリーを使用する。新しい環境へのクローンも許可する。
 - 作業開始時に、使用するチェックアウトのリモートURL、ブランチ、GitHubとの同期状態、未コミット変更を確認する。既存の未コミット変更は保持する。
