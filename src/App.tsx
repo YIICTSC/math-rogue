@@ -14822,7 +14822,10 @@ const App: React.FC = () => {
             }));
             return;
         }
-        startGame();
+        // Retrying from the game-over screen must discard the previous
+        // continue save and immediately start a fresh run. Going through
+        // startGame() would see hasSave and show the title's overwrite modal.
+        confirmStartOver();
     };
 
     const handleFinalBridgeComplete = (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => {
