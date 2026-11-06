@@ -1958,30 +1958,3 @@
  .rpg-room-setup .rpg-waiting-mini-heading h2{font-size:12px}
  .rpg-room-setup .rpg-waiting-mini-heading p,.rpg-room-setup .rpg-waiting-mini-heading>span{display:none}
 }
-
-/* Keep flower-pick and resident-talk buttons content-sized in landscape. */
-@media (orientation:landscape) and (max-height:550px) {
-  .rpg-root--compact .rpg-map-actions .rpg-flower-quick,
-  .rpg-root--compact .rpg-map-actions .rpg-resident-quick {
-    align-self:flex-end;
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:flex-end;
-    gap:6px;
-    width:fit-content;
-    max-width:100%;
-  }
-  .rpg-root--compact .rpg-map-actions .rpg-flower-quick button,
-  .rpg-root--compact .rpg-map-actions .rpg-resident-quick button {
-    flex:0 1 auto;
-    width:auto;
-    min-width:0;
-    max-width:152px;
-    min-height:40px;
-    padding:5px 8px;
-  }
-  .rpg-root--compact .rpg-map-actions .rpg-resident-quick button {
-    min-width:90px;
-    max-width:170px;
-  }
-}

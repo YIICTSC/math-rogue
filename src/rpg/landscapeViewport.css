@@ -128,8 +128,8 @@
   .rpg-root.rpg-root--compact .rpg-voxel-actions button { min-height: 44px !important; }
   .rpg-root.rpg-root--compact .rpg-voxel-actions { grid-area: actions; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .rpg-root.rpg-root--compact .rpg-voxel-target { grid-area: target; margin: 0; }
-  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) { position: static; display: flex; flex-wrap: wrap; gap: 4px; width: 100%; max-width: 100%; }
-  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button { min-width: 0; max-width: 100%; flex: 1 1 120px; min-height: 44px; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) { position: static; display: flex; flex-wrap: wrap; align-self: flex-end; justify-content: flex-end; gap: 4px; width: fit-content; max-width: 100%; }
+  .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button { min-width: 0; max-width: min(170px, 100%); flex: 0 1 auto; min-height: 44px; }
   .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button { padding: 4px 6px; font-size: 11px; line-height: 1.2; }
   .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) :is(img, .town-sprite) { width: 28px; height: 28px; flex-shrink: 0; }
   .rpg-root.rpg-root--compact .rpg-map-actions :is(.rpg-flower-quick, .rpg-resident-quick) button > span:not(.town-sprite) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
