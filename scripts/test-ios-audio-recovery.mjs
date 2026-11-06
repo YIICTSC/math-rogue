@@ -9,9 +9,9 @@ try {
  server=await createServer({configFile:false,logLevel:'error',optimizeDeps:{noDiscovery:true,entries:[]},define:{'import.meta.env.VITE_APP_PLATFORM':JSON.stringify('ios')},server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{name:'audio-recovery-fixture',configureServer(s){s.middlewares.use('/__audio',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__audio',`<button id="wake">Wake audio</button><script type="module" src="/${entry}"></script>`));});}}]});await server.listen();
  browser=await chromium.launch({headless:true});const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{
-  window.requests=[];window.playing=new Set();Object.defineProperty(navigator,'audioSession',{value:{type:'auto'},configurable:true});
-  HTMLMediaElement.prototype.play=function(){window.playing.add(this);return new Promise((resolve,reject)=>window.requests.push({audio:this,resolve,reject,ended:this.onended}));};
-  HTMLMediaElement.prototype.pause=function(){window.playing.delete(this);};HTMLMediaElement.prototype.load=function(){};
+  window.requests=[];window.playing=new Set();window.pauseCount=0;Object.defineProperty(navigator,'audioSession',{value:{type:'auto'},configurable:true});
+  HTMLMediaElement.prototype.play=function(){window.playing.add(this);return new Promise((resolve,reject)=>window.requests.push({audio:this,path:this.currentSrc||this.src,resolve,reject,ended:this.onended}));};
+  HTMLMediaElement.prototype.pause=function(){window.playing.delete(this);window.pauseCount++;};HTMLMediaElement.prototype.load=function(){};
   Object.defineProperty(HTMLMediaElement.prototype,'paused',{get(){return !window.playing.has(this);},configurable:true});
  });
  await page.goto('http://127.0.0.1:'+server.httpServer.address().port+'/__audio');await page.waitForFunction(()=>window.ready);
@@ -32,6 +32,18 @@ try {
  assert.equal(await page.evaluate(()=>playing.size),1,'Closing Web Audio must not orphan native BGM');
  await page.evaluate(async()=>{requests.at(-1).resolve();await reopened;});
  await page.evaluate(()=>service.stopBGM());
+ // Selecting "BGMなし" on the title screen must stop a playing track in the
+ // same event, and changing back to NEW must resume that selected title track.
+ await page.evaluate(()=>{service.setBgmMode('OLD');window.noMusicStart=requests.length;window.titleTrack=service.playBGM('menu');});
+ await page.waitForFunction(()=>requests.length>window.noMusicStart);
+ const noMusic=await page.evaluate(async()=>{requests.at(-1).resolve();await titleTrack;const previousPauseCount=pauseCount;service.setBgmMode('STUDY');return {playing:playing.size,pauseCount,previousPauseCount,currentType:service.getCurrentBgmType()};});
+ assert.equal(noMusic.playing,0,'Selecting BGMなし must stop the current title track immediately');
+ assert.ok(noMusic.pauseCount>noMusic.previousPauseCount,'Selecting BGMなし must pause the active media element immediately');
+ assert.equal(noMusic.currentType,'menu','The selected title track should be retained while BGM is disabled');
+ await page.evaluate(()=>{window.resumeMusicStart=requests.length;service.setBgmMode('NEW');});
+ await page.waitForFunction(()=>requests.length>window.resumeMusicStart);
+ assert.ok(await page.evaluate(()=>requests.at(-1).path.includes('/bgm-new/menu.mp3')),'Re-enabling BGM should resume the title track using the selected mode');
+ await page.evaluate(()=>{requests.at(-1).resolve();service.stopBGM();});
  // Simulate iOS interrupted state and a first acknowledged-but-ineffective resume.
  const recovered=await page.evaluate(async()=>{
   let state='interrupted',calls=0,primed=0;

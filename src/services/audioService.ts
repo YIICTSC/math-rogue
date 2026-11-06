@@ -327,7 +327,14 @@ class AudioService {
       const normalizedMode = mode === 'MP3' ? 'NEW' : mode;
       if (this.bgmMode === normalizedMode) return;
       this.bgmMode = normalizedMode;
-      
+
+      if (normalizedMode === 'STUDY') {
+          // Keep the selected track so switching back to NEW/OLD resumes the
+          // title music, but stop every audible source immediately.
+          if (this.isPlayingBGM && this.currentBgmType) this.silenceCurrentBgmPreservingSelection();
+          return;
+      }
+
       // If currently playing, restart with new mode
       if (this.isPlayingBGM && this.currentBgmType) {
           void this.restartCurrentBGM();
@@ -1549,6 +1556,24 @@ class AudioService {
       return this.isPlayingBGM
           && this.currentBgmType === type
           && this.playbackGeneration === playbackGeneration;
+  }
+
+  private silenceCurrentBgmPreservingSelection() {
+      this.playbackGeneration += 1;
+      if (this.timerID) clearTimeout(this.timerID);
+      this.timerID = null;
+      if (this.currentSource) {
+          try {
+              this.currentSource.onended = null;
+              this.currentSource.stop();
+              this.currentSource.disconnect();
+          } catch(e) {}
+          this.currentSource = null;
+      }
+      if (this.currentHtmlAudio) this.retireHtmlBgm(this.currentHtmlAudio);
+      this.currentHtmlAudio = null;
+      for (const audio of Array.from(this.activeBgmHtmlAudios)) this.retireHtmlBgm(audio);
+      this.isBgmPaused = false;
   }
 
   public stopBGM() {
