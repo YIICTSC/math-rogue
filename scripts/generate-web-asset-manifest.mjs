@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readdir, stat, writeFile } from 'node:fs/promises';
+import { readdir, stat, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { isSourceAsset } from './source-asset-exclusions.mjs';
 
@@ -7,7 +7,7 @@ const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'web-asset-manifest.json');
 const runtimeExtensions = new Set([
   '.png', '.svg', '.ttf', '.otf', '.woff', '.woff2', '.webp', '.glb',
-  '.ogg',
+  '.ogg', '.mp3', '.wav', '.jpg', '.jpeg', '.gif', '.avif', '.gltf', '.bin',
 ]);
 
 const walk = async (directory) => {
@@ -66,7 +66,8 @@ for (const file of preferredFiles) {
   const size = (await stat(file.filePath)).size;
   const pack = packs[getPack(file.path)];
   pack.totalBytes += size;
-  pack.files.push({ path: file.path, size });
+  const revision = createHash('sha256').update(await readFile(file.filePath)).digest('hex');
+  pack.files.push({ path: file.path, size, revision });
 }
 
 for (const pack of Object.values(packs)) {
@@ -76,7 +77,7 @@ for (const pack of Object.values(packs)) {
 const contentHash = createHash('sha256');
 for (const pack of Object.values(packs)) {
   contentHash.update(`${pack.id}:${pack.totalBytes}\n`);
-  pack.files.forEach(file => contentHash.update(`${file.path}\0${file.size}\n`));
+  pack.files.forEach(file => contentHash.update(`${file.path}\0${file.size}\0${file.revision}\n`));
 }
 
 const manifest = {

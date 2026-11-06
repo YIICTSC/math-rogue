@@ -64,8 +64,8 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
     setLoading(true);
     setError(null);
     try {
-      const [nextManifest, nextStats, nextEstimate, nextPersistent] = await Promise.all([
-        getWebAssetManifest(),
+      const nextManifest = await getWebAssetManifest(true);
+      const [nextStats, nextEstimate, nextPersistent] = await Promise.all([
         getAssetPackCacheStats(nextPack),
         getWebStorageEstimate(),
         isPersistentWebStorage(),

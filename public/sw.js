@@ -47,8 +47,8 @@ const isNavigationRequest = (request) => request.mode === 'navigate';
 const isCacheableAsset = (url) => {
   if (url.pathname.endsWith('/web-asset-manifest.json')) return false;
   const isAudioPath = /\/(?:bgm|bgm-new|sfx)\//i.test(url.pathname);
-  if (isAudioPath) return /\.ogg$/i.test(url.pathname);
-  return /\.(?:css|js|mjs|png|jpe?g|svg|webp|gif|woff2?|ttf|otf)$/i.test(url.pathname)
+  if (isAudioPath) return /\.(?:ogg|mp3|wav)$/i.test(url.pathname);
+  return /\.(?:css|js|mjs|png|jpe?g|svg|webp|gif|avif|glb|gltf|bin|woff2?|ttf|otf)$/i.test(url.pathname)
     || /\/(?:sprites|card-illustrations|enemy-illustrations|event-illustrations|ui|fonts)\//i.test(url.pathname);
 };
 
@@ -161,7 +161,7 @@ self.addEventListener('fetch', (event) => {
   if (!isCacheableAsset(url)) return;
   event.respondWith((async () => {
     const cached = await cachedResponse(request);
-    if (cached) return cached;
+    if (cached && request.cache !== 'reload' && request.cache !== 'no-store') return cached;
     let pending = inFlightAssets.get(request.url);
     if (!pending) {
       pending = downloadAsset(request).then(response => {

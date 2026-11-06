@@ -5,6 +5,7 @@ import { assetUrl } from '../utils/assetPaths';
 export type WebAssetManifestFile = {
   path: string;
   size: number;
+  revision?: string;
 };
 
 export type WebAssetPackId = 'common' | VisualThemeId;
@@ -42,6 +43,7 @@ const CACHE_VERSION = 'v3';
 const LEGACY_CACHE_VERSIONS = ['v2', 'v1'];
 const MANIFEST_PATH = 'web-asset-manifest.json';
 const MAX_CONCURRENT_DOWNLOADS = 4;
+const REVISION_HEADER = 'X-Learning-Rogue-Asset-Revision';
 
 const isBrowser = () => typeof window !== 'undefined' && typeof navigator !== 'undefined';
 
@@ -63,7 +65,8 @@ const formatError = (reason: unknown) => (
 
 let manifestPromise: Promise<WebAssetManifest> | null = null;
 
-export const getWebAssetManifest = async (): Promise<WebAssetManifest> => {
+export const getWebAssetManifest = async (refresh = false): Promise<WebAssetManifest> => {
+  if (refresh) manifestPromise = null;
   if (!manifestPromise) {
     manifestPromise = fetch(assetUrl(MANIFEST_PATH), { cache: 'no-store' })
       .then(async response => {
@@ -96,7 +99,8 @@ export const getAssetPackCacheStats = async (packId: WebAssetPackId): Promise<We
   let cachedFiles = 0;
   let cachedBytes = 0;
   for (const file of pack.files) {
-    if (await cache.match(getFileRequest(file))) {
+    const saved = await cache.match(getFileRequest(file));
+    if (saved && (!file.revision || saved.headers.get(REVISION_HEADER) === file.revision)) {
       cachedFiles += 1;
       cachedBytes += file.size;
     }
@@ -155,7 +159,8 @@ export const downloadAssetPack = async (
   const pendingFiles: WebAssetManifestFile[] = [];
 
   for (const file of pack.files) {
-    if (await cache.match(getFileRequest(file))) {
+    const saved = await cache.match(getFileRequest(file));
+    if (saved && (!file.revision || saved.headers.get(REVISION_HEADER) === file.revision)) {
       progress.cachedFiles += 1;
       progress.cachedBytes += file.size;
     } else {
@@ -172,7 +177,9 @@ export const downloadAssetPack = async (
       const request = getFileRequest(file);
       const response = await fetch(request, { cache: 'reload', signal });
       if (!response.ok) throw new Error(`${file.path}: HTTP ${response.status}`);
-      await cache.put(request, response.clone());
+      const headers = new Headers(response.headers);
+      if (file.revision) headers.set(REVISION_HEADER, file.revision);
+      await cache.put(request, new Response(await response.arrayBuffer(), { status: response.status, statusText: response.statusText, headers }));
       progress.cachedFiles += 1;
       progress.cachedBytes += file.size;
       progress.activePath = file.path;
