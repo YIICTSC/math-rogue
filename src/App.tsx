@@ -1,3 +1,4 @@
+import { MINI_GAME_UNIT_CORRECT_EVENT, type MiniGameUnitCorrectDetail } from './services/miniGameUnitProgress';
 import {enableDebugRewards} from './point-exchange/debug';
 import PointExchangeEntry from './point-exchange/PointExchange';
 import QuestionExperience from './point-exchange/QuestionExperience';
@@ -16225,26 +16226,26 @@ const App: React.FC = () => {
         };
     }, [coopPlayerSnapshots, coopSelfPeerId, gameState.player]);
 
+    const modeCorrectProgressRef = useRef({ counts: modeCorrectCounts, mastered: masteredModes });
+    modeCorrectProgressRef.current = { counts: modeCorrectCounts, mastered: masteredModes };
+
     const handleModeCorrectProgress = (mode: string, correctCount: number) => {
         // Overall learning totals are tracked separately; main mastery rewards stay independent.
         if (gameState.rpgOnline || correctCount <= 0) return;
         const modeKey = mode;
-        const prevModeCount = modeCorrectCounts[modeKey] || 0;
+        const prevModeCount = modeCorrectProgressRef.current.counts[modeKey] || 0;
         const nextModeCount = prevModeCount + correctCount;
-        const alreadyMastered = masteredModes.includes(modeKey);
+        const alreadyMastered = modeCorrectProgressRef.current.mastered.includes(modeKey);
         const canGrantMasteryReward = gameState.challengeMode !== 'TYPING' && !isTypingMasteryMode(modeKey);
-        setModeCorrectCounts(prev => {
-            const next = { ...prev, [modeKey]: (prev[modeKey] || 0) + correctCount };
-            storageService.saveModeCorrectCounts(next);
-            return next;
-        });
+        const nextCounts = { ...modeCorrectProgressRef.current.counts, [modeKey]: nextModeCount };
+        modeCorrectProgressRef.current.counts = nextCounts;
+        setModeCorrectCounts(nextCounts);
+        storageService.saveModeCorrectCounts(nextCounts);
         if (canGrantMasteryReward && !alreadyMastered && prevModeCount < 100 && nextModeCount >= 100) {
-            setMasteredModes(prev => {
-                if (prev.includes(modeKey)) return prev;
-                const next = [...prev, modeKey];
-                storageService.saveMasteredModes(next);
-                return next;
-            });
+            const nextMastered = [...modeCorrectProgressRef.current.mastered, modeKey];
+            modeCorrectProgressRef.current.mastered = nextMastered;
+            setMasteredModes(nextMastered);
+            storageService.saveMasteredModes(nextMastered);
             let rewardCard: ICard | undefined;
             if (PAID_EDITION && !gameState.rpgOnline) {
                 const createdRewardCard = createRewardCardForAssignment();
@@ -16257,6 +16258,17 @@ const App: React.FC = () => {
             setMasteryRewardModal({ mode: modeKey, rewardCard });
         }
     };
+
+    useEffect(() => {
+        const onMiniGameUnitCorrect = (event: Event) => {
+            const detail = (event as CustomEvent<MiniGameUnitCorrectDetail>).detail;
+            if (!detail || detail.handled) return;
+            detail.handled = true;
+            handleModeCorrectProgress(detail.mode, detail.count);
+        };
+        window.addEventListener(MINI_GAME_UNIT_CORRECT_EVENT, onMiniGameUnitCorrect);
+        return () => window.removeEventListener(MINI_GAME_UNIT_CORRECT_EVENT, onMiniGameUnitCorrect);
+    }, [handleModeCorrectProgress]);
 
     const addMiniGameUnlockCorrectCount = useCallback((correctCount: number) => {
         if (correctCount <= 0) return;

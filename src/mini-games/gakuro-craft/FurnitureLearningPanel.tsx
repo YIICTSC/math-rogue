@@ -1,3 +1,4 @@
+import {recordMiniGameUnitProgress} from '../../services/miniGameUnitProgress';
 import React,{useEffect,useRef,useState} from 'react';
 import {GameMode} from '../../types';
 import MathText from '../../components/MathText';
@@ -13,7 +14,7 @@ export default function FurnitureLearningPanel({world,g,selfId,t,send}:{world:Ho
  useEffect(()=>{if(q?.visual&&canvas.current)drawProblemVisual(canvas.current,q.visual);},[q]);
  useEffect(()=>()=>{if('speechSynthesis'in window)window.speechSynthesis.cancel();},[]);
  if(!l?.due)return null;
- const answer=(option:number)=>{if(!q||world.paused||feedback!==null||l.answers.length>=3)return;const key=`${l.batch}:${l.answers.length}`;if(clicked.current===key)return;clicked.current=key;if(!world.preview)storageService.saveAssignmentAnswer({mode:q.mode,problemId:q.problemId,question:q.question,correctAnswer:q.options[q.correct],selectedAnswer:q.options[option],correct:option===q.correct,elapsedMs:performance.now()-started.current,answeredAt:new Date().toISOString()});send({type:'game_learn_answer',key:g.key,batch:l.batch,index:l.answers.length,option});};
+ const answer=(option:number)=>{if(!q||world.paused||feedback!==null||l.answers.length>=3)return;const key=`${l.batch}:${l.answers.length}`;if(clicked.current===key)return;clicked.current=key;if(!world.preview){recordMiniGameUnitProgress({mode:q.mode,correct:option===q.correct});storageService.saveAssignmentAnswer({mode:q.mode,problemId:q.problemId,question:q.question,correctAnswer:q.options[q.correct],selectedAnswer:q.options[option],correct:option===q.correct,elapsedMs:performance.now()-started.current,answeredAt:new Date().toISOString()});}send({type:'game_learn_answer',key:g.key,batch:l.batch,index:l.answers.length,option});};
  return <div data-gamepad-question-screen data-gamepad-initial-scope={`furniture-${g.key}-${l.batch}-${index}`} className="gc-learning" role="dialog" aria-modal="true" aria-label={t('ゲームの合間に3問')} onKeyDown={e=>e.stopPropagation()}><section>
  <header><h2>{t('ゲームの合間に3問')}</h2><b>{Math.min(3,l.answers.length+(feedback===null?1:0))}/3</b></header><p>{t(l.reason==='stages'?'3ステージ達成！学習して次の冒険へ。':'3ゲーム終了！学習して次の対戦へ。')}</p>
  {!l.lesson?<>{error?<><p>{t('選択した範囲から問題を準備できませんでした。')}</p><button onClick={()=>setRetry(n=>n+1)}>{t('再読み込み')}</button></>:<p>{t('問題を準備中')}</p>}</>:l.answers.length===3&&feedback===null?<><h3>{t('3問の学習が完了しました。')}</h3><p>{l.answers.filter((a,i)=>a===l.lesson!.questions[i].correct).length}/3 · {t('正解')}</p><button disabled={world.paused} onClick={()=>send({type:'game_learn_finish',key:g.key,batch:l.batch})}>{t('ゲームに戻る')}</button></>:q&&<>

@@ -1,3 +1,4 @@
+import {recordMiniGameUnitProgress} from '../../services/miniGameUnitProgress';
 import '../shared/lobby.css';
 import {GAME_BGM} from './gameBgm';
 import HostSpectator, { useSpectatorTarget } from '../shared/HostSpectator';
@@ -90,6 +91,7 @@ export default function GakuroCraft({onClose,languageMode='JAPANESE',inviteCode=
     if(recorded.current.has(r.token))return;recorded.current.add(r.token);
     const q=r.question,assignment=room.current?.host?selection.current?.assignment:undefined;
     const result={pointReceipt:`craft:${r.token}`,mode:q.mode,subjectId:q.mode,correct:r.correct,elapsedMs:r.elapsedMs,problemId:q.problemId,problemKey:q.problemId||`${q.mode}:${q.question}`,question:q.question,correctAnswer:r.answer,selectedAnswer:r.selected};
+    recordMiniGameUnitProgress(result);
     storageService.saveAssignmentAnswer({...result,assignmentId:assignment?.id,unitName:q.unitName,answeredAt:new Date().toISOString()});
     if(assignment)managementPortalService.queueAnswer(assignment,result);managementPortalService.queueLearningActivity(result,assignment);
   };

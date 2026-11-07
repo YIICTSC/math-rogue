@@ -1,3 +1,4 @@
+import { recordMiniGameUnitProgress } from '../../services/miniGameUnitProgress';
 import { multiTouchAction, multiTouchHold } from '../../utils/multiTouchAction';
 import {useSessionResultExit} from '../../services/useSessionResultExit';
 import OnlineEntryScreen from '../shared/OnlineEntryScreen';
@@ -118,6 +119,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE', inviteC
       if (me.quizAnswers[i] === -2 || recorded.current.has(key)) return;
       recorded.current.add(key);
       const result = { pointReceipt:`kart:${self}:${key}`, mode: q.mode, subjectId: q.mode, correct: me.quizAnswers[i] === q.correct, elapsedMs: me.quizTimes[i] * 1000, problemId: q.problemId, problemKey: q.problemId || `${q.mode}:${q.question}`, question: q.question, correctAnswer: q.options[q.correct], selectedAnswer: q.options[me.quizAnswers[i]] || '' };
+      recordMiniGameUnitProgress(result);
       storageService.saveAssignmentAnswer({ ...result, assignmentId: assignment?.id, unitName: q.unitName, answeredAt: new Date().toISOString() });
       if (assignment) managementPortalService.queueAnswer(assignment, result);
       managementPortalService.queueLearningActivity(result, assignment);

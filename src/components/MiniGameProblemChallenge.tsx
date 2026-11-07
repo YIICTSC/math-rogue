@@ -1,3 +1,4 @@
+import { recordMiniGameUnitProgress } from '../services/miniGameUnitProgress';
 import React from 'react';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
@@ -72,6 +73,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   const effectiveCustomProblems = assignment?.gameMode === 'FREE' ? assignment.customProblems : undefined;
   const challengeScreen = getChallengeScreenForMode(effectiveMode);
   const handleAnswerResult = (result: AssignmentAnswerResult) => {
+    recordMiniGameUnitProgress(result);
     if (onAnswerResult) {
       onAnswerResult(result);
       return;
