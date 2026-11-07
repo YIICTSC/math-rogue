@@ -1338,10 +1338,10 @@
     {
       "id": "reactions-12",
       "raw": "assets-source/dialogue/reactions-12.png",
-      "rawSha256": "b4d141efb49d0f34e77ac478a0161b0cbdd7bc311e759226f0d686630290e7bc",
-      "output": "sprites/dialogue/reactions-12-222782e6cf.webp",
-      "sha256": "222782e6cf38a9a2e4226f297c656a5bd893ff611d6a97984d18d484ad90a743",
-      "bytes": 504498,
+      "rawSha256": "fe772dacaf2bc1c6fffa928b8562718b76ec676ea3171e5991d9987d07a5633f",
+      "output": "sprites/dialogue/reactions-12-397348a466.webp",
+      "sha256": "397348a46679d4f43fddaec6562b765a2ace5e583be78eb972e82be4c74ef402",
+      "bytes": 500450,
       "actors": [
         "magic-koharu",
         "magic-mirai"
@@ -1351,7 +1351,7 @@
         {
           "row": 0,
           "column": 0,
-          "scale": 0.8964462354489174,
+          "scale": 0.8966951402139881,
           "anchor": 192,
           "bounds": [
             15,
@@ -1363,19 +1363,19 @@
         {
           "row": 0,
           "column": 1,
-          "scale": 0.8964462354489174,
+          "scale": 0.8966951402139881,
           "anchor": 192,
           "bounds": [
             375,
-            33,
-            369,
-            520
+            34,
+            367,
+            518
           ]
         },
         {
           "row": 0,
           "column": 2,
-          "scale": 0.8964462354489174,
+          "scale": 0.8966951402139881,
           "anchor": 192,
           "bounds": [
             755,
@@ -1387,7 +1387,7 @@
         {
           "row": 0,
           "column": 3,
-          "scale": 0.8964462354489174,
+          "scale": 0.8966951402139881,
           "anchor": 192,
           "bounds": [
             1111,

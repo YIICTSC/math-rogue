@@ -280,7 +280,7 @@ export const DIALOGUE_PORTRAITS:Record<string,{sheet:string;row:number;columns:n
     "fallback": "sprites/magic/characters/heroine-06-before.webp"
   },
   "magic-koharu": {
-    "sheet": "sprites/dialogue/reactions-12-222782e6cf.webp",
+    "sheet": "sprites/dialogue/reactions-12-397348a466.webp",
     "row": 0,
     "columns": 4,
     "rows": 2,
@@ -292,7 +292,7 @@ export const DIALOGUE_PORTRAITS:Record<string,{sheet:string;row:number;columns:n
     "fallback": "sprites/magic/characters/heroine-07-before.webp"
   },
   "magic-mirai": {
-    "sheet": "sprites/dialogue/reactions-12-222782e6cf.webp",
+    "sheet": "sprites/dialogue/reactions-12-397348a466.webp",
     "row": 1,
     "columns": 4,
     "rows": 2,
