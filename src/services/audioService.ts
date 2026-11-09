@@ -21,7 +21,7 @@ import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction, type Human
 import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
-export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
+export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male' | 'star-tide';
 export type BgmPlaybackOptions = {
   /** Pin a scene's track to the requested asset set, independent of the title setting. */
   mode?: 'NEW' | 'OLD';
@@ -38,7 +38,7 @@ const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLo
 const WEB_OPUS_AUDIO_MIME = 'audio/ogg; codecs="opus"';
 const THEMED_BGM_TYPES = new Set([
     'battle', 'mid_boss', 'boss', 'final_boss', 'menu', 'map', 'shop', 'event',
-    'rest', 'reward', 'victory', 'game_over', 'math', 'relic_select',
+    'rest', 'reward', 'victory', 'game_over', 'math', 'relic_select', 'star_tide_sky',
 ]);
 
 type CommonSoundEffect =
@@ -1247,7 +1247,7 @@ class AudioService {
   }
 
   // --- Public API ---
-  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true, options?: BgmPlaybackOptions) {
+  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'star_tide_sky' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true, options?: BgmPlaybackOptions) {
       const scene = this.currentBgmScene();
       if (scene) { type = scene.type; loop = true; options = scene.options; }
       if (type === 'menu' && !scene) { const chosen=readPoints().bgm; if(chosen) type=chosen as typeof type; }
@@ -1286,7 +1286,7 @@ class AudioService {
       }
   }
 
-  public async switchThemeAndPlayBGM(theme: BgmThemeId, type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss', loop: boolean = true) {
+  public async switchThemeAndPlayBGM(theme: BgmThemeId, type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'star_tide_sky' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss', loop: boolean = true) {
       this.bgmTheme = theme;
       this.stopBGM();
       await this.playBGM(type, loop);
