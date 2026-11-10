@@ -10,7 +10,7 @@ export const defaultConfig=(sport:SportId):Config=>({sport,difficulty:1,mode:'ma
 export interface Skills {speed:number;power:number;control:number;defense:number;stamina:number;jump:number;teamwork:number;pitch:number;}
 export interface Athlete {id:number;team:number;slot:number;hero:string;role:string;name:string;p:Vec;v:Vec;home:Vec;face:number;skills:Skills;spirit:number;hp:number;motion:Motion;action:number;cooldown:number;jump:number;stun:number;charge:number;stats:Record<string,number>;}
 export interface Ball extends Vec {vx:number;vy:number;vz:number;owner:number;team:number;power:number;spin:number;special:boolean;last:number;}
-export interface Event {id:number;at:number;kind:'hit'|'catch'|'whistle'|'cheer'|'special'|'bounce'|'score'|'hurt';text:string;actor:number;}
+export interface Event {id:number;at:number;kind:'hit'|'catch'|'whistle'|'cheer'|'special'|'bounce'|'score'|'hurt';text:string;actor:number;move?:'pitch'|'drive'|'shot'|'serve'|'spike';}
 export interface Frame {ball:Vec;players:{id:number;p:Vec;face:number;motion:Motion;jump:number;action:number}[];}
 export interface Core {online?:boolean;controls?:Record<number,Input>;id:string;config:Config;clock:number;phase:'ready'|'play'|'replay'|'interval'|'finished';phaseTime:number;players:Athlete[];ball:Ball;score:number[];winner:number|null;selected:number;notice:string;events:Event[];serial:number;history:Frame[];replay:Frame[];replayTime:number;elapsed:number;morale:number[];awaken:number[];stats:Record<string,number>[];}
 export const vec=(x=0,y=0,z=0):Vec=>({x,y,z});
@@ -22,10 +22,10 @@ export const unit=(x:number,z:number)=>{const d=Math.hypot(x,z)||1;return{x:x/d,
 const HEROES=['elementary-dodgeball','high-school-warrior','magic-akari','elementary-caretaker','magic-mirai','elementary-assassin','high-school-dodgeball','magic-minato','elementary-bard','magic-koharu','high-school-gardener'];
 export function athlete(team:number,slot:number,role:string,p:Vec,c:Config):Athlete{
  const h=hash(c.seed+team*319+slot*77),s=(offset:number)=>.55+(hash(h+offset)%450)/1000;
- return{id:team*100+slot,team,slot,role,hero:team===c.team&&slot===0?c.hero:HEROES[(slot+team*3)%HEROES.length],name:`${team+1}-${slot+1}`,p:{...p},home:{...p},v:vec(),face:team===0?Math.PI:0,skills:{speed:s(1),power:s(2),control:s(3),defense:s(4),stamina:s(5),jump:s(6),teamwork:s(7),pitch:s(8)},spirit:100,hp:100,motion:'idle',action:0,cooldown:0,jump:0,stun:0,charge:0,stats:{}};
+ return{id:team*100+slot,team,slot,role,hero:team===c.team&&slot===(c.sport==='soccer'?9:c.sport==='volleyball'?3:0)?c.hero:HEROES[(slot+team*3)%HEROES.length],name:`${team+1}-${slot+1}`,p:{...p},home:{...p},v:vec(),face:team===0?Math.PI:0,skills:{speed:s(1),power:s(2),control:s(3),defense:s(4),stamina:s(5),jump:s(6),teamwork:s(7),pitch:s(8)},spirit:100,hp:100,motion:'idle',action:0,cooldown:0,jump:0,stun:0,charge:0,stats:{}};
 }
 export function core(c:Config,teams=2):Core{return{id:`${c.sport}-${c.seed}-${Date.now()}`,config:{...c},clock:0,phase:'ready',phaseTime:1.5,players:[],ball:{...vec(),vx:0,vy:0,vz:0,owner:-1,team:0,power:0,spin:0,special:false,last:-1},score:Array(teams).fill(0),winner:null,selected:c.team*100,notice:'試合開始',events:[],serial:0,history:[],replay:[],replayTime:0,elapsed:0,morale:Array(teams).fill(0),awaken:Array(teams).fill(0),stats:Array.from({length:teams},()=>({}))};}
-export function event(s:Core,kind:Event['kind'],text:string,actor=-1){s.notice=text;s.events.push({id:++s.serial,at:s.clock,kind,text,actor});s.events=s.events.slice(-20);}
+export function event(s:Core,kind:Event['kind'],text:string,actor=-1,move?:Event['move']){s.notice=text;s.events.push({id:++s.serial,at:s.clock,kind,text,actor,...(move?{move}:{})});s.events=s.events.slice(-20);}
 export const stat=(s:Core,team:number,key:string,n=1)=>s.stats[team][key]=(s.stats[team][key]||0)+n;
 export function pose(p:Athlete,motion:Motion,time=.5){p.motion=motion;p.action=time;}
 export function tickCore(s:Core,dt:number){
@@ -44,7 +44,7 @@ export function move(p:Athlete,x:number,z:number,dt:number,boost=false){
 }
 export function runTo(p:Athlete,target:Vec,dt:number,boost=false){const d=len(p.p,target);move(p,d<.15?0:(target.x-p.p.x)/Math.max(1,d),d<.15?0:(target.z-p.p.z)/Math.max(1,d),dt,boost);}
 export const jump=(p:Athlete,power=6)=>{if(p.p.y<.05&&!p.stun){p.v.y=power+p.skills.jump*1.2;pose(p,'jump',.6);}};
-export function kickBall(s:Core,p:Athlete,target:Vec,speed:number,lift=0,spin=0){const d=unit(target.x-s.ball.x,target.z-s.ball.z);s.ball.owner=-1;s.ball.team=p.team;s.ball.last=p.id;s.ball.vx=d.x*speed;s.ball.vz=d.z*speed;s.ball.vy=lift;s.ball.spin=spin;}
+export function kickBall(s:Core,p:Athlete,target:Vec,speed:number,lift=0,spin=0){const d=unit(target.x-s.ball.x,target.z-s.ball.z);s.ball.owner=-1;s.ball.special=false;s.ball.team=p.team;s.ball.last=p.id;s.ball.vx=d.x*speed;s.ball.vz=d.z*speed;s.ball.vy=lift;s.ball.spin=spin;}
 export function physics(b:Ball,dt:number,gravity=9.81,drag=.05){b.vx+=b.vz*b.spin*dt*.02;b.vz-=b.vx*b.spin*dt*.02;b.vy-=gravity*dt;b.vx*=1-drag*dt;b.vz*=1-drag*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;}
 export function morale(s:Core,team:number,n:number){s.morale[team]=Math.min(100,s.morale[team]+n);if(s.morale[team]>=100){s.awaken[team]=12;s.morale[team]=0;event(s,'special','チーム覚醒！');}}
 export const cpu=(s:Core,p:Athlete)=>s.config.mode==='watch'||p.team!==s.config.team||p.id!==s.selected;

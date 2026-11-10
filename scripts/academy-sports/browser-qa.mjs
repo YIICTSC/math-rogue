@@ -18,8 +18,8 @@ try {
    if(id.endsWith('/academy-sports/Scene.tsx'))return code.replace('const tick=(at:number)=>{if(dead)return;const v=', 'let renderedAt=0;const tick=(at:number)=>{if(dead)return;if(at-renderedAt<80){frame=requestAnimationFrame(tick);return;}renderedAt=at;const v=');
    if(!id.endsWith('/academy-sports/AcademySports.tsx'))return;
    const anchor=' const selected=match.players';assert(code.includes(anchor));
-   return code.replace('if(active()&&!state.current.tactics){accumulator','if(active()&&!state.current.tactics&&!(window as any).__academyFreeze){accumulator')
-    .replace(anchor,` Object.assign(window,{__academy:{get match(){return state.current.match;},get input(){return input.current;},get quiz(){return state.current.quiz;},step(n=1){for(let i=0;i<n;i++){const k=keys.current;input.current.x=stick.current.x||Number(k.has('arrowright')||k.has('d'))-Number(k.has('arrowleft')||k.has('a'));input.current.z=stick.current.z||Number(k.has('arrowdown')||k.has('s'))-Number(k.has('arrowup')||k.has('w'));input.current.aimX=input.current.x;input.current.aimZ=input.current.z;input.current.dash=k.has(' ')||input.current.dash;stepMatch(state.current.match,input.current,1/60);}refresh(v=>v+1);},act:(a)=>action.current(a),sound:(kind)=>audioService.playAcademySportsSound(state.current.match.sport,kind),get status(){return state.current.status;}}});\n${anchor}`);
+   return code.replace('if(active()&&!state.current.tactics&&!state.current.online){accumulator','if(active()&&!state.current.tactics&&!state.current.online&&!(window as any).__academyFreeze){accumulator')
+    .replace(anchor,` Object.assign(window,{__academy:{chooseLesson:s=>{setSelection(s);setPicker(false);void start(s);},get match(){return state.current.match;},get input(){return input.current;},get quiz(){return state.current.quiz;},step(n=1){for(let i=0;i<n;i++){const k=keys.current;input.current.x=stick.current.x||Number(k.has('arrowright')||k.has('d'))-Number(k.has('arrowleft')||k.has('a'));input.current.z=stick.current.z||Number(k.has('arrowdown')||k.has('s'))-Number(k.has('arrowup')||k.has('w'));input.current.aimX=input.current.x;input.current.aimZ=input.current.z;input.current.dash=k.has(' ')||input.current.dash;input.current=screenToWorld(state.current.match,input.current,window.innerWidth>=window.innerHeight);stepMatch(state.current.match,input.current,1/60);}refresh(v=>v+1);},act:(a)=>action.current(a),sound:(kind)=>audioService.playAcademySportsSound(state.current.match.sport,kind),get status(){return state.current.status;}}});\n${anchor}`);
   },configureServer(s){s.middlewares.use('/academy-test',async(_req,res)=>{
    res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/academy-test','<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><div id="root"></div><script type="module" src="/scripts/fixtures/academy-sports.tsx"></script>'));
   });}}]
@@ -86,7 +86,7 @@ try {
   await page.getByRole('button',{name:'CPUと対戦',exact:true}).click();
   for(let i=0;i<3;i++)await page.getByRole('button',{name:'次へ',exact:true}).click();
   const earned=await page.evaluate(async()=>(await import('/src/point-exchange/store.ts')).readPoints().earned);
-  await page.getByRole('button',{name:'学習して試合へ',exact:true}).click();
+  await page.getByRole('button',{name:'学習して試合へ',exact:true}).click();await page.locator('[data-online-lesson]').waitFor();await page.evaluate(()=>__academy.chooseLesson({mode:'ADDITION'}));
   for(let q=0;q<3;q++){
    await page.waitForFunction(q=>__academy.quiz?.index===q&&__academy.quiz.selected===null,q);
    const correct=await page.evaluate(()=>__academy.quiz.lesson.questions[__academy.quiz.index].correct);await page.locator('.gg-options button').nth(correct).click();
@@ -95,7 +95,7 @@ try {
   await page.waitForFunction(async n=>(await import('/src/point-exchange/store.ts')).readPoints().earned===n,earned+3);
   await page.evaluate(()=>__academy.step(100));if(sport==='soccer')await page.keyboard.press('z');if(sport==='baseball')await page.evaluate(()=>__academy.step(90));
   console.log(sport,'learning receipt and points passed');
-  const position=()=>page.evaluate(()=>{const s=__academy.match;return s.sport==='baseball'?s.aim.x:s.players.find(p=>p.id===s.selected).p.x;});
+  const position=()=>page.evaluate(()=>{const s=__academy.match;return s.sport==='baseball'?s.aim.x:s.sport==='soccer'&&innerWidth>=innerHeight?-s.players.find(p=>p.id===s.selected).p.z:s.players.find(p=>p.id===s.selected).p.x;});
   const before=await position();await page.keyboard.down('ArrowRight');await page.evaluate(()=>__academy.step(10));await page.keyboard.up('ArrowRight');assert((await position())>before,sport+' keyboard moves the athlete/aim');
   await page.evaluate(()=>{__testPad.connected=true;__testPad.axes[0]=.95;__testPad.buttons[7].pressed=true;});
   await page.waitForFunction(()=>__academy.input.dash);const padBefore=await position();await page.evaluate(()=>__academy.step(5));assert((await position())>padBefore,sport+' gamepad axis moves athlete/aim');

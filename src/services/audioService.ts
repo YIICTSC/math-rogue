@@ -1,3 +1,4 @@
+import {ACADEMY_VOICES} from '../mini-games/academy-sports/voiceCatalog';
 import {readPoints} from '../point-exchange/store';
 import {techniqueVoiceParts,dungeonTechniqueKey,type TechniqueSpeechMode,type VoicePart} from '../components/school-dungeon/techniques/voiceParts';
 import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
@@ -2243,6 +2244,13 @@ class AudioService {
       for(const name of cached.slice(0,Math.max(0,cached.length-16)))delete this.voiceBuffers[name];
   }
 
+  public async playAcademySportsVoiceFile(id:string){
+      if(!Object.hasOwn(ACADEMY_VOICES,id)||!this.canPlayConversationVoice())return false;
+      const clip=ACADEMY_VOICES[id];this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      const name=`sports-voice-academy-${id}`,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
+      this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.duration*1000+350,false,generation,true);
+  }
   public async playSportsVoiceFile(id:string){
       const path=sportsVoicePath(id);if(!sportsVoiceAvailable(id)||!path||!this.canPlayConversationVoice())return false;
       this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;

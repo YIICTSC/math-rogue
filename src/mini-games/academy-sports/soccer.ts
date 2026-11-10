@@ -1,3 +1,4 @@
+import {specialHero,specialName} from './specials';
 import {core,athlete,vec,len,clamp,unit,event,stat,pose,tickCore,capture,replay,finish,move,runTo,physics,kickBall,morale,jump,hash,aiInterval,segmentDistance,type Core,type Config,type Input,type Action,type Vec,type Athlete,controlInput} from './core';
 export const SOCCER_FIELD={width:21,length:33,goal:4.2,height:2.8};
 export const SOCCER_TECHNIQUES=['星帆ブレイク','蒼雷スパイラル','風渡りアーク','天灯ドライブ','月影スライス','双灯コネクト'];
@@ -7,7 +8,7 @@ function formation(c:Config,team:number,slot:number){const dir=direction(team);i
 export function createSoccer(c:Config):Soccer{
  const s=Object.assign(core(c),{sport:'soccer' as const,half:1,halfTime:0,added:0,stage:'restart' as const,restart:'kickoff' as const,restartTeam:0,restartAt:vec(),restartTimer:0,lastPass:-1,passTarget:-1,offside:[] as number[],guard:[100,100],lastTouch:0,shotTeam:-1,shotTimer:0,cinema:0,pendingShot:null,goalFlash:0,decision:0,lastInput:{x:0,z:0,aimX:0,aimZ:0,dash:false,primary:false}});
  const lines=c.formation==='4-4-2'?[4,4,2]:c.formation==='3-5-2'?[3,5,2]:[4,3,3];
- for(let t=0;t<2;t++)for(let i=0;i<11;i++)s.players.push(athlete(t,i,i===0?'GK':i<=lines[0]?'DF':i<=lines[0]+lines[1]?'MF':'FW',formation(c,t,i),c));s.selected=c.team*100+9;placeRestart(s,'kickoff',0,vec());return s;
+ for(let t=0;t<2;t++)for(let i=0;i<11;i++)s.players.push(athlete(t,i,i===0?'GK':i<=lines[0]?'DF':i<=lines[0]+lines[1]?'MF':'FW',formation(c,t,i),c));s.selected=c.team*100+9;placeRestart(s,'kickoff',0,vec());const captain=s.players.find(p=>p.id===c.team*100+9)!,selected=s.players.find(p=>p.id===s.selected)!;if(selected.team===c.team&&selected.id!==captain.id){const prior=selected.hero;selected.hero=c.hero;captain.hero=prior;}return s;
 }
 function holder(s:Soccer){return s.players.find(p=>p.id===s.ball.owner);}
 function assign(s:Soccer,p:Athlete){s.ball.owner=p.id;s.ball.team=p.team;s.lastTouch=p.team;s.ball.vx=s.ball.vy=s.ball.vz=0;if(!s.online&&p.team===s.config.team&&s.config.mode!=='watch'&&p.role!=='GK')s.selected=p.id;}
@@ -27,9 +28,9 @@ function shoot(s:Soccer,p:Athlete,charge:number,special=false){
  const dir=direction(p.team),boost=s.awaken[p.team]>0?1.15:1,skill=special&&p.spirit>=35;
  const shotInput=s.controls?.[p.id]||s.lastInput,aim=clamp(shotInput.aimX||shotInput.x,-1,1),target=vec(aim*3.65,0,dir*34),distance=len(p.p,target),accuracy=p.skills.control*(s.config.assist?1:.8);
  target.x+=Math.sin(p.face)*distance*(1-accuracy)*.04;
- const speed=(18+clamp(charge,0,2)*9+p.skills.power*7)*(skill?1.35:1)*boost;const technique=p.slot%SOCCER_TECHNIQUES.length;
- kickBall(s,p,target,speed,skill?(technique===3?8:technique===2?6:2.8):1.4+Math.min(3,charge*2),skill?(technique%2?1:-1)*(technique===4?3:1.2):aim*.2);
- s.ball.special=skill;s.ball.power=speed;s.ball.y=Math.max(.3,p.p.y+.3);p.spirit=Math.max(0,p.spirit-(skill?35:8));pose(p,'kick',.65);s.shotTeam=p.team;s.shotTimer=4;s.lastPass=-1;s.offside=[];stat(s,p.team,'shots');morale(s,p.team,8);event(s,skill?'special':'hit',skill?SOCCER_TECHNIQUES[technique]:charge>.8?'パワーシュート！':'シュート！',p.id);
+ const signature=specialHero(p.hero);const speed=(18+clamp(charge,0,2)*9+p.skills.power*7)*(skill?signature.speed*1.12:1)*boost;const technique=p.slot%SOCCER_TECHNIQUES.length;
+ kickBall(s,p,target,speed,skill?(technique===3?8:technique===2?6:2.8)+signature.lift:1.4+Math.min(3,charge*2),skill?(technique%2?1:-1)*(technique===4?3:1.2)+signature.curve:aim*.2);
+ s.ball.special=skill;s.ball.power=speed;s.ball.y=Math.max(.3,p.p.y+.3);p.spirit=Math.max(0,p.spirit-(skill?35:8));pose(p,'kick',.65);p.cooldown=.45;s.shotTeam=p.team;s.shotTimer=4;s.lastPass=-1;s.offside=[];stat(s,p.team,'shots');morale(s,p.team,8);event(s,skill?'special':'hit',skill?specialName(p.hero,'soccer'):charge>.8?'パワーシュート！':'シュート！',p.id,skill?'shot':undefined);
 }
 export function soccerAction(s:Soccer,action:Action){
  if(action==='next'){s.phaseTime=0;return;}if(s.phase!=='play'||s.cinema>0)return;
@@ -39,11 +40,11 @@ export function soccerAction(s:Soccer,action:Action){
   if(s.stage==='restart'&&s.restartTeam===p.team){if(s.restart==='penalty'||s.restart==='free-kick'){s.stage='open';shoot(s,holder(s)!,1.1);}else pass(s);return;}
   if(own)p.charge=.02;else if(s.ball.y>1.3&&len(p.p,s.ball)<2.3){jump(p,6);s.ball.x=p.p.x;s.ball.z=p.p.z;shoot(s,p,.6);event(s,'hit','ヘディング！',p.id);}else soccerAction(s,'defend');
  }
- if(action==='release'&&p.charge>0){if(own){const special=p.charge>=1.1&&p.spirit>=35;if(special){s.pendingShot={actor:p.id,charge:p.charge,special:true};s.cinema=.7;pose(p,'kick',1.3);event(s,'special',SOCCER_TECHNIQUES[p.slot%6],p.id);}else shoot(s,p,p.charge);}p.charge=0;}
+ if(action==='release'&&p.charge>0){if(own){const special=p.charge>=1.1&&p.spirit>=35;if(special){s.pendingShot={actor:p.id,charge:p.charge,special:true};s.cinema=.7;pose(p,'kick',1.3);event(s,'special',specialName(p.hero,'soccer'),p.id,'shot');}else shoot(s,p,p.charge);}p.charge=0;}
  if(action==='pass'||action==='lob'){const teammate=holder(s);if(own)pass(s,action==='lob');else if(teammate?.team===p.team&&teammate.cooldown<=0)pass(s,action==='lob',p);}
  if(action==='alternate'&&own&&p.spirit>=18&&!p.cooldown){const d=unit(s.lastInput.x||Math.sin(p.face),s.lastInput.z||Math.cos(p.face));p.p.x=clamp(p.p.x+d.x*1.5,-20,20);p.p.z=clamp(p.p.z+d.z*1.5,-32,32);p.spirit-=18;p.cooldown=.8;pose(p,'run',.4);event(s,'hit','切り返しドリブル！',p.id);}
  if(action==='special'){
-  if(own&&p.spirit>=35){s.pendingShot={actor:p.id,charge:1.5,special:true};s.cinema=.7;pose(p,'kick',1.3);event(s,'special',SOCCER_TECHNIQUES[p.slot%6],p.id);}
+  if(own&&p.spirit>=35){s.pendingShot={actor:p.id,charge:1.5,special:true};s.cinema=.7;pose(p,'kick',1.3);event(s,'special',specialName(p.hero,'soccer'),p.id,'shot');}
   else if(!own&&p.spirit>=25){const keeper=s.players.find(q=>q.team===p.team&&q.role==='GK')!;p.spirit-=25;pose(keeper,'catch',.9);keeper.v.y=5;keeper.p.x=clamp(s.ball.x+s.ball.vx*.2,-4,4);s.guard[p.team]=Math.min(100,s.guard[p.team]+18);event(s,'special','星盾セーブ！',keeper.id);}
  }
  if(action==='defend'&&!own&&!p.cooldown){const h=holder(s);p.cooldown=.8;pose(p,'tackle',.45);p.spirit=Math.max(0,p.spirit-12);if(h&&h.team!==p.team&&len(p.p,h.p)<1.9){const toward=unit(h.p.x-p.p.x,h.p.z-p.p.z),facing={x:Math.sin(h.face),z:Math.cos(h.face)},behind=toward.x*facing.x+toward.z*facing.z;

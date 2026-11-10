@@ -1,11 +1,13 @@
 import assert from'node:assert/strict';import{build}from'esbuild';
 const r=await build({stdin:{contents:"export * from './src/mini-games/academy-sports/onlineWorld';export * from './src/mini-games/academy-sports/core';export * from './src/mini-games/academy-sports/engine';export * from './src/mini-games/academy-sports/onlineInvite';",resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'node'});const E=await import('data:text/javascript;base64,'+Buffer.from(r.outputFiles[0].text).toString('base64'));
+const factory=()=>({title:'共有単元・たし算',questions:[0,1,2].map(i=>({id:'addition-'+i,mode:'ADDITION',question:'1 + 1 = ?',options:['0','1','2','3'],correct:2}))});
 let seq=new Map(),now=100;const cmd=(w,id,c)=>{const n=(seq.get(id)||0)+1;seq.set(id,n);return w.command(id,c,n,now);};
-const create=(sport,count)=>{seq=new Map();const w=new E.OnlineWorld(sport,'p0');w.config.seed=7891;for(let i=0;i<count;i++){assert(w.add('p'+i,'Player '+i));cmd(w,'p'+i,{type:'ready',ready:true});}return w;};
-const start=w=>{assert(cmd(w,'p0',{type:'start'}));for(const p of w.view.players)cmd(w,p.id,{type:'loaded',loaded:true});w.tick(1/60,now);};
+const create=(sport,count)=>{seq=new Map();const w=new E.OnlineWorld(sport,'p0',{},factory);w.config.seed=7891;for(let i=0;i<count;i++){assert(w.add('p'+i,'Player '+i));cmd(w,'p'+i,{type:'ready',ready:true});}return w;};
+const completeStudy=w=>{for(const p of w.view.players){let q;while((q=w.study.view(p.id))){assert(cmd(w,p.id,{type:'answer',quizId:q.id,index:q.index,option:2}));assert(cmd(w,p.id,{type:'continue',quizId:q.id,index:q.index}));}}};
+const start=w=>{assert(cmd(w,'p0',{type:'start'}));for(const p of w.view.players)cmd(w,p.id,{type:'loaded',loaded:true});completeStudy(w);w.tick(1/60,now);};
 for(const sport of ['baseball','soccer','volleyball','festival']){
  const count=E.ONLINE_CAPACITY[sport],w=create(sport,count);assert(!w.add('overflow','Overflow'));const per=sport==='festival'?2:count/2;for(let team=0;team<(sport==='festival'?4:2);team++)assert.equal(w.team(team).length,per);
- assert(!cmd(w,'p1',{type:'start'}));assert(cmd(w,'p0',{type:'start'}));w.tick(1/60,now);assert.equal(w.view.match.clock,0,'No clock while clients load');for(const p of w.view.players)cmd(w,p.id,{type:'loaded',loaded:true});w.tick(1/60,now);assert(!w.view.loading);w.bind();
+ assert(!cmd(w,'p1',{type:'start'}));assert(cmd(w,'p0',{type:'start'}));w.tick(1/60,now);assert.equal(w.view.match.clock,0,'No clock while clients load');for(const p of w.view.players)cmd(w,p.id,{type:'loaded',loaded:true});w.tick(1/60,now);assert(!w.view.loading);assert.equal(w.view.match.clock,0,'Study begins after start and pauses play');assert.equal(E.onlineSnapshot(w).quiz,null);const privateView=E.onlineSnapshot(w,'p0');assert(privateView.quiz);assert(!('correct' in privateView.quiz.question));assert(E.validOnlineView(privateView,sport));completeStudy(w);w.bind();
  const assigned=w.view.players.filter(p=>p.unit>=0).map(p=>p.unit);assert.equal(new Set(assigned).size,assigned.length);assert.equal(assigned.length,sport==='baseball'?2:count);
  assert(E.validOnlineView(E.onlineSnapshot(w),sport));assert(!E.validOnlineView({...E.onlineSnapshot(w),sport:'bad'},sport));
  assert(!cmd(w,'p1',{type:'configure',config:{innings:9},limit:2}));assert(!cmd(w,'p1',{type:'pause',paused:true}));assert(!cmd(w,'p1',{type:'tactic',key:'__proto__',value:3}));assert(!cmd(w,'p1',{type:'action',action:'setScore'}));
@@ -44,7 +46,7 @@ for(const sport of ['soccer','volleyball','festival']){
 // Full matches run through the same authenticated command path as connected peers.
 for(const sport of ['baseball','soccer','volleyball','festival']){
  const w=create(sport,2);start(w);let frame=0;
- while(w.view.phase!=='result'&&frame++<150000){now+=1000/60;const s=w.view.match;w.bind();
+ while(w.view.phase!=='result'&&frame++<150000){now+=1000/60;if(w.study.pending)completeStudy(w);const s=w.view.match;w.bind();
   for(const person of w.view.players){if(person.unit<0)continue;const p=s.players.find(u=>u.id===person.unit);let input=E.neutral();
    if(sport==='baseball'){
     if(person.team!==s.half){if(s.stage==='set'&&s.timer>.4)cmd(w,person.id,{type:'action',action:'primary'});if(s.stage==='meter'&&s.timer>.3)cmd(w,person.id,{type:'action',action:'primary'});
@@ -62,4 +64,8 @@ for(const sport of ['baseball','soccer','volleyball','festival']){
   w.tick(1/60,now);if(frame%1200===0)E.assertFinite(w.view.match);
  }
  assert.equal(w.view.phase,'result',sport+' complete online-command match');E.assertFinite(w.view.match);console.log('PASS full',sport,'match through online commands:',w.view.match.score,'frames',frame);
+}
+
+{
+ const w=create('baseball',2);assert.equal(w.view.phase,'lobby');assert.equal(w.study.view('p0'),null);assert(w.setLesson(factory));for(const p of w.view.players)cmd(w,p.id,{type:'ready',ready:true});assert(cmd(w,'p0',{type:'start'}));const q=w.study.view('p0'),other=w.study.view('p1');assert(q&&other);assert.notEqual(q.id,other.id);assert(!cmd(w,'p1',{type:'answer',quizId:q.id,index:0,option:2}));assert(cmd(w,'p0',{type:'answer',quizId:q.id,index:0,option:2}));assert(!cmd(w,'p0',{type:'answer',quizId:q.id,index:0,option:2}));assert.equal(w.view.players[0].correct,1);assert.equal(w.study.view('p1').answer,null,'Peer feedback remains private');assert.equal(w.study.view('p0').answer,2);assert(!w.setLesson(factory));cmd(w,'p0',{type:'continue',quizId:q.id,index:0});completeStudy(w);for(const p of w.view.players)cmd(w,p.id,{type:'loaded',loaded:true});w.tick(1/60,now);w.view.match.phase='play';w.view.match.inning++;w.tick(1/60,now);assert(w.study.pending,'Next inning inserts the host lesson');const clock=w.view.match.clock;w.tick(1/60,now);assert.equal(w.view.match.clock,clock);w.disconnect('p1');assert.equal(w.study.view('p1'),null);completeStudy(w);w.tick(1/60,now);assert(w.view.match.clock>clock);console.log('PASS host lesson after start and at breaks, private grades, duplicate rejection, disconnect and resume');
 }
