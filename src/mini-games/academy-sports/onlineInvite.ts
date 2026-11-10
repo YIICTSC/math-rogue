@@ -1,0 +1,3 @@
+import {normalizeRoomInput} from '../../services/onlineTransport';import type{SportId}from'./core';
+export function academyInvitation(href:string):{sport:SportId;code:string}|null{try{const u=new URL(href,'https://invite.invalid'),sport=u.searchParams.get('academySport'),code=normalizeRoomInput(u.searchParams.get('academyRoom')||'');return ['baseball','soccer','volleyball','festival'].includes(sport||'')&&/^[0-4]\d{5}$/.test(code)?{sport:sport as SportId,code}:null;}catch{return null;}}
+export function academyInviteUrl(href:string,sport:SportId,code:string){if(!/^[0-4]\d{5}$/.test(code))return '';try{const u=new URL(href);u.search='';u.hash='';u.searchParams.set('academySport',sport);u.searchParams.set('academyRoom',code);return u.toString();}catch{return '';}}

@@ -114,26 +114,26 @@ function runnersStep(s:Baseball,dt:number){for(const r of s.runners){if(r.done)c
 export function stepBaseball(s:Baseball,input:Input,dt:number){
  if(!tickCore(s,dt))return;capture(s,dt);s.timer+=dt;
  if(s.stage==='settle'){nextBatter(s);return;}
- const humanBat=battingHuman(s),b=s.ball,p=pitcher(s);
+ const humanBat=s.online?!!s.controls?.[s.bat]:battingHuman(s),b=s.ball,p=pitcher(s);const batInput=s.online?s.controls?.[s.bat]||neutral():input,pitchInput=s.online?s.controls?.[s.pitcher]||neutral():input,humanPitch=s.online?!!s.controls?.[s.pitcher]:!humanBat&&s.config.mode!=='watch'&&s.config.mode!=='fielding';
  if(s.stage==='set'){
   if(s.stealing)runnersStep(s,dt);
-  if(!humanBat){s.pitchAim.x=clamp(s.pitchAim.x+input.x*dt*1.5,-1.35,1.35);s.pitchAim.y=clamp(s.pitchAim.y-input.z*dt*1.5,.3,2.8);}
-  if(humanBat||s.config.mode==='watch'||s.config.mode==='fielding'){if(s.timer>.8){s.pitch=hash(s.pitchCount+s.config.seed)%PITCHES.length;const n=hash(s.pitchCount*97+s.config.seed);s.pitchAim={x:(n%200/100-1)*.7,y:.6+(n%140)/100};pitchStart(s,.6+s.config.difficulty*.1);}}
+  if(humanPitch){s.pitchAim.x=clamp(s.pitchAim.x+pitchInput.x*dt*1.5,-1.35,1.35);s.pitchAim.y=clamp(s.pitchAim.y-pitchInput.z*dt*1.5,.3,2.8);}
+  if(!humanPitch){if(s.timer>.8){s.pitch=hash(s.pitchCount+s.config.seed)%PITCHES.length;const n=hash(s.pitchCount*97+s.config.seed);s.pitchAim={x:(n%200/100-1)*.7,y:.6+(n%140)/100};pitchStart(s,.6+s.config.difficulty*.1);}}
   return;
  }
  if(s.stage==='meter')return;
  if(s.stage==='windup'){if(s.stealing)runnersStep(s,dt);if(s.timer>.65)releasePitch(s);return;}
  if(s.stage==='pitch'){
-  const oldZ=b.z;physics(b,dt,9.81,0);if(s.pitch===3)b.vy-=dt*2;if(s.pitch===4&&b.z>10)b.vy-=dt*10;if(s.pitch===7){b.vy-=dt*4;b.vx+=dt*.8;}if(s.pitch===8&&b.z>9){b.vx+=dt*3;b.vy-=dt*6;}
-  if(humanBat){s.aim.x=clamp(s.aim.x+input.x*dt*2.5,-1.25,1.25);s.aim.y=clamp(s.aim.y-input.z*dt*2.5,.25,2.9);if(s.config.assist&&Math.abs(input.x)+Math.abs(input.z)<.1){s.aim.x+=(b.x-s.aim.x)*dt*4;s.aim.y+=(b.y-s.aim.y)*dt*4;}}
+  const oldZ=b.z;if(!s.online||s.plateAt<0){physics(b,dt,9.81,0);if(s.pitch===3)b.vy-=dt*2;if(s.pitch===4&&b.z>10)b.vy-=dt*10;if(s.pitch===7){b.vy-=dt*4;b.vx+=dt*.8;}if(s.pitch===8&&b.z>9){b.vx+=dt*3;b.vy-=dt*6;}}
+  if(humanBat){s.aim.x=clamp(s.aim.x+batInput.x*dt*2.5,-1.25,1.25);s.aim.y=clamp(s.aim.y-batInput.z*dt*2.5,.25,2.9);if(s.config.assist&&Math.abs(batInput.x)+Math.abs(batInput.z)<.1){s.aim.x+=(b.x-s.aim.x)*dt*4;s.aim.y+=(b.y-s.aim.y)*dt*4;}}
   else {const level=s.config.difficulty;s.hitMode=(['ground','line','fly'] as const)[hash(s.pitchCount*31+s.config.seed)%3];const reactionError=(hash(s.pitchCount*11+s.config.seed)%100/100-.5)*(.7-level*.12);s.aim={x:b.x+Math.sin(s.pitchCount*3.2)*(.22-level*.05),y:b.y+Math.cos(s.pitchCount)*(.22-level*.04)};if(b.z>18-b.vz*(.05+level*.015+reactionError)&&s.swingAt<0){s.swingAt=s.clock;pose(batter(s),'swing',.4);}}
   if(s.stealing)runnersStep(s,dt);
-  if(oldZ<18&&b.z>=18){s.plateAt=s.clock-(b.z-18)/b.vz;s.plateBall=vec(b.x,b.y,18);}
+  if(oldZ<18&&b.z>=18){s.plateAt=s.clock-(b.z-18)/b.vz;s.plateBall=vec(b.x,b.y,18);if(s.online){b.x=s.plateBall.x;b.y=s.plateBall.y;b.z=18;}}
   if(s.plateAt>=0&&s.swingAt>=0&&Math.abs(s.swingAt-s.plateAt)<.23){const actual=vec(b.x,b.y,b.z);b.x=s.plateBall.x;b.y=s.plateBall.y;b.z=18;if(hitBall(s,s.swingAt-s.plateAt,s.aim.x,s.aim.y))return;b.x=actual.x;b.y=actual.y;b.z=actual.z;}
-  if(b.z>=20.5){const swung=s.swingAt>=0;
+  if(s.online?s.plateAt>=0&&s.clock-s.plateAt>.4:b.z>=20.5){const swung=s.swingAt>=0;
    if(s.stealing){const r=s.runners[0];if(r&&r.at<2){r.done=true;s.bases[0]=null;s.outs++;event(s,'catch','盗塁阻止！');if(s.outs>=3){nextBatter(s);return;}}else if(r){s.bases[0]=null;s.bases[1]=r.unit;}}
    pitchVerdict(s,swung?'strike':Math.abs(b.x)<.62&&b.y>.5&&b.y<2?'strike':'ball');return;}
-  if(s.timer>2.5||b.y<-.5)pitchVerdict(s,'ball');return;
+  if(s.timer>2.5||!s.online&&b.y<-.5)pitchVerdict(s,'ball');return;
  }
  if(s.stage==='live'||s.stage==='throw'){
   s.flightTime+=dt;
@@ -145,7 +145,7 @@ export function stepBaseball(s:Baseball,input:Input,dt:number){
   }else{const holder=s.players.find(p=>p.id===b.owner)!;b.x=holder.p.x;b.y=1.3+holder.p.y;b.z=holder.p.z;}
   const landing=predictLanding(s),field=s.players.find(p=>p.id===s.fielder)!;
   for(const f of s.players.filter(f=>f.team!==s.half)){
-   if(f.id===s.fielder&&s.config.team===f.team&&s.config.mode!=='watch'){move(f,input.x,input.z,dt,input.dash);}
+   if(s.online?!!s.controls?.[f.id]:f.id===s.fielder&&s.config.team===f.team&&s.config.mode!=='watch'){const control=s.online?s.controls![f.id]:input;move(f,control.x,control.z,dt,control.dash);}
    else if(s.stage==='throw'&&f.id===s.throwTarget)runTo(f,BASES[s.throwBase],dt,true);
    else if(f.id===s.fielder&&b.owner!==f.id)runTo(f,b.y>2?landing:vec(b.x,0,b.z),dt,true);
    else if(b.owner!==f.id)runTo(f,f.home,dt);
@@ -161,7 +161,7 @@ export function stepBaseball(s:Baseball,input:Input,dt:number){
   }
   runnersStep(s,dt);if(s.phase!=='play')return;
   if(b.owner>=0){for(const r of s.runners.filter(r=>!r.done&&r.target!==r.at)){const holder=s.players.find(p=>p.id===b.owner)!;const runner=s.players.find(p=>p.id===r.unit)!;if(len(holder.p,runner.p)<.8)putOut(s,r);if(s.phase!=='play')return;}
-   if((s.config.team!==1-s.half||s.config.mode==='watch')&&field.action<=0&&s.timer>1){const base=chooseThrow(s);if(s.runners.some(r=>!r.done&&r.target!==r.at))throwToBase(s,base);}
+   if((s.online?!s.controls?.[s.fielder]:(s.config.team!==1-s.half||s.config.mode==='watch'))&&field.action<=0&&s.timer>1){const base=chooseThrow(s);if(s.runners.some(r=>!r.done&&r.target!==r.at))throwToBase(s,base);}
    if(s.runners.every(r=>r.done||r.at===r.target&&!r.tag)&&s.timer>1.5){settle(s,s.outs>s.outsAtHit?'アウト判定':'セーフ！');return;}}
   if(s.timer>18)settle(s,'プレー終了');
  }

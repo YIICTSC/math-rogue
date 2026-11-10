@@ -1,3 +1,4 @@
+import {academyInvitation} from './mini-games/academy-sports/onlineInvite';
 import { MINI_GAME_UNIT_CORRECT_EVENT, type MiniGameUnitCorrectDetail } from './services/miniGameUnitProgress';
 import {enableDebugRewards} from './point-exchange/debug';
 import PointExchangeEntry from './point-exchange/PointExchange';
@@ -1688,6 +1689,8 @@ const App: React.FC = () => {
     const[basketballInviteOpen,setBasketballInviteOpen]=useState(Boolean(basketballCode));
     const dodgeballCode=useMemo(()=>typeof window==='undefined'?'':dodgeballInviteCode(window.location.href),[]);
     const[dodgeballInviteOpen,setDodgeballInviteOpen]=useState(Boolean(dodgeballCode));
+    const academyInvite = useMemo(()=>typeof window==='undefined'?null:academyInvitation(window.location.href),[]);
+    const [academyInviteOpen,setAcademyInviteOpen] = useState(Boolean(academyInvite));
     const tennisCode = useMemo(() => typeof window === 'undefined' ? '' : tennisInviteCode(window.location.href), []);
     const [tennisInviteOpen,setTennisInviteOpen] = useState(Boolean(tennisCode));
     const craftCode = useMemo(() => typeof window === 'undefined' ? '' : craftInviteCode(window.location.href), []);
@@ -1732,7 +1735,6 @@ const App: React.FC = () => {
         currentStoryIndex: 0,
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
-    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(basketballInviteOpen&&!!basketballCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     const [pendingRpgTitle, setPendingRpgTitle] = useState(false);
@@ -2642,6 +2644,7 @@ const App: React.FC = () => {
     // ?adminDebug=1. Store builds cannot use this route because the feature flag is off.
     const [isDebugMode, setIsDebugMode] = useState(isAdminDebugLaunch);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(academyInviteOpen&&!!academyInvite&&isDebugModeActive)||(basketballInviteOpen&&!!basketballCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     useEffect(()=>{if(gameState.screen===GameScreen.GAKURO_CRAFT)setGameState(prev=>({...prev,screen:GameScreen.START_MENU}));},[gameState.screen]);
     useEffect(()=>{if(vrInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_GAKUROGEAR?prev:{...prev,screen:GameScreen.MINI_GAME_GAKUROGEAR});},[vrInviteOpen]);
     useEffect(()=>{if(cardClubInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_CARD_CLUB?prev:{...prev,screen:GameScreen.MINI_GAME_CARD_CLUB});},[cardClubInviteOpen]);
@@ -21722,9 +21725,9 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen || tennisInviteOpen || dodgeballInviteOpen || basketballInviteOpen) && (
+                {!OFFLINE_DISTRIBUTABLE && (gameState.screen === GameScreen.GAKURO_GOLF || golfInviteOpen || tennisInviteOpen || dodgeballInviteOpen || basketballInviteOpen || (academyInviteOpen&&isDebugModeActive)) && (
                     <React.Suspense fallback={null}>
-                        <SportsHub debugEnabled={isDebugModeActive} onAnswerResult={result=>{const assignment=activeAssignment?effectiveAssignment:null;const pool=getAssignmentModePool(assignment);const custom=result.mode==='ASSIGNMENT_CUSTOM'&&(assignment?.customProblems.length||0)>0;const attributed=!!assignment&&(custom||!pool||pool.includes(result.mode));handleAssignmentAnswerResult(result);if(result.correct){handleModeCorrectProgress(result.mode,1);if(!attributed)addMiniGameUnlockCorrectCount(1);}}} languageMode={languageMode} golfInviteCode={golfInviteOpen?golfCode:''} basketballInviteCode={basketballInviteOpen?basketballCode:''} dodgeballInviteCode={dodgeballInviteOpen?dodgeballCode:''} tennisInviteCode={tennisInviteOpen?tennisCode:''} onClose={()=>{setGolfInviteOpen(false);setTennisInviteOpen(false);setDodgeballInviteOpen(false);setBasketballInviteOpen(false);returnToTitle();}} />
+                        <SportsHub debugEnabled={isDebugModeActive} academyInviteCode={academyInviteOpen?academyInvite?.code:undefined} academyInviteSport={academyInvite?.sport} onAnswerResult={result=>{const assignment=activeAssignment?effectiveAssignment:null;const pool=getAssignmentModePool(assignment);const custom=result.mode==='ASSIGNMENT_CUSTOM'&&(assignment?.customProblems.length||0)>0;const attributed=!!assignment&&(custom||!pool||pool.includes(result.mode));handleAssignmentAnswerResult(result);if(result.correct){handleModeCorrectProgress(result.mode,1);if(!attributed)addMiniGameUnlockCorrectCount(1);}}} languageMode={languageMode} golfInviteCode={golfInviteOpen?golfCode:''} basketballInviteCode={basketballInviteOpen?basketballCode:''} dodgeballInviteCode={dodgeballInviteOpen?dodgeballCode:''} tennisInviteCode={tennisInviteOpen?tennisCode:''} onClose={()=>{setAcademyInviteOpen(false);setGolfInviteOpen(false);setTennisInviteOpen(false);setDodgeballInviteOpen(false);setBasketballInviteOpen(false);returnToTitle();}} />
                     </React.Suspense>
                 )}
 

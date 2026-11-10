@@ -11,6 +11,8 @@
     "test:lantern-war:enemies": "node scripts/test-lantern-enemies.mjs",
     "test:lantern-war:vacation": "node scripts/test-lantern-vacation.mjs",
     "test:academy-sports": "node scripts/academy-sports/test-rules.mjs",
+    "test:academy-sports:online": "node scripts/academy-sports/test-online.mjs",
+    "test:academy-sports:online:browser": "node scripts/academy-sports/test-online-browser.mjs",
     "test:academy-sports:art": "node scripts/academy-sports/test-art-browser.mjs",
     "test:academy-sports:audio": "node scripts/academy-sports/audio-qa.mjs",
     "test:academy-sports:browser": "node scripts/academy-sports/browser-qa.mjs",

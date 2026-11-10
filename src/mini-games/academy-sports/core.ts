@@ -12,7 +12,7 @@ export interface Athlete {id:number;team:number;slot:number;hero:string;role:str
 export interface Ball extends Vec {vx:number;vy:number;vz:number;owner:number;team:number;power:number;spin:number;special:boolean;last:number;}
 export interface Event {id:number;at:number;kind:'hit'|'catch'|'whistle'|'cheer'|'special'|'bounce'|'score'|'hurt';text:string;actor:number;}
 export interface Frame {ball:Vec;players:{id:number;p:Vec;face:number;motion:Motion;jump:number;action:number}[];}
-export interface Core {id:string;config:Config;clock:number;phase:'ready'|'play'|'replay'|'interval'|'finished';phaseTime:number;players:Athlete[];ball:Ball;score:number[];winner:number|null;selected:number;notice:string;events:Event[];serial:number;history:Frame[];replay:Frame[];replayTime:number;elapsed:number;morale:number[];awaken:number[];stats:Record<string,number>[];}
+export interface Core {online?:boolean;controls?:Record<number,Input>;id:string;config:Config;clock:number;phase:'ready'|'play'|'replay'|'interval'|'finished';phaseTime:number;players:Athlete[];ball:Ball;score:number[];winner:number|null;selected:number;notice:string;events:Event[];serial:number;history:Frame[];replay:Frame[];replayTime:number;elapsed:number;morale:number[];awaken:number[];stats:Record<string,number>[];}
 export const vec=(x=0,y=0,z=0):Vec=>({x,y,z});
 export const clamp=(x:number,a:number,b:number)=>Math.max(a,Math.min(b,x));
 export const len=(a:Vec,b:Vec)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -67,3 +67,6 @@ export function normalizeConfig(raw:unknown,sport:SportId):Config{
 }
 export function normalizeInput(input:Input):Input{const finite=(n:number)=>Number.isFinite(n)?clamp(n,-1,1):0;return{x:finite(input.x),z:finite(input.z),aimX:finite(input.aimX),aimZ:finite(input.aimZ),dash:input.dash===true,primary:input.primary===true};}
 export function segmentDistance(a:Vec,b:Vec,p:Vec){const dx=b.x-a.x,dz=b.z-a.z,t=clamp(((p.x-a.x)*dx+(p.z-a.z)*dz)/(dx*dx+dz*dz||1),0,1);return Math.hypot(a.x+dx*t-p.x,a.z+dz*t-p.z);}
+
+/** Host assigns each human a single unit; unassigned units retain CPU behavior. */
+export function controlInput(s:Core,p:Athlete,fallback:Input):Input|undefined{return s.online?s.controls?.[p.id]:s.config.mode!=='watch'&&s.selected===p.id?fallback:undefined;}
