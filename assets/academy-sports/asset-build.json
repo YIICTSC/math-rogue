@@ -1,0 +1,72 @@
+{
+  "generator": "scripts/academy-sports/build-venues.py",
+  "optimizer": "scripts/academy-sports/optimize-assets.mjs",
+  "units": "metres",
+  "up": "+Y",
+  "front": "+Z",
+  "files": [
+    {
+      "path": "public/models/academy-sports/baseball-stadium.glb",
+      "bytes": 2163236,
+      "sha256": "926537189d81698d8c831d87fcf40c39e4d521401f2f4f422e9c283a883eb2c2",
+      "meshes": 1,
+      "materials": 9
+    },
+    {
+      "path": "public/models/academy-sports/equipment.glb",
+      "bytes": 703908,
+      "sha256": "2bf0dec41b86667bb4c79621ceaa953b8c989c025ac94703ec2ec15a1d9af45c",
+      "meshes": 20,
+      "materials": 12
+    },
+    {
+      "path": "public/models/academy-sports/festival-awards.glb",
+      "bytes": 1177924,
+      "sha256": "f3898f6a13f5ec031aa2648f35558aab61d8d6b3d44cfe68528c836f53d85c94",
+      "meshes": 1,
+      "materials": 7
+    },
+    {
+      "path": "public/models/academy-sports/festival-campus.glb",
+      "bytes": 946592,
+      "sha256": "5eb3fb78c9259bff90d5f21015065b71dfb6ee4db010b09399dcc487503d547c",
+      "meshes": 1,
+      "materials": 10
+    },
+    {
+      "path": "public/models/academy-sports/festival-roof.glb",
+      "bytes": 1124132,
+      "sha256": "2fd1a5c51d34ea9f2d35280bdef557ee5e642dc5d5199038d00b9a54b679af06",
+      "meshes": 1,
+      "materials": 7
+    },
+    {
+      "path": "public/models/academy-sports/festival-rooms.glb",
+      "bytes": 802040,
+      "sha256": "e8206eb07e17063173e5cbab414bf9e3bb194807fc2a657443499a33bbb67cbf",
+      "meshes": 1,
+      "materials": 8
+    },
+    {
+      "path": "public/models/academy-sports/festival-target.glb",
+      "bytes": 1119640,
+      "sha256": "ac70521b656a83c88b828d4ebff8b44d9325e3e84d5394497acd9b9f4bd44f6d",
+      "meshes": 9,
+      "materials": 6
+    },
+    {
+      "path": "public/models/academy-sports/soccer-stadium.glb",
+      "bytes": 2968320,
+      "sha256": "bfc37c4e557942e679d8e41e5029fa73fc0dfcbef86b5bf615e8e30fbeeee44f",
+      "meshes": 2,
+      "materials": 9
+    },
+    {
+      "path": "public/models/academy-sports/volleyball-gym.glb",
+      "bytes": 916888,
+      "sha256": "8f0cc7b9c51a0ad94d1a1bff9be41be27c06ddde0127351edab5df89a3b16473",
+      "meshes": 1,
+      "materials": 11
+    }
+  ]
+}

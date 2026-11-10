@@ -3,7 +3,7 @@ import { assetUrl } from '../../utils/assetPaths';
 import './responsiveTitleArt.css';
 
 export const MINI_GAME_TITLE_ART = [
-  'card-club', 'kocho', 'poker', 'survivor', 'dungeons', 'dungeons2',
+  'baseball', 'soccer', 'volleyball', 'festival', 'sports-club', 'card-club', 'kocho', 'poker', 'survivor', 'dungeons', 'dungeons2',
   'paper-plane', 'go-home', 'shogi', 'go', 'chess', 'mahjong', 'stone-glow',
   'school-trpg', 'learning-tcg', 'vr', 'crane', 'kart', 'golf', 'tennis', 'dodgeball', 'basketball', 'sports',
 ] as const;

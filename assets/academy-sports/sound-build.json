@@ -1,0 +1,390 @@
+{
+  "generator": "scripts/academy-sports/build-sounds.py",
+  "recordings": "Original procedural synthesis; no voices or third-party recordings",
+  "files": [
+    {
+      "path": "public/sfx/academy-sports/baseball/hit.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "c234d68e468e6601532a8d22c337da7e36ab18b04a64d5d08f405ce67242e512"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/hit.ogg",
+      "duration": 0.22,
+      "bytes": 1489,
+      "sha256": "9b0b13f06c910203505a880c7c0d9c79bc5b78625828aab656a416735fc89d95"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/catch.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "249b75ddda5948c157ea05402468a7d28a7d5cde47403fbccb54510a288af0aa"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/catch.ogg",
+      "duration": 0.22,
+      "bytes": 1496,
+      "sha256": "be167ba1fc8041777683c7086b141648221d471dfb09937d5c4a591616377a25"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/whistle.mp3",
+      "duration": 0.28,
+      "bytes": 2252,
+      "sha256": "f82a45433b687b457c76b02859a3cea733a18ff990dd8ffebbe13505b47d13ae"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/whistle.ogg",
+      "duration": 0.28,
+      "bytes": 2407,
+      "sha256": "c7dd2b639032c6962b2e98bee6b208c839e90dffb645939b84bf82d3d21ec801"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/cheer.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "3dc3804ef50c2a27f70effa0025f4d40400586ea02aa7dbddee943bada0b5389"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/cheer.ogg",
+      "duration": 0.85,
+      "bytes": 5145,
+      "sha256": "606f035d8931273e434e969562442483adb4219163177d390e323c10abe47e33"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/special.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "313ff83df4a548f654ac3587d23ac3de25004b61823d78599065cf420d404710"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/special.ogg",
+      "duration": 0.85,
+      "bytes": 5498,
+      "sha256": "952294ef666ca57f97924e855273de9670967cce6ac368ff09b93833f6872b10"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/bounce.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "412ed5c312038a65eca3f907a7c5f8d131775c5cb59f0a0945662a92f3d498c7"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/bounce.ogg",
+      "duration": 0.22,
+      "bytes": 1529,
+      "sha256": "243fd4044469249717953dcd09a1f4c59c84d011c0ac5817604624dfd943e553"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/score.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "d6899e1791d8c0fb546c9a4b90fdeafaa3a886b94596a65ed0c4751578a797f8"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/score.ogg",
+      "duration": 0.85,
+      "bytes": 5125,
+      "sha256": "d7d4d0637b8802f7749a541f6c646e70a54330fc4b0e21396ac8b6e4dcb86ee5"
+    },
+    {
+      "path": "public/sfx/academy-sports/baseball/hurt.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "07375a227621bc92c252f405e7aef7462a8780a58f5b99612998bd5b0db4f803"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/baseball/hurt.ogg",
+      "duration": 0.22,
+      "bytes": 1493,
+      "sha256": "dc9be23440ea2b7b29faf92c0304f045094341e04431bdf2ef46bc9ffe4e6999"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/hit.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "06748bd575dce95e48580e8b4c8857f571a64280c51cc2ab1e89bfe2b55b6c58"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/hit.ogg",
+      "duration": 0.22,
+      "bytes": 1480,
+      "sha256": "b6966104e913a67e43bade40f8095245dc6af4f7f9417631775c124dddc1026a"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/catch.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "d7369ac8a02bcffe1a0d436a1a7771d2a6cf8ac46e7bfa785f00f30b559563a7"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/catch.ogg",
+      "duration": 0.22,
+      "bytes": 1482,
+      "sha256": "4e3b80d28430e27825eac5e9596e6ae152ed47a384b5e90edf0bf6c77ecc6d3e"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/whistle.mp3",
+      "duration": 0.28,
+      "bytes": 2252,
+      "sha256": "f82a45433b687b457c76b02859a3cea733a18ff990dd8ffebbe13505b47d13ae"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/whistle.ogg",
+      "duration": 0.28,
+      "bytes": 2407,
+      "sha256": "d6928faa1dce5831c2db316d939709e53456b603732425eaee47abd3d8307c44"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/cheer.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "0055d632c33e457996cf7ccc049b92e0eff3f38f013c9c4592bf079ac9c83272"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/cheer.ogg",
+      "duration": 0.85,
+      "bytes": 5142,
+      "sha256": "8fe3b685da7cfaede27e607001b0ab5752bd3a5cd0b0f83fb43b61bb4debc4d1"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/special.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "89c737e157106e1cade8d63d78d0da3b38cc80431879c14a1035057d76cbf248"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/special.ogg",
+      "duration": 0.85,
+      "bytes": 5777,
+      "sha256": "bb428ce2cc4db92f5ffbb643330c8eba0fd2da8ad791e65f1a1dc615c79902c4"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/bounce.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "2bcec6aa90fb625c6face789b456d1e343e36ed9288343a4a8c940c9c468a812"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/bounce.ogg",
+      "duration": 0.22,
+      "bytes": 1492,
+      "sha256": "a97382f2bdee69d72571df639260304f67171cc971ee13f1ce91d116f44e3dbd"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/score.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "ab17dcf808f170219d764740d76e5275b53980e003c65641c5197b8fcb0a494e"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/score.ogg",
+      "duration": 0.85,
+      "bytes": 5111,
+      "sha256": "f646f2e641b691690105eee7db7e9e2f63cc6f0d722c2d2854d4f05d431a2cee"
+    },
+    {
+      "path": "public/sfx/academy-sports/soccer/hurt.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "ce4c23a154cb586b3f2c0193bf40137e766953ba9f018a090e2ddf247daabf30"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/soccer/hurt.ogg",
+      "duration": 0.22,
+      "bytes": 1485,
+      "sha256": "e8762c1c1f37e2da61aa380b525ae9bfb029c8bf654a3149ca269d9fdb32cd01"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/hit.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "f97e66112604b5a19ca5655eadd75411d15258f31e4449d70f6df29ebb3e2e2b"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/hit.ogg",
+      "duration": 0.22,
+      "bytes": 1520,
+      "sha256": "6534ada17ad8fb5fead6fb80ffc70181b6892a1dfea12dcde731e256c8541fb9"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/catch.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "39bc9028e7abcf16f1fa5c6deba28ff72ef7229e6bd7c129b780e6aad5db8190"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/catch.ogg",
+      "duration": 0.22,
+      "bytes": 1512,
+      "sha256": "606eaa7836c00e94dbf8285aba029400270c62996cd5415a38b956ee6629d2df"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/whistle.mp3",
+      "duration": 0.28,
+      "bytes": 2252,
+      "sha256": "f82a45433b687b457c76b02859a3cea733a18ff990dd8ffebbe13505b47d13ae"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/whistle.ogg",
+      "duration": 0.28,
+      "bytes": 2407,
+      "sha256": "03e0527504ef265006b4b6363d5c122d395fc88ddd66ac2429f911e2b0973bd4"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/cheer.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "bf6740c14e3450f7d2e7b8c9a00c0b19218db723c8d619a23f85221fa69badcf"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/cheer.ogg",
+      "duration": 0.85,
+      "bytes": 5130,
+      "sha256": "7eca89a8b4edcf09bb7273279cc206c4df83e683be51451345f0cbc155aadc99"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/special.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "e9e4f4820852252625485ef90802e7ae9a9bbe50bc6fa703ef7a3023bc3bfdc4"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/special.ogg",
+      "duration": 0.85,
+      "bytes": 5825,
+      "sha256": "50c7d9d66a3f671e91db9b3949263514bc9492bae137f1323c0c12d6494e1e0a"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/bounce.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "3037960a0504798fb390ae35d10cf34be9f5fb9ce21f0070f2d84f209a548f94"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/bounce.ogg",
+      "duration": 0.22,
+      "bytes": 1514,
+      "sha256": "f5fdcf1bad6f65fcb8531da9b093851aa1e9f15ec4797791efe52e02414e8ed3"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/score.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "bfa817b99e06fa6540ffb468c2b220d19dfaef3ed41b390a61ba05fd7d36026c"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/score.ogg",
+      "duration": 0.85,
+      "bytes": 5111,
+      "sha256": "b82122f285499dca6d4a82431862825c279684ab14e091d69eebaca592a9e8ce"
+    },
+    {
+      "path": "public/sfx/academy-sports/volleyball/hurt.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "98158d639f97ca46e580c952792f8c0f69108a56fd143a9685cb7c400a0d3df9"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/volleyball/hurt.ogg",
+      "duration": 0.22,
+      "bytes": 1519,
+      "sha256": "74f4b9ed30276968ec1932249efb55f516ecc62b5e1fdceff8427cf745e0a4f3"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/hit.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "2c8b6a97c5a0da645915afb6dac33712c54562b65c1ff495f8ffd67766da100d"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/hit.ogg",
+      "duration": 0.22,
+      "bytes": 1485,
+      "sha256": "f706e0dfa92996167808b19e87dd823f544507acf750d83d5a404f4380b7bad5"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/catch.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "8b6a78217f19781faf33d04248fd8a7a517eefe73e55921de3963113929a6022"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/catch.ogg",
+      "duration": 0.22,
+      "bytes": 1492,
+      "sha256": "b5698df17d06b2bc9c5582f8c43e9e5a03a5642fb6c67d3807dc0126dee59acc"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/whistle.mp3",
+      "duration": 0.28,
+      "bytes": 2252,
+      "sha256": "f82a45433b687b457c76b02859a3cea733a18ff990dd8ffebbe13505b47d13ae"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/whistle.ogg",
+      "duration": 0.28,
+      "bytes": 2407,
+      "sha256": "f40190370f9efd305cb426602a75fd7a8ab727dc923176ecbfa6d6b73e877273"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/cheer.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "b48aaf6ad9459b3ecb2befb2e357fd1b40b3c4cf0c0b3e2de1ba33c70650ba51"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/cheer.ogg",
+      "duration": 0.85,
+      "bytes": 5655,
+      "sha256": "af540ca2e42e9aba78e9dc7201fb2206514e45d7bcdaddc575fe34b4e121f9b4"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/special.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "535b461583bac32381f6300f92c1a2098bf2be70b116ca95eae327a4406c4e39"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/special.ogg",
+      "duration": 0.85,
+      "bytes": 5860,
+      "sha256": "5009b56497dd48c5b029a6e97b596931bc313956753b3385a54ff89bf225d503"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/bounce.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "c96f1a3253889be9b9f4073ba0fb01c96ab1c916aa0fd854c1d465b933e64607"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/bounce.ogg",
+      "duration": 0.22,
+      "bytes": 1494,
+      "sha256": "0542ebe0a0f09d3876e5185741311236f21f8d60d5918650b99dc7b345324aed"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/score.mp3",
+      "duration": 0.85,
+      "bytes": 5708,
+      "sha256": "64fc208a99585eab7600e430e3b557fd409f69ff666f4e71b5ea947201aef9dd"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/score.ogg",
+      "duration": 0.85,
+      "bytes": 5098,
+      "sha256": "c24a4215bf57e0893767ceaca7ef7542aa40132cdf3cfcac6ce9d27013ac0b22"
+    },
+    {
+      "path": "public/sfx/academy-sports/festival/hurt.mp3",
+      "duration": 0.22,
+      "bytes": 1964,
+      "sha256": "5beeec5ca22b3c5c36541dd03888d98504ffc8cd739716a27d104f087d1cc0e2"
+    },
+    {
+      "path": "public/web-audio/sfx/academy-sports/festival/hurt.ogg",
+      "duration": 0.22,
+      "bytes": 1489,
+      "sha256": "84e6b00415a42c876135922fe193e654045680e8ccdd060bdf84983cd62c0562"
+    }
+  ]
+}

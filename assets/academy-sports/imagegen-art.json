@@ -1,0 +1,141 @@
+{
+  "generator": "ImageGen",
+  "encoding": "WebP quality 88; composition retained",
+  "files": [
+    {
+      "key": "baseball-landscape",
+      "path": "public/sprites/mini-game-titles/baseball-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "alpha": false,
+      "bytes": 402154,
+      "sha256": "b131de9b6604203a6258471e8e57d3cac28297e25cc33b0ba4c45166991c4aad"
+    },
+    {
+      "key": "baseball-portrait",
+      "path": "public/sprites/mini-game-titles/baseball-portrait-v1.webp",
+      "width": 940,
+      "height": 1672,
+      "alpha": false,
+      "bytes": 350476,
+      "sha256": "fd5f464e7c6f7a2f3168d6f710ca1f04dadcd460b4ccd3d6b5c1b252a56319cb"
+    },
+    {
+      "key": "soccer-landscape",
+      "path": "public/sprites/mini-game-titles/soccer-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "alpha": false,
+      "bytes": 419226,
+      "sha256": "2e278dea19abaae6097c2d6bfefb905ba4c6b20863c6bbcbdc480bc404760421"
+    },
+    {
+      "key": "soccer-portrait",
+      "path": "public/sprites/mini-game-titles/soccer-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "alpha": false,
+      "bytes": 370436,
+      "sha256": "612c43f53728c9960708af6a0230cfb4ff5279f7f6143cb9b02a607e9b143fc6"
+    },
+    {
+      "key": "volleyball-landscape",
+      "path": "public/sprites/mini-game-titles/volleyball-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "alpha": false,
+      "bytes": 364346,
+      "sha256": "2d1254b27e38b4cd35ffb0616252e41c37ba76f6f3933a6a78d346740bb33f85"
+    },
+    {
+      "key": "volleyball-portrait",
+      "path": "public/sprites/mini-game-titles/volleyball-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "alpha": false,
+      "bytes": 305388,
+      "sha256": "779aa39efecd67e9ca760bcb16d60c2c2455e7513eda63e8ab65d4c0f5157dea"
+    },
+    {
+      "key": "festival-landscape",
+      "path": "public/sprites/mini-game-titles/festival-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "alpha": false,
+      "bytes": 431800,
+      "sha256": "12a6adac7fe08433501b6415ec3732d75d714eda9f83534685c4e9ff8fbc3e01"
+    },
+    {
+      "key": "festival-portrait",
+      "path": "public/sprites/mini-game-titles/festival-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "alpha": false,
+      "bytes": 361508,
+      "sha256": "3ee5a068bd53d42de75666b36a1685e1e9e5daf1dafaec9f03329d8ec0127fe5"
+    },
+    {
+      "key": "sports-club-landscape",
+      "path": "public/sprites/mini-game-titles/sports-club-landscape-v1.webp",
+      "width": 1672,
+      "height": 941,
+      "alpha": false,
+      "bytes": 500796,
+      "sha256": "42edd22a85c6190d130708fa6b8821ac6d22f85ba8087e5acc77910b00dfbd46"
+    },
+    {
+      "key": "sports-club-portrait",
+      "path": "public/sprites/mini-game-titles/sports-club-portrait-v1.webp",
+      "width": 941,
+      "height": 1672,
+      "alpha": false,
+      "bytes": 488242,
+      "sha256": "2ce1b9015717906703e82e5aa92448187cbffcce0f1905b42ef35a494e4dda42"
+    },
+    {
+      "key": "menu-icons",
+      "path": "public/sprites/sports/academy-menu-icons-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "alpha": true,
+      "bytes": 597568,
+      "sha256": "55ea695a5b45c58e290342ee44752a1169983b2aeb1b67929d57a3ef206d888a"
+    },
+    {
+      "key": "baseball-actions",
+      "path": "public/sprites/academy-sports/baseball-actions-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "alpha": true,
+      "bytes": 491194,
+      "sha256": "b797c2a5ef60ec155764102c460cad36fa4bb5eae842a73b43d1b044b071b0d1"
+    },
+    {
+      "key": "soccer-actions",
+      "path": "public/sprites/academy-sports/soccer-actions-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "alpha": true,
+      "bytes": 547988,
+      "sha256": "b3a71f22f89105c9b30a3e7ff3d24a2b7aa556210246a5ba823af08fa255d521"
+    },
+    {
+      "key": "volleyball-actions",
+      "path": "public/sprites/academy-sports/volleyball-actions-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "alpha": true,
+      "bytes": 543064,
+      "sha256": "7ef249d9c5238db53aa900cd14cc10688145069a32061a772d009581ace36617"
+    },
+    {
+      "key": "festival-actions",
+      "path": "public/sprites/academy-sports/festival-actions-v1.webp",
+      "width": 1536,
+      "height": 1024,
+      "alpha": true,
+      "bytes": 541524,
+      "sha256": "3f8bd91623b926eec5dd935571aecf872dbfa17943c524366a39d37ae04946bb"
+    }
+  ]
+}

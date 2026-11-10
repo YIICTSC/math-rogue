@@ -1,0 +1,99 @@
+{
+  "checkedAt": "2026-11-10T00:02:24.535Z",
+  "rules": {
+    "matches": 64,
+    "difficulties": 4,
+    "seedCountPerDifficulty": 4,
+    "sports": [
+      "baseball",
+      "soccer",
+      "volleyball",
+      "festival"
+    ]
+  },
+  "browser": {
+    "execution": "Grouped gameplay, recovery, venue, hub and audio checks",
+    "renderer": "Chromium / SwiftShader WebGL",
+    "sports": [
+      "baseball",
+      "soccer",
+      "volleyball",
+      "festival"
+    ],
+    "mobileViewports": [
+      [
+        320,
+        568
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ]
+    ],
+    "passed": [
+      "CPU matches reach results",
+      "completed results persist",
+      "three correct answers award three shared points",
+      "keyboard movement",
+      "standard gamepad input, pause and disconnect",
+      "touch stick",
+      "mobile control bounds",
+      "exit",
+      "WebGL context recovery preserves match",
+      "all eight hub routes",
+      "four existing invitation choices",
+      "all five festival venues"
+    ],
+    "physicalDevicesTested": false
+  },
+  "audio": {
+    "dedicatedEffects": 32,
+    "decodedThroughSharedService": 32,
+    "iOSLifecycleRegressionChecks": 43
+  },
+  "legacyRules": [
+    "tennis",
+    "golf",
+    "dodgeball",
+    "basketball"
+  ],
+  "build": {
+    "typecheck": true,
+    "englishGate": true,
+    "web": true,
+    "server": true,
+    "staticMediaOutput": "Hard-linked to conserve workspace disk; same bytes as copied assets"
+  },
+  "limits": [
+    "No physical iPhone/Android or hardware gamepad test",
+    "Gameplay and rule limitations are listed in docs/academy-sports.md"
+  ],
+  "published": false,
+  "presentation": {
+    "generator": "ImageGen",
+    "assets": 15,
+    "debugOnly": true,
+    "normalSports": 4,
+    "debugSports": 8,
+    "titleViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "browserErrors": 0,
+    "missingArt": 0
+  }
+}

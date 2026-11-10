@@ -2047,6 +2047,11 @@ class AudioService {
       }
   }
 
+  public playAcademySportsSound(sport:'baseball'|'soccer'|'volleyball'|'festival',kind:'hit'|'catch'|'whistle'|'cheer'|'special'|'bounce'|'score'|'hurt') {
+      if(this.isMuted || this.sfxVolume <= 0) return;
+      this.playSfxMp3(`academy-sports/${sport}/${kind}`,()=>this.playSound(kind==='score'||kind==='cheer'?'correct':'select'),{maxDurationMs:kind==='score'||kind==='cheer'||kind==='special'?1000:400,overlap:kind==='hit'||kind==='bounce'});
+  }
+
   public playVrSound(kind: 'select'|'alert'|'bubble'|'hold'|'reload'|'collect'|'door'|'correct'|'wrong'|'clear'|'fail'|'countdown') {
       if(this.isMuted || this.sfxVolume <= 0) return;
       this.playSfxMp3(`gakuro-vr/${kind}`,()=>this.playSound(kind==='wrong'||kind==='fail'?'wrong':'select'),{maxDurationMs:kind==='clear'?2500:kind==='countdown'?2000:1600,overlap:false});
