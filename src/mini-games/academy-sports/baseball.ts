@@ -4,7 +4,7 @@ export const BASES=[vec(0,0,18),vec(13,0,5),vec(0,0,-8),vec(-13,0,5),vec(0,0,18)
 export const PITCHES=['ストレート','ツーシーム','スライダー','カーブ','フォーク','チェンジアップ','シュート','シンカー','星弧ドロップ'] as const;
 const DEF=[vec(0,0,0),vec(0,0,20),vec(14,0,4),vec(7,0,-9),vec(-14,0,4),vec(-7,0,-9),vec(-25,0,-29),vec(0,0,-38),vec(25,0,-29)];
 export interface Runner {unit:number;from:number;target:number;at:number;progress:number;forced:boolean;tag:boolean;done:boolean;retouch?:number;advanceAfterTag?:boolean;}
-export interface Baseball extends Core {signatureReady?:Record<number,boolean>;sport:'baseball';inning:number;half:0|1;outs:number;strikes:number;balls:number;bases:(number|null)[];batting:number[];bat:number;pitcher:number;stage:'set'|'meter'|'windup'|'pitch'|'live'|'throw'|'settle';timer:number;pitch:number;aim:{x:number;y:number};pitchAim:{x:number;y:number};pitchCount:number;accuracy:number;swingAt:number;batMode:'contact'|'power'|'bunt';hitMode:'ground'|'line'|'fly';bounced:boolean;fielder:number;runners:Runner[];throwBase:number;throwTarget:number;throwTime:number;playRuns:number;outsAtHit:number;flightTime:number;stealing:boolean;practicePlays:number;lineScore:number[][];plateAt:number;plateBall:Vec;}
+export interface Baseball extends Core {pitchSpeedKmh?:number;signatureReady?:Record<number,boolean>;sport:'baseball';inning:number;half:0|1;outs:number;strikes:number;balls:number;bases:(number|null)[];batting:number[];bat:number;pitcher:number;stage:'set'|'meter'|'windup'|'pitch'|'live'|'throw'|'settle';timer:number;pitch:number;aim:{x:number;y:number};pitchAim:{x:number;y:number};pitchCount:number;accuracy:number;swingAt:number;batMode:'contact'|'power'|'bunt';hitMode:'ground'|'line'|'fly';bounced:boolean;fielder:number;runners:Runner[];throwBase:number;throwTarget:number;throwTime:number;playRuns:number;outsAtHit:number;flightTime:number;stealing:boolean;practicePlays:number;lineScore:number[][];plateAt:number;plateBall:Vec;}
 export function createBaseball(c:Config):Baseball{
  const s:Baseball=Object.assign(core(c),{sport:'baseball' as const,inning:1,half:0 as 0|1,outs:0,strikes:0,balls:0,bases:[null,null,null] as (number|null)[],batting:[0,0],bat:0,pitcher:100,stage:'set' as const,timer:0,pitch:0,aim:{x:0,y:1.2},pitchAim:{x:0,y:1.2},pitchCount:0,accuracy:1,swingAt:-99,batMode:'contact' as const,hitMode:'line' as const,bounced:false,fielder:100,runners:[] as Runner[],throwBase:1,throwTarget:102,throwTime:0,playRuns:0,outsAtHit:0,flightTime:0,stealing:false,practicePlays:0,lineScore:[[],[]] as number[][],plateAt:-1,plateBall:vec()});
  for(let t=0;t<2;t++)for(let i=0;i<9;i++)s.players.push(athlete(t,i,['P','C','1B','2B','3B','SS','LF','CF','RF'][i],DEF[i],c));
@@ -17,7 +17,7 @@ const batter=(s:Baseball)=>s.players.find(p=>p.id===s.bat)!;
 const pitcher=(s:Baseball)=>s.players.find(p=>p.id===s.pitcher)!;
 const battingHuman=(s:Baseball)=>s.half===s.config.team&&s.config.mode!=='watch';
 function setupAtBat(s:Baseball){
- const attack=s.half,defend=1-attack;s.bat=attack*100+s.batting[attack]%9;s.pitcher=defend*100;s.fielder=s.pitcher;s.stage='set';s.signatureReady={};s.timer=0;s.swingAt=-99;s.plateAt=-1;s.bounced=false;s.flightTime=0;s.runners=[];s.stealing=false;
+ const attack=s.half,defend=1-attack;if(s.pitcher!==defend*100)delete s.pitchSpeedKmh;s.bat=attack*100+s.batting[attack]%9;s.pitcher=defend*100;s.fielder=s.pitcher;s.stage='set';s.signatureReady={};s.timer=0;s.swingAt=-99;s.plateAt=-1;s.bounced=false;s.flightTime=0;s.runners=[];s.stealing=false;
  for(const p of s.players){p.v=vec();p.p={...(p.team===defend?DEF[p.slot]:vec(22+p.slot*.75,0,19+(p.slot%2)*1.4))};p.face=p.team===defend?0:Math.PI;}
  batter(s).p=vec(-.9,0,18);for(let i=0;i<3;i++){const p=s.players.find(p=>p.id===s.bases[i]);if(p)p.p={...BASES[i+1]};}
  s.ball={...s.ball,x:0,y:1.4,z:0,vx:0,vy:0,vz:0,owner:s.pitcher,team:defend,special:false};s.selected=battingHuman(s)?s.bat:s.pitcher;
@@ -48,7 +48,7 @@ function releasePitch(s:Baseball){
  const speed=((slow?14:20)+p.skills.pitch*10)*(1-fatigue*.12)*(charged?signature.speed:1),travel=18/speed,error=(1-s.accuracy)*.8+fatigue*.4;
  const sign=((hash(s.pitchCount+s.config.seed)%200)/100-1);const targetX=s.pitchAim.x+sign*error,targetY=s.pitchAim.y+Math.sin(s.pitchCount*1.7)*error;
  s.ball={...s.ball,x:0,y:1.9,z:0,vx:targetX/travel,vy:(targetY-1.9+.5*9.81*travel*travel)/travel,vz:speed,owner:-1,team:p.team,power:speed,special:charged,spin:kind===2?-1.1:kind===6?1.1:kind===1?.4:kind===8?-.9:0,last:p.id};
- if(charged){s.ball.spin+=signature.curve;delete s.signatureReady![p.id];stat(s,p.team,'signatures');}s.stage='pitch';s.timer=0;s.plateAt=-1;event(s,charged?'special':'hit',charged?specialName(p.hero,'baseball'):PITCHES[kind],p.id,charged?'pitch':undefined);
+ s.pitchSpeedKmh=Math.round(speed*3.6);if(charged){s.ball.spin+=signature.curve;delete s.signatureReady![p.id];stat(s,p.team,'signatures');}s.stage='pitch';s.timer=0;s.plateAt=-1;event(s,charged?'special':'hit',charged?specialName(p.hero,'baseball'):PITCHES[kind],p.id,charged?'pitch':undefined);
 }
 function predictLanding(s:Baseball){const b={...s.ball};let t=0;while(t<7&&b.y>0){physics(b,.05,9.81,.055);t+=.05;}return vec(b.x,0,b.z);}
 export function hitBall(s:Baseball,timing:number,contactX:number,contactY:number){

@@ -199,5 +199,83 @@
       "volleyball",
       "festival"
     ]
+  },
+  "broadcastPolish": {
+    "checkedAt": "2026-11-11T09:00:10.169992+00:00",
+    "sports": [
+      "baseball",
+      "soccer"
+    ],
+    "reference": "https://cap2wf.bn-ent.net/system/ and user-provided screenshots",
+    "hud": [
+      "live baseball score, B/S/O lamps, occupied bases, pitcher/batter portrait and skill cards",
+      "soccer score and accelerated 45/90 minute clock, carrier and keeper gauges, 22-player live radar",
+      "timed dribble toast, link level, shot charge and direction guide"
+    ],
+    "motion": [
+      "baseball set, leg lift, torso yaw, release, follow-through, swing, throw and running",
+      "soccer stride/dribble, shot windup/contact/follow-through, tackle, keeper catch",
+      "render-rate-independent camera following and immediate broadcast cuts",
+      "optional fourth yaw argument preserves existing protagonist pose calls"
+    ],
+    "soloControl": [
+      "friendly GK/DF/MF/FW carrier",
+      "actual completed pass and actual keeper save",
+      "manual switch cannot leave friendly possession",
+      "human keeper stays under player control"
+    ],
+    "onlineAllocationUnchanged": true,
+    "gameplay": [
+      "18 spirit timed dribble; perfect <1.9m, good <3.2m",
+      "five links: shot speed +3.5% and charge speed +7% each",
+      "links expire after 10 seconds or possession loss"
+    ],
+    "checks": [
+      "64 complete CPU matches and individual rules",
+      "complete online command-driven matches for all four sports",
+      "35-protagonist signature regression",
+      "live pose quaternion changes, actual pitch phases, timing-based dribble",
+      "four viewport sizes and Japanese, English, Hiragana screens"
+    ],
+    "browser": {
+      "sports": 2,
+      "sizes": [
+        [
+          1280,
+          720
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          390,
+          844
+        ],
+        [
+          320,
+          568
+        ]
+      ],
+      "soloCarrierAndKeeper": true,
+      "motions": true,
+      "dribbleChain": true,
+      "languages": 3,
+      "errors": [],
+      "missing": []
+    },
+    "physicalDevicesTested": false,
+    "renderReadiness": [
+      "new match ID has actually drawn",
+      "all new-match rigs, skeletons and equipment ready",
+      "all 22 equipment templates present",
+      "visible bat and actual ball mesh loaded"
+    ],
+    "build": {
+      "typecheck": true,
+      "englishGate": true,
+      "web": true,
+      "server": true
+    }
   }
 }
