@@ -1,0 +1,73 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Check, LockKeyhole, Send, Trophy, Users, Radio, BellRing, Heart, Eye, X } from 'lucide-react';
+import type { LanguageMode } from '../types';
+import type { AnswerTile, InkStroke, ShowAction, ShowView } from './types';
+import type { QuizShowRoom } from './room';
+import FlipPad, { InkView } from './FlipPad';
+import QuestionContent from './QuestionContent';
+import { copy } from './copy';
+
+export function Countdown({ view, language }: { view: ShowView; language: LanguageMode }) {
+  const t = copy(language), [now, setNow] = useState(Date.now()), r = view.round;
+  useEffect(() => { const id = setInterval(() => setNow(Date.now()), 100); return () => clearInterval(id); }, []);
+  const [offset, setOffset] = useState(0); useEffect(() => setOffset(view.serverNow - Date.now()), [view.serverNow]);
+  if (!r || view.phase !== 'open') return null;
+  const seconds = Math.max(0, Math.ceil((r.paused ? r.remaining : r.deadline - (now + offset)) / 1000));
+  return <div className={`qs-countdown ${seconds <= 5 ? 'is-urgent' : ''} ${r.paused ? 'is-paused' : ''}`} role="timer" aria-label={t('残り時間', 'Time remaining', 'のこりじかん')}><strong>{seconds}</strong><span>{r.paused ? t('一時停止', 'PAUSED', 'いちじていし') : 'SEC'}</span><div style={{ '--progress': `${Math.min(100, seconds / r.seconds * 100)}%` } as React.CSSProperties} /></div>;
+}
+export function AnswerGrid({ view: v, room, language, send, connected }: { view: ShowView; room: QuizShowRoom; language: LanguageMode; send: (a: ShowAction) => void; connected: boolean }) {
+  const t = copy(language), r = v.round; if (!r) return null;
+  const host = v.role === 'host', canReveal = host && ['closed', 'reveal'].includes(v.phase), canJudge = host && ['open', 'closed', 'reveal', 'scoreboard'].includes(v.phase);
+  return <div className={`qs-answer-grid ${r.tiles.length > 20 ? 'is-large-room' : ''}`} data-answer-grid>{r.tiles.map((tile, index) => {
+    const p = v.players.find(p => p.id === tile.id), ink = room.inks.get(`${r.id}:${tile.id}`)?.strokes;
+    return <article key={`${r.id}:${tile.id}`} className={`qs-answer-tile ${tile.revealed ? 'is-revealed' : ''} ${tile.visible ? 'is-visible' : ''} ${tile.correct === true ? 'is-correct' : tile.correct === false ? 'is-wrong' : ''} ${tile.id === v.self ? 'is-mine' : ''}`} data-player={tile.id}>
+      <div className="qs-tile-head"><span>{String(index + 1).padStart(2, '0')}</span><b>{p?.name || '—'}</b>{tile.submitted && <Check size={16} />}</div><div className="qs-tile-answer" data-allow-japanese="true">{tile.visible ? (tile.hasInk ? <>{ink ? <InkView strokes={ink} label={p?.name} /> : <span>{t('読み込み中…', 'Loading…', 'よみこみちゅう…')}</span>}{tile.text && <p>{tile.text}</p>}</> : tile.text ? <p>{tile.text}</p> : <span className="qs-muted">{tile.id === r.artist ? t('描き手', 'Artist', 'かきて') : t('未回答', 'No answer', 'みかいとう')}</span>) : <span className="qs-hidden-answer"><LockKeyhole size={23} /><b>{tile.submitted ? 'READY!' : '…'}</b><small>{tile.submitted ? t('公開を待っています', 'Waiting for reveal', 'こうかいをまっているよ') : t('回答中', 'Answering', 'こたえちゅう')}</small></span>}</div>
+      <div className="qs-tile-foot"><span>{p?.score || 0}<small> PT</small>{r.mode === 'SURVIVAL' && <span className="qs-lives">{Array.from({ length: p?.lives || 0 }, (_, i) => <Heart key={i} size={12} fill="currentColor" />)}</span>}</span>{tile.correct !== undefined && <b className={`qs-verdict ${tile.correct ? 'is-correct' : 'is-wrong'}`}>{tile.correct ? <Check size={15} /> : <X size={15} />}<span>{tile.correct ? t('正解', 'Correct', 'せいかい') : t('不正解', 'Wrong', 'ふせいかい')}</span></b>}{tile.award !== undefined && <b className="qs-award">+{tile.award}</b>}{tile.votes !== undefined && r.mode === 'VOTE' && <b>{tile.votes} {t('票', 'votes', 'ひょう')}</b>}
+        {canReveal && <button className="qs-tiny" disabled={!connected || tile.revealed} onClick={() => send({ type: 'reveal', roundId: r.id, playerId: tile.id })}><Eye size={13} />{tile.revealed ? t('公開済', 'Shown', 'こうかいずみ') : t('公開', 'Reveal', 'こうかい')}</button>}</div>
+      {canJudge && tile.submitted && tile.id !== r.artist && !['NEAREST', 'VOTE', 'CONSENSUS', 'WOLF'].includes(r.mode) && <div className="qs-judge"><button disabled={!connected} aria-label={`${p?.name} ${t('正解', 'correct', 'せいかい')}`} aria-pressed={tile.correct === true} onClick={() => send({ type: 'grade', roundId: r.id, playerId: tile.id, correct: true })}><Check size={17} />{t('正解', 'Correct', 'せいかい')}</button><button disabled={!connected} aria-label={`${p?.name} ${t('不正解', 'incorrect', 'ふせいかい')}`} aria-pressed={tile.correct === false} onClick={() => send({ type: 'grade', roundId: r.id, playerId: tile.id, correct: false })}><X size={17} />{t('不正解', 'Wrong', 'ふせいかい')}</button></div>}
+      {v.role === 'player' && v.phase === 'voting' && tile.submitted && tile.id !== v.self && <button className="qs-vote-button" disabled={!connected} aria-pressed={r.votedFor === tile.id} onClick={() => send({ type: 'vote', roundId: r.id, playerId: tile.id })}>{r.votedFor === tile.id ? <Check size={17} /> : <Users size={17} />}{r.votedFor === tile.id ? t('投票中', 'Your vote', 'とうひょうちゅう') : t('この回答に投票', 'Vote for this answer', 'このこたえにとうひょう')}</button>}
+    </article>;
+  })}</div>;
+}
+export function AnswerInput({ view: v, room, language, connected }: { view: ShowView; room: QuizShowRoom; language: LanguageMode; connected: boolean }) {
+  const t = copy(language), r = v.round!, [text, setText] = useState(''), [ink, setInk] = useState<InkStroke[]>([]), [pending, setPending] = useState(false), [networkError, setNetworkError] = useState(false), mine = r.tiles.find(a => a.id === v.self), artist = r.mode === 'DRAW' && r.artist === v.self;
+  const can = connected && v.hostConnected && v.phase === 'open' && !r.paused && r.eligible.includes(v.self) && !mine?.submitted && !pending;
+  const buzzBlocked = r.mode === 'BUZZER' && r.buzzer !== v.self;
+  const inkRef = useRef(ink); inkRef.current = ink;
+  useEffect(() => { if (mine?.submitted) { setPending(false); setNetworkError(false); } }, [mine?.submitted]);
+  useEffect(() => { if (!pending) return; const timer = setTimeout(() => { setPending(false); setNetworkError(true); }, 6000); return () => clearTimeout(timer); }, [pending]);
+  useEffect(() => {
+    if (!artist || !can) return;
+    let previous: InkStroke[] | null = null;
+    const timer = setInterval(() => { const latest = inkRef.current; if (latest !== previous && room.send({ type: 'answer', roundId: r.id, text: '', ink: latest, submit: false })) previous = latest; }, 450); return () => clearInterval(timer);
+  }, [artist, can, r.id, room]);
+  if (!r.eligible.includes(v.self)) return <div className="qs-waiting"><Radio /><h3>{r.mode === 'SURVIVAL' && v.players.find(p => p.id === v.self)?.lives === 0 ? t('観戦しながら応援しよう', 'Cheer on the remaining players', 'おうえんしよう') : t('次の問題から参加できます', 'You can join the next question', 'つぎのもんだいからさんかできるよ')}</h3></div>;
+  if (v.phase !== 'open' || mine?.submitted) return <div className="qs-waiting"><Check size={30} /><h3>{mine?.submitted ? t('回答を送信しました！', 'Answer locked in!', 'こたえをおくったよ！') : t('司会の進行をお待ちください', 'Wait for the host', 'しかいをまってね')}</h3>{mine?.text && <p data-allow-japanese="true">{mine.text}</p>}{mine?.award !== undefined && <b className="qs-my-award">+{mine.award} PT</b>}{!mine?.submitted && v.phase !== 'ready' && <small>{t('今回は未回答です。次の問題で挑戦しよう。', 'No answer this time. Try the next question.', 'つぎのもんだいでこたえよう。')}</small>}</div>;
+  const submit = (choice?: string) => {
+    if (!can || buzzBlocked) return;
+    const sent = room.send({ type: 'answer', roundId: r.id, text: choice ?? text, ink: r.format === 'FLIP' ? ink : [], submit: true }); setNetworkError(!sent); if (sent) setPending(true);
+  };
+  return <section className="qs-answer-input" aria-label={t('あなたの回答', 'Your answer', 'あなたのこたえ')}>
+    {r.mode === 'BUZZER' && buzzBlocked ? <div className="qs-buzzer-panel"><button className="qs-buzzer" disabled={!can || !!r.buzzer || r.locked.includes(v.self)} onClick={() => room.send({ type: 'buzz', roundId: r.id })}><BellRing size={35} /><b>BUZZ!</b></button><p>{r.locked.includes(v.self) ? t('今回は回答済みです', 'You have used your chance', 'こんかいはこたえずみだよ') : r.buzzer ? t(`${v.players.find(p => p.id === r.buzzer)?.name} さんが回答中`, `${v.players.find(p => p.id === r.buzzer)?.name} is answering`, 'ほかのひとがこたえているよ') : t('答えが分かったら早押し！', 'Buzz when you know it!', 'わかったらはやおし！')}</p></div> : <>
+      {artist && <div className="qs-artist-topic"><span>{t('あなただけのお題', 'Your secret word', 'あなただけのおだい')}</span><b data-allow-japanese="true">{r.answer}</b><small>{t('文字で答えを書かず、絵で伝えよう。', 'Draw it without spelling the answer.', 'もじではなく、えでつたえよう。')}</small></div>}
+      {r.format === 'FLIP' || artist ? <FlipPad strokes={ink} onChange={setInk} disabled={!can} language={language} /> : r.format === 'CHOICE' ? <div className="qs-choices">{r.options.map((s, i) => <button disabled={!can} key={i} onClick={() => submit(s)}><b>{String.fromCharCode(65 + i)}</b><span data-allow-japanese="true">{s}</span></button>)}</div> : null}
+      {!artist && r.format !== 'CHOICE' && <><label className="qs-answer-text-label">{r.format === 'FLIP' ? t('文字の補足（任意）', 'Optional text caption', 'もじのほそく（なくてもOK）') : t('回答を入力', 'Type your answer', 'こたえをいれる')}<textarea rows={r.format === 'FLIP' ? 1 : 2} maxLength={300} disabled={!can} value={text} inputMode={r.mode === 'NEAREST' ? 'decimal' : 'text'} placeholder={t('ここに回答を入力…', 'Your answer…', 'ここにこたえをいれる…')} onChange={e => setText(e.target.value)} /></label><button className="qs-primary qs-submit" disabled={!can || (!text.trim() && !ink.length)} onClick={() => submit()}><Send size={20} />{pending ? t('送信中…', 'Sending…', 'おくっているよ…') : t('回答を決定！', 'Lock in answer!', 'こたえをきめる！')}</button><small>{t('提出すると変更できません。回答は司会が公開するまで他の人には見えません。', 'Submitted answers cannot be changed. Others cannot see your answer until the host reveals it.', 'おくったあとはかえられないよ。こうかいまではひみつ。')}</small></>}
+      {artist && <p className="qs-muted">{t('描いた絵はみんなの画面に表示されます。締切まで描き足せます。', 'Your drawing appears live on everyone’s screen. Keep drawing until time is up.', 'えはみんなにみえるよ。しめきりまでかいてね。')}</p>}
+    </>}{networkError && <p className="qs-error" role="alert">{t('送信を確認できません。接続を確認してもう一度押してください。', 'Delivery was not confirmed. Check your connection and try again.', 'おくれなかったよ。つうしんをかくにんしてね。')}</p>}
+  </section>;
+}
+export function QuestionStage({ view: v, room, language, speak, stopSpeech, speaking = false }: { view: ShowView; room: QuizShowRoom; language: LanguageMode; speak: (prompt: NonNullable<NonNullable<ShowView['round']>['audioPrompt']>) => void; stopSpeech: () => void; speaking?: boolean }) {
+  const t = copy(language), r = v.round; if (!r) return null;
+  const drawing = r.mode === 'DRAW' && v.self !== r.artist && v.role !== 'host' && !r.showAnswer;
+  const artist = r.artist && room.inks.get(`${r.id}:${r.artist}`);
+  return <section className={`qs-question-stage ${v.phase === 'ready' ? 'is-ready' : ''}`}><div className="qs-question-topline"><span className="qs-question-number">Q<span>{String(v.index + 1).padStart(2, '0')}</span>{!v.wolf && <small>/ {v.questionCount}</small>}</span><span className="qs-question-value">{r.points} PT</span><Countdown view={v} language={language} /></div>
+    {v.phase === 'ready' ? <div className="qs-ready-title"><span className="qs-eyebrow">NEXT QUESTION</span><h2>{t('準備はいい？', 'Ready for the next question?', 'じゅんびはいい？')}</h2><p>{t('司会の「出題スタート！」を待とう。', 'Wait for the host to start the question.', 'しかいがもんだいをだすまでまってね。')}</p></div> : drawing ? <div className="qs-live-drawing"><h2>{t('この絵は何でしょう？', 'What is this drawing?', 'このえはなんでしょう？')}</h2>{artist ? <InkView strokes={artist.strokes} label={t('描き手の絵', 'Live drawing', 'かきてのえ')} /> : <div className="qs-empty-drawing">{t('描き手が描き始めるのを待っています…', 'Waiting for the artist’s first stroke…', 'かきはじめるのをまっているよ…')}</div>}<small>{v.players.find(p => p.id === r.artist)?.name} · {t('描画中', 'drawing', 'かいているよ')}</small></div> : <QuestionContent round={r} />}
+    {r.audioPrompt && v.phase !== 'ready' && <button className="qs-speak" onClick={() => speaking ? stopSpeech() : speak(r.audioPrompt!)}>{speaking ? t('発音を停止', 'Stop pronunciation', 'はつおんをていし') : t('問題の音声を聞く', 'Play question audio', 'もんだいのおんせいをきく')}</button>}
+    {r.showAnswer && <div className="qs-correct-answer" data-allow-japanese="true"><span>{['CONSENSUS', 'MAJORITY', 'VOTE', 'WOLF'].includes(r.mode) ? t('回答公開', 'Answers revealed', 'こたえこうかい') : t('正解', 'ANSWER', 'せいかい')}</span><b>{r.answer || t('みんなの回答をチェック！', 'Check everyone’s answers!', 'みんなのこたえをチェック！')}</b></div>}
+  </section>;
+}
+export function Leaderboard({ view: v, language }: { view: ShowView; language: LanguageMode }) {
+  const t = copy(language), players = [...v.players].sort((a, b) => (v.mode === 'SURVIVAL' ? b.lives - a.lives : 0) || b.score - a.score);
+  const teams = Array.from({ length: v.teamCount }, (_, team) => ({ team, score: v.players.filter(p => p.team === team).reduce((n, p) => n + p.score, 0) })).sort((a, b) => b.score - a.score);
+  return <section className="qs-leaderboard"><header><Trophy /><div><span className="qs-eyebrow">{v.phase === 'finished' ? 'FINAL RESULTS' : 'LEADERBOARD'}</span><h2>{v.phase === 'finished' ? t('最終結果', 'Final results', 'さいしゅうけっか') : t('現在のランキング', 'Current standings', 'いまのランキング')}</h2></div></header>{v.mode === 'TEAMS' && <div className="qs-team-ranks">{teams.map((a, i) => <div key={a.team} style={{ '--team': `var(--qs-team-${a.team % 4})` } as React.CSSProperties}><b>#{teams.findIndex(b => b.score === a.score) + 1}</b><span>{t('チーム', 'Team', 'チーム')} {a.team + 1}</span><strong>{a.score}</strong></div>)}</div>}<ol>{players.map((p, i) => <li key={p.id} className={p.id === v.self ? 'is-mine' : ''}><b>{players.findIndex(a => a.score === p.score && (v.mode !== 'SURVIVAL' || a.lives === p.lives)) + 1}</b><span className="qs-avatar" style={{ '--avatar': `hsl(${(v.players.findIndex(a => a.id === p.id) * 53 + 30) % 360} 60% 58%)` } as React.CSSProperties}>{p.name.slice(0, 1)}</span><span>{p.name}{!p.connected && <small> · {t('離席', 'away', 'りせき')}</small>}</span>{v.mode === 'SURVIVAL' && <small>{p.lives} ♥</small>}<strong>{p.score}<small> PT</small></strong></li>)}</ol></section>;
+}

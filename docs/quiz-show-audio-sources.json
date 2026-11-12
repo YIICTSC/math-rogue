@@ -1,0 +1,72 @@
+{
+  "provider": "Springin’ Sound Stock",
+  "license": "https://www.springin.org/sound-stock/guideline/",
+  "checkedOn": "2026-11-12",
+  "use": "Bundled quiz-game cues; no standalone sound-library or download UI.",
+  "files": [
+    {
+      "file": "public/sfx/quiz-show/question.mp3",
+      "originalTitle": "出題1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/subcategory/quiz/",
+      "sha256": "2534d357a178df4f60e1b67e2d45a3160391f46d69cfda6c21ec30fcd08d1b27",
+      "bytes": 47278
+    },
+    {
+      "file": "public/sfx/quiz-show/correct.mp3",
+      "originalTitle": "正解1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/subcategory/quiz/",
+      "sha256": "b1d562489d0b279458d20c1942da74b51489af75518153780feaf0ae9f0b611d",
+      "bytes": 47278
+    },
+    {
+      "file": "public/sfx/quiz-show/incorrect.mp3",
+      "originalTitle": "不正解1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/subcategory/quiz/",
+      "sha256": "455e2d9e3b8ba6e731242ba0edafcd284dae42a02d442e7626166fe67e03d6c5",
+      "bytes": 35995
+    },
+    {
+      "file": "public/sfx/quiz-show/buzzer.mp3",
+      "originalTitle": "選択3",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/subcategory/quiz/",
+      "sha256": "90d29fc74804e654f3a8a3a450bf57c9b622893c267f0f91230995d503e95a50",
+      "bytes": 14677
+    },
+    {
+      "file": "public/sfx/quiz-show/reveal.mp3",
+      "originalTitle": "グロッケングリッサンド1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/category/staging/",
+      "sha256": "a8fe92e899020f64abfa55b6e809f4d54aefd743da9f9abd9d2f5ba4e5791b9e",
+      "bytes": 51691
+    },
+    {
+      "file": "public/sfx/quiz-show/deadline.mp3",
+      "originalTitle": "笛ピッピー1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/category/staging/",
+      "sha256": "af974cff84c206e7d673fbeab428b8b005eae9011f675d7d8e93957690b5e13c",
+      "bytes": 57946
+    },
+    {
+      "file": "public/sfx/quiz-show/results.mp3",
+      "originalTitle": "ジャジャーン1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/category/staging/",
+      "sha256": "239b9c2c070178e2483929a6c1e9fb86760a4bf8d3279037dd9a58f04c692b5f",
+      "bytes": 42901
+    },
+    {
+      "file": "public/sfx/quiz-show/countdown.mp3",
+      "originalTitle": "制限時間1",
+      "author": "SHIKUMI DESIGN Inc.",
+      "sourcePage": "https://www.springin.org/sound-stock/",
+      "sha256": "ba39a9a8d15de591b59f3fdc255588262d908b9856b872bf1c8307e6d8b59588",
+      "bytes": 51671
+    }
+  ]
+}

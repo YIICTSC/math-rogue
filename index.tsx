@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './src/styles.css';
 import { registerWebServiceWorker } from './src/services/webAssetCacheService';
 import { deferredScreen } from './src/utils/deferredScreen';
+import { clearQuizLocation, invitationFromLocation } from './src/quiz-show/invite';
+const quizInvite = invitationFromLocation();
 
 // Render a small, usable loading shell before fetching the game and question
 // banks. The worker can start protecting downloads on the first visit, too.
@@ -21,6 +23,10 @@ const App = deferredScreen(async () => {
     await Promise.race([cacheReady, new Promise(resolve => { timer = setTimeout(resolve, 1800); })]);
   } finally { clearTimeout(timer!); }
   window.dispatchEvent(new Event('learning-rogue-module-ready'));
+  if (quizInvite) {
+    const {default: QuizShow} = await import('./src/quiz-show/QuizShow');
+    return {default: () => <QuizShow direct onBack={() => { clearQuizLocation(); location.reload(); }} />};
+  }
   return import('./src/App');
 }, { startup: true });
 

@@ -233,7 +233,11 @@
     "test:lantern-war:banter:browser": "node scripts/test-lantern-banter-browser.mjs",
     "test:points": "node scripts/test-point-exchange.mjs",
     "test:points:browser": "node scripts/test-point-exchange-browser.mjs",
-    "verify:points:art": "node scripts/verify-point-exchange-art.mjs"
+    "verify:points:art": "node scripts/verify-point-exchange-art.mjs",
+    "test:quiz-show": "node scripts/quiz-show/test-rules.mjs && node scripts/quiz-show/test-invites.mjs",
+    "test:quiz-show:online": "node scripts/quiz-show/test-online.mjs",
+    "test:quiz-show:browser": "node scripts/quiz-show/test-browser.mjs",
+    "test:quiz-show:production": "node scripts/quiz-show/test-production.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",
@@ -302,6 +306,7 @@
     "katex": "^0.16.47",
     "lucide-react": "^0.555.0",
     "peerjs": "^1.5.5",
+    "qrcode-generator": "2.0.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "three": "^0.186.1",

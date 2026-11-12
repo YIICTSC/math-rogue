@@ -24,6 +24,8 @@ import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male' | 'star-tide';
+export type QuizShowCue = 'question' | 'correct' | 'incorrect' | 'buzzer' | 'reveal' | 'deadline' | 'results' | 'countdown';
+const QUIZ_SHOW_CUES: Record<QuizShowCue, number> = { question: 2200, correct: 2200, incorrect: 1700, buzzer: 800, reveal: 2400, deadline: 2600, results: 2200, countdown: 2300 };
 export type BgmPlaybackOptions = {
   /** Pin a scene's track to the requested asset set, independent of the title setting. */
   mode?: 'NEW' | 'OLD';
@@ -623,6 +625,17 @@ class AudioService {
           this.stopActiveSfx(name);
       }
   }
+
+  public async preloadQuizShowSounds() { await this.preloadSfx(Object.keys(QUIZ_SHOW_CUES).map(cue => `quiz-show/${cue}`)); }
+  public playQuizShowSound(cue: QuizShowCue) {
+      if (!this.appIsActive || this.isMuted || this.sfxVolume <= 0 || (typeof document !== 'undefined' && document.hidden)) return;
+      this.init();
+      this.playSfxMp3(`quiz-show/${cue}`, () => this.playSound(cue === 'incorrect' ? 'wrong' : cue === 'correct' || cue === 'results' ? 'correct' : 'select'), { maxDurationMs: QUIZ_SHOW_CUES[cue], overlap: false });
+  }
+  public stopQuizShowSounds() {
+      for (const cue of Object.keys(QUIZ_SHOW_CUES)) this.stopQuizShowSound(cue as QuizShowCue);
+  }
+  public stopQuizShowSound(cue: QuizShowCue) { const name = `quiz-show/${cue}`; this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1); this.stopActiveSfx(name); }
 
   public canPlayConversationVoice() {
       return this.appIsActive && !this.isMuted && this.voiceVolume > 0 && (typeof document === 'undefined' || !document.hidden);

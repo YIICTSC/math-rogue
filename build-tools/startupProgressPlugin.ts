@@ -18,6 +18,7 @@ export function startupProgressPlugin(): Plugin {
         const chunks = Object.values(bundle).filter(item => item.type === 'chunk');
         const entry = chunks.find(item => item.isEntry && item.name === 'index');
         const app = chunks.find(item => item.moduleIds.some(id => id.replaceAll('\\', '/').endsWith('/src/App.tsx')));
+        const quiz = chunks.find(item => item.moduleIds.some(id => id.replaceAll('\\', '/').endsWith('/src/quiz-show/QuizShow.tsx')));
         if (!entry || !app) throw new Error('Startup entry or App chunk is missing');
         const resources = new Map<string, { url: string; bytes: number; style: boolean }>();
         const visit = (file: string) => {
@@ -35,7 +36,11 @@ export function startupProgressPlugin(): Plugin {
           }
         };
         visit(entry.fileName); visit(app.fileName);
-        const config = JSON.stringify({ worker, entry: `./${entry.fileName}`, resources: [...resources.values()] }).replaceAll('<', '\\u003c');
+        const mainResources = [...resources.values()];
+        resources.clear();
+        visit(entry.fileName); if (quiz) visit(quiz.fileName);
+        const config = JSON.stringify({ worker, entry: `./${entry.fileName}`, resources: mainResources,
+          ...(quiz ? { quizResources: [...resources.values()] } : {}) }).replaceAll('<', '\\u003c');
         let source = String(html.source);
         source = source.replace(/<script\b[^>]*\btype="module"[^>]*\bsrc="[^"]+"[^>]*><\/script>/g, '');
         source = source.replace(/<link\b[^>]*\brel="(?:modulepreload|stylesheet)"[^>]*>/g, '');

@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { OFFLINE_DISTRIBUTABLE } from '../config/runtime';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, CharacterAppearanceMode, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService, type BgmThemeId } from '../services/audioService';
@@ -19,6 +20,7 @@ import { formatProblemSelectionUnitName } from '../utils/problemUnitName';
 import { UPPER_KANJI_SUB_MODE_IDS, UPPER_PROBLEM_CATEGORIES } from './ModeSelectionScreen';
 import type { VisualThemeId } from '../data/visualThemes';
 import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
+const QuizShow = lazy(() => import('../quiz-show/QuizShow'));
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -703,6 +705,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   appearanceMode = 'STANDARD',
 }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
+  const [quizShow, setQuizShow] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
   const [selectedSubMode, setSelectedSubMode] = useState<SubModeConfig>(SUBJECT_CATEGORIES[0].subModes[0]);
   const [activeChallenge, setActiveChallenge] = useState<ActiveChallengeConfig | null>(null);
@@ -1080,6 +1083,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     );
   };
 
+  if (quizShow) return <Suspense fallback={<div role="status" className="w-full h-full flex items-center justify-center bg-slate-950 text-amber-100">{languageMode === 'ENGLISH' ? 'Loading quiz studio…' : languageMode === 'HIRAGANA' ? 'クイズをじゅんびちゅう…' : 'クイズ番組を準備中…'}</div>}><QuizShow languageMode={languageMode} onBack={() => setQuizShow(false)} /></Suspense>;
+
   if (phase === 'CHALLENGE') {
     const challengeSubMode = activeChallenge?.subMode ?? selectedSubMode;
     const challengeModePool = activeChallenge?.modePool;
@@ -1266,6 +1271,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         </div>
 
         {/* Main Selection Area - Flexible with Scrollbars */}
+        {!OFFLINE_DISTRIBUTABLE && <button data-quiz-show-entry type="button" onClick={() => { audioService.playSound('select'); setQuizShow(true); }} className="mx-4 mt-2 shrink-0 flex items-center justify-center gap-3 rounded-xl border border-amber-200/60 bg-gradient-to-r from-indigo-950 via-slate-800 to-purple-950 px-4 py-2 text-amber-100 shadow-lg hover:border-amber-100"><span className="font-black text-sm">{languageMode === 'ENGLISH' ? 'Everyone’s Quiz Show' : languageMode === 'HIRAGANA' ? 'みんなでクイズばんぐみ' : 'みんなでクイズ番組'}</span><span className="text-[10px] text-amber-100/75">{languageMode === 'ENGLISH' ? 'Host a room · Up to 40 players' : languageMode === 'HIRAGANA' ? 'ホストべやをつくる · 40にんまで' : 'ホスト部屋を作成 · 最大40人'}</span><ChevronRight size={16} /></button>}
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
 
           {/* Left: Category Selector - Grid on mobile, vertically flex on PC */}
