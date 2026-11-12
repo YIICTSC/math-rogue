@@ -4,6 +4,8 @@ export const QUIZ_PROTOCOL = 1;
 export const MAX_ANSWERERS = 40;
 export const MODES = ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS', 'CONSENSUS', 'MAJORITY', 'NEAREST', 'DRAW', 'VOTE', 'WOLF'] as const;
 export type ShowMode = typeof MODES[number];
+export const minimumAnswerers = (mode: ShowMode) => mode === 'WOLF' ? 3 : ['DRAW','CONSENSUS','MAJORITY','VOTE'].includes(mode) ? 2 : 1;
+export const supportsLearningUnits = (mode: ShowMode) => ['STANDARD','BUZZER','SURVIVAL','TEAMS'].includes(mode);
 export type AnswerFormat = 'TEXT' | 'CHOICE' | 'FLIP';
 export type Phase = 'lobby' | 'ready' | 'open' | 'closed' | 'reveal' | 'voting' | 'scoreboard' | 'finished' | 'review' | 'trial' | 'night' | 'dawn';
 export type Role = 'host' | 'player' | 'screen';
@@ -46,8 +48,9 @@ export interface ShowWorld {
   accepting: boolean; hostConnected: boolean; createdAt: number;
   wolf: WolfGame | null;
   overview: boolean;
-  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean };
+  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean };
   queue: number[];
+  autoProgress?: { phase: Phase; roundId: string; at: number };
 }
 export interface AnswerTile {
   id: string; submitted: boolean; revealed: boolean; visible: boolean; text?: string;
@@ -77,7 +80,7 @@ export interface ShowView {
 export type ShowAction =
   | { type: 'configure'; title: string; mode: ShowMode; teamCount: number }
   | { type: 'bank'; questions: ShowQuestion[] }
-  | { type: 'plan'; order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean }
+  | { type: 'plan'; order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean }
   | { type: 'start' | 'open' | 'close' | 'pause' | 'autoJudge' | 'score' | 'next' | 'finish' | 'voting' | 'revealAnswer' | 'revealAll' | 'publish' | 'balance'; roundId?: string }
   | { type: 'reveal'; roundId: string; playerId: string }
   | { type: 'grade'; roundId: string; playerId: string; correct: boolean }

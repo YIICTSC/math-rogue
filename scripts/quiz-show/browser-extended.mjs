@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 export async function runExtended({page,host,guest,guest2,screen,load,base,out}){
  await load.close();await host.goto(base+'/quiz-test');host.setDefaultTimeout(120000);
- await host.locator('.qs-entry-form select').first().selectOption('WOLF');await host.getByRole('button',{name:'ホスト部屋を作成',exact:true}).click();await host.locator('.qs-invite-url').first().waitFor();const link=await host.locator('.qs-invite-url').first().inputValue(),third=await page(390,844);
+ await host.locator('.qs-entry-form select').first().selectOption('WOLF');await host.getByRole('button',{name:'ホスト部屋を作成',exact:true}).click();await host.locator('.qs-invite-url').first().waitFor();await host.getByLabel('全員回答で自動進行').uncheck();const link=await host.locator('.qs-invite-url').first().inputValue(),third=await page(390,844);
  for(const[p,name]of[[guest,'市民A'],[guest2,'市民B'],[third,'市民C']]){await p.goto(link);await p.getByLabel('表示する名前').fill(name);await p.getByRole('button',{name:'この名前で参加！',exact:true}).click();await p.getByText('参加できました！司会のスタートを待ってね。',{exact:true}).waitFor();}
  await screen.goto(link+'&quizScreen=1');await screen.locator('.qs-audience').waitFor();await host.waitForFunction(()=>__quiz.view.players.length===3);await host.getByRole('button',{name:'番組をスタート',exact:true}).click();await guest.waitForFunction(()=>!!__quiz.view.wolf?.mine);const guests=[guest,guest2,third];
  for(const p of guests)assert.equal(await p.evaluate(()=>__quiz.view.wolf.roles),undefined);assert.equal(await screen.evaluate(()=>__quiz.view.wolf.mine),undefined);assert.equal(await screen.evaluate(()=>__quiz.view.wolf.roles),undefined);

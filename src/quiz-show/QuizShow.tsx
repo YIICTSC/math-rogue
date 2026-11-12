@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, BellRing, BookOpen, Check, CircleHelp, Crown, Fu
 import type { LanguageMode } from '../types';
 import type { LessonSelection } from '../mini-games/gakuro-kart/questions';
 import { OFFLINE_DISTRIBUTABLE } from '../config/runtime';
-import { MODES, type ShowAction, type ShowError, type ShowMode, type ShowView } from './types';
+import { supportsLearningUnits, MODES, type ShowAction, type ShowError, type ShowMode, type ShowView } from './types';
 import { copy, ERRORS, MODE_COPY } from './copy';
 import { addressText, clearQuizLocation, invitationFromLocation, markHost, parseAddress, type RoomAddress } from './invite';
 import { QuizShowRoom, quizShowServerUrl, savedHost } from './room';
@@ -88,11 +88,10 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
   function leave() { session.current++; room.current?.close(); room.current = null; clearQuizLocation(); onBack(); }
   function send(a: ShowAction) { if (!active || !room.current) return; if (!room.current.send(a)) setError('NETWORK'); }
   async function importLesson(selection: LessonSelection) {
-    if (!room.current || lessonBusy) return; setLessonBusy(true); setLessonError('');
+    if (!room.current || lessonBusy || !view || !supportsLearningUnits(view.mode)) return; setLessonBusy(true); setLessonError('');
     try {
       const { buildLesson } = await import('../mini-games/gakuro-kart/questions'), pack = buildLesson(selection, lessonCount);
       const questions = pack.questions.map(q => ({ id: q.id, prompt: q.question, answer: q.options[q.correct], aliases: [], options: [...q.options], format: 'CHOICE' as const, seconds: 50, points: 100, passage: q.passage, visual: q.visual, audioPrompt: q.audioPrompt }));
-      if (view && !['STANDARD','BUZZER','SURVIVAL','TEAMS'].includes(view.mode)) room.current.send({ type: 'configure', title: view.title, mode: 'STANDARD', teamCount: view.teamCount });
       if (!room.current.send({ type: 'bank', questions })) throw new Error(); setLesson(false); setEditor(false);
     } catch { setLessonError(t('問題を用意できませんでした。別の単元か少ない問題数を選んでください。', 'Could not prepare the pack. Try another unit or fewer questions.', 'もんだいをよういできません。べつのたんげんをえらんでね。')); } finally { setLessonBusy(false); }
   }
@@ -118,8 +117,8 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
       </>}</div>{view.role === 'host' && <HostDesk view={view} language={language} connected={active} send={send} onEdit={() => setEditor(true)} onLesson={() => { setLessonError(''); setLesson(true); }} onSamples={() => send({ type: 'bank', questions: starterQuestions(view.mode, language) })} />}</div>}
     </main>}
     {rules && <Rules language={language} onClose={() => setRules(false)} />}
-    {editor && view?.host && <QuestionEditor bank={view.host.bank} language={language} onSave={questions => send({ type: 'bank', questions })} onClose={() => setEditor(false)} onLesson={() => { setLesson(true); setLessonError(''); }} />}
-    {lesson && <Suspense fallback={<div className="qs-loading" role="status">{t('単元を読み込み中…', 'Loading learning units…', 'たんげんをよみこみちゅう…')}</div>}><OnlineLessonPicker extraHeader={<label className="quiz-show-lesson-count">{t('出題数', 'Question count', 'しゅつだいすう')}<select disabled={lessonBusy} value={lessonCount} onChange={e => setLessonCount(Number(e.target.value))}>{[6, 12, 30].map(n => <option key={n} value={n}>{n}</option>)}</select></label>} activity="quiz-show" languageMode={language} busy={lessonBusy} error={lessonError} onSelect={selection => { void importLesson(selection); }} onBack={() => { if (!lessonBusy) setLesson(false); }} /></Suspense>}
+    {editor && view?.host && <QuestionEditor bank={view.host.bank} language={language} onSave={questions => send({ type: 'bank', questions })} onClose={() => setEditor(false)} onLesson={supportsLearningUnits(view.mode) ? () => { setLesson(true); setLessonError(''); } : undefined} />}
+    {lesson && view && supportsLearningUnits(view.mode) && <Suspense fallback={<div className="qs-loading" role="status">{t('単元を読み込み中…', 'Loading learning units…', 'たんげんをよみこみちゅう…')}</div>}><OnlineLessonPicker extraHeader={<label className="quiz-show-lesson-count">{t('出題数', 'Question count', 'しゅつだいすう')}<select disabled={lessonBusy} value={lessonCount} onChange={e => setLessonCount(Number(e.target.value))}>{[6, 12, 30].map(n => <option key={n} value={n}>{n}</option>)}</select></label>} activity="quiz-show" languageMode={language} busy={lessonBusy} error={lessonError} onSelect={selection => { void importLesson(selection); }} onBack={() => { if (!lessonBusy) setLesson(false); }} /></Suspense>}
   </div>;
 }
 function errorCode(error: unknown): ShowError { const text = error instanceof Error ? error.message : ''; return text in ERRORS ? text as ShowError : 'NETWORK'; }

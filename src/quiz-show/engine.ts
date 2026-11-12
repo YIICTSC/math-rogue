@@ -1,4 +1,4 @@
-import { MAX_ANSWERERS, MODES, type Actor, type Answer, type InkStroke, type Player, type Round, type ShowAction, type ShowError, type ShowQuestion, type ShowView, type ShowWorld } from './types';
+import { minimumAnswerers, MAX_ANSWERERS, MODES, type Actor, type Answer, type InkStroke, type Player, type Round, type ShowAction, type ShowError, type ShowQuestion, type ShowView, type ShowWorld } from './types';
 import { checkWolfWinner, nightActors, startWolves, wolfAction } from './wolf';
 
 const key = () => crypto.randomUUID();
@@ -40,8 +40,11 @@ export function validQuestion(q: unknown): q is ShowQuestion {
 export function validBank(bank: unknown): bank is ShowQuestion[] {
   return Array.isArray(bank) && bank.length >= 1 && bank.length <= 60 && bank.every(validQuestion) && new Set(bank.map(q => q.id)).size === bank.length && new TextEncoder().encode(JSON.stringify(bank)).length <= 256000;
 }
+export function validBankForMode(mode: typeof MODES[number], bank: ShowQuestion[]) {
+  return validBank(bank) && (mode !== 'NEAREST' || bank.every(q => numericAnswer(q.answer) !== null)) && (mode !== 'DRAW' || bank.every(q => !!q.answer.trim()));
+}
 export function createShow(title = 'みんなでクイズ', now = Date.now()): ShowWorld {
-  return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'SEQUENTIAL', limit: 0, shuffleChoices: true }, queue: [] };
+  return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true }, queue: [] };
 }
 export function addAnswerer(w: ShowWorld, id: string, name: unknown): ShowError | null {
   if (owns(w.players, id)) { w.players[id].connected = true; w.revision++; return null; }
@@ -76,7 +79,46 @@ function prepare(w: ShowWorld) {
     buzzer: null, buzzOrder: [], locked: [], votes: {}, consensus: null };
 }
 export function tickShow(w: ShowWorld, now = Date.now()) {
-  if (w.phase === 'open' && w.round && !w.round.paused && now >= w.round.deadline) { w.phase = 'closed'; w.round.remaining = 0; markUnanswered(w.round); publishChoices(w); w.revision++; }
+  if (w.phase === 'open' && w.round && !w.round.paused && now >= w.round.deadline) {
+    act(w, {id:'host',role:'host'}, {type:'close',roundId:w.round.id}, now, true);
+  }
+  const r = w.round;
+  if (!r || w.plan.autoAdvance === false || !w.hostConnected || (w.phase === 'open' && r.paused)) { delete w.autoProgress; return; }
+  const host: Actor = {id:'host',role:'host'};
+  const run = (type: 'close'|'publish'|'score'|'next'|'open'|'voting') => act(w, host, {type,roundId:r.id}, now, true);
+  const respondents = r.eligible.filter(id => id !== r.artist && (w.players[id]?.connected || r.answers[id]?.submitted));
+  const allAnswered = respondents.length > 0 && respondents.every(id => r.answers[id]?.submitted);
+  const buzzerWon = r.mode === 'BUZZER' && r.eligible.some(id => r.grades[id] === true);
+  if (w.phase === 'open' && (allAnswered || buzzerWon)) run('close');
+  if (['closed','reveal'].includes(w.phase)) {
+    // Never infer the meaning of handwriting. Keep host overrides intact.
+    judge(w, true);
+    const canScore = ['NEAREST','VOTE'].includes(r.mode) ||
+      (['CONSENSUS','WOLF','MAJORITY'].includes(r.mode) ? r.question.format !== 'FLIP' || (r.mode !== 'MAJORITY' && r.consensus !== null) : !pendingGrades(r));
+    const newlyVisible = !r.showAnswer || r.revealed.length !== r.eligible.length;
+    r.revealed = [...r.eligible]; r.showAnswer = true;
+    if (newlyVisible) w.revision++;
+    if (!canScore) { delete w.autoProgress; return; }
+    if (r.mode !== 'VOTE' && !r.showJudgments) {
+      // Non-competitive agreement and numeric ranks are evaluated by score.
+      if (['STANDARD','BUZZER','SURVIVAL','TEAMS','DRAW'].includes(r.mode)) run('publish');
+    }
+    schedule(r.mode === 'VOTE' ? 'voting' : 'score', 3000);
+  } else if (w.phase === 'voting') {
+    const voters = respondents.filter(id => r.answers[id]?.submitted);
+    if (voters.length > 1 && voters.every(id => r.votes[id])) schedule('score', 1000);
+    else delete w.autoProgress;
+  } else if (w.phase === 'scoreboard') schedule('next', 5000);
+  else if (w.phase === 'ready') schedule('open', 2000);
+  else delete w.autoProgress;
+  function schedule(type: 'score'|'next'|'open'|'voting', delay: number) {
+    const timer = w.autoProgress;
+    if (!timer || timer.phase !== w.phase || timer.roundId !== r!.id) {
+      w.autoProgress = {phase:w.phase,roundId:r!.id,at:now+delay}; return;
+    }
+    if (now < timer.at) return;
+    delete w.autoProgress; run(type);
+  }
 }
 function publishChoices(w: ShowWorld) {
   const r = w.round;
@@ -140,8 +182,8 @@ function settle(w: ShowWorld) {
 function eligible(w: ShowWorld, id: string) { return !!w.round?.eligible.includes(id) && owns(w.players, id); }
 function validText(t: unknown): t is string { return typeof t === 'string' && t.length <= 3000; }
 
-export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now()): ShowError | null {
-  tickShow(w, now);
+export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), fromTick = false): ShowError | null {
+  if (!fromTick) tickShow(w, now);
   if (!raw || typeof raw !== 'object' || typeof (raw as ShowAction).type !== 'string') return 'AUTH';
   const a = raw as ShowAction, r = w.round;
   if (a.type === 'wolfReview' || a.type === 'wolfVote' || a.type === 'wolfNight' || a.type === 'wolfResolve') {
@@ -174,6 +216,10 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now()):
         if (a.submit && !a.text.trim() && !a.ink.length) return 'ANSWER';
         if (a.submit && r.mode === 'NEAREST' && numericAnswer(a.text) === null) return 'ANSWER';
         r.answers[actor.id] = { text: a.text.replace(/[\u0000-\u0008\u000b-\u001f]/g, ''), ink: a.ink.map(s => ({ c: s.c, w: s.w, p: [...s.p] })), submitted: a.submit, revision: (r.answers[actor.id]?.revision || 0) + 1 };
+        if (a.submit && r.mode === 'BUZZER' && format === 'TEXT' && w.plan.autoAdvance !== false && r.question.answer.trim()) {
+          r.grades[actor.id] = textCorrect(r.question,a.text);
+          if (!r.grades[actor.id]) { r.locked.push(actor.id); r.buzzer = null; }
+        }
         if (a.submit && format === 'CHOICE' && !artist) {
           r.grades[actor.id] = a.text === r.question.answer;
           if (r.mode === 'BUZZER' && !r.grades[actor.id]) { r.locked.push(actor.id); r.buzzer = null; }
@@ -198,10 +244,11 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now()):
         w.bank = structuredClone(a.questions); w.index = 0; w.round = null; w.phase = 'lobby'; w.wolf = null; w.queue = []; w.plan.limit = Math.min(w.plan.limit, w.bank.length);
         break;
       case 'plan':
-        if (!['lobby', 'finished'].includes(w.phase) || !['SEQUENTIAL', 'RANDOM'].includes(a.order) || !finiteInt(a.limit, 0, 60) || typeof a.shuffleChoices !== 'boolean') return 'PHASE';
-        w.plan = { order: a.order, limit: a.limit, shuffleChoices: a.shuffleChoices }; break;
+        if (!['lobby', 'finished'].includes(w.phase) || !['SEQUENTIAL', 'RANDOM'].includes(a.order) || !finiteInt(a.limit, 0, 60) || typeof a.shuffleChoices !== 'boolean' || (a.autoAdvance !== undefined && typeof a.autoAdvance !== 'boolean')) return 'PHASE';
+        w.plan = { order: a.order, limit: a.limit, shuffleChoices: a.shuffleChoices, autoAdvance: a.autoAdvance ?? w.plan.autoAdvance ?? true }; break;
       case 'start':
-        if (w.phase !== 'lobby' || !w.bank.length || !Object.values(w.players).some(p => p.connected)) return 'PHASE';
+        if (!validBankForMode(w.mode,w.bank)) return 'QUESTION';
+        if (w.phase !== 'lobby' || !w.bank.length || Object.values(w.players).filter(p => p.connected).length < minimumAnswerers(w.mode)) return 'PHASE';
         if (w.mode === 'WOLF') {
           const ids = Object.values(w.players).filter(p => p.connected).map(p => p.id); if (ids.length < 3) return 'PHASE';
           w.wolf = startWolves(ids); w.accepting = false;
@@ -214,7 +261,7 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now()):
         if (w.phase !== 'ready' || !r) return 'PHASE';
         if (r.mode === 'NEAREST' && numericAnswer(r.question.answer) === null) return 'QUESTION';
         r.eligible = Object.values(w.players).filter(p => (w.wolf ? owns(w.wolf.seats, p.id) : p.connected) && (r.mode !== 'SURVIVAL' || p.lives > 0)).map(p => p.id);
-        if (!r.eligible.length || (['DRAW', 'CONSENSUS', 'VOTE'].includes(r.mode) && r.eligible.length < 2)) return 'PHASE';
+        if (r.eligible.length < minimumAnswerers(r.mode)) return 'PHASE';
         if (r.mode === 'DRAW') { if (!r.question.answer.trim()) return 'QUESTION'; r.artist = r.eligible[w.index % r.eligible.length]; }
         r.startLives = Object.fromEntries(Object.values(w.players).map(p => [p.id, p.lives]));
         r.deadline = now + r.question.seconds * 1000; r.remaining = r.question.seconds * 1000; w.phase = 'open'; break;

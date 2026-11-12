@@ -1,0 +1,1598 @@
+{
+  "VOTE": [
+    {
+      "prompt": [
+        "寝坊した魔王。勇者に送った言い訳は？",
+        "The dark lord overslept. What excuse did they send the hero?",
+        "ねぼうしたまおう。ゆうしゃにおくったいいわけは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "開けたくない宝箱。中から聞こえた一言は？",
+        "A chest nobody wants to open. What did it say?",
+        "あけたくないたからばこ。なかからきこえたひとことは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "給食の時間だけ強くなるヒーロー。その必殺技は？",
+        "A hero who gets stronger at lunch. Name their special move.",
+        "きゅうしょくのじかんだけつよくなるヒーロー。ひっさつわざは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "校長先生が突然ロボットに。最初に言ったことは？",
+        "The principal turns into a robot. What do they say first?",
+        "こうちょうせんせいがロボットに。さいしょになんていった？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "宇宙人が地球のお土産に選んだ意外なものは？",
+        "What surprising souvenir did an alien choose from Earth?",
+        "うちゅうじんがえらんだ、ちきゅうのおみやげは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "伝説の剣に書かれていた注意書きは？",
+        "What warning was printed on the legendary sword?",
+        "でんせつのけんにかかれた、ちゅういがきは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "おばけ屋敷なのに、みんなが笑っている理由は？",
+        "Why is everyone laughing in this haunted house?",
+        "おばけやしきなのに、みんながわらっている。なぜ？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "未来のランドセルに追加された謎の機能は？",
+        "Name a strange feature of a schoolbag from the future.",
+        "みらいのランドセルについた、なぞのきのうは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "ラスボスが戦う前にお願いしてきたことは？",
+        "What favor did the final boss ask before the battle?",
+        "ラスボスがたたかうまえに、おねがいしてきたことは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "猫が一日だけ先生に。最初の授業は？",
+        "A cat becomes a teacher for a day. What is the first lesson?",
+        "ねこがいちにちせんせいに。さいしょのじゅぎょうは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "絶対に売れない魔法の名前と、その効果は？",
+        "Name a spell nobody would buy and explain what it does.",
+        "うれそうにないまほうのなまえと、こうかは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "冒険者の求人広告。最後の一行が変！何と書いてある？",
+        "An adventurer job ad has a strange final line. What is it?",
+        "ぼうけんしゃのぼしゅう。さいごのいちぎょうがへん！なんてかいてある？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    }
+  ],
+  "DRAW": [
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "空を飛ぶペンギン",
+        "a flying penguin",
+        "そらをとぶペンギン"
+      ],
+      "aliases": [
+        "空飛ぶペンギン"
+      ]
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "走る目覚まし時計",
+        "a running alarm clock",
+        "はしるめざましどけい"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "王冠をかぶった猫",
+        "a cat wearing a crown",
+        "おうかんをかぶったねこ"
+      ],
+      "aliases": [
+        "王様の猫"
+      ]
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "雲の上の家",
+        "a house on a cloud",
+        "くものうえのいえ"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "ラーメンを食べるロボット",
+        "a robot eating noodles",
+        "ラーメンをたべるロボット"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "スケートをする象",
+        "an elephant skating",
+        "スケートをするぞう"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "宇宙のおにぎり屋さん",
+        "a rice-ball shop in space",
+        "うちゅうのおにぎりやさん"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "傘をさすカエル",
+        "a frog holding an umbrella",
+        "かさをさすカエル"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "踊るサボテン",
+        "a dancing cactus",
+        "おどるサボテン"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "宝箱から出てきたタコ",
+        "an octopus coming out of a chest",
+        "たからばこからでたタコ"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "歯を磨くドラゴン",
+        "a dragon brushing its teeth",
+        "はをみがくドラゴン"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "このお題を絵で伝えよう",
+        "Draw this secret scene",
+        "このおだいをえでつたえよう"
+      ],
+      "answer": [
+        "大きな靴を履いた雪だるま",
+        "a snowman in oversized shoes",
+        "おおきなくつをはいたゆきだるま"
+      ],
+      "aliases": []
+    }
+  ],
+  "CONSENSUS": [
+    {
+      "prompt": [
+        "おにぎりの具といえば？一つだけ書こう。",
+        "Name one rice-ball filling.",
+        "おにぎりのぐといえば？ひとつだけかこう。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "黄色い果物といえば？一つだけ。",
+        "Name one yellow fruit.",
+        "きいろいくだものといえば？ひとつだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "動物園の人気者といえば？",
+        "Name a popular zoo animal.",
+        "どうぶつえんのにんきものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "夏の冷たいおやつといえば？",
+        "Name a cold summer treat.",
+        "なつのつめたいおやつといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "昔話の主人公といえば？",
+        "Name a fairy-tale hero.",
+        "むかしばなしのしゅじんこうといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "空を飛ぶ乗り物といえば？",
+        "Name a vehicle that flies.",
+        "そらをとぶのりものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "魔法使いが持つものといえば？",
+        "Name something a wizard carries.",
+        "まほうつかいがもつものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "赤い野菜といえば？",
+        "Name a red vegetable.",
+        "あかいやさいといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "雨の日に使うものといえば？",
+        "Name something used on a rainy day.",
+        "あめのひにつかうものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "丸いスポーツ用品といえば？",
+        "Name a round piece of sports equipment.",
+        "まるいスポーツようひんといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "朝にすることといえば？一つだけ。",
+        "Name one thing people do in the morning.",
+        "あさにすることといえば？ひとつだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "遊園地の乗り物といえば？",
+        "Name a theme-park ride.",
+        "ゆうえんちののりものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    }
+  ],
+  "WOLF": [
+    {
+      "prompt": [
+        "「森の動物」といえば？一種類だけ。",
+        "Name one forest animal.",
+        "もりのどうぶつといえば？ひとしゅるいだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「冬の遊び」といえば？",
+        "Name a winter activity.",
+        "ふゆのあそびといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「カレーの具」といえば？一つだけ。",
+        "Name one curry ingredient.",
+        "カレーのぐといえば？ひとつだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「夜空に見えるもの」といえば？",
+        "Name something visible in the night sky.",
+        "よぞらにみえるものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「海の生き物」といえば？一種類だけ。",
+        "Name one sea creature.",
+        "うみのいきものといえば？ひとしゅるいだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「お祭りの食べ物」といえば？",
+        "Name a festival food.",
+        "おまつりのたべものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「冒険の道具」といえば？一つだけ。",
+        "Name one adventuring tool.",
+        "ぼうけんのどうぐといえば？ひとつだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「学校の行事」といえば？",
+        "Name a school event.",
+        "がっこうのぎょうじといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「緑の野菜」といえば？",
+        "Name a green vegetable.",
+        "みどりのやさいといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「空想の生き物」といえば？",
+        "Name a mythical creature.",
+        "くうそうのいきものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「お弁当のおかず」といえば？",
+        "Name a lunchbox side dish.",
+        "おべんとうのおかずといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「公園にあるもの」といえば？一つだけ。",
+        "Name one thing in a park.",
+        "こうえんにあるものといえば？ひとつだけ。"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    }
+  ],
+  "MAJORITY": [
+    {
+      "prompt": [
+        "一日だけ変身するなら「鳥」か「魚」？",
+        "Transform for a day: write \"bird\" or \"fish\".",
+        "いちにちへんしんするなら「とり」か「さかな」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "冒険のお供は「剣」か「魔法」？",
+        "Adventure gear: write \"sword\" or \"magic\".",
+        "ぼうけんのおともは「けん」か「まほう」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "新しいペットは「猫」か「犬」？",
+        "A new pet: write \"cat\" or \"dog\".",
+        "あたらしいペットは「ねこ」か「いぬ」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "休日のお出かけは「海」か「山」？",
+        "A day out: write \"sea\" or \"mountain\".",
+        "おやすみのおでかけは「うみ」か「やま」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "手に入れる力は「空を飛ぶ」か「透明になる」？",
+        "A superpower: write \"fly\" or \"invisible\".",
+        "ほしいちからは「そらをとぶ」か「とうめいになる」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "おやつは「甘い」か「しょっぱい」？",
+        "A snack: write \"sweet\" or \"salty\".",
+        "おやつは「あまい」か「しょっぱい」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "住むなら「海底」か「宇宙」？",
+        "Live somewhere new: write \"underwater\" or \"space\".",
+        "すむなら「かいてい」か「うちゅう」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "時間旅行は「過去」か「未来」？",
+        "Time travel: write \"past\" or \"future\".",
+        "じかんりょこうは「かこ」か「みらい」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "魔法の相棒は「ドラゴン」か「ユニコーン」？",
+        "A magical friend: write \"dragon\" or \"unicorn\".",
+        "まほうのあいぼうは「ドラゴン」か「ユニコーン」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "宝箱の中身は「金貨」か「地図」？",
+        "A chest contains: write \"gold\" or \"map\".",
+        "たからばこのなかみは「きんか」か「ちず」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "お祭りで先に行くのは「屋台」か「ゲーム」？",
+        "At a festival: write \"food\" or \"games\".",
+        "おまつりでさきにいくのは「やたい」か「ゲーム」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "一つだけ大きくするなら「家」か「庭」？",
+        "Enlarge one thing: write \"house\" or \"garden\".",
+        "ひとつおおきくするなら「いえ」か「にわ」？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": []
+    }
+  ],
+  "NEAREST": [
+    {
+      "prompt": [
+        "スライム100匹に帽子を一つずつ。帽子は何個？",
+        "One hat for each of 100 slimes. How many hats?",
+        "スライム100ぴきにぼうしをひとつずつ。ぼうしはなんこ？"
+      ],
+      "answer": [
+        "100",
+        "100",
+        "100"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1週間ずっと眠るドラゴン。合計何分？",
+        "A dragon sleeps for exactly one week. How many minutes?",
+        "1しゅうかんねむるドラゴン。なんぷん？"
+      ],
+      "answer": [
+        "10080",
+        "10080",
+        "10080"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1個6面のサイコロが30個。面の合計は？",
+        "Thirty dice have six faces each. How many faces in total?",
+        "6めんのサイコロが30こ。めんはぜんぶでいくつ？"
+      ],
+      "answer": [
+        "180",
+        "180",
+        "180"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1分に12枚のクッキーを焼く機械。2時間で何枚？",
+        "A machine bakes 12 cookies per minute for two hours. How many cookies?",
+        "1ぷんに12まいのクッキー。2じかんでなんまい？"
+      ],
+      "answer": [
+        "1440",
+        "1440",
+        "1440"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "足8本のタコが25匹。足は全部で何本？",
+        "Twenty-five octopuses with eight arms each. How many arms?",
+        "あし8ぽんのタコが25ひき。あしはぜんぶでなんぼん？"
+      ],
+      "answer": [
+        "200",
+        "200",
+        "200"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1日24時間として、10日間は何秒？",
+        "At 24 hours per day, how many seconds are ten days?",
+        "1にち24じかん。10にちかんはなんびょう？"
+      ],
+      "answer": [
+        "864000",
+        "864000",
+        "864000"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1箱に24個の宝石。箱が125個なら宝石は何個？",
+        "There are 24 gems per box and 125 boxes. How many gems?",
+        "1はこに24このほうせき。125はこならなんこ？"
+      ],
+      "answer": [
+        "3000",
+        "3000",
+        "3000"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "10円玉だけで5000円。何枚必要？",
+        "Make 5000 yen using only 10-yen coins. How many coins?",
+        "10えんだまだけで5000えん。なんまい？"
+      ],
+      "answer": [
+        "500",
+        "500",
+        "500"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1回で2倍になるスライム。1匹から10回分裂すると何匹？",
+        "One slime doubles ten times. How many slimes result?",
+        "1かいで2ばいになるスライム。1ぴきから10かいでなんびき？"
+      ],
+      "answer": [
+        "1024",
+        "1024",
+        "1024"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1個150円のおにぎりを40人に2個ずつ。合計何円？",
+        "Forty people get two rice balls each at 150 yen per ball. Total yen?",
+        "150えんのおにぎりを40にんに2こずつ。なんえん？"
+      ],
+      "answer": [
+        "12000",
+        "12000",
+        "12000"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1周400mのコースを42周。合計何m？",
+        "Run 42 laps of a 400-metre track. How many metres?",
+        "1しゅう400mを42しゅう。ぜんぶでなんm？"
+      ],
+      "answer": [
+        "16800",
+        "16800",
+        "16800"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1分に80回跳ぶロボット。15分で何回？",
+        "A robot jumps 80 times per minute for 15 minutes. How many jumps?",
+        "1ぷんに80かいとぶロボット。15ふんでなんかい？"
+      ],
+      "answer": [
+        "1200",
+        "1200",
+        "1200"
+      ],
+      "aliases": []
+    }
+  ],
+  "STANDARD": [
+    {
+      "prompt": [
+        "バナナの「ナ」は何個？",
+        "How many letter n characters are in banana?",
+        "バナナの「ナ」はなんこ？"
+      ],
+      "answer": [
+        "2",
+        "2",
+        "2"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「しんぶんし」を逆から読むと？",
+        "Reverse the kana in しんぶんし. What Japanese word results? Use kana or romaji.",
+        "「しんぶんし」をうしろからよむと？"
+      ],
+      "answer": [
+        "しんぶんし",
+        "shinbunshi",
+        "しんぶんし"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1匹の猫のしっぽは1本。猫が7匹なら何本？",
+        "Seven cats have one tail each. How many tails?",
+        "ねこ7ひき。しっぽが1ぽんずつなら、なんぼん？"
+      ],
+      "answer": [
+        "7",
+        "7",
+        "7"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "赤い箱に青い玉が3個。赤い玉は何個？",
+        "A red box contains only three blue balls. How many red balls?",
+        "あかいはこに、あおいたまだけ3こ。あかいたまはなんこ？"
+      ],
+      "answer": [
+        "0",
+        "0",
+        "0"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "5個のりんごから2個取った。あなたが取ったのは何個？",
+        "You take two apples from a pile of five. How many did you take?",
+        "りんご5こから2ことった。とったのはなんこ？"
+      ],
+      "answer": [
+        "2",
+        "2",
+        "2"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1位の人を追い越しました。あなたは何位？",
+        "You pass the runner in first place. What place are you in?",
+        "1いのひとをおいこした。あなたはなんい？"
+      ],
+      "answer": [
+        "1",
+        "1",
+        "1"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "カレンダーの月で、28日以上ある月は一年に何か月？",
+        "How many months in a year have at least 28 days?",
+        "28にちいじょうあるつきは、1ねんになんかげつ？"
+      ],
+      "answer": [
+        "12",
+        "12",
+        "12"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "2本のろうそくを3本のろうそくに並べた。全部で何本？",
+        "Place two candles beside three candles. How many candles?",
+        "ろうそく2ほんと3ぼんをならべた。なんぼん？"
+      ],
+      "answer": [
+        "5",
+        "5",
+        "5"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「あいうえお」の真ん中の文字は？",
+        "What is the middle character in the Japanese sequence a-i-u-e-o?",
+        "「あいうえお」のまんなかは？"
+      ],
+      "answer": [
+        "う",
+        "u",
+        "う"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "右手に3枚、左手に4枚のカード。全部で何枚？",
+        "Three cards in one hand and four in the other. Total cards?",
+        "みぎてに3まい、ひだりてに4まい。カードはなんまい？"
+      ],
+      "answer": [
+        "7",
+        "7",
+        "7"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "スライムが3匹。1匹ずつ2個の目。目は全部で何個？",
+        "Three slimes have two eyes each. Total eyes?",
+        "スライム3びき。めは2こずつ。ぜんぶでなんこ？"
+      ],
+      "answer": [
+        "6",
+        "6",
+        "6"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "丸いピザを直線で1回切ると、最大何切れ？",
+        "Cut a round pizza with one straight cut. Maximum pieces?",
+        "まるいピザをまっすぐ1かいきると、いちばんおおくてなんきれ？"
+      ],
+      "answer": [
+        "2",
+        "2",
+        "2"
+      ],
+      "aliases": []
+    }
+  ],
+  "BUZZER": [
+    {
+      "prompt": [
+        "じゃんけんで、グーに勝つ手は？",
+        "In rock-paper-scissors, what beats rock?",
+        "じゃんけんで、グーにかつては？"
+      ],
+      "answer": [
+        "パー",
+        "paper",
+        "パー"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "パンはパンでも、料理に使う「フライ」で始まるパンは？",
+        "What pan has a handle and is used to fry food?",
+        "りょうりにつかう「フライ」ではじまるパンは？"
+      ],
+      "answer": [
+        "フライパン",
+        "frying pan",
+        "フライパン"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "横断歩道の「止まれ」を示す信号の色は？",
+        "What traffic-light colour means stop?",
+        "「とまれ」のしんごうはなにいろ？"
+      ],
+      "answer": [
+        "赤",
+        "red",
+        "あか"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "牛の鳴き声といえば「モー」。猫の鳴き声は？",
+        "A cow says moo. What does a cat say?",
+        "うしはモー。ねこはなんとなく？"
+      ],
+      "answer": [
+        "ニャー",
+        "meow",
+        "ニャー"
+      ],
+      "aliases": [
+        "ニャン",
+        "ニャア",
+        "mew"
+      ]
+    },
+    {
+      "prompt": [
+        "氷を温めると何になる？",
+        "What does ice become when it melts?",
+        "こおりをあたためるとなにになる？"
+      ],
+      "answer": [
+        "水",
+        "water",
+        "みず"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "朝日がのぼる方角は？",
+        "In which direction does the sun rise?",
+        "あさひがのぼるほうがくは？"
+      ],
+      "answer": [
+        "東",
+        "east",
+        "ひがし"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "一年の最後の月は何月？数字で答えて。",
+        "What number is the final month of the year?",
+        "1ねんのさいごはなんがつ？すうじでこたえて。"
+      ],
+      "answer": [
+        "12",
+        "12",
+        "12"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "「大きい」の反対は？",
+        "What is the opposite of big?",
+        "「おおきい」のはんたいは？"
+      ],
+      "answer": [
+        "小さい",
+        "small",
+        "ちいさい"
+      ],
+      "aliases": [
+        "小さいです",
+        "little"
+      ]
+    },
+    {
+      "prompt": [
+        "雨の日に頭の上に広げる道具は？",
+        "What do you open over your head to keep rain off?",
+        "あめのひに、あたまのうえにひろげるどうぐは？"
+      ],
+      "answer": [
+        "傘",
+        "umbrella",
+        "かさ"
+      ],
+      "aliases": [
+        "かさ",
+        "アンブレラ"
+      ]
+    },
+    {
+      "prompt": [
+        "カエルになる前の生き物は？",
+        "What is a young frog before it grows legs?",
+        "カエルになるまえのいきものは？"
+      ],
+      "answer": [
+        "オタマジャクシ",
+        "tadpole",
+        "おたまじゃくし"
+      ],
+      "aliases": [
+        "おたまじゃくし"
+      ]
+    },
+    {
+      "prompt": [
+        "サイコロの目は1からいくつまで？",
+        "A standard die is numbered from one to what?",
+        "サイコロのめは1からいくつ？"
+      ],
+      "answer": [
+        "6",
+        "6",
+        "6"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "宝のありかを描いた紙は「宝の何」？",
+        "A drawing that shows where treasure is hidden is a treasure what?",
+        "たからのばしょをかいたかみは「たからのなに」？"
+      ],
+      "answer": [
+        "地図",
+        "map",
+        "ちず"
+      ],
+      "aliases": []
+    }
+  ],
+  "SURVIVAL": [
+    {
+      "prompt": [
+        "勇者の薬草が10個。3個使うと残りは？",
+        "A hero has ten herbs and uses three. How many remain?",
+        "やくそう10こから3こつかうと、のこりは？"
+      ],
+      "answer": [
+        "7",
+        "7",
+        "7"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "宝箱が2列、各列4個。全部で何個？",
+        "Two rows of four chests. Total chests?",
+        "たからばこ2れつに4こずつ。ぜんぶでなんこ？"
+      ],
+      "answer": [
+        "8",
+        "8",
+        "8"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1時間は何分？",
+        "How many minutes are in an hour?",
+        "1じかんはなんぷん？"
+      ],
+      "answer": [
+        "60",
+        "60",
+        "60"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1辺3cmの正方形。周りの長さは何cm？",
+        "A square has sides of 3 cm. What is its perimeter in cm?",
+        "1ぺん3cmのしかく。まわりはなんcm？"
+      ],
+      "answer": [
+        "12",
+        "12",
+        "12"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "スライムが毎回2倍。3匹から3回増えると何匹？",
+        "Three slimes double three times. How many result?",
+        "スライム3びきが3かい、2ばいずつになるとなんびき？"
+      ],
+      "answer": [
+        "24",
+        "24",
+        "24"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "100円の薬を3個、50円の薬を2個。合計何円？",
+        "Buy three potions at 100 yen and two at 50 yen. Total yen?",
+        "100えんのくすり3こ、50えんを2こ。なんえん？"
+      ],
+      "answer": [
+        "400",
+        "400",
+        "400"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "2、4、8、16。次に2倍した数は？",
+        "Double each time: 2, 4, 8, 16. What comes next?",
+        "2、4、8、16。つぎに2ばいすると？"
+      ],
+      "answer": [
+        "32",
+        "32",
+        "32"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1から10までの整数を全部足すと？",
+        "What is the sum of the integers from 1 through 10?",
+        "1から10まで、ぜんぶたすと？"
+      ],
+      "answer": [
+        "55",
+        "55",
+        "55"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1kgは何g？",
+        "How many grams are in a kilogram?",
+        "1kgはなんg？"
+      ],
+      "answer": [
+        "1000",
+        "1000",
+        "1000"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1個の立方体の辺は何本？",
+        "How many edges does a cube have?",
+        "さいころのかたち。へんはなんぼん？"
+      ],
+      "answer": [
+        "12",
+        "12",
+        "12"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1から30までの整数で、3の倍数はいくつ？",
+        "How many multiples of three are there from 1 through 30?",
+        "1から30に、3のばいすうはいくつ？"
+      ],
+      "answer": [
+        "10",
+        "10",
+        "10"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1から100までの整数を全部足すと？",
+        "What is the sum of the integers from 1 through 100?",
+        "1から100まで、ぜんぶたすと？"
+      ],
+      "answer": [
+        "5050",
+        "5050",
+        "5050"
+      ],
+      "aliases": []
+    }
+  ],
+  "TEAMS": [
+    {
+      "prompt": [
+        "チーム4人にカードを5枚ずつ。全部で何枚？",
+        "Four teammates get five cards each. Total cards?",
+        "4にんにカード5まいずつ。ぜんぶでなんまい？"
+      ],
+      "answer": [
+        "20",
+        "20",
+        "20"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "20個の宝石を4人で同じ数ずつ。1人何個？",
+        "Share twenty gems equally among four teammates. How many each?",
+        "ほうせき20こを4にんでわけると、ひとりなんこ？"
+      ],
+      "answer": [
+        "5",
+        "5",
+        "5"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "赤3点、青5点、黄2点の旗を1本ずつ取った。合計何点？",
+        "Collect red, blue and yellow flags worth 3, 5 and 2 points. Total?",
+        "3てん、5てん、2てんのはた。ぜんぶでなんてん？"
+      ],
+      "answer": [
+        "10",
+        "10",
+        "10"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "6人チームが3組。全部で何人？",
+        "Three teams have six members each. Total people?",
+        "6にんチームが3くみ。ぜんぶでなんにん？"
+      ],
+      "answer": [
+        "18",
+        "18",
+        "18"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "4人が1周ずつ200m走るリレー。全体で何m？",
+        "Four runners each run 200 metres. Total relay distance in metres?",
+        "4にんが200mずつはしる。ぜんぶでなんm？"
+      ],
+      "answer": [
+        "800",
+        "800",
+        "800"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "1袋8個のキャンディーが5袋。4人で分けると1人何個？",
+        "Five bags have eight sweets each. Share among four people. How many each?",
+        "8このあめが5ふくろ。4にんでわけるとひとりなんこ？"
+      ],
+      "answer": [
+        "10",
+        "10",
+        "10"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "チームの得点が15、20、25、40。合計は？",
+        "Teammates score 15, 20, 25 and 40 points. What is the total?",
+        "てんすうが15、20、25、40。ぜんぶでいくつ？"
+      ],
+      "answer": [
+        "100",
+        "100",
+        "100"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "4人で握手を1回ずつ。全員の組み合わせでは何回？",
+        "Four teammates shake hands once with each other. Total handshakes?",
+        "4にんで、ふたりずつ1かいあくしゅ。ぜんぶでなんかい？"
+      ],
+      "answer": [
+        "6",
+        "6",
+        "6"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "8人を2人組に分けると何組？",
+        "Split eight people into pairs. How many pairs?",
+        "8にんを2にんずつにすると、なんくみ？"
+      ],
+      "answer": [
+        "4",
+        "4",
+        "4"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "5人が順番に1文字ずつ。「ありがとう」は全部で何文字？",
+        "Count the Japanese characters in arigatou (ありがとう). How many?",
+        "「ありがとう」は、ぜんぶでなんもじ？"
+      ],
+      "answer": [
+        "5",
+        "5",
+        "5"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "3つのチームが互いに1回ずつ対戦。試合は全部で何試合？",
+        "Three teams each play the other teams once. Total matches?",
+        "3チームが、ほかのチームと1かいずつたいせん。ぜんぶでなんしあい？"
+      ],
+      "answer": [
+        "3",
+        "3",
+        "3"
+      ],
+      "aliases": []
+    },
+    {
+      "prompt": [
+        "一人ずつ1、2、3…と数え、10人目までの数を足すと？",
+        "Teammates count 1 through 10. What is the sum of those numbers?",
+        "1から10まで、じゅんにかぞえたかずをぜんぶたすと？"
+      ],
+      "answer": [
+        "55",
+        "55",
+        "55"
+      ],
+      "aliases": []
+    }
+  ]
+}

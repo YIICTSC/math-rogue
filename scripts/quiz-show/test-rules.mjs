@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 const out = await build({ stdin: { contents: "export * from './src/quiz-show/engine';export * from './src/quiz-show/authority';export * from './src/quiz-show/wolf';", resolveDir: process.cwd() }, bundle: true, write: false, format: 'esm', platform: 'node' });
-const E = await import('data:text/javascript;base64,' + Buffer.from(out.outputFiles[0].text).toString('base64'));
+const original = await import('data:text/javascript;base64,' + Buffer.from(out.outputFiles[0].text).toString('base64'));
+const E={...original,createShow:(...args)=>{const w=original.createShow(...args);w.plan.order='SEQUENTIAL';w.plan.autoAdvance=false;return w;}};
 const H = {id:'host',role:'host'}, player = id => ({id,role:'player'}), screen = {id:'screen',role:'screen'};
 const q = (extra={}) => ({id:'q1',prompt:'A secret question',answer:'Moon',aliases:['月','つき'],options:[],format:'TEXT',seconds:30,points:100,...extra});
 const good = (w,a,actor=H,now=1000) => assert.equal(E.act(w,actor,a,now),null,JSON.stringify(a));

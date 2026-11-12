@@ -10,10 +10,12 @@ export class ShowAuthority {
   private banned = new Set<string>();
   constructor(private hostKey: string, title?: string, saved?: { world: ShowWorld; seats: Seat[]; banned: string[] }) {
     this.world = saved?.world || createShow(title);
-    this.world.plan ||= { order: 'SEQUENTIAL', limit: 0, shuffleChoices: true };
+    this.world.plan ||= { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true };
+    this.world.plan.autoAdvance ??= true;
     this.world.queue ||= this.world.bank.map((_, i) => i);
     if (this.world.round) this.world.round.showJudgments ??= false;
     if (saved) {
+      delete this.world.autoProgress;
       for (const s of saved.seats) if (s.actor.role !== 'screen') this.seats.set(s.key, s);
       this.banned = new Set(saved.banned);
       for (const p of Object.values(this.world.players)) p.connected = false;
