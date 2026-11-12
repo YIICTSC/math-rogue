@@ -15,7 +15,7 @@ export function savedHost(): SavedHost | null {
   try { const s = JSON.parse(sessionStorage.getItem(HOST_SAVE) || 'null') as SavedHost; return s && /^\d{6}$/.test(s.address?.code) && /^[a-zA-Z0-9_-]{16,128}$/.test(s.key) && Date.now() - s.savedAt < 4 * 3600000 ? s : null; } catch { return null; }
 }
 function identity(address: RoomAddress, role: Role) {
-  const slot = `quiz-show-seat-${addressText(address)}-${role}`;
+  const slot = `quiz-show-seat-${address.transport === 'host' ? 'H' : 'S'}-${address.code}-${role}`;
   try { const old = sessionStorage.getItem(slot); if (old && /^[a-zA-Z0-9_-]{16,128}$/.test(old)) return old; const value = token(); sessionStorage.setItem(slot, value); return value; } catch { return token(); }
 }
 export interface InkEntry { revision: number; strokes: InkStroke[] }

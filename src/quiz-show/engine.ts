@@ -40,7 +40,7 @@ export function validQuestion(q: unknown): q is ShowQuestion {
 export function validBank(bank: unknown): bank is ShowQuestion[] {
   return Array.isArray(bank) && bank.length >= 1 && bank.length <= 60 && bank.every(validQuestion) && new Set(bank.map(q => q.id)).size === bank.length && new TextEncoder().encode(JSON.stringify(bank)).length <= 256000;
 }
-export function createShow(title = 'みんなでクイズ番組', now = Date.now()): ShowWorld {
+export function createShow(title = 'みんなでクイズ', now = Date.now()): ShowWorld {
   return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'SEQUENTIAL', limit: 0, shuffleChoices: true }, queue: [] };
 }
 export function addAnswerer(w: ShowWorld, id: string, name: unknown): ShowError | null {
@@ -76,11 +76,17 @@ function prepare(w: ShowWorld) {
     buzzer: null, buzzOrder: [], locked: [], votes: {}, consensus: null };
 }
 export function tickShow(w: ShowWorld, now = Date.now()) {
-  if (w.phase === 'open' && w.round && !w.round.paused && now >= w.round.deadline) { w.phase = 'closed'; w.round.remaining = 0; markUnanswered(w.round); w.revision++; }
+  if (w.phase === 'open' && w.round && !w.round.paused && now >= w.round.deadline) { w.phase = 'closed'; w.round.remaining = 0; markUnanswered(w.round); publishChoices(w); w.revision++; }
+}
+function publishChoices(w: ShowWorld) {
+  const r = w.round;
+  if (!r || r.question.format !== 'CHOICE' || !['STANDARD','BUZZER','SURVIVAL','TEAMS'].includes(r.mode)) return;
+  judge(w); r.revealed = [...r.eligible]; r.showAnswer = true; r.showJudgments = true; w.phase = 'reveal';
 }
 function markUnanswered(r: Round) { for (const id of r.eligible) if (id !== r.artist && !r.answers[id]?.submitted) r.grades[id] = false; }
 function pendingGrades(r: Round) { return ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS'].includes(r.mode) && r.eligible.some(id => r.answers[id]?.submitted && !owns(r.grades, id)); }
 function textCorrect(q: ShowQuestion, text: string) {
+  if (q.format === 'CHOICE') return text === q.answer;
   const n = normalizeAnswer(text);
   return !!n && [q.answer, ...q.aliases].some(a => !!a.trim() && normalizeAnswer(a) === n);
 }
@@ -214,7 +220,7 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now()):
         r.deadline = now + r.question.seconds * 1000; r.remaining = r.question.seconds * 1000; w.phase = 'open'; break;
       case 'close':
         if (w.phase !== 'open' || !r) return 'PHASE';
-        r.remaining = r.paused ? r.remaining : Math.max(0, r.deadline - now); markUnanswered(r); w.phase = 'closed'; break;
+        r.remaining = r.paused ? r.remaining : Math.max(0, r.deadline - now); markUnanswered(r); w.phase = 'closed'; publishChoices(w); break;
       case 'pause':
         if (w.phase !== 'open' || !r) return 'PHASE';
         if (!r.paused) r.remaining = Math.max(0, r.deadline - now); else r.deadline = now + r.remaining;

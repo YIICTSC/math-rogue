@@ -166,7 +166,7 @@
           try {
             const config = JSON.parse(node.textContent);
             // Invitees need only their name. Defer the main game and its curriculum.
-            if (/^[HS]-\d{6}$/.test((new URLSearchParams(location.search).get('quizShow') || '').trim().toUpperCase()) && Array.isArray(config.quizResources)) config.resources = config.quizResources;
+            if (/^(?:[HS]-)?\d{6}$/.test((new URLSearchParams(location.search).get('quizShow') || '').trim().toUpperCase()) && Array.isArray(config.quizResources)) config.resources = config.quizResources;
             if (typeof config.entry !== 'string' || !Array.isArray(config.resources) || !config.resources.length) return null;
             for (const item of [{url: config.entry}, ...config.resources]) {
               const url = new URL(item.url, location.href);

@@ -142,3 +142,14 @@ console.log('All quiz show rule tests passed.');
  const w=setup('BUZZER',2,q({format:'CHOICE',answer:'A',options:['A','B']}));good(w,{type:'buzz',roundId:w.round.id},player('p0'));answer(w,'p0','B');assert.equal(w.round.grades.p0,false);assert.equal(w.round.buzzer,null);good(w,{type:'buzz',roundId:w.round.id},player('p1'));
  const s=setup('SURVIVAL',3);for(const id of Object.keys(s.players)){s.players[id].lives=1;s.round.startLives[id]=1;}answer(s,'p0','Moon');close(s);score(s);assert.equal(s.phase,'finished');assert.equal(s.players.p0.lives,1);assert.equal(s.players.p1.lives,0);console.log('PASS automatic choice-buzzer reopening and survival final-standing finish');
 }
+
+// Shared curriculum choice answers are public to every participant only after close.
+for(const timeout of [false,true]){
+ const w=E.createShow();E.addAnswerer(w,'one','One');E.addAnswerer(w,'two','Two');E.addAnswerer(w,'three','No answer');
+ good(w,{type:'bank',questions:[q({format:'CHOICE',answer:'A',options:['A','a','B','C']})]});good(w,{type:'start'});good(w,{type:'open',roundId:w.round.id});
+ good(w,{type:'answer',roundId:w.round.id,text:'A',ink:[],submit:true},player('one'));good(w,{type:'answer',roundId:w.round.id,text:'a',ink:[],submit:true},player('two'));
+ assert.equal(E.viewFor(w,player('one')).round.tiles.find(t=>t.id==='two').visible,false);
+ if(timeout)E.tickShow(w,w.round.deadline+1);else good(w,{type:'close',roundId:w.round.id});
+ for(const actor of [H,player('one'),player('two'),screen]){const v=E.viewFor(w,actor);assert.equal(v.phase,'reveal');assert(v.round.tiles.every(t=>t.visible));assert.deepEqual(v.round.tiles.map(t=>t.correct),[true,false,false]);assert.equal(v.round.answer,'A');}
+}
+console.log('PASS exact curriculum-choice grading and automatic full answer/judgment list on manual and timed close');
