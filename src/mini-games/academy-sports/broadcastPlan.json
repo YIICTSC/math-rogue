@@ -1,0 +1,504 @@
+{
+  "lines": [
+    {
+      "id": "announcer/common.start",
+      "role": "announcer",
+      "text": "いよいよ試合開始です！ 最後まで目が離せません！"
+    },
+    {
+      "id": "analyst/common.start",
+      "role": "analyst",
+      "text": "まずは落ち着いて一つずつ。気合いだけで走ると、息が先に切れますからね。"
+    },
+    {
+      "id": "announcer/common.finish",
+      "role": "announcer",
+      "text": "試合終了！ 最後まで見応えのある勝負でした！"
+    },
+    {
+      "id": "analyst/common.finish",
+      "role": "analyst",
+      "text": "いいプレーも反省点も、次の試合の財産です。忘れ物にしないでくださいね。"
+    },
+    {
+      "id": "announcer/common.special",
+      "role": "announcer",
+      "text": "ここで大技だ！ 一気に勝負を動かすか！"
+    },
+    {
+      "id": "analyst/common.special",
+      "role": "analyst",
+      "text": "派手さに見合う結果を出したいですね。看板倒れはもったいないですよ。"
+    },
+    {
+      "id": "announcer/baseball.strike",
+      "role": "announcer",
+      "text": "見逃せない一球！ ストライクが入りました！"
+    },
+    {
+      "id": "analyst/baseball.strike",
+      "role": "analyst",
+      "text": "待つのも作戦ですが、待ちすぎると打席が終わりますよ。"
+    },
+    {
+      "id": "announcer/baseball.ball",
+      "role": "announcer",
+      "text": "ボールになりました。次の一球が大事です！"
+    },
+    {
+      "id": "analyst/baseball.ball",
+      "role": "analyst",
+      "text": "力むと狙いが散りますね。深呼吸は、ボールを放す前にどうぞ。"
+    },
+    {
+      "id": "announcer/baseball.foul",
+      "role": "announcer",
+      "text": "ファウル！ 勝負はまだ続きます！"
+    },
+    {
+      "id": "analyst/baseball.foul",
+      "role": "analyst",
+      "text": "当てたのは前進です。次はグラウンドの中に招待しましょう。"
+    },
+    {
+      "id": "announcer/baseball.out",
+      "role": "announcer",
+      "text": "アウトの判定！ ここは守る側が抑えました！"
+    },
+    {
+      "id": "analyst/baseball.out",
+      "role": "analyst",
+      "text": "勝負は厳しいですね。今の一本を、次の判断に生かしましょう。"
+    },
+    {
+      "id": "announcer/baseball.walk",
+      "role": "announcer",
+      "text": "フォアボール！ ランナーが出ました！"
+    },
+    {
+      "id": "analyst/baseball.walk",
+      "role": "analyst",
+      "text": "相手にプレゼントするには、ずいぶん大事な塁ですね。"
+    },
+    {
+      "id": "announcer/baseball.hit",
+      "role": "announcer",
+      "text": "打った！ 鋭い打球が飛んでいく！"
+    },
+    {
+      "id": "analyst/baseball.hit",
+      "role": "analyst",
+      "text": "いい当たりです。見とれる時間があったら、まず一塁へ走りましょう。"
+    },
+    {
+      "id": "announcer/baseball.homerun",
+      "role": "announcer",
+      "text": "伸びる、伸びる！ ホームラン！ 大きな一発です！"
+    },
+    {
+      "id": "analyst/baseball.homerun",
+      "role": "analyst",
+      "text": "いやあ、お見事。今の一球は、ボールに帰宅を命じましたね。"
+    },
+    {
+      "id": "announcer/baseball.steal",
+      "role": "announcer",
+      "text": "ランナーが動いた！ 盗塁を仕掛けます！"
+    },
+    {
+      "id": "analyst/baseball.steal",
+      "role": "analyst",
+      "text": "その勇気は認めます。帰り道の切符も、お忘れなく。"
+    },
+    {
+      "id": "announcer/soccer.shot",
+      "role": "announcer",
+      "text": "シュート！ ゴールを狙った！"
+    },
+    {
+      "id": "analyst/soccer.shot",
+      "role": "analyst",
+      "text": "威力だけでは決まりません。狙う場所まで、最後にもう一仕事です。"
+    },
+    {
+      "id": "announcer/soccer.goal",
+      "role": "announcer",
+      "text": "ゴール！ ネットを揺らした！ 素晴らしい得点です！"
+    },
+    {
+      "id": "analyst/soccer.goal",
+      "role": "analyst",
+      "text": "見事につなぎましたね。決めた選手も、支えた仲間も拍手です。"
+    },
+    {
+      "id": "announcer/soccer.save",
+      "role": "announcer",
+      "text": "止めた！ ゴールキーパー、見事なセーブ！"
+    },
+    {
+      "id": "analyst/soccer.save",
+      "role": "analyst",
+      "text": "頼もしいですね。ただ、守備の皆さんは毎回お願いしないように。"
+    },
+    {
+      "id": "announcer/soccer.steal",
+      "role": "announcer",
+      "text": "奪った！ ここからチャンスを作れるか！"
+    },
+    {
+      "id": "analyst/soccer.steal",
+      "role": "analyst",
+      "text": "取り返した後が大事です。喜んで立ち止まると、また取られますよ。"
+    },
+    {
+      "id": "announcer/soccer.post",
+      "role": "announcer",
+      "text": "惜しい！ ポストに当たった！"
+    },
+    {
+      "id": "analyst/soccer.post",
+      "role": "analyst",
+      "text": "ポストとの勝負ではないんですよ。次は、その内側を狙いましょう。"
+    },
+    {
+      "id": "announcer/soccer.offside",
+      "role": "announcer",
+      "text": "オフサイドの判定！ 飛び出しが少し早かった！"
+    },
+    {
+      "id": "analyst/soccer.offside",
+      "role": "analyst",
+      "text": "やる気が足より先に走りましたね。仲間のパスと時計を合わせましょう。"
+    },
+    {
+      "id": "announcer/soccer.pass",
+      "role": "announcer",
+      "text": "パスがつながった！ 仲間との連係が光ります！"
+    },
+    {
+      "id": "analyst/soccer.pass",
+      "role": "analyst",
+      "text": "ボールは足より速いですからね。全部一人で運ばなくてもいいんです。"
+    },
+    {
+      "id": "announcer/soccer.restart",
+      "role": "announcer",
+      "text": "試合が再開します！ 次の展開に注目です！"
+    },
+    {
+      "id": "analyst/soccer.restart",
+      "role": "analyst",
+      "text": "一度切れた流れを、ここで整えたいですね。焦りは置いていきましょう。"
+    },
+    {
+      "id": "announcer/volleyball.receive",
+      "role": "announcer",
+      "text": "拾った！ ナイスレシーブ！ 仲間につなぎます！"
+    },
+    {
+      "id": "analyst/volleyball.receive",
+      "role": "analyst",
+      "text": "いいですね。次の人が困らないボールこそ、優しいパスです。"
+    },
+    {
+      "id": "announcer/volleyball.spike",
+      "role": "announcer",
+      "text": "高い打点からスパイク！ 強烈な一撃だ！"
+    },
+    {
+      "id": "analyst/volleyball.spike",
+      "role": "analyst",
+      "text": "高さと勢いは十分です。あとは相手のいない所へ届けたいですね。"
+    },
+    {
+      "id": "announcer/volleyball.block",
+      "role": "announcer",
+      "text": "止めた！ 見事なブロックです！"
+    },
+    {
+      "id": "analyst/volleyball.block",
+      "role": "analyst",
+      "text": "壁になりましたね。お見事です。今度は味方の進路を塞がないように。"
+    },
+    {
+      "id": "announcer/volleyball.point",
+      "role": "announcer",
+      "text": "決まった！ ラリーを制しました！"
+    },
+    {
+      "id": "analyst/volleyball.point",
+      "role": "analyst",
+      "text": "最後までつないだご褒美ですね。一人で決めた顔をしないことです。"
+    },
+    {
+      "id": "announcer/volleyball.out",
+      "role": "announcer",
+      "text": "ボールは外！ アウトになりました！"
+    },
+    {
+      "id": "analyst/volleyball.out",
+      "role": "analyst",
+      "text": "力は十分でしたね。次はコートの大きさと相談しましょう。"
+    },
+    {
+      "id": "announcer/volleyball.serveFault",
+      "role": "announcer",
+      "text": "サーブミス！ ここは立て直したいところ！"
+    },
+    {
+      "id": "analyst/volleyball.serveFault",
+      "role": "analyst",
+      "text": "最初の一球で相手を助けてしまいましたね。次は確実につなぎましょう。"
+    },
+    {
+      "id": "announcer/volleyball.double",
+      "role": "announcer",
+      "text": "ダブルコンタクトの判定です！"
+    },
+    {
+      "id": "analyst/volleyball.double",
+      "role": "analyst",
+      "text": "丁寧に触りたいですね。二度手間は、ここでは親切になりません。"
+    },
+    {
+      "id": "announcer/volleyball.four",
+      "role": "announcer",
+      "text": "フォーヒット！ 攻撃を返し切れませんでした！"
+    },
+    {
+      "id": "analyst/volleyball.four",
+      "role": "analyst",
+      "text": "三回で返す約束です。相談が長くなると、ボールが先に困りますよ。"
+    },
+    {
+      "id": "referee/baseball.strike",
+      "role": "referee",
+      "text": "ストライク！"
+    },
+    {
+      "id": "referee/baseball.ball",
+      "role": "referee",
+      "text": "ボール！"
+    },
+    {
+      "id": "referee/baseball.foul",
+      "role": "referee",
+      "text": "ファウル！"
+    },
+    {
+      "id": "referee/baseball.out",
+      "role": "referee",
+      "text": "アウト！"
+    },
+    {
+      "id": "referee/baseball.safe",
+      "role": "referee",
+      "text": "セーフ！"
+    },
+    {
+      "id": "referee/baseball.walk",
+      "role": "referee",
+      "text": "ボールが四つ、1塁へ！"
+    },
+    {
+      "id": "referee/baseball.change",
+      "role": "referee",
+      "text": "スリーアウト、チェンジ！"
+    },
+    {
+      "id": "referee/baseball.start",
+      "role": "referee",
+      "text": "プレイボール！"
+    },
+    {
+      "id": "referee/soccer.offside",
+      "role": "referee",
+      "text": "オフサイドです！"
+    },
+    {
+      "id": "referee/soccer.freeKick",
+      "role": "referee",
+      "text": "フリーキック！"
+    },
+    {
+      "id": "referee/soccer.penalty",
+      "role": "referee",
+      "text": "ピーケーです！"
+    },
+    {
+      "id": "referee/soccer.corner",
+      "role": "referee",
+      "text": "コーナーキック！"
+    },
+    {
+      "id": "referee/soccer.throwIn",
+      "role": "referee",
+      "text": "スローイン！"
+    },
+    {
+      "id": "referee/soccer.goalKick",
+      "role": "referee",
+      "text": "ゴールキックです！"
+    },
+    {
+      "id": "referee/soccer.half",
+      "role": "referee",
+      "text": "前半終了！"
+    },
+    {
+      "id": "referee/soccer.finish",
+      "role": "referee",
+      "text": "試合終了！"
+    },
+    {
+      "id": "referee/volleyball.out",
+      "role": "referee",
+      "text": "アウト！"
+    },
+    {
+      "id": "referee/volleyball.in",
+      "role": "referee",
+      "text": "イン！"
+    },
+    {
+      "id": "referee/volleyball.double",
+      "role": "referee",
+      "text": "ダブルコンタクト！"
+    },
+    {
+      "id": "referee/volleyball.four",
+      "role": "referee",
+      "text": "4回触りました。反則です！"
+    },
+    {
+      "id": "referee/volleyball.libero",
+      "role": "referee",
+      "text": "アタックの反則！"
+    },
+    {
+      "id": "referee/volleyball.serveFault",
+      "role": "referee",
+      "text": "サーブの反則です！"
+    },
+    {
+      "id": "referee/volleyball.finish",
+      "role": "referee",
+      "text": "試合終了！"
+    },
+    {
+      "id": "referee/baseball.finish",
+      "role": "referee",
+      "text": "ゲームセット！"
+    }
+  ],
+  "exchanges": {
+    "common.start": [
+      "announcer/common.start",
+      "analyst/common.start"
+    ],
+    "common.finish": [
+      "announcer/common.finish",
+      "analyst/common.finish"
+    ],
+    "common.special": [
+      "announcer/common.special",
+      "analyst/common.special"
+    ],
+    "baseball.strike": [
+      "announcer/baseball.strike",
+      "analyst/baseball.strike"
+    ],
+    "baseball.ball": [
+      "announcer/baseball.ball",
+      "analyst/baseball.ball"
+    ],
+    "baseball.foul": [
+      "announcer/baseball.foul",
+      "analyst/baseball.foul"
+    ],
+    "baseball.out": [
+      "announcer/baseball.out",
+      "analyst/baseball.out"
+    ],
+    "baseball.walk": [
+      "announcer/baseball.walk",
+      "analyst/baseball.walk"
+    ],
+    "baseball.hit": [
+      "announcer/baseball.hit",
+      "analyst/baseball.hit"
+    ],
+    "baseball.homerun": [
+      "announcer/baseball.homerun",
+      "analyst/baseball.homerun"
+    ],
+    "baseball.steal": [
+      "announcer/baseball.steal",
+      "analyst/baseball.steal"
+    ],
+    "soccer.shot": [
+      "announcer/soccer.shot",
+      "analyst/soccer.shot"
+    ],
+    "soccer.goal": [
+      "announcer/soccer.goal",
+      "analyst/soccer.goal"
+    ],
+    "soccer.save": [
+      "announcer/soccer.save",
+      "analyst/soccer.save"
+    ],
+    "soccer.steal": [
+      "announcer/soccer.steal",
+      "analyst/soccer.steal"
+    ],
+    "soccer.post": [
+      "announcer/soccer.post",
+      "analyst/soccer.post"
+    ],
+    "soccer.offside": [
+      "announcer/soccer.offside",
+      "analyst/soccer.offside"
+    ],
+    "soccer.pass": [
+      "announcer/soccer.pass",
+      "analyst/soccer.pass"
+    ],
+    "soccer.restart": [
+      "announcer/soccer.restart",
+      "analyst/soccer.restart"
+    ],
+    "volleyball.receive": [
+      "announcer/volleyball.receive",
+      "analyst/volleyball.receive"
+    ],
+    "volleyball.spike": [
+      "announcer/volleyball.spike",
+      "analyst/volleyball.spike"
+    ],
+    "volleyball.block": [
+      "announcer/volleyball.block",
+      "analyst/volleyball.block"
+    ],
+    "volleyball.point": [
+      "announcer/volleyball.point",
+      "analyst/volleyball.point"
+    ],
+    "volleyball.out": [
+      "announcer/volleyball.out",
+      "analyst/volleyball.out"
+    ],
+    "volleyball.serveFault": [
+      "announcer/volleyball.serveFault",
+      "analyst/volleyball.serveFault"
+    ],
+    "volleyball.double": [
+      "announcer/volleyball.double",
+      "analyst/volleyball.double"
+    ],
+    "volleyball.four": [
+      "announcer/volleyball.four",
+      "analyst/volleyball.four"
+    ]
+  }
+}

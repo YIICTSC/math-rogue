@@ -1,3 +1,4 @@
+import academyBroadcastVoices from '../mini-games/academy-sports/broadcastVoices.generated.json';
 import {ACADEMY_VOICES} from '../mini-games/academy-sports/voiceCatalog';
 import {readPoints} from '../point-exchange/store';
 import {techniqueVoiceParts,dungeonTechniqueKey,type TechniqueSpeechMode,type VoicePart} from '../components/school-dungeon/techniques/voiceParts';
@@ -2265,6 +2266,15 @@ class AudioService {
       for(const name of names)if(name.startsWith('lantern-war-voice-')){this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);for(const audio of [...(this.activeHtmlSfx.get(name)||[])]){const ended=audio.onended;audio.onended=null;audio.pause();audio.currentTime=0;ended?.call(audio,new Event('ended'));}this.stopActiveSfx(name);}
       const cached=Object.keys(this.voiceBuffers).filter(name=>name.startsWith('lantern-war-voice-'));
       for(const name of cached.slice(0,Math.max(0,cached.length-16)))delete this.voiceBuffers[name];
+  }
+
+  public async playAcademyBroadcastVoiceFile(id:string){
+      const clip=(academyBroadcastVoices as Record<string,{path:string;seconds:number}>)[id];
+      if(!clip||!this.canPlayConversationVoice())return false;
+      this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      const name=`sports-voice-broadcast-${id}`,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
+      this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.seconds*1000+350,false,generation,true);
   }
 
   public async playAcademySportsVoiceFile(id:string){

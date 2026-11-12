@@ -19,6 +19,8 @@
     "test:academy-sports:online:browser": "node scripts/academy-sports/test-online-browser.mjs",
     "test:academy-sports:art": "node scripts/academy-sports/test-art-browser.mjs",
     "test:academy-sports:audio": "node scripts/academy-sports/audio-qa.mjs",
+    "test:academy-sports:commentary": "node scripts/test-academy-broadcast.mjs && node scripts/academy-sports/finalize-broadcast.mjs --check",
+    "test:academy-sports:commentary:browser": "node scripts/academy-sports/test-commentary-browser.mjs",
     "test:academy-sports:browser": "node scripts/academy-sports/browser-qa.mjs",
     "verify:academy-sports:assets": "node scripts/academy-sports/verify-assets.mjs",
     "test:kotoba-life": "node scripts/test-kotoba-life.mjs",

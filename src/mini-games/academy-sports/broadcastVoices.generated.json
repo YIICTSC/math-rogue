@@ -1,0 +1,314 @@
+{
+  "announcer/common.start": {
+    "path": "sfx/academy-broadcast/announcer/common.start.ogg",
+    "seconds": 4.68
+  },
+  "analyst/common.start": {
+    "path": "sfx/academy-broadcast/analyst/common.start.ogg",
+    "seconds": 7.72
+  },
+  "announcer/common.finish": {
+    "path": "sfx/academy-broadcast/announcer/common.finish.ogg",
+    "seconds": 5.16
+  },
+  "analyst/common.finish": {
+    "path": "sfx/academy-broadcast/analyst/common.finish.ogg",
+    "seconds": 7.92
+  },
+  "announcer/common.special": {
+    "path": "sfx/academy-broadcast/announcer/common.special.ogg",
+    "seconds": 4.04
+  },
+  "analyst/common.special": {
+    "path": "sfx/academy-broadcast/analyst/common.special.ogg",
+    "seconds": 6.64
+  },
+  "announcer/baseball.strike": {
+    "path": "sfx/academy-broadcast/announcer/baseball.strike.ogg",
+    "seconds": 4.24
+  },
+  "analyst/baseball.strike": {
+    "path": "sfx/academy-broadcast/analyst/baseball.strike.ogg",
+    "seconds": 5.24
+  },
+  "announcer/baseball.ball": {
+    "path": "sfx/academy-broadcast/announcer/baseball.ball.ogg",
+    "seconds": 4.04
+  },
+  "analyst/baseball.ball": {
+    "path": "sfx/academy-broadcast/analyst/baseball.ball.ogg",
+    "seconds": 7.12
+  },
+  "announcer/baseball.foul": {
+    "path": "sfx/academy-broadcast/announcer/baseball.foul.ogg",
+    "seconds": 3.12
+  },
+  "analyst/baseball.foul": {
+    "path": "sfx/academy-broadcast/analyst/baseball.foul.ogg",
+    "seconds": 5.88
+  },
+  "announcer/baseball.out": {
+    "path": "sfx/academy-broadcast/announcer/baseball.out.ogg",
+    "seconds": 4.24
+  },
+  "analyst/baseball.out": {
+    "path": "sfx/academy-broadcast/analyst/baseball.out.ogg",
+    "seconds": 6.44
+  },
+  "announcer/baseball.walk": {
+    "path": "sfx/academy-broadcast/announcer/baseball.walk.ogg",
+    "seconds": 3.48
+  },
+  "analyst/baseball.walk": {
+    "path": "sfx/academy-broadcast/analyst/baseball.walk.ogg",
+    "seconds": 4.56
+  },
+  "announcer/baseball.hit": {
+    "path": "sfx/academy-broadcast/announcer/baseball.hit.ogg",
+    "seconds": 3.76
+  },
+  "analyst/baseball.hit": {
+    "path": "sfx/academy-broadcast/analyst/baseball.hit.ogg",
+    "seconds": 6.4
+  },
+  "announcer/baseball.homerun": {
+    "path": "sfx/academy-broadcast/announcer/baseball.homerun.ogg",
+    "seconds": 5.2
+  },
+  "analyst/baseball.homerun": {
+    "path": "sfx/academy-broadcast/analyst/baseball.homerun.ogg",
+    "seconds": 5.96
+  },
+  "announcer/baseball.steal": {
+    "path": "sfx/academy-broadcast/announcer/baseball.steal.ogg",
+    "seconds": 3.56
+  },
+  "analyst/baseball.steal": {
+    "path": "sfx/academy-broadcast/analyst/baseball.steal.ogg",
+    "seconds": 6.2
+  },
+  "announcer/soccer.shot": {
+    "path": "sfx/academy-broadcast/announcer/soccer.shot.ogg",
+    "seconds": 3.04
+  },
+  "analyst/soccer.shot": {
+    "path": "sfx/academy-broadcast/analyst/soccer.shot.ogg",
+    "seconds": 6.76
+  },
+  "announcer/soccer.goal": {
+    "path": "sfx/academy-broadcast/announcer/soccer.goal.ogg",
+    "seconds": 4.96
+  },
+  "analyst/soccer.goal": {
+    "path": "sfx/academy-broadcast/analyst/soccer.goal.ogg",
+    "seconds": 7.04
+  },
+  "announcer/soccer.save": {
+    "path": "sfx/academy-broadcast/announcer/soccer.save.ogg",
+    "seconds": 4.12
+  },
+  "analyst/soccer.save": {
+    "path": "sfx/academy-broadcast/analyst/soccer.save.ogg",
+    "seconds": 7.12
+  },
+  "announcer/soccer.steal": {
+    "path": "sfx/academy-broadcast/announcer/soccer.steal.ogg",
+    "seconds": 3.72
+  },
+  "analyst/soccer.steal": {
+    "path": "sfx/academy-broadcast/analyst/soccer.steal.ogg",
+    "seconds": 6.76
+  },
+  "announcer/soccer.post": {
+    "path": "sfx/academy-broadcast/announcer/soccer.post.ogg",
+    "seconds": 3
+  },
+  "analyst/soccer.post": {
+    "path": "sfx/academy-broadcast/analyst/soccer.post.ogg",
+    "seconds": 6.56
+  },
+  "announcer/soccer.offside": {
+    "path": "sfx/academy-broadcast/announcer/soccer.offside.ogg",
+    "seconds": 4.24
+  },
+  "analyst/soccer.offside": {
+    "path": "sfx/academy-broadcast/analyst/soccer.offside.ogg",
+    "seconds": 6.88
+  },
+  "announcer/soccer.pass": {
+    "path": "sfx/academy-broadcast/announcer/soccer.pass.ogg",
+    "seconds": 4.2
+  },
+  "analyst/soccer.pass": {
+    "path": "sfx/academy-broadcast/analyst/soccer.pass.ogg",
+    "seconds": 6.4
+  },
+  "announcer/soccer.restart": {
+    "path": "sfx/academy-broadcast/announcer/soccer.restart.ogg",
+    "seconds": 4.32
+  },
+  "analyst/soccer.restart": {
+    "path": "sfx/academy-broadcast/analyst/soccer.restart.ogg",
+    "seconds": 6.96
+  },
+  "announcer/volleyball.receive": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.receive.ogg",
+    "seconds": 5.4
+  },
+  "analyst/volleyball.receive": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.receive.ogg",
+    "seconds": 6.36
+  },
+  "announcer/volleyball.spike": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.spike.ogg",
+    "seconds": 4.32
+  },
+  "analyst/volleyball.spike": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.spike.ogg",
+    "seconds": 6.92
+  },
+  "announcer/volleyball.block": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.block.ogg",
+    "seconds": 3.28
+  },
+  "analyst/volleyball.block": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.block.ogg",
+    "seconds": 7.4
+  },
+  "announcer/volleyball.point": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.point.ogg",
+    "seconds": 3.28
+  },
+  "analyst/volleyball.point": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.point.ogg",
+    "seconds": 6.84
+  },
+  "announcer/volleyball.out": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.out.ogg",
+    "seconds": 3.28
+  },
+  "analyst/volleyball.out": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.out.ogg",
+    "seconds": 5.96
+  },
+  "announcer/volleyball.serveFault": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.serveFault.ogg",
+    "seconds": 3.88
+  },
+  "analyst/volleyball.serveFault": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.serveFault.ogg",
+    "seconds": 7.16
+  },
+  "announcer/volleyball.double": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.double.ogg",
+    "seconds": 2.6
+  },
+  "analyst/volleyball.double": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.double.ogg",
+    "seconds": 6.64
+  },
+  "announcer/volleyball.four": {
+    "path": "sfx/academy-broadcast/announcer/volleyball.four.ogg",
+    "seconds": 4.4
+  },
+  "analyst/volleyball.four": {
+    "path": "sfx/academy-broadcast/analyst/volleyball.four.ogg",
+    "seconds": 7.88
+  },
+  "referee/baseball.strike": {
+    "path": "sfx/academy-broadcast/referee/baseball.strike.ogg",
+    "seconds": 1.15
+  },
+  "referee/baseball.ball": {
+    "path": "sfx/academy-broadcast/referee/baseball.ball.ogg",
+    "seconds": 0.9
+  },
+  "referee/baseball.foul": {
+    "path": "sfx/academy-broadcast/referee/baseball.foul.ogg",
+    "seconds": 1
+  },
+  "referee/baseball.out": {
+    "path": "sfx/academy-broadcast/referee/baseball.out.ogg",
+    "seconds": 0.85
+  },
+  "referee/baseball.safe": {
+    "path": "sfx/academy-broadcast/referee/baseball.safe.ogg",
+    "seconds": 1.15
+  },
+  "referee/baseball.walk": {
+    "path": "sfx/academy-broadcast/referee/baseball.walk.ogg",
+    "seconds": 3.08
+  },
+  "referee/baseball.change": {
+    "path": "sfx/academy-broadcast/referee/baseball.change.ogg",
+    "seconds": 1.65
+  },
+  "referee/baseball.start": {
+    "path": "sfx/academy-broadcast/referee/baseball.start.ogg",
+    "seconds": 1.15
+  },
+  "referee/soccer.offside": {
+    "path": "sfx/academy-broadcast/referee/soccer.offside.ogg",
+    "seconds": 2
+  },
+  "referee/soccer.freeKick": {
+    "path": "sfx/academy-broadcast/referee/soccer.freeKick.ogg",
+    "seconds": 1.15
+  },
+  "referee/soccer.penalty": {
+    "path": "sfx/academy-broadcast/referee/soccer.penalty.ogg",
+    "seconds": 1.57
+  },
+  "referee/soccer.corner": {
+    "path": "sfx/academy-broadcast/referee/soccer.corner.ogg",
+    "seconds": 1.15
+  },
+  "referee/soccer.throwIn": {
+    "path": "sfx/academy-broadcast/referee/soccer.throwIn.ogg",
+    "seconds": 1.15
+  },
+  "referee/soccer.goalKick": {
+    "path": "sfx/academy-broadcast/referee/soccer.goalKick.ogg",
+    "seconds": 2
+  },
+  "referee/soccer.half": {
+    "path": "sfx/academy-broadcast/referee/soccer.half.ogg",
+    "seconds": 1.15
+  },
+  "referee/soccer.finish": {
+    "path": "sfx/academy-broadcast/referee/soccer.finish.ogg",
+    "seconds": 1.15
+  },
+  "referee/volleyball.out": {
+    "path": "sfx/academy-broadcast/referee/volleyball.out.ogg",
+    "seconds": 1.15
+  },
+  "referee/volleyball.in": {
+    "path": "sfx/academy-broadcast/referee/volleyball.in.ogg",
+    "seconds": 0.65
+  },
+  "referee/volleyball.double": {
+    "path": "sfx/academy-broadcast/referee/volleyball.double.ogg",
+    "seconds": 1.2
+  },
+  "referee/volleyball.four": {
+    "path": "sfx/academy-broadcast/referee/volleyball.four.ogg",
+    "seconds": 3.52
+  },
+  "referee/volleyball.libero": {
+    "path": "sfx/academy-broadcast/referee/volleyball.libero.ogg",
+    "seconds": 1.15
+  },
+  "referee/volleyball.serveFault": {
+    "path": "sfx/academy-broadcast/referee/volleyball.serveFault.ogg",
+    "seconds": 3.04
+  },
+  "referee/volleyball.finish": {
+    "path": "sfx/academy-broadcast/referee/volleyball.finish.ogg",
+    "seconds": 1.15
+  },
+  "referee/baseball.finish": {
+    "path": "sfx/academy-broadcast/referee/baseball.finish.ogg",
+    "seconds": 1.15
+  }
+}

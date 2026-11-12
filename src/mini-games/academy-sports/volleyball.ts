@@ -19,7 +19,7 @@ export function resetRally(s:Volleyball){
 export function volleyballPoint(s:Volleyball,team:number,reason:string){
  s.points[team]++;stat(s,team,'points');morale(s,team,12);const target=s.config.points===15||s.setNumber===s.config.sets&&s.config.sets>1?15:25;
  const wonSet=s.points[team]>=target&&s.points[team]-s.points[1-team]>=2;
- if(wonSet){s.score[team]++;stat(s,team,'sets');if(s.score[team]>=Math.floor(s.config.sets/2)+1){finish(s);event(s,'cheer','マッチポイントを決めた！');return;}s.setNumber++;s.points=[0,0];}
+ if(wonSet){s.score[team]++;stat(s,team,'sets');if(s.score[team]>=Math.floor(s.config.sets/2)+1){event(s,'score',reason);finish(s);event(s,'cheer','マッチポイントを決めた！');return;}s.setNumber++;s.points=[0,0];}
  if(s.server!==team){s.rotations[team]=(s.rotations[team]+1)%6;s.serveSlot[team]=(3-s.rotations[team]+6)%6;}s.server=team;
  replay(s,wonSet?'セット獲得！':reason,1.6);resetRally(s);event(s,'score',reason);
 }
