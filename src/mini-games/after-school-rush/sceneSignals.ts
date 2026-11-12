@@ -1,0 +1,12 @@
+export const PASSAGE_COST = [2, 0, 1] as const;
+export const GLIDER_WIND = [1, -2, 1] as const;
+export const GLIDER_ALTITUDE = [2, 4] as const;
+export const ROPE_FIRST = 1150;
+export const ROPE_INTERVAL = 1450;
+export const ROPE_MARGIN = 195;
+export const TOAST_READY = 750;
+export const TOAST_BURNT = 1450;
+export const CYLINDER_CAPACITY = [5, 3] as const;
+export const ENSEMBLE_BEATS = [0, 2, -1, 1, 1, -1, 2, 0, 2] as const;
+export const ENSEMBLE_BEAT_MS = 850;
+export const FESTIVAL_ORDER = [1, 0, 2] as const;

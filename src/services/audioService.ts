@@ -15,6 +15,7 @@ import { kochoVoiceDuration } from '../mini-games/kocho/voices';
 import type { KochoHeroId } from '../mini-games/kocho/guests';
 import {HOBBY_SOUNDS,RHYTHM_PAD_SOUNDS,type HobbySound} from '../mini-games/gakuro-craft/gameAudio';
 import {FISHING_SOUNDS,type FishingSound} from '../rpg/fishingAudio';
+import { isRushJingle, renderMiniRushCue, type MiniRushCue } from './miniRushSound';
 
 import type { AttackEffectKey, CharacterAppearanceMode, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
@@ -92,7 +93,12 @@ const SHOGI_GIMMICK_SOUND_PROFILES: Readonly<Record<string, ShogiGimmickSoundPro
   TRANSFORM: { baseSound: 'buff', notes: [330, 440, 587, 784, 1175], wave: 'sawtooth', spacing: 0.055, duration: 0.24, volume: 0.1 },
 };
 
+const MINI_RUSH_VOICE = 'mini-rush-voice';
+const MINI_RUSH_FOLEY = 'mini-rush-foley';
+const MINI_RUSH_JINGLE = 'mini-rush-jingle';
+
 class AudioService {
+  private miniRushGeneration = 0;
   private rpgHeroVoice: {theme:'high-school'|'magic';heroId:string}|null=null;
   public setRpgHeroVoice(voice:{theme:'high-school'|'magic';heroId:string}|null){this.rpgHeroVoice=voice;}
   public playRpgHeroVoice(action:'attack'|'damage'|'skill'|'finish'|'defeat'='attack'){const voice=this.rpgHeroVoice;if(!voice)return Promise.resolve(false);if(voice.theme==='high-school')return this.playHighSchoolVoiceFile(voice.heroId,`${action==='skill'?'power':action}-${Math.floor(Math.random()*5)+1}`);return this.redirectMagicHeroVoice(voice.heroId,action==='damage'?'damage':action==='skill'?'spell':'attack');}
@@ -399,6 +405,7 @@ class AudioService {
       this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices();
       this.stopKochoVoices();
       this.stopCardClubVoices(); this.stopPaperPlaneVoices();
+      this.stopMiniRushAudio();
       if (this.backgroundPlaybackEnabled) return;
       if (this.appIsActive) {
           this.appIsActive = false;
@@ -623,7 +630,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
+      if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushVoice(); }
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1631,6 +1638,7 @@ class AudioService {
 
   public stopAllAudio() {
       this.stopBGM();
+      this.stopMiniRushAudio();
       const activeSfxNames = new Set([
           ...this.activeSfxSources.keys(),
           ...this.activeHtmlSfx.keys(),
@@ -1652,7 +1660,7 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       this.applyBgmVolume();
-      if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); }
+      if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushAudio(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1892,21 +1900,22 @@ class AudioService {
       maxDurationMs: number,
       overlap: boolean,
       generation: number,
+      startDeadline = Infinity,
   ): Promise<boolean> {
       const lifecycle = this.appLifecycleGeneration;
-      const canPlay = () => !this.isMuted && this.appIsActive
+      const canPlay = () => performance.now() < startDeadline && !this.isMuted && this.appIsActive
           && lifecycle === this.appLifecycleGeneration
           && (typeof document === 'undefined' || !document.hidden)
           && this.getHtmlSfxVolume(name) > 0;
       if (!canPlay()) return false;
       void this.resumeAudioContext();
       for (const path of paths) {
-          if (!canPlay()) return false;
+          if (!canPlay() || (name === MINI_RUSH_VOICE && this.sfxPlaybackGenerations.get(name) !== generation)) return false;
           if ((name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
-              const htmlVolume = this.getHtmlSfxVolume(name);
+              const htmlVolume = Math.min(1, this.getHtmlSfxVolume(name));
               audio.volume = htmlVolume;
               const didStart = await Promise.race([
                   audio.play().then(() => true).catch(() => false),
@@ -1977,12 +1986,13 @@ class AudioService {
       overlap: boolean,
       generation: number,
       waitForCompletion = false,
+      startDeadline = Infinity,
   ) {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return false;
 
       const lifecycle = this.appLifecycleGeneration;
-      const canPlay = () => !this.isMuted && this.appIsActive
+      const canPlay = () => performance.now() < startDeadline && !this.isMuted && this.appIsActive
           && lifecycle === this.appLifecycleGeneration
           && (typeof document === 'undefined' || !document.hidden)
           && this.getHtmlSfxVolume(name) > 0;
@@ -1990,7 +2000,7 @@ class AudioService {
       // Keep the pre-2026-09-20 playback behavior as the primary path. Voice
       // clips played through HTMLAudioElement bypass the WebAudio master delay,
       // so they start immediately and stay dry instead of gaining an echo.
-      const htmlStarted = await this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation);
+      const htmlStarted = await this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation, startDeadline);
       if (htmlStarted) return true;
       if (!canPlay()) return false;
 
@@ -2000,7 +2010,7 @@ class AudioService {
       // as possible instead of entering the global SFX/BGM delay loop.
       const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
       if (canPlay() && contextReady && this.ctx?.state === 'running') {
-          const buffer = await this.loadVoiceBuffer(name, paths);
+          const buffer = await this.loadVoiceBuffer(name === MINI_RUSH_VOICE ? paths[0] : name, paths);
           if (this.sfxPlaybackGenerations.get(name) !== generation) return true;
           if (!canPlay()) return false;
           if (buffer && this.startSfxSource(
@@ -2024,7 +2034,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name === MINI_RUSH_VOICE || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2610,6 +2620,49 @@ class AudioService {
           this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
           this.stopActiveSfx(name);
       }
+  }
+
+  public playMiniRushCue(cue: MiniRushCue) {
+      const generation = this.miniRushGeneration;
+      const bus = isRushJingle(cue) ? MINI_RUSH_JINGLE : MINI_RUSH_FOLEY;
+      this.runSfxWhenReady(() => {
+          if (!this.ctx || generation !== this.miniRushGeneration) return;
+          const key = `mini-rush-cue/${cue}`;
+          const buffer = this.sfxBuffers[key] ??= renderMiniRushCue(this.ctx, cue);
+          this.startSfxSource(bus, buffer, buffer.duration * 1000, false);
+      }, 175);
+  }
+
+  public prepareMiniRushVoices(paths: readonly string[]) {
+      if (!this.canPlayConversationVoice()) return;
+      this.init();
+      for (const path of paths) {
+          const url = versionBgmPath(assetUrl(path));
+          void this.loadVoiceBuffer(url, [url]);
+      }
+  }
+
+  public playMiniRushVoice(path: string, duration: number) {
+      if (!this.canPlayConversationVoice()) return;
+      this.stopMiniRushVoice();
+      const generation = this.sfxPlaybackGenerations.get(MINI_RUSH_VOICE)!;
+      const url = versionBgmPath(assetUrl(path));
+      const buffer = this.voiceBuffers[url];
+      if (buffer && this.startSfxSource(MINI_RUSH_VOICE, buffer, duration + 120, false, this.voiceVolume, true)) return;
+      void this.playVoiceFile(MINI_RUSH_VOICE, [url], duration + 120, false, generation, false, performance.now() + 220);
+  }
+
+  public stopMiniRushVoice() {
+      const generation = (this.sfxPlaybackGenerations.get(MINI_RUSH_VOICE) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(MINI_RUSH_VOICE, generation);
+      this.stopActiveSfx(MINI_RUSH_VOICE);
+  }
+
+  public stopMiniRushAudio() {
+      this.miniRushGeneration++;
+      this.stopMiniRushVoice();
+      this.stopActiveSfx(MINI_RUSH_FOLEY);
+      this.stopActiveSfx(MINI_RUSH_JINGLE);
   }
 
   public playHomeDashVoice(heroId: string, event: 'jump' | 'dash' | 'flight' | 'damage' | 'upgrade' | 'defeat') {

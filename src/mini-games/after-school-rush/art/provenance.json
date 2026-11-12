@@ -1,0 +1,225 @@
+{
+  "dataset": "https://huggingface.co/datasets/Angais/pixel-art-atlas-1.4m",
+  "revision": "bf78f8c8cbafa6d07718111a94d41e2dd79ddaa7",
+  "split": "train",
+  "dedication": "CC0-1.0, to the extent of rights Angais can waive",
+  "sourceTerms": "https://www.krea.ai/krea-2-licensing",
+  "sprites": [
+    {
+      "file": "drumstick.png",
+      "rowId": 1,
+      "caption": "chicken drumstick",
+      "sha256": "8eeab6e618d705908009cf2bb02bc85d55014b5ce37002714f7ec0353988c821"
+    },
+    {
+      "file": "ghost-cat.png",
+      "rowId": 5,
+      "caption": "ghost cat",
+      "sha256": "96fd7fa9c81a64a019edb02ad91beca5203fe63d104a3a80e1d0d6ac3f1deac3"
+    },
+    {
+      "file": "mimic.png",
+      "rowId": 7,
+      "caption": "mimic chest with sharp teeth",
+      "sha256": "eb2fdaae4723933877dd6f3b6256214477de1348149be59c092e12948c560575"
+    },
+    {
+      "file": "raspberry.png",
+      "rowId": 10,
+      "caption": "raspberry",
+      "sha256": "f00c8e6289d6af8215ac33a51849c30cd781eeb0ae31ed9bc314ef7a280758fa"
+    },
+    {
+      "file": "crystal.png",
+      "rowId": 19,
+      "caption": "orange crystal shard",
+      "sha256": "b9716a931e196d488a8ec7a4194feab96de512bc04d4ae5e2f7f0606f31032e0"
+    },
+    {
+      "file": "coin.png",
+      "rowId": 20,
+      "caption": "oval coin",
+      "sha256": "435b2fb7c450f8aec2e4b47ee40bfa1e52a5f428d7118d38bfc1dda45cbc9a7b"
+    },
+    {
+      "file": "egg.png",
+      "rowId": 23,
+      "caption": "monster egg",
+      "sha256": "999a63b07d51383d9b5237555063fc88b2792c4a87a9440d0f9c31870f84157b"
+    },
+    {
+      "file": "slime.png",
+      "rowId": 32,
+      "caption": "cute teal slime",
+      "sha256": "2e30c47f1476e0cb25dbec68a3aacd563b3d20ee01a5a56a8189bca1fd29b403"
+    },
+    {
+      "file": "wind.png",
+      "rowId": 38,
+      "caption": "wind gust icon",
+      "sha256": "2eec05a623ce22c0d3e178e257d8dd296750c08030157ba67ead3fe93bb5c9bc"
+    },
+    {
+      "file": "hourglass.png",
+      "rowId": 43,
+      "caption": "glossy orange hourglass icon",
+      "sha256": "e448840aa190bac164204b33077a121d43d711cb67ad30bd7f0f50d43b2ccd33"
+    },
+    {
+      "file": "target.png",
+      "rowId": 58,
+      "caption": "target ring marker",
+      "sha256": "df34cf28e7b4419abf40a2aa52ee75c25e3b1f2e4403fa42dbe393d61e37a284"
+    },
+    {
+      "file": "orange.png",
+      "rowId": 68,
+      "caption": "giant orange",
+      "sha256": "389a50502b783d2db9d14902d7ae42abf04ce7dd2587bc106e1dc923786c26ff"
+    },
+    {
+      "file": "books.png",
+      "rowId": 82,
+      "caption": "stack of books",
+      "sha256": "70f11e95888dfa68437b7f7069286645fe74a0435d126a2291297bef83a8df03"
+    },
+    {
+      "file": "shield.png",
+      "rowId": 84,
+      "caption": "knight shield",
+      "sha256": "4833c0dc48970c0e096c622895259b69460fe748fa02f2ea7f9bda6fbe1c2d71"
+    },
+    {
+      "file": "gem.png",
+      "rowId": 94,
+      "caption": "triangle-cut gem",
+      "sha256": "711907c046972907daf90072e0b73107dc574c47792f850bfbca4973202593ad"
+    },
+    {
+      "file": "hook.png",
+      "rowId": 0,
+      "caption": "sturdy brass hook",
+      "sha256": "9c8647e496f60d1afcee87b6d2006339f89f4312cc01c680f4ba44b51b639287"
+    },
+    {
+      "file": "desk.png",
+      "rowId": 6,
+      "caption": "desk",
+      "sha256": "a381b6f08d7054ec4e0cb2f187c186702a46ad67f45561ccb9d742deaf901e35"
+    },
+    {
+      "file": "table.png",
+      "rowId": 16,
+      "caption": "old wooden table",
+      "sha256": "24c5d231a97bf3dd9f6e3078b7477d94e07f2cd50c093167e41c15dbc8295b4d"
+    },
+    {
+      "file": "mirror.png",
+      "rowId": 17,
+      "caption": "vanity mirror",
+      "sha256": "d18304bcc7fb4168bc036aa006b3cb5d222ea3d0862c3eb2cfd12f3459a1e849"
+    },
+    {
+      "file": "train.png",
+      "rowId": 22,
+      "caption": "steam locomotive",
+      "sha256": "344fe256ce4bde78a831908dacbfd4e62d681bf44953ee9d6c9c121f2d43a183"
+    },
+    {
+      "file": "rug.png",
+      "rowId": 26,
+      "caption": "old beige rug with a heart pattern",
+      "sha256": "68a0ad73cdb938a71bedf4f763bc96c2801d083e683474ee4fd5b11cd719c930"
+    },
+    {
+      "file": "splash.png",
+      "rowId": 35,
+      "caption": "enchanted water splash",
+      "sha256": "5aee1299ee4453b377d5fdf94496f290e9c1b67bc9a0cd9783ce43ecfb302e4f"
+    },
+    {
+      "file": "vase.png",
+      "rowId": 46,
+      "caption": "precious vase",
+      "sha256": "d56a730648dceca5e45aa3576dbadfe0c405b048c8343860d6c9cea7bcf95630"
+    },
+    {
+      "file": "truck.png",
+      "rowId": 50,
+      "caption": "muddy teal food truck",
+      "sha256": "970bd24ca0b912a6066ec400b6d2846327928082587a5db6f25433f672ded959"
+    },
+    {
+      "file": "jug.png",
+      "rowId": 54,
+      "caption": "tiny white insulated jug",
+      "sha256": "4dabe1ad93c51de53428dfca1e3731546e19ee79bca5beea5cc8498396bc2c37"
+    },
+    {
+      "file": "stairs.png",
+      "rowId": 59,
+      "caption": "stone stairs",
+      "sha256": "f79e852901ae9ef5c3abdc7923dc10a2729d516e92c4a148add6ef4be48c905e"
+    },
+    {
+      "file": "bread.png",
+      "rowId": 60,
+      "caption": "travel bread",
+      "sha256": "f41f32be9c1c8108e2b68232cb68f44a8af8aec0d07d8bbc2f4d72f5ad8ea676"
+    },
+    {
+      "file": "sign.png",
+      "rowId": 67,
+      "caption": "giant yield sign",
+      "sha256": "ed1de130d7d53eb2259bc629510baaea29c0f13cc0fc746e6bc874385e0ffb85"
+    },
+    {
+      "file": "flask.png",
+      "rowId": 70,
+      "caption": "decanter",
+      "sha256": "44fe69ebf7218b3ea7cb6148303f8f21eb8c0389a32f13db5a2cad24a9040d7b"
+    },
+    {
+      "file": "pin.png",
+      "rowId": 73,
+      "caption": "sleek thumbtack",
+      "sha256": "b6de5422b16e82ecc1526b1187884bb281ab6756c5b04bd973207d78d1d90672"
+    },
+    {
+      "file": "mask.png",
+      "rowId": 80,
+      "caption": "painted purple cat mask",
+      "sha256": "2bf45ed9944dc3c3a01e31657669edd35cfe4c549992b684e8a496ea7ccea6be"
+    },
+    {
+      "file": "alembic.png",
+      "rowId": 85,
+      "caption": "dusty alembic with red liquid",
+      "sha256": "842c9143eea5cadd312a39829bc0b6db1653abde4fad048a15c1df8ad06e35c9"
+    },
+    {
+      "file": "pipette.png",
+      "rowId": 89,
+      "caption": "brand new pipette with red liquid",
+      "sha256": "421116d11b73e51366ce19338a8a30d4eeec47db09e6bebf601b53b1345ba1b4"
+    },
+    {
+      "file": "box.png",
+      "rowId": 92,
+      "caption": "red storage box",
+      "sha256": "ede74df17f94088c70d1f7cdfcab3f35247991e39f0c78008c6ec1a5a0016f1c"
+    },
+    {
+      "file": "block.png",
+      "rowId": 97,
+      "caption": "faded plastic toy building block",
+      "sha256": "4d989564505ebe831730797fe810f273c06a67b28a35d10b2ba7f8d743fe4692"
+    },
+    {
+      "file": "ship-lantern.png",
+      "rowId": 99,
+      "caption": "ship lantern",
+      "sha256": "c2396b52b35fb87b683d6ec366632e8633e5f810c8121423369f11e2e1b4e8c5"
+    }
+  ]
+}

@@ -3935,6 +3935,8 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "キャンセル": "Cancel",
     "あと": "Need",
     "帰宅ダッシュ": "Go Home Dash",
+    "放課後ミニラッシュ": "After-School Mini Rush",
+    "文化祭の鐘を取り戻す10章の物語。200本の短いお題に挑戦。": "Recover the festival chime in ten chapters and 200 quick challenges.",
     "障害物をよけて帰宅せよ！レベルアップで教科を強化。": "Dodge obstacles and get home! Level up to strengthen subjects.",
     "迫りくる敵の大群から生き残れ！ヴァンサバ風アクション。": "Survive waves of incoming enemies in an action arena.",
     "放課後ポーカー": "After-School Poker",

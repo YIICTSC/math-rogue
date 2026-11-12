@@ -958,6 +958,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.DODGEBALL_SHOOTING,
     GameScreen.BASKETBALL_LAYUP,
     GameScreen.MINI_GAME_POKER,
+    GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
     GameScreen.MINI_GAME_CARD_CLUB,
     GameScreen.MINI_GAME_SURVIVOR,
     GameScreen.MINI_GAME_STAR_TIDE,
@@ -21341,7 +21342,9 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete('cardClubRoom');window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
+                            onBack={gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH
+                                ? () => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))
+                                : gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete('cardClubRoom');window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
                             inviteCode={vrInviteOpen?vrCode:''}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}

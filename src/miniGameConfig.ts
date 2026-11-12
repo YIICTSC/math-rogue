@@ -3,6 +3,7 @@ import { GameScreen } from './types';
 import { storageService } from './services/storageService';
 import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
 import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
+import { RUSH_BEST_KEY, STORY_KEY } from './mini-games/after-school-rush/rules';
 
 export interface MiniGameConfig {
   id: string;
@@ -67,6 +68,22 @@ export const MINI_GAMES: MiniGameConfig[] = [
     glowColor: 'rgba(150,200,160,0.4)',
     icon: Compass,
     clearAction: () => { localStorage.removeItem('gakurogear-vr-v1'); }
+  },
+  {
+    id: 'AFTER_SCHOOL_RUSH',
+    name: '放課後ミニラッシュ',
+    titleLines: ['放課後ミニラッシュ'],
+    description: '文化祭の鐘を取り戻す10章の物語。200本の短いお題に挑戦。',
+    screen: GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
+    threshold: 0,
+    typeLabel: 'ARCADE',
+    typeColor: 'bg-violet-700',
+    glowColor: 'rgba(246,191,77,0.55)',
+    icon: Sparkles,
+    clearAction: () => {
+      localStorage.removeItem(RUSH_BEST_KEY);
+      localStorage.removeItem(STORY_KEY);
+    },
   },
   {
     id: 'GO_HOME',
