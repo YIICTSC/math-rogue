@@ -4,6 +4,7 @@ import {readPoints} from '../point-exchange/store';
 import {techniqueVoiceParts,dungeonTechniqueKey,type TechniqueSpeechMode,type VoicePart} from '../components/school-dungeon/techniques/voiceParts';
 import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
 import lanternVoiceManifest from '../mini-games/lantern-war/voiceManifest.json';
+import {crossGameBattleClips} from '../mini-games/lantern-war/battleVoiceBank';
 import {sportsVoicePath,sportsVoiceDuration,sportsVoiceAvailable} from '../mini-games/shared/sportsVoices';
 import {STAR_VOICE_IDS} from '../mini-games/star-tide/voiceIds';
 import {chronicleVoicePath} from '../components/school-dungeon/chronicles/voices';
@@ -2253,7 +2254,7 @@ class AudioService {
   }
 
   public async playLanternWarVoiceFile(id:string,overlap=false){
-      const clip=Object.values(lanternVoiceManifest as Record<string,{id:string;path:string;duration:number}>).find(c=>c.id===id);
+      const clip=crossGameBattleClips.find(c=>c.id===id)||Object.values(lanternVoiceManifest as Record<string,{id:string;path:string;duration:number}>).find(c=>c.id===id);
       if(!/^[a-f0-9]{20}$/.test(id)||!clip||!clip.path.startsWith('sfx/')||clip.path.includes('..')||!this.canPlayConversationVoice())return false;
       if(!overlap)this.stopLanternWarVoices();this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
       // Overlapping calls share the cancellation generation, including repeated clips.

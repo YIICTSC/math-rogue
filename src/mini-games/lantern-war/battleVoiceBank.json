@@ -1,0 +1,614 @@
+{
+  "dungeons2-lyria": {
+    "attack": {
+      "id": "cfa01bd7d0399ed65a23",
+      "path": "sfx/dungeons2-voices/lyria/attack.ogg",
+      "duration": 1.774625,
+      "text": "星よ、切り開け！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "4f75c756bcf3283980e6",
+      "path": "sfx/dungeons2-voices/lyria/damage.ogg",
+      "duration": 1.481875,
+      "text": "まだ、負けない！",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "05c0a92c8c4ffacd1fd4",
+      "path": "sfx/dungeons2-voices/lyria/heal.ogg",
+      "duration": 2.1205,
+      "text": "もう大丈夫。立て直そう。",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "f895390e9b59d6dc1115",
+      "path": "sfx/dungeons2-voices/lyria/finish.ogg",
+      "duration": 1.9075,
+      "text": "これが、私の答え！",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "df35e38546ad1c951a4c",
+      "path": "sfx/dungeons2-voices/lyria/defeat.ogg",
+      "duration": 1.257333,
+      "text": "みんな、ごめん……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "05c0a92c8c4ffacd1fd4",
+      "path": "sfx/dungeons2-voices/lyria/heal.ogg",
+      "duration": 2.1205,
+      "text": "もう大丈夫。立て直そう。",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "19fc23824275e9d31cce",
+      "path": "sfx/dungeons2-voices/lyria/ultimate-3.ogg",
+      "duration": 1.576542,
+      "text": "てんきょくグランドクロス！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-celis": {
+    "attack": {
+      "id": "709b4d48fc6a6ee3d7fa",
+      "path": "sfx/dungeons2-voices/celis/attack.ogg",
+      "duration": 1.869167,
+      "text": "氷よ、貫いて！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "bdf4f29e25eb8b509df5",
+      "path": "sfx/dungeons2-voices/celis/damage.ogg",
+      "duration": 1.744292,
+      "text": "このくらい、平気。",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "b0ee7075c0c432dcb264",
+      "path": "sfx/dungeons2-voices/celis/heal.ogg",
+      "duration": 1.34225,
+      "text": "心を落ち着けて。",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "66f7f4dfba9a8e107e74",
+      "path": "sfx/dungeons2-voices/celis/finish.ogg",
+      "duration": 1.780083,
+      "text": "静かに、眠って。",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "047bd0a4afa4605efb38",
+      "path": "sfx/dungeons2-voices/celis/defeat.ogg",
+      "duration": 1.757458,
+      "text": "もう、届かないの……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "b0ee7075c0c432dcb264",
+      "path": "sfx/dungeons2-voices/celis/heal.ogg",
+      "duration": 1.34225,
+      "text": "心を落ち着けて。",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "5a4853003f795683e85f",
+      "path": "sfx/dungeons2-voices/celis/ultimate-3.ogg",
+      "duration": 1.571792,
+      "text": "ぜつれいのおうかん！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-flora": {
+    "attack": {
+      "id": "aa459710e4fbaa34e288",
+      "path": "sfx/dungeons2-voices/flora/attack.ogg",
+      "duration": 1.965167,
+      "text": "狙いは、外さない！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "617cbe15263ddaac2215",
+      "path": "sfx/dungeons2-voices/flora/damage.ogg",
+      "duration": 2.454167,
+      "text": "いたっ、まだまだ！",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "6ae839e7cb4b06aca7f5",
+      "path": "sfx/dungeons2-voices/flora/heal.ogg",
+      "duration": 1.960583,
+      "text": "さあ、元気出して！",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "8df643af2238d22cd70c",
+      "path": "sfx/dungeons2-voices/flora/finish.ogg",
+      "duration": 2.338333,
+      "text": "やったね、大成功！",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "25f695b880db92d8fe7b",
+      "path": "sfx/dungeons2-voices/flora/defeat.ogg",
+      "duration": 2.107417,
+      "text": "森のみんな、またね……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "6ae839e7cb4b06aca7f5",
+      "path": "sfx/dungeons2-voices/flora/heal.ogg",
+      "duration": 1.960583,
+      "text": "さあ、元気出して！",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "6fae2afbd00ca737c89e",
+      "path": "sfx/dungeons2-voices/flora/ultimate-3.ogg",
+      "duration": 1.623083,
+      "text": "ばんかのけっかい！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-noctia": {
+    "attack": {
+      "id": "d5d8f318a9fd32e65ed9",
+      "path": "sfx/dungeons2-voices/noctia/attack.ogg",
+      "duration": 2.014208,
+      "text": "影に、沈みなさい。",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "edc13f7105e8a235cd85",
+      "path": "sfx/dungeons2-voices/noctia/damage.ogg",
+      "duration": 2.1865,
+      "text": "ふふ、やるわね。",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "6f7d598875d9f1ca1a9f",
+      "path": "sfx/dungeons2-voices/noctia/heal.ogg",
+      "duration": 1.865458,
+      "text": "ひと息、つきましょう。",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "b835326ea704ef102bdb",
+      "path": "sfx/dungeons2-voices/noctia/finish.ogg",
+      "duration": 1.652,
+      "text": "これで、おしまい。",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "2c6c3ec4cdee1bd10fba",
+      "path": "sfx/dungeons2-voices/noctia/defeat.ogg",
+      "duration": 2.153125,
+      "text": "月が、遠いわね……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "6f7d598875d9f1ca1a9f",
+      "path": "sfx/dungeons2-voices/noctia/heal.ogg",
+      "duration": 1.865458,
+      "text": "ひと息、つきましょう。",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "fc89ab80a35039323d02",
+      "path": "sfx/dungeons2-voices/noctia/ultimate-3.ogg",
+      "duration": 1.533625,
+      "text": "かいきげっしょく！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-aurene": {
+    "attack": {
+      "id": "6e0b3a77f186ba850c21",
+      "path": "sfx/dungeons2-voices/aurene/attack.ogg",
+      "duration": 1.864375,
+      "text": "光よ、導いて！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "a26cddbabdc68154016b",
+      "path": "sfx/dungeons2-voices/aurene/damage.ogg",
+      "duration": 2.045208,
+      "text": "私は、立っています！",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "721702d85356e6c4452c",
+      "path": "sfx/dungeons2-voices/aurene/heal.ogg",
+      "duration": 2.452042,
+      "text": "あなたに、癒やしの光を。",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "a04360935a205dc4176f",
+      "path": "sfx/dungeons2-voices/aurene/finish.ogg",
+      "duration": 1.848625,
+      "text": "安らかな、夜明けを。",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "53a433d042e479f08a3e",
+      "path": "sfx/dungeons2-voices/aurene/defeat.ogg",
+      "duration": 1.733917,
+      "text": "どうか、みんなを……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "721702d85356e6c4452c",
+      "path": "sfx/dungeons2-voices/aurene/heal.ogg",
+      "duration": 2.452042,
+      "text": "あなたに、癒やしの光を。",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "60b0b6b0ca2a9e6e6996",
+      "path": "sfx/dungeons2-voices/aurene/ultimate-3.ogg",
+      "duration": 1.567958,
+      "text": "せいじつのしゅくさい！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-ignis": {
+    "attack": {
+      "id": "af89b10a9eeedefe13aa",
+      "path": "sfx/dungeons2-voices/ignis/attack.ogg",
+      "duration": 1.780083,
+      "text": "俺が、道を開く！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "3c3022110fb5915844f4",
+      "path": "sfx/dungeons2-voices/ignis/damage.ogg",
+      "duration": 1.5085,
+      "text": "へっ、まだいける！",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "aada453ebd3334a09cac",
+      "path": "sfx/dungeons2-voices/ignis/heal.ogg",
+      "duration": 1.632875,
+      "text": "もう一度、いくぞ！",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "04e65a40e1611bf0e037",
+      "path": "sfx/dungeons2-voices/ignis/finish.ogg",
+      "duration": 1.56,
+      "text": "よっしゃ、決まった！",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "f0a24d6927f6a35f6356",
+      "path": "sfx/dungeons2-voices/ignis/defeat.ogg",
+      "duration": 1.877792,
+      "text": "くそっ、ここまでか……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "aada453ebd3334a09cac",
+      "path": "sfx/dungeons2-voices/ignis/heal.ogg",
+      "duration": 1.632875,
+      "text": "もう一度、いくぞ！",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "ab81dadff1d17a0470b4",
+      "path": "sfx/dungeons2-voices/ignis/ultimate-3.ogg",
+      "duration": 1.17675,
+      "text": "ぐれんブレイバー！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-leon": {
+    "attack": {
+      "id": "3cac59b8c6ed82e34517",
+      "path": "sfx/dungeons2-voices/leon/attack.ogg",
+      "duration": 2.86425,
+      "text": "この剣に、誓う！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "98816fd33593a74076c9",
+      "path": "sfx/dungeons2-voices/leon/damage.ogg",
+      "duration": 2.518458,
+      "text": "盾は、砕けない！",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "07dcfc4fd385f51d1bbd",
+      "path": "sfx/dungeons2-voices/leon/heal.ogg",
+      "duration": 2.59875,
+      "text": "立ち上がれ、友よ。",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "cbab55c6486772207bec",
+      "path": "sfx/dungeons2-voices/leon/finish.ogg",
+      "duration": 2.859458,
+      "text": "正しき道を、ここに。",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "2c235b26d74da5d5bd66",
+      "path": "sfx/dungeons2-voices/leon/defeat.ogg",
+      "duration": 2.521458,
+      "text": "誓いを、託す……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "07dcfc4fd385f51d1bbd",
+      "path": "sfx/dungeons2-voices/leon/heal.ogg",
+      "duration": 2.59875,
+      "text": "立ち上がれ、友よ。",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "8b96883039e4403f44d2",
+      "path": "sfx/dungeons2-voices/leon/ultimate-3.ogg",
+      "duration": 2.831542,
+      "text": "にちりんエクスカリバー！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-orion": {
+    "attack": {
+      "id": "7a29b5344610d36ec82d",
+      "path": "sfx/dungeons2-voices/orion/attack.ogg",
+      "duration": 1.7765,
+      "text": "そこが、隙だ。",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "b5e81ad22e403098f85f",
+      "path": "sfx/dungeons2-voices/orion/damage.ogg",
+      "duration": 1.888875,
+      "text": "まだ、終わらない。",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "c4a348ef8a43adf2b660",
+      "path": "sfx/dungeons2-voices/orion/heal.ogg",
+      "duration": 1.721083,
+      "text": "借りは、返す。",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "d99863fb6a1840bbebcb",
+      "path": "sfx/dungeons2-voices/orion/finish.ogg",
+      "duration": 2.000625,
+      "text": "勝負は、ついた。",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "6b03acea39a1529ec416",
+      "path": "sfx/dungeons2-voices/orion/defeat.ogg",
+      "duration": 1.785125,
+      "text": "まだ、先が……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "c4a348ef8a43adf2b660",
+      "path": "sfx/dungeons2-voices/orion/heal.ogg",
+      "duration": 1.721083,
+      "text": "借りは、返す。",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "9e57635a348fbe646662",
+      "path": "sfx/dungeons2-voices/orion/ultimate-3.ogg",
+      "duration": 1.638792,
+      "text": "こくげつエクリプス！",
+      "source": "dungeons2"
+    }
+  },
+  "dungeons2-leif": {
+    "attack": {
+      "id": "8b97c6f83edea37fc5dc",
+      "path": "sfx/dungeons2-voices/leif/attack.ogg",
+      "duration": 1.617833,
+      "text": "風よ、まっすぐに！",
+      "source": "dungeons2"
+    },
+    "damage": {
+      "id": "0997fa7ae20bb4fb7e60",
+      "path": "sfx/dungeons2-voices/leif/damage.ogg",
+      "duration": 1.0975,
+      "text": "っと、危ないな！",
+      "source": "dungeons2"
+    },
+    "heal": {
+      "id": "9d9d4458998af3bba4b2",
+      "path": "sfx/dungeons2-voices/leif/heal.ogg",
+      "duration": 1.786542,
+      "text": "よし、調子戻った！",
+      "source": "dungeons2"
+    },
+    "win": {
+      "id": "c6011406bee875da086a",
+      "path": "sfx/dungeons2-voices/leif/finish.ogg",
+      "duration": 1.60925,
+      "text": "ほらね、命中！",
+      "source": "dungeons2"
+    },
+    "defeat": {
+      "id": "db92f22d97f550b90449",
+      "path": "sfx/dungeons2-voices/leif/defeat.ogg",
+      "duration": 1.546292,
+      "text": "ごめん、先に行って……。",
+      "source": "dungeons2"
+    },
+    "support": {
+      "id": "9d9d4458998af3bba4b2",
+      "path": "sfx/dungeons2-voices/leif/heal.ogg",
+      "duration": 1.786542,
+      "text": "よし、調子戻った！",
+      "source": "dungeons2"
+    },
+    "ultimate": {
+      "id": "4296a807768e4d7a948a",
+      "path": "sfx/dungeons2-voices/leif/ultimate-3.ogg",
+      "duration": 1.568042,
+      "text": "せんようのりゅうせいう！",
+      "source": "dungeons2"
+    }
+  },
+  "nagi": {
+    "attack": {
+      "id": "393fb22e7207c48a54d4",
+      "path": "sfx/star-tide/action-bow-2.ogg",
+      "duration": 1.363375,
+      "text": "風を読んで！",
+      "source": "star-tide"
+    },
+    "damage": {
+      "id": "f0eee16d0b2f5141f02e",
+      "path": "sfx/star-tide/action-damage-1.ogg",
+      "duration": 1.381833,
+      "text": "まだ大丈夫！",
+      "source": "star-tide"
+    },
+    "heal": {
+      "id": "0438861baa33bfb71525",
+      "path": "sfx/star-tide/action-heal-1.ogg",
+      "duration": 1.997417,
+      "text": "ありがとう、助かった！",
+      "source": "star-tide"
+    },
+    "support": {
+      "id": "02700f8295de9c82a071",
+      "path": "sfx/star-tide/action-shield-0.ogg",
+      "duration": 1.134417,
+      "text": "ここは守る！",
+      "source": "star-tide"
+    },
+    "win": {
+      "id": "dcbdc3707f380febfbbe",
+      "path": "sfx/star-tide/action-quest-0.ogg",
+      "duration": 2.809583,
+      "text": "約束、守れたね。",
+      "source": "star-tide"
+    },
+    "ultimate": {
+      "id": "613df23245c7c658c140",
+      "path": "sfx/lantern-war/nagi/613df23245c7c658c140.ogg",
+      "duration": 3.12,
+      "text": "アストラルオーシャン！",
+      "source": "existing-technique"
+    },
+    "defeat": {
+      "id": "dfe0da771c2df39bea55",
+      "path": "sfx/lantern-war/battle/nagi/defeat.ogg",
+      "duration": 4.0,
+      "text": "ごめん……航路を、託すね。",
+      "source": "irodori-cpu"
+    }
+  },
+  "mio": {
+    "ultimate": {
+      "id": "55b4954a776c7140b57e",
+      "path": "sfx/lantern-war/mio/55b4954a776c7140b57e.ogg",
+      "duration": 3.12,
+      "text": "フォレストヴォレー！",
+      "source": "existing-technique"
+    },
+    "attack": {
+      "id": "4f737ea6a112ac8c6757",
+      "path": "sfx/lantern-war/battle/mio/attack.ogg",
+      "duration": 2.8,
+      "text": "道は、私が開くよ！",
+      "source": "irodori-cpu"
+    },
+    "damage": {
+      "id": "47b0a8108b9b2caa664b",
+      "path": "sfx/lantern-war/battle/mio/damage.ogg",
+      "duration": 2.299977,
+      "text": "まだ、平気だよ！",
+      "source": "irodori-cpu"
+    },
+    "heal": {
+      "id": "e0be95973e01fa1a6cfe",
+      "path": "sfx/lantern-war/battle/mio/heal.ogg",
+      "duration": 2.8,
+      "text": "ありがとう、元気が出た！",
+      "source": "irodori-cpu"
+    },
+    "support": {
+      "id": "93c2556a255b5e131eb5",
+      "path": "sfx/lantern-war/battle/mio/support.ogg",
+      "duration": 2.8,
+      "text": "みんなを、守るよ！",
+      "source": "irodori-cpu"
+    },
+    "win": {
+      "id": "846d6ec0cbb74e607d06",
+      "path": "sfx/lantern-war/battle/mio/win.ogg",
+      "duration": 2.8,
+      "text": "みんな、無事でよかった！",
+      "source": "irodori-cpu"
+    },
+    "defeat": {
+      "id": "d46fed26133fe85a1c26",
+      "path": "sfx/lantern-war/battle/mio/defeat.ogg",
+      "duration": 3.5,
+      "text": "ごめんね……あとは、お願い。",
+      "source": "irodori-cpu"
+    }
+  },
+  "sena": {
+    "ultimate": {
+      "id": "82db59b46c4301d34d54",
+      "path": "sfx/lantern-war/sena/82db59b46c4301d34d54.ogg",
+      "duration": 3.12,
+      "text": "クロノダブル！",
+      "source": "existing-technique"
+    },
+    "attack": {
+      "id": "b1987ae7de576f99c8e3",
+      "path": "sfx/lantern-war/battle/sena/attack.ogg",
+      "duration": 2.5,
+      "text": "そこが弱点ね！",
+      "source": "irodori-cpu"
+    },
+    "damage": {
+      "id": "7ec3c45b643b93e6a7b9",
+      "path": "sfx/lantern-war/battle/sena/damage.ogg",
+      "duration": 2.299977,
+      "text": "まだ、動けるわ！",
+      "source": "irodori-cpu"
+    },
+    "heal": {
+      "id": "ee494eec191806238cc8",
+      "path": "sfx/lantern-war/battle/sena/heal.ogg",
+      "duration": 2.299977,
+      "text": "ありがとう。助かったわ。",
+      "source": "irodori-cpu"
+    },
+    "support": {
+      "id": "72ab52f01fd9954c24c2",
+      "path": "sfx/lantern-war/battle/sena/support.ogg",
+      "duration": 2.299977,
+      "text": "支えるわ。任せて！",
+      "source": "irodori-cpu"
+    },
+    "win": {
+      "id": "77c4009ea8a86038a043",
+      "path": "sfx/lantern-war/battle/sena/win.ogg",
+      "duration": 2.299977,
+      "text": "みんな無事ね。よかった！",
+      "source": "irodori-cpu"
+    },
+    "defeat": {
+      "id": "00589319ab61e8cf9f95",
+      "path": "sfx/lantern-war/battle/sena/defeat.ogg",
+      "duration": 3.5,
+      "text": "ごめん……みんなを、お願い。",
+      "source": "irodori-cpu"
+    }
+  }
+}

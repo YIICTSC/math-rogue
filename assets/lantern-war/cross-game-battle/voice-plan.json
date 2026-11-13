@@ -1,0 +1,148 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small",
+  "model_revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+  "code_revision": "382205679ebc32295b7d1bfb329327d04c8f4eed",
+  "model_device": "cpu",
+  "codec_device": "cpu",
+  "clips": [
+    {
+      "actor": "nagi",
+      "kind": "defeat",
+      "text": "ごめん……航路を、託すね。",
+      "path": "sfx/lantern-war/battle/nagi/defeat.ogg",
+      "reference": "public/sfx/star-tide/action-heal-1.ogg",
+      "caption": "若い女性の声。明るく芯のある中高音。少しハスキーで快活な航海士。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。 はっきりと、語尾まで明瞭に話す。 敗北の悔しさをこらえ、静かに仲間へ託す。",
+      "seconds": 4.0,
+      "spoken_text": "ごめん……こうろを、たくすね。",
+      "steps": 12,
+      "seed": 20261213
+    },
+    {
+      "actor": "mio",
+      "kind": "attack",
+      "text": "道は、私が開くよ！",
+      "path": "sfx/lantern-war/battle/mio/attack.ogg",
+      "reference": "public/sfx/star-tide/npc-1-room-0.ogg",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。自然な標準日本語。仲間を大切にする道案内の少女。語尾まで明瞭に、自然な抑揚で話す。",
+      "seconds": 2.8,
+      "steps": 12,
+      "seed": 20261314
+    },
+    {
+      "actor": "mio",
+      "kind": "damage",
+      "text": "まだ、平気だよ！",
+      "path": "sfx/lantern-war/battle/mio/damage.ogg",
+      "reference": "public/sfx/star-tide/npc-1-room-0.ogg",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 2.3
+    },
+    {
+      "actor": "mio",
+      "kind": "heal",
+      "text": "ありがとう、元気が出た！",
+      "path": "sfx/lantern-war/battle/mio/heal.ogg",
+      "reference": "public/sfx/star-tide/npc-1-room-0.ogg",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。 はっきりと、語尾まで明瞭に話す。",
+      "seconds": 2.8,
+      "spoken_text": "ありがとう、げんきがでた！",
+      "steps": 12,
+      "seed": 20261216
+    },
+    {
+      "actor": "mio",
+      "kind": "support",
+      "text": "みんなを、守るよ！",
+      "path": "sfx/lantern-war/battle/mio/support.ogg",
+      "reference": "public/sfx/star-tide/npc-1-room-0.ogg",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。自然な標準日本語。仲間を大切にする道案内の少女。語尾まで明瞭に、自然な抑揚で話す。",
+      "seconds": 2.8,
+      "steps": 12,
+      "seed": 20261317
+    },
+    {
+      "actor": "mio",
+      "kind": "win",
+      "text": "みんな、無事でよかった！",
+      "path": "sfx/lantern-war/battle/mio/win.ogg",
+      "reference": "public/sfx/star-tide/npc-1-room-0.ogg",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。自然な標準日本語。仲間を大切にする道案内の少女。語尾まで明瞭に、自然な抑揚で話す。",
+      "seconds": 2.8,
+      "steps": 12,
+      "seed": 20261318
+    },
+    {
+      "actor": "mio",
+      "kind": "defeat",
+      "text": "ごめんね……あとは、お願い。",
+      "path": "sfx/lantern-war/battle/mio/defeat.ogg",
+      "reference": "public/sfx/star-tide/npc-1-room-0.ogg",
+      "caption": "若い女性の声。柔らかく好奇心のある高めの声。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 3.5
+    },
+    {
+      "actor": "sena",
+      "kind": "attack",
+      "text": "そこが弱点ね！",
+      "path": "sfx/lantern-war/battle/sena/attack.ogg",
+      "reference": "public/sfx/star-tide/npc-3-room-0.ogg",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。 はっきりと、語尾まで明瞭に話す。",
+      "seconds": 2.5,
+      "spoken_text": "そこが、じゃくてんね！",
+      "steps": 12,
+      "seed": 20261220
+    },
+    {
+      "actor": "sena",
+      "kind": "damage",
+      "text": "まだ、動けるわ！",
+      "path": "sfx/lantern-war/battle/sena/damage.ogg",
+      "reference": "public/sfx/star-tide/npc-3-room-0.ogg",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 2.3
+    },
+    {
+      "actor": "sena",
+      "kind": "heal",
+      "text": "ありがとう。助かったわ。",
+      "path": "sfx/lantern-war/battle/sena/heal.ogg",
+      "reference": "public/sfx/star-tide/npc-3-room-0.ogg",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 2.3
+    },
+    {
+      "actor": "sena",
+      "kind": "support",
+      "text": "支えるわ。任せて！",
+      "path": "sfx/lantern-war/battle/sena/support.ogg",
+      "reference": "public/sfx/star-tide/npc-3-room-0.ogg",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 2.3
+    },
+    {
+      "actor": "sena",
+      "kind": "win",
+      "text": "みんな無事ね。よかった！",
+      "path": "sfx/lantern-war/battle/sena/win.ogg",
+      "reference": "public/sfx/star-tide/npc-3-room-0.ogg",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 2.3
+    },
+    {
+      "actor": "sena",
+      "kind": "defeat",
+      "text": "ごめん……みんなを、お願い。",
+      "path": "sfx/lantern-war/battle/sena/defeat.ogg",
+      "reference": "public/sfx/star-tide/npc-3-room-0.ogg",
+      "caption": "大人の女性の声。少し低めの明瞭な中音。頼れる修理工。 自然な日本語。戦闘中の短い、明瞭で感情のある演技。",
+      "seconds": 3.5
+    }
+  ],
+  "codec": "Aratako/Semantic-DACVAE-Japanese-32dim",
+  "codec_revision": "47376ee24834d7a05a48ebabfe3cde29b3c5e214",
+  "model_precision": "bf16",
+  "codec_precision": "bf16",
+  "latest_checked_at": "2026-11-13",
+  "checkpoint_preparation": "Official fp32 weights streamed to bf16 for CPU inference; same weights and tokenizer, no fine-tuning.",
+  "cpu_bf16_compatibility_adapter": true
+}
