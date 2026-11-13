@@ -8,15 +8,15 @@ try{
  const play=async()=>{await advance(1800);await p.waitForFunction(()=>__rush.stage.tag==='play');assert.equal(await p.locator('.asr-action-stage').count(),1,'Exactly one live stage');};
  const practice=async key=>{await p.evaluate(key=>{window.__driverKeys=[];__rush.practice(key);},key);await play();};
  const shot=name=>p.screenshot({path:out+'/'+name+'.png'});
- async function actorVisible(){const result=await p.evaluate(async()=>{
+ async function actorVisible(){await p.evaluate(()=>new Promise(requestAnimationFrame));const result=await p.evaluate(async()=>{
   const stage=document.querySelector('.asr-action-stage'),actor=stage.querySelector('.asr-cast-actor'),img=actor?.querySelector('.asr-actor-sheet');
   if(!actor||!img)return {error:'Missing character image'};await img.decode();
   const frame=actor.querySelector('.asr-actor-frame'),box=frame.getBoundingClientRect(),bounds=stage.getBoundingClientRect();
-  const cols=parseFloat(img.style.width)/100,rows=parseFloat(img.style.height)/100,x=-parseFloat(img.style.left)/100,y=-parseFloat(img.style.top)/100;
+  const cols=parseFloat(img.style.width)/100,rows=parseFloat(img.style.height)/100,x=-parseFloat(img.style.left)/100||0,y=-parseFloat(img.style.top)/100||0;
   const canvas=document.createElement('canvas');canvas.width=64;canvas.height=64;const ctx=canvas.getContext('2d');ctx.drawImage(img,x*img.naturalWidth/cols,y*img.naturalHeight/rows,img.naturalWidth/cols,img.naturalHeight/rows,0,0,64,64);
   const pixels=ctx.getImageData(0,0,64,64).data;let count=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]>16)count++;
-  return {width:box.width,height:box.height,pixels:count,overlap:Math.max(0,Math.min(box.right,bounds.right)-Math.max(box.left,bounds.left))*Math.max(0,Math.min(box.bottom,bounds.bottom)-Math.max(box.top,bounds.top)),sized:actor.style.height.endsWith('px'),id:actor.dataset.actor};
- });assert(!result.error&&result.width>16&&result.height>16&&result.overlap>120&&result.pixels>100&&result.sized,'Visible, loaded, nonempty actor: '+JSON.stringify(result));}
+  return {width:box.width,height:box.height,pixels:count,overlap:Math.max(0,Math.min(box.right,bounds.right)-Math.max(box.left,bounds.left))*Math.max(0,Math.min(box.bottom,bounds.bottom)-Math.max(box.top,bounds.top)),sized:actor.style.height.endsWith('px'),id:actor.dataset.actor,pose:actor.dataset.pose,atlas:actor.dataset.atlas,path:new URL(img.src).pathname,row:y,column:x,rows,cols};
+ });assert(!result.error&&result.width>16&&result.height>16&&result.overlap>120&&result.pixels>100&&result.sized,'Visible, loaded, nonempty actor: '+JSON.stringify(result));return result;}
 
  async function bounds(selector){const b=await p.locator(selector).first().boundingBox(),v=p.viewportSize();assert(b&&b.x>=-1&&b.y>=-1&&b.x+b.width<=v.width+1&&b.y+b.height<=v.height+1,selector+' '+JSON.stringify(b)+' '+JSON.stringify(v));return b;}
  async function layouts(name){for(const[width,height]of[[390,844],[844,390],[320,568],[1280,720]]){await p.setViewportSize({width,height});await bounds('.asr-cabinet');const field=await bounds('.asr-action-stage');assert(field.height>=height*.33,'Generous playfield at '+width);await bounds('.asr-controller');await bounds('[data-asr-button=a]');await bounds('[data-asr-button=b]');await actorVisible();assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await shot(name+'-'+width);}}
@@ -29,6 +29,27 @@ try{
  const all=await p.evaluate(()=>__rush.catalog.map(e=>({key:e.key,family:e.game.action.family,boss:!!e.game.boss})));
  for(const entry of all){await practice(entry.key);assert.equal(await p.locator('[data-asr-button]').count(),2);assert.equal(await p.locator('[data-asr-button=a] span').innerText(),await p.evaluate(()=>__rush.stage.round.entry.game.action.a[0]));assert.equal(await p.locator('.asr-world-targets,.asr-original-controls').count(),0,'No question/choice panel remains');await bounds('.asr-action-stage');await bounds('.asr-controller');await actorVisible();}
  console.log('PASS all 100 games render loaded, nonempty character frames (including drivers), physical stages and stick + A/B; no choice cards remain');
+ // Every jumping game keeps the Dash airborne row at ascent, apex and descent.
+ for(const entry of all.filter(e=>['run','climb','hurdles'].includes(e.family))){
+  await practice(entry.key);
+  await p.evaluate(async()=>{const{actionWorld}=await import('/src/mini-games/after-school-rush/action/physics.ts');const s=__rush.stage,v=[...s.round.state],S=__rush.S,w=actionWorld(s.round.entry.game.action,v),g=w.platforms[0];v[S.X]=g.x+g.w/2;v[S.Y]=g.y;v[S.VY]=0;v[S.AX]=0;v[S.LAST_GROUND]=v[S.T];__rush.put({...s,round:{...s.round,state:v}});});
+  await p.keyboard.press('z');await advance(120);
+  const rising=await actorVisible();assert.equal(rising.pose,'jump');assert.equal(rising.atlas,'dash');assert.equal(rising.row,1);assert.equal(rising.column,0);assert(rising.path.endsWith('/heroes/'+rising.id+'.webp'));
+  await advance(264);const apex=await actorVisible();assert.equal(apex.pose,'jump','No standing pose at jump apex: '+entry.key);assert.equal(apex.column,1);
+  await advance(180);const falling=await actorVisible();assert.equal(falling.pose,'jump');assert.equal(falling.column,2);
+  await advance(100);assert.equal((await actorVisible()).column,3);if(entry.family==='run')await shot('dash-jump-'+rising.id);
+  await advance(180);const landed=await actorVisible();assert.equal(landed.pose,'idle');assert.equal(landed.atlas,'dash');assert.equal(landed.row,0);
+ }
+ for(const entry of all.filter(e=>['hurdles','collect','dodge'].includes(e.family))){
+  await practice(entry.key);const duration=entry.family==='hurdles'?650:260;
+  await p.keyboard.press(entry.family==='hurdles'?'x':'z');const enter=await actorVisible();assert.equal(enter.pose,'duck');assert.equal(enter.column,0);assert(enter.path.endsWith('/slides/'+enter.id+'.webp'));assert.equal(enter.rows,1);assert.equal(enter.cols,2);
+  await advance(80);const first=(await actorVisible()).column;await advance(70);const second=(await actorVisible()).column;assert([0,1].includes(first)&&[0,1].includes(second)&&first!==second,'Slide hold is animated: '+entry.key);
+  if(entry.family==='hurdles')await shot('dash-crouch-'+enter.id);
+  await advance(duration-200);assert((await actorVisible()).column<=1);await advance(100);assert.notEqual((await actorVisible()).pose,'duck');
+ }
+ console.log('PASS every jumping and crouching game uses Dash sheets: 4 flight phases, apex continuity, landing, complete 2-frame slide hold and recovery');
+ // Audit every character/facing/frame, including guest sprites, for real image content.
+ const audit=await p.evaluate(async()=>{const{rushActorSprite}=await import('/src/mini-games/after-school-rush/actorSprite.ts');const ids=['high-school-warrior','high-school-caretaker','high-school-assassin','high-school-chef','high-school-gardener','high-school-librarian','high-school-mage','high-school-dodgeball','high-school-bard','magic-shizuku','magic-koharu','magic-akari'];let checked=0;const cache=new Map();for(const id of ids)for(const facing of ['side','rear'])for(const pose of ['idle','walk','jump','duck'])for(const age of [0,100,200,300]){const f=rushActorSprite({id,pose,age,facing,dashMovement:true});let img=cache.get(f.path);if(!img){img=new Image();img.src='/'+f.path;await img.decode();cache.set(f.path,img);}const canvas=document.createElement('canvas');canvas.width=64;canvas.height=64;const ctx=canvas.getContext('2d');ctx.drawImage(img,f.column*img.naturalWidth/f.columns,f.row*img.naturalHeight/f.rows,img.naturalWidth/f.columns,img.naturalHeight/f.rows,0,0,64,64);const a=ctx.getImageData(0,0,64,64).data;let count=0;for(let i=3;i<a.length;i+=4)if(a[i]>16)count++;for(let y=0;y<64;y++)if(a[(y*64)*4+3]>16||a[(y*64+63)*4+3]>16)throw Error('Clipped Dash frame '+JSON.stringify({id,pose,facing,f}));if(count<100)throw Error('Empty Dash frame '+JSON.stringify({id,pose,facing,f}));checked++;}return checked;});assert.equal(audit,384);console.log('PASS all 12 characters × side/rear × idle/run/jump/slide × 4 frame samples have complete, nonempty Dash artwork');
  const representatives=all.filter((e,i)=>!e.boss&&all.findIndex(x=>x.family===e.family&&!x.boss)===i);
  for(const entry of representatives){await p.setViewportSize({width:390,height:844});await practice(entry.key);await drive(700);if(['run','flap','aim','throw','rhythm','climb','collect','carry','brake'].includes(entry.family))await layouts('action-'+entry.family);await p.setViewportSize({width:390,height:844});const result=await drive();assert.equal(result.outcome,'clear',entry.family+' '+JSON.stringify(result));await shot('action-'+entry.family+'-clear');console.log('PASS real keyboard controls and clear:',entry.family);}
  // Two simultaneous touch contacts: steer with one thumb, jump with the other.

@@ -7,6 +7,7 @@ import { gameText } from '../copy';
 import { castFor, type Pose } from '../direction';
 import type { Action, Outcome } from '../engine';
 import { RushActor } from '../RoundEffects';
+import { usesDashMovement } from '../actorSprite';
 import type { State } from '../originals/model';
 import { actionWorld, FLOOR, noteLane, S, sideView, survivalTime, timingGoal } from './physics';
 import type { Point } from './types';
@@ -25,10 +26,12 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
   const stationary = ['aim', 'timing', 'throw', 'rhythm'].includes(family);
   const player = stationary ? { x: family === 'timing' ? timingGoal(spec) : family === 'rhythm' ? 500 : 120, y: 530 } : { x: s[S.X], y: s[S.Y] };
   const rolling = a && ['collect', 'dodge'].includes(family);
+  const grounded = isSide && w.platforms.some(p => s[S.X] >= p.x - 10 && s[S.X] <= p.x + p.w + 10 && Math.abs(s[S.Y] - p.y) < 3 && s[S.VY] >= 0);
+  const dashMovement = usesDashMovement(family);
   const pose: Pose = outcome ? outcome === 'clear' ? 'win' : 'miss' : family === 'aim' ? 'aim'
-    : family === 'flap' || isSide && Math.abs(s[S.VY]) > 35 ? 'jump' : rolling || family === 'hurdles' && b ? 'duck'
+    : family === 'flap' || isSide && !grounded ? 'jump' : rolling || family === 'hurdles' && b ? 'duck'
       : family === 'duel' && a ? 'strike' : family === 'throw' && a ? 'throw'
-        : a || family === 'carry' && s[S.CARRIED] ? 'use' : Math.abs(s[S.AX]) + Math.abs(s[S.AY]) > .1 ? 'walk' : 'idle';
+        : a && !dashMovement || family === 'carry' && s[S.CARRIED] ? 'use' : Math.abs(s[S.AX]) + Math.abs(s[S.AY]) > .1 ? 'walk' : 'idle';
   const progress = ['dodge', 'hurdles', 'flap', 'balance'].includes(family) ? Math.min(1, elapsed / survivalTime(spec))
     : family === 'push' ? Math.min(1, Math.abs(s[S.BOX_X] - (spec.variant % 2 ? 580 : 420)) / 430)
       : family === 'run' || family === 'climb' ? Math.min(1, Math.abs(s[S.X] - (spec.variant % 2 ? 880 : 120)) / 790)
@@ -77,7 +80,12 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
         data-dashing={b && ['run', 'climb', 'catch', 'chase'].includes(family) || undefined}
         data-guard={b && ['duel', 'dodge', 'collect'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
         <i className="asr-action-shadow" />
-        <RushActor size={actorSize} id={cast.id} pose={pose} age={outcome ? feedbackElapsed : pose === 'walk' ? t : action ? Math.max(0, t - action.at) : elapsed} />
+        <RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
+          jumpVelocity={family === 'flap' ? 0 : s[S.VY]}
+          actionRemaining={pose === 'duck' ? (rolling ? s[S.A] : s[S.B]) - t : undefined}
+          age={outcome ? feedbackElapsed : pose === 'walk' ? t : pose === 'duck'
+            ? Math.max(0, t - (rolling ? s[S.A] - 260 : s[S.B] - 650))
+            : action ? Math.max(0, t - action.at) : elapsed} />
         {family==='brake'&&<Sprite name="truck" className="asr-action-vehicle"/>}
         {b && ['duel', 'dodge', 'collect'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
         {family === 'catch' && a && <div className="asr-action-open-arms"><Sprite name="satchel" /><i /></div>}

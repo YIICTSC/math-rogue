@@ -18,6 +18,7 @@ import { ActionBoard } from './action/ActionBoard';
 import { S } from './action/physics';
 import { castFor, directionFor } from './direction';
 import { RushPortrait } from './RoundEffects';
+import { usesDashMovement } from './actorSprite';
 import { TITLE_TRACK, trackFor } from './music';
 import {
   control, steer, difficulty, MAX_MISSES, RUSH_BLOCK, isSpeedUp, playElapsed, remainingTime, resumeAfterStudy, pause, start, step, type Mode, type Stage,
@@ -89,6 +90,13 @@ export default function AfterSchoolRush({
       actionAudioAt.current = -Infinity;
       voicedAction.current = false;
       const cast = castFor(next.round.entry);
+      if (next.round.entry.game.action && usesDashMovement(next.round.entry.game.action.family)) {
+        for (const folder of ['heroes', 'slides']) {
+          const image = new Image();
+          image.src = assetUrl(`sprites/go-home-dash/${folder}/${cast.id}.webp`);
+          void image.decode().catch(() => {});
+        }
+      }
       audioService.prepareMiniRushVoices([cast.cheer[0], cast.retry[0], ...(cast.effort ? [cast.effort[0]] : [])]);
     } else if (next.tag === 'play' && old.tag === 'ready') {
       audioService.stopMiniRushVoice();

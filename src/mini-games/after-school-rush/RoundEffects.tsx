@@ -8,20 +8,9 @@ import { Sprite } from './art';
 import type { Entry } from './catalog';
 import { castFor, directionFor, type CastId, type Pose } from './direction';
 import type { Action, Outcome } from './engine';
-import { clamp } from './originals/model';
+import { rushActorSprite, type ActorSpriteOptions } from './actorSprite';
 
-type ActorProps = {
-  id: CastId;
-  pose: Pose;
-  age: number;
-  facing?: 'side' | 'rear' | 'front';
-  className?: string;
-  size?: number;
-};
-
-const ACTION_ROW: Record<Pose, number> = {
-  idle: 0, walk: 0, jump: 0, duck: 0, strike: 2, throw: 3, swing: 4, read: 5, use: 6, aim: 7, win: 6, miss: 0,
-};
+type ActorProps = ActorSpriteOptions & { className?: string; size?: number };
 
 export function RushPortrait({ id }: { id: CastId }) {
   return <span className="asr-cast-portrait" aria-hidden="true">
@@ -29,28 +18,11 @@ export function RushPortrait({ id }: { id: CastId }) {
   </span>;
 }
 
-export function RushActor({ id, pose, age, facing = 'side', className = '', size }: ActorProps) {
-  const walk = pose === 'walk';
-  const dashPose = pose === 'jump' || pose === 'duck';
-  const rearRun = facing === 'rear' && walk;
-  const dashPath = 'sprites/go-home-dash/';
-  let row = ACTION_ROW[pose];
-  let column = facing === 'rear' ? 1 : facing === 'front' || pose === 'win' || pose === 'miss' ? 0 : 2;
-  let rows = 8;
-  let columns = 8;
-  let path = `sprites/dungeons1/actions/${id}.webp`;
-  if (dashPose || rearRun) {
-    columns = 4;
-    rows = rearRun || (pose === 'duck' && facing !== 'rear') ? 1 : 2;
-    path = `${dashPath}${facing === 'rear' ? rearRun ? 'rush/rear/' : 'rush/actions/' : pose === 'duck' ? 'slides/' : 'heroes/'}${id}.webp`;
-    column = clamp(Math.floor(age / 75), 0, 3);
-    row = rows === 2 && (facing !== 'rear' || pose === 'duck') ? 1 : 0;
-  } else if (walk) {
-    row = Math.floor(age / 85) % 2;
-  }
-  const aspect = rearRun ? 128 / 160 : dashPose ? (rows === 1 ? 1 : 128 / 160) : 1;
+export function RushActor({ className = '', size, ...options }: ActorProps) {
+  const { id, pose } = options;
+  const { path, row, column, rows, columns, aspect, heightScale, atlas } = rushActorSprite(options);
   const style = {
-    ...(size ? {width:size*aspect,height:size} : {}),
+    ...(size ? {width:size*heightScale*aspect,height:size*heightScale} : {}),
     '--asr-actor-sheet': `url("${assetUrl(path)}")`,
     '--asr-actor-columns': columns,
     '--asr-actor-rows': rows,
@@ -59,7 +31,7 @@ export function RushActor({ id, pose, age, facing = 'side', className = '', size
     '--asr-actor-ratio': aspect,
   } as CSSProperties;
   return <div className={`asr-cast-actor ${className}`} data-actor={id} data-pose={pose}
-    data-atlas={dashPose || rearRun ? 'dash' : 'dungeon'} style={style} aria-hidden="true">
+    data-atlas={atlas} style={style} aria-hidden="true">
     <span className="asr-actor-frame"><img className="asr-actor-sheet" src={assetUrl(path)} alt="" draggable={false} style={{width:`${columns*100}%`,height:`${rows*100}%`,left:`${-column*100}%`,top:`${-row*100}%`}}/></span>
   </div>;
 }
