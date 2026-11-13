@@ -2666,6 +2666,32 @@ class AudioService {
       }
   }
 
+  /** Reuse the existing games' Foley on Mini Rush's short-lived playback bus. */
+  public prepareMiniRushFoley(paths: readonly string[]) {
+      const names = [...new Set(paths.filter(path => /^sfx\/.+\.mp3$/.test(path)).map(path => path.slice(4, -4)))];
+      void this.preloadSfx(names).catch(() => undefined);
+  }
+
+  public playMiniRushFoley(path: string, duration: number, fallback: MiniRushCue = 'tap') {
+      if (!this.canPlaySfx()) return;
+      if (!/^sfx\/.+\.mp3$/.test(path)) { this.playMiniRushCue(fallback); return; }
+      this.init();
+      const name = path.slice(4, -4), scene = this.miniRushGeneration;
+      const generation = (this.sfxPlaybackGenerations.get(MINI_RUSH_FOLEY) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(MINI_RUSH_FOLEY, generation);
+      const canPlay = () => scene === this.miniRushGeneration && this.canPlaySfx()
+          && this.sfxPlaybackGenerations.get(MINI_RUSH_FOLEY) === generation;
+      const cached = this.sfxBuffers[name];
+      if (cached && this.ctx?.state === 'running' && !this.foregroundRecoveryPromise
+          && this.startSfxSource(MINI_RUSH_FOLEY, cached, duration, false)) return;
+      // HTMLAudio can still start during an iOS AudioContext interruption. A
+      // late download cannot leak into a later round, pause or another game.
+      void this.playHtmlSfx(MINI_RUSH_FOLEY, this.getSfxPlaybackPaths(name), duration, false, generation, performance.now() + 220)
+          .then(played => { if (!played && canPlay()) this.playMiniRushCue(fallback); })
+          .catch(() => { if (canPlay()) this.playMiniRushCue(fallback); });
+      void this.loadSfxBuffer(name).catch(() => null);
+  }
+
   public playMiniRushVoice(path: string, duration: number) {
       if (!this.canPlayConversationVoice()) return;
       this.stopMiniRushVoice();
@@ -2684,6 +2710,7 @@ class AudioService {
 
   public stopMiniRushAudio() {
       this.miniRushGeneration++;
+      this.sfxPlaybackGenerations.set(MINI_RUSH_FOLEY, (this.sfxPlaybackGenerations.get(MINI_RUSH_FOLEY) ?? 0) + 1);
       this.stopMiniRushVoice();
       this.stopActiveSfx(MINI_RUSH_FOLEY);
       this.stopActiveSfx(MINI_RUSH_JINGLE);

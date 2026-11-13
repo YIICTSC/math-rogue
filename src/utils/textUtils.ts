@@ -3936,7 +3936,7 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "あと": "Need",
     "帰宅ダッシュ": "Go Home Dash",
     "放課後ミニラッシュ": "After-School Mini Rush",
-    "スティックとA・Bで、走る・跳ぶ・よける！ 全100本の瞬間アクション。": "Run, jump, and dodge with the stick and A/B. 100 quick action games.",
+    "スティックとA・Bで、走る・跳ぶ・よける！ 全240本の瞬間アクション。": "Run, jump, and dodge with the stick and A/B. 240 quick action games.",
     "障害物をよけて帰宅せよ！レベルアップで教科を強化。": "Dodge obstacles and get home! Level up to strengthen subjects.",
     "迫りくる敵の大群から生き残れ！ヴァンサバ風アクション。": "Survive waves of incoming enemies in an action arena.",
     "放課後ポーカー": "After-School Poker",

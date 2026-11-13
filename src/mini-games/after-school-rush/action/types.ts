@@ -1,7 +1,8 @@
 import type { ArtName } from '../art';
 import type { Local } from '../originals/model';
 export type Family = 'run' | 'hurdles' | 'climb' | 'catch' | 'collect' | 'dodge' | 'aim' | 'timing'
-  | 'balance' | 'push' | 'flap' | 'duel' | 'throw' | 'rhythm' | 'chase' | 'brake' | 'sweep' | 'carry';
+  | 'balance' | 'push' | 'flap' | 'duel' | 'throw' | 'rhythm' | 'chase' | 'brake' | 'sweep' | 'carry'
+  | 'bat' | 'rally' | 'soccer' | 'golf' | 'kart' | 'parry' | 'grapple' | 'fishing' | 'mining' | 'volley';
 export type ActionControl = { kind: 'stick'; x: number; y: number } | { kind: 'button'; button: 'a' | 'b' };
 export type ActionSpec = {
   family: Family; variant: number; goal: number; boss: boolean; seconds: number;

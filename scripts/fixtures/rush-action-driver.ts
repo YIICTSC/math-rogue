@@ -1,5 +1,5 @@
 import type { Active } from '../../src/mini-games/after-school-rush/engine';
-import { actionWorld, nextBeat, noteLane, S, timingGoal, timingX } from '../../src/mini-games/after-school-rush/action/physics';
+import { actionWorld, fishX, golfMeter, nextBeat, noteLane, pitchBall, S, timingGoal, timingX } from '../../src/mini-games/after-school-rush/action/physics';
 export function actionDriver(stage: Active) {
   const s = stage.round.state, spec = stage.round.entry.game.action!, world = actionWorld(spec, s), t = s[S.T];
   let x = 0, y = 0, a = false, b = false;
@@ -56,6 +56,57 @@ export function actionDriver(stage: Active) {
     case 'rhythm': if (Math.abs(t - nextBeat(s)) < 45) { if (noteLane(s, s[S.NOTE])) b = true; else a = true; } break;
     case 'chase': toward(world.enemy!.x, world.enemy!.y); a = Math.hypot(world.enemy!.x - s[S.X], world.enemy!.y - s[S.Y] + 35) < 140; b = !a; break;
     case 'brake': y = s[S.Y] > 245 ? -1 : 0; if (s[S.X] > world.goal.x - 35) b = true; break;
+    case 'bat': case 'rally': {
+      const ball = pitchBall(s, spec); x = dx(ball.x, s[S.X], 20);
+      a = ball.y > 400 && ball.y < 540 && Math.abs(ball.x - s[S.X]) < 130 && s[S.CYCLE] !== Math.floor(t / 1600);
+      break;
+    }
+    case 'soccer': {
+      if (s[S.X] < 610) {
+        if (s[S.Y] > 170 && s[S.X] < 350) toward(s[S.X], 95);
+        else toward(650, 95);
+      } else {
+        toward(790, world.goal.y);
+        if (s[S.X] > 750 && Math.abs(s[S.Y] - 35 - world.goal.y) < 30) {
+          x = 0; y = 0;
+          a = !!s[S.CARRIED] && Math.abs(world.enemy!.y - world.goal.y) > 82;
+        }
+      }
+      b = s[S.X] < 600;
+      break;
+    }
+    case 'golf': {
+      x = dx(world.goal.y, s[S.ANGLE], 4);
+      if (s[S.PHASE] === 0) a = Math.abs(s[S.ANGLE] - world.goal.y) < 10;
+      else if (s[S.PHASE] === 1) a = golfMeter(s) > .68 && golfMeter(s) < .76;
+      else if (s[S.PHASE] === 2) a = t - s[S.STOP] > 200 && golfMeter(s) > .36 && golfMeter(s) < .64;
+      break;
+    }
+    case 'kart': x = dx(110, s[S.X], 8); a = true; break;
+    case 'parry': {
+      x = dx(world.enemy!.x - 150, s[S.X], 15);
+      a = s[S.COMBO] > t && Math.abs(world.enemy!.x - s[S.X]) < 215;
+      b = !a && t % 1500 > 450 && t % 1500 < 950;
+      break;
+    }
+    case 'grapple': x = s[S.X] < 900 ? 1 : 0; a = s[S.X] < 830; break;
+    case 'fishing': {
+      x = dx(fishX(s, spec), s[S.X], 20);
+      b = s[S.TENSION] > .52;
+      a = !b && Math.abs(fishX(s, spec) - s[S.X]) < 130;
+      break;
+    }
+    case 'mining': {
+      const i = world.targets.findIndex((_, i) => !(s[S.MASK] & 1 << i)), target = world.targets[i];
+      if (target) { toward(target.x, target.y);const distance=Math.hypot(target.x - s[S.X], target.y - s[S.Y] + 35);b=distance<205;a=!b&&distance<145; }
+      break;
+    }
+    case 'volley': {
+      x = dx(s[S.BALL_X], s[S.X], 20);
+      a = s[S.PHASE] === 0 && s[S.BALL_Y] > 350 && s[S.BALL_Y] < 540 && Math.abs(s[S.BALL_X] - s[S.X]) < 145;
+      b = s[S.PHASE] === 1 && s[S.BALL_Y] < 355;
+      break;
+    }
     case 'carry': {
       if (!s[S.CARRIED]) { const egg = s[S.MASK] ? { x: s[S.BOX_X], y: s[S.BOX_Y] } : { x: 150, y: 300 }; toward(egg.x, egg.y); a = Math.hypot(egg.x - s[S.X], egg.y - s[S.Y] + 35) < 100; }
       else if (s[S.X] < 745) { if (s[S.Y] > 155 && s[S.X] < 360) toward(s[S.X], 90); else toward(770, 90); }

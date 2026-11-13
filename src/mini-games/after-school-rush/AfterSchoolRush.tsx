@@ -14,12 +14,13 @@ import { CATALOG, canPlayChapter, CHAPTER_ROUNDS, readStory, THEMES } from './ca
 import { RUSH_BEST_KEY, STORY_KEY, type Prop } from './rules';
 import { GENRES, type Genre } from './originals/model';
 import ChapterMenu from './ChapterMenu';
+import { readDiscovery, recordEncounter } from './discovery';
 import { ActionBoard } from './action/ActionBoard';
 import { S } from './action/physics';
-import { castFor, directionFor } from './direction';
+import { actionVoiceFor, castFor, directionFor, soundFor } from './direction';
 import { RushPortrait } from './RoundEffects';
 import { usesDashMovement } from './actorSprite';
-import { TITLE_TRACK, trackFor } from './music';
+import { TITLE_TRACK, musicFor } from './music';
 import {
   control, steer, difficulty, MAX_MISSES, RUSH_BLOCK, isSpeedUp, playElapsed, remainingTime, resumeAfterStudy, pause, start, step, type Mode, type Stage,
 } from './engine';
@@ -51,6 +52,7 @@ export default function AfterSchoolRush({
   const stageRef = useRef(stage);
   const mounted = useRef(true);
   const rootRef = useRef<HTMLElement>(null);
+  const audioWarning = useRef(false);
   const actionAudioAt = useRef(-Infinity);
   const voicedAction = useRef(false);
   const music = useRef<ReturnType<typeof audioService.acquireBgmScene> | null>(null);
@@ -62,34 +64,62 @@ export default function AfterSchoolRush({
   const padAxes = useRef({ x: 0, y: 0, ignore: false, active: false });
   const [menu, setMenu] = useState<'home' | 'story' | 'practice'>('home');
   const [scores, setScores] = useState(readStory);
+  const [discovered, setDiscovered] = useState(readDiscovery);
+  const discoveryRef = useRef(discovered);
   const [chapter, setChapter] = useState(0);
   const [genre, setGenre] = useState<Genre | ''>('');
   const [best, setBest] = useState(readBest);
   const l: Localize = (ja, en, hira) => translate(languageMode, [ja, en, hira]);
   const title = l('放課後ミニラッシュ', 'After-School Mini Rush', 'ほうかごミニラッシュ');
 
+  // WebView audio can be interrupted or unavailable during a screen transition.
+  // Its recovery must never prevent a control or a round transition from committing.
+  function sound(effect: () => void) {
+    try { effect(); } catch (error) {
+      if (!audioWarning.current) { audioWarning.current = true; console.warn('Mini Rush audio is temporarily unavailable.', error); }
+    }
+  }
+  function foley(entry: Parameters<typeof soundFor>[0], event: Parameters<typeof soundFor>[1], index = 4) {
+    const clip = soundFor(entry, event, index);
+    if (clip) audioService.playMiniRushFoley(clip.path, clip.duration, clip.fallback);
+    return !!clip;
+  }
+
   function show(next: Stage) {
     if (!mounted.current) return;
     const old = stageRef.current;
-    if (next.tag !== 'play' || next.pausedAt !== undefined) heldKeys.current.clear();
-    if (next.tag === 'play' && old.tag === 'play' && next.round.entry.key === old.round.entry.key && next.round.state[S.HP] < old.round.state[S.HP]) audioService.playMiniRushCue('tap');
-    if (next.tag === 'play' && old.tag === 'play' && next.round.entry.key === old.round.entry.key
-      && next.round.state[S.SCORE] > old.round.state[S.SCORE] && next.round.action === old.round.action) audioService.playMiniRushCue('collect');
     if (next === old) return;
+    if ((next.tag !== 'play' && next.tag !== 'ready') || next.pausedAt !== undefined) heldKeys.current.clear();
     stageRef.current = next;
     setStage(next);
+    if (next.tag === 'play' && next.run.mode.kind === 'story'
+      && (old.tag !== 'play' || old.round.entry.key !== next.round.entry.key || old.run.number !== next.run.number)) {
+      const known = recordEncounter(next.run.mode, next.round.entry, discoveryRef.current);
+      if (known.length !== discoveryRef.current.length) { discoveryRef.current = known; setDiscovered(known); }
+    }
+    if (next.tag === 'study') setQuizCorrect(null);
+    sound(() => {
+    if (next.tag === 'play' && old.tag === 'play' && next.round.entry.key === old.round.entry.key && next.round.state[S.HP] < old.round.state[S.HP]) {
+      if (!foley(next.round.entry, 'hurt')) audioService.playMiniRushCue('tap');
+    }
+    if (next.tag === 'play' && old.tag === 'play' && next.round.entry.key === old.round.entry.key
+      && next.round.state[S.SCORE] > old.round.state[S.SCORE] && next.round.action === old.round.action) {
+      if (!foley(next.round.entry, 'score')) audioService.playMiniRushCue('collect');
+    }
     if ((next.tag === 'ready' || next.tag === 'play' || next.tag === 'feedback') && next.pausedAt !== undefined) {
       audioService.stopMiniRushAudio();
     } else if (next.tag === 'lobby') {
       audioService.stopMiniRushAudio();
     } else if (next.tag === 'study') {
       audioService.stopMiniRushAudio();
-      setQuizCorrect(null);
     } else if (next.tag === 'ready' && old.tag !== 'ready') {
       if (next.run.number > 1) audioService.playMiniRushCue(next.round.entry.game.boss ? 'boss' : isSpeedUp(next.run) ? 'speed' : 'ready');
       actionAudioAt.current = -Infinity;
       voicedAction.current = false;
       const cast = castFor(next.round.entry);
+      const clips = (['start', 'action', 'score', 'hurt', 'clear'] as const).flatMap(event => [soundFor(next.round.entry, event, 4), soundFor(next.round.entry, event, 5)]).filter(clip => !!clip);
+      audioService.prepareMiniRushFoley(clips.map(clip => clip.path));
+      const actionVoices = [actionVoiceFor(next.round.entry, 4), actionVoiceFor(next.round.entry, 5)].flatMap(voice => voice ? [voice[0]] : []);
       if (next.round.entry.game.action && usesDashMovement(next.round.entry.game.action.family)) {
         for (const folder of ['heroes', 'slides']) {
           const image = new Image();
@@ -97,7 +127,8 @@ export default function AfterSchoolRush({
           void image.decode().catch(() => {});
         }
       }
-      audioService.prepareMiniRushVoices([cast.cheer[0], cast.retry[0], ...(cast.effort ? [cast.effort[0]] : [])]);
+      audioService.prepareMiniRushVoices([cast.cheer[0], cast.retry[0], ...actionVoices]);
+      foley(next.round.entry, 'start');
     } else if (next.tag === 'play' && old.tag === 'ready') {
       audioService.stopMiniRushVoice();
     } else if (next.tag === 'feedback' && old.tag !== 'feedback') {
@@ -105,6 +136,7 @@ export default function AfterSchoolRush({
       const cast = castFor(next.round.entry);
       audioService.playMiniRushCue(clear ? next.round.entry.game.boss ? 'finale' : 'clear'
         : next.outcome === 'time' ? 'time' : 'miss');
+      if (clear) foley(next.round.entry, 'clear');
       const voice = clear ? cast.cheer : cast.retry;
       if (next.round.entry.game.boss || voice[1] <= 1400) audioService.playMiniRushVoice(...voice);
       if (next.recovered) audioService.playMiniRushCue('recover');
@@ -113,6 +145,7 @@ export default function AfterSchoolRush({
       const second = Math.ceil(remainingTime(next) / 1000), key = `${next.run.number}:${second}`;
       if (second > 0 && second <= 3 && clockCue.current !== key) { clockCue.current = key; audioService.playMiniRushCue('count'); }
     }
+    });
     if (next.tag === 'results' && next.run.mode.kind === 'rush' && next.run.score > readBest()) {
       try { localStorage.setItem(RUSH_BEST_KEY, String(next.run.score)); } catch { /* Storage can be unavailable. */ }
       setBest(previous => Math.max(previous, next.run.score));
@@ -131,8 +164,7 @@ export default function AfterSchoolRush({
     setLearning({ correct: 0, answered: 0 });
     clockCue.current = '';
     heldKeys.current.clear();
-    audioService.stopMiniRushAudio();
-    audioService.playMiniRushCue('start');
+    sound(() => { audioService.stopMiniRushAudio(); audioService.playMiniRushCue('start'); });
     show(start(mode, performance.now()));
   }
 
@@ -146,22 +178,24 @@ export default function AfterSchoolRush({
     const current = stageRef.current;
     const now = performance.now();
     const next = control(current, now, command);
+    show(next);
+    sound(() => {
     if (current.tag === 'play' && (next.tag === 'play' || next.tag === 'feedback')
       && next.round.action && next.round.action !== current.round.action && (next.tag === 'play' || next.outcome === 'clear')) {
       const direction = directionFor(next.round.entry, next.round.action.index);
       if (now - actionAudioAt.current >= 75) {
         actionAudioAt.current = now;
-        audioService.playMiniRushCue(direction.cue);
+        if (!foley(next.round.entry, 'action', next.round.action.index)) audioService.playMiniRushCue(direction.cue);
       }
       if (next.tag === 'play' && !voicedAction.current && direction.effort) {
-        const effort = castFor(next.round.entry).effort;
+        const effort = actionVoiceFor(next.round.entry, next.round.action.index);
         if (effort) {
           voicedAction.current = true;
           audioService.playMiniRushVoice(...effort);
         }
       }
     }
-    show(next);
+    });
   }
 
   const active = stage.tag === 'play' || stage.tag === 'ready' || stage.tag === 'feedback';
@@ -169,34 +203,37 @@ export default function AfterSchoolRush({
   const roundNumber = active ? stage.run.number : 0;
   const activeKey = active ? stage.round.entry.key : '';
   const studying = stage.tag === 'study' || stage.tag === 'results' && stage.run.mode.kind !== 'practice' && quizCorrect === null;
-  const musicTrack = active ? stage.run.mode.kind === 'rush' ? stage.round.entry.game.boss ? 'kocho_boss' : 'paper_plane_battle' : trackFor(stage.round.entry)
-    : studying ? 'math'
+  const selectedMusic = active ? musicFor(stage.round.entry, stage.run.mode.kind === 'rush' ? Math.floor((stage.run.number - 1) / RUSH_BLOCK) : undefined) : undefined;
+  const musicTrack = selectedMusic?.type ?? (studying ? 'math'
       : stage.tag === 'results' ? stage.run.mode.kind === 'practice' ? 'poker_shop' : stage.run.completed ? 'victory' : 'game_over'
-        : menu === 'story' ? 'map' : menu === 'practice' ? 'poker_shop' : TITLE_TRACK;
+        : menu === 'story' ? 'map' : menu === 'practice' ? 'poker_shop' : TITLE_TRACK);
+  const musicTheme = selectedMusic?.options.theme ?? 'high-school';
+  const musicMode = selectedMusic?.options.mode;
 
   useEffect(() => {
     const options: BgmPlaybackOptions = audioService.getBgmMode() === 'STUDY' ? { theme: 'high-school' }
       : { theme: 'high-school', mode: audioService.getBgmMode() === 'OLD' ? 'OLD' : 'NEW' };
-    const scope = audioService.acquireBgmScene(TITLE_TRACK, options, 25);
-    music.current = scope;
-    return () => { music.current = null; scope(); };
+    sound(() => { music.current = audioService.acquireBgmScene(TITLE_TRACK, options, 25); });
+    return () => { const scope = music.current; music.current = null; sound(() => scope?.()); };
   }, []);
 
   useEffect(() => {
     const saved = audioService.getBgmMode();
-    music.current?.update(musicTrack, { theme: 'high-school', mode: saved === 'STUDY' ? undefined : saved === 'OLD' ? 'OLD' : 'NEW' });
-  }, [musicTrack]);
+    sound(() => music.current?.update(musicTrack, { theme: musicTheme, mode: saved === 'STUDY' ? undefined : musicMode ?? (saved === 'OLD' ? 'OLD' : 'NEW') }));
+  }, [musicTrack, musicTheme, musicMode]);
 
   useEffect(() => {
     if (!active || paused) return;
     let raf = 0;
     let last = -Infinity;
     const frame = (now: number) => {
+      // Reserve the next frame before notification/media work. A one-off
+      // callback failure must not leave READY or feedback frozen indefinitely.
+      raf = requestAnimationFrame(frame);
       if (now - last >= 24) {
         last = now;
         show(step(stageRef.current, now));
       }
-      raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
@@ -214,7 +251,7 @@ export default function AfterSchoolRush({
     return () => {
       mounted.current = false;
       document.removeEventListener('visibilitychange', onHide);
-      audioService.stopMiniRushAudio();
+      sound(() => audioService.stopMiniRushAudio());
     };
   }, []);
 
@@ -244,7 +281,7 @@ export default function AfterSchoolRush({
       if (!event.repeat) { heldKeys.current.clear(); show(pause(current, performance.now())); }
       return;
     }
-    if (current.tag !== 'play' || current.pausedAt !== undefined || event.altKey || event.ctrlKey || event.metaKey) return;
+    if ((current.tag !== 'play' && current.tag !== 'ready') || current.pausedAt !== undefined || event.altKey || event.ctrlKey || event.metaKey) return;
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
       event.preventDefault(); event.stopPropagation();
       if (!event.repeat || heldKeys.current.has(event.key)) { heldKeys.current.add(event.key); keyAxes(); }
@@ -264,6 +301,9 @@ export default function AfterSchoolRush({
     if (current.tag !== 'play' && current.tag !== 'ready' && current.tag !== 'feedback') return;
     if (pad.pressed[PAD.MENU]) { heldKeys.current.clear(); show(pause(current, performance.now())); return; }
     if (current.tag !== 'play' || current.pausedAt !== undefined) {
+      if (current.tag === 'ready' && current.pausedAt === undefined) {
+        if (pad.pressed[PAD.A]) input('a'); else if (pad.pressed[PAD.B]) input('b');
+      }
       before.ignore = Math.hypot(pad.x, pad.y) > .1; before.active = true; before.x = pad.x; before.y = pad.y; return;
     }
     if (Math.hypot(pad.x, pad.y) < .1) before.ignore = false;
@@ -298,7 +338,7 @@ export default function AfterSchoolRush({
           <span className="asr-best"><Sprite name="coin" />{l('最高', 'BEST', 'さいこう')} <b>{best}</b></span>
         </header>
         {menu !== 'home' ? <ChapterMenu view={menu} chapter={chapter} setChapter={setChapter}
-          scores={scores} launch={launch} l={l} mode={languageMode} genre={genre} setGenre={setGenre} /> : <section className="asr-title-card">
+          scores={scores} discovered={discovered} launch={launch} l={l} mode={languageMode} genre={genre} setGenre={setGenre} /> : <section className="asr-title-card">
           <div className="asr-title-art" aria-hidden="true">
             <img className="asr-title-key-art" src={assetUrl(TITLE_ART)} alt="" fetchPriority="high" />
           </div>
@@ -367,7 +407,7 @@ export default function AfterSchoolRush({
             action={stage.round.action} outcome={stage.outcome} feedbackElapsed={stage.tag === 'feedback' ? phaseElapsed : 0} mode={languageMode} />
           <VirtualControls key={`controls-${roundNumber}-${activeKey}`} entry={stage.round.entry} state={stage.round.state}
             elapsed={elapsed} mode={languageMode} cursor={stage.round.cursor ?? 0} canUndo={!!stage.round.history?.length}
-            enabled={stage.tag === 'play' && !paused} onControl={input} onSteer={steering} />
+            enabled={(stage.tag === 'play' || stage.tag === 'ready') && !paused} onControl={input} onSteer={steering} />
           <RoundBroadcast stage={stage} mode={languageMode} />
         </section>
         {paused && <div className="asr-pause" role="dialog" aria-modal="true" aria-label={l('一時停止', 'Paused', 'いちじていし')} data-gamepad-modal>
@@ -394,7 +434,7 @@ export default function AfterSchoolRush({
           onAnswerResult={onAnswerResult} onComplete={correct => {
             if (!mounted.current) return;
             quizOffset.current += 3;
-            audioService.stopMiniRushVoice();
+            sound(() => audioService.stopMiniRushVoice());
             setLearning(previous => ({ correct: previous.correct + correct, answered: previous.answered + 3 }));
             if (stageRef.current.tag === 'study') { setQuizCorrect(null); show(resumeAfterStudy(stageRef.current, performance.now())); }
             else setQuizCorrect(correct);

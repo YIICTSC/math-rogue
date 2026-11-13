@@ -2,6 +2,7 @@ import type { AttackEffectKey } from '../../types';
 import type { MiniRushCue } from '../../services/miniRushSound';
 import type { Entry } from './catalog';
 import type { Copy } from './rules';
+import sportsVoiceDurations from '../../data/sportsVoiceDurations.json';
 import { visualFor, type Motion } from './visuals';
 
 type Voice = readonly [path: string, duration: number];
@@ -113,6 +114,56 @@ type Direction = {
   effort?: boolean;
 };
 
+export type RushAudioEvent = 'start' | 'action' | 'score' | 'hurt' | 'clear';
+export type RushFoley = { path: string; duration: number; fallback: MiniRushCue };
+const foley = (name: string, duration = 400, fallback: MiniRushCue = 'tap'): RushFoley => ({ path: `sfx/${name}.mp3`, duration, fallback });
+
+/** Original recordings from the sport, fishing, crafting and battle games. The
+ * caller plays them only after the corresponding action/state was accepted. */
+export function soundFor(entry: Entry, event: RushAudioEvent, index = 4): RushFoley | undefined {
+  const family = entry.game.action?.family, secondary = index === 5;
+  const sport = family === 'bat' ? 'baseball' : family === 'soccer' ? 'soccer' : family === 'volley' || family === 'rally' ? 'volleyball' : undefined;
+  if (sport) return foley(`academy-sports/${sport}/${event === 'start' ? 'whistle' : event === 'hurt' ? 'hurt' : event === 'clear' ? 'score' : event === 'score' ? 'hit' : secondary && family === 'volley' ? 'special' : 'hit'}`, event === 'clear' ? 700 : 350, event === 'clear' ? 'collect' : 'tap');
+  if (family === 'golf') return event === 'clear' || event === 'score' ? foley('golf/cup', 650, 'collect')
+    : event === 'hurt' ? foley('golf/ob', 400, 'tap') : event === 'start' ? foley('golf/start', 550, 'ready') : foley(secondary ? 'golf/putt' : 'golf/swing', 450, 'shot');
+  if (family === 'fishing') return foley(`rpg-fishing/${event === 'start' ? 'cast' : event === 'clear' ? 'catch' : event === 'score' ? 'perfect' : event === 'hurt' ? 'miss' : secondary ? 'bite' : 'reel'}`, event === 'clear' ? 850 : 400, event === 'clear' || event === 'score' ? 'collect' : 'water');
+  if (family === 'mining') return event === 'start' ? undefined : foley(event === 'clear' ? 'rpg-life/craft' : event === 'score' ? 'rpg-games/dozer-gem' : event === 'hurt' ? 'rpg-games/miss' : 'rpg-life/mine', event === 'clear' ? 650 : 300, event === 'score' ? 'collect' : 'gravel');
+  if (family === 'kart') return event === 'action' ? foley('rpg-games/race-move', 300, secondary ? 'gravel' : 'dodge') : event === 'clear' ? foley('academy-sports/festival/score', 700, 'collect') : undefined;
+  if (family === 'parry' || family === 'duel') return event === 'action' ? foley(`attack-effects/${secondary ? 'flash' : 'slash'}`, 250, secondary ? 'spark' : 'tap') : event === 'score' ? foley('attack-effects/critical', 300, 'snap') : undefined;
+  if (family === 'grapple') return event === 'action' ? foley(`attack-effects/${secondary ? 'wind' : 'projectile'}`, 300, 'jump') : event === 'score' || event === 'clear' ? foley('rpg-games/relic', 450, 'collect') : undefined;
+  if (event !== 'action') return undefined;
+  if (family === 'aim' || family === 'throw') return foley('attack-effects/projectile', 220, 'shot');
+  if (family === 'rhythm') return foley(`rpg-games/maou-rhythm-${secondary ? 'snare' : 'kick'}`, 200, 'beat');
+  if (family === 'sweep') return foley('rpg-life/gather', 200, 'brush');
+  return undefined;
+}
+
+// Milliseconds measured from the reused files with ffprobe. Keeping the source
+// actor in every path prevents a guest action from speaking in another voice.
+const REUSED_VOICE_MS: Record<CastId, readonly [number, number, number, number]> = {
+  'high-school-warrior': [1860, 2080, 1800, 1960], 'high-school-caretaker': [1348, 1870, 1360, 1880],
+  'high-school-assassin': [1860, 2080, 2200, 2200], 'high-school-chef': [1853, 2080, 3123, 2880],
+  'high-school-gardener': [2080, 2080, 1720, 1720], 'high-school-librarian': [1842, 1874, 1680, 2080],
+  'high-school-mage': [2041, 2046, 1280, 1880], 'high-school-dodgeball': [1874, 2080, 1200, 1760],
+  'high-school-bard': [2056, 2080, 1440, 1640], 'magic-shizuku': [1386, 2080, 1960, 2840],
+  'magic-koharu': [1347, 2080, 1640, 2040], 'magic-akari': [1500, 2080, 1240, 1520],
+};
+export function actionVoiceFor(entry: Entry, index = 4): Voice | undefined {
+  const cast = castFor(entry), family = entry.game.action?.family;
+  const sport = family === 'bat' || family === 'golf' ? 'golf' : family === 'rally' || family === 'volley' ? 'tennis' : family === 'soccer' ? 'basketball' : undefined;
+  if (sport) {
+    const key = `${cast.id}/${sport}/action`, duration = (sportsVoiceDurations as Record<string, number>)[key];
+    if (duration) return [`sfx/sports/${key}.ogg`, duration];
+  }
+  if (index === 5 && family !== 'mining') return undefined;
+  if (family === 'kart' || family === 'grapple') return dash(cast.id, family === 'kart' ? 'dash' : 'flight', REUSED_VOICE_MS[cast.id][family === 'kart' ? 2 : 3]);
+  if (family === 'parry' || family === 'mining' || family === 'fishing') {
+    const attack = family === 'parry';
+    return [`sfx/dungeons-chronicles/${cast.id}/${attack ? 'attack' : 'use'}.ogg`, REUSED_VOICE_MS[cast.id][attack ? 0 : 1]];
+  }
+  return cast.effort;
+}
+
 const MOTIONS: Readonly<Record<Motion, Direction>> = {
   connect: { pose: 'use', cue: 'snap' },
   cut: { pose: 'swing', cue: 'snip' },
@@ -142,7 +193,17 @@ const MOTIONS: Readonly<Record<Motion, Direction>> = {
 export function directionFor(entry: Entry, index: number): Direction {
   if (entry.game.action) {
     const family = entry.game.action.family;
-    if (index === 5) return { pose: 'duck', cue: family === 'rhythm' ? 'beat' : 'dodge' };
+    if (family === 'bat' || family === 'rally' || family === 'golf') return { pose: 'swing', cue: 'shot', effect: 'impact', effort: true };
+    if (family === 'soccer' || family === 'volley') return { pose: 'throw', cue: index === 5 ? 'jump' : 'shot', effect: 'projectile', effort: true };
+    if (family === 'kart') return { pose: index === 5 ? 'duck' : 'walk', cue: index === 5 ? 'gravel' : 'dodge', effect: index === 5 ? undefined : 'wind', effort: index !== 5 };
+    if (family === 'parry') return { pose: index === 5 ? 'use' : 'strike', cue: index === 5 ? 'spark' : 'tap', effect: index === 5 ? 'flash' : 'slash', effort: index !== 5 };
+    if (family === 'grapple') return { pose: 'jump', cue: 'jump', effect: 'wind', effort: index !== 5 };
+    if (family === 'fishing') return { pose: 'use', cue: 'water', effort: index !== 5 };
+    if (family === 'mining') return { pose: 'strike', cue: 'gravel', effect: index === 5 ? 'shockwave' : 'impact', effort: true };
+    if (index === 5) return family === 'rhythm' ? { pose: 'use', cue: 'beat' }
+      : ['run', 'climb', 'catch', 'chase'].includes(family) ? { pose: 'walk', cue: 'dodge', effect: 'wind' }
+        : ['duel', 'collect', 'dodge'].includes(family) ? { pose: 'use', cue: 'spark', effect: 'flash' }
+          : family === 'hurdles' ? { pose: 'duck', cue: 'dodge' } : { pose: 'use', cue: 'snap' };
     if (['run', 'climb', 'hurdles', 'flap'].includes(family)) return MOTIONS.leap;
     if (['aim', 'throw'].includes(family)) return MOTIONS.shoot;
     if (family === 'duel') return MOTIONS.strike;

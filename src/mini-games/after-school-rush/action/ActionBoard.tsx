@@ -11,6 +11,8 @@ import { usesDashMovement } from '../actorSprite';
 import type { State } from '../originals/model';
 import { actionWorld, FLOOR, noteLane, S, sideView, survivalTime, timingGoal } from './physics';
 import type { Point } from './types';
+import { CrossoverScene } from './CrossoverScene';
+import { ActionFeedback } from './ActionFeedback';
 
 const at = (p: Point): CSSProperties => ({ left: `${p.x / 10}%`, top: `${p.y / 6}%` });
 function ObjectArt({ p, art, className = '', children }: { p: Point; art: ArtName; className?: string; children?: ReactNode }) {
@@ -23,16 +25,17 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
   useLayoutEffect(()=>{const node=field.current;if(!node)return;const measure=()=>setActorSize(Math.max(32,node.clientHeight*.2));measure();const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);observer?.observe(node);window.addEventListener('resize',measure);return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};},[]);
   const spec = entry.game.action!, w = actionWorld(spec, s), family = spec.family, t = s[S.T];
   const isSide = sideView(spec), cast = castFor(entry), a = t < s[S.A], b = t < s[S.B], hit = t - s[S.DAMAGE] < 900;
-  const stationary = ['aim', 'timing', 'throw', 'rhythm'].includes(family);
+  const stationary = ['aim', 'timing', 'throw', 'rhythm', 'golf'].includes(family);
   const player = stationary ? { x: family === 'timing' ? timingGoal(spec) : family === 'rhythm' ? 500 : 120, y: 530 } : { x: s[S.X], y: s[S.Y] };
   const rolling = a && ['collect', 'dodge'].includes(family);
   const grounded = isSide && w.platforms.some(p => s[S.X] >= p.x - 10 && s[S.X] <= p.x + p.w + 10 && Math.abs(s[S.Y] - p.y) < 3 && s[S.VY] >= 0);
   const dashMovement = usesDashMovement(family);
   const pose: Pose = outcome ? outcome === 'clear' ? 'win' : 'miss' : family === 'aim' ? 'aim'
+    : family === 'golf' && s[S.PHASE] === 3 ? 'swing'
     : family === 'flap' || isSide && !grounded ? 'jump' : rolling || family === 'hurdles' && b ? 'duck'
-      : family === 'duel' && a ? 'strike' : family === 'throw' && a ? 'throw'
+      : ['duel', 'parry', 'bat', 'rally', 'volley', 'mining'].includes(family) && a ? 'strike' : family === 'throw' && a ? 'throw'
         : a && !dashMovement || family === 'carry' && s[S.CARRIED] ? 'use' : Math.abs(s[S.AX]) + Math.abs(s[S.AY]) > .1 ? 'walk' : 'idle';
-  const progress = ['dodge', 'hurdles', 'flap', 'balance'].includes(family) ? Math.min(1, elapsed / survivalTime(spec))
+  const progress = family === 'fishing' ? s[S.PROGRESS] : family === 'kart' ? s[S.PROGRESS] / (1500 * spec.goal) : family === 'golf' ? s[S.PROGRESS] : family === 'grapple' ? (s[S.X] - 120) / 780 : ['dodge', 'hurdles', 'flap', 'balance'].includes(family) ? Math.min(1, elapsed / survivalTime(spec))
     : family === 'push' ? Math.min(1, Math.abs(s[S.BOX_X] - (spec.variant % 2 ? 580 : 420)) / 430)
       : family === 'run' || family === 'climb' ? Math.min(1, Math.abs(s[S.X] - (spec.variant % 2 ? 880 : 120)) / 790)
         : family === 'carry' || family === 'brake' ? Math.min(1, s[S.X] / 870) : s[S.SCORE] / spec.goal;
@@ -76,9 +79,10 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
         })}</div>}
       {family === 'carry' && <><div className="asr-action-delivery" style={at(w.goal)}><Sprite name="satchel" /><span>★</span></div>
         <ObjectArt p={s[S.CARRIED] ? { x: s[S.X], y: s[S.Y] - 90 } : s[S.MASK] ? { x: s[S.BOX_X], y: s[S.BOX_Y] } : { x: 150, y: 300 }} art={spec.item} className="asr-action-parcel" /></>}
-      <div className="asr-action-player" data-facing={s[S.FACING]} data-pose={pose} data-vehicle={family==='brake'||undefined} data-rolling={rolling && !outcome || undefined}
-        data-dashing={b && ['run', 'climb', 'catch', 'chase'].includes(family) || undefined}
-        data-guard={b && ['duel', 'dodge', 'collect'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
+      <CrossoverScene spec={spec} state={s} world={w} mode={mode} />
+      <div className="asr-action-player" data-facing={s[S.FACING]} data-pose={pose} data-vehicle={family==='brake'||family==='kart'||undefined} data-rolling={rolling && !outcome || undefined}
+        data-dashing={b && ['run', 'climb', 'catch', 'chase', 'soccer'].includes(family) || undefined}
+        data-guard={b && ['duel', 'dodge', 'collect', 'parry'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
         <i className="asr-action-shadow" />
         <RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
           jumpVelocity={family === 'flap' ? 0 : s[S.VY]}
@@ -86,14 +90,16 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
           age={outcome ? feedbackElapsed : pose === 'walk' ? t : pose === 'duck'
             ? Math.max(0, t - (rolling ? s[S.A] - 260 : s[S.B] - 650))
             : action ? Math.max(0, t - action.at) : elapsed} />
+        {family==='kart'&&<i className="asr-kart-body"><i/><i/></i>}
         {family==='brake'&&<Sprite name="truck" className="asr-action-vehicle"/>}
-        {b && ['duel', 'dodge', 'collect'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
+        {b && ['duel', 'dodge', 'collect', 'parry'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
         {family === 'catch' && a && <div className="asr-action-open-arms"><Sprite name="satchel" /><i /></div>}
         {family === 'flap' && <Sprite name="glider" className="asr-action-glider" />}
-        {a && ['chase', 'sweep', 'push', 'duel'].includes(family) && <i className="asr-action-swing" key={action?.at} />}
+        {a && ['chase', 'sweep', 'push', 'duel', 'bat', 'rally', 'volley', 'mining', 'parry'].includes(family) && <i className="asr-action-swing" key={action?.at} />}
       </div>
+      <ActionFeedback entry={entry} state={s} elapsed={elapsed} action={action} outcome={outcome} player={player}/>
       <div className="asr-action-status"><span>{Array.from({ length: spec.boss ? 3 : 2 }, (_, i) => <i key={i} data-lost={i >= s[S.HP]}>◆</i>)}</span>
-        <span>{['collect', 'catch', 'aim', 'timing', 'duel', 'chase', 'sweep', 'throw', 'rhythm'].includes(family) ? `${s[S.SCORE]} / ${spec.goal}` : '★'}</span></div>
+        <span>{['collect', 'catch', 'aim', 'timing', 'duel', 'chase', 'sweep', 'throw', 'rhythm', 'bat', 'rally', 'soccer', 'parry', 'mining', 'volley'].includes(family) ? `${s[S.SCORE]} / ${spec.goal}` : '★'}</span></div>
       <div className="asr-action-progress" aria-hidden="true"><span style={{ width: `${outcome === 'clear' ? 100 : Math.max(0, Math.min(1, progress)) * 100}%` }} /></div>
       {outcome === 'clear' && <div className="asr-action-clear-burst" aria-hidden="true">✦<span>✦</span><span>✦</span></div>}
     </div>

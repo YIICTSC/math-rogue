@@ -15,6 +15,7 @@ type Props = {
   chapter: number;
   setChapter: (index: number) => void;
   scores: number[];
+  discovered: readonly string[];
   launch: (mode: Mode) => void;
   l: Localize;
   mode: LanguageMode;
@@ -22,7 +23,7 @@ type Props = {
   setGenre: (genre: Genre | '') => void;
 };
 
-export default function ChapterMenu({ view, chapter, setChapter, scores, launch, l, mode, genre, setGenre }: Props) {
+export default function ChapterMenu({ view, chapter, setChapter, scores, discovered, launch, l, mode, genre, setGenre }: Props) {
   const theme = THEMES[chapter];
   const practice = view === 'practice';
   const entries = genre ? CATALOG.filter(entry => entry.game.genre === genre) : chapterEntries(chapter);
@@ -34,7 +35,7 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, launch,
         <h1>{practice ? l('お題図鑑', 'Game Library', 'おだいずかん')
           : l('消えた文化祭の鐘', 'The Missing Festival Chime', 'きえた ぶんかさいの かね')}</h1>
       </div>
-      <b>{practice ? `${CATALOG.length} ${l('本', 'games', 'ほん')}` : `${scores.filter(Boolean).length} / ${THEMES.length}`}</b>
+      <b>{practice ? `${discovered.length} / ${CATALOG.length}` : `${scores.filter(Boolean).length} / ${THEMES.length}`}</b>
     </div>
     <nav className="asr-chapter-tabs" aria-label={l('章を選ぶ', 'Choose chapter', 'しょうを えらぶ')}>
       {THEMES.map((item, i) => {
@@ -47,6 +48,7 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, launch,
       })}
     </nav>
     {practice ? <>
+      <p className="asr-library-explainer">{l('ストーリーで一度遊んだお題が解禁されます。ミスしても登録！', 'Play a game in Story to unlock it here. A miss still counts!', 'ストーリーで いちど あそんだ おだいが ひらきます。ミスしても とうろく！')}</p>
       <div className="asr-library-filter">
         <label>
           <span>{l('遊び方から探す', 'Browse by play style', 'あそびかたから さがす')}</span>
@@ -61,11 +63,13 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, launch,
         {entries.map(entry => {
           const entryTheme = THEMES[entry.chapter];
           const [, , prop] = visualFor(entry);
-          return <button type="button" key={entry.key} onClick={() => launch({ kind: 'practice', entry })}
+          const locked = !discovered.includes(entry.key);
+          return <button type="button" key={entry.key} data-asr-library-entry={entry.key} data-asr-locked={locked}
+            disabled={locked} onClick={() => { if (!locked) launch({ kind: 'practice', entry }); }}
             style={{ '--card-color': entry.game.boss ? '#ffb4b7' : entryTheme.color } as CSSProperties}>
-            <Sprite name={prop} />
-            <span>{entry.game.boss ? l(...entryTheme.boss) : gameText(mode, entry.game.title)}</span>
-            <small>{entry.game.quick ? l('瞬間チャレンジ', 'Quick challenge', 'しゅんかんチャレンジ') : l(...GENRES[entry.game.genre])}
+            {locked ? <b className="asr-library-lock" aria-hidden="true">?</b> : <Sprite name={prop} />}
+            <span>{locked ? '???' : entry.game.boss ? l(...entryTheme.boss) : gameText(mode, entry.game.title)}</span>
+            <small>{locked ? l('ストーリーで発見しよう', 'Discover in Story', 'ストーリーで みつけよう') : entry.game.quick ? l('瞬間チャレンジ', 'Quick challenge', 'しゅんかんチャレンジ') : l(...GENRES[entry.game.genre])}
               {genre && ` · ${l(...entryTheme.name)}`}</small>
           </button>;
         })}

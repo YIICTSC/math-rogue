@@ -1,0 +1,14 @@
+.asr-action-feedback{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.asr-contact-effect{position:absolute;transform:translate(-50%,-65%);width:92px;height:92px;filter:drop-shadow(0 0 5px #fff7);animation:asr-impact-recoil .29s ease-out both}
+.asr-score-flash{position:absolute;transform:translate(-50%,-130%);font-weight:1000;font-style:italic;color:#fff3a1;white-space:nowrap;text-shadow:2px 2px #5b245f,-1px -1px #5b245f;animation:asr-nice-pop .43s ease-out both}
+.asr-score-flash b{font-size:clamp(16px,4cqh,28px)}
+.asr-score-flash i{position:absolute;color:#fff783;font-size:20px;left:-20px;top:-8px}
+.asr-score-flash i:nth-child(3){left:auto;right:-20px;top:4px}.asr-score-flash i:nth-child(4){left:40%;top:-24px;font-size:14px}
+.asr-velocity-trails{position:absolute;width:90px;height:60px;transform:translate(-100%,-40%)}
+.asr-velocity-trails[data-facing="-1"]{transform:translate(0,-40%) scaleX(-1)}
+.asr-velocity-trails i{position:absolute;right:0;top:10%;height:3px;width:80%;border-radius:5px;background:linear-gradient(90deg,transparent,#fff8b7);animation:asr-speed-trail .16s linear infinite}
+.asr-velocity-trails i:nth-child(2){top:45%;width:100%;animation-delay:-.06s}.asr-velocity-trails i:nth-child(3){top:80%;width:65%;animation-delay:-.11s}
+@keyframes asr-speed-trail{to{opacity:.2;translate:-20px 0}}
+@keyframes asr-nice-pop{0%{opacity:0;scale:.55}25%{opacity:1;scale:1.15}70%{opacity:1}100%{opacity:0;translate:0 -22px}}
+@keyframes asr-impact-recoil{from{scale:.7;opacity:.8}30%{scale:1.15;opacity:1}to{scale:1;opacity:.7}}
+@media(prefers-reduced-motion:reduce){.asr-velocity-trails{display:none}.asr-contact-effect,.asr-score-flash{animation:none}}

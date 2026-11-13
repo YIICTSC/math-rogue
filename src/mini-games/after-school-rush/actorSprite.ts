@@ -1,7 +1,7 @@
 import type { CastId, Pose } from './direction';
 import type { Family } from './action/types';
 
-export const usesDashMovement = (family: Family) => ['run', 'climb', 'hurdles', 'collect', 'dodge', 'flap'].includes(family);
+export const usesDashMovement = (family: Family) => ['run', 'climb', 'hurdles', 'collect', 'dodge', 'flap', 'soccer', 'mining', 'grapple', 'kart'].includes(family);
 
 export type ActorSpriteOptions = {
   id: CastId;

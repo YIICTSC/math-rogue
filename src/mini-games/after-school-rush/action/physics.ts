@@ -7,9 +7,10 @@ export const S = {
   BALL_X: 19, BALL_Y: 20, BALL_VX: 21, BALL_VY: 22, CARRIED: 23, LEAN: 24, ANGLE: 25,
   POWER: 26, INVULN: 27, LAST_GROUND: 28, GROUND_X: 29, RESULT: 30, MOVED: 31,
   LAST_HIT: 32, CYCLE: 33, AMMO: 34, STOP: 35, NOTE: 36, QUEUED_JUMP: 37, DAMAGE: 38,
+  PHASE: 39, PROGRESS: 40, TENSION: 41, EVENT: 42, TARGET: 43, COMBO: 44,
 } as const;
 export const FLOOR = 520, RADIUS = 28, BODY = 70;
-const side = new Set(['run', 'climb', 'hurdles', 'push', 'duel']);
+const side = new Set(['run', 'climb', 'hurdles', 'push', 'duel', 'parry', 'grapple']);
 export const sideView = (spec: ActionSpec) => side.has(spec.family);
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 const center = (s: State) => ({ x: s[S.X], y: s[S.Y] - 35 });
@@ -23,7 +24,7 @@ export const timingX = (s: State) => 500 + Math.sin(s[S.ANGLE]) * 330;
 export const timingGoal = (spec: ActionSpec) => 420 + spec.variant % 3 * 80;
 
 export function initialAction(spec: ActionSpec, seed: number, level: number): State {
-  const s = Array(39).fill(0);
+  const s = Array(45).fill(0);
   s[S.X] = sideView(spec) ? mirror(spec, 120) : 150;
   s[S.Y] = sideView(spec) ? FLOOR : spec.family === 'flap' ? 290 : 350;
   s[S.SEED] = seed >>> 0; s[S.LEVEL] = level; s[S.HP] = spec.boss ? 3 : 2;
@@ -37,8 +38,27 @@ export function initialAction(spec: ActionSpec, seed: number, level: number): St
   if (spec.family === 'aim') { s[S.X] = 500; s[S.Y] = 330; }
   if (spec.family === 'balance') { s[S.X] = 500; s[S.Y] = 460; }
   if (spec.family === 'brake') { s[S.X] = 120; s[S.Y] = 380; }
+  if (['bat', 'rally', 'volley', 'fishing', 'kart'].includes(spec.family)) { s[S.X] = 500; s[S.Y] = 520; }
+  if (spec.family === 'soccer') { s[S.X] = 130; s[S.Y] = 330; s[S.CARRIED] = 1; s[S.BALL_X] = 165; s[S.BALL_Y] = 295; }
+  if (spec.family === 'golf') { s[S.X] = 120; s[S.Y] = 520; s[S.ANGLE] = 300; }
+  if (spec.family === 'parry') { s[S.X] = 360; s[S.Y] = FLOOR; }
+  if (spec.family === 'grapple') { s[S.X] = 120; s[S.Y] = FLOOR; }
+  if (spec.family === 'volley') { s[S.BALL_X] = 450 + spec.variant % 3 * 50; s[S.BALL_Y] = 100; }
+  if (spec.family === 'mining') s[S.AMMO] = 0;
+  s[S.EVENT] = -1;
   return s;
 }
+
+export const CROSSOVER_FAMILIES = new Set(['bat', 'rally', 'soccer', 'golf', 'kart', 'parry', 'grapple', 'fishing', 'mining', 'volley']);
+export const fishX = (s: State, spec: ActionSpec) => 500 + Math.sin(s[S.T] / (1000 + spec.variant % 3 * 150) + spec.variant) * 260;
+export const pitchBall = (s: State, spec: ActionSpec): Point => {
+  const cycle = Math.floor(s[S.T] / 1600), phase = fractional(s[S.T], 1600);
+  const x = 500 + Math.sin(cycle * 2.1 + spec.variant) * 230;
+  return s[S.CYCLE] === cycle ? { x: x + (phase - s[S.LAST_HIT] % 1600) * .28, y: 430 - (phase - s[S.LAST_HIT] % 1600) * (spec.family === 'bat' && s[S.TARGET] ? .18 : s[S.TARGET] ? .9 : .65) }
+    : { x, y: 50 + phase * .38 };
+};
+export const golfMeter = (s: State) => s[S.PHASE] === 1 ? 1 - Math.abs(1 - fractional((s[S.T] - s[S.STOP]) / 850, 2))
+  : s[S.PHASE] === 2 ? (Math.sin((s[S.T] - s[S.STOP]) / 180) + 1) / 2 : 0;
 
 /** Rendering and collision use exactly the same geometry, including gaps and moving targets. */
 export function actionWorld(spec: ActionSpec, s: State): World {
@@ -92,6 +112,22 @@ export function actionWorld(spec: ActionSpec, s: State): World {
       world.hazards = [{ x: 490, y: 310 + Math.sin(t / 900 + v) * 110, radius: 48 }];
       if (spec.boss) world.hazards.push({ x: 680, y: 220 + Math.cos(t / 850) * 110, radius: 42 }); break;
     case 'rhythm': break;
+    case 'bat': case 'rally': world.targets = [pitchBall(s, spec)]; world.goal = { x: s[S.X], y: 465 }; break;
+    case 'soccer': world.goal = { x: 935, y: 220 + v % 3 * 80 }; world.enemy = { x: 850, y: world.goal.y + Math.sin(t / 650 + v) * 95 }; world.hazards = [{ x: 500, y: 300 + Math.sin(t / 700 + v) * 140, radius: 40 }]; break;
+    case 'golf': world.goal = { x: 850, y: 250 + v % 3 * 50 }; break;
+    case 'kart':
+      world.goal = { x: 500, y: 50 };
+      world.hazards = Array.from({ length: 5 }, (_, i) => ({ x: 230 + ((i + v) % 3) * 270, y: -300 + i * 300 + fractional(s[S.PROGRESS], 1500), radius: 48 })); break;
+    case 'parry': world.enemy = { x: 650, y: FLOOR }; break;
+    case 'grapple':
+      world.platforms = [{ x: 0, y: FLOOR, w: 220 }, { x: 830, y: FLOOR, w: 170 }];
+      world.targets = [{ x: 330, y: 150 }, { x: 610, y: 130 + v % 3 * 25 }, { x: 900, y: 160 }];
+      world.goal = { x: 900, y: FLOOR }; break;
+    case 'fishing': world.targets = [{ x: fishX(s, spec), y: 310 }]; world.goal = { x: s[S.X], y: 310 }; break;
+    case 'mining':
+      world.targets = [{ x: 260, y: 200 }, { x: 600, y: 400 }, { x: 820, y: 180 }, { x: 780, y: 460 }].slice(0, spec.goal).map(p => ({ x: v % 2 ? 1000 - p.x : p.x, y: p.y }));
+      world.hazards = [{ x: 490 + Math.sin(t / 800) * 70, y: 300, radius: 37 }]; break;
+    case 'volley': world.targets = [{ x: s[S.BALL_X], y: s[S.BALL_Y] }]; world.goal = { x: 500, y: 160 }; break;
   }
   return world;
 }
@@ -119,6 +155,7 @@ export function actionInput(spec: ActionSpec, state: State, event: ActionControl
   if (t < s[ready]) return s;
   s[ready] = t + 170; s[a ? S.A : S.B] = t + 400; s[S.MOVED] += 10;
   const w = actionWorld(spec, s);
+  if (CROSSOVER_FAMILIES.has(spec.family)) return crossoverInput(spec, s, a, t, w);
   switch (spec.family) {
     case 'run': case 'climb': case 'hurdles':
       if (a) s[S.QUEUED_JUMP] = t + 150;
@@ -199,10 +236,122 @@ export function actionInput(spec: ActionSpec, state: State, event: ActionControl
   return s;
 }
 
+function crossoverInput(spec: ActionSpec, s: number[], a: boolean, t: number, w: World): State {
+  switch (spec.family) {
+    case 'bat': case 'rally': {
+      const cycle = Math.floor(t / 1600), ball = pitchBall(s, spec);
+      s[a ? S.READY_A : S.READY_B] = t + 360;
+      if (s[S.CYCLE] !== cycle && ball.y > (a ? 385 : 345) && ball.y < 560 && Math.abs(ball.x - s[S.X]) < (a ? 150 : 210)) {
+        s[S.CYCLE] = cycle; s[S.SCORE]++; s[S.LAST_HIT] = t; s[S.TARGET] = a ? 0 : 1;
+      }
+      break;
+    }
+    case 'soccer':
+      if (a && s[S.CARRIED]) { s[S.CARRIED] = 0; s[S.STOP] = t; s[S.BALL_X] = s[S.X] + 35; s[S.BALL_Y] = s[S.Y] - 35; s[S.BALL_VX] = 850; s[S.BALL_VY] = s[S.AY] * 250; }
+      else if (!a) { s[S.B] = t + 320; s[S.READY_B] = t + 700; }
+      break;
+    case 'golf':
+      if (!a) { s[S.PHASE] = 0; s[S.BALL_X] = -1; break; }
+      if (s[S.PHASE] === 0) { s[S.PHASE] = 1; s[S.STOP] = t; }
+      else if (s[S.PHASE] === 1) { s[S.POWER] = golfMeter(s); s[S.PHASE] = 2; s[S.STOP] = t; }
+      else if (s[S.PHASE] === 2) { s[S.AMMO] = golfMeter(s); s[S.PHASE] = 3; s[S.BALL_X] = 140; s[S.BALL_Y] = 470; s[S.PROGRESS] = 0; s[S.LAST_HIT] = t; }
+      break;
+    case 'kart':
+      s[a ? S.A : S.B] = t + (a ? 650 : 500); s[a ? S.READY_A : S.READY_B] = t + (a ? 950 : 170); break;
+    case 'parry': {
+      const phase = fractional(t, 1500);
+      if (!a) { s[S.B] = t + 500; s[S.READY_B] = t + 650; if (phase > 420 && phase < 1000) { s[S.COMBO] = t + 1100; s[S.INVULN] = t + 800; s[S.LAST_HIT] = t; } }
+      else if (Math.abs(s[S.X] - w.enemy!.x) < 220 && s[S.COMBO] > t) { s[S.SCORE]++; s[S.COMBO] = 0; s[S.LAST_HIT] = t; s[S.READY_A] = t + 450; }
+      break;
+    }
+    case 'grapple': {
+      if (!a) { s[S.PHASE] = 0; s[S.VY] = -280; s[S.VX] = 400; break; }
+      const target = w.targets.find(p => p.x > s[S.X] + 65 && distance(p, { x: s[S.X], y: s[S.Y] - 70 }) < 520);
+      if (target) { s[S.BALL_X] = target.x; s[S.BALL_Y] = target.y; s[S.PHASE] = 1; s[S.READY_A] = t + 300; }
+      break;
+    }
+    case 'fishing':
+      if (!a) { s[S.TENSION] = Math.max(0, s[S.TENSION] - .55); s[S.READY_B] = t + 350; }
+      else { s[S.READY_A] = t + 380; s[S.TENSION] += Math.abs(s[S.X] - fishX(s, spec)) < 150 ? .27 : .42;
+        if (Math.abs(s[S.X] - fishX(s, spec)) < 150) { s[S.PROGRESS] += .23; s[S.LAST_HIT] = t; }
+        if (s[S.TENSION] > 1) { hurt(s, t); s[S.TENSION] = .35; }
+        if (s[S.PROGRESS] >= 1) win(s); }
+      break;
+    case 'mining':
+      for (let i = 0; i < w.targets.length; i++) if (!(s[S.MASK] & 1 << i) && distance(center(s), w.targets[i]) < (a ? 155 : 220)) {
+        if (!a || s[S.AMMO] & 1 << i) { s[S.MASK] |= 1 << i; s[S.SCORE]++; s[S.LAST_HIT] = t; }
+        else s[S.AMMO] |= 1 << i;
+      }
+      s[a ? S.READY_A : S.READY_B] = t + (a ? 220 : 950); break;
+    case 'volley':
+      if (a && s[S.PHASE] === 0 && s[S.BALL_Y] > 335 && s[S.BALL_Y] < 560 && Math.abs(s[S.BALL_X] - s[S.X]) < 165) {
+        s[S.PHASE] = 1; s[S.BALL_VY] = -620; s[S.LAST_HIT] = t; s[S.VY] = -310;
+      } else if (!a && s[S.PHASE] === 1 && s[S.BALL_Y] < 365) { s[S.SCORE]++; s[S.PHASE] = 2; s[S.STOP] = t; s[S.BALL_VY] = -500; s[S.LAST_HIT] = t; }
+      break;
+  }
+  if (['bat', 'rally', 'soccer', 'parry', 'mining'].includes(spec.family) && s[S.SCORE] >= spec.goal) win(s);
+  return s;
+}
+function integrateCrossover(spec: ActionSpec, s: number[], dt: number, t: number, w: World) {
+  const f = spec.family;
+  if (['bat', 'rally', 'volley', 'fishing', 'kart'].includes(f)) s[S.X] = clamp(s[S.X] + s[S.AX] * (f === 'kart' ? 560 : 650) * dt, 100, 900);
+  if (f === 'bat' || f === 'rally') {
+    const cycle = Math.floor(t / 1600);
+    if (fractional(t, 1600) > 1460 && s[S.CYCLE] !== cycle && s[S.EVENT] !== cycle) { s[S.EVENT] = cycle; hurt(s, t); }
+  } else if (f === 'soccer' || f === 'mining') {
+    const boost = f === 'soccer' && t < s[S.B] ? 1.8 : 1;
+    s[S.X] = clamp(s[S.X] + s[S.AX] * 390 * boost * dt, 60, 880); s[S.Y] = clamp(s[S.Y] + s[S.AY] * 390 * boost * dt, 130, 535);
+    for (const h of w.hazards) if (distance(center(s), h) < h.radius + 23) hurt(s, t);
+    if (f === 'soccer') {
+      if (s[S.CARRIED]) { s[S.BALL_X] = s[S.X] + 35; s[S.BALL_Y] = s[S.Y] - 35; }
+      else { s[S.BALL_X] += s[S.BALL_VX] * dt; s[S.BALL_Y] += s[S.BALL_VY] * dt;
+        if (distance({ x: s[S.BALL_X], y: s[S.BALL_Y] }, w.enemy!) < 65) { s[S.BALL_VX] = -250; s[S.BALL_VY] = 80; }
+        if (s[S.BALL_X] > 910) { if (Math.abs(s[S.BALL_Y] - w.goal.y) < 105) { s[S.SCORE]++; s[S.LAST_HIT] = t; if (s[S.SCORE] >= spec.goal) win(s); } s[S.CARRIED] = 1; }
+        else if (s[S.BALL_X] < 40 || s[S.BALL_Y] < 50 || s[S.BALL_Y] > 570 || t - s[S.STOP] > 300 && distance(center(s), { x: s[S.BALL_X], y: s[S.BALL_Y] }) < 75) s[S.CARRIED] = 1;
+      }
+    }
+  } else if (f === 'golf') {
+    s[S.ANGLE] = clamp(s[S.ANGLE] + s[S.AX] * 190 * dt, 130, 480);
+    if (s[S.PHASE] === 3) {
+      s[S.PROGRESS] = Math.min(1, s[S.PROGRESS] + dt * 1.25);
+      const p = s[S.PROGRESS], landingX = 140 + s[S.POWER] * 1000;
+      s[S.BALL_X] = 140 + (landingX - 140) * p; s[S.BALL_Y] = 470 + (s[S.ANGLE] - 470) * p - Math.sin(p * Math.PI) * 240;
+      if (p >= 1) { if (Math.abs(landingX - w.goal.x) < 145 && Math.abs(s[S.ANGLE] - w.goal.y) < 95 && Math.abs(s[S.AMMO] - .5) < .3) win(s);
+        else { hurt(s, t); s[S.PHASE] = 0; s[S.BALL_X] = -1; } }
+    }
+  } else if (f === 'kart') {
+    if (s[S.MOVED] > 10) s[S.PROGRESS] += dt * (t < s[S.B] ? 120 : t < s[S.A] ? 620 : 310);
+    for (const h of w.hazards) if (distance({ x: s[S.X], y: 465 }, h) < 85) hurt(s, t);
+    if (s[S.PROGRESS] >= 1500 * spec.goal) win(s);
+  } else if (f === 'parry') {
+    s[S.X] = clamp(s[S.X] + s[S.AX] * 380 * dt, 100, 700);
+    const cycle = Math.floor(t / 1500), phase = fractional(t, 1500);
+    if (phase > 900 && phase < 1120 && s[S.EVENT] !== cycle) { s[S.EVENT] = cycle; if (Math.abs(s[S.X] - w.enemy!.x) < 250 && t > s[S.B]) hurt(s, t); }
+  } else if (f === 'grapple') {
+    if (s[S.PHASE] === 1) { const dx = s[S.BALL_X] - s[S.X], dy = s[S.BALL_Y] + 100 - s[S.Y], len = Math.hypot(dx, dy); const amount = Math.min(len, 700 * dt);
+      s[S.X] += dx / Math.max(1, len) * amount; s[S.Y] += dy / Math.max(1, len) * amount; s[S.VY] = 0;
+      if (len < 12 && s[S.BALL_X] > 830) s[S.PHASE] = 0;
+    } else {
+      const oldY = s[S.Y]; s[S.X] = clamp(s[S.X] + (s[S.AX] * 340 + s[S.VX] * .4) * dt, 50, 950); s[S.VX] *= Math.max(0, 1 - dt * 3); s[S.VY] += 1300 * dt; s[S.Y] += s[S.VY] * dt;
+      if (s[S.VY] >= 0) for (const p of w.platforms) if (s[S.X] >= p.x && s[S.X] <= p.x + p.w && oldY <= p.y + 2 && s[S.Y] >= p.y) { s[S.Y] = p.y; s[S.VY] = 0; }
+      if (s[S.Y] > 690) { hurt(s, t); s[S.X] = 120; s[S.Y] = FLOOR; s[S.VY] = 0; }
+      if (s[S.X] > 850 && Math.abs(s[S.Y] - FLOOR) < 5) win(s);
+    }
+  } else if (f === 'fishing') s[S.TENSION] = Math.max(0, s[S.TENSION] - dt * .035);
+  else if (f === 'volley') {
+    if (s[S.PHASE] === 2 && s[S.SCORE] >= spec.goal && t - s[S.STOP] > 350) { win(s); return; }
+    if (s[S.PHASE] === 2 && t - s[S.STOP] > 550) { s[S.PHASE] = 0; s[S.BALL_X] = 300 + ((s[S.SCORE] + spec.variant) % 3) * 200; s[S.BALL_Y] = 90; s[S.BALL_VY] = 0; }
+    s[S.BALL_VY] += dt * (s[S.PHASE] === 2 ? 0 : 530); s[S.BALL_Y] += s[S.BALL_VY] * dt;
+    if (s[S.BALL_Y] > 590) { hurt(s, t); s[S.PHASE] = 0; s[S.BALL_Y] = 100; s[S.BALL_VY] = 0; }
+    if (s[S.Y] < FLOOR || s[S.VY] < 0) { s[S.VY] += dt * 1000; s[S.Y] = Math.min(FLOOR, s[S.Y] + s[S.VY] * dt); }
+  }
+}
+
 function integrate(spec: ActionSpec, s: number[], dt: number, t: number) {
   s[S.T] = t;
   if (s[S.RESULT]) return;
   const oldX = s[S.X], oldY = s[S.Y], w = actionWorld(spec, s), boost = t < s[S.B] ? 1.7 : 1;
+  if (CROSSOVER_FAMILIES.has(spec.family)) { integrateCrossover(spec, s, dt, t, w); s[S.MOVED] += Math.hypot(s[S.X] - oldX, s[S.Y] - oldY); return; }
   if (sideView(spec)) {
     const ground = w.platforms.find(p => oldX >= p.x - 10 && oldX <= p.x + p.w + 10 && Math.abs(oldY - p.y) < 3 && s[S.VY] >= 0);
     if (ground) { s[S.LAST_GROUND] = t; s[S.GROUND_X] = oldX; }

@@ -73,7 +73,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     id: 'AFTER_SCHOOL_RUSH',
     name: '放課後ミニラッシュ',
     titleLines: ['放課後ミニラッシュ'],
-    description: 'スティックとA・Bで、走る・跳ぶ・よける！ 全100本の瞬間アクション。',
+    description: 'スティックとA・Bで、走る・跳ぶ・よける！ 全240本の瞬間アクション。',
     screen: GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
     threshold: 0,
     typeLabel: 'ARCADE',

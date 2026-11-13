@@ -1,6 +1,6 @@
 {
-  "games": 100,
-  "families": 18,
+  "games": 240,
+  "families": 28,
   "entries": [
     {
       "key": "gate/action-1",
@@ -298,6 +298,480 @@
       },
       "variant": 8,
       "goal": 2
+    },
+    {
+      "key": "gate/cross-1",
+      "chapter": 1,
+      "title": [
+        "校門ホームラン",
+        "Gate home run",
+        "こうもんホームラン"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 100,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "gate/cross-2",
+      "chapter": 1,
+      "title": [
+        "門前ラリー",
+        "Gate rally",
+        "もんぜんラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 101,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "gate/cross-3",
+      "chapter": 1,
+      "title": [
+        "校門ドリブル",
+        "Gate dribble",
+        "こうもんドリブル"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 102,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "gate/cross-4",
+      "chapter": 1,
+      "title": [
+        "通学路アプローチ",
+        "School-road approach",
+        "つうがくろアプローチ"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 103,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "gate/cross-5",
+      "chapter": 1,
+      "title": [
+        "GP・校門スタート",
+        "GP: gate start",
+        "GP・こうもんスタート"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 104,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "gate/cross-6",
+      "chapter": 1,
+      "title": [
+        "ダンジョンズ・門の盾",
+        "Dungeons: gate shield",
+        "ダンジョンズ・もんのたて"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 105,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "gate/cross-7",
+      "chapter": 1,
+      "title": [
+        "航路・門を越えて",
+        "Star Tide: over the gate",
+        "こうろ・もんをこえて"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 106,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "gate/cross-8",
+      "chapter": 1,
+      "title": [
+        "RPG・門前の池",
+        "RPG: gate pond",
+        "RPG・もんぜんのいけ"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 107,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "gate/cross-9",
+      "chapter": 1,
+      "title": [
+        "クラフト・石畳採掘",
+        "Craft: paving crystals",
+        "クラフト・いしだたみさいくつ"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 108,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "gate/cross-10",
+      "chapter": 1,
+      "title": [
+        "門前レシーブ",
+        "Gate receive",
+        "もんぜんレシーブ"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 109,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "gate/cross-11",
+      "chapter": 1,
+      "title": [
+        "忘れ物スライド",
+        "Lost-and-found slide",
+        "わすれものスライド"
+      ],
+      "family": "hurdles",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "rope",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "しゃがむ",
+          "Duck",
+          null
+        ]
+      },
+      "variant": 110,
+      "goal": 1
+    },
+    {
+      "key": "gate/cross-12",
+      "chapter": 1,
+      "title": [
+        "鐘楼へのひと跳び",
+        "Bell-tower leap",
+        "しょうろうへのひととび"
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 111,
+      "goal": 1
+    },
+    {
+      "key": "gate/cross-13",
+      "chapter": 1,
+      "title": [
+        "門番の反撃修行",
+        "Gatekeeper counter drill",
+        "もんばんのはんげきしゅぎょう"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 112,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "gate/cross-14",
+      "chapter": 1,
+      "title": [
+        "帰宅便フック",
+        "Homebound hook",
+        "きたくびんフック"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 113,
+      "goal": 1,
+      "sourceGame": "star-tide"
     },
     {
       "key": "gate/action-10",
@@ -630,6 +1104,481 @@
       "goal": 2
     },
     {
+      "key": "classroom/cross-1",
+      "chapter": 2,
+      "title": [
+        "チョークの強打",
+        "Chalk slugger",
+        "チョークのきょうだ"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 114,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "classroom/cross-2",
+      "chapter": 2,
+      "title": [
+        "教室ミニコート",
+        "Classroom mini court",
+        "きょうしつミニコート"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 115,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "classroom/cross-3",
+      "chapter": 2,
+      "title": [
+        "机間ドリブル",
+        "Desk dribble",
+        "つくえかんドリブル"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 116,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "classroom/cross-4",
+      "chapter": 2,
+      "title": [
+        "廊下の一打",
+        "Hallway approach",
+        "ろうかのいちだ"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 117,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "classroom/cross-5",
+      "chapter": 2,
+      "title": [
+        "GP・机間スラローム",
+        "GP: desk slalom",
+        "GP・つくえかんスラローム"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 118,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "classroom/cross-6",
+      "chapter": 2,
+      "title": [
+        "ダンジョンズ・黒板の盾",
+        "Dungeons: blackboard shield",
+        "ダンジョンズ・こくばんのたて"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 119,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "classroom/cross-7",
+      "chapter": 2,
+      "title": [
+        "航路・机からフック",
+        "Star Tide: desk hooks",
+        "こうろ・つくえからフック"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 120,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "classroom/cross-8",
+      "chapter": 2,
+      "title": [
+        "RPG・教室アクアリウム",
+        "RPG: classroom aquarium",
+        "RPG・きょうしつアクアリウム"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 121,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "classroom/cross-9",
+      "chapter": 2,
+      "title": [
+        "クラフト・机の結晶",
+        "Craft: desk crystals",
+        "クラフト・つくえのけっしょう"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 122,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "classroom/cross-10",
+      "chapter": 2,
+      "title": [
+        "黒板前のアタック",
+        "Blackboard attack",
+        "こくばんまえのアタック"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 123,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "classroom/cross-11",
+      "chapter": 2,
+      "title": [
+        "窓ぎわコイン便",
+        "Window coin run",
+        "まどぎわコインびん"
+      ],
+      "family": "collect",
+      "boss": false,
+      "seconds": 8,
+      "item": "coin",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 124,
+      "goal": 3
+    },
+    {
+      "key": "classroom/cross-12",
+      "chapter": 2,
+      "title": [
+        "消しゴムのリターン",
+        "Eraser return",
+        "けしゴムのリターン"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 125,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "classroom/cross-13",
+      "chapter": 2,
+      "title": [
+        "ノートを運ぶフック",
+        "Notebook hook courier",
+        "ノートをはこぶフック"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 126,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "classroom/cross-14",
+      "chapter": 2,
+      "title": [
+        "黒板鉱山",
+        "Blackboard mine",
+        "こくばんこうざん"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 127,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
       "key": "classroom/action-10",
       "chapter": 2,
       "title": [
@@ -958,6 +1907,481 @@
       },
       "variant": 14,
       "goal": 1
+    },
+    {
+      "key": "store/cross-1",
+      "chapter": 3,
+      "title": [
+        "パン屋のフルスイング",
+        "Bakery full swing",
+        "パンやのフルスイング"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 128,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "store/cross-2",
+      "chapter": 3,
+      "title": [
+        "おやつ返球リレー",
+        "Snack return relay",
+        "おやつへんきゅうリレー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 129,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "store/cross-3",
+      "chapter": 3,
+      "title": [
+        "購買部カップ",
+        "School-store cup",
+        "こうばいぶカップ"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 130,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "store/cross-4",
+      "chapter": 3,
+      "title": [
+        "パンかごアプローチ",
+        "Bread-basket approach",
+        "パンかごアプローチ"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 131,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "store/cross-5",
+      "chapter": 3,
+      "title": [
+        "GP・購買カート便",
+        "GP: store cart express",
+        "GP・こうばいカートびん"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 132,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "store/cross-6",
+      "chapter": 3,
+      "title": [
+        "ダンジョンズ・おやつ防衛",
+        "Dungeons: snack defense",
+        "ダンジョンズ・おやつぼうえい"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 133,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "store/cross-7",
+      "chapter": 3,
+      "title": [
+        "航路・棚から棚へ",
+        "Star Tide: shelf hooks",
+        "こうろ・たなからたなへ"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 134,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "store/cross-8",
+      "chapter": 3,
+      "title": [
+        "RPG・お昼の釣り便",
+        "RPG: lunchtime fishing",
+        "RPG・おひるのつりびん"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 135,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "store/cross-9",
+      "chapter": 3,
+      "title": [
+        "クラフト・氷の倉庫",
+        "Craft: ice-store mining",
+        "クラフト・こおりのそうこ"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 136,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "store/cross-10",
+      "chapter": 3,
+      "title": [
+        "おやつのトス",
+        "Snack toss",
+        "おやつのトス"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 137,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "store/cross-11",
+      "chapter": 3,
+      "title": [
+        "小銭の大そうじ",
+        "Change cleanup",
+        "こぜにのおおそうじ"
+      ],
+      "family": "sweep",
+      "boss": false,
+      "seconds": 8,
+      "item": "slime",
+      "hazard": "egg",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "はらう",
+          "Sweep",
+          null
+        ],
+        "b": [
+          "吸いこむ",
+          "Vacuum",
+          "すいこむ"
+        ]
+      },
+      "variant": 138,
+      "goal": 3
+    },
+    {
+      "key": "store/cross-12",
+      "chapter": 3,
+      "title": [
+        "閉店ドリブル",
+        "Closing-time dribble",
+        "へいてんドリブル"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 139,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "store/cross-13",
+      "chapter": 3,
+      "title": [
+        "ラストオーダー便",
+        "Last-order express",
+        "ラストオーダーびん"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 140,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "store/cross-14",
+      "chapter": 3,
+      "title": [
+        "釣れたらいただきます",
+        "Catch of the day",
+        "つれたらいただきます"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 141,
+      "goal": 1,
+      "sourceGame": "rpg"
     },
     {
       "key": "store/action-10",
@@ -1290,6 +2714,480 @@
       "goal": 1
     },
     {
+      "key": "yard/cross-1",
+      "chapter": 4,
+      "title": [
+        "校庭ホームラン競争",
+        "Yard home-run challenge",
+        "こうていホームランきょうそう"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 142,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "yard/cross-2",
+      "chapter": 4,
+      "title": [
+        "校庭センターラリー",
+        "Center-court rally",
+        "こうていセンターラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 143,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "yard/cross-3",
+      "chapter": 4,
+      "title": [
+        "サッカー・突破の一歩",
+        "Soccer: break through",
+        "サッカー・とっぱのいっぽ"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 144,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "yard/cross-4",
+      "chapter": 4,
+      "title": [
+        "ゴルフ・風の一打",
+        "Golf: breeze shot",
+        "ゴルフ・かぜのいちだ"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 145,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "yard/cross-5",
+      "chapter": 4,
+      "title": [
+        "GP・校庭サーキット",
+        "GP: schoolyard circuit",
+        "GP・こうていサーキット"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 146,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "yard/cross-6",
+      "chapter": 4,
+      "title": [
+        "ダンジョンズ・砂の反撃",
+        "Dungeons: sand counter",
+        "ダンジョンズ・すなのはんげき"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 147,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "yard/cross-7",
+      "chapter": 4,
+      "title": [
+        "航路・校庭横断",
+        "Star Tide: yard crossing",
+        "こうろ・こうていおうだん"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 148,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "yard/cross-8",
+      "chapter": 4,
+      "title": [
+        "RPG・校庭の釣り堀",
+        "RPG: yard fishing pond",
+        "RPG・こうていのつりぼり"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 149,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "yard/cross-9",
+      "chapter": 4,
+      "title": [
+        "クラフト・校庭採石場",
+        "Craft: schoolyard quarry",
+        "クラフト・こうていさいせきじょう"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 150,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "yard/cross-10",
+      "chapter": 4,
+      "title": [
+        "バレー・校庭アタック",
+        "Volley: schoolyard attack",
+        "バレー・こうていアタック"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 151,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "yard/cross-11",
+      "chapter": 4,
+      "title": [
+        "帰宅ダッシュ・連続段差",
+        "Home Dash: stepping stones",
+        "きたくダッシュ・れんぞくだんさ"
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 152,
+      "goal": 1
+    },
+    {
+      "key": "yard/cross-12",
+      "chapter": 4,
+      "title": [
+        "ドッジの回避リレー",
+        "Dodgeball escape relay",
+        "ドッジのかいひリレー"
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 153,
+      "goal": 1
+    },
+    {
+      "key": "yard/cross-13",
+      "chapter": 4,
+      "title": [
+        "サッカー・用具庫カップ",
+        "Soccer: shed cup",
+        "サッカー・ようぐこカップ"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 154,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "yard/cross-14",
+      "chapter": 4,
+      "title": [
+        "野球・風向き勝負",
+        "Baseball: wind challenge",
+        "やきゅう・かざむきしょうぶ"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 155,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
       "key": "yard/action-10",
       "chapter": 4,
       "title": [
@@ -1618,6 +3516,481 @@
       },
       "variant": 20,
       "goal": 4
+    },
+    {
+      "key": "library/cross-1",
+      "chapter": 5,
+      "title": [
+        "本棚のすき間打ち",
+        "Bookshelf batting gap",
+        "ほんだなのすきまうち"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 156,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "library/cross-2",
+      "chapter": 5,
+      "title": [
+        "しおりラリー",
+        "Bookmark rally",
+        "しおりラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 157,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "library/cross-3",
+      "chapter": 5,
+      "title": [
+        "静かなドリブル",
+        "Quiet dribble",
+        "しずかなドリブル"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 158,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "library/cross-4",
+      "chapter": 5,
+      "title": [
+        "図書室アプローチ",
+        "Library approach",
+        "としょしつアプローチ"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 159,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "library/cross-5",
+      "chapter": 5,
+      "title": [
+        "GP・本の回廊",
+        "GP: book corridor",
+        "GP・ほんのかいろう"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 160,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "library/cross-6",
+      "chapter": 5,
+      "title": [
+        "ダンジョンズ・古書の盾",
+        "Dungeons: ancient-book shield",
+        "ダンジョンズ・こしょのたて"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 161,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "library/cross-7",
+      "chapter": 5,
+      "title": [
+        "航路・高い本棚へ",
+        "Star Tide: high shelves",
+        "こうろ・たかいほんだなへ"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 162,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "library/cross-8",
+      "chapter": 5,
+      "title": [
+        "RPG・図鑑の魚",
+        "RPG: field-guide fish",
+        "RPG・ずかんのさかな"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 163,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "library/cross-9",
+      "chapter": 5,
+      "title": [
+        "クラフト・石の書庫",
+        "Craft: stone archive",
+        "クラフト・いしのしょこ"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 164,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "library/cross-10",
+      "chapter": 5,
+      "title": [
+        "本を落とすな",
+        "Keep the book aloft",
+        "ほんをおとすな"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 165,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "library/cross-11",
+      "chapter": 5,
+      "title": [
+        "司書のキャッチ修行",
+        "Librarian catch drill",
+        "ししょのキャッチしゅぎょう"
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "bell",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 166,
+      "goal": 2
+    },
+    {
+      "key": "library/cross-12",
+      "chapter": 5,
+      "title": [
+        "図書館の月釣り",
+        "Library moon fishing",
+        "としょかんのつきつり"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 167,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "library/cross-13",
+      "chapter": 5,
+      "title": [
+        "書庫の守り手",
+        "Archive guardian",
+        "しょこのまもりて"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 168,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "library/cross-14",
+      "chapter": 5,
+      "title": [
+        "返却口のワンショット",
+        "Return-slot one shot",
+        "へんきゃくぐちのワンショット"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 169,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
     },
     {
       "key": "library/action-10",
@@ -1950,6 +4323,481 @@
       "goal": 1
     },
     {
+      "key": "lab/cross-1",
+      "chapter": 6,
+      "title": [
+        "結晶スラッガー",
+        "Crystal slugger",
+        "けっしょうスラッガー"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 170,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "lab/cross-2",
+      "chapter": 6,
+      "title": [
+        "実験ラリー",
+        "Experiment rally",
+        "じっけんラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 171,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "lab/cross-3",
+      "chapter": 6,
+      "title": [
+        "磁力ドリブル",
+        "Magnet dribble",
+        "じりょくドリブル"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 172,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "lab/cross-4",
+      "chapter": 6,
+      "title": [
+        "実験室のホールイン",
+        "Lab hole-in challenge",
+        "じっけんしつのホールイン"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 173,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "lab/cross-5",
+      "chapter": 6,
+      "title": [
+        "GP・実験コース",
+        "GP: lab course",
+        "GP・じっけんコース"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 174,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "lab/cross-6",
+      "chapter": 6,
+      "title": [
+        "ダンジョンズ・結晶反射",
+        "Dungeons: crystal counter",
+        "ダンジョンズ・けっしょうはんしゃ"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 175,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "lab/cross-7",
+      "chapter": 6,
+      "title": [
+        "航路・浮遊装置",
+        "Star Tide: floating devices",
+        "こうろ・ふゆうそうち"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 176,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "lab/cross-8",
+      "chapter": 6,
+      "title": [
+        "RPG・水槽の大物",
+        "RPG: aquarium catch",
+        "RPG・すいそうのおおもの"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 177,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "lab/cross-9",
+      "chapter": 6,
+      "title": [
+        "クラフト・結晶ラッシュ",
+        "Craft: crystal rush",
+        "クラフト・けっしょうラッシュ"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 178,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "lab/cross-10",
+      "chapter": 6,
+      "title": [
+        "実験室の反発ボール",
+        "Lab rebound ball",
+        "じっけんしつのはんぱつボール"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 179,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "lab/cross-11",
+      "chapter": 6,
+      "title": [
+        "泡の空中散歩",
+        "Bubble air walk",
+        "あわのくうちゅうさんぽ"
+      ],
+      "family": "flap",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "glider",
+      "hazard": "windsock",
+      "controls": {
+        "stick": [
+          "飛行",
+          "Fly",
+          "ひこう"
+        ],
+        "a": [
+          "はばたく",
+          "Flap",
+          null
+        ],
+        "b": [
+          "急降下",
+          "Dive",
+          "きゅうこうか"
+        ]
+      },
+      "variant": 180,
+      "goal": 1
+    },
+    {
+      "key": "lab/cross-12",
+      "chapter": 6,
+      "title": [
+        "化石を掘り出せ",
+        "Unearth the fossil",
+        "かせきをほりだせ"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 181,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "lab/cross-13",
+      "chapter": 6,
+      "title": [
+        "ロケット便フック",
+        "Rocket hook express",
+        "ロケットびんフック"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 182,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "lab/cross-14",
+      "chapter": 6,
+      "title": [
+        "電撃の切り返し",
+        "Spark riposte",
+        "でんげきのきりかえし"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 183,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
       "key": "lab/action-10",
       "chapter": 6,
       "title": [
@@ -2278,6 +5126,481 @@
       },
       "variant": 26,
       "goal": 1
+    },
+    {
+      "key": "gym/cross-1",
+      "chapter": 7,
+      "title": [
+        "野球・決めろ強打",
+        "Baseball: power hit",
+        "やきゅう・きめろきょうだ"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 184,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "gym/cross-2",
+      "chapter": 7,
+      "title": [
+        "テニス・二球ラリー",
+        "Tennis: quick rally",
+        "テニス・にきゅうラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 185,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "gym/cross-3",
+      "chapter": 7,
+      "title": [
+        "サッカー・体育館カップ",
+        "Soccer: gym cup",
+        "サッカー・たいいくかんカップ"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 186,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "gym/cross-4",
+      "chapter": 7,
+      "title": [
+        "ゴルフ・インドアショット",
+        "Golf: indoor shot",
+        "ゴルフ・インドアショット"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 187,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "gym/cross-5",
+      "chapter": 7,
+      "title": [
+        "GP・体育館ジムカーナ",
+        "GP: gymkhana",
+        "GP・たいいくかんジムカーナ"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 188,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "gym/cross-6",
+      "chapter": 7,
+      "title": [
+        "ダンジョンズ・特訓の盾",
+        "Dungeons: shield drill",
+        "ダンジョンズ・とっくんのたて"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 189,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "gym/cross-7",
+      "chapter": 7,
+      "title": [
+        "航路・リング横断",
+        "Star Tide: ring crossing",
+        "こうろ・リングおうだん"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 190,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "gym/cross-8",
+      "chapter": 7,
+      "title": [
+        "RPG・遠征の釣り",
+        "RPG: expedition fishing",
+        "RPG・えんせいのつり"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 191,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "gym/cross-9",
+      "chapter": 7,
+      "title": [
+        "クラフト・体育館の鉱脈",
+        "Craft: gym ore vein",
+        "クラフト・たいいくかんのこうみゃく"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 192,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "gym/cross-10",
+      "chapter": 7,
+      "title": [
+        "バレー・速攻アタック",
+        "Volley: quick attack",
+        "バレー・そっこうアタック"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 193,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "gym/cross-11",
+      "chapter": 7,
+      "title": [
+        "バスケ・空中フィニッシュ",
+        "Basketball: air finish",
+        "バスケ・くうちゅうフィニッシュ"
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 194,
+      "goal": 1
+    },
+    {
+      "key": "gym/cross-12",
+      "chapter": 7,
+      "title": [
+        "テニス・ロブの達人",
+        "Tennis: lob master",
+        "テニス・ロブのたつじん"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 195,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "gym/cross-13",
+      "chapter": 7,
+      "title": [
+        "野球・送りバント",
+        "Baseball: sacrifice bunt",
+        "やきゅう・おくりバント"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 196,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "gym/cross-14",
+      "chapter": 7,
+      "title": [
+        "バレー・つなぐ二球",
+        "Volley: keep it alive",
+        "バレー・つなぐにきゅう"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 197,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
     },
     {
       "key": "gym/action-10",
@@ -2610,6 +5933,481 @@
       "goal": 1
     },
     {
+      "key": "music/cross-1",
+      "chapter": 8,
+      "title": [
+        "音速バッティング",
+        "Sonic batting",
+        "おんそくバッティング"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 198,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "music/cross-2",
+      "chapter": 8,
+      "title": [
+        "音符のリターン",
+        "Musical-note return",
+        "おんぷのリターン"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 199,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "music/cross-3",
+      "chapter": 8,
+      "title": [
+        "ビートでドリブル",
+        "Beat dribble",
+        "ビートでドリブル"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 200,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "music/cross-4",
+      "chapter": 8,
+      "title": [
+        "メロディーショット",
+        "Melody shot",
+        "メロディーショット"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 201,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "music/cross-5",
+      "chapter": 8,
+      "title": [
+        "GP・リズムレーン",
+        "GP: rhythm lanes",
+        "GP・リズムレーン"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 202,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "music/cross-6",
+      "chapter": 8,
+      "title": [
+        "ダンジョンズ・拍子の盾",
+        "Dungeons: rhythmic shield",
+        "ダンジョンズ・ひょうしのたて"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 203,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "music/cross-7",
+      "chapter": 8,
+      "title": [
+        "航路・音のかけ橋",
+        "Star Tide: sound bridge",
+        "こうろ・おとのかけはし"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 204,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "music/cross-8",
+      "chapter": 8,
+      "title": [
+        "RPG・音楽室の釣り便",
+        "RPG: music-room fishing",
+        "RPG・おんがくしつのつりびん"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 205,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "music/cross-9",
+      "chapter": 8,
+      "title": [
+        "クラフト・音の原石",
+        "Craft: musical ore",
+        "クラフト・おとのげんせき"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 206,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "music/cross-10",
+      "chapter": 8,
+      "title": [
+        "アンコールスパイク",
+        "Encore spike",
+        "アンコールスパイク"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 207,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "music/cross-11",
+      "chapter": 8,
+      "title": [
+        "合奏のビートラッシュ",
+        "Ensemble beat rush",
+        "がっそうのビートラッシュ"
+      ],
+      "family": "rhythm",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "mic",
+      "hazard": "bell",
+      "controls": {
+        "stick": [
+          "リズム",
+          "Rhythm",
+          null
+        ],
+        "a": [
+          "左の太鼓",
+          "Left drum",
+          "ひだりのたいこ"
+        ],
+        "b": [
+          "右の太鼓",
+          "Right drum",
+          "みぎのたいこ"
+        ]
+      },
+      "variant": 208,
+      "goal": 4
+    },
+    {
+      "key": "music/cross-12",
+      "chapter": 8,
+      "title": [
+        "演奏会のリバウンド",
+        "Concert rebound",
+        "えんそうかいのリバウンド"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 209,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "music/cross-13",
+      "chapter": 8,
+      "title": [
+        "タクトの反撃",
+        "Baton counter",
+        "タクトのはんげき"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 210,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "music/cross-14",
+      "chapter": 8,
+      "title": [
+        "ステージの一振り",
+        "Stage swing",
+        "ステージのひとふり"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 211,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
       "key": "music/action-10",
       "chapter": 8,
       "title": [
@@ -2940,6 +6738,480 @@
       "goal": 2
     },
     {
+      "key": "roof/cross-1",
+      "chapter": 9,
+      "title": [
+        "天空ホームラン",
+        "Sky home run",
+        "てんくうホームラン"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 212,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "roof/cross-2",
+      "chapter": 9,
+      "title": [
+        "風のラリー",
+        "Wind rally",
+        "かぜのラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 213,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "roof/cross-3",
+      "chapter": 9,
+      "title": [
+        "屋上ドリブル決戦",
+        "Rooftop dribble challenge",
+        "おくじょうドリブルけっせん"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 214,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "roof/cross-4",
+      "chapter": 9,
+      "title": [
+        "雲までアプローチ",
+        "Cloud approach",
+        "くもまでアプローチ"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 215,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "roof/cross-5",
+      "chapter": 9,
+      "title": [
+        "GP・屋上スカイレーン",
+        "GP: rooftop sky lanes",
+        "GP・おくじょうスカイレーン"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 216,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "roof/cross-6",
+      "chapter": 9,
+      "title": [
+        "ダンジョンズ・風の反撃",
+        "Dungeons: wind counter",
+        "ダンジョンズ・かぜのはんげき"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 217,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "roof/cross-7",
+      "chapter": 9,
+      "title": [
+        "航路・空渡りフック",
+        "Star Tide: sky hooks",
+        "こうろ・そらわたりフック"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 218,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "roof/cross-8",
+      "chapter": 9,
+      "title": [
+        "RPG・屋上の星釣り",
+        "RPG: rooftop star fishing",
+        "RPG・おくじょうのほしつり"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 219,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "roof/cross-9",
+      "chapter": 9,
+      "title": [
+        "クラフト・空の結晶",
+        "Craft: sky crystals",
+        "クラフト・そらのけっしょう"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 220,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "roof/cross-10",
+      "chapter": 9,
+      "title": [
+        "空中レシーブ",
+        "Air receive",
+        "くうちゅうレシーブ"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 221,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "roof/cross-11",
+      "chapter": 9,
+      "title": [
+        "雲間のフックリレー",
+        "Cloud hook relay",
+        "くもまのフックリレー"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 222,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "roof/cross-12",
+      "chapter": 9,
+      "title": [
+        "帰宅ダッシュ・屋根の階段",
+        "Home Dash: roof steps",
+        "きたくダッシュ・やねのかいだん"
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 223,
+      "goal": 1
+    },
+    {
+      "key": "roof/cross-13",
+      "chapter": 9,
+      "title": [
+        "風を読むナイスショット",
+        "Read-the-wind shot",
+        "かぜをよむナイスショット"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 224,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "roof/cross-14",
+      "chapter": 9,
+      "title": [
+        "星空グライド",
+        "Starlight glide",
+        "ほしぞらグライド"
+      ],
+      "family": "flap",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "glider",
+      "hazard": "windsock",
+      "controls": {
+        "stick": [
+          "飛行",
+          "Fly",
+          "ひこう"
+        ],
+        "a": [
+          "はばたく",
+          "Flap",
+          null
+        ],
+        "b": [
+          "急降下",
+          "Dive",
+          "きゅうこうか"
+        ]
+      },
+      "variant": 225,
+      "goal": 1
+    },
+    {
       "key": "roof/action-10",
       "chapter": 9,
       "title": [
@@ -3268,6 +7540,480 @@
       },
       "variant": 35,
       "goal": 1
+    },
+    {
+      "key": "festival/cross-1",
+      "chapter": 10,
+      "title": [
+        "文化祭ホームラン",
+        "Festival home run",
+        "ぶんかさいホームラン"
+      ],
+      "family": "bat",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "target",
+      "controls": {
+        "stick": [
+          "左右のねらい",
+          "Aim left / right",
+          "さゆうのねらい"
+        ],
+        "a": [
+          "スイング",
+          "Swing",
+          null
+        ],
+        "b": [
+          "バント",
+          "Bunt",
+          null
+        ]
+      },
+      "variant": 226,
+      "goal": 2,
+      "sourceGame": "academy-sports/baseball"
+    },
+    {
+      "key": "festival/cross-2",
+      "chapter": 10,
+      "title": [
+        "テニス・お祭りラリー",
+        "Tennis: festival rally",
+        "テニス・おまつりラリー"
+      ],
+      "family": "rally",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "返球",
+          "Return",
+          "へんきゅう"
+        ],
+        "b": [
+          "ロブ",
+          "Lob",
+          null
+        ]
+      },
+      "variant": 227,
+      "goal": 2,
+      "sourceGame": "tennis"
+    },
+    {
+      "key": "festival/cross-3",
+      "chapter": 10,
+      "title": [
+        "サッカー・文化祭カップ",
+        "Soccer: festival cup",
+        "サッカー・ぶんかさいカップ"
+      ],
+      "family": "soccer",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "キック",
+          "Kick",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 228,
+      "goal": 1,
+      "sourceGame": "academy-sports/soccer"
+    },
+    {
+      "key": "festival/cross-4",
+      "chapter": 10,
+      "title": [
+        "ゴルフ・屋台ホール",
+        "Golf: festival hole",
+        "ゴルフ・やたいホール"
+      ],
+      "family": "golf",
+      "boss": false,
+      "seconds": 10,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "ゲージ決定",
+          "Set gauge",
+          "ゲージけってい"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 229,
+      "goal": 1,
+      "sourceGame": "gakuro-golf"
+    },
+    {
+      "key": "festival/cross-5",
+      "chapter": 10,
+      "title": [
+        "GP・文化祭グランプリ",
+        "GP: festival grand prix",
+        "GP・ぶんかさいグランプリ"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 230,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "festival/cross-6",
+      "chapter": 10,
+      "title": [
+        "ダンジョンズ・祭りの奥義",
+        "Dungeons: festival counter",
+        "ダンジョンズ・まつりのおうぎ"
+      ],
+      "family": "parry",
+      "boss": false,
+      "seconds": 9,
+      "item": "mimic",
+      "hazard": "shield",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "追撃",
+          "Follow-up",
+          "ついげき"
+        ],
+        "b": [
+          "ジャストガード",
+          "Perfect guard",
+          null
+        ]
+      },
+      "variant": 231,
+      "goal": 2,
+      "sourceGame": "dungeons"
+    },
+    {
+      "key": "festival/cross-7",
+      "chapter": 10,
+      "title": [
+        "航路・灯りのかけ橋",
+        "Star Tide: lantern bridge",
+        "こうろ・あかりのかけはし"
+      ],
+      "family": "grapple",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "方向",
+          "Direction",
+          "ほうこう"
+        ],
+        "a": [
+          "フック",
+          "Hook",
+          null
+        ],
+        "b": [
+          "解除",
+          "Release",
+          "かいじょ"
+        ]
+      },
+      "variant": 232,
+      "goal": 1,
+      "sourceGame": "star-tide"
+    },
+    {
+      "key": "festival/cross-8",
+      "chapter": 10,
+      "title": [
+        "RPG・お祭り釣り大会",
+        "RPG: festival fishing",
+        "RPG・おまつりつりたいかい"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 233,
+      "goal": 1,
+      "sourceGame": "rpg"
+    },
+    {
+      "key": "festival/cross-9",
+      "chapter": 10,
+      "title": [
+        "クラフト・宝石屋台",
+        "Craft: gem stall",
+        "クラフト・ほうせきやたい"
+      ],
+      "family": "mining",
+      "boss": false,
+      "seconds": 9,
+      "item": "crystal",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "採掘",
+          "Mine",
+          "さいくつ"
+        ],
+        "b": [
+          "まとめて砕く",
+          "Shatter",
+          "まとめてくだく"
+        ]
+      },
+      "variant": 234,
+      "goal": 3,
+      "sourceGame": "gakuro-craft"
+    },
+    {
+      "key": "festival/cross-10",
+      "chapter": 10,
+      "title": [
+        "バレー・文化祭マッチ",
+        "Volley: festival match",
+        "バレー・ぶんかさいマッチ"
+      ],
+      "family": "volley",
+      "boss": false,
+      "seconds": 9,
+      "item": "volleyball",
+      "hazard": "rope",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "レシーブ",
+          "Receive",
+          null
+        ],
+        "b": [
+          "スパイク",
+          "Spike",
+          null
+        ]
+      },
+      "variant": 235,
+      "goal": 2,
+      "sourceGame": "academy-sports/volleyball"
+    },
+    {
+      "key": "festival/cross-11",
+      "chapter": 10,
+      "title": [
+        "サバイバー・おばけ包囲網",
+        "Survivor: ghost ring",
+        "サバイバー・おばけほういもう"
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 236,
+      "goal": 1
+    },
+    {
+      "key": "festival/cross-12",
+      "chapter": 10,
+      "title": [
+        "バスケ・花火シュート",
+        "Basketball: firework shot",
+        "バスケ・はなびシュート"
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 237,
+      "goal": 1
+    },
+    {
+      "key": "festival/cross-13",
+      "chapter": 10,
+      "title": [
+        "文化祭アンコール便",
+        "Festival encore express",
+        "ぶんかさいアンコールびん"
+      ],
+      "family": "kart",
+      "boss": false,
+      "seconds": 9,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "ブースト",
+          "Boost",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 238,
+      "goal": 1,
+      "sourceGame": "gakuro-kart"
+    },
+    {
+      "key": "festival/cross-14",
+      "chapter": 10,
+      "title": [
+        "最後の星をつれ",
+        "Catch the final star",
+        "さいごのほしをつれ"
+      ],
+      "family": "fishing",
+      "boss": false,
+      "seconds": 9,
+      "item": "hook",
+      "hazard": "splash",
+      "controls": {
+        "stick": [
+          "魚に合わせる",
+          "Track the fish",
+          "さかなにあわせる"
+        ],
+        "a": [
+          "巻く",
+          "Reel",
+          "まく"
+        ],
+        "b": [
+          "ゆるめる",
+          "Loosen",
+          null
+        ]
+      },
+      "variant": 239,
+      "goal": 1,
+      "sourceGame": "rpg"
     },
     {
       "key": "festival/action-10",

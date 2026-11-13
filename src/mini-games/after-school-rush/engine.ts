@@ -9,7 +9,9 @@ export const FEEDBACK_MS = 950;
 export const MAX_MISSES = 3;
 export const RUSH_BLOCK = 8;
 export type Action = { index: number; at: number };
-type Round = { entry: Entry; state: State; duration: number; speed: number; action?: Action; cursor?: number; history?: State[] };
+type Round = { entry: Entry; state: State; duration: number; speed: number; action?: Action; cursor?: number; history?: State[];
+  queuedButtons?: { button: 'a' | 'b'; at: number }[] };
+export const INPUT_BUFFER_MS = 250;
 export type Mode = { kind: 'rush' } | { kind: 'story'; chapter: number } | { kind: 'practice'; entry: Entry };
 export type Run = {
   mode: Mode; number: number; misses: number; streak: number; deck: Entry[];
@@ -105,7 +107,7 @@ export function pause(stage: Stage, now: number): Stage {
     return { ...stage, since: stage.since + now - stage.pausedAt, now, pausedAt: undefined };
   const state = stage.round.entry.game.mechanic.control?.(stage.round.state, { kind: 'stick', x: 0, y: 0 },
     { now: playElapsed(stage), before: playElapsed(stage), dt: 0 });
-  return { ...stage, pausedAt: now, round: state ? { ...stage.round, state } : stage.round };
+  return { ...stage, pausedAt: now, round: { ...stage.round, state: state ?? stage.round.state, queuedButtons: undefined } };
 }
 export function resumeAfterStudy(stage: Stage, now: number): Stage {
   return stage.tag === 'study' ? nextRound(stage.run, now, stage.last) : stage;
@@ -113,7 +115,7 @@ export function resumeAfterStudy(stage: Stage, now: number): Stage {
 
 /** One input vocabulary for touch, keyboard and physical controllers. Clocks never rewind on undo. */
 export function control(stage: Stage, now: number, command: RushControl): Stage {
-  if (stage.tag !== 'play' || stage.pausedAt !== undefined) return stage;
+  if ((stage.tag !== 'play' && stage.tag !== 'ready') || stage.pausedAt !== undefined) return stage;
   if (stage.round.entry.game.mechanic.control) return actionControl(stage, now, command === 'a' || command === 'b'
     ? { kind: 'button', button: command } : { kind: 'stick', x: command === 'left' ? -1 : command === 'right' ? 1 : 0, y: command === 'up' ? -1 : command === 'down' ? 1 : 0 });
   const live = step(stage, now);
@@ -135,8 +137,18 @@ export function control(stage: Stage, now: number, command: RushControl): Stage 
 }
 
 function actionControl(stage: Stage, now: number, event: ActionControl): Stage {
-  if (stage.tag !== 'play' || stage.pausedAt !== undefined) return stage;
+  if ((stage.tag !== 'play' && stage.tag !== 'ready') || stage.pausedAt !== undefined) return stage;
   const live = step(stage, now);
+  if (live.tag === 'ready') {
+    // A thumb already on the stick must still steer when GO appears. Keep only
+    // fresh button edges so an early jump cannot disappear at the READY boundary.
+    if (event.kind === 'stick') {
+      const state = live.round.entry.game.mechanic.control?.(live.round.state, event, { now: 0, before: 0, dt: 0 });
+      return state ? { ...live, round: { ...live.round, state } } : live;
+    }
+    const queuedButtons = [...(live.round.queuedButtons ?? []).filter(input => input.button !== event.button), { button: event.button, at: now }];
+    return { ...live, round: { ...live.round, queuedButtons } };
+  }
   if (live.tag !== 'play') return live;
   const m = live.round.entry.game.mechanic, time = playElapsed(live);
   const state = m.control?.(live.round.state, event, { now: time, before: time, dt: 0 });
@@ -162,8 +174,16 @@ export function step(stage: Stage, timestamp: number, input?: Input): Stage {
       return { tag: 'study', run: nextRun, last: stage.round.entry };
     return nextRound(nextRun, now, stage.round.entry);
   }
-  if (stage.tag === 'ready') return elapsed >= readyDuration(stage) && !input
-    ? { ...stage, tag: 'play', since: now, now } : now === stage.now ? stage : { ...stage, now };
+  if (stage.tag === 'ready') {
+    if (elapsed < readyDuration(stage) || input) return now === stage.now ? stage : { ...stage, now };
+    let state = stage.round.state, action: Action | undefined;
+    for (const queued of stage.round.queuedButtons ?? []) {
+      if (now - queued.at > INPUT_BUFFER_MS) continue;
+      state = stage.round.entry.game.mechanic.control?.(state, { kind: 'button', button: queued.button }, { now: 0, before: 0, dt: 0 }) ?? state;
+      action = { index: queued.button === 'a' ? 4 : 5, at: 0 };
+    }
+    return { ...stage, tag: 'play', since: now, now, round: { ...stage.round, state, action, queuedButtons: undefined } };
+  }
   const logical = elapsed * stage.round.speed;
   if (logical >= stage.round.duration) return finish(stage, now, 'time');
   const clock: Clock = { now: logical, before: (stage.now - stage.since) * stage.round.speed,

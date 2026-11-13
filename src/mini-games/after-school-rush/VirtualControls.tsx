@@ -4,6 +4,7 @@ import type { Entry } from './catalog';
 import { gameText, PROP_NAMES } from './copy';
 import { controlsFor, DIRECTION_SYMBOLS, repeatsDirection, stickDirection, type Direction, type RushControl } from './controls';
 import type { State } from './originals/model';
+import { S } from './action/physics';
 
 export function VirtualControls({ entry, state, elapsed, mode, cursor, canUndo, enabled, onControl, onSteer }: {
   entry: Entry; state: State; elapsed: number; mode: LanguageMode; cursor: number; canUndo: boolean;
@@ -46,7 +47,7 @@ export function VirtualControls({ entry, state, elapsed, mode, cursor, canUndo, 
     raf = requestAnimationFrame(tick);
     window.addEventListener('blur', release);
     window.addEventListener('resize', release);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('blur', release); window.removeEventListener('resize', release); };
+    return () => { cancelAnimationFrame(raf); release(); window.removeEventListener('blur', release); window.removeEventListener('resize', release); };
   }, []);
   function move(clientX: number, clientY: number) {
     const rect = stick.current?.getBoundingClientRect(), press = held.current;
@@ -74,7 +75,8 @@ export function VirtualControls({ entry, state, elapsed, mode, cursor, canUndo, 
       }}
       onPointerMove={event => { if (held.current?.pointer === event.pointerId) move(event.clientX, event.clientY); }}
       onPointerUp={event => { if (held.current?.pointer === event.pointerId) release(); }}
-      onPointerCancel={release} onLostPointerCapture={() => { held.current = undefined; setOffset({ x: 0, y: 0 }); }}>
+      onPointerCancel={event => { if (held.current?.pointer === event.pointerId) release(); }}
+      onLostPointerCapture={event => { if (held.current?.pointer === event.pointerId) release(); }}>
       {(['up', 'right', 'down', 'left'] as const).map(direction => <button type="button" key={direction} data-asr-direction={direction}
         tabIndex={enabled && stickAvailable ? 0 : -1} disabled={!enabled || !stickAvailable}
         aria-label={local({ up: '上', right: '右', down: '下', left: '左' }[direction], direction, { up: 'うえ', right: 'みぎ', down: 'した', left: 'ひだり' }[direction])}
@@ -88,13 +90,19 @@ export function VirtualControls({ entry, state, elapsed, mode, cursor, canUndo, 
         : local('矢印キー ／ Z・X', 'Arrow keys / Z · X', 'やじるしキー ／ Z・X')}</small>
     </div>
     <div className="asr-ab-buttons">
-      {(['b', 'a'] as const).map(command => <button type="button" key={command} data-asr-button={command}
+      {(['b', 'a'] as const).map(command => {
+        const cooldown = entry.game.action ? Math.max(0, (state[command === 'a' ? S.READY_A : S.READY_B] ?? 0) - elapsed) : 0;
+        const acting = !!entry.game.action && (state[command === 'a' ? S.A : S.B] ?? 0) > elapsed;
+        return <button type="button" key={command} data-asr-button={command}
+        data-cooldown={cooldown > 0 || undefined} data-acting={acting || undefined}
         disabled={!enabled || command === 'b' && !bAvailable}
         aria-label={`${command.toUpperCase()}: ${command === 'a' ? aLabel : bLabel}`}
         onPointerDown={event => { if (event.button === 0) { event.preventDefault(); onControl(command); } }}
         onClick={event => { if (event.detail === 0) onControl(command); }}>
         <b>{command.toUpperCase()}</b><span>{command === 'a' ? aLabel : bLabel}</span>
-      </button>)}
+        <i className="asr-button-cooldown" aria-hidden="true"><i style={{ transform: `scaleX(${Math.min(1, cooldown / 1000)})` }} /></i>
+      </button>;
+      })}
     </div>
   </div>;
 }
