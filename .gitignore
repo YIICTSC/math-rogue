@@ -104,3 +104,5 @@ server/dist/
 # Lantern War generation working files
 scripts/lantern-war/__pycache__/
 assets/lantern-war/*.lock
+
+scripts/quiz-show/__pycache__/

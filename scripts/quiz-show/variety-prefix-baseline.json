@@ -1,0 +1,42 @@
+{
+  "STANDARD": {
+    "count": 64,
+    "sha256": "4d5e3b730ad88d1cb0da74c0180c444556ce42328a115067a1a7300a073a15c1"
+  },
+  "BUZZER": {
+    "count": 64,
+    "sha256": "4d5e3b730ad88d1cb0da74c0180c444556ce42328a115067a1a7300a073a15c1"
+  },
+  "SURVIVAL": {
+    "count": 64,
+    "sha256": "4d5e3b730ad88d1cb0da74c0180c444556ce42328a115067a1a7300a073a15c1"
+  },
+  "TEAMS": {
+    "count": 64,
+    "sha256": "4d5e3b730ad88d1cb0da74c0180c444556ce42328a115067a1a7300a073a15c1"
+  },
+  "CONSENSUS": {
+    "count": 64,
+    "sha256": "8baa3d8093de0320246392da9bea4025fc0019de9786d1e612d7015efca7f80a"
+  },
+  "MAJORITY": {
+    "count": 64,
+    "sha256": "8baa3d8093de0320246392da9bea4025fc0019de9786d1e612d7015efca7f80a"
+  },
+  "WOLF": {
+    "count": 64,
+    "sha256": "8baa3d8093de0320246392da9bea4025fc0019de9786d1e612d7015efca7f80a"
+  },
+  "VOTE": {
+    "count": 64,
+    "sha256": "8baa3d8093de0320246392da9bea4025fc0019de9786d1e612d7015efca7f80a"
+  },
+  "DRAW": {
+    "count": 32,
+    "sha256": "59896b091bbc1653ab1e02547bfee2e4a955948334f661395bb0df1c889f7d28"
+  },
+  "NEAREST": {
+    "count": 32,
+    "sha256": "fc7a5d386937a18b6399e47653d0662eaeab4e286a7837708519b9634993328c"
+  }
+}

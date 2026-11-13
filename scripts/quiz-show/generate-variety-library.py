@@ -168,8 +168,10 @@ for items in [facts,social,draw,nearest]:
  for q in items:
   i=counts.get(q['category'],0);counts[q['category']]=i+1;q['difficulty']=['EASY','NORMAL','HARD'][i%3]
  assert len({q['prompt'][0] for q in items})==len(items)
-banks={mode:facts for mode in ['STANDARD','BUZZER','SURVIVAL','TEAMS']}
-banks.update({mode:social for mode in ['CONSENSUS','MAJORITY','WOLF','VOTE']});banks.update(DRAW=draw,NEAREST=nearest)
+banks={mode:list(facts) for mode in ['STANDARD','BUZZER','SURVIVAL','TEAMS']}
+banks.update({mode:list(social) for mode in ['CONSENSUS','MAJORITY','WOLF','VOTE']});banks.update(DRAW=draw,NEAREST=nearest)
+from variety_expansion import append_expansion, ROWS as EXPANSION_ROWS
+append_expansion(banks,row,hi)
 output=Path(__file__).resolve().parents[2]/'src/quiz-show/varietyPrompts.json'
 output.write_text(json.dumps(banks,ensure_ascii=False,indent=2)+'\n')
-print('Authored',sum(map(len,[facts,social,draw,nearest])),'new prompts;',sum(map(len,banks.values())),'mode entries')
+print('Authored',sum(map(len,[facts,social,draw,nearest]))+len(EXPANSION_ROWS),'authored prompts;',sum(map(len,banks.values())),'mode entries')

@@ -242,7 +242,7 @@
     "test:points": "node scripts/test-point-exchange.mjs",
     "test:points:browser": "node scripts/test-point-exchange-browser.mjs",
     "verify:points:art": "node scripts/verify-point-exchange-art.mjs",
-    "test:quiz-show": "node scripts/quiz-show/test-rules.mjs && node scripts/quiz-show/test-invites.mjs && node scripts/quiz-show/test-party-prompts.mjs && node scripts/quiz-show/test-auto-progress.mjs && node scripts/quiz-show/test-variety-settings.mjs && node scripts/quiz-show/test-variety-library.mjs && node scripts/quiz-show/test-host-queue.mjs",
+    "test:quiz-show": "node scripts/quiz-show/test-rules.mjs && node scripts/quiz-show/test-invites.mjs && node scripts/quiz-show/test-party-prompts.mjs && node scripts/quiz-show/test-auto-progress.mjs && node scripts/quiz-show/test-variety-settings.mjs && node scripts/quiz-show/test-variety-library.mjs && node scripts/quiz-show/test-host-queue.mjs && node scripts/quiz-show/test-variety-expansion.mjs",
     "test:quiz-show:online": "node scripts/quiz-show/test-online.mjs",
     "test:quiz-show:responsive": "node scripts/quiz-show/test-responsive-browser.mjs",
     "test:quiz-show:variety:browser": "node scripts/quiz-show/test-variety-browser.mjs",

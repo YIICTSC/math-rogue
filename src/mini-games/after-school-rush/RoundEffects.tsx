@@ -16,6 +16,7 @@ type ActorProps = {
   age: number;
   facing?: 'side' | 'rear' | 'front';
   className?: string;
+  size?: number;
 };
 
 const ACTION_ROW: Record<Pose, number> = {
@@ -28,7 +29,7 @@ export function RushPortrait({ id }: { id: CastId }) {
   </span>;
 }
 
-export function RushActor({ id, pose, age, facing = 'side', className = '' }: ActorProps) {
+export function RushActor({ id, pose, age, facing = 'side', className = '', size }: ActorProps) {
   const walk = pose === 'walk';
   const dashPose = pose === 'jump' || pose === 'duck';
   const rearRun = facing === 'rear' && walk;
@@ -49,6 +50,7 @@ export function RushActor({ id, pose, age, facing = 'side', className = '' }: Ac
   }
   const aspect = rearRun ? 128 / 160 : dashPose ? (rows === 1 ? 1 : 128 / 160) : 1;
   const style = {
+    ...(size ? {width:size*aspect,height:size} : {}),
     '--asr-actor-sheet': `url("${assetUrl(path)}")`,
     '--asr-actor-columns': columns,
     '--asr-actor-rows': rows,
@@ -58,7 +60,7 @@ export function RushActor({ id, pose, age, facing = 'side', className = '' }: Ac
   } as CSSProperties;
   return <div className={`asr-cast-actor ${className}`} data-actor={id} data-pose={pose}
     data-atlas={dashPose || rearRun ? 'dash' : 'dungeon'} style={style} aria-hidden="true">
-    <i />
+    <span className="asr-actor-frame"><img className="asr-actor-sheet" src={assetUrl(path)} alt="" draggable={false} style={{width:`${columns*100}%`,height:`${rows*100}%`,left:`${-column*100}%`,top:`${-row*100}%`}}/></span>
   </div>;
 }
 

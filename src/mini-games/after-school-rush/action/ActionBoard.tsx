@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import {useLayoutEffect,useRef,useState,type CSSProperties,type ReactNode} from 'react';
 import type { LanguageMode } from '../../../types';
 import { assetUrl } from '../../../utils/assetPaths';
 import { Sprite, type ArtName } from '../art';
@@ -18,6 +18,8 @@ function ObjectArt({ p, art, className = '', children }: { p: Point; art: ArtNam
 export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, feedbackElapsed = 0 }: {
   entry: Entry; state: State; elapsed: number; mode: LanguageMode; action?: Action; outcome?: Outcome; feedbackElapsed?: number;
 }) {
+  const field=useRef<HTMLDivElement>(null),[actorSize,setActorSize]=useState(72);
+  useLayoutEffect(()=>{const node=field.current;if(!node)return;const measure=()=>setActorSize(Math.max(32,node.clientHeight*.2));measure();const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);observer?.observe(node);window.addEventListener('resize',measure);return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};},[]);
   const spec = entry.game.action!, w = actionWorld(spec, s), family = spec.family, t = s[S.T];
   const isSide = sideView(spec), cast = castFor(entry), a = t < s[S.A], b = t < s[S.B], hit = t - s[S.DAMAGE] < 900;
   const stationary = ['aim', 'timing', 'throw', 'rhythm'].includes(family);
@@ -34,7 +36,7 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
   const title = gameText(mode, spec.boss ? THEMES[entry.chapter].boss : entry.game.title);
   const local = (ja: string, en: string, hira?: string) => gameText(mode, [ja, en, hira]);
   return <div className="asr-original asr-action-original">
-    <div className="asr-field asr-action-stage" data-family={family} data-side={isSide} data-hit={hit || undefined} data-outcome={outcome}
+    <div ref={field} className="asr-field asr-action-stage" data-family={family} data-side={isSide} data-hit={hit || undefined} data-outcome={outcome}
       role="img" aria-label={title} style={{ '--asr-scenery': `url("${assetUrl(THEMES[entry.chapter].art)}")` } as CSSProperties}>
       <div className="asr-action-backdrop" /><div className="asr-action-atmosphere" />
       {!isSide && <div className="asr-action-floor" data-flying={family === 'flap'} />}
@@ -71,11 +73,12 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
         })}</div>}
       {family === 'carry' && <><div className="asr-action-delivery" style={at(w.goal)}><Sprite name="satchel" /><span>★</span></div>
         <ObjectArt p={s[S.CARRIED] ? { x: s[S.X], y: s[S.Y] - 90 } : s[S.MASK] ? { x: s[S.BOX_X], y: s[S.BOX_Y] } : { x: 150, y: 300 }} art={spec.item} className="asr-action-parcel" /></>}
-      <div className="asr-action-player" data-facing={s[S.FACING]} data-pose={pose} data-rolling={rolling && !outcome || undefined}
+      <div className="asr-action-player" data-facing={s[S.FACING]} data-pose={pose} data-vehicle={family==='brake'||undefined} data-rolling={rolling && !outcome || undefined}
         data-dashing={b && ['run', 'climb', 'catch', 'chase'].includes(family) || undefined}
-        data-guard={b && ['duel', 'dodge', 'collect'].includes(family)} style={at(player)}>
+        data-guard={b && ['duel', 'dodge', 'collect'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
         <i className="asr-action-shadow" />
-        {family === 'brake' ? <Sprite name="truck" /> : <RushActor id={cast.id} pose={pose} age={outcome ? feedbackElapsed : pose === 'walk' ? t : action ? Math.max(0, t - action.at) : elapsed} />}
+        <RushActor size={actorSize} id={cast.id} pose={pose} age={outcome ? feedbackElapsed : pose === 'walk' ? t : action ? Math.max(0, t - action.at) : elapsed} />
+        {family==='brake'&&<Sprite name="truck" className="asr-action-vehicle"/>}
         {b && ['duel', 'dodge', 'collect'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
         {family === 'catch' && a && <div className="asr-action-open-arms"><Sprite name="satchel" /><i /></div>}
         {family === 'flap' && <Sprite name="glider" className="asr-action-glider" />}

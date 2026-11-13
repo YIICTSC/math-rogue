@@ -3,7 +3,7 @@ import type { KartQuestion } from '../mini-games/gakuro-kart/learning';
 export const QUIZ_PROTOCOL = 1;
 export const MAX_ANSWERERS = 40;
 export const MAX_SHOW_QUESTIONS = 240;
-export const PARTY_CATEGORIES = ['ALL','ANIMALS','FOOD','LOVE','DAILY','WORLD','NATURE','CULTURE','FANTASY'] as const;
+export const PARTY_CATEGORIES = ['ALL','ANIMALS','FOOD','LOVE','DAILY','WORLD','NATURE','CULTURE','FANTASY','SPORTS','GAMES','SCHOOL','WORK','HISTORY','TECH','MYSTERY','MONEY','SEASONS','TRANSPORT','HEALTH','SPACE'] as const;
 export type PartyCategory = typeof PARTY_CATEGORIES[number];
 export const MODES = ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS', 'CONSENSUS', 'MAJORITY', 'NEAREST', 'DRAW', 'VOTE', 'WOLF'] as const;
 export type ShowMode = typeof MODES[number];
