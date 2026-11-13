@@ -214,7 +214,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
-      audioService.playSound('correct');
+      try { audioService.playSound('correct'); } catch { /* Audio failure must not strand the answered question. */ }
       if (!problems[currentProblemIndex].isAssignmentRetry) {
         const cycleScope = getProblemCycleScope(String(mode), assignmentFilterForMode(assignmentUnits, mode));
         storageService.markProblemCycleCorrect(cycleScope, answerResult.problemKey);
@@ -226,7 +226,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       storageService.saveHintStreak(mode, currentStreak + 1);
     } else {
       setFeedback('WRONG');
-      audioService.playSound('wrong');
+      try { audioService.playSound('wrong'); } catch { /* Audio failure must not strand the answered question. */ }
       storageService.saveHintStreak(mode, 0);
     }
 

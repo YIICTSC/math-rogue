@@ -41,3 +41,5 @@
 .asr-ab-buttons [data-cooldown=true] .asr-button-cooldown{opacity:1}.asr-button-cooldown>i{display:block;width:100%;height:100%;background:#4b2859;transform-origin:left}
 .asr-root .asr-ab-buttons button[data-acting=true]{filter:brightness(1.14);border-color:#fff4ba}
 @media(prefers-reduced-motion:reduce){.asr-round-intro,.asr-verdict{animation:none}}
+
+.asr-root>.asr-quiz{position:fixed;inset:0;overflow:auto;isolation:isolate;pointer-events:auto}

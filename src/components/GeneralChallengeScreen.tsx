@@ -578,7 +578,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
-      audioService.playSound('correct');
+      try { audioService.playSound('correct'); } catch { /* Audio failure must not strand the answered question. */ }
       if (!previewOnly) {
         onModeCorrect?.(problems[currentProblemIndex].sourceMode, 1);
         const currentTotal = storageService.getMathCorrectCount();
@@ -588,7 +588,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       }
     } else {
       setFeedback('WRONG');
-      audioService.playSound('wrong');
+      try { audioService.playSound('wrong'); } catch { /* Audio failure must not strand the answered question. */ }
       if (!previewOnly) storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
     }
     const answerResult = {

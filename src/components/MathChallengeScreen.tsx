@@ -235,7 +235,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
-      audioService.playSound('correct');
+      try { audioService.playSound('correct'); } catch { /* Audio failure must not strand the answered question. */ }
       if (!problems[currentProblemIndex].isAssignmentRetry) {
         const cycleScope = getProblemCycleScope(String(mode), assignmentFilterForMode(assignmentUnits, mode));
         storageService.markProblemCycleCorrect(cycleScope, answerResult.problemKey);
@@ -244,7 +244,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       storageService.saveMathCorrectCount(currentTotal + 1);
     } else {
       setFeedback('WRONG');
-      audioService.playSound('wrong');
+      try { audioService.playSound('wrong'); } catch { /* Audio failure must not strand the answered question. */ }
     }
 
     if (!debugSkip) void awardAnswer(answerResult);

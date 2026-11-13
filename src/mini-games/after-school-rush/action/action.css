@@ -52,3 +52,7 @@
 .asr-grapple-anchor>b{bottom:-7%;right:-7%;padding:2px 5px}
 .asr-sport-opponent{width:min(15cqh,16cqw);height:min(15cqh,16cqw)}
 .asr-goalkeeper{width:min(18cqh,20cqw);height:min(18cqh,20cqw)}
+
+/* Mirror the strike arc around the same feet anchor as the actor. */
+.asr-strike-direction{position:absolute;inset:0;pointer-events:none;transform-origin:50% 65%}
+.asr-action-player[data-facing="-1"]>.asr-action-shield{right:auto;left:-12%;scale:-1 1}

@@ -25,6 +25,8 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
   useLayoutEffect(()=>{const node=field.current;if(!node)return;const measure=()=>setActorSize(Math.max(32,node.clientHeight*.2));measure();const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);observer?.observe(node);window.addEventListener('resize',measure);return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};},[]);
   const spec = entry.game.action!, w = actionWorld(spec, s), family = spec.family, t = s[S.T];
   const isSide = sideView(spec), cast = castFor(entry), a = t < s[S.A], b = t < s[S.B], hit = t - s[S.DAMAGE] < 900;
+  const strikeDirection=useRef({at:-1,angle:0});
+  if(action&&strikeDirection.current.at!==action.at){strikeDirection.current={at:action.at,angle:!isSide&&Math.hypot(s[S.AX],s[S.AY])>.1?Math.atan2(s[S.AY],s[S.AX])*180/Math.PI:s[S.FACING]<0?180:0};}
   const stationary = ['aim', 'timing', 'throw', 'rhythm', 'golf'].includes(family);
   const player = stationary ? { x: family === 'timing' ? timingGoal(spec) : family === 'rhythm' ? 500 : 120, y: 530 } : { x: s[S.X], y: s[S.Y] };
   const rolling = a && ['collect', 'dodge'].includes(family);
@@ -97,7 +99,7 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
         {b && ['duel', 'dodge', 'collect', 'parry'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
         {family === 'catch' && a && <div className="asr-action-open-arms"><Sprite name="satchel" /><i /></div>}
         {family === 'flap' && <Sprite name="glider" className="asr-action-glider" />}
-        {a && ['chase', 'sweep', 'push', 'duel', 'bat', 'rally', 'volley', 'mining', 'parry'].includes(family) && <i className="asr-action-swing" key={action?.at} />}
+        {(striking || a && ['chase', 'sweep', 'push'].includes(family)) && <span className="asr-strike-direction" style={{rotate:`${strikeDirection.current.angle}deg`}} key={action?.at}><i className="asr-action-swing" /></span>}
       </div>
       <ActionFeedback entry={entry} state={s} elapsed={elapsed} action={action} outcome={outcome} player={player}/>
       <div className="asr-action-status"><span>{Array.from({ length: spec.boss ? 3 : 2 }, (_, i) => <i key={i} data-lost={i >= s[S.HP]}>◆</i>)}</span>

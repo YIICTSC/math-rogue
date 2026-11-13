@@ -331,7 +331,7 @@ export default function AfterSchoolRush({
   return (
     <main className="asr-root" data-asr-screen={stage.tag} data-asr-mode={'run' in stage ? stage.run.mode.kind : undefined}
       data-gamepad-live={active && !paused ? 'mini-rush' : undefined} ref={rootRef} tabIndex={-1} style={skin} onKeyDown={keydown} onKeyUp={keyup}
-      data-gamepad-navigation-root data-gamepad-initial-scope={`mini-rush-${stage.tag}-${paused}-${menu}-${activeKey}`}
+      data-gamepad-navigation-root={studying ? undefined : true} data-gamepad-initial-scope={`mini-rush-${stage.tag}-${paused}-${menu}-${activeKey}`}
       aria-label={title} lang={languageMode === 'ENGLISH' ? 'en' : 'ja'}>
       {stage.tag === 'lobby' && <div className="asr-lobby">
         <header className="asr-top">
@@ -429,7 +429,7 @@ export default function AfterSchoolRush({
       </>}
 
       {studying && (stage.tag === 'results' || stage.tag === 'study') && <div className="asr-quiz" data-asr-quiz>
-        <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode}
+        <MiniGameProblemChallenge key={`${stage.tag}-${quizOffset.current}`} mode={problemMode} modePool={problemModePool} answerMode={answerMode}
           assignment={assignment} languageMode={languageMode} problemOffset={quizOffset.current}
           rewardHint={stage.tag === 'study' ? l('ひと息ついて3問！ 次はスピードアップ', 'Three questions, then the next gear!', 'ひといきついて3もん！ つぎはスピードアップ') : stage.run.completed
             ? l('章クリア！ 3問にチャレンジ', 'Chapter cleared! Try three questions.', 'しょうクリア！ 3もんに チャレンジ')
