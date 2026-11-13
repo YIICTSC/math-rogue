@@ -9,6 +9,9 @@ const html =
   '<html><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><body style="margin:0"><div id="root" style="height:100dvh"></div><script type="module" src="/scripts/fixtures/schoolyard-survivor.tsx"></script></body></html>';
 try {
   server = await createServer({
+    configFile: false,
+    cacheDir: "node_modules/.vite-survivor-qa",
+    optimizeDeps: { noDiscovery: true, include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime", "lucide-react"] },
     logLevel: "error",
     server: { host: "127.0.0.1", port: 0, hmr: false },
     plugins: [
@@ -43,14 +46,14 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1280, height: 800 },
   });
-  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("pageerror", (e) => {errors.push(e.message);console.log("PAGE ERROR", e.message);});
   page.on("console", (m) => {
     if (m.type() === "error" && /loop error/.test(m.text()))
       errors.push(m.text());
   });
   await page.addInitScript(() => localStorage.setItem("pixel_spire_theme_clear_counts_v1", JSON.stringify({elementary:100,"high-school":100,magic:100})));
   await page.clock.install();
-  await page.goto(base);
+  await page.goto(base, { timeout: 90000 });
   await page.getByRole("heading", { level: 1 }).waitFor();
   await page.waitForFunction(
     () =>
@@ -526,7 +529,7 @@ try {
     "astral",
   ].entries()) {
     const p = await browser.newPage({ viewport: { width: 1000, height: 700 } });
-    p.on("pageerror", (e) => errors.push(e.message));
+    p.on("pageerror", (e) => {errors.push(e.message);console.log("PAGE ERROR", e.message);});
     await p.clock.install();
     await p.goto(base);
     await p.locator(".sy-title-copy .sy-primary").click();
@@ -599,7 +602,7 @@ try {
       isMobile: true,
       hasTouch: true,
     });
-    p.on("pageerror", (e) => errors.push(e.message));
+    p.on("pageerror", (e) => {errors.push(e.message);console.log("PAGE ERROR", e.message);});
     await p.goto(`${base}?lang=${lang}`);
     await p.getByRole("heading", { level: 1 }).waitFor();
     await p.screenshot({ path: `${shots}/title-${width}.png` });

@@ -4,7 +4,7 @@ export const QUIZ_PROTOCOL = 1;
 export const MAX_ANSWERERS = 40;
 export const MODES = ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS', 'CONSENSUS', 'MAJORITY', 'NEAREST', 'DRAW', 'VOTE', 'WOLF'] as const;
 export type ShowMode = typeof MODES[number];
-export const minimumAnswerers = (mode: ShowMode) => mode === 'WOLF' ? 3 : ['DRAW','CONSENSUS','MAJORITY','VOTE'].includes(mode) ? 2 : 1;
+export const minimumAnswerers = (mode: ShowMode) => mode === 'WOLF' ? 3 : ['DRAW','CONSENSUS','MAJORITY','VOTE','NEAREST'].includes(mode) ? 2 : 1;
 export const supportsLearningUnits = (mode: ShowMode) => ['STANDARD','BUZZER','SURVIVAL','TEAMS'].includes(mode);
 export type AnswerFormat = 'TEXT' | 'CHOICE' | 'FLIP';
 export type Phase = 'lobby' | 'ready' | 'open' | 'closed' | 'reveal' | 'voting' | 'scoreboard' | 'finished' | 'review' | 'trial' | 'night' | 'dawn';
@@ -20,6 +20,7 @@ export interface ShowQuestion {
   points: number;
   passage?: string;
   visual?: KartQuestion['visual'];
+  party?: boolean; difficulty?: 'EASY'|'NORMAL'|'HARD'; opinion?: boolean; freeDraw?: boolean;
   audioPrompt?: KartQuestion['audioPrompt'];
 }
 /** Normalized vector ink: coordinates in [0,1000], fixed palette and bounded points. */
@@ -33,7 +34,7 @@ export interface Round {
   deadline: number; remaining: number; paused: boolean; artist: string | null;
   buzzer: string | null; buzzOrder: string[]; locked: string[];
   votes: Record<string, string>; consensus: boolean | null;
-  agreementAwarded?: boolean;
+  agreementAwarded?: boolean; average?: number;
 }
 export type WolfRole = 'HUMAN' | 'WOLF' | 'SEER' | 'MEDIUM' | 'GUARD' | 'MAD';
 export interface WolfSeat { role: WolfRole; original: WolfRole; active: boolean; lastGuard: string | null; reports: { target: string; wolf: boolean; day: number }[] }
@@ -48,7 +49,7 @@ export interface ShowWorld {
   accepting: boolean; hostConnected: boolean; createdAt: number;
   wolf: WolfGame | null;
   overview: boolean;
-  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean };
+  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: 'ALL'|'EASY'|'NORMAL'|'HARD'; drawFree?: boolean };
   queue: number[];
   autoProgress?: { phase: Phase; roundId: string; at: number };
 }
@@ -67,7 +68,7 @@ export interface ShowView {
     passage?: string; visual?: ShowQuestion['visual']; audioPrompt?: ShowQuestion['audioPrompt'];
     seconds: number; points: number; deadline: number; remaining: number; paused: boolean;
     eligible: string[]; artist: string | null; buzzer: string | null; buzzOrder: string[]; locked: string[];
-    answer?: string; showAnswer: boolean; showJudgments: boolean; tiles: AnswerTile[]; votedFor?: string; consensus: boolean | null;
+    freeDraw?: boolean; topicReady?: boolean; average?: number; answer?: string; showAnswer: boolean; showJudgments: boolean; tiles: AnswerTile[]; votedFor?: string; consensus: boolean | null;
   };
   host?: { bank: ShowQuestion[] };
   wolf?: {
@@ -80,7 +81,7 @@ export interface ShowView {
 export type ShowAction =
   | { type: 'configure'; title: string; mode: ShowMode; teamCount: number }
   | { type: 'bank'; questions: ShowQuestion[] }
-  | { type: 'plan'; order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean }
+  | { type: 'plan'; order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: 'ALL'|'EASY'|'NORMAL'|'HARD'; drawFree?: boolean }
   | { type: 'start' | 'open' | 'close' | 'pause' | 'autoJudge' | 'score' | 'next' | 'finish' | 'voting' | 'revealAnswer' | 'revealAll' | 'publish' | 'balance'; roundId?: string }
   | { type: 'reveal'; roundId: string; playerId: string }
   | { type: 'grade'; roundId: string; playerId: string; correct: boolean }
@@ -92,6 +93,7 @@ export type ShowAction =
   | { type: 'adjust'; playerId: string; delta: number }
   | { type: 'remove'; playerId: string }
   | { type: 'buzz'; roundId: string }
+  | { type: 'drawingTopic'; roundId: string; text: string }
   | { type: 'answer'; roundId: string; text: string; ink: InkStroke[]; submit: boolean }
   | { type: 'vote'; roundId: string; playerId: string }
   | WolfAction;

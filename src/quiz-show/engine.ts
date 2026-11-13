@@ -31,7 +31,8 @@ export function validQuestion(q: unknown): q is ShowQuestion {
   return typeof v.id === 'string' && v.id.length > 0 && v.id.length <= 300 && typeof v.prompt === 'string' && v.prompt.trim().length > 0 && v.prompt.length <= 12000 &&
     typeof v.answer === 'string' && v.answer.length <= 3000 && Array.isArray(v.aliases) && v.aliases.length <= 12 && v.aliases.every(a => typeof a === 'string' && a.length <= 3000) &&
     Array.isArray(v.options) && v.options.length <= 6 && v.options.every(a => typeof a === 'string' && a.length > 0 && a.length <= 3000) &&
-    ['TEXT', 'FLIP', 'CHOICE'].includes(v.format) && (v.format !== 'CHOICE' || (v.options.length >= 2 && new Set(v.options).size === v.options.length && v.options.includes(v.answer))) &&
+    ['TEXT', 'FLIP', 'CHOICE'].includes(v.format) && (v.format !== 'CHOICE' || (v.options.length >= 2 && new Set(v.options).size === v.options.length && (v.options.includes(v.answer) || (v.opinion === true && v.answer === '')))) &&
+    (v.party === undefined || typeof v.party === 'boolean') && (v.opinion === undefined || typeof v.opinion === 'boolean') && (v.freeDraw === undefined || typeof v.freeDraw === 'boolean') && (v.difficulty === undefined || ['EASY','NORMAL','HARD'].includes(v.difficulty)) &&
     finiteInt(v.seconds, 10, 600) && finiteInt(v.points, 10, 1000) &&
     (v.passage === undefined || (typeof v.passage === 'string' && v.passage.length <= 16000)) &&
     (v.audioPrompt === undefined || (typeof v.audioPrompt?.text === 'string' && v.audioPrompt.text.length <= 3000 && ['ja-JP', 'en-US', 'en-GB'].includes(v.audioPrompt.lang || 'ja-JP'))) &&
@@ -41,7 +42,7 @@ export function validBank(bank: unknown): bank is ShowQuestion[] {
   return Array.isArray(bank) && bank.length >= 1 && bank.length <= 60 && bank.every(validQuestion) && new Set(bank.map(q => q.id)).size === bank.length && new TextEncoder().encode(JSON.stringify(bank)).length <= 256000;
 }
 export function validBankForMode(mode: typeof MODES[number], bank: ShowQuestion[]) {
-  return validBank(bank) && (mode !== 'NEAREST' || bank.every(q => numericAnswer(q.answer) !== null)) && (mode !== 'DRAW' || bank.every(q => !!q.answer.trim()));
+  return validBank(bank) && (mode !== 'DRAW' || bank.every(q => q.freeDraw || !!q.answer.trim())) && bank.every(q => (!q.freeDraw || mode==='DRAW') && (!q.opinion || ['NEAREST','DRAW','CONSENSUS','MAJORITY','WOLF','VOTE'].includes(mode)));
 }
 export function createShow(title = 'みんなでクイズ', now = Date.now()): ShowWorld {
   return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true }, queue: [] };
@@ -72,6 +73,11 @@ function prepare(w: ShowWorld) {
   const source = w.bank[w.queue[queueIndex]];
   const q = source && structuredClone(source);
   if (!q) { w.phase = 'finished'; return; }
+  if (q.party) {
+    if (w.mode === 'DRAW') {q.format='FLIP';q.freeDraw=!!w.plan.drawFree;if(q.freeDraw){q.answer='';q.aliases=[];}}
+    else if(w.mode==='NEAREST') q.format='TEXT';
+    else q.format=w.plan.partyFormat||q.format;
+  }
   if (w.plan.shuffleChoices && q.format === 'CHOICE') q.options = shuffle(q.options);
   w.phase = 'ready';
   w.round = { id: key(), index: w.index, mode: w.mode, question: q, eligible: [], answers: {}, revealed: [], showAnswer: false, showJudgments: false,
@@ -79,7 +85,7 @@ function prepare(w: ShowWorld) {
     buzzer: null, buzzOrder: [], locked: [], votes: {}, consensus: null };
 }
 export function tickShow(w: ShowWorld, now = Date.now()) {
-  if (w.phase === 'open' && w.round && !w.round.paused && now >= w.round.deadline) {
+  if (w.phase === 'open' && w.round && !w.round.paused && now >= w.round.deadline && !(w.round.question.freeDraw && !w.round.question.answer)) {
     act(w, {id:'host',role:'host'}, {type:'close',roundId:w.round.id}, now, true);
   }
   const r = w.round;
@@ -139,7 +145,7 @@ function judge(w: ShowWorld, onlyMissing = false) {
     if (onlyMissing && owns(r.grades, id)) continue;
     const a = r.answers[id];
     if (!a?.submitted) { if (w.phase !== 'open') r.grades[id] = false; }
-    else if (!a.ink.length && r.question.answer.trim()) r.grades[id] = textCorrect(r.question, a.text);
+    else if (!r.question.opinion && !a.ink.length && r.question.answer.trim()) r.grades[id] = textCorrect(r.question, a.text);
   }
 }
 /** Recalculate from the round baseline. Repeated grading never duplicates scores or life loss. */
@@ -149,10 +155,12 @@ function settle(w: ShowWorld) {
   if (r.mode === 'VOTE') {
     for (const target of Object.values(r.votes)) awards[target] = (awards[target] || 0) + 10;
   } else if (r.mode === 'NEAREST') {
-    const target = numericAnswer(r.question.answer);
-    const ranked = submitted.map(id => ({ id, value: numericAnswer(r.answers[id].text) })).filter(a => a.value !== null && target !== null).map(a => ({ id: a.id, distance: Math.abs(a.value! - target!) })).sort((a, b) => a.distance - b.distance);
-    const distances = [...new Set(ranked.map(a => a.distance))];
-    for (const a of ranked) { const rank = distances.indexOf(a.distance); awards[a.id] = Math.round(r.question.points * ([1, .7, .5][rank] || .2)); r.grades[a.id] = rank === 0; }
+    const values = submitted.map(id=>({id,value:numericAnswer(r.answers[id].text)})).filter((a):a is {id:string;value:number}=>a.value!==null);
+    const target = values.length ? values.reduce((n,a)=>n+a.value/values.length,0) : undefined;
+    r.average=target;
+    const ranked=values.map(a=>({id:a.id,distance:Math.abs(a.value-(target??0))})).sort((a,b)=>a.distance-b.distance);
+    const distances:number[]=[];
+    for(const a of ranked){let rank=distances.findIndex(d=>Math.abs(d-a.distance)<=Number.EPSILON*Math.max(1,d,a.distance,Math.abs(target??0))*2);if(rank<0){rank=distances.length;distances.push(a.distance);}awards[a.id]=Math.round(r.question.points*([1,.7,.5][rank]||.2));r.grades[a.id]=rank===0;}
   } else if (r.mode === 'CONSENSUS' || r.mode === 'WOLF') {
     const texts = submitted.map(id => normalizeAnswer(r.answers[id].text));
     const agree = r.consensus ?? (submitted.length === r.eligible.length && texts.length >= 2 && !!texts[0] && texts.every(t => t === texts[0]));
@@ -186,6 +194,11 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
   if (!fromTick) tickShow(w, now);
   if (!raw || typeof raw !== 'object' || typeof (raw as ShowAction).type !== 'string') return 'AUTH';
   const a = raw as ShowAction, r = w.round;
+  if(a.type==='drawingTopic'){
+    if(actor.role!=='player'||!r||r.id!==a.roundId||r.mode!=='DRAW'||!r.question.freeDraw||r.artist!==actor.id||w.phase!=='open'||!w.hostConnected||typeof a.text!=='string'||!a.text.trim()||a.text.length>80)return 'AUTH';
+    if(r.question.answer)return r.question.answer===a.text.trim()?null:'ANSWER';
+    r.question.answer=a.text.trim();r.deadline=now+r.question.seconds*1000;r.remaining=r.question.seconds*1000;w.revision++;return null;
+  }
   if (a.type === 'wolfReview' || a.type === 'wolfVote' || a.type === 'wolfNight' || a.type === 'wolfResolve') {
     const result = wolfAction(w, actor, a);
     if (result === 'next') { w.index++; prepare(w); }
@@ -211,6 +224,7 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
         const format = r.mode === 'NEAREST' || (r.mode === 'DRAW' && r.artist !== actor.id) ? 'TEXT' : r.question.format;
         const artist = r.mode === 'DRAW' && r.artist === actor.id;
         if (artist && a.submit) return 'ANSWER'; // Artist keeps drawing until the host closes the round.
+        if (!artist && r.question.freeDraw && !r.question.answer) return 'PHASE';
         if (!artist && format === 'CHOICE' && !r.question.options.includes(a.text)) return 'ANSWER';
         if (!artist && format !== 'FLIP' && a.ink.length) return 'ANSWER';
         if (a.submit && !a.text.trim() && !a.ink.length) return 'ANSWER';
@@ -220,7 +234,7 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
           r.grades[actor.id] = textCorrect(r.question,a.text);
           if (!r.grades[actor.id]) { r.locked.push(actor.id); r.buzzer = null; }
         }
-        if (a.submit && format === 'CHOICE' && !artist) {
+        if (a.submit && format === 'CHOICE' && !artist && !r.question.opinion) {
           r.grades[actor.id] = a.text === r.question.answer;
           if (r.mode === 'BUZZER' && !r.grades[actor.id]) { r.locked.push(actor.id); r.buzzer = null; }
         }
@@ -245,7 +259,8 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
         break;
       case 'plan':
         if (!['lobby', 'finished'].includes(w.phase) || !['SEQUENTIAL', 'RANDOM'].includes(a.order) || !finiteInt(a.limit, 0, 60) || typeof a.shuffleChoices !== 'boolean' || (a.autoAdvance !== undefined && typeof a.autoAdvance !== 'boolean')) return 'PHASE';
-        w.plan = { order: a.order, limit: a.limit, shuffleChoices: a.shuffleChoices, autoAdvance: a.autoAdvance ?? w.plan.autoAdvance ?? true }; break;
+        if ((a.partyFormat!==undefined&&!['TEXT','FLIP','CHOICE'].includes(a.partyFormat))||(a.partyLevel!==undefined&&!['ALL','EASY','NORMAL','HARD'].includes(a.partyLevel))||(a.drawFree!==undefined&&typeof a.drawFree!=='boolean'))return 'QUESTION';
+        w.plan = {order:a.order,limit:a.limit,shuffleChoices:a.shuffleChoices,autoAdvance:a.autoAdvance??w.plan.autoAdvance??true,partyFormat:a.partyFormat??w.plan.partyFormat??'TEXT',partyLevel:a.partyLevel??w.plan.partyLevel??'ALL',drawFree:a.drawFree??w.plan.drawFree??false}; break;
       case 'start':
         if (!validBankForMode(w.mode,w.bank)) return 'QUESTION';
         if (w.phase !== 'lobby' || !w.bank.length || Object.values(w.players).filter(p => p.connected).length < minimumAnswerers(w.mode)) return 'PHASE';
@@ -254,20 +269,19 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
           w.wolf = startWolves(ids); w.accepting = false;
         }
         for (const p of Object.values(w.players)) { p.score = 0; p.lives = 3; }
-        const all = w.bank.map((_, i) => i), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
+        const all = w.bank.map((_, i) => i).filter(i=>!w.bank[i].party||!w.plan.partyLevel||w.plan.partyLevel==='ALL'||w.bank[i].difficulty===w.plan.partyLevel), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
         w.queue = w.wolf || !w.plan.limit ? ordered : ordered.slice(0, w.plan.limit);
         w.index = 0; prepare(w); break;
       case 'open':
         if (w.phase !== 'ready' || !r) return 'PHASE';
-        if (r.mode === 'NEAREST' && numericAnswer(r.question.answer) === null) return 'QUESTION';
         r.eligible = Object.values(w.players).filter(p => (w.wolf ? owns(w.wolf.seats, p.id) : p.connected) && (r.mode !== 'SURVIVAL' || p.lives > 0)).map(p => p.id);
         if (r.eligible.length < minimumAnswerers(r.mode)) return 'PHASE';
-        if (r.mode === 'DRAW') { if (!r.question.answer.trim()) return 'QUESTION'; r.artist = r.eligible[w.index % r.eligible.length]; }
+        if (r.mode === 'DRAW') { if (!r.question.freeDraw && !r.question.answer.trim()) return 'QUESTION'; r.artist = r.eligible[w.index % r.eligible.length]; }
         r.startLives = Object.fromEntries(Object.values(w.players).map(p => [p.id, p.lives]));
         r.deadline = now + r.question.seconds * 1000; r.remaining = r.question.seconds * 1000; w.phase = 'open'; break;
       case 'close':
         if (w.phase !== 'open' || !r) return 'PHASE';
-        r.remaining = r.paused ? r.remaining : Math.max(0, r.deadline - now); markUnanswered(r); w.phase = 'closed'; publishChoices(w); break;
+        r.remaining = r.paused ? r.remaining : Math.max(0, r.deadline - now); markUnanswered(r); if(r.mode==='NEAREST'){const values=r.eligible.filter(id=>r.answers[id]?.submitted).map(id=>numericAnswer(r.answers[id].text)).filter((v):v is number=>v!==null);r.average=values.length?values.reduce((n,v)=>n+v/values.length,0):undefined;} w.phase = 'closed'; publishChoices(w); break;
       case 'pause':
         if (w.phase !== 'open' || !r) return 'PHASE';
         if (!r.paused) r.remaining = Math.max(0, r.deadline - now); else r.deadline = now + r.remaining;
@@ -338,7 +352,7 @@ export function viewFor(w: ShowWorld, actor: Actor, now = Date.now()): ShowView 
   const r = w.round, host = actor.role === 'host';
   const qVisible = w.phase !== 'ready';
   const v: ShowView = { revision: w.revision, serverNow: now, title: w.title, mode: w.mode, teamCount: w.teamCount, phase: w.phase,
-    accepting: w.accepting, hostConnected: w.hostConnected, players: Object.values(w.players).map(p => ({ ...p })), self: actor.id, role: actor.role, questionCount: w.queue.length || Math.min(w.bank.length, w.plan.limit || 60), index: w.index, overview: !!w.overview, plan: { ...w.plan }, round: null };
+    accepting: w.accepting, hostConnected: w.hostConnected, players: Object.values(w.players).map(p => ({ ...p })), self: actor.id, role: actor.role, questionCount: w.queue.length || Math.min(w.bank.filter(q=>!q.party||!w.plan.partyLevel||w.plan.partyLevel==='ALL'||q.difficulty===w.plan.partyLevel).length, w.plan.limit || 60), index: w.index, overview: !!w.overview, plan: { ...w.plan }, round: null };
   if (host) v.host = { bank: w.bank };
   if (w.wolf) {
     const g = w.wolf, mine = g.seats[actor.id];
@@ -357,8 +371,9 @@ export function viewFor(w: ShowWorld, actor: Actor, now = Date.now()): ShowView 
       ...(qVisible && !secretDrawing && r.mode !== 'DRAW' ? { passage: q.passage, visual: q.visual, audioPrompt: q.audioPrompt } : {}),
       seconds: q.seconds, points: q.points, deadline: r.deadline, remaining: r.remaining, paused: r.paused,
       eligible: [...r.eligible], artist: r.artist, buzzer: r.buzzer, buzzOrder: [...r.buzzOrder], locked: [...r.locked],
+      freeDraw:!!q.freeDraw,topicReady:!!q.answer,...(r.showAnswer&&r.mode==='NEAREST'&&r.average!==undefined?{average:r.average}:{}),
       showAnswer: r.showAnswer, showJudgments: r.showJudgments, consensus: r.consensus, votedFor: r.votes[actor.id],
-      ...(host || r.showAnswer || (r.mode === 'DRAW' && actor.id === r.artist) ? { answer: q.answer } : {}),
+      ...(host || r.showAnswer || (r.mode === 'DRAW' && actor.id === r.artist) ? { answer: r.mode==='NEAREST' ? (r.average===undefined?'':String(Number(r.average.toFixed(6)))) : q.answer } : {}),
       tiles: r.eligible.map(id => {
         const a = r.answers[id], revealed = r.revealed.includes(id);
         const visible = host || actor.id === id || revealed || (r.mode === 'DRAW' && id === r.artist && qVisible);

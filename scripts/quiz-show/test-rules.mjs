@@ -69,7 +69,7 @@ const close=w=>good(w,{type:'close',roundId:w.round.id});const score=w=>{if(w.ph
  console.log('PASS majority ties and no singleton wins');
 }
 {
- const w=setup('NEAREST',4,q({answer:'100'}));['９０','110','1,000',''].forEach((s,i)=>{if(s)answer(w,'p'+i,s)});close(w);score(w);assert.equal(w.players.p0.score,100);assert.equal(w.players.p1.score,100);assert.equal(w.players.p2.score,70);assert.equal(w.players.p3.score,0);
+ const w=setup('NEAREST',4,q({answer:'100'}));['９０','110','1,000',''].forEach((s,i)=>{if(s)answer(w,'p'+i,s)});close(w);score(w);assert.equal(w.round.average,400);assert.equal(w.players.p0.score,70);assert.equal(w.players.p1.score,100);assert.equal(w.players.p2.score,50);assert.equal(w.players.p3.score,0);
  assert.equal(E.numericAnswer(''),null);assert.equal(E.numericAnswer('Infinity'),null);assert.equal(E.numericAnswer('１２，３４５'),12345);
  console.log('PASS nearest-number ranking, equal distances, full-width normalization and unanswered exclusion');
 }
