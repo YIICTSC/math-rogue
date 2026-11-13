@@ -52,11 +52,11 @@ try {
  };
  for(const sport of (hubOnly?[]:scenesOnly?['festival']:recoveryOnly?['soccer']:['baseball','soccer','volleyball','festival']).filter(s=>!only||s===only)){
   await page.setViewportSize({width:1024,height:640});await page.goto(base+'?debug=1&sport='+sport,{waitUntil:'domcontentloaded',timeout:120000});
-  await page.locator('.game-launch-menu button').first().click();await ready();assert.equal(await page.evaluate(()=>__academy.status.failed),false,sport+' assets');
+  await page.locator('.ac-launch-choices [data-intent=match]').click();await ready();assert.equal(await page.evaluate(()=>__academy.status.failed),false,sport+' assets');
   const metrics=await page.evaluate(()=>__academy.status);console.log(sport,'ready',metrics);await snap(sport+'-setup');
   if(recoveryOnly){await recovery();reports.push({sport,metrics,passed:['WebGL context recovery']});continue;}
   if(scenesOnly){
-   await page.getByRole('button',{name:'CPU同士の試合を観戦',exact:true}).click();for(let i=0;i<3;i++)await page.getByRole('button',{name:'次へ',exact:true}).click();await page.getByRole('button',{name:'観戦を始める',exact:true}).click();
+   await page.getByRole('tab',{name:'観戦',exact:true}).click();await page.locator('.ac-setup-panel>nav>button').nth(3).click();await page.getByRole('button',{name:'観戦を始める',exact:true}).click();
    for(let contest=0;contest<=4;contest++){
     await page.evaluate(async index=>{const{startContest,groundHeight}=await import('/src/mini-games/academy-sports/festival.ts'),s=__academy.match;
      if(index===4){s.score=[220,180,160,120];(await import('/src/mini-games/academy-sports/core.ts')).finish(s);}
@@ -69,8 +69,8 @@ try {
    await page.evaluate(()=>__academy.sound('cheer'));reports.push({sport,metrics,passed:['all five festival venues, bridge/steps and four event surfaces']});console.log('PASS all five festival venues and surface review');continue;
   }
 
-  await page.getByRole('button',{name:'CPU同士の試合を観戦',exact:true}).click();
-  for(let i=0;i<3;i++)await page.getByRole('button',{name:'次へ',exact:true}).click();
+  await page.getByRole('tab',{name:'観戦',exact:true}).click();
+  await page.locator('.ac-setup-panel>nav>button').nth(3).click();
   await page.getByRole('button',{name:'観戦を始める',exact:true}).click();await page.waitForFunction(()=>__academy.match.config.mode==='watch');
   await page.evaluate(()=>__academy.step(240));await snap(sport+'-play');
   for(const [width,height] of [[390,844],[844,390],[320,568]]){
@@ -82,9 +82,9 @@ try {
   assert.equal(await page.evaluate(()=>__academy.match.phase),'finished',sport+' completes CPU match');await page.locator('.ac-results').waitFor();await snap(sport+'-result');
   await page.waitForFunction(async()=>{const{readRecords}=await import('/src/mini-games/academy-sports/records.ts');return readRecords().some(r=>r.id===__academy.match.id);});
   console.log(sport,'CPU result and persisted record passed');
-  await page.getByRole('button',{name:'設定へ',exact:true}).click();await page.getByRole('button',{name:'次へ',exact:true}).waitFor();
-  await page.getByRole('button',{name:'CPUと対戦',exact:true}).click();
-  for(let i=0;i<3;i++)await page.getByRole('button',{name:'次へ',exact:true}).click();
+  await page.getByRole('button',{name:'設定へ',exact:true}).click();await page.locator('.ac-setup-panel').waitFor();
+  await page.getByRole('tab',{name:'対戦',exact:true}).click();
+  await page.locator('.ac-setup-panel>nav>button').nth(3).click();
   const earned=await page.evaluate(async()=>(await import('/src/point-exchange/store.ts')).readPoints().earned);
   await page.getByRole('button',{name:'学習して試合へ',exact:true}).click();await page.locator('[data-online-lesson]').waitFor();await page.evaluate(()=>__academy.chooseLesson({mode:'ADDITION'}));
   for(let q=0;q<3;q++){

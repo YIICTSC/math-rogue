@@ -10,6 +10,8 @@
   "scripts": {
     "test:lantern-war:enemies": "node scripts/test-lantern-enemies.mjs",
     "test:lantern-war:vacation": "node scripts/test-lantern-vacation.mjs",
+    "test:academy-sports:practice": "node scripts/academy-sports/test-practice.mjs",
+    "test:academy-sports:preparation:browser": "node scripts/academy-sports/test-preparation-browser.mjs",
     "test:academy-sports": "node scripts/academy-sports/test-rules.mjs",
     "test:academy-sports:broadcast": "node scripts/academy-sports/test-broadcast.mjs",
     "test:academy-sports:broadcast:browser": "node scripts/academy-sports/test-broadcast-browser.mjs",

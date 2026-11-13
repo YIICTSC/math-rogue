@@ -108,6 +108,7 @@ export function createAcademyRenderer(canvas:HTMLCanvasElement,onStatus:(status:
   cursor.visible=false;
   if(s.sport==='baseball'&&['pitch','set','meter','windup'].includes(s.stage)){cursor.visible=true;cursor.rotation.set(0,0,0);cursor.scale.setScalar(.7);const aim=s.half===s.config.team?s.aim:s.pitchAim;cursor.position.set(aim.x,aim.y,18.12);}
   if(s.sport==='volleyball'&&s.stage==='rally'){cursor.visible=true;cursor.rotation.x=-Math.PI/2;cursor.scale.setScalar(.85);cursor.position.set(s.landing.x,.1,s.landing.z);}
+  if(s.practice&&(s.practice.id==='soccer-move'||s.practice.id==='volley-move')){cursor.visible=true;cursor.rotation.x=-Math.PI/2;cursor.scale.setScalar(2.2);cursor.position.set(s.practice.target.x,.12,s.practice.target.z);}
   if(s.sport==='soccer')for(const net of nets){const a=net.geometry.attributes.position as T.BufferAttribute,source=net.userData.original as Float32Array,sign=net.userData.sign as number,goalSign=Math.sign(s.replay.at(-1)?.ball.z??1),deform=s.goalFlash>0&&sign===goalSign&&!reduced?Math.sin(s.clock*18)*.16:0;for(let i=0;i<a.count;i++)a.setZ(i,source[i*3+2]+deform*Math.sin(source[i*3]*2));a.needsUpdate=true;}
   if(s.sport==='festival'&&kitReady){
    if(s.contest===2&&s.phase!=='finished')for(let i=0;i<8;i++){const platform=environment.getObjectByName('TargetPlatform'+i);if(platform)platform.position.y=i%2?Math.sin(s.clock*1.3+i)*.45:0;}

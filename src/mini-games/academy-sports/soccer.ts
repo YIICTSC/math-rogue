@@ -35,7 +35,7 @@ function dribbleMove(s:Soccer,p:Athlete){
 function markOffside(s:Soccer,p:Athlete){const dir=direction(p.team),defenders=s.players.filter(q=>q.team!==p.team).map(q=>q.p.z*dir).sort((a,b)=>b-a),line=Math.max(defenders[1]||0,s.ball.z*dir);s.offside=s.config.rules==='standard'?s.players.filter(q=>q.team===p.team&&q.id!==p.id&&q.p.z*dir>Math.max(0,line)+.2).map(q=>q.id):[];}
 function pass(s:Soccer,lob=false,requester?:Athlete){const p=holder(s);if(!p||p.stun)return;const dir=direction(p.team),input=s.lastInput,aim=Math.hypot(input.x,input.z)>.1?unit(input.x,input.z):{x:0,z:dir};
  const targets=s.players.filter(q=>q.team===p.team&&q.id!==p.id&&q.role!=='GK').sort((a,b)=>{const score=(q:Athlete)=>{const d=unit(q.p.x-p.p.x,q.p.z-p.p.z);return(d.x*aim.x+d.z*aim.z)*12+(q.p.z-p.p.z)*dir*.12-len(q.p,p.p)*.12;};return score(b)-score(a);});
- const target=requester??targets[0];if(!target)return;markOffside(s,p);s.lastPass=p.id;s.passTarget=target.id;const destination={...target.p};if(lob){destination.z+=dir*4;destination.x+=target.v.x*.3;}kickBall(s,p,destination,lob?25:19,lob?8:1,0);pose(p,'kick',.45);p.cooldown=.25;stat(s,p.team,'passes');s.stage='open';event(s,'hit',requester?'パスを要求！':lob?'スペースへのロングパス':'パス！',p.id);
+ const target=requester??targets[0];if(!target)return;markOffside(s,p);s.lastPass=p.id;s.passTarget=target.id;const destination={...target.p};if(lob){destination.z+=dir*4;destination.x+=target.v.x*.3;}const flight=clamp(len(s.ball,destination)/22,1.15,1.8);kickBall(s,p,destination,lob?len(s.ball,destination)/flight:19,lob?(.75-s.ball.y+.5*9.81*flight*flight)/flight:1,0);pose(p,'kick',.45);p.cooldown=.25;stat(s,p.team,'passes');s.stage='open';event(s,'hit',requester?'パスを要求！':lob?'スペースへのロングパス':'パス！',p.id);
 }
 function shoot(s:Soccer,p:Athlete,charge:number,special=false){
  const dir=direction(p.team),boost=s.awaken[p.team]>0?1.15:1,skill=special&&p.spirit>=35;
@@ -83,7 +83,7 @@ export function stepSoccer(s:Soccer,input:Input,dt:number){
  if(s.cinema>0){s.clock+=dt;s.cinema-=dt;if(s.cinema<=0&&s.pendingShot){const c=s.pendingShot;s.pendingShot=null;shoot(s,s.players.find(p=>p.id===c.actor)!,c.charge,c.special);}return;}
  if(!tickCore(s,dt))return;capture(s,dt);s.lastInput={...input};s.goalFlash=Math.max(0,s.goalFlash-dt);s.shotTimer=Math.max(0,s.shotTimer-dt);
  s.halfTime+=dt;if(s.halfTime>=s.config.minutes*30+s.added){if(s.half===1){s.half=2;s.halfTime=0;s.added=0;s.phase='interval';s.phaseTime=3;placeRestart(s,'kickoff',1,vec());event(s,'whistle','ハーフタイム');return;}finish(s);return;}
- if(['practice'].includes(s.config.mode)&&s.elapsed>90){finish(s);return;}
+ if(['practice'].includes(s.config.mode)&&!s.practice&&s.elapsed>90){finish(s);return;}
  if(s.stage==='restart'){
   s.restartTimer+=dt;if(s.restartTimer>1.2&&(s.online?!s.controls?.[s.ball.owner]:(s.restartTeam!==s.config.team||s.config.mode==='watch'))){s.stage='open';if(s.restart==='penalty')shoot(s,holder(s)!,1.1);else pass(s,s.restart==='corner'||s.restart==='goal-kick');}
   if(s.restartTimer>12){s.stage='open';pass(s);}return;

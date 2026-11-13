@@ -1,0 +1,135 @@
+{
+  "tool": "ImageGen",
+  "date": "2026-11-13",
+  "layout": {
+    "columns": 4,
+    "rows": 2
+  },
+  "sources": {
+    "baseball": "/workspace/generated_images/exec-369ada85-a0bf-440c-a5d0-d3de7b6afd0a.png",
+    "soccer": "/workspace/generated_images/exec-17d74650-3a59-459e-8744-be7423b68c13.png",
+    "volleyball": "/workspace/generated_images/exec-7cd15dac-d036-4551-8b82-1e5cda51dabd.png"
+  },
+  "files": [
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-0-v1.webp",
+      "bytes": 61134,
+      "sha256": "a0549c03b98e8e1a25e3b7d7ddbfabf45a130b4bd357b23646fd74a5d2290b46"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-1-v1.webp",
+      "bytes": 70366,
+      "sha256": "4513984f10911df32445e1e31dede06e3f0c651e7dab02e8ef338dc1cc8f7290"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-2-v1.webp",
+      "bytes": 63478,
+      "sha256": "8a11e7772ccdf57162dfea9d2a5cd8584e0a2c3f1709d301c27d0db9ad356b73"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-3-v1.webp",
+      "bytes": 61744,
+      "sha256": "552fcddaf5d1aeaf4bdc61601967a82054049b64036e1506c2a5647679544923"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-4-v1.webp",
+      "bytes": 58500,
+      "sha256": "510692015b49b36675b811b5ce3eb1abaf118f000d460fde9ed3fb02eef3ee57"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-5-v1.webp",
+      "bytes": 68328,
+      "sha256": "25e7a7ed9c57577f0d7f7564a7b682c6fd11e680ce90912635449d060243f772"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-6-v1.webp",
+      "bytes": 59292,
+      "sha256": "51bed1fcd24a6b6b1750a0bfa12edf0aa770113ca86756d5cd8e091d55dbad0e"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/baseball-7-v1.webp",
+      "bytes": 62626,
+      "sha256": "665875dcbfd08353330a1b8754ae09ed090b55d2a5aadb9dea2a97b3d3de51ec"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-0-v1.webp",
+      "bytes": 71734,
+      "sha256": "769a343712ddd195501dd3ab6023ea28dbfca43796fe3d65c47ba0a7bfe075ca"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-1-v1.webp",
+      "bytes": 74328,
+      "sha256": "79c9b5c3e12eff393eeec6de66a190ba45a98ece614eb1601f14eef8175fe7b6"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-2-v1.webp",
+      "bytes": 67994,
+      "sha256": "a3d87b98c723164c990c304bf96e3baf8fe9e1ef94887a10ffb7c6804f15577f"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-3-v1.webp",
+      "bytes": 63710,
+      "sha256": "68cd9e009ac5380b50d38e3a38fe329ec2faf0b02c87c478bf34259dbeb6dff1"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-4-v1.webp",
+      "bytes": 62574,
+      "sha256": "be21f82171dedddd40d2b726c534fc5c8a4bb53d7d958b8666c2ce3d77e076e3"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-5-v1.webp",
+      "bytes": 69580,
+      "sha256": "d9a7a9466207f75e669b1fcf58a8ff09b148e4f1c981768add5ce7d395817f33"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-6-v1.webp",
+      "bytes": 73318,
+      "sha256": "f4e6579a0fc02166e7dd54b03d5a01be2bbbe7c5841989344b3850de1d58b346"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/soccer-7-v1.webp",
+      "bytes": 65392,
+      "sha256": "d46243b051ad20fe7306ed7663e3f22b0ea575032c445aabb4288a2569dc20f6"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-0-v1.webp",
+      "bytes": 57784,
+      "sha256": "f638264551291dde03048f4d7d1b212c58507fd0e7a715d4addfec2ebf5707ba"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-1-v1.webp",
+      "bytes": 42796,
+      "sha256": "61a5ab34885051f61901cf716f81119192217192bf07203f109f4a98533d8e9c"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-2-v1.webp",
+      "bytes": 44040,
+      "sha256": "9f117557d6d6bd3a67c509e37ba4dcecc6b8fe5898e2c07ad85b72028962493c"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-3-v1.webp",
+      "bytes": 48908,
+      "sha256": "9b2d81a75e6336867467d45c36c2fdaab1346b58481eab9af2ed6b6e21dc881e"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-4-v1.webp",
+      "bytes": 46978,
+      "sha256": "f267aca6266815a9dfaaa491043a1ceff04b3ad5c6c501c38329ae0972c57291"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-5-v1.webp",
+      "bytes": 43362,
+      "sha256": "d8ffb912fd8004b71bb70fdf854aabacc1f5f4ba600a9aa9d9129b41051a3bac"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-6-v1.webp",
+      "bytes": 48376,
+      "sha256": "d726f59d26b8a19deedb48b94d53fcea853128765e5706c1a52b7bae26db3908"
+    },
+    {
+      "path": "public/sprites/academy-sports/modes/volleyball-7-v1.webp",
+      "bytes": 61760,
+      "sha256": "83623ddf68a943c6d8c0ecba6e9ccbbfdd7e83fbedca3a8e4904aab5340a0680"
+    }
+  ]
+}

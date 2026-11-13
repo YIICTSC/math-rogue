@@ -5,6 +5,10 @@ import { isSourceAsset } from './source-asset-exclusions.mjs';
 
 const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'web-asset-manifest.json');
+// A complete subtree can be refreshed without dropping assets absent from a sparse checkout.
+const scopeIndex = process.argv.indexOf('--update-prefix');
+const scope = scopeIndex < 0 ? '' : process.argv[scopeIndex + 1];
+if (scopeIndex >= 0 && (!scope || !scope.endsWith('/') || scope.startsWith('/') || scope.includes('\\') || path.posix.normalize(scope) !== scope || scope.split('/').some(part => part === '..' || part === '.'))) throw new Error('--update-prefix requires a relative directory ending in /');
 const runtimeExtensions = new Set([
   '.png', '.svg', '.ttf', '.otf', '.woff', '.woff2', '.webp', '.glb',
   '.ogg', '.mp3', '.wav', '.jpg', '.jpeg', '.gif', '.avif', '.gltf', '.bin',
@@ -38,7 +42,7 @@ const getPack = (assetPath) => {
   return 'common';
 };
 
-const filesOnDisk = await walk(publicDir);
+const filesOnDisk = await walk(scope ? path.join(publicDir, scope) : publicDir);
 const filePaths = filesOnDisk
   .map(filePath => ({
     filePath,
@@ -61,6 +65,14 @@ const packs = {
   'high-school': { id: 'high-school', totalBytes: 0, files: [] },
   magic: { id: 'magic', totalBytes: 0, files: [] },
 };
+
+if (scope) {
+  const previous = JSON.parse(await readFile(manifestPath, 'utf8'));
+  for (const pack of Object.values(packs)) {
+    pack.files = (previous.packs?.[pack.id]?.files || []).filter(file => !file.path.startsWith(scope));
+    pack.totalBytes = pack.files.reduce((total, file) => total + file.size, 0);
+  }
+}
 
 for (const file of preferredFiles) {
   const size = (await stat(file.filePath)).size;

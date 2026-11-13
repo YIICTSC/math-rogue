@@ -1,7 +1,8 @@
 import {audioService} from '../../services/audioService';
 import {trans} from '../../utils/textUtils';
 import React,{useEffect,useRef,useState,Suspense,lazy} from 'react';
-import GameTitleScreen from '../shared/GameTitleScreen';
+import AcademyLaunch from './AcademyLaunch';
+import type {SoloIntent} from './modes';
 import SportsSetupScreen from '../shared/SportsSetupScreen';
 import InviteJoin from '../shared/InviteJoin';
 import SportsInviteBox from '../shared/SportsInviteBox';
@@ -16,8 +17,9 @@ import {ONLINE_CAPACITY,type OnlineView,type OnlineCommand} from './onlineWorld'
 import {academyInviteUrl} from './onlineInvite';
 const LessonPicker=lazy(()=>import('../shared/OnlineLessonPicker'));
 export interface OnlineSession {view:OnlineView;selfId:string;host:boolean;send:(command:OnlineCommand)=>void;leave:()=>void;}
-export default function AcademySportsEntry({sport,languageMode='JAPANESE',onClose,inviteCode='',inviteName,renderGame}:{sport:SportId;languageMode?:LanguageMode;onClose:()=>void;onAnswerResult?:(result:AssignmentAnswerResult)=>void;inviteCode?:string;inviteName?:string;renderGame:(online?:OnlineSession)=>React.ReactNode}){
+export default function AcademySportsEntry({sport,languageMode='JAPANESE',onClose,inviteCode='',inviteName,renderGame}:{sport:SportId;languageMode?:LanguageMode;onClose:()=>void;onAnswerResult?:(result:AssignmentAnswerResult)=>void;inviteCode?:string;inviteName?:string;renderGame:(online?:OnlineSession,intent?:SoloIntent)=>React.ReactNode}){
  const L=local(languageMode),C=(v:readonly[string,string,string])=>L(...v);
+ const [intent,setIntent]=useState<SoloIntent>('match');
  const [entry,setEntry]=useState<'title'|'solo'|'host'|'join'>(inviteCode?'join':'title');
  const [name,setName]=useState(inviteName??(inviteCode?'':'Player')),[code,setCode]=useState(inviteCode);
  const [view,setView]=useState<OnlineView|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[picker,setPicker]=useState(false);
@@ -35,13 +37,9 @@ export default function AcademySportsEntry({sport,languageMode='JAPANESE',onClos
  const join=async()=>{if(busy||!name.trim())return;void audioService.unlockAudio();setBusy(true);setError('');const next=makeRoom();try{await next.join(code,name.trim());}catch(e){next.close(false);if(mounted.current&&room.current===next){setView(null);setError(e instanceof Error?e.message:String(e));}}finally{if(mounted.current&&room.current===next)setBusy(false);}};
  useSportsInvitation(inviteCode,inviteName,join);
  const online=room.current&&view?{view,selfId:room.current.selfId,host:room.current.host,send:(c:OnlineCommand)=>room.current?.send(c),leave}:undefined;
- if(entry==='solo')return <>{renderGame()}</>;
+ if(entry==='solo')return <>{renderGame(undefined,intent)}</>;
  if(view&&view.phase!=='lobby'&&online)return <>{renderGame(online)}{error&&<div className="ac-online-error" role="alert">{error}<button onClick={leave}>{L('戻る','Back','もどる')}</button></div>}</>;
- if(!view&&entry==='title')return <GameTitleScreen kind={sport} title={BRANDS[sport]} subtitle={C(SPORT_NAMES[sport])} backdrop={null} languageMode={languageMode} backLabel={L('スポーツへ戻る','Sports club','スポーツへもどる')} onClose={onClose} actions={[
-  {label:L('CPUと対戦','Play the CPU','CPUとたいせん'),onClick:()=>setEntry('solo')},
-  {label:L('オンラインの部屋を作る','Create online room','オンラインのへやをつくる'),onClick:()=>setEntry('host')},
-  {label:L('招待に参加する','Join invitation','しょうたいにさんかする'),onClick:()=>setEntry('join')}
- ]}/>;
+ if(!view&&entry==='title')return <AcademyLaunch sport={sport} languageMode={languageMode} onBack={onClose} onSolo={chosen=>{setIntent(chosen);setEntry('solo');}} onHost={()=>setEntry('host')} onJoin={()=>setEntry('join')}/>;
  if(!view&&entry==='join')return <InviteJoin title={BRANDS[sport]} languageMode={languageMode} name={name} onName={setName} code={code} onCode={setCode} busy={busy} error={error} onJoin={()=>void join()} onClose={leave} closeLabel={L('タイトルへ戻る','Back to title','タイトルへもどる')}/>;
  const me=view?.players.find(p=>p.id===room.current?.selfId),people=view?.players.filter(p=>p.connected)||[],host=room.current?.host;
  const canStart=people.length>=2&&people.every(p=>p.ready)&&new Set(people.map(p=>p.team)).size>=2;
@@ -50,13 +48,13 @@ export default function AcademySportsEntry({sport,languageMode='JAPANESE',onClos
   <button className="online-entry-primary" disabled={busy||!name.trim()} onClick={()=>setPicker(true)}>{L('問題を選んで部屋を作る','Choose lesson and create room','もんだいをえらんでへやをつくる')}</button>:
   <div className="sp-footer-row"><button disabled={busy||me?.ready} onClick={()=>{void audioService.unlockAudio();room.current?.send({type:'ready',ready:true});}}>{me?.ready?L('準備完了','Ready','じゅんびかんりょう'):L('準備完了にする','Get ready','じゅんびかんりょうにする')}</button>{host?<button className="online-entry-primary" disabled={!canStart} onClick={()=>room.current?.send({type:'start'})}>{L('試合を開始','Start match','しあいをかいし')}</button>:<p>{L('ホストの開始を待っています。','Waiting for the host.','ホストのかいしをまっています。')}</p>}</div>}>
  {!view&&<label>{L('参加名','Player name','さんかなまえ')}<input maxLength={16} autoComplete="nickname" value={name} onChange={e=>setName(e.target.value)} disabled={busy}/></label>}
- <p>{L('2人以上で対戦。空いた選手はCPUが担当します。','Two or more players. CPU fills unoccupied positions.','2にんいじょうでたいせん。あいたせんしゅはCPUがたんとうします。')}</p>
+ <p className="ac-lobby-note">{L('2人以上で対戦。空いた選手はCPUが担当します。','Two or more players. CPU fills unoccupied positions.','2にんいじょうでたいせん。あいたせんしゅはCPUがたんとうします。')}</p>
  {view&&<><SportsInviteBox compact code={room.current!.code} url={academyInviteUrl(location.href,sport,room.current!.code)} t={s=>trans(s,languageMode)}/>
  <p className="ac-shared-lesson">{L('共通の学習範囲','Shared lesson','きょうつうのがくしゅうはんい')}：<b data-allow-japanese="true">{view.lessonTitle}</b></p>
  {host&&<button disabled={busy} onClick={()=>setPicker(true)}>{L('単元を変更','Change lesson','たんげんをへんこう')}</button>}
  <label>{L('所属チーム','Your team','しょぞくチーム')}<select value={me?.team??0} onChange={e=>room.current?.send({type:'team',team:Number(e.target.value)})}>{TEAM_NAMES.slice(0,sport==='festival'?4:2).map((t,i)=><option value={i} key={i}>{C(t)}</option>)}</select></label>
- <div className="ac-online-roster">{people.map(p=><p key={p.id}><b data-allow-japanese="true">{p.name}</b> · {C(TEAM_NAMES[p.team])} · {p.seat+1} · {p.ready?L('準備完了','Ready','じゅんびかんりょう'):L('準備中','Preparing','じゅんびちゅう')}</p>)}</div>
- {sport==='baseball'&&<p>{L('各チームの担当者が打席ごとに順番に操作します。','Teammates take turns controlling each at-bat and its defense.','たんとうしゃがだせきごとにじゅんばんにそうさします。')}</p>}
+ <details className="ac-lobby-roster"><summary>{L('出場者とチームを確認','Review players and teams','しゅつじょうしゃとチームをかくにん')}</summary><div className="ac-online-roster">{people.map(p=><p key={p.id}><b data-allow-japanese="true">{p.name}</b> · {C(TEAM_NAMES[p.team])} · {p.seat+1} · {p.ready?L('準備完了','Ready','じゅんびかんりょう'):L('準備中','Preparing','じゅんびちゅう')}</p>)}</div></details>
+ {sport==='baseball'&&<p className="ac-lobby-note">{L('各チームの担当者が打席ごとに順番に操作します。','Teammates take turns controlling each at-bat and its defense.','たんとうしゃがだせきごとにじゅんばんにそうさします。')}</p>}
  {host&&<><label>{L('募集人数','Room capacity','ぼしゅうにんずう')}<select value={view.limit} onChange={e=>room.current?.send({type:'configure',config:{},limit:Number(e.target.value)})}>{Array.from({length:ONLINE_CAPACITY[sport]-1},(_,i)=>i+2).map(n=><option key={n}>{n}</option>)}</select></label>{sport==='baseball'&&field(L('イニング数','Innings','イニングすう'),'innings',[3,6,9])}{sport==='soccer'&&field(L('試合時間（分）','Match minutes','しあいじかん（ふん）'),'minutes',[1,3])}{sport==='volleyball'&&<>{field(L('セット数','Sets','セットすう'),'sets',[1,3])}{field(L('セット点数','Set points','セットてんすう'),'points',[15,25])}</>}</>}
  {!canStart&&<p>{L('2チーム以上・2人以上で、全員の準備完了を待ちます。','At least two teams and two ready players are required.','2チーム・2にんいじょうで、ぜんいんのじゅんびかんりょうをまちます。')}</p>}</>}
  {error&&<p role="alert">{error}</p>}
