@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const result=await build({entryPoints:['src/quiz-show/room.ts'],bundle:true,write:false,format:'esm',platform:'node',plugins:[{name:'peer-stub',setup(b){b.onResolve({filter:/^peerjs$/},()=>({path:'peer',namespace:'test'}));b.onLoad({filter:/.*/,namespace:'test'},()=>({contents:'export default class Peer {}'}));}}]});
+const {QuizShowRoom}=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
+let blocked=false;const packets=[],errors=[];
+const room=new QuizShowRoom(()=>{},e=>errors.push(e),()=>{},()=>{});room.actor={id:'host',role:'host'};room.view={};room.dedicated={send(packet){if(blocked)return false;packets.push(packet);if(packet.action.type==='bank')blocked=true;return true;}};
+const bank={type:'bank',questions:[{id:'q',prompt:'Question',answer:'A',aliases:[],options:['A','B','C','D'],format:'CHOICE',seconds:40,points:100}]};
+assert(room.send(bank));assert(room.send({type:'plan',partyCategory:'ANIMALS'}));assert(room.send({type:'plan',partyFormat:'CHOICE'}));assert(room.send({type:'plan',limit:2}));assert.equal(packets.length,1,'Large bank creates backpressure');blocked=false;room.flushHostActions();assert.deepEqual(packets.slice(1).map(p=>p.action),[{type:'plan',partyCategory:'ANIMALS'},{type:'plan',partyFormat:'CHOICE'},{type:'plan',limit:2}]);assert.equal(room.hostActions.length,0);
+blocked=true;assert(room.send({type:'plan',limit:3}));room.hostActions[0].at=Date.now()-11000;room.flushHostActions();assert.equal(room.hostActions.length,0);assert.equal(errors.at(-1),'NETWORK','Expired controls are not replayed after a long outage');
+console.log('PASS bank backpressure preserves following host settings in order, with bounded expiration.');

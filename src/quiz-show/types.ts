@@ -2,6 +2,9 @@ import type { KartQuestion } from '../mini-games/gakuro-kart/learning';
 
 export const QUIZ_PROTOCOL = 1;
 export const MAX_ANSWERERS = 40;
+export const MAX_SHOW_QUESTIONS = 240;
+export const PARTY_CATEGORIES = ['ALL','ANIMALS','FOOD','LOVE','DAILY','WORLD','NATURE','CULTURE','FANTASY'] as const;
+export type PartyCategory = typeof PARTY_CATEGORIES[number];
 export const MODES = ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS', 'CONSENSUS', 'MAJORITY', 'NEAREST', 'DRAW', 'VOTE', 'WOLF'] as const;
 export type ShowMode = typeof MODES[number];
 export const minimumAnswerers = (mode: ShowMode) => mode === 'WOLF' ? 3 : ['DRAW','CONSENSUS','MAJORITY','VOTE','NEAREST'].includes(mode) ? 2 : 1;
@@ -21,6 +24,7 @@ export interface ShowQuestion {
   passage?: string;
   visual?: KartQuestion['visual'];
   party?: boolean; difficulty?: 'EASY'|'NORMAL'|'HARD'; opinion?: boolean; freeDraw?: boolean;
+  category?: Exclude<PartyCategory,'ALL'>;
   audioPrompt?: KartQuestion['audioPrompt'];
 }
 /** Normalized vector ink: coordinates in [0,1000], fixed palette and bounded points. */
@@ -44,12 +48,13 @@ export interface WolfGame {
   event: { kind: 'banished' | 'attacked' | 'safe' | 'tie' | 'skip'; target?: string } | null;
 }
 export interface ShowWorld {
+  autoPaused?: boolean; audienceScreens?: number; questionSource?: string;
   revision: number; title: string; mode: ShowMode; teamCount: number; phase: Phase;
   players: Record<string, Player>; bank: ShowQuestion[]; index: number; round: Round | null;
   accepting: boolean; hostConnected: boolean; createdAt: number;
   wolf: WolfGame | null;
   overview: boolean;
-  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: 'ALL'|'EASY'|'NORMAL'|'HARD'; drawFree?: boolean };
+  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: 'ALL'|'EASY'|'NORMAL'|'HARD'; partyCategory?: PartyCategory; drawFree?: boolean };
   queue: number[];
   autoProgress?: { phase: Phase; roundId: string; at: number };
 }
@@ -58,6 +63,7 @@ export interface AnswerTile {
   inkRevision: number; hasInk: boolean; correct?: boolean; award?: number; votes?: number;
 }
 export interface ShowView {
+  autoPaused?: boolean; audienceScreens?: number; questionSource?: string;
   revision: number; serverNow: number; title: string; mode: ShowMode; teamCount: number; phase: Phase;
   accepting: boolean; hostConnected: boolean; players: Player[]; self: string; role: Role;
   questionCount: number; index: number;
@@ -80,8 +86,9 @@ export interface ShowView {
 }
 export type ShowAction =
   | { type: 'configure'; title: string; mode: ShowMode; teamCount: number }
-  | { type: 'bank'; questions: ShowQuestion[] }
-  | { type: 'plan'; order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: 'ALL'|'EASY'|'NORMAL'|'HARD'; drawFree?: boolean }
+  | { type: 'bank'; questions: ShowQuestion[]; source?: string }
+  | ({ type: 'plan' } & Partial<ShowWorld['plan']>)
+  | { type: 'autoPause'; roundId?: string }
   | { type: 'start' | 'open' | 'close' | 'pause' | 'autoJudge' | 'score' | 'next' | 'finish' | 'voting' | 'revealAnswer' | 'revealAll' | 'publish' | 'balance'; roundId?: string }
   | { type: 'reveal'; roundId: string; playerId: string }
   | { type: 'grade'; roundId: string; playerId: string; correct: boolean }

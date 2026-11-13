@@ -1,4 +1,4 @@
-import { minimumAnswerers, MAX_ANSWERERS, MODES, type Actor, type Answer, type InkStroke, type Player, type Round, type ShowAction, type ShowError, type ShowQuestion, type ShowView, type ShowWorld } from './types';
+import { minimumAnswerers, MAX_ANSWERERS, MAX_SHOW_QUESTIONS, PARTY_CATEGORIES, MODES, type Actor, type Answer, type InkStroke, type Player, type Round, type ShowAction, type ShowError, type ShowQuestion, type ShowView, type ShowWorld } from './types';
 import { checkWolfWinner, nightActors, startWolves, wolfAction } from './wolf';
 
 const key = () => crypto.randomUUID();
@@ -32,6 +32,7 @@ export function validQuestion(q: unknown): q is ShowQuestion {
     typeof v.answer === 'string' && v.answer.length <= 3000 && Array.isArray(v.aliases) && v.aliases.length <= 12 && v.aliases.every(a => typeof a === 'string' && a.length <= 3000) &&
     Array.isArray(v.options) && v.options.length <= 6 && v.options.every(a => typeof a === 'string' && a.length > 0 && a.length <= 3000) &&
     ['TEXT', 'FLIP', 'CHOICE'].includes(v.format) && (v.format !== 'CHOICE' || (v.options.length >= 2 && new Set(v.options).size === v.options.length && (v.options.includes(v.answer) || (v.opinion === true && v.answer === '')))) &&
+    (v.category === undefined || PARTY_CATEGORIES.slice(1).includes(v.category)) &&
     (v.party === undefined || typeof v.party === 'boolean') && (v.opinion === undefined || typeof v.opinion === 'boolean') && (v.freeDraw === undefined || typeof v.freeDraw === 'boolean') && (v.difficulty === undefined || ['EASY','NORMAL','HARD'].includes(v.difficulty)) &&
     finiteInt(v.seconds, 10, 600) && finiteInt(v.points, 10, 1000) &&
     (v.passage === undefined || (typeof v.passage === 'string' && v.passage.length <= 16000)) &&
@@ -39,10 +40,13 @@ export function validQuestion(q: unknown): q is ShowQuestion {
     new TextEncoder().encode(JSON.stringify(v)).length <= 48000;
 }
 export function validBank(bank: unknown): bank is ShowQuestion[] {
-  return Array.isArray(bank) && bank.length >= 1 && bank.length <= 60 && bank.every(validQuestion) && new Set(bank.map(q => q.id)).size === bank.length && new TextEncoder().encode(JSON.stringify(bank)).length <= 256000;
+  return Array.isArray(bank) && bank.length >= 1 && bank.length <= MAX_SHOW_QUESTIONS && bank.every(validQuestion) && new Set(bank.map(q => q.id)).size === bank.length && new TextEncoder().encode(JSON.stringify(bank)).length <= 256000;
 }
 export function validBankForMode(mode: typeof MODES[number], bank: ShowQuestion[]) {
   return validBank(bank) && (mode !== 'DRAW' || bank.every(q => q.freeDraw || !!q.answer.trim())) && bank.every(q => (!q.freeDraw || mode==='DRAW') && (!q.opinion || ['NEAREST','DRAW','CONSENSUS','MAJORITY','WOLF','VOTE'].includes(mode)));
+}
+export function matchesPartyPlan(q: ShowQuestion, plan: ShowWorld['plan']) {
+  return !q.party || ((!plan.partyLevel || plan.partyLevel==='ALL' || q.difficulty===plan.partyLevel) && (!plan.partyCategory || plan.partyCategory==='ALL' || q.category===plan.partyCategory));
 }
 export function createShow(title = 'みんなでクイズ', now = Date.now()): ShowWorld {
   return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true }, queue: [] };
@@ -89,7 +93,7 @@ export function tickShow(w: ShowWorld, now = Date.now()) {
     act(w, {id:'host',role:'host'}, {type:'close',roundId:w.round.id}, now, true);
   }
   const r = w.round;
-  if (!r || w.plan.autoAdvance === false || !w.hostConnected || (w.phase === 'open' && r.paused)) { delete w.autoProgress; return; }
+  if (!r || w.plan.autoAdvance === false || w.autoPaused || !w.hostConnected || (w.phase === 'open' && r.paused)) { delete w.autoProgress; return; }
   const host: Actor = {id:'host',role:'host'};
   const run = (type: 'close'|'publish'|'score'|'next'|'open'|'voting') => act(w, host, {type,roundId:r.id}, now, true);
   const respondents = r.eligible.filter(id => id !== r.artist && (w.players[id]?.connected || r.answers[id]?.submitted));
@@ -255,12 +259,16 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
         break;
       case 'bank':
         if (!['lobby', 'finished'].includes(w.phase) || !validBank(a.questions)) return 'QUESTION';
+        if (a.source !== undefined && (typeof a.source !== 'string' || a.source.length > 160)) return 'QUESTION';
+        w.questionSource = a.source || ''; w.autoPaused = false;
         w.bank = structuredClone(a.questions); w.index = 0; w.round = null; w.phase = 'lobby'; w.wolf = null; w.queue = []; w.plan.limit = Math.min(w.plan.limit, w.bank.length);
         break;
-      case 'plan':
-        if (!['lobby', 'finished'].includes(w.phase) || !['SEQUENTIAL', 'RANDOM'].includes(a.order) || !finiteInt(a.limit, 0, 60) || typeof a.shuffleChoices !== 'boolean' || (a.autoAdvance !== undefined && typeof a.autoAdvance !== 'boolean')) return 'PHASE';
-        if ((a.partyFormat!==undefined&&!['TEXT','FLIP','CHOICE'].includes(a.partyFormat))||(a.partyLevel!==undefined&&!['ALL','EASY','NORMAL','HARD'].includes(a.partyLevel))||(a.drawFree!==undefined&&typeof a.drawFree!=='boolean'))return 'QUESTION';
-        w.plan = {order:a.order,limit:a.limit,shuffleChoices:a.shuffleChoices,autoAdvance:a.autoAdvance??w.plan.autoAdvance??true,partyFormat:a.partyFormat??w.plan.partyFormat??'TEXT',partyLevel:a.partyLevel??w.plan.partyLevel??'ALL',drawFree:a.drawFree??w.plan.drawFree??false}; break;
+      case 'plan': {
+        const next = {...w.plan,...a};
+        if (!['lobby', 'finished'].includes(w.phase) || !['SEQUENTIAL', 'RANDOM'].includes(next.order) || !finiteInt(next.limit, 0, MAX_SHOW_QUESTIONS) || typeof next.shuffleChoices !== 'boolean' || (next.autoAdvance !== undefined && typeof next.autoAdvance !== 'boolean')) return 'PHASE';
+        if ((next.partyCategory!==undefined&&!PARTY_CATEGORIES.includes(next.partyCategory))||(next.partyFormat!==undefined&&!['TEXT','FLIP','CHOICE'].includes(next.partyFormat))||(next.partyLevel!==undefined&&!['ALL','EASY','NORMAL','HARD'].includes(next.partyLevel))||(next.drawFree!==undefined&&typeof next.drawFree!=='boolean'))return 'QUESTION';
+        w.plan = {order:next.order,limit:next.limit,shuffleChoices:next.shuffleChoices,autoAdvance:next.autoAdvance??w.plan.autoAdvance??true,partyFormat:next.partyFormat??w.plan.partyFormat??'TEXT',partyLevel:next.partyLevel??w.plan.partyLevel??'ALL',partyCategory:next.partyCategory??w.plan.partyCategory??'ALL',drawFree:next.drawFree??w.plan.drawFree??false}; break;
+      }
       case 'start':
         if (!validBankForMode(w.mode,w.bank)) return 'QUESTION';
         if (w.phase !== 'lobby' || !w.bank.length || Object.values(w.players).filter(p => p.connected).length < minimumAnswerers(w.mode)) return 'PHASE';
@@ -269,9 +277,10 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
           w.wolf = startWolves(ids); w.accepting = false;
         }
         for (const p of Object.values(w.players)) { p.score = 0; p.lives = 3; }
-        const all = w.bank.map((_, i) => i).filter(i=>!w.bank[i].party||!w.plan.partyLevel||w.plan.partyLevel==='ALL'||w.bank[i].difficulty===w.plan.partyLevel), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
+        const all = w.bank.map((_, i) => i).filter(i=>matchesPartyPlan(w.bank[i],w.plan)), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
         w.queue = w.wolf || !w.plan.limit ? ordered : ordered.slice(0, w.plan.limit);
-        w.index = 0; prepare(w); break;
+        if (!ordered.length) return 'QUESTION';
+        w.autoPaused = false; w.index = 0; prepare(w); break;
       case 'open':
         if (w.phase !== 'ready' || !r) return 'PHASE';
         r.eligible = Object.values(w.players).filter(p => (w.wolf ? owns(w.wolf.seats, p.id) : p.connected) && (r.mode !== 'SURVIVAL' || p.lives > 0)).map(p => p.id);
@@ -282,6 +291,9 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
       case 'close':
         if (w.phase !== 'open' || !r) return 'PHASE';
         r.remaining = r.paused ? r.remaining : Math.max(0, r.deadline - now); markUnanswered(r); if(r.mode==='NEAREST'){const values=r.eligible.filter(id=>r.answers[id]?.submitted).map(id=>numericAnswer(r.answers[id].text)).filter((v):v is number=>v!==null);r.average=values.length?values.reduce((n,v)=>n+v/values.length,0):undefined;} w.phase = 'closed'; publishChoices(w); break;
+      case 'autoPause':
+        if (!r || ['lobby','finished'].includes(w.phase)) return 'PHASE';
+        w.autoPaused = !w.autoPaused; delete w.autoProgress; break;
       case 'pause':
         if (w.phase !== 'open' || !r) return 'PHASE';
         if (!r.paused) r.remaining = Math.max(0, r.deadline - now); else r.deadline = now + r.remaining;
@@ -352,7 +364,8 @@ export function viewFor(w: ShowWorld, actor: Actor, now = Date.now()): ShowView 
   const r = w.round, host = actor.role === 'host';
   const qVisible = w.phase !== 'ready';
   const v: ShowView = { revision: w.revision, serverNow: now, title: w.title, mode: w.mode, teamCount: w.teamCount, phase: w.phase,
-    accepting: w.accepting, hostConnected: w.hostConnected, players: Object.values(w.players).map(p => ({ ...p })), self: actor.id, role: actor.role, questionCount: w.queue.length || Math.min(w.bank.filter(q=>!q.party||!w.plan.partyLevel||w.plan.partyLevel==='ALL'||q.difficulty===w.plan.partyLevel).length, w.plan.limit || 60), index: w.index, overview: !!w.overview, plan: { ...w.plan }, round: null };
+    autoPaused: !!w.autoPaused, audienceScreens: w.audienceScreens || 0, questionSource: w.questionSource || '',
+    accepting: w.accepting, hostConnected: w.hostConnected, players: Object.values(w.players).map(p => ({ ...p })), self: actor.id, role: actor.role, questionCount: w.queue.length || Math.min(w.bank.filter(q=>matchesPartyPlan(q,w.plan)).length, w.plan.limit || MAX_SHOW_QUESTIONS), index: w.index, overview: !!w.overview, plan: { ...w.plan }, round: null };
   if (host) v.host = { bank: w.bank };
   if (w.wolf) {
     const g = w.wolf, mine = g.seats[actor.id];
@@ -376,10 +389,11 @@ export function viewFor(w: ShowWorld, actor: Actor, now = Date.now()): ShowView 
       ...(host || r.showAnswer || (r.mode === 'DRAW' && actor.id === r.artist) ? { answer: r.mode==='NEAREST' ? (r.average===undefined?'':String(Number(r.average.toFixed(6)))) : q.answer } : {}),
       tiles: r.eligible.map(id => {
         const a = r.answers[id], revealed = r.revealed.includes(id);
-        const visible = host || actor.id === id || revealed || (r.mode === 'DRAW' && id === r.artist && qVisible);
+        const collecting = actor.role === 'screen' && ['ready','open','closed'].includes(w.phase);
+        const visible = (!collecting && (host || actor.id === id || revealed)) || (r.mode === 'DRAW' && id === r.artist && qVisible);
         return { id, submitted: !!a?.submitted, revealed, visible, ...(visible && a ? { text: a.text } : {}),
           inkRevision: visible && a?.ink.length ? a.revision : 0, hasInk: visible && !!a?.ink.length,
-          ...(host || r.showJudgments || w.phase === 'scoreboard' || w.phase === 'finished' ? { correct: r.grades[id], award: r.awards[id] } : {}),
+          ...(!collecting && (host || r.showJudgments || w.phase === 'scoreboard' || w.phase === 'finished') ? { correct: r.grades[id], award: r.awards[id] } : {}),
           ...(w.phase === 'scoreboard' || host ? { votes: Object.values(r.votes).filter(t => t === id).length } : {}) };
       }) };
   }
@@ -389,6 +403,7 @@ export function viewFor(w: ShowWorld, actor: Actor, now = Date.now()): ShowView 
 export function inkFor(w: ShowWorld, actor: Actor, roundId: string, playerId: string): Answer | null {
   const r = w.round;
   if (!r || r.id !== roundId || !owns(r.answers, playerId)) return null;
-  const permitted = actor.role === 'host' || actor.id === playerId || r.revealed.includes(playerId) || (r.mode === 'DRAW' && r.artist === playerId && w.phase !== 'ready');
+  const collecting = actor.role === 'screen' && ['ready','open','closed'].includes(w.phase);
+  const permitted = (!collecting && (actor.role === 'host' || actor.id === playerId || r.revealed.includes(playerId))) || (r.mode === 'DRAW' && r.artist === playerId && w.phase !== 'ready');
   return permitted ? r.answers[playerId] : null;
 }

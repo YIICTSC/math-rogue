@@ -32,6 +32,7 @@ export class QuizShowRoom {
   private channels = new Map<string, { channel: DataConnection; actor: Actor; revision: number }>();
   private timer: ReturnType<typeof setInterval> | null = null;
   private closed = false;
+  private hostActions: {action:ShowAction;at:number}[] = [];
   private view: ShowView | null = null;
   private savedAt = 0;
   private receivedAt = 0;
@@ -92,6 +93,7 @@ export class QuizShowRoom {
       if (this.closed) return;
       if (this.authority) { this.authority.tick(); this.emit(); }
       else if (this.view && Date.now() - this.receivedAt > 5000 && !this.syncing) { if (Date.now() - this.receivedAt > 16000) this.connection('reconnecting'); this.sendPacket({ type: 'ping' }); }
+      this.flushHostActions();
       this.fetchInk();
     }, 200);
     const save = () => this.persist(); window.addEventListener('pagehide', save); this.unwatch = () => window.removeEventListener('pagehide', save);
@@ -205,14 +207,29 @@ export class QuizShowRoom {
     const dedicated = new DedicatedConnection(packet => { if (packet.type === 'error' && !this.view) throw new Error(packet.code || 'NETWORK'); return this.accept(packet); }, () => { if (!this.closed) { dedicated.close(); this.scheduleReconnect(); } }, url);
     this.dedicated = dedicated; await dedicated.open('quiz-show', hello);
   }
+  private flushHostActions() {
+    if(this.closed||!this.dedicated||!this.view)return;
+    for(let n=0;n<4&&this.hostActions.length;n++){
+      const pending=this.hostActions[0];
+      if(Date.now()-pending.at>10000){this.hostActions=[];this.status('NETWORK');return;}
+      if(!this.sendPacket({type:'action',action:pending.action}))return;
+      this.hostActions.shift();
+    }
+  }
   send(action: ShowAction) {
     if (this.closed) return false;
     if (action.type === 'bank' && !validBank(action.questions)) { this.status('QUESTION'); return false; }
     if (this.authority) { const error = this.authority.command(HOST, action); if (error) { this.status(error); return false; } this.status(null); this.emit(); this.persist(); return true; }
+    // A bank exceeds the shared socket's 16 KiB backpressure threshold.
+    // Preserve following settings in order instead of silently dropping them.
+    if(this.actor.role==='host'&&this.dedicated){
+      if(this.hostActions.length>=16)return false;
+      this.hostActions.push({action:structuredClone(action),at:Date.now()});this.flushHostActions();return true;
+    }
     return this.sendPacket({ type: 'action', action });
   }
   close() {
-    if (this.closed) return; this.persist(); this.closed = true;
+    if (this.closed) return; this.persist(); this.closed = true; this.hostActions=[];
     if (this.timer) clearInterval(this.timer); if (this.retry) clearTimeout(this.retry); this.unwatch?.();
     for (const cancel of this.cancelPending) cancel(); this.cancelPending.clear();
     for (const channel of this.pendingChannels) channel.close(); this.pendingChannels.clear();

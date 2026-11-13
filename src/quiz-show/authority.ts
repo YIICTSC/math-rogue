@@ -14,6 +14,7 @@ export class ShowAuthority {
     this.world.plan.autoAdvance ??= true;
     this.world.queue ||= this.world.bank.map((_, i) => i);
     if (this.world.round) this.world.round.showJudgments ??= false;
+    this.world.audienceScreens = 0;
     if (saved) {
       delete this.world.autoProgress;
       for (const s of saved.seats) if (s.actor.role !== 'screen') this.seats.set(s.key, s);
@@ -40,12 +41,17 @@ export class ShowAuthority {
     const actor: Actor = { id: crypto.randomUUID(), role: h.role };
     if (h.role === 'player') { const error = addAnswerer(this.world, actor.id, h.name); if (error) return { error }; }
     this.seats.set(h.key, { key: h.key, actor });
+    this.syncScreens();
     return { actor };
   }
   leave(actor: Actor) {
     if (actor.role === 'host') hostConnection(this.world, false);
     else if (actor.role === 'player') disconnectAnswerer(this.world, actor.id);
-    else for (const [key, s] of this.seats) if (s.actor.id === actor.id) this.seats.delete(key);
+    else { for (const [key, s] of this.seats) if (s.actor.id === actor.id) this.seats.delete(key); this.syncScreens(); }
+  }
+  private syncScreens() {
+    const count = [...this.seats.values()].filter(s => s.actor.role === 'screen').length;
+    if (count !== this.world.audienceScreens) { this.world.audienceScreens = count; this.world.revision++; }
   }
   command(actor: Actor, action: unknown, now = Date.now()): ShowError | null {
     if (actor.role === 'player' && !this.world.players[actor.id]) return 'AUTH';
