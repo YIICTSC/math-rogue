@@ -9,13 +9,13 @@ try{
  const practice=async (key,level=0)=>{await p.evaluate(key=>{window.__driverKeys=[];__rush.practice(key);},key);await play();if(level)await p.evaluate(async level=>{const{challengeEntry}=await import('/src/mini-games/after-school-rush/action/challenge.ts');const s=__rush.stage,entry=challengeEntry(__rush.catalog.find(e=>e.key===s.round.entry.key),level,1);__rush.put({...s,round:{...s.round,entry,state:entry.game.mechanic.initialFor(1,level),duration:entry.game.seconds*1000,speed:1.4}});},level);};
  const shot=name=>p.screenshot({path:out+'/'+name+'.png'});
  async function actorVisible(){await p.evaluate(()=>new Promise(requestAnimationFrame));const result=await p.evaluate(async()=>{
-  const stage=document.querySelector('.asr-action-stage'),actor=stage.querySelector('.asr-cast-actor'),img=actor?.querySelector('.asr-actor-sheet');
+  const stage=document.querySelector('.asr-action-stage'),actor=stage.querySelector('.asr-cast-actor,.asr-paper-plane'),img=actor?.querySelector('img');
   if(!actor||!img)return {error:'Missing character image'};await img.decode();
-  const frame=actor.querySelector('.asr-actor-frame'),box=frame.getBoundingClientRect(),bounds=stage.getBoundingClientRect();
+  const frame=actor.querySelector('.asr-actor-frame')||actor,box=frame.getBoundingClientRect(),bounds=stage.getBoundingClientRect();
   const cols=parseFloat(img.style.width)/100,rows=parseFloat(img.style.height)/100,x=-parseFloat(img.style.left)/100||0,y=-parseFloat(img.style.top)/100||0;
   const canvas=document.createElement('canvas');canvas.width=64;canvas.height=64;const ctx=canvas.getContext('2d');ctx.drawImage(img,x*img.naturalWidth/cols,y*img.naturalHeight/rows,img.naturalWidth/cols,img.naturalHeight/rows,0,0,64,64);
   const pixels=ctx.getImageData(0,0,64,64).data;let count=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]>16)count++;
-  return {width:box.width,height:box.height,pixels:count,overlap:Math.max(0,Math.min(box.right,bounds.right)-Math.max(box.left,bounds.left))*Math.max(0,Math.min(box.bottom,bounds.bottom)-Math.max(box.top,bounds.top)),sized:actor.style.height.endsWith('px'),id:actor.dataset.actor,pose:actor.dataset.pose,atlas:actor.dataset.atlas,path:new URL(img.src).pathname,row:y,column:x,rows,cols};
+  return {width:box.width,height:box.height,pixels:count,overlap:Math.max(0,Math.min(box.right,bounds.right)-Math.max(box.left,bounds.left))*Math.max(0,Math.min(box.bottom,bounds.bottom)-Math.max(box.top,bounds.top)),sized:actor.classList.contains('asr-paper-plane')||actor.style.height.endsWith('px'),id:actor.dataset.actor,pose:actor.dataset.pose,atlas:actor.dataset.atlas,path:new URL(img.src).pathname,row:y,column:x,rows,cols};
  });assert(!result.error&&result.width>16&&result.height>16&&result.overlap>120&&result.pixels>100&&result.sized,'Visible, loaded, nonempty actor: '+JSON.stringify(result));return result;}
 
  async function bounds(selector){const b=await p.locator(selector).first().boundingBox(),v=p.viewportSize();assert(b&&b.x>=-1&&b.y>=-1&&b.x+b.width<=v.width+1&&b.y+b.height<=v.height+1,selector+' '+JSON.stringify(b)+' '+JSON.stringify(v));return b;}
@@ -25,6 +25,8 @@ try{
   while(__rush.stage.tag==='play'&&elapsed<limit&&n++<1000){const s=__rush.stage,d=actionDriver(s),want=new Set();if(d.x<-.12)want.add('ArrowLeft');if(d.x>.12)want.add('ArrowRight');if(d.y<-.12)want.add('ArrowUp');if(d.y>.12)want.add('ArrowDown');for(const key of held)if(!want.has(key)){fire('keyup',key);held.delete(key);}for(const key of want)if(!held.has(key)){fire('keydown',key);held.add(key);}if(d.a){fire('keydown','z');fire('keyup','z');}if(d.b){fire('keydown','x');fire('keyup','x');}const dt=24/s.round.speed;__rush.advance(dt);elapsed+=24;if(n%4===0)await new Promise(r=>setTimeout(r,0));}
   window.__driverKeys=[...held];if(__rush.stage.tag!=='play'){for(const key of held)fire('keyup',key);window.__driverKeys=[];}return{outcome:__rush.stage.outcome,family:__rush.stage.round.entry.game.action.family,t:__rush.stage.round.state[0],hp:__rush.stage.round.state[7]};
  },limit);}
+ for(const[width,height]of[[390,844],[844,390],[320,568],[1280,720]]){await p.setViewportSize({width,height});await p.goto(base,{waitUntil:'domcontentloaded'});await bounds('.asr-title-card');for(const button of await p.locator('.asr-menu button').all()){const b=await button.boundingBox();assert(b.y+b.height<=height,'Title choices visible at '+width);}await shot('compact-title-'+width);await p.getByRole('button',{name:'ストーリー',exact:true}).click();await bounds('.asr-chapter-menu');await bounds('.asr-chapter-story .asr-primary');await shot('compact-story-'+width);assert.equal(await p.evaluate(()=>document.documentElement.scrollHeight>innerHeight),false);}
+ await p.setViewportSize({width:390,height:844});
  await p.goto(base,{waitUntil:'domcontentloaded'});
  // A library entry becomes playable only after actually entering its story round.
  await p.getByRole('button',{name:'お題図鑑',exact:true}).click();
@@ -37,6 +39,7 @@ try{
  assert.deepEqual(await discovery(),[],'READY is not a story encounter');await play();assert.deepEqual(await discovery(),[firstStoryKey]);
  await p.goto(base,{waitUntil:'domcontentloaded'});await p.getByRole('button',{name:'お題図鑑',exact:true}).click();
  assert.equal(await p.locator('[data-asr-library-entry][data-asr-locked=false]').count(),1,'Encounter is preserved after reload');assert.equal(await p.locator('[data-asr-library-entry][data-asr-locked=true]:disabled').count(),23);
+ await p.getByLabel('遊ぶモード',{exact:true}).selectOption('endless');await p.locator('[data-asr-library-entry][data-asr-locked=false]').click();await play();assert.equal((await state()).run.mode.endless,true);assert.equal((await drive()).outcome,'clear');await advance(1300);assert.equal((await state()).tag,'ready');assert.equal((await state()).run.number,2);assert((await state()).round.speed>1);await play();await advance(25000);await advance(1300);assert.equal((await state()).tag,'results');console.log('PASS library endless mode repeats after clear and stops after a failed wave');
  await practice('gate/action-1');assert.deepEqual(await discovery(),[firstStoryKey],'Practice does not reveal another story game');await shot('action-intro');await p.keyboard.down('ArrowRight');await advance(200);assert((await state()).round.state[1]>120);await p.keyboard.up('ArrowRight');const released=(await state()).round.state[1];await advance(200);assert.equal((await state()).round.state[1],released,'Keyboard release stops motion');
  const all=await p.evaluate(()=>__rush.catalog.map(e=>({key:e.key,family:e.game.action.family,boss:!!e.game.boss,title:e.game.title[0]})));
  // Portraits must clip the scaled character inside their square, above the title.
@@ -51,6 +54,8 @@ try{
  }
  console.log('PASS portrait clipping and command/title separation in four viewport sizes');
  await p.setViewportSize({width:390,height:844});
+ await practice(all.find(e=>e.family==='flap').key);assert.equal(await p.locator('.asr-action-player .asr-cast-actor').count(),0);await p.locator('.asr-paper-plane img').evaluate(img=>img.decode());await shot('paper-plane-flight');
+ await practice(all.find(e=>e.family==='rhythm').key);const drums=await p.locator('.asr-action-drum').evaluateAll(nodes=>nodes.map(n=>({label:n.innerText,x:n.getBoundingClientRect().x})));assert(drums.find(d=>d.label==='B').x<drums.find(d=>d.label==='A').x);await shot('drums-left-b-right-a');
  const crossoverScenery={bat:'.asr-sport-hit-zone',rally:'.asr-sport-hit-zone',soccer:'.asr-soccer-goal',golf:'.asr-crossover-meter',kart:'.asr-kart-road',parry:'.asr-parry-warning',grapple:'.asr-grapple-anchor',fishing:'.asr-fishing-water',mining:'.asr-mining-rock',volley:'.asr-volley-combo'};
  for(const entry of all){await practice(entry.key);if(crossoverScenery[entry.family])assert(await p.locator(crossoverScenery[entry.family]).count()>0,entry.family+' has its own playable scene');assert.equal(await p.locator('[data-asr-button]').count(),2);assert.equal(await p.locator('[data-asr-button=a] span').innerText(),await p.evaluate(()=>__rush.stage.round.entry.game.action.a[0]));assert.equal(await p.locator('.asr-world-targets,.asr-original-controls').count(),0,'No question/choice panel remains');await bounds('.asr-action-stage');await bounds('.asr-controller');await actorVisible();}
  console.log('PASS all 240 games render loaded, nonempty character frames (including drivers), physical stages and stick + A/B; no choice cards remain');

@@ -117,13 +117,13 @@ export default function AfterSchoolRush({
       actionAudioAt.current = -Infinity;
       voicedAction.current = false;
       const cast = castFor(next.round.entry);
-      for (const path of battleSpritePaths(cast.id)) {
+      for (const path of next.round.entry.game.action?.family==='flap' ? ['sprites/paper-plane/pilots-02.webp'] : battleSpritePaths(cast.id)) {
         const image = new Image(); image.src = assetUrl(path); void image.decode().catch(() => {});
       }
       const clips = (['start', 'action', 'score', 'hurt', 'clear'] as const).flatMap(event => [soundFor(next.round.entry, event, 4), soundFor(next.round.entry, event, 5)]).filter(clip => !!clip);
       audioService.prepareMiniRushFoley(clips.map(clip => clip.path));
       const actionVoices = [actionVoiceFor(next.round.entry, 4), actionVoiceFor(next.round.entry, 5)].flatMap(voice => voice ? [voice[0]] : []);
-      if (next.round.entry.game.action && usesDashMovement(next.round.entry.game.action.family)) {
+      if (next.round.entry.game.action && next.round.entry.game.action.family!=='flap' && usesDashMovement(next.round.entry.game.action.family)) {
         for (const folder of ['heroes', 'slides']) {
           const image = new Image();
           image.src = assetUrl(`sprites/go-home-dash/${folder}/${cast.id}.webp`);
@@ -366,7 +366,7 @@ export default function AfterSchoolRush({
       {active && game && <>
         <header className="asr-top" inert={paused}>
           <div className="asr-hud">
-            <span>{stage.run.mode.kind === 'practice' ? l('練習', 'PRACTICE', 'れんしゅう') : `ROUND ${String(stage.run.number).padStart(2, '0')}${stage.run.mode.kind === 'story' ? ` / ${CHAPTER_ROUNDS}` : ''}`}</span>
+            <span>{stage.run.mode.kind === 'practice' ? stage.run.mode.endless ? `∞ ${stage.run.wins} · ${Math.floor(((stage.run.elapsed??0)+(stage.tag==='play'?phaseElapsed:0))/1000)}s` : l('練習', 'PRACTICE', 'れんしゅう') : `ROUND ${String(stage.run.number).padStart(2, '0')}${stage.run.mode.kind === 'story' ? ` / ${CHAPTER_ROUNDS}` : ''}`}</span>
             {stage.run.mode.kind !== 'practice' && <span className="asr-lives"
               aria-label={`${l('残りライフ', 'Lives left', 'のこりライフ')} ${MAX_MISSES - stage.run.misses}`}>
               {Array.from({ length: MAX_MISSES }, (_, i) => <i key={i} data-lost={i >= MAX_MISSES - stage.run.misses} aria-hidden="true">♥</i>)}

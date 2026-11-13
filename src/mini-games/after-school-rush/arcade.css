@@ -43,3 +43,27 @@
 @media(prefers-reduced-motion:reduce){.asr-round-intro,.asr-verdict{animation:none}}
 
 .asr-root>.asr-quiz{position:fixed;inset:0;overflow:auto;isolation:isolate;pointer-events:auto}
+/* The viewport owns the shell; only the library list may scroll. */
+.asr-root{height:100dvh;max-height:100dvh;min-height:0;overflow:hidden;padding:8px max(10px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.asr-lobby{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;width:min(100%,1050px)}
+.asr-lobby>.asr-top{flex:none;margin:0;min-height:34px}
+.asr-lobby>.asr-title-card,.asr-lobby>.asr-chapter-menu{flex:1;min-height:0;height:auto;margin:0}
+.asr-title-card{grid-template-rows:minmax(0,1fr) auto}
+.asr-title-art{min-height:0!important}
+.asr-title-copy{align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:clamp(10px,2dvh,22px);gap:8px}
+.asr-title-copy h1{font-size:clamp(26px,5dvh,48px);line-height:1.12;margin:0}
+.asr-title-copy p{font-size:clamp(11px,1.8dvh,15px);margin:0}
+.asr-title-copy .asr-menu{margin:0;gap:7px}.asr-title-copy .asr-menu button{min-height:40px;padding:9px;font-size:clamp(14px,2.3dvh,20px)}
+.asr-title-card>.asr-marquee{grid-column:1/-1;max-height:32px;padding:3px}.asr-title-card>.asr-marquee .asr-sprite{width:24px;height:24px}
+.asr-chapter-menu{display:flex;flex-direction:column;padding:clamp(9px,2dvh,20px);gap:8px;overflow:hidden}
+.asr-chapter-heading{flex:none}.asr-chapter-heading h1{font-size:clamp(20px,3.8dvh,34px);margin:0}.asr-chapter-heading small{font-size:10px}
+.asr-chapter-tabs{flex:none;margin:0;gap:4px}.asr-chapter-tabs button{font-size:clamp(10px,1.8dvh,14px);min-height:34px}
+.asr-chapter-story{flex:1;min-height:0}.asr-chapter-portrait{min-height:0}.asr-chapter-portrait img{height:100%;max-height:100%;min-height:0}
+.asr-chapter-copy{min-height:0;overflow:auto;padding:10px}.asr-chapter-copy p{font-size:clamp(11px,1.9dvh,15px);margin:5px 0}.asr-chapter-copy small{font-size:10px}
+.asr-library-explainer{margin:0;font-size:11px}.asr-library-filter{flex:none;margin:0;gap:7px}.asr-library-filter label{min-width:0}.asr-practice-grid{flex:1;min-height:0;overflow:auto;align-content:start;overscroll-behavior:contain}
+@media(orientation:portrait){.asr-title-card{grid-template-columns:1fr;grid-template-rows:minmax(0,.44fr) minmax(0,.56fr) auto}.asr-title-art{border-right:0}.asr-title-copy h1 br{display:none}.asr-title-copy .asr-menu{display:grid;grid-template-columns:1fr 1fr}.asr-title-copy .asr-menu>.asr-primary{grid-column:1/-1}.asr-title-kicker img{width:25px;height:25px}.asr-title-kicker small{font-size:9px}.asr-chapter-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(orientation:landscape) and (max-height:540px){.asr-title-copy{gap:5px;padding:10px}.asr-title-copy h1{font-size:28px}.asr-title-copy h1 br{display:none}.asr-title-copy p{font-size:11px}.asr-title-kicker{display:none}.asr-title-copy .asr-menu{display:grid;grid-template-columns:1fr 1fr}.asr-title-copy .asr-menu>.asr-primary{grid-column:1/-1}.asr-title-copy .asr-menu button{min-height:34px;padding:6px;font-size:14px}.asr-title-card>.asr-marquee{display:none}.asr-chapter-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}.asr-chapter-tabs button{min-height:28px}.asr-chapter-copy h2{font-size:18px;margin:0}.asr-chapter-heading small{display:none}}
+.asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback]){grid-template-rows:34px minmax(0,1fr);gap:4px;padding:5px max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))}
+.asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback])>.asr-top{height:34px}
+.asr-cabinet{padding-inline:6px;padding-bottom:6px}.asr-cabinet>h2{font-size:clamp(18px,3dvh,28px);margin:3px 0 5px}.asr-cabinet-top{min-height:26px;padding:4px 0}.asr-cabinet>.asr-time{margin-top:4px;height:12px}
+@media(orientation:landscape) and (max-height:540px){.asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback]){grid-template-rows:26px minmax(0,1fr)}.asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback])>.asr-top{height:26px}.asr-cabinet-top{min-height:22px}.asr-cabinet>h2{font-size:18px;margin:2px 0 3px}}

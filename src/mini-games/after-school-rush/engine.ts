@@ -13,9 +13,9 @@ export type Action = { index: number; at: number };
 type Round = { entry: Entry; state: State; duration: number; speed: number; action?: Action; cursor?: number; history?: State[];
   queuedButtons?: { button: 'a' | 'b'; at: number }[] };
 export const INPUT_BUFFER_MS = 250;
-export type Mode = { kind: 'rush' } | { kind: 'story'; chapter: number } | { kind: 'practice'; entry: Entry };
+export type Mode = { kind: 'rush' } | { kind: 'story'; chapter: number } | { kind: 'practice'; entry: Entry; endless?: boolean };
 export type Run = {
-  mode: Mode; number: number; misses: number; streak: number; deck: Entry[];
+  elapsed?: number; mode: Mode; number: number; misses: number; streak: number; deck: Entry[];
   score: number; wins: number; bestStreak: number; completed: boolean; seed: number; bosses: number;
 };
 export type Outcome = 'clear' | 'mistake' | 'time';
@@ -39,7 +39,7 @@ function shuffle<T>(items: readonly T[], seed: number) {
 export const RUSH_ENTRIES = CATALOG.filter(entry => !entry.game.boss);
 
 export function difficulty(run: Run) {
-  if (run.mode.kind === 'practice') return 0;
+  if (run.mode.kind === 'practice') return run.mode.endless ? Math.min(4,Math.floor((run.elapsed??0)/20000)) : 0;
   if (run.mode.kind === 'story') return Math.min(4, Math.floor(run.mode.chapter / 4) + Math.floor((run.number - 1) / 3));
   return Math.min(4, Math.floor((run.number - 1) / RUSH_BLOCK));
 }
@@ -68,12 +68,12 @@ function nextRound(run: Run, now: number, last?: Entry): Active {
     if (different > 0) [deck[0], deck[different]] = [deck[different], deck[0]];
   }
   const bosses = shuffle(CATALOG.filter(entry => entry.game.boss), run.seed);
-  const base = bossRound ? bosses[(run.number / RUSH_BLOCK - 1) % bosses.length] : deck.shift()!;
+  const base = run.mode.kind==='practice' ? run.mode.entry : bossRound ? bosses[(run.number / RUSH_BLOCK - 1) % bosses.length] : deck.shift()!;
   const seed = (run.seed + Math.imul(run.number, 2654435761)) >>> 0;
   const entry = challengeEntry(base, difficulty(run), seed);
   const seconds = entry.game.seconds ?? 10;
   const duration = (run.mode.kind === 'practice' ? Math.max(15, seconds + 3) : seconds) * 1000;
-  const speed = run.mode.kind !== 'rush' || entry.game.boss ? 1 : 1 + difficulty(run) * .1;
+  const speed = run.mode.kind==='practice'&&run.mode.endless ? 1+Math.min(.8,(run.elapsed??0)/150000) : run.mode.kind !== 'rush' || entry.game.boss ? 1 : 1 + difficulty(run) * .1;
   return {
     tag: 'ready', since: now, now, run: { ...run, deck },
     round: { entry, duration, speed, state: entry.game.mechanic.initialFor?.(seed, difficulty(run)) ?? [...entry.game.mechanic.initial] },
@@ -96,7 +96,7 @@ function finish(stage: Active, now: number, outcome: Outcome): Active {
   return {
     ...stage, tag: 'feedback', since: now, now, outcome, recovered,
     resolvedAt: Math.min(round.duration, (now - since) * round.speed), points,
-    run: { ...run, misses: Math.max(0, run.misses + Number(!clear) - Number(recovered)),
+    run: { ...run, elapsed:(run.elapsed??0)+Math.max(0,now-since), misses: Math.max(0, run.misses + Number(!clear) - Number(recovered)),
       wins: run.wins + Number(clear), score: run.score + points, streak,
       bosses: run.bosses + Number(clear && boss), bestStreak: Math.max(streak, run.bestStreak),
       completed: clear && boss },
@@ -169,7 +169,7 @@ export function step(stage: Stage, timestamp: number, input?: Input): Stage {
   if (stage.tag === 'feedback') {
     if (elapsed < feedbackDuration(stage) || input) return now === stage.now ? stage : { ...stage, now };
     const { run } = stage;
-    if (run.mode.kind === 'practice' || run.misses >= MAX_MISSES || (run.mode.kind === 'story' && !run.deck.length))
+    if (run.mode.kind === 'practice' && (!run.mode.endless || stage.outcome!=='clear') || run.misses >= MAX_MISSES || (run.mode.kind === 'story' && !run.deck.length))
       return { tag: 'results', run };
     const nextRun = { ...run, number: run.number + 1 };
     if (run.mode.kind === 'rush' && run.number % RUSH_BLOCK === 0)

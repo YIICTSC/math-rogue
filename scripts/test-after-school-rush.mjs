@@ -91,3 +91,9 @@ let spike=start(E.CATALOG.find(e=>e.game.action.family==='volley'));let spikeGua
 while(spike.tag==='play'&&spike.round.state[E.S.SCORE]<spike.round.entry.game.action.goal&&spikeGuard++<800){const d=E.actionDriver(spike);spike=E.steer(spike,spike.now,d.x,d.y);if(d.a)spike=E.control(spike,spike.now,'a');if(d.b)spike=E.control(spike,spike.now,'b');spike=E.step(spike,spike.now+16);}
 assert.equal(spike.tag,'play','A final spike remains visible before the verdict');const flightTime=spike.now;spike=E.step(spike,flightTime+200);assert.equal(spike.tag,'play');spike=E.step(spike,flightTime+400);assert.equal(spike.outcome,'clear');
 console.log('PASS final volleyball spike travels visibly before clear feedback');
+
+// Library endurance repeats the chosen entry, ramps by active time and stops on the first failed game.
+for(const entry of E.CATALOG){let s=E.start({kind:'practice',entry,endless:true},0,17);for(let wave=0;wave<4;wave++){
+ assert.equal(s.round.entry.key,entry.key);s=E.step(s,s.since+E.readyDuration(s)+1);s={...s,tag:'feedback',outcome:'clear',since:s.now,run:{...s.run,elapsed:wave*30000}};s=E.step(s,s.now+E.feedbackDuration(s)+1);assert.equal(s.tag,'ready');assert(s.round.speed>=1);assert.equal(s.round.entry.game.action.tier,Math.min(4,Math.floor(wave*30000/20000)));}
+ s={...s,tag:'feedback',outcome:'mistake',since:s.now};s=E.step(s,s.now+E.feedbackDuration(s)+1);assert.equal(s.tag,'results');}
+console.log('PASS all 240 library endurance games repeat, ramp with play time and end on the first failure');

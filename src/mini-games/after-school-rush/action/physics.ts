@@ -139,7 +139,7 @@ export function actionWorld(spec: ActionSpec, s: State): World {
       world.goal = { x: 870 + shift(12, 30), y: 300 + shift(13, 45) };
       world.hazards = [{ x: 490, y: 310 + Math.sin(t / (900 - level * 55) + v) * 110, radius: 48 + level * 2 }];
       if (spec.boss || level >= 3) world.hazards.push({ x: 680, y: 300 + Math.cos(t / 850) * 95, radius: 42 + level * 2 }); break;
-    case 'rhythm': world.targets = [{ x: 350 + level * 12, y: 470 }, { x: 650 - level * 12, y: 470 }]; break;
+    case 'rhythm': world.targets = [{ x: 650 - level * 12, y: 470 }, { x: 350 + level * 12, y: 470 }]; break;
     case 'bat': case 'rally': world.targets = [pitchBall(s, spec)]; world.goal = { x: s[S.X], y: 465 }; break;
     case 'soccer':
       world.goal = { x: 935, y: 220 + v % 3 * 80 + shift(14, 25) };

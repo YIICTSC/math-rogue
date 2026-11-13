@@ -56,3 +56,6 @@
 /* Mirror the strike arc around the same feet anchor as the actor. */
 .asr-strike-direction{position:absolute;inset:0;pointer-events:none;transform-origin:50% 65%}
 .asr-action-player[data-facing="-1"]>.asr-action-shield{right:auto;left:-12%;scale:-1 1}
+.asr-action-player>.asr-paper-plane{position:absolute;inset:-15% -25% 0;overflow:hidden;transform:rotate(-25deg) scaleX(-1);pointer-events:none}
+.asr-paper-plane>img{position:absolute;width:500%;height:500%;max-width:none;left:-100%;top:0}
+.asr-action-player>.asr-paper-plane{inset:auto;left:50%;bottom:0;width:min(115%,24cqw);height:min(115%,24cqw);translate:-50% 0}

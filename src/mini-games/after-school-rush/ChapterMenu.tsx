@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import {useState,type CSSProperties} from 'react';
 import { assetUrl } from '../../utils/assetPaths';
 import { CATALOG, chapterEntries, CHAPTER_ROUNDS, canPlayChapter, THEMES } from './catalog';
 import { Sprite, type Localize } from './art';
@@ -24,6 +24,7 @@ type Props = {
 };
 
 export default function ChapterMenu({ view, chapter, setChapter, scores, discovered, launch, l, mode, genre, setGenre }: Props) {
+  const [endless,setEndless]=useState(false);
   const theme = THEMES[chapter];
   const practice = view === 'practice';
   const entries = genre ? CATALOG.filter(entry => entry.game.genre === genre) : chapterEntries(chapter);
@@ -49,7 +50,7 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, discove
     </nav>
     {practice ? <>
       <p className="asr-library-explainer">{l('ストーリーで一度遊んだお題が解禁されます。ミスしても登録！', 'Play a game in Story to unlock it here. A miss still counts!', 'ストーリーで いちど あそんだ おだいが ひらきます。ミスしても とうろく！')}</p>
-      <div className="asr-library-filter">
+      <div className="asr-library-filter"><label><span>{l('遊ぶモード','Play mode','あそぶモード')}</span><select aria-label={l('遊ぶモード','Play mode','あそぶモード')} value={endless?'endless':'practice'} onChange={e=>setEndless(e.target.value==='endless')}><option value="practice">{l('1回練習','Single practice','1かいれんしゅう')}</option><option value="endless">{l('ミスまでエンドレス','Endless until a miss','ミスまでエンドレス')}</option></select></label>
         <label>
           <span>{l('遊び方から探す', 'Browse by play style', 'あそびかたから さがす')}</span>
           <select value={genre} onChange={event => setGenre(event.currentTarget.value as Genre | '')}>
@@ -65,7 +66,7 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, discove
           const [, , prop] = visualFor(entry);
           const locked = !discovered.includes(entry.key);
           return <button type="button" key={entry.key} data-asr-library-entry={entry.key} data-asr-locked={locked}
-            disabled={locked} onClick={() => { if (!locked) launch({ kind: 'practice', entry }); }}
+            disabled={locked} onClick={() => { if (!locked) launch({ kind: 'practice', entry, endless }); }}
             style={{ '--card-color': entry.game.boss ? '#ffb4b7' : entryTheme.color } as CSSProperties}>
             {locked ? <b className="asr-library-lock" aria-hidden="true">?</b> : <Sprite name={prop} />}
             <span>{locked ? '???' : entry.game.boss ? l(...entryTheme.boss) : gameText(mode, entry.game.title)}</span>

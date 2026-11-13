@@ -88,17 +88,17 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
         data-dashing={b && ['run', 'climb', 'catch', 'chase', 'soccer'].includes(family) || undefined}
         data-guard={b && ['duel', 'dodge', 'collect', 'parry'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
         <i className="asr-action-shadow" />
-        <RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
-          jumpVelocity={family === 'flap' ? 0 : s[S.VY]}
+        {family!=='flap'&&<RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
+          jumpVelocity={s[S.VY]}
           actionRemaining={pose === 'duck' ? (rolling ? s[S.A] : s[S.B]) - t : undefined}
           age={outcome ? feedbackElapsed : pose === 'walk' ? t : pose === 'duck'
             ? Math.max(0, t - (rolling ? s[S.A] - 260 : s[S.B] - 650))
-            : action ? Math.max(0, t - action.at) : elapsed} />
+            : action ? Math.max(0, t - action.at) : elapsed} />}
         {family==='kart'&&<i className="asr-kart-body"><i/><i/></i>}
         {family==='brake'&&<Sprite name="truck" className="asr-action-vehicle"/>}
         {b && ['duel', 'dodge', 'collect', 'parry'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
         {family === 'catch' && a && <div className="asr-action-open-arms"><Sprite name="satchel" /><i /></div>}
-        {family === 'flap' && <Sprite name="glider" className="asr-action-glider" />}
+        {family === 'flap' && <span className="asr-paper-plane" aria-hidden="true"><img src={assetUrl('sprites/paper-plane/pilots-02.webp')} style={{width:'500%',height:'500%',left:'-100%',top:0}} alt="" draggable={false}/></span>}
         {(striking || a && ['chase', 'sweep', 'push'].includes(family)) && <span className="asr-strike-direction" style={{rotate:`${strikeDirection.current.angle}deg`}} key={action?.at}><i className="asr-action-swing" /></span>}
       </div>
       <ActionFeedback entry={entry} state={s} elapsed={elapsed} action={action} outcome={outcome} player={player}/>
