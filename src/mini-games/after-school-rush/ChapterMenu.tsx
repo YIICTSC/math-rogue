@@ -52,7 +52,7 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, launch,
           <span>{l('遊び方から探す', 'Browse by play style', 'あそびかたから さがす')}</span>
           <select value={genre} onChange={event => setGenre(event.currentTarget.value as Genre | '')}>
             <option value="">{l('章から探す', 'Browse by chapter', 'しょうから さがす')}</option>
-            {Object.entries(GENRES).map(([id, label]) => <option key={id} value={id}>{l(...label)}</option>)}
+            {Object.entries(GENRES).filter(([id]) => CATALOG.some(entry => entry.game.genre === id)).map(([id, label]) => <option key={id} value={id}>{l(...label)}</option>)}
           </select>
         </label>
         <small>{entries.length} {l('本', 'games', 'ほん')}</small>
@@ -60,12 +60,12 @@ export default function ChapterMenu({ view, chapter, setChapter, scores, launch,
       <div className="asr-practice-grid">
         {entries.map(entry => {
           const entryTheme = THEMES[entry.chapter];
-          const [view, , prop] = visualFor(entry);
+          const [, , prop] = visualFor(entry);
           return <button type="button" key={entry.key} onClick={() => launch({ kind: 'practice', entry })}
             style={{ '--card-color': entry.game.boss ? '#ffb4b7' : entryTheme.color } as CSSProperties}>
             <Sprite name={prop} />
             <span>{entry.game.boss ? l(...entryTheme.boss) : gameText(mode, entry.game.title)}</span>
-            <small>{l(...GENRES[entry.game.genre])} · {view === 'flat' ? '2D' : view === 'diorama' ? '2.5D' : '3D'}
+            <small>{entry.game.quick ? l('瞬間チャレンジ', 'Quick challenge', 'しゅんかんチャレンジ') : l(...GENRES[entry.game.genre])}
               {genre && ` · ${l(...entryTheme.name)}`}</small>
           </button>;
         })}

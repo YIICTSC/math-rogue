@@ -1,27 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
+import { useGameplayGamepad, PAD } from '../../hooks/useGameplayGamepad';
+import RoundBroadcast from './RoundBroadcast';
 import { audioService, type BgmPlaybackOptions } from '../../services/audioService';
 import { GameMode } from '../../types';
 import { assetUrl } from '../../utils/assetPaths';
 import { gameText, translate } from './copy';
-import { CHOICE_KEYS, Sprite, type Localize } from './art';
+import { Sprite, type Localize } from './art';
+import { controlsFor, type RushControl } from './controls';
+import { VirtualControls } from './VirtualControls';
 import { CATALOG, canPlayChapter, CHAPTER_ROUNDS, readStory, THEMES } from './catalog';
-import { RUSH_BEST_KEY, STORY_KEY, type Input, type Prop } from './rules';
+import { RUSH_BEST_KEY, STORY_KEY, type Prop } from './rules';
 import { GENRES, type Genre } from './originals/model';
 import ChapterMenu from './ChapterMenu';
-import { OriginalBoard } from './OriginalBoard';
+import { ActionBoard } from './action/ActionBoard';
+import { S } from './action/physics';
 import { castFor, directionFor } from './direction';
 import { RushPortrait } from './RoundEffects';
 import { TITLE_TRACK, trackFor } from './music';
 import {
-  difficulty, MAX_MISSES, pause, start, step, type Mode, type Stage,
+  control, steer, difficulty, MAX_MISSES, RUSH_BLOCK, isSpeedUp, playElapsed, remainingTime, resumeAfterStudy, pause, start, step, type Mode, type Stage,
 } from './engine';
 import './after-school-rush.css';
-import './playfield.css';
-import './depth-pieces.css';
-import './action-pieces.css';
 import './round-effects.css';
+import './arcade.css';
+import './action/action.css';
 
 const TITLE_ART = 'sprites/after-school-rush/title-v1.webp';
 const TITLE_ICON = 'sprites/after-school-rush/menu-icon-v1.webp';
@@ -44,12 +48,17 @@ export default function AfterSchoolRush({
 }: MiniGameComponentProps) {
   const [stage, setStage] = useState<Stage>({ tag: 'lobby' });
   const stageRef = useRef(stage);
+  const mounted = useRef(true);
   const rootRef = useRef<HTMLElement>(null);
   const actionAudioAt = useRef(-Infinity);
   const voicedAction = useRef(false);
   const music = useRef<ReturnType<typeof audioService.acquireBgmScene> | null>(null);
   const quizOffset = useRef(0);
   const [quizCorrect, setQuizCorrect] = useState<number | null>(null);
+  const [learning, setLearning] = useState({ correct: 0, answered: 0 });
+  const clockCue = useRef('');
+  const heldKeys = useRef(new Set<string>());
+  const padAxes = useRef({ x: 0, y: 0, ignore: false, active: false });
   const [menu, setMenu] = useState<'home' | 'story' | 'practice'>('home');
   const [scores, setScores] = useState(readStory);
   const [chapter, setChapter] = useState(0);
@@ -59,15 +68,24 @@ export default function AfterSchoolRush({
   const title = l('放課後ミニラッシュ', 'After-School Mini Rush', 'ほうかごミニラッシュ');
 
   function show(next: Stage) {
+    if (!mounted.current) return;
     const old = stageRef.current;
+    if (next.tag !== 'play' || next.pausedAt !== undefined) heldKeys.current.clear();
+    if (next.tag === 'play' && old.tag === 'play' && next.round.entry.key === old.round.entry.key && next.round.state[S.HP] < old.round.state[S.HP]) audioService.playMiniRushCue('tap');
+    if (next.tag === 'play' && old.tag === 'play' && next.round.entry.key === old.round.entry.key
+      && next.round.state[S.SCORE] > old.round.state[S.SCORE] && next.round.action === old.round.action) audioService.playMiniRushCue('collect');
     if (next === old) return;
     stageRef.current = next;
     setStage(next);
-    if (next.tag !== 'lobby' && next.tag !== 'results' && next.pausedAt !== undefined) {
+    if ((next.tag === 'ready' || next.tag === 'play' || next.tag === 'feedback') && next.pausedAt !== undefined) {
       audioService.stopMiniRushAudio();
     } else if (next.tag === 'lobby') {
       audioService.stopMiniRushAudio();
+    } else if (next.tag === 'study') {
+      audioService.stopMiniRushAudio();
+      setQuizCorrect(null);
     } else if (next.tag === 'ready' && old.tag !== 'ready') {
+      if (next.run.number > 1) audioService.playMiniRushCue(next.round.entry.game.boss ? 'boss' : isSpeedUp(next.run) ? 'speed' : 'ready');
       actionAudioAt.current = -Infinity;
       voicedAction.current = false;
       const cast = castFor(next.round.entry);
@@ -79,7 +97,13 @@ export default function AfterSchoolRush({
       const cast = castFor(next.round.entry);
       audioService.playMiniRushCue(clear ? next.round.entry.game.boss ? 'finale' : 'clear'
         : next.outcome === 'time' ? 'time' : 'miss');
-      audioService.playMiniRushVoice(...(clear ? cast.cheer : cast.retry));
+      const voice = clear ? cast.cheer : cast.retry;
+      if (next.round.entry.game.boss || voice[1] <= 1400) audioService.playMiniRushVoice(...voice);
+      if (next.recovered) audioService.playMiniRushCue('recover');
+    }
+    if (next.tag === 'play') {
+      const second = Math.ceil(remainingTime(next) / 1000), key = `${next.run.number}:${second}`;
+      if (second > 0 && second <= 3 && clockCue.current !== key) { clockCue.current = key; audioService.playMiniRushCue('count'); }
     }
     if (next.tag === 'results' && next.run.mode.kind === 'rush' && next.run.score > readBest()) {
       try { localStorage.setItem(RUSH_BEST_KEY, String(next.run.score)); } catch { /* Storage can be unavailable. */ }
@@ -96,6 +120,9 @@ export default function AfterSchoolRush({
 
   function launch(mode: Mode) {
     setQuizCorrect(null);
+    setLearning({ correct: 0, answered: 0 });
+    clockCue.current = '';
+    heldKeys.current.clear();
     audioService.stopMiniRushAudio();
     audioService.playMiniRushCue('start');
     show(start(mode, performance.now()));
@@ -107,13 +134,13 @@ export default function AfterSchoolRush({
     setMenu('story');
   }
 
-  function input(value: Input) {
+  function input(command: RushControl) {
     const current = stageRef.current;
     const now = performance.now();
-    const next = step(current, now, value);
+    const next = control(current, now, command);
     if (current.tag === 'play' && (next.tag === 'play' || next.tag === 'feedback')
-      && next.round.action !== current.round.action && (next.tag === 'play' || next.outcome === 'clear')) {
-      const direction = directionFor(next.round.entry, value.index);
+      && next.round.action && next.round.action !== current.round.action && (next.tag === 'play' || next.outcome === 'clear')) {
+      const direction = directionFor(next.round.entry, next.round.action.index);
       if (now - actionAudioAt.current >= 75) {
         actionAudioAt.current = now;
         audioService.playMiniRushCue(direction.cue);
@@ -133,8 +160,8 @@ export default function AfterSchoolRush({
   const paused = active && stage.pausedAt !== undefined;
   const roundNumber = active ? stage.run.number : 0;
   const activeKey = active ? stage.round.entry.key : '';
-  const studying = stage.tag === 'results' && stage.run.mode.kind !== 'practice' && quizCorrect === null;
-  const musicTrack = active ? trackFor(stage.round.entry)
+  const studying = stage.tag === 'study' || stage.tag === 'results' && stage.run.mode.kind !== 'practice' && quizCorrect === null;
+  const musicTrack = active ? stage.run.mode.kind === 'rush' ? stage.round.entry.game.boss ? 'kocho_boss' : 'paper_plane_battle' : trackFor(stage.round.entry)
     : studying ? 'math'
       : stage.tag === 'results' ? stage.run.mode.kind === 'practice' ? 'poker_shop' : stage.run.completed ? 'victory' : 'game_over'
         : menu === 'story' ? 'map' : menu === 'practice' ? 'poker_shop' : TITLE_TRACK;
@@ -168,6 +195,7 @@ export default function AfterSchoolRush({
   }, [active, paused]);
 
   useEffect(() => {
+    mounted.current = true;
     const onHide = () => {
       const current = stageRef.current;
       if (document.hidden && (current.tag === 'play' || current.tag === 'ready' || current.tag === 'feedback') && current.pausedAt === undefined) {
@@ -176,6 +204,7 @@ export default function AfterSchoolRush({
     };
     document.addEventListener('visibilitychange', onHide);
     return () => {
+      mounted.current = false;
       document.removeEventListener('visibilitychange', onHide);
       audioService.stopMiniRushAudio();
     };
@@ -185,26 +214,55 @@ export default function AfterSchoolRush({
     if (studying) return;
     const root = rootRef.current;
     const selector = paused ? '[data-asr-resume]' : stage.tag === 'play'
-      ? '[data-asr-choice][data-gamepad-initial-choice]' : '[data-gamepad-initial-choice]';
+      ? '[data-asr-button=a]' : '[data-gamepad-initial-choice]';
     (root?.querySelector<HTMLElement>(selector) ?? root)?.focus({ preventScroll: true });
   }, [stage.tag, roundNumber, activeKey, paused, menu, studying]);
 
+  function steering(x: number, y: number) {
+    show(steer(stageRef.current, performance.now(), x, y));
+  }
+  function keyAxes() {
+    const keys = heldKeys.current;
+    steering(Number(keys.has('ArrowRight')) - Number(keys.has('ArrowLeft')), Number(keys.has('ArrowDown')) - Number(keys.has('ArrowUp')));
+  }
+  function keyup(event: React.KeyboardEvent) {
+    if (event.key.startsWith('Arrow')) { heldKeys.current.delete(event.key); keyAxes(); }
+  }
   function keydown(event: React.KeyboardEvent) {
     const current = stageRef.current;
     if (current.tag !== 'play' && current.tag !== 'ready' && current.tag !== 'feedback') return;
     if (event.key === 'Escape') {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!event.repeat) show(pause(current, performance.now()));
+      event.preventDefault(); event.stopPropagation();
+      if (!event.repeat) { heldKeys.current.clear(); show(pause(current, performance.now())); }
       return;
     }
     if (current.tag !== 'play' || current.pausedAt !== undefined || event.altKey || event.ctrlKey || event.metaKey) return;
-    const index = CHOICE_KEYS.indexOf(event.key.toUpperCase());
-    if (index >= 0) {
-      event.preventDefault();
-      if (!event.repeat) input({ index });
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      event.preventDefault(); event.stopPropagation();
+      if (!event.repeat || heldKeys.current.has(event.key)) { heldKeys.current.add(event.key); keyAxes(); }
+      return;
     }
+    const key = event.key.toLowerCase(), command = ['z', ' ', 'enter'].includes(key) ? 'a' : key === 'x' ? 'b' : undefined;
+    if (command) { event.preventDefault(); event.stopPropagation(); if (!event.repeat) input(command); }
   }
+  useEffect(() => {
+    const release = () => { heldKeys.current.clear(); steering(0, 0); };
+    window.addEventListener('blur', release);
+    return () => window.removeEventListener('blur', release);
+  }, []);
+  useGameplayGamepad('mini-rush', pad => {
+    const before = padAxes.current, current = stageRef.current;
+    if (!pad.active) { if (before.active) steering(0, 0); padAxes.current = { x: 0, y: 0, ignore: before.ignore || before.active, active: false }; return; }
+    if (current.tag !== 'play' && current.tag !== 'ready' && current.tag !== 'feedback') return;
+    if (pad.pressed[PAD.MENU]) { heldKeys.current.clear(); show(pause(current, performance.now())); return; }
+    if (current.tag !== 'play' || current.pausedAt !== undefined) {
+      before.ignore = Math.hypot(pad.x, pad.y) > .1; before.active = true; before.x = pad.x; before.y = pad.y; return;
+    }
+    if (Math.hypot(pad.x, pad.y) < .1) before.ignore = false;
+    if (!before.ignore && (!before.active || Math.abs(pad.x - before.x) > .01 || Math.abs(pad.y - before.y) > .01)) steering(pad.x, pad.y);
+    before.x = pad.x; before.y = pad.y; before.active = true;
+    if (pad.pressed[PAD.A]) input('a'); else if (pad.pressed[PAD.B]) input('b');
+  });
 
   const game = active ? stage.round.entry.game : undefined;
   const theme = active ? THEMES[stage.round.entry.chapter] : null;
@@ -213,13 +271,15 @@ export default function AfterSchoolRush({
   const isStoryResult = stage.tag === 'results' && stage.run.mode.kind === 'story';
   const resultChapter = isStoryResult && stage.run.mode.kind === 'story' ? stage.run.mode.chapter : null;
   const resultTheme = resultChapter === null ? null : THEMES[resultChapter];
-  const elapsed = active ? Math.max(0, stage.now - stage.since) : 0;
-  const remaining = active ? Math.max(0, stage.round.duration - elapsed) : 0;
+  const phaseElapsed = active ? Math.max(0, stage.now - stage.since) : 0;
+  const elapsed = active ? stage.tag === 'play' ? playElapsed(stage) : stage.tag === 'feedback' ? stage.resolvedAt ?? 0 : 0 : 0;
+  const remaining = active ? remainingTime(stage) : 0;
   const backdrop = theme?.art ?? resultTheme?.art ?? (stage.tag === 'lobby' && menu === 'home' ? TITLE_ART : HALL);
   const skin = { '--asr-accent': isBoss ? '#ffb4b7' : theme?.color ?? '#ffdc68', '--asr-backdrop': `url("${assetUrl(backdrop)}")` } as React.CSSProperties;
 
   return (
-    <main className="asr-root" ref={rootRef} tabIndex={-1} style={skin} onKeyDown={keydown}
+    <main className="asr-root" data-asr-screen={stage.tag} data-asr-mode={'run' in stage ? stage.run.mode.kind : undefined}
+      data-gamepad-live={active && !paused ? 'mini-rush' : undefined} ref={rootRef} tabIndex={-1} style={skin} onKeyDown={keydown} onKeyUp={keyup}
       data-gamepad-navigation-root data-gamepad-initial-scope={`mini-rush-${stage.tag}-${paused}-${menu}-${activeKey}`}
       aria-label={title} lang={languageMode === 'ENGLISH' ? 'en' : 'ja'}>
       {stage.tag === 'lobby' && <div className="asr-lobby">
@@ -237,14 +297,14 @@ export default function AfterSchoolRush({
           <div className="asr-title-copy">
             <div className="asr-title-kicker"><img src={assetUrl(TITLE_ICON)} alt="" /><small>LEARNING ROGUE / ARCADE</small></div>
             <h1>{languageMode === 'ENGLISH' ? title : <>{l('放課後', 'After School', 'ほうかご')}<br />ミニラッシュ</>}</h1>
-            <p>{l(`文化祭の鐘を取り戻す10章の物語。全${CATALOG.length}本のお題に挑戦！`,
-              `A ten-chapter story to save the festival chime. Play ${CATALOG.length} microgames!`,
-              `ぶんかさいの かねを とりもどす 10しょうの おはなし。${CATALOG.length}ほんの おだいに ちょうせん！`)}</p>
+            <p>{l(`文化祭の鐘を取り戻す10章の物語。全${CATALOG.length}本のアクションに挑戦！`,
+              `A ten-chapter story to save the festival chime. ${CATALOG.length} action microgames. Stick + A / B!`,
+              `ぶんかさいの かねを とりもどす 10しょうの おはなし。${CATALOG.length}ほんの アクションに ちょうせん！`)}</p>
             <div className="asr-menu">
               <button type="button" className="asr-primary" data-gamepad-initial-choice onClick={openStory}>
                 {l('ストーリー', 'Story', 'ストーリー')} <span aria-hidden="true">▶</span>
               </button>
-              <button type="button" className="asr-secondary" onClick={() => launch({ kind: 'rush' })}>{l('ラッシュ', 'Rush', 'ラッシュ')}</button>
+              <button type="button" className="asr-secondary" onClick={() => launch({ kind: 'rush' })}>{l('ラッシュ', 'Rush', 'ラッシュ')} <small>{l('数秒勝負・8本ごとにボス！', 'Quick games. Boss every 8!', 'すうびょうしょうぶ・8ほんごとにボス！')}</small></button>
               <button type="button" className="asr-secondary" onClick={() => { setChapter(0); setGenre(''); setMenu('practice'); }}>{l('お題図鑑', 'Game Library', 'おだいずかん')}</button>
             </div>
           </div>
@@ -271,7 +331,7 @@ export default function AfterSchoolRush({
         <section className="asr-cabinet" data-asr-phase={stage.tag} data-asr-paused={paused || undefined}
           data-asr-outcome={stage.outcome} aria-label={isBoss && theme ? l(...theme.boss) : gameText(languageMode, game.title)} inert={paused}>
           <div className="asr-cabinet-top">
-            <span><Sprite name={isBoss ? 'shield' : game.icon} />{isBoss && theme ? l(...theme.boss) : gameText(languageMode, game.title)}</span>
+            <span><Sprite name={isBoss ? 'shield' : game.action?.item ?? game.icon} />{isBoss && theme ? l(...theme.boss) : gameText(languageMode, game.title)}</span>
             {cast && <div className="asr-cast-credit" data-actor={cast.id}>
               <RushPortrait id={cast.id} /><span>{l(...cast.name)}</span>
             </div>}
@@ -281,25 +341,32 @@ export default function AfterSchoolRush({
               : l(...GENRES[game.genre])}
             {!isBoss && stage.run.mode.kind !== 'practice' && ` · LV ${difficulty(stage.run) + 1}`}
           </div>
-          {stage.tag === 'play' && <div className="asr-time">
-            <meter aria-label={l('残り時間', 'Time remaining', 'のこりじかん')} min={0} max={stage.round.duration} value={remaining} />
+          <div className="asr-block-progress" aria-hidden="true">{Array.from({ length: RUSH_BLOCK }, (_, i) => <i key={i} data-done={i < (stage.run.number - 1) % RUSH_BLOCK} data-current={i === (stage.run.number - 1) % RUSH_BLOCK}>{i === RUSH_BLOCK - 1 ? '◆' : '●'}</i>)}</div>
+          {stage.tag === 'play' && <div className="asr-time" data-urgent={remaining <= 2000}>
+            <meter aria-label={l('残り時間', 'Time remaining', 'のこりじかん')} min={0} max={stage.round.duration / stage.round.speed} value={remaining} />
             <b aria-hidden="true">{(Math.ceil(remaining / 100) / 10).toFixed(1)}</b>
           </div>}
-          {stage.tag === 'feedback' ? <div className="asr-verdict" role="status" data-outcome={stage.outcome}>
+          {stage.tag === 'feedback' && <div className="asr-verdict" role="status" data-outcome={stage.outcome}>
             <Sprite name={stage.outcome === 'clear' ? 'bell' : 'hourglass'} />
             <h2>{stage.outcome === 'clear' ? l('クリア！', 'Clear!', 'クリア！')
               : stage.outcome === 'time' ? l('時間切れ！', 'Time’s up!', 'じかんぎれ！') : l('ミス！', 'Miss!', 'ミス！')}</h2>
-            {stage.outcome === 'clear' && <b>+{stage.points} PTS {stage.run.streak > 1 && `· ×${stage.run.streak}`}</b>}
-          </div> : <h2 role={stage.tag === 'ready' ? 'status' : undefined}>{gameText(languageMode, game.cue)}</h2>}
-          <OriginalBoard key={`${roundNumber}-${activeKey}`} entry={stage.round.entry} state={stage.round.state}
+            {stage.outcome === 'clear' && <b>+{stage.points} PTS {stage.run.streak > 1 && `· ${stage.run.streak} COMBO`}</b>}
+            {stage.recovered && <span className="asr-life-recovered">♥ +1</span>}
+          </div>}
+          <h2>{gameText(languageMode, game.cue)}</h2>
+          <ActionBoard key={`${roundNumber}-${activeKey}`} entry={stage.round.entry} state={stage.round.state}
             elapsed={stage.tag === 'feedback' ? stage.resolvedAt ?? 0 : elapsed}
-            action={stage.round.action} outcome={stage.outcome} preview={stage.tag === 'ready'}
-            feedbackElapsed={stage.tag === 'feedback' ? elapsed : 0}
-            mode={languageMode} select={index => input({ index })} />
+            action={stage.round.action} outcome={stage.outcome} feedbackElapsed={stage.tag === 'feedback' ? phaseElapsed : 0} mode={languageMode} />
+          <VirtualControls key={`controls-${roundNumber}-${activeKey}`} entry={stage.round.entry} state={stage.round.state}
+            elapsed={elapsed} mode={languageMode} cursor={stage.round.cursor ?? 0} canUndo={!!stage.round.history?.length}
+            enabled={stage.tag === 'play' && !paused} onControl={input} onSteer={steering} />
+          <RoundBroadcast stage={stage} mode={languageMode} />
         </section>
         {paused && <div className="asr-pause" role="dialog" aria-modal="true" aria-label={l('一時停止', 'Paused', 'いちじていし')} data-gamepad-modal>
           <section>
             <h2>{l('一時停止', 'Paused', 'いちじていし')}</h2>
+            <p>{gameText(languageMode, stage.round.entry.game.cue)}</p>
+            <small>{l('スティックで移動・選択、Aで操作、Bで補助。矢印キーとZ・Xにも対応。', 'Move or choose with the stick, act with A, use B for the second action. Keyboard: arrows + Z / X.', 'スティックで いどう・せんたく、Aでそうさ、Bでほじょ。やじるしキーとZ・Xもつかえる。')}</small>
             <button type="button" className="asr-primary" data-asr-resume data-gamepad-initial-choice
               onClick={() => show(pause(stageRef.current, performance.now()))}>{l('続ける', 'Resume', 'つづける')}</button>
             <button type="button" className="asr-secondary" onClick={() => show({ tag: 'lobby' })}>
@@ -310,16 +377,19 @@ export default function AfterSchoolRush({
         </div>}
       </>}
 
-      {studying && stage.tag === 'results' && <div className="asr-quiz" data-asr-quiz>
+      {studying && (stage.tag === 'results' || stage.tag === 'study') && <div className="asr-quiz" data-asr-quiz>
         <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode}
           assignment={assignment} languageMode={languageMode} problemOffset={quizOffset.current}
-          rewardHint={stage.run.completed
+          rewardHint={stage.tag === 'study' ? l('ひと息ついて3問！ 次はスピードアップ', 'Three questions, then the next gear!', 'ひといきついて3もん！ つぎはスピードアップ') : stage.run.completed
             ? l('章クリア！ 3問にチャレンジ', 'Chapter cleared! Try three questions.', 'しょうクリア！ 3もんに チャレンジ')
             : l('ゲームオーバー。最後に3問！', 'Game over. Three final questions!', 'ゲームオーバー。さいごに 3もん！')}
           onAnswerResult={onAnswerResult} onComplete={correct => {
+            if (!mounted.current) return;
             quizOffset.current += 3;
             audioService.stopMiniRushVoice();
-            setQuizCorrect(correct);
+            setLearning(previous => ({ correct: previous.correct + correct, answered: previous.answered + 3 }));
+            if (stageRef.current.tag === 'study') { setQuizCorrect(null); show(resumeAfterStudy(stageRef.current, performance.now())); }
+            else setQuizCorrect(correct);
           }} />
       </div>}
       {stage.tag === 'results' && !studying && <section className="asr-results">
@@ -329,11 +399,12 @@ export default function AfterSchoolRush({
           : stage.run.mode.kind === 'rush' ? l('ゲームオーバー', 'Game over', 'ゲームオーバー') : l('今回の記録', 'Your result', 'こんかいの きろく')}</h1>
         {resultTheme && <p>{stage.run.completed ? l(...resultTheme.clear)
           : l('3回ミスする前にボスまでたどり着き、章の最後のお題をクリアしよう。', 'Reach the boss before three misses and clear the chapter’s final challenge.', '3かい ミスする まえに ボスへ すすみ、しょうの さいごの おだいを クリアしよう。')}</p>}
-        {quizCorrect !== null && <p className="asr-quiz-score">{l(`問題は3問中${quizCorrect}問正解`, `${quizCorrect} of 3 questions correct`, `もんだいは 3もんちゅう ${quizCorrect}もん せいかい`)}</p>}
+        {learning.answered > 0 && <p className="asr-quiz-score">{l(`問題は${learning.answered}問中${learning.correct}問正解`, `${learning.correct} of ${learning.answered} questions correct`, `もんだいは ${learning.answered}もんちゅう ${learning.correct}もん せいかい`)}</p>}
         <strong>{stage.run.score} <small>PTS</small></strong>
         <dl>
           <div><dt>{l('クリア数', 'Cleared', 'クリアすう')}</dt><dd>{stage.run.wins}</dd></div>
           <div><dt>{l('最高連続', 'Best streak', 'さいこうれんぞく')}</dt><dd>{stage.run.bestStreak}</dd></div>
+          {stage.run.mode.kind === 'rush' && <div><dt>{l('ボス撃破', 'Bosses cleared', 'ボスげきは')}</dt><dd>{stage.run.bosses}</dd></div>}
           {stage.run.mode.kind === 'rush' && <div><dt>{l('自己ベスト', 'Personal best', 'じこベスト')}</dt><dd>{best}</dd></div>}
         </dl>
         <div className="asr-menu">

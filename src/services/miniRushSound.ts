@@ -2,6 +2,11 @@ type Note = readonly [frequency: number, start: number, length: number, volume: 
 
 // A shared bell motif answers the same opening interval on clear and on miss.
 const CUES = {
+  ready: [[587, 0, .06, .13], [784, .06, .09, .13]],
+  speed: [[659, 0, .08, .15], [880, .06, .08, .15], [1175, .12, .15, .16]],
+  boss: [[196, 0, .15, .18], [294, .12, .15, .18], [392, .24, .22, .18]],
+  recover: [[784, 0, .09, .14], [1047, .08, .12, .14]],
+  count: [[880, 0, .045, .06]],
   start: [[523, 0, .105, .22], [784, .075, .13, .2]],
   clear: [[523, 0, .17, .22], [784, .085, .17, .22], [1047, .17, .28, .2], [659, .17, .2, .07]],
   finale: [[523, 0, .17, .24], [784, .085, .17, .23], [1047, .17, .24, .23], [1319, .28, .27, .18], [784, .28, .24, .09]],
@@ -31,7 +36,7 @@ const CUES = {
 export type MiniRushCue = keyof typeof CUES;
 
 export function isRushJingle(cue: MiniRushCue) {
-  return cue === 'start' || cue === 'clear' || cue === 'finale' || cue === 'miss' || cue === 'time';
+  return cue === 'start' || cue === 'clear' || cue === 'finale' || cue === 'miss' || cue === 'time' || cue === 'speed' || cue === 'boss';
 }
 
 export function renderMiniRushCue(context: AudioContext, cue: MiniRushCue) {

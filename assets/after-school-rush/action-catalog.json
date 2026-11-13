@@ -1,0 +1,3306 @@
+{
+  "games": 100,
+  "families": 18,
+  "entries": [
+    {
+      "key": "gate/action-1",
+      "chapter": 1,
+      "title": [
+        "閉門ダッシュ",
+        "Closing-time dash",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 0,
+      "goal": 1
+    },
+    {
+      "key": "gate/action-2",
+      "chapter": 1,
+      "title": [
+        "なわのトンネル",
+        "Rope tunnel",
+        null
+      ],
+      "family": "hurdles",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "rope",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "しゃがむ",
+          "Duck",
+          null
+        ]
+      },
+      "variant": 1,
+      "goal": 1
+    },
+    {
+      "key": "gate/action-3",
+      "chapter": 1,
+      "title": [
+        "チャイムをつかめ",
+        "Chime catch",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "bell",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 2,
+      "goal": 2
+    },
+    {
+      "key": "gate/action-4",
+      "chapter": 1,
+      "title": [
+        "門前のおつり",
+        "Gate coins",
+        null
+      ],
+      "family": "collect",
+      "boss": false,
+      "seconds": 8,
+      "item": "coin",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 3,
+      "goal": 3
+    },
+    {
+      "key": "gate/action-5",
+      "chapter": 1,
+      "title": [
+        "門柱のてっぺん",
+        "Gatepost climb",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 4,
+      "goal": 1
+    },
+    {
+      "key": "gate/action-6",
+      "chapter": 1,
+      "title": [
+        "カバンのシーソー",
+        "Bag seesaw",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "satchel",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 5,
+      "goal": 1
+    },
+    {
+      "key": "gate/action-7",
+      "chapter": 1,
+      "title": [
+        "通行証を追え",
+        "Runaway pass",
+        null
+      ],
+      "family": "chase",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "notebook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかまえる",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 6,
+      "goal": 1
+    },
+    {
+      "key": "gate/action-8",
+      "chapter": 1,
+      "title": [
+        "門の大きな荷物",
+        "Gate delivery",
+        null
+      ],
+      "family": "push",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "box",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "押す",
+          "Push",
+          "おす"
+        ],
+        "b": [
+          "引く",
+          "Pull",
+          "ひく"
+        ]
+      },
+      "variant": 7,
+      "goal": 1
+    },
+    {
+      "key": "gate/action-9",
+      "chapter": 1,
+      "title": [
+        "合図の鈴",
+        "Signal bell",
+        null
+      ],
+      "family": "timing",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "見きわめる",
+          "Watch",
+          "みきわめる"
+        ],
+        "a": [
+          "キャッチ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ゆっくり",
+          "Slow down",
+          null
+        ]
+      },
+      "variant": 8,
+      "goal": 2
+    },
+    {
+      "key": "gate/action-10",
+      "chapter": 1,
+      "title": [
+        "門番ミミック",
+        "Gatekeeper Mimic",
+        null
+      ],
+      "family": "duel",
+      "boss": true,
+      "seconds": 12,
+      "item": "mimic",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "アタック",
+          "Attack",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 9,
+      "goal": 4
+    },
+    {
+      "key": "classroom/action-1",
+      "chapter": 2,
+      "title": [
+        "机から机へ",
+        "Desk hop",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 3,
+      "goal": 1
+    },
+    {
+      "key": "classroom/action-2",
+      "chapter": 2,
+      "title": [
+        "消しゴムの雨",
+        "Eraser rain",
+        null
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "block",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 4,
+      "goal": 1
+    },
+    {
+      "key": "classroom/action-3",
+      "chapter": 2,
+      "title": [
+        "消しゴムシュート",
+        "Eraser toss",
+        null
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "block",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 5,
+      "goal": 1
+    },
+    {
+      "key": "classroom/action-4",
+      "chapter": 2,
+      "title": [
+        "プリント回収",
+        "Paper pickup",
+        null
+      ],
+      "family": "collect",
+      "boss": false,
+      "seconds": 8,
+      "item": "notebook",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 6,
+      "goal": 3
+    },
+    {
+      "key": "classroom/action-5",
+      "chapter": 2,
+      "title": [
+        "そっと運ぶ花瓶",
+        "Careful vase",
+        null
+      ],
+      "family": "carry",
+      "boss": false,
+      "seconds": 8,
+      "item": "vase",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "持つ・届ける",
+          "Pick up / Deliver",
+          "もつ・とどける"
+        ],
+        "b": [
+          "そっと歩く",
+          "Tiptoe",
+          "そっとあるく"
+        ]
+      },
+      "variant": 7,
+      "goal": 1
+    },
+    {
+      "key": "classroom/action-6",
+      "chapter": 2,
+      "title": [
+        "黒板クリーナー",
+        "Board cleaner",
+        null
+      ],
+      "family": "sweep",
+      "boss": false,
+      "seconds": 8,
+      "item": "slime",
+      "hazard": "egg",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "はらう",
+          "Sweep",
+          null
+        ],
+        "b": [
+          "吸いこむ",
+          "Vacuum",
+          "すいこむ"
+        ]
+      },
+      "variant": 8,
+      "goal": 3
+    },
+    {
+      "key": "classroom/action-7",
+      "chapter": 2,
+      "title": [
+        "教室を飛び出せ",
+        "Classroom escape",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 9,
+      "goal": 1
+    },
+    {
+      "key": "classroom/action-8",
+      "chapter": 2,
+      "title": [
+        "飛んでくるノート",
+        "Flying notebooks",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "notebook",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 10,
+      "goal": 2
+    },
+    {
+      "key": "classroom/action-9",
+      "chapter": 2,
+      "title": [
+        "教室の的あて",
+        "Classroom targets",
+        null
+      ],
+      "family": "aim",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "target",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 11,
+      "goal": 2
+    },
+    {
+      "key": "classroom/action-10",
+      "chapter": 2,
+      "title": [
+        "黒板の大あらし",
+        "Blackboard storm",
+        null
+      ],
+      "family": "dodge",
+      "boss": true,
+      "seconds": 12,
+      "item": "shield",
+      "hazard": "notebook",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 12,
+      "goal": 1
+    },
+    {
+      "key": "store/action-1",
+      "chapter": 3,
+      "title": [
+        "焼きたてキャッチ",
+        "Fresh-baked catch",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "toast",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 6,
+      "goal": 2
+    },
+    {
+      "key": "store/action-2",
+      "chapter": 3,
+      "title": [
+        "おやつを届けて",
+        "Snack delivery",
+        null
+      ],
+      "family": "carry",
+      "boss": false,
+      "seconds": 8,
+      "item": "toast",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "持つ・届ける",
+          "Pick up / Deliver",
+          "もつ・とどける"
+        ],
+        "b": [
+          "そっと歩く",
+          "Tiptoe",
+          "そっとあるく"
+        ]
+      },
+      "variant": 7,
+      "goal": 1
+    },
+    {
+      "key": "store/action-3",
+      "chapter": 3,
+      "title": [
+        "おつり大回収",
+        "Pocket the change",
+        null
+      ],
+      "family": "collect",
+      "boss": false,
+      "seconds": 8,
+      "item": "coin",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 8,
+      "goal": 3
+    },
+    {
+      "key": "store/action-4",
+      "chapter": 3,
+      "title": [
+        "購買カート",
+        "Store cart",
+        null
+      ],
+      "family": "brake",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "アクセル",
+          "Accelerate",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 9,
+      "goal": 1
+    },
+    {
+      "key": "store/action-5",
+      "chapter": 3,
+      "title": [
+        "大箱を動かせ",
+        "Moving day",
+        null
+      ],
+      "family": "push",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "box",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "押す",
+          "Push",
+          "おす"
+        ],
+        "b": [
+          "引く",
+          "Pull",
+          "ひく"
+        ]
+      },
+      "variant": 10,
+      "goal": 1
+    },
+    {
+      "key": "store/action-6",
+      "chapter": 3,
+      "title": [
+        "パンの空中キャッチ",
+        "Bread in the air",
+        null
+      ],
+      "family": "timing",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "toast",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "見きわめる",
+          "Watch",
+          "みきわめる"
+        ],
+        "a": [
+          "キャッチ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ゆっくり",
+          "Slow down",
+          null
+        ]
+      },
+      "variant": 11,
+      "goal": 2
+    },
+    {
+      "key": "store/action-7",
+      "chapter": 3,
+      "title": [
+        "フルーツシュート",
+        "Fruit toss",
+        null
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "orange",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 12,
+      "goal": 1
+    },
+    {
+      "key": "store/action-8",
+      "chapter": 3,
+      "title": [
+        "暴れるミミック",
+        "Snack thief",
+        null
+      ],
+      "family": "duel",
+      "boss": false,
+      "seconds": 8,
+      "item": "mimic",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "アタック",
+          "Attack",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 13,
+      "goal": 2
+    },
+    {
+      "key": "store/action-9",
+      "chapter": 3,
+      "title": [
+        "棚の上まで",
+        "Shelf scramble",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 14,
+      "goal": 1
+    },
+    {
+      "key": "store/action-10",
+      "chapter": 3,
+      "title": [
+        "閉店前の大注文",
+        "Last Call Orders",
+        null
+      ],
+      "family": "catch",
+      "boss": true,
+      "seconds": 12,
+      "item": "toast",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 15,
+      "goal": 4
+    },
+    {
+      "key": "yard/action-1",
+      "chapter": 4,
+      "title": [
+        "放課後ハードル",
+        "After-school hurdles",
+        null
+      ],
+      "family": "hurdles",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "rope",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "しゃがむ",
+          "Duck",
+          null
+        ]
+      },
+      "variant": 9,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-2",
+      "chapter": 4,
+      "title": [
+        "ボールの雨をよけて",
+        "Ball shower",
+        null
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "volleyball",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 10,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-3",
+      "chapter": 4,
+      "title": [
+        "校庭コインリレー",
+        "Yard coin relay",
+        null
+      ],
+      "family": "collect",
+      "boss": false,
+      "seconds": 8,
+      "item": "coin",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 11,
+      "goal": 3
+    },
+    {
+      "key": "yard/action-4",
+      "chapter": 4,
+      "title": [
+        "空き缶シュート",
+        "Can shot",
+        null
+      ],
+      "family": "aim",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "cylinder",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 12,
+      "goal": 2
+    },
+    {
+      "key": "yard/action-5",
+      "chapter": 4,
+      "title": [
+        "風の本タワー",
+        "Windy book tower",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "books",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 13,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-6",
+      "chapter": 4,
+      "title": [
+        "草むらを追え",
+        "Grassland chase",
+        null
+      ],
+      "family": "chase",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "ghost-cat",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかまえる",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 14,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-7",
+      "chapter": 4,
+      "title": [
+        "用具庫までダッシュ",
+        "Shed sprint",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 15,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-8",
+      "chapter": 4,
+      "title": [
+        "みどりに駐車",
+        "Green parking",
+        null
+      ],
+      "family": "brake",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "アクセル",
+          "Accelerate",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 16,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-9",
+      "chapter": 4,
+      "title": [
+        "ボールを輪へ",
+        "Ball in the hoop",
+        null
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 17,
+      "goal": 1
+    },
+    {
+      "key": "yard/action-10",
+      "chapter": 4,
+      "title": [
+        "つむじ風の通り道",
+        "Whirlwind Crossing",
+        null
+      ],
+      "family": "hurdles",
+      "boss": true,
+      "seconds": 12,
+      "item": "rope",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "しゃがむ",
+          "Duck",
+          null
+        ]
+      },
+      "variant": 18,
+      "goal": 1
+    },
+    {
+      "key": "library/action-1",
+      "chapter": 5,
+      "title": [
+        "本棚アスレチック",
+        "Bookshelf scramble",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 12,
+      "goal": 1
+    },
+    {
+      "key": "library/action-2",
+      "chapter": 5,
+      "title": [
+        "本をキャッチ",
+        "Book catch",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "books",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 13,
+      "goal": 2
+    },
+    {
+      "key": "library/action-3",
+      "chapter": 5,
+      "title": [
+        "静かに運ぼう",
+        "Quiet delivery",
+        null
+      ],
+      "family": "carry",
+      "boss": false,
+      "seconds": 8,
+      "item": "books",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "持つ・届ける",
+          "Pick up / Deliver",
+          "もつ・とどける"
+        ],
+        "b": [
+          "そっと歩く",
+          "Tiptoe",
+          "そっとあるく"
+        ]
+      },
+      "variant": 14,
+      "goal": 1
+    },
+    {
+      "key": "library/action-4",
+      "chapter": 5,
+      "title": [
+        "しおりを追え",
+        "Bookmark chase",
+        null
+      ],
+      "family": "chase",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "notebook",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかまえる",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 15,
+      "goal": 1
+    },
+    {
+      "key": "library/action-5",
+      "chapter": 5,
+      "title": [
+        "本の山をたおすな",
+        "Book balance",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "books",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 16,
+      "goal": 1
+    },
+    {
+      "key": "library/action-6",
+      "chapter": 5,
+      "title": [
+        "図書ワゴン",
+        "Library wagon",
+        null
+      ],
+      "family": "push",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "books",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "押す",
+          "Push",
+          "おす"
+        ],
+        "b": [
+          "引く",
+          "Pull",
+          "ひく"
+        ]
+      },
+      "variant": 17,
+      "goal": 1
+    },
+    {
+      "key": "library/action-7",
+      "chapter": 5,
+      "title": [
+        "ホコリ大そうじ",
+        "Dust patrol",
+        null
+      ],
+      "family": "sweep",
+      "boss": false,
+      "seconds": 8,
+      "item": "slime",
+      "hazard": "egg",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "はらう",
+          "Sweep",
+          null
+        ],
+        "b": [
+          "吸いこむ",
+          "Vacuum",
+          "すいこむ"
+        ]
+      },
+      "variant": 18,
+      "goal": 3
+    },
+    {
+      "key": "library/action-8",
+      "chapter": 5,
+      "title": [
+        "本のすき間",
+        "Between the shelves",
+        null
+      ],
+      "family": "flap",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "glider",
+      "hazard": "windsock",
+      "controls": {
+        "stick": [
+          "飛行",
+          "Fly",
+          "ひこう"
+        ],
+        "a": [
+          "はばたく",
+          "Flap",
+          null
+        ],
+        "b": [
+          "急降下",
+          "Dive",
+          "きゅうこうか"
+        ]
+      },
+      "variant": 19,
+      "goal": 1
+    },
+    {
+      "key": "library/action-9",
+      "chapter": 5,
+      "title": [
+        "返却のリズム",
+        "Return-desk rhythm",
+        null
+      ],
+      "family": "rhythm",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "mic",
+      "hazard": "bell",
+      "controls": {
+        "stick": [
+          "リズム",
+          "Rhythm",
+          null
+        ],
+        "a": [
+          "左の太鼓",
+          "Left drum",
+          "ひだりのたいこ"
+        ],
+        "b": [
+          "右の太鼓",
+          "Right drum",
+          "みぎのたいこ"
+        ]
+      },
+      "variant": 20,
+      "goal": 4
+    },
+    {
+      "key": "library/action-10",
+      "chapter": 5,
+      "title": [
+        "屋根まで本棚登り",
+        "The Towering Library",
+        null
+      ],
+      "family": "climb",
+      "boss": true,
+      "seconds": 12,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 21,
+      "goal": 1
+    },
+    {
+      "key": "lab/action-1",
+      "chapter": 6,
+      "title": [
+        "実験室の電撃",
+        "Lab sparks",
+        null
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 15,
+      "goal": 1
+    },
+    {
+      "key": "lab/action-2",
+      "chapter": 6,
+      "title": [
+        "フラスコのバランス",
+        "Flask balance",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "flask",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 16,
+      "goal": 1
+    },
+    {
+      "key": "lab/action-3",
+      "chapter": 6,
+      "title": [
+        "結晶をねらえ",
+        "Crystal targets",
+        null
+      ],
+      "family": "aim",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "crystal",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 17,
+      "goal": 2
+    },
+    {
+      "key": "lab/action-4",
+      "chapter": 6,
+      "title": [
+        "泡をキャッチ",
+        "Bubble catch",
+        null
+      ],
+      "family": "timing",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "splash",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "見きわめる",
+          "Watch",
+          "みきわめる"
+        ],
+        "a": [
+          "キャッチ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ゆっくり",
+          "Slow down",
+          null
+        ]
+      },
+      "variant": 18,
+      "goal": 2
+    },
+    {
+      "key": "lab/action-5",
+      "chapter": 6,
+      "title": [
+        "試験管を運べ",
+        "Test-tube delivery",
+        null
+      ],
+      "family": "carry",
+      "boss": false,
+      "seconds": 8,
+      "item": "flask",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "持つ・届ける",
+          "Pick up / Deliver",
+          "もつ・とどける"
+        ],
+        "b": [
+          "そっと歩く",
+          "Tiptoe",
+          "そっとあるく"
+        ]
+      },
+      "variant": 19,
+      "goal": 1
+    },
+    {
+      "key": "lab/action-6",
+      "chapter": 6,
+      "title": [
+        "実験グライダー",
+        "Lab glider",
+        null
+      ],
+      "family": "flap",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "glider",
+      "hazard": "windsock",
+      "controls": {
+        "stick": [
+          "飛行",
+          "Fly",
+          "ひこう"
+        ],
+        "a": [
+          "はばたく",
+          "Flap",
+          null
+        ],
+        "b": [
+          "急降下",
+          "Dive",
+          "きゅうこうか"
+        ]
+      },
+      "variant": 20,
+      "goal": 1
+    },
+    {
+      "key": "lab/action-7",
+      "chapter": 6,
+      "title": [
+        "こぼれた液体",
+        "Spill patrol",
+        null
+      ],
+      "family": "sweep",
+      "boss": false,
+      "seconds": 8,
+      "item": "slime",
+      "hazard": "egg",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "はらう",
+          "Sweep",
+          null
+        ],
+        "b": [
+          "吸いこむ",
+          "Vacuum",
+          "すいこむ"
+        ]
+      },
+      "variant": 21,
+      "goal": 3
+    },
+    {
+      "key": "lab/action-8",
+      "chapter": 6,
+      "title": [
+        "実験室のミミック",
+        "Lab mimic",
+        null
+      ],
+      "family": "duel",
+      "boss": false,
+      "seconds": 8,
+      "item": "mimic",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "アタック",
+          "Attack",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 22,
+      "goal": 2
+    },
+    {
+      "key": "lab/action-9",
+      "chapter": 6,
+      "title": [
+        "装置の上へ",
+        "Machine climb",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 23,
+      "goal": 1
+    },
+    {
+      "key": "lab/action-10",
+      "chapter": 6,
+      "title": [
+        "暴走する回路盤",
+        "Runaway Circuit",
+        null
+      ],
+      "family": "aim",
+      "boss": true,
+      "seconds": 12,
+      "item": "target",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 24,
+      "goal": 4
+    },
+    {
+      "key": "gym/action-1",
+      "chapter": 7,
+      "title": [
+        "バスケット・ワン",
+        "Basket one",
+        null
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 18,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-2",
+      "chapter": 7,
+      "title": [
+        "体育館ハードル",
+        "Gym hurdles",
+        null
+      ],
+      "family": "hurdles",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "rope",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "しゃがむ",
+          "Duck",
+          null
+        ]
+      },
+      "variant": 19,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-3",
+      "chapter": 7,
+      "title": [
+        "ドッジの特訓",
+        "Dodge training",
+        null
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "volleyball",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 20,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-4",
+      "chapter": 7,
+      "title": [
+        "リバウンドキャッチ",
+        "Rebound catch",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 21,
+      "goal": 2
+    },
+    {
+      "key": "gym/action-5",
+      "chapter": 7,
+      "title": [
+        "移動するまと",
+        "Moving targets",
+        null
+      ],
+      "family": "aim",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "target",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 22,
+      "goal": 2
+    },
+    {
+      "key": "gym/action-6",
+      "chapter": 7,
+      "title": [
+        "ボールを追いかけろ",
+        "Loose ball",
+        null
+      ],
+      "family": "chase",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかまえる",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 23,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-7",
+      "chapter": 7,
+      "title": [
+        "マット運び",
+        "Mat delivery",
+        null
+      ],
+      "family": "push",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "rug",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "押す",
+          "Push",
+          "おす"
+        ],
+        "b": [
+          "引く",
+          "Pull",
+          "ひく"
+        ]
+      },
+      "variant": 24,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-8",
+      "chapter": 7,
+      "title": [
+        "平均台の風",
+        "Windy beam",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "books",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 25,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-9",
+      "chapter": 7,
+      "title": [
+        "ホイッスルダッシュ",
+        "Whistle dash",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 26,
+      "goal": 1
+    },
+    {
+      "key": "gym/action-10",
+      "chapter": 7,
+      "title": [
+        "三列ターゲット決戦",
+        "Three-Lane Showdown",
+        null
+      ],
+      "family": "aim",
+      "boss": true,
+      "seconds": 12,
+      "item": "target",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 27,
+      "goal": 4
+    },
+    {
+      "key": "music/action-1",
+      "chapter": 8,
+      "title": [
+        "左右の太鼓",
+        "Twin drums",
+        null
+      ],
+      "family": "rhythm",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "mic",
+      "hazard": "bell",
+      "controls": {
+        "stick": [
+          "リズム",
+          "Rhythm",
+          null
+        ],
+        "a": [
+          "左の太鼓",
+          "Left drum",
+          "ひだりのたいこ"
+        ],
+        "b": [
+          "右の太鼓",
+          "Right drum",
+          "みぎのたいこ"
+        ]
+      },
+      "variant": 21,
+      "goal": 4
+    },
+    {
+      "key": "music/action-2",
+      "chapter": 8,
+      "title": [
+        "音符のキャッチ",
+        "Note catch",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "crystal",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 22,
+      "goal": 2
+    },
+    {
+      "key": "music/action-3",
+      "chapter": 8,
+      "title": [
+        "指揮者の合図",
+        "Conductor timing",
+        null
+      ],
+      "family": "timing",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "orange",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "見きわめる",
+          "Watch",
+          "みきわめる"
+        ],
+        "a": [
+          "キャッチ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ゆっくり",
+          "Slow down",
+          null
+        ]
+      },
+      "variant": 23,
+      "goal": 2
+    },
+    {
+      "key": "music/action-4",
+      "chapter": 8,
+      "title": [
+        "楽器は大事に",
+        "Precious instrument",
+        null
+      ],
+      "family": "carry",
+      "boss": false,
+      "seconds": 8,
+      "item": "mic",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "持つ・届ける",
+          "Pick up / Deliver",
+          "もつ・とどける"
+        ],
+        "b": [
+          "そっと歩く",
+          "Tiptoe",
+          "そっとあるく"
+        ]
+      },
+      "variant": 24,
+      "goal": 1
+    },
+    {
+      "key": "music/action-5",
+      "chapter": 8,
+      "title": [
+        "音符を追え",
+        "Runaway note",
+        null
+      ],
+      "family": "chase",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "crystal",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかまえる",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 25,
+      "goal": 1
+    },
+    {
+      "key": "music/action-6",
+      "chapter": 8,
+      "title": [
+        "ステージを駆けろ",
+        "Stage sprint",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 26,
+      "goal": 1
+    },
+    {
+      "key": "music/action-7",
+      "chapter": 8,
+      "title": [
+        "ゆれるマイクスタンド",
+        "Mic sway",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "mic",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 27,
+      "goal": 1
+    },
+    {
+      "key": "music/action-8",
+      "chapter": 8,
+      "title": [
+        "ドラム缶ジャンプ",
+        "Drum hop",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 28,
+      "goal": 1
+    },
+    {
+      "key": "music/action-9",
+      "chapter": 8,
+      "title": [
+        "光のスポット",
+        "Spotlight dodge",
+        null
+      ],
+      "family": "dodge",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "shield",
+      "hazard": "lantern",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 29,
+      "goal": 1
+    },
+    {
+      "key": "music/action-10",
+      "chapter": 8,
+      "title": [
+        "消えかけの合奏",
+        "Fading Ensemble",
+        null
+      ],
+      "family": "rhythm",
+      "boss": true,
+      "seconds": 12,
+      "item": "mic",
+      "hazard": "bell",
+      "controls": {
+        "stick": [
+          "リズム",
+          "Rhythm",
+          null
+        ],
+        "a": [
+          "左の太鼓",
+          "Left drum",
+          "ひだりのたいこ"
+        ],
+        "b": [
+          "右の太鼓",
+          "Right drum",
+          "みぎのたいこ"
+        ]
+      },
+      "variant": 30,
+      "goal": 6
+    },
+    {
+      "key": "roof/action-1",
+      "chapter": 9,
+      "title": [
+        "屋上グライダー",
+        "Rooftop glider",
+        null
+      ],
+      "family": "flap",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "glider",
+      "hazard": "windsock",
+      "controls": {
+        "stick": [
+          "飛行",
+          "Fly",
+          "ひこう"
+        ],
+        "a": [
+          "はばたく",
+          "Flap",
+          null
+        ],
+        "b": [
+          "急降下",
+          "Dive",
+          "きゅうこうか"
+        ]
+      },
+      "variant": 24,
+      "goal": 1
+    },
+    {
+      "key": "roof/action-2",
+      "chapter": 9,
+      "title": [
+        "屋根づたい",
+        "Rooftop hop",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 25,
+      "goal": 1
+    },
+    {
+      "key": "roof/action-3",
+      "chapter": 9,
+      "title": [
+        "風見計のリズム",
+        "Vane rhythm",
+        null
+      ],
+      "family": "rhythm",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "mic",
+      "hazard": "bell",
+      "controls": {
+        "stick": [
+          "リズム",
+          "Rhythm",
+          null
+        ],
+        "a": [
+          "左の太鼓",
+          "Left drum",
+          "ひだりのたいこ"
+        ],
+        "b": [
+          "右の太鼓",
+          "Right drum",
+          "みぎのたいこ"
+        ]
+      },
+      "variant": 26,
+      "goal": 4
+    },
+    {
+      "key": "roof/action-4",
+      "chapter": 9,
+      "title": [
+        "強風バランス",
+        "Gust balance",
+        null
+      ],
+      "family": "balance",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "books",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "バランス",
+          "Balance",
+          null
+        ],
+        "a": [
+          "立て直す",
+          "Steady",
+          "たてなおす"
+        ],
+        "b": [
+          "ふんばる",
+          "Brace",
+          null
+        ]
+      },
+      "variant": 27,
+      "goal": 1
+    },
+    {
+      "key": "roof/action-5",
+      "chapter": 9,
+      "title": [
+        "風の小包",
+        "Windborne parcel",
+        null
+      ],
+      "family": "carry",
+      "boss": false,
+      "seconds": 8,
+      "item": "satchel",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "持つ・届ける",
+          "Pick up / Deliver",
+          "もつ・とどける"
+        ],
+        "b": [
+          "そっと歩く",
+          "Tiptoe",
+          "そっとあるく"
+        ]
+      },
+      "variant": 28,
+      "goal": 1
+    },
+    {
+      "key": "roof/action-6",
+      "chapter": 9,
+      "title": [
+        "アンテナの先へ",
+        "Antenna climb",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 29,
+      "goal": 1
+    },
+    {
+      "key": "roof/action-7",
+      "chapter": 9,
+      "title": [
+        "流れ星をキャッチ",
+        "Shooting-star catch",
+        null
+      ],
+      "family": "timing",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "gem",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "見きわめる",
+          "Watch",
+          "みきわめる"
+        ],
+        "a": [
+          "キャッチ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ゆっくり",
+          "Slow down",
+          null
+        ]
+      },
+      "variant": 30,
+      "goal": 2
+    },
+    {
+      "key": "roof/action-8",
+      "chapter": 9,
+      "title": [
+        "空飛ぶ猫を追え",
+        "Flying-cat chase",
+        null
+      ],
+      "family": "chase",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "ghost-cat",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかまえる",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 31,
+      "goal": 1
+    },
+    {
+      "key": "roof/action-9",
+      "chapter": 9,
+      "title": [
+        "屋上のまと",
+        "Rooftop targets",
+        null
+      ],
+      "family": "aim",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "target",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 32,
+      "goal": 2
+    },
+    {
+      "key": "roof/action-10",
+      "chapter": 9,
+      "title": [
+        "風見計の大暴走",
+        "Storm Vane",
+        null
+      ],
+      "family": "flap",
+      "boss": true,
+      "seconds": 12,
+      "item": "glider",
+      "hazard": "windsock",
+      "controls": {
+        "stick": [
+          "飛行",
+          "Fly",
+          "ひこう"
+        ],
+        "a": [
+          "はばたく",
+          "Flap",
+          null
+        ],
+        "b": [
+          "急降下",
+          "Dive",
+          "きゅうこうか"
+        ]
+      },
+      "variant": 33,
+      "goal": 1
+    },
+    {
+      "key": "festival/action-1",
+      "chapter": 10,
+      "title": [
+        "開幕ダッシュ",
+        "Opening dash",
+        null
+      ],
+      "family": "run",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "door",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 27,
+      "goal": 1
+    },
+    {
+      "key": "festival/action-2",
+      "chapter": 10,
+      "title": [
+        "屋台カーを止めろ",
+        "Festival cart",
+        null
+      ],
+      "family": "brake",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "truck",
+      "hazard": "cone",
+      "controls": {
+        "stick": [
+          "ハンドル",
+          "Steer",
+          null
+        ],
+        "a": [
+          "アクセル",
+          "Accelerate",
+          null
+        ],
+        "b": [
+          "ブレーキ",
+          "Brake",
+          null
+        ]
+      },
+      "variant": 28,
+      "goal": 1
+    },
+    {
+      "key": "festival/action-3",
+      "chapter": 10,
+      "title": [
+        "景品をキャッチ",
+        "Prize catch",
+        null
+      ],
+      "family": "catch",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "gem",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "つかむ",
+          "Catch",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 29,
+      "goal": 2
+    },
+    {
+      "key": "festival/action-4",
+      "chapter": 10,
+      "title": [
+        "金色の紙ふぶき",
+        "Golden confetti",
+        null
+      ],
+      "family": "collect",
+      "boss": false,
+      "seconds": 8,
+      "item": "coin",
+      "hazard": "slime",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ころがる",
+          "Roll",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 30,
+      "goal": 3
+    },
+    {
+      "key": "festival/action-5",
+      "chapter": 10,
+      "title": [
+        "おまつり太鼓",
+        "Festival drums",
+        null
+      ],
+      "family": "rhythm",
+      "boss": false,
+      "seconds": 6.5,
+      "item": "mic",
+      "hazard": "bell",
+      "controls": {
+        "stick": [
+          "リズム",
+          "Rhythm",
+          null
+        ],
+        "a": [
+          "左の太鼓",
+          "Left drum",
+          "ひだりのたいこ"
+        ],
+        "b": [
+          "右の太鼓",
+          "Right drum",
+          "みぎのたいこ"
+        ]
+      },
+      "variant": 31,
+      "goal": 4
+    },
+    {
+      "key": "festival/action-6",
+      "chapter": 10,
+      "title": [
+        "お祭りの大そうじ",
+        "Festival cleanup",
+        null
+      ],
+      "family": "sweep",
+      "boss": false,
+      "seconds": 8,
+      "item": "slime",
+      "hazard": "egg",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "はらう",
+          "Sweep",
+          null
+        ],
+        "b": [
+          "吸いこむ",
+          "Vacuum",
+          "すいこむ"
+        ]
+      },
+      "variant": 32,
+      "goal": 3
+    },
+    {
+      "key": "festival/action-7",
+      "chapter": 10,
+      "title": [
+        "看板のてっぺん",
+        "Banner climb",
+        null
+      ],
+      "family": "climb",
+      "boss": false,
+      "seconds": 8,
+      "item": "bell",
+      "hazard": "wind",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "ジャンプ",
+          "Jump",
+          null
+        ],
+        "b": [
+          "ダッシュ",
+          "Dash",
+          null
+        ]
+      },
+      "variant": 33,
+      "goal": 1
+    },
+    {
+      "key": "festival/action-8",
+      "chapter": 10,
+      "title": [
+        "ミミック最終勝負",
+        "Mimic rematch",
+        null
+      ],
+      "family": "duel",
+      "boss": false,
+      "seconds": 8,
+      "item": "mimic",
+      "hazard": "mimic",
+      "controls": {
+        "stick": [
+          "移動",
+          "Move",
+          "いどう"
+        ],
+        "a": [
+          "アタック",
+          "Attack",
+          null
+        ],
+        "b": [
+          "ガード",
+          "Guard",
+          null
+        ]
+      },
+      "variant": 34,
+      "goal": 2
+    },
+    {
+      "key": "festival/action-9",
+      "chapter": 10,
+      "title": [
+        "空へシュート",
+        "Sky shot",
+        null
+      ],
+      "family": "throw",
+      "boss": false,
+      "seconds": 7.5,
+      "item": "volleyball",
+      "hazard": "hoop",
+      "controls": {
+        "stick": [
+          "角度・強さ",
+          "Angle / power",
+          "かくど・つよさ"
+        ],
+        "a": [
+          "投げる",
+          "Throw",
+          "なげる"
+        ],
+        "b": [
+          "やり直す",
+          "Retry",
+          "やりなおす"
+        ]
+      },
+      "variant": 35,
+      "goal": 1
+    },
+    {
+      "key": "festival/action-10",
+      "chapter": 10,
+      "title": [
+        "放課後の点灯式",
+        "Festival Lighting Ceremony",
+        null
+      ],
+      "family": "aim",
+      "boss": true,
+      "seconds": 12,
+      "item": "lantern",
+      "hazard": "crystal",
+      "controls": {
+        "stick": [
+          "ねらう",
+          "Aim",
+          null
+        ],
+        "a": [
+          "撃つ",
+          "Shoot",
+          "うつ"
+        ],
+        "b": [
+          "ねらい補助",
+          "Steady aim",
+          "ねらいほじょ"
+        ]
+      },
+      "variant": 36,
+      "goal": 4
+    }
+  ]
+}

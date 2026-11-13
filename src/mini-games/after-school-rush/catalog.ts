@@ -1,5 +1,5 @@
 import { STORY_KEY, type Copy } from './rules';
-import { ORIGINAL_CHAPTERS } from './originals';
+import { ACTION_CHAPTERS } from './action/games';
 import type { Original } from './originals/model';
 
 const BG = 'sprites/backgrounds/learning-rogue/';
@@ -28,13 +28,13 @@ export const THEMES: readonly Theme[] = [
   },
   {
     id: 'classroom', name: ['教室', 'Classroom', 'きょうしつ'],
-    story: ['黒板の式がひとりでに書き換わる。数字と並びの手がかりを解いて、二つ目の音を取り戻そう。',
-      'The equations on the board keep changing. Decode the numbers and patterns to recover the second note.',
-      'こくばんの しきが かきかわる。すうじと ならびの てがかりを といて、おとを とりもどそう。'],
+    story: ['チョークやノートが教室じゅうを飛び回る！ 机を跳び渡り、二つ目の音を取り戻そう。',
+      'Chalk and notebooks are flying everywhere! Leap between desks and recover the second note.',
+      'チョークや ノートが きょうしつじゅうを とびまわる！ つくえを とびわたり、ふたつめの おとを とりもどそう。'],
     clear: ['メモの裏に購買部のスタンプがあった。おやつの時間に間に合うかな。',
       'There’s a school store stamp on the back. Hurry over before snack time ends.',
       'メモの うらに こうばいぶの スタンプが あった。おやつの じかんに まにあうかな。'],
-    boss: ['黒板の暗号', 'Blackboard Cipher', 'こくばんの あんごう'],
+    boss: ['黒板の大あらし', 'Blackboard Storm', 'こくばんの おおあらし'],
     art: BG + 'battle-classroom.webp', color: '#ffdba4',
   },
   {
@@ -61,13 +61,13 @@ export const THEMES: readonly Theme[] = [
   },
   {
     id: 'library', name: ['図書室', 'Library', 'としょしつ'],
-    story: ['棚の本が順番を忘れている。記憶と手がかりを頼りに、本の背に隠れた音を探そう。',
-      'The books have forgotten their order. Follow the clues to find a note hidden on a spine.',
-      'たなの ほんが じゅんばんを わすれた。きおくと てがかりで、かくれた おとを さがそう。'],
+    story: ['本棚が空へとのび、本がはばたき始めた。落ちる本を受け止め、棚の上に隠れた音を探そう。',
+      'The shelves tower skyward and books take flight. Catch them and climb toward the hidden note.',
+      'ほんだなが そらへとのび、ほんが はばたきはじめた。おちる ほんを うけとめ、たなの うえの おとを さがそう。'],
     clear: ['音は古い実験ノートに挟まっていた。ノートを理科室に届けよう。',
       'The note was tucked into an old lab journal. Take it back to the science lab.',
       'おとは ふるい じっけんノートに はさまっていた。りかしつに とどけよう。'],
-    boss: ['消える目録', 'The Vanishing Index', 'きえる もくろく'],
+    boss: ['屋根まで本棚登り', 'The Towering Library', 'やねまで ほんだなのぼり'],
     art: BG + 'battle-library.webp', color: '#d3bbff',
   },
   {
@@ -131,7 +131,7 @@ export const CHAPTER_ROUNDS = 8;
 export type Entry = { key: string; chapter: number; game: Original };
 
 export const CATALOG = THEMES.flatMap((theme, chapter): Entry[] =>
-  ORIGINAL_CHAPTERS[chapter].map(game => ({ key: `${theme.id}/${game.id}`, chapter, game })),
+  ACTION_CHAPTERS[chapter].map(game => ({ key: `${theme.id}/${game.id}`, chapter, game })),
 );
 
 export function chapterEntries(chapter: number) {

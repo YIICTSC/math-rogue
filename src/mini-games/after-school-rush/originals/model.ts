@@ -1,4 +1,5 @@
 import type { Copy, Prop } from '../rules';
+import type { ActionControl, ActionSpec } from '../action/types';
 
 export type Local = readonly [ja: string, en: string, hira?: string];
 export type Layout = 'grid' | 'track' | 'machine' | 'counter' | 'orbit' | 'score' | 'story' | 'stack';
@@ -47,9 +48,12 @@ export type Mechanic = {
   layout: Layout;
   direct?: boolean;
   initial: State;
+  initialFor?: (seed: number, level: number) => State;
   display: (state: State, time: Clock) => Display;
   tap: (state: State, index: number, time: Clock) => Change;
   tick?: (state: State, time: Clock) => Change;
+  control?: (state: State, input: ActionControl, time: Clock) => State;
+  result?: (state: State) => 'clear' | 'mistake' | undefined;
 };
 export type Original = {
   id: string;
@@ -60,6 +64,8 @@ export type Original = {
   mechanic: Mechanic;
   seconds?: number;
   boss?: true;
+  quick?: true;
+  action?: ActionSpec;
 };
 
 export const loc = (ja: string, en: string, hira?: string): Local => [ja, en, hira];

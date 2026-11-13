@@ -140,36 +140,18 @@ const MOTIONS: Readonly<Record<Motion, Direction>> = {
 };
 
 export function directionFor(entry: Entry, index: number): Direction {
-  switch (entry.key) {
-    case 'gate/quiet-zone':
-      return { pose: 'walk', cue: index === 0 ? 'gravel' : index === 1 ? 'grass' : 'step' };
-    case 'gate/mimic-gate':
-      return index === 0 ? { pose: 'duck', cue: 'dodge', effect: 'wind' }
-        : { pose: 'strike', cue: 'bell', effect: 'soundwave' };
-    case 'store/toast-flip':
-      return index === 0 ? { pose: 'swing', cue: 'sizzle' } : { pose: 'use', cue: 'plate' };
-    case 'store/last-call':
-      return { pose: 'use', cue: 'sizzle' };
-    case 'yard/jump-rope-gap':
-      return index === 0 ? MOTIONS.leap : { pose: 'duck', cue: 'dodge', effect: 'wind' };
-    case 'yard/whirlwind-crossing':
-      return index < 2 ? MOTIONS.walk : index === 2 ? { pose: 'use', cue: 'snap' } : MOTIONS.plant;
-    case 'lab/water-divider':
-      return { pose: 'use', cue: 'water' };
-    case 'lab/runaway-circuit':
-      return index === 2 ? { pose: 'use', cue: 'spark', effect: 'lightning', effort: true } : MOTIONS.turn;
-    case 'gym/three-lane-tournament':
-      return index === 2 ? MOTIONS.shoot : MOTIONS.walk;
-    case 'roof/launch-glider':
-      return index === 2 ? { pose: 'aim', cue: 'dodge', effect: 'wind', effort: true } : MOTIONS.turn;
-    case 'roof/storm-vane':
-      return index < 2 ? MOTIONS.walk : { pose: 'use', cue: 'snap', effect: 'wind' };
-    case 'music/fading-ensemble':
-      return { pose: 'use', cue: 'beat', effect: 'soundwave', effort: true };
-    case 'festival/festival-lighting':
-      return { pose: 'use', cue: 'bell', effect: index === 3 ? 'graduation' : 'flash' };
-    default:
-      if (entry.game.genre === 'rhythm') return { pose: 'use', cue: 'beat', effect: 'soundwave' };
-      return MOTIONS[visualFor(entry)[3]];
+  if (entry.game.action) {
+    const family = entry.game.action.family;
+    if (index === 5) return { pose: 'duck', cue: family === 'rhythm' ? 'beat' : 'dodge' };
+    if (['run', 'climb', 'hurdles', 'flap'].includes(family)) return MOTIONS.leap;
+    if (['aim', 'throw'].includes(family)) return MOTIONS.shoot;
+    if (family === 'duel') return MOTIONS.strike;
+    if (family === 'rhythm') return { pose: 'use', cue: 'beat' };
+    if (family === 'sweep') return { pose: 'use', cue: 'brush' };
+    if (family === 'push') return { pose: 'use', cue: 'gravel' };
+    if (family === 'carry') return { pose: 'use', cue: 'drop' };
+    if (['collect', 'dodge', 'chase'].includes(family)) return { pose: 'duck', cue: 'dodge' };
+    return MOTIONS.pick;
   }
+  return MOTIONS[visualFor(entry)[3]];
 }

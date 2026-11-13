@@ -73,7 +73,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     id: 'AFTER_SCHOOL_RUSH',
     name: '放課後ミニラッシュ',
     titleLines: ['放課後ミニラッシュ'],
-    description: '文化祭の鐘を取り戻す10章の物語。200本の短いお題に挑戦。',
+    description: 'スティックとA・Bで、走る・跳ぶ・よける！ 全100本の瞬間アクション。',
     screen: GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
     threshold: 0,
     typeLabel: 'ARCADE',

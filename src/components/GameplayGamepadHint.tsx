@@ -1,6 +1,7 @@
 import React from 'react';
 import type { GameplayMode } from '../hooks/useGameplayGamepad';
 const hints: Record<GameplayMode, string> = {
+  'mini-rush': 'D-pad: Move / Aim · A / B: Actions · Menu: Pause',
   'academy-sports': 'LS / D-pad: Move · A: Main action / Hold shot · B: Defend · X: Pass / Item · Y: Jump · LB: Switch · RB: Signature · RT: Dash · Menu: Pause',
   basketball: 'A: Hold shot / Block · B: Pass / Steal · X: Drive · Y: Pass / Call · LB: Rebound · RB: Skill · Menu: Menu',
   dodgeball: 'A: Throw / Catch · B: Catch · X: Duck · Y: Pass · LB: Dash · LT: Jump · RB: Super · Menu: Menu',
