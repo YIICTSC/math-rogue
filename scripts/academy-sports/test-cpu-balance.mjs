@@ -63,3 +63,17 @@ for(let difficulty=0;difficulty<4;difficulty++){
  const s=E.createVolleyball(cfg('volleyball',{mode:'watch',difficulty}));s.phase='play';s.stage='rally';const p=s.players.find(p=>p.id===s.selected);p.p=E.vec(0,0,1);s.contactTeam=0;s.contacts=2;s.lastContact=0;Object.assign(s.ball,{x:0,y:2.6,z:1});assert(E.touch(s,p,'spike',E.neutral()));speeds.push(s.ball.power);
 }
 assert(speeds[0]<speeds[1]&&speeds[1]<speeds[2]&&speeds[2]<speeds[3]);console.log('PASS volleyball CPU spikes leave more reaction time at easier levels:',speeds.map(n=>n.toFixed(2)).join(', '));
+// Only actionable manual defense controls are exposed, including fielding practice.
+for(const manualFielding of [false,true])for(const mode of ['match','fielding']){
+ const s=E.createBaseball(cfg('baseball',{team:1,manualFielding,mode}));s.phase='play';
+ for(const stage of ['set','meter','windup','pitch']){s.stage=stage;assert(!E.actionButtons(s).some(b=>['defend','switch'].includes(b.action)),stage+' hides fielding controls');}
+ s.stage='live';s.fielder=102;s.selected=102;
+ const manual=manualFielding||mode==='fielding';assert.equal(E.autoFielding(s),!manual);
+ assert.equal(E.actionButtons(s).some(b=>b.action==='defend'),manual);assert.equal(E.actionButtons(s).some(b=>b.action==='switch'),manual);
+ if(manual){E.baseballAction(s,'defend');assert.equal(s.players.find(p=>p.id===102).motion,'catch');E.baseballAction(s,'switch');assert.notEqual(s.selected,102);}
+}
+assert.equal(E.normalizeConfig({manualFielding:true},'baseball').manualFielding,true);
+assert.equal(E.normalizeConfig({},'baseball').manualFielding,false);
+console.log('PASS auto default, saved manual setting, phase-specific buttons and working dive/switch in manual defense');
+
+const manualPitch=E.createBaseball(cfg('baseball',{team:1,manualFielding:true}));manualPitch.phase='play';for(let i=0;i<90;i++)E.stepBaseball(manualPitch,{...E.neutral(),x:.5},1/60);assert.equal(manualPitch.stage,'set');assert(manualPitch.pitchAim.x>0,'Manual fielding preserves player pitching');E.baseballAction(manualPitch,'primary');assert.equal(manualPitch.stage,'meter');

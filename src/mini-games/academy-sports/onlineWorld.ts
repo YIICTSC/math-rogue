@@ -1,3 +1,4 @@
+import {autoFielding} from './baseball';
 import {OnlineStudy,studyBreakKey,type LessonFactory,type StudyView,type StudyCommand} from './onlineStudy';
 import {defaultConfig,normalizeConfig,normalizeInput,neutral,len,type Config,type SportId,type Input,type Action} from './core';
 import {createMatch,stepMatch,matchAction,type Match} from './engine';
@@ -33,7 +34,7 @@ export class OnlineWorld{
   s.selected=p.unit;s.config.team=p.team;if(s.sport==='soccer')s.lastInput={...input};matchAction(s,c.action,input);if(s.sport==='baseball'&&c.action==='primary'&&p.team===s.half&&s.stage==='pitch'&&typeof c.observedClock==='number'&&Number.isFinite(c.observedClock)&&c.observedClock>=s.clock-.4&&c.observedClock<=s.clock+.02)s.swingAt=Math.min(s.clock,c.observedClock);s.config.team=team;s.selected=before;this.bind();return true;
  }
  bind(){const v=this.view,s=v.match;if(!s)return;
-  if(s.sport==='baseball'){const key=`${s.inning}:${s.half}:${s.bat}`;if(key!==this.atBats[s.half]){if(this.atBats[s.half])this.turns[s.half]++;this.atBats[s.half]=key;}for(const p of v.players)p.unit=-1;for(let team=0;team<2;team++){const people=this.team(team),active=people[this.turns[s.half]%Math.max(1,people.length)];if(active)active.unit=team===s.half?s.bat:s.pitcher;}}
+  if(s.sport==='baseball'){const key=`${s.inning}:${s.half}:${s.bat}`;if(key!==this.atBats[s.half]){if(this.atBats[s.half])this.turns[s.half]++;this.atBats[s.half]=key;}for(const p of v.players)p.unit=-1;for(let team=0;team<2;team++){const people=this.team(team),active=people[this.turns[s.half]%Math.max(1,people.length)];if(active)active.unit=team===s.half?s.bat:!autoFielding(s)&&['live','throw'].includes(s.stage)?s.fielder:s.pitcher;}}
   else if(s.sport==='festival'){for(const p of v.players)p.unit=p.connected?p.team*100+p.seat:-1;}
   else for(let team=0;team<2;team++){const people=this.team(team),order=s.sport==='soccer'?[9,8,10,7,6,5,4,3,2,1,0]:[3,4,0,1,2,5],occupied=new Set(people.filter(p=>p.unit>=0).map(p=>p.unit));for(const p of people)if(p.unit<0||Math.floor(p.unit/100)!==team){p.unit=order.map(slot=>team*100+slot).find(id=>!occupied.has(id))??-1;occupied.add(p.unit);}
    let desired=-1;if(s.sport==='soccer'&&s.ball.owner>=0&&Math.floor(s.ball.owner/100)===team)desired=s.ball.owner;

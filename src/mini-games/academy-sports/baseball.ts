@@ -17,7 +17,7 @@ export function createBaseball(c:Config):Baseball{
 const batter=(s:Baseball)=>s.players.find(p=>p.id===s.bat)!;
 const pitcher=(s:Baseball)=>s.players.find(p=>p.id===s.pitcher)!;
 const battingHuman=(s:Baseball)=>s.half===s.config.team&&s.config.mode!=='watch';
-export const autoFielding=(s:Baseball)=>s.config.mode!=='fielding';
+export const autoFielding=(s:Baseball)=>s.config.mode!=='fielding'&&!s.config.manualFielding;
 function setupAtBat(s:Baseball){
  const attack=s.half,defend=1-attack;if(s.pitcher!==defend*100)delete s.pitchSpeedKmh;s.bat=attack*100+s.batting[attack]%9;s.pitcher=defend*100;s.fielder=s.pitcher;s.stage='set';s.signatureReady={};s.timer=0;s.swingAt=-99;s.plateAt=-1;s.bounced=false;s.flightTime=0;s.runners=[];s.stealing=false;
  for(const p of s.players){p.v=vec();p.p={...(p.team===defend?DEF[p.slot]:vec(22+p.slot*.75,0,19+(p.slot%2)*1.4))};p.face=p.team===defend?0:Math.PI;}
