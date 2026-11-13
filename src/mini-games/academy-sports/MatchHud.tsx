@@ -52,7 +52,7 @@ export default function MatchHud({match,languageMode}:{match:Match;languageMode:
   </div>;
  }
  if(match.sport==='soccer'){
-  const selected=match.players.find(p=>p.id===match.selected)||match.players[0],opponent=match.players.find(p=>p.team!==match.config.team&&p.role==='GK')!;
+  const selected=match.players.find(p=>p.id===match.selected)||match.players[0],opponent=match.players.find(p=>p.team!==match.config.team&&p.role==='GK');
   // Present accelerated matches on the familiar 45 / 90 minute broadcast clock.
   const halfLength=match.config.minutes*30,seconds=Math.max(0,Math.floor((match.half-1)*2700+Math.min(match.halfTime,halfLength)/halfLength*2700));
   const time=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;
@@ -64,7 +64,7 @@ export default function MatchHud({match,languageMode}:{match:Match;languageMode:
    {chain>0&&<div className="ac-bc-chain" aria-label={`${L('連携','Chain','れんけい')} ${chain}`}><strong>{chain}</strong><div><b>LINK</b><span>{L('連携で威力UP','SHOT BOOST','れんけいでいりょくUP')}</span></div><i style={{width:chain/5*100+'%'}}/></div>}
    {duel&&<div className="ac-bc-duel-toast" key={duel.at} data-grade={duel.grade}><b>{duel.grade==='perfect'?'PERFECT':duel.grade==='good'?'GOOD':L('切り返し','BURST','きりかえし')}</b>{duel.grade!=='burst'&&<span>{L('突破成功・連携UP','DRIBBLE WIN · LINK UP','とっぱせいこう・れんけいUP')}</span>}</div>}
    <PlayerCard player={selected} sport="soccer" kind="controlled" languageMode={languageMode}><div className="ac-bc-spirit"><span>{L('スピリット','SPIRIT','スピリット')}</span><meter aria-label={L('操作選手のスピリット','Controlled player spirit','そうさせんしゅのスピリット')} min={0} max={100} value={selected.spirit}/><b>{Math.round(selected.spirit)}%</b></div><div className="ac-bc-technique">{specialName(selected.hero,'soccer',languageMode)}<span>{selected.spirit>=35?L('発動可能','READY','はつどうかのう'):L('回復中','CHARGING','かいふくちゅう')}</span></div>{selected.charge>0&&<div className="ac-bc-charge"><span>{L('シュート','SHOT','シュート')}</span><meter aria-label={L('シュートのため','Shot charge','シュートのため')} min={0} max={2} value={selected.charge}/></div>}</PlayerCard>
-   <PlayerCard player={opponent} sport="soccer" kind="keeper" languageMode={languageMode}><div className="ac-bc-spirit"><span>{L('相手GK','OPPONENT GK','あいてGK')}</span><meter aria-label={L('相手キーパーのガード','Opponent keeper guard','あいてキーパーのガード')} min={0} max={100} value={match.guard[opponent.team]}/><b>{Math.round(match.guard[opponent.team])}%</b></div></PlayerCard>
+   {opponent&&<PlayerCard player={opponent} sport="soccer" kind="keeper" languageMode={languageMode}><div className="ac-bc-spirit"><span>{L('相手GK','OPPONENT GK','あいてGK')}</span><meter aria-label={L('相手キーパーのガード','Opponent keeper guard','あいてキーパーのガード')} min={0} max={100} value={match.guard[opponent.team]}/><b>{Math.round(match.guard[opponent.team])}%</b></div></PlayerCard>}
    <SoccerRadar match={match} languageMode={languageMode}/>
   </div>;
  }
