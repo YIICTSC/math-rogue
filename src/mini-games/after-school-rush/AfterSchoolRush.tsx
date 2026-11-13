@@ -19,7 +19,7 @@ import { ActionBoard } from './action/ActionBoard';
 import { S } from './action/physics';
 import { actionVoiceFor, castFor, directionFor, soundFor } from './direction';
 import { RushPortrait } from './RoundEffects';
-import { usesDashMovement } from './actorSprite';
+import { battleSpritePaths, usesDashMovement } from './actorSprite';
 import { TITLE_TRACK, musicFor } from './music';
 import {
   control, steer, difficulty, MAX_MISSES, RUSH_BLOCK, isSpeedUp, playElapsed, remainingTime, resumeAfterStudy, pause, start, step, type Mode, type Stage,
@@ -117,6 +117,9 @@ export default function AfterSchoolRush({
       actionAudioAt.current = -Infinity;
       voicedAction.current = false;
       const cast = castFor(next.round.entry);
+      for (const path of battleSpritePaths(cast.id)) {
+        const image = new Image(); image.src = assetUrl(path); void image.decode().catch(() => {});
+      }
       const clips = (['start', 'action', 'score', 'hurt', 'clear'] as const).flatMap(event => [soundFor(next.round.entry, event, 4), soundFor(next.round.entry, event, 5)]).filter(clip => !!clip);
       audioService.prepareMiniRushFoley(clips.map(clip => clip.path));
       const actionVoices = [actionVoiceFor(next.round.entry, 4), actionVoiceFor(next.round.entry, 5)].flatMap(voice => voice ? [voice[0]] : []);

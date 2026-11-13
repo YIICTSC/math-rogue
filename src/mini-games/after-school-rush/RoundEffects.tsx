@@ -20,7 +20,8 @@ export function RushPortrait({ id }: { id: CastId }) {
 
 export function RushActor({ className = '', size, ...options }: ActorProps) {
   const { id, pose } = options;
-  const { path, row, column, rows, columns, aspect, heightScale, atlas } = rushActorSprite(options);
+  const sprite = rushActorSprite(options);
+  const { path, row, column, rows, columns, aspect, heightScale, atlas } = sprite;
   const style = {
     ...(size ? {width:size*heightScale*aspect,height:size*heightScale} : {}),
     '--asr-actor-sheet': `url("${assetUrl(path)}")`,
@@ -29,6 +30,8 @@ export function RushActor({ className = '', size, ...options }: ActorProps) {
     '--asr-actor-frame-x': `${column * 100 / (columns - 1)}%`,
     '--asr-actor-frame-y': `${rows > 1 ? row * 100 / (rows - 1) : 0}%`,
     '--asr-actor-ratio': aspect,
+    '--asr-frame-foot': `${'feet' in sprite ? sprite.feet : 5}%`,
+    '--asr-frame-shift': `${'shift' in sprite ? sprite.shift : 0}%`,
   } as CSSProperties;
   return <div className={`asr-cast-actor ${className}`} data-actor={id} data-pose={pose}
     data-atlas={atlas} style={style} aria-hidden="true">

@@ -1,5 +1,7 @@
 import type { CastId, Pose } from './direction';
 import type { Family } from './action/types';
+import { DASH_HERO_ART } from '../go-home-dash/heroes';
+import metrics from './battleSpriteMetrics.json';
 
 export const usesDashMovement = (family: Family) => ['run', 'climb', 'hurdles', 'collect', 'dodge', 'flap', 'soccer', 'mining', 'grapple', 'kart'].includes(family);
 
@@ -12,17 +14,18 @@ export type ActorSpriteOptions = {
   jumpVelocity?: number;
   actionRemaining?: number;
 };
-const ACTION_ROW: Record<Exclude<Pose, 'jump' | 'duck'>, number> = {
-  idle: 0, walk: 0, strike: 2, throw: 3, swing: 4, read: 5, use: 6, aim: 7, win: 6, miss: 0,
-};
+export type BattleAction = 'attack' | 'skill' | 'hit';
+export const battleSpritePath = (id: CastId, action: BattleAction) =>
+  DASH_HERO_ART[id].replace('/characters/', `/characters-${action}-sheets/`);
+export const battleSpritePaths = (id: CastId) => (['attack', 'skill', 'hit'] as const).map(action => battleSpritePath(id, action));
 const frame = (age: number, ms: number) => Math.floor(Math.max(0, age) / ms) % 4;
 
 /** Dash sheets supply real running, airborne and sliding poses; never fake them
  * with a Dungeons standing frame. Jump frames follow the simulated flight. */
-export function rushActorSprite({ id, pose, age, facing = 'side', dashMovement = false, jumpVelocity, actionRemaining }: ActorSpriteOptions) {
+export function rushActorSprite({ id, pose, age, facing = 'side', jumpVelocity, actionRemaining }: ActorSpriteOptions) {
   const jumping = pose === 'jump', sliding = pose === 'duck', walking = pose === 'walk';
   const rearRun = facing === 'rear' && walking;
-  if (jumping || sliding || rearRun || dashMovement && (walking || pose === 'idle')) {
+  if (jumping || sliding || rearRun || walking || pose === 'idle') {
     const rear = facing === 'rear';
     const folder = rear ? jumping || sliding ? 'rush/actions' : 'rush/rear' : sliding ? 'slides' : 'heroes';
     const rows = folder === 'slides' || folder === 'rush/rear' ? 1 : 2;
@@ -36,8 +39,10 @@ export function rushActorSprite({ id, pose, age, facing = 'side', dashMovement =
       row: rear ? sliding ? 1 : 0 : jumping ? 1 : 0, column,
       aspect: sideSlide ? 160 / 80 : 128 / 160, heightScale: sideSlide ? .6 : 1, atlas: 'dash' as const };
   }
-  return { path: `sprites/dungeons1/actions/${id}.webp`, columns: 8, rows: 8,
-    row: walking ? Math.floor(Math.max(0, age) / 85) % 2 : ACTION_ROW[pose as keyof typeof ACTION_ROW],
-    column: facing === 'rear' ? 1 : facing === 'front' || pose === 'win' || pose === 'miss' ? 0 : 2,
-    aspect: 1, heightScale: 1, atlas: 'dungeon' as const };
+  const action: BattleAction = pose === 'miss' ? 'hit' : ['use', 'read', 'win'].includes(pose) ? 'skill' : 'attack';
+  const cell = Math.min(3, Math.floor(Math.max(0, age) / 95));
+  const anchor = metrics[id][action];
+  return { path: battleSpritePath(id, action), columns: 2, rows: 2,
+    row: Math.floor(cell / 2), column: cell % 2, aspect: 1, heightScale: anchor.scale,
+    feet: anchor.feet[cell], shift: anchor.shift[cell], atlas: 'battle' as const };
 }

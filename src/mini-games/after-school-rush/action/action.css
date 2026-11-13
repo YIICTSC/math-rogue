@@ -14,6 +14,8 @@
 .asr-action-player>.asr-cast-actor{inset:auto;left:50%;bottom:0;width:calc(100% * var(--asr-actor-ratio));height:100%;translate:-50% 18.75%;transform:none}
 .asr-action-player[data-facing="-1"]>.asr-cast-actor{transform:scaleX(-1)}
 .asr-action-player>.asr-cast-actor[data-atlas=dash]{translate:-50% 5%}
+.asr-action-player>.asr-cast-actor[data-atlas=battle]{translate:calc(-50% + var(--asr-frame-shift)) var(--asr-frame-foot)}
+.asr-action-player[data-facing="-1"]>.asr-cast-actor[data-atlas=battle]{translate:calc(-50% - var(--asr-frame-shift)) var(--asr-frame-foot)}
 .asr-action-player>.asr-cast-actor[data-pose=duck][data-atlas=dash]{translate:-50% 7.5%}
 .asr-action-goal{width:min(20cqw,28cqh);max-width:none;min-width:0}
 .asr-action-danger-zone{position:absolute;z-index:4;transform:translate(-50%,-50%);border:2px solid #f5c0a4aa;border-radius:50%;background:#a828422f;box-shadow:0 0 0 4px #e66e6c19;pointer-events:none;display:grid;place-items:center}

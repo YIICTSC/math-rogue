@@ -1,5 +1,5 @@
 import type { Active } from '../../src/mini-games/after-school-rush/engine';
-import { actionWorld, fishX, golfMeter, nextBeat, noteLane, pitchBall, S, timingGoal, timingX } from '../../src/mini-games/after-school-rush/action/physics';
+import { actionWorld, duelPhase, fishX, fishingWindow, golfMeter, nextBeat, noteLane, parryPhase, parryWindow, pitchBall, pitchPeriod, S, timingGoal, timingX } from '../../src/mini-games/after-school-rush/action/physics';
 export function actionDriver(stage: Active) {
   const s = stage.round.state, spec = stage.round.entry.game.action!, world = actionWorld(spec, s), t = s[S.T];
   let x = 0, y = 0, a = false, b = false;
@@ -48,8 +48,8 @@ export function actionDriver(stage: Active) {
     case 'duel': {
       const enemy = world.enemy!; const dist = Math.abs(enemy.x - s[S.X]);
       if (dist > 140) x = Math.sign(enemy.x - s[S.X]);
-      a = dist < 170 && (!spec.boss || t % 1600 > 970 || t % 1600 < 200);
-      b = t % 1600 > 430 && t % 1600 < 700;
+      a = dist < 170 && (!spec.boss || duelPhase(spec,t) > 970 || duelPhase(spec,t) < 200);
+      b = duelPhase(spec,t) > 430 && duelPhase(spec,t) < 700;
       break;
     }
     case 'throw': a = s[S.BALL_X] < 0; if (s[S.ANGLE] > 33) x = -1; else if (s[S.ANGLE] < 31) x = 1; break;
@@ -58,7 +58,7 @@ export function actionDriver(stage: Active) {
     case 'brake': y = s[S.Y] > 245 ? -1 : 0; if (s[S.X] > world.goal.x - 35) b = true; break;
     case 'bat': case 'rally': {
       const ball = pitchBall(s, spec); x = dx(ball.x, s[S.X], 20);
-      a = ball.y > 400 && ball.y < 540 && Math.abs(ball.x - s[S.X]) < 130 && s[S.CYCLE] !== Math.floor(t / 1600);
+      a = ball.y > 430 && ball.y < 520 && Math.abs(ball.x - s[S.X]) < 130 && s[S.CYCLE] !== Math.floor(t / pitchPeriod(s));
       break;
     }
     case 'soccer': {
@@ -78,27 +78,27 @@ export function actionDriver(stage: Active) {
     case 'golf': {
       x = dx(world.goal.y, s[S.ANGLE], 4);
       if (s[S.PHASE] === 0) a = Math.abs(s[S.ANGLE] - world.goal.y) < 10;
-      else if (s[S.PHASE] === 1) a = golfMeter(s) > .68 && golfMeter(s) < .76;
-      else if (s[S.PHASE] === 2) a = t - s[S.STOP] > 200 && golfMeter(s) > .36 && golfMeter(s) < .64;
+      else if (s[S.PHASE] === 1) a = Math.abs(golfMeter(s) - (world.goal.x-140)/1000) < .035;
+      else if (s[S.PHASE] === 2) a = t - s[S.STOP] > 200 && golfMeter(s) > .44 && golfMeter(s) < .56;
       break;
     }
     case 'kart': x = dx(110, s[S.X], 8); a = true; break;
     case 'parry': {
       x = dx(world.enemy!.x - 150, s[S.X], 15);
       a = s[S.COMBO] > t && Math.abs(world.enemy!.x - s[S.X]) < 215;
-      b = !a && t % 1500 > 450 && t % 1500 < 950;
+      b = !a && parryPhase(spec,t) > parryWindow(spec)[0] + 30 && parryPhase(spec,t) < parryWindow(spec)[1] - 30;
       break;
     }
     case 'grapple': x = s[S.X] < 900 ? 1 : 0; a = s[S.X] < 830; break;
     case 'fishing': {
       x = dx(fishX(s, spec), s[S.X], 20);
       b = s[S.TENSION] > .52;
-      a = !b && Math.abs(fishX(s, spec) - s[S.X]) < 130;
+      a = !b && Math.abs(fishX(s, spec) - s[S.X]) < fishingWindow(spec) - 20;
       break;
     }
     case 'mining': {
       const i = world.targets.findIndex((_, i) => !(s[S.MASK] & 1 << i)), target = world.targets[i];
-      if (target) { toward(target.x, target.y);const distance=Math.hypot(target.x - s[S.X], target.y - s[S.Y] + 35);b=distance<205;a=!b&&distance<145; }
+      if (target) { toward(target.x, target.y);const distance=Math.hypot(target.x - s[S.X], target.y - s[S.Y] + 35);b=distance<205-(spec.tier??0)*15;a=!b&&distance<140-(spec.tier??0)*8; }
       break;
     }
     case 'volley': {

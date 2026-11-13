@@ -8,6 +8,8 @@ export type ActionSpec = {
   family: Family; variant: number; goal: number; boss: boolean; seconds: number;
   a: Local; b: Local; stick: Local; axis: 'free' | 'horizontal' | 'none' | 'aim';
   item: ArtName; hazard: ArtName;
+  /** Round-specific tier. Catalog entries keep their original, untuned settings. */
+  tier?: number;
 };
 export type Point = { x: number; y: number };
 export type Platform = { x: number; y: number; w: number };

@@ -1,16 +1,43 @@
 import assert from'node:assert/strict';import{build}from'esbuild';
-const bundle=await build({stdin:{contents:"export * from './src/mini-games/after-school-rush/engine';export * from './src/mini-games/after-school-rush/catalog';export * from './src/mini-games/after-school-rush/discovery';export * from './src/mini-games/after-school-rush/action/physics';export * from './scripts/fixtures/rush-action-driver';",resolveDir:process.cwd()},write:false,bundle:true,platform:'node',format:'esm'});
+const bundle=await build({stdin:{contents:"export * from './src/mini-games/after-school-rush/engine';export * from './src/mini-games/after-school-rush/catalog';export * from './src/mini-games/after-school-rush/discovery';export * from './src/mini-games/after-school-rush/action/physics';export * from './src/mini-games/after-school-rush/action/challenge';export * from './scripts/fixtures/rush-action-driver';",resolveDir:process.cwd()},write:false,bundle:true,platform:'node',format:'esm'});
 const E=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
 assert.equal(E.CATALOG.length,240);assert.equal(new Set(E.CATALOG.map(e=>e.key)).size,240);assert.equal(E.RUSH_ENTRIES.length,230);assert(E.CATALOG.every(e=>e.game.action&&e.game.mechanic.control));assert.equal(new Set(E.CATALOG.map(e=>e.game.action.family)).size,28);
-function start(entry,seed=1,level=0){let s=E.start({kind:'practice',entry},0,seed);s=E.step(s,E.readyDuration(s));s.round.state=entry.game.mechanic.initialFor(seed,level);s.round.duration=entry.game.seconds*1000;s.round.speed=entry.game.boss?1:1+level*.1;return s;}
+function start(entry,seed=1,level=0){let s=E.start({kind:'practice',entry},0,seed);s=E.step(s,E.readyDuration(s));const tuned=E.challengeEntry(entry,level,seed);s.round.entry=tuned;s.round.state=tuned.game.mechanic.initialFor(seed,level);s.round.duration=tuned.game.seconds*1000;s.round.speed=entry.game.boss?1:1+level*.1;return s;}
+// Challenge construction changes real scenarios without mutating the library.
+const catalogBefore=JSON.stringify(E.CATALOG.map(e=>e.game.action));
+for(const entry of E.CATALOG){
+ const a=E.challengeEntry(entry,0,1),b=E.challengeEntry(entry,4,1);
+ const sample=e=>{
+  const spec=e.game.action,initial=e.game.mechanic.initialFor(1,spec.tier);
+  const changed=e.game.mechanic.tick(initial,{before:0,now:900,dt:900});
+  return {world:E.actionWorld(spec,initial),later:E.actionWorld(spec,changed),goal:spec.goal,
+   state:changed.filter((_,i)=>i!==E.S.LEVEL&&i!==E.S.SEED),
+   windows:[E.aimRadius(spec),E.timingWindow(spec),E.parryWindow(spec),E.fishingWindow(spec)]};
+ };
+ const low=sample(a),high=sample(b);
+ // Ignore generic windows for families that do not use them.
+ if(!['aim','timing','parry','fishing'].includes(a.game.action.family)){delete low.windows;delete high.windows;}
+ assert.notDeepEqual(low,high,entry.key+' must change layout, objective, trajectory or timing at late difficulty');
+ assert.equal(a.key,b.key);assert.equal(a.game.action.variant%2,b.game.action.variant%2,'Original travel direction stays readable');
+}
+assert.equal(JSON.stringify(E.CATALOG.map(e=>e.game.action)),catalogBefore,'Library specs remain unchanged');
+let progression=E.start({kind:'rush'},0,55);
+for(let number=1;number<=41;number++){
+ assert.equal(progression.tag,'ready');assert.equal(progression.run.number,number);
+ assert.equal(progression.round.entry.game.action.tier,Math.min(4,Math.floor((number-1)/8)));
+ progression={...progression,tag:'feedback',outcome:'clear',since:progression.now};
+ progression=E.step(progression,progression.now+E.feedbackDuration(progression)+1);
+ if(progression.tag==='study')progression=E.resumeAfterStudy(progression,progression.now+1);
+}
+console.log('PASS all 240 scenarios evolve at later tiers; five-tier production Rush routing and immutable library');
 const fails=[];
-for(const entry of E.CATALOG)for(const seed of[1,22,87])for(const level of[0,2,4]){
+for(const entry of E.CATALOG)for(const seed of[1,22,87])for(const level of[0,1,2,3,4]){
  let s=start(entry,seed,level),loops=0;
  while(s.tag==='play'&&loops++<1200){const d=E.actionDriver(s);s=E.steer(s,s.now,d.x,d.y);if(d.a)s=E.control(s,s.now,'a');if(d.b)s=E.control(s,s.now,'b');s=E.step(s,s.now+16/s.round.speed);}
  if(s.outcome!=='clear')fails.push({key:entry.key,family:entry.game.action.family,variant:entry.game.action.variant,seed,level,outcome:s.outcome,t:s.round.state[E.S.T],hp:s.round.state[E.S.HP],score:s.round.state[E.S.SCORE],x:s.round.state[E.S.X],y:s.round.state[E.S.Y],ball:[s.round.state[E.S.BALL_X],s.round.state[E.S.BALL_Y]]});
  else{const score=s.run.score;assert.equal(E.control(s,s.now+1,'a').run.score,score);}
 }
-if(fails.length){console.log('AUTOPLAY FAILURES',JSON.stringify(fails.slice(0,45),null,2));console.log('FAIL COUNT',fails.length);process.exitCode=1;}else console.log('PASS all 240 action games × 3 seeds × 3 difficulties, using stick + A/B, with exactly-once scoring');
+if(fails.length){console.log('AUTOPLAY FAILURES',JSON.stringify(fails.slice(0,45),null,2));console.log('FAIL COUNT',fails.length);process.exitCode=1;}else console.log('PASS all 240 action games × 3 seeds × 5 difficulties, using stick + A/B, with exactly-once scoring');
 for(const entry of E.CATALOG){let s=start(entry);while(s.tag==='play')s=E.step(s,s.now+100);assert.notEqual(s.outcome,'clear',entry.key+' must require player input');}
 const run=E.CATALOG.find(e=>e.game.action.family==='run');let p=start(run);p=E.steer(p,p.now,1,0);p=E.step(p,p.now+200);assert(p.round.state[E.S.X]>120);p=E.steer(p,p.now,0,0);const stopped=p.round.state[E.S.X];p=E.step(p,p.now+300);assert.equal(p.round.state[E.S.X],stopped,'Releasing stops horizontal movement');p=E.steer(p,p.now,1,0);p=E.pause(p,p.now);assert.equal(p.round.state[E.S.AX],0,'Pause clears held input');const time=p.since;assert.strictEqual(E.step(p,p.now+10000),p);p=E.pause(p,p.now+10000);assert.equal(p.since,time+10000);
 for(let seed=0;seed<40;seed++){const r=E.start({kind:'rush'},0,seed);assert.equal(r.round.entry.game.action.family,'run');}

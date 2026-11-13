@@ -3,6 +3,7 @@ import type { Clock, State } from './originals/model';
 import type { Input } from './rules';
 import { controlsFor, resolveControl, type RushControl } from './controls';
 import type { ActionControl } from './action/types';
+import { challengeEntry } from './action/challenge';
 
 export const READY_MS = 1500;
 export const FEEDBACK_MS = 950;
@@ -39,7 +40,7 @@ export const RUSH_ENTRIES = CATALOG.filter(entry => !entry.game.boss);
 
 export function difficulty(run: Run) {
   if (run.mode.kind === 'practice') return 0;
-  if (run.mode.kind === 'story') return Math.floor(run.mode.chapter / 4);
+  if (run.mode.kind === 'story') return Math.min(4, Math.floor(run.mode.chapter / 4) + Math.floor((run.number - 1) / 3));
   return Math.min(4, Math.floor((run.number - 1) / RUSH_BLOCK));
 }
 export const isSpeedUp = (run: Run) => run.mode.kind === 'rush' && run.number > 1
@@ -67,11 +68,12 @@ function nextRound(run: Run, now: number, last?: Entry): Active {
     if (different > 0) [deck[0], deck[different]] = [deck[different], deck[0]];
   }
   const bosses = shuffle(CATALOG.filter(entry => entry.game.boss), run.seed);
-  const entry = bossRound ? bosses[(run.number / RUSH_BLOCK - 1) % bosses.length] : deck.shift()!;
+  const base = bossRound ? bosses[(run.number / RUSH_BLOCK - 1) % bosses.length] : deck.shift()!;
+  const seed = (run.seed + Math.imul(run.number, 2654435761)) >>> 0;
+  const entry = challengeEntry(base, difficulty(run), seed);
   const seconds = entry.game.seconds ?? 10;
   const duration = (run.mode.kind === 'practice' ? Math.max(15, seconds + 3) : seconds) * 1000;
   const speed = run.mode.kind !== 'rush' || entry.game.boss ? 1 : 1 + difficulty(run) * .1;
-  const seed = (run.seed + Math.imul(run.number, 2654435761)) >>> 0;
   return {
     tag: 'ready', since: now, now, run: { ...run, deck },
     round: { entry, duration, speed, state: entry.game.mechanic.initialFor?.(seed, difficulty(run)) ?? [...entry.game.mechanic.initial] },
