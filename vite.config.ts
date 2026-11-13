@@ -6,24 +6,25 @@ const assetVersion = process.env.VITE_ASSET_VERSION || new Date().toISOString().
 
 // A shared icon or audio helper must not pull the entire main game into a name-only invite.
 function quizChunks() {
-  let quiz: Set<string> | null = null, audio: Set<string> | null = null;
+  let quiz: Set<string> | null = null, audio: Set<string> | null = null, bootstrap: Set<string> | null = null;
   return (id: string, graph: {getModuleIds: () => IterableIterator<string>; getModuleInfo: (id: string) => {importedIds: readonly string[]; isExternal: boolean} | null}) => {
     const closure = (root: string | undefined) => {
       const found = new Set<string>();
       const visit = (next: string) => { if (found.has(next)) return; const info = graph.getModuleInfo(next); if (!info || info.isExternal) return; found.add(next); info.importedIds.forEach(visit); };
       if (root) visit(root); return found;
     };
-    if (!quiz || !audio) {
+    if (!quiz || !audio || !bootstrap) {
       const ids = [...graph.getModuleIds()];
       quiz = closure(ids.find(p => p.replaceAll('\\', '/').endsWith('/src/quiz-show/QuizShow.tsx')));
-      // The bootstrap's shared cache/React helpers must also remain outside App's chunk.
-      const bootstrap = ids.find(p => p.replaceAll('\\', '/').endsWith('/index.tsx') && !p.replaceAll('\\', '/').includes('/src/') && !p.includes('/node_modules/'));
-      for (const dependency of closure(bootstrap)) quiz.add(dependency);
-      if (bootstrap) quiz.delete(bootstrap);
+      // Keep code shared with the tiny invite/startup loader out of the large
+      // quiz chunk. Putting the whole bootstrap closure in this manual chunk
+      // made the HTML entry download all quiz logic before the app could start.
+      const bootstrapEntry = ids.find(p => p.replaceAll('\\', '/').endsWith('/index.tsx') && !p.replaceAll('\\', '/').includes('/src/') && !p.includes('/node_modules/'));
+      bootstrap = closure(bootstrapEntry);
       audio = closure(ids.find(p => p.replaceAll('\\', '/').endsWith('/src/services/audioService.ts')));
     }
-    if (quiz.has(id)) return 'quiz-show-core';
-    if (audio.has(id)) return 'game-audio';
+    if (quiz.has(id) && !bootstrap.has(id)) return 'quiz-show-core';
+    if (audio.has(id) && !bootstrap.has(id)) return 'game-audio';
   };
 }
 
