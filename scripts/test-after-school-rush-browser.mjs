@@ -145,5 +145,22 @@ try{
  }
  assert.deepEqual(liveErrors,[],'Media failures are isolated from the live frame loop');await live.close();
  console.log('PASS real RAF survives clear, mistake and timeout feedback even when audio throws');
+ // Result actions stay in view for every mode and both orientations.
+ for(const[width,height]of[[844,390],[667,375],[1280,590],[390,844],[320,568]]){
+  await p.setViewportSize({width,height});await p.goto(base);await practice('gate/action-1');
+  if(width>height){const field=await bounds('.asr-action-stage');assert(field.height>=height*.6,'Landscape playfield uses at least 60% of screen height');const stick=await bounds('.asr-stick');assert(stick.y<field.y+field.height,'Stick overlays the field');}
+  for(const kind of ['story','rush','practice'])for(const completed of [false,true]){
+   await p.evaluate(({kind,completed})=>{__rush.practice('gate/action-1');const s=__rush.stage;__rush.put({...s,tag:'results',run:{...s.run,mode:kind==='story'?{kind,chapter:0}:kind==='practice'?s.run.mode:{kind},completed}});},{kind,completed});
+   const quiz=p.locator('[data-asr-quiz]');if(await quiz.count()){
+    const board=p.getByRole('button',{name:'板書を閉じる',exact:true});if(await board.count())await board.click();
+    const answers=await p.evaluate(()=>__answers.length);
+    for(let i=0;i<3;i++){const q=await p.locator('.basic-challenge-question h3').innerText(),n=q.match(/\d+/g).map(Number);await p.locator('.basic-challenge-options').getByRole('button',{name:String(n[0]+n[1]),exact:true}).click();await p.waitForFunction(n=>__answers.length>=n,answers+i+1);}
+   }
+   await p.locator('.asr-results').waitFor();await bounds('.asr-results');await bounds('.asr-results>.asr-menu');
+   for(const button of await p.locator('.asr-results>.asr-menu button').all()){const hit=await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));});assert(hit,'Result action receives touch');}
+   await shot('results-'+kind+'-'+completed+'-'+width);await p.locator('.asr-results>.asr-menu button').last().click();await p.locator('.asr-lobby').waitFor();
+  }
+ }
+ console.log('PASS all result variants fit and accept touches in five mobile viewports; landscape controls overlay a larger field');
  assert.deepEqual(errors,[]);assert.deepEqual([...new Set(missing)],[]);console.log('PASS translations, reduced motion, media and silent teardown');
 }catch(e){console.error(e);if(browser)for(const c of browser.contexts())for(const p of c.pages()){console.log('DIAGNOSTIC',await p.evaluate(()=>({text:document.body.innerText.slice(-2500),stage:window.__rush?.stage})).catch(String));await p.screenshot({path:out+'/action-failure.png'}).catch(()=>{});}throw e;}finally{await browser?.close();await server?.close();}

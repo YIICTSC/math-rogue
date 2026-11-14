@@ -443,7 +443,7 @@ export default function AfterSchoolRush({
             else setQuizCorrect(correct);
           }} />
       </div>}
-      {stage.tag === 'results' && !studying && <section className="asr-results">
+      {stage.tag === 'results' && !studying && <section className="asr-results"><div className="asr-results-summary">
         <Sprite name={stage.run.wins ? 'gem' : 'hourglass'} />
         <h1>{resultTheme ? stage.run.completed ? l('章クリア！', 'Chapter clear!', 'しょうクリア！')
           : l('ゲームオーバー', 'Game over', 'ゲームオーバー')
@@ -458,7 +458,7 @@ export default function AfterSchoolRush({
           {stage.run.mode.kind === 'rush' && <div><dt>{l('ボス撃破', 'Bosses cleared', 'ボスげきは')}</dt><dd>{stage.run.bosses}</dd></div>}
           {stage.run.mode.kind === 'rush' && <div><dt>{l('自己ベスト', 'Personal best', 'じこベスト')}</dt><dd>{best}</dd></div>}
         </dl>
-        <div className="asr-menu">
+        </div><div className="asr-menu">
           {resultChapter !== null && stage.run.completed && resultChapter + 1 < THEMES.length
             ? <button type="button" className="asr-primary" data-gamepad-initial-choice onClick={() => { setChapter(resultChapter + 1); show({ tag: 'lobby' }); }}>
               {l('次の章へ', 'Next chapter', 'つぎの しょうへ')}

@@ -67,3 +67,30 @@
 .asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback])>.asr-top{height:34px}
 .asr-cabinet{padding-inline:6px;padding-bottom:6px}.asr-cabinet>h2{font-size:clamp(18px,3dvh,28px);margin:3px 0 5px}.asr-cabinet-top{min-height:26px;padding:4px 0}.asr-cabinet>.asr-time{margin-top:4px;height:12px}
 @media(orientation:landscape) and (max-height:540px){.asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback]){grid-template-rows:26px minmax(0,1fr)}.asr-root:is([data-asr-screen=ready],[data-asr-screen=play],[data-asr-screen=feedback])>.asr-top{height:26px}.asr-cabinet-top{min-height:22px}.asr-cabinet>h2{font-size:18px;margin:2px 0 3px}}
+/* Result actions stay reachable even when the story or translated copy is long. */
+.asr-root[data-asr-screen=results]{display:flex;justify-content:center}
+.asr-results{display:flex;flex-direction:column;max-height:100%;min-height:0;padding:clamp(10px,2dvh,20px);overflow:hidden}
+.asr-results-summary{min-height:0;overflow:auto;overscroll-behavior:contain;flex:1}
+.asr-results-summary>.asr-sprite{width:clamp(28px,7dvh,64px);height:clamp(28px,7dvh,64px);margin:auto}
+.asr-results-summary>strong{font-size:clamp(36px,10dvh,78px);line-height:1;font-weight:1000}.asr-results-summary>strong small{font-size:.32em}
+.asr-results>.asr-menu{flex:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:10px 0 0}.asr-results>.asr-menu button{flex:1;min-height:44px;margin:0;padding:10px}
+.asr-pause section{max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain}
+@media(orientation:landscape) and (max-height:600px){
+ .asr-results{width:min(100%,850px);padding:10px}
+ .asr-results-summary>h1{font-size:25px;margin:2px 0 5px}.asr-results-summary>p{font-size:12px;line-height:1.4;margin:5px 0}
+ .asr-results-summary>.asr-sprite{width:30px;height:30px}.asr-results-summary>strong{font-size:42px}
+ .asr-results-summary dl{margin:7px 0;gap:5px}.asr-results-summary dl div{padding:4px 9px}.asr-results-summary dd{font-size:19px}
+ .asr-cabinet>.asr-controller{position:absolute;left:10px;right:10px;bottom:21px;z-index:8;width:auto;height:80px;margin:0;pointer-events:none;grid-template-columns:80px minmax(0,1fr) 154px}
+ .asr-cabinet>.asr-controller .asr-stick,.asr-cabinet>.asr-controller .asr-ab-buttons{pointer-events:auto;opacity:.8}
+ .asr-cabinet>.asr-controller .asr-stick:active,.asr-cabinet>.asr-controller .asr-ab-buttons:active{opacity:1}
+ .asr-cabinet>.asr-controller .asr-control-hint{display:none}
+ .asr-cabinet>.asr-controller .asr-ab-buttons{grid-column:3;justify-self:end}
+ .asr-cabinet>.asr-time{position:absolute;left:14px;right:14px;bottom:5px;z-index:7;margin:0;pointer-events:none}
+ .asr-cabinet>.asr-original{padding-bottom:0}
+}
+@media(orientation:landscape) and (max-height:600px){
+ .asr-root .asr-cabinet{width:100%;max-width:none}.asr-root>.asr-top{width:100%;max-width:none}
+ .asr-cabinet>.asr-controller .asr-stick{width:72px;height:72px}
+ .asr-cabinet>.asr-controller .asr-ab-buttons button{width:62px;height:62px}
+ .asr-cabinet>.asr-controller .asr-ab-buttons button[data-asr-button=a]{width:72px;height:72px;margin:0}
+}
