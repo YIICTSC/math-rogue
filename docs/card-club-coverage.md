@@ -2,9 +2,29 @@
 
 参照: https://gamefarm.jp/rule/contents.html
 
-トランプ分類 467件中、個別ルールを実装したゲーム 73件。未対応 394件。
+トランプ分類 469件中、個別ルールを実装したゲーム 78件。未対応 391件。
 
 この表は「全件対応済み」を意味しません。同じ画面・一般ルールへ未対応ゲームを流す処理はありません。
+
+| 分類 | 実装数 | 参照総数 |
+| --- | ---: | ---: |
+| トリックテイキング | 36 | 253 |
+| カシノ系のゲーム | 5 | 21 |
+| ラミー系のゲーム | 2 | 40 |
+| 手札出しきりゲーム | 12 | 29 |
+| 大貧民の仲間 | 1 | 15 |
+| クリベッジの仲間 | 1 | 4 |
+| ポーカーの仲間 | 1 | 29 |
+| レイアウトゲーム | 3 | 25 |
+| 交換ゲーム | 4 | 8 |
+| うそつきゲーム | 2 | 7 |
+| 加算ゲーム | 3 | 8 |
+| 推理ブラフゲーム | 1 | 3 |
+| マネージメントゲーム | 1 | 2 |
+| ユニークな新作 | 1 | 8 |
+| その他 | 2 | 6 |
+| 全取得ゲーム | 2 | 5 |
+| ギャンブルゲーム | 1 | 6 |
 
 | ゲーム | 分類 | 人数（参照元） | 状況 | 参照ルール |
 | --- | --- | --- | --- | --- |
@@ -288,7 +308,7 @@
 | 争上游 | 大貧民の仲間 | 2, 3, 4, 5, 6 | 未対応 | [zhengshangyou-2](https://gamefarm.jp/rule/zhengshangyou.html) |
 | ファンタン | 手札出しきりゲーム | 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [fantan](https://gamefarm.jp/rule/fantan.html) |
 | ピティパット | 手札出しきりゲーム | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [pitypat](https://gamefarm.jp/rule/pitypat.html) |
-| ヤニブ | 手札出しきりゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [yaniv](https://gamefarm.jp/rule/yaniv.html) |
+| ヤニブ | 手札出しきりゲーム | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [yaniv](https://gamefarm.jp/rule/yaniv.html) |
 | コストリーカラー | クリベッジの仲間 | 2 | 未対応 | [costlycolours](https://gamefarm.jp/rule/costlycolours.html) |
 | クリベッジ | クリベッジの仲間 | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [cribbage](https://gamefarm.jp/rule/cribbage.html) |
 | ジャッコ | クリベッジの仲間 | 2 | 未対応 | [jacko](https://gamefarm.jp/rule/jacko.html) |
@@ -326,7 +346,7 @@
 | レパード | レイアウトゲーム | 2 | 未対応 | [leopard](https://gamefarm.jp/rule/leopard.html) |
 | ミルケン | レイアウトゲーム | 3, 4, 5 | 未対応 | [milken](https://gamefarm.jp/rule/milken.html) |
 | ミルクラン | レイアウトゲーム | 2, 3, 4 | 未対応 | [milkrun](https://gamefarm.jp/rule/milkrun.html) |
-| ミッチ | レイアウトゲーム | 2, 3, 4, 5 | 未対応 | [mitch](https://gamefarm.jp/rule/mitch.html) |
+| ミッチ | レイアウトゲーム | 2, 3, 4, 5 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [mitch](https://gamefarm.jp/rule/mitch.html) |
 | リボルーション | レイアウトゲーム | 2, 3, 4, 5 | 未対応 | [revolution](https://gamefarm.jp/rule/revolution.html) |
 | スパンク | レイアウトゲーム | 2, 3, 4, 5, 6, 7, 8, 9 | 未対応 | [spank](https://gamefarm.jp/rule/spank.html) |
 | スプーンアイ | レイアウトゲーム | 2, 3, 4 | 未対応 | [spooneye](https://gamefarm.jp/rule/spooneye.html) |
@@ -339,7 +359,7 @@
 | エムパット・サツ | 交換ゲーム | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [empatsatu](https://gamefarm.jp/rule/empatsatu.html) |
 | シュビメン | 交換ゲーム | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [schwimmen](https://gamefarm.jp/rule/schwimmen.html) |
 | ケンプス | 交換ゲーム | 4 | 未対応 | [kemps](https://gamefarm.jp/rule/kemps.html) |
-| ポーカー・ブル | うそつきゲーム | 5, 6, 7, 8 | 未対応 | [pokerbull](https://gamefarm.jp/rule/pokerbull) |
+| ポーカー・ブル | うそつきゲーム | 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [pokerbull](https://gamefarm.jp/rule/pokerbull) |
 | ポーカーフェイス | うそつきゲーム | 3, 4, 5, 6, 7 | 未対応 | [pokerface](https://gamefarm.jp/rule/pokerface.html) |
 | ポーカー・マントール | うそつきゲーム | 2, 3, 4, 5, 6, 7, 8 | 未対応 | [pokermenteur](https://gamefarm.jp/rule/pokermenteur.html) |
 | セブン・スペーズ | うそつきゲーム | 2 | 未対応 | [sevenspades](https://gamefarm.jp/rule/sevenspades.html) |
@@ -475,3 +495,5 @@
 | エリウシス | レイアウトゲーム | 4, 5, 6, 7, 8 | 未対応 | [eleusis](https://gamefarm.jp/rule/eleusis.html) |
 | チャイニーズ・ペイシャンス | レイアウトゲーム | 2, 3, 4 | 未対応 | [chinesepatience](https://gamefarm.jp/rule/chinesepatience.html) |
 | ズウィッケン | トリックテイキング | 3 | 未対応 | [zwikken](https://gamefarm.jp/rule/zwikken.html) |
+| ロイヤルカシノ | カシノ系のゲーム | 2, 3, 4 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [royalcassino](https://www.pagat.com/fishing/royal_casino.html) |
+| トランプクルー | トリックテイキング | 2, 3, 4, 5, 6, 7, 8 | 個別実装あり（対応人数・卓ルールはアプリ内に表示） | [trumpcrew](https://kusabazyun.banjoyugi.net/草場純さんの研究博物館-on-web/文書/トランプゲームの部屋/トランプクルーのルール) |

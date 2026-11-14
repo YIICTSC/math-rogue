@@ -1,3 +1,4 @@
+import {yanivRules,mitchRules,pokerBullRules,trumpCrewRules} from './newRequestedGames';
 import { diversityExtension } from './diversityGames';
 import { traditionalExtension } from './traditionalGames';
 import { worldExtension } from './worldGames';
@@ -11,7 +12,7 @@ import { sideRules } from './sideGames';
 import { rummyRules } from './rummy';
 import { sheddingRules } from './shedding';
 
-export const extensionFor=(id:GameId):RuleExtension|undefined=>diversityExtension(id)??traditionalExtension(id)??worldExtension(id)??classicExtension(id)??(EXTENDED_TRICKS.has(id)?extendedTricks:id==='rummy'?rummyRules:sideRules[id]||sheddingRules[id]);
+export const extensionFor=(id:GameId):RuleExtension|undefined=>({yaniv:yanivRules,mitch:mitchRules,pokerbull:pokerBullRules,trumpcrew:trumpCrewRules} as Partial<Record<GameId,RuleExtension>>)[id]??diversityExtension(id)??traditionalExtension(id)??worldExtension(id)??classicExtension(id)??(EXTENDED_TRICKS.has(id)?extendedTricks:id==='rummy'?rummyRules:sideRules[id]||sheddingRules[id]);
 export function publicExtension(s:ClubState,index=-1):ExtensionState{
   return {...s.extra,classic:classicView(s,index),board:s.extra.board.map((c,i)=>c===-2||s.extra.visible.includes(i)||s.phase==='result'?c:-1),selections:s.extra.selections.map(()=>[]),seen:[]};
 }

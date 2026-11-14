@@ -2,7 +2,7 @@ export const SUITS = ['♣','♦','♥','♠'] as const;
 export const rank=(card:number)=>card%13+1;
 export const suit=(card:number)=>Math.floor(card/13);
 export const high=(card:number)=>rank(card)===1?14:rank(card);
-export const cardLabel=(card:number)=>card===52?'JOKER':`${SUITS[suit(card)]}${['','A','2','3','4','5','6','7','8','9','10','J','Q','K'][rank(card)]}`;
+export const cardLabel=(card:number)=>card>=52?'JOKER':`${SUITS[suit(card)]}${['','A','2','3','4','5','6','7','8','9','10','J','Q','K'][rank(card)]}`;
 export const scopaValue=(card:number)=>rank(card)>10?rank(card)-3:rank(card);
 export function shuffled<T>(items:T[],seed:number):T[]{
   const out=[...items]; let n=seed>>>0;

@@ -56,16 +56,16 @@
     },
     {
       "path": "public/models/academy-sports/soccer-stadium.glb",
-      "bytes": 2968320,
-      "sha256": "bfc37c4e557942e679d8e41e5029fa73fc0dfcbef86b5bf615e8e30fbeeee44f",
-      "meshes": 2,
+      "bytes": 2972816,
+      "sha256": "c05af49df5c58abd16cca6e155a39a10c9407face875951343f3399075e47081",
+      "meshes": 4,
       "materials": 9
     },
     {
       "path": "public/models/academy-sports/volleyball-gym.glb",
-      "bytes": 916888,
-      "sha256": "8f0cc7b9c51a0ad94d1a1bff9be41be27c06ddde0127351edab5df89a3b16473",
-      "meshes": 1,
+      "bytes": 921568,
+      "sha256": "1f5824ccd496efcf4b4a3d9081e835cb745809e2d5cd69bfd8291008732d477b",
+      "meshes": 3,
       "materials": 11
     }
   ]

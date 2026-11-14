@@ -20,7 +20,7 @@ function replenish(s:ClubState){if(!s.stock.length&&s.discard.length){s.stock=sh
 function startRound(s:ClubState,nextStock?:number[]){
   if(s.game==='whist'&&s.players.some(p=>p.score>=5))s.players.forEach(p=>p.score=0);
   s.stock=nextStock??shuffled(pack(),s.seed+s.round*1009);s.discard=[];s.table=[];s.trick=[];s.lastTrick=[];s.trump=-1;s.activeSuit=-1;s.broken=false;s.total=0;s.direction=1;s.pool=0;s.claim=1;s.pending=null;s.capturesBy=-1;s.phase='play';s.ladder=null;
-  s.players.forEach(p=>{p.hand=[];p.taken=[];p.tricks=0;p.bid=null;p.books=[];p.stake=1;p.out=s.game==='99add'&&p.lives<=0;});
+  s.players.forEach(p=>{p.hand=[];p.taken=[];p.tricks=0;p.bid=null;p.books=[];p.stake=1;p.out=(s.game==='99add'||s.game==='pokerbull')&&p.lives<=0||s.game==='yaniv'&&p.score < -200;});
   const n=s.players.length;s.extra=emptyExtension(n);
   if(extensionFor(s.game))extensionFor(s.game)!.start(s);
   else if(trickGames.has(s.game)){

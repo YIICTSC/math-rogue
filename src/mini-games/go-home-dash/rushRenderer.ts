@@ -5,6 +5,8 @@ import type {ArcadeState} from './arcade';
 import {loopPose,easeRush,transitionProgress} from './rush';
 import {drawTrickBurst,trickRotation} from './courseEffects';
 
+import {trackDepth} from './rushTrack';
+
 export interface RushRenderFrame {state:ArcadeState;distance:number;jump:number;frame:number;vy?:number;side:HTMLImageElement|null;rear:HTMLImageElement|null;actions?:HTMLImageElement|null;reduced:boolean;}
 /** A render adapter driven by the existing fixed-step simulation; no second game clock. */
 export function createRushRenderer(){
@@ -33,7 +35,7 @@ export function createRushRenderer(){
   for(let i=0;i<5;i++){const o=prefabs.get('SkyArch')!.clone();arches.push(o);depth.add(o);}
   for(let i=0;i<9;i++)for(const side of [-1,1]){
    const o=prefabs.get(i%3===0?'Tower':'Tree')!.clone();o.scale.setScalar(i%3===0?1+(i%2)*.4:1);decor.push({o,i,side});depth.add(o);
-   const island=prefabs.get('FloatingIsland')!.clone();island.position.set(side*13,-5,-i*22);depth.add(island);
+   const island=prefabs.get('FloatingIsland')!.clone();island.position.set(side*13,-5,-i*22);island.userData.trackIndex=i;depth.add(island);
   }
   loop.add(prefabs.get('LoopTrack')!.clone());ready=true;
  }).catch(()=>{ready=false;});
@@ -55,8 +57,9 @@ export function createRushRenderer(){
    const curve=f.reduced?0:Math.sin(r.progress*Math.PI*2)*.45;
    camera.position.set(r.laneX*.35,4.8,11);camera.lookAt(curve,1,-24);camera.rotation.z=f.reduced?0:-curve*.07;
    const phase=f.distance*.035;
-   tiles.forEach((o,i)=>o.position.set(0,0,-i*24+phase%24));arches.forEach((o,i)=>o.position.set(0,0,-i*30+phase%30-8));
-   decor.forEach(({o,i,side})=>o.position.set(side*(9+i%3*3),-1,-i*20+phase%20));
+   tiles.forEach((o,i)=>o.position.set(0,0,trackDepth(i,24,tiles.length,phase,24)));arches.forEach((o,i)=>o.position.set(0,0,trackDepth(i,30,arches.length,phase)));
+   decor.forEach(({o,i,side})=>o.position.set(side*(9+i%3*3),-1,trackDepth(i,20,9,phase)));
+   for(const island of depth.children)if(island.userData.trackIndex!==undefined)island.position.z=trackDepth(island.userData.trackIndex,22,9,phase*.8);
    const sliding=f.state.slide>0&&f.jump<10;hero.position.set(r.laneX*3,1.07+Math.max(0,f.jump)*.025,2);hero.scale.set(1.9,2.4,1);(hero.material as THREE.SpriteMaterial).rotation=f.reduced?0:(r.lane-r.laneX)*-.18;
    shadow.visible=true;shadow.position.set(r.laneX*3,.045,2);
    const live=new Set<number>();

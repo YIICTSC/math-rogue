@@ -1,5 +1,6 @@
 import type {AdventureMode,AdventureState,SchoolBase} from './adventure';
 export const EXPEDITIONS=[
+ {id:'FINAL_EXAM',ja:'風来道場・最終試練',en:'Wanderer Final Trial',floors:99,biome:'cycle',color:'#d8b4fa',tier:5,series:1,desc:'持ち込みなし・未識別・99階。拾った道具と操作の知恵だけで挑む。',english:'No carry-ins. Unidentified supplies, stronger foes and 99 floors.'},
  {id:'VERDANT',ja:'翠緑の迷い森',en:'Verdant Labyrinth',floors:18,biome:'forest',color:'#8cdd7a',tier:1,series:1,desc:'毒の森と豊富な食料。根に足を取られないように。',english:'Poisonous forest guardians, abundant food and tangled roots.'},
  {id:'GLACIER',ja:'氷晶の回廊',en:'Glacial Gallery',floors:24,biome:'ice',color:'#8feaff',tier:1,series:1,desc:'連なる氷床と凍てつく守護者。滑る先を読もう。',english:'Ice lanes and frozen guardians. Plan where your slide ends.'},
  {id:'TIDAL',ja:'潮騒の地下水路',en:'Tidal Waterways',floors:22,biome:'water',color:'#50bfeb',tier:1,series:1,desc:'水路を渡る近道と、遠距離の水辺の魔物。',english:'Optional water shortcuts and ranged waterside monsters.'},
@@ -17,9 +18,9 @@ export const EXPEDITIONS=[
 ] as const;
 export type ExpeditionId=typeof EXPEDITIONS[number]['id'];
 export function expedition(mode:string){return EXPEDITIONS.find(v=>v.id===mode);}
-export function expeditionUnlocked(base:SchoolBase,id:string){const entry=expedition(id);if(!entry)return false;if(base.clears[entry.id])return true;const clears=EXPEDITIONS.filter(v=>base.clears[v.id]).length;return Boolean(base.clears.STORY)&&(entry.tier===1||entry.tier===2&&clears>=1||entry.tier===3&&clears>=2||entry.tier===4&&clears>=3||entry.tier===5&&Boolean(base.clears.DRAGON));}
+export function expeditionUnlocked(base:SchoolBase,id:string){const entry=expedition(id);if(!entry)return false;if(base.clears[entry.id])return true;if(id==='FINAL_EXAM')return Boolean(base.clears.STORY)&&Object.keys(base.dojo||{}).length>=10;const clears=EXPEDITIONS.filter(v=>base.clears[v.id]).length;return Boolean(base.clears.STORY)&&(entry.tier===1||entry.tier===2&&clears>=1||entry.tier===3&&clears>=2||entry.tier===4&&clears>=3||entry.tier===5&&Boolean(base.clears.DRAGON));}
 export function availableExpeditions(series:1|2){return EXPEDITIONS.filter(v=>v.series<=series);}
-export function expeditionRequirement(id:string):[string,string]{const d=expedition(id);return d?.tier===1?['放課後の大冒険を踏破','Clear After-school adventure']:d?.tier===5?['竜冠の最終試験を踏破','Clear Dragoncrest Trial']:[`追加迷宮を${Math.max(1,(d?.tier||2)-1)}種類踏破`,`Clear ${Math.max(1,(d?.tier||2)-1)} different additional labyrinths`];}
+export function expeditionRequirement(id:string):[string,string]{const d=expedition(id);if(id==='FINAL_EXAM')return ['道場10問と放課後の大冒険を踏破','Clear ten dojo lessons and After-school adventure'];return d?.tier===1?['放課後の大冒険を踏破','Clear After-school adventure']:d?.tier===5?['竜冠の最終試験を踏破','Clear Dragoncrest Trial']:[`追加迷宮を${Math.max(1,(d?.tier||2)-1)}種類踏破`,`Clear ${Math.max(1,(d?.tier||2)-1)} different additional labyrinths`];}
 /** Decorate the existing generator, reserving a dry path to every stair. */
 export function decorateExpedition(s:AdventureState,map:string[][],enemies:any[],items:any[],traps:any[],px:number,py:number,catalog:Record<string,any>,series:1|2,cards:any[]=[]) {
  const entry=expedition(s.mode);if(!entry)return;

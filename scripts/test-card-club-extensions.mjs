@@ -10,10 +10,10 @@ try{
  const {shouldReportPeerError}=await server.ssrLoadModule('/src/mini-games/card-club/networkPolicy.ts');
  const players=n=>Array.from({length:n},(_,i)=>({id:`p${i}`,name:`P${i}`,hero:'high-school-warrior',cpu:true}));
  const make=(g,n=4)=>createClubGame(g,players(n),42);
- assert.equal(GENRES.length,17);assert.equal(searchGames().length,467);
+ assert.equal(GENRES.length,17);assert.equal(searchGames().length,469);
  assert.equal(searchGames('','','available').length,CLUB_GAMES.length);
- assert.equal(GENRES.reduce((n,g)=>n+searchGames('',g).length,0),467);
- assert.equal(searchGames('','','unavailable').length,467-CLUB_GAMES.length);
+ assert.equal(GENRES.reduce((n,g)=>n+searchGames('',g).length,0),469);
+ assert.equal(searchGames('','','unavailable').length,469-CLUB_GAMES.length);
  assert.equal(searchGames('神経衰弱')[0].id,'memory');assert.equal(searchGames('しんけいすいじゃく')[0].id,'memory');
  assert.equal(searchGames('ＷＨＩＳＴ','','available')[0].id,'whist');assert(searchGames('９９').some(g=>g.id==='99add'));
  assert(searchGames('rummy').length>20);assert.equal(searchGames('rummy','ポーカーの仲間').length,0);

@@ -39,4 +39,12 @@ const {equipmentResonance}=await import('../tmp/school-test/rules.mjs');
 assert.deepEqual(equipmentResonance({}),{attack:0,defense:0,names:[]});assert.equal(equipmentResonance({weapon:item('NURSE_PENCIL',{marks:['HEAL_SWORD']}),accessory:item('RING_HEAL')}).attack,2);assert.equal(equipmentResonance({weapon:item('DRAGON_RULER',{marks:['DRAGON_KILLER']}),armor:item('FIREFIGHTER')}).defense,3);
 console.log('PASS: school equipment resonance and inherited emblems');
 
-const {modeUnlocked}=await import('../tmp/school-test/rules.mjs');const locked=newBase();assert(modeUnlocked(locked,'STORY'));for(const mode of MODES.filter(m=>m.id!=='STORY'))assert(!modeUnlocked(locked,mode.id));locked.dojo={1:10,2:10,3:10,4:10,5:10};assert(modeUnlocked(locked,'PUZZLE'));assert(!modeUnlocked(locked,'TRAPS'));locked.clears.STORY=1;assert(modeUnlocked(locked,'MYSTERY'));assert(modeUnlocked(locked,'CARDS'));assert(!modeUnlocked(locked,'BARE'));locked.clears.CARDS=1;assert(modeUnlocked(locked,'NO_GEAR'));locked.clears.NO_GEAR=1;assert(modeUnlocked(locked,'BARE'));console.log('PASS: staged dungeon unlocks and existing clear compatibility');
+const {modeUnlocked}=await import('../tmp/school-test/rules.mjs');
+const locked=newBase();assert(modeUnlocked(locked,'STORY'));for(const mode of MODES.filter(m=>m.id!=='STORY'))assert(!modeUnlocked(locked,mode.id));
+// Journey routes now open in sequence; dojo records do not bypass their prerequisites.
+locked.dojo={1:10,2:10,3:10,4:10,5:10};assert(!modeUnlocked(locked,'PUZZLE'));
+locked.clears.STORY=1;assert(modeUnlocked(locked,'PUZZLE'));assert(!modeUnlocked(locked,'TRAPS'));assert(!modeUnlocked(locked,'FINAL_EXAM'));
+for(const [cleared,next]of [['PUZZLE','TRAPS'],['TRAPS','MYSTERY'],['MYSTERY','CARDS'],['CARDS','NO_GEAR'],['NO_GEAR','BARE']]){locked.clears[cleared]=1;assert(modeUnlocked(locked,next));}
+locked.dojo={...locked.dojo,6:10,7:10,8:10,9:10,10:10};assert(modeUnlocked(locked,'FINAL_EXAM'));
+const oldSave=newBase();oldSave.clears.BARE=1;for(const mode of ['STORY','PUZZLE','TRAPS','MYSTERY','CARDS','NO_GEAR','BARE'])assert(modeUnlocked(oldSave,mode));
+console.log('PASS: sequential journey unlocks, final-trial dojo gate and existing clear compatibility');

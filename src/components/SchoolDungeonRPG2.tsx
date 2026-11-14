@@ -1,3 +1,4 @@
+import {weaponTargets} from './school-dungeon/dungeons1/weaponArea';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
@@ -1727,15 +1728,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if(technique){
           studentCue.technique(technique.id,technique.tier===5?'finisher':'normal');
           addLog(adventure.text(technique.ja,technique.en),'#ffe396');
-          if(technique.pattern==='burst'||technique.pattern==='sweep')for(const enemy of enemies){
-              if(enemy.id===target.id||enemy.hp<=0||enemy.enemyType==='SHOPKEEPER')continue;
-              const dx=enemy.x-player.x,dy=enemy.y-player.y;
-              if(Math.max(Math.abs(dx),Math.abs(dy))<=1&&(technique.pattern==='burst'||dx*player.dir.x+dy*player.dir.y>=0))targets.push(enemy);
-          }
-          if(technique.pattern==='pierce'){
-              const x=target.x+player.dir.x,y=target.y+player.dir.y;
-              if(map[y]?.[x]&&map[y][x]!=='WALL'){const enemy=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0&&e.enemyType!=='SHOPKEEPER');if(enemy)targets.push(enemy);}
-          }
+          targets.splice(0,targets.length,...weaponTargets(weaponKind,player,player.dir,map,enemies));
       }
 
 
@@ -1746,6 +1739,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       }
       let newEnemies = [...enemies];
       targets.filter((t,i)=>targets.findIndex(e=>e.id===t.id)===i).forEach(t => {
+          if(t.id!==target.id)addVisualEffect('MARTIAL',t.x,t.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
           let dmg = Math.max(1, Math.floor(player.attack*(technique?.power||1))-Math.floor(t.defense*(technique?.pattern==='pierce'?.5:1))); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2; const wType = player.equipment?.weapon?.type;
           if (equipmentHas(player.equipment?.weapon, 'OFUDA_RULER') && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); } if (equipmentHas(player.equipment?.weapon, 'VITAMIN_INJECT') && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); } if (equipmentHas(player.equipment?.weapon, 'STAINLESS_PEN') && t.enemyType === 'METAL') dmg = 1; if (equipmentHas(player.equipment?.weapon, 'RICH_WATCH') && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); } if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
           dmg = adventure.damage(dmg); newEnemies = newEnemies.map(e => { if (e.id === t.id) { const nhp = e.hp - dmg; addLog(`${e.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' }); if (nhp <= 0 && equipmentHas(player.equipment?.weapon, 'LADLE') && Math.random() < 0.3) { const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` }; setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]); addLog(`${e.name}を肉に変えた！`, currentTheme.colors.C2); } return { ...e, hp: nhp }; } return e; });
@@ -1758,9 +1752,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const useMartialTechnique=(id:string)=>{
       if(menuOpen||shopState.active||gameOver||gameClear||adventure.abilityBlocked||adventure.state.place!=='DUNGEON'||adventure.state.mode==='PUZZLE'||adventure.isDojoActive()||(adventure.panel&&adventure.panel!=='TECHNIQUES')||(player.status.sleep||0)>0||(player.status.frozen||0)>0)return false;
-      const kind=equippedWeaponKind(player.equipment?.weapon),range=kind==='bow'?6:1;
-      let target:Entity|undefined;
-      for(let n=1;n<=range;n++){const x=player.x+player.dir.x*n,y=player.y+player.dir.y*n;if(!map[y]?.[x]||map[y][x]==='WALL')break;const e=enemies.find(e=>e.x===x&&e.y===y&&e.hp>0);if(e){if(e.enemyType!=='SHOPKEEPER')target=e;break;}}
+      const kind=equippedWeaponKind(player.equipment?.weapon);
+      const target=weaponTargets(kind,player,player.dir,map,enemies)[0];
       if(!target)return false;
       if(adventure.panel==='TECHNIQUES')adventure.closeTechniquePanel();
       if(!attackEnemy(target,id))return false;
@@ -1897,6 +1890,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => setInspectedItem(item), 500); };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if(facingOnlyRef.current&&adventure.isDojoActive()){adventure.dojoStep({type:'FACE',dx,dy});return;}
       if(facingOnlyRef.current&&adventure.state.place==='DUNGEON'&&!adventure.dojoRun){if(!adventure.blocksInput()&&!menuOpen&&!shopState.active&&!gameOver&&!gameClear&&(dx||dy))setPlayer(p=>({...p,dir:{x:dx,y:dy}}));return;}
       movePlayer(dx,dy);
   };
@@ -1904,6 +1898,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (adventure.townKey(e)) return;
+      if (adventure.isDojoActive() && facingOnlyRef.current) {
+        const direction:Record<string,number[]>={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
+        const d=direction[e.key];if(d){e.preventDefault();adventure.dojoStep({type:'FACE',dx:d[0],dy:d[1]});return;}
+      }
       if (adventure.dojoKey(e)) return;
         if (adventure.blocksInput()) return;
         if(['q','e','f'].includes(e.key.toLowerCase())){e.preventDefault();adventure.activateAbility(['q','e','f'].indexOf(e.key.toLowerCase()));return;}

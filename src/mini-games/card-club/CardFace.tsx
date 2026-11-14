@@ -12,6 +12,6 @@ export function CardFace({card,selected,onClick,label}:{card:number;selected?:bo
     return ()=>animation.cancel();
   },[card]);
   return <button type="button" data-card={card} className={`cc-card ${back?'cc-back':''} ${red?'cc-red':''} ${selected?'cc-selected':''}`} onClick={onClick?()=>{audioService.playCardClubSound('select');onClick();}:undefined} disabled={!onClick} aria-pressed={onClick?!!selected:undefined} aria-label={label|| (back?'?':cardLabel(card))}>
-    <span ref={body} className="cc-card-body" aria-hidden="true"><span className="cc-card-front">{!back&&<><small>{cardLabel(card)}</small><strong>{card===52?'★':SUITS[Math.floor(card/13)]}</strong><i>{cardLabel(card)}</i></>}</span><span className="cc-card-reverse"><b>✦</b></span></span>
+    <span ref={body} className="cc-card-body" aria-hidden="true"><span className="cc-card-front">{!back&&<><small>{cardLabel(card)}</small><strong>{card>=52?'★':SUITS[Math.floor(card/13)]}</strong><i>{cardLabel(card)}</i></>}</span><span className="cc-card-reverse"><b>✦</b></span></span>
   </button>;
 }

@@ -10470,6 +10470,53 @@
       ],
       "difficulty": 4,
       "source": "https://gamefarm.jp/rule/zwikken.html"
+    },
+    {
+      "id": "royalcassino",
+      "name": "ロイヤルカシノ",
+      "english": "Royal Casino",
+      "category": "カシノ系のゲーム",
+      "subcategory": "カシノの仲間",
+      "players": [
+        2,
+        3,
+        4
+      ],
+      "recommended": [
+        2,
+        4
+      ],
+      "cards": [
+        52
+      ],
+      "difficulty": 4,
+      "source": "https://www.pagat.com/fishing/royal_casino.html"
+    },
+    {
+      "id": "trumpcrew",
+      "name": "トランプクルー",
+      "english": "Trump Crew",
+      "category": "トリックテイキング",
+      "subcategory": "協力",
+      "players": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "recommended": [
+        4,
+        5,
+        6
+      ],
+      "cards": [
+        53
+      ],
+      "difficulty": 4,
+      "source": "https://kusabazyun.banjoyugi.net/草場純さんの研究博物館-on-web/文書/トランプゲームの部屋/トランプクルーのルール"
     }
   ]
 }

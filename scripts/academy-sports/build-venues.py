@@ -3,7 +3,7 @@ Reproduce: blender -b -t 2 --python scripts/academy-sports/build-venues.py
 No character or existing sports file is overwritten.
 """
 import bpy, math, json, sys, argparse
-from mathutils import Vector
+from mathutils import Vector, Matrix
 from pathlib import Path
 OUT=Path('public/models/academy-sports');OUT.mkdir(parents=True,exist_ok=True)
 PALETTE={'grass':'427868','grass2':'508674','soil':'b78b64','line':'f8edd1','navy':'193c52','teal':'35b9b0','gold':'efbd5c','rose':'d77e73','steel':'668b94','concrete':'ccd2bd','wood':'c79362','glass':'91c6ca','dark':'173039','white':'f2f2e5','red':'d44f55','blue':'4088af','cloth':'44b6b3'}
@@ -46,9 +46,15 @@ def export(file):
 def lamps(x,z):
  rod('Venue',(x,0,z),(x,14,z),.16,'steel');box('Venue',(x,14,z),(4,.5,1.2),'navy',.12)
  for i in range(5):sphere('Venue',(x-1.5+i*.75,13.9,z+.65),(.25,.15,.1),'gold')
-def bench(p):
- box('Venue',(p[0],.8,p[2]),(4,.18,1),'teal',.08);box('Venue',(p[0],1.3,p[2]-.5),(4,.9,.15),'navy',.08)
- for x in[-1.4,1.4]:rod('Venue',(p[0]+x,0,p[2]),(p[0]+x,.8,p[2]),.06,'steel')
+def bench(p,yaw=0,name='Venue'):
+ # The seat faces local +Z; rotate the entire assembly toward the court.
+ before=len(groups.get(name,[]))
+ box(name,(p[0],.8,p[2]),(4,.18,1),'teal',.08);box(name,(p[0],1.3,p[2]-.5),(4,.9,.15),'navy',.08)
+ for x in[-1.4,1.4]:rod(name,(p[0]+x,0,p[2]),(p[0]+x,.8,p[2]),.06,'steel')
+ rotation=Matrix.Rotation(yaw,4,'Z');center=Vector(xyz(p))
+ for o in groups[name][before:]:
+  o.location=center+rotation@(o.location-center)
+  o.rotation_euler=(rotation.to_3x3()@o.rotation_euler.to_matrix()).to_euler()
 def tree(x,z):
  cylinder('Venue',(x,1.4,z),.23,2.8,'soil');sphere('Venue',(x,3,z),(1.5,1.9,1.5),'grass2')
 def fence(a,b,h=3):
@@ -56,11 +62,12 @@ def fence(a,b,h=3):
  for i in range(n+1):
   t=i/max(1,n);x=a[0]+(b[0]-a[0])*t;z=a[1]+(b[1]-a[1])*t;rod('Venue',(x,0,z),(x,h,z),.025,'steel')
 def seats(x,z,rows=4,count=14,dx=1.5,dz=-1.4):
+ front=-1 if dz>0 else 1
  for row in range(rows):
   box('Venue',(x,1+row*.7,z+row*dz),(count*dx+2,.6,1.8),'concrete',.1)
   for i in range(count):
-   xx=x+(i-(count-1)/2)*dx;zz=z+row*dz;box('Venue',(xx,1.5+row*.7,zz),(.85,.18,.8),'teal' if(i+row)%3 else 'gold',.08);box('Venue',(xx,1.85+row*.7,zz-.35),(.85,.65,.14),'navy',.06)
-  rod('Venue',(x-count*dx/2,2+row*.7,z+row*dz+.8),(x+count*dx/2,2+row*.7,z+row*dz+.8),.035,'steel')
+   xx=x+(i-(count-1)/2)*dx;zz=z+row*dz;box('Venue',(xx,1.5+row*.7,zz),(.85,.18,.8),'teal' if(i+row)%3 else 'gold',.08);box('Venue',(xx,1.85+row*.7,zz-front*.35),(.85,.65,.14),'navy',.06)
+  rod('Venue',(x-count*dx/2,2+row*.7,z+row*dz+front*.8),(x+count*dx/2,2+row*.7,z+row*dz+front*.8),.035,'steel')
 def football():
  # Keep the terrace below the turf: coplanar top faces flicker on mobile GPUs.
  reset();box('Venue',(0,-.31,0),(65,.5,92),'concrete',.5)
@@ -79,7 +86,7 @@ def football():
    rod('Venue',(x,0,sign*32.7),(x,1.5,sign*32.7),.04,'steel');poly('Venue',[(x,1.5,sign*32.7),(x+.8,1.2,sign*32.7),(x,1,sign*32.7)],[(0,1,2)],'gold')
   seats(0,sign*39,4,26,dz=sign*1.4)
  for x in[-28,28]:
-  bench((x,0,0));lamps(x,-30);lamps(x,30)
+  bench((x,0,0),-math.copysign(math.pi/2,x),'BenchLeft' if x<0 else 'BenchRight');lamps(x,-30);lamps(x,30)
  box('Venue',(0,10,-42),(17,4,.8),'navy',.2);label('GAKURO  STADIUM',(0,10,-41.5),1.1)
  export('soccer-stadium')
 def baseball():
@@ -110,7 +117,7 @@ def gym():
  for col in range(121):x=-5+col/12;rod('Venue',(x,1.4,0),(x,2.43,0),.008,'white')
  rod('Venue',(-5,2.43,0),(5,2.43,0),.035,'white');box('Venue',(6,1.2,0),(1,.15,1),'navy',.05)
  for x in[-6.4,-5.6]:rod('Venue',(x,0,-.4),(x,1.2,-.4),.045,'steel')
- for sign in[-1,1]:bench((sign*10,0,0));seats(sign*8,-12,3,7);box('Venue',(sign*14,5,0),(.4,10,33),'concrete',.1)
+ for sign in[-1,1]:bench((sign*10,0,0),-sign*math.pi/2,'BenchLeft' if sign<0 else 'BenchRight');seats(sign*8,-12,3,7);box('Venue',(sign*14,5,0),(.4,10,33),'concrete',.1)
  box('Venue',(0,5,-16),(29,10,.35),'concrete');box('Venue',(0,6,-15.7),(11,2,.2),'navy',.1);label('THE ACADEMY  /  VOLLEY',(0,6,-15.5),.65)
  for z in[-12,-6,0,6,12]:
   rod('Venue',(-13,10,z),(0,12,z),.12,'steel');rod('Venue',(0,12,z),(13,10,z),.12,'steel');box('Venue',(0,10.5,z),(5,.15,.45),'white',.03)

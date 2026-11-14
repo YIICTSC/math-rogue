@@ -7,8 +7,8 @@ export interface Input {x:number;z:number;aimX:number;aimZ:number;dash:boolean;p
 export const neutral=():Input=>({x:0,z:0,aimX:0,aimZ:0,dash:false,primary:false});
 export type DrillId='soccer-move'|'soccer-shot'|'soccer-pass'|'soccer-lob'|'soccer-dribble'|'soccer-tackle'|'soccer-special'|'soccer-switch'|'volley-serve'|'volley-receive'|'volley-set'|'volley-spike'|'volley-block'|'volley-dive'|'volley-special'|'volley-move';
 export interface PracticeState {id:DrillId;attempt:number;successes:number;limit:number;time:number;result:null|'success'|'miss';resultTime:number;baseline:Record<string,number>;startSelected:number;jumped:boolean;dashed:boolean;dove:boolean;acted:boolean;target:Vec;special:boolean;}
-export interface Config {manualFielding?:boolean;drill?:DrillId;sport:SportId;difficulty:0|1|2|3;mode:'match'|'practice'|'batting'|'pitching'|'fielding'|'home-run'|'watch';rules:'simple'|'standard';assist:boolean;innings:3|6|9;minutes:1|3;sets:1|3;points:15|25;formation:'4-4-2'|'4-3-3'|'3-5-2';night:boolean;ringOut:boolean;hero:string;team:number;seed:number;}
-export const defaultConfig=(sport:SportId):Config=>({sport,manualFielding:false,difficulty:1,mode:'match',rules:'simple',assist:true,innings:3,minutes:1,sets:1,points:15,formation:'4-3-3',night:false,ringOut:true,hero:'elementary-dodgeball',team:0,seed:7891});
+export interface Config {manualFielding?:boolean;drill?:DrillId;sport:SportId;difficulty:0|1|2|3;mode:'match'|'practice'|'batting'|'pitching'|'fielding'|'home-run'|'watch';rules:'simple'|'standard';assist:boolean;innings:3|6|9;minutes:1|3|5;sets:1|3;points:15|25;formation:'4-4-2'|'4-3-3'|'3-5-2';night:boolean;ringOut:boolean;hero:string;team:number;seed:number;}
+export const defaultConfig=(sport:SportId):Config=>({sport,manualFielding:false,difficulty:1,mode:'match',rules:'simple',assist:true,innings:3,minutes:3,sets:1,points:15,formation:'4-3-3',night:false,ringOut:true,hero:'elementary-dodgeball',team:0,seed:7891});
 export interface Skills {speed:number;power:number;control:number;defense:number;stamina:number;jump:number;teamwork:number;pitch:number;}
 export interface Athlete {id:number;team:number;slot:number;hero:string;role:string;name:string;p:Vec;v:Vec;home:Vec;face:number;skills:Skills;spirit:number;hp:number;motion:Motion;action:number;cooldown:number;jump:number;stun:number;charge:number;stats:Record<string,number>;cpuTarget?:Vec;cpuAt?:number;}
 export interface Ball extends Vec {vx:number;vy:number;vz:number;owner:number;team:number;power:number;spin:number;special:boolean;last:number;}
@@ -59,7 +59,7 @@ export function normalizeConfig(raw:unknown,sport:SportId):Config{
  if(Number.isInteger(p.team)&&p.team!>=0&&p.team!<(sport==='festival'?4:2))c.team=p.team!;
  if(['simple','standard'].includes(p.rules!))c.rules=p.rules!;
  if([3,6,9].includes(p.innings!))c.innings=p.innings!;
- if([1,3].includes(p.minutes!))c.minutes=p.minutes!;
+ if([1,3,5].includes(p.minutes!))c.minutes=p.minutes!;
  if([1,3].includes(p.sets!))c.sets=p.sets!;
  if([15,25].includes(p.points!))c.points=p.points!;
  if(['4-4-2','4-3-3','3-5-2'].includes(p.formation!))c.formation=p.formation!;
