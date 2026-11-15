@@ -41,14 +41,14 @@ export default function SportsPresentation({sport,stream,events,actors,paused=fa
  // Warm just the current court's performers; never download the full cast to start a match.
  useEffect(()=>{
   if(!stream)return;const controllers:AbortController[]=[];
-  for(const actor of actors){const speaker=sportsSpeaker(actor.avatar);for(const event of ['action','special']){const path=sportsVoicePath(`${speaker}/${sport}/${event}`);if(path&&sportsVoiceAvailable(`${speaker}/${sport}/${event}`)){const controller=new AbortController();controllers.push(controller);void fetch(assetUrl(path),{signal:controller.signal}).catch(()=>{});}}if(Object.hasOwn(SPORTS_HEROES,speaker)){const hero=SPORTS_HEROES[speaker as keyof typeof SPORTS_HEROES];const image=new Image();image.src=assetUrl(`sprites/sports-cutins/cast-${hero.sheet}.webp`);}}
+  for(const actor of actors){const speaker=sportsSpeaker(actor.avatar);for(const event of ['action','special']){const path=sportsVoicePath(`${speaker}/${sport}/${event}`);if(path&&sportsVoiceAvailable(`${speaker}/${sport}/${event}`)){const controller=new AbortController();controllers.push(controller);void fetch(assetUrl(path),{signal:controller.signal}).catch(()=>{});}}if(Object.hasOwn(SPORTS_HEROES,speaker)){const hero=SPORTS_HEROES[speaker as keyof typeof SPORTS_HEROES];const image=new Image();image.src=assetUrl(speaker==='magic-tsubasa'?`sprites/sports-cutins/corrections/magic-tsubasa-${sport}-v2.webp`:`sprites/sports-cutins/cast-${hero.sheet}.webp`);}}
   return()=>controllers.forEach(c=>c.abort());
  },[stream,sport,actors.map(a=>a.avatar?.protagonist??a.avatar?.sportsVoice??'custom').join('|')]);
  const hero=cutin&&SPORTS_HEROES[cutin.speaker as keyof typeof SPORTS_HEROES],column=['golf','tennis','basketball','dodgeball'].indexOf(sport);
  return cutin?<div className={`sports-performance sports-performance-${sport}`} key={cutin.key} aria-hidden="true" data-sport-cutin={sport} data-speaker={cutin.speaker}>
   <div className="sports-rendered-burst" style={{backgroundImage:`url(${assetUrl(`sprites/sports-effects/${sport}.webp`)})`}}/>
   <div className="sports-cutin-banner">
-   {hero?<div className="sports-cutin-art" style={{backgroundImage:`url(${assetUrl(`sprites/sports-cutins/cast-${hero.sheet}.webp`)})`,backgroundSize:`400% ${hero.rows*100}%`,backgroundPosition:`${column/3*100}% ${hero.row/(hero.rows-1)*100}%`}}/>:<div className="sports-cutin-symbol">{sport==='golf'?'⛳':sport==='tennis'?'🎾':sport==='basketball'?'🏀':'🏐'}</div>}
+   {hero?<div className="sports-cutin-art" style={{backgroundImage:`url(${assetUrl(cutin.speaker==='magic-tsubasa'?`sprites/sports-cutins/corrections/magic-tsubasa-${sport}-v2.webp`:`sprites/sports-cutins/cast-${hero.sheet}.webp`)})`,backgroundSize:cutin.speaker==='magic-tsubasa'?'100% 100%':`400% ${hero.rows*100}%`,backgroundPosition:cutin.speaker==='magic-tsubasa'?'50% 50%':`${column/3*100}% ${hero.row/(hero.rows-1)*100}%`}}/>:<div className="sports-cutin-symbol">{sport==='golf'?'⛳':sport==='tennis'?'🎾':sport==='basketball'?'🏀':'🏐'}</div>}
    <div className="sports-cutin-copy"><small>{t('必殺プレー')}</small><strong>{t(PROTAGONISTS.find(p=>p.id===cutin.speaker)?.name??cutin.name)}</strong><b>{hero?hero.moves[sport][languageMode==='ENGLISH'?1:languageMode==='HIRAGANA'?2:0]:t('スターショット')}</b></div>
   </div>
  </div>:null;

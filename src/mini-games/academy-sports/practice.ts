@@ -1,3 +1,4 @@
+import {SOCCER_FIELD,SOCCER_SCALE,VOLLEY_FIELD} from './courts';
 import {createSoccer,stepSoccer,type Soccer} from './soccer';
 import {createVolleyball,stepVolleyball,resetRally,landing,type Volleyball} from './volleyball';
 import {PRACTICE_MODES} from './modes';
@@ -13,8 +14,8 @@ export function resetPracticeAttempt(s:TrainingMatch){
  for(const a of s.players){a.cooldown=0;a.stun=0;a.charge=0;a.spirit=100;a.action=0;a.p.y=0;a.v=vec();}
  if(s.sport==='soccer'){
   const dir=-sign,human=s.players.find(a=>a.id===team*100+9)!;s.selected=human.id;s.stage='open';s.restartTimer=0;s.halfTime=0;s.cinema=0;s.pendingShot=null;s.guard[1-team]=12;
-  for(const a of s.players){a.p=vec(a.team===team?16:-18,0,dir*(a.team===team?-8:-15)+(a.slot-5)*1.3);a.home={...a.p};if(a.role==='GK'){a.p=vec(0,0,a.team===0?30:-30);a.home={...a.p};}}
-  human.p=vec(0,0,dir*18);human.home={...human.p};human.face=dir<0?Math.PI:0;s.ball={...s.ball,...human.p,y:.23,owner:human.id,team,last:human.id,vx:0,vy:0,vz:0};s.lastTouch=team;s.lastPass=-1;s.shotTeam=-1;s.shotTimer=0;
+  for(const a of s.players){a.p=vec(a.team===team?16:-18,0,dir*(a.team===team?-8:-15)+(a.slot-5)*1.3);a.home={...a.p};if(a.role==='GK'){a.p=vec(0,0,a.team===0?30*SOCCER_SCALE:-30*SOCCER_SCALE);a.home={...a.p};}}
+  human.p=vec(0,0,dir*((id==='soccer-shot'||id==='soccer-special')?SOCCER_FIELD.length-14:18));human.home={...human.p};human.face=dir<0?Math.PI:0;s.ball={...s.ball,...human.p,y:.23,owner:human.id,team,last:human.id,vx:0,vy:0,vz:0};s.lastTouch=team;s.lastPass=-1;s.shotTeam=-1;s.shotTimer=0;
   if(id==='soccer-shot'||id==='soccer-special'){const keeper=s.players.find(a=>a.team!==team&&a.role==='GK')!;keeper.role='DF';keeper.p=vec(-18,0,0);keeper.home={...keeper.p};}
   for(const slot of[1,2]){const defender=s.players.find(a=>a.id===(1-team)*100+slot)!;defender.p=vec(slot===1?-14:14,0,dir*29);defender.home={...defender.p};}
   const friend=s.players.find(a=>a.id===team*100+8)!;friend.p=vec(5,0,dir*24);friend.home={...friend.p};
@@ -65,7 +66,7 @@ export function stepPractice(s:TrainingMatch,input:Input,dt:number){
   else if(p.id==='soccer-switch'){if(p.acted&&s.selected!==p.startSelected)result(s,true);}
   else if(p.id==='volley-serve'||p.id==='volley-special'){
    p.special ||= delta('signatures')>0;if(p.id==='volley-special'&&p.special)result(s,true);
-   if(s.sport==='volleyball'&&delta('serves')>0&&s.ball.z*(team===0?1:-1)<0){const end=landing(s);if(Math.abs(end.x)<4.5&&Math.abs(end.z)<9&&(p.id==='volley-serve'||p.special))result(s,true);}
+   if(s.sport==='volleyball'&&delta('serves')>0&&s.ball.z*(team===0?1:-1)<0){const end=landing(s);if(Math.abs(end.x)<VOLLEY_FIELD.width&&Math.abs(end.z)<VOLLEY_FIELD.length&&(p.id==='volley-serve'||p.special))result(s,true);}
   }else if(p.id==='volley-receive'){if(delta('receives')>0)result(s,true);}
   else if(p.id==='volley-dive'){if(delta('receives')>0&&p.dove)result(s,true);}
   else if(p.id==='volley-set'){if(delta('setsMade')>0)result(s,true);}

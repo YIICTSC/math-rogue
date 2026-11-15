@@ -63,6 +63,7 @@ for(const sport of ['baseball','soccer','volleyball','festival']){
   }
   w.tick(1/60,now);if(frame%1200===0)E.assertFinite(w.view.match);
  }
+ if(w.view.phase!=='result')console.error(JSON.stringify({sport,clock:w.view.match.clock,points:w.view.match.points,score:w.view.match.score,stage:w.view.match.stage,stats:w.view.match.stats,lastPoint:w.view.match.lastPoint,ball:w.view.match.ball}));
  assert.equal(w.view.phase,'result',sport+' complete online-command match');E.assertFinite(w.view.match);console.log('PASS full',sport,'match through online commands:',w.view.match.score,'frames',frame);
 }
 

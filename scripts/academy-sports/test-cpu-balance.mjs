@@ -53,7 +53,7 @@ for(let difficulty=0;difficulty<4;difficulty++){
  let wide=0,power=0;
  for(let seed=1;seed<=100;seed++){
   const a=cpuShot(seed,difficulty,{...E.neutral(),x:1,aimX:1}),b=cpuShot(seed,difficulty,{...E.neutral(),x:-1,aimX:-1});assert.equal(a.ball.vx,b.ball.vx);assert.equal(a.ball.vz,b.ball.vz);
-  const crossing=a.ball.x+a.ball.vx/a.ball.vz*(-34-a.ball.z);wide+=Number(Math.abs(crossing)>4.2);power+=a.ball.power;
+  const crossing=a.ball.x+a.ball.vx/a.ball.vz*(-E.SOCCER_FIELD.length-1-a.ball.z);wide+=Number(Math.abs(crossing)>4.2);power+=a.ball.power;
  }
  shotStats.push({difficulty,wide,power:power/100});
 }

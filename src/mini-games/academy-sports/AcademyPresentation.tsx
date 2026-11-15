@@ -1,3 +1,4 @@
+import {specialArt} from './specialArt';
 import React,{useEffect,useRef,useState} from 'react';
 import {audioService} from '../../services/audioService';
 import {assetUrl} from '../../utils/assetPaths';
@@ -32,11 +33,11 @@ export default function AcademyPresentation({match,paused,languageMode}:{match:M
   for(const sequence of planner.current.sequences(match,events,now))queue.current?.enqueue(sequence);
  },[match.id,match.serial,paused]);
  useEffect(()=>{if(!cutin)return;const timer=setTimeout(()=>setCutin(null),1450);return()=>clearTimeout(timer);},[cutin?.key]);
- useEffect(()=>{if(paused||match.sport==='festival')return;const profile=specialHero(match.config.hero),image=new Image();image.src=assetUrl(`sprites/academy-sports/cutins/cast-${profile.sheet}-v1.webp`);},[match.id,match.config.hero,paused]);
+ useEffect(()=>{if(paused||match.sport==='festival')return;for(const move of (match.sport==='baseball'?['pitch','drive']:['shot']) as Event['move'][]){const image=new Image();image.src=assetUrl(specialArt(match.config.hero,match.sport,move).path);}},[match.id,match.config.hero,paused]);
  if(!cutin||match.sport==='festival')return null;
- const hero=specialHero(cutin.hero),column=match.sport==='baseball'?0:match.sport==='soccer'?1:2;
- return <aside className="ac-signature-cutin" style={{'--signature':hero.color} as React.CSSProperties} key={cutin.key} aria-hidden="true" data-academy-cutin={match.sport} data-hero={cutin.hero}>
-  <div className="ac-signature-art" style={{backgroundImage:`url(${assetUrl(`sprites/academy-sports/cutins/cast-${hero.sheet}-v1.webp`)})`,backgroundSize:`300% ${hero.rows*100}%`,backgroundPosition:`${column*50}% ${hero.row/(hero.rows-1)*100}%`}}/>
-  <div><small>{languageMode==='ENGLISH'?'SIGNATURE BALL':languageMode==='HIRAGANA'?'ひっさつきゅう':'必殺球'}</small><strong>{specialName(cutin.hero,match.sport,languageMode,cutin.move)}</strong><span>{trans(PROTAGONISTS.find(p=>p.id===cutin.hero)?.name||cutin.hero,languageMode)}</span></div>
+ const hero=specialHero(cutin.hero),art=specialArt(cutin.hero,match.sport,cutin.move),batting=cutin.move==='drive';
+ return <aside className="ac-signature-cutin" style={{'--signature':hero.color} as React.CSSProperties} key={cutin.key} aria-hidden="true" data-academy-cutin={match.sport} data-hero={cutin.hero} data-move={cutin.move}>
+  <div className="ac-signature-art" style={{backgroundImage:`url(${assetUrl(art.path)})`,backgroundSize:art.size,backgroundPosition:art.position}}/>
+  <div><small>{batting?(languageMode==='ENGLISH'?'SIGNATURE HIT':languageMode==='HIRAGANA'?'ひっさつだ':'必殺打'):(languageMode==='ENGLISH'?'SIGNATURE BALL':languageMode==='HIRAGANA'?'ひっさつきゅう':'必殺球')}</small><strong>{specialName(cutin.hero,match.sport,languageMode,cutin.move)}</strong><span>{trans(PROTAGONISTS.find(p=>p.id===cutin.hero)?.name||cutin.hero,languageMode)}</span></div>
  </aside>;
 }

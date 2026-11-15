@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {build} from 'esbuild';
+import {NodeIO} from '@gltf-transform/core';
+const built=await build({stdin:{contents:"export * from './src/mini-games/academy-sports/core';export * from './src/mini-games/academy-sports/baseball';export * from './src/mini-games/academy-sports/viewControls';export * from './src/mini-games/academy-sports/soccer';export * from './src/mini-games/academy-sports/volleyball';export * from './src/mini-games/academy-sports/courts';export * from './src/mini-games/academy-sports/copy';export * from './src/mini-games/academy-sports/specialArt';export * from './src/three/protagonistCatalog';",resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'node'});
+const E=await import('data:text/javascript;base64,'+Buffer.from(built.outputFiles[0].text).toString('base64'));
+assert(Math.abs(E.SOCCER_FIELD.width*E.SOCCER_FIELD.length/(21*33)-3)<1e-9);
+assert(Math.abs(E.VOLLEY_FIELD.width*E.VOLLEY_FIELD.length/(4.5*9)-2)<1e-9);
+const cfg=sport=>E.defaultConfig(sport);
+for(const online of [false,true]){
+ const s=E.createSoccer(cfg('soccer'));s.phase='play';s.stage='open';s.online=online;const p=s.players.find(p=>p.id===s.selected);p.p=E.vec(25,0,0);s.ball.owner=p.id;if(online)s.controls={[p.id]:{...E.neutral(),x:1}};E.stepSoccer(s,{...E.neutral(),x:1},.1);assert(p.p.x>25,'New playable space accepts movement');assert.equal(s.stage,'open');
+ const v=E.createVolleyball(cfg('volleyball'));v.phase='play';v.stage='rally';v.online=online;Object.assign(v.ball,{owner:-1,x:5.2,y:.1,z:-10,vy:-1,vx:0,vz:0,team:0});E.stepVolleyball(v,E.neutral(),1/60);assert.equal(v.points[0],1,'Old out-of-bounds area is now inside the actual court');assert.equal(v.lastPoint.team,0);assert.deepEqual(v.lastPoint.points,[1,0]);
+}
+const viewVolley=E.createVolleyball(cfg('volleyball'));assert.equal(E.screenToWorld(viewVolley,{...E.neutral(),x:1},true).z,-1);assert.equal(E.screenToWorld(viewVolley,{...E.neutral(),x:1},false).x,1);
+const v=E.createVolleyball({...cfg('volleyball'),sets:3,points:25});v.points=[24,23];E.volleyballPoint(v,0,'test');assert.deepEqual(v.setScores,[[25,23]]);assert.equal(v.lastPoint.set,1);assert.equal(v.lastPoint.wonSet,true);assert.deepEqual(v.points,[0,0]);assert.equal(v.setNumber,2);v.setNumber=3;assert.equal(E.volleySetTarget(v),15);const roundtrip=JSON.parse(JSON.stringify(v));assert.deepEqual(roundtrip.setScores,v.setScores);assert.deepEqual(roundtrip.lastPoint,v.lastPoint);
+const tired=E.createVolleyball(cfg('volleyball'));tired.phase='play';tired.stage='rally';const receiver=tired.players.find(p=>p.id===tired.selected);receiver.spirit=0;Object.assign(tired.ball,{x:receiver.p.x,y:1,z:receiver.p.z});assert.equal(E.touch(tired,receiver,'receive',E.neutral()),false,'Exhausted players cannot return indefinitely');assert.equal(E.actionButtons(tired)[0].disabled,true);receiver.spirit=100;assert.equal(E.actionButtons(tired)[0].disabled,false);
+const plan=JSON.parse(await fs.readFile('assets/academy-sports/batting-art.json'));assert.equal(plan.files.length,43);assert.equal(new Set(plan.files.filter(f=>f.move==='drive').map(f=>f.hero)).size,35);assert.equal(new Set(plan.files.map(f=>f.sha256)).size,43);
+for(const h of E.PROTAGONISTS){const art=E.specialArt(h.id,'baseball','drive');assert(art.path.includes('/batting/'+h.id));assert.notEqual(art.path,E.specialArt(h.id,'baseball','pitch').path);const s=E.createBaseball({...cfg('baseball'),hero:h.id});assert.equal(E.actionButtons(s).find(b=>b.action==='special').label[0],'必殺打');}
+for(const f of plan.files)assert.equal(createHash('sha256').update(await fs.readFile(f.path)).digest('hex'),f.sha256);
+const io=new NodeIO();for(const sport of ['soccer','volleyball']){const d=await io.read('public/models/academy-sports/'+(sport==='soccer'?'soccer-stadium':'volleyball-gym')+'.glb');const nodes=d.getRoot().listNodes();assert(nodes.some(n=>n.getName()==='BenchLeft'));assert(nodes.some(n=>n.getName()==='BenchRight'));if(sport==='soccer'){const goal=nodes.find(n=>n.getName()==='GoalFrame');const xs=goal.getMesh().listPrimitives().flatMap(p=>Array.from(p.getAttribute('POSITION').getArray()).filter((_,i)=>i%3===0));assert(Math.max(...xs)<4.5&&Math.min(...xs)>-4.5,'Goal mouth stays human-sized');}}
+console.log('PASS expanded live/online bounds, exact area ratios, set history/point snapshots, deciding-set target, 35 dedicated batter routes, eight corrections and preserved goal/bench geometry.');

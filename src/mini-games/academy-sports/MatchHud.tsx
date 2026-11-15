@@ -1,3 +1,6 @@
+import {specialArt} from './specialArt';
+import {SOCCER_FIELD} from './courts';
+import VolleyballHud from './VolleyballHud';
 import React from 'react';
 import type {LanguageMode} from '../../types';
 import {PROTAGONISTS} from '../../three/protagonistCatalog';
@@ -12,18 +15,18 @@ import './match-hud.css';
 
 const teamColors=['#45d4ee','#ff6895'];
 const grade=(n:number)=>n>=.92?'S':n>=.84?'A':n>=.75?'B':n>=.66?'C':n>=.57?'D':'E';
-function Portrait({player,sport}:{player:Athlete;sport:'baseball'|'soccer'}){
- const h=specialHero(player.hero);
- return <span className="ac-bc-portrait" aria-hidden="true" style={{backgroundImage:`url(${assetUrl(`sprites/academy-sports/cutins/cast-${h.sheet}-v1.webp`)})`,backgroundSize:`300% ${h.rows*100}%`,backgroundPosition:`${sport==='baseball'?0:50}% ${h.row/(h.rows-1)*100}%`}}/>;
+function Portrait({player,sport,kind}:{player:Athlete;sport:'baseball'|'soccer';kind:string}){
+ const art=specialArt(player.hero,sport,kind==='batter'?'drive':undefined);
+ return <span className="ac-bc-portrait" aria-hidden="true" style={{backgroundImage:`url(${assetUrl(art.path)})`,backgroundSize:art.size,backgroundPosition:art.position}}/>;
 }
 function PlayerCard({player,sport,kind,languageMode,children}:{player:Athlete;sport:'baseball'|'soccer';kind:string;languageMode:LanguageMode;children:React.ReactNode}){
  const name=trans(PROTAGONISTS.find(p=>p.id===player.hero)?.name||player.name,languageMode);
  return <section className={'ac-bc-player ac-bc-'+kind} style={{'--side':teamColors[player.team]} as React.CSSProperties} aria-label={name} data-player={player.id}>
-  <Portrait player={player} sport={sport}/><div className="ac-bc-player-copy"><div className="ac-bc-player-name"><b>{kind==='pitcher'?'P':kind==='batter'?'BAT':player.role}</b><span>{name}</span><small>#{player.slot+1}</small></div>{children}</div>
+  <Portrait player={player} sport={sport} kind={kind}/><div className="ac-bc-player-copy"><div className="ac-bc-player-name"><b>{kind==='pitcher'?'P':kind==='batter'?'BAT':player.role}</b><span>{name}</span><small>#{player.slot+1}</small></div>{children}</div>
  </section>;
 }
 function SoccerRadar({match,languageMode}:{match:Extract<Match,{sport:'soccer'}>;languageMode:LanguageMode}){
- const L=local(languageMode),x=(z:number)=>6+(33-z)/66*88,y=(x:number)=>5+(x+21)/42*50;
+ const L=local(languageMode),x=(z:number)=>6+(SOCCER_FIELD.length-z)/(SOCCER_FIELD.length*2)*88,y=(x:number)=>5+(x+SOCCER_FIELD.width)/(SOCCER_FIELD.width*2)*50;
  return <figure className="ac-bc-radar" aria-label={L('選手とボールの位置','Player and ball positions','せんしゅとボールのいち')}><svg viewBox="0 0 100 60" role="img" aria-label={L('戦術ミニマップ','Tactical minimap','せんじゅつミニマップ')}>
   <title>{L('青と桃色の点は各チーム、金色はボール。白い輪は操作選手。','Blue and pink: teams. Gold: ball. White ring: controlled player.','あおとももいろのてんはかくチーム、きんいろはボール。しろいわはそうさせんしゅ。')}</title>
   <rect className="ac-radar-field" x="6" y="5" width="88" height="50"/><path d="M50 5V55 M6 16H20V44H6 M94 16H80V44H94 M6 24H11V36H6 M94 24H89V36H94"/><circle className="ac-radar-line" cx="50" cy="30" r="7"/>
@@ -33,6 +36,7 @@ function SoccerRadar({match,languageMode}:{match:Extract<Match,{sport:'soccer'}>
 }
 export default function MatchHud({match,languageMode}:{match:Match;languageMode:LanguageMode}){
  const L=local(languageMode),C=(v:readonly[string,string,string])=>L(...v);
+ if(match.sport==='volleyball')return <VolleyballHud match={match} languageMode={languageMode}/>;
  if(match.sport==='baseball'){
   const pitcher=match.players.find(p=>p.id===match.pitcher)!,batter=match.players.find(p=>p.id===match.bat)!;
   const speed=match.pitchSpeedKmh;

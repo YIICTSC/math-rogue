@@ -1,0 +1,90 @@
+{
+  "generator": "ImageGen",
+  "entries": [
+    {
+      "kind": "batting",
+      "group": 0,
+      "source": "/workspace/generated_images/exec-aa3e5c27-1662-46f0-a6e9-07c0b8380c9e.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-0-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 1,
+      "source": "/workspace/generated_images/exec-1e656653-7e56-40df-ad99-02c8e95a87f5.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-1-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 2,
+      "source": "/workspace/generated_images/exec-1a7d51ed-2b68-484f-aa22-7d2205ef1f47.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-2-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 3,
+      "source": "/workspace/generated_images/exec-d58c1f0a-6afb-4c84-bdbf-8f0795333543.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-3-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 4,
+      "source": "/workspace/generated_images/exec-32f4e660-02cb-4ff7-b019-d846a637afe6.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-4-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 5,
+      "source": "/workspace/generated_images/exec-0677369d-a81b-4347-a1df-278f51bf9697.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-5-v1.webp",
+        "public/sprites/magic/characters/heroine-04-after.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 6,
+      "source": "/workspace/generated_images/exec-521912ed-30ab-49ca-95b1-2cb40171d982.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-6-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 7,
+      "source": "/workspace/generated_images/exec-9ab3caac-3274-4af0-aaf5-05b4e74de44c.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-7-v1.webp"
+      ]
+    },
+    {
+      "kind": "batting",
+      "group": 8,
+      "source": "/workspace/generated_images/exec-1178966b-ebd1-4c60-885b-ee85b3a34725.png",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-8-v1.webp"
+      ]
+    },
+    {
+      "kind": "madoka-pitch",
+      "source": "/workspace/generated_images/exec-14e1a2fd-c679-44f2-89e9-1d97cb676118.png"
+    },
+    {
+      "kind": "tsubasa-sports",
+      "source": "/workspace/generated_images/exec-593cfd5e-9bca-473c-84e5-469c8378b520.png"
+    },
+    {
+      "kind": "tsubasa-classic",
+      "source": "/workspace/generated_images/exec-6b98ed2e-8dd6-4822-bab0-a5ad8f5e4252.png"
+    }
+  ]
+}

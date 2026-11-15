@@ -94,7 +94,7 @@ export function baseballAction(s:Baseball,action:Action,input:Input=neutral()){
  if(!attack&&live&&autoFielding(s))return;
  if(attack&&live){if(action==='primary')action='advance';else if(action==='defend'||action==='alternate')action='retreat';}
  if(action==='alternate'){if(!attack){s.pitch=(s.pitch+1)%PITCHES.length;event(s,'whistle',PITCHES[s.pitch]);}else s.batMode=s.batMode==='contact'?'power':s.batMode==='power'?'bunt':'contact';return;}
- if(action==='special'){const p=attack?batter(s):pitcher(s);if((attack?['set','meter','windup','pitch']:['set','meter']).includes(s.stage)&&p.spirit>=SIGNATURE_COST&&!s.signatureReady?.[p.id]){s.signatureReady??={};s.signatureReady[p.id]=true;p.spirit-=SIGNATURE_COST;event(s,'whistle','必殺球を準備！',p.id);}return;}
+ if(action==='special'){const p=attack?batter(s):pitcher(s);if((attack?['set','meter','windup','pitch']:['set','meter']).includes(s.stage)&&p.spirit>=SIGNATURE_COST&&!s.signatureReady?.[p.id]){s.signatureReady??={};s.signatureReady[p.id]=true;p.spirit-=SIGNATURE_COST;event(s,'whistle',s.half===s.config.team?'必殺打を準備！':'必殺球を準備！',p.id);}return;}
  if(action==='switch'&&!attack&&live){const list=s.players.filter(p=>p.team!==s.half).sort((a,b)=>len(a.p,s.ball)-len(b.p,s.ball));s.fielder=list[(list.findIndex(p=>p.id===s.fielder)+1)%Math.min(3,list.length)].id;s.selected=s.fielder;}
  if(action==='primary'){
   if(battingHuman(s)&&s.stage==='pitch'){s.swingAt=s.clock;pose(batter(s),'swing',.4);}

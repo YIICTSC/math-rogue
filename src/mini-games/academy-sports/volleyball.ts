@@ -1,3 +1,4 @@
+import {VOLLEY_FIELD as F,VOLLEY_SCALE as V,volleyPosition} from './courts';
 import {specialHero,specialName,SIGNATURE_COST} from './specials';
 import {cpuLevel,cpuProfile,cpuRoll,cpuRunTo,cpuTarget} from './ai';
 import {core,athlete,vec,len,clamp,unit,event,stat,pose,tickCore,capture,replay,finish,move,runTo,physics,kickBall,morale,jump,hash,type Core,type Config,type Input,type Action,type Vec,type Athlete,controlInput,neutral} from './core';
@@ -5,22 +6,25 @@ export const SERVES=['通常サーブ','ジャンプサーブ','フローター'
 export const SETS=['通常トス','高いトス','クイック','バックトス','時間差'];
 export const ATTACKS=['クロス','ストレート','フェイント','ブロックアウト','強打','パイプ'];
 const side=(team:number)=>team===0?1:-1;
-export interface Volleyball extends Core {signatureReady?:Record<number,boolean>;buffers?:Record<number,number>;sport:'volleyball';points:number[];setNumber:number;server:number;serveSlot:number[];rotations:number[];stage:'serve'|'toss'|'rally';serveType:number;setType:number;attackType:number;contacts:number;contactTeam:number;lastContact:number;lastWasBlock:boolean;timer:number;rally:number;target:number;receiver:number;precision:number;buffer:number;serveAim:Vec;landing:Vec;link:boolean;}
-function home(team:number,slot:number,rotation=0){const i=(slot+rotation)%6;return vec([-3,0,3,3,0,-3][i],0,side(team)*[2,2,2,6,6,6][i]);}
+export interface VolleyPoint {team:number;at:number;reason:string;points:number[];set:number;wonSet:boolean;match:boolean;sideout:boolean;}
+export const volleySetTarget=(s:Volleyball)=>s.config.points===15||s.setNumber===s.config.sets&&s.config.sets>1?15:25;
+export interface Volleyball extends Core {setScores?:number[][];pointSerial?:number;lastPoint?:VolleyPoint;signatureReady?:Record<number,boolean>;buffers?:Record<number,number>;sport:'volleyball';points:number[];setNumber:number;server:number;serveSlot:number[];rotations:number[];stage:'serve'|'toss'|'rally';serveType:number;setType:number;attackType:number;contacts:number;contactTeam:number;lastContact:number;lastWasBlock:boolean;timer:number;rally:number;target:number;receiver:number;precision:number;buffer:number;serveAim:Vec;landing:Vec;link:boolean;}
+function home(team:number,slot:number,rotation=0){const i=(slot+rotation)%6;return volleyPosition([-3,0,3,3,0,-3][i],0,side(team)*[2,2,2,6,6,6][i]);}
 export function createVolleyball(c:Config):Volleyball{
- const s=Object.assign(core(c),{sport:'volleyball' as const,points:[0,0],setNumber:1,server:0,serveSlot:[3,3],rotations:[0,0],stage:'serve' as const,serveType:0,setType:0,attackType:0,contacts:0,contactTeam:0,lastContact:-1,lastWasBlock:false,timer:0,rally:0,target:2,receiver:100,precision:1,buffer:0,serveAim:vec(1,0,-6),landing:vec(),link:false});
+ const s=Object.assign(core(c),{sport:'volleyball' as const,setScores:[] as number[][],pointSerial:0,points:[0,0],setNumber:1,server:0,serveSlot:[3,3],rotations:[0,0],stage:'serve' as const,serveType:0,setType:0,attackType:0,contacts:0,contactTeam:0,lastContact:-1,lastWasBlock:false,timer:0,rally:0,target:2,receiver:100,precision:1,buffer:0,serveAim:volleyPosition(1,0,-6),landing:vec(),link:false});
  for(let t=0;t<2;t++)for(let i=0;i<6;i++)s.players.push(athlete(t,i,['S','WS','MB','OP','L','WS'][i],home(t,i),c));resetRally(s);return s;
 }
 export function resetRally(s:Volleyball){
  for(const p of s.players){p.home=home(p.team,p.slot,s.rotations[p.team]);p.p={...p.home};p.v=vec();p.face=p.team===0?Math.PI:0;p.charge=0;delete p.cpuTarget;delete p.cpuAt;}
- const server=s.players.find(p=>p.id===s.server*100+s.serveSlot[s.server])!;server.p=vec(2,0,side(s.server)*10);s.stage='serve';s.contacts=0;s.lastContact=-1;s.lastWasBlock=false;s.contactTeam=s.server;s.timer=0;s.rally=0;s.buffer=0;s.link=false;s.signatureReady={};
- s.ball={...s.ball,x:server.p.x,y:1.2,z:server.p.z,vx:0,vy:0,vz:0,owner:server.id,team:server.team,last:server.id,special:false};s.serveAim=vec(-1,0,-side(s.server)*6);s.selected=s.config.team===s.server?server.id:s.config.team*100+4;
+ const server=s.players.find(p=>p.id===s.server*100+s.serveSlot[s.server])!;server.p=volleyPosition(2,0,side(s.server)*10);s.stage='serve';s.contacts=0;s.lastContact=-1;s.lastWasBlock=false;s.contactTeam=s.server;s.timer=0;s.rally=0;s.buffer=0;s.link=false;s.signatureReady={};
+ s.ball={...s.ball,x:server.p.x,y:1.2,z:server.p.z,vx:0,vy:0,vz:0,owner:server.id,team:server.team,last:server.id,special:false};s.serveAim=volleyPosition(-1,0,-side(s.server)*6);s.selected=s.config.team===s.server?server.id:s.config.team*100+4;
  event(s,'whistle','サーブでラリー開始',server.id);
 }
 export function volleyballPoint(s:Volleyball,team:number,reason:string){
- s.points[team]++;stat(s,team,'points');morale(s,team,12);const target=s.config.points===15||s.setNumber===s.config.sets&&s.config.sets>1?15:25;
+ s.points[team]++;stat(s,team,'points');morale(s,team,12);const target=volleySetTarget(s);
  const wonSet=s.points[team]>=target&&s.points[team]-s.points[1-team]>=2;
- if(wonSet){s.score[team]++;stat(s,team,'sets');if(s.score[team]>=Math.floor(s.config.sets/2)+1){event(s,'score',reason);finish(s);event(s,'cheer','マッチポイントを決めた！');return;}s.setNumber++;s.points=[0,0];}
+ s.lastPoint={team,at:s.clock,reason,points:[...s.points],set:s.setNumber,wonSet,match:wonSet&&s.score[team]+1>=Math.floor(s.config.sets/2)+1,sideout:s.server!==team};s.pointSerial=(s.pointSerial||0)+1;
+ if(wonSet){(s.setScores??=[]).push([...s.points]);s.score[team]++;stat(s,team,'sets');if(s.score[team]>=Math.floor(s.config.sets/2)+1){event(s,'score',reason);finish(s);event(s,'cheer','マッチポイントを決めた！');return;}s.setNumber++;s.points=[0,0];}
  if(s.server!==team){s.rotations[team]=(s.rotations[team]+1)%6;s.serveSlot[team]=(3-s.rotations[team]+6)%6;}s.server=team;
  replay(s,wonSet?'セット獲得！':reason,1.6);resetRally(s);event(s,'score',reason);
 }
@@ -30,7 +34,7 @@ function arc(s:Volleyball,p:Athlete,target:Vec,time:number,extra=0){
 export function landing(s:Volleyball):Vec{const b={...s.ball};for(let i=0;i<180;i++){physics(b,1/60,9.81,0);if(b.y<.2)return vec(b.x,0,b.z);}return vec(b.x,0,b.z);}
 function futureAt(b:Volleyball['ball'],seconds:number){return vec(b.x+b.vx*seconds,Math.max(0,b.y+b.vy*seconds-4.905*seconds*seconds),b.z+b.vz*seconds);}
 export function touch(s:Volleyball,p:Athlete,kind:'receive'|'set'|'spike'|'block',input:Input){
- const b=s.ball;if(p.cooldown>0||p.stun)return false;
+ const b=s.ball;if(p.cooldown>0||p.stun||p.spirit<5)return false;
  const error=len(p.p,b),height=b.y-p.p.y,range=kind==='receive'?(p.motion==='catch'?2.7:1.9)+(s.config.assist?.35:0):kind==='set'?1.8:2;
  if(error>range||height>(kind==='receive'?2.3:3.15)||height<.1){return false;}
  if(s.config.rules==='standard'&&p.id===s.lastContact&&!s.lastWasBlock){volleyballPoint(s,1-p.team,'ダブルコンタクト');return false;}
@@ -40,20 +44,20 @@ export function touch(s:Volleyball,p:Athlete,kind:'receive'|'set'|'spike'|'block
  }
  p.cooldown=.38;p.spirit=Math.max(0,p.spirit-5);const quality=clamp(1-error/range*.45-Math.abs(height-(kind==='receive'?1:2.6))*.12,0,1);s.precision=quality;
  if(kind==='receive'){
-  const setter=s.players.filter(q=>q.team===p.team&&q.id!==p.id).sort((a,b)=>(a.role==='S'?-10:0)-(b.role==='S'?-10:0)+len(a.p,vec(0,0,side(p.team)*2))-len(b.p,vec(0,0,side(p.team)*2)))[0];
-  const target=vec(setter.p.x*.3,2.6,side(p.team)*2.8);arc(s,p,target,1.02+(1-quality)*.25);s.receiver=setter.id;stat(s,p.team,'receives');pose(p,'receive',.55);morale(s,p.team,quality>.75?8:3);event(s,'catch',quality>.8?'ナイスレシーブ！':'レシーブ！',p.id);
+  const setter=s.players.filter(q=>q.team===p.team&&q.id!==p.id).sort((a,b)=>(a.role==='S'?-10:0)-(b.role==='S'?-10:0)+len(a.p,vec(0,0,side(p.team)*2*V))-len(b.p,vec(0,0,side(p.team)*2*V)))[0];
+  const target=vec(setter.p.x*.3,2.6,side(p.team)*2.8*V);arc(s,p,target,(1.02+(1-quality)*.25)*Math.sqrt(V));s.receiver=setter.id;stat(s,p.team,'receives');pose(p,'receive',.55);morale(s,p.team,quality>.75?8:3);event(s,'catch',quality>.8?'ナイスレシーブ！':'レシーブ！',p.id);
  }else if(kind==='set'){
   const choices=s.players.filter(q=>q.team===p.team&&q.id!==p.id&&q.role!=='L');let attacker=choices.find(q=>q.slot===s.target)||choices.sort((a,b)=>b.skills.power-a.skills.power)[0];
   const quick=s.setType===2,time=quick?.68:s.setType===1?1.35:s.setType===4?1.15:.95;
-  const back=s.setType===3||s.attackType===5,target=vec(s.setType===3?-2.5:attacker.home.x*.75,3.1,side(p.team)*(back?4:1.5));
-  arc(s,p,target,time);s.receiver=attacker.id;pose(p,'set',.55);stat(s,p.team,'setsMade');morale(s,p.team,quality>.75?9:4);event(s,'hit',SETS[s.setType],p.id);
+  const back=s.setType===3||s.attackType===5,target=vec(s.setType===3?-2.5*V:attacker.home.x*.75,3.1,side(p.team)*(back?4:1.5)*V);
+  arc(s,p,target,time*Math.sqrt(V));s.receiver=attacker.id;pose(p,'set',.55);stat(s,p.team,'setsMade');morale(s,p.team,quality>.75?9:4);event(s,'hit',SETS[s.setType],p.id);
  }else if(kind==='spike'){
-  if(s.config.rules==='standard'&&p.role==='L'&&b.y>2.43){volleyballPoint(s,1-p.team,'リベロのアタック反則');return false;}
+  if(s.config.rules==='standard'&&p.role==='L'&&b.y>F.net){volleyballPoint(s,1-p.team,'リベロのアタック反則');return false;}
   const sign=side(p.team),human=!!controlInput(s,p,input),profile=cpuProfile(s,p),salt=s.lastContact*31+(s.stats[p.team].spikes||0)*19;let target:Vec;
-  if(human)target=vec(clamp((input.aimX||input.x)*4,-4.1,4.1),0,-sign*(s.attackType===2?2.1:7));
-  else{const spots=[vec(-3.2,0,-sign*6.5),vec(3.2,0,-sign*6.5),vec(0,0,-sign*3)],readsGap=cpuRoll(s,p,salt)<[.12,.25,.5,.8][cpuLevel(s,p)];if(readsGap)spots.sort((a,b)=>{const nearest=(q:Vec)=>Math.min(...s.players.filter(x=>x.team!==p.team).map(x=>len(x.p,q)));return nearest(b)-nearest(a);});else spots.sort((a,b)=>a.x-b.x);target={...spots[readsGap?0:Math.floor(cpuRoll(s,p,salt+1)*3)]};}
-  if(s.attackType===1)target.x=clamp(b.x,-3.8,3.8);if(s.attackType===3)target.x=Math.sign(b.x||1)*4.45;
-  const charged=!!s.signatureReady?.[p.id],signature=specialHero(p.hero);const distance=len(b,target),speed=(s.attackType===2?9:15+quality*7+p.skills.power*4)*(s.link?1.12:1)*(charged?signature.speed:1)*(human?1:profile.volleyPower),time=clamp(distance/speed,charged?.26:.32,human?.7:.95);
+  if(human)target=vec(clamp((input.aimX||input.x)*4*V,-4.1*V,4.1*V),0,-sign*(s.attackType===2?2.1:7)*V);
+  else{const spots=[volleyPosition(-3.2,0,-sign*6.5),volleyPosition(3.2,0,-sign*6.5),volleyPosition(0,0,-sign*3)],readsGap=cpuRoll(s,p,salt)<[.12,.25,.5,.8][cpuLevel(s,p)];if(readsGap)spots.sort((a,b)=>{const nearest=(q:Vec)=>Math.min(...s.players.filter(x=>x.team!==p.team).map(x=>len(x.p,q)));return nearest(b)-nearest(a);});else spots.sort((a,b)=>a.x-b.x);target={...spots[readsGap?0:Math.floor(cpuRoll(s,p,salt+1)*3)]};}
+  if(s.attackType===1)target.x=clamp(b.x,-3.8*V,3.8*V);if(s.attackType===3)target.x=Math.sign(b.x||1)*(F.width-.05);
+  const charged=!!s.signatureReady?.[p.id],signature=specialHero(p.hero);const distance=len(b,target),speed=(s.attackType===2?9:15+quality*7+p.skills.power*4)*(s.link?1.12:1)*(charged?signature.speed:1)*(human?1:profile.volleyPower),time=clamp(distance/speed,charged?.26:.32,(human?.7:.95)*Math.sqrt(V));
   const dispersion=(1-quality)*(1-p.skills.control)*1.7;target.x+=Math.sin(p.id+s.rally)*dispersion;target.z+=Math.cos(p.id+s.rally)*dispersion;
   arc(s,p,target,time);b.power=speed*(charged?signature.power:1);b.special=charged||s.link;if(charged){b.spin=signature.curve*.65;delete s.signatureReady![p.id];stat(s,p.team,'signatures');}pose(p,'spike',.65);stat(s,p.team,'spikes');if(charged)event(s,'special',specialName(p.hero,'volleyball'),p.id,'spike');else if(s.link)event(s,'special',s.setType===2?'星継ぎクイック！':s.attackType===5?'宵風パイプ！':'双灯コンビネーション！',p.id);else event(s,'hit',ATTACKS[s.attackType]+'スパイク！',p.id);
  }else {b.vz=-b.vz*.72;b.vy=-3;b.team=p.team;b.last=p.id;s.lastContact=p.id;s.lastWasBlock=true;s.contacts=0;s.contactTeam=p.team;pose(p,'block',.6);stat(s,p.team,'blocks');morale(s,p.team,16);event(s,'catch','ブロック成功！',p.id);}
@@ -63,7 +67,7 @@ export function touch(s:Volleyball,p:Athlete,kind:'receive'|'set'|'spike'|'block
 function serveHit(s:Volleyball){
  const p=s.players.find(q=>q.id===s.ball.last)!,b=s.ball,charged=!!s.signatureReady?.[p.id],signature=specialHero(p.hero);const timing=Math.abs(b.y-(s.serveType===1?3.2:2.4));
  const quality=clamp(1-timing*.6,0,1);if(s.serveType===1&&p.p.y<.1)jump(p,6);b.y=Math.max(b.y,p.p.y+2.1);
- const time=s.serveType===1?.8:s.serveType===2?1.15:1.05;const target={...s.serveAim,y:.25},cpu=!controlInput(s,p,neutral());arc(s,p,target,(time+(1-quality)*.25)*(cpu?1+(1-cpuProfile(s,p).volleyPower)*.6:1)/(charged?signature.speed:1));b.spin=s.serveType===2?Math.sin(s.clock)*.6:0;b.power=17*(charged?signature.power:1);b.special=charged;if(charged){b.spin+=signature.curve*.65;delete s.signatureReady![p.id];stat(s,p.team,'signatures');}s.contacts=0;s.stage='rally';s.timer=0;s.lastContact=p.id;pose(p,'serve',.7);stat(s,p.team,'serves');event(s,charged?'special':'hit',charged?specialName(p.hero,'volleyball','JAPANESE','serve'):SERVES[s.serveType],p.id,charged?'serve':undefined);
+ const time=s.serveType===1?.8:s.serveType===2?1.15:1.05;const target={...s.serveAim,y:.25},cpu=!controlInput(s,p,neutral());arc(s,p,target,(time+(1-quality)*.25)*Math.sqrt(V)*(cpu?1+(1-cpuProfile(s,p).volleyPower)*.6:1)/(charged?signature.speed:1));b.spin=s.serveType===2?Math.sin(s.clock)*.6:0;b.power=17*(charged?signature.power:1);b.special=charged;if(charged){b.spin+=signature.curve*.65;delete s.signatureReady![p.id];stat(s,p.team,'signatures');}s.contacts=0;s.stage='rally';s.timer=0;s.lastContact=p.id;pose(p,'serve',.7);stat(s,p.team,'serves');event(s,charged?'special':'hit',charged?specialName(p.hero,'volleyball','JAPANESE','serve'):SERVES[s.serveType],p.id,charged?'serve':undefined);
 }
 export function volleyballAction(s:Volleyball,action:Action,input:Input){
  if(action==='next'){s.phaseTime=0;return;}if(s.phase!=='play')return;const p=s.players.find(q=>q.id===s.selected)!;if(!p)return;
@@ -83,10 +87,10 @@ export function volleyballAction(s:Volleyball,action:Action,input:Input){
 export function stepVolleyball(s:Volleyball,input:Input,dt:number){
  if(!tickCore(s,dt))return;capture(s,dt);s.timer+=dt;s.rally+=dt;if(s.buffers)for(const id of Object.keys(s.buffers))s.buffers[Number(id)]=Math.max(0,s.buffers[Number(id)]-dt);s.buffer=Math.max(0,s.buffer-dt);
  const b=s.ball,server=s.players.find(p=>p.id===s.server*100+s.serveSlot[s.server])!,human=s.online?server:s.players.find(p=>p.id===s.selected)!,serveInput=s.online?s.controls?.[server.id]||neutral():input,serverCpu=s.online?!s.controls?.[server.id]:s.config.mode==='watch'||s.server!==s.config.team;
- if(s.online&&s.stage!=='rally')for(const p of s.players){const control=s.controls?.[p.id];if(control&&p.id!==server.id){move(p,control.x,control.z,dt,control.dash);p.p.x=clamp(p.p.x,-4.4,4.4);p.p.z=clamp(p.p.z,p.team===0?.2:-8.8,p.team===0?8.8:-.2);}}
+ if(s.online&&s.stage!=='rally')for(const p of s.players){const control=s.controls?.[p.id];if(control&&p.id!==server.id){move(p,control.x,control.z,dt,control.dash);p.p.x=clamp(p.p.x,-F.width+.1,F.width-.1);p.p.z=clamp(p.p.z,p.team===0?.2:-F.length+.2,p.team===0?F.length-.2:-.2);}}
  if(s.stage==='serve'){
   if(serverCpu){if(s.timer>1){s.stage='toss';b.owner=-1;b.vy=5.5;b.y=1.7;s.timer=0;}}
-  else {human.p.x=clamp(human.p.x+serveInput.x*dt*3,-4,4);s.serveAim.x=clamp(s.serveAim.x+(serveInput.aimX||serveInput.x)*dt*2,-4,4);b.x=human.p.x;}
+  else {human.p.x=clamp(human.p.x+serveInput.x*dt*3,-F.width+.5,F.width-.5);s.serveAim.x=clamp(s.serveAim.x+(serveInput.aimX||serveInput.x)*dt*2,-F.width+.5,F.width-.5);b.x=human.p.x;}
   return;
  }
  if(s.stage==='toss'){
@@ -95,20 +99,20 @@ export function stepVolleyball(s:Volleyball,input:Input,dt:number){
  }
  const old={...b};physics(b,dt,9.81,0);s.landing=landing(s);
  const ballSide=b.z>=0?0:1;
- if(old.z*b.z<0&&Math.abs(b.x)<4.6){const alpha=old.z/(old.z-b.z),height=old.y+(b.y-old.y)*alpha;
-  if(height<2.43){b.z=Math.sign(old.z)*.08;b.vz=-b.vz*.2;b.vy=-1;event(s,'bounce','ネットに当たった！');}
+ if(old.z*b.z<0&&Math.abs(b.x)<F.width+.5*V){const alpha=old.z/(old.z-b.z),height=old.y+(b.y-old.y)*alpha;
+  if(height<F.net){b.z=Math.sign(old.z)*.08;b.vz=-b.vz*.2;b.vy=-1;event(s,'bounce','ネットに当たった！');}
   else {for(const p of s.players.filter(p=>p.team===ballSide&&Math.abs(p.p.z)<2&&p.motion==='block'))if(Math.abs(p.p.x-b.x)<.85&&height<2.3+p.p.y&&height>1.8){touch(s,p,'block',input);break;}}
  }
- if(b.y<=.12){const out=Math.abs(b.x)>4.5||Math.abs(b.z)>9;const winner=out?1-b.team:1-(b.z>=0?0:1);if(s.contacts===0&&s.lastContact>=0)stat(s,winner,'aces');if(b.power>17&&winner===b.team)stat(s,winner,'kills');volleyballPoint(s,winner,out?'アウト！':'ボールがコートに落ちた！');return;}
- if(Math.abs(b.x)>7||Math.abs(b.z)>13){volleyballPoint(s,1-b.team,'アウト！');return;}
+ if(b.y<=.12){const out=Math.abs(b.x)>F.width||Math.abs(b.z)>F.length;const winner=out?1-b.team:1-(b.z>=0?0:1);if(s.contacts===0&&s.lastContact>=0)stat(s,winner,'aces');if(b.power>17&&winner===b.team)stat(s,winner,'kills');volleyballPoint(s,winner,out?'アウト！':'ボールがコートに落ちた！');return;}
+ if(Math.abs(b.x)>F.width+2.5||Math.abs(b.z)>F.length+4){volleyballPoint(s,1-b.team,'アウト！');return;}
  const receivingTeam=s.contactTeam===ballSide&&s.contacts>0?ballSide:ballSide;
  const desired=s.contactTeam===receivingTeam&&s.contacts>0?s.receiver:s.players.filter(p=>p.team===receivingTeam&&p.id!==s.lastContact).sort((a,b)=>len(a.p,s.landing)-len(b.p,s.landing))[0].id;
  for(const p of s.players){
   p.spirit=Math.max(0,p.spirit-dt*(7+s.rally*.3));
   const control=controlInput(s,p,input),playerControlled=!!control;let target={...p.home};
-  if(p.id===desired){const future=futureAt(b,b.vy>0?.25:.08);target=vec(clamp(future.x,-4.3,4.3),0,clamp(future.z,receivingTeam===0?.4:-8.5,receivingTeam===0?8.5:-.4));}
-  else if(p.team!==receivingTeam&&p.role!=='L'&&s.contacts>=2){target=vec(clamp(b.x+(p.slot-1)*.8,-4,4),0,side(p.team)*.8);}
-  if(playerControlled){if(s.config.assist&&Math.hypot(control!.x,control!.z)<.1&&p.id===desired)runTo(p,target,dt);else move(p,control!.x,control!.z,dt,control!.dash);p.p.x=clamp(p.p.x,-4.4,4.4);p.p.z=clamp(p.p.z,p.team===0?.2:-8.8,p.team===0?8.8:-.2);
+  if(p.id===desired){const future=futureAt(b,b.vy>0?.25:.08);target=vec(clamp(future.x,-F.width+.2,F.width-.2),0,clamp(future.z,receivingTeam===0?.4:-F.length+.5,receivingTeam===0?F.length-.5:-.4));}
+  else if(p.team!==receivingTeam&&p.role!=='L'&&s.contacts>=2){target=vec(clamp(b.x+(p.slot-1)*.8,-F.width+.5,F.width-.5),0,side(p.team)*.8);}
+  if(playerControlled){if(s.config.assist&&Math.hypot(control!.x,control!.z)<.1&&p.id===desired)runTo(p,target,dt);else move(p,control!.x,control!.z,dt,control!.dash);p.p.x=clamp(p.p.x,-F.width+.1,F.width-.1);p.p.z=clamp(p.p.z,p.team===0?.2:-F.length+.2,p.team===0?F.length-.2:-.2);
    if((s.online?(s.buffers?.[p.id]||0):s.buffer)>0){const kind=s.contactTeam===p.team&&s.contacts>=2?'spike':s.contactTeam===p.team&&s.contacts===1?'set':'receive';if(touch(s,p,kind,s.controls?.[p.id]||input)){s.buffer=0;if(s.buffers)s.buffers[p.id]=0;}}
   }else {
    const profile=cpuProfile(s,p),level=cpuLevel(s,p);

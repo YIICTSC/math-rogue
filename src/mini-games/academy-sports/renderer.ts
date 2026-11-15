@@ -1,3 +1,4 @@
+import {SOCCER_FIELD,SOCCER_SCALE,VOLLEY_SCALE} from './courts';
 import {sportsPose} from './sportsMotion';
 import {specialHero} from './specials';
 import * as T from 'three';
@@ -42,7 +43,7 @@ export function createAcademyRenderer(canvas:HTMLCanvasElement,onStatus:(status:
  function releaseObject(root:T.Object3D){root.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.LineSegments){o.geometry.dispose();owned.delete(o.geometry);for(const m of[o.material].flat()){m.dispose();owned.delete(m);}}});}
  function loadVenue(name:string){if(venue===name)return;venue=name;venueReady=false;const token=++request;for(const child of [...environment.children])releaseObject(child);environment.clear();nets.length=0;
   loader.load(assetUrl(`models/academy-sports/${name}.glb`),g=>{collect(g.scene);if(disposed||token!==request){releaseObject(g.scene);return;}environment.add(g.scene);venueReady=true;
-   if(name==='soccer-stadium')for(const sign of[-1,1]){const positions:number[]=[];for(let i=0;i<=28;i++){const x=-4.2+i*.3;positions.push(x,0,sign*35,x,2.2,sign*35,x,2.2,sign*35,x,2.8,sign*33);}for(let i=0;i<=8;i++){const y=i*.275;positions.push(-4.2,y,sign*35,4.2,y,sign*35);}const geometry=own(new T.BufferGeometry());geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));const mesh=new T.LineSegments(geometry,own(new T.LineBasicMaterial({color:'#f7f5d7',transparent:true,opacity:.6})));mesh.userData.sign=sign;mesh.userData.original=new Float32Array(positions);environment.add(mesh);nets.push(mesh);}
+   if(name==='soccer-stadium')for(const sign of[-1,1]){const positions:number[]=[];for(let i=0;i<=28;i++){const x=-4.2+i*.3;positions.push(x,0,sign*(SOCCER_FIELD.length+2),x,2.2,sign*(SOCCER_FIELD.length+2),x,2.2,sign*(SOCCER_FIELD.length+2),x,2.8,sign*SOCCER_FIELD.length);}for(let i=0;i<=8;i++){const y=i*.275;positions.push(-4.2,y,sign*(SOCCER_FIELD.length+2),4.2,y,sign*(SOCCER_FIELD.length+2));}const geometry=own(new T.BufferGeometry());geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));const mesh=new T.LineSegments(geometry,own(new T.LineBasicMaterial({color:'#f7f5d7',transparent:true,opacity:.6})));mesh.userData.sign=sign;mesh.userData.original=new Float32Array(positions);environment.add(mesh);nets.push(mesh);}
   },undefined,()=>{failed=true;});
  }
  function prop(key:string,name:string,color?:string){let o=props.get(key);if(!o){o=clone(name,color);props.set(key,o);dynamic.add(o);}o.visible=true;return o;}
@@ -101,7 +102,7 @@ export function createAcademyRenderer(canvas:HTMLCanvasElement,onStatus:(status:
   if(selectedArrow.visible&&controlled){selectedArrow.position.set(controlled.p.x,controlled.p.y+3.0,controlled.p.z);}
   chargePath.visible=s.sport==='soccer'&&!!controlled&&s.ball.owner===controlled.id&&controlled.charge>0&&s.cinema<=0;
   if(chargePath.visible&&controlled&&s.sport==='soccer'){
-   const aim=s.controls?.[controlled.id]||s.lastInput,tx=(aim.aimX||aim.x)*3.65,tz=controlled.team===0?-33:33,dx=tx-s.ball.x,dz=tz-s.ball.z,distance=Math.hypot(dx,dz)||1,reach=Math.min(distance,5+controlled.charge*3);
+   const aim=s.controls?.[controlled.id]||s.lastInput,tx=(aim.aimX||aim.x)*3.65,tz=controlled.team===0?-SOCCER_FIELD.length:SOCCER_FIELD.length,dx=tx-s.ball.x,dz=tz-s.ball.z,distance=Math.hypot(dx,dz)||1,reach=Math.min(distance,5+controlled.charge*3);
    for(let i=0;i<16;i++){const t=i/15;chargePositions[i*3]=s.ball.x+dx/distance*reach*t;chargePositions[i*3+1]=.3+Math.sin(t*Math.PI)*controlled.charge*.2;chargePositions[i*3+2]=s.ball.z+dz/distance*reach*t;}
    chargeGeo.attributes.position.needsUpdate=true;chargeGeo.computeBoundingSphere();chargePath.computeLineDistances();
   }
@@ -128,10 +129,10 @@ export function createAcademyRenderer(canvas:HTMLCanvasElement,onStatus:(status:
    if(['set','meter','windup','pitch'].includes(s.stage)){const batting=s.half===s.config.team;targetPosition.set(batting?.8:-3.2,batting?1.8:3.1,batting?22.2:-6.8);look.set(0,1.1,batting?3:17);fov=batting?50:52;}
    else {targetPosition.set(point.x*.25+18,29,point.z*.2+35);look.set(point.x*.35,0,point.z*.45);fov=58;}
   }else if(s.sport==='soccer'){
-   if(camera.aspect>=1){targetPosition.set(32,24,point.z*.62);look.set(0,.6,point.z*.62);}else{targetPosition.set(point.x*.35,27,point.z*.65+26);look.set(point.x*.35,.5,point.z*.65);}canvas.dataset.courtOrientation=camera.aspect>=1?'horizontal':'vertical';fov=55;
-   if(s.phase==='replay'&&s.goalFlash>0&&!reduced){const end=Math.sign(point.z)||1;targetPosition.set(13,8,end*21);look.set(0,1,end*32);fov=49;}
+   const focusX=T.MathUtils.clamp((point.x*.65+(controlled?.p.x??point.x)*.35)*.55,-SOCCER_FIELD.width*.55,SOCCER_FIELD.width*.55),focusZ=T.MathUtils.clamp(point.z*.78+(controlled?.p.z??point.z)*.22,-SOCCER_FIELD.length+12,SOCCER_FIELD.length-12);if(camera.aspect>=1){targetPosition.set(focusX+40,30,focusZ);look.set(focusX,.6,focusZ);}else{targetPosition.set(focusX,32,focusZ+32);look.set(focusX,.5,focusZ);}canvas.dataset.courtOrientation=camera.aspect>=1?'horizontal':'vertical';fov=55;
+   if(s.phase==='replay'&&s.goalFlash>0&&!reduced){const end=Math.sign(point.z)||1;targetPosition.set(13,8,end*(SOCCER_FIELD.length-12));look.set(0,1,end*(SOCCER_FIELD.length-1));fov=49;}
    if(s.cinema>0&&s.pendingShot&&!reduced){const p=s.players.find(p=>p.id===s.pendingShot!.actor)!;const beat=1-s.cinema/.7;targetPosition.set(p.p.x+3.8-beat*1.2,2.4+beat*.6,p.p.z+4);look.set(p.p.x,.95,p.p.z);fov=43-beat*6;}
-  }else if(s.sport==='volleyball'){targetPosition.set(9,16,24);look.set(0,1.5,0);fov=44;}
+  }else if(s.sport==='volleyball'){if(camera.aspect>=1)targetPosition.set(22,19,3);else targetPosition.set(9*VOLLEY_SCALE,16*VOLLEY_SCALE,24*VOLLEY_SCALE);look.set(0,1.5,0);fov=camera.aspect>=1?36:44;canvas.dataset.courtOrientation=camera.aspect>=1?'horizontal':'vertical';}
   else if(s.phase==='finished'){targetPosition.set(9,8,17);look.set(0,1.4,0);fov=45;}
   else if(s.contest<2){const p=s.players.find(p=>p.id===s.selected)!;targetPosition.set(p.p.x*.4,7+p.p.y,p.p.z+13);look.set(p.p.x*.4,1,p.p.z-6);fov=56;}
   else {targetPosition.set(0,s.contest===2?17:21,25);look.set(0,s.contest===2?3:0,0);fov=48;}
@@ -143,8 +144,8 @@ export function createAcademyRenderer(canvas:HTMLCanvasElement,onStatus:(status:
   if(controlled){const projected=new T.Vector3(controlled.p.x,controlled.p.y+1.2,controlled.p.z).project(camera);canvas.dataset.controlledX=String(projected.x);canvas.dataset.controlledY=String(projected.y);}
 
   if(s.config.night){scene.background=nightSky;(scene.fog as T.Fog).color.set('#243d58');hemi.intensity=1.1;sun.intensity=2.1;}else{scene.background=daySky;(scene.fog as T.Fog).color.set('#bbd6cf');hemi.intensity=2.2;sun.intensity=3.2;}
-  const text=s.score.map((n,i)=>`TEAM ${i+1}  ${n}`).join('     ');if(boardText!==text){boardText=text;labelCtx.clearRect(0,0,1024,256);labelCtx.fillStyle='#113c4dec';labelCtx.fillRect(0,0,1024,256);labelCtx.fillStyle='#ffebae';labelCtx.font='bold 70px system-ui';labelCtx.textAlign='center';labelCtx.fillText(text,512,150,980);labelMap.needsUpdate=true;}
-  board.visible=s.sport!=='festival';board.position.set(0,s.sport==='baseball'?8:s.sport==='soccer'?9:5,s.sport==='baseball'?-52:s.sport==='soccer'?-40:-15);board.scale.set(s.sport==='volleyball'?9:15,s.sport==='volleyball'?2.25:3.75,1);
+  const text=s.sport==='volleyball'?`SET ${s.setNumber}     ${s.points[0]} : ${s.points[1]}`:s.score.map((n,i)=>`TEAM ${i+1}  ${n}`).join('     ');if(boardText!==text){boardText=text;labelCtx.clearRect(0,0,1024,256);labelCtx.fillStyle='#113c4dec';labelCtx.fillRect(0,0,1024,256);labelCtx.fillStyle='#ffebae';labelCtx.font='bold 70px system-ui';labelCtx.textAlign='center';labelCtx.fillText(text,512,150,980);labelMap.needsUpdate=true;}
+  board.visible=s.sport!=='festival';board.position.set(0,s.sport==='baseball'?8:s.sport==='soccer'?9:5,s.sport==='baseball'?-52:s.sport==='soccer'?-40*SOCCER_SCALE:-15*VOLLEY_SCALE);board.scale.set(s.sport==='volleyball'?9:15,s.sport==='volleyball'?2.25:3.75,1);
   renderer.render(scene,camera);if(cursor.visible){const projected=cursor.position.clone().project(camera);canvas.dataset.aimX=String(projected.x);canvas.dataset.aimY=String(projected.y);}else{delete canvas.dataset.aimX;delete canvas.dataset.aimY;}canvas.dataset.matchId=s.id;canvas.dataset.players=String(ready);canvas.dataset.total=String(total);canvas.dataset.venue=venue;canvas.dataset.renderer='three';canvas.dataset.selectedPose=rigs.get(s.selected)?.root.userData.sportsPose||'';
   const status:RenderStatus={ready:venueReady&&kitReady&&ready===total,players:ready,total,failed,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles};const signature=JSON.stringify([s.id,status.ready,ready,total,failed]);if(signature!==lastStatus){lastStatus=signature;onStatus(status);}
  }

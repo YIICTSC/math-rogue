@@ -1,0 +1,745 @@
+{
+  "generator": "ImageGen",
+  "batting": 35,
+  "corrections": 8,
+  "sources": [
+    {
+      "key": "batting-0",
+      "path": "assets/academy-sports/batting-art/originals/batting-0.png",
+      "sha256": "bc1b866d89ba9825cb33e6547bd7dab05a0da1a55add302c8bb0126cc805831e",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-0-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-1",
+      "path": "assets/academy-sports/batting-art/originals/batting-1.png",
+      "sha256": "de1d0786a5cf4ece366944a4fe650517e108d115142b070532d52ac4c8d24cc6",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-1-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-2",
+      "path": "assets/academy-sports/batting-art/originals/batting-2.png",
+      "sha256": "c38afce667f89aceb859f63bdc4f268b45093b2e7910b4039c351a5323fec363",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-2-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-3",
+      "path": "assets/academy-sports/batting-art/originals/batting-3.png",
+      "sha256": "28fab7f95f855560f56e289d104077c7c9acb11ef146472e717d87cffc84a447",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-3-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-4",
+      "path": "assets/academy-sports/batting-art/originals/batting-4.png",
+      "sha256": "0a0577faba4a83ecafbb6900f4e7f61dfb3142d023c93976df4fd98ac640b8ac",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-4-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-5",
+      "path": "assets/academy-sports/batting-art/originals/batting-5.png",
+      "sha256": "f42fb8983b2952ca1caa564ac033be26392cc21ebf1ec3e1a8d4de9d5ee7d32e",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-5-v1.webp",
+        "public/sprites/magic/characters/heroine-04-after.webp"
+      ]
+    },
+    {
+      "key": "batting-6",
+      "path": "assets/academy-sports/batting-art/originals/batting-6.png",
+      "sha256": "9cc1c2d502dfb91099f85073390c14fbfcfedc96f6f935abca275616d52db4f3",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-6-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-7",
+      "path": "assets/academy-sports/batting-art/originals/batting-7.png",
+      "sha256": "160623320131ed1a75c039511e67a00a7940c5e6bc757954650ffc99dcb59b3e",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-7-v1.webp"
+      ]
+    },
+    {
+      "key": "batting-8",
+      "path": "assets/academy-sports/batting-art/originals/batting-8.png",
+      "sha256": "7df62f0442609abdec5a376f277c5e39ea2b5714d00377895e4594e08acc0da0",
+      "references": [
+        "public/sprites/academy-sports/cutins/cast-8-v1.webp"
+      ]
+    },
+    {
+      "key": "madoka-pitch",
+      "path": "assets/academy-sports/batting-art/originals/madoka-pitch.png",
+      "sha256": "5ca79fbd99f65bf9ecf572bd4dfdca5fe4d46d6788a950a3b82129003b910b63",
+      "references": []
+    },
+    {
+      "key": "tsubasa-sports",
+      "path": "assets/academy-sports/batting-art/originals/tsubasa-sports.png",
+      "sha256": "a3a3b8ff97af432ccf2887408159239e07a9c1174eb328b5514d9ae5d5528e5b",
+      "references": []
+    },
+    {
+      "key": "tsubasa-classic",
+      "path": "assets/academy-sports/batting-art/originals/tsubasa-classic.png",
+      "sha256": "b2417fdff9bb1bafffed01f67cbe00b8b1f8369ada9bec4c0944a9ad5f5d5b2f",
+      "references": []
+    }
+  ],
+  "files": [
+    {
+      "hero": "elementary-warrior",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-warrior-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-0.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "f27cb036d8ba016e81d9b19a09d6fccb3cceb777c10613c953d334105c466675",
+      "bytes": 81894
+    },
+    {
+      "hero": "elementary-caretaker",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-caretaker-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-0.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "a24dfec414a6eef0b1c5cb85d829325ee5943667761f867c2c7322194a422f36",
+      "bytes": 84332
+    },
+    {
+      "hero": "elementary-assassin",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-assassin-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-0.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "037ba3c2c65ed4df552f5d3996a33e8f3cb92873bb63cea813341dd25edd4f2a",
+      "bytes": 79768
+    },
+    {
+      "hero": "elementary-dodgeball",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-dodgeball-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-0.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "c9b8f0b57dc6fc6b28c3399139726c1ad0282768b1f3e7838f3551c44ccfc114",
+      "bytes": 88030
+    },
+    {
+      "hero": "elementary-bard",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-bard-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-1.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "d349d26a4914c65ef5f7d03e3ede4e22fc36e36eaa6078bc03411d73065d878b",
+      "bytes": 75680
+    },
+    {
+      "hero": "elementary-librarian",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-librarian-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-1.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "a2ac83fa7362e22816b56cb07c1ed71b67a93d217f77a44233cb48e76d93abd2",
+      "bytes": 85128
+    },
+    {
+      "hero": "elementary-chef",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-chef-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-1.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "ea83f43facbc607dafae2e931949dce47344929e3e50f402fda8776f17d4b8ac",
+      "bytes": 83590
+    },
+    {
+      "hero": "elementary-gardener",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-gardener-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-1.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "e376823e5f41e45ba6b539c03183855f8fbfd49d196e9228a4f24c4fbc619211",
+      "bytes": 79482
+    },
+    {
+      "hero": "elementary-mage",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/elementary-mage-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-2.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "cd3259f99ecfe0bf28a102b55e4ea24133dc39dc4a069e61e93b57544d23d5e3",
+      "bytes": 85592
+    },
+    {
+      "hero": "high-school-warrior",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-warrior-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-2.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "eb4b6fa7370b12b2204f3260b3fafadea855d850bcea49f1291a79ad5b5f36a5",
+      "bytes": 82374
+    },
+    {
+      "hero": "high-school-caretaker",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-caretaker-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-2.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "1113e31e2c146991a918b18ce49658a34cb0f27e0bbf238204ef66be07cee2da",
+      "bytes": 95674
+    },
+    {
+      "hero": "high-school-assassin",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-assassin-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-2.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "7e25cfe2bb4cd60b48bf50f6098451c6cb53fb49e1b452184b1bc98833dcec25",
+      "bytes": 86450
+    },
+    {
+      "hero": "high-school-mage",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-mage-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-3.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "3b945d8e362f923daeff7eb8a80e0efbf30907ce9f72a5fd551cbacde8de315d",
+      "bytes": 92064
+    },
+    {
+      "hero": "high-school-dodgeball",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-dodgeball-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-3.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "4e1ecdb240465e705476085b161a03ce8101dce9b6ce5ae904be76efd6c0c76c",
+      "bytes": 91908
+    },
+    {
+      "hero": "high-school-bard",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-bard-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-3.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "9c31108f10e8325f3231783e4118b587acce07035eb8a810700203180e5086fa",
+      "bytes": 86976
+    },
+    {
+      "hero": "high-school-librarian",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-librarian-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-3.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "64bde9d49b02247a43c6471cf2ecf8f13caa13defab97484ee3d072c8af17c49",
+      "bytes": 88476
+    },
+    {
+      "hero": "high-school-chef",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-chef-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-4.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "ad7d1330b4764001d90bb59085c771bb7738d440e946a0f53e56bf64e5ed198d",
+      "bytes": 90870
+    },
+    {
+      "hero": "high-school-gardener",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/high-school-gardener-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-4.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "b2cfba350a1c1a145c65de54cbc7b978d1a5121d8e1f71d4b856040a96d16b04",
+      "bytes": 87958
+    },
+    {
+      "hero": "magic-akari",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-akari-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-4.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "454d9d091b89cb35592d332ed9c15bc5eb77c8c14f3758cad8d981c07da844ae",
+      "bytes": 96750
+    },
+    {
+      "hero": "magic-shizuku",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-shizuku-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-4.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "ebfcff1d1c60b72a772873faf09557979eccb9adedf8b478011c7b08c0e9a2f9",
+      "bytes": 96040
+    },
+    {
+      "hero": "magic-hiyori",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-hiyori-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-5.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "921fda76c50c76ed20108d97e98cb4c9e0737bdf51f5548c224e3fef2b417be4",
+      "bytes": 99804
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-tsubasa-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-5.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "1a70fbed34a6599a339377385bbc5a0fed571d06b0182ca12cd71d1d0a909144",
+      "bytes": 98426
+    },
+    {
+      "hero": "magic-rei",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-rei-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-5.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "810cb26ae087686636f873820e1b88248762150e4f2cf90c21a923ab3692402f",
+      "bytes": 99950
+    },
+    {
+      "hero": "magic-madoka",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-madoka-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-5.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "6bd80378273e3fa1f019aab2b9204a35ee5e3486a3ca1f80c8726e02291af5f0",
+      "bytes": 106808
+    },
+    {
+      "hero": "magic-koharu",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-koharu-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-6.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "6ed2cd446b1cfd1b56fcaee8a66a7fd9bf1c92bd15e5e6e239ea878135753a05",
+      "bytes": 91976
+    },
+    {
+      "hero": "magic-mirai",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-mirai-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-6.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "4c84ad7658045fb87a5e6a4739aa99e79f0197711dc0c9292375ed563b6cd444",
+      "bytes": 93656
+    },
+    {
+      "hero": "magic-sera",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-sera-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-6.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "803993132a64a1b188f7e72f21afb48d88f48e4d80ffe15cf36d082cab0b994a",
+      "bytes": 96864
+    },
+    {
+      "hero": "magic-ren",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-ren-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-6.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "97ba7d5274e287c84e417905b0e33f557753ebf0e8aae2a6f556d931946a85d6",
+      "bytes": 87910
+    },
+    {
+      "hero": "magic-soma",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-soma-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-7.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "38e0e799b303f9d01d5b0a642ef740e186101d4682f03b0482b6a0b1dc08e4d2",
+      "bytes": 91778
+    },
+    {
+      "hero": "magic-minato",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-minato-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-7.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "e72d379795fea3e110a0f539fa0cc4ee208aa88933cef4f7069d1e9399c9d3f8",
+      "bytes": 97048
+    },
+    {
+      "hero": "magic-riku",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-riku-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-7.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "a42440e82da397066b161a2e97356ce7b5f8cfdc6cd39e53b21f78e4f1be1012",
+      "bytes": 89690
+    },
+    {
+      "hero": "magic-yamato",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-yamato-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-7.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "e661690b37487d101f1f0fcb7cb85811baf6f3daef90551e340d491e0b329c9d",
+      "bytes": 94288
+    },
+    {
+      "hero": "magic-leon",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-leon-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-8.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "d8cc831e3d2652bfb646c53712801da893c8c44f6b7dbbda433681b05bfeabf4",
+      "bytes": 89874
+    },
+    {
+      "hero": "magic-elliot",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-elliot-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-8.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "d0ce58eb6432804160dc819aa05e0f81c13810b1e830b2c4abfa7b7632058f4b",
+      "bytes": 90514
+    },
+    {
+      "hero": "magic-sakuya",
+      "sport": "baseball",
+      "move": "drive",
+      "path": "public/sprites/academy-sports/cutins/batting/magic-sakuya-v1.webp",
+      "source": "assets/academy-sports/batting-art/originals/batting-8.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "795bbc29b8a64a15cddea002c600915cb7fd0848b9742efce93f1964c6484179",
+      "bytes": 95592
+    },
+    {
+      "hero": "magic-madoka",
+      "sport": "baseball",
+      "move": "pitch",
+      "path": "public/sprites/academy-sports/cutins/corrections/magic-madoka-baseball-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/madoka-pitch.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 1,
+        "rows": 1
+      },
+      "sha256": "b790a8c2f3108e35ff614d4d79951437e2488cac2b49a5bab9d392b795ac985d",
+      "bytes": 97312
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "baseball",
+      "move": "pitch",
+      "path": "public/sprites/academy-sports/cutins/corrections/magic-tsubasa-baseball-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-sports.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 3,
+        "rows": 1
+      },
+      "sha256": "177518bd32c348501d8a88e0c16acbc61294d67d55d1391e6904bcf93dd0723b",
+      "bytes": 81298
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "soccer",
+      "move": "shot",
+      "path": "public/sprites/academy-sports/cutins/corrections/magic-tsubasa-soccer-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-sports.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 3,
+        "rows": 1
+      },
+      "sha256": "81291417065b3eec3b67bc4bd27210f98e7b5687555db6e3f780795ec44c7dbc",
+      "bytes": 77812
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "volleyball",
+      "move": "spike",
+      "path": "public/sprites/academy-sports/cutins/corrections/magic-tsubasa-volleyball-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-sports.png",
+      "cell": {
+        "column": 2,
+        "row": 0,
+        "columns": 3,
+        "rows": 1
+      },
+      "sha256": "2e5b3dbd585b8e45e054b318270af7e591f4751082f0ac2eb07fa60e65349f99",
+      "bytes": 76968
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "golf",
+      "move": "special",
+      "path": "public/sprites/sports-cutins/corrections/magic-tsubasa-golf-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-classic.png",
+      "cell": {
+        "column": 0,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "dc4cf284cff2feee9ce14193d06ca30025fe73a7673f4300f9175dd9fd3a688b",
+      "bytes": 137332
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "tennis",
+      "move": "special",
+      "path": "public/sprites/sports-cutins/corrections/magic-tsubasa-tennis-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-classic.png",
+      "cell": {
+        "column": 1,
+        "row": 0,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "3c0fd9cf9aecce809f373d382cad00b798231d5d89e40b5d9decbe71c70f60b0",
+      "bytes": 178506
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "basketball",
+      "move": "special",
+      "path": "public/sprites/sports-cutins/corrections/magic-tsubasa-basketball-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-classic.png",
+      "cell": {
+        "column": 0,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "e73da3950a1f2d68499151e5d09c6e2bcbc01c5e6e525516b7754bb94e069367",
+      "bytes": 163552
+    },
+    {
+      "hero": "magic-tsubasa",
+      "sport": "dodgeball",
+      "move": "special",
+      "path": "public/sprites/sports-cutins/corrections/magic-tsubasa-dodgeball-v2.webp",
+      "source": "assets/academy-sports/batting-art/originals/tsubasa-classic.png",
+      "cell": {
+        "column": 1,
+        "row": 1,
+        "columns": 2,
+        "rows": 2
+      },
+      "sha256": "25edc1ebadce962ff014019828f9c5135527028adc98079b2eb7d12b4679d23b",
+      "bytes": 173300
+    }
+  ]
+}

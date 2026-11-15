@@ -68,6 +68,20 @@ def seats(x,z,rows=4,count=14,dx=1.5,dz=-1.4):
   for i in range(count):
    xx=x+(i-(count-1)/2)*dx;zz=z+row*dz;box('Venue',(xx,1.5+row*.7,zz),(.85,.18,.8),'teal' if(i+row)%3 else 'gold',.08);box('Venue',(xx,1.85+row*.7,zz-front*.35),(.85,.65,.14),'navy',.06)
   rod('Venue',(x-count*dx/2,2+row*.7,z+row*dz+front*.8),(x+count*dx/2,2+row*.7,z+row*dz+front*.8),.035,'steel')
+def expand_court(sport):
+ # Shared dimensions keep Blender lines and the authoritative game bounds aligned.
+ dimensions=json.loads(Path('src/mini-games/academy-sports/courtDimensions.json').read_text())[sport]
+ scale=math.sqrt(dimensions['areaMultiplier']);ground=Matrix.Diagonal((scale,scale,1,1))
+ for name,objects in groups.items():
+  for o in objects:
+   if name=='GoalFrame':
+    # Goal mouths stay human-sized; only move each frame to its new goal line.
+    o.location.y+=math.copysign(33*(scale-1),o.location.y)
+   elif name in ['BenchLeft','BenchRight']:
+    center=28 if sport=='soccer' else 10
+    o.location.x+=math.copysign(center*(scale-1),o.location.x)
+   else:o.matrix_world=ground@o.matrix_world
+
 def football():
  # Keep the terrace below the turf: coplanar top faces flicker on mobile GPUs.
  reset();box('Venue',(0,-.31,0),(65,.5,92),'concrete',.5)
@@ -88,7 +102,7 @@ def football():
  for x in[-28,28]:
   bench((x,0,0),-math.copysign(math.pi/2,x),'BenchLeft' if x<0 else 'BenchRight');lamps(x,-30);lamps(x,30)
  box('Venue',(0,10,-42),(17,4,.8),'navy',.2);label('GAKURO  STADIUM',(0,10,-41.5),1.1)
- export('soccer-stadium')
+ expand_court('soccer');export('soccer-stadium')
 def baseball():
  reset();box('Venue',(0,-.3,-12),(150,.5,130),'grass',1)
  center=(0,.01,18);verts=[center]+[(math.sin(a)*66,.01,18-math.cos(a)*66)for a in[-math.pi/4+i*math.pi/64 for i in range(33)]];poly('Venue',verts,[(0,i,i+1)for i in range(1,33)],'grass2')
@@ -121,7 +135,7 @@ def gym():
  box('Venue',(0,5,-16),(29,10,.35),'concrete');box('Venue',(0,6,-15.7),(11,2,.2),'navy',.1);label('THE ACADEMY  /  VOLLEY',(0,6,-15.5),.65)
  for z in[-12,-6,0,6,12]:
   rod('Venue',(-13,10,z),(0,12,z),.12,'steel');rod('Venue',(0,12,z),(13,10,z),.12,'steel');box('Venue',(0,10.5,z),(5,.15,.45),'white',.03)
- export('volleyball-gym')
+ expand_court('volleyball');export('volleyball-gym')
 def race():
  reset();box('Venue',(0,-.3,-110),(48,.5,248),'grass');box('Venue',(0,-.01,-110),(12,.1,238),'concrete')
  for z in range(0,-231,-10):
