@@ -1,0 +1,362 @@
+{
+  "EXP_LOW": {
+    "sheet": "supporters",
+    "index": 0,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_ODD": {
+    "sheet": "supporters",
+    "index": 1,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_EVEN": {
+    "sheet": "supporters",
+    "index": 2,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_RAINBOW": {
+    "sheet": "supporters",
+    "index": 3,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_OPENING": {
+    "sheet": "supporters",
+    "index": 4,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_FINALE": {
+    "sheet": "supporters",
+    "index": 5,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_RECYCLE": {
+    "sheet": "supporters",
+    "index": 6,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_THRIFT": {
+    "sheet": "supporters",
+    "index": 7,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_DISTINCT": {
+    "sheet": "supporters",
+    "index": 8,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_DUO": {
+    "sheet": "supporters",
+    "index": 9,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_POCKET": {
+    "sheet": "supporters",
+    "index": 10,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_LIGHT": {
+    "sheet": "supporters",
+    "index": 11,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_ECHO": {
+    "sheet": "supporters",
+    "index": 12,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_EMBER": {
+    "sheet": "supporters",
+    "index": 13,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_PRISM": {
+    "sheet": "supporters",
+    "index": 14,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_INK": {
+    "sheet": "supporters",
+    "index": 15,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_LUCKY": {
+    "sheet": "supporters",
+    "index": 16,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_ANCHOR": {
+    "sheet": "supporters",
+    "index": 17,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_ACE": {
+    "sheet": "supporters",
+    "index": 18,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_TEN": {
+    "sheet": "supporters",
+    "index": 19,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_SMALL": {
+    "sheet": "supporters",
+    "index": 20,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_LESSON": {
+    "sheet": "supporters",
+    "index": 21,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_MARATHON": {
+    "sheet": "supporters",
+    "index": 22,
+    "columns": 6,
+    "rows": 4
+  },
+  "EXP_CONSTELLATION": {
+    "sheet": "supporters",
+    "index": 23,
+    "columns": 6,
+    "rows": 4
+  },
+  "STA_EXP_ECHO": {
+    "sheet": "items",
+    "index": 0,
+    "columns": 6,
+    "rows": 4
+  },
+  "STA_EXP_EMBER": {
+    "sheet": "items",
+    "index": 1,
+    "columns": 6,
+    "rows": 4
+  },
+  "STA_EXP_PRISM": {
+    "sheet": "items",
+    "index": 2,
+    "columns": 6,
+    "rows": 4
+  },
+  "STA_EXP_INK": {
+    "sheet": "items",
+    "index": 3,
+    "columns": 6,
+    "rows": 4
+  },
+  "STA_EXP_LUCKY": {
+    "sheet": "items",
+    "index": 4,
+    "columns": 6,
+    "rows": 4
+  },
+  "STA_EXP_ANCHOR": {
+    "sheet": "items",
+    "index": 5,
+    "columns": 6,
+    "rows": 4
+  },
+  "TXT_EXP_HIGH_CARD": {
+    "sheet": "items",
+    "index": 6,
+    "columns": 6,
+    "rows": 4
+  },
+  "TXT_EXP_PAIR": {
+    "sheet": "items",
+    "index": 7,
+    "columns": 6,
+    "rows": 4
+  },
+  "TXT_EXP_TWO_PAIR": {
+    "sheet": "items",
+    "index": 8,
+    "columns": 6,
+    "rows": 4
+  },
+  "TXT_EXP_THREE_OF_A_KIND": {
+    "sheet": "items",
+    "index": 9,
+    "columns": 6,
+    "rows": 4
+  },
+  "TXT_EXP_STRAIGHT": {
+    "sheet": "items",
+    "index": 10,
+    "columns": 6,
+    "rows": 4
+  },
+  "TXT_EXP_FLUSH": {
+    "sheet": "items",
+    "index": 11,
+    "columns": 6,
+    "rows": 4
+  },
+  "SPX_TRAINING": {
+    "sheet": "items",
+    "index": 12,
+    "columns": 6,
+    "rows": 4
+  },
+  "SPX_STEEL": {
+    "sheet": "items",
+    "index": 13,
+    "columns": 6,
+    "rows": 4
+  },
+  "SPX_DRAW": {
+    "sheet": "items",
+    "index": 14,
+    "columns": 6,
+    "rows": 4
+  },
+  "SPX_RESET": {
+    "sheet": "items",
+    "index": 15,
+    "columns": 6,
+    "rows": 4
+  },
+  "SPX_LUNCH": {
+    "sheet": "items",
+    "index": 16,
+    "columns": 6,
+    "rows": 4
+  },
+  "SPX_REVIEW": {
+    "sheet": "items",
+    "index": 17,
+    "columns": 6,
+    "rows": 4
+  },
+  "ENH_ECHO": {
+    "sheet": "items",
+    "index": 18,
+    "columns": 6,
+    "rows": 4
+  },
+  "ENH_EMBER": {
+    "sheet": "items",
+    "index": 19,
+    "columns": 6,
+    "rows": 4
+  },
+  "ENH_PRISM": {
+    "sheet": "items",
+    "index": 20,
+    "columns": 6,
+    "rows": 4
+  },
+  "ENH_INK": {
+    "sheet": "items",
+    "index": 21,
+    "columns": 6,
+    "rows": 4
+  },
+  "ENH_LUCKY": {
+    "sheet": "items",
+    "index": 22,
+    "columns": 6,
+    "rows": 4
+  },
+  "ENH_ANCHOR": {
+    "sheet": "items",
+    "index": 23,
+    "columns": 6,
+    "rows": 4
+  },
+  "PACK_EXP_HEART": {
+    "sheet": "packs",
+    "index": 0,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_BLACK": {
+    "sheet": "packs",
+    "index": 1,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_ACE": {
+    "sheet": "packs",
+    "index": 2,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_STUDY": {
+    "sheet": "packs",
+    "index": 3,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_CRAFT": {
+    "sheet": "packs",
+    "index": 4,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_CREW": {
+    "sheet": "packs",
+    "index": 5,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_ECHO": {
+    "sheet": "packs",
+    "index": 6,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_EMBER": {
+    "sheet": "packs",
+    "index": 7,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_PRISM": {
+    "sheet": "packs",
+    "index": 8,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_INK": {
+    "sheet": "packs",
+    "index": 9,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_LUCKY": {
+    "sheet": "packs",
+    "index": 10,
+    "columns": 4,
+    "rows": 3
+  },
+  "PACK_EXP_ANCHOR": {
+    "sheet": "packs",
+    "index": 11,
+    "columns": 4,
+    "rows": 3
+  }
+}

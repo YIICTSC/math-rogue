@@ -1,0 +1,23 @@
+[
+  {
+    "source": "assets/after-school-poker/expansion/supporters.png",
+    "output": "public/sprites/after-school-poker/expansion/supporters.webp",
+    "generator": "ImageGen",
+    "sha256": "7a43a1b0d22172261f49dd58bf8d8fdaadecf10cc441e07cec0e7f5faf457de3",
+    "count": 24
+  },
+  {
+    "source": "assets/after-school-poker/expansion/items.png",
+    "output": "public/sprites/after-school-poker/expansion/items.webp",
+    "generator": "ImageGen",
+    "sha256": "35eb6c176134dd911cb51f1870f43bbd3426d48b9190cfc1ce0e4ccb97a6414d",
+    "count": 24
+  },
+  {
+    "source": "assets/after-school-poker/expansion/packs.png",
+    "output": "public/sprites/after-school-poker/expansion/packs.webp",
+    "generator": "ImageGen",
+    "sha256": "bc7ec18c48fc96bb12aeeb5b97d02533644dc22ba0eb3b1f7f14c68079c31ff7",
+    "count": 12
+  }
+]

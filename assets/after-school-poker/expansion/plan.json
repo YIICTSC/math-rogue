@@ -1,0 +1,520 @@
+{
+  "supporters": [
+    {
+      "id": "EXP_LOW",
+      "name": "低学年の応援団",
+      "description": "2〜5の得点カード1枚につき基礎点+35",
+      "icon": "SMILE|#ffbc66",
+      "price": 6,
+      "rarity": "COMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_ODD",
+      "name": "奇数探偵",
+      "description": "得点カードがすべて奇数なら倍率+12",
+      "icon": "EYE|#bb99ff",
+      "price": 6,
+      "rarity": "COMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_EVEN",
+      "name": "偶数研究会",
+      "description": "得点カードがすべて偶数なら基礎点+160",
+      "icon": "ROBOT|#88ccff",
+      "price": 6,
+      "rarity": "COMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_RAINBOW",
+      "name": "虹色の旗手",
+      "description": "出したカードが4スートなら倍率x2.5",
+      "icon": "FLAG|#b5e88b",
+      "price": 9,
+      "rarity": "RARE",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_OPENING",
+      "name": "朝練キャプテン",
+      "description": "対戦の最初のプレイで倍率+15",
+      "icon": "SUN|#ffd85e",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_FINALE",
+      "name": "逆転の応援歌",
+      "description": "残り手数1で倍率x3",
+      "icon": "BELL|#ff8d99",
+      "price": 9,
+      "rarity": "RARE",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_RECYCLE",
+      "name": "リサイクル部長",
+      "description": "残り捨て回数1につき倍率+3",
+      "icon": "BACKPACK|#8ed5a9",
+      "price": 6,
+      "rarity": "COMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_THRIFT",
+      "name": "節約上手",
+      "description": "部活ポイントが5以下なら基礎点+180",
+      "icon": "GOLD_BAG|#e3bb73",
+      "price": 6,
+      "rarity": "COMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_DISTINCT",
+      "name": "個性派カルテット",
+      "description": "得点カードの異なるランク1種類につき倍率+3",
+      "icon": "SPARKLES|#f4abd6",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_DUO",
+      "name": "放課後デュオ",
+      "description": "ワンペアなら倍率x2.5",
+      "icon": "HUMANOID|#83c4e8",
+      "price": 8,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_POCKET",
+      "name": "ポケット図書室",
+      "description": "手元に残すクラブ1枚につき倍率+4",
+      "icon": "LIBRARIAN|#a0d390",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_LIGHT",
+      "name": "身軽な冒険者",
+      "description": "残り山札が25枚以下なら倍率x2",
+      "icon": "SHOE|#81d4ed",
+      "price": 8,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_ECHO",
+      "name": "反響マイク",
+      "description": "反響カード1枚につき倍率+8",
+      "icon": "BELL|#bdabff",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_EMBER",
+      "name": "焚き火当番",
+      "description": "成長カード1枚につき基礎点+90",
+      "icon": "FLAME|#ffa674",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_PRISM",
+      "name": "プリズム工房",
+      "description": "異なるスート1種類につき基礎点+45",
+      "icon": "GEM|#7fe0e4",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_INK",
+      "name": "書道の達人",
+      "description": "手元に残す墨カード1枚につき倍率x1.5",
+      "icon": "NOTEBOOK|#8793bf",
+      "price": 9,
+      "rarity": "RARE",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_LUCKY",
+      "name": "幸運の郵便屋",
+      "description": "幸運カードを得点に使うと部活ポイント+2",
+      "icon": "FLIER|#f6d175",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_ANCHOR",
+      "name": "錨の守り人",
+      "description": "錨カードを手元に残すと基礎点+120",
+      "icon": "SHIELD|#86c9da",
+      "price": 7,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_ACE",
+      "name": "エースの相棒",
+      "description": "得点に使うA1枚につき倍率+10",
+      "icon": "FIST|#ffbc78",
+      "price": 8,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_TEN",
+      "name": "十点満点の先生",
+      "description": "10・J・Q・K1枚につき基礎点+60",
+      "icon": "TEACHER|#f7a4a4",
+      "price": 8,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_SMALL",
+      "name": "小さな切り札",
+      "description": "1枚だけで得点すると倍率x3",
+      "icon": "GEM|#9bd6ff",
+      "price": 9,
+      "rarity": "RARE",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_LESSON",
+      "name": "復習の鬼",
+      "description": "役レベルを上げた回数1につき倍率+2",
+      "icon": "NOTEBOOK|#acb8f6",
+      "price": 8,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_MARATHON",
+      "name": "放課後マラソン",
+      "description": "この挑戦のプレイ累計1回につき基礎点+18",
+      "icon": "SHOE|#b9e49a",
+      "price": 8,
+      "rarity": "UNCOMMON",
+      "triggerOn": "HAND_PLAYED"
+    },
+    {
+      "id": "EXP_CONSTELLATION",
+      "name": "星座の導き手",
+      "description": "得点カード5枚のランクがすべて異なると倍率x3",
+      "icon": "ALIEN|#b8a1f8",
+      "price": 10,
+      "rarity": "RARE",
+      "triggerOn": "HAND_PLAYED"
+    }
+  ],
+  "consumables": [
+    {
+      "id": "STA_EXP_ECHO",
+      "type": "TAROT",
+      "name": "反響のしおり",
+      "description": "選んだカード1枚に「反響」を付与",
+      "price": 4,
+      "icon": "NOTEBOOK|#b7a8f5"
+    },
+    {
+      "id": "STA_EXP_EMBER",
+      "type": "TAROT",
+      "name": "成長のしおり",
+      "description": "選んだカード1枚に「成長」を付与",
+      "price": 5,
+      "icon": "NOTEBOOK|#b7a8f5"
+    },
+    {
+      "id": "STA_EXP_PRISM",
+      "type": "TAROT",
+      "name": "虹光のしおり",
+      "description": "選んだカード1枚に「虹光」を付与",
+      "price": 6,
+      "icon": "NOTEBOOK|#b7a8f5"
+    },
+    {
+      "id": "STA_EXP_INK",
+      "type": "TAROT",
+      "name": "墨のしおり",
+      "description": "選んだカード1枚に「墨」を付与",
+      "price": 4,
+      "icon": "NOTEBOOK|#b7a8f5"
+    },
+    {
+      "id": "STA_EXP_LUCKY",
+      "type": "TAROT",
+      "name": "幸運のしおり",
+      "description": "選んだカード1枚に「幸運」を付与",
+      "price": 5,
+      "icon": "NOTEBOOK|#b7a8f5"
+    },
+    {
+      "id": "STA_EXP_ANCHOR",
+      "type": "TAROT",
+      "name": "錨のしおり",
+      "description": "選んだカード1枚に「錨」を付与",
+      "price": 6,
+      "icon": "NOTEBOOK|#b7a8f5"
+    },
+    {
+      "id": "TXT_EXP_HIGH_CARD",
+      "type": "PLANET",
+      "name": "基礎演習ゼミ",
+      "description": "ハイカードを3レベル強化",
+      "price": 6,
+      "icon": "NOTEBOOK|#efc778"
+    },
+    {
+      "id": "TXT_EXP_PAIR",
+      "type": "PLANET",
+      "name": "ペア研究ゼミ",
+      "description": "ワンペアを3レベル強化",
+      "price": 6,
+      "icon": "NOTEBOOK|#efc778"
+    },
+    {
+      "id": "TXT_EXP_TWO_PAIR",
+      "type": "PLANET",
+      "name": "対の理論書",
+      "description": "ツーペアを3レベル強化",
+      "price": 6,
+      "icon": "NOTEBOOK|#efc778"
+    },
+    {
+      "id": "TXT_EXP_THREE_OF_A_KIND",
+      "type": "PLANET",
+      "name": "三重奏の楽譜",
+      "description": "スリーカードを3レベル強化",
+      "price": 6,
+      "icon": "NOTEBOOK|#efc778"
+    },
+    {
+      "id": "TXT_EXP_STRAIGHT",
+      "type": "PLANET",
+      "name": "連続数の研究",
+      "description": "ストレートを3レベル強化",
+      "price": 6,
+      "icon": "NOTEBOOK|#efc778"
+    },
+    {
+      "id": "TXT_EXP_FLUSH",
+      "type": "PLANET",
+      "name": "同色の画集",
+      "description": "フラッシュを3レベル強化",
+      "price": 6,
+      "icon": "NOTEBOOK|#efc778"
+    },
+    {
+      "id": "SPX_TRAINING",
+      "type": "SPECTRAL",
+      "name": "特訓ノート",
+      "description": "手札全てに基礎点+20",
+      "price": 5,
+      "icon": "NOTEBOOK|#a9cdf0"
+    },
+    {
+      "id": "SPX_STEEL",
+      "type": "SPECTRAL",
+      "name": "予備の定規",
+      "description": "手札の先頭1枚をスチールにする",
+      "price": 6,
+      "icon": "SHIELD|#a9cdf0"
+    },
+    {
+      "id": "SPX_DRAW",
+      "type": "SPECTRAL",
+      "name": "追加プリント",
+      "description": "山札から2枚引く（手札上限12）",
+      "price": 7,
+      "icon": "FLIER|#a9cdf0"
+    },
+    {
+      "id": "SPX_RESET",
+      "type": "SPECTRAL",
+      "name": "気分転換",
+      "description": "捨て回数+2、直前の役の記録を消す",
+      "price": 5,
+      "icon": "SPARKLES|#a9cdf0"
+    },
+    {
+      "id": "SPX_LUNCH",
+      "type": "SPECTRAL",
+      "name": "臨時の活動費",
+      "description": "部活ポイント+8",
+      "price": 6,
+      "icon": "GOLD_BAG|#a9cdf0"
+    },
+    {
+      "id": "SPX_REVIEW",
+      "type": "SPECTRAL",
+      "name": "総復習ノート",
+      "description": "基本6役を全て1レベル強化",
+      "price": 7,
+      "icon": "LIBRARIAN|#a9cdf0"
+    }
+  ],
+  "packs": [
+    {
+      "id": "PACK_EXP_HEART",
+      "name": "ハートの贈り物",
+      "description": "ハートの贈り物の候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 5,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_BLACK",
+      "name": "黒札セレクション",
+      "description": "黒札セレクションの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 5,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_ACE",
+      "name": "エースの切り札",
+      "description": "エースの切り札の候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 5,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_STUDY",
+      "name": "教科書セット",
+      "description": "教科書セットの候補3つから1つ選ぶ",
+      "type": "BUFF",
+      "size": 3,
+      "choose": 1,
+      "price": 5,
+      "icon": "NOTEBOOK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_CRAFT",
+      "name": "工房の道具箱",
+      "description": "工房の道具箱の候補3つから1つ選ぶ",
+      "type": "BUFF",
+      "size": 3,
+      "choose": 1,
+      "price": 5,
+      "icon": "NOTEBOOK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_CREW",
+      "name": "新入部員パック",
+      "description": "新入部員パックの候補3つから1つ選ぶ",
+      "type": "SUPPORTER",
+      "size": 3,
+      "choose": 1,
+      "price": 8,
+      "icon": "SMILE|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_ECHO",
+      "name": "反響パック",
+      "description": "反響カードの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 6,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_EMBER",
+      "name": "成長パック",
+      "description": "成長カードの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 6,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_PRISM",
+      "name": "虹光パック",
+      "description": "虹光カードの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 6,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_INK",
+      "name": "墨パック",
+      "description": "墨カードの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 6,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_LUCKY",
+      "name": "幸運パック",
+      "description": "幸運カードの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 6,
+      "icon": "BACKPACK|#e2bf77"
+    },
+    {
+      "id": "PACK_EXP_ANCHOR",
+      "name": "錨パック",
+      "description": "錨カードの候補3つから1つ選ぶ",
+      "type": "STANDARD",
+      "size": 3,
+      "choose": 1,
+      "price": 6,
+      "icon": "BACKPACK|#e2bf77"
+    }
+  ],
+  "enhancements": [
+    {
+      "id": "ENH_ECHO",
+      "name": "反響",
+      "description": "得点時、カード自身の基礎点をもう一度加算"
+    },
+    {
+      "id": "ENH_EMBER",
+      "name": "成長",
+      "description": "得点時、この挑戦のプレイ累計1回につき基礎点+12"
+    },
+    {
+      "id": "ENH_PRISM",
+      "name": "虹光",
+      "description": "得点時、異なる得点スート1種類につき倍率+2"
+    },
+    {
+      "id": "ENH_INK",
+      "name": "墨",
+      "description": "出さずに手元に残すと基礎点+45"
+    },
+    {
+      "id": "ENH_LUCKY",
+      "name": "幸運",
+      "description": "得点時、必ず部活ポイント+1"
+    },
+    {
+      "id": "ENH_ANCHOR",
+      "name": "錨",
+      "description": "出さずに手元に残すと倍率+3"
+    }
+  ]
+}
