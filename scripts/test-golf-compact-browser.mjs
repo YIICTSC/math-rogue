@@ -18,19 +18,28 @@ browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--
 const base=`http://127.0.0.1:${server.httpServer.address().port}/__performance`;
 await page.addInitScript(()=>{if(new URLSearchParams(location.search).has('specialTutorial'))localStorage.removeItem('gakuro-golf-special-tutorial-v2');else localStorage.setItem('gakuro-golf-special-tutorial-v2','done');if(new URLSearchParams(location.search).has('tutorial'))localStorage.removeItem('gakuro-golf-shot-tutorial-v1');else localStorage.setItem('gakuro-golf-shot-tutorial-v1','done');});
 for(const[width,height]of(process.env.GOLF_QA_SIZES?JSON.parse(process.env.GOLF_QA_SIZES):[[390,844],[844,390],[320,568],[568,320],[1280,720]])){
- await page.setViewportSize({width,height});await page.goto(base+'?sport=golf',{waitUntil:'domcontentloaded',timeout:120000});await page.locator('.gg-shot-settings').waitFor();
- assert.equal(await page.locator('.gg-shot-settings').getAttribute('open'),null);
- const dock=await page.locator('.gg-control-dock').boundingBox();assert(dock.x>=0&&dock.y>=0&&dock.x+dock.width<=width+1&&dock.y+dock.height<=height+1);
- assert(dock.width*dock.height/(width*height)<(width<height?.46:.29),'compact persistent controls: '+JSON.stringify(dock));
- for(const sel of ['.gg-shot-setup','.gg-shot-meter','.gg-meter-actions button']){const b=await page.locator(sel).boundingBox();assert(b&&b.y>=0&&b.y+b.height<=height+1);}
+ await page.setViewportSize({width,height});await page.goto(base+'?sport=golf',{waitUntil:'domcontentloaded',timeout:120000});await page.locator('.gg-club-switch select').waitFor();
+ assert.equal(await page.locator('.gg-shot-settings').count(),0,'No shot-settings accordion');
+ const setup=await page.locator('.gg-shot-setup').boundingBox(),contact=await page.locator('.gg-contact').boundingBox(),club=await page.locator('.gg-club-switch').boundingBox(),timing=await page.locator('.gg-shot-meter').boundingBox(),tools=await page.locator('.gg-course-tools').boundingBox();
+ assert(club.x<width*.12&&club.y>height*.6,'Club selection stays at lower left');assert(contact.y+contact.height<=club.y+1,'Contact is above club');assert(timing.x>=setup.x+setup.width,'Timing bar uses the remaining bottom width');
+ const area=[setup,timing,tools].reduce((sum,r)=>sum+r.width*r.height,0);assert(area/(width*height)<(width<height?.46:height<=400?.42:.29),'HUD leaves the course visible');
+ for(const sel of ['.gg-shot-setup','.gg-shot-meter','.gg-meter-actions button','.gg-course-tools']){const b=await page.locator(sel).boundingBox();assert(b&&b.x>=0&&b.y>=0&&b.x+b.width<=width+1&&b.y+b.height<=height+1,sel+' stays in viewport '+JSON.stringify(b));}
+ assert((await page.locator('.gg-star-gauge').boundingBox()).width>=70,'Energy gauge remains readable beside aiming');
  const color=await page.locator('.gg-meter-heading').evaluate(n=>getComputedStyle(n).color);assert(color==='rgb(23, 62, 52)','readable dark labels on cream: '+color);await page.screenshot({path:out+'/'+width+'x'+height+'.png'});
  await page.locator('.gg-minimap summary').click();const map=await page.locator('.gg-minimap svg').boundingBox();assert(map.x>=0&&map.y>=0&&map.x+map.width<=width+1&&map.y+map.height<=height+1,'open course map fits the screen');await page.locator('.gg-minimap summary').click();
- await page.locator('.gg-shot-settings summary').click();await page.locator('.gg-clubs button').nth(1).click();assert.equal(await page.locator('.gg-clubs button').nth(1).getAttribute('aria-pressed'),'true');
+ await page.getByLabel('クラブを変更',{exact:true}).selectOption('iron');assert.equal(await page.getByLabel('クラブを変更',{exact:true}).inputValue(),'iron');
  await page.locator('.gg-contact input').fill('0.5');await page.locator('.gg-aim-control input').fill('15');assert.equal(await page.locator('.gg-aim-control input').inputValue(),'15');
- const shot=await page.locator('.gg-shot-meter').boundingBox();assert(shot.y>=0&&shot.y+shot.height<=height+1,'timing card stays visible with settings open');await page.screenshot({path:out+'/'+width+'x'+height+'-settings.png'});
- await page.locator('.gg-meter-actions button').click();await page.waitForFunction(()=>document.querySelector('.gg-timing')?.getAttribute('data-active')==='true');assert.equal(await page.locator('.gg-shot-settings').getAttribute('open'),null,'settings close without resetting the active shot meter');
- await page.evaluate(()=>window.dispatchEvent(new CustomEvent('learning-rogue:golf-meter',{detail:'cancel'})));console.log('PASS compact golf',width,height);
+ await page.getByLabel('クラブを変更',{exact:true}).selectOption('putter');assert(await page.locator('.gg-contact input').isDisabled());assert.equal(await page.locator('.gg-contact input').inputValue(),'0');await page.getByLabel('クラブを変更',{exact:true}).selectOption('iron');
+ const glow=await page.locator('.gg-meter-track').evaluate(el=>getComputedStyle(el).animationName);assert.equal(glow,'gg-special-ready','Full special gauge lights the shot meter');
+ await page.evaluate(()=>{window.__room.world.players.local.starEnergy=.5;window.__repeat();});await page.waitForFunction(()=>document.querySelector('.gg-shot-meter').dataset.specialReady==='false');assert.equal(await page.locator('.gg-meter-track').evaluate(el=>getComputedStyle(el).animationName),'none');
+ await page.evaluate(()=>{window.__room.world.players.local.starEnergy=1;window.__repeat();});await page.waitForFunction(()=>document.querySelector('.gg-shot-meter').dataset.specialReady==='true');
+ await page.locator('.gg-meter-actions button').click();await page.waitForFunction(()=>document.querySelector('.gg-timing')?.getAttribute('data-active')==='true');assert(await page.getByLabel('クラブを変更',{exact:true}).isDisabled(),'Club cannot change mid-shot');assert(await page.locator('.gg-contact input').isDisabled());
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('learning-rogue:golf-meter',{detail:'cancel'})));console.log('PASS direct-club golf',width,height);
 }
+await page.setViewportSize({width:390,height:844});await page.goto(base+'?sport=golf');await page.locator('.gg-club-switch select').waitFor();await page.getByLabel('クラブを変更',{exact:true}).selectOption('iron');
+const contactBall=await page.locator('.gg-contact-ball').boundingBox();await page.mouse.move(contactBall.x+contactBall.width/2,contactBall.y+contactBall.height*.2);await page.mouse.down();await page.mouse.move(contactBall.x+contactBall.width/2,contactBall.y+contactBall.height*.85);await page.mouse.up();assert(Number(await page.locator('.gg-contact input').inputValue())<-.5,'Dragging contact ball changes spin');
+await page.evaluate(()=>window.__pause());assert(await page.getByLabel('クラブを変更',{exact:true}).isDisabled());assert(await page.locator('.gg-contact input').isDisabled());assert(await page.locator('.gg-aim-control input').isDisabled());await page.evaluate(()=>{window.__room.world.paused=false;window.__repeat();});
+await page.getByRole('button',{name:'コース全景',exact:true}).click();assert.equal(await page.locator('.gg-shot-controls').isVisible(),false);await page.getByRole('button',{name:'ボールを追う',exact:true}).click();assert(await page.locator('.gg-shot-controls').isVisible());
 await page.setViewportSize({width:390,height:844});await page.goto(base+'?sport=golf&tutorial=1');await page.locator('.gg-meter-tutorial').waitFor();await page.screenshot({path:out+'/tutorial.png'});await page.goto(base+'?sport=golf&specialTutorial=1');
 await page.getByText('必殺ゲージ満タン！パワーMAXと黄色で発動。外すと飛びすぎる危険！').waitFor();
 assert.equal(await page.getByRole('button',{name:/スターショット/}).count(),0);
@@ -42,5 +51,5 @@ assert.equal(await page.evaluate(()=>window.__commands.filter(c=>c.type==='shot'
 await page.waitForFunction(()=>document.querySelector('canvas')?.dataset.sportsFx==='true');
 await page.screenshot({path:out+'/special-fired.png'});
 console.log('PASS automatic special, guided power/yellow freeze, single shot, saved first-time completion and loaded Blender effect.');
-assert.deepEqual(errors,[]);console.log('PASS: compact portrait/landscape cards, working club/spin/aim, uninterrupted shot timing and first-shot tutorial.');
+await page.emulateMedia({reducedMotion:'reduce'});await page.goto(base+'?sport=golf');await page.locator('.gg-club-switch select').waitFor();assert.equal(await page.locator('.gg-meter-track').evaluate(el=>getComputedStyle(el).animationName),'none');assert.notEqual(await page.locator('.gg-meter-track').evaluate(el=>getComputedStyle(el).boxShadow),'none');assert.deepEqual(errors,[]);console.log('PASS direct club and always-visible contact, responsive bottom meter, energy-dependent glow, reduced motion and uninterrupted automatic special tutorial.');
 }catch(e){if(debugPage){await debugPage.screenshot({path:out+'/failure.png',timeout:10000}).catch(()=>{});console.error(await debugPage.locator('body').innerText().catch(()=>''));}throw e;}finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}

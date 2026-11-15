@@ -1,4 +1,8 @@
 const copy: [string, string, string][] = [
+  ['クラブと打点','Club and contact','クラブと だてん'],
+  ['クラブを変更','Change club','クラブを へんこう'],
+  ['タッチでクラブ変更','Tap to change club','タッチで クラブへんこう'],
+  ['パワーMAX＋黄色で必殺','MAX power + yellow for a special','パワーまっくすと きいろで ひっさつ'],
   ['練習ラウンド・公式スコアは確定済み','Practice round · official score locked','れんしゅうらうんど・こうしきすこあはかくていずみ'],
   ['ここがパワーMAX！押して決めよう','This is MAX power! Press to lock it.','ここがパワーまっくす！おしてきめよう'],
   ['強烈なスピンでカップを狙う！','Powerful spin pulls the ball toward the cup!','きょうれつなスピンで カップをねらう！'],
