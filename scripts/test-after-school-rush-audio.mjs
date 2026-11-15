@@ -4,13 +4,17 @@ import { execFileSync } from 'node:child_process';
 import vm from 'node:vm';
 import { build, transform } from 'esbuild';
 
-const bundled = await build({ stdin: { contents: `import {CATALOG} from './src/mini-games/after-school-rush/catalog';import {soundFor,actionVoiceFor} from './src/mini-games/after-school-rush/direction';import {musicFor} from './src/mini-games/after-school-rush/music';export const rows=CATALOG.map(entry=>({key:entry.key,family:entry.game.action.family,sounds:['start','action','score','hurt','clear'].flatMap(event=>[4,5].map(index=>soundFor(entry,event,index))).filter(Boolean),voices:[4,5].map(index=>actionVoiceFor(entry,index)).filter(Boolean),music:musicFor(entry)}));`, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, write: false, platform: 'node', format: 'esm', logLevel: 'silent' });
+const bundled = await build({ stdin: { contents: `import {CATALOG} from './src/mini-games/after-school-rush/catalog';import {soundFor,actionVoiceFor} from './src/mini-games/after-school-rush/direction';import {musicFor} from './src/mini-games/after-school-rush/music';export const rows=CATALOG.map(entry=>({key:entry.key,family:entry.game.action.family,sounds:['start','action','score','hurt','clear'].flatMap(event=>[4,5].map(index=>soundFor(entry,event,index))).filter(Boolean),actionSounds:[4,5].map(index=>soundFor(entry,'action',index)).filter(Boolean),voices:[4,5].map(index=>actionVoiceFor(entry,index)).filter(Boolean),music:musicFor(entry)}));`, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, write: false, platform: 'node', format: 'esm', logLevel: 'silent' });
 const { rows } = await import(`data:text/javascript;base64,${Buffer.from(bundled.outputFiles[0].text).toString('base64')}`);
 const tracked = new Set(execFileSync('git', ['ls-tree', '-r', '--name-only', 'HEAD', 'public/sfx'], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }).trim().split('\n'));
 const sounds = new Set(), voices = new Map();
 const newFamilies = new Set(['bat','rally','soccer','golf','kart','parry','grapple','fishing','mining','volley']);
 for (const row of rows) {
   assert(row.music?.type && row.music.options?.mode, row.key + ' has an explicit source soundtrack');
+  if (row.family === 'fishing') {
+    assert.deepEqual(row.actionSounds.map(sound => sound.path), ['sfx/rpg-fishing/reel.mp3','sfx/rpg-fishing/reel.mp3'], row.key + ' uses the reel SFX for both timing inputs');
+    assert.deepEqual(row.voices, [], row.key + ' has no character voice layered over reel input');
+  }
   for (const sound of row.sounds) { assert(tracked.has('public/' + sound.path), row.key + ': ' + sound.path); assert(sound.duration > 0 && sound.fallback); sounds.add(sound.path); }
   for (const [path, duration] of row.voices) { assert(tracked.has('public/' + path), row.key + ': ' + path); if (newFamilies.has(row.family)) voices.set(path, duration); }
 }

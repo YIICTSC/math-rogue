@@ -24,6 +24,7 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
   const field=useRef<HTMLDivElement>(null),[actorSize,setActorSize]=useState(72);
   useLayoutEffect(()=>{const node=field.current;if(!node)return;const measure=()=>setActorSize(Math.max(32,node.clientHeight*.2));measure();const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);observer?.observe(node);window.addEventListener('resize',measure);return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};},[]);
   const spec = entry.game.action!, w = actionWorld(spec, s), family = spec.family, t = s[S.T];
+  const integratedKartDriver = family === 'kart' && entry.key === 'gate/cross-5';
   const isSide = sideView(spec), cast = castFor(entry), a = t < s[S.A], b = t < s[S.B], hit = t - s[S.DAMAGE] < 900;
   const strikeDirection=useRef({at:-1,angle:0});
   if(action&&strikeDirection.current.at!==action.at){strikeDirection.current={at:action.at,angle:!isSide&&Math.hypot(s[S.AX],s[S.AY])>.1?Math.atan2(s[S.AY],s[S.AX])*180/Math.PI:s[S.FACING]<0?180:0};}
@@ -87,14 +88,14 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
       <div className="asr-action-player" data-facing={s[S.FACING]} data-pose={pose} data-vehicle={family==='brake'||family==='kart'||undefined} data-rolling={rolling && !outcome || undefined}
         data-dashing={b && ['run', 'climb', 'catch', 'chase', 'soccer'].includes(family) || undefined}
         data-guard={b && ['duel', 'dodge', 'collect', 'parry'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
-        <i className="asr-action-shadow" />
-        {family!=='flap'&&<RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
+        {!integratedKartDriver&&<i className="asr-action-shadow" />}
+        {family!=='flap'&&!integratedKartDriver&&<RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
           jumpVelocity={s[S.VY]}
           actionRemaining={pose === 'duck' ? (rolling ? s[S.A] : s[S.B]) - t : undefined}
           age={outcome ? feedbackElapsed : pose === 'walk' ? t : pose === 'duck'
             ? Math.max(0, t - (rolling ? s[S.A] - 260 : s[S.B] - 650))
             : action ? Math.max(0, t - action.at) : elapsed} />}
-        {family==='kart'&&<i className="asr-kart-body"><i/><i/></i>}
+        {family==='kart'&&<img className="asr-kart-vehicle" data-integrated-driver={integratedKartDriver||undefined} src={assetUrl(`sprites/after-school-rush/${integratedKartDriver?'kart-gate-driver-v1.webp':'kart-overhead-v1.webp'}`)} alt="" draggable={false}/>}
         {family==='brake'&&<Sprite name="truck" className="asr-action-vehicle"/>}
         {b && ['duel', 'dodge', 'collect', 'parry'].includes(family) && <Sprite name="shield" className="asr-action-shield" />}
         {family === 'catch' && a && <div className="asr-action-open-arms"><Sprite name="satchel" /><i /></div>}

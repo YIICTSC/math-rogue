@@ -126,7 +126,7 @@ export function soundFor(entry: Entry, event: RushAudioEvent, index = 4): RushFo
   if (sport) return foley(`academy-sports/${sport}/${event === 'start' ? 'whistle' : event === 'hurt' ? 'hurt' : event === 'clear' ? 'score' : event === 'score' ? 'hit' : secondary && family === 'volley' ? 'special' : 'hit'}`, event === 'clear' ? 700 : 350, event === 'clear' ? 'collect' : 'tap');
   if (family === 'golf') return event === 'clear' || event === 'score' ? foley('golf/cup', 650, 'collect')
     : event === 'hurt' ? foley('golf/ob', 400, 'tap') : event === 'start' ? foley('golf/start', 550, 'ready') : foley(secondary ? 'golf/putt' : 'golf/swing', 450, 'shot');
-  if (family === 'fishing') return foley(`rpg-fishing/${event === 'start' ? 'cast' : event === 'clear' ? 'catch' : event === 'score' ? 'perfect' : event === 'hurt' ? 'miss' : secondary ? 'bite' : 'reel'}`, event === 'clear' ? 850 : 400, event === 'clear' || event === 'score' ? 'collect' : 'water');
+  if (family === 'fishing') return foley(`rpg-fishing/${event === 'start' ? 'cast' : event === 'clear' ? 'catch' : event === 'score' ? 'perfect' : event === 'hurt' ? 'miss' : event === 'action' ? 'reel' : 'miss'}`, event === 'clear' ? 850 : 400, event === 'clear' || event === 'score' ? 'collect' : 'water');
   if (family === 'mining') return event === 'start' ? undefined : foley(event === 'clear' ? 'rpg-life/craft' : event === 'score' ? 'rpg-games/dozer-gem' : event === 'hurt' ? 'rpg-games/miss' : 'rpg-life/mine', event === 'clear' ? 650 : 300, event === 'score' ? 'collect' : 'gravel');
   if (family === 'kart') return event === 'action' ? foley('rpg-games/race-move', 300, secondary ? 'gravel' : 'dodge') : event === 'clear' ? foley('academy-sports/festival/score', 700, 'collect') : undefined;
   if (family === 'parry' || family === 'duel') return event === 'action' ? foley(`attack-effects/${secondary ? 'flash' : 'slash'}`, 250, secondary ? 'spark' : 'tap') : event === 'score' ? foley('attack-effects/critical', 300, 'snap') : undefined;
@@ -155,9 +155,10 @@ export function actionVoiceFor(entry: Entry, index = 4): Voice | undefined {
     const key = `${cast.id}/${sport}/action`, duration = (sportsVoiceDurations as Record<string, number>)[key];
     if (duration) return [`sfx/sports/${key}.ogg`, duration];
   }
+  if (family === 'fishing') return undefined;
   if (index === 5 && family !== 'mining') return undefined;
   if (family === 'kart' || family === 'grapple') return dash(cast.id, family === 'kart' ? 'dash' : 'flight', REUSED_VOICE_MS[cast.id][family === 'kart' ? 2 : 3]);
-  if (family === 'parry' || family === 'mining' || family === 'fishing') {
+  if (family === 'parry' || family === 'mining') {
     const attack = family === 'parry';
     return [`sfx/dungeons-chronicles/${cast.id}/${attack ? 'attack' : 'use'}.ogg`, REUSED_VOICE_MS[cast.id][attack ? 0 : 1]];
   }
@@ -198,7 +199,7 @@ export function directionFor(entry: Entry, index: number): Direction {
     if (family === 'kart') return { pose: index === 5 ? 'duck' : 'walk', cue: index === 5 ? 'gravel' : 'dodge', effect: index === 5 ? undefined : 'wind', effort: index !== 5 };
     if (family === 'parry') return { pose: index === 5 ? 'use' : 'strike', cue: index === 5 ? 'spark' : 'tap', effect: index === 5 ? 'flash' : 'slash', effort: index !== 5 };
     if (family === 'grapple') return { pose: 'jump', cue: 'jump', effect: 'wind', effort: index !== 5 };
-    if (family === 'fishing') return { pose: 'use', cue: 'water', effort: index !== 5 };
+    if (family === 'fishing') return { pose: 'use', cue: 'water' };
     if (family === 'mining') return { pose: 'strike', cue: 'gravel', effect: index === 5 ? 'shockwave' : 'impact', effort: true };
     if (index === 5) return family === 'rhythm' ? { pose: 'use', cue: 'beat' }
       : ['run', 'climb', 'catch', 'chase'].includes(family) ? { pose: 'walk', cue: 'dodge', effect: 'wind' }

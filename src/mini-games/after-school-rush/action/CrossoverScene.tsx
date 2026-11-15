@@ -11,6 +11,7 @@ function Ball({ p, kind }: { p: Point; kind: string }) { return <div className="
 /** Compact views of familiar sports, exploration and gathering systems. */
 export function CrossoverScene({ spec, state: s, world: w, mode }: { spec: ActionSpec; state: State; world: World; mode: LanguageMode }) {
  const f=spec.family,t=s[S.T],l=(ja:string,en:string,hira?:string)=>gameText(mode,[ja,en,hira]);
+ const kartFinishTop=-8+Math.max(0,Math.min(1,s[S.PROGRESS]/(1500*spec.goal)))*92;
  const sport=f==='bat'?'baseball':f==='soccer'?'soccer':f==='volley'?'volleyball':null;
  return <>
   {sport&&<span className="asr-crossover-action-art" style={{backgroundImage:`url(${assetUrl(`sprites/academy-sports/${sport}-actions-v1.webp`)})`}}/>}
@@ -21,7 +22,7 @@ export function CrossoverScene({ spec, state: s, world: w, mode }: { spec: Actio
    <svg className="asr-crossover-lines" viewBox="0 0 1000 600" preserveAspectRatio="none"><path d={`M140 470 Q490 100 ${w.goal.x} ${s[S.ANGLE]}`} strokeDasharray="10 16"/></svg>
    <Ball p={s[S.BALL_X]>=0?{x:s[S.BALL_X],y:s[S.BALL_Y]}:{x:140,y:470}} kind="golf"/>
    <div className="asr-crossover-meter"><b>{s[S.PHASE]===0?l('Aでショット開始','A: Start shot','Aでショットかいし'):s[S.PHASE]===1?l('黄色でパワー決定','Set power in yellow','きいろでパワーけってい'):s[S.PHASE]===2?l('中央でインパクト','Impact in the middle','ちゅうおうでインパクト'):l('飛んでいけ！','Fly!','とんでいけ！')}</b><div data-gauge={s[S.PHASE]===1?'power':'impact'}><i style={{left:`${golfMeter(s)*100}%`}}/></div></div></>}
-  {f==='kart'&&<><div className="asr-kart-road" style={{backgroundPositionY:`${s[S.PROGRESS]/3}px`}}><i/><i/></div><div className="asr-kart-finish" style={{top:`${Math.max(6,(1500*spec.goal-s[S.PROGRESS])/10)}%`}}/>{t<s[S.A]&&<div className="asr-kart-speedlines"/>}</>}
+  {f==='kart'&&<><div className="asr-kart-road" style={{backgroundPositionY:`${s[S.PROGRESS]/3}px`}}><i/><i/></div><div className="asr-kart-finish" style={{top:`${kartFinishTop}%`}}/>{t<s[S.A]&&<div className="asr-kart-speedlines"/>}</>}
   {f==='parry'&&<><div className="asr-parry-warning" data-ready={parryPhase(spec,t)>parryWindow(spec)[0]&&parryPhase(spec,t)<parryWindow(spec)[1]} style={at(w.enemy!)}><i style={{scale:String(.4+parryPhase(spec,t)/1500)}}/><Sprite name="mimic"/><b>{s[S.COMBO]>t?'A!':'B'}</b></div>{s[S.COMBO]>t&&<div className="asr-parry-counter">{l('反撃チャンス！','COUNTER!','はんげきチャンス！')}</div>}</>}
   {f==='grapple'&&<><div className="asr-grapple-abyss"/>{w.targets.map((p,i)=><div className="asr-grapple-anchor" key={i} style={at(p)}><Sprite name="hook"/><b>{i+1}</b></div>)}
    {s[S.PHASE]===1&&<svg className="asr-crossover-lines asr-grapple-rope" viewBox="0 0 1000 600" preserveAspectRatio="none"><line x1={s[S.X]} y1={s[S.Y]-55} x2={s[S.BALL_X]} y2={s[S.BALL_Y]}/></svg>}<div className="asr-grapple-exit" style={at(w.goal)}>★</div></>}
