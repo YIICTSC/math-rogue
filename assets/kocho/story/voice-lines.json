@@ -1,0 +1,140 @@
+{
+  "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+  "heroes": [
+    {
+      "id": "original",
+      "caption": "Japanese youthful male hero voice. Athletic, earnest, warm mid-high register with clear consonants and a powerful confident battle cry. A red-tracksuit school action hero. Clear, energetic action game delivery. No music or sound effects.",
+      "references": [
+        "assets/kocho/original-speaker.wav"
+      ],
+      "seed": 85000,
+      "lines": {
+        "original-8d7862ac125c": "放課後まで禁止なんて、足が勝手に抗議してる！校長先生、勝負だ！",
+        "original-bec25a322557": "俺の願いは、みんなで笑って帰ること。それだけは譲れない！",
+        "original-feeb37657657": "作戦は、前へ進んで、危なくなったら一歩下がる！",
+        "original-f86b7467b83b": "よし、名前はあとだ！足を動かしながら考える！",
+        "original-1cb58712e668": "これは俺の夕飯じゃない。勝利への燃料だ！",
+        "original-b6f54a89b96c": "半分こにしよう。腹も友情も、空っぽじゃ戦えない！",
+        "original-c81949165855": "応援で体育館が揺れてる！これ、俺が負けたら逆に危ないぞ！",
+        "original-0286516d7acc": "旗の数だけ、もうひと踏ん張りだ！",
+        "original-f5ad9b2643aa": "校長先生も、昔は放課後を守りたかったのかな。",
+        "original-9f204bd8087e": "だったら、拳より先に、気持ちを届ける勝負にする！",
+        "original-d1cbbd539bf6": "赤いジャージは目立つけど、今日は逃げない目印だ。",
+        "original-b99584113c4c": "みんな、帰り道の寄り道まで、一緒にな！",
+        "original-e53557b682d8": "校長先生！放課後の楽しさを、答案より大きな声で伝えに来た！",
+        "original-b3a289a0735d": "勝ったら、禁止じゃなくて、一緒に楽しむ約束をください！",
+        "original-e68dcd55ae92": "勝った！でも一番うれしいのは、みんながここにいることだ！",
+        "original-680ffd9175f8": "赤ジャージ、祝勝会の給食当番も引き受ける！おかわり自由だ！"
+      },
+      "synthesis_text": {
+        "original-680ffd9175f8": "赤ジャージ、しゅくしょうかいの給食当番も引き受ける！おかわり自由だ！"
+      }
+    },
+    {
+      "id": "rebel",
+      "caption": "Japanese youthful character voice. Preserve the speaker identity of the reference audio. Clear, energetic action game delivery. No music or sound effects.",
+      "references": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+        "public/sfx/high-school-voices/WARRIOR/power-1.ogg"
+      ],
+      "seed": 83000,
+      "lines": {
+        "rebel-781fc30bd0a0": "放課後禁止？その校則、俺たちの楽しみまで縛る気か。",
+        "rebel-fde2d970724a": "校長先生、正面から異議を申し立てる。拳は最後、話は最初だ。",
+        "rebel-71b57231442c": "正面突破にも段取りはいる。まず足元、その次に相手を見る。",
+        "rebel-20a1b5f5d35b": "会議名は反省会以外で頼む。まだ何もやってない。",
+        "rebel-5162f2023d63": "最後のパンか。妙だな、校長戦より緊張してきた。",
+        "rebel-e3800e79f58a": "全員分に分けるぞ。俺の分が小さい？それは遠近法だ。",
+        "rebel-53eabb01676e": "おい、応援幕に怖い顔を描くな。俺は敵役じゃない。",
+        "rebel-70418a3b21a2": "その声、ちゃんと届いてる。だから、一歩も引けないんだ。",
+        "rebel-cd8d1e63f66e": "この写真、校長先生も制服を着崩してるじゃないか。",
+        "rebel-aed774c18a11": "過去を笑うより、今の俺たちを見てもらおう。",
+        "rebel-b4d24ac6ab71": "自由って、好き勝手することだけじゃない。仲間の居場所も守ることだ。",
+        "rebel-bb86d935c6be": "帰ったら全員で飯だ。もちろん、反省会はなしで。",
+        "rebel-8b3e2cc1ed68": "叛逆ってのは、相手を黙らせることじゃない。届くまで立つことだ。",
+        "rebel-ad832e2d23e9": "校長先生。俺たちの放課後を、ちゃんと見てくれ！",
+        "rebel-666851253755": "勝ったのに、校長先生まで笑ってる。こういう決着も、悪くない。",
+        "rebel-853bdcac8f79": "祝勝会の看板、叛逆定食はやめろ。普通にうまそうな名前にしろ。"
+      },
+      "synthesis_text": {
+        "rebel-b4d24ac6ab71": "自由って、好き勝手することだけじゃない。仲間の居場所も、守ることだ。",
+        "rebel-8b3e2cc1ed68": "はんぎゃくってのは、相手を黙らせることじゃない。届くまで、立つことだ。",
+        "rebel-853bdcac8f79": "しゅくしょうかいの看板、はんぎゃく定食はやめろ。普通にうまそうな名前にしろ。"
+      }
+    },
+    {
+      "id": "akari",
+      "caption": "Japanese youthful female character voice. Preserve the speaker identity of the reference audio. Bright, clear, energetic action game delivery. No music or sound effects.",
+      "references": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg",
+        "public/sfx/magic-voices/AKARI/spell-1.ogg"
+      ],
+      "seed": 84000,
+      "lines": {
+        "akari-7c6b3016fc91": "放課後がなくなったら、星を見上げる約束もなくなっちゃう！",
+        "akari-ddd875e31f72": "校長先生、みんなのきらきらまで、しまわないでください！",
+        "akari-70b813c83c82": "作戦名は、きらきら校則見直し大作戦！ちょっと長い？",
+        "akari-2fd7db912034": "じゃあ、略してきら作！名前だけでも明るく行こう！",
+        "akari-4ebb63561ff8": "このパン、星形じゃないけど、すっごく輝いて見える！",
+        "akari-0ade8d5cc0e2": "みんなで分けたら、幸せも増える。魔法じゃなくてもね！",
+        "akari-3efe4d4bfea3": "応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？",
+        "akari-4b4de001d337": "怖いときは、ひとりで光らなくていい。みんな、ありがとう！",
+        "akari-c5386553fa0a": "昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。",
+        "akari-a7b72be585b6": "忘れた願いなら、もう一度一緒に思い出せばいいよ！",
+        "akari-0e43c4abc1f0": "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。",
+        "akari-8bc5a429b783": "この空の下に、みんなの居場所を残したい！",
+        "akari-2bef4215ab90": "校長先生！今日は、星よりまぶしい放課後のプレゼンです！",
+        "akari-c217f73d3ac3": "勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！",
+        "akari-05cb18c06c39": "やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！",
+        "akari-41e4bb13d56d": "校長先生の乾杯、星が一周しちゃう前にお願いしまーす！"
+      }
+    },
+    {
+      "id": "aster",
+      "caption": "Mature Japanese male fantasy protagonist. Warm grounded confident tenor, natural friendly comic timing. Preserve the reference speaker identity.",
+      "references": [
+        "assets/lantern-war/references/aster-fantasy-v3.ogg"
+      ],
+      "seed": 9345,
+      "anchor_text": "放課後の校庭に、小さな勇者たちの笑い声が響いた。",
+      "lines": {
+        "aster-a4782fe23071": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
+        "aster-8944c334bf33": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
+        "aster-6986d95ffd7c": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
+        "aster-0e3b4f1903c5": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。"
+      }
+    },
+    {
+      "id": "lyra",
+      "caption": "Mature Japanese female fantasy heroine. Warm poised clear expressive voice with playful friendly humor. Preserve the reference speaker identity.",
+      "references": [
+        "assets/lantern-war/references/lyra-fantasy-v3.ogg"
+      ],
+      "seed": 9345,
+      "anchor_text": "放課後の校庭に、小さな勇者たちの笑い声が響いた。",
+      "lines": {
+        "lyra-9b2932834dd6": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
+        "lyra-9d19e53ba248": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
+        "lyra-f6d16095e479": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
+        "lyra-e88a9aaab01e": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！"
+      }
+    },
+    {
+      "id": "narrator",
+      "caption": "Japanese mature male anime storyteller, warm clear mid-low register, dry playful comedic timing, gentle heartfelt narration. No music or effects.",
+      "references": [],
+      "seed": 9345,
+      "anchor_text": "放課後の校庭に、小さな勇者たちの笑い声が響いた。",
+      "lines": {
+        "narrator-1b865af99e1e": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+        "narrator-164424fd03bb": "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+        "narrator-7510670c21d2": "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+        "narrator-7ca8eb2f981e": "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+        "narrator-80504a2670be": "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+        "narrator-7b71ca7ac338": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+        "narrator-57033b383f97": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+        "narrator-5e339e7a1191": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。"
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import KochoStoryScreen,{kochoStoryReady} from '../mini-games/kocho/story/StoryScreen';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import ResponsiveTitleArt from '../mini-games/shared/ResponsiveTitleArt';
 import { findKochoSuper, kochoSuperCandidates, kochoSupers, resolveKochoSuper, superArtStyle, type KochoSuperMove } from '../mini-games/kocho/superMoves';
@@ -124,6 +125,7 @@ interface UpgradeOffer {
 }
 
 interface KochoGameState {
+    storySeen?:string[];
     heroId: KochoHeroId;
     focus: number;
     phase: GamePhase;
@@ -798,7 +800,7 @@ const KochoShowdown: React.FC<{
     const voiceMountedRef = useRef(true);
     const voiceStateRef = useRef({ hp: gameState.player.hp, status: gameState.status, hero: gameState.heroId });
     const playActionVoice = (action: KochoVoiceAction, hero = stateRef.current.heroId) => {
-        if (debugPreview || isUiPreview || !voiceMountedRef.current) return;
+        if (debugPreview || isUiPreview || !voiceMountedRef.current || storyActiveRef.current) return;
         const priority = action === 'victory' || action === 'defeat' ? 4
             : action === 'special' || action === 'item' ? 3
             : action === 'damage' ? 2 : 1;
@@ -835,7 +837,7 @@ const KochoShowdown: React.FC<{
             enemies: gameState.enemies.map(e => ({...e, intent: e.intent ? {...e.intent} : undefined})),
             turns: gameState.totalTurns, phase: gameState.phase,
         };
-        if (debugPreview || isUiPreview || document.hidden || !voiceMountedRef.current || gameState.phase !== 'BATTLE'
+        if (debugPreview || isUiPreview || document.hidden || !voiceMountedRef.current || storyActiveRef.current || gameState.phase !== 'BATTLE'
             || gameState.status === 'GAME_OVER' || gameState.status === 'VICTORY' || gameState.status === 'WAVE_CLEAR') return;
         const event = selectKochoEnemyVoice(before.phase === 'BATTLE' ? before.enemies : [], gameState.enemies, gameState.totalTurns !== before.turns);
         if (event) void audioService.playKochoEnemyVoice(event.name, event.action, event.priority);
@@ -875,6 +877,14 @@ const KochoShowdown: React.FC<{
     );
     const [kochoUnlockedCount, setKochoUnlockedCount] = useState(() => storageService.getUnlockedKochoCards().length);
     const [clearedHeroes, setClearedHeroes] = useState(() => storageService.getKochoClearedHeroes());
+    const storyActiveRef=useRef(false);
+    const [storyScene,setStoryScene]=useState<string|null>(null);
+    useEffect(()=>{if(!kochoStoryReady.ready||debugPreview||gameState.isEndless||gameState.phase==='SETUP')return;
+        const stage=gameState.status==='VICTORY'?8:gameState.phase==='BATTLE'?gameState.battleStage:0;
+        if(stage<1||stage>8)return;const id=gameState.heroId+'-'+stage;
+        if(!gameState.storySeen?.includes(id)){audioService.stopKochoVoices();storyActiveRef.current=true;setStoryScene(id);}
+    },[gameState.heroId,gameState.battleStage,gameState.status,gameState.phase,gameState.isEndless]);
+    const finishStory=()=>{const id=storyScene;storyActiveRef.current=false;setStoryScene(null);if(id)setGameState(prev=>({...prev,storySeen:[...new Set([...(prev.storySeen||[]),id])]}));};
     const [selectedHero, setSelectedHero] = useState<KochoHeroId>(() => initialKochoState.heroId);
     const [newlyUnlockedHero, setNewlyUnlockedHero] = useState<KochoHeroId | null>(null);
     const [setupPage, setSetupPage] = useState<'title' | 'hero'>('title');
@@ -1688,6 +1698,7 @@ const KochoShowdown: React.FC<{
     // --- ACTION HANDLERS ---
     
     const useConsumable = (index: number) => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (animating) return;
         const state = stateRef.current;
@@ -1759,6 +1770,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleMove = async (dir: -1 | 1) => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         const front = stateRef.current.player.pos + dir;
@@ -1802,6 +1814,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleTurn = async () => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
@@ -1827,6 +1840,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleWait = async () => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
@@ -1847,6 +1861,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleSwapPosition = async () => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
@@ -1899,6 +1914,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleQueueCard = async (card: KCard, idx: number) => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         if (card.currentCooldown > 0) {
@@ -1941,6 +1957,7 @@ const KochoShowdown: React.FC<{
     };
 
     const handleUnqueueCard = (idx: number) => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
@@ -1956,6 +1973,7 @@ const KochoShowdown: React.FC<{
     };
 
     const executeQueue = async () => {
+        if(storyActiveRef.current)return;
         if (showSuperGuide) return;
         if (stateRef.current.status !== 'PLAYING' || animating || stateRef.current.queue.length === 0) return;
         setAnimating(true);
@@ -3014,6 +3032,7 @@ const KochoShowdown: React.FC<{
     // --- MAIN RENDER ---
     return (
         <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="ios-edge-to-edge kocho-showdown-root flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
+            {storyScene&&<KochoStoryScreen key={storyScene} sceneId={storyScene} language={languageMode||'JAPANESE'} onDone={finishStory}/>}
             {showSuperGuide && <div className="kocho-super-modal" data-gamepad-modal role="dialog" aria-modal="true" aria-label={tr('超必殺技')} onKeyDown={e=>{if(e.key==='Escape'){e.stopPropagation();closeSuperGuide();}else if(e.key==='Tab'){e.preventDefault();e.currentTarget.querySelector<HTMLButtonElement>('button')?.focus();}}}>
                 <section className="kocho-super-guide">
                     <header><h2>{tr('超必殺技')}</h2><button data-gamepad-back data-gamepad-initial-choice autoFocus onClick={closeSuperGuide}>{tr('閉じる')}</button></header>

@@ -1,0 +1,7 @@
+import React,{useState}from'react';import{createRoot}from'react-dom/client';import{flushSync}from'react-dom';
+import StoryScreen,{kochoStoryScenes}from'../../src/mini-games/kocho/story/StoryScreen';
+import{audioService}from'../../src/services/audioService';import{useXboxControllerNavigation}from'../../src/hooks/useXboxControllerNavigation';import'../../src/styles.css';
+const params=new URLSearchParams(location.search),language=params.get('lang')==='en'?'ENGLISH':params.get('lang')==='hi'?'HIRAGANA':'JAPANESE';let resolveVoice:(v:boolean)=>void=()=>{},requests:string[]=[],stops=0;
+if(!params.has('audio')){audioService.canPlayConversationVoice=()=>true;audioService.playKochoStoryVoice=path=>{requests.push(path);return new Promise<boolean>(resolve=>{resolveVoice=resolve;});};audioService.stopKochoVoices=()=>{stops++;resolveVoice(false);};}
+function Harness(){useXboxControllerNavigation();const[scene,setScene]=useState<string|null>('original-1'),[done,setDone]=useState(0);Object.assign(window,{__story:{scene,done,scenes:kochoStoryScenes,get requests(){return requests;},get stops(){return stops;},completeVoice:()=>resolveVoice(true),setScene:(id:string)=>flushSync(()=>setScene(id))}});return <div style={{position:'relative',width:'100vw',height:'100dvh',background:'#101a2a'}}>{scene?<StoryScreen key={scene} sceneId={scene} language={language} onDone={()=>{setDone(n=>n+1);setScene(null);}}/>:<p>Finished</p>}</div>;}
+createRoot(document.getElementById('root')!).render(<Harness/>);

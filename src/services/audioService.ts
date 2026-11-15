@@ -2241,6 +2241,12 @@ class AudioService {
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
   }
 
+  public async playKochoStoryVoice(path:string){
+      if(!/^sfx\/kocho-story\/(original|rebel|akari|aster|lyra|narrator)\/[a-z0-9-]+\.ogg$/.test(path)||!this.canPlayConversationVoice())return false;
+      this.stopKochoVoices();this.init();if(!this.ctx||!this.sfxGain||this.isMuted)return false;
+      const name='kocho-voice-story-'+path,generation=(this.sfxPlaybackGenerations.get(name)??0)+1;this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(path))],19000,false,generation,true);
+  }
   private theaterVoiceRequest=0;
   public async playTheaterVoiceFile(id:string){
       this.stopLanternWarVoices();const ticket=this.theaterVoiceRequest;

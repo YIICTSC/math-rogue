@@ -1,0 +1,1058 @@
+[
+  {
+    "id": "original-1",
+    "hero": "original",
+    "stage": 1,
+    "title": "校長先生、異議あり！",
+    "englishTitle": "The Great School Appeal",
+    "image": "sprites/kocho/story/original-1.webp",
+    "artPrompt": "school gate at sunset, a comically enormous pile of school-rule papers, determined hero, warm heroic comedy",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+        "english": "At sunset, a ban on after-school activities sends our heroes into action.",
+        "voiceId": "narrator-1b865af99e1e",
+        "audio": "sfx/kocho-story/narrator/narrator-1b865af99e1e.ogg",
+        "hiragana": "ゆうがたのこうもん。とつぜんのほうかごきんしれいに、ゆうしゃたちがたちあがった。"
+      },
+      {
+        "speaker": "original",
+        "text": "放課後まで禁止なんて、足が勝手に抗議してる！校長先生、勝負だ！",
+        "english": "My feet object to banning after school! Principal, I challenge you!",
+        "voiceId": "original-8d7862ac125c",
+        "audio": "sfx/kocho-story/original/original-8d7862ac125c.ogg",
+        "hiragana": "ほうかごまできんしなんて、あしがかってにこうぎしてる！こうちょうせんせい、しょうぶだ！"
+      },
+      {
+        "speaker": "aster",
+        "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
+        "english": "A principal challenge? More paperwork than saving the world.",
+        "voiceId": "aster-a4782fe23071",
+        "audio": "sfx/kocho-story/aster/aster-a4782fe23071.ogg",
+        "hiragana": "こうちょうへのちょうせんか。せかいをすくうより、しんせいしょがおおそうだな。"
+      },
+      {
+        "speaker": "original",
+        "text": "俺の願いは、みんなで笑って帰ること。それだけは譲れない！",
+        "english": "I want everyone to walk home smiling. I will not back down!",
+        "voiceId": "original-bec25a322557",
+        "audio": "sfx/kocho-story/original/original-bec25a322557.ogg",
+        "hiragana": "おれのねがいは、みんなでわらってかえること。それだけはゆずれない！"
+      }
+    ],
+    "hiraganaTitle": "こうちょうせんせい、いぎあり！"
+  },
+  {
+    "id": "original-2",
+    "hero": "original",
+    "stage": 2,
+    "title": "階段は会議室ではありません",
+    "englishTitle": "Stairway Summit",
+    "image": "sprites/kocho/story/original-2.webp",
+    "artPrompt": "sunlit school stair landing, hero planning over notebook, playful diagrams without readable text",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+        "english": "Beyond the first challenge, an emergency meeting starts on the stairs.",
+        "voiceId": "narrator-164424fd03bb",
+        "audio": "sfx/kocho-story/narrator/narrator-164424fd03bb.ogg",
+        "hiragana": "さいしょのかんもんをぬけたいちぎょう。かいだんのおどりばで、きんきゅうさくせんかいぎがはじまる。"
+      },
+      {
+        "speaker": "original",
+        "text": "作戦は、前へ進んで、危なくなったら一歩下がる！",
+        "english": "Advance, and take one step back when things get dangerous!",
+        "voiceId": "original-feeb37657657",
+        "audio": "sfx/kocho-story/original/original-feeb37657657.ogg",
+        "hiragana": "さくせんは、まえへすすんで、あぶなくなったらいっぽさがる！"
+      },
+      {
+        "speaker": "lyra",
+        "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
+        "english": "Names matter, but naming this plan might take all afternoon.",
+        "voiceId": "lyra-9b2932834dd6",
+        "audio": "sfx/kocho-story/lyra/lyra-9b2932834dd6.ogg",
+        "hiragana": "さくせんめいはだいじよ。でも、なまえをきめるだけでげこうじきざになりそう。"
+      },
+      {
+        "speaker": "original",
+        "text": "よし、名前はあとだ！足を動かしながら考える！",
+        "english": "Names can wait! I will think on my feet!",
+        "voiceId": "original-f86b7467b83b",
+        "audio": "sfx/kocho-story/original/original-f86b7467b83b.ogg",
+        "hiragana": "よし、なまえはあとだ！あしをうごかしながらかんがえる！"
+      }
+    ],
+    "hiraganaTitle": "かいだんはかいぎしつではありません"
+  },
+  {
+    "id": "original-3",
+    "hero": "original",
+    "stage": 3,
+    "title": "購買のパンは世界を救う",
+    "englishTitle": "Bread Saves the Day",
+    "image": "sprites/kocho/story/original-3.webp",
+    "artPrompt": "school courtyard shop, one glorious bread roll on tray, hero dramatically reaching, funny heroic lighting",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+        "english": "Supplies await at the school shop. The last bread roll sparks a crisis.",
+        "voiceId": "narrator-7510670c21d2",
+        "audio": "sfx/kocho-story/narrator/narrator-7510670c21d2.ogg",
+        "hiragana": "こうばいまえでほきゅうをはっけん。しかしさいごのぱんには、ゆうしゃにもゆずれないじじょうがあった。"
+      },
+      {
+        "speaker": "original",
+        "text": "これは俺の夕飯じゃない。勝利への燃料だ！",
+        "english": "This is not dinner. It is fuel for victory!",
+        "voiceId": "original-1cb58712e668",
+        "audio": "sfx/kocho-story/original/original-1cb58712e668.ogg",
+        "hiragana": "これはおれのゆうはんじゃない。しょうりへのねんりょうだ！"
+      },
+      {
+        "speaker": "aster",
+        "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
+        "english": "I can draw a sword. Negotiating the last bread roll is harder.",
+        "voiceId": "aster-8944c334bf33",
+        "audio": "sfx/kocho-story/aster/aster-8944c334bf33.ogg",
+        "hiragana": "つるぎならぬける。だがさいごのやきそばぱんは、ぬきさしならないな。"
+      },
+      {
+        "speaker": "original",
+        "text": "半分こにしよう。腹も友情も、空っぽじゃ戦えない！",
+        "english": "Let us share it. Empty stomachs and lonely hearts cannot fight!",
+        "voiceId": "original-b6f54a89b96c",
+        "audio": "sfx/kocho-story/original/original-b6f54a89b96c.ogg",
+        "hiragana": "はんぶんこにしよう。はらもゆうじょうも、からっぽじゃたたかえない！"
+      }
+    ],
+    "hiraganaTitle": "こうばいのぱんはせかいをすくう"
+  },
+  {
+    "id": "original-4",
+    "hero": "original",
+    "stage": 4,
+    "title": "体育館で大作戦",
+    "englishTitle": "Gymnasium Strategy",
+    "image": "sprites/kocho/story/original-4.webp",
+    "artPrompt": "school gym, many colorful cheering flags, hero regaining resolve, golden afternoon rays",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+        "english": "The gym is close. At least the cheering squad is fully prepared.",
+        "voiceId": "narrator-7ca8eb2f981e",
+        "audio": "sfx/kocho-story/narrator/narrator-7ca8eb2f981e.ogg",
+        "hiragana": "たいいくかんまでこればあとすこし。なかまたちは、おうえんのじゅんびだけはかんぺきだった。"
+      },
+      {
+        "speaker": "original",
+        "text": "応援で体育館が揺れてる！これ、俺が負けたら逆に危ないぞ！",
+        "english": "Those cheers are shaking the gym! Losing might be dangerous!",
+        "voiceId": "original-c81949165855",
+        "audio": "sfx/kocho-story/original/original-c81949165855.ogg",
+        "hiragana": "おうえんでたいいくかんがゆれてる！これ、おれがまけたらぎゃくにあぶないぞ！"
+      },
+      {
+        "speaker": "lyra",
+        "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
+        "english": "I brought ten cheering flags. Never mind that we have fewer fighters.",
+        "voiceId": "lyra-9d19e53ba248",
+        "audio": "sfx/kocho-story/lyra/lyra-9d19e53ba248.ogg",
+        "hiragana": "おうえんはた、じゅうほんもってきたわ。たたかうにんずうよりおおいのは、きにしないで。"
+      },
+      {
+        "speaker": "original",
+        "text": "旗の数だけ、もうひと踏ん張りだ！",
+        "english": "One more push for every flag!",
+        "voiceId": "original-0286516d7acc",
+        "audio": "sfx/kocho-story/original/original-0286516d7acc.ogg",
+        "hiragana": "はたのかずだけ、もうひとふんばりだ！"
+      }
+    ],
+    "hiraganaTitle": "たいいくかんでだいさくせん"
+  },
+  {
+    "id": "original-5",
+    "hero": "original",
+    "stage": 5,
+    "title": "図書室の静かな決意",
+    "englishTitle": "Quiet Determination",
+    "image": "sprites/kocho/story/original-5.webp",
+    "artPrompt": "quiet school library, old photo album, hero thoughtful smile, tender dust-filled light",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+        "english": "Old meeting notes reveal the principal was once a challenger too.",
+        "voiceId": "narrator-80504a2670be",
+        "audio": "sfx/kocho-story/narrator/narrator-80504a2670be.ogg",
+        "hiragana": "としょしつでみつけたふるいぎじろく。そこには、こうちょうもむかしはちょうせんしゃだったとかかれていた。"
+      },
+      {
+        "speaker": "original",
+        "text": "校長先生も、昔は放課後を守りたかったのかな。",
+        "english": "Did the principal once want to protect afternoons too?",
+        "voiceId": "original-f5ad9b2643aa",
+        "audio": "sfx/kocho-story/original/original-f5ad9b2643aa.ogg",
+        "hiragana": "こうちょうせんせいも、むかしはほうかごをまもりたかったのかな。"
+      },
+      {
+        "speaker": "aster",
+        "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
+        "english": "Even the strongest started somewhere. Now it is your turn.",
+        "voiceId": "aster-6986d95ffd7c",
+        "audio": "sfx/kocho-story/aster/aster-6986d95ffd7c.ogg",
+        "hiragana": "つよいあいてにも、はじまりのいっぽがある。こんどはくんのばんだ。"
+      },
+      {
+        "speaker": "original",
+        "text": "だったら、拳より先に、気持ちを届ける勝負にする！",
+        "english": "Then this battle should deliver our feelings before our fists!",
+        "voiceId": "original-9f204bd8087e",
+        "audio": "sfx/kocho-story/original/original-9f204bd8087e.ogg",
+        "hiragana": "だったら、こぶしよりさきに、きもちをとどけるしょうぶにする！"
+      }
+    ],
+    "hiraganaTitle": "としょしつのしずかなけつい"
+  },
+  {
+    "id": "original-6",
+    "hero": "original",
+    "stage": 6,
+    "title": "屋上の約束",
+    "englishTitle": "Rooftop Promise",
+    "image": "sprites/kocho/story/original-6.webp",
+    "artPrompt": "school rooftop at golden hour, hero looking toward friends, gentle moving ribbons, hopeful expansive sky",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+        "english": "The rooftop wind lifts their worries. Their precious afternoons are within reach.",
+        "voiceId": "narrator-7b71ca7ac338",
+        "audio": "sfx/kocho-story/narrator/narrator-7b71ca7ac338.ogg",
+        "hiragana": "おくじょうにふくかぜが、ふあんをすこしだけつれていく。まもりたいほうかごは、もうすぐそこだ。"
+      },
+      {
+        "speaker": "original",
+        "text": "赤いジャージは目立つけど、今日は逃げない目印だ。",
+        "english": "This red tracksuit stands out. Today it means I will not run away.",
+        "voiceId": "original-d1cbbd539bf6",
+        "audio": "sfx/kocho-story/original/original-d1cbbd539bf6.ogg",
+        "hiragana": "あかいじゃーじはめだつけど、こんにちはにげないめじるしだ。"
+      },
+      {
+        "speaker": "lyra",
+        "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
+        "english": "Someone is waiting for you. That is stronger than any secret technique.",
+        "voiceId": "lyra-f6d16095e479",
+        "audio": "sfx/kocho-story/lyra/lyra-f6d16095e479.ogg",
+        "hiragana": "かえりをまつにんがいる。それって、どんなひっさつわざよりつよいおまもりよ。"
+      },
+      {
+        "speaker": "original",
+        "text": "みんな、帰り道の寄り道まで、一緒にな！",
+        "english": "Stay with me, even for the detour home!",
+        "voiceId": "original-b99584113c4c",
+        "audio": "sfx/kocho-story/original/original-b99584113c4c.ogg",
+        "hiragana": "みんな、かえりみちのよりみちまで、いっしょにな！"
+      }
+    ],
+    "hiraganaTitle": "おくじょうのやくそく"
+  },
+  {
+    "id": "original-7",
+    "hero": "original",
+    "stage": 7,
+    "title": "校長室、正面突破！",
+    "englishTitle": "The Principal Awaits",
+    "image": "sprites/kocho/story/original-7.webp",
+    "artPrompt": "ornate school principal office doorway, heroic student facing huge dignified principal silhouette, dramatic warm light",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+        "english": "The office door opens. Three deep breaths precede the final showdown.",
+        "voiceId": "narrator-57033b383f97",
+        "audio": "sfx/kocho-story/narrator/narrator-57033b383f97.ogg",
+        "hiragana": "ついにこうちょうしつのとびらがひらく。さいしゅうけっせんのまえに、さんにんふんのしんこきゅうがひびいた。"
+      },
+      {
+        "speaker": "original",
+        "text": "校長先生！放課後の楽しさを、答案より大きな声で伝えに来た！",
+        "english": "Principal! We came to speak up for our afternoons!",
+        "voiceId": "original-e53557b682d8",
+        "audio": "sfx/kocho-story/original/original-e53557b682d8.ogg",
+        "hiragana": "こうちょうせんせい！ほうかごのたのしさを、とうあんよりおおきなこえでつたえにきた！"
+      },
+      {
+        "speaker": "aster",
+        "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
+        "english": "Tell him what you want after winning. Defeating him is not the real goal.",
+        "voiceId": "aster-0e3b4f1903c5",
+        "audio": "sfx/kocho-story/aster/aster-0e3b4f1903c5.ogg",
+        "hiragana": "かったらねがいをつたえよう。こうちょうせんせいをたおすことが、もくてきじゃないだろ。"
+      },
+      {
+        "speaker": "original",
+        "text": "勝ったら、禁止じゃなくて、一緒に楽しむ約束をください！",
+        "english": "If we win, promise to enjoy them with us instead of banning them!",
+        "voiceId": "original-b3a289a0735d",
+        "audio": "sfx/kocho-story/original/original-b3a289a0735d.ogg",
+        "hiragana": "かったら、きんしじゃなくて、いっしょにたのしむやくそくをください！"
+      }
+    ],
+    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！"
+  },
+  {
+    "id": "original-8",
+    "hero": "original",
+    "stage": 8,
+    "title": "最高の放課後、開幕！",
+    "englishTitle": "Our Best Afternoon",
+    "image": "sprites/kocho/story/original-8.webp",
+    "artPrompt": "joyful school festival courtyard at sunset, victorious hero center, colorful confetti, friends sharing bread, principal holding a comically tiny celebratory teacup, heartfelt triumphant ending",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+        "english": "The challenge ends, and the restored afternoon rings with laughter louder than victory.",
+        "voiceId": "narrator-5e339e7a1191",
+        "audio": "sfx/kocho-story/narrator/narrator-5e339e7a1191.ogg",
+        "hiragana": "ちょうせんはおわった。とりもどしたほうかごには、しょうりよりおおきなわらいこえがあった。"
+      },
+      {
+        "speaker": "original",
+        "text": "勝った！でも一番うれしいのは、みんながここにいることだ！",
+        "english": "We won! But having everyone here matters even more!",
+        "voiceId": "original-e68dcd55ae92",
+        "audio": "sfx/kocho-story/original/original-e68dcd55ae92.ogg",
+        "hiragana": "かった！でもいちばんうれしいのは、みんながここにいることだ！"
+      },
+      {
+        "speaker": "lyra",
+        "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
+        "english": "We did it! Principal, please keep the victory toast under three minutes!",
+        "voiceId": "lyra-e88a9aaab01e",
+        "audio": "sfx/kocho-story/lyra/lyra-e88a9aaab01e.ogg",
+        "hiragana": "やったわね！こうちょうせんせい、しゅくしょうかいのかんぱいだけはさんぷんいないでおねがい！"
+      },
+      {
+        "speaker": "original",
+        "text": "赤ジャージ、祝勝会の給食当番も引き受ける！おかわり自由だ！",
+        "english": "This tracksuit hero will serve the victory feast! Seconds for everyone!",
+        "voiceId": "original-680ffd9175f8",
+        "audio": "sfx/kocho-story/original/original-680ffd9175f8.ogg",
+        "hiragana": "あかじゃーじ、しゅくしょうかいのきゅうしょくとうばんもひきうける！おかわりじゆうだ！"
+      }
+    ],
+    "hiraganaTitle": "さいこうのほうかご、かいまく！"
+  },
+  {
+    "id": "rebel-1",
+    "hero": "rebel",
+    "stage": 1,
+    "title": "校長先生、異議あり！",
+    "englishTitle": "The Great School Appeal",
+    "image": "sprites/kocho/story/rebel-1.webp",
+    "artPrompt": "school gate at sunset, a comically enormous pile of school-rule papers, determined hero, warm heroic comedy",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+        "english": "At sunset, a ban on after-school activities sends our heroes into action.",
+        "voiceId": "narrator-1b865af99e1e",
+        "audio": "sfx/kocho-story/narrator/narrator-1b865af99e1e.ogg",
+        "hiragana": "ゆうがたのこうもん。とつぜんのほうかごきんしれいに、ゆうしゃたちがたちあがった。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "放課後禁止？その校則、俺たちの楽しみまで縛る気か。",
+        "english": "No after-school activities? That rule will not chain our happiness.",
+        "voiceId": "rebel-781fc30bd0a0",
+        "audio": "sfx/kocho-story/rebel/rebel-781fc30bd0a0.ogg",
+        "hiragana": "ほうかごきんし？そのこうそく、おれたちのたのしみまでしばるきか。"
+      },
+      {
+        "speaker": "aster",
+        "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
+        "english": "A principal challenge? More paperwork than saving the world.",
+        "voiceId": "aster-a4782fe23071",
+        "audio": "sfx/kocho-story/aster/aster-a4782fe23071.ogg",
+        "hiragana": "こうちょうへのちょうせんか。せかいをすくうより、しんせいしょがおおそうだな。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "校長先生、正面から異議を申し立てる。拳は最後、話は最初だ。",
+        "english": "I will challenge you openly. Talking first, fists last.",
+        "voiceId": "rebel-fde2d970724a",
+        "audio": "sfx/kocho-story/rebel/rebel-fde2d970724a.ogg",
+        "hiragana": "こうちょうせんせい、しょうめんからいぎをもうしたてる。こぶしはさいご、はなしはさいしょだ。"
+      }
+    ],
+    "hiraganaTitle": "こうちょうせんせい、いぎあり！"
+  },
+  {
+    "id": "rebel-2",
+    "hero": "rebel",
+    "stage": 2,
+    "title": "階段は会議室ではありません",
+    "englishTitle": "Stairway Summit",
+    "image": "sprites/kocho/story/rebel-2.webp",
+    "artPrompt": "sunlit school stair landing, hero planning over notebook, playful diagrams without readable text",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+        "english": "Beyond the first challenge, an emergency meeting starts on the stairs.",
+        "voiceId": "narrator-164424fd03bb",
+        "audio": "sfx/kocho-story/narrator/narrator-164424fd03bb.ogg",
+        "hiragana": "さいしょのかんもんをぬけたいちぎょう。かいだんのおどりばで、きんきゅうさくせんかいぎがはじまる。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "正面突破にも段取りはいる。まず足元、その次に相手を見る。",
+        "english": "Even a frontal assault needs planning. Watch your footing, then your opponent.",
+        "voiceId": "rebel-71b57231442c",
+        "audio": "sfx/kocho-story/rebel/rebel-71b57231442c.ogg",
+        "hiragana": "しょうめんとっぱにもだんどりはいる。まずあしもと、そのつぎにあいてをみる。"
+      },
+      {
+        "speaker": "lyra",
+        "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
+        "english": "Names matter, but naming this plan might take all afternoon.",
+        "voiceId": "lyra-9b2932834dd6",
+        "audio": "sfx/kocho-story/lyra/lyra-9b2932834dd6.ogg",
+        "hiragana": "さくせんめいはだいじよ。でも、なまえをきめるだけでげこうじきざになりそう。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "会議名は反省会以外で頼む。まだ何もやってない。",
+        "english": "Just do not call this a reflection meeting. We have not done anything yet.",
+        "voiceId": "rebel-20a1b5f5d35b",
+        "audio": "sfx/kocho-story/rebel/rebel-20a1b5f5d35b.ogg",
+        "hiragana": "かいぎめいははんせいかいいがいでたのむ。まだなにもやってない。"
+      }
+    ],
+    "hiraganaTitle": "かいだんはかいぎしつではありません"
+  },
+  {
+    "id": "rebel-3",
+    "hero": "rebel",
+    "stage": 3,
+    "title": "購買のパンは世界を救う",
+    "englishTitle": "Bread Saves the Day",
+    "image": "sprites/kocho/story/rebel-3.webp",
+    "artPrompt": "school courtyard shop, one glorious bread roll on tray, hero dramatically reaching, funny heroic lighting",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+        "english": "Supplies await at the school shop. The last bread roll sparks a crisis.",
+        "voiceId": "narrator-7510670c21d2",
+        "audio": "sfx/kocho-story/narrator/narrator-7510670c21d2.ogg",
+        "hiragana": "こうばいまえでほきゅうをはっけん。しかしさいごのぱんには、ゆうしゃにもゆずれないじじょうがあった。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "最後のパンか。妙だな、校長戦より緊張してきた。",
+        "english": "The last bread roll. Somehow this is more tense than the principal fight.",
+        "voiceId": "rebel-5162f2023d63",
+        "audio": "sfx/kocho-story/rebel/rebel-5162f2023d63.ogg",
+        "hiragana": "さいごのぱんか。みょうだな、こうちょうせんよりきんちょうしてきた。"
+      },
+      {
+        "speaker": "aster",
+        "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
+        "english": "I can draw a sword. Negotiating the last bread roll is harder.",
+        "voiceId": "aster-8944c334bf33",
+        "audio": "sfx/kocho-story/aster/aster-8944c334bf33.ogg",
+        "hiragana": "つるぎならぬける。だがさいごのやきそばぱんは、ぬきさしならないな。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "全員分に分けるぞ。俺の分が小さい？それは遠近法だ。",
+        "english": "Everyone gets a share. My piece is smaller? It is perspective.",
+        "voiceId": "rebel-e3800e79f58a",
+        "audio": "sfx/kocho-story/rebel/rebel-e3800e79f58a.ogg",
+        "hiragana": "ぜんいんぶんにわけるぞ。おれのふんがちーさい？それはえんきんほうだ。"
+      }
+    ],
+    "hiraganaTitle": "こうばいのぱんはせかいをすくう"
+  },
+  {
+    "id": "rebel-4",
+    "hero": "rebel",
+    "stage": 4,
+    "title": "体育館で大作戦",
+    "englishTitle": "Gymnasium Strategy",
+    "image": "sprites/kocho/story/rebel-4.webp",
+    "artPrompt": "school gym, many colorful cheering flags, hero regaining resolve, golden afternoon rays",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+        "english": "The gym is close. At least the cheering squad is fully prepared.",
+        "voiceId": "narrator-7ca8eb2f981e",
+        "audio": "sfx/kocho-story/narrator/narrator-7ca8eb2f981e.ogg",
+        "hiragana": "たいいくかんまでこればあとすこし。なかまたちは、おうえんのじゅんびだけはかんぺきだった。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "おい、応援幕に怖い顔を描くな。俺は敵役じゃない。",
+        "english": "Stop drawing scary faces on that banner. I am not the villain.",
+        "voiceId": "rebel-53eabb01676e",
+        "audio": "sfx/kocho-story/rebel/rebel-53eabb01676e.ogg",
+        "hiragana": "おい、おうえんまくにこわいかおをえがくな。おれはてきやくじゃない。"
+      },
+      {
+        "speaker": "lyra",
+        "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
+        "english": "I brought ten cheering flags. Never mind that we have fewer fighters.",
+        "voiceId": "lyra-9d19e53ba248",
+        "audio": "sfx/kocho-story/lyra/lyra-9d19e53ba248.ogg",
+        "hiragana": "おうえんはた、じゅうほんもってきたわ。たたかうにんずうよりおおいのは、きにしないで。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "その声、ちゃんと届いてる。だから、一歩も引けないんだ。",
+        "english": "I hear every cheer. That is why I cannot give up.",
+        "voiceId": "rebel-70418a3b21a2",
+        "audio": "sfx/kocho-story/rebel/rebel-70418a3b21a2.ogg",
+        "hiragana": "そのこえ、ちゃんととどいてる。だから、いっぽもひけないんだ。"
+      }
+    ],
+    "hiraganaTitle": "たいいくかんでだいさくせん"
+  },
+  {
+    "id": "rebel-5",
+    "hero": "rebel",
+    "stage": 5,
+    "title": "図書室の静かな決意",
+    "englishTitle": "Quiet Determination",
+    "image": "sprites/kocho/story/rebel-5.webp",
+    "artPrompt": "quiet school library, old photo album, hero thoughtful smile, tender dust-filled light",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+        "english": "Old meeting notes reveal the principal was once a challenger too.",
+        "voiceId": "narrator-80504a2670be",
+        "audio": "sfx/kocho-story/narrator/narrator-80504a2670be.ogg",
+        "hiragana": "としょしつでみつけたふるいぎじろく。そこには、こうちょうもむかしはちょうせんしゃだったとかかれていた。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "この写真、校長先生も制服を着崩してるじゃないか。",
+        "english": "In this photo, even the principal wore his uniform casually.",
+        "voiceId": "rebel-cd8d1e63f66e",
+        "audio": "sfx/kocho-story/rebel/rebel-cd8d1e63f66e.ogg",
+        "hiragana": "このしゃしん、こうちょうせんせいもせいふくをちゃくくずしてるじゃないか。"
+      },
+      {
+        "speaker": "aster",
+        "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
+        "english": "Even the strongest started somewhere. Now it is your turn.",
+        "voiceId": "aster-6986d95ffd7c",
+        "audio": "sfx/kocho-story/aster/aster-6986d95ffd7c.ogg",
+        "hiragana": "つよいあいてにも、はじまりのいっぽがある。こんどはくんのばんだ。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "過去を笑うより、今の俺たちを見てもらおう。",
+        "english": "Rather than laugh at the past, let us show him who we are now.",
+        "voiceId": "rebel-aed774c18a11",
+        "audio": "sfx/kocho-story/rebel/rebel-aed774c18a11.ogg",
+        "hiragana": "かこをわらうより、いまのおれたちをみてもらおう。"
+      }
+    ],
+    "hiraganaTitle": "としょしつのしずかなけつい"
+  },
+  {
+    "id": "rebel-6",
+    "hero": "rebel",
+    "stage": 6,
+    "title": "屋上の約束",
+    "englishTitle": "Rooftop Promise",
+    "image": "sprites/kocho/story/rebel-6.webp",
+    "artPrompt": "school rooftop at golden hour, hero looking toward friends, gentle moving ribbons, hopeful expansive sky",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+        "english": "The rooftop wind lifts their worries. Their precious afternoons are within reach.",
+        "voiceId": "narrator-7b71ca7ac338",
+        "audio": "sfx/kocho-story/narrator/narrator-7b71ca7ac338.ogg",
+        "hiragana": "おくじょうにふくかぜが、ふあんをすこしだけつれていく。まもりたいほうかごは、もうすぐそこだ。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "自由って、好き勝手することだけじゃない。仲間の居場所も守ることだ。",
+        "english": "Freedom is more than doing what you like. It means protecting a place for your friends.",
+        "voiceId": "rebel-b4d24ac6ab71",
+        "audio": "sfx/kocho-story/rebel/rebel-b4d24ac6ab71.ogg",
+        "hiragana": "じゆうって、すきかってすることだけじゃない。なかまのいばしょもまもることだ。"
+      },
+      {
+        "speaker": "lyra",
+        "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
+        "english": "Someone is waiting for you. That is stronger than any secret technique.",
+        "voiceId": "lyra-f6d16095e479",
+        "audio": "sfx/kocho-story/lyra/lyra-f6d16095e479.ogg",
+        "hiragana": "かえりをまつにんがいる。それって、どんなひっさつわざよりつよいおまもりよ。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "帰ったら全員で飯だ。もちろん、反省会はなしで。",
+        "english": "We will all eat together afterward. No reflection meeting.",
+        "voiceId": "rebel-bb86d935c6be",
+        "audio": "sfx/kocho-story/rebel/rebel-bb86d935c6be.ogg",
+        "hiragana": "かえったらぜんいんでめしだ。もちろん、はんせいかいはなしで。"
+      }
+    ],
+    "hiraganaTitle": "おくじょうのやくそく"
+  },
+  {
+    "id": "rebel-7",
+    "hero": "rebel",
+    "stage": 7,
+    "title": "校長室、正面突破！",
+    "englishTitle": "The Principal Awaits",
+    "image": "sprites/kocho/story/rebel-7.webp",
+    "artPrompt": "ornate school principal office doorway, heroic student facing huge dignified principal silhouette, dramatic warm light",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+        "english": "The office door opens. Three deep breaths precede the final showdown.",
+        "voiceId": "narrator-57033b383f97",
+        "audio": "sfx/kocho-story/narrator/narrator-57033b383f97.ogg",
+        "hiragana": "ついにこうちょうしつのとびらがひらく。さいしゅうけっせんのまえに、さんにんふんのしんこきゅうがひびいた。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "叛逆ってのは、相手を黙らせることじゃない。届くまで立つことだ。",
+        "english": "Rebellion does not mean silencing someone. It means standing until you are heard.",
+        "voiceId": "rebel-8b3e2cc1ed68",
+        "audio": "sfx/kocho-story/rebel/rebel-8b3e2cc1ed68.ogg",
+        "hiragana": "はんぎゃくってのは、あいてをだまらせることじゃない。とどくまでたつことだ。"
+      },
+      {
+        "speaker": "aster",
+        "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
+        "english": "Tell him what you want after winning. Defeating him is not the real goal.",
+        "voiceId": "aster-0e3b4f1903c5",
+        "audio": "sfx/kocho-story/aster/aster-0e3b4f1903c5.ogg",
+        "hiragana": "かったらねがいをつたえよう。こうちょうせんせいをたおすことが、もくてきじゃないだろ。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "校長先生。俺たちの放課後を、ちゃんと見てくれ！",
+        "english": "Principal. Please see what our afternoons really mean!",
+        "voiceId": "rebel-ad832e2d23e9",
+        "audio": "sfx/kocho-story/rebel/rebel-ad832e2d23e9.ogg",
+        "hiragana": "こうちょうせんせい。おれたちのほうかごを、ちゃんとみてくれ！"
+      }
+    ],
+    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！"
+  },
+  {
+    "id": "rebel-8",
+    "hero": "rebel",
+    "stage": 8,
+    "title": "最高の放課後、開幕！",
+    "englishTitle": "Our Best Afternoon",
+    "image": "sprites/kocho/story/rebel-8.webp",
+    "artPrompt": "joyful school festival courtyard at sunset, victorious hero center, colorful confetti, friends sharing bread, principal holding a comically tiny celebratory teacup, heartfelt triumphant ending",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+        "english": "The challenge ends, and the restored afternoon rings with laughter louder than victory.",
+        "voiceId": "narrator-5e339e7a1191",
+        "audio": "sfx/kocho-story/narrator/narrator-5e339e7a1191.ogg",
+        "hiragana": "ちょうせんはおわった。とりもどしたほうかごには、しょうりよりおおきなわらいこえがあった。"
+      },
+      {
+        "speaker": "rebel",
+        "text": "勝ったのに、校長先生まで笑ってる。こういう決着も、悪くない。",
+        "english": "Even the principal is smiling. This is not a bad way to win.",
+        "voiceId": "rebel-666851253755",
+        "audio": "sfx/kocho-story/rebel/rebel-666851253755.ogg",
+        "hiragana": "かったのに、こうちょうせんせいまでわらってる。こういうけっちゃくも、わるくない。"
+      },
+      {
+        "speaker": "lyra",
+        "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
+        "english": "We did it! Principal, please keep the victory toast under three minutes!",
+        "voiceId": "lyra-e88a9aaab01e",
+        "audio": "sfx/kocho-story/lyra/lyra-e88a9aaab01e.ogg",
+        "hiragana": "やったわね！こうちょうせんせい、しゅくしょうかいのかんぱいだけはさんぷんいないでおねがい！"
+      },
+      {
+        "speaker": "rebel",
+        "text": "祝勝会の看板、叛逆定食はやめろ。普通にうまそうな名前にしろ。",
+        "english": "Do not name the feast Rebellion Dinner. Give it an appetizing name!",
+        "voiceId": "rebel-853bdcac8f79",
+        "audio": "sfx/kocho-story/rebel/rebel-853bdcac8f79.ogg",
+        "hiragana": "しゅくしょうかいのかんばん、はんぎゃくていしょくはやめろ。ふつうにうまそうななまえにしろ。"
+      }
+    ],
+    "hiraganaTitle": "さいこうのほうかご、かいまく！"
+  },
+  {
+    "id": "akari-1",
+    "hero": "akari",
+    "stage": 1,
+    "title": "校長先生、異議あり！",
+    "englishTitle": "The Great School Appeal",
+    "image": "sprites/kocho/story/akari-1.webp",
+    "artPrompt": "school gate at sunset, a comically enormous pile of school-rule papers, determined hero, warm heroic comedy",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+        "english": "At sunset, a ban on after-school activities sends our heroes into action.",
+        "voiceId": "narrator-1b865af99e1e",
+        "audio": "sfx/kocho-story/narrator/narrator-1b865af99e1e.ogg",
+        "hiragana": "ゆうがたのこうもん。とつぜんのほうかごきんしれいに、ゆうしゃたちがたちあがった。"
+      },
+      {
+        "speaker": "akari",
+        "text": "放課後がなくなったら、星を見上げる約束もなくなっちゃう！",
+        "english": "If afternoons disappear, so does our promise to watch the stars!",
+        "voiceId": "akari-7c6b3016fc91",
+        "audio": "sfx/kocho-story/akari/akari-7c6b3016fc91.ogg",
+        "hiragana": "ほうかごがなくなったら、ほしをみあげるやくそくもなくなっちゃう！"
+      },
+      {
+        "speaker": "aster",
+        "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
+        "english": "A principal challenge? More paperwork than saving the world.",
+        "voiceId": "aster-a4782fe23071",
+        "audio": "sfx/kocho-story/aster/aster-a4782fe23071.ogg",
+        "hiragana": "こうちょうへのちょうせんか。せかいをすくうより、しんせいしょがおおそうだな。"
+      },
+      {
+        "speaker": "akari",
+        "text": "校長先生、みんなのきらきらまで、しまわないでください！",
+        "english": "Principal, please do not lock away our sparkle!",
+        "voiceId": "akari-ddd875e31f72",
+        "audio": "sfx/kocho-story/akari/akari-ddd875e31f72.ogg",
+        "hiragana": "こうちょうせんせい、みんなのきらきらまで、しまわないでください！"
+      }
+    ],
+    "hiraganaTitle": "こうちょうせんせい、いぎあり！"
+  },
+  {
+    "id": "akari-2",
+    "hero": "akari",
+    "stage": 2,
+    "title": "階段は会議室ではありません",
+    "englishTitle": "Stairway Summit",
+    "image": "sprites/kocho/story/akari-2.webp",
+    "artPrompt": "sunlit school stair landing, hero planning over notebook, playful diagrams without readable text",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+        "english": "Beyond the first challenge, an emergency meeting starts on the stairs.",
+        "voiceId": "narrator-164424fd03bb",
+        "audio": "sfx/kocho-story/narrator/narrator-164424fd03bb.ogg",
+        "hiragana": "さいしょのかんもんをぬけたいちぎょう。かいだんのおどりばで、きんきゅうさくせんかいぎがはじまる。"
+      },
+      {
+        "speaker": "akari",
+        "text": "作戦名は、きらきら校則見直し大作戦！ちょっと長い？",
+        "english": "Operation Sparkling School Rule Reform! Too long?",
+        "voiceId": "akari-70b813c83c82",
+        "audio": "sfx/kocho-story/akari/akari-70b813c83c82.ogg",
+        "hiragana": "さくせんめいは、きらきらこうそくみなおしだいさくせん！ちょっとながい？"
+      },
+      {
+        "speaker": "lyra",
+        "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
+        "english": "Names matter, but naming this plan might take all afternoon.",
+        "voiceId": "lyra-9b2932834dd6",
+        "audio": "sfx/kocho-story/lyra/lyra-9b2932834dd6.ogg",
+        "hiragana": "さくせんめいはだいじよ。でも、なまえをきめるだけでげこうじきざになりそう。"
+      },
+      {
+        "speaker": "akari",
+        "text": "じゃあ、略してきら作！名前だけでも明るく行こう！",
+        "english": "Then Sparkle Plan it is! At least the name should be bright!",
+        "voiceId": "akari-2fd7db912034",
+        "audio": "sfx/kocho-story/akari/akari-2fd7db912034.ogg",
+        "hiragana": "じゃあ、りゃくしてきらさく！なまえだけでもあかるくいこう！"
+      }
+    ],
+    "hiraganaTitle": "かいだんはかいぎしつではありません"
+  },
+  {
+    "id": "akari-3",
+    "hero": "akari",
+    "stage": 3,
+    "title": "購買のパンは世界を救う",
+    "englishTitle": "Bread Saves the Day",
+    "image": "sprites/kocho/story/akari-3.webp",
+    "artPrompt": "school courtyard shop, one glorious bread roll on tray, hero dramatically reaching, funny heroic lighting",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+        "english": "Supplies await at the school shop. The last bread roll sparks a crisis.",
+        "voiceId": "narrator-7510670c21d2",
+        "audio": "sfx/kocho-story/narrator/narrator-7510670c21d2.ogg",
+        "hiragana": "こうばいまえでほきゅうをはっけん。しかしさいごのぱんには、ゆうしゃにもゆずれないじじょうがあった。"
+      },
+      {
+        "speaker": "akari",
+        "text": "このパン、星形じゃないけど、すっごく輝いて見える！",
+        "english": "This bread is not star-shaped, but it looks brilliant!",
+        "voiceId": "akari-4ebb63561ff8",
+        "audio": "sfx/kocho-story/akari/akari-4ebb63561ff8.ogg",
+        "hiragana": "このぱん、ほしがたじゃないけど、すっごくかがやいてみえる！"
+      },
+      {
+        "speaker": "aster",
+        "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
+        "english": "I can draw a sword. Negotiating the last bread roll is harder.",
+        "voiceId": "aster-8944c334bf33",
+        "audio": "sfx/kocho-story/aster/aster-8944c334bf33.ogg",
+        "hiragana": "つるぎならぬける。だがさいごのやきそばぱんは、ぬきさしならないな。"
+      },
+      {
+        "speaker": "akari",
+        "text": "みんなで分けたら、幸せも増える。魔法じゃなくてもね！",
+        "english": "Sharing makes happiness grow. No magic required!",
+        "voiceId": "akari-0ade8d5cc0e2",
+        "audio": "sfx/kocho-story/akari/akari-0ade8d5cc0e2.ogg",
+        "hiragana": "みんなでわけたら、しあわせもふえる。まほうじゃなくてもね！"
+      }
+    ],
+    "hiraganaTitle": "こうばいのぱんはせかいをすくう"
+  },
+  {
+    "id": "akari-4",
+    "hero": "akari",
+    "stage": 4,
+    "title": "体育館で大作戦",
+    "englishTitle": "Gymnasium Strategy",
+    "image": "sprites/kocho/story/akari-4.webp",
+    "artPrompt": "school gym, many colorful cheering flags, hero regaining resolve, golden afternoon rays",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+        "english": "The gym is close. At least the cheering squad is fully prepared.",
+        "voiceId": "narrator-7ca8eb2f981e",
+        "audio": "sfx/kocho-story/narrator/narrator-7ca8eb2f981e.ogg",
+        "hiragana": "たいいくかんまでこればあとすこし。なかまたちは、おうえんのじゅんびだけはかんぺきだった。"
+      },
+      {
+        "speaker": "akari",
+        "text": "応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？",
+        "english": "Ten cheering flags! Would a flag constellation make the principal look up?",
+        "voiceId": "akari-3efe4d4bfea3",
+        "audio": "sfx/kocho-story/akari/akari-3efe4d4bfea3.ogg",
+        "hiragana": "おうえんはたがじゅうほん！せいざにしたら、こうちょうせんせいもみあげちゃうかな？"
+      },
+      {
+        "speaker": "lyra",
+        "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
+        "english": "I brought ten cheering flags. Never mind that we have fewer fighters.",
+        "voiceId": "lyra-9d19e53ba248",
+        "audio": "sfx/kocho-story/lyra/lyra-9d19e53ba248.ogg",
+        "hiragana": "おうえんはた、じゅうほんもってきたわ。たたかうにんずうよりおおいのは、きにしないで。"
+      },
+      {
+        "speaker": "akari",
+        "text": "怖いときは、ひとりで光らなくていい。みんな、ありがとう！",
+        "english": "When I am scared, I do not have to shine alone. Thank you!",
+        "voiceId": "akari-4b4de001d337",
+        "audio": "sfx/kocho-story/akari/akari-4b4de001d337.ogg",
+        "hiragana": "こわいときは、ひとりでひからなくていい。みんな、ありがとう！"
+      }
+    ],
+    "hiraganaTitle": "たいいくかんでだいさくせん"
+  },
+  {
+    "id": "akari-5",
+    "hero": "akari",
+    "stage": 5,
+    "title": "図書室の静かな決意",
+    "englishTitle": "Quiet Determination",
+    "image": "sprites/kocho/story/akari-5.webp",
+    "artPrompt": "quiet school library, old photo album, hero thoughtful smile, tender dust-filled light",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+        "english": "Old meeting notes reveal the principal was once a challenger too.",
+        "voiceId": "narrator-80504a2670be",
+        "audio": "sfx/kocho-story/narrator/narrator-80504a2670be.ogg",
+        "hiragana": "としょしつでみつけたふるいぎじろく。そこには、こうちょうもむかしはちょうせんしゃだったとかかれていた。"
+      },
+      {
+        "speaker": "akari",
+        "text": "昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。",
+        "english": "The young principal has sparkling eyes. He watched the same stars.",
+        "voiceId": "akari-c5386553fa0a",
+        "audio": "sfx/kocho-story/akari/akari-c5386553fa0a.ogg",
+        "hiragana": "むかしのこうちょうせんせい、めがきらきらしてる。いまとおなじほしをみてたんだね。"
+      },
+      {
+        "speaker": "aster",
+        "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
+        "english": "Even the strongest started somewhere. Now it is your turn.",
+        "voiceId": "aster-6986d95ffd7c",
+        "audio": "sfx/kocho-story/aster/aster-6986d95ffd7c.ogg",
+        "hiragana": "つよいあいてにも、はじまりのいっぽがある。こんどはくんのばんだ。"
+      },
+      {
+        "speaker": "akari",
+        "text": "忘れた願いなら、もう一度一緒に思い出せばいいよ！",
+        "english": "If he forgot his wish, we can remember it together!",
+        "voiceId": "akari-a7b72be585b6",
+        "audio": "sfx/kocho-story/akari/akari-a7b72be585b6.ogg",
+        "hiragana": "わすれたねがいなら、もういちどいっしょにおもいだせばいいよ！"
+      }
+    ],
+    "hiraganaTitle": "としょしつのしずかなけつい"
+  },
+  {
+    "id": "akari-6",
+    "hero": "akari",
+    "stage": 6,
+    "title": "屋上の約束",
+    "englishTitle": "Rooftop Promise",
+    "image": "sprites/kocho/story/akari-6.webp",
+    "artPrompt": "school rooftop at golden hour, hero looking toward friends, gentle moving ribbons, hopeful expansive sky",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+        "english": "The rooftop wind lifts their worries. Their precious afternoons are within reach.",
+        "voiceId": "narrator-7b71ca7ac338",
+        "audio": "sfx/kocho-story/narrator/narrator-7b71ca7ac338.ogg",
+        "hiragana": "おくじょうにふくかぜが、ふあんをすこしだけつれていく。まもりたいほうかごは、もうすぐそこだ。"
+      },
+      {
+        "speaker": "akari",
+        "text": "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。",
+        "english": "Courage is not being fearless. It is remembering a promise.",
+        "voiceId": "akari-0e43c4abc1f0",
+        "audio": "sfx/kocho-story/akari/akari-0e43c4abc1f0.ogg",
+        "hiragana": "ゆうきって、こわくないことじゃなくて、やくそくをおもいだすことなんだ。"
+      },
+      {
+        "speaker": "lyra",
+        "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
+        "english": "Someone is waiting for you. That is stronger than any secret technique.",
+        "voiceId": "lyra-f6d16095e479",
+        "audio": "sfx/kocho-story/lyra/lyra-f6d16095e479.ogg",
+        "hiragana": "かえりをまつにんがいる。それって、どんなひっさつわざよりつよいおまもりよ。"
+      },
+      {
+        "speaker": "akari",
+        "text": "この空の下に、みんなの居場所を残したい！",
+        "english": "I want everyone to have a place beneath this sky!",
+        "voiceId": "akari-8bc5a429b783",
+        "audio": "sfx/kocho-story/akari/akari-8bc5a429b783.ogg",
+        "hiragana": "このそらのしたに、みんなのいばしょをのこしたい！"
+      }
+    ],
+    "hiraganaTitle": "おくじょうのやくそく"
+  },
+  {
+    "id": "akari-7",
+    "hero": "akari",
+    "stage": 7,
+    "title": "校長室、正面突破！",
+    "englishTitle": "The Principal Awaits",
+    "image": "sprites/kocho/story/akari-7.webp",
+    "artPrompt": "ornate school principal office doorway, heroic student facing huge dignified principal silhouette, dramatic warm light",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+        "english": "The office door opens. Three deep breaths precede the final showdown.",
+        "voiceId": "narrator-57033b383f97",
+        "audio": "sfx/kocho-story/narrator/narrator-57033b383f97.ogg",
+        "hiragana": "ついにこうちょうしつのとびらがひらく。さいしゅうけっせんのまえに、さんにんふんのしんこきゅうがひびいた。"
+      },
+      {
+        "speaker": "akari",
+        "text": "校長先生！今日は、星よりまぶしい放課後のプレゼンです！",
+        "english": "Principal! Today we present an afternoon brighter than the stars!",
+        "voiceId": "akari-2bef4215ab90",
+        "audio": "sfx/kocho-story/akari/akari-2bef4215ab90.ogg",
+        "hiragana": "こうちょうせんせい！こんにちは、ほしよりまぶしいほうかごのぷれぜんです！"
+      },
+      {
+        "speaker": "aster",
+        "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
+        "english": "Tell him what you want after winning. Defeating him is not the real goal.",
+        "voiceId": "aster-0e3b4f1903c5",
+        "audio": "sfx/kocho-story/aster/aster-0e3b4f1903c5.ogg",
+        "hiragana": "かったらねがいをつたえよう。こうちょうせんせいをたおすことが、もくてきじゃないだろ。"
+      },
+      {
+        "speaker": "akari",
+        "text": "勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！",
+        "english": "If we win, watch the stars with us. Tell us your wish too!",
+        "voiceId": "akari-c217f73d3ac3",
+        "audio": "sfx/kocho-story/akari/akari-c217f73d3ac3.ogg",
+        "hiragana": "かったら、いっしょにほしをみよう。せんせいのねがいも、きかせてください！"
+      }
+    ],
+    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！"
+  },
+  {
+    "id": "akari-8",
+    "hero": "akari",
+    "stage": 8,
+    "title": "最高の放課後、開幕！",
+    "englishTitle": "Our Best Afternoon",
+    "image": "sprites/kocho/story/akari-8.webp",
+    "artPrompt": "joyful school festival courtyard at sunset, victorious hero center, colorful confetti, friends sharing bread, principal holding a comically tiny celebratory teacup, heartfelt triumphant ending",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "text": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+        "english": "The challenge ends, and the restored afternoon rings with laughter louder than victory.",
+        "voiceId": "narrator-5e339e7a1191",
+        "audio": "sfx/kocho-story/narrator/narrator-5e339e7a1191.ogg",
+        "hiragana": "ちょうせんはおわった。とりもどしたほうかごには、しょうりよりおおきなわらいこえがあった。"
+      },
+      {
+        "speaker": "akari",
+        "text": "やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！",
+        "english": "We did it! The ban turned into a festival announcement!",
+        "voiceId": "akari-05cb18c06c39",
+        "audio": "sfx/kocho-story/akari/akari-05cb18c06c39.ogg",
+        "hiragana": "やったあ！きんしれいが、おたのしみかいのおしらせにかわったよ！"
+      },
+      {
+        "speaker": "lyra",
+        "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
+        "english": "We did it! Principal, please keep the victory toast under three minutes!",
+        "voiceId": "lyra-e88a9aaab01e",
+        "audio": "sfx/kocho-story/lyra/lyra-e88a9aaab01e.ogg",
+        "hiragana": "やったわね！こうちょうせんせい、しゅくしょうかいのかんぱいだけはさんぷんいないでおねがい！"
+      },
+      {
+        "speaker": "akari",
+        "text": "校長先生の乾杯、星が一周しちゃう前にお願いしまーす！",
+        "english": "Principal, please finish the toast before the stars complete a whole orbit!",
+        "voiceId": "akari-41e4bb13d56d",
+        "audio": "sfx/kocho-story/akari/akari-41e4bb13d56d.ogg",
+        "hiragana": "こうちょうせんせいのかんぱい、ほしがいっしゅうしちゃうまえにおねがいしまーす！"
+      }
+    ],
+    "hiraganaTitle": "さいこうのほうかご、かいまく！"
+  }
+]
