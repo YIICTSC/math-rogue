@@ -1,3 +1,4 @@
+import {EXTRA_SUPPORTERS,EXTRA_CONSUMABLES,EXTRA_PACKS,EXTRA_ENHANCEMENTS} from './mini-games/after-school-poker/expansion';
 
 import { Card, CardType, TargetType, Relic, Potion, Character, PokerHandResult, PokerSupporter, PokerConsumable, PokerPack, PokerSuit, PokerVoucher } from './types';
 import { ADDITIONAL_CARDS } from './constants1';
@@ -892,6 +893,7 @@ export const POKER_HAND_LEVELS: Record<string, PokerHandResult> = {
 
 // Card Enhancements Definitions
 export const POKER_ENHANCEMENTS: Record<string, { name: string, desc: string }> = {
+    ...EXTRA_ENHANCEMENTS,
     BONUS: { name: 'ボーナス', desc: '基礎点 +30' },
     MULT: { name: 'マルチ', desc: '倍率 +0.5' }, // Game logic adds 0.5 to multiplier
     WILD: { name: 'ワイルド', desc: '全てのマークとして扱われる' },
@@ -1236,6 +1238,10 @@ export const VOUCHERS_LIBRARY: PokerVoucher[] = [
     { id: 'V_PAINT_BRUSH', name: 'パレット', description: '手札の上限枚数 +1', price: 10, icon: 'NOTEBOOK|#a855f7' },
     { id: 'V_OVERSTOCK', name: '在庫処分', description: 'ショップの商品枠 +1', price: 10, icon: 'BACKPACK|#64748b' }
 ];
+
+SUPPORTERS_LIBRARY.push(...EXTRA_SUPPORTERS);
+CONSUMABLES_LIBRARY.push(...EXTRA_CONSUMABLES);
+PACK_LIBRARY.push(...EXTRA_PACKS);
 
 // --- CARD WITH UPDATED EFFECT ---
 export const UPDATED_CARDS: Record<string, Omit<Card, 'id'>> = {

@@ -1,3 +1,7 @@
+import {PokerRivalWarning,PokerUnlockPanel} from '../mini-games/after-school-poker/ExpansionPanels';
+import {EXTRA_SUPPORTERS,EXTRA_CONSUMABLES,EXTRA_PACKS,EXTRA_ENHANCEMENTS,EXTRA_PLANETS,EXPANSION_TIERS,PACK_RECIPES,extraCardEffect,applyExtraSpectral,type ExtraEnhancement} from '../mini-games/after-school-poker/expansion';
+import {readPokerProgress,persistPokerProgress,awardPokerWin,progressionTier,unlockedPokerItem} from '../mini-games/after-school-poker/progression';
+import {RIVAL_TRAITS,rivalEligibleCards,rivalDisallows,applyRivalTrait} from '../mini-games/after-school-poker/rivalTraits';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import { PokerLobby, PokerPortrait, PokerSignatureIcon, PokerClubArt, PokerUseEffect, type PokerExpression } from '../mini-games/after-school-poker/Presentation';
 import { DEFAULT_POKER_HERO, POKER_HEROES, POKER_SIGNATURE_SUPPORTERS, signatureSupporter, keepsakeEnglish } from '../mini-games/after-school-poker/heroes';
@@ -274,11 +278,11 @@ export const PokerCompendiumSprite: React.FC<{
 );
 
 const getPokerCardFaceStyle = (card: PokerCard): React.CSSProperties => {
-    const accent = card.enhancement === 'GOLD' ? '#f6d66d'
+    const accent = ({ECHO:'#eee5ff',EMBER:'#ffe1bc',PRISM:'#e1f4f6',INK:'#e2e5f3',LUCKY:'#ddf4d4',ANCHOR:'#d9edf6'} as Record<string,string>)[card.enhancement||''] || (card.enhancement === 'GOLD' ? '#f6d66d'
         : card.enhancement === 'STEEL' ? '#b8c1d1'
         : card.enhancement === 'GLASS' ? '#bdf6ff'
         : card.enhancement === 'STONE' ? '#c6cbd4'
-        : '#f8f0df';
+        : '#f8f0df');
     return {
         backgroundImage: `linear-gradient(135deg, ${accent} 0%, #fffaf0 38%, #e4d3aa 100%)`,
         imageRendering: 'pixelated'
@@ -359,7 +363,7 @@ const POKER_TUTORIAL_STEPS_JA: PokerTutorialStep[] = [
     { title: '困ったら情報を確認', body: 'ルール、山札、組み合わせのレベルは右上のボタンから確認できます。チュートリアルもここから何度でも開けます。', focus: 'tools', placement: 'bottom' },
     { title: 'サポーターと消費アイテム', body: '上段の枠にはサポーターと消費アイテムが並びます。クリックや長押しで効果を確認し、得点を伸ばしましょう。', focus: 'supporters', placement: 'bottom' },
     { title: '手札を選ぶ', body: 'カードをクリック、またはなぞって選択します。最大5枚まで選べるので、強い役を作れる組み合わせを探してください。', focus: 'hand', placement: 'top' },
-    { title: '出すか、捨てるか', body: 'PLAY HANDで選んだカードを出して得点します。DISCARDはカードを入れ替える操作で、残り捨札数がある時だけ使えます。', focus: 'actions', placement: 'top' },
+    { title: '出すか、捨てるか', body: 'プレイで選んだカードを出して得点します。すてるはカードを入れ替える操作で、残り捨札数がある時だけ使えます。', focus: 'actions', placement: 'top' },
     { title: '勝ったらデッキを育てる', body: 'ラウンド勝利後はカードショップで、部活ポイントを使ってカードやサポーター、ランダムパックを購入できます。次の相手に合わせてデッキを強化しましょう。', focus: 'supporters', placement: 'bottom' }
 ];
 
@@ -694,8 +698,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   const t = (text: string) => trans(text, languageMode ?? 'JAPANESE');
   const pokerTutorialSteps = useMemo(() => getPokerTutorialSteps(languageMode), [languageMode]);
   const pokerTutorialLabels = useMemo(() => getPokerTutorialLabels(languageMode), [languageMode]);
+  const [progress,setProgress]=useState(()=>{const p=readPokerProgress(),cleared=storageService.getPokerExpandedSupporterUnlockCount()>0;return {...p,clears:Math.max(p.clears,cleared?1:0),bestAnte:Math.max(p.bestAnte,cleared?8:1,storageService.loadPokerState()?.ante||1,...storageService.getPokerScores().map(s=>s.ante))};});
+  const progressRef=useRef(progress);
+  useEffect(()=>{progressRef.current=progress;persistPokerProgress(progress);},[progress]);
+  const progressTier=progressionTier(progress);
+  const [showUnlocks,setShowUnlocks]=useState(false);
+  const [rivalWarning,setRivalWarning]=useState(true);
   const expandedSupporterUnlockCount = Math.min(
-      storageService.getPokerExpandedSupporterUnlockCount(),
+      Math.max(storageService.getPokerExpandedSupporterUnlockCount(),progress.wins*2+progress.bestAnte-1),
       EXPANDED_SUPPORTER_IDS.length
   );
   const unlockedExpandedSupporterIds = useMemo(
@@ -703,9 +713,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       [expandedSupporterUnlockCount]
   );
   const availableSupporters = useMemo(
-      () => SUPPORTERS_LIBRARY.filter(s => !EXPANDED_SUPPORTER_IDS.includes(s.id) || unlockedExpandedSupporterIds.has(s.id)),
-      [unlockedExpandedSupporterIds]
+      () => SUPPORTERS_LIBRARY.filter(s => (!EXPANDED_SUPPORTER_IDS.includes(s.id) || unlockedExpandedSupporterIds.has(s.id))&&unlockedPokerItem(s.id,progressTier,EXPANSION_TIERS)),
+      [unlockedExpandedSupporterIds,progressTier]
   );
+  const availableConsumables=useMemo(()=>CONSUMABLES_LIBRARY.filter(c=>unlockedPokerItem(c.id,progressTier,EXPANSION_TIERS)),[progressTier]);
+  const availablePacks=useMemo(()=>PACK_LIBRARY.filter(c=>unlockedPokerItem(c.id,progressTier,EXPANSION_TIERS)),[progressTier]);
   const nextUnlockSupporterId = EXPANDED_SUPPORTER_IDS[expandedSupporterUnlockCount] ?? null;
   const nextUnlockSupporter = nextUnlockSupporterId
       ? SUPPORTERS_LIBRARY.find(s => s.id === nextUnlockSupporterId) ?? null
@@ -739,6 +751,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
       return {
           ...state,
+          runId:state.runId||crypto.randomUUID(),
           currentBlind: getBlindConfig(state.ante, state.blindIndex, state.currentBlind?.rivalId),
           supporters: hydrateSupporters(state.supporters),
           consumables: hydrateConsumables(state.consumables),
@@ -955,10 +968,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       if (selectedCards.length === 0) return null;
       
       const playedCards = runState.hand.filter(c => selectedCards.includes(c.id));
-      const { type } = getHandResult(playedCards, runState.supporters);
+      const eligible=rivalEligibleCards(RIVAL_TRAITS[runState.currentBlind.rivalId||''],playedCards);
+      const { type } = getHandResult(eligible, runState.supporters);
       
       const level = runState.handLevels[type] || 1;
-      const isDisallowed = runState.currentBlind.bossAbility === 'THE_EYE' && type === runState.lastHandTypePlayed;
+      const isDisallowed = eligible.length===0||rivalDisallows(RIVAL_TRAITS[runState.currentBlind.rivalId||''],playedCards,type,runState.lastHandTypePlayed)||(runState.currentBlind.bossAbility === 'THE_EYE' && type === runState.lastHandTypePlayed);
 
       return {
           name: POKER_HAND_LEVELS[type].name,
@@ -966,9 +980,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           type: type,
           isDisallowed
       };
-  }, [selectedCards, runState.hand, runState.handLevels, runState.supporters, runState.currentBlind.bossAbility, runState.lastHandTypePlayed]);
+  }, [selectedCards, runState.hand, runState.handLevels, runState.supporters, runState.currentBlind.bossAbility, runState.currentBlind.rivalId, runState.lastHandTypePlayed]);
 
   const currentRivalVisual = getPokerRivalById(runState.currentBlind.rivalId) || { ...POKER_RIVALS[0], index: 0, isEndless: false };
+  const currentTrait=RIVAL_TRAITS[runState.currentBlind.rivalId||''];
+  useEffect(()=>{if(phase==='BLIND_SELECT')setRivalWarning(true);},[phase,runState.currentBlind.rivalId,runState.ante,runState.blindIndex]);
+  useEffect(()=>{if(!runState.runId)setRunState(prev=>({...prev,runId:crypto.randomUUID()}));},[runState.runId]);
   const currentRivalName = runState.currentBlind.rivalName || runState.currentBlind.name;
   const currentRivalExpression = getPokerRivalExpression(runState.currentScore, runState.currentBlind.scoreGoal);
   const currentRivalPortraitStyle = getPokerRivalPortraitStyle(currentRivalVisual, currentRivalExpression);
@@ -1041,6 +1058,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       setRunState({
           deck,
           protagonistId: hero,
+          runId:crypto.randomUUID(),
           money: 4,
           ante: endless?9:1,
           blindIndex: 0,
@@ -1074,6 +1092,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   };
 
   const startBlind = () => {
+      setRivalWarning(false);
       if (playLatch.current) return;
       setHeroMood(null);
       setScoreFly(null);
@@ -1109,6 +1128,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           currentScore: 0,
           handsRemaining: baseHands,
           discardsRemaining: baseDiscards,
+          persistentCounters:{...prev.persistentCounters,HANDS_THIS_BLIND:0,DISCARDS_THIS_BLIND:0},
           lastHandTypePlayed: undefined // Reset for "The Eye"
       }));
       setPhase('PLAY');
@@ -1173,17 +1193,18 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       
       const playedCards = runState.hand.filter(c => selectedCards.includes(c.id));
       const heldCards = runState.hand.filter(c => !selectedCards.includes(c.id));
-      const { type, cards: scoringCards } = getHandResult(playedCards, runState.supporters);
+      const eligible=rivalEligibleCards(RIVAL_TRAITS[runState.currentBlind.rivalId||''],playedCards);
+      const { type, cards: scoringCards } = getHandResult(eligible, runState.supporters);
       const breakdown: ScoreBreakdownEntry[] = [];
       const maxHandsForBlind = runState.currentBlind.bossAbility === 'THE_NEEDLE' ? 1 : 4;
-      const handsPlayedThisBlind = maxHandsForBlind - runState.handsRemaining + 1;
+      const handsPlayedThisBlind = (runState.persistentCounters.HANDS_THIS_BLIND??Math.max(0,maxHandsForBlind-runState.handsRemaining))+1;
       
       const spaceLevelUp = runState.supporters.some(s => s.id === 'SUP_SPACE') && Math.random() < 0.25;
       const level = (runState.handLevels[type] || 1) + (spaceLevelUp ? 1 : 0);
       const baseStats = POKER_HAND_LEVELS[type];
       
       // Boss Constraint: THE_EYE (Cannot repeat hand types)
-      const isDisallowed = runState.currentBlind.bossAbility === 'THE_EYE' && type === runState.lastHandTypePlayed;
+      const isDisallowed = eligible.length===0||rivalDisallows(RIVAL_TRAITS[runState.currentBlind.rivalId||''],playedCards,type,runState.lastHandTypePlayed)||(runState.currentBlind.bossAbility === 'THE_EYE' && type === runState.lastHandTypePlayed);
 
       let chips = isDisallowed ? 0 : (baseStats.baseChips + (level - 1) * 10);
       let mult = isDisallowed ? 0 : (baseStats.baseMult + (level - 1) * 1);
@@ -1214,7 +1235,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           ? scoringCards.filter(c => c.enhancement)
           : [];
       const vampireAbsorbedIds = new Set(vampireAbsorbedCards.map(c => c.id));
-      const scoringCounters = { ...runState.persistentCounters };
+      const scoringCounters = { ...runState.persistentCounters,EXP_LEVELS:Object.values(runState.handLevels).reduce((sum,lv)=>sum+Math.max(0,lv-1),0)+(spaceLevelUp?1:0) };
       const dnaCloneCard = runState.supporters.some(s => s.id === 'SUP_DNA') && handsPlayedThisBlind === 1 && playedCards.length === 1
           ? { ...playedCards[0], id: `dna-${Date.now()}-${Math.random()}`, isSelected: false }
           : null;
@@ -1276,7 +1297,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       }
       breakdown.push(...scoringCardAdjustmentEntries);
 
-      heldCards.forEach(c => {
+      rivalEligibleCards(RIVAL_TRAITS[runState.currentBlind.rivalId||''],heldCards).forEach(c => {
           if (c.enhancement === 'STEEL') {
               mult *= 1.5;
               breakdown.push({
@@ -1289,10 +1310,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       });
 
       const ctx: PokerScoringContext = {
-          chips, mult, handType: type, cards: scoringCards, handCards: runState.hand,
+          chips, mult, handType: type, cards: scoringCards, handCards: rivalEligibleCards(RIVAL_TRAITS[runState.currentBlind.rivalId||''],runState.hand), playedCards:eligible,
           handsPlayed: handsPlayedThisBlind,
           handsRemaining: runState.handsRemaining,
-          discardsUsed: (3 - runState.discardsRemaining),
+          discardsUsed: runState.persistentCounters.DISCARDS_THIS_BLIND??Math.max(0,3-runState.discardsRemaining),
           discardsRemaining: runState.discardsRemaining,
           consumablesCount: runState.consumables.length,
           moneyDelta: 0,
@@ -1301,6 +1322,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           persistentCounters: scoringCounters
       };
       
+      for(const card of [...scoringCards,...rivalEligibleCards(RIVAL_TRAITS[runState.currentBlind.rivalId||''],heldCards)]){
+          const beforeChips=ctx.chips,beforeMult=ctx.mult,beforeMoney=ctx.moneyDelta;
+          extraCardEffect(card,ctx,heldCards.includes(card));
+          if(ctx.chips!==beforeChips||ctx.mult!==beforeMult||ctx.moneyDelta!==beforeMoney)breakdown.push({id:'extra-'+card.id,label:formatPokerCardLabel(card)+' '+t(EXTRA_ENHANCEMENTS[card.enhancement as ExtraEnhancement]?.name||''),chipsDelta:ctx.chips-beforeChips||undefined,multDelta:ctx.mult-beforeMult||undefined,moneyDelta:ctx.moneyDelta-beforeMoney||undefined,accent:'special'});
+      }
       runState.supporters.forEach(s => {
           if (s.triggerOn !== 'HAND_PLAYED' && s.triggerOn) return;
           const beforeChips = ctx.chips;
@@ -1357,11 +1383,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           }
       });
 
+      const trait=RIVAL_TRAITS[runState.currentBlind.rivalId||''];
+      const beforeTraitChips=ctx.chips,beforeTraitMult=ctx.mult;
+      applyRivalTrait(trait,ctx,playedCards);
+      if(trait&&(ctx.chips!==beforeTraitChips||ctx.mult!==beforeTraitMult))breakdown.push({id:'rival-trait',label:t(trait.name),chipsDelta:ctx.chips-beforeTraitChips||undefined,multFactor:beforeTraitMult?Number((ctx.mult/beforeTraitMult).toFixed(2)):undefined,accent:'special'});
       chips = Math.floor(ctx.chips);
-      mult = Math.floor(ctx.mult);
+      mult = Math.max(0,Number(ctx.mult.toFixed(2)));
       bonusMoney += Math.floor(ctx.moneyDelta);
       if (isDisallowed) { chips = 0; mult = 0; }
-      const score = chips * mult;
+      const score = Math.floor(chips * mult);
       const handName = isDisallowed ? "制約により無効" : baseStats.name;
 
       setLastHandScore({ chips, mult, total: score, name: handName });
@@ -1477,6 +1507,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       setRunState(prev => {
           const newCounters = { ...prev.persistentCounters };
           newCounters['HANDS_PLAYED'] = (newCounters['HANDS_PLAYED'] || 0) + 1;
+          newCounters.HANDS_THIS_BLIND=handsPlayedThisBlind;
           if (vampireAbsorbedCards.length > 0) {
               newCounters['VAMPIRE_ABSORBED'] = (newCounters['VAMPIRE_ABSORBED'] || 0) + vampireAbsorbedCards.length;
           }
@@ -1549,6 +1580,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           hand: newHand,
           deck: currentDeck,
           discardPile: newDiscardPile,
+          persistentCounters:{...prev.persistentCounters,DISCARDS_THIS_BLIND:(prev.persistentCounters.DISCARDS_THIS_BLIND||0)+1},
           discardsRemaining: prev.discardsRemaining - 1
       }));
       setSelectedCards([]);
@@ -1556,6 +1588,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   };
 
   const winBlind = (remainingHands = runState.handsRemaining) => {
+      const progressNext=awardPokerWin(progressRef.current,runState.runId||'legacy',runState.ante,runState.blindIndex);
+      if(progressNext!==progressRef.current){progressRef.current=progressNext;setProgress(progressNext);persistPokerProgress(progressNext);}
+
       const interestCap = runState.vouchers.includes('V_SEED_MONEY') ? 10 : 5;
       const interest = Math.min(interestCap, Math.floor(runState.money / 5));
       const handBonus = remainingHands;
@@ -1634,10 +1669,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const supporters = [...availableSupporters].sort(() => Math.random() - 0.5);
       items.push(supporters[0]);
       items.push(supporters[1]);
-      const consumables = [...CONSUMABLES_LIBRARY].sort(() => Math.random() - 0.5);
+      const consumables = [...availableConsumables].sort(() => Math.random() - 0.5);
       items.push(consumables[0]);
       items.push(consumables[1]);
-      const packs = [...PACK_LIBRARY].sort(() => Math.random() - 0.5);
+      const packs = [...availablePacks].sort(() => Math.random() - 0.5);
       items.push(packs[0]);
       items.push(packs[1]);
 
@@ -1710,6 +1745,16 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       audioService.playSound('select');
   };
 
+  const decoratePackCard=(card:PokerCard,pack:PokerPack)=>{
+      const recipe=PACK_RECIPES[pack.id];
+      if(recipe?.suit)card.suit=recipe.suit;
+      if(recipe?.black)card.suit=Math.random()<.5?'SPADE':'CLUB';
+      if(recipe?.ranks)card.rank=recipe.ranks[Math.floor(Math.random()*recipe.ranks.length)];
+      const unlocked=Object.keys(EXTRA_ENHANCEMENTS).filter((_,i)=>progressTier>=i+1) as ExtraEnhancement[];
+      if(recipe?.enhancement)card.enhancement=recipe.enhancement;
+      else if(unlocked.length&&Math.random()<.22)card.enhancement=unlocked[Math.floor(Math.random()*unlocked.length)];
+      return card;
+  };
   const createPackPreview = (pack: PokerPack) => {
       markPokerDiscovery('pack', pack.id);
       const content: (PokerCard | PokerSupporter | PokerConsumable)[] = [];
@@ -1717,10 +1762,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       if (pack.type === 'STANDARD') {
           const ENHANCEMENT_RATE = 0.4;
           for (let i = 0; i < pack.size; i++) {
-             let card = generateRandomPlayingCard(ENHANCEMENT_RATE);
+             let card = decoratePackCard(generateRandomPlayingCard(ENHANCEMENT_RATE),pack);
              let retries = 0;
              while (content.some(c => 'suit' in c && c.suit === card.suit && c.rank === card.rank) && retries < 10) {
-                 card = generateRandomPlayingCard(ENHANCEMENT_RATE);
+                 card = decoratePackCard(generateRandomPlayingCard(ENHANCEMENT_RATE),pack);
                  retries++;
              }
              content.push(card);
@@ -1728,12 +1773,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       } else {
           let pool: (PokerSupporter | PokerConsumable)[] = [];
           if (pack.type === 'BUFF') {
-              pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'PLANET' || c.type === 'TAROT')];
+              pool = [...availableConsumables.filter(c => c.type === 'PLANET' || c.type === 'TAROT')];
           } else if (pack.type === 'SUPPORTER') {
               pool = [...availableSupporters];
           } else if (pack.type === 'SPECTRAL') {
-              pool = [...CONSUMABLES_LIBRARY.filter(c => c.type === 'SPECTRAL')];
+              pool = [...availableConsumables.filter(c => c.type === 'SPECTRAL')];
           }
+          const recipe=PACK_RECIPES[pack.id];
+          if(recipe?.family==='EXPANSION')pool=pool.filter(c=>c.id.startsWith('EXP_'));
+          else if(recipe?.family)pool=pool.filter(c=>'type' in c&&c.type===recipe.family);
           pool = pool.sort(() => Math.random() - 0.5);
           for (let i = 0; i < Math.min(pack.size, pool.length); i++) {
               content.push(pool[i]);
@@ -1806,7 +1854,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           const currentHand = getHandResult(runState.hand, runState.supporters).type;
           const basicPool = ['HIGH_CARD', 'PAIR', 'TWO_PAIR', 'THREE_OF_A_KIND', 'STRAIGHT', 'FLUSH'];
           const advancedPool = ['FULL_HOUSE', 'FOUR_OF_A_KIND', 'STRAIGHT_FLUSH', 'ROYAL_FLUSH', 'FIVE_OF_A_KIND', 'FLUSH_FIVE'];
-          const mapped = PLANET_TARGETS[consumable.id];
+          const mapped = EXTRA_PLANETS[consumable.id]||PLANET_TARGETS[consumable.id];
           const targetHand = consumable.id === 'TXT_RANDOM_BASIC'
               ? basicPool[Math.floor(Math.random() * basicPool.length)]
               : consumable.id === 'TXT_RANDOM_ADV'
@@ -1815,12 +1863,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   ? currentHand
                   : mapped?.hand || 'HIGH_CARD';
           const levelGain = mapped?.levels || (consumable.id === 'TXT_BLACK_HANDBOOK' ? 1 : 1);
-          setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: prev.handLevels[targetHand] + levelGain }, consumables: prev.consumables.filter((_, i) => i !== index) }));
+          setRunState(prev => ({ ...prev, handLevels: { ...prev.handLevels, [targetHand]: (prev.handLevels[targetHand]||1) + levelGain }, persistentCounters:{...prev.persistentCounters,EXP_LEVELS:(prev.persistentCounters.EXP_LEVELS||0)+levelGain}, consumables: prev.consumables.filter((_, i) => i !== index) }));
           audioService.playSound('win');
       } else if (consumable.type === 'TAROT') { setSelectedConsumable(consumable); } else if (consumable.type === 'SPECTRAL') { handleSpectral(consumable, index); }
   };
   
   const handleSpectral = (consumable: PokerConsumable, index: number) => {
+      if(consumable.id.startsWith('SPX_')){const next=applyExtraSpectral(runState,consumable.id);if(!next){audioService.playSound('wrong');return;}next.consumables=next.consumables.filter((_,i)=>i!==index);setRunState(next);audioService.playSound('win');return;}
+
       let newState = { ...runState };
       const requiresSupporter = ['SPC_ANKH', 'SPC_HEX', 'SPC_PHANTOM_BELL', 'SPC_CURSE_BOX', 'SPC_AURA'].includes(consumable.id);
       const requiresHand = ['SPC_IMMOLATE', 'SPC_OUIJA', 'SPC_METEOR', 'SPC_MIRROR', 'SPC_VOID_NOTE', 'SPC_GHOST_WRITER'].includes(consumable.id);
@@ -1952,7 +2002,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           STA_PAINT: 3,
           STA_INK: 3
       };
-      const requiredCount = requiredSelectionCount[selectedConsumable.id];
+      const requiredCount = selectedConsumable.id.startsWith('STA_EXP_')?1:requiredSelectionCount[selectedConsumable.id];
       if (requiredCount !== undefined && selectedCards.length !== requiredCount) {
           audioService.playSound('wrong');
           return;
@@ -1962,6 +2012,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           let mod = { ...c };
           if (selectedConsumable.id === 'STA_RULER') mod.rank = Math.min(14, mod.rank + 1) as PokerRank; 
           if (selectedConsumable.id === 'STA_STICKER') { mod.bonusChips += 50; mod.enhancement = 'BONUS'; } 
+          if(selectedConsumable.id.startsWith('STA_EXP_'))mod.enhancement=selectedConsumable.id.slice(8) as ExtraEnhancement;
           if (selectedConsumable.id === 'STA_MARKER') { mod.multMultiplier = 1.5; mod.enhancement = 'MULT'; } 
           if (selectedConsumable.id === 'STA_PAINT') { mod.suit = 'HEART'; } 
           if (selectedConsumable.id === 'STA_INK') { mod.suit = 'SPADE'; } 
@@ -2097,7 +2148,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                         <div className="flex flex-col items-center mb-4">
                             <div className="w-24 h-24 mb-4">{renderPokerItemIcon((item as PokerPack).icon, (item as PokerPack).name, 'w-full h-full', (item as PokerPack).id)}</div>
                             <h3 className="text-2xl font-bold text-yellow-400 mb-2">{t((item as PokerPack).name)}</h3>
-                            <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">PACK</div>
+                            <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">{languageMode==='ENGLISH'?'PACK':languageMode==='HIRAGANA'?'パック':'パック'}</div>
                         </div>
                         <p className="text-lg text-gray-300 text-center leading-relaxed">{t((item as PokerPack).description)}</p>
                         <div className="mt-6 text-center text-yellow-500 font-bold text-xl">{getPrice((item as PokerPack).price)} pt</div>
@@ -2116,7 +2167,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                 </div>
                             )}
 
-                            {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">VOUCHER</div>}
+                            {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{languageMode==='ENGLISH'?'VOUCHER':languageMode==='HIRAGANA'?'ひきかえけん':'引換券'}</div>}
                             {!isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>}
                         </div>
                         <p className="text-lg text-gray-300 text-center leading-relaxed mb-4">{t((item as any).description)}</p>
@@ -2145,8 +2196,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               onClick={() => { useConsumable(consumableItem, index); setInspectedItem(null); }}
                               className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded border-2 border-blue-400 shadow-lg flex items-center justify-center animate-pulse"
                           >
-                              <Sparkles size={16} className="mr-1" /> USE
-                          </button>
+                              <Sparkles size={16} className="mr-1" />{languageMode==='ENGLISH'?'USE':languageMode==='HIRAGANA'?'つかう':'使う'}</button>
                           <button
                               data-gamepad-zone="poker-inspection-actions"
                               data-gamepad-order={1}
@@ -2242,6 +2292,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const config = runState.currentBlind;
       return (
           <div data-gamepad-initial-scope="poker-rival" className="poker-rival-screen flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
+              {rivalWarning&&<PokerRivalWarning trait={currentTrait} name={t(config.rivalName||config.name)} boss={config.description?t(config.description):undefined} language={languageMode} onBegin={startBlind} onClose={()=>setRivalWarning(false)}/>}
               <div className="absolute top-4 left-4">
                   <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> {t('戻る')}</button>
               </div>
@@ -2276,12 +2327,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
               <div data-gamepad-initial-scope="poker-candidate-select" className={`poker-pack-opening ${packRevealed ? "poker-pack-revealed" : ""} mini-game-poker-screen poker-pack-open-screen flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden`} style={pokerTableBackgroundStyle}>
-                  <div className="absolute inset-0 bg-black/20 z-0"></div>
+                  <div className="poker-pack-rays" aria-hidden="true"><i/></div>
                   {renderInspectionModal()}
                   
                   <div className="poker-pack-open-content ios-safe-ui-x ios-safe-ui-header z-10 flex flex-col items-center w-full max-w-4xl">
                       {!packRevealed ? <button data-gamepad-initial-choice className="poker-sealed-pack" onClick={() => { setPackRevealed(true); audioService.playSound("win"); }}><small>AFTER SCHOOL · CARD CLUB</small><PokerClubArt index={28} className="poker-booster-art"/><strong>{t(currentPack.name)}</strong><small>{languageMode === "ENGLISH" ? "TAP TO OPEN" : languageMode === "HIRAGANA" ? "タップで かいふう" : "タップして開封"}</small></button> : <>
-                      <h2 className="poker-pack-open-title text-3xl font-bold mb-3 text-yellow-400">{t("ランダムパックを開封！1つ選ぶ")}</h2>
+                      <h2 className="poker-pack-open-title text-3xl font-bold mb-3 text-yellow-400">{t("パックを開封！1つ選ぶ")}</h2>
                       <p className="poker-pack-open-description mb-8 text-center text-sm text-slate-200">{t("購入したパックの内容です。好きな1つを選んで受け取れます。")}</p>
                           <div className="poker-pack-choice-grid flex flex-wrap justify-center gap-6 animate-in zoom-in duration-500">
                               {packContent.map((item, idx) => {
@@ -2294,9 +2345,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   const type = isCard ? 'CARD' : isSupporter ? 'SUPPORTER' : 'CONSUMABLE';
                                   return (
                                       <div key={idx} style={{ "--pack-index": idx } as React.CSSProperties} data-gamepad-initial-choice={!disabled ? true : undefined} role={!disabled ? 'button' : undefined} tabIndex={!disabled ? 0 : undefined} className={`poker-pack-choice relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onKeyDown={(event) => { if (!disabled && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectPackItem(item); } }} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
-                                          {isCard && <div className="poker-pack-card w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2" style={getPokerCardFaceStyle(item as PokerCard)}><div className={`poker-pack-rank text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="poker-pack-suit scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="poker-pack-enhancement text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`poker-pack-rank text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
+                                          {isCard && <div className="poker-pack-card w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2" style={getPokerCardFaceStyle(item as PokerCard)}><div className={`poker-pack-rank text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="poker-pack-suit scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="poker-pack-enhancement text-xs text-center font-bold text-gray-500">{t(POKER_ENHANCEMENTS[(item as PokerCard).enhancement||'']?.name || '')}</div><div className={`poker-pack-rank text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
                                           {!isCard && <div className="poker-pack-card w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">{renderPokerItemIcon((item as any).icon, (item as any).name, 'poker-pack-item-icon w-16 h-16 mb-2', (item as any).id)}<div className="poker-pack-item-name font-bold text-sm">{t((item as any).name)}</div><div className="poker-pack-item-description text-[10px] text-gray-400 mt-2 leading-tight">{t((item as any).description)}</div></div>}
-                                          <button className={`poker-pack-select absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? t('FULL') : t('SELECT')}</button>
+                                          <button className={`poker-pack-select absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? (languageMode==='ENGLISH'?'FULL':'満員') : (languageMode==='ENGLISH'?'SELECT':languageMode==='HIRAGANA'?'えらぶ':'選ぶ')}</button>
                                       </div>
                                   );
                               })}
@@ -2315,7 +2366,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           <div data-gamepad-initial-scope="poker-shop" className="mini-game-poker-screen poker-shop-screen poker-club-table flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
               {renderInspectionModal()}
               {effectOverlay}
-              <div className="absolute bottom-3 left-3 z-10 pointer-events-none">{heroBadge}</div>
+              {showUnlocks&&<PokerUnlockPanel progress={progress} language={languageMode} onClose={()=>setShowUnlocks(false)}/>}
+              <button className="poker-unlocks-button" onClick={()=>setShowUnlocks(true)}>{languageMode==='ENGLISH'?'Effect unlocks':languageMode==='HIRAGANA'?'こうかの かいきん':'効果の解禁'} ✦ {[...EXTRA_SUPPORTERS,...EXTRA_CONSUMABLES,...EXTRA_PACKS].filter(i=>unlockedPokerItem(i.id,progressTier,EXPANSION_TIERS)).length}/54</button>
+
               
               {showRoundResult && roundResult && (
                   <div data-gamepad-modal data-gamepad-initial-scope="poker-round-result" className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
@@ -2363,7 +2416,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   <div className="poker-shop-owned w-full bg-slate-800/90 p-2 rounded-lg border border-slate-600 shrink-0 shadow-sm">
                       <div className="flex gap-2 h-16 md:h-20 items-stretch">
                           <div className="flex-1 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 min-w-0">
-                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>SUPPORTERS ({runState.supporters.length}/5)</div>
+                              <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>{t('サポーター')} ({runState.supporters.length}/5)</div>
                               <div className="flex-1 flex items-center gap-1 overflow-x-auto custom-scrollbar">
                                   {runState.supporters.map((s, i) => (
                                       <div key={i} className={`bg-slate-800 p-0.5 rounded flex-shrink-0 border cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} onTouchEnd={handleTouchEnd}>
@@ -2377,7 +2430,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           </div>
                           
                           <div className="w-24 md:w-32 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 shrink-0">
-                              <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>CARDS ({runState.consumables.length}/2)</div>
+                              <div className="text-[9px] text-purple-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-purple-500 rounded-full mr-1 inline-block"></span>{languageMode==='ENGLISH'?'CARDS':languageMode==='HIRAGANA'?'しょうひカード':'消費カード'} ({runState.consumables.length}/2)</div>
                               <div className="flex-1 flex items-center gap-1 justify-center">
                                   {runState.consumables.map((c, i) => (
                                       <div key={i} className="bg-slate-800 p-0.5 rounded flex-shrink-0 border border-slate-600 cursor-pointer hover:bg-slate-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center relative group" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>
@@ -2418,7 +2471,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                     onTouchStart={() => handleTouchStart(voucher, 'VOUCHER', false)}
                                     onTouchEnd={handleTouchEnd}
                                   >
-                                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full border-b border-gray-700 pb-1">Voucher</div>
+                                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full border-b border-gray-700 pb-1">{languageMode==='ENGLISH'?'Voucher':languageMode==='HIRAGANA'?'ひきかえけん':'引換券'}</div>
                                       <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-700 mt-2">
                                           {renderPokerItemIcon(voucher.icon, voucher.name, 'w-8 h-8', voucher.id)}
                                       </div>
@@ -2435,7 +2488,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
                           {shopPacks.map((item) => (
                               <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">{languageMode==='ENGLISH'?'PACK':languageMode==='HIRAGANA'?'パック':'パック'}</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{t(item.name)}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
@@ -2445,7 +2498,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           
                           {shopSupporters.map((item) => (
                               <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">{languageMode==='ENGLISH'?'SUPPORTER':'サポーター'}</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{t(item.name)}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
@@ -2455,7 +2508,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           
                           {shopConsumables.map((item) => (
                               <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
-                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
+                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">{languageMode==='ENGLISH'?'CARD':'カード'}</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{t(item.name)}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
@@ -2489,7 +2542,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           <div className="poker-played-cards">{playedVisuals.map((card, index) => <div key={card.id} className={`poker-scoring-card ${['HEART','DIAMOND'].includes(card.suit) ? 'is-red' : ''} ${scoringCardIndex === index && scoringVisualIds.includes(card.id) ? 'is-scoring' : ''}`} style={{ '--card-index': index } as React.CSSProperties}><span>{getRankDisplay(card.rank)}</span><span>{card.suit === 'SPADE' ? '♠' : card.suit === 'HEART' ? '♥' : card.suit === 'DIAMOND' ? '♦' : '♣'}</span>{scoringCardIndex === index && scoringVisualIds.includes(card.id) && <em className="poker-card-chip-pop">+{(card.rank === 14 ? 11 : Math.min(10, card.rank)) + card.bonusChips}</em>}</div>)}</div>
           {!scoreAnimation.isDisallowed && scoreBreakdown.length > 0 && (
               <div className="poker-score-breakdown mb-2 max-h-28 overflow-y-auto rounded-xl border border-slate-700 bg-black/25 px-2 py-1.5 text-left custom-scrollbar">
-                  <div className="mb-1 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">Breakdown</div>
+                  <div className="mb-1 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500">{languageMode==='ENGLISH'?'Breakdown':languageMode==='HIRAGANA'?'とくてんの うちわけ':'得点の内訳'}</div>
                   <div className="space-y-1">
                       {scoreBreakdown.slice(Math.max(0, revealedBreakdownCount - 2), revealedBreakdownCount).map((entry) => (
                           <div key={entry.id} className="flex items-start justify-between gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-2 py-1 text-[10px] animate-in fade-in slide-in-from-bottom-1">
@@ -2507,12 +2560,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           )}
           <div className="poker-score-readout flex items-center justify-center gap-2 md:gap-3">
               <div className={`min-w-[96px] rounded-xl border px-3 py-2 transition-all duration-200 ${scoreAnimation.phase === 'chips' ? 'border-cyan-300 bg-cyan-500/15 scale-105' : 'border-slate-700 bg-black/25'}`}>
-                  <div className="text-[9px] font-black uppercase tracking-[0.25em] text-cyan-300">Base</div>
+                  <div className="text-[9px] font-black uppercase tracking-[0.25em] text-cyan-300">{languageMode==='ENGLISH'?'Base':languageMode==='HIRAGANA'?'きそてん':'基礎点'}</div>
                   <div className="text-xl md:text-2xl font-black text-cyan-300">{scoreAnimation.displayChips.toLocaleString()}</div>
               </div>
               <div className={`text-lg md:text-2xl font-black ${scoreAnimation.phase === 'mult' ? 'scale-125 text-white transition-transform duration-150' : 'text-slate-500'}`}>×</div>
               <div className={`min-w-[96px] rounded-xl border px-3 py-2 transition-all duration-200 ${scoreAnimation.phase === 'mult' ? 'border-rose-300 bg-rose-500/15 scale-105' : 'border-slate-700 bg-black/25'}`}>
-                  <div className="text-[9px] font-black uppercase tracking-[0.25em] text-rose-300">Mult</div>
+                  <div className="text-[9px] font-black uppercase tracking-[0.25em] text-rose-300">{languageMode==='ENGLISH'?'Mult':languageMode==='HIRAGANA'?'ばいりつ':'倍率'}</div>
                   <div className="text-xl md:text-2xl font-black text-rose-300">{scoreAnimation.displayMult.toLocaleString()}</div>
               </div>
               <div className="min-w-[112px]">
@@ -2619,6 +2672,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             </div>
         )}
 
+        {rivalWarning&&<PokerRivalWarning trait={currentTrait} name={t(currentRivalName)} boss={runState.currentBlind.description?t(runState.currentBlind.description):undefined} language={languageMode} onBegin={()=>setRivalWarning(false)} onClose={()=>setRivalWarning(false)} review/>}
+        {currentTrait&&<button className="poker-live-trait" disabled={animating} onClick={()=>setRivalWarning(true)}>⚠ {languageMode==='ENGLISH'?currentTrait.englishName:languageMode==='HIRAGANA'?currentTrait.hiraganaName:currentTrait.name}</button>}
         <div className="poker-live-header flex flex-col md:flex-row justify-between items-stretch md:items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0 gap-2">
             <div className={`flex gap-2 w-full md:w-auto ${getPokerTutorialHighlightClass('goal')}`}>
                 <div className={`${rivalHit ? "poker-rival-hit" : ""} w-16 md:w-20 shrink-0 rounded border border-yellow-500 bg-slate-900/90 p-1 flex flex-col items-center justify-center shadow-lg`}>
@@ -2730,9 +2785,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                             data-gamepad-down-zone="poker-hand"
                             onClick={applyTarot}
                             className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500"
-                        >
-                            USE
-                        </button>
+                        >{languageMode==='ENGLISH'?'USE':languageMode==='HIRAGANA'?'つかう':'使う'}</button>
                         <button
                             data-gamepad-zone="poker-consumable-cancel"
                             data-gamepad-order={0}
@@ -2741,9 +2794,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                             data-gamepad-cancel-shortcut
                             onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }}
                             className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500"
-                        >
-                            CANCEL
-                        </button>
+                        >{languageMode==='ENGLISH'?'CANCEL':languageMode==='HIRAGANA'?'やめる':'やめる'}</button>
                     </div>
                 </div>
             )}
@@ -2755,7 +2806,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                 return (
                     <div
                         key={card.id} data-card-id={card.id} data-gamepad-multiselect data-gamepad-linear-axis="horizontal" data-gamepad-up-zone={selectedConsumable ? 'poker-consumable-use' : runState.supporters.length > 0 ? 'poker-supporters' : 'poker-consumables'} data-gamepad-initial-choice={idx === 0 ? true : undefined} data-gamepad-zone="poker-hand" data-gamepad-order={idx} role="button" tabIndex={0} onPointerDown={(e) => handlePointerDown(e, card.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleSelect(card.id); } }} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
-                        className={`w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'} ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''} ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''} ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''} ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''} ${!card.enhancement ? 'bg-gray-100' : ''}`}
+                        data-enhancement={card.enhancement} className={`w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'} ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''} ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''} ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''} ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''} ${!card.enhancement ? 'bg-gray-100' : ''}`}
                         style={getPokerCardFaceStyle(card)}
                     >
                         {card.bonusChips > 0 && <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md z-30 border border-white">+{card.bonusChips}</div>}
@@ -2763,20 +2814,20 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                         <div className="flex justify-between w-full"><div className={`text-xl md:text-2xl font-bold ${['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-slate-900'}`}>{getRankDisplay(card.rank)}</div></div>
                         <div className="scale-150">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>
                         <div className="self-end rotate-180 text-xl md:text-2xl font-bold opacity-30">{getRankDisplay(card.rank)}</div>
-                        {card.enhancement && card.enhancement !== 'BONUS' && card.enhancement !== 'MULT' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold uppercase tracking-wide bg-black/10 px-1 rounded">{card.enhancement}</div>}
+                        {card.enhancement && card.enhancement !== 'BONUS' && card.enhancement !== 'MULT' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold uppercase tracking-wide bg-black/10 px-1 rounded">{t(POKER_ENHANCEMENTS[card.enhancement]?.name||card.enhancement)}</div>}
                     </div>
                 );
             })}
         </div>
 
         <div className="flex justify-center gap-4 my-2 z-30 shrink-0">
-            <button data-gamepad-zone="poker-sort" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={sortHandRank} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800">{sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>} Rank</button>
-            <button data-gamepad-zone="poker-sort" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> Suit</button>
+            <button data-gamepad-zone="poker-sort" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={sortHandRank} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800">{sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>} {languageMode==='ENGLISH'?'Rank':languageMode==='HIRAGANA'?'ランク':'ランク'}</button>
+            <button data-gamepad-zone="poker-sort" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> {languageMode==='ENGLISH'?'Suit':'スート'}</button>
         </div>
 
         <div className={`bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up shrink-0 ${getPokerTutorialHighlightClass('actions')}`}>
-            <button data-gamepad-zone="poker-actions" data-gamepad-order={0} data-gamepad-shortcut="X" aria-keyshortcuts="X" onClick={playHand} disabled={animating || playLatch.current || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">PLAY HAND</button>
-            <button data-gamepad-zone="poker-actions" data-gamepad-order={1} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={discardHand} disabled={animating || playLatch.current || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">DISCARD</button>
+            <button data-gamepad-zone="poker-actions" data-gamepad-order={0} data-gamepad-shortcut="X" aria-keyshortcuts="X" onClick={playHand} disabled={animating || playLatch.current || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">{languageMode==='ENGLISH'?'PLAY HAND':'プレイ'}</button>
+            <button data-gamepad-zone="poker-actions" data-gamepad-order={1} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={discardHand} disabled={animating || playLatch.current || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">{languageMode==='ENGLISH'?'DISCARD':'すてる'}</button>
         </div>
     </div>
   );

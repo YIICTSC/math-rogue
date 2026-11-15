@@ -1,9 +1,11 @@
+import pokerExpansionText from './pokerExpansionText.json';
 /**
  * Human-reviewed English for cross-platform gameplay copy which does not have
  * a stable catalogue identifier.  Keep this static: iOS, Android, Steam and
  * Web must render the same wording without an OS translation service.
  */
 export const ENGLISH_REVIEW_EXACT: Readonly<Record<string, string>> = Object.freeze({
+  ...pokerExpansionText.english,
   // Shared battle and shell copy
   'プレイヤー': 'Player',
   '和解のパイプ': 'Peace Pipe',

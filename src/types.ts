@@ -1112,7 +1112,7 @@ export interface PokerCard {
   isSelected: boolean;
   bonusChips: number;
   multMultiplier: number;
-  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL';
+  enhancement?: 'BONUS' | 'MULT' | 'WILD' | 'STONE' | 'GLASS' | 'GOLD' | 'STEEL' | 'ECHO' | 'EMBER' | 'PRISM' | 'INK' | 'LUCKY' | 'ANCHOR';
   edition?: 'FOIL' | 'HOLOGRAPHIC' | 'POLYCHROME';
 }
 
@@ -1129,6 +1129,7 @@ export interface PokerScoringContext {
   handType: string;
   cards: PokerCard[];
   handCards: PokerCard[];
+  playedCards?: PokerCard[];
   handsPlayed: number;
   handsRemaining: number;
   discardsUsed: number;
@@ -1192,6 +1193,7 @@ export interface PokerBlind {
 }
 
 export interface PokerRunState {
+  runId?: string;
   protagonistId?: string;
   bestHandScore?: number;
   openPack?: { packId: string; content: (PokerCard | PokerSupporter | PokerConsumable)[] };
