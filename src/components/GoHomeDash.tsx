@@ -1,5 +1,9 @@
+import UpgradeScreen from '../mini-games/go-home-dash/UpgradeScreen';
+import {DASH_UPGRADES,rollUpgrades,gainUpgrade,upgradeLevel,upgradeStats,upgradeHealth,type DashUpgrade,type UpgradeLevels} from '../mini-games/go-home-dash/upgrades';
+import {AIR_ENEMIES,emitAirWeapons,nearestAirTarget,resolveAirHits,downAirEnemy,damageAirBoss,type AirKind,type AirProjectile} from '../mini-games/go-home-dash/airCombat';
+import {loadCombatArt,drawAirEnemy,drawAirHp,drawAirProjectile,drawCombatFx} from '../mini-games/go-home-dash/combatArt';
 import {drawSideLoop,drawTrickBurst,trickRotation} from '../mini-games/go-home-dash/courseEffects';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronLeft, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -89,6 +93,7 @@ const PROJECTILE_SPRITE_CELLS: Record<ProjectileSpriteKey, SpriteCell> = {
 };
 
 interface Obstacle {
+    airKind?:AirKind; hp?:number; maxHp?:number; hitFlash?:number;
     id: string;
     x: number;
     y: number;
@@ -106,7 +111,7 @@ interface Obstacle {
     hopCooldown?: number;
 }
 
-interface Projectile {
+interface Projectile extends AirProjectile {
     id: string;
     x: number;
     y: number;
@@ -130,16 +135,6 @@ interface Particle {
     life: number;
     color: string;
     size: number;
-}
-
-interface DashCardEffect {
-    id: string;
-    name: string;
-    description: string;
-    iconType: 'MATH' | 'SCIENCE' | 'JAPANESE' | 'PE' | 'SOCIAL';
-    isWeaponBase?: boolean; 
-    requiresWeapon?: boolean; 
-    apply: (p: any, setHp: any, setMaxHp: any) => void;
 }
 
 type DashGameState = 'START' | 'PLAYING' | 'CHALLENGE' | 'LEVEL_UP' | 'GAME_OVER';
@@ -393,44 +388,27 @@ const GoHomeDash: React.FC<{
     const particlesRef = useRef<Particle[]>([]);
     const frameIdRef = useRef<number>(null);
 
-    // --- UPGRADE POOL ---
-    const UPGRADE_POOL: DashCardEffect[] = useMemo(() => [
-        { id: 'STRIKE_1', name: 'えんぴつミサイル', description: '前方にえんぴつを発射！', iconType: 'MATH', isWeaponBase: true, apply: (p) => { p.shootingRate = p.shootingRate === 0 ? 100 : Math.max(30, p.shootingRate - 20); } },
-        { id: 'STRIKE_2', name: '2連装えんぴつ', description: '弾を2発同時に発射する。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.doubleShot = true; } },
-        { id: 'STRIKE_3', name: '3方向ショット', description: '扇状に3発の弾を発射。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.tripleShot = true; } },
-        { id: 'STRIKE_4', name: '貫通えんぴつ', description: '弾が敵を貫通するようになる。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.pierceShot = true; } },
-        { id: 'STRIKE_5', name: '巨大えんぴつ', description: '弾のサイズと当たり判定がアップ。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.largeShot = true; } },
-        { id: 'STRIKE_6', name: '追尾誘導弾', description: '一番近い敵を自動で追いかける。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.homingShot = true; } },
-        { id: 'STRIKE_7', name: '連射力UP', description: 'ミサイルの発射速度が大幅に上昇。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.shootingRate = Math.max(15, (p.shootingRate || 100) - 30); } },
-        { id: 'STRIKE_8', name: '着地衝撃波', description: '着地時に周囲の敵をなぎ倒す。', iconType: 'PE', apply: (p) => { p.landShockwave = true; } },
-        { id: 'STRIKE_9', name: 'ソニックブーム', description: 'ジャンプ時に前方の敵を攻撃。', iconType: 'PE', apply: (p) => { p.jumpBoom = true; } },
-        { id: 'STRIKE_10', name: '火炎の足跡', description: '走りながら背後に炎を置いていく。', iconType: 'SCIENCE', apply: (p) => { p.trailFire = true; } },
-        { id: 'STRIKE_11', name: '辞書プレッシャー', description: '定期的に巨大な辞書を投げつける。', iconType: 'JAPANESE', requiresWeapon: true, apply: (p) => { p.largeShot = true; p.shootingRate = Math.max(40, (p.shootingRate || 120) - 10); } },
-        { id: 'STRIKE_12', name: '反射バリア', description: 'バリア消失時に敵にダメージ。', iconType: 'SCIENCE', apply: (p) => { p.reflectShield = true; p.barrier = true; } },
-        { id: 'STRIKE_13', name: '吸血攻撃', description: '敵を倒すと稀にHPが1回復する。', iconType: 'SCIENCE', apply: (p) => { p.lifesteal = true; } },
-        { id: 'STRIKE_14', name: 'コンパス針', description: '弾が回転しながら飛び、多段ヒット。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.pierceShot = true; p.shootingRate = Math.max(30, (p.shootingRate || 100) - 5); } },
-        { id: 'STRIKE_15', name: 'フルバースト', description: '弾数が一気に増えるが、少し遅くなる。', iconType: 'MATH', requiresWeapon: true, apply: (p) => { p.doubleShot = true; p.tripleShot = true; p.speedBoost *= 0.95; } },
-        { id: 'MOVE_1', name: '上履きブースト', description: '移動速度が常時アップ。', iconType: 'PE', apply: (p) => { p.speedBoost += 0.2; } },
-        { id: 'MOVE_2', name: '空中2段ジャンプ', description: '空中でさらにもう一度飛べる。', iconType: 'PE', apply: (p) => { p.maxJumps = Math.max(p.maxJumps, 2); } },
-        { id: 'MOVE_3', name: '3段ジャンプ', description: '驚異の3段ジャンプが可能に。', iconType: 'PE', apply: (p) => { p.maxJumps = Math.max(p.maxJumps, 3); } },
-        { id: 'MOVE_4', name: 'マ〇オステップ', description: '敵を踏んで倒せるようになる！', iconType: 'PE', apply: (p) => { p.stompAbility = true; } },
-        { id: 'MOVE_5', name: 'ホバリング', description: 'ジャンプ中に長押しで滞空できる。', iconType: 'SCIENCE', apply: (p) => { p.airStall = true; } },
-        { id: 'MOVE_6', name: 'ロケットスタート', description: '初期位置から少し前に進む。', iconType: 'PE', apply: (p) => { p.x = Math.min(p.x + 50, 300); } },
-        { id: 'MOVE_8', name: '瞬足の極意', description: '速度が大幅アップし、無敵時間増加。', iconType: 'PE', apply: (p) => { p.speedBoost += 0.3; } },
-        { id: 'DEF_1', name: 'ノートバリア', description: '衝突を防ぐバリアを展開。', iconType: 'JAPANESE', apply: (p) => { p.barrier = true; } },
-        { id: 'DEF_2', name: '給食おかわり', description: '最大HPが+1され、全回復。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => { setMaxHp((prev:number)=>prev+1); setHp((prev:number)=>prev+1); } },
-        { id: 'DEF_3', name: '自動修復ノート', description: '一定時間ごとにバリアが自動復活。', iconType: 'JAPANESE', apply: (p) => { p.barrierRegen = true; } },
-        { id: 'DEF_4', name: '保健室の飴', description: '一定時間ごとにHPが1回復する。', iconType: 'SOCIAL', apply: (p) => { p.autoHeal = true; } },
-        { id: 'DEF_7', name: 'カルシウム摂取', description: '最大HP+2。', iconType: 'SOCIAL', apply: (p, setHp, setMaxHp) => { setMaxHp((prev:number)=>prev+2); } },
-        { id: 'DEF_10', name: 'ビタミン補給', description: 'HPを2回復し、加速。', iconType: 'SOCIAL', apply: (p, setHp) => { setHp((prev:number)=>Math.min(5, prev+2)); p.speedBoost += 0.1; } },
-        { id: 'UTIL_1', name: '進級パワー', description: '獲得EXPが常時1.5倍に。', iconType: 'SCIENCE', apply: (p) => { p.expMult += 0.5; } },
-        { id: 'UTIL_2', name: 'お年玉ボーナス', description: 'スコアの増加速度がアップ。', iconType: 'SOCIAL', apply: (p) => { p.scoreBonus += 0.5; } },
-        { id: 'UTIL_4', name: '大掃除', description: '画面内の敵をすべて消去する。', iconType: 'SOCIAL', apply: (p) => { p.cleaningDuty = 1; } },
-        { id: 'UTIL_7', name: '委員長の号令', description: 'すべてのクールダウンを短縮。', iconType: 'JAPANESE', apply: (p) => { p.shootingRate = Math.max(20, (p.shootingRate || 100) - 20); } },
-        { id: 'UTIL_10', name: '卒業証明書', description: 'すべてのステータスを少しずつ強化。', iconType: 'SOCIAL', apply: (p) => { p.maxJumps = 2; p.speedBoost += 0.1; p.shootingRate = 60; p.expMult += 0.2; } },
-    ], [setHp, setMaxHp]);
-
-    const [upgradeOptions, setUpgradeOptions] = useState<DashCardEffect[]>([]);
+    const upgradeLevelsRef=useRef<UpgradeLevels>({});
+    const upgradeStatsRef=useRef(upgradeStats({}));
+    const reserveShield=useRef({charges:0,timer:0});
+    const [upgradeLevels,setUpgradeLevels]=useState<UpgradeLevels>({});
+    const [upgradeOptions,setUpgradeOptions]=useState<DashUpgrade[]>([]);
+    useEffect(()=>{loadCombatArt();},[]);
+    const applyGrade=(card:DashUpgrade)=>{
+        const before=upgradeLevel(upgradeLevelsRef.current,card.id);
+        if(card.id!=='REFILL'&&before>=card.maxLevel)return false;
+        const next=gainUpgrade(upgradeLevelsRef.current,card),lv=upgradeLevel(next,card.id);
+        upgradeLevelsRef.current=next;setUpgradeLevels(next);upgradeStatsRef.current=upgradeStats(next);
+        Object.assign(playerRef.current,upgradeStatsRef.current);
+        const health=upgradeHealth(card.id,lv,hpRef.current,maxHpRef.current);
+        hpRef.current=health.hp;maxHpRef.current=health.maxHp;setHp(health.hp);setMaxHp(health.maxHp);
+        if(card.id==='DEF_1'||card.id==='STRIKE_12')playerRef.current.barrier=true;
+        if(card.id==='MOVE_6'){playerRef.current.x=Math.min(300,playerRef.current.x+30+lv*15);arcadeRef.current.boost=Math.max(arcadeRef.current.boost,60+lv*30);}
+        if(card.id==='UTIL_4')playerRef.current.cleaningDuty=lv;
+        if(card.id==='DEF_11')reserveShield.current.charges=upgradeStatsRef.current.shieldCapacity;
+        return true;
+    };
+    const downObstacle=(obs:Obstacle)=>{const down=downAirEnemy(arcadeRef.current,obs);if(down)expRef.current+=8*playerRef.current.expMult;return down;};
 
     const addVfxRing = (x: number, y: number, color: string) => {
         for(let i=0; i<8; i++) {
@@ -447,9 +425,9 @@ const GoHomeDash: React.FC<{
         shakeRef.current = 10;
     };
 
-    const selectUpgrade = (card: DashCardEffect) => {
+    const selectUpgrade = (card: DashUpgrade) => {
         const p = playerRef.current;
-        card.apply(p, setHp, setMaxHp);
+        if(gameStateRef.current!=='LEVEL_UP'||!upgradeOptions.some(option=>option.id===card.id)||!applyGrade(card))return;
         // 報酬獲得後2秒間（120フレーム）無敵にする
         p.invulFrame = 120;
         stopInputs();
@@ -484,6 +462,7 @@ const GoHomeDash: React.FC<{
             stompAbility: false, airStall: false, reflectShield: false, lifesteal: false, trailFire: false, jumpBoom: false,
             scoreBonus: 1, cleaningDuty: 0, animFrameTimer: 0, dashFrames: 0, dashCooldown: 0, flying: false, flapCooldown: 0
         };
+        upgradeLevelsRef.current={};upgradeStatsRef.current=upgradeStats({});setUpgradeLevels({});reserveShield.current={charges:0,timer:0};
         obstaclesRef.current = []; projectilesRef.current = []; enemyProjectilesRef.current = []; particlesRef.current = [];
         if (checkpoint) {
             playerRef.current.y=floorAt(routeSeedRef.current,distanceRef.current+120);playerRef.current.invulFrame=120;
@@ -516,7 +495,7 @@ const GoHomeDash: React.FC<{
         if(arcade.rush.kind==='loop'){arcade.rush.jumpQueued=true;audioService.playSound('jump');return;}
         if(arcade.rush.kind==='run'&&p.isJumping&&arcade.rush.flash===0){
             const target=obstaclesRef.current.filter(o=>isDestroyable(o.type)&&o.x>p.x&&o.x-p.x<230&&Math.abs(o.y-(p.y-35))<150).sort((a,b)=>a.x-b.x)[0];
-            if(target){obstaclesRef.current=obstaclesRef.current.filter(o=>o!==target);p.x=Math.min(260,target.x);p.vy=-8;p.invulFrame=Math.max(p.invulFrame,12);p.jumpCount=0;arcade.rush.homings++;arcade.rush.flash=36;arcade.stats.breaks++;reward(arcade,180,12);announce(arcade,'homing');addVfxRing(target.x,target.y,'#8effd8');audioService.playSound('attack');voice('jump');return;}
+            if(target){downObstacle(target);obstaclesRef.current=obstaclesRef.current.filter(o=>o!==target);p.x=Math.min(260,target.x);p.vy=-8;p.invulFrame=Math.max(p.invulFrame,12);p.jumpCount=0;arcade.rush.homings++;arcade.rush.flash=36;if(!target.airKind)arcade.stats.breaks++;reward(arcade,180,12);announce(arcade,'homing');addVfxRing(target.x,target.y,'#8effd8');audioService.playSound('attack');voice('jump');return;}
         }
         if(p.isJumping&&p.jumpCount>=p.maxJumps&&airTrick(arcade,p,arcade.rush.kind==='depth'?340:floorAt(routeSeedRef.current,distanceRef.current+p.x))){audioService.playSound('correct');voice('jump');return;}
         arcade.slide=0;
@@ -525,19 +504,19 @@ const GoHomeDash: React.FC<{
         if (arcade.vehicle === 'wave') return;
         if (p.flying) { p.vy = -4.6; p.flapCooldown = 18; voice('jump'); addParticle(p.x, p.y, '#befcff'); return; }
         if (!p.flying && !p.isFalling && p.jumpCount < p.maxJumps) {
-            p.vy = JUMP_FORCE * (arcade.sneakers>0?1.3:1); p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
+            p.vy = -upgradeStatsRef.current.jumpForce * (arcade.sneakers>0?1.3:1); p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
             voice('jump');
             audioService.playSound('jump'); addParticle(p.x, p.y, '#ffffff');
             if (p.jumpBoom) {
                  addVfxRing(p.x, p.y, '#ffffff');
                  obstaclesRef.current = obstaclesRef.current.filter(obs => {
                      const dx = obs.x - p.x;
-                     if (dx > 0 && dx < 150 && Math.abs(obs.y - p.y) < 100) {
+                     if (dx > 0 && dx < upgradeStatsRef.current.boomRange && Math.abs(obs.y - p.y) < 100) {
                          if (['FLIGHT_GATE', 'HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
                              addParticle(obs.x, obs.y, '#94a3b8');
                              return true;
                          }
-                         addParticle(obs.x, obs.y, '#ffeb3b');
+                         downObstacle(obs);addParticle(obs.x, obs.y, '#ffeb3b');
                          scoreRef.current += 10;
                          return false;
                      }
@@ -687,13 +666,7 @@ const GoHomeDash: React.FC<{
         expRef.current += addExp;
         if (expRef.current >= nextLevelExpRef.current) {
             levelRef.current++; expRef.current = 0; nextLevelExpRef.current += 100;
-            const hasWeapon = p.shootingRate > 0;
-            const availableUpgrades = UPGRADE_POOL.filter(card => {
-                if (card.requiresWeapon && !hasWeapon) return false;
-                return true;
-            });
-            const shuffled = [...availableUpgrades].sort(() => randomRef.current() - 0.5);
-            setUpgradeOptions(shuffled.slice(0, 3));
+            setUpgradeOptions(rollUpgrades(upgradeLevelsRef.current,randomRef.current));
             stopInputs(); audioService.stopHomeDashVoices();
             gameStateRef.current = 'CHALLENGE';
             setGameState('CHALLENGE');
@@ -707,6 +680,8 @@ const GoHomeDash: React.FC<{
     const updateLogic = () => {
         if (gameStateRef.current !== 'PLAYING' || pausedRef.current) return;
         const p = playerRef.current, arcade=arcadeRef.current;
+        const build=upgradeStatsRef.current;arcade.magnetLevel=build.magnetLevel;arcade.comboLevel=build.comboLevel;
+        if(build.shieldCapacity&&reserveShield.current.charges<build.shieldCapacity&&++reserveShield.current.timer>=build.shieldInterval){reserveShield.current.charges++;reserveShield.current.timer=0;}
         if(arcade.rush.transition){
             laneButtonPointers.current.clear();laneButtonHeld.current.left=false;laneButtonHeld.current.right=false;
             const changed=advanceRushTransition(arcade,p,340);arcade.frame++;if(arcade.noticeTime>0)arcade.noticeTime--;frameCount.current++;p.animFrame=Math.floor(frameCount.current/4)%4;
@@ -733,8 +708,8 @@ const GoHomeDash: React.FC<{
             const laneButtonDirection=Number(laneButtonHeld.current.right)-Number(laneButtonHeld.current.left);
             if(laneButtonDirection)moveRushLane(arcade,laneButtonDirection,DEPTH_LANE_TOUCH_SPEED);
             else if(arcade.rush.kind!=='depth'){laneButtonPointers.current.clear();laneButtonHeld.current.left=false;laneButtonHeld.current.right=false;}
-            if(p.barrierRegen&&!p.barrier&&++p.barrierTimer>600){p.barrier=true;p.barrierTimer=0;}
-            if(p.autoHeal&&++p.autoHealTimer>1200){setHp(h=>Math.min(maxHpRef.current,h+1));p.autoHealTimer=0;}
+            if(p.barrierRegen&&!p.barrier&&++p.barrierTimer>upgradeStatsRef.current.barrierInterval){p.barrier=true;p.barrierTimer=0;}
+            if(p.autoHeal&&++p.autoHealTimer>upgradeStatsRef.current.healInterval){setHp(h=>Math.min(maxHpRef.current,h+1));p.autoHealTimer=0;}
             if(p.shootingRate>0&&--p.shootingTimer<=0){p.shootingTimer=p.shootingRate;const target=arcade.rush.objects.find(e=>!e.taken&&e.kind==='barrier'&&Math.abs(e.lane-arcade.rush.laneX)<.5&&e.at-distanceRef.current>120&&e.at-distanceRef.current<650);if(target){target.taken=true;arcade.stats.breaks++;reward(arcade,80,6);arcade.rush.flash=15;}}
             const coinsBefore=arcade.stats.coins,noticeBefore=arcade.notice;
             if(stepRush(arcade,p,distanceRef.current,floor))handlePlayerDamage(false);
@@ -754,7 +729,7 @@ const GoHomeDash: React.FC<{
 
         frameCount.current++;
         for(const obstacle of obstaclesRef.current){
-            if(advanceObstacleMotion(obstacle,routeSeedRef.current,distanceRef.current,currentSpeed,frameCount.current,randomRef.current))addParticle(obstacle.x,floorAt(routeSeedRef.current,distanceRef.current+obstacle.x),obstacle.type==='WATER_SLIME'?'#72c9e9':'#8d6e63');
+            if(advanceObstacleMotion(obstacle,routeSeedRef.current,distanceRef.current,currentSpeed*(obstacle.airKind?build.gravitySlow:1),frameCount.current,randomRef.current))addParticle(obstacle.x,floorAt(routeSeedRef.current,distanceRef.current+obstacle.x),obstacle.type==='WATER_SLIME'?'#72c9e9':'#8d6e63');
         }
 
         if (p.x < PLAYER_DEFAULT_X) p.x += 0.8;else if(p.x>PLAYER_DEFAULT_X)p.x-=Math.min(12,(p.x-PLAYER_DEFAULT_X)*.14);
@@ -769,7 +744,7 @@ const GoHomeDash: React.FC<{
         if (p.jumpActionFrame > 0) p.jumpActionFrame--;
 
         if (!p.flying && p.airStall && p.isPressing && p.vy > 0) {
-            p.vy *= 0.8; 
+            p.vy *= upgradeStatsRef.current.hoverGravity;
             addParticle(p.x, p.y + 10, '#00ffff');
         }
 
@@ -793,7 +768,7 @@ const GoHomeDash: React.FC<{
                 p.y = Math.max(84, Math.min(334, p.y)); p.vy = p.y <= 84 ? 2 : -3;
             }
             p.isJumping = true; p.isFalling = false;
-        } else { p.vy += GRAVITY * (arcade.lowGravity>0?.55:1); p.y += p.vy; }
+        } else { p.vy += GRAVITY * (arcade.lowGravity>0?.55:1);if(upgradeLevel(upgradeLevelsRef.current,'MOVE_9')>0)p.vy=Math.min(p.vy,build.glideFall); p.y += p.vy; }
 
         if (p.isFalling && p.y > CANVAS_HEIGHT + 20) { handlePlayerDamage(true); return; }
 
@@ -803,7 +778,8 @@ const GoHomeDash: React.FC<{
 
         if (p.cleaningDuty > 0) {
             addVfxRing(p.x, p.y, '#ffffff');
-            obstaclesRef.current = obstaclesRef.current.filter(obs => !isDestroyable(obs.type));
+            obstaclesRef.current = obstaclesRef.current.filter(obs => {if(!isDestroyable(obs.type))return true;downObstacle(obs);return false;});
+            if(damageAirBoss(arcade,p.cleaningDuty*3))announce(arcade,'bossWin');
             p.cleaningDuty = 0;
             audioService.playSound('win');
         }
@@ -853,7 +829,7 @@ const GoHomeDash: React.FC<{
                         audioService.playSound('block');
                         obstaclesRef.current = obstaclesRef.current.filter(obs => {
                             if (!isDestroyable(obs.type)) return true;
-                            return Math.abs(obs.x - p.x) > 120;
+                            const keep=Math.abs(obs.x-p.x)>upgradeStatsRef.current.groundRange;if(!keep)downObstacle(obs);return keep;
                         });
                     }
                 }
@@ -867,27 +843,27 @@ const GoHomeDash: React.FC<{
         
         if (p.barrierRegen && !p.barrier) {
             p.barrierTimer++;
-            if (p.barrierTimer > 600) { p.barrier = true; p.barrierTimer = 0; audioService.playSound('buff'); }
+            if (p.barrierTimer > upgradeStatsRef.current.barrierInterval) { p.barrier = true; p.barrierTimer = 0; audioService.playSound('buff'); }
         }
 
         if (p.autoHeal) {
             p.autoHealTimer++;
-            if (p.autoHealTimer > 1200) { setHp(h => Math.min(maxHpRef.current, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
+            if (p.autoHealTimer > upgradeStatsRef.current.healInterval) { setHp(h => Math.min(maxHpRef.current, h + 1)); p.autoHealTimer = 0; audioService.playSound('buff'); }
         }
 
         if (p.trailFire && frameCount.current % 10 === 0) {
             addParticle(p.x - 20, p.y, '#ff4500');
             obstaclesRef.current = obstaclesRef.current.filter(obs => {
                 if (!isDestroyable(obs.type)) return true;
-                return Math.abs(obs.x - (p.x - 40)) > 40;
+                const keep=Math.abs(obs.x-(p.x-40))>upgradeStatsRef.current.fireRange;if(!keep)downObstacle(obs);return keep;
             });
         }
 
         if (p.shootingRate > 0) {
             p.shootingTimer++;
             if (p.shootingTimer >= p.shootingRate) {
-                const angles = p.tripleShot ? [-0.2, 0, 0.2] : [0];
-                const count = p.doubleShot ? 2 : 1;
+                const angles = p.tripleShot ? [-build.fanSpread, 0, build.fanSpread] : [0];
+                const count = 1+build.extraShots;
                 for (const angle of angles) {
                     for (let i = 0; i < count; i++) {
                         projectilesRef.current.push({ 
@@ -896,7 +872,7 @@ const GoHomeDash: React.FC<{
                             vy: (currentSpeed + 12) * Math.sin(angle),
                             isHoming: p.homingShot, isLarge: p.largeShot, isPierce: p.pierceShot,
                             spriteKey: 'PLAYER_PENCIL',
-                            radius: p.largeShot ? 12 : 7
+                            radius: build.shotSize/2, damage:build.damage
                         });
                     }
                 }
@@ -904,21 +880,29 @@ const GoHomeDash: React.FC<{
             }
         }
 
+        projectilesRef.current.push(...emitAirWeapons(arcade,p,build,obstaclesRef.current));
+        if(projectilesRef.current.length>90)projectilesRef.current.splice(0,projectilesRef.current.length-90);
         // プレイヤーの弾更新
         const projs = projectilesRef.current;
         for (let i = projs.length - 1; i >= 0; i--) {
             const pr = projs[i];
             if (pr.isHoming) {
-                const target = obstaclesRef.current.find(o => o.x > pr.x && isDestroyable(o.type));
-                if (target) {
-                    const ang = Math.atan2(target.y - 20 - pr.y, target.x - pr.x);
-                    pr.vx += Math.cos(ang) * 0.5; pr.vy += Math.sin(ang) * 0.5;
-                }
+                const air=nearestAirTarget(arcade,obstaclesRef.current,pr.x,pr.y);
+                const target=air||obstaclesRef.current.find(o=>o.x>pr.x&&isDestroyable(o.type));
+                if(target){const dx=target.x-pr.x,dy=target.y-pr.y,length=Math.hypot(dx,dy)||1,force=pr.airWeapon ? .85 : build.homingStrength;pr.vx+=dx/length*force;pr.vy+=dy/length*force;const speed=Math.hypot(pr.vx,pr.vy);if(speed>18){pr.vx*=18/speed;pr.vy*=18/speed;}}
             }
+            pr.previousX=pr.x;pr.previousY=pr.y;if(pr.life!==undefined)pr.life--;
             pr.x += pr.vx; pr.y += pr.vy;
-            if (pr.x > viewportRef.current.width + 50 || pr.y < -50 || pr.y > CANVAS_HEIGHT + 50) projs.splice(i, 1);
+            if ((pr.life!==undefined&&pr.life<0)||pr.x > viewportRef.current.width + 120 || pr.x < -100 || pr.y < -70 || pr.y > CANVAS_HEIGHT + 70) projs.splice(i, 1);
         }
 
+        const airResult=resolveAirHits(arcade,obstaclesRef.current,projectilesRef.current,build);
+        projectilesRef.current.splice(0,projectilesRef.current.length,...airResult.projectiles as Projectile[]);
+        obstaclesRef.current.splice(0,obstaclesRef.current.length,...obstaclesRef.current.filter(o=>!o.airKind||(o.hp??1)>0));
+        if(airResult.hits)audioService.playSound('attack');
+        if(airResult.downs){audioService.playSound('explosion');expRef.current+=airResult.downs*8*p.expMult;if(p.lifesteal&&randomRef.current()<build.healChance)setHp(h=>Math.min(maxHpRef.current,h+1));}
+        if(airResult.bossDown){announce(arcade,'bossWin');arcade.entities=arcade.entities.filter(e=>e.kind!=='missile');audioService.playSound('correct');triggerShake();}
+        else if(airResult.hits&&arcade.boss)announce(arcade,'bossHit');
         // 敵の弾更新
         const enemyProjs = enemyProjectilesRef.current;
         for (let i = enemyProjs.length - 1; i >= 0; i--) {
@@ -967,7 +951,7 @@ const GoHomeDash: React.FC<{
             if (isStair(type) && (incoming.id !== stage.id || incoming.flight)) type = 'BACKPACK';
             const isAir = ['BIRD', 'DRONE', 'CLOCK_GHOST', 'PAPER_WYVERN', 'FIRE_FLY', 'WIND_SPIRIT'].includes(type);
             const isHard = !isDestroyable(type);
-            const speedMult = type === 'TEACHER_RUNNER' ? 1.8 : type === 'HALL_MONITOR' ? 1.65 : type === 'SHOE_ROLLER' ? 1.9 : (isAir ? 1.25 : 1.0);
+            let speedMult = type === 'TEACHER_RUNNER' ? 1.8 : type === 'HALL_MONITOR' ? 1.65 : type === 'SHOE_ROLLER' ? 1.9 : (isAir ? 1.25 : 1.0);
             
             let width = 40;
             let height = 40;
@@ -988,12 +972,15 @@ const GoHomeDash: React.FC<{
                 for (const rect of steps) addEntity(arcade,'coin',distanceRef.current+rect.left+rect.width/2,base-rect.top+30,18,18);
                 if (type==='MOUNTAIN_STEPS') {const top=steps[steps.length-1];addEntity(arcade,'star',distanceRef.current+top.left+top.width/2,height+58,24,24);}
             }
+            const airDef=isAir?AIR_ENEMIES[Math.floor(randomRef.current()*Math.min(12,4+Math.floor(levelRef.current/2)))]:null;
+            if(airDef){width=airDef.width;height=airDef.height;speedMult*=airDef.speed;}
             const phase=randomRef.current()*Math.PI*2;
             obstaclesRef.current.push({ 
                 id: randomRef.current().toString(),
                 x: spawnX, 
                 y: type==='ELEVATOR'?floorAt(routeSeedRef.current,distanceRef.current+spawnX)-80-24*Math.sin(frameCount.current*.025+phase):isAir ? (stage.flight ? 115 + randomRef.current() * 135 : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - 110 - randomRef.current() * 50) : floorAt(routeSeedRef.current, distanceRef.current + spawnX) - height / 2,
                 phase,
+                ...(airDef?{airKind:airDef.id,hp:airDef.hp+Math.floor(levelRef.current/10),maxHp:airDef.hp+Math.floor(levelRef.current/10)}:{}),
                 vy: 0,
                 width, 
                 height, 
@@ -1006,6 +993,8 @@ const GoHomeDash: React.FC<{
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const obs = obstacles[i]; 
+            if(obs.airKind&&(obs.hp??1)<=0){obstacles.splice(i,1);continue;}
+            if(obs.hitFlash)obs.hitFlash--;
 
             const obsFloor = floorAt(routeSeedRef.current, distanceRef.current + obs.x);
             if (obs.type === 'FLIGHT_GATE') {
@@ -1063,8 +1052,8 @@ const GoHomeDash: React.FC<{
                 const dx = p.x - obs.x;
                 const dy = obs.y - p.y;
                 if (Math.abs(dx) < 40 && dy > 0 && dy < 40) {
-                    p.vy = JUMP_FORCE * 0.7; 
-                    obstacles.splice(i, 1);
+                    p.vy = -upgradeStatsRef.current.jumpForce * upgradeStatsRef.current.stompBounce;
+                    downObstacle(obs);obstacles.splice(i, 1);
                     audioService.playSound('attack');
                     scoreRef.current += 100;
                     addVfxRing(obs.x, obs.y, '#ffffff');
@@ -1073,7 +1062,7 @@ const GoHomeDash: React.FC<{
             }
 
             if(p.dashFrames>0&&isDestroyable(obs.type)&&Math.abs(p.x-obs.x)<60&&Math.abs(p.y-30-obs.y)<65){
-                obstacles.splice(i,1);arcade.score+=80;arcade.stats.breaks++;announce(arcade,'smash');addVfxRing(obs.x,obs.y,'#ffdf9b');continue;
+                downObstacle(obs);obstacles.splice(i,1);arcade.score+=80;if(!obs.airKind)arcade.stats.breaks++;announce(arcade,'smash');addVfxRing(obs.x,obs.y,'#ffdf9b');continue;
             }
             if (!['STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'ELEVATOR', 'SPRING'].includes(obs.type)) {
                 const pdx = p.x - obs.x; const pdy = (p.y - (arcade.slide>0?13:30)) - obs.y;
@@ -1081,8 +1070,9 @@ const GoHomeDash: React.FC<{
             }
 
             for (let j = projs.length - 1; j >= 0; j--) {
+                if(obs.airKind)break;
                 const proj = projs[j]; const rdx = proj.x - obs.x; const rdy = proj.y - obs.y;
-                const hitDist = proj.isLarge ? 50 : 35;
+                const hitDist = 25+(proj.radius||7);
                 if (Math.sqrt(rdx * rdx + rdy * rdy) < hitDist) {
                     if (!isDestroyable(obs.type)) {
                         projs.splice(j, 1); 
@@ -1092,7 +1082,7 @@ const GoHomeDash: React.FC<{
                         if (!proj.isPierce) projs.splice(j, 1);
                         obstacles.splice(i, 1); audioService.playSound('attack');
                         scoreRef.current += 50; addParticle(obs.x, obs.y, '#ffeb3b');
-                        if (p.lifesteal && randomRef.current() < 0.1) setHp(h => Math.min(maxHpRef.current, h + 1));
+                        if (p.lifesteal && randomRef.current() < upgradeStatsRef.current.healChance) setHp(h => Math.min(maxHpRef.current, h + 1));
                     }
                     break;
                 }
@@ -1102,7 +1092,9 @@ const GoHomeDash: React.FC<{
 
         if(gameStateRef.current!=='PLAYING')return;
         const oldCoins=arcade.stats.coins,oldNotice=arcade.notice,oldNoticeTime=arcade.noticeTime;
+        const antiAirPickups=arcade.entities.filter(e=>e.kind==='antiAir'&&!e.taken);
         const arcadeDamage=endArcade(arcade,p,distanceRef.current);
+        if(antiAirPickups.some(e=>e.taken)){const rocket=DASH_UPGRADES.find(u=>u.id==='AIR_1')!;applyGrade(rocket);audioService.playSound('buff');}
         if(arcade.score){scoreRef.current+=arcade.score;arcade.score=0;}
         if(arcade.stats.coins>oldCoins&&arcade.frame%6===0)audioService.playSound('select');
         if(arcade.noticeTime>oldNoticeTime||arcade.notice!==oldNotice){
@@ -1166,19 +1158,20 @@ const GoHomeDash: React.FC<{
         if(hitArcade(arcadeRef.current)){
             p.invulFrame=90;
             if(isFall){p.y=floorAt(routeSeedRef.current,distanceRef.current+p.x);p.vy=-10;p.isFalling=false;p.isJumping=true;p.jumpCount=1;}
-            if(obsIdx!==undefined)obstaclesRef.current.splice(obsIdx,1);audioService.playSound('block');return;
+            if(obsIdx!==undefined){const obs=obstaclesRef.current[obsIdx];if(obs)downObstacle(obs);obstaclesRef.current.splice(obsIdx,1);}audioService.playSound('block');return;
         }
         if (p.barrier) {
             p.barrier = false;
             p.invulFrame = 45;
             if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = -10; p.isFalling = false; p.isJumping=true; p.jumpCount=1; }
-            else if (obsIdx !== undefined) obstaclesRef.current.splice(obsIdx, 1);
+            else if (obsIdx !== undefined) {const obs=obstaclesRef.current[obsIdx];if(obs)downObstacle(obs);obstaclesRef.current.splice(obsIdx,1);}
             if (p.reflectShield) {
                 addVfxRing(p.x, p.y, '#00ffff');
-                obstaclesRef.current = obstaclesRef.current.filter(o => Math.abs(o.x - p.x) > 200);
+                obstaclesRef.current = obstaclesRef.current.filter(o => {if(!isDestroyable(o.type))return true;const keep=Math.abs(o.x-p.x)>80+upgradeLevel(upgradeLevelsRef.current,'STRIKE_12')*25;if(!keep)downObstacle(o);return keep;});
             }
             audioService.playSound('block'); return;
         }
+        if(reserveShield.current.charges>0){reserveShield.current.charges--;p.invulFrame=upgradeStatsRef.current.invulnerability;audioService.playSound('block');if(isFall){p.y=floorAt(routeSeedRef.current,distanceRef.current+p.x);p.vy=-10;p.isFalling=false;p.isJumping=true;}return;}
         const nextHp = Math.max(0, hpRef.current - 1);
         hpRef.current = nextHp;
         setHp(nextHp);
@@ -1187,7 +1180,7 @@ const GoHomeDash: React.FC<{
             return;
         }
         voice('damage');
-        p.invulFrame = 60; audioService.playSound('damage'); triggerShake();
+        p.invulFrame = upgradeStatsRef.current.invulnerability; audioService.playSound('damage'); triggerShake();
         if (isFall) { p.y = floorAt(routeSeedRef.current, distanceRef.current + p.x); p.vy = 0; p.isFalling = false; p.isJumping=false; p.jumpCount=0; }
     };
 
@@ -1229,7 +1222,8 @@ const GoHomeDash: React.FC<{
         const projectileSheet = projectileSpriteSheetRef.current;
         const projs = projectilesRef.current;
         for (const proj of projs) {
-            const sz = proj.isLarge ? 24 : 14;
+            if(drawAirProjectile(ctx,proj))continue;
+            const sz = (proj.radius||7)*2;
             const drew = drawSpriteCell(ctx, projectileSheet, PROJECTILE_SPRITE_CELLS[proj.spriteKey || 'PLAYER_PENCIL'], proj.x - sz / 2, proj.y - sz / 2, sz, sz);
             if (!drew) {
                 ctx.fillStyle = '#fbbf24';
@@ -1255,6 +1249,7 @@ const GoHomeDash: React.FC<{
 
         for (const obs of obstacles) {
             if (obs.type === 'HOLE') continue;
+            if(obs.airKind){drawDangerAura(ctx,obs.x-obs.width/2,obs.y-obs.height/2,obs.width,obs.height,frameCount.current,reducedMotionRef.current);drawAirEnemy(ctx,obs.airKind,obs.x,obs.y,obs.width,obs.height,obs.hitFlash);if((obs.hp??1)<(obs.maxHp??1))drawAirHp(ctx,obs.airKind,obs.x,obs.y-obs.height/2-8,obs.width,obs.hp||0,obs.maxHp||1);continue;}
             if (obs.type === 'FLIGHT_GATE') {
                 const rects=flightGateRects(obs.x,obs.width,obs.y,obs.gateGap);
                 for (let index=0;index<rects.length;index++) {
@@ -1338,6 +1333,7 @@ const GoHomeDash: React.FC<{
             }
         }
 
+        drawCombatFx(ctx,arcade,reducedMotionRef.current);
         const loopPreview=rushAt(arcade.seed,distanceRef.current+120+900);
         if(sidePose||loopPreview.kind==='loop'){const progress=sidePose?arcade.rush.progress:(distanceRef.current+120-loopPreview.start)/loopPreview.length;drawSideLoop(ctx,arcade,progress,floorAt(routeSeedRef.current,distanceRef.current+120),reducedMotionRef.current);}
         const pl={...playerRef.current,x:displayX,y:sidePose?floorAt(routeSeedRef.current,distanceRef.current+120)-sidePose.lift:arcade.rush.transition?.direction==='toDepth'?arcade.rush.transition.fromY+(playerRef.current.y-arcade.rush.transition.fromY)*easeRush(Math.min(1,transitionProgress(arcade.rush)*2)):playerRef.current.y};
@@ -1419,7 +1415,7 @@ const GoHomeDash: React.FC<{
     },[gameState==='START']);
     useEffect(()=>()=>{rushRendererRef.current?.dispose();rushRendererRef.current=null;},[]);
 
-    const getSubjectIcon = (type: DashCardEffect['iconType']) => {
+    const getSubjectIcon = (type: 'MATH' | 'SCIENCE' | 'JAPANESE' | 'PE' | 'SOCIAL') => {
         switch(type) {
             case 'MATH': return <Brain className="text-emerald-400" />;
             case 'SCIENCE': return <Flame className="text-orange-400" />;
@@ -1470,20 +1466,7 @@ const GoHomeDash: React.FC<{
                 </div>
             )}
 
-            {gameState === 'LEVEL_UP' && (
-                <div data-gamepad-modal data-gamepad-initial-scope={`go-home-level-up-${level}`} className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-indigo-950/95 p-4 backdrop-blur-md animate-in fade-in" onPointerDown={e => e.stopPropagation()}>
-                    <div className="flex items-center gap-4 mb-10 animate-bounce"><Star size={40} className="text-yellow-400 fill-current" /><h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">Grade Up!</h2><Star size={40} className="text-yellow-400 fill-current" /></div>
-                    <div className="grid grid-cols-1 gap-4 w-full max-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar" data-gamepad-navigation-root>
-                        {upgradeOptions.map((card, index) => (
-                            <div key={card.id} data-gamepad-initial-choice={index === 0 ? true : undefined} data-gamepad-zone="go-home-upgrades" data-gamepad-order={index} role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectUpgrade(card); } }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
-                                <div className="p-3 bg-black/40 rounded-2xl mr-4 border border-slate-700 group-hover:border-yellow-500/50">{getSubjectIcon(card.iconType)}</div>
-                                <div className="flex-grow"><h3 className="text-lg font-black text-white leading-tight">{t(card.name)}</h3><p className="text-[10px] text-slate-400 font-bold leading-tight mt-1">{t(card.description)}</p></div>
-                                <ChevronRight size={20} className="text-slate-600 group-hover:text-yellow-400 transition-colors ml-2"/>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {gameState === 'LEVEL_UP' && <UpgradeScreen options={upgradeOptions} levels={upgradeLevels} level={levelRef.current} onChoose={selectUpgrade} language={languageMode}/>}
 
             {gameState === 'GAME_OVER' && (
                 <div data-gamepad-modal data-gamepad-initial-scope="go-home-game-over" className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>

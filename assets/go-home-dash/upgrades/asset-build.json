@@ -1,0 +1,54 @@
+{
+  "generator": "ImageGen",
+  "preparation": "scripts/prepare-home-dash-upgrades.mjs",
+  "files": [
+    {
+      "path": "public/sprites/go-home-dash/upgrades/upgrades-a.webp",
+      "source": "assets/go-home-dash/upgrades/upgrades-a.png",
+      "generator": "ImageGen",
+      "columns": 6,
+      "rows": 4,
+      "cell": 160,
+      "frames": 24,
+      "sourceSha256": "80baa0389be7663e8b217945fc72d6e806d22fb33e5ef8d92a11970b6898db44",
+      "sha256": "de82f0a53ad27e08ec7698399f1107fa26f6ed111c8f983260c5bc2c3d765b6c",
+      "bytes": 362168
+    },
+    {
+      "path": "public/sprites/go-home-dash/upgrades/upgrades-b.webp",
+      "source": "assets/go-home-dash/upgrades/upgrades-b.png",
+      "generator": "ImageGen",
+      "columns": 6,
+      "rows": 4,
+      "cell": 160,
+      "frames": 24,
+      "sourceSha256": "99a2095aba533bd6383157ecd9519a6f7e3944c01dacf744bcf748d6b61cb17c",
+      "sha256": "54dc31779c0d01e9ab167139efa4c83591f9949ae442d23b5c0855c020eeef79",
+      "bytes": 308002
+    },
+    {
+      "path": "public/sprites/go-home-dash/upgrades/air-enemies.webp",
+      "source": "assets/go-home-dash/upgrades/air-enemies.png",
+      "generator": "ImageGen",
+      "columns": 4,
+      "rows": 4,
+      "cell": 192,
+      "frames": 16,
+      "sourceSha256": "b9ce8c3362bbf097d79f3f39a7041334ac162b36469a841020f6eb182206fe68",
+      "sha256": "792b7b7e9e0cda016bab0459fc08ae165e9de5810e51ae0ff35e5896552d4002",
+      "bytes": 260694
+    },
+    {
+      "path": "public/sprites/go-home-dash/upgrades/explosion.webp",
+      "source": "assets/go-home-dash/upgrades/explosion.png",
+      "generator": "ImageGen",
+      "columns": 4,
+      "rows": 2,
+      "cell": 192,
+      "frames": 8,
+      "sourceSha256": "259f8a402c3ea735af7a2e5b2dcb9ad64e3010bdbbe4eaf62c0c925997f37153",
+      "sha256": "93567573e27910f5cfa4c9a10d9e7de9b9361fa04b2e5c8fa86cc9b92fdd20fa",
+      "bytes": 127684
+    }
+  ]
+}

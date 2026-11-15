@@ -1,8 +1,10 @@
+import {bossBounds} from './airCombat';
+import {drawAirEnemy,drawAirHp,drawAntiAirPickup} from './combatArt';
 import {drawAura} from './aura';
 import { drawDangerAura, drawFlightPillar, drawHostileArt, drawArt, type ArtImages, type ArtKey } from './art';
 import { entityRects, entityY, isPickup, laserActive, type ArcadeEntity, type ArcadeState } from './arcade';
-const COLORS:Record<string,string>={coin:'#ffdc70',star:'#ff90d8',magnet:'#f49ac2',shield:'#7de9ff',double:'#fff07b',sneakers:'#a9ffb5',board:'#82b9ff',rocket:'#ffb88a',lowGravity:'#b9a5ff',gravity:'#d4a2ff',wave:'#8dffdf',charge:'#91efff',orb:'#ffed9a',pad:'#bdff80',boost:'#8dfff4'};
-const ICONS:Record<string,string>={magnet:'∩',shield:'◇',double:'×2',sneakers:'↑↑',board:'≋',rocket:'↑',lowGravity:'↓',gravity:'↕',wave:'∿',charge:'ϟ',orb:'↑',pad:'↑',boost:'»'};
+const COLORS:Record<string,string>={antiAir:'#ffd778',coin:'#ffdc70',star:'#ff90d8',magnet:'#f49ac2',shield:'#7de9ff',double:'#fff07b',sneakers:'#a9ffb5',board:'#82b9ff',rocket:'#ffb88a',lowGravity:'#b9a5ff',gravity:'#d4a2ff',wave:'#8dffdf',charge:'#91efff',orb:'#ffed9a',pad:'#bdff80',boost:'#8dfff4'};
+const ICONS:Record<string,string>={antiAir:'↗',magnet:'∩',shield:'◇',double:'×2',sneakers:'↑↑',board:'≋',rocket:'↑',lowGravity:'↓',gravity:'↕',wave:'∿',charge:'ϟ',orb:'↑',pad:'↑',boost:'»'};
 function star(ctx:CanvasRenderingContext2D,x:number,y:number,r:number){ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,v=i%2?r*.45:r;ctx.lineTo(x+Math.cos(a)*v,y+Math.sin(a)*v);}ctx.closePath();ctx.fill();}
 export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:number,reducedMotion=false,width=800,height=400,art?:ArtImages) {
  ctx.save();
@@ -17,7 +19,7 @@ export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:n
    const size=e.kind==='coin'?26:e.kind==='star'?38:e.kind==='orb'?56:48;
    const aw=floorItem?e.width:portal?76:size,ah=floorItem?24:portal?96:size;
    ctx.save();if(e.kind==='coin'){ctx.translate(x,y);ctx.scale(.65+.35*Math.abs(Math.cos(s.frame*.055+e.id)),1);ctx.translate(-x,-y);}
-   const drew=drawArt(ctx,art,e.kind as ArtKey,x-aw/2,floorItem?y-16:y-ah/2+pulse,aw,ah,floorItem?'stretch':'contain');ctx.restore();
+   const drew=e.kind==='antiAir'?drawAntiAirPickup(ctx,x,y+pulse,52):drawArt(ctx,art,e.kind as ArtKey,x-aw/2,floorItem?y-16:y-ah/2+pulse,aw,ah,floorItem?'stretch':'contain');ctx.restore();
    if(drew)continue;
    const color=COLORS[e.kind]||'#fff';ctx.fillStyle=color;ctx.strokeStyle=color;ctx.lineWidth=2;
    if(e.kind==='coin'){ctx.beginPath();ctx.ellipse(x,y,7+Math.abs(Math.cos(s.frame*.055+e.id))*3,11,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#754b17';ctx.fillRect(x-1,y-5,2,10);}
@@ -59,14 +61,14 @@ export function drawArcade(ctx:CanvasRenderingContext2D,s:ArcadeState,distance:n
   }
  }
  if(s.boss){
-  const x=610,y=112+(reducedMotion?0:Math.sin(s.frame*.04)*14);
+  const {x,y,width:bw,height:bh}=bossBounds(s);
   drawDangerAura(ctx,x-105,y-60,210,120,s.frame,reducedMotion);
-  if(!drawHostileArt(ctx,art,'boss',x-105,y-60,210,120)){
+  if(!(s.boss.kind?drawAirEnemy(ctx,s.boss.kind,x,y,bw,bh,s.boss.hitFlash):drawHostileArt(ctx,art,'boss',x-105,y-60,210,120))){
   ctx.fillStyle='#2d294e';ctx.beginPath();ctx.ellipse(x,y,63,29,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff99af';ctx.lineWidth=3;ctx.stroke();
   ctx.fillStyle='#ffcb7c';ctx.fillRect(x-16,y-9,32,13);ctx.fillStyle='#1f1735';ctx.fillRect(x-10,y-5,6,5);ctx.fillRect(x+4,y-5,6,5);
   ctx.strokeStyle='#c1eaff';ctx.beginPath();ctx.moveTo(x-85,y-16);ctx.lineTo(x-40,y-16);ctx.moveTo(x+40,y-16);ctx.lineTo(x+85,y-16);ctx.stroke();
   }
-  for(let i=0;i<3;i++){ctx.fillStyle=i<s.boss.hp?'#ff99af':'#ffffff30';ctx.fillRect(x-34+i*25,y-76,18,6);}
+  drawAirHp(ctx,s.boss.kind||'flagship',x,y-bh/2-12,bw,s.boss.hp,s.boss.maxHp||3);
  }
  ctx.restore();
 }

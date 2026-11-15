@@ -1,9 +1,10 @@
+import {spawnAirBoss,damageAirBoss,advanceCombatFx,type AirBoss,type CombatFx} from './airCombat';
 import { floorAt, routeAt } from './routes';
 import {createRush,rushAt,type RushState} from './rush';
 
 export type RunMode = 'classic' | 'daily' | 'practice';
 export type Vehicle = 'normal' | 'gravity' | 'wave' | 'rocket';
-export type Pickup = 'coin' | 'star' | 'magnet' | 'shield' | 'double' | 'sneakers' | 'board' | 'rocket' | 'lowGravity' | 'wave' | 'gravity' | 'charge' | 'orb' | 'pad' | 'boost';
+export type Pickup = 'coin' | 'star' | 'magnet' | 'shield' | 'double' | 'sneakers' | 'board' | 'rocket' | 'lowGravity' | 'wave' | 'gravity' | 'charge' | 'orb' | 'pad' | 'boost' | 'antiAir';
 export type Hazard = 'spike' | 'tunnel' | 'wall' | 'saw' | 'laser' | 'missile' | 'airGate' | 'rail';
 export interface ArcadeEntity {
   id: number; kind: Pickup | Hazard; d: number; lift: number; width: number; height: number;
@@ -21,10 +22,10 @@ export interface ArcadeState {
   magnet: number; double: number; sneakers: number; board: number; shield: number; lowGravity: number;
   boost: number; slide: number; vehicle: Vehicle; vehicleTime: number; gravity: number;
   stats: ArcadeStats; missionDone: boolean[]; score: number; notice: string; noticeTime: number;
-  boss: { hp: number; life: number; shot: number } | null; clearAhead: boolean; changedVehicle: boolean;
+  combatWidth?:number;combatFx?:CombatFx[];magnetLevel?:number;comboLevel?:number; boss: AirBoss | null; clearAhead: boolean; changedVehicle: boolean;
 }
 export const PATTERNS = ['coinRoad','magnetTrail','orbSpikes','slideTunnel','dashWall','sawSlalom','moonJump','gravityRoad','waveGates','rocketRide','laserDance','bossRush','skyRail','springChain','treasureRoad','boostRoad'] as const;
-const pickups = new Set<string>(['coin','star','magnet','shield','double','sneakers','board','rocket','lowGravity','wave','gravity','charge','orb','pad','boost']);
+const pickups = new Set<string>(['coin','star','magnet','shield','double','sneakers','board','rocket','lowGravity','wave','gravity','charge','orb','pad','boost','antiAir']);
 export const isPickup = (kind: string) => pickups.has(kind);
 export const hash = (n: number) => { n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); n = Math.imul(n ^ (n >>> 16), 0x45d9f3b); return (n ^ (n >>> 16)) >>> 0; };
 export function dailySeed(day = new Date().toISOString().slice(0,10)) { return [...day].reduce((n,c)=>hash(n+c.charCodeAt(0)), 1701); }
@@ -42,7 +43,7 @@ export function entityY(s: ArcadeState, e: ArcadeEntity) {
 }
 export function multiplier(s: ArcadeState) {return (1+Math.min(4,Math.floor(s.combo/10)))*(s.double>0?2:1)*(s.fever>0?2:1);}
 export function reward(s: ArcadeState, value=20, energy=4) {
-  s.rush.momentum=Math.min(100,s.rush.momentum+energy*.65);s.combo++;s.bestCombo=Math.max(s.bestCombo,s.combo);s.comboTime=360;s.score+=value*multiplier(s);
+  s.rush.momentum=Math.min(100,s.rush.momentum+energy*.65);s.combo++;s.bestCombo=Math.max(s.bestCombo,s.combo);s.comboTime=360+(s.comboLevel||0)*45;s.score+=value*multiplier(s);
   if(s.fever<=0){s.energy=Math.min(100,s.energy+energy);if(s.energy>=100){s.energy=0;s.fever=480;announce(s,'fever');}}
 }
 export function missionProgress(s: ArcadeState) {return [s.stats.coins,s.stats.dodges,s.stats.breaks];}
@@ -52,7 +53,7 @@ function trail(s:ArcadeState,d:number,lift:number,count=8,arc=false,air=false){f
 export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:number, flight=false) {
   s.clearAhead=true;
   if(d>=12000&&d-s.protectionSpawnAt>=14000&&s.shield<=0&&s.board<=0&&hash(s.seed+Math.floor(d/1800)*967)%12===0){addEntity(s,hash(s.seed+Math.floor(d))%2?'shield':'board',d+1050,flight?150:34,30,30,flight);s.protectionSpawnAt=d;}
-  if(flight){
+  if(flight&&name!=='bossRush'){
     trail(s,d,150,10,false,true);addEntity(s,['magnet','double','sneakers','charge'][hash(s.seed+s.chunk)%4] as Pickup,d+280,150,30,30,true);
     addEntity(s,'star',d+650,120,26,26,true);return;
   }
@@ -68,7 +69,7 @@ export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:numb
     case 'waveGates':addEntity(s,'wave',d,38,42,80);addEntity(s,'airGate',d+600,165,64,340,true);trail(s,d+160,165,12,false,true);break;
     case 'rocketRide':addEntity(s,'rocket',d,38,38,44);trail(s,d+180,150,18,true,true);addEntity(s,'star',d+560,240,26,26,true);break;
     case 'laserDance':addEntity(s,'laser',d+250,55,180,14);addEntity(s,'laser',d+700,55,150,14);trail(s,d,125,14,true);announce(s,'laserHint');break;
-    case 'bossRush':s.boss={hp:3,life:780,shot:90};announce(s,'bossHint');addEntity(s,'charge',d,32);break;
+    case 'bossRush':spawnAirBoss(s,Math.floor(d/1800));announce(s,'bossHint');addEntity(s,'antiAir',d,flight?150:32,38,38,flight);break;
     case 'skyRail':addEntity(s,'orb',d+40,80,42,42);addEntity(s,'rail',d+400,105,460,12);trail(s,d+220,140);trail(s,d+200,24);addEntity(s,'star',d+420,160);announce(s,'upperHint');break;
     case 'springChain':addEntity(s,'pad',d+150,0,64,12);trail(s,d+180,70,9,true);addEntity(s,'pad',d+650,0,64,12);addEntity(s,'star',d+860,150);break;
     case 'treasureRoad':addEntity(s,'double',d,34);addEntity(s,'magnet',d+240,34);trail(s,d+300,30,14,true);addEntity(s,'star',d+900,130);break;
@@ -78,7 +79,7 @@ export function spawnPattern(s:ArcadeState, name:typeof PATTERNS[number], d:numb
 export function beginArcade(s:ArcadeState,distance:number,flight:boolean,viewWidth=800,special=false) {
   const area=routeAt(s.seed,distance+120).index;
   if(area!==s.dashArea){s.dashArea=area;s.dashUsed=false;announce(s,'areaDash');}
-  s.frame++;s.clearAhead=false;s.changedVehicle=false;
+  s.combatWidth=viewWidth;advanceCombatFx(s);s.frame++;s.clearAhead=false;s.changedVehicle=false;
   for(const key of ['comboTime','fever','magnet','double','sneakers','board','shield','lowGravity','boost','slide','noticeTime'] as const)if(s[key]>0)s[key]--;
   if(s.comboTime===0)s.combo=0;
   if(s.vehicleTime>0&&--s.vehicleTime===0){s.vehicle='normal';s.changedVehicle=true;announce(s,'landing');}
@@ -106,7 +107,7 @@ export function activateOrb(s:ArcadeState,p:ArcadePlayer,distance:number) {
 export function dashArcade(s:ArcadeState,p:ArcadePlayer) {
   if(s.dashUsed)return;
   s.dashUsed=true;
-  if(s.boss){s.boss.hp=0;s.boss.life=Math.max(s.boss.life,180);reward(s,100,10);announce(s,'bossHit');if(s.boss.hp<=0){s.boss=null;s.stats.bosses++;s.score+=1500;s.entities=s.entities.filter(e=>e.kind!=='missile');announce(s,'bossWin');}}
+  if(s.boss){const hp=s.boss.hp;reward(s,100,10);announce(s,'bossHit');if(damageAirBoss(s,hp)){s.entities=s.entities.filter(e=>e.kind!=='missile');announce(s,'bossWin');}}
 }
 export function hitArcade(s:ArcadeState):boolean {
   if(s.fever>0)return true;
@@ -141,7 +142,7 @@ export function endArcade(s:ArcadeState,p:ArcadePlayer,distance:number) {
     }
     if(isPickup(e.kind)){
       const floorItem=e.kind==='pad'||e.kind==='boost';
-      const attracted=(e.kind==='coin'&&(s.magnet>0||s.fever>0)&&Math.hypot(dx,dy)<190);
+      const attracted=(e.kind==='coin'&&(s.magnet>0||s.fever>0||(s.magnetLevel||0)>0)&&Math.hypot(dx,dy)<(s.magnet>0||s.fever>0?190+(s.magnetLevel||0)*20:70+(s.magnetLevel||0)*24));
       const collected=floorItem?Math.abs(dx)<e.width/2&&Math.abs(p.y-y)<20:Math.hypot(dx,dy)<(e.kind==='orb'?30:34);
       if(e.kind==='orb')continue;
       if(attracted){e.d+=(p.x+distance-e.d)*.22;e.lift+=(dy)*.22;}
@@ -151,6 +152,7 @@ export function endArcade(s:ArcadeState,p:ArcadePlayer,distance:number) {
       else if(e.kind==='star'){s.stats.stars++;reward(s,250,18);announce(s,'star');}
       else if(e.kind==='pad'){p.vy=-17;p.isJumping=true;p.jumpCount=0;reward(s,40,6);announce(s,'bounce');}
       else if(e.kind==='boost'){s.boost=5*60;reward(s,40,6);announce(s,'boost');}
+      else if(e.kind==='antiAir'){announce(s,'antiAir');}
       else if(e.kind==='charge'){s.energy=Math.min(99,s.energy+18);announce(s,'charge');}
       else if(e.kind==='gravity'||e.kind==='wave'||e.kind==='rocket'){
         s.vehicle=e.kind;s.vehicleTime=540;s.gravity=1;s.changedVehicle=true;p.y=Math.min(p.y,floorAt(s.seed,distance+p.x)-30,275);p.vy=-4;p.isFalling=false;p.isJumping=true;p.jumpCount=0;announce(s,e.kind);
