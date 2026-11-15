@@ -3258,17 +3258,17 @@ const KochoShowdown: React.FC<{
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-[#111827]/35 to-black/70" />
                     {/* Status Overlay */}
                     {(gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER' || gameState.phase === 'REWARD' || gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') && (
-                        <div data-gamepad-modal data-gamepad-initial-scope={`kocho-result-${gameState.phase}-${gameState.status}`} className="absolute inset-0 bg-black/75 z-40 flex flex-col items-center justify-center p-4 backdrop-blur-[1px]">
+                        <div data-gamepad-modal data-gamepad-initial-scope={`kocho-result-${gameState.phase}-${gameState.status}`} data-kocho-phase={gameState.phase} className="kocho-result-overlay absolute inset-0 bg-black/75 z-40 flex flex-col items-center justify-center p-4 backdrop-blur-[1px]">
                             
                             {/* REWARD UI */}
                             {gameState.phase === 'REWARD' && (
-                                <div className="text-center w-full">
-                                    <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> {tr('Card Reward')}</h2>
-                                    <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
+                                <div className="kocho-reward-panel text-center w-full">
+                                    <h2 className="kocho-reward-heading font-bold text-yellow-400 flex items-center justify-center"><Gift className="mr-2"/> {tr('Card Reward')}</h2>
+                                    <div className="kocho-reward-cards">
                                         {rewardCards.map((card, i) => (
-                                            <div key={i} data-gamepad-initial-choice={i === 0 ? true : undefined} role="button" tabIndex={0} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectReward(card); } }}>
-                                                <KochoCardActionArt card={card} className="mb-2 h-16 w-16 rounded-lg border border-indigo-400/40 bg-black/40" />
-                                                <div className="font-bold text-white mb-1 text-center text-sm md:text-base leading-tight">{tr(card.name)}</div>
+                                            <button type="button" key={i} data-kocho-reward-card data-gamepad-initial-choice={i === 0 ? true : undefined} className="kocho-reward-card bg-slate-800 border-4 border-yellow-500 rounded-xl flex flex-col items-center cursor-pointer" onClick={() => selectReward(card)}>
+                                                <KochoCardActionArt card={card} className="kocho-reward-art rounded-lg border border-indigo-400/40 bg-black/40" />
+                                                <div className="kocho-reward-name font-bold text-white text-center leading-tight">{tr(card.name)}</div>
                                                 
                                                 {/* ADDED STATS DISPLAY */}
                                                 <div className="flex gap-1 text-[10px] my-1 justify-center w-full">
@@ -3276,15 +3276,15 @@ const KochoShowdown: React.FC<{
                                                     <span className="text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded font-bold border border-blue-500/50">CD {card.cooldown}</span>
                                                 </div>
 
-                                                <div className="text-[10px] text-gray-400 text-center leading-tight h-8 overflow-hidden flex items-center justify-center">{tr(card.description)}</div>
+                                                <div className="kocho-reward-description text-gray-300 text-center leading-tight">{tr(card.description)}</div>
                                                 
                                                 <div className="flex gap-0.5 justify-center mt-2">
                                                     {[...Array(card.maxSlots)].map((_, idx) => (
                                                         <div key={idx} className="w-1.5 h-1.5 rounded-full bg-gray-600 border border-gray-400" />
                                                     ))}
                                                 </div>
-                                                <button className="mt-4 bg-yellow-600 text-black font-bold px-4 py-1 rounded-full text-xs hover:bg-yellow-500">{tr('Select')}</button>
-                                            </div>
+                                                <span className="kocho-reward-pick bg-yellow-600 text-black font-bold rounded-full">{tr('Select')}</span>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>

@@ -530,94 +530,6 @@
       ],
       "reading_similarity": 1.0
     },
-    "aster/aster-a4782fe23071": {
-      "expected": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-      "reading": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-      "sha256": "8d2dadd996851e349b45426007985bb05e0ce894aba35f84b02f18d93dc28992",
-      "recognized": "校長への挑戦か、世界を救うより申請書が多そうだな。",
-      "seconds": 5.88,
-      "accepted_readings": [
-        "校長への挑戦か。世界を救うより、申請書が多そうだな。"
-      ],
-      "reading_similarity": 1.0
-    },
-    "aster/aster-8944c334bf33": {
-      "expected": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-      "reading": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-      "sha256": "ae03f0157882f7d60be86a49a7af29805825fe3054246146b9e6575f8ec5e029",
-      "recognized": "剣なら抜ける。だが最後の焼そばパンは抜き差しならないな。",
-      "seconds": 6.6,
-      "accepted_readings": [
-        "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。"
-      ],
-      "reading_similarity": 1.0
-    },
-    "aster/aster-6986d95ffd7c": {
-      "expected": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-      "reading": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-      "sha256": "0aae048c9293e5461e2cad80f48fc452834c3e064185a05e6433f643f72b694a",
-      "recognized": "強い相手にも始まりの一歩がある。今度は君の番だ。",
-      "seconds": 5.7,
-      "accepted_readings": [
-        "強い相手にも、始まりの一歩がある。今度は君の番だ。"
-      ],
-      "reading_similarity": 1.0
-    },
-    "aster/aster-0e3b4f1903c5": {
-      "expected": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-      "reading": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-      "sha256": "31d9b20ce02bfcdc6947c2e0be954181d60d922ee2a13fcddda1666374190fe4",
-      "recognized": "勝ったら願いを伝えよう、校長先生を倒すことが、目的じゃないだろ。",
-      "seconds": 6.96,
-      "accepted_readings": [
-        "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。"
-      ],
-      "reading_similarity": 1.0
-    },
-    "lyra/lyra-9b2932834dd6": {
-      "expected": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-      "reading": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-      "sha256": "99db65a824aa54647f5998750ece4a0daedb768dee91630ad1b10a57c37abc71",
-      "recognized": "作戦名は大事よ でも名前を決めるだけで激光時刻になりそう",
-      "seconds": 6.6,
-      "accepted_readings": [
-        "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。"
-      ],
-      "reading_similarity": 0.886
-    },
-    "lyra/lyra-9d19e53ba248": {
-      "expected": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-      "reading": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-      "sha256": "e1d7bef93d2adc5663cd22f266fa8cc589309e0de952464a2aa9643c6c560f94",
-      "recognized": "応援機10本持ってきたわ 戦う人数より多いのは気にしないで",
-      "seconds": 6.78,
-      "accepted_readings": [
-        "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。"
-      ],
-      "reading_similarity": 0.917
-    },
-    "lyra/lyra-f6d16095e479": {
-      "expected": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-      "reading": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-      "sha256": "344b258e4aff3b8da7841c1ea003ca3c8b5ee8828a1877de637cde2803a49c78",
-      "recognized": "帰りを待つ人がいる それってどんな必殺技より強いを守りよう",
-      "seconds": 6.6,
-      "accepted_readings": [
-        "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。"
-      ],
-      "reading_similarity": 0.957
-    },
-    "lyra/lyra-e88a9aaab01e": {
-      "expected": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-      "reading": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-      "sha256": "500dce53a3b9a0d7356a652645e60e717e8499dd575c15fd6013eb6a80d7e7b1",
-      "recognized": "やったわねー 校長先生宿紹介の乾杯だけは3分以内でお願い",
-      "seconds": 6.42,
-      "accepted_readings": [
-        "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！"
-      ],
-      "reading_similarity": 0.878
-    },
     "narrator/narrator-1b865af99e1e": {
       "expected": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
       "reading": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
@@ -705,6 +617,294 @@
         "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。"
       ],
       "reading_similarity": 1.0
+    },
+    "high-school-mage/high-school-mage-ce14f3c833db": {
+      "expected": "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。",
+      "reading": "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。",
+      "sha256": "ba2f0709f75f0bc96e43dc27b5fa8ef05240527f3f73490e63fccb4fd24ad101",
+      "recognized": "キー指令の根拠、気になるねー。実験より先にまず申請者の束を攻略しよう。",
+      "seconds": 7.32,
+      "accepted_readings": [
+        "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。"
+      ],
+      "reading_similarity": 0.944,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-madoka/magic-madoka-13bc793cf1a1": {
+      "expected": "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。",
+      "reading": "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。",
+      "sha256": "aab53f211ccecfdb28811df10b8a018a444217d35499f36aca3ebf8e319e9582",
+      "recognized": "えっと、作戦令を決めてる間に下降時刻になりそうだよ",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。"
+      ],
+      "reading_similarity": 0.862,
+      "recognizer": "faster-whisper/medium, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-chef/high-school-chef-0b668fc58497": {
+      "expected": "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。",
+      "reading": "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。",
+      "sha256": "7274c9e3fa1043e534c544b360d80eafa84afa68d87b50e436eb0d9d08e417cb",
+      "recognized": "戦いの前こそ、腹ごしらえだ。ただし、最後のパンをめぐって、仲間我はするなよ。",
+      "seconds": 7.68,
+      "accepted_readings": [
+        "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-bard/high-school-bard-5479bb826aa7": {
+      "expected": "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？",
+      "reading": "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？",
+      "sha256": "4c6a591eba009a4edf9b2eb296ced654fb7ded14b72d78e66ddd76e17a4b5829",
+      "recognized": "応援機は10本。マイクも持ってきたけど、音量は校長室に届くくらいでいい?",
+      "seconds": 7.5,
+      "accepted_readings": [
+        "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？"
+      ],
+      "reading_similarity": 0.932,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-librarian/high-school-librarian-52f201bcc7c5": {
+      "expected": "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。",
+      "reading": "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。",
+      "sha256": "7adefdb6e573294ea6c908c76f11b84a7e64b43dd5a03576b64ec65b059c29d1",
+      "recognized": "この議事録にも昔の挑戦が残ってる。君の言葉で次の一行を書いてきて。",
+      "seconds": 7.5,
+      "accepted_readings": [
+        "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-sera/magic-sera-977b7af0fd25": {
+      "expected": "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。",
+      "reading": "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。",
+      "sha256": "f5edeab5d63dc1b4f3edb52296a4db6210f4ec1bf7c258351610478e505d036c",
+      "recognized": "ここに帰ってくる約束があるならきっと大丈夫。私たちもずっと思ってるから。",
+      "seconds": 8.04,
+      "accepted_readings": [
+        "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。"
+      ],
+      "reading_similarity": 0.965,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-dodgeball/high-school-dodgeball-a7a449bbd91b": {
+      "expected": "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！",
+      "reading": "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！",
+      "sha256": "4a9da5c6dc48ccae4c2766bf9a664864b7668862ce67b68aa5c45f5a267bed12",
+      "recognized": "勝ったら、願いをまっすぐ伝えようぜ。 先生まで仲間にできたら、それが一番だ!",
+      "seconds": 7.86,
+      "accepted_readings": [
+        "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！"
+      ],
+      "reading_similarity": 0.976,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-hiyori/magic-hiyori-046e936e8c00": {
+      "expected": "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？",
+      "reading": "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？",
+      "sha256": "79f8a7fc4c29d3989a70731d93ee88505f3b2a4daeafbd142df7279a48c9690e",
+      "recognized": "お祝いのご飯、みんなで作ろう。ところで、今日の休職討伐、誰にお願いしようかな?",
+      "seconds": 8.04,
+      "accepted_readings": [
+        "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？"
+      ],
+      "reading_similarity": 0.978,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-rei/magic-rei-39aa5311fbb2": {
+      "expected": "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。",
+      "reading": "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。",
+      "sha256": "56957ea03b0b3b45391c040d264cca27f3d03496e84b75dda57d0431446ad020",
+      "recognized": "あの金指令、文字数まで得らそうね。 あなたの本音なら、もっと短く届くはずよ。",
+      "seconds": 7.68,
+      "accepted_readings": [
+        "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。"
+      ],
+      "reading_similarity": 0.938,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-mirai/magic-mirai-d0c5b3a342eb": {
+      "expected": "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？",
+      "reading": "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？",
+      "sha256": "3152918e5e57a07c81852d292b682564f25910815a5445cd7960971239be83a4",
+      "recognized": "作戦名は任せて 舞台名は豪華語大半正解なんてどう",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？"
+      ],
+      "reading_similarity": 0.941,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-ren/magic-ren-5dbcc64ef6be": {
+      "expected": "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。",
+      "reading": "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。",
+      "sha256": "509dca8f7c1ac980d59acfbc13056aac09c5ca5c4f415d804b6589ba2bc222da",
+      "recognized": "全員分に分けよう その切り方だと君の文が一番小さくなっちゃうけど",
+      "seconds": 7.32,
+      "accepted_readings": [
+        "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。"
+      ],
+      "reading_similarity": 0.975,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-tsubasa/magic-tsubasa-19a7a4ded9c1": {
+      "expected": "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！",
+      "reading": "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！",
+      "sha256": "944f18ddf91fe10690413d01d9c946730a63df81a7caf4f33507296467d809d6",
+      "recognized": "強そうに書いたつもりだって オラッ声の応援なら負けないぞ",
+      "seconds": 6.42,
+      "accepted_readings": [
+        "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！"
+      ],
+      "reading_similarity": 0.903,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-leon/magic-leon-1fd9508c755f": {
+      "expected": "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。",
+      "reading": "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。",
+      "sha256": "816b72267abd98b20c5e27a670a209aaadf56a2bfa3ab68a9c3ac022b4afd105",
+      "recognized": "校長先生にだって、かっこをつけたい季節はあったさ。今度は君の番だ!",
+      "seconds": 6.78,
+      "accepted_readings": [
+        "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。"
+      ],
+      "reading_similarity": 0.974,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-riku/magic-riku-4b4707821b4a": {
+      "expected": "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。",
+      "reading": "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。",
+      "sha256": "5f76bb22826a770812f8a587a0575b31d3be13710be97a1d114153edfe5d25bd",
+      "recognized": "帰ったら、反省会って名前の職事会にする?席は全員分、確保しとくよ。",
+      "seconds": 7.14,
+      "accepted_readings": [
+        "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。"
+      ],
+      "reading_similarity": 0.964,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-yamato/magic-yamato-0c26cc5683a7": {
+      "expected": "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。",
+      "reading": "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。",
+      "sha256": "370ea3aa1431b03bb9a9c5439dda06d4d10ff08292081ab7f015492ba23ff191",
+      "recognized": "ぶつけるなら、こぶしより気持ちだ。先生を倒すより、願いを届けてこいよ。",
+      "seconds": 6.96,
+      "accepted_readings": [
+        "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-gardener/high-school-gardener-03adbb5c588e": {
+      "expected": "今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。",
+      "reading": "今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。",
+      "sha256": "154927de8be2a337983fd6497103771501a2999422001e67f2c6ba86c19650d1",
+      "recognized": "今日の看板は繁殖正職だ 花も山盛りに飾っておいたぜ",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。"
+      ],
+      "reading_similarity": 0.917,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-assassin/high-school-assassin-20d5eee1c07f": {
+      "expected": "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。",
+      "reading": "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。",
+      "sha256": "d6d17fa374c14669336ae27e5d683e9e4664033029b31505bc2fe112107d1a00",
+      "recognized": "秘密基地を守りより豪華号を守る 方が難しそうだ一人でわいかせないけど",
+      "seconds": 7.86,
+      "accepted_readings": [
+        "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。"
+      ],
+      "reading_similarity": 0.905,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-shizuku/magic-shizuku-c9b73449ab53": {
+      "expected": "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。",
+      "reading": "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。",
+      "sha256": "2b827ae65bed334fc1c287aca26687e54b75a1b6e5efbc7eaa096c67bd96ec0f",
+      "recognized": "その作戦に言い終わる前に下校時間を短くしても気持ちは減らないわ",
+      "seconds": 7.5,
+      "accepted_readings": [
+        "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。"
+      ],
+      "reading_similarity": 0.935,
+      "recognizer": "faster-whisper/medium, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-soma/magic-soma-a9a9d07bd884": {
+      "expected": "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？",
+      "reading": "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？",
+      "sha256": "9406269c015d6c7f1305fadd296513b0c1eed695b52fed58f4f81443f6c5c3aa",
+      "recognized": "後兵に切る計算だら任せてくれ。パンクズまで数えるのは、やりすぎか?",
+      "seconds": 7.14,
+      "accepted_readings": [
+        "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？"
+      ],
+      "reading_similarity": 0.917,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-koharu/magic-koharu-65ef1b2936ca": {
+      "expected": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。",
+      "reading": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。",
+      "sha256": "33a2885e3cfc78143a21898e8f33c8f149c12e74cc0e6081eaa68847cafe5ff9",
+      "recognized": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが降るからね。",
+      "seconds": 7.14,
+      "accepted_readings": [
+        "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-elliot/magic-elliot-1a60da967c78": {
+      "expected": "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。",
+      "reading": "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。",
+      "sha256": "68e5b3d0cb3fdeee0a6f5b1835ec889cb5280ed909b055e3c2a52345766e8d59",
+      "recognized": "先生にも、忘れられない放課後があるのですね。あなたの光なら、じっと届きます。",
+      "seconds": 8.04,
+      "accepted_readings": [
+        "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。"
+      ],
+      "reading_similarity": 0.976,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "high-school-caretaker/high-school-caretaker-213444921fc0": {
+      "expected": "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。",
+      "reading": "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。",
+      "sha256": "374894cb407b3f2e19003303bf1dc4d0ec08df1410bafe027204d024826efec5",
+      "recognized": "小さな目だって、ひなたがあるから飛ばすの。みんなの居場所ちゃんと残そうね",
+      "seconds": 7.86,
+      "accepted_readings": [
+        "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。"
+      ],
+      "reading_similarity": 0.88,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-sakuya/magic-sakuya-78df1c1fa05e": {
+      "expected": "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。",
+      "reading": "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。",
+      "sha256": "68ea32c56dd96eb06b465b0d61b7bb2343c55682b3445bf3233f8104bcbeb9d4",
+      "recognized": "その日かに言葉だけで終わらせるな先日に願いまで聞けたら見届けてやる",
+      "seconds": 7.5,
+      "accepted_readings": [
+        "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。"
+      ],
+      "reading_similarity": 0.857,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "magic-minato/magic-minato-2a958f3b3fb0": {
+      "expected": "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！",
+      "reading": "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！",
+      "sha256": "fed6683d7d315577dbe2a1de5bcc8ed3a811dae30837f96d4f2017a163dde6df",
+      "recognized": "乾杯の練習はもうバッチリです先生挨拶は短めでお願いします",
+      "seconds": 6.96,
+      "accepted_readings": [
+        "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/small, Japanese, int8 CPU, 1s-separated batches, no text prompt"
     }
   },
   "recognizer": "faster-whisper/medium, Japanese, int8 CPU, 1s-separated batches, no text prompt"

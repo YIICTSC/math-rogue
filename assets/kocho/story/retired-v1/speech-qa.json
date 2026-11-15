@@ -1,0 +1,711 @@
+{
+  "samples": {
+    "original/original-8d7862ac125c": {
+      "expected": "放課後まで禁止なんて、足が勝手に抗議してる！校長先生、勝負だ！",
+      "reading": "放課後まで禁止なんて、足が勝手に抗議してる！校長先生、勝負だ！",
+      "sha256": "a78a25569f1dae4d05e37f8b0e9549834318a20024f062ac7a8631068a0d13ac",
+      "recognized": "放課後まで禁止なんて足が勝手に抗議してる 校長先生勝負だ",
+      "seconds": 6.78,
+      "accepted_readings": [
+        "放課後まで禁止なんて、足が勝手に抗議してる！校長先生、勝負だ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-bec25a322557": {
+      "expected": "俺の願いは、みんなで笑って帰ること。それだけは譲れない！",
+      "reading": "俺の願いは、みんなで笑って帰ること。それだけは譲れない！",
+      "sha256": "2850deb4ea40ef59e836a26712542770e1e8d5b79b8ed9103ddc8a77342ba39d",
+      "recognized": "俺の願いはみんなで笑って帰ること それだけは譲れない",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "俺の願いは、みんなで笑って帰ること。それだけは譲れない！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-feeb37657657": {
+      "expected": "作戦は、前へ進んで、危なくなったら一歩下がる！",
+      "reading": "作戦は、前へ進んで、危なくなったら一歩下がる！",
+      "sha256": "d903c97149c0619510f863d3bddb59992d5bfbcd3bbaedcff09329a4fd7da5ec",
+      "recognized": "作戦は前へ進んで危なくなったら一歩下がる",
+      "seconds": 5.34,
+      "accepted_readings": [
+        "作戦は、前へ進んで、危なくなったら一歩下がる！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-f86b7467b83b": {
+      "expected": "よし、名前はあとだ！足を動かしながら考える！",
+      "reading": "よし、名前はあとだ！足を動かしながら考える！",
+      "sha256": "31e83b81c61101dca0f1f4eab8e310a13d682392e7f2c6308e7b46959a1f16f8",
+      "recognized": "よし、名前はアートだ。足を動かしなら考える。",
+      "seconds": 5.16,
+      "accepted_readings": [
+        "よし、名前はあとだ！足を動かしながら考える！"
+      ],
+      "reading_similarity": 0.958
+    },
+    "original/original-1cb58712e668": {
+      "expected": "これは俺の夕飯じゃない。勝利への燃料だ！",
+      "reading": "これは俺の夕飯じゃない。勝利への燃料だ！",
+      "sha256": "bac024e074266a168793c69067310ccd4c230e6eb3331cbfcf156319aa462e1c",
+      "recognized": " これは俺の夕飯じゃない。勝利への燃料だ。",
+      "seconds": 4.8,
+      "accepted_readings": [
+        "これは俺の夕飯じゃない。勝利への燃料だ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-b6f54a89b96c": {
+      "expected": "半分こにしよう。腹も友情も、空っぽじゃ戦えない！",
+      "reading": "半分こにしよう。腹も友情も、空っぽじゃ戦えない！",
+      "sha256": "fe95d644d860401bb025958207d2634316bda7f731c1751d95872ee8a32a6147",
+      "recognized": "半分こにしよう。腹も友情も、空っぽじゃ戦えない。",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "半分こにしよう。腹も友情も、空っぽじゃ戦えない！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-c81949165855": {
+      "expected": "応援で体育館が揺れてる！これ、俺が負けたら逆に危ないぞ！",
+      "reading": "応援で体育館が揺れてる！これ、俺が負けたら逆に危ないぞ！",
+      "sha256": "1b85085165183af5dfb37de49307edca593d43ca689adf811e917491c2d4ae3f",
+      "recognized": "応援で体育館が揺れてる!これ、俺が負けたら逆に危ないぞ!",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "応援で体育館が揺れてる！これ、俺が負けたら逆に危ないぞ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-0286516d7acc": {
+      "expected": "旗の数だけ、もうひと踏ん張りだ！",
+      "reading": "旗の数だけ、もうひと踏ん張りだ！",
+      "sha256": "aec9168836ca84ab88ce60ef4bc04c9c2f09b8a4541ccaac50b094131bd12c50",
+      "recognized": "旗の数だけ、もう一踏ん張りだ!",
+      "seconds": 4.08,
+      "accepted_readings": [
+        "旗の数だけ、もうひと踏ん張りだ！"
+      ],
+      "reading_similarity": 0.875
+    },
+    "original/original-f5ad9b2643aa": {
+      "expected": "校長先生も、昔は放課後を守りたかったのかな。",
+      "reading": "校長先生も、昔は放課後を守りたかったのかな。",
+      "sha256": "38ddc7cf6e9fb4e076dcb18f0f83f9ce3a41c3f6420291ce3a9e4a3c7a96f6b9",
+      "recognized": "校長先生も、昔は放課後を守りたかったのかな?",
+      "seconds": 5.16,
+      "accepted_readings": [
+        "校長先生も、昔は放課後を守りたかったのかな。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-9f204bd8087e": {
+      "expected": "だったら、拳より先に、気持ちを届ける勝負にする！",
+      "reading": "だったら、拳より先に、気持ちを届ける勝負にする！",
+      "sha256": "df43d7c6fbb4a7cc612807488196a5c2da67530d1ed6276a5eff821697068045",
+      "recognized": "だったら、拳より先に気持ちを届ける勝負にする!",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "だったら、拳より先に、気持ちを届ける勝負にする！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-d1cbbd539bf6": {
+      "expected": "赤いジャージは目立つけど、今日は逃げない目印だ。",
+      "reading": "赤いジャージは目立つけど、今日は逃げない目印だ。",
+      "sha256": "c07aeea382d08bd6d6a89cc04ca73bb17b85eeda5b0b92e5577c46cf414292cd",
+      "recognized": "赤いジャージュは目指すけど 今日は逃げない目印だ",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "赤いジャージは目立つけど、今日は逃げない目印だ。"
+      ],
+      "reading_similarity": 0.909
+    },
+    "original/original-b99584113c4c": {
+      "expected": "みんな、帰り道の寄り道まで、一緒にな！",
+      "reading": "みんな、帰り道の寄り道まで、一緒にな！",
+      "sha256": "6442837a696949539fd1b1ba309225a1a44afc1653bbd51a0fd1365328bed0a7",
+      "recognized": "みんな帰り道の寄り道まで一緒 にな",
+      "seconds": 4.62,
+      "accepted_readings": [
+        "みんな、帰り道の寄り道まで、一緒にな！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-e53557b682d8": {
+      "expected": "校長先生！放課後の楽しさを、答案より大きな声で伝えに来た！",
+      "reading": "校長先生！放課後の楽しさを、答案より大きな声で伝えに来た！",
+      "sha256": "f73a29f01ac5843fc12afd9e7fb67b5ad3de025ccbeaca9999b6be2ea6c61e8f",
+      "recognized": "校長先生、放課後の楽しさを東湾より大きな声で伝えに来た",
+      "seconds": 6.42,
+      "accepted_readings": [
+        "校長先生！放課後の楽しさを、答案より大きな声で伝えに来た！"
+      ],
+      "reading_similarity": 0.909
+    },
+    "original/original-b3a289a0735d": {
+      "expected": "勝ったら、禁止じゃなくて、一緒に楽しむ約束をください！",
+      "reading": "勝ったら、禁止じゃなくて、一緒に楽しむ約束をください！",
+      "sha256": "17c74816a09bb8479abed1a4a398d2813d204098838ceb7bc1f13b41ed3f21cd",
+      "recognized": " 勝ったら禁止じゃなくて一緒に楽しむ約束をください",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "勝ったら、禁止じゃなくて、一緒に楽しむ約束をください！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-e68dcd55ae92": {
+      "expected": "勝った！でも一番うれしいのは、みんながここにいることだ！",
+      "reading": "勝った！でも一番うれしいのは、みんながここにいることだ！",
+      "sha256": "bbfc80e08c70482177e0260f2c54da0108f9544c90f4bd6bf1f6c0af3fd143e2",
+      "recognized": "勝った でも一番嬉しいのはみんながここにいることだ",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "勝った！でも一番うれしいのは、みんながここにいることだ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "original/original-680ffd9175f8": {
+      "expected": "赤ジャージ、祝勝会の給食当番も引き受ける！おかわり自由だ！",
+      "reading": "赤ジャージ、祝勝会の給食当番も引き受ける！おかわり自由だ！",
+      "sha256": "b13c5f911876a51a35dfd56722a9356a0e41d4977f0f789b513587ee341234c4",
+      "recognized": "赤ジャージ 祝賞会の給食当番も引き受けるお代わり 自由だ",
+      "seconds": 7.32,
+      "accepted_readings": [
+        "赤ジャージ、祝勝会の給食当番も引き受ける！おかわり自由だ！"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/medium, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "rebel/rebel-781fc30bd0a0": {
+      "expected": "放課後禁止？その校則、俺たちの楽しみまで縛る気か。",
+      "reading": "放課後禁止？その校則、俺たちの楽しみまで縛る気か。",
+      "sha256": "94f230c7c52b8bace8a2c884853964245bbc0e0141f6475b9e51682d88ac2fbb",
+      "recognized": "放課後禁止 その拘束俺たちの楽しみまで縛る気か",
+      "seconds": 5.7,
+      "accepted_readings": [
+        "放課後禁止？その校則、俺たちの楽しみまで縛る気か。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-fde2d970724a": {
+      "expected": "校長先生、正面から異議を申し立てる。拳は最後、話は最初だ。",
+      "reading": "校長先生、正面から異議を申し立てる。拳は最後、話は最初だ。",
+      "sha256": "d562fcc601369ef87eac9aa48c25ec96943e4881c8bf43bc77f8de3b071d21d2",
+      "recognized": "校長先生 正面から意義を申し立てるこぶしは最後 話は最初だ",
+      "seconds": 6.42,
+      "accepted_readings": [
+        "校長先生、正面から異議を申し立てる。拳は最後、話は最初だ。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-71b57231442c": {
+      "expected": "正面突破にも段取りはいる。まず足元、その次に相手を見る。",
+      "reading": "正面突破にも段取りはいる。まず足元、その次に相手を見る。",
+      "sha256": "692c07ca3a72cc43f1dcb8c8ab974f27b2f8bcc230d222324b722a9ccd615ec6",
+      "recognized": "正面突破にも段取りはいる まず足元その次に相手を見る",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "正面突破にも段取りはいる。まず足元、その次に相手を見る。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-20a1b5f5d35b": {
+      "expected": "会議名は反省会以外で頼む。まだ何もやってない。",
+      "reading": "会議名は反省会以外で頼む。まだ何もやってない。",
+      "sha256": "f1729e32d99bd314935dedf1288da3db328b79cd0f29ace89f59e5c5a5a1edf7",
+      "recognized": "会議名は繁盛会以外で頼む まだ何もやってない",
+      "seconds": 5.34,
+      "accepted_readings": [
+        "会議名は反省会以外で頼む。まだ何もやってない。"
+      ],
+      "reading_similarity": 0.915
+    },
+    "rebel/rebel-5162f2023d63": {
+      "expected": "最後のパンか。妙だな、校長戦より緊張してきた。",
+      "reading": "最後のパンか。妙だな、校長戦より緊張してきた。",
+      "sha256": "6c24ed36d0fc1ba4df5d0484431add16a02a9c94d0514ab5f31ec4e4d1600e66",
+      "recognized": "最後のパンカー メオだなぁ校長戦より緊張してきた",
+      "seconds": 5.34,
+      "accepted_readings": [
+        "最後のパンか。妙だな、校長戦より緊張してきた。"
+      ],
+      "reading_similarity": 0.885
+    },
+    "rebel/rebel-e3800e79f58a": {
+      "expected": "全員分に分けるぞ。俺の分が小さい？それは遠近法だ。",
+      "reading": "全員分に分けるぞ。俺の分が小さい？それは遠近法だ。",
+      "sha256": "21576f9070bb553d554520e2ba24230f28e99b2ab5bf8ed8f3e92799a69e8440",
+      "recognized": " 全員分に分けるぞ俺の分は地下それは延期法だ",
+      "seconds": 5.7,
+      "accepted_readings": [
+        "全員分に分けるぞ。俺の分が小さい？それは遠近法だ。"
+      ],
+      "reading_similarity": 0.881
+    },
+    "rebel/rebel-53eabb01676e": {
+      "expected": "おい、応援幕に怖い顔を描くな。俺は敵役じゃない。",
+      "reading": "おい、応援幕に怖い顔を描くな。俺は敵役じゃない。",
+      "sha256": "69f53e49d86d5f76c2296e026605a13e07d7efb0f7ebb50dda450995d15bd715",
+      "recognized": " おおい応援幕に怖い顔を得なくな俺は敵役じゃない そ",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "おい、応援幕に怖い顔を描くな。俺は敵役じゃない。"
+      ],
+      "reading_similarity": 0.935
+    },
+    "rebel/rebel-70418a3b21a2": {
+      "expected": "その声、ちゃんと届いてる。だから、一歩も引けないんだ。",
+      "reading": "その声、ちゃんと届いてる。だから、一歩も引けないんだ。",
+      "sha256": "263acb0441cc37cb28339ffceba21539e871a86fbbdde8fe6ba3ebdbb5f76d50",
+      "recognized": "の声ちゃんと届いてるだから 一歩も引けないんだ",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "その声、ちゃんと届いてる。だから、一歩も引けないんだ。"
+      ],
+      "reading_similarity": 0.98
+    },
+    "rebel/rebel-cd8d1e63f66e": {
+      "expected": "この写真、校長先生も制服を着崩してるじゃないか。",
+      "reading": "この写真、校長先生も制服を着崩してるじゃないか。",
+      "sha256": "c5532abbd21bc600e88cb70aeb0b7929d43e55914239331ffc8f68a893bcf76a",
+      "recognized": "この写真、包丁先生を制服を効き崩してるじゃないか。",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "この写真、校長先生も制服を着崩してるじゃないか。"
+      ],
+      "reading_similarity": 0.866
+    },
+    "rebel/rebel-aed774c18a11": {
+      "expected": "過去を笑うより、今の俺たちを見てもらおう。",
+      "reading": "過去を笑うより、今の俺たちを見てもらおう。",
+      "sha256": "2a0779e9e2c54cbad9428ee68dcb45b1151b36323961e0ec3b8542f9d77873b3",
+      "recognized": "過去を笑うより、今の俺たちを見てもらおう。",
+      "seconds": 4.98,
+      "accepted_readings": [
+        "過去を笑うより、今の俺たちを見てもらおう。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-b4d24ac6ab71": {
+      "expected": "自由って、好き勝手することだけじゃない。仲間の居場所も守ることだ。",
+      "reading": "自由って、好き勝手することだけじゃない。仲間の居場所も守ることだ。",
+      "sha256": "2b1bc599be55b3a6f872ed4ec9e230dc0da1d33f15974fef95e0e4d4cb4a03e4",
+      "recognized": "自由って 好き勝手することだけじゃない 仲間の今そも守ることだ",
+      "seconds": 7.32,
+      "accepted_readings": [
+        "自由って、好き勝手することだけじゃない。仲間の居場所も守ることだ。"
+      ],
+      "reading_similarity": 0.928
+    },
+    "rebel/rebel-bb86d935c6be": {
+      "expected": "帰ったら全員で飯だ。もちろん、反省会はなしで。",
+      "reading": "帰ったら全員で飯だ。もちろん、反省会はなしで。",
+      "sha256": "2b70c247cbd383f2462680f65302db44e3986791cc89f4f9f4583db4ccd26050",
+      "recognized": "帰ったら全員で飯だ!もちろん、反省会はなしで!",
+      "seconds": 5.34,
+      "accepted_readings": [
+        "帰ったら全員で飯だ。もちろん、反省会はなしで。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-8b3e2cc1ed68": {
+      "expected": "叛逆ってのは、相手を黙らせることじゃない。届くまで立つことだ。",
+      "reading": "叛逆ってのは、相手を黙らせることじゃない。届くまで立つことだ。",
+      "sha256": "6c36252534b1fedbf6317d1fd64532ee0d4d542f18d6180e285781814f06099e",
+      "recognized": "反逆ってのは 相手を黙らせることじゃないほどくまで 立つことだ",
+      "seconds": 7.5,
+      "accepted_readings": [
+        "叛逆ってのは、相手を黙らせることじゃない。届くまで立つことだ。"
+      ],
+      "reading_similarity": 0.971
+    },
+    "rebel/rebel-ad832e2d23e9": {
+      "expected": "校長先生。俺たちの放課後を、ちゃんと見てくれ！",
+      "reading": "校長先生。俺たちの放課後を、ちゃんと見てくれ！",
+      "sha256": "36c454bd226e80c9bd323697dcc1093c919df840d16be9debf948a39ecca8c19",
+      "recognized": "校長先生 俺たちの放課後をちゃんと見てくれ",
+      "seconds": 5.34,
+      "accepted_readings": [
+        "校長先生。俺たちの放課後を、ちゃんと見てくれ！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-666851253755": {
+      "expected": "勝ったのに、校長先生まで笑ってる。こういう決着も、悪くない。",
+      "reading": "勝ったのに、校長先生まで笑ってる。こういう決着も、悪くない。",
+      "sha256": "50230bcd6eb589b583db468e2c34a69fa0363549814664091effaed45df0076d",
+      "recognized": "勝ったのに校長先生まで笑ってる こういう決着も悪くない",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "勝ったのに、校長先生まで笑ってる。こういう決着も、悪くない。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "rebel/rebel-853bdcac8f79": {
+      "expected": "祝勝会の看板、叛逆定食はやめろ。普通にうまそうな名前にしろ。",
+      "reading": "祝勝会の看板、叛逆定食はやめろ。普通にうまそうな名前にしろ。",
+      "sha256": "c10935553a370a000268600d517a08dacda92752c630b2814df11ec2d17dae37",
+      "recognized": "祝賞会の看板反逆定食はやめろ 普通にうまそうな名前にしろ",
+      "seconds": 8.04,
+      "accepted_readings": [
+        "祝勝会の看板、叛逆定食はやめろ。普通にうまそうな名前にしろ。"
+      ],
+      "reading_similarity": 1.0,
+      "recognizer": "faster-whisper/medium, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+    },
+    "akari/akari-7c6b3016fc91": {
+      "expected": "放課後がなくなったら、星を見上げる約束もなくなっちゃう！",
+      "reading": "放課後がなくなったら、星を見上げる約束もなくなっちゃう！",
+      "sha256": "10b3d251b7271ba99c46db36d00b31dda6bd8bd694cc4d1a5ca10b1d9f491665",
+      "recognized": "放課後がなくなったら 星を見上げる約束もなくなっちゃう",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "放課後がなくなったら、星を見上げる約束もなくなっちゃう！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-ddd875e31f72": {
+      "expected": "校長先生、みんなのきらきらまで、しまわないでください！",
+      "reading": "校長先生、みんなのきらきらまで、しまわないでください！",
+      "sha256": "2a47a3b6cd7aed7ff841a3ff5e72fbc9af58e6d2373cefdfcc4b063d354634be",
+      "recognized": "校長先生 みんなのキラキラまで閉まわないでくださいさあへ",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "校長先生、みんなのきらきらまで、しまわないでください！"
+      ],
+      "reading_similarity": 0.951
+    },
+    "akari/akari-70b813c83c82": {
+      "expected": "作戦名は、きらきら校則見直し大作戦！ちょっと長い？",
+      "reading": "作戦名は、きらきら校則見直し大作戦！ちょっと長い？",
+      "sha256": "180acb4e4d2c53d5e69435bd1ef22516f75b85e026c5f07ff220cf0a02b3932f",
+      "recognized": " 作戦名はキラキラ高速見直し大作戦ちょっと長い",
+      "seconds": 5.7,
+      "accepted_readings": [
+        "作戦名は、きらきら校則見直し大作戦！ちょっと長い？"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-2fd7db912034": {
+      "expected": "じゃあ、略してきら作！名前だけでも明るく行こう！",
+      "reading": "じゃあ、略してきら作！名前だけでも明るく行こう！",
+      "sha256": "137c620ca828ee05fc2a2fec036b59c4ef1bc9a1af64c9f5a3b8fff3b346d8a3",
+      "recognized": " じゃあ逆してキラサク名前だけでも当たるくいこう",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "じゃあ、略してきら作！名前だけでも明るく行こう！"
+      ],
+      "reading_similarity": 0.863
+    },
+    "akari/akari-4ebb63561ff8": {
+      "expected": "このパン、星形じゃないけど、すっごく輝いて見える！",
+      "reading": "このパン、星形じゃないけど、すっごく輝いて見える！",
+      "sha256": "f00d37df68b8c537d841413c52aeb4c6503cd3bee1c2eb11dc532186f5d46e0a",
+      "recognized": "このパン、星型じゃないけど、すっごく輝いて見える!",
+      "seconds": 5.7,
+      "accepted_readings": [
+        "このパン、星形じゃないけど、すっごく輝いて見える！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-0ade8d5cc0e2": {
+      "expected": "みんなで分けたら、幸せも増える。魔法じゃなくてもね！",
+      "reading": "みんなで分けたら、幸せも増える。魔法じゃなくてもね！",
+      "sha256": "0e97e414927878da7895b5eca24d175c1c612d8607c95fe2d4f123704b1a368f",
+      "recognized": "みんなで分けたら、幸せも増える!魔法じゃなくてもね!",
+      "seconds": 5.88,
+      "accepted_readings": [
+        "みんなで分けたら、幸せも増える。魔法じゃなくてもね！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-3efe4d4bfea3": {
+      "expected": "応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？",
+      "reading": "応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？",
+      "sha256": "4815ce78ff03da3c8258cc4092f455fc4416b3815f59aa1795be73dccee46697",
+      "recognized": "応援機が10本!制作にしたら、校長先生も見上げちゃおうかな!",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？"
+      ],
+      "reading_similarity": 0.861
+    },
+    "akari/akari-4b4de001d337": {
+      "expected": "怖いときは、ひとりで光らなくていい。みんな、ありがとう！",
+      "reading": "怖いときは、ひとりで光らなくていい。みんな、ありがとう！",
+      "sha256": "e8fafb83269d71c37b4c648b31421cd18c003989e144798e69d9c0548da25bcd",
+      "recognized": "怖い時は、一人で光らなくていい!みんな、ありがとう!",
+      "seconds": 6.24,
+      "accepted_readings": [
+        "怖いときは、ひとりで光らなくていい。みんな、ありがとう！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-c5386553fa0a": {
+      "expected": "昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。",
+      "reading": "昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。",
+      "sha256": "c4353d1534c71556f7309268fcfaedbfeb4384bdc8d2e72073342a842075f929",
+      "recognized": "昔の校長先生、目がキラキラしてる。今と同じ星を見てたんだね。",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-a7b72be585b6": {
+      "expected": "忘れた願いなら、もう一度一緒に思い出せばいいよ！",
+      "reading": "忘れた願いなら、もう一度一緒に思い出せばいいよ！",
+      "sha256": "c08b93cb98e219ec88594e89c3ca2de99af4a179c30fdeaf90de21fa1064459a",
+      "recognized": "忘れた願いだが、もう一度一緒に思い出せばいいよ。",
+      "seconds": 5.52,
+      "accepted_readings": [
+        "忘れた願いなら、もう一度一緒に思い出せばいいよ！"
+      ],
+      "reading_similarity": 0.929
+    },
+    "akari/akari-0e43c4abc1f0": {
+      "expected": "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。",
+      "reading": "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。",
+      "sha256": "31e5fd548852d993d21d36613b3ecb2d777b7cc292181981f933a0d2a4526a3a",
+      "recognized": "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-8bc5a429b783": {
+      "expected": "この空の下に、みんなの居場所を残したい！",
+      "reading": "この空の下に、みんなの居場所を残したい！",
+      "sha256": "a8c04b975bfae02775b51dc853f9b8b51af000959ccddfdb2de8ac048f52de9f",
+      "recognized": "この空の下に、みんなの居場所を残したい!",
+      "seconds": 4.8,
+      "accepted_readings": [
+        "この空の下に、みんなの居場所を残したい！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-2bef4215ab90": {
+      "expected": "校長先生！今日は、星よりまぶしい放課後のプレゼンです！",
+      "reading": "校長先生！今日は、星よりまぶしい放課後のプレゼンです！",
+      "sha256": "7162f21f70f289a066b059bf240c16e7673cf0498eeae4c164d25e9925344565",
+      "recognized": "校長先生、今日は星より眩しい放課後のプレゼンです!",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "校長先生！今日は、星よりまぶしい放課後のプレゼンです！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-c217f73d3ac3": {
+      "expected": "勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！",
+      "reading": "勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！",
+      "sha256": "a060ed0bc8376187db9db342ad3c274c6efe6e049a64e4d5039fee0c786af39d",
+      "recognized": "勝ったら、一緒に星を見よう!先生の願いも聞かせてください!",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "akari/akari-05cb18c06c39": {
+      "expected": "やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！",
+      "reading": "やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！",
+      "sha256": "a79a1bdd33a15aa51cef8dc2a98671b3a4c2c2f30f99639502ed87b7a8adc6cb",
+      "recognized": "やったー! 禁止令がお楽しみ会のお寿司変わったよ!",
+      "seconds": 6.06,
+      "accepted_readings": [
+        "やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！"
+      ],
+      "reading_similarity": 0.889
+    },
+    "akari/akari-41e4bb13d56d": {
+      "expected": "校長先生の乾杯、星が一周しちゃう前にお願いしまーす！",
+      "reading": "校長先生の乾杯、星が一周しちゃう前にお願いしまーす！",
+      "sha256": "66f5af53e33db5c9fc4b57bd5dd3026b02a4f0ae55fa15d9cd9fd5b0448cf74c",
+      "recognized": "校長先生の乾杯! 星が一周しちゃう前にお願いしまーす!",
+      "seconds": 5.88,
+      "accepted_readings": [
+        "校長先生の乾杯、星が一周しちゃう前にお願いしまーす！"
+      ],
+      "reading_similarity": 1.0
+    },
+    "aster/aster-a4782fe23071": {
+      "expected": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
+      "reading": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
+      "sha256": "8d2dadd996851e349b45426007985bb05e0ce894aba35f84b02f18d93dc28992",
+      "recognized": "校長への挑戦か、世界を救うより申請書が多そうだな。",
+      "seconds": 5.88,
+      "accepted_readings": [
+        "校長への挑戦か。世界を救うより、申請書が多そうだな。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "aster/aster-8944c334bf33": {
+      "expected": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
+      "reading": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
+      "sha256": "ae03f0157882f7d60be86a49a7af29805825fe3054246146b9e6575f8ec5e029",
+      "recognized": "剣なら抜ける。だが最後の焼そばパンは抜き差しならないな。",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "aster/aster-6986d95ffd7c": {
+      "expected": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
+      "reading": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
+      "sha256": "0aae048c9293e5461e2cad80f48fc452834c3e064185a05e6433f643f72b694a",
+      "recognized": "強い相手にも始まりの一歩がある。今度は君の番だ。",
+      "seconds": 5.7,
+      "accepted_readings": [
+        "強い相手にも、始まりの一歩がある。今度は君の番だ。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "aster/aster-0e3b4f1903c5": {
+      "expected": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
+      "reading": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
+      "sha256": "31d9b20ce02bfcdc6947c2e0be954181d60d922ee2a13fcddda1666374190fe4",
+      "recognized": "勝ったら願いを伝えよう、校長先生を倒すことが、目的じゃないだろ。",
+      "seconds": 6.96,
+      "accepted_readings": [
+        "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "lyra/lyra-9b2932834dd6": {
+      "expected": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
+      "reading": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
+      "sha256": "99db65a824aa54647f5998750ece4a0daedb768dee91630ad1b10a57c37abc71",
+      "recognized": "作戦名は大事よ でも名前を決めるだけで激光時刻になりそう",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。"
+      ],
+      "reading_similarity": 0.886
+    },
+    "lyra/lyra-9d19e53ba248": {
+      "expected": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
+      "reading": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
+      "sha256": "e1d7bef93d2adc5663cd22f266fa8cc589309e0de952464a2aa9643c6c560f94",
+      "recognized": "応援機10本持ってきたわ 戦う人数より多いのは気にしないで",
+      "seconds": 6.78,
+      "accepted_readings": [
+        "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。"
+      ],
+      "reading_similarity": 0.917
+    },
+    "lyra/lyra-f6d16095e479": {
+      "expected": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
+      "reading": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
+      "sha256": "344b258e4aff3b8da7841c1ea003ca3c8b5ee8828a1877de637cde2803a49c78",
+      "recognized": "帰りを待つ人がいる それってどんな必殺技より強いを守りよう",
+      "seconds": 6.6,
+      "accepted_readings": [
+        "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。"
+      ],
+      "reading_similarity": 0.957
+    },
+    "lyra/lyra-e88a9aaab01e": {
+      "expected": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
+      "reading": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
+      "sha256": "500dce53a3b9a0d7356a652645e60e717e8499dd575c15fd6013eb6a80d7e7b1",
+      "recognized": "やったわねー 校長先生宿紹介の乾杯だけは3分以内でお願い",
+      "seconds": 6.42,
+      "accepted_readings": [
+        "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！"
+      ],
+      "reading_similarity": 0.878
+    },
+    "narrator/narrator-1b865af99e1e": {
+      "expected": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+      "reading": "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+      "sha256": "fd1e38e38e3e008335e9b4d79b411a528f92a65511cb4d9977f5430e88e00213",
+      "recognized": "夕方の拷問 突然の放課後禁止令に勇者たちが立ち上がった",
+      "seconds": 6.42,
+      "accepted_readings": [
+        "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。"
+      ],
+      "reading_similarity": 0.973
+    },
+    "narrator/narrator-164424fd03bb": {
+      "expected": "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+      "reading": "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+      "sha256": "61b594f69127c42f110a4b39d9689da3b6155299757e656e578a4bea2668a458",
+      "recognized": "最初の関門を抜けた一行、階段の踊り場で緊急作戦会議が始まる。",
+      "seconds": 6.78,
+      "accepted_readings": [
+        "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "narrator/narrator-7510670c21d2": {
+      "expected": "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+      "reading": "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+      "sha256": "1a98c5e37b69bea00e510e5653fb11b44508724f9cb5e55c4e2b42f779a57f2e",
+      "recognized": "公売前で補給を発見。しかし最後のパンには勇者にも譲れない事情があった。",
+      "seconds": 7.68,
+      "accepted_readings": [
+        "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "narrator/narrator-7ca8eb2f981e": {
+      "expected": "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+      "reading": "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+      "sha256": "8dc3125da42864cb4028dd1186d6724fe419f4e42684c9ecbf3c138762310f68",
+      "recognized": "退役館まで来ればあと少し。仲間たちは応援の準備だけは完璧だった。",
+      "seconds": 7.14,
+      "accepted_readings": [
+        "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。"
+      ],
+      "reading_similarity": 0.951
+    },
+    "narrator/narrator-80504a2670be": {
+      "expected": "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+      "reading": "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+      "sha256": "d672f1d99df16fcec5e0157a281418bc49b8984437bcdf8d98f2794d7e56b0fe",
+      "recognized": "図書室で見つけた古い議事録 そこには校長も昔は挑戦者だったと書かれていた",
+      "seconds": 8.04,
+      "accepted_readings": [
+        "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "narrator/narrator-7b71ca7ac338": {
+      "expected": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+      "reading": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+      "sha256": "c635bb2377109389172aea0872ae238d460cd95cbb5b8ef7b4eb50af24076d74",
+      "recognized": "屋上に吹く風が不安を少しだけ連れていく 守りたい放課後はもうすぐそこだ",
+      "seconds": 8.04,
+      "accepted_readings": [
+        "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "narrator/narrator-57033b383f97": {
+      "expected": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+      "reading": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+      "sha256": "524b1ef53876391d763796526958c65c5bd880d37ded2cc06bffc9a58d33d2be",
+      "recognized": "ついに校長室の扉が開く。最終決戦の前に三人分の深呼吸が響いた。",
+      "seconds": 6.96,
+      "accepted_readings": [
+        "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。"
+      ],
+      "reading_similarity": 1.0
+    },
+    "narrator/narrator-5e339e7a1191": {
+      "expected": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+      "reading": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+      "sha256": "5e10351d5bc0566e9579171a1891e5779db6227e27ec53c97f7beab95353d0a3",
+      "recognized": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+      "seconds": 7.32,
+      "accepted_readings": [
+        "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。"
+      ],
+      "reading_similarity": 1.0
+    }
+  },
+  "recognizer": "faster-whisper/medium, Japanese, int8 CPU, 1s-separated batches, no text prompt"
+}

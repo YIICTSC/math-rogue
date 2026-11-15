@@ -5,8 +5,8 @@
     "stage": 1,
     "title": "校長先生、異議あり！",
     "englishTitle": "The Great School Appeal",
-    "image": "sprites/kocho/story/original-1.webp",
-    "artPrompt": "school gate at sunset, a comically enormous pile of school-rule papers, determined hero, warm heroic comedy",
+    "image": "sprites/kocho/story/original-1-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 化学研究会長 (high-school-mage). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gate in the late afternoon, a school notice board, the guest holds a neat stack of forms while the hero resolves to challenge the principal. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -25,12 +25,12 @@
         "hiragana": "ほうかごまできんしなんて、あしがかってにこうぎしてる！こうちょうせんせい、しょうぶだ！"
       },
       {
-        "speaker": "aster",
-        "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-        "english": "A principal challenge? More paperwork than saving the world.",
-        "voiceId": "aster-a4782fe23071",
-        "audio": "sfx/kocho-story/aster/aster-a4782fe23071.ogg",
-        "hiragana": "こうちょうへのちょうせんか。せかいをすくうより、しんせいしょがおおそうだな。"
+        "speaker": "high-school-mage",
+        "text": "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。",
+        "english": "I wonder what evidence supports that ban. Before experiments, let us conquer this pile of application forms.",
+        "hiragana": "きんしれいのこんきょ、きになるね。じっけんよりさきに、まずしんせいしょのそくをこうりゃくしよう。",
+        "voiceId": "high-school-mage-ce14f3c833db",
+        "audio": "sfx/kocho-story/high-school-mage/high-school-mage-ce14f3c833db.ogg"
       },
       {
         "speaker": "original",
@@ -41,7 +41,13 @@
         "hiragana": "おれのねがいは、みんなでわらってかえること。それだけはゆずれない！"
       }
     ],
-    "hiraganaTitle": "こうちょうせんせい、いぎあり！"
+    "hiraganaTitle": "こうちょうせんせい、いぎあり！",
+    "guest": "high-school-mage",
+    "cast": [
+      "original",
+      "high-school-mage"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-2",
@@ -49,8 +55,8 @@
     "stage": 2,
     "title": "階段は会議室ではありません",
     "englishTitle": "Stairway Summit",
-    "image": "sprites/kocho/story/original-2.webp",
-    "artPrompt": "sunlit school stair landing, hero planning over notebook, playful diagrams without readable text",
+    "image": "sprites/kocho/story/original-2-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 翠川まどか (magic-madoka). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Sunlit school stair landing, a quick planning meeting, guest and hero looking at a small plan notebook, expressive friendly comic timing. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: えっと、作戦名を決めてる間に、下校時刻になりそうだよ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -69,12 +75,12 @@
         "hiragana": "さくせんは、まえへすすんで、あぶなくなったらいっぽさがる！"
       },
       {
-        "speaker": "lyra",
-        "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-        "english": "Names matter, but naming this plan might take all afternoon.",
-        "voiceId": "lyra-9b2932834dd6",
-        "audio": "sfx/kocho-story/lyra/lyra-9b2932834dd6.ogg",
-        "hiragana": "さくせんめいはだいじよ。でも、なまえをきめるだけでげこうじきざになりそう。"
+        "speaker": "magic-madoka",
+        "text": "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。",
+        "english": "Um, at this rate it will be closing time before we finish naming the plan.",
+        "hiragana": "えっと、さくせんめいをきめてるまに、げこうじきざになりそうだよ。",
+        "voiceId": "magic-madoka-13bc793cf1a1",
+        "audio": "sfx/kocho-story/magic-madoka/magic-madoka-13bc793cf1a1.ogg"
       },
       {
         "speaker": "original",
@@ -85,7 +91,13 @@
         "hiragana": "よし、なまえはあとだ！あしをうごかしながらかんがえる！"
       }
     ],
-    "hiraganaTitle": "かいだんはかいぎしつではありません"
+    "hiraganaTitle": "かいだんはかいぎしつではありません",
+    "guest": "magic-madoka",
+    "cast": [
+      "original",
+      "magic-madoka"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-3",
@@ -93,8 +105,8 @@
     "stage": 3,
     "title": "購買のパンは世界を救う",
     "englishTitle": "Bread Saves the Day",
-    "image": "sprites/kocho/story/original-3.webp",
-    "artPrompt": "school courtyard shop, one glorious bread roll on tray, hero dramatically reaching, funny heroic lighting",
+    "image": "sprites/kocho/story/original-3-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 学食の料理長 (high-school-chef). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School bread shop counter, exactly one last yakisoba bread roll resting on a clean tray, guest and hero preparing to split it fairly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -113,12 +125,12 @@
         "hiragana": "これはおれのゆうはんじゃない。しょうりへのねんりょうだ！"
       },
       {
-        "speaker": "aster",
-        "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-        "english": "I can draw a sword. Negotiating the last bread roll is harder.",
-        "voiceId": "aster-8944c334bf33",
-        "audio": "sfx/kocho-story/aster/aster-8944c334bf33.ogg",
-        "hiragana": "つるぎならぬける。だがさいごのやきそばぱんは、ぬきさしならないな。"
+        "speaker": "high-school-chef",
+        "text": "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。",
+        "english": "Fuel up before a battle! Just do not fight your friends over the last bread roll.",
+        "hiragana": "たたかいのぜんこそはらごしらえだ。ただしさいごのぱんをめぐって、なかまわれはするなよ。",
+        "voiceId": "high-school-chef-0b668fc58497",
+        "audio": "sfx/kocho-story/high-school-chef/high-school-chef-0b668fc58497.ogg"
       },
       {
         "speaker": "original",
@@ -129,7 +141,13 @@
         "hiragana": "はんぶんこにしよう。はらもゆうじょうも、からっぽじゃたたかえない！"
       }
     ],
-    "hiraganaTitle": "こうばいのぱんはせかいをすくう"
+    "hiraganaTitle": "こうばいのぱんはせかいをすくう",
+    "guest": "high-school-chef",
+    "cast": [
+      "original",
+      "high-school-chef"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-4",
@@ -137,8 +155,8 @@
     "stage": 4,
     "title": "体育館で大作戦",
     "englishTitle": "Gymnasium Strategy",
-    "image": "sprites/kocho/story/original-4.webp",
-    "artPrompt": "school gym, many colorful cheering flags, hero regaining resolve, golden afternoon rays",
+    "image": "sprites/kocho/story/original-4-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 放送部ディレクター (high-school-bard). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gymnasium, guest cheering enthusiastically with cheering pennants and a microphone or small banner bundle, ten small cheering flags as props, hero responds warmly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -157,12 +175,12 @@
         "hiragana": "おうえんでたいいくかんがゆれてる！これ、おれがまけたらぎゃくにあぶないぞ！"
       },
       {
-        "speaker": "lyra",
-        "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-        "english": "I brought ten cheering flags. Never mind that we have fewer fighters.",
-        "voiceId": "lyra-9d19e53ba248",
-        "audio": "sfx/kocho-story/lyra/lyra-9d19e53ba248.ogg",
-        "hiragana": "おうえんはた、じゅうほんもってきたわ。たたかうにんずうよりおおいのは、きにしないで。"
+        "speaker": "high-school-bard",
+        "text": "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？",
+        "english": "Ten cheering flags! I brought a microphone too. Shall I set the volume so the principal can hear us?",
+        "hiragana": "おうえんはたはじゅうほん！まいくももってきたけど、おんりょうはこうちょうしつにとどくくらいでいい？",
+        "voiceId": "high-school-bard-5479bb826aa7",
+        "audio": "sfx/kocho-story/high-school-bard/high-school-bard-5479bb826aa7.ogg"
       },
       {
         "speaker": "original",
@@ -173,7 +191,13 @@
         "hiragana": "はたのかずだけ、もうひとふんばりだ！"
       }
     ],
-    "hiraganaTitle": "たいいくかんでだいさくせん"
+    "hiraganaTitle": "たいいくかんでだいさくせん",
+    "guest": "high-school-bard",
+    "cast": [
+      "original",
+      "high-school-bard"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-5",
@@ -181,8 +205,8 @@
     "stage": 5,
     "title": "図書室の静かな決意",
     "englishTitle": "Quiet Determination",
-    "image": "sprites/kocho/story/original-5.webp",
-    "artPrompt": "quiet school library, old photo album, hero thoughtful smile, tender dust-filled light",
+    "image": "sprites/kocho/story/original-5-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 文芸部書記 (high-school-librarian). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Quiet school library, guest and hero examining an old school meeting ledger and an old photograph of the principal as a student; no readable text on documents. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -201,12 +225,12 @@
         "hiragana": "こうちょうせんせいも、むかしはほうかごをまもりたかったのかな。"
       },
       {
-        "speaker": "aster",
-        "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-        "english": "Even the strongest started somewhere. Now it is your turn.",
-        "voiceId": "aster-6986d95ffd7c",
-        "audio": "sfx/kocho-story/aster/aster-6986d95ffd7c.ogg",
-        "hiragana": "つよいあいてにも、はじまりのいっぽがある。こんどはくんのばんだ。"
+        "speaker": "high-school-librarian",
+        "text": "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。",
+        "english": "These minutes preserve an old challenge. Go write the next line in your own words.",
+        "hiragana": "このぎじろくにも、むかしのちょうせんがのこってる。くんのことばで、つぎのいちぎょうをかいてきて。",
+        "voiceId": "high-school-librarian-52f201bcc7c5",
+        "audio": "sfx/kocho-story/high-school-librarian/high-school-librarian-52f201bcc7c5.ogg"
       },
       {
         "speaker": "original",
@@ -217,7 +241,13 @@
         "hiragana": "だったら、こぶしよりさきに、きもちをとどけるしょうぶにする！"
       }
     ],
-    "hiraganaTitle": "としょしつのしずかなけつい"
+    "hiraganaTitle": "としょしつのしずかなけつい",
+    "guest": "high-school-librarian",
+    "cast": [
+      "original",
+      "high-school-librarian"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-6",
@@ -225,8 +255,8 @@
     "stage": 6,
     "title": "屋上の約束",
     "englishTitle": "Rooftop Promise",
-    "image": "sprites/kocho/story/original-6.webp",
-    "artPrompt": "school rooftop at golden hour, hero looking toward friends, gentle moving ribbons, hopeful expansive sky",
+    "image": "sprites/kocho/story/original-6-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 白峰セラ (magic-sera). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School rooftop in a warm sunset breeze, guest and hero speaking sincerely side by side against the city and school landscape, hopeful atmosphere. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -245,12 +275,12 @@
         "hiragana": "あかいじゃーじはめだつけど、こんにちはにげないめじるしだ。"
       },
       {
-        "speaker": "lyra",
-        "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-        "english": "Someone is waiting for you. That is stronger than any secret technique.",
-        "voiceId": "lyra-f6d16095e479",
-        "audio": "sfx/kocho-story/lyra/lyra-f6d16095e479.ogg",
-        "hiragana": "かえりをまつにんがいる。それって、どんなひっさつわざよりつよいおまもりよ。"
+        "speaker": "magic-sera",
+        "text": "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。",
+        "english": "If you promised to come back, you will be all right. We will be here waiting for you.",
+        "hiragana": "ここにかえってくるやくそくがあるなら、きっとだいじょうぶ。わたしたちも、ずっとまってるから。",
+        "voiceId": "magic-sera-977b7af0fd25",
+        "audio": "sfx/kocho-story/magic-sera/magic-sera-977b7af0fd25.ogg"
       },
       {
         "speaker": "original",
@@ -261,7 +291,13 @@
         "hiragana": "みんな、かえりみちのよりみちまで、いっしょにな！"
       }
     ],
-    "hiraganaTitle": "おくじょうのやくそく"
+    "hiraganaTitle": "おくじょうのやくそく",
+    "guest": "magic-sera",
+    "cast": [
+      "original",
+      "magic-sera"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-7",
@@ -269,8 +305,8 @@
     "stage": 7,
     "title": "校長室、正面突破！",
     "englishTitle": "The Principal Awaits",
-    "image": "sprites/kocho/story/original-7.webp",
-    "artPrompt": "ornate school principal office doorway, heroic student facing huge dignified principal silhouette, dramatic warm light",
+    "image": "sprites/kocho/story/original-7-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, バスケ部エース (high-school-dodgeball). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Outside the closed principal office door, guest encourages the hero just before the final challenge, warm dramatic rim light, a hopeful determined mood. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -289,12 +325,12 @@
         "hiragana": "こうちょうせんせい！ほうかごのたのしさを、とうあんよりおおきなこえでつたえにきた！"
       },
       {
-        "speaker": "aster",
-        "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-        "english": "Tell him what you want after winning. Defeating him is not the real goal.",
-        "voiceId": "aster-0e3b4f1903c5",
-        "audio": "sfx/kocho-story/aster/aster-0e3b4f1903c5.ogg",
-        "hiragana": "かったらねがいをつたえよう。こうちょうせんせいをたおすことが、もくてきじゃないだろ。"
+        "speaker": "high-school-dodgeball",
+        "text": "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！",
+        "english": "When you win, tell him what you want. Getting the principal on our team would be the best result!",
+        "hiragana": "かったら、ねがいをまことっすぐつたえようぜ。せんせいまでなかまにできたら、それがいちばんだ！",
+        "voiceId": "high-school-dodgeball-a7a449bbd91b",
+        "audio": "sfx/kocho-story/high-school-dodgeball/high-school-dodgeball-a7a449bbd91b.ogg"
       },
       {
         "speaker": "original",
@@ -305,7 +341,13 @@
         "hiragana": "かったら、きんしじゃなくて、いっしょにたのしむやくそくをください！"
       }
     ],
-    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！"
+    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！",
+    "guest": "high-school-dodgeball",
+    "cast": [
+      "original",
+      "high-school-dodgeball"
+    ],
+    "artVersion": 2
   },
   {
     "id": "original-8",
@@ -313,8 +355,8 @@
     "stage": 8,
     "title": "最高の放課後、開幕！",
     "englishTitle": "Our Best Afternoon",
-    "image": "sprites/kocho/story/original-8.webp",
-    "artPrompt": "joyful school festival courtyard at sunset, victorious hero center, colorful confetti, friends sharing bread, principal holding a comically tiny celebratory teacup, heartfelt triumphant ending",
+    "image": "sprites/kocho/story/original-8-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black spiky-haired male in a RED TRACKSUIT, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 花咲ひより (magic-hiyori). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School courtyard festival feast after victory at sunset, guest and hero laughing together, festive bunting and food, friendly elderly principal holding a juice cup in the background, joyful best ending. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -333,12 +375,12 @@
         "hiragana": "かった！でもいちばんうれしいのは、みんながここにいることだ！"
       },
       {
-        "speaker": "lyra",
-        "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-        "english": "We did it! Principal, please keep the victory toast under three minutes!",
-        "voiceId": "lyra-e88a9aaab01e",
-        "audio": "sfx/kocho-story/lyra/lyra-e88a9aaab01e.ogg",
-        "hiragana": "やったわね！こうちょうせんせい、しゅくしょうかいのかんぱいだけはさんぷんいないでおねがい！"
+        "speaker": "magic-hiyori",
+        "text": "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？",
+        "english": "Let us cook a celebration meal together! Who shall we put on lunch duty today?",
+        "hiragana": "おいわいのごめし、みんなでつくろう！ところできょうのきゅうしょくとうばん、だれにおねがいしようかな？",
+        "voiceId": "magic-hiyori-046e936e8c00",
+        "audio": "sfx/kocho-story/magic-hiyori/magic-hiyori-046e936e8c00.ogg"
       },
       {
         "speaker": "original",
@@ -349,7 +391,13 @@
         "hiragana": "あかじゃーじ、しゅくしょうかいのきゅうしょくとうばんもひきうける！おかわりじゆうだ！"
       }
     ],
-    "hiraganaTitle": "さいこうのほうかご、かいまく！"
+    "hiraganaTitle": "さいこうのほうかご、かいまく！",
+    "guest": "magic-hiyori",
+    "cast": [
+      "original",
+      "magic-hiyori"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-1",
@@ -357,8 +405,8 @@
     "stage": 1,
     "title": "校長先生、異議あり！",
     "englishTitle": "The Great School Appeal",
-    "image": "sprites/kocho/story/rebel-1.webp",
-    "artPrompt": "school gate at sunset, a comically enormous pile of school-rule papers, determined hero, warm heroic comedy",
+    "image": "sprites/kocho/story/rebel-1-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 黒羽れい (magic-rei). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gate in the late afternoon, a school notice board, the guest holds a neat stack of forms while the hero resolves to challenge the principal. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -377,12 +425,12 @@
         "hiragana": "ほうかごきんし？そのこうそく、おれたちのたのしみまでしばるきか。"
       },
       {
-        "speaker": "aster",
-        "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-        "english": "A principal challenge? More paperwork than saving the world.",
-        "voiceId": "aster-a4782fe23071",
-        "audio": "sfx/kocho-story/aster/aster-a4782fe23071.ogg",
-        "hiragana": "こうちょうへのちょうせんか。せかいをすくうより、しんせいしょがおおそうだな。"
+        "speaker": "magic-rei",
+        "text": "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。",
+        "english": "Even the word count of that ban sounds pompous. Your honest feelings will reach him in far fewer words.",
+        "hiragana": "あのきんしれい、もじすうまでえらそうね。あなたのほんねなら、もっとみじかくとどくはずよ。",
+        "voiceId": "magic-rei-39aa5311fbb2",
+        "audio": "sfx/kocho-story/magic-rei/magic-rei-39aa5311fbb2.ogg"
       },
       {
         "speaker": "rebel",
@@ -393,7 +441,13 @@
         "hiragana": "こうちょうせんせい、しょうめんからいぎをもうしたてる。こぶしはさいご、はなしはさいしょだ。"
       }
     ],
-    "hiraganaTitle": "こうちょうせんせい、いぎあり！"
+    "hiraganaTitle": "こうちょうせんせい、いぎあり！",
+    "guest": "magic-rei",
+    "cast": [
+      "rebel",
+      "magic-rei"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-2",
@@ -401,8 +455,8 @@
     "stage": 2,
     "title": "階段は会議室ではありません",
     "englishTitle": "Stairway Summit",
-    "image": "sprites/kocho/story/rebel-2.webp",
-    "artPrompt": "sunlit school stair landing, hero planning over notebook, playful diagrams without readable text",
+    "image": "sprites/kocho/story/rebel-2-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 紫藤みらい (magic-mirai). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Sunlit school stair landing, a quick planning meeting, guest and hero looking at a small plan notebook, expressive friendly comic timing. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 作戦名は任せて！舞台名は、放課後・大反省会なんてどう？ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -421,12 +475,12 @@
         "hiragana": "しょうめんとっぱにもだんどりはいる。まずあしもと、そのつぎにあいてをみる。"
       },
       {
-        "speaker": "lyra",
-        "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-        "english": "Names matter, but naming this plan might take all afternoon.",
-        "voiceId": "lyra-9b2932834dd6",
-        "audio": "sfx/kocho-story/lyra/lyra-9b2932834dd6.ogg",
-        "hiragana": "さくせんめいはだいじよ。でも、なまえをきめるだけでげこうじきざになりそう。"
+        "speaker": "magic-mirai",
+        "text": "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？",
+        "english": "Leave the name to me! How about After-School: The Great Reflection Meeting?",
+        "hiragana": "さくせんめいはまかせて！ぶたいめいは、ほうかご・だいはんせいかいなんてどう？",
+        "voiceId": "magic-mirai-d0c5b3a342eb",
+        "audio": "sfx/kocho-story/magic-mirai/magic-mirai-d0c5b3a342eb.ogg"
       },
       {
         "speaker": "rebel",
@@ -437,7 +491,13 @@
         "hiragana": "かいぎめいははんせいかいいがいでたのむ。まだなにもやってない。"
       }
     ],
-    "hiraganaTitle": "かいだんはかいぎしつではありません"
+    "hiraganaTitle": "かいだんはかいぎしつではありません",
+    "guest": "magic-mirai",
+    "cast": [
+      "rebel",
+      "magic-mirai"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-3",
@@ -445,8 +505,8 @@
     "stage": 3,
     "title": "購買のパンは世界を救う",
     "englishTitle": "Bread Saves the Day",
-    "image": "sprites/kocho/story/rebel-3.webp",
-    "artPrompt": "school courtyard shop, one glorious bread roll on tray, hero dramatically reaching, funny heroic lighting",
+    "image": "sprites/kocho/story/rebel-3-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 朝霧 蓮 (magic-ren). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School bread shop counter, exactly one last yakisoba bread roll resting on a clean tray, guest and hero preparing to split it fairly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -465,12 +525,12 @@
         "hiragana": "さいごのぱんか。みょうだな、こうちょうせんよりきんちょうしてきた。"
       },
       {
-        "speaker": "aster",
-        "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-        "english": "I can draw a sword. Negotiating the last bread roll is harder.",
-        "voiceId": "aster-8944c334bf33",
-        "audio": "sfx/kocho-story/aster/aster-8944c334bf33.ogg",
-        "hiragana": "つるぎならぬける。だがさいごのやきそばぱんは、ぬきさしならないな。"
+        "speaker": "magic-ren",
+        "text": "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。",
+        "english": "Let us divide it between everyone. But if you cut it that way, your piece will be the smallest.",
+        "hiragana": "ぜんいんぶんにわけよう。そのきりかただと、くんのふんがいちばんちーさくなっちゃうけど。",
+        "voiceId": "magic-ren-5dbcc64ef6be",
+        "audio": "sfx/kocho-story/magic-ren/magic-ren-5dbcc64ef6be.ogg"
       },
       {
         "speaker": "rebel",
@@ -481,7 +541,13 @@
         "hiragana": "ぜんいんぶんにわけるぞ。おれのふんがちーさい？それはえんきんほうだ。"
       }
     ],
-    "hiraganaTitle": "こうばいのぱんはせかいをすくう"
+    "hiraganaTitle": "こうばいのぱんはせかいをすくう",
+    "guest": "magic-ren",
+    "cast": [
+      "rebel",
+      "magic-ren"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-4",
@@ -489,8 +555,8 @@
     "stage": 4,
     "title": "体育館で大作戦",
     "englishTitle": "Gymnasium Strategy",
-    "image": "sprites/kocho/story/rebel-4.webp",
-    "artPrompt": "school gym, many colorful cheering flags, hero regaining resolve, golden afternoon rays",
+    "image": "sprites/kocho/story/rebel-4-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 火神つばさ (magic-tsubasa). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gymnasium, guest cheering enthusiastically with cheering pennants and a microphone or small banner bundle, ten small cheering flags as props, hero responds warmly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -509,12 +575,12 @@
         "hiragana": "おい、おうえんまくにこわいかおをえがくな。おれはてきやくじゃない。"
       },
       {
-        "speaker": "lyra",
-        "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-        "english": "I brought ten cheering flags. Never mind that we have fewer fighters.",
-        "voiceId": "lyra-9d19e53ba248",
-        "audio": "sfx/kocho-story/lyra/lyra-9d19e53ba248.ogg",
-        "hiragana": "おうえんはた、じゅうほんもってきたわ。たたかうにんずうよりおおいのは、きにしないで。"
+        "speaker": "magic-tsubasa",
+        "text": "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！",
+        "english": "I was trying to make you look strong! Listen, nobody can beat my cheering voice!",
+        "hiragana": "つよそうにえがいたつもりだって！ほら、こえのおうえんならまけないぞ！",
+        "voiceId": "magic-tsubasa-19a7a4ded9c1",
+        "audio": "sfx/kocho-story/magic-tsubasa/magic-tsubasa-19a7a4ded9c1.ogg"
       },
       {
         "speaker": "rebel",
@@ -525,7 +591,13 @@
         "hiragana": "そのこえ、ちゃんととどいてる。だから、いっぽもひけないんだ。"
       }
     ],
-    "hiraganaTitle": "たいいくかんでだいさくせん"
+    "hiraganaTitle": "たいいくかんでだいさくせん",
+    "guest": "magic-tsubasa",
+    "cast": [
+      "rebel",
+      "magic-tsubasa"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-5",
@@ -533,8 +605,8 @@
     "stage": 5,
     "title": "図書室の静かな決意",
     "englishTitle": "Quiet Determination",
-    "image": "sprites/kocho/story/rebel-5.webp",
-    "artPrompt": "quiet school library, old photo album, hero thoughtful smile, tender dust-filled light",
+    "image": "sprites/kocho/story/rebel-5-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 神代 レオン (magic-leon). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Quiet school library, guest and hero examining an old school meeting ledger and an old photograph of the principal as a student; no readable text on documents. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -553,12 +625,12 @@
         "hiragana": "このしゃしん、こうちょうせんせいもせいふくをちゃくくずしてるじゃないか。"
       },
       {
-        "speaker": "aster",
-        "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-        "english": "Even the strongest started somewhere. Now it is your turn.",
-        "voiceId": "aster-6986d95ffd7c",
-        "audio": "sfx/kocho-story/aster/aster-6986d95ffd7c.ogg",
-        "hiragana": "つよいあいてにも、はじまりのいっぽがある。こんどはくんのばんだ。"
+        "speaker": "magic-leon",
+        "text": "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。",
+        "english": "Even the principal once wanted to look cool. Now it is your turn.",
+        "hiragana": "こうちょうせんせいにだって、かっこうつけたいきせつはあったさ。こんどはくんのばんだ。",
+        "voiceId": "magic-leon-1fd9508c755f",
+        "audio": "sfx/kocho-story/magic-leon/magic-leon-1fd9508c755f.ogg"
       },
       {
         "speaker": "rebel",
@@ -569,7 +641,13 @@
         "hiragana": "かこをわらうより、いまのおれたちをみてもらおう。"
       }
     ],
-    "hiraganaTitle": "としょしつのしずかなけつい"
+    "hiraganaTitle": "としょしつのしずかなけつい",
+    "guest": "magic-leon",
+    "cast": [
+      "rebel",
+      "magic-leon"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-6",
@@ -577,8 +655,8 @@
     "stage": 6,
     "title": "屋上の約束",
     "englishTitle": "Rooftop Promise",
-    "image": "sprites/kocho/story/rebel-6.webp",
-    "artPrompt": "school rooftop at golden hour, hero looking toward friends, gentle moving ribbons, hopeful expansive sky",
+    "image": "sprites/kocho/story/rebel-6-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 天音 理玖 (magic-riku). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School rooftop in a warm sunset breeze, guest and hero speaking sincerely side by side against the city and school landscape, hopeful atmosphere. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -597,12 +675,12 @@
         "hiragana": "じゆうって、すきかってすることだけじゃない。なかまのいばしょもまもることだ。"
       },
       {
-        "speaker": "lyra",
-        "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-        "english": "Someone is waiting for you. That is stronger than any secret technique.",
-        "voiceId": "lyra-f6d16095e479",
-        "audio": "sfx/kocho-story/lyra/lyra-f6d16095e479.ogg",
-        "hiragana": "かえりをまつにんがいる。それって、どんなひっさつわざよりつよいおまもりよ。"
+        "speaker": "magic-riku",
+        "text": "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。",
+        "english": "Shall we call our meal a reflection meeting? I will save a seat for everyone.",
+        "hiragana": "かえったら、はんせいかいってなまえのしょくじかいにする？せきはぜんいんぶん、かくほしとくよ。",
+        "voiceId": "magic-riku-4b4707821b4a",
+        "audio": "sfx/kocho-story/magic-riku/magic-riku-4b4707821b4a.ogg"
       },
       {
         "speaker": "rebel",
@@ -613,7 +691,13 @@
         "hiragana": "かえったらぜんいんでめしだ。もちろん、はんせいかいはなしで。"
       }
     ],
-    "hiraganaTitle": "おくじょうのやくそく"
+    "hiraganaTitle": "おくじょうのやくそく",
+    "guest": "magic-riku",
+    "cast": [
+      "rebel",
+      "magic-riku"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-7",
@@ -621,8 +705,8 @@
     "stage": 7,
     "title": "校長室、正面突破！",
     "englishTitle": "The Principal Awaits",
-    "image": "sprites/kocho/story/rebel-7.webp",
-    "artPrompt": "ornate school principal office doorway, heroic student facing huge dignified principal silhouette, dramatic warm light",
+    "image": "sprites/kocho/story/rebel-7-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 黒瀬 大和 (magic-yamato). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Outside the closed principal office door, guest encourages the hero just before the final challenge, warm dramatic rim light, a hopeful determined mood. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -641,12 +725,12 @@
         "hiragana": "はんぎゃくってのは、あいてをだまらせることじゃない。とどくまでたつことだ。"
       },
       {
-        "speaker": "aster",
-        "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-        "english": "Tell him what you want after winning. Defeating him is not the real goal.",
-        "voiceId": "aster-0e3b4f1903c5",
-        "audio": "sfx/kocho-story/aster/aster-0e3b4f1903c5.ogg",
-        "hiragana": "かったらねがいをつたえよう。こうちょうせんせいをたおすことが、もくてきじゃないだろ。"
+        "speaker": "magic-yamato",
+        "text": "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。",
+        "english": "Make him feel your resolve, not your fists. Get your wish across instead of just beating him.",
+        "hiragana": "ぶつけるならこぶしよりきもちだ。せんせいをたおすより、ねがいをとどけてこいよ。",
+        "voiceId": "magic-yamato-0c26cc5683a7",
+        "audio": "sfx/kocho-story/magic-yamato/magic-yamato-0c26cc5683a7.ogg"
       },
       {
         "speaker": "rebel",
@@ -657,7 +741,13 @@
         "hiragana": "こうちょうせんせい。おれたちのほうかごを、ちゃんとみてくれ！"
       }
     ],
-    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！"
+    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！",
+    "guest": "magic-yamato",
+    "cast": [
+      "rebel",
+      "magic-yamato"
+    ],
+    "artVersion": 2
   },
   {
     "id": "rebel-8",
@@ -665,8 +755,8 @@
     "stage": 8,
     "title": "最高の放課後、開幕！",
     "englishTitle": "Our Best Afternoon",
-    "image": "sprites/kocho/story/rebel-8.webp",
-    "artPrompt": "joyful school festival courtyard at sunset, victorious hero center, colorful confetti, friends sharing bread, principal holding a comically tiny celebratory teacup, heartfelt triumphant ending",
+    "image": "sprites/kocho/story/rebel-8-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the black-haired male student in a dark navy-black school jacket with gold trim and a blue inner lining, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 園芸部部長 (high-school-gardener). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School courtyard festival feast after victory at sunset, guest and hero laughing together, festive bunting and food, friendly elderly principal holding a juice cup in the background, joyful best ending. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -685,12 +775,12 @@
         "hiragana": "かったのに、こうちょうせんせいまでわらってる。こういうけっちゃくも、わるくない。"
       },
       {
-        "speaker": "lyra",
-        "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-        "english": "We did it! Principal, please keep the victory toast under three minutes!",
-        "voiceId": "lyra-e88a9aaab01e",
-        "audio": "sfx/kocho-story/lyra/lyra-e88a9aaab01e.ogg",
-        "hiragana": "やったわね！こうちょうせんせい、しゅくしょうかいのかんぱいだけはさんぷんいないでおねがい！"
+        "speaker": "high-school-gardener",
+        "text": "今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。",
+        "english": "The sign for today says Rebellion Set Meal! I decorated it with heaps of flowers too.",
+        "hiragana": "きょうのかんばんは、はんぎゃくていしょくだ！はなもやまもりにかざっておいたぜ。",
+        "voiceId": "high-school-gardener-03adbb5c588e",
+        "audio": "sfx/kocho-story/high-school-gardener/high-school-gardener-03adbb5c588e.ogg"
       },
       {
         "speaker": "rebel",
@@ -701,7 +791,13 @@
         "hiragana": "しゅくしょうかいのかんばん、はんぎゃくていしょくはやめろ。ふつうにうまそうななまえにしろ。"
       }
     ],
-    "hiraganaTitle": "さいこうのほうかご、かいまく！"
+    "hiraganaTitle": "さいこうのほうかご、かいまく！",
+    "guest": "high-school-gardener",
+    "cast": [
+      "rebel",
+      "high-school-gardener"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-1",
@@ -709,8 +805,8 @@
     "stage": 1,
     "title": "校長先生、異議あり！",
     "englishTitle": "The Great School Appeal",
-    "image": "sprites/kocho/story/akari-1.webp",
-    "artPrompt": "school gate at sunset, a comically enormous pile of school-rule papers, determined hero, warm heroic comedy",
+    "image": "sprites/kocho/story/akari-1-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 謎めく転入生 (high-school-assassin). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gate in the late afternoon, a school notice board, the guest holds a neat stack of forms while the hero resolves to challenge the principal. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -729,12 +825,12 @@
         "hiragana": "ほうかごがなくなったら、ほしをみあげるやくそくもなくなっちゃう！"
       },
       {
-        "speaker": "aster",
-        "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-        "english": "A principal challenge? More paperwork than saving the world.",
-        "voiceId": "aster-a4782fe23071",
-        "audio": "sfx/kocho-story/aster/aster-a4782fe23071.ogg",
-        "hiragana": "こうちょうへのちょうせんか。せかいをすくうより、しんせいしょがおおそうだな。"
+        "speaker": "high-school-assassin",
+        "text": "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。",
+        "english": "Protecting after-school time looks harder than protecting a secret base. I will not let you go alone.",
+        "hiragana": "ひみつきちをまもるより、ほうかごをまもるほうがむつかしそうだな。ひとりではいかせないけど。",
+        "voiceId": "high-school-assassin-20d5eee1c07f",
+        "audio": "sfx/kocho-story/high-school-assassin/high-school-assassin-20d5eee1c07f.ogg"
       },
       {
         "speaker": "akari",
@@ -745,7 +841,13 @@
         "hiragana": "こうちょうせんせい、みんなのきらきらまで、しまわないでください！"
       }
     ],
-    "hiraganaTitle": "こうちょうせんせい、いぎあり！"
+    "hiraganaTitle": "こうちょうせんせい、いぎあり！",
+    "guest": "high-school-assassin",
+    "cast": [
+      "akari",
+      "high-school-assassin"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-2",
@@ -753,8 +855,8 @@
     "stage": 2,
     "title": "階段は会議室ではありません",
     "englishTitle": "Stairway Summit",
-    "image": "sprites/kocho/story/akari-2.webp",
-    "artPrompt": "sunlit school stair landing, hero planning over notebook, playful diagrams without readable text",
+    "image": "sprites/kocho/story/akari-2-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 水城しずく (magic-shizuku). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Sunlit school stair landing, a quick planning meeting, guest and hero looking at a small plan notebook, expressive friendly comic timing. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -773,12 +875,12 @@
         "hiragana": "さくせんめいは、きらきらこうそくみなおしだいさくせん！ちょっとながい？"
       },
       {
-        "speaker": "lyra",
-        "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-        "english": "Names matter, but naming this plan might take all afternoon.",
-        "voiceId": "lyra-9b2932834dd6",
-        "audio": "sfx/kocho-story/lyra/lyra-9b2932834dd6.ogg",
-        "hiragana": "さくせんめいはだいじよ。でも、なまえをきめるだけでげこうじきざになりそう。"
+        "speaker": "magic-shizuku",
+        "text": "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。",
+        "english": "School will close before you finish saying that name. Shortening it will not lessen your resolve.",
+        "hiragana": "そのさくせんめい、いいおわるまえにげこうじかんよ。みじかくしても、きもちはへらないわ。",
+        "voiceId": "magic-shizuku-c9b73449ab53",
+        "audio": "sfx/kocho-story/magic-shizuku/magic-shizuku-c9b73449ab53.ogg"
       },
       {
         "speaker": "akari",
@@ -789,7 +891,13 @@
         "hiragana": "じゃあ、りゃくしてきらさく！なまえだけでもあかるくいこう！"
       }
     ],
-    "hiraganaTitle": "かいだんはかいぎしつではありません"
+    "hiraganaTitle": "かいだんはかいぎしつではありません",
+    "guest": "magic-shizuku",
+    "cast": [
+      "akari",
+      "magic-shizuku"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-3",
@@ -797,8 +905,8 @@
     "stage": 3,
     "title": "購買のパンは世界を救う",
     "englishTitle": "Bread Saves the Day",
-    "image": "sprites/kocho/story/akari-3.webp",
-    "artPrompt": "school courtyard shop, one glorious bread roll on tray, hero dramatically reaching, funny heroic lighting",
+    "image": "sprites/kocho/story/akari-3-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 御影 颯真 (magic-soma). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School bread shop counter, exactly one last yakisoba bread roll resting on a clean tray, guest and hero preparing to split it fairly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -817,12 +925,12 @@
         "hiragana": "このぱん、ほしがたじゃないけど、すっごくかがやいてみえる！"
       },
       {
-        "speaker": "aster",
-        "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-        "english": "I can draw a sword. Negotiating the last bread roll is harder.",
-        "voiceId": "aster-8944c334bf33",
-        "audio": "sfx/kocho-story/aster/aster-8944c334bf33.ogg",
-        "hiragana": "つるぎならぬける。だがさいごのやきそばぱんは、ぬきさしならないな。"
+        "speaker": "magic-soma",
+        "text": "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？",
+        "english": "Leave the calculations for fair shares to me. Would counting the crumbs be going too far?",
+        "hiragana": "こうへいにきるけいさんならまかせてくれ。ぱんくずまでかぞえるのは、やりすぎか？",
+        "voiceId": "magic-soma-a9a9d07bd884",
+        "audio": "sfx/kocho-story/magic-soma/magic-soma-a9a9d07bd884.ogg"
       },
       {
         "speaker": "akari",
@@ -833,7 +941,13 @@
         "hiragana": "みんなでわけたら、しあわせもふえる。まほうじゃなくてもね！"
       }
     ],
-    "hiraganaTitle": "こうばいのぱんはせかいをすくう"
+    "hiraganaTitle": "こうばいのぱんはせかいをすくう",
+    "guest": "magic-soma",
+    "cast": [
+      "akari",
+      "magic-soma"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-4",
@@ -841,8 +955,8 @@
     "stage": 4,
     "title": "体育館で大作戦",
     "englishTitle": "Gymnasium Strategy",
-    "image": "sprites/kocho/story/akari-4.webp",
-    "artPrompt": "school gym, many colorful cheering flags, hero regaining resolve, golden afternoon rays",
+    "image": "sprites/kocho/story/akari-4-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 風森こはる (magic-koharu). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gymnasium, guest cheering enthusiastically with cheering pennants and a microphone or small banner bundle, ten small cheering flags as props, hero responds warmly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -861,12 +975,12 @@
         "hiragana": "おうえんはたがじゅうほん！せいざにしたら、こうちょうせんせいもみあげちゃうかな？"
       },
       {
-        "speaker": "lyra",
-        "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-        "english": "I brought ten cheering flags. Never mind that we have fewer fighters.",
-        "voiceId": "lyra-9d19e53ba248",
-        "audio": "sfx/kocho-story/lyra/lyra-9d19e53ba248.ogg",
-        "hiragana": "おうえんはた、じゅうほんもってきたわ。たたかうにんずうよりおおいのは、きにしないで。"
+        "speaker": "magic-koharu",
+        "text": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。",
+        "english": "All ten carry our support. Even without a breeze, we will keep waving them.",
+        "hiragana": "じゅうほんとも、みんなのおうえんだよ。かぜがふかなくても、わたしたちがふるからね。",
+        "voiceId": "magic-koharu-65ef1b2936ca",
+        "audio": "sfx/kocho-story/magic-koharu/magic-koharu-65ef1b2936ca.ogg"
       },
       {
         "speaker": "akari",
@@ -877,7 +991,13 @@
         "hiragana": "こわいときは、ひとりでひからなくていい。みんな、ありがとう！"
       }
     ],
-    "hiraganaTitle": "たいいくかんでだいさくせん"
+    "hiraganaTitle": "たいいくかんでだいさくせん",
+    "guest": "magic-koharu",
+    "cast": [
+      "akari",
+      "magic-koharu"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-5",
@@ -885,8 +1005,8 @@
     "stage": 5,
     "title": "図書室の静かな決意",
     "englishTitle": "Quiet Determination",
-    "image": "sprites/kocho/story/akari-5.webp",
-    "artPrompt": "quiet school library, old photo album, hero thoughtful smile, tender dust-filled light",
+    "image": "sprites/kocho/story/akari-5-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, エリオット・ノクス (magic-elliot). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Quiet school library, guest and hero examining an old school meeting ledger and an old photograph of the principal as a student; no readable text on documents. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -905,12 +1025,12 @@
         "hiragana": "むかしのこうちょうせんせい、めがきらきらしてる。いまとおなじほしをみてたんだね。"
       },
       {
-        "speaker": "aster",
-        "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-        "english": "Even the strongest started somewhere. Now it is your turn.",
-        "voiceId": "aster-6986d95ffd7c",
-        "audio": "sfx/kocho-story/aster/aster-6986d95ffd7c.ogg",
-        "hiragana": "つよいあいてにも、はじまりのいっぽがある。こんどはくんのばんだ。"
+        "speaker": "magic-elliot",
+        "text": "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。",
+        "english": "The principal has an after-school memory he cannot forget too. I am certain your light will reach him.",
+        "hiragana": "せんせいにも、わすれられないほうかごがあるのですね。あなたのひかりなら、きっととどきます。",
+        "voiceId": "magic-elliot-1a60da967c78",
+        "audio": "sfx/kocho-story/magic-elliot/magic-elliot-1a60da967c78.ogg"
       },
       {
         "speaker": "akari",
@@ -921,7 +1041,13 @@
         "hiragana": "わすれたねがいなら、もういちどいっしょにおもいだせばいいよ！"
       }
     ],
-    "hiraganaTitle": "としょしつのしずかなけつい"
+    "hiraganaTitle": "としょしつのしずかなけつい",
+    "guest": "magic-elliot",
+    "cast": [
+      "akari",
+      "magic-elliot"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-6",
@@ -929,8 +1055,8 @@
     "stage": 6,
     "title": "屋上の約束",
     "englishTitle": "Rooftop Promise",
-    "image": "sprites/kocho/story/akari-6.webp",
-    "artPrompt": "school rooftop at golden hour, hero looking toward friends, gentle moving ribbons, hopeful expansive sky",
+    "image": "sprites/kocho/story/akari-6-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 生物部の先輩 (high-school-caretaker). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School rooftop in a warm sunset breeze, guest and hero speaking sincerely side by side against the city and school landscape, hopeful atmosphere. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -949,12 +1075,12 @@
         "hiragana": "ゆうきって、こわくないことじゃなくて、やくそくをおもいだすことなんだ。"
       },
       {
-        "speaker": "lyra",
-        "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-        "english": "Someone is waiting for you. That is stronger than any secret technique.",
-        "voiceId": "lyra-f6d16095e479",
-        "audio": "sfx/kocho-story/lyra/lyra-f6d16095e479.ogg",
-        "hiragana": "かえりをまつにんがいる。それって、どんなひっさつわざよりつよいおまもりよ。"
+        "speaker": "high-school-caretaker",
+        "text": "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。",
+        "english": "Even little sprouts need a sunny spot to grow. Let us make sure everyone keeps a place here.",
+        "hiragana": "ちいさなめだって、にちなたがあるからそだつの。みんなのいばしょ、ちゃんとのこそうね。",
+        "voiceId": "high-school-caretaker-213444921fc0",
+        "audio": "sfx/kocho-story/high-school-caretaker/high-school-caretaker-213444921fc0.ogg"
       },
       {
         "speaker": "akari",
@@ -965,7 +1091,13 @@
         "hiragana": "このそらのしたに、みんなのいばしょをのこしたい！"
       }
     ],
-    "hiraganaTitle": "おくじょうのやくそく"
+    "hiraganaTitle": "おくじょうのやくそく",
+    "guest": "high-school-caretaker",
+    "cast": [
+      "akari",
+      "high-school-caretaker"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-7",
@@ -973,8 +1105,8 @@
     "stage": 7,
     "title": "校長室、正面突破！",
     "englishTitle": "The Principal Awaits",
-    "image": "sprites/kocho/story/akari-7.webp",
-    "artPrompt": "ornate school principal office doorway, heroic student facing huge dignified principal silhouette, dramatic warm light",
+    "image": "sprites/kocho/story/akari-7-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 九条 朔夜 (magic-sakuya). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Outside the closed principal office door, guest encourages the hero just before the final challenge, warm dramatic rim light, a hopeful determined mood. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -993,12 +1125,12 @@
         "hiragana": "こうちょうせんせい！こんにちは、ほしよりまぶしいほうかごのぷれぜんです！"
       },
       {
-        "speaker": "aster",
-        "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-        "english": "Tell him what you want after winning. Defeating him is not the real goal.",
-        "voiceId": "aster-0e3b4f1903c5",
-        "audio": "sfx/kocho-story/aster/aster-0e3b4f1903c5.ogg",
-        "hiragana": "かったらねがいをつたえよう。こうちょうせんせいをたおすことが、もくてきじゃないだろ。"
+        "speaker": "magic-sakuya",
+        "text": "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。",
+        "english": "Do not let that light stop at words. If you hear the principal out too, I will stay and watch.",
+        "hiragana": "そのひかり、ことばだけでおわらせるな。せんせいのねがいまできけたら、みとどけてやる。",
+        "voiceId": "magic-sakuya-78df1c1fa05e",
+        "audio": "sfx/kocho-story/magic-sakuya/magic-sakuya-78df1c1fa05e.ogg"
       },
       {
         "speaker": "akari",
@@ -1009,7 +1141,13 @@
         "hiragana": "かったら、いっしょにほしをみよう。せんせいのねがいも、きかせてください！"
       }
     ],
-    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！"
+    "hiraganaTitle": "こうちょうしつ、しょうめんとっぱ！",
+    "guest": "magic-sakuya",
+    "cast": [
+      "akari",
+      "magic-sakuya"
+    ],
+    "artVersion": 2
   },
   {
     "id": "akari-8",
@@ -1017,8 +1155,8 @@
     "stage": 8,
     "title": "最高の放課後、開幕！",
     "englishTitle": "Our Best Afternoon",
-    "image": "sprites/kocho/story/akari-8.webp",
-    "artPrompt": "joyful school festival courtyard at sunset, victorious hero center, colorful confetti, friends sharing bread, principal holding a comically tiny celebratory teacup, heartfelt triumphant ending",
+    "image": "sprites/kocho/story/akari-8-v2.webp",
+    "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 白石 湊 (magic-minato). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School courtyard festival feast after victory at sunset, guest and hero laughing together, festive bunting and food, friendly elderly principal holding a juice cup in the background, joyful best ending. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
         "speaker": "narrator",
@@ -1037,12 +1175,12 @@
         "hiragana": "やったあ！きんしれいが、おたのしみかいのおしらせにかわったよ！"
       },
       {
-        "speaker": "lyra",
-        "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-        "english": "We did it! Principal, please keep the victory toast under three minutes!",
-        "voiceId": "lyra-e88a9aaab01e",
-        "audio": "sfx/kocho-story/lyra/lyra-e88a9aaab01e.ogg",
-        "hiragana": "やったわね！こうちょうせんせい、しゅくしょうかいのかんぱいだけはさんぷんいないでおねがい！"
+        "speaker": "magic-minato",
+        "text": "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！",
+        "english": "We have rehearsed our toast perfectly! Sir, please keep your speech short!",
+        "hiragana": "かんぱいのれんしゅうは、もうばっちりです！せんせい、あいさつはみじかめでおねがいします！",
+        "voiceId": "magic-minato-2a958f3b3fb0",
+        "audio": "sfx/kocho-story/magic-minato/magic-minato-2a958f3b3fb0.ogg"
       },
       {
         "speaker": "akari",
@@ -1053,6 +1191,12 @@
         "hiragana": "こうちょうせんせいのかんぱい、ほしがいっしゅうしちゃうまえにおねがいしまーす！"
       }
     ],
-    "hiraganaTitle": "さいこうのほうかご、かいまく！"
+    "hiraganaTitle": "さいこうのほうかご、かいまく！",
+    "guest": "magic-minato",
+    "cast": [
+      "akari",
+      "magic-minato"
+    ],
+    "artVersion": 2
   }
 ]

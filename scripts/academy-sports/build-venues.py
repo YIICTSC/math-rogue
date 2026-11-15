@@ -99,9 +99,12 @@ def football():
   for x in[-20.7,20.7]:
    rod('Venue',(x,0,sign*32.7),(x,1.5,sign*32.7),.04,'steel');poly('Venue',[(x,1.5,sign*32.7),(x+.8,1.2,sign*32.7),(x,1,sign*32.7)],[(0,1,2)],'gold')
   seats(0,sign*39,4,26,dz=sign*1.4)
- for x in[-28,28]:
-  bench((x,0,0),-math.copysign(math.pi/2,x),'BenchLeft' if x<0 else 'BenchRight');lamps(x,-30);lamps(x,30)
- box('Venue',(0,10,-42),(17,4,.8),'navy',.2);label('GAKURO  STADIUM',(0,10,-41.5),1.1)
+ # Both teams share the far technical sideline, seats facing the pitch (+X).
+ for z,name in[(-7,'BenchLeft'),(7,'BenchRight')]:bench((-28,0,z),math.pi/2,name)
+ for x in[-28,28]:lamps(x,-30);lamps(x,30)
+ # Separate mount: the renderer places this behind the far touchline/endline
+ # for landscape/portrait cameras instead of leaving a perpendicular sign.
+ box('StadiumBoard',(0,10,0),(17,4,.8),'navy',.2)
  expand_court('soccer');export('soccer-stadium')
 def baseball():
  reset();box('Venue',(0,-.3,-12),(150,.5,130),'grass',1)

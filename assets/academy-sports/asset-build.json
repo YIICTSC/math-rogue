@@ -56,9 +56,9 @@
     },
     {
       "path": "public/models/academy-sports/soccer-stadium.glb",
-      "bytes": 2975336,
-      "sha256": "1a8ec037b80dc02a1815ef95aac3ab7d655cde416d90591758c78fa699b982a1",
-      "meshes": 4,
+      "bytes": 2855612,
+      "sha256": "a1456f780fb7e700ee5746f616be342107d66178795e6e53cf7b1a597fd197f3",
+      "meshes": 5,
       "materials": 9
     },
     {

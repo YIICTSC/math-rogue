@@ -15,6 +15,7 @@ try {
  page.on('response',res=>{if(res.url().includes('/sprites/kocho/')&&res.status()>=400)errors.push(`${res.status()} ${res.url()}`);});
  const base=`http://127.0.0.1:${server.httpServer.address().port}/kocho-test`;
  await page.goto(base+((process.env.KOCHO_VOICE_TEST||process.env.KOCHO_ENEMY_VOICE_TEST||process.env.KOCHO_SUPER_TEST||process.env.KOCHO_SUPER_AUDIO_TEST)?'?voice=1':''));await page.locator('[data-kocho-enter]').waitFor();await page.locator('[data-kocho-enter]').click();await page.locator('.kocho-selection-shell').waitFor();
+ if(process.env.KOCHO_REWARD_TEST){const {testKochoRewardLayout}=await import('./test-kocho-reward-layout.mjs');await testKochoRewardLayout(page,out);assert.deepEqual(errors,[]);await browser.close();await server.close();process.exit(0);}
  if(process.env.KOCHO_VOICE_EXPORT){
   const catalog=await page.evaluate(async()=>{const {KOCHO_GUEST_CARDS}=await import('/src/mini-games/kocho/guests.ts');return {shared:__kocho.cards.filter(c=>!KOCHO_GUEST_CARDS.some(g=>g.name===c.name)).map(({name,type})=>({name,type})),guests:KOCHO_GUEST_CARDS.map(({hero,name,type,hiraganaName})=>({hero,name,type,hiraganaName}))};});
   await fs.writeFile('tmp/kocho-voice-cards.json',JSON.stringify(catalog,null,2));console.log('Exported voice cards',catalog.shared.length,catalog.guests.length);await browser.close();await server.close();process.exit(0);

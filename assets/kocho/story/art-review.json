@@ -1,0 +1,205 @@
+{
+  "reviewedAt": "2026-11-15",
+  "method": "Visual review of all 24 final CGs in the contact sheet, against the canonical guest portraits used in the reference boards. Browser decodes and responsive dialogue overlays tested separately.",
+  "checks": [
+    "Correct school/magic guest appears with scene hero",
+    "No Aster or Lyra as active guests",
+    "Foreground faces remain inside the image",
+    "No obvious duplicate foreground arms or hands",
+    "Location matches the dialogue scene"
+  ],
+  "scenes": [
+    {
+      "id": "original-1",
+      "cast": [
+        "original",
+        "high-school-mage"
+      ],
+      "sha256": "b7bc0904defe2c6b0ad15c16ca127a012e58c3693351bc916ae1f91dc97f40d2"
+    },
+    {
+      "id": "original-2",
+      "cast": [
+        "original",
+        "magic-madoka"
+      ],
+      "sha256": "54470fe6799f171019a1f388008d17b01b9606a3aa0016a6487c5c6d2214379e"
+    },
+    {
+      "id": "original-3",
+      "cast": [
+        "original",
+        "high-school-chef"
+      ],
+      "sha256": "7e7eec3ac3fb4ce30018b2877fa74dbafe8eb4807c70ad4cc9aaed220ba690ce"
+    },
+    {
+      "id": "original-4",
+      "cast": [
+        "original",
+        "high-school-bard"
+      ],
+      "sha256": "eb12a4d46afea60cca34591477529c3af7afc2e74e55b00651d34416ecfed7a1"
+    },
+    {
+      "id": "original-5",
+      "cast": [
+        "original",
+        "high-school-librarian"
+      ],
+      "sha256": "d5797af8e3c5c5c50a10c25e522c7f09d8630be77c350445c05e31b653fbdc27"
+    },
+    {
+      "id": "original-6",
+      "cast": [
+        "original",
+        "magic-sera"
+      ],
+      "sha256": "a5079080f58239c49a26a3ce3a1f03224a4249b74d53b262e8e75f42e7eb3c9f"
+    },
+    {
+      "id": "original-7",
+      "cast": [
+        "original",
+        "high-school-dodgeball"
+      ],
+      "sha256": "f075accb0b1245562f46e724bcd0ab1e9edd68af33926abc6245f8f44e2e0e4b"
+    },
+    {
+      "id": "original-8",
+      "cast": [
+        "original",
+        "magic-hiyori"
+      ],
+      "sha256": "5071e675de16effad6de45fc09a76ac474ae37513ef4cb1a3d5a465cef58b88b"
+    },
+    {
+      "id": "rebel-1",
+      "cast": [
+        "rebel",
+        "magic-rei"
+      ],
+      "sha256": "eb050ea1309918ff424dc2d23ce987805a60c888e89f9b99c3bb2d15f0f58dc9"
+    },
+    {
+      "id": "rebel-2",
+      "cast": [
+        "rebel",
+        "magic-mirai"
+      ],
+      "sha256": "633ef906cd57a16eda874c43e28b265ecf0c81b4239c0cb477526e48773cdedd"
+    },
+    {
+      "id": "rebel-3",
+      "cast": [
+        "rebel",
+        "magic-ren"
+      ],
+      "sha256": "c1b920d5558d6a00c154339b945672f99ab1ef18b128e47858be09843ca8cff0"
+    },
+    {
+      "id": "rebel-4",
+      "cast": [
+        "rebel",
+        "magic-tsubasa"
+      ],
+      "sha256": "79388e98d20da3b1879f1e4bedaf532df3dd77e908d0868c941364c6daadfbcb"
+    },
+    {
+      "id": "rebel-5",
+      "cast": [
+        "rebel",
+        "magic-leon"
+      ],
+      "sha256": "2d1d589fc908b6df6a03decb858204b37459be743593f988d263385b740ed9f6"
+    },
+    {
+      "id": "rebel-6",
+      "cast": [
+        "rebel",
+        "magic-riku"
+      ],
+      "sha256": "20763be583b6c26ff11321c719e651ba8835d35c3e0abf73a4ab4a88c7dea8a4"
+    },
+    {
+      "id": "rebel-7",
+      "cast": [
+        "rebel",
+        "magic-yamato"
+      ],
+      "sha256": "2800a273727f10cbebf968b99a6d0bd7e2689fcfee5b0cf46df68c5b8769dae5"
+    },
+    {
+      "id": "rebel-8",
+      "cast": [
+        "rebel",
+        "high-school-gardener"
+      ],
+      "sha256": "79aa1835b8a0b59a51816817ac582fb30012e0d2fbee5c81a73920b7163babe3"
+    },
+    {
+      "id": "akari-1",
+      "cast": [
+        "akari",
+        "high-school-assassin"
+      ],
+      "sha256": "576db9695b60a21ff6242f2555a8f2e6ffe3f969fac547800d535a3d34e94f1c"
+    },
+    {
+      "id": "akari-2",
+      "cast": [
+        "akari",
+        "magic-shizuku"
+      ],
+      "sha256": "e99ebbdfa2f96d4da4eea66ce373c58b8fd3b9dc5b07d4191df48decbda1f7af"
+    },
+    {
+      "id": "akari-3",
+      "cast": [
+        "akari",
+        "magic-soma"
+      ],
+      "sha256": "0d33af34a7c0b5ec3b86fabc84d041fdafee960dbb71c8aeee6d98e37d5a9023"
+    },
+    {
+      "id": "akari-4",
+      "cast": [
+        "akari",
+        "magic-koharu"
+      ],
+      "sha256": "1d5612ea81c08999f222851a91a88f2bee4ab024604543bf24e72471fad5ae7f"
+    },
+    {
+      "id": "akari-5",
+      "cast": [
+        "akari",
+        "magic-elliot"
+      ],
+      "sha256": "f972b155fc3c99dd619dfd372d435aaa37d81b9e3059a84882df5a532c39a17f"
+    },
+    {
+      "id": "akari-6",
+      "cast": [
+        "akari",
+        "high-school-caretaker"
+      ],
+      "sha256": "56629369810fede1d6294c96101a1ec77a2a45b7dc4cc2e8f94ff4b46210afee"
+    },
+    {
+      "id": "akari-7",
+      "cast": [
+        "akari",
+        "magic-sakuya"
+      ],
+      "sha256": "1bdf58d2bfe5fbc09764d1d87fc0c851c09f04a8d4c102d6a651a9e30b668637"
+    },
+    {
+      "id": "akari-8",
+      "cast": [
+        "akari",
+        "magic-minato"
+      ],
+      "sha256": "0a0832b4d996a4b464fc9033082a754b4b09a56211bb141bd12972edad3a82d2"
+    }
+  ]
+}

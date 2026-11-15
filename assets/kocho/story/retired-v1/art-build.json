@@ -1,0 +1,218 @@
+[
+  {
+    "id": "original-1",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-1.png",
+    "output": "public/sprites/kocho/story/original-1.webp",
+    "sourceSha256": "15449786da1af0d342accfad745178acb4bd60cd7105aa848f2598aed7a97124",
+    "sha256": "135bfa20e31f8dca3f429c2b019c641857d2638bf2319ae44b52cac32bec43ee",
+    "bytes": 443934
+  },
+  {
+    "id": "original-2",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-2.png",
+    "output": "public/sprites/kocho/story/original-2.webp",
+    "sourceSha256": "77852816ba854879d56301a5c3c6c001308a8865c6d693c5ae3e06388dcd3467",
+    "sha256": "3469bc7283da6bc5022f5cfa6057ab42f22cb2797dbb09db945aa242e8d029c2",
+    "bytes": 480534
+  },
+  {
+    "id": "original-3",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-3.png",
+    "output": "public/sprites/kocho/story/original-3.webp",
+    "sourceSha256": "515c743c64837af96e04ae5f8048096d74026a93a90a5928cd4b384fe919b76e",
+    "sha256": "c7ff9a850d55ed20ca8d9f42d8ef843ea878d3b87457717a8a61c6b402e2f596",
+    "bytes": 402814
+  },
+  {
+    "id": "original-4",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-4.png",
+    "output": "public/sprites/kocho/story/original-4.webp",
+    "sourceSha256": "a61285399aea145fe8ca85aff8938248b1e237f9312bfd3bb76e8241915b0a97",
+    "sha256": "aecf3cfa95515eb14837663aff9b45645f315f4ecffce5a4072e8a223e546ddc",
+    "bytes": 342582
+  },
+  {
+    "id": "original-5",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-5.png",
+    "output": "public/sprites/kocho/story/original-5.webp",
+    "sourceSha256": "69cd6636e7f5192c8617ecd853e69329233ac4760bf992035a12b9a970ec5928",
+    "sha256": "6e5a8cd7ffefdd92b59ff9476621a9d7e4b8c6e8ddcedfa95eff2ed3bb608126",
+    "bytes": 336562
+  },
+  {
+    "id": "original-6",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-6.png",
+    "output": "public/sprites/kocho/story/original-6.webp",
+    "sourceSha256": "a965e049a6e962f29e1c596527cfbc9baa36b5deff05cb45d484b57a0e84be93",
+    "sha256": "f1ca33ec65efceb71bb02ba1042ed336f9afb3379ec0b3d2a0dc09df851fffc7",
+    "bytes": 404788
+  },
+  {
+    "id": "original-7",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-7.png",
+    "output": "public/sprites/kocho/story/original-7.webp",
+    "sourceSha256": "a1d81262e2f6298816128831c873acc61441aef1cb19592d87be951ff7a33f34",
+    "sha256": "8c3ed9b940dbad2d3098bdcbeefb76171abbe8250e4713a286ac5d4fbfc4c6f5",
+    "bytes": 373914
+  },
+  {
+    "id": "original-8",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/original-8.png",
+    "output": "public/sprites/kocho/story/original-8.webp",
+    "sourceSha256": "22d67cfb7767fe45b3879326388b9a7faae87e4cf973f41235ecb0c7e1390c52",
+    "sha256": "3b17582db982b77a4546de4b6929596dcf9021323fd1ecf8da95aca48975969a",
+    "bytes": 506478
+  },
+  {
+    "id": "rebel-1",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-1.png",
+    "output": "public/sprites/kocho/story/rebel-1.webp",
+    "sourceSha256": "c46c328e23f1fecdc590e1a2c8f1a82bc26aa58a83c8515fa6c765fefd50516a",
+    "sha256": "529b7eddb2ebdf77337ef41a925fd7ef4706087e52b84c19dd2d2e35e082c801",
+    "bytes": 416562
+  },
+  {
+    "id": "rebel-2",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-2.png",
+    "output": "public/sprites/kocho/story/rebel-2.webp",
+    "sourceSha256": "fb7f22c916b3d7f48aec00cf6c3d57e5e139ec0d659d417ee48d1b2fcff3fd1c",
+    "sha256": "4e4ad1dffa4f6c0d052ba4879931b52721389018f7251b7d541dced284634727",
+    "bytes": 417400
+  },
+  {
+    "id": "rebel-3",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-3.png",
+    "output": "public/sprites/kocho/story/rebel-3.webp",
+    "sourceSha256": "7485c2d52b217ee65b647479452e503df8bb37c5e8967aa835c0698c9efdc3f6",
+    "sha256": "f66b2cf5b6db7df4a7046e7ac54800a250c5ab0bf5e48eedbe62ab28d993a3c0",
+    "bytes": 419846
+  },
+  {
+    "id": "rebel-4",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-4.png",
+    "output": "public/sprites/kocho/story/rebel-4.webp",
+    "sourceSha256": "45a853fab15514f9cbb7ae75a6f6bb7d12f8ceda1105658eeb34d66378a5af11",
+    "sha256": "c56d48eeb87874507fc24304cda301df908759b57a419157febd0258266874eb",
+    "bytes": 380158
+  },
+  {
+    "id": "rebel-5",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-5.png",
+    "output": "public/sprites/kocho/story/rebel-5.webp",
+    "sourceSha256": "a3c4500b4a92d647276f2031a4d9ee864f070fbacf58b27360b6addb47af814f",
+    "sha256": "c14c0109074739be2c7179db822091c2546b22d7d22893078741fe6fef2f1ce1",
+    "bytes": 383948
+  },
+  {
+    "id": "rebel-6",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-6.png",
+    "output": "public/sprites/kocho/story/rebel-6.webp",
+    "sourceSha256": "2123d5aeca99633142621fa184ed5b5d3307ccf657dd406d230ecbe65091735c",
+    "sha256": "7f7d379f6fa5fb97e12e63fb85efec31e34a4dc2f1a5fec137d3a72914917a9e",
+    "bytes": 450450
+  },
+  {
+    "id": "rebel-7",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-7.png",
+    "output": "public/sprites/kocho/story/rebel-7.webp",
+    "sourceSha256": "6e8aea7a1b020986ac8d2499abf8df172d5f2766856c98e49c90043a0a1638c2",
+    "sha256": "68b5a92efd586bcf90a6277a46a50d6e767aa405cbf8230fe4735acce96e1ae0",
+    "bytes": 348454
+  },
+  {
+    "id": "rebel-8",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/rebel-8.png",
+    "output": "public/sprites/kocho/story/rebel-8.webp",
+    "sourceSha256": "a59ea0e8806ea37fc9801c5a34b3ee85ed7c5e59846ad113903026b314c7ff03",
+    "sha256": "c8c440e30c0be7c635cb365e90bca1d83a9c2660310494ddbef0aa4f25593623",
+    "bytes": 448454
+  },
+  {
+    "id": "akari-1",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-1.png",
+    "output": "public/sprites/kocho/story/akari-1.webp",
+    "sourceSha256": "3076a2e6fb1fcbf0fc3484a4a78df081a81a3c5254825253bc9dff8b951b1c57",
+    "sha256": "18de6dae7e30a9bbac88fad5a9ab3c19be3d18a9e89884a26c0e31d6b549de83",
+    "bytes": 467452
+  },
+  {
+    "id": "akari-2",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-2.png",
+    "output": "public/sprites/kocho/story/akari-2.webp",
+    "sourceSha256": "b298da167b19bc06edd493404711d6e2d0151e1e0d5e3d438ad0a89a230af9c7",
+    "sha256": "388aaf960d856ed63cdec401a3969932f9d347549c3dace61f7ac05c59200258",
+    "bytes": 417590
+  },
+  {
+    "id": "akari-3",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-3.png",
+    "output": "public/sprites/kocho/story/akari-3.webp",
+    "sourceSha256": "2fd75071e081db27bbf230bfa24448b182f39e5ca98f9095a3bb9e5689f0689e",
+    "sha256": "fc125028641bb53e2a8224886cce79f21834d27c3cf7fc004ca3e0c12517a920",
+    "bytes": 412000
+  },
+  {
+    "id": "akari-4",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-4.png",
+    "output": "public/sprites/kocho/story/akari-4.webp",
+    "sourceSha256": "e64a58c406a32004d7d38803cb0e3cf783f279ff06edb5802c4a237a4a109c48",
+    "sha256": "5808db6da67dc7bcc55713fc9be25ded070741983273f376686a0446a396376c",
+    "bytes": 369142
+  },
+  {
+    "id": "akari-5",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-5.png",
+    "output": "public/sprites/kocho/story/akari-5.webp",
+    "sourceSha256": "05642950baa36bb2bd8e2a75a62823d3e12b184a92119b48c617b0a9a8781a5a",
+    "sha256": "ce2eb3904cbee5372a0e8aa7147a35ff2cb50381f6c5192de79b3a857113c1c4",
+    "bytes": 373242
+  },
+  {
+    "id": "akari-6",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-6.png",
+    "output": "public/sprites/kocho/story/akari-6.webp",
+    "sourceSha256": "9c9d0bed11dc0f9df07d4a879d652aef522684d9b2d5edf664114eb3ca7586a5",
+    "sha256": "86b56574429ef3ba1e0446098f55ab808329473a105bf1956e0c44a002f72b46",
+    "bytes": 407648
+  },
+  {
+    "id": "akari-7",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-7.png",
+    "output": "public/sprites/kocho/story/akari-7.webp",
+    "sourceSha256": "89d3fb223407b81986a245431ed59f53e8fad09ee4adbbbdcb627eb2c964ad80",
+    "sha256": "a2c4a7d5bf7d2d9a407639469a1cf495ce8d3890e22e61824d8985e39419fd42",
+    "bytes": 369808
+  },
+  {
+    "id": "akari-8",
+    "generator": "ImageGen",
+    "archive": "assets/kocho/story/originals/akari-8.png",
+    "output": "public/sprites/kocho/story/akari-8.webp",
+    "sourceSha256": "2c7576be857edfd8aa2c48dfe3056ec40ed5a3e449a9b530f726d68c01fd494b",
+    "sha256": "ff4036bdd50562d535f98e27975b76578d5122c763e6cf5e615acd1d4af8d2ee",
+    "bytes": 441508
+  }
+]

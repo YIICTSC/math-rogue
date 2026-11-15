@@ -1,0 +1,146 @@
+[
+  {
+    "id": "high-school-mage",
+    "caption": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/MAGE/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/3.webp"
+  },
+  {
+    "id": "magic-madoka",
+    "caption": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/MADOKA/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-06-before.webp"
+  },
+  {
+    "id": "high-school-chef",
+    "caption": "高校生の男子アニメ主人公。気さくで頼れる明るい中低音。料理長らしい面倒見のよさと勢いを持ち、冗談は親しみやすく、決意は力強く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/CHEF/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/7.webp"
+  },
+  {
+    "id": "high-school-bard",
+    "caption": "高校生の女性アニメ主人公。明るく通る放送部の声。言葉を届ける表現力と軽快なリズムを持ち、感動場面では温かな余韻を残す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/BARD/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/5.webp"
+  },
+  {
+    "id": "high-school-librarian",
+    "caption": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/LIBRARIAN/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/6.webp"
+  },
+  {
+    "id": "magic-sera",
+    "caption": "高校生の女性魔法主人公。礼儀正しく透明感のある中高音。異世界の記録者らしい丁寧さと、希望を失わない素直な明るさを持つ。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/SERA/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-09-before.webp"
+  },
+  {
+    "id": "high-school-dodgeball",
+    "caption": "高校生の男子アニメ主人公。明るく前へ押し出す中高音。スポーツ選手らしい息の勢いと素早いテンポを持ち、仲間への声かけは熱く爽やかに。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/DODGEBALL/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/4.webp"
+  },
+  {
+    "id": "magic-hiyori",
+    "caption": "高校生の女性魔法主人公。柔らかく包み込む穏やかな中音。相手を安心させる温かさを持ち、守る決意は静かに強く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/HIYORI/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-03-before.webp"
+  },
+  {
+    "id": "magic-rei",
+    "caption": "高校生の女性魔法主人公。寡黙で厳格な低めの声。無駄なく静かに話し、守る言葉だけに深い庇護と意志を込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/REI/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-05-before.webp"
+  },
+  {
+    "id": "magic-mirai",
+    "caption": "高校生の女性魔法主人公。華やかで表現力のある中高音。舞台のように明るく弾ませつつ、本音の場面では寂しさと温かさを自然に出す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/MIRAI/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-08-before.webp"
+  },
+  {
+    "id": "magic-ren",
+    "caption": "高校生の男性魔法主人公。世話焼きで誠実な若い中低音。近い距離の親しみやすさを持ち、仲間を守る時は頼れる力強さを出す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/REN/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/ren-before.webp"
+  },
+  {
+    "id": "magic-tsubasa",
+    "caption": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/TSUBASA/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-04-before.webp"
+  },
+  {
+    "id": "magic-leon",
+    "caption": "高校生の男性魔法主人公。華やかで自信のある中高音。舞台役者のように響かせ、冗談は軽く、仲間への本音はまっすぐ輝かせる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/LEON/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/leon-before.webp"
+  },
+  {
+    "id": "magic-riku",
+    "caption": "高校生の男性魔法主人公。飄々とした軽やかな中音。知的な余裕と遊び心を持ち、仲間を選ぶ場面では静かな本気を見せる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/RIKU/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/riku-before.webp"
+  },
+  {
+    "id": "magic-yamato",
+    "caption": "高校生の男性魔法主人公。ぶっきらぼうで熱い低めの声。乱暴な語尾の奥に情の厚さを持ち、守る台詞は腹から強く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/YAMATO/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/yamato-before.webp"
+  },
+  {
+    "id": "high-school-gardener",
+    "caption": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/GARDENER/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/8.webp"
+  },
+  {
+    "id": "high-school-assassin",
+    "caption": "若い男性の落ち着いた低音。中性的でクールな高校生の声。息を混ぜすぎず静かで精密、抑えた自信。明瞭な日本語で自然な演技。音楽や効果音なし。 参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/ASSASSIN/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/2.webp"
+  },
+  {
+    "id": "magic-shizuku",
+    "caption": "高校生の女性魔法主人公。冷静で透明感のある中音。論理的に落ち着いて話し、感情が揺れる場面では抑えた優しさをにじませる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/SHIZUKU/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-02-before.webp"
+  },
+  {
+    "id": "magic-soma",
+    "caption": "高校生の男性魔法主人公。規律正しく知的な中低音。完璧主義らしく明瞭に区切り、感情を選ぶ場面では抑えた誠実さを込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/SOMA/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/soma-before.webp"
+  },
+  {
+    "id": "magic-koharu",
+    "caption": "高校生の女性魔法主人公。穏やかで自然体の中音。風のように柔らかく話し、仲間を導く時は落ち着いた芯を見せる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/KOHARU/endless-true-1.ogg",
+    "art": "public/sprites/magic/characters/heroine-07-before.webp"
+  },
+  {
+    "id": "magic-elliot",
+    "caption": "高校生の男性魔法主人公。礼儀正しく気品のある静かな中低音。星界の記録者らしい距離感と孤独を持ち、希望の台詞には柔らかな光を込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/ELLIOT/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/elliot-before.webp"
+  },
+  {
+    "id": "high-school-caretaker",
+    "caption": "高校生の女性アニメ主人公。落ち着いた柔らかい中音。生き物を見守る包容力と、静かな芯の強さを出す。安心させる台詞は穏やかに、決意は明瞭に。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/high-school-voices/CARETAKER/endless-true-1.ogg",
+    "art": "public/sprites/high-school/characters/1.webp"
+  },
+  {
+    "id": "magic-sakuya",
+    "caption": "高校生の男性魔法主人公。冷たく抑えた低音。封印術師らしく言葉を重く区切り、過去を越える決意には隠れた熱と優しさを込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-event-voices/SAKUYA/endless-true-1.ogg",
+    "art": "public/sprites/magic/male-characters/sakuya-before.webp"
+  },
+  {
+    "id": "magic-minato",
+    "caption": "高校生の男性魔法主人公。素直で努力家の若い中音。少し控えめな親しみやすさから始め、成長と決意の場面では前向きに声を張る。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+    "reference": "public/sfx/magic-voices/MINATO/attack-1.ogg",
+    "art": "public/sprites/magic/male-characters/minato-before.webp"
+  }
+]

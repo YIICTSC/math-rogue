@@ -384,70 +384,6 @@
       "rms": 0.09937,
       "clipped_ratio": 0.0
     },
-    "aster/aster-a4782fe23071": {
-      "sha256": "8d2dadd996851e349b45426007985bb05e0ce894aba35f84b02f18d93dc28992",
-      "seconds": 5.88,
-      "sample_rate": 44100,
-      "peak": 0.73922,
-      "rms": 0.11743,
-      "clipped_ratio": 0.0
-    },
-    "aster/aster-8944c334bf33": {
-      "sha256": "ae03f0157882f7d60be86a49a7af29805825fe3054246146b9e6575f8ec5e029",
-      "seconds": 6.6,
-      "sample_rate": 44100,
-      "peak": 0.84348,
-      "rms": 0.10626,
-      "clipped_ratio": 0.0
-    },
-    "aster/aster-6986d95ffd7c": {
-      "sha256": "0aae048c9293e5461e2cad80f48fc452834c3e064185a05e6433f643f72b694a",
-      "seconds": 5.7,
-      "sample_rate": 44100,
-      "peak": 0.65626,
-      "rms": 0.10855,
-      "clipped_ratio": 0.0
-    },
-    "aster/aster-0e3b4f1903c5": {
-      "sha256": "31d9b20ce02bfcdc6947c2e0be954181d60d922ee2a13fcddda1666374190fe4",
-      "seconds": 6.96,
-      "sample_rate": 44100,
-      "peak": 0.73785,
-      "rms": 0.1035,
-      "clipped_ratio": 0.0
-    },
-    "lyra/lyra-9b2932834dd6": {
-      "sha256": "99db65a824aa54647f5998750ece4a0daedb768dee91630ad1b10a57c37abc71",
-      "seconds": 6.6,
-      "sample_rate": 44100,
-      "peak": 0.83767,
-      "rms": 0.11793,
-      "clipped_ratio": 0.0
-    },
-    "lyra/lyra-9d19e53ba248": {
-      "sha256": "e1d7bef93d2adc5663cd22f266fa8cc589309e0de952464a2aa9643c6c560f94",
-      "seconds": 6.78,
-      "sample_rate": 44100,
-      "peak": 0.85532,
-      "rms": 0.119,
-      "clipped_ratio": 0.0
-    },
-    "lyra/lyra-f6d16095e479": {
-      "sha256": "344b258e4aff3b8da7841c1ea003ca3c8b5ee8828a1877de637cde2803a49c78",
-      "seconds": 6.6,
-      "sample_rate": 44100,
-      "peak": 0.84072,
-      "rms": 0.13175,
-      "clipped_ratio": 0.0
-    },
-    "lyra/lyra-e88a9aaab01e": {
-      "sha256": "500dce53a3b9a0d7356a652645e60e717e8499dd575c15fd6013eb6a80d7e7b1",
-      "seconds": 6.42,
-      "sample_rate": 44100,
-      "peak": 0.83716,
-      "rms": 0.12279,
-      "clipped_ratio": 0.0
-    },
     "narrator/narrator-1b865af99e1e": {
       "sha256": "fd1e38e38e3e008335e9b4d79b411a528f92a65511cb4d9977f5430e88e00213",
       "seconds": 6.42,
@@ -510,6 +446,198 @@
       "sample_rate": 44100,
       "peak": 0.74503,
       "rms": 0.11704,
+      "clipped_ratio": 0.0
+    },
+    "high-school-mage/high-school-mage-ce14f3c833db": {
+      "sha256": "ba2f0709f75f0bc96e43dc27b5fa8ef05240527f3f73490e63fccb4fd24ad101",
+      "seconds": 7.32,
+      "sample_rate": 44100,
+      "peak": 0.74019,
+      "rms": 0.112,
+      "clipped_ratio": 0.0
+    },
+    "magic-madoka/magic-madoka-13bc793cf1a1": {
+      "sha256": "aab53f211ccecfdb28811df10b8a018a444217d35499f36aca3ebf8e319e9582",
+      "seconds": 6.06,
+      "sample_rate": 44100,
+      "peak": 0.84251,
+      "rms": 0.13229,
+      "clipped_ratio": 0.0
+    },
+    "high-school-chef/high-school-chef-0b668fc58497": {
+      "sha256": "7274c9e3fa1043e534c544b360d80eafa84afa68d87b50e436eb0d9d08e417cb",
+      "seconds": 7.68,
+      "sample_rate": 44100,
+      "peak": 0.83098,
+      "rms": 0.11002,
+      "clipped_ratio": 0.0
+    },
+    "high-school-bard/high-school-bard-5479bb826aa7": {
+      "sha256": "4c6a591eba009a4edf9b2eb296ced654fb7ded14b72d78e66ddd76e17a4b5829",
+      "seconds": 7.5,
+      "sample_rate": 44100,
+      "peak": 0.82659,
+      "rms": 0.12019,
+      "clipped_ratio": 0.0
+    },
+    "high-school-librarian/high-school-librarian-52f201bcc7c5": {
+      "sha256": "7adefdb6e573294ea6c908c76f11b84a7e64b43dd5a03576b64ec65b059c29d1",
+      "seconds": 7.5,
+      "sample_rate": 44100,
+      "peak": 0.86079,
+      "rms": 0.10129,
+      "clipped_ratio": 0.0
+    },
+    "magic-sera/magic-sera-977b7af0fd25": {
+      "sha256": "f5edeab5d63dc1b4f3edb52296a4db6210f4ec1bf7c258351610478e505d036c",
+      "seconds": 8.04,
+      "sample_rate": 44100,
+      "peak": 0.85626,
+      "rms": 0.08762,
+      "clipped_ratio": 0.0
+    },
+    "high-school-dodgeball/high-school-dodgeball-a7a449bbd91b": {
+      "sha256": "4a9da5c6dc48ccae4c2766bf9a664864b7668862ce67b68aa5c45f5a267bed12",
+      "seconds": 7.86,
+      "sample_rate": 44100,
+      "peak": 0.7414,
+      "rms": 0.10866,
+      "clipped_ratio": 0.0
+    },
+    "magic-hiyori/magic-hiyori-046e936e8c00": {
+      "sha256": "79f8a7fc4c29d3989a70731d93ee88505f3b2a4daeafbd142df7279a48c9690e",
+      "seconds": 8.04,
+      "sample_rate": 44100,
+      "peak": 0.86459,
+      "rms": 0.0897,
+      "clipped_ratio": 0.0
+    },
+    "magic-rei/magic-rei-39aa5311fbb2": {
+      "sha256": "56957ea03b0b3b45391c040d264cca27f3d03496e84b75dda57d0431446ad020",
+      "seconds": 7.68,
+      "sample_rate": 44100,
+      "peak": 0.73108,
+      "rms": 0.12018,
+      "clipped_ratio": 0.0
+    },
+    "magic-mirai/magic-mirai-d0c5b3a342eb": {
+      "sha256": "3152918e5e57a07c81852d292b682564f25910815a5445cd7960971239be83a4",
+      "seconds": 6.06,
+      "sample_rate": 44100,
+      "peak": 0.84894,
+      "rms": 0.11748,
+      "clipped_ratio": 0.0
+    },
+    "magic-ren/magic-ren-5dbcc64ef6be": {
+      "sha256": "509dca8f7c1ac980d59acfbc13056aac09c5ca5c4f415d804b6589ba2bc222da",
+      "seconds": 7.32,
+      "sample_rate": 44100,
+      "peak": 0.74372,
+      "rms": 0.11813,
+      "clipped_ratio": 0.0
+    },
+    "magic-tsubasa/magic-tsubasa-19a7a4ded9c1": {
+      "sha256": "944f18ddf91fe10690413d01d9c946730a63df81a7caf4f33507296467d809d6",
+      "seconds": 6.42,
+      "sample_rate": 44100,
+      "peak": 0.89923,
+      "rms": 0.09651,
+      "clipped_ratio": 0.0
+    },
+    "magic-leon/magic-leon-1fd9508c755f": {
+      "sha256": "816b72267abd98b20c5e27a670a209aaadf56a2bfa3ab68a9c3ac022b4afd105",
+      "seconds": 6.78,
+      "sample_rate": 44100,
+      "peak": 0.60268,
+      "rms": 0.11886,
+      "clipped_ratio": 0.0
+    },
+    "magic-riku/magic-riku-4b4707821b4a": {
+      "sha256": "5f76bb22826a770812f8a587a0575b31d3be13710be97a1d114153edfe5d25bd",
+      "seconds": 7.14,
+      "sample_rate": 44100,
+      "peak": 0.86887,
+      "rms": 0.11133,
+      "clipped_ratio": 0.0
+    },
+    "magic-yamato/magic-yamato-0c26cc5683a7": {
+      "sha256": "370ea3aa1431b03bb9a9c5439dda06d4d10ff08292081ab7f015492ba23ff191",
+      "seconds": 6.96,
+      "sample_rate": 44100,
+      "peak": 0.66899,
+      "rms": 0.11849,
+      "clipped_ratio": 0.0
+    },
+    "high-school-gardener/high-school-gardener-03adbb5c588e": {
+      "sha256": "154927de8be2a337983fd6497103771501a2999422001e67f2c6ba86c19650d1",
+      "seconds": 6.6,
+      "sample_rate": 44100,
+      "peak": 0.84577,
+      "rms": 0.10861,
+      "clipped_ratio": 0.0
+    },
+    "high-school-assassin/high-school-assassin-20d5eee1c07f": {
+      "sha256": "d6d17fa374c14669336ae27e5d683e9e4664033029b31505bc2fe112107d1a00",
+      "seconds": 7.86,
+      "sample_rate": 44100,
+      "peak": 0.8603,
+      "rms": 0.10143,
+      "clipped_ratio": 0.0
+    },
+    "magic-shizuku/magic-shizuku-c9b73449ab53": {
+      "sha256": "2b827ae65bed334fc1c287aca26687e54b75a1b6e5efbc7eaa096c67bd96ec0f",
+      "seconds": 7.5,
+      "sample_rate": 44100,
+      "peak": 0.64921,
+      "rms": 0.11692,
+      "clipped_ratio": 0.0
+    },
+    "magic-soma/magic-soma-a9a9d07bd884": {
+      "sha256": "9406269c015d6c7f1305fadd296513b0c1eed695b52fed58f4f81443f6c5c3aa",
+      "seconds": 7.14,
+      "sample_rate": 44100,
+      "peak": 0.83427,
+      "rms": 0.11843,
+      "clipped_ratio": 0.0
+    },
+    "magic-koharu/magic-koharu-65ef1b2936ca": {
+      "sha256": "33a2885e3cfc78143a21898e8f33c8f149c12e74cc0e6081eaa68847cafe5ff9",
+      "seconds": 7.14,
+      "sample_rate": 44100,
+      "peak": 0.63714,
+      "rms": 0.10162,
+      "clipped_ratio": 0.0
+    },
+    "magic-elliot/magic-elliot-1a60da967c78": {
+      "sha256": "68e5b3d0cb3fdeee0a6f5b1835ec889cb5280ed909b055e3c2a52345766e8d59",
+      "seconds": 8.04,
+      "sample_rate": 44100,
+      "peak": 0.86017,
+      "rms": 0.09867,
+      "clipped_ratio": 0.0
+    },
+    "high-school-caretaker/high-school-caretaker-213444921fc0": {
+      "sha256": "374894cb407b3f2e19003303bf1dc4d0ec08df1410bafe027204d024826efec5",
+      "seconds": 7.86,
+      "sample_rate": 44100,
+      "peak": 0.87093,
+      "rms": 0.10005,
+      "clipped_ratio": 0.0
+    },
+    "magic-sakuya/magic-sakuya-78df1c1fa05e": {
+      "sha256": "68ea32c56dd96eb06b465b0d61b7bb2343c55682b3445bf3233f8104bcbeb9d4",
+      "seconds": 7.5,
+      "sample_rate": 44100,
+      "peak": 0.66882,
+      "rms": 0.12478,
+      "clipped_ratio": 0.0
+    },
+    "magic-minato/magic-minato-2a958f3b3fb0": {
+      "sha256": "fed6683d7d315577dbe2a1de5bcc8ed3a811dae30837f96d4f2017a163dde6df",
+      "seconds": 6.96,
+      "sample_rate": 44100,
+      "peak": 0.85952,
+      "rms": 0.10852,
       "clipped_ratio": 0.0
     }
   },

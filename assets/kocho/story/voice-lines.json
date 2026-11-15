@@ -90,36 +90,6 @@
       }
     },
     {
-      "id": "aster",
-      "caption": "Mature Japanese male fantasy protagonist. Warm grounded confident tenor, natural friendly comic timing. Preserve the reference speaker identity.",
-      "references": [
-        "assets/lantern-war/references/aster-fantasy-v3.ogg"
-      ],
-      "seed": 9345,
-      "anchor_text": "放課後の校庭に、小さな勇者たちの笑い声が響いた。",
-      "lines": {
-        "aster-a4782fe23071": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-        "aster-8944c334bf33": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-        "aster-6986d95ffd7c": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-        "aster-0e3b4f1903c5": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。"
-      }
-    },
-    {
-      "id": "lyra",
-      "caption": "Mature Japanese female fantasy heroine. Warm poised clear expressive voice with playful friendly humor. Preserve the reference speaker identity.",
-      "references": [
-        "assets/lantern-war/references/lyra-fantasy-v3.ogg"
-      ],
-      "seed": 9345,
-      "anchor_text": "放課後の校庭に、小さな勇者たちの笑い声が響いた。",
-      "lines": {
-        "lyra-9b2932834dd6": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-        "lyra-9d19e53ba248": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-        "lyra-f6d16095e479": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-        "lyra-e88a9aaab01e": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！"
-      }
-    },
-    {
       "id": "narrator",
       "caption": "Japanese mature male anime storyteller, warm clear mid-low register, dry playful comedic timing, gentle heartfelt narration. No music or effects.",
       "references": [],
@@ -134,6 +104,273 @@
         "narrator-7b71ca7ac338": "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
         "narrator-57033b383f97": "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
         "narrator-5e339e7a1191": "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。"
+      }
+    },
+    {
+      "id": "high-school-mage",
+      "caption": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/MAGE/endless-true-1.ogg"
+      ],
+      "seed": 91000,
+      "lines": {
+        "high-school-mage-ce14f3c833db": "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。"
+      }
+    },
+    {
+      "id": "magic-madoka",
+      "caption": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/MADOKA/endless-true-1.ogg"
+      ],
+      "seed": 91137,
+      "lines": {
+        "magic-madoka-13bc793cf1a1": "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。"
+      }
+    },
+    {
+      "id": "high-school-chef",
+      "caption": "高校生の男子アニメ主人公。気さくで頼れる明るい中低音。料理長らしい面倒見のよさと勢いを持ち、冗談は親しみやすく、決意は力強く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/CHEF/endless-true-1.ogg"
+      ],
+      "seed": 91274,
+      "lines": {
+        "high-school-chef-0b668fc58497": "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。"
+      }
+    },
+    {
+      "id": "high-school-bard",
+      "caption": "高校生の女性アニメ主人公。明るく通る放送部の声。言葉を届ける表現力と軽快なリズムを持ち、感動場面では温かな余韻を残す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/BARD/endless-true-1.ogg"
+      ],
+      "seed": 91411,
+      "lines": {
+        "high-school-bard-5479bb826aa7": "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？"
+      }
+    },
+    {
+      "id": "high-school-librarian",
+      "caption": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/LIBRARIAN/endless-true-1.ogg"
+      ],
+      "seed": 91548,
+      "lines": {
+        "high-school-librarian-52f201bcc7c5": "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。"
+      }
+    },
+    {
+      "id": "magic-sera",
+      "caption": "高校生の女性魔法主人公。礼儀正しく透明感のある中高音。異世界の記録者らしい丁寧さと、希望を失わない素直な明るさを持つ。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/SERA/endless-true-1.ogg"
+      ],
+      "seed": 91685,
+      "lines": {
+        "magic-sera-977b7af0fd25": "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。"
+      }
+    },
+    {
+      "id": "high-school-dodgeball",
+      "caption": "高校生の男子アニメ主人公。明るく前へ押し出す中高音。スポーツ選手らしい息の勢いと素早いテンポを持ち、仲間への声かけは熱く爽やかに。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/DODGEBALL/endless-true-1.ogg"
+      ],
+      "seed": 91822,
+      "lines": {
+        "high-school-dodgeball-a7a449bbd91b": "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！"
+      }
+    },
+    {
+      "id": "magic-hiyori",
+      "caption": "高校生の女性魔法主人公。柔らかく包み込む穏やかな中音。相手を安心させる温かさを持ち、守る決意は静かに強く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/HIYORI/endless-true-1.ogg"
+      ],
+      "seed": 91959,
+      "lines": {
+        "magic-hiyori-046e936e8c00": "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？"
+      }
+    },
+    {
+      "id": "magic-rei",
+      "caption": "高校生の女性魔法主人公。寡黙で厳格な低めの声。無駄なく静かに話し、守る言葉だけに深い庇護と意志を込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/REI/endless-true-1.ogg"
+      ],
+      "seed": 92096,
+      "lines": {
+        "magic-rei-39aa5311fbb2": "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。"
+      }
+    },
+    {
+      "id": "magic-mirai",
+      "caption": "高校生の女性魔法主人公。華やかで表現力のある中高音。舞台のように明るく弾ませつつ、本音の場面では寂しさと温かさを自然に出す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/MIRAI/endless-true-1.ogg"
+      ],
+      "seed": 92233,
+      "lines": {
+        "magic-mirai-d0c5b3a342eb": "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？"
+      }
+    },
+    {
+      "id": "magic-ren",
+      "caption": "高校生の男性魔法主人公。世話焼きで誠実な若い中低音。近い距離の親しみやすさを持ち、仲間を守る時は頼れる力強さを出す。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/REN/endless-true-1.ogg"
+      ],
+      "seed": 92370,
+      "lines": {
+        "magic-ren-5dbcc64ef6be": "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。"
+      }
+    },
+    {
+      "id": "magic-tsubasa",
+      "caption": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/TSUBASA/endless-true-1.ogg"
+      ],
+      "seed": 92507,
+      "lines": {
+        "magic-tsubasa-19a7a4ded9c1": "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！"
+      }
+    },
+    {
+      "id": "magic-leon",
+      "caption": "高校生の男性魔法主人公。華やかで自信のある中高音。舞台役者のように響かせ、冗談は軽く、仲間への本音はまっすぐ輝かせる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/LEON/endless-true-1.ogg"
+      ],
+      "seed": 92644,
+      "lines": {
+        "magic-leon-1fd9508c755f": "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。"
+      }
+    },
+    {
+      "id": "magic-riku",
+      "caption": "高校生の男性魔法主人公。飄々とした軽やかな中音。知的な余裕と遊び心を持ち、仲間を選ぶ場面では静かな本気を見せる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/RIKU/endless-true-1.ogg"
+      ],
+      "seed": 92781,
+      "lines": {
+        "magic-riku-4b4707821b4a": "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。"
+      }
+    },
+    {
+      "id": "magic-yamato",
+      "caption": "高校生の男性魔法主人公。ぶっきらぼうで熱い低めの声。乱暴な語尾の奥に情の厚さを持ち、守る台詞は腹から強く。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/YAMATO/endless-true-1.ogg"
+      ],
+      "seed": 92918,
+      "lines": {
+        "magic-yamato-0c26cc5683a7": "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。"
+      }
+    },
+    {
+      "id": "high-school-gardener",
+      "caption": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/GARDENER/endless-true-1.ogg"
+      ],
+      "seed": 93055,
+      "lines": {
+        "high-school-gardener-03adbb5c588e": "今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。"
+      },
+      "synthesis_text": {
+        "high-school-gardener-03adbb5c588e": "今日の看板は、はんぎゃく定食だ！花も山盛りに飾っておいたぜ。"
+      }
+    },
+    {
+      "id": "high-school-assassin",
+      "caption": "若い男性の落ち着いた低音。中性的でクールな高校生の声。息を混ぜすぎず静かで精密、抑えた自信。明瞭な日本語で自然な演技。音楽や効果音なし。 参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/ASSASSIN/endless-true-1.ogg"
+      ],
+      "seed": 93192,
+      "lines": {
+        "high-school-assassin-20d5eee1c07f": "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。"
+      }
+    },
+    {
+      "id": "magic-shizuku",
+      "caption": "高校生の女性魔法主人公。冷静で透明感のある中音。論理的に落ち着いて話し、感情が揺れる場面では抑えた優しさをにじませる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/SHIZUKU/endless-true-1.ogg"
+      ],
+      "seed": 93329,
+      "lines": {
+        "magic-shizuku-c9b73449ab53": "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。"
+      }
+    },
+    {
+      "id": "magic-soma",
+      "caption": "高校生の男性魔法主人公。規律正しく知的な中低音。完璧主義らしく明瞭に区切り、感情を選ぶ場面では抑えた誠実さを込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/SOMA/endless-true-1.ogg"
+      ],
+      "seed": 93466,
+      "lines": {
+        "magic-soma-a9a9d07bd884": "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？"
+      }
+    },
+    {
+      "id": "magic-koharu",
+      "caption": "高校生の女性魔法主人公。穏やかで自然体の中音。風のように柔らかく話し、仲間を導く時は落ち着いた芯を見せる。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/KOHARU/endless-true-1.ogg"
+      ],
+      "seed": 93603,
+      "lines": {
+        "magic-koharu-65ef1b2936ca": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。"
+      }
+    },
+    {
+      "id": "magic-elliot",
+      "caption": "高校生の男性魔法主人公。礼儀正しく気品のある静かな中低音。星界の記録者らしい距離感と孤独を持ち、希望の台詞には柔らかな光を込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/ELLIOT/endless-true-1.ogg"
+      ],
+      "seed": 93740,
+      "lines": {
+        "magic-elliot-1a60da967c78": "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。"
+      }
+    },
+    {
+      "id": "high-school-caretaker",
+      "caption": "高校生の女性アニメ主人公。落ち着いた柔らかい中音。生き物を見守る包容力と、静かな芯の強さを出す。安心させる台詞は穏やかに、決意は明瞭に。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/high-school-voices/CARETAKER/endless-true-1.ogg"
+      ],
+      "seed": 93877,
+      "lines": {
+        "high-school-caretaker-213444921fc0": "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。"
+      }
+    },
+    {
+      "id": "magic-sakuya",
+      "caption": "高校生の男性魔法主人公。冷たく抑えた低音。封印術師らしく言葉を重く区切り、過去を越える決意には隠れた熱と優しさを込める。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-event-voices/SAKUYA/endless-true-1.ogg"
+      ],
+      "seed": 94014,
+      "lines": {
+        "magic-sakuya-78df1c1fa05e": "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。"
+      }
+    },
+    {
+      "id": "magic-minato",
+      "caption": "高校生の男性魔法主人公。素直で努力家の若い中音。少し控えめな親しみやすさから始め、成長と決意の場面では前向きに声を張る。  参照音声と同じ声色と年齢感。日常会話の自然な日本語、親しい仲間への温かな掛け合い。音楽や効果音なし。",
+      "references": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "seed": 94151,
+      "lines": {
+        "magic-minato-2a958f3b3fb0": "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！"
       }
     }
   ]

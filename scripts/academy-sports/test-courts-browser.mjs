@@ -13,6 +13,7 @@ try{
  for(const sport of (process.argv.includes('--art-only')?[]:['soccer','volleyball'])){
   await open(sport);for(const [width,height]of [[844,390],[390,844],[568,320],[1280,720]]){await p.setViewportSize({width,height});await p.waitForFunction(w=>document.querySelector('.ac-canvas').width>0&&document.querySelector('.ac-canvas').dataset.courtOrientation===(w>=innerHeight?'horizontal':'vertical'),width);await p.waitForTimeout(500);await p.screenshot({path:`${out}/${sport}-${width}.png`});
    for(const b of await p.locator('.ac-actions button,.ac-hud button').all()){const r=await b.boundingBox();assert(r&&r.x>=-1&&r.y>=-1&&r.x+r.width<=width+1&&r.y+r.height<=height+1,'Controls fit '+sport+' '+width);}
+   if(sport==='soccer')assert.equal(await p.locator('.ac-canvas').getAttribute('data-stadium-board-orientation'),width>=height?'horizontal':'vertical');
    if(sport==='volleyball'){const r=await p.locator('.ac-vb-scoreboard').boundingBox();assert(r.x>=0&&r.y>=0&&r.x+r.width<=width&&r.y+r.height<height*.5);assert.equal(await p.locator('[data-serving=true]').count(),1);}
   }
   if(sport==='volleyball'){

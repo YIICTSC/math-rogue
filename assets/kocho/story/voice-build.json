@@ -1954,310 +1954,6 @@
       },
       "synthesis_sample_rate": 48000
     },
-    "aster/aster-a4782fe23071": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "fcd015bfa9d21eca543931ec20568967b9c0d8d44892f009bf78a9f5125462bf",
-      "text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-      "spoken_text": "校長への挑戦か。世界を救うより、申請書が多そうだな。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/aster-fantasy-v3.ogg",
-          "sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6"
-        }
-      ],
-      "reference_digest": "9f239bfb2a40",
-      "explicit_seconds": 5.88,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 5.88,
-      "seed": 10828449,
-      "sha256": "8d2dadd996851e349b45426007985bb05e0ce894aba35f84b02f18d93dc28992",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.0014633780010626651,
-        "prepare_reference": 0.0016726899993955158,
-        "sample_meanflow": 7.2858973189977405,
-        "unpatchify_latent": 6.357200254569761e-05,
-        "decode_latent": 11.16323363900301,
-        "silentcipher_watermark": 2.5415607590002764
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "aster/aster-8944c334bf33": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "fc3f7d4890a7709a233c7193d02e09eb82b2a791ebef378e6680b6324169a14a",
-      "text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-      "spoken_text": "剣なら抜ける。だが最後の焼きそばパンは、抜き差しならないな。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/aster-fantasy-v3.ogg",
-          "sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6"
-        }
-      ],
-      "reference_digest": "9f239bfb2a40",
-      "explicit_seconds": 6.6,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 6.6,
-      "seed": 4501533,
-      "sha256": "ae03f0157882f7d60be86a49a7af29805825fe3054246146b9e6575f8ec5e029",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.002835106999555137,
-        "prepare_reference": 0.004349127997556934,
-        "sample_meanflow": 8.596563808998326,
-        "unpatchify_latent": 6.627499897149391e-05,
-        "decode_latent": 14.174805613001809,
-        "silentcipher_watermark": 3.1657153999985894
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "aster/aster-6986d95ffd7c": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "0ed9ed6310f8fd4507b7a8cfc716b522f8da7897c85a0abc224f24b4fd8c01f7",
-      "text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-      "spoken_text": "強い相手にも、始まりの一歩がある。今度は君の番だ。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/aster-fantasy-v3.ogg",
-          "sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6"
-        }
-      ],
-      "reference_digest": "9f239bfb2a40",
-      "explicit_seconds": 5.7,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 5.7,
-      "seed": 6315705,
-      "sha256": "0aae048c9293e5461e2cad80f48fc452834c3e064185a05e6433f643f72b694a",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.003030414998647757,
-        "prepare_reference": 0.004812956998648588,
-        "sample_meanflow": 6.86707132799711,
-        "unpatchify_latent": 4.212600106257014e-05,
-        "decode_latent": 10.24026427300123,
-        "silentcipher_watermark": 2.460241231998225
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "aster/aster-0e3b4f1903c5": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "fcabc981e4a5ca057ead40be7c7c82a4d81e11f5865c066aaa31684629519f2d",
-      "text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-      "spoken_text": "勝ったら願いを伝えよう。校長先生を倒すことが、目的じゃないだろ。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/aster-fantasy-v3.ogg",
-          "sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6"
-        }
-      ],
-      "reference_digest": "9f239bfb2a40",
-      "explicit_seconds": 6.96,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 6.96,
-      "seed": 3542972,
-      "sha256": "31d9b20ce02bfcdc6947c2e0be954181d60d922ee2a13fcddda1666374190fe4",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.0015366209991043434,
-        "prepare_reference": 0.0018534119990363251,
-        "sample_meanflow": 7.442005614000664,
-        "unpatchify_latent": 4.448199979378842e-05,
-        "decode_latent": 12.826692364000337,
-        "silentcipher_watermark": 3.3504570899967803
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "lyra/lyra-9b2932834dd6": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "45f71a7e674972f4b6a10675711f377de46f51fc982c814376906ca6dc1a5b1f",
-      "text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-      "spoken_text": "作戦名は大事よ。でも、名前を決めるだけで下校時刻になりそう。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/lyra-fantasy-v3.ogg",
-          "sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556"
-        }
-      ],
-      "reference_digest": "adb038104c7d",
-      "explicit_seconds": 6.6,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 6.6,
-      "seed": 11798575,
-      "sha256": "99db65a824aa54647f5998750ece4a0daedb768dee91630ad1b10a57c37abc71",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.0011268210000707768,
-        "prepare_reference": 0.0017996069982473273,
-        "sample_meanflow": 7.426697031001822,
-        "unpatchify_latent": 3.71429996448569e-05,
-        "decode_latent": 11.959266221001599,
-        "silentcipher_watermark": 2.89792825800032
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "lyra/lyra-9d19e53ba248": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "927dc96a72d26e4c2358897c35ac7fda047c3399324497d34a4cf0e5cd923b0f",
-      "text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-      "spoken_text": "応援旗、十本持ってきたわ。戦う人数より多いのは、気にしないで。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/lyra-fantasy-v3.ogg",
-          "sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556"
-        }
-      ],
-      "reference_digest": "adb038104c7d",
-      "explicit_seconds": 6.78,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 6.78,
-      "seed": 9450504,
-      "sha256": "e1d7bef93d2adc5663cd22f266fa8cc589309e0de952464a2aa9643c6c560f94",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.0011776619976444636,
-        "prepare_reference": 0.000997900999209378,
-        "sample_meanflow": 8.516932763999648,
-        "unpatchify_latent": 6.337002560030669e-06,
-        "decode_latent": 15.20502780500101,
-        "silentcipher_watermark": 4.1866304769973794
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "lyra/lyra-f6d16095e479": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "27d7aa0cc308ee3778c00d692d900d65b882c3e39e1e5d8d968a195706c921db",
-      "text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-      "spoken_text": "帰りを待つ人がいる。それって、どんな必殺技より強いお守りよ。",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/lyra-fantasy-v3.ogg",
-          "sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556"
-        }
-      ],
-      "reference_digest": "adb038104c7d",
-      "explicit_seconds": 6.6,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 6.6,
-      "seed": 9919120,
-      "sha256": "344b258e4aff3b8da7841c1ea003ca3c8b5ee8828a1877de637cde2803a49c78",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.0009422370021638926,
-        "prepare_reference": 0.0012508340005297214,
-        "sample_meanflow": 7.84602562299915,
-        "unpatchify_latent": 4.2375999328214675e-05,
-        "decode_latent": 11.704008287000761,
-        "silentcipher_watermark": 3.0803708669991465
-      },
-      "synthesis_sample_rate": 48000
-    },
-    "lyra/lyra-e88a9aaab01e": {
-      "sampler": "meanflow",
-      "effective_guidance": "fused training-time CFG; runtime scales ignored",
-      "recipe_sha256": "0ffe8e54e40364bc6296829dfcbd60bd86b0df5c21a2728da122e2ebdc2e8787",
-      "text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-      "spoken_text": "やったわね！校長先生、祝勝会の乾杯だけは三分以内でお願い！",
-      "references": [
-        {
-          "path": "assets/lantern-war/references/lyra-fantasy-v3.ogg",
-          "sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556"
-        }
-      ],
-      "reference_digest": "adb038104c7d",
-      "explicit_seconds": 6.42,
-      "guidance": [
-        3,
-        3,
-        3
-      ],
-      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
-      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
-      "cfg_mode": "joint",
-      "sampling_steps": 4,
-      "sample_rate": 44100,
-      "seconds": 6.42,
-      "seed": 5047615,
-      "sha256": "500dce53a3b9a0d7356a652645e60e717e8499dd575c15fd6013eb6a80d7e7b1",
-      "compute": "cpu-bf16",
-      "timings": {
-        "tokenize_text": 0.0016515369970875327,
-        "prepare_reference": 0.0017248209987883456,
-        "sample_meanflow": 6.711372440997366,
-        "unpatchify_latent": 7.33499982743524e-05,
-        "decode_latent": 12.234005140999216,
-        "silentcipher_watermark": 3.5234638179972535
-      },
-      "synthesis_sample_rate": 48000
-    },
     "narrator/narrator-1b865af99e1e": {
       "sampler": "meanflow",
       "effective_guidance": "fused training-time CFG; runtime scales ignored",
@@ -2561,6 +2257,918 @@
         "silentcipher_watermark": 4.956565584994678
       },
       "synthesis_sample_rate": 48000
+    },
+    "high-school-mage/high-school-mage-ce14f3c833db": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "964c363a525725c9678861f02e6a64a451c5287fe1365af105fc0311eb7619c3",
+      "text": "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。",
+      "spoken_text": "禁止令の根拠、気になるね。実験より先に、まず申請書の束を攻略しよう。",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/MAGE/endless-true-1.ogg",
+          "sha256": "291f43b8c659cf7a8a907bc4079f8d562adab9a52fb3c399a4963b38c3dca79b"
+        }
+      ],
+      "reference_digest": "66cbeb539bdd",
+      "explicit_seconds": 7.32,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.32,
+      "seed": 3204733,
+      "sha256": "ba2f0709f75f0bc96e43dc27b5fa8ef05240527f3f73490e63fccb4fd24ad101",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0051245050053694285,
+        "prepare_reference": 0.0031083229987416416,
+        "sample_meanflow": 11.203096265999193,
+        "unpatchify_latent": 6.237998604774475e-06,
+        "decode_latent": 13.171275531996798,
+        "silentcipher_watermark": 3.5220058510021772
+      }
+    },
+    "magic-madoka/magic-madoka-13bc793cf1a1": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "4e386b0d82c119009a63b889bc39ddecfc3da6a08ea4648a6408f630807517f5",
+      "text": "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。",
+      "spoken_text": "えっと、作戦名を決めてる間に、下校時刻になりそうだよ。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/MADOKA/endless-true-1.ogg",
+          "sha256": "3ccb5e3dc2ee319010867b4d42b85b9a3cf2bc8399e32ecdbb71f94bcc9c3310"
+        }
+      ],
+      "reference_digest": "3f4cd6861a23",
+      "explicit_seconds": 6.06,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.06,
+      "seed": 2588820,
+      "sha256": "aab53f211ccecfdb28811df10b8a018a444217d35499f36aca3ebf8e319e9582",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.004457097995327786,
+        "prepare_reference": 0.0030624739956692792,
+        "sample_meanflow": 10.046581170005084,
+        "unpatchify_latent": 5.783400411019102e-05,
+        "decode_latent": 12.388010615002713,
+        "silentcipher_watermark": 2.454124233001494
+      }
+    },
+    "high-school-chef/high-school-chef-0b668fc58497": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "192756353cfb60bfbcacfb2901d319d049908840b002dd0c904cc25801a2241b",
+      "text": "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。",
+      "spoken_text": "戦いの前こそ腹ごしらえだ。ただし最後のパンを巡って、仲間割れはするなよ。",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/CHEF/endless-true-1.ogg",
+          "sha256": "723481dfea1461c2006fb0a25d93a9d0b6b921df3d37978102f52b806c114b53"
+        }
+      ],
+      "reference_digest": "bd427ab21fcd",
+      "explicit_seconds": 7.68,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.68,
+      "seed": 2770684,
+      "sha256": "7274c9e3fa1043e534c544b360d80eafa84afa68d87b50e436eb0d9d08e417cb",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0058631709980545565,
+        "prepare_reference": 0.0037695409992011264,
+        "sample_meanflow": 11.44032501399488,
+        "unpatchify_latent": 5.276199954096228e-05,
+        "decode_latent": 15.696925023003132,
+        "silentcipher_watermark": 3.8184151359964744
+      }
+    },
+    "high-school-bard/high-school-bard-5479bb826aa7": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "9a236b79245ba3bef91478d377d4fde57a3381bed9a9da4153476cf482675995",
+      "text": "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？",
+      "spoken_text": "応援旗は十本！マイクも持ってきたけど、音量は校長室に届くくらいでいい？",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/BARD/endless-true-1.ogg",
+          "sha256": "e4bce660b4c2aa300bb3466a2b118495e26be9890ad7bb41816d7d223e9a2eea"
+        }
+      ],
+      "reference_digest": "5aaf0c22a3a2",
+      "explicit_seconds": 7.5,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.5,
+      "seed": 6240693,
+      "sha256": "4c6a591eba009a4edf9b2eb296ced654fb7ded14b72d78e66ddd76e17a4b5829",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.005667915997037198,
+        "prepare_reference": 0.00363270199886756,
+        "sample_meanflow": 12.998356161995616,
+        "unpatchify_latent": 7.61560004320927e-05,
+        "decode_latent": 22.588649188997806,
+        "silentcipher_watermark": 3.6213561090044095
+      }
+    },
+    "high-school-librarian/high-school-librarian-52f201bcc7c5": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "a706cfdfc50b65875522ff539d0d2f521e6d4a95f0fc97cd46081eca899fe0af",
+      "text": "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。",
+      "spoken_text": "この議事録にも、昔の挑戦が残ってる。君の言葉で、次の一行を書いてきて。",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/LIBRARIAN/endless-true-1.ogg",
+          "sha256": "8d847390d66f84fdc38b116dea407d38763151085295dfbf8695853e3db71b89"
+        }
+      ],
+      "reference_digest": "73c593f4e6b1",
+      "explicit_seconds": 7.5,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.5,
+      "seed": 16694371,
+      "sha256": "7adefdb6e573294ea6c908c76f11b84a7e64b43dd5a03576b64ec65b059c29d1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.006191373002366163,
+        "prepare_reference": 0.0041431339996051975,
+        "sample_meanflow": 14.404189921995567,
+        "unpatchify_latent": 8.690700633451343e-05,
+        "decode_latent": 16.933551172005537,
+        "silentcipher_watermark": 3.569854319001024
+      }
+    },
+    "magic-sera/magic-sera-977b7af0fd25": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "f3c1cd9030849e147977ae77f8602257c280d78427a93f8c1b2b32a79a8fc20e",
+      "text": "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。",
+      "spoken_text": "ここに帰ってくる約束があるなら、きっと大丈夫。私たちも、ずっと待ってるから。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/SERA/endless-true-1.ogg",
+          "sha256": "f87bf7a547d688e5edfff6af2826199d25ccbef65d1dfcceda0cc8ad9679ed49"
+        }
+      ],
+      "reference_digest": "0010caa78fba",
+      "explicit_seconds": 8.04,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 8.04,
+      "seed": 11340004,
+      "sha256": "f5edeab5d63dc1b4f3edb52296a4db6210f4ec1bf7c258351610478e505d036c",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0047596889999113046,
+        "prepare_reference": 0.002379377001489047,
+        "sample_meanflow": 12.414906922000227,
+        "unpatchify_latent": 1.5060999430716038e-05,
+        "decode_latent": 19.11061181799596,
+        "silentcipher_watermark": 3.6655139819995384
+      }
+    },
+    "high-school-dodgeball/high-school-dodgeball-a7a449bbd91b": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "0418f1bc43dafe7ad8e587f70de2708e608c726c953d6cf10eacc8171fbcf83a",
+      "text": "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！",
+      "spoken_text": "勝ったら、願いを真っすぐ伝えようぜ。先生まで仲間にできたら、それが一番だ！",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/DODGEBALL/endless-true-1.ogg",
+          "sha256": "bbbd730b452bcb8b87e40a125e79d7e0cc0f80f6c5b4d03e0491342578e6fe14"
+        }
+      ],
+      "reference_digest": "3f3c91453ba6",
+      "explicit_seconds": 7.86,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.86,
+      "seed": 8705716,
+      "sha256": "4a9da5c6dc48ccae4c2766bf9a664864b7668862ce67b68aa5c45f5a267bed12",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0016755960023147054,
+        "prepare_reference": 0.0013077929979772307,
+        "sample_meanflow": 11.769145215002936,
+        "unpatchify_latent": 1.4215002011042088e-05,
+        "decode_latent": 15.676489187004336,
+        "silentcipher_watermark": 4.12624735099962
+      }
+    },
+    "magic-hiyori/magic-hiyori-046e936e8c00": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "4ae218b303da5cd35762f1d2ac755468b07c392e1fb4f9dfc330076bf08f80b6",
+      "text": "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？",
+      "spoken_text": "お祝いのご飯、みんなで作ろう！ところで今日の給食当番、誰にお願いしようかな？",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/HIYORI/endless-true-1.ogg",
+          "sha256": "80c9fbe615573a05c049b032bb2f79f23c360d3ab76e43fd097e70d7006f5707"
+        }
+      ],
+      "reference_digest": "62c5305cbaa4",
+      "explicit_seconds": 8.04,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 8.04,
+      "seed": 8486953,
+      "sha256": "79f8a7fc4c29d3989a70731d93ee88505f3b2a4daeafbd142df7279a48c9690e",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0017296980004175566,
+        "prepare_reference": 0.0009635879978304729,
+        "sample_meanflow": 11.848171325000294,
+        "unpatchify_latent": 1.4290002582129091e-05,
+        "decode_latent": 20.42754446499748,
+        "silentcipher_watermark": 3.5190141670027515
+      }
+    },
+    "magic-rei/magic-rei-39aa5311fbb2": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "ad09cf9ed20bee27a435b24c1795e24fb8fc789e34d20615641040e242475985",
+      "text": "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。",
+      "spoken_text": "あの禁止令、文字数まで偉そうね。あなたの本音なら、もっと短く届くはずよ。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/REI/endless-true-1.ogg",
+          "sha256": "30fdb3466b550134b5784d8ad6aa4186073753841751b070f70d817f48800715"
+        }
+      ],
+      "reference_digest": "918917577daa",
+      "explicit_seconds": 7.68,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.68,
+      "seed": 118422,
+      "sha256": "56957ea03b0b3b45391c040d264cca27f3d03496e84b75dda57d0431446ad020",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0021468019986059517,
+        "prepare_reference": 0.0015604059954057448,
+        "sample_meanflow": 12.128238014993258,
+        "unpatchify_latent": 5.571899964706972e-05,
+        "decode_latent": 14.823595813999418,
+        "silentcipher_watermark": 4.90170588199544
+      }
+    },
+    "magic-mirai/magic-mirai-d0c5b3a342eb": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "f671dd34704366af621cd14598e3804e66e2a0d1f3584a01d49808d692abf870",
+      "text": "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？",
+      "spoken_text": "作戦名は任せて！舞台名は、放課後・大反省会なんてどう？",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/MIRAI/endless-true-1.ogg",
+          "sha256": "ba6d9eb9cee5671c0b39f14d90b4a0f322fac4337ff1d7d726a0ef62424707b6"
+        }
+      ],
+      "reference_digest": "498b73bcdd13",
+      "explicit_seconds": 6.06,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.06,
+      "seed": 16532040,
+      "sha256": "3152918e5e57a07c81852d292b682564f25910815a5445cd7960971239be83a4",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0035961280009360053,
+        "prepare_reference": 0.002842428999429103,
+        "sample_meanflow": 12.097958402002405,
+        "unpatchify_latent": 4.4846005039289594e-05,
+        "decode_latent": 12.116873156999645,
+        "silentcipher_watermark": 2.761255040000833
+      }
+    },
+    "magic-ren/magic-ren-5dbcc64ef6be": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "422b495bf60172dfb550cee8ab3aea13076a2e3567c99e7aa7a3bd83d760c5ab",
+      "text": "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。",
+      "spoken_text": "全員分に分けよう。その切り方だと、君の分が一番小さくなっちゃうけど。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/REN/endless-true-1.ogg",
+          "sha256": "996845cf141454d66909bd79d04c3bb54b570d7e1bf3876308cd270fa3d7fbf5"
+        }
+      ],
+      "reference_digest": "f875995174e2",
+      "explicit_seconds": 7.32,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.32,
+      "seed": 6364705,
+      "sha256": "509dca8f7c1ac980d59acfbc13056aac09c5ca5c4f415d804b6589ba2bc222da",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.002615260993479751,
+        "prepare_reference": 0.0014839880022918805,
+        "sample_meanflow": 13.689100810996024,
+        "unpatchify_latent": 1.501700171502307e-05,
+        "decode_latent": 16.078989797002578,
+        "silentcipher_watermark": 3.8385239920025924
+      }
+    },
+    "magic-tsubasa/magic-tsubasa-19a7a4ded9c1": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "1bcc41221fff7a55fbe4993836941264738b282729b9e5b2947de87266bb1740",
+      "text": "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！",
+      "spoken_text": "強そうに描いたつもりだって！ほら、声の応援なら負けないぞ！",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/TSUBASA/endless-true-1.ogg",
+          "sha256": "fa097f347fa349066123f492e0629234c6bcd2fb059cee0e7b7cfbd2c31812e2"
+        }
+      ],
+      "reference_digest": "1a01d3bb71f5",
+      "explicit_seconds": 6.42,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.42,
+      "seed": 10308552,
+      "sha256": "944f18ddf91fe10690413d01d9c946730a63df81a7caf4f33507296467d809d6",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.006512660002044868,
+        "prepare_reference": 0.001819642995542381,
+        "sample_meanflow": 10.619284061001963,
+        "unpatchify_latent": 1.6363002941943705e-05,
+        "decode_latent": 14.400481392003712,
+        "silentcipher_watermark": 3.8073342370043974
+      }
+    },
+    "magic-leon/magic-leon-1fd9508c755f": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "29324e30292d381e8eba4a44b947c1132050c942af44576b2feb7a6bacbb8919",
+      "text": "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。",
+      "spoken_text": "校長先生にだって、格好つけたい季節はあったさ。今度は君の番だ。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/LEON/endless-true-1.ogg",
+          "sha256": "ab01ae8c958460aae6e7407d5244ad7943d5afc5ad7f407dccd3f3f11b955269"
+        }
+      ],
+      "reference_digest": "bd9c57430fb8",
+      "explicit_seconds": 6.78,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.78,
+      "seed": 15219567,
+      "sha256": "816b72267abd98b20c5e27a670a209aaadf56a2bfa3ab68a9c3ac022b4afd105",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0014840630028629676,
+        "prepare_reference": 0.0009707159988465719,
+        "sample_meanflow": 11.859956250998948,
+        "unpatchify_latent": 5.670997779816389e-06,
+        "decode_latent": 14.496602061997692,
+        "silentcipher_watermark": 3.2895248670029105
+      }
+    },
+    "magic-riku/magic-riku-4b4707821b4a": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "e9336d56c1125fd4a9f7f782e0d48e2a293d382b5b907066dc4e010812392acb",
+      "text": "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。",
+      "spoken_text": "帰ったら、反省会って名前の食事会にする？席は全員分、確保しとくよ。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/RIKU/endless-true-1.ogg",
+          "sha256": "fc266d2b1c4c8a13b670ab6c3c6dd88b8babbfc20aca308bdad15e818ed01c02"
+        }
+      ],
+      "reference_digest": "559a5b55203d",
+      "explicit_seconds": 7.14,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.14,
+      "seed": 8570155,
+      "sha256": "5f76bb22826a770812f8a587a0575b31d3be13710be97a1d114153edfe5d25bd",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0018704979956964962,
+        "prepare_reference": 0.0016845659993123263,
+        "sample_meanflow": 11.608915789001912,
+        "unpatchify_latent": 3.9115002437029034e-05,
+        "decode_latent": 15.630888357001822,
+        "silentcipher_watermark": 4.861180849999073
+      }
+    },
+    "magic-yamato/magic-yamato-0c26cc5683a7": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "20380afe2091dbe9ba5758b38fd1377d9d196bb66fceb1ee166e9b48d4ab7733",
+      "text": "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。",
+      "spoken_text": "ぶつけるなら拳より気持ちだ。先生を倒すより、願いを届けてこいよ。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/YAMATO/endless-true-1.ogg",
+          "sha256": "1b35d3dedf6000857df555be19facfa32895f8af9e85bb1232600faf131e29b4"
+        }
+      ],
+      "reference_digest": "d8e0c44b818c",
+      "explicit_seconds": 6.96,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.96,
+      "seed": 13659097,
+      "sha256": "370ea3aa1431b03bb9a9c5439dda06d4d10ff08292081ab7f015492ba23ff191",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.004660152000724338,
+        "prepare_reference": 0.0028244489949429408,
+        "sample_meanflow": 11.645481346000452,
+        "unpatchify_latent": 6.873399979667738e-05,
+        "decode_latent": 14.684838353998202,
+        "silentcipher_watermark": 3.2136493170037284
+      }
+    },
+    "high-school-gardener/high-school-gardener-03adbb5c588e": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "5b4e5959842d04392b227581544a9d7de5eeadcfc66ef43a06fbb686f00c6cbc",
+      "text": "今日の看板は、叛逆定食だ！花も山盛りに飾っておいたぜ。",
+      "spoken_text": "今日の看板は、はんぎゃく定食だ！花も山盛りに飾っておいたぜ。",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/GARDENER/endless-true-1.ogg",
+          "sha256": "d5e5fb8c7c886e4c34c24629202721a86d176135e4ae1222cfc77a67e59d3c8d"
+        }
+      ],
+      "reference_digest": "76cc2a22be85",
+      "explicit_seconds": 6.6,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.6,
+      "seed": 1596332,
+      "sha256": "154927de8be2a337983fd6497103771501a2999422001e67f2c6ba86c19650d1",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.005366926001443062,
+        "prepare_reference": 0.003455637001025025,
+        "sample_meanflow": 11.97443519400258,
+        "unpatchify_latent": 1.89869970199652e-05,
+        "decode_latent": 17.07921975899808,
+        "silentcipher_watermark": 2.8825280020028003
+      }
+    },
+    "high-school-assassin/high-school-assassin-20d5eee1c07f": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "d315fa15fe9847fba0ddaf61151377c0d29f0533d0783bb773fd404dc332f541",
+      "text": "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。",
+      "spoken_text": "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/ASSASSIN/endless-true-1.ogg",
+          "sha256": "f9f54c358fab386337f56c4265b7911f34e53800d6e7c3a7e9b7d831a3b7ddb9"
+        }
+      ],
+      "reference_digest": "903006d78b5f",
+      "explicit_seconds": 7.86,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.86,
+      "seed": 4915380,
+      "sha256": "d6d17fa374c14669336ae27e5d683e9e4664033029b31505bc2fe112107d1a00",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0031286070006899536,
+        "prepare_reference": 0.00284396799543174,
+        "sample_meanflow": 13.21317093000107,
+        "unpatchify_latent": 2.3824002710171044e-05,
+        "decode_latent": 21.295722205002676,
+        "silentcipher_watermark": 4.578789548999339
+      }
+    },
+    "magic-shizuku/magic-shizuku-c9b73449ab53": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "30c550cfa57012bb188e18cfc753f5ac4fd413442b1dc81590159c50436ff51a",
+      "text": "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。",
+      "spoken_text": "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/SHIZUKU/endless-true-1.ogg",
+          "sha256": "951c8dccd7872496c82b19f6ef09d5d931093b008db383a54c36a88fb260e9a5"
+        }
+      ],
+      "reference_digest": "bef6cab9f834",
+      "explicit_seconds": 7.5,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.5,
+      "seed": 4704420,
+      "sha256": "2b827ae65bed334fc1c287aca26687e54b75a1b6e5efbc7eaa096c67bd96ec0f",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.002682669000932947,
+        "prepare_reference": 0.0018000170020968653,
+        "sample_meanflow": 12.422722006005642,
+        "unpatchify_latent": 1.727800554363057e-05,
+        "decode_latent": 17.28081941200071,
+        "silentcipher_watermark": 3.9852197549989796
+      }
+    },
+    "magic-soma/magic-soma-a9a9d07bd884": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "6bf14b9ff529be052f3505db72ad0e507c8399f72c92d61a802eace4c574c622",
+      "text": "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？",
+      "spoken_text": "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/SOMA/endless-true-1.ogg",
+          "sha256": "498a11c3c33ec7227e040ffb4204f8bf72150e246a8f1fa0d07c3ce6fc0d3211"
+        }
+      ],
+      "reference_digest": "d61adbe5d210",
+      "explicit_seconds": 7.14,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.14,
+      "seed": 10261934,
+      "sha256": "9406269c015d6c7f1305fadd296513b0c1eed695b52fed58f4f81443f6c5c3aa",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.003187198999512475,
+        "prepare_reference": 0.0032279829974868335,
+        "sample_meanflow": 16.623673014000815,
+        "unpatchify_latent": 5.288799729896709e-05,
+        "decode_latent": 17.488596628005325,
+        "silentcipher_watermark": 3.960441051000089
+      }
+    },
+    "magic-koharu/magic-koharu-65ef1b2936ca": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "79e393e8069ad9928ae6aa4bbf012f0fe16df4e69f6cd8880a0e65ece67eb72a",
+      "text": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。",
+      "spoken_text": "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/KOHARU/endless-true-1.ogg",
+          "sha256": "739c31f4fc90d86e0714b86ebaff49fb6eebfc6a3ceb10d2443443d06a2e144c"
+        }
+      ],
+      "reference_digest": "c74d210e8419",
+      "explicit_seconds": 7.14,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.14,
+      "seed": 15565357,
+      "sha256": "33a2885e3cfc78143a21898e8f33c8f149c12e74cc0e6081eaa68847cafe5ff9",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.005581377001362853,
+        "prepare_reference": 0.0027894040031242184,
+        "sample_meanflow": 13.299293514006422,
+        "unpatchify_latent": 3.3152995456475765e-05,
+        "decode_latent": 19.25814032999915,
+        "silentcipher_watermark": 3.3774102669995045
+      }
+    },
+    "magic-elliot/magic-elliot-1a60da967c78": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "90528152200302cd6fdb90fef8858d6de16abc33db0cb1aa7a993403a56be73e",
+      "text": "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。",
+      "spoken_text": "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/ELLIOT/endless-true-1.ogg",
+          "sha256": "107e127bf9dc0f79ebe9e7cec4f774dce842975e2e49d98ae83d5c498ce5f2e7"
+        }
+      ],
+      "reference_digest": "44a169340582",
+      "explicit_seconds": 8.04,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 8.04,
+      "seed": 8703698,
+      "sha256": "68e5b3d0cb3fdeee0a6f5b1835ec889cb5280ed909b055e3c2a52345766e8d59",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.003351376006321516,
+        "prepare_reference": 0.0010996870041708462,
+        "sample_meanflow": 15.066942188001121,
+        "unpatchify_latent": 1.7108002793975174e-05,
+        "decode_latent": 18.892611440998735,
+        "silentcipher_watermark": 3.83211171500443
+      }
+    },
+    "high-school-caretaker/high-school-caretaker-213444921fc0": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "450d9a758af5e8cb39ee15f22aae86c0a20bf8840f4be384f4df7ed67aa6b849",
+      "text": "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。",
+      "spoken_text": "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。",
+      "references": [
+        {
+          "path": "public/sfx/high-school-voices/CARETAKER/endless-true-1.ogg",
+          "sha256": "3d0cd0437eeb619a49e251af5d0645b9d4852769c69f705098c3347689667e05"
+        }
+      ],
+      "reference_digest": "ea32a5a23c0a",
+      "explicit_seconds": 7.86,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.86,
+      "seed": 10653900,
+      "sha256": "374894cb407b3f2e19003303bf1dc4d0ec08df1410bafe027204d024826efec5",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.001914991000376176,
+        "prepare_reference": 0.0012766960062435828,
+        "sample_meanflow": 12.083320502999413,
+        "unpatchify_latent": 2.1566003852058202e-05,
+        "decode_latent": 19.26012456099852,
+        "silentcipher_watermark": 4.212498950000736
+      }
+    },
+    "magic-sakuya/magic-sakuya-78df1c1fa05e": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "507ae395d0655cff069ec1596b18ce1028caa80391fea64f1adb8cc8c50f1bae",
+      "text": "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。",
+      "spoken_text": "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。",
+      "references": [
+        {
+          "path": "public/sfx/magic-event-voices/SAKUYA/endless-true-1.ogg",
+          "sha256": "b044c34f6f32f6af0452f82bd3a590b7748d46b7f5e8651104b7c7c8e4f6d52c"
+        }
+      ],
+      "reference_digest": "5383467eb529",
+      "explicit_seconds": 7.5,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 7.5,
+      "seed": 2701092,
+      "sha256": "68ea32c56dd96eb06b465b0d61b7bb2343c55682b3445bf3233f8104bcbeb9d4",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.0029820989948348142,
+        "prepare_reference": 0.0024079060021904297,
+        "sample_meanflow": 13.105567096004961,
+        "unpatchify_latent": 4.448900290299207e-05,
+        "decode_latent": 17.776611310997396,
+        "silentcipher_watermark": 3.69682381900202
+      }
+    },
+    "magic-minato/magic-minato-2a958f3b3fb0": {
+      "sampler": "meanflow",
+      "effective_guidance": "fused training-time CFG; runtime scales ignored",
+      "recipe_sha256": "b218aca1792744e5cd277756960dd83f520640318a8cc3ca59d92c7f1cb5dc86",
+      "text": "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！",
+      "spoken_text": "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！",
+      "references": [
+        {
+          "path": "public/sfx/magic-voices/MINATO/attack-1.ogg",
+          "sha256": "47603d3eb3a8c71e511fd456fb37e2c1f99bdaa370988c83b7c7d2824d01798e"
+        }
+      ],
+      "reference_digest": "42bbdcebb639",
+      "explicit_seconds": 6.96,
+      "guidance": [
+        3,
+        3,
+        3
+      ],
+      "model": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "checkpoint_sha256": "a3f204b3ee06058f4e639a1af38408e7e3af5b6c75176897ecb8bfaaebb4fd54",
+      "cfg_mode": "joint",
+      "sampling_steps": 8,
+      "sample_rate": 44100,
+      "synthesis_sample_rate": 48000,
+      "seconds": 6.96,
+      "seed": 16235874,
+      "sha256": "fed6683d7d315577dbe2a1de5bcc8ed3a811dae30837f96d4f2017a163dde6df",
+      "compute": "cpu-bf16",
+      "timings": {
+        "tokenize_text": 0.003491053998004645,
+        "prepare_reference": 0.0025153789974865504,
+        "sample_meanflow": 13.16457416099729,
+        "unpatchify_latent": 4.991800233256072e-05,
+        "decode_latent": 14.464945175001048,
+        "silentcipher_watermark": 3.4635992069961503
+      }
     }
   },
   "irodori_revision": "382205679ebc32295b7d1bfb329327d04c8f4eed",
@@ -2611,22 +3219,154 @@
         "sha256": "07c1f8537c1c264ca4361c332b026fcd080783f40215b4fa9672aff989404d06"
       }
     ],
-    "aster": [
-      {
-        "path": "assets/lantern-war/references/aster-fantasy-v3.ogg",
-        "sha256": "9cdea38f7df06d38cc0f87330d615b98699d7c9757a8ef83d9a8e2dfbb967da6"
-      }
-    ],
-    "lyra": [
-      {
-        "path": "assets/lantern-war/references/lyra-fantasy-v3.ogg",
-        "sha256": "22831b693e6cbf4e5dc8f8b48241dcb82359108a355ec0f506d01c349e315556"
-      }
-    ],
     "narrator": [
       {
         "path": "assets/kocho/story/references/narrator.wav",
         "sha256": "d57ad4b7d6d8b8fbaec5d91537baebe42a5620f74fb5428996c7af65ae6ad008"
+      }
+    ],
+    "high-school-mage": [
+      {
+        "path": "public/sfx/high-school-voices/MAGE/endless-true-1.ogg",
+        "sha256": "291f43b8c659cf7a8a907bc4079f8d562adab9a52fb3c399a4963b38c3dca79b"
+      }
+    ],
+    "magic-madoka": [
+      {
+        "path": "public/sfx/magic-event-voices/MADOKA/endless-true-1.ogg",
+        "sha256": "3ccb5e3dc2ee319010867b4d42b85b9a3cf2bc8399e32ecdbb71f94bcc9c3310"
+      }
+    ],
+    "high-school-chef": [
+      {
+        "path": "public/sfx/high-school-voices/CHEF/endless-true-1.ogg",
+        "sha256": "723481dfea1461c2006fb0a25d93a9d0b6b921df3d37978102f52b806c114b53"
+      }
+    ],
+    "high-school-bard": [
+      {
+        "path": "public/sfx/high-school-voices/BARD/endless-true-1.ogg",
+        "sha256": "e4bce660b4c2aa300bb3466a2b118495e26be9890ad7bb41816d7d223e9a2eea"
+      }
+    ],
+    "high-school-librarian": [
+      {
+        "path": "public/sfx/high-school-voices/LIBRARIAN/endless-true-1.ogg",
+        "sha256": "8d847390d66f84fdc38b116dea407d38763151085295dfbf8695853e3db71b89"
+      }
+    ],
+    "magic-sera": [
+      {
+        "path": "public/sfx/magic-event-voices/SERA/endless-true-1.ogg",
+        "sha256": "f87bf7a547d688e5edfff6af2826199d25ccbef65d1dfcceda0cc8ad9679ed49"
+      }
+    ],
+    "high-school-dodgeball": [
+      {
+        "path": "public/sfx/high-school-voices/DODGEBALL/endless-true-1.ogg",
+        "sha256": "bbbd730b452bcb8b87e40a125e79d7e0cc0f80f6c5b4d03e0491342578e6fe14"
+      }
+    ],
+    "magic-hiyori": [
+      {
+        "path": "public/sfx/magic-event-voices/HIYORI/endless-true-1.ogg",
+        "sha256": "80c9fbe615573a05c049b032bb2f79f23c360d3ab76e43fd097e70d7006f5707"
+      }
+    ],
+    "magic-rei": [
+      {
+        "path": "public/sfx/magic-event-voices/REI/endless-true-1.ogg",
+        "sha256": "30fdb3466b550134b5784d8ad6aa4186073753841751b070f70d817f48800715"
+      }
+    ],
+    "magic-mirai": [
+      {
+        "path": "public/sfx/magic-event-voices/MIRAI/endless-true-1.ogg",
+        "sha256": "ba6d9eb9cee5671c0b39f14d90b4a0f322fac4337ff1d7d726a0ef62424707b6"
+      }
+    ],
+    "magic-ren": [
+      {
+        "path": "public/sfx/magic-event-voices/REN/endless-true-1.ogg",
+        "sha256": "996845cf141454d66909bd79d04c3bb54b570d7e1bf3876308cd270fa3d7fbf5"
+      }
+    ],
+    "magic-tsubasa": [
+      {
+        "path": "public/sfx/magic-event-voices/TSUBASA/endless-true-1.ogg",
+        "sha256": "fa097f347fa349066123f492e0629234c6bcd2fb059cee0e7b7cfbd2c31812e2"
+      }
+    ],
+    "magic-leon": [
+      {
+        "path": "public/sfx/magic-event-voices/LEON/endless-true-1.ogg",
+        "sha256": "ab01ae8c958460aae6e7407d5244ad7943d5afc5ad7f407dccd3f3f11b955269"
+      }
+    ],
+    "magic-riku": [
+      {
+        "path": "public/sfx/magic-event-voices/RIKU/endless-true-1.ogg",
+        "sha256": "fc266d2b1c4c8a13b670ab6c3c6dd88b8babbfc20aca308bdad15e818ed01c02"
+      }
+    ],
+    "magic-yamato": [
+      {
+        "path": "public/sfx/magic-event-voices/YAMATO/endless-true-1.ogg",
+        "sha256": "1b35d3dedf6000857df555be19facfa32895f8af9e85bb1232600faf131e29b4"
+      }
+    ],
+    "high-school-gardener": [
+      {
+        "path": "public/sfx/high-school-voices/GARDENER/endless-true-1.ogg",
+        "sha256": "d5e5fb8c7c886e4c34c24629202721a86d176135e4ae1222cfc77a67e59d3c8d"
+      }
+    ],
+    "high-school-assassin": [
+      {
+        "path": "public/sfx/high-school-voices/ASSASSIN/endless-true-1.ogg",
+        "sha256": "f9f54c358fab386337f56c4265b7911f34e53800d6e7c3a7e9b7d831a3b7ddb9"
+      }
+    ],
+    "magic-shizuku": [
+      {
+        "path": "public/sfx/magic-event-voices/SHIZUKU/endless-true-1.ogg",
+        "sha256": "951c8dccd7872496c82b19f6ef09d5d931093b008db383a54c36a88fb260e9a5"
+      }
+    ],
+    "magic-soma": [
+      {
+        "path": "public/sfx/magic-event-voices/SOMA/endless-true-1.ogg",
+        "sha256": "498a11c3c33ec7227e040ffb4204f8bf72150e246a8f1fa0d07c3ce6fc0d3211"
+      }
+    ],
+    "magic-koharu": [
+      {
+        "path": "public/sfx/magic-event-voices/KOHARU/endless-true-1.ogg",
+        "sha256": "739c31f4fc90d86e0714b86ebaff49fb6eebfc6a3ceb10d2443443d06a2e144c"
+      }
+    ],
+    "magic-elliot": [
+      {
+        "path": "public/sfx/magic-event-voices/ELLIOT/endless-true-1.ogg",
+        "sha256": "107e127bf9dc0f79ebe9e7cec4f774dce842975e2e49d98ae83d5c498ce5f2e7"
+      }
+    ],
+    "high-school-caretaker": [
+      {
+        "path": "public/sfx/high-school-voices/CARETAKER/endless-true-1.ogg",
+        "sha256": "3d0cd0437eeb619a49e251af5d0645b9d4852769c69f705098c3347689667e05"
+      }
+    ],
+    "magic-sakuya": [
+      {
+        "path": "public/sfx/magic-event-voices/SAKUYA/endless-true-1.ogg",
+        "sha256": "b044c34f6f32f6af0452f82bd3a590b7748d46b7f5e8651104b7c7c8e4f6d52c"
+      }
+    ],
+    "magic-minato": [
+      {
+        "path": "public/sfx/magic-voices/MINATO/attack-1.ogg",
+        "sha256": "47603d3eb3a8c71e511fd456fb37e2c1f99bdaa370988c83b7c7d2824d01798e"
       }
     ]
   },

@@ -1,7 +1,7 @@
 import {specialHero,specialName} from './specials';
 import {cpuLevel,cpuProfile,cpuRoll,cpuRunTo,cpuTarget} from './ai';
 import {core,athlete,vec,len,clamp,unit,event,stat,pose,tickCore,capture,replay,finish,move,physics,kickBall,morale,jump,hash,segmentDistance,type Core,type Config,type Input,type Action,type Vec,type Athlete,controlInput} from './core';
-import {SOCCER_FIELD,SOCCER_SCALE as S} from './courts';
+import {SOCCER_FIELD,SOCCER_PLAYER_MARGIN,SOCCER_SCALE as S} from './courts';
 export {SOCCER_FIELD} from './courts';
 export const SOCCER_TECHNIQUES=['星帆ブレイク','蒼雷スパイラル','風渡りアーク','天灯ドライブ','月影スライス','双灯コネクト'];
 export interface Soccer extends Core {chains?:number[];chainAt?:number[];duel?:{actor:number;at:number;grade:'perfect'|'good'|'burst'};sport:'soccer';half:number;halfTime:number;added:number;stage:'open'|'restart';restart:'kickoff'|'throw-in'|'corner'|'free-kick'|'penalty'|'goal-kick'|'offside';restartTeam:number;restartAt:Vec;restartTimer:number;lastPass:number;passTarget:number;offside:number[];guard:number[];lastTouch:number;shotTeam:number;shotTimer:number;cinema:number;pendingShot:{actor:number;charge:number;special:boolean}|null;goalFlash:number;decision:number;lastInput:Input;}
@@ -12,14 +12,20 @@ export function createSoccer(c:Config):Soccer{
  const lines=c.formation==='4-4-2'?[4,4,2]:c.formation==='3-5-2'?[3,5,2]:[4,3,3];
  for(let t=0;t<2;t++)for(let i=0;i<11;i++)s.players.push(athlete(t,i,i===0?'GK':i<=lines[0]?'DF':i<=lines[0]+lines[1]?'MF':'FW',formation(c,t,i),c));s.selected=c.team*100+9;placeRestart(s,'kickoff',0,vec());const captain=s.players.find(p=>p.id===c.team*100+9)!,selected=s.players.find(p=>p.id===s.selected)!;if(selected.team===c.team&&selected.id!==captain.id){const prior=selected.hero;selected.hero=c.hero;captain.hero=prior;}return s;
 }
+const inField=(p:Vec):Vec=>({...p,x:clamp(p.x,-SOCCER_FIELD.width+SOCCER_PLAYER_MARGIN,SOCCER_FIELD.width-SOCCER_PLAYER_MARGIN),z:clamp(p.z,-SOCCER_FIELD.length+SOCCER_PLAYER_MARGIN,SOCCER_FIELD.length-SOCCER_PLAYER_MARGIN)});
+/** Apply the same footprint bounds after every movement source, including CPU, separation and restarts. */
+export function constrainSoccerPlayers(s:Soccer){for(const p of s.players){const next=inField(p.p);if(next.x!==p.p.x)p.v.x=0;if(next.z!==p.p.z)p.v.z=0;p.p.x=next.x;p.p.z=next.z;p.home=inField(p.home);if(p.cpuTarget)p.cpuTarget=inField(p.cpuTarget);}}
+function soccerRunTo(s:Soccer,p:Athlete,target:Vec,dt:number,boost=false){cpuRunTo(s,p,inField(target),dt,boost);}
 function holder(s:Soccer){return s.players.find(p=>p.id===s.ball.owner);}
 function assign(s:Soccer,p:Athlete){if(s.ball.team!==p.team&&s.chains)s.chains[s.ball.team]=0;s.ball.owner=p.id;s.ball.team=p.team;s.lastTouch=p.team;s.ball.vx=s.ball.vy=s.ball.vz=0;if(!s.online&&p.team===s.config.team&&s.config.mode!=='watch')s.selected=p.id;}
 export function placeRestart(s:Soccer,kind:Soccer['restart'],team:number,point:Vec){
+ point=inField(point);constrainSoccerPlayers(s);
  s.stage='restart';s.restart=kind;s.restartTeam=team;s.restartAt={...point};s.restartTimer=0;s.offside=[];s.shotTeam=-1;s.shotTimer=0;
  for(const p of s.players){delete p.cpuTarget;delete p.cpuAt;}
  if(kind==='kickoff')for(const p of s.players){p.p=formation(s.config,p.team,p.slot);p.home={...p.p};p.v=vec();}
  const taker=s.players.filter(p=>p.team===team&&p.role!=='GK').sort((a,b)=>len(a.p,point)-len(b.p,point))[0];taker.p={...point};assign(s,taker);s.ball.x=point.x;s.ball.z=point.z;s.ball.y=.22;
- for(const p of s.players)if(p.team!==team&&len(p.p,point)<4){const d=unit(p.p.x-point.x,p.p.z-point.z);p.p.x=point.x+d.x*4;p.p.z=point.z+d.z*4;}
+ for(const p of s.players)if(p.team!==team&&len(p.p,point)<4){const d=len(p.p,point)>.1?unit(p.p.x-point.x,p.p.z-point.z):unit(-point.x,-point.z||1);let away=inField(vec(point.x+d.x*4,p.p.y,point.z+d.z*4));if(len(away,point)<3.5){const inward=unit(-point.x,-point.z||1);away=inField(vec(point.x+inward.x*4,p.p.y,point.z+inward.z*4));}p.p=away;}
+ constrainSoccerPlayers(s);
  event(s,'whistle',{'kickoff':'キックオフ','throw-in':'スローイン',corner:'コーナーキック','free-kick':'フリーキック',penalty:'ペナルティーキック','goal-kick':'ゴールキック',offside:'オフサイド'}[kind],taker.id);
 }
 /** Solo possession follows the ball, including goalkeeper catches and restarts. */
@@ -38,7 +44,7 @@ function dribbleMove(s:Soccer,p:Athlete){
 function markOffside(s:Soccer,p:Athlete){const dir=direction(p.team),defenders=s.players.filter(q=>q.team!==p.team).map(q=>q.p.z*dir).sort((a,b)=>b-a),line=Math.max(defenders[1]||0,s.ball.z*dir);s.offside=s.config.rules==='standard'?s.players.filter(q=>q.team===p.team&&q.id!==p.id&&q.p.z*dir>Math.max(0,line)+.2).map(q=>q.id):[];}
 function pass(s:Soccer,lob=false,requester?:Athlete){const p=holder(s);if(!p||p.stun)return;const dir=direction(p.team),input=controlInput(s,p,s.lastInput),aim=input&&Math.hypot(input.x,input.z)>.1?unit(input.x,input.z):{x:0,z:dir};
  const targets=s.players.filter(q=>q.team===p.team&&q.id!==p.id&&q.role!=='GK').sort((a,b)=>{const score=(q:Athlete)=>{const d=unit(q.p.x-p.p.x,q.p.z-p.p.z);return(d.x*aim.x+d.z*aim.z)*12+(q.p.z-p.p.z)*dir*.12-len(q.p,p.p)*.12;};return score(b)-score(a);});
- const target=requester??targets[0];if(!target)return;markOffside(s,p);s.lastPass=p.id;s.passTarget=target.id;const destination={...target.p};if(lob){destination.z+=dir*4*S;destination.x+=target.v.x*.3;}const flight=clamp(len(s.ball,destination)/(22*Math.sqrt(S)),1.15,2.4);kickBall(s,p,destination,lob?len(s.ball,destination)/flight:19*Math.sqrt(S),lob?(.75-s.ball.y+.5*9.81*flight*flight)/flight:1,0);pose(p,'kick',.45);p.cooldown=.25;stat(s,p.team,'passes');s.stage='open';event(s,'hit',requester?'パスを要求！':lob?'スペースへのロングパス':'パス！',p.id);
+ const target=requester??targets[0];if(!target)return;markOffside(s,p);s.lastPass=p.id;s.passTarget=target.id;const destination={...target.p};if(lob){destination.z+=dir*4*S;destination.x+=target.v.x*.3;}Object.assign(destination,inField(destination));const flight=clamp(len(s.ball,destination)/(22*Math.sqrt(S)),1.15,2.4);kickBall(s,p,destination,lob?len(s.ball,destination)/flight:19*Math.sqrt(S),lob?(.75-s.ball.y+.5*9.81*flight*flight)/flight:1,0);pose(p,'kick',.45);p.cooldown=.25;stat(s,p.team,'passes');s.stage='open';event(s,'hit',requester?'パスを要求！':lob?'スペースへのロングパス':'パス！',p.id);
 }
 function shoot(s:Soccer,p:Athlete,charge:number,special=false){
  const dir=direction(p.team),boost=s.awaken[p.team]>0?1.15:1,skill=special&&p.spirit>=35;
@@ -75,7 +81,7 @@ function keeperStep(s:Soccer,p:Athlete,dt:number,input:Input){
  const ownGoal=-direction(p.team)*31*S;const b=s.ball;const towardGoal=b.owner<0&&b.vz*Math.sign(ownGoal)>0;
  const eta=Math.abs(b.vz)>.1?(ownGoal-b.z)/b.vz:99,profile=cpuProfile(s,p),error=(cpuRoll(s,p,(s.stats[1-p.team].shots||0)+17)*2-1)*profile.shotError*.4;
  const targetX=towardGoal&&eta>0?clamp(b.x+b.vx*eta+error,-4.2,4.2):clamp(b.x*.18,-3,3);
- if(!controlled)cpuRunTo(s,p,cpuTarget(s,p,vec(targetX,0,ownGoal+(towardGoal?0:direction(p.team)))),dt,towardGoal&&cpuLevel(s,p)>=2);s.guard[p.team]=Math.min(100,s.guard[p.team]+dt*1.5);
+ if(!controlled)soccerRunTo(s,p,cpuTarget(s,p,vec(targetX,0,ownGoal+(towardGoal?0:direction(p.team)))),dt,towardGoal&&cpuLevel(s,p)>=2);s.guard[p.team]=Math.min(100,s.guard[p.team]+dt*1.5);
  if(towardGoal&&eta<.5&&eta>0){if(b.y>1.7&&p.p.y===0)jump(p,6);pose(p,'catch',.3);}
  if(b.owner<0&&len(p.p,b)<1.5+(p.action?.3:0)&&b.y<2+p.p.y&&b.team!==p.team){
   const guard=s.guard[p.team];s.guard[p.team]=Math.max(0,guard-b.power*.5);stat(s,p.team,'saves');morale(s,p.team,18);
@@ -85,7 +91,7 @@ function keeperStep(s:Soccer,p:Athlete,dt:number,input:Input){
  if(b.owner===p.id&&p.cooldown<=0&&!controlled)pass(s,true);
 }
 export function stepSoccer(s:Soccer,input:Input,dt:number){
- syncSoloSoccerControl(s);for(let team=0;team<2;team++)if(s.chains&&s.chainAt&&s.clock-s.chainAt[team]>10)s.chains[team]=0;
+ constrainSoccerPlayers(s);syncSoloSoccerControl(s);for(let team=0;team<2;team++)if(s.chains&&s.chainAt&&s.clock-s.chainAt[team]>10)s.chains[team]=0;
  if(s.cinema>0){s.clock+=dt;s.cinema-=dt;if(s.cinema<=0&&s.pendingShot){const c=s.pendingShot;s.pendingShot=null;shoot(s,s.players.find(p=>p.id===c.actor)!,c.charge,c.special);}return;}
  if(!tickCore(s,dt))return;capture(s,dt);s.lastInput={...input};s.goalFlash=Math.max(0,s.goalFlash-dt);s.shotTimer=Math.max(0,s.shotTimer-dt);
  s.halfTime+=dt;if(s.halfTime>=s.config.minutes*30+s.added){if(s.half===1){s.half=2;s.halfTime=0;s.added=0;s.phase='interval';s.phaseTime=3;placeRestart(s,'kickoff',1,vec());event(s,'whistle','ハーフタイム');return;}finish(s);return;}
@@ -94,14 +100,14 @@ export function stepSoccer(s:Soccer,input:Input,dt:number){
   s.restartTimer+=dt;if(s.restartTimer>1.2&&(s.online?!s.controls?.[s.ball.owner]:(s.restartTeam!==s.config.team||s.config.mode==='watch'))){s.stage='open';if(s.restart==='penalty')shoot(s,holder(s)!,1.1);else pass(s,s.restart==='corner'||s.restart==='goal-kick');}
   if(s.restartTimer>12){s.stage='open';pass(s);}return;
  }
- let h=holder(s);for(const human of s.players){const control=controlInput(s,human,input);if(control){move(human,control.x,control.z,dt,control.dash);human.p.x=clamp(human.p.x,-SOCCER_FIELD.width+.5,SOCCER_FIELD.width-.5);human.p.z=clamp(human.p.z,-SOCCER_FIELD.length+.5,SOCCER_FIELD.length-.5);if(control.primary&&h?.id===human.id)human.charge=Math.min(2,human.charge+dt*(s.awaken[human.team]>0?1.5:1)*(1+(s.chains?.[human.team]||0)*.07));}}
+ let h=holder(s);for(const human of s.players){const control=controlInput(s,human,input);if(control){move(human,control.x,control.z,dt,control.dash);human.p.x=clamp(human.p.x,-SOCCER_FIELD.width+SOCCER_PLAYER_MARGIN,SOCCER_FIELD.width-SOCCER_PLAYER_MARGIN);human.p.z=clamp(human.p.z,-SOCCER_FIELD.length+SOCCER_PLAYER_MARGIN,SOCCER_FIELD.length-SOCCER_PLAYER_MARGIN);if(control.primary&&h?.id===human.id)human.charge=Math.min(2,human.charge+dt*(s.awaken[human.team]>0?1.5:1)*(1+(s.chains?.[human.team]||0)*.07));}}
  s.decision+=dt;
  const chasers=[0,1].map(team=>s.players.filter(p=>p.team===team&&p.role!=='GK').sort((a,b)=>len(a.p,s.ball)-len(b.p,s.ball)).slice(0,2).map(p=>p.id));
  for(const p of s.players){
   if(p.role==='GK'){keeperStep(s,p,dt,input);continue;}if(controlInput(s,p,input))continue;
   let target={...p.home};const dir=direction(p.team),owns=h?.team===p.team;
   const level=cpuLevel(s,p),profile=cpuProfile(s,p),think=s.decision>=profile.reaction;
-  if(h?.id===p.id){target=vec(p.p.x*.9,0,dir*31*S);cpuRunTo(s,p,cpuTarget(s,p,target),dt,p.spirit>55&&level>=2);
+  if(h?.id===p.id){target=vec(p.p.x*.9,0,dir*31*S);soccerRunTo(s,p,cpuTarget(s,p,target),dt,p.spirit>55&&level>=2);
    const goal=vec(0,0,dir*SOCCER_FIELD.length),distance=len(p.p,goal),blocked=s.players.some(q=>q.team!==p.team&&q.role!=='GK'&&len(q.p,p.p)<2.5);
    if(p.cooldown<=0&&think){
     if(distance<[13,15,18,20][level]*Math.sqrt(S)&&(Math.abs(p.p.x)<10||distance<8)){shoot(s,p,.25+level*.2,p.spirit>55&&level>=2&&cpuRoll(s,p,Math.floor(s.clock))<[0,0,.18,.35][level]);p.cooldown=1.5-level*.2;}
@@ -110,14 +116,14 @@ export function stepSoccer(s:Soccer,input:Input,dt:number){
   }else{
    if(!owns&&chasers[p.team].includes(p.id))target=vec(s.ball.x,0,s.ball.z+dir*.5);
    else {target.x=clamp(target.x+s.ball.x*.18,-19*S,19*S);target.z=clamp(target.z+s.ball.z*.25+(owns?dir*4*S:-dir*4*S),-29*S,29*S);if(s.passTarget===p.id&&s.ball.owner<0)target=vec(s.ball.x+s.ball.vx*.28,0,s.ball.z+s.ball.vz*.28);}
-   cpuRunTo(s,p,cpuTarget(s,p,target),dt,!owns&&chasers[p.team][0]===p.id&&level>=2);
+   soccerRunTo(s,p,cpuTarget(s,p,target),dt,!owns&&chasers[p.team][0]===p.id&&level>=2);
    if(h&&h.team!==p.team&&len(p.p,h.p)<1.2&&p.cooldown<=0&&p.spirit>10&&think){p.cooldown=1.6-level*.25;const approach=unit(h.p.x-p.p.x,h.p.z-p.p.z);if(cpuRoll(s,p,Math.floor(s.clock*2))<[.3,.48,.68,.82][level]&&approach.x*Math.sin(h.face)+approach.z*Math.cos(h.face)<.7&&p.skills.defense+p.spirit/180>h.skills.control+.2){assign(s,p);stat(s,p.team,'steals');pose(p,'tackle',.4);event(s,'catch','インターセプト！',p.id);h=p;}}
   }
  }
  if(s.decision>=Math.max(cpuProfile(s,s.players[0]).reaction,cpuProfile(s,s.players[11]).reaction))s.decision=0;
  // Soft body separation preserves shape instead of making twenty players pile onto the ball.
  for(let i=0;i<s.players.length;i++)for(let j=i+1;j<s.players.length;j++){const a=s.players[i],b=s.players[j],d=len(a.p,b.p);if(d<.75&&d>.001){const nx=(a.p.x-b.p.x)/d,nz=(a.p.z-b.p.z)/d,push=(.75-d)*.2;a.p.x+=nx*push;a.p.z+=nz*push;b.p.x-=nx*push;b.p.z-=nz*push;}}
- h=holder(s);const b=s.ball,previous={x:b.x,y:b.y,z:b.z};
+ constrainSoccerPlayers(s);h=holder(s);const b=s.ball,previous={x:b.x,y:b.y,z:b.z};
  if(h){const speed=Math.hypot(h.v.x,h.v.z),stride=.55+Math.sin(s.clock*speed*2)*.12;b.x=h.p.x+Math.sin(h.face)*stride;b.z=h.p.z+Math.cos(h.face)*stride;b.y=.23+Math.abs(Math.sin(s.clock*speed))*Math.min(.13,speed*.02);b.team=h.team;s.lastTouch=h.team;}
  else {
   physics(b,dt,9.81,.15);if(b.y<.22){b.y=.22;b.vy=Math.abs(b.vy)*.46;if(Math.abs(b.vy)<.3)b.vy=0;b.vx*=.985;b.vz*=.985;}
