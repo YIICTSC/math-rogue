@@ -1,4 +1,16 @@
 {
-  "soccer": { "areaMultiplier": 3, "baseHalfWidth": 21, "baseHalfLength": 33, "goalHalfWidth": 4.2, "goalHeight": 2.8 },
-  "volleyball": { "areaMultiplier": 2, "baseHalfWidth": 4.5, "baseHalfLength": 9, "netHeight": 2.43 }
+  "soccer": {
+    "areaMultiplier": 3,
+    "baseHalfWidth": 21,
+    "baseHalfLength": 33,
+    "goalHalfWidth": 4.2,
+    "goalHeight": 2.8,
+    "venue": "soccer-stadium-v3"
+  },
+  "volleyball": {
+    "areaMultiplier": 2,
+    "baseHalfWidth": 4.5,
+    "baseHalfLength": 9,
+    "netHeight": 2.43
+  }
 }

@@ -74,6 +74,7 @@ def expand_court(sport):
  scale=math.sqrt(dimensions['areaMultiplier']);ground=Matrix.Diagonal((scale,scale,1,1))
  for name,objects in groups.items():
   for o in objects:
+   if name=='SoccerPitch':continue # Already authored in final gameplay coordinates.
    if name=='GoalFrame':
     # Goal mouths stay human-sized; only move each frame to its new goal line.
     o.location.y+=math.copysign(33*(scale-1),o.location.y)
@@ -85,14 +86,17 @@ def expand_court(sport):
 def football():
  # Keep the terrace below the turf: coplanar top faces flicker on mobile GPUs.
  reset();box('Venue',(0,-.31,0),(65,.5,92),'concrete',.5)
- for i in range(12):box('Venue',(0,-.025,-30.25+i*5.5),(42,.05,5.5),'grass' if i%2 else 'grass2')
- for x in[-21,21]:box('Venue',(x,.015,0),(.08,.025,66),'line')
- for z in[-33,0,33]:box('Venue',(0,.02,z),(42,.03,.08),'line')
- arc('Venue',(0,.035,0),6,0,math.pi*2,'line',.035)
+ # Author the pitch directly in the same world coordinates as the player formation.
+ dimensions=json.loads(Path('src/mini-games/academy-sports/courtDimensions.json').read_text())['soccer']
+ scale=math.sqrt(dimensions['areaMultiplier']);half_width=dimensions['baseHalfWidth']*scale;half_length=dimensions['baseHalfLength']*scale
+ for i in range(12):box('SoccerPitch',(0,-.025,-half_length+(i+.5)*half_length/6),(2*half_width,.05,half_length/6),'grass' if i%2 else 'grass2')
+ for x in[-half_width,half_width]:box('SoccerPitch',(x,.015,0),(.08,.025,2*half_length),'line')
+ for z in[-half_length,0,half_length]:box('SoccerPitch',(0,.02,z),(2*half_width,.03,.08),'line')
+ arc('SoccerPitch',(0,.035,0),6*scale,0,math.pi*2,'line',.035)
  for sign in[-1,1]:
-  for width,depth in[(20,11),(10,4)]:
-   for x in[-width/2,width/2]:box('Venue',(x,.03,sign*(33-depth/2)),(.07,.025,depth),'line')
-   box('Venue',(0,.03,sign*(33-depth)),(width,.025,.07),'line')
+  for width,depth in[(20*scale,11*scale),(10*scale,4*scale)]:
+   for x in[-width/2,width/2]:box('SoccerPitch',(x,.03,sign*(half_length-depth/2)),(.07,.025,depth),'line')
+   box('SoccerPitch',(0,.03,sign*(half_length-depth)),(width,.025,.07),'line')
   for x in[-4.2,4.2]:rod('GoalFrame',(x,0,sign*33),(x,2.8,sign*33),.1,'white');rod('GoalFrame',(x,2.8,sign*33),(x,2.2,sign*35),.06,'white')
   rod('GoalFrame',(-4.2,2.8,sign*33),(4.2,2.8,sign*33),.1,'white')
   # Nets are rendered separately and deform on goals.
@@ -105,7 +109,7 @@ def football():
  # Separate mount: the renderer places this behind the far touchline/endline
  # for landscape/portrait cameras instead of leaving a perpendicular sign.
  box('StadiumBoard',(0,10,0),(17,4,.8),'navy',.2)
- expand_court('soccer');export('soccer-stadium')
+ expand_court('soccer');export(dimensions['venue'])
 def baseball():
  reset();box('Venue',(0,-.3,-12),(150,.5,130),'grass',1)
  center=(0,.01,18);verts=[center]+[(math.sin(a)*66,.01,18-math.cos(a)*66)for a in[-math.pi/4+i*math.pi/64 for i in range(33)]];poly('Venue',verts,[(0,i,i+1)for i in range(1,33)],'grass2')

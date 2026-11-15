@@ -1,5 +1,6 @@
 import dimensions from './courtDimensions.json';
 /** Expand playable area, keeping athlete size, goal mouth and vertical physics unchanged. */
+export const SOCCER_VENUE = dimensions.soccer.venue;
 export const SOCCER_PLAYER_MARGIN = .8;
 export const SOCCER_SCALE = Math.sqrt(dimensions.soccer.areaMultiplier);
 export const VOLLEY_SCALE = Math.sqrt(dimensions.volleyball.areaMultiplier);

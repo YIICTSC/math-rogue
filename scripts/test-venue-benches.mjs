@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 import {NodeIO} from '@gltf-transform/core';
 const io=new NodeIO();
-for(const name of ['soccer-stadium','volleyball-gym']){
+const dimensions=JSON.parse(await fs.readFile('src/mini-games/academy-sports/courtDimensions.json'));
+for(const name of [dimensions.soccer.venue,'volleyball-gym']){
  const doc=await io.read('public/models/academy-sports/'+name+'.glb');
  for(const sign of [-1,1]){
   const node=doc.getRoot().listNodes().find(n=>n.getName()===(sign<0?'BenchLeft':'BenchRight'));assert(node,'Named bench exists');

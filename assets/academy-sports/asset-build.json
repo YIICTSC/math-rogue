@@ -55,6 +55,13 @@
       "materials": 6
     },
     {
+      "path": "public/models/academy-sports/soccer-stadium-v3.glb",
+      "bytes": 2855688,
+      "sha256": "c8db84c9483f5e95d42910da4106c3f17b2bdd295adcf64cf27249785174b548",
+      "meshes": 6,
+      "materials": 9
+    },
+    {
       "path": "public/models/academy-sports/soccer-stadium.glb",
       "bytes": 2855612,
       "sha256": "a1456f780fb7e700ee5746f616be342107d66178795e6e53cf7b1a597fd197f3",
