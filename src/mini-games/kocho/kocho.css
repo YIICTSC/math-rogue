@@ -133,3 +133,14 @@
 .kocho-reward-card .kocho-reward-pick{display:block;position:sticky;bottom:0;flex-shrink:0;align-self:stretch;min-height:32px;font-size:12px;padding:6px 12px;box-sizing:border-box;box-shadow:0 0 0 3px #1e293b}
 @media(orientation:portrait){.kocho-reward-card{flex-basis:calc(50% - 10px)}.kocho-reward-cards{align-content:flex-start}.kocho-reward-card .kocho-reward-pick{min-height:40px;padding:10px}}
 @media(max-height:400px) and (orientation:landscape){.kocho-reward-card{border-width:2px;gap:3px;padding:6px}.kocho-reward-art{width:36px;height:36px}.kocho-reward-card .my-1{margin:0}.kocho-reward-card .mt-2{margin-top:0}.kocho-reward-description{font-size:10px;min-height:20px}.kocho-reward-name{font-size:12px}}
+
+/* Keep reward choices centered and readable in both phone orientations. */
+.kocho-reward-panel{justify-content:center}
+.kocho-reward-cards{flex:0 1 auto;align-content:center}
+.kocho-reward-description{flex:0 0 auto}
+.kocho-reward-card{justify-content:center;min-height:min(360px,65dvh)}
+.kocho-reward-art{width:clamp(64px,16vh,112px);height:clamp(64px,16vh,112px)}
+.kocho-reward-name{font-size:clamp(16px,3vh,22px)}
+.kocho-reward-description{font-size:clamp(12px,2.4vh,16px)}
+@media(orientation:portrait){.kocho-reward-cards{align-content:center}}
+@media(max-height:500px) and (orientation:landscape){.kocho-reward-card{min-height:0;gap:5px;padding:8px 12px;max-height:100%}.kocho-reward-art{width:clamp(52px,17vh,86px);height:clamp(52px,17vh,86px)}.kocho-reward-name{font-size:clamp(15px,4vh,20px)}.kocho-reward-description{font-size:clamp(12px,3vh,15px)}}

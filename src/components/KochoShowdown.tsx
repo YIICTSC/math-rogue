@@ -3110,7 +3110,7 @@ const KochoShowdown: React.FC<{
                         <div className="kocho-title-actions">
                             {debugRewardsUnlocked() && <button onClick={startEndlessRun}>{tr('放課後エンドレスへ')}</button>}
                             <button data-kocho-enter data-gamepad-initial-choice onClick={() => setSetupPage('hero')}>{tr('主人公選択へ')} <Play size={20}/></button>
-                            <button data-kocho-field disabled={clearedHeroes.length===0} onClick={()=>setFieldOpen(true)}>{languageMode==='ENGLISH'?'Field Battle':languageMode==='HIRAGANA'?'フィールドバトル':'フィールドバトル'} <small>{clearedHeroes.length===0?(languageMode==='ENGLISH'?'Clear the campaign to unlock':'本編クリアで解禁'):'3 LINES / 50 TILES'}</small></button>
+                            <button data-kocho-field disabled={clearedHeroes.length===0&&!debugRewardsUnlocked()} onClick={()=>setFieldOpen(true)}>{languageMode==='ENGLISH'?'Field Battle':languageMode==='HIRAGANA'?'フィールドバトル':'フィールドバトル'} <small>{clearedHeroes.length===0&&!debugRewardsUnlocked()?(languageMode==='ENGLISH'?'Clear the campaign to unlock':'本編クリアで解禁'):'3 LINES / 50 TILES'}</small></button>
                             <button data-gamepad-back onClick={handleQuit}>{tr('戻る')}</button>
                         </div>
                     </div>
