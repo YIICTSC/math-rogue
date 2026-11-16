@@ -86,10 +86,18 @@ function finishPoint(w:TennisWorld,m:Match,winner:Side,reason:Match['reason'],fa
  m.studyAt=result.game||w.clock-m.studyAt>=180?-1:m.studyAt;
 }
 function fault(w:TennisWorld,m:Match,reason:Match['reason'],factory:LessonFactory|undefined){m.faults++;sportsEvent(m,'referee',w.clock,undefined,m.faults>=2?'double-fault':'fault');if(m.faults>=2)finishPoint(w,m,other(m.server),'double-fault',factory);else{const faults=m.faults;prepareServe(m,w);m.faults=faults;m.reason=reason;m.wait=.9;}}
-function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWorld){
+/** One shared readiness predicate for buttons, keyboard, CPU and authoritative hits. */
+export const SMASH_WINDOW={minHeight:2.35,maxHeight:3.7,reach:1.35,maxRise:1.8} as const;
+export function canSmash(m:Match|null|undefined,u:Unit|undefined){
+ if(!m||!u||m.phase!=='rally'||m.ball.lastSide===u.side||u.swing>.1||(u.spinStun??0)>0)return false;
+ const b=m.ball;
+ return b.z>=SMASH_WINDOW.minHeight&&b.z<=SMASH_WINDOW.maxHeight&&b.vz<=SMASH_WINDOW.maxRise&&Math.hypot(b.x-u.x,b.y-u.y)<=SMASH_WINDOW.reach&&Math.sign(b.y)===sideY(u.side)&&(!b.serve||b.bounces>0&&m.receiver===u.id);
+}
+function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWorld,smash=false){
  const serve=m.phase==='serve',direction=-sideY(u.side),width=w.mode==='singles'?SINGLES_WIDTH:DOUBLES_WIDTH;
  const depth=u.cpu?0:(u.directionY||0)*direction;
  let targetX=aim*(width-.35),targetY=direction*((shot==='drop'?2.3:shot==='lob'?10.4:10.1)+depth*1.2),duration=shot==='lob'?1.75:shot==='drop'?.9:shot==='special'?.66:shot==='slice'?1.25:1.0;
+ if(smash){duration=shot==='special'?.38:.52;power=Math.max(.85,power);targetY=direction*(8.1+depth*1.2);}
  if(serve){const cross=-Math.sign(u.x);targetX=cross*clamp(2.1+aim*cross*1.4,.55,3.65);targetY=direction*(5.5+depth*.4);duration=1.02;}
  duration*=1.12-power*.22;
  const z=serve?2.7:Math.max(.65,m.ball.z),startX=serve?u.x:m.ball.x,startY=serve?u.y:m.ball.y;
@@ -97,9 +105,9 @@ function ballFlight(m:Match,u:Unit,shot:Shot,aim:number,power:number,w:TennisWor
  const spin=serve?0:shot==='slice'?aim*1.4:shot==='special'?aim*2.5:0;
  // Fixed landing target and ballistic height: collision decisions belong to simulation, not rendering.
  const gravity=9.8,dx=targetX-startX,dy=targetY-startY;
- m.ball={star:shot==='special'&&!serve,x:startX,y:startY,z,vx:dx/duration-spin*duration*.5,vy:dy/duration,vz:(.08-z+.5*gravity*duration*duration)/duration,spin,lastSide:u.side,bounces:0,serve,netLet:false,trail:[]};
+ m.ball={smash,star:shot==='special'&&!serve,x:startX,y:startY,z,vx:dx/duration-spin*duration*.5,vy:dy/duration,vz:(.08-z+.5*gravity*duration*duration)/duration,spin,lastSide:u.side,bounces:0,serve,netLet:false,trail:[]};
  sportsEvent(m,shot==='special'?'special':'action',w.clock,u.id);if(u.cpu&&shot==='special')spendCpuSpecial(m,u.side,w.clock);
- m.phase='rally';m.time=0;m.rally++;m.shotSerial++;u.shot=shot;u.shotSeq=m.shotSerial;u.swing=.42;u.buffer=0;u.energy=shot==='special'?0:Math.min(1,u.energy+.10);u.stamina=Math.max(0,u.stamina-.04);
+ m.phase='rally';m.time=0;m.rally++;m.shotSerial++;u.smash=smash;u.shot=shot;u.shotSeq=m.shotSerial;u.swing=.42;u.buffer=0;u.energy=shot==='special'?0:Math.min(1,u.energy+.10);u.stamina=Math.max(0,u.stamina-.04);
 }
 function attemptHit(w:TennisWorld,m:Match,u:Unit){
  if(u.buffer<=0||u.swing>.14||(u.spinStun??0)>0)return false;
@@ -109,7 +117,7 @@ function attemptHit(w:TennisWorld,m:Match,u:Unit){
  if(Math.sign(m.ball.y)!==sideY(u.side))return false;
  const incomingStar=!!m.ball.star;
  if(incomingStar){if(Math.hypot(m.ball.x-u.x,m.ball.y-u.y)>1.05)return false;if(u.buffer<.24){u.spinStun=1.25;u.buffer=0;finishPoint(w,m,m.ball.lastSide,'winner',undefined);return false;}}
- let shot=u.shot;if(shot==='special'&&(u.energy<.99||u.cpu&&!cpuSpecialReady(m,u.side,w.clock)))shot='topspin';ballFlight(m,u,shot,u.aim,u.power,w);return true;
+ let shot=u.shot;if(shot==='special'&&(u.energy<.99||u.cpu&&!cpuSpecialReady(m,u.side,w.clock)))shot='topspin';const smash=(shot==='topspin'||shot==='special')&&canSmash(m,u);ballFlight(m,u,shot,u.aim,u.power,w,smash);return true;
 }
 export function command(w:TennisWorld,id:string,raw:unknown,factory?:LessonFactory){
  const p=w.players[id],c=raw as Record<string,any>;if(!p||!p.connected||!c||typeof c!=='object'||Array.isArray(c))return false;

@@ -1,7 +1,7 @@
 import { StorybookModels, type Placement } from '../../three/storybookModels';
 import { paintedSurface, storybookAtmosphere, qualityProfile, type Quality } from '../../three/storybookStyle';
 import * as THREE from 'three';
-import type { Hole } from './course';
+import {groundHeight, type Hole } from './course';
 
 /** Deterministic decorative scenery; playable ground stays level with golf physics. */
 export function createCourseScenery(scene:THREE.Scene,hole:Hole,quality:Quality='auto'){
@@ -12,7 +12,7 @@ export function createCourseScenery(scene:THREE.Scene,hole:Hole,quality:Quality=
  const sky=document.createElement('canvas');sky.width=4;sky.height=256;const ctx=sky.getContext('2d')!,gradient=ctx.createLinearGradient(0,0,0,256);gradient.addColorStop(0,'#438fd2');gradient.addColorStop(.55,'#9bcee5');gradient.addColorStop(1,'#dae9cd');ctx.fillStyle=gradient;ctx.fillRect(0,0,4,256);const skyTexture=new THREE.CanvasTexture(sky);skyTexture.colorSpace=THREE.SRGBColorSpace;textures.push(skyTexture);scene.background=skyTexture;
  const material=(color:string)=>{const m=new THREE.MeshStandardMaterial({color,roughness:1});materials.push(m);return m;};
  const sphere=new THREE.SphereGeometry(1,9,7),trunk=new THREE.CylinderGeometry(.5,.75,1,6),ground=new THREE.PlaneGeometry(1800,1800);geometries.push(sphere,trunk,ground);
- const grassMaterial=paintedSurface(new THREE.MeshStandardMaterial({map:grass,roughness:1}));materials.push(grassMaterial);const field=new THREE.Mesh(ground,grassMaterial);field.rotation.x=-Math.PI/2;field.position.y=-.2;scene.add(field);
+ const grassMaterial=paintedSurface(new THREE.MeshStandardMaterial({map:grass,roughness:1}));materials.push(grassMaterial);const field=new THREE.Mesh(ground,grassMaterial);field.rotation.x=-Math.PI/2;field.position.y=-.2;field.visible=!hole.terrain;scene.add(field);
  const hills=new THREE.InstancedMesh(sphere,material('#708d64'),14),distant=new THREE.InstancedMesh(sphere,material('#9ab4a1'),14);hills.name='GolfSceneryHills';distant.name='GolfSceneryDistant';const transform=new THREE.Object3D();
  for(let i=0;i<14;i++){const side=i%2?-1:1;transform.position.set(side*(145+random()*110),-5,hole.cup.z*.3+i*34);transform.scale.set(65+random()*45,20+random()*40,65+random()*40);transform.position.x=side*(100+transform.scale.x+random()*35);transform.updateMatrix();hills.setMatrixAt(i,transform.matrix);transform.position.x*=1.9;transform.position.z+=100;transform.scale.y*=1.5;transform.updateMatrix();distant.setMatrixAt(i,transform.matrix);}scene.add(hills,distant);
  const treeCount=qualityProfile(quality).low?40:64,trunks=new THREE.InstancedMesh(trunk,material('#78583a'),treeCount),leaves=new THREE.InstancedMesh(sphere,material('#32682e'),treeCount*4),shadows=new THREE.InstancedMesh(new THREE.CircleGeometry(1,12),new THREE.MeshBasicMaterial({color:'#183a1a',transparent:true,opacity:.13,depthWrite:false}),treeCount);geometries.push(shadows.geometry);materials.push(shadows.material as THREE.Material);
@@ -31,6 +31,7 @@ export function createCourseScenery(scene:THREE.Scene,hole:Hole,quality:Quality=
  if(i%7===0)placements.push({model:'rock',x:side*96,z:i*(hole.cup.z+30)/treeCount,scale:3});}
  placements.push({model:'clubhouse',x:-135,z:-20,scale:8,yaw:.3},{model:'windmill',x:140,z:hole.cup.z*.55,scale:7},{model:'cottage',x:-140,z:hole.cup.z*.7,scale:7},{model:'bench',x:hole.cup.x+29,z:hole.cup.z+23,scale:3});
  for(let i=0;i<4;i++)placements.push({model:'butterfly',x:(i%2?1:-1)*23,y:2+i*.4,z:20+i*15,scale:3});
+ if(hole.terrain){for(const p of placements)p.y=(p.y||0)+groundHeight(hole,{x:p.x,z:p.z});if(hole.terrain.theme==='sky'){hills.visible=distant.visible=trunks.visible=leaves.visible=shadows.visible=false;placements.length=0;}}
  library.set(placements);
  let previousTime=0;
  return {grass,fairway,green,update:(time:number)=>{library.update(previousTime?Math.min(.1,(time-previousTime)/1000):0,matchMedia('(prefers-reduced-motion: reduce)').matches);previousTime=time;atmosphere.update(time/1000);},library,dispose:()=>{library.dispose();atmosphere.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());}};

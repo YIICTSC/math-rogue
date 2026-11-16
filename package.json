@@ -252,7 +252,9 @@
     "test:quiz-show:production": "node scripts/quiz-show/test-production.mjs",
     "test:quiz-show:broadcast:browser": "node scripts/quiz-show/test-broadcast-flow-browser.mjs",
     "test:lantern-war:cross-game-voices": "node scripts/test-lantern-cross-game-voices.mjs",
-    "test:lantern-war:cross-game-audio:browser": "node scripts/test-lantern-cross-game-audio-browser.mjs"
+    "test:lantern-war:cross-game-audio:browser": "node scripts/test-lantern-cross-game-audio-browser.mjs",
+    "test:golf:adventure": "node scripts/test-golf-adventure.mjs",
+    "test:golf:expansion:browser": "node scripts/test-golf-expansion-browser.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

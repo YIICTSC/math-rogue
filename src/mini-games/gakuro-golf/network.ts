@@ -2,9 +2,9 @@ import {createHostRoomCode,roomAddress,type OnlineTransport} from '../../service
 import {sessionResult} from '../../services/sessionResults';
 import {SessionEnd, sendFinalResult} from '../../services/sessionResultDisplay';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
+import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setCourse, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfCommand, type GolfView, type GolfWorld } from './engine';
 import { validLesson, type KartLesson } from '../gakuro-kart/learning';
-import { HOLES } from './course';
+import {type CourseId, HOLES } from './course';
 import { GOLF_PROTOCOL, validView } from './protocol';
 import { DedicatedConnection, onlineServerUrl } from '../../services/dedicatedConnection';
 import type { LessonSelection } from '../gakuro-kart/questions';
@@ -81,7 +81,7 @@ export class GolfRoom {
       if (['init', 'state'].includes(packet.type) && packet.version === GOLF_PROTOCOL && Number.isInteger(packet.sequence) && packet.sequence > this.lastSequence && validView(packet.state) && packet.state.players.some(p => p.id === this.selfId)) { this.lastSequence = packet.sequence; this.lastView = packet.state; this.update(packet.state); return true; }
       return false;
     }, () => { if (!this.closed) { this.close(); this.update(null); this.status('サーバーとの接続が終了しました。部屋に入り直してください。'); } });
-    this.dedicated = connection; await connection.open('golf', { ...hello, protocol: GOLF_PROTOCOL });
+    this.dedicated = connection; await connection.open('golf', { ...hello, protocol: GOLF_PROTOCOL, terrain:1 });
   }
   async create(name: string) {
     if (this.transport==='server') { await this.openDedicated({ create: true, name: name.slice(0, 16) }); return; }
@@ -99,8 +99,9 @@ export class GolfRoom {
         const now = performance.now(), rate = this.rates.get(c.peer);
         if (!rate || now - rate.at > 1000) this.rates.set(c.peer, { at: now, count: 1 }); else if (++rate.count > 15) return;
         if (d.type === 'hello') {
+          if(this.world.course==='adventure'&&d.terrain!==1){this.reject(c,'冒険コースには最新版のゴルフが必要です。');return;}
           if (d.version !== GOLF_PROTOCOL || typeof d.name !== 'string' || !addPlayer(this.world, c.peer, d.name)) { this.reject(c, '参加できません。部屋の空き人数を確認してください。'); return; }
-          clearTimeout(timeout); this.pending.delete(timeout); this.emit();
+          this.world.players[c.peer].supportsTerrain=d.terrain===1;clearTimeout(timeout); this.pending.delete(timeout); this.emit();
         } else if (d.type === 'command') this.apply(c.peer, d.command);
       });
       let dropped = false;
@@ -117,7 +118,7 @@ export class GolfRoom {
       const done = () => { clearTimeout(timeout); this.pending.delete(timeout); this.cancellations.delete(cancel); };
       const fail = (error: Error) => { done(); reject(error); };
       const timeout = setTimeout(() => fail(new Error('部屋が見つからないか、接続できません。')), 15000); this.pending.add(timeout); this.cancellations.add(cancel);
-      c.on('open', () => this.sendTo(c, { type: 'hello', version: GOLF_PROTOCOL, name: name.slice(0, 16) }));
+      c.on('open', () => this.sendTo(c, { type: 'hello', version: GOLF_PROTOCOL, terrain:1, name: name.slice(0, 16) }));
       c.on('data', raw => {
         if (this.closed || typeof raw !== 'string' || raw.length > 200000) return;
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
@@ -149,6 +150,7 @@ export class GolfRoom {
     if (this.dedicated) this.dedicated.send({ type: 'observe', id });
     else if (this.world) this.update(viewFor(this.world, this.selfId, this.observedId || undefined));
   }
+  setCourse(course:CourseId){if(this.closed||!this.host)return;if(this.dedicated){if(course==='adventure'&&this.lastView&&this.lastView.course===undefined){this.status('接続先はクラシックコースに対応しています。冒険コースはホスト通信か更新済みサーバーで遊べます。');return;}this.dedicated.send({type:'course',course});return;}if(this.world){if(setCourse(this.world,course))this.emit();else if(course==='adventure')this.status('冒険コースには全員が最新版のゴルフを使う必要があります。');}}
   setHoleCount(count: number) {
     if (this.closed || !this.host) return;
     if (this.dedicated) { this.dedicated.send({ type: 'holes', count }); return; }

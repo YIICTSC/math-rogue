@@ -25,7 +25,7 @@ import { trans } from '../../utils/textUtils';
 import type { LanguageMode } from '../../types';
 import { buildLesson, type LessonSelection } from '../gakuro-kart/questions';
 import { benefits, CLUBS, MAX_PLAYERS, type Club, type GolfCommand, type GolfView } from './engine';
-import { HOLES, distance, surface } from './course';
+import { HOLES, courseHoles, holeFor, distance, surface, type CourseId } from './course';
 import { GolfRoom } from './network';
 import GolfCanvas from './GolfCanvas';
 import ShotMeter from './ShotMeter';
@@ -37,6 +37,7 @@ import AvatarCreator from '../gakuro-kart/AvatarCreator';
 import { loadAvatar, validAvatar, type KartAvatar } from '../gakuro-kart/avatar';
 import './golf.css';
 import { useGolfAudio } from './useGolfAudio';
+const SideGolf=React.lazy(()=>import('./side-golf/SideGolf'));
 const lies = { green: 'グリーン', fairway: 'フェアウェイ', rough: 'ラフ', sand: 'バンカー', water: '池', ob: 'OB' };
 export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteCode='', inviteName, backLabel='学習ローグへ' }: { onClose: () => void; languageMode?: LanguageMode; inviteCode?:string;inviteName?:string;backLabel?:string }) {
   const [transport,setTransport]=useState<OnlineTransport>(initialTransport);
@@ -50,7 +51,9 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const tutorialMisses = useRef(initialTutorialMissTracker());
   const [avatar, setAvatar] = useState<KartAvatar>(() => { try { const saved = JSON.parse(localStorage.getItem('gakuro-golf-avatar-v1') || 'null'); return validAvatar(saved) ? saved : loadAvatar(); } catch { return loadAvatar(); } });
   const [showCreator, setShowCreator] = useState(false);
+  const [sideGolf,setSideGolf]=useState(false);
   const [entry,setEntry]=useState<'title'|'practice'|'host'|'join'>('title');
+  const [course,setCourse]=useState<CourseId>('classic');
   const [holeCount, setHoleCount] = useState(18);
   const room = useRef<GolfRoom | null>(null), mounted = useRef(true);
   const invite=view&&room.current?.code?golfInviteUrl(window.location.href,shareRoomCode(room.current.code,room.current.transport)):'';
@@ -67,7 +70,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   const candidates = (view?.players || []).filter(p => p.id !== self && p.connected && !p.spectator);
   const spectators = useSpectatorTarget(spectating, candidates.map(p => p.id));
   const viewId = spectating ? spectators.target || self : self;
-  const me = view?.practicePlayer?.id===viewId ? view.practicePlayer : view?.players.find(p => p.id === viewId), hole = HOLES[me?.hole ?? 0];
+  const me = view?.practicePlayer?.id===viewId ? view.practicePlayer : view?.players.find(p => p.id === viewId), hole = me?holeFor(me):courseHoles(course)[0];
   useEffect(() => {
     if (view?.phase !== 'playing' || !own || own.spectator) { tutorialMisses.current = initialTutorialMissTracker(); return; }
     const result = recordTutorialShot(tutorialMisses.current, own.shotId, own.shotQuality);
@@ -82,7 +85,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   useEffect(()=>{if(!spectating&&own?.phase==='moving'&&own.shotSpecial){setSpecialTutorialDone(true);try{localStorage.setItem('gakuro-golf-special-tutorial-v2','done');}catch{/* Session completion is retained. */}}},[own?.shotId,own?.phase,own?.shotSpecial,spectating]);
   const remaining = me ? distance(me, hole.cup) : hole.cup.z;
   const baseAngle = me ? Math.atan2(hole.cup.x - me.x, hole.cup.z - me.z) : 0;
-  const angle = Math.atan2(Math.sin(baseAngle + offset * Math.PI / 180), Math.cos(baseAngle + offset * Math.PI / 180));
+  const angle = Math.atan2(Math.sin(baseAngle - offset * Math.PI / 180), Math.cos(baseAngle - offset * Math.PI / 180));
   useEffect(() => { if (me?.phase === 'aim') { setOffset(0); setPower(.7); setClub(remaining < 22 ? 'putter' : remaining < 55 ? 'wedge' : remaining < 110 ? 'iron' : 'driver'); } }, [me?.phase, me?.shotId]);
   const leave = () => { tutorialShotPending.current = false; tutorialMisses.current = initialTutorialMissTracker(); setShowCreator(false); const old = room.current; room.current = null; old?.close(); setView(null); setMessage(''); setPicker(null);setEntry('title'); setBusy(false); };
   useSessionResultExit('golf', leave);
@@ -100,7 +103,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
       if (intent !== 'change') { current = createRoom(); if (intent === 'host') await current.create(name); else current.practice(name); }
       if (!current || room.current !== current || !mounted.current) return;
       current.setLesson(history => buildLesson(selection, 3, history), selection);
-      if (intent !== 'change') current.setHoleCount(holeCount); setPicker(null);
+      if (intent !== 'change') {current.setCourse(course);current.setHoleCount(holeCount);} setPicker(null);
     } catch (e) { if (mounted.current) { if (intent !== 'change' && current && room.current === current) { room.current = null; current.close(); setView(null); } setMessage(e instanceof Error ? e.message : '問題を準備できませんでした。'); } }
     finally { if (mounted.current) setBusy(false); }
   };
@@ -111,6 +114,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     finally { if (mounted.current) setBusy(false); }
   };
   useSportsInvitation(inviteCode,inviteName,join);
+  const prepareShot=()=>{if(overview){setOverview(false);return false;}const event=new Event('learning-rogue:golf-address',{cancelable:true});window.dispatchEvent(event);return !event.defaultPrevented;};
   const send = (c: GolfCommand) => { if (!spectating && !view?.paused) room.current?.send(c); };
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
@@ -120,7 +124,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     };
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   }, [showCreator, showScores, picker, overview, spectating, view?.paused, view?.phase, me?.phase]);
-  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(showCreator||spectating||view?.paused||me?.phase!=='aim'||meterActive||(e.target as Element)?.closest('input,textarea,select,[role=dialog]'))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setOffset(n=>Math.max(-180,Math.min(180,n+(e.key==='ArrowLeft'?2:-2))));}else if((e.key==='ArrowUp'||e.key==='ArrowDown')&&club!=='putter'){e.preventDefault();setSpin(n=>Math.max(-1,Math.min(1,Math.round((n+(e.key==='ArrowUp'?.1:-.1))*10)/10)));}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[showCreator,spectating,view?.paused,me?.phase,meterActive,club]);
+  useEffect(()=>{const key=(e:KeyboardEvent)=>{if(showCreator||spectating||view?.paused||me?.phase!=='aim'||meterActive||(e.target as Element)?.closest('input,textarea,select,[role=dialog]'))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();setOffset(n=>Math.max(-180,Math.min(180,n+(e.key==='ArrowLeft'?-2:2))));}else if((e.key==='ArrowUp'||e.key==='ArrowDown')&&club!=='putter'){e.preventDefault();setSpin(n=>Math.max(-1,Math.min(1,Math.round((n+(e.key==='ArrowUp'?.1:-.1))*10)/10)));}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[showCreator,spectating,view?.paused,me?.phase,meterActive,club]);
   const bonus = benefits(me?.correct ?? 0);
   const controllerAimTime=useRef(0);
   useGameplayGamepad('golf',pad=>{
@@ -130,15 +134,15 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     if(pad.pressed[PAD.B]){meter('cancel');setOverview(false);return;}
     if(pad.pressed[PAD.X]){meter('cancel');setShowScores(v=>!v);return;}
     if(pad.pressed[PAD.Y]){meter('cancel');setOverview(v=>!v);return;}
-    if(overview)return;
     if(pad.pressed[PAD.A])meter('tap');
+    if(overview)return;
     if(meterActive)return;
     const clubs=Object.keys(CLUBS) as Club[];
     if(pad.pressed[PAD.LB])setClub(clubs[(clubs.indexOf(club)+clubs.length-1)%clubs.length]);
     if(pad.pressed[PAD.RB])setClub(clubs[(clubs.indexOf(club)+1)%clubs.length]);
     controllerAimTime.current+=pad.dt;
     if(controllerAimTime.current>=.05){const dt=controllerAimTime.current;controllerAimTime.current=0;
-      if(pad.x)setOffset(n=>Math.max(-180,Math.min(180,Math.round(n-pad.x*dt*80))));
+      if(pad.x)setOffset(n=>Math.max(-180,Math.min(180,Math.round(n+pad.x*dt*80))));
       if(pad.y&&club!=='putter')setSpin(n=>Math.max(-1,Math.min(1,Math.round((n-pad.y*dt*1.5)*10)/10)));
     }
   });
@@ -157,11 +161,12 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
       }
     }}><section className="gg-character-dialog gg-panel" role="dialog" aria-modal="true" aria-label={t('キャラクタークリエイト')}><header><b>YOUR GOLFER</b><button autoFocus onClick={() => setShowCreator(false)}>{t('確定')}</button></header><div className="gg-character-preview"><GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar} portrait /></div><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} activity="golf" /></section></div>;
+  if(sideGolf)return <React.Suspense fallback={<div className="sports-loading">LOADING…</div>}><SideGolf onClose={()=>setSideGolf(false)} languageMode={languageMode} avatar={avatar} onAvatar={changeAvatar}/></React.Suspense>;
   if(!view&&(inviteCode||entry==='join'))return <InviteJoin title="GAKURO GOLF" closeLabel={inviteName?t('スポーツへ戻る'):undefined} name={name} onName={setName} code={code} onCode={inviteCode?undefined:setCode} onJoin={join} onClose={()=>{leave();if(inviteCode)onClose();}} busy={busy} error={t(message)} languageMode={languageMode}/>;
-  if(!view&&entry==='title'&&!picker)return <GameTitleScreen backLabel={backLabel} kind="golf" title="GAKURO GOLF" logo={<GameTitleLogo kind="golf" languageMode={languageMode}/>} subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
+  if(!view&&entry==='title'&&!picker)return <GameTitleScreen backLabel={backLabel} kind="golf" title="GAKURO GOLF" logo={<GameTitleLogo kind="golf" languageMode={languageMode}/>} subtitle={t('学んで、狙って、カップイン。')} languageMode={languageMode} onClose={onClose} backdrop={<GolfCanvas view={null} selfId="" aim={0} overview={false}/>} actions={[{label:t('星渡り2D・72ホール'),onClick:()=>setSideGolf(true)},{label:t('ひとりで練習'),onClick:()=>setEntry('practice')},{label:t('オンラインの部屋を作る'),onClick:()=>setEntry('host')},{label:t('招待に参加する'),onClick:()=>setEntry('join')}]}/>;
   if(!view&&!picker)return <><SportsSetupScreen sport="golf" brand="GAKURO GOLF" title={t(entry==='practice'?'ひとりで練習':entry==='host'?'オンラインの部屋を作る':'招待に参加する')} languageMode={languageMode} onBack={()=>setEntry('title')} preview={<GolfCanvas view={null} selfId="" aim={0} overview={false} avatar={avatar}/>} caption={t('学んで、狙って、カップイン。')} footer={<><button aria-label={t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} className="online-entry-primary" disabled={busy||!name.trim()||(entry==='join'&&!validRoomAddress(code))} onClick={()=>entry==='join'?void join():setPicker(entry==='host'?'host':'practice')}>{t(entry==='join'?'参加する':entry==='host'?'問題を選んで部屋を作る':'ひとりで練習')} →</button>{busy&&<p role="status">{t(transport==='server'?'サーバーを起動しています。初回は最大3分お待ちください。':'接続中…')}</p>}</>}>
     <div className="sp-player"><label>{t('参加名')}<input value={name} maxLength={16} onChange={e=>setName(e.target.value)} disabled={busy}/></label><button disabled={busy} onClick={()=>setShowCreator(true)}>{t('キャラクタークリエイト')}</button></div>
-    <div className="sp-options">{entry==='join'?<label>{t('ルームコード')}<input aria-label={t('ルームコード')} placeholder="123456" maxLength={8} inputMode="numeric" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} disabled={busy}/></label>:<label>{t('プレイするホール数')}<select value={holeCount} disabled={busy} onChange={e=>setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {HOLES.slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label>}</div>
+    <div className="sp-options">{entry!=='join'&&<label>{t('コースを選ぶ')}<select aria-label={t('コースを選ぶ')} value={course} onChange={e=>setCourse(e.target.value as CourseId)} disabled={busy}><option value="classic">{t('クラシック・18ホール')}</option><option value="adventure">{t('冒険・18ホール')}</option></select></label>}{entry==='join'?<label>{t('ルームコード')}<input aria-label={t('ルームコード')} placeholder="123456" maxLength={8} inputMode="numeric" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} disabled={busy}/></label>:<label>{t('プレイするホール数')}<select value={holeCount} disabled={busy} onChange={e=>setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {courseHoles(view?.course||course).slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label>}</div>
     {entry==='host'&&<TransportPicker compact game="golf" value={transport} onChange={setTransport} disabled={busy} languageMode={languageMode}/>}
     {message&&<p role="alert">{t(message)}</p>}
     <details><summary>{t('遊び方')}</summary><p>{t('開始時と3ショットごとに、選んだ範囲から3問。')}</p><p>{t('0・1・2・3問正解で最大パワー55・70・85・100%。')}</p><p>{t('クラブと方向を選んでカップを狙おう。池とOBは1打罰。')}</p></details>
@@ -169,7 +174,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
   if(view?.phase==='lobby'&&!picker)return <><SportsSetupScreen sport="golf" brand="GAKURO GOLF" title={t('スタート前の集合')} languageMode={languageMode} onBack={leave} members={view.players} selfId={self} capacity={MAX_PLAYERS} previewActions={<WaitingHomeDash languageMode={languageMode}/>} preview={<GolfCanvas view={view} selfId={self} aim={0} overview={false} avatar={avatar}/>} footer={<div className="sp-footer-row">{room.current?.code&&<button onClick={()=>room.current?.setSpectator(!own?.spectator)}>{t(own?.spectator?'出場する':'観戦する')}</button>}{room.current?.host?<button className="online-entry-primary" aria-label={t('ラウンド開始')} disabled={!view.title||busy||!view.players.some(p=>p.connected&&!p.spectator)} onClick={()=>room.current?.start()}>{t('ラウンド開始')} →</button>:<p role="status">{t('ホストの開始を待っています。')}</p>}</div>}>
     {room.current?.code&&<SportsInviteBox compact code={shareRoomCode(room.current.code,room.current.transport)} url={invite} t={t}/>}
     <div className="sp-lesson"><p data-allow-japanese="true">{view.title}</p>{room.current?.host&&<button disabled={busy} onClick={()=>setPicker('change')}>{t('問題の範囲を変更')}</button>}</div>
-    <div className="sp-player"><label>{t('プレイするホール数')}<select value={view.holeCount} disabled={!room.current?.host||busy} onChange={e=>room.current?.setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {HOLES.slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label><button onClick={()=>setShowCreator(true)}>{t('キャラクタークリエイト')}</button></div>
+    <div className="sp-player"><label>{t('コースを選ぶ')}<select aria-label={t('コースを選ぶ')} disabled={!room.current?.host||busy} value={view.course||'classic'} onChange={e=>room.current?.setCourse(e.target.value as CourseId)}><option value="classic">{t('クラシック・18ホール')}</option><option value="adventure">{t('冒険・18ホール')}</option></select></label><label>{t('プレイするホール数')}<select value={view.holeCount} disabled={!room.current?.host||busy} onChange={e=>room.current?.setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H / PAR {courseHoles(view?.course||course).slice(0,i+1).reduce((n,h)=>n+h.par,0)}</option>)}</select></label><button onClick={()=>setShowCreator(true)}>{t('キャラクタークリエイト')}</button></div>
     {message&&<p role="alert">{t(message)}</p>}
   </SportsSetupScreen>{creator}</>;
   return <TranslatedUiTree mode={languageMode}><main className={`gg-root ${view?.phase==='lobby'?'gg-collecting':''} ${!view?'gg-title-screen':''} ${view&&view.phase!=='lobby'&&!picker?'gg-playing':''} ${spectating?'gg-spectating':''} ${overview?'gg-overview':''}`} data-gamepad-live={view?.phase==='playing'&&me?.phase==='aim'&&!spectating&&!view.paused&&!showScores&&!showCreator&&!picker?'golf':undefined} data-gamepad-initial-scope="gakuro-golf">
@@ -180,7 +185,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
     {message && <div role="alert" className="gg-message">{t(message)}</div>}
     {picker ? <LessonPicker languageMode={languageMode} busy={busy} error={message} onSelect={selectLesson} onBack={() => { if (!busy) { setPicker(null); setMessage(''); } }} /> : <>
       <section className={`gg-stage ${!view || view.phase === 'lobby' ? 'gg-preview' : ''} ${me?.phase === 'aim' ? 'gg-aiming' : ''}`}>
-        <GolfCanvas view={view?.practicePlayer?{...view,players:view.players.map(p=>p.id===view.practicePlayer!.id?view.practicePlayer!:p)}:view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} spin={club === 'putter' ? 0 : spin} avatar={spectating ? me?.avatar || avatar : avatar} />
+        <GolfCanvas view={view?.practicePlayer?{...view,players:view.players.map(p=>p.id===view.practicePlayer!.id?view.practicePlayer!:p)}:view} selfId={viewId} spectator={spectating} aim={angle} overview={overview} club={club} power={power} spin={club === 'putter' ? 0 : spin} special={starShot} avatar={spectating ? me?.avatar || avatar : avatar} />
         {view && view.phase !== 'lobby' && me && <>
           <CourseHud player={me} hole={hole} remaining={remaining} aim={angle} players={view.players} holeCount={view.holeCount} t={t}/>
 
@@ -201,7 +206,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
               <section className="gg-shot-meter gg-panel" aria-label={t('ショット')} data-special-ready={starShot}>
                 <div className="gg-shot-topline" data-meter-ignore="true"><label className="gg-aim-control">{t('狙う方向')} <b>{offset}°</b><input aria-label={t('狙う方向')} type="range" min={-180} max={180} step={1} value={offset} onChange={e => setOffset(Number(e.target.value))} disabled={view.paused || meterActive}/></label><div className="gg-star-gauge" role="progressbar" aria-label={t('必殺ゲージ')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round((me.starEnergy??0)*100)} title={t(starShot?'パワーMAX＋黄色で必殺！外すと飛びすぎる危険':'6問正解で必殺ゲージ満タン')}><i style={{width:`${Math.round((me.starEnergy??0)*100)}%`}}/><span>★ {Math.round((me.starEnergy??0)*100)}%</span></div></div>
                 {starShot&&<p className="gg-star-status">{t('パワーMAX＋黄色で必殺')}</p>}
-                <ShotMeter limit={bonus.power} key={me.shotId} tutorial={!shotTutorialDone||specialTutorial} specialTutorial={specialTutorial} disabled={overview || showScores || showCreator || view.paused || !me.connected} t={t} onActive={setMeterActive} onPower={setPower} onShot={(power,impact) => { if (!shotTutorialDone) tutorialShotPending.current = true; send({ type: 'shot', shotId: me.shotId, club, angle, power, impact, spin: club === 'putter' ? 0 : spin }); }}/>
+                <ShotMeter onPrepare={prepareShot} limit={bonus.power} key={me.shotId} tutorial={!shotTutorialDone||specialTutorial} specialTutorial={specialTutorial} disabled={showScores || showCreator || view.paused || !me.connected} t={t} onActive={setMeterActive} onPower={setPower} onShot={(power,impact) => { if (!shotTutorialDone) tutorialShotPending.current = true; send({ type: 'shot', shotId: me.shotId, club, angle, power, impact, spin: club === 'putter' ? 0 : spin }); }}/>
               </section>
             </div>}
             {me.phase === 'moving' && <p className="gg-flying" role="status">{me.shotQuality && me.shotQuality !== 'good' && <strong className={`gg-shot-quality ${me.shotQuality}`}>{me.shotSpecial ? 'SPECIAL SHOT!' : me.shotQuality === 'nice' ? 'NICE SHOT!' : 'MISS'}</strong>}{t(me.shotSpecial?'強烈なスピンでカップを狙う！':'ボールの行方を見よう')}</p>}
@@ -209,7 +214,7 @@ export default function GakuroGolf({ onClose, languageMode = 'JAPANESE', inviteC
             {view.practicePlayer && <p className="gg-flying" role="status">{t('練習ラウンド・公式スコアは確定済み')}</p>}
           </div>}
           </div>
-          {(showScores || view.phase === 'result') && <section className={`gg-scores gg-panel ${view.phase==='result'?'gg-round-result':''}`}><header><h2>{t(view.phase === 'result' ? 'ラウンド結果' : 'スコアボード')}</h2>{view.phase !== 'result' && <button onClick={() => setShowScores(false)}>{t('閉じる')}</button>}</header><p className="gg-muted">{t('選んだホールの合計打数が少ない人が勝ち。同点は同順位です。')}</p><div className="gg-result-grid"><div className="gg-score-scroll"><table><thead><tr><th>{t('順位')}</th><th>{t('参加名')}</th>{HOLES.slice(0,view.holeCount).map((_, i) => <th key={i}>H{i + 1}</th>)}<th>{t('合計')}</th><th>{t('状態')}</th></tr></thead><tbody>{scoreRows.map(p => <tr key={p.id} className={p.id === me.id ? 'is-self' : ''}><td>{p.phase === 'finished' ? 1 + scoreRows.filter(other => other.phase === 'finished' && other.scores.reduce((s, n) => s + n, 0) < p.scores.reduce((s, n) => s + n, 0)).length : '—'}</td><td data-allow-japanese="true">{p.name}</td>{HOLES.slice(0,view.holeCount).map((_, i) => <td key={i}>{p.scores[i] ?? '—'}</td>)}<td>{p.scores.reduce((s, n) => s + n, 0)}</td><td>{t(!p.connected && p.phase !== 'finished' ? '途中退出' : p.phase === 'finished' ? '完走' : 'プレイ中')}</td></tr>)}</tbody></table></div>{view.phase === 'result' && <aside className="gg-result-actions">{room.current?.host?<><label>{t('プレイするホール数')}<select value={holeCount} onChange={e=>setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H</option>)}</select></label><button className="gg-primary" onClick={()=>{setShowScores(false);room.current?.rematch(holeCount);}}>{t('次のラウンドへ')}</button></>:<p>{t('ホストの開始を待っています。')}</p>}<button onClick={leave}>{t('クラブハウスへ')}</button></aside>}</div></section>}
+          {(showScores || view.phase === 'result') && <section className={`gg-scores gg-panel ${view.phase==='result'?'gg-round-result':''}`}><header><h2>{t(view.phase === 'result' ? 'ラウンド結果' : 'スコアボード')}</h2>{view.phase !== 'result' && <button onClick={() => setShowScores(false)}>{t('閉じる')}</button>}</header><p className="gg-muted">{t('選んだホールの合計打数が少ない人が勝ち。同点は同順位です。')}</p><div className="gg-result-grid"><div className="gg-score-scroll"><table><thead><tr><th>{t('順位')}</th><th>{t('参加名')}</th>{courseHoles(view.course).slice(0,view.holeCount).map((_, i) => <th key={i}>H{i + 1}</th>)}<th>{t('合計')}</th><th>{t('状態')}</th></tr></thead><tbody>{scoreRows.map(p => <tr key={p.id} className={p.id === me.id ? 'is-self' : ''}><td>{p.phase === 'finished' ? 1 + scoreRows.filter(other => other.phase === 'finished' && other.scores.reduce((s, n) => s + n, 0) < p.scores.reduce((s, n) => s + n, 0)).length : '—'}</td><td data-allow-japanese="true">{p.name}</td>{courseHoles(view.course).slice(0,view.holeCount).map((_, i) => <td key={i}>{p.scores[i] ?? '—'}</td>)}<td>{p.scores.reduce((s, n) => s + n, 0)}</td><td>{t(!p.connected && p.phase !== 'finished' ? '途中退出' : p.phase === 'finished' ? '完走' : 'プレイ中')}</td></tr>)}</tbody></table></div>{view.phase === 'result' && <aside className="gg-result-actions">{room.current?.host?<><label>{t('プレイするホール数')}<select value={holeCount} onChange={e=>setHoleCount(Number(e.target.value))}>{Array.from({length:18},(_,i)=><option key={i} value={i+1}>{i+1} H</option>)}</select></label><button className="gg-primary" onClick={()=>{setShowScores(false);room.current?.rematch(holeCount);}}>{t('次のラウンドへ')}</button></>:<p>{t('ホストの開始を待っています。')}</p>}<button onClick={leave}>{t('クラブハウスへ')}</button></aside>}</div></section>}
         </>}
       </section>
     </>}

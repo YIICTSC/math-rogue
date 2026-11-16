@@ -1,6 +1,10 @@
+import { ADVENTURE_HOLES } from './adventureCourses';
+export { ADVENTURE_HOLES };
 export interface Point { x: number; z: number }
 export interface Hazard extends Point { rx: number; rz: number }
-export interface Hole { par: number; cup: Point; fairway: number; wind: Point; water: Hazard[]; sand: Hazard[] }
+export type CourseId='classic'|'adventure';
+export interface TerrainHill extends Hazard {height:number}
+export interface Hole { name?:string; terrain?:{theme:'meadow'|'mountain'|'sky'|'desert'|'moon';base?:number;hills:TerrainHill[];islands?:Hazard[]}; par: number; cup: Point; fairway: number; wind: Point; water: Hazard[]; sand: Hazard[] }
 export const HOLES: Hole[] = [
   { par: 3, cup: { x: 0, z: 135 }, fairway: 23, wind: { x: .25, z: .1 }, water: [{ x: -32, z: 65, rx: 16, rz: 22 }], sand: [{ x: 15, z: 119, rx: 9, rz: 12 }] },
   { par: 4, cup: { x: 24, z: 235 }, fairway: 25, wind: { x: -.4, z: .2 }, water: [{ x: -18, z: 135, rx: 21, rz: 32 }], sand: [{ x: 41, z: 214, rx: 12, rz: 16 }, { x: -5, z: 65, rx: 10, rz: 14 }] },
@@ -25,8 +29,23 @@ export const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.z - b.z)
 export const inHazard = (p: Point, h: Hazard) => ((p.x - h.x) / h.rx) ** 2 + ((p.z - h.z) / h.rz) ** 2 <= 1;
 export function surface(hole: Hole, p: Point): 'water' | 'sand' | 'green' | 'fairway' | 'rough' | 'ob' {
   if (Math.abs(p.x) > 75 || p.z < -25 || p.z > hole.cup.z + 45) return 'ob';
+  if (hole.terrain?.islands&&!hole.terrain.islands.some(h=>inHazard(p,h))) return 'ob';
   if (hole.water.some(h => inHazard(p, h))) return 'water';
   if (distance(p, hole.cup) < 17) return 'green';
   if (hole.sand.some(h => inHazard(p, h))) return 'sand';
   return Math.abs(p.x - hole.cup.x * Math.max(0, p.z) / hole.cup.z) < hole.fairway ? 'fairway' : 'rough';
 }
+
+export const courseHoles=(course?:CourseId)=>course==='adventure'?ADVENTURE_HOLES:HOLES;
+export const holeFor=(player:{hole:number;course?:CourseId})=>courseHoles(player.course)[player.hole]||HOLES[0];
+const rawHeight=(hole:Hole,p:Point)=>(hole.terrain?.base||0)+(hole.terrain?.hills||[]).reduce((h,v)=>h+v.height*Math.exp(-2*(((p.x-v.x)/v.rx)**2+((p.z-v.z)/v.rz)**2)),0);
+/** One height field drives rendering, physics and trajectory previews. Flat tee/cup allow fair putts. */
+export function groundHeight(hole:Hole,p:Point){
+ if(!hole.terrain)return 0;
+ const tee=Math.min(1,Math.max(0,(distance(p,{x:0,z:0})-9)/8));
+ const cup=Math.min(1,Math.max(0,(distance(p,hole.cup)-7)/7));
+ const smooth=(t:number)=>t*t*(3-2*t);
+ const h=rawHeight(hole,p)*smooth(tee)+rawHeight(hole,{x:0,z:0})*(1-smooth(tee));
+ return h*smooth(cup)+rawHeight(hole,hole.cup)*(1-smooth(cup));
+}
+export function groundSlope(hole:Hole,p:Point){const d=.25;return {x:(groundHeight(hole,{x:p.x+d,z:p.z})-groundHeight(hole,{x:p.x-d,z:p.z}))/(2*d),z:(groundHeight(hole,{x:p.x,z:p.z+d})-groundHeight(hole,{x:p.x,z:p.z-d}))/(2*d)};}

@@ -1,3 +1,4 @@
+import {holeFor,groundHeight,surface} from './course';
 import { addPlayer, createGolf, startSpecialShot, shotVelocity, tick, type Club, type PublicGolfer } from './engine';
 
 type Sample = { at: number; player: PublicGolfer };
@@ -36,7 +37,7 @@ export class BallMotion {
           (2 * t3 - 3 * t2 + 1) * a.player[axis] + (t3 - 2 * t2 + t) * duration * va +
           (-2 * t3 + 3 * t2) * b.player[axis] + (t3 - t2) * duration * vb;
       }
-      out.y = Math.max(0, out.y);
+      if(surface(holeFor(b.player),{x:out.x,z:out.z})!=='ob')out.y = Math.max(groundHeight(holeFor(b.player),{x:out.x,z:out.z}), out.y);
       return out;
     }
     // Freeze when packets stop; never simulate an unconfirmed landing or penalty.
@@ -49,10 +50,10 @@ export class BallMotion {
 export function predictShot(player: PublicGolfer, club: Club, angle: number, power: number, spin = 0, impact = 0, special = false) {
   const world = createGolf(); addPlayer(world, 'preview', 'Preview'); world.phase = 'playing';
   const p = world.players.preview; angle += impact * 12 * Math.PI / 180;
-  Object.assign(p, { hole: player.hole, correct: player.correct, x: player.x, y: 0, z: player.z,
+  Object.assign(p, { course:player.course,hole: player.hole, correct: player.correct, x: player.x, y: groundHeight(holeFor(player),player), z: player.z,
     phase: 'moving', shotClub: club, shotAngle: angle, shotSpin: club === 'putter' ? 0 : spin, spinApplied: false, origin: { x: player.x, z: player.z }, ...shotVelocity(player, club, angle, power, spin, impact) });
   if(special&&power===1&&Math.abs(impact)<=.200001){p.shotSpecial=true;startSpecialShot(p);}
-  const points = [{ x: p.x, y: .55, z: p.z }];
+  const points = [{ x: p.x, y: p.y+.55, z: p.z }];
   for (let i = 0; i < 900 && p.phase === 'moving'; i++) {
     const previous = { x: p.x, y: p.y + .55, z: p.z };
     tick(world, 1 / 30);

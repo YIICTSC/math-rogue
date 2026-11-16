@@ -1,9 +1,10 @@
+import {terrainGeometry} from './terrainGeometry';
 import {createSportsEffect} from '../shared/sportsEffects';
 import { configureStorybook, paintedSurface, storybookWater } from '../../three/storybookStyle';
 import { useStorybookQuality } from '../../three/StorybookQuality';
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { HOLES } from './course';
+import { courseHoles, groundHeight, surface } from './course';
 import type { Club, GolfView, PublicGolfer } from './engine';
 import { defaultAvatar, type KartAvatar } from '../gakuro-kart/avatar';
 import { BallMotion, predictShot } from './motion';
@@ -13,9 +14,12 @@ const colors = ['#f9d66b', '#79dbff', '#fa91ae', '#c1e881', '#b9a0ff', '#ffad72'
 const previewPlayer: PublicGolfer = { id: 'preview', name: '', slot: 0, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, phase: 'ready', correct: 3, totalCorrect: 0, shotId: 0, shotsLeft: 3, penalty: false, penaltyKind: null, capped: false };
 export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver', power = .7, spin = 0, special = false, avatar = defaultAvatar(), portrait = false, spectator = false }: { view: GolfView | null; selfId: string; aim: number; overview: boolean; club?: Club; power?: number; spin?: number; special?:boolean; avatar?: KartAvatar; portrait?: boolean; spectator?: boolean }) {
   const orbit=useRef({yaw:0,pitch:.6,active:false,drag:null as null|{id:number;x:number;y:number}});
+  const resetCamera=useRef(false);
+  useEffect(()=>{const reset=(e:Event)=>{if(!orbit.current.active)return;orbit.current.active=false;orbit.current.drag=null;resetCamera.current=true;e.preventDefault();};window.addEventListener('learning-rogue:golf-address',reset);return()=>window.removeEventListener('learning-rogue:golf-address',reset);},[]);
   const overviewPan=useRef({x:0,z:0,unitsPerPixel:1});
   const quality=useStorybookQuality();
   const canvas = useRef<HTMLCanvasElement>(null), state = useRef({ view, selfId, aim, overview, club, power, spin, special, avatar, spectator }); state.current = { view, selfId, aim, overview, club, power, spin, special, avatar, spectator };
+  const courseId=view?.course||'classic';
   const holeIndex = view?.players.find(p => p.id === selfId)?.hole ?? 0;
   useEffect(()=>{orbit.current.active=false;orbit.current.drag=null;overviewPan.current.x=overviewPan.current.z=0;},[overview,holeIndex,selfId]);
   const [failed, setFailed] = useState(false);
@@ -32,29 +36,29 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
     const lost = (event: Event) => { event.preventDefault(); setFailed(true); disposed = true; cancelAnimationFrame(frame); };
     let observer: ResizeObserver | undefined, scenery: ReturnType<typeof createCourseScenery> | undefined;
     try {
-      setFailed(false); renderer = new THREE.WebGLRenderer({ canvas: el, antialias: true, powerPreference: 'high-performance' });
+      resetCamera.current=true;setFailed(false); renderer = new THREE.WebGLRenderer({ canvas: el, antialias: true, powerPreference: 'high-performance' });
       const profile=configureStorybook(renderer,quality); renderer.shadowMap.enabled = profile.shadows; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       scene.add(new THREE.HemisphereLight('#efffff', '#456744', 2.1));
       const sun = new THREE.DirectionalLight('#fff4ce', 2.8); sun.position.set(-70, 130, -30); sun.castShadow=profile.shadows;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=90;sun.shadow.camera.bottom=-90;sun.shadow.camera.far=350;sun.shadow.normalBias=.08; scene.add(sun);
-      const hole = HOLES[holeIndex];
+      const hole = courseHoles(courseId)[holeIndex];
       scenery = createCourseScenery(scene,hole,quality);
       renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
-      mesh(geo(new THREE.BoxGeometry(220, 3, hole.cup.z + 160)), mat('#ffffff', {map:scenery.grass}), 0, -1.6, hole.cup.z / 2);
+      if(hole.terrain){const tint=hole.terrain.theme==='desert'?'#d7b879':hole.terrain.theme==='moon'?'#abb9d7':'#ffffff';mesh(geo(terrainGeometry(hole,0,hole.cup.z/2,220,hole.cup.z+160)),mat(tint,{map:scenery.grass}),0,0,0);if(hole.terrain.islands)for(const h of hole.terrain.islands){const base=groundHeight(hole,h);const rock=mesh(geo(new THREE.ConeGeometry(1,1,24)),mat('#8a82a0'),h.x,base-12,h.z);rock.rotation.z=Math.PI;rock.scale.set(h.rx*.94,23,h.rz*.94);}}else mesh(geo(new THREE.BoxGeometry(220,3,hole.cup.z+160)),mat('#ffffff',{map:scenery.grass}),0,-1.6,hole.cup.z/2);
       // Alternating mowing strips follow the line from tee to green.
       const length = Math.hypot(hole.cup.x, hole.cup.z), angle = Math.atan2(hole.cup.x, hole.cup.z);
       for (let i = 0; i < Math.ceil(length / 12); i++) {
-        const z = i * 12; const strip = mesh(geo(new THREE.PlaneGeometry(hole.fairway * 2, 12)), mat(i % 2 ? '#f3f6da' : '#ffffff', {map:scenery.fairway}), Math.sin(angle) * z, .01, Math.cos(angle) * z);
+        const z = i * 12;if(hole.terrain){mesh(geo(terrainGeometry(hole,Math.sin(angle)*z,Math.cos(angle)*z,hole.fairway*2,12,2,.025)),mat(i%2?'#f3f6da':'#ffffff',{map:scenery.fairway}),0,0,0);continue;}const strip = mesh(geo(new THREE.PlaneGeometry(hole.fairway * 2, 12)), mat(i % 2 ? '#f3f6da' : '#ffffff', {map:scenery.fairway}), Math.sin(angle) * z, .01, Math.cos(angle) * z);
         strip.rotation.set(-Math.PI / 2, 0, -angle);
       }
-      const ellipse = (x: number, z: number, rx: number, rz: number, color: string, y = .03) => { const o = mesh(geo(new THREE.CircleGeometry(1, 48)), mat(color), x, y, z); o.rotation.x = -Math.PI / 2; o.scale.set(rx, rz, 1); return o; };
+      const ellipse = (x: number, z: number, rx: number, rz: number, color: string, y = .03) => { if(hole.terrain){const g=geo(new THREE.CircleGeometry(1,48,6)),pos=g.getAttribute('position');for(let i=0;i<pos.count;i++){const px=x+pos.getX(i)*rx,pz=z+pos.getY(i)*rz;pos.setXYZ(i,px,groundHeight(hole,{x:px,z:pz})+y,pz);}g.computeVertexNormals();return mesh(g,mat(color,{side:THREE.DoubleSide}),0,0,0);}const o = mesh(geo(new THREE.CircleGeometry(1, 48)), mat(color), x, y, z); o.rotation.x = -Math.PI / 2; o.scale.set(rx, rz, 1); return o; };
       const animatedWater=storybookWater();resources.push(animatedWater.material);
       for (const h of hole.water) { ellipse(h.x, h.z, h.rx + 1.5, h.rz + 1.5, '#b0c99a'); const pool=ellipse(h.x,h.z,h.rx,h.rz,'#4fa6b7',.04);pool.material=animatedWater.material; }
       for (const h of hole.sand) { ellipse(h.x,h.z,h.rx+1,h.rz+1,'#bcc184',.025); ellipse(h.x, h.z, h.rx, h.rz, '#ead9a5'); }
       const green = ellipse(hole.cup.x, hole.cup.z, 17, 17, '#ffffff', .05); (green.material as THREE.MeshStandardMaterial).map = scenery.green;
       ellipse(hole.cup.x, hole.cup.z, .9, .9, '#163a31', .07);
-      mesh(geo(new THREE.CylinderGeometry(.1, .1, 6, 8)), mat('#f7f0d4'), hole.cup.x, 3, hole.cup.z);
-      const flag = mesh(geo(new THREE.PlaneGeometry(3.2, 1.8)), mat('#ed735f', { side: THREE.DoubleSide }), hole.cup.x + 1.6, 5, hole.cup.z);
-      for (const x of [-3, 3]) mesh(geo(new THREE.BoxGeometry(.6, .5, .6)), mat('#f4edda'), x, .25, -1.8);
+      mesh(geo(new THREE.CylinderGeometry(.1, .1, 6, 8)), mat('#f7f0d4'), hole.cup.x, groundHeight(hole,hole.cup)+3, hole.cup.z);
+      const flag = mesh(geo(new THREE.PlaneGeometry(3.2, 1.8)), mat('#ed735f', { side: THREE.DoubleSide }), hole.cup.x + 1.6, groundHeight(hole,hole.cup)+5, hole.cup.z);
+      for (const x of [-3, 3]) mesh(geo(new THREE.BoxGeometry(.6, .5, .6)), mat('#f4edda'), x, groundHeight(hole,{x,z:-1.8})+.25, -1.8);
       const ballGeo = geo(new THREE.SphereGeometry(.16, 12, 8));
       const lineMat = new THREE.LineDashedMaterial({ color: '#fff6c9', dashSize: 2, gapSize: 1 }); resources.push(lineMat);
       const lineGeo = geo(new THREE.BufferGeometry()); lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(512 * 3), 3));
@@ -64,7 +68,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
       if (portrait) { camera.position.set(1, 3.8, 8); camera.up.set(0,1,0);camera.lookAt(-2, 2.6, 0); }
       const target = new THREE.Vector3(), cameraGoal = new THREE.Vector3(), lookAt = new THREE.Vector3(portrait ? -2 : 0, portrait ? 2.6 : 0, 0);
       let viewportWidth=1,viewportHeight=1,lastLift=-1,offsetWidth=0,offsetHeight=0;
-      observer = new ResizeObserver(() => { const { width, height } = el.getBoundingClientRect(); if (width && height && renderer) { viewportWidth=width;viewportHeight=height;renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix(); } }); observer.observe(el);
+      observer = new ResizeObserver(() => { const { width, height } = el.getBoundingClientRect(); if (width && height && renderer) { viewportWidth=width;viewportHeight=height;resetCamera.current=true;renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix(); } }); observer.observe(el);
       el.addEventListener('webglcontextlost', lost);
       let previous = performance.now();
       let lastView: GolfView | null | undefined, previewKey = '';
@@ -108,9 +112,9 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           }
           const avatarKey = JSON.stringify(look); if (marker.avatarKey !== avatarKey) { marker.rig.update(look); marker.avatarKey = avatarKey; }
           const position = marker.motion.sample(now);
-          marker.ball.visible = marker.shadow.visible = true;
+          marker.ball.visible=true;marker.shadow.visible=surface(hole,position)!=='ob';
           marker.ball.position.set(position.x, position.y + .16, position.z);
-          marker.shadow.position.set(position.x, .08, position.z); marker.shadow.scale.setScalar(1 + Math.min(1.8, position.y * .025));
+          marker.shadow.position.set(position.x, groundHeight(hole,position)+.08, position.z); marker.shadow.scale.setScalar(1 + Math.min(1.8, position.y * .025));
           marker.rig.root.visible = nearest.has(p.id);
           const flying = p.phase === 'moving' || now - marker.swingStart < 900;
           const facing = flying ? marker.direction : p.id === id ? direction : Math.atan2(hole.cup.x-p.x,hole.cup.z-p.z);
@@ -165,6 +169,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             }
             if (p.id === id) { el.dataset.celebration = String(pose); el.dataset.reaction = mood; }
           } else {marker.rig.setExpression();if (p.id === id) { delete el.dataset.reaction; delete el.dataset.celebration; }}
+          marker.rig.root.position.y+=groundHeight(hole,{x:marker.rig.root.position.x,z:marker.rig.root.position.z});
           marker.rig.animateHero(1/60,renderedSwing);
           if(p.id===id||!current){el.dataset.protagonist=look.protagonist||'';el.dataset.protagonistReady=String(!!marker.rig.root.userData.protagonistReady);}
           marker.rig.clubHead.scale.set(selectedClub === 'putter' && p.id === id ? .42 : .31, .13, .17);
@@ -184,24 +189,24 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           const pan=overviewPan.current;
           const height=Math.max(hole.cup.z*.75+45,(hole.cup.z+40)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))));
           pan.unitsPerPixel=2*height*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/Math.max(1,viewportHeight);
-          cameraGoal.set(hole.cup.x/2+pan.x,height,hole.cup.z/2+pan.z);
-          target.set(hole.cup.x/2+pan.x,0,hole.cup.z/2+pan.z);
+          cameraGoal.set(hole.cup.x/2+pan.x,height+groundHeight(hole,hole.cup),hole.cup.z/2+pan.z);
+          target.set(hole.cup.x/2+pan.x,groundHeight(hole,hole.cup),hole.cup.z/2+pan.z);
         }
         else if (!me || current?.phase === 'lobby') { cameraGoal.set(12, 13, -18); target.set(-1, 2, 7); }
         else if (me.phase === 'holed' && !me.capped && now - (markers.get(me.id)?.cheerStart ?? -Infinity) < 6000) {
-          const hero = markers.get(me.id)!.rig.root.position; cameraGoal.set(hero.x + 6, 4.5, hero.z + 8); target.set(hero.x, 2.4, hero.z);
+          const hero = markers.get(me.id)!.rig.root.position; cameraGoal.set(hero.x + 6, hero.y+4.5, hero.z + 8); target.set(hero.x, hero.y+2.4, hero.z);
         }
         else if (me.phase !== 'moving') {
           // Address view: player in the foreground, green and flag ahead.
           const narrow = camera.aspect < 1, wide = viewportHeight < 550 && camera.aspect > 1, behind = narrow ? 12 : wide ? 16 : 10, side = narrow ? -.8 : camera.aspect < 1.5 ? 1.8 : 4.8;
-          cameraGoal.set(ball.x - Math.sin(base) * behind - Math.cos(base) * side, wide ? 6.4 : 5.8, ball.z - Math.cos(base) * behind + Math.sin(base) * side);
-          target.set(ball.x + Math.sin(base) * (narrow?24:35), 2.7, ball.z + Math.cos(base) * (narrow?24:35));
+          cameraGoal.set(ball.x - Math.sin(base) * behind - Math.cos(base) * side, ball.y+(wide ? 6.4 : 5.8), ball.z - Math.cos(base) * behind + Math.sin(base) * side);
+          target.set(ball.x + Math.sin(base) * (narrow?24:35), ball.y+2.7, ball.z + Math.cos(base) * (narrow?24:35));
         }
-        else { cameraGoal.set(ball.x - Math.sin(base) * 26, Math.max(17, ball.y + 14), ball.z - Math.cos(base) * 26); target.set(ball.x + Math.sin(base) * 13, Math.max(1, ball.y * .7), ball.z + Math.cos(base) * 13); }
+        else { cameraGoal.set(ball.x - Math.sin(base) * 26, Math.max(17, ball.y + 14), ball.z - Math.cos(base) * 26); target.set(ball.x + Math.sin(base) * 13, groundHeight(hole,ball)+Math.max(1,(ball.y-groundHeight(hole,ball))*.7), ball.z + Math.cos(base) * 13); }
         if (!portrait && !full && orbit.current.active && me && me.phase !== 'moving') {
           const o=orbit.current, radius=45;
-          target.set(ball.x,1,ball.z);
-          cameraGoal.set(ball.x+Math.sin(o.yaw)*Math.cos(o.pitch)*radius,Math.sin(o.pitch)*radius+2,ball.z+Math.cos(o.yaw)*Math.cos(o.pitch)*radius);
+          target.set(ball.x,ball.y+1,ball.z);
+          cameraGoal.set(ball.x+Math.sin(o.yaw)*Math.cos(o.pitch)*radius,ball.y+Math.sin(o.pitch)*radius+2,ball.z+Math.cos(o.yaw)*Math.cos(o.pitch)*radius);
         }
         // Reserve the bottom HUD area without shrinking the course horizontally.
         const lift = !portrait && !full && me && me.phase !== 'moving' ? me.phase === 'aim'
@@ -211,7 +216,10 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
           if(lift) camera.setViewOffset(viewportWidth,viewportHeight,0,viewportHeight*lift,viewportWidth,viewportHeight);
           else if(camera.view?.enabled) camera.clearViewOffset();
         }
+        if(resetCamera.current){camera.position.copy(cameraGoal);lookAt.copy(target);resetCamera.current=false;}
         camera.position.lerp(cameraGoal, 1 - Math.exp(-dt * (full ? 12 : 3))); lookAt.lerp(target, 1 - Math.exp(-dt * (full ? 12 : 5))); camera.up.set(0,full&&!orbit.current.active?0:1,full&&!orbit.current.active?1:0);camera.lookAt(lookAt);
+        camera.updateMatrixWorld();const wm=camera.matrixWorld.elements;const windArrow=el.parentElement?.querySelector<HTMLElement>('.gg-wind-arrow');if(windArrow){const wx=hole.wind.x*wm[0]+hole.wind.z*wm[2],wy=hole.wind.x*wm[4]+hole.wind.z*wm[6];windArrow.style.setProperty('--gg-wind-angle',`${Math.atan2(wx,wy)*180/Math.PI}deg`);}
+        el.dataset.orbit=String(orbit.current.active);const hero=me?markers.get(me.id)?.rig.root:undefined;if(hero){const screen=hero.position.clone();screen.y+=2;screen.project(camera);el.dataset.heroScreenX=String((screen.x+1)*viewportWidth/2);el.dataset.heroScreenY=String((1-screen.y)*viewportHeight/2);}
         aimLine.visible = !state.current.spectator && !portrait && !!me && me.phase === 'aim'; landing.visible = aimLine.visible;
         if (me && aimLine.visible) {
           const key = [me.x, me.z, me.correct, direction, selectedClub, selectedPower, state.current.spin,state.current.special].join('/');
@@ -220,19 +228,19 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
             const positions = lineGeo.getAttribute('position') as THREE.BufferAttribute;
             points.forEach((p,i) => positions.setXYZ(i,p.x,p.y - .39,p.z)); positions.needsUpdate = true;
             lineGeo.setDrawRange(0,points.length); lineGeo.computeBoundingSphere(); aimLine.computeLineDistances();
-            const end = points.at(-1)!; landing.position.set(end.x, .1, end.z);
+            const end = points.at(-1)!; landing.position.set(end.x, groundHeight(hole,end)+.1, end.z);
             el.dataset.trajectoryHeight = String(Math.max(...points.map(p=>p.y)));
           }
         }
         el.dataset.characterStyle=[...markers.values()].some(m=>m.rig.torso.children.some(o=>o instanceof THREE.Mesh&&o.geometry.userData.storybookCharacter))?'blender-storybook':'loading';
         el.dataset.golferCount = String(nearest.size); el.dataset.ballHeight = String(ball.y); el.dataset.swing = String(me ? markers.get(me.id)?.rig.arms.rotation.z || 0 : 0);
-        el.dataset.cameraMode = portrait ? 'portrait' : orbit.current.active && me?.phase!=='moving' ? 'orbit' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
+        el.dataset.course=courseId;el.dataset.terrain=hole.terrain?.theme||'flat';el.dataset.cameraMode = portrait ? 'portrait' : orbit.current.active && me?.phase!=='moving' ? 'orbit' : full ? 'overview' : me?.phase==='moving' ? 'flight' : el.dataset.reaction ? 'reaction' : 'address';
         flag.rotation.y = Math.sin(now / 700) * .12;
         sportsFx.update(now,current?.sportsEvents,current?.players.map(p=>({id:p.id,x:p.x,y:-p.z}))??[],me?{x:ball.x,y:ball.y+.25,z:ball.z}:undefined,!!me?.shotSpecial&&me.phase==='moving'&&!current?.paused);el.dataset.sportsFx=String(sportsFx.group.userData.ready===true);scenery?.update(now);animatedWater.update(now/1000);el.dataset.blenderModels=String(scenery?.library.ready?scenery.library.group.userData.models:0);el.dataset.blenderAnimations=String(scenery?.library.group.userData.animations||0);renderer.render(scene, camera); frame = requestAnimationFrame(draw);
       }; frame = requestAnimationFrame(draw);
     } catch (error) { console.error('Golf renderer initialization failed', error); setFailed(true); }
     return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); el.removeEventListener('webglcontextlost', lost); markers.forEach(m=>m.rig.dispose()); sportsFx.dispose(); golferAssets.dispose(); scenery?.dispose(); resources.forEach(r => r.dispose()); renderer?.dispose(); };
-  }, [holeIndex, portrait, quality]);
+  }, [holeIndex, courseId, portrait, quality]);
   const endDrag=(event:React.PointerEvent<HTMLCanvasElement>)=>{if(orbit.current.drag?.id===event.pointerId)orbit.current.drag=null;};
   return <><canvas className="gg-canvas" ref={canvas}
     onPointerDown={e=>{if(portrait||e.button!==0||orbit.current.drag)return;if(e.nativeEvent.isTrusted)e.currentTarget.setPointerCapture(e.pointerId);orbit.current.drag={id:e.pointerId,x:e.clientX,y:e.clientY};}}
@@ -240,7 +248,7 @@ export default function GolfCanvas({ view, selfId, aim, overview, club = 'driver
       const o=orbit.current,d=o.drag;if(!d||d.id!==e.pointerId)return;
       const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.hypot(dx,dy)<2)return;
       if(state.current.overview){
-        const pan=overviewPan.current,hole=HOLES[holeIndex];
+        const pan=overviewPan.current,hole=courseHoles(courseId)[holeIndex];
         pan.x=THREE.MathUtils.clamp(pan.x+dx*pan.unitsPerPixel,-100-hole.cup.x/2,100-hole.cup.x/2);
         pan.z=THREE.MathUtils.clamp(pan.z+dy*pan.unitsPerPixel,-40-hole.cup.z/2,hole.cup.z/2+60);
       }else{o.active=true;o.yaw-=dx*.008;o.pitch=Math.max(.15,Math.min(1.45,o.pitch+dy*.008));}

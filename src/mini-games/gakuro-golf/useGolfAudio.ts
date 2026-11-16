@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { audioService, type BgmPlaybackOptions } from '../../services/audioService';
-import { HOLES } from './course';
+import { holeFor } from './course';
 import type { GolfView, PublicGolfer } from './engine';
 type Track = { type: Parameters<typeof audioService.playBGM>[0]; options: BgmPlaybackOptions };
 // Calm openers, brighter middle holes and a warm final stretch; existing game assets only.
@@ -28,7 +28,7 @@ const clubhouse: Track = {type:'paper_plane_setup',options:{mode:'NEW',theme:'el
 const results: Track = {type:'victory',options:{mode:'NEW',theme:'elementary'}};
 export function golfAudioCues(before: PublicGolfer | undefined, next: PublicGolfer | undefined): Parameters<typeof audioService.playGolfSound>[0][] {
   if (!before || !next || before.id !== next.id || before.hole !== next.hole) return [];
-  if (next.scores.length > before.scores.length && !next.capped) return [next.strokes < HOLES[next.hole].par ? 'birdie' : 'cup'];
+  if (next.scores.length > before.scores.length && !next.capped) return [next.strokes < holeFor(next).par ? 'birdie' : 'cup'];
   if (next.penalty && (!before.penalty || next.shotId !== before.shotId)) {
     return [next.penaltyKind === 'water' ? 'water' : 'ob'];
   }

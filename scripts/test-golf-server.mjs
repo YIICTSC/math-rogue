@@ -5,7 +5,7 @@ import { build } from 'esbuild';
 import { WebSocket } from 'ws';
 await mkdir('tmp/golf-server', { recursive: true });
 await build({ entryPoints: ['server/golfRooms.ts'], outfile: 'tmp/golf-server/adapter.mjs', bundle: true, platform: 'node', format: 'esm', target: 'node22', packages: 'external', define: { 'import.meta.env': '{}' } });
-const { createGolfServer } = await import('../tmp/golf-server/adapter.mjs');
+const { createGolfServer,GOLF_SERVER_PROTOCOL } = await import('../tmp/golf-server/adapter.mjs');
 const adapter = createGolfServer({ allowedOrigins: new Set(['https://golf.test']), idleMs: 20000 });
 const server = createHttpServer((_req, res) => { res.writeHead(200); res.end('ok'); });
 server.on('upgrade', (req, socket, head) => {
@@ -22,13 +22,16 @@ async function connect(hello, origin = 'https://golf.test') {
   socket.on('message', raw => { const p = JSON.parse(raw.toString()); if (p.type === 'connected') Object.assign(client, { id: p.id, code: p.code, host: p.host }); if (['init', 'state'].includes(p.type)) client.view = p.state; if (p.type === 'error') client.errors.push(p.message); });
   socket.on('close', () => { client.closed = true; }); socket.on('error', () => {});
   await new Promise(resolve => { socket.once('open', resolve); socket.once('close', resolve); });
-  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: 3, ...hello }));
+  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: GOLF_SERVER_PROTOCOL, terrain:1, ...hello }));
   await wait(() => client.view || client.closed || client.errors.length, 'handshake'); return client;
 }
 const send = (c, d) => c.socket.send(JSON.stringify(d));
 try {
   const denied = await connect({ create: true, name: 'Denied' }, 'https://invalid.test'); assert(denied.closed); assert.equal(adapter.roomCount, 0);
   const host = await connect({ create: true, name: 'Host' }); assert(host.host);
+  const legacy=await connect({create:false,code:host.code,name:'Legacy',terrain:undefined});assert(legacy.view,'older clients still connect to classic rooms');send(host,{type:'course',course:'adventure'});await wait(()=>host.errors.some(s=>s.includes('最新版')));assert.equal(host.view.course,'classic');legacy.socket.close();await wait(()=>host.view.players.every(p=>p.id!==legacy.id));
+  send(host, {type:'course',course:'adventure'});await wait(()=>host.view.course==='adventure');assert.equal(host.view.players[0].course,'adventure');const blockedLegacy=await connect({create:false,code:host.code,name:'Legacy',terrain:undefined});assert(blockedLegacy.closed||blockedLegacy.errors.length,'older clients cannot misrender an adventure room');
+  send(host,{type:'course',course:'classic'});await wait(()=>host.view.course==='classic');
   send(host, { type: 'lesson', selection: { mode: 'INVALID' } }); await wait(() => host.errors.length); assert.equal(host.view.title, '');
   const selection = { mode: 'ADDITION', assignment: { title: 'Server lesson', units: [], customProblems: [{ id: 'custom', question: '1 + 1 = ?', answer: '2', options: ['3', '4', '5'] }] } };
   send(host, { type: 'lesson', selection }); await wait(() => host.view.title === 'Server lesson');

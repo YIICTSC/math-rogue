@@ -1,6 +1,6 @@
 import {sportsEvent,type SportsEventBuffer} from '../shared/sportsEvents';
 import { validLesson, type KartLesson, type KartQuestion } from '../gakuro-kart/learning';
-import { HOLES, distance, surface, type Point } from './course';
+import { HOLES, distance, surface, holeFor, groundHeight, groundSlope, type CourseId, type Point } from './course';
 import { defaultAvatar, validAvatar, type KartAvatar } from '../gakuro-kart/avatar';
 export const MAX_PLAYERS = 40;
 export const MAX_STROKES = 12;
@@ -15,14 +15,14 @@ export type Club = keyof typeof CLUBS;
 export const benefits = (correct: number) => ({ power: [.55, .7, .85, 1][correct] ?? .55, spread: [9, 6, 3, .7][correct] ?? 9 });
 export type PlayerPhase = 'ready' | 'quiz' | 'aim' | 'moving' | 'holed' | 'finished';
 export interface Golfer {
-  id: string; name: string; slot: number; connected: boolean; spectator?: boolean; hole: number; strokes: number; scores: number[];
+  id: string; name: string; slot: number; connected: boolean; supportsTerrain?:boolean; spectator?: boolean; course?:CourseId; hole: number; strokes: number; scores: number[];
   x: number; y: number; z: number; vx: number; vy: number; vz: number;
   phase: PlayerPhase; shotsLeft: number; correct: number; totalCorrect: number; shotId: number;
   questionHistory?: string[]; lesson: KartLesson | null; answers: number[]; feedback: number | null;
   origin: Point; flightTime: number; penalty: boolean; penaltyKind: 'water' | 'ob' | null; capped: boolean;
   avatar: KartAvatar; shotClub: Club; shotAngle: number; shotSpin: number; shotImpact: number; shotQuality: 'nice' | 'good' | 'miss'; spinApplied: boolean; starEnergy?:number; shotSpecial?:boolean; specialLanding?: Point;
 }
-export interface GolfWorld extends SportsEventBuffer { practicePlayers?:Record<string,Golfer>; phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean; holeCount: number }
+export interface GolfWorld extends SportsEventBuffer { course?:CourseId; practicePlayers?:Record<string,Golfer>; phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean; holeCount: number }
 export type GolfCommand =
   | { type: 'avatar'; avatar: KartAvatar }
   | { type: 'quiz' }
@@ -30,23 +30,27 @@ export type GolfCommand =
   | { type: 'continue'; shotId: number; index: number }
   | { type: 'shot'; shotId: number; club: Club; angle: number; power: number; impact?: number; spin?: number; special?:boolean }
   | { type: 'next' };
-export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'spectator' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'shotsLeft' | 'penalty' | 'penaltyKind' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle' | 'shotSpin' | 'shotImpact' | 'shotQuality' | 'starEnergy' | 'shotSpecial'>>;
+export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'spectator' | 'course' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'shotsLeft' | 'penalty' | 'penaltyKind' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle' | 'shotSpin' | 'shotImpact' | 'shotQuality' | 'starEnergy' | 'shotSpecial'>>;
 export interface GolfView extends SportsEventBuffer {
-  practicePlayer?:PublicGolfer; observedId?: string | null; phase: GolfWorld['phase']; title: string; paused: boolean; holeCount: number; players: PublicGolfer[];
+  course?:CourseId; practicePlayer?:PublicGolfer; observedId?: string | null; phase: GolfWorld['phase']; title: string; paused: boolean; holeCount: number; players: PublicGolfer[];
   quiz: null | { shotId: number; index: number; question: Omit<KartQuestion, 'correct'>; selected: number | null; answer: number | null };
 }
-export const createGolf = (seed = 1): GolfWorld => ({ phase: 'lobby', players: Object.create(null), seed: seed >>> 0 || 1, title: '', paused: false, holeCount: 18 });
+export const createGolf = (seed = 1): GolfWorld => ({ course:'classic', phase: 'lobby', players: Object.create(null), seed: seed >>> 0 || 1, title: '', paused: false, holeCount: 18 });
 export function addPlayer(w: GolfWorld, id: string, name: string) {
   if (w.phase === 'result' || Object.hasOwn(w.players, id) || !id || id.length > 100 || ['__proto__', 'constructor', 'prototype'].includes(id) || typeof name!=='string') return false;
   if(Object.keys(w.players).length>=MAX_PLAYERS)for(const [pid,p]of Object.entries(w.players))if(!p.connected){delete w.players[pid];if(w.practicePlayers)delete w.practicePlayers[pid];}
   if(Object.keys(w.players).length>=MAX_PLAYERS)return false;
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
-  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', shotsLeft: 0, correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, penaltyKind: null, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0, shotSpin: 0, shotImpact: 0, shotQuality: 'nice', spinApplied: false, starEnergy:0, shotSpecial:false }; return true;
+  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, course:w.course||'classic', hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', shotsLeft: 0, correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, penaltyKind: null, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0, shotSpin: 0, shotImpact: 0, shotQuality: 'nice', spinApplied: false, starEnergy:0, shotSpecial:false }; w.players[id].y=groundHeight(holeFor(w.players[id]),w.players[id]);return true;
 }
 export function setSpectator(w: GolfWorld, id: string, enabled: boolean) {
   const p = w.players[id];
   if (w.phase !== 'lobby' || !p || typeof enabled !== 'boolean') return false;
   p.spectator = enabled; return true;
+}
+export function setCourse(w:GolfWorld,course:unknown){
+ if(w.phase!=='lobby'||!['classic','adventure'].includes(String(course))||course==='adventure'&&Object.values(w.players).some(p=>p.connected&&p.supportsTerrain===false))return false;
+ w.course=course as CourseId;for(const p of Object.values(w.players)){p.course=w.course;p.y=groundHeight(holeFor(p),p);}return true;
 }
 export function setHoleCount(w: GolfWorld, count: number) {
   if (w.phase !== 'lobby' || !Number.isInteger(count) || count < 1 || count > HOLES.length) return false;
@@ -67,14 +71,14 @@ export function disconnectPlayer(w: GolfWorld, id: string) {
 }
 function completeHole(p: Golfer) { p.phase = 'holed'; p.scores[p.hole] = p.strokes; p.vx = p.vy = p.vz = 0; }
 function settle(p: Golfer) {
-  p.vx = p.vy = p.vz = p.y = 0;
+  p.vx = p.vy = p.vz = 0;p.y=groundHeight(holeFor(p),p);
   if (p.strokes >= MAX_STROKES) { p.capped = true; completeHole(p); } else p.phase = p.shotsLeft > 0 ? 'aim' : 'ready';
 }
 function random(w: GolfWorld) { w.seed ^= w.seed << 13; w.seed ^= w.seed >>> 17; w.seed ^= w.seed << 5; return (w.seed >>> 0) / 4294967296; }
 function beginPractice(w:GolfWorld,official:Golfer,previous:Golfer){
  const p=structuredClone(previous);
  Object.assign(p,{hole:0,strokes:0,scores:[],phase:'ready',x:0,y:0,z:0,vx:0,vy:0,vz:0,shotsLeft:0,correct:0,totalCorrect:0,shotId:previous.shotId+1,lesson:null,answers:[],feedback:null,penalty:false,penaltyKind:null,capped:false,starEnergy:0,shotSpecial:false,specialLanding:undefined,flightTime:0});
- (w.practicePlayers||={})[official.id]=p;
+ p.y=groundHeight(holeFor(p),p);(w.practicePlayers||={})[official.id]=p;
 }
 export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (history: string[]) => KartLesson): boolean {
   if (!raw || typeof raw !== 'object') return false;
@@ -106,14 +110,14 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (hi
   }
   if (c.type === 'next' && p.phase === 'holed') {
     if (p.hole === w.holeCount - 1) p.phase = 'finished';
-    else { p.hole++; p.strokes = 0; p.x = p.y = p.z = 0; p.phase = p.shotsLeft > 0 ? 'aim' : 'ready'; p.penalty = p.capped = false; p.penaltyKind = null; }
+    else { p.hole++; p.strokes = 0; p.x = p.z = 0;p.y=groundHeight(holeFor(p),p); p.phase = p.shotsLeft > 0 ? 'aim' : 'ready'; p.penalty = p.capped = false; p.penaltyKind = null; }
     finishCheck(w);if(w.phase==='playing'&&p.phase==='finished')beginPractice(w,official,p);return true;
   }
   return false;
 }
 /** Shared by authoritative shots and the visual preview; the preview omits random aim spread. */
-export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'correct'>, club: Club, angle: number, power: number, spin = 0, impact = 0) {
-  const spec = CLUBS[club], lie = surface(HOLES[p.hole], p);
+export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'course' | 'correct'>, club: Club, angle: number, power: number, spin = 0, impact = 0) {
+  const spec = CLUBS[club], lie = surface(holeFor(p), p);
   const speed = spec.speed * Math.sqrt(power * benefits(p.correct).power * (1 - Math.abs(impact) * .2)) * (lie === 'sand' ? .65 : lie === 'rough' ? .82 : 1);
   const loft = (spec.loft - (club === 'putter' ? 0 : spin * 9)) * Math.PI / 180;
   return { vx: Math.sin(angle) * speed * Math.cos(loft), vz: Math.cos(angle) * speed * Math.cos(loft), vy: Math.sin(loft) * speed };
@@ -124,15 +128,15 @@ export function startSpecialShot(p: Golfer) {
   p.specialLanding = {x:p.origin.x + Math.sin(p.shotAngle)*travel,z:p.origin.z + Math.cos(p.shotAngle)*travel};
 }
 export function specialShotPosition(p: Golfer, at: number) {
-  const landing=p.specialLanding!,cup=HOLES[p.hole].cup;
+  const landing=p.specialLanding!,cup=holeFor(p).cup;
   const air=Math.min(1,at/3),roll=Math.max(0,Math.min(1,(at-3)/2.5));
-  if(at<3) return {x:p.origin.x+(landing.x-p.origin.x)*air,z:p.origin.z+(landing.z-p.origin.z)*air,y:Math.sin(Math.PI*air)*(34+Math.min(30,distance(p.origin,landing)*.2))};
+  if(at<3) return {x:p.origin.x+(landing.x-p.origin.x)*air,z:p.origin.z+(landing.z-p.origin.z)*air,y:groundHeight(holeFor(p),p.origin)*(1-air)+groundHeight(holeFor(p),landing)*air+Math.sin(Math.PI*air)*(34+Math.min(30,distance(p.origin,landing)*.2))};
   // Accelerate into a violent top/backspin recovery, then ease directly into the cup.
   const ease=roll*roll*(3-2*roll);
-  return {x:landing.x+(cup.x-landing.x)*ease,z:landing.z+(cup.z-landing.z)*ease,y:.5*Math.sin(Math.PI*roll)};
+  return {x:landing.x+(cup.x-landing.x)*ease,z:landing.z+(cup.z-landing.z)*ease,y:groundHeight(holeFor(p),{x:landing.x+(cup.x-landing.x)*ease,z:landing.z+(cup.z-landing.z)*ease})+.5*Math.sin(Math.PI*roll)};
 }
 function sinkShot(w: GolfWorld,p: Golfer) {
-  const hole=HOLES[p.hole];p.x=hole.cup.x;p.y=0;p.z=hole.cup.z;
+  const hole=holeFor(p);p.x=hole.cup.x;p.z=hole.cup.z;p.y=groundHeight(hole,p);
   const delta=p.strokes-hole.par;
   sportsEvent(w,'referee',p.shotId,p.id,p.strokes===1?'hole-in-one':delta<=-3?'albatross':delta===-2?'eagle':delta===-1?'birdie':delta===0?'par':delta===1?'bogey':delta===2?'double-bogey':'over-par');
   completeHole(p);
@@ -141,7 +145,7 @@ export function tick(w: GolfWorld, dt: number) {
   if (w.phase !== 'playing' || w.paused || !Number.isFinite(dt) || dt <= 0 || dt > .1) return;
   for (const p of [...Object.values(w.players),...Object.values(w.practicePlayers||{})]) {
     if (p.spectator || p.phase !== 'moving' || !p.connected) continue;
-    const hole = HOLES[p.hole], previous = { x: p.x, z: p.z };
+    const hole = holeFor(p), previous = { x: p.x, z: p.z };
     p.flightTime += dt;
     if(p.shotSpecial && p.specialLanding){
       const point=specialShotPosition(p,p.flightTime);
@@ -150,12 +154,16 @@ export function tick(w: GolfWorld, dt: number) {
       if(p.flightTime>=5.5)sinkShot(w,p);
       continue;
     }
-    if (p.y > 0 || p.vy > 0) { p.vy -= 9.8 * dt; p.vx += hole.wind.x * dt; p.vz += hole.wind.z * dt; }
+    const onGround=surface(hole,p)!=='ob'&&p.y<=groundHeight(hole,p)+.015&&p.vy<=.01;
+    if(onGround&&hole.terrain){const slope=groundSlope(hole,p),factor=9.8/(1+slope.x*slope.x+slope.z*slope.z);p.vx-=slope.x*factor*dt;p.vz-=slope.z*factor*dt;}
+    if (!onGround) { p.vy -= 9.8 * dt; p.vx += hole.wind.x * dt; p.vz += hole.wind.z * dt; }
     p.x += p.vx * dt; p.z += p.vz * dt; p.y += p.vy * dt;
-    if (p.y <= 0) {
-      p.y = 0;
+    const ground=groundHeight(hole,p),voidBelow=!!hole.terrain?.islands&&surface(hole,p)==='ob';
+    if(voidBelow&&p.y>ground-35)continue;
+    if (p.y <= ground || onGround) {
+      p.y = ground;
       const lie = surface(hole, p);
-      if (lie === 'water' || lie === 'ob') { p.x = p.origin.x; p.z = p.origin.z; p.strokes++; p.penalty = true; p.penaltyKind = lie; sportsEvent(w,'referee',p.shotId,p.id,lie==='water'?'water':'ob'); settle(p); continue; }
+      if (lie === 'water' || lie === 'ob') { p.x = p.origin.x; p.z = p.origin.z;p.y=groundHeight(hole,p); p.strokes++; p.penalty = true; p.penaltyKind = lie; sportsEvent(w,'referee',p.shotId,p.id,lie==='water'?'water':'ob'); settle(p); continue; }
       if (!p.spinApplied && p.shotClub !== 'putter') {
         p.spinApplied = true;
         const grip = lie === 'green' ? 1 : lie === 'fairway' ? .6 : lie === 'rough' ? .25 : .1;
@@ -165,7 +173,7 @@ export function tick(w: GolfWorld, dt: number) {
       const speed = Math.hypot(p.vx, p.vz), dx = p.x - previous.x, dz = p.z - previous.z;
       const t = Math.max(0, Math.min(1, ((hole.cup.x - previous.x) * dx + (hole.cup.z - previous.z) * dz) / (dx * dx + dz * dz || 1)));
       const near = distance(hole.cup, { x: previous.x + dx * t, z: previous.z + dz * t });
-      if (near < .9 && speed < 9 && Math.abs(p.vy) < 5) { sinkShot(w,p); continue; }
+      if (near < .9 && speed < 9 && Math.abs(p.y-groundHeight(hole,hole.cup))<1 && Math.abs(p.vy) < 5) { sinkShot(w,p); continue; }
       if (p.vy < -2) { p.vy *= -.25; p.vx *= .72; p.vz *= .72; } else {
         p.vy = 0; const friction = lie === 'green' ? 1.2 : lie === 'sand' ? 8 : lie === 'rough' ? 6 : 3;
         const ratio = Math.max(0, speed - friction * dt) / (speed || 1); p.vx *= ratio; p.vz *= ratio;
@@ -175,7 +183,7 @@ export function tick(w: GolfWorld, dt: number) {
     if (p.flightTime > 30) settle(p);
   }
 }
-const publicGolfer = ({ id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped, starEnergy, shotSpecial }:Golfer):PublicGolfer => ({ id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped, starEnergy, shotSpecial });
+const publicGolfer = ({ course, id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped, starEnergy, shotSpecial }:Golfer):PublicGolfer => ({ course, id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped, starEnergy, shotSpecial });
 export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
   const watched = w.players[id]?.spectator && target && w.players[target]?.connected && !w.players[target]?.spectator ? target : id;
   const p = w.phase==='playing' ? w.practicePlayers?.[watched] || w.players[watched] : w.players[watched]; let quiz: GolfView['quiz'] = null;
@@ -184,12 +192,12 @@ export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
     const { correct: _secret, ...question } = p.lesson.questions[index];
     quiz = { shotId: p.shotId, index, question, selected: p.feedback === null ? null : p.answers[index], answer: p.feedback };
   }
-  return { sportsSerial:w.sportsSerial,sportsEvents:structuredClone(w.sportsEvents),phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, practicePlayer:w.phase==='playing'&&w.practicePlayers?.[watched]?publicGolfer(w.practicePlayers[watched]):undefined, players: Object.values(w.players).map(publicGolfer) };
+  return { course:w.course, sportsSerial:w.sportsSerial,sportsEvents:structuredClone(w.sportsEvents),phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, practicePlayer:w.phase==='playing'&&w.practicePlayers?.[watched]?publicGolfer(w.practicePlayers[watched]):undefined, players: Object.values(w.players).map(publicGolfer) };
 }
 
 export function rematchGolf(w:GolfWorld,count=w.holeCount){
  if(w.phase!=='result'||!Number.isInteger(count)||count<1||count>HOLES.length)return false;
- const next=createGolf(w.seed+1);next.title=w.title;next.holeCount=count;
- for(const p of Object.values(w.players)){if(!p.connected)continue;addPlayer(next,p.id,p.name);Object.assign(next.players[p.id],{avatar:{...p.avatar},spectator:p.spectator,questionHistory:p.questionHistory,shotId:p.shotId+1});}
+ const next=createGolf(w.seed+1);next.title=w.title;next.holeCount=count;next.course=w.course;
+ for(const p of Object.values(w.players)){if(!p.connected)continue;addPlayer(next,p.id,p.name);Object.assign(next.players[p.id],{avatar:{...p.avatar},spectator:p.spectator,supportsTerrain:p.supportsTerrain,questionHistory:p.questionHistory,shotId:p.shotId+1});}
  w.practicePlayers=undefined;Object.assign(w,next);return true;
 }

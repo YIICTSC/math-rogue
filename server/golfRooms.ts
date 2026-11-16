@@ -6,9 +6,10 @@ import { GameMode } from '../src/types';
 import {sessionResult} from '../src/services/sessionResults';
 import {endSession} from './sessionEnd';
 import { buildLesson, type LessonSelection } from '../src/mini-games/gakuro-kart/questions';
-import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
+import { addPlayer, command, rematchGolf, createGolf, disconnectPlayer, MAX_PLAYERS, setCourse, setHoleCount, setSpectator, startGolf, tick, viewFor, type GolfWorld } from '../src/mini-games/gakuro-golf/engine';
 
-export const GOLF_SERVER_PROTOCOL = 3;
+import {GOLF_PROTOCOL} from '../src/mini-games/gakuro-golf/protocol';
+export const GOLF_SERVER_PROTOCOL = GOLF_PROTOCOL;
 export const GOLF_ENDPOINT = '/golf';
 const MAX_SETUP_BYTES = 512 * 1024;
 const modes = new Set<string>(Object.values(GameMode));
@@ -81,7 +82,9 @@ export function createGolfServer(options: GolfServerOptions = {}) {
           candidate = rooms.get(code);
           if (!candidate) { fail(m, '部屋が見つかりません。', true); return; }
         }
+        if(candidate.world.course==='adventure'&&d.terrain!==1){fail(m,'冒険コースには最新版のゴルフが必要です。',true);return;}
         if (candidate.members.size >= MAX_PLAYERS || !addPlayer(candidate.world, m.id, d.name)) { fail(m, '満員、またはラウンド終了済みです。', true); return; }
+        candidate.world.players[m.id].supportsTerrain=d.terrain===1;
         room = candidate; rooms.set(room.code, room); room.members.set(m.id, m); room.lastActive = now; clearTimeout(timeout);
         send(m, { type: 'connected', id: m.id, code: room.code, host: m.id === room.host }); emit(room, m); return;
       }
@@ -106,6 +109,7 @@ export function createGolfServer(options: GolfServerOptions = {}) {
           const selection = structuredClone(d.selection), sample = buildLesson(selection);
           room.selection = selection; room.world.title = sample.title; emit(room); return;
         }
+        if(d.type==='course'){if(m.id===room.host){if(setCourse(room.world,d.course))emit(room);else fail(m,'冒険コースには全員が最新版のゴルフを使う必要があります。');}return;}
         if (d.type === 'holes') {
           if (m.id === room.host && setHoleCount(room.world, d.count)) emit(room);
           return;

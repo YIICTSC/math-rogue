@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { impactAt, meterPosition, powerAt, MAX_SNAP, SWEEP_MS, MAX_HOLD_MS, IMPACT_CENTER } from './shotTiming';
 const TUTORIAL_POWER = .5;
 type TutorialStage = 'start' | 'power-moving' | 'power-wait' | 'impact-moving' | 'impact-wait';
-export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limit = 1, tutorial = false, specialTutorial = false }: { disabled: boolean; limit?: number; tutorial?: boolean; specialTutorial?: boolean; onShot: (power: number, impact: number) => void; onPower: (power: number) => void; onActive: (active: boolean) => void; t: (s: string) => string }) {
+export default function ShotMeter({ disabled, onShot, onPower, onActive, onPrepare, t, limit = 1, tutorial = false, specialTutorial = false }: { disabled: boolean; onPrepare?:()=>boolean; limit?: number; tutorial?: boolean; specialTutorial?: boolean; onShot: (power: number, impact: number) => void; onPower: (power: number) => void; onActive: (active: boolean) => void; t: (s: string) => string }) {
   const tutorialPower = specialTutorial ? 1 : TUTORIAL_POWER;
   const [active, setActive] = useState(false), [locked, setLocked] = useState<number | null>(null), [returning, setReturning] = useState(false);
   const state = useRef({ start: 0, power: null as number | null, active: false });
   const [tutorialStage, setTutorialStage] = useState<TutorialStage>('start');
   const guide = useRef<{stage: TutorialStage; stopped: number}>({stage: 'start', stopped: 0});
   const stage = (value: TutorialStage) => { guide.current.stage = value; setTutorialStage(value); };
-  const callbacks = useRef({ onShot, onPower, onActive }); callbacks.current = { onShot, onPower, onActive };
+  const callbacks = useRef({ onShot, onPower, onActive, onPrepare }); callbacks.current = { onShot, onPower, onActive, onPrepare };
   const lastInput = useRef(-Infinity);
   const cursor = useRef<HTMLSpanElement>(null);
   const cancel = () => { state.current.active = false; setActive(false); setLocked(null); setReturning(false); stage('start'); callbacks.current.onActive(false); };
@@ -18,7 +18,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     if (disabled) return;
     lastInput.current = performance.now();
     const s = state.current;
-    if (!s.active) { s.start = performance.now(); s.power = null; s.active = true; setActive(true); setLocked(null); setReturning(false); if (tutorial) stage('power-moving'); callbacks.current.onActive(true); return; }
+    if (!s.active) { if(callbacks.current.onPrepare?.()===false)return; s.start = performance.now(); s.power = null; s.active = true; setActive(true); setLocked(null); setReturning(false); if (tutorial) stage('power-moving'); callbacks.current.onActive(true); return; }
     if (tutorial) {
       if (guide.current.stage === 'power-wait') { s.power = tutorialPower; setLocked(tutorialPower); callbacks.current.onPower(tutorialPower); s.start = performance.now() - guide.current.stopped; stage('impact-moving'); }
       else if (guide.current.stage === 'impact-wait') finish(0);
@@ -33,7 +33,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
     window.addEventListener('learning-rogue:golf-meter',controller);
     return()=>window.removeEventListener('learning-rogue:golf-meter',controller);
   },[disabled,active]);
-  useEffect(()=>{if(active||disabled)return;const key=(e:KeyboardEvent)=>{if(e.repeat||!(e.code==='Enter'||e.code==='Space')||(e.target as Element)?.closest('input,textarea,select,[role=dialog],[data-meter-ignore]'))return;e.preventDefault();e.stopPropagation();tap();};document.addEventListener('keydown',key,true);return()=>document.removeEventListener('keydown',key,true);},[active,disabled]);
+  useEffect(()=>{if(active||disabled)return;const key=(e:KeyboardEvent)=>{if(e.repeat||!(e.code==='Enter'||e.code==='Space')||(e.target as Element)?.closest('textarea,input:not([type=range]),[contenteditable=true],[role=dialog]'))return;e.preventDefault();e.stopPropagation();tap();};document.addEventListener('keydown',key,true);return()=>document.removeEventListener('keydown',key,true);},[active,disabled]);
   useEffect(() => { if (disabled) cancel(); }, [disabled]);
   useEffect(() => {
     if (!active) return;
@@ -51,7 +51,7 @@ export default function ShotMeter({ disabled, onShot, onPower, onActive, t, limi
       if (m.expired) { finish(1); return; } frame = requestAnimationFrame(draw);
     };
     const pointer = (e: PointerEvent) => { if (e.button !== 0 || (e.target as Element).closest('[data-meter-ignore]') || (tutorial && !(e.target as Element).closest('.gg-meter-actions button'))) return; e.preventDefault(); e.stopPropagation(); tap(); };
-    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') cancel(); else if ((e.target as Element)?.closest('[data-meter-ignore]')) return; else if (!e.repeat && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); e.stopPropagation(); tap(); } };
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') cancel(); else if (e.code!=='Enter'&&(e.target as Element)?.closest('[data-meter-ignore]')) return; else if (!e.repeat && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); e.stopPropagation(); tap(); } };
     const visibility = () => { if (document.hidden) cancel(); };
     frame = requestAnimationFrame(draw); document.addEventListener('pointerdown', pointer, true); document.addEventListener('keydown', key, true); document.addEventListener('visibilitychange', visibility); window.addEventListener('blur', cancel);
     return () => { cancelAnimationFrame(frame); document.removeEventListener('pointerdown', pointer, true); document.removeEventListener('keydown', key, true); document.removeEventListener('visibilitychange', visibility); window.removeEventListener('blur', cancel); };
