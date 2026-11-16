@@ -254,7 +254,8 @@
     "test:lantern-war:cross-game-voices": "node scripts/test-lantern-cross-game-voices.mjs",
     "test:lantern-war:cross-game-audio:browser": "node scripts/test-lantern-cross-game-audio-browser.mjs",
     "test:golf:adventure": "node scripts/test-golf-adventure.mjs",
-    "test:golf:expansion:browser": "node scripts/test-golf-expansion-browser.mjs"
+    "test:golf:expansion:browser": "node scripts/test-golf-expansion-browser.mjs",
+    "test:golf:side:online": "node scripts/test-golf-side-online.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

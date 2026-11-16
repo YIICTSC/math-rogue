@@ -1,6 +1,9 @@
+import {SIDE_COURSES,REWARD_ITEMS,type Power,type RewardItem} from './side-golf/courses';
+import {createSideState,shootSide,tickSide,airBrake,rewindSide,attachSideBoard,type SideState} from './side-golf/physics';
+import {createSideBoard,tickSideBoard,type SideBoard} from './side-golf/debris';
 import {sportsEvent,type SportsEventBuffer} from '../shared/sportsEvents';
 import { validLesson, type KartLesson, type KartQuestion } from '../gakuro-kart/learning';
-import { HOLES, distance, surface, holeFor, groundHeight, groundSlope, type CourseId, type Point } from './course';
+import { HOLES, isSideCourse, sideHoleId, distance, surface, holeFor, groundHeight, groundSlope, type CourseId, type Point } from './course';
 import { defaultAvatar, validAvatar, type KartAvatar } from '../gakuro-kart/avatar';
 export const MAX_PLAYERS = 40;
 export const MAX_STROKES = 12;
@@ -15,24 +18,28 @@ export type Club = keyof typeof CLUBS;
 export const benefits = (correct: number) => ({ power: [.55, .7, .85, 1][correct] ?? .55, spread: [9, 6, 3, .7][correct] ?? 9 });
 export type PlayerPhase = 'ready' | 'quiz' | 'aim' | 'moving' | 'holed' | 'finished';
 export interface Golfer {
-  id: string; name: string; slot: number; connected: boolean; supportsTerrain?:boolean; spectator?: boolean; course?:CourseId; hole: number; strokes: number; scores: number[];
+  id: string; name: string; slot: number; connected: boolean; supportsTerrain?:boolean; supportsSide?:boolean; side?:SideState; reward?:{id:number;hole:number;options:RewardItem[]}; spectator?: boolean; course?:CourseId; hole: number; strokes: number; scores: number[];
   x: number; y: number; z: number; vx: number; vy: number; vz: number;
   phase: PlayerPhase; shotsLeft: number; correct: number; totalCorrect: number; shotId: number;
   questionHistory?: string[]; lesson: KartLesson | null; answers: number[]; feedback: number | null;
   origin: Point; flightTime: number; penalty: boolean; penaltyKind: 'water' | 'ob' | null; capped: boolean;
   avatar: KartAvatar; shotClub: Club; shotAngle: number; shotSpin: number; shotImpact: number; shotQuality: 'nice' | 'good' | 'miss'; spinApplied: boolean; starEnergy?:number; shotSpecial?:boolean; specialLanding?: Point;
 }
-export interface GolfWorld extends SportsEventBuffer { course?:CourseId; practicePlayers?:Record<string,Golfer>; phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean; holeCount: number }
+export interface GolfWorld extends SportsEventBuffer { sideBoards?:Record<string,SideBoard>;course?:CourseId; practicePlayers?:Record<string,Golfer>; phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean; holeCount: number }
 export type GolfCommand =
   | { type: 'avatar'; avatar: KartAvatar }
   | { type: 'quiz' }
   | { type: 'answer'; shotId: number; index: number; option: number }
   | { type: 'continue'; shotId: number; index: number }
   | { type: 'shot'; shotId: number; club: Club; angle: number; power: number; impact?: number; spin?: number; special?:boolean }
-  | { type: 'next' };
+  | { type: 'next' }
+  | { type:'side-shot';shotId:number;angle:number;power:number;ball:Power;special?:boolean }
+  | { type:'side-brake';shotId:number }
+  | { type:'side-undo';shotId:number }
+  | { type:'reward';id:number;option:number };
 export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'spectator' | 'course' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'shotsLeft' | 'penalty' | 'penaltyKind' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle' | 'shotSpin' | 'shotImpact' | 'shotQuality' | 'starEnergy' | 'shotSpecial'>>;
 export interface GolfView extends SportsEventBuffer {
-  course?:CourseId; practicePlayer?:PublicGolfer; observedId?: string | null; phase: GolfWorld['phase']; title: string; paused: boolean; holeCount: number; players: PublicGolfer[];
+  sideState?:SideState;reward?:Golfer['reward'];sideVersion?:1;course?:CourseId; practicePlayer?:PublicGolfer; observedId?: string | null; phase: GolfWorld['phase']; title: string; paused: boolean; holeCount: number; players: PublicGolfer[];
   quiz: null | { shotId: number; index: number; question: Omit<KartQuestion, 'correct'>; selected: number | null; answer: number | null };
 }
 export const createGolf = (seed = 1): GolfWorld => ({ course:'classic', phase: 'lobby', players: Object.create(null), seed: seed >>> 0 || 1, title: '', paused: false, holeCount: 18 });
@@ -41,7 +48,7 @@ export function addPlayer(w: GolfWorld, id: string, name: string) {
   if(Object.keys(w.players).length>=MAX_PLAYERS)for(const [pid,p]of Object.entries(w.players))if(!p.connected){delete w.players[pid];if(w.practicePlayers)delete w.practicePlayers[pid];}
   if(Object.keys(w.players).length>=MAX_PLAYERS)return false;
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
-  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, course:w.course||'classic', hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', shotsLeft: 0, correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, penaltyKind: null, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0, shotSpin: 0, shotImpact: 0, shotQuality: 'nice', spinApplied: false, starEnergy:0, shotSpecial:false }; w.players[id].y=groundHeight(holeFor(w.players[id]),w.players[id]);return true;
+  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, course:w.course||'classic', hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', shotsLeft: 0, correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, penaltyKind: null, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0, shotSpin: 0, shotImpact: 0, shotQuality: 'nice', spinApplied: false, starEnergy:0, shotSpecial:false }; w.players[id].y=groundHeight(holeFor(w.players[id]),w.players[id]);if(isSideCourse(w.course))resetSide(w,w.players[id]);return true;
 }
 export function setSpectator(w: GolfWorld, id: string, enabled: boolean) {
   const p = w.players[id];
@@ -49,8 +56,8 @@ export function setSpectator(w: GolfWorld, id: string, enabled: boolean) {
   p.spectator = enabled; return true;
 }
 export function setCourse(w:GolfWorld,course:unknown){
- if(w.phase!=='lobby'||!['classic','adventure'].includes(String(course))||course==='adventure'&&Object.values(w.players).some(p=>p.connected&&p.supportsTerrain===false))return false;
- w.course=course as CourseId;for(const p of Object.values(w.players)){p.course=w.course;p.y=groundHeight(holeFor(p),p);}return true;
+ if(w.phase!=='lobby'||!['classic','adventure','side-1','side-2','side-3','side-4'].includes(String(course))||isSideCourse(String(course))&&Object.values(w.players).some(p=>p.connected&&p.supportsSide===false)||course==='adventure'&&Object.values(w.players).some(p=>p.connected&&p.supportsTerrain===false))return false;
+ w.course=course as CourseId;w.sideBoards={};for(const p of Object.values(w.players)){p.course=w.course;p.reward=undefined;p.side=undefined;if(isSideCourse(w.course))resetSide(w,p);else p.y=groundHeight(holeFor(p),p);}return true;
 }
 export function setHoleCount(w: GolfWorld, count: number) {
   if (w.phase !== 'lobby' || !Number.isInteger(count) || count < 1 || count > HOLES.length) return false;
@@ -69,6 +76,10 @@ export function disconnectPlayer(w: GolfWorld, id: string) {
   if(w.practicePlayers?.[id])w.practicePlayers[id].connected=false;
   finishCheck(w);
 }
+function sideBoard(w:GolfWorld,p:Golfer){const key=(w.practicePlayers?.[p.id]===p?'practice:':'')+p.hole;return (w.sideBoards||={})[key]||((w.sideBoards||={})[key]=createSideBoard());}
+function resetSide(w:GolfWorld,p:Golfer,carry=false){const inventory=carry&&p.side?{...p.side.inventory}:undefined;p.side=createSideState(sideHoleId(p.course,p.hole));if(inventory)p.side.inventory=inventory;attachSideBoard(p.side,sideBoard(w,p));syncSide(p);}
+function syncSide(p:Golfer){const s=p.side!;p.x=s.ball.x;p.y=s.ball.y;p.z=0;p.vx=s.ball.vx;p.vy=s.ball.vy;p.vz=0;p.strokes=s.strokes;p.flightTime=s.flight;p.origin={x:s.origin.x,z:s.origin.y};p.capped=s.conceded;}
+function completeSide(w:GolfWorld,p:Golfer){syncSide(p);completeHole(p);if(!p.capped){const options=[...REWARD_ITEMS];for(let i=options.length-1;i>0;i--){const j=Math.floor(random(w)*(i+1));[options[i],options[j]]=[options[j],options[i]];}p.reward={id:p.shotId,hole:p.hole,options:options.slice(0,3)};const delta=p.strokes-holeFor(p).par;sportsEvent(w,'referee',p.shotId,p.id,p.strokes===1?'hole-in-one':delta<=-3?'albatross':delta===-2?'eagle':delta===-1?'birdie':delta===0?'par':delta===1?'bogey':delta===2?'double-bogey':'over-par');}}
 function completeHole(p: Golfer) { p.phase = 'holed'; p.scores[p.hole] = p.strokes; p.vx = p.vy = p.vz = 0; }
 function settle(p: Golfer) {
   p.vx = p.vy = p.vz = 0;p.y=groundHeight(holeFor(p),p);
@@ -78,7 +89,7 @@ function random(w: GolfWorld) { w.seed ^= w.seed << 13; w.seed ^= w.seed >>> 17;
 function beginPractice(w:GolfWorld,official:Golfer,previous:Golfer){
  const p=structuredClone(previous);
  Object.assign(p,{hole:0,strokes:0,scores:[],phase:'ready',x:0,y:0,z:0,vx:0,vy:0,vz:0,shotsLeft:0,correct:0,totalCorrect:0,shotId:previous.shotId+1,lesson:null,answers:[],feedback:null,penalty:false,penaltyKind:null,capped:false,starEnergy:0,shotSpecial:false,specialLanding:undefined,flightTime:0});
- p.y=groundHeight(holeFor(p),p);(w.practicePlayers||={})[official.id]=p;
+ p.reward=undefined;p.side=undefined;p.y=groundHeight(holeFor(p),p);(w.practicePlayers||={})[official.id]=p;if(isSideCourse(p.course))resetSide(w,p);
 }
 export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (history: string[]) => KartLesson): boolean {
   if (!raw || typeof raw !== 'object') return false;
@@ -100,6 +111,18 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (hi
   if (c.type === 'continue' && p.phase === 'quiz' && p.feedback !== null && c.shotId === p.shotId && c.index === p.answers.length - 1) {
     p.feedback = null; if (p.answers.length === 3) { p.phase = 'aim'; p.shotsLeft = 3; p.lesson = null; } return true;
   }
+  if(isSideCourse(p.course)){
+    const side=p.side;if(!side)return false;
+    if(c.type==='side-shot'){
+      if(p.phase!=='aim'||p.shotsLeft<1||c.shotId!==p.shotId||!Number.isFinite(c.angle)||Math.abs(c.angle)>180||!Number.isFinite(c.power)||c.power<.05||c.power>1||!['normal','sticky','ice','heavy','bounce','float','phase'].includes(c.ball)||c.special!==undefined&&typeof c.special!=='boolean'||c.special&&(p.starEnergy??0)<.999)return false;
+      if(!shootSide(side,c.angle,c.power,c.special?'special':c.ball,p.correct))return false;
+      if(c.special)p.starEnergy=0;p.shotSpecial=!!c.special;p.shotQuality='nice';p.shotsLeft--;p.shotId++;p.phase='moving';p.penalty=false;p.penaltyKind=null;syncSide(p);sportsEvent(w,c.special?'special':'action',p.shotId,p.id);return true;
+    }
+    if(c.type==='side-brake'){if(p.phase!=='moving'||c.shotId!==p.shotId||!airBrake(side))return false;syncSide(p);return true;}
+    if(c.type==='side-undo'){if(!['aim','moving','ready'].includes(p.phase)||c.shotId!==p.shotId||!rewindSide(side))return false;p.shotsLeft=Math.min(3,p.shotsLeft+1);p.shotId++;p.phase='aim';p.penalty=false;p.penaltyKind=null;syncSide(p);return true;}
+    if(c.type==='reward'){if(p.phase!=='holed'||!p.reward||p.reward.id!==c.id||!Number.isInteger(c.option)||c.option<0||c.option>2)return false;const item=p.reward.options[c.option];side.inventory[item]=Math.min(20,side.inventory[item]+1);p.reward=undefined;return true;}
+    if(c.type==='shot')return false;
+  }
   if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1 && (c.impact === undefined || Number.isFinite(c.impact) && Math.abs(c.impact) <= 1) && (c.spin === undefined || Number.isFinite(c.spin) && Math.abs(c.spin) <= 1) && (c.special===undefined||typeof c.special==='boolean')) {
     const bonus = benefits(p.correct), impact = c.impact ?? 0, spin = c.club === 'putter' ? 0 : c.spin ?? 0;
     const angle = c.angle + impact * 12 * Math.PI / 180 + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
@@ -108,9 +131,9 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: (hi
     sportsEvent(w,p.shotSpecial?'special':'action',p.shotId,p.id); if(p.shotQuality==='nice'&&c.club!=='putter')sportsEvent(w,'referee',p.shotId,p.id,Math.abs(impact)<.06?'perfect':'nice');
     p.strokes++; p.shotsLeft--; p.shotId++; p.phase = 'moving'; p.flightTime = 0; p.penalty = false; p.penaltyKind = null; return true;
   }
-  if (c.type === 'next' && p.phase === 'holed') {
+  if (c.type === 'next' && p.phase === 'holed'&&!p.reward) {
     if (p.hole === w.holeCount - 1) p.phase = 'finished';
-    else { p.hole++; p.strokes = 0; p.x = p.z = 0;p.y=groundHeight(holeFor(p),p); p.phase = p.shotsLeft > 0 ? 'aim' : 'ready'; p.penalty = p.capped = false; p.penaltyKind = null; }
+    else { p.hole++; p.strokes = 0; p.x = p.z = 0;p.y=groundHeight(holeFor(p),p); p.phase = p.shotsLeft > 0 ? 'aim' : 'ready'; p.penalty = p.capped = false; p.penaltyKind = null;if(isSideCourse(p.course))resetSide(w,p,true); }
     finishCheck(w);if(w.phase==='playing'&&p.phase==='finished')beginPractice(w,official,p);return true;
   }
   return false;
@@ -143,7 +166,18 @@ function sinkShot(w: GolfWorld,p: Golfer) {
 }
 export function tick(w: GolfWorld, dt: number) {
   if (w.phase !== 'playing' || w.paused || !Number.isFinite(dt) || dt <= 0 || dt > .1) return;
-  for (const p of [...Object.values(w.players),...Object.values(w.practicePlayers||{})]) {
+  const golfers=[...Object.values(w.players),...Object.values(w.practicePlayers||{})];
+  if(isSideCourse(w.course)){
+    const boards=new Map<SideBoard,number>();for(const p of golfers)if(p.connected&&!p.spectator&&p.side)boards.set(sideBoard(w,p),p.side.courseId);
+    for(const [board,id]of boards)tickSideBoard(board,id,dt);
+    for(const p of golfers){if(!p.side||p.spectator||!p.connected||p.phase==='finished')continue;const before=p.side.serial;if(p.phase==='quiz'){attachSideBoard(p.side,sideBoard(w,p));continue;}tickSide(p.side,dt,sideBoard(w,p));syncSide(p);
+      if(p.phase==='aim'&&p.side.phase==='flight'){p.phase='moving';p.shotSpecial=false;}
+      if(p.phase==='moving'&&p.side.phase==='holed'){completeSide(w,p);continue;}
+      if(p.phase==='moving'&&p.side.phase==='aim'){p.phase=p.shotsLeft>0?'aim':'ready';if(p.side.event==='water'&&p.side.serial!==before){p.penalty=true;p.penaltyKind='ob';}}
+    }
+    return;
+  }
+  for (const p of golfers) {
     if (p.spectator || p.phase !== 'moving' || !p.connected) continue;
     const hole = holeFor(p), previous = { x: p.x, z: p.z };
     p.flightTime += dt;
@@ -183,6 +217,7 @@ export function tick(w: GolfWorld, dt: number) {
     if (p.flightTime > 30) settle(p);
   }
 }
+const publicSide=(s:SideState):SideState=>{const copy=structuredClone(s);copy.canUndo=!!s.previous;copy.previous=undefined;return copy;};
 const publicGolfer = ({ course, id, name, slot, connected, spectator, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped, starEnergy, shotSpecial }:Golfer):PublicGolfer => ({ course, id, name, slot, connected, spectator, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, shotSpin, shotImpact, shotQuality, phase, correct, totalCorrect, shotId, shotsLeft, penalty, penaltyKind, capped, starEnergy, shotSpecial });
 export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
   const watched = w.players[id]?.spectator && target && w.players[target]?.connected && !w.players[target]?.spectator ? target : id;
@@ -192,12 +227,12 @@ export function viewFor(w: GolfWorld, id: string, target?: string): GolfView {
     const { correct: _secret, ...question } = p.lesson.questions[index];
     quiz = { shotId: p.shotId, index, question, selected: p.feedback === null ? null : p.answers[index], answer: p.feedback };
   }
-  return { course:w.course, sportsSerial:w.sportsSerial,sportsEvents:structuredClone(w.sportsEvents),phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, practicePlayer:w.phase==='playing'&&w.practicePlayers?.[watched]?publicGolfer(w.practicePlayers[watched]):undefined, players: Object.values(w.players).map(publicGolfer) };
+  return { sideVersion:1,sideState:p?.side?publicSide(p.side):undefined,reward:p?.reward?structuredClone(p.reward):undefined,course:w.course, sportsSerial:w.sportsSerial,sportsEvents:structuredClone(w.sportsEvents),phase: w.phase, title: w.title, paused: w.paused, holeCount: w.holeCount, quiz, observedId: watched === id ? null : watched, practicePlayer:w.phase==='playing'&&w.practicePlayers?.[watched]?publicGolfer(w.practicePlayers[watched]):undefined, players: Object.values(w.players).map(publicGolfer) };
 }
 
 export function rematchGolf(w:GolfWorld,count=w.holeCount){
  if(w.phase!=='result'||!Number.isInteger(count)||count<1||count>HOLES.length)return false;
  const next=createGolf(w.seed+1);next.title=w.title;next.holeCount=count;next.course=w.course;
- for(const p of Object.values(w.players)){if(!p.connected)continue;addPlayer(next,p.id,p.name);Object.assign(next.players[p.id],{avatar:{...p.avatar},spectator:p.spectator,supportsTerrain:p.supportsTerrain,questionHistory:p.questionHistory,shotId:p.shotId+1});}
- w.practicePlayers=undefined;Object.assign(w,next);return true;
+ for(const p of Object.values(w.players)){if(!p.connected)continue;addPlayer(next,p.id,p.name);Object.assign(next.players[p.id],{avatar:{...p.avatar},spectator:p.spectator,supportsTerrain:p.supportsTerrain,supportsSide:p.supportsSide,questionHistory:p.questionHistory,shotId:p.shotId+1});}
+ w.practicePlayers=undefined;w.sideBoards=undefined;Object.assign(w,next);return true;
 }

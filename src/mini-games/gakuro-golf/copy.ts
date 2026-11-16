@@ -154,5 +154,31 @@ copy.push(
 );
 for(const tour of TOURS)copy.push([tour.name,tour.english,tour.hiragana],[tour.hint,tour.hintEn,tour.hintHi]);
 for(const item of Object.values(ITEM_INFO))copy.push([item.name,item.en,item.hi],[item.hint,item.hintEn,item.hintHi]);
+copy.push(
+ ["2D・全72ホール", "2D · 72 holes", "2D・ぜん72ホール"],
+ ["2Dコースを選ぶ", "Choose a 2D course", "2Dコースを えらぶ"],
+ ["2D・草原と氷晶", "2D · Meadows & Ice", "2D・そうげんと ひょうしょう"],
+ ["2D・遺跡と雲海", "2D · Ruins & Clouds", "2D・いせきと うんかい"],
+ ["2D・工房と星屑", "2D · Clockwork & Stardust", "2D・こうぼうと ほしくず"],
+ ["2D・紅蓮と虹", "2D · Ember & Rainbow", "2D・ぐれんと にじ"],
+ ["2Dコースには最新版のゴルフが必要です。", "2D courses require the latest golf version.", "2Dコースには さいしんばんの ゴルフが ひつようです。"],
+ ["2Dコースには全員が最新版のゴルフを使う必要があります。", "Everyone needs the latest golf version for 2D courses.", "2Dコースには ぜんいんが さいしんばんの ゴルフを つかう ひつようが あります。"],
+ ["2Dコースはホスト通信か更新済みサーバーで遊べます。", "Use host networking or an updated server for 2D courses.", "2Dコースは ホストつうしんか こうしんずみサーバーで あそべます。"],
+ ["打球の行方を見届けよう。", "Watch your shot fly.", "だきゅうの ゆくえを みとどけよう。"],
+ ["3問に答えてショットを準備しよう。", "Answer three questions to prepare your shots.", "3もんに こたえて ショットを じゅんびしよう。"],
+ ["左右で発射角。ショットを押してパワーを決めよう。", "Set the launch angle, then press shot to choose power.", "さゆうで はっしゃかく。ショットを おして パワーを きめよう。"],
+ ["次のプレイヤー", "Next player", "つぎの プレイヤー"],
+ ["破砕スペシャル", "Shatter special", "はさいスペシャル"],
+ ["正解6問で地形を砕くスペシャルショット！", "Six correct answers unlock a terrain-shattering special shot!", "せいかい6もんで ちけいを くだく スペシャルショット！"],
+ ["地形を砕いて突破。散った破片も足場になる！", "Smash through terrain. Scattered fragments become footholds!", "ちけいを くだいて とっぱ。ちった はへんも あしばに なる！"],
+ ["正解6問でスペシャルショット！", "Six correct answers unlock a special shot!", "せいかい6もんで スペシャルショット！"],
+ ["ホールクリア報酬", "Hole clear reward", "ホールクリアほうしゅう"],
+ ["3枚から1枚、次の一打の力を。", "Choose one card to power your next shot.", "3まいから1まい、つぎの いちだの ちからを。"],
+ ["選んだアイテムを1つ獲得。次のホールへ持ち越せます。", "Gain one of the chosen item and carry it to the next hole.", "えらんだ アイテムを 1つ かくとく。つぎの ホールへ もちこせます。"],
+ ["プレイヤーがカードを選んでいます。", "The player is choosing a card.", "プレイヤーが カードを えらんでいます。"],
+ ["初期アイテムはゼロ。ホールクリア後に3枚から1枚を選んで獲得。問題正解ではアイテムは増えません。", "Start with no items. Clear a hole and choose one of three cards. Correct answers do not grant items.", "しょきアイテムは ゼロ。ホールクリアごに 3まいから1まいを えらんで かくとく。もんだいせいかいでは アイテムは ふえません。"],
+ ["正解6問で破砕スペシャル。ボタンを選んでショットすると、地形を砕いて突破できます。", "Six correct answers unlock Shatter. Select its button and shoot to smash through terrain.", "せいかい6もんで はさいスペシャル。ボタンを えらんで ショットすると、ちけいを くだいて とっぱできます。"],
+ ["発射角のみを表示します。飛距離と跳ね返りは自分の感覚で狙おう。", "Only the launch angle is shown. Judge distance and rebounds yourself.", "はっしゃかくのみを ひょうじします。ひきょりと はねかえりは じぶんの かんかくで ねらおう。"]
+);
 export const GOLF_ENGLISH: Record<string, string> = Object.fromEntries(copy.map(([ja, en]) => [ja, en]));
 export const GOLF_HIRAGANA: Record<string, string> = Object.fromEntries(copy.map(([ja, , hira]) => [ja, hira]));

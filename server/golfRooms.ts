@@ -1,3 +1,4 @@
+import {isSideCourse} from '../src/mini-games/gakuro-golf/course';
 import { randomInt, randomUUID } from 'node:crypto';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
@@ -82,9 +83,10 @@ export function createGolfServer(options: GolfServerOptions = {}) {
           candidate = rooms.get(code);
           if (!candidate) { fail(m, '部屋が見つかりません。', true); return; }
         }
+        if(isSideCourse(candidate.world.course)&&d.sideGolf!==1){fail(m,'2Dコースには最新版のゴルフが必要です。',true);return;}
         if(candidate.world.course==='adventure'&&d.terrain!==1){fail(m,'冒険コースには最新版のゴルフが必要です。',true);return;}
         if (candidate.members.size >= MAX_PLAYERS || !addPlayer(candidate.world, m.id, d.name)) { fail(m, '満員、またはラウンド終了済みです。', true); return; }
-        candidate.world.players[m.id].supportsTerrain=d.terrain===1;
+        candidate.world.players[m.id].supportsSide=d.sideGolf===1;candidate.world.players[m.id].supportsTerrain=d.terrain===1;
         room = candidate; rooms.set(room.code, room); room.members.set(m.id, m); room.lastActive = now; clearTimeout(timeout);
         send(m, { type: 'connected', id: m.id, code: room.code, host: m.id === room.host }); emit(room, m); return;
       }
@@ -109,7 +111,7 @@ export function createGolfServer(options: GolfServerOptions = {}) {
           const selection = structuredClone(d.selection), sample = buildLesson(selection);
           room.selection = selection; room.world.title = sample.title; emit(room); return;
         }
-        if(d.type==='course'){if(m.id===room.host){if(setCourse(room.world,d.course))emit(room);else fail(m,'冒険コースには全員が最新版のゴルフを使う必要があります。');}return;}
+        if(d.type==='course'){if(m.id===room.host){if(setCourse(room.world,d.course))emit(room);else fail(m,isSideCourse(d.course)?'2Dコースには全員が最新版のゴルフを使う必要があります。':'冒険コースには全員が最新版のゴルフを使う必要があります。');}return;}
         if (d.type === 'holes') {
           if (m.id === room.host && setHoleCount(room.world, d.count)) emit(room);
           return;

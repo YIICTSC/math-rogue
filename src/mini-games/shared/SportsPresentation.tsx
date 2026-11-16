@@ -8,12 +8,18 @@ import {audioService} from '../../services/audioService';
 import {sportsSpeaker,sportsVoicePath,sportsVoiceAvailable,SPORTS_HEROES} from './sportsVoices';
 import type {Sport,SportsEvent} from './sportsEvents';
 import {SportsVoiceQueue,type SportsVoiceCue} from './sportsVoiceQueue';
+import {DUNGEON_CHRONICLE_VOICE_ACTORS} from '../../data/dungeonChronicleVoiceActors';
 import './sportsPresentation.css';
 export interface SportsActor {id:string;name:string;avatar?:KartAvatar;owner?:string|null}
-export interface SportsPresentationProps {sport:Sport;stream:string|null;events?:SportsEvent[];actors:SportsActor[];paused?:boolean;languageMode:LanguageMode;focusActor?:string;viewerId?:string}
-export default function SportsPresentation({sport,stream,events,actors,paused=false,languageMode,focusActor,viewerId}:SportsPresentationProps){
+export type SportsReaction={key:string;hero:string;kind:'pickup'|'equip'|'cheer'|'recover'};
+export interface SportsPresentationProps {sport:Sport;stream:string|null;events?:SportsEvent[];actors:SportsActor[];paused?:boolean;languageMode:LanguageMode;focusActor?:string;viewerId?:string;reaction?:SportsReaction|null}
+export default function SportsPresentation({sport,stream,events,actors,paused=false,languageMode,focusActor,viewerId,reaction}:SportsPresentationProps){
  const t=(s:string)=>trans(s,languageMode),cursor=useRef<{stream:string|null;id:number}>({stream:null,id:0}),[cutin,setCutin]=useState<{key:string;speaker:string;name:string}|null>(null),currentActors=useRef(actors);currentActors.current=actors;
- const queue=useRef<SportsVoiceQueue|null>(null);if(!queue.current)queue.current=new SportsVoiceQueue(id=>audioService.playSportsVoiceFile(id),()=>audioService.stopSportsVoices());
+ const reactionSource=useRef(''),reactionCursor=useRef(''),voiceTicket=useRef(0);
+ const queue=useRef<SportsVoiceQueue|null>(null);if(!queue.current)queue.current=new SportsVoiceQueue(async id=>{
+  const ticket=++voiceTicket.current,[source,hero,action]=id.split(':');reactionSource.current=source==='chronicle'||source==='dash'?source:'';
+  try{return source==='chronicle'?await audioService.playDungeonChronicleVoiceFile(hero,action):source==='dash'?await audioService.playHomeDashVoice(hero,action as 'upgrade'|'damage'):await audioService.playSportsVoiceFile(id);}finally{if(ticket===voiceTicket.current)reactionSource.current='';}
+ },()=>{audioService.stopSportsVoices();if(reactionSource.current==='chronicle')audioService.stopDungeonChronicleVoices();if(reactionSource.current==='dash')audioService.stopHomeDashVoices();});
  useEffect(()=>{
   const silence=()=>queue.current?.cancel();const clear=()=>{silence();setCutin(null);};window.addEventListener('learning-rogue:sports-voice-muted',silence);document.addEventListener('visibilitychange',clear);window.addEventListener('blur',clear);
   return()=>{clear();window.removeEventListener('learning-rogue:sports-voice-muted',silence);document.removeEventListener('visibilitychange',clear);window.removeEventListener('blur',clear);};
@@ -37,6 +43,14 @@ export default function SportsPresentation({sport,stream,events,actors,paused=fa
   }
   queue.current?.enqueue(cues);
  },[events,stream,sport,paused,focusActor,viewerId]);
+ useEffect(()=>{
+  if(!reaction||reactionCursor.current===reaction.key)return;reactionCursor.current=reaction.key;
+  if(!stream||paused||document.hidden||!(DUNGEON_CHRONICLE_VOICE_ACTORS as readonly string[]).includes(reaction.hero))return;
+  const dash=/^(high-school|magic)-/.test(reaction.hero),kind=reaction.kind;
+  const id=kind==='pickup'||kind==='equip'?`chronicle:${reaction.hero}:${kind}`:dash?`dash:${reaction.hero}:${kind==='cheer'?'upgrade':'damage'}`:`chronicle:${reaction.hero}:${kind==='cheer'?'equip':'heal'}`;
+  // Reactions wait for the technique call and official judgment to finish.
+  queue.current?.enqueue([{id,priority:kind==='equip'?0:1}]);
+ },[reaction?.key,stream,paused]);
  useEffect(()=>{if(!cutin)return;const timer=setTimeout(()=>setCutin(null),1450);return()=>clearTimeout(timer);},[cutin?.key]);
  // Warm just the current court's performers; never download the full cast to start a match.
  useEffect(()=>{

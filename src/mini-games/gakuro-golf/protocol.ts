@@ -1,3 +1,6 @@
+import {isSideCourse,sideHoleId} from './course';
+import {validSideState} from './side-golf/validation';
+import {REWARD_ITEMS} from './side-golf/courses';
 import {validSportsEvents} from '../shared/sportsEvents';
 import { MAX_PLAYERS, type GolfView } from './engine';
 import { validLesson } from '../gakuro-kart/learning';
@@ -7,11 +10,11 @@ export const GOLF_PROTOCOL = 3;
 const phases = ['ready', 'quiz', 'aim', 'moving', 'holed', 'finished'];
 export function validView(v: any): v is GolfView {
   if (!v || !validSportsEvents(v,'golf') || !['lobby', 'playing', 'result'].includes(v.phase) || typeof v.title !== 'string' || v.title.length > 160 || typeof v.paused !== 'boolean' || !Number.isInteger(v.holeCount) || v.holeCount < 1 || v.holeCount > HOLES.length || !Array.isArray(v.players) || v.players.length < 1 || v.players.length > MAX_PLAYERS) return false;
-  if(v.course!==undefined&&!['classic','adventure'].includes(v.course))return false;
+  if(v.course!==undefined&&!['classic','adventure','side-1','side-2','side-3','side-4'].includes(v.course))return false;
   const ids = new Set(), slots = new Set();
   for (const p of v.players) {
-    if (!p || typeof p.id !== 'string' || p.id.length > 100 || ids.has(p.id) || !Number.isInteger(p.slot) || p.slot < 0 || p.slot >= MAX_PLAYERS || slots.has(p.slot) || typeof p.name !== 'string' || p.name.length > 16 || typeof p.connected !== 'boolean' || (p.spectator !== undefined && typeof p.spectator !== 'boolean') || !phases.includes(p.phase) || !Number.isInteger(p.hole) || p.hole < 0 || p.hole >= v.holeCount || !Number.isInteger(p.strokes) || p.strokes < 0 || p.strokes > 13 || !Array.isArray(p.scores) || p.scores.length > v.holeCount || p.scores.some((s: unknown) => !Number.isInteger(s) || Number(s) < 1 || Number(s) > 13) || ![p.x, p.y, p.z].every(n => Number.isFinite(n) && Math.abs(n) < 10000) || !Number.isInteger(p.correct) || p.correct < 0 || p.correct > 3 || !Number.isInteger(p.totalCorrect) || p.totalCorrect < 0 || !Number.isInteger(p.shotId) || p.shotId < 0 || !Number.isInteger(p.shotsLeft) || p.shotsLeft < 0 || p.shotsLeft > 3 || typeof p.penalty !== 'boolean' || ![null,'water','ob'].includes(p.penaltyKind) || typeof p.capped !== 'boolean') return false;
-    if(p.course!==undefined&&(!['classic','adventure'].includes(p.course)||p.course!==(v.course||'classic')))return false;
+    if (!p || typeof p.id !== 'string' || p.id.length > 100 || ids.has(p.id) || !Number.isInteger(p.slot) || p.slot < 0 || p.slot >= MAX_PLAYERS || slots.has(p.slot) || typeof p.name !== 'string' || p.name.length > 16 || typeof p.connected !== 'boolean' || (p.spectator !== undefined && typeof p.spectator !== 'boolean') || !phases.includes(p.phase) || !Number.isInteger(p.hole) || p.hole < 0 || p.hole >= v.holeCount || !Number.isInteger(p.strokes) || p.strokes < 0 || p.strokes > (isSideCourse(v.course)?19:13) || !Array.isArray(p.scores) || p.scores.length > v.holeCount || p.scores.some((s: unknown) => !Number.isInteger(s) || Number(s) < 1 || Number(s) > (isSideCourse(v.course)?19:13)) || ![p.x, p.y, p.z].every(n => Number.isFinite(n) && Math.abs(n) < 10000) || !Number.isInteger(p.correct) || p.correct < 0 || p.correct > 3 || !Number.isInteger(p.totalCorrect) || p.totalCorrect < 0 || !Number.isInteger(p.shotId) || p.shotId < 0 || !Number.isInteger(p.shotsLeft) || p.shotsLeft < 0 || p.shotsLeft > 3 || typeof p.penalty !== 'boolean' || ![null,'water','ob'].includes(p.penaltyKind) || typeof p.capped !== 'boolean') return false;
+    if(p.course!==undefined&&(!['classic','adventure','side-1','side-2','side-3','side-4'].includes(p.course)||p.course!==(v.course||'classic')))return false;
     ids.add(p.id); slots.add(p.slot);
     if (p.starEnergy!==undefined&&(typeof p.starEnergy!=='number'||!Number.isFinite(p.starEnergy)||p.starEnergy<0||p.starEnergy>1)||p.shotSpecial!==undefined&&typeof p.shotSpecial!=='boolean')return false;
     if (p.avatar !== undefined && !validAvatar(p.avatar)) return false;
@@ -26,6 +29,10 @@ export function validView(v: any): v is GolfView {
     if(v.phase!=='playing'||!official||official.phase!=='finished'||official.spectator||official.slot!==v.practicePlayer.slot||!validView({...v,players:[v.practicePlayer],practicePlayer:undefined,observedId:null}))return false;
   }
   if (v.observedId != null && (typeof v.observedId !== 'string' || !ids.has(v.observedId))) return false;
+  if(v.sideVersion!==undefined&&v.sideVersion!==1)return false;
+  const watched=v.practicePlayer||v.players.find((p:any)=>p.id===v.observedId)||null;
+  if(v.sideState!==undefined){if(!isSideCourse(v.course))return false;const golfer=watched||v.players.find((p:any)=>sideHoleId(v.course,p.hole)===v.sideState.courseId);if(!golfer||!validSideState(v.sideState,sideHoleId(v.course,golfer.hole)))return false;}
+  if(v.reward!==undefined&&(!isSideCourse(v.course)||!v.sideState||v.sideState.phase!=='holed'||!Number.isInteger(v.reward.id)||!Number.isInteger(v.reward.hole)||v.reward.hole<0||v.reward.hole>=v.holeCount||!Array.isArray(v.reward.options)||v.reward.options.length!==3||new Set(v.reward.options).size!==3||!v.reward.options.every((i:any)=>REWARD_ITEMS.includes(i))))return false;
   if (v.quiz !== null) {
     const q = v.quiz;
     if (!q || !Number.isInteger(q.shotId) || q.shotId < 1 || !Number.isInteger(q.index) || q.index < 0 || q.index > 2 || !q.question || Object.hasOwn(q.question, 'correct')) return false;

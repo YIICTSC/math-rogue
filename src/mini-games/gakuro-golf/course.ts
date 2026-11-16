@@ -1,8 +1,9 @@
+import {SIDE_COURSES,SIDE_COLLECTIONS} from './side-golf/courses';
 import { ADVENTURE_HOLES } from './adventureCourses';
 export { ADVENTURE_HOLES };
 export interface Point { x: number; z: number }
 export interface Hazard extends Point { rx: number; rz: number }
-export type CourseId='classic'|'adventure';
+export type CourseId='classic'|'adventure'|'side-1'|'side-2'|'side-3'|'side-4';
 export interface TerrainHill extends Hazard {height:number}
 export interface Hole { name?:string; terrain?:{theme:'meadow'|'mountain'|'sky'|'desert'|'moon';base?:number;hills:TerrainHill[];islands?:Hazard[]}; par: number; cup: Point; fairway: number; wind: Point; water: Hazard[]; sand: Hazard[] }
 export const HOLES: Hole[] = [
@@ -36,7 +37,10 @@ export function surface(hole: Hole, p: Point): 'water' | 'sand' | 'green' | 'fai
   return Math.abs(p.x - hole.cup.x * Math.max(0, p.z) / hole.cup.z) < hole.fairway ? 'fairway' : 'rough';
 }
 
-export const courseHoles=(course?:CourseId)=>course==='adventure'?ADVENTURE_HOLES:HOLES;
+export const isSideCourse=(course?:string):course is Extract<CourseId,`side-${number}`>=>SIDE_COLLECTIONS.some(c=>c.id===course);
+export const sideHoleId=(course:CourseId|undefined,hole:number)=>(SIDE_COLLECTIONS.find(c=>c.id===course)?.start||0)+hole;
+const SIDE_HOLES:Record<string,Hole[]>=Object.fromEntries(SIDE_COLLECTIONS.map(c=>[c.id,SIDE_COURSES.slice(c.start,c.start+18).map(h=>({name:h.name,par:h.par,cup:{x:h.cup.x,z:h.cup.y},fairway:30,wind:{x:0,z:0},water:[],sand:[]}))]));
+export const courseHoles=(course?:CourseId)=>course&&isSideCourse(course)?SIDE_HOLES[course]:course==='adventure'?ADVENTURE_HOLES:HOLES;
 export const holeFor=(player:{hole:number;course?:CourseId})=>courseHoles(player.course)[player.hole]||HOLES[0];
 const rawHeight=(hole:Hole,p:Point)=>(hole.terrain?.base||0)+(hole.terrain?.hills||[]).reduce((h,v)=>h+v.height*Math.exp(-2*(((p.x-v.x)/v.rx)**2+((p.z-v.z)/v.rz)**2)),0);
 /** One height field drives rendering, physics and trajectory previews. Flat tee/cup allow fair putts. */

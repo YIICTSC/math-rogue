@@ -54,3 +54,12 @@ export function makeSideCourse(tour:number,number:number):SideCourse{
 }
 export const SIDE_COURSES=TOURS.flatMap((_,t)=>Array.from({length:9},(_,n)=>makeSideCourse(t,n)));
 export function solidPoints(s:Solid,time:number):V[]{const m=s.move,dx=m?Math.sin(time*m.speed+m.phase)*m.x:0,dy=m?Math.sin(time*m.speed+m.phase)*m.y:0;return s.points.map(p=>({x:p.x+dx,y:p.y+dy}));}
+
+export const SIDE_COLLECTIONS=[
+ {id:'side-1',name:'2D・草原と氷晶',start:0},
+ {id:'side-2',name:'2D・遺跡と雲海',start:18},
+ {id:'side-3',name:'2D・工房と星屑',start:36},
+ {id:'side-4',name:'2D・紅蓮と虹',start:54},
+] as const;
+export type RewardItem=Exclude<Item,'normal'>;
+export const REWARD_ITEMS:RewardItem[]=['sticky','ice','heavy','bounce','float','phase','brake','undo'];

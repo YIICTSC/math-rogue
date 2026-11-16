@@ -22,7 +22,7 @@ async function connect(hello, origin = 'https://golf.test') {
   socket.on('message', raw => { const p = JSON.parse(raw.toString()); if (p.type === 'connected') Object.assign(client, { id: p.id, code: p.code, host: p.host }); if (['init', 'state'].includes(p.type)) client.view = p.state; if (p.type === 'error') client.errors.push(p.message); });
   socket.on('close', () => { client.closed = true; }); socket.on('error', () => {});
   await new Promise(resolve => { socket.once('open', resolve); socket.once('close', resolve); });
-  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: GOLF_SERVER_PROTOCOL, terrain:1, ...hello }));
+  if (!client.closed) socket.send(JSON.stringify({ type: 'connect', protocol: GOLF_SERVER_PROTOCOL, terrain:1,sideGolf:1, ...hello }));
   await wait(() => client.view || client.closed || client.errors.length, 'handshake'); return client;
 }
 const send = (c, d) => c.socket.send(JSON.stringify(d));
@@ -63,5 +63,14 @@ try {
   assert(golfers[1].view.players.filter(p => p.connected).every(p => p.strokes === 1 && p.z > 20));
   assert.equal(golfers[1].view.paused, false);
   for (const c of golfers.slice(1)) c.socket.close(); await wait(() => adapter.roomCount === 0, 'empty room cleanup');
+  const sideHost=await connect({create:true,name:'2D Host'}),sideGuest=await connect({create:false,code:sideHost.code,name:'2D Guest'});
+  send(sideHost,{type:'course',course:'side-1'});await wait(()=>sideGuest.view.course==='side-1'&&sideHost.view.course==='side-1');assert.equal(sideGuest.view.holeCount,18);assert.equal(sideGuest.view.sideState.courseId,0);
+  const oldSide=await connect({create:false,code:sideHost.code,name:'Old client',sideGolf:undefined});assert(oldSide.closed||oldSide.errors.length,'old clients cannot join a 2D course');
+  send(sideHost,{type:'lesson',selection});await wait(()=>sideGuest.view.title==='Server lesson');send(sideHost,{type:'start'});await wait(()=>sideGuest.view.phase==='playing');
+  const study=async(c)=>{send(c,{type:'command',command:{type:'quiz'}});await wait(()=>c.view.quiz);for(let index=0;index<3;index++){const quiz=c.view.quiz;send(c,{type:'command',command:{type:'answer',shotId:quiz.shotId,index,option:quiz.question.options.indexOf('2')}});await wait(()=>c.view.quiz?.answer!==null);send(c,{type:'command',command:{type:'continue',shotId:quiz.shotId,index}});await wait(()=>index===2?!c.view.quiz:c.view.quiz?.index===index+1&&c.view.quiz.answer===null);}};
+  await study(sideGuest);assert.equal(sideHost.view.quiz,null,'2D question contents remain private');assert(Object.entries(sideGuest.view.sideState.inventory).every(([item,n])=>item==='normal'||n===0));
+  for(let n=0;n<3;n++){const me=sideGuest.view.players.find(p=>p.id===sideGuest.id);send(sideGuest,{type:'command',command:{type:'side-shot',shotId:me.shotId,angle:90,power:.05,ball:'normal'}});await wait(()=>sideGuest.view.players.find(p=>p.id===sideGuest.id).shotId>me.shotId);await wait(()=>sideGuest.view.players.find(p=>p.id===sideGuest.id).phase!=='moving','2D settle',10000);}
+  await study(sideGuest);const sg=sideGuest.view.players.find(p=>p.id===sideGuest.id);assert(sg.starEnergy>=.999);send(sideGuest,{type:'command',command:{type:'side-shot',shotId:sg.shotId,angle:25,power:1,ball:'normal',special:true}});await wait(()=>sideGuest.view.sideState.fragments.length>0&&sideHost.view.sideState.fragments.length>0,'2D shared destruction');assert.equal(sideGuest.view.players.find(p=>p.id===sideGuest.id).starEnergy,0);assert.deepEqual(sideHost.view.sideState.broken,sideGuest.view.sideState.broken);assert(sideHost.view.sideState.fragments.some(f=>Math.hypot(f.vx,f.vy)>0));sideHost.socket.close();sideGuest.socket.close();await wait(()=>adapter.roomCount===0);
+  console.log('Golf 2D WebSocket: course sync, lesson privacy, zero inventory, three-shot cadence, six-answer special and authoritative shared debris passed.');
   console.log('Golf Render adapter: origin enforcement, 40 WebSocket players, overflow/late-join rejection, owner-only configuration, private questions, authoritative grading, duplicate shot rejection, owner handoff and physics continuity passed.');
 } finally { for (const c of clients) c.socket.terminate(); adapter.close(); await new Promise(resolve => server.close(resolve)); }
