@@ -1,0 +1,30 @@
+{
+  "generator": "ImageGen",
+  "sources": {
+    "buildings": "exec-a24c4b05-03e5-423e-bbaf-1a34c93cb601.png",
+    "dream-sprites": "exec-ffec1ade-09f1-4ff3-8d4e-7f1e80842d72.png",
+    "school-room": "exec-d96be6ee-92f0-4e86-9aff-29e7d082255d.png",
+    "shop-room": "exec-4c278e5f-8b63-4525-8935-57f9c7168f6b.png",
+    "arcade-room": "exec-7669bf83-3426-4953-bfdf-56105acde256.png",
+    "street": "exec-ec4a5b80-4f75-44cf-9e3e-c10fde5b1d23.png",
+    "dream-sky": "exec-7ba722bf-0981-425b-9c1b-9d1f48136422.png"
+  },
+  "note": "Original after-school buildings and interiors, original mint cloud mascot and dream kingdom; reference ROM assets are not shipped.",
+  "blender": {
+    "engine": "Cycles",
+    "device": "CPU",
+    "samples": 8,
+    "size": [
+      256,
+      256
+    ],
+    "project": "assets/kocho/field-surfaces.blend",
+    "script": "scripts/kocho-field/render-tiles.py",
+    "surfaces": [
+      "meadow",
+      "sugar",
+      "ice",
+      "sand"
+    ]
+  }
+}

@@ -1,0 +1,234 @@
+[
+  {
+    "course": 0,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": 0,
+        "power": 0.7,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 1,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": 0,
+        "power": 0.4,
+        "loft": false
+      },
+      {
+        "angle": -1.5043111146472776,
+        "power": 0.05,
+        "loft": true
+      },
+      {
+        "angle": 0.016714698303463532,
+        "power": 0,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 2,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.5404195002705842,
+        "power": 0.45,
+        "loft": false
+      },
+      {
+        "angle": 0.18351249348315957,
+        "power": 0,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 3,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": 0,
+        "power": 0.05,
+        "loft": false
+      },
+      {
+        "angle": 1.4,
+        "power": 0,
+        "loft": false
+      },
+      {
+        "angle": -0.16137427639914692,
+        "power": 0.05,
+        "loft": true
+      },
+      {
+        "angle": -1.313204270155259,
+        "power": 0,
+        "loft": false
+      },
+      {
+        "angle": 0.02287390169045267,
+        "power": 0,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 4,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.4636476090008061,
+        "power": 0.75,
+        "loft": false
+      },
+      {
+        "angle": 1.2083690016579192,
+        "power": 0,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 5,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": 0,
+        "power": 1,
+        "loft": false
+      },
+      {
+        "angle": 0,
+        "power": 0.35,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 6,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.4636476090008061,
+        "power": 0.4,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 7,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.4636476090008061,
+        "power": 0.7,
+        "loft": false
+      },
+      {
+        "angle": 2.542546426984506,
+        "power": 0.55,
+        "loft": false
+      },
+      {
+        "angle": -0.5960081777808587,
+        "power": 0.5,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 8,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.1266274931268761,
+        "power": 0.2,
+        "loft": false
+      },
+      {
+        "angle": 0.34970773287352463,
+        "power": 0.05,
+        "loft": false
+      },
+      {
+        "angle": -0.5243417926778179,
+        "power": 0.15,
+        "loft": false
+      },
+      {
+        "angle": -1.788596102379765,
+        "power": 0.05,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 9,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.4636476090008061,
+        "power": 0.55,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 10,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.04877100358390701,
+        "power": 0.3,
+        "loft": false
+      },
+      {
+        "angle": -1.6897403893421543,
+        "power": 0.05,
+        "loft": true
+      },
+      {
+        "angle": -2.787456869956045,
+        "power": 0,
+        "loft": false
+      },
+      {
+        "angle": -0.2402375045436785,
+        "power": 0.1,
+        "loft": false
+      }
+    ]
+  },
+  {
+    "course": 11,
+    "phase": "clear",
+    "shots": [
+      {
+        "angle": -0.5880026035475675,
+        "power": 0.45,
+        "loft": false
+      },
+      {
+        "angle": 2.2457507051530206,
+        "power": 0,
+        "loft": false
+      },
+      {
+        "angle": -1.1374338758271243,
+        "power": 0.05,
+        "loft": true
+      },
+      {
+        "angle": 0.5519396476556319,
+        "power": 0.05,
+        "loft": false
+      }
+    ]
+  }
+]
