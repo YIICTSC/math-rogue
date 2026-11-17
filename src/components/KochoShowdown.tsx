@@ -1,5 +1,4 @@
 import KochoStoryScreen,{kochoStoryReady} from '../mini-games/kocho/story/StoryScreen';
-import FieldBattle from '../mini-games/kocho/field/FieldBattle';
 import {takeNormalArcadePrizes} from '../mini-games/kocho/field/progress';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import ResponsiveTitleArt from '../mini-games/shared/ResponsiveTitleArt';
@@ -890,12 +889,6 @@ const KochoShowdown: React.FC<{
     const [selectedHero, setSelectedHero] = useState<KochoHeroId>(() => initialKochoState.heroId);
     const [newlyUnlockedHero, setNewlyUnlockedHero] = useState<KochoHeroId | null>(null);
     const [setupPage, setSetupPage] = useState<'title' | 'hero'>('title');
-    const [fieldOpen, setFieldOpen] = useState(false);
-    const wasInField = useRef(false);
-    useEffect(()=>{
-        if(wasInField.current && !fieldOpen) void audioService.playBGM(gameState.phase==='SETUP'?'kocho_setup':gameState.status==='VICTORY'?'victory':'kocho_battle');
-        wasInField.current=fieldOpen;
-    },[fieldOpen,gameState.phase,gameState.status]);
     const [showGuestCards, setShowGuestCards] = useState(false);
     const unlockedHeroes = debugRewardsUnlocked() ? KOCHO_HEROES.map(h=>h.id) : unlockedKochoHeroes(clearedHeroes);
     const superArtHero = gameState.phase === 'SETUP' ? selectedHero : gameState.heroId;
@@ -2925,7 +2918,7 @@ const KochoShowdown: React.FC<{
                 
                 {p.pos === idx && (
                     <div className="relative w-full h-full flex items-end justify-center z-20">
-                        <div className={`transition-transform duration-200 ${p.facing === -1 ? 'scale-x-[-1]' : ''}`}>
+                        <div className={`transition-transform duration-200 ${(p.facing === -1) !== (gameState.heroId === 'rebel' && !activeActionCardName) ? 'scale-x-[-1]' : ''}`}>
                             {(() => {
                                 const asset = getKochoPlayerAsset();
                                 return (
@@ -3041,7 +3034,6 @@ const KochoShowdown: React.FC<{
 
     const superCandidates = kochoSuperCandidates(gameState.heroId, gameState.queue.map(c=>c.name));
     // --- MAIN RENDER ---
-    if (fieldOpen) return <FieldBattle language={languageMode} onExit={()=>setFieldOpen(false)} deck={hero=>getInitialDeck(hero).map(({icon,...card})=>card)} pool={(hero,stage)=>getUnlockedKochoCardTemplates(hero,stage).map(({icon,...card},i)=>({...card,id:'field-pool-'+i,currentCooldown:0,usedSlots:0}))} art={getKochoHeroActionAsset} CardArt={KochoCardActionArt} items={CONSUMABLE_DB} relics={SHOP_RELICS} itemImage={getKochoItemImageSrc} relicImage={getKochoRelicImageSrc} problemMode={problemMode} problemModePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult}/>;
     return (
         <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="ios-edge-to-edge kocho-showdown-root flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {storyScene&&<KochoStoryScreen key={storyScene} sceneId={storyScene} language={languageMode||'JAPANESE'} onDone={finishStory}/>}
@@ -3110,7 +3102,6 @@ const KochoShowdown: React.FC<{
                         <div className="kocho-title-actions">
                             {debugRewardsUnlocked() && <button onClick={startEndlessRun}>{tr('放課後エンドレスへ')}</button>}
                             <button data-kocho-enter data-gamepad-initial-choice onClick={() => setSetupPage('hero')}>{tr('主人公選択へ')} <Play size={20}/></button>
-                            <button data-kocho-field disabled={clearedHeroes.length===0&&!debugRewardsUnlocked()} onClick={()=>setFieldOpen(true)}>{languageMode==='ENGLISH'?'Field Battle':languageMode==='HIRAGANA'?'フィールドバトル':'フィールドバトル'} <small>{clearedHeroes.length===0&&!debugRewardsUnlocked()?(languageMode==='ENGLISH'?'Clear the campaign to unlock':'本編クリアで解禁'):'3 LINES / 50 TILES'}</small></button>
                             <button data-gamepad-back onClick={handleQuit}>{tr('戻る')}</button>
                         </div>
                     </div>
@@ -3428,7 +3419,6 @@ const KochoShowdown: React.FC<{
                                             {tr('追加カード解放')} {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
                                         </div>
                                         <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
-                                            <button data-kocho-field-victory onClick={()=>setFieldOpen(true)} className="bg-emerald-700 px-5 py-3 rounded text-lg font-bold">{languageMode==='ENGLISH'?'Field Battle unlocked':'フィールドバトル解禁！'}</button>
                                             <button onClick={initGame} className="bg-amber-600 px-5 py-3 rounded text-lg font-bold hover:bg-amber-500">{tr('主人公選択へ')}</button>
                                             <button onClick={startEndlessRun} className="bg-pink-600 px-8 py-3 rounded text-xl font-bold hover:bg-pink-500 border border-pink-300">{tr('放課後エンドレスへ')}</button>
                                             <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">{tr('職員室に戻る')}</button>

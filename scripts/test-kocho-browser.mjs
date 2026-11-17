@@ -39,6 +39,7 @@ try {
  }
  await page.locator('.kocho-lobby-heading button').click();
  assert.equal(await page.locator('[data-kocho-hero]').count(),0);
+ assert.equal(await page.locator('[data-kocho-field]').count(),0,'Shelved field mode has no title entry');
  await page.locator('.kocho-title-art img').evaluate(img=>img.decode());
  for(const [width,height] of [[1280,900],[390,844],[844,390]]) {
   await page.setViewportSize({width,height});
@@ -86,6 +87,7 @@ try {
  // Actual victory effect: unlock once, persist, then select the guest.
  await page.evaluate(()=>{const s=__kocho.initial();s.status='VICTORY';s.phase='VICTORY';s.battleStage=7;__kocho.setState(s);});
  await page.getByText('ゲスト主人公解放！',{exact:true}).waitFor();
+ assert.equal(await page.locator('[data-kocho-field-victory]').count(),0,'Shelved field mode has no victory entry');
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.pixel_spire_kocho_ranking_v1).length),1);
  await page.getByRole('button',{name:'主人公選択へ',exact:true}).click();
  await page.locator('[data-kocho-hero=rebel]').click();
@@ -98,6 +100,14 @@ try {
  assert.equal(await page.evaluate(()=>__kocho.state.heroId),'rebel');
  assert.equal(await page.evaluate(()=>__kocho.state.hand.every(c=>['叛逆ナックル','紅蓮タックル','不屈のガード'].includes(c.name))),true);
  const setArena=async(hero='rebel')=>page.evaluate(hero=>{const s=__kocho.initial(hero);s.phase='BATTLE';s.battleStage=2;s.player.pos=2;s.player.maxHp=100;s.player.hp=50;s.enemies=[{...s.player,id:'enemy',type:'ENEMY',name:'不良生徒',pos:3,facing:-1,maxHp:1000,hp:1000,intent:{type:'WAIT',timer:99}}];__kocho.setState(s);},hero);
+ // Verify the rendered idle sprite orientation in both directions; action artwork uses its existing convention.
+ for(const hero of ['original','rebel','akari'])for(const facing of [1,-1]){
+  await setArena(hero);await page.evaluate(facing=>{const s=__kocho.state;s.player.facing=facing;__kocho.setState(s);},facing);
+  await page.waitForTimeout(230);
+  const matrix=await page.locator('[data-kocho-cell="2"] .transition-transform').first().evaluate(el=>new DOMMatrix(getComputedStyle(el).transform).a);
+  assert.equal(matrix<0,hero==='rebel'?facing===1:facing===-1,`${hero} idle matches logical facing ${facing}`);
+ }
+ console.log('PASS all idle hero orientations and shelved field entry removal');
  await setArena();await page.locator('[data-kocho-special]').click();await page.waitForFunction(()=>__kocho.state.specialActionCooldown===3);
  assert.equal(await page.evaluate(()=>__kocho.state.player.pos),4);assert.equal(await page.evaluate(()=>__kocho.state.player.facing),-1);
  await setArena();await page.evaluate(()=>{const s=__kocho.state;s.focus=5;s.queue=[{...__kocho.cards.find(c=>c.name==='紅蓮連拳・解放'),id:'test-card',currentCooldown:0,usedSlots:0}];__kocho.setState(s);});
@@ -107,6 +117,7 @@ try {
  assert.equal(await page.evaluate(()=>__kocho.state.player.shield),2);
  await setArena();await page.evaluate(()=>{const s=__kocho.state;s.status='VICTORY';s.phase='VICTORY';s.battleStage=7;__kocho.setState(s);});
  await page.getByText('ゲスト主人公解放！',{exact:true}).waitFor();
+ assert.equal(await page.locator('[data-kocho-field-victory]').count(),0,'Shelved field mode has no victory entry');
  await page.getByRole('button',{name:'主人公選択へ',exact:true}).click();
  await page.locator('[data-kocho-hero=akari]').click();
  await page.getByRole('button',{name:/専用カードを見る/}).click();
