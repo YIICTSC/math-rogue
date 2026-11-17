@@ -406,6 +406,7 @@ export default function AfterSchoolRush({
           </div>}
           <h2>{gameText(languageMode, game.cue)}</h2>
           <ActionBoard key={`${roundNumber}-${activeKey}`} entry={stage.round.entry} state={stage.round.state}
+            onCombatAspect={aspect=>{const current=stageRef.current;if(!('round' in current)||Math.abs((current.round.state[S.COMBAT_ASPECT]||0)-aspect)<.01)return;const state=[...current.round.state];state[S.COMBAT_ASPECT]=aspect;const next={...current,round:{...current.round,state}};stageRef.current=next;setStage(next);}}
             elapsed={stage.tag === 'feedback' ? stage.resolvedAt ?? 0 : elapsed}
             action={stage.round.action} outcome={stage.outcome} feedbackElapsed={stage.tag === 'feedback' ? phaseElapsed : 0} mode={languageMode} />
           <VirtualControls key={`controls-${roundNumber}-${activeKey}`} entry={stage.round.entry} state={stage.round.state}

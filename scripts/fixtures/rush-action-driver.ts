@@ -1,5 +1,5 @@
 import type { Active } from '../../src/mini-games/after-school-rush/engine';
-import { actionWorld, duelPhase, fishX, fishingWindow, golfMeter, nextBeat, noteLane, parryPhase, parryWindow, pitchBall, pitchPeriod, S, timingGoal, timingX } from '../../src/mini-games/after-school-rush/action/physics';
+import { actionWorld, duelPhase, meleeReach, fishX, fishingWindow, golfMeter, nextBeat, noteLane, parryPhase, parryWindow, pitchBall, pitchPeriod, S, timingGoal, timingX } from '../../src/mini-games/after-school-rush/action/physics';
 export function actionDriver(stage: Active) {
   const s = stage.round.state, spec = stage.round.entry.game.action!, world = actionWorld(spec, s), t = s[S.T];
   let x = 0, y = 0, a = false, b = false;
@@ -47,8 +47,8 @@ export function actionDriver(stage: Active) {
     }
     case 'duel': {
       const enemy = world.enemy!; const dist = Math.abs(enemy.x - s[S.X]);
-      if (dist > 140) x = Math.sign(enemy.x - s[S.X]);
-      a = dist < 170 && (!spec.boss || duelPhase(spec,t) > 970 || duelPhase(spec,t) < 200);
+      if (dist > meleeReach(s)*.8 || s[S.FACING] !== Math.sign(enemy.x - s[S.X])) x = Math.sign(enemy.x - s[S.X]);
+      a = dist < meleeReach(s) && (!spec.boss || duelPhase(spec,t) > 970 || duelPhase(spec,t) < 200);
       b = duelPhase(spec,t) > 430 && duelPhase(spec,t) < 700;
       break;
     }
@@ -84,8 +84,8 @@ export function actionDriver(stage: Active) {
     }
     case 'kart': x = dx(110, s[S.X], 8); a = true; break;
     case 'parry': {
-      x = dx(world.enemy!.x - 150, s[S.X], 15);
-      a = s[S.COMBO] > t && Math.abs(world.enemy!.x - s[S.X]) < 215;
+      x = dx(world.enemy!.x - meleeReach(s)*.75, s[S.X], 10);
+      a = s[S.COMBO] > t && Math.abs(world.enemy!.x - s[S.X]) < meleeReach(s);
       b = !a && parryPhase(spec,t) > parryWindow(spec)[0] + 30 && parryPhase(spec,t) < parryWindow(spec)[1] - 30;
       break;
     }

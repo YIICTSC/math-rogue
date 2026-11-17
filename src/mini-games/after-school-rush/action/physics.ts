@@ -7,7 +7,7 @@ export const S = {
   BALL_X: 19, BALL_Y: 20, BALL_VX: 21, BALL_VY: 22, CARRIED: 23, LEAN: 24, ANGLE: 25,
   POWER: 26, INVULN: 27, LAST_GROUND: 28, GROUND_X: 29, RESULT: 30, MOVED: 31,
   LAST_HIT: 32, CYCLE: 33, AMMO: 34, STOP: 35, NOTE: 36, QUEUED_JUMP: 37, DAMAGE: 38,
-  PHASE: 39, PROGRESS: 40, TENSION: 41, EVENT: 42, TARGET: 43, COMBO: 44,
+  PHASE: 39, PROGRESS: 40, TENSION: 41, EVENT: 42, TARGET: 43, COMBO: 44, COMBAT_ASPECT:45,CONTACT_X:46,CONTACT_Y:47,CONTACT_KIND:48,CONTACT_AT:49,CONTACT_DIRECTION:50,
 } as const;
 export const FLOOR = 520, RADIUS = 28, BODY = 70;
 const side = new Set(['run', 'climb', 'hurdles', 'push', 'duel', 'parry', 'grapple']);
@@ -41,7 +41,7 @@ export const timingX = (s: State) => 500 + Math.sin(s[S.ANGLE]) * 330;
 export const timingGoal = (spec: ActionSpec) => 420 + spec.variant % 3 * 80 + tierOf(spec) * 8;
 
 export function initialAction(spec: ActionSpec, seed: number, level: number): State {
-  const s = Array(45).fill(0);
+  const s = Array(51).fill(0);
   s[S.X] = sideView(spec) ? mirror(spec, 120) : 150;
   s[S.Y] = sideView(spec) ? FLOOR : spec.family === 'flap' ? 290 : 350;
   s[S.SEED] = seed >>> 0; s[S.LEVEL] = spec.tier ?? level; s[S.HP] = spec.boss ? 3 : 2;
@@ -49,7 +49,7 @@ export function initialAction(spec: ActionSpec, seed: number, level: number): St
   s[S.BALL_X] = -1; s[S.ANGLE] = spec.family === 'throw' ? 37 : (seed % 24) / 10;
   s[S.POWER] = 1040; s[S.LAST_GROUND] = 0; s[S.GROUND_X] = s[S.X];
   s[S.AMMO] = 4; s[S.STOP] = -1; s[S.CYCLE] = -1;
-  s[S.LAST_HIT] = -9999; s[S.DAMAGE] = -9999;
+  s[S.LAST_HIT] = -9999; s[S.DAMAGE] = -9999;s[S.CONTACT_AT]=-9999;s[S.COMBAT_ASPECT]=1000/600;
   if (spec.family === 'hurdles') s[S.X] = 210;
   if (spec.family === 'catch') s[S.Y] = FLOOR;
   if (spec.family === 'aim') { s[S.X] = 500; s[S.Y] = 330; }
@@ -58,7 +58,7 @@ export function initialAction(spec: ActionSpec, seed: number, level: number): St
   if (['bat', 'rally', 'volley', 'fishing', 'kart'].includes(spec.family)) { s[S.X] = 500; s[S.Y] = 520; }
   if (spec.family === 'soccer') { s[S.X] = 130; s[S.Y] = 330; s[S.CARRIED] = 1; s[S.BALL_X] = 165; s[S.BALL_Y] = 295; }
   if (spec.family === 'golf') { s[S.X] = 120; s[S.Y] = 520; s[S.ANGLE] = 300; }
-  if (spec.family === 'parry') { s[S.X] = 360; s[S.Y] = FLOOR; }
+  if (spec.family === 'parry') { s[S.FACING]=1;s[S.X] = 360; s[S.Y] = FLOOR; }
   if (spec.family === 'grapple') { s[S.X] = 120; s[S.Y] = FLOOR; }
   if (spec.family === 'volley') { s[S.BALL_X] = 450 + spec.variant % 3 * 50; s[S.BALL_Y] = 100; }
   if (spec.family === 'mining') s[S.AMMO] = 0;
@@ -174,6 +174,26 @@ function nearEnemy(spec: ActionSpec, s: State, reach: number) {
   const enemy = actionWorld(spec, s).enemy;
   return enemy && distance(center(s), { x: enemy.x, y: enemy.y - (spec.family === 'duel' ? 35 : 0) }) < reach;
 }
+/** Convert the enemy's height-based artwork to world X units on tall phones.
+ * Enemy body + weapon reach are both measured in stage-height units. */
+export function meleeReach(s: State) {
+  const aspect = clamp(s[S.COMBAT_ASPECT] || 1000 / 600, .45, 4);
+  return Math.max(75, Math.min(430, 210 / aspect + 20));
+}
+export function meleeCanHit(s: State, enemy: Point) {
+  const dx = enemy.x - s[S.X];
+  return Math.abs(dx) <= meleeReach(s) && dx * s[S.FACING] >= -35
+    && Math.abs(enemy.y - s[S.Y]) <= 100;
+}
+function contact(s: number[], enemy: Point, now: number, kind: 1 | 2) {
+  const sign = Math.sign(enemy.x - s[S.X]) || s[S.FACING];
+  const half = 84 / (s[S.COMBAT_ASPECT] || 1000 / 600);
+  s[S.CONTACT_X] = enemy.x - sign * half;
+  s[S.CONTACT_Y] = enemy.y - 75;
+  s[S.CONTACT_AT] = now;
+  s[S.CONTACT_KIND] = kind;
+  s[S.CONTACT_DIRECTION] = sign;
+}
 export function actionInput(spec: ActionSpec, state: State, event: ActionControl, clock: Clock): State {
   const s = [...state], t = clock.now, level = tierOf(spec);
   if (s[S.RESULT]) return s;
@@ -228,7 +248,7 @@ export function actionInput(spec: ActionSpec, state: State, event: ActionControl
     case 'flap': s[S.VY] = a ? -270 : 230; break;
     case 'duel': {
       const phase = duelPhase(spec, t);
-      if (a) { if (nearEnemy(spec, s, 180 - level * 8) && (!spec.boss || phase > 900 || phase < 250)) { s[S.SCORE]++; s[S.LAST_HIT] = t; } s[S.READY_A] = t + 350; }
+      if (a) { if (meleeCanHit(s,w.enemy!) && (!spec.boss || phase > 900 || phase < 250)) { s[S.SCORE]++; s[S.LAST_HIT] = t;contact(s,w.enemy!,t,1); } s[S.READY_A] = t + 350; }
       else { s[S.B] = t + 650 - level * 50; s[S.INVULN] = Math.max(s[S.INVULN], s[S.B]); s[S.READY_B] = t + 750; }
       break;
     }
@@ -293,8 +313,8 @@ function crossoverInput(spec: ActionSpec, s: number[], a: boolean, t: number, w:
       s[a ? S.A : S.B] = t + (a ? 650 : 500); s[a ? S.READY_A : S.READY_B] = t + (a ? 950 : 170); break;
     case 'parry': {
       const phase = parryPhase(spec, t), [from, until] = parryWindow(spec);
-      if (!a) { s[S.B] = t + 500 - level * 40; s[S.READY_B] = t + 650; if (phase > from && phase < until) { s[S.COMBO] = t + 1100 - level * 100; s[S.INVULN] = t + 800; s[S.LAST_HIT] = t; } }
-      else if (Math.abs(s[S.X] - w.enemy!.x) < 220 - level * 12 && s[S.COMBO] > t) { s[S.SCORE]++; s[S.COMBO] = 0; s[S.LAST_HIT] = t; s[S.READY_A] = t + 450; }
+      if (!a) { s[S.B] = t + 500 - level * 40; s[S.READY_B] = t + 650; if (phase > from && phase < until && meleeCanHit(s,w.enemy!)) {contact(s,w.enemy!,t,2); s[S.COMBO] = t + 1100 - level * 100; s[S.INVULN] = t + 800; s[S.LAST_HIT] = t; } }
+      else if (meleeCanHit(s,w.enemy!) && s[S.COMBO] > t) { s[S.SCORE]++; s[S.COMBO] = 0; s[S.LAST_HIT] = t;contact(s,w.enemy!,t,1); s[S.READY_A] = t + 450; }
       break;
     }
     case 'grapple': {

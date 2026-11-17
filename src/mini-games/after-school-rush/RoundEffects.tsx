@@ -31,10 +31,11 @@ export function RushActor({ className = '', size, ...options }: ActorProps) {
     '--asr-actor-frame-y': `${rows > 1 ? row * 100 / (rows - 1) : 0}%`,
     '--asr-actor-ratio': aspect,
     '--asr-frame-foot': `${'feet' in sprite ? sprite.feet : 5}%`,
-    '--asr-frame-shift': `${'shift' in sprite ? sprite.shift : 0}%`,
+    '--asr-frame-shift': `${('shift' in sprite ? sprite.shift : 0)*('nativeFacing' in sprite ? sprite.nativeFacing : 1)}%`,
+    '--asr-source-flip':'nativeFacing' in sprite?sprite.nativeFacing:1,
   } as CSSProperties;
   return <div className={`asr-cast-actor ${className}`} data-actor={id} data-pose={pose}
-    data-atlas={atlas} style={style} aria-hidden="true">
+    data-atlas={atlas} data-native-facing={'nativeFacing' in sprite?sprite.nativeFacing:1} style={style} aria-hidden="true">
     <span className="asr-actor-frame"><img className="asr-actor-sheet" src={assetUrl(path)} alt="" draggable={false} style={{width:`${columns*100}%`,height:`${rows*100}%`,left:`${-column*100}%`,top:`${-row*100}%`}}/></span>
   </div>;
 }

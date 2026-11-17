@@ -27,6 +27,42 @@ try{
   while(__rush.stage.tag==='play'&&elapsed<limit&&n++<1000){const s=__rush.stage,d=actionDriver(s),want=new Set();if(d.x<-.12)want.add('ArrowLeft');if(d.x>.12)want.add('ArrowRight');if(d.y<-.12)want.add('ArrowUp');if(d.y>.12)want.add('ArrowDown');for(const key of held)if(!want.has(key)){fire('keyup',key);held.delete(key);}for(const key of want)if(!held.has(key)){fire('keydown',key);held.add(key);}if(d.a){fire('keydown','z');fire('keyup','z');}if(d.b){fire('keydown','x');fire('keyup','x');}const dt=24/s.round.speed;__rush.advance(dt);elapsed+=24;if(n%4===0)await new Promise(r=>setTimeout(r,0));}
   window.__driverKeys=[...held];if(__rush.stage.tag!=='play'){for(const key of held)fire('keyup',key);window.__driverKeys=[];}return{outcome:__rush.stage.outcome,family:__rush.stage.round.entry.game.action.family,t:__rush.stage.round.state[0],hp:__rush.stage.round.state[7]};
  },limit);}
+ // Hit the visible near edge rather than overlapping enemy centers, at real viewport sizes.
+ await p.goto(base,{waitUntil:'domcontentloaded'});await p.waitForFunction(()=>window.__rush);
+ for(const viewport of [{width:390,height:844},{width:844,height:390}]){
+  await p.setViewportSize(viewport);
+  for(const family of ['duel','parry'])for(const facing of family==='duel'?[1,-1]:[1]){
+   const key=await p.evaluate(({family,facing})=>__rush.catalog.find(e=>!e.game.boss&&e.game.action.family===family&&(family==='parry'||e.game.action.variant%2===(facing===1?0:1))).key,{family,facing});
+   await practice(key);
+   await p.evaluate(async({family,facing})=>{
+    const{actionWorld,meleeReach}=await import('/src/mini-games/after-school-rush/action/physics.ts');
+    const cur=__rush.stage,S=__rush.S,entry=cur.round.entry;
+    const v=[...cur.round.state];v[S.T]=family==='parry'?600:100;v[S.FACING]=facing;v[S.INVULN]=10000;
+    const enemy=actionWorld(entry.game.action,v).enemy;v[S.X]=enemy.x-facing*(meleeReach(v)-10);v[S.Y]=enemy.y;
+    window.__rushClock=cur.since+v[S.T]/cur.round.speed;__rush.put({...cur,now:__rushClock,round:{...cur.round,entry,state:v}});
+   },{family,facing});
+   const stageAspect=await p.locator('.asr-action-stage').evaluate(el=>el.clientWidth/el.clientHeight);
+   assert(Math.abs((await state()).round.state[45]-stageAspect)<.02,'Physics follows the measured playfield');
+   await p.keyboard.press(family==='parry'?'x':'z');
+   await p.locator('.asr-combat-impact').waitFor();
+   assert.equal(await p.locator('.asr-combat-impact').getAttribute('data-kind'),family==='parry'?'2':'1');
+   if(family==='parry'){
+    assert.equal((await state()).round.state[8],0,'Parry spark appears before a scoring counter');
+    await p.keyboard.press('z');assert.equal(await p.locator('.asr-combat-impact').getAttribute('data-kind'),'1');
+   }
+   assert.equal((await state()).round.state[8],1,'A hits from the enemy near edge');
+   const reaction=p.locator('.asr-enemy-hit');assert.equal(await reaction.count(),1);
+   assert.equal(await reaction.locator(':scope > .asr-sprite').evaluate(el=>getComputedStyle(el).animationName),'asr-enemy-recoil');
+   const sprite=await actorVisible();assert.equal(sprite.atlas,'battle');
+   const facingData=await p.locator('.asr-action-player').evaluate(el=>{
+    const actor=el.querySelector('.asr-cast-actor');return{facing:Number(el.dataset.facing),native:Number(actor.dataset.nativeFacing),scale:getComputedStyle(actor).scale};
+   });assert.equal(facingData.facing,facing);assert.equal(Number(facingData.scale.split(' ')[0]),facingData.native);
+   await shot(`combat-${family}-${facing}-${viewport.width}`);
+   await advance(450);assert.equal(await p.locator('.asr-combat-impact').count(),0,'Impact expires and play resumes');assert.equal(await p.locator('.asr-enemy-hit').count(),0);
+  }
+ }
+ console.log('PASS portrait/landscape edge hits, both attack directions, actual sprite normalization, parry/counter sparks, enemy recoil and effect cleanup');
+ if(process.argv.includes('--combat-only')){assert.deepEqual(errors,[]);assert.deepEqual([...new Set(missing)],[]);await browser.close();await server.close();process.exit(0);}
  for(const[width,height]of[[390,844],[844,390],[320,568],[1280,720]]){await p.setViewportSize({width,height});await p.goto(base,{waitUntil:'domcontentloaded'});await bounds('.asr-title-card');for(const button of await p.locator('.asr-menu button').all()){const b=await button.boundingBox();assert(b.y+b.height<=height,'Title choices visible at '+width);}await shot('compact-title-'+width);await p.getByRole('button',{name:'ストーリー',exact:true}).click();await bounds('.asr-chapter-menu');await bounds('.asr-chapter-story .asr-primary');await shot('compact-story-'+width);assert.equal(await p.evaluate(()=>document.documentElement.scrollHeight>innerHeight),false);}
  await p.setViewportSize({width:390,height:844});
  await p.goto(base,{waitUntil:'domcontentloaded'});

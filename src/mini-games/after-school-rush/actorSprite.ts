@@ -1,3 +1,4 @@
+import {ATTACK_NATIVE_FACING} from './battleFacing';
 import type { CastId, Pose } from './direction';
 import type { Family } from './action/types';
 import { DASH_HERO_ART } from '../go-home-dash/heroes';
@@ -44,5 +45,5 @@ export function rushActorSprite({ id, pose, age, facing = 'side', jumpVelocity, 
   const anchor = metrics[id][action];
   return { path: battleSpritePath(id, action), columns: 2, rows: 2,
     row: Math.floor(cell / 2), column: cell % 2, aspect: 1, heightScale: anchor.scale,
-    feet: anchor.feet[cell], shift: anchor.shift[cell], atlas: 'battle' as const };
+    nativeFacing:action==='attack'?ATTACK_NATIVE_FACING[id]:1, feet: anchor.feet[cell], shift: anchor.shift[cell], atlas: 'battle' as const };
 }

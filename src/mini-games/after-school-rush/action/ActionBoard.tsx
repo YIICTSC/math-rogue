@@ -18,11 +18,11 @@ const at = (p: Point): CSSProperties => ({ left: `${p.x / 10}%`, top: `${p.y / 6
 function ObjectArt({ p, art, className = '', children }: { p: Point; art: ArtName; className?: string; children?: ReactNode }) {
   return <div className={`asr-action-object ${className}`} style={at(p)}><Sprite name={art} />{children}</div>;
 }
-export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, feedbackElapsed = 0 }: {
-  entry: Entry; state: State; elapsed: number; mode: LanguageMode; action?: Action; outcome?: Outcome; feedbackElapsed?: number;
+export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, feedbackElapsed = 0,onCombatAspect }: {
+  entry: Entry; state: State; elapsed: number; mode: LanguageMode; action?: Action; outcome?: Outcome; feedbackElapsed?: number;onCombatAspect?:(aspect:number)=>void;
 }) {
   const field=useRef<HTMLDivElement>(null),[actorSize,setActorSize]=useState(72);
-  useLayoutEffect(()=>{const node=field.current;if(!node)return;const measure=()=>setActorSize(Math.max(32,node.clientHeight*.2));measure();const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);observer?.observe(node);window.addEventListener('resize',measure);return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};},[]);
+  useLayoutEffect(()=>{const node=field.current;if(!node)return;const measure=()=>{setActorSize(Math.max(32,node.clientHeight*.2));if(node.clientWidth&&node.clientHeight)onCombatAspect?.(node.clientWidth/node.clientHeight);};measure();const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);observer?.observe(node);window.addEventListener('resize',measure);return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};},[]);
   const spec = entry.game.action!, w = actionWorld(spec, s), family = spec.family, t = s[S.T];
   const integratedKartDriver = family === 'kart' && entry.key === 'gate/cross-5';
   const isSide = sideView(spec), cast = castFor(entry), a = t < s[S.A], b = t < s[S.B], hit = t - s[S.DAMAGE] < 900;
@@ -44,11 +44,12 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
     : family === 'push' ? Math.min(1, Math.abs(s[S.BOX_X] - (spec.variant % 2 ? 580 : 420)) / 430)
       : family === 'run' || family === 'climb' ? Math.min(1, Math.abs(s[S.X] - (spec.variant % 2 ? 880 : 120)) / 790)
         : family === 'carry' || family === 'brake' ? Math.min(1, s[S.X] / 870) : s[S.SCORE] / spec.goal;
+  const contactAge=t-s[S.CONTACT_AT],enemyHit=contactAge>=0&&contactAge<300&&s[S.CONTACT_KIND]===1;
   const title = gameText(mode, spec.boss ? THEMES[entry.chapter].boss : entry.game.title);
   const local = (ja: string, en: string, hira?: string) => gameText(mode, [ja, en, hira]);
   return <div className="asr-original asr-action-original">
     <div ref={field} className="asr-field asr-action-stage" data-family={family} data-tier={spec.tier ?? 0} data-side={isSide} data-hit={hit || undefined} data-outcome={outcome}
-      role="img" aria-label={title} style={{ '--asr-scenery': `url("${assetUrl(THEMES[entry.chapter].art)}")` } as CSSProperties}>
+      role="img" aria-label={title} style={{ '--asr-recoil-x':s[S.CONTACT_DIRECTION]<0?'-12%':'12%', '--asr-scenery': `url("${assetUrl(THEMES[entry.chapter].art)}")` } as CSSProperties}>
       <div className="asr-action-backdrop" /><div className="asr-action-atmosphere" />
       {!isSide && <div className="asr-action-floor" data-flying={family === 'flap'} />}
       {w.platforms.map((p, i) => <div className="asr-action-platform" key={i} style={{ left: `${p.x / 10}%`, top: `${p.y / 6}%`, width: `${p.w / 10}%`, height: `${(600 - p.y) / 6}%` }}><i /></div>)}
@@ -67,7 +68,7 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
       {family === 'timing' && <><div className="asr-action-catch-zone" style={{...at(w.goal),width:`${timingWindow(spec)/5}%`}}><i /><span>A</span></div><ObjectArt p={w.targets[0]} art={spec.item} /></>}
       {family === 'balance' && <><div className="asr-action-balance-base" style={{left:`${w.goal.x/10}%`}}><i /></div><div className="asr-action-balance-beam" style={{ left:`${w.goal.x/10}%`, transform: `translateX(-50%) rotate(${s[S.LEAN] * 27}deg)` }} />
         <div className="asr-action-wind" data-reverse={spec.variant % 2}>➜ ➜ ➜</div><ObjectArt p={{ x: s[S.X], y: 370 }} art={spec.item} /></>}
-      {family === 'duel' && w.enemy && <ObjectArt p={w.enemy} art={spec.item} className={`asr-action-feet asr-action-enemy ${duelPhase(spec,t) > 400 && duelPhase(spec,t) < 950 ? 'is-attacking' : 'is-open'}`}>
+      {family === 'duel' && w.enemy && <ObjectArt p={w.enemy} art={spec.item} className={`asr-action-feet asr-action-enemy ${enemyHit?'asr-enemy-hit':''} ${duelPhase(spec,t) > 400 && duelPhase(spec,t) < 950 ? 'is-attacking' : 'is-open'}`}>
         <span>{Array.from({ length: Math.max(0, spec.goal - s[S.SCORE]) }, (_, i) => <i key={i}>◆</i>)}</span></ObjectArt>}
       {family === 'chase' && w.enemy && <ObjectArt p={w.enemy} art={spec.item} className="asr-action-runaway"><span>!</span></ObjectArt>}
       {family === 'throw' && <><ObjectArt p={w.goal} art="hoop" className="asr-action-hoop" />
@@ -85,14 +86,14 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
       {family === 'carry' && <><div className="asr-action-delivery" style={at(w.goal)}><Sprite name="satchel" /><span>★</span></div>
         <ObjectArt p={s[S.CARRIED] ? { x: s[S.X], y: s[S.Y] - 90 } : s[S.MASK] ? { x: s[S.BOX_X], y: s[S.BOX_Y] } : { x: 150, y: 300 }} art={spec.item} className="asr-action-parcel" /></>}
       <CrossoverScene spec={spec} state={s} world={w} mode={mode} />
-      <div className="asr-action-player" data-facing={s[S.FACING]} data-pose={pose} data-vehicle={family==='brake'||family==='kart'||undefined} data-rolling={rolling && !outcome || undefined}
+      <div className="asr-action-player" data-facing={striking?(Math.cos(strikeDirection.current.angle*Math.PI/180)<0?-1:1):s[S.FACING]} data-pose={pose} data-vehicle={family==='brake'||family==='kart'||undefined} data-rolling={rolling && !outcome || undefined}
         data-dashing={b && ['run', 'climb', 'catch', 'chase', 'soccer'].includes(family) || undefined}
         data-guard={b && ['duel', 'dodge', 'collect', 'parry'].includes(family)} style={{...at(player),width:actorSize,height:actorSize}}>
         {!integratedKartDriver&&<i className="asr-action-shadow" />}
         {family!=='flap'&&!integratedKartDriver&&<RushActor size={actorSize} id={cast.id} pose={pose} dashMovement={dashMovement}
           jumpVelocity={s[S.VY]}
           actionRemaining={pose === 'duck' ? (rolling ? s[S.A] : s[S.B]) - t : undefined}
-          age={outcome ? feedbackElapsed : pose === 'walk' ? t : pose === 'duck'
+          age={striking&&enemyHit?Math.max(190,action?t-action.at:0):outcome ? feedbackElapsed : pose === 'walk' ? t : pose === 'duck'
             ? Math.max(0, t - (rolling ? s[S.A] - 260 : s[S.B] - 650))
             : action ? Math.max(0, t - action.at) : elapsed} />}
         {family==='kart'&&<img className="asr-kart-vehicle" data-integrated-driver={integratedKartDriver||undefined} src={assetUrl(`sprites/after-school-rush/${integratedKartDriver?'kart-gate-driver-v1.webp':'kart-overhead-v1.webp'}`)} alt="" draggable={false}/>}
@@ -102,7 +103,7 @@ export function ActionBoard({ entry, state: s, elapsed, mode, action, outcome, f
         {family === 'flap' && <span className="asr-paper-plane" aria-hidden="true"><img src={assetUrl('sprites/paper-plane/pilots-02.webp')} style={{width:'500%',height:'500%',left:'-100%',top:0}} alt="" draggable={false}/></span>}
         {(striking || a && ['chase', 'sweep', 'push'].includes(family)) && <span className="asr-strike-direction" style={{rotate:`${strikeDirection.current.angle}deg`}} key={action?.at}><i className="asr-action-swing" /></span>}
       </div>
-      <ActionFeedback entry={entry} state={s} elapsed={elapsed} action={action} outcome={outcome} player={player}/>
+      <ActionFeedback entry={entry} state={s} elapsed={elapsed} action={action} outcome={outcome} player={player} attackAngle={strikeDirection.current.angle}/>
       <div className="asr-action-status"><span>{Array.from({ length: spec.boss ? 3 : 2 }, (_, i) => <i key={i} data-lost={i >= s[S.HP]}>◆</i>)}</span>
         <span>{['collect', 'catch', 'aim', 'timing', 'duel', 'chase', 'sweep', 'throw', 'rhythm', 'bat', 'rally', 'soccer', 'parry', 'mining', 'volley'].includes(family) ? `${s[S.SCORE]} / ${spec.goal}` : '★'}</span></div>
       <div className="asr-action-progress" aria-hidden="true"><span style={{ width: `${outcome === 'clear' ? 100 : Math.max(0, Math.min(1, progress)) * 100}%` }} /></div>
