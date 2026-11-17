@@ -805,7 +805,7 @@
     "stage": 1,
     "title": "校長先生、異議あり！",
     "englishTitle": "The Great School Appeal",
-    "image": "sprites/kocho/story/akari-1-v2.webp",
+    "image": "sprites/kocho/story/akari-1-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 謎めく転入生 (high-school-assassin). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gate in the late afternoon, a school notice board, the guest holds a neat stack of forms while the hero resolves to challenge the principal. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -855,7 +855,7 @@
     "stage": 2,
     "title": "階段は会議室ではありません",
     "englishTitle": "Stairway Summit",
-    "image": "sprites/kocho/story/akari-2-v2.webp",
+    "image": "sprites/kocho/story/akari-2-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 水城しずく (magic-shizuku). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Sunlit school stair landing, a quick planning meeting, guest and hero looking at a small plan notebook, expressive friendly comic timing. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -905,7 +905,7 @@
     "stage": 3,
     "title": "購買のパンは世界を救う",
     "englishTitle": "Bread Saves the Day",
-    "image": "sprites/kocho/story/akari-3-v2.webp",
+    "image": "sprites/kocho/story/akari-3-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 御影 颯真 (magic-soma). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School bread shop counter, exactly one last yakisoba bread roll resting on a clean tray, guest and hero preparing to split it fairly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -955,7 +955,7 @@
     "stage": 4,
     "title": "体育館で大作戦",
     "englishTitle": "Gymnasium Strategy",
-    "image": "sprites/kocho/story/akari-4-v2.webp",
+    "image": "sprites/kocho/story/akari-4-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 風森こはる (magic-koharu). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School gymnasium, guest cheering enthusiastically with cheering pennants and a microphone or small banner bundle, ten small cheering flags as props, hero responds warmly. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -1005,7 +1005,7 @@
     "stage": 5,
     "title": "図書室の静かな決意",
     "englishTitle": "Quiet Determination",
-    "image": "sprites/kocho/story/akari-5-v2.webp",
+    "image": "sprites/kocho/story/akari-5-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, エリオット・ノクス (magic-elliot). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Quiet school library, guest and hero examining an old school meeting ledger and an old photograph of the principal as a student; no readable text on documents. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -1055,7 +1055,7 @@
     "stage": 6,
     "title": "屋上の約束",
     "englishTitle": "Rooftop Promise",
-    "image": "sprites/kocho/story/akari-6-v2.webp",
+    "image": "sprites/kocho/story/akari-6-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 生物部の先輩 (high-school-caretaker). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School rooftop in a warm sunset breeze, guest and hero speaking sincerely side by side against the city and school landscape, hopeful atmosphere. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -1105,7 +1105,7 @@
     "stage": 7,
     "title": "校長室、正面突破！",
     "englishTitle": "The Principal Awaits",
-    "image": "sprites/kocho/story/akari-7-v2.webp",
+    "image": "sprites/kocho/story/akari-7-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 九条 朔夜 (magic-sakuya). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. Outside the closed principal office door, guest encourages the hero just before the final challenge, warm dramatic rim light, a hopeful determined mood. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。 Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {
@@ -1155,7 +1155,7 @@
     "stage": 8,
     "title": "最高の放課後、開幕！",
     "englishTitle": "Our Best Afternoon",
-    "image": "sprites/kocho/story/akari-8-v2.webp",
+    "image": "sprites/kocho/story/akari-8-v3.webp",
     "artPrompt": "Repaint a single beautiful 16:9 school anime story CG. The LEFT part of the reference board is the old scene: retain ONLY the MAIN HERO, the red ponytail girl Akari with a gold star hair clip and navy sailor school uniform, with the same face and outfit. The RIGHT part is the canonical portrait of the NEW SPEAKING GUEST, 白石 湊 (magic-minato). Replace all old non-hero foreground characters with this new guest. The final image MUST prominently show exactly TWO foreground characters: that hero AND that specific guest, both identifiable with faithful hair, face, glasses and accessories from their references. No Aster, no Lyra, no unrelated fantasy warrior or hooded desert guest. School courtyard festival feast after victory at sunset, guest and hero laughing together, festive bunting and food, friendly elderly principal holding a juice cup in the background, joyful best ending. The guest is actually speaking to the hero, natural eyelines, appropriate facial reactions. The conversational context is: 乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！ Do NOT render that dialogue as text. Match the warm richly detailed anime illustration and school-story atmosphere of the old CG; preserve natural female/male proportions of the canonical guest. Exactly two arms per person, anatomically correct hands, no extra hands, no duplicate limbs. A complete composed illustration, no split panels, no comparison board, no labels, no subtitles, no logos, no UI, no frames. All faces fully inside image. Keep the lower quarter calm enough for a later dialogue overlay.",
     "lines": [
       {

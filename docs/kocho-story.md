@@ -16,6 +16,12 @@
 
 一枚絵24枚は旧場面の主人公と新ゲストの正規立ち絵を参照してImageGenで再生成。新生成元PNGは `originals-v2/`、実行用WebPは `public/sprites/kocho/story/*-v2.webp`。`art-build.json` に場面、出演者、参照画像とSHA-256を記録。加工は `node scripts/prepare-kocho-story-art.mjs`。
 
+## あかりの原画への統一（2026-11-17）
+
+あかりの開始・各章間・エンディングの8枚をImageGenで再生成した。マジック編の正規立ち絵 `public/sprites/magic/characters/heroine-01-before.webp` を主参照とし、顔立ち、赤いサイドポニーテール、小さな星の髪飾り、白い縁取りの紺の制服と赤いリボンを合わせた。大きく拳を上げる姿を控え、明るさと素直さが伝わる自然なポーズへ変更。各場面の正規ゲストも参照し、台詞96件と既存音声80本の割り当ては保持した。
+
+生成設定・台本上の場面・3点の参照は `assets/kocho/story/art-generation-v3.json`、元PNGは `originals-v3/`、実行用画像は `public/sprites/kocho/story/akari-*-v3.webp`。`art-build.json` に主人公・ゲストの参照ハッシュと生成元・実行用画像のハッシュを記録し、`art-review.json` に視覚確認を記録した。旧版と他の主人公16枚は保管。準備スクリプトの `--hero akari` で8枚だけ更新できる。
+
 ## 音声制作と検査
 
 公式Irodori-TTSのHEAD `382205679ebc32295b7d1bfb329327d04c8f4eed` と、公開モデル `Aratako/Irodori-TTS-v4.1-Small-MF` revision `ccc78f5d480b6e51b69b2d5042a14c4da04fea6e` を2026-11-15に確認。新ゲストは8-step、bf16、2スレッド、モデル・codecともCPU。

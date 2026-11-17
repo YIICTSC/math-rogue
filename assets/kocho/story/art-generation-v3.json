@@ -1,0 +1,119 @@
+{
+  "generator": "ImageGen",
+  "purpose": "Match Akari's canonical Magic-arc model, blazer uniform and warm composed personality",
+  "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+  "scenes": [
+    {
+      "id": "akari-1",
+      "stage": 1,
+      "guest": "high-school-assassin",
+      "ref": "public/sprites/high-school/characters/2.webp",
+      "lines": [
+        "夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。",
+        "放課後がなくなったら、星を見上げる約束もなくなっちゃう！",
+        "秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。",
+        "校長先生、みんなのきらきらまで、しまわないでください！"
+      ],
+      "source": "/workspace/generated_images/exec-626e264e-b426-4b72-85c7-4bb0b0b10dc2.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: At the school gate in warm sunset light, Akari talks earnestly to her mystery-transfer-student friend about protecting after-school promises. Akari stands naturally with knees close together, lightly clasped hands at chest level and a hopeful confident smile. Keep exactly these two distinct main characters prominent; any distant bystanders remain subdued. Conversational context (do NOT draw the words): 夕方の校門。突然の放課後禁止令に、勇者たちが立ち上がった。 放課後がなくなったら、星を見上げる約束もなくなっちゃう！ 秘密基地を守るより、放課後を守る方が難しそうだな。一人では行かせないけど。 校長先生、みんなのきらきらまで、しまわないでください！. Full coherent single scene, warm cinematic light and nuanced friendly expressions. Each person exactly two arms, anatomically correct hands and limbs. Calm lower quarter for dialogue overlay. No captions, lettering, logos, UI, panels, border or watermark."
+    },
+    {
+      "id": "akari-2",
+      "stage": 2,
+      "guest": "magic-shizuku",
+      "ref": "public/sprites/magic/characters/heroine-02-before.webp",
+      "lines": [
+        "最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。",
+        "作戦名は、きらきら校則見直し大作戦！ちょっと長い？",
+        "その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。",
+        "じゃあ、略してきら作！名前だけでも明るく行こう！"
+      ],
+      "source": "/workspace/generated_images/exec-f72c26e2-59f5-4a8a-91b4-311b595f8f44.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: At a sunlit staircase landing, Akari and her dark-haired female friend Shizuku discuss a plan notebook while sitting properly on a bench, both feet on the floor. Akari makes a small polite pointing gesture toward the notebook, smiling softly. Keep exactly these two distinct main characters prominent; any distant bystanders remain subdued. Conversational context (do NOT draw the words): 最初の関門を抜けた一行。階段の踊り場で、緊急作戦会議が始まる。 作戦名は、きらきら校則見直し大作戦！ちょっと長い？ その作戦名、言い終わる前に下校時間よ。短くしても、気持ちは減らないわ。 じゃあ、略してきら作！名前だけでも明るく行こう！. Full coherent single scene, warm cinematic light and nuanced friendly expressions. Each person exactly two arms, anatomically correct hands and limbs. Calm lower quarter for dialogue overlay. No captions, lettering, logos, UI, panels, border or watermark."
+    },
+    {
+      "id": "akari-3",
+      "stage": 3,
+      "guest": "magic-soma",
+      "ref": "public/sprites/magic/male-characters/soma-before.webp",
+      "lines": [
+        "購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。",
+        "このパン、星形じゃないけど、すっごく輝いて見える！",
+        "公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？",
+        "みんなで分けたら、幸せも増える。魔法じゃなくてもね！"
+      ],
+      "source": "/workspace/generated_images/exec-86731938-e130-40a7-bdbf-0e6e4ad624df.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: At a school bread-shop counter, Akari and Soma stand together discussing how to share the final bread roll on a tray. Akari's hands are relaxed, her friendly smile modest and sincere, with a natural closed-knee posture. Conversational context, not text in the picture: 購買前で補給を発見。しかし最後のパンには、勇者にも譲れない事情があった。 このパン、星形じゃないけど、すっごく輝いて見える！ 公平に切る計算なら任せてくれ。パンくずまで数えるのは、やり過ぎか？ みんなで分けたら、幸せも増える。魔法じゃなくてもね！. Complete cohesive 16:9 cinematic anime school-story image, warm detailed light, faithful canonical guest from second reference. Exactly two arms and correct natural hands per person. Calm lower quarter for dialogue overlay. No text, labels, logo, border or UI."
+    },
+    {
+      "id": "akari-4",
+      "stage": 4,
+      "guest": "magic-koharu",
+      "ref": "public/sprites/magic/characters/heroine-07-before.webp",
+      "lines": [
+        "体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。",
+        "応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？",
+        "十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。",
+        "怖いときは、ひとりで光らなくていい。みんな、ありがとう！"
+      ],
+      "source": "/workspace/generated_images/exec-235c13d9-5207-4611-a1ff-64064a4396e4.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: In the school gym with ten small cheering flags, Akari and her green-haired female friend Koharu share a touching moment of encouragement. Akari holds one small flag loosely at waist level and smiles gratefully, relaxed shoulders and natural stance. Keep exactly these two distinct main characters prominent; any distant bystanders remain subdued. Conversational context (do NOT draw the words): 体育館まで来ればあと少し。仲間たちは、応援の準備だけは完璧だった。 応援旗が十本！星座にしたら、校長先生も見上げちゃうかな？ 十本とも、みんなの応援だよ。風が吹かなくても、私たちが振るからね。 怖いときは、ひとりで光らなくていい。みんな、ありがとう！. Full coherent single scene, warm cinematic light and nuanced friendly expressions. Each person exactly two arms, anatomically correct hands and limbs. Calm lower quarter for dialogue overlay. No captions, lettering, logos, UI, panels, border or watermark."
+    },
+    {
+      "id": "akari-5",
+      "stage": 5,
+      "guest": "magic-elliot",
+      "ref": "public/sprites/magic/male-characters/elliot-before.webp",
+      "lines": [
+        "図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。",
+        "昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。",
+        "先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。",
+        "忘れた願いなら、もう一度一緒に思い出せばいいよ！"
+      ],
+      "source": "/workspace/generated_images/exec-8fdb5fc4-3587-4965-8baf-efe296289aa2.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: In the warm school library, Akari and her pale-haired male friend Elliott sit upright at a table studying an old principal's photo album, which is open between them. Akari looks thoughtful and kind. No lying on tables. Keep exactly these two distinct main characters prominent; any distant bystanders remain subdued. Conversational context (do NOT draw the words): 図書室で見つけた古い議事録。そこには、校長も昔は挑戦者だったと書かれていた。 昔の校長先生、目がきらきらしてる。今と同じ星を見てたんだね。 先生にも、忘れられない放課後があるのですね。あなたの光なら、きっと届きます。 忘れた願いなら、もう一度一緒に思い出せばいいよ！. Full coherent single scene, warm cinematic light and nuanced friendly expressions. Each person exactly two arms, anatomically correct hands and limbs. Calm lower quarter for dialogue overlay. No captions, lettering, logos, UI, panels, border or watermark."
+    },
+    {
+      "id": "akari-6",
+      "stage": 6,
+      "guest": "high-school-caretaker",
+      "ref": "public/sprites/high-school/characters/1.webp",
+      "lines": [
+        "屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。",
+        "勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。",
+        "小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。",
+        "この空の下に、みんなの居場所を残したい！"
+      ],
+      "source": "/workspace/generated_images/exec-80acff53-a6c5-482b-bec4-721a57a9fc42.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: On the sunset school rooftop, Akari and the brown-haired gardening-club girl exchange a promise to preserve everyone's place after school. Akari has one hand gently over her heart and a quiet determined smile, gazing at her friend. Keep exactly these two distinct main characters prominent; any distant bystanders remain subdued. Conversational context (do NOT draw the words): 屋上に吹く風が、不安を少しだけ連れていく。守りたい放課後は、もうすぐそこだ。 勇気って、怖くないことじゃなくて、約束を思い出すことなんだ。 小さな芽だって、日なたがあるから育つの。みんなの居場所、ちゃんと残そうね。 この空の下に、みんなの居場所を残したい！. Full coherent single scene, warm cinematic light and nuanced friendly expressions. Each person exactly two arms, anatomically correct hands and limbs. Calm lower quarter for dialogue overlay. No captions, lettering, logos, UI, panels, border or watermark."
+    },
+    {
+      "id": "akari-7",
+      "stage": 7,
+      "guest": "magic-sakuya",
+      "ref": "public/sprites/magic/male-characters/sakuya-before.webp",
+      "lines": [
+        "ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。",
+        "校長先生！今日は、星よりまぶしい放課後のプレゼンです！",
+        "その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。",
+        "勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！"
+      ],
+      "source": "/workspace/generated_images/exec-f863b628-c2eb-4216-b739-9888461caee0.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: At the open principal's office door, Akari speaks respectfully with Sakuya before presenting her wishes to the principal. Calm determined smile, one small open-palm gesture, proper upright posture. Conversational context, not text in the picture: ついに校長室の扉が開く。最終決戦の前に、三人分の深呼吸が響いた。 校長先生！今日は、星よりまぶしい放課後のプレゼンです！ その光、言葉だけで終わらせるな。先生の願いまで聞けたら、見届けてやる。 勝ったら、一緒に星を見よう。先生の願いも、聞かせてください！. Complete cohesive 16:9 cinematic anime school-story image, warm detailed light, faithful canonical guest from second reference. Exactly two arms and correct natural hands per person. Calm lower quarter for dialogue overlay. No text, labels, logo, border or UI."
+    },
+    {
+      "id": "akari-8",
+      "stage": 8,
+      "guest": "magic-minato",
+      "ref": "public/sprites/magic/male-characters/minato-before.webp",
+      "lines": [
+        "挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。",
+        "やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！",
+        "乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！",
+        "校長先生の乾杯、星が一周しちゃう前にお願いしまーす！"
+      ],
+      "source": "/workspace/generated_images/exec-cd0fd673-f23a-4a98-a76e-2fbafe846847.png",
+      "prompt": "Create ONE complete richly detailed 16:9 anime school story illustration. The FIRST reference is the AUTHORITATIVE model sheet of the heroine Hoshimiya Akari. Rebuild the red-haired heroine in the THIRD reference story scene using this FIRST reference EXACTLY: same gentle youthful face, large warm reddish-brown eyes, natural soft bangs, neat red high side ponytail and single small yellow star hair clip, slim natural build. MOST IMPORTANT the outfit is the canonical fitted NAVY BLAZER WITH WHITE PIPING on collar/lapels/edges/cuffs, white collared shirt and small RED RIBBON at neck, navy pleated skirt with thin pale hem trim, dark ankle socks and simple white/red low-top sneakers. It is a blazer uniform, NOT a sailor blouse. Use the tidy silhouette and quiet friendly personality from the first model sheet, no spiky wild hair, no exaggerated oversize star, no raised fists, no fighting poses, no screaming mouth, no wide-legged stance, no rebellious or delinquent attitude. She can be bright and determined while remaining kind and composed. The SECOND reference is the exact speaking guest: preserve their identity, hair, face, clothing and proportions. The THIRD reference supplies the story setting and painterly visual style, but its Akari design and pose MUST BE REPLACED. Scene direction: At a warm school courtyard after-school victory party, Akari and Minato hold small glasses of orange juice and smile warmly. The elderly principal offers a toast in the background. Akari has a relaxed, gentle radiant smile; no fists or exaggerated shouting. Conversational context, not text in the picture: 挑戦は終わった。取り戻した放課後には、勝利より大きな笑い声があった。 やったあ！禁止令が、お楽しみ会のお知らせに変わったよ！ 乾杯の練習は、もうばっちりです！先生、挨拶は短めでお願いします！ 校長先生の乾杯、星が一周しちゃう前にお願いしまーす！. Complete cohesive 16:9 cinematic anime school-story image, warm detailed light, faithful canonical guest from second reference. Exactly two arms and correct natural hands per person. Calm lower quarter for dialogue overlay. No text, labels, logo, border or UI."
+    }
+  ]
+}

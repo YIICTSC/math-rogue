@@ -1,3 +1,5 @@
+import FusionWorkshop from '../mini-games/kocho/FusionWorkshop';
+import {makeKochoFusion,fusionParts,fusionSuper,fusionName,fusionDescription,applyFusionDamageUpgrade,KOCHO_FUSION_PRICE,type FusionSuper} from '../mini-games/kocho/fusion';
 import KochoStoryScreen,{kochoStoryReady} from '../mini-games/kocho/story/StoryScreen';
 import {takeNormalArcadePrizes} from '../mini-games/kocho/field/progress';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
@@ -26,6 +28,8 @@ type GamePhase = 'SETUP' | 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VIC
 type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT' | 'STUN' | 'HEAL' | 'DRAIN' | 'PIERCE_DASH';
 
 interface KCard {
+    fusionParts?:KCard[];
+    fusionSuper?:FusionSuper;
     technique?: HeroTechnique;
     id: string;
     name: string;
@@ -150,6 +154,7 @@ interface KochoGameState {
     specialActionCooldown: number;
     money: number;
     relics: KRelic[];
+    shopFusionUsed: boolean;
     shopUpgradeUsed: boolean; // Tracks if upgrade was used in current shop/event
     currentUpgradeOffer: UpgradeOffer | null; // Persist current upgrade offer
     shopInventory: KRelic[]; // New: Store specific relics for the shop
@@ -336,9 +341,12 @@ const getKochoEffectAssetForCard = (cardName?: string) => {
 };
 
 export const KochoCardActionArt: React.FC<{
-    card: Pick<KCard, 'name'>;
+    card: Pick<KCard, 'name'> & Partial<Pick<KCard,'fusionParts'|'fusionSuper'>>;
     className?: string;
 }> = ({ card, className = '' }) => {
+    const move=fusionSuper(card);
+    if(move)return <div aria-hidden className={'kocho-fused-art kocho-fused-super '+className} title={card.name}><div className="kocho-fused-super-picture" style={superArtStyle(move)}/></div>;
+    if(card.fusionParts)return <div aria-hidden className={'kocho-fused-art kocho-fused-parts '+className} title={card.name}>{card.fusionParts.map((part,i)=><KochoCardActionArt key={i} card={part} className="kocho-fused-piece"/>)}</div>;
     const asset = getKochoHeroActionAsset(card.name);
     return (
         <KochoSheetSprite
@@ -651,10 +659,11 @@ const getKochoDifficulty = (level: number) => KOCHO_DIFFICULTIES[Math.max(0, Mat
 // --- HELPER: Hydrate/Restore State ---
 const hydrateState = (state: any): KochoGameState => {
     // Restore React Nodes for Cards (Icons)
-    const restoreCards = (cards: any[]) => cards.map(c => {
+    const restoreCards = (cards: any[]):KCard[] => cards.map(c => {
         const template = getKochoCardTemplateByName(c.name);
         return { 
-            ...c, 
+            ...c,
+            ...(c.fusionParts?{fusionParts:restoreCards(c.fusionParts)}:{}),
             technique: template?.technique ?? c.technique,
             icon: template ? template.icon : <HelpCircle size={16}/> 
         };
@@ -690,6 +699,7 @@ const hydrateState = (state: any): KochoGameState => {
         player: { ...state.player, barrier: state.player.barrier || 0, strength: state.player.strength || 0 }, // Legacy support
         currentUpgradeOffer: restoredOffer,
         shopInventory: state.shopInventory || [],
+        shopFusionUsed: Boolean(state.shopFusionUsed),
         totalTurns: state.totalTurns || 0, // Restore Total Turns
         pendingPhase: state.pendingPhase || null,
         nextWaveMessage: state.nextWaveMessage || undefined, // New field
@@ -726,6 +736,7 @@ const getInitialState = (heroId: KochoHeroId = 'original'): KochoGameState => ({
     money: 0,
     relics: [],
     shopUpgradeUsed: false,
+    shopFusionUsed: false,
     currentUpgradeOffer: null,
     shopInventory: [],
     nextWaveMessage: undefined,
@@ -777,7 +788,11 @@ const KochoShowdown: React.FC<{
     debugPreview?: MiniGameDebugPreview;
     isUiPreview?: boolean;
 }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview, isUiPreview = false }) => {
-    const tr = (text: string) => trans(text, languageMode);
+    const tr = (text: string):string => {
+        const card=[...gameState.hand,...gameState.queue,...gameState.rewardCards].find(c=>c.fusionParts&&(c.name===text||c.description===text));
+        const base=(s:string)=>trans(s,languageMode);
+        return card?(card.name===text?fusionName(card,languageMode,base):fusionDescription(card,languageMode,base)):base(text);
+    };
     const steamControllerLayout = DISTRIBUTION_PLATFORM === 'steam';
     
     // State
@@ -786,6 +801,7 @@ const KochoShowdown: React.FC<{
     const [gameState, setGameState] = useState<KochoGameState>(() => createKochoDebugPreviewState(debugPreview, initialKochoState));
 
     const [showSuperGuide, setShowSuperGuide] = useState(false);
+    const [showFusionWorkshop,setShowFusionWorkshop]=useState(false);
     const [superCutin, setSuperCutin] = useState<KochoSuperMove | null>(null);
     const [superChain, setSuperChain] = useState(false);
     const closeSuperGuide = () => {
@@ -890,7 +906,9 @@ const KochoShowdown: React.FC<{
     const [newlyUnlockedHero, setNewlyUnlockedHero] = useState<KochoHeroId | null>(null);
     const [setupPage, setSetupPage] = useState<'title' | 'hero'>('title');
     const [showGuestCards, setShowGuestCards] = useState(false);
-    const unlockedHeroes = debugRewardsUnlocked() ? KOCHO_HEROES.map(h=>h.id) : unlockedKochoHeroes(clearedHeroes);
+    const [debugUnlocked,setDebugUnlocked]=useState(debugRewardsUnlocked);
+    useEffect(()=>{const refresh=()=>setDebugUnlocked(debugRewardsUnlocked());window.addEventListener('learning-points-changed',refresh);return()=>window.removeEventListener('learning-points-changed',refresh);},[]);
+    const unlockedHeroes = (debugUnlocked||Boolean(debugPreview)) ? KOCHO_HEROES.map(h=>h.id) : unlockedKochoHeroes(clearedHeroes);
     const superArtHero = gameState.phase === 'SETUP' ? selectedHero : gameState.heroId;
     useEffect(() => {
         const image = new Image();
@@ -1001,10 +1019,11 @@ const KochoShowdown: React.FC<{
     };
 
     const startEndlessRun = () => {
-        playActionVoice('start');
+        const base=stateRef.current.phase==='SETUP'?getInitialState(selectedHero):stateRef.current;
+        playActionVoice('start',base.heroId);
         resultSavedRef.current = false;
         const nextState: KochoGameState = {
-            ...stateRef.current,
+            ...base,
             phase: 'BATTLE',
             pendingPhase: null,
             battleStage: FINAL_STAGE + 1,
@@ -1319,6 +1338,7 @@ const KochoShowdown: React.FC<{
             nextWaveMessage: undefined, // Clear message
             specialActionCooldown: 0,
             shopUpgradeUsed: false,
+            shopFusionUsed: false,
             fieldItems: prev.fieldItems
         }));
 
@@ -1703,7 +1723,7 @@ const KochoShowdown: React.FC<{
     
     const useConsumable = (index: number) => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (animating) return;
         const state = stateRef.current;
         const item = state.consumables[index];
@@ -1775,7 +1795,7 @@ const KochoShowdown: React.FC<{
 
     const handleMove = async (dir: -1 | 1) => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         const front = stateRef.current.player.pos + dir;
         if (stateRef.current.heroId === 'akari' && dir === stateRef.current.player.facing && stateRef.current.enemies.some(e => e.hp > 0 && e.pos === front)) {
@@ -1819,7 +1839,7 @@ const KochoShowdown: React.FC<{
 
     const handleTurn = async () => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         
@@ -1845,7 +1865,7 @@ const KochoShowdown: React.FC<{
 
     const handleWait = async () => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         setAnimating(true);
         playActionVoice('wait');
@@ -1866,7 +1886,7 @@ const KochoShowdown: React.FC<{
 
     const handleSwapPosition = async () => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
         const current = stateRef.current;
@@ -1919,7 +1939,7 @@ const KochoShowdown: React.FC<{
 
     const handleQueueCard = async (card: KCard, idx: number) => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         if (card.currentCooldown > 0) {
             audioService.playSound('wrong');
@@ -1962,7 +1982,7 @@ const KochoShowdown: React.FC<{
 
     const handleUnqueueCard = (idx: number) => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating) return;
         
         const card = stateRef.current.queue[idx];
@@ -1978,7 +1998,7 @@ const KochoShowdown: React.FC<{
 
     const executeQueue = async () => {
         if(storyActiveRef.current)return;
-        if (showSuperGuide) return;
+        if (showSuperGuide || showFusionWorkshop) return;
         if (stateRef.current.status !== 'PLAYING' || animating || stateRef.current.queue.length === 0) return;
         setAnimating(true);
         // Keep a resumable checkpoint while voiced combos are in flight.
@@ -1986,14 +2006,16 @@ const KochoShowdown: React.FC<{
         setGameState(prev => ({ ...prev, status: 'EXECUTING' }));
 
         const queue = [...stateRef.current.queue];
-        const superMove = findKochoSuper(stateRef.current.heroId, queue.map(c => c.name));
-        setSuperChain(Boolean(superMove));
+        const queuedSuper = findKochoSuper(stateRef.current.heroId, queue.map(c => c.name));
+        setSuperChain(Boolean(queuedSuper||queue.some(c=>fusionSuper(c))));
+        const steps=queue.flatMap((parent,queueIndex)=>fusionParts(parent).map((card,partIndex,parts)=>({card,parent,queueIndex,lastPart:partIndex===parts.length-1})));
         const cardsReturningToHand: KCard[] = [];
         
         let currentState = { ...stateRef.current };
 
         // Execute all player cards
-        for (const [cardIndex,card] of queue.entries()) {
+        for (const [cardIndex,{card,parent,queueIndex,lastPart}] of steps.entries()) {
+            const superMove=fusionSuper(parent)??queuedSuper;
             if (currentState.status === 'GAME_OVER') break;
             
             activeActionCardNameRef.current = card.name;
@@ -2001,7 +2023,7 @@ const KochoShowdown: React.FC<{
             const voiceClip = kochoSkillVoice(currentState.heroId, card.name);
             // Voice playback follows the action without extending its animation lock.
             if (voiceClip && !debugPreview && !isUiPreview && voiceMountedRef.current) {
-                void audioService.playKochoVoice(currentState.heroId, voiceClip, 3,queue.length>1?(cardIndex===0?'combo-first':'combo'):'normal');
+                void audioService.playKochoVoice(currentState.heroId, voiceClip, 3,steps.length>1?(cardIndex===0?'combo-first':'combo'):'normal');
             }
             addLog(`${card.name}！`);
             if (superMove) for (const offset of [-1, 0, 1]) addVfx('AFTERIMAGE', Math.max(0, Math.min(6, currentState.player.pos + offset)), {sourceCardName: card.name, color: 'super', durationMs: 480, direction: currentState.player.facing});
@@ -2344,7 +2366,7 @@ const KochoShowdown: React.FC<{
             if (technique.reduceCooldown) cardsReturningToHand.forEach(c => { c.currentCooldown = Math.max(0, c.currentCooldown - technique.reduceCooldown); });
             // Queued cards retain their own cooldown.
             currentState = { ...currentState, focus: technique.focus, hand: nextHand, player: nextPlayer, enemies: nextEnemies };
-            cardsReturningToHand.push({ ...card, currentCooldown: card.cooldown });
+            if(lastPart)cardsReturningToHand.push({ ...parent, currentCooldown: parent.cooldown });
             
             setGameState(prev => {
                  return { ...prev, focus: technique.focus, hand: nextHand, player: nextPlayer, enemies: nextEnemies };
@@ -2360,7 +2382,7 @@ const KochoShowdown: React.FC<{
             if (superMove) {
                 const from = currentState.player.pos;
                 for (const pos of [pPos, from]) addVfx('AFTERIMAGE', pos, {sourceCardName: card.name, color: 'super', durationMs: 480, direction: currentState.player.facing});
-                if (card.id === queue[queue.length - 1].id && hit) {
+                if (lastPart && (fusionSuper(parent) || (queueIndex === queue.length-1 && hit))) {
                     const finish = resolveKochoSuper(superMove, currentState.player, currentState.enemies);
                     currentState = {...currentState, player: finish.player, enemies: finish.enemies};
                     setGameState(prev => ({...prev, player: finish.player, enemies: finish.enemies}));
@@ -2595,6 +2617,7 @@ const KochoShowdown: React.FC<{
                 nextState.phase = targetPhase;
                 nextState.status = 'PLAYING';
                 nextState.shopUpgradeUsed = false;
+                if(targetPhase === 'SHOP') nextState.shopFusionUsed = false;
                 nextState.currentUpgradeOffer = getRandomOffer();
                 nextState.shopInventory = newInventory;
             } else if (targetPhase === 'VICTORY') {
@@ -2691,6 +2714,16 @@ const KochoShowdown: React.FC<{
         audioService.playSound('select');
     };
 
+    const handleFuseCards = (ids:string[]) => {
+        setGameState(prev=>{
+            if(prev.phase!=='SHOP'||prev.shopFusionUsed||prev.money<KOCHO_FUSION_PRICE)return prev;
+            const cards=ids.map(id=>prev.hand.find(c=>c.id===id));if(cards.some(c=>!c))return prev;
+            const card=makeKochoFusion(prev.heroId,cards as KCard[],`fusion_${crypto.randomUUID()}`);if(!card)return prev;
+            return {...prev,hand:[...prev.hand.filter(c=>!ids.includes(c.id)),card],money:prev.money-KOCHO_FUSION_PRICE,shopFusionUsed:true};
+        });
+        setShowFusionWorkshop(false);audioService.playSound('buff');
+    };
+
     // Apply the active upgrade to a selected card
     const handleApplyUpgrade = (cardIndex: number) => {
         const offer = gameState.currentUpgradeOffer;
@@ -2740,7 +2773,7 @@ const KochoShowdown: React.FC<{
              if (!isSlotUpgrade) {
                  card.usedSlots++;
              }
-             newHand[cardIndex] = card;
+             newHand[cardIndex] = applyFusionDamageUpgrade(card,card.damage-gameState.hand[cardIndex].damage);
         }
 
         setGameState(prev => ({ ...prev, hand: newHand, shopUpgradeUsed: true }));
@@ -3050,6 +3083,7 @@ const KochoShowdown: React.FC<{
                     </article>)}</div>
                 </section>
             </div>}
+            {showFusionWorkshop&&gameState.phase==='SHOP'&&<FusionWorkshop<KCard> hand={gameState.hand} hero={gameState.heroId} money={gameState.money} used={gameState.shopFusionUsed} language={languageMode} tr={tr} CardArt={KochoCardActionArt} onClose={()=>setShowFusionWorkshop(false)} onConfirm={handleFuseCards}/>}
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="kocho-problem-overlay absolute inset-0 z-[100] w-full h-full pointer-events-auto">
@@ -3100,7 +3134,7 @@ const KochoShowdown: React.FC<{
                         <ResponsiveTitleArt game="kocho"/>
                         <div className="kocho-title-copy"><span>KOCHO SHOWDOWN</span><h1>{tr('校長対決')}</h1><p>{tr('一歩と一枚で、校則を超えろ。')}</p></div>
                         <div className="kocho-title-actions">
-                            {debugRewardsUnlocked() && <button onClick={startEndlessRun}>{tr('放課後エンドレスへ')}</button>}
+                            {debugUnlocked && <button data-kocho-endless onClick={startEndlessRun}>{tr('放課後エンドレスへ')}</button>}
                             <button data-kocho-enter data-gamepad-initial-choice onClick={() => setSetupPage('hero')}>{tr('主人公選択へ')} <Play size={20}/></button>
                             <button data-gamepad-back onClick={handleQuit}>{tr('戻る')}</button>
                         </div>
@@ -3124,6 +3158,7 @@ const KochoShowdown: React.FC<{
                         <p className="kocho-lobby-special">{tr(kochoSpecialLabel(selectedHero))}<br/>{tr(kochoSpecialDescription(selectedHero))}</p>
                         {selectedHero !== 'original' && <><p className="kocho-lobby-special">{tr(selectedHero === 'rebel' ? '闘志：通常移動・特殊アクション成功で+1。専用カードでも蓄積し、解放技で消費。上限10。' : '星光：通常移動・特殊アクション成功で+1。専用カードでも蓄積し、解放技で消費。上限10。')}</p><button className="kocho-catalog-button" onClick={() => setShowGuestCards(true)}>{tr('専用カードを見る')} (80)</button></>}
                         <button data-kocho-super-guide onClick={() => setShowSuperGuide(true)} className="kocho-catalog-button">{tr('超必殺技')} · 12</button>
+                        {debugUnlocked&&<button data-kocho-endless className="kocho-catalog-button" onClick={startEndlessRun}>{tr('放課後エンドレスへ')}</button>}
                         <h2 className="kocho-lobby-difficulty-title">{tr('難易度選択')}</h2>
                         <p className="kocho-lobby-note">{tr('Lv.1から開始し、クリアするたびに次のレベルが1つ解禁されます。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。')}</p>
                         <div className="kocho-lobby-levels">
@@ -3334,7 +3369,7 @@ const KochoShowdown: React.FC<{
                             {/* SHOP UI */}
                             {gameState.phase === 'SHOP' && (
                                 <div className="kocho-shop-panel w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
-                                    <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> {tr('Shop')}</h2>
+                                    <div className="kocho-shop-heading"><h2 className="text-3xl font-bold text-indigo-400 flex items-center"><ShoppingBag className="mr-2"/> {tr('Shop')}</h2><button data-kocho-fusion-open disabled={gameState.shopFusionUsed} onClick={()=>setShowFusionWorkshop(true)}>{tr('カード合成')} · {gameState.shopFusionUsed?tr('(済)'):KOCHO_FUSION_PRICE+' G'}</button></div>
                                     <div className="kocho-shop-columns flex flex-col md:flex-row gap-8 flex-grow">
                                         <div className="kocho-shop-upgrade-column flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar flex flex-col">
                                             <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between"><span className="flex items-center"><Hammer className="mr-2 text-red-400"/> {tr('Deck Upgrade')}</span><span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>{gameState.shopUpgradeUsed ? tr('(済)') : tr('(1回のみ)')}</span></h3>

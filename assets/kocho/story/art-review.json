@@ -1,6 +1,6 @@
 {
-  "reviewedAt": "2026-11-15",
-  "method": "Visual review of all 24 final CGs in the contact sheet, against the canonical guest portraits used in the reference boards. Browser decodes and responsive dialogue overlays tested separately.",
+  "reviewedAt": "2026-11-17",
+  "method": "Previous original/rebel CG reviews preserved. All 8 Akari v3 CGs visually inspected in a contact sheet against the canonical Magic-arc model; no claim of human review. Browser image decoding and dialogue overlays checked separately.",
   "checks": [
     "Correct school/magic guest appears with scene hero",
     "No Aster or Lyra as active guests",
@@ -143,7 +143,17 @@
         "akari",
         "high-school-assassin"
       ],
-      "sha256": "576db9695b60a21ff6242f2555a8f2e6ffe3f969fac547800d535a3d34e94f1c"
+      "sha256": "8a94ff46eb8e8933292f28ae982a4d6919defb459fdca848c228c2122edcd0a8",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-2",
@@ -151,7 +161,17 @@
         "akari",
         "magic-shizuku"
       ],
-      "sha256": "e99ebbdfa2f96d4da4eea66ce373c58b8fd3b9dc5b07d4191df48decbda1f7af"
+      "sha256": "f51598d48abdfa2d76288ecda0778b7b6989dca68c6386627460eba62b71fa2c",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-3",
@@ -159,7 +179,17 @@
         "akari",
         "magic-soma"
       ],
-      "sha256": "0d33af34a7c0b5ec3b86fabc84d041fdafee960dbb71c8aeee6d98e37d5a9023"
+      "sha256": "476ac707026d9dcc5617557a08c02492870f8989eb7f6a85be25adb98c91ad4c",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-4",
@@ -167,7 +197,17 @@
         "akari",
         "magic-koharu"
       ],
-      "sha256": "1d5612ea81c08999f222851a91a88f2bee4ab024604543bf24e72471fad5ae7f"
+      "sha256": "5d01b8b962733d298d442c7074c8b2eec246e5c04bd768da440ea2be758d8de6",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-5",
@@ -175,7 +215,17 @@
         "akari",
         "magic-elliot"
       ],
-      "sha256": "f972b155fc3c99dd619dfd372d435aaa37d81b9e3059a84882df5a532c39a17f"
+      "sha256": "78de0c1cdbcc2910fdafedc37489e004348dfb7ddc8a86bda7de3936377e3d42",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-6",
@@ -183,7 +233,17 @@
         "akari",
         "high-school-caretaker"
       ],
-      "sha256": "56629369810fede1d6294c96101a1ec77a2a45b7dc4cc2e8f94ff4b46210afee"
+      "sha256": "1e543735346d218751750e1f8d060bc40e221afe9e054594a5313649911c593a",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-7",
@@ -191,7 +251,17 @@
         "akari",
         "magic-sakuya"
       ],
-      "sha256": "1bdf58d2bfe5fbc09764d1d87fc0c851c09f04a8d4c102d6a651a9e30b668637"
+      "sha256": "01c6243cf23157ac6107bdff6919dcda8a7a5296c73c75a2618154c94611fb18",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     },
     {
       "id": "akari-8",
@@ -199,7 +269,17 @@
         "akari",
         "magic-minato"
       ],
-      "sha256": "0a0832b4d996a4b464fc9033082a754b4b09a56211bb141bd12972edad3a82d2"
+      "sha256": "49ee2d0d029fee84154c506f81d961e95ac8e0a808d465954145bdd8eaa359b7",
+      "version": 3,
+      "reviewedAt": "2026-11-17",
+      "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+      "checks": [
+        "Canonical Magic-arc face, red side ponytail and small star clip",
+        "Navy uniform with white trim and red neck ribbon",
+        "Gentle expressions and natural posture",
+        "Scene guest preserved",
+        "No obvious extra foreground hands or limbs"
+      ]
     }
   ]
 }

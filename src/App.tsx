@@ -2645,6 +2645,7 @@ const App: React.FC = () => {
     // ?adminDebug=1. Store builds cannot use this route because the feature flag is off.
     const [isDebugMode, setIsDebugMode] = useState(isAdminDebugLaunch);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    useEffect(()=>{if(DEBUG_FEATURES_ENABLED&&gameState.screen===GameScreen.DEBUG_MENU)enableDebugRewards();},[gameState.screen]);
     const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(academyInviteOpen&&!!academyInvite)||(basketballInviteOpen&&!!basketballCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     useEffect(()=>{if(gameState.screen===GameScreen.GAKURO_CRAFT)setGameState(prev=>({...prev,screen:GameScreen.START_MENU}));},[gameState.screen]);
     useEffect(()=>{if(vrInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_GAKUROGEAR?prev:{...prev,screen:GameScreen.MINI_GAME_GAKUROGEAR});},[vrInviteOpen]);

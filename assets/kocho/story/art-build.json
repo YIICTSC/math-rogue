@@ -274,7 +274,7 @@
   {
     "id": "akari-1",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "high-school-assassin"
@@ -282,16 +282,19 @@
     "guest": "high-school-assassin",
     "referenceArt": "public/sprites/high-school/characters/2.webp",
     "referenceSha256": "00617e686ead7b025bd8b0570e9ef446170f6ba668d6c87b9b536d61a2b71d21",
-    "archive": "assets/kocho/story/originals-v2/akari-1.png",
-    "output": "public/sprites/kocho/story/akari-1-v2.webp",
-    "sourceSha256": "e352c99aebe269fbd653b38fbf318b0921008bfd7528759354288754fbf846c3",
-    "sha256": "576db9695b60a21ff6242f2555a8f2e6ffe3f969fac547800d535a3d34e94f1c",
-    "bytes": 429628
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "006c7cd7a28d622d7a68e98c599e103bad1966273d229fa1c8b8ad05f695c537",
+    "archive": "assets/kocho/story/originals-v3/akari-1.png",
+    "output": "public/sprites/kocho/story/akari-1-v3.webp",
+    "sourceSha256": "36bd111ed21c381e786e70119f1a6ee28ba9f61860429af7e598fca281187073",
+    "sha256": "8a94ff46eb8e8933292f28ae982a4d6919defb459fdca848c228c2122edcd0a8",
+    "bytes": 413462
   },
   {
     "id": "akari-2",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "magic-shizuku"
@@ -299,16 +302,19 @@
     "guest": "magic-shizuku",
     "referenceArt": "public/sprites/magic/characters/heroine-02-before.webp",
     "referenceSha256": "eb96e13071539bf0332ff3d2635ef948fbbf637c80fbe5dc550eb4d1fec31065",
-    "archive": "assets/kocho/story/originals-v2/akari-2.png",
-    "output": "public/sprites/kocho/story/akari-2-v2.webp",
-    "sourceSha256": "7b742fa09e922d10eb25887b5c0d0ee16b689b01751ccb58033bb6d0b9cf7a13",
-    "sha256": "e99ebbdfa2f96d4da4eea66ce373c58b8fd3b9dc5b07d4191df48decbda1f7af",
-    "bytes": 370552
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "064bbd193162946141b27950e713867c8335d8c2acc407691a80a5346b8be0a6",
+    "archive": "assets/kocho/story/originals-v3/akari-2.png",
+    "output": "public/sprites/kocho/story/akari-2-v3.webp",
+    "sourceSha256": "e77dfdbf7aeaca74f62d0ea20b5e7dc44910707469e75677ff34aa9501ccdcb8",
+    "sha256": "f51598d48abdfa2d76288ecda0778b7b6989dca68c6386627460eba62b71fa2c",
+    "bytes": 392376
   },
   {
     "id": "akari-3",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "magic-soma"
@@ -316,16 +322,19 @@
     "guest": "magic-soma",
     "referenceArt": "public/sprites/magic/male-characters/soma-before.webp",
     "referenceSha256": "f678bac2a49bf4f87c554836dec42babd494e1322389c273bc481f6bcd2ca374",
-    "archive": "assets/kocho/story/originals-v2/akari-3.png",
-    "output": "public/sprites/kocho/story/akari-3-v2.webp",
-    "sourceSha256": "a04f614daa6735c701ffd49ef8bdb72fc2aa3589de51d5c418e747e4ddbf11d3",
-    "sha256": "0d33af34a7c0b5ec3b86fabc84d041fdafee960dbb71c8aeee6d98e37d5a9023",
-    "bytes": 386658
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "b7227a9d46e2427e656fb6404fa4c29cc9f0a23d73958fee1d513ae3de52bf5b",
+    "archive": "assets/kocho/story/originals-v3/akari-3.png",
+    "output": "public/sprites/kocho/story/akari-3-v3.webp",
+    "sourceSha256": "7247d6f6b9b67b88038edb9cc4c6efc3ac2c6b3a1d7e26f9824a4ddb455e7485",
+    "sha256": "476ac707026d9dcc5617557a08c02492870f8989eb7f6a85be25adb98c91ad4c",
+    "bytes": 354410
   },
   {
     "id": "akari-4",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "magic-koharu"
@@ -333,16 +342,19 @@
     "guest": "magic-koharu",
     "referenceArt": "public/sprites/magic/characters/heroine-07-before.webp",
     "referenceSha256": "0bb257718cbeb4fb9272c2ee19c8ab5b854554a60ef5f57aebc4c62fe106df40",
-    "archive": "assets/kocho/story/originals-v2/akari-4.png",
-    "output": "public/sprites/kocho/story/akari-4-v2.webp",
-    "sourceSha256": "f147ec16d08aab88df1b46a087a9ed71fd45551b85ed45316a2a366204de7cd3",
-    "sha256": "1d5612ea81c08999f222851a91a88f2bee4ab024604543bf24e72471fad5ae7f",
-    "bytes": 334488
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "d57f1c70deb28ade47f88609a91ce25273f3f6805946ed25398f0a7564ca6de0",
+    "archive": "assets/kocho/story/originals-v3/akari-4.png",
+    "output": "public/sprites/kocho/story/akari-4-v3.webp",
+    "sourceSha256": "600fed511c534965ccd29935833081b2f27b114aaac8acf11aaa17b31052da2a",
+    "sha256": "5d01b8b962733d298d442c7074c8b2eec246e5c04bd768da440ea2be758d8de6",
+    "bytes": 316314
   },
   {
     "id": "akari-5",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "magic-elliot"
@@ -350,16 +362,19 @@
     "guest": "magic-elliot",
     "referenceArt": "public/sprites/magic/male-characters/elliot-before.webp",
     "referenceSha256": "f5c8a79bdd8fbe534b8e1311bc842789547acac5ea494eb093b3efe4a5719394",
-    "archive": "assets/kocho/story/originals-v2/akari-5.png",
-    "output": "public/sprites/kocho/story/akari-5-v2.webp",
-    "sourceSha256": "3179bbee805b07470de8aafafe631f0aea2d9d8d20ea4c8345fc16b1fefc18a1",
-    "sha256": "f972b155fc3c99dd619dfd372d435aaa37d81b9e3059a84882df5a532c39a17f",
-    "bytes": 351600
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "8b9f47209f5256687f2e3013a16849dcccd0f62edd975aa2ca2dd9c2cded85b9",
+    "archive": "assets/kocho/story/originals-v3/akari-5.png",
+    "output": "public/sprites/kocho/story/akari-5-v3.webp",
+    "sourceSha256": "6866cafbb05ba918b8f4437cbc514629caad19ca418e8418c3aadccb79f3a84e",
+    "sha256": "78de0c1cdbcc2910fdafedc37489e004348dfb7ddc8a86bda7de3936377e3d42",
+    "bytes": 422828
   },
   {
     "id": "akari-6",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "high-school-caretaker"
@@ -367,16 +382,19 @@
     "guest": "high-school-caretaker",
     "referenceArt": "public/sprites/high-school/characters/1.webp",
     "referenceSha256": "100f20253ade6ab92826045dafad3b212b6cd0e8a2479c4b626e7064dea6f9a8",
-    "archive": "assets/kocho/story/originals-v2/akari-6.png",
-    "output": "public/sprites/kocho/story/akari-6-v2.webp",
-    "sourceSha256": "84a7312852ff0017184346586a8db9e51d0b66b0ac99312e39d03455594a4e83",
-    "sha256": "56629369810fede1d6294c96101a1ec77a2a45b7dc4cc2e8f94ff4b46210afee",
-    "bytes": 375498
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "433fc2c5ee51c0a6fe789600bc92a68748b641e7a33727cfe7127fc64d30bb97",
+    "archive": "assets/kocho/story/originals-v3/akari-6.png",
+    "output": "public/sprites/kocho/story/akari-6-v3.webp",
+    "sourceSha256": "23f0acadd679db2407812d566509ff1d90636b79d7af2294aa29b6d7f351a61e",
+    "sha256": "1e543735346d218751750e1f8d060bc40e221afe9e054594a5313649911c593a",
+    "bytes": 334420
   },
   {
     "id": "akari-7",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "magic-sakuya"
@@ -384,16 +402,19 @@
     "guest": "magic-sakuya",
     "referenceArt": "public/sprites/magic/male-characters/sakuya-before.webp",
     "referenceSha256": "ace00526f7e393c5d64c481e862c5a85438fea08be3a58c42f01ab4ca7da0f60",
-    "archive": "assets/kocho/story/originals-v2/akari-7.png",
-    "output": "public/sprites/kocho/story/akari-7-v2.webp",
-    "sourceSha256": "717002a823147d9e28d11f57ec1207c28a1f3b4f38d4ba67bff04e981ca77171",
-    "sha256": "1bdf58d2bfe5fbc09764d1d87fc0c851c09f04a8d4c102d6a651a9e30b668637",
-    "bytes": 359562
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "283f7fcaefdb2a0aeebea4d9b89333d4cfa8c4056009a05e13bfd5a90bfe54fd",
+    "archive": "assets/kocho/story/originals-v3/akari-7.png",
+    "output": "public/sprites/kocho/story/akari-7-v3.webp",
+    "sourceSha256": "5da088fccb141db8fec99fc1cd1a9ed338cffab5eae859f304e9d8f628da384d",
+    "sha256": "01c6243cf23157ac6107bdff6919dcda8a7a5296c73c75a2618154c94611fb18",
+    "bytes": 343582
   },
   {
     "id": "akari-8",
     "generator": "ImageGen",
-    "version": 2,
+    "version": 3,
     "cast": [
       "akari",
       "magic-minato"
@@ -401,10 +422,13 @@
     "guest": "magic-minato",
     "referenceArt": "public/sprites/magic/male-characters/minato-before.webp",
     "referenceSha256": "d39864d09051066e00dbeeeaa55cde197cbeac8b73f5ce078b1ac8a4a113c33d",
-    "archive": "assets/kocho/story/originals-v2/akari-8.png",
-    "output": "public/sprites/kocho/story/akari-8-v2.webp",
-    "sourceSha256": "9d0d00a5d3964f21611dc16f8467286045e308dcd7528abe379f02c5edc91543",
-    "sha256": "0a0832b4d996a4b464fc9033082a754b4b09a56211bb141bd12972edad3a82d2",
-    "bytes": 425200
+    "heroReference": "public/sprites/magic/characters/heroine-01-before.webp",
+    "heroReferenceSha256": "5f0025c9212dd1af0c4f884b57c3f800221c6d0554277b20e31d0d0a3997523e",
+    "promptSha256": "e4d75974a1bdeb0a6ab2bc9b56ef0f6ad095b476aa1171ac1b682644cabff148",
+    "archive": "assets/kocho/story/originals-v3/akari-8.png",
+    "output": "public/sprites/kocho/story/akari-8-v3.webp",
+    "sourceSha256": "b6eff78db33a1e4dc09dccde5d41663fc1b4f47d99013dab71cfebdd76a8aa99",
+    "sha256": "49ee2d0d029fee84154c506f81d961e95ac8e0a808d465954145bdd8eaa359b7",
+    "bytes": 433996
   }
 ]

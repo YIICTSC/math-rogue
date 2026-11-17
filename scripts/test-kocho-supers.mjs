@@ -79,7 +79,7 @@ export async function testKochoSupers(page,base) {
  await page.screenshot({path:'tmp/kocho-qa/super-guide-mobile.png'});
  await page.keyboard.press('Escape');
  for(const lang of ['en','hi']){
-  await page.evaluate(()=>{__kocho.setState(__kocho.initial());localStorage.clear();});await page.goto(base+`?lang=${lang}`);await page.locator('.kocho-lobby').waitFor();
+  await page.evaluate(()=>{__kocho.setState(__kocho.initial());localStorage.clear();});await page.goto(base+`?lang=${lang}`);await page.locator('.kocho-lobby').waitFor();await page.locator('[data-kocho-enter]').click();
   await page.locator('[data-kocho-super-guide]').click();const text=await page.getByRole('dialog').innerText();
   if(lang==='en')assert.equal(/[ぁ-んァ-ン一-龯]/.test(text),false,text);
   else assert.equal(/[一-龯]/.test(text),false,text);

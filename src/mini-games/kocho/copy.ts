@@ -1,6 +1,18 @@
 import { SUPER_ENGLISH, SUPER_HIRAGANA } from './superCopy';
 import { KOCHO_TECHNIQUE_ENGLISH, KOCHO_TECHNIQUE_HIRAGANA } from './techniques';
 const rows = [
+ ["カード合成", "Card fusion", "カードごうせい"],
+ ["このショップでは合成済み", "Fusion used in this shop", "このショップではごうせいずみ"],
+ ["各ショップで1回だけ", "Once per shop", "かくショップで1かいだけ"],
+ ["2〜3枚を選んだ順に合成。最大4アクション。CDは素材の最大値。", "Fuse 2–3 cards in order, up to 4 actions. Cooldown is the highest ingredient cooldown.", "2〜3まいをえらんだじゅんにごうせい。さいだい4アクション。CDはそざいのさいだいち。"],
+ ["選んだ順に発動", "Actions play in this order", "えらんだじゅんにはつどう"],
+ ["1枚で超必殺技！", "One-card super move!", "1まいでちょうひっさつわざ！"],
+ ["素材を2〜3枚選ぼう", "Choose 2–3 ingredients", "そざいを2〜3まいえらぼう"],
+ ["この順で合成する", "Fuse in this order", "このじゅんでごうせいする"],
+ ["お金が足りません", "Not enough gold", "おかねがたりません"],
+ ["超必殺技の合成順", "Super move recipes", "ちょうひっさつわざのごうせいじゅん"],
+ ["3枚を正しい順で選ぶと、専用イラストの超必殺技カードが完成！", "Choose the correct three-card sequence to create an illustrated super move card!", "3まいをただしいじゅんでえらぶと、せんようイラストのちょうひっさつわざカードがかんせい！"],
+
  ['回り込み','Circle behind','まわりこみ'], ['押し出す','Shove','おしだす'], ['位置交換','Swap','いちこうかん'],
  ['赤ジャージの勇者','Red Tracksuit Hero','あかジャージのゆうしゃ'],
  ['学用品で戦う、いつもの主人公','The original hero, armed with school supplies','がくようひんでたたかう、いつものしゅじんこう'],
