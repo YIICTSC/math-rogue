@@ -1,3 +1,4 @@
+import type {LadderOptions} from './ladderOptions';
 import type { GameId } from './catalog';
 import type { LadderState } from './ladder';
 import type { ExtensionState } from './extensionModel';
@@ -13,7 +14,7 @@ export interface ClubState {
   claim:number;pending:{player:number;cards:number[];rank:number;remaining:number[]}|null;
   capturesBy:number;winners:number[];log:ClubEvent[];resultReason:string;
   whistHonors:number[];whistWins:number[];whistPoints:number[];
-  ladder:LadderState|null;
+  ladder:LadderState|null;ladderOptions?:LadderOptions;
   extra:ExtensionState;
 }
 export type ClubView=Omit<ClubState,'players'|'stock'|'discard'|'pending'>&{

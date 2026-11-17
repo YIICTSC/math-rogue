@@ -1,6 +1,7 @@
+import {ladderOptions} from './ladderOptions';
 import { combinations, rank, suit } from './cards';
 import type { Action, ClubState } from './model';
-export type LadderState={count:number;form:'set'|'run';rank:number;last:number;passes:number;reversed:boolean;order:number[]};
+export type LadderState={count:number;form:'set'|'run';rank:number;last:number;passes:number;reversed:boolean;order:number[];jackBack?:boolean;lock?:string};
 const r=(c:number)=>c===52?100:rank(c)===1?14:rank(c)===2?15:rank(c);
 const strength=(value:number,count:number,form:'set'|'run',reversed:boolean)=>value===100?100:form==='set'?(reversed?18-value:value):(reversed?18-value:value+count-1);
 export const ladderCardStrength=(card:number,reversed:boolean)=>strength(r(card),1,'set',reversed);
@@ -8,7 +9,10 @@ const physical=(st:number,value:number)=>st*13+(value===14?1:value===15?2:value)
 export function ladderActions(s:ClubState):Action[]{
  const hand=s.players[s.turn].hand,ladder=s.ladder!,actions:Action[]=[],hasJoker=hand.includes(52);
  const add=(cards:number[],form:'set'|'run',value:number)=>{
-  if(ladder.count&&(cards.length!==ladder.count||form!==ladder.form||strength(value,cards.length,form,ladder.reversed)<=strength(ladder.rank,ladder.count,ladder.form,ladder.reversed)))return;
+  const opts=ladderOptions(s.ladderOptions),pattern=cards.map(suit).sort().join(',');const counter=opts.spadeThree&&s.table.length===1&&s.table[0]===52&&cards.length===1&&cards[0]===41;
+  if(ladder.lock&&pattern!==ladder.lock&&!counter)return;
+  const reversed=ladder.reversed!==!!ladder.jackBack;
+  if(!counter&&ladder.count&&(cards.length!==ladder.count||form!==ladder.form||strength(value,cards.length,form,reversed)<=strength(ladder.rank,ladder.count,ladder.form,reversed)))return;
   const action:Action={type:'play',cards,form,value};actions.push(action);if(cards.length===4&&form==='set')actions.push({...action,revolution:true});
  };
  for(const c of hand)add([c],'set',r(c));
@@ -27,16 +31,21 @@ export function ladderActions(s:ClubState):Action[]{
  if(ladder.count)actions.push({type:'pass'});return actions;
 }
 export function playLadder(s:ClubState,action:Action){
- const p=s.players[s.turn],ladder=s.ladder!,player=s.turn;
- const next=(from:number)=>{for(let k=1;k<=s.players.length;k++){const i=(from+k)%s.players.length;if(!s.players[i].out)return i;}return from;};
+ const p=s.players[s.turn],ladder=s.ladder!,player=s.turn,opts=ladderOptions(s.ladderOptions);
+ const clear=()=>{s.discard.push(...s.table);s.table=[];ladder.count=0;ladder.passes=0;ladder.jackBack=false;ladder.lock=undefined;};
+ const next=(from:number)=>{for(let k=1;k<=s.players.length;k++){const i=(from+k*s.direction+s.players.length*2)%s.players.length;if(!s.players[i].out)return i;}return from;};
  if(action.type==='pass'){
   ladder.passes++;const required=s.players.filter(p=>!p.out).length-(s.players[ladder.last].out?0:1);
-  if(ladder.passes>=required){s.discard.push(...s.table);s.table=[];ladder.count=0;ladder.passes=0;s.turn=s.players[ladder.last].out?next(ladder.last):ladder.last;}else s.turn=next(player);
+  if(ladder.passes>=required){clear();s.turn=s.players[ladder.last].out?next(ladder.last):ladder.last;}else s.turn=next(player);
  }else{
+  const counter=opts.spadeThree&&s.table.length===1&&s.table[0]===52&&action.cards!.length===1&&action.cards![0]===41;
+  if(opts.suitLock&&s.table.length&&s.table.every(c=>c!==52)&&action.cards!.every(c=>c!==52)&&s.table.map(suit).sort().join(',')===action.cards!.map(suit).sort().join(','))ladder.lock=action.cards!.map(suit).sort().join(',');
   p.hand=p.hand.filter(c=>!action.cards!.includes(c));s.discard.push(...s.table);s.table=[...action.cards!];ladder.count=action.cards!.length;ladder.form=action.form!;ladder.rank=action.value!;ladder.last=player;ladder.passes=0;
   if(action.revolution)ladder.reversed=!ladder.reversed;
+  if(opts.jackBack&&action.cards!.some(c=>c!==52&&rank(c)===11))ladder.jackBack=!ladder.jackBack;
+  if(opts.reverseNine&&action.cards!.some(c=>c!==52&&rank(c)===9))s.direction*=-1;
   if(!p.hand.length){p.out=true;ladder.order.push(player);}
-  if(s.players.filter(p=>!p.out).length<=1){const last=s.players.findIndex(p=>!p.out);if(last>=0)ladder.order.push(last);ladder.order.forEach((i,place)=>s.players[i].score=s.players.length-place-1);s.phase='result';s.winners=[ladder.order[0]];s.resultReason='empty';}
-  else s.turn=next(player);
+  if(s.players.filter(p=>!p.out).length<=1){const last=s.players.findIndex(p=>!p.out);if(last>=0)ladder.order.push(last);ladder.order.forEach((i,place)=>s.players[i].score+=s.players.length-place-1);s.phase=s.round+1<opts.rounds?'round':'result';if(s.phase==='round')s.turn=0;const best=Math.max(...s.players.map(p=>p.score));s.winners=s.players.flatMap((p,i)=>p.score===best?[i]:[]);s.resultReason='empty';}
+  else if(counter||opts.eightCut&&action.cards!.some(c=>c!==52&&rank(c)===8)){clear();s.turn=p.out?next(player):player;}else {s.turn=next(player);if(opts.skipFive)for(let n=0;n<action.cards!.filter(c=>c!==52&&rank(c)===5).length;n++)s.turn=next(s.turn);}
  }
 }

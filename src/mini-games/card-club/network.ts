@@ -1,3 +1,4 @@
+import type {LadderOptions} from './ladderOptions';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { createHostRoomCode, normalizeRoomInput } from '../../services/onlineTransport';
 import { ClubSession, validProfile, type ClubPacket } from './session';
@@ -72,7 +73,7 @@ export class CardClubRoom {
       });
     }finally{this.connecting=false;}
   }
-  configure(game:GameId,count:number){if(this.host)this.session?.configure(game,count);}
+  configure(game:GameId,count:number,options?:Partial<LadderOptions>){if(this.host)this.session?.configure(game,count,options);}
   start(){if(this.host)this.session?.start(crypto.getRandomValues(new Uint32Array(1))[0]);}
   command(action:Action){const revision=this.last?.phase==='game'?this.last.view.revision:-1;if(this.host)this.session?.command(this.selfId,action,revision);else{const c=this.channels.get('host');if(c)this.send(c,{type:'action',action,revision});}}
   rematch(){if(this.host)this.session?.rematch();}

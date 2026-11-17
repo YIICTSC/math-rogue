@@ -28,7 +28,7 @@ export function ClassicTable({view:v,l,send,selected,select}:{view:ClubView;l:(j
  {v.game==='yaniv'&&<p className="cc-step">{l('先に捨ててから1枚取ります。合計5以下でヤニブ。','Discard before drawing one card. Call Yaniv at five or less.')} {l('自分の合計','Your total')}: {v.players[v.self]?.hand.reduce((n,c)=>n+yanivValue(c),0)}</p>}
  {v.game==='pokerbull'&&<p className="cc-step">{v.claim<0?l('全員の札を合わせた役を宣言','Claim a combination across all hands'):l(bullLabel(v.claim,false),bullLabel(v.claim,true))} · {l('残りライフ','Lives')}: {v.players.map(p=>p.lives).join(' / ')}</p>}
  {v.game==='trumpcrew'&&<p className="cc-step">{l('ステージ','Stage')} {c.handSize}/{Math.floor(52/v.players.length)} · {v.extra.step==='crewStrength'?l('親が手札の強・中・弱を公表','Dealer announces weak, medium or strong'):v.extra.step==='crewBid'?l('残りチップ','Remaining chips')+': '+c.contract:l('全員が宣言どおりに勝とう','Everyone must match their bid')} · {l('親の評価','Dealer strength')}: {v.extra.multiplier}</p>}
- {v.game==='mitch'&&<div className="cc-layouts">{v.players.map((p,i)=><article key={i}><h3>{p.name}</h3>{[0,1,2,3].map(color=><div key={color}><b>{SUITS[color]}</b>{c.rows[i*4+color].map(card=><CardFace key={card} card={card}/>)}</div>)}</article>)}</div>}
+ {v.game==='mitch'&&<div className="cc-layouts">{v.players.map((p,i)=><article key={i}><h3>{p.name}</h3>{[0,1,2,3].map(color=><div className="cc-mitch-suit" key={color}><b>{SUITS[color]}</b><div className="cc-mitch-row">{c.rows[i*4+color].map(card=><CardFace key={card} card={card}/>)}</div></div>)}</article>)}</div>}
 
   <TraditionalTable view={v} l={l}/>{DIVERSITY_IDS.some(id=>id===v.game)&&<DiversityTable view={v} l={l}/>}
   <WorldTable view={v} l={l} send={send} selected={selected} select={select}/>

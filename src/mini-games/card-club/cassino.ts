@@ -81,7 +81,7 @@ function score(s:ClubState){
  const counts=groups.map(cs=>cs.length),spades=groups.map(cs=>cs.filter(card=>suit(card)===3).length);
  groups.forEach((cards,team)=>{
   const points=cards.filter(card=>rank(card)===1).length+(cards.includes(22)?2:0)+(cards.includes(40)?1:0)+(counts.filter(n=>n===Math.max(...counts)).length===1&&counts[team]===Math.max(...counts)?3:0)+(spades.filter(n=>n===Math.max(...spades)).length===1&&spades[team]===Math.max(...spades)?1:0);
-  s.players.forEach((p,i)=>{if(i%teams===team)p.score+=points;});
+  s.players.forEach((p,i)=>{if(i%teams===team){p.score+=points;const reasons:[string,number][]=[['scoreAce',cards.filter(card=>rank(card)===1).length],['scoreBig',cards.includes(22)?2:0],['scoreLittle',cards.includes(40)?1:0],['scoreCards',counts.filter(n=>n===Math.max(...counts)).length===1&&counts[team]===Math.max(...counts)?3:0],['scoreSpades',spades.filter(n=>n===Math.max(...spades)).length===1&&spades[team]===Math.max(...spades)?1:0]];for(const [key,value]of reasons)if(value)record(s,key,i,value);}});
  });
  const scores=Array.from({length:teams},(_,i)=>s.players[i].score),max=Math.max(...scores);
  if(max>=21&&scores.filter(n=>n===max).length===1)finish(s);else roundOver(s);
@@ -93,7 +93,7 @@ function apply(s:ClubState,a:Action){
  }else{
   const captured=a.cards!.slice(1),selected=all.filter(u=>u.cards.some(card=>captured.includes(card)));
   if(captured.length){removeUnits(s,selected);s.players[i].taken.push(card,...captured);s.capturesBy=i;record(s,'capture',i,captured.length,card);
-   if(!s.table.length&&!c.rows.length){s.players.forEach((p,j)=>{if(j===i||s.players.length===4&&j%2===i%2)p.score++;});record(s,'sweep',i);}
+   if(!s.table.length&&!c.rows.length){s.players.forEach((p,j)=>{if(j===i||s.players.length===4&&j%2===i%2)p.score++;});record(s,'sweep',i,1);}
   }else {s.table.push(card);record(s,'play',i,undefined,card);}
  }
  s.turn=nextSeat(s);

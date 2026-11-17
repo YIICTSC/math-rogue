@@ -1,3 +1,4 @@
+import {ladderOptions,type LadderOptions} from './ladderOptions';
 import { classicHideOwnHand,classicHideTable } from './classicPrivacy';
 import { definition, type GameId } from './catalog';
 import { blackjackValue, high, pack, rank, scopaValue, shuffled, sorted, suit } from './cards';
@@ -51,10 +52,10 @@ function startRound(s:ClubState,nextStock?:number[]){
   if(s.game==='daihinmin')s.turn=s.dealer;
   if(s.game==='blackjack'&&s.turn===s.dealer)settleBlackjack(s);
 }
-export function createClubGame(game:GameId,players:PlayerInput[],seed:number):ClubState {
+export function createClubGame(game:GameId,players:PlayerInput[],seed:number,options?:Partial<LadderOptions>):ClubState {
   const d=definition(game);if(!d||!d.players.includes(players.length))throw Error('Unsupported player count');
   if(new Set(players.map(p=>p.id)).size!==players.length)throw Error('Duplicate player');
-  const s:ClubState={version:1,game,seed,revision:0,phase:'play',players:players.map(p=>({...p,name:p.name.slice(0,32),hand:[],taken:[],score:0,tricks:0,bid:null,bags:0,books:[],lives:5,out:false,stake:1})),turn:0,dealer:0,round:0,stock:[],discard:[],table:[],trick:[],lastTrick:[],trump:-1,activeSuit:-1,broken:false,total:0,direction:1,pool:0,claim:1,pending:null,capturesBy:-1,winners:[],log:[],resultReason:'',whistHonors:[0,0],whistWins:[0,0],whistPoints:[0,0],ladder:null,extra:emptyExtension(players.length)};
+  const s:ClubState={version:1,game,seed,ladderOptions:ladderOptions(options),revision:0,phase:'play',players:players.map(p=>({...p,name:p.name.slice(0,32),hand:[],taken:[],score:0,tricks:0,bid:null,bags:0,books:[],lives:5,out:false,stake:1})),turn:0,dealer:0,round:0,stock:[],discard:[],table:[],trick:[],lastTrick:[],trump:-1,activeSuit:-1,broken:false,total:0,direction:1,pool:0,claim:1,pending:null,capturesBy:-1,winners:[],log:[],resultReason:'',whistHonors:[0,0],whistWins:[0,0],whistPoints:[0,0],ladder:null,extra:emptyExtension(players.length)};
   startRound(s);return s;
 }
 function trickCards(s:ClubState){
@@ -133,13 +134,13 @@ function finishCaptureRound(s:ClubState){
   if(s.capturesBy>=0){s.players[s.capturesBy].taken.push(...s.table);s.table=[];}
   const teams=s.players.length===4?2:s.players.length;
   const piles=Array.from({length:teams},(_,team)=>s.players.flatMap((p,i)=>i%teams===team?p.taken:[]));
-  const add=(team:number,points:number)=>s.players.forEach((p,i)=>{if(i%teams===team)p.score+=points;});
+  const add=(team:number,points:number,reason:string)=>s.players.forEach((p,i)=>{if(i%teams===team){p.score+=points;event(s,reason,i,points);}});let metricIndex=0;
   for(const metric of [(p:number[])=>p.length,(p:number[])=>p.filter(c=>suit(c)===1).length,(p:number[])=>{
     const values=[0,16,12,13,14,15,18,21,0,0,0,10,10,10];const best=[0,1,2,3].map(st=>Math.max(0,...p.filter(c=>suit(c)===st).map(c=>values[rank(c)])));return best.every(Boolean)?best.reduce((a,b)=>a+b,0):0;
   }]){
-    const points=piles.map(metric),best=Math.max(...points);if(points.filter(v=>v===best).length===1)add(points.indexOf(best),1);
+    const points=piles.map(metric),best=Math.max(...points);if(points.filter(v=>v===best).length===1)add(points.indexOf(best),1,['scoreCards','scoreDiamonds','scorePrime'][metricIndex]);metricIndex++;
   }
-  piles.forEach((p,i)=>{if(p.includes(19))add(i,1);});
+  piles.forEach((p,i)=>{if(p.includes(19))add(i,1,'scoreSeven');});
   const highScore=Math.max(...s.players.map(p=>p.score));if(highScore>=11&&s.players.slice(0,teams).filter(p=>p.score===highScore).length===1){end(s,highest(s));return;}
   s.phase='round';s.turn=0;event(s,'roundEnd');
 }
