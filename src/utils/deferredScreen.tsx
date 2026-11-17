@@ -74,8 +74,11 @@ export function deferredScreen<P extends object>(load: () => Promise<{ default: 
   let sharedScreen = React.lazy(loadAndCache);
   return function DeferredScreen(props: P) {
     const [attempt, setAttempt] = useState(0);
-    const LazyScreen = useMemo(() => attempt === 0 ? sharedScreen : React.lazy(loadAndCache), [attempt]);
-    const Screen = loaded || LazyScreen;
+    // Choose the element type once per mounted screen (and explicit retry).
+    // Switching from React.lazy to its resolved component after a parent render
+    // remounts the screen and re-generates questions, discarding in-flight input.
+    // A later visit can still use the already-loaded component immediately.
+    const Screen = useMemo(() => loaded || (attempt === 0 ? sharedScreen : React.lazy(loadAndCache)), [attempt]);
     const languageMode = (props as { languageMode?: LanguageMode }).languageMode;
     return <ScreenBoundary key={attempt} startup={options.startup} languageMode={languageMode} retry={() => setAttempt(value => value + 1)}>
       {/* index.html owns the only loading screen, shown once during startup. */}
